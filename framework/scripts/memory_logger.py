@@ -1,6 +1,532 @@
 #!/usr/bin/env python
-import sys, os, subprocess, socket, pickle, argparse, time, decimal, csv, platform, re
 from tempfile import TemporaryFile
+import os, sys, re, socket, time, pickle, csv, uuid, subprocess, argparse, decimal, select
+
+class Server:
+  def __init__(self, arguments):
+    self.arguments = arguments
+    self.arguments.cwd = os.getcwd()
+    # Test to see if we are starting as a server
+    if self.arguments.pbs == True:
+      if os.getenv('PBS_NODEFILE') != None:
+        # Initialize an agent, strictly for holding our stdout logs. Give it the UUID of 'server'
+        self.agent = Agent(self.arguments, 'server')
+        self.logfile = WriteCSV(self.arguments.outfile[0])
+        self.client_connections = []
+        self.startServer()
+      else:
+        print 'I could not find your PBS_NODEFILE. Is PBS loaded?'
+        sys.exit(1)
+    # If we are not a server, start the single client
+    else:
+      self.startClient()
+
+  def startServer(self):
+    # Setup the TCP socket
+    self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    self.server_socket.bind((socket.gethostname(), 0))
+    self.server_socket.listen(5)
+    (self.host, self.port) = self.server_socket.getsockname()
+
+    # We will store all connections (sockets objects) made to the server in a list
+    self.client_connections.append(self.server_socket)
+
+    # Launch the actual binary we want to track
+    self._launchJob()
+
+    # Now launch all pbs agents
+    self._launchClients()
+
+    # This is a try so we can handle a keyboard ctrl-c
+    try:
+
+      # Continue to listen and accept active connections from agents
+      # until all agents report a STOP command.
+      AGENTS_ACTIVE = True
+      while AGENTS_ACTIVE:
+        read_sockets, write_sockets, error_sockets = select.select(self.client_connections,[],[])
+        for sock in read_sockets:
+          if sock == self.server_socket:
+            # Accept an incomming connection
+            self.client_connections.append(self.server_socket.accept()[0])
+          else:
+            # Deal with the data being sent to the server by its agents
+            self.handleAgent()
+
+            # Check to see if _all_ agents are telling the server to stop
+            agent_count = len(self.agent.agent_data.keys())
+            current_count = 0
+            for agent in self.agent.agent_data.keys():
+              if self.agent.agent_data[agent]['STOP']:
+                current_count += 1
+
+            # if All Agents have reported a STOP command, begin to exit
+            if current_count == agent_count:
+              AGENTS_ACTIVE = False
+              # Gotta get out of the for loop somehow...
+              break
+
+          # Sleep a bit before reading additional data
+          time.sleep(self.arguments.repeat_rate[-1])
+
+      # Close the server socket
+      self.server_socket.close()
+
+      # Close the logfile as the server is about to exit
+      self.logfile.close()
+
+    # Cancel server operations if ctrl-c was pressed
+    except KeyboardInterrupt:
+      print 'Canceled by user'
+      sys.exit(0)
+
+    # Normal exiting procedures
+    print '\n\nAll agents have stopped. Log file saved to:', self.arguments.outfile[0]
+    sys.exit(0)
+
+  def startClient(self):
+    Client(self.arguments)
+
+  def _launchClients(self):
+    # Read the environment PBS_NODEFILE
+    self._PBS_NODEFILE = open(os.getenv('PBS_NODEFILE'), 'r')
+    nodes = set(self._PBS_NODEFILE.read().split())
+
+    # Print some useful information about our setup
+    print 'Memory Logger running on Host:', self.host, 'Port:', self.port, '\nNodes:', ', '.join(nodes), '\nSample rate (including stdout):', self.arguments.repeat_rate[-1], 's (use --repeat-rate to adjust)\nRemote agents delaying', self.arguments.pbs_delay[-1], 'second/s before tracking. (use --pbs-delay to adjust)\n'
+
+    # Build our command list based on the PBS_NODEFILE
+    command = []
+    for node in nodes:
+      command.append([  'ssh', node,
+                   'bash --login -c "source /etc/profile && ' \
+                   + 'sleep ' + str(self.arguments.pbs_delay[-1]) + ' && ' \
+                   + os.path.abspath(__file__) \
+                   + ' --call-back-host ' \
+                   + self.host + ' ' + str(self.port) \
+                   + '"'])
+
+    # remote into each node and execute another copy of memory_logger.py
+    # with a call back argument to recieve further instructions
+    for pbs_node in command:
+      subprocess.Popen(pbs_node, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+  # Launch the binary we intend to track
+  def _launchJob(self):
+    subprocess.Popen(self.arguments.run[-1].split(), stdout=self.agent.log, stderr=self.agent.log)
+
+  # A connection has been made from client to server
+  # Capture that data, and determin what to do with it
+  def handleAgent(self):
+    # Loop through all client connections, and receive data if any
+    for agent_socket in self.client_connections:
+
+      # Completely ignore the server_socket object
+      if agent_socket == self.server_socket:
+        continue
+
+      # Assign an AgentConnector for the task of handling data between client and server
+      reporting_agent = AgentConnector(self.arguments, agent_socket)
+
+      # OK... get data from a client and begin
+      new_data = reporting_agent.readData()
+      if new_data != None:
+        # There should be only one dictionary key (were reading data from just one client at a time)
+        agent_uuid = new_data.keys()[0]
+
+        # Update our dictionary of an agents data
+        self.agent.agent_data[agent_uuid] = new_data[agent_uuid]
+
+        # Modify incoming Agents timestamp to match Server's time (because every node is a little bit off)
+        self.agent.agent_data[agent_uuid]['TIMESTAMP'] = GetTime().now
+
+        # update total usage for all known reporting agents
+        total_usage = 0
+        for one_agent in self.agent.agent_data.keys():
+          total_usage += self.agent.agent_data[one_agent]['MEMORY']
+        self.agent.agent_data[agent_uuid]['TOTAL'] = int(total_usage)
+
+        # Get any stdout thats happened thus far and apply it to what ever agent just sent us data
+        self.agent.agent_data[agent_uuid]['STDOUT'] = self.agent._getStdout()
+
+        # Write to our logfile
+        self.logfile.write(self.agent.agent_data[agent_uuid])
+
+        # Check for any agents sending a stop command. If we find one,
+        # set some zeroing values, and close that agent's socket.
+        if self.agent.agent_data[agent_uuid]['STOP']:
+          self.agent.agent_data[agent_uuid]['MEMORY'] = 0
+          agent_socket.close()
+          if agent_socket != self.server_socket:
+            self.client_connections.remove(agent_socket)
+
+          # Go ahead and set our server agent to STOP as well.
+          # The server will continue recording samples from agents
+          self.agent.agent_data['server']['STOP'] = True
+
+        # If an Agent has made a request for instructions, handle it here
+        update_client = False
+        if new_data[agent_uuid]['REQUEST'] != None:
+          for request in new_data[agent_uuid]['REQUEST'].iteritems():
+            if new_data[agent_uuid]['REQUEST'][request[0]] == '':
+              update_client = True
+              # We only support sending any arguments supplied to ther server, back to the agent
+              for request_type in dir(self.arguments):
+                if request[0] == str(request_type):
+                  self.agent.agent_data[agent_uuid]['REQUEST'][request[0]] = getattr(self.arguments, request[0])
+
+          # If an Agent needed additional instructions, go ahead and re-send those instructions
+          if update_client:
+            reporting_agent.sendData(self.agent.agent_data[agent_uuid])
+
+class Client:
+  def __init__(self, arguments):
+    self.arguments = arguments
+
+    # Initialize an Agent with a UUID based on our hostname
+    self.my_agent = Agent(arguments, str(uuid.uuid3(uuid.NAMESPACE_DNS, socket.gethostname())))
+
+    # Initialize an AgentConnector
+    self.remote_server = AgentConnector(self.arguments)
+
+    # If client will talk to a server (PBS)
+    if self.arguments.call_back_host:
+      # We know by initializing an agent, agent_data contains the necessary message asking for further instructions
+      self.my_agent.agent_data[self.my_agent.my_uuid] = self.remote_server.sendData(self.my_agent.agent_data)
+
+      # Apply new instructions received from server (this basically updates our arguments)
+      for request in self.my_agent.agent_data[self.my_agent.my_uuid]['REQUEST'].iteritems():
+        for request_type in dir(self.arguments):
+          if request[0] == str(request_type):
+            setattr(self.arguments, request[0], request[1])
+
+      # Requests have been satisfied, set to None
+      self.my_agent.agent_data[self.my_agent.my_uuid]['REQUEST'] = None
+
+      # Change to the same directory as the server was when initiated (needed for PBS stuff)
+      os.chdir(self.arguments.cwd)
+
+    # Client will not be talking to a server, save data to a file instead
+    else:
+      self.logfile = WriteCSV(self.arguments.outfile[0])
+
+    # Lets begin!
+    self.startProcess()
+
+  # This function handles the starting and stoping of the sampler process.
+  # We loop until an agent returns a stop command.
+  def startProcess(self):
+    AGENTS_ACTIVE = True
+
+    # If we know we are the only client, go ahead and start the process we want to track.
+    if self.arguments.call_back_host == None:
+      subprocess.Popen(self.arguments.run[-1].split(), stdout=self.my_agent.log, stderr=self.my_agent.log)
+      # Delay just a bit to keep from recording a possible zero memory usage as the binary starts up
+      time.sleep(self.arguments.sample_delay[0])
+
+
+    # Continue to process data until an Agent reports a STOP command
+    while AGENTS_ACTIVE:
+      # Take a sample
+      current_data = self.my_agent.takeSample()
+
+      # Handle the data supplied by the Agent.
+      self._handleData(current_data)
+
+      # If an Agent reported a STOP command, go ahead and begin the shutdown phase
+      if current_data[current_data.keys()[0]]['STOP']:
+        AGENTS_ACTIVE = False
+
+      # Sleep just a bit between samples, as to not saturate the machine
+      time.sleep(self.arguments.repeat_rate[-1])
+
+    # An agent reported a stop command... so let everyone know where the log was saved, and exit!
+    if self.arguments.call_back_host == None:
+      print 'Binary has exited. Wrote log:', self.arguments.outfile[0]
+
+    # close the memory_logger
+    sys.exit(0)
+
+  # Figure out what to do with the sampled data
+  def _handleData(self, data):
+    # Sending the sampled data to a server
+    if self.arguments.call_back_host:
+      self.remote_server.sendData(data)
+    # Saving the sampled data to a file
+    else:
+      # Compute the TOTAL memory usage to be how much our one agent reported
+      # Because were the only client doing any work
+      data[self.my_agent.my_uuid]['TOTAL'] = data[self.my_agent.my_uuid]['MEMORY']
+      self.logfile.write(data[self.my_agent.my_uuid])
+
+      # If the agent has been told to stop, close the database file
+      if self.my_agent.agent_data[self.my_agent.my_uuid]['STOP'] == True:
+        self.logfile.close()
+
+class AgentConnector:
+  """
+Functions used to communicate to and from Client and Server.
+Both Client and Server classes use this object.
+
+readData()
+sendData('message', socket_connection=None)
+
+if sendData's socket_connection is None, it will create a new connection to the server
+based on supplied arguments
+"""
+  def __init__(self, arguments, connection=None):
+    self.arguments = arguments
+    self.connection = connection
+    self.CREATED_CONNECTION = False
+
+    # If the connection is None, meaning this object was instanced by a client,
+    # we must create a connection to the server first
+    if self.connection == None and self.arguments.call_back_host != None:
+      self.CREATED_CONNECTION = True
+      self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      self.connection.settimeout(15)
+      self.connection.connect((self.arguments.call_back_host[0], int(self.arguments.call_back_host[1])))
+
+  # read all data sent by an agent
+  def readData(self):
+    # Get how much data there is to receive
+    # The first eight bytes is our data length
+    data_width = int(self.connection.recv(8))
+    tmp_received = ''
+
+    # We need to receive precisely the ammount of data the
+    # client is trying to send us.
+    while len(tmp_received) < data_width:
+      if data_width - len(tmp_received) > 1024:
+        tmp_received += self.connection.recv(1024)
+      else:
+        tmp_received += self.connection.recv(data_width - (len(tmp_received)))
+
+    # unpickle the received message
+    return self._unpickleMessage(tmp_received)
+
+  # send data to an agent
+  def sendData(self, message):
+    # pickle the data up, and send the message
+    self.connection.sendall(self._pickleMessage(message))
+
+    # If we had to create the socket (connection was none), and this client/agent is requesting
+    # instructions, go ahead and read the data that _better be there_ sent to us by the server.
+    if self.CREATED_CONNECTION and message[message.keys()[0]]['REQUEST'] != None:
+      return self.readData()
+
+  # The following two functions pickle up the data for easy socket transport
+  def _pickleMessage(self, message):
+    t = TemporaryFile()
+    pickle.dump(message, t)
+    t.seek(0)
+    str_msg = t.read()
+    str_len = len(str_msg)
+    message = "%-8d" % (str_len,) + str_msg
+    return message
+
+  def _unpickleMessage(self, message):
+    t = TemporaryFile()
+    t.write(message)
+    t.seek(0)
+    try:
+      return pickle.load(t)
+    except KeyError:
+      print 'Socket data was not pickled data: ', message
+    except:
+      raise
+
+class WriteCSV:
+  def __init__(self, logfile):
+    self.file_object = open(logfile, 'w', 1)
+    self.log_file = csv.writer(self.file_object, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
+
+  # Close the logfile
+  def close(self):
+    self.file_object.close()
+
+  # Write a CSV row
+  def write(self, data):
+    formatted_string = self._formatString(data)
+    self.log_file.writerow(formatted_string)
+
+  # Format the CSV output
+  def _formatString(self, data):
+    # We will be saving this data in CSV format. Before we do, lets format it a bit here
+    format_order = ['TIMESTAMP', 'TOTAL', 'STDOUT', 'STACK', 'HOSTNAME', 'MEMORY']
+    formatted_text = []
+    for item in format_order:
+      formatted_text.append(str(data[item]))
+    return formatted_text
+
+class Agent:
+  """
+Each agent object contains its own sampled log data. The Agent class is responsible for
+collecting and storing data. machine_id is used to identify the agent.
+
+machine_id is supplied by the client class. This allows for multiple agents if desired
+"""
+  def __init__(self, arguments, machine_id):
+    self.arguments = arguments
+    self.my_uuid = machine_id
+    self.track_process = ''
+
+    # This log object is for stdout purposes
+    self.log = TemporaryFile()
+    self.log_position = 0
+
+    # Create the dictionary to which all sampled data will be stored
+    # NOTE: REQUEST dictionary items are instructions (arguments) we will
+    # ask the server to provide (if we are running with --pbs)
+    # Simply add them here. We _can not_ make the arguments match the
+    # server exactly, this would cause every agent launched to perform
+    # like a server... bad stuff
+
+    # Example: We added repeat_rate (see dictionary below). Now every
+    # agent would update their repeat_rate according to what the user
+    # supplied as an argument (--repeat_rate 0.02)
+    self.agent_data = { self.my_uuid :
+                        { 'HOSTNAME'  : socket.gethostname(),
+                          'STDOUT'    : '',
+                          'STACK'     : '',
+                          'MEMORY'    : 0,
+                          'TIMESTAMP' : GetTime().now,
+                          'REQUEST'   : { 'run'          : '',
+                                          'pstack'       : '',
+                                          'repeat_rate'  : '',
+                                          'cwd'          : ''},
+                          'STOP'      : False,
+                          'TOTAL'     : 0,
+                          'DEBUG_LOG' : ''
+                        }
+                      }
+
+
+  # NOTE: This is the only function that should be called in this class
+  def takeSample(self):
+    if self.arguments.pstack:
+      self.agent_data[self.my_uuid]['STACK'] = self._getStack()
+
+    # Always do the following
+    self.agent_data[self.my_uuid]['MEMORY'] = self._getMemory()
+    self.agent_data[self.my_uuid]['STDOUT'] = self._getStdout()
+    self.agent_data[self.my_uuid]['TIMESTAMP'] = GetTime().now
+
+    # Return the data to whom ever asked for it
+    return self.agent_data
+
+  def _getStdout(self):
+    self.log.seek(self.log_position)
+    output = self.log.read()
+    self.log_position = self.log.tell()
+    sys.stdout.write(output)
+    return output
+
+  def _getMemory(self):
+    tmp_pids = self._getPIDs()
+    memory_usage = 0
+    if tmp_pids != {}:
+      for single_pid in tmp_pids.iteritems():
+        memory_usage += int(single_pid[1][0])
+      if memory_usage == 0:
+        # Memory usage hit zero? Then assume the binary being tracked has exited. So lets begin doing the same.
+        self.agent_data[self.my_uuid]['DEBUG_LOG'] = 'I found the total memory usage of all my processes hit 0. Stoping'
+        self.agent_data[self.my_uuid]['STOP'] = True
+        return 0
+      return int(memory_usage)
+    # No binay even detected? Lets assume it exited, so we should begin doing the same.
+    self.agent_data[self.my_uuid]['STOP'] = True
+    self.agent_data[self.my_uuid]['DEBUG_LOG'] = 'I found no processes running. Stopping'
+    return 0
+
+  def _getStack(self):
+    # A quick way to safely check for the avilability of needed tools
+    self._verifyCommand(['pstack'])
+
+    tmp_pids = self._getPIDs()
+    if self._darwin == True:
+      return ''
+    else:
+      # We are Linux
+      if tmp_pids != {}:
+        lowest_pid = sorted([x for x in tmp_pids.keys()])[0]
+        # This is very expensive on some systems (~1 second). Hence we only do this once with the first item found
+        tmp_proc = subprocess.Popen([which('pstack'), str(lowest_pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return tmp_proc.communicate()[0]
+      else:
+        return ''
+
+  def _getPIDs(self):
+    pid_list = {}
+
+    # Determin the binary to sample and store it. Doing the findCommand is a little expensive.
+    if self.track_process == '':
+      self.track_process = self._findCommand(''.join(self.arguments.run))
+
+    # A quick way to safely check for the avilability of needed tools
+    self._verifyCommand(['ps'])
+
+    # If we are tracking a binary
+    if self.arguments.run:
+      command = [which('ps'), '-e', '-o', 'pid,rss,user,args']
+      tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      all_pids = tmp_proc.communicate()[0].split('\n')
+      # Figure out what we are allowed to track (strip away mpiexec, processes not owned by us, etc)
+      for single_pid in all_pids:
+        if single_pid.find(self.track_process) != -1 and \
+           single_pid.find(__file__) == -1 and \
+           single_pid.find('mpirun') == -1 and \
+           single_pid.find(os.getenv('USER')) != -1 and \
+           single_pid.find('mpiexec') == -1:
+          pid_list[int(single_pid.split()[0])] = []
+          pid_list[int(single_pid.split()[0])].extend([single_pid.split()[1], single_pid.split()[3]])
+    return pid_list
+
+  def _verifyCommand(self, command_list):
+    for command in command_list:
+      if which(command) == None:
+        print 'Command not found:', command
+        sys.exit(1)
+
+  # determine if we are running on a darwin kernel
+  def _darwin(self):
+   if platform.platform(0, 1).split('-')[:-1][0].find('Darwin') != -1:
+     return True
+
+  # Determine the command we are going to track
+  # A few things are happening here; first we strip off any MPI commands
+  # we then loop through the remaining items until we find a matching path
+  # exp:  mpiexec -n 12 ../../../moose_test-opt -i simple_diffusion.i -r 6
+  # would first strip off mpiexec, check for the presence of -n in our
+  # current directory, then 12, then ../../../moose_test-opt   <- found. It would
+  # stop and return the base name (moose_test-opt).
+  def _findCommand(self, command):
+    if command.find('mpiexec') == 0 or command.find('mpirun') == 0:
+      for binary in command.split():
+        if os.path.exists(binary):
+          return os.path.split(binary)[1]
+    elif os.path.exists(command.split()[0]):
+      return os.path.split(command.split()[0])[1]
+
+class GetTime:
+  """A simple formatted time object.
+"""
+  def __init__(self, posix_time=None):
+    import datetime
+    if posix_time == None:
+      self.posix_time = datetime.datetime.now()
+    else:
+      self.posix_time = datetime.datetime.fromtimestamp(posix_time)
+    self.now = str(datetime.datetime.now().strftime('%s.%f'))
+    self.microsecond = self.posix_time.microsecond
+    self.second = self.posix_time.second
+    self.minute = self.posix_time.strftime('%M')
+    self.hour = self.posix_time.strftime('%H')
+    self.day = self.posix_time.strftime('%d')
+    self.month = self.posix_time.strftime('%m')
+    self.year = self.posix_time.year
+    self.dayname = self.posix_time.strftime('%a')
+    self.monthname = self.posix_time.strftime('%b')
 
 class MemoryPlotter:
   def __init__(self, arguments):
@@ -162,240 +688,6 @@ class MemoryPlotter:
                                  )
                  )
 
-class ExportMemoryUsage:
-  """Converts a log file to a comma delimited format (for Matlab)
-"""
-  def __init__(self, arguments):
-    self.arguments = arguments
-    if os.path.exists(self.arguments.export[-1]):
-      history_file = open(self.arguments.export[-1], 'r')
-    else:
-      print 'Input file not found:', self.arguments.export[-1]
-      sys.exit(1)
-
-    reader = csv.reader(history_file, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
-    self.memory_list = []
-    for row in reader:
-      self.memory_list.append(row)
-    history_file.close()
-
-    self.sorted_list = []
-    self.mem_list = []
-    self.exportFile()
-
-  def exportFile(self):
-    output_file = open(self.arguments.export[-1] + '.comma_delimited', 'w')
-    for timestamp in self.memory_list:
-      time_object = GetTime(float(timestamp[0]))
-      self.mem_list.append(timestamp[1])
-      self.sorted_list.append([str(time_object.year) + '-' + str(time_object.month) + '-' + str(time_object.day) + ' ' + str(time_object.hour) + ':' + str(time_object.minute) + ':' + str(time_object.second) + '.' + str(time_object.microsecond), timestamp[1]])
-    for item in self.sorted_list:
-      output_file.write(str(item[0]) + ',' + str(item[1]) + '\n')
-    output_file.close()
-    print 'Comma delimited file saved to: ' + os.getcwd() + '/' + str(self.arguments.export[-1]) + '.comma_delimited'
-
-class WriteLog:
-  """The logfile object
-"""
-  def __init__(self, log_file):
-    self.file_object = open(log_file, 'w')
-    self.log_file = csv.writer(self.file_object, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
-
-  def write_file(self, data):
-    self.log_file.writerow(data)
-
-  def close(self):
-    self.file_object.close()
-
-class SamplerUtils:
-  """This class contains the logging facilities as well as
-the methods to retrieve memory usage and stack traces.
-"""
-  def __init__(self, arguments):
-    self.arguments = arguments
-    self.log = TemporaryFile()
-    self.last_position = 0
-    self.machine_type = self.get_platform()[0]
-
-  def __del__(self):
-    try:
-      self.log.close()
-    except:
-      pass
-
-  def get_platform(self):
-    return platform.platform(0, 1).split('-')[:-1]
-
-  def _discover_name(self):
-    if self.arguments.run:
-      for item in self.arguments.run[-1].split():
-        if os.path.exists(item):
-          return (item.split('/').pop(), item)
-    elif self.arguments.call_back_host:
-      return (self.arguments.agent_run, self.arguments.agent_run)
-
-  # Gets the current stdout/err
-  def read_log(self):
-    self.log.seek(self.last_position)
-    output = self.log.read()
-    self.last_position = self.log.tell()
-    sys.stdout.write(output)
-    return output
-
-  # return a dictionary of PIDs and their memory_usage
-  def get_pids(self):
-    pid_list = {}
-    if self.arguments.track == None:
-      command = ['ps', '-e', '-o', 'pid,rss,user,args']
-      tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      all_pids = tmp_proc.communicate()[0].split('\n')
-      (search_for, abs) = self._discover_name()
-      for single_pid in all_pids:
-        if single_pid.find(search_for) > -1 and single_pid.find(os.getenv('USER')) > -1 and single_pid.find(__file__) == -1:
-          pid_list[single_pid.split()[0]] = []
-          pid_list[single_pid.split()[0]].append(single_pid.split()[1])
-    else:
-      command = ['ps', str(self.arguments.track[-1]), '-e', '-o', 'pid,rss,user,args']
-      tmp_proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      all_pids = tmp_proc.communicate()[0].split('\n')
-      for single_pid in all_pids:
-        if single_pid.find(self.arguments.track[-1]) > -1:
-          pid_list[single_pid.split()[0]] = []
-          pid_list[single_pid.split()[0]].append(single_pid.split()[1])
-    if pid_list == {}:
-      return None
-    return pid_list
-
-  # Get total memory usage
-  def read_ps(self):
-    memory_usage = 0
-    pid_list = self.get_pids()
-    if pid_list == None:
-      return None
-    for single_pid in pid_list:
-      for single_usage in pid_list[single_pid]:
-        memory_usage += int(single_usage)
-    if memory_usage == 0:
-      return None
-    return int(memory_usage)
-
-  # Get Stack Trace information from first discovered PID
-  def read_pstack(self):
-    if self.machine_type.find('Darwin') != -1:
-      # We are Macintosh
-      if self.arguments.pstack:
-        pid_list = self.get_pids()
-        if pid_list == None:
-          return ''
-        try:
-          with open('gdb_commands_temp'): pass
-        except IOError:
-          gdb_commands_temp = open('gdb_commands_temp', 'w')
-          gdb_commands_temp.write('set width 0\nset height 0\nset pagination no\nbt\n')
-          gdb_commands_temp.close()
-        for single_pid in pid_list:
-          # This is very expensive on some systems (~1 second). Hence we only do this once.
-          tmp_proc = subprocess.Popen(['gdb', '--batch', '--quiet', '-x', 'gdb_commands_temp', self._discover_name()[1], str(single_pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-          tmp_results = tmp_proc.communicate()[0]
-          return ''.join(re.findall(r'#.*\n', tmp_results))
-        else:
-          return ''
-    else:
-      # We are Linux
-      if self.arguments.pstack:
-        pid_list = self.get_pids()
-        if pid_list == None:
-          return ''
-        for single_pid in pid_list:
-          # This is very expensive on some systems (~1 second). Hence we only do this once.
-          tmp_proc = subprocess.Popen(['pstack', str(single_pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-          return tmp_proc.communicate()[0]
-        else:
-          return ''
-
-class Report:
-  """This class handles all the actual data.
-"""
-  def __init__(self, arguments):
-    self.args = arguments
-    self.changes = False
-    self.sampler = SamplerUtils(self.args)
-    self.writer = WriteLog(self.args.outfile[-1])
-    if self.args.node_list == None:
-      self.args.node_list = [ self.args.my_hostname ]
-    self.current_results = { 'HOST' : {},
-                             'REPORTING_HOST'  : '',
-                             'TOTAL'           : 0,
-                             'REQ'             : False,
-                             'REQ_DATA'        : {},
-                             'RUN'             : True
-                             }
-    for node in self.args.node_list:
-      self.current_results['HOST'][node] = { 'PSTACK' : '',
-                                             'LOG'    : '',
-                                             'TOTAL'  : 0
-                                             }
-    self.last_results = self.current_results.copy()
-
-    self.initialize = { 'REPORTING_HOST' : self.args.my_hostname,
-                        'REQ'            : True,
-                        'REQ_DATA'       : { 'agent_run'   : None,
-                                             'sample_delay' : None,
-                                             'pstack'      : None,
-                                             'pbs_delay'   : None
-                                             }
-                        }
-
-  def __del__(self):
-    self.writer.close()
-
-  def getReport(self):
-    if self.args.pbs:
-      # If we are the server, only get stdout
-      self.current_results['HOST'][self.current_results['REPORTING_HOST']]['LOG']  = self.sampler.read_log()
-    else:
-      self.current_results['HOST'][self.args.my_hostname]['PSTACK'] = self.sampler.read_pstack()
-      self.current_results['HOST'][self.args.my_hostname]['TOTAL']  = self.sampler.read_ps()
-      self.current_results['HOST'][self.args.my_hostname]['LOG']  = self.sampler.read_log()
-      self.current_results['REPORTING_HOST'] = self.args.my_hostname
-    self.updateReport()
-
-  def updateReport(self):
-    total_mem = 0
-    log_changed = False
-    for key in self.args.node_list:
-      if self.current_results['HOST'][key]['TOTAL'] == None and self.args.pbs != True:
-        print 'Informing server all processes have stopped.'
-        self.current_results['RUN'] = False
-        self.current_results['HOST'][key]['TOTAL'] = 0
-      else:
-        if self.current_results['HOST'][key]['TOTAL'] != None:
-          total_mem += int(self.current_results['HOST'][key]['TOTAL'])
-          if self.current_results['HOST'][key]['LOG'] != "":
-            log_changed = True
-
-    self.current_results['TOTAL'] = total_mem
-    if self.last_results != self.current_results or log_changed:
-      self.changes = True
-      for key in self.last_results.keys():
-        if key != 'HOST':
-          self.last_results[key] = self.current_results[key]
-      for key in self.last_results['HOST'].keys():
-        self.last_results['HOST'][key] = self.current_results['HOST'][key]
-    if self.args.pbs:
-      self.writeResults()
-
-  def writeResults(self):
-    self.changes = False
-    data = [ GetTime().now,
-             self.last_results['TOTAL'],
-             self.last_results['HOST'][self.current_results['REPORTING_HOST']]['LOG'],
-             self.last_results['HOST'][self.current_results['REPORTING_HOST']]['PSTACK'],
-             self.last_results['REPORTING_HOST'],
-             self.last_results['HOST'][self.current_results['REPORTING_HOST']]['TOTAL']
-             ]
-    self.writer.write_file(data)
-
 class ReadLog:
   """Read a memory_logger log file, and display the results to stdout in an easy to read form.
 """
@@ -488,8 +780,6 @@ class ReadLog:
       message = ''
     return date + '{:15,.0f}'.format(total_memory) + ' K | ' + color_code + '-'*int(node_position) + message + '-'*(int(total_position) - (int(node_position) + ((len(message) - additional_correction) + footer))) + RESET + '| ' + percent + '%\n' + tmp_log
 
-
-
   def getTerminalSize(self):
     """Quicky to get terminal window size"""
     env = os.environ
@@ -515,280 +805,7 @@ class ReadLog:
         cr = (25, 80)
     return int(cr[1]), int(cr[0])
 
-class ParseResults:
-  """A class to read the socket file object into the running dictionary
-"""
-  def __init__(self, arguments, stdout_log, launched_job, node_list):
-    self.stdout_log = stdout_log
-    self.arguments = arguments
-    self.server_stop = False
-    self.r = Reporter(self.arguments, launched_job, node_list)
-
-  def parse(self, client_data):
-    try:
-      if client_data != None:
-        t = TemporaryFile()
-        t.write(client_data)
-        t.seek(0)
-        reported_data = pickle.load(t)
-        t.close()
-        self.parseData(reported_data)
-    except ValueError:
-      print 'Error unpacking dictionary. Not a dictionary:', str(reported_data)
-      self.r.current_report[self.arguments.my_hostname]['RUN'] = False
-
-  def parseData(self, reported_data):
-    self.r.current_results[reported_data.keys()[0]] = reported_data[reported_data.keys()[0]]
-    self.r.current_results['REPORTING_HOST'] = reported_data.keys()[0]
-    self.r.current_results[reported_data.keys()[0]]['TIME'] = GetTime().now
-    if self.r.current_results[self.arguments.my_hostname]['RUN'] == False:
-      self.server_stop = True
-    self.r.getReport()
-
-class GetTime:
-  """A simple formatted time object.
-"""
-  def __init__(self, posix_time=None):
-    import datetime
-    if posix_time == None:
-      self.posix_time = datetime.datetime.now()
-    else:
-      self.posix_time = datetime.datetime.fromtimestamp(posix_time)
-    self.now = str(datetime.datetime.now().strftime('%s.%f'))
-    self.microsecond = self.posix_time.microsecond
-    self.second = self.posix_time.second
-    self.minute = self.posix_time.strftime('%M')
-    self.hour = self.posix_time.strftime('%H')
-    self.day = self.posix_time.strftime('%d')
-    self.month = self.posix_time.strftime('%m')
-    self.year = self.posix_time.year
-    self.dayname = self.posix_time.strftime('%a')
-    self.monthname = self.posix_time.strftime('%b')
-
-class ClientParser:
-  """This class contains the logic for recieved data.
-"""
-  def __init__(self, report):
-    self.r = report
-
-  def accept(self, client):
-    msg = ''
-    data_len = int(client[0].recv(8))
-    while len(msg) < data_len:
-      msg = msg + str(client[0].recv(1024))
-    self.parse_message(self._unpickle_message(msg), client)
-
-  def _unpickle_message(self, message):
-    t = TemporaryFile()
-    t.write(message)
-    t.seek(0)
-    try:
-      message = pickle.load(t)
-      t.close()
-      return message
-    except KeyError:
-      print 'Socket data was not pickled data'
-    except:
-      raise
-
-  def _pickle_message(self, message):
-    t = TemporaryFile()
-    pickle.dump(message, t)
-    t.seek(0)
-    str_msg = t.read()
-    str_len = len(str_msg)
-    message = "%-8d" % (str_len,) + str_msg
-    t.close()
-    return message
-
-  def parse_message(self, dictionary_data, client):
-    reporting_node = dictionary_data['REPORTING_HOST']
-    if dictionary_data['REQ'] == True:
-      self.determine_request(dictionary_data, client)
-    else:
-      self.r.current_results['HOST'][reporting_node] = dictionary_data['HOST'][reporting_node]
-      self.r.current_results['REPORTING_HOST'] = reporting_node
-      self.r.current_results['RUN'] = dictionary_data['RUN']
-      self.r.getReport()
-
-  def determine_request(self, message, client):
-    # Right now, we only support the request for arguments
-    for request in message['REQ_DATA'].keys():
-      for request_type in dir(self.r.args):
-        if str(request) == str(request_type):
-          message['REQ_DATA'][request] = getattr(self.r.args, request)
-    message['REQ'] = False
-    client[0].sendall(self._pickle_message(message))
-
-class ServerAgent:
-  """This class creates a listing socket and passes any connection attempts to the client parser.
-ServerAgent also creates the reporter instance and launches all reporter agents.
-"""
-  def __init__(self, arguments):
-    self.args = arguments
-    self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    self.server.bind((socket.gethostname(), 0))
-    self.server.listen(5)
-    (self.host, self.port) = self.server.getsockname()
-    self.report = Report(self.args)
-    self.cp = ClientParser(self.report)
-    print 'Memory Logger running on:', self.host, self.port, '\nNodes:', ', '.join(self.args.node_list), '\nSample rate (including stdout):', self.args.sample_delay[-1], 's\nDelaying', self.args.pbs_delay[-1], 'seconds before agents attempt tracking\n'
-
-  def start_server(self):
-    self.launch_agents()
-    try:
-      while self.report.current_results['RUN']:
-        client_connection = self.server.accept()
-        self.cp.accept(client_connection)
-    except KeyboardInterrupt:
-      print 'Canceled by user'
-      sys.exit(0)
-    if self.args.pbs_delay[-1] < 1:
-      print 'Application terminated. If termination was unexpected, try increasing the --pbs-delay value.'
-      sys.exit(0)
-    print 'Application terminated. Wrote to file:', self.args.outfile[-1]
-
-  def launch_agents(self):
-    (self.args.agent_run, abs) = self.report.sampler._discover_name()
-    if self.args.agent_run == None:
-      print 'No binary detected. Exiting...'
-      sys.exit(1)
-    else:
-      print '\nInstructing agents to track:', self.args.agent_run
-
-    self.args.process = subprocess.Popen(self.args.run[-1].split(), stdout=self.report.sampler.log, stderr=self.report.sampler.log)
-    for node in self.args.node_list:
-      if self.args.pstack:
-        command = [  'ssh',
-                     node,
-                     'bash --login -c "source /etc/profile && ' \
-                     + 'sleep ' + str(self.args.pbs_delay[-1]) + ' && ' \
-                     + os.path.abspath(__file__) \
-                     + ' --pstack --call-back-host ' \
-                     + self.host + ' ' + str(self.port) \
-                     + '"']
-      else:
-        command = [  'ssh',
-                     node,
-                     'bash --login -c "source /etc/profile && ' \
-                     + 'sleep ' + str(self.args.pbs_delay[-1]) + ' && ' \
-                     + os.path.abspath(__file__) \
-                     + ' --call-back-host ' \
-                     + self.host + ' ' + str(self.port) \
-                     + '"']
-      subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-class ClientConnection:
-  """This class controls the data connection between client and server.
-server = (( 'server hostname', int(port) ))
-"""
-  def __init__(self, server):
-    self.server = server
-    self.client = None
-
-  def close(self):
-    try:
-      self.client.close()
-    except:
-      pass
-
-  def send(self, message):
-    try:
-      self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      self.client.settimeout(15)
-      self.client.connect(self.server)
-      self.client.sendall(self._pickle_message(message))
-    except:
-      print 'Connection timeout'
-      sys.exit(0)
-
-  def receive(self, message):
-    msg = ''
-    try:
-      self.client = socket.socket()
-      self.client.settimeout(15)
-      self.client.connect(self.server)
-      self.client.sendall(self._pickle_message(message))
-      data_len = int(self.client.recv(8))
-      while len(msg) < data_len:
-        msg = msg + str(self.client.recv(1024))
-      return self._unpickle_message(msg)
-    except:
-      print 'Connection timeout'
-      sys.exit(0)
-
-  def _unpickle_message(self, message):
-    t = TemporaryFile()
-    t.write(message)
-    t.seek(0)
-    try:
-      return pickle.load(t)
-    except KeyError:
-      print 'Socket data was not pickled data'
-    except:
-      raise
-
-  def _pickle_message(self, message):
-    t = TemporaryFile()
-    pickle.dump(message, t)
-    t.seek(0)
-    str_msg = t.read()
-    str_len = len(str_msg)
-    message = "%-8d" % (str_len,) + str_msg
-    t.close()
-    return message
-
-
-##########################################################
-
-def trackMemory(args):
-  if args.pbs:
-    node_list = []
-    node_file = open(os.getenv('PBS_NODEFILE'), 'r')
-    tmp_list = set(node_file.read().split())
-    for item in tmp_list:
-      node_list.append(socket.getfqdn(item))
-    node_file.close()
-    args.node_list = node_list
-    ServerAgent(args).start_server()
-  elif args.call_back_host:
-    agent = ClientConnection((args.call_back_host[0], int(args.call_back_host[1])))
-    args.node_list = None
-    report = Report(args)
-    for initialize_item in report.initialize.keys():
-      report.current_results[initialize_item] = report.initialize[initialize_item]
-    print report.current_results
-    report.current_results = agent.receive(report.current_results)
-    print report.current_results
-    agent.close()
-    args.sample_delay = report.current_results['REQ_DATA']['sample_delay']
-    args.pstack = report.current_results['REQ_DATA']['pstack']
-    args.agent_run = report.current_results['REQ_DATA']['agent_run']
-    while report.current_results['RUN']:
-      report.getReport()
-      if report.changes:
-        agent = ClientConnection((args.call_back_host[0], int(args.call_back_host[1])))
-        agent.send(report.current_results)
-        agent.close()
-      time.sleep(args.sample_delay[-1])
-  else:
-    args.node_list = None
-    report = Report(args)
-    args.process = subprocess.Popen(args.run[-1].split(), stdout=report.sampler.log, stderr=report.sampler.log)
-    time.sleep(.5)
-    try:
-      while report.current_results['RUN']:
-        report.getReport()
-        if report.changes:  #or args.report_unchanged:  <- Unnecessary
-          report.writeResults()
-        time.sleep(args.sample_delay[-1])
-    except KeyboardInterrupt:
-      print 'Canceled by user'
-      sys.exit(0)
-    except:
-      raise
-    print 'Application terminated. Wrote to file:', args.outfile[-1]
-
+# A simple which function to return path to program
 def which(program):
   def is_exe(fpath):
     return os.path.exists(fpath) and os.access(fpath, os.X_OK)
@@ -801,38 +818,26 @@ def which(program):
       exe_file = os.path.join(path, program)
       if is_exe(exe_file):
         return exe_file
-  return None
+  print 'I could not find the following binary:', program
+  sys.exit(1)
 
-def _verifyARGs(args):
+def verifyArgs(args):
   option_count = 0
-  if args.track:
-    option_count += 1
   if args.read:
     option_count += 1
   if args.run:
-    option_count += 1
-  if args.export:
     option_count += 1
   if args.plot:
     option_count += 1
   if option_count != 1 and args.pbs != True:
     if args.call_back_host == None:
-      print 'You must use one of the following: track, read, run, or plot'
+      print 'You must use one of the following: run, read, or plot'
       sys.exit(1)
-  if args.pstack:
-    if which('pstack') == None and args.read == None and args.plot == None:
-      print '\npstack binary not found. Add it to your PATH and try again.'
-      sys.exit(1)
-  if args.run:
-    if args.run[0].split(' ')[0] == 'mpiexec' or args.run[0].split(' ')[0] == 'mpirun':
-      args.mpi = True
-    else:
-      args.mpi = False
-    if args.mpi is not True and args.pbs:
-      print 'Ummm, you are specifying PBS with out using mpiexec/mpirun.'
-      sys.exit(0)
-
-  args.my_hostname = socket.gethostname()
+  args.socket = socket.gethostname()
+  args.delay = 2.0
+  args.cwd = os.getcwd()
+  if args.outfile == None and args.run:
+    args.outfile = [os.getcwd() + '/' + args.run[0].replace('..', '').replace('/', '').replace(' ', '_') + '.log']
   return args
 
 def parseArguments(args=None):
@@ -842,19 +847,17 @@ def parseArguments(args=None):
   rungroup.add_argument('--run', nargs=1, metavar='command', help='Run specified command. You must encapsulate the command in quotes\n ')
   rungroup.add_argument('--pbs', dest='pbs', metavar='', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches on all nodes\n ')
   rungroup.add_argument('--pbs-delay', dest='pbs_delay', metavar='float', nargs=1, type=float, default=[1.0], help='For larger jobs, you may need to increase the delay as to when the memory_logger will launch the tracking agents\n ')
-  rungroup.add_argument('--track', nargs=1, metavar='int', type=int, help='Track a single specific PID already running\n ')
-  rungroup.add_argument('--sample-delay', nargs=1,  metavar='float', type=float, default=[0.25], help='Indicate the sleep delay in float seconds to check memory usage (default 0.25 seconds)\n ')
-#  rungroup.add_argument('--report-unchanged', dest='report_unchanged', action='store_const', const=True, default=False, help='Track changes even when memory is unchanged.  This may significantly increase the size of your logfile.')
-  rungroup.add_argument('--outfile', nargs=1, metavar='file', default=[os.getcwd() + '/usage.log'], help='Save log to specified file. (Defaults to usage.log)\n ')
+  rungroup.add_argument('--sample-delay', dest='sample_delay', metavar='float', nargs=1, type=float, default=[0.05], help='The time to delay before taking the first sample (when not using pbs)')
+  rungroup.add_argument('--repeat-rate', nargs=1,  metavar='float', type=float, default=[0.25], help='Indicate the sleep delay in float seconds to check memory usage (default 0.25 seconds)\n ')
+  rungroup.add_argument('--outfile', nargs=1, metavar='file', help='Save log to specified file. (Defaults based on run command)\n ')
 
   readgroup = parser.add_argument_group('Read / Display', 'Options to manipulate or read log files created by the memory_logger')
   readgroup.add_argument('--read', nargs=1, metavar='file', help='Read a specified memory log file to stdout\n ')
+  readgroup.add_argument('--separate', dest='separate', action='store_const', const=True, default=False, help='Display individual node memory usage (read mode only)\n ')
   readgroup.add_argument('--plot', nargs="+", metavar='file', help='Display a graphical representation of memory usage (Requires Matplotlib). Specify a single file or a list of files to plot\n ')
-  readgroup.add_argument('--separate', dest='separate', action='store_const', const=True, default=False, help='Display individual node memory usage\n ')
-  readgroup.add_argument('--export', nargs=1, metavar='file', help='Export specified log file to a comma delimited format\n ')
 
   commongroup = parser.add_argument_group('Common Options', 'The following options can be used when displaying the results')
-  commongroup.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Display stack trace information (if available)\n ')
+  commongroup.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Display/Record stack trace information (if available)\n ')
   commongroup.add_argument('--stdout', dest='stdout', action='store_const', const=True, default=False, help='Display stdout information\n ')
 
   plotgroup = parser.add_argument_group('Plot Options', 'Additional options when using --plot')
@@ -866,17 +869,14 @@ def parseArguments(args=None):
   internalgroup = parser.add_argument_group('Internal PBS Options', 'The following options are used to control how memory_logger as a tracking agent connects back to the caller. These are set automatically when using PBS and can be ignored.')
   internalgroup.add_argument('--call-back-host', nargs=2, help='Server hostname and port that launched memory_logger\n ')
 
-  return _verifyARGs(parser.parse_args(args))
+  return verifyArgs(parser.parse_args(args))
 
 if __name__ == '__main__':
   args = parseArguments()
   if args.read:
     ReadLog(args)
     sys.exit(0)
-  if args.export:
-    ExportMemoryUsage(args)
-    sys.exit(0)
   if args.plot:
     MemoryPlotter(args)
     sys.exit(0)
-  trackMemory(args)
+  Server(args)
