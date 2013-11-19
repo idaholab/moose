@@ -12,11 +12,11 @@
 template<> void dataStore(std::ostream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context)
 {
   mooseAssert(unique_grain, "Unique Grain Pointer is NULL");
-  
+
   storeHelper(stream, unique_grain->variable_idx, context);
   storeHelper(stream, unique_grain->status, context);
   storeHelper(stream, unique_grain->sphere_ptrs, context);
-  
+
   // We do not need to store the nodes_ptrs structure. This information is not necessary for restart.
 }
 
@@ -40,7 +40,7 @@ template<> void dataStore(std::ostream & stream, GrainTracker::BoundingSphereInf
   mooseAssert(bound_sphere_info, "Sphere pointer is NULL");
   storeHelper(stream, bound_sphere_info->member_node_id, context);
   storeHelper(stream, bound_sphere_info->b_sphere.center(), context);
-  storeHelper(stream, bound_sphere_info->b_sphere.radius(), context); 
+  storeHelper(stream, bound_sphere_info->b_sphere.radius(), context);
 }
 
 template<> void dataLoad(std::istream & stream, GrainTracker::BoundingSphereInfo * & bound_sphere_info, void * context)
@@ -48,7 +48,7 @@ template<> void dataLoad(std::istream & stream, GrainTracker::BoundingSphereInfo
   unsigned int member_node_id;
   Point center;
   Real radius;
-    
+
   loadHelper(stream, member_node_id, context);
   loadHelper(stream, center, context);
   loadHelper(stream, radius, context);
@@ -709,12 +709,14 @@ GrainTracker::updateFieldInfo()
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
 
     if (grain_it->second->status != INACTIVE)
-      for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin();
+      for (std::set<unsigned int>::iterator node_it = grain_it->second->nodes_ptr->begin();
            node_it != grain_it->second->nodes_ptr->end(); ++node_it)
       {
-        const Node *curr_node = mesh.query_node_ptr(*node_it);
+        Node *curr_node = mesh.query_node_ptr(*node_it);
 
-        if (curr_node && _vars[grain_it->second->variable_idx]->getNodalValue(*curr_node) > tmp_map[curr_node->id()])
+        if (curr_node &&
+            _mesh.isSemiLocal(curr_node) &&
+            _vars[grain_it->second->variable_idx]->getNodalValue(*curr_node) > tmp_map[curr_node->id()])
         {
           _bubble_maps[map_idx][curr_node->id()] = grain_it->first;
           if (_var_index_mode)
