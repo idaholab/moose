@@ -63,6 +63,13 @@
 
 []
 
+[AuxVariables]
+  [./volumetric_strain]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [SolidMechanics]
   [./solid]
     disp_r = disp_x
@@ -70,6 +77,14 @@
   [../]
 []
 
+[AuxKernels]
+  [./fred]
+    type = MaterialTensorAux
+    quantity = VolUMetricsTRAiN
+    variable = volumetric_strain
+    tensor = total_strain
+  [../]
+[]
 
 [BCs]
 
@@ -131,6 +146,16 @@
   [./internalVolume]
     type = InternalVolume
     boundary = 2
+  [../]
+  [./volStrain0]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = volumetric_strain
+  [../]
+  [./volStrain1]
+    type = ElementalVariableValue
+    elementid = 1
+    variable = volumetric_strain
   [../]
 []
 

@@ -12,7 +12,7 @@ InputParameters validParams<MaterialTensorAux>()
 
 void addMaterialTensorParams(InputParameters& params)
 {
-  MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Hoop, Radial, Axial, MaxPrincipal, MedPrincipal, MinPrincipal, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality");
+  MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Hoop, Radial, Axial, MaxPrincipal, MedPrincipal, MinPrincipal, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality, VolumetricStrain");
 
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
   params.addParam<int>("index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
@@ -237,6 +237,15 @@ MaterialTensorAux::getTensorQuantity(const SymmTensor & tensor,
                                    std::pow(tensor.zx(), 2))));
 
     value = std::abs(hydrostatic / von_mises);
+  }
+  else if ( quantity == MTA_VOLUMETRICSTRAIN )
+  {
+    value =
+      tensor.trace() +
+      tensor.xx()*tensor.yy() +
+      tensor.yy()*tensor.zz() +
+      tensor.zz()*tensor.xx() +
+      tensor.xx()*tensor.yy()*tensor.zz();
   }
   else
   {
