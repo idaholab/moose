@@ -472,7 +472,7 @@ MultiAppNearestNodeTransfer::execute()
 
       // Now loop through min_procs and see if _this_ processor had the actual minimum for any nodes.
       // If it did then we're going to go get the value from that nearest node and transfer its value
-      unsigned int proc_id = libMesh::processor_id();
+      processor_id_type proc_id = libMesh::processor_id();
 
       for(unsigned int j=0; j<min_procs.size(); j++)
       {

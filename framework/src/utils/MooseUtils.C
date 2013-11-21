@@ -118,7 +118,7 @@ checkFileWriteable(const std::string & filename)
 void
 parallelBarrierNotify()
 {
-  int slave_processor_id;
+  processor_id_type slave_processor_id;
 
   if (libMesh::processor_id() == 0)
   {

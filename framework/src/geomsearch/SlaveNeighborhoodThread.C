@@ -64,7 +64,7 @@ SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Th
 void
 SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
 {
-  unsigned int processor_id = libMesh::processor_id();
+  processor_id_type processor_id = libMesh::processor_id();
 
   for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
   {

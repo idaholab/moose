@@ -29,8 +29,8 @@ void
 RestartableDataIO::writeRestartableData(std::string base_file_name, const RestartableDatas & restartable_datas, std::set<std::string> & /*_recoverable_data*/)
 {
   unsigned int n_threads = libMesh::n_threads();
-  unsigned int n_procs = libMesh::n_processors();
-  unsigned int proc_id = libMesh::processor_id();
+  processor_id_type n_procs = libMesh::n_processors();
+  processor_id_type proc_id = libMesh::processor_id();
 
   for(unsigned int tid=0; tid<n_threads; tid++)
   {
@@ -117,8 +117,8 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
   bool recovering = _fe_problem.getMooseApp().isRecovering();
 
   unsigned int n_threads = libMesh::n_threads();
-  unsigned int n_procs = libMesh::n_processors();
-  unsigned int proc_id = libMesh::processor_id();
+  processor_id_type n_procs = libMesh::n_processors();
+  processor_id_type proc_id = libMesh::processor_id();
 
   std::vector<std::string> ignored_data;
 
