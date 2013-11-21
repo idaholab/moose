@@ -17,7 +17,6 @@ InputParameters validParams<PFCFreezingIC>()
   params.addParam<Real>("max", 1.0, "Upper bound of the randomly generated values");
   params.addParam<Real>("inside", 1.0, "Value inside sinusoids");
   params.addParam<Real>("outside", 0.0, "Value outside sinusoids");
-  params.addParam<unsigned int>("power",2,"Power of sinusoid");
 
   params.addRequiredParam<Real>("lc", "The lattice constant off the crystal structure");
   
@@ -47,8 +46,7 @@ PFCFreezingIC::PFCFreezingIC(const std::string & name,
    _max(getParam<Real>("max")),
    _val_range(_max - _min),
    _inside(getParam<Real>("inside")),
-   _outside(getParam<Real>("outside")),
-   _power(getParam<unsigned int>("power"))
+   _outside(getParam<Real>("outside"))
 {
   std::cout << "MooseEnum? " << _crystal_structure << std::endl;
   
@@ -77,45 +75,28 @@ PFCFreezingIC::value(const Point & p)
 
   Real val = 0.0;
   
-  for (unsigned int i=0; i<_icdim; i++) 
-    val += std::cos((2.0/_lc*p(i))*libMesh::pi);
-  
-  if (_range(2) > 0.0)
-    val = val/6.0 + 0.5;
-  else
-    val = val/4.0 + 0.5;
-
-  val = std::pow(val,static_cast<Real>(_power));
   
   if (_crystal_structure == "FCC")
   {
-    Real val2 = 0.0;
+    Real val = 0.0;
     
     for (unsigned int i=0; i<_icdim; i++) 
-      val2 += std::cos((2.0/_lc*p(i) + 1.0)*libMesh::pi);
-    
-    if (_range(2) > 0.0)
-      val2 = val2/6.0 + 0.5;
-    else
-      val2 = val2/4.0 + 0.5;
-    val2 = std::pow(val2,static_cast<Real>(_power));
-
-    val += val2;
-
-    if (_power == 2)
-    val = 2.0*(val - 0.5);
-    else if (_power == 3)
-      val = (val - 0.25)/0.75;
-    else if (_power == 4)
-      val = (val - 0.1)/0.9;
+      val *= std::cos((2.0/_lc*p(i))*libMesh::pi);
   }
-
-  val = _outside + (_inside - _outside)*val;
+  else
+  {
+      for (unsigned int i=0; i<_icdim; i++) 
+      {
+          val += std::cos((1.0/_lc*p(i))*libMesh::pi);
+      }
+      val /= 3;
+      val = std::pow(val,2);
+  }
+  Real amp = _inside - _outside;
+  
+  val =  amp * val + _outside;
   
   return val;
-  
-  
-  
 }
 
   

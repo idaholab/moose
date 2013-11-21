@@ -48,7 +48,7 @@ PFCRFFMaterial::computeQpProperties()
   if (_num_L == 3)
   {
     //alpha constants
-    _alpha_R_0[_qp] = -2.429134088464706;
+    _alpha_R_0[_qp] = 2.429134088464706;
     _alpha_I_0[_qp] =  0.0;
     _alpha_R_1[_qp] = 18.943264072194637;
     _alpha_I_1[_qp] =  9.349446845430961;
@@ -56,7 +56,7 @@ PFCRFFMaterial::computeQpProperties()
     _alpha_I_2[_qp] =  6.499130135847140;
     
     //A constants
-    _A_R_0[_qp] = -1.282478656880326e2;
+    _A_R_0[_qp] = -63.1;
     _A_I_0[_qp] =  9.910190130869531e-15;
     _A_R_1[_qp] = 10.501019149026910;
     _A_I_1[_qp] =  2.363585467971611;

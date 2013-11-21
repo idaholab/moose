@@ -67,11 +67,13 @@ CHPFCRFF::computeQpResidual()
     break;
     
   case 2: //Approach using substitution
-    //ln_expansion = _u[_qp] - 0.6917*std::pow(_u[_qp],2)/double(2) + 0.0854*std::pow(_u[_qp],3)/double(3);
-
-    for (unsigned int i=1; i<_n_exp_terms; ++i)
-      ln_expansion += std::pow(double(-1),int(i+1))*std::pow(_u[_qp],int(i-1))/double(i);
+    ln_expansion = _u[_qp] - 0.6917*std::pow(_u[_qp],2)/double(2) + 0.0854*std::pow(_u[_qp],3)/double(3);
     break;
+    
+
+    // for (unsigned int i=1; i<_n_exp_terms; ++i)
+    // ln_expansion += std::pow(double(-1),int(i+1))*std::pow(_u[_qp],int(i-1))/double(i);
+    // break;
     
   }
   

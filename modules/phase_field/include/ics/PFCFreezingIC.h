@@ -51,7 +51,7 @@ private:
   Real _min, _max, _val_range;
   Real _inside, _outside;
 
-  unsigned int _power, _icdim;
+  unsigned int _icdim;
   
   
 };
