@@ -33,6 +33,7 @@ InputParameters validParams<RecoverBaseAction>()
   params.addParam<OutFileBase>("file_base", "The desired solution output name without an extension (Defaults to the mesh file name + '_out' or 'out' if generating the mesh by some other means)");
   params.addParam<std::string>("checkpoint_dir_suffix", "cp", "This will be appended to the file_base to create the directory name for checkpoint files.");
 
+  params.addParamNamesToGroup("checkpoint_dir_suffix", "Checkpoint");
   return params;
 }
 
