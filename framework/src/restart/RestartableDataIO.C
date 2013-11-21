@@ -151,7 +151,7 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
       unsigned int this_file_version;
       in.read((char *)&this_file_version, sizeof(this_file_version));
 
-      unsigned int this_n_procs = 0;
+      processor_id_type this_n_procs = 0;
       unsigned int this_n_threads = 0;
 
       in.read((char *)&this_n_procs, sizeof(this_n_procs));
