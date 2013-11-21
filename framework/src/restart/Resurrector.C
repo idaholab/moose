@@ -93,7 +93,7 @@ Resurrector::write()
   if (_restart_file_names.size() > _num_checkpoint_files)
   {
     unsigned int n_threads = libMesh::n_threads();
-    unsigned int n_procs = libMesh::n_processors();
+//    unsigned int n_procs = libMesh::n_processors();
     unsigned int proc_id = libMesh::processor_id();
 
     // remove the head from the list

@@ -20,7 +20,7 @@ NanKernel::computeQpResidual()
 {
   Real zero = 0;
 
-  if (_t_step >= _timestep_to_nan)
+  if (static_cast<unsigned int>(_t_step) >= _timestep_to_nan)
     return _grad_u[_qp] * _grad_test[_i][_qp] / zero;
   else
     return _grad_u[_qp] * _grad_test[_i][_qp];

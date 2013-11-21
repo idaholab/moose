@@ -590,7 +590,7 @@ Transient::keepGoing()
   }
 
   // Check for stop condition based upon number of simulation steps and/or solution end time:
-  if(_t_step>_num_steps)
+  if(static_cast<unsigned int>(_t_step) > _num_steps)
     keep_going = false;
 
   if((_time>_end_time) || (fabs(_time-_end_time)<=_timestep_tolerance))
