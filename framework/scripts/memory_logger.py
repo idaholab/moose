@@ -208,7 +208,13 @@ class Client:
 
     # Client will not be talking to a server, save data to a file instead
     else:
-      self.logfile = WriteCSV(self.arguments.outfile[0])
+      # Deal with --recover
+      if self.arguments.recover:
+        # Do not overwrite the file
+        self.logfile = WriteCSV(self.arguments.outfile[0], False)
+      else:
+        # Overwrite the file
+        self.logfile = WriteCSV(self.arguments.outfile[0], True)
 
     # Lets begin!
     self.startProcess()
@@ -337,8 +343,11 @@ based on supplied arguments
       raise
 
 class WriteCSV:
-  def __init__(self, logfile):
-    self.file_object = open(logfile, 'w', 1)
+  def __init__(self, logfile, overwrite):
+    if overwrite:
+      self.file_object = open(logfile, 'w', 1)
+    else:
+      self.file_object = open(logfile, 'a', 1)
     self.log_file = csv.writer(self.file_object, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
 
   # Close the logfile
@@ -356,7 +365,11 @@ class WriteCSV:
     format_order = ['TIMESTAMP', 'TOTAL', 'STDOUT', 'STACK', 'HOSTNAME', 'MEMORY']
     formatted_text = []
     for item in format_order:
-      formatted_text.append(str(data[item]))
+      # We have to handle python's way of formatting floats to strings specially
+      if item == 'TIMESTAMP':
+        formatted_text.append('%.6f' % data[item])
+      else:
+        formatted_text.append(data[item])
     return formatted_text
 
 class Agent:
@@ -375,6 +388,26 @@ machine_id is supplied by the client class. This allows for multiple agents if d
     self.log = TemporaryFile()
     self.log_position = 0
 
+    # Discover if --recover is being used. If so, we need to obtain the
+    # timestamp of the last entry in the outfile log... a little bulky
+    # to do... and not a very good place to do it.
+    if self.arguments.recover:
+      if os.path.exists(self.arguments.outfile[-1]):
+        memory_list = []
+        history_file = open(self.arguments.outfile[-1], 'r')
+        reader = csv.reader(history_file, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
+        for row in reader:
+          memory_list.append(row)
+        history_file.close()
+        # Get last item in list. Unfortunately, no way to do this until
+        last_entry = float(memory_list[-1][0]) + self.arguments.repeat_rate[-1]
+        self.delta = (GetTime().now - last_entry)
+      else:
+        print 'Recovery options detected, but I could not find your previous memory log file.'
+        sys.exit(1)
+    else:
+      self.delta = 0
+
     # Create the dictionary to which all sampled data will be stored
     # NOTE: REQUEST dictionary items are instructions (arguments) we will
     # ask the server to provide (if we are running with --pbs)
@@ -390,7 +423,7 @@ machine_id is supplied by the client class. This allows for multiple agents if d
                           'STDOUT'    : '',
                           'STACK'     : '',
                           'MEMORY'    : 0,
-                          'TIMESTAMP' : GetTime().now,
+                          'TIMESTAMP' : GetTime().now - self.delta,
                           'REQUEST'   : { 'run'          : '',
                                           'pstack'       : '',
                                           'repeat_rate'  : '',
@@ -401,7 +434,6 @@ machine_id is supplied by the client class. This allows for multiple agents if d
                         }
                       }
 
-
   # NOTE: This is the only function that should be called in this class
   def takeSample(self):
     if self.arguments.pstack:
@@ -410,7 +442,10 @@ machine_id is supplied by the client class. This allows for multiple agents if d
     # Always do the following
     self.agent_data[self.my_uuid]['MEMORY'] = self._getMemory()
     self.agent_data[self.my_uuid]['STDOUT'] = self._getStdout()
-    self.agent_data[self.my_uuid]['TIMESTAMP'] = GetTime().now
+    if self.arguments.recover:
+      self.agent_data[self.my_uuid]['TIMESTAMP'] = GetTime().now - self.delta
+    else:
+      self.agent_data[self.my_uuid]['TIMESTAMP'] = GetTime().now
 
     # Return the data to whom ever asked for it
     return self.agent_data
@@ -517,7 +552,7 @@ class GetTime:
       self.posix_time = datetime.datetime.now()
     else:
       self.posix_time = datetime.datetime.fromtimestamp(posix_time)
-    self.now = str(datetime.datetime.now().strftime('%s.%f'))
+    self.now = float(datetime.datetime.now().strftime('%s.%f'))
     self.microsecond = self.posix_time.microsecond
     self.second = self.posix_time.second
     self.minute = self.posix_time.strftime('%M')
@@ -834,8 +869,20 @@ def verifyArgs(args):
       print 'You must use one of the following: run, read, or plot'
       sys.exit(1)
   args.cwd = os.getcwd()
+
   if args.outfile == None and args.run:
-    args.outfile = [os.getcwd() + '/' + args.run[0].replace('..', '').replace('/', '').replace(' ', '_') + '.log']
+    # Work with --recover (a MOOSE application specific option)
+    if args.run[0].find('--recover') != -1:
+      args.recover = True
+    else:
+      args.recover = False
+
+    # Attempt to build the output file based on input file
+    if re.findall(r'-i (\w+)', args.run[0]) != []:
+      args.outfile = [os.getcwd() + '/' + re.findall(r'-i (\w+)', args.run[0])[0] + '_memory.log']
+    else:
+      args.outfile = [os.getcwd() + '/' + args.run[0].replace('..', '').replace('/', '').replace(' ', '_') + '.log']
+
   return args
 
 def parseArguments(args=None):
