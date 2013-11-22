@@ -11,7 +11,10 @@ class Server:
       if os.getenv('PBS_NODEFILE') != None:
         # Initialize an agent, strictly for holding our stdout logs. Give it the UUID of 'server'
         self.agent = Agent(self.arguments, 'server')
-        self.logfile = WriteCSV(self.arguments.outfile[0])
+        if self.arguments.recover:
+          self.logfile = WriteCSV(self.arguments.outfile[0], False)
+        else:
+          self.logfile = WriteCSV(self.arguments.outfile[0], True)
         self.client_connections = []
         self.startServer()
       else:
