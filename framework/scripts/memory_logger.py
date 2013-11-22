@@ -234,26 +234,35 @@ class Client:
       time.sleep(self.arguments.sample_delay[0])
 
 
-    # Continue to process data until an Agent reports a STOP command
-    while AGENTS_ACTIVE:
-      # Take a sample
-      current_data = self.my_agent.takeSample()
+    # This is a try so we can handle a keyboard ctrl-c
+    try:
 
-      # Handle the data supplied by the Agent.
-      self._handleData(current_data)
+      # Continue to process data until an Agent reports a STOP command
+      while AGENTS_ACTIVE:
+        # Take a sample
+        current_data = self.my_agent.takeSample()
 
-      # If an Agent reported a STOP command, go ahead and begin the shutdown phase
-      if current_data[current_data.keys()[0]]['STOP']:
-        AGENTS_ACTIVE = False
+        # Handle the data supplied by the Agent.
+        self._handleData(current_data)
 
-      # Sleep just a bit between samples, as to not saturate the machine
-      time.sleep(self.arguments.repeat_rate[-1])
+        # If an Agent reported a STOP command, go ahead and begin the shutdown phase
+        if current_data[current_data.keys()[0]]['STOP']:
+          AGENTS_ACTIVE = False
 
-    # An agent reported a stop command... so let everyone know where the log was saved, and exit!
-    if self.arguments.call_back_host == None:
-      print 'Binary has exited. Wrote log:', self.arguments.outfile[0]
+        # Sleep just a bit between samples, as to not saturate the machine
+        time.sleep(self.arguments.repeat_rate[-1])
 
-    # close the memory_logger
+      # An agent reported a stop command... so let everyone know where the log was saved, and exit!
+      if self.arguments.call_back_host == None:
+        print 'Binary has exited. Wrote log:', self.arguments.outfile[0]
+
+    # Cancel server operations if ctrl-c was pressed
+    except KeyboardInterrupt:
+      self.logfile.close()
+      print 'Canceled by user. Wrote log:', self.arguments.outfile[0]
+      sys.exit(0)
+
+    # Everything went smooth.
     sys.exit(0)
 
   # Figure out what to do with the sampled data
@@ -399,10 +408,13 @@ machine_id is supplied by the client class. This allows for multiple agents if d
         memory_list = []
         history_file = open(self.arguments.outfile[-1], 'r')
         reader = csv.reader(history_file, delimiter=',', quotechar='|', escapechar='\\', quoting=csv.QUOTE_MINIMAL)
+
+        # Get last item in list. Unfortunately, no way to do this until
+        # we have read the entire file...? Lucky for us, most memory log
+        # files are in the single digit megabytes
         for row in reader:
           memory_list.append(row)
         history_file.close()
-        # Get last item in list. Unfortunately, no way to do this until
         last_entry = float(memory_list[-1][0]) + self.arguments.repeat_rate[-1]
         self.delta = (GetTime().now - last_entry)
       else:
@@ -873,12 +885,11 @@ def verifyArgs(args):
       sys.exit(1)
   args.cwd = os.getcwd()
 
+  # Work with --recover (a MOOSE application specific option)
+  args.recover = False
   if args.outfile == None and args.run:
-    # Work with --recover (a MOOSE application specific option)
     if args.run[0].find('--recover') != -1:
       args.recover = True
-    else:
-      args.recover = False
 
     # Attempt to build the output file based on input file
     if re.findall(r'-i (\w+)', args.run[0]) != []:
