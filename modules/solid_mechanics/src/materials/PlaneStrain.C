@@ -26,10 +26,10 @@ PlaneStrain::computeStrain( const unsigned qp,
 {
   strain_increment.xx() = _grad_disp_x[qp](0);
   strain_increment.yy() = _grad_disp_y[qp](1);
-//  strain_increment.zz() = 0;
+  strain_increment.zz() = 0;
   strain_increment.xy() = 0.5*(_grad_disp_x[qp](1) + _grad_disp_y[qp](0));
-//  strain_increment.yz() = 0;
-//  strain_increment.zx() = 0;
+  strain_increment.yz() = 0;
+  strain_increment.zx() = 0;
   if (_large_strain)
   {
     strain_increment.xx() += 0.5*(_grad_disp_x[qp](0)*_grad_disp_x[qp](0) +
