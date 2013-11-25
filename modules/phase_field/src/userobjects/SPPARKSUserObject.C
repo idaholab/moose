@@ -231,7 +231,7 @@ SPPARKSUserObject::initialSetup()
     std::multiset<ELKID>::iterator elk_iter = elk_id.find( *i );
     if (elk_iter != elk_id.end() )
     {
-      _spparks_to_elk.insert(std::make_pair<SPPARKSID, ELKID>(*i, *elk_iter));
+      _spparks_to_elk.insert(std::pair<SPPARKSID, ELKID>(*i, *elk_iter));
     }
     else
     {
@@ -243,11 +243,11 @@ SPPARKSUserObject::initialSetup()
     std::set<SPPARKSID>::iterator spparks_iter = spparks_id.find( *i );
     if (spparks_iter != spparks_id.end() )
     {
-      _elk_to_spparks.insert(std::make_pair<ELKID, SPPARKSID>(*i, *spparks_iter));
+      _elk_to_spparks.insert(std::pair<ELKID, SPPARKSID>(*i, *spparks_iter));
     }
     // else
     // {
-    //   _spparks_to_proc.insert(std::make_pair<SPPARKSID, unsigned>(*i, -1));
+    //   _spparks_to_proc.insert(std::pair<SPPARKSID, unsigned>(*i, -1));
     // }
   }
 
