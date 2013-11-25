@@ -39,6 +39,7 @@
 #include "PolycrystalVoronoiICAction.h"
 #include "PolycrystalRandomICAction.h"
 #include "SPPARKSUserObject.h"
+#include "SPPARKSAux.h"
 
 void
 Elk::PhaseField::registerObjects(Factory & factory)
@@ -69,6 +70,7 @@ Elk::PhaseField::registerObjects(Factory & factory)
   registerUserObject(NodalFloodCount);
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);
+  registerAux(SPPARKSAux);
   registerUserObject(NodalVolumeFraction);
   registerUserObject(SPPARKSUserObject);
 }
