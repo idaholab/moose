@@ -189,7 +189,6 @@ SPPARKSUserObject::initialSetup()
 
   char id[] = "id";
   getSPPARKSPointer(iptr, id);
-  int * id_array = iptr;
 
   double ** ddptr;
   char xyz[] = "xyz";

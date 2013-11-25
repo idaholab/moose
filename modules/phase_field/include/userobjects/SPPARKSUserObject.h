@@ -182,8 +182,6 @@ protected:
       }
     }
 
-    const unsigned num_sends = data_from_me.size();
-
     offset = 0;
     for (typename std::map<unsigned, std::vector<T> >::const_iterator i = data_from_me.begin(); i != data_from_me.end(); ++i)
     {
