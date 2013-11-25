@@ -38,6 +38,7 @@
 #include "PolycrystalHexGrainICAction.h"
 #include "PolycrystalVoronoiICAction.h"
 #include "PolycrystalRandomICAction.h"
+#include "SPPARKSUserObject.h"
 
 void
 Elk::PhaseField::registerObjects(Factory & factory)
@@ -69,6 +70,7 @@ Elk::PhaseField::registerObjects(Factory & factory)
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);
   registerUserObject(NodalVolumeFraction);
+  registerUserObject(SPPARKSUserObject);
 }
 
 void
@@ -83,7 +85,7 @@ Elk::PhaseField::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   syntax.registerActionSyntax("PolycrystalHexGrainICAction", "ICs/PolycrystalICs/PolycrystalHexGrainIC");
   syntax.registerActionSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
   syntax.registerActionSyntax("PolycrystalRandomICAction", "ICs/PolycrystalICs/PolycrystalRandomIC");
-  
+
   registerAction(PolycrystalKernelAction, "add_kernel");
   registerAction(PolycrystalVariablesAction, "add_variable");
   registerAction(BicrystalCircleGrainICAction, "add_ic");
@@ -93,4 +95,3 @@ Elk::PhaseField::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   registerAction(PolycrystalVoronoiICAction, "add_ic");
   registerAction(PolycrystalRandomICAction, "add_ic");
 }
-
