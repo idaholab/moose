@@ -80,7 +80,7 @@ class Server:
 
     # Cancel server operations if ctrl-c was pressed
     except KeyboardInterrupt:
-      print 'Canceled by user'
+      print 'Canceled by user. Wrote log:', self.arguments.outfile[0]
       sys.exit(0)
 
     # Normal exiting procedures
@@ -887,10 +887,11 @@ def verifyArgs(args):
 
   # Work with --recover (a MOOSE application specific option)
   args.recover = False
-  if args.outfile == None and args.run:
+  if args.run:
     if args.run[0].find('--recover') != -1:
       args.recover = True
 
+  if args.outfile == None and args.run:
     # Attempt to build the output file based on input file
     if re.findall(r'-i (\w+)', args.run[0]) != []:
       args.outfile = [os.getcwd() + '/' + re.findall(r'-i (\w+)', args.run[0])[0] + '_memory.log']
