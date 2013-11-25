@@ -23,7 +23,7 @@ public:
   virtual void execute();
   virtual void finalize() {}
 
-  Real getIntValue(unsigned elk_node_id, unsigned index) const;
+  int  getIntValue(unsigned elk_node_id, unsigned index) const;
   Real getDoubleValue(unsigned elk_node_id, unsigned index) const;
 
 protected:

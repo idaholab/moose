@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'spparks.i'
+    exodiff = 'spparks_out.e'
+    platform = DARWIN
+  [../]
+[]

@@ -103,21 +103,36 @@ SPPARKSUserObject::~SPPARKSUserObject()
   spparks_close( _spparks );
 }
 
-Real
+int
 SPPARKSUserObject::getIntValue( unsigned elk_node_id, unsigned index ) const
 {
+  if (_spparks_only)
+  {
+    return 0;
+  }
+
   return getValue( _int_data_for_elk, elk_node_id, index );
 }
 
 Real
 SPPARKSUserObject::getDoubleValue( unsigned elk_node_id, unsigned index ) const
 {
+  if (_spparks_only)
+  {
+    return 0;
+  }
+
   return getValue( _double_data_for_elk, elk_node_id, index );
 }
 
 void
 SPPARKSUserObject::initialize()
 {
+  if (_spparks_only)
+  {
+    return;
+  }
+
   getSPPARKSData();
 }
 
@@ -142,6 +157,11 @@ SPPARKSUserObject::getSPPARKSData()
 void
 SPPARKSUserObject::execute()
 {
+  if (_spparks_only)
+  {
+    return;
+  }
+
   if (_t != _last_time)
   {
     _last_time = _t;
