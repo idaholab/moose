@@ -4,5 +4,6 @@
     input = 'spparks.i'
     exodiff = 'spparks_out.e'
     platform = DARWIN
+    method = 'OPT OPROF'
   [../]
 []
