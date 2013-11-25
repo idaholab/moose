@@ -1,7 +1,7 @@
 #include "SPPARKSUserObject.h"
 
 // SPPARKS
-#include "SPPARKS.h"
+#include "SPPARKS/src/library.h"
 
 template<>
 InputParameters validParams<SPPARKSUserObject>()
