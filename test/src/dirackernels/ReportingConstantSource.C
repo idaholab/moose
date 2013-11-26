@@ -18,17 +18,17 @@ template<>
 InputParameters validParams<ReportingConstantSource>()
 {
   InputParameters params = validParams<DiracKernel>();
-  params.addRequiredParam<Real>("value", "The value of the point source");
   params.addRequiredParam<std::vector<Real> >("point", "The x,y,z coordinates of the point");
-  params.addRequiredParam<PostprocessorName>("reporter", "The name of the reporting postprocessor");
+  params.addRequiredCoupledVar("shared", "Constant auxilary variable for storing the total flux");
+  params.addParam<Real>("factor", 1, "The multiplier for the shared source value");
   return params;
 }
 
 ReportingConstantSource::ReportingConstantSource(const std::string & name, InputParameters parameters) :
     DiracKernel(name, parameters),
-    _value(getParam<Real>("value")),
+    _shared_var(coupledScalarValue("shared")),
     _point_param(getParam<std::vector<Real> >("point")),
-    _reporter(getPostprocessorValue("reporter"))
+    _factor(getParam<Real>("factor"))
 {
   _p(0) = _point_param[0];
 
@@ -37,19 +37,13 @@ ReportingConstantSource::ReportingConstantSource(const std::string & name, Input
     _p(1) = _point_param[1];
 
     if(_point_param.size() > 2)
-    {
       _p(2) = _point_param[2];
-    }
   }
 }
 
 void
 ReportingConstantSource::addPoints()
 {
-  // This function gets called just before the DiracKernel is evaluated
-  // so this is a handy place to zero this out.
-  _reporter = 0.0;
-
   addPoint(_p);
 }
 
@@ -57,9 +51,5 @@ Real
 ReportingConstantSource::computeQpResidual()
 {
   // This is negative because it's a forcing function that has been brought over to the left side.
-  Real flux = -_test[_i][_qp]*_value;
-
-  _reporter += flux;
-
-  return flux;
+  return -_test[_i][_qp]*_shared_var[0]*_factor;
 }

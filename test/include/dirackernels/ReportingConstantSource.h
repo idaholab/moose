@@ -25,22 +25,21 @@ template<>
 InputParameters validParams<ReportingConstantSource>();
 
 /**
- * TOOD
+ * A test class that uses a AuxScalarVariable to share with another
+ * kernel as well as report the value via a postprocessor
  */
 class ReportingConstantSource : public DiracKernel
 {
 public:
   ReportingConstantSource(const std::string & name, InputParameters parameters);
-
   virtual void addPoints();
   virtual Real computeQpResidual();
 
 protected:
-  Real _value;
+  VariableValue & _shared_var;
   std::vector<Real> _point_param;
   Point _p;
-
-  PostprocessorValue & _reporter;
+  Real _factor;
 };
 
 #endif //REPORTINGCONSTANTSOURCE_H
