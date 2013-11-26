@@ -65,7 +65,6 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<std::vector<VariableName> >("hidden_variables", "A list of the variables that should NOT be output to the Exodus file.  If this is not provided then all variables will be in the output.");
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental variables also as nodal");
   params.addParam<bool>("exodus_inputfile_output", true, "Determines whether or not the input file is output to exodus - default (true)");
-  params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputing only a subset of outputs when using MultiApps.");
   params.addParam<bool>("linear_residuals", "Specifies whether the linear residuals are printed during the solve");
 
   // restart options

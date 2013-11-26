@@ -23,6 +23,7 @@ InputParameters validParams<SetupOutputNameAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<OutFileBase>("file_base", "out", "The desired solution output name without an extension (Defaults to the mesh file name + '_out' or 'out' if generating the mesh by some other means)");
+  params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputing only a subset of outputs when using MultiApps.");
   return params;
 }
 
