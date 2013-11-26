@@ -265,7 +265,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
       for (unsigned int app = 0; app < n_apps; app++)
       {
         Point pt = qpt - _multi_app->position(app);
-        if (from_bbs[app]->contains_point(pt))
+        if (from_bbs[app] != NULL && from_bbs[app]->contains_point(pt))
         {
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
           f = (*from_fns[app])(pt);
