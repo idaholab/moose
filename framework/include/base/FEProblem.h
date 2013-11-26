@@ -588,8 +588,8 @@ public:
   virtual bool shouldPrintLinearResiduals() { return _print_linear_residuals; }
 
   /**
-   * Set which variables will be written in ouput files
-   * @param output_variables The list of variable names to write in the ouput files
+   * Set which variables will be written in output files
+   * @param output_variables The list of variable names to write in the output files
    */
   void setOutputVariables();
   void hideVariableFromOutput(const VariableName & var_name);

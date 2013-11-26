@@ -46,8 +46,8 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<unsigned int>("n_threads", "--n-threads=<n>", 1, "Runs the specified number of threads (Intel TBB) per process");
 
   params.addCommandLineParam<bool>("warn_unused", "-w --warn-unused", "Warn about unused input file options");
-  params.addCommandLineParam<bool>("error_unused", "-e --error-unused", "Error when encounting unused input file options");
-  params.addCommandLineParam<bool>("error_override", "-o --error-override", "Error when encountering overriden or parameters supplied multipled times");
+  params.addCommandLineParam<bool>("error_unused", "-e --error-unused", "Error when encountering unused input file options");
+  params.addCommandLineParam<bool>("error_override", "-o --error-override", "Error when encountering overridden or parameters supplied multiple times");
 
   params.addCommandLineParam<bool>("parallel_mesh", "--parallel-mesh", "The libMesh Mesh underlying MooseMesh should always be a ParallelMesh");
 
