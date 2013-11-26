@@ -76,6 +76,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("RecoverBaseAction", "Output");
   syntax.registerActionSyntax("SetupOutputAction", "Output");
+  syntax.registerActionSyntax("SetupOutputNameAction", "Output");
   syntax.registerActionSyntax("SetupOverSamplingAction", "Output/OverSampling");
 
   // Note: Preconditioner Actions will be built by this setup action

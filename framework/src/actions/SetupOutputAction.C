@@ -31,7 +31,6 @@ InputParameters validParams<SetupOutputAction>()
   InputParameters params = validParams<Action>();
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
-  params.addParam<OutFileBase>("file_base", "The desired solution output name without an extension (Defaults to the mesh file name + '_out' or 'out' if generating the mesh by some other means)");
   params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
   params.addParam<unsigned int>("screen_interval", 1, "The interval at which postprocessors are output to the screen. This value must evenly divide \"interval\" so that postprocessors are calculated at corresponding solution timesteps. In addition, if \"screen_interval\" is strictly greater than \"interval\", \"output_initial\" must be set to true");
   params.addParam<bool>("exodus", false, "Specifies that you would like Exodus output solution file(s)");
@@ -97,25 +96,9 @@ SetupOutputAction::setupOutputObject(Output &output, InputParameters & params)
 {
   mooseAssert(params.have_parameter<std::vector<VariableName> >("output_variables"), "Output Variables are required");
 
-  OutFileBase base = params.get<OutFileBase>("file_base");
-
   // Set the append parameter on the Output object (default false).
   if (_app.isRecovering())
     output.setAppend(true);
-
-  if(params.isParamValid("output_if_base_contains"))
-  {
-    const std::vector<std::string> & strings = params.get<std::vector<std::string> >("output_if_base_contains");
-
-    bool found_it = false;
-    for(unsigned int i=0; i<strings.size(); i++)
-      found_it = found_it || ( base.find(strings[i]) != std::string::npos);
-
-    if(!found_it) // Didn't find a match so no output should be done
-      return;
-  }
-
-  output.fileBase(base);
 
   if (params.get<bool>("exodus"))
   {
@@ -173,17 +156,9 @@ SetupOutputAction::act()
   if(_pars.isParamValid("position"))
     _app.setOutputPosition(_pars.get<Point>("position"));
 
-  // If the user didn't provide a filename - see if the parser has a filename that we can use as a base
-  if (!_pars.isParamValid("file_base"))
-    mooseError("\"file_base\" wasn't populated either by the input file or the parser.");
-
   _problem->setOutputVariables();
 
   Output & output = _problem->out();                       // can't use use this with coupled problems on different meshes
-
-  // Has the filebase been overriden at the application level?
-  if(_app.getOutputFileBase() != "")
-    _pars.set<OutFileBase>("file_base") = _app.getOutputFileBase();
 
   setupOutputObject(output, _pars);
 
@@ -263,15 +238,6 @@ SetupOutputAction::act()
         _problem->setColorOutput(true);
     }
   }
-
- // Test to make sure that the user can write to the directory specified in file_base
-  std::string base = "./" + getParam<OutFileBase>("file_base");
-  base = base.substr(0, base.find_last_of('/'));
-
-  // TODO: We have a function that tests read/write in the Parser namespace.  We should probably
-  // use that instead of creating another one here
-  if (access(base.c_str(), W_OK) == -1)
-    mooseError("Can not write to directory: " + base + " for file base: " + getParam<OutFileBase>("file_base"));
 
   _problem->getNonlinearSystem().printAllVariableNorms(getParam<bool>("all_var_norms"));
 }

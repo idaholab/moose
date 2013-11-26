@@ -278,6 +278,7 @@
 #include "SetupMeshAction.h"
 #include "AddMeshModifierAction.h"
 #include "SetupMeshCompleteAction.h"
+#include "SetupOutputNameAction.h"
 #include "SetupOutputAction.h"
 #include "AddMaterialAction.h"
 #include "GlobalParamsAction.h"
@@ -581,6 +582,7 @@ addActionTypes(Syntax & syntax)
   registerActionName("init_displaced_problem", false);
   registerActionName("create_problem", true);
   registerActionName("setup_output", false);
+  registerActionName("setup_output_name", true);
   registerActionName("init_problem", true);
   registerActionName("check_copy_nodal_vars", true);
   registerActionName("copy_nodal_vars", true);
@@ -680,6 +682,9 @@ addActionTypes(Syntax & syntax)
 "(setup_dampers)"
 "(setup_residual_debug)"
 "(add_bounds_vectors)"
+"(setup_output_name)"
+"(add_multi_app)"
+"(add_transfer)"
 "(init_problem)"
 "(copy_nodal_vars, copy_nodal_aux_vars)"
 "(initial_mesh_refinement)"
@@ -690,8 +695,6 @@ addActionTypes(Syntax & syntax)
 "(setup_output)"
 "(setup_oversampling)"
 "(setup_debug)"
-"(add_multi_app)"
-"(add_transfer)"
 "(check_integrity)"
 );
 
@@ -740,6 +743,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
   registerAction(CreateProblemAction, "create_problem");
   registerAction(SetupOutputAction, "setup_output");
+  registerAction(SetupOutputNameAction, "setup_output_name");
   registerAction(GlobalParamsAction, "set_global_params");
   registerAction(SetupPredictorAction, "setup_predictor");
 

@@ -47,11 +47,11 @@ InputParameters validParams<SetupOverSamplingAction>()
 
   params.addParam<std::vector<VariableName> >("output_variables", "A list of the variables that should be in the Exodus output file.  If this is not provided then all variables will be in the output.");
 
-  params.addParam<int>("interval", 1, "The iterval at which timesteps are output to the solution file");
+  params.addParam<int>("interval", 1, "The interval at which timesteps are output to the solution file");
   params.addParam<Real>("iteration_plot_start_time", std::numeric_limits<Real>::max(), "Specifies a time after which the solution will be written following each nonlinear iteration");
   params.addParam<bool>("output_initial", false, "Requests that the initial condition is output to the solution file");
 
-  params.addParam<Point>("position", "Set a positional offset.  This vector will get added to the nodal cooardinates to move the domain.");
+  params.addParam<Point>("position", "Set a positional offset.  This vector will get added to the nodal coordinates to move the domain.");
   params.addParam<MeshFileName>("file", "The name of the mesh file to read");
 
   return params;
@@ -81,7 +81,8 @@ SetupOverSamplingAction::act()
   if(_pars.isParamValid("position"))
     out_problem.setPosition(_pars.get<Point>("position"));
 
-  _pars.set<OutFileBase>("file_base") = _problem->out().fileBase() + "_oversample";
+  std::string file_base = _problem->out().fileBase() + "_oversample";
+  output.fileBase(file_base);
 
   setupOutputObject(output, _pars);
 
@@ -96,8 +97,8 @@ SetupOverSamplingAction::act()
   output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
 
 // Test to make sure that the user can write to the directory specified in file_base
-  std::string base = "./" + getParam<OutFileBase>("file_base");
+  std::string base = "./" + file_base;
   base = base.substr(0, base.find_last_of('/'));
   if (access(base.c_str(), W_OK) == -1)
-    mooseError("Can not write to directory: " + base + " for file base: " + getParam<OutFileBase>("file_base"));
+    mooseError("Can not write to directory: " + base + " for file base: " + file_base);
 }
