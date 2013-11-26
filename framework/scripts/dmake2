@@ -1,0 +1,187 @@
+#!/usr/bin/env python
+
+# Import the required packages
+import os, sys, argparse, socket, time, subprocess
+
+# Import the distcc API objexts
+from distcc import *
+
+## Set the DISTCC_HOSTS environment and run 'make'
+#  @param distcc_hosts The complete DISTCC_HOSTS enviornmental variable (from MachineWarehouse::getHosts)
+#  @param jobs The number of jobs to run 'make' with (from MachineWarehouse::getHosts)
+#  @param kwargs Optional keyword/value pairings
+#
+#  Keyword/Value Options:
+#    dbg = True | {False}   - Sets build method to debug (takes priority over opt and oprof)
+#    opt = True | {False}   - Sets build method to opt (take prioirity over oprof)
+#    oprof = {True} | False - Set build method to oprof (default)
+#    quiet = True | {False} - Disables the distcc verbose output
+#    timeout = <number>     - Length of time before distcc assumes failure (default 30s)
+def runMake(distcc_hosts, jobs, **kwargs):
+
+  if kwargs.pop('dbg', False):
+    method = 'dbg'
+  elif kwargs.pop('opt', False):
+    method = 'opt'
+  else:
+    method = 'oprof'
+
+  # Set the DISTCC_HOSTS environmental variable
+  os.environ['DISTCC_HOSTS'] = distcc_hosts
+
+  # Set the verboseness of distcc
+  if kwargs.pop('quiet', False):
+    os.environ['DISTCC_VERBOSE'] = '0'
+
+  # Set distcc timeout
+  os.environ['DISTCC_IO_TIMEOUT'] = str(kwargs.pop('timeout', 30))
+
+  # Build the make command
+  os.environ['METHOD'] = method
+  make = ['make', '-j', str(jobs)]
+  make.extend(make_args)
+
+  # Run make
+  strt = time.clock()
+  sub = subprocess.Popen(make)
+
+  # Wait for process to terminate
+  while sub.poll() == None:
+    pass
+
+  # Print the make durration
+  t = time.clock() - strt
+  print 'Make Execution Time: ' + str(t) + ' sec.'
+
+
+## Function for parsing command line arguments
+def parseArguments(args=None):
+
+  # Create the argument parser
+  parser = argparse.ArgumentParser(description='dmake: A front-end tool for distcc\n')
+
+  # Flag options
+  gen = parser.add_argument_group('General Options')
+  gen.add_argument('--summary', '-s', action='store_true', help='Show distribution summary')
+  gen.add_argument('--quiet', '-q', action='store_true', help='Do not print compile errors/warnings')
+  gen.add_argument('--local', '-l', action='store_true', help='Run make locally with all possible threads')
+  gen.add_argument('--verbose', '-v', action='store_true', help='Show a detailed summary')
+  gen.add_argument('--refresh', '-r', action='store_true', help='Force a refresh of the stored DISTCC_HOSTS cache')
+  gen.add_argument('--description', nargs=1, metavar='"Description"', type=str, help='Add/change description for your machine.')
+
+  # Make related options
+  make = parser.add_argument_group('Compiler Options')
+  make.add_argument('--jobs', '-j', type=int, help='Override the automatic job count settings')
+  make.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs available (plese be nice)')
+  make.add_argument('--dbg', '-d', action='store_true', help='Build in debug mode')
+  make.add_argument('--oprof', '-p', action='store_true', help='Build in oprof mode')
+  make.add_argument('--opt', '-o', action='store_true', help='Build in opt mode')
+  make.add_argument('--benchmark','-b', action='store_true', help='Run \'make cleanall\' and \'make\' in the current directory')
+
+  # DISTCC_HOSTS Options
+  hosts = parser.add_argument_group('DISTCC_HOST Options')
+  hosts.add_argument('--localhost', type=int, help='Override the automatic setting for the number of localhost processors to utilize')
+  hosts.add_argument('--localslots', type=int, help='Override the automatic setting for the number of local compile slots')
+  hosts.add_argument('--localslots_cpp', type=int, help='Override the automatic setting for the number of local preprocessor slots')
+
+  # Distcc options
+  distcc = parser.add_argument_group('Advanced distcc Options')
+  distcc.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
+  distcc.add_argument('--disable', nargs='+', help='Temporarly remove hostname/IP(s) from your DISTCC_HOSTS list')
+
+  # Options that do not run make
+  daemon = parser.add_argument_group('Distcc Daemon Options')
+  #daemon.add_argument('--daemon', action='store_true', help='Launch distcc as a daemon')
+  #daemon.add_argument('--kill', action='store_true', help='Kill distcc as a daemon')
+  daemon.add_argument('--no-daemon', '-n', action='store_true', help='Do not launch any daemon processes')
+  daemon.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
+  #daemon.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
+
+  # Advanced options
+  misc = parser.add_argument_group('Misc. Options')
+  misc.add_argument('--clean', '-c', action='store_true', help='Clean up .dmake and .dmake_hosts files')
+  misc.add_argument('--buck', action='store_true', help='Use the distcc file generator from buck')
+
+  # Allow flags to be run together
+  #parser.parse_args('-mqvnlrbdpoc'.split())
+
+  # Parse the input and return the options
+  (options, other_args) = parser.parse_known_args()
+
+  # Set the refresh options if any of the following options are used
+  refresh = ['summary', 'max', 'localhost', 'localslots', 'localslots_cpp', 'disable']
+  for r in refresh:
+    if getattr(options, r) and getattr(options, r) != parser.get_default(r):
+      options.refresh = True
+      break
+
+  # Set the output to be verbose if --summary is used
+  if options.summary:
+    options.verbose = True
+
+  # Return the options
+  return (options, other_args)
+
+## Helper function to extract options for **kwargs input
+def subOptions(options, *args):
+  output = dict()
+  opt = vars(options)
+  for key in args:
+    output[key] = opt[key]
+
+  return output
+
+
+## Main function
+if __name__ == "__main__":
+
+  # Extract the options from the command line
+  (options, make_args) = parseArguments()
+
+  # Run 'make cleanall' if the benchmark options is given
+  if options.benchmark:
+    sub = subprocess.Popen(['make', 'cleanall'])
+    sub.wait()
+
+  # Create the MachineWarehouse object
+  opt = subOptions(options,'local','buck','dedicated','jobs','description','clean','disable')
+  warehouse = MachineWarehouse(**opt)
+
+  # Create the MachineOutput object
+  outputer = MachineOutput(warehouse)
+
+  # Extract the hosts and jobs from the warehouse.
+  opt = subOptions(options,'refresh','max','localhost','localslots','localslots_cpp')
+  distcc_hosts, jobs = warehouse.getHosts(**opt)
+
+  # Display the  output
+  outputer.display(distcc_hosts, jobs,
+                   verbose=options.verbose,
+                   make_args=make_args)
+
+  # --summary does not run any commands, so exit
+  if options.summary:
+    sys.exit()
+
+  # \todo Add Daemon actions here
+
+  # Run Make
+  opt = subOptions(options,'timeout','quiet','dbg','opt','oprof')
+  runMake(distcc_hosts,gitjobs,make_args=make_args,**opt)
+
+
+  # Start the distcc daemon, do not n make
+  #elif farm.options.daemon or farm.options.dedicated:
+  #  farm.startDaemon()
+
+  # Kill the daemons, do not run make
+  #elif farm.options.kill:
+  #  farm.killDaemon()
+
+  # Run local build if desired, short-circut the rest of the script for speed
+  #elif farm.options.local:
+  #  farm.local()
+
+  # Run a distributed compile
+  #else:
+  #  farm.distribute()
