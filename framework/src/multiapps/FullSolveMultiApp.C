@@ -30,13 +30,21 @@ FullSolveMultiApp::FullSolveMultiApp(const std::string & name, InputParameters p
     MultiApp(name, parameters),
     _solved(false)
 {
-  if(!_has_an_app)
-    return;
+}
 
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+FullSolveMultiApp::~FullSolveMultiApp()
+{
+}
+
+void
+FullSolveMultiApp::init()
+{
+  MultiApp::init();
 
   if(_has_an_app)
   {
+    MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+
     _executioners.resize(_my_num_apps);
 
     // Grab Executioner from each app
@@ -50,14 +58,9 @@ FullSolveMultiApp::FullSolveMultiApp(const std::string & name, InputParameters p
 
       _executioners[i] = ex;
     }
+    // Swap back
+    Moose::swapLibMeshComm(swapped);
   }
-
-  // Swap back
-  Moose::swapLibMeshComm(swapped);
-}
-
-FullSolveMultiApp::~FullSolveMultiApp()
-{
 }
 
 void

@@ -65,22 +65,6 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
   // Transfer interpolation only makes sense for sub-cycling solves
   if(_interpolate_transfers && !_sub_cycling)
     mooseError("MultiApp " << _name << " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
-
-  if(!_has_an_app)
-    return;
-
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
-
-  if(_has_an_app)
-  {
-    _transient_executioners.resize(_my_num_apps);
-    // Grab Transient Executioners from each app
-    for(unsigned int i=0; i<_my_num_apps; i++)
-      setupApp(i);
-  }
-
-  // Swap back
-  Moose::swapLibMeshComm(swapped);
 }
 
 TransientMultiApp::~TransientMultiApp()
@@ -111,6 +95,28 @@ TransientMultiApp::appTransferVector(unsigned int app, std::string var_name)
     return appProblem(app)->getAuxiliarySystem().system().get_vector("transfer");
 
   return appProblem(app)->getAuxiliarySystem().solution();
+}
+
+void
+TransientMultiApp::init()
+{
+  MultiApp::init();
+
+  if(!_has_an_app)
+    return;
+
+  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+
+  if(_has_an_app)
+  {
+    _transient_executioners.resize(_my_num_apps);
+    // Grab Transient Executioners from each app
+    for(unsigned int i=0; i<_my_num_apps; i++)
+      setupApp(i);
+  }
+
+  // Swap back
+  Moose::swapLibMeshComm(swapped);
 }
 
 void

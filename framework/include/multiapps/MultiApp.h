@@ -45,6 +45,8 @@ public:
 
   virtual ~MultiApp();
 
+  virtual void init();
+
   /**
    * Gets called just before transfers are done _to_ the MultiApp
    * (Which is just before the MultiApp is solved)

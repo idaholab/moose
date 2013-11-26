@@ -48,6 +48,8 @@ public:
    */
   virtual NumericVector<Number> & appTransferVector(unsigned int app, std::string var_name);
 
+  virtual void init();
+
   /**
    * Advance all of the apps one timestep.
    */

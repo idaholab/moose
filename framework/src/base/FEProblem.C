@@ -2518,6 +2518,7 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
   _multi_apps(type)[0].addMultiApp(multi_app);
+  multi_app->init();
 }
 
 MultiApp *

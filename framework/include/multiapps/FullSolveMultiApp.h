@@ -37,6 +37,8 @@ public:
 
   virtual ~FullSolveMultiApp();
 
+  virtual void init();
+
   /**
    * Completely solve all of the Apps
    */

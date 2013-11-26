@@ -110,6 +110,24 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     _move_happened(false),
     _has_an_app(true)
 {
+}
+
+MultiApp::~MultiApp()
+{
+  if(!_has_an_app)
+    return;
+
+  for(unsigned int i=0; i<_my_num_apps; i++)
+  {
+    MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+    delete _apps[i];
+    Moose::swapLibMeshComm(swapped);
+  }
+}
+
+void
+MultiApp::init()
+{
   if(isParamValid("positions"))
     _positions = getParam<std::vector<Point> >("positions");
   else if(isParamValid("positions_file"))
@@ -163,19 +181,6 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
   // Swap back
   Moose::swapLibMeshComm(swapped);
-}
-
-MultiApp::~MultiApp()
-{
-  if(!_has_an_app)
-    return;
-
-  for(unsigned int i=0; i<_my_num_apps; i++)
-  {
-    MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
-    delete _apps[i];
-    Moose::swapLibMeshComm(swapped);
-  }
 }
 
 void
@@ -355,6 +360,7 @@ void
 MultiApp::createApp(unsigned int i, Real start_time)
 {
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
+  app_params.set<FEProblem *>("_parent_fep") = _fe_problem;
   MooseApp * app = AppFactory::instance().create(_app_type, "multi_app", app_params);
 
   std::ostringstream output_base;
