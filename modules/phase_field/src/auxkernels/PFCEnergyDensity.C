@@ -37,12 +37,12 @@ PFCEnergyDensity::PFCEnergyDensity( const std::string& name, InputParameters par
 Real
 PFCEnergyDensity::computeValue()
 {
-  Real val = pow((*_vals[0])[_qp],2)*(1 + (*_coeff[0])[_qp])/2.0;
+  Real val = pow((*_vals[0])[_qp],2)*(1 - (*_coeff[0])[_qp])/2.0;
 
   // Loop Through Variables
   for (unsigned int i = 1; i < _order; i++)
     val += pow(-1.0,i+1)* (*_coeff[i])[_qp]* (*_vals[0])[_qp]* (*_vals[i])[_qp]/2.0;
 
-  val += (_b[_qp]/12.0*pow((*_vals[0])[_qp],3)) - (_a[_qp]/6.0*pow((*_vals[0])[_qp],3));
+  val += (_b[_qp]/12.0*pow((*_vals[0])[_qp],4)) - (_a[_qp]/6.0*pow((*_vals[0])[_qp],3));
   return val;
 }
