@@ -90,7 +90,7 @@ class MachineWarehouse(object):
       self._buildWorkers()
       self._buildHosts(**kwargs)
     else:
-      print '\nUsing cached DISTCC_HOSTS, use --refresh to rebuild'
+      print 'Using cached DISTCC_HOSTS, use --refresh to rebuild'
 
     # Extract and return the variables
     distcc_hosts = self._dmakerc.get('DISTCC_HOSTS')

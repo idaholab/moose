@@ -167,7 +167,7 @@ if __name__ == "__main__":
 
   # Run Make
   opt = subOptions(options,'timeout','quiet','dbg','opt','oprof')
-  runMake(distcc_hosts,gitjobs,make_args=make_args,**opt)
+  runMake(distcc_hosts, jobs, make_args=make_args, **opt)
 
 
   # Start the distcc daemon, do not n make
