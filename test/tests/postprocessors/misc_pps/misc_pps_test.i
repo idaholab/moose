@@ -21,6 +21,12 @@
   [../]
 []
 
+[AuxVariables]
+  [./aux_var]
+    family = SCALAR
+  [../]
+[]
+
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
@@ -87,7 +93,8 @@
     type = Residual
   [../]
   [./reporter]
-    type = Reporter
+    type = ScalarVariable
+    variable = aux_var
   [../]
   [./empty]
     type = EmptyPostprocessor
@@ -105,17 +112,15 @@
     type = GenericConstantMaterial
     prop_names = diffusivity
     prop_values = 1
-		block = 0
+    block = 0
   [../]
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
   scheme = implicit-euler
-
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   start_time = 0.0
   num_steps = 10
   dt = 0.25
@@ -128,3 +133,4 @@
   exodus = true
   perf_log = true
 []
+
