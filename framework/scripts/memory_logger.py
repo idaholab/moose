@@ -141,7 +141,10 @@ class Server:
         self.agent.agent_data[agent_uuid] = new_data[agent_uuid]
 
         # Modify incoming Agents timestamp to match Server's time (because every node is a little bit off)
-        self.agent.agent_data[agent_uuid]['TIMESTAMP'] = GetTime().now
+        if self.arguments.recover:
+          self.agent.agent_data[agent_uuid]['TIMESTAMP'] = GetTime().now - self.agent.delta
+        else:
+          self.agent.agent_data[agent_uuid]['TIMESTAMP'] = GetTime().now
 
         # update total usage for all known reporting agents
         total_usage = 0
