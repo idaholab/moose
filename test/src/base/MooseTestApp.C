@@ -41,6 +41,7 @@
 #include "ConvectionPrecompute.h"
 #include "CoupledKernelGradTest.h"
 #include "CoupledKernelValueTest.h"
+#include "ScalarLagrangeMultiplier.h"
 #include "SplineFFn.h"
 #include "BlkResTestDiffusion.h"
 #include "DiffTensorKernel.h"
@@ -97,6 +98,7 @@
 #include "ImplicitODEx.h"
 #include "ImplicitODEy.h"
 #include "AlphaCED.h"
+#include "PostprocessorCED.h"
 
 #include "EqualValueNodalConstraint.h"
 // user objects
@@ -221,6 +223,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(SplineFFn);
   registerKernel(BlkResTestDiffusion);
   registerKernel(DiffTensorKernel);
+  registerKernel(ScalarLagrangeMultiplier);
 
   // Aux kernels
   registerAux(CoupledAux);
@@ -283,6 +286,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerScalarKernel(ImplicitODEx);
   registerScalarKernel(ImplicitODEy);
   registerScalarKernel(AlphaCED);
+  registerScalarKernel(PostprocessorCED);
 
   // Functions
   registerFunction(TimestepSetupFunction);
