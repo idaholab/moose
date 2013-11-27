@@ -176,10 +176,18 @@ protected:
   virtual VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
 
 protected:
-  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars; ///< Coupled vars whose values we provide
-  std::vector<MooseVariable *> _coupled_moose_vars; ///< Vector of coupled variables
-  bool _nodal; ///< True if we provide coupling to nodal values
-  bool _c_is_implicit; ///< True if implicit value is required
+
+  /// Coupled vars whose values we provide
+  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;
+
+  /// Vector of coupled variables
+  std::vector<MooseVariable *> _coupled_moose_vars;
+
+  /// True if we provide coupling to nodal values
+  bool _nodal;
+
+  /// True if implicit value is required
+  bool _c_is_implicit;
 
   /**
    * Extract pointer to a coupled variable
@@ -218,47 +226,4 @@ public:
 
   virtual VariableSecond & coupledNeighborSecond(const std::string & var_name, unsigned int i = 0);
 };
-
-/**
- * Interface for objects that needs coupling capabilities
- *
- */
-class ScalarCoupleable
-{
-public:
-  ScalarCoupleable(InputParameters & parameters);
-  virtual ~ScalarCoupleable();
-
-  /**
-   * Get the list of coupled scalar variables
-   * @return The list of coupled variables
-   */
-  const std::vector<MooseVariableScalar *> & getCoupledMooseScalarVars() { return _coupled_moose_scalar_vars; }
-
-protected:
-  /**
-   * Returns true if a variables has been coupled_as name.
-   *
-   * @param name The name the kernel wants to refer to the variable as.
-   */
-  virtual bool isCoupledScalar(const std::string & var_name, unsigned int i = 0);
-
-  virtual unsigned int coupledScalar(const std::string & var_name, unsigned int comp = 0);
-
-  virtual VariableValue & coupledScalarValue(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & coupledScalarValueOld(const std::string & var_name, unsigned int comp = 0);
-
-  virtual VariableValue & coupledScalarDot(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & coupledScalarDotDu(const std::string & var_name, unsigned int comp = 0);
-
-protected:
-  /// Coupled vars whose values we provide
-  std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;
-  std::vector<MooseVariableScalar *> _coupled_moose_scalar_vars;
-  /// True if implicit value is required
-  bool _sc_is_implicit;
-
-  MooseVariableScalar *getScalarVar(const std::string & var_name, unsigned int comp);
-};
-
 #endif /* COUPLEABLE_H */

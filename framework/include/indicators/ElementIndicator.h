@@ -23,6 +23,7 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 #include "Coupleable.h"
+#include "ScalarCoupleable.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "ZeroInterface.h"

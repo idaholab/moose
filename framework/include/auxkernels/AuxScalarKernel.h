@@ -17,6 +17,7 @@
 
 #include "MooseObject.h"
 #include "Coupleable.h"
+#include "ScalarCoupleable.h"
 #include "SetupInterface.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"

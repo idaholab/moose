@@ -16,6 +16,7 @@
 #define COUPLEABLEMOOSEVARIABLEDEPENDENCYINTERMEDIATEINTERFACE_H
 
 #include "Coupleable.h"
+#include "ScalarCoupleable.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
 

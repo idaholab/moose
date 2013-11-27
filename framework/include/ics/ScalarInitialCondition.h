@@ -19,6 +19,7 @@
 #include "ParallelUniqueId.h"
 #include "InputParameters.h"
 #include "Coupleable.h"
+#include "ScalarCoupleable.h"
 #include "DependencyResolverInterface.h"
 
 #include "libmesh/dense_vector.h"
