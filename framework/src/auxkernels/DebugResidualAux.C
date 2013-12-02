@@ -38,6 +38,6 @@ DebugResidualAux::~DebugResidualAux()
 Real
 DebugResidualAux::computeValue()
 {
-  unsigned int dof = _current_node->dof_number(_nl_sys.number(), _debug_var.index(), 0);
+  dof_id_type dof = _current_node->dof_number(_nl_sys.number(), _debug_var.index(), 0);
   return _residual_copy(dof);
 }

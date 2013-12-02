@@ -639,12 +639,12 @@ Assembly::init()
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
   {
-    unsigned int j = (*jt)->index();
+    dof_id_type j = (*jt)->index();
     for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
     {
-      unsigned int i = (*it)->index();
+      dof_id_type i = (*it)->index();
       if ((*_cm)(i, j) != 0)
-        _cm_entry.push_back(std::pair<unsigned int, unsigned int>(i, j));
+        _cm_entry.push_back(std::pair<dof_id_type, dof_id_type>(i, j));
     }
   }
 
@@ -666,7 +666,7 @@ Assembly::init()
   // two vectors: one for time residual contributions and one for non-time residual contributions
   _sub_Re.resize(2);
   _sub_Rn.resize(2);
-  for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  for (dof_id_type i = 0; i < _sub_Re.size(); i++)
   {
     _sub_Re[i].resize(n_vars);
     _sub_Rn[i].resize(n_vars);
@@ -699,10 +699,10 @@ Assembly::init()
 void
 Assembly::prepare()
 {
-  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  for (std::vector<std::pair<dof_id_type, dof_id_type> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
   {
-    unsigned int vi = (*it).first;
-    unsigned int vj = (*it).second;
+    dof_id_type vi = (*it).first;
+    dof_id_type vj = (*it).second;
 
     MooseVariable & ivar = _sys.getVariable(_tid, vi);
     MooseVariable & jvar = _sys.getVariable(_tid, vj);
@@ -715,7 +715,7 @@ Assembly::prepare()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
-    for (unsigned int i = 0; i < _sub_Re.size(); i++)
+    for (dof_id_type i = 0; i < _sub_Re.size(); i++)
     {
       _sub_Re[i][ivar.index()].resize(ivar.dofIndices().size());
       _sub_Re[i][ivar.index()].zero();
@@ -726,10 +726,10 @@ Assembly::prepare()
 void
 Assembly::prepareVariable(MooseVariable * var)
 {
-  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  for (std::vector<std::pair<dof_id_type, dof_id_type> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
   {
-    unsigned int vi = (*it).first;
-    unsigned int vj = (*it).second;
+    dof_id_type vi = (*it).first;
+    dof_id_type vj = (*it).second;
 
     if(vi == var->index() || vj == var->index())
     {
@@ -740,7 +740,7 @@ Assembly::prepareVariable(MooseVariable * var)
     }
   }
 
-  for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  for (dof_id_type i = 0; i < _sub_Re.size(); i++)
   {
     _sub_Re[i][var->index()].resize(var->dofIndices().size());
     _sub_Re[i][var->index()].zero();
@@ -750,10 +750,10 @@ Assembly::prepareVariable(MooseVariable * var)
 void
 Assembly::prepareNeighbor()
 {
-  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  for (std::vector<std::pair<dof_id_type, dof_id_type> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
   {
-    unsigned int vi = (*it).first;
-    unsigned int vj = (*it).second;
+    dof_id_type vi = (*it).first;
+    dof_id_type vj = (*it).second;
 
     MooseVariable & ivar = _sys.getVariable(_tid, vi);
     MooseVariable & jvar = _sys.getVariable(_tid, vj);
@@ -772,7 +772,7 @@ Assembly::prepareNeighbor()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
-    for (unsigned int i = 0; i < _sub_Rn.size(); i++)
+    for (dof_id_type i = 0; i < _sub_Rn.size(); i++)
     {
       _sub_Rn[i][ivar.index()].resize(ivar.dofIndicesNeighbor().size());
       _sub_Rn[i][ivar.index()].zero();
@@ -781,12 +781,12 @@ Assembly::prepareNeighbor()
 }
 
 void
-Assembly::prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices)
+Assembly::prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<dof_id_type> & dof_indices)
 {
   jacobianBlock(ivar,jvar).resize(dof_indices.size(), dof_indices.size());
   jacobianBlock(ivar,jvar).zero();
 
-  for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  for (dof_id_type i = 0; i < _sub_Re.size(); i++)
   {
     _sub_Re[i][ivar].resize(dof_indices.size());
     _sub_Re[i][ivar].zero();
@@ -800,9 +800,9 @@ Assembly::prepareScalar()
   for (std::vector<MooseVariableScalar *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariableScalar & ivar = *(*it);
-    unsigned int idofs = ivar.dofIndices().size();
+    dof_id_type idofs = ivar.dofIndices().size();
 
-    for (unsigned int i = 0; i < _sub_Re.size(); i++)
+    for (dof_id_type i = 0; i < _sub_Re.size(); i++)
     {
       _sub_Re[i][ivar.index()].resize(idofs);
       _sub_Re[i][ivar.index()].zero();
@@ -811,7 +811,7 @@ Assembly::prepareScalar()
     for (std::vector<MooseVariableScalar *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
       MooseVariableScalar & jvar = *(*jt);
-      unsigned int jdofs = jvar.dofIndices().size();
+      dof_id_type jdofs = jvar.dofIndices().size();
 
       jacobianBlock(ivar.index(), jvar.index()).resize(idofs, jdofs);
       jacobianBlock(ivar.index(), jvar.index()).zero();
@@ -828,12 +828,12 @@ Assembly::prepareOffDiagScalar()
   for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin(); it != scalar_vars.end(); ++it)
   {
     MooseVariableScalar & ivar = *(*it);
-    unsigned int idofs = ivar.dofIndices().size();
+    dof_id_type idofs = ivar.dofIndices().size();
 
     for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
       MooseVariable & jvar = *(*jt);
-      unsigned int jdofs = jvar.dofIndices().size();
+      dof_id_type jdofs = jvar.dofIndices().size();
 
       jacobianBlock(ivar.index(), jvar.index()).resize(idofs, jdofs);
       jacobianBlock(ivar.index(), jvar.index()).zero();
@@ -882,7 +882,7 @@ Assembly::copyNeighborShapes(unsigned int var)
 }
 
 void
-Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<unsigned int> & dof_indices, Real scaling_factor)
+Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<dof_id_type> & dof_indices, Real scaling_factor)
 {
   if (dof_indices.size() > 0 && res_block.size())
   {
@@ -903,7 +903,7 @@ Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 }
 
 void
-Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor)
+Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor)
 {
   if (dof_indices.size() > 0 && res_block.size())
   {
@@ -915,7 +915,7 @@ Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
 
-      for(unsigned int i=0; i<_tmp_Re.size(); i++)
+      for(dof_id_type i=0; i<_tmp_Re.size(); i++)
       {
         _cached_residual_values.push_back(_tmp_Re(i));
         _cached_residual_rows.push_back(_temp_dof_indices[i]);
@@ -923,7 +923,7 @@ Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsign
     }
     else
     {
-      for(unsigned int i=0; i<res_block.size(); i++)
+      for(dof_id_type i=0; i<res_block.size(); i++)
       {
         _cached_residual_values.push_back(res_block(i));
         _cached_residual_rows.push_back(_temp_dof_indices[i]);
@@ -976,7 +976,7 @@ Assembly::cacheResidual()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
-    for (unsigned int i = 0; i < _sub_Re.size(); i++)
+    for (dof_id_type i = 0; i < _sub_Re.size(); i++)
       cacheResidualBlock(_sub_Re[i][var.index()], var.dofIndices(), var.scalingFactor());
   }
 }
@@ -988,7 +988,7 @@ Assembly::cacheResidualNeighbor()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
-    for (unsigned int i = 0; i < _sub_Re.size(); i++)
+    for (dof_id_type i = 0; i < _sub_Re.size(); i++)
       cacheResidualBlock(_sub_Rn[i][var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
@@ -999,7 +999,7 @@ Assembly::addCachedResidual(NumericVector<Number> & residual)
 {
   mooseAssert(_cached_residual_values.size() == _cached_residual_rows.size(), "Number of cached residuals and number of rows must match!");
 
-  for(unsigned int i=0; i<_cached_residual_values.size(); i++)
+  for(dof_id_type i=0; i<_cached_residual_values.size(); i++)
   {
     residual.add(_cached_residual_rows[i], _cached_residual_values[i]);
   }
@@ -1018,22 +1018,22 @@ Assembly::addCachedResidual(NumericVector<Number> & residual)
 
 
 void
-Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor)
+Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor)
 {
   if (dof_indices.size() > 0)
   {
-    std::vector<unsigned int> di(dof_indices);
+    std::vector<dof_id_type> di(dof_indices);
     _dof_map.constrain_element_vector(res_block, di, false);
 
     if (scaling_factor != 1.0)
     {
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
-      for(unsigned int i=0; i<di.size(); i++)
+      for(dof_id_type i=0; i<di.size(); i++)
         residual.set(di[i], _tmp_Re(i));
     }
     else
-      for(unsigned int i=0; i<di.size(); i++)
+      for(dof_id_type i=0; i<di.size(); i++)
         residual.set(di[i], res_block(i));
   }
 }
@@ -1062,12 +1062,12 @@ Assembly::setResidualNeighbor(NumericVector<Number> & residual, Moose::KernelTyp
 
 
 void
-Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<unsigned int> & idof_indices, const std::vector<unsigned int> & jdof_indices, Real scaling_factor)
+Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, Real scaling_factor)
 {
   if ((idof_indices.size() > 0) && (jdof_indices.size() > 0) && jac_block.n() && jac_block.m())
   {
-    std::vector<unsigned int> di(idof_indices);
-    std::vector<unsigned int> dj(jdof_indices);
+    std::vector<dof_id_type> di(idof_indices);
+    std::vector<dof_id_type> dj(jdof_indices);
     _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
@@ -1082,12 +1082,12 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> 
 }
 
 void
-Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor)
+Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id_type> & idof_indices, std::vector<dof_id_type> & jdof_indices, Real scaling_factor)
 {
   if ((idof_indices.size() > 0) && (jdof_indices.size() > 0) && jac_block.n() && jac_block.m())
   {
-    std::vector<unsigned int> di(idof_indices);
-    std::vector<unsigned int> dj(jdof_indices);
+    std::vector<dof_id_type> di(idof_indices);
+    std::vector<dof_id_type> dj(jdof_indices);
     _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
@@ -1095,8 +1095,8 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsign
       _tmp_Ke = jac_block;
       _tmp_Ke *= scaling_factor;
 
-      for(unsigned int i=0; i<di.size(); i++)
-        for(unsigned int j=0; j<dj.size(); j++)
+      for(dof_id_type i=0; i<di.size(); i++)
+        for(dof_id_type j=0; j<dj.size(); j++)
         {
           _cached_jacobian_values.push_back(_tmp_Ke(i, j));
           _cached_jacobian_rows.push_back(di[i]);
@@ -1105,8 +1105,8 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsign
     }
     else
     {
-      for(unsigned int i=0; i<di.size(); i++)
-        for(unsigned int j=0; j<dj.size(); j++)
+      for(dof_id_type i=0; i<di.size(); i++)
+        for(dof_id_type j=0; j<dj.size(); j++)
         {
           _cached_jacobian_values.push_back(jac_block(i, j));
           _cached_jacobian_rows.push_back(di[i]);
@@ -1125,7 +1125,7 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & jacobian)
   mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
               "Error: Cached data sizes MUST be the same!");
 
-  for(unsigned int i=0; i<_cached_jacobian_rows.size(); i++)
+  for(dof_id_type i=0; i<_cached_jacobian_rows.size(); i++)
     jacobian.add(_cached_jacobian_rows[i], _cached_jacobian_cols[i], _cached_jacobian_values[i]);
 
   if(_max_cached_jacobians < _cached_jacobian_values.size())
@@ -1235,12 +1235,12 @@ Assembly::cacheJacobianNeighbor()
 }
 
 void
-Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices)
+Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices)
 {
   DenseMatrix<Number> & ke = jacobianBlock(ivar, jvar);
 
   // stick it into the matrix
-  std::vector<unsigned int> di(dof_indices);
+  std::vector<dof_id_type> di(dof_indices);
   dof_map.constrain_element_matrix(ke, di, false);
 
   Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();
@@ -1255,15 +1255,15 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, u
 }
 
 void
-Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices)
+Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, std::vector<dof_id_type> & neighbor_dof_indices)
 {
   DenseMatrix<Number> & kee = jacobianBlock(ivar, jvar);
   DenseMatrix<Number> & ken = jacobianBlockNeighbor(Moose::ElementNeighbor, ivar, jvar);
   DenseMatrix<Number> & kne = jacobianBlockNeighbor(Moose::NeighborElement, ivar, jvar);
   DenseMatrix<Number> & knn = jacobianBlockNeighbor(Moose::NeighborNeighbor, ivar, jvar);
 
-  std::vector<unsigned int> di(dof_indices);
-  std::vector<unsigned int> dn(neighbor_dof_indices);
+  std::vector<dof_id_type> di(dof_indices);
+  std::vector<dof_id_type> dn(neighbor_dof_indices);
   // stick it into the matrix
   dof_map.constrain_element_matrix(kee, di, false);
   dof_map.constrain_element_matrix(ken, di, dn, false);

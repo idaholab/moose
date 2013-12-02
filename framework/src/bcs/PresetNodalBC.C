@@ -31,7 +31,7 @@ PresetNodalBC::PresetNodalBC(const std::string & name, InputParameters parameter
 void
 PresetNodalBC::computeValue(NumericVector<Number> & current_solution)
 {
-  unsigned int & dof_idx = _var.nodalDofIndex();
+  dof_id_type & dof_idx = _var.nodalDofIndex();
   _qp = 0;
   current_solution.set(dof_idx, computeQpValue());
 }

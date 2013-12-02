@@ -58,7 +58,7 @@ public:
   void reinitAux();
   void reinitAuxNeighbor();
 
-  void reinitNodes(const std::vector<unsigned int> & nodes);
+  void reinitNodes(const std::vector<dof_id_type> & nodes);
 
   const std::set<SubdomainID> & activeSubdomains();
 
@@ -136,7 +136,7 @@ public:
   VariableValue & duDotDu() { return _du_dot_du; }
 
   const Node * & node() { return _node; }
-  unsigned int & nodalDofIndex() { return _nodal_dof_index; }
+  dof_id_type & nodalDofIndex() { return _nodal_dof_index; }
   bool isNodalDefined() { return _is_defined; }
   VariableValue & nodalSln() { return _nodal_u; }
   VariableValue & nodalSlnOld() { return _nodal_u_old; }
@@ -155,7 +155,7 @@ public:
   VariableSecond & secondSlnOlderNeighbor() { _need_second_older_neighbor = true; secondPhiFaceNeighbor(); return _second_u_older_neighbor; }
 
   const Node * & nodeNeighbor() { return _node_neighbor; }
-  unsigned int & nodalDofIndexNeighbor() { return _nodal_dof_index_neighbor; }
+  dof_id_type & nodalDofIndexNeighbor() { return _nodal_dof_index_neighbor; }
   bool isNodalNeighborDefined() { return _is_defined_neighbor; }
   VariableValue & nodalSlnNeighbor() { return _nodal_u_neighbor; }
   VariableValue & nodalSlnOldNeighbor() { return _nodal_u_old_neighbor; }
@@ -188,7 +188,7 @@ public:
   /**
    * Set the nodal value for this variable (to keep everything up to date
    */
-  void setNodalValue(Number value, unsigned int idx = 0);
+  void setNodalValue(Number value, dof_id_type idx = 0);
 
   /**
    * Set the neighbor nodal value for this variable
@@ -204,7 +204,7 @@ public:
    * Get DOF indices for currently selected element
    * @return
    */
-  std::vector<unsigned int> & dofIndicesNeighbor() { return _dof_indices_neighbor; }
+  std::vector<dof_id_type> & dofIndicesNeighbor() { return _dof_indices_neighbor; }
 
   void insert(NumericVector<Number> & residual);
   void add(NumericVector<Number> & residual);
@@ -262,7 +262,7 @@ protected:
    * @param elem[in] Element whose DOFs we are requesting
    * @param dof_indices[out] DOF indices for the given element
    */
-  void getDofIndices(const Elem * elem, std::vector<unsigned int> & dof_indices);
+  void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices);
 
 protected:
   /// Thread ID
@@ -286,7 +286,7 @@ protected:
   const Elem * & _neighbor;
 
   /// DOF indices (neighbor)
-  std::vector<unsigned int> _dof_indices_neighbor;
+  std::vector<dof_id_type> _dof_indices_neighbor;
 
 
   bool _need_u_old;
@@ -363,7 +363,7 @@ protected:
   bool _has_nodal_value;
   bool _has_nodal_value_neighbor;
   const Node * & _node;
-  unsigned int _nodal_dof_index;
+  dof_id_type _nodal_dof_index;
   VariableValue _nodal_u;
   VariableValue _nodal_u_old;
   VariableValue _nodal_u_older;
@@ -375,7 +375,7 @@ protected:
   /// If the variable is defined at the neighbor node (used in compute nodal values)
   bool _is_defined_neighbor;
   const Node * & _node_neighbor;
-  unsigned int _nodal_dof_index_neighbor;
+  dof_id_type _nodal_dof_index_neighbor;
   VariableValue _nodal_u_neighbor;
   VariableValue _nodal_u_old_neighbor;
   VariableValue _nodal_u_older_neighbor;

@@ -115,7 +115,7 @@ NodeFaceConstraint::~NodeFaceConstraint()
 void
 NodeFaceConstraint::computeSlaveValue(NumericVector<Number> & current_solution)
 {
-  unsigned int & dof_idx = _var.nodalDofIndex();
+  dof_id_type & dof_idx = _var.nodalDofIndex();
   _qp = 0;
   current_solution.set(dof_idx, computeQpSlaveValue());
 }
@@ -139,24 +139,24 @@ NodeFaceConstraint::computeResidual()
 void
 NodeFaceConstraint::computeJacobian()
 {
-  std::vector<unsigned int> & elems = _node_to_elem_map[_current_node->id()];
+  std::vector<dof_id_type> & elems = _node_to_elem_map[_current_node->id()];
 
   _connected_dof_indices.clear();
-  std::set<unsigned int> unique_dof_indices;
+  std::set<dof_id_type> unique_dof_indices;
 
   // Get the dof indices from each elem connected to the node
-  for(unsigned int el=0; el < elems.size(); ++el)
+  for(dof_id_type el=0; el < elems.size(); ++el)
   {
-    unsigned int cur_elem = elems[el];
+    dof_id_type cur_elem = elems[el];
 
-    std::vector<unsigned int> dof_indices;
+    std::vector<dof_id_type> dof_indices;
     _var.getDofIndices(_mesh.elem(cur_elem), dof_indices);
 
-    for(unsigned int di=0; di < dof_indices.size(); di++)
+    for(dof_id_type di=0; di < dof_indices.size(); di++)
       unique_dof_indices.insert(dof_indices[di]);
   }
 
-  for(std::set<unsigned int>::iterator sit=unique_dof_indices.begin(); sit != unique_dof_indices.end(); ++sit)
+  for(std::set<dof_id_type>::iterator sit=unique_dof_indices.begin(); sit != unique_dof_indices.end(); ++sit)
     _connected_dof_indices.push_back(*sit);
 
   //  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
@@ -174,7 +174,7 @@ NodeFaceConstraint::computeJacobian()
 
   // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
   // This corresponds to evaluating all of the connected shape functions at _this_ node
-  for(unsigned int j=0; j<_connected_dof_indices.size(); j++)
+  for(dof_id_type j=0; j<_connected_dof_indices.size(); j++)
   {
     _phi_slave[j].resize(1);
 

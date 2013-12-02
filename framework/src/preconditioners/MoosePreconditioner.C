@@ -59,8 +59,8 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
 
       for(unsigned int i=0; i<n_comp; i++)
       {
-        unsigned int from_dof = node->dof_number(from_system,from_var,i);
-        unsigned int to_dof = node->dof_number(to_system,to_var,i);
+        dof_id_type from_dof = node->dof_number(from_system,from_var,i);
+        dof_id_type to_dof = node->dof_number(to_system,to_var,i);
 
         to_vector.set(to_dof,from_vector(from_dof));
       }
@@ -81,8 +81,8 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
 
       for(unsigned int i=0; i<n_comp; i++)
       {
-        unsigned int from_dof = elem->dof_number(from_system,from_var,i);
-        unsigned int to_dof = elem->dof_number(to_system,to_var,i);
+        dof_id_type from_dof = elem->dof_number(from_system,from_var,i);
+        dof_id_type to_dof = elem->dof_number(to_system,to_var,i);
 
         to_vector.set(to_dof,from_vector(from_dof));
       }

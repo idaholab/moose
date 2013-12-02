@@ -99,11 +99,11 @@ InitialCondition::compute()
   // The element type
   const ElemType elem_type = _current_elem->type();
   // The number of nodes on the new element
-  const unsigned int n_nodes = _current_elem->n_nodes();
+  const dof_id_type n_nodes = _current_elem->n_nodes();
   // The global DOF indices
-  std::vector<unsigned int> dof_indices;
+  std::vector<dof_id_type> dof_indices;
   // Side/edge DOF indices
-  std::vector<unsigned int> side_dofs;
+  std::vector<dof_id_type> side_dofs;
 
   // Get FE objects of the appropriate type
   // We cannot use the FE object in Assembly, since the following code is messing with the quadrature rules
@@ -140,7 +140,7 @@ InitialCondition::compute()
   dof_indices = _var.dofIndices();
 
   // The number of DOFs on the element
-  const unsigned int n_dofs = dof_indices.size();
+  const dof_id_type n_dofs = dof_indices.size();
   if (n_dofs == 0)
     return;
 
@@ -161,12 +161,12 @@ InitialCondition::compute()
   _fe_problem.sizeZeroes(n_nodes, _tid);
 
   // Interpolate node values first
-  unsigned int current_dof = 0;
-  for (unsigned int n = 0; n != n_nodes; ++n)
+  dof_id_type current_dof = 0;
+  for (dof_id_type n = 0; n != n_nodes; ++n)
   {
     // FIXME: this should go through the DofMap,
     // not duplicate dof_indices code badly!
-    const unsigned int nc = FEInterface::n_dofs_at_node (dim, fe_type, elem_type, n);
+    const dof_id_type nc = FEInterface::n_dofs_at_node (dim, fe_type, elem_type, n);
     if (!_current_elem->is_vertex(n))
     {
       current_dof += nc;
@@ -292,8 +292,8 @@ InitialCondition::compute()
 
       // Some edge dofs are on nodes and already
       // fixed, others are free to calculate
-      unsigned int free_dofs = 0;
-      for (unsigned int i=0; i != side_dofs.size(); ++i)
+      dof_id_type free_dofs = 0;
+      for (dof_id_type i=0; i != side_dofs.size(); ++i)
         if (!dof_is_fixed[side_dofs[i]])
           free_dof[free_dofs++] = i;
 
@@ -323,15 +323,15 @@ InitialCondition::compute()
           finegrad = gradient(xyz_values[qp]);
 
         // Form edge projection matrix
-        for (unsigned int sidei = 0, freei = 0; sidei != side_dofs.size(); ++sidei)
+        for (dof_id_type sidei = 0, freei = 0; sidei != side_dofs.size(); ++sidei)
         {
-          unsigned int i = side_dofs[sidei];
+          dof_id_type i = side_dofs[sidei];
           // fixed DoFs aren't test functions
           if (dof_is_fixed[i])
             continue;
-          for (unsigned int sidej = 0, freej = 0; sidej != side_dofs.size(); ++sidej)
+          for (dof_id_type sidej = 0, freej = 0; sidej != side_dofs.size(); ++sidej)
           {
-            unsigned int j = side_dofs[sidej];
+            dof_id_type j = side_dofs[sidej];
             if (dof_is_fixed[j])
               Fe(freei) -= phi[i][qp] * phi[j][qp] * JxW[qp] * Ue(j);
             else
@@ -356,7 +356,7 @@ InitialCondition::compute()
       Ke.cholesky_solve(Fe, Uedge);
 
       // Transfer new edge solutions to element
-      for (unsigned int i=0; i != free_dofs; ++i)
+      for (dof_id_type i=0; i != free_dofs; ++i)
       {
         Number &ui = Ue(side_dofs[free_dof[i]]);
         libmesh_assert(std::abs(ui) < TOLERANCE || std::abs(ui - Uedge(i)) < TOLERANCE);
@@ -373,8 +373,8 @@ InitialCondition::compute()
 
       // Some side dofs are on nodes/edges and already
       // fixed, others are free to calculate
-      unsigned int free_dofs = 0;
-      for (unsigned int i=0; i != side_dofs.size(); ++i)
+      dof_id_type free_dofs = 0;
+      for (dof_id_type i=0; i != side_dofs.size(); ++i)
         if (!dof_is_fixed[side_dofs[i]])
           free_dof[free_dofs++] = i;
 
@@ -404,15 +404,15 @@ InitialCondition::compute()
           finegrad = gradient(xyz_values[qp]);
 
         // Form side projection matrix
-        for (unsigned int sidei = 0, freei = 0; sidei != side_dofs.size(); ++sidei)
+        for (dof_id_type sidei = 0, freei = 0; sidei != side_dofs.size(); ++sidei)
         {
-          unsigned int i = side_dofs[sidei];
+          dof_id_type i = side_dofs[sidei];
           // fixed DoFs aren't test functions
           if (dof_is_fixed[i])
             continue;
-          for (unsigned int sidej = 0, freej = 0; sidej != side_dofs.size(); ++sidej)
+          for (dof_id_type sidej = 0, freej = 0; sidej != side_dofs.size(); ++sidej)
           {
-            unsigned int j = side_dofs[sidej];
+            dof_id_type j = side_dofs[sidej];
             if (dof_is_fixed[j])
               Fe(freei) -= phi[i][qp] * phi[j][qp] * JxW[qp] * Ue(j);
             else
@@ -437,7 +437,7 @@ InitialCondition::compute()
       Ke.cholesky_solve(Fe, Uside);
 
       // Transfer new side solutions to element
-      for (unsigned int i=0; i != free_dofs; ++i)
+      for (dof_id_type i=0; i != free_dofs; ++i)
       {
         Number &ui = Ue(side_dofs[free_dof[i]]);
         libmesh_assert(std::abs(ui) < TOLERANCE || std::abs(ui - Uside(i)) < TOLERANCE);
@@ -450,8 +450,8 @@ InitialCondition::compute()
 
   // Some interior dofs are on nodes/edges/sides and
   // already fixed, others are free to calculate
-  unsigned int free_dofs = 0;
-  for (unsigned int i=0; i != n_dofs; ++i)
+  dof_id_type free_dofs = 0;
+  for (dof_id_type i=0; i != n_dofs; ++i)
     if (!dof_is_fixed[i])
       free_dof[free_dofs++] = i;
 
@@ -480,12 +480,12 @@ InitialCondition::compute()
         finegrad = gradient(xyz_values[qp]);
 
       // Form interior projection matrix
-      for (unsigned int i=0, freei=0; i != n_dofs; ++i)
+      for (dof_id_type i=0, freei=0; i != n_dofs; ++i)
       {
         // fixed DoFs aren't test functions
         if (dof_is_fixed[i])
           continue;
-        for (unsigned int j=0, freej=0; j != n_dofs; ++j)
+        for (dof_id_type j=0, freej=0; j != n_dofs; ++j)
         {
           if (dof_is_fixed[j])
             Fe(freei) -= phi[i][qp] * phi[j][qp] * JxW[qp] * Ue(j);
@@ -510,7 +510,7 @@ InitialCondition::compute()
     Ke.cholesky_solve(Fe, Uint);
 
     // Transfer new interior solutions to element
-    for (unsigned int i=0; i != free_dofs; ++i)
+    for (dof_id_type i=0; i != free_dofs; ++i)
     {
       Number &ui = Ue(free_dof[i]);
       libmesh_assert(std::abs(ui) < TOLERANCE || std::abs(ui - Uint(i)) < TOLERANCE);
@@ -520,12 +520,12 @@ InitialCondition::compute()
   } // if there are free interior dofs
 
   // Make sure every DoF got reached!
-  for (unsigned int i=0; i != n_dofs; ++i)
+  for (dof_id_type i=0; i != n_dofs; ++i)
     libmesh_assert(dof_is_fixed[i]);
 
   NumericVector<Number> & solution = _var.sys().solution();
 
-  const unsigned int
+  const dof_id_type
     first = solution.first_local_index(),
     last  = solution.last_local_index();
 
@@ -533,7 +533,7 @@ InitialCondition::compute()
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-    for (unsigned int i = 0; i < n_dofs; i++)
+    for (dof_id_type i = 0; i < n_dofs; i++)
       // We may be projecting a new zero value onto
       // an old nonzero approximation - RHS
       // if (Ue(i) != 0.)

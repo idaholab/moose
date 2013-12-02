@@ -135,7 +135,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
             Real value = vals.front();
 
             // The zero only works for LAGRANGE!
-            unsigned int dof = node->dof_number(sys_num, var_num, 0);
+            dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
             solution.set(dof, value);
           }

@@ -49,7 +49,7 @@ NearestNodeValueAux::computeValue()
   // Assumes the variable you are coupling to is from the nonlinear system for now.
   const Node * nearest = _nearest_node.nearestNode(_current_node->id());
   mooseAssert(nearest != NULL, "I do not have the nearest node for you");
-  long int dof_number = nearest->dof_number(_nl_sys.number(), _paired_variable, 0);
+  dof_id_type dof_number = nearest->dof_number(_nl_sys.number(), _paired_variable, 0);
 
   return (*_serialized_solution)(dof_number);
 }

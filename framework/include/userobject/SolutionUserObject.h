@@ -94,7 +94,7 @@ protected:
    * @param dof_index The DOF of the solution desired
    * @return The solution at the given DOF
    */
-  virtual Real directValue(unsigned int dof_index) const;
+  virtual Real directValue(dof_id_type dof_index) const;
 
   /**
    * Get the type of file that was read

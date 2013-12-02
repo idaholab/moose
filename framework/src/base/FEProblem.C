@@ -605,7 +605,7 @@ FEProblem::prepareFace(const Elem * elem, THREAD_ID tid)
 }
 
 void
-FEProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
+FEProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
 {
   _assembly[tid]->reinit(elem);
 
@@ -752,7 +752,7 @@ FEProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 }
 
 void
-FEProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid)
+FEProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
 {
   _assembly[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
   if(_displaced_problem)
@@ -760,7 +760,7 @@ FEProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, 
 }
 
 void
-FEProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid)
+FEProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, std::vector<dof_id_type> & neighbor_dof_indices, THREAD_ID tid)
 {
   _assembly[tid]->addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices);
   if(_displaced_problem)
@@ -786,7 +786,7 @@ FEProblem::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
 }
 
 void
-FEProblem::addGhostedElem(unsigned int elem_id)
+FEProblem::addGhostedElem(dof_id_type elem_id)
 {
   if(_mesh.elem(elem_id)->processor_id() != libMesh::processor_id())
     _ghosted_elems.insert(elem_id);
@@ -918,7 +918,7 @@ FEProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
 }
 
 void
-FEProblem::reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid)
+FEProblem::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
   sizeZeroes(nodes.size(), tid);
 
@@ -1454,10 +1454,10 @@ FEProblem::projectSolution()
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      const dof_id_type n_SCALAR_dofs = var.dofIndices().size();
+      for (dof_id_type i = 0; i < n_SCALAR_dofs; i++)
       {
-        const unsigned int global_index = var.dofIndices()[i];
+        const dof_id_type global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));
         var.setValue(i, vals(i));
       }
@@ -2357,7 +2357,7 @@ void
 FEProblem::reinitBecauseOfGhosting()
 {
   // Need to see if _any_ processor has ghosted elems
-  unsigned int ghosted = _ghosted_elems.size();
+  dof_id_type ghosted = _ghosted_elems.size();
   Parallel::sum(ghosted);
 
   if(ghosted)

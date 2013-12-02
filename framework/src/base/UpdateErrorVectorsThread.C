@@ -63,7 +63,7 @@ UpdateErrorVectorsThread::onElement(const Elem *elem)
     unsigned int var_num = it->first;
     ErrorVector & ev = *(it->second);
 
-    unsigned int dof_number = elem->dof_number(_system_number, var_num, 0);
+    dof_id_type dof_number = elem->dof_number(_system_number, var_num, 0);
     Real value = _solution(dof_number);
     ev[elem->id()] = value;
   }

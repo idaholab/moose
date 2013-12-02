@@ -47,7 +47,7 @@ protected:
   SystemBase & _variable_sys;
   const NumericVector<Number> * & _variable_sys_solution;
   FEType _variable_fe_type;
-  std::vector<unsigned int> _variable_dof_indices;
+  std::vector<dof_id_type> _variable_dof_indices;
 };
 
 #endif /* VALUETHRESHOLDMARKER_H */

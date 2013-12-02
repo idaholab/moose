@@ -40,7 +40,7 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
 {
   if (_var.isNodalDefined())
   {
-    unsigned int & dof_idx = _var.nodalDofIndex();
+    dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     residual.set(dof_idx, computeQpResidual());
   }

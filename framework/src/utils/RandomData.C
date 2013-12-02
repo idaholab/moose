@@ -31,7 +31,7 @@ RandomData::RandomData(FEProblem &problem, const RandomInterface & random_interf
 }
 
 unsigned int
-RandomData::getSeed(unsigned int id)
+RandomData::getSeed(dof_id_type id)
 {
   mooseAssert(_seeds.find(id) != _seeds.end(), "Call to updateSeeds() is stale! Check your initialize() or timestepSetup() calls");
 
@@ -102,7 +102,7 @@ RandomData::updateGenerators()
 
     for (; it != end_it; ++it)
     {
-      unsigned int id = (*it)->id();
+      dof_id_type id = (*it)->id();
       _seeds[id] = _generator.randl(MASTER);
 
       // Update the individual dof object generators
@@ -116,7 +116,7 @@ RandomData::updateGenerators()
 
     for (; it != end_it; ++it)
     {
-      unsigned int id = (*it)->id();
+      dof_id_type id = (*it)->id();
       _seeds[id] = _generator.randl(MASTER);
 
       // Update the individual dof object generators

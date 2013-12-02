@@ -125,8 +125,8 @@ public:
 
   virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
   virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
-  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid) = 0;
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid) = 0;
+  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid) = 0;
+  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, std::vector<dof_id_type> & neighbor_dof_indices, THREAD_ID tid) = 0;
 
   virtual void cacheJacobian(THREAD_ID tid) = 0;
   virtual void cacheJacobianNeighbor(THREAD_ID tid) = 0;
@@ -134,7 +134,7 @@ public:
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;
-  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid) = 0;
+  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & dof_indices, THREAD_ID tid) = 0;
   virtual void prepareAssembly(THREAD_ID tid) = 0;
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
@@ -313,7 +313,7 @@ protected:
   std::vector<bool> _has_active_elemental_moose_variables;
 
   /// Elements that should have Dofs ghosted to the local processor
-  std::set<unsigned int> _ghosted_elems;
+  std::set<dof_id_type> _ghosted_elems;
 
   /// Where the restartable data is held (indexed on tid)
   RestartableDatas _restartable_data;

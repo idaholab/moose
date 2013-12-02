@@ -247,8 +247,8 @@ SolutionUserObject::directValue(const Node * node, const std::string & var_name)
   unsigned int sys_num = _system->number();
 
   // Get the node id and associated dof
-  libMesh::dof_id_type node_id = node->id();
-  libMesh::dof_id_type dof_id = _system->get_mesh().node(node_id).dof_number(sys_num, var_num, 0);
+  dof_id_type node_id = node->id();
+  dof_id_type dof_id = _system->get_mesh().node(node_id).dof_number(sys_num, var_num, 0);
 
   // Return the desried value for the dof
   return directValue(dof_id);
@@ -262,8 +262,8 @@ SolutionUserObject::directValue(const Elem * elem, const std::string & var_name)
   unsigned int sys_num = _system->number();
 
   // Get the element id and associated dof
-  libMesh::dof_id_type elem_id = elem->id();
-  libMesh::dof_id_type dof_id = _system->get_mesh().elem(elem_id)->dof_number(sys_num, var_num, 0);
+  dof_id_type elem_id = elem->id();
+  dof_id_type dof_id = _system->get_mesh().elem(elem_id)->dof_number(sys_num, var_num, 0);
 
   // Return the desired value
   return directValue(dof_id);

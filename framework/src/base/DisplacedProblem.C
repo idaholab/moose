@@ -297,7 +297,7 @@ DisplacedProblem::prepareFace(const Elem * /*elem*/, THREAD_ID tid)
 }
 
 void
-DisplacedProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<unsigned int> & dof_indices, THREAD_ID tid)
+DisplacedProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
 {
   _assembly[tid]->reinit(elem);
 
@@ -536,13 +536,13 @@ DisplacedProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID t
 }
 
 void
-DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, THREAD_ID tid)
+DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
 {
   _assembly[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
 }
 
 void
-DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices, THREAD_ID tid)
+DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, std::vector<dof_id_type> & neighbor_dof_indices, THREAD_ID tid)
 {
   _assembly[tid]->addJacobianNeighbor(jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices);
 }
@@ -605,7 +605,7 @@ DisplacedProblem::setOutputVariables(std::vector<VariableName> output_variables)
 }
 
 void
-DisplacedProblem::addGhostedElem(unsigned int elem_id)
+DisplacedProblem::addGhostedElem(dof_id_type elem_id)
 {
   _mproblem.addGhostedElem(elem_id);
 }

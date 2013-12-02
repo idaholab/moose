@@ -110,7 +110,7 @@ MultiAppMeshFunctionTransfer::execute()
               if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
                 // The zero only works for LAGRANGE!
-                unsigned int dof = node->dof_number(sys_num, var_num, 0);
+                dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
@@ -139,7 +139,7 @@ MultiAppMeshFunctionTransfer::execute()
               if(elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
               {
                 // The zero only works for LAGRANGE!
-                unsigned int dof = elem->dof_number(sys_num, var_num, 0);
+                dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
@@ -240,7 +240,7 @@ MultiAppMeshFunctionTransfer::execute()
               if(app_box.contains_point(*node-app_position))
               {
                 // The zero only works for LAGRANGE!
-                unsigned int dof = node->dof_number(to_sys_num, to_var_num, 0);
+                dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
 
                 MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
                 Real from_value = from_func(*node-app_position);
@@ -271,7 +271,7 @@ MultiAppMeshFunctionTransfer::execute()
               if(app_box.contains_point(centroid-app_position))
               {
                 // The zero only works for LAGRANGE!
-                unsigned int dof = elem->dof_number(to_sys_num, to_var_num, 0);
+                dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
 
                 MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
                 Real from_value = from_func(centroid-app_position);

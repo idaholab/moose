@@ -127,7 +127,7 @@ MultiAppInterpolationTransfer::execute()
           Node * from_node = *from_nodes_it;
 
           // Assuming LAGRANGE!
-          unsigned int from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
+          dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
 
           src_pts.push_back(*from_node);
           src_vals.push_back(from_solution(from_dof));
@@ -143,7 +143,7 @@ MultiAppInterpolationTransfer::execute()
           Elem * from_elem = *from_elements_it;
 
           // Assuming CONSTANT MONOMIAL
-          unsigned int from_dof = from_elem->dof_number(from_sys_num, from_var_num, 0);
+          dof_id_type from_dof = from_elem->dof_number(from_sys_num, from_var_num, 0);
 
           src_pts.push_back(from_elem->centroid());
           src_vals.push_back(from_solution(from_dof));
@@ -202,7 +202,7 @@ MultiAppInterpolationTransfer::execute()
                 Real value = vals.front();
 
                 // The zero only works for LAGRANGE!
-                unsigned int dof = node->dof_number(sys_num, var_num, 0);
+                dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
                 solution.set(dof, value);
               }
@@ -232,7 +232,7 @@ MultiAppInterpolationTransfer::execute()
 
                 Real value = vals.front();
 
-                unsigned int dof = elem->dof_number(sys_num, var_num, 0);
+                dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
 
                 solution.set(dof, value);
               }
@@ -344,7 +344,7 @@ MultiAppInterpolationTransfer::execute()
             Node * from_node = *from_nodes_it;
 
             // Assuming LAGRANGE!
-            unsigned int from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
+            dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
 
             src_pts.push_back(*from_node+app_position);
             src_vals.push_back(from_solution(from_dof));
@@ -360,7 +360,7 @@ MultiAppInterpolationTransfer::execute()
             Elem * from_element = *from_elements_it;
 
             // Assuming LAGRANGE!
-            unsigned int from_dof = from_element->dof_number(from_sys_num, from_var_num, 0);
+            dof_id_type from_dof = from_element->dof_number(from_sys_num, from_var_num, 0);
 
             src_pts.push_back(from_element->centroid()+app_position);
             src_vals.push_back(from_solution(from_dof));
@@ -396,7 +396,7 @@ MultiAppInterpolationTransfer::execute()
             Real value = vals.front();
 
             // The zero only works for LAGRANGE!
-            unsigned int dof = node->dof_number(to_sys_num, to_var_num, 0);
+            dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
 
             to_solution.set(dof, value);
           }
@@ -425,7 +425,7 @@ MultiAppInterpolationTransfer::execute()
 
             Real value = vals.front();
 
-            unsigned int dof = elem->dof_number(to_sys_num, to_var_num, 0);
+            dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
 
             to_solution.set(dof, value);
           }

@@ -220,12 +220,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
           transfer.close();
           transfer_old.close();
 
-          std::set<unsigned int>::iterator it  = _transferred_dofs.begin();
-          std::set<unsigned int>::iterator end = _transferred_dofs.end();
+          std::set<dof_id_type>::iterator it  = _transferred_dofs.begin();
+          std::set<dof_id_type>::iterator end = _transferred_dofs.end();
 
           for(; it != end; ++it)
           {
-            unsigned int dof = *it;
+            dof_id_type dof = *it;
             solution.set(dof, (transfer_old(dof) * one_minus_step_percent) + (transfer(dof) * step_percent));
 //            solution.set(dof, transfer_old(dof));
 //            solution.set(dof, transfer(dof));

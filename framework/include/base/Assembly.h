@@ -302,7 +302,7 @@ public:
    */
   void prepareVariable(MooseVariable * var);
   void prepareNeighbor();
-  void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<unsigned int> & dof_indices);
+  void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<dof_id_type> & dof_indices);
   void prepareScalar();
   void prepareOffDiagScalar();
 
@@ -335,9 +335,9 @@ public:
   void setResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
 
   void addJacobian(SparseMatrix<Number> & jacobian);
-  void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices);
+  void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices);
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian);
-  void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<unsigned int> & dof_indices, std::vector<unsigned int> & neighbor_dof_indices);
+  void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, std::vector<dof_id_type> & neighbor_dof_indices);
   void addJacobianScalar(SparseMatrix<Number> & jacobian);
   void addJacobianOffDiagScalar(SparseMatrix<Number> & jacobian, unsigned int ivar);
 
@@ -363,9 +363,9 @@ public:
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
-  void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<unsigned int> & idof_indices, std::vector<unsigned int> & jdof_indices, Real scaling_factor);
+  void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id_type> & idof_indices, std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
 
-  std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
+  std::vector<std::pair<dof_id_type, dof_id_type> > & couplingEntries() { return _cm_entry; }
 
   const VariablePhiValue & phi() { return _phi; }
   const VariablePhiGradient & gradPhi() { return _grad_phi; }
@@ -415,12 +415,12 @@ protected:
    */
   void reinitFEFace(const Elem * elem, unsigned int side);
 
-  void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<unsigned int> & dof_indices, Real scaling_factor);
-  void cacheResidualBlock(DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
+  void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<dof_id_type> & dof_indices, Real scaling_factor);
+  void cacheResidualBlock(DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor);
 
   void setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
 
-  void addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<unsigned int> & idof_indices, const std::vector<unsigned int> & jdof_indices, Real scaling_factor);
+  void addJacobianBlock(SparseMatrix<Number> & jacobian, DenseMatrix<Number> & jac_block, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
 
   SystemBase & _sys;
   /// Reference to coupling matrix
@@ -634,7 +634,7 @@ protected:
   unsigned int _block_diagonal_matrix;
 
   /// Temporary work vector to keep from reallocating it
-  std::vector<unsigned int> _temp_dof_indices;
+  std::vector<dof_id_type> _temp_dof_indices;
 };
 
 #endif /* ASSEMBLY_H */

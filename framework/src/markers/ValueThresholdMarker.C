@@ -67,7 +67,7 @@ ValueThresholdMarker::computeElementMarker()
 
   Real max_value = -std::numeric_limits<Real>::max();
 
-  for(unsigned int i=0; i<_variable_dof_indices.size(); i++)
+  for(dof_id_type i=0; i<_variable_dof_indices.size(); i++)
   {
     Real value = (*_variable_sys_solution)(_variable_dof_indices[i]);
     max_value = std::max(max_value, value);

@@ -24,6 +24,7 @@
 // libMesh
 #include "libmesh/system.h"
 #include "libmesh/mesh_tools.h"
+#include "libmesh/id_types.h"
 
 template<>
 InputParameters validParams<MultiAppNearestNodeTransfer>()
@@ -131,7 +132,7 @@ MultiAppNearestNodeTransfer::execute()
               if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
                 // The zero only works for LAGRANGE!
-                unsigned int dof = node->dof_number(sys_num, var_num, 0);
+                dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
@@ -161,7 +162,7 @@ MultiAppNearestNodeTransfer::execute()
                   nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
 
                 // Assuming LAGRANGE!
-                unsigned int from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
+                dof_id_type from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
                 Real from_value = (*serialized_solution)(from_dof);
 
                 // Swap again
@@ -186,7 +187,7 @@ MultiAppNearestNodeTransfer::execute()
               if(elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
               {
                 // The zero only works for LAGRANGE!
-                unsigned int dof = elem->dof_number(sys_num, var_num, 0);
+                dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
@@ -216,7 +217,7 @@ MultiAppNearestNodeTransfer::execute()
                   nearest_node = getNearestNode(actual_position, distance, from_nodes_begin, from_nodes_end);
 
                 // Assuming LAGRANGE!
-                unsigned int from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
+                dof_id_type from_dof = nearest_node->dof_number(from_sys_num, from_var_num, 0);
                 Real from_value = (*serialized_solution)(from_dof);
 
                 // Swap again
@@ -267,8 +268,8 @@ MultiAppNearestNodeTransfer::execute()
 
       bool is_nodal = to_sys.variable_type(to_var_num) == FEType();
 
-      unsigned int n_nodes = to_mesh->n_nodes();
-      unsigned int n_elems = to_mesh->n_elem();
+      dof_id_type n_nodes = to_mesh->n_nodes();
+      dof_id_type n_elems = to_mesh->n_elem();
 
       ///// All of the following are indexed off to_node->id() or to_elem->id() /////
 
@@ -276,7 +277,7 @@ MultiAppNearestNodeTransfer::execute()
       std::vector<Real> min_distances;
 
       // The node ids in the "from" mesh that this processor has found to be the minimum distances to the "to" nodes
-      std::vector<unsigned int> min_nodes;
+      std::vector<dof_id_type> min_nodes;
 
       // After the call to maxloc() this will tell us which processor actually has the minimum
       std::vector<unsigned int> min_procs;
@@ -479,7 +480,7 @@ MultiAppNearestNodeTransfer::execute()
         if(min_procs[j] == proc_id) // This means that this processor really did find the minumum so we need to transfer the value
         {
           // The zero only works for LAGRANGE!
-          unsigned int to_dof = 0;
+          dof_id_type to_dof = 0;
 
           if(is_nodal)
           {
@@ -521,7 +522,7 @@ MultiAppNearestNodeTransfer::execute()
           Node & from_node = from_mesh->node(min_nodes[j]);
 
           // Assuming LAGRANGE!
-          unsigned int from_dof = from_node.dof_number(from_sys_num, from_var_num, 0);
+          dof_id_type from_dof = from_node.dof_number(from_sys_num, from_var_num, 0);
           Real from_value = (*from_sys.solution)(from_dof);
 
           // Swap back

@@ -48,7 +48,7 @@ MooseVariableScalar::reinit()
 
   _dof_map.SCALAR_dof_indices(_dof_indices, _var_num);
 
-  unsigned int n = _dof_indices.size();
+  dof_id_type n = _dof_indices.size();
   _u.resize(n);
   _u_old.resize(n);
   _u_older.resize(n);
@@ -58,9 +58,9 @@ MooseVariableScalar::reinit()
     _du_dot_du.resize(n);
   }
 
-  for (unsigned int i = 0; i < n; i++)
+  for (dof_id_type i = 0; i < n; i++)
   {
-    unsigned int idx = _dof_indices[i];
+    dof_id_type idx = _dof_indices[i];
     _u[i] = current_solution(idx);
     _u_old[i] = solution_old(idx);
     _u_older[i] = solution_older(idx);
@@ -81,7 +81,7 @@ MooseVariableScalar::isNodal() const
 }
 
 void
-MooseVariableScalar::setValue(unsigned int i, Number value)
+MooseVariableScalar::setValue(dof_id_type i, Number value)
 {
   _u[i] = value;                  // update variable value
 }
@@ -89,6 +89,6 @@ MooseVariableScalar::setValue(unsigned int i, Number value)
 void
 MooseVariableScalar::insert(NumericVector<Number> & soln)
 {
-  for (unsigned int i = 0; i < _dof_indices.size(); i++)
+  for (dof_id_type i = 0; i < _dof_indices.size(); i++)
     soln.set(_dof_indices[i], _u[i]);
 }

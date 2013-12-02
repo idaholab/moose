@@ -69,10 +69,10 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
   Real scaling_factor = _var.scalingFactor();
   _qp = 0;
   // master node
-  unsigned int & dof_idx = _var.nodalDofIndex();
+  dof_id_type & dof_idx = _var.nodalDofIndex();
   residual.add(dof_idx, scaling_factor * computeQpResidual(Moose::Master));
   // slave node
-  unsigned int & dof_idx_neighbor = _var.nodalDofIndexNeighbor();
+  dof_id_type & dof_idx_neighbor = _var.nodalDofIndexNeighbor();
   residual.add(dof_idx_neighbor, scaling_factor * computeQpResidual(Moose::Slave));
 }
 
@@ -80,8 +80,8 @@ void
 NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
 {
   _qp = 0;
-  unsigned int & dof_idx = _var.nodalDofIndex();
-  unsigned int & dof_idx_neighbor = _var.nodalDofIndexNeighbor();
+  dof_id_type & dof_idx = _var.nodalDofIndex();
+  dof_id_type & dof_idx_neighbor = _var.nodalDofIndexNeighbor();
 
   Real scaling_factor = _var.scalingFactor();
   jacobian.add(dof_idx, dof_idx, scaling_factor * computeQpJacobian(Moose::MasterMaster));

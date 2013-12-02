@@ -43,7 +43,7 @@ Real
 BoundsAux::computeValue()
 {
   // The zero is for the component, this will only work for Lagrange variables!
-  unsigned int dof = _current_node->dof_number(_nl_sys.number(), _bounded_variable_id, 0);
+  dof_id_type dof = _current_node->dof_number(_nl_sys.number(), _bounded_variable_id, 0);
   if(_upper_valid) _upper_vector.set(dof, _upper);
   if(_lower_valid) _lower_vector.set(dof, _lower);
 

@@ -95,7 +95,7 @@ public:
    */
   const DofMap & dofMap() { return _dof_map; }
 
-  std::vector<unsigned int> & dofIndices() { return _dof_indices; }
+  std::vector<dof_id_type> & dofIndices() { return _dof_indices; }
 
   /**
    * Is this variable nodal
@@ -122,7 +122,7 @@ protected:
   /// DOF map
   const DofMap & _dof_map;
   /// DOF indices
-  std::vector<unsigned int> _dof_indices;
+  std::vector<dof_id_type> _dof_indices;
 
   /// scaling factor for this variable
   Real _scaling_factor;

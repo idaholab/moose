@@ -38,7 +38,7 @@ public:
 
   void join(const AllLocalDofIndicesThread & y);
 
-  std::set<unsigned int> _all_dof_indices;
+  std::set<dof_id_type> _all_dof_indices;
 
 protected:
   System & _sys;

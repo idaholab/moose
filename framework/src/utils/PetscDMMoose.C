@@ -420,23 +420,23 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
 
     if (!dmm->allvars || !dmm->allblocks || !dmm->nosides || !dmm->nounsides || !dmm->nocontacts || !dmm->nouncontacts) {
       DofMap& dofmap = dmm->nl->sys().get_dof_map();
-      std::set<unsigned int>               indices;
-      std::set<unsigned int> unindices;
-      for(std::map<std::string, unsigned int>::const_iterator vit = dmm->varids->begin(); vit != dmm->varids->end(); ++vit){
-	unsigned int v = vit->second;
+      std::set<dof_id_type>               indices;
+      std::set<dof_id_type> unindices;
+      for(std::map<std::string, dof_id_type>::const_iterator vit = dmm->varids->begin(); vit != dmm->varids->end(); ++vit){
+	dof_id_type v = vit->second;
 	/* Iterate only over this DM's blocks. */
 	if (!dmm->allblocks || (dmm->nosides && dmm->nocontacts)) {
-	  for(std::map<std::string, unsigned int>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
-	    unsigned int b = bit->second;
+	  for(std::map<std::string, dof_id_type>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
+	    dof_id_type b = bit->second;
 	    MeshBase::const_element_iterator el     = dmm->nl->sys().get_mesh().active_local_subdomain_elements_begin(b);
 	    MeshBase::const_element_iterator end_el = dmm->nl->sys().get_mesh().active_local_subdomain_elements_end(b);
 	    for ( ; el != end_el; ++el) {
 	      const Elem* elem = *el;
-	      std::vector<unsigned int> evindices;
+	      std::vector<dof_id_type> evindices;
 	      // Get the degree of freedom indices for the given variable off the current element.
 	      dofmap.dof_indices(elem, evindices, v);
-	      for(unsigned int i = 0; i < evindices.size(); ++i) {
-		unsigned int dof = evindices[i];
+	      for(dof_id_type i = 0; i < evindices.size(); ++i) {
+		dof_id_type dof = evindices[i];
 		if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) /* might want to use variable_first/last_local_dof instead */
 		  indices.insert(dof);
 	      }
@@ -446,11 +446,11 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
 	/* Iterate over the sides from this split. */
 	if (dmm->sideids->size()) {
 	  // For some reason the following may return an empty node list
-	  // std::vector<unsigned int> snodes;
+	  // std::vector<dof_id_type> snodes;
 	  // std::vector<boundary_id_type> sides;
 	  // dmm->nl->sys().get_mesh().boundary_info->build_node_list(snodes, sides);
 	  // // FIXME: make an array of (snode,side) pairs, sort on side and use std::lower_bound from <algorithm>
-	  // for (unsigned int i = 0; i < sides.size(); ++i) {
+	  // for (dof_id_type i = 0; i < sides.size(); ++i) {
 	  //   boundary_id_type s = sides[i];
 	  //   if (!dmm->sidenames->count(s)) continue;
 	  //  const Node& node = dmm->nl->sys().get_mesh().node(snodes[i]);
@@ -498,8 +498,8 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
 	    } else {
 	      locator = dmm->nl->_fe_problem.geomSearchData()._penetration_locators[it->first];
 	    }
-	    std::vector<unsigned int>& slave_nodes = locator->_nearest_node._slave_nodes;
-	    for (unsigned int i = 0; i < slave_nodes.size(); ++i) {
+	    std::vector<dof_id_type>& slave_nodes = locator->_nearest_node._slave_nodes;
+	    for (dof_id_type i = 0; i < slave_nodes.size(); ++i) {
 	      if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end()) continue;
 	      Node& slave_node = dmm->nl->sys().get_mesh().node(slave_nodes[i]);
 	      dof_id_type dof = slave_node.dof_number(dmm->nl->sys().number(),v,0);
@@ -525,8 +525,8 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
 	    } else {
 	      locator = dmm->nl->_fe_problem.geomSearchData()._penetration_locators[it->first];
 	    }
-	    std::vector<unsigned int>& slave_nodes = locator->_nearest_node._slave_nodes;
-	    for (unsigned int i = 0; i < slave_nodes.size(); ++i) {
+	    std::vector<dof_id_type>& slave_nodes = locator->_nearest_node._slave_nodes;
+	    for (dof_id_type i = 0; i < slave_nodes.size(); ++i) {
 	      if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end()) continue;
 	      Node& slave_node = dmm->nl->sys().get_mesh().node(slave_nodes[i]);
 	      dof_id_type dof = slave_node.dof_number(dmm->nl->sys().number(),v,0);
@@ -537,12 +537,12 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
 	  }
 	}
       }
-      std::set<unsigned int> dindices;
+      std::set<dof_id_type> dindices;
       std::set_difference(indices.begin(),indices.end(),unindices.begin(),unindices.end(),std::inserter(dindices,dindices.end()));
       PetscInt *darray;
       ierr = PetscMalloc(sizeof(PetscInt)*dindices.size(),&darray);CHKERRQ(ierr);
-      unsigned int i = 0;
-      for(std::set<unsigned int>::const_iterator it = dindices.begin(); it != dindices.end(); ++it) {
+      dof_id_type i = 0;
+      for(std::set<dof_id_type>::const_iterator it = dindices.begin(); it != dindices.end(); ++it) {
 	darray[i] = *it;
 	++i;
       }
@@ -577,8 +577,8 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
   if(namelist) {ierr = PetscMalloc(*len*sizeof(char*),namelist);CHKERRQ(ierr);}
   if(islist)   {ierr = PetscMalloc(*len*sizeof(IS),islist);CHKERRQ(ierr);}
   if(dmlist)   {ierr = PetscMalloc(*len*sizeof(DM),dmlist);CHKERRQ(ierr);}
-  for (std::multimap<std::string, unsigned int>::const_iterator dit = dmm->splitlocs->begin(); dit != dmm->splitlocs->end(); ++dit) {
-    unsigned int                             d = dit->second;
+  for (std::multimap<std::string, dof_id_type>::const_iterator dit = dmm->splitlocs->begin(); dit != dmm->splitlocs->end(); ++dit) {
+    dof_id_type                             d = dit->second;
     std::string                          dname = dit->first;
     DM_Moose::SplitInfo&                 dinfo = (*dmm->splits)[dname];
     if (!dinfo.dm) {

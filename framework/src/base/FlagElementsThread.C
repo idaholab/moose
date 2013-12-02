@@ -57,7 +57,7 @@ FlagElementsThread::FlagElementsThread(FlagElementsThread & x, Threads::split sp
 void
 FlagElementsThread::onElement(const Elem *elem)
 {
-  unsigned int dof_number = elem->dof_number(_system_number, _field_var_number, 0);
+  dof_id_type dof_number = elem->dof_number(_system_number, _field_var_number, 0);
   Marker::MarkerValue marker_value = (Marker::MarkerValue)_serialized_solution[dof_number];
 
   // If no Markers cared about what happened to this element let's just leave it alone

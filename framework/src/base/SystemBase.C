@@ -27,7 +27,7 @@
 #include "libmesh/quadrature_gauss.h"
 
 /// Free function used for a libMesh callback
-void extraSendList(std::vector<unsigned int> & send_list, void * context)
+void extraSendList(std::vector<dof_id_type> & send_list, void * context)
 {
   SystemBase * sys = static_cast<SystemBase *>(context);
   sys->augmentSendList(send_list);
@@ -124,11 +124,11 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
-    std::set<unsigned int> dof_indices_to_zero = aldit._all_dof_indices;
+    std::set<dof_id_type> dof_indices_to_zero = aldit._all_dof_indices;
 
     solution.close();
 
-    for(std::set<unsigned int>::iterator it = dof_indices_to_zero.begin();
+    for(std::set<dof_id_type>::iterator it = dof_indices_to_zero.begin();
         it != dof_indices_to_zero.end();
         ++it)
       solution.set(*it, 0);
@@ -336,7 +336,7 @@ SystemBase::reinitNodeNeighbor(const Node * /*node*/, THREAD_ID tid)
 }
 
 void
-SystemBase::reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid)
+SystemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
@@ -359,15 +359,15 @@ SystemBase::reinitScalars(THREAD_ID tid)
 }
 
 void
-SystemBase::augmentSendList(std::vector<unsigned int> & send_list)
+SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
 {
-  std::set<unsigned int> & ghosted_elems = _subproblem.ghostedElems();
+  std::set<dof_id_type> & ghosted_elems = _subproblem.ghostedElems();
 
   DofMap & dof_map = dofMap();
 
-  std::vector<unsigned int> dof_indices;
+  std::vector<dof_id_type> dof_indices;
 
-  for(std::set<unsigned int>::iterator elem_id = ghosted_elems.begin();
+  for(std::set<dof_id_type>::iterator elem_id = ghosted_elems.begin();
       elem_id != ghosted_elems.end();
       ++elem_id)
   {
@@ -377,9 +377,9 @@ SystemBase::augmentSendList(std::vector<unsigned int> & send_list)
     {
       dof_map.dof_indices(elem, dof_indices);
 
-      for(unsigned int i=0; i<dof_indices.size(); i++)
+      for(dof_id_type i=0; i<dof_indices.size(); i++)
       {
-        unsigned int dof = dof_indices[i];
+        dof_id_type dof = dof_indices[i];
 
         // Only need to ghost it if it's actually not on this processor
         if(dof < dof_map.first_dof() || dof >= dof_map.end_dof())

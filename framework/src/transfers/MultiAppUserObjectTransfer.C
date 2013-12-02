@@ -98,7 +98,7 @@ MultiAppUserObjectTransfer::execute()
               if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
                 // The zero only works for LAGRANGE!
-                unsigned int dof = node->dof_number(sys_num, var_num, 0);
+                dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
@@ -124,7 +124,7 @@ MultiAppUserObjectTransfer::execute()
               if(elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
               {
                 // The zero only works for LAGRANGE!
-                unsigned int dof = elem->dof_number(sys_num, var_num, 0);
+                dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
@@ -201,7 +201,7 @@ MultiAppUserObjectTransfer::execute()
               // See if this node falls in this bounding box
               if(app_box.contains_point(*node))
               {
-                unsigned int dof = node->dof_number(to_sys_num, to_var_num, 0);
+                dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
 
                 MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
                 Real from_value = user_object.spatialValue(*node-app_position);
@@ -228,7 +228,7 @@ MultiAppUserObjectTransfer::execute()
               // See if this elem falls in this bounding box
               if(app_box.contains_point(centroid))
               {
-                unsigned int dof = elem->dof_number(to_sys_num, to_var_num, 0);
+                dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
 
                 MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
                 Real from_value = user_object.spatialValue(centroid-app_position);

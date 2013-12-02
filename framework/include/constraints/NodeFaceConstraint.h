@@ -188,7 +188,7 @@ protected:
   /// DOF map
   const DofMap & _dof_map;
 
-  std::map<unsigned int, std::vector<unsigned int> > & _node_to_elem_map;
+  std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map;
 
   /**
    * Whether or not the slave's residual should be overwritten.
@@ -199,7 +199,7 @@ protected:
   bool _overwrite_slave_residual;
 
 public:
-  std::vector<unsigned int> _connected_dof_indices;
+  std::vector<dof_id_type> _connected_dof_indices;
 
   DenseMatrix<Number> _Kne;
   DenseMatrix<Number> _Kee;

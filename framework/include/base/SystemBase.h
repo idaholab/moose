@@ -40,7 +40,7 @@ class MooseMesh;
 /**
  * ///< Type of coordinate system
  */
-void extraSendList(std::vector<unsigned int> & send_list, void * context);
+void extraSendList(std::vector<dof_id_type> & send_list, void * context);
 
 /**
  * Free function used for a libMesh callback
@@ -132,7 +132,7 @@ public:
   /**
    * Will modify the send_list to add all of the extra ghosted dofs for this system
    */
-  virtual void augmentSendList(std::vector<unsigned int> & send_list);
+  virtual void augmentSendList(std::vector<dof_id_type> & send_list);
 
   /**
    * Will modify the sparsity pattern to add logical geometric connections
@@ -329,7 +329,7 @@ public:
    * @param nodes List of node ids to reinit
    * @param tid Thread ID
    */
-  virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid);
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid);
 
   /**
    * Reinit scalar varaibles
