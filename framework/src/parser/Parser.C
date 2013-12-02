@@ -836,11 +836,13 @@ Parser::InputFileSort::InputFileSort(bool sort_alpha):
   _o.push_back("MultiApps");
   _o.push_back("Problem");
   _o.push_back("Mesh");
+  _o.push_back("MeshModifiers");
   _o.push_back("Transfers");
   _o.push_back("Functions");
   _o.push_back("Preconditioning");
   _o.push_back("Variables");
   _o.push_back("AuxVariables");
+  _o.push_back("ICs");
   _o.push_back("Kernels");
   _o.push_back("DGKernels");
   _o.push_back("DiracKernels");
@@ -848,10 +850,22 @@ Parser::InputFileSort::InputFileSort(bool sort_alpha):
   _o.push_back("Dampers");
   _o.push_back("BCs");
   _o.push_back("AuxBCs");
+  _o.push_back("NodalNormals");
+  _o.push_back("Bounds");
+  _o.push_back("Constraints");
+  _o.push_back("Contact");
+  _o.push_back("ThermalContact");
   _o.push_back("Materials");
   _o.push_back("Postprocessors");
+  _o.push_back("UserObjects");
   _o.push_back("Executioner");
+  _o.push_back("MultiApps");
+  _o.push_back("Transfers");
+  _o.push_back("Coupled_Problems");
+  _o.push_back("Adaptivity");
   _o.push_back("Output");
+  _o.push_back("Debug");
+  _o.push_back("DeprecatedBlock");
 }
 
 bool
