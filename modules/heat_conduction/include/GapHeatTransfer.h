@@ -44,6 +44,9 @@ protected:
 
   Real _gap_temp;
   Real _gap_distance;
+
+  //This is a factor that is used to gradually taper down the conductance if the
+  //contact point is off the face and tangential_tolerance is nonzero.
   Real _edge_multiplier;
 
   bool _has_info;

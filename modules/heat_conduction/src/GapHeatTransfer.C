@@ -237,6 +237,10 @@ GapHeatTransfer::computeGapValues()
       if (tangential_tolerance != 0.0)
       {
         _edge_multiplier = 1.0 - pinfo->_tangential_distance / tangential_tolerance;
+        if (_edge_multiplier < 0.0)
+        {
+          _edge_multiplier = 0.0;
+        }
       }
     }
     else
