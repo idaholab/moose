@@ -14,6 +14,7 @@
 #include "ChemicalReactionsModule.h"
 #include "MiscModule.h"
 #include "VpscModule.h"
+#include "RichardsModule.h"
 
 
 template<>
@@ -57,6 +58,7 @@ ElkApp::registerObjects(Factory & factory)
   Elk::ChemicalReactions::registerObjects(factory);
   Elk::Misc::registerObjects(factory);
   Elk::Vpsc::registerObjects(factory);
+  Elk::Richards::registerObjects(factory);
 }
 
 void
@@ -70,5 +72,6 @@ ElkApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   Elk::ChemicalReactions::associateSyntax(syntax, action_factory);
   Elk::Misc::associateSyntax(syntax, action_factory);
   Elk::Vpsc::associateSyntax(syntax, action_factory);
+  Elk::Richards::associateSyntax(syntax, action_factory);
 }
 
