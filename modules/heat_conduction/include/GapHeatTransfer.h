@@ -44,6 +44,7 @@ protected:
 
   Real _gap_temp;
   Real _gap_distance;
+  Real _edge_multiplier;
 
   bool _has_info;
 

@@ -44,6 +44,7 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
    _max_gap(getParam<Real>("max_gap")),
    _gap_temp(0),
    _gap_distance(88888),
+   _edge_multiplier(1.0),
    _has_info(false),
    _xdisp_coupled(isCoupled("disp_x")),
    _ydisp_coupled(isCoupled("disp_y")),
@@ -82,7 +83,7 @@ GapHeatTransfer::computeQpResidual()
   if(!_has_info)
     return 0;
 
-  Real grad_t = (_u[_qp] - _gap_temp) * _gap_conductance[_qp];
+  Real grad_t = (_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance[_qp];
 
   // This is keeping track of this residual contribution so it can be used as the flux on the other side of the gap.
   if(!_quadrature)
@@ -109,7 +110,7 @@ GapHeatTransfer::computeQpJacobian()
   if(!_has_info)
     return 0;
 
-  return _test[_i][_qp] * ((_u[_qp] - _gap_temp) * _gap_conductance_dT[_qp] + _gap_conductance[_qp]) * _phi[_j][_qp];
+  return _test[_i][_qp] * ((_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance_dT[_qp] + _edge_multiplier * _gap_conductance[_qp]) * _phi[_j][_qp];
 }
 
 Real
@@ -174,7 +175,7 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
     const Point & normal( _normals[_qp] );
 
     const Real dgap = dgapLength( -normal(coupled_component) );
-    dRdx = -(_u[_qp]-_gap_temp)*_gap_conductance[_qp]/gapL * dgap;
+    dRdx = -(_u[_qp]-_gap_temp)*_edge_multiplier*_gap_conductance[_qp]/gapL * dgap;
   }
   return _test[_i][_qp] * dRdx * _phi[_j][_qp];
 }
@@ -221,6 +222,7 @@ GapHeatTransfer::computeGapValues()
     _gap_temp = 0.0;
     _gap_distance = 88888;
     _has_info = false;
+    _edge_multiplier = 1.0;
 
     if (pinfo)
     {
@@ -230,6 +232,12 @@ GapHeatTransfer::computeGapValues()
       Elem * slave_side = pinfo->_side;
       std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
       _gap_temp = _variable->getValue(slave_side, slave_side_phi);
+
+      Real tangential_tolerance = _penetration_locator->getTangentialTolerance();
+      if (tangential_tolerance != 0.0)
+      {
+        _edge_multiplier = 1.0 - pinfo->_tangential_distance / tangential_tolerance;
+      }
     }
     else
     {
