@@ -3,9 +3,14 @@
 #include "ActionFactory.h"
 #include "Parser.h"
 
+#include "RichardsDensityConstBulk.h"
+#include "RichardsDensityIdeal.h"
+
 void
 Elk::Richards::registerObjects(Factory & factory)
 {
+  registerUserObject(RichardsDensityConstBulk);
+  registerUserObject(RichardsDensityIdeal);
 }
 
 void
