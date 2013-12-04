@@ -3,6 +3,7 @@
 #include "ActionFactory.h"
 #include "Parser.h"
 
+// UserObjects
 #include "RichardsDensityConstBulk.h"
 #include "RichardsDensityIdeal.h"
 #include "RichardsRelPermPower.h"
@@ -12,9 +13,18 @@
 #include "RichardsSeffVG1.h"
 #include "RichardsSat.h"
 
+// AuxKernels
+#include "RichardsSeffAux.h"
+#include "RichardsMobility.h"
+#include "RichardsMobilityPrime.h"
+#include "RichardsMassDensity.h"
+#include "RichardsMassDensityPrime.h"
+
+
 void
 Elk::Richards::registerObjects(Factory & factory)
 {
+  // UserObjects
   registerUserObject(RichardsDensityConstBulk);
   registerUserObject(RichardsDensityIdeal);
   registerUserObject(RichardsRelPermPower);
@@ -23,6 +33,14 @@ Elk::Richards::registerObjects(Factory & factory)
   registerUserObject(RichardsSeffVG);
   registerUserObject(RichardsSeffVG1);
   registerUserObject(RichardsSat);
+
+  // AuxKernels
+  registerAux(RichardsSeffAux);
+  registerAux(RichardsMobility);
+  registerAux(RichardsMobilityPrime);
+  registerAux(RichardsMassDensity);
+  registerAux(RichardsMassDensityPrime);
+
 }
 
 void
