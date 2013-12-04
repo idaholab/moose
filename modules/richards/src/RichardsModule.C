@@ -39,6 +39,8 @@
 #include "NodalMaxVarChange.h"
 #include "RichardsExcavFlow.h"
 
+// TimeSteppers
+#include "FunctionControlledDT.h"
 
 void
 Elk::Richards::registerObjects(Factory & factory)
@@ -78,6 +80,9 @@ Elk::Richards::registerObjects(Factory & factory)
   registerPostprocessor(RichardsPiecewiseLinearSinkFlux);
   registerPostprocessor(NodalMaxVarChange);
   registerPostprocessor(RichardsExcavFlow);
+
+  // TimeSteppers
+  registerTimeStepper(FunctionControlledDT);
 
 }
 
