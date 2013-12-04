@@ -5,12 +5,18 @@
 
 #include "RichardsDensityConstBulk.h"
 #include "RichardsDensityIdeal.h"
+#include "RichardsRelPermPower.h"
+#include "RichardsRelPermVG.h"
+#include "RichardsRelPermVG1.h"
 
 void
 Elk::Richards::registerObjects(Factory & factory)
 {
   registerUserObject(RichardsDensityConstBulk);
   registerUserObject(RichardsDensityIdeal);
+  registerUserObject(RichardsRelPermPower);
+  registerUserObject(RichardsRelPermVG);
+  registerUserObject(RichardsRelPermVG1);
 }
 
 void
