@@ -27,6 +27,10 @@
 #include "RichardsBorehole.h"
 #include "RichardsPolyLineSink.h"
 
+// Functions
+#include "RichardsExcavGeom.h"
+
+
 void
 Elk::Richards::registerObjects(Factory & factory)
 {
@@ -53,6 +57,10 @@ Elk::Richards::registerObjects(Factory & factory)
   // DiracKernels
   registerDiracKernel(RichardsPolyLineSink);
   registerDiracKernel(RichardsBorehole);
+
+  // Functions
+  registerFunction(RichardsExcavGeom);
+
 }
 
 void
