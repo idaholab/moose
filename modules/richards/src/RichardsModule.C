@@ -30,6 +30,9 @@
 // Functions
 #include "RichardsExcavGeom.h"
 
+// Indicators
+#include "RichardsFluxJumpIndicator.h"
+
 
 void
 Elk::Richards::registerObjects(Factory & factory)
@@ -60,6 +63,9 @@ Elk::Richards::registerObjects(Factory & factory)
 
   // Functions
   registerFunction(RichardsExcavGeom);
+
+  // Indicators
+  registerIndicator(RichardsFluxJumpIndicator);
 
 }
 
