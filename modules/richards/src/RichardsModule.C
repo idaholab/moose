@@ -8,6 +8,8 @@
 #include "RichardsRelPermPower.h"
 #include "RichardsRelPermVG.h"
 #include "RichardsRelPermVG1.h"
+#include "RichardsSeffVG.h"
+#include "RichardsSeffVG1.h"
 
 void
 Elk::Richards::registerObjects(Factory & factory)
@@ -17,6 +19,8 @@ Elk::Richards::registerObjects(Factory & factory)
   registerUserObject(RichardsRelPermPower);
   registerUserObject(RichardsRelPermVG);
   registerUserObject(RichardsRelPermVG1);
+  registerUserObject(RichardsSeffVG);
+  registerUserObject(RichardsSeffVG1);
 }
 
 void
