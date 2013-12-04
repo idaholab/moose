@@ -20,6 +20,8 @@
 #include "RichardsMassDensity.h"
 #include "RichardsMassDensityPrime.h"
 
+// Materials
+#include "RichardsMaterial.h"
 
 void
 Elk::Richards::registerObjects(Factory & factory)
@@ -40,6 +42,9 @@ Elk::Richards::registerObjects(Factory & factory)
   registerAux(RichardsMobilityPrime);
   registerAux(RichardsMassDensity);
   registerAux(RichardsMassDensityPrime);
+
+  // Materials
+  registerMaterial(RichardsMaterial);
 
 }
 
