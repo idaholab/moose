@@ -33,6 +33,12 @@
 // Indicators
 #include "RichardsFluxJumpIndicator.h"
 
+// Postprocessors
+#include "RichardsMass.h"
+#include "RichardsPiecewiseLinearSinkFlux.h"
+#include "NodalMaxVarChange.h"
+#include "RichardsExcavFlow.h"
+
 
 void
 Elk::Richards::registerObjects(Factory & factory)
@@ -66,6 +72,12 @@ Elk::Richards::registerObjects(Factory & factory)
 
   // Indicators
   registerIndicator(RichardsFluxJumpIndicator);
+
+  // Postprocessors
+  registerPostprocessor(RichardsMass);
+  registerPostprocessor(RichardsPiecewiseLinearSinkFlux);
+  registerPostprocessor(NodalMaxVarChange);
+  registerPostprocessor(RichardsExcavFlow);
 
 }
 
