@@ -42,6 +42,16 @@
 // TimeSteppers
 #include "FunctionControlledDT.h"
 
+// Kernels
+#include "RichardsMassChange.h"
+#include "RichardsFlux.h"
+
+  // BoundaryConditions
+#include "RichardsExcav.h"
+#include "RichardsPiecewiseLinearSink.h"
+#include "RichardsHalfGaussianSink.h"
+
+
 void
 Elk::Richards::registerObjects(Factory & factory)
 {
@@ -83,6 +93,15 @@ Elk::Richards::registerObjects(Factory & factory)
 
   // TimeSteppers
   registerTimeStepper(FunctionControlledDT);
+
+  // Kernels
+  registerKernel(RichardsMassChange);
+  registerKernel(RichardsFlux);
+
+  // BoundaryConditions
+  registerBoundaryCondition(RichardsExcav);
+  registerBoundaryCondition(RichardsPiecewiseLinearSink);
+  registerBoundaryCondition(RichardsHalfGaussianSink);
 
 }
 
