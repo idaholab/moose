@@ -23,6 +23,10 @@
 // Materials
 #include "RichardsMaterial.h"
 
+// DiracKernels
+#include "RichardsBorehole.h"
+#include "RichardsPolyLineSink.h"
+
 void
 Elk::Richards::registerObjects(Factory & factory)
 {
@@ -46,6 +50,9 @@ Elk::Richards::registerObjects(Factory & factory)
   // Materials
   registerMaterial(RichardsMaterial);
 
+  // DiracKernels
+  registerDiracKernel(RichardsPolyLineSink);
+  registerDiracKernel(RichardsBorehole);
 }
 
 void
