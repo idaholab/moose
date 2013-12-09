@@ -125,7 +125,7 @@ class MachineWarehouse(object):
   def startDaemon(self):
 
     # The Machine objects are required
-    self._buildWorkers
+    self._buildWorkers()
 
     # Start the daemon
     self._daemon.start(self.workers + self.down, allow=self._allow)
