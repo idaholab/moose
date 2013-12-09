@@ -9,4 +9,5 @@ from Machine import *
 from MachineWarehouse import *
 from MachineOutput import *
 from DmakeRC import *
-__all__ = ['DmakeRC', 'Machine', 'MachineWarehouse', 'MachineOutput']
+from DistccDaemon import *
+__all__ = ['DmakeRC', 'Machine', 'MachineWarehouse', 'MachineOutput', 'DistccDaemon']

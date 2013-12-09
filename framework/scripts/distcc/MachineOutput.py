@@ -56,14 +56,7 @@ class MachineOutput(object):
     # Get max widths (dict with attribute as keyword)
     col_width = self._getMaxColumnWidth()
     headings  = ['Status', 'Username', 'Description', 'Jobs', 'Hostname', 'IP Address', 'Last Used']
-    attributes = ['status', 'username', 'description', 'threads', 'hostname', 'address', 'timestamp']
-
-    # Remove attributes that are not available
-    #tmp = []
-    #for a in attributes:
-    #  if a in col_width:
-    #    tmp.append(a)
-    #attributes = tmp
+    attributes = ['status', 'username', 'description', 'use_threads', 'hostname', 'address', 'timestamp']
 
     # Update the column widths to account for the width of the headings
     for i in range(len(attributes)):
@@ -75,7 +68,7 @@ class MachineOutput(object):
     for i in range(len(attributes)):
       if attributes[i] in col_width:
         w = str(col_width[attributes[i]]+2)
-        frmt = ' %-' + w + 's |'
+        frmt = ' %-' + w + 's|'
         output[-1] += frmt % headings[i]
 
     # Insert the heading horizontal lines
@@ -85,8 +78,6 @@ class MachineOutput(object):
 
     # Print the master machine information
     output.append(self._formatter(self.warehouse.master, col_width, attributes))
-    if self.warehouse.workers != []:
-      output.append(s)
 
     # Print the slave machine information, if the information exists
     use = 0
@@ -104,7 +95,7 @@ class MachineOutput(object):
         output.append(self._formatter(machine, col_width, attributes))
       output.append(s)
 
-    # Make sure the table is close
+    # Make sure the table is closed
     if output[-1] != s:
       output.append(s)
 
@@ -143,7 +134,7 @@ class MachineOutput(object):
     output = '| '
     for key in attributes:
       value = str(getattr(machine, key))
-      frmt = ' %-' + str(widths[key]+2) + 's |'
+      frmt = ' %-' + str(widths[key]+2) + 's|'
       output += frmt % value
     return output
 

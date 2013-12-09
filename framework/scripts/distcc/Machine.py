@@ -53,7 +53,7 @@ class Machine(object):
       self.hostname = h[0]
     except:
       self.hostname = self.address
-      self.available = False
+      #self.available = False
 
     # Compute lengths of attributes, this is used by the MachineWarehouse
     # for creating the output table

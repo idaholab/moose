@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Load the required modules
 import os, sys, subprocess, socket, multiprocessing
 from random import shuffle
@@ -8,6 +6,7 @@ from sets import Set
 # Import the Machine and DmakeRC class
 from Machine import *
 from DmakeRC import *
+from DistccDaemon import *
 
 ## Helper function for creating machine objects, this is required to be outside
 #  of the class to allow the use of running the object creation in parallel
@@ -44,8 +43,13 @@ class MachineWarehouse(object):
     self.workers = []
     self.down = []
 
-    # Override the default number of threads
+    # Flag set to true of machines are built
+    self._machines = False
+
+    # Get the optional input
     self._jobs = kwargs.pop('jobs', None)
+    self._disable = kwargs.pop('disable', None)
+    self._allow = kwargs.pop('allow', None)
 
     # If this is a local build, there is nothing more to do
     self._local = kwargs.pop('local', False)
@@ -55,8 +59,13 @@ class MachineWarehouse(object):
     # Read the .dmakerc and remote file
     self._dmakerc = DmakeRC(self.master, **kwargs)
 
-    # Set the disable list
-    self._disable = kwargs.pop('disable', None)
+    # Check if the remote access failed, if so preform local build
+    if self._dmakerc.fail():
+      self._local = True
+      return
+
+    # Create the Deamon object
+    self._daemon = DistccDaemon(self.master, dedicated=kwargs['dedicated'])
 
 
   ## Return the hosts line and number of jobs (public)
@@ -70,12 +79,22 @@ class MachineWarehouse(object):
   #    localhost = <int>        - Set the DISTCC_HOSTS localhost value (passed to _buildHosts)
   #    localslots = <int>       - Set the DISTCC_HOSTS localslots value (passed to _buildHosts)
   #    localslots_cpp = <int>   - Set the DISTCC_HOSTS localslots_cpp value (passed to _buildHosts)
+  #    disable = list()         - A list of hostnames or ip addresses to disable from DISTCC_HOSTS line,
+  #                               (The names and numbers may be incomplete)
   #
   #  @see _buildHosts
   def getHosts(self, **kwargs):
 
     # Gather the options
     refresh = kwargs.pop('refresh', False)
+
+    # Set refresh to true of any of the optional arguments are set
+    if kwargs['max'] == True \
+       or kwargs['localhost'] != None \
+       or kwargs['localslots'] != None \
+       or kwargs['localslots_cpp'] != None \
+       or self._disable != None:
+      refresh = True
 
     # Return the local
     if self._local:
@@ -88,6 +107,7 @@ class MachineWarehouse(object):
     # Build the machine objects (if desired or needed)
     if refresh or self._dmakerc.distccHostsNeedsUpdate():
       self._buildWorkers()
+      self.startDaemon()
       self._buildHosts(**kwargs)
     else:
       print 'Using cached DISTCC_HOSTS, use --refresh to rebuild'
@@ -100,6 +120,23 @@ class MachineWarehouse(object):
     return distcc_hosts, jobs
 
 
+  ## Starts the distccd daemons (public)
+  # @see DistccDaemon
+  def startDaemon(self):
+
+    # The Machine objects are required
+    self._buildWorkers
+
+    # Start the daemon
+    self._daemon.start(self.workers + self.down, allow=self._allow)
+
+
+  ## Kills all distccd processes (build)
+  # @see DistccDaemon
+  def killDaemon(self):
+    self._daemon.kill()
+
+
   ## Build the remote Machine objects (private)
   #  Read the list of machines from the HOST_LINES from the server and
   #  build the Machine objects (in parallel)
@@ -107,9 +144,18 @@ class MachineWarehouse(object):
   #  @see createMachine Machine
   def _buildWorkers(self):
 
+    # Return if the workers are already built
+    if self._machines:
+      return
+
+    # Handle empty host lines
+    host_lines =  self._dmakerc.get('HOST_LINES')
+    if len(host_lines) == 0:
+      return
+
     # Create the Machine objects (in parallel)
     pool = multiprocessing.Pool(processes=self.master.threads)
-    output = pool.map(createMachine, self._dmakerc.get('HOST_LINES'))
+    output = pool.map(createMachine, host_lines)
     pool.close()
     pool.join()
 
@@ -126,6 +172,7 @@ class MachineWarehouse(object):
 
     # Populate the two lists of machines
     for machine in output:
+
       # Available machines
       if machine.available:
         self.workers.append(machine)
@@ -133,6 +180,9 @@ class MachineWarehouse(object):
       # Unavailable machines
       else:
         self.down.append(machine)
+
+    # Update the build flag
+    self._machines = True
 
 
   ## Update the DISTCC_HOSTS enviornmental variable (private)

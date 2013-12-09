@@ -62,7 +62,7 @@ def parseArguments(args=None):
 
   # Flag options
   gen = parser.add_argument_group('General Options')
-  gen.add_argument('--summary', '-s', action='store_true', help='Show distribution summary')
+  gen.add_argument('--summary', '-s', action='store_true', help='Show distribution summary (no make)')
   gen.add_argument('--quiet', '-q', action='store_true', help='Do not print compile errors/warnings')
   gen.add_argument('--local', '-l', action='store_true', help='Run make locally with all possible threads')
   gen.add_argument('--verbose', '-v', action='store_true', help='Show a detailed summary')
@@ -91,11 +91,11 @@ def parseArguments(args=None):
 
   # Options that do not run make
   daemon = parser.add_argument_group('Distcc Daemon Options')
-  #daemon.add_argument('--daemon', action='store_true', help='Launch distcc as a daemon')
-  #daemon.add_argument('--kill', action='store_true', help='Kill distcc as a daemon')
+  daemon.add_argument('--daemon', action='store_true', help='Launch distcc as a daemon (no make)')
+  daemon.add_argument('--kill', action='store_true', help='Kill distcc as a daemon (no make)')
   daemon.add_argument('--no-daemon', '-n', action='store_true', help='Do not launch any daemon processes')
   daemon.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
-  #daemon.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
+  daemon.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
 
   # Advanced options
   misc = parser.add_argument_group('Misc. Options')
@@ -103,24 +103,19 @@ def parseArguments(args=None):
   misc.add_argument('--buck', action='store_true', help='Use the distcc file generator from buck')
 
   # Allow flags to be run together
-  #parser.parse_args('-mqvnlrbdpoc'.split())
+  parser.parse_args('-mqvnlrbdpoc'.split())
 
   # Parse the input and return the options
   (options, other_args) = parser.parse_known_args()
 
-  # Set the refresh options if any of the following options are used
-  refresh = ['summary', 'max', 'localhost', 'localslots', 'localslots_cpp', 'disable']
-  for r in refresh:
-    if getattr(options, r) and getattr(options, r) != parser.get_default(r):
-      options.refresh = True
-      break
-
-  # Set the output to be verbose if --summary is used
+  # Set the output to be verbose and refresh to be true if --summary is used
   if options.summary:
     options.verbose = True
+    options.refresh = True
 
   # Return the options
   return (options, other_args)
+
 
 ## Helper function to extract options for **kwargs input
 def subOptions(options, *args):
@@ -128,7 +123,6 @@ def subOptions(options, *args):
   opt = vars(options)
   for key in args:
     output[key] = opt[key]
-
   return output
 
 
@@ -144,11 +138,21 @@ if __name__ == "__main__":
     sub.wait()
 
   # Create the MachineWarehouse object
-  opt = subOptions(options,'local','buck','dedicated','jobs','description','clean','disable')
+  opt = subOptions(options,'local','buck','dedicated','jobs','description','clean','disable','allow')
   warehouse = MachineWarehouse(**opt)
 
   # Create the MachineOutput object
   outputer = MachineOutput(warehouse)
+
+  # Kill the daemons
+  if options.kill:
+    warhouse.killDaemon()
+    sys.exit()
+
+  # Start the daemons
+  if options.daemon:
+    warehouse.startDaemon()
+    sys.exit()
 
   # Extract the hosts and jobs from the warehouse.
   opt = subOptions(options,'refresh','max','localhost','localslots','localslots_cpp')
@@ -163,25 +167,6 @@ if __name__ == "__main__":
   if options.summary:
     sys.exit()
 
-  # \todo Add Daemon actions here
-
   # Run Make
   opt = subOptions(options,'timeout','quiet','dbg','opt','oprof')
   runMake(distcc_hosts, jobs, make_args=make_args, **opt)
-
-
-  # Start the distcc daemon, do not n make
-  #elif farm.options.daemon or farm.options.dedicated:
-  #  farm.startDaemon()
-
-  # Kill the daemons, do not run make
-  #elif farm.options.kill:
-  #  farm.killDaemon()
-
-  # Run local build if desired, short-circut the rest of the script for speed
-  #elif farm.options.local:
-  #  farm.local()
-
-  # Run a distributed compile
-  #else:
-  #  farm.distribute()

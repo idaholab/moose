@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Load requied packages
 import sys, os, pickle, uuid, platform, urllib2
 from sets import Set
@@ -36,6 +34,10 @@ class DmakeRC(object):
     # Store the complete filename for the .dmakerc file
     self._filename =  os.path.join(os.getenv('HOME'), '.dmakerc')
 
+    # Set the local flag (this is set to true if the remote connection fails, the
+    # MachineWarehouse will then use a local build)
+    self._fail = False
+
     # Remove .dmakerc if clean option is given
     if kwargs.pop('clean', False):
       os.remove(self._filename)
@@ -48,13 +50,18 @@ class DmakeRC(object):
     # the get/set methods of this object
     self._dmakerc = self._readLocalFile()
 
+    # Set/update the user supplied description of the local machine
+    self._checkDescription(kwargs.pop('description', None))
+
     # Read the remote machine file from the server, if nothing has changed
     # this list will be identical to the HOST_LINES item in the self._dmakerc
     # dictionary
     self._remote  = self._readRemoteFile()
 
-    # Set/update the user supplied description of the local machine
-    self._checkDescription(kwargs.pop('description', None))
+    # Return if the remote connection fails
+    if self._remote == None:
+      self._fail = True
+      return
 
     # Set the stored HOST_LINES to be the same as the server
     self.set(HOST_LINES=self._remote)
@@ -115,6 +122,12 @@ class DmakeRC(object):
       return self._update_distcc_hosts
 
 
+  ## Return the status of the remote access
+  # @return True if the remote connection failed
+  def fail(self):
+    return self._fail
+
+
   ## Reads the local .dmakerc file (private)
   # @return A map of the data loaded from the .dmakerc
   def _readLocalFile(self):
@@ -148,11 +161,17 @@ class DmakeRC(object):
   # @return A map of the data loaded from the .dmakerc
   def _readRemoteFile(self):
 
+    # Define the servers
+    buck =  dict(url='https://buck.inl.gov/distcc_gen', name='buck')
+    hpcsc = dict(url='https://hpcsc.inl.gov/distcc_gen', name='hpcsc')
+
     # Get the remote location to utilize
     if self._test:
-      remote = 'https://buck.inl.gov/distcc_gen'
+      remote = buck
+      backup = hpcsc
     else:
-      remote = 'https://hpcsc.inl.gov/distcc_gen'
+      remote = hpcsc
+      backup = buck
 
     # Set the 'use_threads' attribute for this machine
     if self._dedicated:
@@ -160,26 +179,16 @@ class DmakeRC(object):
     else:
       self._master.use_threads = (int(self._master.threads) / 4)
 
-    # Set the url to send to the remote server
-    filename = remote + '?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
-                 '&arch=' + platform.system().lower() + \
-                 '&ip=' + self._master.address + \
-                 '&cpus=' + str(self._master.threads) + \
-                 '&threads=' + str(self._master.threads) + \
-                 '&use=' + str(self._master.use_threads) + \
-                 '&network=' + self._master.network + \
-                 '&description=' + urllib2.quote(self._master.description) + \
-                 '&username=' + os.getenv('USER')
+    # Read the data from the server
+    data = self._urlOpen(remote)
 
-    # Read the remote server, return None if it fails
-    try:
-      fid = urllib2.urlopen(filename)
-      data = fid.read().split('\n')
-      fid.close()
+    # If data doesn't exist try the backup
+    if data == None:
+      data = self._urlOpen(backup)
 
-    except:
-      print 'Warning: Failed to connect to hpcsc, running locally'
-      data = None
+    # If it still dosen't exist, run locallay
+    if data == None:
+      return None
 
     # Return the host lines from the remote server
     return self._cleanHostLines(data)
@@ -191,7 +200,7 @@ class DmakeRC(object):
 
     # Set the description via the input argument
     if description != None:
-      self.set(DESCRIPTION = description)
+      self.set(DESCRIPTION = description[0])
 
     # If the description is empty, prompt the user
     if self.get('DESCRIPTION') == None:
@@ -201,6 +210,7 @@ class DmakeRC(object):
 
     # Update the description of this machine
     self._master.description = self.get('DESCRIPTION')
+    self._master._computeLength()
 
 
   ## Cleans up the raw HOST_LINES input (private)
@@ -232,3 +242,30 @@ class DmakeRC(object):
     # Sort the output and return it
     output.sort()
     return output
+
+
+  ## Access the server
+  # @param input Dictionary with url and name parameters for the remote server
+  # @return The data from the server if sucessfull, or None if it fails
+  def _urlOpen(self, input):
+
+    # Set the url to send to the remote server
+    filename = input['url'] + '?uuid=' + str(uuid.uuid3(uuid.NAMESPACE_DNS, self._master.hostname)) + \
+                 '&arch=' + platform.system().lower() + \
+                 '&ip=' + self._master.address + \
+                 '&cpus=' + str(self._master.threads) + \
+                 '&threads=' + str(self._master.threads) + \
+                 '&use=' + str(self._master.use_threads) + \
+                 '&network=' + self._master.network + \
+                 '&description=' + urllib2.quote(self._master.description) + \
+                 '&username=' + os.getenv('USER')
+
+    try:
+      fid = urllib2.urlopen(filename, None, 1)
+      data = fid.read().split('\n')
+      fid.close()
+      return data
+
+    except:
+      print 'Warning: Failed to connect to ' + input['name']
+      return None
