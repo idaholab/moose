@@ -42,6 +42,7 @@ protected:
   virtual void computeJacobian();
   virtual void computeFaceJacobian(BoundaryID bnd_id);
   virtual void computeInternalFaceJacobian();
+  virtual void postElement(const Elem * /*elem*/);
 };
 
 #endif //COMPUTEFULLJACOBIANTHREAD_H

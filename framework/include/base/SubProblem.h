@@ -118,7 +118,7 @@ public:
 
   virtual void cacheResidual(THREAD_ID tid) = 0;
   virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;
-  virtual void addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+  virtual void addCachedResidual(THREAD_ID tid) = 0;
 
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;

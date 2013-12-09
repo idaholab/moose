@@ -539,7 +539,15 @@ public:
 
   virtual void cacheResidual(THREAD_ID tid);
   virtual void cacheResidualNeighbor(THREAD_ID tid);
-  virtual void addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void addCachedResidual(THREAD_ID tid);
+
+  /**
+   * Allows for all the residual contributions that are currently cached to be added directly into the vector passed in.
+   *
+   * @param residual The vector to add the cached contributions to.
+   * @param tid The thread id.
+   */
+  virtual void addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid);
 
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid);
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);

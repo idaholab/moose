@@ -45,6 +45,8 @@ protected:
   SparseMatrix<Number> & _jacobian;
   NonlinearSystem & _sys;
 
+  unsigned int _num_cached;
+
   virtual void computeJacobian();
   virtual void computeFaceJacobian(BoundaryID bnd_id);
   virtual void computeInternalFaceJacobian();

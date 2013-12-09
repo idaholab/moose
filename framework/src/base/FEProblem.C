@@ -632,7 +632,6 @@ FEProblem::residualVector(Moose::KernelType type)
   return _nl.residualVector(type);
 }
 
-
 void
 FEProblem::addResidual(THREAD_ID tid)
 {
@@ -676,11 +675,23 @@ FEProblem::cacheResidualNeighbor(THREAD_ID tid)
 }
 
 void
-FEProblem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblem::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addCachedResidual(residual);
+  _assembly[tid]->addCachedResidual(residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  _assembly[tid]->addCachedResidual(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+
   if(_displaced_problem)
-    _displaced_problem->addCachedResidual(residual, tid);
+    _displaced_problem->addCachedResidual(tid);
+}
+
+void
+FEProblem::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _assembly[tid]->addCachedResidual(residual, Moose::KT_TIME);
+  _assembly[tid]->addCachedResidual(residual, Moose::KT_NONTIME);
+
+  if(_displaced_problem)
+    _displaced_problem->addCachedResidualDirectly(residual, tid);
 }
 
 void

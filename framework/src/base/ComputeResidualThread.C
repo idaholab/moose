@@ -25,7 +25,8 @@
 ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, Moose::KernelType type) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _sys(sys),
-    _kernel_type(type)
+    _kernel_type(type),
+    _num_cached(0)
 {
 }
 
@@ -33,7 +34,8 @@ ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSy
 ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _sys(x._sys),
-    _kernel_type(x._kernel_type)
+    _kernel_type(x._kernel_type),
+    _num_cached(0)
 {
 }
 
@@ -181,8 +183,14 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 void
 ComputeResidualThread::postElement(const Elem * /*elem*/)
 {
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-  _fe_problem.addResidual(_tid);
+  _fe_problem.cacheResidual(_tid);
+  _num_cached++;
+
+  if(_num_cached % 20 == 0)
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    _fe_problem.addCachedResidual(_tid);
+  }
 }
 
 void

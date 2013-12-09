@@ -855,6 +855,8 @@ NonlinearSystem::residualVector(Moose::KernelType type)
   {
   case Moose::KT_TIME: return _Re_time;
   case Moose::KT_NONTIME: return _Re_non_time;
+  case Moose::KT_ALL: return _Re_non_time;
+
   default: mooseError("Trying to get residual vector that is not available");
   }
 }
@@ -1109,7 +1111,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       if(constraints_applied)
       {
 	residual.close();
-	_fe_problem.addCachedResidual(residual, 0);
+	_fe_problem.addCachedResidualDirectly(residual, 0);
 	residual.close();
 	if (_need_residual_ghosted) {
 	  _residual_ghosted = residual;
@@ -1125,7 +1127,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
     if(constraints_applied)
     {
       residual.close();
-      _fe_problem.addCachedResidual(residual, 0);
+      _fe_problem.addCachedResidualDirectly(residual, 0);
       residual.close();
       if (_need_residual_ghosted)
       {
@@ -1159,7 +1161,14 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   PARALLEL_TRY {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeResidualThread cr(_fe_problem, *this, type);
+
+    Moose::perf_log.push("ComputeResidualThread", "Solve");
     Threads::parallel_reduce(elem_range, cr);
+    Moose::perf_log.pop("ComputeResidualThread", "Solve");
+
+    unsigned int n_threads = libMesh::n_threads();
+    for(unsigned int i=0; i<n_threads; i++) // Add any cached residuals that might be hanging around
+      _fe_problem.addCachedResidual(i);
   }
   PARALLEL_CATCH;
 
@@ -1615,6 +1624,10 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
       {
         ComputeJacobianThread cj(_fe_problem, *this, jacobian);
         Threads::parallel_reduce(elem_range, cj);
+
+        unsigned int n_threads = libMesh::n_threads();
+        for(unsigned int i=0; i<n_threads; i++) // Add any Jacobian contibutions still hanging around
+          _fe_problem.addCachedJacobian(jacobian, i);
       }
       break;
 
@@ -1623,6 +1636,10 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
       {
         ComputeFullJacobianThread cj(_fe_problem, *this, jacobian);
         Threads::parallel_reduce(elem_range, cj);
+        unsigned int n_threads = libMesh::n_threads();
+
+        for(unsigned int i=0; i<n_threads; i++)
+          _fe_problem.addCachedJacobian(jacobian, i);
       }
       break;
     }

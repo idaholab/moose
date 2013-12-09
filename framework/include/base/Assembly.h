@@ -329,7 +329,7 @@ public:
    *
    * Note that this will also clear the cache.
    */
-  void addCachedResidual(NumericVector<Number> & residual);
+  void addCachedResidual(NumericVector<Number> & residual, Moose::KernelType type);
 
   void setResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
   void setResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
@@ -416,7 +416,7 @@ protected:
   void reinitFEFace(const Elem * elem, unsigned int side);
 
   void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<dof_id_type> & dof_indices, Real scaling_factor);
-  void cacheResidualBlock(DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor);
+  void cacheResidualBlock(std::vector<Real> & cached_residual_values, std::vector<unsigned int> & cached_residual_rows, DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor);
 
   void setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<unsigned int> & dof_indices, Real scaling_factor);
 
@@ -614,10 +614,11 @@ protected:
   std::map<FEType, FEShapeData * > _fe_shape_data_face;
   std::map<FEType, FEShapeData * > _fe_shape_data_face_neighbor;
 
-  /// Values cached by calling cacheResidual()
-  std::vector<Real> _cached_residual_values;
-  /// Where the cached values should go
-  std::vector<unsigned int> _cached_residual_rows;
+  /// Values cached by calling cacheResidual() (the first vector is for TIME vs NONTIME)
+  std::vector<std::vector<Real> > _cached_residual_values;
+
+  /// Where the cached values should go (the first vector is for TIME vs NONTIME)
+  std::vector<std::vector<unsigned int> > _cached_residual_rows;
 
   unsigned int _max_cached_residuals;
 

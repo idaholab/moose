@@ -180,3 +180,10 @@ ComputeFullJacobianThread::computeInternalFaceJacobian()
     }
   }
 }
+
+void
+ComputeFullJacobianThread::postElement(const Elem * /*elem*/)
+{
+  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  _fe_problem.addJacobian(_jacobian, _tid);
+}

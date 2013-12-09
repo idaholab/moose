@@ -45,6 +45,7 @@ public:
 protected:
   NonlinearSystem & _sys;
   Moose::KernelType _kernel_type;
+  unsigned int _num_cached;
 };
 
 #endif //COMPUTERESIDUALTHREAD_H

@@ -25,7 +25,8 @@
 ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _jacobian(jacobian),
-    _sys(sys)
+    _sys(sys),
+    _num_cached(0)
 {
 }
 
@@ -33,7 +34,8 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSy
 ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _jacobian(x._jacobian),
-    _sys(x._sys)
+    _sys(x._sys),
+    _num_cached(x._num_cached)
 {
 }
 
@@ -211,8 +213,14 @@ ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
 void
 ComputeJacobianThread::postElement(const Elem * /*elem*/)
 {
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-  _fe_problem.addJacobian(_jacobian, _tid);
+  _fe_problem.cacheJacobian(_tid);
+  _num_cached++;
+
+  if(_num_cached % 20 == 0)
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    _fe_problem.addCachedJacobian(_jacobian, _tid);
+  }
 }
 
 void

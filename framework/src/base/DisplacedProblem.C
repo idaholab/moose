@@ -488,9 +488,17 @@ DisplacedProblem::cacheResidualNeighbor(THREAD_ID tid)
 }
 
 void
-DisplacedProblem::addCachedResidual(NumericVector<Number> & residual, THREAD_ID tid)
+DisplacedProblem::addCachedResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addCachedResidual(residual);
+  _assembly[tid]->addCachedResidual(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
+  _assembly[tid]->addCachedResidual(_mproblem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+}
+
+void
+DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
+{
+  _assembly[tid]->addCachedResidual(residual, Moose::KT_TIME);
+  _assembly[tid]->addCachedResidual(residual, Moose::KT_NONTIME);
 }
 
 void
@@ -676,4 +684,3 @@ DisplacedProblem::registerRecoverableData(std::string name)
 
   _mproblem.registerRecoverableData(name);
 }
-

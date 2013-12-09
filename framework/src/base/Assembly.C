@@ -51,6 +51,9 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _should_use_fe_cache(false),
     _currently_fe_caching(true),
 
+    _cached_residual_values(2), // The 2 is for TIME and NONTIME
+    _cached_residual_rows(2), // The 2 is for TIME and NONTIME
+
     _max_cached_residuals(0),
     _max_cached_jacobians(0),
     _block_diagonal_matrix(false)
@@ -903,7 +906,7 @@ Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 }
 
 void
-Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor)
+Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values, std::vector<unsigned int> & cached_residual_rows, DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor)
 {
   if (dof_indices.size() > 0 && res_block.size())
   {
@@ -917,16 +920,16 @@ Assembly::cacheResidualBlock(DenseVector<Number> & res_block, std::vector<dof_id
 
       for(dof_id_type i=0; i<_tmp_Re.size(); i++)
       {
-        _cached_residual_values.push_back(_tmp_Re(i));
-        _cached_residual_rows.push_back(_temp_dof_indices[i]);
+        cached_residual_values.push_back(_tmp_Re(i));
+        cached_residual_rows.push_back(_temp_dof_indices[i]);
       }
     }
     else
     {
       for(dof_id_type i=0; i<res_block.size(); i++)
       {
-        _cached_residual_values.push_back(res_block(i));
-        _cached_residual_rows.push_back(_temp_dof_indices[i]);
+        cached_residual_values.push_back(res_block(i));
+        cached_residual_rows.push_back(_temp_dof_indices[i]);
       }
     }
   }
@@ -976,8 +979,9 @@ Assembly::cacheResidual()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
+
     for (dof_id_type i = 0; i < _sub_Re.size(); i++)
-      cacheResidualBlock(_sub_Re[i][var.index()], var.dofIndices(), var.scalingFactor());
+      cacheResidualBlock(_cached_residual_values[i], _cached_residual_rows[i], _sub_Re[i][var.index()], var.dofIndices(), var.scalingFactor());
   }
 }
 
@@ -988,32 +992,33 @@ Assembly::cacheResidualNeighbor()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
-    for (dof_id_type i = 0; i < _sub_Re.size(); i++)
-      cacheResidualBlock(_sub_Rn[i][var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
+
+    for (unsigned int i = 0; i < _sub_Re.size(); i++)
+      cacheResidualBlock(_cached_residual_values[i], _cached_residual_rows[i], _sub_Rn[i][var.index()], var.dofIndicesNeighbor(), var.scalingFactor());
   }
 }
 
 
 void
-Assembly::addCachedResidual(NumericVector<Number> & residual)
+Assembly::addCachedResidual(NumericVector<Number> & residual, Moose::KernelType type)
 {
-  mooseAssert(_cached_residual_values.size() == _cached_residual_rows.size(), "Number of cached residuals and number of rows must match!");
+  std::vector<Real> & cached_residual_values = _cached_residual_values[type];
+  std::vector<unsigned int> & cached_residual_rows = _cached_residual_rows[type];
 
-  for(dof_id_type i=0; i<_cached_residual_values.size(); i++)
-  {
-    residual.add(_cached_residual_rows[i], _cached_residual_values[i]);
-  }
+  mooseAssert(cached_residual_values.size() == cached_residual_rows.size(), "Number of cached residuals and number of rows must match!");
 
-  if(_max_cached_residuals < _cached_residual_values.size())
-    _max_cached_residuals = _cached_residual_values.size();
+  residual.add_vector(cached_residual_values, cached_residual_rows);
+
+  if(_max_cached_residuals < cached_residual_values.size())
+    _max_cached_residuals = cached_residual_values.size();
 
   // Try to be more efficient from now on
   // The 2 is just a fudge factor to keep us from having to grow the vector during assembly
-  _cached_residual_values.clear();
-  _cached_residual_values.reserve(_max_cached_residuals*2);
+  cached_residual_values.clear();
+  cached_residual_values.reserve(_max_cached_residuals*2);
 
-  _cached_residual_rows.clear();
-  _cached_residual_rows.reserve(_max_cached_residuals*2);
+  cached_residual_rows.clear();
+  cached_residual_rows.reserve(_max_cached_residuals*2);
 }
 
 
