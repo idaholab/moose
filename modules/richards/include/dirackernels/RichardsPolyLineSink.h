@@ -2,8 +2,7 @@
 #define RICHARDSPOLYLINESINK_H
 
 #include "DiracKernel.h"
-
-#include "LinInt.h"
+#include "LinearInterpolation.h"
 
 //Forward Declarations
 class RichardsPolyLineSink;
@@ -23,7 +22,7 @@ public:
 
 protected:
   PostprocessorValue & _reporter;
-  LinInt _sink_func;
+  LinearInterpolation _sink_func;
   std::string _point_file;
   MaterialProperty<RealVectorValue> &_vel_SUPG;
   MaterialProperty<RealTensorValue> &_vel_prime_SUPG;

@@ -2,8 +2,7 @@
 #define RICHARDSPIECEWISELINEARSINK
 
 #include "IntegratedBC.h"
-
-#include "LinInt.h"
+#include "LinearInterpolation.h"
 
 // Forward Declarations
 class RichardsPiecewiseLinearSink;
@@ -23,7 +22,7 @@ protected:
 
   virtual Real computeQpJacobian();
 
-  LinInt _sink_func;
+  LinearInterpolation _sink_func;
   MaterialProperty<RealVectorValue> &_vel_SUPG;
   MaterialProperty<RealTensorValue> &_vel_prime_SUPG;
   MaterialProperty<Real> &_tau_SUPG;

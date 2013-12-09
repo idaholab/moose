@@ -3,8 +3,6 @@
 
 #include "IntegratedBC.h"
 
-#include "LinInt.h"
-
 // Forward Declarations
 class RichardsHalfGaussianSink;
 

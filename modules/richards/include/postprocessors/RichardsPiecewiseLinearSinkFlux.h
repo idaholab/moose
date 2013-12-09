@@ -2,8 +2,7 @@
 #define RICHARDSPIECEWISELINEARSINKFLUX_H
 
 #include "SideIntegralVariablePostprocessor.h"
-
-#include "LinInt.h"
+#include "LinearInterpolation.h"
 
 //Forward Declarations
 class RichardsPiecewiseLinearSinkFlux;
@@ -24,7 +23,7 @@ protected:
   virtual Real computeQpIntegral();
 
   FEProblem & _feproblem;
-  LinInt _sink_func;
+  LinearInterpolation _sink_func;
 
 };
 
