@@ -122,7 +122,7 @@ class Machine(object):
       self.network = 'fn'
     else:
       self.network = 'inl'
-      #os.environ['no_proxy'] = '.inl.gov'
+      os.environ['no_proxy'] = '.inl.gov'
 
     # Set the description, if the remote or local file is read this will be updated with the user supplied
     # description. This is not done here for speed purposed if a local only build is performed
