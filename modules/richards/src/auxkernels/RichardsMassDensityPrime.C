@@ -11,7 +11,7 @@ InputParameters validParams<RichardsMassDensityPrime>()
   params.addRequiredParam<UserObjectName>("sat_UO", "Name of user object that defines saturation");
   params.addRequiredCoupledVar("pressure_var", "The variable that represents the pressure");
   params.addRequiredParam<Real>("p_air", "Air pressure.  Typical value=101E3");
-  params.addClassDescription("auxillary variable which is d(density*saturation)/dP");
+  params.addClassDescription("auxiliary variable which is d(density*saturation)/dP");
   return params;
 }
 

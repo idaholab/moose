@@ -1,17 +1,3 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
-
 #include "RichardsExcavGeom.h"
 
 template<>
@@ -40,12 +26,11 @@ RichardsExcavGeom::RichardsExcavGeom(const std::string & name, InputParameters p
 }
 
 
+/// this returns the effective saturation as a function of
+/// pressure.  Input pressure in the first slot (t).
+/// This uses the van Genuchten expression.
 Real
 RichardsExcavGeom::value(Real t, const Point & p)
-/* this returns the effective saturation as a function of
- * pressure.  Input pressure in the first slot (t).
- * This uses the van Genuchten expression.
- */
 {
   if (t < _start_time || (p - _start_posn)*_retreat_vel < 0)
     // point is behind start posn - it'll never be active
