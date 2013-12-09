@@ -19,12 +19,13 @@ from distcc import *
 #    timeout = <number>     - Length of time before distcc assumes failure (default 30s)
 def runMake(distcc_hosts, jobs, **kwargs):
 
+  # Set the build type
   if kwargs.pop('dbg', False):
-    method = 'dbg'
+    os.environ['METHOD'] = dbg
   elif kwargs.pop('opt', False):
-    method = 'opt'
-  else:
-    method = 'oprof'
+    os.environ['METHOD'] = 'opt'
+  elif kwargs.pop('oprof', False):
+    os.environ['METHOD'] = 'oprof'
 
   # Set the DISTCC_HOSTS environmental variable
   os.environ['DISTCC_HOSTS'] = distcc_hosts
@@ -37,7 +38,6 @@ def runMake(distcc_hosts, jobs, **kwargs):
   os.environ['DISTCC_IO_TIMEOUT'] = str(kwargs.pop('timeout', 30))
 
   # Build the make command
-  os.environ['METHOD'] = method
   make = ['make', '-j', str(jobs)]
   make.extend(make_args)
 
