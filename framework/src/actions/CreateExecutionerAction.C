@@ -142,6 +142,7 @@ CreateExecutionerAction::act()
 void
 CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, InputParameters & params)
 {
+  // Note: Options set in the Preconditioner block will override those set in the Executioner block
   if (params.isParamValid("solve_type"))
   {
     // Extract the solve type
@@ -149,11 +150,9 @@ CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, In
     fe_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
   }
 
-  if (fe_problem.solverParams()._line_search == Moose::LS_INVALID)
-  {
-    const std::string & line_search = params.get<MooseEnum>("line_search");
+  MooseEnum line_search = params.get<MooseEnum>("line_search");
+  if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
     fe_problem.solverParams()._line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
-  }
 
 #ifdef LIBMESH_HAVE_PETSC
   std::vector<MooseEnum>   petsc_options       = params.get<std::vector<MooseEnum> >  ("petsc_options");
