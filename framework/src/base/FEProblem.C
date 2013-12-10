@@ -3763,10 +3763,10 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
 {
   NonlinearSystem & system = getNonlinearSystem();
   MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
-  std::stringstream oss;
 
   if (_dbg_print_var_rnorms)
   {
+    std::ostringstream oss;
     TransientNonlinearImplicitSystem &s = system.sys();
     unsigned int max_name_size=0;
     for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
@@ -3775,16 +3775,19 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
       if (var_name_size > max_name_size)
         max_name_size = var_name_size;
     }
-    Moose::out << "    |residual|_2 of individual variables:" << std::endl;
+
+    oss << "    |residual|_2 of individual variables:\n";
     for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
     {
       Real varResid = s.calculate_norm(*s.rhs,var_num,DISCRETE_L2);
-      Moose::out<<std::setw(27-max_name_size)<<" "<<std::setw(max_name_size+2) //match position of overall NL residual
-               <<std::left<<s.variable_name(var_num)+":"
-               <<varResid<<std::endl;
+      oss << std::setw(27-max_name_size) << " " << std::setw(max_name_size+2) //match position of overall NL residual
+          << std::left << s.variable_name(var_num) + ":" << varResid << "\n";
     }
+    Moose::out << oss.str();
+    Moose::out.flush();
   }
 
+  std::ostringstream oss;
   if (fnorm != fnorm)
   {
     oss << "Failed to converge, function norm is NaN\n";
@@ -3792,19 +3795,19 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
   }
   else if (fnorm < abstol)
   {
-    oss << "Converged due to function norm " << fnorm << " < " << abstol << std::endl;
+    oss << "Converged due to function norm " << fnorm << " < " << abstol << '\n';
     reason = MOOSE_CONVERGED_FNORM_ABS;
   }
   else if (nfuncs >= max_funcs)
   {
-    oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs << std::endl;
+    oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs << '\n';
     reason = MOOSE_DIVERGED_FUNCTION_COUNT;
   }
   else if(it &&
           fnorm > system._last_nl_rnorm &&
           fnorm >= div_threshold)
   {
-    oss << "Nonlinear solve was blowing up!" << std::endl;
+    oss << "Nonlinear solve was blowing up!\n";
     reason = MOOSE_DIVERGED_LINE_SEARCH;
   }
 
@@ -3812,12 +3815,12 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
   {
     if (fnorm <= ref_resid*rtol)
     {
-      oss << "Converged due to function norm " << fnorm << " < " << " (relative tolerance)" << std::endl;
+      oss << "Converged due to function norm " << fnorm << " < " << " (relative tolerance)\n";
       reason = MOOSE_CONVERGED_FNORM_RELATIVE;
     }
     else if (snorm < stol*xnorm)
     {
-      oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm << std::endl;
+      oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm << '\n';
       reason = MOOSE_CONVERGED_SNORM_RELATIVE;
     }
   }
