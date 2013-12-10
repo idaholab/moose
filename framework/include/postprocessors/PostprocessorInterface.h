@@ -37,7 +37,7 @@ public:
    *
    * The name required by this method is the name that is hard-coded into
    * your source code. For example, if you have a Kernel that requires
-   * a Postprocessure you may have an input file with "pp = my_pp", this function
+   * a Postprocessor you may have an input file with "pp = my_pp", this function
    * requires the "pp" name as input (see .../moose_test/functions/PostprocessorFunction.C)
    *
    * see getPostprocessorValueOld getPostprocessorValueByName getPostprocessorValueOldByName
@@ -50,7 +50,7 @@ public:
    * @return A reference to the desired value
    *
    * The name required by this method is the name defined in the input file. For example,
-   * if you have a Kernel that requires a Postprocesser you may have an input file with
+   * if you have a Kernel that requires a Postprocessor you may have an input file with
    * "pp = my_pp", this method requires the "my_pp" name as input
    * (see .../moose_test/functions/PostprocessorFunction.C)
    *
@@ -92,7 +92,7 @@ private:
   THREAD_ID _pi_tid;
 
   /// PostprocessorInterface Parameters
-  InputParameters  _ppi_params;
+  InputParameters _ppi_params;
 };
 
 #endif //POSTPROCESSORINTERFACE_H
