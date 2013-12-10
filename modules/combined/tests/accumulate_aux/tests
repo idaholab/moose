@@ -3,5 +3,8 @@
     type = 'Exodiff'
     input = 'accumulate_aux.i'
     exodiff = 'accumulate_aux_out.e'
+
+    # This mesh only has a single element
+    max_parallel = 1
   [../]
 []
