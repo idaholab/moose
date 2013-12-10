@@ -21,4 +21,10 @@
     prereq = 'testRestart2'
     scale_refine = 2
   [../]
+
+  [./test]
+    type = 'Exodiff'
+    input = 'lsh_pressure.i'
+    exodiff = 'lsh_pressure_out.e'
+  [../]
 []
