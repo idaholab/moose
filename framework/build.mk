@@ -32,6 +32,7 @@ libmesh_CFLAGS   := $(shell METHOD=$(METHOD) $(libmesh_config) --cflags)
 libmesh_FFLAGS   := $(shell METHOD=$(METHOD) $(libmesh_config) --fflags)
 libmesh_LIBS     := $(shell METHOD=$(METHOD) $(libmesh_config) --libs)
 libmesh_HOST     := $(shell METHOD=$(METHOD) $(libmesh_config) --host)
+libmesh_LDFLAGS  := $(shell METHOD=$(METHOD) $(libmesh_config) --ldflags)
 
 # Make.common used to provide an obj-suffix which was related to the
 # machine in question (from config.guess, i.e. @host@ in
