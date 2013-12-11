@@ -36,7 +36,6 @@ MooseInit::MooseInit(int argc, char *argv[], MPI_Comm COMM_WORLD_IN) :
 
   // Set the number of OpenMP threads to the same as the number of threads libMesh is going to use
 #ifdef LIBMESH_HAVE_OPENMP
-  omp_get_thread_num();
   omp_set_num_threads(libMesh::n_threads());
 #endif
 
