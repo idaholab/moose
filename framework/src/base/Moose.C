@@ -255,6 +255,7 @@
 #include "MultiAppInterpolationTransfer.h"
 #include "MultiAppPostprocessorTransfer.h"
 #include "MultiAppProjectionTransfer.h"
+#include "MultiAppPostprocessorToAuxScalarTransfer.h"
 
 
 // Actions
@@ -552,6 +553,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppInterpolationTransfer);
   registerTransfer(MultiAppPostprocessorTransfer);
   registerTransfer(MultiAppProjectionTransfer);
+  registerTransfer(MultiAppPostprocessorToAuxScalarTransfer);
 
   registered = true;
 }
