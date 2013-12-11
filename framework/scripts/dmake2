@@ -21,7 +21,7 @@ def runMake(distcc_hosts, jobs, **kwargs):
 
   # Set the build type
   if kwargs.pop('dbg', False):
-    os.environ['METHOD'] = dbg
+    os.environ['METHOD'] = 'dbg'
   elif kwargs.pop('opt', False):
     os.environ['METHOD'] = 'opt'
   elif kwargs.pop('oprof', False):
