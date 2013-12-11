@@ -8,6 +8,7 @@ from time import sleep
 from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
 from Tester import Tester
+from PetscJacobianTester import PetscJacobianTester
 from InputParameters import InputParameters
 from Factory import Factory
 

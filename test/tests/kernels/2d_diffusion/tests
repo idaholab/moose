@@ -12,4 +12,9 @@
     exodiff = 'neumannbc_out.e'
     scale_refine = 5
   [../]
+
+  [./test_jacobian]
+    type = 'PetscJacobianTester'
+    input = '2d_diffusion_test.i'
+  [../]
 []
