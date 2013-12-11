@@ -37,6 +37,15 @@ class Factory;
     Parallel::max<bool>(__local_bool__);        \
     if (__local_bool__)
 
+/**
+ * Wrap all fortran function calls in this.
+ */
+#ifdef __bg__ // On Blue Gene Architectures there is no underscore
+  #define FORTRAN_CALL(name) name
+#else  // One underscore everywhere else
+  #define FORTRAN_CALL(name) name ## _
+#endif
+
 // forward declarations
 class Syntax;
 class FEProblem;

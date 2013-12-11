@@ -16,7 +16,7 @@
 #include "MooseError.h"
 #include "libmesh/libmesh_common.h"
 
-extern "C" void dgels_ ( ... );
+extern "C" void FORTRAN_CALL(dgels) ( ... );
 
 int PolynomialFit::_file_number = 0;
 
@@ -85,14 +85,14 @@ PolynomialFit::doLeastSquares()
   // Must copy _y because the call to dgels destroys the original values
   std::vector<Real> rhs = _y;
 
-  dgels_(&mode, &num_rows, &num_coeff, &num_rhs, &_matrix[0], &num_rows, &rhs[0], &num_rows, &opt_buffer_size, &buffer_size, &return_value);
+  FORTRAN_CALL(dgels)(&mode, &num_rows, &num_coeff, &num_rhs, &_matrix[0], &num_rows, &rhs[0], &num_rows, &opt_buffer_size, &buffer_size, &return_value);
   if (return_value)
     mooseError("");
 
   buffer_size = (int) opt_buffer_size;
 
   buffer = new Real[buffer_size];
-  dgels_(&mode, &num_rows, &num_coeff, &num_rhs, &_matrix[0], &num_rows, &rhs[0], &num_rows, buffer, &buffer_size, &return_value);
+  FORTRAN_CALL(dgels)(&mode, &num_rows, &num_coeff, &num_rhs, &_matrix[0], &num_rows, &rhs[0], &num_rows, buffer, &buffer_size, &return_value);
   delete [] buffer;
 
   if (return_value)
