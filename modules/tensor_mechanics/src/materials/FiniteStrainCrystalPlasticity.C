@@ -1,7 +1,7 @@
 #include "FiniteStrainCrystalPlasticity.h"
 #include <cmath>
 
-extern "C" void dsyev_ ( ... );
+extern "C" void FORTRAN_CALL(dsyev) ( ... );
 
 template<>
 InputParameters validParams<FiniteStrainCrystalPlasticity>()
@@ -617,7 +617,7 @@ RankTwoTensor FiniteStrainCrystalPlasticity::getmatrot(RankTwoTensor &a)
     for(int j=0;j<3;j++)
       cmat[i][j]=c(i,j);
 
-  dsyev_("V","U",&nd,cmat,&nd,&w,&work,&lwork,&info);
+  FORTRAN_CALL(dsyev)("V","U",&nd,cmat,&nd,&w,&work,&lwork,&info);
 
   diag.zero();
   

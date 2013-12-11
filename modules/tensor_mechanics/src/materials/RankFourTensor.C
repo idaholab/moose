@@ -7,10 +7,10 @@
 #include "libmesh/libmesh.h"
 #include <ostream>
 
-extern "C" void dsyev_ ( ... );
-extern "C" void dgeev_ ( ... );
-extern "C" void dgetri_ ( ... );
-extern "C" void dgetrf_ ( ... );
+extern "C" void FORTRAN_CALL(dsyev) ( ... );
+extern "C" void FORTRAN_CALL(dgeev) ( ... );
+extern "C" void FORTRAN_CALL(dgetri) ( ... );
+extern "C" void FORTRAN_CALL(dgetrf) ( ... );
 
 
 RankFourTensor::RankFourTensor()
@@ -419,7 +419,7 @@ RankFourTensor::MatrixInversion(double* A, int n)
 
   ipiv=(int*)calloc(n, sizeof(int));
   buffer=(int*)calloc(buffer_size, sizeof(int));
-  dgetrf_(&n, &n, A, &n, ipiv, &return_value);
+  FORTRAN_CALL(dgetrf)(&n, &n, A, &n, ipiv, &return_value);
 
   if (return_value!=0)
   {
@@ -428,7 +428,7 @@ RankFourTensor::MatrixInversion(double* A, int n)
     free(buffer);
     return return_value;
   }
-  dgetri_(&n, A, &n, ipiv, buffer, &buffer_size, &return_value);
+  FORTRAN_CALL(dgetri)(&n, A, &n, ipiv, buffer, &buffer_size, &return_value);
 
   free(ipiv);
   free(buffer);

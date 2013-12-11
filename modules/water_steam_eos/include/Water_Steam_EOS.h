@@ -1,3 +1,4 @@
+#include "Moose.h"
 
 namespace Water_Steam_EOS
 {
@@ -8,10 +9,10 @@ namespace Water_Steam_EOS
     //double TSAT_( double&, double&, double&);
     
     //subroutine water_steam_prop_PH(p, h, Ts,T, Sw, Den, dTdp, dTdh, dDendp, dDendh,  ierr, dhwdp, dhsdp, dTdp)
-    void water_steam_prop_ph_( double&, double&, double&, double&, double&, double&, double&, double&, double&, double&, 
+    void FORTRAN_CALL(water_steam_prop_ph)( double&, double&, double&, double&, double&, double&, double&, double&, double&, double&, 
                                double&, double&, double&, double&, double&, int&, double&, double&,double&);
     // subroutine water_steam_prop_PH_noderiv(p, h, T, Sw, Den,Denw, Dens, hw, hs,visw,viss,ierror)
-    void water_steam_prop_ph_noderiv_(double&,double&, double&, double&, double&, double&, double&, double&, double&, double&, double&, int&);
+    void FORTRAN_CALL(water_steam_prop_ph_noderiv)(double&,double&, double&, double&, double&, double&, double&, double&, double&, double&, double&, int&);
     
     
     //subroutine  wateos_noderiv(T, p, dw, dwmol, hw, energyscale, ierr)
@@ -19,10 +20,10 @@ namespace Water_Steam_EOS
     //void water_eos1_( double&, double&, double&);
     
     //subroutine  wateos_noderiv(T, p, dw)  this one is faster, no derivatives calculated
-    void wateos_noderiv1_( double&, double&, double&);
+    void FORTRAN_CALL(wateos_noderiv1)( double&, double&, double&);
 
     //subroutine  VISW_noderiv1 (rho_s,tc,vs)  
-    void viss_noderiv1_( double&, double&, double&);  
+    void FORTRAN_CALL(viss_noderiv1)( double&, double&, double&);  
 
     //================================================================================
     //
@@ -31,13 +32,13 @@ namespace Water_Steam_EOS
     //
     //--------------------------------------------------------------------------------
 
-    void   boundary_23_(double& P, double& T, int& N);
+    void   FORTRAN_CALL(boundary_23)(double& P, double& T, int& N);
 
-    void   saturation_(double& P, double& T, int& N, int& nerr);
+    void   FORTRAN_CALL(saturation)(double& P, double& T, int& N, int& nerr);
 
-    void   enthalpy_density_pt_(double& H, double& D, double& P, double& T, int& nerr, int& nRegion);
+    void   FORTRAN_CALL(enthalpy_density_pt)(double& H, double& D, double& P, double& T, int& nerr, int& nRegion);
 
-    double viscosity_(double& rho, double& T);
+    double FORTRAN_CALL(viscosity)(double& rho, double& T);
 
     //////////////////////////////////////////////////////////////////////////////////
     //
