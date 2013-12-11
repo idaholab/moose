@@ -343,6 +343,14 @@ void FEProblem::initialSetup()
     }
   }
 
+  // Build Refinement and Coarsening maps for stateful material projections if necessary
+  if (_adaptivity.isOn() && _material_props.hasStatefulProperties())
+  {
+    Moose::setup_perf_log.push("mesh.buildRefinementAndCoarseningMaps()","Setup");
+    _mesh.buildRefinementAndCoarseningMaps(_assembly[0]);
+    Moose::setup_perf_log.pop("mesh.buildRefinementAndCoarseningMaps()","Setup");
+  }
+
   if(!isRecovering())
   {
     // uniform refine
@@ -2823,10 +2831,6 @@ FEProblem::init()
   Moose::setup_perf_log.push("eq.init()","Setup");
   _eq.init();
   Moose::setup_perf_log.pop("eq.init()","Setup");
-
-  Moose::setup_perf_log.push("mesh.buildRefinementAndCoarseningMaps()","Setup");
-  _mesh.buildRefinementAndCoarseningMaps(_assembly[0]);
-  Moose::setup_perf_log.pop("mesh.buildRefinementAndCoarseningMaps()","Setup");
 
   Moose::setup_perf_log.push("FEProblem::init::meshChanged()","Setup");
   _mesh.meshChanged();

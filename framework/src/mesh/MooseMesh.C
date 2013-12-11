@@ -1422,6 +1422,12 @@ MooseMesh::getRefinementMap(const Elem & elem, int parent_side, int child, int c
 
     return _elem_type_to_child_side_refinement_map[elem.type()][child_pair];
   }
+
+  /**
+   *  TODO: When running with parallel mesh + stateful adaptivty we will need to make sure that each
+   *  processor has a complete map.  This may require parallel communication.  This is likely to happen
+   *  when running on a mixed element mesh.
+   */
 }
 
 void
@@ -1438,6 +1444,12 @@ MooseMesh::buildCoarseningMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
   // The -1 here is for a specific child.  We don't do that for coarsening maps
   // Also note that we're always mapping the same side to the same side (which is guaranteed by libMesh).
   findAdaptivityQpMaps(&elem, qrule, qrule_face, refinement_map, coarsen_map, input_side, -1, input_side);
+
+  /**
+   *  TODO: When running with parallel mesh + stateful adaptivty we will need to make sure that each
+   *  processor has a complete map.  This may require parallel communication.  This is likely to happen
+   *  when running on a mixed element mesh.
+   */
 }
 
 const std::vector<std::pair<unsigned int, QpMap> > &
