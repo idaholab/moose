@@ -52,7 +52,6 @@ Parser::Parser(MooseApp & app, ActionWarehouse & action_wh) :
     _syntax(_action_wh.syntax()),
     _syntax_formatter(NULL),
     _getpot_initialized(false),
-    _sort_alpha(false),
     _sections_read(false)
 {
 }
@@ -339,9 +338,6 @@ Parser::buildFullTree(const std::string &search_string)
     all_names.push_back(std::pair<std::string, Syntax::ActionInfo>(iter->first, act_info));
   }
 
-  // Sort the Syntax
-  std::sort(all_names.begin(), all_names.end(), InputFileSort(_sort_alpha));
-
   for (std::vector<std::pair<std::string, Syntax::ActionInfo> >::iterator act_names = all_names.begin(); act_names != all_names.end(); ++act_names)
   {
     InputParameters action_obj_params = _action_factory.getValidParams(act_names->second._action);
@@ -396,18 +392,6 @@ const GetPot *
 Parser::getPotHandle() const
 {
   return _getpot_initialized ? &_getpot_file : NULL;
-}
-
-void
-Parser::setSortAlpha(bool sort_alpha_flag)
-{
-  _sort_alpha = sort_alpha_flag;
-}
-
-bool
-Parser::getSortFlag() const
-{
-  return _sort_alpha;
 }
 
 /**************************************************************************************************************************
@@ -823,88 +807,4 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
     for (int i = 0; i < vec_size; ++i)
       global_block->setVectorParam<MooseEnum>(short_name)[i] = values[0];
   }
-}
-
-//--------------------------------------------------------------------------
-// Input File Sorter Functor methods
-
-Parser::InputFileSort::InputFileSort(bool sort_alpha):
-    _sort_alpha(sort_alpha)
-{
-  _o.reserve(20);
-  _o.push_back("GlobalParams");
-  _o.push_back("MultiApps");
-  _o.push_back("Problem");
-  _o.push_back("Mesh");
-  _o.push_back("MeshModifiers");
-  _o.push_back("Transfers");
-  _o.push_back("Functions");
-  _o.push_back("Preconditioning");
-  _o.push_back("Variables");
-  _o.push_back("AuxVariables");
-  _o.push_back("ICs");
-  _o.push_back("Kernels");
-  _o.push_back("DGKernels");
-  _o.push_back("DiracKernels");
-  _o.push_back("AuxKernels");
-  _o.push_back("Dampers");
-  _o.push_back("BCs");
-  _o.push_back("AuxBCs");
-  _o.push_back("NodalNormals");
-  _o.push_back("Bounds");
-  _o.push_back("Constraints");
-  _o.push_back("Contact");
-  _o.push_back("ThermalContact");
-  _o.push_back("Materials");
-  _o.push_back("Postprocessors");
-  _o.push_back("UserObjects");
-  _o.push_back("Executioner");
-  _o.push_back("MultiApps");
-  _o.push_back("Transfers");
-  _o.push_back("Coupled_Problems");
-  _o.push_back("Adaptivity");
-  _o.push_back("Output");
-  _o.push_back("Debug");
-  _o.push_back("DeprecatedBlock");
-}
-
-bool
-Parser::InputFileSort::operator() (Action *a, Action *b) const
-{
-  std::vector<std::string> elements;
-  std::string short_a, short_b;
-  MooseUtils::tokenize(a->name(), elements);
-  short_a = elements[0];
-  elements.clear();
-  MooseUtils::tokenize(b->name(), elements);
-  short_b = elements[0];
-
-  return sorter(short_a, short_b) >= 0 ? false : true;
-}
-
-bool
-Parser::InputFileSort::operator() (const std::pair<std::string, Syntax::ActionInfo> &a, const std::pair<std::string, Syntax::ActionInfo> &b) const
-{
-  std::vector<std::string> elements;
-  std::string short_a, short_b;
-  MooseUtils::tokenize(a.first, elements);
-  short_a = elements[0];
-  elements.clear();
-  MooseUtils::tokenize(b.first, elements);
-  short_b = elements[0];
-
-  int ret = sorter(short_a, short_b);
-  if (ret == 0)
-    return a.first.size() > b.first.size() ? false : true;
-  else
-    return ret > 0 ? false : true;
-}
-
-int
-Parser::InputFileSort::sorter(const std::string &a, const std::string &b) const
-{
-  if (_sort_alpha)
-    return a < b ? -1 : 1;
-  else
-    return std::find(_o.begin(), _o.end(), a) - std::find(_o.begin(), _o.end(), b);
 }

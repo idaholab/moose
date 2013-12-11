@@ -175,12 +175,6 @@ public:
   void setErrorOverridden();
 
   /**
-   * Set/Get a flag so that syntax dumped from the system is in alphabetical order
-   */
-  void setSortAlpha(bool sort_alpha_flag) { _parser.setSortAlpha(sort_alpha_flag); }
-  bool getSortFlag() const { return _parser.getSortFlag(); }
-
-  /**
    * Removes warnings and error checks for unrecognized variables in the input file
    */
   void disableCheckUnusedFlag();

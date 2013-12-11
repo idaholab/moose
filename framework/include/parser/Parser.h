@@ -83,12 +83,6 @@ public:
   const GetPot * getPotHandle() const;
 
   /**
-   * Set/Get a flag so that syntax dumped from the system is in alphabetical order
-   */
-  void setSortAlpha(bool sort_alpha_flag);
-  bool getSortFlag() const;
-
-  /**
    * This function attempts to extract values from the input file based on the contents of
    * the passed parameters objects.  It handles a number of various types with dynamic casting
    * including vector types
@@ -163,27 +157,8 @@ protected:
 
   /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;
-  bool _sort_alpha;
 
-  ///
   bool _sections_read;
-
-public:
-  /**
-   * Functor for sorting input file syntax in MOOSE desired order
-   */
-  class InputFileSort
-  {
-  public:
-    InputFileSort(bool sort_alpha=false);
-    bool operator() (Action *a, Action *b) const;
-    bool operator() (const std::pair<std::string, Syntax::ActionInfo> &a, const std::pair<std::string, Syntax::ActionInfo> &b) const;
-
-  private:
-    int sorter(const std::string &a, const std::string &b) const;
-    std::vector<std::string> _o;
-    bool _sort_alpha;
-  };
 };
 
 
