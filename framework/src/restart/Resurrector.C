@@ -44,23 +44,29 @@ Resurrector::setRestartFile(const std::string & file_base)
 void
 Resurrector::restartFromFile()
 {
+  Moose::setup_perf_log.push("restartFromFile()","Resurrector");
   std::string file_name(_restart_file_base + ".xdr");
   MooseUtils::checkFileReadable(file_name);
   _fe_problem._eq.read(file_name, libMeshEnums::DECODE, EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA);
   _fe_problem._nl.update();
+  Moose::setup_perf_log.pop("restartFromFile()","Resurrector");
 }
 
 void
 Resurrector::restartStatefulMaterialProps()
 {
+  Moose::setup_perf_log.push("restartStatefulMaterialProps()","Resurrector");
   std::string file_name(_restart_file_base + MAT_PROP_EXT);
   _mat.read(file_name);
+  Moose::setup_perf_log.pop("restartStatefulMaterialProps()","Resurrector");
 }
 
 void
 Resurrector::restartRestartableData()
 {
+  Moose::setup_perf_log.push("restartRestartableData()","Resurrector");
   _restartable.readRestartableData(_restart_file_base + RESTARTABLE_DATA_EXT, _fe_problem._restartable_data, _fe_problem._recoverable_data);
+  Moose::setup_perf_log.pop("restartRestartableData()","Resurrector");
 }
 
 
@@ -76,6 +82,7 @@ Resurrector::write()
   if (_num_checkpoint_files == 0)
     return;
 
+  Moose::perf_log.push("write()","Resurrector");
   std::string cp_dir = _fe_problem.getCheckpointDir();
 
   mkdir(cp_dir.c_str(),  S_IRWXU | S_IRGRP);
@@ -145,6 +152,7 @@ Resurrector::write()
       }
     }
   }
+  Moose::perf_log.pop("write()","Resurrector");
 }
 
 unsigned int
