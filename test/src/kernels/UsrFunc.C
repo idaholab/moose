@@ -71,11 +71,11 @@ Number ManSol4ADR2(const Point& p, Real& A0, Real& B0, Real& C0, Real& w, Real &
 {
    Real x = p(0);
    Real y = p(1);
-   Real r = sqrt(pow(x-A0,2)+pow(y-B0,2));
+   Real r = std::sqrt(std::pow(x-A0,2)+std::pow(y-B0,2));
    if(r>C0)
       return 0.0;
    else
-      return ((1.-std::cos(2.*libMesh::pi*(C0-sqrt(pow(-A0+x,2)+pow(-B0+y,2)))))*(1.+std::sin(libMesh::pi*(-0.5+t*w))))/4.;
+      return ((1.-std::cos(2.*libMesh::pi*(C0-std::sqrt(std::pow(-A0+x,2)+std::pow(-B0+y,2)))))*(1.+std::sin(libMesh::pi*(-0.5+t*w))))/4.;
 }
 
 Number ManSol4ADR2src(const Point& p, Real& A0, Real& B0, Real& C0,
@@ -85,16 +85,16 @@ Number ManSol4ADR2src(const Point& p, Real& A0, Real& B0, Real& C0,
 {
    Real x = p(0);
    Real y = p(1);
-   Real r = sqrt(pow(x-A0,2)+pow(y-B0,2));
+   Real r = std::sqrt(std::pow(x-A0,2)+std::pow(y-B0,2));
    if(r>C0)
       return 0.0;
    else
-      return (libMesh::pi*((4.*pow(std::sin((libMesh::pi*t*w)/2.),2)*(2.*libMesh::pi*sqrt(pow(A0-x,2)
-            +pow(B0-y,2))*(Ak+Bk*x+Ck*y)*std::cos(2.*libMesh::pi*(C0-sqrt(pow(A0-x,2)+pow(B0-y,2))))
-            +(-Ak+Av*B0+B0*Ck-(Au+2.*Bk)*x+B0*Bv*x-Bu*pow(x,2)-(Av+2.*Ck-B0*Cv+(Bv+Cu)*x)*y-Cv*pow(y,2)
-            +A0*(Au+Bk+Bu*x+Cu*y))*std::sin(2.*libMesh::pi*(C0-sqrt(pow(A0-x,2)+pow(B0-y,2))))))/sqrt(pow(A0-x,2)
-            +pow(B0-y,2))+(w*(2.*std::sin(libMesh::pi*t*w)-std::sin(libMesh::pi*(2.*C0+t*w-2.*sqrt(pow(A0-x,2)
-            +pow(B0-y,2))))-std::sin(libMesh::pi*(-2.*C0+t*w+2.*sqrt(pow(A0-x,2)+pow(B0-y,2))))))/2.))/4.;
+      return (libMesh::pi*((4.*std::pow(std::sin((libMesh::pi*t*w)/2.),2)*(2.*libMesh::pi*std::sqrt(std::pow(A0-x,2)
+            +std::pow(B0-y,2))*(Ak+Bk*x+Ck*y)*std::cos(2.*libMesh::pi*(C0-std::sqrt(std::pow(A0-x,2)+std::pow(B0-y,2))))
+            +(-Ak+Av*B0+B0*Ck-(Au+2.*Bk)*x+B0*Bv*x-Bu*std::pow(x,2)-(Av+2.*Ck-B0*Cv+(Bv+Cu)*x)*y-Cv*std::pow(y,2)
+            +A0*(Au+Bk+Bu*x+Cu*y))*std::sin(2.*libMesh::pi*(C0-std::sqrt(std::pow(A0-x,2)+std::pow(B0-y,2))))))/std::sqrt(std::pow(A0-x,2)
+            +std::pow(B0-y,2))+(w*(2.*std::sin(libMesh::pi*t*w)-std::sin(libMesh::pi*(2.*C0+t*w-2.*std::sqrt(std::pow(A0-x,2)
+            +std::pow(B0-y,2))))-std::sin(libMesh::pi*(-2.*C0+t*w+2.*std::sqrt(std::pow(A0-x,2)+std::pow(B0-y,2))))))/2.))/4.;
 }
 
 Number ManSol4ADR2exv(const Point& p,
@@ -123,11 +123,11 @@ Gradient ManSol4ADR2exd(const Point& p,
 
    Real x = p(0);
    Real y = p(1);
-   Real r = sqrt(pow(x-A0,2)+pow(y-B0,2));
+   Real r = std::sqrt(std::pow(x-A0,2)+std::pow(y-B0,2));
    if(r<=C0)
    {
-      gradu(0) = (libMesh::pi*(A0-x)*pow(std::sin((libMesh::pi*t*w)/2.),2)*std::sin(2*libMesh::pi*(C0-sqrt(pow(A0-x,2)+pow(B0-y,2)))))/sqrt(pow(A0-x,2)+pow(B0-y,2));
-      gradu(1) = (libMesh::pi*(B0-y)*pow(std::sin((libMesh::pi*t*w)/2.),2)*std::sin(2*libMesh::pi*(C0-sqrt(pow(A0-x,2)+pow(B0-y,2)))))/sqrt(pow(A0-x,2)+pow(B0-y,2));
+      gradu(0) = (libMesh::pi*(A0-x)*std::pow(std::sin((libMesh::pi*t*w)/2.),2)*std::sin(2*libMesh::pi*(C0-std::sqrt(std::pow(A0-x,2)+std::pow(B0-y,2)))))/std::sqrt(std::pow(A0-x,2)+std::pow(B0-y,2));
+      gradu(1) = (libMesh::pi*(B0-y)*std::pow(std::sin((libMesh::pi*t*w)/2.),2)*std::sin(2*libMesh::pi*(C0-std::sqrt(std::pow(A0-x,2)+std::pow(B0-y,2)))))/std::sqrt(std::pow(A0-x,2)+std::pow(B0-y,2));
    }
 
    return gradu;

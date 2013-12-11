@@ -14,6 +14,8 @@
 
 #include "DGMatDiffusion.h"
 
+#include <cmath>
+
 template<>
 InputParameters validParams<DGMatDiffusion>()
 {
@@ -41,7 +43,7 @@ DGMatDiffusion::computeQpResidual(Moose::DGResidualType type)
   Real r = 0;
 
   const unsigned int elem_b_order = static_cast<unsigned int> (_var.getOrder());
-  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./pow(elem_b_order, 2.);
+  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./std::pow(elem_b_order, 2.);
 
   switch (type)
   {
@@ -67,7 +69,7 @@ DGMatDiffusion::computeQpJacobian(Moose::DGJacobianType type)
   Real r = 0;
 
   const unsigned int elem_b_order = static_cast<unsigned int> (_var.getOrder());
-  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./pow(elem_b_order, 2.);
+  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./std::pow(elem_b_order, 2.);
 
   switch (type)
   {

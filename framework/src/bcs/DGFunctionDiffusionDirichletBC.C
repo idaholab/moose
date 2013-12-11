@@ -17,6 +17,8 @@
 
 #include "libmesh/numeric_vector.h"
 
+#include <cmath>
+
 template<>
 InputParameters validParams<DGFunctionDiffusionDirichletBC>()
 {
@@ -41,7 +43,7 @@ Real
 DGFunctionDiffusionDirichletBC::computeQpResidual()
 {
   const unsigned int elem_b_order = static_cast<unsigned int> (_var.getOrder());
-  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./pow(elem_b_order, 2.);
+  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./std::pow(elem_b_order, 2.);
 
   Real fn = _func.value(_t, _q_point[_qp]);
   Real r = 0;
@@ -56,7 +58,7 @@ Real
 DGFunctionDiffusionDirichletBC::computeQpJacobian()
 {
   const unsigned int elem_b_order = static_cast<unsigned int> (_var.getOrder());
-  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./pow(elem_b_order, 2.);
+  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./std::pow(elem_b_order, 2.);
 
   Real r = 0;
   r -= (_grad_phi[_j][_qp] * _normals[_qp] * _test[_i][_qp]);
