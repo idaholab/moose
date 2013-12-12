@@ -3,7 +3,21 @@
     type = 'Exodiff'
     input = 'uo1.i'
     exodiff = 'uo1.e'
-    abs_zero = 1e-09
+    abs_zero = 1e-15
+    use_old_floor = True
+  [../]
+  [./test_uo2]
+    type = 'Exodiff'
+    input = 'uo2.i'
+    exodiff = 'uo2.e'
+    abs_zero = 1e-10
+    use_old_floor = True
+  [../]
+  [./test_uo3]
+    type = 'Exodiff'
+    input = 'uo3.i'
+    exodiff = 'uo3.e'
+    abs_zero = 1e-15
     use_old_floor = True
   [../]
 []

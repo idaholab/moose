@@ -19,15 +19,16 @@ protected:
 
   virtual Real computeQpIntegral();
 
-  MaterialProperty<Real> &_density;
-  MaterialProperty<Real> &_rel_perm;
-  MaterialProperty<Real> &_dens0;
+  unsigned int _this_var_num;
+  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
+
+  MaterialProperty<std::vector<Real> > &_density;
+  MaterialProperty<std::vector<Real> > &_rel_perm;
   MaterialProperty<RealVectorValue> &_gravity;
   MaterialProperty<RealTensorValue> & _permeability;
 
-  MaterialProperty<Real> &_density_n;
-  MaterialProperty<Real> &_rel_perm_n;
-  MaterialProperty<Real> &_dens0_n;
+  MaterialProperty<std::vector<Real> > &_density_n;
+  MaterialProperty<std::vector<Real> > &_rel_perm_n;
   MaterialProperty<RealVectorValue> &_gravity_n;
   MaterialProperty<RealTensorValue> & _permeability_n;
 };

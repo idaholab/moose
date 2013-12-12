@@ -1,18 +1,18 @@
-//  van-Genuchten effective saturation as a function of capillary pressure, and its derivs wrt pc
+//  van-Genuchten effective saturation as a function of single pressure, and its derivs wrt to that pressure
 //
-#include "RichardsSeffVG.h"
+#include "RichardsSeff1VG.h"
 
 template<>
-InputParameters validParams<RichardsSeffVG>()
+InputParameters validParams<RichardsSeff1VG>()
 {
   InputParameters params = validParams<RichardsSeff>();
-  params.addParam<Real>("al", "van-Genuchten alpha parameter.  Must be positive.    seff = (1 + (al*pc)^(1/(1-m)))^(-m)");
-  params.addParam<Real>("m", "van-Genuchten m parameter.  Must be between 0 and 1, and optimally should be set to >0.5    seff = (1 + (al*pc)^(1/(1-m)))^(-m)");
-  params.addClassDescription("van-Genuchten effective saturation as a function of capillary pressure.  seff = (1 + (al*pc)^(1/(1-m)))^(-m)");
+  params.addParam<Real>("al", "van-Genuchten alpha parameter.  Must be positive.  Single-phase VG seff = (1 + (-al*c)^(1/(1-m)))^(-m)");
+  params.addParam<Real>("m", "van-Genuchten m parameter.  Must be between 0 and 1, and optimally should be set to >0.5   Single-phase VG seff = (1 + (-al*p)^(1/(1-m)))^(-m)");
+  params.addClassDescription("van-Genuchten effective saturation as a function of pressure suitable for use in single-phase simulations..  seff = (1 + (-al*p)^(1/(1-m)))^(-m)");
   return params;
 }
 
-RichardsSeffVG::RichardsSeffVG(const std::string & name, InputParameters parameters) :
+RichardsSeff1VG::RichardsSeff1VG(const std::string & name, InputParameters parameters) :
   RichardsSeff(name, parameters),
   _al(getParam<Real>("al")),
   _m(getParam<Real>("m"))
@@ -26,61 +26,66 @@ RichardsSeffVG::RichardsSeffVG(const std::string & name, InputParameters paramet
 
 
 Real
-RichardsSeffVG::seff(Real pc) const
+RichardsSeff1VG::seff(std::vector<VariableValue *> p, unsigned int qp) const
 {
   Real n, seff;
 
-  if (pc <= 0)
+  if ((*p[0])[qp] >= 0)
     {
       return 1.0;
     }
   else
     {
       n = 1.0/(1.0 - _m);
-      seff = 1 + std::pow(_al*pc, n);
+      seff = 1 + std::pow(-_al*(*p[0])[qp], n);
       return std::pow(seff, -_m);
     }
 }
 
-Real
-RichardsSeffVG::dseff(Real pc) const
+std::vector<Real>
+RichardsSeff1VG::dseff(std::vector<VariableValue *> p, unsigned int qp) const
 {
-  Real n, inner, dinner_dpc, dseff_dpc;
-
-  if (pc <= 0)
+  Real n, inner, dinner_dp;
+  
+  if ((*p[0])[qp] >= 0)
     {
-      return 0.0;
+      return std::vector<Real>(1, 0);
     }
   else
     {
       n = 1.0/(1.0 - _m);
-      inner = 1 + std::pow(_al*pc, n);
-      dinner_dpc = n*_al*std::pow(_al*pc, n-1);
-      dseff_dpc = -_m*std::pow(inner, -_m - 1)*dinner_dpc;
-      return dseff_dpc;
+      inner = 1 + std::pow(-_al*(*p[0])[qp], n);
+      dinner_dp = -n*_al*std::pow(-_al*(*p[0])[qp], n-1);
+      std::vector<Real> dseff_dp(1);
+      dseff_dp[0] = -_m*std::pow(inner, -_m - 1)*dinner_dp;
+      return dseff_dp;
     }
 }
 
-Real
-RichardsSeffVG::d2seff(Real pc) const
+std::vector<std::vector<Real> >
+RichardsSeff1VG::d2seff(std::vector<VariableValue *> p, unsigned int qp) const
 {
   Real n;
-  Real inner, dinner_dpc, d2inner_dpc2;
-  Real dseff_dpc, d2seff_dpc2;
+  Real inner, dinner_dp, d2inner_dp2;
+  Real d2seff_dp2;
 
-
-  if (pc <= 0)
+  // create a dummy b that is 1x1 and zeroed
+  std::vector<Real> a(1, 0);
+  std::vector<std::vector <Real> > b(1, a);
+   
+  if ((*p[0])[qp] >= 0)
     {
-      return 0.0;
+      return b;
     }
   else
     {
       n = 1.0/(1.0 - _m);
-      inner = 1 + std::pow(_al*pc, n);
-      dinner_dpc = n*_al*std::pow(_al*pc, n-1);
-      d2inner_dpc2 = n*(n-1)*_al*_al*std::pow(_al*pc, n-2);
-      d2seff_dpc2 = _m*(_m+1)*std::pow(inner, -_m - 2)*std::pow(dinner_dpc, 2) - _m*std::pow(inner, -_m - 1)*d2inner_dpc2;
-      return d2seff_dpc2;
+      inner = 1 + std::pow(-_al*(*p[0])[qp], n);
+      dinner_dp = -n*_al*std::pow(-_al*(*p[0])[qp], n-1);
+      d2inner_dp2 = n*(n-1)*_al*_al*std::pow(-_al*(*p[0])[qp], n-2);
+      d2seff_dp2 = _m*(_m+1)*std::pow(inner, -_m - 2)*std::pow(dinner_dp, 2) - _m*std::pow(inner, -_m - 1)*d2inner_dp2;
+      b[0][0] = d2seff_dp2;
+      return b;
     }
 }
 

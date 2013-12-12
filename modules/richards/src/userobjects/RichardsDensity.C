@@ -24,23 +24,3 @@ RichardsDensity::execute()
 
 void RichardsDensity::finalize()
 {}
-
-
-Real
-RichardsDensity::density(Real p) const
-{
-  return 0;
-}
-
-Real
-RichardsDensity::ddensity(Real p) const
-{
-  return 0;
-}
-
-Real
-RichardsDensity::d2density(Real p) const
-{
-  return 0;
-}
-

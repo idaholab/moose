@@ -27,7 +27,7 @@ class RichardsSat : public GeneralUserObject
  protected:
   
   Real _s_res;
-  Real _s_res_air;
+  Real _sum_s_res;
 
 };
 

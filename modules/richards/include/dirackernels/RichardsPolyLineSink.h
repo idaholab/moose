@@ -24,10 +24,7 @@ protected:
   PostprocessorValue & _reporter;
   LinearInterpolation _sink_func;
   std::string _point_file;
-  MaterialProperty<RealVectorValue> &_vel_SUPG;
-  MaterialProperty<RealTensorValue> &_vel_prime_SUPG;
-  MaterialProperty<Real> &_tau_SUPG;
-  MaterialProperty<RealVectorValue> &_tau_prime_SUPG;
+
   std::vector<Real> _xs;
   std::vector<Real> _ys;
   std::vector<Real> _zs;

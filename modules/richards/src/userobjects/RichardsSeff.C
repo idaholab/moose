@@ -1,4 +1,4 @@
-//  Base class for effective saturation as a function of capillary pressure
+//  Base class for effective saturation as a function of pressure(s)
 //
 #include "RichardsSeff.h"
 
@@ -24,23 +24,4 @@ RichardsSeff::execute()
 
 void RichardsSeff::finalize()
 {}
-
-
-Real
-RichardsSeff::seff(std::vector<Real> p) const
-{
-  return 0;
-}
-
-Real
-RichardsSeff::dseff(std::vector<Real> p) const
-{
-  return 0;
-}
-
-Real
-RichardsSeff::d2seff(std::vector<Real> p) const
-{
-  return 0;
-}
 

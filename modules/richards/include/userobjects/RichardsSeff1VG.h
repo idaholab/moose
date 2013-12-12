@@ -1,24 +1,24 @@
-//  van-Genuchten effective saturation as a function of capillary pressure, and its derivs wrt pc
+//  van-Genuchten effective saturation as a function of single pressure, and its derivs wrt to that pressure
 //
-#ifndef RICHARDSSEFFVG_H
-#define RICHARDSSEFFVG_H
+#ifndef RICHARDSSEFF1VG_H
+#define RICHARDSSEFF1VG_H
 
 #include "RichardsSeff.h"
 
-class RichardsSeffVG;
+class RichardsSeff1VG;
 
 
 template<>
-InputParameters validParams<RichardsSeffVG>();
+InputParameters validParams<RichardsSeff1VG>();
 
-class RichardsSeffVG : public RichardsSeff
+class RichardsSeff1VG : public RichardsSeff
 {
  public:
-  RichardsSeffVG(const std::string & name, InputParameters parameters);
+  RichardsSeff1VG(const std::string & name, InputParameters parameters);
 
-  Real seff(Real pc) const;
-  Real dseff(Real pc) const;
-  Real d2seff(Real pc) const;
+  Real seff(std::vector<VariableValue *> p, unsigned int qp) const;
+  std::vector<Real> dseff(std::vector<VariableValue *> p, unsigned int qp) const;
+  std::vector<std::vector<Real> > d2seff(std::vector<VariableValue *> p, unsigned int qp) const;
 
  protected:
   
@@ -27,4 +27,4 @@ class RichardsSeffVG : public RichardsSeff
 
 };
 
-#endif // RICHARDSSEFFVG_H
+#endif // RICHARDSSEFF1VG_H

@@ -1,4 +1,4 @@
-# User objects give the correct value
+# Seff User objects give the correct value
 # 
 # If you want to add another test for another UserObject
 # then add the UserObject, add a Function defining the expected result,
@@ -6,20 +6,17 @@
 # and finally add a NodalL2Error that compares this with the Function
 
 [UserObjects]
+  [./Seff1VG]
+    type = RichardsSeff1VG
+    m = 0.8
+    al = 1E-6
+  [../]
+
+  # following are unimportant in this test
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1000
     bulk_mod = 2E6
-  [../]
-  [./DensityIdeal]
-    type = RichardsDensityIdeal
-    p0 = 33333
-    slope = 1.1
-  [../]
-  [./SeffVG]
-    type = RichardsSeff1VG
-    m = 0.8
-    al = 1E-6
   [../]
   [./RelPermPower]
     type = RichardsRelPermPower
@@ -42,90 +39,76 @@
     type = ParsedFunction
     value = x
   [../]
-  [./answer_DensityConstBulk]
-    type = ParsedFunction
-    value = dens0*exp(x/bulk_mod)
-    vars = 'dens0 bulk_mod'
-    vals = '1000 2E6'
-  [../]
-  [./answer_DensityIdeal]
-    type = ParsedFunction
-    value = slope*(x-p0)
-    vars = 'p0 slope'
-    vals = '33333 1.1'
-  [../]
-  [./answer_SeffVG]
+  [./answer_Seff1VG]
     type = ParsedFunction
     value = (1+max((-x)*al,0)^(1/(1-m)))^(-m)
     vars = 'al m'
     vals = '1E-6 0.8'
   [../]
-  [./answer_RelPermPower]
-    type = ParsedFunction
-    value = max((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm,0)/((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm)*(((n+1)*(((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm)/(1-simm))^n)-(n*((((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm)/(1-simm))^(n+1))))
-    vars = 'al m simm n'
-    vals = '1E-6 0.8 0.10101 2'
+  [./answer_dSeff1VG]
+    type = GradParsedFunction
+    direction = '1 0 0'
+    value = (1+max((-x)*al,0)^(1/(1-m)))^(-m)
+    vars = 'al m'
+    vals = '1E-6 0.8'
+  [../]
+  [./answer_d2Seff1VG]
+    type = Grad2ParsedFunction
+    direction = '1 0 0'
+    value = (1+max((-x)*al,0)^(1/(1-m)))^(-m)
+    vars = 'al m'
+    vals = '1E-6 0.8'
   [../]
 []
 
 [AuxVariables]
-  [./DensityConstBulk_Aux]
+  [./Seff1VG_Aux]
   [../]
-  [./DensityIdeal_Aux]
+  [./dSeff1VG_Aux]
   [../]
-  [./SeffVG_Aux]
-  [../]
-  [./RelPermPower_Aux]
+  [./d2Seff1VG_Aux]
   [../]
 []
 
 [AuxKernels]
-  [./DensityConstBulk_AuxK]
-    type = RichardsDensityAux
-    variable = DensityConstBulk_Aux
-    density_UO = DensityConstBulk
-    pressure_var = pressure
-  [../]
-  [./DensityIdeal_AuxK]
-    type = RichardsDensityAux
-    variable = DensityIdeal_Aux
-    density_UO = DensityIdeal
-    pressure_var = pressure
-  [../]
-  [./SeffVG_AuxK]
+  [./Seff1VG_AuxK]
     type = RichardsSeffAux
-    variable = SeffVG_Aux
-    seff_UO = SeffVG
+    variable = Seff1VG_Aux
+    seff_UO = Seff1VG
     pressure_vars = pressure
   [../]
-  [./RelPermPower_AuxK]
-    type = RichardsRelPermAux
-    variable = RelPermPower_Aux
-    relperm_UO = RelPermPower
-    seff_var = SeffVG_Aux
+  [./dSeff1VG_AuxK]
+    type = RichardsSeffPrimeAux
+    variable = dSeff1VG_Aux
+    seff_UO = Seff1VG
+    pressure_vars = pressure
+    wrtnum = 0
+  [../]
+  [./d2Seff1VG_AuxK]
+    type = RichardsSeffPrimePrimeAux
+    variable = d2Seff1VG_Aux
+    seff_UO = Seff1VG
+    pressure_vars = pressure
+    wrtnum1 = 0
+    wrtnum2 = 0
   [../]
 []
 
 [Postprocessors]
-  [./cf_DensityConstBulk]
+  [./cf_Seff1VG]
     type = NodalL2Error
-    function = answer_DensityConstBulk
-    variable = DensityConstBulk_Aux
+    function = answer_Seff1VG
+    variable = Seff1VG_Aux
   [../]
-  [./cf_DensityIdeal]
+  [./cf_dSeff1VG]
     type = NodalL2Error
-    function = answer_DensityIdeal
-    variable = DensityIdeal_Aux
+    function = answer_dSeff1VG
+    variable = dSeff1VG_Aux
   [../]
-  [./cf_SeffVG]
+  [./cf_d2Seff1VG]
     type = NodalL2Error
-    function = answer_SeffVG
-    variable = SeffVG_Aux
-  [../]
-  [./cf_RelPermPower]
-    type = NodalL2Error
-    function = answer_RelPermPower
-    variable = RelPermPower_Aux
+    function = answer_d2Seff1VG
+    variable = d2Seff1VG_Aux
   [../]
 []
     
@@ -177,7 +160,7 @@
     density_UO = DensityConstBulk
     relperm_UO = RelPermPower
     sat_UO = Saturation
-    seff_UO = SeffVG
+    seff_UO = Seff1VG
     SUPG_UO = SUPGstandard
     viscosity = 1E-3
     gravity = '0 0 -10'
@@ -204,7 +187,7 @@
 
 [Output]
   linear_residuals = false
-  file_base = uo1
+  file_base = uo3
   interval = 1
   exodus = true
   perf_log = false

@@ -24,23 +24,3 @@ RichardsRelPerm::execute()
 
 void RichardsRelPerm::finalize()
 {}
-
-
-Real
-RichardsRelPerm::relperm(Real seff) const
-{
-  return 0;
-}
-
-Real
-RichardsRelPerm::drelperm(Real seff) const
-{
-  return 0;
-}
-
-Real
-RichardsRelPerm::d2relperm(Real seff) const
-{
-  return 0;
-}
-

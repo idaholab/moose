@@ -1,4 +1,4 @@
-//  Base class for effective saturation as a function of capillary pressure
+//  Base class for effective saturation as a function of pressure(s)
 //
 #ifndef RICHARDSSEFF_H
 #define RICHARDSSEFF_H
@@ -22,9 +22,9 @@ class RichardsSeff : public GeneralUserObject
 
   // These functions must be over-ridden in the derived class
   // to provide the actual values of seff and its derivatives
-  virtual Real seff(std::vector<Real> p) const;
-  virtual Real dseff(std::vector<Real> p) const;
-  virtual Real d2seff(std::vector<Real> p) const;
+  virtual Real seff(std::vector<VariableValue *> p, unsigned int qp) const = 0;
+  virtual std::vector<Real> dseff(std::vector<VariableValue *> p, unsigned int qp) const = 0;
+  virtual std::vector<std::vector<Real> > d2seff(std::vector<VariableValue *> p, unsigned int qp) const = 0;
 
 };
 

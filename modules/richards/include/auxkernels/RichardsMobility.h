@@ -21,10 +21,13 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _pressure_var;
+  int _p_num;
   const RichardsDensity & _density_UO;
   const RichardsSeff & _seff_UO;
   const RichardsRelPerm & _relperm_UO;
+
+  std::vector<unsigned int> _pressure_vars;
+  std::vector<VariableValue *> _pressure_vals;
 };
 
 #endif // RICHARDSMOBILITY_H

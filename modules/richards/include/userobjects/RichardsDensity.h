@@ -22,9 +22,9 @@ class RichardsDensity : public GeneralUserObject
 
   // These functions must be over-ridden in the derived class
   // to provide the actual values of density and its derivatives
-  virtual Real density(Real p) const;
-  virtual Real ddensity(Real p) const;
-  virtual Real d2density(Real p) const;
+  virtual Real density(Real p) const = 0;
+  virtual Real ddensity(Real p) const = 0;
+  virtual Real d2density(Real p) const = 0;
 
 };
 

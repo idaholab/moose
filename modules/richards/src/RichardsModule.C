@@ -6,16 +6,23 @@
 // UserObjects
 #include "RichardsDensityConstBulk.h"
 #include "RichardsDensityIdeal.h"
+#include "RichardsRelPermUnity.h"
 #include "RichardsRelPermPower.h"
 #include "RichardsRelPermVG.h"
 #include "RichardsRelPermVG1.h"
-#include "RichardsSeffVG.h"
-#include "RichardsSeffVG1.h"
+#include "RichardsSeff1VG.h"
+#include "RichardsSeff1VGcut.h"
 #include "RichardsSat.h"
+#include "RichardsSUPGnone.h"
+#include "RichardsSUPGstandard.h"
 
 // AuxKernels
 #include "RichardsSeffAux.h"
+#include "RichardsSeffPrimeAux.h"
+#include "RichardsSeffPrimePrimeAux.h"
 #include "RichardsDensityAux.h"
+#include "RichardsDensityPrimeAux.h"
+#include "RichardsDensityPrimePrimeAux.h"
 #include "RichardsRelPermAux.h"
 #include "RichardsMobility.h"
 #include "RichardsMobilityPrime.h"
@@ -31,6 +38,8 @@
 
 // Functions
 #include "RichardsExcavGeom.h"
+#include "GradParsedFunction.h"
+#include "Grad2ParsedFunction.h"
 
 // Indicators
 #include "RichardsFluxJumpIndicator.h"
@@ -60,16 +69,23 @@ Elk::Richards::registerObjects(Factory & factory)
   // UserObjects
   registerUserObject(RichardsDensityConstBulk);
   registerUserObject(RichardsDensityIdeal);
+  registerUserObject(RichardsRelPermUnity);
   registerUserObject(RichardsRelPermPower);
   registerUserObject(RichardsRelPermVG);
   registerUserObject(RichardsRelPermVG1);
-  registerUserObject(RichardsSeffVG);
-  registerUserObject(RichardsSeffVG1);
+  registerUserObject(RichardsSeff1VG);
+  registerUserObject(RichardsSeff1VGcut);
   registerUserObject(RichardsSat);
+  registerUserObject(RichardsSUPGnone);
+  registerUserObject(RichardsSUPGstandard);
 
   // AuxKernels
   registerAux(RichardsSeffAux);
+  registerAux(RichardsSeffPrimeAux);
+  registerAux(RichardsSeffPrimePrimeAux);
   registerAux(RichardsDensityAux);
+  registerAux(RichardsDensityPrimeAux);
+  registerAux(RichardsDensityPrimePrimeAux);
   registerAux(RichardsRelPermAux);
   registerAux(RichardsMobility);
   registerAux(RichardsMobilityPrime);
@@ -85,6 +101,8 @@ Elk::Richards::registerObjects(Factory & factory)
 
   // Functions
   registerFunction(RichardsExcavGeom);
+  registerFunction(GradParsedFunction);
+  registerFunction(Grad2ParsedFunction);
 
   // Indicators
   registerIndicator(RichardsFluxJumpIndicator);

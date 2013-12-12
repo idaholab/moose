@@ -22,12 +22,14 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-  MaterialProperty<Real> &_dens0;
-  MaterialProperty<Real> &_viscosity;
+  unsigned int _this_var_num;
+  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
+
+  MaterialProperty<std::vector<Real> > &_viscosity;
   MaterialProperty<RealVectorValue> &_gravity;
   MaterialProperty<RealTensorValue> & _permeability;
-  MaterialProperty<Real> &_rel_perm;
-  MaterialProperty<Real> &_density;
+  MaterialProperty<std::vector<Real> > &_rel_perm;
+  MaterialProperty<std::vector<Real> > &_density;
   Function & _func;
   FEProblem & _feproblem;
 };

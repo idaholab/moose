@@ -19,8 +19,10 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _pressure_var;
   const RichardsSeff & _seff_UO;
+
+  std::vector<unsigned int> _pressure_vars;
+  std::vector<VariableValue *> _pressure_vals;
 };
 
 #endif // RICHARDSSEFFAUX_H

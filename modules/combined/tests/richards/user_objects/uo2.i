@@ -1,4 +1,4 @@
-# User objects give the correct value
+# Density User objects give the correct value
 # 
 # If you want to add another test for another UserObject
 # then add the UserObject, add a Function defining the expected result,
@@ -14,8 +14,10 @@
   [./DensityIdeal]
     type = RichardsDensityIdeal
     p0 = 33333
-    slope = 1.1
+    slope = 1.1E-2
   [../]
+
+  # following are unimportant in this test
   [./SeffVG]
     type = RichardsSeff1VG
     m = 0.8
@@ -48,34 +50,56 @@
     vars = 'dens0 bulk_mod'
     vals = '1000 2E6'
   [../]
+  [./answer_dDensityConstBulk]
+    type = GradParsedFunction
+    direction = '1 0 0'
+    value = dens0*exp(x/bulk_mod)
+    vars = 'dens0 bulk_mod'
+    vals = '1000 2E6'
+  [../]
+  [./answer_d2DensityConstBulk]
+    type = Grad2ParsedFunction
+    direction = '1 0 0'
+    value = dens0*exp(x/bulk_mod)
+    vars = 'dens0 bulk_mod'
+    vals = '1000 2E6'
+  [../]
+
   [./answer_DensityIdeal]
     type = ParsedFunction
     value = slope*(x-p0)
     vars = 'p0 slope'
-    vals = '33333 1.1'
+    vals = '33333 1.1E-2'
   [../]
-  [./answer_SeffVG]
-    type = ParsedFunction
-    value = (1+max((-x)*al,0)^(1/(1-m)))^(-m)
-    vars = 'al m'
-    vals = '1E-6 0.8'
+  [./answer_dDensityIdeal]
+    type = GradParsedFunction
+    direction = '1 0 0'
+    value = slope*(x-p0)
+    vars = 'p0 slope'
+    vals = '33333 1.1E-2'
   [../]
-  [./answer_RelPermPower]
-    type = ParsedFunction
-    value = max((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm,0)/((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm)*(((n+1)*(((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm)/(1-simm))^n)-(n*((((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm)/(1-simm))^(n+1))))
-    vars = 'al m simm n'
-    vals = '1E-6 0.8 0.10101 2'
+  [./answer_d2DensityIdeal]
+    type = Grad2ParsedFunction
+    direction = '1 0 0'
+    value = slope*(x-p0)
+    vars = 'p0 slope'
+    vals = '33333 1.1E-2'
   [../]
 []
 
 [AuxVariables]
   [./DensityConstBulk_Aux]
   [../]
+  [./dDensityConstBulk_Aux]
+  [../]
+  [./d2DensityConstBulk_Aux]
+  [../]
+
   [./DensityIdeal_Aux]
   [../]
-  [./SeffVG_Aux]
+  [./dDensityIdeal_Aux]
   [../]
-  [./RelPermPower_Aux]
+  [./d2DensityIdeal_Aux]
   [../]
 []
 
@@ -86,23 +110,36 @@
     density_UO = DensityConstBulk
     pressure_var = pressure
   [../]
+  [./dDensityConstBulk_AuxK]
+    type = RichardsDensityPrimeAux
+    variable = dDensityConstBulk_Aux
+    density_UO = DensityConstBulk
+    pressure_var = pressure
+  [../]
+  [./d2DensityConstBulk_AuxK]
+    type = RichardsDensityPrimePrimeAux
+    variable = d2DensityConstBulk_Aux
+    density_UO = DensityConstBulk
+    pressure_var = pressure
+  [../]
+
   [./DensityIdeal_AuxK]
     type = RichardsDensityAux
     variable = DensityIdeal_Aux
     density_UO = DensityIdeal
     pressure_var = pressure
   [../]
-  [./SeffVG_AuxK]
-    type = RichardsSeffAux
-    variable = SeffVG_Aux
-    seff_UO = SeffVG
-    pressure_vars = pressure
+  [./dDensityIdeal_AuxK]
+    type = RichardsDensityPrimeAux
+    variable = dDensityIdeal_Aux
+    density_UO = DensityIdeal
+    pressure_var = pressure
   [../]
-  [./RelPermPower_AuxK]
-    type = RichardsRelPermAux
-    variable = RelPermPower_Aux
-    relperm_UO = RelPermPower
-    seff_var = SeffVG_Aux
+  [./d2DensityIdeal_AuxK]
+    type = RichardsDensityPrimePrimeAux
+    variable = d2DensityIdeal_Aux
+    density_UO = DensityIdeal
+    pressure_var = pressure
   [../]
 []
 
@@ -112,20 +149,31 @@
     function = answer_DensityConstBulk
     variable = DensityConstBulk_Aux
   [../]
+  [./cf_dDensityConstBulk]
+    type = NodalL2Error
+    function = answer_dDensityConstBulk
+    variable = dDensityConstBulk_Aux
+  [../]
+  [./cf_d2DensityConstBulk]
+    type = NodalL2Error
+    function = answer_d2DensityConstBulk
+    variable = d2DensityConstBulk_Aux
+  [../]
+
   [./cf_DensityIdeal]
     type = NodalL2Error
     function = answer_DensityIdeal
     variable = DensityIdeal_Aux
   [../]
-  [./cf_SeffVG]
+  [./cf_dDensityIdeal]
     type = NodalL2Error
-    function = answer_SeffVG
-    variable = SeffVG_Aux
+    function = answer_dDensityIdeal
+    variable = dDensityIdeal_Aux
   [../]
-  [./cf_RelPermPower]
+  [./cf_d2DensityIdeal]
     type = NodalL2Error
-    function = answer_RelPermPower
-    variable = RelPermPower_Aux
+    function = answer_d2DensityIdeal
+    variable = d2DensityIdeal_Aux
   [../]
 []
     
@@ -204,7 +252,7 @@
 
 [Output]
   linear_residuals = false
-  file_base = uo1
+  file_base = uo2
   interval = 1
   exodus = true
   perf_log = false

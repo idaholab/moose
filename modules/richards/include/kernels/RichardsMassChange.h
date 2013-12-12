@@ -23,27 +23,33 @@ protected:
 
   virtual Real computeQpJacobian();
 
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+
+  unsigned int _this_var_num;
+
   bool _lumping;
   bool _use_supg;
 
   MaterialProperty<Real> &_porosity;
 
-  MaterialProperty<Real> &_sat_old;
+  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
 
-  MaterialProperty<Real> &_sat;
-  MaterialProperty<Real> &_dsat;
-  MaterialProperty<Real> &_d2sat;
+  MaterialProperty<std::vector<Real> > &_sat_old;
 
-  MaterialProperty<Real> &_density_old;
+  MaterialProperty<std::vector<Real> > &_sat;
+  MaterialProperty<std::vector<std::vector<Real> > > &_dsat;
+  MaterialProperty<std::vector<std::vector<std::vector<Real> > > > &_d2sat;
 
-  MaterialProperty<Real> &_density;
-  MaterialProperty<Real> &_ddensity;
-  MaterialProperty<Real> &_d2density;
+  MaterialProperty<std::vector<Real> > &_density_old;
 
-  MaterialProperty<RealVectorValue> &_vel_SUPG;
-  MaterialProperty<RealTensorValue> &_vel_prime_SUPG;
-  MaterialProperty<Real> &_tau_SUPG;
-  MaterialProperty<RealVectorValue> &_tau_prime_SUPG;
+  MaterialProperty<std::vector<Real> > &_density;
+  MaterialProperty<std::vector<Real> > &_ddensity;
+  MaterialProperty<std::vector<Real> > &_d2density;
+
+  MaterialProperty<std::vector<RealVectorValue> >&_tauvel_SUPG;
+  MaterialProperty<std::vector<RealTensorValue> >&_dtauvel_SUPG_dgradp;
+  MaterialProperty<std::vector<RealVectorValue> >&_dtauvel_SUPG_dp;
+
 };
 
 #endif //RICHARDSMASSCHANGE

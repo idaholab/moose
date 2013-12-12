@@ -17,27 +17,30 @@ RichardsMassChange::RichardsMassChange(const std::string & name,
                                              InputParameters parameters) :
     Kernel(name,parameters),
 
+    _this_var_num(_var.index()),
+
     _lumping(getParam<bool>("lumping")),
     _use_supg(getParam<bool>("use_supg")),
     // This kernel expects input parameters named "bulk_mod", etc
     _porosity(getMaterialProperty<Real>("porosity")),
 
-    _sat_old(getMaterialProperty<Real>("sat_old")),
+    _p_var_nums(getMaterialProperty<std::vector<unsigned int> >("p_var_nums")),
 
-    _sat(getMaterialProperty<Real>("sat")),
-    _dsat(getMaterialProperty<Real>("dsat")),
-    _d2sat(getMaterialProperty<Real>("d2sat")),
+    _sat_old(getMaterialProperty<std::vector<Real> >("sat_old")),
 
-    _density_old(getMaterialProperty<Real>("density_old")), 
+    _sat(getMaterialProperty<std::vector<Real> >("sat")),
+    _dsat(getMaterialProperty<std::vector<std::vector<Real> > >("dsat")),
+    _d2sat(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("d2sat")),
 
-    _density(getMaterialProperty<Real>("density")), 
-    _ddensity(getMaterialProperty<Real>("ddensity")),
-    _d2density(getMaterialProperty<Real>("d2density")),
+    _density_old(getMaterialProperty<std::vector<Real> >("density_old")), 
 
-    _vel_SUPG(getMaterialProperty<RealVectorValue>("vel_SUPG")),
-    _vel_prime_SUPG(getMaterialProperty<RealTensorValue>("vel_prime_SUPG")),
-    _tau_SUPG(getMaterialProperty<Real>("tau_SUPG")),
-    _tau_prime_SUPG(getMaterialProperty<RealVectorValue>("tau_prime_SUPG"))
+    _density(getMaterialProperty<std::vector<Real> >("density")), 
+    _ddensity(getMaterialProperty<std::vector<Real> >("ddensity")),
+    _d2density(getMaterialProperty<std::vector<Real> >("d2density")),
+
+    _tauvel_SUPG(getMaterialProperty<std::vector<RealVectorValue> >("tauvel_SUPG")),
+    _dtauvel_SUPG_dgradp(getMaterialProperty<std::vector<RealTensorValue> >("dtauvel_SUPG_dgradp")),
+    _dtauvel_SUPG_dp(getMaterialProperty<std::vector<RealVectorValue> >("dtauvel_SUPG_dp"))
 {
 }
 
@@ -45,51 +48,71 @@ RichardsMassChange::RichardsMassChange(const std::string & name,
 Real
 RichardsMassChange::computeQpResidual()
 {
-  Real mass = _porosity[_qp]*_density[_qp]*_sat[_qp];
-  Real mass_old = _porosity[_qp]*_density_old[_qp]*_sat_old[_qp];
-
-  Real test_fcn = _test[_i][_qp] ;
-  if (_use_supg) {
-    test_fcn += _tau_SUPG[_qp]*_vel_SUPG[_qp]*_grad_test[_i][_qp];
-  }
-
-  return test_fcn*(mass - mass_old)/_dt;
+  for (int pvar=0 ; pvar<_p_var_nums.size() ; ++pvar )
+    {
+      if (_p_var_nums[_qp][pvar] == _this_var_num)
+	{
+	  Real mass = _porosity[_qp]*_density[_qp][pvar]*_sat[_qp][pvar];
+	  Real mass_old = _porosity[_qp]*_density_old[_qp][pvar]*_sat_old[_qp][pvar];
+	  
+	  Real test_fcn = _test[_i][_qp] ;
+	  if (_use_supg) {
+	    test_fcn += _tauvel_SUPG[_qp][pvar]*_grad_test[_i][_qp];
+	  }
+	  return test_fcn*(mass - mass_old)/_dt;
+	}
+    }
+  return 0.0;
 }
 
 Real
 RichardsMassChange::computeQpJacobian()
 {
-  Real mass = _porosity[_qp]*_density[_qp]*_sat[_qp];
-  Real mass_old = _porosity[_qp]*_density_old[_qp]*_sat_old[_qp];
-  Real mass_prime = _phi[_j][_qp]*_porosity[_qp]*(_ddensity[_qp]*_sat[_qp] + _density[_qp]*_dsat[_qp]);
+  for (int pvar=0 ; pvar<_p_var_nums.size() ; ++pvar )
+    {
+      if (_p_var_nums[_qp][pvar] == _this_var_num)
+	{
+	  Real mass = _porosity[_qp]*_density[_qp][pvar]*_sat[_qp][pvar];
+	  Real mass_old = _porosity[_qp]*_density_old[_qp][pvar]*_sat_old[_qp][pvar];
+	  Real mass_prime = _phi[_j][_qp]*_porosity[_qp]*(_ddensity[_qp][pvar]*_sat[_qp][pvar] + _density[_qp][pvar]*_dsat[_qp][pvar][pvar]);
 
-  Real test_fcn = _test[_i][_qp] ;
-  Real test_fcn_prime = 0;
-    
-  if (_use_supg) {
-    test_fcn += _tau_SUPG[_qp]*_vel_SUPG[_qp]*_grad_test[_i][_qp];
-    test_fcn_prime += ((_tau_prime_SUPG[_qp]*_grad_phi[_j][_qp])*(_vel_SUPG[_qp]*_grad_test[_i][_qp]) + _tau_SUPG[_qp]*(_vel_prime_SUPG[_qp]*_grad_phi[_j][_qp])*_grad_test[_i][_qp]);
-  }
+	  //std::cout << _ddensity[_qp][pvar] << " " << _sat[_qp][pvar]  << " " <<  _density[_qp][pvar] << " " << _dsat[_qp][pvar][pvar] << "\n";
+	  //std::cout << "phi=" << _phi[_j][_qp] << " " << _test[_i][_qp] << "\n";
 
-  return (test_fcn*mass_prime + test_fcn_prime*(mass- mass_old))/_dt;
+	  Real test_fcn = _test[_i][_qp] ;
+	  Real test_fcn_prime = 0;
+	  
+	  if (_use_supg) {
+	    test_fcn += _tauvel_SUPG[_qp][pvar]*_grad_test[_i][_qp];
+	    test_fcn_prime += _grad_phi[_j][_qp]*(_dtauvel_SUPG_dgradp[_qp][pvar]*_grad_test[_i][_qp]) + _phi[_j][_qp]*_dtauvel_SUPG_dp[_qp][pvar]*_grad_test[_i][_qp];
+	  }
+	  //std::cout << (test_fcn*mass_prime + test_fcn_prime*(mass- mass_old))/_dt << " " << _dt << "\n";
+	  return (test_fcn*mass_prime + test_fcn_prime*(mass- mass_old))/_dt;
+	}
+    }
+  return 0.0;
 }
 
-/*
-void
-RichardsMassChange::computeJacobian()
+Real
+RichardsMassChange::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_lumping)
-  {
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), _var.index());
-
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
-        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        {
-          ke(_i, _i) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
-        }
-  }
-  else
-    Kernel::computeJacobian();
+  for (int pvar=0 ; pvar<_p_var_nums.size() ; ++pvar )
+    {
+      if (_p_var_nums[_qp][pvar] == _this_var_num)
+	{
+	  for (int dvar=0 ; dvar<_p_var_nums.size() ; ++dvar )
+	    {
+	      if (_p_var_nums[_qp][dvar] == jvar)
+		{
+		  Real mass_prime = _phi[_j][_qp]*_porosity[_qp]*_density[_qp][pvar]*_dsat[_qp][pvar][dvar];
+		  Real test_fcn = _test[_i][_qp] ;
+		  if (_use_supg) {
+		    test_fcn += _tauvel_SUPG[_qp][pvar]*_grad_test[_i][_qp];
+		  }
+		  return test_fcn*mass_prime/_dt;
+		}
+	    }
+	}
+    }
+  return 0.0;
 }
-*/

@@ -22,30 +22,34 @@ protected:
 
   virtual Real computeQpJacobian();
 
-  MaterialProperty<Real> &_dens0;
-  MaterialProperty<Real> &_viscosity;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+
+  unsigned int _this_var_num;
+
+  MaterialProperty<std::vector<Real> > &_viscosity;
   MaterialProperty<RealVectorValue> &_gravity;
   MaterialProperty<RealTensorValue> & _permeability;
 
-  MaterialProperty<Real> &_seff;
-  MaterialProperty<Real> &_dseff;
-  MaterialProperty<Real> &_d2seff;
+  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
 
-  MaterialProperty<Real> &_rel_perm;
-  MaterialProperty<Real> &_drel_perm;
-  MaterialProperty<Real> &_d2rel_perm;
+  MaterialProperty<std::vector<Real> > &_seff;
+  MaterialProperty<std::vector<std::vector<Real> > > &_dseff;
+  MaterialProperty<std::vector<std::vector<std::vector<Real> > > > &_d2seff;
 
-  MaterialProperty<Real> &_density;
-  MaterialProperty<Real> &_ddensity;
-  MaterialProperty<Real> &_d2density;
+  MaterialProperty<std::vector<Real> > &_rel_perm;
+  MaterialProperty<std::vector<Real> > &_drel_perm;
+  MaterialProperty<std::vector<Real> > &_d2rel_perm;
+
+  MaterialProperty<std::vector<Real> > &_density;
+  MaterialProperty<std::vector<Real> > &_ddensity;
+  MaterialProperty<std::vector<Real> > &_d2density;
 
   VariableSecond & _second_u;
   VariablePhiSecond & _second_phi;
 
-  MaterialProperty<RealVectorValue> &_vel_SUPG;
-  MaterialProperty<RealTensorValue> &_vel_prime_SUPG;
-  MaterialProperty<Real> &_tau_SUPG;
-  MaterialProperty<RealVectorValue> &_tau_prime_SUPG;
+  MaterialProperty<std::vector<RealVectorValue> >&_tauvel_SUPG;
+  MaterialProperty<std::vector<RealTensorValue> >&_dtauvel_SUPG_dgradp;
+  MaterialProperty<std::vector<RealVectorValue> >&_dtauvel_SUPG_dp;
 
 };
 

@@ -22,9 +22,9 @@ class RichardsRelPerm : public GeneralUserObject
 
   // These functions must be over-ridden in the derived class
   // to provide the actual values of relative perm and its derivatives
-  virtual Real relperm(Real seff) const;
-  virtual Real drelperm(Real seff) const;
-  virtual Real d2relperm(Real seff) const;
+  virtual Real relperm(Real seff) const = 0;
+  virtual Real drelperm(Real seff) const = 0;
+  virtual Real d2relperm(Real seff) const = 0;
 
 };
 

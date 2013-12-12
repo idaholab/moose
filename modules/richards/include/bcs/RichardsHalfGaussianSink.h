@@ -24,11 +24,6 @@ protected:
   Real _maximum;
   Real _sd;
   Real _centre;
-  MaterialProperty<RealVectorValue> &_vel_SUPG;
-  MaterialProperty<RealTensorValue> &_vel_prime_SUPG;
-  MaterialProperty<Real> &_tau_SUPG;
-  MaterialProperty<RealVectorValue> &_tau_prime_SUPG;
-
 };
 
 #endif //RICHARDSHALFGAUSSIANSINK

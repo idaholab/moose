@@ -15,20 +15,14 @@ InputParameters validParams<RichardsPiecewiseLinearSink>()
 RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const std::string & name,
                                              InputParameters parameters) :
     IntegratedBC(name,parameters),
-    _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("fluxes")),
-    _vel_SUPG(getMaterialProperty<RealVectorValue>("vel_SUPG")),
-    _vel_prime_SUPG(getMaterialProperty<RealTensorValue>("vel_prime_SUPG")),
-    _tau_SUPG(getMaterialProperty<Real>("tau_SUPG")),
-    _tau_prime_SUPG(getMaterialProperty<RealVectorValue>("tau_prime_SUPG"))
-
+    _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("fluxes"))
 {}
 
-/* NOTE: I don't THINK it's necessary to do SUPG here */
 
 Real
 RichardsPiecewiseLinearSink::computeQpResidual()
 {
-  Real test_fcn = _test[_i][_qp] + _tau_SUPG[_qp]*_vel_SUPG[_qp]*_grad_test[_i][_qp]*0;
+  Real test_fcn = _test[_i][_qp];
   return test_fcn*_sink_func.sample(_u[_qp]);
 }
 

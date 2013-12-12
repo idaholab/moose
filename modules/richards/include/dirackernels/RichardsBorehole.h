@@ -23,9 +23,8 @@ protected:
   Real _well_constant_production;
   Real _well_constant_injection;
   Real _p_bot;
-  RealVectorValue _gravity;
+  RealVectorValue _unit_weight;
 
-  MaterialProperty<Real> &_dens0;
   MaterialProperty<Real> &_viscosity;
 
   MaterialProperty<Real> &_dseff;
@@ -38,11 +37,6 @@ protected:
 
   PostprocessorValue & _reporter;
   std::string _point_file;
-
-  MaterialProperty<RealVectorValue> &_vel_SUPG;
-  MaterialProperty<RealTensorValue> &_vel_prime_SUPG;
-  MaterialProperty<Real> &_tau_SUPG;
-  MaterialProperty<RealVectorValue> &_tau_prime_SUPG;
 
   std::vector<Real> _xs;
   std::vector<Real> _ys;

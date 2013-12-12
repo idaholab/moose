@@ -21,9 +21,12 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
+  unsigned int _this_var_num;
+  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
+
   MaterialProperty<Real> &_porosity;
-  MaterialProperty<Real> &_sat;
-  MaterialProperty<Real> &_density;
+  MaterialProperty<std::vector<Real> > &_sat;
+  MaterialProperty<std::vector<Real> > &_density;
 };
 
 #endif

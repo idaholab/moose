@@ -7,6 +7,7 @@
 #include "RichardsRelPerm.h"
 #include "RichardsSeff.h"
 #include "RichardsSat.h"
+#include "RichardsSUPG.h"
 
 //Forward Declarations
 class RichardsMaterial;
@@ -29,22 +30,12 @@ private:
 
   Real _material_por;
   RealTensorValue _material_perm;
-  const RichardsRelPerm & _material_relperm_UO;
-  const RichardsSeff & _material_seff_UO;
-  const RichardsSat & _material_sat_UO;
-  const RichardsDensity & _material_density_UO;
-  Real _material_dens0;
-  Real _material_viscosity;
+  std::vector<Real> _material_viscosity;
+
+  unsigned int _num_p; 
+
   RealVectorValue _material_gravity;
-
-  VariableValue& _pressure;
-
-  VariableValue& _pressure_old;
-
   // Following is for SUPG
-  bool _doing_SUPG;
-  Real _SUPG_pressure;
-  VariableGradient& _grad_p;
   Real _trace_perm;
 
   // Reference to a pointer to an FEBase object from the _subproblem object.  Initialized in ctor.
@@ -62,41 +53,56 @@ private:
 
   MaterialProperty<Real> & _porosity;
   MaterialProperty<RealTensorValue> & _permeability;
-  MaterialProperty<Real> & _dens0;
-  MaterialProperty<Real> & _viscosity;
+  MaterialProperty<std::vector<Real> > & _viscosity;
   MaterialProperty<RealVectorValue> & _gravity;
 
-  MaterialProperty<Real> & _density_old;
+  MaterialProperty<std::vector<unsigned int> > & _p_var_nums;
+  MaterialProperty<std::vector<int> > & _mat_var_num;
 
-  MaterialProperty<Real> & _density;
-  MaterialProperty<Real> & _ddensity; // d(density)/dp
-  MaterialProperty<Real> & _d2density; // d^2(density)/dp^2
+  MaterialProperty<std::vector<Real> > & _density_old;
 
-  MaterialProperty<Real> & _seff_old; // old effective saturation
+  MaterialProperty<std::vector<Real> > & _density;
+  MaterialProperty<std::vector<Real> > & _ddensity; // d(density)/dp
+  MaterialProperty<std::vector<Real> > & _d2density; // d^2(density)/dp^2
 
-  MaterialProperty<Real> & _seff; // effective saturation
-  MaterialProperty<Real> & _dseff; // d(seff)/dp
-  MaterialProperty<Real> & _d2seff; // d^2(seff)/dp^2
+  MaterialProperty<std::vector<Real> > & _seff_old; // old effective saturation
 
-  MaterialProperty<Real> & _sat_old; // old saturation
+  MaterialProperty<std::vector<Real> > & _seff; // effective saturation
+  MaterialProperty<std::vector<std::vector<Real> > > & _dseff; // d(seff)/dp
+  MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _d2seff; // d^2(seff)/dp^2
 
-  MaterialProperty<Real> & _sat; // saturation
-  MaterialProperty<Real> & _dsat; // d(saturation)/dp
-  MaterialProperty<Real> & _d2sat; // d^2(saturation)/dp^2
+  MaterialProperty<std::vector<Real> >& _sat_old; // old saturation
 
-  MaterialProperty<Real> & _rel_perm; // relative permeability
-  MaterialProperty<Real> & _drel_perm; // d(relperm)/dSeff
-  MaterialProperty<Real> & _d2rel_perm; // d^2(relperm)/dSeff^2
+  MaterialProperty<std::vector<Real> >& _sat; // saturation
+  MaterialProperty<std::vector<std::vector<Real> > >& _dsat; // d(saturation)/dp
+  MaterialProperty<std::vector<std::vector<std::vector<Real> > > >& _d2sat; // d^2(saturation)/dp^2
 
-  MaterialProperty<RealVectorValue> & _vel_SUPG; // vector that points in direction of information propagation
-  MaterialProperty<RealTensorValue> & _vel_prime_SUPG; // d (_vel_SUPG)/d(_grad_u)
-  MaterialProperty<Real> & _tau_SUPG; // the "tau" SUPG parameter
-  MaterialProperty<RealVectorValue> & _tau_prime_SUPG; // d (_tau_SUPG)/d(_grad_u)
+  MaterialProperty<std::vector<Real> > & _rel_perm; // relative permeability
+  MaterialProperty<std::vector<Real> > & _drel_perm; // d(relperm)/dSeff
+  MaterialProperty<std::vector<Real> > & _d2rel_perm; // d^2(relperm)/dSeff^2
 
-  RealVectorValue velSUPG(unsigned qp);
-  RealTensorValue velPrimeSUPG(unsigned qp);
-  Real tauSUPG(unsigned qp);
-  RealVectorValue tauPrimeSUPG(unsigned qp);
+  MaterialProperty<std::vector<RealVectorValue> > & _tauvel_SUPG; // tauSUPG * velSUPG
+  MaterialProperty<std::vector<RealTensorValue> > & _dtauvel_SUPG_dgradp; // d (_tauvel_SUPG)/d(_grad_p)
+  MaterialProperty<std::vector<RealVectorValue> > & _dtauvel_SUPG_dp; // d (_tauvel_SUPG)/d(p)
+
+  std::vector<unsigned int> _pressure_vars;
+  std::vector<VariableValue *> _pressure_vals;
+  std::vector<VariableValue *> _pressure_old_vals;
+
+  std::vector<const RichardsRelPerm *> _material_relperm_UO;
+  std::vector<const RichardsSeff *> _material_seff_UO;
+  std::vector<const RichardsSat *> _material_sat_UO;
+  std::vector<const RichardsDensity *> _material_density_UO;
+  std::vector<const RichardsSUPG *> _material_SUPG_UO;
+
+  std::vector<int> _material_var_num;
+
+  std::vector<VariableGradient *> _grad_p;
+
+  RealVectorValue velSUPG(VectorValue<double> gradp, Real dens, unsigned int qp);
+  RealTensorValue velPrimeSUPG();
+  Real tauSUPG(VectorValue<double> gradp, Real dens, Real SUPGp, unsigned int qp);
+  RealVectorValue tauPrimeSUPG(VectorValue<double> gradp, Real dens, Real SUPGp, unsigned int qp);
 
 };
 
