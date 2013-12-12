@@ -1,7 +1,7 @@
 # unsaturated = false
 # gravity = true
 # supg = false
-# transient = false
+# transient = true
 
 [Mesh]
   type = GeneratedMesh
@@ -58,7 +58,7 @@
     
   
 [Kernels]
-  active = 'richardsf'
+  active = 'richardsf richardst'
   [./richardst]
     type = RichardsMassChange
     variable = pressure
@@ -99,12 +99,13 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = Newton
+  dt = 1E-5
 []
 
 [Output]
-  file_base = jn03
+  file_base = jn11
   output_initial = false
   exodus = false
   perf_log = false

@@ -1,7 +1,7 @@
-# unsaturated = false
-# gravity = true
+# unsaturated = true
+# gravity = false
 # supg = false
-# transient = false
+# transient = true
 
 [Mesh]
   type = GeneratedMesh
@@ -50,15 +50,15 @@
     [./InitialCondition]
       type = RandomIC
       block = 0
-      min = 0
-      max = 1
+      min = -1
+      max = 0
     [../]
   [../]
 []
     
   
 [Kernels]
-  active = 'richardsf'
+  active = 'richardsf richardst'
   [./richardst]
     type = RichardsMassChange
     variable = pressure
@@ -82,7 +82,7 @@
     sat_UO = Saturation
     seff_UO = SeffVG
     viscosity = 1E-3
-    gravity = '1 2 3'
+    gravity = '0 0 0'
     linear_shape_fcns = true
   [../]
 []
@@ -99,12 +99,13 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = Newton
+  dt = 1E-5
 []
 
 [Output]
-  file_base = jn03
+  file_base = jn10
   output_initial = false
   exodus = false
   perf_log = false
