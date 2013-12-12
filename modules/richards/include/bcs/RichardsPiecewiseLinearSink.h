@@ -23,10 +23,6 @@ protected:
   virtual Real computeQpJacobian();
 
   LinearInterpolation _sink_func;
-  MaterialProperty<RealVectorValue> &_vel_SUPG;
-  MaterialProperty<RealTensorValue> &_vel_prime_SUPG;
-  MaterialProperty<Real> &_tau_SUPG;
-  MaterialProperty<RealVectorValue> &_tau_prime_SUPG;
 };
 
 #endif //RichardsPiecewiseLinearSink

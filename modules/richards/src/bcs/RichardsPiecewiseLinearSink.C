@@ -29,7 +29,6 @@ RichardsPiecewiseLinearSink::computeQpResidual()
 Real
 RichardsPiecewiseLinearSink::computeQpJacobian()
 {
-  Real test_fcn = _test[_i][_qp] + _tau_SUPG[_qp]*_vel_SUPG[_qp]*_grad_test[_i][_qp]*0;
-  Real supg_test_prime = (_tau_prime_SUPG[_qp]*_grad_phi[_j][_qp])*(_vel_SUPG[_qp]*_grad_test[_i][_qp]) + _tau_SUPG[_qp]*(_vel_prime_SUPG[_qp]*_grad_phi[_j][_qp])*_grad_test[_i][_qp];
-  return test_fcn*_sink_func.sampleDerivative(_u[_qp])*_phi[_j][_qp] + supg_test_prime*_sink_func.sample(_u[_qp])*0;
+  Real test_fcn = _test[_i][_qp];
+  return test_fcn*_sink_func.sampleDerivative(_u[_qp])*_phi[_j][_qp];
 }
