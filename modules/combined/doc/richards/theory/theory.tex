@@ -25,7 +25,7 @@
 \begin{document}
 
 
-\title{Wallaby Theory Manual}
+\title{Richards Theory Manual}
 \author{Andy Wilkins \\
 CSIRO}
 \maketitle
@@ -36,30 +36,56 @@ CSIRO}
 \chapter{Introduction}
 %%%
 
-Wallaby is a finite-element based groundwater flow code.  This
-document describes the theoretical and numerical foundations of
-Wallaby.  Examples of Wallaby applications can be found in the
-accompanying Wallaby Examples document.
+The Richards' equation\footnote{Contrary to the urban legend,
+  ``Richards'' is unrelated to Richard Martineau:
+  see~\cite{richards1931}.} describes slow fluid flow through a porous
+medium.  This document describes the theoretical and numerical
+foundations of the MOOSE implementation.
+\begin{itemize}
+\item Chapter~\ref{chap.govern.eqn} describes the governing equation
+  and associated nonlinear functions.
+\item Chapter~\ref{sources.sinks.chap} describes the sources and sinks
+  that I have implemented.
+\item Chapter~\ref{chap.upwinding} describes upwinding using the SUPG method.
+\item Chapter~\ref{chap.multi} describes the multi-phase Richards'
+  equations that I have implemented.  For notational simplicity, the
+  rest of this document focusses on the single-phase case, but this
+  chapter shows the multi-phase version is a straightforward
+  generalisation.
+\item Chapter~\ref{tol.chap} briefly discusses tolerancs and
+  convergence criteria.
+\item Chapter~\ref{discret.chap} discusses technical issues with the
+  finite-element discretisation.
+\end{itemize}
+There are two other accompanying documents: (1) A description of the
+unit tests and benchmark verifications; (2) Examples of input syntax
+that users can utilise when building models.
 
 %%%
-\chapter{Governing Equations}
+\chapter{Governing equations for the single-phase situation}
+\label{chap.govern.eqn}
 %%%
-The Wallaby governing DE is Richards' equation~\cite{richards1931}.
-This describes the movement of fluid through the connected pore space
-of a porous medium.  The equation is
+The Richards' equation~\cite{richards1931} describes the movement of
+fluid through the connected pore space of a porous medium.  For a
+single phase, the equation is
 \begin{equation}
 \phi \frac{\partial}{\partial t} \left( \rho S \right) = \nabla_{i}
-\left( \frac{\rho \kappa_{ij}\kappa_{\mathrm{rel}}}{\mu} (\nabla_{j}P - \rho_{0} g_{j}) \right)
+\left( \frac{\rho \kappa_{ij}\kappa_{\mathrm{rel}}}{\mu} (\nabla_{j}P - \rho g_{j}) \right)
 + F \ ,
 \label{richards.eqn}
 \end{equation}
-where the independent variable is $P$, the fluid pressure.  On the
+where the independent variable is $P$, the fluid pressure.  The
+multi-phase version is very similar and is described in
+Chapter~\ref{chap.multi}.  On the
 right-hand side, the index summation convection has been used, so $i$
 and $j$ are both summed from 1 to 3 in three dimensions (or 1 to 2 in
 two dimensions).  The following notation has been used.
 \begin{itemize}
 \item $\phi$ is the porosity of the medium (dimensionless).  It is a
-  material property (independent of the fluid pressure).  It is assumed
+  material property (independent of the fluid pressure).  The porous
+  medium is assumed to be made up of solid material with a porespace
+  through which the fluid can flow, and the porosity is
+  $V_{\mathrm{porespace}}/V_{\mathrm{medium}}$.  The porosity is assumed
   time-independent, but may be spatially varying.  A typical value for
   rock is 0.1.  To be strict, $\phi$ is the {\em connected} porosity, as the
   medium may have disconnected pores which are irrelevant for the
@@ -67,30 +93,25 @@ two dimensions).  The following notation has been used.
 \item $t$ is time.
 \item ${\mathbf{x}}$ is space, and $\nabla_{i}$ is the gradient operator.
 \item $\rho$ is the fluid density (measured in mass.length$^{-3}$,
-  usually kg.m$^{-3}$).  $\rho_{0}$ is a reference constant reference
-  density\footnote{A more physically precise version of
-    Eqn~(\ref{richards.eqn}) is obtained by replacing $\rho_{0}$ with
-    $\rho$.  Because most models use fluids with $\rho \sim \rho_{0}$
-    over the pressure ranges encountered, it is more usual to use
-    $\rho_{0}$, even though this is strictly not correct.  It would be
-  very simple to implement this generalisation in MOOSE}.  $\rho$ is
-  typically a function of pressure, and these two
-  parameters are discussed in more detail below.
+  usually kg.m$^{-3}$).  $\rho$ is
+  typically a function of pressure, which is discussed in more detail below.
 \item $S$ is the fluid saturation (dimensionless).  It is bounded,
   $0\leq S \leq 1$, and is the fraction of pore volume that is filled
-  with the fluid.  (The pore volume available to the fluid is just
-  $\phi V$ where $V$ is the volume of the medium.)  The term ``fully
+  with the fluid.  Hence $\phi\rho S$ appearing on the LHS of
+  Richards' equation is the volume-density of fluid at a point.  The term ``fully
   saturated'' means $S=1$, so that the entire pore volume is filled
   with the fluid.  When $S<1$, the medium is called ``partially
   saturated''.  The porevolume of a partially saturated medium is
   filled partially with the fluid, and partially with another fluid
   which I shall call air in the following (the other fluid need not
-  actually be air, but is convenient to call it so).  This air is free
+  actually be air, but is convenient to call it so).  In the
+  single-phase version, this air is free
   to move throughout the porevolume --- it may even be spontaneously
   created in a region where there was previously no air --- and the
   assumption of Richards' equation is that it has no affect on the
-  dynamics of the fluid.  $S$ is a function of fluid pressure and is
-  discussed in more detail below.
+  dynamics of the fluid.   In the multi-phase version
+  (Chapter~\ref{chap.multi}), the air is given a dynamics of its own.
+  $S$ is a function of fluid pressure and is discussed in more detail below.
 \item $\kappa_{ij}$ is the permeability tensor of the medium (measured
   in length$^{2}$, usually m$^{2}$).  It is a material property
   (independent of the fluid pressure).  It may be spatially varying.
@@ -107,12 +128,12 @@ two dimensions).  The following notation has been used.
   detail below.
 \item $\mu$ is the fluid's dynamic viscosity (measured
   force.length$^{-2}$.time, usually Pa.s).  While in reality it may be
-  a function of pressure, Wallaby considers it constant.  A typical
+  a function of pressure, I have implemented it as constant.  A typical
   value for liquid water is $10^{-3}$\,Pa.s.
-\item $P$ is the fluid porepressure (measured in Pa).  It is the
-  independent variable.
+\item $P$ is the fluid porepressure (measured force.length$^{-2}$,
+  usually Pa).  It is the independent variable.
 \item ${\mathbf{g}}$ is the acceleration of gravity (measured
-  in m.s$^{-2}$) as a vector pointing ``downwards''.  It is constant.
+  in length.time$^{-2}$, usually m.s$^{-2}$) as a vector pointing ``downwards''.  It is constant.
   For instance
   ${\mathbf{g}} = (0,\ 0,\ -9.8)$\,m.s$^{-2}$.
 \item $F$ is a source term (measured in
@@ -123,7 +144,7 @@ two dimensions).  The following notation has been used.
 \section{Residual saturations, effective saturation, and immobile saturation}
 
 Although physically the fluid saturation, $S$, can never exceed its
-bounds, $0\leq S\leq 1$, in practice it is often found that
+bounds, $0\leq S\leq 1$, in practice it is sometimes found that
 \begin{equation}
 S_{\mathrm{res}} \leq S \leq 1 - S_{\mathrm{air}} \ .
 \end{equation}
@@ -132,10 +153,11 @@ $S_{\mathrm{air}}$ is the ``residual air saturation''.
 
 The residual saturation is attained in experiments by applying an
 ``infinite negative fluid pressure'' to the porous material to suck out as
-much fluid as possible.  What happens is that the fluid becomes
+much fluid as possible.  What may happen is that the fluid becomes
 discontinuous so that small blobs or very thin films of fluid exist in
 the material, but because they are discontinuous they do not feel
-the ``infinite negative pressure''.  However, further fluid may be
+the ``infinite negative pressure''.  This gives rise to the nonzero
+$S_{\mathrm{res}}$.  However, further fluid may be
 extracted through other means such as heating or mechanical
 stimulation.
 
@@ -153,24 +175,24 @@ S_{\mathrm{eff}} = \frac{S - S_{\mathrm{res}}}{1 - S_{\mathrm{air}} -
 which has bounds $0\leq S_{\mathrm{eff}} \leq 1$ in the domain of
 applicability of Richards' equation.
 
-Richard's equation is only valid for $0\leq S_{\mathrm{eff}} \leq 1$,
-so that in many practical simulations, modellers often set
-$S_{\mathrm{res}} = 0 = S_{\mathrm{air}}$, but nevertheless Wallaby
-allows a nonzero value for these parameters.  It is a moot point as to
-whether $S_{\mathrm{res}}=0=S_{\mathrm{air}}$, because experiments are
-hard to perform.  What is of more practical use is the ``immobile
-saturation'', $S_{\mathrm{imm}}$, below which the relative permeability
-is zero, and that is discussed further in Section~\ref{rel.perm.sec}.
-(The physical reasons for the relative permeability going to zero below
-$S_{\mathrm{imm}}$ are probably those given above: the continuous film
-of fluid breaking down in the presence of large negative porepressures.)
+It is a moot point as to whether
+$S_{\mathrm{res}}=0=S_{\mathrm{air}}$, because experiments are hard to
+perform.  What is of more practical use is the ``immobile
+saturation'', $S_{\mathrm{imm}}$, below which the relative
+permeability is zero, and that is discussed further in
+Section~\ref{rel.perm.sec}.  (The physical reasons for the relative
+permeability going to zero below $S_{\mathrm{imm}}$ are probably those
+given above: the continuous film of fluid breaking down in the
+presence of large negative porepressures.)
 
 
 \section{Density}
 \label{sec.density.constk}
 
-It is assumed that the fluid bulk modulus is constant.  This means
-that the fluid density is
+The MOOSE implementation allows users to specify arbitrary
+relationships between density and porepressure.  One common case
+for liquids is that the fluid bulk modulus is constant, which means
+that 
 \begin{equation}
 \rho = \rho_{0}e^{P/K} \ .
 \end{equation}
@@ -192,12 +214,17 @@ allows definition of the capillary pressure
 \begin{equation}
 P_{\mathrm{c}} = P_{\mathrm{air}} - P \ ,
 \end{equation}
-in terms of the air pressure and the fluid porepressure.
-$P_{\mathrm{air}}$ is deemed to be constant for the single-phase
-situation described here.  In the two-phase case, it is the second
-variable, and this will be discussed elsewhere.
+in terms of the air pressure and the fluid porepressure.  For the
+single-phase case it is convenient to define
+\begin{equation}
+P_{\mathrm{air}} = 0 \ ,
+\label{eqn.pair.zero}
+\end{equation}
+so that the porepressure is referenced to this constant air pressure.
+The situation is more complicated in the multi-phase case as discussed
+in Chapter~\ref{chap.multi}.
 
-For a wetting fluid (compared with air), $P_{\mathrm{c}} > 0$, and
+For an unsaturated wetting fluid, $P_{\mathrm{c}} > 0$, and
 Laplace showed that $P_{\mathrm{c}} \propto 1/r$, where $r$ is the
 radius of the capillary.  This $P_{\mathrm{c}}$ is unbounded as
 $r\rightarrow 0$, but clearly there must be some cutoff where the
@@ -221,7 +248,8 @@ $P_{\mathrm{c}}$, the fluid is only occupying a small fraction of pore
 space.
 
 Various relationships between $P_{\mathrm{c}}$ and $S_{\mathrm{eff}}$
-have been proposed and used, and the most common is due to van
+have been proposed and used, and the MOOSE implemtnation allows users
+to specify any functional relationship.  The most common is due to van
 Genuchten~\cite{vangenucthen1980}:
 \begin{equation}
 S_{\mathrm{eff}} = \left( 1 + (\alpha P_{c})^{\frac{1}{1 - m}}
@@ -251,17 +279,18 @@ this latter version often causes algorithms to ``get stuck'' around
 $S_{\mathrm{eff}} = 0$.  As also mentioned above, because of the low
 relative permeability around $S_{\mathrm{eff}}$, physically realistic
 problems rarely explore the $S_{\mathrm{eff}}\sim 0$ region.
-\item Both $S_{\mathrm{eff}}\rightarrow 1$ and
-  $\mathrm{d}S_{\mathrm{eff}}/\mathrm{d}P_{c} \rightarrow 0$ as
+\item $S_{\mathrm{eff}}\rightarrow 1$ and
+  $\mathrm{d}S_{\mathrm{eff}}/\mathrm{d}P_{c} \rightarrow 0^{+}$ as
   $P_{c}\rightarrow 0$, for all $m$.  This ensures that there is
   continuity in the porepressure, $P$, and the derivative
-  $\mathrm{d}S/\mathrm{d}P$ around full saturation.  Also
+  $\mathrm{d}S/\mathrm{d}P$ around full saturation (remember that by definition
+  $S_{\mathrm{eff}}=1$ for $P_{c}<0$).  Also
   $\mathrm{d}^{2}S_{\mathrm{eff}}/\mathrm{d}P_{c}^{2} \rightarrow 0$
-  as $P_{c}\rightarrow 0$ if $m>0.5$.  This type of term enters the
+  as $P_{c}\rightarrow 0^{+}$ if $m>0.5$.  This type of term enters the
   Jacobian\footnote{It appears explicitly from the time derivative in
     Eqn~(\ref{richards.eqn}) if the derivative is written in terms of
     $\dot{P}$.  In fact, that formulation does not give good
-    mass-balance characteristics so it is not used in Wallaby, but
+    mass-balance characteristics so it is not used in the MOOSE implementation, but
     nevertheless it is good to have
     $\mathrm{d}^{2}S_{\mathrm{eff}}/\mathrm{d}P_{c}^{2}$ continuous.}
   in an implicit time-stepping scheme, so it is advantageous that it
@@ -274,13 +303,27 @@ I encourage users to set $m>0.5$.
 \includegraphics[width=10cm]{van_genuchten_pc.eps}
 \caption{$\alpha P_{c}$ as a function of $S_{\mathrm{eff}}$ as given
   by van Genuchten's expression Eqn~(\ref{vg.cap.eqn}).  Three values
-  of $m$ are shown: 0.5, 0.7 and 0.9.}
+  of $m$ are shown: 0.5, 0.7 and 0.9 (the $m=0.5$ case has largest
+  $P_{c}$ around $S_{\mathrm{eff}}\sim 0$).}
 \label{van_genuchten_pc.fig}
 \end{figure}
 
 
 \section{Relative permeability}
 \label{rel.perm.sec}
+
+The relative permeability obeys $0\leq \kappa_{\mathrm{rel}} \leq 1$.
+It encodes the fact that in the unsaturated region, continuous fluid
+films only exist in the small pores, and only moves through these
+small pores.  In contrast, for a fully-saturated region the fluid has
+access to the entire porespace, so by definition
+\begin{equation}
+\kappa_{\mathrm{rel}}(S_{\mathrm{eff}}) = 1 \ \ \ \mbox{for }\  P>0
+\ .
+\label{full.sat.rel.perm.eqn}
+\end{equation}
+Moreoever, $\kappa_{\mathrm{rel}}$ must be a monotonically-increasing
+function of $S_{\mathrm{eff}}$.
 
 Define the ``immobile saturation'' $S_{\mathrm{imm}}$.  Then all
 relative permeabilities are functions of
@@ -302,6 +345,11 @@ or mechanical effects, for instance), $S_{\mathrm{eff}}\geq
 S_{\mathrm{imm}}$, and this places a lower bound on
 physically-obtainable porepressures.
 
+The MOOSE implementation of Richards' equations allows users to
+specify arbitrary relationships between $\kappa_{\mathrm{rel}}$ and
+$S_{\mathrm{eff}}$.  Some relationships that have already been coded
+and tested are given below.
+
 Corresponding to the van Genuchten capillary curve of
 Eqn~(\ref{vg.cap.eqn}), van Genuchten~\cite{vangenucthen1980} showed
 there was a relative permeability function
@@ -319,24 +367,27 @@ As $\tilde{S}\rightarrow 0$, $k_{\mathrm{rel}} \rightarrow \tilde{S}^{\frac{1}{2
   \frac{2}{m}} < \tilde{S}^{5/2}$, where the final inequality results from
 $0<m<1$.
 
-As suggested in Figure~\ref{van_genuchten_krel.fig}, $\mathrm{d}k_{\mathrm{rel}}/d P
-\rightarrow 0$ as $P\rightarrow 0$ if $m>0.5$.  This is advantageous
-numerically when using an implicit time-stepping solution technique,
-since then both $k_{\mathrm{rel}}$ and its pressure-derivative are
-continuous around full saturation.  Once again, I encourage users to
+As suggested in Figure~\ref{van_genuchten_krel.fig},
+$\mathrm{d}k_{\mathrm{rel}}/d P_{c} \rightarrow 0$ as
+$P_{c}\rightarrow 0^{+}$ if $m>0.5$ when using the van Genuchten
+relative permeability and capillary pressure relationships.  This is
+advantageous numerically when using an implicit time-stepping solution
+technique, since then both $k_{\mathrm{rel}}$ and its
+pressure-derivative are continuous around full saturation (because of
+Eqn~(\ref{full.sat.rel.perm.eqn})).  Once again, I encourage users to
 set $m>0.5$.
 
 However, setting $m<0.5$ can sometimes be useful because: (1) the
 derivative $\mathrm{d}S_{\mathrm{eff}}/\mathrm{d} P$ is smaller (see
 Fig~\ref{van_genuchten_pc.fig}) which helps convergence; (2) published
-literature specifies the value of $m$.  In this case, it is extremely
-advantageous to modify the relative permeability curve close to
-$S_{\mathrm{eff}}=1$ to ensure continuity of its pressure derivative
-in that region.  This is standard practice in other codes too.
-Wallaby allows users to specify a relative permeability function of
-type {\tt vg\_1}, and specify a cutoff in $\tilde{S}$, {\tt
-  vg\_1\_cutoff}, above which the relative permeability is approximated
-by a cubic:
+literature or experiment specify the value of $m$.  In this case, it
+is extremely advantageous to modify the relative permeability curve
+close to $S_{\mathrm{eff}}=1$ to ensure continuity of its pressure
+derivative in that region.  This is standard practice in other codes
+too.  A modified relative permeability function has been coded into
+the MOOSE implementation that allows users to specify a cutoff in $\tilde{S}$, {\tt
+  vg\_1\_cutoff}, above which the relative permeability is
+approximated by a cubic:
 \begin{equation}
 \kappa_{\mathrm{rel}}(\tilde{S}) = \left\{
 \begin{array}{ll}
@@ -348,17 +399,17 @@ by a cubic:
 \label{eqn.mod_vg_1}
 \end{equation}
 The cubic is chosen so that the result is $C^{2}$ continuous,
-monotonically increasing\footnote{This is true, since the
-  van Genuchten $\kappa_{\mathrm{rel}}$ and its first and second
-  derivatives are positive at all values of the cutoff (assuming it is
-  greater than zero), and the first derivative of the cubic is
-  positive at $\tilde{S}=1$.  Because cubics have at most 2 turning
+monotonically increasing\footnote{This is true, since the van
+  Genuchten $\kappa_{\mathrm{rel}}$ and its first and second
+  derivatives are positive at all values of the cutoff (assuming the
+  cutoff is greater than zero), and the first derivative of the cubic
+  is positive at $\tilde{S}=1$.  Because cubics have at most 2 turning
   points, monotonicity is therefore guaranteed.}, and is unity at
 $\tilde{S}=1$.  Figure~\ref{vg_krel_mod.fig} shows two examples.
 
 
 Another class of relative-permeability curves has also been coded into
-Wallaby, which have the form
+MOOSE, which have the form
 \begin{equation}
 \kappa_{\mathrm{rel}}(\tilde{S}) = (n+1)\tilde{S}^{n} - n
 \tilde{S}^{n+1} \ \ \ \mbox{for}\ \ n\geq 2 \ .
@@ -369,8 +420,11 @@ have the nice property that
 $\mathrm{d}\kappa_{\mathrm{rel}}/\mathrm{d} S_{\mathrm{eff}}
 \rightarrow 0$ as $S_{\mathrm{eff}}\rightarrow 1$.  Moreover, for
 small $\tilde{S}$, $\kappa_{\mathrm{rel}} \sim \tilde{S}^{n}$, so that
-users can easily choose $n$ large to ensure that
+users can easily choose $n$ large enough to ensure that
 $\kappa_{\mathrm{rel}}$ is arbitrarily small for small $\tilde{S}$.
+However, caution should be applied when choosing large $n$, as the
+increasing nonlinearity adversely affects convergence (I suggest
+choosing $n \leq 5$).
 Figure~\ref{power_krel.fig} shows 3 example curves.
 
 \begin{figure}[htb]
@@ -401,7 +455,7 @@ Figure~\ref{power_krel.fig} shows 3 example curves.
   show the difference between the two formulations.  Right: with {\tt
     vg\_1\_cut}$=0.99$ the result is almost indistinguishable from the
   original expression.}
-\label{vG_krel_mod.fig}
+\label{vg_krel_mod.fig}
 \end{figure}
 
 \begin{figure}[htb]
@@ -414,13 +468,17 @@ Three values  of $n$ are shown: 2 (topmost line), 5 and 12 (bottom line)}
 \end{figure}
 
 
+
+
+
 \chapter{Sources and Sinks}
+\label{sources.sinks.chap}
 
 $F$ in Eqn~(\ref{richards.eqn}) denotes a source term (if positive) or
 a sink (if negative).  There are a number of sources and sinks that
-are of particular interest in groundwater flow, which have been coded
-into Wallaby.  This chapter details these.  $F$ is a volumetric source
-(measured in mass.length$^{-3}$.time$^{-1}$), but many of the sources
+are of particular interest to me, which have been coded
+into MOOSE.  This chapter details these.  $F$ is a volumetric source
+(measured in mass.length$^{-3}$.time$^{-1}$ in 3D), but many of the sources
 and sinks described below are defined on a $(d-1)$-dimensional
 submanifold of the model (the 2D boundary of a 3D model, for
 instance).  In these cases, think of $F$ as a surface-source, measured
@@ -433,7 +491,7 @@ leads to no confusion.
 Fluxes from boundaries can be imposed by fixing the porepressure at
 the boundary, or by specifying a conductance for the fluid through the
 boundary.  The former is a standard feature in MOOSE.  The later is
-implemented in Wallaby by making $F$ (the surface source) a
+implemented in MOOSE by making $F$ (the surface source) a
 piecewise-linear function of the porepressure:
 \begin{equation}
 F = F(P) \ .
@@ -455,7 +513,10 @@ if the density of the fluid is 1000\,kg.m$^{-3}$.
 
 Usually, however, a seepage condition is imposed at the same time as
 the rainfall recharge, in order that the porepressure at a model's
-surface doesn't rise appreciably above atmospheric pressure.  Then
+surface doesn't rise appreciably above atmospheric pressure.  (Recall
+Eqn~(\ref{eqn.pair.zero}) that references porepressure to zero air
+pressure, so that $P_{\mathrm{atm}}$ must also be referenced
+similarly: usually $P_{\mathrm{atm}} = P_{\mathrm{air}} = 0$.) Then
 \begin{equation}
 F = \left\{
 \begin{array}{ll}
@@ -467,8 +528,8 @@ P_{\mathrm{atm}}
 \label{rain.rechage.eqn}
 \end{equation}
 In models, the conductance, $C$, must be chosen carefully, otherwise
-PETSc will find it difficult to invert the stiffness matrix.  A
-suitable choice is
+the system will become mathematically stiff, and PETSc will find it
+difficult to invert the stiffness matrix.  A suitable choice is
 \begin{equation}
 C = \frac{\kappa_{zz}\rho}{L\mu} \ ,
 \label{cond.typical.eqn}
@@ -478,12 +539,12 @@ tensor at the model's surface, $\rho$ is the fluid density, $\mu$
 is its viscosity, and $L$ is a distance variable.  In my experience
 $L=1$\,m is a good choice.
 
-In the MOOSE input file, Eqn~(\ref{rain.rechage.eqn}) is implemented
-by specifying the pressure tuple $(P_{\mathrm{atm}},
-P_{\mathrm{big}})$, and the flux tuple $(-3.17E-7, -3.17E-7 +
-C(P_{\mathrm{big}}-P_{\mathrm{atm}}))$, for porepressure
-$P_{\mathrm{big}}$ that is a little bigger than the modeller expects
-to see in the model.
+As described in the accompanying Example document, in the MOOSE input
+file, Eqn~(\ref{rain.rechage.eqn}) is implemented by specifying the
+pressure tuple $(P_{\mathrm{atm}}, P_{\mathrm{big}})$, and the flux
+tuple $(-3.17E-7, -3.17E-7 + C(P_{\mathrm{big}}-P_{\mathrm{atm}}))$,
+for porepressure $P_{\mathrm{big}}$ that is a little bigger than the
+modeller expects to see in the model.
 
 \section{Evapotranspiration}
 
@@ -493,18 +554,18 @@ half-Gaussian sink for the surface-source $F$:
 F = \left\{
 \begin{array}{ll}
 -E_{\mathrm{max}} \exp\left(
--\frac{1}{2}\left(\frac{P-P_{c}}{\sigma}\right)^{2} \right) &
-\ \ \ \mbox{for } \ \ P<P_{c} \\
--E_{\mathrm{max}} & \ \ \ \mbox{for } \ \ P\geq P_{c}
+-\frac{1}{2}\left(\frac{P-P_{\mathrm{o}}}{\sigma}\right)^{2} \right) &
+\ \ \ \mbox{for } \ \ P<P_{\mathrm{o}} \\
+-E_{\mathrm{max}} & \ \ \ \mbox{for } \ \ P\geq P_{\mathrm{o}}
 \end{array}
 \right.
 \label{half.gaussian.et}
 \end{equation}
 Here $E_{\mathrm{max}}$ is the maximum value of evapotranspiration,
 and in standard units is measured in kg.m$^{-2}$.s$^{-1}$.
-Eqn~(\ref{half.gaussian.et}) also contains $P_{c}$, which is the centre
-of the Gaussian.  The final parameter is $\sigma$, which
-parameterises the plant root depth.  When $P = P_{c} - \sigma$, the
+Eqn~(\ref{half.gaussian.et}) also contains $P_{\mathrm{o}}$, which is the centre
+of the Gaussian (usually $P_{\mathrm{o}}=P_{\mathrm{air}}=0$).  The final parameter is $\sigma$, which
+parameterises the plant root depth.  When $P = P_{\mathrm{o}} - \sigma$, the
 evapotranspiration will be reduced to 37\% of its maximum value.  Some
 example curves are shown in Figure~\ref{et.fig}
 
@@ -512,7 +573,7 @@ example curves are shown in Figure~\ref{et.fig}
 \centering
 \includegraphics[width=9cm]{et.eps}
 \caption{Evapotranspiration $-F/E_{\mathrm{max}}$ as a function of
-  porepressure $P - P_{\mathrm{atm}}$ for different $\sigma$ parameters.  Top (blue)
+  porepressure $P - P_{\mathrm{o}}$ for different $\sigma$ parameters.  Top (blue)
   shows $\sigma=7\times 10^{4}$, middle (red) $\sigma=5\times 10^{4}$,
   and bottom (greend) $\sigma=2\times 10^{4}$.}
 \label{et.fig}
@@ -522,8 +583,9 @@ example curves are shown in Figure~\ref{et.fig}
 A typical recorded value for maximum evapotranspiration would be
 4\,mm/day, which corresponds to $E_{\mathrm{max}} = 4.63\times
 10^{-5}$\,kg.m$^{-2}$.s$^{-1}$, assuming the fluid density is
-1000\,kg.m$^{-3}$.  Usually $P_{c}$ is chosen to be atmospheric
-pressure $P_{c} = P_{\mathrm{atm}}$.  Typical tree roots reach to
+1000\,kg.m$^{-3}$.  Usually $P_{\mathrm{o}}$ is chosen to be atmospheric
+pressure $P_{\mathrm{o}} = P_{\mathrm{atm}}$, and usually $P_{\mathrm{atm}} =
+P_{\mathrm{air}} = 0$.  Typical tree roots reach to
 about 5\,m, so a standard value for $\sigma$ is $\sigma = 5\times
 10^{4}$\,Pa, assuming the density of fluid
 is 1000\,kg.m$^{-3}$ and gravity is 10\,m.s$^{-2}$.
@@ -572,7 +634,7 @@ models this is actually a calibration parameter to match measured
 baseflow).  The other parameters are $L_{\mathrm{seg}}$ and
 $W_{\mathrm{seg}}$ which are, respectively, the length and width of
 the segment of river that the point $x_{i}$ is representing.  The
-current implementation of Wallaby has $f$ being the same for all
+current implementation in MOOSE has $f$ being the same for all
 points along a river, so the $L_{\mathrm{seg}}$ and $W_{\mathrm{seg}}$
 parameters must be the same for all $x_{i}$ along a river (otherwise,
 the river should be broken into a number of individual reaches).
@@ -583,7 +645,8 @@ the river should be broken into a number of individual reaches).
 \begin{equation}
 F(P) = C(P - P_{\mathrm{atm}})
 \end{equation}
-where $C$ is the riverbed conductance.  This is implemented in the
+where $C$ is the riverbed conductance.  As described in the Examples
+document, this is implemented in the
 MOOSE input file using the pressure tuple $(-P_{\mathrm{big}},
 P_{\mathrm{big}})$ and the flux tuple $(C(-P_{\mathrm{big}} -
 P_{\mathrm{atm}}), C(P_{\mathrm{big}} - P_{\mathrm{atm}}) )$.
@@ -598,7 +661,8 @@ C(P - P_{\mathrm{atm}}) & \ \ \ \mbox{for } \ \ P > P_{\mathrm{atm}}
 \end{array}
 \right.
 \end{equation}
-where $C$ is the riverbed conductance.  This is implemented in the
+where $C$ is the riverbed conductance.  As described in the Examples
+document, this is implemented in the
 MOOSE input file using the pressure tuple $(P_{\mathrm{atm}},
 P_{\mathrm{big}})$, and the flux tuple $(0, C(P_{\mathrm{big}} -
 P_{\mathrm{atm}}) )$.
@@ -617,7 +681,8 @@ P_{\mathrm{cutoff}} \\
 \end{array}
 \right.
 \end{equation}
-where $C$ is the riverbed conductancel.  This is implemented in the
+where $C$ is the riverbed conductancel.  As described in the example
+document, this is implemented in the
 MOOSE input file using the pressure tuple $(P_{\mathrm{atm}},
 P_{\mathrm{cutoff}})$, and the flux tuple $(0, C(P_{\mathrm{cutoff}} -
 P_{\mathrm{atm}}) )$.
@@ -635,7 +700,7 @@ but $f$ is a special function (measured in kg.s$^{-1}$ in standard
 units) defined in terms of the pressure at a
 point in the wellbore
 \begin{equation}
-P_{\mathrm{wellbore}}(x_{i}) = P_{\mathrm{bot}} + \rho_{0} g\cdot (x_{i} -
+P_{\mathrm{wellbore}}(x_{i}) = P_{\mathrm{bot}} + \gamma \cdot (x_{i} -
 x_{i}^{\mathrm{bot}})
 \end{equation}
 The form of $f$ is
@@ -654,34 +719,31 @@ There are a number of parameters in these expressions:
 \item $P_{\mathrm{bot}}$ is an input parameter.  It is the pressure at
   the bottom of the wellbore.
 \item $x_{i}^{\mathrm{bot}}$ is the position of the bottom of the wellbore.
-\item $\rho_{0}$ is the fluid reference density (see
-  Sec~\ref{sec.density.constk}), and $g$ is the vector of
-  gravitational acceleration which points downwards.  This means that
+\item $\gamma$ is a weight vector pointing downwards (product of fluid
+  density and gravity).  This means that
   $P_{\mathrm{wellbore}}(x_{i})$ will be the pressure at point $x_{i}$
-  in the wellbore, due to gravitational head, assuming that the fluid
-  density does change significantly in the wellbore.  If these
-  gravitational effects are undesirable, the code has been written in
-  such a way that the user may simply set $g=0$ for the wellbore.
+  in the wellbore, due to gravitational head.  If these
+  gravitational effects are undesirable, the user may simply specify
+  $\gamma = (0,0,0)$.
 \item $\kappa_{\mathrm{rel}}$, $\rho$, and $\mu$ are the fluid
   relative permeability, density and viscosity at the point $x_{i}$.
 \item $W_{i}$ and $W_{p}$ are the injection and production well
   constants, respectively.  They are measured in length$^{3}$.
 
-If
-  $W_{i}=0$ then the wellbore is a production well, which is, as far
-  as Wallaby is concerned, a sink that produces fluid only if $P >
-  P_{\mathrm{wellbore}}$.  If $W_{p}=0$ then the wellbore is an
-  injection well, which is a source that injects fluid only if $P <
-  P_{\mathrm{wellbore}}$.
+If $W_{i}=0$ then the wellbore is a production well, which is, as far
+as MOOSE is concerned, a sink that produces fluid only if $P >
+P_{\mathrm{wellbore}}$.  If $W_{p}=0$ then the wellbore is an
+injection well, which is a source that injects fluid only if $P <
+P_{\mathrm{wellbore}}$.
 
-Usually the well constants are chosen as
-\begin{equation}
-W = \kappa L_{\mathrm{seg}} \ ,
-\end{equation}
-where $\kappa$ is a relevant permeability component (eg, a horizontal
-component if this is a vertical wellbore), and $L_{\mathrm{seg}}$ is
-the length of this section of the wellbore that the point $x_{i}$ is
-approximating.
+%Usually the well constants are chosen as
+%\begin{equation}
+%W = \kappa L_{\mathrm{seg}} \ ,
+%\end{equation}
+%where $\kappa$ is a relevant permeability component (eg, a horizontal
+%component if this is a vertical wellbore), and $L_{\mathrm{seg}}$ is
+%the length of this section of the wellbore that the point $x_{i}$ is
+%approximating.
 \end{itemize}
 
 
@@ -699,21 +761,23 @@ the surface of a rectangular prism, that grows as the excavation
 proceeds.  The parameter $P_{\mathrm{excav}}$ is the excavation
 pressure.
 
-The time-dependant excavation boundary is defined
-succinctly through a time-dependent level-set function, that is
-positive on parts of the domain where excavation has occurred, and
-negative on the other region.
+As described in the accompanying Examples document, the time-dependant
+excavation boundary is defined easily and succinctly through a time-dependent
+level-set function, that is positive on parts of the domain where
+excavation has occurred, and negative on the other region.
 
 
 
 
 \chapter{Upwinding}
+\label{chap.upwinding}
+
 It is well-known that numerical implementations of
 Eqn~(\ref{richards.eqn}) must use upwinding so that the propagation of
 fronts be accurately simulated
 (eg~\cite{huyakorn1978,dalen1979,helmig1998}).  This chapter details
-the Streamline-Upwind-Petrov-Galerkin (SUPG) upwinding used in
-Wallaby, which is based on~\cite{brooks1982, hughes1986}.
+the Streamline-Upwind-Petrov-Galerkin (SUPG) upwinding I have
+implemented, which is based on~\cite{brooks1982, hughes1986}.
 
 First consider the
 fairly general case of one scalar variable whose evolution within a
@@ -802,7 +866,7 @@ upstream weighting.
 \end{figure}
 
 
-\section{An explicit worked example: SUPG upwinding of the advection equation in one dimension}
+\section{SUPG and the advection equation in one dimension}
 
 The advection equation in arbitrary dimensions is
 \begin{equation}
@@ -979,7 +1043,7 @@ $k$, the PG function because closer to that of Eqn~(\ref{eqn.simple.ktilde}).
 \end{figure}
 
 
-\section{SUPG of the continuity equation}
+\section{SUPG and the continuity equation}
 
 Now we are armed with some examples, it is clear that the PG test
 function in Eqn~(\ref{supg.general.eqn}) can have the form
@@ -1001,6 +1065,7 @@ parallel to $a$.  Probably this is irrelevant in the Richards'
 situation, since, effectively $\nabla u$ {\em is} $a$, as discussed
 below.  In~\cite{hughes1986} the case for more than one field in
 multiple dimensions is studied.
+
 
 \section{SUPG upwinding of Richards' equation}
 
@@ -1078,12 +1143,75 @@ needed.  Then it is advantageous to set $P_{\mathrm{SUPG}}$ less than
 the expected range in pressures in the unsaturated zone.  For problems
 where fronts are less important, SUPG is not usually necessary, so the
 parameter should be set larger, otherwise it will cause problems in
-convergence as the upwinding direction changes every timestep when
-simulations start to reach steadystate.
+convergence when simulations start to reach steady state as the upwinding direction changes every timestep.
+
+
+
+\chapter{Multi-phase Richards' equations}
+\label{chap.multi}
+
+The MOOSE implentation of Richards' equation is not only valid for the
+single-phase case as described elsewhere in this document, but for the
+multi-phase case too.  Denote the phase number by $\gamma$.  The
+Richards' equations for multi-phase flow are
+\begin{equation}
+\phi \frac{\partial}{\partial t} \left( \rho^{\gamma} S^{\gamma} \right) = \nabla_{i}
+\left( \frac{\rho^{\gamma} \kappa_{ij}\kappa^{\gamma}_{\mathrm{rel}}}{\mu^{\gamma}} (\nabla_{j}P^{\gamma} - \rho^{\gamma}
+g_{j}) \right) 
++ F^{\gamma} \ ,
+\label{richards.eqn.multi}
+\end{equation}
+where the independent variables are porepressures of the phases, $P^{\gamma}$.
+The notation is the same as in Eqn~(\ref{richards.eqn}).
+
+The MOOSE
+implementation allows users to specify arbitrary functions for the
+phase densities and relative permeabilities, but assumes the following.
+\begin{itemize}
+\item The density for phase $\gamma$ is only a function of its
+  pressure: $\rho^{\gamma} = \rho^{\gamma}(P^{\gamma})$.
+\item The relative permeability for phase $\gamma$ is only a function
+  of its effective saturation: $\kappa^{\gamma}_{\mathrm{rel}} =
+  \kappa^{\gamma}_{\mathrm{rel}}(S^{\gamma}_{\mathrm{eff}})$.
+\end{itemize}
+The immobile and relative saturations may be set independently for
+each phase.
+
+The effective saturations are more complicated, as they are functions
+of all the pressure variables:
+\begin{equation}
+S^{\gamma}_{\mathrm{eff}} =
+S^{\gamma}_{\mathrm{eff}}(P_{1},\ P_{2},\ldots) \ .
+\end{equation}
+It is therefore the saturations that couple the separate phases
+together.  The MOOSE implementation allows users to specify arbitrary
+functions for the effective saturations, but these must obey the
+constraint 
+\begin{equation}
+\sum_{\gamma}S^{\gamma} = 1 \ .
+\end{equation}
+
+For two phases --- water and gas --- a common practise is to define
+\begin{equation}
+P_{c} = P_{\mathrm{gas}} - P_{\mathrm{water}} \ ,
+\end{equation}
+and to use the van Genuchten expression for the
+water effective saturation:
+\begin{equation}
+S^{\mathrm{water}}_{\mathrm{eff}} = \left( 1 + (\alpha P_{c})^{\frac{1}{1 - m}}
+\right)^{-m} \ \ \ \mbox{for}\ \ 0<m<1 \ .
+\end{equation}
+Then the gas effective saturation is just
+$S^{\mathrm{gas}}_{\mathrm{eff}} = 1 -
+S^{\mathrm{water}}_{\mathrm{eff}}$ (assuming residual saturations are
+zero).  This common case has been coded and tested in the MOOSE implementation.
+
+
 
 
 
 \chapter{Tolerances and Convergence}
+\label{tol.chap}
 
 It is sometimes difficult to set appropriate tolerances on the
 nonlinear solver when running real models.  You should never expect
@@ -1219,6 +1347,7 @@ addition of SUPG does not affect any considerations of minimum residual.
 
 
 \chapter{Discretisation}
+\label{discret.chap}
 
 \section{General comments}
 
@@ -1232,10 +1361,10 @@ that comes from $\partial(\phi\rho S)/\partial t$ just depends on the
 porepressure at that node.  It has been shown in many papers that this
 lumping is advantageous for mass consideration and reduces spurious
 oscillations of the pressure around sharp fronts~\cite{celiaET1990}.
-This is explained in Section~\ref{sec.lumping.timde.deriv}.
-In the current implementation of Wallaby, this residual depends on the
-porepressure at all the quadrature points surrounding the node, and
-I'm not sure how to implement lumping in Moose.
+This is explained in Section~\ref{sec.lumping.timde.deriv}.  In the
+current implementation of Richards' equation in MOOSE, this residual
+depends on the porepressure at all the quadrature points surrounding
+the node, and I'm not sure how to implement lumping in MOOSE.
 
 
 
@@ -1399,17 +1528,6 @@ oscillatory around fronts.  This is why lumping is
 necessary~\cite{celiaET1990}.  With lumping the matrix in the above
 equation becomes diagonal, and the solution is $\dot{(\rho S)}_{0} =
 0$.
-
-
-
-
-
-
-
-
-
-
-
 
 
 
