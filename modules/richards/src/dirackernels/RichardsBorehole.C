@@ -9,7 +9,7 @@ InputParameters validParams<RichardsBorehole>()
   params.addRequiredParam<Real>("bottom_pressure", "Pressure at the bottom of the borehole");
   params.addRequiredParam<RealVectorValue>("unit_weight", "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  Note that the borehole pressure at a given z position is bottom_pressure + unit_weight*(p - p_bottom), where p=(x,y,z) and p_bottom=(x,y,z) of the bottom point of the borehole.  If you don't want bottomhole pressure to vary in the borehole just set unit_weight=0.  Typical value is gravity = (0,0,-1E4)");
   params.addRequiredParam<std::string>("point_file", "The file containing the coordinates of the point sinks that approximate the borehole.  Each line in the file must contain a space-separated coordinate.  The last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  Note that you will get segementation faults if your points do not lie within your mesh!");
-  params.addRequiredParam<PostprocessorName>("reporter", "The Postprocessor of type=Reporter and sum=true in which the total fluid mass flowing out of the system to the borehole for this time step will be recorded.");
+  params.addRequiredParam<PostprocessorName>("reporter", "the total fluid mass flowing out of the system to the sink for this time step will be recorded.");
   params.addClassDescription("Approximates a borehole in the mesh with given well constant using a number of point sinks whose positions are read from a file");
   return params;
 }
@@ -34,8 +34,8 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
     _density(getMaterialProperty<std::vector<Real> >("density")), 
     _ddensity(getMaterialProperty<std::vector<Real> >("ddensity")),
-
-    _reporter(getPostprocessorValue("reporter")),
+  
+    _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("reporter"))),
     _point_file(getParam<std::string>("point_file"))
 
 {
@@ -99,7 +99,7 @@ RichardsBorehole::addPoints()
 {
   // This function gets called just before the DiracKernel is evaluated
   // so this is a handy place to zero this out.
-  _reporter = 0.0;
+  _total_outflow_mass.zero();
 
   for (unsigned int i = 0; i < _zs.size(); i++)
     {
@@ -134,7 +134,7 @@ RichardsBorehole::computeQpResidual()
       flow += test_fcn*_well_constant_production*mob*(_u[_qp] - bh_pressure);
     }
 
-  _reporter += flow*_dt; // this is not thread safe, but DiracKernel's aren't currently threaded
+  _total_outflow_mass.add(flow*_dt); // this is not thread safe, but DiracKernel's aren't currently threaded
   return flow;
 }
 

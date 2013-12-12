@@ -3,6 +3,7 @@
 
 // Moose Includes
 #include "DiracKernel.h"
+#include "RichardsSumQuantity.h"
 
 //Forward Declarations
 class RichardsBorehole;
@@ -37,8 +38,8 @@ protected:
 
   MaterialProperty<std::vector<Real> > &_density;
   MaterialProperty<std::vector<Real> > &_ddensity;
-
-  PostprocessorValue & _reporter;
+  
+  RichardsSumQuantity & _total_outflow_mass;
   std::string _point_file;
 
   std::vector<Real> _xs;

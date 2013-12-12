@@ -42,6 +42,10 @@
   [./total_outflow_mass]
     type = RichardsSumQuantity
   [../]
+
+  [./borehole_total_outflow_mass]
+    type = RichardsSumQuantity
+  [../]
 []
 
 
@@ -87,7 +91,7 @@
     type = RichardsBorehole
     bottom_pressure = 1E6
     point_file = small.bh
-    reporter = bh_report
+    reporter = boreholse_total_outflow_mass
     variable = pressure
     unit_weight = '0 0 -10000'
     well_constant_production = 1.0E-12
@@ -106,11 +110,6 @@
 
 
 [Postprocessors]
-  [./bh_report]
-    type = Reporter
-    sum = true
-  [../]
-
   [./st_report]
     type = RichardsPlotQuantity
     uo = total_outflow_mass
