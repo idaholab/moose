@@ -15,6 +15,8 @@
 
 // AuxKernels
 #include "RichardsSeffAux.h"
+#include "RichardsDensityAux.h"
+#include "RichardsRelPermAux.h"
 #include "RichardsMobility.h"
 #include "RichardsMobilityPrime.h"
 #include "RichardsMassDensity.h"
@@ -67,6 +69,8 @@ Elk::Richards::registerObjects(Factory & factory)
 
   // AuxKernels
   registerAux(RichardsSeffAux);
+  registerAux(RichardsDensityAux);
+  registerAux(RichardsRelPermAux);
   registerAux(RichardsMobility);
   registerAux(RichardsMobilityPrime);
   registerAux(RichardsMassDensity);
