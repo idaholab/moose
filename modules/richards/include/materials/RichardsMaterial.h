@@ -99,10 +99,6 @@ private:
 
   std::vector<VariableGradient *> _grad_p;
 
-  RealVectorValue velSUPG(VectorValue<double> gradp, Real dens, unsigned int qp);
-  RealTensorValue velPrimeSUPG();
-  Real tauSUPG(VectorValue<double> gradp, Real dens, Real SUPGp, unsigned int qp);
-  RealVectorValue tauPrimeSUPG(VectorValue<double> gradp, Real dens, Real SUPGp, unsigned int qp);
 
 };
 

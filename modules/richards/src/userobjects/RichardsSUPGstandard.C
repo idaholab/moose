@@ -119,12 +119,12 @@ RichardsSUPGstandard::dtauSUPG_dgradp(RealVectorValue vel, RealTensorValue dvel_
 {
   Real norm_vel = std::pow(vel*vel, 0.5);
   if (norm_vel == 0)
-    return 0*vel; // ZERO properly - this deriv is not necessarily correct, but i can't see a better thing to do
+    return RealVectorValue();
   RealVectorValue norm_vel_dgradp(dvel_dgradp*vel/norm_vel);
 
   Real norm_b = std::pow(b*b, 0.5); 
   if (norm_b == 0)
-    return 0*vel; // ZERO properly - this deriv is not necessarily correct, but i can't see a better thing to do
+    return RealVectorValue();
   RealVectorValue norm_b_dgradp = db2_dgradp/2/norm_b;
 
   Real h = 2*norm_vel/norm_b;

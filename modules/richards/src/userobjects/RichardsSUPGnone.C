@@ -17,33 +17,33 @@ RichardsSUPGnone::RichardsSUPGnone(const std::string & name, InputParameters par
 RealVectorValue
 RichardsSUPGnone::velSUPG(RealTensorValue perm, RealVectorValue gradp, Real density, RealVectorValue gravity) const
 {
-  return 0*gradp;
+  return RealVectorValue();
 }
 
 RealTensorValue
 RichardsSUPGnone::dvelSUPG_dgradp(RealTensorValue perm) const
 {
-  return 0*perm;
+  return RealTensorValue();
 }
 
 RealVectorValue
 RichardsSUPGnone::dvelSUPG_dp(RealTensorValue perm, Real density_prime, RealVectorValue gravity) const
 {
-  return 0*gravity;
+  return RealVectorValue();
 }
 
 
 RealVectorValue
 RichardsSUPGnone::bb(RealVectorValue vel, int dimen, RealVectorValue xi_prime, RealVectorValue eta_prime, RealVectorValue zeta_prime) const
 {
-  return 0*vel;
+  return RealVectorValue();
 }
 
 // following is d(bb*bb)/d(gradp)
 RealVectorValue
 RichardsSUPGnone::dbb2_dgradp(RealVectorValue vel, RealTensorValue dvel_dgradp, RealVectorValue xi_prime, RealVectorValue eta_prime, RealVectorValue zeta_prime) const
 {
-  return 0*vel;
+  return RealVectorValue();
 }
 
 // following is d(bb*bb)/d(p)
@@ -64,7 +64,7 @@ RichardsSUPGnone::tauSUPG(RealVectorValue vel, Real traceperm, RealVectorValue b
 RealVectorValue
 RichardsSUPGnone::dtauSUPG_dgradp(RealVectorValue vel, RealTensorValue dvel_dgradp, Real traceperm, RealVectorValue b, RealVectorValue db2_dgradp) const
 {
-  return 0*vel;
+  return RealVectorValue();
 }
 
 Real
