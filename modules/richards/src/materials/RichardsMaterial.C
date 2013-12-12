@@ -36,22 +36,6 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     _material_gravity(getParam<RealVectorValue>("gravity")),
     _trace_perm(_material_perm.tr()),
 
-    // Grab reference to linear Lagrange finite element object pointer,
-    // currently this is always a linear Lagrange element, so this might need to
-    // be generalized if we start working with higher-order elements...
-    _fe(_subproblem.assembly(_tid).getFE( getParam<bool>("linear_shape_fcns") ? FEType(FIRST, LAGRANGE) : FEType(SECOND, LAGRANGE))),
-    
-    // Grab references to FE object's mapping data from the _subproblem's FE object
-    _dxidx(_fe->get_dxidx()),
-    _dxidy(_fe->get_dxidy()),
-    _dxidz(_fe->get_dxidz()),
-    _detadx(_fe->get_detadx()),
-    _detady(_fe->get_detady()),
-    _detadz(_fe->get_detadz()),
-    _dzetadx(_fe->get_dzetadx()), // Empty in 2D
-    _dzetady(_fe->get_dzetady()), // Empty in 2D
-    _dzetadz(_fe->get_dzetadz()), // Empty in 2D
-
     // Declare that this material is going to provide a Real
     // valued property named "porosity", etc, that Kernels can use.
     _porosity(declareProperty<Real>("porosity")),
@@ -150,6 +134,22 @@ RichardsMaterial::computeQpProperties()
 void
 RichardsMaterial::computeProperties()
 {
+  // Grab reference to linear Lagrange finite element object pointer,
+  // currently this is always a linear Lagrange element, so this might need to
+  // be generalized if we start working with higher-order elements...
+  FEBase * & fe(_assembly.getFE(getParam<bool>("linear_shape_fcns") ? FEType(FIRST, LAGRANGE) : FEType(SECOND, LAGRANGE)));
+
+  // Grab references to FE object's mapping data from the _subproblem's FE object
+  const std::vector<Real>& dxidx(fe->get_dxidx());
+  const std::vector<Real>& dxidy(fe->get_dxidy());
+  const std::vector<Real>& dxidz(fe->get_dxidz());
+  const std::vector<Real>& detadx(fe->get_detadx());
+  const std::vector<Real>& detady(fe->get_detady());
+  const std::vector<Real>& detadz(fe->get_detadz());
+  const std::vector<Real>& dzetadx(fe->get_dzetadx());
+  const std::vector<Real>& dzetady(fe->get_dzetady());
+  const std::vector<Real>& dzetadz(fe->get_dzetadz());
+
   // this gets run for each element
   for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
     {
@@ -242,36 +242,36 @@ RichardsMaterial::computeProperties()
       _dtauvel_SUPG_dp[qp].resize(_num_p);
       
       // Bounds checking on element data and putting into vector form
-      mooseAssert(qp < _dxidx.size(), "Insufficient data in dxidx array!");
-      mooseAssert(qp < _dxidy.size(), "Insufficient data in dxidy array!");
-      mooseAssert(qp < _dxidz.size(), "Insufficient data in dxidz array!");
+      mooseAssert(qp < dxidx.size(), "Insufficient data in dxidx array!");
+      mooseAssert(qp < dxidy.size(), "Insufficient data in dxidy array!");
+      mooseAssert(qp < dxidz.size(), "Insufficient data in dxidz array!");
       if (_mesh.dimension() >= 2)
 	{
-	  mooseAssert(qp < _detadx.size(), "Insufficient data in detadx array!");
-	  mooseAssert(qp < _detady.size(), "Insufficient data in detady array!");
-	  mooseAssert(qp < _detadz.size(), "Insufficient data in detadz array!");
+	  mooseAssert(qp < detadx.size(), "Insufficient data in detadx array!");
+	  mooseAssert(qp < detady.size(), "Insufficient data in detady array!");
+	  mooseAssert(qp < detadz.size(), "Insufficient data in detadz array!");
 	}
       if (_mesh.dimension() >= 3)
 	{
-	  mooseAssert(qp < _dzetadx.size(), "Insufficient data in dzetadx array!");
-	  mooseAssert(qp < _dzetady.size(), "Insufficient data in dzetady array!");
-	  mooseAssert(qp < _dzetadz.size(), "Insufficient data in dzetadz array!");
+	  mooseAssert(qp < dzetadx.size(), "Insufficient data in dzetadx array!");
+	  mooseAssert(qp < dzetady.size(), "Insufficient data in dzetady array!");
+	  mooseAssert(qp < dzetadz.size(), "Insufficient data in dzetadz array!");
 	}
 
       // CHECK : Does this work spherical, cylindrical, etc?
-      RealVectorValue xi_prime(_dxidx[qp], _dxidy[qp], _dxidz[qp]);
+      RealVectorValue xi_prime(dxidx[qp], dxidy[qp], dxidz[qp]);
       RealVectorValue eta_prime, zeta_prime;
       if (_mesh.dimension() >= 2)
 	{
-	  eta_prime(0) = _detadx[qp];
-	  eta_prime(1) = _detady[qp];
+	  eta_prime(0) = detadx[qp];
+	  eta_prime(1) = detady[qp];
 	}
       if (_mesh.dimension() == 3)
 	{
-	  eta_prime(2) = _detadz[qp];
-	  zeta_prime(0) = _dzetadx[qp];
-	  zeta_prime(1) = _dzetady[qp];
-	  zeta_prime(2) = _dzetadz[qp];
+	  eta_prime(2) = detadz[qp];
+	  zeta_prime(0) = dzetadx[qp];
+	  zeta_prime(1) = dzetady[qp];
+	  zeta_prime(2) = dzetadz[qp];
 	}
 
       for (unsigned int i=0 ; i<_num_p; ++i)

@@ -125,20 +125,6 @@ private:
 
   // To be called from computeProperties() function to compute the strong residual of each equation.
   void compute_strong_residuals(unsigned qp);
-
-  // Reference to a pointer to an FEBase object from the _subproblem object.  Initialized in ctor.
-  FEBase*& _fe;
-  
-  // Constant references to finite element mapping data
-  const std::vector<Real>& _dxidx;
-  const std::vector<Real>& _dxidy;
-  const std::vector<Real>& _dxidz;
-  const std::vector<Real>& _detadx;
-  const std::vector<Real>& _detady;
-  const std::vector<Real>& _detadz;
-  const std::vector<Real>& _dzetadx; // Empty in 2D
-  const std::vector<Real>& _dzetady; // Empty in 2D
-  const std::vector<Real>& _dzetadz; // Empty in 2D
 };
 
 #endif //NAVIERSTOKESMATERIAL_H

@@ -93,23 +93,7 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _tauc(declareProperty<Real>("tauc")),
     _taum(declareProperty<Real>("taum")),
     _taue(declareProperty<Real>("taue")),
-    _strong_residuals(declareProperty<std::vector<Real> >("strong_residuals")),
-
-    // Grab reference to linear Lagrange finite element object pointer,
-    // currently this is always a linear Lagrange element, so this might need to
-    // be generalized if we start working with higher-order elements...
-    _fe(_subproblem.assembly(_tid).getFE(FEType())),
-    
-    // Grab references to FE object's mapping data from the _subproblem's FE object
-    _dxidx(_fe->get_dxidx()),
-    _dxidy(_fe->get_dxidy()),
-    _dxidz(_fe->get_dxidz()),
-    _detadx(_fe->get_detadx()),
-    _detady(_fe->get_detady()),
-    _detadz(_fe->get_detadz()),
-    _dzetadx(_fe->get_dzetadx()), // Empty in 2D
-    _dzetady(_fe->get_dzetady()), // Empty in 2D
-    _dzetadz(_fe->get_dzetadz()) // Empty in 2D
+    _strong_residuals(declareProperty<std::vector<Real> >("strong_residuals"))
   {
     // Load the velocity gradients up into a single vector for convenience
     _vel_grads.resize(3);
@@ -185,20 +169,36 @@ NavierStokesMaterial::computeProperties()
 
 void NavierStokesMaterial::compute_h_supg(unsigned qp)
 {
+  // Grab reference to linear Lagrange finite element object pointer,
+  // currently this is always a linear Lagrange element, so this might need to
+  // be generalized if we start working with higher-order elements...
+  FEBase*& fe(_assembly.getFE(FEType()));
+
+  // Grab references to FE object's mapping data from the _subproblem's FE object
+  const std::vector<Real>& dxidx(fe->get_dxidx());
+  const std::vector<Real>& dxidy(fe->get_dxidy());
+  const std::vector<Real>& dxidz(fe->get_dxidz());
+  const std::vector<Real>& detadx(fe->get_detadx());
+  const std::vector<Real>& detady(fe->get_detady());
+  const std::vector<Real>& detadz(fe->get_detadz());
+  const std::vector<Real>& dzetadx(fe->get_dzetadx()); // Empty in 2D
+  const std::vector<Real>& dzetady(fe->get_dzetady()); // Empty in 2D
+  const std::vector<Real>& dzetadz(fe->get_dzetadz()); // Empty in 2D
+
   // Bounds checking on element data
-  mooseAssert(qp < _dxidx.size(), "Insufficient data in dxidx array!");
-  mooseAssert(qp < _dxidy.size(), "Insufficient data in dxidy array!");
-  mooseAssert(qp < _dxidz.size(), "Insufficient data in dxidz array!");
+  mooseAssert(qp < dxidx.size(), "Insufficient data in dxidx array!");
+  mooseAssert(qp < dxidy.size(), "Insufficient data in dxidy array!");
+  mooseAssert(qp < dxidz.size(), "Insufficient data in dxidz array!");
     
-  mooseAssert(qp < _detadx.size(), "Insufficient data in detadx array!");
-  mooseAssert(qp < _detady.size(), "Insufficient data in detady array!");
-  mooseAssert(qp < _detadz.size(), "Insufficient data in detadz array!");
+  mooseAssert(qp < detadx.size(), "Insufficient data in detadx array!");
+  mooseAssert(qp < detady.size(), "Insufficient data in detady array!");
+  mooseAssert(qp < detadz.size(), "Insufficient data in detadz array!");
     
   if (_mesh_dimension == 3)
   {
-    mooseAssert(qp < _dzetadx.size(), "Insufficient data in dzetadx array!");
-    mooseAssert(qp < _dzetady.size(), "Insufficient data in dzetady array!");
-    mooseAssert(qp < _dzetadz.size(), "Insufficient data in dzetadz array!");
+    mooseAssert(qp < dzetadx.size(), "Insufficient data in dzetadx array!");
+    mooseAssert(qp < dzetady.size(), "Insufficient data in dzetady array!");
+    mooseAssert(qp < dzetadz.size(), "Insufficient data in dzetadz array!");
   }
 
   // The velocity vector at this quadrature point.
@@ -207,21 +207,21 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
   // Pull out element inverse map values at the current qp into a little dense matrix
   Real dxi_dx[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
   
-  dxi_dx[0][0] = _dxidx[qp];  dxi_dx[0][1] = _dxidy[qp];
-  dxi_dx[1][0] = _detadx[qp]; dxi_dx[1][1] = _detady[qp];
+  dxi_dx[0][0] = dxidx[qp];  dxi_dx[0][1] = dxidy[qp];
+  dxi_dx[1][0] = detadx[qp]; dxi_dx[1][1] = detady[qp];
 
   // OK to access third entries on 2D elements if LIBMESH_DIM==3, though they
   // may be zero...
   if (LIBMESH_DIM == 3)
   {
-    /**/             /**/               dxi_dx[0][2] = _dxidz[qp];
-    /**/             /**/               dxi_dx[1][2] = _detadz[qp];
+    /**/             /**/               dxi_dx[0][2] = dxidz[qp];
+    /**/             /**/               dxi_dx[1][2] = detadz[qp];
   }
 
   // The last row of entries available only for 3D elements.
   if (_mesh_dimension == 3)
   {
-    dxi_dx[2][0] = _dzetadx[qp];   dxi_dx[2][1] = _dzetady[qp];   dxi_dx[2][2] = _dzetadz[qp];
+    dxi_dx[2][0] = dzetadx[qp];   dxi_dx[2][1] = dzetady[qp];   dxi_dx[2][2] = dzetadz[qp];
   }
 
   // Construct the g_ij = d(xi_k)/d(x_j) * d(xi_k)/d(x_i) matrix 
