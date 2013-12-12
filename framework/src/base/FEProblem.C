@@ -1473,8 +1473,8 @@ FEProblem::projectSolution()
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const dof_id_type n_SCALAR_dofs = var.dofIndices().size();
-      for (dof_id_type i = 0; i < n_SCALAR_dofs; i++)
+      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
       {
         const dof_id_type global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));

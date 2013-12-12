@@ -249,7 +249,7 @@ MooseVariable::reinitNodes(const std::vector<dof_id_type> & nodes)
 {
   // Store only DOFs that are on this processor and have the variable defined here
   _dof_indices.clear();
-  for (dof_id_type i = 0; i < nodes.size(); i++)
+  for (unsigned int i = 0; i < nodes.size(); i++)
   {
     // The MeshBase::query_node_ptr() routine will return NULL if the requested
     // node is non-local.
@@ -426,7 +426,7 @@ MooseVariable::computeElemValues()
     }
   }
 
-  dof_id_type num_dofs = _dof_indices.size();
+  unsigned int num_dofs = _dof_indices.size();
 
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
@@ -434,7 +434,7 @@ MooseVariable::computeElemValues()
   const NumericVector<Real> & u_dot            = _sys.solutionUDot();
   const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
 
-  int idx = 0;
+  dof_id_type idx = 0;
   Real soln_local = 0;
   Real soln_old_local = 0;
   Real soln_older_local = 0;
@@ -455,7 +455,7 @@ MooseVariable::computeElemValues()
   RealTensor * second_u_old_qp = NULL;
   RealTensor * second_u_older_qp = NULL;
 
-  for (dof_id_type i=0; i < num_dofs; i++)
+  for (unsigned int i=0; i < num_dofs; i++)
   {
     idx = _dof_indices[i];
     soln_local = current_solution(idx);
@@ -619,7 +619,7 @@ MooseVariable::computeElemValuesFace()
     }
   }
 
-  dof_id_type num_dofs = _dof_indices.size();
+  unsigned int num_dofs = _dof_indices.size();
 
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
@@ -627,7 +627,7 @@ MooseVariable::computeElemValuesFace()
   const NumericVector<Real> & u_dot            = _sys.solutionUDot();
   const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
 
-  int idx;
+  dof_id_type idx;
   Real soln_local;
   Real soln_old_local=0;
   Real soln_older_local=0;
@@ -638,7 +638,7 @@ MooseVariable::computeElemValuesFace()
   RealGradient dphi_local;
   RealTensor d2phi_local;
 
-  for (dof_id_type i=0; i < num_dofs; ++i)
+  for (unsigned int i=0; i < num_dofs; ++i)
   {
     idx = _dof_indices[i];
     soln_local = current_solution(idx);
@@ -759,13 +759,13 @@ MooseVariable::computeNeighborValuesFace()
     }
   }
 
-  dof_id_type num_dofs = _dof_indices_neighbor.size();
+  unsigned int num_dofs = _dof_indices_neighbor.size();
 
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
 
-  int idx;
+  dof_id_type idx;
   Real soln_local;
   Real soln_old_local=0;
   Real soln_older_local=0;
@@ -774,7 +774,7 @@ MooseVariable::computeNeighborValuesFace()
   RealGradient dphi_local;
   RealTensor d2phi_local;
 
-  for (dof_id_type i=0; i < num_dofs; ++i)
+  for (unsigned int i=0; i < num_dofs; ++i)
   {
     idx = _dof_indices_neighbor[i];
     soln_local = current_solution(idx);
@@ -886,13 +886,13 @@ MooseVariable::computeNeighborValues()
     }
   }
 
-  dof_id_type num_dofs = _dof_indices_neighbor.size();
+  unsigned int num_dofs = _dof_indices_neighbor.size();
 
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
 
-  int idx;
+  dof_id_type idx;
   Real soln_local;
   Real soln_old_local=0;
   Real soln_older_local=0;
@@ -958,7 +958,7 @@ MooseVariable::computeNodalValues()
 {
   if (_is_defined)
   {
-    dof_id_type n = _dof_indices.size();
+    unsigned int n = _dof_indices.size();
 
     _nodal_u.resize(n);
     if (_subproblem.isTransient())
@@ -972,7 +972,7 @@ MooseVariable::computeNodalValues()
       }
     }
 
-    for (dof_id_type i = 0; i < n; i++)
+    for (unsigned int i = 0; i < n; i++)
     {
       _nodal_u[i] = (*_sys.currentSolution())(_dof_indices[i]);
 
@@ -996,7 +996,7 @@ MooseVariable::computeNodalNeighborValues()
 {
   if (_is_defined_neighbor)
   {
-    dof_id_type n = _dof_indices_neighbor.size();
+    unsigned int n = _dof_indices_neighbor.size();
 
     _nodal_u_neighbor.resize(n);
     if (_subproblem.isTransient())
@@ -1005,7 +1005,7 @@ MooseVariable::computeNodalNeighborValues()
       _nodal_u_older_neighbor.resize(n);
     }
 
-    for (dof_id_type i = 0; i < n; i++)
+    for (unsigned int i = 0; i < n; i++)
     {
       _nodal_u_neighbor[i] = (*_sys.currentSolution())(_dof_indices_neighbor[i]);
       if (_subproblem.isTransient())
@@ -1018,7 +1018,7 @@ MooseVariable::computeNodalNeighborValues()
 }
 
 void
-MooseVariable::setNodalValue(Number value, dof_id_type idx/* = 0*/)
+MooseVariable::setNodalValue(Number value, unsigned int idx/* = 0*/)
 {
   _nodal_u[idx] = value;                  // update variable nodal value
   _has_nodal_value = true;
@@ -1050,11 +1050,11 @@ MooseVariable::computeDamping(const NumericVector<Number> & increment_vec)
 
   _increment.resize(nqp);
   // Compute the increment at each quadrature point
-  dof_id_type num_dofs = _dof_indices.size();
+  unsigned int num_dofs = _dof_indices.size();
   for(unsigned int qp=0; qp<nqp; qp++)
   {
     _increment[qp]=0;
-    for (dof_id_type i=0; i<num_dofs; i++)
+    for (unsigned int i=0; i<num_dofs; i++)
       _increment[qp] +=  _phi[i][qp]*increment_vec(_dof_indices[i]);
   }
 }
@@ -1091,7 +1091,7 @@ MooseVariable::getValue(const Elem * elem, const std::vector<std::vector<Real> >
   Real value = 0;
   if (isNodal())
   {
-    for (dof_id_type i = 0; i < dof_indices.size(); ++i)
+    for (unsigned int i = 0; i < dof_indices.size(); ++i)
     {
       //The zero index is because we only have one point that the phis are evaluated at
       value += phi[i][0] * (*_sys.currentSolution())(dof_indices[i]);

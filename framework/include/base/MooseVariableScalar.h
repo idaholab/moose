@@ -49,7 +49,7 @@ public:
   /**
    * Set the nodal value for this variable (to keep everything up to date
    */
-  void setValue(dof_id_type i, Number value);
+  void setValue(unsigned int i, Number value);
 
   void insert(NumericVector<Number> & soln);
 

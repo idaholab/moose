@@ -263,7 +263,7 @@ public:
    * Return the list of elements that should have their DoFs ghosted to this processor.
    * @return The list
    */
-  virtual std::set<unsigned int> & ghostedElems() { return _ghosted_elems; }
+  virtual std::set<dof_id_type> & ghostedElems() { return _ghosted_elems; }
 
   /**
    * Register a piece of restartable data.  This is data that will get

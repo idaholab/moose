@@ -377,7 +377,7 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
     {
       dof_map.dof_indices(elem, dof_indices);
 
-      for(dof_id_type i=0; i<dof_indices.size(); i++)
+      for(unsigned int i=0; i<dof_indices.size(); i++)
       {
         dof_id_type dof = dof_indices[i];
 

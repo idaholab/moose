@@ -145,14 +145,14 @@ NodeFaceConstraint::computeJacobian()
   std::set<dof_id_type> unique_dof_indices;
 
   // Get the dof indices from each elem connected to the node
-  for(dof_id_type el=0; el < elems.size(); ++el)
+  for(unsigned int el=0; el < elems.size(); ++el)
   {
     dof_id_type cur_elem = elems[el];
 
     std::vector<dof_id_type> dof_indices;
     _var.getDofIndices(_mesh.elem(cur_elem), dof_indices);
 
-    for(dof_id_type di=0; di < dof_indices.size(); di++)
+    for(unsigned int di=0; di < dof_indices.size(); di++)
       unique_dof_indices.insert(dof_indices[di]);
   }
 
@@ -174,7 +174,7 @@ NodeFaceConstraint::computeJacobian()
 
   // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
   // This corresponds to evaluating all of the connected shape functions at _this_ node
-  for(dof_id_type j=0; j<_connected_dof_indices.size(); j++)
+  for(unsigned int j=0; j<_connected_dof_indices.size(); j++)
   {
     _phi_slave[j].resize(1);
 

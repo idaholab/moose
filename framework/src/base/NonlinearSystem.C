@@ -926,7 +926,7 @@ NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian
 void
 NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced)
 {
-  std::map<std::pair<dof_id_type, dof_id_type>, PenetrationLocator *> * penetration_locators = NULL;
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = NULL;
 
   if(!displaced)
   {
@@ -941,7 +941,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 
   bool constraints_applied = false;
 
-  for(std::map<std::pair<dof_id_type, dof_id_type>, PenetrationLocator *>::iterator it = penetration_locators->begin();
+  for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
       it != penetration_locators->end();
       ++it)
   {
@@ -960,7 +960,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 
     if(constraints.size())
     {
-      for(dof_id_type i=0; i<slave_nodes.size(); i++)
+      for(unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
         Node & slave_node = _mesh.node(slave_node_num);
@@ -1014,7 +1014,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 void
 NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool displaced)
 {
-  std::map<std::pair<dof_id_type, dof_id_type>, PenetrationLocator *> * penetration_locators = NULL;
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = NULL;
 
   if(!displaced)
   {
@@ -1029,7 +1029,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
   bool constraints_applied;
   if (!_assemble_constraints_separately) constraints_applied = false;
-  for(std::map<std::pair<dof_id_type, dof_id_type>, PenetrationLocator *>::iterator it = penetration_locators->begin();
+  for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
       it != penetration_locators->end();
       ++it)
   {
@@ -1054,7 +1054,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
     if(constraints.size())
     {
-      for(dof_id_type i=0; i<slave_nodes.size(); i++)
+      for(unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
         Node & slave_node = _mesh.node(slave_node_num);
@@ -1110,13 +1110,14 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
       if(constraints_applied)
       {
-	residual.close();
-	_fe_problem.addCachedResidualDirectly(residual, 0);
-	residual.close();
-	if (_need_residual_ghosted) {
-	  _residual_ghosted = residual;
-	  _residual_ghosted.close();  // somewhat redundant since the assignment above should also close
-	}
+        residual.close();
+        _fe_problem.addCachedResidualDirectly(residual, 0);
+        residual.close();
+        if (_need_residual_ghosted)
+        {
+          _residual_ghosted = residual;
+          _residual_ghosted.close();  // somewhat redundant since the assignment above should also close
+        }
       }
     }
   }
@@ -1277,15 +1278,15 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
 void
 NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<unsigned int, std::vector<unsigned int> > & graph)
 {
-  std::map<std::pair<dof_id_type, dof_id_type>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
+  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
 
-  for(std::map<std::pair<dof_id_type, dof_id_type>, NearestNodeLocator *>::iterator it = nearest_node_locators.begin();
+  for(std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator it = nearest_node_locators.begin();
       it != nearest_node_locators.end();
       ++it)
   {
     std::vector<dof_id_type> & slave_nodes = it->second->_slave_nodes;
 
-    for(dof_id_type i=0; i<slave_nodes.size(); i++)
+    for(unsigned int i=0; i<slave_nodes.size(); i++)
     {
       std::set<dof_id_type> unique_slave_indices;
       std::set<dof_id_type> unique_master_indices;
@@ -1296,21 +1297,21 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
         std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[slave_node];
 
         // Get the dof indices from each elem connected to the node
-        for(dof_id_type el=0; el < elems.size(); ++el)
+        for(unsigned int el=0; el < elems.size(); ++el)
         {
           dof_id_type cur_elem = elems[el];
 
           std::vector<dof_id_type> dof_indices;
           dofMap().dof_indices(_mesh.elem(cur_elem), dof_indices);
 
-          for(dof_id_type di=0; di < dof_indices.size(); di++)
+          for(unsigned int di=0; di < dof_indices.size(); di++)
             unique_slave_indices.insert(dof_indices[di]);
         }
       }
 
       std::vector<dof_id_type> master_nodes = it->second->_neighbor_nodes[slave_node];
 
-      for(dof_id_type k=0; k<master_nodes.size(); k++)
+      for(unsigned int k=0; k<master_nodes.size(); k++)
       {
         dof_id_type master_node = master_nodes[k];
 
@@ -1318,14 +1319,14 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
           std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[master_node];
 
           // Get the dof indices from each elem connected to the node
-          for(dof_id_type el=0; el < elems.size(); ++el)
+          for(unsigned int el=0; el < elems.size(); ++el)
           {
             dof_id_type cur_elem = elems[el];
 
             std::vector<dof_id_type> dof_indices;
             dofMap().dof_indices(_mesh.elem(cur_elem), dof_indices);
 
-            for(dof_id_type di=0; di < dof_indices.size(); di++)
+            for(unsigned int di=0; di < dof_indices.size(); di++)
               unique_master_indices.insert(dof_indices[di]);
           }
         }
@@ -1349,10 +1350,10 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
   // Make every entry sorted and unique
   for(std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
   {
-    std::vector<unsigned int> & row = git->second;
+    std::vector<dof_id_type> & row = git->second;
 
     std::sort(row.begin(), row.end());
-    std::vector<unsigned int>::iterator uit = std::unique(row.begin(), row.end());
+    std::vector<dof_id_type>::iterator uit = std::unique(row.begin(), row.end());
     row.resize(uit - row.begin());
   }
 }
@@ -1369,7 +1370,7 @@ NonlinearSystem::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jaco
   for(std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
   {
     dof_id_type dof = git->first;
-    std::vector<unsigned int> & row = git->second;
+    std::vector<dof_id_type> & row = git->second;
 
     for(unsigned int i=0; i<row.size(); i++)
     {
@@ -1384,7 +1385,7 @@ void
 NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced)
 {
   std::vector<numeric_index_type> zero_rows;
-  std::map<std::pair<dof_id_type, dof_id_type>, PenetrationLocator *> * penetration_locators = NULL;
+  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = NULL;
 
   if(!displaced)
   {
@@ -1399,7 +1400,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
   bool constraints_applied;
   if (!_assemble_constraints_separately) constraints_applied = false;
-  for(std::map<std::pair<dof_id_type, dof_id_type>, PenetrationLocator *>::iterator it = penetration_locators->begin();
+  for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
       it != penetration_locators->end();
       ++it)
   {
@@ -1424,7 +1425,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
     zero_rows.clear();
     if(constraints.size())
     {
-      for(dof_id_type i=0; i<slave_nodes.size(); i++)
+      for(unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
         Node & slave_node = _mesh.node(slave_node_num);
@@ -1941,7 +1942,7 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
       if(dof < first_dof_on_proc || dof >= end_dof_on_proc)
         continue;
 
-      std::vector<unsigned int> & row = git->second;
+      std::vector<dof_id_type> & row = git->second;
 
       SparsityPattern::Row & sparsity_row = sparsity[local_dof];
 

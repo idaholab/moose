@@ -150,7 +150,7 @@ public:
    * Return the list of elements that should have their DoFs ghosted to this processor.
    * @return The list
    */
-  virtual std::set<unsigned int> & ghostedElems() { return _mproblem.ghostedElems(); }
+  virtual std::set<dof_id_type> & ghostedElems() { return _mproblem.ghostedElems(); }
 
   virtual Order getQuadratureOrder();
 

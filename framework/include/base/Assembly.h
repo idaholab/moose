@@ -365,7 +365,7 @@ public:
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id_type> & idof_indices, std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
 
-  std::vector<std::pair<dof_id_type, dof_id_type> > & couplingEntries() { return _cm_entry; }
+  std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
 
   const VariablePhiValue & phi() { return _phi; }
   const VariablePhiGradient & gradPhi() { return _grad_phi; }

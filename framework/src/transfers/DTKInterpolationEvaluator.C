@@ -53,7 +53,7 @@ DTKInterpolationEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>& elem
 
     Number value = 0;
 
-    for (dof_id_type j=0; j<dof_indices.size(); j++)
+    for (unsigned int j=0; j<dof_indices.size(); j++)
       value += current_local_solution(dof_indices[j]) * data.shape[j];
 
     values[i] = value;

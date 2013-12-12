@@ -642,12 +642,12 @@ Assembly::init()
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
   {
-    dof_id_type j = (*jt)->index();
+    unsigned int j = (*jt)->index();
     for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
     {
-      dof_id_type i = (*it)->index();
+      unsigned int i = (*it)->index();
       if ((*_cm)(i, j) != 0)
-        _cm_entry.push_back(std::pair<dof_id_type, dof_id_type>(i, j));
+        _cm_entry.push_back(std::pair<unsigned int, unsigned int>(i, j));
     }
   }
 
@@ -669,7 +669,7 @@ Assembly::init()
   // two vectors: one for time residual contributions and one for non-time residual contributions
   _sub_Re.resize(2);
   _sub_Rn.resize(2);
-  for (dof_id_type i = 0; i < _sub_Re.size(); i++)
+  for (unsigned int i = 0; i < _sub_Re.size(); i++)
   {
     _sub_Re[i].resize(n_vars);
     _sub_Rn[i].resize(n_vars);
@@ -702,10 +702,10 @@ Assembly::init()
 void
 Assembly::prepare()
 {
-  for (std::vector<std::pair<dof_id_type, dof_id_type> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
   {
-    dof_id_type vi = (*it).first;
-    dof_id_type vj = (*it).second;
+    unsigned int vi = (*it).first;
+    unsigned int vj = (*it).second;
 
     MooseVariable & ivar = _sys.getVariable(_tid, vi);
     MooseVariable & jvar = _sys.getVariable(_tid, vj);
@@ -718,7 +718,7 @@ Assembly::prepare()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
-    for (dof_id_type i = 0; i < _sub_Re.size(); i++)
+    for (unsigned int i = 0; i < _sub_Re.size(); i++)
     {
       _sub_Re[i][ivar.index()].resize(ivar.dofIndices().size());
       _sub_Re[i][ivar.index()].zero();
@@ -729,10 +729,10 @@ Assembly::prepare()
 void
 Assembly::prepareVariable(MooseVariable * var)
 {
-  for (std::vector<std::pair<dof_id_type, dof_id_type> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
   {
-    dof_id_type vi = (*it).first;
-    dof_id_type vj = (*it).second;
+    unsigned int vi = (*it).first;
+    unsigned int vj = (*it).second;
 
     if(vi == var->index() || vj == var->index())
     {
@@ -743,7 +743,7 @@ Assembly::prepareVariable(MooseVariable * var)
     }
   }
 
-  for (dof_id_type i = 0; i < _sub_Re.size(); i++)
+  for (unsigned int i = 0; i < _sub_Re.size(); i++)
   {
     _sub_Re[i][var->index()].resize(var->dofIndices().size());
     _sub_Re[i][var->index()].zero();
@@ -753,10 +753,10 @@ Assembly::prepareVariable(MooseVariable * var)
 void
 Assembly::prepareNeighbor()
 {
-  for (std::vector<std::pair<dof_id_type, dof_id_type> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
   {
-    dof_id_type vi = (*it).first;
-    dof_id_type vj = (*it).second;
+    unsigned int vi = (*it).first;
+    unsigned int vj = (*it).second;
 
     MooseVariable & ivar = _sys.getVariable(_tid, vi);
     MooseVariable & jvar = _sys.getVariable(_tid, vj);
@@ -775,7 +775,7 @@ Assembly::prepareNeighbor()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
-    for (dof_id_type i = 0; i < _sub_Rn.size(); i++)
+    for (unsigned int i = 0; i < _sub_Rn.size(); i++)
     {
       _sub_Rn[i][ivar.index()].resize(ivar.dofIndicesNeighbor().size());
       _sub_Rn[i][ivar.index()].zero();
@@ -789,7 +789,7 @@ Assembly::prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<dof_i
   jacobianBlock(ivar,jvar).resize(dof_indices.size(), dof_indices.size());
   jacobianBlock(ivar,jvar).zero();
 
-  for (dof_id_type i = 0; i < _sub_Re.size(); i++)
+  for (unsigned int i = 0; i < _sub_Re.size(); i++)
   {
     _sub_Re[i][ivar].resize(dof_indices.size());
     _sub_Re[i][ivar].zero();
@@ -803,9 +803,9 @@ Assembly::prepareScalar()
   for (std::vector<MooseVariableScalar *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariableScalar & ivar = *(*it);
-    dof_id_type idofs = ivar.dofIndices().size();
+    unsigned int idofs = ivar.dofIndices().size();
 
-    for (dof_id_type i = 0; i < _sub_Re.size(); i++)
+    for (unsigned int i = 0; i < _sub_Re.size(); i++)
     {
       _sub_Re[i][ivar.index()].resize(idofs);
       _sub_Re[i][ivar.index()].zero();
@@ -814,7 +814,7 @@ Assembly::prepareScalar()
     for (std::vector<MooseVariableScalar *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
       MooseVariableScalar & jvar = *(*jt);
-      dof_id_type jdofs = jvar.dofIndices().size();
+      unsigned int jdofs = jvar.dofIndices().size();
 
       jacobianBlock(ivar.index(), jvar.index()).resize(idofs, jdofs);
       jacobianBlock(ivar.index(), jvar.index()).zero();
@@ -831,12 +831,12 @@ Assembly::prepareOffDiagScalar()
   for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin(); it != scalar_vars.end(); ++it)
   {
     MooseVariableScalar & ivar = *(*it);
-    dof_id_type idofs = ivar.dofIndices().size();
+    unsigned int idofs = ivar.dofIndices().size();
 
     for (std::vector<MooseVariable *>::const_iterator jt = vars.begin(); jt != vars.end(); ++jt)
     {
       MooseVariable & jvar = *(*jt);
-      dof_id_type jdofs = jvar.dofIndices().size();
+      unsigned int jdofs = jvar.dofIndices().size();
 
       jacobianBlock(ivar.index(), jvar.index()).resize(idofs, jdofs);
       jacobianBlock(ivar.index(), jvar.index()).zero();
@@ -918,7 +918,7 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values, std::ve
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
 
-      for(dof_id_type i=0; i<_tmp_Re.size(); i++)
+      for(unsigned int i=0; i<_tmp_Re.size(); i++)
       {
         cached_residual_values.push_back(_tmp_Re(i));
         cached_residual_rows.push_back(_temp_dof_indices[i]);
@@ -926,7 +926,7 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values, std::ve
     }
     else
     {
-      for(dof_id_type i=0; i<res_block.size(); i++)
+      for(unsigned int i=0; i<res_block.size(); i++)
       {
         cached_residual_values.push_back(res_block(i));
         cached_residual_rows.push_back(_temp_dof_indices[i]);
@@ -980,7 +980,7 @@ Assembly::cacheResidual()
   {
     MooseVariable & var = *(*it);
 
-    for (dof_id_type i = 0; i < _sub_Re.size(); i++)
+    for (unsigned int i = 0; i < _sub_Re.size(); i++)
       cacheResidualBlock(_cached_residual_values[i], _cached_residual_rows[i], _sub_Re[i][var.index()], var.dofIndices(), var.scalingFactor());
   }
 }
@@ -1034,11 +1034,11 @@ Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
     {
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
-      for(dof_id_type i=0; i<di.size(); i++)
+      for(unsigned int i=0; i<di.size(); i++)
         residual.set(di[i], _tmp_Re(i));
     }
     else
-      for(dof_id_type i=0; i<di.size(); i++)
+      for(unsigned int i=0; i<di.size(); i++)
         residual.set(di[i], res_block(i));
   }
 }
@@ -1100,8 +1100,8 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id
       _tmp_Ke = jac_block;
       _tmp_Ke *= scaling_factor;
 
-      for(dof_id_type i=0; i<di.size(); i++)
-        for(dof_id_type j=0; j<dj.size(); j++)
+      for(unsigned int i=0; i<di.size(); i++)
+        for(unsigned int j=0; j<dj.size(); j++)
         {
           _cached_jacobian_values.push_back(_tmp_Ke(i, j));
           _cached_jacobian_rows.push_back(di[i]);
@@ -1110,8 +1110,8 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id
     }
     else
     {
-      for(dof_id_type i=0; i<di.size(); i++)
-        for(dof_id_type j=0; j<dj.size(); j++)
+      for(unsigned int i=0; i<di.size(); i++)
+        for(unsigned int j=0; j<dj.size(); j++)
         {
           _cached_jacobian_values.push_back(jac_block(i, j));
           _cached_jacobian_rows.push_back(di[i]);
@@ -1130,7 +1130,7 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & jacobian)
   mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
               "Error: Cached data sizes MUST be the same!");
 
-  for(dof_id_type i=0; i<_cached_jacobian_rows.size(); i++)
+  for(unsigned int i=0; i<_cached_jacobian_rows.size(); i++)
     jacobian.add(_cached_jacobian_rows[i], _cached_jacobian_cols[i], _cached_jacobian_values[i]);
 
   if(_max_cached_jacobians < _cached_jacobian_values.size())

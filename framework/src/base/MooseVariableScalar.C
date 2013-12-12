@@ -81,7 +81,7 @@ MooseVariableScalar::isNodal() const
 }
 
 void
-MooseVariableScalar::setValue(dof_id_type i, Number value)
+MooseVariableScalar::setValue(unsigned int i, Number value)
 {
   _u[i] = value;                  // update variable value
 }

@@ -188,7 +188,7 @@ public:
   /**
    * Set the nodal value for this variable (to keep everything up to date
    */
-  void setNodalValue(Number value, dof_id_type idx = 0);
+  void setNodalValue(Number value, unsigned int idx = 0);
 
   /**
    * Set the neighbor nodal value for this variable
