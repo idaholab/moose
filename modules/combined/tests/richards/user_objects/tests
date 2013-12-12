@@ -1,0 +1,9 @@
+[Tests]
+  [./test_uo1]
+    type = 'Exodiff'
+    input = 'uo1.i'
+    exodiff = 'uo1.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+  [../]
+[]
