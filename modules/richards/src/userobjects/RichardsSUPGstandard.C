@@ -45,9 +45,9 @@ RichardsSUPGstandard::dvelSUPG_dp(RealTensorValue perm, Real density_prime, Real
 Real
 RichardsSUPGstandard::cosh_relation(Real alpha) const
 {
-  if (alpha >= 20)
+  if (alpha >= 5.0)
     return 1 - 1.0/alpha; // prevents overflows
-  else if (alpha <= -20)
+  else if (alpha <= -5.0)
     return -1 - 1.0/alpha;
   else if (alpha == 0)
     return 0.0;
@@ -57,9 +57,9 @@ RichardsSUPGstandard::cosh_relation(Real alpha) const
 Real
 RichardsSUPGstandard::cosh_relation_prime(Real alpha) const
 {
-  if (alpha >= 20)
+  if (alpha >= 5.0)
       return 1.0/alpha/alpha;
-  else if (alpha <= -20)
+  else if (alpha <= -5.0)
       return 1.0/alpha/alpha;
   else if (alpha == 0)
     return 1.0/3.0;
@@ -100,13 +100,14 @@ RichardsSUPGstandard::tauSUPG(RealVectorValue vel, Real traceperm, RealVectorVal
 {
   // vel = velocity, b = bb
   Real norm_v = std::pow(vel*vel, 0.5);
+ 
   Real norm_b = std::pow(b*b, 0.5); // Hughes et al investigate infinity-norm and 2-norm.  i just use 2-norm here.   norm_b ~ 2|a|/ele_length_in_direction_of_a
   
   if (norm_b == 0)
     return 0.0; // Only way for norm_b=0 is for zero ele size, or vel=0.  Either way we don't have to upwind.
-  
+
   Real h = 2*norm_v/norm_b; // h is a measure of the element length in the "a" direction
-  Real alpha = 0.5*norm_v*h/traceperm/_p_SUPG;
+  Real alpha = 0.5*norm_v*h/traceperm/_p_SUPG;   // this is the Peclet number
   
   Real xi_tilde = RichardsSUPGstandard::cosh_relation(alpha);
   
@@ -127,7 +128,7 @@ RichardsSUPGstandard::dtauSUPG_dgradp(RealVectorValue vel, RealTensorValue dvel_
     return RealVectorValue();
   RealVectorValue norm_b_dgradp = db2_dgradp/2/norm_b;
 
-  Real h = 2*norm_vel/norm_b;
+  Real h = 2*norm_vel/norm_b; // h is a measure of the element length in the "a" direction
   RealVectorValue h_dgradp(2*norm_vel_dgradp/norm_b - 2*norm_vel*norm_b_dgradp/norm_b/norm_b);
 
   Real alpha = 0.5*norm_vel*h/traceperm/_p_SUPG;  // this is the Peclet number
@@ -137,7 +138,6 @@ RichardsSUPGstandard::dtauSUPG_dgradp(RealVectorValue vel, RealTensorValue dvel_
   Real xi_tilde_prime = RichardsSUPGstandard::cosh_relation_prime(alpha);
   RealVectorValue xi_tilde_dgradp = xi_tilde_prime*alpha_dgradp;
 
-  //Real tau = xi_tilde/norm_b;
   RealVectorValue tau_dgradp = xi_tilde_dgradp/norm_b - xi_tilde*norm_b_dgradp/norm_b/norm_b;
 
   return tau_dgradp;
@@ -156,7 +156,7 @@ RichardsSUPGstandard::dtauSUPG_dp(RealVectorValue vel, RealVectorValue dvel_dp, 
     return 0.0; // this deriv is not necessarily correct, but i can't see a better thing to do
   Real norm_b_dp = db2_dp/2/norm_b;
 
-  Real h = 2*norm_vel/norm_b;
+  Real h = 2*norm_vel/norm_b; // h is a measure of the element length in the "a" direction
   Real h_dp(2*norm_vel_dp/norm_b - 2*norm_vel*norm_b_dp/norm_b/norm_b);
 
   Real alpha = 0.5*norm_vel*h/traceperm/_p_SUPG;  // this is the Peclet number

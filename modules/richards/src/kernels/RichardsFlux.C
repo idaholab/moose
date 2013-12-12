@@ -56,17 +56,23 @@ RichardsFlux::computeQpResidual()
     {
       if (_p_var_nums[_qp][pvar] == _this_var_num)
 	{
-	  Real flux_part = _grad_test[_i][_qp]*((_density[_qp][pvar]*_rel_perm[_qp][pvar]/_viscosity[_qp][pvar])*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][pvar]*_gravity[_qp])));
+	  Real mob = mobility(_density[_qp][pvar], _rel_perm[_qp][pvar]);
+	  RealVectorValue pot = _permeability[_qp]*(_grad_u[_qp] - _density[_qp][pvar]*_gravity[_qp]);
+	  Real flux_part = _grad_test[_i][_qp]*mob*pot;
+
 	  Real supg_test = _tauvel_SUPG[_qp][pvar]*_grad_test[_i][_qp];
 	  Real supg_kernel = 0.0;
-
+	  
 	  if (supg_test != 0)
 	    {
-	      supg_kernel = -(_ddensity[_qp][pvar]*_rel_perm[_qp][pvar] + _density[_qp][pvar]*_drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar])/_viscosity[_qp][pvar]*_grad_u[_qp]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][pvar]*_gravity[_qp]));
+	      Real dmob_dp = dmobility_dp(_density[_qp][pvar], _ddensity[_qp][pvar], _rel_perm[_qp][pvar], _drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar]);
+	      RealVectorValue grad_mob = dmob_dp*_grad_u[_qp];
 	      // NOTE: since Libmesh does not correctly calculate grad(_grad_u) correctly, so following might not be correct
-	      supg_kernel -= (_density[_qp][pvar]*_rel_perm[_qp][pvar]/_viscosity[_qp][pvar])*((_permeability[_qp]*_second_u[_qp]).tr() - (_permeability[_qp]*_grad_u[_qp])*_ddensity[_qp][pvar]*_gravity[_qp]);
+	      Real div_pot = (_permeability[_qp]*_second_u[_qp]).tr() - (_permeability[_qp]*_grad_u[_qp])*_ddensity[_qp][pvar]*_gravity[_qp];
+	      supg_kernel = -grad_mob*pot - mob*div_pot;
 	    }
-	  return flux_part + supg_test*supg_kernel;
+
+	  return (flux_part + supg_test*supg_kernel)/_viscosity[_qp][pvar]; // TEST
 	}
     }
   return 0.0;
@@ -80,29 +86,34 @@ RichardsFlux::computeQpJacobian()
     {
       if (_p_var_nums[_qp][pvar] == _this_var_num)
 	{
-	  Real flux_prime = _grad_test[_i][_qp]*((_density[_qp][pvar]*_rel_perm[_qp][pvar]/_viscosity[_qp][pvar])*(_permeability[_qp]*(_grad_phi[_j][_qp] - _phi[_j][_qp]*_ddensity[_qp][pvar]*_gravity[_qp])));
-	  flux_prime += _grad_test[_i][_qp]*((_ddensity[_qp][pvar]*_rel_perm[_qp][pvar] + _density[_qp][pvar]*_drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar])*_phi[_j][_qp]/_viscosity[_qp][pvar]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][pvar]*_gravity[_qp])));
-	  //std::cout << _density[_qp][pvar] << " " << _ddensity[_qp][pvar] << " " << _rel_perm[_qp][pvar] << " " << _drel_perm[_qp][pvar] << "\n";
-	  //std::cout << _dseff[_qp][pvar][pvar] << "\n";
-	  //std::cout << _grad_test[_i][_qp]*((_density[_qp][pvar]*_rel_perm[_qp][pvar]/_viscosity[_qp][pvar])*(_permeability[_qp]*(_grad_phi[_j][_qp] - _phi[_j][_qp]*_ddensity[_qp][pvar]*_gravity[_qp]))) << " " << _grad_test[_i][_qp]*((_ddensity[_qp][pvar]*_rel_perm[_qp][pvar] + _density[_qp][pvar]*_drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar])*_phi[_j][_qp]/_viscosity[_qp][pvar]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][pvar]*_gravity[_qp]))) << "\n";
+	  Real mob = mobility(_density[_qp][pvar], _rel_perm[_qp][pvar]);
+	  Real dmob_dp = dmobility_dp(_density[_qp][pvar], _ddensity[_qp][pvar], _rel_perm[_qp][pvar], _drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar]);
+	  RealVectorValue pot = _permeability[_qp]*(_grad_u[_qp] - _density[_qp][pvar]*_gravity[_qp]);
+	  RealVectorValue dpot_dp = _permeability[_qp]*(_grad_phi[_j][_qp] - _phi[_j][_qp]*_ddensity[_qp][pvar]*_gravity[_qp]); // note: includes _phi
+
+	  Real dflux_dp = _grad_test[_i][_qp]*(dmob_dp*_phi[_j][_qp]*pot + mob*dpot_dp);
+
 	  Real supg_test = _tauvel_SUPG[_qp][pvar]*_grad_test[_i][_qp];
 	  Real supg_test_prime = _grad_phi[_j][_qp]*(_dtauvel_SUPG_dgradp[_qp][pvar]*_grad_test[_i][_qp]) + _phi[_j][_qp]*_dtauvel_SUPG_dp[_qp][pvar]*_grad_test[_i][_qp];
 	  Real supg_kernel = 0.0;
 	  Real supg_kernel_prime = 0.0;
+
 	  if (supg_test != 0)
 	    {
-	      //std::cout << "richardsflux:;computeqpjac doing supg\n";
-	      supg_kernel = -(_ddensity[_qp][pvar]*_rel_perm[_qp][pvar] + _density[_qp][pvar]*_drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar])/_viscosity[_qp][pvar]*_grad_u[_qp]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][pvar]*_gravity[_qp]));
-	      supg_kernel -= (_density[_qp][pvar]*_rel_perm[_qp][pvar]/_viscosity[_qp][pvar])*((_permeability[_qp]*_second_u[_qp]).tr() - (_permeability[_qp]*_grad_u[_qp])*_ddensity[_qp][pvar]*_gravity[_qp]);
+	      RealVectorValue grad_mob = dmob_dp*_grad_u[_qp];
+	      // NOTE: since Libmesh does not correctly calculate grad(_grad_u) correctly, so following might not be correct
+	      Real div_pot = ((_permeability[_qp]*_second_u[_qp]).tr() - (_permeability[_qp]*_grad_u[_qp])*_ddensity[_qp][pvar]*_gravity[_qp]);
+	      supg_kernel = -grad_mob*pot - mob*div_pot;
 
-	      supg_kernel_prime = -(_d2density[_qp][pvar]*_rel_perm[_qp][pvar] + 2*_ddensity[_qp][pvar]*_drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar] + _density[_qp][pvar]*_d2rel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar]*_dseff[_qp][pvar][pvar] + _density[_qp][pvar]*_drel_perm[_qp][pvar]*_d2seff[_qp][pvar][pvar][pvar])*_phi[_j][_qp]/_viscosity[_qp][pvar]*_grad_u[_qp]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][pvar]*_gravity[_qp]));
-	      supg_kernel_prime -= (_ddensity[_qp][pvar]*_rel_perm[_qp][pvar] + _density[_qp][pvar]*_drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar])/_viscosity[_qp][pvar]*(_grad_phi[_j][_qp]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][pvar]*_gravity[_qp])) + _grad_u[_qp]*(_permeability[_qp]*(_grad_phi[_j][_qp] - _phi[_j][_qp]*_ddensity[_qp][pvar]*_gravity[_qp])));
-	      supg_kernel_prime -= ((_ddensity[_qp][pvar]*_rel_perm[_qp][pvar] + _density[_qp][pvar]*_drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar])*_phi[_j][_qp]/_viscosity[_qp][pvar]*((_permeability[_qp]*_second_u[_qp]).tr() - (_permeability[_qp]*_grad_u[_qp])*_ddensity[_qp][pvar]*_gravity[_qp]));
-            //supg_kernel_prime -= (_density[_qp][pvar]*_rel_perm[_qp][pvar]/_viscosity[_qp][pvar])*((_permeability[_qp]*_second_phi[_j][_qp]).tr()); //uncomment once second_phi is zeroed
-	      supg_kernel_prime -= (_density[_qp][pvar]*_rel_perm[_qp][pvar]/_viscosity[_qp][pvar])*(-(_permeability[_qp]*_grad_phi[_j][_qp])*_ddensity[_qp][pvar] - (_permeability[_qp]*_grad_u[_qp])*_d2density[_qp][pvar]*_phi[_j][_qp])*_gravity[_qp];
+	      Real d2mob_dp2 = d2mobility_dp2(_density[_qp][pvar], _ddensity[_qp][pvar], _d2density[_qp][pvar], _rel_perm[_qp][pvar], _drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar], _d2rel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar]*_dseff[_qp][pvar][pvar] + _drel_perm[_qp][pvar]*_d2seff[_qp][pvar][pvar][pvar]);
+	      RealVectorValue dgrad_mob_dp = d2mob_dp2*_phi[_j][_qp]*_grad_u[_qp] + dmob_dp*_grad_phi[_j][_qp];
+	      Real ddiv_pot_dp = -(_permeability[_qp]*_grad_phi[_j][_qp])*_ddensity[_qp][pvar]*_gravity[_qp]  - (_permeability[_qp]*_grad_u[_qp])*_d2density[_qp][pvar]*_phi[_j][_qp]*_gravity[_qp];
+	      //Real ddiv_pot_dp += (_permeability[_qp]*_second_phi[_j][_qp]).tr();
+
+	      supg_kernel_prime = -dgrad_mob_dp*pot - grad_mob*dpot_dp - dmob_dp*_phi[_j][_qp]*div_pot - mob*ddiv_pot_dp;
 	    }
-	  //std::cout << "elem=" << _current_elem->id() << " qp=" << _qp << " gradtest=" << _grad_test[_i][_qp] << " supg_test=" << supg_test << " supg_test_prime=" << supg_test_prime << "\n";
-	  return flux_prime + (supg_test_prime*supg_kernel + supg_test*supg_kernel_prime);
+
+	  return (dflux_dp + supg_test_prime*supg_kernel + supg_test*supg_kernel_prime)/_viscosity[_qp][pvar]; // TEST
 	}
     }
   return 0.0;
@@ -140,3 +151,25 @@ RichardsFlux::computeQpOffDiagJacobian(unsigned int jvar)
     }
   return 0.0;
 }    
+
+
+// mobility
+Real
+RichardsFlux::mobility(Real density, Real relperm)
+{
+  return density*relperm;
+}
+
+// d(mobility)/dp
+Real
+RichardsFlux::dmobility_dp(Real density, Real ddensity_dp, Real relperm, Real drelperm_dp)
+{
+  return ddensity_dp*relperm + density*drelperm_dp;
+}
+
+// d2(mobility)/dp2
+Real
+RichardsFlux::d2mobility_dp2(Real density, Real ddensity_dp, Real d2density_dp2, Real relperm, Real drelperm_dp, Real d2relperm_dp2)
+{
+  return d2density_dp2*relperm + 2*ddensity_dp*drelperm_dp + density*d2relperm_dp2;
+}

@@ -1,6 +1,6 @@
-# unsaturated = false
-# gravity = false
-# supg = true
+# unsaturated = true
+# gravity = true
+# supg = false
 # transient = false
 
 [Mesh]
@@ -9,19 +9,19 @@
   nx = 1
   ny = 1
   nz = 1
-  xmin = -10
-  xmax = 10
-  ymin = -10
-  ymax = 10
-  zmin = -10
-  zmax = 10
+  xmin = -1
+  xmax = 1
+  ymin = -1
+  ymax = 1
+  zmin = -1
+  zmax = 1
 []
 
 [UserObjects]
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
-    dens0 = 1000
-    bulk_mod = 2.0 # notice small quantity, so PETSc's "constant state" works
+    dens0 = 1
+    bulk_mod = 1.0 # notice small quantity, so PETSc's "constant state" works
   [../]
   [./SeffVG]
     type = RichardsSeff1VG
@@ -38,9 +38,8 @@
     s_res = 0.1
     sum_s_res = 0.1
   [../]
-  [./SUPGstandard]
-    type = RichardsSUPGstandard
-    p_SUPG = 0.1
+  [./SUPGnone]
+    type = RichardsSUPGnone
   [../]
 []
 
@@ -51,8 +50,8 @@
     [./InitialCondition]
       type = RandomIC
       block = 0
-      min = 0
-      max = 1
+      min = -1
+      max = 0
     [../]
   [../]
 []
@@ -79,11 +78,11 @@
     pressure_vars = pressure
     density_UO = DensityConstBulk
     relperm_UO = RelPermPower
-    SUPG_UO = SUPGstandard
+    SUPG_UO = SUPGnone
     sat_UO = Saturation
     seff_UO = SeffVG
     viscosity = 1E-3
-    gravity = '0 0 0'
+    gravity = '1 2 3'
     linear_shape_fcns = true
   [../]
 []

@@ -1,7 +1,7 @@
 # unsaturated = true
 # gravity = false
 # supg = false
-# transient = true
+# transient = false
 
 [Mesh]
   type = GeneratedMesh
@@ -9,19 +9,19 @@
   nx = 1
   ny = 1
   nz = 1
-  xmin = -10
-  xmax = 10
-  ymin = -10
-  ymax = 10
-  zmin = -10
-  zmax = 10
+  xmin = -1
+  xmax = 1
+  ymin = -1
+  ymax = 1
+  zmin = -1
+  zmax = 1
 []
 
 [UserObjects]
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
-    dens0 = 1000
-    bulk_mod = 2.0 # notice small quantity, so PETSc's "constant state" works
+    dens0 = 1
+    bulk_mod = 1.0 # notice small quantity, so PETSc's "constant state" works
   [../]
   [./SeffVG]
     type = RichardsSeff1VG
@@ -58,7 +58,7 @@
     
   
 [Kernels]
-  active = 'richardsf richardst'
+  active = 'richardsf'
   [./richardst]
     type = RichardsMassChange
     variable = pressure
@@ -99,13 +99,12 @@
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
   solve_type = Newton
-  dt = 1E-5
 []
 
 [Output]
-  file_base = jn10
+  file_base = jn02
   output_initial = false
   exodus = false
   perf_log = false

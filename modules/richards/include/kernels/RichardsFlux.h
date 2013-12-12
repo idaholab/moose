@@ -51,6 +51,10 @@ protected:
   MaterialProperty<std::vector<RealTensorValue> >&_dtauvel_SUPG_dgradp;
   MaterialProperty<std::vector<RealVectorValue> >&_dtauvel_SUPG_dp;
 
+ private:
+  Real mobility(Real density, Real relperm);
+  Real dmobility_dp(Real density, Real ddensity_dp, Real relperm, Real drelperm_dp);
+  Real d2mobility_dp2(Real density, Real ddensity_dp, Real d2density_dp2, Real relperm, Real drelperm_dp, Real d2relperm_dp2);
 };
 
 #endif //RICHARDSFLUX

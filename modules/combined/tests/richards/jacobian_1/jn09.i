@@ -1,5 +1,5 @@
 # unsaturated = false
-# gravity = true
+# gravity = false
 # supg = false
 # transient = true
 
@@ -9,19 +9,19 @@
   nx = 1
   ny = 1
   nz = 1
-  xmin = -10
-  xmax = 10
-  ymin = -10
-  ymax = 10
-  zmin = -10
-  zmax = 10
+  xmin = -1
+  xmax = 1
+  ymin = -1
+  ymax = 1
+  zmin = -1
+  zmax = 1
 []
 
 [UserObjects]
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
-    dens0 = 1000
-    bulk_mod = 2.0 # notice small quantity, so PETSc's "constant state" works
+    dens0 = 1
+    bulk_mod = 1.0 # notice small quantity, so PETSc's "constant state" works
   [../]
   [./SeffVG]
     type = RichardsSeff1VG
@@ -82,7 +82,7 @@
     sat_UO = Saturation
     seff_UO = SeffVG
     viscosity = 1E-3
-    gravity = '1 2 3'
+    gravity = '0 0 0'
     linear_shape_fcns = true
   [../]
 []
@@ -101,11 +101,10 @@
 [Executioner]
   type = Transient
   solve_type = Newton
-  dt = 1E-5
 []
 
 [Output]
-  file_base = jn11
+  file_base = jn09
   output_initial = false
   exodus = false
   perf_log = false

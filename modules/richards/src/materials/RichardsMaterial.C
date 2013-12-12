@@ -285,11 +285,14 @@ RichardsMaterial::computeProperties()
 	  Real tau = (*_material_SUPG_UO[i]).tauSUPG(vel, _trace_perm, bb);
 	  RealVectorValue dtau_dgradp = (*_material_SUPG_UO[i]).dtauSUPG_dgradp(vel, dvel_dgradp, _trace_perm, bb, dbb2_dgradp);
 	  Real dtau_dp = (*_material_SUPG_UO[i]).dtauSUPG_dp(vel, dvel_dp, _trace_perm, bb, dbb2_dp);
+
 	  _tauvel_SUPG[qp][i] = tau*vel;
+
 	  _dtauvel_SUPG_dgradp[qp][i] = tau*dvel_dgradp;
-	  for (unsigned int j=0 ; j<vel.size(); ++j)
-	    for (unsigned int k=0 ; k<vel.size(); ++k)
+	  for (unsigned int j=0 ; j<3; ++j)
+	    for (unsigned int k=0 ; k<3; ++k)
 	      _dtauvel_SUPG_dgradp[qp][i](j,k) += dtau_dgradp(j)*vel(k); // this is outerproduct - maybe libmesh can do it better?
+
 	  _dtauvel_SUPG_dp[qp][i] = dtau_dp*vel + tau*dvel_dp;
 	}
     }
