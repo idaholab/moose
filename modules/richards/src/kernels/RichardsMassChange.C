@@ -7,19 +7,19 @@
 template<>
 InputParameters validParams<RichardsMassChange>()
 {
-  InputParameters params = validParams<Kernel>();
-  params.addParam<bool>("lumping", false, "True for mass matrix lumping, false otherwise.  NOTE: THIS CURRENTLY DOES NOTHING!");
+  InputParameters params = validParams<TimeDerivative>();
+  //params.addParam<bool>("lumping", false, "True for mass matrix lumping, false otherwise.  NOTE: THIS CURRENTLY DOES NOTHING!");
   params.addParam<bool>("use_supg", false, "True for using SUPG in this kernel, false otherwise.  This has no effect if the material does not use SUPG.");
   return params;
 }
 
 RichardsMassChange::RichardsMassChange(const std::string & name,
                                              InputParameters parameters) :
-    Kernel(name,parameters),
+    TimeDerivative(name,parameters),
 
     _this_var_num(_var.index()),
 
-    _lumping(getParam<bool>("lumping")),
+    //_lumping(getParam<bool>("lumping")),
     _use_supg(getParam<bool>("use_supg")),
     // This kernel expects input parameters named "bulk_mod", etc
     _porosity(getMaterialProperty<Real>("porosity")),

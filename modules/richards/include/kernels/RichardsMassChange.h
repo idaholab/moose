@@ -1,7 +1,7 @@
 #ifndef RICHARDSMASSCHANGE
 #define RICHARDSMASSCHANGE
 
-#include "Kernel.h"
+#include "TimeDerivative.h"
 
 // Forward Declarations
 class RichardsMassChange;
@@ -9,7 +9,7 @@ class RichardsMassChange;
 template<>
 InputParameters validParams<RichardsMassChange>();
 
-class RichardsMassChange : public Kernel
+class RichardsMassChange : public TimeDerivative
 {
 public:
 
@@ -27,7 +27,7 @@ protected:
 
   unsigned int _this_var_num;
 
-  bool _lumping;
+  //bool _lumping;
   bool _use_supg;
 
   MaterialProperty<Real> &_porosity;
