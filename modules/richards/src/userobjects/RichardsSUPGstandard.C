@@ -83,7 +83,7 @@ RichardsSUPGstandard::bb(RealVectorValue vel, int dimen, RealVectorValue xi_prim
 RealVectorValue
 RichardsSUPGstandard::dbb2_dgradp(RealVectorValue vel, RealTensorValue dvel_dgradp, RealVectorValue xi_prime, RealVectorValue eta_prime, RealVectorValue zeta_prime) const
 {
-  return 2*((xi_prime*vel)*(dvel_dgradp*xi_prime) + (eta_prime*vel)*(dvel_dgradp*eta_prime) + (zeta_prime*vel)*(dvel_dgradp*zeta_prime)); // if dvel_dgradp wasn't symmetric we'd have to do a transpose of it here.
+  return 2*((xi_prime*vel)*(dvel_dgradp.transpose()*xi_prime) + (eta_prime*vel)*(dvel_dgradp.transpose()*eta_prime) + (zeta_prime*vel)*(dvel_dgradp.transpose()*zeta_prime)); // if dvel_dgradp is symmetric so transpose is probably a waste of time
 }
 
 // following is d(bb*bb)/d(p)
@@ -110,7 +110,7 @@ RichardsSUPGstandard::tauSUPG(RealVectorValue vel, Real traceperm, RealVectorVal
   
   Real xi_tilde = RichardsSUPGstandard::cosh_relation(alpha);
   
-  return (norm_b == 0 ? 0 : xi_tilde/norm_b);
+  return xi_tilde/norm_b;
 }
 
 
@@ -137,7 +137,7 @@ RichardsSUPGstandard::dtauSUPG_dgradp(RealVectorValue vel, RealTensorValue dvel_
   Real xi_tilde_prime = RichardsSUPGstandard::cosh_relation_prime(alpha);
   RealVectorValue xi_tilde_dgradp = xi_tilde_prime*alpha_dgradp;
 
-  //Real tau = (norm_b == 0 ? 0 : xi_tilde/norm_b);
+  //Real tau = xi_tilde/norm_b;
   RealVectorValue tau_dgradp = xi_tilde_dgradp/norm_b - xi_tilde*norm_b_dgradp/norm_b/norm_b;
 
   return tau_dgradp;
@@ -166,7 +166,7 @@ RichardsSUPGstandard::dtauSUPG_dp(RealVectorValue vel, RealVectorValue dvel_dp, 
   Real xi_tilde_prime = RichardsSUPGstandard::cosh_relation_prime(alpha);
   Real xi_tilde_dp = xi_tilde_prime*alpha_dp;
 
-  //Real tau = (norm_b == 0 ? 0 : xi_tilde/norm_b);
+  //Real tau = xi_tilde/norm_b;
   Real tau_dp = xi_tilde_dp/norm_b - xi_tilde*norm_b_dp/norm_b/norm_b;
 
   return tau_dp;
