@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "AddAuxVariableAction.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddAuxVariableAction>()
@@ -43,5 +44,35 @@ AddAuxVariableAction::getAuxVariableFamilies()
 MooseEnum
 AddAuxVariableAction::getAuxVariableOrders()
 {
-  return MooseEnum("CONSTANT, FIRST, SECOND", "FIRST");
+  return MooseEnum("CONSTANT, FIRST, SECOND", "FIRST", true);
+}
+
+void
+AddAuxVariableAction::act()
+{
+  // Name of variable being added
+  std::string var_name = getShortName();
+
+  // Blocks from the input
+  std::set<SubdomainID> blocks = getSubdomainIDs();
+
+  // Scalar variable
+  if (_scalar_var)
+    _problem->addAuxScalarVariable(var_name, _fe_type.order);
+
+  // Non-scalar variable
+  else
+  {
+    // Check that the order is valid (CONSTANT, FIRST, or SECOND)
+    if (_fe_type.order > 2)
+      mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, or SECOND order (" << _fe_type.order << " supplied)");
+
+    if (blocks.empty())
+      _problem->addAuxVariable(var_name, _fe_type);
+    else
+      _problem->addAuxVariable(var_name, _fe_type, &blocks);
+  }
+
+  // Create the initial condition
+  setInitialCondition();
 }

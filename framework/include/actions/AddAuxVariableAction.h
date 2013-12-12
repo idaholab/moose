@@ -15,19 +15,42 @@
 #ifndef ADDAUXVARIABLEACTION_H
 #define ADDAUXVARIABLEACTION_H
 
+// MOOSE includes
 #include "AddVariableAction.h"
 
+//Forward declerations
 class AddAuxVariableAction;
 
 template<>
 InputParameters validParams<AddAuxVariableAction>();
 
+/**
+ * Action for creating Auxiliary variables
+ */
 class AddAuxVariableAction : public AddVariableAction
 {
 public:
+
+  /**
+   * Class constructor
+   */
   AddAuxVariableAction(const std::string & name, InputParameters params);
 
+  /**
+   * Creates the AuxVariable
+   */
+  virtual void act();
+
+  /**
+   * Returns available families for AuxVariables
+   * @return MooseEnum with the valid familes for AuxVariables
+   */
   static MooseEnum getAuxVariableFamilies();
+
+  /**
+   * Returns available orders for AuxVariables
+   * @return MooseEnum with valid orders
+   */
   static MooseEnum getAuxVariableOrders();
 };
 

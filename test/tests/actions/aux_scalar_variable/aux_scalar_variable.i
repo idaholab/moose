@@ -1,16 +1,19 @@
 [Mesh]
-  file = square.e
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
 []
 
 [Variables]
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
-  [./q]
+  [./a_very_unique_auxiliary_variable_name_good_for_error_checking]
+    order = FIRST
+		family = LAGRANGE
   [../]
 []
 
@@ -25,36 +28,32 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = left
     value = 0
   [../]
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = right
     value = 1
   [../]
 []
 
 [Executioner]
-  type = Steady
-
   # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
+  type = Steady
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Output]
   linear_residuals = true
-  file_base = out
   output_initial = true
-  interval = 1
   exodus = true
   perf_log = true
 []
 
-[MoreAuxVariables]
-  [./q]
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
+[Debug]
+  show_var_residual_norms = true
 []

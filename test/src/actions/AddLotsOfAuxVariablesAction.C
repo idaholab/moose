@@ -60,6 +60,7 @@ AddLotsOfAuxVariablesAction::AddLotsOfAuxVariablesAction(const std::string & nam
 void
 AddLotsOfAuxVariablesAction::act()
 {
+
   unsigned int number = getParam<unsigned int>("number");
   for(unsigned int cur_num = 0; cur_num < number; cur_num++)
   {

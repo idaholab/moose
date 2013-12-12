@@ -288,7 +288,7 @@
   [./same_name_variable_test]
     type = 'RunException'
     input = 'same_name_variable_test.i'
-    expect_err = "Cannot have an auxiliary variable and a nonlinear variable with the same name!"
+    expect_err = "Cannot have an auxiliary variable and a nonlinear variable with the same name"
   [../]
 
   [./subdomain_restricted_auxkernel_test]

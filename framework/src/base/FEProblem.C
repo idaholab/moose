@@ -1139,7 +1139,7 @@ void
 FEProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
   if (_aux.hasVariable(var_name))
-    mooseError("Cannot have an auxiliary variable and a nonlinear variable with the same name!");
+    mooseError("Cannot have an auxiliary variable and a nonlinear variable with the same name: " << var_name);
 
   if (_nl.hasVariable(var_name))
   {
@@ -1255,7 +1255,6 @@ FEProblem::addAuxVariable(const std::string & var_name, const FEType & type, con
 
     return;
   }
-
 
   _aux.addVariable(var_name, type, 1.0, active_subdomains);
   if (_displaced_problem)
