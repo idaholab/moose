@@ -25,7 +25,6 @@ protected:
   const RichardsDensity & _density_UO;
   const RichardsSeff & _seff_UO;
   const RichardsRelPerm & _relperm_UO;
-  Real _p_air;
 };
 
 #endif // RICHARDSMOBILITYPRIME_H

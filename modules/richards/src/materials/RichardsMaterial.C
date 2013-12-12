@@ -13,9 +13,8 @@ InputParameters validParams<RichardsMaterial>()
   params.addRequiredParam<UserObjectName>("relperm_UO", "Name of user object that defines relative permeability");
   params.addRequiredParam<UserObjectName>("seff_UO", "Name of user object that defines effective saturation as a function of capillary pressure");
   params.addRequiredParam<UserObjectName>("sat_UO", "Name of user object that defines saturation as a function of effective saturation");
-  params.addRequiredParam<Real>("p_air", "Air pressure.  Typical value=101E3");
   params.addRequiredParam<UserObjectName>("density_UO", "Name of user object that defines fluid density.");
-  params.addRequiredParam<Real>("dens0", "Density of fluid at pressure = p_air.  Must be positive.  Typical value for water=1000.  This is only used if SUPG is active");
+  params.addRequiredParam<Real>("dens0", "Density of fluid at pressure=0.  Must be positive.  Typical value for water=1000.  This is only used if SUPG is active");
   params.addRequiredParam<Real>("viscosity", "Viscosity of fluid (Pa.s).  Typical value for water is=1E-3");
   params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-10).   This is only used if SUPG is active");
   params.addRequiredCoupledVar("pressure_variable", "The name of the pressure variable");
@@ -34,7 +33,6 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     _material_relperm_UO(getUserObject<RichardsRelPerm>("relperm_UO")),
     _material_seff_UO(getUserObject<RichardsSeff>("seff_UO")),
     _material_sat_UO(getUserObject<RichardsSat>("sat_UO")),
-    _material_p_air(getParam<Real>("p_air")),
     _material_density_UO(getUserObject<RichardsDensity>("density_UO")),
     _material_dens0(getParam<Real>("dens0")),
     _material_viscosity(getParam<Real>("viscosity")),
@@ -70,7 +68,6 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     _porosity(declareProperty<Real>("porosity")),
     _permeability(declareProperty<RealTensorValue>("permeability")),
 
-    _p_air(declareProperty<Real>("p_air")),
     _dens0(declareProperty<Real>("dens0")),
     _viscosity(declareProperty<Real>("viscosity")),
     _gravity(declareProperty<RealVectorValue>("gravity")),
@@ -131,7 +128,6 @@ RichardsMaterial::computeProperties()
       _permeability[qp] = _material_perm;
 
 
-      _p_air[qp] = _material_p_air;
       _dens0[qp] = _material_dens0;
       _viscosity[qp] = _material_viscosity;
       _gravity[qp] = _material_gravity;
@@ -141,10 +137,10 @@ RichardsMaterial::computeProperties()
       _ddensity[qp] = _material_density_UO.ddensity(_pressure[qp]);
       _d2density[qp] = _material_density_UO.d2density(_pressure[qp]);
 
-      _seff_old[qp] = _material_seff_UO.seff(_p_air[qp] - _pressure_old[qp]);
-      _seff[qp] = _material_seff_UO.seff(_p_air[qp] - _pressure[qp]);
-      _dseff[qp] = -_material_seff_UO.dseff(_p_air[qp] - _pressure[qp]); // minus sign because we want deriv wrt pressure, not pc
-      _d2seff[qp] = _material_seff_UO.d2seff(_p_air[qp] - _pressure[qp]);
+      _seff_old[qp] = _material_seff_UO.seff(-_pressure_old[qp]);
+      _seff[qp] = _material_seff_UO.seff(-_pressure[qp]);
+      _dseff[qp] = -_material_seff_UO.dseff(-_pressure[qp]); // minus sign because we want deriv wrt pressure, not pc
+      _d2seff[qp] = _material_seff_UO.d2seff(-_pressure[qp]);
 
       _sat_old[qp] = _material_sat_UO.sat(_seff_old[qp]);
       _sat[qp] = _material_sat_UO.sat(_seff[qp]);

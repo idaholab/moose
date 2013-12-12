@@ -106,14 +106,12 @@
     type = RichardsSeffAux
     variable = SeffVG_Aux
     seff_UO = SeffVG
-    p_air = 0.0
     pressure_var = pressure
   [../]
   [./SeffVG1_AuxK]
     type = RichardsSeffAux
     variable = SeffVG1_Aux
     seff_UO = SeffVG1
-    p_air = 0.0
     pressure_var = pressure
   [../]
   [./RelPermPower_AuxK]
@@ -197,7 +195,6 @@
     mat_porosity = 0.1
     mat_permeability = '1E-20 0 0  0 1E-20 0  0 0 1E-20'
     pressure_variable = pressure
-    p_air = 0
     density_UO = DensityConstBulk
     relperm_UO = RelPermPower
     sat_UO = Saturation

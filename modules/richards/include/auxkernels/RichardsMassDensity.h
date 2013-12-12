@@ -25,7 +25,6 @@ protected:
   const RichardsDensity & _density_UO;
   const RichardsSeff & _seff_UO;
   const RichardsSat & _sat_UO;
-  Real _p_air;
 };
 
 #endif // RICHARDSMASSDENSITY_H

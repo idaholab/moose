@@ -32,7 +32,6 @@ private:
   const RichardsRelPerm & _material_relperm_UO;
   const RichardsSeff & _material_seff_UO;
   const RichardsSat & _material_sat_UO;
-  Real _material_p_air;
   const RichardsDensity & _material_density_UO;
   Real _material_dens0;
   Real _material_viscosity;
@@ -63,7 +62,6 @@ private:
 
   MaterialProperty<Real> & _porosity;
   MaterialProperty<RealTensorValue> & _permeability;
-  MaterialProperty<Real> & _p_air;
   MaterialProperty<Real> & _dens0;
   MaterialProperty<Real> & _viscosity;
   MaterialProperty<RealVectorValue> & _gravity;

@@ -21,7 +21,6 @@ protected:
 
   VariableValue & _pressure_var;
   const RichardsSeff & _seff_UO;
-  Real _p_air;
 };
 
 #endif // RICHARDSSEFFAUX_H

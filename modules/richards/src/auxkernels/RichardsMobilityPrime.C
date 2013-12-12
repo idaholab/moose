@@ -10,7 +10,6 @@ InputParameters validParams<RichardsMobilityPrime>()
   params.addRequiredParam<UserObjectName>("density_UO", "Name of user object that defines fluid density.");
   params.addRequiredParam<UserObjectName>("seff_UO", "Name of user object that defines effective saturation.");
   params.addRequiredParam<UserObjectName>("relperm_UO", "Name of user object that defines relative permeability");
-  params.addRequiredParam<Real>("p_air", "Air pressure.  Typical value=101E3");
   params.addClassDescription("auxillary variable which is d(density*relative_permeability)/dP");
   return params;
 }
@@ -20,8 +19,7 @@ RichardsMobilityPrime::RichardsMobilityPrime(const std::string & name, InputPara
   _pressure_var(coupledValue("pressure_var")),
   _density_UO(getUserObject<RichardsDensity>("density_UO")),
   _seff_UO(getUserObject<RichardsSeff>("seff_UO")),
-  _relperm_UO(getUserObject<RichardsRelPerm>("relperm_UO")),
-  _p_air(getParam<Real>("p_air"))
+  _relperm_UO(getUserObject<RichardsRelPerm>("relperm_UO"))
 {}
 
 Real
@@ -30,7 +28,7 @@ RichardsMobilityPrime::computeValue()
   Real density = _density_UO.density(_pressure_var[_qp]);
   Real ddensity_dp = _density_UO.ddensity(_pressure_var[_qp]);
 
-  Real pc = _p_air - _pressure_var[_qp];
+  Real pc = -_pressure_var[_qp];
   Real seff = _seff_UO.seff(pc);
   Real dseff_dp = -_seff_UO.dseff(pc); // remember dPc/dP = -1
 
