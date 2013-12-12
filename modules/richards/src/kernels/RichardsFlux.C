@@ -112,7 +112,6 @@ RichardsFlux::computeQpJacobian()
 Real
 RichardsFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  std::cout << "RichardsFlux::computeQpOffDiagJacobian\n";
   for (int pvar=0 ; pvar<_p_var_nums.size() ; ++pvar )
     {
       if (_p_var_nums[_qp][pvar] == _this_var_num)

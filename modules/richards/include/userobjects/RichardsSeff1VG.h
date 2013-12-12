@@ -4,6 +4,7 @@
 #define RICHARDSSEFF1VG_H
 
 #include "RichardsSeff.h"
+#include "RichardsSeffVG.h"
 
 class RichardsSeff1VG;
 

@@ -93,7 +93,6 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
   if (_material_por <= 0 || _material_por >= 1)
     mooseError("Porosity set to " << _material_por << " but it must be between 0 and 1");
 
-
   unsigned int n = coupledComponents("pressure_vars");
   _pressure_vars.resize(n);
   _pressure_vals.resize(n);
