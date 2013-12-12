@@ -22,9 +22,9 @@ class RichardsSeff : public GeneralUserObject
 
   // These functions must be over-ridden in the derived class
   // to provide the actual values of seff and its derivatives
-  virtual Real seff(Real pc) const;
-  virtual Real dseff(Real pc) const;
-  virtual Real d2seff(Real pc) const;
+  virtual Real seff(std::vector<Real> p) const;
+  virtual Real dseff(std::vector<Real> p) const;
+  virtual Real d2seff(std::vector<Real> p) const;
 
 };
 

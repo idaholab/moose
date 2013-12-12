@@ -27,19 +27,19 @@ void RichardsSeff::finalize()
 
 
 Real
-RichardsSeff::seff(Real pc) const
+RichardsSeff::seff(std::vector<Real> p) const
 {
   return 0;
 }
 
 Real
-RichardsSeff::dseff(Real pc) const
+RichardsSeff::dseff(std::vector<Real> p) const
 {
   return 0;
 }
 
 Real
-RichardsSeff::d2seff(Real pc) const
+RichardsSeff::d2seff(std::vector<Real> p) const
 {
   return 0;
 }
