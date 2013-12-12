@@ -20,20 +20,23 @@ public:
   virtual Real computeQpJacobian();
 
 protected:
+  unsigned int _this_var_num;
+  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
+
   Real _well_constant_production;
   Real _well_constant_injection;
   Real _p_bot;
   RealVectorValue _unit_weight;
 
-  MaterialProperty<Real> &_viscosity;
+  MaterialProperty<std::vector<Real> > &_viscosity;
 
-  MaterialProperty<Real> &_dseff;
+  MaterialProperty<std::vector<std::vector<Real> > > &_dseff;
 
-  MaterialProperty<Real> &_rel_perm;
-  MaterialProperty<Real> &_drel_perm;
+  MaterialProperty<std::vector<Real> > &_rel_perm;
+  MaterialProperty<std::vector<Real> > &_drel_perm;
 
-  MaterialProperty<Real> &_density;
-  MaterialProperty<Real> &_ddensity;
+  MaterialProperty<std::vector<Real> > &_density;
+  MaterialProperty<std::vector<Real> > &_ddensity;
 
   PostprocessorValue & _reporter;
   std::string _point_file;

@@ -16,20 +16,24 @@ InputParameters validParams<RichardsBorehole>()
 
 RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters parameters) :
     DiracKernel(name, parameters),
+
+    _this_var_num(_var.index()),
+    _p_var_nums(getMaterialProperty<std::vector<unsigned int> >("p_var_nums")),
+
     _well_constant_production(getParam<Real>("well_constant_production")),
     _well_constant_injection(getParam<Real>("well_constant_injection")),
     _p_bot(getParam<Real>("bottom_pressure")),
     _unit_weight(getParam<RealVectorValue>("unit_weight")),
 
-    _viscosity(getMaterialProperty<Real>("viscosity")),
+    _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
 
-    _dseff(getMaterialProperty<Real>("ds_eff")),
+    _dseff(getMaterialProperty<std::vector<std::vector<Real> > >("ds_eff")),
 
-    _rel_perm(getMaterialProperty<Real>("rel_perm")),
-    _drel_perm(getMaterialProperty<Real>("drel_perm")),
+    _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
+    _drel_perm(getMaterialProperty<std::vector<Real> >("drel_perm")),
 
-    _density(getMaterialProperty<Real>("density")), 
-    _ddensity(getMaterialProperty<Real>("ddensity")),
+    _density(getMaterialProperty<std::vector<Real> >("density")), 
+    _ddensity(getMaterialProperty<std::vector<Real> >("ddensity")),
 
     _reporter(getPostprocessorValue("reporter")),
     _point_file(getParam<std::string>("point_file"))
@@ -108,7 +112,16 @@ Real
 RichardsBorehole::computeQpResidual()
 {
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think
-  Real mob = _rel_perm[_qp]*_density[_qp]/_viscosity[_qp];
+
+  Real mob = 0;
+  for (int pvar=0 ; pvar<_p_var_nums.size() ; ++pvar )
+    {
+      if (_p_var_nums[_qp][pvar] == _this_var_num)
+	{
+	  mob = _rel_perm[_qp][pvar]*_density[_qp][pvar]/_viscosity[_qp][pvar];
+	}
+    }
+
   Real flow(0.0);
 
   Real test_fcn = _test[_i][_qp];
@@ -129,8 +142,18 @@ Real
 RichardsBorehole::computeQpJacobian()
 {
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think
-  Real mob = _rel_perm[_qp]*_density[_qp]/_viscosity[_qp];
-  Real mobp = (_drel_perm[_qp]*_dseff[_qp]*_density[_qp] + _rel_perm[_qp]*_ddensity[_qp])/_viscosity[_qp];
+
+  Real mob(0);
+  Real mobp(0);
+  for (int pvar=0 ; pvar<_p_var_nums.size() ; ++pvar )
+    {
+      if (_p_var_nums[_qp][pvar] == _this_var_num)
+	{
+	  mob = _rel_perm[_qp][pvar]*_density[_qp][pvar]/_viscosity[_qp][pvar];
+	  mobp = (_drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar]*_density[_qp][pvar] + _rel_perm[_qp][pvar]*_ddensity[_qp][pvar])/_viscosity[_qp][pvar];
+	}
+    }
+
   Real flowp(0.0);
 
   Real test_fcn = _test[_i][_qp];
