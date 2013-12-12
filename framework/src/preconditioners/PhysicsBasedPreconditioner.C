@@ -22,6 +22,7 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/nonlinear_solver.h"
 #include "libmesh/linear_implicit_system.h"
 #include "libmesh/transient_system.h"
 #include "libmesh/numeric_vector.h"

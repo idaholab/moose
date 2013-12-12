@@ -215,5 +215,7 @@ Split::getSchurPreconditioner(const std::string& str)
 }
 #else
 void
-Split::setup(){}
+Split::setup(const std::string& prefix)
+{
+}
 #endif

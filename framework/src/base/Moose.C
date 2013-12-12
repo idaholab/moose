@@ -830,7 +830,9 @@ swapLibMeshComm(MPI_Comm new_comm)
   MPI_Comm old_comm = libMesh::COMM_WORLD;
   libMesh::COMM_WORLD = new_comm;
   libMesh::CommWorld = new_comm;
+#ifdef LIBMESH_HAVE_PETSC
   PETSC_COMM_WORLD = new_comm;
+#endif //LIBMESH_HAVE_PETSC
 
   int pid;
   ierr = MPI_Comm_rank(new_comm, &pid); mooseCheckMPIErr(ierr);
