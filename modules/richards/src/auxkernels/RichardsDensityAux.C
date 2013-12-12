@@ -1,0 +1,25 @@
+//  This post processor returns the density of a region.
+//
+#include "RichardsDensityAux.h"
+
+template<>
+InputParameters validParams<RichardsDensityAux>()
+{
+  InputParameters params = validParams<AuxKernel>();
+  params.addRequiredCoupledVar("pressure_var", "The variable that represents the pressure");
+  params.addRequiredParam<UserObjectName>("density_UO", "Name of user object that defines the density.");
+  params.addClassDescription("auxillary variable which is fluid density");
+  return params;
+}
+
+RichardsDensityAux::RichardsDensityAux(const std::string & name, InputParameters parameters) :
+  AuxKernel(name, parameters),
+  _pressure_var(coupledValue("pressure_var")),
+  _density_UO(getUserObject<RichardsDensity>("density_UO"))
+{}
+
+Real
+RichardsDensityAux::computeValue()
+{
+  return _density_UO.density(_pressure_var[_qp]);
+}
