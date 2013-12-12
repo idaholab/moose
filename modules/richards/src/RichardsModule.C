@@ -17,6 +17,7 @@
 #include "RichardsSat.h"
 #include "RichardsSUPGnone.h"
 #include "RichardsSUPGstandard.h"
+#include "RichardsSumQuantity.h"
 
 // AuxKernels
 #include "RichardsSeffAux.h"
@@ -51,6 +52,7 @@
 #include "RichardsPiecewiseLinearSinkFlux.h"
 #include "NodalMaxVarChange.h"
 #include "RichardsExcavFlow.h"
+#include "RichardsPlotQuantity.h"
 
 // TimeSteppers
 #include "FunctionControlledDT.h"
@@ -82,6 +84,7 @@ Elk::Richards::registerObjects(Factory & factory)
   registerUserObject(RichardsSat);
   registerUserObject(RichardsSUPGnone);
   registerUserObject(RichardsSUPGstandard);
+  registerUserObject(RichardsSumQuantity);
 
   // AuxKernels
   registerAux(RichardsSeffAux);
@@ -116,6 +119,7 @@ Elk::Richards::registerObjects(Factory & factory)
   registerPostprocessor(RichardsPiecewiseLinearSinkFlux);
   registerPostprocessor(NodalMaxVarChange);
   registerPostprocessor(RichardsExcavFlow);
+  registerPostprocessor(RichardsPlotQuantity);
 
   // TimeSteppers
   registerTimeStepper(FunctionControlledDT);

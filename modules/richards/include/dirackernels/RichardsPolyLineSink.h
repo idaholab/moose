@@ -3,6 +3,7 @@
 
 #include "DiracKernel.h"
 #include "LinearInterpolation.h"
+#include "RichardsSumQuantity.h"
 
 //Forward Declarations
 class RichardsPolyLineSink;
@@ -21,7 +22,7 @@ public:
 
 
 protected:
-  PostprocessorValue & _reporter;
+  RichardsSumQuantity & _total_outflow_mass;
   LinearInterpolation _sink_func;
   std::string _point_file;
 
