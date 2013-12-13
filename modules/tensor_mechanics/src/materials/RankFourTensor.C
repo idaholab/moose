@@ -126,6 +126,7 @@ RankFourTensor::operator*=(const Real &a)
 
   return *this;
 }
+
 RankFourTensor
 RankFourTensor::operator/(const Real &a)
 {

@@ -33,6 +33,8 @@ public:
 
   ElasticityTensorR4 & operator=(const ElasticityTensorR4 &a);
 
+  ElasticityTensorR4 operator/(const Real &a);
+
 protected:
 
 private:
