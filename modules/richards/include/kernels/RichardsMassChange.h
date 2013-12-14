@@ -2,6 +2,7 @@
 #define RICHARDSMASSCHANGE
 
 #include "TimeDerivative.h"
+#include "RichardsPorepressureNames.h"
 
 // Forward Declarations
 class RichardsMassChange;
@@ -16,8 +17,6 @@ public:
   RichardsMassChange(const std::string & name,
                         InputParameters parameters);
 
-  //virtual void computeJacobian();
-
 protected:
   virtual Real computeQpResidual();
 
@@ -25,14 +24,12 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  unsigned int _this_var_num;
+  const RichardsPorepressureNames & _pp_name_UO;
+  unsigned int _pvar;
 
-  //bool _lumping;
   bool _use_supg;
 
   MaterialProperty<Real> &_porosity;
-
-  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
 
   MaterialProperty<std::vector<Real> > &_sat_old;
 

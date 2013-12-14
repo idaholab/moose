@@ -4,6 +4,7 @@
 #include "SideIntegralVariablePostprocessor.h"
 #include "MaterialPropertyInterface.h"
 #include "FunctionInterface.h"
+#include "RichardsPorepressureNames.h"
 
 //Forward Declarations
 class RichardsExcavFlow;
@@ -22,8 +23,8 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-  unsigned int _this_var_num;
-  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
+  const RichardsPorepressureNames & _pp_name_UO;
+  unsigned int _pvar;
 
   MaterialProperty<std::vector<Real> > &_viscosity;
   MaterialProperty<RealVectorValue> &_gravity;

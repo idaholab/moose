@@ -4,6 +4,7 @@ template<>
 InputParameters validParams<RichardsBorehole>()
 {
   InputParameters params = validParams<DiracKernel>();
+  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
   params.addRequiredParam<Real>("well_constant_production", "The well constant for the borehole that will be used if fluid pressure > borehole pressure.  If this is positive then the borehole will act as a sink when fluid pressure > borehole pressure.  Set to zero if you want only injection.");
   params.addRequiredParam<Real>("well_constant_injection", "The well constant for the borehole that will be used if fluid pressure < borehole pressure.  If this is positive then the borehole will act as a source when fluid pressure < borehole pressure.  Set to zero if you want only production.");
   params.addRequiredParam<Real>("bottom_pressure", "Pressure at the bottom of the borehole");
@@ -17,8 +18,8 @@ InputParameters validParams<RichardsBorehole>()
 RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters parameters) :
     DiracKernel(name, parameters),
 
-    _this_var_num(_var.index()),
-    _p_var_nums(getMaterialProperty<std::vector<unsigned int> >("p_var_nums")),
+    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
+    _pvar(_pp_name_UO.pressure_var_num(_var.index())),
 
     _well_constant_production(getParam<Real>("well_constant_production")),
     _well_constant_injection(getParam<Real>("well_constant_injection")),
@@ -113,14 +114,7 @@ RichardsBorehole::computeQpResidual()
 {
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think
 
-  Real mob = 0;
-  for (int pvar=0 ; pvar<_p_var_nums.size() ; ++pvar )
-    {
-      if (_p_var_nums[_qp][pvar] == _this_var_num)
-	{
-	  mob = _rel_perm[_qp][pvar]*_density[_qp][pvar]/_viscosity[_qp][pvar];
-	}
-    }
+  Real mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
 
   Real flow(0.0);
 
@@ -143,16 +137,8 @@ RichardsBorehole::computeQpJacobian()
 {
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think
 
-  Real mob(0);
-  Real mobp(0);
-  for (int pvar=0 ; pvar<_p_var_nums.size() ; ++pvar )
-    {
-      if (_p_var_nums[_qp][pvar] == _this_var_num)
-	{
-	  mob = _rel_perm[_qp][pvar]*_density[_qp][pvar]/_viscosity[_qp][pvar];
-	  mobp = (_drel_perm[_qp][pvar]*_dseff[_qp][pvar][pvar]*_density[_qp][pvar] + _rel_perm[_qp][pvar]*_ddensity[_qp][pvar])/_viscosity[_qp][pvar];
-	}
-    }
+  Real mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
+  Real mobp = (_drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]*_density[_qp][_pvar] + _rel_perm[_qp][_pvar]*_ddensity[_qp][_pvar])/_viscosity[_qp][_pvar];
 
   Real flowp(0.0);
 

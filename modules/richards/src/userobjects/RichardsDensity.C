@@ -1,4 +1,4 @@
-//  Base class for fluid density as a function of pressure
+//  Fluid density base class.
 //
 #include "RichardsDensity.h"
 

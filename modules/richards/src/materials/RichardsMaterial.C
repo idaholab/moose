@@ -10,6 +10,7 @@ InputParameters validParams<RichardsMaterial>()
 
   params.addRequiredParam<Real>("mat_porosity", "The porosity of the material.  Should be between 0 and 1.  Eg, 0.1");
   params.addRequiredParam<RealTensorValue>("mat_permeability", "The permeability tensor (m^2).");
+  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
   params.addRequiredParam<std::vector<UserObjectName> >("relperm_UO", "List of names of user objects that define relative permeability");
   params.addRequiredParam<std::vector<UserObjectName> >("seff_UO", "List of name of user objects that define effective saturation as a function of pressure list");
   params.addRequiredParam<std::vector<UserObjectName> >("sat_UO", "List of names of user objects that define saturation as a function of effective saturation");
@@ -30,7 +31,8 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     _material_perm(getParam<RealTensorValue>("mat_permeability")),
     _material_viscosity(getParam<std::vector<Real> >("viscosity")),
 
-    _num_p(coupledComponents("pressure_vars")),
+    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
+    _num_p(_pp_name_UO.num_pp()),
 
     // FOLLOWING IS FOR SUPG
     _material_gravity(getParam<RealVectorValue>("gravity")),
@@ -43,9 +45,6 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
 
     _viscosity(declareProperty<std::vector<Real> >("viscosity")),
     _gravity(declareProperty<RealVectorValue>("gravity")),
-
-    _p_var_nums(declareProperty<std::vector<unsigned int> >("p_var_nums")),
-    _mat_var_num(declareProperty<std::vector<int> >("mat_var_num")),
 
     _density_old(declareProperty<std::vector<Real> >("density_old")),
 
@@ -77,26 +76,28 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
   if (_material_por <= 0 || _material_por >= 1)
     mooseError("Porosity set to " << _material_por << " but it must be between 0 and 1");
 
-  unsigned int n = coupledComponents("pressure_vars");
-  _pressure_vars.resize(n);
-  _pressure_vals.resize(n);
-  _pressure_old_vals.resize(n);
-  _material_relperm_UO.resize(n);
-  _material_seff_UO.resize(n);
-  _material_sat_UO.resize(n);
-  _material_density_UO.resize(n);
-  _material_SUPG_UO.resize(n);
-  _grad_p.resize(n);
+  _pressure_vals.resize(_num_p);
+  _pressure_old_vals.resize(_num_p);
+  _material_relperm_UO.resize(_num_p);
+  _material_seff_UO.resize(_num_p);
+  _material_sat_UO.resize(_num_p);
+  _material_density_UO.resize(_num_p);
+  _material_SUPG_UO.resize(_num_p);
+  _grad_p.resize(_num_p);
 
-  unsigned int max_moose_var_num_seen(0);
     
-  for (unsigned int i=0 ; i<n; ++i)
+  for (unsigned int i=0 ; i<_num_p; ++i)
     {
-      _pressure_vars[i] = coupled("pressure_vars", i);
-      max_moose_var_num_seen = (max_moose_var_num_seen > _pressure_vars[i] ? max_moose_var_num_seen : _pressure_vars[i]);
+      // DON'T WANT "pressure_vars" at all since pp_name_UO contains the same info
       _pressure_vals[i] = &coupledValue("pressure_vars", i);
       _pressure_old_vals[i] = (_is_transient ? &coupledValueOld("pressure_vars", i) : &_zero);
       _grad_p[i] = &coupledGradient("pressure_vars", i);
+
+      // DOES NOT WORK !
+      //_pressure_vals[i] = &coupledValue(_pp_name_UO.pp_names(), i);
+      //_pressure_old_vals[i] = (_is_transient ? &coupledValueOld(_pp_name_UO.pp_names(), i) : &_zero);
+      //_grad_p[i] = &coupledGradient(_pp_name_UO.pp_names(), i);
+
       // in the following.  first get the userobject names that were inputted, then get the i_th one of these, then get the actual userobject that this corresponds to, then finally & gives pointer to RichardsRelPerm object. 
       _material_relperm_UO[i] = &getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[i]); 
       _material_seff_UO[i] = &getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName> >("seff_UO")[i]); 
@@ -105,14 +106,6 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
       _material_SUPG_UO[i] = &getUserObjectByName<RichardsSUPG>(getParam<std::vector<UserObjectName> >("SUPG_UO")[i]); 
     }
   
-  _material_var_num.resize(max_moose_var_num_seen + 1);
-  for (unsigned int i=0 ; i<max_moose_var_num_seen+1 ; ++i)
-    _material_var_num[i] = -1;
-  for (unsigned int i=0 ; i<n; ++i)
-    {
-      _material_var_num[_pressure_vars[i]] = i;
-    }
-      
 }
 
 /*
@@ -160,9 +153,6 @@ RichardsMaterial::computeProperties()
 
       _viscosity[qp].resize(_num_p);
 
-      _p_var_nums[qp].resize(_num_p);
-      _mat_var_num[qp].resize(_material_var_num.size());
-
       _density_old[qp].resize(_num_p);
       _density[qp].resize(_num_p);
       _ddensity[qp].resize(_num_p);
@@ -186,8 +176,6 @@ RichardsMaterial::computeProperties()
       for (unsigned int i=0 ; i<_num_p; ++i)
 	{
 	  _viscosity[qp][i] = _material_viscosity[i];
-
-	  _p_var_nums[qp][i] = _pressure_vars[i];
 
 	  _density_old[qp][i] = (*_material_density_UO[i]).density((*_pressure_old_vals[i])[qp]);
 	  _density[qp][i] = (*_material_density_UO[i]).density((*_pressure_vals[i])[qp]);
@@ -228,11 +216,6 @@ RichardsMaterial::computeProperties()
 	  _drel_perm[qp][i] = (*_material_relperm_UO[i]).drelperm(_seff[qp][i]);
 	  _d2rel_perm[qp][i] =(* _material_relperm_UO[i]).d2relperm(_seff[qp][i]);
 
-	}
-
-      for (unsigned int i=0 ; i<_material_var_num.size(); ++i)
-	{
-	  _mat_var_num[qp][i] = _material_var_num[i];
 	}
 
 

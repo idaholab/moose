@@ -4,6 +4,7 @@
 #include "Parser.h"
 
 // UserObjects
+#include "RichardsPorepressureNames.h"
 #include "RichardsDensityConstBulk.h"
 #include "RichardsDensityIdeal.h"
 #include "RichardsRelPermUnity.h"
@@ -71,6 +72,7 @@ void
 Elk::Richards::registerObjects(Factory & factory)
 {
   // UserObjects
+  registerUserObject(RichardsPorepressureNames);
   registerUserObject(RichardsDensityConstBulk);
   registerUserObject(RichardsDensityIdeal);
   registerUserObject(RichardsRelPermUnity);

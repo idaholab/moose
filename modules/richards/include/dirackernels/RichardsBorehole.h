@@ -4,6 +4,7 @@
 // Moose Includes
 #include "DiracKernel.h"
 #include "RichardsSumQuantity.h"
+#include "RichardsPorepressureNames.h"
 
 //Forward Declarations
 class RichardsBorehole;
@@ -21,8 +22,8 @@ public:
   virtual Real computeQpJacobian();
 
 protected:
-  unsigned int _this_var_num;
-  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
+  const RichardsPorepressureNames & _pp_name_UO;
+  unsigned int _pvar;
 
   Real _well_constant_production;
   Real _well_constant_injection;

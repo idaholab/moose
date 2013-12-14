@@ -7,6 +7,7 @@ template<>
 InputParameters validParams<RichardsMass>()
 {
   InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
   params.addClassDescription("Returns the mass in a region.");
   return params;
 }
@@ -14,8 +15,8 @@ InputParameters validParams<RichardsMass>()
 RichardsMass::RichardsMass(const std::string & name, InputParameters parameters) :
     ElementIntegralVariablePostprocessor(name, parameters),
 
-    _this_var_num(_var.index()),
-    _p_var_nums(getMaterialProperty<std::vector<unsigned int> >("p_var_nums")),
+    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
+    _pvar(_pp_name_UO.pressure_var_num(_var.index())),
 
     _porosity(getMaterialProperty<Real>("porosity")),
     _sat(getMaterialProperty<std::vector<Real> >("sat")),
@@ -26,12 +27,5 @@ RichardsMass::RichardsMass(const std::string & name, InputParameters parameters)
 Real
 RichardsMass::computeQpIntegral()
 {
-  for (int pvar=0 ; pvar<_p_var_nums.size() ; ++pvar )
-    {
-      if (_p_var_nums[_qp][pvar] == _this_var_num)
-	{
-	  return _porosity[_qp]*_density[_qp][pvar]*_sat[_qp][pvar];
-	}
-    }
-  return 0.0;
+  return _porosity[_qp]*_density[_qp][_pvar]*_sat[_qp][_pvar];
 }

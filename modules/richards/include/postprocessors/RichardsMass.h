@@ -2,6 +2,7 @@
 #define RICHARDSMASS_H
 
 #include "ElementIntegralVariablePostprocessor.h"
+#include "RichardsPorepressureNames.h"
 
 //Forward Declarations
 class RichardsMass;
@@ -21,8 +22,8 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-  unsigned int _this_var_num;
-  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
+  const RichardsPorepressureNames & _pp_name_UO;
+  unsigned int _pvar;
 
   MaterialProperty<Real> &_porosity;
   MaterialProperty<std::vector<Real> > &_sat;

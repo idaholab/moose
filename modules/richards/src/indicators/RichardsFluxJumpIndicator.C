@@ -4,6 +4,7 @@ template<>
 InputParameters validParams<RichardsFluxJumpIndicator>()
 {
   InputParameters params = validParams<JumpIndicator>();
+  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
   params.addClassDescription("Indicator which calculates jumps in Richards fluxes over elements.");
   return params;
 }
@@ -12,8 +13,8 @@ InputParameters validParams<RichardsFluxJumpIndicator>()
 RichardsFluxJumpIndicator::RichardsFluxJumpIndicator(const std::string & name, InputParameters parameters) :
     JumpIndicator(name, parameters),
 
-    _this_var_num(_var.index()),
-    _p_var_nums(getMaterialProperty<std::vector<unsigned int> >("p_var_nums")),
+    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
+    _pvar(_pp_name_UO.pressure_var_num(_var.index())),
 
     _density(getMaterialProperty<std::vector<Real> >("density")),
     _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
@@ -31,18 +32,11 @@ RichardsFluxJumpIndicator::RichardsFluxJumpIndicator(const std::string & name, I
 Real
 RichardsFluxJumpIndicator::computeQpIntegral()
 {
-  for (int pvar=0 ; pvar<_p_var_nums.size() ; ++pvar )
-    {
-      if (_p_var_nums[_qp][pvar] == _this_var_num)
-	{
-	  RealVectorValue gra = _density[_qp][pvar]*_rel_perm[_qp][pvar]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][pvar]*_gravity[_qp]));
-	  RealVectorValue gra_n = _density_n[_qp][pvar]*_rel_perm_n[_qp][pvar]*(_permeability_n[_qp]*(_grad_u_neighbor[_qp] - _density_n[_qp][pvar]*_gravity_n[_qp]));
-	  
-	  Real jump = (gra - gra_n)*_normals[_qp];
-	  
-	  return jump*jump;
-	}
-    }
-  return 0.0;
+  RealVectorValue gra = _density[_qp][_pvar]*_rel_perm[_qp][_pvar]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][_pvar]*_gravity[_qp]));
+  RealVectorValue gra_n = _density_n[_qp][_pvar]*_rel_perm_n[_qp][_pvar]*(_permeability_n[_qp]*(_grad_u_neighbor[_qp] - _density_n[_qp][_pvar]*_gravity_n[_qp]));
+  
+  Real jump = (gra - gra_n)*_normals[_qp];
+  
+  return jump*jump;
 }
 

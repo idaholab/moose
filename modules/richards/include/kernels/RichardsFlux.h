@@ -2,6 +2,7 @@
 #define RICHARDSFLUX
 
 #include "Kernel.h"
+#include "RichardsPorepressureNames.h"
 
 // Forward Declarations
 class RichardsFlux;
@@ -24,13 +25,12 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  unsigned int _this_var_num;
+  const RichardsPorepressureNames & _pp_name_UO;
+  unsigned int _pvar;
 
   MaterialProperty<std::vector<Real> > &_viscosity;
   MaterialProperty<RealVectorValue> &_gravity;
   MaterialProperty<RealTensorValue> & _permeability;
-
-  MaterialProperty<std::vector<unsigned int> > &_p_var_nums;
 
   MaterialProperty<std::vector<Real> > &_seff;
   MaterialProperty<std::vector<std::vector<Real> > > &_dseff;

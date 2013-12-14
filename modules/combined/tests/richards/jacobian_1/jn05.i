@@ -17,7 +17,15 @@
   zmax = 1
 []
 
+[GlobalParams]
+  porepressureNames_UO = PPNames
+[]
+
 [UserObjects]
+  [./PPNames]
+    type = RichardsPorepressureNames
+    porepressure_vars = pressure
+  [../]
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1
