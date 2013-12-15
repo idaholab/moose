@@ -1,4 +1,5 @@
-# User objects give the correct value
+# Relative-permeability User objects give the correct value
+# (note 0.01<=(x=p)<=0.99, and i use seff=p in the aux vars)
 # 
 # If you want to add another test for another UserObject
 # then add the UserObject, add a Function defining the expected result,
@@ -6,6 +7,23 @@
 # and finally add a NodalL2Error that compares this with the Function
 
 [UserObjects]
+  [./RelPermPower]
+    type = RichardsRelPermPower
+    simm = 0.0
+    n = 2
+  [../]
+  [./RelPermPower5]
+    type = RichardsRelPermPower
+    simm = 0.0
+    n = 5
+  [../]
+  [./RelPermVG]
+    type = RichardsRelPermVG
+    simm = 0.0
+    m = 0.8
+  [../]
+
+  # following are unimportant in this test
   [./PPNames]
     type = RichardsPorepressureNames
     porepressure_vars = pressure
@@ -15,17 +33,12 @@
     dens0 = 1000
     bulk_mod = 2E6
   [../]
-  [./DensityIdeal]
-    type = RichardsDensityIdeal
-    p0 = 33333
-    slope = 1.1
-  [../]
   [./SeffVG]
     type = RichardsSeff1VG
     m = 0.8
     al = 1E-6
   [../]
-  [./RelPermPower]
+  [./RelPermPower_unimportant]
     type = RichardsRelPermPower
     simm = 0.10101
     n = 2
@@ -46,90 +59,200 @@
     type = ParsedFunction
     value = x
   [../]
-  [./answer_DensityConstBulk]
-    type = ParsedFunction
-    value = dens0*exp(x/bulk_mod)
-    vars = 'dens0 bulk_mod'
-    vals = '1000 2E6'
-  [../]
-  [./answer_DensityIdeal]
-    type = ParsedFunction
-    value = slope*(x-p0)
-    vars = 'p0 slope'
-    vals = '33333 1.1'
-  [../]
-  [./answer_SeffVG]
-    type = ParsedFunction
-    value = (1+max((-x)*al,0)^(1/(1-m)))^(-m)
-    vars = 'al m'
-    vals = '1E-6 0.8'
-  [../]
+
   [./answer_RelPermPower]
     type = ParsedFunction
-    value = max((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm,0)/((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm)*(((n+1)*(((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm)/(1-simm))^n)-(n*((((1+max((-x)*al,0)^(1/(1-m)))^(-m)-simm)/(1-simm))^(n+1))))
-    vars = 'al m simm n'
-    vals = '1E-6 0.8 0.10101 2'
+    value = ((n+1)*(x^n))-(n*(x^(n+1)))
+    vars = 'n'
+    vals = '2'
+  [../]
+  [./answer_dRelPermPower]
+    type = GradParsedFunction
+    direction = '1E-4 0 0'
+    value = ((n+1)*(x^n))-(n*(x^(n+1)))
+    vars = 'n'
+    vals = '2'
+  [../]
+  [./answer_d2RelPermPower]
+    type = Grad2ParsedFunction
+    direction = '1E-3 0 0'
+    value = ((n+1)*(x^n))-(n*(x^(n+1)))
+    vars = 'n'
+    vals = '2'
+  [../]
+
+  [./answer_RelPermPower5]
+    type = ParsedFunction
+    value = ((n+1)*(x^n))-(n*(x^(n+1)))
+    vars = 'n'
+    vals = '5'
+  [../]
+  [./answer_dRelPermPower5]
+    type = GradParsedFunction
+    direction = '1E-4 0 0'
+    value = ((n+1)*(x^n))-(n*(x^(n+1)))
+    vars = 'n'
+    vals = '5'
+  [../]
+  [./answer_d2RelPermPower5]
+    type = Grad2ParsedFunction
+    direction = '1E-5 0 0'
+    value = ((n+1)*(x^n))-(n*(x^(n+1)))
+    vars = 'n'
+    vals = '5'
+  [../]
+
+  [./answer_RelPermVG]
+    type = ParsedFunction
+    value = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
+    vars = 'm'
+    vals = '0.8'
+  [../]
+  [./answer_dRelPermVG]
+    type = GradParsedFunction
+    direction = '1E-4 0 0'
+    value = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
+    vars = 'm'
+    vals = '0.8'
+  [../]
+  [./answer_d2RelPermVG]
+    type = Grad2ParsedFunction
+    direction = '1E-5 0 0'
+    value = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
+    vars = 'm'
+    vals = '0.8'
   [../]
 []
 
 [AuxVariables]
-  [./DensityConstBulk_Aux]
-  [../]
-  [./DensityIdeal_Aux]
-  [../]
-  [./SeffVG_Aux]
-  [../]
   [./RelPermPower_Aux]
+  [../]
+  [./dRelPermPower_Aux]
+  [../]
+  [./d2RelPermPower_Aux]
+  [../]
+
+  [./RelPermPower5_Aux]
+  [../]
+  [./dRelPermPower5_Aux]
+  [../]
+  [./d2RelPermPower5_Aux]
+  [../]
+
+  [./RelPermVG_Aux]
+  [../]
+  [./dRelPermVG_Aux]
+  [../]
+  [./d2RelPermVG_Aux]
   [../]
 []
 
 [AuxKernels]
-  [./DensityConstBulk_AuxK]
-    type = RichardsDensityAux
-    variable = DensityConstBulk_Aux
-    density_UO = DensityConstBulk
-    pressure_var = pressure
-  [../]
-  [./DensityIdeal_AuxK]
-    type = RichardsDensityAux
-    variable = DensityIdeal_Aux
-    density_UO = DensityIdeal
-    pressure_var = pressure
-  [../]
-  [./SeffVG_AuxK]
-    type = RichardsSeffAux
-    variable = SeffVG_Aux
-    seff_UO = SeffVG
-    pressure_vars = pressure
-  [../]
   [./RelPermPower_AuxK]
     type = RichardsRelPermAux
     variable = RelPermPower_Aux
     relperm_UO = RelPermPower
-    seff_var = SeffVG_Aux
+    seff_var = pressure
+  [../]
+  [./dRelPermPower_AuxK]
+    type = RichardsRelPermPrimeAux
+    variable = dRelPermPower_Aux
+    relperm_UO = RelPermPower
+    seff_var = pressure
+  [../]
+  [./d2RelPermPower_AuxK]
+    type = RichardsRelPermPrimePrimeAux
+    variable = d2RelPermPower_Aux
+    relperm_UO = RelPermPower
+    seff_var = pressure
+  [../]
+
+  [./RelPermPower5_AuxK]
+    type = RichardsRelPermAux
+    variable = RelPermPower5_Aux
+    relperm_UO = RelPermPower5
+    seff_var = pressure
+  [../]
+  [./dRelPermPower5_AuxK]
+    type = RichardsRelPermPrimeAux
+    variable = dRelPermPower5_Aux
+    relperm_UO = RelPermPower5
+    seff_var = pressure
+  [../]
+  [./d2RelPermPower5_AuxK]
+    type = RichardsRelPermPrimePrimeAux
+    variable = d2RelPermPower5_Aux
+    relperm_UO = RelPermPower5
+    seff_var = pressure
+  [../]
+
+  [./RelPermVG_AuxK]
+    type = RichardsRelPermAux
+    variable = RelPermVG_Aux
+    relperm_UO = RelPermVG
+    seff_var = pressure
+  [../]
+  [./dRelPermVG_AuxK]
+    type = RichardsRelPermPrimeAux
+    variable = dRelPermVG_Aux
+    relperm_UO = RelPermVG
+    seff_var = pressure
+  [../]
+  [./d2RelPermVG_AuxK]
+    type = RichardsRelPermPrimePrimeAux
+    variable = d2RelPermVG_Aux
+    relperm_UO = RelPermVG
+    seff_var = pressure
   [../]
 []
 
 [Postprocessors]
-  [./cf_DensityConstBulk]
-    type = NodalL2Error
-    function = answer_DensityConstBulk
-    variable = DensityConstBulk_Aux
-  [../]
-  [./cf_DensityIdeal]
-    type = NodalL2Error
-    function = answer_DensityIdeal
-    variable = DensityIdeal_Aux
-  [../]
-  [./cf_SeffVG]
-    type = NodalL2Error
-    function = answer_SeffVG
-    variable = SeffVG_Aux
-  [../]
   [./cf_RelPermPower]
     type = NodalL2Error
     function = answer_RelPermPower
     variable = RelPermPower_Aux
+  [../]
+  [./cf_dRelPermPower]
+    type = NodalL2Error
+    function = answer_dRelPermPower
+    variable = dRelPermPower_Aux
+  [../]
+  [./cf_d2RelPermPower]
+    type = NodalL2Error
+    function = answer_d2RelPermPower
+    variable = d2RelPermPower_Aux
+  [../]
+
+  [./cf_RelPermPower5]
+    type = NodalL2Error
+    function = answer_RelPermPower5
+    variable = RelPermPower5_Aux
+  [../]
+  [./cf_dRelPermPower5]
+    type = NodalL2Error
+    function = answer_dRelPermPower5
+    variable = dRelPermPower5_Aux
+  [../]
+  [./cf_d2RelPermPower5]
+    type = NodalL2Error
+    function = answer_d2RelPermPower5
+    variable = d2RelPermPower5_Aux
+  [../]
+
+  [./cf_RelPermVG]
+    type = NodalL2Error
+    function = answer_RelPermVG
+    variable = RelPermVG_Aux
+  [../]
+  [./cf_dRelPermVG]
+    type = NodalL2Error
+    function = answer_dRelPermVG
+    variable = dRelPermVG_Aux
+  [../]
+  [./cf_d2RelPermVG]
+    type = NodalL2Error
+    function = answer_d2RelPermVG
+    variable = d2RelPermVG_Aux
   [../]
 []
     
@@ -144,8 +267,8 @@
   type = GeneratedMesh
   dim = 1
   nx = 100
-  xmin = -5E6
-  xmax = 5E6
+  xmin = 0.01
+  xmax = 0.99
 []
 
 [Variables]
@@ -182,7 +305,7 @@
     porepressureNames_UO = PPNames
     pressure_vars = pressure
     density_UO = DensityConstBulk
-    relperm_UO = RelPermPower
+    relperm_UO = RelPermPower_unimportant
     sat_UO = Saturation
     seff_UO = SeffVG
     SUPG_UO = SUPGstandard

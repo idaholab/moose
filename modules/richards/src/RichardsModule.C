@@ -28,6 +28,8 @@
 #include "RichardsDensityPrimeAux.h"
 #include "RichardsDensityPrimePrimeAux.h"
 #include "RichardsRelPermAux.h"
+#include "RichardsRelPermPrimeAux.h"
+#include "RichardsRelPermPrimePrimeAux.h"
 #include "RichardsMobility.h"
 #include "RichardsMobilityPrime.h"
 #include "RichardsMassDensity.h"
@@ -96,6 +98,8 @@ Elk::Richards::registerObjects(Factory & factory)
   registerAux(RichardsDensityPrimeAux);
   registerAux(RichardsDensityPrimePrimeAux);
   registerAux(RichardsRelPermAux);
+  registerAux(RichardsRelPermPrimeAux);
+  registerAux(RichardsRelPermPrimePrimeAux);
   registerAux(RichardsMobility);
   registerAux(RichardsMobilityPrime);
   registerAux(RichardsMassDensity);

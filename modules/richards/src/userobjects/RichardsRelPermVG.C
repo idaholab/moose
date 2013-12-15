@@ -84,7 +84,7 @@ RichardsRelPermVG::d2relperm(Real seff) const
   Real tmppp = -1.0/_m*(1.0/_m - 1)*std::pow(s_internal, 1.0/_m - 2);
   Real tmp2 = 1 - std::pow(tmp, _m);
   Real tmp2p = -_m*std::pow(tmp, _m - 1)*tmpp;
-  Real tmp2pp = -_m*(_m - 1)*std::pow(tmp, _m - 2)*tmpp - _m*std::pow(tmp, _m - 1)*tmppp;
+  Real tmp2pp = -_m*(_m - 1)*std::pow(tmp, _m - 2)*tmpp*tmpp - _m*std::pow(tmp, _m - 1)*tmppp;
   //Real krel = std::pow(s_internal, 0.5)*std::pow(tmp2, 2);
   //Real krelp = 0.5*std::pow(s_internal, -0.5)*std::pow(tmp2, 2) + 2*std::pow(s_internal, 0.5)*tmp2*tmp2p;
   Real krelpp = -0.25*std::pow(s_internal, -1.5)*std::pow(tmp2, 2) + 2*0.5*std::pow(s_internal, -0.5)*2*tmp2*tmp2p + 2*std::pow(s_internal, 0.5)*(tmp2p*tmp2p + tmp2*tmp2pp);
