@@ -112,7 +112,7 @@
 []
 
 [Output]
-  file_base = jn01
+  file_base = jn04
   output_initial = false
   exodus = false
   perf_log = false
