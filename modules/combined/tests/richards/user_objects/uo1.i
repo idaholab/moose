@@ -22,6 +22,12 @@
     simm = 0.0
     m = 0.8
   [../]
+  [./RelPermVG1]
+    type = RichardsRelPermVG1
+    simm = 0.0
+    m = 0.8
+    scut = 1E-6 # then we get a cubic
+  [../]
 
   # following are unimportant in this test
   [./PPNames]
@@ -122,6 +128,21 @@
     vars = 'm'
     vals = '0.8'
   [../]
+
+  [./answer_RelPermVG1]
+    type = ParsedFunction
+    value = x^3
+  [../]
+  [./answer_dRelPermVG1]
+    type = GradParsedFunction
+    direction = '1E-4 0 0'
+    value = x^3
+  [../]
+  [./answer_d2RelPermVG1]
+    type = Grad2ParsedFunction
+    direction = '1E-5 0 0'
+    value = x^3
+  [../]
 []
 
 [AuxVariables]
@@ -144,6 +165,13 @@
   [./dRelPermVG_Aux]
   [../]
   [./d2RelPermVG_Aux]
+  [../]
+
+  [./RelPermVG1_Aux]
+  [../]
+  [./dRelPermVG1_Aux]
+  [../]
+  [./d2RelPermVG1_Aux]
   [../]
 []
 
@@ -204,6 +232,25 @@
     relperm_UO = RelPermVG
     seff_var = pressure
   [../]
+
+  [./RelPermVG1_AuxK]
+    type = RichardsRelPermAux
+    variable = RelPermVG1_Aux
+    relperm_UO = RelPermVG1
+    seff_var = pressure
+  [../]
+  [./dRelPermVG1_AuxK]
+    type = RichardsRelPermPrimeAux
+    variable = dRelPermVG1_Aux
+    relperm_UO = RelPermVG1
+    seff_var = pressure
+  [../]
+  [./d2RelPermVG1_AuxK]
+    type = RichardsRelPermPrimePrimeAux
+    variable = d2RelPermVG1_Aux
+    relperm_UO = RelPermVG1
+    seff_var = pressure
+  [../]
 []
 
 [Postprocessors]
@@ -253,6 +300,22 @@
     type = NodalL2Error
     function = answer_d2RelPermVG
     variable = d2RelPermVG_Aux
+  [../]
+
+  [./cf_RelPermVG1]
+    type = NodalL2Error
+    function = answer_RelPermVG1
+    variable = RelPermVG1_Aux
+  [../]
+  [./cf_dRelPermVG1]
+    type = NodalL2Error
+    function = answer_dRelPermVG1
+    variable = dRelPermVG1_Aux
+  [../]
+  [./cf_d2RelPermVG1]
+    type = NodalL2Error
+    function = answer_d2RelPermVG1
+    variable = d2RelPermVG1_Aux
   [../]
 []
     
