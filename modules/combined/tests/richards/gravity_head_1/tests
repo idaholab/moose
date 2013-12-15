@@ -111,4 +111,32 @@
     abs_zero = 1e-13
     use_old_floor = True
   [../]
+  [./test_gh20]
+    type = 'Exodiff'
+    input = 'gh20.i'
+    exodiff = 'gh20.e'
+    abs_zero = 1e-13
+    use_old_floor = True
+  [../]
+  [./test_gh21]
+    type = 'Exodiff'
+    input = 'gh21.i'
+    exodiff = 'gh21.e'
+    abs_zero = 1e-13
+    use_old_floor = True
+  [../]
+  [./test_gh22]
+    type = 'Exodiff'
+    input = 'gh22.i'
+    exodiff = 'gh22.e'
+    abs_zero = 1e-13
+    use_old_floor = True
+  [../]
+  [./test_gh23]
+    type = 'Exodiff'
+    input = 'gh23.i'
+    exodiff = 'gh23.e'
+    abs_zero = 1e-13
+    use_old_floor = True
+  [../]
 []
