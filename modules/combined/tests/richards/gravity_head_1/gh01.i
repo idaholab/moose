@@ -1,21 +1,25 @@
 # unsaturated = false
 # gravity = false
-# supg = true
-# transient = true
+# supg = false
+# transient = false
 
 [Mesh]
   type = GeneratedMesh
-  dim = 3
+  dim = 1
   nx = 1
-  ny = 1
-  nz = 1
   xmin = -1
   xmax = 1
-  ymin = -1
-  ymax = 1
-  zmin = -1
-  zmax = 1
 []
+
+[BCs]
+  [./left]
+    type = DirichletBC
+    boundary = left
+    value = 1
+    variable = pressure
+  [../]
+[]
+
 
 [GlobalParams]
   porepressureNames_UO = PPNames
@@ -29,7 +33,7 @@
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1
-    bulk_mod = 1.0 # notice small quantity, so PETSc's "constant state" works
+    bulk_mod = 1.0E3
   [../]
   [./SeffVG]
     type = RichardsSeff1VG
@@ -38,7 +42,7 @@
   [../]
   [./RelPermPower]
     type = RichardsRelPermPower
-    simm = 0.2
+    simm = 0.0
     n = 2
   [../]
   [./Saturation]
@@ -46,9 +50,8 @@
     s_res = 0.1
     sum_s_res = 0.1
   [../]
-  [./SUPGstandard]
-    type = RichardsSUPGstandard
-    p_SUPG = 0.1
+  [./SUPGnone]
+    type = RichardsSUPGnone
   [../]
 []
 
@@ -67,13 +70,14 @@
     
   
 [Kernels]
-  active = 'richardsf richardst'
+  active = 'richardsf'
   [./richardst]
     type = RichardsMassChange
     variable = pressure
   [../]
   [./richardsf]
     type = RichardsFlux
+    porepressureNames_UO = PPNames
     variable = pressure
   [../]
 []
@@ -87,7 +91,7 @@
     pressure_vars = pressure
     density_UO = DensityConstBulk
     relperm_UO = RelPermPower
-    SUPG_UO = SUPGstandard
+    SUPG_UO = SUPGnone
     sat_UO = Saturation
     seff_UO = SeffVG
     viscosity = 1E-3
@@ -102,21 +106,20 @@
     type = SMP
     full = true
     #petsc_options = '-snes_test_display'
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
-    petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
+    petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
   [../]
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
   solve_type = Newton
-  dt = 1E-5
 []
 
 [Output]
-  file_base = jn13
+  file_base = gh01
   output_initial = false
-  exodus = false
+  exodus = true
   perf_log = false
   linear_residuals = false
 []
