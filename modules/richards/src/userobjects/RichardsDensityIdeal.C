@@ -26,13 +26,13 @@ RichardsDensityIdeal::density(Real p) const
 }
 
 Real
-RichardsDensityIdeal::ddensity(Real p) const
+RichardsDensityIdeal::ddensity(Real /*p*/) const
 {
   return _slope;
 }
 
 Real
-RichardsDensityIdeal::d2density(Real p) const
+RichardsDensityIdeal::d2density(Real /*p*/) const
 {
   return 0.0;
 }

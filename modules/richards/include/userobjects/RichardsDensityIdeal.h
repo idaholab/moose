@@ -17,8 +17,8 @@ class RichardsDensityIdeal : public RichardsDensity
   RichardsDensityIdeal(const std::string & name, InputParameters parameters);
 
   Real density(Real p) const;
-  Real ddensity(Real p) const;
-  Real d2density(Real p) const;
+  Real ddensity(Real /*p*/) const;
+  Real d2density(Real /*p*/) const;
 
  protected:
   Real _slope;

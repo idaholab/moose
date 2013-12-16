@@ -89,14 +89,13 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
   for (unsigned int i=0 ; i<_num_p; ++i)
     {
       // DON'T WANT "pressure_vars" at all since pp_name_UO contains the same info
-      _pressure_vals[i] = &coupledValue("pressure_vars", i);
-      _pressure_old_vals[i] = (_is_transient ? &coupledValueOld("pressure_vars", i) : &_zero);
-      _grad_p[i] = &coupledGradient("pressure_vars", i);
+      //_pressure_vals[i] = &coupledValue("pressure_vars", i); // coupled value returns a reference
+      //_pressure_old_vals[i] = (_is_transient ? &coupledValueOld("pressure_vars", i) : &_zero);
+      //_grad_p[i] = &coupledGradient("pressure_vars", i);
 
-      // DOES NOT WORK !
-      //_pressure_vals[i] = &coupledValue(_pp_name_UO.pp_names(), i);
-      //_pressure_old_vals[i] = (_is_transient ? &coupledValueOld(_pp_name_UO.pp_names(), i) : &_zero);
-      //_grad_p[i] = &coupledGradient(_pp_name_UO.pp_names(), i);
+      _pressure_vals[i] = _pp_name_UO.pp_vals(i);
+      _pressure_old_vals[i] = _pp_name_UO.pp_vals_old(i);
+      _grad_p[i] = _pp_name_UO.grad_pp(i);
 
       // in the following.  first get the userobject names that were inputted, then get the i_th one of these, then get the actual userobject that this corresponds to, then finally & gives pointer to RichardsRelPerm object. 
       _material_relperm_UO[i] = &getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[i]); 

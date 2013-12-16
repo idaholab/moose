@@ -59,7 +59,7 @@
     [./InitialCondition]
       type = RandomIC
       block = 0
-      min = 1
+      min = -1
       max = 0
     [../]
   [../]

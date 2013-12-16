@@ -37,8 +37,7 @@ RichardsFlux::RichardsFlux(const std::string & name,
     _d2density(getMaterialProperty<std::vector<Real> >("d2density")),
 
     _second_u(getParam<bool>("linear_shape_fcns") ? _second_zero : (_is_implicit ? _var.secondSln() : _var.secondSlnOld())),
-    //_second_phi(getParam<bool>("linear_shape_fcns") ? _second_zero : secondPhi()), // does not compile
-    _second_phi(secondPhi()), // does compile
+    _second_phi(getParam<bool>("linear_shape_fcns") ? _second_phi_zero : secondPhi()),
 
     _tauvel_SUPG(getMaterialProperty<std::vector<RealVectorValue> >("tauvel_SUPG")),
     _dtauvel_SUPG_dgradp(getMaterialProperty<std::vector<RealTensorValue> >("dtauvel_SUPG_dgradp")),
@@ -96,7 +95,7 @@ RichardsFlux::computeQpJacobian()
       Real d2mob_dp2 = d2mobility_dp2(_density[_qp][_pvar], _ddensity[_qp][_pvar], _d2density[_qp][_pvar], _rel_perm[_qp][_pvar], _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar], _d2rel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]*_dseff[_qp][_pvar][_pvar] + _drel_perm[_qp][_pvar]*_d2seff[_qp][_pvar][_pvar][_pvar]);
       RealVectorValue dgrad_mob_dp = d2mob_dp2*_phi[_j][_qp]*_grad_u[_qp] + dmob_dp*_grad_phi[_j][_qp];
       Real ddiv_pot_dp = -(_permeability[_qp]*_grad_phi[_j][_qp])*_ddensity[_qp][_pvar]*_gravity[_qp]  - (_permeability[_qp]*_grad_u[_qp])*_d2density[_qp][_pvar]*_phi[_j][_qp]*_gravity[_qp];
-      //Real ddiv_pot_dp += (_permeability[_qp]*_second_phi[_j][_qp]).tr();
+      //ddiv_pot_dp += (_permeability[_qp]*_second_phi[_j][_qp]).tr(); // crashes because _second_phi_zero is not done correctly
       
       supg_kernel_prime = -dgrad_mob_dp*pot - grad_mob*dpot_dp - dmob_dp*_phi[_j][_qp]*div_pot - mob*ddiv_pot_dp;
     }

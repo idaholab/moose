@@ -42,13 +42,13 @@ RichardsSat::sat(Real seff) const
 }
 
 Real
-RichardsSat::dsat(Real seff) const
+RichardsSat::dsat(Real /*seff*/) const
 {
   return 1.0 - _sum_s_res;
 }
 
 Real
-RichardsSat::d2sat(Real seff) const
+RichardsSat::d2sat(Real /*seff*/) const
 {
   return 0.0;
 }

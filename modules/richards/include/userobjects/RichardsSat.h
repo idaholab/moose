@@ -21,8 +21,8 @@ class RichardsSat : public GeneralUserObject
   void finalize();
 
   Real sat(Real seff) const;
-  Real dsat(Real seff) const;
-  Real d2sat(Real seff) const;
+  Real dsat(Real /*seff*/) const;
+  Real d2sat(Real /*seff*/) const;
 
  protected:
   

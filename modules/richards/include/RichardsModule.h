@@ -10,7 +10,7 @@ namespace Elk
   namespace Richards
   {
     void registerObjects(Factory & factory);
-    void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
+    void associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/);
   }
 }
 

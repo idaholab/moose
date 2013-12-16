@@ -5,6 +5,7 @@
 
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
+#include "ZeroInterface.h"
 
 class RichardsPorepressureNames;
 
@@ -14,7 +15,9 @@ InputParameters validParams<RichardsPorepressureNames>();
 
 class RichardsPorepressureNames :
 public GeneralUserObject,
-public Coupleable
+public Coupleable,
+public ZeroInterface
+
 
 {
  public:
@@ -29,13 +32,18 @@ public Coupleable
   unsigned int pressure_var_num(unsigned int moose_var_num) const;
   bool not_pressure_var(unsigned int moose_var_num) const;
   std::string pp_names() const;
+  VariableValue * pp_vals(unsigned int pressure_var_num) const;
+  VariableValue * pp_vals_old(unsigned int pressure_var_num) const;
+  VariableGradient * grad_pp(unsigned int pressure_var_num) const;
 
  protected:
   unsigned int _num_p;
   std::string _the_names;
   std::vector<unsigned int> _moose_var_num;
-  std::vector<VariableValue *> _moose_var_value;
   std::vector<unsigned int> _pressure_var_num;
+  std::vector<VariableValue *> _moose_var_value; // this is a vector of pointers to VariableValues
+  std::vector<VariableValue *> _moose_var_value_old;
+  std::vector<VariableGradient *> _moose_grad_var;
 
 };
 

@@ -16,21 +16,21 @@ RichardsRelPermUnity::RichardsRelPermUnity(const std::string & name, InputParame
 
 
 Real
-RichardsRelPermUnity::relperm(Real seff) const
+RichardsRelPermUnity::relperm(Real /*seff*/) const
 {
   return 1.0;
 }
 
 
 Real
-RichardsRelPermUnity::drelperm(Real seff) const
+RichardsRelPermUnity::drelperm(Real /*seff*/) const
 {
   return 0.0;
 }
 
 
 Real
-RichardsRelPermUnity::d2relperm(Real seff) const
+RichardsRelPermUnity::d2relperm(Real /*seff*/) const
 {
   return 0.0;
 }

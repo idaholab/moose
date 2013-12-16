@@ -142,6 +142,6 @@ Elk::Richards::registerObjects(Factory & factory)
 }
 
 void
-Elk::Richards::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+Elk::Richards::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }
