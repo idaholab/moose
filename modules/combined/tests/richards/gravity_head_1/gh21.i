@@ -114,9 +114,12 @@
   end_time = 1E5
 
   [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
-    adapt_log = false
-    dt = 1E2
+    type = FunctionDT
+    time_dt = '1 10 100 1000 10000'
+    time_t = '0 10 100 1000 10000'
+    #type = SolutionTimeAdaptiveDT
+    #adapt_log = false
+    #dt = 1E2
   [../]
 []
 

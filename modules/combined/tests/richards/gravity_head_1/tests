@@ -132,7 +132,7 @@
     input = 'gh20.i'
     exodiff = 'gh20.e'
     exodiff_opts = '-steps last'
-    abs_zero = 1e-4
+    abs_zero = 1e-6
     use_old_floor = True
   [../]
   [./test_gh21]
@@ -140,7 +140,7 @@
     input = 'gh21.i'
     exodiff = 'gh21.e'
     exodiff_opts = '-steps last'
-    abs_zero = 1e-4
+    abs_zero = 1e-6
     use_old_floor = True
   [../]
   [./test_gh22]
@@ -148,7 +148,7 @@
     input = 'gh22.i'
     exodiff = 'gh22.e'
     exodiff_opts = '-steps last'
-    abs_zero = 1e-4
+    abs_zero = 1e-6
     use_old_floor = True
   [../]
   [./test_gh23]
@@ -156,7 +156,7 @@
     input = 'gh23.i'
     exodiff = 'gh23.e'
     exodiff_opts = '-steps last'
-    abs_zero = 1e-4
+    abs_zero = 1e-6
     use_old_floor = True
   [../]
 []
