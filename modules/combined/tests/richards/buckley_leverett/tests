@@ -1,0 +1,9 @@
+[Tests]
+  [./test_bl01]
+    type = 'Exodiff'
+    input = 'bl01.i'
+    exodiff = 'bl01.e'
+    rel_err = 1E-5
+    use_old_floor = True
+  [../]
+[]
