@@ -18,7 +18,7 @@ InputParameters validParams<RichardsMaterial>()
   params.addRequiredParam<std::vector<UserObjectName> >("SUPG_UO", "List of names of user objects that define the SUPG");
   params.addRequiredParam<std::vector<Real> >("viscosity", "List of viscosity of fluids (Pa.s).  Typical value for water is=1E-3");
   params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-10)");
-  params.addRequiredCoupledVar("pressure_vars", "List of variables that represent the pressure");
+  //params.addRequiredCoupledVar("pressure_vars", "List of variables that represent the pressure");
   params.addParam<bool>("linear_shape_fcns", true, "If you are using second-order Lagrange shape functions you need to set this to false.");
   
   return params;

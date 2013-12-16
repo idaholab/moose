@@ -84,7 +84,6 @@
     block = 0
     mat_porosity = 0.1
     mat_permeability = '1E-5 0 0  0 1E-5 0  0 0 1E-5'
-    pressure_vars = pressure
     density_UO = DensityConstBulk
     relperm_UO = RelPermPower
     SUPG_UO = SUPGnone
@@ -123,7 +122,7 @@
 [Output]
   file_base = gh22
   output_initial = true
-  interval = 100
+  interval = 10000
   exodus = true
   perf_log = false
   linear_residuals = false

@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'gh01.i'
     exodiff = 'gh01.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -10,6 +11,7 @@
     type = 'Exodiff'
     input = 'gh02.i'
     exodiff = 'gh02.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -17,6 +19,7 @@
     type = 'Exodiff'
     input = 'gh03.i'
     exodiff = 'gh03.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -24,6 +27,7 @@
     type = 'Exodiff'
     input = 'gh04.i'
     exodiff = 'gh04.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -31,6 +35,7 @@
     type = 'Exodiff'
     input = 'gh05.i'
     exodiff = 'gh05.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -38,6 +43,7 @@
     type = 'Exodiff'
     input = 'gh06.i'
     exodiff = 'gh06.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -45,6 +51,7 @@
     type = 'Exodiff'
     input = 'gh07.i'
     exodiff = 'gh07.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -52,6 +59,7 @@
     type = 'Exodiff'
     input = 'gh08.i'
     exodiff = 'gh08.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -59,6 +67,7 @@
     type = 'Exodiff'
     input = 'gh09.i'
     exodiff = 'gh09.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -66,6 +75,7 @@
     type = 'Exodiff'
     input = 'gh10.i'
     exodiff = 'gh10.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -73,6 +83,7 @@
     type = 'Exodiff'
     input = 'gh11.i'
     exodiff = 'gh11.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -80,6 +91,7 @@
     type = 'Exodiff'
     input = 'gh12.i'
     exodiff = 'gh12.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -87,6 +99,7 @@
     type = 'Exodiff'
     input = 'gh13.i'
     exodiff = 'gh13.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -94,6 +107,7 @@
     type = 'Exodiff'
     input = 'gh14.i'
     exodiff = 'gh14.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -101,6 +115,7 @@
     type = 'Exodiff'
     input = 'gh15.i'
     exodiff = 'gh15.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -108,6 +123,7 @@
     type = 'Exodiff'
     input = 'gh16.i'
     exodiff = 'gh16.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-8
     use_old_floor = True
   [../]
@@ -115,6 +131,7 @@
     type = 'Exodiff'
     input = 'gh20.i'
     exodiff = 'gh20.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-4
     use_old_floor = True
   [../]
@@ -122,6 +139,7 @@
     type = 'Exodiff'
     input = 'gh21.i'
     exodiff = 'gh21.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-4
     use_old_floor = True
   [../]
@@ -129,6 +147,7 @@
     type = 'Exodiff'
     input = 'gh22.i'
     exodiff = 'gh22.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-4
     use_old_floor = True
   [../]
@@ -136,6 +155,7 @@
     type = 'Exodiff'
     input = 'gh23.i'
     exodiff = 'gh23.e'
+    exodiff_opts = '-steps last'
     abs_zero = 1e-4
     use_old_floor = True
   [../]
