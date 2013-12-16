@@ -1,4 +1,4 @@
-  [Mesh]
+[Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
@@ -10,18 +10,11 @@
   [../]
 []
 
-[AuxVariables]
-  [./from_master_app]
-    order = FIRST
-		family = SCALAR
-  [../]
-[]
-
 [Kernels]
   [./diff]
     type = CoefDiffusion
     variable = u
-    coef = 0.01
+    coef = 0.1
   [../]
   [./td]
     type = TimeDerivative
@@ -45,20 +38,20 @@
 []
 
 [Postprocessors]
-  [./from_master]
-    type = ScalarVariable
-		variable = from_master_app
+  [./point_value]
+    type = PointValue
+    variable = u
+    point = '1 1 0'
+    output = none
   [../]
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
   num_steps = 1
   dt = 1
-
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

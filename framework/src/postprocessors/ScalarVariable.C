@@ -20,14 +20,14 @@ InputParameters validParams<ScalarVariable>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "Name of the variable");
-  params.addParam<unsigned int>("idx", 0, "Index for this variable");
+  params.addParam<unsigned int>("component", 0, "Component to output for this variable");
   return params;
 }
 
 ScalarVariable::ScalarVariable(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _var(_subproblem.getScalarVariable(_tid, getParam<VariableName>("variable"))),
-    _idx(getParam<unsigned int>("idx"))
+    _idx(getParam<unsigned int>("component"))
 {
 }
 

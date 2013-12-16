@@ -42,12 +42,14 @@ MultiAppPostprocessorToAuxScalarTransfer::MultiAppPostprocessorToAuxScalarTransf
 void
 MultiAppPostprocessorToAuxScalarTransfer::execute()
 {
+
+
+  // Perform action based on the transfer direction
   switch(_direction)
   {
     // MasterApp -> SubApp
     case TO_MULTIAPP:
     {
-
       // Extract the postprocessor that is being transferd
       FEProblem & from_problem = *_multi_app->problem();
       Real pp_value = from_problem.getPostprocessorValue(_from_pp_name);
@@ -57,23 +59,38 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
         if(_multi_app->hasLocalApp(i))
         {
           // Get reference to the AuxVariable where the postprocessor will be passed
-          MooseVariableScalar & var =  _multi_app->appProblem(i)->getScalarVariable(_tid, _to_aux_name);
+          MooseVariableScalar & scalar =  _multi_app->appProblem(i)->getScalarVariable(_tid, _to_aux_name);
 
           // Set all values of the AuxVariable to the value of the postprocessor
-          var.sln().setAllValues(pp_value);
+          scalar.sln().setAllValues(pp_value);
 
           // Update the solution
-          var.insert(var.sys().solution());
+          scalar.insert(scalar.sys().solution());
         }
       break;
     }
 
     // SubApp -> MasterApp
-    //TODO: This should be possible if the AuxVariable has a component for each subapp (i.e., order = num. of sub apps), but this
-    // can't be implemente until #2331 is complete.
     case FROM_MULTIAPP:
     {
-      mooseError("Not yet implemented.");
+      // The number of sub applications
+      unsigned int num_apps = _multi_app->numGlobalApps();
+
+      // The AuxVariable for storing the postprocessor values from the sub app
+      MooseVariableScalar & scalar =  _multi_app->problem()->getScalarVariable(_tid, _to_aux_name);
+
+      // The dof indices for the scalar variable of interest
+      std::vector<dof_id_type> & dof = scalar.dofIndices();
+
+      // Error if there is a size mismatch between the scalar AuxVariable and the number of sub apps
+      if (num_apps != scalar.sln().size())
+        mooseError("The number of sub apps (" << num_apps << ") must be equal to the order of the scalar AuxVariable (" << scalar.order() << ")");
+
+      // Loop over each sub-app and populate the AuxVariable values from the postprocessors
+      for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+        if(_multi_app->hasLocalApp(i))
+          scalar.sys().solution().set(dof[i], _multi_app->appProblem(i)->getPostprocessorValue(_from_pp_name));
+
       break;
     }
   }

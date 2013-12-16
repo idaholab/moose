@@ -77,23 +77,23 @@
   [./v1]
     type = ScalarVariable
     variable = v
-    idx = 0
+    component = 0
   [../]
   [./v2]
     type = ScalarVariable
     variable = v
-    idx = 1
+    component = 1
   [../]
 
   [./a1]
     type = ScalarVariable
     variable = a
-    idx = 0
+    component = 0
   [../]
   [./a2]
     type = ScalarVariable
     variable = a
-    idx = 1
+    component = 1
   [../]
 []
 

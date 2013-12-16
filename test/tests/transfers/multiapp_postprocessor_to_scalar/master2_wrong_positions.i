@@ -1,4 +1,4 @@
-  [Mesh]
+[Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
@@ -11,9 +11,9 @@
 []
 
 [AuxVariables]
-  [./from_master_app]
-    order = FIRST
-		family = SCALAR
+  [./from_sub_app]
+    order = THIRD
+    family = SCALAR
   [../]
 []
 
@@ -40,21 +40,20 @@
     type = DirichletBC
     variable = u
     boundary = right
-    value = 2
+    value = 1
   [../]
 []
 
 [Postprocessors]
-  [./from_master]
-    type = ScalarVariable
-		variable = from_master_app
+  [./average]
+    type = ElementAverageValue
+    variable = u
   [../]
 []
 
 [Executioner]
   type = Transient
-  num_steps = 1
-  dt = 1
+  num_steps = 5
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -68,4 +67,25 @@
   output_initial = true
   exodus = true
   perf_log = true
+[]
+
+[MultiApps]
+  [./pp_sub]
+    app_type = MooseTestApp
+    positions = '0.5 0.5 0'
+    execute_on = timestep
+    type = TransientMultiApp
+    input_files = sub2.i
+  [../]
+[]
+
+[Transfers]
+  [./pp_transfer]
+    type = MultiAppPostprocessorToAuxScalarTransfer
+    direction = from_multiapp
+    execute_on = timestep
+    multi_app = pp_sub
+    from_postprocessor = point_value
+    to_aux_scalar = from_sub_app
+  [../]
 []
