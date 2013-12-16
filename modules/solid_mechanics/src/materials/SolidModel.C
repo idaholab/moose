@@ -31,6 +31,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<FunctionName>("thermal_expansion_function", "Thermal expansion coefficient as a function of temperature.");
   params.addCoupledVar("temp", "Coupled Temperature");
   params.addParam<Real>("stress_free_temperature", "The stress-free temperature.  If not specified, the initial temperature is used.");
+  params.addParam<std::vector<Real> >("initial_stress", "The initial stress tensor (xx, yy, zz, xy, yz, zx)");
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
   params.addParam<Real>("cracking_residual_stress", 0.0, "The fraction of the cracking stress allowed to be maintained following a crack.");
@@ -451,6 +452,17 @@ SolidModel::rotateSymmetricTensor( const ColumnMajorMatrix & R,
 void
 SolidModel::initQpStatefulProperties()
 {
+  if (isParamValid("initial_stress"))
+  {
+    const std::vector<Real> & s = getParam<std::vector<Real> >("initial_stress");
+    if (6 != s.size())
+    {
+      mooseError("initial_stress must give six values");
+    }
+    _stress[_qp].fillFromInputVector( s );
+    _stress_old_prop[_qp].fillFromInputVector( s );
+  }
+
   if (_cracking_stress > 0)
   {
     (*_crack_flags)[_qp](0) =

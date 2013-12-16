@@ -41,6 +41,13 @@
     abs_zero = 1e-09
   [../]
 
+  [./stress_relaxation2]
+    type = 'Exodiff'
+    input = 'PLC_LSH_stress_relaxation2.i'
+    exodiff = 'PLC_LSH_stress_relaxation2_out.e'
+    abs_zero = 1e-09
+  [../]
+
   [./plc]
     type = 'Exodiff'
     input = 'PLC_LSH_plc.i'
