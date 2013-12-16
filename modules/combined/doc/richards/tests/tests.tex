@@ -25,7 +25,7 @@
 \begin{document}
 
 
-\title{Wallaby Tests}
+\title{Richards Tests}
 \author{Andy Wilkins \\
 CSIRO}
 \maketitle
@@ -33,45 +33,160 @@ CSIRO}
 \tableofcontents
 
 %%%
-\chapter{The test suite}
+\chapter{Introduction}
 %%%
 
-Wallaby is a finite-element based groundwater flow code.  This
-document describes the test suite associated with Wallaby.
+The Richards' equation describes slow fluid flow through a porous
+medium.  This document describes the test suite associated with the
+Richards MOOSE code, both brief unit-style tests, and more complicated
+benchmark verifications.  There are two other accompanying documents: (1)
+The theoretical and numerical foundations of the code; (2) Examples of
+input syntax that users can utilise when building models.
 
-\chapter{Gravitational head}
 
+\chapter{UserObject tests}
+
+The Richards' UserObjects define the nonlinear functions that form the
+core of all models.  The tests of these UserObjects involve checking
+whether the functions and their derivatives are correctly coded.  This
+is done by comparing the values of the UserObjects with
+ParsedFunctions that are coded into a MOOSE input file, and the values
+of the UserObject derivatives with finite-differences of the same
+ParsedFunction.  These are simple tests and are part of the automatic
+test suite.  The following tests are performed.
+
+\begin{itemize}
+
+\item That the `power' form of the relative permeability:
+\begin{equation}
+\kappa_{\mathrm{rel}}(S) = (n+1)S^{n} - nS^{n+1} \ ,
+\end{equation}
+is correctly coded, and also that its first and second derivatives
+with repsect to $S$ are correctly coded.
+
+\item That the `van Genuchten' form of the relative permeability:
+\begin{equation}
+\kappa_{\mathrm{rel}}(S) = \sqrt{S}\left(1 - \left(1 -
+S^{1/m}\right)^{m}\right)^{2} \ ,
+\end{equation}
+is correctly coded, and also that its first and second derivatives
+with respect to $S$ are correctly coded.
+
+\item That the 'modified van Genuchten' form of the relative permeability:
+\begin{equation}
+\kappa_{\mathrm{rel}}(S) = \left\{
+\begin{array}{ll}
+\sqrt{S}\left(1 - \left(1 -
+S^{1/m}\right)^{m}\right)^{2} \ & \mbox{ for } S<S_{\mathrm{cut}} \\
+\mbox{cubic} \ & \mbox{ for } S \geq S_{\mathrm{cut}}
+\end{array}
+\right.
+\end{equation}
+is correctly coded, and also that its first and second derivatives
+with respect to $S$ are correctly coded.
+
+\item That the `constant bulk modulus' form of the density
+\begin{equation}
+\rho(P) = \rho_{0}e^{P/B} \ ,
+\end{equation}
+is correctly coded, and also that its first and second derivatives
+with respect to $P$ are correctly coded.
+
+\item That the `ideal gas' form of the density
+\begin{equation}
+\rho(P) = s(P-P_{\mathrm{0}}) \ ,
+\end{equation}
+is correctly coded, and also that its first and second derivatives
+with respect to $P$ are correctly coded.
+
+\item That the `van Genuchten' effective saturation
+\begin{equation}
+S_{\mathrm{eff}} = \left(1 + (\alpha
+P_{\mathrm{c}})^{\frac{1}{1-m}}\right)^{-m} \ ,
+\end{equation}
+is correctly coded, and also that its first and second derivatives
+with respect to $P_{\mathrm{c}}$ are correctly coded.
+
+\end{itemize}
+
+
+
+\chapter{Jacobian tests}
+
+The UserObjects and their derivatives need to be combined to form a
+residual and a Jacobian during the solution process.  Correctly coding
+the Jacobian leads to rapid convergence to the correct solution, so
+tests of the Jacobian are important.  These are simple tests and are
+part of the automatic test suite.
+
+In MOOSE parlance, the Jacobian consists of `Diagonal' and
+`OffDiagonal' terms.  The former consist of the derivative of a
+variable's residual with respect to the same variable (at the same
+quadrature point or a different one); while the latter
+consist of the derivatives with respect to another variable (at the
+same quadrature point or a different one).
+
+The `Diagonal' terms are tested using a single-phase single-element
+model with random initial conditions.  Sixteen different tests are
+performed which are all possible combinations of:
+\begin{itemize}
+\item Fully-saturated or unsaturated initial conditions
+\item With or without gravity
+\item With or without SUPG
+\item With or without time derivatives
+\end{itemize}
+Of course, the unsaturated case with gravity, SUPG and time
+derivatives is the most complicated, but the other cases are useful
+for debugging.
+
+The `OffDiagonal' terms only appear if there is more than one pressure
+variable, that is for multi-phase problems.  No tests have been
+performed yet.
+
+
+
+\chapter{Long-time behaviour}
+
+These tests concern the steadystate pressure distribution obtained
+either by running a transient model for a long time, or by running a
+steady-state analysis, both of which should lead to the same result.
 Without fluxes, the steadystate pressure distribution is just
 \begin{equation}
 P(x) = P_{0} + \rho_{0} g x \ ,
 \end{equation}
-where $\rho_{0}$ is the constant reference fluid density, $g$ is the
-acceleration due to gravity (a vector), and $x$ is position.  
+if the fluid bulk modulus is large enough compared with $P$.  Here
+$\rho_{0}$ is the constant reference fluid density, $g$ is the
+acceleration due to gravity (a vector), and $x$ is position.  These
+are simple tests and are part of the automatic test suite.
 
-This is verified in Wallaby using the following tests on a single
-square element of unit size.
+This is verified by running sixteen single-phase single-element models
+with random initial conditions.  The sixteen cases are all possible
+combinations of:
+\begin{itemize}
+\item Fully-saturated or unsaturated initial conditions
+\item With or without gravity
+\item With or without SUPG
+\item Transient or Steadystate
+\end{itemize}
+
+In addition to these cases, a number of more complicated scenarios are
+also part of the automatic test suite:
 \begin{enumerate}
-\item Steady state analysis with SUPG, fully-saturated situation.
-\item Steady state analysis without SUPG, fully-saturated situation.
-\item Transient analysis with SUPG, fully-saturated situation.
-\item Transient analysis without SUPG, fully-saturated situation.
-\item Steady state analysis with SUPG, partially saturated situation.
-\item Steady state analysis without SUPG, partially saturated situation.
-\item Transient analysis with SUPG, partially saturated situation.
-\item Transient analysis without SUPG, partially saturated situation.
-\item Transient analysis with SUPG, partially saturated situation.
-\item Transient analysis without SUPG, partially saturated situation,
-  with nonzero immobile saturation, and with 5 elements in the $x$
-  direction which has length 20\,m.
-\item Transient analysis with SUPG, partially saturated situation,
-  with nonzero immobile saturation, and with 5 elements in the $x$
-  direction which has length 20\,m.
+\item\label{gh20.item} A single-phase situation with nonzero immobile saturation.
+  There are 5 elements in the $x$ direction along which gravity acts.
+  The $x$ direction has length 20\,m, and the initial condition is
+  sufficiently unsaturated so that after some time the saturation at
+  the `top' of the model ($x\sim 20$) would reduce below immobile
+  saturation if the relative permeability weren't preventing it.  Two
+  cases are studied: with SUPG and without SUPG.  The results are
+  shown in the top two pictures of Figure~\ref{gh.fig} and show that
+  SUPG reduces oscillations and prevents $S<S_{\mathrm{imm}}$ in this
+  example at least.
+\item The same situation is in item~\ref{gh20.item}, but with 50
+  elements in the $x$ direction.  Figure~\ref{gh.fig} shows once again
+  the stabilising nature of SUPG is seen, as well as the hydrostatic
+  pressure head for $S>S_{\mathrm{imm}}$.
 \end{enumerate}
-The final two tests are interesting because they also show that a
-nonzero $S_{\mathrm{imm}}$ means that effective saturation can no
-longer reduce to zero, and they also illustrate the stabilisating
-nature of SUPG in reducing oscillatory behaviour in the solution, as
-shown in Figure~\ref{gh.fig}
 
 \begin{figure}[htb]
 \centering
@@ -93,7 +208,7 @@ $\mbox{}$ \\
 \end{figure}
 
 
-\chapter{A pressure pulse in the fully saturated situation}
+\chapter{A pressure pulse in the fully saturated situation - NEEDS UPDATE}
 
 Darcy's equation for flow through a fully saturated medium without
 gravity and without sources is 
@@ -158,7 +273,7 @@ An example verification is shown in Figure~\ref{pressure_pulse.fig}.
 \end{figure}
 
 
-\chapter{Buckley-Leverett}
+\chapter{Buckley-Leverett - NEEDS UPDATE}
 
 Wallaby is compared with a simple one dimensional
 Buckley-Leverett problem\footnote{SE Buckley and MC Leverett (1942)
@@ -263,7 +378,7 @@ $\mbox{}$
 \end{figure}
 
 
-\chapter{Unsaturated flow in a bar}
+\chapter{Unsaturated flow in a bar - NEEDS UPDATE}
 
 This problem is one of cosflow's benchmark problems.  Water inside a
 porous ``bar'' of material length 10m, and width and depth 1m is
@@ -335,7 +450,7 @@ to my current inability to lump the mass term.)
 \end{figure}
 
 
-\chapter{Infiltration and drainage}
+\chapter{Infiltration and drainage - NEEDS UPDATE}
 
 Forsyth, Wu and Pruess\footnote{PA Forsyth, YS Wu and K Pruess,
   ``Robust numerical methods for saturated-unsaturated flow with dry
@@ -415,7 +530,7 @@ $\mbox{}$\\
 \end{figure}
 
 
-\chapter{Newton cooling from a bar}
+\chapter{Newton cooling from a bar - NEEDS UPDATE}
 
 Darcy's equation for flow through a fully saturated medium without
 gravity and without sources is 
