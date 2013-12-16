@@ -39,8 +39,9 @@ CSIRO}
 The Richards' equation describes slow fluid flow through a porous
 medium.  This document describes the test suite associated with the
 Richards MOOSE code, both brief unit-style tests, and more complicated
-benchmark verifications.  There are two other accompanying documents: (1)
-The theoretical and numerical foundations of the code; (2) Examples of
+benchmark verifications.  There are two other accompanying documents:
+(1) The theoretical and numerical foundations of the code, which also
+describes the notation used throughout this document; (2) Examples of
 input syntax that users can utilise when building models.
 
 
@@ -274,29 +275,31 @@ These tests run rapidly and are part of the automatic test suite.
 \end{figure}
 
 
-\chapter{Buckley-Leverett - NEEDS UPDATE}
+\chapter{Buckley-Leverett}
 
-Wallaby is compared with a simple one dimensional
-Buckley-Leverett problem\footnote{SE Buckley and MC Leverett (1942)
-  ``Mechanism of fluid displacements in sands''.  Transactions of the
-  AIME {\bf 146} 107--116}.  The fluid moves in a region $0\leq x\leq
+MOOSE compared with a simple one dimensional Buckley-Leverett
+problem\footnote{SE Buckley and MC Leverett (1942) ``Mechanism of
+  fluid displacements in sands''.  Transactions of the AIME {\bf 146}
+  107--116}.  The single-phase fluid moves in a region $0\leq x\leq
 15$\,m.  A fully-saturated front initially sits at position $x=5$,
 while the region $x>5$ is initially unsaturated.  With zero suction
 function $P_{c} = 0$, there is no diffusion of the sharp front, and it
 progresses towards the right.  This is a difficult problem to simulate
-numerically as maintaining the sharp front is hard.  The speed is
-independent of the 
-relative permeability, since the fluid is flowing from a
-fully-saturated region.  This problem is therefore a good test of the upwinding.
+numerically as maintaining the sharp front is hard.  The front's speed
+is independent of the relative permeability, since the fluid is
+flowing from a fully-saturated region (where
+$\kappa_{\mathrm{rel}}=1$).  This problem is therefore a good test of
+the upwinding.
 
 
 In the simulation below, the pressure at the left boundary is kept
 fixed at $P_{0}=0.98$\,MPa, while the right boundary is kept fixed at
-$P_{15}=-20000$\,Pa.  The medium's permeability is set to $\kappa =
-10^{-10}\,\mathrm{m}^{2}$ and its porosity is $\phi = 0.15$.  It is
-not possible to use a zero suction function in Wallaby, but using
-$\alpha = 10^{-4}$\,Pa$^{-1}$ and $m=0.8$ approximates it.  The fluid
-viscosity is $\mu = 10^{-3}$\,Pa.s.
+$P_{15}=-20000$\,Pa, so the difference is 1\,MPa.  The medium's
+permeability is set to $\kappa = 10^{-10}\,\mathrm{m}^{2}$ and its
+porosity is $\phi = 0.15$.  It is not possible to use a zero suction
+function in the MOOSE implementation, but using the van Genuchten
+parameters $\alpha = 10^{-4}$\,Pa$^{-1}$ and $m=0.8$ approximates it.
+The fluid viscosity is $\mu = 10^{-3}$\,Pa.s.
 
 The initial condition is
 \begin{equation}
@@ -351,7 +354,7 @@ f(t) = \sqrt{f(0)^{2} + \frac{2\kappa}{\phi\mu}(P_{0}-P_{15})t} \ .
 For the parameters listed above, the front will be at position
 $f=9.6$\,m at $t=50$\,s.  This solution is only valid for zero
 capillary suction.  A nonzero suction function will tend to diffuse
-the sharp front away.
+the sharp front.
 
 With coarse meshes it is impossible to simulate a sharp front, of
 course, since the front is spread over at least one element.  It is
@@ -359,12 +362,16 @@ therefore quite advantageous to use mesh adaptivity in this test,
 since the mesh can be fine around the front where all the interesting
 dynamics occurs, and coarse elsewhere.
 
-Figure~\ref{satfront.figa} shows the results from a Wallaby simulation
+Figure~\ref{satfront.figa} shows the results from a MOOSE simulation
 with an initial mesh of element size 1\,m, and a minimum size of
 0.125\,m, with a maximum timestep of 0.3\,s.  (Reducing the minimum
 element size or the maximum timestep size keeps the front sharper.)
 The front in this simulation is between $x=9.9$\,m and $x=10.35$\,m,
 in fair agreement with the predicted value of 9.6\,m.
+
+The automatic test suite contains a simulation with elements of size
+0.1\,m using a timestep of 2\,s, which gives results very similar to
+those shown in Figure~\ref{satfront.figa}.
 
 \begin{figure}[htb]
 \begin{center}
@@ -375,78 +382,6 @@ $\mbox{}$
   $t=50$\,s.  Top: saturation.  Bottom: porepressure.  The front sits
   between $x=9.9$\,m and $x=10.35$\,m.}
 \label{satfront.figa}
-\end{center}
-\end{figure}
-
-
-\chapter{Unsaturated flow in a bar - NEEDS UPDATE}
-
-This problem is one of cosflow's benchmark problems.  Water inside a
-porous ``bar'' of material length 10m, and width and depth 1m is
-initialised to porepressure $P_{0}<0$, corresponding to water
-saturation $S_{0}<1$.  The porepressure left-hand end (at $x=0$) is
-raised and fixed at $P_{1}<0$, corresonding to water saturation
-$S_{1}$ with $S_{0}<S_{1}<1$, and the evolution of porepressure at the
-right-hand end ($x=10$\,m) is recorded.  Apart from the left-hand end,
-the other boundaries of the bar are impermeable.  The setup is shown in
-Figure~\ref{uf_setup.fig}.
-
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[width=8cm]{uf_setup.eps}
-\caption{The unsaturated problem involves a porous
-  ``bar'' of material of length 10m with initial porepressure
-  $P_{0}$.  The left-hand end is raised to porepressure $P_{1}$ and
-  held fixed.  The other parts of the bar's exterior surface are impermeable.}
-\label{uf_setup.fig}
-\end{center}
-\end{figure}
-
-This problem exhibits quite severe mesh dependency, and since the
-upwinding in cosflow and Wallaby are different, the results are not
-expected to be the same, except in the limit of zero element size.
-
-\noindent The following parameters are used \\
-\begin{center}
-\begin{tabular}{|ll|}
-\hline
-Bar porosity & 0.1 \\
-Bar permeability & $10^{-12}$\,m$^{2}$ \\
-\hline
-Gravity & 0 \\
-\hline
-Water density & 1000\,kg.m$^{-3}$ \\
-Water viscosity & 0.001\,Pa.s \\
-Water bulk modulus & 2\,GPa \\
-Water immobile saturation & 0.0 \\
-Water residual saturation & 0.0 \\
-Air residual saturation & 0.0 \\
-\hline
-van Genuchten $\alpha$ & $10^{-4}$\,Pa$^{-1}$ \\
-van Genuchten $a$ & 0.35 \\
-\hline
-Initial porepressure $P_{0}$ & -197347.0503\,Pa \\
-Initial saturation $S_{0}$ & 0.2 \\
-Applied pressure $P_{1}$ & -9283.000501\,Pa \\
-Applied saturation $S_{1}$ & 0.8 \\
-\hline
-\end{tabular} \\
-\end{center}
-
-Figure~\ref{uf.result.fig} shows agreement between Wallaby and
-cosflow for a variety of different mesh densities, including an
-adaptive mesh example.  The Wallaby results appear to be closer to the
-zero-element-size result than cosflow, but for low mesh density
-exhibit spurious oscillations as the high saturation region moves into
-the low saturation region.  (This oscillation is almost definitely due
-to my current inability to lump the mass term.)
-
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[width=17cm]{uf.eps}
-\caption{The porepressure at the right-hand end ($x=10$) of the bar as
-  a function of time for various different meshes.}
-\label{uf.result.fig}
 \end{center}
 \end{figure}
 
@@ -627,7 +562,76 @@ results are shown in Figure~\ref{nc.fig}.
 
 
 
+\chapter{Unsaturated flow in a bar - NEEDS UPDATE}
 
+This problem is one of cosflow's benchmark problems.  Water inside a
+porous ``bar'' of material length 10m, and width and depth 1m is
+initialised to porepressure $P_{0}<0$, corresponding to water
+saturation $S_{0}<1$.  The porepressure left-hand end (at $x=0$) is
+raised and fixed at $P_{1}<0$, corresonding to water saturation
+$S_{1}$ with $S_{0}<S_{1}<1$, and the evolution of porepressure at the
+right-hand end ($x=10$\,m) is recorded.  Apart from the left-hand end,
+the other boundaries of the bar are impermeable.  The setup is shown in
+Figure~\ref{uf_setup.fig}.
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=8cm]{uf_setup.eps}
+\caption{The unsaturated problem involves a porous
+  ``bar'' of material of length 10m with initial porepressure
+  $P_{0}$.  The left-hand end is raised to porepressure $P_{1}$ and
+  held fixed.  The other parts of the bar's exterior surface are impermeable.}
+\label{uf_setup.fig}
+\end{center}
+\end{figure}
+
+This problem exhibits quite severe mesh dependency, and since the
+upwinding in cosflow and Wallaby are different, the results are not
+expected to be the same, except in the limit of zero element size.
+
+\noindent The following parameters are used \\
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Bar porosity & 0.1 \\
+Bar permeability & $10^{-12}$\,m$^{2}$ \\
+\hline
+Gravity & 0 \\
+\hline
+Water density & 1000\,kg.m$^{-3}$ \\
+Water viscosity & 0.001\,Pa.s \\
+Water bulk modulus & 2\,GPa \\
+Water immobile saturation & 0.0 \\
+Water residual saturation & 0.0 \\
+Air residual saturation & 0.0 \\
+\hline
+van Genuchten $\alpha$ & $10^{-4}$\,Pa$^{-1}$ \\
+van Genuchten $a$ & 0.35 \\
+\hline
+Initial porepressure $P_{0}$ & -197347.0503\,Pa \\
+Initial saturation $S_{0}$ & 0.2 \\
+Applied pressure $P_{1}$ & -9283.000501\,Pa \\
+Applied saturation $S_{1}$ & 0.8 \\
+\hline
+\end{tabular} \\
+\end{center}
+
+Figure~\ref{uf.result.fig} shows agreement between Wallaby and
+cosflow for a variety of different mesh densities, including an
+adaptive mesh example.  The Wallaby results appear to be closer to the
+zero-element-size result than cosflow, but for low mesh density
+exhibit spurious oscillations as the high saturation region moves into
+the low saturation region.  (This oscillation is almost definitely due
+to my current inability to lump the mass term.)
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=17cm]{uf.eps}
+\caption{The porepressure at the right-hand end ($x=10$) of the bar as
+  a function of time for various different meshes.}
+\label{uf.result.fig}
+\end{center}
+\end{figure}
 
 
 
