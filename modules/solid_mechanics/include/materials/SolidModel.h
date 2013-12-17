@@ -213,6 +213,8 @@ protected:
   std::vector<SubdomainID> _block_id;
 
   std::map<SubdomainID, ConstitutiveModel*> _constitutive_model;
+  // This set keeps track of the dynamic memory allocated in this object
+  std::set<ConstitutiveModel *> _models_to_free;
   bool _constitutive_active;
 
   /// Compute the stress (sigma += deltaSigma)

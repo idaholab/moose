@@ -215,14 +215,8 @@ SolidModel::SolidModel( const std::string & name,
 
 SolidModel::~SolidModel()
 {
-  std::set<ConstitutiveModel *> addresses_freed;
-  // Don't double free!
-  for (std::map<SubdomainID, ConstitutiveModel*>::iterator it = _constitutive_model.begin(); it != _constitutive_model.end(); ++it)
-    if (addresses_freed.find(it->second) == addresses_freed.end())
-    {
-      delete it->second;
-      addresses_freed.insert(it->second);
-    }
+  for (std::set<ConstitutiveModel *>::iterator it = _models_to_free.begin(); it != _models_to_free.end(); ++it)
+    delete *it;
 
   delete _local_elasticity_tensor;
   delete _element;
@@ -1294,10 +1288,12 @@ SolidModel::createConstitutiveModel(const std::string & cm_name, const InputPara
 
   Factory & factory = _app.getFactory();
   ConstitutiveModel * cm = dynamic_cast<ConstitutiveModel*>(factory.create(cm_name, _name+"Model", params));
+
   if (!cm)
   {
     mooseError("\""+_name+"\" is not a ConstitutiveModel");
   }
+  _models_to_free.insert(cm);  // Keep track of the dynamic memory that is created internally to this object
 
   _constitutive_active = true;
   for(unsigned i(0); i < _block_id.size(); ++i)
