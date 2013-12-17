@@ -215,6 +215,15 @@ SolidModel::SolidModel( const std::string & name,
 
 SolidModel::~SolidModel()
 {
+  std::set<ConstitutiveModel *> addresses_freed;
+  // Don't double free!
+  for (std::map<SubdomainID, ConstitutiveModel*>::iterator it = _constitutive_model.begin(); it != _constitutive_model.end(); ++it)
+    if (addresses_freed.find(it->second) == addresses_freed.end())
+    {
+      delete it->second;
+      addresses_freed.insert(it->second);
+    }
+
   delete _local_elasticity_tensor;
   delete _element;
 }
