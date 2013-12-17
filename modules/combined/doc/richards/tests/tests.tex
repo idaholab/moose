@@ -38,8 +38,11 @@ CSIRO}
 
 The Richards' equation describes slow fluid flow through a porous
 medium.  This document describes the test suite associated with the
-Richards MOOSE code, both brief unit-style tests, and more complicated
-benchmark verifications.  There are two other accompanying documents:
+Richards MOOSE code: both brief unit-style tests, and more complicated
+benchmark verifications.  Many of the tests are run automatically
+every time the code is updated.  Some of the tests are marked `heavy'
+since they are more lengthy (they take over 2 seconds to run) and
+these must be run manually.  There are two other accompanying documents:
 (1) The theoretical and numerical foundations of the code, which also
 describes the notation used throughout this document; (2) Examples of
 input syntax that users can utilise when building models.
@@ -386,7 +389,7 @@ $\mbox{}$
 \end{figure}
 
 
-\chapter{Infiltration and drainage - NEEDS UPDATE}
+\chapter{Infiltration and drainage}
 
 Forsyth, Wu and Pruess\footnote{PA Forsyth, YS Wu and K Pruess,
   ``Robust numerical methods for saturated-unsaturated flow with dry
@@ -442,13 +445,20 @@ In experiment 1, the caisson is initially at saturation 0.303
 ($P=-72620.4$\,Pa), and water is pumped into the top with a rate
 0.002315\,kg.m$^{-2}$.s$^{-1}$.  This causes a front of water to
 advance down the caisson.  Figure~\ref{rd.result.fig} shows the
-agreement between Wallaby and the published result (this result was
+agreement between MOOSE and the published result (this result was
 obtained by extracting data by hand from online graphics).
 
 In experiment 2, the caisson is initially fully saturated at $P=0$,
 and the bottom is held at $P=0$ to cause water to drain via the action
 of gravity.  Figure~\ref{rd.result.fig} shows the agreement between
-Wallaby and the published result.
+MOOSE and the published result.
+
+Experiment 1 and the first 4 simulation days of experiment 2 are
+marked as ``heavy'' in the Richards' test suite since the simulations
+take around 3 seconds to complete.  This means they are not run by
+default every time the code is updated, and must be run manually.
+However, the final 96 days of experiment 2 run quickly and are part of
+the automatic test suite.
 
 
 \begin{figure}[htb]
