@@ -95,6 +95,9 @@ class MachineOutput(object):
         output.append(self._formatter(machine, col_width, attributes))
       output.append(s)
 
+    # Add this machines processors to the jobs count
+    use += self.warehouse.master.threads
+
     # Make sure the table is closed
     if output[-1] != s:
       output.append(s)
@@ -105,12 +108,9 @@ class MachineOutput(object):
     # Format string for information display
     frmt = '%25s: '
 
-    # Print processors
-    output.append(frmt % 'Processors Used' + str(jobs))
-
     # Total available
-    output.append(frmt % 'Available Processors' + str(use+self.warehouse.master.use_threads))
-    output.append(frmt % 'Total Processors' + str(total+self.warehouse.master.threads))
+    output.append(frmt % 'Number of processors' + str(use))
+    output.append(frmt % 'Available Processors' + str(total))
 
     # Add make command
     make = frmt % 'Make Command' + 'make -j ' + str(jobs)

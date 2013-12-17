@@ -40,7 +40,8 @@ class DmakeRC(object):
 
     # Remove .dmakerc if clean option is given
     if kwargs.pop('clean', False):
-      os.remove(self._filename)
+      if os.path.exists(self._filename):
+        os.remove(self._filename)
 
     # Initialize the update variable, this value is True when when
     # the DISTCC_HOSTS stored is out-of-date
@@ -132,12 +133,9 @@ class DmakeRC(object):
   # @return A map of the data loaded from the .dmakerc
   def _readLocalFile(self):
 
-    # Location of .dmakerc
-    dmakerc = os.path.join(os.getenv('HOME'), '.dmakerc')
-
     # Read the file, if it exists
-    if os.path.exists(dmakerc):
-      fid = open(dmakerc, 'r')
+    if os.path.exists(self._filename):
+      fid = open(self._filename, 'r')
       data = pickle.load(fid)
       fid.close()
     else:
