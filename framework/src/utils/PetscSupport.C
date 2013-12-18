@@ -234,7 +234,7 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
   // Prior to PETSc 3.0.0, you could call KSPDefaultConverged with a NULL context
   // pointer, as it was unused.
   KSPDefaultConverged(ksp, n, rnorm, reason, PETSC_NULL);
-#elif PETSC_VERSION_LESS_THAN(3,5,0) && PETSC_VERSION_RELEASE
+#else
   // As of PETSc 3.0.0, you must call KSPDefaultConverged with a
   // non-NULL context pointer which must be created with
   // KSPDefaultConvergedCreate(), and destroyed with
@@ -243,12 +243,6 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
   KSPDefaultConvergedCreate(&default_ctx);
   KSPDefaultConverged(ksp, n, rnorm, reason, default_ctx);
   KSPDefaultConvergedDestroy(default_ctx);
-#else
-  // As of PETSc 3.5.0, use KSPConvergedDefaultXXX
-  void* default_ctx = NULL;
-  KSPConvergedDefaultCreate(&default_ctx);
-  KSPConvergedDefault(ksp, n, rnorm, reason, default_ctx);
-  KSPConvergedDefaultDestroy(default_ctx);
 #endif
 
   // Pop the Error handler we pushed on the stack to go back
