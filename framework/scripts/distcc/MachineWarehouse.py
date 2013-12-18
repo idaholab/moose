@@ -65,7 +65,7 @@ class MachineWarehouse(object):
       return
 
     # Create the Deamon object
-    self._daemon = DistccDaemon(self.master, dedicated=kwargs['dedicated'])
+    self._daemon = DistccDaemon(self.master, dedicated=kwargs.pop('dedicated', False))
 
 
   ## Return the hosts line and number of jobs (public)
@@ -90,9 +90,9 @@ class MachineWarehouse(object):
 
     # Set refresh to true of any of the optional arguments are set
     if kwargs['max'] == True \
-       or kwargs['localhost'] != None \
-       or kwargs['localslots'] != None \
-       or kwargs['localslots_cpp'] != None \
+       or kwargs.pop('localhost', None) != None \
+       or kwargs.pop('localslots', None) != None \
+       or kwargs.pop('localslots_cpp', None) != None \
        or self._disable != None:
       refresh = True
 
@@ -131,7 +131,7 @@ class MachineWarehouse(object):
     self._daemon.start(self.workers + self.down, allow=self._allow)
 
 
-  ## Kills all distccd processes (build)
+  ## Kills all distccd processes (public)
   # @see DistccDaemon
   def killDaemon(self):
     self._daemon.kill()
