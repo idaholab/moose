@@ -13,7 +13,6 @@
 #include <petscdm.h>
 #define DMMOOSE "moose"
 
-extern PetscErrorCode DMMooseRegisterAll();
 extern PetscErrorCode DMCreateMoose(MPI_Comm,NonlinearSystem&,DM*);
 extern PetscErrorCode DMMooseReset(DM);
 extern PetscErrorCode DMMooseSetNonlinearSystem(DM,NonlinearSystem&);
@@ -38,7 +37,7 @@ extern PetscErrorCode DMMooseSetSplitBlocks(DM,const std::string&,const std::set
 extern PetscErrorCode DMMooseGetSplitBlocks(DM,const std::string&,std::set<std::string>&);
 extern PetscErrorCode DMMooseSetSplitSides(DM,const std::string&,const std::set<std::string>&);
 extern PetscErrorCode DMMooseGetSplitSides(DM,const std::string&,std::set<std::string>&);
-extern PetscErrorCode SNESUpdateDMMoose(SNES snes, PetscInt iteration);
+
 
 #endif // #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-#endif // #ifdef _PETSCDMMOOSE
+#endif // #ifdef _petscdmmoose

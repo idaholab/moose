@@ -20,8 +20,6 @@
 #ifdef LIBMESH_HAVE_PETSC
 
 #include "Problem.h"
-#include "NonlinearSystem.h"
-
 // libMesh
 #include "libmesh/petsc_nonlinear_solver.h"
 
@@ -36,8 +34,6 @@ void petscSetOptions(FEProblem & problem);
 void petscSetDefaults(FEProblem & problem);
 
 void petscSetupDampers(NonlinearImplicitSystem& sys);
-
-void petscSetupDM(NonlinearSystem & nl);
 
 }
 }

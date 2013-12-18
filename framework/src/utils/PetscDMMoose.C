@@ -66,7 +66,6 @@ struct DM_Moose
   PetscBool                                print_embedding;
 };
 
-
 #undef  __FUNCT__
 #define __FUNCT__ "DMMooseGetContacts"
 PetscErrorCode DMMooseGetContacts(DM dm, std::vector<std::pair<std::string,std::string> >& contactnames, std::vector<PetscBool>& displaced)
@@ -1624,59 +1623,5 @@ PetscErrorCode  DMCreate_Moose(DM dm)
 }
 EXTERN_C_END
 
-#undef __FUNCT__
-#define __FUNCT__ "SNESUpdateDMMoose"
-PetscErrorCode  SNESUpdateDMMoose(SNES snes, PetscInt iteration)
-{
-  /* This is called any time the structure of the problem changes in a way that affects the Jacobian sparsity pattern.
-     For example, this may happen when NodeFaceConstraints change Jacobian's sparsity pattern based on newly-detected Penetration.
-     In that case certain preconditioners (e.g., PCASM) will not work, unless we tell them that the sparsity pattern has changed.
-     For now we are rebuilding the whole KSP, when necessary.
-  */
-  PetscErrorCode ierr;
-  DM dm;
-  KSP ksp;
-  const char* prefix;
-  MPI_Comm comm;
-  PC pc;
 
-  PetscFunctionBegin;
-  if (iteration) {
-    /* TODO: limit this only to situations when displaced (un)contact splits are present, as is DisplacedProblem(). */
-    ierr = SNESGetDM(snes,&dm);CHKERRQ(ierr);
-    ierr = DMMooseReset(dm);CHKERRQ(ierr);
-    ierr = DMSetUp(dm);CHKERRQ(ierr);
-    ierr = SNESGetKSP(snes,&ksp);CHKERRQ(ierr);
-    /* Should we rebuild the whole KSP? */
-    ierr = PetscObjectGetOptionsPrefix((PetscObject)ksp,&prefix);CHKERRQ(ierr);
-    ierr = PetscObjectGetComm((PetscObject)ksp,&comm);CHKERRQ(ierr);
-    ierr = PCCreate(comm,&pc);CHKERRQ(ierr);
-    ierr = PCSetDM(pc,dm);CHKERRQ(ierr);
-    ierr = PCSetOptionsPrefix(pc,prefix);CHKERRQ(ierr);
-    ierr = PCSetFromOptions(pc);CHKERRQ(ierr);
-    ierr = KSPSetPC(ksp,pc);CHKERRQ(ierr);
-    ierr = PCDestroy(&pc);CHKERRQ(ierr);
-  }
-  PetscFunctionReturn(0);
-}
-
-
-#undef  __FUNCT__
-#define __FUNCT__ "DMMooseRegisterAll"
-PetscErrorCode DMMooseRegisterAll()
-{
-    static PetscBool     DMMooseRegisterAllCalled = PETSC_FALSE;
-    PetscErrorCode       ierr;
-
-    PetscFunctionBegin;
-    if (!DMMooseRegisterAllCalled) {
-#if PETSC_VERSION_LESS_THAN(3,4,0)
-      ierr = DMRegister(DMMOOSE, PETSC_NULL, "DMCreate_Moose", DMCreate_Moose);CHKERRQ(ierr);
-#else
-      ierr = DMRegister(DMMOOSE, DMCreate_Moose);CHKERRQ(ierr);
-#endif
-      DMMooseRegisterAllCalled = PETSC_TRUE;
-    }
-  PetscFunctionReturn(0);
-}
 #endif // #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
