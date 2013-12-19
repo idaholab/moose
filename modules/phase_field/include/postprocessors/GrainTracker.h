@@ -85,7 +85,7 @@ protected:
   /**
    * This method swaps the values at all the nodes in grain_it1, with the values in grain_it2.
    */
-  void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2);
+  void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2, unsigned int attempt_number);
 
   /**
    * This method returns the periodic distance between two spheres.  If ignore_radii is true, then the distance will be between the two
