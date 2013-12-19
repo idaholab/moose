@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'uo1.i'
     exodiff = 'uo1.e'
-    abs_zero = 1e-8
+    rel_err = 1.0
     use_old_floor = True
   [../]
   [./test_uo2]
