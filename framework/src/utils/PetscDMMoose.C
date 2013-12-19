@@ -2,6 +2,7 @@
 // This only works with petsc-3.3 and above.
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+/* Inside these guards we can use PETSC_VERSION_LT, which need not be modified upon transition from dev to a release. */
 
 #include "PetscDMMoose.h"
 
@@ -598,7 +599,7 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
 	ierr = DMMooseGetEmbedding_Private(dinfo.dm,&dembedding);CHKERRQ(ierr);
 	if(dmm->embedding) {
 	  /* Create a relative embedding into the parent's index space. */
-#if PETSC_VERSION_LE(3,3,0) && PETSC_VERSION_RELEASE
+#if PETSC_VERSION_LT(3,4,0)
 	  ierr = ISMapFactorRight(dembedding,dmm->embedding, PETSC_TRUE, &lembedding); CHKERRQ(ierr);
 #else
 	  ierr = ISEmbed(dembedding,dmm->embedding, PETSC_TRUE, &lembedding); CHKERRQ(ierr);
@@ -651,7 +652,7 @@ static PetscErrorCode  DMCreateDomainDecomposition_Moose(DM dm, PetscInt *len, c
 
 
 
-#if PETSC_VERSION_LE(3,3,0) && PETSC_VERSION_RELEASE
+#if PETSC_VERSION_LT(3,4,0)
 #undef  __FUNCT__
 #define __FUNCT__ "DMCreateFieldDecompositionDM_Moose"
 PetscErrorCode DMCreateFieldDecompositionDM_Moose(DM dm, const char*/*name*/,DM* ddm)
@@ -751,7 +752,7 @@ static PetscErrorCode DMMooseFunction(DM dm, Vec x, Vec r)
   PetscFunctionReturn(0);
 }
 
-#if !PETSC_VERSION_LE(3,3,0) || !PETSC_VERSION_RELEASE
+#if !PETSC_VERSION_LT(3,4,0)
 #undef __FUNCT__
 #define __FUNCT__ "SNESFunction_DMMoose"
 static PetscErrorCode SNESFunction_DMMoose(SNES, Vec x, Vec r, void *ctx)
@@ -836,7 +837,7 @@ static PetscErrorCode DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc, MatStructur
   PetscFunctionReturn(0);
 }
 
-#if !PETSC_VERSION_LE(3,3,0) || !PETSC_VERSION_RELEASE
+#if !PETSC_VERSION_LT(3,4,0)
 #undef  __FUNCT__
 #define __FUNCT__ "SNESJacobian_DMMoose"
 static PetscErrorCode SNESJacobian_DMMoose(SNES,Vec x,Mat *jac,Mat *pc, MatStructure* flag, void* ctx)
@@ -915,16 +916,27 @@ static PetscErrorCode DMCreateGlobalVector_Moose(DM dm, Vec *x)
 
 #undef __FUNCT__
 #define __FUNCT__ "DMCreateMatrix_Moose"
+#if PETSC_VERSION_LT(3,5,0)
 static PetscErrorCode DMCreateMatrix_Moose(DM dm, const MatType type, Mat *A)
+#else
+static PetscErrorCode DMCreateMatrix_Moose(DM dm, Mat *A)
+#endif
 {
   PetscErrorCode ierr;
   DM_Moose       *dmm = (DM_Moose *)(dm->data);
   PetscBool      ismoose;
+#if !PETSC_VERSION_LESS_THAN(3,5,0) || !PETSC_VERSION_RELEASE
+  MatType type;
+#endif
 
   PetscFunctionBegin;
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);CHKERRQ(ierr);
   if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "DM of type %s, not of type %s", ((PetscObject)dm)->type, DMMOOSE);
   if (!dmm->nl) SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
+  // No PETSC_VERSION_GE macro prior to petsc-3.4
+#if !PETSC_VERSION_LT(3,5,0)
+  ierr = DMGetMatType(dm,&type);CHKERRQ(ierr);
+#endif
   /*
     The simplest thing for now: compute the sparsity_pattern using dof_map and init the matrix using that info.
     TODO: compute sparsity restricted to this DM's blocks, variables and sides.
@@ -1301,7 +1313,7 @@ static PetscErrorCode  DMSetUp_Moose(DM dm)
      Do not evaluate function, Jacobian or bounds for an embedded DM -- the subproblem might not have enough information for that.
   */
   if (dmm->allvars && dmm->allblocks && dmm->nosides && dmm->nounsides && dmm->nocontacts && dmm->nouncontacts)  {
-#if PETSC_VERSION_LE(3,3,0) && PETSC_VERSION_RELEASE
+#if PETSC_VERSION_LT(3,4,0)
     ierr = DMSetFunction(dm, DMMooseFunction); CHKERRQ(ierr);
     ierr = DMSetJacobian(dm, DMMooseJacobian); CHKERRQ(ierr);
 #else
@@ -1576,7 +1588,11 @@ PetscErrorCode  DMCreate_Moose(DM dm)
 
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+#if PETSC_VERSION_LESS_THAN(3,5,0) && PETSC_VERSION_RELEASE
   ierr = PetscNewLog(dm,DM_Moose,&dmm);CHKERRQ(ierr);
+#else
+  ierr = PetscNewLog(dm,&dmm);CHKERRQ(ierr);
+#endif
   dm->data = dmm;
 
   dmm->varids        = new(std::map<std::string, unsigned int>);
@@ -1607,7 +1623,7 @@ PetscErrorCode  DMCreate_Moose(DM dm)
   dm->ops->getinjection       = 0; // DMGetInjection_Moose;
   dm->ops->getaggregates      = 0; // DMGetAggregates_Moose;
 
-#if PETSC_VERSION_LE(3,3,0) && PETSC_VERSION_RELEASE
+#if PETSC_VERSION_LT(3,4,0)
   dm->ops->createfielddecompositiondm  = DMCreateFieldDecompositionDM_Moose;
   dm->ops->createdomaindecompositiondm = DMCreateDomainDecompositionDM_Moose;
 #endif
@@ -1622,6 +1638,5 @@ PetscErrorCode  DMCreate_Moose(DM dm)
 
 }
 EXTERN_C_END
-
 
 #endif // #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)

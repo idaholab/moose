@@ -230,9 +230,6 @@ NonlinearSystem::solve()
   if(_use_finite_differenced_preconditioner)
     setupFiniteDifferencedPreconditioner();
 
-  if(_have_decomposition)
-    setupDecomposition();
-
   if(_use_split_based_preconditioner)
     setupSplitBasedPreconditioner();
 
@@ -342,18 +339,38 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
   ISColoring iscoloring;
 
 #if PETSC_VERSION_LESS_THAN(3,2,0)
+  // PETSc 3.2.x
   ierr = MatGetColoring(petsc_mat->mat(), MATCOLORING_LF, &iscoloring);
-#else
-  // PETSc 3.3.0
-  ierr = MatGetColoring(petsc_mat->mat(), MATCOLORINGLF, &iscoloring);
-#endif
   CHKERRABORT(libMesh::COMM_WORLD,ierr);
+// else we have >= petsc-3.3, hence can use PETSC_VERSION_LT, which handles non-release dev versions correctly
+#elif PETSC_VERSION_LT(3,5,0)
+  // PETSc 3.3.x, 3.4.x
+  ierr = MatGetColoring(petsc_mat->mat(), MATCOLORINGLF, &iscoloring);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+#else
+  // PETSc 3.5.x
+  MatColoring matcoloring;
+  ierr = MatColoringCreate(petsc_mat->mat(),&matcoloring);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = MatColoringSetType(matcoloring,MATCOLORINGLF);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = MatColoringSetFromOptions(matcoloring);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = MatColoringApply(matcoloring,&iscoloring);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = MatColoringDestroy(&matcoloring);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+#endif
+
 
   MatFDColoringCreate(petsc_mat->mat(),iscoloring, &_fdcoloring);
   MatFDColoringSetFromOptions(_fdcoloring);
   MatFDColoringSetFunction(_fdcoloring,
                            (PetscErrorCode (*)(void))&libMesh::__libmesh_petsc_snes_residual,
                            &petsc_nonlinear_solver);
+#if !PETSC_VERSION_LESS_THAN(3,5,0) || !PETSC_VERSION_RELEASE
+  MatFDColoringSetUp(petsc_mat->mat(),iscoloring,_fdcoloring);
+#endif
 #if PETSC_VERSION_LESS_THAN(3,4,0)
   SNESSetJacobian(petsc_nonlinear_solver.snes(),
                   petsc_mat->mat(),
