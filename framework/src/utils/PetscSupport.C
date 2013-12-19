@@ -173,15 +173,24 @@ petscSetOptions(FEProblem & problem)
 
   setSolverOptions(problem.solverParams());
 
-  // Add any additional options specified in the input file
+  // Add any additional options specified in the input fible
   for (unsigned int i=0; i<petsc_options.size(); ++i)
     PetscOptionsSetValue(std::string(petsc_options[i]).c_str(), PETSC_NULL);
   for (unsigned int i=0; i<petsc_options_inames.size(); ++i)
     PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());
 
   SolverParams& solver_params = problem.solverParams();
-  if (solver_params._type != Moose::ST_JFNK  && solver_params._type != Moose::ST_FD) {
-    // Set up DM only if not using MF-based solvers
+  if (solver_params._type != Moose::ST_JFNK  &&
+      solver_params._type != Moose::ST_FD &&
+      !problem.getNonlinearSystem().haveFiniteDifferencedPreconditioner() &&
+      problem.getNonlinearSystem().haveDecomposition())
+  {
+    // Set up DM only if have a decomposition. Additionally, turn DM OFF if not using FD-based solvers,
+    // (both -snes_mf and -snes_fd) and FDP. This is all rather crufty, but what's a good generic rule here?
+    // In principle at least, splits should be able to work with ST_FD (-snes_fd) and FDP (a coloring-based
+    // version of -snes_fd), but one has to be careful about the initialization order so as not to override
+    // SNESComputeJacobianDefaultColor() set up by FDP, for instance.  However, it's unlikely that splits
+    // will be used when running an FD solver (debugging).
     problem.getNonlinearSystem().setupDecomposition();
     petscSetupDM(problem.getNonlinearSystem());
   } else {

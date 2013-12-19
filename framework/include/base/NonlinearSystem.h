@@ -68,6 +68,10 @@ public:
   void setupDecomposition();
   void setupSplitBasedPreconditioner();
 
+  bool haveFiniteDifferencedPreconditioner() {return _use_finite_differenced_preconditioner;}
+  bool haveSplitBasedPreconditioner()        {return _use_split_based_preconditioner;}
+  bool haveDecomposition()                   {return _have_decomposition;}
+
   /**
    * Returns the convergence state
    * @return true if converged, otherwise false
