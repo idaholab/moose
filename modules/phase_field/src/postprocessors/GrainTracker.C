@@ -8,6 +8,7 @@
 #include "libmesh/sphere.h"
 
 #include <limits>
+#include <algorithm>
 
 template<> void dataStore(std::ostream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context)
 {
@@ -571,7 +572,7 @@ GrainTracker::remapGrains()
             boundingRegionDistance(grain_it1->second->sphere_ptrs, grain_it2->second->sphere_ptrs, false) < 0)  // If so, do their spheres intersect?
         {
           // If so, remap one of them
-          swapSolutionValues(grain_it1, grain_it2);
+          swapSolutionValues(grain_it1, grain_it2, times_through_loop);
 
           // Since something was remapped, we need to inspect all the grains again to make sure that previously ok grains
           // aren't in some new nearly intersecting state.  Setting this Boolean to true will trigger the loop again
@@ -592,7 +593,8 @@ GrainTracker::remapGrains()
 
 void
 GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1,
-                                 std::map<unsigned int, UniqueGrain *>::iterator & grain_it2)
+                                 std::map<unsigned int, UniqueGrain *>::iterator & grain_it2,
+                                 unsigned int attempt_number)
 {
   NumericVector<Real> & solution         =  _nl.solution();
   NumericVector<Real> & solution_old     =  _nl.solutionOld();
@@ -623,10 +625,23 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
 
   /**
    * We have a vector of the distances to the closest grains represented by each of our variables.  We just need to pick
-   * the maximum of this this list: (max of the mins).  Note: We don't have an explicit check here to avoid remapping a
-   * variable to itself.  This is unecessary since the min_distance of a variable is explicitly set up above.
+   * a suitable grain to replace with.  We will start with the maximum of this this list: (max of the mins), but will settle
+   * for next to largest and so forth as we make more attempts at remapping grains.  This is a graph coloring problem so
+   * more work will be required to optimize this process.
+   * Note: We don't have an explicit check here to avoid remapping a  variable to itself.  This is unecessary since the
+   * min_distance of a variable is explicitly set up above.
    */
-  unsigned int new_variable_idx = std::distance(min_distances.begin(), std::max_element(min_distances.begin(), min_distances.end()));
+  unsigned int nth_largest_idx = min_distances.size() - attempt_number - 1;
+
+  // nth element destroys the original array so we need to copy it first
+  std::vector<Real> min_distances_copy(min_distances);
+  std::nth_element(min_distances_copy.begin(), min_distances_copy.end()+nth_largest_idx, min_distances_copy.end());
+
+  // Now find the location of the nth element in the original vector
+  unsigned int new_variable_idx = std::distance(min_distances.begin(),
+                                                std::find(min_distances.begin(),
+                                                          min_distances.end(),
+                                                          min_distances_copy[nth_largest_idx]));
 
   std::cout << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
             << " (variable index: " << grain_it1->second->variable_idx << ")\n";
