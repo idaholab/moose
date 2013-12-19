@@ -79,8 +79,10 @@ class Machine(object):
   #  Displays a simple list of the attributes and their respective values,
   #  mainly for debugging purposes.
   def info(self):
+    print '\n' + self.description + ':'
     for member in self._getMembers():
-      print member + " = " + str(getattr(self, member))
+      if member != 'description':
+        print '  ' +  member + ' = ' + str(getattr(self, member))
 
 
   ## Method for extracting names of "public" member variables (private)

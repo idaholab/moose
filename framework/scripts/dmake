@@ -101,6 +101,7 @@ def parseArguments(args=None):
   misc = parser.add_argument_group('Misc. Options')
   misc.add_argument('--clean', '-c', action='store_true', help='Clean up .dmake and .dmake_hosts files')
   misc.add_argument('--buck', action='store_true', help='Use the distcc file generator from buck')
+  misc.add_argument('--serial', action='store_true', help='Disable the parallel creating of the Machine objects; this also will print the information for each object created for debuggin purposes')
 
   # Allow flags to be run together
   parser.parse_args('-mqvnlrbdpoc'.split())
@@ -138,7 +139,7 @@ if __name__ == "__main__":
     sub.wait()
 
   # Create the MachineWarehouse object
-  opt = subOptions(options,'local','buck','dedicated','jobs','description','clean','disable','allow')
+  opt = subOptions(options,'local','buck','dedicated','jobs','description','clean','disable','allow','serial')
   warehouse = MachineWarehouse(**opt)
 
   # Create the MachineOutput object

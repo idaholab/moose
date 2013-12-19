@@ -35,6 +35,8 @@ class MachineWarehouse(object):
   #                             server (passed to DmakeRC)
   #    dedicated = True | {False} - run the machine as a dedicated build box (passed to DmakeRC)
   #    disable = list<str> - list of ip addresses to exclude from DISTCC_HOSTS
+  #    allow = list<str> - list of ip addresses/hostnames to allow in DISTCC_HOSTS
+  #    serial = Ture | {False} - toggle the parallel creation of the Machine objects
   # @see DmakeRC
   def __init__(self, **kwargs):
 
@@ -50,6 +52,7 @@ class MachineWarehouse(object):
     self._jobs = kwargs.pop('jobs', None)
     self._disable = kwargs.pop('disable', None)
     self._allow = kwargs.pop('allow', None)
+    self._serial = kwargs.pop('serial', False)
 
     # If this is a local build, there is nothing more to do
     self._local = kwargs.pop('local', False)
@@ -154,10 +157,18 @@ class MachineWarehouse(object):
       return
 
     # Create the Machine objects (in parallel)
-    pool = multiprocessing.Pool(processes=self.master.threads)
-    output = pool.map(createMachine, host_lines)
-    pool.close()
-    pool.join()
+    output = []
+    if not self._serial:
+      pool = multiprocessing.Pool(processes=self.master.threads)
+      output = pool.map(createMachine, host_lines)
+      pool.close()
+      pool.join()
+
+    # Create the Machine objects serially
+    else:
+      for line in host_lines:
+        output.append(createMachine(line))
+        output[-1].info()
 
     # Check the disabled list against the address and ip, the user is allowed to
     # supply partial ip/hostnames so loop through each and test that the substring
