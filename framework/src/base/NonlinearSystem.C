@@ -422,81 +422,15 @@ NonlinearSystem::setDecomposition(const std::vector<std::string>& splits)
   }  else {
     _have_decomposition = false;
   }
-
 }
 
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-#undef __FUNCT__
-#define __FUNCT__ "SNESUpdateMoose"
-static PetscErrorCode  SNESUpdateMoose(SNES snes, PetscInt iteration)
-{
-  PetscErrorCode ierr;
-  DM dm;
-  KSP ksp;
-  const char* prefix;
-  MPI_Comm comm;
-  PC pc;
-
-  PetscFunctionBegin;
-  if (iteration) {
-    /* TODO: limit this only to situations when displaced (un)contact splits are present, as is DisplacedProblem(). */
-    ierr = SNESGetDM(snes,&dm);CHKERRQ(ierr);
-    ierr = DMMooseReset(dm);CHKERRQ(ierr);
-    ierr = DMSetUp(dm);CHKERRQ(ierr);
-    ierr = SNESGetKSP(snes,&ksp);CHKERRQ(ierr);
-    /* Should we rebuild the whole KSP? */
-    ierr = PetscObjectGetOptionsPrefix((PetscObject)ksp,&prefix);CHKERRQ(ierr);
-    ierr = PetscObjectGetComm((PetscObject)ksp,&comm);CHKERRQ(ierr);
-    ierr = PCCreate(comm,&pc);CHKERRQ(ierr);
-    ierr = PCSetDM(pc,dm);CHKERRQ(ierr);
-    ierr = PCSetOptionsPrefix(pc,prefix);CHKERRQ(ierr);
-    ierr = PCSetFromOptions(pc);CHKERRQ(ierr);
-    ierr = KSPSetPC(ksp,pc);CHKERRQ(ierr);
-    ierr = PCDestroy(&pc);CHKERRQ(ierr);
-  }
-  PetscFunctionReturn(0);
-}
-#endif
 
 void
 NonlinearSystem::setupDecomposition()
 {
+  if (!_have_decomposition) return;
   Split* top_split = getSplit(_decomposition_split);
   top_split->setup();
-
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-  static bool     DMMooseRegistered = false;
-  PetscErrorCode  ierr;
-
-  // Create and set up the DM that will consume the split options set above.
-  if (!DMMooseRegistered) {
-#if PETSC_VERSION_LESS_THAN(3,4,0)
-    ierr = DMRegister(DMMOOSE, PETSC_NULL, "DMCreate_Moose", DMCreate_Moose);
-    CHKERRABORT(libMesh::COMM_WORLD, ierr);
-#else
-    ierr = DMRegister(DMMOOSE, DMCreate_Moose);
-    CHKERRABORT(libMesh::COMM_WORLD, ierr);
-#endif
-    DMMooseRegistered = true;
-  }
-
-  PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(sys().nonlinear_solver.get());
-  SNES snes = petsc_solver->snes();
-  /* FIXME: reset the DM, do not recreate it anew every time? */
-  DM dm = PETSC_NULL;
-  ierr = DMCreateMoose(libMesh::COMM_WORLD, *this, &dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-  ierr = DMSetFromOptions(dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-  ierr = DMSetUp(dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-  ierr = SNESSetDM(snes,dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-  ierr = DMDestroy(&dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-  ierr = SNESSetUpdate(snes,SNESUpdateMoose);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-#endif
 }
 
 void

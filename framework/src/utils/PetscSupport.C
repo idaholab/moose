@@ -50,6 +50,10 @@
 #include <petscdm.h>
 #endif
 
+//PetscDMMoose include
+#include "PetscDMMoose.h"
+
+
 namespace Moose
 {
 namespace PetscSupport
@@ -119,6 +123,33 @@ setSolverOptions(SolverParams & solver_params)
   }
 }
 
+void petscSetupDM (NonlinearSystem & nl) {
+#if !PETSC_VERSION_LESS_THAN(3,3,0)
+  PetscErrorCode  ierr;
+
+  // Initialize the part of the DM package that's packaged with Moose; in the PETSc source tree this call would be in DMInitializePackage()
+  ierr = DMMooseRegisterAll();
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  // Create and set up the DM that will consume the split options and deal with block matrices.
+  PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+  SNES snes = petsc_solver->snes();
+  /* FIXME: reset the DM, do not recreate it anew every time? */
+  DM dm = PETSC_NULL;
+  ierr = DMCreateMoose(libMesh::COMM_WORLD, nl, &dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = DMSetFromOptions(dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = DMSetUp(dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = SNESSetDM(snes,dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = DMDestroy(&dm);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = SNESSetUpdate(snes,SNESUpdateDMMoose);
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+#endif
+}
+
 
 void
 petscSetOptions(FEProblem & problem)
@@ -147,6 +178,18 @@ petscSetOptions(FEProblem & problem)
     PetscOptionsSetValue(std::string(petsc_options[i]).c_str(), PETSC_NULL);
   for (unsigned int i=0; i<petsc_options_inames.size(); ++i)
     PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());
+
+  SolverParams& solver_params = problem.solverParams();
+  if (solver_params._type != Moose::ST_JFNK  && solver_params._type != Moose::ST_FD) {
+    // Set up DM only if not using MF-based solvers
+    problem.getNonlinearSystem().setupDecomposition();
+    petscSetupDM(problem.getNonlinearSystem());
+  } else {
+    // Otherwise turn off the decomposition
+    std::vector<std::string> nosplits;
+    problem.getNonlinearSystem().setDecomposition(nosplits);
+  }
+
 }
 
 /// Quick helper to output the norm in color
@@ -564,9 +607,8 @@ void petscSetDefaults(FEProblem & problem)
 #endif
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
-
-
 }
+
 } // Namespace PetscSupport
 } // Namespace MOOSE
 
