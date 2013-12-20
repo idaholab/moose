@@ -645,21 +645,24 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
                                                           min_distances.end(),
                                                           min_distances_copy[nth_largest_idx]));
 
-  Moose::out<< "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
-            << " (variable index: " << grain_it1->second->variable_idx << ")\n";
+  std::ostringstream oss;
+  oss << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
+      << " (variable index: " << grain_it1->second->variable_idx << ")\n";
+  Moose::out << _fe_problem.colorText(YELLOW, oss.str());
 
   if (min_distances[new_variable_idx] < 0)
   {
-    std::ostringstream oss;
-    oss << "******************************************************************************************************\n"
-        << "Warning: No suitable variable found for remapping. Will attempt to remap in next loop if necessary..."
-        << "\n****************************************************************************************************\n";
+    oss.str("");
+    oss << "*****************************************************************************************************\n"
+        << "Warning: No suitable variable found for remapping. Will attempt to remap in next loop if necessary...\n"
+        << "*****************************************************************************************************\n";
     Moose::out << _fe_problem.colorText(YELLOW, oss.str());
     return;
   }
 
-  Moose::out<< "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << "\n";
-
+  oss.str("");
+  oss << "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << "\n";
+  Moose::out << _fe_problem.colorText(GREEN, oss.str());
 
   MeshBase & mesh = _mesh.getMesh();
   // Remap the grain
