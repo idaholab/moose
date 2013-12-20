@@ -241,7 +241,7 @@ GrainTracker::getNodalValues(unsigned int node_id) const
   else
   {
 #if DEBUG
-    mooseDoOnce(std::cout << "Nodal values not in structure for node: " << node_id << " this may be normal.");
+    mooseDoOnce(Moose::out << "Nodal values not in structure for node: " << node_id << " this may be normal.");
 #endif
     return _empty;
   }
@@ -332,7 +332,7 @@ GrainTracker::buildBoundingSpheres()
     }
   }
 
-  std::cout << "\nTotal Node Count: " << total_node_count << "\n";
+  Moose::out<< "\nTotal Node Count: " << total_node_count << "\n";
 }
 
 void
@@ -359,11 +359,11 @@ GrainTracker::trackGrains()
   {
     for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
     {
-      std::cout << "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> " << _bubble_sets[map_num].size();
+      Moose::out<< "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> " << _bubble_sets[map_num].size();
       if (map_sizes[map_num] != _bubble_sets[map_num].size())
-        std::cout << "**";
+        Moose::out<< "**";
     }
-    std::cout << std::endl;
+    Moose::out<< std::endl;
   }
 
   std::vector<UniqueGrain *> new_grains; new_grains.reserve(_unique_grains.size());
@@ -493,7 +493,7 @@ GrainTracker::trackGrains()
         }
         else
         {
-          std::cout << "Marking Grain " << curr_idx << " as INACTIVE (varible index: "
+          Moose::out<< "Marking Grain " << curr_idx << " as INACTIVE (varible index: "
                     << _unique_grains[curr_idx]->variable_idx <<  ")\n";
           _unique_grains[curr_idx]->status = INACTIVE;
         }
@@ -508,10 +508,12 @@ GrainTracker::trackGrains()
   for (unsigned int i=0; i<new_grains.size(); ++i)
     if (new_grains[i]->status == NOT_MARKED)
     {
-      std::cout << "*****************************************************************************\n"
-                << "Couldn't find a matching grain while working on variable index: " << new_grains[i]->variable_idx
-                << "\nCreating new unique grain: " << _unique_grains.size() + 1
-                << "\n*****************************************************************************\n";
+      std::ostringstream oss;
+      oss << "*****************************************************************************\n"
+          << "Couldn't find a matching grain while working on variable index: " << new_grains[i]->variable_idx
+          << "\nCreating new unique grain: " << _unique_grains.size() + 1
+          << "\n*****************************************************************************\n";
+      Moose::out << _fe_problem.colorText(YELLOW, oss.str());
       new_grains[i]->status = MARKED;
       _unique_grains[_unique_grains.size() + 1] = new_grains[i];   // transfer ownership
     }
@@ -525,7 +527,7 @@ GrainTracker::trackGrains()
   for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
     if (it->second->status == NOT_MARKED)
     {
-      std::cout << "Marking Grain " << it->first << " as INACTIVE (varible index: "
+      Moose::out<< "Marking Grain " << it->first << " as INACTIVE (varible index: "
                     << it->second->variable_idx <<  ")\n";
       it->second->status = INACTIVE;
     }
@@ -552,7 +554,7 @@ GrainTracker::remapGrains()
   bool variables_remapped;
   do
   {
-    std::cout << "Remap Loop: " << ++times_through_loop << std::endl;
+    Moose::out<< "Remap Loop: " << ++times_through_loop << std::endl;
 
     variables_remapped = false;
     for (std::map<unsigned int, UniqueGrain *>::iterator grain_it1 = _unique_grains.begin();
@@ -585,10 +587,10 @@ GrainTracker::remapGrains()
     }
 
     if (times_through_loop >= 5)
-      mooseError("Five passes through the remapping loop and grains are still being remapped, perhaps you need more op variables?");
+      mooseError(_fe_problem.colorText(RED, "Five passes through the remapping loop and grains are still being remapped, perhaps you need more op variables?"));
 
   } while (variables_remapped);
-  std::cout << "Done Remapping\n";
+  Moose::out << "Done Remapping" << std::endl;
 }
 
 void
@@ -643,18 +645,20 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
                                                           min_distances.end(),
                                                           min_distances_copy[nth_largest_idx]));
 
-  std::cout << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
+  Moose::out<< "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
             << " (variable index: " << grain_it1->second->variable_idx << ")\n";
 
   if (min_distances[new_variable_idx] < 0)
   {
-    std::cout << "******************************************************************************************************\n"
-              << "Warning: No suitable variable found for remapping. Will attempt to remap in next loop if necessary..."
-              << "\n****************************************************************************************************\n";
+    std::ostringstream oss;
+    oss << "******************************************************************************************************\n"
+        << "Warning: No suitable variable found for remapping. Will attempt to remap in next loop if necessary..."
+        << "\n****************************************************************************************************\n";
+    Moose::out << _fe_problem.colorText(YELLOW, oss.str());
     return;
   }
 
-  std::cout << "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << "\n";
+  Moose::out<< "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << "\n";
 
 
   MeshBase & mesh = _mesh.getMesh();
