@@ -11,6 +11,13 @@
     m = 0.8
     al = 1E-6
   [../]
+  [./Seff1BWsmall]
+    type = RichardsSeff1BWsmall
+    Sn = 0.0
+    Ss = 1.0
+    C = 1.05
+    las = 1E5
+  [../]
 
   # following are unimportant in this test
   [./PPNames]
@@ -72,6 +79,9 @@
   [../]
   [./d2Seff1VG_Aux]
   [../]
+
+  [./Seff1BWsmall_Aux]
+  [../]
 []
 
 [AuxKernels]
@@ -95,6 +105,13 @@
     pressure_vars = pressure
     wrtnum1 = 0
     wrtnum2 = 0
+  [../]
+
+  [./Seff1BWsmall_AuxK]
+    type = RichardsSeffAux
+    variable = Seff1BWsmall_Aux
+    seff_UO = Seff1BWsmall
+    pressure_vars = pressure
   [../]
 []
 
