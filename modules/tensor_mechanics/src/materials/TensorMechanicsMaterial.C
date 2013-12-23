@@ -21,6 +21,8 @@ InputParameters validParams<TensorMechanicsMaterial>()
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
 
+  params.addCoupledVar("temperature", "temperature variable");
+
   return params;
 }
 
@@ -44,7 +46,9 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
       _Cijkl_vector(getParam<std::vector<Real> >("C_ijkl")),
       _all_21(getParam<bool>("all_21")),
       _Cijkl(),
-      _Euler_angles(_euler_angle_1, _euler_angle_2, _euler_angle_3)
+      _Euler_angles(_euler_angle_1, _euler_angle_2, _euler_angle_3),
+      _has_T(isCoupled("temperature")),
+      _T(_has_T ? &coupledValue("temperature") : NULL)
 {
   // fill in the local tensors from the input vector information
   

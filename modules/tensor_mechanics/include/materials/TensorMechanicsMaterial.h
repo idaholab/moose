@@ -70,6 +70,9 @@ protected:
 
 // Current deformation gradient
   RankTwoTensor _dfgrd;
+  
+  bool _has_T;
+  VariableValue * _T; //pointer rather than reference
 
 private:
 

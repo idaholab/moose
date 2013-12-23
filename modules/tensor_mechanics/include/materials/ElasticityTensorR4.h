@@ -35,7 +35,7 @@ public:
 
   ElasticityTensorR4 operator/(const Real &a);
 
-protected:
+ protected:
 
 private:
 
