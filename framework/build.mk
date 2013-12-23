@@ -111,6 +111,13 @@ pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
+#
+# Static Analysis
+#
+
+%.plist.$(obj-suffix) : %.C
+	@echo "Clang Static Analysis (in "$(METHOD)" mode) "$<"..."
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) --analyze $< -o $@
 
 #
 # C rules
@@ -294,7 +301,7 @@ clean_up:
 #
 # Maintenance
 #
-.PHONY: cleanall clean doc
+.PHONY: cleanall clean doc sa
 
 #
 # Misc

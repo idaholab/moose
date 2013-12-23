@@ -40,6 +40,9 @@ moose_test_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_test_srcfiles)) \
               $(patsubst %.c, %.$(obj-suffix).d, $(moose_test_csrcfiles)) \
               $(patsubst %.C, %.$(obj-suffix).d, $(moose_test_main_src))
 
+# clang static analyzer files
+moose_test_analyzer := $(patsubst %.C, %.plist, $(moose_test_srcfiles))
+
 # If building shared libs, make the plugins a dependency, otherwise don't.
 ifeq ($(libmesh_shared),yes)
   moose_test_plugin_deps := $(moose_test_plugins)
@@ -56,6 +59,9 @@ $(moose_test_LIB): $(moose_test_objects) $(moose_test_plugin_deps)
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_test_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(MOOSE_TEST_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_test_LIB) $(MOOSE_TEST_DIR)
+
+# Clang static analyzer
+sa:: $(moose_test_analyzer)
 
 # include MOOSE_TEST dep files
 -include $(moose_test_deps)

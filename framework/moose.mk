@@ -46,6 +46,8 @@ moose_objects   += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
 moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
               $(patsubst %.c, %.$(obj-suffix).d, $(moose_csrcfiles))
 
+# clang static analyzer files
+moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
 
 # revision header
 revision_header = $(MOOSE_DIR)/include/base/HerdRevision.h
@@ -72,6 +74,9 @@ $(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB)
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(MOOSE_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(MOOSE_DIR)
+
+## Clang static analyzer
+sa:: $(moose_analyzer)
 
 # include MOOSE dep files. Note: must use -include for deps, since they don't exist for first time builds.
 -include $(moose_deps)
@@ -110,14 +115,16 @@ delete_list := $(moose_LIB) $(exodiff_APP) $(pcre_LIB) libmoose-$(METHOD).* $(pc
 
 clean::
 	@rm -fr $(delete_list)
-	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" -or -name "*.lo" -or -name "*.la" \) -exec rm '{}' \;)
+	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
+                           -or -name "*.lo" -or -name "*.la" -or -name "*.plist" \) -exec rm '{}' \;)
 	@$(shell find . \( -name *.gch \) | xargs rm -rf)
 	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
 
 clobber::
 	@rm -fr $(delete_list)
 	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                           -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "*.lo" -or -name "*.la" \) -exec rm '{}' \;)
+                           -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "*.lo" -or -name "*.la" \
+			   -or -name "*.plist" \) -exec rm '{}' \;)
 	@$(shell find . \( -name *.gch \) | xargs rm -rf)
 	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
 
