@@ -467,7 +467,7 @@ MultiApp::buildComm()
   else if((unsigned int) my_app >= _total_num_apps-1) // The last app will gain any left-over procs
   {
     my_app = _total_num_apps - 1;
-    procs_for_my_app += _orig_num_procs % _total_num_apps;
+//    procs_for_my_app += _orig_num_procs % _total_num_apps;
     _first_local_app = my_app;
     _my_num_apps = 1;
   }

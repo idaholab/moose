@@ -528,7 +528,6 @@ PenetrationThread::competeInteractions(PenetrationInfo * pi1,
     {
       if (pi1->_off_edge_nodes.size() == pi2->_off_edge_nodes.size())
       {
-        result=NEITHER_WINS;
         mooseError("Invalid off_edge_nodes counts");
       }
       else if (pi1->_off_edge_nodes.size()==2)
@@ -541,7 +540,6 @@ PenetrationThread::competeInteractions(PenetrationInfo * pi1,
       }
       else
       {
-        result=NEITHER_WINS;
         mooseError("Invalid off_edge_nodes counts");
       }
     }

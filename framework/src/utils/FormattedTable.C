@@ -195,7 +195,7 @@ FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries, cons
     }
     if (col_it != col_end && cols_in_group >= 2)
     {
-      curr_width -= col_widths[*curr_end];
+      //curr_width -= col_widths[*curr_end];
       col_widths.erase(*curr_end);
       col_it = curr_end;
     }

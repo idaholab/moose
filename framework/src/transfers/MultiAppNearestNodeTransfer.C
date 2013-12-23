@@ -155,7 +155,7 @@ MultiAppNearestNodeTransfer::execute()
                   else
                   {
                     nearest_node = _node_map[node->id()];
-                    distance = _distance_map[node->id()];
+                    //distance = _distance_map[node->id()];
                   }
                 }
                 else
@@ -210,7 +210,7 @@ MultiAppNearestNodeTransfer::execute()
                   else
                   {
                     nearest_node = _node_map[elem->id()];
-                    distance = _distance_map[elem->id()];
+                    //distance = _distance_map[elem->id()];
                   }
                 }
                 else

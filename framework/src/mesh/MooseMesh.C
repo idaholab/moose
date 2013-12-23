@@ -1176,7 +1176,7 @@ MooseMesh::detectPairedSidesets()
             ++boundary_counts[bounds_ids[l]];
         }
 
-      BoundaryID common_boundary;
+      BoundaryID common_boundary = std::numeric_limits<BoundaryID>::max();
       unsigned int max_count = 0;
       for (std::map<BoundaryID, unsigned int>::const_iterator it=boundary_counts.begin(); it != boundary_counts.end(); ++it)
       {
