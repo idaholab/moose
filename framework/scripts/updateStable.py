@@ -2,7 +2,7 @@
 import os, sys, string, subprocess, re, socket, getopt
 
 # If hostname equals head_node, this script will run
-head_node = 'qbuild'
+head_node = 'hpcbuild'
 
 # Moose stable and devel checkout locations
 moose_stable = 'https://hpcsc.inl.gov/svn/herd/trunk/moose'
