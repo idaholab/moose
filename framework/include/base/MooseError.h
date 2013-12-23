@@ -28,7 +28,7 @@
 #ifdef NDEBUG
 #define mooseAssert(asserted, msg)
 #else
-#define mooseAssert(asserted, msg)  do { if (!(asserted)) { Moose::err << "\n\nAssertion `" #asserted "' failed\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << std::endl; if (libMesh::n_processors() == 1) print_trace(); libmesh_here(); MPI_Abort(libMesh::COMM_WORLD,1); } } while(0)
+#define mooseAssert(asserted, msg)  do { if (!(asserted)) { Moose::err << "\n\nAssertion `" #asserted "' failed\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << std::endl; if (libMesh::n_processors() == 1) print_trace(); libmesh_here(); MPI_Abort(libMesh::COMM_WORLD,1); exit(1); } } while(0)
 #endif
 
 #define mooseWarning(msg) do { Moose::err << "\n\n*** Warning ***\n" << msg << "\nat " << __FILE__ << ", line " << __LINE__ << "\n" << std::endl; } while(0)
