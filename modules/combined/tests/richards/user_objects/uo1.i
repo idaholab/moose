@@ -28,6 +28,14 @@
     m = 0.8
     scut = 1E-6 # then we get a cubic
   [../]
+  [./RelPermBW]
+    type = RichardsRelPermBW
+    Sn = 0.0
+    Ss = 1.0
+    Kn = 0.0
+    Ks = 1.0
+    C = 1.5
+  [../]
 
   # following are unimportant in this test
   [./PPNames]
@@ -143,6 +151,27 @@
     direction = '1E-5 0 0'
     value = x^3
   [../]
+
+  [./answer_RelPermBW]
+    type = ParsedFunction
+    value = kn+(x^2)*(c-1)*(ks-kn)/(c-x)
+    vars = 'kn ks c'
+    vals = '0 1 1.5'
+  [../]
+  [./answer_dRelPermBW]
+    type = GradParsedFunction
+    direction = '1E-4 0 0'
+    value = kn+(x^2)*(c-1)*(ks-kn)/(c-x)
+    vars = 'kn ks c'
+    vals = '0 1 1.5'
+  [../]
+  [./answer_d2RelPermBW]
+    type = Grad2ParsedFunction
+    direction = '1E-5 0 0'
+    value = kn+(x^2)*(c-1)*(ks-kn)/(c-x)
+    vars = 'kn ks c'
+    vals = '0 1 1.5'
+  [../]
 []
 
 [AuxVariables]
@@ -172,6 +201,13 @@
   [./dRelPermVG1_Aux]
   [../]
   [./d2RelPermVG1_Aux]
+  [../]
+
+  [./RelPermBW_Aux]
+  [../]
+  [./dRelPermBW_Aux]
+  [../]
+  [./d2RelPermBW_Aux]
   [../]
 []
 
@@ -251,6 +287,25 @@
     relperm_UO = RelPermVG1
     seff_var = pressure
   [../]
+
+  [./RelPermBW_AuxK]
+    type = RichardsRelPermAux
+    variable = RelPermBW_Aux
+    relperm_UO = RelPermBW
+    seff_var = pressure
+  [../]
+  [./dRelPermBW_AuxK]
+    type = RichardsRelPermPrimeAux
+    variable = dRelPermBW_Aux
+    relperm_UO = RelPermBW
+    seff_var = pressure
+  [../]
+  [./d2RelPermBW_AuxK]
+    type = RichardsRelPermPrimePrimeAux
+    variable = d2RelPermBW_Aux
+    relperm_UO = RelPermBW
+    seff_var = pressure
+  [../]
 []
 
 [Postprocessors]
@@ -316,6 +371,22 @@
     type = NodalL2Error
     function = answer_d2RelPermVG1
     variable = d2RelPermVG1_Aux
+  [../]
+
+  [./cf_RelPermBW]
+    type = NodalL2Error
+    function = answer_RelPermBW
+    variable = RelPermBW_Aux
+  [../]
+  [./cf_dRelPermBW]
+    type = NodalL2Error
+    function = answer_dRelPermBW
+    variable = dRelPermBW_Aux
+  [../]
+  [./cf_d2RelPermBW]
+    type = NodalL2Error
+    function = answer_d2RelPermBW
+    variable = d2RelPermBW_Aux
   [../]
 []
     
