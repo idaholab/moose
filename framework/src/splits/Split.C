@@ -26,7 +26,7 @@ InputParameters validParams<Split>()
   params.addParam<std::vector<std::string> >("decomposition", "The names of the splits (subsystems) in the decomposition of this split");
   params.addParam<std::string>("decomposition_type", "additive", "Split decomposition type: additive|multiplicative|symmetric_multiplicative|schur");
   params.addParam<std::string>("schur_type", "full", "Type of Schur complement: full|upper|lower");
-  params.addParam<std::string>("schur_pre",  "self", "Type of Schur complement preconditioner matrix: self|a11");
+  params.addParam<std::string>("schur_pre",  "self", "Type of Schur complement preconditioner matrix: self|selfp|a11");
   params.addParam<std::vector<std::string> >("petsc_options", "PETSc flags for the FieldSplit solver");
   params.addParam<std::vector<std::string> >("petsc_options_iname", "PETSc option names for the FieldSplit solver");
   params.addParam<std::vector<std::string> >("petsc_options_value", "PETSc option values for the FieldSplit solver");
@@ -208,7 +208,8 @@ Split::getSchurType(const std::string& str)
 Split::SchurPreconditioner
 Split::getSchurPreconditioner(const std::string& str)
 {
-  if(str=="self")            return SchurPreconditionerSelf;
+  if(str=="self")              return SchurPreconditionerSelf;
+  else if(str=="selfp")        return SchurPreconditionerSelfP;
   else if(str=="a11")          return SchurPreconditionerA11;
   else  mooseError(std::string("Invalid SchurPreconditioner: ") + str);
   return SchurPreconditionerA11;

@@ -55,6 +55,7 @@ class Split :
   /// 'D' means the lower-right block in decomposition J = [A B; C D]
   enum SchurPreconditioner {
     SchurPreconditionerSelf,
+    SchurPreconditionerSelfP,
     SchurPreconditionerA11
   };
   SchurPreconditioner
