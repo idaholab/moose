@@ -82,7 +82,6 @@ InputParameters validParams<FEProblem>()
   params.addParam<unsigned int>("dimNullSpace", 0, "The dimension of the nullspace");
   params.addParam<unsigned int>("dimNearNullSpace", 0, "The dimension of the near nullspace");
   params.addParam<bool>("solve", true, "Whether or not to actually solve the Nonlinear system.  This is handy in the case that all you want to do is execute AuxKernels, Transfers, etc. without actually solving anything");
-  params.addParam<std::vector<std::string> >("decomposition","Top-level split defining a hierarchical decomposition into subsystems to help the solver.");
   return params;
 }
 
@@ -192,9 +191,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
   _subspace_dim["NearNullSpace"] = dimNearNullSpace;
   dimNearNullSpace = _subspace_dim["NearNullSpace"];
 
-
-  std::vector<std::string> splits = parameters.get<std::vector<std::string> >("decomposition");
-  _nl.setDecomposition(splits);
 
   _functions.resize(n_threads);
   _ics.resize(n_threads);

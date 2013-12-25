@@ -29,15 +29,15 @@ class Split :
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
  protected:
-  /// Which decomposition to use
-  enum DecompositionType {
-    DecompositionTypeAdditive,
-    DecompositionTypeMultiplicative,
-    DecompositionTypeSymmetricMultiplicative,
-    DecompositionTypeSchur
+  /// Which splitting to use
+  enum SplittingType {
+    SplittingTypeAdditive,
+    SplittingTypeMultiplicative,
+    SplittingTypeSymmetricMultiplicative,
+    SplittingTypeSchur
   };
-  DecompositionType
-  getDecompositionType(const std::string& str);
+  SplittingType
+    getSplittingType(const std::string& str, std::string& petsc_str);
 
   /// Which Schur factorization  to use.
   enum SchurType {
@@ -47,19 +47,26 @@ class Split :
     SchurTypeFull
   };
   SchurType
-  getSchurType(const std::string& str);
+    getSchurType(const std::string& str, std::string& petsc_str);
 
   /// Which preconditioning matrix to use with S = D - CA^{-1}B
   /// 'Self' means use S to build the preconditioner.
   ///  limited choices here: PCNONE and PCLSC in PETSc
-  /// 'D' means the lower-right block in decomposition J = [A B; C D]
-  enum SchurPreconditioner {
-    SchurPreconditionerSelf,
-    SchurPreconditionerSelfP,
-    SchurPreconditionerA11
+  /// 'D' means the lower-right block in splitting J = [A B; C D]
+  enum SchurPre {
+    SchurPreS,
+    SchurPreSp,
+    SchurPreA11
   };
-  SchurPreconditioner
-  getSchurPreconditioner(const std::string& str);
+  SchurPre
+    getSchurPre(const std::string& str, std::string& petsc_str);
+
+  enum SchurAinv {
+    SchurAdiag,
+    SchurAlump
+  };
+  SchurAinv
+    getSchurAinv(const std::string& str, std::string& petsc_str);
 
   FEProblem& _fe_problem;
   std::string _name;
@@ -67,10 +74,11 @@ class Split :
   std::vector<std::string> _blocks;
   std::vector<std::string> _sides;
   std::vector<std::string> _unsides;
-  std::vector<std::string> _decomposition;
-  std::string              _decomposition_type;
+  std::vector<std::string> _splitting;
+  std::string              _splitting_type;
   std::string              _schur_type;
   std::string              _schur_pre;
+  std::string              _schur_ainv;
   std::vector<std::string> _petsc_options;
   std::vector<std::string> _petsc_options_iname;
   std::vector<std::string> _petsc_options_value;

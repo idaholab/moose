@@ -31,6 +31,7 @@ Steady::Steady(const std::string & name, InputParameters parameters) :
     _time_step(_problem.timeStep()),
     _time(_problem.time())
 {
+  _problem.getNonlinearSystem().setDecomposition(_splitting);
   if(_app.isRecovering())
   {
     Moose::out<<"\nCannot recover steady solves!\nExiting...\n"<<std::endl;
@@ -72,6 +73,9 @@ Steady::init()
     _problem.outputPostprocessors();
     _problem.outputRestart();
   }
+
+
+
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
 

@@ -108,6 +108,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _allow_output(true),
     _verbose(getParam<bool>("verbose"))
 {
+  _problem.getNonlinearSystem().setDecomposition(_splitting);
   _t_step = 0;
   _dt = 0;
   _next_interval_output_time = 0.0;

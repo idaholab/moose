@@ -108,6 +108,9 @@ protected:
 
   // Restart
   std::string _restart_file_base;
+
+  // Splitting
+  std::vector<std::string> _splitting;
 };
 
 #endif //EXECUTIONER_H

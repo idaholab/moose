@@ -16,38 +16,6 @@
   [../]
 []
 
-[Problem]
-    decomposition   = 'uv'
-[]
-
-[Splits]
-  [./uv]
-    decomposition = 'u v'
-    decomposition_type  = symmetric_multiplicative
-    petsc_options = '-dm_view'
-  [../]
-  [./u]
-    vars = 'u'
-    petsc_options = '-dm_view'
-    petsc_options_iname = '-pc_type'
-    petsc_options_value = '     asm'
-  [../]
-  [./v]
-    vars = 'v'
-    petsc_options = '-dm_view'
-    petsc_options_iname = '-pc_type'
-    petsc_options_value = '     asm'
-  [../]
-[]
-[Preconditioning]
-  [./SBP]
-    type = SBP
-    full = true
-    off_diag_row    = 'v'
-    off_diag_column = 'u'
-  [../]
-[]
-
 [Kernels]
   active = 'diff_u conv_v diff_v'
 
@@ -105,12 +73,32 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
+  splitting = 'uv'
   petsc_options       = '-snes_view -snes_monitor -snes_converged_reason -ksp_converged_reason'
+[]
+[Splits]
+  [./uv]
+    splitting = 'u v'
+    splitting_type  = additive
+    petsc_options = '-dm_view'
+  [../]
+  [./u]
+    vars = 'u'
+    petsc_options       = '-dm_view'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = '     asm'
+  [../]
+  [./v]
+    vars = 'v'
+    petsc_options       = '-dm_view'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = '     asm'
+  [../]
 []
 
 [Output]
   linear_residuals = true
-  file_base = sbp_symmetric_multiplicative_out
+  file_base = splitting_additive_out
   output_initial = true
   interval = 1
   exodus = true

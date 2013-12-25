@@ -33,6 +33,8 @@ InputParameters validParams<Executioner>()
 
   params.addParamNamesToGroup("restart_file_base", "Restart");
 
+  params.addParam<std::vector<std::string> >("splitting","Top-level splitting defining a hierarchical decomposition into subsystems to help the solver.");
+
   return params;
 }
 
@@ -44,7 +46,8 @@ Executioner::Executioner(const std::string & name, InputParameters parameters) :
     _output_initial(false),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),
-    _restart_file_base(getParam<FileNameNoExtension>("restart_file_base"))
+    _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
+    _splitting(getParam<std::vector<std::string> >("splitting"))
 {
 }
 
