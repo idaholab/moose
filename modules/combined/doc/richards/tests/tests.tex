@@ -820,76 +820,76 @@ $\mbox{}$
 
 
 
-\chapter{Unsaturated flow in a bar - NEEDS UPDATE}
-
-This problem is one of cosflow's benchmark problems.  Water inside a
-porous ``bar'' of material length 10m, and width and depth 1m is
-initialised to porepressure $P_{0}<0$, corresponding to water
-saturation $S_{0}<1$.  The porepressure left-hand end (at $x=0$) is
-raised and fixed at $P_{1}<0$, corresonding to water saturation
-$S_{1}$ with $S_{0}<S_{1}<1$, and the evolution of porepressure at the
-right-hand end ($x=10$\,m) is recorded.  Apart from the left-hand end,
-the other boundaries of the bar are impermeable.  The setup is shown in
-Figure~\ref{uf_setup.fig}.
-
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[width=8cm]{uf_setup.eps}
-\caption{The unsaturated problem involves a porous
-  ``bar'' of material of length 10m with initial porepressure
-  $P_{0}$.  The left-hand end is raised to porepressure $P_{1}$ and
-  held fixed.  The other parts of the bar's exterior surface are impermeable.}
-\label{uf_setup.fig}
-\end{center}
-\end{figure}
-
-This problem exhibits quite severe mesh dependency, and since the
-upwinding in cosflow and Wallaby are different, the results are not
-expected to be the same, except in the limit of zero element size.
-
-\noindent The following parameters are used \\
-\begin{center}
-\begin{tabular}{|ll|}
-\hline
-Bar porosity & 0.1 \\
-Bar permeability & $10^{-12}$\,m$^{2}$ \\
-\hline
-Gravity & 0 \\
-\hline
-Water density & 1000\,kg.m$^{-3}$ \\
-Water viscosity & 0.001\,Pa.s \\
-Water bulk modulus & 2\,GPa \\
-Water immobile saturation & 0.0 \\
-Water residual saturation & 0.0 \\
-Air residual saturation & 0.0 \\
-\hline
-van Genuchten $\alpha$ & $10^{-4}$\,Pa$^{-1}$ \\
-van Genuchten $a$ & 0.35 \\
-\hline
-Initial porepressure $P_{0}$ & -197347.0503\,Pa \\
-Initial saturation $S_{0}$ & 0.2 \\
-Applied pressure $P_{1}$ & -9283.000501\,Pa \\
-Applied saturation $S_{1}$ & 0.8 \\
-\hline
-\end{tabular} \\
-\end{center}
-
-Figure~\ref{uf.result.fig} shows agreement between Wallaby and
-cosflow for a variety of different mesh densities, including an
-adaptive mesh example.  The Wallaby results appear to be closer to the
-zero-element-size result than cosflow, but for low mesh density
-exhibit spurious oscillations as the high saturation region moves into
-the low saturation region.  (This oscillation is almost definitely due
-to my current inability to lump the mass term.)
-
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[width=17cm]{uf.eps}
-\caption{The porepressure at the right-hand end ($x=10$) of the bar as
-  a function of time for various different meshes.}
-\label{uf.result.fig}
-\end{center}
-\end{figure}
+%\chapter{Unsaturated flow in a bar - NEEDS UPDATE}
+%
+%This problem is one of cosflow's benchmark problems.  Water inside a
+%porous ``bar'' of material length 10m, and width and depth 1m is
+%initialised to porepressure $P_{0}<0$, corresponding to water
+%saturation $S_{0}<1$.  The porepressure left-hand end (at $x=0$) is
+%raised and fixed at $P_{1}<0$, corresonding to water saturation
+%$S_{1}$ with $S_{0}<S_{1}<1$, and the evolution of porepressure at the
+%right-hand end ($x=10$\,m) is recorded.  Apart from the left-hand end,
+%the other boundaries of the bar are impermeable.  The setup is shown in
+%Figure~\ref{uf_setup.fig}.
+%
+%\begin{figure}[htb]
+%\begin{center}
+%\includegraphics[width=8cm]{uf_setup.eps}
+%\caption{The unsaturated problem involves a porous
+%  ``bar'' of material of length 10m with initial porepressure
+%  $P_{0}$.  The left-hand end is raised to porepressure $P_{1}$ and
+%  held fixed.  The other parts of the bar's exterior surface are impermeable.}
+%\label{uf_setup.fig}
+%\end{center}
+%\end{figure}
+%
+%This problem exhibits quite severe mesh dependency, and since the
+%upwinding in cosflow and Wallaby are different, the results are not
+%expected to be the same, except in the limit of zero element size.
+%
+%\noindent The following parameters are used \\
+%\begin{center}
+%\begin{tabular}{|ll|}
+%\hline
+%Bar porosity & 0.1 \\
+%Bar permeability & $10^{-12}$\,m$^{2}$ \\
+%\hline
+%Gravity & 0 \\
+%\hline
+%Water density & 1000\,kg.m$^{-3}$ \\
+%Water viscosity & 0.001\,Pa.s \\
+%Water bulk modulus & 2\,GPa \\
+%Water immobile saturation & 0.0 \\
+%Water residual saturation & 0.0 \\
+%Air residual saturation & 0.0 \\
+%\hline
+%van Genuchten $\alpha$ & $10^{-4}$\,Pa$^{-1}$ \\
+%van Genuchten $a$ & 0.35 \\
+%\hline
+%Initial porepressure $P_{0}$ & -197347.0503\,Pa \\
+%Initial saturation $S_{0}$ & 0.2 \\
+%Applied pressure $P_{1}$ & -9283.000501\,Pa \\
+%Applied saturation $S_{1}$ & 0.8 \\
+%\hline
+%\end{tabular} \\
+%\end{center}
+%
+%Figure~\ref{uf.result.fig} shows agreement between Wallaby and
+%cosflow for a variety of different mesh densities, including an
+%adaptive mesh example.  The Wallaby results appear to be closer to the
+%zero-element-size result than cosflow, but for low mesh density
+%exhibit spurious oscillations as the high saturation region moves into
+%the low saturation region.  (This oscillation is almost definitely due
+%to my current inability to lump the mass term.)
+%
+%\begin{figure}[htb]
+%\begin{center}
+%\includegraphics[width=17cm]{uf.eps}
+%\caption{The porepressure at the right-hand end ($x=10$) of the bar as
+%  a function of time for various different meshes.}
+%\label{uf.result.fig}
+%\end{center}
+%\end{figure}
 
 
 
