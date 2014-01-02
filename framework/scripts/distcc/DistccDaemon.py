@@ -60,7 +60,7 @@ class DistccDaemon(object):
     os.environ['DISTCC_BACKOFF_PERIOD'] = '6000'
 
     # Run the daemon
-    sub = subprocess.Popen(distccd_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    sub = subprocess.Popen(distccd_cmd)
     sub.wait()
 
 
