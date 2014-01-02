@@ -348,8 +348,11 @@ These tests run rapidly and are part of the automatic test suite.
 
 
 
-\chapter{Newton cooling from a bar - NEEDS UPDATE}
+\chapter{Newton cooling from a bar}
 \label{nc}
+
+This test demonstrates that MOOSE behaves correctly when a simulation
+contains a sink.  The sink is a piecewise linear function of pressure.
 
 Darcy's equation for flow through a fully saturated medium without
 gravity and without sources is 
@@ -384,8 +387,9 @@ and $C$ is a constant conductance.  This corresponds to the flux
 \left.\frac{\partial P}{\partial x}\right|_{x=L} = -CB\left(1 -
 e^{(P_{e}-P)/B}\right)_{x=L} \ ,
 \end{equation}
-which can easily be coded into a Wallaby input file: the flux is
-$\rho\kappa\nabla P/\mu = -CB\kappa(e^{P/B} - e^{P_{e}/B})/\mu$.
+which can easily be coded into a MOOSE input file: the flux is
+$\rho\kappa\nabla P/\mu = -CB\kappa(e^{P/B} - e^{P_{e}/B})/\mu$, and
+this may be represented by a piecewise linear function of pressure.
 
 The solution of this problem is well known and is
 \begin{equation}
@@ -401,9 +405,10 @@ a_{n}\int_{0}^{L}\sin^{2}\frac{k_{n}x}{L}\,\mathrm{d}x =
 \int_{0}^{L}\left(\rho_{0}(x) - \rho_{0}(0) + \frac{\rho_{0}(0) -
   \rho_{e}}{1 + LC}Cx\right)\sin \frac{k_{n}x}{L}\,\mathrm{d}x \ ,
 \end{equation}
-which may be solved numerically.
+which may be solved numerically (I have used Mathematica to generate
+the solution in Figure~\ref{nc.fig}).
 
-\noindent The problem is solved in Wallaby using the following parameters:
+\noindent The problem is solved in MOOSE using the following parameters:
 \begin{center}
 \begin{tabular}{|ll|}
 \hline
@@ -438,7 +443,9 @@ results are shown in Figure~\ref{nc.fig}.
 \begin{center}
 \includegraphics[width=17cm]{nc.eps}
 \caption{The porepressure in the bar at $t=10^{8}$\,s, and at
-  steadystate.  Wallaby agrees well with theory.}
+  steadystate.  The pressure at $x=0$ is held fixed, while the sink is
+  applied at $x=100$\,m.  MOOSE agrees well with theory demonstrating
+  that piecewise-linear sinks/sources are correctly implemented in MOOSE.}
 \label{nc.fig}
 \end{center}
 \end{figure}

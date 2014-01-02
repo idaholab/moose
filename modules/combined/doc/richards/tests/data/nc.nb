@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     15801,        414]
-NotebookOptionsPosition[     15049,        383]
-NotebookOutlinePosition[     15412,        399]
-CellTagsIndexPosition[     15369,        396]
+NotebookDataLength[     16092,        417]
+NotebookOptionsPosition[     15336,        386]
+NotebookOutlinePosition[     15703,        402]
+CellTagsIndexPosition[     15660,        399]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -21,13 +21,13 @@ Notebook[{
 
 Cell[CellGroupData[{
 Cell[BoxData[
- RowBox[{"SetDirectory", "[", "\"\<L:/moose/trunk/wallaby/doc/tests/data\>\"",
-   "]"}]], "Input",
- CellChangeTimes->{{3.594080503678144*^9, 3.5940805249307814`*^9}}],
+ RowBox[{"SetDirectory", "[", "\"\<L:/moose/project2/trunk\>\"", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.594080503678144*^9, 3.5940805249307814`*^9}, {
+  3.597700763449992*^9, 3.597700772300951*^9}}],
 
-Cell[BoxData["\<\"L:\\\\moose\\\\trunk\\\\wallaby\\\\doc\\\\tests\\\\data\"\>\
-"], "Output",
- CellChangeTimes->{3.594080525741806*^9}]
+Cell[BoxData["\<\"L:\\\\moose\\\\project2\\\\trunk\"\>"], "Output",
+ CellChangeTimes->{3.594080525741806*^9, 3.5977007734179554`*^9}]
 }, Open  ]],
 
 Cell[BoxData[{
@@ -153,7 +153,7 @@ QajcAQNlhzY/tXQuiNGBPkGYll3F+Ys2P6wPjfV/hD5BQ9DgVY+QNj/2WiBn
  CellChangeTimes->{
   3.594079748476598*^9, {3.594079780360873*^9, 3.5940797921423445`*^9}, {
    3.5940804599918327`*^9, 3.594080482485508*^9}, 3.594081537404072*^9, 
-   3.594082958779114*^9}]
+   3.594082958779114*^9, 3.5977007831176777`*^9}]
 }, Open  ]],
 
 Cell[BoxData[
@@ -355,14 +355,14 @@ JDD8qnNF1+T0fuJEI4dBYO21hFGtloatjspm6RwC/wM3jSOb
    3.594084458682148*^9, 3.594084645413945*^9, 3.594084739677774*^9, {
    3.594085032520561*^9, 3.594085044542922*^9}, 3.594085780524007*^9, 
    3.5940859950554447`*^9, 3.5940861214842386`*^9, 3.5940861527491765`*^9, {
-   3.594086844679144*^9, 3.5940868613616447`*^9}}]
+   3.594086844679144*^9, 3.5940868613616447`*^9}, 3.5977007996825724`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{"Export", "[", 
-  RowBox[{"\"\<nc02_analytic.txt\>\"", ",", 
+  RowBox[{"\"\<elk/doc/richards/tests/data/nc01_analytic.txt\>\"", ",", 
    RowBox[{
     RowBox[{
      RowBox[{"{", 
@@ -370,19 +370,22 @@ Cell[BoxData[
        RowBox[{"Evaluate", "[", 
         RowBox[{"pressure", "[", 
          RowBox[{"#", ",", 
-          RowBox[{"10", "^", "12"}]}], "]"}], "]"}]}], "}"}], "&"}], "/@", 
+          RowBox[{"10", "^", "8"}]}], "]"}], "]"}]}], "}"}], "&"}], "/@", 
     RowBox[{"Range", "[", "100", "]"}]}], ",", "\"\<Table\>\""}], 
   "]"}]], "Input",
  CellChangeTimes->{{3.5940859977765265`*^9, 3.5940860853291535`*^9}, {
-  3.594086550716323*^9, 3.5940865547264433`*^9}}],
+  3.594086550716323*^9, 3.5940865547264433`*^9}, {3.597700809014964*^9, 
+  3.5977008241425667`*^9}, {3.5977008569270463`*^9, 3.597700860502261*^9}}],
 
-Cell[BoxData["\<\"nc02_analytic.txt\"\>"], "Output",
+Cell[BoxData["\<\"elk/doc/richards/tests/data/nc01_analytic.txt\"\>"], \
+"Output",
  CellChangeTimes->{{3.5940860786579533`*^9, 3.5940861026516733`*^9}, 
-   3.594086165990574*^9, 3.5940865557964754`*^9}]
+   3.594086165990574*^9, 3.5940865557964754`*^9, {3.597700853609063*^9, 
+   3.59770086633951*^9}}]
 }, Open  ]]
 },
 WindowSize->{701, 867},
-WindowMargins->{{0, Automatic}, {Automatic, 0}},
+WindowMargins->{{506, Automatic}, {Automatic, 102}},
 ShowSelection->True,
 FrontEndVersion->"9.0 for Microsoft Windows (64-bit) (January 25, 2013)",
 StyleDefinitions->"Default.nb"
@@ -399,22 +402,22 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[579, 22, 180, 3, 31, "Input"],
-Cell[762, 27, 134, 2, 31, "Output"]
+Cell[579, 22, 215, 4, 31, "Input"],
+Cell[797, 28, 133, 1, 31, "Output"]
 }, Open  ]],
-Cell[911, 32, 2129, 61, 292, "Input"],
+Cell[945, 32, 2129, 61, 292, "Input"],
 Cell[CellGroupData[{
-Cell[3065, 97, 443, 10, 31, "Input"],
-Cell[3511, 109, 2297, 46, 230, "Output"]
+Cell[3099, 97, 443, 10, 31, "Input"],
+Cell[3545, 109, 2321, 46, 230, "Output"]
 }, Open  ]],
-Cell[5823, 158, 4820, 127, 392, "Input"],
+Cell[5881, 158, 4820, 127, 392, "Input"],
 Cell[CellGroupData[{
-Cell[10668, 289, 981, 18, 31, "Input"],
-Cell[11652, 309, 2639, 48, 258, "Output"]
+Cell[10726, 289, 981, 18, 31, "Input"],
+Cell[11710, 309, 2663, 48, 225, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[14328, 362, 530, 14, 52, "Input"],
-Cell[14861, 378, 172, 2, 31, "Output"]
+Cell[14410, 362, 656, 15, 52, "Input"],
+Cell[15069, 379, 251, 4, 88, "Output"]
 }, Open  ]]
 }
 ]
