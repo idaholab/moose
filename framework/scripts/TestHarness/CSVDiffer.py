@@ -2,8 +2,8 @@ import os, re
 
 class CSVDiffer:
   def __init__(self, test_dir, out_files, abs_zero=1e-11, relative_error=5.5e-6):
-    self.abs_zero = abs_zero
-    self.rel_tol = relative_error
+    self.abs_zero = float(abs_zero)
+    self.rel_tol = float(relative_error)
     self.files = []
     self.msg = ''
     self.num_errors = 0
@@ -89,8 +89,8 @@ class CSVDiffer:
           if abs(val2) < abs_zero:
             val2 = 0
 
-          # if they're both 0 then they're equal so pass this test
-          if max( val1, val2 ) == 0:
+          # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
+          if val1 == 0 and val2 == 0:
             continue
 
           rel_diff = abs( ( val1 - val2 ) / max( abs(val1), abs(val2) ) )
