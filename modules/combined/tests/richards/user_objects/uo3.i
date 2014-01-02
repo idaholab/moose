@@ -11,7 +11,7 @@
     m = 0.8
     al = 1E-6
   [../]
-  [./Seff1BWsmall] # !!! NOT TESTED YET !!!
+  [./Seff1BWsmall]
     type = RichardsSeff1BWsmall
     Sn = 0.0
     Ss = 1.0
@@ -50,6 +50,7 @@
     type = ParsedFunction
     value = x
   [../]
+
   [./answer_Seff1VG]
     type = ParsedFunction
     value = (1+max((-x)*al,0)^(1/(1-m)))^(-m)
@@ -70,6 +71,25 @@
     vars = 'al m'
     vals = '1E-6 0.8'
   [../]
+
+  [./answer_Seff1BW]
+    type = PiecewiseLinearFile
+    format = columns
+    yourFileName = satBW.csv
+    axis = 0
+  [../]
+  [./answer_Seff1BWprime]
+    type = PiecewiseLinearFile
+    format = columns
+    yourFileName = satBWprime.csv
+    axis = 0
+  [../]
+  [./answer_Seff1BW2prime]
+    type = PiecewiseLinearFile
+    format = columns
+    yourFileName = satBW2prime.csv
+    axis = 0
+  [../]
 []
 
 [AuxVariables]
@@ -85,6 +105,9 @@
   [./dSeff1BWsmall_Aux]
   [../]
   [./d2Seff1BWsmall_Aux]
+  [../]
+
+  [./check_Aux]
   [../]
 []
 
@@ -132,6 +155,12 @@
     wrtnum1 = 0
     wrtnum2 = 0
   [../]
+
+  [./check_AuxK]
+    type = FunctionAux
+    variable = check_Aux
+    function = answer_Seff1BW2prime
+  [../]
 []
 
 [Postprocessors]
@@ -150,6 +179,23 @@
     function = answer_d2Seff1VG
     variable = d2Seff1VG_Aux
   [../]
+
+  [./cf_Seff1BW]
+    type = NodalL2Error
+    function = answer_Seff1BW
+    variable = Seff1BWsmall_Aux
+  [../]
+  [./cf_Seff1BWprime]
+    type = NodalL2Error
+    function = answer_Seff1BWprime
+    variable = dSeff1BWsmall_Aux
+  [../]
+  [./cf_Seff1BW2prime]
+    type = NodalL2Error
+    function = answer_Seff1BW2prime
+    variable = d2Seff1BWsmall_Aux
+  [../]
+
 []
     
 
@@ -232,6 +278,7 @@
   file_base = uo3
   interval = 1
   exodus = true
+  postprocessor_csv = true
   perf_log = false
   hidden_variables = pressure
 []

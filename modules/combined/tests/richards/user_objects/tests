@@ -1,23 +1,20 @@
 [Tests]
   [./test_uo1]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'uo1.i'
-    exodiff = 'uo1.e'
-    rel_err = 1.0
-    use_old_floor = True
+    csvdiff = 'uo1.csv'
+    abs_zero = 1.0E-4
   [../]
   [./test_uo2]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'uo2.i'
-    exodiff = 'uo2.e'
-    abs_zero = 1e-8
-    use_old_floor = True
+    csvdiff = 'uo2.csv'
+    abs_zero = 1E-8
   [../]
   [./test_uo3]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'uo3.i'
-    exodiff = 'uo3.e'
-    abs_zero = 1e-8
-    use_old_floor = True
+    csvdiff = 'uo3.csv'
+    abs_zero = 1E-7
   [../]
 []

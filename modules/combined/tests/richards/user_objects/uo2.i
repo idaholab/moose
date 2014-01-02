@@ -260,7 +260,8 @@
   linear_residuals = false
   file_base = uo2
   interval = 1
-  exodus = true
+  exodus = false
+  postprocessor_csv = true
   perf_log = false
   hidden_variables = pressure
 []
