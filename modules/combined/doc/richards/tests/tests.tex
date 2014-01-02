@@ -75,12 +75,17 @@ follows.
   system contains a sink flux that is a function of porepressure.  A
   particular function is used so that an analytic solution exists.
 \item Chapter~\ref{bw} demonstrates that flow in the unsaturated
+  region along with source fluxes is correctly implemented by comparing
+  with the analytic solution of Broadbridge and White for constant
+  infiltration.
+\item Chapter~\ref{wli} demonstrates that flow in the unsaturated
   region is correctly implemented by comparing with the analytic
-  solution of Broadbridge and White for constant infiltration.
+  solution of Warrick, Lomen and Islas for drainage of a medium under
+  the action of gravity.
 \item Chapter~\ref{forsyth} compares MOOSE with numerical results from
   HYDRUS for infiltration and drainage from a large caisson.  In
-  reality, this is very similar to Chapter~\ref{bw}: the only
-  essential differences are the capillary and relative
+  reality, this is very similar to Chapters~\ref{bw} and~\ref{wli}:
+  the only essential differences are the capillary and relative
   permeability functions.
 \item Chapter~\ref{bl} compares MOOSE with the analytic solution of
   the Buckley-Leverett problem.
@@ -474,7 +479,10 @@ to constant infiltration to groundwater has been derived Broadbridge
 and White\footnote{P Broadbridge, I White ``Constant rate rainfall
   infiltration: A versatile nonlinear model, 1 Analytical solution''.
   Water Resources Research 24 (1988) 145--154.} for certain functions
-$D$ and $K$.  The hydraulic conductivity is
+$D$ and $K$.  The setup is shown in ``Experiment 1'' of
+Figure~\ref{rd_setup.fig} (ignore the specified infiltration rate,
+initial saturation and height of sample).  Broadbridge and White
+assume the hydraulic conductivity is
 \begin{equation}
 K(S) = K_{n} + (K_{s}-K_{n})\frac{\Theta^{2}(C-1)}{C-\Theta} \ ,
 \end{equation}
@@ -518,7 +526,8 @@ $K_{n}$ & 0\,m.s$^{-1}$ \\
 $K_{s}$ & 1\,m.s$^{-1}$ \\
 $C$ & 1.5 \\
 $\lambda_{s}$ & 2\,Pa \\
-$R_{\ast}$ & 0.5 \\
+\hline
+Recharge rate $R_{\ast}$ & 0.5 \\
 \hline
 \end{tabular} \\
 \end{center}
@@ -557,22 +566,50 @@ the code is updated.
 
 
 
-\chapter{The analytic drainage solution --- NEEDS UPDATE}
+\chapter{The analytic drainage solution}
+\label{wli}
 
-The analytic solutions of this nonlinear
-diffusion-advection relevant to groundwater flow have been studied by
-Broadbridge and White\footnote{P Broadbridge, I White ``Constant rate
-  rainfall infiltration: A versatile nonlinear model, 1 Analytical
-  solution''.  Water Resources Research 24 (1988) 145--154.} and
 Warrick, Lomen and Islas\footnote{AW Warrick, DO Lomen and A Islas,
   ``An analytical solution to Richards' Equation for a Draining Soil
-  Profile'', Water Resources Research 26 (1990) 253--258.}, and others
-(see references below), and are
-valid for 
-\begin{eqnarray}
-D(S) & = & \frac{a}{(b-S)^{2}} \ , \\
-K(S) & = & \beta + \gamma(b - S) + \frac{\lambda}{2(b - S)} \ .
-\end{eqnarray}
+  Profile'', Water Resources Research 26 (1990) 253--258.} extended
+the analysis of Broadbridge and White (Chapter~\ref{bw}) to include
+the case of drainage from a medium.  The setup is in ``Experiment 2'' of
+Figure~\ref{rd_setup.fig}.  To obtain their analytical
+solutions, Warrick, Lomen and Islas make the same assumptions as
+Broadbridge and White concerning the diffusivity and conductivity of
+the medium.  Their solutions are quite lengthy, so I will not write
+them here.
+
+A MOOSE model with the parameters almost identical to those listed in
+Chapter~\ref{bw} is compared with the analytical solutions.  The only
+differences are that the ``bar'' length is 10000\,m (to avoid any
+interference from the lower Dirichlet boundary condition), and
+$R_{\ast}=0$ since there is no recharge.  The initial condition is
+$P=10^{-4}$\,Pa: the choice $P=0$ leads to poor convergence since
+by construction the Broadbridge-White capillary function is only
+designed to simulate the unsaturated zone $P<0$ and a sensible
+extension to $P\geq 0$ is discontinuous at $P=0$.
+
+Figure~\ref{wli.fig} shows good agreement between the analytic
+solution and the MOOSE implementation.  Any minor discrepancies get
+smaller as the temporal and spatial resolution increase.
+
+This test is part of the automatic test suite that is run every time
+the code is updated.
+
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=16cm]{wli.eps}
+\caption{Comparison of the Warrick, Lomen and Islas analytical solution
+  with the MOOSE solution for 3 times.  This figure is shown in the
+  standard format used in the literature: the top of the model is
+  $\mbox{depth}=0$ surface, and gravity acts downwards in this figure,
+with fluid draining from $\mbox{depth}=\infty$.}
+\label{wli.fig}
+\end{figure}
+
+
 
 
 \chapter{Infiltration and drainage}
