@@ -52,12 +52,25 @@ NodalVolumeFraction::finalize()
   // Now calculate the Avrami data if requested
   if (_pars.isParamValid("Avrami_file"))
   {
-    std::vector<Real> data; data.reserve(4);
-    data.push_back(_fe_problem.timeStep());
-    data.push_back(_fe_problem.time());
-    data.push_back(std::log(_fe_problem.time()));
-    data.push_back(calculateAvramiValue());
-    writeCSVFile(getParam<FileName>("Avrami_file"), data);
+    // Output the headers during the first timestep
+    if (_fe_problem.timeStep() == 0)
+    {
+      std::vector<std::string> data; data.reserve(4);
+      data.push_back("timestep");
+      data.push_back("time");
+      data.push_back("log_time");
+      data.push_back("Avrami");
+      writeCSVFile(getParam<FileName>("Avrami_file"), data);
+    }
+    else
+    {
+      std::vector<Real> data; data.reserve(4);
+      data.push_back(_fe_problem.timeStep());
+      data.push_back(_fe_problem.time());
+      data.push_back(std::log(_fe_problem.time()));
+      data.push_back(calculateAvramiValue());
+      writeCSVFile(getParam<FileName>("Avrami_file"), data);
+    }
   }
 }
 

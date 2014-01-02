@@ -70,5 +70,6 @@
   interval = 1
   exodus = true
   perf_log = true
+  output_initial = true
 []
  

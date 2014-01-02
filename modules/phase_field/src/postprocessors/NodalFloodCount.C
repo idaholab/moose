@@ -20,7 +20,6 @@
 
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
-#include "InfixIterator.h"
 
 //libMesh includes
 #include "libmesh/dof_map.h"
@@ -620,27 +619,6 @@ NodalFloodCount::calculateBubbleVolumes()
 
   Moose::perf_log.pop("calculateBubbleVolume()","NodalFloodCount");
 }
-
-void
-NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<Real> data)
-{
-  if (libMesh::processor_id() == 0)
-  {
-    std::map<std::string, std::ofstream *>::iterator handle_it = _file_handles.find(file_name);
-    if (handle_it == _file_handles.end())
-    {
-      MooseUtils::checkFileWriteable(file_name);
-      _file_handles[file_name] = new std::ofstream(file_name.c_str());
-      *_file_handles[file_name] << std::scientific << std::setprecision(6);
-    }
-
-    mooseAssert(_file_handles[file_name]->is_open(), "File handle is not open");
-
-    std::copy(data.begin(), data.end(), infix_ostream_iterator<Real>(*_file_handles[file_name], ", "));
-    *_file_handles[file_name] << std::endl;
-  }
-}
-
 
 template<>
 unsigned long

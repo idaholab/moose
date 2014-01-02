@@ -10,6 +10,6 @@
    type = CSVDiff
    input = 'Avrami.i'
    csvdiff = 'Avrami.csv'
-   rel_err = 1.0e-05
+   rel_err = 1.0e-02
   [../]
 []

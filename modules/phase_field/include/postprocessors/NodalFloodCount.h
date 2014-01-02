@@ -19,6 +19,7 @@
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
 #include "ZeroInterface.h"
+#include "InfixIterator.h"
 
 #include <list>
 #include <vector>
@@ -132,7 +133,8 @@ protected:
    * This routine writes out data to a CSV file.  It is designed to be extended to derived classes
    * but is used to write out bubble volumes for this class.
    */
-  void writeCSVFile(const std::string file_name, const std::vector<Real> data);
+  template<class T>
+  void writeCSVFile(const std::string file_name, const std::vector<T> data);
 
   /**
    * This method detects whether two sets intersect without building a result set.  It exits as soon as
@@ -277,6 +279,28 @@ NodalFloodCount::bytesHelper(T container)
 {
   typename T::value_type t;
   return sizeof(t) * container.size();
+}
+
+
+template <class T>
+void
+NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<T> data)
+{
+  if (libMesh::processor_id() == 0)
+  {
+    std::map<std::string, std::ofstream *>::iterator handle_it = _file_handles.find(file_name);
+    if (handle_it == _file_handles.end())
+    {
+      MooseUtils::checkFileWriteable(file_name);
+      _file_handles[file_name] = new std::ofstream(file_name.c_str());
+      *_file_handles[file_name] << std::scientific << std::setprecision(6);
+    }
+
+    mooseAssert(_file_handles[file_name]->is_open(), "File handle is not open");
+
+    std::copy(data.begin(), data.end(), infix_ostream_iterator<T>(*_file_handles[file_name], ", "));
+    *_file_handles[file_name] << std::endl;
+  }
 }
 
 
