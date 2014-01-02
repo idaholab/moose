@@ -4,7 +4,7 @@
 #define RICHARDSSEFF1BWSMALL_H
 
 #include "RichardsSeff.h"
-#include "LambertW.h"
+//#include "LambertW.h"
 
 class RichardsSeff1BWsmall;
 
@@ -17,6 +17,7 @@ class RichardsSeff1BWsmall : public RichardsSeff
  public:
   RichardsSeff1BWsmall(const std::string & name, InputParameters parameters);
 
+  Real LambertW(const double z) const;
   Real seff(std::vector<VariableValue *> p, unsigned int qp) const;
   std::vector<Real> dseff(std::vector<VariableValue *> p, unsigned int qp) const;
   std::vector<std::vector<Real> > d2seff(std::vector<VariableValue *> p, unsigned int qp) const;
