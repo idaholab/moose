@@ -11,11 +11,11 @@
     m = 0.8
     al = 1E-6
   [../]
-  [./Seff1BWsmall]
+  [./Seff1BWsmall] # !!! NOT TESTED YET !!!
     type = RichardsSeff1BWsmall
     Sn = 0.0
     Ss = 1.0
-    C = 1.05
+    C = 1.01
     las = 1E5
   [../]
 
@@ -82,6 +82,10 @@
 
   [./Seff1BWsmall_Aux]
   [../]
+  [./dSeff1BWsmall_Aux]
+  [../]
+  [./d2Seff1BWsmall_Aux]
+  [../]
 []
 
 [AuxKernels]
@@ -112,6 +116,21 @@
     variable = Seff1BWsmall_Aux
     seff_UO = Seff1BWsmall
     pressure_vars = pressure
+  [../]
+  [./dSeff1BWsmall_AuxK]
+    type = RichardsSeffPrimeAux
+    variable = dSeff1BWsmall_Aux
+    seff_UO = Seff1BWsmall
+    pressure_vars = pressure
+    wrtnum = 0
+  [../]
+  [./d2Seff1BWsmall_AuxK]
+    type = RichardsSeffPrimePrimeAux
+    variable = d2Seff1BWsmall_Aux
+    seff_UO = Seff1BWsmall
+    pressure_vars = pressure
+    wrtnum1 = 0
+    wrtnum2 = 0
   [../]
 []
 

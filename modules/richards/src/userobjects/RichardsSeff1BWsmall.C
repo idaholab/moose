@@ -50,7 +50,14 @@ std::vector<Real>
 RichardsSeff1BWsmall::dseff(std::vector<VariableValue *> p, unsigned int qp) const
 {
   std::vector<Real> dseff_dp(1);
-  dseff_dp[0] = 0.0; // TODO
+  dseff_dp[0] = 0.0;
+
+  Real pp = (*p[0])[qp];
+  if (pp >= 0) return dseff_dp;
+
+  Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
+  Real lamw = LambertW(0, x);
+  dseff_dp[0] = std::pow(_c, 2)/_las*lamw/std::pow(1 + lamw, 3);
   return dseff_dp;
 }
 
@@ -60,6 +67,13 @@ RichardsSeff1BWsmall::d2seff(std::vector<VariableValue *> p, unsigned int qp) co
   // create a dummy b that is 1x1 and zeroed
   std::vector<Real> a(1, 0);
   std::vector<std::vector <Real> > b(1, a);
-  b[0][0] = 0.0; // TODO
+  b[0][0] = 0.0;
+
+  Real pp = (*p[0])[qp];
+  if (pp >= 0) return b;
+
+  Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
+  Real lamw = LambertW(0, x);
+  b[0][0] = -std::pow(_c, 3)/std::pow(_las, 2)*lamw*(1 - 2*lamw)/std::pow(1 + lamw, 5);
   return b;
 }
