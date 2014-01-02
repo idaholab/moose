@@ -206,6 +206,8 @@ In this expression
   2\,GPa.
 \end{itemize}
 
+The density of an ideal fluid (gas) has also been coded into MOOSE.
+
 \section{Capillary suction}
 
 Because of the different wetability of the fluid and air, there will
@@ -308,6 +310,7 @@ I encourage users to set $m>0.5$.
 \label{van_genuchten_pc.fig}
 \end{figure}
 
+The Broadbridge-White capillary curve valid for small $K_{n}$ has also been coded into MOOSE~\cite{bw1988}.
 
 \section{Relative permeability}
 \label{rel.perm.sec}
@@ -468,6 +471,7 @@ Three values  of $n$ are shown: 2 (topmost line), 5 and 12 (bottom line)}
 \end{figure}
 
 
+The Broadbridge-White relative permeability function has also been coded into MOOSE~\cite{bw1988}.
 
 
 
@@ -1542,6 +1546,9 @@ equation becomes diagonal, and the solution is $\dot{(\rho S)}_{0} =
 \bibitem{vangenucthen1980}MT van Genuchten ``A closed-form equation
   for predicting the hydraulic conductivity of unsaturated soils''
   Soil Sci Soc Am J 44 (1980) 892--898.
+\bibitem{bw1988}P Broadbridge and I White ``Constant rate rainfall
+  infiltration: A versatile nonlinear model, 1 Analytical solution''.
+  Water Resources Research 24 (1988) 145--154
 \bibitem{huyakorn1978}PS Huyakorn and GF Pinder ``A new finite element
   technique for the solution of two-phase flow through porous media''
   Advances in Water Resources 1 (1978) 285--298

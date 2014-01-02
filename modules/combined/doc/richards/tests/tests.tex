@@ -47,8 +47,48 @@ these must be run manually.  There are two other accompanying documents:
 describes the notation used throughout this document; (2) Examples of
 input syntax that users can utilise when building models.
 
+The test suite does not {\em prove} that the Richards' equation is
+correctly implemented in MOOSE, as the expected results might be
+obtained by pure luck.  The tests are ordered approximately by
+complexity, so that by the end I hope that all readers will agree that
+the implementation is highly likely to be correct.  The tests are as
+follows.
+\begin{itemize}
+\item Chapter~\ref{uo} tests the so-called UserObjects that define the
+ Richards' nonlinear functions: relative permeability, density, and
+ effective saturation.  These functions are independent of the
+ Darcy/Richards flow, but of course they must be correctly implemented
+ in order that the code give correct solutions of flow problems.
+\item Chapter~\ref{jac} contains many tests the Jacobian of Richards'
+  flow.  The Jacobian actually has little effect on the final
+  numerical solution of a flow problem, but if it is incorrectly
+  implemented then MOOSE will display poor convergence
+  characteristics.  Therefore it is extremely important to check the
+  Jacobian.
+\item Chapter~\ref{gh} contains many tests of the long-time behaviour
+  in simple problems, which should just be hydrostatic pressure head,
+  with the caveat that $S\geq S_{\mathrm{imm}}$.
+\item Chapter~\ref{pp} checks that pressure pulses diffuse correctly
+  through a fully-saturated medium.  For readers experienced in the
+  groundwater, this is very similar to the Theis solution.
+\item Chapter~\ref{nc} checks that MOOSE behaves correctly when the
+  system contains a sink flux that is a function of porepressure.  A
+  particular function is used so that an analytic solution exists.
+\item Chapter~\ref{bw} demonstrates that flow in the unsaturated
+  region is correctly implemented by comparing with the analytic
+  solution of Broadbridge and White for constant infiltration.
+\item Chapter~\ref{forsyth} compares MOOSE with numerical results from
+  HYDRUS for infiltration and drainage from a large caisson.  In
+  reality, this is very similar to Chapter~\ref{bw}: the only
+  essential differences are the capillary and relative
+  permeability functions.
+\item Chapter~\ref{bl} compares MOOSE with the analytic solution of
+  the Buckley-Leverett problem.
+\end{itemize}
+
 
 \chapter{UserObject tests}
+\label{uo}
 
 The Richards' UserObjects define the nonlinear functions that form the
 core of all models.  The tests of these UserObjects involve checking
@@ -76,7 +116,7 @@ S^{1/m}\right)^{m}\right)^{2} \ ,
 is correctly coded, and also that its first and second derivatives
 with respect to $S$ are correctly coded.
 
-\item That the 'modified van Genuchten' form of the relative permeability:
+\item That the `modified van Genuchten' form of the relative permeability:
 \begin{equation}
 \kappa_{\mathrm{rel}}(S) = \left\{
 \begin{array}{ll}
@@ -88,6 +128,19 @@ S^{1/m}\right)^{m}\right)^{2} \ & \mbox{ for } S<S_{\mathrm{cut}} \\
 \end{equation}
 is correctly coded, and also that its first and second derivatives
 with respect to $S$ are correctly coded.
+
+\item That the `Broadbridge-White' form of the relative permeability:
+\begin{equation}
+\kappa_{\mathrm{rel}}(S) = \kappa_{n} +
+(\kappa_{s}-\kappa_{n})\frac{\Theta^{2}(C-1)}{C-\Theta} \ ,
+\label{bw.krel}
+\end{equation}
+where $\Theta = (S-S_{n})/(S_{s}-S_{n})$, 
+is correctly coded, and also that its first and second derivatives
+with respect to $S$ are correctly coded.  Broadbridge and White assume
+that saturation is bounded $S_{n}\leq S\leq S_{s}$, so for most MOOSE
+models it is appropriate to treat $S_{n}$ as the immobile saturation
+with $\kappa_{n}=0$, and $S_{s}=1$ with $\kappa_{s}=1$.
 
 \item That the `constant bulk modulus' form of the density
 \begin{equation}
@@ -111,11 +164,25 @@ P_{\mathrm{c}})^{\frac{1}{1-m}}\right)^{-m} \ ,
 is correctly coded, and also that its first and second derivatives
 with respect to $P_{\mathrm{c}}$ are correctly coded.
 
+\item That the `Broadbridge-White' effective saturation valid for
+  small $\kappa_{n}$, defined by
+\begin{equation}
+\frac{P_{\mathrm{c}}}{\lambda_{s}} = \frac{1-\Theta}{\Theta} - \frac{1}{C}\log
+\left( \frac{C-\Theta}{(C-1)\Theta} \right) \ ,
+\end{equation}
+with $\Theta = (S_{\mathrm{eff}} - S_{n})/(S_{s}-S_{n})$, 
+is correctly coded, and also that the first and second derivatives of
+$S_{\mathrm{eff}}$ with respect to $P_{\mathrm{c}}$ are correctly
+coded.  Note that Broadbridge and White assume that
+$S_{\mathrm{eff}}=S$ (no residual saturations) and $S_{n}\leq S \leq
+S_{s}$, so in most MOOSE models $S_{n}$ is the immobile saturation.
+
 \end{itemize}
 
 
 
 \chapter{Jacobian tests}
+\label{jac}
 
 The UserObjects and their derivatives need to be combined to form a
 residual and a Jacobian during the solution process.  Correctly coding
@@ -150,6 +217,7 @@ performed yet.
 
 
 \chapter{Long-time behaviour}
+\label{gh}
 
 These tests concern the steadystate pressure distribution obtained
 either by running a transient model for a long time, or by running a
@@ -213,6 +281,7 @@ $\mbox{}$ \\
 
 
 \chapter{A pressure pulse in the fully saturated situation}
+\label{pp}
 
 Richards' equation for flow through a fully saturated medium without
 gravity and without sources is just Darcy's equation
@@ -278,7 +347,317 @@ These tests run rapidly and are part of the automatic test suite.
 \end{figure}
 
 
+
+\chapter{Newton cooling from a bar - NEEDS UPDATE}
+\label{nc}
+
+Darcy's equation for flow through a fully saturated medium without
+gravity and without sources is 
+\begin{equation}
+\frac{\partial}{\partial t}\phi\rho = \nabla_{i}\left(\frac{\rho
+  \kappa_{ij}}{\mu} \nabla_{j}P \right) \ ,
+\end{equation}
+with notation described in the Theory Manual.  Using $\rho \propto
+\exp(P/K)$, where $K$ is the fluid bulk modulus, Darcy's equation
+becomes
+\begin{equation}
+\frac{\partial}{\partial t}\rho = \nabla_{i}\alpha_{ij}\nabla\rho \ ,
+\end{equation}
+with 
+\begin{equation}
+\alpha_{ij} = \frac{\kappa_{ij}B}{\mu\phi} \ .
+\end{equation}
+Here I've assumed the porosity and bulk modulus are constant in space
+and time.
+
+Consider the one-dimensional case where a bar sits between $x=0$ and
+$x=L$ with initial pressure distribution so $\rho(x,t=0) = \rho_{0}(x)$.
+Maintain the end $x=0$ at constant pressure, so that $\rho(x=0, t) =
+\rho_{0}(0)$.  At the end $x=L$, prescribe a sink flux
+\begin{equation}
+\left.\frac{\partial\rho}{\partial x}\right|_{x=L} = -C\left(\rho -
+\rho_{e}\right)_{x=L} \ ,
+\end{equation}
+where $\rho_{e}$ is a fixed quantity (``e'' stands for ``external''),
+and $C$ is a constant conductance.  This corresponds to the flux
+\begin{equation}
+\left.\frac{\partial P}{\partial x}\right|_{x=L} = -CB\left(1 -
+e^{(P_{e}-P)/B}\right)_{x=L} \ ,
+\end{equation}
+which can easily be coded into a Wallaby input file: the flux is
+$\rho\kappa\nabla P/\mu = -CB\kappa(e^{P/B} - e^{P_{e}/B})/\mu$.
+
+The solution of this problem is well known and is
+\begin{equation}
+\rho(x, t) = \rho_{0}(0) - \frac{\rho_{0}(0) - \rho_{e}}{1 + LC}Cx +
+\sum_{n=1}^{\infty} a_{n}\sin \frac{k_{n}x}{L}e^{-k_{n}^{2}\alpha
+  t/L^{2}} \ ,
+\end{equation}
+where $k_{n}$ is the $n^{\mathrm{th}}$ positive root of the equation
+$LC\tan k + k=0$  ($k_{n}$ is a little bigger than
+$(2n-1)\pi/2$), and $a_{n}$ is determined from
+\begin{equation}
+a_{n}\int_{0}^{L}\sin^{2}\frac{k_{n}x}{L}\,\mathrm{d}x =
+\int_{0}^{L}\left(\rho_{0}(x) - \rho_{0}(0) + \frac{\rho_{0}(0) -
+  \rho_{e}}{1 + LC}Cx\right)\sin \frac{k_{n}x}{L}\,\mathrm{d}x \ ,
+\end{equation}
+which may be solved numerically.
+
+\noindent The problem is solved in Wallaby using the following parameters:
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Bar length & 100\,m \\
+Bar porosity & 0.1 \\
+Bar permeability & $10^{-15}$\,m$^{2}$ \\
+\hline
+Gravity & 0 \\
+\hline
+Water density & 1000\,kg.m$^{-3}$ \\
+Water viscosity & 0.001\,Pa.s \\
+Water bulk modulus & 1\,MPa \\
+\hline
+Initial porepressure $P_{0}$ & 2\,MPa \\
+Environmental pressure $P_{e}$ & 0 \\
+\hline
+Conductance $C$ & 0.05389\,m$^{-1}$ \\
+\hline
+\end{tabular} \\
+\end{center}
+This conductance is chosen so at steadystate $\rho(x=L)=2000$\,kg.m$^{-3}$.
+
+The problem is solved using 1000 elements along the $x$
+direction ($L=100$\,m), and using 100 time-steps of size $10^6$\,s.
+Using fewer elements or fewer timesteps means the agreement with the
+theory is marginally poorer.  The problem is also solved using the
+steadystate solver.  In this case the initial condition is
+$P=2-x/L$\,MPa, since the uniform $P=2$\,MPa does not converge.  The
+results are shown in Figure~\ref{nc.fig}.
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=17cm]{nc.eps}
+\caption{The porepressure in the bar at $t=10^{8}$\,s, and at
+  steadystate.  Wallaby agrees well with theory.}
+\label{nc.fig}
+\end{center}
+\end{figure}
+
+
+
+\chapter{The analytic infiltration solution}
+\label{bw}
+
+The Richards' equation for an incompressible fluid reads in one
+spatial dimension ($z$) reads 
+\begin{equation}
+\dot{S} = \nabla \left(D \nabla S\right) - \nabla K \ ,
+\end{equation}
+where
+\begin{eqnarray}
+D(S) & = & -\frac{\kappa \kappa_{rel}}{\mu\phi}P_{\mathrm{c}}' \ ,
+\\
+K(S) & = &\frac{\rho g \kappa\kappa_{\mathrm{rel}}}{\mu\phi} \ .
+\end{eqnarray}
+Here $P_{\mathrm{c}} = -P$ which is the capillary pressure, and recall
+that $P_{\mathrm{c}}'(S)<0$.
+
+The analytic solution of this nonlinear diffusion-advection relevant
+to constant infiltration to groundwater has been derived Broadbridge
+and White\footnote{P Broadbridge, I White ``Constant rate rainfall
+  infiltration: A versatile nonlinear model, 1 Analytical solution''.
+  Water Resources Research 24 (1988) 145--154.} for certain functions
+$D$ and $K$.  The hydraulic conductivity is
+\begin{equation}
+K(S) = K_{n} + (K_{s}-K_{n})\frac{\Theta^{2}(C-1)}{C-\Theta} \ ,
+\end{equation}
+where 
+\begin{equation}
+\Theta = \frac{S - S_{n}}{S_{s} - S_{s}} \ ,
+\end{equation}
+and the parameters obey $0 \leq K_{n} < K_{s}$, $0 \leq S_{n} \leq S
+\leq S_{s}\leq 1$, and $C>1$.  The diffusivity is of the form
+$a(b-S)^{-2}$.  This leads to very complicated relationships between
+the capillary pressure, $P_{c}$, and the saturation, except in the
+case where $K_{n}$ is small, when they are related through
+\begin{equation}
+\frac{P_{\mathrm{c}}}{\lambda_{s}} = \frac{1-\Theta}{\Theta} - \frac{1}{C}\log
+\left( \frac{C-\Theta}{(C-1)\Theta} \right) \ ,
+\end{equation}
+with $\lambda_{s}>0$ being the final parameter.
+
+Broadbridge and White derive time-dependent solutions for constant
+recharge to one end of a semi-infinite line.  This represents constant
+rainfall recharge to an initially unsaturated soil block, for
+instance.  Their solutions are quite lengthy, so I will not write them
+here.  To compare with MOOSE, I use the following parameters --- the
+hydraulic parameters are those used in Figure~3 of Broadbridge and
+White:
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Bar length & 20\,m \\
+Bar porosity & 0.25 \\
+Bar permeability & 1 \\
+\hline
+Gravity & 0.1\,m.s$^{-2}$ \\
+\hline
+Fluid density & 10\,kg.m$^{-3}$ \\
+Fluid viscosity & 4\,Pa.s \\
+\hline
+$S_{n}$ & 0\,m.s$^{-1}$ \\
+$S_{s}$ & 1\,m.s$^{-1}$ \\
+$K_{n}$ & 0\,m.s$^{-1}$ \\
+$K_{s}$ & 1\,m.s$^{-1}$ \\
+$C$ & 1.5 \\
+$\lambda_{s}$ & 2\,Pa \\
+$R_{\ast}$ & 0.5 \\
+\hline
+\end{tabular} \\
+\end{center}
+Broadbridge and white consider the case where the initial condition is
+$S=S_{s}$, but this yields $P=-\infty$, which is impossible to use in
+a MOOSE model.  Therefore the initial condition $P=-900$\,Pa is used
+which avoids any underflow problems.  The recharge rate of
+$R_{\ast}=0.5$ corresponds in the MOOSE model to a recharge rate of
+$0.5\rho\phi(\kappa_{s}-\kappa_{n})=1.25$\,kg.m$^{-2}$.s$^{-1}$.  Note
+that I've chosen $\frac{\rho g \kappa}{\mu \phi} = 1$\,m.s$^{-1}$, so
+that the $K_{n}$ and $K_{s}$ may be encoded as $\kappa_{n}=0$ and
+$\kappa_{s}=1$ in the relative permeability function
+Eqn~(\ref{bw.krel}) in a straightforward way.
+
+Figure~\ref{bw.fig} shows good agreement between the analytic solution
+of Broadbridge and White and the MOOSE implementation.  There are
+minor discrepancies for small values of saturation: these get smaller
+as the temporal and spatial resolution is increased, but never totally
+disappear due to the initial condition of $P=-900$\,Pa.
+
+This test is part of the automatic test suite that is run every time
+the code is updated.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=16cm]{bw.eps}
+\caption{Comparison of the Broadbridge and White analytical solution
+  with the MOOSE solution for 3 times.  This figure is shown in the
+  standard format used in the Broadbridge-White paper: the constant
+  recharge is applied to the $\mbox{depth}=0$ surface, and gravity
+  acts downwards in this figure.}
+\label{bw.fig}
+\end{figure}
+
+
+
+
+
+\chapter{The analytic drainage solution --- NEEDS UPDATE}
+
+The analytic solutions of this nonlinear
+diffusion-advection relevant to groundwater flow have been studied by
+Broadbridge and White\footnote{P Broadbridge, I White ``Constant rate
+  rainfall infiltration: A versatile nonlinear model, 1 Analytical
+  solution''.  Water Resources Research 24 (1988) 145--154.} and
+Warrick, Lomen and Islas\footnote{AW Warrick, DO Lomen and A Islas,
+  ``An analytical solution to Richards' Equation for a Draining Soil
+  Profile'', Water Resources Research 26 (1990) 253--258.}, and others
+(see references below), and are
+valid for 
+\begin{eqnarray}
+D(S) & = & \frac{a}{(b-S)^{2}} \ , \\
+K(S) & = & \beta + \gamma(b - S) + \frac{\lambda}{2(b - S)} \ .
+\end{eqnarray}
+
+
+\chapter{Infiltration and drainage}
+\label{forsyth}
+
+Forsyth, Wu and Pruess\footnote{PA Forsyth, YS Wu and K Pruess,
+  ``Robust numerical methods for saturated-unsaturated flow with dry
+  initial conditions in heterogeneous media'', Advances in Water
+  Resources 18 (1995) 25--38} describe a HYDRUS simulation of an
+experiment involving infiltration (experiment 1) and subsequent
+drainage (experiment 2) in a large caisson.  The simulation is
+effectively one dimensional, and is shown in
+Figure~\ref{rd_setup.fig}.
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=12cm]{rd_setup.eps}
+\caption{Two experimental setups from Forsyth, Wu and Pruess.
+  Experiment 1 involves infiltration of water into an initially
+  unsaturated caisson.  Experiment 2 involves drainage of water from
+  an initially saturated caisson.}
+\label{rd_setup.fig}
+\end{center}
+\end{figure}
+
+The properties common to each experiment
+are:
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Caisson & 0.33 \\
+Caisson permeability & $2.95\times 10^{-13}$\,m$^{2}$ \\
+\hline
+Gravity & 10\,m.s$^{-2}$ \\
+\hline
+Water density & 1000\,kg.m$^{-3}$ \\
+Water viscosity & 0.00101\,Pa.s \\
+Water bulk modulus & 20\,MPa \\
+Water immobile saturation & 0.0 \\
+Water residual saturation & 0.0 \\
+Air residual saturation & 0.0 \\
+Air pressure & 0.0 \\
+\hline
+van Genuchten $\alpha$ & $1.43\times 10^{-4}$\,Pa$^{-1}$ \\
+van Genuchten $a$ & 0.336 \\
+van Genuchten\_1 cutoff & 0.99 \\
+\hline
+\end{tabular} \\
+\end{center}
+In each experiment 120 finite elements were used along the length of
+the Caisson.  The modified van-Genuchten relative permeability curve
+was employed in order to improve convergence significantly.  Hydrus
+also uses a modified van-Genuchten curve, although I couldn't find any
+details on the modification.
+
+In experiment 1, the caisson is initially at saturation 0.303
+($P=-72620.4$\,Pa), and water is pumped into the top with a rate
+0.002315\,kg.m$^{-2}$.s$^{-1}$.  This causes a front of water to
+advance down the caisson.  Figure~\ref{rd.result.fig} shows the
+agreement between MOOSE and the published result (this result was
+obtained by extracting data by hand from online graphics).
+
+In experiment 2, the caisson is initially fully saturated at $P=0$,
+and the bottom is held at $P=0$ to cause water to drain via the action
+of gravity.  Figure~\ref{rd.result.fig} shows the agreement between
+MOOSE and the published result.
+
+Experiment 1 and the first 4 simulation days of experiment 2 are
+marked as ``heavy'' in the Richards' test suite since the simulations
+take around 3 seconds to complete.  This means they are not run by
+default every time the code is updated, and must be run manually.
+However, the final 96 days of experiment 2 run quickly and are part of
+the automatic test suite.
+
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=12cm]{rd01.eps} \\
+$\mbox{}$\\
+\includegraphics[width=12cm]{rd02.eps}
+\caption{Saturation profiles in the caisson.  Top: After 4.16 days of
+  infiltration.  Bottom: After drainage from an initially-saturated
+  simulation (4 days and 100 days profiles).  Note that the HYDRUS
+  results are only approximate as I extrated the data by hand from
+  online graphics.}
+\label{rd.result.fig}
+\end{center}
+\end{figure}
+
+
 \chapter{Buckley-Leverett}
+\label{bl}
 
 MOOSE compared with a simple one dimensional Buckley-Leverett
 problem\footnote{SE Buckley and MC Leverett (1942) ``Mechanism of
@@ -389,217 +768,6 @@ $\mbox{}$
 \end{figure}
 
 
-\chapter{Comparisons with unsaturated analytical solutions}
-
-The Richards' equation for an incompressible fluid reads in one
-spatial dimension ($z$) reads 
-\begin{equation}
-\dot{S} = \nabla \left(D \nabla S\right) - \nabla K \ ,
-\end{equation}
-where
-\begin{eqnarray}
-D(S) & = & -\frac{\kappa \kappa_{rel}}{\mu\phi}P_{\mathrm{c}}' \ ,
-\\
-K(S) & = &\frac{\rho g \kappa\kappa_{\mathrm{rel}}}{\mu\phi} \ .
-\end{eqnarray}
-Here $P_{\mathrm{c}} = -P$ which is the capillary pressure, and recall
-that $P_{\mathrm{c}}'(S)<0$.  Analytic solutions of this nonlinear
-diffusion-advection relevant to groundwater flow have been studied by
-Broadbridge and White\footnote{P Broadbridge, I White ``Constant rate
-  rainfall infiltration: A versatile nonlinear model, 1 Analytical
-  solution''.  Water Resources Research 24 (1988) 145--154.} and
-Warrick, Lomen and Islas\footnote{AW Warrick, DO Lomen and A Islas,
-  ``An analytical solution to Richards' Equation for a Draining Soil
-  Profile'', Water Resources Research 26 (1990) 253--258.}, and others
-(see references below), and are
-valid for 
-\begin{eqnarray}
-D(S) & = & \frac{a}{(b-S)^{2}} \ , \\
-K(S) & = & \beta + \gamma(b - S) + \frac{\lambda}{2(b - S)} \ .
-\end{eqnarray}
-
-
-
-\chapter{Infiltration and drainage}
-
-Forsyth, Wu and Pruess\footnote{PA Forsyth, YS Wu and K Pruess,
-  ``Robust numerical methods for saturated-unsaturated flow with dry
-  initial conditions in heterogeneous media'', Advances in Water
-  Resources 18 (1995) 25--38} describe a HYDRUS simulation of an
-experiment involving infiltration (experiment 1) and subsequent
-drainage (experiment 2) in a large caisson.  The simulation is
-effectively one dimensional, and is shown in
-Figure~\ref{rd_setup.fig}.
-
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[width=12cm]{rd_setup.eps}
-\caption{Two experimental setups from Forsyth, Wu and Pruess.
-  Experiment 1 involves infiltration of water into an initially
-  unsaturated caisson.  Experiment 2 involves drainage of water from
-  an initially saturated caisson.}
-\label{rd_setup.fig}
-\end{center}
-\end{figure}
-
-The properties common to each experiment
-are:
-\begin{center}
-\begin{tabular}{|ll|}
-\hline
-Caisson & 0.33 \\
-Caisson permeability & $2.95\times 10^{-13}$\,m$^{2}$ \\
-\hline
-Gravity & 10\,m.s$^{-2}$ \\
-\hline
-Water density & 1000\,kg.m$^{-3}$ \\
-Water viscosity & 0.00101\,Pa.s \\
-Water bulk modulus & 20\,MPa \\
-Water immobile saturation & 0.0 \\
-Water residual saturation & 0.0 \\
-Air residual saturation & 0.0 \\
-Air pressure & 0.0 \\
-\hline
-van Genuchten $\alpha$ & $1.43\times 10^{-4}$\,Pa$^{-1}$ \\
-van Genuchten $a$ & 0.336 \\
-van Genuchten\_1 cutoff & 0.99 \\
-\hline
-\end{tabular} \\
-\end{center}
-In each experiment 120 finite elements were used along the length of
-the Caisson.  The modified van-Genuchten relative permeability curve
-was employed in order to improve convergence significantly.  Hydrus
-also uses a modified van-Genuchten curve, although I couldn't find any
-details on the modification.
-
-In experiment 1, the caisson is initially at saturation 0.303
-($P=-72620.4$\,Pa), and water is pumped into the top with a rate
-0.002315\,kg.m$^{-2}$.s$^{-1}$.  This causes a front of water to
-advance down the caisson.  Figure~\ref{rd.result.fig} shows the
-agreement between MOOSE and the published result (this result was
-obtained by extracting data by hand from online graphics).
-
-In experiment 2, the caisson is initially fully saturated at $P=0$,
-and the bottom is held at $P=0$ to cause water to drain via the action
-of gravity.  Figure~\ref{rd.result.fig} shows the agreement between
-MOOSE and the published result.
-
-Experiment 1 and the first 4 simulation days of experiment 2 are
-marked as ``heavy'' in the Richards' test suite since the simulations
-take around 3 seconds to complete.  This means they are not run by
-default every time the code is updated, and must be run manually.
-However, the final 96 days of experiment 2 run quickly and are part of
-the automatic test suite.
-
-
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[width=12cm]{rd01.eps} \\
-$\mbox{}$\\
-\includegraphics[width=12cm]{rd02.eps}
-\caption{Saturation profiles in the caisson.  Top: After 4.16 days of
-  infiltration.  Bottom: After drainage from an initially-saturated
-  simulation (4 days and 100 days profiles).  Note that the HYDRUS
-  results are only approximate as I extrated the data by hand from
-  online graphics.}
-\label{rd.result.fig}
-\end{center}
-\end{figure}
-
-
-\chapter{Newton cooling from a bar - NEEDS UPDATE}
-
-Darcy's equation for flow through a fully saturated medium without
-gravity and without sources is 
-\begin{equation}
-\frac{\partial}{\partial t}\phi\rho = \nabla_{i}\left(\frac{\rho
-  \kappa_{ij}}{\mu} \nabla_{j}P \right) \ ,
-\end{equation}
-with notation described in the Theory Manual.  Using $\rho \propto
-\exp(P/K)$, where $K$ is the fluid bulk modulus, Darcy's equation
-becomes
-\begin{equation}
-\frac{\partial}{\partial t}\rho = \nabla_{i}\alpha_{ij}\nabla\rho \ ,
-\end{equation}
-with 
-\begin{equation}
-\alpha_{ij} = \frac{\kappa_{ij}B}{\mu\phi} \ .
-\end{equation}
-Here I've assumed the porosity and bulk modulus are constant in space
-and time.
-
-Consider the one-dimensional case where a bar sits between $x=0$ and
-$x=L$ with initial pressure distribution so $\rho(x,t=0) = \rho_{0}(x)$.
-Maintain the end $x=0$ at constant pressure, so that $\rho(x=0, t) =
-\rho_{0}(0)$.  At the end $x=L$, prescribe a sink flux
-\begin{equation}
-\left.\frac{\partial\rho}{\partial x}\right|_{x=L} = -C\left(\rho -
-\rho_{e}\right)_{x=L} \ ,
-\end{equation}
-where $\rho_{e}$ is a fixed quantity (``e'' stands for ``external''),
-and $C$ is a constant conductance.  This corresponds to the flux
-\begin{equation}
-\left.\frac{\partial P}{\partial x}\right|_{x=L} = -CB\left(1 -
-e^{(P_{e}-P)/B}\right)_{x=L} \ ,
-\end{equation}
-which can easily be coded into a Wallaby input file: the flux is
-$\rho\kappa\nabla P/\mu = -CB\kappa(e^{P/B} - e^{P_{e}/B})/\mu$.
-
-The solution of this problem is well known and is
-\begin{equation}
-\rho(x, t) = \rho_{0}(0) - \frac{\rho_{0}(0) - \rho_{e}}{1 + LC}Cx +
-\sum_{n=1}^{\infty} a_{n}\sin \frac{k_{n}x}{L}e^{-k_{n}^{2}\alpha
-  t/L^{2}} \ ,
-\end{equation}
-where $k_{n}$ is the $n^{\mathrm{th}}$ positive root of the equation
-$LC\tan k + k=0$  ($k_{n}$ is a little bigger than
-$(2n-1)\pi/2$), and $a_{n}$ is determined from
-\begin{equation}
-a_{n}\int_{0}^{L}\sin^{2}\frac{k_{n}x}{L}\,\mathrm{d}x =
-\int_{0}^{L}\left(\rho_{0}(x) - \rho_{0}(0) + \frac{\rho_{0}(0) -
-  \rho_{e}}{1 + LC}Cx\right)\sin \frac{k_{n}x}{L}\,\mathrm{d}x \ ,
-\end{equation}
-which may be solved numerically.
-
-\noindent The problem is solved in Wallaby using the following parameters:
-\begin{center}
-\begin{tabular}{|ll|}
-\hline
-Bar length & 100\,m \\
-Bar porosity & 0.1 \\
-Bar permeability & $10^{-15}$\,m$^{2}$ \\
-\hline
-Gravity & 0 \\
-\hline
-Water density & 1000\,kg.m$^{-3}$ \\
-Water viscosity & 0.001\,Pa.s \\
-Water bulk modulus & 1\,MPa \\
-\hline
-Initial porepressure $P_{0}$ & 2\,MPa \\
-Environmental pressure $P_{e}$ & 0 \\
-\hline
-Conductance $C$ & 0.05389\,m$^{-1}$ \\
-\hline
-\end{tabular} \\
-\end{center}
-This conductance is chosen so at steadystate $\rho(x=L)=2000$\,kg.m$^{-3}$.
-
-The problem is solved using 1000 elements along the $x$
-direction ($L=100$\,m), and using 100 time-steps of size $10^6$\,s.
-Using fewer elements or fewer timesteps means the agreement with the
-theory is marginally poorer.  The problem is also solved using the
-steadystate solver.  In this case the initial condition is
-$P=2-x/L$\,MPa, since the uniform $P=2$\,MPa does not converge.  The
-results are shown in Figure~\ref{nc.fig}.
-
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[width=17cm]{nc.eps}
-\caption{The porepressure in the bar at $t=10^{8}$\,s, and at
-  steadystate.  Wallaby agrees well with theory.}
-\label{nc.fig}
-\end{center}
-\end{figure}
 
 
 
