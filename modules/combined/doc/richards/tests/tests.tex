@@ -724,7 +724,7 @@ $P_{15}=-20000$\,Pa, so the difference is 1\,MPa.  The medium's
 permeability is set to $\kappa = 10^{-10}\,\mathrm{m}^{2}$ and its
 porosity is $\phi = 0.15$.  It is not possible to use a zero suction
 function in the MOOSE implementation, but using the van Genuchten
-parameters $\alpha = 10^{-4}$\,Pa$^{-1}$ and $m=0.8$ approximates it.
+parameters $\alpha = 10^{-3}$\,Pa$^{-1}$ and $m=0.8$ approximates it.
 The fluid viscosity is $\mu = 10^{-3}$\,Pa.s.
 
 The initial condition is
@@ -783,30 +783,35 @@ capillary suction.  A nonzero suction function will tend to diffuse
 the sharp front.
 
 With coarse meshes it is impossible to simulate a sharp front, of
-course, since the front is spread over at least one element.  It is
+course, since the front is spread over at least one element.  It can be
 therefore quite advantageous to use mesh adaptivity in this test,
 since the mesh can be fine around the front where all the interesting
 dynamics occurs, and coarse elsewhere.
 
 Figure~\ref{satfront.figa} shows the results from a MOOSE simulation
-with an initial mesh of element size 1\,m, and a minimum size of
-0.125\,m, with a maximum timestep of 0.3\,s.  (Reducing the minimum
-element size or the maximum timestep size keeps the front sharper.)
-The front in this simulation is between $x=9.9$\,m and $x=10.35$\,m,
-in fair agreement with the predicted value of 9.6\,m.
-
-The automatic test suite contains a simulation with elements of size
-0.1\,m using a timestep of 2\,s, which gives results very similar to
-those shown in Figure~\ref{satfront.figa}.
+with a uniform mesh of size 0.1\,m.  At $t=50$\,s the front in this
+simulation sits at $x=9.6$\,m as desired.  However, the simulation
+takes 3 minutes to complete due to the very low values of saturation
+obtained for van Genuchten $\alpha=10^{-3}$\,Pa$^{-1}$.  Other
+simulations give similar results but run much faster.  For instance,
+great speedups can be obtained by setting the van-Genuchten parameter
+$\alpha=10^{-4}$\,Pa$^{-1}$, but the front diffuses a little into the
+unsaturated region.  Using an initial mesh of element size 1\,m, and a
+minimum size of 0.125\,m, with a maximum timestep of 0.3\,s (to give
+the mesh time to adapt around the front),the front at $t=50$\,s sits
+between between $x=9.9$\,m and $x=10.35$\,m, and the simulation takes
+only 3 seconds.  The automatic test suite contains a simulation with
+elements of size 0.1\,m using a timestep of 2\,s, which gives results
+very similar to these, and takes less than 2 seconds to run.
 
 \begin{figure}[htb]
 \begin{center}
 \includegraphics[width=10cm]{bl_seff.eps} \\
 $\mbox{}$
 \includegraphics[width=10cm]{bl_p.eps} \\
-\caption{The Wallaby solution of the Buckley-Leverett problem at
+\caption{The MOOSE solution of the Buckley-Leverett problem at
   $t=50$\,s.  Top: saturation.  Bottom: porepressure.  The front sits
-  between $x=9.9$\,m and $x=10.35$\,m.}
+  between $x=9.6$\,m as expected from the analytical solution.}
 \label{satfront.figa}
 \end{center}
 \end{figure}
