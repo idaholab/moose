@@ -87,7 +87,8 @@ def parseArguments(args=None):
   # Distcc options
   distcc = parser.add_argument_group('Advanced distcc Options')
   distcc.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
-  distcc.add_argument('--disable', nargs='+', help='Temporarly remove hostname/IP(s) from your DISTCC_HOSTS list')
+  distcc.add_argument('--disable', nargs='+', help='Remove username/hostname/IP(s) from your DISTCC_HOSTS list')
+  distcc.add_argument('--enable','-e', action='store_true', help='Enable the previousily disabled machines')
 
   # Options that do not run make
   daemon = parser.add_argument_group('Distcc Daemon Options')
@@ -104,7 +105,7 @@ def parseArguments(args=None):
   misc.add_argument('--serial', action='store_true', help='Disable the parallel creating of the Machine objects; this also will print the information for each object created for debuggin purposes')
 
   # Allow flags to be run together
-  parser.parse_args('-mqvnlrbdpoc'.split())
+  parser.parse_args('-mqvnlrbdpoce'.split())
 
   # Parse the input and return the options
   (options, other_args) = parser.parse_known_args()
@@ -139,7 +140,8 @@ if __name__ == "__main__":
     sub.wait()
 
   # Create the MachineWarehouse object
-  opt = subOptions(options,'local','buck','dedicated','jobs','description','clean','disable','allow','serial')
+  opt = subOptions(options,'local','buck','dedicated','jobs','description','clean','disable',\
+                   'enable','allow','serial')
   warehouse = MachineWarehouse(**opt)
 
   # Create the MachineOutput object

@@ -34,7 +34,7 @@ class MachineWarehouse(object):
   #    buck  = True | {False} - utilize the test machine (buck) for the list of machines on the s
   #                             server (passed to DmakeRC)
   #    dedicated = True | {False} - run the machine as a dedicated build box (passed to DmakeRC)
-  #    disable = list<str> - list of ip addresses to exclude from DISTCC_HOSTS
+  #    disable = list<str> - list of hostnames, username, or ip addresses to exclude from DISTCC_HOSTS
   #    allow = list<str> - list of ip addresses/hostnames to allow in DISTCC_HOSTS
   #    serial = Ture | {False} - toggle the parallel creation of the Machine objects
   # @see DmakeRC
@@ -50,7 +50,6 @@ class MachineWarehouse(object):
 
     # Get the optional input
     self._jobs = kwargs.pop('jobs', None)
-    self._disable = kwargs.pop('disable', None)
     self._allow = kwargs.pop('allow', None)
     self._serial = kwargs.pop('serial', False)
 
@@ -82,8 +81,8 @@ class MachineWarehouse(object):
   #    localhost = <int>        - Set the DISTCC_HOSTS localhost value (passed to _buildHosts)
   #    localslots = <int>       - Set the DISTCC_HOSTS localslots value (passed to _buildHosts)
   #    localslots_cpp = <int>   - Set the DISTCC_HOSTS localslots_cpp value (passed to _buildHosts)
-  #    disable = list()         - A list of hostnames or ip addresses to disable from DISTCC_HOSTS line,
-  #                               (The names and numbers may be incomplete)
+  #    disable = list()         - A list of username,hostnames or ip addresses to disable
+  #                               from DISTCC_HOSTS line (names and numbers may be incomplete)
   #
   #  @see _buildHosts
   def getHosts(self, **kwargs):
@@ -95,8 +94,7 @@ class MachineWarehouse(object):
     if kwargs['max'] == True \
        or kwargs.pop('localhost', None) != None \
        or kwargs.pop('localslots', None) != None \
-       or kwargs.pop('localslots_cpp', None) != None \
-       or self._disable != None:
+       or kwargs.pop('localslots_cpp', None) != None:
       refresh = True
 
     # Return the local
@@ -173,9 +171,9 @@ class MachineWarehouse(object):
     # supply partial ip/hostnames so loop through each and test that the substring
     # is not contained in either
     for machine in output:
-      if (self._disable != None):
-        for d in self._disable:
-          if (d in machine.address) or (d in machine.hostname):
+      if (self._dmakerc.get('DISABLE') != None):
+        for d in self._dmakerc.get('DISABLE'):
+          if (d in machine.address) or (d in machine.hostname) or (d in machine.username):
             machine.status = 'disabled'
             machine.available = False
             break

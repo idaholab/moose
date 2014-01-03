@@ -22,7 +22,13 @@ class DmakeRC(object):
   #    dedicated = True | {False} - True sets the local machine as a dedicated build box on the server
   #    description = <str>        - Set the description of this computer
   #    clean = True | {False}     - remove existing .dmakerc
+  #    disable = list()           - A list of username, descriptions, hostnames or ip addresses to disable
+  #                                 from DISTCC_HOSTS line (names and numbers may be incomplete)
+  #    enable = True | {False}    - Enables all machines that were previously disabled
   def __init__(self, master, **kwargs):
+
+    # List of available items
+    self._items = ['HOST_LINES', 'DESCRIPTION', 'DISTCC_HOSTS', 'JOBS', 'DISABLE']
 
     # Extract the options from the user
     self._test = kwargs.pop('buck', False)
@@ -67,6 +73,14 @@ class DmakeRC(object):
     # Set the stored HOST_LINES to be the same as the server
     self.set(HOST_LINES=self._remote)
 
+    # Enable previously disabled machines
+    if kwargs.pop('enable', False):
+      self.set(DISABLE=None)
+
+    # Set the disable list to be the same as the input
+    if kwargs['disable'] != None:
+      self.set(DISABLE=kwargs['disable'])
+
 
   ## Accessor for stored variables (public)
   #  @param key The name of the dictionary item to retrun (e.g., 'DISTCC_HOSTS')
@@ -85,6 +99,7 @@ class DmakeRC(object):
   #    DESCRIPTION = <str>      - String containing description of this machine
   #    HOST_LINES = list(<str>) - A list of raw strings, with each entry representing a remote machine, as
   #                               read from the server
+  #    DISABLE = list           - A list of username, description, hostname, or ip addresses to ignore
   #
   #  Optional keywords available:
   #    write = {True} | False   - Toggle the writting of the .dmakerc file if something is changes
@@ -140,12 +155,8 @@ class DmakeRC(object):
       fid.close()
     else:
       data = dict()
-
-    # Set the default values for the keys in the .dmakerc
-    data.setdefault('HOST_LINES', None)
-    data.setdefault('DESCRIPTION', None)
-    data.setdefault('DISTCC_HOSTS', None)
-    data.setdefault('JOBS', None)
+      for item in self._items:
+        data.setdefault(item, None)
 
     # Clean up the hostlines
     if data['HOST_LINES'] != None:
