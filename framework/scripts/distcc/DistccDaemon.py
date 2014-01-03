@@ -67,7 +67,7 @@ class DistccDaemon(object):
   ## Stops all running distccd processes (public)
   # @see start
   def kill(self):
-    sub = subprocess.Popen(['killall', 'distccd'])
+    sub = subprocess.Popen(['killall', '-9', 'distccd'])
     sub.wait()
 
 

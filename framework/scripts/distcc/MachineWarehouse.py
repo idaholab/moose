@@ -109,7 +109,6 @@ class MachineWarehouse(object):
 
     # Build the machine objects (if desired or needed)
     if refresh or self._dmakerc.distccHostsNeedsUpdate():
-      self._buildWorkers()
       self.startDaemon()
       self._buildHosts(**kwargs)
     else:
