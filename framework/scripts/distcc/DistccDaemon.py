@@ -1,5 +1,5 @@
 # Load the required modules
-import os, subprocess, re, time
+import os, subprocess, re, time, errno, signal
 
 ## @class DistccDaemon
 # Class for managing the distccd daemons
@@ -16,6 +16,7 @@ class DistccDaemon(object):
     # Initilize variables
     self._master = master
     self._filename = os.path.join(os.getenv('HOME'), '.dmakerc_cron')
+    self._pidfile = os.path.join(os.getenv('HOME'), '.dmake_pid')
 
     # Setup the cron jobs
     self._manageCron(kwargs.pop('dedicated', False))
@@ -46,7 +47,7 @@ class DistccDaemon(object):
     os.environ['DISTCC_CMDLIST'] = os.getenv('HOME') + '/.cmd_list'
 
     # Build the distccd command
-    distccd_cmd = ['distccd', '--daemon']
+    distccd_cmd = ['distccd', '--daemon', '-P', self._pidfile]
     for machine in machines:
       distccd_cmd.extend(['--allow', machine.address])
 
@@ -67,9 +68,26 @@ class DistccDaemon(object):
   ## Stops all running distccd processes (public)
   # @see start
   def kill(self):
-    sub = subprocess.Popen(['killall', '-9', 'distccd'])
-    sub.wait()
+    if os.path.exists(self._pidfile):
+      f = open(self._pidfile)
+      pid = int(f.read())
+      os.kill(pid, signal.SIGTERM)   # Tell the parent distccd process to terminate
 
+      # Make sure the process is terminated
+      try:
+        tries = 10
+        while tries > 0:
+          time.sleep(0.2)
+          os.kill(pid, 0)     # Get process status
+
+        print "Unable to terminate distccd process through SIGTERM, using SIGKILL"
+        os.kill(pid, signal.SIGKILL)
+
+      except OSError as error:
+        if error.errno == errno.ESRCH:
+          pass
+        else:
+          print "Unknown error while obtaining distccd status"
 
   ## A function to facilitate cronjobs with dedicated mode (private)
   # @param dedicated True if running in dedicated mode
