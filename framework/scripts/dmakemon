@@ -24,8 +24,6 @@ elif os.environ.has_key("MOOSE_DEV"):
 
 sys.path.append(MOOSE_DIR + '/scripts/common')
 
-os.environ["TERM"] = "peacock"
-
 from optparse import OptionParser
 
 try:
@@ -33,7 +31,7 @@ try:
 except AttributeError:
   _fromUtf8 = lambda s: s
 
-
+''' A widget with a name label, progress bar and value label '''
 class BarWidget(QtGui.QWidget):
   def __init__(self, username):
     QtGui.QWidget.__init__(self)
@@ -57,35 +55,66 @@ class BarWidget(QtGui.QWidget):
   def setMaximum(self, value):
     self.bar.setMaximum(value)
 
-class UiBox(QtGui.QMainWindow):
-  def __init__(self, options, args, qt_app, win_parent = None):
-    QtGui.QMainWindow.__init__(self, win_parent, QtCore.Qt.WindowStaysOnTopHint)
-    self.options = options
-    self.setWindowTitle('DMakeMon')
-    self.qt_app = qt_app
+'''Base class for a widget that contains multiple BarWidgets that update periodically'''
+class BarContainerBase(QtGui.QGroupBox):
+  def __init__(self, name):
+    QtGui.QWidget.__init__(self, name)
     self.bars = {}
 
-    self.initUI()
+    self.main_layout = QtGui.QVBoxLayout()
 
-    # Pull this window to the foreground
-    self.raise_()
+    self.updateBars()
+
+    self.setLayout(self.main_layout)
 
     self.timer = QtCore.QTimer()
     self.timer.setInterval(2000)
     self.timer.timeout.connect(self.updateBars)
     self.timer.start()
 
-  def initUI(self):
-    self.main_ui = QtGui.QWidget(self)
-    self.main_ui.setObjectName(_fromUtf8("Dialog"))
-    self.main_layout = QtGui.QVBoxLayout()
-    self.setCentralWidget(self.main_ui)
 
-    self.updateBars()
+  ''' "Pure virtual" that should return a dictionary of name:value for each Bar to be displayed '''
+  def getInfo():
+    raise RuntimeError
 
-    self.main_ui.setLayout(self.main_layout)
+  ''' Updates all of the bars '''
+  def updateBars(self):
+    info = self.getInfo()
 
-  def parseLog(self):
+    max_value = 0
+
+    for name,value in info.items():
+      if value > max_value:
+        max_value = value
+
+    # Set them all to zero
+    for name, bar in self.bars.items():
+      if name not in info:
+        bar.hide()
+
+      bar.setValue(0)
+      bar.setMaximum(max_value)
+
+    for name, value in info.items():
+      bar = None
+
+      if name not in self.bars:
+        bar = BarWidget(name)
+        self.main_layout.addWidget(bar)
+
+        self.bars[name] = bar
+      else:
+        bar = self.bars[name]
+
+      bar.show()
+      bar.setValue(value)
+
+''' Collection of bars showing the users using your machine '''
+class UsersWidget(BarContainerBase):
+  def __init__(self):
+    BarContainerBase.__init__(self, 'Using You')
+
+  def getInfo(self):
     raw_log = subprocess.check_output("cat /var/log/system.log | grep job_summary | tail -n 2000", shell=True)
     raw_log_lines = raw_log.split('\n')
 
@@ -105,40 +134,64 @@ class UiBox(QtGui.QMainWindow):
             if m:
               username = m.group(1)
               if username not in whos_compiling:
-                whos_compiling[username] = 0
+                whos_compiling[username] = 1
               else:
                 whos_compiling[username] += 1
 
     return whos_compiling
 
+''' Collection of bars showing the machines you're using '''
+class UsingWidget(BarContainerBase):
+  def __init__(self):
+    BarContainerBase.__init__(self, "You're Using")
 
-  def updateBars(self):
-    whos_compiling = self.parseLog()
+  def getInfo(self):
+    raw_info = subprocess.check_output("distccmon-text", shell=True)
+    raw_info_lines = raw_info.split('\n')
 
-    max_compiles = 0
+    using_who = {}
 
-    for username,compiles in whos_compiling.items():
-      if compiles > max_compiles:
-        max_compiles = compiles
+    machine_re = re.compile(r'(\S+)\[\d+\]$')
+    # username_re = re.compile('/Users/(\w+)')
 
-    # Set them all to zero
-    for username, bar in self.bars.items():
-      bar.setValue(0)
-      bar.setMaximum(max_compiles)
+    for line in raw_info_lines:
+      machine_m = machine_re.search(line)
+      if machine_m:
+        machine = machine_m.group(1)
+        if machine not in using_who:
+          using_who[machine] = 1
+        else:
+          using_who[machine] += 1
 
-    for username,compiles in whos_compiling.items():
-      bar = None
+    return using_who
 
-      if username not in self.bars:
-        bar = BarWidget(username)
-        self.main_layout.addWidget(bar)
+''' Main window '''
+class UiBox(QtGui.QMainWindow):
+  def __init__(self, options, args, qt_app, win_parent = None):
+    QtGui.QMainWindow.__init__(self, win_parent, QtCore.Qt.WindowStaysOnTopHint)
+    self.options = options
+    self.setWindowTitle('DMakeMon')
+    self.qt_app = qt_app
 
-        self.bars[username] = bar
-      else:
-        bar = self.bars[username]
+    self.initUI()
 
-      bar.setValue(compiles)
+    # Pull this window to the foreground
+    self.raise_()
 
+
+  def initUI(self):
+    self.main_ui = QtGui.QWidget(self)
+    self.main_ui.setObjectName(_fromUtf8("Dialog"))
+    self.main_layout = QtGui.QVBoxLayout()
+    self.setCentralWidget(self.main_ui)
+
+    self.users_widget = UsersWidget()
+    self.using_widget = UsingWidget()
+
+    self.main_layout.addWidget(self.users_widget)
+    self.main_layout.addWidget(self.using_widget)
+
+    self.main_ui.setLayout(self.main_layout)
 
 
 if __name__ == '__main__':
