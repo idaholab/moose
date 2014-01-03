@@ -59,7 +59,7 @@ class BarWidget(QtGui.QWidget):
 
 class UiBox(QtGui.QMainWindow):
   def __init__(self, options, args, qt_app, win_parent = None):
-    QtGui.QMainWindow.__init__(self, win_parent)
+    QtGui.QMainWindow.__init__(self, win_parent, QtCore.Qt.WindowStaysOnTopHint)
     self.options = options
     self.setWindowTitle('DMakeMon')
     self.qt_app = qt_app
