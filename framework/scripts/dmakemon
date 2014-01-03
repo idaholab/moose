@@ -97,15 +97,17 @@ class UiBox(QtGui.QMainWindow):
     for line in raw_log_lines:
       if 'COMPILE_OK' in line or 'COMPILE_ERROR' in line:
         date_m = date_re.match(line)
-        time_string = date_m.group(1)
-        date = datetime.datetime.strptime(str(datetime.date.today().year) + " " + time_string, '%Y %b %d %H:%M:%S')
-        if( (datetime.datetime.now() - date).total_seconds() < 600): # Was this in the last 10 minutes?
-          m = username_re.search(line)
-          username = m.group(1)
-          if username not in whos_compiling:
-            whos_compiling[username] = 0
-          else:
-            whos_compiling[username] += 1
+        if date_m:
+          time_string = date_m.group(1)
+          date = datetime.datetime.strptime(str(datetime.date.today().year) + " " + time_string, '%Y %b %d %H:%M:%S')
+          if( (datetime.datetime.now() - date).total_seconds() < 600): # Was this in the last 10 minutes?
+            m = username_re.search(line)
+            if m:
+              username = m.group(1)
+              if username not in whos_compiling:
+                whos_compiling[username] = 0
+              else:
+                whos_compiling[username] += 1
 
     return whos_compiling
 
