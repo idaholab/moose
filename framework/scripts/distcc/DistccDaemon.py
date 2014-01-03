@@ -79,6 +79,7 @@ class DistccDaemon(object):
         while tries > 0:
           time.sleep(0.2)
           os.kill(pid, 0)     # Get process status
+          tries = tries-1
 
         print "Unable to terminate distccd process through SIGTERM, using SIGKILL"
         os.kill(pid, signal.SIGKILL)
