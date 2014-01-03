@@ -1,0 +1,157 @@
+#!/usr/bin/python
+import os, sys, PyQt4, re, inspect, subprocess, re, datetime
+from PyQt4 import QtCore, QtGui
+
+# Get the real path of peacock
+if(os.path.islink(sys.argv[0])):
+  pathname = os.path.dirname(os.path.realpath(sys.argv[0]))
+else:
+  pathname = os.path.dirname(sys.argv[0])
+  pathname = os.path.abspath(pathname)
+
+subdirs = ['gui','utils','vtk','mesh_info','plug_ins']
+
+for subdir in subdirs:
+  sys.path.append(pathname + '/' + subdir)
+
+# Add the utilities/python_getpot directory
+MOOSE_DIR = pathname + '/../moose'
+#### See if MOOSE_DIR is already in the environment instead
+if os.environ.has_key("MOOSE_DIR"):
+  MOOSE_DIR = os.environ['MOOSE_DIR']
+elif os.environ.has_key("MOOSE_DEV"):
+  MOOSE_DIR = pathname + '/../devel/moose'
+
+sys.path.append(MOOSE_DIR + '/scripts/common')
+
+os.environ["TERM"] = "peacock"
+
+from optparse import OptionParser
+
+try:
+  _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+  _fromUtf8 = lambda s: s
+
+
+class BarWidget(QtGui.QWidget):
+  def __init__(self, username):
+    QtGui.QWidget.__init__(self)
+
+    self.main_layout = QtGui.QHBoxLayout()
+
+    self.bar = QtGui.QProgressBar()
+    self.username_label = QtGui.QLabel(username)
+    self.value_label = QtGui.QLabel()
+
+    self.main_layout.addWidget(self.username_label)
+    self.main_layout.addWidget(self.bar)
+    self.main_layout.addWidget(self.value_label)
+
+    self.setLayout(self.main_layout)
+
+  def setValue(self, value):
+    self.value_label.setText(str(value))
+    self.bar.setValue(value)
+
+  def setMaximum(self, value):
+    self.bar.setMaximum(value)
+
+class UiBox(QtGui.QMainWindow):
+  def __init__(self, options, args, qt_app, win_parent = None):
+    QtGui.QMainWindow.__init__(self, win_parent)
+    self.options = options
+    self.setWindowTitle('DMakeMon')
+    self.qt_app = qt_app
+    self.bars = {}
+
+    self.initUI()
+
+    # Pull this window to the foreground
+    self.raise_()
+
+    self.timer = QtCore.QTimer()
+    self.timer.setInterval(2000)
+    self.timer.timeout.connect(self.updateBars)
+    self.timer.start()
+
+  def initUI(self):
+    self.main_ui = QtGui.QWidget(self)
+    self.main_ui.setObjectName(_fromUtf8("Dialog"))
+    self.main_layout = QtGui.QVBoxLayout()
+    self.setCentralWidget(self.main_ui)
+
+    self.updateBars()
+
+    self.main_ui.setLayout(self.main_layout)
+
+  def parseLog(self):
+    raw_log = subprocess.check_output("cat /var/log/system.log | grep job_summary | tail -n 2000", shell=True)
+    raw_log_lines = raw_log.split('\n')
+
+    whos_compiling = {}
+
+    date_re = re.compile('(\w+\s+\w+\s[0-9:]+)')
+    username_re = re.compile('/Users/(\w+)')
+
+    for line in raw_log_lines:
+      if 'COMPILE_OK' in line or 'COMPILE_ERROR' in line:
+        date_m = date_re.match(line)
+        time_string = date_m.group(1)
+        date = datetime.datetime.strptime(str(datetime.date.today().year) + " " + time_string, '%Y %b %d %H:%M:%S')
+        if( (datetime.datetime.now() - date).total_seconds() < 600): # Was this in the last 10 minutes?
+          m = username_re.search(line)
+          username = m.group(1)
+          if username not in whos_compiling:
+            whos_compiling[username] = 0
+          else:
+            whos_compiling[username] += 1
+
+    return whos_compiling
+
+
+  def updateBars(self):
+    whos_compiling = self.parseLog()
+
+    max_compiles = 0
+
+    for username,compiles in whos_compiling.items():
+      if compiles > max_compiles:
+        max_compiles = compiles
+
+    # Set them all to zero
+    for username, bar in self.bars.items():
+      bar.setValue(0)
+      bar.setMaximum(max_compiles)
+
+    for username,compiles in whos_compiling.items():
+      bar = None
+
+      if username not in self.bars:
+        bar = BarWidget(username)
+        self.main_layout.addWidget(bar)
+
+        self.bars[username] = bar
+      else:
+        bar = self.bars[username]
+
+      bar.setValue(compiles)
+
+
+
+if __name__ == '__main__':
+  usage = "Usage: %prog [options]"
+  description = "Monitor DMake Usage"
+  parser = OptionParser(usage=usage, description=description)
+
+#  parser.add_option("-e", "--executable", dest="executable",
+#                    help="The executable you would like to build an input file for.  If not supplied an executable will be searched for.  The searched for executable will default to the optimized version of the executable (if available).")
+
+  (options, args) = parser.parse_args()
+
+  app = QtGui.QApplication(sys.argv)
+  main_window = UiBox(options, args, app)
+  main_window.show()
+  main_window.raise_()
+
+  app.exec_()
