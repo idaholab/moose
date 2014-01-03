@@ -94,7 +94,7 @@ def parseArguments(args=None):
   daemon = parser.add_argument_group('Distcc Daemon Options')
   daemon.add_argument('--daemon', action='store_true', help='Launch distcc as a daemon (no make)')
   daemon.add_argument('--kill', action='store_true', help='Kill distcc as a daemon (no make)')
-  daemon.add_argument('--no-daemon', '-n', action='store_true', help='Do not launch any daemon processes')
+  daemon.add_argument('--no-daemon', action='store_true', help='Do not launch any daemon processes')
   daemon.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
   daemon.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
 
@@ -105,7 +105,7 @@ def parseArguments(args=None):
   misc.add_argument('--serial', action='store_true', help='Disable the parallel creating of the Machine objects; this also will print the information for each object created for debuggin purposes')
 
   # Allow flags to be run together
-  parser.parse_args('-mqvnlrbdpoce'.split())
+  parser.parse_args('-mqvlrbdpoce'.split())
 
   # Parse the input and return the options
   (options, other_args) = parser.parse_known_args()

@@ -84,9 +84,13 @@ class DmakeRC(object):
 
   ## Accessor for stored variables (public)
   #  @param key The name of the dictionary item to retrun (e.g., 'DISTCC_HOSTS')
-  #  @return The value from the dictionary for the given key
+  #  @return The value from the dictionary for the given key, it will return None
+  #          if the key is not found
   def get(self, key):
-    return self._dmakerc[key]
+    if key not in self._dmakerc:
+      return None
+    else:
+      return self._dmakerc[key]
 
 
   ## Method for storing data (public)
@@ -114,7 +118,11 @@ class DmakeRC(object):
     # Loop through the keyword/value pairs and update the store
     # values if they are different
     for key, value in kwargs.iteritems():
-     if self._dmakerc[key] != value:
+     if key not in self._items:
+       print 'Error: Unknown key ' + key
+       sys.exit()
+
+     if (key not in self._dmakerc) or (self._dmakerc[key] != value):
        self._dmakerc[key] = value
 
        # If the HOST_LINES is changed, the DISTCC_HOSTS needs updated,
