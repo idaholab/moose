@@ -1062,22 +1062,26 @@ MooseVariable::computeDamping(const NumericVector<Number> & increment_vec)
 Number
 MooseVariable::getNodalValue(const Node & node)
 {
+  mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
+
   dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
   return (*_sys.currentSolution())(dof);
-
 }
 
 Number
 MooseVariable::getNodalValueOld(const Node & node)
 {
+  mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
+
   dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
   return _sys.solutionOld()(dof);
-
 }
 
 Number
 MooseVariable::getNodalValueOlder(const Node & node)
 {
+  mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
+
   dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
   return _sys.solutionOlder()(dof);
 }
