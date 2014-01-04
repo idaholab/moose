@@ -101,6 +101,7 @@
 #include "PostprocessorCED.h"
 
 #include "EqualValueNodalConstraint.h"
+
 // user objects
 #include "MTUserObject.h"
 #include "RandomHitUserObject.h"
@@ -114,6 +115,7 @@
 #include "VerifyElementUniqueID.h"
 #include "VerifyNodalUniqueID.h"
 #include "RandomElementalUserObject.h"
+#include "TrackDiracFront.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -128,6 +130,7 @@
 
 // DiracKernels
 #include "ReportingConstantSource.h"
+#include "FrontSource.h"
 
 // markers
 #include "RandomHitMarker.h"
@@ -297,12 +300,14 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // DiracKernels
   registerDiracKernel(ReportingConstantSource);
+  registerDiracKernel(FrontSource);
 
   // meshes
   registerObject(StripeMesh);
 
   registerConstraint(EqualValueNodalConstraint);
 
+  // UserObjects
   registerUserObject(MTUserObject);
   registerUserObject(RandomHitUserObject);
   registerUserObject(RandomHitSolutionModifier);
@@ -315,6 +320,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(VerifyElementUniqueID);
   registerUserObject(VerifyNodalUniqueID);
   registerUserObject(RandomElementalUserObject);
+  registerUserObject(TrackDiracFront);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);

@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'front_tracking.i'
+    exodiff = 'front_tracking_out.e'
+  [../]
+[]
