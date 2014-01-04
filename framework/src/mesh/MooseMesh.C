@@ -595,15 +595,20 @@ MooseMesh::buildBndElemList()
 std::map<unsigned int, std::vector<unsigned int> > &
 MooseMesh::nodeToElemMap()
 {
-  if(!_node_to_elem_map_built)
+  if(!_node_to_elem_map_built) // Guard the creation with a double checked lock
   {
-    _node_to_elem_map_built = true;
-    MeshBase::const_element_iterator       el  = getMesh().elements_begin();
-    const MeshBase::const_element_iterator end = getMesh().elements_end();
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    if(!_node_to_elem_map_built)
+    {
+      MeshBase::const_element_iterator       el  = getMesh().elements_begin();
+      const MeshBase::const_element_iterator end = getMesh().elements_end();
 
-    for (; el != end; ++el)
-      for (unsigned int n=0; n<(*el)->n_nodes(); n++)
-        _node_to_elem_map[(*el)->node(n)].push_back((*el)->id());
+      for (; el != end; ++el)
+        for (unsigned int n=0; n<(*el)->n_nodes(); n++)
+          _node_to_elem_map[(*el)->node(n)].push_back((*el)->id());
+
+      _node_to_elem_map_built = true; // MUST be set at the end for double-checked locking to work!
+    }
   }
 
   return _node_to_elem_map;
@@ -1990,4 +1995,3 @@ MooseMesh::errorIfParallelDistribution(std::string name) const
                << "Consider specifying distribution = 'serial' in your input file\n"
                << "to prevent it from being run with ParallelMesh.");
 }
-
