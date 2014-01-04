@@ -69,6 +69,8 @@ public:
   virtual void threadJoin(const UserObject & uo) = 0;
 
 protected:
+  /// The mesh that is being iterated over
+  MooseMesh & _mesh;
 
   /// Quadrature point index
   const unsigned int _qp;

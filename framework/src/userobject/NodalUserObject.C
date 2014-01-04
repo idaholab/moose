@@ -43,6 +43,7 @@ NodalUserObject::NodalUserObject(const std::string & name, InputParameters param
     PostprocessorInterface(parameters),
     RandomInterface(name, parameters, _fe_problem, _tid, true),
     ZeroInterface(parameters),
+    _mesh(_subproblem.mesh()),
     _qp(0),
     _current_node(_assembly.node())
 {
