@@ -111,4 +111,21 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
+
+  [./jn20]
+    type = 'PetscJacobianTester'
+    input = 'jn20.i'
+    cli_args = 'Output/exodus=false'
+    # can't make too tight as finite-difference constant state bums out due to precision loss
+    ratio_tol = 1E-5 
+    difference_tol = 1E10
+  [../]
+  [./jn21]
+    type = 'PetscJacobianTester'
+    input = 'jn21.i'
+    cli_args = 'Output/exodus=false'
+    # can't make too tight as finite-difference constant state bums out due to precision loss
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
 []
