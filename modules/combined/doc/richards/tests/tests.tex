@@ -65,6 +65,7 @@ follows.
   implemented then MOOSE will display poor convergence
   characteristics.  Therefore it is extremely important to check the
   Jacobian.
+\item Chapter~\ref{ma} checks that the fluid mass is calculated correctly.
 \item Chapter~\ref{gh} contains many tests of the long-time behaviour
   in simple problems, which should just be hydrostatic pressure head,
   with the caveat that $S\geq S_{\mathrm{imm}}$.
@@ -218,6 +219,56 @@ for debugging.
 The `OffDiagonal' terms only appear if there is more than one pressure
 variable, that is for multi-phase problems.  No tests have been
 performed yet.
+
+\chapter{Fluid mass}
+\label{ma}
+
+The total fluid mass within a volume $V$ is
+\begin{equation}
+\int_{V} \phi\rho S \ .
+\end{equation}
+It must be checked that MOOSE calculates this correctly in order that
+mass-balances be correct, and also because this quantity is used in a
+number of tests below.
+
+A 1D model with $-1\leq x \leq 1$, and with two elements of size 1 is
+created with the following properties:
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Constant fluid bulk modulus & 1\,Pa \\
+Fluid density at zero pressure & 1\,kg.m$^{-3}$ \\
+Residual fluid saturation & 0.1 \\
+Residual air saturation & 0.1 \\
+Van Genuchten $m$ & 0.5 \\
+Van Genuchten $\alpha$ & 1\,Pa$^{-1}$ \\
+Porosity & 0.1 \\
+\hline
+\end{tabular} 
+\end{center}
+The porepressure is set at $P=x$.
+
+For linear-lagrange elements, MOOSE calculates the integral over
+$-1\leq x \leq 1$ by performing a sum over quadrature points at
+$x=\pm 0.788675$ and $x=\pm 0.211325$.
+Using the properties given above, this yields:
+\begin{center}
+\begin{tabular}{|cccccc|}
+\hline
+$x$ & $p$ & Density & $S_{\mathrm{eff}}$ & Saturation & Mass \\
+\hline
+-0.788675 & -0.788675 & 0.454447 & 0.785188 & 0.72815 & 0.016545 \\
+-0.211325 & -0.211325 & 0.809511 & 0.978392 & 0.882714 & 0.035728 \\
+0.211325 & 0.211325 & 1.235314 & 1 & 0.9 & 0.055589 \\
+0.788675 & 0.788675 & 2.200479 & 1 & 0.9 & 0.099022 \\
+\hline
+ & & & & Total & 0.206884 \\
+\hline
+\end{tabular} 
+\end{center}
+MOOSE also gives the total mass as 0.206884\,kg.
+
+
 
 
 
