@@ -69,6 +69,8 @@ follows.
 \item Chapter~\ref{gh} contains many tests of the long-time behaviour
   in simple problems, which should just be hydrostatic pressure head,
   with the caveat that $S\geq S_{\mathrm{imm}}$.
+\item Chapter~\ref{si} checks that the piecewise-linear sink and the
+  half-Gaussian sink are implemented correctly.
 \item Chapter~\ref{pp} checks that pressure pulses diffuse correctly
   through a fully-saturated medium.  For readers experienced in the
   groundwater, this is very similar to the Theis solution.
@@ -266,7 +268,8 @@ $x$ & $p$ & Density & $S_{\mathrm{eff}}$ & Saturation & Mass \\
 \hline
 \end{tabular} 
 \end{center}
-MOOSE also gives the total mass as 0.206884\,kg.
+MOOSE also gives the total mass as 0.206884\,kg.  This test is part of
+the automatic test suite that is run every time the code is updated.
 
 
 
@@ -334,6 +337,106 @@ $\mbox{}$ \\
   $S_{\mathrm{eff}}< S_{\mathrm{imm}}$.}
 \label{gh.fig}
 \end{figure}
+
+
+\chapter{Piecewise linear and half-Gaussian sinks}
+\label{si}
+
+The MOOSE implementation allows users to specify sinks and sources
+acting at boundaries that are functions of porepressure.  This chapter
+tests that these sinks and sources act as specified.  These tests are
+part of the automatic test suite that is run every time the code is
+updated.
+
+A 2D model with $0\leq x \leq 1$ and $0\leq y \leq 1$ with just a
+single element is subjected to sink fluxes from its left and right
+boundaries.  Because it is a single element no fluid flow within the
+element occurs.  The following fluid properties are used:
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Constant fluid bulk modulus & 1\,Pa \\
+Fluid density at zero pressure & 1\,kg.m$^{-3}$ \\
+Residual fluid saturation & 0.1 \\
+Residual air saturation & 0.1 \\
+Van Genuchten $m$ & 0.5 \\
+Van Genuchten $\alpha$ & 1\,Pa$^{-1}$ \\
+Porosity & 0.1 \\
+\hline
+\end{tabular} 
+\end{center}
+
+\noindent In the first test a piecewise-linear sink is applied with strength:
+\begin{equation}
+\mbox{sink flux (kg.m$^{-1}$.s$^{-1}$)} = \left\{
+\begin{array}{ll}
+1 & \mbox{ for } p \leq 0 \\
+p & \mbox{ for } 0<p<1 \\
+2 & \mbox{ for } p\geq 1 
+\end{array}
+\right.
+\label{eqn.s01}
+\end{equation}
+The sink flux is recorded by into a Postprocessor by MOOSE.  It is
+remotely possible that the MOOSE implementation {\em applies} the sink
+flux incorrectly, but {\em records} it as a Postprocessor correctly as
+specified by Eqn~(\ref{eqn.s01}).  Therefore the simulation also
+records the fluid mass and mass-balance error in order to check that
+the fluid mass is indeed being reduced correctly by the sink flux.
+The initial condition is $p=2$\,Pa, and the simulation is run for
+0.2\,s with 100 time steps.  The expected behaviour is demonstrated in
+Figure~\ref{s01.fig}.
+
+\begin{figure}[htb]
+\centering
+\begin{tabular}{cc}
+\includegraphics[width=7cm]{s01.eps} &
+\includegraphics[width=7cm]{s01_mass_bal.eps}
+\end{tabular}
+\caption{Left: Comparison between the MOOSE result (in dots), and the
+  expected behaviour of the sink flux given by Eqn~(\ref{eqn.s01}).
+  Right: The mass-balance error is small for the simulation described
+  demonstrating that the recorded sink flux is truly reducing the mass
+  in the correct way.}
+\label{s01.fig}
+\end{figure}
+
+
+\noindent In the second test a piecewise-linear sink is applied with strength:
+\begin{equation}
+\mbox{sink flux (kg.m$^{-1}$.s$^{-1}$)} = \left\{
+\begin{array}{ll}
+2\exp(-0.5(P-1)^{2}) & \mbox{ for } p < 1 \\
+2 & \mbox{ for } p\geq 1 
+\end{array}
+\right.
+\label{eqn.s02}
+\end{equation}
+This is called a half-Gaussian sink flux and may be used to model
+evapotranspiration.  The sink flux is recorded by into a Postprocessor by MOOSE.  It is
+remotely possible that the MOOSE implementation {\em applies} the sink
+flux incorrectly, but {\em records} it as a Postprocessor correctly as
+specified by Eqn~(\ref{eqn.s02}).  Therefore the simulation also
+records the fluid mass and mass-balance error in order to check that
+the fluid mass is indeed being reduced correctly by the sink flux.
+The initial condition is $p=2$\,Pa, and the simulation is run for
+0.4\,s with 100 time steps.  The expected behaviour is demonstrated in
+Figure~\ref{s02.fig}.
+
+\begin{figure}[htb]
+\centering
+\begin{tabular}{cc}
+\includegraphics[width=7cm]{s02.eps} &
+\includegraphics[width=7cm]{s02_mass_bal.eps}
+\end{tabular}
+\caption{Left: Comparison between the MOOSE result (in dots), and the
+  expected behaviour of the sink flux given by Eqn~(\ref{eqn.s02}).
+  Right: The mass-balance error is small for the simulation described
+  demonstrating that the recorded sink flux is truly reducing the mass
+  in the correct way.}
+\label{s02.fig}
+\end{figure}
+
 
 
 \chapter{A pressure pulse in the fully saturated situation}

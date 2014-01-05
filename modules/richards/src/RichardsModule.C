@@ -55,6 +55,7 @@
 // Postprocessors
 #include "RichardsMass.h"
 #include "RichardsPiecewiseLinearSinkFlux.h"
+#include "RichardsHalfGaussianSinkFlux.h"
 #include "NodalMaxVarChange.h"
 #include "RichardsExcavFlow.h"
 #include "RichardsPlotQuantity.h"
@@ -127,6 +128,7 @@ Elk::Richards::registerObjects(Factory & factory)
   // Postprocessors
   registerPostprocessor(RichardsMass);
   registerPostprocessor(RichardsPiecewiseLinearSinkFlux);
+  registerPostprocessor(RichardsHalfGaussianSinkFlux);
   registerPostprocessor(NodalMaxVarChange);
   registerPostprocessor(RichardsExcavFlow);
   registerPostprocessor(RichardsPlotQuantity);
