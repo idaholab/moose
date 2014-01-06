@@ -28,14 +28,17 @@ class MachineWarehouse(object):
   ## Class constructor
   #
   #  Optional Arguments:
-  #    local = True | {False} - perform a local build (i.e., no remote machines)
-  #    jobs  = <int>           - override the automatic computation of number of jobs for 'make'
-  #    buck  = True | {False} - utilize the test machine (buck) for the list of machines on the s
-  #                             server (passed to DmakeRC)
+  #    local = True | {False}     - perform a local build (i.e., no remote machines)
+  #    jobs  = <int>              - override the automatic computation of number of jobs for 'make'
+  #    buck  = True | {False}     - utilize the test machine (buck) for the list of machines on the s
+  #                                 server (passed to DmakeRC)
   #    dedicated = True | {False} - run the machine as a dedicated build box (passed to DmakeRC)
-  #    disable = list<str> - list of hostnames, username, or ip addresses to exclude from DISTCC_HOSTS
-  #    allow = list<str> - list of ip addresses/hostnames to allow in DISTCC_HOSTS
-  #    serial = Ture | {False} - toggle the parallel creation of the Machine objects
+  #    disable = list<str>        - list of hostnames, username, or ip addresses to exclude from DISTCC_HOSTS
+  #    allow = list<str>          - list of ip addresses/hostnames to allow in DISTCC_HOSTS
+  #    serial = True | {False}    - toggle the parallel creation of the Machine objects
+  #    restrict = list<str>       - a list of ip addresses to consider for local build restriction, if the
+  #                                 local machine starts with any of the values in this list,
+  #                                 perform a local build
   # @see DmakeRC
   def __init__(self, **kwargs):
 
@@ -47,6 +50,13 @@ class MachineWarehouse(object):
     # Flag set to true of machines are built
     self._machines = False
 
+    # Flag if DISTCC_HOSTS line needs to be created
+    self._refresh = kwargs.pop('refresh', False)
+
+    # If disable/enable are used a refresh is required
+    if kwargs.get('disable', None) != None or kwargs.get('enable', False):
+      self._refresh = True
+
     # Get the optional input
     self._jobs = kwargs.pop('jobs', None)
     self._allow = kwargs.pop('allow', None)
@@ -56,6 +66,20 @@ class MachineWarehouse(object):
     self._local = kwargs.pop('local', False)
     if self._local:
       return
+
+    # Check that your IP address against the restricted
+    restrict = kwargs.pop("restrict", None)
+    if restrict != None:
+      on_network = False
+      for r in restrict:
+        if self.master.address.startswith(r):
+          on_network = True
+          break
+
+      if not on_network:
+        print "Your machine (" + self.master.address + ") is off network, performing a local build"
+        self._local = True
+        return
 
     # Read the .dmakerc and remote file
     self._dmakerc = DmakeRC(self.master, **kwargs)
@@ -75,26 +99,24 @@ class MachineWarehouse(object):
   #  @return jobs
   #
   #  Optional Arguments:
-  #    refresh = True | {False} - Force a refresh from the server
+  #    refresh = True | False   - Force a refresh from the server, defaults to value from constructor
   #    max = True | {False}     - Run the maximum no. of threads (passed to _buildHosts)
   #    localhost = <int>        - Set the DISTCC_HOSTS localhost value (passed to _buildHosts)
   #    localslots = <int>       - Set the DISTCC_HOSTS localslots value (passed to _buildHosts)
   #    localslots_cpp = <int>   - Set the DISTCC_HOSTS localslots_cpp value (passed to _buildHosts)
-  #    disable = list()         - A list of username,hostnames or ip addresses to disable
-  #                               from DISTCC_HOSTS line (names and numbers may be incomplete)
   #
   #  @see _buildHosts
   def getHosts(self, **kwargs):
 
     # Gather the options
-    refresh = kwargs.pop('refresh', False)
+    self._refresh = kwargs.pop('refresh', self._refresh)
 
     # Set refresh to true of any of the optional arguments are set
     if kwargs['max'] == True \
        or kwargs.pop('localhost', None) != None \
        or kwargs.pop('localslots', None) != None \
        or kwargs.pop('localslots_cpp', None) != None:
-      refresh = True
+      self._refresh = True
 
     # Return the local
     if self._local:
@@ -104,8 +126,12 @@ class MachineWarehouse(object):
       distcc_hosts = 'localhost/' + str(jobs)
       return distcc_hosts, jobs
 
+    # Check if the IP lists between the local and remote lists are different
+    if self._dmakerc._remote_ip != self._dmakerc._local_ip:
+      self._refresh = True
+
     # Build the machine objects (if desired or needed)
-    if refresh or self._dmakerc.distccHostsNeedsUpdate():
+    if self._refresh:
       self.startDaemon()
       self._buildHosts(**kwargs)
     else:

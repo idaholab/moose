@@ -140,12 +140,9 @@ if __name__ == "__main__":
     sub.wait()
 
   # Create the MachineWarehouse object
-  opt = subOptions(options,'local','buck','dedicated','jobs','description','clean','disable',\
+  opt = subOptions(options,'refresh','local','buck','dedicated','jobs','description','clean','disable',\
                    'enable','allow','serial')
-  warehouse = MachineWarehouse(**opt)
-
-  # Create the MachineOutput object
-  outputer = MachineOutput(warehouse)
+  warehouse = MachineWarehouse(restrict=['141','134'], **opt)
 
   # Kill the daemons
   if options.kill:
@@ -158,10 +155,11 @@ if __name__ == "__main__":
     sys.exit()
 
   # Extract the hosts and jobs from the warehouse.
-  opt = subOptions(options,'refresh','max','localhost','localslots','localslots_cpp')
+  opt = subOptions(options,'max','localhost','localslots','localslots_cpp')
   distcc_hosts, jobs = warehouse.getHosts(**opt)
 
   # Display the  output
+  outputer = MachineOutput(warehouse)
   outputer.display(distcc_hosts, jobs,
                    verbose=options.verbose,
                    make_args=make_args)

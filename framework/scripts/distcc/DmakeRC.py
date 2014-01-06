@@ -49,27 +49,19 @@ class DmakeRC(object):
       if os.path.exists(self._filename):
         os.remove(self._filename)
 
-    # Initialize the update variable, this value is True when when
-    # the DISTCC_HOSTS stored is out-of-date
-    self._update_distcc_hosts = False
-
     # Read the .dmakerc, stored as a dictionary which is accessible via
-    # the get/set methods of this object
-    self._dmakerc, local_ip = self._readLocalFile()
+    # the get/set methods of this object, this creates two member variables:
+    #  (1) _dmakerc -> stored dictionary
+    #  (2) _local_ip -> set of ip address read from the local .dmakerc file
+    self._readLocalFile()
 
     # Set/update the user supplied description of the local machine
     self._checkDescription(kwargs.pop('description', None))
 
-    # Read the remote machine file from the server, if nothing has changed
-    # this list will be identical to the HOST_LINES item in the self._dmakerc
-    # dictionary
-    self._remote, remote_ip = self._readRemoteFile()
-
-    # Check if the ip address differ between the local and remote lists, if so
-    # indicate an update is needed
-    if remote_ip != local_ip:
-      print remote_ip, local_ip
-      self._update_distcc_hosts = True
+    # Read the remote machine file from the server, this creates two member variables:
+    #  (1) _remote -> raw host information extracted from server
+    #  (2) _remote_ip -> set of ip address read from the remote file
+    self._readRemoteFile()
 
     # Return if the remote connection fails
     if self._remote == None:
@@ -82,12 +74,10 @@ class DmakeRC(object):
     # Enable previously disabled machines, requires update
     if kwargs.pop('enable', False):
       self.set(DISABLE=None)
-      self._update_distcc_hosts = True
 
     # Set the disable list to be the same as the input, requires update
     if kwargs['disable'] != None:
       self.set(DISABLE=kwargs['disable'])
-      self._update_distcc_hosts = True
 
 
   ## Accessor for stored variables (public)
@@ -126,29 +116,20 @@ class DmakeRC(object):
     # Loop through the keyword/value pairs
     for key, value in kwargs.iteritems():
 
-     # Error if the key is unknown
-     if key not in self._items:
-       print 'Error: Unknown key ' + key
-       sys.exit()
+      # Error if the key is unknown
+      if key not in self._items:
+        print 'Error: Unknown key ' + key
+        sys.exit()
 
-     # If the key is not in the dictionary or it has changed, update the value
-     if (key not in self._dmakerc) or (self._dmakerc[key] != value):
-       self._dmakerc[key] = value
+      # If the key is not in the dictionary or it has changed, update the value
+      if (key not in self._dmakerc) or (self._dmakerc[key] != value):
+        self._dmakerc[key] = value
 
     # Store the change to the file (this is allways done unless specified)
     if write:
       fid = open(self._filename, 'w')
       pickle.dump(self._dmakerc, fid)
       fid.close()
-
-
-  ## Was the .dmakerc file updated (public)
-  #  @return True if the DISTCC_HOSTS variable needs to be updated
-  def distccHostsNeedsUpdate(self):
-    if self.get('DISTCC_HOSTS') == None:
-      return True
-    else:
-      return self._update_distcc_hosts
 
 
   ## Return the status of the remote access (public)
@@ -167,23 +148,20 @@ class DmakeRC(object):
     # Read the file, if it exists
     if os.path.exists(self._filename):
       fid = open(self._filename, 'r')
-      data = pickle.load(fid)
+      self._dmakerc = pickle.load(fid)
       fid.close()
     else:
       data = dict()
       for item in self._items:
-        data.setdefault(item, None)
+        self._dmakerc.setdefault(item, None)
 
     # Clean up the hostlines
-    if data['HOST_LINES'] != None:
-      data['HOST_LINES'], ip = self._cleanHostLines(data['HOST_LINES'])
-
-    # Return the data
-    return data, ip
+    if self._dmakerc['HOST_LINES'] != None:
+      self._dmakerc['HOST_LINES'], self._local_ip = self._cleanHostLines(self._dmakerc['HOST_LINES'])
 
 
   ## Reads the remote machine list (private)
-  # @return A map of the data loaded from the .dmakerc
+  # Sets the _remote and _remote_ip member variables
   def _readRemoteFile(self):
 
     # Define the servers
@@ -216,8 +194,7 @@ class DmakeRC(object):
       return None
 
     # Return the host lines from the remote server
-    lines, ip = self._cleanHostLines(data)
-    return lines, ip
+    self._remote, self._remote_ip = self._cleanHostLines(data)
 
   ## Create/override the user supplied description (private)
   #  @param description A description of this machine
