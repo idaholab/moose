@@ -39,6 +39,7 @@ class MachineWarehouse(object):
   #    restrict = list<str>       - a list of ip addresses to consider for local build restriction, if the
   #                                 local machine starts with any of the values in this list,
   #                                 perform a local build
+  #    allow_off_network = True | {False} - if true, the above restrictions are ignored
   # @see DmakeRC
   def __init__(self, **kwargs):
 
@@ -68,8 +69,8 @@ class MachineWarehouse(object):
       return
 
     # Check that your IP address against the restricted
-    restrict = kwargs.pop("restrict", None)
-    if restrict != None:
+    restrict = kwargs.pop('restrict', None)
+    if (not kwargs.pop('allow_off_network')) and (restrict != None):
       on_network = False
       for r in restrict:
         if self.master.address.startswith(r):

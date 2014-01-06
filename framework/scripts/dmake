@@ -89,6 +89,7 @@ def parseArguments(args=None):
   distcc.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
   distcc.add_argument('--disable', nargs='+', help='Remove username/hostname/IP(s) from your DISTCC_HOSTS list')
   distcc.add_argument('--enable','-e', action='store_true', help='Enable the previousily disabled machines')
+  distcc.add_argument('--allow_off_network', action='store_true', help='Allow for off INL network to use distcc pool')
 
   # Options that do not run make
   daemon = parser.add_argument_group('Distcc Daemon Options')
@@ -141,7 +142,7 @@ if __name__ == "__main__":
 
   # Create the MachineWarehouse object
   opt = subOptions(options,'refresh','local','buck','dedicated','jobs','description','clean','disable',\
-                   'enable','allow','serial')
+                   'enable','allow','serial', 'allow_off_network')
   warehouse = MachineWarehouse(restrict=['141','134'], **opt)
 
   # Kill the daemons
