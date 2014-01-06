@@ -15,8 +15,7 @@ from DistccDaemon import *
 def createMachine(line):
   if len(line) == 0:
     return
-  parts = line.split(',')
-  return Machine(*parts)
+  return Machine(*line)
 
 ## @class MachineWarehouse
 #  Creates and controls the local and worker Machine objects, it mainly provides the
