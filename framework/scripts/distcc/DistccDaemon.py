@@ -71,7 +71,11 @@ class DistccDaemon(object):
     if os.path.exists(self._pidfile):
       f = open(self._pidfile)
       pid = int(f.read())
-      os.kill(pid, signal.SIGTERM)   # Tell the parent distccd process to terminate
+
+      try:
+        os.kill(pid, signal.SIGTERM)   # Tell the parent distccd process to terminate
+      except:  # This means the process must have died for other reasons
+        return
 
       # Make sure the process is terminated
       try:
