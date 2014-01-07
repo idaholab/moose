@@ -37,13 +37,26 @@ def runMake(distcc_hosts, jobs, **kwargs):
   # Set distcc timeout
   os.environ['DISTCC_IO_TIMEOUT'] = str(kwargs.pop('timeout', 30))
 
+  # Locate the Makefile
+  make_dir = None
+  dir = os.getcwd()
+  while dir != '/':
+    dir = os.path.realpath(os.path.join(dir, '..'))
+    if os.path.exists(os.path.join(dir, 'Makefile')):
+      make_dir = dir
+
+  # Exit if 'Makefile' was not located
+  if make_dir == None:
+    print 'Error: No Makefile located'
+    sys.exit()
+
   # Build the make command
   make = ['make', '-j', str(jobs)]
   make.extend(make_args)
 
   # Run make
   strt = time.clock()
-  sub = subprocess.Popen(make)
+  sub = subprocess.Popen(make, cwd=make_dir)
 
   # Wait for process to terminate
   while sub.poll() == None:
