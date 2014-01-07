@@ -40,6 +40,8 @@ class MachineWarehouse(object):
   #                                 local machine starts with any of the values in this list,
   #                                 perform a local build
   #    allow_off_network = True | {False} - if true, the above restrictions are ignored
+  #    no_daemon = True | {False} - set to true to disable the starting of daemons and kill existings
+  #
   # @see DmakeRC
   def __init__(self, **kwargs):
 
@@ -62,6 +64,7 @@ class MachineWarehouse(object):
     self._jobs = kwargs.pop('jobs', None)
     self._allow = kwargs.pop('allow', None)
     self._serial = kwargs.pop('serial', False)
+    self._no_daemon = kwargs.pop('no_daemon', False)
 
     # If this is a local build, there is nothing more to do
     self._local = kwargs.pop('local', False)
@@ -92,6 +95,10 @@ class MachineWarehouse(object):
 
     # Create the Deamon object
     self._daemon = DistccDaemon(self.master, dedicated=kwargs.pop('dedicated', False))
+
+    # Kill daemons
+    if self._no_daemon:
+      self.killDaemon()
 
 
   ## Return the hosts line and number of jobs (public)
@@ -149,6 +156,10 @@ class MachineWarehouse(object):
   ## Starts the distccd daemons (public)
   # @see DistccDaemon
   def startDaemon(self):
+
+    # Return if no_daemon = True
+    if self._no_daemon:
+      return
 
     # The Machine objects are required
     self._buildWorkers()

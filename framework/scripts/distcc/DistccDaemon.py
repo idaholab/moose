@@ -68,6 +68,7 @@ class DistccDaemon(object):
   ## Stops all running distccd processes (public)
   # @see start
   def kill(self):
+
     if os.path.exists(self._pidfile):
       f = open(self._pidfile)
       pid = int(f.read())

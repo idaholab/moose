@@ -109,7 +109,7 @@ def parseArguments(args=None):
   daemon = parser.add_argument_group('Distcc Daemon Options')
   daemon.add_argument('--daemon', action='store_true', help='Launch distcc as a daemon (no make)')
   daemon.add_argument('--kill', action='store_true', help='Kill distcc as a daemon (no make)')
-  daemon.add_argument('--no-daemon', action='store_true', help='Do not launch any daemon processes')
+  daemon.add_argument('--no-daemon', action='store_true', help='Do not launch any daemon processes and kill existing')
   daemon.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
   daemon.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
 
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     sub.wait()
 
   # Create the MachineWarehouse object
-  opt = subOptions(options,'refresh','local','buck','dedicated','jobs','description','clean','disable',\
+  opt = subOptions(options,'refresh','no_daemon','local','buck','dedicated','jobs','description','clean','disable',\
                    'enable','allow','serial', 'allow_off_network')
   warehouse = MachineWarehouse(restrict=['141','134'], **opt)
 
