@@ -53,7 +53,7 @@ IsotropicPlasticity::initStatefulProperties(unsigned n_points)
 {
   for (unsigned qp(0); qp < n_points; ++qp)
   {
-    _hardening_variable[qp] = _hardening_variable_old[qp] = 0;
+    _hardening_variable[qp] = 0;
     if (_scalar_plastic_strain)
     {
       (*_scalar_plastic_strain)[qp] = (*_scalar_plastic_strain_old)[qp] = 0;
@@ -86,6 +86,7 @@ Real
 IsotropicPlasticity::computeResidual(unsigned qp, Real effectiveTrialStress, Real scalar)
 {
   Real residual(0);
+  _hardening_slope = 0;
   if (_yield_condition > 0)
   {
     _hardening_slope = computeHardening( qp, scalar );
