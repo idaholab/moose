@@ -30,12 +30,12 @@ public:
    */
   HexPolycrystalIC(const std::string & name,
                 InputParameters parameters);
-  
+
   virtual void initialSetup();
 
 private:
   Real _x_offset;
-  
+  Real _perturbation_percent;
 };
 
 #endif //HEXPOLYCRYSTALIC_H

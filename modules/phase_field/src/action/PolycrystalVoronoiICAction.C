@@ -28,7 +28,7 @@ InputParameters validParams<PolycrystalVoronoiICAction>()
   params.addParam<bool>("cody_test",false,"Use set grain center points for Cody's test. Grain num MUST equal 10");
 
   params.addParam<bool>("columnar_3D",false,"3D microstructure will be columnar in the z-direction?");
-  
+
 
   return params;
 }
@@ -41,15 +41,15 @@ PolycrystalVoronoiICAction::PolycrystalVoronoiICAction(const std::string & name,
 {}
 
 void
-PolycrystalVoronoiICAction::act() 
-{ 
+PolycrystalVoronoiICAction::act()
+{
 #ifdef DEBUG
   std::cerr << "Inside the PolycrystalVoronoiICAction Object\n";
 #endif
 
 // Loop through the number of order parameters
-  
-  
+
+
   for (unsigned int crys = 0; crys<_crys_num; crys++)
   {
     //Create variable names
@@ -67,8 +67,8 @@ PolycrystalVoronoiICAction::act()
     poly_params.set<unsigned int>("rand_seed") = getParam<unsigned int>("rand_seed");
     poly_params.set<bool>("cody_test") = getParam<bool>("cody_test");
     poly_params.set<bool>("columnar_3D") = getParam<bool>("columnar_3D");
-    
-    
+
+
     //Add initial condition
     _problem->addInitialCondition("PolycrystalReducedIC", "InitialCondition", poly_params);
   }

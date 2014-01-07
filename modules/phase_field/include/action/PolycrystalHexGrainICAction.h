@@ -22,7 +22,7 @@ private:
   unsigned int _grain_num;
 
   Real _x_offset;
-  
+  Real _perturbation_percent;
 };
 
 template<>
