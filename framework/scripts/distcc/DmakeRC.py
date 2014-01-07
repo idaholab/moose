@@ -143,7 +143,7 @@ class DmakeRC(object):
   def _readLocalFile(self):
 
     # An empty set of IP addresses
-    ip = Set()
+    self._local_ip = Set()
 
     # Read the file, if it exists
     if os.path.exists(self._filename):
@@ -151,7 +151,7 @@ class DmakeRC(object):
       self._dmakerc = pickle.load(fid)
       fid.close()
     else:
-      data = dict()
+      self._dmakerc = dict()
       for item in self._items:
         self._dmakerc.setdefault(item, None)
 
