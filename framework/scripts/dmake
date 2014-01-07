@@ -44,6 +44,7 @@ def runMake(distcc_hosts, jobs, **kwargs):
     dir = os.path.realpath(os.path.join(dir, '..'))
     if os.path.exists(os.path.join(dir, 'Makefile')):
       make_dir = dir
+      break
 
   # Exit if 'Makefile' was not located
   if make_dir == None:
