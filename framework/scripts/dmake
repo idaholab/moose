@@ -40,11 +40,11 @@ def runMake(distcc_hosts, jobs, **kwargs):
   # Locate the Makefile
   make_dir = None
   dir = os.getcwd()
-  while dir != '/':
-    dir = os.path.realpath(os.path.join(dir, '..'))
+  while dir != os.getenv('HOME'):
     if os.path.exists(os.path.join(dir, 'Makefile')):
       make_dir = dir
       break
+    dir = os.path.realpath(os.path.join(dir, '..'))
 
   # Exit if 'Makefile' was not located
   if make_dir == None:
