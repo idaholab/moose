@@ -1,6 +1,8 @@
 #include "HexPolycrystalIC.h"
 #include "MooseRandom.h"
 
+#include <cmath>
+
 template<>
 InputParameters validParams<HexPolycrystalIC>()
 {
@@ -31,6 +33,18 @@ HexPolycrystalIC::initialSetup()
 {
   MooseRandom::seed(_rand_seed);
 
+  unsigned int root = std::floor(std::pow(_grain_num, 1.0/_mesh.dimension()));
+
+  if (_grain_num != std::pow((float)root, (float)_mesh.dimension()))
+  {
+    root++;  // Try "ceiling due to round off error
+    if (_grain_num != std::pow((float)root, (float)_mesh.dimension()))
+      mooseError("HexPolycrystalIC requires a square or cubic number depending on the mesh dimension");
+  }
+
+  unsigned int third_dimension_iterations = _mesh.dimension() == 3 ? root : 1;
+  Real ndist = 1.0/root;
+
  //Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
   {
@@ -46,36 +60,26 @@ HexPolycrystalIC::initialSetup()
   _assigned_op.resize(_grain_num);
   std::vector<Real> distances(_grain_num);
 
-  std::vector<Point> holder;
-  holder.resize(_grain_num);
+  std::vector<Point> holder(_grain_num);
 
-  unsigned int nxy = std::sqrt(_grain_num);
-  Real ndist = 1.0/std::sqrt(_grain_num);
-
-
-  unsigned int shift = 1;
   unsigned int count = 0;
-
   //Assign the relative center points positions, defining the grains according to a hexagonal pattern
-  for (unsigned int i = 0; i<nxy; i++)
-  {
-    for (unsigned int j = 0; j<nxy; j++)
-    {
-      //Set x-coordinate
-      if (shift == 2)
-        holder[count](0) = (i + 0.5 + _x_offset)*ndist;
-      if (shift == 1)
-        holder[count](0) = (i + _x_offset)*ndist;
+  for (unsigned int k = 0; k<third_dimension_iterations; ++k)
+    for (unsigned int j = 0; j<root; ++j)
+      for (unsigned int i = 0; i<root; ++i)
+      {
+        //Set x-coordinate
+        holder[count](0) = i*ndist + (0.5*ndist*(j%2)) + _x_offset*ndist;
 
-      holder[count](1) = j*ndist;
-      //set y-coordinate
-      shift = 3 - shift;
-      //increment counter
-      count++;
-    }
+        //set y-coordinate
+        holder[count](1) = j*ndist + (0.5*ndist*(k%2));
 
-    shift = 1;
-  }
+        // set z-coordinate
+        holder[count](2) = k*ndist;
+
+        //increment counter
+        count++;
+      }
 
   //Assign center point values
   for (unsigned int grain=0; grain<_grain_num; grain++)
@@ -84,7 +88,7 @@ HexPolycrystalIC::initialSetup()
       if (_range(i) == 0)
         continue;
 
-      Real perturbation_dist = (_range(i)/nxy * (MooseRandom::rand()*2 - 1.0)) * _perturbation_percent;  // Perturb -100 to 100%
+      Real perturbation_dist = (_range(i)/root * (MooseRandom::rand()*2 - 1.0)) * _perturbation_percent;  // Perturb -100 to 100%
       _centerpoints[grain](i) = _bottom_left(i) + _range(i)*holder[grain](i) + perturbation_dist;
 
       if (_centerpoints[grain](i) > _top_right(i))
