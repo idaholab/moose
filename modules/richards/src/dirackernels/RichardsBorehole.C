@@ -10,7 +10,7 @@ InputParameters validParams<RichardsBorehole>()
   params.addRequiredParam<Real>("bottom_pressure", "Pressure at the bottom of the borehole");
   params.addRequiredParam<RealVectorValue>("unit_weight", "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  Note that the borehole pressure at a given z position is bottom_pressure + unit_weight*(p - p_bottom), where p=(x,y,z) and p_bottom=(x,y,z) of the bottom point of the borehole.  If you don't want bottomhole pressure to vary in the borehole just set unit_weight=0.  Typical value is gravity = (0,0,-1E4)");
   params.addRequiredParam<std::string>("point_file", "The file containing the coordinates of the point sinks that approximate the borehole.  Each line in the file must contain a space-separated coordinate.  The last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  Note that you will get segementation faults if your points do not lie within your mesh!");
-  params.addRequiredParam<PostprocessorName>("reporter", "the total fluid mass flowing out of the system to the sink for this time step will be recorded.");
+  params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the borehole for each time step.");
   params.addClassDescription("Approximates a borehole in the mesh with given well constant using a number of point sinks whose positions are read from a file");
   return params;
 }
@@ -28,6 +28,8 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
 
+    _permeability(getMaterialProperty<RealTensorValue>("permeability")),
+
     _dseff(getMaterialProperty<std::vector<std::vector<Real> > >("ds_eff")),
 
     _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
@@ -36,7 +38,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     _density(getMaterialProperty<std::vector<Real> >("density")), 
     _ddensity(getMaterialProperty<std::vector<Real> >("ddensity")),
   
-    _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("reporter"))),
+    _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
     _point_file(getParam<std::string>("point_file"))
 
 {
@@ -45,6 +47,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   if (!file.good())
     mooseError("Error opening file '" + _point_file + "' from RichardsBorehole.");
 
+  // construct the arrays of x, array of y and array of z
   std::vector<Real> scratch;
   while (parseNextLineReals(file, scratch))
     {
@@ -72,6 +75,64 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   _bottom_point(1) = _ys[num_pts - 1];
   _bottom_point(2) = _zs[num_pts - 1];
 
+  // construct the line-segment lengths between each point
+  _seg_len.resize(num_pts-1);
+  for (unsigned int i=0 ; i<_xs.size()-1; ++i)
+    {
+      _seg_len[i] = std::sqrt(std::pow(_xs[i+1] - _xs[i], 2) + std::pow(_ys[i+1] - _ys[i], 2) + std::pow(_zs[i+1] - _zs[i], 2));
+      if (_seg_len[i] == 0)
+	mooseError("Borehole has a zero-segment length at (x,y,z) = " << _xs[i] << " " << _ys[i] << " " << _zs[i] << "\n");
+    }
+
+  // construct the rotation matrix needed to rotate the permeability
+  _rot_matrix.resize(num_pts-1);
+  RealVectorValue x0(1,0,0);
+  RealVectorValue y0(0,1,0);
+  RealVectorValue z0(0,0,1);
+  for (unsigned int i=0 ; i<_xs.size()-1; ++i)
+    {
+      // v2 is unit vector along line segment
+      RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
+      v2 /= std::sqrt(v2*v2);
+
+      // construct v0 and v1 to be orthonormal to v2
+      // TODO: perhaps there is a quicker and neater way?
+      RealVectorValue v0, v1;
+      Real projx = v2*x0;
+      Real projy = v2*y0;
+      Real projz = v2*z0;
+      // possible permutations are, in order of increasing size:
+      // xyz, xzy, yxz, yzx, zxy, zyx
+      // for these permutations, a suitable initial direction for v0 is
+      // x, x, y, y, z, z
+      if ( (projz >= projy && projy >= projx) || (projy >= projz && projz >= projx) )
+	v0(0) = 1;
+      else if ( (projz >= projx && projx >= projy) || (projx >= projz && projz >= projy) )
+	v0(1) = 1;
+      else
+	v0(2) = 1;
+      // use cross product to get v1 = v2 x v0
+      v1(0) = v2(1)*v0(2) - v2(2)*v0(1);
+      v1(1) = v2(2)*v0(0) - v2(0)*v0(2);
+      v1(2) = v2(0)*v0(1) - v2(1)*v0(0);
+      v1 /= std::sqrt(v1*v1);
+      // now use cross product to get v0 = v1 x v2
+      v0(0) = v1(1)*v2(2) - v1(2)*v2(1);
+      v0(1) = v1(2)*v2(0) - v1(0)*v2(2);
+      v0(2) = v1(0)*v2(1) - v1(1)*v2(0);
+      v0 /= std::sqrt(v0*v0); // reduces roundoff error???
+	
+      // rotation matrix rotates permeability tensor so that the z-prime direction lies along v2
+      _rot_matrix[i](0,0) = v0*x0;
+      _rot_matrix[i](0,1) = v0*y0;
+      _rot_matrix[i](0,2) = v0*z0;
+      _rot_matrix[i](1,0) = v1*x0;
+      _rot_matrix[i](1,1) = v1*y0;
+      _rot_matrix[i](1,2) = v1*z0;
+      _rot_matrix[i](2,0) = v2*x0;
+      _rot_matrix[i](2,1) = v2*y0;
+      _rot_matrix[i](2,2) = v2*z0;
+    }
 }
 
 bool RichardsBorehole::parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
@@ -115,6 +176,10 @@ RichardsBorehole::computeQpResidual()
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think
 
   Real mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
+
+  RealTensorValue rot_perm = (_rot_matrix[0]*_permeability[_qp])*_rot_matrix[0].transpose();
+  Real effective_perm = std::sqrt(rot_perm(0,0)*rot_perm(1,1) - rot_perm(0,1)*rot_perm(1,0));
+  //std::cout << "eff = " << effective_perm << " rot_perm=" << rot_perm << "\n";
 
   Real flow(0.0);
 

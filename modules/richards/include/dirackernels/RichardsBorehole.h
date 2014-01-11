@@ -32,6 +32,8 @@ protected:
 
   MaterialProperty<std::vector<Real> > &_viscosity;
 
+  MaterialProperty<RealTensorValue> & _permeability;
+
   MaterialProperty<std::vector<std::vector<Real> > > &_dseff;
 
   MaterialProperty<std::vector<Real> > &_rel_perm;
@@ -47,6 +49,10 @@ protected:
   std::vector<Real> _ys;
   std::vector<Real> _zs;
   Point _bottom_point;
+
+  std::vector<Real> _seg_len;
+
+  std::vector<RealTensorValue> _rot_matrix;
 
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
 };
