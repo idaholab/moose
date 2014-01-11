@@ -22,6 +22,8 @@ public:
   virtual Real computeQpJacobian();
 
 protected:
+  bool _debug_things;
+
   const RichardsPorepressureNames & _pp_name_UO;
   unsigned int _pvar;
 
@@ -50,11 +52,12 @@ protected:
   std::vector<Real> _zs;
   Point _bottom_point;
 
-  std::vector<Real> _seg_len;
+  std::vector<Real> _half_seg_len;
 
   std::vector<RealTensorValue> _rot_matrix;
 
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
+  RealTensorValue rotVecToZ(RealVectorValue v2);
 };
 
 #endif //RICHARDSBOREHOLE_H

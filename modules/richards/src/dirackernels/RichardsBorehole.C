@@ -11,12 +11,15 @@ InputParameters validParams<RichardsBorehole>()
   params.addRequiredParam<RealVectorValue>("unit_weight", "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  Note that the borehole pressure at a given z position is bottom_pressure + unit_weight*(p - p_bottom), where p=(x,y,z) and p_bottom=(x,y,z) of the bottom point of the borehole.  If you don't want bottomhole pressure to vary in the borehole just set unit_weight=0.  Typical value is gravity = (0,0,-1E4)");
   params.addRequiredParam<std::string>("point_file", "The file containing the coordinates of the point sinks that approximate the borehole.  Each line in the file must contain a space-separated coordinate.  The last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  Note that you will get segementation faults if your points do not lie within your mesh!");
   params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the borehole for each time step.");
+  params.addParam<bool>("MyNameIsAndyWilkins", true, "Used for debugging by Andy");
   params.addClassDescription("Approximates a borehole in the mesh with given well constant using a number of point sinks whose positions are read from a file");
   return params;
 }
 
 RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters parameters) :
     DiracKernel(name, parameters),
+
+    _debug_things(getParam<bool>("MyNameIsAndyWilkins")),
 
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
     _pvar(_pp_name_UO.pressure_var_num(_var.index())),
@@ -76,63 +79,108 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   _bottom_point(2) = _zs[num_pts - 1];
 
   // construct the line-segment lengths between each point
-  _seg_len.resize(num_pts-1);
+  _half_seg_len.resize(num_pts-1);
   for (unsigned int i=0 ; i<_xs.size()-1; ++i)
     {
-      _seg_len[i] = std::sqrt(std::pow(_xs[i+1] - _xs[i], 2) + std::pow(_ys[i+1] - _ys[i], 2) + std::pow(_zs[i+1] - _zs[i], 2));
-      if (_seg_len[i] == 0)
+      _half_seg_len[i] = 0.5*std::sqrt(std::pow(_xs[i+1] - _xs[i], 2) + std::pow(_ys[i+1] - _ys[i], 2) + std::pow(_zs[i+1] - _zs[i], 2));
+      if (_half_seg_len[i] == 0)
 	mooseError("Borehole has a zero-segment length at (x,y,z) = " << _xs[i] << " " << _ys[i] << " " << _zs[i] << "\n");
     }
 
   // construct the rotation matrix needed to rotate the permeability
   _rot_matrix.resize(num_pts-1);
-  RealVectorValue x0(1,0,0);
-  RealVectorValue y0(0,1,0);
-  RealVectorValue z0(0,0,1);
   for (unsigned int i=0 ; i<_xs.size()-1; ++i)
     {
-      // v2 is unit vector along line segment
       RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
-      v2 /= std::sqrt(v2*v2);
-
-      // construct v0 and v1 to be orthonormal to v2
-      // TODO: perhaps there is a quicker and neater way?
-      RealVectorValue v0, v1;
-      Real projx = v2*x0;
-      Real projy = v2*y0;
-      Real projz = v2*z0;
-      // possible permutations are, in order of increasing size:
-      // xyz, xzy, yxz, yzx, zxy, zyx
-      // for these permutations, a suitable initial direction for v0 is
-      // x, x, y, y, z, z
-      if ( (projz >= projy && projy >= projx) || (projy >= projz && projz >= projx) )
-	v0(0) = 1;
-      else if ( (projz >= projx && projx >= projy) || (projx >= projz && projz >= projy) )
-	v0(1) = 1;
-      else
-	v0(2) = 1;
-      // use cross product to get v1 = v2 x v0
-      v1(0) = v2(1)*v0(2) - v2(2)*v0(1);
-      v1(1) = v2(2)*v0(0) - v2(0)*v0(2);
-      v1(2) = v2(0)*v0(1) - v2(1)*v0(0);
-      v1 /= std::sqrt(v1*v1);
-      // now use cross product to get v0 = v1 x v2
-      v0(0) = v1(1)*v2(2) - v1(2)*v2(1);
-      v0(1) = v1(2)*v2(0) - v1(0)*v2(2);
-      v0(2) = v1(0)*v2(1) - v1(1)*v2(0);
-      v0 /= std::sqrt(v0*v0); // reduces roundoff error???
-	
-      // rotation matrix rotates permeability tensor so that the z-prime direction lies along v2
-      _rot_matrix[i](0,0) = v0*x0;
-      _rot_matrix[i](0,1) = v0*y0;
-      _rot_matrix[i](0,2) = v0*z0;
-      _rot_matrix[i](1,0) = v1*x0;
-      _rot_matrix[i](1,1) = v1*y0;
-      _rot_matrix[i](1,2) = v1*z0;
-      _rot_matrix[i](2,0) = v2*x0;
-      _rot_matrix[i](2,1) = v2*y0;
-      _rot_matrix[i](2,2) = v2*z0;
+      _rot_matrix[i] = rotVecToZ(v2);
     }
+
+  if (_debug_things)
+    {
+      std::cout << "Checking rotation matrices\n";
+      RealVectorValue zzz(0,0,1);
+      RealTensorValue iii;
+      iii(0,0) = 1;
+      iii(1,1) = 1;
+      iii(2,2) = 1;
+      RealVectorValue vec0;
+      RealTensorValue ten0;
+      Real the_sum;
+      for (unsigned int i=0 ; i<_xs.size()-1; ++i)
+	{
+	  // check rotation matrix does the correct rotation
+	  RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
+	  v2 /= std::sqrt(v2*v2);
+	  vec0 = _rot_matrix[i]*v2 - zzz;
+	  if ((vec0*vec0) > 1E-20)
+	    mooseError("Rotation matrix for v2 = " << v2 << " is wrong.  It is " << _rot_matrix[i] << "\n");
+	  
+	  // check rotation matrix is orthogonal
+	  ten0 = _rot_matrix[i]*_rot_matrix[i].transpose() - iii;
+	  the_sum = 0;
+	  for (unsigned int j=0 ; j<3; ++j)
+	    for (unsigned int k=0 ; k<3; ++k)
+	      the_sum = ten0(j,k)*ten0(j,k);
+	  if (the_sum > 1E-20)
+	    mooseError("Rotation matrix for v2 = " << v2 << " does not obey R.R^T=I.  It is " << _rot_matrix[i] << "\n");
+
+	  ten0 = _rot_matrix[i].transpose()*_rot_matrix[i] - iii;
+	  the_sum = 0;
+	  for (unsigned int j=0 ; j<3; ++j)
+	    for (unsigned int k=0 ; k<3; ++k)
+	      the_sum = ten0(j,k)*ten0(j,k);
+	  if (the_sum > 1E-20)
+	    mooseError("Rotation matrix for v2 = " << v2 << " does not obey R^T.R=I.  It is " << _rot_matrix[i] << "\n");
+	}
+    }
+
+}
+
+RealTensorValue
+RichardsBorehole::rotVecToZ(RealVectorValue v2)
+// provides a rotation matrix that will rotate the vector v2 to the z axis (the "2" direction)
+{
+  // ensure that v2 is normalised
+  v2 /= std::sqrt(v2*v2);
+
+  // construct v0 and v1 to be orthonormal to v2
+  // and form a RH basis, that is, so v1 x v2 = v0
+
+  // Use Gram-Schmidt method to find v1.  
+  RealVectorValue v1;
+  // Need a prototype for v1 first, and this is done by looking at the smallest component of v2
+  if ( (v2(2) >= v2(1) && v2(1) >= v2(0)) || (v2(1) >= v2(2) && v2(2) >= v2(0)) )
+    // v2(0) is the smallest component
+    v1(0) = 1;
+  else if ( (v2(2) >= v2(0) && v2(0) >= v2(1)) || (v2(0) >= v2(2) && v2(2) >= v2(1)) )
+    // v2(1) is the smallest component
+    v1(1) = 1;
+  else
+    // v2(2) is the smallest component
+    v1(2) = 1;
+  // now Gram-Schmidt
+  v1 -= (v1*v2)*v2;
+  v1 /= std::sqrt(v1*v1);
+
+  // now use v0 = v1 x v2
+  RealVectorValue v0;
+  v0(0) = v1(1)*v2(2) - v1(2)*v2(1);
+  v0(1) = v1(2)*v2(0) - v1(0)*v2(2);
+  v0(2) = v1(0)*v2(1) - v1(1)*v2(0);
+
+  // the desired rotation matrix is just
+  RealTensorValue rot;
+  rot(0, 0) = v0(0);
+  rot(0, 1) = v0(1);
+  rot(0, 2) = v0(2);
+  rot(1, 0) = v1(0);
+  rot(1, 1) = v1(1);
+  rot(1, 2) = v1(2);
+  rot(2, 0) = v2(0);
+  rot(2, 1) = v2(1);
+  rot(2, 2) = v2(2);
+
+  return rot;
 }
 
 bool RichardsBorehole::parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
