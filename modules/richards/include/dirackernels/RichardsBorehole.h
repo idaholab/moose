@@ -47,6 +47,7 @@ protected:
   RichardsSumQuantity & _total_outflow_mass;
   std::string _point_file;
 
+  std::vector<Real> _rs;
   std::vector<Real> _xs;
   std::vector<Real> _ys;
   std::vector<Real> _zs;
@@ -58,6 +59,7 @@ protected:
 
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
   RealTensorValue rotVecToZ(RealVectorValue v2);
+  Real wellConstant(const RealTensorValue & perm, const RealTensorValue & rot, const Real & half_len, const Elem * ele, const Real & rad);
 };
 
 #endif //RICHARDSBOREHOLE_H
