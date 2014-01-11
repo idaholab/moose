@@ -178,8 +178,68 @@ RichardsBorehole::computeQpResidual()
   Real mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
 
   RealTensorValue rot_perm = (_rot_matrix[0]*_permeability[_qp])*_rot_matrix[0].transpose();
-  Real effective_perm = std::sqrt(rot_perm(0,0)*rot_perm(1,1) - rot_perm(0,1)*rot_perm(1,0));
+  Real trace2D = rot_perm(0,0) + rot_perm(1,1);
+  Real det2D = rot_perm(0,0)*rot_perm(1,1) - rot_perm(0,1)*rot_perm(1,0);
+  Real eig_val1 = 0.5*trace2D + std::sqrt(0.25*trace2D*trace2D - det2D);
+  Real eig_val2 = 0.5*trace2D - std::sqrt(0.25*trace2D*trace2D - det2D);
+  RealVectorValue eig_vec1, eig_vec2;
+  if (rot_perm(1,0) != 0)
+    {
+      eig_vec1(0) = eig_val1 - rot_perm(1,1);
+      eig_vec1(1) = rot_perm(1,0);
+      eig_vec2(0) = eig_val2 - rot_perm(1,1);
+      eig_vec1(1) = rot_perm(1,0);
+    }
+  else if (rot_perm(0,1) != 0)
+    {
+      eig_vec1(0) = rot_perm(0,1);
+      eig_vec1(1) = eig_val1 - rot_perm(0,0);
+      eig_vec2(0) = rot_perm(0,1);
+      eig_vec2(1) = eig_val2 - rot_perm(0,0);
+    }
+  else // off diagonal terms are both zero
+    { 
+      eig_vec1(0) = 1;
+      eig_vec2(1) = 1;
+    }
+  // now rotate these to original frame and normalise
+  eig_vec1 = _rot_matrix[0].transpose()*eig_vec1;
+  eig_vec1 /= std::sqrt(eig_vec1*eig_vec1);
+  eig_vec2 = _rot_matrix[0].transpose()*eig_vec2;
+  eig_vec2 /= std::sqrt(eig_vec2*eig_vec2);
+
+  Real max1 = eig_vec1*_current_elem->point(0);
+  Real max2 = eig_vec2*_current_elem->point(0);
+  Real min1 = max1;
+  Real min2 = min2;
+  Real proj;
+  for (unsigned int i = 1; i < _current_elem->n_nodes(); i++)
+    {
+      proj = eig_vec1*_current_elem->point(i);
+      max1 = (max1 < proj) ? proj : max1;
+      min1 = (min1 < proj) ? min1 : proj;
+
+      proj = eig_vec2*_current_elem->point(i);
+      max2 = (max2 < proj) ? proj : max2;
+      min2 = (min2 < proj) ? min2 : proj;
+    }
+  Real ll1 = max1 - min1;
+  Real ll2 = max2 - min2;
+    
+  //std::cout << " max1, min1, max2, min2 " << max1 << " " << min1 << " " << max2 << " " << min2 << "\n";
+
+  Real r0 = 0.28*std::sqrt( std::sqrt(eig_val1/eig_val2)*std::pow(ll2, 2) + std::sqrt(eig_val2/eig_val1)*std::pow(ll1, 2)) / ( std::pow(eig_val1/eig_val2, 0.25) + std::pow(eig_val2/eig_val1, 0.25) );
+  
+  Real effective_perm = std::sqrt(det2D);
   //std::cout << "eff = " << effective_perm << " rot_perm=" << rot_perm << "\n";
+
+  Real bhole_len = 1.0;
+  Real mypi = 3.1415927;
+  Real borehole_radius = 1.0;
+
+  Real wc = 2*mypi*effective_perm*bhole_len/std::log(r0/borehole_radius);
+
+  std::cout << "wc = " << wc << "\n";
 
   Real flow(0.0);
 
