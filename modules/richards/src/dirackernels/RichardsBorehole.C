@@ -5,14 +5,13 @@ InputParameters validParams<RichardsBorehole>()
 {
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
-  params.addRequiredParam<Real>("well_constant_production", "The well constant for the borehole that will be used if fluid pressure > borehole pressure.  If this is positive then the borehole will act as a sink when fluid pressure > borehole pressure.  Set to zero if you want only injection.");
-  params.addRequiredParam<Real>("well_constant_injection", "The well constant for the borehole that will be used if fluid pressure < borehole pressure.  If this is positive then the borehole will act as a source when fluid pressure < borehole pressure.  Set to zero if you want only production.");
+  params.addRequiredParam<Real>("character", "If zero then borehole does nothing.  If positive the borehole acts as a sink (production well) for porepressure > borehole pressure, and does nothing otherwise.  If negative the borehole acts as a source (injection well) for porepressure < borehole pressure, and does nothing otherwise.  The flow rate to/from the borehole is multiplied by |character|, so usually character = +/- 1, but you can specify other quantities to provide an overall scaling to the flow if you like.");
   params.addRequiredParam<Real>("bottom_pressure", "Pressure at the bottom of the borehole");
   params.addRequiredParam<RealVectorValue>("unit_weight", "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  Note that the borehole pressure at a given z position is bottom_pressure + unit_weight*(p - p_bottom), where p=(x,y,z) and p_bottom=(x,y,z) of the bottom point of the borehole.  If you don't want bottomhole pressure to vary in the borehole just set unit_weight=0.  Typical value is gravity = (0,0,-1E4)");
   params.addRequiredParam<std::string>("point_file", "The file containing the borehole radii and coordinates of the point sinks that approximate the borehole.  Each line in the file must contain a space-separated radius and coordinate.  Ie r x y z.  The last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  Note that you will get segementation faults if your points do not lie within your mesh!");
   params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the borehole for each time step.");
   params.addParam<bool>("MyNameIsAndyWilkins", true, "Used for debugging by Andy");
-  params.addClassDescription("Approximates a borehole in the mesh with given well constant using a number of point sinks whose positions are read from a file");
+  params.addClassDescription("Approximates a borehole in the mesh with given bottomhole pressure, and radii using a number of point sinks whose positions are read from a file");
   return params;
 }
 
@@ -24,8 +23,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
     _pvar(_pp_name_UO.pressure_var_num(_var.index())),
 
-    _well_constant_production(getParam<Real>("well_constant_production")),
-    _well_constant_injection(getParam<Real>("well_constant_injection")),
+    _character(getParam<Real>("character")),
     _p_bot(getParam<Real>("bottom_pressure")),
     _unit_weight(getParam<RealVectorValue>("unit_weight")),
 
@@ -96,6 +94,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
       _rot_matrix[i] = rotVecToZ(v2);
     }
 
+  // do debugging if AndyWilkins
   if (_debug_things)
     {
       std::cout << "Checking rotation matrices\n";
@@ -297,57 +296,71 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
 Real
 RichardsBorehole::computeQpResidual()
 {
-  Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think
+  if (_character == 0.0) return 0.0;
+
+  Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
 
   Real mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
 
   unsigned int current_dirac_ptid = 0;
 
-  Real flow(0.0);
+  Real outflow(0.0); // this is the flow rate from porespace out of the system
 
   Real wc(0.0);
   if (current_dirac_ptid > 0)
     // contribution from half-segment "behind" this point
     {
       wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
+      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+	// injection, so outflow<0 || // production, so outflow>0
+	outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure); 
     }
 
   if (current_dirac_ptid < _zs.size() - 1)
     // contribution from half-segment "ahead of" this point
     {
       wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
+      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+	// injection, so outflow<0 || // production, so outflow>0
+	outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure); 
     }
 
-
-  if (_u[_qp] <= bh_pressure) // injection case (borehole is a source)
-    flow += _test[_i][_qp]*_well_constant_injection*mob*(_u[_qp] - bh_pressure);
-  else // production case (borehole is a sink)
-    flow += _test[_i][_qp]*_well_constant_production*mob*(_u[_qp] - bh_pressure);
-
-  _total_outflow_mass.add(flow*_dt); // this is not thread safe, but DiracKernel's aren't currently threaded
-  return flow;
+  _total_outflow_mass.add(outflow*_dt); // this is not thread safe, but DiracKernel's aren't currently threaded
+  return outflow;
 }
 
 Real
 RichardsBorehole::computeQpJacobian()
 {
-  Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think
+  if (_character == 0.0) return 0.0;
+
+  Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
 
   Real mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
   Real mobp = (_drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]*_density[_qp][_pvar] + _rel_perm[_qp][_pvar]*_ddensity[_qp][_pvar])/_viscosity[_qp][_pvar];
 
-  Real flowp(0.0);
+  unsigned int current_dirac_ptid = 0;
 
-  Real test_fcn = _test[_i][_qp];
+  Real outflowp(0.0);
 
-  if (_u[_qp] <= bh_pressure) // injection case (borehole is a source)
+  Real wc(0.0);
+  if (current_dirac_ptid > 0)
+    // contribution from half-segment "behind" this point
     {
-      flowp += test_fcn*_well_constant_injection*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
-    }
-  else // production case (borehole is a sink)
-    {
-      flowp += test_fcn*_well_constant_production*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
+      wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
+      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+	// injection, so outflow<0 || // production, so outflow>0
+	outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
     }
 
-  return flowp;
+  if (current_dirac_ptid < _zs.size() - 1)
+    // contribution from half-segment "ahead of" this point
+    {
+      wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
+      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+	// injection, so outflow<0 || // production, so outflow>0
+	outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
+    }
+
+  return outflowp;
 }

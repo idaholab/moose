@@ -27,8 +27,7 @@ protected:
   const RichardsPorepressureNames & _pp_name_UO;
   unsigned int _pvar;
 
-  Real _well_constant_production;
-  Real _well_constant_injection;
+  Real _character;
   Real _p_bot;
   RealVectorValue _unit_weight;
 
