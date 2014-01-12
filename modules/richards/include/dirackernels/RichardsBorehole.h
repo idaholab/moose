@@ -30,6 +30,7 @@ protected:
   Real _character;
   Real _p_bot;
   RealVectorValue _unit_weight;
+  Real _re_constant;
 
   MaterialProperty<std::vector<Real> > &_viscosity;
 

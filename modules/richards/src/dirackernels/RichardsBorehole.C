@@ -10,6 +10,7 @@ InputParameters validParams<RichardsBorehole>()
   params.addRequiredParam<RealVectorValue>("unit_weight", "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  Note that the borehole pressure at a given z position is bottom_pressure + unit_weight*(p - p_bottom), where p=(x,y,z) and p_bottom=(x,y,z) of the bottom point of the borehole.  If you don't want bottomhole pressure to vary in the borehole just set unit_weight=0.  Typical value is gravity = (0,0,-1E4)");
   params.addRequiredParam<std::string>("point_file", "The file containing the borehole radii and coordinates of the point sinks that approximate the borehole.  Each line in the file must contain a space-separated radius and coordinate.  Ie r x y z.  The last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  Note that you will get segementation faults if your points do not lie within your mesh!");
   params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the borehole for each time step.");
+  params.addParam<Real>("re_constant", 0.28, "The dimensionless constant used in evaluating the borehole effective radius.  This depends on the meshing scheme.  Peacemann finite-difference calculations give 0.28, while for rectangular finite elements the result is closer to 0.1594.  (See  Eqn(4.13) of Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388.)");
   params.addParam<bool>("MyNameIsAndyWilkins", true, "Used for debugging by Andy");
   params.addClassDescription("Approximates a borehole in the mesh with given bottomhole pressure, and radii using a number of point sinks whose positions are read from a file");
   return params;
@@ -26,6 +27,8 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     _character(getParam<Real>("character")),
     _p_bot(getParam<Real>("bottom_pressure")),
     _unit_weight(getParam<RealVectorValue>("unit_weight")),
+
+    _re_constant(getParam<Real>("re_constant")),
 
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
 
@@ -281,7 +284,7 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
     
   //std::cout << " max1, min1, max2, min2 " << max1 << " " << min1 << " " << max2 << " " << min2 << "\n";
 
-  Real r0 = 0.28*std::sqrt( std::sqrt(eig_val1/eig_val2)*std::pow(ll2, 2) + std::sqrt(eig_val2/eig_val1)*std::pow(ll1, 2)) / ( std::pow(eig_val1/eig_val2, 0.25) + std::pow(eig_val2/eig_val1, 0.25) );
+  Real r0 = _re_constant*std::sqrt( std::sqrt(eig_val1/eig_val2)*std::pow(ll2, 2) + std::sqrt(eig_val2/eig_val1)*std::pow(ll1, 2)) / ( std::pow(eig_val1/eig_val2, 0.25) + std::pow(eig_val2/eig_val1, 0.25) );
   
   Real effective_perm = std::sqrt(det2D);
   //std::cout << "eff = " << effective_perm << " rot_perm=" << rot_perm << "\n";
@@ -289,7 +292,7 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
   const Real halfPi = acos(0.0);
 
   if (r0 <= rad)
-    mooseError("The element size for a RichardsBorehole must be (much) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size " << r0 << " and the borehole radius is " << rad << "\n");
+    mooseError("The effective element size (about 0.2-times-true-ele-size) for an element containing a RichardsBorehole must be (much) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size " << r0 << " and the borehole radius is " << rad << "\n");
   
   //std::cout << "computed wc= " << 4*halfPi*effective_perm*half_len/std::log(r0/rad) << "\n";
   return 4*halfPi*effective_perm*half_len/std::log(r0/rad);
