@@ -109,6 +109,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
       for (unsigned int i=0 ; i<_xs.size()-1; ++i)
 	{
 	  // check rotation matrix does the correct rotation
+	  std::cout << i << "\n";
 	  RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
 	  v2 /= std::sqrt(v2*v2);
 	  vec0 = _rot_matrix[i]*v2 - zzz;
@@ -289,7 +290,8 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
 
   if (r0 <= rad)
     mooseError("The element size for a RichardsBorehole must be (much) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size " << r0 << " and the borehole radius is " << rad << "\n");
-
+  
+  //std::cout << "computed wc= " << 4*halfPi*effective_perm*half_len/std::log(r0/rad) << "\n";
   return 4*halfPi*effective_perm*half_len/std::log(r0/rad);
 }
 
@@ -357,6 +359,7 @@ RichardsBorehole::computeQpJacobian()
     // contribution from half-segment "ahead of" this point
     {
       wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
+      //std::cout << "mob= " << mob << " mobp= " << mobp << " wc= " << wc << "p= " << _u[_qp] << "\n" ;
       if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
 	// injection, so outflow<0 || // production, so outflow>0
 	outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
