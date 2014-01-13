@@ -35,7 +35,6 @@
 #include "ExceptionKernel.h"
 #include "MatConvection.h"
 #include "PPSDiffusion.h"
-#include "DefaultPostprocessorDiffusion.h"
 #include "DotCouplingKernel.h"
 #include "UserObjectKernel.h"
 #include "DiffusionPrecompute.h"
@@ -220,7 +219,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(ExceptionKernel);
   registerKernel(MatConvection);
   registerKernel(PPSDiffusion);
-  registerKernel(DefaultPostprocessorDiffusion);
   registerKernel(DotCouplingKernel);
   registerKernel(UserObjectKernel);
   registerKernel(DiffusionPrecompute);

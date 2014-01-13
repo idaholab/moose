@@ -54,7 +54,7 @@ public:
   virtual Real getValue();
 
   /**
-   * Initial setup function for applying the default value
+   * Initial setup function for apply the default value
    */
   virtual void initialSetup();
 
