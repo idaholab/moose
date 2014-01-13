@@ -193,8 +193,12 @@ void
 Assembly::setVolumeQRule(QBase * qrule, unsigned int dim)
 {
   _current_qrule = qrule;
-  for (std::map<FEType, FEBase *>::iterator it = _fe[dim].begin(); it != _fe[dim].end(); ++it)
-    it->second->attach_quadrature_rule(_current_qrule);
+
+  if(qrule) // Don't set a NULL qrule
+  {
+    for (std::map<FEType, FEBase *>::iterator it = _fe[dim].begin(); it != _fe[dim].end(); ++it)
+      it->second->attach_quadrature_rule(_current_qrule);
+  }
 }
 
 void
