@@ -18,7 +18,7 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  PostprocessorValue & _pps_value;
+  const PostprocessorValue & _pps_value;
 };
 
 #endif //PPSDIFFUSION_H

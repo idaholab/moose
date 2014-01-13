@@ -28,9 +28,9 @@ public:
   PostprocessorFunction(const std::string & name, InputParameters parameters);
 
   virtual Real value(Real t, const Point & p);
-  
+
 protected:
-  PostprocessorValue & _pp;
+  const PostprocessorValue & _pp;
 };
 
 #endif //POSTPROCESSORFUNCTION_H
