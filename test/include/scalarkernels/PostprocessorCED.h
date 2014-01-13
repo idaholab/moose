@@ -30,7 +30,7 @@ protected:
   unsigned int _i;
 
   Real _value;
-  const PostprocessorValue & _pp_value;
+  PostprocessorValue & _pp_value;
 };
 
 
