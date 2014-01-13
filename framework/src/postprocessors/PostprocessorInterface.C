@@ -31,9 +31,28 @@ PostprocessorInterface::getPostprocessorValue(const std::string & name)
 }
 
 const PostprocessorValue &
+PostprocessorInterface::getPostprocessorValue(const std::string & name, Real d_value)
+{
+  return getPostprocessorValueByName(_ppi_params.get<PostprocessorName>(name), d_value);
+}
+
+
+const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & name)
 {
   return _pi_feproblem.getPostprocessorValue(name, _pi_tid);
+}
+
+const PostprocessorValue &
+PostprocessorInterface::getPostprocessorValueByName(const std::string & name, Real d_value)
+{
+  if (hasPostprocessor(name))
+    return _pi_feproblem.getPostprocessorValue(name, _pi_tid);
+  else
+  {
+    _default_postprocessor_value[name] = d_value;
+    return _default_postprocessor_value[name];
+  }
 }
 
 const PostprocessorValue &
@@ -42,10 +61,31 @@ PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
   return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
 
+
+const PostprocessorValue &
+PostprocessorInterface::getPostprocessorValueOld(const std::string & name, Real d_value)
+{
+  return getPostprocessorValueOldByName(_ppi_params.get<PostprocessorName>(name), d_value);
+}
+
+
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOldByName(const PostprocessorName & name)
 {
   return _pi_feproblem.getPostprocessorValueOld(name, _pi_tid);
+}
+
+
+const PostprocessorValue &
+PostprocessorInterface::getPostprocessorValueOldByName(const std::string & name, Real d_value)
+{
+  if (hasPostprocessor(name))
+    return _pi_feproblem.getPostprocessorValueOld(name, _pi_tid);
+  else
+  {
+    _default_postprocessor_old_value[name] = d_value;
+    return _default_postprocessor_old_value[name];
+  }
 }
 
 bool

@@ -30,7 +30,7 @@ class PostprocessorInterface
 public:
   PostprocessorInterface(InputParameters & params);
 
-  /**,
+  /**
    * Retrieve the value of a Postprocessor
    * @param name The name of the Postprocessor (see below)
    * @return A reference to the desired value
@@ -43,6 +43,21 @@ public:
    * see getPostprocessorValueOld getPostprocessorValueByName getPostprocessorValueOldByName
    */
   const PostprocessorValue & getPostprocessorValue(const std::string & name);
+
+  /**
+   * Retrieve value of a postprocessor or a default
+   * @param name The name of the Postprocessor
+   * @param d_value The default value
+   *
+   * This function will return a constant reference to the postprocessor value or in the
+   * case that the postprocessor does not exists (hasPostprocessor(name) == false) a
+   * constant reference to the value provided in d_value will be returned. The default value
+   * returned is local to the object, that is, if getPostprocessorValue if called from another
+   * object it will not return the default value set by another.
+   *
+   * @see getPostprocessorValue
+   */
+  const PostprocessorValue & getPostprocessorValue(const std::string & name, Real d_value);
 
   /**
    * Retrieve the value of the Postprocessor
@@ -59,6 +74,21 @@ public:
   const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
   /**
+   * Retrieve value of a postprocessor or a default
+   * @param name The name of the Postprocessor
+   * @param d_value The default value
+   *
+   * This function will return a constant reference to the postprocessor value or in the
+   * case that the postprocessor does not exists (hasPostprocessor(name) == false) a
+   * constant reference to the value provided in d_value will be returned. The default value
+   * returned is local to the object, that is, if getPostprocessorValue if called from another
+   * object it will not return the default value set by another.
+   *
+   * @see getPostprocessorValueByName
+   */
+  const PostprocessorValue & getPostprocessorValueByName(const std::string & name, Real d_value);
+
+  /**
    * Retrieve the old value of a Postprocessor
    * @param name The name of the Postprocessor
    * @return The value of the Postprocessor
@@ -70,11 +100,43 @@ public:
   /**
    * Retrieve the old value of a Postprocessor
    * @param name The name of the Postprocessor
+   * @param d_value The default value to utilize if the postprocessor does not exist
+   * @return The value of the Postprocessor
+   *
+   * This function will return a constant reference to the postprocessor value or in the
+   * case that the postprocessor does not exists (hasPostprocessor(name) == false) a
+   * constant reference to the value provided in d_value will be returned. The default value
+   * returned is local to the object, that is, if getPostprocessorValue if called from another
+   * object it will not return the default value set by another.
+   *
+   * see getPostprocessorValue
+   */
+  const PostprocessorValue & getPostprocessorValueOld(const std::string & name, Real d_value);
+
+  /**
+   * Retrieve the old value of a Postprocessor
+   * @param name The name of the Postprocessor
    * @return The value of the Postprocessor
    *
    * see getPostprocessorValueByName
    */
   const PostprocessorValue & getPostprocessorValueOldByName(const PostprocessorName & name);
+
+  /**
+   * Retrieve the old value of a Postprocessor
+   * @param name The name of the Postprocessor
+   * @param d_value The default value to utilize if the postprocessor does not exist
+   * @return The value of the Postprocessor
+   *
+   * This function will return a constant reference to the postprocessor value or in the
+   * case that the postprocessor does not exists (hasPostprocessor(name) == false) a
+   * constant reference to the value provided in d_value will be returned. The default value
+   * returned is local to the object, that is, if getPostprocessorValue if called from another
+   * object it will not return the default value set by another.
+   *
+   * see getPostprocessorValueByName
+   */
+  const PostprocessorValue & getPostprocessorValueOldByName(const std::string & name, Real d_value);
 
   /**
    * Determine if the postprocessor exists
@@ -93,6 +155,13 @@ private:
 
   /// PostprocessorInterface Parameters
   InputParameters _ppi_params;
+
+  /// Storage for default values
+  std::map<std::string, PostprocessorValue> _default_postprocessor_value;
+
+  /// Storage for default old values
+  std::map<std::string, PostprocessorValue> _default_postprocessor_old_value;
+
 };
 
 #endif //POSTPROCESSORINTERFACE_H
