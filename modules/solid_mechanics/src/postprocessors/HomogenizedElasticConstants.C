@@ -223,10 +223,10 @@ HomogenizedElasticConstants::computeQpIntegral()
     {
       for(int q = 0; q < 3; q++)
       {
-        value = value + E(_I,3 * q + p) * (*grad[_column][p])[_qp](q);
+        value += E(_I,3 * q + p) * (*grad[_column][p])[_qp](q);
       }
     }
 
-    return (E(_I,_J) - value);
+    return (E(_I,_J) + value);
 
 }

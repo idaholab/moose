@@ -19,5 +19,6 @@ HomogenizationHeatConduction::HomogenizationHeatConduction(const std::string & n
 Real
 HomogenizationHeatConduction::computeQpResidual()
 {
- return -_thermal_conductivity[_qp] * _grad_test[_i][_qp](_component);
+  // Compute positive value since we are computing a residual not a rhs
+  return _thermal_conductivity[_qp] * _grad_test[_i][_qp](_component);
 }
