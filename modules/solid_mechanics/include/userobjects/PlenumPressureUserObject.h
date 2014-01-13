@@ -33,7 +33,7 @@ protected:
 
   const Real _initial_pressure;
 
-  std::vector<Real*> _material_input;
+  std::vector<const PostprocessorValue *> _material_input;
 
   const Real _R;
 
