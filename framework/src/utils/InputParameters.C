@@ -44,6 +44,7 @@ InputParameters::clear()
   _private_params.clear();
   _coupled_vars.clear();
   _syntax.clear();
+  _default_coupled_value.clear();
 }
 
 void
@@ -83,6 +84,7 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_valid_params = rhs._valid_params;
   this->_coupled_vars = rhs._coupled_vars;
   this->_syntax = rhs._syntax;
+  this->_default_coupled_value = rhs._default_coupled_value;
 
   return *this;
 }
@@ -102,6 +104,14 @@ InputParameters::operator+=(const InputParameters &rhs)
   _syntax.insert(rhs._syntax.begin(), rhs._syntax.end());
 
   return *this;
+}
+
+void
+InputParameters::addCoupledVar(const std::string &name, Real value, const std::string &doc_string)
+{
+  _default_coupled_value[name] = value;
+
+  addCoupledVar(name, doc_string);
 }
 
 void
@@ -184,6 +194,17 @@ InputParameters::checkParams(const std::string &prefix) const
                  getDocString(it->first) + "\"");
     }
   }
+}
+
+Real
+InputParameters::defaultCoupledValue(std::string coupling_name)
+{
+  std::map<std::string, Real>::iterator value_it = _default_coupled_value.find(coupling_name);
+
+  if(value_it == _default_coupled_value.end())
+    mooseError("Attempted to retrieve default value for coupled variable '" << coupling_name << "' when none was provided. \n\nThere are three reasons why this may have occurred:\n 1. The other version of params.addCoupledVar() should be used in order to provde a default value. \n 2. This should have been a required coupled variable added with params.addRequiredCoupledVar() \n 3. The call to get the coupled value should have been properly guarded with isCoupled()\n");
+
+  return value_it->second;
 }
 
 std::string

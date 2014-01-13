@@ -26,6 +26,7 @@
 #include "ComputeMarkerThread.h"
 #include "ComputeInitialConditionThread.h"
 #include "ComputeBoundaryInitialConditionThread.h"
+#include "MaxQpsThread.h"
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Material.h"
@@ -2752,6 +2753,23 @@ FEProblem::createQRules(QuadratureType type, Order order)
 
   if (_displaced_problem)
     _displaced_problem->createQRules(type, _quadrature_order);
+
+  // Find the maximum number of quadrature points
+  {
+    Moose::setup_perf_log.push("maxQps()","Setup");
+    MaxQpsThread mqt(*this);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mqt);
+    _max_qps = mqt.max();
+
+    // Set all of the current volume quadrature rules back to NULL as if we never did this...
+    for(unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    {
+      for(unsigned int dim=0; dim <= LIBMESH_DIM; dim++)
+        _assembly[tid]->setVolumeQRule(NULL,dim);
+    }
+
+    Moose::setup_perf_log.pop("maxQps()","Setup");
+  }
 }
 
 void

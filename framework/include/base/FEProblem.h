@@ -215,6 +215,12 @@ public:
 
   virtual void createQRules(QuadratureType type, Order order);
   virtual Order getQuadratureOrder() { return _quadrature_order; }
+
+  /**
+   * @return The maximum number of quadrature points in use on any element in this problem.
+   */
+  virtual unsigned int getMaxQps() { return _max_qps; }
+
   virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
 
   /**
@@ -895,6 +901,9 @@ protected:
 
   /// Determies whether a check to verify an active kernel on every subdomain
   bool _kernel_coverage_check;
+
+  /// Maximum number of quadrature points used in the problem
+  unsigned int _max_qps;
 
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)

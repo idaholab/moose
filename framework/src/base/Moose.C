@@ -633,7 +633,6 @@ addActionTypes(Syntax & syntax)
   registerActionName("add_coupled_variable", false);
   registerActionName("add_multi_app", false);
   registerActionName("add_transfer", false);
-  registerActionName("add_nodal_normals", false);
   registerActionName("setup_predictor", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
@@ -672,6 +671,7 @@ addActionTypes(Syntax & syntax)
 "(add_aux_variable, add_variable, add_elemental_field_variable)"
 "(add_coupled_variable)"
 "(setup_variable_complete)"
+"(setup_quadrature)"
 "(add_function)"
 "(add_periodic_bc)"
 "(add_user_object)"
@@ -680,9 +680,7 @@ addActionTypes(Syntax & syntax)
 "(set_adaptivity_options)"
 "(add_ic)"
 "(add_preconditioning, add_constraint)"
-"(add_nodal_normals)"
 "(ready_to_init)"
-"(setup_quadrature)"
 "(setup_dampers)"
 "(setup_residual_debug)"
 "(add_bounds_vectors)"
@@ -753,6 +751,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");
+  registerAction(AddVariableAction, "add_ic");
   registerAction(CopyNodalVarsAction, "copy_nodal_vars");
   registerAction(AddAuxVariableAction, "add_aux_variable");
   registerAction(CopyNodalVarsAction, "copy_nodal_aux_vars");
@@ -792,7 +791,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupResidualDebugAction, "setup_residual_debug");
 
   registerAction(AddBoundsVectorsAction, "add_bounds_vectors");
-  registerAction(AddNodalNormalsAction, "add_nodal_normals");
+  registerAction(AddNodalNormalsAction, "junk");
 
   // NonParsedActions
   registerAction(SetupDampersAction, "setup_dampers");

@@ -15,12 +15,17 @@
 #include "Coupleable.h"
 #include "Problem.h"
 #include "SubProblem.h"
+#include "FEProblem.h"
 
 Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
     _nodal(nodal),
-    _c_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true)
+    _c_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
+    _coupleable_params(parameters)
 {
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
+  FEProblem & fe_problem = *parameters.get<FEProblem *>("_fe_problem");
+
+  _coupleable_max_qps = fe_problem.getMaxQps();
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
@@ -49,6 +54,9 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
       }
     }
   }
+
+  _default_gradient.resize(_coupleable_max_qps);
+  _default_second.resize(_coupleable_max_qps);
 }
 
 Coupleable::~Coupleable()
@@ -98,6 +106,9 @@ Coupleable::getVar(const std::string & var_name, unsigned int comp)
 unsigned int
 Coupleable::coupled(const std::string & var_name, unsigned int comp)
 {
+  if(!isCoupled(var_name)) // If it's optionally coupled just return 0
+    return 0;
+
   MooseVariable * var = getVar(var_name, comp);
   switch (var->kind())
   {
@@ -110,6 +121,13 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 {
+  if(!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
+  {
+    VariableValue & value = _default_value[var_name];
+    value.resize(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+    return value;
+  }
+
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
   if (_nodal)
@@ -121,6 +139,13 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 {
+  if(!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
+  {
+    VariableValue & value = _default_value[var_name];
+    value.resize(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+    return value;
+  }
+
   coupledCallback(var_name, true);
   MooseVariable * var = getVar(var_name, comp);
   if (_nodal)
@@ -132,6 +157,13 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 {
+  if(!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
+  {
+    VariableValue & value = _default_value[var_name];
+    value.resize(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+    return value;
+  }
+
   coupledCallback(var_name, true);
   MooseVariable * var = getVar(var_name, comp);
   if (_nodal)

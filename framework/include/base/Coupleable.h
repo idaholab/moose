@@ -189,6 +189,19 @@ protected:
   /// True if implicit value is required
   bool _c_is_implicit;
 
+  /// Reference to the InputParameters
+  InputParameters _coupleable_params;
+
+  /// Will hold the default value for optional coupled variables.
+  std::map<std::string, VariableValue> _default_value;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
+  VariableGradient _default_gradient;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
+  VariableSecond _default_second;
+
+
   /**
    * Extract pointer to a coupled variable
    * @param var_name Name of parameter desired
@@ -197,6 +210,11 @@ protected:
    */
   MooseVariable *getVar(const std::string & var_name, unsigned int comp);
 
+
+private:
+
+  /// Maximum qps for any element in this system
+  unsigned int _coupleable_max_qps;
 };
 
 /**

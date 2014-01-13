@@ -56,15 +56,19 @@ AddNodalNormalsAction::act()
   FEType fe_type(order, family);
 
   // Add 3 aux variables for each component of the normal
-  _problem->addAuxVariable("nodal_normal_x", fe_type);
-  _problem->addAuxVariable("nodal_normal_y", fe_type);
-  _problem->addAuxVariable("nodal_normal_z", fe_type);
+  if(getAction() == "add_aux_variable")
+  {
+    _problem->addAuxVariable("nodal_normal_x", fe_type);
+    _problem->addAuxVariable("nodal_normal_y", fe_type);
+    _problem->addAuxVariable("nodal_normal_z", fe_type);
+  }
 
   // Set the execute options
   MooseEnum execute_options(SetupInterface::getExecuteOptions());
   execute_options = "timestep_begin";
 
   // Create the NodalNormalsPreprocessor UserObject
+  if(getAction() == "add_postprocessor")
   {
     InputParameters pars = _factory.getValidParams("NodalNormalsPreprocessor");
     pars.set<Order>("fe_order") = order;
@@ -78,21 +82,24 @@ AddNodalNormalsAction::act()
     _problem->addUserObject("NodalNormalsPreprocessor", "nodal_normals_preprocessor", pars);
   }
 
-  /// Create the NodalNormalsCorner UserObject (only if corner boundary is given)
-  if (_has_corners)
+  if(getAction() == "add_user_object")
   {
-    InputParameters pars = _factory.getValidParams("NodalNormalsCorner");
-    pars.set<MooseEnum>("execute_on") = execute_options;
-    pars.set<std::vector<BoundaryName> >("boundary") = _boundary;
-    pars.set<BoundaryName>("corner_boundary") = _corner_boundary;
-    _problem->addUserObject("NodalNormalsCorner", "nodal_normals_corner", pars);
-  }
+    /// Create the NodalNormalsCorner UserObject (only if corner boundary is given)
+    if (_has_corners)
+    {
+      InputParameters pars = _factory.getValidParams("NodalNormalsCorner");
+      pars.set<MooseEnum>("execute_on") = execute_options;
+      pars.set<std::vector<BoundaryName> >("boundary") = _boundary;
+      pars.set<BoundaryName>("corner_boundary") = _corner_boundary;
+      _problem->addUserObject("NodalNormalsCorner", "nodal_normals_corner", pars);
+    }
 
-  /// Create the NodalNormalsEvaluator UserObject
-  {
-    InputParameters pars = _factory.getValidParams("NodalNormalsEvaluator");
-    pars.set<MooseEnum>("execute_on") = execute_options;
-    pars.set<std::vector<BoundaryName> >("boundary") = _boundary;
-    _problem->addUserObject("NodalNormalsEvaluator", "nodal_normals_evaluator", pars);
+    /// Create the NodalNormalsEvaluator UserObject
+    {
+      InputParameters pars = _factory.getValidParams("NodalNormalsEvaluator");
+      pars.set<MooseEnum>("execute_on") = execute_options;
+      pars.set<std::vector<BoundaryName> >("boundary") = _boundary;
+      _problem->addUserObject("NodalNormalsEvaluator", "nodal_normals_evaluator", pars);
+    }
   }
 }

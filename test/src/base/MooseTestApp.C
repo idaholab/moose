@@ -45,6 +45,8 @@
 #include "SplineFFn.h"
 #include "BlkResTestDiffusion.h"
 #include "DiffTensorKernel.h"
+#include "OptionallyCoupledForce.h"
+
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
 #include "PolyConstantAux.h"
@@ -227,6 +229,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(BlkResTestDiffusion);
   registerKernel(DiffTensorKernel);
   registerKernel(ScalarLagrangeMultiplier);
+  registerKernel(OptionallyCoupledForce);
 
   // Aux kernels
   registerAux(CoupledAux);

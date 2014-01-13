@@ -50,29 +50,33 @@ AddAuxVariableAction::getAuxVariableOrders()
 void
 AddAuxVariableAction::act()
 {
-  // Name of variable being added
-  std::string var_name = getShortName();
-
-  // Blocks from the input
-  std::set<SubdomainID> blocks = getSubdomainIDs();
-
-  // Scalar variable
-  if (_scalar_var)
-    _problem->addAuxScalarVariable(var_name, _fe_type.order);
-
-  // Non-scalar variable
-  else
+  if(getAction() == "add_aux_variable")
   {
-    // Check that the order is valid (CONSTANT, FIRST, or SECOND)
-    if (_fe_type.order > 2)
-      mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, or SECOND order (" << _fe_type.order << " supplied)");
+    // Name of variable being added
+    std::string var_name = getShortName();
 
-    if (blocks.empty())
-      _problem->addAuxVariable(var_name, _fe_type);
+    // Blocks from the input
+    std::set<SubdomainID> blocks = getSubdomainIDs();
+
+    // Scalar variable
+    if (_scalar_var)
+      _problem->addAuxScalarVariable(var_name, _fe_type.order);
+
+    // Non-scalar variable
     else
-      _problem->addAuxVariable(var_name, _fe_type, &blocks);
+    {
+      // Check that the order is valid (CONSTANT, FIRST, or SECOND)
+      if (_fe_type.order > 2)
+        mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, or SECOND order (" << _fe_type.order << " supplied)");
+
+      if (blocks.empty())
+        _problem->addAuxVariable(var_name, _fe_type);
+      else
+        _problem->addAuxVariable(var_name, _fe_type, &blocks);
+    }
   }
 
   // Create the initial condition
-  setInitialCondition();
+  if(getAction() == "add_ic")
+    setInitialCondition();
 }

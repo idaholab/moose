@@ -218,6 +218,15 @@ public:
   void addCoupledVar(const std::string &name, const std::string &doc_string);
 
   /**
+   * This method adds a coupled variable name pair.  The parser will look for variable
+   * name pair in the input file and can return a reference to the storage location
+   * for the coupled variable if found
+   *
+   * Also - you can provide a default value for this variable in the case that an actual variable is not provided.
+   */
+  void addCoupledVar(const std::string &name, const Real value, const std::string &doc_string);
+
+  /**
    * Utility functions for retrieving one of the MooseTypes variables into the common "string" base class.
    * Scalar and Vector versions are supplied
    */
@@ -294,6 +303,13 @@ public:
     return _coupled_vars.end();
   }
 
+  /**
+   * Get the default value for an optionally coupled variable.
+   *
+   * @param coupling_name The name of the coupling parameter to get the default value for.
+   */
+  Real defaultCoupledValue(std::string coupling_name);
+
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters validParams<MooseObject>();
   friend InputParameters validParams<Action>();
@@ -333,6 +349,9 @@ private:
 
   /// The coupled variables set
   std::set<std::string> _coupled_vars;
+
+  /// The default value for optionally coupled variables
+  std::map<std::string, Real> _default_coupled_value;
 };
 
 // Template and inline function implementations

@@ -77,25 +77,29 @@ AddVariableAction::getNonlinearVariableOrders()
 void
 AddVariableAction::act()
 {
-  // Get necessary data for creating a variable
-  std::string var_name = getShortName();
-  std::set<SubdomainID> blocks = getSubdomainIDs();
-  Real scale_factor = isParamValid("scaling") ? getParam<Real>("scaling") : 1;
+  if(getAction() == "add_variable")
+  {
+    // Get necessary data for creating a variable
+    std::string var_name = getShortName();
+    std::set<SubdomainID> blocks = getSubdomainIDs();
+    Real scale_factor = isParamValid("scaling") ? getParam<Real>("scaling") : 1;
 
-  // Scalar variable
-  if (_scalar_var)
-    _problem->addScalarVariable(var_name, _fe_type.order, scale_factor);
+    // Scalar variable
+    if (_scalar_var)
+      _problem->addScalarVariable(var_name, _fe_type.order, scale_factor);
 
-  // Block restricted variable
-  else if (blocks.empty())
-    _problem->addVariable(var_name, _fe_type, scale_factor);
+    // Block restricted variable
+    else if (blocks.empty())
+      _problem->addVariable(var_name, _fe_type, scale_factor);
 
-  // Non-block restricted variable
-  else
-    _problem->addVariable(var_name, _fe_type, scale_factor, &blocks);
+    // Non-block restricted variable
+    else
+      _problem->addVariable(var_name, _fe_type, scale_factor, &blocks);
+  }
 
   // Set the initial condition
-  setInitialCondition();
+  if(getAction() == "add_ic")
+    setInitialCondition();
 }
 
 void

@@ -42,12 +42,15 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("SetupResidualDebugAction", "Debug");
 
   /// Variable/AuxVariable Actions
-  syntax.registerActionSyntax("AddVariableAction", "Variables/*");
+  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
+  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_ic");
+
   syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
   syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   syntax.registerActionSyntax("AddICAction", "Variables/*/InitialCondition");
 
-  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*");
+  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_aux_variable");
+  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_ic");
   syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "check_copy_nodal_vars");
   syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
   syntax.registerActionSyntax("AddICAction", "AuxVariables/*/InitialCondition");
@@ -101,7 +104,10 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AddUserObjectAction", "UserObjects/*", "add_user_object");
 
   syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds", "add_bounds_vectors");
-  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_nodal_normals");
+
+  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_aux_variable");
+  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_postprocessor");
+  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_user_object");
 
   // This works because the AddKernelAction will build AuxKernels if the path doesn't contain Kernels!
   syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");
