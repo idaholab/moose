@@ -328,6 +328,7 @@ RichardsBorehole::computeQpResidual()
       if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
 	// injection, so outflow<0 || // production, so outflow>0
 	outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure); 
+        //outflow += _test[_i][_qp]*std::abs(_character)*wc*std::exp(_u[_qp]*10)*(_u[_qp] - bh_pressure)/_viscosity[_qp][_pvar]; 
     }
 
   _total_outflow_mass.add(outflow*_dt); // this is not thread safe, but DiracKernel's aren't currently threaded
@@ -340,7 +341,7 @@ RichardsBorehole::computeQpJacobian()
   if (_character == 0.0) return 0.0;
 
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
-
+\
   Real mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
   Real mobp = (_drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]*_density[_qp][_pvar] + _rel_perm[_qp][_pvar]*_ddensity[_qp][_pvar])/_viscosity[_qp][_pvar];
 
@@ -362,7 +363,6 @@ RichardsBorehole::computeQpJacobian()
     // contribution from half-segment "ahead of" this point
     {
       wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
-      //std::cout << "mob= " << mob << " mobp= " << mobp << " wc= " << wc << "p= " << _u[_qp] << "\n" ;
       if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
 	// injection, so outflow<0 || // production, so outflow>0
 	outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));

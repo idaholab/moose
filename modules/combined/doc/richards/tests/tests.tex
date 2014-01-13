@@ -77,6 +77,9 @@ follows.
 \item Chapter~\ref{nc} checks that MOOSE behaves correctly when the
   system contains a sink flux that is a function of porepressure.  A
   particular function is used so that an analytic solution exists.
+\item Chapter~\ref{bh} demonstrates that boreholes are correctly
+  implemented by comparing with the desired expression for the flux to
+  the borehole, and by comparing with the known 2D analytic solution.
 \item Chapter~\ref{bw} demonstrates that flow in the unsaturated
   region along with source fluxes is correctly implemented by comparing
   with the analytic solution of Broadbridge and White for constant
@@ -528,10 +531,10 @@ gravity and without sources is
   \kappa_{ij}}{\mu} \nabla_{j}P \right) \ ,
 \end{equation}
 with notation described in the Theory Manual.  Using $\rho \propto
-\exp(P/K)$, where $K$ is the fluid bulk modulus, Darcy's equation
+\exp(P/B)$, where $B$ is the fluid bulk modulus, Darcy's equation
 becomes
 \begin{equation}
-\frac{\partial}{\partial t}\rho = \nabla_{i}\alpha_{ij}\nabla\rho \ ,
+\frac{\partial}{\partial t}\rho = \nabla_{i}\alpha_{ij}\nabla_{j}\rho \ ,
 \end{equation}
 with 
 \begin{equation}
@@ -616,6 +619,171 @@ results are shown in Figure~\ref{nc.fig}.
 \label{nc.fig}
 \end{center}
 \end{figure}
+
+
+\chapter{Boreholes}
+\label{bh}
+
+As detailed in the Theory Manual, a borehole defined by a curve (or,
+most often, a straight line segment) in 3D space is modelled by a
+sequence of Dirac points.  At each point, a flux is prescribed:
+\begin{equation}
+f = W|C(P-P_{\mathrm{bh}})| \frac{\rho \kappa_{\mathrm{rel}}}{\mu} (P - P_{\mathrm{bh}}) \ ,
+\label{bh.propto.eqn}
+\end{equation}
+where $P$ is the porepressure at the Dirac point, and
+$P_{\mathrm{bh}}$ is the borehole pressure at that point (an input
+parameter).  The other parameters are: $C$, the character of the
+borehole (eg, ``production'' has $C=1$ for $P>P_{\mathrm{bh}}$ and zero
+otherwise); $\rho$ is the fluid density; $\kappa_{\mathrm{rel}}$ is
+the relative permeability; and $\mu$ is the fluid viscosity.   The
+coefficient of proportionality,, $W$ in this expression is a
+complicated function of the geometry of the finite element (or the
+neighbouring elements if the Dirac point is on an elemental boundary)
+and the rock permeability, and the borehole radius at that point.
+
+\section{Rotation matrices}
+The well constant $W$ in Eqn~(\ref{bh.propto.eqn})
+involves the rotation matrices that transforms between Cartesian
+$(x,y,z)$ coordinates and coordinates in which the $z$ axis lies along
+the local direction of the borehole.
+\begin{itemize}
+\item The first borehole test checks that these rotation matrices are
+  formed correctly for random alignments of boreholes.
+\end{itemize}
+This test is very fast to run (it does not involve any fluid flow) and
+is part of the automatic test suite.
+
+\section{Fluxes}
+The automatic test suite also contains four tests that check that
+Eqn~(\ref{bh.propto.eqn}) is correctly implemented for given $W$ (the
+Peaceman formulation is used) by placing a vertical borehole through
+the centre of a single element, and measuring the fluid flow to the
+borehole as a function of porepressure $P$.  These four tests are:
+\begin{itemize}
+\item A production borehole with $P_{\mathrm{bh}} = 0$, with a
+  fully-saturated medium
+\item An injection borehole with $P_{\mathrm{bh}} = 10$\,MPa, with a
+  fully-saturated medium
+\item A production borehole with $P_{\mathrm{bh}} = -1$\,MPa, with an
+  unsaturated medium
+\item An injection borehole with $P_{\mathrm{bh}} = 0$, with an
+  unsaturated medium
+\end{itemize}
+The parameters common to these four tests are:
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Element size & $2\times 2\times 2$\,m$^{3}$ \\
+Borehole radius & 0.1\,m \\
+Bar permeability & $10^{-12}$\,m$^{2}$ \\
+Gravity & 0 \\
+Unit fluid weight & 0 \\
+Fluid reference density & 1000\,kg.m$^{-3}$ \\
+Fluid bulk modulus & 2\,GPa \\
+Fluid viscosity & $10^{-3}$\,Pa.s \\
+Van Genuchten $\alpha$ & $10^{-5}$\,Pa \\
+Van Genuchten $m$ & 0.8  \\
+Immobile saturation & 0 \\
+Relative permeability $n$ & 2 \\
+\hline
+\end{tabular} \\
+\end{center}
+It is remotely possible that the MOOSE implementation {\em applies}
+the borehole flux incorrectly, but {\em records} it as a Postprocessor
+correct as specified by Eqn~(\ref{bh.propto.eqn}).  Therefore, these
+four simulations also record the fluid mass and mass-balance error in
+order to check that the fluid mass is indeed being correctly changed
+by the borehole.  Figure~\ref{bh02_05.fig} demonstrates that
+Eqn~(\ref{bh.propto.eqn}) is indeed correctly implemented in MOOSE.
+
+\begin{figure}[htb]
+\centering
+\begin{tabular}{cc}
+\includegraphics[width=7cm]{bh02.eps} &
+\includegraphics[width=7cm]{bh02_mass_balance.eps} \\
+\includegraphics[width=7cm]{bh03.eps} &
+\includegraphics[width=7cm]{bh03_mass_balance.eps} \\
+\includegraphics[width=7cm]{bh04.eps} &
+\includegraphics[width=7cm]{bh04_mass_balance.eps} \\
+\includegraphics[width=7cm]{bh05.eps} &
+\includegraphics[width=7cm]{bh05_mass_balance.eps}
+\end{tabular}
+\caption{Left figures: Comparison between the MOOSE result (in dots), and the
+  expected behaviour of the borehole flux given by
+  Eqn~(\ref{bh.propto.eqn}) (as a line) for the cases listed in the text.  Right
+  figures: The mass balances, which are all small.}
+\label{bh02_05.fig}
+\end{figure}
+
+\section{Comparison with analytic solution}
+The Richards' equation for a fully-saturated medium with $\rho \propto
+\exp(P/B)$ and constant bulk modulus $B$ becomes Darcy's equation
+\begin{equation}
+\frac{\partial}{\partial t}\rho \nabla_{i}\alpha_{ij}\nabla_{j}\rho
+\end{equation}
+where $\alpha_{ij} = \kappa_{ij}B/(\mu\phi)$, with notation described
+in the Theory Manual.   In the isotropic case (where $\kappa_{ij} =
+\kappa \delta_{ij}$), the steadystate equation is just Laplace's
+equation
+\begin{equation}
+\nabla^{2}\rho = 0 \ ,
+\end{equation}
+Place a borehole of radius $r_{\mathrm{bh}}$ and infinite length
+oriented along the $z$ axis.  Then the situation becomes 2D and can be
+solved in cylindrical coordinates, with $\rho=\rho(r,\theta)$ and
+independent of $z$.  If the pressure at the borehole wall
+$r=r_{\mathrm{bh}}$ is $P_{\mathrm{bh}}$, then the fluid density is
+$\rho_{\mathrm{bh}} \propto \exp(P_{\mathrm{bh}}/B)$.  Assume that at
+$r=R$ the fluid pressure is held fixed at $P_{R}$, or equivalently the
+density is held fixed at $\rho_{R}$.  Then the solution of Laplace's
+equation is well-known to be
+\begin{equation}
+\rho = \rho_{\mathrm{bh}} + (\rho_{R} - \rho_{\mathrm{bh}})
+\frac{\log(r/r_{\mathrm{bh}})}{\log(R/r_{\mathrm{bh}})} \ .
+\label{eqn.log.bh}
+\end{equation}
+This is the fundamental solution used by Peaceman and others to derive
+expressions for $W$ by comparing with numerical expressions resulting
+from Eqn~(\ref{bh.propto.eqn}) (see Theory Manual for more details).
+
+Chen and Zhang (see Theory manual) have derived an expression for $W$
+in the case where this borehole is placed at a node in a square mesh.
+The following test is part of the automatic test suite:
+\begin{itemize}
+\item The steadystate solution with a single borehole with $W$ defined by
+Chen and Zhang's formula is compared with Eqn~(\ref{eqn.log.bh}) to
+illustrate that the MOOSE implementation of a borehole is correct.
+\end{itemize}
+Figure~\ref{bh07.fig} shows this comparison.  Most parameters in this
+study are identical to those given in the above table with the
+following exceptions: the mesh is shown in Fig~\ref{bh07.mesh.fig};
+the permeability is $10^{-11}$\,m$^{2}$; the borehole radius is 1\,m;
+the borehole pressure is $P_{\mathrm{bh}}=0$; the outer radius is
+$r=300$\,m; and the outer pressure is $P_{R}=10$\,MPa.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=8cm]{bh07.mesh.eps}
+\caption{The mesh used in the comparison with Eqn~(\ref{eqn.log.bh}),
+  with the green dot indicating the position of the borehole.
+  The central elements are $10\times 10$\,m$^{2}$, and the outer
+  boundary is at $r=300$\,m.}
+\label{bh07.mesh.fig}
+\end{figure}
+
+
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=12cm]{bh07.eps}
+\caption{Comparison of the MOOSE results (dots) with the analytical
+  solution Eqn~(\ref{eqn.log.bh}) for the steadystate porepressure
+  distribution surrounding single borehole.}
+\label{bh07.fig}
+\end{figure}
+
+
 
 
 
