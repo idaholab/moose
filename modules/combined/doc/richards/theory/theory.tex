@@ -696,27 +696,25 @@ P_{\mathrm{atm}}) )$.
 \section{Wellbores}
 
 Wellbores are implemented in a similar way to
-Eqn~(\ref{source.stream.eqn}).  Here
+Eqn~(\ref{source.stream.eqn}) using the method first described by
+Peaceman~\cite{peaceman1983}.  Here  
 \begin{equation}
 F = \sum_{i}f(P_{i}, x_{i})\delta(x - x_{i}) \ ,
 \end{equation}
-but $f$ is a special function (measured in kg.s$^{-1}$ in standard
+with $P_{i}$ being the porepressure at point $i$.  Here $f$ is a
+special function (measured in kg.s$^{-1}$ in standard 
 units) defined in terms of the pressure at a
-point in the wellbore
+point at the wall of the wellbore (which is an input parameter: it is
+not the porepressure) 
 \begin{equation}
 P_{\mathrm{wellbore}}(x_{i}) = P_{\mathrm{bot}} + \gamma \cdot (x_{i} -
 x_{i}^{\mathrm{bot}})
 \end{equation}
 The form of $f$ is
 \begin{equation}
-f(P_{i}, x_{i}) = \left\{
-\begin{array}{ll}
-W_{i}\frac{\kappa_{\mathrm{rel}}\rho}{\mu}(P_{\mathrm{wellbore}} - P)
-\ \ \ \mbox{for}\ \ P<P_{\mathrm{wellbore}} \\
-W_{p}\frac{\kappa_{\mathrm{rel}}\rho}{\mu}(P_{\mathrm{wellbore}} - P)
-\ \ \ \mbox{for}\ \ P\geq P_{\mathrm{wellbore}}
-\end{array}
-\right.
+f(P_{i}, x_{i}) = 
+W \left|C(P_{i}-P_{\mathrm{wellbore}})\right|
+\frac{\kappa_{\mathrm{rel}}\rho}{\mu}(P_{i} - P_{\mathrm{wellbore}})
 \end{equation}
 There are a number of parameters in these expressions:
 \begin{itemize}
@@ -731,24 +729,57 @@ There are a number of parameters in these expressions:
   $\gamma = (0,0,0)$.
 \item $\kappa_{\mathrm{rel}}$, $\rho$, and $\mu$ are the fluid
   relative permeability, density and viscosity at the point $x_{i}$.
-\item $W_{i}$ and $W_{p}$ are the injection and production well
-  constants, respectively.  They are measured in length$^{3}$.
-
-If $W_{i}=0$ then the wellbore is a production well, which is, as far
-as MOOSE is concerned, a sink that produces fluid only if $P >
-P_{\mathrm{wellbore}}$.  If $W_{p}=0$ then the wellbore is an
-injection well, which is a source that injects fluid only if $P <
-P_{\mathrm{wellbore}}$.
-
-%Usually the well constants are chosen as
-%\begin{equation}
-%W = \kappa L_{\mathrm{seg}} \ ,
-%\end{equation}
-%where $\kappa$ is a relevant permeability component (eg, a horizontal
-%component if this is a vertical wellbore), and $L_{\mathrm{seg}}$ is
-%the length of this section of the wellbore that the point $x_{i}$ is
-%approximating.
+\item In the MOOSE implementation $C$ is called the ``character'' of
+  the wellbore.   There are two choices (note that $f$ depends only on
+  the absolute value $|C|$):
+\begin{itemize}
+\item $C=1$ for $P>P_{\mathrm{wellbore}}$, and zero otherwise.  In
+  this case the wellbore is called a ``production'' wellbore, and it
+  acts as a sink, removing fluid from the porespace.
+\item $C=-1$ for $P<P_{\mathrm{wellbore}}$, and zero otherwise.  In
+  this case the wellbore is called an ``injection'' wellbore, and it
+  acts as a source, adding fluid to the porespace.
 \end{itemize}
+\item The function $W$ is called the well-constant of the wellbore, and is
+measured in units of length$^{3}$. 
+\end{itemize}
+
+Peaceman~\cite{peaceman1983} described the form of $W$ by performing
+2D analytical and numerical calculations to obtain the following
+formulae
+\begin{equation}
+W = 2\pi \sqrt{\kappa_{xx}\kappa_{yy}}L_{z}/\ln(r_{e}/r_{\mathrm{bh}})
+\ ,
+\end{equation}
+In this formula: the borehole is oriented along the $z$ direction;
+$\kappa_{xx}$ and $\kappa_{yy}$ are the diagonal components of the
+permeability tensor in the $(x,y)$ plane; $L_{z}$ is the length of the borehole,
+$r_{\mathrm{bh}}$ is the borehole radius (an input parameter); and,
+$r_{e}$ is the effective borehole radius.  For a cell-centred
+finite-difference approach, Peaceman found that
+\begin{equation}
+r_{e} = 0.28 \frac{\sqrt{\sqrt{\kappa_{xx}/\kappa_{yy}}L_{x}^{2} +
+    \sqrt{\kappa_{yy}/\kappa_{xx}}L_{y}^{2}}}{(\kappa_{xx}/\kappa_{yy})^{1/4}
+  + (\kappa_{yy}/\kappa_{xx})^{1/4}} 
+= 0.2 \frac{\sqrt{\mbox{$\frac{1}{2}$}\sqrt{\kappa_{xx}/\kappa_{yy}}L_{x}^{2} +
+    \mbox{$\frac{1}{2}$}\sqrt{\kappa_{yy}/\kappa_{xx}}L_{y}^{2}}}{\mbox{$\frac{1}{2}$}(\kappa_{xx}/\kappa_{yy})^{1/4}
+  + \mbox{$\frac{1}{2}$}(\kappa_{yy}/\kappa_{xx})^{1/4}} \ .
+\end{equation}
+Here $L_{x}$ and $L_{y}$ are the finite-difference spatial sizes.
+Other authors have generalised Peaceman's approach to writing $W$ for
+different geometrical situations.  Some of these are contained in the
+article by, Chen and Zhang~\cite{chen2009}, where they show that for a
+finite element situation with square elements of size $L$, the
+borehole at a nodal position, and isotropic permeability
+\begin{equation}
+r_{e} =  0.113L \ .
+\end{equation}
+Note that the 0.113 is substantially different to Peaceman's 0.2,
+demonstrating that this method of introducing wellbores dependent on
+the geometry.
+
+TODO: write versions of $r_{e}$ for different geometries.
+
 
 
 
@@ -1549,6 +1580,13 @@ equation becomes diagonal, and the solution is $\dot{(\rho S)}_{0} =
 \bibitem{bw1988}P Broadbridge and I White ``Constant rate rainfall
   infiltration: A versatile nonlinear model, 1 Analytical solution''.
   Water Resources Research 24 (1988) 145--154
+\bibitem{peaceman1983}DW Peaceman ``Interpretation of well-block
+  pressures in numerical reservoir simulation with nonsquare grid
+  blocks and anisotropic permeability'' Society of Petroleum Engineers
+  of AIME, June 1983, pp 531--543
+\bibitem{chen2009}Z Chen and Y Zhang ``Well flow models for various
+  numerical methods'' International Journal of Numerical Analysis and
+  Modelling 6 (2009) 375--388
 \bibitem{huyakorn1978}PS Huyakorn and GF Pinder ``A new finite element
   technique for the solution of two-phase flow through porous media''
   Advances in Water Resources 1 (1978) 285--298
