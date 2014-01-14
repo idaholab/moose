@@ -149,7 +149,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _const_jacobian(false),
     _has_jacobian(false),
     _restarting(false),
-    _kernel_coverage_check(false)
+    _kernel_coverage_check(false),
+    _max_qps(std::numeric_limits<unsigned int>::max())
 {
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
