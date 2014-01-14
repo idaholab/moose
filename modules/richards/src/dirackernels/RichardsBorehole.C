@@ -46,6 +46,9 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     _point_file(getParam<std::string>("point_file"))
 
 {
+  // zero the outflow mass
+  _total_outflow_mass.zero();
+
   // open file
   std::ifstream file(_point_file.c_str());
   if (!file.good())
