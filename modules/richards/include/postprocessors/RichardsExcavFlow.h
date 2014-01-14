@@ -32,7 +32,6 @@ protected:
   MaterialProperty<std::vector<Real> > &_rel_perm;
   MaterialProperty<std::vector<Real> > &_density;
   Function & _func;
-  FEProblem & _feproblem;
 };
 
 #endif // RICHARDSEXCAVFLOW_H

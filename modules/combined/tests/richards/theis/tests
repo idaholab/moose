@@ -5,6 +5,7 @@
     heavy = true
     csvdiff = 'th01.csv'
     rel_err = 1.0E-5
+    max_time = 1000
   [../]
 
   [./test_th02]

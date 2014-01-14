@@ -6,6 +6,7 @@
     rel_err = 1E-6
     heavy = true
     use_old_floor = True
+    max_time = 1000
   [../]
   [./test_rd02]
     type = 'Exodiff'
@@ -14,6 +15,7 @@
     rel_err = 1E-6
     heavy = true
     use_old_floor = True
+    max_time = 1000
   [../]
   [./test_rd03]
     type = 'Exodiff'

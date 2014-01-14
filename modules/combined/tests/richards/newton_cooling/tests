@@ -6,6 +6,7 @@
     rel_err = 1E-4
     use_old_floor = True
     heavy = True
+    max_time = 1000
   [../]
   [./test_nc02]
     type = 'Exodiff'
