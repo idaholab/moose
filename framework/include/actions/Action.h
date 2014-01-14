@@ -47,7 +47,7 @@ public:
 
   InputParameters & parameters() { return _pars; }
 
-  const std::string & getAction() { return _action; }
+  const std::string & getAction() { return _current_action; }
 
   template <typename T>
   const T & getParam(const std::string & name) { return _pars.get<T>(name); }
@@ -80,7 +80,9 @@ protected:
   /// Builds Actions
   ActionFactory & _action_factory;
 
-  std::string _action;
+  /// The current action (even though we have seperate instances for each action)
+  std::string _current_action;
+
   /// Reference to ActionWarehouse where we store object build by actions
   ActionWarehouse & _awh;
   MooseMesh * & _mesh;

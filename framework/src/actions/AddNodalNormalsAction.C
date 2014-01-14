@@ -56,7 +56,7 @@ AddNodalNormalsAction::act()
   FEType fe_type(order, family);
 
   // Add 3 aux variables for each component of the normal
-  if(getAction() == "add_aux_variable")
+  if (_current_action == "add_aux_variable")
   {
     _problem->addAuxVariable("nodal_normal_x", fe_type);
     _problem->addAuxVariable("nodal_normal_y", fe_type);
@@ -68,7 +68,7 @@ AddNodalNormalsAction::act()
   execute_options = "timestep_begin";
 
   // Create the NodalNormalsPreprocessor UserObject
-  if(getAction() == "add_postprocessor")
+  if (_current_action == "add_postprocessor")
   {
     InputParameters pars = _factory.getValidParams("NodalNormalsPreprocessor");
     pars.set<Order>("fe_order") = order;
@@ -82,7 +82,7 @@ AddNodalNormalsAction::act()
     _problem->addUserObject("NodalNormalsPreprocessor", "nodal_normals_preprocessor", pars);
   }
 
-  if(getAction() == "add_user_object")
+  if (_current_action == "add_user_object")
   {
     /// Create the NodalNormalsCorner UserObject (only if corner boundary is given)
     if (_has_corners)

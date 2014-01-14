@@ -50,7 +50,7 @@ AddAuxVariableAction::getAuxVariableOrders()
 void
 AddAuxVariableAction::act()
 {
-  if(getAction() == "add_aux_variable")
+  if (_current_action == "add_aux_variable")
   {
     // Name of variable being added
     std::string var_name = getShortName();
@@ -77,6 +77,6 @@ AddAuxVariableAction::act()
   }
 
   // Create the initial condition
-  if(getAction() == "add_ic")
+  if (_current_action == "add_ic")
     setInitialCondition();
 }

@@ -29,7 +29,7 @@ AddScalarKernelAction::AddScalarKernelAction(const std::string & name, InputPara
 void
 AddScalarKernelAction::act()
 {
-  if (getAction() == "add_scalar_kernel")
+  if (_current_action == "add_scalar_kernel")
     _problem->addScalarKernel(_type, getShortName(), _moose_object_pars);
   else
     _problem->addAuxScalarKernel(_type, getShortName(), _moose_object_pars);

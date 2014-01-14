@@ -44,12 +44,12 @@ CopyNodalVarsAction::act()
   {
     SystemBase * system;
 
-    if (getAction() == "check_copy_nodal_vars")
+    if (_current_action == "check_copy_nodal_vars")
       _app.setFileRestart() = true;
     else
     {
       // Is this a NonlinearSystem variable or an AuxiliarySystem variable?
-      if (getAction() == "copy_nodal_vars")
+      if (_current_action == "copy_nodal_vars")
         system = &_problem->getNonlinearSystem();
       else
         system = &_problem->getAuxiliarySystem();

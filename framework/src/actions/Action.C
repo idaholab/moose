@@ -37,7 +37,7 @@ Action::Action(const std::string & name, InputParameters params) :
     _app(*getParam<MooseApp *>("_moose_app")),
     _factory(_app.getFactory()),
     _action_factory(_app.getActionFactory()),
-    _action(getParam<std::string>("action")),
+    _current_action(getParam<std::string>("action")),
     _awh(*getParam<ActionWarehouse *>("awh")),
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
