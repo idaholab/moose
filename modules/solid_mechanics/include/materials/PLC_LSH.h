@@ -50,7 +50,7 @@ protected:
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
 
-  const PostprocessorValue * const _output;
+  PostprocessorValue * const _output;
 
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress();

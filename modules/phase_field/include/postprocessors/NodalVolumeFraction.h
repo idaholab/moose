@@ -39,7 +39,7 @@ public:
   
 protected:
   
-  const PostprocessorValue & _mesh_volume;
+  Real & _mesh_volume;
   Real _volume_fraction;
   Real _equil_fraction;
 };
