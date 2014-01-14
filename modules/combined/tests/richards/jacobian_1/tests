@@ -128,4 +128,12 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
   [../]
+
+  [./jn40]
+    type = 'PetscJacobianTester'
+    input = 'jn40.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7 
+    difference_tol = 1E10
+  [../]
 []
