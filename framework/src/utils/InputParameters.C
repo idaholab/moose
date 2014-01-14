@@ -102,6 +102,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   _valid_params.insert(rhs._valid_params.begin(), rhs._valid_params.end());
   _coupled_vars.insert(rhs._coupled_vars.begin(), rhs._coupled_vars.end());
   _syntax.insert(rhs._syntax.begin(), rhs._syntax.end());
+  _default_coupled_value.insert(rhs._default_coupled_value.begin(), rhs._default_coupled_value.end());
 
   return *this;
 }
