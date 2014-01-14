@@ -150,7 +150,9 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _has_jacobian(false),
     _restarting(false),
     _kernel_coverage_check(false),
-    _max_qps(std::numeric_limits<unsigned int>::max())
+    _max_qps(32)  // TODO: Wrong!  Fix this! Ticket #2378
+//    _max_qps(std::numeric_limits<unsigned int>::max())  TODO: Make this line work!
+
 {
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
