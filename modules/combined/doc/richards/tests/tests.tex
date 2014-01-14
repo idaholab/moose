@@ -74,11 +74,12 @@ follows.
 \item Chapter~\ref{st} checks that the piecewise-linear stream-type
   sink (the PolyLineSink) is implemented correctly.
 \item Chapter~\ref{pp} checks that pressure pulses diffuse correctly
-  through a fully-saturated medium.  For readers experienced in the
-  groundwater, this is very similar to the Theis solution.
+  through a fully-saturated medium.
 \item Chapter~\ref{nc} checks that MOOSE behaves correctly when the
   system contains a sink flux that is a function of porepressure.  A
   particular function is used so that an analytic solution exists.
+\item Chapter~\ref{th} compares MOOSE with the Theis solution for
+  extraction of fluid from a saturated aquifer.
 \item Chapter~\ref{bh} demonstrates that boreholes are correctly
   implemented by comparing with the desired expression for the flux to
   the borehole, and by comparing with the known 2D analytic solution.
@@ -682,6 +683,165 @@ results are shown in Figure~\ref{nc.fig}.
   that piecewise-linear sinks/sources are correctly implemented in MOOSE.}
 \label{nc.fig}
 \end{center}
+\end{figure}
+
+
+\chapter{The Theis problem}
+\label{th}
+
+The Theis problem is related to an aquifer pumping test where water is
+withdrawn at a constant rate, $Q$ (m$^{3}$.s$^{-1}$) from an
+isotropic, infinite, fully-saturated, confined aquifer.  Water is withdrawn
+using a vertical borehole of negligible radius that spans the entire
+aquifer height, $b$ (m).  In the Theis solution, gravitational
+effects are ignored (the pressures at the bottom and top of the
+aquifer are is assumed equal).  At some horizontal radial distance, $r$, from
+the borehole the pressure is measured.  The geometry is shown in
+Figure~\ref{th.setup.fig}. 
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=8cm]{th.setup.eps}
+\caption{The Theis problem: An isotropic infinite, fully-saturated,
+  confined aquifer of vertical height $b$ is subjected to pumping at
+  rate $Q$ via a vertical borehole that spans the entire height of the
+  aquifer.  The pressure is measured at a radial distance $r$.}
+\label{th.setup.fig}
+\end{center}
+\end{figure}
+
+\section{Derivation of the Theis solution}
+
+Theis solved this problem\footnote{CV Theis, ``The relation between
+  the lowering of the piezometric surface and the rate and duration of
+  discharge of a well using groundwater storage''.  Transactions,
+  American Geophysical Union 16 (1935) 519--524}, and the derivation
+is given now using the Theory Manual notation.  Darcy's equation reads
+\begin{equation}
+\phi \frac{\partial}{\partial t} \rho S = \nabla\cdot \left(\frac{\rho
+  \kappa}{\mu} (\nabla P - \rho {\mathbf{g}}) \right) \ ,
+\end{equation}
+where $\phi$ is the aquifer porosity, $t$ is time, $\rho$ is the water
+density, $S$ is the water saturation, $\nabla$ is the spatial
+derivative, $\kappa$ is the isotropic permeability, $\mu$ is the water
+viscosity, and $P$ is the water pressure.  Assume the following
+\begin{itemize}
+\item The problem is fully saturation, $S=1$, and gravitational
+  effects are ignored, ${\mathbf{g}} = {\mathbf{0}}$.
+\item The bulk modulus, $K_{\mathrm{w}}$, of water is constant so that
+  $\rho = \rho_{0}e^{P/K_{\mathrm{w}}}$.
+\item The problem studied has the property
+\begin{equation}
+\left| \nabla^{2}P \right| \gg \left|\frac{(\nabla
+  P)^{2}}{K_{\mathrm{w}}} \right|  \ .
+\label{assumption.eqn}
+\end{equation}
+This inequality will be explored below.
+\end{itemize}
+\noindent Under these assumptions, Darcy's equation reads
+\begin{equation}
+\frac{\phi}{K_{\mathrm{w}}} \frac{\partial}{\partial t}P =
+\frac{K}{\mu}\nabla^{2}P \ ,
+\end{equation}
+which, in this 2D case, has the standard exponential integral solution
+\begin{equation}
+P(r,t) = P_{0} - \alpha \int_{\frac{r^{2}\phi\mu}{4 t \kappa
+    K_{\mathrm{w}}}}^{\infty} \frac{1}{u} e^{-u}\,\mathrm{d} u \ .
+\end{equation}
+Applying the boundary condition at $r=0$ that the rate of change of
+volume of water in the aquifer is $Q$ yields the coefficient $\alpha$,
+and the solution becomes
+\begin{equation}
+P(r,t) = P_{0} - \frac{Q\mu}{4\pi b \kappa} \int_{\frac{r^{2}\phi\mu}{4 t \kappa
+    K_{\mathrm{w}}}}^{\infty} \frac{1}{u} e^{-u}\,\mathrm{d} u \ .
+\label{eqn.theis}
+\end{equation}
+
+\section{Transmissivity, Storativity and Well function}
+
+The hydrogeology literature uses different notation.  It defines the
+head, $h=P/\rho g$; the transmissivity, $T = \kappa\rho g b/\mu$; the
+storativity, $S = b\rho 
+g \phi/K_{\mathrm{w}}$; and the well function $W(x) =
+\int_{x}^{\infty}u^{-1}e^{-u}\mathrm{d}u$, so that the Theis solution,
+Eqn~(\ref{eqn.theis}) becomes
+\begin{equation}
+h(r,t) = h_{0} - \frac{Q}{4\pi T} W
+\left(\frac{r^{2}S}{4Tt} \right) \ .
+\end{equation}
+
+\section{Comparison with MOOSE}
+
+A Moose model defined by a cylinder of radius 3\,km with 1500
+hexahedral elements is created.  The plan mesh is shown in
+Figure~\ref{th.mesh.fig}.  The well is situated at $r=0$, and the
+pressure is measured at $r=50$\,m.  The pumping is modelled using a
+PolyLineSink with constant rate.
+
+\begin{figure}[htb]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=6cm]{th_mesh.eps} &
+\includegraphics[width=6cm]{th_mesh_zoom.eps}
+\end{tabular}
+\caption{The mesh for the Theis problem has 1500 elements, and a
+  radius of 3\,km.  Left: the whole plan mesh.  Right: the region
+  $r\leq 50$\,m.}
+\label{th.mesh.fig}
+\end{center}
+\end{figure}
+
+The following parameters are used:
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Aquifer porosity, $\phi$ & 0.1 \\
+Aquifer permeability, $\kappa$ & $10^{-10}$\,m$^{2}$ \\
+\hline
+Water viscosity, $\mu$ & 0.001\,Pa.s \\
+Water bulk modulus, $K_{\mathrm{w}}$ & 2\,GPa \\
+\hline
+Gravity & 0.0 \\
+Aquifer thickness, $b$ & 20\,m  \\
+Pumping rate, $Q$ & 0.2\,m$^{3}$.s$^{-1}$ \\
+\hline
+\end{tabular}
+\end{center}
+The van-Genuchten parameters, etc, are unimportant as this is a
+fully-saturated simulation.
+
+Eqn~(\ref{assumption.eqn}) contains an important assumption of the
+Theis solution which constrains the validity of the result.
+Substituting the solution, Eqn~(\ref{eqn.theis}), into the assumption
+yields
+\begin{equation} 
+\frac{1}{u} e^{-u} \ll \frac{4 \pi b \kappa K_{\mathrm{w}}}{Q\phi\mu}
+= \frac{4\pi b T}{QS} \ ,
+\end{equation}
+where
+\begin{equation}
+u = \frac{r^{2}\phi\mu}{4t\kappa K_{\mathrm{w}}} = \frac{r^{2}S}{4tT}
+\ .
+\end{equation}
+In the situation under study, substituting the numerical values given
+above yields $u^{-1}e^{-u} \ll 2.5\times 10^{6}$, or $u\gg 4\times
+10^{-7}$.  When $r=50$\,m, this yields $t\ll 8\times 10^{5}$\,s.
+
+Figure~\ref{th01.fig} shows good agreement between the Theis solution
+and the MOOSE implementation.  This test is not part of the automatic
+test suite since it takes 17\,seconds to complete.  It is therefore
+marked as ``heavy'' and is not run every time the code is updated.
+However, a similar test on a coarser mesh with only 272 elements, that
+also takes larger timesteps, that gives similar drawdowns (to within
+0.1\,m) is part of the automatic test suite.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=14cm]{th01.eps}
+\caption{Comparison between the MOOSE result (in dots) and the
+  expected behaviour of the drawdown as given by Eqn~(\ref{eqn.theis})
+  (drawdown is $P/\rho g$, or $P/10000$ in this model).}
+\label{th01.fig}
 \end{figure}
 
 
