@@ -42,7 +42,7 @@ public:
    *
    * see getPostprocessorValueOld getPostprocessorValueByName getPostprocessorValueOldByName
    */
-  const PostprocessorValue & getPostprocessorValue(const std::string & name);
+  PostprocessorValue & getPostprocessorValue(const std::string & name);
 
   /**
    * Retrieve the value of the Postprocessor

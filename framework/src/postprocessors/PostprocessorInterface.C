@@ -24,7 +24,7 @@ PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
 {
 }
 
-const PostprocessorValue &
+PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & name)
 {
   return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name), _pi_tid);
