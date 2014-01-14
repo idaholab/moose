@@ -61,6 +61,13 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
 
 Coupleable::~Coupleable()
 {
+  for (std::map<std::string, VariableValue *>::iterator it = _default_value.begin(); it != _default_value.end(); ++it)
+  {
+    it->second->release();
+    delete it->second;
+  }
+  _default_gradient.release();
+  _default_second.release();
 }
 
 void
@@ -123,9 +130,13 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 {
   if(!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
   {
-    VariableValue & value = _default_value[var_name];
-    value.resize(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
-    return value;
+    VariableValue * value = _default_value[var_name];
+    if (value == NULL)
+    {
+      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+      _default_value[var_name] = value;
+    }
+    return *_default_value[var_name];
   }
 
   coupledCallback(var_name, false);
@@ -141,9 +152,13 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 {
   if(!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
   {
-    VariableValue & value = _default_value[var_name];
-    value.resize(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
-    return value;
+    VariableValue * value = _default_value[var_name];
+    if (value == NULL)
+    {
+      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+      _default_value[var_name] = value;
+    }
+    return *_default_value[var_name];
   }
 
   coupledCallback(var_name, true);
@@ -159,9 +174,13 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 {
   if(!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
   {
-    VariableValue & value = _default_value[var_name];
-    value.resize(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
-    return value;
+    VariableValue * value = _default_value[var_name];
+    if (value == NULL)
+    {
+      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+      _default_value[var_name] = value;
+    }
+    return *_default_value[var_name];
   }
 
   coupledCallback(var_name, true);

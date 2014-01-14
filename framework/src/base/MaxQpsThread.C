@@ -58,8 +58,6 @@ MaxQpsThread::operator() (const ConstElemRange & range)
 void
 MaxQpsThread::join(const MaxQpsThread & y)
 {
-  Assembly & assembly = _fe_problem.assembly(_tid);
-
   if(y._max > _max)
     _max = y._max;
 }
