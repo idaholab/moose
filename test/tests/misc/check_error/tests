@@ -62,7 +62,7 @@
   [./bad_second_order_test]
     type = 'RunException'
     input = 'bad_second_order_test.i'
-    expect_err = 'Finite element LAGRANGE on geometric element QUAD4'
+    expect_err = 'Bad ElemType'
     method = 'DBG'
   [../]
 
