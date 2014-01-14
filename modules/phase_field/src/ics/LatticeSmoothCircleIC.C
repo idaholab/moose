@@ -21,6 +21,13 @@ LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
    _Rnd_variation(getParam<Real>("Rnd_variation")),
    _circles_per_side(getParam<std::vector<unsigned int> >("circles_per_side"))
 {
+}
+
+void
+LatticeSmoothCircleIC::initialSetup()
+{
+  MultiSmoothCircleIC::initialSetup();
+  
   /*std::vector<unsigned int> circles_per_side;
   circles_per_side.resize(3);
   

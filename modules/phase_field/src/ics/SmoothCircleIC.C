@@ -29,13 +29,9 @@ SmoothCircleIC::SmoothCircleIC(const std::string & name,
    _radius(parameters.get<Real>("radius")),
    _int_width(parameters.get<Real>("int_width")),
    _3D_spheres(parameters.get<bool>("3D_spheres")),
-   _center(_x1,_y1,_z1)
+   _center(_x1,_y1,_z1),
+   _num_dim(_3D_spheres ? 3 : 2)
 {  
-  if (_3D_spheres)
-    _num_dim = 3;
-  else
-    _num_dim = 2;
-
 }
 
 Real

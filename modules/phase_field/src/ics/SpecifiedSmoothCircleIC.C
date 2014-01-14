@@ -27,6 +27,13 @@ SpecifiedSmoothCircleIC::SpecifiedSmoothCircleIC(const std::string & name,
    _z_positions(getParam<std::vector<Real> >("z_positions")),
    _radii(getParam<std::vector<Real> >("radii"))
 {
+}
+
+void
+SpecifiedSmoothCircleIC::initialSetup()
+{
+  MultiSmoothCircleIC::initialSetup();
+  
   unsigned int y_size, z_size, radii_size;
   _numbub = _x_positions.size();
   //std::cout << "check 1" << "\n";

@@ -32,6 +32,11 @@ MultiSmoothCircleIC::MultiSmoothCircleIC(const std::string & name,
    _numtries(getParam<unsigned int>("numtries")),
    _radius_variation(getParam<Real>("radius_variation"))
 {
+}
+
+void
+MultiSmoothCircleIC::initialSetup()
+{
    _bubcent.resize(_numbub);
    _bubradi.resize(_numbub);
    

@@ -30,6 +30,8 @@ public:
    */
   MultiSmoothCircleIC(const std::string & name,
                          InputParameters parameters);
+
+  virtual void initialSetup();
   
   virtual Real value(const Point & p);
   virtual RealGradient gradient(const Point & p);

@@ -30,6 +30,8 @@ public:
    */
   SpecifiedSmoothCircleIC(const std::string & name,
                          InputParameters parameters);
+
+  virtual void initialSetup();
   
 protected:
   std::vector<Real> _x_positions;

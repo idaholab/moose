@@ -31,6 +31,8 @@ public:
   LatticeSmoothCircleIC(const std::string & name,
                          InputParameters parameters);
 
+  virtual void initialSetup();
+  
 protected:
   Real _Rnd_variation;
   std::vector<unsigned int> _circles_per_side;
