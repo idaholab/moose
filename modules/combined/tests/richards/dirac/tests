@@ -37,4 +37,11 @@
     exodiff = 'bh07.e'
     rel_err = 1E-5
   [../]
+
+  [./test_st01]
+    type = 'CSVDiff'
+    input = 'st01.i'
+    csvdiff = 'st01.csv'
+    rel_err = 1E-5
+  [../]
 []

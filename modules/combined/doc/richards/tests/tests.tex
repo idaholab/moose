@@ -71,6 +71,8 @@ follows.
   with the caveat that $S\geq S_{\mathrm{imm}}$.
 \item Chapter~\ref{si} checks that the piecewise-linear sink and the
   half-Gaussian sink are implemented correctly.
+\item Chapter~\ref{st} checks that the piecewise-linear stream-type
+  sink (the PolyLineSink) is implemented correctly.
 \item Chapter~\ref{pp} checks that pressure pulses diffuse correctly
   through a fully-saturated medium.  For readers experienced in the
   groundwater, this is very similar to the Theis solution.
@@ -229,7 +231,7 @@ In addition to these tests, the Jacobians for the following sinks/sources are te
 \begin{itemize}
 \item Piecewise linear sink
 \item Half Gaussian sink
-\item Piecewise linear stream sink
+\item Polyline stream sink
 \end{itemize}
 
 
@@ -449,6 +451,67 @@ Figure~\ref{s02.fig}.
 \label{s02.fig}
 \end{figure}
 
+
+\chapter{PolyLine sink}
+\label{st}
+
+The MOOSE implementation allows users to specify sinks and sources
+acting along polylines that are functions of porepressure.  This is
+primarily designed to model stream sources/sinks.  This chapter
+tests that these sinks and sources act as specified.  The test is
+part of the automatic test suite that is run every time the code is
+updated.
+
+A 3D model with $-1\leq x \leq 1$, $-1\leq y \leq 1$ and $-1\leq z
+\leq 1$ with just a
+single element is subjected to polyline sink flux acting at its
+centre point.  Because it is a single element with the polyline
+sitting at its centre, no fluid flow within the
+element occurs.  The following fluid properties are used:
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Constant fluid bulk modulus & 2\,GPa \\
+Fluid density at zero pressure & 1000\,kg.m$^{-3}$ \\
+\hline
+\end{tabular} 
+\end{center}
+The test is fully-saturated, so the van Genuchten parameters, etc, are
+irrelevant.  The initial porepressure is set to 10\,MPa, and the
+polyline sink flux is applied with strength:
+\begin{equation}
+\mbox{sink flux (kg.s$^{-1}$)} = \left\{
+\begin{array}{ll}
+1 & \mbox{ for } p \leq 2\,\mbox{MPa} \\
+1 + (p - 2)/6 & \mbox{ for } 2<p<8\,\mbox{MPa} \\
+2 & \mbox{ for } p\geq 8\,\mbox{MPa}
+\end{array}
+\right.
+\label{eqn.st01}
+\end{equation}
+The sink flux is recorded by into a Postprocessor by MOOSE.  It is
+remotely possible that the MOOSE implementation {\em applies} the sink
+flux incorrectly, but {\em records} it as a Postprocessor correctly as
+specified by Eqn~(\ref{eqn.st01}).  Therefore the simulation also
+records the fluid mass and mass-balance error in order to check that
+the fluid mass is indeed being reduced correctly by the sink flux.
+The simulation is run for 2.5\,s using 25 time steps.
+
+The expected behaviour is demonstrated in Figure~\ref{st01.fig}.
+
+\begin{figure}[htb]
+\centering
+\begin{tabular}{cc}
+\includegraphics[width=7cm]{st01.eps} &
+\includegraphics[width=7cm]{st01_mass_balance.eps}
+\end{tabular}
+\caption{Left: Comparison between the MOOSE result (in dots), and the
+  expected behaviour of the sink flux given by Eqn~(\ref{eqn.st01}).
+  Right: The mass-balance error is small for the simulation described
+  demonstrating that the recorded sink flux is truly reducing the mass
+  in the correct way.}
+\label{st01.fig}
+\end{figure}
 
 
 \chapter{A pressure pulse in the fully saturated situation}
