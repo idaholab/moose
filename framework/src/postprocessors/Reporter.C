@@ -12,25 +12,37 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef POSTPROCESSORFUNCTION_H
-#define POSTPROCESSORFUNCTION_H
-
-#include "Function.h"
-
-class PostprocessorFunction;
+#include "Reporter.h"
 
 template<>
-InputParameters validParams<PostprocessorFunction>();
-
-class PostprocessorFunction : public Function
+InputParameters validParams<Reporter>()
 {
-public:
-  PostprocessorFunction(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<GeneralPostprocessor>();
+  params.addParam<Real>("default", 0, "Default value");
+  params.addParam<bool>("sum", false, "Whether or not to use the global sum as the value");
+  return params;
+}
 
-  virtual Real value(Real t, const Point & p);
-  
-protected:
-  PostprocessorValue & _pp;
-};
+Reporter::Reporter(const std::string & name, InputParameters params) :
+    GeneralPostprocessor(name, params),
+    _my_value(getPostprocessorValueByName(name)),
+    _sum(getParam<bool>("sum"))
+{
+}
 
-#endif //POSTPROCESSORFUNCTION_H
+void
+Reporter::initialSetup()
+{
+  // Set the default value
+  _my_value = getParam<Real>("default");
+}
+
+Real
+Reporter::getValue()
+{
+  if(_sum)
+    gatherSum(_my_value);
+
+  // Return the stored value (references stored value in getPostprocessorData)
+  return _my_value;
+}

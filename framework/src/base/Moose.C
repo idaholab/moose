@@ -145,6 +145,8 @@
 #include "ScalarVariable.h"
 #include "NumVars.h"
 #include "NumResidualEvaluations.h"
+
+#include "Reporter.h"
 #include "Receiver.h"
 #include "SideAverageValue.h"
 #include "SideFluxIntegral.h"
@@ -444,6 +446,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumVars);
   registerPostprocessor(NumResidualEvaluations);
   registerPostprocessor(PlotFunction);
+  registerDeprecatedObject(Reporter, "01/15/2014 07:42");
   registerPostprocessor(Receiver);
   registerPostprocessor(SideAverageValue);
   registerPostprocessor(SideFluxIntegral);

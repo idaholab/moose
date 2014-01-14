@@ -37,7 +37,7 @@ protected:
   virtual Real computeInitialDT();
   virtual Real computeDT();
 
-  const PostprocessorValue & _pps_value;
+  PostprocessorValue & _pps_value;
   bool _has_initial_dt;
   Real _initial_dt;
 };

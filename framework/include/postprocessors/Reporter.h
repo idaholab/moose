@@ -12,30 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef RECEIVER_H
-#define RECEIVER_H
+#ifndef REPORTER_H
+#define REPORTER_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class Receiver;
+class Reporter;
 
 template<>
-InputParameters validParams<Receiver>();
+InputParameters validParams<Reporter>();
 
 /**
  * A class for storing data, it allows the user to change the value of the
  * postprocessor by altering the _my_value reference
  */
-class Receiver : public GeneralPostprocessor
+class Reporter : public GeneralPostprocessor
 {
 public:
   /**
    * Class constructor
-   * @param name The name of the Receiver postprocessor
+   * @param name The name of the Reporter postprocessor
    * @param parameters The input parameters
    */
-  Receiver(const std::string & name, InputParameters parameters);
+  Reporter(const std::string & name, InputParameters parameters);
 
   /**
    * No action taken
@@ -67,4 +67,4 @@ protected:
   bool _sum;
 };
 
-#endif //RECEIVER_H
+#endif //REPORTER_H

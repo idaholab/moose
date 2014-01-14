@@ -40,13 +40,13 @@ protected:
   Real _value;
 
   /// My old value
-  const PostprocessorValue & _value_old;
+  PostprocessorValue & _value_old;
 
   /// The current post-processor value
-  const PostprocessorValue & _pps_value;
+  PostprocessorValue & _pps_value;
 
   /// The old post-processor value
-  const PostprocessorValue & _pps_value_old;
+  PostprocessorValue & _pps_value_old;
 };
 
 #endif /* TOTALVARIABLEVALUE_H */
