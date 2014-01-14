@@ -248,7 +248,7 @@ protected:
   PeriodicBoundaries *_pbs;
 
   /// Average value of the domain which can optionally be used to find bubbles in a field
-  Real & _element_average_value;
+  const PostprocessorValue & _element_average_value;
 
   /**
    * The data structure which is a list of nodes that are constrained to other nodes
