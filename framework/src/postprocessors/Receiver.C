@@ -18,31 +18,27 @@ template<>
 InputParameters validParams<Receiver>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addParam<Real>("default", 0, "Default value");
-  params.addParam<bool>("sum", false, "Whether or not to use the global sum as the value");
+  params.addParam<Real>("default", "The default value");
+
   return params;
 }
 
 Receiver::Receiver(const std::string & name, InputParameters params) :
     GeneralPostprocessor(name, params),
-    _my_value(getPostprocessorValueByName(name)),
-    _sum(getParam<bool>("sum"))
+    _my_value(getPostprocessorValueByName(name))
 {
-}
-
-void
-Receiver::initialSetup()
-{
-  // Set the default value
-  _my_value = getParam<Real>("default");
 }
 
 Real
 Receiver::getValue()
 {
-  if(_sum)
-    gatherSum(_my_value);
-
   // Return the stored value (references stored value in getPostprocessorData)
   return _my_value;
+}
+
+void
+Receiver::initialSetup()
+{
+  if (isParamValid("default"))
+    _fe_problem.getPostprocessorValue(_pp_name) = getParam<Real>("default");
 }

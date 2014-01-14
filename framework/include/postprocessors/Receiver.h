@@ -48,23 +48,21 @@ public:
   virtual void execute() {}
 
   /**
-   * Set the _my_value to the supplied default value
-   */
-  virtual void initialSetup();
-
-  /**
    * Returns the value stored in _my_value
-   * @return The value of the postprocessor
+   * @return A const reference to the value of the postprocessor
    */
   virtual Real getValue();
+
+  /**
+   * Initial setup function for apply the default value
+   */
+  virtual void initialSetup();
 
 protected:
 
   /// Reference to the value being stored in the associated PostprocessorData class
-  PostprocessorValue & _my_value;
+  const PostprocessorValue & _my_value;
 
-  /// Whether or not the value should be the global sum
-  bool _sum;
 };
 
 #endif //RECEIVER_H
