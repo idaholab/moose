@@ -48,9 +48,9 @@ void
 Elk::HeatConduction::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   // This registers an action to add the "slave_flux" vector to the system at the right time
-  registerActionName("add_slave_flux_vector", false);
-  addActionNameDependency("add_slave_flux_vector", "ready_to_init");
-  addActionNameDependency("init_problem", "add_slave_flux_vector");
+  registerTask("add_slave_flux_vector", false);
+  addTaskDependency("add_slave_flux_vector", "ready_to_init");
+  addTaskDependency("init_problem", "add_slave_flux_vector");
   registerAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
   syntax.registerActionSyntax("AddSlaveFluxVectorAction", "ThermalContact/*");
 
