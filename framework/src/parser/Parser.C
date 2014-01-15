@@ -177,7 +177,7 @@ Parser::parse(const std::string &input_filename)
           extractParams(curr_identifier, params);
 
           // Add the parsed syntax to the parameters object for consumption by the Action
-          params.set<std::string>("action") = i->second._action_name;
+          params.set<std::string>("action") = i->second._task;
 
           // Create the Action
           Action * action = _action_factory.create(i->second._action, curr_identifier, params);
@@ -329,11 +329,11 @@ Parser::buildFullTree(const std::string &search_string)
        iter != _syntax.getAssociatedActions().end(); ++iter)
   {
     Syntax::ActionInfo act_info = iter->second;
-    // If the action_name is NULL that means we need to figure out which action_name
+    // If the task is NULL that means we need to figure out which task
     // goes with this syntax for the purpose of building the Moose Object part of the tree.
     // We will figure this out by asking the ActionFactory for the registration info.
-    if (act_info._action_name == "")
-      act_info._action_name = _action_factory.getActionName(act_info._action);
+    if (act_info._task == "")
+      act_info._task = _action_factory.getTaskName(act_info._action);
 
     all_names.push_back(std::pair<std::string, Syntax::ActionInfo>(iter->first, act_info));
   }
@@ -343,7 +343,7 @@ Parser::buildFullTree(const std::string &search_string)
     InputParameters action_obj_params = _action_factory.getValidParams(act_names->second._action);
     _syntax_formatter->insertNode(act_names->first, act_names->second._action, true, &action_obj_params);
 
-    const std::string & action_name = act_names->second._action_name;
+    const std::string & task = act_names->second._task;
     std::string act_name = act_names->first;
 
     // We need to see if this action is inherited from MooseObjectAction
@@ -358,9 +358,9 @@ Parser::buildFullTree(const std::string &search_string)
         InputParameters moose_obj_params = (moose_obj->second)();
 
         if (moose_obj_params.have_parameter<std::string>("built_by_action") &&
-            (moose_obj_params.get<std::string>("built_by_action") == action_name ||
+            (moose_obj_params.get<std::string>("built_by_action") == task ||
              // Print out aux_bcs which are "built_by_action" add_aux_kernel
-             (action_name == "add_aux_bc" &&
+             (task == "add_aux_bc" &&
               moose_obj_params.get<std::string>("built_by_action") == "add_aux_kernel")))
         {
 
@@ -455,12 +455,12 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
   static const std::string global_params_block_name = "GlobalParams";
 
-  static const std::string global_params_action_name = "set_global_params";
-  ActionIterator act_iter = _action_wh.actionBlocksWithActionBegin(global_params_action_name);
+  static const std::string global_params_task = "set_global_params";
+  ActionIterator act_iter = _action_wh.actionBlocksWithActionBegin(global_params_task);
   GlobalParamsAction *global_params_block = NULL;
 
   // We are grabbing only the first
-  if (act_iter != _action_wh.actionBlocksWithActionEnd(global_params_action_name))
+  if (act_iter != _action_wh.actionBlocksWithActionEnd(global_params_task))
     global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
 
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)

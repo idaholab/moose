@@ -559,7 +559,7 @@ void
 addActionTypes(Syntax & syntax)
 {
   /**
-   * The second param here indicates whether the action_name must be satisfied or not for a successful run.
+   * The second param here indicates whether the task must be satisfied or not for a successful run.
    * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they have
    * not been explicitly created by the parser or some other mechanism.
    *
@@ -572,71 +572,71 @@ addActionTypes(Syntax & syntax)
   /**** Register Actions ****/
   /**************************/
   /// Minimal Problem
-  registerActionName("recover_base", false);
-  registerActionName("setup_mesh", false);
-  registerActionName("prepare_mesh", false);
-  registerActionName("setup_mesh_complete", false);  // calls prepare
-  registerActionName("add_variable", false);
-  registerActionName("add_kernel", false);
-  registerActionName("setup_executioner", true);
-  registerActionName("setup_time_stepper", false);
-  registerActionName("init_displaced_problem", false);
-  registerActionName("create_problem", true);
-  registerActionName("setup_output", false);
-  registerActionName("setup_output_name", true);
-  registerActionName("init_problem", true);
-  registerActionName("check_copy_nodal_vars", true);
-  registerActionName("copy_nodal_vars", true);
-  registerActionName("copy_nodal_aux_vars", true);
-  registerActionName("add_bc", false);  // Does this need to be true?  Not if you have periodic boundaries...
-  registerActionName("setup_dampers", true);
-  registerActionName("check_integrity", true);
-  registerActionName("setup_quadrature", true);
+  registerTask("recover_base", false);
+  registerTask("setup_mesh", false);
+  registerTask("prepare_mesh", false);
+  registerTask("setup_mesh_complete", false);  // calls prepare
+  registerTask("add_variable", false);
+  registerTask("add_kernel", false);
+  registerTask("setup_executioner", true);
+  registerTask("setup_time_stepper", false);
+  registerTask("init_displaced_problem", false);
+  registerTask("create_problem", true);
+  registerTask("setup_output", false);
+  registerTask("setup_output_name", true);
+  registerTask("init_problem", true);
+  registerTask("check_copy_nodal_vars", true);
+  registerTask("copy_nodal_vars", true);
+  registerTask("copy_nodal_aux_vars", true);
+  registerTask("add_bc", false);  // Does this need to be true?  Not if you have periodic boundaries...
+  registerTask("setup_dampers", true);
+  registerTask("check_integrity", true);
+  registerTask("setup_quadrature", true);
 
   /// Additional Actions
-  registerActionName("no_action", false);  // Used for Empty Action placeholders
-  registerActionName("set_global_params", false);
-  registerActionName("add_mesh_modifier", false);
-  registerActionName("setup_time_periods", true);
-  registerActionName("add_material", false);
-  registerActionName("add_function", false);
-  registerActionName("add_aux_variable", false);
-  registerActionName("add_aux_kernel", false);
-  registerActionName("add_aux_bc", false);
-  registerActionName("add_dirac_kernel", false);
-  registerActionName("add_scalar_kernel", false);
-  registerActionName("add_aux_scalar_kernel", false);
-  registerActionName("add_dg_kernel", false);
-  registerActionName("add_ic", false);
-  registerActionName("add_postprocessor", false);
-  registerActionName("add_damper", false);
-  registerActionName("add_periodic_bc", false);
-  registerActionName("add_preconditioning", false);
-  registerActionName("setup_adaptivity", false);
-  registerActionName("meta_action", false);
-  registerActionName("initial_mesh_refinement", false);
-  registerActionName("setup_debug", false);
-  registerActionName("setup_residual_debug", false);
-  registerActionName("setup_oversampling", false);
-  registerActionName("deprecated_block", false);
-  registerActionName("add_constraint", false);
-  registerActionName("add_user_object", false);
-  registerActionName("add_bounds_vectors", false);
-  registerActionName("add_elemental_field_variable", false);
-  registerActionName("add_indicator", false);
-  registerActionName("add_marker", false);
-  registerActionName("set_adaptivity_options", false);
-  registerActionName("add_feproblem", false);
-  registerActionName("add_coupled_variable", false);
-  registerActionName("add_multi_app", false);
-  registerActionName("add_transfer", false);
-  registerActionName("setup_predictor", false);
+  registerTask("no_action", false);  // Used for Empty Action placeholders
+  registerTask("set_global_params", false);
+  registerTask("add_mesh_modifier", false);
+  registerTask("setup_time_periods", true);
+  registerTask("add_material", false);
+  registerTask("add_function", false);
+  registerTask("add_aux_variable", false);
+  registerTask("add_aux_kernel", false);
+  registerTask("add_aux_bc", false);
+  registerTask("add_dirac_kernel", false);
+  registerTask("add_scalar_kernel", false);
+  registerTask("add_aux_scalar_kernel", false);
+  registerTask("add_dg_kernel", false);
+  registerTask("add_ic", false);
+  registerTask("add_postprocessor", false);
+  registerTask("add_damper", false);
+  registerTask("add_periodic_bc", false);
+  registerTask("add_preconditioning", false);
+  registerTask("setup_adaptivity", false);
+  registerTask("meta_action", false);
+  registerTask("initial_mesh_refinement", false);
+  registerTask("setup_debug", false);
+  registerTask("setup_residual_debug", false);
+  registerTask("setup_oversampling", false);
+  registerTask("deprecated_block", false);
+  registerTask("add_constraint", false);
+  registerTask("add_user_object", false);
+  registerTask("add_bounds_vectors", false);
+  registerTask("add_elemental_field_variable", false);
+  registerTask("add_indicator", false);
+  registerTask("add_marker", false);
+  registerTask("set_adaptivity_options", false);
+  registerTask("add_feproblem", false);
+  registerTask("add_coupled_variable", false);
+  registerTask("add_multi_app", false);
+  registerTask("add_transfer", false);
+  registerTask("setup_predictor", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
-  registerActionName("setup_function_complete", false);
-  registerActionName("setup_variable_complete", false);
-  registerActionName("ready_to_init", true);
-  registerActionName("setup_pps_complete", false);
+  registerTask("setup_function_complete", false);
+  registerTask("setup_variable_complete", false);
+  registerTask("ready_to_init", true);
+  registerTask("setup_pps_complete", false);
 
   /**************************/
   /****** Dependencies ******/
@@ -647,7 +647,7 @@ addActionTypes(Syntax & syntax)
    * line.  Items on the same line have equal weight and can be executed in any order.
    *
    * Additional dependencies can be inserted later inside of user applications with calls to
-   * ActionWarehouse::addDependency("action_name", "pre_req")
+   * ActionWarehouse::addDependency("task", "pre_req")
    */
   syntax.addDependencySets(
 "(meta_action)"
@@ -711,7 +711,7 @@ addActionTypes(Syntax & syntax)
  * "setup_mesh_complete" <---> SetupMeshCompleteAction <-
  *
  *
- * Action classes can also be registered to act on more than one input file section for a different action_name
+ * Action classes can also be registered to act on more than one input file section for a different task
  * if similar logic can work in multiple cases
  *
  * Example:
@@ -805,7 +805,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddTransferAction, "add_transfer");
 
   // TODO: Why is this here?
-  registerActionName("finish_input_file_output", false);
+  registerTask("finish_input_file_output", false);
   registerAction(EmptyAction, "finish_input_file_output");
 }
 

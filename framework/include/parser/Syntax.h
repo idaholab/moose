@@ -28,7 +28,7 @@ public:
   struct ActionInfo
   {
     std::string _action;
-    std::string _action_name;
+    std::string _task;
   };
 
 public:
@@ -38,26 +38,26 @@ public:
   void addDependency(std::string action, std::string pre_req);
   void addDependencySets(const std::string & action_sets);
 
-  const std::vector<std::string> & getSortedActionName();
-  const std::vector<std::set<std::string> > & getSortedActionNameSet();
+  const std::vector<std::string> & getSortedTask();
+  const std::vector<std::set<std::string> > & getSortedTaskSet();
 
-  bool hasActionName(const std::string & action_name);
+  bool hasTask(const std::string & task);
 
-  bool isActionRequired(const std::string & action_name);
+  bool isActionRequired(const std::string & task);
 
   // Registration function for associating Moose Actions with syntax
   void registerActionSyntax(const std::string & action, const std::string & syntax,
-                            const std::string & action_name = "");
+                            const std::string & task = "");
 
   /**
    *  Registration function that replaces existing Moose Actions with a completely new action
    *  Note: This function will remove all actions associated with this piece of syntax _NOT_ just
    *        a single match of some kind
    */
-  void replaceActionSyntax(const std::string & action, const std::string & syntax, const std::string & action_name);
+  void replaceActionSyntax(const std::string & action, const std::string & syntax, const std::string & task);
 
-  // Retrieve the Syntax associated with the passed Action and action_name
-  std::string getSyntaxByAction(const std::string & action, const std::string & action_name);
+  // Retrieve the Syntax associated with the passed Action and task
+  std::string getSyntaxByAction(const std::string & action, const std::string & task);
 
   /**
    * Method for determining whether a piece of syntax is associated with an Action

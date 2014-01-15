@@ -39,67 +39,67 @@ Syntax::addDependency(std::string action, std::string pre_req)
 void
 Syntax::addDependencySets(const std::string & action_sets)
 {
-  std::vector<std::string> sets, prev_names, action_names;
+  std::vector<std::string> sets, prev_names, tasks;
   MooseUtils::tokenize(action_sets, sets, 1, "()");
 
   for (unsigned int i=0; i<sets.size(); ++i)
   {
-    action_names.clear();
-    MooseUtils::tokenize(sets[i], action_names, 0, ", ");
-    for (unsigned int j=0; j<action_names.size(); ++j)
+    tasks.clear();
+    MooseUtils::tokenize(sets[i], tasks, 0, ", ");
+    for (unsigned int j=0; j<tasks.size(); ++j)
     {
       // Each line should depend on each item in the previous line
       for (unsigned int k=0; k<prev_names.size(); ++k)
-        addDependency(action_names[j], prev_names[k]);
+        addDependency(tasks[j], prev_names[k]);
     }
     // Copy the the current items to the previous items for the next iteration
-    std::swap(action_names, prev_names);
+    std::swap(tasks, prev_names);
   }
 }
 
 const std::vector<std::string> &
-Syntax::getSortedActionName()
+Syntax::getSortedTask()
 {
   return _actions.getSortedValues();
 }
 
 const std::vector<std::set<std::string> > &
-Syntax::getSortedActionNameSet()
+Syntax::getSortedTaskSet()
 {
   return _actions.getSortedValuesSets();
 }
 
 bool
-Syntax::hasActionName(const std::string & action_name)
+Syntax::hasTask(const std::string & task)
 {
-  return (_registered_actions.find(action_name) != _registered_actions.end());
+  return (_registered_actions.find(task) != _registered_actions.end());
 }
 
 bool
-Syntax::isActionRequired(const std::string & action_name)
+Syntax::isActionRequired(const std::string & task)
 {
-  return _registered_actions[action_name];
+  return _registered_actions[task];
 }
 
 void
-Syntax::registerActionSyntax(const std::string & action, const std::string & syntax, const std::string & action_name)
+Syntax::registerActionSyntax(const std::string & action, const std::string & syntax, const std::string & task)
 {
   ActionInfo action_info;
   action_info._action = action;
-  action_info._action_name = action_name;
+  action_info._task = task;
 
   _associated_actions.insert(std::make_pair(syntax, action_info));
 }
 
 void
-Syntax::replaceActionSyntax(const std::string & action, const std::string & syntax, const std::string & action_name)
+Syntax::replaceActionSyntax(const std::string & action, const std::string & syntax, const std::string & task)
 {
   _associated_actions.erase(syntax);
-  registerActionSyntax(action, syntax, action_name);
+  registerActionSyntax(action, syntax, task);
 }
 
 std::string
-Syntax::getSyntaxByAction(const std::string & action, const std::string & action_name)
+Syntax::getSyntaxByAction(const std::string & action, const std::string & task)
 {
   std::string syntax;
   /**
@@ -111,7 +111,7 @@ Syntax::getSyntaxByAction(const std::string & action, const std::string & action
        iter != _associated_actions.end(); ++iter)
   {
     if (iter->second._action == action &&
-        (iter->second._action_name == action_name || iter->second._action_name == ""))
+        (iter->second._task == task || iter->second._task == ""))
       syntax = iter->first;
   }
 

@@ -49,8 +49,8 @@ public:
 
   virtual ~Parser();
 
-  /// Retrieve the Syntax associated with the passed Action and action_name
-  std::string getSyntaxByAction(const std::string & action, const std::string & action_name) { return _syntax.getSyntaxByAction(action, action_name); }
+  /// Retrieve the Syntax associated with the passed Action and task
+  std::string getSyntaxByAction(const std::string & action, const std::string & task) { return _syntax.getSyntaxByAction(action, task); }
 
   /**
    * Determines whether a particular block is marked as active

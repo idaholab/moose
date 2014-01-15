@@ -86,11 +86,11 @@ CoupledExecutioner::addFEProblem(const std::string & name, const FileName & file
 }
 
 void
-CoupledExecutioner::addVariableAction(const std::string & action_name, ActionWarehouse & src, const std::string & src_var_name, ActionWarehouse & dest, const std::string & dest_var_name)
+CoupledExecutioner::addVariableAction(const std::string & task, ActionWarehouse & src, const std::string & src_var_name, ActionWarehouse & dest, const std::string & dest_var_name)
 {
   // first, try to find if the destination warehouse already has the variable we are going to add
   bool dest_var_exists = false;
-  for (ActionIterator ai = dest.actionBlocksWithActionBegin(action_name); ai != dest.actionBlocksWithActionEnd(action_name); ai++)
+  for (ActionIterator ai = dest.actionBlocksWithActionBegin(task); ai != dest.actionBlocksWithActionEnd(task); ai++)
   {
     Action * action = *ai;
     if (action->getShortName() == dest_var_name)
@@ -102,7 +102,7 @@ CoupledExecutioner::addVariableAction(const std::string & action_name, ActionWar
 
   if (!dest_var_exists)
   {
-    for (ActionIterator ai = src.actionBlocksWithActionBegin(action_name); ai != src.actionBlocksWithActionEnd(action_name); ai++)
+    for (ActionIterator ai = src.actionBlocksWithActionBegin(task); ai != src.actionBlocksWithActionEnd(task); ai++)
     {
       Action * action = *ai;
       if (action->getShortName() == src_var_name)

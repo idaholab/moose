@@ -56,10 +56,10 @@ public:
   void printActionDependencySets();
   void printInputFile(std::ostream & out);
 
-  ActionIterator actionBlocksWithActionBegin(const std::string & action_name);
-  ActionIterator actionBlocksWithActionEnd(const std::string & action_name);
+  ActionIterator actionBlocksWithActionBegin(const std::string & task);
+  ActionIterator actionBlocksWithActionEnd(const std::string & task);
 
-  const std::vector<Action *> & getActionsByName(const std::string & action_name) const;
+  const std::vector<Action *> & getActionsByName(const std::string & task) const;
 
   /**
    * This method loops over all actions in the warehouse and executes them.  Meta-actions
@@ -68,7 +68,7 @@ public:
   void executeAllActions();
 
   /**
-   * This method executes only the actions in the warehouse that satisfy the action_name
+   * This method executes only the actions in the warehouse that satisfy the task
    * passed in
    */
   void executeActionsWithAction(const std::string & name);
@@ -85,7 +85,7 @@ public:
   MooseApp & mooseApp() { return _app; }
 
 protected:
-  void buildBuildableActions(const std::string &action_name);
+  void buildBuildableActions(const std::string &task);
 
   /// The MooseApp this Warehouse is associated with
   MooseApp & _app;

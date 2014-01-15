@@ -29,8 +29,8 @@
  */
 #define stringifyName(name) #name
 #define registerAction(tplt, action)                  action_factory.reg<tplt>(stringifyName(tplt), action)
-#define registerActionName(name, is_required)         syntax.registerName(name, is_required)
-#define addActionNameDependency(action, depends_on)   syntax.addDependency(action, depends_on)
+#define registerTask(name, is_required)         syntax.registerName(name, is_required)
+#define addTaskDependency(action, depends_on)   syntax.addDependency(action, depends_on)
 
 // Forward Declaration
 class ActionFactory;
@@ -67,19 +67,19 @@ public:
   virtual ~ActionFactory();
 
   template<typename T>
-  void reg(const std::string & name, const std::string & action_name)
+  void reg(const std::string & name, const std::string & task)
   {
     BuildInfo build_info;
     build_info._build_pointer = &buildAction<T>;
     build_info._params_pointer = &validParams<T>;
-    build_info._action_name = action_name;
+    build_info._task = task;
     build_info._unique_id = _unique_id++;
     _name_to_build_info.insert(std::make_pair(name, build_info));
 
-    _action_to_name_map.insert(std::make_pair(action_name, name));
+    _action_to_name_map.insert(std::make_pair(task, name));
   }
 
-  std::string getActionName(const std::string & action);
+  std::string getTaskName(const std::string & action);
 
   Action * create(const std::string & action, const std::string & name, InputParameters params);
 
@@ -90,7 +90,7 @@ public:
   public:
     buildActionPtr _build_pointer;
     paramsActionPtr _params_pointer;
-    std::string _action_name;
+    std::string _task;
     unsigned int _unique_id;
   };
 
@@ -104,7 +104,7 @@ public:
   iterator end();
   const_iterator end() const;
 
-  std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator> getA(const std::string & action_name);
+  std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator> getA(const std::string & task);
 
   std::multimap<std::string, BuildInfo> _name_to_build_info;
 
@@ -147,9 +147,9 @@ ActionFactory::const_iterator ActionFactory::end() const
 
 inline
 std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator>
-ActionFactory::getA(const std::string & action_name)
+ActionFactory::getA(const std::string & task)
 {
-  return _action_to_name_map.equal_range(action_name);
+  return _action_to_name_map.equal_range(task);
 }
 
 #endif /* ACTIONFACTORY_H */

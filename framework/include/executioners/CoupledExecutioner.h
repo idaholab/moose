@@ -91,13 +91,13 @@ protected:
 
   /**
    * Create an action that adds a variable
-   * @param action_name Type of action we are looking for
-   * @param src Source warehouse that is search for actions that satisfy action_name
+   * @param task Type of action we are looking for
+   * @param src Source warehouse that is search for actions that satisfy task
    * @param src_var_name Name of the variable in the source problem
    * @param dest Target warehouse we put the new action into
    * @param dest_var_name Name of the variable in the target problem
    */
-  void addVariableAction(const std::string & action_name, ActionWarehouse & src, const std::string & src_var_name, ActionWarehouse & dest, const std::string & dest_var_name);
+  void addVariableAction(const std::string & task, ActionWarehouse & src, const std::string & src_var_name, ActionWarehouse & dest, const std::string & dest_var_name);
 
   /**
    * Project all variables that problem 'fep' needs

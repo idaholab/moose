@@ -57,7 +57,7 @@ ActionFactory::create(const std::string & action, const std::string & name, Inpu
     mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + name);
 
   if (params.get<std::string>("action") == "")
-    params.set<std::string>("action") = build_info->_action_name;
+    params.set<std::string>("action") = build_info->_task;
 
   return (*build_info->_build_pointer)(name, params);
 }
@@ -84,13 +84,13 @@ ActionFactory::getValidParams(const std::string & name)
 }
 
 std::string
-ActionFactory::getActionName(const std::string & action)
+ActionFactory::getTaskName(const std::string & action)
 {
   // We are returning only the first found instance here
   std::multimap<std::string, BuildInfo>::iterator iter = _name_to_build_info.find(action);
 
   if (iter != _name_to_build_info.end())
-    return iter->second._action_name;
+    return iter->second._task;
   else
     return "";
 }

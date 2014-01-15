@@ -47,7 +47,7 @@ public:
 
   InputParameters & parameters() { return _pars; }
 
-  const std::string & getAction() { return _current_action; }
+  const std::string & getTask() { return _current_action; }
 
   template <typename T>
   const T & getParam(const std::string & name) { return _pars.get<T>(name); }

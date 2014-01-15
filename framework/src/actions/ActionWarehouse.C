@@ -42,7 +42,7 @@ ActionWarehouse::~ActionWarehouse()
 void
 ActionWarehouse::build()
 {
-  _ordered_names = _syntax.getSortedActionName();
+  _ordered_names = _syntax.getSortedTask();
   for (std::vector<std::string>::iterator it = _ordered_names.begin(); it != _ordered_names.end(); ++it)
     buildBuildableActions(*it);
 }
@@ -62,13 +62,13 @@ ActionWarehouse::clear()
 void
 ActionWarehouse::addActionBlock(Action * blk)
 {
-  std::string action_name = blk->getAction();
+  std::string task = blk->getTask();
 
   // Some error checking
-  if (!_syntax.hasActionName(action_name))
-    mooseError("A(n) " << action_name << " is not a registered action name");
+  if (!_syntax.hasTask(task))
+    mooseError("A(n) " << task << " is not a registered action name");
 
-  // Make sure that the ObjectAction action_name and Action action_name are consistent
+  // Make sure that the ObjectAction task and Action task are consistent
   // otherwise that means that is action was built by the wrong type
   MooseObjectAction * moa = dynamic_cast<MooseObjectAction *>(blk);
   if (moa)
@@ -76,45 +76,45 @@ ActionWarehouse::addActionBlock(Action * blk)
     InputParameters mparams = moa->getObjectParams();
     if (mparams.have_parameter<std::string>("built_by_action"))
     {
-      std::string moose_action_name = moa->getObjectParams().get<std::string>("built_by_action");
-      if ((moose_action_name != action_name) &&  // if there is a mismatch, that means there is an object in the wrong section, unless...
+      std::string moose_task = moa->getObjectParams().get<std::string>("built_by_action");
+      if ((moose_task != task) &&  // if there is a mismatch, that means there is an object in the wrong section, unless...
           ! // NOT in the exception list...
-          ((action_name == "add_aux_bc" && moose_action_name == "add_aux_kernel") ||
-           (action_name == "add_postprocessor" && moose_action_name == "add_user_object") ||
-           (action_name == "add_user_object" && moose_action_name == "add_postprocessor")))
-        mooseError("Inconsistent Action Name detected (" + blk->name() + ")! Action that satisfies " + action_name + " is building a MOOSE Object that normally satisfies " + moose_action_name);
+          ((task == "add_aux_bc" && moose_task == "add_aux_kernel") ||
+           (task == "add_postprocessor" && moose_task == "add_user_object") ||
+           (task == "add_user_object" && moose_task == "add_postprocessor")))
+        mooseError("Inconsistent Action Name detected (" + blk->name() + ")! Action that satisfies " + task + " is building a MOOSE Object that normally satisfies " + moose_task);
     }
   }
 
-  _action_blocks[action_name].push_back(blk);
+  _action_blocks[task].push_back(blk);
 }
 
 ActionIterator
-ActionWarehouse::actionBlocksWithActionBegin(const std::string & action_name)
+ActionWarehouse::actionBlocksWithActionBegin(const std::string & task)
 {
-  return _action_blocks[action_name].begin();
+  return _action_blocks[task].begin();
 }
 
 ActionIterator
-ActionWarehouse::actionBlocksWithActionEnd(const std::string & action_name)
+ActionWarehouse::actionBlocksWithActionEnd(const std::string & task)
 {
-  return _action_blocks[action_name].end();
+  return _action_blocks[task].end();
 }
 
 const std::vector<Action *> &
-ActionWarehouse::getActionsByName(const std::string & action_name) const
+ActionWarehouse::getActionsByName(const std::string & task) const
 {
-  return _action_blocks.at(action_name);
+  return _action_blocks.at(task);
 }
 
 void
-ActionWarehouse::buildBuildableActions(const std::string &action_name)
+ActionWarehouse::buildBuildableActions(const std::string &task)
 {
-  if (_syntax.isActionRequired(action_name) && _action_blocks[action_name].empty())
+  if (_syntax.isActionRequired(task) && _action_blocks[task].empty())
   {
     bool ret_value = false;
     std::pair<std::multimap<std::string, std::string>::iterator,
-              std::multimap<std::string, std::string>::iterator> range = _action_factory.getA(action_name);
+              std::multimap<std::string, std::string>::iterator> range = _action_factory.getA(task);
     for (std::multimap<std::string, std::string>::iterator it = range.first; it != range.second; ++it)
     {
       InputParameters params = _action_factory.getValidParams(it->second);
@@ -128,7 +128,7 @@ ActionWarehouse::buildBuildableActions(const std::string &action_name)
     }
 
     if (!ret_value)
-      _unsatisfied_dependencies.insert(action_name);
+      _unsatisfied_dependencies.insert(task);
   }
 }
 
@@ -160,7 +160,7 @@ ActionWarehouse::printActionDependencySets()
 {
   Moose::err << "[DBG][ACT] Ordered Actions:\n";
 
-  const std::vector<std::set<std::string> > & ordered_names = _syntax.getSortedActionNameSet();
+  const std::vector<std::set<std::string> > & ordered_names = _syntax.getSortedTaskSet();
   for (std::vector<std::set<std::string> >::const_iterator i = ordered_names.begin(); i != ordered_names.end(); ++i)
   {
     Moose::err << "[DBG][ACT] (";
@@ -177,7 +177,7 @@ ActionWarehouse::printActionDependencySets()
       for (std::vector<Action *>::const_iterator k = _action_blocks[*j].begin(); k != _action_blocks[*j].end(); ++k)
       {
         Action * act = *k;
-        Moose::err << "[DBG][ACT]" << "\t" << act->getAction();
+        Moose::err << "[DBG][ACT]" << "\t" << act->getTask();
         if (dynamic_cast<MooseObjectAction *>(act) != NULL ||
             dynamic_cast<AddVariableAction *>(act) != NULL ||
             dynamic_cast<AddAuxVariableAction *>(act) != NULL)
@@ -206,8 +206,8 @@ ActionWarehouse::executeAllActions()
 
   for (std::vector<std::string>::iterator it = _ordered_names.begin(); it != _ordered_names.end(); ++it)
   {
-    std::string action_name = *it;
-    executeActionsWithAction(action_name);
+    std::string task = *it;
+    executeActionsWithAction(task);
   }
 }
 
@@ -242,7 +242,7 @@ ActionWarehouse::printInputFile(std::ostream & out)
        ++i)
    {
     std::string name ((*i)->name());
-    std::string action ((*i)->getAction());
+    std::string action ((*i)->getTask());
 
     bool is_parent;
     if (_syntax.isAssociated(name, &is_parent) != "")

@@ -23,9 +23,9 @@ namespace Moose
 void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   /**
-   * Note: the optional third parameter is used to differentiate which action_name is
+   * Note: the optional third parameter is used to differentiate which task is
    * satisfied based on the syntax encountered for classes which are registered
-   * to satisfy more than one action_name
+   * to satisfy more than one task
    */
   syntax.registerActionSyntax("CreateProblemAction", "Problem");
   syntax.registerActionSyntax("SetupMeshAction", "Mesh");
