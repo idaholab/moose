@@ -70,7 +70,9 @@ ifeq ($(MOOSE_PRECOMPILED), true)
 endif
 
 ifneq (,$(filter $(cxx_compiler), clang++))
+  ifneq (,$(findstring darwin,$(libmesh_HOST)))
 	libmesh_CXXFLAGS += -mmacosx-version-min=10.7
+  endif
 endif
 
 # Number of JOBS to run in parallel used in run_tests
