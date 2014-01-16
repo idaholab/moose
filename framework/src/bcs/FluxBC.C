@@ -35,11 +35,11 @@ FluxBC::~FluxBC()
 Real
 FluxBC::computeQpResidual()
 {
-  return computeQpFluxResidual() * _normals[_qp] * _test[_i][_qp];
+  return - computeQpFluxResidual() * _normals[_qp] * _test[_i][_qp];
 }
 
 Real
 FluxBC::computeQpJacobian()
 {
-  return computeQpFluxJacobian() * _normals[_qp] * _test[_i][_qp];
+  return - computeQpFluxJacobian() * _normals[_qp] * _test[_i][_qp];
 }
