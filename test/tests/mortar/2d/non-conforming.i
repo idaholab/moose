@@ -1,12 +1,12 @@
 [Mesh]
   file = non-conf-coarse.e
-[]
 
-[MortarInterfaces]
-  [./middle]
-    master = 100
-    slave = 101
-    subdomain = 1000
+  [./MortarInterfaces]
+    [./middle]
+      master = 100
+      slave = 101
+      subdomain = 1000
+    [../]
   [../]
 []
 
@@ -84,13 +84,14 @@
   [./fmp]
     type = SMP
     full = true
+    solve_type = 'NEWTON'
   [../]
 []
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
-  nl_rel_tol = 1e-13
+  nl_rel_tol = 1e-15
+  l_tol = 1e-15
 []
 
 [Output]

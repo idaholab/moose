@@ -29,5 +29,6 @@
     exodiff = 'non-conforming-2nd-order_out.e'
     max_parallel = 1
     max_threads = 1
+    deleted = true
   [../]
 []

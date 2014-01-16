@@ -1,12 +1,12 @@
 [Mesh]
   file = 3d-conf-2nd.e
-[]
-
-[MortarInterfaces]
-  [./middle]
-    master = 100
-    slave = 101
-    subdomain = 1000
+  
+  [./MortarInterfaces]
+    [./middle]
+      master = 100
+      slave = 101
+      subdomain = 1000
+    [../]
   [../]
 []
 
@@ -63,12 +63,6 @@
     variable = u
     boundary = '1 2 3 4 5 6'
     function = exact_sln
-  [../]
-  
-  [./mortar]
-    type = DiffusionFluxBC
-    variable = u
-    boundary = '100 101'
   [../]
 []
 

@@ -1,12 +1,12 @@
 [Mesh]
   file = 3d-non-conf.e
-[]
 
-[MortarInterfaces]
-  [./middle]
-    master = 100
-    slave = 101
-    subdomain = 1000
+  [./MortarInterfaces]
+    [./middle]
+      master = 100
+      slave = 101
+      subdomain = 1000
+    [../]
   [../]
 []
 
@@ -82,16 +82,17 @@
 []
 
 [Preconditioning]
-  [./fmp]
+  [./smp]
     type = SMP
     full = true
+    solve_type = 'NEWTON'
   [../]
 []
 
 [Executioner]
   type = Steady
-  solve_type = 'NEWTON'
   nl_rel_tol = 1e-14
+  l_tol = 1e-14
 []
 
 [Output]

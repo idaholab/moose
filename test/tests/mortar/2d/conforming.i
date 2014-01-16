@@ -1,12 +1,12 @@
 [Mesh]
   file = 2blk-conf.e
-[]
-
-[MortarInterfaces]
-  [./middle]
-    master = 100
-    slave = 101
-    subdomain = 1000
+  
+  [./MortarInterfaces]
+    [./middle]
+      master = 100
+      slave = 101
+      subdomain = 1000
+    [../]
   [../]
 []
 
@@ -84,13 +84,14 @@
   [./fmp]
     type = SMP
     full = true
+    solve_type = 'NEWTON'
   [../]
 []
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
   nl_rel_tol = 1e-11
+  l_tol = 1e-10
 []
 
 [Output]
