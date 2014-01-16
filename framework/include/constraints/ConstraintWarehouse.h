@@ -23,6 +23,7 @@
 
 class NodalConstraint;
 class NodeFaceConstraint;
+class FaceFaceConstraint;
 
 /**
  * Warehouse for storing boundary conditions (for non-linear variables)
@@ -43,10 +44,16 @@ public:
 
   void addNodeFaceConstraint(unsigned int slave, unsigned int master, NodeFaceConstraint * nfc);
 
+  void addFaceFaceConstraint(const std::string & name, FaceFaceConstraint * ffc);
+
   std::vector<NodalConstraint *> & getNodalConstraints();
 
   std::vector<NodeFaceConstraint *> & getNodeFaceConstraints(BoundaryID boundary_id);
   std::vector<NodeFaceConstraint *> & getDisplacedNodeFaceConstraints(BoundaryID boundary_id);
+
+  std::vector<FaceFaceConstraint *> & getFaceFaceConstraints(const std::string & name);
+
+  void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const;
 
 protected:
   /// nodal constraints on a boundary
@@ -54,6 +61,8 @@ protected:
 
   std::map<BoundaryID, std::vector<NodeFaceConstraint *> > _node_face_constraints;
   std::map<BoundaryID, std::vector<NodeFaceConstraint *> > _displaced_node_face_constraints;
+
+  std::map<std::string, std::vector<FaceFaceConstraint *> > _face_face_constraints;
 };
 
 #endif // CONSTRAINTWAREHOUSE_H

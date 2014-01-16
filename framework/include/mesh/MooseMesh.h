@@ -593,6 +593,34 @@ public:
    */
   void allowRecovery(bool allow) { _allow_recovery = allow; }
 
+  /**
+   * Add surface
+   * @param name The name of the surface
+   * @param bnd_id Boundary ID in the existing mesh this surface mesh will be created from
+   * @param domain_id New domain ID assigned to the surface mesh
+   */
+  void addSurface(const std::string & name, BoundaryID bnd_id, SubdomainID domain_id);
+
+  class MortarInterface
+  {
+  public:
+    /// The name of the interface
+    std::string _name;
+    /// subdomain ID of elements in this interface
+    SubdomainID _id;
+    /// List of elements on this interface
+    std::vector<Elem *> _elems;
+    /// master and slave ID of the interface
+    BoundaryName _master, _slave;
+  };
+
+  void addMortarInterface(const std::string & name, BoundaryName master, BoundaryName slave, SubdomainName domain_id);
+
+  std::vector<MooseMesh::MortarInterface *> & getMortarInterfaces() { return _mortar_interface; }
+
+  MooseMesh::MortarInterface * getMortarInterfaceByName(const std::string name) { return _mortar_interface_by_name[name]; }
+  MooseMesh::MortarInterface * getMortarInterface(BoundaryID master, BoundaryID slave) { return _mortar_interface_by_ids[std::pair<BoundaryID, BoundaryID>(master, slave)]; }
+
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a SerialMesh or ParallelMesh.
@@ -725,6 +753,12 @@ protected:
 
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID> > _paired_boundary;
+
+  /// Mortar interfaces mapped through their names
+  std::map<std::string, MortarInterface *> _mortar_interface_by_name;
+  std::vector<MortarInterface *> _mortar_interface;
+  /// Mortar interfaces mapped though master, slave IDs pairs
+  std::map<std::pair<BoundaryID, BoundaryID>, MortarInterface *> _mortar_interface_by_ids;
 
   void cacheInfo();
   void freeBndNodes();

@@ -43,6 +43,13 @@ public:
   PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order);
 
   /**
+   * Retrieve the mortar PentrationLocator associated with the two sides.
+   *
+   * A mortar version means that it's going to find the penetration each quadrature point on this boundary
+   */
+  PenetrationLocator & getMortarPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintSideType side_type, Order order);
+
+  /**
    * Retrieve the PentrationLocator associated with the two sides.
    */
   NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
@@ -53,6 +60,13 @@ public:
    * A "Quadrature" version means that it's going to find the nearest nodes to each quadrature point on this boundary
    */
   NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
+
+  /**
+   * Retrieve a mortar NearestNodeLocator associated with the two sides.
+   *
+   * A mortar version means that it's going to find the nearest nodes to each quadrature point on this boundary
+   */
+  NearestNodeLocator & getMortarNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintSideType side_type);
 
 protected:
   GeometricSearchData & _geometric_search_data;

@@ -39,10 +39,12 @@
 #include "PenetrationLocator.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
+#include "FaceFaceConstraint.h"
 #include "ScalarKernel.h"
 #include "Parser.h"
 #include "Split.h"
 #include "SplitBasedPreconditioner.h"
+#include "MooseMesh.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -572,11 +574,16 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
 
   NodalConstraint    * nc = dynamic_cast<NodalConstraint *>(obj);
   NodeFaceConstraint * nfc = dynamic_cast<NodeFaceConstraint *>(obj);
+  FaceFaceConstraint * ffc = dynamic_cast<FaceFaceConstraint *>(obj);
   if (nfc != NULL)
   {
     unsigned int slave = _mesh.getBoundaryID(parameters.get<BoundaryName>("slave"));
     unsigned int master = _mesh.getBoundaryID(parameters.get<BoundaryName>("master"));
     _constraints[0].addNodeFaceConstraint(slave, master, nfc);
+  }
+  else if (ffc != NULL)
+  {
+    _constraints[0].addFaceFaceConstraint(parameters.get<std::string>("interface"), ffc);
   }
   else if (nc != NULL)
   {
@@ -1088,6 +1095,43 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       }
     }
   }
+
+  THREAD_ID tid = 0;
+  // go over mortar interfaces
+  std::vector<MooseMesh::MortarInterface *> & ifaces = _mesh.getMortarInterfaces();
+  for (std::vector<MooseMesh::MortarInterface *>::iterator it = ifaces.begin(); it != ifaces.end(); ++it)
+  {
+    MooseMesh::MortarInterface * iface = *it;
+
+    std::vector<FaceFaceConstraint *> & face_constraints = _constraints[tid].getFaceFaceConstraints(iface->_name);
+    if (face_constraints.size() > 0)
+    {
+      // go over elements on that interface
+      const std::vector<Elem *> & elems = iface->_elems;
+      for (std::vector<Elem *>::const_iterator el = elems.begin(); el != elems.end(); ++el)
+      {
+        const Elem * elem = *el;
+        // for each element process constraints on the
+        _fe_problem.prepare(elem, tid);
+        _fe_problem.reinitElem(elem, tid);
+
+        for (std::vector<FaceFaceConstraint *>::iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
+        {
+          FaceFaceConstraint * ffc = *fc_it;
+          ffc->reinit();
+          ffc->computeResidual();
+        }
+        _fe_problem.addResidual(tid);
+
+        // evaluate residuals that go into master and slave side
+        for (std::vector<FaceFaceConstraint *>::iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
+        {
+          FaceFaceConstraint * ffc = *fc_it;
+          ffc->computeResidualSide();
+        }
+      }
+    }
+  }
 }
 
 
@@ -1500,6 +1544,34 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
       jacobian.close();
     }
   }
+
+  THREAD_ID tid = 0;
+  // go over mortar interfaces
+  std::vector<MooseMesh::MortarInterface *> & ifaces = _mesh.getMortarInterfaces();
+  for (std::vector<MooseMesh::MortarInterface *>::iterator it = ifaces.begin(); it != ifaces.end(); ++it)
+  {
+    MooseMesh::MortarInterface * iface = *it;
+    // go over elements on that interface
+    const std::vector<Elem *> & elems = iface->_elems;
+    for (std::vector<Elem *>::const_iterator el = elems.begin(); el != elems.end(); ++el)
+    {
+      const Elem * elem = *el;
+      // for each element process constraints on the
+      std::vector<FaceFaceConstraint *> & face_constraints = _constraints[tid].getFaceFaceConstraints(iface->_name);
+      if (face_constraints.size() > 0)
+      {
+        _fe_problem.prepare(elem, tid);
+        _fe_problem.reinitElem(elem, tid);
+
+        for (std::vector<FaceFaceConstraint *>::iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
+        {
+          FaceFaceConstraint * ffc = *fc_it;
+          ffc->subProblem().prepareShapes(ffc->variable().index(), tid);
+          ffc->computeJacobian(jacobian);
+        }
+      }
+    }
+  }
 }
 
 
@@ -1613,6 +1685,23 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   }
   PARALLEL_CATCH;
 
+  PARALLEL_TRY {
+    // Add in Jacobian contributions from Constraints
+    if(_fe_problem._has_constraints)
+    {
+      // Nodal Constraints
+      enforceNodalConstraintsJacobian(jacobian);
+
+      // Undisplaced Constraints
+      constraintJacobians(jacobian, false);
+
+      // Displaced Constraints
+      if(_fe_problem.getDisplacedProblem())
+        constraintJacobians(jacobian, true);
+    }
+  }
+  PARALLEL_CATCH;
+
   jacobian.close();
 
   PARALLEL_TRY {
@@ -1643,23 +1732,6 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   }
   PARALLEL_CATCH;
   jacobian.close();
-
-  PARALLEL_TRY {
-    // Add in Jacobian contributions from Constraints
-    if(_fe_problem._has_constraints)
-    {
-      // Nodal Constraints
-      enforceNodalConstraintsJacobian(jacobian);
-
-      // Undisplaced Constraints
-      constraintJacobians(jacobian, false);
-
-      // Displaced Constraints
-      if(_fe_problem.getDisplacedProblem())
-        constraintJacobians(jacobian, true);
-    }
-  }
-  PARALLEL_CATCH;
 
   _currently_computing_jacobian = false;
 }
@@ -2048,6 +2120,7 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
   std::set<std::string> kernel_variables;
 
   bool global_kernels_exist = _kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
+  _constraints[0].subdomainsCovered(input_subdomains, kernel_variables);
   if (!global_kernels_exist && check_kernel_coverage)
   {
     std::set<SubdomainID> difference;

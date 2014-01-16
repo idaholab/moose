@@ -35,6 +35,12 @@ GeometricSearchInterface::getQuadraturePenetrationLocator(const BoundaryName & m
   return _geometric_search_data.getQuadraturePenetrationLocator(master, slave, order);
 }
 
+PenetrationLocator &
+GeometricSearchInterface::getMortarPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintSideType side_type, Order order)
+{
+  return _geometric_search_data.getMortarPenetrationLocator(master, slave, side_type, order);
+}
+
 NearestNodeLocator &
 GeometricSearchInterface::getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave)
 {
@@ -45,4 +51,10 @@ NearestNodeLocator &
 GeometricSearchInterface::getQuadratureNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave)
 {
   return _geometric_search_data.getQuadratureNearestNodeLocator(master, slave);
+}
+
+NearestNodeLocator &
+GeometricSearchInterface::getMortarNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintSideType side_type)
+{
+  return _geometric_search_data.getMortarNearestNodeLocator(master, slave, side_type);
 }

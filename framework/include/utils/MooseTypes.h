@@ -75,6 +75,12 @@ enum CouplingType
   COUPLING_CUSTOM
 };
 
+enum ConstraintSideType
+{
+  SIDE_MASTER,
+  SIDE_SLAVE
+};
+
 enum DGResidualType
 {
   Element,

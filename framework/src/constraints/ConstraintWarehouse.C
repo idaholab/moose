@@ -15,6 +15,7 @@
 #include "ConstraintWarehouse.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
+#include "FaceFaceConstraint.h"
 
 ConstraintWarehouse::ConstraintWarehouse()
 {
@@ -111,6 +112,16 @@ ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*ma
     _node_face_constraints[slave].push_back(nfc);
 }
 
+void
+ConstraintWarehouse::addFaceFaceConstraint(const std::string & name, FaceFaceConstraint * ffc)
+{
+  bool displaced = ffc->parameters().have_parameter<bool>("use_displaced_mesh") && ffc->getParam<bool>("use_displaced_mesh");
+  if (!displaced)
+    _face_face_constraints[name].push_back(ffc);
+  else
+    mooseError("Face-face constraints are not available on displaced meshes, yet.");
+}
+
 std::vector<NodalConstraint *> &
 ConstraintWarehouse::getNodalConstraints()
 {
@@ -127,4 +138,25 @@ std::vector<NodeFaceConstraint *> &
 ConstraintWarehouse::getDisplacedNodeFaceConstraints(BoundaryID boundary_id)
 {
   return _displaced_node_face_constraints[boundary_id];
+}
+
+std::vector<FaceFaceConstraint *> &
+ConstraintWarehouse::getFaceFaceConstraints(const std::string & name)
+{
+  return _face_face_constraints[name];
+}
+
+void
+ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const
+{
+  for (std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator it = _face_face_constraints.begin(); it != _face_face_constraints.end(); ++it)
+  {
+    for (std::vector<FaceFaceConstraint *>::const_iterator jt = (*it).second.begin(); jt != (*it).second.end(); ++jt)
+    {
+      MooseVariable & var = (*jt)->variable();
+      unique_variables.insert(var.name());
+      const std::set<SubdomainID> & subdomains = var.activeSubdomains();
+      subdomains_covered.insert(subdomains.begin(), subdomains.end());
+    }
+  }
 }

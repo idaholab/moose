@@ -152,9 +152,6 @@ KernelWarehouse::updateActiveKernels(unsigned int subdomain_id)
 bool
 KernelWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const
 {
-  subdomains_covered.clear();
-  unique_variables.clear();
-
   for (std::vector<Kernel *>::const_iterator it = _all_kernels.begin(); it != _all_kernels.end(); ++it)
     unique_variables.insert((*it)->variable().name());
 

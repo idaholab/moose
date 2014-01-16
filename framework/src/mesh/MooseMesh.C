@@ -40,12 +40,12 @@
 #include "libmesh/parallel_ghost_sync.h"
 #include "libmesh/utility.h"
 #include "libmesh/remote_elem.h"
-
 #include "libmesh/linear_partitioner.h"
 #include "libmesh/centroid_partitioner.h"
 #include "libmesh/parmetis_partitioner.h"
 #include "libmesh/hilbert_sfc_partitioner.h"
 #include "libmesh/morton_sfc_partitioner.h"
+#include "libmesh/edge_edge2.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
@@ -266,6 +266,9 @@ MooseMesh::~MooseMesh()
   delete _refined_elements;
   delete _coarsened_elements;
   delete _mesh;
+
+  for (std::vector<MortarInterface *>::iterator it = _mortar_interface.begin(); it != _mortar_interface.end(); ++it)
+    delete (*it);
 }
 
 void
@@ -1988,10 +1991,82 @@ MooseMesh::isBoundaryNode(unsigned int node_id)
 }
 
 void
+
 MooseMesh::errorIfParallelDistribution(std::string name) const
 {
   if (_use_parallel_mesh)
     mooseError("Cannot use " << name << " with ParallelMesh!\n"
                << "Consider specifying distribution = 'serial' in your input file\n"
                << "to prevent it from being run with ParallelMesh.");
+}
+
+void
+MooseMesh::addMortarInterface(const std::string & name, BoundaryName master, BoundaryName slave, SubdomainName domain_name)
+{
+  SubdomainID domain_id = getSubdomainID(domain_name);
+  boundary_id_type master_id = getBoundaryID(master);
+  boundary_id_type slave_id = getBoundaryID(slave);
+
+  MortarInterface * iface = new MortarInterface;
+
+  iface->_id = domain_id;
+  iface->_master = master;
+  iface->_slave = slave;
+  iface->_name = name;
+
+  MeshBase::element_iterator           el = _mesh->level_elements_begin(0);
+  const MeshBase::element_iterator end_el = _mesh->level_elements_end(0);
+  for (; el != end_el; ++el)
+  {
+    Elem *elem = *el;
+    if (elem->subdomain_id() == domain_id)
+      iface->_elems.push_back(elem);
+  }
+
+#if 0
+  // Only level-0 elements store BCs.  Loop over them.
+//  MeshBase::element_iterator           el = _mesh.level_elements_begin(0);
+//  const MeshBase::element_iterator end_el = _mesh.level_elements_end(0);
+//  for (; el != end_el; ++el)
+//  {
+//    Elem *elem = *el;
+//    unsigned int n_sides = elem->n_sides();
+//    for (unsigned int side = 0; side != n_sides; ++side)
+//    {
+//      const std::vector<boundary_id_type> & ids = _mesh.boundary_info->boundary_ids(elem, side);
+//      if (std::find(ids.begin(), ids.end(), slave_id) != ids.end())
+//      {
+//        Elem * se = elem->build_side(side, false).release();
+//        se->subdomain_id() = iface->_id;
+//        iface->_elems.push_back(se);
+//      }
+//    }
+//  }
+
+  Point p1(0.0, 0.5, 0.);
+  Node * nd1 = _mesh->add_point(p1);
+  Point p2(0.5, 0.5, 0.);
+  Node * nd2 = _mesh->add_point(p2);
+  Point p3(1.0, 0.5, 0.);
+  Node * nd3 = _mesh->add_point(p3);
+
+  Elem * elem1 = _mesh->add_elem(new Edge2);
+  elem1->subdomain_id() = domain_id;
+  elem1->set_node(0) = _mesh->node_ptr(nd1->id());
+  elem1->set_node(1) = _mesh->node_ptr(nd2->id());
+  iface->_elems.push_back(elem1);
+
+  Elem * elem2 = _mesh->add_elem(new Edge2);
+  elem2->subdomain_id() = domain_id;
+  elem2->set_node(0) = _mesh->node_ptr(nd2->id());
+  elem2->set_node(1) = _mesh->node_ptr(nd3->id());
+  iface->_elems.push_back(elem2);
+#endif
+
+  setSubdomainName(iface->_id, name);
+//  _mesh_subdomains.insert(iface->_id);
+
+  _mortar_interface.push_back(iface);
+  _mortar_interface_by_name[name] = iface;
+  _mortar_interface_by_ids[std::pair<BoundaryID, BoundaryID>(master_id, slave_id)] = iface;
 }

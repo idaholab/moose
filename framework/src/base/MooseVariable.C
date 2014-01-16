@@ -1091,6 +1091,8 @@ MooseVariable::getValue(const Elem * elem, const std::vector<std::vector<Real> >
 {
   std::vector<dof_id_type> dof_indices;
   _dof_map.dof_indices(elem, dof_indices, _var_num);
+//  std::cerr << "elem = " << *elem << std::endl;
+//  std::cerr << "di = " << dof_indices.size() << std::endl;
 
   Real value = 0;
   if (isNodal())
@@ -1099,7 +1101,9 @@ MooseVariable::getValue(const Elem * elem, const std::vector<std::vector<Real> >
     {
       //The zero index is because we only have one point that the phis are evaluated at
       value += phi[i][0] * (*_sys.currentSolution())(dof_indices[i]);
+//      std::cerr << "phi[i][0] = " << phi[i][0] << std::endl;
     }
+//    std::cerr << "val = " << value << std::endl;
   }
   else
   {

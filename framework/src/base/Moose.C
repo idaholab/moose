@@ -198,6 +198,7 @@
 // Constraints
 #include "TiedValueConstraint.h"
 #include "AddBoundsVectorsAction.h"
+#include "EqualValueConstraint.h"
 
 // ScalarKernels
 #include "ODETimeDerivative.h"
@@ -308,6 +309,8 @@
 #include "SetupTimeStepperAction.h"
 #include "RecoverBaseAction.h"
 #include "SetupPredictorAction.h"
+#include "AddMortarInterfaceAction.h"
+
 
 namespace Moose {
 
@@ -492,6 +495,7 @@ registerObjects(Factory & factory)
 
   // Constraints
   registerConstraint(TiedValueConstraint);
+  registerConstraint(EqualValueConstraint);
 
   // Scalar kernels
   registerScalarKernel(ODETimeDerivative);
@@ -633,6 +637,7 @@ addActionTypes(Syntax & syntax)
   registerTask("add_multi_app", false);
   registerTask("add_transfer", false);
   registerTask("setup_predictor", false);
+  registerTask("add_mortar_interface", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerTask("setup_function_complete", false);
@@ -659,6 +664,7 @@ addActionTypes(Syntax & syntax)
 "(setup_mesh)"
 "(prepare_mesh)"
 "(add_mesh_modifier)"
+"(add_mortar_interface)"
 "(setup_mesh_complete)"
 "(create_problem)"
 "(setup_executioner)"
@@ -735,6 +741,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(SetupMeshCompleteAction, "prepare_mesh");
   registerAction(AddMeshModifierAction, "add_mesh_modifier");
+  registerAction(AddMortarInterfaceAction, "add_mortar_interface");
   registerAction(SetupMeshCompleteAction, "setup_mesh_complete");
 
   registerAction(AddFunctionAction, "add_function");
