@@ -85,13 +85,15 @@ public:
       for(unsigned int i=0; i<num_var_nums; i++)
       {
         unsigned int direction = var_nums_directions[i];
-        displaced_node(direction) = reference_node(direction) + _nl_soln(reference_node.dof_number(nonlinear_system_number, var_nums[i], 0));
+        if (reference_node.n_dofs(nonlinear_system_number, var_nums[i]) > 0)
+          displaced_node(direction) = reference_node(direction) + _nl_soln(reference_node.dof_number(nonlinear_system_number, var_nums[i], 0));
       }
 
       for(unsigned int i=0; i<num_aux_var_nums; i++)
       {
         unsigned int direction = aux_var_nums_directions[i];
-        displaced_node(direction) = reference_node(direction) + _aux_soln(reference_node.dof_number(aux_system_number, aux_var_nums[i], 0));
+        if (reference_node.n_dofs(aux_system_number, aux_var_nums[i]) > 0)
+          displaced_node(direction) = reference_node(direction) + _aux_soln(reference_node.dof_number(aux_system_number, aux_var_nums[i], 0));
       }
     }
   }
