@@ -1684,6 +1684,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     }
   }
   PARALLEL_CATCH;
+  jacobian.close();
 
   PARALLEL_TRY {
     // Add in Jacobian contributions from Constraints
@@ -1701,7 +1702,6 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     }
   }
   PARALLEL_CATCH;
-
   jacobian.close();
 
   PARALLEL_TRY {
