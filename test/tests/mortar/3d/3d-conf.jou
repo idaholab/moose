@@ -1,0 +1,52 @@
+reset
+
+# brick 1
+brick x 0.5 y 1 z 1
+move volume 1 preview x 0.0 include_merged 
+
+volume 1  size auto factor 10
+mesh volume 1 
+refine volume 1  numsplit 1 bias 1.0 depth 1 smooth
+
+# brick 2
+brick x 0.5 y 1 z 1
+move volume 2 x 0.75 include_merged 
+
+volume 2  size auto factor 10
+mesh volume 2 
+refine volume 2  numsplit 1 bias 1.0 depth 1 smooth
+
+# mortar
+create vertex 0.5 -0.5   0.5
+create vertex 0.5   0.5   0.5
+create vertex 0.5   0.5 -0.5
+create vertex 0.5 -0.5 -0.5
+create curve vertex 19 18  
+create curve vertex 19 20  
+create curve vertex 18 17  
+create curve vertex 20 17
+create surface curve 28 26 27 25  
+
+surface 13  size auto factor 10
+mesh surface 13 
+refine surface 13  numsplit 1 bias 1.0 depth 1 smooth
+
+# IDs
+block 1 volume 1
+block 1 element type HEX8
+block 2 volume 2
+block 2 element type HEX8
+block 1000 surface 13
+block 1000 element type QUAD4
+
+sideset 1 surface 4
+sideset 2 surface 12
+sideset 3 surface 1 7
+sideset 4 surface 2 8
+sideset 6 surface 3 9
+sideset 5 surface 5 11
+sideset 100 surface 6
+sideset 101 surface 10
+
+export mesh "3d-conf.e" overwrite
+

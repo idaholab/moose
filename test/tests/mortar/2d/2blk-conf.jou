@@ -1,0 +1,59 @@
+reset
+# body 1
+create vertex 0 0 0 
+create vertex 1 0 0 
+create vertex 1 0.5 0 
+create vertex 0 0.5 0 
+create curve vertex 1 2  
+create curve vertex 3 2  
+create curve vertex 3 4  
+create curve vertex 1 4  
+create surface curve 1 4 2 3  
+
+surface 1  size auto factor 10
+mesh surface 1
+refine surface 1 numsplit 1 bias 1.0 depth 1 smooth
+
+# body 2
+create vertex 0 0.5 0
+create vertex 1 0.5 0
+create vertex 1 1 0
+create vertex 0 1 0
+create curve vertex 9 10
+create curve vertex 10 11
+create curve vertex 11 12
+create curve vertex 12 9  
+create surface curve 5 6 7 8
+
+surface 2  size auto factor 10
+mesh surface 2
+refine surface 2 numsplit 1 bias 1.0 depth 1 smooth
+
+# mortar space
+create vertex 0 0.5 0
+create vertex 1 0.5 0
+create curve vertex 17 18
+
+curve 9  interval 4
+curve 9  scheme equal
+mesh curve 9
+
+# IDs
+set duplicate block elements off
+# blocks
+block 1 surface 1
+block 1 element type QUAD4
+block 2 surface 2
+block 2 element type QUAD4
+block 1000 curve 9
+block 1000 element type BEAM2
+# side sets
+sideset 1 curve 1
+sideset 2 curve 2 6
+sideset 3 curve 7
+sideset 4 curve 8 4
+sideset 100 curve 5
+sideset 101 curve 3
+
+export mesh "2blk-conf.e" overwrite
+

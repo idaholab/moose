@@ -1,0 +1,25 @@
+[Tests]
+  [./conforming]
+    type = 'Exodiff'
+    input = 'conforming.i'
+    exodiff = 'conforming_out.e'
+    max_parallel = 1
+    max_threads = 1
+  [../]
+
+  [./conforming-2nd-order]
+    type = 'Exodiff'
+    input = 'conforming-2nd-order.i'
+    exodiff = 'conforming-2nd-order_out.e'
+    max_parallel = 1
+    max_threads = 1
+  [../]
+
+  [./non-conforming]
+    type = 'Exodiff'
+    input = 'non-conforming.i'
+    exodiff = 'non-conforming_out.e'
+    max_parallel = 1
+    max_threads = 1
+  [../]
+[]

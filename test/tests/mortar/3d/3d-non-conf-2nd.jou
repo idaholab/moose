@@ -1,0 +1,208 @@
+reset
+
+# block 1
+brick x 1 y 2 z 2
+move volume 1 x -0.5 include_merged 
+volume 1  size auto factor 8
+mesh volume 1 
+
+# block 2
+brick x 1 y 2 z 2
+move volume 2 x 0.5 include_merged 
+volume 2  size auto factor 7
+mesh volume 2
+
+# interface
+create vertex 0 -1   1
+create vertex 0   1   1
+create vertex 0   1 -1
+create vertex 0 -1 -1
+create curve vertex 17 18  
+create curve vertex 18 19  
+create curve vertex 19 20  
+create curve vertex 20 17  
+create surface curve 28 27 26 25  
+
+create node location 0 -1 -1 owner surface 13
+create node location 0 -1 -0.666666 owner surface 13
+create node location 0 -1 -0.5 owner surface 13
+create node location 0 -1 -0.333333 owner surface 13
+create node location 0 -1   0 owner surface 13
+create node location 0 -1   0.333333 owner surface 13
+create node location 0 -1   0.5 owner surface 13
+create node location 0 -1   0.666666 owner surface 13
+create node location 0 -1   1 owner surface 13
+
+create node location 0 -0.666666 -1 owner surface 13
+create node location 0 -0.666666 -0.666666 owner surface 13
+create node location 0 -0.666666 -0.5 owner surface 13
+create node location 0 -0.666666 -0.333333 owner surface 13
+create node location 0 -0.666666   0 owner surface 13
+create node location 0 -0.666666   0.333333 owner surface 13
+create node location 0 -0.666666   0.5 owner surface 13
+create node location 0 -0.666666   0.666666 owner surface 13
+create node location 0 -0.666666   1 owner surface 13
+
+create node location 0 -0.5 -1 owner surface 13
+create node location 0 -0.5 -0.666666 owner surface 13
+create node location 0 -0.5 -0.5 owner surface 13
+create node location 0 -0.5 -0.333333 owner surface 13
+create node location 0 -0.5   0 owner surface 13
+create node location 0 -0.5   0.333333 owner surface 13
+create node location 0 -0.5   0.5 owner surface 13
+create node location 0 -0.5   0.666666 owner surface 13
+create node location 0 -0.5   1 owner surface 13
+
+create node location 0 -0.333333 -1 owner surface 13
+create node location 0 -0.333333 -0.666666 owner surface 13
+create node location 0 -0.333333 -0.5 owner surface 13
+create node location 0 -0.333333 -0.333333 owner surface 13
+create node location 0 -0.333333   0 owner surface 13
+create node location 0 -0.333333   0.333333 owner surface 13
+create node location 0 -0.333333   0.5 owner surface 13
+create node location 0 -0.333333   0.666666 owner surface 13
+create node location 0 -0.333333   1 owner surface 13
+
+create node location 0  0 -1 owner surface 13
+create node location 0  0 -0.666666 owner surface 13
+create node location 0  0 -0.5 owner surface 13
+create node location 0  0 -0.333333 owner surface 13
+create node location 0  0   0 owner surface 13
+create node location 0  0   0.333333 owner surface 13
+create node location 0  0   0.5 owner surface 13
+create node location 0  0   0.666666 owner surface 13
+create node location 0  0   1 owner surface 13
+
+create node location 0 0.333333 -1 owner surface 13
+create node location 0 0.333333 -0.666666 owner surface 13
+create node location 0 0.333333 -0.5 owner surface 13
+create node location 0 0.333333 -0.333333 owner surface 13
+create node location 0 0.333333   0 owner surface 13
+create node location 0 0.333333   0.333333 owner surface 13
+create node location 0 0.333333   0.5 owner surface 13
+create node location 0 0.333333   0.666666 owner surface 13
+create node location 0 0.333333   1 owner surface 13
+
+create node location 0 0.5 -1 owner surface 13
+create node location 0 0.5 -0.666666 owner surface 13
+create node location 0 0.5 -0.5 owner surface 13
+create node location 0 0.5 -0.333333 owner surface 13
+create node location 0 0.5   0 owner surface 13
+create node location 0 0.5   0.333333 owner surface 13
+create node location 0 0.5   0.5 owner surface 13
+create node location 0 0.5   0.666666 owner surface 13
+create node location 0 0.5   1 owner surface 13
+
+create node location 0 0.666666 -1 owner surface 13
+create node location 0 0.666666 -0.666666 owner surface 13
+create node location 0 0.666666 -0.5 owner surface 13
+create node location 0 0.666666 -0.333333 owner surface 13
+create node location 0 0.666666   0 owner surface 13
+create node location 0 0.666666   0.333333 owner surface 13
+create node location 0 0.666666   0.5 owner surface 13
+create node location 0 0.666666   0.666666 owner surface 13
+create node location 0 0.666666   1 owner surface 13
+
+create node location 0 1 -1 owner surface 13
+create node location 0 1 -0.666666 owner surface 13
+create node location 0 1 -0.5 owner surface 13
+create node location 0 1 -0.333333 owner surface 13
+create node location 0 1   0 owner surface 13
+create node location 0 1   0.333333 owner surface 13
+create node location 0 1   0.5 owner surface 13
+create node location 0 1   0.666666 owner surface 13
+create node location 0 1   1 owner surface 13
+
+create face node 272  273  282 281 owner surface 13
+create face node 273  274  283 282 owner surface 13
+create face node 274  275  284 283 owner surface 13
+create face node 275  276  285 284 owner surface 13
+create face node 276  277  286 285 owner surface 13
+create face node 277  278  287 286 owner surface 13
+create face node 278  279  288 287 owner surface 13
+create face node 279  280  289 288 owner surface 13
+
+create face node  281 282 291 290 owner surface 13
+create face node  282 283 292 291 owner surface 13
+create face node  283 284 293 292 owner surface 13
+create face node  284 285 294 293 owner surface 13
+create face node  285 286 295 294 owner surface 13
+create face node  286 287 296 295 owner surface 13
+create face node  287 288 297 296 owner surface 13
+create face node  288 289 298 297 owner surface 13
+
+create face node  290 291 300 299 owner surface 13
+create face node  291 292 301 300 owner surface 13
+create face node  292 293 302 301 owner surface 13
+create face node  293 294 303 302 owner surface 13
+create face node  294 295 304 303 owner surface 13
+create face node  295 296 305 304 owner surface 13
+create face node  296 297 306 305 owner surface 13
+create face node  297 298 307 306 owner surface 13
+
+create face node 299 300 309 308 owner surface 13
+create face node 300 301 310 309 owner surface 13
+create face node 301 302 311 310 owner surface 13
+create face node 302 303 312 311 owner surface 13
+create face node 303 304 313 312 owner surface 13
+create face node 304 305 314 313 owner surface 13
+create face node 305 306 315 314 owner surface 13
+create face node 306 307 316 315 owner surface 13
+
+create face node 308 309 318 317 owner surface 13
+create face node 309 310 319 318 owner surface 13
+create face node 310 311 320 319 owner surface 13
+create face node 311 312 321 320 owner surface 13
+create face node 312 313 322 321 owner surface 13
+create face node 313 314 323 322 owner surface 13
+create face node 314 315 324 323 owner surface 13
+create face node 315 316 325 324 owner surface 13
+
+create face node 317 318 327 326 owner surface 13
+create face node 318 319 328 327 owner surface 13
+create face node 319 320 329 328 owner surface 13
+create face node 320 321 330 329 owner surface 13
+create face node 321 322 331 330 owner surface 13
+create face node 322 323 332 331 owner surface 13
+create face node 323 324 333 332 owner surface 13
+create face node 324 325 334 333 owner surface 13
+
+create face node 326 327 336 335 owner surface 13
+create face node 327 328 337 336 owner surface 13
+create face node 328 329 338 337 owner surface 13
+create face node 329 330 339 338 owner surface 13
+create face node 330 331 340 339 owner surface 13
+create face node 331 332 341 340 owner surface 13
+create face node 332 333 342 341 owner surface 13
+create face node 333 334 343 342 owner surface 13
+
+create face node 335 336 345 344 owner surface 13
+create face node 336 337 346 345 owner surface 13
+create face node 337 338 347 346 owner surface 13
+create face node 338 339 348 347 owner surface 13
+create face node 339 340 349 348 owner surface 13
+create face node 340 341 350 349 owner surface 13
+create face node 341 342 351 350 owner surface 13
+create face node 342 343 352 351 owner surface 13
+
+# IDs
+block 1 volume 1
+block 1 element type HEX27
+block 2 volume 2
+block 2 element type HEX27
+block 1000 surface 13
+block 1000 element type QUAD9
+
+sideset 1 surface 4
+sideset 2 surface 12
+sideset 3 surface 1 7
+sideset 4 surface 2 8
+sideset 6 surface 3 9
+sideset 5 surface 5 11
+sideset 100 surface 10
+sideset 101 surface 6
+
+export mesh "3d-non-conf-2nd.e" overwrite
+
+
+

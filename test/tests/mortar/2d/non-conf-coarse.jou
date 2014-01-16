@@ -1,0 +1,62 @@
+#
+# 
+#
+reset
+
+create surface rectangle width 3 height 1.5 zplane
+move surface 1 location 1.5 0.75 0 include_merged
+create surface rectangle width 3 height 1.5 zplane
+move surface 2 location 1.5 2.25 0 include_merged
+
+# mesh
+surface 1  size auto factor 9
+mesh surface 1
+refine surface 1  numsplit 1 bias 1.0 depth 1 smooth
+
+surface 2 size auto factor 10
+mesh surface 2
+refine surface 2  numsplit 1 bias 1.0 depth 1 smooth
+
+# mortar space
+create vertex 0 1.5 0
+create vertex 3 1.5 0
+create curve vertex 9 10 
+
+create node location 0      1.5 0 owner curve 9
+create node location 0.5   1.5 0 owner curve 9
+create node location 0.75 1.5 0 owner curve 9
+create node location 1      1.5 0 owner curve 9
+create node location 1.5   1.5 0 owner curve 9
+create node location 2      1.5 0 owner curve 9
+create node location 2.25 1.5 0 owner curve 9
+create node location 2.5   1.5 0 owner curve 9
+create node location 3      1.5 0 owner curve 9
+
+create edge node 51 52 owner curve 9
+create edge node 52 53 owner curve 9
+create edge node 53 54 owner curve 9
+create edge node 54 55 owner curve 9
+create edge node 55 56 owner curve 9
+create edge node 56 57 owner curve 9
+create edge node 57 58 owner curve 9
+create edge node 58 59 owner curve 9
+
+# IDs
+block 1 surface 1
+block 1 element type QUAD4
+
+block 2 surface 2
+block 2 element type QUAD4
+
+block 1000 curve 9
+block 1000 element type BAR2
+
+sideset 1 curve 3
+sideset 2 curve 4 8
+sideset 3 curve 5
+sideset 4 curve 6 2
+sideset 100 curve 1
+sideset 101 curve 7
+
+export mesh "non-conf-coarse.e" overwrite
+
