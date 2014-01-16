@@ -67,8 +67,8 @@ FaceFaceConstraint::FaceFaceConstraint(const std::string & name, InputParameters
     _lambda(_var.sln()),
 
     _iface(*_mesh.getMortarInterfaceByName(getParam<std::string>("interface"))),
-    _master_penetration_locator(getMortarPenetrationLocator(_iface._master, _iface._slave, Moose::SIDE_MASTER, Order(_master_var.order()))),
-    _slave_penetration_locator(getMortarPenetrationLocator(_iface._master, _iface._slave, Moose::SIDE_SLAVE, Order(_slave_var.order()))),
+    _master_penetration_locator(getMortarPenetrationLocator(_iface._master, _iface._slave, Moose::Master, Order(_master_var.order()))),
+    _slave_penetration_locator(getMortarPenetrationLocator(_iface._master, _iface._slave, Moose::Slave, Order(_slave_var.order()))),
 
     _test_master(_master_var.phi()),
     _phi_master(_master_var.phi()),
@@ -143,7 +143,7 @@ FaceFaceConstraint::computeResidualSide()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       for (_i = 0; _i < _test_master.size(); _i++)
-        re_master(_i) += _JxW_lm[_qp] * computeQpResidualSide(Moose::SIDE_MASTER);
+        re_master(_i) += _JxW_lm[_qp] * computeQpResidualSide(Moose::Master);
     }
     _assembly.addResidual(_fe_problem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
   }
@@ -159,7 +159,7 @@ FaceFaceConstraint::computeResidualSide()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       for (_i = 0; _i < _test_slave.size(); _i++)
-        re_slave(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidualSide(Moose::SIDE_SLAVE);
+        re_slave(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidualSide(Moose::Slave);
     }
     _assembly.addResidual(_fe_problem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
   }
@@ -196,8 +196,18 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
     }
   }
 
-  // TODO: some constraints might need to fill in the diagonal block
+  // fill in the diagonal block
+  {
+    DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.index(), _var.index());
 
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      for (_i = 0; _i < _test.size(); _i++)
+        for (_j = 0; _j < _phi.size(); _j++)
+          Kee(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobian();
+    _assembly.addJacobian(jacobian);
+  }
+
+  // off-diagonal part for master side
   {
     _assembly.reinit(_elem_master);
     _master_var.prepare();
@@ -212,14 +222,14 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
       {
         for (_j = 0; _j < _phi.size(); _j++)
         {
-          Real value = _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SIDE_MASTER);
-          Ken_master(_j, _i) += value;
-          Kne_master(_i, _j) += value;
+          Ken_master(_j, _i) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::MasterMaster);
+          Kne_master(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SlaveMaster);
         }
       }
     _assembly.addJacobian(jacobian);
   }
 
+  // off-diagonal part for slave side
   {
     _assembly.reinit(_elem_slave);
     _slave_var.prepare();
@@ -233,9 +243,8 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
       {
         for (_j = 0; _j < _phi.size(); _j++)
         {
-          Real value = _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SIDE_SLAVE);
-          Ken_slave(_j, _i) += value;
-          Kne_slave(_i, _j) += value;
+          Ken_slave(_j, _i) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::MasterSlave);
+          Kne_slave(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SlaveSlave);
         }
       }
     _assembly.addJacobian(jacobian);
@@ -243,7 +252,13 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
 }
 
 Real
-FaceFaceConstraint::computeQpJacobianSide(Moose::ConstraintSideType side_type)
+FaceFaceConstraint::computeQpJacobian()
+{
+  return 0.;
+}
+
+Real
+FaceFaceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType /*side_type*/)
 {
   return 0.;
 }

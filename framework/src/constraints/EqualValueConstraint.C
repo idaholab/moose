@@ -39,23 +39,30 @@ EqualValueConstraint::computeQpResidual()
 }
 
 Real
-EqualValueConstraint::computeQpResidualSide(Moose::ConstraintSideType side)
+EqualValueConstraint::computeQpResidualSide(Moose::ConstraintType res_type)
 {
-  switch (side)
+  switch (res_type)
   {
-  case Moose::SIDE_MASTER: return  _lambda[_qp] * _test_master[_i][_qp];
-  case Moose::SIDE_SLAVE:  return -_lambda[_qp] * _test_slave[_i][_qp];
+  case Moose::Master: return  _lambda[_qp] * _test_master[_i][_qp];
+  case Moose::Slave:  return -_lambda[_qp] * _test_slave[_i][_qp];
   default: return 0;
   }
 }
 
 Real
-EqualValueConstraint::computeQpJacobianSide(Moose::ConstraintSideType side)
+EqualValueConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType jac_type)
 {
-  switch (side)
+  switch (jac_type)
   {
-  case Moose::SIDE_MASTER: return  _phi[_j][_qp] * _test_master[_i][_qp];
-  case Moose::SIDE_SLAVE:  return -_phi[_j][_qp] * _test_slave[_i][_qp];
-  default: return 0;
+  case Moose::MasterMaster:
+  case Moose::SlaveMaster:
+    return  _phi[_j][_qp] * _test_master[_i][_qp];
+
+  case Moose::MasterSlave:
+  case Moose::SlaveSlave:
+    return -_phi[_j][_qp] * _test_slave[_i][_qp];
+
+  default:
+    return 0;
   }
 }

@@ -183,7 +183,7 @@
   [./missing_material_prop_test]
     type = 'RunException'
     input = 'missing_material_prop_test.i'
-    expect_err = "The following blocks from your input mesh do not contain on active material: \d+"
+    expect_err = "The following blocks from your input mesh do not contain an active material: \d+"
   [../]
 
   [./missing_material_prop_test2]

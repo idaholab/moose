@@ -33,8 +33,8 @@ public:
 
 protected:
   virtual Real computeQpResidual();
-  virtual Real computeQpResidualSide(Moose::ConstraintSideType side);
-  virtual Real computeQpJacobianSide(Moose::ConstraintSideType side);
+  virtual Real computeQpResidualSide(Moose::ConstraintType res_type);
+  virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
 };
 
 

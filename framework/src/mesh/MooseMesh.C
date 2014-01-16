@@ -2000,6 +2000,26 @@ MooseMesh::errorIfParallelDistribution(std::string name) const
                << "to prevent it from being run with ParallelMesh.");
 }
 
+MooseMesh::MortarInterface *
+MooseMesh::getMortarInterfaceByName(const std::string name)
+{
+  std::map<std::string, MortarInterface *>::iterator it = _mortar_interface_by_name.find(name);
+  if (it != _mortar_interface_by_name.end())
+    return (*it).second;
+  else
+    mooseError("Requesting non-existent mortar interface '" << name << "'.");
+}
+
+MooseMesh::MortarInterface *
+MooseMesh::getMortarInterface(BoundaryID master, BoundaryID slave)
+{
+  std::map<std::pair<BoundaryID, BoundaryID>, MortarInterface *>::iterator it = _mortar_interface_by_ids.find(std::pair<BoundaryID, BoundaryID>(master, slave));
+  if (it != _mortar_interface_by_ids.end())
+    return (*it).second;
+  else
+    mooseError("Requesting non-existing mortar interface (master = " << master << ", slave = " << slave << ").");
+}
+
 void
 MooseMesh::addMortarInterface(const std::string & name, BoundaryName master, BoundaryName slave, SubdomainName domain_name)
 {
@@ -2022,46 +2042,6 @@ MooseMesh::addMortarInterface(const std::string & name, BoundaryName master, Bou
     if (elem->subdomain_id() == domain_id)
       iface->_elems.push_back(elem);
   }
-
-#if 0
-  // Only level-0 elements store BCs.  Loop over them.
-//  MeshBase::element_iterator           el = _mesh.level_elements_begin(0);
-//  const MeshBase::element_iterator end_el = _mesh.level_elements_end(0);
-//  for (; el != end_el; ++el)
-//  {
-//    Elem *elem = *el;
-//    unsigned int n_sides = elem->n_sides();
-//    for (unsigned int side = 0; side != n_sides; ++side)
-//    {
-//      const std::vector<boundary_id_type> & ids = _mesh.boundary_info->boundary_ids(elem, side);
-//      if (std::find(ids.begin(), ids.end(), slave_id) != ids.end())
-//      {
-//        Elem * se = elem->build_side(side, false).release();
-//        se->subdomain_id() = iface->_id;
-//        iface->_elems.push_back(se);
-//      }
-//    }
-//  }
-
-  Point p1(0.0, 0.5, 0.);
-  Node * nd1 = _mesh->add_point(p1);
-  Point p2(0.5, 0.5, 0.);
-  Node * nd2 = _mesh->add_point(p2);
-  Point p3(1.0, 0.5, 0.);
-  Node * nd3 = _mesh->add_point(p3);
-
-  Elem * elem1 = _mesh->add_elem(new Edge2);
-  elem1->subdomain_id() = domain_id;
-  elem1->set_node(0) = _mesh->node_ptr(nd1->id());
-  elem1->set_node(1) = _mesh->node_ptr(nd2->id());
-  iface->_elems.push_back(elem1);
-
-  Elem * elem2 = _mesh->add_elem(new Edge2);
-  elem2->subdomain_id() = domain_id;
-  elem2->set_node(0) = _mesh->node_ptr(nd2->id());
-  elem2->set_node(1) = _mesh->node_ptr(nd3->id());
-  iface->_elems.push_back(elem2);
-#endif
 
   setSubdomainName(iface->_id, name);
 //  _mesh_subdomains.insert(iface->_id);

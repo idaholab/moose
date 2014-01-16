@@ -618,8 +618,8 @@ public:
 
   std::vector<MooseMesh::MortarInterface *> & getMortarInterfaces() { return _mortar_interface; }
 
-  MooseMesh::MortarInterface * getMortarInterfaceByName(const std::string name) { return _mortar_interface_by_name[name]; }
-  MooseMesh::MortarInterface * getMortarInterface(BoundaryID master, BoundaryID slave) { return _mortar_interface_by_ids[std::pair<BoundaryID, BoundaryID>(master, slave)]; }
+  MooseMesh::MortarInterface * getMortarInterfaceByName(const std::string name);
+  MooseMesh::MortarInterface * getMortarInterface(BoundaryID master, BoundaryID slave);
 
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether

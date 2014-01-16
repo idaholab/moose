@@ -64,7 +64,8 @@ GeometricSearchData::update()
       ++qbnd_it)
     updateQuadratureNodes(*qbnd_it);
 
-  updateMortarNodes();
+  if (_mortar_boundaries.size() > 0)
+    updateMortarNodes();
 
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
   const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
@@ -167,7 +168,7 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master
 }
 
 PenetrationLocator &
-GeometricSearchData::getMortarPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintSideType side_type, Order order)
+GeometricSearchData::getMortarPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintType side_type, Order order)
 {
   unsigned int master_id = _mesh.getBoundaryID(master);
   unsigned int slave_id  = _mesh.getBoundaryID(slave);
@@ -177,13 +178,13 @@ GeometricSearchData::getMortarPenetrationLocator(const BoundaryName & master, co
   unsigned int mortar_boundary_id, boundary_id;
   switch (side_type)
   {
-  case Moose::SIDE_MASTER:
+  case Moose::Master:
     boundary_id = master_id;
     mortar_boundary_id = MORTAR_BASE_ID + slave_id;
     _boundary_to_mortarboundary[slave_id] = mortar_boundary_id;
     break;
 
-  case Moose::SIDE_SLAVE:
+  case Moose::Slave:
     boundary_id = slave_id;
     mortar_boundary_id = MORTAR_BASE_ID + master_id;
     _boundary_to_mortarboundary[master_id] = mortar_boundary_id;
@@ -256,7 +257,7 @@ GeometricSearchData::getQuadratureNearestNodeLocator(const unsigned int master_i
 void
 GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int qslave_id)
 {
-  // Have we already generaged quadrature nodes for this boundary id?
+  // Have we already generated quadrature nodes for this boundary id?
   if(_quadrature_boundaries.find(slave_id) != _quadrature_boundaries.end())
     return;
 
@@ -290,7 +291,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
 }
 
 NearestNodeLocator &
-GeometricSearchData::getMortarNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintSideType side_type)
+GeometricSearchData::getMortarNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintType side_type)
 {
   unsigned int master_id = _mesh.getBoundaryID(master);
   unsigned int slave_id  = _mesh.getBoundaryID(slave);
@@ -299,19 +300,19 @@ GeometricSearchData::getMortarNearestNodeLocator(const BoundaryName & master, co
 }
 
 NearestNodeLocator &
-GeometricSearchData::getMortarNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id, Moose::ConstraintSideType side_type)
+GeometricSearchData::getMortarNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id, Moose::ConstraintType side_type)
 {
   unsigned int mortarboundary_id, boundary;
 
   switch (side_type)
   {
-  case Moose::SIDE_MASTER:
+  case Moose::Master:
     boundary = master_id;
     mortarboundary_id = MORTAR_BASE_ID + slave_id;
     _boundary_to_mortarboundary[slave_id] = mortarboundary_id;
     break;
 
-  case Moose::SIDE_SLAVE:
+  case Moose::Slave:
     boundary = slave_id;
     mortarboundary_id = MORTAR_BASE_ID + master_id;
     _boundary_to_mortarboundary[master_id] = mortarboundary_id;
@@ -338,8 +339,7 @@ GeometricSearchData::generateMortarNodes(unsigned int master_id, unsigned int sl
   for (std::vector<Elem *>::iterator it = iface->_elems.begin(); it != iface->_elems.end(); ++it)
   {
     Elem * elem = *it;
-    _subproblem.prepare(elem, 0);
-//    _subproblem.reinitElem(elem, 0);
+    _subproblem.assembly(0).reinit(elem);
 
     for (unsigned int qp = 0; qp < qpoints.size(); qp++)
       _mesh.addQuadratureNode(elem, 0, qp, qslave_id, qpoints[qp]);
@@ -399,8 +399,7 @@ GeometricSearchData::updateMortarNodes()
     for (std::vector<Elem *>::iterator it = iface->_elems.begin(); it != iface->_elems.end(); ++it)
     {
       Elem * elem = *it;
-      _subproblem.prepare(elem, 0);
-//      _subproblem.reinitElem(elem, 0);
+      _subproblem.assembly(0).reinit(elem);
 
       for (unsigned int qp = 0; qp < qpoints.size(); qp++)
         (*_mesh.getQuadratureNode(elem, 0, qp)) = qpoints[qp];

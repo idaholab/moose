@@ -3563,6 +3563,10 @@ FEProblem::checkProblemIntegrity()
       local_mesh_subs.erase(*i);
       check_material_coverage = true;
     }
+    // also exclude mortar spaces from the material check
+    std::vector<MooseMesh::MortarInterface *> & mortar_ifaces = _mesh.getMortarInterfaces();
+    for (std::vector<MooseMesh::MortarInterface *>::iterator it = mortar_ifaces.begin(); it != mortar_ifaces.end(); ++it)
+      local_mesh_subs.erase((*it)->_id);
 
     // Check Material Coverage
     if (check_material_coverage && !local_mesh_subs.empty())
@@ -3571,7 +3575,7 @@ FEProblem::checkProblemIntegrity()
       /// <unsigned int> is necessary to print SubdomainIDs in the statement below
       std::copy (local_mesh_subs.begin(), local_mesh_subs.end(), std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
-      mooseError("The following blocks from your input mesh do not contain on active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
+      mooseError("The following blocks from your input mesh do not contain an active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
     }
 
     // Check material properties on blocks and boundaries

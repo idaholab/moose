@@ -115,11 +115,7 @@ ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*ma
 void
 ConstraintWarehouse::addFaceFaceConstraint(const std::string & name, FaceFaceConstraint * ffc)
 {
-  bool displaced = ffc->parameters().have_parameter<bool>("use_displaced_mesh") && ffc->getParam<bool>("use_displaced_mesh");
-  if (!displaced)
-    _face_face_constraints[name].push_back(ffc);
-  else
-    mooseError("Face-face constraints are not available on displaced meshes, yet.");
+  _face_face_constraints[name].push_back(ffc);
 }
 
 std::vector<NodalConstraint *> &

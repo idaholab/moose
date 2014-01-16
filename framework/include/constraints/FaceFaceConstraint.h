@@ -30,6 +30,18 @@ template<>
 InputParameters validParams<FaceFaceConstraint>();
 
 /**
+ * User for mortar methods
+ *
+ * Indexing:
+ *
+ *              T_m             T_s        \lambda
+ *         +--------------+-------------+-------------+
+ * T_m     |  K_1         |             | SlaveMaster |
+ *         +--------------+-------------+-------------+
+ * T_s     |              |  K_2        | SlaveSlave  |
+ *         +--------------+-------------+-------------+
+ * \lambda | MasterMaster | MasterSlave |             |
+ *         +--------------+-------------+-------------+
  *
  */
 class FaceFaceConstraint :
@@ -72,8 +84,9 @@ public:
 
 protected:
   virtual Real computeQpResidual() = 0;
-  virtual Real computeQpResidualSide(Moose::ConstraintSideType side_type) = 0;
-  virtual Real computeQpJacobianSide(Moose::ConstraintSideType side_type);
+  virtual Real computeQpResidualSide(Moose::ConstraintType res_type) = 0;
+  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
 
   FEProblem & _fe_problem;
   SubProblem & _subproblem;
