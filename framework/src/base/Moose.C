@@ -65,6 +65,7 @@
 #include "SinNeumannBC.h"
 #include "VectorNeumannBC.h"
 #include "WeakGradientBC.h"
+#include "DiffusionFluxBC.h"
 // auxkernels
 #include "ConstantAux.h"
 #include "FunctionAux.h"
@@ -360,6 +361,7 @@ registerObjects(Factory & factory)
   registerBoundaryCondition(SinNeumannBC);
   registerBoundaryCondition(VectorNeumannBC);
   registerBoundaryCondition(WeakGradientBC);
+  registerBoundaryCondition(DiffusionFluxBC);
 
   // dirac kernels
   registerDiracKernel(ConstantPointSource);
