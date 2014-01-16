@@ -7,6 +7,7 @@
 #include "AddSlaveFluxVectorAction.h"
 #include "ConvectiveFluxFunction.h"
 #include "GapConductance.h"
+#include "GapConductanceConstraint.h"
 #include "GapHeatPointSourceMaster.h"
 #include "GapHeatTransfer.h"
 #include "HeatConduction.h"
@@ -44,6 +45,7 @@ Elk::HeatConduction::registerObjects(Factory & factory)
   registerKernel(HomogenizationHeatConduction);
   registerPostprocessor(HomogenizedThermalConductivity);
   registerPostprocessor(ThermalCond);
+  registerConstraint(GapConductanceConstraint);
 }
 
 void
