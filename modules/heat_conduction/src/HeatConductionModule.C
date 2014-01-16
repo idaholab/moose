@@ -12,6 +12,7 @@
 #include "HeatConduction.h"
 #include "HeatConductionTimeDerivative.h"
 #include "HeatConductionMaterial.h"
+#include "HeatConductionBC.h"
 #include "BulkCoolantBC.h"
 #include "ThermalContactAuxBCsAction.h"
 #include "ThermalContactAuxKernelsAction.h"
@@ -32,6 +33,7 @@ Elk::HeatConduction::registerObjects(Factory & factory)
   registerNamedKernel(HeatConductionKernel, "HeatConduction");
   registerKernel(HeatConductionTimeDerivative);
   registerKernel(HeatSource);
+  registerBoundaryCondition(HeatConductionBC);
   registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);
   registerBoundaryCondition(BulkCoolantBC);
