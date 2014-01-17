@@ -16,6 +16,7 @@
 #include "OneDContactConstraint.h"
 #include "MultiDContactConstraint.h"
 #include "GluedContactConstraint.h"
+#include "SparsityBasedGluedContactConstraint.h"
 #include "FrictionalContactProblem.h"
 #include "ReferenceResidualProblem.h"
 
@@ -28,6 +29,7 @@ Elk::Contact::registerObjects(Factory & factory)
   registerConstraint(OneDContactConstraint);
   registerConstraint(MultiDContactConstraint);
   registerConstraint(GluedContactConstraint);
+  registerConstraint(SparsityBasedGluedContactConstraint);
   registerProblem(FrictionalContactProblem);
   registerProblem(ReferenceResidualProblem);
 
