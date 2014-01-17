@@ -1134,7 +1134,11 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
     dmm->nocontacts = PETSC_FALSE;
     for (std::set<DM_Moose::ContactName>::iterator cit = dmm->contacts->begin(); cit != dmm->contacts->end(); ++cit) {
       try {
-	dmm->nl->_fe_problem.geomSearchData().getPenetrationLocator(cit->second,cit->first);
+	if ((*dmm->contact_displaced)[*cit]) {
+	  dmm->nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(cit->first,cit->second);
+	} else {
+	  dmm->nl->_fe_problem.geomSearchData().getPenetrationLocator(cit->first,cit->second);
+	}
       }
       catch(...) {
 	std::ostringstream err;
@@ -1152,7 +1156,11 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
     dmm->nouncontacts = PETSC_FALSE;
     for (std::set<DM_Moose::ContactName>::iterator cit = dmm->uncontacts->begin(); cit != dmm->uncontacts->end(); ++cit) {
       try {
-	dmm->nl->_fe_problem.geomSearchData().getPenetrationLocator(cit->first,cit->second);
+	if ((*dmm->uncontact_displaced)[*cit]) {
+	  dmm->nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(cit->first,cit->second);
+	} else {
+	  dmm->nl->_fe_problem.geomSearchData().getPenetrationLocator(cit->first,cit->second);
+	}
       }
       catch(...) {
 	std::ostringstream err;
