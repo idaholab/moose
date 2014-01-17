@@ -3,6 +3,7 @@
 #include "libmesh/mesh_tools.h"
 
 #include <numeric>
+#include <cstring>
 
 template<>
 InputParameters validParams<SPPARKSUserObject>()
