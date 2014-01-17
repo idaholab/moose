@@ -19,6 +19,7 @@
     min_parallel = 1
     max_parallel = 1
     prereq = test2
+    recover = false
   [../]
 
   [./parallel_error2]

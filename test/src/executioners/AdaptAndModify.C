@@ -70,6 +70,8 @@ AdaptAndModify::endStep()
 #endif
     }
 
+    _problem.computeUserObjects(EXEC_CUSTOM);
+
     //output
     if(_time_interval)
     {
