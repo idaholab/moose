@@ -112,15 +112,15 @@ protected:
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 
-  MooseArray<Real> _JxW_lm;
+  std::vector<Real> _JxW_lm;
 
   /**
    * Current element on the interface (i.e in the mortar space)
    */
   const Elem * & _current_elem;
 
-  VariableTestValue _test;
-  VariablePhiValue _phi;
+  std::vector<std::vector<Real> > _test;
+  std::vector<std::vector<Real> > _phi;
 
   MooseVariable & _master_var;
   MooseVariable & _slave_var;

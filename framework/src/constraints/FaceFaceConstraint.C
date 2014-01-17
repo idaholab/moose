@@ -60,7 +60,6 @@ FaceFaceConstraint::FaceFaceConstraint(const std::string & name, InputParameters
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation()),
     _current_elem(_assembly.elem()),
-    _phi(_var.phi()),
 
     _master_var(_subproblem.getVariable(_tid, getParam<VariableName>("master_variable"))),
     _slave_var(isParamValid("slave_variable") ? _subproblem.getVariable(_tid, getParam<VariableName>("slave_variable")) : _subproblem.getVariable(_tid, getParam<VariableName>("master_variable"))),
@@ -91,8 +90,8 @@ FaceFaceConstraint::reinit()
   _phys_points_master.resize(nqp);
   _u_slave.resize(nqp);
   _phys_points_slave.resize(nqp);
-  _test = _var.phi();               // yes, copy here
-  _JxW_lm = _JxW;                   // another copy here to preserve the right JxW
+  _test = _assembly.getFE(_var.feType())->get_phi();                     // yes we need to do a copy here
+  _JxW_lm = _assembly.getFE(_var.feType())->get_JxW();                   // another copy here to preserve the right JxW
 
   for (_qp = 0; _qp < nqp; _qp++)
   {
@@ -175,9 +174,9 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
 
   _phys_points_master.resize(nqp);
   _phys_points_slave.resize(nqp);
-  _test = _var.phi();               // yes we need to do a copy here
-  _phi = _var.phi();                // yes we need to do a copy here
-  _JxW_lm = _JxW;                   // another copy here to preserve the right JxW
+  _test = _assembly.getFE(_var.feType())->get_phi();               // yes we need to do a copy here
+  _phi = _assembly.getFE(_var.feType())->get_phi();                // yes we need to do a copy here
+  _JxW_lm = _assembly.getFE(_var.feType())->get_JxW();             // another copy here to preserve the right JxW
 
   for (_qp = 0; _qp < nqp; _qp++)
   {
