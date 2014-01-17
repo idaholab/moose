@@ -6,5 +6,6 @@
     compiler = 'GCC'
     #deleted = 'Ticket #1647'
     rel_err = 5.e-5
+    recover = false
   [../]
 []

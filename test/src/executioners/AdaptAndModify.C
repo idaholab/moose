@@ -41,7 +41,10 @@ AdaptAndModify::incrementStepOrReject()
     _problem.copyOldSolutions();
   }
   else
+  {
     _time_stepper->rejectStep();
+    _time = _time_old;
+  }
 
   _first = false;
 }
@@ -50,9 +53,9 @@ void
 AdaptAndModify::endStep()
 {
   _last_solve_converged = lastSolveConverged();
-
-  if (lastSolveConverged())
+  if (_last_solve_converged)
   {
+    // Compute the Error Indicators and Markers
     for(unsigned int i=0; i<_adapt_cycles; i++)
     {
       // Compute the Error Indicators and Markers
@@ -67,10 +70,37 @@ AdaptAndModify::endStep()
 #endif
     }
 
-    _problem.computeUserObjects(EXEC_CUSTOM);
-
-    // if _at_sync_point is true, force the output no matter what
-    _problem.output(_at_sync_point);
-    _problem.outputPostprocessors(_at_sync_point);
+    //output
+    if(_time_interval)
+    {
+      //Force output if the current time is at an output interval
+      if(std::abs(_time-_next_interval_output_time)<=_timestep_tolerance
+         || (_problem.out().interval() > 1 && _t_step % _problem.out().interval() == 0))
+      {
+        if(_allow_output)
+        {
+          _problem.output(true);
+          _problem.outputPostprocessors(true);
+          _problem.outputRestart();
+        }
+      }
+      //Set the time for the next output interval if we're at or beyond an output interval
+      if (_time + _timestep_tolerance >= _next_interval_output_time)
+      {
+        _next_interval_output_time += _time_interval_output_interval;
+      }
+    }
+    else
+    {
+      // if _at_sync_point is true, force the output no matter what
+      if(_allow_output)
+      {
+        _problem.output(_at_sync_point);
+        _problem.outputPostprocessors(_at_sync_point);
+        _problem.outputRestart();
+      }
+    }
   }
 }
+
+

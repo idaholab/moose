@@ -126,7 +126,7 @@ RecoverBaseAction::newestRestartFileWithBase(std::string base_name)
     tinydir_next(&tdir);
   }
 
-  int max_file_num = 0;
+  int max_file_num = -1;
   std::string max_base;
 
   // Now, out of the newest files find the one with the largest number in it
@@ -140,8 +140,14 @@ RecoverBaseAction::newestRestartFileWithBase(std::string base_name)
     re_base_and_file_num.FullMatch(file_name, &the_base, &file_num);
 
     if(file_num > max_file_num)
+    {
+      max_file_num = file_num;
       max_base = the_base;
+    }
   }
+
+  if(max_file_num == -1)
+    mooseError("Unable to find suitable recovery file!");
 
   return dir + "/" + max_base;
 }
