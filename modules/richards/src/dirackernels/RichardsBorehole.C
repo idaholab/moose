@@ -270,7 +270,7 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
   Real max1 = eig_vec1*ele->point(0);
   Real max2 = eig_vec2*ele->point(0);
   Real min1 = max1;
-  Real min2 = min2;
+  Real min2 = max2;
   Real proj;
   for (unsigned int i = 1; i < ele->n_nodes(); i++)
     {
