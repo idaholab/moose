@@ -192,7 +192,7 @@ void
 ExodusOutput::allocateExodusObject()
 {
   _out = new ExodusII_IO(_es.get_mesh());
-  _out->set_output_variables(_output_variables);
+  _out->set_output_variables(_output_variables, /*allow_empty=*/false);
 
   // Skip output of z coordinates for 2D meshes, but still
   // write 1D meshes as 3D, otherwise Paraview has trouble
