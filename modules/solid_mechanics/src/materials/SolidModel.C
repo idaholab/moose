@@ -785,6 +785,7 @@ SolidModel::crackingStrainDirections()
   if (_cracking_stress > 0)
   {
     // Compute whether cracking has occurred
+    (*_crack_rotation)[_qp] = (*_crack_rotation_old)[_qp];
 
     ColumnMajorMatrix RT( (*_crack_rotation)[_qp].transpose() );
     SymmTensor ePrime;
@@ -965,8 +966,6 @@ SolidModel::crackingStressRotation()
     ColumnMajorMatrix RT( (*_crack_rotation)[_qp].transpose() );
     SymmTensor sigmaPrime;
     rotateSymmetricTensor( RT, _stress[_qp], sigmaPrime );
-    SymmTensor sigmaOldPrime;
-    rotateSymmetricTensor( RT, _stress_old_prop[_qp], sigmaOldPrime );
 
     unsigned int num_cracks(0);
     for (unsigned i(0); i < 3; ++i)
