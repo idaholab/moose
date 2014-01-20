@@ -10,7 +10,7 @@ InputParameters validParams<MultiSmoothCircleIC>()
   params.addRequiredParam<Real>("Lx", "length of simulation domain in x-direction");
   params.addRequiredParam<Real>("Ly", "length of simulation domain in y-direction");
   params.addParam<Real>("Lz",0.0,"length of simulation domain in z-direction");
-  params.addParam<unsigned int>("rnd_seed",2000,"random seed");
+  params.addParam<unsigned int>("rand_seed",2000,"random seed");
   params.addParam<unsigned int>("numtries", 1000,"The number of tries");
   params.addParam<Real>("radius_variation",0.0,"Plus or minus Percent of random variation in the bubble radius");
   //These are SmoothCircleIC inputs that are not needed here.
@@ -28,7 +28,7 @@ MultiSmoothCircleIC::MultiSmoothCircleIC(const std::string & name,
    _Lx(getParam<Real>("Lx")),
    _Ly(getParam<Real>("Ly")),
    _Lz(getParam<Real>("Lz")),
-   _rnd_seed(getParam<unsigned int>("rnd_seed")),
+   _rnd_seed(getParam<unsigned int>("rand_seed")),
    _numtries(getParam<unsigned int>("numtries")),
    _radius_variation(getParam<Real>("radius_variation"))
 {
