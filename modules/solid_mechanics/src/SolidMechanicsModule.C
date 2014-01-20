@@ -27,6 +27,7 @@
 #include "MacroElastic.h"
 #include "Mass.h"
 #include "JIntegral.h"
+#include "CrackFrontDefinition.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
 #include "MaterialTensorOnLine.h"
@@ -106,6 +107,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
 
   registerUserObject(MaterialTensorOnLine);
   registerUserObject(PlenumPressureUserObject);
+  registerUserObject(CrackFrontDefinition);
 
 }
 
