@@ -47,7 +47,7 @@ Resurrector::restartFromFile()
   Moose::setup_perf_log.push("restartFromFile()","Resurrector");
   std::string file_name(_restart_file_base + ".xdr");
   MooseUtils::checkFileReadable(file_name);
-  _fe_problem._eq.read(file_name, libMeshEnums::DECODE, EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA);
+  _fe_problem._eq.read(file_name, libMeshEnums::DECODE, EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA, _fe_problem.adaptivity().isOn());
   _fe_problem._nl.update();
   Moose::setup_perf_log.pop("restartFromFile()","Resurrector");
 }

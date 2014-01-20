@@ -14,6 +14,7 @@
 
 #include "CheckpointOutput.h"
 #include "Problem.h"
+#include "FEProblem.h"
 
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/serial_mesh.h"
@@ -24,7 +25,8 @@
 
 CheckpointOutput::CheckpointOutput(EquationSystems & es, bool binary, SubProblem & sub_problem) :
     Outputter(es, sub_problem, "CheckpointOutput"),
-    _binary(binary)
+    _binary(binary),
+    _fe_problem(dynamic_cast<FEProblem *>(&sub_problem))
 {
 }
 
@@ -55,15 +57,20 @@ CheckpointOutput::output(const std::string & file_base, Real /*time*/, unsigned 
 
   CheckpointIO io(mesh, _binary);
 
+  bool renumber = true;
+
+  if(_fe_problem && !_fe_problem->adaptivity().isOn())
+    renumber = false;
+
   if (_binary)
   {
     io.write(getFileName(file_base, t_step)+"_mesh.cpr");
-    _es.write (getFileName(file_base, t_step)+".xdr", libMeshEnums::ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES);
+    _es.write (getFileName(file_base, t_step)+".xdr", libMeshEnums::ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES, renumber);
   }
   else
   {
     io.write(getFileName(file_base, t_step)+"_mesh.cpa");
-    _es.write (getFileName(file_base, t_step)+".xda", libMeshEnums::WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES);
+    _es.write (getFileName(file_base, t_step)+".xda", libMeshEnums::WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES, renumber);
   }
 }
 

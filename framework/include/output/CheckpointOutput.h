@@ -21,6 +21,9 @@
 // libMesh
 #include "libmesh/libmesh_common.h"
 
+// Forward Declarations
+class FEProblem;
+
 class CheckpointOutput : public Outputter
 {
 public:
@@ -38,6 +41,8 @@ public:
 protected:
   /// true if outputting in binary format
   bool _binary;
+
+  FEProblem * _fe_problem;
 };
 
 #endif /* CHECKPOINTOUTPUT_H */

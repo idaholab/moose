@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'duplicate_node.i'
+    exodiff = 'duplicate_node_out.e'
+  [../]
+[]
