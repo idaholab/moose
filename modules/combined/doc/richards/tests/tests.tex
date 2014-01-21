@@ -225,8 +225,22 @@ derivatives is the most complicated, but the other cases are useful
 for debugging.
 
 The `OffDiagonal' terms only appear if there is more than one pressure
-variable, that is for multi-phase problems.  No tests have been
-performed yet.
+variable, that is for multi-phase problems.  A two-phase
+single-element model is used with random initial conditions
+obeying the constraint $P_{1}\geq P_{2}$ (to be meaningful physically).  Eight
+different tests are performed which model all possible combinations
+of:
+\begin{itemize}
+\item With or without gravity
+\item With or without SUPG
+\item With or without time derivatives
+\end{itemize}
+Two other tests are also performed: the first with random initial
+conditions subject to $P_{1}=P_{2}$ so that the system is fully
+saturated with the ``1'' phase; and the second with random initial
+conditions subject to $P_{1}\ll P_{2}$ so the system is almost fully
+saturated with the ``2'' phase.  Both these tests have gravity, SUPG
+and time derivatives.
 
 In addition to these tests, the Jacobians for the following sinks/sources are tested:
 \begin{itemize}
