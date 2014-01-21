@@ -41,6 +41,7 @@ protected:
 private:
   unsigned int _v_var;
   VariableValue & _v;
+  bool _v_coupled;
 };
 
 #endif //OPTIONALLYCOUPLEDFORCE_H

@@ -72,7 +72,7 @@ protected:
    * Returns the index for a coupled variable by name
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Index of coupled variable
+   * @return Index of coupled variable, if this is an optionally coupled variable that wasn't provided this will return a unique "invalid" index.
    */
   virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
 
@@ -215,6 +215,9 @@ private:
 
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;
+
+  /// Unique indices for optionally coupled vars that weren't provided
+  std::map<std::string, unsigned int> _optional_var_index;
 };
 
 /**

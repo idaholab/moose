@@ -35,7 +35,7 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
        ++iter)
   {
     std::string name = *iter;
-    if (parameters.getVecMooseType(*iter) != std::vector<std::string>())
+    if (parameters.getVecMooseType(name) != std::vector<std::string>())
     {
       std::vector<std::string> vars = parameters.getVecMooseType(*iter);
       for (unsigned int i = 0; i < vars.size(); i++)
@@ -53,6 +53,8 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
           mooseError("Coupled variable '" + coupled_var_name + "' was not found\n");
       }
     }
+    else // This means it was optional coupling.  Let's assign a unique id to this variable
+      _optional_var_index[name] = std::numeric_limits<unsigned int>::max() - _optional_var_index.size();
   }
 
   _default_gradient.resize(_coupleable_max_qps);
@@ -114,7 +116,7 @@ unsigned int
 Coupleable::coupled(const std::string & var_name, unsigned int comp)
 {
   if(!isCoupled(var_name)) // If it's optionally coupled just return 0
-    return 0;
+    return _optional_var_index[var_name];
 
   MooseVariable * var = getVar(var_name, comp);
   switch (var->kind())
