@@ -91,6 +91,8 @@ public:
   /**
    * Returns the variable associated with that part of the component.
    *
+   * In case of an error, this method will throw a std::string exception with an error description.
+   *
    * @param piece The name of the piece of the component you are interested in.
    */
   virtual std::string variableName(std::string piece) = 0;
