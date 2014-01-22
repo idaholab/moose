@@ -24,20 +24,10 @@ PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
 {
 }
 
-const PostprocessorValue &
+PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & name)
 {
-  // Get the default name
-  std::string default_name(name);
-  default_name += "_default_value";
-
-  // If the postprocessor does not exists and a default value was given, use the default
-  if (!hasPostprocessor(name) && _ppi_params.isParamValid(default_name))
-    return _ppi_params.get<PostprocessorValue>(default_name);
-
-  // Otherwise, proceceed as normal
-  else
-    return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name), _pi_tid);
+  return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
 
 const PostprocessorValue &
@@ -49,18 +39,7 @@ PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & na
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
 {
-  // Get the default name
-  std::string default_name(name);
-  default_name += "_default_value";
-
-  // If the postprocessor does not exists and a default value was given, use the default
-  if (!hasPostprocessor(name) && _ppi_params.isParamValid(default_name))
-    return _ppi_params.get<PostprocessorValue>(default_name += "_default_value");
-
-  // Proceed as normal
-  else
-    return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name), _pi_tid);
-
+  return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
 
 const PostprocessorValue &
@@ -71,13 +50,6 @@ PostprocessorInterface::getPostprocessorValueOldByName(const PostprocessorName &
 
 bool
 PostprocessorInterface::hasPostprocessor(const std::string & name)
-{
-  return _pi_feproblem.hasPostprocessor(_ppi_params.get<PostprocessorName>(name), _pi_tid);
-}
-
-
-bool
-PostprocessorInterface::hasPostprocessorByName(const PostprocessorName & name)
 {
   return _pi_feproblem.hasPostprocessor(name, _pi_tid);
 }
