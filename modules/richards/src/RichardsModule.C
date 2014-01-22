@@ -66,7 +66,7 @@
 // Kernels
 #include "RichardsMassChange.h"
 #include "RichardsFlux.h"
-#include "RichardsPConstraint.h"
+#include "RichardsPPenalty.h"
 
   // BoundaryConditions
 #include "RichardsExcav.h"
@@ -140,7 +140,7 @@ Elk::Richards::registerObjects(Factory & factory)
   // Kernels
   registerKernel(RichardsMassChange);
   registerKernel(RichardsFlux);
-  registerKernel(RichardsPConstraint);
+  registerKernel(RichardsPPenalty);
 
   // BoundaryConditions
   registerBoundaryCondition(RichardsExcav);

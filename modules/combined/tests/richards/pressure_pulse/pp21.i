@@ -134,7 +134,7 @@
     variable = pgas
   [../]
   [./pconstraint]
-    type = RichardsPConstraint
+    type = RichardsPPenalty
     variable = pgas
     a = 1E-8
     lower_var = pwater
