@@ -576,9 +576,9 @@ DisplacedProblem::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
 }
 
 void
-DisplacedProblem::updateGeomSearch()
+DisplacedProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 {
-  _geometric_search_data.update();
+  _geometric_search_data.update(type);
 }
 
 void

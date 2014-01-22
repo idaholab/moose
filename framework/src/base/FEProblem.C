@@ -470,8 +470,9 @@ void FEProblem::initialSetup()
   _nl.setSolution(*(_nl.sys().current_local_solution.get()));
 
   Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
-  //Update the geometric searches (has to be called after the problem is all set up)
-  updateGeomSearch();
+  // Update the nearest node searches (has to be called after the problem is all set up)
+  // We do this here because this sets up the Element's DoFs to ghost
+  updateGeomSearch(GeometricSearchData::NEAREST_NODE);
   Moose::setup_perf_log.pop("Initial updateGeomSearch()","Setup");
 
   Moose::setup_perf_log.push("Initial updateActiveSemiLocalNodeRange()","Setup");
@@ -489,6 +490,9 @@ void FEProblem::initialSetup()
   if(_displaced_mesh)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
+  Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
+  updateGeomSearch(); // Call all of the rest of the geometric searches
+  Moose::setup_perf_log.pop("Initial updateGeomSearch()","Setup");
 
   // Random interface objects
   for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
@@ -3258,12 +3262,12 @@ FEProblem::initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters para
 }
 
 void
-FEProblem::updateGeomSearch()
+FEProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 {
-  _geometric_search_data.update();
+  _geometric_search_data.update(type);
 
   if(_displaced_problem)
-    _displaced_problem->updateGeomSearch();
+    _displaced_problem->updateGeomSearch(type);
 }
 
 void

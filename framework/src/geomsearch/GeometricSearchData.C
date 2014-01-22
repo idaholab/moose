@@ -46,45 +46,55 @@ GeometricSearchData::~GeometricSearchData()
 }
 
 void
-GeometricSearchData::update()
+GeometricSearchData::update(GeometricSearchType type)
 {
-  if(_first) // Only do this once
+  if(type == ALL || type == QUADRATURE || type == NEAREST_NODE)
   {
-    _first = false;
+    if(_first) // Only do this once
+    {
+      _first = false;
 
-    for(std::map<unsigned int, unsigned int>::iterator it = _slave_to_qslave.begin();
-        it != _slave_to_qslave.end();
-        ++it)
-      generateQuadratureNodes(it->first, it->second);
+      for(std::map<unsigned int, unsigned int>::iterator it = _slave_to_qslave.begin();
+          it != _slave_to_qslave.end();
+          ++it)
+        generateQuadratureNodes(it->first, it->second);
+    }
+
+    // Update the position of quadrature nodes first
+    for(std::set<unsigned int>::iterator qbnd_it = _quadrature_boundaries.begin();
+        qbnd_it != _quadrature_boundaries.end();
+        ++qbnd_it)
+      updateQuadratureNodes(*qbnd_it);
   }
 
-  // Update the position of quadrature nodes first
-  for(std::set<unsigned int>::iterator qbnd_it = _quadrature_boundaries.begin();
-      qbnd_it != _quadrature_boundaries.end();
-      ++qbnd_it)
-    updateQuadratureNodes(*qbnd_it);
+  if(type == ALL || type == MORTAR)
+    if (_mortar_boundaries.size() > 0)
+      updateMortarNodes();
 
-  if (_mortar_boundaries.size() > 0)
-    updateMortarNodes();
-
-  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
-  const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
-
-  for(; nnl_it != nnl_end; ++nnl_it)
+  if(type == ALL || type == NEAREST_NODE)
   {
-    NearestNodeLocator * nnl = nnl_it->second;
+    std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
+    const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
 
-    nnl->findNodes();
+    for(; nnl_it != nnl_end; ++nnl_it)
+    {
+      NearestNodeLocator * nnl = nnl_it->second;
+
+      nnl->findNodes();
+    }
   }
 
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_it = _penetration_locators.begin();
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_end = _penetration_locators.end();
-
-  for(; pl_it != pl_end; ++pl_it)
+  if(type == ALL || type == PENETRATION)
   {
-    PenetrationLocator * pl = pl_it->second;
+    std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_it = _penetration_locators.begin();
+    std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_end = _penetration_locators.end();
 
-    pl->detectPenetration();
+    for(; pl_it != pl_end; ++pl_it)
+    {
+      PenetrationLocator * pl = pl_it->second;
+
+      pl->detectPenetration();
+    }
   }
 }
 
@@ -421,4 +431,3 @@ GeometricSearchData::reinitMortarNodes()
     generateMortarNodes(master_id, slave_id, 0);
   }
 }
-

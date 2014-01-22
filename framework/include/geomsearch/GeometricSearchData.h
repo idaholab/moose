@@ -30,6 +30,16 @@ class NearestNodeLocator;
 class GeometricSearchData
 {
 public:
+  /// Used to select groups of geometric search objects to update
+  enum GeometricSearchType
+  {
+    ALL,
+    NEAREST_NODE,
+    PENETRATION,
+    QUADRATURE,
+    MORTAR
+  };
+
   GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh);
   virtual ~GeometricSearchData();
 
@@ -49,7 +59,7 @@ public:
   /**
    * Update all of the search objects.
    */
-  void update();
+  void update(GeometricSearchType type = ALL);
 
   /**
    * Completely redo all geometric search objects.  This should be called when the mesh is adapted.

@@ -138,7 +138,7 @@ public:
   virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
 
   // Geom Search /////
-  virtual void updateGeomSearch();
+  virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL);
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
   virtual bool computingInitialResidual();

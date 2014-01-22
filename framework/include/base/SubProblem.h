@@ -162,7 +162,7 @@ public:
   virtual void clearDiracInfo() = 0;
 
   // Geom Search
-  virtual void updateGeomSearch() = 0;
+  virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) = 0;
 
   virtual GeometricSearchData & geomSearchData() = 0;
 

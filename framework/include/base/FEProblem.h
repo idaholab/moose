@@ -577,7 +577,7 @@ public:
   virtual void initDisplacedProblem(MooseMesh * displaced_mesh, InputParameters params);
   virtual DisplacedProblem * & getDisplacedProblem() { return _displaced_problem; }
 
-  virtual void updateGeomSearch();
+  virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL);
 
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
