@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'tosub_master.i'
     exodiff = 'tosub_master_out_sub0.e tosub_master_out_sub1.e'
-    skip = "waiting for libMesh patch"
+    deleted = 'Need to finish implementaiton - refs #1913'
   [../]
 
   [./fromsub]
