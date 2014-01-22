@@ -65,8 +65,8 @@ If a two-phase model has regions that are fully saturated with the
 phase is zero.  This means the ``2''-phase pressure will not change in
 those regions, potentially violating $P_{1}\leq P_{2}$.  If the ``2''
 phase subsequently infiltrates to these regions, an initially crazy
-$P_{2}$ might affect the results.  This also holds for
-almost-saturated situations.
+$P_{2}$ might affect the results.  This sometimes also holds for
+almost-saturated situations, depending on the exact simulation.
 
 In these cases it is useful to add a penalty term to the residual to
 ensure that $P_{1}\leq P_{2}$.  An example can be found in the tests
@@ -77,6 +77,10 @@ nothing.  In both cases, convergence is poor as the penalty term
 switches on and off during the Newton-Raphson procedure.  The
 documentation for {\tt RichardsPPenalty} describes how to set $a$ (run
 MOOSE with a {\tt -\,-dump} flag).
+
+The penalty term should {\em not} be used unless absolutely necessary
+as it will lead to poorer convergence characteristics.  In many cases
+it is not necessary.
 
 \section{An excavation}
 

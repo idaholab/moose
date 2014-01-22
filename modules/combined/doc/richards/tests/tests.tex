@@ -789,7 +789,7 @@ density, $S$ is the water saturation, $\nabla$ is the spatial
 derivative, $\kappa$ is the isotropic permeability, $\mu$ is the water
 viscosity, and $P$ is the water pressure.  Assume the following
 \begin{itemize}
-\item The problem is fully saturation, $S=1$, and gravitational
+\item The problem is fully saturated, $S=1$, and gravitational
   effects are ignored, ${\mathbf{g}} = {\mathbf{0}}$.
 \item The bulk modulus, $K_{\mathrm{w}}$, of water is constant so that
   $\rho = \rho_{0}e^{P/K_{\mathrm{w}}}$.
@@ -891,17 +891,20 @@ above yields $u^{-1}e^{-u} \ll 2.5\times 10^{6}$, or $u\gg 4\times
 10^{-7}$.  When $r=50$\,m, this yields $t\ll 8\times 10^{5}$\,s.
 
 Figure~\ref{th01.fig} shows good agreement between the Theis solution
-and the MOOSE implementation.  This test is not part of the automatic
-test suite since it takes 17\,seconds to complete.  It is therefore
-marked as ``heavy'' and is not run every time the code is updated.
-However, a similar test on a coarser mesh with only 272 elements, that
-also takes larger timesteps, that gives similar drawdowns (to within
-0.1\,m) is part of the automatic test suite.
+and the MOOSE implementation.  Both 1-phase and fully-water-saturated
+2-phase models give the same result.  This test is not part of the
+automatic test suite since it takes 17\,seconds to complete.  It is
+therefore marked as ``heavy'' and is not run every time the code is
+updated.  However, a similar tests (both 1-phase and
+fully-water-saturated 2-phase) on a coarser mesh with only 272
+elements, that also takes larger timesteps, that gives similar
+drawdowns (to within 0.1\,m) is part of the automatic test suite.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=14cm]{th01.eps}
-\caption{Comparison between the MOOSE result (in dots) and the
+\caption{Comparison between the MOOSE result (in dots, both 1-phase
+  and 2-phase fully-saturated give indistinguishable results) and the
   expected behaviour of the drawdown as given by Eqn~(\ref{eqn.theis})
   (drawdown is $P/\rho g$, or $P/10000$ in this model).}
 \label{th01.fig}
