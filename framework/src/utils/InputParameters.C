@@ -293,3 +293,12 @@ InputParameters::getGroupName(const std::string &param_name) const
   else
     return std::string();
 }
+
+void InputParameters::addPostprocessorParam(const PostprocessorName &name, const Real & value, const std::string &doc_string)
+{
+  addParam<PostprocessorName>(name, doc_string);
+
+  std::string default_name(name);
+  default_name += "_default_value";
+  addPrivateParam<PostprocessorValue>(default_name, value);
+}
