@@ -32,10 +32,10 @@ class DmakeRC(object):
 
     # Extract the options from the user
     self._test = kwargs.pop('buck', False)
-    self._dedicated = kwargs.pop('dedicated', False)
 
     # Store the local Machine object
     self._master = master
+    self._master.dedicated = kwargs.pop('dedicated', False)
 
     # Store the complete filename for the .dmakerc file
     self._filename =  os.path.join(os.getenv('HOME'), '.dmakerc')
@@ -43,6 +43,9 @@ class DmakeRC(object):
     # Set the local flag (this is set to true if the remote connection fails, the
     # MachineWarehouse will then use a local build)
     self._fail = False
+
+    # Set the default update flag (assume update is not required by default)
+    self._update = False
 
     # Remove .dmakerc if clean option is given
     if kwargs.pop('clean', False):
@@ -74,11 +77,19 @@ class DmakeRC(object):
     # Enable previously disabled machines, requires update
     if kwargs.pop('enable', False):
       self.set(DISABLE=None)
+      self._update = True
 
     # Set the disable list to be the same as the input, requires update
     if kwargs['disable'] != None:
-      self.set(DISABLE=kwargs['disable'])
 
+      # If the store value returns none, create a new list
+      if self.get('DISABLE') == None:
+        self.set(DISABLE=kwargs['disable'])
+
+      # Append the existing list
+      else:
+        self.set(DISABLE=self.get('DISABLE') + kwargs['disable'])
+      self._update = True
 
   ## Accessor for stored variables (public)
   #  @param key The name of the dictionary item to retrun (e.g., 'DISTCC_HOSTS')
@@ -138,6 +149,12 @@ class DmakeRC(object):
     return self._fail
 
 
+  ## Return true of the distcc hosts requires update (public)
+  # @return True if the ip addresses from the server differ from the stored
+  def needUpdate(self):
+    return self._update or (self._remote_ip == self._local_ip)
+
+
   ## Reads the local .dmakerc file (private)
   # @return A map of the data loaded from the .dmakerc
   def _readLocalFile(self):
@@ -177,7 +194,7 @@ class DmakeRC(object):
       backup = buck
 
     # Set the 'use_threads' attribute for this machine
-    if self._dedicated:
+    if self._master.dedicated:
       self._master.use_threads = (int(self._master.threads) / 2)
     else:
       self._master.use_threads = (int(self._master.threads) / 4)

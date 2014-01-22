@@ -64,10 +64,10 @@ class MachineOutput(object):
         col_width[attributes[i]] = len(headings[i])
 
     # Build the formatted string for the title output
-    output.append('| ')
+    output.append('|')
     for i in range(len(attributes)):
       if attributes[i] in col_width:
-        w = str(col_width[attributes[i]]+2)
+        w = str(col_width[attributes[i]]+1)
         frmt = ' %-' + w + 's|'
         output[-1] += frmt % headings[i]
 
@@ -82,8 +82,8 @@ class MachineOutput(object):
     # Print the slave machine information, if the information exists
     use = 0
     total = 0
-    if len(self.warehouse.workers) > 0:
-      for machine in self.warehouse.workers:
+    if len(self.warehouse.machines) > 0:
+      for machine in self.warehouse.machines:
          output.append(self._formatter(machine, col_width, attributes))
          use += machine.use_threads
          total += machine.cores
@@ -131,10 +131,10 @@ class MachineOutput(object):
   #  @param widths The dict() containing the column widths stored by attribute name
   #  @param attributes A list of attributes desired
   def _formatter(self, machine, widths, attributes):
-    output = '| '
+    output = '|'
     for key in attributes:
       value = str(getattr(machine, key))
-      frmt = ' %-' + str(widths[key]+2) + 's|'
+      frmt = ' %-' + str(widths[key]+1) + 's|'
       output += frmt % value
     return output
 
@@ -150,7 +150,7 @@ class MachineOutput(object):
     # Loop through all of the keys in the online and offline machines
     # and store the max value
     for key in widths:
-      for machine in self.warehouse.workers:
+      for machine in self.warehouse.machines:
         m_widths = machine.getLengths()
         widths[key] = max(widths[key], m_widths[key])
       for machine in self.warehouse.down:

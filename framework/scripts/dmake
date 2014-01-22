@@ -6,6 +6,26 @@ import os, sys, argparse, socket, time, subprocess
 # Import the distcc API objexts
 from distcc import *
 
+## Get the make directory
+def getMakeDirectory():
+
+  # Locate the Makefile
+  make_dir = None
+  dir = os.getcwd()
+  while dir != os.getenv('HOME'):
+    if os.path.exists(os.path.join(dir, 'Makefile')):
+      make_dir = dir
+      break
+    dir = os.path.realpath(os.path.join(dir, '..'))
+
+  # Exit if 'Makefile' was not located
+  if make_dir == None:
+    print 'Error: No Makefile located'
+    sys.exit()
+
+  return make_dir
+
+
 ## Set the DISTCC_HOSTS environment and run 'make'
 #  @param distcc_hosts The complete DISTCC_HOSTS enviornmental variable (from MachineWarehouse::getHosts)
 #  @param jobs The number of jobs to run 'make' with (from MachineWarehouse::getHosts)
@@ -17,6 +37,7 @@ from distcc import *
 #    oprof = {True} | False - Set build method to oprof (default)
 #    quiet = True | {False} - Disables the distcc verbose output
 #    timeout = <number>     - Length of time before distcc assumes failure (default 30s)
+#    cwd = str              - Directory to run make, if excluded getMakeDirectory() is called
 def runMake(distcc_hosts, jobs, **kwargs):
 
   # Set the build type
@@ -37,23 +58,14 @@ def runMake(distcc_hosts, jobs, **kwargs):
   # Set distcc timeout
   os.environ['DISTCC_IO_TIMEOUT'] = str(kwargs.pop('timeout', 30))
 
-  # Locate the Makefile
-  make_dir = None
-  dir = os.getcwd()
-  while dir != os.getenv('HOME'):
-    if os.path.exists(os.path.join(dir, 'Makefile')):
-      make_dir = dir
-      break
-    dir = os.path.realpath(os.path.join(dir, '..'))
-
-  # Exit if 'Makefile' was not located
-  if make_dir == None:
-    print 'Error: No Makefile located'
-    sys.exit()
-
   # Build the make command
   make = ['make', '-j', str(jobs)]
   make.extend(make_args)
+
+  # Get the make directory
+  make_dir = kwargs.pop('cwd', None)
+  if make_dir == None:
+    make_dir = getMakeDirectory()
 
   # Run make
   strt = time.clock()
@@ -149,29 +161,48 @@ if __name__ == "__main__":
   # Extract the options from the command line
   (options, make_args) = parseArguments()
 
+  # Get the make directory
+  make_dir = getMakeDirectory()
+
   # Run 'make cleanall' if the benchmark options is given
   if options.benchmark:
-    sub = subprocess.Popen(['make', 'cleanall'])
+    sub = subprocess.Popen(['make', 'cleanall'], cwd=make_dir)
     sub.wait()
 
-  # Create the MachineWarehouse object
-  opt = subOptions(options,'refresh','no_daemon','local','buck','dedicated','jobs','description','clean','disable',\
-                   'enable','allow','serial', 'allow_off_network')
+  # Create the MachineWarehouse object, limit to the known networks
+  opt = subOptions(options, 'allow', 'allow_off_network')
   warehouse = MachineWarehouse(restrict=['141','134'], **opt)
 
+  # Create the DmakeRC object
+  opt = subOptions(options, 'buck', 'dedicated', 'description', 'clean', 'disable', 'enable')
+  dmakerc = DmakeRC(warehouse.master, **opt)
+
+  # Create the DistccDaemon object
+  daemon = DistccDaemon(warehouse.master, dedicated=options.dedicated)
+
   # Kill the daemons
-  if options.kill:
-    warehouse.killDaemon()
-    sys.exit()
+  if options.kill or options.no_daemon or options.refresh:
+    daemon.kill()
 
   # Start the daemons
-  if options.daemon:
-    warehouse.startDaemon()
+  if options.daemon and not options.no_daemon:
+    warehouse.buildMachines()
+    daemon.start(warehouse.machines)
+
+  # Exit if running basic daemon options
+  if options.daemon or options.kill:
     sys.exit()
 
-  # Extract the hosts and jobs from the warehouse.
-  opt = subOptions(options,'max','localhost','localslots','localslots_cpp')
-  distcc_hosts, jobs = warehouse.getHosts(**opt)
+  # Get the hosts and jobs
+  if dmakerc.needUpdate() or options.refresh:
+    opt = subOptions(options,'max','localhost','localslots','localslots_cpp')
+    distcc_hosts, jobs = warehouse.getHosts(dmakerc.get('HOST_LINES'), disable=dmakerc.get('DISABLE'), **opt)
+    dmakerc.set(DISTCC_HOSTS=distcc_hosts, JOBS=jobs, write=(not options.max))
+
+  else:
+    distcc_hosts = dmakerc.get("DISTCC_HOSTS")
+    jobs = dmakerc.get("JOBS")
+    print 'Using cached DISTCC_HOSTS, use --refresh to rebuild'
 
   # Display the  output
   outputer = MachineOutput(warehouse)
@@ -185,4 +216,4 @@ if __name__ == "__main__":
 
   # Run Make
   opt = subOptions(options,'timeout','quiet','dbg','opt','oprof')
-  runMake(distcc_hosts, jobs, make_args=make_args, **opt)
+  runMake(distcc_hosts, jobs, make_args=make_args, cwd=make_dir, **opt)

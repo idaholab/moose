@@ -34,7 +34,8 @@ class Machine(object):
     self.username = None
     self.hostname = None
     self.available = None
-    self.status = 'Offline'
+    self.status = 'offline'
+    self.dedicated = False
 
     # The machine is from the localhost
     localhost = kwargs.pop('localhost', False)
@@ -55,14 +56,18 @@ class Machine(object):
       self.hostname = self.address
       #self.available = False
 
+    # Set the status
+    if self.available:
+      if (int(self.threads) / 2) == self.use_threads:
+        self.status = 'dedicated'
+        self.dedicated = True
+      else:
+        self.status = 'online'
+
     # Compute lengths of attributes, this is used by the MachineWarehouse
     # for creating the output table
     self._length = dict()
     self._computeLength()
-
-    # Set the status
-    if self.available:
-      self.status = 'Online'
 
 
   ## Return a dictionary containing the number of characters in each attricute (public)

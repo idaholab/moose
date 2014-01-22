@@ -106,7 +106,6 @@ class DistccDaemon(object):
     # Modify crontab to run dmake in dedicated mode, refreshing the list every 30 minutes
     if dedicated:
       if current_cron.find('dmake') == -1:
-        self._master.description = self._master.description +  ' (Dedicated Mode)'
         current_cron += '*/30 * * * * if [ -f ~/.bash_profile ]; then source ~/.bash_profile >/dev/null 2>&1; elif [ -f ~/.bashrc ]; then source ~/.bashrc >/dev/null 2>&1; fi && dmake --dedicated --daemon --description "' + self._master.description + '" >/dev/null 2>&1\n'
         self._updateCron(current_cron)
     else:
