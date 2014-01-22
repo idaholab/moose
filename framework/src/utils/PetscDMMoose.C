@@ -926,7 +926,7 @@ static PetscErrorCode DMCreateMatrix_Moose(DM dm, Mat *A)
   PetscErrorCode ierr;
   DM_Moose       *dmm = (DM_Moose *)(dm->data);
   PetscBool      ismoose;
-#if !PETSC_VERSION_LESS_THAN(3,5,0) || !PETSC_VERSION_RELEASE
+#if !PETSC_RELEASE_LESS_THAN(3,5,0)
   MatType type;
 #endif
 
@@ -1597,7 +1597,7 @@ PetscErrorCode  DMCreate_Moose(DM dm)
 
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
-#if PETSC_VERSION_LESS_THAN(3,5,0) && PETSC_VERSION_RELEASE
+#if PETSC_RELEASE_LESS_THAN(3,5,0)
   ierr = PetscNewLog(dm,DM_Moose,&dmm);CHKERRQ(ierr);
 #else
   ierr = PetscNewLog(dm,&dmm);CHKERRQ(ierr);

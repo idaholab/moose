@@ -370,7 +370,7 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
   MatFDColoringSetFunction(_fdcoloring,
                            (PetscErrorCode (*)(void))&libMesh::__libmesh_petsc_snes_residual,
                            &petsc_nonlinear_solver);
-#if !PETSC_VERSION_LESS_THAN(3,5,0) || !PETSC_VERSION_RELEASE
+#if !PETSC_RELEASE_LESS_THAN(3,5,0)
   MatFDColoringSetUp(petsc_mat->mat(),iscoloring,_fdcoloring);
 #endif
 #if PETSC_VERSION_LESS_THAN(3,4,0)
