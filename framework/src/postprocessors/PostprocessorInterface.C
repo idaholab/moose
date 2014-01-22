@@ -27,6 +27,7 @@ PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & name)
 {
+
   // Get the default name
   std::string default_name(name);
   default_name += "_default_value";
@@ -55,7 +56,7 @@ PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
 
   // If the postprocessor does not exists and a default value was given, use the default
   if (!hasPostprocessor(name) && _ppi_params.isParamValid(default_name))
-    return _ppi_params.get<PostprocessorValue>(default_name += "_default_value");
+    return _ppi_params.get<PostprocessorValue>(default_name);
 
   // Proceed as normal
   else

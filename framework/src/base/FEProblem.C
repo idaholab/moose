@@ -1823,6 +1823,10 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
     _pps(type)[tid].addPostprocessor(pp);
     _objects_by_name[tid][name].push_back(mo);
 
+    // Initialize the data if was not initialized previously by SetupPostprocessorDataAction
+    if (!hasPostprocessor(name))
+      _pps_data[tid]->init(name);
+
     // Add it to the user object warehouse as well...
     {
       UserObject * user_object = dynamic_cast<UserObject *>(mo);
