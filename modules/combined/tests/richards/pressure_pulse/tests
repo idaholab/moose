@@ -14,6 +14,13 @@
     use_old_floor = True
   [../]
 
+  [./test_pp21]
+    type = 'Exodiff'
+    input = 'pp21.i'
+    exodiff = 'pp21.e'
+    rel_err = 1E-8
+    use_old_floor = True
+  [../]
   [./test_pp22]
     type = 'Exodiff'
     input = 'pp22.i'

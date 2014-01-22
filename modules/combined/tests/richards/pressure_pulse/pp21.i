@@ -1,5 +1,5 @@
 # investigating pressure pulse in 1D with 2 phase
-# transient
+# steadystate
 
 [Mesh]
   type = GeneratedMesh
@@ -116,7 +116,7 @@
 
 
 [Kernels]
-  active = 'richardsfwater richardstwater richardsfgas richardstgas pconstraint'
+  active = 'richardsfwater richardsfgas pconstraint'
   [./richardstwater]
     type = RichardsMassChange
     variable = pwater
@@ -179,16 +179,13 @@
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
   solve_type = Newton
-  dt = 1E3
-  end_time = 1E4
 []
 
 [Output]
-  file_base = pp22
-  output_initial = true
-  interval = 10000
+  file_base = pp21
+  output_initial = false
   exodus = true
   perf_log = false
   linear_residuals = false
