@@ -24,70 +24,47 @@ template<>
 InputParameters validParams<NodeFaceConstraint>()
 {
   MooseEnum orders("FIRST, SECOND, THIRD, FORTH", "FIRST");
-
-  InputParameters params = validParams<MooseObject>();
-
-  // Add the SetupInterface parameter, 'execute_on', default is 'residual'
-  params += validParams<SetupInterface>();
-
-  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this constraint is applied to.");
+  InputParameters params = validParams<Constraint>();
   params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
   params.addRequiredParam<BoundaryName>("master", "The boundary ID associated with the master side");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-  params.addPrivateParam<std::string>("built_by_action", "add_constraint");
   return params;
 }
 
 NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters parameters) :
-  MooseObject(name, parameters),
-  SetupInterface(parameters),
-  CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
-  FunctionInterface(parameters),
-  TransientInterface(parameters, name, "node_face_constraints"),
-  GeometricSearchInterface(parameters),
-  Restartable(name, parameters, "Constraints"),
-  ZeroInterface(parameters),
-  _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-  _sys(*parameters.get<SystemBase *>("_sys")),
-  _tid(parameters.get<THREAD_ID>("_tid")),
-  _assembly(_subproblem.assembly(_tid)),
-  _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
-  _mesh(_subproblem.mesh()),
-//  _dim(_mesh.dimension()),
+    Constraint(name, parameters),
+    CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
+    _slave(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
+    _master(_mesh.getBoundaryID(getParam<BoundaryName>("master"))),
 
-  _slave(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
-  _master(_mesh.getBoundaryID(getParam<BoundaryName>("master"))),
+    _master_q_point(_assembly.qPointsFace()),
+    _master_qrule(_assembly.qRuleFace()),
 
-  _master_q_point(_assembly.qPointsFace()),
-  _master_qrule(_assembly.qRuleFace()),
+    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"),
+                                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
 
-  _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"),
-                                             Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
+    _current_node(_var.node()),
+    _current_master(_var.neighbor()),
+    _u_slave(_var.nodalSln()),
+    _phi_slave(1),  // One entry
+    _test_slave(1),  // One entry
 
-  _current_node(_var.node()),
-  _current_master(_var.neighbor()),
-  _u_slave(_var.nodalSln()),
-  _phi_slave(1),  // One entry
-  _test_slave(1),  // One entry
+    _phi_master(_assembly.phiFaceNeighbor()),
+    _grad_phi_master(_assembly.gradPhiFaceNeighbor()),
 
-  _phi_master(_assembly.phiFaceNeighbor()),
-  _grad_phi_master(_assembly.gradPhiFaceNeighbor()),
+    _test_master(_var.phiFaceNeighbor()),
+    _grad_test_master(_var.gradPhiFaceNeighbor()),
 
-  _test_master(_var.phiFaceNeighbor()),
-  _grad_test_master(_var.gradPhiFaceNeighbor()),
+    _u_master(_var.slnNeighbor()),
+    _grad_u_master(_var.gradSlnNeighbor()),
 
-  _u_master(_var.slnNeighbor()),
-  _grad_u_master(_var.gradSlnNeighbor()),
+    _dof_map(_sys.dofMap()),
+    _node_to_elem_map(_mesh.nodeToElemMap()),
 
-  _dof_map(_sys.dofMap()),
-  _node_to_elem_map(_mesh.nodeToElemMap()),
-
-  _overwrite_slave_residual(true)
+    _overwrite_slave_residual(true)
 {
   if (parameters.isParamValid("tangential_tolerance"))
   {
@@ -201,18 +178,6 @@ NodeFaceConstraint::computeJacobian()
   for (_i=0; _i<_test_master.size(); _i++)
     for (_j=0; _j<_phi_master.size(); _j++)
       Knn(_i,_j) += computeQpJacobian(Moose::MasterMaster);
-}
-
-MooseVariable &
-NodeFaceConstraint::variable()
-{
-  return _var;
-}
-
-SubProblem &
-NodeFaceConstraint::subProblem()
-{
-  return _subproblem;
 }
 
 bool

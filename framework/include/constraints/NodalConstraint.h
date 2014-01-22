@@ -16,43 +16,18 @@
 #define NODALCONSTRAINT_H
 
 //MOOSE includes
-#include "MooseObject.h"
-#include "SetupInterface.h"
+#include "Constraint.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "FunctionInterface.h"
-#include "UserObjectInterface.h"
-#include "MaterialPropertyInterface.h"
-#include "TransientInterface.h"
-#include "GeometricSearchInterface.h"
-#include "MooseVariable.h"
-#include "SubProblem.h"
-#include "MooseMesh.h"
-#include "Restartable.h"
-
-//libMesh includes
-#include "libmesh/libmesh_common.h"
-#include "libmesh/elem.h"
-#include "libmesh/point.h"
 
 //Forward Declarations
-class Assembly;
-
 class NodalConstraint;
 
 template<>
 InputParameters validParams<NodalConstraint>();
 
-/**
- */
 class NodalConstraint :
-  public MooseObject,
-  public SetupInterface,
-  public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public TransientInterface,
-  protected GeometricSearchInterface,
-  public Restartable
+  public Constraint,
+  public NeighborCoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   NodalConstraint(const std::string & name, InputParameters parameters);
@@ -62,24 +37,13 @@ public:
    * Get the node ID of the master
    * @return node ID
    */
-  unsigned int getMasterNodeId();
+  unsigned int getMasterNodeId() const;
 
   /**
    * Get the list of connected slave nodes
    * @return list of slave node IDs
    */
   std::vector<unsigned int> & getSlaveNodeId() { return _connected_nodes; }
-
-  /**
-   * The variable number that this object operates on.
-   */
-  MooseVariable & variable() { return _var; }
-
-  /**
-   * Subproblem this constraint is part of
-   * @return The reference to the subproblem
-   */
-  SubProblem & subProblem() { return _subproblem; }
 
   /**
    * Built the connectivity for this constraint
@@ -107,36 +71,20 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) = 0;
 
-
-//  unsigned int _boundary_id;                                            ///< Boundary ID of the master node
-
-  SubProblem & _subproblem;
-  SystemBase & _sys;
-
-  THREAD_ID _tid;
-
-  Assembly & _assembly;
-  MooseVariable & _var;
-  MooseMesh & _mesh;
-//  unsigned int _dim;
-
-  unsigned int _i, _j;
-  unsigned int _qp;
-
   /// master node id
   unsigned int _master_node_id;
 
   /// Holds the reference to the master node
   const Node * & _master_node;
-  /// Holds the current solution at the current quadrature point
-  VariableValue & _u_master;
   /// Holds the reference to the current slave node
   const Node * & _slave_node;
   /// Value of the unknown variable this BC is action on
   VariableValue & _u_slave;
-
   /// node IDs connected to the master node (slave nodes)
   std::vector<unsigned int> _connected_nodes;
+
+  /// Holds the current solution at the current quadrature point
+  VariableValue & _u_master;
 };
 
 #endif

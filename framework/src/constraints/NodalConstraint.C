@@ -18,38 +18,19 @@
 template<>
 InputParameters validParams<NodalConstraint>()
 {
-  InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this constraint is applied to.");
+  InputParameters params = validParams<Constraint>();
   params.addRequiredParam<unsigned int>("master", "The ID of the master node");
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-  params.addPrivateParam<std::string>("built_by_action", "add_constraint");
   return params;
 }
 
 NodalConstraint::NodalConstraint(const std::string & name, InputParameters parameters) :
-  MooseObject(name, parameters),
-  SetupInterface(parameters),
-  NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
-  FunctionInterface(parameters),
-  UserObjectInterface(parameters),
-  TransientInterface(parameters, name, "nodal_constraints"),
-  GeometricSearchInterface(parameters),
-  Restartable(name, parameters, "Constraints"),
-  _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-  _sys(*parameters.get<SystemBase *>("_sys")),
-  _tid(parameters.get<THREAD_ID>("_tid")),
-  _assembly(_subproblem.assembly(_tid)),
-  _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
-  _mesh(_subproblem.mesh()),
-//  _dim(_mesh.dimension()),
-
-  _master_node_id(getParam<unsigned int>("master")),
-
-  _master_node(_assembly.node()),
-  _u_master(_var.nodalSln()),
-  _slave_node(_assembly.nodeNeighbor()),
-  _u_slave(_var.nodalSlnNeighbor())
+    Constraint(name, parameters),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
+    _master_node_id(getParam<unsigned int>("master")),
+    _master_node(_assembly.node()),
+    _slave_node(_assembly.nodeNeighbor()),
+    _u_slave(_var.nodalSlnNeighbor()),
+    _u_master(_var.nodalSln())
 {
 }
 
@@ -58,7 +39,7 @@ NodalConstraint::~NodalConstraint()
 }
 
 unsigned int
-NodalConstraint::getMasterNodeId()
+NodalConstraint::getMasterNodeId() const
 {
   return _master_node_id;
 }

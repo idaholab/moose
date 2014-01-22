@@ -13,46 +13,24 @@
 /****************************************************************/
 
 #include "FaceFaceConstraint.h"
-#include "MooseMesh.h"
-#include "SystemBase.h"
-#include "Assembly.h"
-#include "SubProblem.h"
 #include "FEProblem.h"
 #include "NearestNodeLocator.h"
 #include "PenetrationLocator.h"
 
-
 template<>
 InputParameters validParams<FaceFaceConstraint>()
 {
-  InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this constraint is applied to.");
+  InputParameters params = validParams<Constraint>();
   params.addRequiredParam<std::string>("interface", "The name of the interface.");
   params.addRequiredParam<VariableName>("master_variable", "Variable on master surface");
   params.addParam<VariableName>("slave_variable", "Variable on master surface");
-
-  params.addPrivateParam<std::string>("built_by_action", "add_constraint");
-
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-
   return params;
 }
 
 FaceFaceConstraint::FaceFaceConstraint(const std::string & name, InputParameters parameters) :
-    MooseObject(name, parameters),
-    SetupInterface(parameters),
+    Constraint(name, parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
-    FunctionInterface(parameters),
-    TransientInterface(parameters, name, "face_face_constraints"),
-    GeometricSearchInterface(parameters),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
-    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _sys(*parameters.get<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
-    _mesh(_subproblem.mesh()),
     _dim(_mesh.dimension()),
 
     _q_point(_assembly.qPoints()),
@@ -260,16 +238,4 @@ Real
 FaceFaceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType /*side_type*/)
 {
   return 0.;
-}
-
-MooseVariable &
-FaceFaceConstraint::variable()
-{
-  return _var;
-}
-
-SubProblem &
-FaceFaceConstraint::subProblem()
-{
-  return _subproblem;
 }

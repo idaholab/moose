@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<EqualValueNodalConstraint>()
 {
   InputParameters params = validParams<NodalConstraint>();
-  params.addRequiredParam<unsigned int>("slave", "The ID of the master node");
+  params.addRequiredParam<unsigned int>("slave", "The ID of the slave node");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }

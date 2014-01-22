@@ -16,30 +16,15 @@
 #define NODEFACECONSTRAINT_H
 
 //MOOSE includes
-#include "DiracKernelData.h"
-#include "DiracKernelInfo.h"
-#include "MooseObject.h"
-#include "SetupInterface.h"
+#include "Constraint.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "FunctionInterface.h"
-#include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
 #include "GeometricSearchInterface.h"
-#include "MooseVariable.h"
-#include "SubProblem.h"
-#include "MooseMesh.h"
-#include "Restartable.h"
-#include "ZeroInterface.h"
+
 //libMesh includes
-#include "libmesh/libmesh_common.h"
-#include "libmesh/elem.h"
-#include "libmesh/point.h"
 #include "libmesh/sparse_matrix.h"
-//#include "ValidParams.h"
 
 //Forward Declarations
-class Assembly;
-
 class NodeFaceConstraint;
 
 template<>
@@ -55,14 +40,8 @@ InputParameters validParams<NodeFaceConstraint>();
  * This is common for contact algorithms and other constraints.
  */
 class NodeFaceConstraint :
-  public MooseObject,
-  public SetupInterface,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
-  public FunctionInterface,
-  public TransientInterface,
-  private GeometricSearchInterface,
-  public Restartable,
-  public ZeroInterface
+  public Constraint,
+  public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   NodeFaceConstraint(const std::string & name, InputParameters parameters);
@@ -82,16 +61,6 @@ public:
    * Computes the jacobian for the current element.
    */
   virtual void computeJacobian();
-
-  /**
-   * The variable number that this object operates on.
-   */
-  MooseVariable & variable();
-
-  /**
-   * Return a reference to the subproblem.
-   */
-  SubProblem & subProblem();
 
   /**
    * Compute the value the slave node should have at the beginning of a timestep.
@@ -131,32 +100,22 @@ public:
    */
   virtual bool overwriteSlaveJacobian(){return overwriteSlaveResidual();};
 
+  // TODO: Make this protected or add an accessor
+  // Do the same for all the other public members
   SparseMatrix<Number> * _jacobian;
 
 protected:
-  SubProblem & _subproblem;
-  SystemBase & _sys;
-
-  THREAD_ID _tid;
-
-  Assembly & _assembly;
-  MooseVariable & _var;
-  MooseMesh & _mesh;
-//  unsigned int _dim;
-
   /// Boundary ID for the slave surface
   unsigned int _slave;
   /// Boundary ID for the master surface
   unsigned int _master;
-
-  unsigned int _i, _j;
-  unsigned int _qp;
 
   const MooseArray< Point > & _master_q_point;
   QBase * & _master_qrule;
 
 public:
   PenetrationLocator & _penetration_locator;
+
 protected:
 
   /// current node being processed

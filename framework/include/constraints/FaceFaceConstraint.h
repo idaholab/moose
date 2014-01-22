@@ -15,14 +15,10 @@
 #ifndef FACEFACECONSTRAINT_H
 #define FACEFACECONSTRAINT_H
 
-#include "MooseObject.h"
-#include "SetupInterface.h"
+#include "Constraint.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "FunctionInterface.h"
-#include "TransientInterface.h"
-#include "GeometricSearchInterface.h"
-#include "MooseMesh.h"
 
+//Forward Declarations
 class FaceFaceConstraint;
 class FEProblem;
 
@@ -45,12 +41,8 @@ InputParameters validParams<FaceFaceConstraint>();
  *
  */
 class FaceFaceConstraint :
-  public MooseObject,
-  public SetupInterface,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
-  public FunctionInterface,
-  public TransientInterface,
-  protected GeometricSearchInterface
+  public Constraint,
+  public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   FaceFaceConstraint(const std::string & name, InputParameters parameters);
@@ -72,16 +64,6 @@ public:
    */
   virtual void computeJacobian(SparseMatrix<Number> & jacobian);
 
-  /**
-   * The variable number that this object operates on.
-   */
-  MooseVariable & variable();
-
-  /**
-   * Return a reference to the subproblem.
-   */
-  SubProblem & subProblem();
-
 protected:
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpResidualSide(Moose::ConstraintType res_type) = 0;
@@ -89,14 +71,6 @@ protected:
   virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
 
   FEProblem & _fe_problem;
-  SubProblem & _subproblem;
-  SystemBase & _sys;
-
-  THREAD_ID _tid;
-
-  Assembly & _assembly;
-  MooseVariable & _var;
-  MooseMesh & _mesh;
   unsigned int _dim;
 
   /// Boundary ID for the slave surface
@@ -104,9 +78,6 @@ protected:
   /// Boundary ID for the master surface
   BoundaryID _master;
 
-  unsigned int _i, _j;
-
-  unsigned int _qp;
   const MooseArray< Point > & _q_point;
   QBase * & _qrule;
   const MooseArray<Real> & _JxW;
