@@ -83,10 +83,16 @@ PiecewiseConstant::value(Real t, const Point & p)
 
   for ( ; i < len; ++i )
   {
-    if ( (_direction == LEFT  && x < (1+toler) * domain(i)) ||
-         (_direction == RIGHT && x < (1-toler) * domain(i)) )
+    if ( _direction == LEFT &&
+         x < (1+toler) * domain(i) )
     {
       func_value = range(i-1);
+      break;
+    }
+    else if ( (_direction == RIGHT &&
+               x < (1-toler) * domain(i)) )
+    {
+      func_value = range(i);
       break;
     }
   }
@@ -105,9 +111,14 @@ PiecewiseConstant::integral()
 {
   const unsigned len = functionSize();
   Real sum(0);
-  for (unsigned i(0); i < len; ++i)
+  unsigned offset = 0;
+  if (_direction == RIGHT)
   {
-    sum += range(i) * (domain(i+1) - domain(i));
+    offset = 1;
+  }
+  for (unsigned i(0); i < len-1; ++i)
+  {
+    sum += range(i+offset) * (domain(i+1) - domain(i));
   }
   return _scale_factor * sum;
 }

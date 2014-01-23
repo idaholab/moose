@@ -24,7 +24,7 @@
   [./bVar]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.1
+    initial_condition = 0.2
   [../]
   [./cVar]
     order = FIRST
@@ -34,7 +34,7 @@
   [./dVar]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.1
+    initial_condition = 0.2
   [../]
 []
 
