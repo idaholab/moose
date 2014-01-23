@@ -20,6 +20,7 @@ public:
   virtual void addPoints();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 protected:
   bool _debug_things;

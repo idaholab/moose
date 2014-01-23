@@ -373,3 +373,43 @@ RichardsBorehole::computeQpJacobian()
 
   return outflowp;
 }
+
+Real
+RichardsBorehole::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  std::cout << "Starting OffDiag computation for borehole\n";
+  if (_pp_name_UO.not_pressure_var(jvar))
+    return 0.0;
+  unsigned int dvar = _pp_name_UO.pressure_var_num(jvar);
+
+  if (_character == 0.0) return 0.0;
+
+  Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
+
+  Real mobp = _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][dvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
+
+  unsigned int current_dirac_ptid = 0;
+
+  Real outflowp(0.0);
+
+  Real wc(0.0);
+  if (current_dirac_ptid > 0)
+    // contribution from half-segment "behind" this point
+    {
+      wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
+      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+	// injection, so outflow<0 || // production, so outflow>0
+	outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
+    }
+
+  if (current_dirac_ptid < _zs.size() - 1)
+    // contribution from half-segment "ahead of" this point
+    {
+      wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
+      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+	// injection, so outflow<0 || // production, so outflow>0
+	outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
+    }
+
+  return outflowp;
+}
