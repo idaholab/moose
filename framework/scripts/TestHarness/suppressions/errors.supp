@@ -40,10 +40,4 @@
    obj:*
    fun:getpwuid_r@@GLIBC_2.2.5
    fun:getpwuid
-   fun:PetscGetUserName
-   fun:PetscErrorPrintfInitialize
-   fun:PetscInitialize.part.1
-   fun:_ZN7libMesh11LibMeshInitC1EiPKPKci
-   fun:_ZN9MooseInitC1EiPPci
-   fun:main
 }
