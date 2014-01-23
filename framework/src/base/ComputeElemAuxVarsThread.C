@@ -49,8 +49,13 @@ ComputeElemAuxVarsThread::subdomainChanged()
     var->prepareAux();
   }
 
-  // TODO: No subdomain setup for block elemental aux-kernels?
+  // block setup
+  for(std::vector<AuxKernel *>::const_iterator aux_it=_auxs[_tid].activeBlockElementKernels(_subdomain).begin();
+      aux_it != _auxs[_tid].activeBlockElementKernels(_subdomain).end();
+      aux_it++)
+    (*aux_it)->subdomainSetup();
 
+  // global setup
   for(std::vector<AuxKernel *>::const_iterator aux_it=_auxs[_tid].activeElementKernels().begin();
       aux_it != _auxs[_tid].activeElementKernels().end();
       aux_it++)
