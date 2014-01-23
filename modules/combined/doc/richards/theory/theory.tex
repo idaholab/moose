@@ -312,6 +312,10 @@ I encourage users to set $m>0.5$.
 
 The Broadbridge-White capillary curve valid for small $K_{n}$ has also been coded into MOOSE~\cite{bw1988}.
 
+The Rogers-Stallybrass-Clements capillary curve valid for zero
+residual saturations and oil viscosity double that of water viscosity
+has also been coded into MOOSE~\cite{rsc1983}. 
+
 \section{Relative permeability}
 \label{rel.perm.sec}
 
@@ -471,7 +475,18 @@ Three values  of $n$ are shown: 2 (topmost line), 5 and 12 (bottom line)}
 \end{figure}
 
 
-The Broadbridge-White relative permeability function has also been coded into MOOSE~\cite{bw1988}.
+The Broadbridge-White relative permeability function has also been
+coded into MOOSE~\cite{bw1988}.
+
+A monomial form of relative permeability, where
+\begin{equation}
+\kappa_{\mathrm{rel}}(\tilde{S}) = \tilde{S}^{n} \ ,
+\label{monomial.krel.eqn}
+\end{equation}
+has also been coded into MOOSE.  This is mostly useful for comparing
+MOOSE results against analytic solutions for unsaturated flow since
+its deriviative is discontinuous at $\tilde{S}=1$.
+
 
 
 
@@ -1580,6 +1595,10 @@ equation becomes diagonal, and the solution is $\dot{(\rho S)}_{0} =
 \bibitem{bw1988}P Broadbridge and I White ``Constant rate rainfall
   infiltration: A versatile nonlinear model, 1 Analytical solution''.
   Water Resources Research 24 (1988) 145--154
+\bibitem{rsc1983}C Rogers, MP Stallybrass and DL Clements ``On two
+  phase filtration under gravity and with boundary infiltration:
+  application of a Backlund transformation'' Nonlinear Analysis,
+  Theory, Methods and Applications, 7 (1983) 785--799
 \bibitem{peaceman1983}DW Peaceman ``Interpretation of well-block
   pressures in numerical reservoir simulation with nonsquare grid
   blocks and anisotropic permeability'' Society of Petroleum Engineers

@@ -36,6 +36,11 @@
     Ks = 1.0
     C = 1.5
   [../]
+  [./RelPermMonomial]
+    type = RichardsRelPermMonomial
+    simm = 0.0
+    n = 3
+  [../]
 
   # following are unimportant in this test
   [./PPNames]
@@ -172,6 +177,28 @@
     vars = 'kn ks c'
     vals = '0 1 1.5'
   [../]
+
+  [./answer_RelPermMonomial]
+    type = ParsedFunction
+    value = x^n
+    vars = 'n'
+    vals = '3'
+  [../]
+  [./answer_dRelPermMonomial]
+    type = GradParsedFunction
+    direction = '1E-4 0 0'
+    value = x^n
+    vars = 'n'
+    vals = '3'
+  [../]
+  [./answer_d2RelPermMonomial]
+    type = Grad2ParsedFunction
+    direction = '1E-3 0 0'
+    value = x^n
+    vars = 'n'
+    vals = '3'
+  [../]
+
 []
 
 [AuxVariables]
@@ -209,6 +236,14 @@
   [../]
   [./d2RelPermBW_Aux]
   [../]
+
+  [./RelPermMonomial_Aux]
+  [../]
+  [./dRelPermMonomial_Aux]
+  [../]
+  [./d2RelPermMonomial_Aux]
+  [../]
+
 []
 
 [AuxKernels]
@@ -306,6 +341,26 @@
     relperm_UO = RelPermBW
     seff_var = pressure
   [../]
+
+  [./RelPermMonomial_AuxK]
+    type = RichardsRelPermAux
+    variable = RelPermMonomial_Aux
+    relperm_UO = RelPermMonomial
+    seff_var = pressure
+  [../]
+  [./dRelPermMonomial_AuxK]
+    type = RichardsRelPermPrimeAux
+    variable = dRelPermMonomial_Aux
+    relperm_UO = RelPermMonomial
+    seff_var = pressure
+  [../]
+  [./d2RelPermMonomial_AuxK]
+    type = RichardsRelPermPrimePrimeAux
+    variable = d2RelPermMonomial_Aux
+    relperm_UO = RelPermMonomial
+    seff_var = pressure
+  [../]
+
 []
 
 [Postprocessors]
@@ -387,6 +442,22 @@
     type = NodalL2Error
     function = answer_d2RelPermBW
     variable = d2RelPermBW_Aux
+  [../]
+
+  [./cf_RelPermMonomial]
+    type = NodalL2Error
+    function = answer_RelPermMonomial
+    variable = RelPermMonomial_Aux
+  [../]
+  [./cf_dRelPermMonomial]
+    type = NodalL2Error
+    function = answer_dRelPermMonomial
+    variable = dRelPermMonomial_Aux
+  [../]
+  [./cf_d2RelPermMonomial]
+    type = NodalL2Error
+    function = answer_d2RelPermMonomial
+    variable = d2RelPermMonomial_Aux
   [../]
 []
     

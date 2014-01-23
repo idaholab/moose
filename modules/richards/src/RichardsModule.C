@@ -8,6 +8,7 @@
 #include "RichardsDensityConstBulk.h"
 #include "RichardsDensityIdeal.h"
 #include "RichardsRelPermUnity.h"
+#include "RichardsRelPermMonomial.h"
 #include "RichardsRelPermPower.h"
 #include "RichardsRelPermVG.h"
 #include "RichardsRelPermVG1.h"
@@ -17,6 +18,8 @@
 #include "RichardsSeff1BWsmall.h"
 #include "RichardsSeff2waterVG.h"
 #include "RichardsSeff2gasVG.h"
+#include "RichardsSeff2waterRSC.h"
+#include "RichardsSeff2gasRSC.h"
 #include "RichardsSat.h"
 #include "RichardsSUPGnone.h"
 #include "RichardsSUPGstandard.h"
@@ -82,6 +85,7 @@ Elk::Richards::registerObjects(Factory & factory)
   registerUserObject(RichardsDensityConstBulk);
   registerUserObject(RichardsDensityIdeal);
   registerUserObject(RichardsRelPermUnity);
+  registerUserObject(RichardsRelPermMonomial);
   registerUserObject(RichardsRelPermPower);
   registerUserObject(RichardsRelPermVG);
   registerUserObject(RichardsRelPermVG1);
@@ -91,6 +95,8 @@ Elk::Richards::registerObjects(Factory & factory)
   registerUserObject(RichardsSeff1BWsmall);
   registerUserObject(RichardsSeff2waterVG);
   registerUserObject(RichardsSeff2gasVG);
+  registerUserObject(RichardsSeff2waterRSC);
+  registerUserObject(RichardsSeff2gasRSC);
   registerUserObject(RichardsSat);
   registerUserObject(RichardsSUPGnone);
   registerUserObject(RichardsSUPGstandard);
