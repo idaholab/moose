@@ -24,7 +24,7 @@ PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
 {
 }
 
-PostprocessorValue &
+const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & name)
 {
   return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name), _pi_tid);
@@ -40,6 +40,7 @@ const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
 {
   return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name), _pi_tid);
+
 }
 
 const PostprocessorValue &
@@ -50,6 +51,13 @@ PostprocessorInterface::getPostprocessorValueOldByName(const PostprocessorName &
 
 bool
 PostprocessorInterface::hasPostprocessor(const std::string & name)
+{
+  return _pi_feproblem.hasPostprocessor(_ppi_params.get<PostprocessorName>(name), _pi_tid);
+}
+
+
+bool
+PostprocessorInterface::hasPostprocessorByName(const PostprocessorName & name)
 {
   return _pi_feproblem.hasPostprocessor(name, _pi_tid);
 }

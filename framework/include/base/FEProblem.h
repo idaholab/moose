@@ -380,6 +380,12 @@ public:
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
 
+  /**
+   * Initializes the postprocessor data
+   * @see SetupPostprocessorDataAction
+   */
+  void initPostprocessorData(const std::string & name);
+
   void clearPostprocessorTables();
 
   // UserObjects /////

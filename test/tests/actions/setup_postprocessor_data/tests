@@ -1,0 +1,13 @@
+[Tests]
+  [./test_pass]
+    type = 'RunException'
+    input = 'setup_postprocessor_data.i'
+    expect_err = 'TestSetupPostprocessorDataActionFunction pass'
+  [../]
+  [./test_failure]
+    type = 'RunException'
+    input = 'setup_postprocessor_data.i'
+    expect_err = 'TestSetupPostprocessorDataActionFunction fail'
+	 cli_args = 'Functions/tester/postprocessor=unknown'
+  [../]
+[]

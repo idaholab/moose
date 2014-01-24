@@ -129,6 +129,7 @@
 #include "MTPiecewiseConst1D.h"
 #include "MTPiecewiseConst2D.h"
 #include "MTPiecewiseConst3D.h"
+#include "TestSetupPostprocessorDataActionFunction.h"
 
 // DiracKernels
 #include "ReportingConstantSource.h"
@@ -300,6 +301,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerFunction(MTPiecewiseConst1D);
   registerFunction(MTPiecewiseConst2D);
   registerFunction(MTPiecewiseConst3D);
+  registerFunction(TestSetupPostprocessorDataActionFunction);
 
   // DiracKernels
   registerDiracKernel(ReportingConstantSource);

@@ -310,6 +310,7 @@
 #include "RecoverBaseAction.h"
 #include "SetupPredictorAction.h"
 #include "AddMortarInterfaceAction.h"
+#include "SetupPostprocessorDataAction.h"
 
 
 namespace Moose {
@@ -582,6 +583,7 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_mesh", false);
   registerTask("prepare_mesh", false);
   registerTask("setup_mesh_complete", false);  // calls prepare
+  registerTask("setup_postprocessor_data", false);
   registerTask("add_variable", false);
   registerTask("add_kernel", false);
   registerTask("setup_executioner", true);
@@ -671,6 +673,7 @@ addActionTypes(Syntax & syntax)
 "(setup_time_stepper)"
 "(setup_predictor)"
 "(add_feproblem)"
+"(setup_postprocessor_data)"
 "(setup_time_periods)"
 "(init_displaced_problem)"
 "(add_aux_variable, add_variable, add_elemental_field_variable)"
@@ -737,6 +740,8 @@ addActionTypes(Syntax & syntax)
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
+  registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
+
   registerAction(RecoverBaseAction, "recover_base");
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(SetupMeshCompleteAction, "prepare_mesh");

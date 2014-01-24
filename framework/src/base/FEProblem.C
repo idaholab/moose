@@ -1821,8 +1821,8 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
     Postprocessor * pp = getPostprocessorPointer(mo);
     _pps(type)[tid].addPostprocessor(pp);
-    _pps_data[tid]->init(name);
     _objects_by_name[tid][name].push_back(mo);
+    _pps_data[tid]->init(name);
 
     // Add it to the user object warehouse as well...
     {
@@ -1834,6 +1834,15 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
     }
   }
 }
+
+void
+FEProblem::initPostprocessorData(const std::string & name)
+{
+  for(THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    _pps_data[tid]->init(name);
+
+}
+
 
 ExecStore<PostprocessorWarehouse> &
 FEProblem::getPostprocessorWarehouse()
