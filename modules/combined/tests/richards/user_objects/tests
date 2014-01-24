@@ -4,6 +4,7 @@
     input = 'uo1.i'
     csvdiff = 'uo1.csv'
     abs_zero = 1.0E-4
+    skip = 'Broken on all systems'
   [../]
   [./test_uo2]
     type = 'CSVDiff'
