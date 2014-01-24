@@ -44,7 +44,7 @@ public:
    *
    * see getPostprocessorValueOld getPostprocessorValueByName getPostprocessorValueOldByName
    */
-  const PostprocessorValue & getPostprocessorValue(const std::string & name);
+  PostprocessorValue & getPostprocessorValue(const std::string & name);
 
   /**
    * Retrieve the value of the Postprocessor
@@ -58,7 +58,7 @@ public:
    *
    * see getPostprocessorValue getPostprocessorValueOldByName getPostprocessorValueByName
    */
-  const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
+  PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
   /**
    * Retrieve the old value of a Postprocessor
@@ -67,7 +67,7 @@ public:
    *
    * see getPostprocessorValue
    */
-  const PostprocessorValue & getPostprocessorValueOld(const std::string & name);
+  PostprocessorValue & getPostprocessorValueOld(const std::string & name);
 
   /**
    * Retrieve the old value of a Postprocessor
@@ -80,7 +80,7 @@ public:
    *
    * see getPostprocessorValueByName
    */
-  const PostprocessorValue & getPostprocessorValueOldByName(const PostprocessorName & name);
+  PostprocessorValue & getPostprocessorValueOldByName(const PostprocessorName & name);
 
   /**
    * Determine if the postprocessor exists
