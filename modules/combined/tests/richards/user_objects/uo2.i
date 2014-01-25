@@ -105,6 +105,9 @@
   [../]
   [./d2DensityIdeal_Aux]
   [../]
+
+  [./check_Aux]
+  [../]
 []
 
 [AuxKernels]
@@ -144,6 +147,12 @@
     variable = d2DensityIdeal_Aux
     density_UO = DensityIdeal
     pressure_var = pressure
+  [../]
+
+  [./check_AuxK]
+    type = FunctionAux
+    variable = check_Aux
+    function = answer_d2DensityConstBulk
   [../]
 []
 

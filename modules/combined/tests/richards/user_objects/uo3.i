@@ -4,6 +4,8 @@
 # then add the UserObject, add a Function defining the expected result,
 # add an AuxVariable and AuxKernel that will record the UserObject's value
 # and finally add a NodalL2Error that compares this with the Function
+#
+# pressure = x (-5E6<=x<=5E6)
 
 [UserObjects]
   [./Seff1VG]
@@ -21,8 +23,8 @@
   [./Seff1RSC]
     type = RichardsSeff1RSC
     oil_viscosity = 2.0
-    scale_ratio = 2E6
-    shift = 1E6
+    scale_ratio = 1E6
+    shift = 2E6
   [../]
 
   # following are unimportant in this test
@@ -99,23 +101,23 @@
 
   [./answer_Seff1RSC]
     type = ParsedFunction
-    value = 1-(1+exp((-x-shift)/scale))^(-0.5)
+    value = 1-(1+exp(-(-x-shift)/scale))^(-0.5)
     vars = 'shift scale'
-    vals = '1E6 2E6'
+    vals = '2E6 1E6'
   [../]
   [./answer_dSeff1RSC]
     type = GradParsedFunction
     direction = '10000 0 0'
-    value = 1-(1+exp((-x-shift)/scale))^(-0.5)
+    value = 1-(1+exp(-(-x-shift)/scale))^(-0.5)
     vars = 'shift scale'
-    vals = '1E6 2E6'
+    vals = '2E6 1E6'
   [../]
   [./answer_d2Seff1RSC]
     type = Grad2ParsedFunction
     direction = '1 0 0'
-    value = 1-(1+exp((-x-shift)/scale))^(-0.5)
+    value = 1-(1+exp(-(-x-shift)/scale))^(-0.5)
     vars = 'shift scale'
-    vals = '1E6 2E6'
+    vals = '2E6 1E6'
   [../]
 []
 
@@ -215,7 +217,7 @@
   [./check_AuxK]
     type = FunctionAux
     variable = check_Aux
-    function = answer_Seff1BW2prime
+    function = answer_Seff1RSC
   [../]
 []
 
@@ -348,7 +350,7 @@
   linear_residuals = false
   file_base = uo3
   interval = 1
-  exodus = true
+  exodus = false
   postprocessor_csv = true
   perf_log = false
   hidden_variables = pressure

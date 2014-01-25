@@ -244,6 +244,8 @@
   [./d2RelPermMonomial_Aux]
   [../]
 
+  [./check_Aux]
+  [../]
 []
 
 [AuxKernels]
@@ -361,6 +363,11 @@
     seff_var = pressure
   [../]
 
+  [./check_AuxK]
+    type = FunctionAux
+    variable = check_Aux
+    function = answer_dRelPermMonomial
+  [../]
 []
 
 [Postprocessors]
