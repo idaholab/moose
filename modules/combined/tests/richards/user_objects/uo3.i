@@ -18,6 +18,12 @@
     C = 1.01
     las = 1E5
   [../]
+  [./Seff1RSC]
+    type = RichardsSeff1RSC
+    oil_viscosity = 2.0
+    scale_ratio = 2E6
+    shift = 1E6
+  [../]
 
   # following are unimportant in this test
   [./PPNames]
@@ -90,6 +96,27 @@
     yourFileName = satBW2prime.csv
     axis = 0
   [../]
+
+  [./answer_Seff1RSC]
+    type = ParsedFunction
+    value = 1-(1+exp((-x-shift)/scale))^(-0.5)
+    vars = 'shift scale'
+    vals = '1E6 2E6'
+  [../]
+  [./answer_dSeff1RSC]
+    type = GradParsedFunction
+    direction = '10000 0 0'
+    value = 1-(1+exp((-x-shift)/scale))^(-0.5)
+    vars = 'shift scale'
+    vals = '1E6 2E6'
+  [../]
+  [./answer_d2Seff1RSC]
+    type = Grad2ParsedFunction
+    direction = '1 0 0'
+    value = 1-(1+exp((-x-shift)/scale))^(-0.5)
+    vars = 'shift scale'
+    vals = '1E6 2E6'
+  [../]
 []
 
 [AuxVariables]
@@ -105,6 +132,13 @@
   [./dSeff1BWsmall_Aux]
   [../]
   [./d2Seff1BWsmall_Aux]
+  [../]
+
+  [./Seff1RSC_Aux]
+  [../]
+  [./dSeff1RSC_Aux]
+  [../]
+  [./d2Seff1RSC_Aux]
   [../]
 
   [./check_Aux]
@@ -156,6 +190,28 @@
     wrtnum2 = 0
   [../]
 
+  [./Seff1RSC_AuxK]
+    type = RichardsSeffAux
+    variable = Seff1RSC_Aux
+    seff_UO = Seff1RSC
+    pressure_vars = pressure
+  [../]
+  [./dSeff1RSC_AuxK]
+    type = RichardsSeffPrimeAux
+    variable = dSeff1RSC_Aux
+    seff_UO = Seff1RSC
+    pressure_vars = pressure
+    wrtnum = 0
+  [../]
+  [./d2Seff1RSC_AuxK]
+    type = RichardsSeffPrimePrimeAux
+    variable = d2Seff1RSC_Aux
+    seff_UO = Seff1RSC
+    pressure_vars = pressure
+    wrtnum1 = 0
+    wrtnum2 = 0
+  [../]
+
   [./check_AuxK]
     type = FunctionAux
     variable = check_Aux
@@ -196,6 +252,21 @@
     variable = d2Seff1BWsmall_Aux
   [../]
 
+  [./cf_Seff1RSC]
+    type = NodalL2Error
+    function = answer_Seff1RSC
+    variable = Seff1RSC_Aux
+  [../]
+  [./cf_dSeff1RSC]
+    type = NodalL2Error
+    function = answer_dSeff1RSC
+    variable = dSeff1RSC_Aux
+  [../]
+  [./cf_d2Seff1RSC]
+    type = NodalL2Error
+    function = answer_d2Seff1RSC
+    variable = d2Seff1RSC_Aux
+  [../]
 []
     
 
