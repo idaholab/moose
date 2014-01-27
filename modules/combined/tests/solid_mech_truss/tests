@@ -10,7 +10,6 @@
     input = 'trussTest.i'
     exodiff = 'trussTest_out.e'
     abs_zero = 1e-8
-    skip = "Broken"
   [../]
   [./truss]
     type = 'Exodiff'
