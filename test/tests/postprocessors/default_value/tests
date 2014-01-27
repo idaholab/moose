@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'default_value.i'
+    exodiff = 'default_value_out.e'
+  [../]
+  [./default_error]
+    type = 'RunException'
+    input = 'default_value.i'
+    cli_args = 'Kernels/diff/test_default_error=true'
+	  expect_err = 'A default PostprcessorValue does not exist for the given name: invalid_postprocessor_name'
+  [../]
+[]

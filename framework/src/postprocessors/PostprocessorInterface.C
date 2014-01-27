@@ -27,7 +27,12 @@ PostprocessorInterface::PostprocessorInterface(InputParameters & params) :
 PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & name)
 {
-  return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name), _pi_tid);
+  // Return the default if the Postprocessor does not exist and a default does, otherwise
+  // continue as usual
+  if (!hasPostprocessor(name) && _ppi_params.hasDefaultPostprocessorValue(name))
+    return _ppi_params.defaultPostprocessorValue(name);
+  else
+    return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
 
 PostprocessorValue &
@@ -39,8 +44,12 @@ PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & na
 PostprocessorValue &
 PostprocessorInterface::getPostprocessorValueOld(const std::string & name)
 {
-  return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name), _pi_tid);
-
+  // // Return the default if the Postprocessor does not exist and a default does, otherwise
+  // // continue as usual
+  if (!hasPostprocessor(name) && _ppi_params.hasDefaultPostprocessorValue(name))
+    return _ppi_params.defaultPostprocessorValue(name);
+  else
+    return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name), _pi_tid);
 }
 
 PostprocessorValue &

@@ -98,9 +98,20 @@ public:
    * but can be checked with "isValid" before use
    */
   template <typename T>
-  void addParam(const std::string &name, const T &value, const std::string &doc_string);
+  void addParam(const std::string &name, const T & value, const std::string &doc_string);
   template <typename T>
   void addParam(const std::string &name, const std::string &doc_string);
+
+  /**
+   * Method for adding a input parameter that expects a postprocessor name, but provides a default value
+   * in the case where the postprocessor name provided is not valid or not provided.
+   * @param name The name of the input file parameter that is expecting a PostprocessorName
+   * @param default_value The default value to use in the case that the postprocessor does not exist
+   * @param doc_string Documentation string for this parameter
+   *
+   * This parameter works with the PostprocessorInterface to return the default value when getPostprocessorValue is called
+   */
+  void addPostprocessor(const std::string & name, Real default_value, const std::string & doc_string);
 
   /**
    * These methods add an option parameter and with a customer type to the InputParameters object.  The custom
@@ -310,6 +321,21 @@ public:
    */
   Real defaultCoupledValue(std::string coupling_name);
 
+  /**
+   * Get the default value for a postprocessor added with addPostprocessor
+   * @param name The name of the postprocessor
+   * @return The default value for the postprocessor
+   */
+  PostprocessorValue & defaultPostprocessorValue(const std::string & name);
+
+  /**
+   * Returns true if a default PostprocessorValue is defined
+   * @param name The name of the postprocessor
+   * @return True if a default value exists
+   */
+  bool hasDefaultPostprocessorValue(const std::string & name) const;
+
+
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters validParams<MooseObject>();
   friend InputParameters validParams<Action>();
@@ -321,7 +347,6 @@ private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters() {}
 
-private:
   /// The documentation strings for each parameter
   std::map<std::string, std::string> _doc_string;
 
@@ -352,6 +377,10 @@ private:
 
   /// The default value for optionally coupled variables
   std::map<std::string, Real> _default_coupled_value;
+
+  /// The default value for postprocessors
+  std::map<std::string, PostprocessorValue> _default_postprocessor_value;
+
 };
 
 // Template and inline function implementations
@@ -382,7 +411,7 @@ void InputParameters::addRequiredParam(const std::string &name, const std::strin
 template <typename T>
 void InputParameters::addRequiredParam(const std::string & /*name*/, const T & /*value*/, const std::string & /*doc_string*/)
 {
-  mooseError("You cannon call addRequiredParam and supply a default value for this type, please use addParam instead");
+  mooseError("You cannot call addRequiredParam and supply a default value for this type, please use addParam instead");
 }
 
 template <typename T>

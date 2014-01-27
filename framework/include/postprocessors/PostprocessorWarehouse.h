@@ -118,7 +118,6 @@ public:
    */
   const std::set<SubdomainID> & blockNodalIds() { return _block_ids_with_nodal_postprocessors; }
 
-
 protected:
   std::vector<ElementPostprocessor *> _all_element_postprocessors;
   std::vector<NodalPostprocessor *> _all_nodal_postprocessors;

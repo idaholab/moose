@@ -45,6 +45,7 @@ InputParameters::clear()
   _coupled_vars.clear();
   _syntax.clear();
   _default_coupled_value.clear();
+  _default_postprocessor_value.clear();
 }
 
 void
@@ -85,6 +86,7 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_coupled_vars = rhs._coupled_vars;
   this->_syntax = rhs._syntax;
   this->_default_coupled_value = rhs._default_coupled_value;
+  this->_default_postprocessor_value = rhs._default_postprocessor_value;
 
   return *this;
 }
@@ -103,7 +105,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   _coupled_vars.insert(rhs._coupled_vars.begin(), rhs._coupled_vars.end());
   _syntax.insert(rhs._syntax.begin(), rhs._syntax.end());
   _default_coupled_value.insert(rhs._default_coupled_value.begin(), rhs._default_coupled_value.end());
-
+  _default_postprocessor_value.insert(rhs._default_postprocessor_value.begin(), rhs._default_postprocessor_value.end());
   return *this;
 }
 
@@ -292,4 +294,31 @@ InputParameters::getGroupName(const std::string &param_name) const
     return it->second;
   else
     return std::string();
+}
+
+void
+InputParameters::addPostprocessor(const std::string & name, Real default_value, const std::string &doc_string)
+{
+  // Add the postprocessor name parameter in traditional manner
+  addParam<PostprocessorName>(name, doc_string);
+
+  // Store the default value
+  _default_postprocessor_value[name] = default_value;
+}
+
+PostprocessorValue &
+InputParameters::defaultPostprocessorValue(const std::string & name)
+{
+  // Check that a default exists, error if it does not
+  if (!hasDefaultPostprocessorValue(name))
+    mooseError("A default PostprcessorValue does not exist for the given name: " << name);
+
+  // Return the value
+  return _default_postprocessor_value[name];
+}
+
+bool
+InputParameters::hasDefaultPostprocessorValue(const std::string & name) const
+{
+  return _default_postprocessor_value.find(name) != _default_postprocessor_value.end();
 }

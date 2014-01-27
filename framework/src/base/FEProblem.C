@@ -1180,7 +1180,6 @@ FEProblem::addKernel(const std::string & kernel_name, const std::string & name, 
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
-
   _nl.addKernel(kernel_name, name, parameters);
 }
 
