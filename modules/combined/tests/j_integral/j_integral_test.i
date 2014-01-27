@@ -22,6 +22,8 @@
 [Mesh]
   file = crack.e
   displacements = 'disp_x disp_y disp_z'
+  partitioner = centroid
+  centroid_partitioner_direction = z
 []
 
 
@@ -78,6 +80,17 @@
   [../]
 []
 
+[UserObjects]
+  [./crackFrontDefinition]
+    type = CrackFrontDefinition
+    boundary = 800
+    execute_on = residual
+    crack_direction = '1 0 0'
+    2d = true
+    2d_axis = 2
+    use_displaced_mesh = false
+  [../]
+[]
 
 [SolidMechanics]
   [./solid]
@@ -90,35 +103,35 @@
     variable = q1
     j_integral_radius_inner = 4
     j_integral_radius_outer = 4.5
-    crack_location = '0 -10 0.5'
+    crack_front_definition = crackFrontDefinition
   [../]
   [./q2]
     type = qFunctionJIntegral
     variable = q2
     j_integral_radius_inner = 4.5
     j_integral_radius_outer = 5
-    crack_location = '0 -10 0.5'
+    crack_front_definition = crackFrontDefinition
   [../]
   [./q]
     type = qFunctionJIntegral
     variable = q3
     j_integral_radius_inner = 5
     j_integral_radius_outer = 5.5
-    crack_location = '0 -10 0.5'
+    crack_front_definition = crackFrontDefinition
   [../]
   [./q4]
     type = qFunctionJIntegral
     variable = q4
     j_integral_radius_inner = 5.5
     j_integral_radius_outer = 6
-    crack_location = '0 -10 0.5'
+    crack_front_definition = crackFrontDefinition
   [../]
   [./q5]
     type = qFunctionJIntegral
     variable = q5
     j_integral_radius_inner = 6
     j_integral_radius_outer = 6.5
-    crack_location = '0 -10 0.5'
+    crack_front_definition = crackFrontDefinition
   [../]
   [./stress_xx]               # computes stress components for output
     type = MaterialTensorAux
@@ -288,56 +301,56 @@
   [./J1]
     type = JIntegral
     q = q1
-    direction = '1 0 0'
+    crack_front_definition = crackFrontDefinition
   [../]
   [./J1_large]
     type = JIntegral
     q = q1
-    direction = '1 0 0'
+    crack_front_definition = crackFrontDefinition
     large = true
   [../]
   [./J2]
     type = JIntegral
     q = q2
-    direction = '1 0 0'
+    crack_front_definition = crackFrontDefinition
   [../]
    [./J2_large]
     type = JIntegral
     q = q2
-    direction = '1 0 0'
+    crack_front_definition = crackFrontDefinition
     large = true
   [../]
  [./J3]
     type = JIntegral
     q = q3
-    direction = '1 0 0'
+    crack_front_definition = crackFrontDefinition
   [../]
   [./J3_large]
     type = JIntegral
     q = q3
-    direction = '1 0 0'
+    crack_front_definition = crackFrontDefinition
     large = true
   [../]
   [./J4]
     type = JIntegral
     q = q4
-    direction = '1 0 0'
+    crack_front_definition = crackFrontDefinition
   [../]
   [./J4_large]
     type = JIntegral
     q = q4
-    direction = '1 0 0'
+    crack_front_definition = crackFrontDefinition
     large = true
   [../]
   [./J5]
     type = JIntegral
     q = q5
-    direction = '1 0 0'
+    crack_front_definition = crackFrontDefinition
   [../]
   [./J5_large]
     type = JIntegral
     q = q5
-    direction = '1 0 0'
+    crack_front_definition = crackFrontDefinition
     large = true
   [../]
 []

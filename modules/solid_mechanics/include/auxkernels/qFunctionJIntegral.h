@@ -2,6 +2,7 @@
 #define QFUNCTIONJINTEGRAL_H
 
 #include "AuxKernel.h"
+#include "CrackFrontDefinition.h"
 
 /**
  * Coupled auxiliary value
@@ -19,16 +20,19 @@ public:
   virtual ~qFunctionJIntegral() {}
 
 protected:
-//  virtual Real computeValue(const Point & p);
+  virtual void initialSetup();
   virtual Real computeValue();
 
 private:
   const Real _j_integral_radius_inner;
   const Real _j_integral_radius_outer;
-  RealVectorValue _crack_location;
+  const CrackFrontDefinition * const _crack_front_definition;
+  bool _has_crack_front_node_index;
+  const unsigned int _crack_front_node_index;
+  bool _treat_as_2d;
 };
 
 template<>
 InputParameters validParams<qFunctionJIntegral>();
 
-#endif //JINTEGRALDISK_H
+#endif //QFUNCTIONJINTEGRAL3D_H

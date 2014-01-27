@@ -14,9 +14,5 @@ Sideset 400 surface 13 11
 Sideset 500 surface 8 15 10 14  
 Sideset 600 surface 16 9  
 Sideset 700 surface 4  
-export mesh "/Users/novasr/work/grizzly_J_integral/crack.e" dimension 3 block 1 overwrite
-
-
-
-
-
+nodeset 800 curve 14
+export mesh "crack.e" dimension 3 block 1 overwrite
