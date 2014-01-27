@@ -14,6 +14,8 @@ InputParameters validParams<Component>()
   params.addParam<std::string>("physics_input_file", "Input file with physics");
   params.addPrivateParam<std::string>("built_by_action", "add_component");
 
+  params.registerBase("Component");
+  
   return params;
 }
 
