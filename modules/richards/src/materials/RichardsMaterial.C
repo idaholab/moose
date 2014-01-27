@@ -73,6 +73,14 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     _dtauvel_SUPG_dp(declareProperty<std::vector<RealVectorValue> >("dtauvel_SUPG_dp"))
 
 {
+
+  // Need to add the variables that the user object is coupled to as dependencies so MOOSE will compute them
+  {
+    const std::vector<MooseVariable *> & coupled_vars = _pp_name_UO.getCoupledMooseVars();
+    for(unsigned int i=0; i<coupled_vars.size(); i++)
+      addMooseVariableDependency(coupled_vars[i]);
+  }
+  
   if (_material_por <= 0 || _material_por >= 1)
     mooseError("Porosity set to " << _material_por << " but it must be between 0 and 1");
 
