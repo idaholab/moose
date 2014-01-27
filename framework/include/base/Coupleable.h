@@ -49,7 +49,7 @@ public:
    * Get the list of coupled variables
    * @return The list of coupled variables
    */
-  const std::vector<MooseVariable *> & getCoupledMooseVars() { return _coupled_moose_vars; }
+  const std::vector<MooseVariable *> & getCoupledMooseVars() const { return _coupled_moose_vars; }
 
 protected:
   /**
