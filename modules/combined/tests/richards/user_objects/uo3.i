@@ -22,9 +22,9 @@
   [../]
   [./Seff1RSC]
     type = RichardsSeff1RSC
-    oil_viscosity = 2.0
+    oil_viscosity = 4.0
     scale_ratio = 1E6
-    shift = 2E6
+    shift = -2E6
   [../]
 
   # following are unimportant in this test
@@ -101,23 +101,23 @@
 
   [./answer_Seff1RSC]
     type = ParsedFunction
-    value = 1-(1+exp(-(-x-shift)/scale))^(-0.5)
+    value = (1+exp((-x-shift)/scale))^(-0.5)
     vars = 'shift scale'
-    vals = '2E6 1E6'
+    vals = '-2E6 1E6'
   [../]
   [./answer_dSeff1RSC]
     type = GradParsedFunction
-    direction = '10000 0 0'
-    value = 1-(1+exp(-(-x-shift)/scale))^(-0.5)
+    direction = '1 0 0'
+    value = (1+exp((-x-shift)/scale))^(-0.5)
     vars = 'shift scale'
-    vals = '2E6 1E6'
+    vals = '-2E6 1E6'
   [../]
   [./answer_d2Seff1RSC]
     type = Grad2ParsedFunction
     direction = '1 0 0'
-    value = 1-(1+exp(-(-x-shift)/scale))^(-0.5)
+    value = (1+exp((-x-shift)/scale))^(-0.5)
     vars = 'shift scale'
-    vals = '2E6 1E6'
+    vals = '-2E6 1E6'
   [../]
 []
 

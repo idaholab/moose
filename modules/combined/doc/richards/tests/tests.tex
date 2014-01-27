@@ -202,8 +202,8 @@ S_{s}$, so in most MOOSE models $S_{n}$ is the immobile saturation.
   valid for zero residual saturations and oil viscosity double that of
   water viscosity, defined by
 \begin{equation}
-S_{\mathrm{eff}} = 1 - \frac{1}{\sqrt{1 +
-    \exp\left(-\frac{P_{\mathrm{c}}-P_{\mathrm{shift}}}{P_{\mathrm{scale}}}\right)}}
+S_{\mathrm{eff}} = \frac{1}{\sqrt{1 +
+    \exp\left(\frac{P_{\mathrm{c}}-P_{\mathrm{shift}}}{P_{\mathrm{scale}}}\right)}}
 \ ,
 \end{equation}
 and its derivatives with respect to $P_{\mathrm{c}}$ are correctly coded.

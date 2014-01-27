@@ -13,7 +13,7 @@ InputParameters validParams<RichardsSeff1RSC>()
   params.addParam<Real>("oil_viscosity", "Viscosity of oil (gas) phase.  It is assumed this is double the water-phase viscosity.  (Note that this effective saturation is mostly useful for 2-phase, not single-phase.)");
   params.addParam<Real>("scale_ratio", "This is porosity/permeability/beta^2, where beta may be chosen by the user.  It has dimensions [time]");
   params.addParam<Real>("shift", "effective saturation is a function of (Pc - shift)");
-  params.addClassDescription("Rogers-Stallybrass-Clements version of effective saturation for the water phase, valid for residual saturations = 0, and viscosityOil = 2*viscosityWater.  seff_water = 1 - 1/Sqrt(1 + Exp(-(Pc - shift)/scale)), where scale = 0.5*scale_ratio*oil_viscosity.  Note that this effective saturation is mostly useful for 2-phase, not single-phase.");
+  params.addClassDescription("Rogers-Stallybrass-Clements version of effective saturation for the water phase, valid for residual saturations = 0, and viscosityOil = 2*viscosityWater.  seff_water = 1/Sqrt(1 + Exp((Pc - shift)/scale)), where scale = 0.25*scale_ratio*oil_viscosity.  Note that this effective saturation is mostly useful for 2-phase, not single-phase.");
   return params;
 }
 
@@ -22,7 +22,7 @@ RichardsSeff1RSC::RichardsSeff1RSC(const std::string & name, InputParameters par
   _oil_viscosity(getParam<Real>("oil_viscosity")),
   _scale_ratio(getParam<Real>("scale_ratio")),
   _shift(getParam<Real>("shift")),
-  _scale(0.5*_scale_ratio*_oil_viscosity)
+  _scale(0.25*_scale_ratio*_oil_viscosity)
 {}
 
 Real

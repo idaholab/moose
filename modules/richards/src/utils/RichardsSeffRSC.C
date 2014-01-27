@@ -11,15 +11,15 @@ Real
 RichardsSeffRSC::seff(Real pc, Real shift, Real scale)
 {
   Real x = (pc - shift)/scale;
-  Real ex = std::exp(-x);
-  return 1 - std::pow(1 + ex, -0.5);
+  Real ex = std::exp(x);
+  return std::pow(1 + ex, -0.5);
 }
 
 Real
 RichardsSeffRSC::dseff(Real pc, Real shift, Real scale)
 {
   Real x = (pc - shift)/scale;
-  Real ex = std::exp(-x);
+  Real ex = std::exp(x);
   return -0.5*ex*std::pow(1 + ex, -1.5)/scale;
 }
 
@@ -27,6 +27,6 @@ Real
 RichardsSeffRSC::d2seff(Real pc, Real shift, Real scale)
 {
   Real x = (pc - shift)/scale;
-  Real ex = std::exp(-x);
-  return (-0.75*ex*ex*std::pow(1 + ex, -2.5) + 0.5*ex*std::pow(1 + ex, -1.5))/scale/scale;
+  Real ex = std::exp(x);
+  return (0.75*ex*ex*std::pow(1 + ex, -2.5) - 0.5*ex*std::pow(1 + ex, -1.5))/scale/scale;
 }
