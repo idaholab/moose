@@ -181,12 +181,12 @@ if __name__ == "__main__":
   daemon = DistccDaemon(warehouse.master, dedicated=options.dedicated)
 
   # Kill the daemons
-  if options.kill or options.no_daemon or options.refresh:
+  if options.kill or options.no_daemon:
     daemon.kill()
 
   # Start the daemons
-  if options.daemon and not options.no_daemon:
-    warehouse.buildMachines()
+  if options.refresh or (options.daemon and not options.no_daemon):
+    warehouse.buildMachines(dmakerc.get('HOST_LINES'))
     daemon.start(warehouse.machines)
 
   # Exit if running basic daemon options
@@ -206,9 +206,7 @@ if __name__ == "__main__":
 
   # Display the  output
   outputer = MachineOutput(warehouse)
-  outputer.display(distcc_hosts, jobs,
-                   verbose=options.verbose,
-                   make_args=make_args)
+  outputer.display(distcc_hosts, jobs, verbose=options.verbose, make_args=make_args)
 
   # --summary does not run any commands, so exit
   if options.summary:
@@ -216,4 +214,7 @@ if __name__ == "__main__":
 
   # Run Make
   opt = subOptions(options,'timeout','quiet','dbg','opt','oprof')
+
+  print distcc_hosts, jobs
+
   runMake(distcc_hosts, jobs, make_args=make_args, cwd=make_dir, **opt)

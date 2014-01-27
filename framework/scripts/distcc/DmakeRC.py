@@ -51,6 +51,7 @@ class DmakeRC(object):
     if kwargs.pop('clean', False):
       if os.path.exists(self._filename):
         os.remove(self._filename)
+        self._update = True
 
     # Read the .dmakerc, stored as a dictionary which is accessible via
     # the get/set methods of this object, this creates two member variables:

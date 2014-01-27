@@ -92,7 +92,7 @@ class MachineWarehouse(object):
 
     # Return remote
     else:
-      self.buildMachines(host_lines, kwargs.pop('disable', None), serial=kwargs.pop("serial", False))
+      self.buildMachines(host_lines, disable=kwargs.pop('disable', None), serial=kwargs.pop("serial", False))
       return self._buildHosts(**kwargs)
 
 
@@ -105,9 +105,9 @@ class MachineWarehouse(object):
   #
   #  Optional Arguments:
   #    serial = True | {False}    - toggle the parallel creation of the Machine objects
-  #
+  #    disable = list(<str>)      - a list of machines to disables
   #  @see createMachine Machine
-  def buildMachines(self, host_lines, disable, **kwargs):
+  def buildMachines(self, host_lines, **kwargs):
 
     # Return if the workers are already built
     if len(self.machines) > 0:
@@ -116,6 +116,9 @@ class MachineWarehouse(object):
     # Handle empty host lines
     if len(host_lines) == 0:
       return
+
+    # Get the disable list
+    disable = kwargs.pop('disable', None)
 
     # Create the Machine objects (in parallel)
     output = []

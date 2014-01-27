@@ -21,7 +21,6 @@ class DistccDaemon(object):
     # Setup the cron jobs
     self._manageCron(kwargs.pop('dedicated', False))
 
-
   ## Start the daemons (public)
   # @param machines A list of Machine objects to start
   # @param kwargs Optional inputs (see below)
@@ -94,6 +93,7 @@ class DistccDaemon(object):
           pass
         else:
           print "Unknown error while obtaining distccd status"
+
 
   ## A function to facilitate cronjobs with dedicated mode (private)
   # @param dedicated True if running in dedicated mode
