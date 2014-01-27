@@ -58,7 +58,7 @@ public:
    *
    * see getPostprocessorValue getPostprocessorValueOldByName getPostprocessorValueByName
    */
-  PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
+  const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
   /**
    * Retrieve the old value of a Postprocessor
@@ -80,7 +80,7 @@ public:
    *
    * see getPostprocessorValueByName
    */
-  PostprocessorValue & getPostprocessorValueOldByName(const PostprocessorName & name);
+  const PostprocessorValue & getPostprocessorValueOldByName(const PostprocessorName & name);
 
   /**
    * Determine if the postprocessor exists
