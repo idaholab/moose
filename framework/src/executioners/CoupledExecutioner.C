@@ -108,12 +108,14 @@ CoupledExecutioner::addVariableAction(const std::string & task, ActionWarehouse 
       if (action->getShortName() == src_var_name)
       {
         // take the action params and change them to create an aux variable
-        InputParameters params = action->parameters();
+        InputParameters src_params = action->parameters();
+        InputParameters params = _app.getActionFactory().getValidParams("AddAuxVariableAction");
         params.addPrivateParam("_moose_app", &_app);
-        params.set<std::string>("action") = "add_aux_variable";
         std::string dest_name("AuxVariables/" + dest_var_name);
         params.set<Parser *>("parser") = NULL;                    // set parser to NULL, since this action was not create by a parser
         params.set<ActionWarehouse *>("awh") = &dest;             // move the action into destination action warehouse
+        params.set<MooseEnum>("family") = src_params.get<MooseEnum>("family");
+        params.set<MooseEnum>("order") = src_params.get<MooseEnum>("order");
 
         Action * dest_action = _app.getActionFactory().create("AddAuxVariableAction", dest_name, params);
         mooseAssert (dest_action != NULL, std::string("Action AddAuxVariableAction not created"));

@@ -29,7 +29,7 @@ InputParameters validParams<Executioner>()
   InputParameters params = validParams<MooseObject>();
   params.addParam<FileNameNoExtension>("restart_file_base", "File base name used for restart");
 
-  params.addPrivateParam<std::string>("built_by_action", "setup_executioner");
+  params.registerBase("Executioner");
 
   params.addParamNamesToGroup("restart_file_base", "Restart");
 

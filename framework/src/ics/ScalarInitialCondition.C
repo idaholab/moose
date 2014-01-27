@@ -23,7 +23,8 @@ InputParameters validParams<ScalarInitialCondition>()
   InputParameters params = validParams<MooseObject>();
   params.addParam<VariableName>("variable", "The variable this initial condition is supposed to provide values for.");
 
-  params.addPrivateParam<std::string>("built_by_action", "add_ic");
+  params.registerBase("ScalarInitialCondition");
+
   return params;
 }
 

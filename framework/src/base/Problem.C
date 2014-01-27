@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<Problem>()
 {
   InputParameters params;
-  params.addPrivateParam<std::string>("built_by_action", "create_problem");
+  params.registerBase("Problem");
   return params;
 }
 

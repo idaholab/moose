@@ -22,9 +22,6 @@ InputParameters validParams<LayeredIntegral>()
 {
   InputParameters params = validParams<ElementIntegralVariableUserObject>();
   params += validParams<LayeredBase>();
-
-  params.set<std::string>("built_by_action") = "add_user_object";
-
   return params;
 }
 

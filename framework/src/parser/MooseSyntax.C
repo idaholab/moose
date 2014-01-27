@@ -27,10 +27,26 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
    * satisfied based on the syntax encountered for classes which are registered
    * to satisfy more than one task
    */
+  syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
+  syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
+  syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "check_copy_nodal_vars");
+  syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
+
+  syntax.registerActionSyntax("AddKernelAction", "Kernels/*", "add_kernel");
+  syntax.registerActionSyntax("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
+  syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");
+
+  syntax.registerActionSyntax("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
+  syntax.registerActionSyntax("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
+
+  syntax.registerActionSyntax("AddBCAction", "BCs/*", "add_bc");
+  syntax.registerActionSyntax("AddBCAction", "AuxBCs/*", "add_aux_bc");
+
   syntax.registerActionSyntax("CreateProblemAction", "Problem");
   syntax.registerActionSyntax("SetupMeshAction", "Mesh");
-  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "prepare_mesh");
-  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "setup_mesh_complete");
+  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh");
+//  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "prepare_mesh");
+//  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "setup_mesh_complete");
   syntax.registerActionSyntax("InitDisplacedProblemAction", "Mesh");
   syntax.registerActionSyntax("AddMeshModifierAction", "MeshModifiers/*");
   syntax.registerActionSyntax("AddMortarInterfaceAction", "Mesh/MortarInterfaces/*");
@@ -43,32 +59,20 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("SetupResidualDebugAction", "Debug");
 
   /// Variable/AuxVariable Actions
-  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
-  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_ic");
+  syntax.registerActionSyntax("AddVariableAction", "Variables/*");
+//  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
+//  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_ic");
 
-  syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
-  syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   syntax.registerActionSyntax("AddICAction", "Variables/*/InitialCondition");
 
-  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_aux_variable");
-  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_ic");
-  syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "check_copy_nodal_vars");
-  syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
+  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*");
+//  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_aux_variable");
+//  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_ic");
+
   syntax.registerActionSyntax("AddICAction", "AuxVariables/*/InitialCondition");
 
-  syntax.registerActionSyntax("AddKernelAction", "Kernels/*", "add_kernel");
-
-  syntax.registerActionSyntax("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
-
-  syntax.registerActionSyntax("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
-
-  syntax.registerActionSyntax("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
-
-  syntax.registerActionSyntax("AddBCAction", "BCs/*", "add_bc");
-  syntax.registerActionSyntax("EmptyAction", "BCs/Periodic");  // placeholder
+  syntax.registerActionSyntax("EmptyAction", "BCs/Periodic", "no_action");  // placeholder
   syntax.registerActionSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
-
-  syntax.registerActionSyntax("AddBCAction", "AuxBCs/*", "add_aux_bc");
 
   syntax.registerActionSyntax("AddInitialConditionAction", "ICs/*", "add_ic");
 
@@ -103,16 +107,14 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("AddConstraintAction", "Constraints/*");
 
-  syntax.registerActionSyntax("AddUserObjectAction", "UserObjects/*", "add_user_object");
+  syntax.registerActionSyntax("AddUserObjectAction", "UserObjects/*");
 
-  syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds", "add_bounds_vectors");
+  syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds");
 
-  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_aux_variable");
-  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_postprocessor");
-  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_user_object");
-
-  // This works because the AddKernelAction will build AuxKernels if the path doesn't contain Kernels!
-  syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");
+  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals");
+//  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_aux_variable");
+//  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_postprocessor");
+//  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_user_object");
 
   // Coupling
   syntax.registerActionSyntax("AddFEProblemAction", "CoupledProblems/*");
@@ -133,10 +135,10 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("DeprecatedBlockAction", "DeprecatedBlock");
 
   // Multi Apps
-  syntax.registerActionSyntax("AddMultiAppAction", "MultiApps/*", "add_multi_app");
+  syntax.registerActionSyntax("AddMultiAppAction", "MultiApps/*");
 
   // Transfers
-  syntax.registerActionSyntax("AddTransferAction", "Transfers/*", "add_transfer");
+  syntax.registerActionSyntax("AddTransferAction", "Transfers/*");
 
   addActionTypes(syntax);
   registerActions(syntax, action_factory);

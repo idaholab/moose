@@ -30,7 +30,9 @@ class MooseObjectAction : public Action
 public:
   MooseObjectAction(const std::string & name, InputParameters params);
 
-  inline InputParameters & getObjectParams() { return _moose_object_pars; }
+  InputParameters & getObjectParams() { return _moose_object_pars; }
+
+  const std::string & getMooseObjectType() const { return _type; }
 
 protected:
   std::string _type;

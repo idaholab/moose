@@ -21,19 +21,42 @@ Syntax::Syntax()
 }
 
 void
-Syntax::registerName(std::string action, bool is_required)
+Syntax::registerTaskName(std::string task, bool is_required)
 {
-  _actions.addItem(action);
-  _registered_actions[action] = is_required;
+  if (_registered_tasks.find(task) != _registered_tasks.end())
+    mooseError("A " << task << " is already registered.  Do you need to use appendTaskName instead?");
+
+  _tasks.addItem(task);
+  _registered_tasks[task] = is_required;
 }
 
 void
-Syntax::addDependency(std::string action, std::string pre_req)
+Syntax::registerTaskName(std::string task, std::string moose_object_type, bool is_required)
 {
-  if (_registered_actions.find(action) == _registered_actions.end())
-    mooseError("A " << action << " is not a registered action name");
+  if (_registered_tasks.find(task) != _registered_tasks.end())
+    mooseError("A " << task << " is already registered.  Do you need to use appendTaskName instead?");
 
-  _actions.insertDependency(action, pre_req);
+  _tasks.addItem(task);
+  _registered_tasks[task] = is_required;
+  _moose_systems_to_tasks.insert(std::make_pair(moose_object_type, task));
+}
+
+void
+Syntax::appendTaskName(std::string task, std::string moose_object_type)
+{
+  if (_registered_tasks.find(task) == _registered_tasks.end())
+    mooseError("A " << task << " is not a registered task name.");
+
+  _moose_systems_to_tasks.insert(std::make_pair(moose_object_type, task));
+}
+
+void
+Syntax::addDependency(std::string task, std::string pre_req)
+{
+  if (_registered_tasks.find(task) == _registered_tasks.end())
+    mooseError("A " << task << " is not a registered task name.");
+
+  _tasks.insertDependency(task, pre_req);
 }
 
 void
@@ -60,25 +83,25 @@ Syntax::addDependencySets(const std::string & action_sets)
 const std::vector<std::string> &
 Syntax::getSortedTask()
 {
-  return _actions.getSortedValues();
+  return _tasks.getSortedValues();
 }
 
 const std::vector<std::set<std::string> > &
 Syntax::getSortedTaskSet()
 {
-  return _actions.getSortedValuesSets();
+  return _tasks.getSortedValuesSets();
 }
 
 bool
 Syntax::hasTask(const std::string & task)
 {
-  return (_registered_actions.find(task) != _registered_actions.end());
+  return (_registered_tasks.find(task) != _registered_tasks.end());
 }
 
 bool
 Syntax::isActionRequired(const std::string & task)
 {
-  return _registered_actions[task];
+  return _registered_tasks[task];
 }
 
 void
@@ -185,3 +208,15 @@ Syntax::getActions(const std::string & name)
   return _associated_actions.equal_range(name);
 }
 
+bool
+Syntax::verifyMooseObjectTask(const std::string & base, const std::string & task) const
+{
+  std::pair<std::multimap<std::string, std::string>::const_iterator, std::multimap<std::string, std::string>::const_iterator> iters =
+    _moose_systems_to_tasks.equal_range(base);
+
+  for (std::multimap<std::string, std::string>::const_iterator it = iters.first; it != iters.second; ++it)
+    if (task == it->second)
+      return true;
+
+  return false;
+}

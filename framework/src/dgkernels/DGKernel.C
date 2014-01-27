@@ -37,7 +37,8 @@ InputParameters validParams<DGKernel>()
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this boundary condition applies to");
   params.addPrivateParam<BoundaryID>("_boundary_id", DGKernel::InternalBndId);
 
-  params.addPrivateParam<std::string>("built_by_action", "add_dg_kernel");
+  params.registerBase("DGKernel");
+
   return params;
 }
 

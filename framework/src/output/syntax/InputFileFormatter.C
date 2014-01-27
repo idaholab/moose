@@ -94,7 +94,7 @@ InputFileFormatter::printParams(const std::string &prefix, InputParameters &para
       }
 
       // Mark it as "seen"
-      seenIt(prefix, iter->first);
+      // seenIt(prefix, iter->first); // TODO: This line is no longer necessary after Action System refactor.
 
       // Don't print type if it is blank
       if (iter->first == "type")

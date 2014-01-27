@@ -28,9 +28,11 @@
  * Macros
  */
 #define stringifyName(name) #name
-#define registerAction(tplt, action)                  action_factory.reg<tplt>(stringifyName(tplt), action)
-#define registerTask(name, is_required)         syntax.registerName(name, is_required)
-#define addTaskDependency(action, depends_on)   syntax.addDependency(action, depends_on)
+#define registerAction(tplt, action)                               action_factory.reg<tplt>(stringifyName(tplt), action)
+#define registerTask(name, is_required)                            syntax.registerTaskName(name, is_required)
+#define registerMooseObjectTask(name, moose_system, is_required)   syntax.registerTaskName(name, stringifyName(moose_system), is_required)
+#define appendMooseObjectTask(name, moose_system)                  syntax.appendTaskName(name, stringifyName(moose_system))
+#define addTaskDependency(action, depends_on)                      syntax.addDependency(action, depends_on)
 
 // Forward Declaration
 class ActionFactory;
@@ -76,7 +78,7 @@ public:
     build_info._unique_id = _unique_id++;
     _name_to_build_info.insert(std::make_pair(name, build_info));
 
-    _action_to_name_map.insert(std::make_pair(task, name));
+    _task_to_action_map.insert(std::make_pair(task, name));
   }
 
   std::string getTaskName(const std::string & action);
@@ -104,52 +106,19 @@ public:
   iterator end();
   const_iterator end() const;
 
-  std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator> getA(const std::string & task);
+  std::pair<std::multimap<std::string, std::string>::const_iterator, std::multimap<std::string, std::string>::const_iterator> getActionsByTask(const std::string & task) const;
 
-  std::multimap<std::string, BuildInfo> _name_to_build_info;
-
-  std::multimap<std::string, std::string> _action_to_name_map;
-
-  std::vector<std::string> _registered_parser_block_names;
-
-  // TODO: I don't think we need this anymore
-  static unsigned int _unique_id;        ///< Unique ID for identifying multiple registrations
+  std::set<std::string> getTasksByAction(const std::string & action) const;
 
 protected:
   MooseApp & _app;
+
+  std::multimap<std::string, BuildInfo> _name_to_build_info;
+
+  std::multimap<std::string, std::string> _task_to_action_map;
+
+  // TODO: I don't think we need this anymore
+  static unsigned int _unique_id;        ///< Unique ID for identifying multiple registrations
 };
-
-// -----------------------------------------------------------------------------
-// ActionFactory class inline methods
-inline
-ActionFactory::iterator ActionFactory::begin()
-{
-  return _name_to_build_info.begin();
-}
-
-inline
-ActionFactory::const_iterator ActionFactory::begin() const
-{
-  return _name_to_build_info.begin();
-}
-
-inline
-ActionFactory::iterator ActionFactory::end()
-{
-  return _name_to_build_info.end();
-}
-
-inline
-ActionFactory::const_iterator ActionFactory::end() const
-{
-  return _name_to_build_info.end();
-}
-
-inline
-std::pair<std::multimap<std::string, std::string>::iterator, std::multimap<std::string, std::string>::iterator>
-ActionFactory::getA(const std::string & task)
-{
-  return _action_to_name_map.equal_range(task);
-}
 
 #endif /* ACTIONFACTORY_H */

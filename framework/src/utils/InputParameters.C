@@ -183,6 +183,13 @@ InputParameters::isPrivate(const std::string &name) const
 }
 
 void
+InputParameters::registerBase(const std::string &value)
+{
+  InputParameters::set<std::string>("_moose_base") = value;
+  _private_params.insert("_moose_base");
+}
+
+void
 InputParameters::checkParams(const std::string &prefix) const
 {
   std::string l_prefix = this->have_parameter<std::string>("long_name") ? this->get<std::string>("long_name") : prefix;

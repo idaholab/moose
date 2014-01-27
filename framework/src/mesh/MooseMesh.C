@@ -77,7 +77,7 @@ InputParameters validParams<MooseMesh>()
   MooseEnum direction("x, y, z, radial");
   params.addParam<MooseEnum>("centroid_partitioner_direction", direction, "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
 
-  params.addPrivateParam<std::string>("built_by_action", "setup_mesh");
+  params.registerBase("MooseMesh");
 
   // groups
   params.addParamNamesToGroup("dim nemesis", "Advanced");

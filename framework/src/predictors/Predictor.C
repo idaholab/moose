@@ -22,6 +22,8 @@ InputParameters validParams<Predictor>()
   InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<Real>("scale", "The scale factor for the predictor (can range from 0 to 1)");
 
+  params.registerBase("Predictor");
+
   return params;
 }
 

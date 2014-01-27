@@ -32,6 +32,8 @@ InputParameters validParams<Split>()
   params.addParam<std::vector<std::string> >("petsc_options_iname", "PETSc option names for the FieldSplit solver");
   params.addParam<std::vector<std::string> >("petsc_options_value", "PETSc option values for the FieldSplit solver");
 
+  params.registerBase("Split");
+
   return params;
 }
 

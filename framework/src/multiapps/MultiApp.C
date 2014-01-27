@@ -85,7 +85,7 @@ InputParameters validParams<MultiApp>()
 
   params.addParam<std::vector<Point> >("move_positions", "The positions corresponding to each move_app.");
 
-  params.addPrivateParam<std::string>("built_by_action", "add_multi_app");
+  params.registerBase("MultiApp");
 
   return params;
 }

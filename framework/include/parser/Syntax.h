@@ -34,8 +34,11 @@ public:
 public:
   Syntax();
 
-  void registerName(std::string action, bool is_required);
-  void addDependency(std::string action, std::string pre_req);
+  void registerTaskName(std::string task, bool is_required);
+  void registerTaskName(std::string task, std::string moose_object_type, bool is_required);
+  void appendTaskName(std::string task, std::string moose_object_type);
+
+  void addDependency(std::string task, std::string pre_req);
   void addDependencySets(const std::string & action_sets);
 
   const std::vector<std::string> & getSortedTask();
@@ -68,16 +71,22 @@ public:
   std::pair<std::multimap<std::string, ActionInfo>::iterator, std::multimap<std::string, ActionInfo>::iterator>
   getActions(const std::string & name);
 
-  std::multimap<std::string, ActionInfo> & getAssociatedActions() { return _associated_actions; }
+  const std::multimap<std::string, ActionInfo> & getAssociatedActions() const { return _associated_actions; }
+
+  bool verifyMooseObjectTask(const std::string & base, const std::string & task) const;
 
 protected:
-  /// The list of registered actions and a flag indicating whether or not they are required
-  std::map<std::string, bool> _registered_actions;
+  /// The list of registered tasks and a flag indicating whether or not they are required
+  std::map<std::string, bool> _registered_tasks;
+
+  /// The list of Moose system objects to tasks.  This map indicates which tasks are allowed to build certain MooseObjects.
+  std::multimap<std::string, std::string> _moose_systems_to_tasks;
+
   /// The dependency resolver
-  DependencyResolver<std::string> _actions;
+  DependencyResolver<std::string> _tasks;
+
   /// Actions/Syntax association
   std::multimap<std::string, ActionInfo> _associated_actions;
-
 };
 
 

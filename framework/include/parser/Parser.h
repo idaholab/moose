@@ -33,6 +33,8 @@ class MooseApp;
 class Factory;
 class ActionFactory;
 
+#define DEBUG_PARSER 0
+
 /**
  * Class for parsing input files.
  */

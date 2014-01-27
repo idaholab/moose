@@ -21,9 +21,10 @@ template<>
 InputParameters validParams<TimeStepper>()
 {
   InputParameters params = validParams<MooseObject>();
-
-  params.addPrivateParam<std::string>("built_by_action", "setup_time_stepper");
   params.addParam<bool>("reset_dt", false, "Use when restarting a calculation to force a change in dt.");
+
+  params.registerBase("TimeStepper");
+
   return params;
 }
 

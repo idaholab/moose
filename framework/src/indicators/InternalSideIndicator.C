@@ -37,8 +37,6 @@ InputParameters validParams<InternalSideIndicator>()
   params.addParam<bool>("scale_by_flux_faces", false, "Whether or not to scale the error values by the number of flux faces.  This attempts to not penalize elements on boundaries for having less neighbors.");
 
   params.addPrivateParam<BoundaryID>("_boundary_id", InternalSideIndicator::InternalBndId);
-
-  params.addPrivateParam<std::string>("built_by_action", "add_indicator");
   return params;
 }
 

@@ -165,31 +165,31 @@ Parser::parse(const std::string &input_filename)
       if (iters.first == iters.second)
         mooseError(std::string("A '") + curr_identifier + "' does not have an associated \"Action\".\nDid you leave off a leading \"./\" in one of your nested blocks?\n");
 
-      for (std::multimap<std::string, Syntax::ActionInfo>::iterator i = iters.first; i != iters.second; ++i)
+      for (std::multimap<std::string, Syntax::ActionInfo>::iterator it = iters.first; it != iters.second; ++it)
       {
         if (!is_parent)
         {
-          params = _action_factory.getValidParams(i->second._action);
-
+          params = _action_factory.getValidParams(it->second._action);
 
           params.set<ActionWarehouse *>("awh") = &_action_wh;
 
           extractParams(curr_identifier, params);
 
           // Add the parsed syntax to the parameters object for consumption by the Action
-          params.set<std::string>("action") = i->second._task;
+          params.set<std::string>("task") = it->second._task;
+          params.set<std::string>("registered_identifier") = registered_identifier;
 
           // Create the Action
-          Action * action = _action_factory.create(i->second._action, curr_identifier, params);
-          mooseAssert (action != NULL, std::string("Action") + i->second._action + " not created");
+          Action * action_obj = _action_factory.create(it->second._action, curr_identifier, params);
+          mooseAssert (action_obj != NULL, std::string("Action") + it->second._action + " not created");
 
           // extract the MooseObject params if necessary
-          MooseObjectAction * object_action = dynamic_cast<MooseObjectAction *>(action);
+          MooseObjectAction * object_action = dynamic_cast<MooseObjectAction *>(action_obj);
           if (object_action)
             extractParams(curr_identifier, object_action->getObjectParams());
 
           // add it to the warehouse
-          _action_wh.addActionBlock(action);
+          _action_wh.addActionBlock(action_obj);
         }
       }
     }
@@ -348,7 +348,7 @@ Parser::buildFullTree(const std::string &search_string)
 
     // We need to see if this action is inherited from MooseObjectAction
     // If it is, then we will loop over all the Objects in MOOSE's Factory object to print them out
-    // if they have matching "built_by_action" tags.
+    // if they have associated bases matching the current task.
     if (action_obj_params.have_parameter<bool>("isObjectAction") && action_obj_params.get<bool>("isObjectAction"))
     {
       for (registeredMooseObjectIterator moose_obj = _factory.registeredObjectsBegin();
@@ -357,13 +357,9 @@ Parser::buildFullTree(const std::string &search_string)
       {
         InputParameters moose_obj_params = (moose_obj->second)();
 
-        if (moose_obj_params.have_parameter<std::string>("built_by_action") &&
-            (moose_obj_params.get<std::string>("built_by_action") == task ||
-             // Print out aux_bcs which are "built_by_action" add_aux_kernel
-             (task == "add_aux_bc" &&
-              moose_obj_params.get<std::string>("built_by_action") == "add_aux_kernel")))
+        if (moose_obj_params.have_parameter<std::string>("_moose_base") &&
+            _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"), task))
         {
-
           std::string name;
           size_t pos = 0;
           if (act_name[act_name.size()-1] == '*')

@@ -29,6 +29,7 @@ Action *
 ActionFactory::create(const std::string & action, const std::string & name, InputParameters params)
 {
   params.addPrivateParam("_moose_app", &_app);
+  params.addPrivateParam("action_type", action);
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
   BuildInfo *build_info = NULL;
 
@@ -49,17 +50,22 @@ ActionFactory::create(const std::string & action, const std::string & name, Inpu
     }
   }
   // For backwards compatibility - If there is only one Action registered but it doesn't contain a unique_id that
-  // matches - then it surely it must still be the correct one
+  // matches, then surely it must still be the correct one
   if (count == 1 && !build_info)
     build_info = &(iters.first->second);
 
   if (!build_info)
     mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + name);
 
-  if (params.get<std::string>("action") == "")
-    params.set<std::string>("action") = build_info->_task;
+  Action * action_obj = (*build_info->_build_pointer)(name, params);
 
-  return (*build_info->_build_pointer)(name, params);
+//  if (params.get<std::string>("task") == "")
+//    params.set<std::string>("task") = build_info->_task;
+
+  if (params.get<std::string>("task") == "")
+    action_obj->appendTask(build_info->_task);
+
+  return action_obj;
 }
 
 InputParameters
@@ -93,4 +99,43 @@ ActionFactory::getTaskName(const std::string & action)
     return iter->second._task;
   else
     return "";
+}
+
+ActionFactory::iterator ActionFactory::begin()
+{
+  return _name_to_build_info.begin();
+}
+
+ActionFactory::const_iterator ActionFactory::begin() const
+{
+  return _name_to_build_info.begin();
+}
+
+ActionFactory::iterator ActionFactory::end()
+{
+  return _name_to_build_info.end();
+}
+
+ActionFactory::const_iterator ActionFactory::end() const
+{
+  return _name_to_build_info.end();
+}
+
+std::pair<std::multimap<std::string, std::string>::const_iterator, std::multimap<std::string, std::string>::const_iterator>
+ActionFactory::getActionsByTask(const std::string & task) const
+{
+  return _task_to_action_map.equal_range(task);
+}
+
+std::set<std::string>
+ActionFactory::getTasksByAction(const std::string & action) const
+{
+  std::set<std::string> tasks;
+
+  std::pair<std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator, std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator>
+    iters = _name_to_build_info.equal_range(action);
+  for (std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator it = iters.first; it != iters.second; ++it)
+    tasks.insert(it->second._task);
+
+  return tasks;
 }

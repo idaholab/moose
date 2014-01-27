@@ -578,25 +578,67 @@ addActionTypes(Syntax & syntax)
   /**************************/
   /**** Register Actions ****/
   /**************************/
-  /// Minimal Problem
+  registerMooseObjectTask("create_problem",               Problem,                 true);
+  registerMooseObjectTask("setup_executioner",            Executioner,             true);
+
+  registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
+  registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
+
+  registerMooseObjectTask("add_kernel",                   Kernel,                 false);
+  registerMooseObjectTask("add_material",                 Material,               false);
+  registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
+  registerMooseObjectTask("add_function",                 Function,               false);
+
+  registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
+  registerMooseObjectTask("add_aux_bc",                   AuxKernel,              false);
+  registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
+  registerMooseObjectTask("add_coupled_variable",         AuxKernel,              false);
+
+  registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
+  registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
+  registerMooseObjectTask("add_dirac_kernel",             DiracKernel,            false);
+  registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
+  registerMooseObjectTask("add_constraint",               Constraint,             false);
+
+  registerMooseObjectTask("add_ic",                       InitialCondition,       false);
+  appendMooseObjectTask  ("add_ic",                       ScalarInitialCondition);
+
+  registerMooseObjectTask("add_damper",                   Damper,                 false);
+  registerMooseObjectTask("setup_predictor",              Predictor,              false);
+  registerMooseObjectTask("setup_time_stepper",           TimeStepper,            false);
+
+  registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);
+  registerMooseObjectTask("add_split",                    Split,                  false);
+
+  registerMooseObjectTask("add_user_object",              UserObject,             false);
+  appendMooseObjectTask  ("add_user_object",              Postprocessor);
+  registerMooseObjectTask("add_postprocessor",            Postprocessor,          false);
+
+  registerMooseObjectTask("add_indicator",                Indicator,              false);
+  registerMooseObjectTask("add_marker",                   Marker,                 false);
+
+  registerMooseObjectTask("add_multi_app",                MultiApp,               false);
+  registerMooseObjectTask("add_transfer",                 Transfer,               false);
+
+  registerTask("add_feproblem", false);
+  registerTask("add_bounds_vectors", false);
+  registerTask("add_periodic_bc", false);
+  registerTask("add_aux_variable", false);
+  registerTask("add_variable", false);
   registerTask("recover_base", false);
-  registerTask("setup_mesh", false);
+
   registerTask("prepare_mesh", false);
   registerTask("setup_mesh_complete", false);  // calls prepare
-  registerTask("setup_postprocessor_data", false);
-  registerTask("add_variable", false);
-  registerTask("add_kernel", false);
-  registerTask("setup_executioner", true);
-  registerTask("setup_time_stepper", false);
+
   registerTask("init_displaced_problem", false);
-  registerTask("create_problem", true);
   registerTask("setup_output", false);
   registerTask("setup_output_name", true);
   registerTask("init_problem", true);
   registerTask("check_copy_nodal_vars", true);
   registerTask("copy_nodal_vars", true);
   registerTask("copy_nodal_aux_vars", true);
-  registerTask("add_bc", false);  // Does this need to be true?  Not if you have periodic boundaries...
+  registerTask("setup_postprocessor_data", false);
+
   registerTask("setup_dampers", true);
   registerTask("check_integrity", true);
   registerTask("setup_quadrature", true);
@@ -604,22 +646,7 @@ addActionTypes(Syntax & syntax)
   /// Additional Actions
   registerTask("no_action", false);  // Used for Empty Action placeholders
   registerTask("set_global_params", false);
-  registerTask("add_mesh_modifier", false);
   registerTask("setup_time_periods", true);
-  registerTask("add_material", false);
-  registerTask("add_function", false);
-  registerTask("add_aux_variable", false);
-  registerTask("add_aux_kernel", false);
-  registerTask("add_aux_bc", false);
-  registerTask("add_dirac_kernel", false);
-  registerTask("add_scalar_kernel", false);
-  registerTask("add_aux_scalar_kernel", false);
-  registerTask("add_dg_kernel", false);
-  registerTask("add_ic", false);
-  registerTask("add_postprocessor", false);
-  registerTask("add_damper", false);
-  registerTask("add_periodic_bc", false);
-  registerTask("add_preconditioning", false);
   registerTask("setup_adaptivity", false);
   registerTask("meta_action", false);
   registerTask("initial_mesh_refinement", false);
@@ -627,18 +654,7 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_residual_debug", false);
   registerTask("setup_oversampling", false);
   registerTask("deprecated_block", false);
-  registerTask("add_constraint", false);
-  registerTask("add_user_object", false);
-  registerTask("add_bounds_vectors", false);
-  registerTask("add_elemental_field_variable", false);
-  registerTask("add_indicator", false);
-  registerTask("add_marker", false);
   registerTask("set_adaptivity_options", false);
-  registerTask("add_feproblem", false);
-  registerTask("add_coupled_variable", false);
-  registerTask("add_multi_app", false);
-  registerTask("add_transfer", false);
-  registerTask("setup_predictor", false);
   registerTask("add_mortar_interface", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
@@ -687,7 +703,7 @@ addActionTypes(Syntax & syntax)
 "(setup_adaptivity)"
 "(set_adaptivity_options)"
 "(add_ic)"
-"(add_preconditioning, add_constraint)"
+"(add_preconditioning, add_constraint, add_split)"
 "(ready_to_init)"
 "(setup_dampers)"
 "(setup_residual_debug)"
@@ -762,13 +778,19 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");
-  registerAction(AddVariableAction, "add_ic");
-  registerAction(CopyNodalVarsAction, "copy_nodal_vars");
+  registerAction(AddVariableAction, "add_ic");     // initial condition shortcut syntax
+
   registerAction(AddAuxVariableAction, "add_aux_variable");
+  registerAction(AddAuxVariableAction, "add_ic");  // initial condition shortcut syntax
+
+  registerAction(CopyNodalVarsAction, "check_copy_nodal_vars");
+  registerAction(CopyNodalVarsAction, "copy_nodal_vars");
   registerAction(CopyNodalVarsAction, "copy_nodal_aux_vars");
 
+  // Initial Condition Actions
   registerAction(AddICAction, "add_ic");
   registerAction(AddInitialConditionAction, "add_ic");
+
   registerAction(AddKernelAction, "add_kernel");
   registerAction(AddKernelAction, "add_aux_kernel");
   registerAction(AddScalarKernelAction, "add_scalar_kernel");
@@ -781,7 +803,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddMaterialAction, "add_material");
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddDamperAction, "add_damper");
-  registerAction(AddSplitAction, "add_preconditioning"); // FIXME: a hack -- need to introduce a real add_split action
+  registerAction(AddSplitAction, "add_split");
   registerAction(SetupPreconditionerAction, "add_preconditioning");
   registerAction(SetupQuadratureAction, "setup_quadrature");
   registerAction(SetupOverSamplingAction, "setup_oversampling");
@@ -793,6 +815,10 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddMarkerAction, "add_marker");
   registerAction(SetAdaptivityOptionsAction, "set_adaptivity_options");
 
+  registerAction(AddNodalNormalsAction, "add_aux_variable");
+  registerAction(AddNodalNormalsAction, "add_postprocessor");
+  registerAction(AddNodalNormalsAction, "add_user_object");
+
 #ifdef LIBMESH_ENABLE_AMR
   registerAction(AdaptivityAction, "setup_adaptivity");
 #endif
@@ -802,7 +828,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupResidualDebugAction, "setup_residual_debug");
 
   registerAction(AddBoundsVectorsAction, "add_bounds_vectors");
-  registerAction(AddNodalNormalsAction, "junk");
 
   // NonParsedActions
   registerAction(SetupDampersAction, "setup_dampers");

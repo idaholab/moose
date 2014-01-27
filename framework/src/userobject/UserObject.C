@@ -27,7 +27,9 @@ InputParameters validParams<UserObject>()
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-  params.addPrivateParam<std::string>("built_by_action", "add_user_object");
+
+  params.registerBase("UserObject");
+
   return params;
 }
 

@@ -28,7 +28,8 @@ InputParameters validParams<InitialCondition>()
 
   params.addRequiredParam<VariableName>("variable", "The variable this initial condition is supposed to provide values for.");
 
-  params.addPrivateParam<std::string>("built_by_action", "add_ic");
+  params.registerBase("InitialCondition");
+
   return params;
 }
 

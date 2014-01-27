@@ -43,11 +43,15 @@ public:
 
   virtual void act() = 0;
 
-  const std::string & name() { return _name; }
+  const std::string & name() const { return _name; }
+
+  const std::string & type() const { return _action_type; }
 
   InputParameters & parameters() { return _pars; }
 
-  const std::string & getTask() { return _current_action; }
+  const std::string & specificTaskName() const { return _specific_task_name; }
+
+  const std::set<std::string> & getAllTasks() const { return _all_tasks; }
 
   template <typename T>
   const T & getParam(const std::string & name) { return _pars.get<T>(name); }
@@ -65,11 +69,20 @@ public:
    */
   std::string getShortName() const;
 
+  void appendTask(const std::string & task) { _all_tasks.insert(task); }
+
 protected:
   /// The name of the action
   std::string _name;
+
   /// Input parameters for the action
   InputParameters _pars;
+
+  // The registered syntax for this block if any
+  std::string _registered_identifier;
+
+  // The type name of this Action instance
+  std::string _action_type;
 
   /// The MOOSE application this is associated with
   MooseApp & _app;
@@ -80,11 +93,27 @@ protected:
   /// Builds Actions
   ActionFactory & _action_factory;
 
-  /// The current action (even though we have seperate instances for each action)
-  std::string _current_action;
+  /**
+   * This member will only be populated if this Action instance is only designed to
+   * handle one task.  This happens when an Action is registered with several pieces
+   * of syntax in which case separate instances are built to handle the different
+   * incoming parameter values.
+   */
+  std::string _specific_task_name;
+
+  /**
+   * A list of all the tasks that this Action will satisfy.
+   * Note: That this is _not_ populated at construction time.  However, all tasks will be
+   *       added prior to act().
+   */
+  std::set<std::string> _all_tasks;
 
   /// Reference to ActionWarehouse where we store object build by actions
   ActionWarehouse & _awh;
+
+  /// The current action (even though we have seperate instances for each action)
+  const std::string & _current_action;
+
   MooseMesh * & _mesh;
   MooseMesh * & _displaced_mesh;
   /// Convenience reference to a problem this action works on

@@ -19,7 +19,8 @@ InputParameters validParams<MeshModifier>()
 {
   InputParameters params = validParams<MooseObject>();
 
-  params.addPrivateParam<std::string>("built_by_action", "add_mesh_modifier");
+  params.registerBase("MeshModifier");
+
   return params;
 }
 

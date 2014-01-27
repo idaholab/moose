@@ -20,9 +20,12 @@ InputParameters validParams<MoosePreconditioner>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<FEProblem *>("_fe_problem");
-  params.addPrivateParam<std::string>("built_by_action", "add_preconditioning");
+
   MooseEnum pc_side("left, right, symmetric", "right");
   params.addParam<MooseEnum>("pc_side", pc_side, "Preconditioning side");
+
+  params.registerBase("MoosePreconditioner");
+
   return params;
 }
 

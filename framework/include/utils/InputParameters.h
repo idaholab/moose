@@ -286,6 +286,12 @@ public:
   bool isPrivate(const std::string &name) const;
 
   /**
+   * This method must be called from every base "Moose System" to create linkage with the Action System.
+   * See "Moose.C" for the registerMooseObjectTask() calls.
+   */
+  void registerBase(const std::string &value);
+
+  /**
    * Copy and Copy/Add operators for the InputParameters object
    */
   using Parameters::operator=;

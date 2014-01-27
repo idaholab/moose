@@ -62,3 +62,7 @@
   exodus = true
   perf_log = true
 []
+
+[Debug]
+  show_actions = true
+[]
