@@ -159,12 +159,8 @@ class RunApp(Tester):
     reason = ''
     specs = self.specs
 
-    # Valgrind runs
-    if options.enable_valgrind:
-      if retcode == 0 and not specs[NO_VALGRIND] and 'ERROR SUMMARY: 0 errors' not in output:
-        reason = 'MEMORY ERROR'
     # PBS runs
-    elif options.pbs != None:
+    if options.pbs != None:
       if retcode == 0 and 'command not found' in output:
         reason = 'QSUB NOT FOUND'
     # Everything else
@@ -179,7 +175,7 @@ class RunApp(Tester):
         # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
         # since a message to standard error might actually be a real error.  This case should be handled
         # in the derived class.
-        if not specs.isValid(EXPECT_ERR) and len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
+        if not options.enable_valgrind and not specs.isValid(EXPECT_ERR) and len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
           reason = 'ERRMSG'
         elif retcode == RunParallel.TIMEOUT:
           reason = 'TIMEOUT'
@@ -187,6 +183,9 @@ class RunApp(Tester):
           reason = 'NO CRASH'
         elif retcode != 0 and specs[SHOULD_CRASH] == False:
           reason = 'CRASH'
+        # Valgrind runs
+        elif retcode == 0 and options.enable_valgrind and not specs[NO_VALGRIND] and 'ERROR SUMMARY: 0 errors' not in output:
+          reason = 'MEMORY ERROR'
 
     return (reason, output)
 

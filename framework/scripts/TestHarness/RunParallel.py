@@ -116,6 +116,10 @@ class RunParallel:
       output = 'Working Directory: ' + tester.specs[TEST_DIR] + '\nRunning command: ' + command + '\n'
       output += self.readOutput(f)
       f.close()
+
+      if tester in self.reported_jobs:
+        tester.specs.addParam('CAVEATS', ['FINISHED'], "")
+
       if not self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock()):
         did_pass = False
 
@@ -160,7 +164,7 @@ class RunParallel:
             threshold = max(start_min_threshold, (0.1 * float(tester.specs[MAX_TIME])))
 
             if now >= threshold:
-              self.harness.handleTestResult(tester.specs, '', 'RUNNING', start_time, now, False)
+              self.harness.handleTestResult(tester.specs, '', 'RUNNING...', start_time, now, False)
 
               self.reported_jobs.add(tester)
               self.reported_timer = now
