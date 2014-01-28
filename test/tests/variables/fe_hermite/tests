@@ -11,7 +11,7 @@
     input = 'hermite-3-3d.i'
     exodiff = 'hermite-3-3d_out.e'
     abs_zero = 1e-07
-    no_valgrind = true
+    valgrind = 'HEAVY'
   [../]
 
   [./test_hermite_3_1d]

@@ -95,15 +95,17 @@ class TestHarness:
                 test[INPUT] = test[INPUT].strip()
 
                 # Double the alloted time for tests when running with the valgrind option
-                if self.options.enable_valgrind:
+                if self.options.valgrind_mode == 'NORMAL':
                   test[MAX_TIME] = test[MAX_TIME] * 2
+                elif self.options.valgrind_mode == 'HEAVY':
+                  test[MAX_TIME] = test[MAX_TIME] * 4
 
                 # Build the requested Tester object and run
                 tester = self.factory.create(test[TYPE], test)
 
                 # When running in valgrind mode, we end up with a ton of output for each failed
                 # test.  Therefore, we limit the number of fails...
-                if self.options.enable_valgrind and self.num_failed > self.options.valgrind_max_fails:
+                if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
                   (should_run, reason) = (False, 'Max Fails Exceeded')
                 else:
                   (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
@@ -610,7 +612,8 @@ class TestHarness:
     parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
     parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
     parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
-    parser.add_argument('--valgrind', action='store_true', dest='enable_valgrind', help='Enable Valgrind')
+    parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
+    parser.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
     parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
     parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')
     parser.add_argument('--pbs-cleanup', nargs=1, metavar='batch_file', help='Clean up the directories/files created by PBS. You must supply the same batch_file used to launch PBS.')
@@ -665,7 +668,7 @@ class TestHarness:
       # Thus we need to turn off timing.
       opts.timing = False
       opts.scaling = True
-    if opts.enable_valgrind and (opts.parallel > 1 or opts.nthreads > 1):
+    if opts.valgrind_mode and (opts.parallel > 1 or opts.nthreads > 1):
       print 'ERROR: --parallel and/or --threads can not be used with --valgrind'
       sys.exit(1)
 
@@ -675,6 +678,9 @@ class TestHarness:
         self.options.method = os.environ['METHOD']
       else:
         self.options.method = 'opt'
+
+    if not self.options.valgrind_mode:
+      self.options.valgrind_mode = ''
 
     # Update libmesh_dir to reflect arguments
     if opts.libmesh_dir:

@@ -5,7 +5,7 @@
     exodiff = 'dt2_out_adapt.e-s038'
     group = 'adaptive'
     method = 'OPT OPROF'
-    no_valgrind = true
+    valgrind = 'HEAVY'
     deleted = true
   [../]
 []

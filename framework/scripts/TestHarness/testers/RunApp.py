@@ -27,7 +27,7 @@ class RunApp(Tester):
     params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
 
     # Valgrind
-    params.addParam('no_valgrind', False, "Set to True to skip test when running with --valgrind")
+    params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
     return params
   getValidParams = staticmethod(getValidParams)
@@ -78,7 +78,7 @@ class RunApp(Tester):
       self.specs['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
     if options.parallel or ncpus > 1 or nthreads > 1:
       command = 'mpiexec -host localhost -n ' + str(ncpus) + ' ' + specs[EXECUTABLE] + ' --n-threads=' + str(nthreads) + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' +  ' '.join(specs[CLI_ARGS])
-    elif options.enable_valgrind and not specs[NO_VALGRIND]:
+    elif options.valgrind_mode == specs[VALGRIND] or options.valgrind_mode == 'HEAVY' and specs[VALGRIND] == 'NORMAL':
       command = 'valgrind --suppressions=' + specs[MOOSE_DIR] + 'scripts/TestHarness/suppressions/errors.supp --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs[EXECUTABLE] + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
     else:
       command = specs[EXECUTABLE] + timing_string + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
@@ -175,7 +175,7 @@ class RunApp(Tester):
         # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
         # since a message to standard error might actually be a real error.  This case should be handled
         # in the derived class.
-        if not options.enable_valgrind and not specs.isValid(EXPECT_ERR) and len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
+        if options.valgrind_mode == '' and not specs.isValid(EXPECT_ERR) and len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
           reason = 'ERRMSG'
         elif retcode == RunParallel.TIMEOUT:
           reason = 'TIMEOUT'
@@ -184,7 +184,7 @@ class RunApp(Tester):
         elif retcode != 0 and specs[SHOULD_CRASH] == False:
           reason = 'CRASH'
         # Valgrind runs
-        elif retcode == 0 and options.enable_valgrind and not specs[NO_VALGRIND] and 'ERROR SUMMARY: 0 errors' not in output:
+        elif retcode == 0 and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
           reason = 'MEMORY ERROR'
 
     return (reason, output)

@@ -81,7 +81,7 @@ USE_OLD_FLOOR = 'use_old_floor'  # Boolean: Use Exodiff old floor option
 DELETE_OUTPUT_BEFORE_RUNNING = 'delete_output_before_running' # Boolean: Default true, if false does not delete "old" output files before running
 
 # Valgrind Options
-NO_VALGRIND   = 'no_valgrind'    # Set to True to skip test when testing with --valgrind
+VALGRIND      = 'valgrind'       # Set to True to skip test when testing with --valgrind
 
 # Default test options: these are use if an option is not specified
 DEFAULTS = { EXODIFF : [],
@@ -122,7 +122,7 @@ DEFAULTS = { EXODIFF : [],
              DELETE_OUTPUT_BEFORE_RUNNING : True, # Exodiff option
              GOLD_DIR : 'gold',
              PREREQ : [],
-             NO_VALGRIND : False
+             VALGRIND : 'NORMAL'
              # TEST_DIR is automatically populated to the location of the py file
              # TEST_NAME is automatically populated to module_name.dict_name
 }

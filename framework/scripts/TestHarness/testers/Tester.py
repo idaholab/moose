@@ -108,13 +108,16 @@ class Tester(object):
     # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
     elif options.store_time and self.specs[SCALE_REFINE] == 0:
       return (False, reason)
-    # If we're testing with valgrind, then skip tests that require parallel or threads
-    elif options.enable_valgrind and (self.specs[MIN_PARALLEL] > 1 or self.specs[MIN_THREADS] > 1):
-      reason = 'skipped (Valgrind requires serial)'
-      return (False, reason)
-    elif options.enable_valgrind and self.specs[NO_VALGRIND]:
-      reason = 'skipped (NO VALGRIND)'
-      return (False, reason)
+    # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
+    elif options.valgrind_mode != '':
+      if self.specs[VALGRIND] == 'NONE':
+        reason = 'skipped (Valgrind==NONE)'
+      elif self.specs[VALGRIND] == 'HEAVY' and options.valgrind_mode == 'NORMAL':
+        reason = 'skipped (Valgrind==HEAVY)'
+      elif self.specs[MIN_PARALLEL] > 1 or self.specs[MIN_THREADS] > 1:
+        reason = 'skipped (Valgrind requires serial)'
+      if reason != '':
+        return (False, reason)
     # If we're running in recover mode skip tests that have recover = false
     elif options.enable_recover and self.specs[RECOVER] == False:
       reason = 'skipped (NO RECOVER)'

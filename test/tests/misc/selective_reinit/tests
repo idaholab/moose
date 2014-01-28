@@ -7,7 +7,7 @@
     max_time = 20
     compiler = 'GCC CLANG'
     method = 'OPT OPROF'
-    no_valgrind = true
+    valgrind = 'HEAVY'
     min_reported_time = 20
   [../]
 []
