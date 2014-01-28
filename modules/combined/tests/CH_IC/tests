@@ -14,6 +14,7 @@
     exodiff = 'cross.e-s002'
     group = 'adaptive'
     scale_refine = 1
+    valgrind = 'HEAVY'
   [../]
 
   [./circleIC_test]
@@ -22,6 +23,7 @@
     exodiff = 'circle_oversample.e'
     group = 'adaptive'
     scale_refine = 1
+    valgrind = 'HEAVY'
   [../]
 
   [./rndboxIC_test]
@@ -30,6 +32,7 @@
     exodiff = 'rndbox.e'
     group = 'adaptive'
     scale_refine = 1
+    valgrind = 'HEAVY'
   [../]
 
   [./circleIC_3D_test]
@@ -37,6 +40,7 @@
     input = 'SmoothCircleIC_3D_test.i'
     exodiff = 'circle_3D.e'
     scale_refine = 1
+    valgrind = 'HEAVY'
   [../]
 
   [./rndcircleIC_test]
@@ -45,5 +49,6 @@
     exodiff = 'rnd_circle.e-s002'
     group = 'adaptive'
     scale_refine = 1
+    valgrind = 'HEAVY'
   [../]
 []

@@ -4,6 +4,7 @@
     input = 'PLC_LSH_combined.i'
     exodiff = 'PLC_LSH_combined_out.e'
     abs_zero = 1e-09
+    valgrind = 'HEAVY'
   [../]
   [./combined2]
     type = 'Exodiff'
@@ -11,6 +12,7 @@
     exodiff = 'PLC_LSH_combined_out.e'
     abs_zero = 1e-09
     prereq = combined
+    valgrind = 'HEAVY'
   [../]
 
   [./lsh]
