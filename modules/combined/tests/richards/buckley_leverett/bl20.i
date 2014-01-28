@@ -1,9 +1,8 @@
 # two-phase version
-# sharp front version
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 150
+  nx = 30
   xmin = 0
   xmax = 15
 []
@@ -31,12 +30,12 @@
   [./SeffWater]
     type = RichardsSeff2waterVG
     m = 0.8
-    al = 3E-5
+    al = 1E-5
   [../]
   [./SeffGas]
     type = RichardsSeff2gasVG
     m = 0.8
-    al = 3E-5
+    al = 1E-5
   [../]
   [./RelPermWater]
     type = RichardsRelPermPower
@@ -128,7 +127,7 @@
     variable = bounds_dummy
     bounded_variable = pwater
     upper = 1E7
-    lower = -110000
+    lower = -310000
   [../]
 []
 
@@ -163,7 +162,7 @@
     type = DirichletBC
     variable = pwater
     boundary = right
-    value = -100000
+    value = -300000
   [../]
   [./right_g]
     type = DirichletBC
@@ -177,8 +176,8 @@
 [Functions]
   [./initial_water]
     type = ParsedFunction
-    value = 1000000*(1-min(x/5,1))-100000*(max(x-5,0)/max(abs(x-5),1E-10))
-    #value = max(1000000*(1-x/5),-100000)
+    value = 1000000*(1-min(x/5,1))-300000*(max(x-5,0)/max(abs(x-5),1E-10))
+    #value = max(1000000*(1-x/5),-300000)
   [../]
   [./initial_gas]
     type = ParsedFunction
@@ -234,13 +233,13 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1E-3 1E-2 3E-2 4E-2 0.5 0.5 1'
-    time_t =  '0    1E-2 1E-1 1    5   40  41'
+    time_dt = '0.1 0.5 0.5 1 2  4'
+    time_t =  '0   0.1 1   5 40 42'
   [../]
 []
 
 [Output]
-  file_base = bl21
+  file_base = bl20
   output_initial = true
   interval = 10000
   exodus = true

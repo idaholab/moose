@@ -1,5 +1,5 @@
 # two-phase version
-# sharp front version
+# super-sharp front version
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -31,12 +31,12 @@
   [./SeffWater]
     type = RichardsSeff2waterVG
     m = 0.8
-    al = 3E-5
+    al = 1E-4
   [../]
   [./SeffGas]
     type = RichardsSeff2gasVG
     m = 0.8
-    al = 3E-5
+    al = 1E-4
   [../]
   [./RelPermWater]
     type = RichardsRelPermPower
@@ -234,13 +234,13 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1E-3 1E-2 3E-2 4E-2 0.5 0.5 1'
-    time_t =  '0    1E-2 1E-1 1    5   40  41'
+    time_dt = '1E-4 1E-3 1E-2 2E-2 5E-2 6E-2 0.1 0.2'
+    time_t =  '0    1E-2 1E-1 1    5    20   40  41'
   [../]
 []
 
 [Output]
-  file_base = bl21
+  file_base = bl22
   output_initial = true
   interval = 10000
   exodus = true
