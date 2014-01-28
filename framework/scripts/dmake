@@ -161,14 +161,6 @@ if __name__ == "__main__":
   # Extract the options from the command line
   (options, make_args) = parseArguments()
 
-  # Get the make directory
-  make_dir = getMakeDirectory()
-
-  # Run 'make cleanall' if the benchmark options is given
-  if options.benchmark:
-    sub = subprocess.Popen(['make', 'cleanall'], cwd=make_dir)
-    sub.wait()
-
   # Create the MachineWarehouse object, limit to the known networks
   opt = subOptions(options, 'allow', 'allow_off_network')
   warehouse = MachineWarehouse(restrict=['141','134'], **opt)
@@ -211,6 +203,14 @@ if __name__ == "__main__":
   # --summary does not run any commands, so exit
   if options.summary:
     sys.exit()
+
+  # Get the make directory
+  make_dir = getMakeDirectory()
+
+  # Run 'make cleanall' if the benchmark options is given
+  if options.benchmark:
+    sub = subprocess.Popen(['make', 'cleanall'], cwd=make_dir)
+    sub.wait()
 
   # Run Make
   opt = subOptions(options,'timeout','quiet','dbg','opt','oprof')

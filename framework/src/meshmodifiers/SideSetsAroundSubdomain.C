@@ -46,8 +46,8 @@ SideSetsAroundSubdomain::modify()
   MeshBase & mesh = _mesh_ptr->getMesh();
 
   // Extract the first block id, produce a warning if more exist
-  SubdomainID block_id = *_blk_ids.begin();
-  if (_blk_ids.size() > 1)
+  SubdomainID block_id = *blockIDs().begin();
+  if (blockIDs().size() > 1)
   {
     std::vector<SubdomainName> blks = blocks();
     mooseWarning("SideSetsAroundSubdomain only acts on a single subdomain, but multiple were provided: only the " << blks[0] << "' subdomain is being used.");

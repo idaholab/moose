@@ -35,13 +35,14 @@ InputParameters validParams<BoundaryRestrictable>()
 }
 
 BoundaryRestrictable::BoundaryRestrictable(const std::string name, InputParameters & parameters) :
-    _boundary_names(parameters.get<std::vector<BoundaryName> >("boundary")),
     _bnd_feproblem(parameters.isParamValid("_fe_problem") ?
                    parameters.get<FEProblem *>("_fe_problem") : NULL),
     _bnd_mesh(parameters.isParamValid("_mesh") ?
               parameters.get<MooseMesh *>("_mesh") : NULL),
-    _boundary_id(_bnd_feproblem->getActiveBoundaryID()),
-    _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable"))
+    _boundary_names(parameters.get<std::vector<BoundaryName> >("boundary")),
+    _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
+    _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
+    _current_boundary_id(_bnd_feproblem == NULL ? _invalid_boundary_id : _bnd_feproblem->getCurrentBoundaryID())
 
 {
 
@@ -81,14 +82,8 @@ BoundaryRestrictable::~BoundaryRestrictable()
 {
 }
 
-BoundaryID
-BoundaryRestrictable::boundaryID()
-{
-  return _boundary_id;
-}
-
 const std::set<BoundaryID> &
-BoundaryRestrictable::boundaryIDs()
+BoundaryRestrictable::boundaryIDs() const
 {
   return _bnd_ids;
 }
@@ -124,15 +119,7 @@ BoundaryRestrictable::hasBoundary(std::vector<BoundaryName> names)
 bool
 BoundaryRestrictable::hasBoundary(BoundaryID id)
 {
-  // Cycle through the stored values, return if the supplied id matches one of the entries
-  for (std::set<BoundaryID>::const_iterator it = _bnd_ids.begin(); it != _bnd_ids.end(); ++it)
-  {
-    if (id == *it)
-      return true;
-  }
-
-  // If you make it here, there was no match
-  return false;
+  return _bnd_ids.find(id) != _bnd_ids.end();
 }
 
 bool
@@ -185,11 +172,4 @@ BoundaryRestrictable::isBoundarySubset(std::vector<BoundaryID> ids)
 {
   std::set<BoundaryID> ids_set(ids.begin(), ids.end());
   return isBoundarySubset(ids_set);
-}
-
-const BoundaryID &
-BoundaryRestrictable::getActiveBoundaryID()
-{
-  mooseAssert(_boundary_id != Moose::INVALID_BOUNDARY_ID, "BoundaryID is invalid");
-  return _boundary_id;
 }

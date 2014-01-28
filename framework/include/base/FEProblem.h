@@ -736,7 +736,7 @@ public:
    *
    * @see BoundaryRestrictable ComputeUserObjectThread::onBoundary
    */
-  void setActiveBoundaryID(BoundaryID id){ _active_boundary_id = id; }
+  void setCurrentBoundaryID(BoundaryID id){ _current_boundary_id = id; }
 
   /**
    * Return a reference to the active BoundaryID
@@ -744,7 +744,7 @@ public:
    *
    * @see setActiveBoundaryID
    */
-  const BoundaryID & getActiveBoundaryID(){ return _active_boundary_id; }
+  const BoundaryID & getCurrentBoundaryID(){ return _current_boundary_id; }
 
 
 protected:
@@ -757,7 +757,7 @@ protected:
    * getActiveBoundaryID returns a reference to this
    * @see setActiveBoundaryID BoundaryRestrictable
    */
-  BoundaryID _active_boundary_id;
+  BoundaryID _current_boundary_id;
 
   /// Whether or not to actually solve the nonlinear system
   bool _solve;

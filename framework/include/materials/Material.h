@@ -228,7 +228,7 @@ private:
   void registerPropName(std::string prop_name, bool is_get)
   {
     // Store material properties for block ids
-    for (std::set<SubdomainID>::const_iterator it = _blk_ids.begin(); it != _blk_ids.end(); ++it)
+    for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
     {
       // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
       if (!is_get)
@@ -238,7 +238,7 @@ private:
     }
 
     // Store material properites for the boundary ids
-    for (std::set<BoundaryID>::const_iterator it = _bnd_ids.begin(); it != _bnd_ids.end(); ++it)
+    for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
     {
       // \TODO: see ticket #2192
       // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty

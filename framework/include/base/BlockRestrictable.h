@@ -84,7 +84,7 @@ public:
    * Return the block subdomain ids for this object
    * @return a set of SudomainIDs that are valid for this object
    */
-  const std::set<SubdomainID> & blockIDs();
+  const std::set<SubdomainID> & blockIDs() const;
 
   /**
    * Test if the supplied block name is valid for this object
@@ -152,7 +152,7 @@ public:
    */
   bool hasBlockMaterialProperty(const std::string & name);
 
-protected:
+private:
 
   /// Set of block ids
   std::set<SubdomainID> _blk_ids;
@@ -168,8 +168,6 @@ protected:
 
   /// Pointer to Mesh
   MooseMesh * _blk_mesh;
-
-private:
 
   /**
    * A helper function for extracting the subdomain IDs for a variable

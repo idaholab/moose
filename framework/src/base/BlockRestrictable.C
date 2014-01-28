@@ -115,7 +115,7 @@ BlockRestrictable::blocks()
 }
 
 const std::set<SubdomainID> &
-BlockRestrictable::blockIDs()
+BlockRestrictable::blockIDs() const
 {
   return _blk_ids;
 }
@@ -145,15 +145,7 @@ BlockRestrictable::hasBlocks(std::vector<SubdomainName> names)
 bool
 BlockRestrictable::hasBlocks(SubdomainID id)
 {
-  // Cycle through the stored values, return if the supplied id matches on of the entries
-  for (std::set<SubdomainID>::const_iterator it = _blk_ids.begin(); it != _blk_ids.end(); ++it)
-  {
-    if (id == *it)
-      return true;
-  }
-
-  // If you make it here, there was no match
-  return false;
+  return _blk_ids.find(id) != _blk_ids.end();
 }
 
 bool

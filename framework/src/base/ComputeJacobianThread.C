@@ -172,12 +172,12 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
     // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
-    _fe_problem.setActiveBoundaryID(bnd_id);
+    _fe_problem.setCurrentBoundaryID(bnd_id);
 
     computeFaceJacobian(bnd_id);
 
     // Set the active boundary to invalid
-    _fe_problem.setActiveBoundaryID(Moose::INVALID_BOUNDARY_ID);
+    _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
 
     _fe_problem.swapBackMaterialsFace(_tid);
   }

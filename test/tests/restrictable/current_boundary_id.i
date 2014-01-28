@@ -33,17 +33,15 @@
 []
 
 [UserObjects]
-  [./assert]
+  [./test]
     type = TestBoundaryRestrictableAssert
     boundary = 2
   [../]
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Steady
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
-

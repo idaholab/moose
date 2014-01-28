@@ -60,7 +60,7 @@ void
 BoundaryUserObject::execute()
 {
 	for (unsigned int qp = 0; qp < _q_point.size(); ++qp)
-		_value += _u[qp] * _factors[getActiveBoundaryID()];
+		_value += _u[qp] * _factors[_current_boundary_id];
 }
 
 void

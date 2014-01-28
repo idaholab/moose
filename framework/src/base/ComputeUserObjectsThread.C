@@ -116,10 +116,10 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
          side_UserObject_it != _user_objects[_tid].sideUserObjects(bnd_id, _group).end();
          ++side_UserObject_it)
     {
-      _fe_problem.setActiveBoundaryID(bnd_id);
+      _fe_problem.setCurrentBoundaryID(bnd_id);
       (*side_UserObject_it)->execute();
     }
-    _fe_problem.setActiveBoundaryID(Moose::INVALID_BOUNDARY_ID);
+    _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
     _fe_problem.swapBackMaterialsFace(_tid);
   }
 }

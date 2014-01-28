@@ -35,10 +35,10 @@ InputParameters validParams<SideSetsFromNormals>()
 SideSetsFromNormals::SideSetsFromNormals(const std::string & name, InputParameters parameters):
     AddSideSetsBase(name, parameters),
     BoundaryRestrictableRequired(name, parameters),
-    _boundary_ids(_bnd_ids.begin(), _bnd_ids.end()),
+    _boundary_ids(boundaryIDs().begin(), boundaryIDs().end()),
     _normals(getParam<std::vector<Point> >("normals"))
 {
-  if (_normals.size() != _boundary_names.size())
+  if (_normals.size() != boundaryNames().size())
     mooseError("normal list and boundary list are not the same length");
 
   // Make sure that the normals are normalized
@@ -63,7 +63,7 @@ SideSetsFromNormals::modify()
   _mesh_ptr->errorIfParallelDistribution("SideSetsFromNormals");
 
   // Get the BoundaryIDs from the mesh
-  _boundary_ids = _mesh_ptr->getBoundaryIDs(_boundary_names, true);
+  _boundary_ids = _mesh_ptr->getBoundaryIDs(boundaryNames(), true);
 
   setup();
 
@@ -95,7 +95,7 @@ SideSetsFromNormals::modify()
 
   finalize();
 
-  for (unsigned int i=0; i<_boundary_ids.size(); ++i)
-    _mesh_ptr->getMesh().boundary_info->sideset_name(_boundary_ids[i]) = _boundary_names[i];
+  for (unsigned int i = 0; i < _boundary_ids.size(); ++i)
+    _mesh_ptr->getMesh().boundary_info->sideset_name(_boundary_ids[i]) = boundaryNames()[i];
 
 }

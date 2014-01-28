@@ -133,7 +133,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
     // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
-    _fe_problem.setActiveBoundaryID(bnd_id);
+    _fe_problem.setCurrentBoundaryID(bnd_id);
 
     for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
     {
@@ -144,7 +144,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
     _fe_problem.swapBackMaterialsFace(_tid);
 
     // Set active boundary id to invalid
-    _fe_problem.setActiveBoundaryID(Moose::INVALID_BOUNDARY_ID);
+    _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
   }
 }
 

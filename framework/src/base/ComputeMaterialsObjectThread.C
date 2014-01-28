@@ -76,14 +76,16 @@ ComputeMaterialsObjectThread::onElement(const Elem *elem)
 }
 
 void
-ComputeMaterialsObjectThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID /*bnd_id*/)
+ComputeMaterialsObjectThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
 //  if (!_sys.hasActiveIntegratedBCs(bnd_id, _tid) && !_sys.doingDG())
 //    return;
 
+  _fe_problem.setCurrentBoundaryID(bnd_id);
   _assembly[_tid]->reinit(elem, side);
   unsigned int n_points = _assembly[_tid]->qRuleFace()->n_points();
   _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), n_points, *elem, side);
+  _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
 }
 
 void

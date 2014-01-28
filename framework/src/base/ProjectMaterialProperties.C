@@ -103,7 +103,7 @@ void
 ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
   // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
-  _fe_problem.setActiveBoundaryID(bnd_id);
+  _fe_problem.setCurrentBoundaryID(bnd_id);
 
   if (!_sys.hasActiveIntegratedBCs(bnd_id, _tid))
     return;
@@ -135,7 +135,7 @@ ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, Bound
   }
 
   // Set the active boundary id to invalid
-  _fe_problem.setActiveBoundaryID(Moose::INVALID_BOUNDARY_ID);
+  _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
 
 }
 

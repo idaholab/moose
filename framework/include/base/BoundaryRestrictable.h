@@ -57,19 +57,10 @@ public:
   virtual ~BoundaryRestrictable();
 
   /**
-   * Returns the active boundary ID
-   * The parameter '_boundary_id' and the variable _boundary_id are used
-   * by Moose objects to control the behavior of objects restricted on a boundary, this
-   * method returns the current value for this variable.
-   * @return The current boundary ID
-   */
-  BoundaryID boundaryID();
-
-  /**
    * Return the boundary IDs for this object
    * @return A set of all boundary ids for which the object is restricted
    */
-  const std::set<BoundaryID> & boundaryIDs();
+  const std::set<BoundaryID> & boundaryIDs() const;
 
   /**
    * Return the boundary names for this object
@@ -156,13 +147,13 @@ c   * @param name A BoundaryName to check
   template<typename T>
   bool hasBoundaryMaterialProperty(const std::string & name);
 
-  /**
-   * Return the active boundary id
-   * @return The active boundary id, returns invalid if this is used when it is undefined
-   */
-  const BoundaryID & getActiveBoundaryID();
+private:
 
-protected:
+  /// Pointer to FEProblem
+  FEProblem * _bnd_feproblem;
+
+  /// Point to mesh
+  MooseMesh * _bnd_mesh;
 
   /// Set of the boundary ids
   std::set<BoundaryID> _bnd_ids;
@@ -170,18 +161,17 @@ protected:
   /// Vector the the boundary names
   std::vector<BoundaryName> _boundary_names;
 
-private:
-  /// Pointer to FEProblem
-  FEProblem * _bnd_feproblem;
-
-  /// Point to mesh
-  MooseMesh * _bnd_mesh;
-
-  /// Reference to active boundary id (use getActiveBoundaryID)
-  const BoundaryID & _boundary_id;
-
   /// Flag for allowing dual restriction with BlockRestrictable
   const bool _bnd_dual_restrictable;
+
+  /// Invalid BoundaryID for case when FEProblem
+  const BoundaryID _invalid_boundary_id;
+
+protected:
+
+  /// Reference to active boundary id
+  const BoundaryID & _current_boundary_id;
+
 };
 
 template<typename T>

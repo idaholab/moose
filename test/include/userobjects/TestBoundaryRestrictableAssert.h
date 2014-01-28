@@ -33,7 +33,7 @@ public:
 
   TestBoundaryRestrictableAssert(const std::string & name, InputParameters parameters);
   virtual ~TestBoundaryRestrictableAssert(){}
-  virtual void execute(){}
+  virtual void execute();
   virtual void threadJoin(const UserObject & /*uo*/){}
   virtual void initialize(){}
   virtual void finalize(){}
