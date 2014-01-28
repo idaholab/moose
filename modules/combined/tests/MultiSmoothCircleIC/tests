@@ -4,6 +4,7 @@
     input = 'multismoothcircleIC_test.i'
     exodiff = 'multismoothcircleIC_test_out.e'
     scale_refine = 1
+    valgrind = 'HEAVY'
   [../]
 
   [./lattice_test]
@@ -11,6 +12,7 @@
     input = 'latticesmoothcircleIC_test.i'
     exodiff = 'latticesmoothcircleIC_test_out.e'
     scale_refine = 1
+    valgrind = 'HEAVY'
   [../]
 
   [./specified_test]
@@ -18,5 +20,6 @@
     input = 'specifiedsmoothcircleIC_test.i'
     exodiff = 'specifiedsmoothcircleIC_test_out.e'
     scale_refine = 1
+    valgrind = 'HEAVY'
   [../]
 []

@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'tensor_mechanics_rate_plasticity.i'
     exodiff = 'out.e'
+    valgrind = 'HEAVY'
   [../]
 []
