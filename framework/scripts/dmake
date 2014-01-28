@@ -214,7 +214,4 @@ if __name__ == "__main__":
 
   # Run Make
   opt = subOptions(options,'timeout','quiet','dbg','opt','oprof')
-
-  print distcc_hosts, jobs
-
   runMake(distcc_hosts, jobs, make_args=make_args, cwd=make_dir, **opt)

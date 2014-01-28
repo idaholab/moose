@@ -16,6 +16,7 @@
 #define INTERNALSIDEUSEROBJECT_H
 
 #include "UserObject.h"
+#include "BlockRestrictable.h"
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 #include "MooseVariableDependencyInterface.h"
@@ -34,6 +35,7 @@ InputParameters validParams<InternalSideUserObject>();
  */
 class InternalSideUserObject :
   public UserObject,
+  public BlockRestrictable,
   public MaterialPropertyInterface,
   public NeighborCoupleable,
   public MooseVariableDependencyInterface,

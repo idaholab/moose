@@ -18,12 +18,13 @@ template<>
 InputParameters validParams<InternalSideUserObject>()
 {
   InputParameters params = validParams<UserObject>();
-
+  params += validParams<BlockRestrictable>();
   return params;
 }
 
 InternalSideUserObject::InternalSideUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
+    BlockRestrictable(name, parameters),
     MaterialPropertyInterface(parameters),
     NeighborCoupleable(parameters, false),
     MooseVariableDependencyInterface(),
