@@ -139,7 +139,7 @@ SolidModel::SolidModel( const std::string & name,
    _compute_JIntegral(getParam<bool>("compute_JIntegral")),
    _Eshelby_tensor(declareProperty<ColumnMajorMatrix>("Eshelby_tensor")),
    _Eshelby_tensor_small(declareProperty<ColumnMajorMatrix>("Eshelby_tensor_small")),
-   _block_id(std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end())),
+   _block_id(std::vector<SubdomainID>(blockIDs().begin(), blockIDs().end())),
    _constitutive_active(false),
    _element(NULL),
    _local_elasticity_tensor(NULL)

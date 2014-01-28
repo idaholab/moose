@@ -39,7 +39,7 @@ void
 CrackFrontDefinition::initialSetup()
 {
   //TODO:  This is an attempt to get the coordinates updated for the off-processor nodes.  It still doesn't work.
-  for(std::set<BoundaryID>::iterator biditer=_bnd_ids.begin(); biditer != _bnd_ids.end(); ++biditer)
+  for(std::set<BoundaryID>::iterator biditer=boundaryIDs().begin(); biditer != boundaryIDs().end(); ++biditer)
   {
     _subproblem.addGhostedBoundary(*biditer);
   }
@@ -51,7 +51,7 @@ CrackFrontDefinition::initialSetup()
     const BndNode * bnode = *nd;
     BoundaryID boundary_id = bnode->_bnd_id;
 
-    if (_bnd_ids.find(boundary_id) != _bnd_ids.end())
+    if (hasBoundary(boundary_id))
     {
       nodes.insert(bnode->_node->id());
     }

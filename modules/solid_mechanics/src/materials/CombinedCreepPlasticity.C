@@ -33,7 +33,7 @@ CombinedCreepPlasticity::CombinedCreepPlasticity( const std::string & name,
 void
 CombinedCreepPlasticity::initialSetup()
 {
-  std::vector<SubdomainID> block_id = std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end());
+  std::vector<SubdomainID> block_id = std::vector<SubdomainID>(blockIDs().begin(), blockIDs().end());
   const std::vector<std::string> & submodels = getParam<std::vector<std::string> >("submodels");
   for(unsigned i(0); i < block_id.size(); ++i)
   {
