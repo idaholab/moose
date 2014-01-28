@@ -528,7 +528,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
   {
     BoundaryID boundary_id = _mesh.getBoundaryID(boundaries[i]);
 
-    parameters.set<BoundaryID>("_boundary_id") = boundary_id;
+    //parameters.set<BoundaryID>("_boundary_id") = boundary_id;
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;

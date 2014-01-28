@@ -23,6 +23,7 @@
 #include "libmesh/stored_range.h"
 #include "libmesh/elem.h"
 #include "libmesh/petsc_macro.h"
+#include "libmesh/boundary_info.h"
 
 #include <string>
 #include <vector>
@@ -40,8 +41,9 @@ typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElem
 namespace Moose
 {
 const SubdomainID ANY_BLOCK_ID = (SubdomainID) -1;
-
 const BoundaryID ANY_BOUNDARY_ID = (BoundaryID) -1;
+const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
+
 
 /**
  * Framework-wide stuff

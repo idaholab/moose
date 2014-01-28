@@ -46,8 +46,6 @@ class SideUserObject :
 public:
   SideUserObject(const std::string & name, InputParameters parameters);
 
-  //const std::vector<BoundaryName> & boundaries() { return _boundaries; }
-
   /**
    * This function will get called on each geometric object this postprocessor acts on
    * (ie Elements, Sides or Nodes).  This will most likely get called multiple times
@@ -65,8 +63,6 @@ public:
   virtual void threadJoin(const UserObject & uo) = 0;
 
 protected:
-
-  //std::vector<BoundaryName> _boundaries;
 
   MooseMesh & _mesh;
 

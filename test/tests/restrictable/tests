@@ -110,4 +110,11 @@
 		cli_args = "BCs/left/test=hasBoundaryMaterialProperty_false"
 		expect_err = "hasBoundaryMaterialProperty is false, test passed"
 	[../]
+
+	[./assert]
+		type = 'RunException'
+		input = 'test_assert.i'
+		expect_err = "BoundaryID is invalid"
+		method = dbg
+  [../]
 []

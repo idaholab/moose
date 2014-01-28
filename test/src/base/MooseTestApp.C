@@ -119,10 +119,13 @@
 #include "VerifyNodalUniqueID.h"
 #include "RandomElementalUserObject.h"
 #include "TrackDiracFront.h"
+#include "BoundaryUserObject.h"
+#include "TestBoundaryRestrictableAssert.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
 #include "InsideValuePPS.h"
+#include "BoundaryValuePPS.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -328,9 +331,12 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(VerifyNodalUniqueID);
   registerUserObject(RandomElementalUserObject);
   registerUserObject(TrackDiracFront);
+  registerUserObject(BoundaryUserObject);
+  registerUserObject(TestBoundaryRestrictableAssert);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
+  registerPostprocessor(BoundaryValuePPS);
 
   registerMarker(RandomHitMarker);
 

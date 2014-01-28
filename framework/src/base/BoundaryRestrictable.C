@@ -23,7 +23,7 @@ InputParameters validParams<BoundaryRestrictable>()
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
 
-  // Create a private parameter for storing the boundary IDs
+  // Create a private parameter for storing the boundary IDs (used by MaterialPropertyInterface)
   params.addPrivateParam<std::vector<BoundaryID> >("_boundary_ids", std::vector<BoundaryID>());
 
   // A parameter for disabling error message for objects restrictable by boundary and block,
@@ -36,13 +36,13 @@ InputParameters validParams<BoundaryRestrictable>()
 
 BoundaryRestrictable::BoundaryRestrictable(const std::string name, InputParameters & parameters) :
     _boundary_names(parameters.get<std::vector<BoundaryName> >("boundary")),
-    _boundary_id(parameters.isParamValid("_boundary_id") ?
-                 parameters.get<BoundaryID>("_boundary_id") : Moose::ANY_BOUNDARY_ID),
-    _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _bnd_feproblem(parameters.isParamValid("_fe_problem") ?
                    parameters.get<FEProblem *>("_fe_problem") : NULL),
     _bnd_mesh(parameters.isParamValid("_mesh") ?
-              parameters.get<MooseMesh *>("_mesh") : NULL)
+              parameters.get<MooseMesh *>("_mesh") : NULL),
+    _boundary_id(_bnd_feproblem->getActiveBoundaryID()),
+    _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable"))
+
 {
 
   // If the mesh pointer is not defined, but FEProblem is, get it from there
@@ -67,7 +67,6 @@ BoundaryRestrictable::BoundaryRestrictable(const std::string name, InputParamete
        std::vector<SubdomainID> blk_ids = parameters.get<std::vector<SubdomainID> >("_block_ids");
        if (!blk_ids.empty() && blk_ids[0] != Moose::ANY_BLOCK_ID)
          mooseError("Attempted to restrict the object '" << name << "' to a boundary, but the object is already restricted by block(s)");
-
     }
 
   // Store ANY_BOUNDARY_ID if empty
@@ -101,7 +100,7 @@ BoundaryRestrictable::boundaryNames()
 }
 
 unsigned int
-BoundaryRestrictable::numBoundary()
+BoundaryRestrictable::numBoundaryIDs()
 {
   return (unsigned int) _bnd_ids.size();
 }
@@ -186,4 +185,11 @@ BoundaryRestrictable::isBoundarySubset(std::vector<BoundaryID> ids)
 {
   std::set<BoundaryID> ids_set(ids.begin(), ids.end());
   return isBoundarySubset(ids_set);
+}
+
+const BoundaryID &
+BoundaryRestrictable::getActiveBoundaryID()
+{
+  mooseAssert(_boundary_id != Moose::INVALID_BOUNDARY_ID, "BoundaryID is invalid");
+  return _boundary_id;
 }

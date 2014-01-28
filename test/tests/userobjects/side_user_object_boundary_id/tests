@@ -1,0 +1,7 @@
+[Tests]
+  [./boundary_id]
+    type = Exodiff
+		input = 'side_user_object.i'
+		output = 'side_user_object_out.e'
+  [../]
+[]

@@ -81,11 +81,11 @@ public:
    * Return the number of boundaries for this object
    * @return The number of subdomains
    */
-  unsigned int numBoundary();
+  unsigned int numBoundaryIDs();
 
   /**
    * Test if the supplied boundary name is valid for this object
-   * @param name A BoundaryName to check
+c   * @param name A BoundaryName to check
    * @return True if the given id is valid for this object
    */
   bool hasBoundary(BoundaryName name);
@@ -156,25 +156,32 @@ public:
   template<typename T>
   bool hasBoundaryMaterialProperty(const std::string & name);
 
-protected:
+  /**
+   * Return the active boundary id
+   * @return The active boundary id, returns invalid if this is used when it is undefined
+   */
+  const BoundaryID & getActiveBoundaryID();
 
-  /// Vector the the boundary names
-  std::vector<BoundaryName> _boundary_names;
+protected:
 
   /// Set of the boundary ids
   std::set<BoundaryID> _bnd_ids;
 
-  /// Boundary ID this BC is active on
-  BoundaryID _boundary_id;
+  /// Vector the the boundary names
+  std::vector<BoundaryName> _boundary_names;
 
-  /// Flag for allowing dual restriction with BlockRestrictable
-  const bool _bnd_dual_restrictable;
-
+private:
   /// Pointer to FEProblem
   FEProblem * _bnd_feproblem;
 
   /// Point to mesh
   MooseMesh * _bnd_mesh;
+
+  /// Reference to active boundary id (use getActiveBoundaryID)
+  const BoundaryID & _boundary_id;
+
+  /// Flag for allowing dual restriction with BlockRestrictable
+  const bool _bnd_dual_restrictable;
 };
 
 template<typename T>

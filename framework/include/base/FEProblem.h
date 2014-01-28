@@ -726,11 +726,38 @@ public:
 
   void setKernelCoverageCheck(bool flag) { _kernel_coverage_check = flag; }
 
+  /**
+   * Updates the active boundary id
+   * @param id The BoundaryID to set as active
+   *
+   * The BoundaryRestrictable class has a member, _boundary_id, that is set
+   * to the boundary id that is being operated on, this method is used to set the value
+   * to which the BoundaryRestrictable class references.
+   *
+   * @see BoundaryRestrictable ComputeUserObjectThread::onBoundary
+   */
+  void setActiveBoundaryID(BoundaryID id){ _active_boundary_id = id; }
+
+  /**
+   * Return a reference to the active BoundaryID
+   * @return constant reference to the active BoundaryID
+   *
+   * @see setActiveBoundaryID
+   */
+  const BoundaryID & getActiveBoundaryID(){ return _active_boundary_id; }
+
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
   Moose::KernelType _kernel_type;
+
+  /** Storage for current boundary id
+   * getActiveBoundaryID returns a reference to this
+   * @see setActiveBoundaryID BoundaryRestrictable
+   */
+  BoundaryID _active_boundary_id;
 
   /// Whether or not to actually solve the nonlinear system
   bool _solve;
