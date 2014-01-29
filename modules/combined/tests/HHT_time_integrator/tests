@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'one_element_b_0_3025_g_0_6_cubic.i'
+    exodiff = 'one_element_b_0_3025_g_0_6_cubic_out.e'
+    abs_zero = 1e-09
+  [../]
+[]
