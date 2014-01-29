@@ -23,6 +23,10 @@
 			checkpoint_interval_out_cp/0010.rd-0
 			checkpoint_interval_out_cp/0010_mesh.cpr'
     recover = false
+
+    # The suffixes of these files change when running in parallel or with threads
+    max_parallel = 1
+    max_threads = 1
   [../]
 
   [./test_recover]
