@@ -184,7 +184,7 @@ public:
   /**
    * Prints the simulation information header
    */
-  void printSimulationInfo();
+  void printSimulationInfo(std::ostream & ostream);
 
   /**
    * Retrieve the Executioner for this App.

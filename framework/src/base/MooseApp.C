@@ -279,7 +279,7 @@ MooseApp::executeExecutioner()
   if (_executioner)
   {
     _executioner->init();
-    printSimulationInfo();
+    printSimulationInfo(Moose::out);
 
     const char code[12] = {45,45,103,105,114,108,
                            45,109,111,100,101,0};
@@ -388,7 +388,7 @@ MooseApp::getFileName(bool stripLeadingPath) const
 
 
 void
-MooseApp::printSimulationInfo()
+MooseApp::printSimulationInfo(std::ostream & ostream)
 {
   std::stringstream oss;
 
@@ -538,6 +538,6 @@ MooseApp::printSimulationInfo()
     oss << '\n';
   }
 
-
-  Moose::out << oss.str();
+  ostream << oss.str();
+  ostream.flush();
 }
