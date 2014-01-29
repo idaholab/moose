@@ -9,7 +9,8 @@ InputParameters validParams<RichardsSumQuantity>()
 }
 
 RichardsSumQuantity::RichardsSumQuantity(const std::string & name, InputParameters parameters) :
-    GeneralUserObject(name, parameters)
+    GeneralUserObject(name, parameters),
+    _total_outflow_mass(0)
 {
 }
 
