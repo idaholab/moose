@@ -32,11 +32,6 @@ Steady::Steady(const std::string & name, InputParameters parameters) :
     _time(_problem.time())
 {
   _problem.getNonlinearSystem().setDecomposition(_splitting);
-  if(_app.isRecovering())
-  {
-    Moose::out<<"\nCannot recover steady solves!\nExiting...\n"<<std::endl;
-    MPI_Abort(libMesh::COMM_WORLD, 0);
-  }
 
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
@@ -63,6 +58,12 @@ Steady::problem()
 void
 Steady::init()
 {
+  if(_app.isRecovering())
+  {
+    Moose::out<<"\nCannot recover steady solves!\nExiting...\n"<<std::endl;
+    return;
+  }
+
   checkIntegrity();
 
   _problem.initialSetup();
@@ -82,6 +83,9 @@ Steady::init()
 void
 Steady::execute()
 {
+  if(_app.isRecovering())
+    return;
+
   Moose::out << "Time: " << _time_step << '\n';
   preExecute();
 

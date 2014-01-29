@@ -590,7 +590,7 @@ public:
   // Output /////
   virtual Output & out() { return _out; }
   virtual void output(bool force = false);
-  virtual void outputRestart();
+  virtual void outputRestart(bool force = false);
   virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
   virtual void outputSolutionHistory(bool state = true) { _output_solution_history = state; }
   virtual void outputESInfo(bool state = true) { _output_es_info = state; }

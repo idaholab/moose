@@ -318,7 +318,7 @@ PetscTSExecutioner::execute()
     bool reset_dt = false;      /* has some meaning in Transient::computeConstrainedDT, but we do not use that logic here */
     _fe_problem.output(reset_dt);
     _fe_problem.outputPostprocessors(reset_dt);
-    _problem.outputRestart();
+    _problem.outputRestart(reset_dt);
 
 #ifdef LIBMESH_ENABLE_AMR
     if (_fe_problem.adaptivity().isOn())

@@ -34,6 +34,7 @@ Output::Output(FEProblem & fe_problem, EquationSystems & eq) :
     _dt(_fe_problem.dt()),
     _interval(1),
     _screen_interval(1),
+    _checkpoint_interval(1),
     _iteration_plot_start_time(std::numeric_limits<Real>::max()),
     _last_iteration_output_time(0.0),
     _time_interval(false),
@@ -261,6 +262,18 @@ int
 Output::screen_interval()
 {
   return _screen_interval;
+}
+
+void
+Output::checkpoint_interval(unsigned int checkpoint_interval)
+{
+  _checkpoint_interval = checkpoint_interval;
+}
+
+int
+Output::checkpoint_interval()
+{
+  return _checkpoint_interval;
 }
 
 void

@@ -1,0 +1,36 @@
+[Tests]
+  [./test_files]
+    type = 'CheckFiles'
+    input = 'checkpoint_interval.i'
+    check_files =      'checkpoint_interval_out_cp/0006.xdr
+                        checkpoint_interval_out_cp/0006.xdr.0000
+			checkpoint_interval_out_cp/0006.rd-0
+			checkpoint_interval_out_cp/0006_mesh.cpr
+    		        checkpoint_interval_out_cp/0009.xdr
+                        checkpoint_interval_out_cp/0009.xdr.0000
+			checkpoint_interval_out_cp/0009.rd-0
+			checkpoint_interval_out_cp/0009_mesh.cpr'
+    check_not_exists = 'checkpoint_interval_out_cp/0007.xdr
+                        checkpoint_interval_out_cp/0007.xdr.0000
+			checkpoint_interval_out_cp/0007.rd-0
+			checkpoint_interval_out_cp/0007_mesh.cpr
+			checkpoint_interval_out_cp/0008.xdr
+                        checkpoint_interval_out_cp/0008.xdr.0000
+			checkpoint_interval_out_cp/0008.rd-0
+			checkpoint_interval_out_cp/0008_mesh.cpr
+    		        checkpoint_interval_out_cp/0010.xdr
+                        checkpoint_interval_out_cp/0010.xdr.0000
+			checkpoint_interval_out_cp/0010.rd-0
+			checkpoint_interval_out_cp/0010_mesh.cpr'
+    recover = false
+  [../]
+
+  [./test_recover]
+    # This test verifies that we can restart for a solution that may not be
+    # the most recent one written to the output file.
+    type = 'Exodiff'
+    input = 'checkpoint_interval.i'
+    exodiff = 'checkpoint_interval_out.e'
+    prereq = 'test_files'
+  [../]
+[]

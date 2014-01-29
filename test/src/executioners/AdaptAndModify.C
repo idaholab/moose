@@ -83,7 +83,7 @@ AdaptAndModify::endStep()
         {
           _problem.output(true);
           _problem.outputPostprocessors(true);
-          _problem.outputRestart();
+          _problem.outputRestart(true);
         }
       }
       //Set the time for the next output interval if we're at or beyond an output interval

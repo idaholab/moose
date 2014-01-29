@@ -69,6 +69,7 @@ InputParameters validParams<SetupOutputAction>()
 
   // restart options
   params.addParam<unsigned int>("num_checkpoint_files", 0, "Number of the restart files to save (0 = no restart files)");
+  params.addParam<unsigned int>("checkpoint_interval", 1, "The interval at which restart files are written to disk");
   params.addParam<std::string>("checkpoint_dir_suffix", "cp", "This will be appended to the file_base to create the directory name for checkpoint files.");
 
   params.addParam<Point>("position", "Set a positional offset.  This vector will get added to the nodal cooardinates to move the domain.");
@@ -78,7 +79,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParamNamesToGroup("nemesis gmv vtk tecplot tecplot_binary xda xdr", "Format");
   params.addParamNamesToGroup("screen_interval postprocessor_screen max_pps_rows_screen pps_fit_to_screen postprocessor_csv postprocessor_gnuplot gnuplot_format", "Postprocessor");
   params.addParamNamesToGroup("perf_log show_setup_log_early", "Logging");
-  params.addParamNamesToGroup("num_checkpoint_files checkpoint_dir_suffix", "Checkpoint");
+  params.addParamNamesToGroup("num_checkpoint_files checkpoint_dir_suffix checkpoint_interval", "Checkpoint");
 
 
   return params;
@@ -189,6 +190,7 @@ SetupOutputAction::act()
 
   const unsigned int interval = getParam<unsigned int>("interval");
   const unsigned int screen_interval = getParam<unsigned int>("screen_interval");
+  const unsigned int checkpoint_interval = getParam<unsigned int>("checkpoint_interval");
 
   // Error checks
   if (interval < screen_interval)
@@ -206,6 +208,8 @@ SetupOutputAction::act()
 
   output.interval(getParam<unsigned int>("interval"));
   output.screen_interval(getParam<unsigned int>("screen_interval"));
+  output.checkpoint_interval(getParam<unsigned int>("checkpoint_interval"));
+
   output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
   if(isParamValid("time_interval"))
    {

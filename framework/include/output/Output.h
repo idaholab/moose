@@ -73,6 +73,8 @@ public:
   int interval();
   void screen_interval(unsigned int screen_interval);
   int screen_interval();
+  void checkpoint_interval(unsigned int checkpoint_interval);
+  int checkpoint_interval();
 
   void meshChanged();
   void sequence(bool state);
@@ -121,6 +123,7 @@ protected:
   Real & _dt;
   unsigned int _interval;
   unsigned int _screen_interval;
+  unsigned int _checkpoint_interval;
   Real _iteration_plot_start_time;
 
   std::vector<Outputter *> _outputters;

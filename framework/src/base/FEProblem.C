@@ -3280,7 +3280,7 @@ FEProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 }
 
 void
-FEProblem::output(bool force/*= false*/)
+FEProblem::output(bool force)
 {
   if ((_t_step % out().interval() == 0) || force)
   {
@@ -3312,9 +3312,10 @@ FEProblem::output(bool force/*= false*/)
 }
 
 void
-FEProblem::outputRestart()
+FEProblem::outputRestart(bool force)
 {
-  _resurrector->write();
+  if ((_t_step % out().checkpoint_interval() == 0) || force)
+    _resurrector->write();
 }
 
 void

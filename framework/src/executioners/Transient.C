@@ -407,7 +407,7 @@ Transient::endStep()
         {
           _problem.output(true);
           _problem.outputPostprocessors(true);
-          _problem.outputRestart();
+          _problem.outputRestart(true);
         }
       }
       //Set the time for the next output interval if we're at or beyond an output interval
@@ -423,7 +423,7 @@ Transient::endStep()
       {
         _problem.output(_at_sync_point);
         _problem.outputPostprocessors(_at_sync_point);
-        _problem.outputRestart();
+        _problem.outputRestart(_at_sync_point);
       }
     }
   }
@@ -602,7 +602,7 @@ Transient::keepGoing()
     _problem.output(true);
     if(_allow_output)
       _problem.outputPostprocessors(true);
-    _problem.outputRestart();
+    _problem.outputRestart(true);
   }
 
   if(!lastSolveConverged() && _abort)
@@ -664,7 +664,7 @@ Transient::forceOutput()
 {
   _problem.output(true);
   _problem.outputPostprocessors(true);
-  _problem.outputRestart();
+  _problem.outputRestart(true);
 }
 
 Real
