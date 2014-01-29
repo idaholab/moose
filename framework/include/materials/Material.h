@@ -104,13 +104,25 @@ public:
    * Retrieve the property named "name"
    */
   template<typename T>
-  MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  MaterialProperty<T> & getMaterialProperty(const std::string & prop_name);
 
   template<typename T>
-  MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  MaterialProperty<T> & getMaterialPropertyOld(const std::string & prop_name);
 
   template<typename T>
-  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  MaterialProperty<T> & getMaterialPropertyOlder(const std::string & prop_name);
+
+  /**
+   * Declare the property named "name"
+   */
+  template<typename T>
+  MaterialProperty<T> & declareProperty(const std::string & prop_name);
+
+  template<typename T>
+  MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
+
+  template<typename T>
+  MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
 
   virtual
   const std::set<std::string> &
@@ -180,44 +192,6 @@ protected:
    */
   virtual QpData * createData();
 
-  /**
-   * Declare the Real valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using get().
-   */
-  template<typename T>
-  MaterialProperty<T> & declareProperty(const std::string & prop_name, bool is_get=false)
-  {
-    registerPropName(prop_name, is_get);
-    return _material_data.declareProperty<T>(prop_name);
-  }
-
-  /**
-   * Declare the Real valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOld().
-   */
-  template<typename T>
-  MaterialProperty<T> & declarePropertyOld(const std::string & prop_name, bool is_get=false)
-  {
-    _has_stateful_property = true;
-    registerPropName(prop_name, is_get);
-    return _material_data.declarePropertyOld<T>(prop_name);
-  }
-
-  /**
-   * Declare the Real valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOlder().
-   */
-  template<typename T>
-  MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name, bool is_get=false)
-  {
-    _has_stateful_property = true;
-    registerPropName(prop_name, is_get);
-    return _material_data.declarePropertyOlder<T>(prop_name);
-  }
-
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
 
@@ -255,27 +229,57 @@ private:
 
 template<typename T>
 MaterialProperty<T> &
-Material::getMaterialProperty(const std::string & name)
+Material::getMaterialProperty(const std::string & prop_name)
 {
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
-  _depend_props.insert(name);
-  return declareProperty<T>(name, true);
+  _depend_props.insert(prop_name);
+  registerPropName(prop_name, true);
+  return _material_data.getProperty<T>(prop_name);
 }
 
 template<typename T>
 MaterialProperty<T> &
-Material::getMaterialPropertyOld(const std::string & name)
+Material::getMaterialPropertyOld(const std::string & prop_name)
 {
-  _depend_props.insert(name);
-  return declarePropertyOld<T>(name, true);
+  _depend_props.insert(prop_name);
+  registerPropName(prop_name, true);
+  return _material_data.getPropertyOld<T>(prop_name);
 }
 
 template<typename T>
 MaterialProperty<T> &
-Material::getMaterialPropertyOlder(const std::string & name)
+Material::getMaterialPropertyOlder(const std::string & prop_name)
 {
-  _depend_props.insert(name);
-  return declarePropertyOlder<T>(name, true);
+  _depend_props.insert(prop_name);
+  registerPropName(prop_name, true);
+  return _material_data.getPropertyOlder<T>(prop_name);
 }
+
+template<typename T>
+MaterialProperty<T> &
+Material::declareProperty(const std::string & prop_name)
+{
+  registerPropName(prop_name, false);
+  return _material_data.declareProperty<T>(prop_name);
+}
+
+template<typename T>
+MaterialProperty<T> &
+Material::declarePropertyOld(const std::string & prop_name)
+{
+  _has_stateful_property = true;
+  registerPropName(prop_name, false);
+  return _material_data.declarePropertyOld<T>(prop_name);
+}
+
+template<typename T>
+MaterialProperty<T> &
+Material::declarePropertyOlder(const std::string & prop_name)
+{
+  _has_stateful_property = true;
+  registerPropName(prop_name, false);
+  return _material_data.declarePropertyOlder<T>(prop_name);
+}
+
 
 #endif //MATERIAL_H

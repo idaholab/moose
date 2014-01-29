@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'stateful_coupling.i'
+    exodiff = 'stateful_coupling_out.e'
+  [../]
+[]
