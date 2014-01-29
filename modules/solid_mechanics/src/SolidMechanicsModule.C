@@ -33,6 +33,8 @@
 #include "MaterialTensorOnLine.h"
 #include "MaterialVectorAux.h"
 #include "AccumulateAux.h"
+#include "NewmarkAccelAux.h"
+#include "NewmarkVelAux.h"
 #include "qFunctionJIntegral.h"
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
@@ -46,6 +48,7 @@
 #include "Pressure.h"
 #include "PressureAction.h"
 #include "SolidMechanicsAction.h"
+#include "SolidMechInertialForce.h"
 #include "SolidMechImplicitEuler.h"
 #include "SolidModel.h"
 #include "StressDivergence.h"
@@ -62,6 +65,8 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerAux(MaterialTensorAux);
   registerAux(MaterialVectorAux);
   registerAux(AccumulateAux);
+  registerAux(NewmarkAccelAux);
+  registerAux(NewmarkVelAux);
   registerAux(qFunctionJIntegral);
   registerAux(ElementsOnLineAux);
 
@@ -93,6 +98,7 @@ Elk::SolidMechanics::registerObjects(Factory & factory)
   registerKernel(Gravity);
   registerKernel(HomogenizationKernel);
   registerKernel(SolidMechImplicitEuler);
+  registerKernel(SolidMechInertialForce);
   registerKernel(StressDivergence);
   registerKernel(StressDivergenceRZ);
   registerKernel(StressDivergenceRSpherical);
