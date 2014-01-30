@@ -106,11 +106,19 @@ class MachineOutput(object):
     output.append('\nBUILD INFROMATION:')
 
     # Format string for information display
-    frmt = '%25s: '
+    frmt = '%36s: '
 
-    # Total available
-    output.append(frmt % 'Number of processors' + str(use))
-    output.append(frmt % 'Available Processors' + str(total))
+    # Extract the localslots_cpp
+    if 'localslots_cpp' in distcc_hosts:
+      cpp = distcc_hosts.split()[1].split('=')[1]
+      output.append(frmt % 'No. of processors (preprocess)' + cpp)
+
+    # Build processors
+    output.append(frmt % 'No. of processors (build)' + str(jobs))
+
+    # Available
+    if total > 0:
+      output.append(frmt % 'Available Processors' + str(total))
 
     # Add make command
     make = frmt % 'Make Command' + 'make -j ' + str(jobs)

@@ -128,6 +128,7 @@ def parseArguments(args=None):
   # Advanced options
   misc = parser.add_argument_group('Misc. Options')
   misc.add_argument('--clean', '-c', action='store_true', help='Clean up .dmake and .dmake_hosts files')
+  misc.add_argument('--refresh-time', help='Number of minutes before the cached hosts are refreshed (uses 10 if this has not been set previously)')
   misc.add_argument('--buck', action='store_true', help='Use the distcc file generator from buck')
   misc.add_argument('--serial', action='store_true', help='Disable the parallel creating of the Machine objects; this also will print the information for each object created for debuggin purposes')
 
@@ -166,7 +167,7 @@ if __name__ == "__main__":
   warehouse = MachineWarehouse(restrict=['141','134'], **opt)
 
   # Create the DmakeRC object
-  opt = subOptions(options, 'buck', 'dedicated', 'description', 'clean', 'disable', 'enable')
+  opt = subOptions(options, 'buck', 'dedicated', 'description', 'clean', 'disable', 'enable', 'refresh_time')
   dmakerc = DmakeRC(warehouse.master, **opt)
 
   # Create the DistccDaemon object
@@ -187,8 +188,16 @@ if __name__ == "__main__":
 
   # Get the hosts and jobs
   if dmakerc.needUpdate() or options.refresh:
-    opt = subOptions(options,'max','localhost','localslots','localslots_cpp')
+
+    # Get hosts and jobs from warehouse
+    opt = subOptions(options,'max','localhost','localslots','localslots_cpp','local')
     distcc_hosts, jobs = warehouse.getHosts(dmakerc.get('HOST_LINES'), disable=dmakerc.get('DISABLE'), **opt)
+
+    # Use user supplied jobs, if given
+    if options.jobs:
+      jobs = options.jobs
+
+    # Update the DmakeRC file
     dmakerc.set(DISTCC_HOSTS=distcc_hosts, JOBS=jobs, write=(not options.max))
 
   else:

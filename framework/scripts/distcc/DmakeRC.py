@@ -1,5 +1,5 @@
 # Load requied packages
-import sys, os, pickle, uuid, platform, urllib2
+import sys, os, pickle, uuid, platform, urllib2, datetime
 from sets import Set
 
 ## @class DmakeRC
@@ -25,10 +25,11 @@ class DmakeRC(object):
   #    disable = list()           - A list of username, descriptions, hostnames or ip addresses to disable
   #                                 from DISTCC_HOSTS line (names and numbers may be incomplete)
   #    enable = True | {False}    - Enables all machines that were previously disabled
+  #    refresh_time = <float>     - No. of minutes before needsUpdate returns true (default 10, value is stored)
   def __init__(self, master, **kwargs):
 
     # List of available items
-    self._items = ['HOST_LINES', 'DESCRIPTION', 'DISTCC_HOSTS', 'JOBS', 'DISABLE']
+    self._items = ['HOST_LINES', 'DESCRIPTION', 'DISTCC_HOSTS', 'JOBS', 'DISABLE', "DISTCC_HOSTS_TIME", "REFRESH_TIME"]
 
     # Extract the options from the user
     self._test = kwargs.pop('buck', False)
@@ -92,6 +93,15 @@ class DmakeRC(object):
         self.set(DISABLE=self.get('DISABLE') + kwargs['disable'])
       self._update = True
 
+    # Refresh time (look for stored value, use 10 if it is not stored)
+    if self.get('REFRESH_TIME') == None:
+      self.set(REFRESH_TIME=600)
+
+    # Update the refresh time from user input
+    if 'refresh_time' in kwargs and kwargs['refresh_time'] != None:
+      self.set(REFRESH_TIME=float(kwargs.pop('refresh_time'))*60)
+
+
   ## Accessor for stored variables (public)
   #  @param key The name of the dictionary item to retrun (e.g., 'DISTCC_HOSTS')
   #  @return The value from the dictionary for the given key, it will return None
@@ -137,6 +147,10 @@ class DmakeRC(object):
       if (key not in self._dmakerc) or (self._dmakerc[key] != value):
         self._dmakerc[key] = value
 
+        # If the distcc hosts are changed, update the time
+        if key == 'DISTCC_HOSTS':
+          self._dmakerc['TIME'] = datetime.datetime.now()
+
     # Store the change to the file (this is allways done unless specified)
     if write:
       fid = open(self._filename, 'w')
@@ -153,7 +167,15 @@ class DmakeRC(object):
   ## Return true of the distcc hosts requires update (public)
   # @return True if the ip addresses from the server differ from the stored
   def needUpdate(self):
-    return self._update or (self._remote_ip == self._local_ip)
+
+    # Time difference
+    if self.get('TIME') == None:
+      delta = float('inf')
+    else:
+      delta = datetime.datetime.now() - self.get('TIME')
+
+    # Perform checks
+    return self._update or (self._remote_ip != self._local_ip) or (delta.seconds > self.get('REFRESH_TIME'))
 
 
   ## Reads the local .dmakerc file (private)
