@@ -221,6 +221,7 @@
 // time steppers
 #include "ConstantDT.h"
 #include "FunctionDT.h"
+#include "IterationAdaptiveDT.h"
 #include "SolutionTimeAdaptiveDT.h"
 #include "DT2.h"
 #include "PostprocessorDT.h"
@@ -527,6 +528,7 @@ registerObjects(Factory & factory)
   // time steppers
   registerTimeStepper(ConstantDT);
   registerTimeStepper(FunctionDT);
+  registerTimeStepper(IterationAdaptiveDT);
   registerTimeStepper(SolutionTimeAdaptiveDT);
   registerTimeStepper(DT2);
   registerTimeStepper(PostprocessorDT);
