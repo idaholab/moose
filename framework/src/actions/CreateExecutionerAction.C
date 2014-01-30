@@ -92,6 +92,10 @@ CreateExecutionerAction::act()
   // is held in the child block Adaptivity and needs to be pulled early
 
   Moose::setup_perf_log.push("Create Executioner","Setup");
+
+  if (_problem == NULL)
+    mooseError("Your simulation contains no \"Problem\" instance.  This might happen if your input file is missing the Mesh section.");
+
   _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem;
   Executioner * executioner = static_cast<Executioner *>(_factory.create(_type, "Executioner", _moose_object_pars));
   Moose::setup_perf_log.pop("Create Executioner","Setup");
