@@ -26,8 +26,6 @@ public:
 
 protected:
 
-  void init();
-
   Real & _plenum_pressure;
   Real & _n0; // The initial number of moles of gas.
 
@@ -54,7 +52,7 @@ protected:
   unsigned & _refab_counter;
 
 
-  bool _initialized;
+  bool & _initialized;
 
 };
 

@@ -52,7 +52,7 @@ PlenumPressureUserObject::PlenumPressureUserObject(const std::string & name, Inp
                 getParam<std::vector<unsigned> >("refab_type") :
                 std::vector<unsigned>(_refab_time.size(), 0) ),
    _refab_counter(declareRestartableData<unsigned int>("refab_counter", 0)),
-   _initialized(false)
+   _initialized(declareRestartableData<bool>("initialized", false))
 {
 
   if (isParamValid("material_input"))
@@ -102,22 +102,18 @@ PlenumPressureUserObject::getValue( const std::string & quantity ) const
 }
 
 void
-PlenumPressureUserObject::init()
+PlenumPressureUserObject::initialize()
 {
-  if (0 == _refab_counter)
+  if (!_initialized)
   {
     _n0 = _initial_pressure * _volume / (_R * _temperature);
 
     _start_time = _t - _dt;
     const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
     _plenum_pressure = factor * _initial_pressure;
+    _initialized = true;
   }
-  _initialized = true;
-}
 
-void
-PlenumPressureUserObject::initialize()
-{
   if (_refab_counter < _refab_needed && _refab_time[_refab_counter] <= _t)
   {
     _refab_gas_released = 0;
@@ -137,11 +133,6 @@ PlenumPressureUserObject::initialize()
 void
 PlenumPressureUserObject::execute()
 {
-
-  if (!_initialized)
-  {
-    init();
-  }
 
   Real pressure(0);
   if (!_refab_needed ||
