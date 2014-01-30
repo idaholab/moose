@@ -135,7 +135,43 @@
   [./function_file_test4]
     type = 'RunException'
     input = 'function_file_test4.i'
-    expect_err = "Invalid option for format: \S+ in ic_function.  Valid options are rows and columns."
+    expect_err = "Invalid option for format: \S+ in ic_function.  Valid options are 'rows' and 'columns'."
+  [../]
+
+  [./function_file_test5]
+    type = 'RunException'
+    input = 'function_file_test5.i'
+    expect_err = "In Piecewise: Cannot specify 'data_file' and 'x', 'y', or 'xy_data' together."
+  [../]
+
+  [./function_file_test6]
+    type = 'RunException'
+    input = 'function_file_test6.i'
+    expect_err = "In Piecewise: Cannot specify 'x', 'y', and 'xy_data' together."
+  [../]
+
+  [./function_file_test7]
+    type = 'RunException'
+    input = 'function_file_test7.i'
+    expect_err = "In Piecewise: Both 'x' and 'y' must be specified if either one is specified."
+  [../]
+
+  [./function_file_test8]
+    type = 'RunException'
+    input = 'function_file_test8.i'
+    expect_err = "In Piecewise: Length of data provided in 'xy_data' must be a multiple of 2."
+  [../]
+
+  [./function_file_test9]
+    type = 'RunException'
+    input = 'function_file_test9.i'
+    expect_err = "In Piecewise: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified."
+  [../]
+
+  [./function_file_test10]
+    type = 'RunException'
+    input = 'function_file_test10.i'
+    expect_err = "In Piecewise function axis=3 outside allowable range \(0-2\)."
   [../]
 
   [./incomplete_kernel_block_coverage_test]

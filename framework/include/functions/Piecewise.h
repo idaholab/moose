@@ -40,7 +40,7 @@ protected:
   int _axis;
   bool _has_axis;
 private:
-  const std::string _file_name;
+  const std::string _data_file_name;
   bool parseNextLineReals( std::ifstream & ifs, std::vector<Real> & myvec);
   void parseRows( std::vector<Real> & x, std::vector<Real> & y );
   void parseColumns( std::vector<Real> & x, std::vector<Real> & y);

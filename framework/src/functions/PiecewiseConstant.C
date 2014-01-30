@@ -17,13 +17,7 @@
 template<>
 InputParameters validParams<PiecewiseConstant>()
 {
-  InputParameters params = validParams<Function>();
-  params.addParam<std::vector<Real> >("x", "The abscissa values");
-  params.addParam<std::vector<Real> >("y", "The ordinate values");
-  params.addParam<std::string>("yourFileName", "File holding your csv data for use with PiecewiseLinear");
-  params.addParam<std::string>("format", "rows" ,"Format of csv data file that is in either in columns or rows");
-  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
-  params.addParam<int>("axis", "The axis used (0, 1, or 2 for x, y, or z) if this is to be a function of position");
+  InputParameters params = validParams<Piecewise>();
   MooseEnum direction("left, right", "left");
   params.addParam<MooseEnum>("direction", direction, "Direction to look to find value: " + direction.getRawNames());
   return params;

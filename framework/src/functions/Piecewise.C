@@ -18,9 +18,11 @@ template<>
 InputParameters validParams<Piecewise>()
 {
   InputParameters params = validParams<Function>();
+  params.addParam<std::vector<Real> >("xy_data", "All function data, supplied in abscissa, ordinate pairs");
   params.addParam<std::vector<Real> >("x", "The abscissa values");
   params.addParam<std::vector<Real> >("y", "The ordinate values");
-  params.addParam<std::string>("yourFileName", "File holding your csv data for use with Piecewise");
+  params.addParam<std::string>("data_file", "File holding csv data for use with Piecewise");
+  params.addParam<std::string>("yourFileName", "File holding your csv data for use with Piecewise (Deprecated)");
   params.addParam<std::string>("format", "rows" ,"Format of csv data file that is in either in columns or rows");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
   params.addParam<int>("axis", "The axis used (0, 1, or 2 for x, y, or z) if this is to be a function of position");
@@ -32,16 +34,29 @@ Piecewise::Piecewise(const std::string & name, InputParameters parameters) :
   _scale_factor( getParam<Real>("scale_factor") ),
   _linear_interp( NULL ),
   _has_axis(false),
-  _file_name( isParamValid("yourFileName") ? getParam<std::string>("yourFileName") : "")
+  _data_file_name( isParamValid("yourFileName") ? getParam<std::string>("yourFileName") :
+              (isParamValid("data_file") ? getParam<std::string>("data_file") : ""))
 {
   std::vector<Real> x;
   std::vector<Real> y;
 
-  if (parameters.isParamValid("yourFileName"))
+  if (_data_file_name != "")
   {
-    if (parameters.isParamValid("x"))
+    if (parameters.isParamValid("yourFileName"))
     {
-      mooseError("Error in Piecewise: Cannot specify yourFileName and either x or y.");
+      mooseWarning("In Piecewise, 'yourFileName' is Deprecated.  Use 'data_file' instead.");
+
+      if (parameters.isParamValid("data_file"))
+      {
+        mooseError("In Piecewise, cannot specify both 'yourFileName' and 'data_file'.");
+      }
+    }
+
+    if ((parameters.isParamValid("x")) ||
+        (parameters.isParamValid("y")) ||
+        (parameters.isParamValid("xy_data")))
+    {
+      mooseError("In Piecewise: Cannot specify 'data_file' and 'x', 'y', or 'xy_data' together.");
     }
     std::string format = getParam<std::string>("format");
     if (format.compare(0, 4, "rows")==0)
@@ -54,21 +69,44 @@ Piecewise::Piecewise(const std::string & name, InputParameters parameters) :
     }
     else
     {
-      mooseError("Invalid option for format: "+format+" in "+_name+".  Valid options are rows and columns.");
+      mooseError("Invalid option for format: "+format+" in "+_name+".  Valid options are 'rows' and 'columns'.");
     }
   }
-  else if (parameters.isParamValid("x"))
+  else if ((parameters.isParamValid("x")) ||
+           (parameters.isParamValid("y")))
   {
-    if (!parameters.isParamValid("y"))
+    if (! ((parameters.isParamValid("x")) &&
+          (parameters.isParamValid("y"))))
     {
-      mooseError("Error in Piecewise: If one of x and y is specified, both must be.");
+      mooseError("In Piecewise: Both 'x' and 'y' must be specified if either one is specified.");
+    }
+    if (parameters.isParamValid("xy_data"))
+    {
+      mooseError("In Piecewise: Cannot specify 'x', 'y', and 'xy_data' together.");
     }
     x = getParam<std::vector<Real> >("x");
     y = getParam<std::vector<Real> >("y");
   }
+  else if (parameters.isParamValid("xy_data"))
+  {
+    std::vector<Real> xy = getParam<std::vector<Real> >("xy_data");
+    unsigned int xy_size = xy.size();
+    if (xy_size % 2 != 0)
+    {
+      mooseError("In Piecewise: Length of data provided in 'xy_data' must be a multiple of 2.");
+    }
+    unsigned int x_size = xy_size/2;
+    x.reserve(x_size);
+    y.reserve(x_size);
+    for (unsigned int i=0; i<xy_size/2; ++i)
+    {
+      x.push_back(xy[i*2]);
+      y.push_back(xy[i*2+1]);
+    }
+  }
   else
   {
-    mooseError("Error in Piecewise: Either yourFileName or both of x and y must be specified.");
+    mooseError("In Piecewise: Either 'data_file', 'x' and 'y', or 'xy_data' must be specified.");
   }
 
   _linear_interp = new LinearInterpolation( x, y );
@@ -138,9 +176,9 @@ Piecewise::parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
 void
 Piecewise::parseRows( std::vector<Real> & x, std::vector<Real> & y )
 {
-  std::ifstream file(_file_name.c_str());
+  std::ifstream file(_data_file_name.c_str());
   if (!file.good())
-    mooseError("Error opening file '" + _file_name + "' from Piecewise function.");
+    mooseError("Error opening file '" + _data_file_name + "' from Piecewise function.");
   std::string line;
 
   while(parseNextLineReals(file, x))
@@ -150,7 +188,7 @@ Piecewise::parseRows( std::vector<Real> & x, std::vector<Real> & y )
   }
 
   if (x.size() == 0)
-    mooseError("File '" + _file_name + "' contains no data for Piecewise function.");
+    mooseError("File '" + _data_file_name + "' contains no data for Piecewise function.");
 
   while(parseNextLineReals(file, y))
   {
@@ -159,14 +197,14 @@ Piecewise::parseRows( std::vector<Real> & x, std::vector<Real> & y )
   }
 
   if (y.size() == 0)
-    mooseError("File '" + _file_name + "' contains no y data for Piecewise function.");
+    mooseError("File '" + _data_file_name + "' contains no y data for Piecewise function.");
   else if (y.size() != x.size())
-    mooseError("Lengths of x and y data do not match in file '" + _file_name + "' for Piecewise function.");
+    mooseError("Lengths of x and y data do not match in file '" + _data_file_name + "' for Piecewise function.");
 
   std::vector<Real> scratch;
   while(parseNextLineReals(file, scratch)){
     if (scratch.size() > 0)
-      mooseError("Read more than two rows of data from file '" + _file_name + "' for Piecewise function.  Did you mean to use \"format = columns\"?");
+      mooseError("Read more than two rows of data from file '" + _data_file_name + "' for Piecewise function.  Did you mean to use \"format = columns\"?");
   }
 
 }
@@ -174,9 +212,9 @@ Piecewise::parseRows( std::vector<Real> & x, std::vector<Real> & y )
 void
 Piecewise::parseColumns( std::vector<Real> & x, std::vector<Real> & y )
 {
-  std::ifstream file(_file_name.c_str());
+  std::ifstream file(_data_file_name.c_str());
   if (!file.good())
-    mooseError("Error opening file '" + _file_name + "' from Piecewise function.");
+    mooseError("Error opening file '" + _data_file_name + "' from Piecewise function.");
   std::string line;
 
   std::vector<Real> scratch;
@@ -184,7 +222,7 @@ Piecewise::parseColumns( std::vector<Real> & x, std::vector<Real> & y )
   {
     if (scratch.size() > 0){
       if (scratch.size() != 2)
-        mooseError("Read more than 2 columns of data from file '" + _file_name + "' for Piecewise function.  Did you mean to use \"format = rows\"?");
+        mooseError("Read more than 2 columns of data from file '" + _data_file_name + "' for Piecewise function.  Did you mean to use \"format = rows\"?");
       x.push_back(scratch[0]);
       y.push_back(scratch[1]);
     }

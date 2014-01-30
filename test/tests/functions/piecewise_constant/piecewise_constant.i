@@ -41,8 +41,9 @@
 [Functions]
   [./a]
     type = PiecewiseConstant
-    x = '0   1   2'
-    y = '0.1 0.2 0.1'
+    xy_data = '0 0.1
+               1 0.2
+               2 0.1'
     direction = left
   [../]
   [./b]
