@@ -30,7 +30,7 @@ InputParameters validParams<Predictor>()
 Predictor::Predictor(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     Restartable(name, parameters, "Predictors"),
-    _fe_problem(*getParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _nl(_fe_problem.getNonlinearSystem()),
 
     _t_step(_fe_problem.timeStep()),

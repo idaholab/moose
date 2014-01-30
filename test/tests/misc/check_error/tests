@@ -1,4 +1,10 @@
 [Tests]
+  [./checked_pointer_param_test]
+    type = 'RunException'
+    input = 'checked_pointer_param_test.i'
+    expect_err = "_fe_problem is NULL."
+  [../]
+
   [./add_aux_variable_multiple_test]
     type = 'RunException'
     input = 'add_aux_variable_multiple_test.i'

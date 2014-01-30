@@ -27,7 +27,7 @@ InputParameters validParams<Steady>()
 
 Steady::Steady(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
-    _problem(*getParam<FEProblem *>("_fe_problem")),
+    _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
     _time_step(_problem.timeStep()),
     _time(_problem.time())
 {

@@ -39,7 +39,6 @@ class InputParameters;
 template<class T>
 InputParameters validParams();
 
-
 /**
  *
  */
@@ -68,13 +67,19 @@ public:
   /**
    * Override from libMesh to set user-defined attributes on our parameter
    */
-  virtual void set_attributes(const std::string & name, bool inserted_only);
+  virtual void set_attributes(const std::string &name, bool inserted_only);
 
   /**
    * Returns a writable reference to the named parametesr.  Note: This is not a virutal
    * function! Use caution when comparing to the parent class implementation
    */
   template <typename T> T & set (const std::string&);
+
+  /**
+   * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
+   * The template parameter must be a pointer or an error will be thrown.
+   */
+  template <typename T> T getCheckedPointerParam(const std::string &name, const std::string &error_string="");
 
   /**
    * This method adds a parameter and documentation string to the InputParameters
@@ -391,8 +396,8 @@ private:
 
 // Template and inline function implementations
 template <typename T>
-inline
-T& InputParameters::set (const std::string& name)
+T &
+InputParameters::set (const std::string& name)
 {
   checkConsistentType<T>(name);
 
@@ -405,7 +410,20 @@ T& InputParameters::set (const std::string& name)
 }
 
 template <typename T>
-void InputParameters::addRequiredParam(const std::string &name, const std::string &doc_string)
+T
+InputParameters::getCheckedPointerParam(const std::string &name, const std::string &error_string)
+{
+  T param = this->get<T>(name);
+
+  // Note: You will receive a compile error on this line if you attempt to pass a non-pointer template type to this method
+  if (param == NULL)
+    mooseError("Parameter " << name << " is NULL.\n" << error_string);
+  return this->get<T>(name);
+}
+
+template <typename T>
+void
+InputParameters::addRequiredParam(const std::string &name, const std::string &doc_string)
 {
   checkConsistentType<T>(name);
 
@@ -415,13 +433,15 @@ void InputParameters::addRequiredParam(const std::string &name, const std::strin
 }
 
 template <typename T>
-void InputParameters::addRequiredParam(const std::string & /*name*/, const T & /*value*/, const std::string & /*doc_string*/)
+void
+InputParameters::addRequiredParam(const std::string & /*name*/, const T & /*value*/, const std::string & /*doc_string*/)
 {
   mooseError("You cannot call addRequiredParam and supply a default value for this type, please use addParam instead");
 }
 
 template <typename T>
-void InputParameters::addParam(const std::string &name, const T &value, const std::string &doc_string)
+void
+InputParameters::addParam(const std::string &name, const T &value, const std::string &doc_string)
 {
   checkConsistentType<T>(name);
 
@@ -430,7 +450,8 @@ void InputParameters::addParam(const std::string &name, const T &value, const st
 }
 
 template <typename T>
-void InputParameters::addParam(const std::string &name, const std::string &doc_string)
+void
+InputParameters::addParam(const std::string &name, const std::string &doc_string)
 {
   checkConsistentType<T>(name);
 
@@ -439,28 +460,32 @@ void InputParameters::addParam(const std::string &name, const std::string &doc_s
 }
 
 template <typename T>
-void InputParameters::addRequiredCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string)
+void
+InputParameters::addRequiredCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string)
 {
   addRequiredParam<T>(name, doc_string);
   _custom_type[name] = custom_type;
 }
 
 template <typename T>
-void InputParameters::addCustomTypeParam(const std::string &name, const T &value, const std::string &custom_type, const std::string &doc_string)
+void
+InputParameters::addCustomTypeParam(const std::string &name, const T &value, const std::string &custom_type, const std::string &doc_string)
 {
   addParam<T>(name, value, doc_string);
   _custom_type[name] = custom_type;
 }
 
 template <typename T>
-void InputParameters::addCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string)
+void
+InputParameters::addCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string)
 {
   addParam<T>(name, doc_string);
   _custom_type[name] = custom_type;
 }
 
 template <typename T>
-void InputParameters::addPrivateParam(const std::string &name)
+void
+InputParameters::addPrivateParam(const std::string &name)
 {
   checkConsistentType<T>(name);
 
@@ -469,7 +494,8 @@ void InputParameters::addPrivateParam(const std::string &name)
 }
 
 template <typename T>
-void InputParameters::addPrivateParam(const std::string &name, const T &value)
+void
+InputParameters::addPrivateParam(const std::string &name, const T &value)
 {
   checkConsistentType<T>(name);
 
@@ -478,21 +504,24 @@ void InputParameters::addPrivateParam(const std::string &name, const T &value)
 }
 
 template <typename T>
-void InputParameters::addRequiredCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string)
+void
+InputParameters::addRequiredCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string)
 {
   addRequiredParam<T>(name, doc_string);
   MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
 }
 
 template <typename T>
-void InputParameters::addCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string)
+void
+InputParameters::addCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string)
 {
   addParam<T>(name, doc_string);
   MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
 }
 
 template <typename T>
-void InputParameters::addCommandLineParam(const std::string &name, const std::string &syntax, const T &value, const std::string &doc_string)
+void
+InputParameters::addCommandLineParam(const std::string &name, const std::string &syntax, const T &value, const std::string &doc_string)
 {
   addParam<T>(name, value, doc_string);
   MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
@@ -500,7 +529,8 @@ void InputParameters::addCommandLineParam(const std::string &name, const std::st
 
 
 template <typename T>
-void InputParameters::checkConsistentType(const std::string &name) const
+void
+InputParameters::checkConsistentType(const std::string &name) const
 {
   // Do we have a paremeter with the same name but a different type?
   InputParameters::const_iterator it = _values.find(name);
@@ -509,7 +539,8 @@ void InputParameters::checkConsistentType(const std::string &name) const
 }
 
 template <typename T>
-void InputParameters::suppressParameter(const std::string &name)
+void
+InputParameters::suppressParameter(const std::string &name)
 {
   _required_params.erase(name);
   _valid_params.erase(name);
@@ -517,7 +548,8 @@ void InputParameters::suppressParameter(const std::string &name)
 }
 
 template <typename T>
-void InputParameters::addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
+void
+InputParameters::addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
 {
   mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
 
@@ -525,7 +557,8 @@ void InputParameters::addRequiredDeprecatedParam(const std::string &name, const 
 }
 
 template <typename T>
-void InputParameters::addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message)
+void
+InputParameters::addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message)
 {
   mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
 
@@ -533,7 +566,8 @@ void InputParameters::addDeprecatedParam(const std::string &name, const T &value
 }
 
 template <typename T>
-void InputParameters::addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
+void
+InputParameters::addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
 {
   mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
 
@@ -541,7 +575,8 @@ void InputParameters::addDeprecatedParam(const std::string &name, const std::str
 }
 
 template <typename T>
-void InputParameters::addRemovedParam(const std::string &name, const std::string &removed_message)
+void
+InputParameters::addRemovedParam(const std::string &name, const std::string &removed_message)
 {
   mooseError("The parameter " << name << " has been removed.\n" << removed_message);
 }
@@ -549,7 +584,8 @@ void InputParameters::addRemovedParam(const std::string &name, const std::string
 // Specializations for MooseEnum
 template <>
 inline
-void InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string)
+void
+InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string)
 {
   InputParameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
   _required_params.insert(name);
@@ -558,7 +594,8 @@ void InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const
 
 template <>
 inline
-void InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &name, const std::vector<MooseEnum> &moose_enums, const std::string &doc_string)
+void
+InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &name, const std::vector<MooseEnum> &moose_enums, const std::string &doc_string)
 {
   InputParameters::set<std::vector<MooseEnum> >(name) = moose_enums;    // valid parameter is set by set_attributes
   _required_params.insert(name);
@@ -567,14 +604,16 @@ void InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::strin
 
 template <>
 inline
-void InputParameters::addParam<MooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/)
+void
+InputParameters::addParam<MooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/)
 {
   mooseError("You must supply a MooseEnum object when using addParam, even if the parameter is not required!");
 }
 
 template <>
 inline
-void InputParameters::addParam<std::vector<MooseEnum> >(const std::string & /*name*/, const std::string & /*doc_string*/)
+void
+InputParameters::addParam<std::vector<MooseEnum> >(const std::string & /*name*/, const std::string & /*doc_string*/)
 {
   mooseError("You must supply a vector of MooseEnum object(s) when using addParam, even if the parameter is not required!");
 }

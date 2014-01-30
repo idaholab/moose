@@ -32,11 +32,11 @@ ScalarInitialCondition::ScalarInitialCondition(const std::string & name, InputPa
     MooseObject(name, parameters),
     ScalarCoupleable(parameters),
     DependencyResolverInterface(),
-    _subproblem(*getParam<SubProblem *>("_subproblem")),
-    _sys(*getParam<SystemBase *>("_sys")),
+    _subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getScalarVariable(_tid, parameters.get<VariableName>("variable")))
+    _var(_sys.getScalarVariable(_tid, getParam<VariableName>("variable")))
 {
   _supplied_vars.insert(getParam<VariableName>("variable"));
 
