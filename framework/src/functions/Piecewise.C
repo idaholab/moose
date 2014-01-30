@@ -22,7 +22,7 @@ InputParameters validParams<Piecewise>()
   params.addParam<std::vector<Real> >("x", "The abscissa values");
   params.addParam<std::vector<Real> >("y", "The ordinate values");
   params.addParam<std::string>("data_file", "File holding csv data for use with Piecewise");
-  params.addParam<std::string>("yourFileName", "File holding your csv data for use with Piecewise (Deprecated)");
+  params.addParam<std::string>("yourFileName", "File holding csv data for use with Piecewise (Deprecated)");
   params.addParam<std::string>("format", "rows" ,"Format of csv data file that is in either in columns or rows");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
   params.addParam<int>("axis", "The axis used (0, 1, or 2 for x, y, or z) if this is to be a function of position");

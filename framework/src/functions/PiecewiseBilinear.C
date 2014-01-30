@@ -44,7 +44,8 @@ template<>
 InputParameters validParams<PiecewiseBilinear>()
 {
   InputParameters params = validParams<Function>();
-  params.addRequiredParam<std::string>("yourFileName", "File holding your csv data for use with PiecewiseBilinear");
+  params.addParam<std::string>("data_file", "File holding csv data for use with PiecewiseBilinear");
+  params.addParam<std::string>("yourFileName", "File holding csv data for use with PiecewiseBilinear (Deprecated)");
   params.addParam<int>("axis", -1, "The axis used (0, 1, or 2 for x, y, or z).");
   params.addParam<int>("xaxis", -1, "The coordinate used for x-axis data (0, 1, or 2 for x, y, or z).");
   params.addParam<int>("yaxis", -1, "The coordinate used for y-axis data (0, 1, or 2 for x, y, or z).");
@@ -56,7 +57,8 @@ InputParameters validParams<PiecewiseBilinear>()
 PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters parameters) :
   Function(name, parameters),
   _bilinear_interp( NULL ),
-  _file_name( getParam<std::string>("yourFileName") ),
+  _data_file_name( isParamValid("yourFileName") ? getParam<std::string>("yourFileName") :
+              (isParamValid("data_file") ? getParam<std::string>("data_file") : "")),
   _axis(getParam<int>("axis")),
   _yaxis(getParam<int>("yaxis")),
   _xaxis(getParam<int>("xaxis")),
@@ -66,6 +68,20 @@ PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters p
   _scale_factor( getParam<Real>("scale_factor") ),
   _radial(getParam<bool>("radial"))
 {
+  if (parameters.isParamValid("yourFileName"))
+  {
+    mooseWarning("In PiecewiseBilinear, 'yourFileName' is Deprecated.  Use 'data_file' instead.");
+
+    if (parameters.isParamValid("data_file"))
+    {
+      mooseError("In PiecewiseBilinear, cannot specify both 'yourFileName' and 'data_file'.");
+    }
+  }
+  else if (!parameters.isParamValid("data_file"))
+  {
+    mooseError("In PiecewiseBilinear, 'data_file' must be specified.");
+  }
+
   if (!_axisValid && !_yaxisValid && !_xaxisValid)
   {
     mooseError("Error in " << _name << ". None of axis, yaxis, or xaxis properly defined.  Allowable range is 0-2");
@@ -132,9 +148,9 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
                           std::vector<Real> & y,
                           ColumnMajorMatrix & z)
 {
-  std::ifstream file(_file_name.c_str());
+  std::ifstream file(_data_file_name.c_str());
   if (!file.good())
-    mooseError("Error opening file '" + _file_name + "' from PiecewiseBilinear function.");
+    mooseError("Error opening file '" + _data_file_name + "' from PiecewiseBilinear function.");
    std::string line;
    unsigned int linenum= 0;
    unsigned int itemnum = 0;
@@ -164,7 +180,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
        if (num_cols+1 != itemnum)
        {
          mooseError("ERROR! Read "<<itemnum<<" columns of data but expected "<<num_cols+1<<
-                    " columns while reading line "<<linenum<<" of '"+ _file_name + "' for PiecewiseBilinear function.");
+                    " columns while reading line "<<linenum<<" of '"+ _data_file_name + "' for PiecewiseBilinear function.");
        }
      }
    }
@@ -194,6 +210,6 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
    }
    if (data.size() != offset)
    {
-     mooseError("ERROR! Inconsistency in data read from '" + _file_name + "' for PiecewiseBilinear function.");
+     mooseError("ERROR! Inconsistency in data read from '" + _data_file_name + "' for PiecewiseBilinear function.");
    }
 }

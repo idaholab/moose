@@ -43,7 +43,7 @@ public:
 
 private:
   BilinearInterpolation * _bilinear_interp;
-  const std::string _file_name;
+  const std::string _data_file_name;
   const int _axis;
   const int _yaxis;
   const int _xaxis;
