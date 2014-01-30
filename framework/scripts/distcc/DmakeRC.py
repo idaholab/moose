@@ -172,10 +172,10 @@ class DmakeRC(object):
     if self.get('TIME') == None:
       delta = float('inf')
     else:
-      delta = datetime.datetime.now() - self.get('TIME')
+      delta = (datetime.datetime.now() - self.get('TIME')).seconds
 
     # Perform checks
-    return self._update or (self._remote_ip != self._local_ip) or (delta.seconds > self.get('REFRESH_TIME'))
+    return self._update or (self._remote_ip != self._local_ip) or (delta > self.get('REFRESH_TIME'))
 
 
   ## Reads the local .dmakerc file (private)
