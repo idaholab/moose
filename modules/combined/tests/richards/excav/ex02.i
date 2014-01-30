@@ -226,13 +226,13 @@
 
 [Executioner]
   type = Transient
-  end_time = 6E6
-  dt = 3E6
+  end_time = 3E7
+  dt = 1E6
   solve_type = NEWTON
 []
 
 [Output]
-  file_base = ex01
+  file_base = ex02
   output_initial = true
   interval = 1
   exodus = true
