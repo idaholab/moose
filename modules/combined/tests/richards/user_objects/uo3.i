@@ -83,19 +83,19 @@
   [./answer_Seff1BW]
     type = PiecewiseLinearFile
     format = columns
-    yourFileName = satBW.csv
+    data_file = satBW.csv
     axis = 0
   [../]
   [./answer_Seff1BWprime]
     type = PiecewiseLinearFile
     format = columns
-    yourFileName = satBWprime.csv
+    data_file = satBWprime.csv
     axis = 0
   [../]
   [./answer_Seff1BW2prime]
     type = PiecewiseLinearFile
     format = columns
-    yourFileName = satBW2prime.csv
+    data_file = satBW2prime.csv
     axis = 0
   [../]
 

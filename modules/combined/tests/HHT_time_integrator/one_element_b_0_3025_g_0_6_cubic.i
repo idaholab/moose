@@ -261,7 +261,7 @@
     y = '0.0 0.000167 0.00133 0.0045 0.010667   0.020833 0.036 0.057167 0.0853 0.1215 0.16667'
     scale_factor = 1
 #    type = PiecewiseLinearFile 
-#    yourFileName = wave_one_element.csv
+#    data_file = wave_one_element.csv
 #    format = columns
   [../]
 []

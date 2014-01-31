@@ -22,7 +22,7 @@
 [Functions]
   [./Fiss_Function]
     type = PiecewiseLinearFile
-    yourFileName = blip.csv
+    data_file = blip.csv
     format = columns
   [../]
 []
