@@ -1,7 +1,7 @@
 # This is a test designed to evaluate the cabability of the
-# AdaptiveDT TimeStepper to adjust time step size according to
+# IterationAdaptiveDT TimeStepper to adjust time step size according to
 # a function.  For example, if the power input function for a BISON
-# simulation rapidly increases or decreases, the AdaptiveDT
+# simulation rapidly increases or decreases, the IterationAdaptiveDT
 # TimeStepper should take time steps small enough to capture the
 # oscillation.
 
@@ -157,7 +157,7 @@
 #  dt = 1e6
   end_time = 5.1e3
   [./TimeStepper]
-    type = AdaptiveDT
+    type = IterationAdaptiveDT
     timestep_limiting_function = Fiss_Function
     max_function_change = 3e20
     force_step_every_function_point = true

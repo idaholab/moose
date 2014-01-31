@@ -149,7 +149,7 @@
   dtmax = 5e6
   dtmin = 1
   [./TimeStepper]
-    type = AdaptiveDT
+    type = IterationAdaptiveDT
     dt = 1
     optimal_iterations = 6
     iteration_window = 0.4

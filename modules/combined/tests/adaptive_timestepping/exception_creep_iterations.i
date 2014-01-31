@@ -250,7 +250,7 @@
   end_time = 1.0
   num_steps = 100
   [./TimeStepper]
-    type = AdaptiveDT
+    type = IterationAdaptiveDT
     dt = 1.0
   [../]
 []
