@@ -28,6 +28,17 @@ public:
 
 protected:
 
+  char * runSPPARKSCommand( const std::string & cmd )
+  {
+    std::vector<char> strng(cmd.c_str(), cmd.c_str()+cmd.size()+1u);
+    return spparks_command(_spparks, &strng[0]);
+  }
+
+  Real getSPPARKSTime( Real dt )
+  {
+    return dt;
+  }
+
   template
   <typename T>
   Real getValue(const std::map<unsigned, std::map<unsigned, T> > & data, unsigned elk_node_id, unsigned index) const

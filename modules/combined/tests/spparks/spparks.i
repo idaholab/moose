@@ -45,9 +45,9 @@
   l_max_its = 20
 
   start_time = 0.0
-  dt = 1.0
+  dt = 30.0
   num_steps = 2
-  end_time = 2.0
+  end_time = 60.0
 [] # Executioner
 
 [Output]

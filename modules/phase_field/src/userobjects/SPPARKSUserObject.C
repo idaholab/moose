@@ -167,6 +167,13 @@ SPPARKSUserObject::execute()
   {
     _last_time = _t;
 
+    // Run SPPARKS over a certain time
+    const Real sp_time = getSPPARKSTime( _dt );
+    std::stringstream cmd;
+    cmd << "run ";
+    cmd << sp_time;
+    runSPPARKSCommand( cmd.str() );
+
     getSPPARKSData();
   }
 }
