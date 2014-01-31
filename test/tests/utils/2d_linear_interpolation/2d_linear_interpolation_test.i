@@ -61,7 +61,7 @@
 #
 # The parameters and possible values for the function PiecewiseBilinear are:
 #
-# yourFilename = fred.csv
+# data_file = fred.csv
 # axis = 0, 1, or 2
 # xaxis = 0, 1, or 2
 # yaxis = 0, 1, or 2
@@ -137,7 +137,7 @@
 
   [./u]
     type = PiecewiseBilinear
-    yourFileName = fred.csv
+    data_file = fred.csv
     axis = 0
   [../]
 #
@@ -159,7 +159,7 @@
 #
   [./v]
     type = PiecewiseBilinear
-    yourFileName = fred.csv
+    data_file = fred.csv
     xaxis = 1
   [../]
 #
@@ -179,7 +179,7 @@
 #
   [./w]
     type = PiecewiseBilinear
-    yourFileName = fred.csv
+    data_file = fred.csv
     yaxis = 2
   [../]
 #
@@ -199,7 +199,7 @@
 #
   [./A]
     type = PiecewiseBilinear
-    yourFileName = fred.csv
+    data_file = fred.csv
     xaxis = 0
     yaxis = 1
   [../]
@@ -225,7 +225,7 @@
 #
   [./scaled_u]
     type = PiecewiseBilinear
-    yourFileName = fred.csv
+    data_file = fred.csv
     axis = 0
     scale_factor = 2
   [../]
@@ -236,7 +236,7 @@
 #
   [./R]
     type = PiecewiseBilinear
-    yourFileName = fred.csv
+    data_file = fred.csv
     xaxis = 0
     yaxis = 1
     radial = true

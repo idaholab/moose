@@ -20,7 +20,7 @@
 [Functions]
   [./ic_function]
     type = PiecewiseLinearFile
-    yourFileName = nonexistent_file #should generate error
+    data_file = nonexistent_file #should generate error
     scale_factor = 1.0
   [../]
 []

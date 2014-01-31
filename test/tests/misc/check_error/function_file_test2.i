@@ -20,7 +20,7 @@
 [Functions]
   [./ic_function]
     type = PiecewiseLinearFile
-    yourFileName = piecewise_linear_rows.csv #Will generate error because data is expected in columns
+    data_file = piecewise_linear_rows.csv #Will generate error because data is expected in columns
     format = columns
     scale_factor = 1.0
   [../]

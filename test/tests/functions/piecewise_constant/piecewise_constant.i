@@ -54,13 +54,13 @@
   [../]
   [./c]
     type = PiecewiseConstant
-    yourFileName = pc.csv
+    data_file = pc.csv
     direction = left
     format = columns
   [../]
   [./d]
     type = PiecewiseConstant
-    yourFileName = pc.csv
+    data_file = pc.csv
     direction = right
     format = columns
   [../]

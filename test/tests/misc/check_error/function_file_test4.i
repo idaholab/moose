@@ -20,7 +20,7 @@
 [Functions]
   [./ic_function]
     type = PiecewiseLinear
-    yourFileName = dummy #we don't get that far
+    data_file = dummy #we don't get that far
     format = rowls
     scale_factor = 1.0
   [../]

@@ -52,22 +52,22 @@
 
   [./a]
     type = PiecewiseLinearFile
-    yourFileName = rows.csv
+    data_file = rows.csv
     format = rows
   [../]
   [./b]
     type = PiecewiseLinearFile
-    yourFileName = columns.csv
+    data_file = columns.csv
     format = columns
   [../]
   [./c]
     type = PiecewiseLinearFile
-    yourFileName = rows_space.dat
+    data_file = rows_space.dat
     format = rows
   [../]
   [./d]
     type = PiecewiseLinearFile
-    yourFileName = columns_space.dat
+    data_file = columns_space.dat
     format = columns
   [../]
 []
