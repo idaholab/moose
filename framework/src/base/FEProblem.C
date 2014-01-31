@@ -44,6 +44,7 @@
 #include "ElementPostprocessor.h"
 #include "NodalPostprocessor.h"
 #include "SidePostprocessor.h"
+#include "InternalSidePostprocessor.h"
 #include "GeneralPostprocessor.h"
 #include "Indicator.h"
 #include "Marker.h"
@@ -1771,6 +1772,12 @@ getPostprocessorPointer(MooseObject * mo)
   }
 
   {
+    InternalSidePostprocessor * intermediate = dynamic_cast<InternalSidePostprocessor *>(mo);
+    if(intermediate)
+      return static_cast<Postprocessor *>(intermediate);
+  }
+
+  {
     SidePostprocessor * intermediate = dynamic_cast<SidePostprocessor *>(mo);
     if(intermediate)
       return static_cast<Postprocessor *>(intermediate);
@@ -2062,7 +2069,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
         }
       }
 
-      const std::vector<InternalSideUserObject *> & isuos = pps[0].internalSideUserObjects(group);
+      const std::vector<InternalSideUserObject *> & isuos = pps[tid].internalSideUserObjects(group);
       for (std::vector<InternalSideUserObject *>::const_iterator it = isuos.begin(); it != isuos.end(); ++it)
       {
         (*it)->initialize();
@@ -2181,8 +2188,46 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
         }
       }
 
+      // Internal side user objects
       already_gathered.clear();
-      const std::vector<InternalSideUserObject *> & isuos = pps[0].internalSideUserObjects(group);
+      for (std::set<SubdomainID>::const_iterator block_ids_it = pps[0].blockIds().begin();
+           block_ids_it != pps[0].blockIds().end();
+           ++block_ids_it)
+      {
+        SubdomainID block_id = *block_ids_it;
+
+        const std::vector<InternalSideUserObject *> & internal_side_user_objects = pps[0].internalSideUserObjects(block_id, group);
+        for (unsigned int i = 0; i < internal_side_user_objects.size(); ++i)
+        {
+          // Pointer to current warehouse
+          InternalSideUserObject * it = internal_side_user_objects[i];
+
+          // join across the threads (gather the value in thread #0)
+          if (already_gathered.find(it) == already_gathered.end())
+          {
+            for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+              it->threadJoin(*pps[tid].internalSideUserObjects(block_id, group)[i]);
+
+            it->finalize();
+
+            Postprocessor * pp = getPostprocessorPointer(it);
+
+            if(pp)
+            {
+              Real value = pp->getValue();
+
+              // store the value in each thread
+              for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+                _pps_data[tid]->storeValue(pp->PPName(), value);
+            }
+
+            already_gathered.insert(it);
+          }
+        }
+      }
+
+      /*
+       const std::vector<InternalSideUserObject *> & isuos = pps[0].internalSideUserObjects(group);
       for (unsigned int i = 0; i < isuos.size(); ++i)
       {
         InternalSideUserObject *ps = isuos[i];
@@ -2195,6 +2240,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
         }
         already_gathered.insert(ps);
       }
+      */
     }
 
     // Don't waste time looping over nodes if there aren't any nodal user_objects to calculate

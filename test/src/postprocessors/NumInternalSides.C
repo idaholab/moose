@@ -12,29 +12,53 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ELEMENTPOSTPROCESSOR_H
-#define ELEMENTPOSTPROCESSOR_H
-
-#include "ElementUserObject.h"
-#include "Postprocessor.h"
-
-//Forward Declarations
-class ElementPostprocessor;
+#include "NumInternalSides.h"
 
 template<>
-InputParameters validParams<ElementPostprocessor>();
-
-class ElementPostprocessor :
-  public ElementUserObject,
-  public Postprocessor
+InputParameters validParams<NumInternalSides>()
 {
-public:
-  ElementPostprocessor(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<InternalSidePostprocessor>();
+  return params;
+}
 
-  /**
-   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
-   */
-  virtual void finalize(){ }
-};
+NumInternalSides::NumInternalSides(const std::string & name, InputParameters parameters) :
+    InternalSidePostprocessor(name, parameters),
+    _count(0)
+{
+}
 
-#endif
+NumInternalSides::~NumInternalSides()
+{
+}
+
+void
+NumInternalSides::execute()
+{
+  _count++;
+}
+
+void
+NumInternalSides::initialize()
+{
+  _count = 0;
+}
+
+void
+NumInternalSides::finalize()
+{
+  gatherSum(_count);
+}
+
+
+PostprocessorValue
+NumInternalSides::getValue()
+{
+  return _count;
+}
+
+void
+NumInternalSides::threadJoin(const UserObject & uo)
+{
+  const NumInternalSides & obj = static_cast<const NumInternalSides &>(uo);
+  _count += obj.count();
+}

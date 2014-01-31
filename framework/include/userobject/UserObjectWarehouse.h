@@ -84,7 +84,7 @@ public:
    * Get the list of internal side user objects
    * @return The list of internal side user objects
    */
-  const std::vector<InternalSideUserObject *> & internalSideUserObjects(GROUP group = ALL);
+  const std::vector<InternalSideUserObject *> & internalSideUserObjects(SubdomainID block_id, GROUP group = ALL);
 
   /**
    * Get the list of nodal user_objects
@@ -143,46 +143,55 @@ public:
   const std::set<SubdomainID> & blockNodalIds() { return _block_ids_with_nodal_user_objects; }
 
 protected:
+
+  /// Userobject Names
   std::map<std::string, UserObject *> _name_to_user_objects;
 
+  // All UserObjects
+  std::vector<UserObject *> _all_user_objects;
   std::vector<ElementUserObject *> _all_element_user_objects;
   std::vector<NodalUserObject *> _all_nodal_user_objects;
   std::vector<SideUserObject *> _all_side_user_objects;
+  std::vector<InternalSideUserObject *> _all_internal_side_user_objects;
   std::vector<GeneralUserObject *> _all_generic_user_objects;
-  std::vector<UserObject *> _all_user_objects;
 
-  std::map<SubdomainID, std::vector<ElementUserObject *> > _element_user_objects;
-  std::map<BoundaryID, std::vector<SideUserObject *> > _side_user_objects;
-  std::vector<InternalSideUserObject *> _internal_side_user_objects;
-  std::map<BoundaryID, std::vector<NodalUserObject *> > _nodal_user_objects;
-  // Block restricted nodal user objects
+  // Block restricted UserObjects
+  std::map<SubdomainID, std::vector<ElementUserObject *> > _block_element_user_objects;
+  std::map<SubdomainID, std::vector<InternalSideUserObject *> > _block_internal_side_user_objects;
   std::map<SubdomainID, std::vector<NodalUserObject *> > _block_nodal_user_objects;
-  std::vector<GeneralUserObject *> _generic_user_objects;
+
+  // Boundary restricted User Objects
+  std::map<BoundaryID, std::vector<SideUserObject *> > _boundary_side_user_objects;
+  std::map<BoundaryID, std::vector<NodalUserObject *> > _boundary_nodal_user_objects;
 
   // PreAux UO
   std::map<SubdomainID, std::vector<ElementUserObject *> > _pre_element_user_objects;
-  std::map<BoundaryID, std::vector<SideUserObject *> > _pre_side_user_objects;
-  std::vector<InternalSideUserObject *> _pre_internal_side_user_objects;
-  std::map<BoundaryID, std::vector<NodalUserObject *> > _pre_nodal_user_objects;
   std::map<SubdomainID, std::vector<NodalUserObject *> > _pre_block_nodal_user_objects;
+  std::map<SubdomainID, std::vector<InternalSideUserObject *> > _pre_internal_side_user_objects;
+  std::map<BoundaryID, std::vector<SideUserObject *> > _pre_side_user_objects;
+  std::map<BoundaryID, std::vector<NodalUserObject *> > _pre_nodal_user_objects;
   std::vector<GeneralUserObject *> _pre_generic_user_objects;
 
   // PostAux UO
   std::map<SubdomainID, std::vector<ElementUserObject *> > _post_element_user_objects;
-  std::map<BoundaryID, std::vector<SideUserObject *> > _post_side_user_objects;
-  std::vector<InternalSideUserObject *> _post_internal_side_user_objects;
-  std::map<BoundaryID, std::vector<NodalUserObject *> > _post_nodal_user_objects;
+  std::map<SubdomainID, std::vector<InternalSideUserObject *> > _post_internal_side_user_objects;
   std::map<SubdomainID, std::vector<NodalUserObject *> > _post_block_nodal_user_objects;
+  std::map<BoundaryID, std::vector<SideUserObject *> > _post_side_user_objects;
+  std::map<BoundaryID, std::vector<NodalUserObject *> > _post_nodal_user_objects;
   std::vector<GeneralUserObject *> _post_generic_user_objects;
 
   /// All of the block ids that have user_objects specified to act on them
   std::set<SubdomainID> _block_ids_with_user_objects;
+
   /// All of the boundary ids that have user_objects specified to act on them
   std::set<BoundaryID> _boundary_ids_with_user_objects;
+
   /// All of the nodeset ids that have user_objects specified to act on them
   std::set<BoundaryID> _nodeset_ids_with_user_objects;
+
   /// All of the block ids that have nodal user_objects specified to act on them
   std::set<SubdomainID> _block_ids_with_nodal_user_objects;
+
 };
 
-#endif // USER_OBJECTWAREHOUSE_H
+#endif // USER_OBJECTWAREHOUSE_Hb

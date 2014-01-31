@@ -115,6 +115,8 @@ def parseArguments(args=None):
   distcc.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
   distcc.add_argument('--disable', nargs='+', help='Remove username/hostname/IP(s) from your DISTCC_HOSTS list')
   distcc.add_argument('--enable','-e', action='store_true', help='Enable the previousily disabled machines')
+  distcc.add_argument('--hammer', nargs='+', help='Set username/hostname/IP(s) from your DISTCC_HOSTS list to use max available processors')
+  distcc.add_argument('--normal','-n', action='store_true', help='Reset the machines to utilize the normal number of cores')
   distcc.add_argument('--allow_off_network', action='store_true', help='Allow for off INL network to use distcc pool')
 
   # Options that do not run make
@@ -167,7 +169,7 @@ if __name__ == "__main__":
   warehouse = MachineWarehouse(restrict=['141','134'], **opt)
 
   # Create the DmakeRC object
-  opt = subOptions(options, 'buck', 'dedicated', 'description', 'clean', 'disable', 'enable', 'refresh_time')
+  opt = subOptions(options, 'buck', 'dedicated', 'description', 'clean', 'disable', 'enable', 'refresh_time', 'hammer', 'normal')
   dmakerc = DmakeRC(warehouse.master, **opt)
 
   # Create the DistccDaemon object
@@ -179,7 +181,7 @@ if __name__ == "__main__":
 
   # Start the daemons
   if options.refresh or (options.daemon and not options.no_daemon):
-    warehouse.buildMachines(dmakerc.get('HOST_LINES'))
+    warehouse.buildMachines(dmakerc.get('HOST_LINES'), disable=dmakerc.get('DISABLE'), hammer=dmakerc.get('HAMMER'))
     daemon.start(warehouse.machines)
 
   # Exit if running basic daemon options
@@ -191,7 +193,7 @@ if __name__ == "__main__":
 
     # Get hosts and jobs from warehouse
     opt = subOptions(options,'max','localhost','localslots','localslots_cpp','local')
-    distcc_hosts, jobs = warehouse.getHosts(dmakerc.get('HOST_LINES'), disable=dmakerc.get('DISABLE'), **opt)
+    distcc_hosts, jobs = warehouse.getHosts(dmakerc.get('HOST_LINES'), disable=dmakerc.get('DISABLE'), hammer=dmakerc.get('HAMMER'), **opt)
 
     # Use user supplied jobs, if given
     if options.jobs:
@@ -201,8 +203,15 @@ if __name__ == "__main__":
     dmakerc.set(DISTCC_HOSTS=distcc_hosts, JOBS=jobs, write=(not options.max))
 
   else:
+    # Use user supplied jobs, if given, and store in .dmakerc file
+    if options.jobs:
+      jobs = options.jobs
+      dmakerc.set(JOBS=jobs)
+
+    # Get the cached hosts and jobs
     distcc_hosts = dmakerc.get("DISTCC_HOSTS")
     jobs = dmakerc.get("JOBS")
+
     print 'Using cached DISTCC_HOSTS, use --refresh to rebuild'
 
   # Display the  output

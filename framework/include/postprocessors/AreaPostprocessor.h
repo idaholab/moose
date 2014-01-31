@@ -34,6 +34,7 @@ public:
 
 protected:
   virtual Real computeQpIntegral();
+
 };
 
 #endif

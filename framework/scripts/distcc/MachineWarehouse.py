@@ -74,7 +74,8 @@ class MachineWarehouse(object):
   #    localslots = <int>       - Set the DISTCC_HOSTS localslots value (passed to _buildHosts)
   #    localslots_cpp = <int>   - Set the DISTCC_HOSTS localslots_cpp value (passed to _buildHosts)
   #    disable = list(<str>)    - list of machines to disable
-  #    serial = True | {False}    - toggle the parallel creation of the Machine objects
+  #    serial = True | {False}  - toggle the parallel creation of the Machine objects
+  #    hammer = list(<str>)     - list of machines to set to max
   #
   #  @see _buildHosts
   def getHosts(self, host_lines, **kwargs):
@@ -92,7 +93,7 @@ class MachineWarehouse(object):
 
     # Return remote
     else:
-      self.buildMachines(host_lines, disable=kwargs.pop('disable', None), serial=kwargs.pop("serial", False))
+      self.buildMachines(host_lines, disable=kwargs.pop('disable', None), serial=kwargs.pop("serial", False), hammer=kwargs.pop('hammer', None))
       return self._buildHosts(**kwargs)
 
 
@@ -117,8 +118,9 @@ class MachineWarehouse(object):
     if len(host_lines) == 0:
       return
 
-    # Get the disable list
+    # Get the disable list and hammer list
     disable = kwargs.pop('disable', None)
+    hammer = kwargs.pop('hammer', None)
 
     # Create the Machine objects (in parallel)
     output = []
@@ -138,7 +140,14 @@ class MachineWarehouse(object):
     # supply partial ip/hostnames so loop through each and test that the substring
     # is not contained in either
     for machine in output:
-      if (disable != None):
+      if hammer != None:
+        for h in hammer:
+          if machine.available and ((h in machine.address) or (h in machine.hostname) or (h in machine.username)):
+            machine.status = 'hammer'
+            machine.use_threads = machine.threads
+            break
+
+      if disable != None:
         for d in disable:
           if (d in machine.address) or (d in machine.hostname) or (d in machine.username):
             machine.status = 'disabled'

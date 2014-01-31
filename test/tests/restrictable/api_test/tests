@@ -1,18 +1,4 @@
 [Tests]
-  [./fe_problem_null]
-    type = 'RunException'
-    input = 'block_restrictable.i'
-	  cli_args = "Kernels/diff/test=fe_problem_null"
-    expect_err = "The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'"
-  [../]
-
-	[./mesh_null]
-    type = 'RunException'
-    input = 'block_restrictable.i'
-		cli_args = "Kernels/diff/test=mesh_null"
-    expect_err = "The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'"
-  [../]
-
   [./block_solution_working]
 	  type = 'Exodiff'
 		input = 'block_restrictable.i'
@@ -110,16 +96,4 @@
 		cli_args = "BCs/left/test=hasBoundaryMaterialProperty_false"
 		expect_err = "hasBoundaryMaterialProperty is false, test passed"
 	[../]
-
-	[./current_boundary_id_valid]
-		type = 'RunException'
-		input = 'current_boundary_id.i'
-		expect_err = "Valid boundary id test passed"
-  [../]
-	[./current_boundary_id_invalid]
-		type = 'RunException'
-		input = 'current_boundary_id.i'
-		cli_args = 'UserObjects/test/test_invalid=true'
-		expect_err = "Invalid boundary id test passed"
-  [../]
 []

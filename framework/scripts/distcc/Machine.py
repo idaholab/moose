@@ -27,6 +27,7 @@ class Machine(object):
     # Initialize the available fields (public)
     self.address = None
     self.cores = None
+    self.threads = None
     self.use_threads = None
     self.network = None
     self.description = None

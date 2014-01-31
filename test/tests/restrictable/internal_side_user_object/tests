@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'internal_side_user_object.i'
+    csvdiff = 'internal_side_user_object_out.csv'
+  [../]
+[]

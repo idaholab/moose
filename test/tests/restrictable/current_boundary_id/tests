@@ -1,0 +1,13 @@
+[Tests]
+	[./current_boundary_id_valid]
+		type = 'RunException'
+		input = 'current_boundary_id.i'
+		expect_err = "Valid boundary id test passed"
+  [../]
+	[./current_boundary_id_invalid]
+		type = 'RunException'
+		input = 'current_boundary_id.i'
+		cli_args = 'UserObjects/test/test_invalid=true'
+		expect_err = "Invalid boundary id test passed"
+  [../]
+[]

@@ -1136,7 +1136,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
 
 void
-NonlinearSystem::computeResidualInternal(Moose::KernelType type)
+ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 {
 
    // residualSetup() /////
@@ -1148,6 +1148,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
     if (_doing_dg) _dg_kernels[i].residualSetup();
     _constraints[i].residualSetup();
   }
+
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)

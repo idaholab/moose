@@ -105,6 +105,7 @@
 
 #include "EqualValueNodalConstraint.h"
 
+
 // user objects
 #include "MTUserObject.h"
 #include "RandomHitUserObject.h"
@@ -126,6 +127,7 @@
 #include "TestCopyInitialSolution.h"
 #include "InsideValuePPS.h"
 #include "BoundaryValuePPS.h"
+#include "NumInternalSides.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -346,6 +348,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   registerProblem(MooseTestProblem);
   registerProblem(FailingProblem);
+  registerProblem(NumInternalSides);
 }
 
 void

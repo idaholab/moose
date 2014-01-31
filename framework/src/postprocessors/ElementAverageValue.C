@@ -30,7 +30,6 @@ void
 ElementAverageValue::initialize()
 {
   ElementIntegralVariablePostprocessor::initialize();
-
   _volume = 0;
 }
 

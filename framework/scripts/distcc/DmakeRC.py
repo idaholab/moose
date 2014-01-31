@@ -29,7 +29,8 @@ class DmakeRC(object):
   def __init__(self, master, **kwargs):
 
     # List of available items
-    self._items = ['HOST_LINES', 'DESCRIPTION', 'DISTCC_HOSTS', 'JOBS', 'DISABLE', "DISTCC_HOSTS_TIME", "REFRESH_TIME"]
+    self._items = ['HOST_LINES', 'DESCRIPTION', 'DISTCC_HOSTS', 'JOBS', 'DISABLE', 'HAMMER',
+                   'DISTCC_HOSTS_TIME', 'REFRESH_TIME']
 
     # Extract the options from the user
     self._test = kwargs.pop('buck', False)
@@ -47,6 +48,10 @@ class DmakeRC(object):
 
     # Set the default update flag (assume update is not required by default)
     self._update = False
+
+    # Initialize remote member variables
+    self._remote = None
+    self._remote_ip = None
 
     # Remove .dmakerc if clean option is given
     if kwargs.pop('clean', False):
@@ -81,16 +86,36 @@ class DmakeRC(object):
       self.set(DISABLE=None)
       self._update = True
 
+    # Reset machines that were hammered
+    if kwargs.pop('normal', False):
+      self.set(HAMMER=None)
+      self._update = True
+
     # Set the disable list to be the same as the input, requires update
-    if kwargs['disable'] != None:
+    disable = kwargs.pop('disable', None)
+    if disable != None:
 
       # If the store value returns none, create a new list
       if self.get('DISABLE') == None:
-        self.set(DISABLE=kwargs['disable'])
+        self.set(DISABLE=disable)
 
       # Append the existing list
       else:
-        self.set(DISABLE=self.get('DISABLE') + kwargs['disable'])
+        if disable not in self.get('DISABLE'):
+          self.set(DISABLE=self.get('DISABLE') + kwargs['disable'])
+      self._update = True
+
+    # Set the hammer list to be the same as the input, requires update
+    hammer = kwargs.pop('hammer', None)
+    if hammer != None:
+
+      # If the store value returns none, create a new list
+      if self.get('HAMMER') == None:
+        self.set(HAMMER=hammer)
+
+      # Append the existing list
+      else:
+        self.set(HAMMER=self.get('HAMMER') + hammer)
       self._update = True
 
     # Refresh time (look for stored value, use 10 if it is not stored)
@@ -149,7 +174,7 @@ class DmakeRC(object):
 
         # If the distcc hosts are changed, update the time
         if key == 'DISTCC_HOSTS':
-          self._dmakerc['TIME'] = datetime.datetime.now()
+          self._dmakerc['DISTCC_HOSTS_TIME'] = datetime.datetime.now()
 
     # Store the change to the file (this is allways done unless specified)
     if write:
@@ -169,10 +194,10 @@ class DmakeRC(object):
   def needUpdate(self):
 
     # Time difference
-    if self.get('TIME') == None:
+    if self.get('DISTCC_HOSTS_TIME') == None:
       delta = float('inf')
     else:
-      delta = (datetime.datetime.now() - self.get('TIME')).seconds
+      delta = (datetime.datetime.now() - self.get('DISTCC_HOSTS_TIME')).seconds
 
     # Perform checks
     return self._update or (self._remote_ip != self._local_ip) or (delta > self.get('REFRESH_TIME'))
@@ -231,7 +256,7 @@ class DmakeRC(object):
 
     # If it still dosen't exist, run locally
     if data == None:
-      return None
+      return
 
     # Return the host lines from the remote server
     self._remote, self._remote_ip = self._cleanHostLines(data)

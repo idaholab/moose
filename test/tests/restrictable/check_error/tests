@@ -1,0 +1,14 @@
+[Tests]
+  [./fe_problem_null]
+    type = 'RunException'
+    input = 'check_error.i'
+	  cli_args = "Kernels/diff/test=fe_problem_null"
+    expect_err = "The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'"
+  [../]
+
+	[./mesh_null]
+    type = 'RunException'
+    input = 'check_error.i'
+		cli_args = "Kernels/diff/test=mesh_null"
+    expect_err = "The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'"
+  [../]

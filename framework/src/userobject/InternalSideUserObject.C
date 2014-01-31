@@ -19,6 +19,7 @@ InputParameters validParams<InternalSideUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<BlockRestrictable>();
+  //params.addParam<bool>(
   return params;
 }
 

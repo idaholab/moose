@@ -12,29 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ELEMENTPOSTPROCESSOR_H
-#define ELEMENTPOSTPROCESSOR_H
-
-#include "ElementUserObject.h"
-#include "Postprocessor.h"
-
-//Forward Declarations
-class ElementPostprocessor;
+#include "InternalSidePostprocessor.h"
 
 template<>
-InputParameters validParams<ElementPostprocessor>();
-
-class ElementPostprocessor :
-  public ElementUserObject,
-  public Postprocessor
+InputParameters validParams<InternalSidePostprocessor>()
 {
-public:
-  ElementPostprocessor(const std::string & name, InputParameters parameters);
+  InputParameters params = validParams<InternalSideUserObject>();
+  params += validParams<Postprocessor>();
+  return params;
+}
 
-  /**
-   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
-   */
-  virtual void finalize(){ }
-};
-
-#endif
+InternalSidePostprocessor::InternalSidePostprocessor(const std::string & name, InputParameters parameters) :
+    InternalSideUserObject(name, parameters),
+    Postprocessor(name, parameters)
+{
+}

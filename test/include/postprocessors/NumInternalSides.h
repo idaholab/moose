@@ -12,29 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ELEMENTPOSTPROCESSOR_H
-#define ELEMENTPOSTPROCESSOR_H
+#ifndef NUMINTERNALSIDES_H
+#define NUMINTERNALSIDES_H
 
-#include "ElementUserObject.h"
-#include "Postprocessor.h"
+// MOOSE includes
+#include "InternalSidePostprocessor.h"
 
-//Forward Declarations
-class ElementPostprocessor;
+// Forward declerations
+class NumInternalSides;
 
 template<>
-InputParameters validParams<ElementPostprocessor>();
+InputParameters validParams<NumInternalSides>();
 
-class ElementPostprocessor :
-  public ElementUserObject,
-  public Postprocessor
+/**
+ * An object for testing the block restricted behavior of InternalSideUserObject, it
+ * simply counts the number of sides
+ */
+class NumInternalSides : public InternalSidePostprocessor
 {
 public:
-  ElementPostprocessor(const std::string & name, InputParameters parameters);
+  NumInternalSides(const std::string & name, InputParameters parameters);
+  virtual ~NumInternalSides();
+  virtual void execute();
+  virtual void threadJoin(const UserObject & uo);
+  virtual void finalize();
+  virtual void initialize();
+  virtual PostprocessorValue getValue();
+  const unsigned int & count() const { return _count; }
 
-  /**
-   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
-   */
-  virtual void finalize(){ }
+private:
+  unsigned int _count;
 };
 
-#endif
+#endif //NUMINTERNALSIDES_H

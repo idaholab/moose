@@ -29,16 +29,14 @@ UserObjectWarehouse::UserObjectWarehouse()
 UserObjectWarehouse::~UserObjectWarehouse()
 {
   for (std::vector<UserObject *>::iterator i=_all_user_objects.begin(); i!=_all_user_objects.end(); ++i)
-  {
     delete *i;
-  }
 }
 
 void
 UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo)
 {
   // Bin the user objects into either Pre or Post AuxKernel bins
-  for (std::map<SubdomainID, std::vector<ElementUserObject *> >::iterator it1 = _element_user_objects.begin(); it1 != _element_user_objects.end(); ++it1)
+  for (std::map<SubdomainID, std::vector<ElementUserObject *> >::iterator it1 = _block_element_user_objects.begin(); it1 != _block_element_user_objects.end(); ++it1)
   {
     _pre_element_user_objects[it1->first].clear();
     _post_element_user_objects[it1->first].clear();
@@ -51,7 +49,7 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
     }
   }
 
-  for (std::map<BoundaryID, std::vector<SideUserObject *> >::iterator it1 = _side_user_objects.begin(); it1 != _side_user_objects.end(); ++it1)
+  for (std::map<BoundaryID, std::vector<SideUserObject *> >::iterator it1 = _boundary_side_user_objects.begin(); it1 != _boundary_side_user_objects.end(); ++it1)
   {
     _pre_side_user_objects[it1->first].clear();
     _post_side_user_objects[it1->first].clear();
@@ -66,15 +64,21 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
 
   _pre_internal_side_user_objects.clear();
   _post_internal_side_user_objects.clear();
-  for (std::vector<InternalSideUserObject *>::iterator it1 = _internal_side_user_objects.begin(); it1 != _internal_side_user_objects.end(); ++it1)
+  for (std::map<SubdomainID, std::vector<InternalSideUserObject *> >::iterator it1 = _block_internal_side_user_objects.begin(); it1 != _block_internal_side_user_objects.end(); ++it1)
   {
-    if (depend_uo.find((*it1)->name()) != depend_uo.end())
-      _pre_internal_side_user_objects.push_back(*it1);
-    else
-      _post_internal_side_user_objects.push_back(*it1);
+    _pre_internal_side_user_objects[it1->first].clear();
+    _post_internal_side_user_objects[it1->first].clear();
+    for (std::vector<InternalSideUserObject *>::iterator it2 = it1->second.begin(); it2 != it1->second.end(); ++it2)
+    {
+      if (depend_uo.find((*it2)->name()) != depend_uo.end())
+        _pre_internal_side_user_objects[it1->first].push_back(*it2);
+      else
+        _post_internal_side_user_objects[it1->first].push_back(*it2);
+    }
   }
 
-  for (std::map<BoundaryID, std::vector<NodalUserObject *> >::iterator it1 = _nodal_user_objects.begin(); it1 != _nodal_user_objects.end(); ++it1)
+
+  for (std::map<BoundaryID, std::vector<NodalUserObject *> >::iterator it1 = _boundary_nodal_user_objects.begin(); it1 != _boundary_nodal_user_objects.end(); ++it1)
   {
     _pre_nodal_user_objects[it1->first].clear();
     _post_nodal_user_objects[it1->first].clear();
@@ -102,7 +106,7 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
 
   _pre_generic_user_objects.clear();
   _post_generic_user_objects.clear();
-  for (std::vector<GeneralUserObject *>::iterator it2 = _generic_user_objects.begin(); it2 != _generic_user_objects.end(); ++it2)
+  for (std::vector<GeneralUserObject *>::iterator it2 = _all_generic_user_objects.begin(); it2 != _all_generic_user_objects.end(); ++it2)
   {
     if (depend_uo.find((*it2)->name()) != depend_uo.end())
       _pre_generic_user_objects.push_back(*it2);
@@ -129,8 +133,8 @@ UserObjectWarehouse::initialSetup()
       ++i)
     (*i)->initialSetup();
 
-  for(std::vector<InternalSideUserObject *>::const_iterator i=_internal_side_user_objects.begin();
-      i!=_internal_side_user_objects.end();
+  for(std::vector<InternalSideUserObject *>::const_iterator i=_all_internal_side_user_objects.begin();
+      i!=_all_internal_side_user_objects.end();
       ++i)
     (*i)->initialSetup();
 
@@ -158,8 +162,8 @@ UserObjectWarehouse::timestepSetup()
       ++i)
     (*i)->timestepSetup();
 
-  for(std::vector<InternalSideUserObject *>::const_iterator i=_internal_side_user_objects.begin();
-      i!=_internal_side_user_objects.end();
+  for(std::vector<InternalSideUserObject *>::const_iterator i=_all_internal_side_user_objects.begin();
+      i!=_all_internal_side_user_objects.end();
       ++i)
     (*i)->timestepSetup();
 
@@ -187,8 +191,8 @@ UserObjectWarehouse::residualSetup()
       ++i)
     (*i)->residualSetup();
 
-  for(std::vector<InternalSideUserObject *>::const_iterator i=_internal_side_user_objects.begin();
-      i!=_internal_side_user_objects.end();
+  for(std::vector<InternalSideUserObject *>::const_iterator i=_all_internal_side_user_objects.begin();
+      i!=_all_internal_side_user_objects.end();
       ++i)
     (*i)->residualSetup();
 
@@ -216,8 +220,8 @@ UserObjectWarehouse::jacobianSetup()
       ++i)
     (*i)->jacobianSetup();
 
-  for(std::vector<InternalSideUserObject *>::const_iterator i=_internal_side_user_objects.begin();
-      i!=_internal_side_user_objects.end();
+  for(std::vector<InternalSideUserObject *>::const_iterator i=_all_internal_side_user_objects.begin();
+      i!=_all_internal_side_user_objects.end();
       ++i)
     (*i)->jacobianSetup();
 
@@ -238,19 +242,19 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
   // Add an ElementUserObject
   if(dynamic_cast<ElementUserObject*>(user_object))
   {
-    // Extract the blockIDs (see by BlockRestrictable)
-    ElementUserObject * elem_uo = dynamic_cast<ElementUserObject*>(user_object);
-    const std::set<SubdomainID> & blocks = elem_uo->blockIDs();
+    // Extract the BlockIDs (see BlockRestrictable)
+    ElementUserObject * element_uo = dynamic_cast<ElementUserObject*>(user_object);
+    const std::set<SubdomainID> & blks = element_uo->blockIDs();
 
-    // Add the to list of all ElementUserObjects
-    _all_element_user_objects.push_back(elem_uo);
+    // Add to the list of all SideUserObjects
+    _all_element_user_objects.push_back(element_uo);
 
     // Loop through each of the block ids and update the various storage lists
-    for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
-      {
-        _element_user_objects[*it].push_back(elem_uo);
-        _block_ids_with_user_objects.insert(*it);
-      }
+    for (std::set<SubdomainID>::const_iterator it = blks.begin(); it != blks.end(); ++it)
+    {
+      _block_element_user_objects[*it].push_back(element_uo);
+      _block_ids_with_user_objects.insert(*it);
+    }
   }
 
   // Add a SideUserObject
@@ -266,7 +270,7 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
     // Loop through each of the block ids and update the various storage lists
     for (std::set<BoundaryID>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
     {
-      _side_user_objects[*it].push_back(side_uo);
+      _boundary_side_user_objects[*it].push_back(side_uo);
       _boundary_ids_with_user_objects.insert(*it);
     }
   }
@@ -274,8 +278,19 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
   // Add an InternalSideUserObject
   else if(dynamic_cast<InternalSideUserObject*>(user_object))
   {
-    InternalSideUserObject * int_side_uo = dynamic_cast<InternalSideUserObject*>(user_object);
-    _internal_side_user_objects.push_back(int_side_uo);
+    // Extract the BlockIDs (see BlockRestrictable)
+    InternalSideUserObject * element_uo = dynamic_cast<InternalSideUserObject*>(user_object);
+    const std::set<SubdomainID> & blks = element_uo->blockIDs();
+
+    // Add to the list of all SideUserObjects
+    _all_internal_side_user_objects.push_back(element_uo);
+
+    // Loop through each of the block ids and update the various storage lists
+    for (std::set<SubdomainID>::const_iterator it = blks.begin(); it != blks.end(); ++it)
+    {
+      _block_internal_side_user_objects[*it].push_back(element_uo);
+      _block_ids_with_user_objects.insert(*it);
+    }
   }
 
   // Add a NodalUserObject
@@ -291,7 +306,7 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
 
     // If the Block IDs does not contain ANY_BLOCK_ID, then the object is block restricted
     if (blks.find(Moose::ANY_BLOCK_ID) == blks.end())
-       for (std::set<SubdomainID>::const_iterator it = blks.begin(); it != blks.end(); ++it)
+      for (std::set<SubdomainID>::const_iterator it = blks.begin(); it != blks.end(); ++it)
       {
         _block_nodal_user_objects[*it].push_back(nodal_uo);
         _block_ids_with_nodal_user_objects.insert(*it);
@@ -301,10 +316,9 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
     else
       for (std::set<BoundaryID>::const_iterator it = bnds.begin(); it != bnds.end(); ++it)
       {
-        _nodal_user_objects[*it].push_back(nodal_uo);
+        _boundary_nodal_user_objects[*it].push_back(nodal_uo);
         _nodeset_ids_with_user_objects.insert(*it);
       }
-
   }
 
   // Add a GeneralUserObject
@@ -313,7 +327,6 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
     GeneralUserObject * general_uo = dynamic_cast<GeneralUserObject*>(user_object);
 
     // FIXME: generic pps multithreaded
-    _generic_user_objects.push_back(general_uo);
     _all_generic_user_objects.push_back(general_uo);
   }
 }
@@ -324,7 +337,7 @@ UserObjectWarehouse::elementUserObjects(SubdomainID block_id, GROUP group)
   switch(group)
   {
   case ALL:
-    return _element_user_objects[block_id];
+    return _block_element_user_objects[block_id];
   case PRE_AUX:
     return _pre_element_user_objects[block_id];
   case POST_AUX:
@@ -340,29 +353,30 @@ UserObjectWarehouse::sideUserObjects(BoundaryID boundary_id, GROUP group)
   switch(group)
   {
   case ALL:
-    return _side_user_objects[boundary_id];
+    return _boundary_side_user_objects[boundary_id];
   case PRE_AUX:
     return _pre_side_user_objects[boundary_id];
   case POST_AUX:
     return _post_side_user_objects[boundary_id];
   default:
-    mooseError("Bad Enum");
+    mooseError("Bad value for Enum GROUP, must be ALL, PRE_AUX, or POST_AUX");
   }
 }
 
 const std::vector<InternalSideUserObject *> &
-UserObjectWarehouse::internalSideUserObjects(GROUP group)
+UserObjectWarehouse::internalSideUserObjects(SubdomainID block_id, GROUP group)
 {
   switch (group)
   {
   case ALL:
-    return _internal_side_user_objects;
+    return _block_internal_side_user_objects[block_id];
   case PRE_AUX:
-    return _pre_internal_side_user_objects;
+    return _pre_internal_side_user_objects[block_id];
   case POST_AUX:
-    return _post_internal_side_user_objects;
+    return _post_internal_side_user_objects[block_id];
   default:
-    mooseError("Bad Enum");
+    mooseError("Bad value for Enum GROUP, must be ALL, PRE_AUX, or POST_AUX");
+
   }
 }
 
@@ -372,13 +386,13 @@ UserObjectWarehouse::nodalUserObjects(BoundaryID boundary_id, GROUP group)
   switch(group)
   {
   case ALL:
-    return _nodal_user_objects[boundary_id];
+    return _boundary_nodal_user_objects[boundary_id];
   case PRE_AUX:
     return _pre_nodal_user_objects[boundary_id];
   case POST_AUX:
     return _post_nodal_user_objects[boundary_id];
   default:
-    mooseError("Bad Enum");
+    mooseError("Bad value for Enum GROUP, must be ALL, PRE_AUX, or POST_AUX");
   }
 }
 
@@ -394,7 +408,7 @@ UserObjectWarehouse::blockNodalUserObjects(SubdomainID subdomain_id, GROUP group
   case POST_AUX:
     return _post_block_nodal_user_objects[subdomain_id];
   default:
-    mooseError("Bad Enum");
+    mooseError("Bad value for Enum GROUP, must be ALL, PRE_AUX, or POST_AUX");
   }
 }
 
@@ -404,12 +418,12 @@ UserObjectWarehouse::genericUserObjects(GROUP group)
   switch(group)
   {
   case ALL:
-    return _generic_user_objects;
+    return _all_generic_user_objects;
   case PRE_AUX:
     return _pre_generic_user_objects;
   case POST_AUX:
     return _post_generic_user_objects;
   default:
-    mooseError("Bad Enum");
+    mooseError("Bad value for Enum GROUP, must be ALL, PRE_AUX, or POST_AUX");
   }
 }

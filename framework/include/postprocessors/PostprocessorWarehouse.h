@@ -22,6 +22,7 @@
 
 class Postprocessor;
 class ElementPostprocessor;
+class InternalSidePostprocessor;
 class NodalPostprocessor;
 class SidePostprocessor;
 class GeneralPostprocessor;
@@ -122,9 +123,11 @@ protected:
   std::vector<ElementPostprocessor *> _all_element_postprocessors;
   std::vector<NodalPostprocessor *> _all_nodal_postprocessors;
   std::vector<SidePostprocessor *> _all_side_postprocessors;
+  std::vector<InternalSidePostprocessor *> _all_internal_side_postprocessors;
   std::vector<GeneralPostprocessor *> _all_generic_postprocessors;
 
   std::map<SubdomainID, std::vector<ElementPostprocessor *> > _element_postprocessors;
+  std::map<SubdomainID, std::vector<InternalSidePostprocessor *> > _internal_side_postprocessors;
   std::map<BoundaryID, std::vector<SidePostprocessor *> > _side_postprocessors;
   std::map<BoundaryID, std::vector<NodalPostprocessor *> > _nodal_postprocessors;
   // Block restricted nodal pps
