@@ -27,9 +27,7 @@ class MachineWarehouse(object):
   #
   #  Optional Arguments:
   #    allow = list<str>          - list of ip addresses/hostnames to allow in DISTCC_HOSTS
-  #    restrict = list<str>       - a list of ip addresses to consider for local build restriction, if the
-  #                                 local machine starts with any of the values in this list,
-  #                                 perform a local build
+  #    restrict = list<str>       -
   #    allow_off_network = True | {False} - if true, the above restrictions are ignored
   #
   # @see DmakeRC
@@ -38,24 +36,29 @@ class MachineWarehouse(object):
     # Set default values for public/private members
     self.machines = []
     self.down = []
-    self._local = False
 
     # Build the master machine
     self.master = Machine(localhost=True)
 
-    # Check that your IP address against the restricted
-    restrict = kwargs.pop('restrict', None)
-    if (not kwargs.pop('allow_off_network')) and (restrict != None):
-      on_network = False
-      for r in restrict:
-        if self.master.address.startswith(r):
-          on_network = True
-          break
 
-      if not on_network:
-        print "Your machine (" + self.master.address + ") is off network, performing a local build"
-        self._local = True
-        return
+  ## Check network
+  # @param restrict A list of ip addresses to consider for local build restriction, if the
+  #                 local machine starts with any of the values in this list,
+  #                 erform a local build
+  # @return True if the machine is on the restricted network(s)
+  def onNetwork(self, restrict):
+
+    # Assume off network
+    on_network = False
+
+    # Check the master against the list of restrited ip addresses
+    for r in restrict:
+      if self.master.address.startswith(r):
+        on_network = True
+        break
+
+    # Return the result
+    return on_network
 
 
   ## Return the hosts line and number of jobs (public)
@@ -64,7 +67,6 @@ class MachineWarehouse(object):
   #  @return jobs
   #
   #  Optional Arguments (used by getHosts() directly):
-  #    local = True | {False}   - Run a local build
   #    jobs = <int>             - Custom, user-defined jobs number
   #
   #  Optional Arguments (passed to buildMachines or _buildHosts):
@@ -82,19 +84,12 @@ class MachineWarehouse(object):
 
     # Get the optional parameters needed by getHosts
     jobs = kwargs.get("jobs", None)
-    local = kwargs.pop("local", self._local)
 
-    # Return the local build host line and job number
-    if local:
-      if jobs == None:
-        jobs = self.master.threads
-      distcc_hosts = 'localhost/' + str(jobs)
-      return distcc_hosts, jobs
+    # Buld the Machine objects
+    self.buildMachines(host_lines, disable=kwargs.pop('disable', None), serial=kwargs.pop("serial", False), hammer=kwargs.pop('hammer', None))
 
-    # Return remote
-    else:
-      self.buildMachines(host_lines, disable=kwargs.pop('disable', None), serial=kwargs.pop("serial", False), hammer=kwargs.pop('hammer', None))
-      return self._buildHosts(**kwargs)
+    # Buld the hosts lines (return distcc_hosts and jobs)
+    return self._buildHosts(**kwargs)
 
 
   ## Build the remote Machine objects (public)

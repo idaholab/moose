@@ -165,8 +165,8 @@ if __name__ == "__main__":
   (options, make_args) = parseArguments()
 
   # Create the MachineWarehouse object, limit to the known networks
-  opt = subOptions(options, 'allow', 'allow_off_network')
-  warehouse = MachineWarehouse(restrict=['141','134'], **opt)
+  opt = subOptions(options, 'allow')
+  warehouse = MachineWarehouse(**opt)
 
   # Create the DmakeRC object
   opt = subOptions(options, 'buck', 'dedicated', 'description', 'clean', 'disable', 'enable', 'refresh_time', 'hammer', 'normal')
@@ -188,11 +188,21 @@ if __name__ == "__main__":
   if options.daemon or options.kill:
     sys.exit()
 
-  # Get the hosts and jobs
-  if dmakerc.needUpdate() or options.refresh:
+  # Check that ths system is on-network, perform a local build if it is off-network
+  if (not options.allow_off_network) and (not warehouse.onNetwork(['141', '134'])):
+    print "Your machine (" + warehouse.master.address + ") is off network, performing a local build"
+    options.local = True
+
+  # Perform local build
+  if options.local:
+    jobs = warehouse.master.threads
+    distcc_hosts = 'localhost/' + str(jobs)
+
+  # Build a new DISTCC_HOSTS line
+  elif dmakerc.needUpdate() or options.refresh:
 
     # Get hosts and jobs from warehouse
-    opt = subOptions(options,'max','localhost','localslots','localslots_cpp','local')
+    opt = subOptions(options,'max','localhost','localslots','localslots_cpp')
     distcc_hosts, jobs = warehouse.getHosts(dmakerc.get('HOST_LINES'), disable=dmakerc.get('DISABLE'), hammer=dmakerc.get('HAMMER'), **opt)
 
     # Use user supplied jobs, if given
@@ -202,6 +212,7 @@ if __name__ == "__main__":
     # Update the DmakeRC file
     dmakerc.set(DISTCC_HOSTS=distcc_hosts, JOBS=jobs, write=(not options.max))
 
+  # Use cached DISTCC_HOSTS
   else:
     # Use user supplied jobs, if given, and store in .dmakerc file
     if options.jobs:
