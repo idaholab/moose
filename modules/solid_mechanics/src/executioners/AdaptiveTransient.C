@@ -90,6 +90,7 @@ AdaptiveTransient::AdaptiveTransient(const std::string & name, InputParameters p
     _cutback_factor(getParam<Real>("cutback_factor")),
     _cutback_occurred(false)
 {
+  mooseWarning("AdaptiveTransient is deprecated and will be removed in the near future.  Please replace with Transient and IterationAdaptiveDT");
   _t_step = 0;
   _dt = 0;
   _time = _time_old = getParam<Real>("start_time");
