@@ -47,6 +47,8 @@
 #include "BlkResTestDiffusion.h"
 #include "DiffTensorKernel.h"
 #include "OptionallyCoupledForce.h"
+#include "FDDiffusion.h"
+#include "FDAdvection.h"
 
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
@@ -238,6 +240,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(DiffTensorKernel);
   registerKernel(ScalarLagrangeMultiplier);
   registerKernel(OptionallyCoupledForce);
+  registerKernel(FDDiffusion);
+  registerKernel(FDAdvection);
 
   // Aux kernels
   registerAux(CoupledAux);

@@ -163,6 +163,21 @@ public:
 
   /**
    * Compute values at interior quadrature points
+   * when this variable's elem dof i is perturbed
+   * by h in the current solution. Perturbation h
+   * is computed based on the current variable
+   * value at i, its size controlled by scale.
+   */
+  void computePerturbedElemValues(unsigned i, Real scale, Real& h);
+
+  /**
+   * Restore the values the variable had before a call to
+   * computePerturbedElemValues().
+   */
+  void restoreUnperturbedElemValues();
+
+  /**
+   * Compute values at interior quadrature points
    */
   void computeElemValues();
   /**
@@ -328,15 +343,15 @@ protected:
   /// Normals at QPs on faces
   const MooseArray<Point> & _normals;
 
-  VariableValue _u;
-  VariableValue _u_old;
-  VariableValue _u_older;
-  VariableGradient  _grad_u;
-  VariableGradient  _grad_u_old;
-  VariableGradient  _grad_u_older;
-  VariableSecond _second_u;
-  VariableSecond _second_u_old;
-  VariableSecond _second_u_older;
+  VariableValue _u, _u_bak;
+  VariableValue _u_old, _u_old_bak;
+  VariableValue _u_older, _u_older_bak;
+  VariableGradient  _grad_u, _grad_u_bak;
+  VariableGradient  _grad_u_old, _grad_u_old_bak;
+  VariableGradient  _grad_u_older, _grad_u_older_bak;
+  VariableSecond _second_u, _second_u_bak;
+  VariableSecond _second_u_old, _second_u_old_bak;
+  VariableSecond _second_u_older, _second_u_older_bak;
 
   VariableValue _u_neighbor;
   VariableValue _u_old_neighbor;
@@ -351,9 +366,9 @@ protected:
   // time derivatives
 
   /// u_dot (time derivative)
-  VariableValue _u_dot;
+  VariableValue _u_dot, _u_dot_bak;
   /// derivative of u_dot wrt u
-  VariableValue _du_dot_du;
+  VariableValue _du_dot_du, _du_dot_du_bak;
 
   // nodal stuff
 

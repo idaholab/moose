@@ -350,6 +350,262 @@ MooseVariable::secondPhiFaceNeighbor()
   return *_second_phi_face_neighbor;
 }
 
+
+// FIXME: this and computeElemeValues() could be refactored to reuse most of
+//        the common code, instead of duplicating it.
+void
+MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real perturbation_scale, Real& perturbation)
+{
+
+  bool is_transient = _subproblem.isTransient();
+  unsigned int nqp = _qrule->n_points();
+
+  _u_bak = _u;
+  _grad_u_bak = _grad_u;
+  _u.resize(nqp);
+  _grad_u.resize(nqp);
+
+  if (_need_second)
+    _second_u_bak = _second_u;
+    _second_u.resize(nqp);
+
+  if (is_transient)
+  {
+    if (_is_nl)
+    {
+      _u_dot_bak = _u_dot;
+      _u_dot.resize(nqp);
+      _du_dot_du_bak = _du_dot_du;
+      _du_dot_du.resize(nqp);
+    }
+
+    if(_need_u_old)
+      _u_old_bak = _u_old;
+      _u_old.resize(nqp);
+
+    if(_need_u_older)
+      _u_older_bak = _u_older;
+      _u_older.resize(nqp);
+
+    if(_need_grad_old)
+      _grad_u_old_bak = _grad_u_old;
+      _grad_u_old.resize(nqp);
+
+    if(_need_grad_older)
+      _grad_u_older_bak = _grad_u_older;
+      _grad_u_older.resize(nqp);
+
+    if(_need_second_old)
+      _second_u_old_bak = _second_u_old;
+      _second_u_old.resize(nqp);
+
+    if(_need_second_older)
+      _second_u_older_bak = _second_u_older;
+      _second_u_older.resize(nqp);
+  }
+
+  for (unsigned int i = 0; i < nqp; ++i)
+  {
+    _u[i] = 0;
+    _grad_u[i] = 0;
+
+    if (_need_second)
+      _second_u[i] = 0;
+
+    if (is_transient)
+    {
+      if (_is_nl)
+      {
+        _u_dot[i] = 0;
+        _du_dot_du[i] = 0;
+      }
+
+      if(_need_u_old)
+        _u_old[i] = 0;
+
+      if(_need_u_older)
+        _u_older[i] = 0;
+
+      if(_need_grad_old)
+        _grad_u_old[i] = 0;
+
+      if(_need_grad_older)
+        _grad_u_older[i] = 0;
+
+      if(_need_second_old)
+        _second_u_old[i] = 0;
+
+      if(_need_second_older)
+        _second_u_older[i] = 0;
+    }
+  }
+
+  unsigned int num_dofs = _dof_indices.size();
+
+  const NumericVector<Real> & current_solution = *_sys.currentSolution();
+  const NumericVector<Real> & solution_old     = _sys.solutionOld();
+  const NumericVector<Real> & solution_older   = _sys.solutionOlder();
+  const NumericVector<Real> & u_dot            = _sys.solutionUDot();
+  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
+
+  dof_id_type idx = 0;
+  Real soln_local = 0;
+  Real soln_old_local = 0;
+  Real soln_older_local = 0;
+  Real u_dot_local = 0;
+  Real du_dot_du_local = 0;
+
+  Real phi_local = 0;
+  const RealGradient * dphi_qp = NULL;
+  const RealTensor * d2phi_local = NULL;
+
+  RealGradient * grad_u_qp = NULL;
+
+  RealGradient * grad_u_old_qp = NULL;
+  RealGradient * grad_u_older_qp = NULL;
+
+  RealTensor * second_u_qp = NULL;
+
+  RealTensor * second_u_old_qp = NULL;
+  RealTensor * second_u_older_qp = NULL;
+
+  for (unsigned int i=0; i < num_dofs; i++)
+  {
+    idx = _dof_indices[i];
+    soln_local = current_solution(idx);
+    if (i == perturbation_idx) {
+      // Compute the size of the perturbation.
+      // For the PETSc DS differencing method we use the magnitude of the variable at the "node"
+      // to determine the differencing parameters.  The WP method could use the element L2 norm of
+      // the variable  instead.
+      perturbation = soln_local;
+      // HACK: the use of fabs() and < assume Real is double or similar. Otherwise need to use PetscAbsScalar, PetscRealPart, etc.
+      if (fabs(perturbation) < 1.0e-16) perturbation = (perturbation < 0. ? -1.0: 1.0)*0.1;
+      perturbation *= perturbation_scale;
+      soln_local += perturbation;
+    }
+    if (is_transient)
+    {
+      if(_need_u_old || _need_grad_old || _need_second_old)
+        soln_old_local = solution_old(idx);
+
+      if(_need_u_older || _need_grad_older || _need_second_older)
+        soln_older_local = solution_older(idx);
+
+      if (_is_nl)
+      {
+        u_dot_local        = u_dot(idx);
+        du_dot_du_local    = du_dot_du(idx);
+      }
+    }
+
+    for (unsigned int qp=0; qp < nqp; qp++)
+    {
+      phi_local = _phi[i][qp];
+      dphi_qp = &_grad_phi[i][qp];
+
+      grad_u_qp = &_grad_u[qp];
+
+      if(is_transient)
+      {
+        if(_need_grad_old)
+          grad_u_old_qp = &_grad_u_old[qp];
+
+        if(_need_grad_older)
+          grad_u_older_qp = &_grad_u_older[qp];
+      }
+
+      if (_need_second || _need_second_old || _need_second_older)
+      {
+        d2phi_local = &(*_second_phi)[i][qp];
+
+        if(_need_second)
+          second_u_qp = &_second_u[qp];
+
+        if(is_transient)
+        {
+          if(_need_second_old)
+            second_u_old_qp = &_second_u_old[qp];
+
+          if(_need_second_older)
+            second_u_older_qp = &_second_u_older[qp];
+        }
+      }
+
+      _u[qp]     += phi_local * soln_local;
+
+      grad_u_qp->add_scaled(*dphi_qp, soln_local);
+
+      if (_need_second)
+        second_u_qp->add_scaled(*d2phi_local, soln_local);
+
+      if (is_transient)
+      {
+        if (_is_nl)
+        {
+          _u_dot[qp]        += phi_local * u_dot_local;
+          _du_dot_du[qp]    += phi_local * du_dot_du_local;
+        }
+
+        if(_need_u_old)
+          _u_old[qp]        += phi_local * soln_old_local;
+
+        if(_need_u_older)
+          _u_older[qp]      += phi_local * soln_older_local;
+
+        if(_need_grad_old)
+          grad_u_old_qp->add_scaled(*dphi_qp, soln_old_local);
+
+        if(_need_grad_older)
+          grad_u_older_qp->add_scaled(*dphi_qp, soln_older_local);
+
+        if(_need_second_old)
+          second_u_old_qp->add_scaled(*d2phi_local, soln_old_local);
+
+        if(_need_second_older)
+          second_u_older_qp->add_scaled(*d2phi_local, soln_older_local);
+      }
+    }
+  }
+}
+
+void
+MooseVariable::restoreUnperturbedElemValues()
+{
+  _u = _u_bak;
+  _grad_u = _grad_u_bak;
+  if (_need_second)
+    _second_u = _second_u_bak;
+
+
+  if (_subproblem.isTransient())
+  {
+    if (_is_nl)
+    {
+      _u_dot = _u_dot_bak;
+      _du_dot_du = _du_dot_du_bak;
+    }
+
+    if(_need_u_old)
+      _u_old = _u_old_bak;
+
+    if(_need_u_older)
+      _u_older = _u_older_bak;
+
+    if(_need_grad_old)
+      _grad_u_old = _grad_u_old_bak;
+
+    if(_need_grad_older)
+      _grad_u_older = _grad_u_older_bak;
+
+    if(_need_second_old)
+      _second_u_old = _second_u_old_bak;
+
+    if(_need_second_older)
+      _second_u_older = _second_u_older_bak;
+  }
+}
+
 void
 MooseVariable::computeElemValues()
 {
