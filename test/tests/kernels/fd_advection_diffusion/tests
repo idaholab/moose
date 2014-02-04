@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'fd_advection_diffusion.i'
     exodiff = 'fd_advection_diffusion_out.e'
+    max_parallel = 1
   [../]
 []
