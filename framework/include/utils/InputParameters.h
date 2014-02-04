@@ -297,6 +297,23 @@ public:
   void registerBase(const std::string &value);
 
   /**
+   * This method is here to indicate which Moose types a particular Action may build. It takes a space
+   * delimited list of registered MooseObjects.
+   */
+  void registerBuildableTypes(const std::string &names);
+
+  /**
+   * Returns the list of buildable types as a std::vector<std::string>
+   */
+  const std::vector<std::string> & getBuildableTypes() const;
+
+  /**
+   * Mutators for controlling whether or not the outermost level of syntax will be collapsed when printed.
+   */
+  void collapseSyntaxNesting(bool collapse);
+  bool collapseSyntaxNesting() const;
+
+  /**
    * Copy and Copy/Add operators for the InputParameters object
    */
   using Parameters::operator=;
@@ -356,7 +373,7 @@ public:
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.
-  InputParameters() {}
+  InputParameters();
 
   /// The documentation strings for each parameter
   std::map<std::string, std::string> _doc_string;
@@ -369,6 +386,14 @@ private:
 
   /// The names of the parameters organized into groups
   std::map<std::string, std::string> _group;
+
+  /// The parameter is used to restrict types that can be built.  Typically this
+  /// is used for MooseObjectAction derived Actions.
+  std::vector<std::string> _buildable_types;
+
+  /// This parameter collapses one level of nesting in the syntax blocks.  It is used
+  /// in conjuction with MooseObjectAction derived Actions.
+  bool _collapse_nesting;
 
   /// The set of parameters that are required (i.e. will cause an abort if not supplied)
   std::set<std::string> _required_params;

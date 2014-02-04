@@ -16,6 +16,7 @@
 #include <map>
 #include <fstream>
 #include <iomanip>
+#include <algorithm>
 
 #include "MooseUtils.h"
 #include "MooseInit.h"
@@ -356,16 +357,30 @@ Parser::buildFullTree(const std::string &search_string)
            ++moose_obj)
       {
         InputParameters moose_obj_params = (moose_obj->second)();
+        // Now that we know that this is a MooseObjectAction we need to see if it has been restricted
+        // in any way by the user.
+        const std::vector<std::string> & buildable_types = action_obj_params.getBuildableTypes();
 
-        if (moose_obj_params.have_parameter<std::string>("_moose_base") &&
-            _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"), task))
+        // See if the current Moose Object syntax belongs under this Action's block
+        if ((buildable_types.empty() ||                                                                                // Not restricted
+             std::find(buildable_types.begin(), buildable_types.end(), moose_obj->first) != buildable_types.end()) &&  // Restricted but found
+            moose_obj_params.have_parameter<std::string>("_moose_base") &&                                             // Has a registered base
+            _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"), task))                     // and that base is associated
         {
           std::string name;
           size_t pos = 0;
+          bool is_action_params = false;;
           if (act_name[act_name.size()-1] == '*')
           {
-            pos = act_name.size()-1;
-            name = act_name.substr(0, pos) + moose_obj->first;
+            pos = act_name.size();
+
+            if (!action_obj_params.collapseSyntaxNesting())
+              name = act_name.substr(0, pos-1) + moose_obj->first;
+            else
+            {
+              name = act_name.substr(0, pos-1) + "/<type>/" + moose_obj->first;
+              is_action_params = true;
+            }
           }
           else
           {
@@ -374,7 +389,7 @@ Parser::buildFullTree(const std::string &search_string)
 
           moose_obj_params.set<std::string>("type") = moose_obj->first;
 
-          _syntax_formatter->insertNode(name, moose_obj->first, false, &moose_obj_params);
+          _syntax_formatter->insertNode(name, moose_obj->first, is_action_params, &moose_obj_params);
         }
       }
     }

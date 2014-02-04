@@ -22,7 +22,14 @@ InputParameters emptyInputParameters()
   return params;
 }
 
-InputParameters::InputParameters(const InputParameters &rhs) : Parameters()
+InputParameters::InputParameters() :
+    Parameters(),
+    _collapse_nesting(false)
+{
+}
+
+InputParameters::InputParameters(const InputParameters &rhs) :
+    Parameters()
 {
   *this = rhs;
 }
@@ -30,6 +37,7 @@ InputParameters::InputParameters(const InputParameters &rhs) : Parameters()
 InputParameters::InputParameters(const Parameters &rhs)
 {
   Parameters::operator=(rhs);
+  _collapse_nesting = false;
 }
 
 void
@@ -46,6 +54,7 @@ InputParameters::clear()
   _syntax.clear();
   _default_coupled_value.clear();
   _default_postprocessor_value.clear();
+  _collapse_nesting = false;
 }
 
 void
@@ -80,6 +89,7 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_doc_string = rhs._doc_string;
   this->_custom_type = rhs._custom_type;
   this->_group = rhs._group;
+  this->_buildable_types = rhs._buildable_types;
   this->_required_params = rhs._required_params;
   this->_private_params = rhs._private_params;
   this->_valid_params = rhs._valid_params;
@@ -87,6 +97,7 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_syntax = rhs._syntax;
   this->_default_coupled_value = rhs._default_coupled_value;
   this->_default_postprocessor_value = rhs._default_postprocessor_value;
+  _collapse_nesting = rhs._collapse_nesting;
 
   return *this;
 }
@@ -99,6 +110,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   _doc_string.insert(rhs._doc_string.begin(), rhs._doc_string.end());
   _custom_type.insert(rhs._custom_type.begin(), rhs._custom_type.end());
   _group.insert(rhs._group.begin(), rhs._group.end());
+  _buildable_types.insert(_buildable_types.end(), rhs._buildable_types.begin(), rhs._buildable_types.end());
   _required_params.insert(rhs._required_params.begin(), rhs._required_params.end());
   _private_params.insert(rhs._private_params.begin(), rhs._private_params.end());
   _valid_params.insert(rhs._valid_params.begin(), rhs._valid_params.end());
@@ -106,6 +118,8 @@ InputParameters::operator+=(const InputParameters &rhs)
   _syntax.insert(rhs._syntax.begin(), rhs._syntax.end());
   _default_coupled_value.insert(rhs._default_coupled_value.begin(), rhs._default_coupled_value.end());
   _default_postprocessor_value.insert(rhs._default_postprocessor_value.begin(), rhs._default_postprocessor_value.end());
+  // Collapse nesting is not modified with +=
+
   return *this;
 }
 
@@ -187,6 +201,31 @@ InputParameters::registerBase(const std::string &value)
 {
   InputParameters::set<std::string>("_moose_base") = value;
   _private_params.insert("_moose_base");
+}
+
+void
+InputParameters::registerBuildableTypes(const std::string &names)
+{
+  _buildable_types.clear();
+  MooseUtils::tokenize(names, _buildable_types, 1, " \t\n\v\f\r");  // tokenize on whitespace
+}
+
+const std::vector<std::string> &
+InputParameters::getBuildableTypes() const
+{
+  return _buildable_types;
+}
+
+void
+InputParameters::collapseSyntaxNesting(bool collapse)
+{
+  _collapse_nesting = collapse;
+}
+
+bool
+InputParameters::collapseSyntaxNesting() const
+{
+  return _collapse_nesting;
 }
 
 void
