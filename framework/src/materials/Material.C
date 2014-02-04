@@ -117,3 +117,45 @@ Material::createData()
 {
   return NULL;
 }
+
+void
+Material::checkStatefulSanity() const
+{
+  for (std::map<std::string, int>::const_iterator it = _props_to_flags.begin(); it != _props_to_flags.end(); ++it)
+  {
+    if (static_cast<int>(it->second) % 2 == 0) // Only Stateful properties declared!
+      mooseError("Material '" << _name << "' has stateful properties declared but not associated \"current\" properties." << it->second);
+  }
+}
+
+void
+Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_State state)
+{
+  if (!is_get)
+  {
+    _props_to_flags[prop_name] |= static_cast<int>(state);
+    if (static_cast<int>(state) % 2 == 0)
+      _has_stateful_property = true;
+  }
+
+  // Store material properties for block ids
+  for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
+  {
+    // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
+    if (!is_get)
+      _supplied_props.insert(prop_name);
+    _fe_problem.storeMatPropName(*it, prop_name);
+    _subproblem.storeMatPropName(*it, prop_name);
+  }
+
+  // Store material properites for the boundary ids
+  for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
+  {
+    // \TODO: see ticket #2192
+    // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
+    // if (!is_get)
+    //  _supplied_props.insert(prop_name);
+    _fe_problem.storeMatPropName(*it, prop_name);
+    _subproblem.storeMatPropName(*it, prop_name);
+  }
+}

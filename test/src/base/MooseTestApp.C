@@ -91,6 +91,7 @@
 #include "CoupledMaterial2.h"
 #include "LinearInterpolationMaterial.h"
 #include "VarCouplingMaterial.h"
+#include "BadStatefulMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -106,7 +107,6 @@
 #include "PostprocessorCED.h"
 
 #include "EqualValueNodalConstraint.h"
-
 
 // user objects
 #include "MTUserObject.h"
@@ -299,6 +299,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(CoupledMaterial2);
   registerMaterial(LinearInterpolationMaterial);
   registerMaterial(VarCouplingMaterial);
+  registerMaterial(BadStatefulMaterial);
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);

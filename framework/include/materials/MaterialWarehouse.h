@@ -77,19 +77,22 @@ public:
    * Get the list of blocks that materials are defined on
    * @return The list of subdomain IDs
    */
-  const std::set<SubdomainID> & blocks() { return _blocks; }
+  const std::set<SubdomainID> & blocks() const { return _blocks; }
 
   /**
    * Get the list of boundary ids that the materials are defined
    * @return The set of Boundary IDs
    */
-  const std::set<BoundaryID> & boundaries() { return _boundaries; }
+  const std::set<BoundaryID> & boundaries() const { return _boundaries; }
 
-  /// This function displays a list of active materials and the properties they supply
-  void printMaterialMap();
+  /// This method displays a list of active materials and the properties they supply
+  void printMaterialMap() const;
 
+  /// This method checks for coupled material properties to make sure that all retrieved properties are supplied
+  void checkMaterialDependSanity() const;
 
-  void checkMaterialDependSanity();
+  /// This method loops over all materials and calls checkStatefulSanity() on the individual materials
+  void checkStatefulSanity() const;
 
 protected:
   /// A list of material associated with the block (subdomain)
@@ -130,7 +133,7 @@ private:
    * This routine checks to make sure that all requests for material properties, specifically
    * by other materials make sense for the given block.
    */
-  void checkDependMaterials(std::map<SubdomainID, std::vector<Material *> > & materials_map);
+  void checkDependMaterials(const std::map<SubdomainID, std::vector<Material *> > & materials_map) const;
 };
 
 #endif // MATERIALWAREHOUSE_H

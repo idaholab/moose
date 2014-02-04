@@ -235,10 +235,10 @@ void MaterialWarehouse::addBoundaryMaterial(std::vector<BoundaryID> boundaries, 
 }
 
 void
-MaterialWarehouse::printMaterialMap()
+MaterialWarehouse::printMaterialMap() const
 {
   unsigned int map_num=0;
-  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::const_iterator i = _master_list.begin(); i != _master_list.end(); ++i)
   {
     switch (map_num)
     {
@@ -253,7 +253,7 @@ MaterialWarehouse::printMaterialMap()
       break;
     }
 
-    for (std::map<SubdomainID, std::vector<Material *> >::iterator k = (*i)->begin(); k != (*i)->end(); ++k)
+    for (std::map<SubdomainID, std::vector<Material *> >::const_iterator k = (*i)->begin(); k != (*i)->end(); ++k)
     {
       Moose::out << "  block ID = " << k->first << ":\n";
       for (unsigned int l=0; l<k->second.size(); l++)
@@ -271,7 +271,7 @@ MaterialWarehouse::printMaterialMap()
   }
 
   Moose::out << " Active materials on side sets:\n";
-  for (std::map<BoundaryID, std::vector<Material *> >::iterator k = _active_boundary_materials.begin();
+  for (std::map<BoundaryID, std::vector<Material *> >::const_iterator k = _active_boundary_materials.begin();
        k != _active_boundary_materials.end(); ++k)
   {
     Moose::out << "  side set ID = " << k->first << ":\n";
@@ -289,16 +289,25 @@ MaterialWarehouse::printMaterialMap()
 }
 
 void
-MaterialWarehouse::checkMaterialDependSanity()
+MaterialWarehouse::checkMaterialDependSanity() const
 {
-  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::const_iterator i = _master_list.begin(); i != _master_list.end(); ++i)
     checkDependMaterials(**i);
 }
 
 void
-MaterialWarehouse::checkDependMaterials(std::map<SubdomainID, std::vector<Material *> > & materials_map)
+MaterialWarehouse::checkStatefulSanity() const
 {
-  for (std::map<SubdomainID, std::vector<Material *> >::iterator j = materials_map.begin(); j != materials_map.end(); ++j)
+  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::const_iterator i = _master_list.begin(); i != _master_list.end(); ++i)
+    for (std::map<SubdomainID, std::vector<Material *> >::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j)
+      for (std::vector<Material *>::const_iterator k = j->second.begin(); k != j->second.end(); ++k)
+        (*k)->checkStatefulSanity();
+}
+
+void
+MaterialWarehouse::checkDependMaterials(const std::map<SubdomainID, std::vector<Material *> > & materials_map) const
+{
+  for (std::map<SubdomainID, std::vector<Material *> >::const_iterator j = materials_map.begin(); j != materials_map.end(); ++j)
   {
     /// These two sets are used to make sure that all depenedent props on a block are actually supplied
     std::set<std::string> block_depend_props, block_supplied_props;

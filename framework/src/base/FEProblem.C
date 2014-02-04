@@ -3644,6 +3644,8 @@ FEProblem::checkProblemIntegrity()
 
     // Check that material properties exist when requested by other properties on a given block
     _materials[0].checkMaterialDependSanity();
+
+    _materials[0].checkStatefulSanity();
   }
 
   // Check that BCs used in your simulation exist in your mesh

@@ -132,6 +132,7 @@ public:
   const std::set<std::string> &
   getSuppliedItems() { return _supplied_props; }
 
+  void checkStatefulSanity() const;
 
 protected:
   SubProblem & _subproblem;
@@ -172,6 +173,14 @@ protected:
     PREV
   };
 
+  enum Prop_State
+  {
+    CURRENT = 0x1,
+    OLD = 0x2,
+    OLDER = 0x4
+  };
+  std::map<std::string, int> _props_to_flags;
+
   /**
    * Initialize stateful properties at quadrature points.  Note when using this function you only need to address
    * the "current" material properties not the old ones directly, i.e. if you have a property named "_diffusivity"
@@ -199,29 +208,7 @@ private:
   /**
    * Small helper function to call storeMatPropName
    */
-  void registerPropName(std::string prop_name, bool is_get)
-  {
-    // Store material properties for block ids
-    for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
-    {
-      // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
-      if (!is_get)
-        _supplied_props.insert(prop_name);
-      _fe_problem.storeMatPropName(*it, prop_name);
-      _subproblem.storeMatPropName(*it, prop_name);
-    }
-
-    // Store material properites for the boundary ids
-    for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
-    {
-      // \TODO: see ticket #2192
-      // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
-      // if (!is_get)
-      //  _supplied_props.insert(prop_name);
-      _fe_problem.storeMatPropName(*it, prop_name);
-      _subproblem.storeMatPropName(*it, prop_name);
-    }
-  }
+  void registerPropName(std::string prop_name, bool is_get, Prop_State state);
 
   bool _has_stateful_property;
 };
@@ -233,7 +220,7 @@ Material::getMaterialProperty(const std::string & prop_name)
 {
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
   _depend_props.insert(prop_name);
-  registerPropName(prop_name, true);
+  registerPropName(prop_name, true, Material::CURRENT);
   return _material_data.getProperty<T>(prop_name);
 }
 
@@ -242,7 +229,7 @@ MaterialProperty<T> &
 Material::getMaterialPropertyOld(const std::string & prop_name)
 {
   _depend_props.insert(prop_name);
-  registerPropName(prop_name, true);
+  registerPropName(prop_name, true, Material::OLD);
   return _material_data.getPropertyOld<T>(prop_name);
 }
 
@@ -251,7 +238,7 @@ MaterialProperty<T> &
 Material::getMaterialPropertyOlder(const std::string & prop_name)
 {
   _depend_props.insert(prop_name);
-  registerPropName(prop_name, true);
+  registerPropName(prop_name, true, Material::OLDER);
   return _material_data.getPropertyOlder<T>(prop_name);
 }
 
@@ -259,7 +246,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::declareProperty(const std::string & prop_name)
 {
-  registerPropName(prop_name, false);
+  registerPropName(prop_name, false, Material::CURRENT);
   return _material_data.declareProperty<T>(prop_name);
 }
 
@@ -267,8 +254,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::declarePropertyOld(const std::string & prop_name)
 {
-  _has_stateful_property = true;
-  registerPropName(prop_name, false);
+  registerPropName(prop_name, false, Material::OLD);
   return _material_data.declarePropertyOld<T>(prop_name);
 }
 
@@ -276,8 +262,7 @@ template<typename T>
 MaterialProperty<T> &
 Material::declarePropertyOlder(const std::string & prop_name)
 {
-  _has_stateful_property = true;
-  registerPropName(prop_name, false);
+  registerPropName(prop_name, false, Material::OLDER);
   return _material_data.declarePropertyOlder<T>(prop_name);
 }
 

@@ -234,6 +234,19 @@
     expect_err = "Material property 'diff1' is not defined on block \d+"
   [../]
 
+  [./bad_stateful_material_only_old]
+    type = 'RunException'
+    input = 'bad_stateful_material.i'
+    expect_err = "Material '\S+' has stateful properties declared but not associated"
+  [../]
+
+  [./bad_stateful_material_only_older]
+    type = 'RunException'
+    input = 'bad_stateful_material.i'
+    expect_err = "Material '\S+' has stateful properties declared but not associated"
+    cli_args = 'Materials/stateful_mat/declare_only_older=true'
+  [../]
+
   [./missing_mesh_bcs_test]
     type = 'RunException'
     input = 'missing_mesh_bcs_test.i'
