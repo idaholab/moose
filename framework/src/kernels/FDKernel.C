@@ -30,11 +30,11 @@ InputParameters validParams<FDKernel>()
 }
 
 FDKernel::FDKernel(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters)
+    Kernel(name, parameters)
 {
-    _scale = 1.490116119384766e-08; // HACK: sqrt of the machine epsilon for double precision
+  _scale = 1.490116119384766e-08; // HACK: sqrt of the machine epsilon for double precision
 #ifdef LIBMESH_HAVE_PETSC
-    _scale = PETSC_SQRT_MACHINE_EPSILON;
+  _scale = PETSC_SQRT_MACHINE_EPSILON;
 #endif
 }
 
@@ -101,13 +101,12 @@ FDKernel::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
 {
   // FIXME: implement me.
   /*
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), jvar);
-  MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), jvar);
+    MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
 
-  for (_i = 0; _i < _test.size(); _i++)
+    for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jv.order(); _j++)
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
   */
 }
-

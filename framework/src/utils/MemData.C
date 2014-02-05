@@ -93,42 +93,42 @@ void MemData::get_current_mem_usage(long& mem_in_kB, struct rusage& r_usage)
   // Process file line by line
   std::string line;
   while (true)
+  {
+    std::getline(file, line);
+
+    // Check stream. If OK, process line.  We do it this
+    // way because std::getline may have set EOF.
+    if (file)
     {
-      std::getline(file, line);
+      // Search line for "VmSize"
+      size_t start = line.find("VmSize");
 
-      // Check stream. If OK, process line.  We do it this
-      // way because std::getline may have set EOF.
-      if (file)
-	{
-	  // Search line for "VmSize"
-	  size_t start = line.find("VmSize");
+      // If the substring was found, tokenize the line...
+      if (start != std::string::npos)
+      {
+        std::istringstream iss(line);
+        std::string key, units;
+        iss >> key >> mem_in_kB >> units;
 
-	  // If the substring was found, tokenize the line...
-	  if (start != std::string::npos)
-	    {
-	      std::istringstream iss(line);
-	      std::string key, units;
-	      iss >> key >> mem_in_kB >> units;
+        // Sanity check, I've never seen a Linux that didn't report values in kB
+        if (units != "kB")
+          mooseError("VmSize reported in unknown units, cannot continue!");
 
-	      // Sanity check, I've never seen a Linux that didn't report values in kB
-	      if (units != "kB")
-		mooseError("VmSize reported in unknown units, cannot continue!");
+        // This is the only line we wanted, so break out
+        break;
+      }
 
-	      // This is the only line we wanted, so break out
-	      break;
-	    }
-
-	  // This was not the line we were after, so continue to next line
-	  continue;
-	}
-
-      // Check for eof
-      if (file.eof())
-	break;
-
-      // !file AND !file.eof, the stream is "bad"
-      mooseError("Error opening PID status file!");
+      // This was not the line we were after, so continue to next line
+      continue;
     }
+
+    // Check for eof
+    if (file.eof())
+      break;
+
+    // !file AND !file.eof, the stream is "bad"
+    mooseError("Error opening PID status file!");
+  }
 
 #else
 
@@ -136,4 +136,3 @@ void MemData::get_current_mem_usage(long& mem_in_kB, struct rusage& r_usage)
 
 #endif
 }
-

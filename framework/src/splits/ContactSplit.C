@@ -29,13 +29,13 @@ InputParameters validParams<ContactSplit>()
 }
 
 ContactSplit::ContactSplit (const std::string & name, InputParameters params) :
-  Split(name, params),
-  _contact_master(getParam<std::vector<std::string> >("contact_master")),
-  _contact_slave(getParam<std::vector<std::string> >("contact_slave")),
-  _contact_displaced(getParam<std::vector<bool> >("contact_displaced")),
-  _uncontact_master(getParam<std::vector<std::string> >("uncontact_master")),
-  _uncontact_slave(getParam<std::vector<std::string> >("uncontact_slave")),
-  _uncontact_displaced(getParam<std::vector<bool> >("uncontact_displaced"))
+    Split(name, params),
+    _contact_master(getParam<std::vector<std::string> >("contact_master")),
+    _contact_slave(getParam<std::vector<std::string> >("contact_slave")),
+    _contact_displaced(getParam<std::vector<bool> >("contact_displaced")),
+    _uncontact_master(getParam<std::vector<std::string> >("uncontact_master")),
+    _uncontact_slave(getParam<std::vector<std::string> >("uncontact_slave")),
+    _uncontact_displaced(getParam<std::vector<bool> >("uncontact_displaced"))
 {
   if (_contact_master.size() != _contact_slave.size()) {
     std::ostringstream err;
@@ -122,5 +122,3 @@ ContactSplit::setup(const std::string& prefix)
   Split::setup(prefix);
 }
 #endif
-
-

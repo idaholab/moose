@@ -100,27 +100,27 @@ NemesisOutput::outputPps(const std::string & /*file_base*/, const FormattedTable
     rend = table.getData().rend();
 
   for (; rit != rend; ++rit)
-    {
-      // Difference between input time and the time stored in the table
-      Real time_diff = std::abs((time - (*rit).first));
+  {
+    // Difference between input time and the time stored in the table
+    Real time_diff = std::abs((time - (*rit).first));
 
-      // Get relative difference, but don't divide by zero!
-      if ( std::abs(time) > 0.)
-	time_diff /= std::abs(time);
+    // Get relative difference, but don't divide by zero!
+    if ( std::abs(time) > 0.)
+      time_diff /= std::abs(time);
 
-      // Break out of the loop if we found the right time
-      if (time_diff < time_tol)
-	break;
-    }
+    // Break out of the loop if we found the right time
+    if (time_diff < time_tol)
+      break;
+  }
 
   // If we didn't find anything, print an error message
   if ( rit == rend )
-    {
-      Moose::err << "Input time: " << time
-                << "\nLatest Table time: " << (*(table.getData().rbegin())).first << std::endl;
-      mooseError("Time mismatch in outputting Nemesis global variables\n"
-                 "Have the postprocessor values been computed with the correct time?");
-    }
+  {
+    Moose::err << "Input time: " << time
+               << "\nLatest Table time: " << (*(table.getData().rbegin())).first << std::endl;
+    mooseError("Time mismatch in outputting Nemesis global variables\n"
+               "Have the postprocessor values been computed with the correct time?");
+  }
 
   // Otherwise, fill local vectors with name/value information and write to file.
   const std::map<std::string, Real> & tmp = (*rit).second;

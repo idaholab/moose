@@ -85,7 +85,7 @@ PetscErrorCode DMMooseGetContacts(DM dm, std::vector<std::pair<std::string,std::
     displaced.push_back((*dmm->contact_displaced)[it->second]);
   }
   PetscFunctionReturn(0);
- }
+}
 
 #undef  __FUNCT__
 #define __FUNCT__ "DMMooseGetUnContacts"
@@ -406,16 +406,16 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
        ['ANY' means 'not NONE' and covers 'ALL' as well, unless there is a specific 'ALL' clause, which overrides 'ANY'; 'NOT ALL' means not ALL and not NONE]
        [there are always some blocks, since by default 'ALL' is assumed, unless it is overridden by a specific list, which implies ANY]
        In general,
-          (1)  ALL blocks      and ANY sides are interpreted as the INTERSECTION of blocks and sides, equivalent to just the sides (since ALL blocks are assumed to be a cover).
-          (2)  NOT ALL blocks  and ANY or NO sides are interpreted as the UNION of blocks and sides.
-	  (3a) ANY unsides and ANY blocks are interpreted as the DIFFERENCE of blocks and unsides.
-	  (3b) ANY unsides and ANY sides are interpreted as the DIFFERENCE of sides and unsides.
-          (4)  NO  unsides means NO DIFFERENCE is needed.
+       (1)  ALL blocks      and ANY sides are interpreted as the INTERSECTION of blocks and sides, equivalent to just the sides (since ALL blocks are assumed to be a cover).
+       (2)  NOT ALL blocks  and ANY or NO sides are interpreted as the UNION of blocks and sides.
+       (3a) ANY unsides and ANY blocks are interpreted as the DIFFERENCE of blocks and unsides.
+       (3b) ANY unsides and ANY sides are interpreted as the DIFFERENCE of sides and unsides.
+       (4)  NO  unsides means NO DIFFERENCE is needed.
        The result is easily computed by first computing the result of (1 & 2) followed by difference with the result of (3 & 4).
        To simply (1 & 2) observe the following:
-          - The intersection is computed only if ALL blocks and ANY sides, and the result is the sides, so block dofs do not need to be computed.
-	  - Otherwise the union is computed, and initially consists of the blocks' dofs, to which the sides' dofs are added, if ANY.
-	  - The result is called 'indices'
+       - The intersection is computed only if ALL blocks and ANY sides, and the result is the sides, so block dofs do not need to be computed.
+       - Otherwise the union is computed, and initially consists of the blocks' dofs, to which the sides' dofs are added, if ANY.
+       - The result is called 'indices'
        To satisfy (3 & 4) simply cmpute subtrahend set 'unindices' as all of the unsides' dofs:
        Then take the set difference of 'indices' and 'unindices', putting the result in 'dindices'.
     */
@@ -591,7 +591,7 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
     }
     ierr = DMSetFromOptions(dinfo.dm);CHKERRQ(ierr);
     ierr = DMSetUp(dinfo.dm);CHKERRQ(ierr);
-   if(namelist) {
+    if(namelist) {
       ierr = PetscStrallocpy(dname.c_str(),(*namelist)+d);CHKERRQ(ierr);
     }
     if(islist) {
@@ -920,7 +920,7 @@ static PetscErrorCode DMCreateGlobalVector_Moose(DM dm, Vec *x)
 #if PETSC_VERSION_LT(3,5,0)
 static PetscErrorCode DMCreateMatrix_Moose(DM dm, const MatType type, Mat *A)
 #else
-static PetscErrorCode DMCreateMatrix_Moose(DM dm, Mat *A)
+  static PetscErrorCode DMCreateMatrix_Moose(DM dm, Mat *A)
 #endif
 {
   PetscErrorCode ierr;
@@ -1319,7 +1319,7 @@ static PetscErrorCode  DMSetUp_Moose(DM dm)
     }
   }
   /*
-     Do not evaluate function, Jacobian or bounds for an embedded DM -- the subproblem might not have enough information for that.
+    Do not evaluate function, Jacobian or bounds for an embedded DM -- the subproblem might not have enough information for that.
   */
   if (dmm->allvars && dmm->allblocks && dmm->nosides && dmm->nounsides && dmm->nocontacts && dmm->nouncontacts)  {
 #if PETSC_VERSION_LT(3,4,0)
@@ -1334,11 +1334,11 @@ static PetscErrorCode  DMSetUp_Moose(DM dm)
   }
   else {
     /*
-       Fow now we don't implement even these, although a linear "Dirichlet" subproblem is well-defined.
-       Creating the submatrix, however, might require extracting the submatrix preallocation from an unassembled matrix.
+      Fow now we don't implement even these, although a linear "Dirichlet" subproblem is well-defined.
+      Creating the submatrix, however, might require extracting the submatrix preallocation from an unassembled matrix.
     */
-      dm->ops->createglobalvector = 0;
-      dm->ops->creatematrix = 0;
+    dm->ops->createglobalvector = 0;
+    dm->ops->creatematrix = 0;
   }
   PetscFunctionReturn(0);
 
@@ -1689,18 +1689,18 @@ PetscErrorCode  SNESUpdateDMMoose(SNES snes, PetscInt iteration)
 #define __FUNCT__ "DMMooseRegisterAll"
 PetscErrorCode DMMooseRegisterAll()
 {
-    static PetscBool     DMMooseRegisterAllCalled = PETSC_FALSE;
-    PetscErrorCode       ierr;
+  static PetscBool     DMMooseRegisterAllCalled = PETSC_FALSE;
+  PetscErrorCode       ierr;
 
-    PetscFunctionBegin;
-    if (!DMMooseRegisterAllCalled) {
+  PetscFunctionBegin;
+  if (!DMMooseRegisterAllCalled) {
 #if PETSC_VERSION_LESS_THAN(3,4,0)
-      ierr = DMRegister(DMMOOSE, PETSC_NULL, "DMCreate_Moose", DMCreate_Moose);CHKERRQ(ierr);
+    ierr = DMRegister(DMMOOSE, PETSC_NULL, "DMCreate_Moose", DMCreate_Moose);CHKERRQ(ierr);
 #else
-      ierr = DMRegister(DMMOOSE, DMCreate_Moose);CHKERRQ(ierr);
+    ierr = DMRegister(DMMOOSE, DMCreate_Moose);CHKERRQ(ierr);
 #endif
-      DMMooseRegisterAllCalled = PETSC_TRUE;
-    }
+    DMMooseRegisterAllCalled = PETSC_TRUE;
+  }
   PetscFunctionReturn(0);
 }
 #endif // #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)

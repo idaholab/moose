@@ -34,17 +34,17 @@ struct indirect_comparator
 {
   // ctor
   indirect_comparator(RandomAccessIterator r, UserComparisonFunctor c) :
-    _random_access_iterator(r),
-    _user_comp(c)
-  {}
+      _random_access_iterator(r),
+      _user_comp(c)
+    {}
 
   // comparison operator - calls the user's comparison function on
   // v[lhs] and v[rhs]
   bool operator()(size_t lhs, size_t rhs)
-  {
-    // Note: operator[] is defined for random access iterators!
-    return _user_comp(_random_access_iterator[lhs], _random_access_iterator[rhs]);
-  }
+    {
+      // Note: operator[] is defined for random access iterators!
+      return _user_comp(_random_access_iterator[lhs], _random_access_iterator[rhs]);
+    }
 
 private:
   // data

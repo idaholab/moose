@@ -40,7 +40,7 @@
 
 namespace libMesh {
 
-  class DTKInterpolationEvaluator : public DataTransferKit::FieldEvaluator<long unsigned int,DataTransferKit::FieldContainer<double> >
+class DTKInterpolationEvaluator : public DataTransferKit::FieldEvaluator<long unsigned int,DataTransferKit::FieldContainer<double> >
 {
 public:
   typedef DataTransferKit::MeshContainer<long unsigned int>	      MeshContainerType;

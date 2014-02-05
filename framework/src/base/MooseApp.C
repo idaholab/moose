@@ -383,152 +383,152 @@ MooseApp::printSimulationInfo(std::ostream & ostream)
 
   std::stringstream oss;
 
-	oss << std::left << '\n'
-			<< "Parallelism:\n"
-			<< std::setw(FIELD_WIDTH) << "	Num Processors: "			 << static_cast<std::size_t>(libMesh::n_processors()) << '\n'
-			<< std::setw(FIELD_WIDTH) << "	Num Threads: "				 << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
-			<< '\n';
+  oss << std::left << '\n'
+      << "Parallelism:\n"
+      << std::setw(FIELD_WIDTH) << "	Num Processors: "			 << static_cast<std::size_t>(libMesh::n_processors()) << '\n'
+      << std::setw(FIELD_WIDTH) << "	Num Threads: "				 << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
+      << '\n';
 
-	MooseMesh *moose_mesh = _action_warehouse.mesh();
-	if (moose_mesh)
-	{
-		MeshBase & mesh = moose_mesh->getMesh();
+  MooseMesh *moose_mesh = _action_warehouse.mesh();
+  if (moose_mesh)
+  {
+    MeshBase & mesh = moose_mesh->getMesh();
 
-		oss << std::setw(FIELD_WIDTH) << "Mesh: " << '\n'
-				<< std::setw(FIELD_WIDTH) << "	Distribution: " << (moose_mesh->isParallelMesh() ? "parallel" : "serial")
-																												<< (moose_mesh->isDistributionForced() ? " (forced) " : "") << '\n'
-				<< std::setw(FIELD_WIDTH) << "	Mesh Dimension: " << mesh.mesh_dimension() << '\n'
-				<< std::setw(FIELD_WIDTH) << "	Spatial Dimension: " << mesh.spatial_dimension() << '\n'
-				<< std::setw(FIELD_WIDTH) << "	Nodes:" << '\n'
-				<< std::setw(FIELD_WIDTH) << "		Total:" << mesh.n_nodes() << '\n'
-				<< std::setw(FIELD_WIDTH) << "		Local:" << mesh.n_local_nodes() << '\n'
-				<< std::setw(FIELD_WIDTH) << "	Elems:" << '\n'
-				<< std::setw(FIELD_WIDTH) << "		Total:" << mesh.n_elem() << '\n'
-				<< std::setw(FIELD_WIDTH) << "		Local:" << mesh.n_local_elem() << '\n'
-				<< std::setw(FIELD_WIDTH) << "	Num Subdomains: "			 << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
-				<< std::setw(FIELD_WIDTH) << "	Num Partitions: "			 << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
-		if (libMesh::n_processors() > 1 && moose_mesh->partitionerName() != "")
-			oss << std::setw(FIELD_WIDTH) << "	Partitioner: "			 << moose_mesh->partitionerName()
-																															 << (moose_mesh->isPartitionerForced() ? " (forced) " : "")
-					<< '\n';
-		oss << '\n';
-	}
+    oss << std::setw(FIELD_WIDTH) << "Mesh: " << '\n'
+        << std::setw(FIELD_WIDTH) << "	Distribution: " << (moose_mesh->isParallelMesh() ? "parallel" : "serial")
+        << (moose_mesh->isDistributionForced() ? " (forced) " : "") << '\n'
+        << std::setw(FIELD_WIDTH) << "	Mesh Dimension: " << mesh.mesh_dimension() << '\n'
+        << std::setw(FIELD_WIDTH) << "	Spatial Dimension: " << mesh.spatial_dimension() << '\n'
+        << std::setw(FIELD_WIDTH) << "	Nodes:" << '\n'
+        << std::setw(FIELD_WIDTH) << "		Total:" << mesh.n_nodes() << '\n'
+        << std::setw(FIELD_WIDTH) << "		Local:" << mesh.n_local_nodes() << '\n'
+        << std::setw(FIELD_WIDTH) << "	Elems:" << '\n'
+        << std::setw(FIELD_WIDTH) << "		Total:" << mesh.n_elem() << '\n'
+        << std::setw(FIELD_WIDTH) << "		Local:" << mesh.n_local_elem() << '\n'
+        << std::setw(FIELD_WIDTH) << "	Num Subdomains: "			 << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
+        << std::setw(FIELD_WIDTH) << "	Num Partitions: "			 << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
+    if (libMesh::n_processors() > 1 && moose_mesh->partitionerName() != "")
+      oss << std::setw(FIELD_WIDTH) << "	Partitioner: "			 << moose_mesh->partitionerName()
+          << (moose_mesh->isPartitionerForced() ? " (forced) " : "")
+          << '\n';
+    oss << '\n';
+  }
 
-	FEProblem *problem = _action_warehouse.problem();
-	if (problem)
-	{
-		EquationSystems & eq = _action_warehouse.problem()->es();
-		unsigned int num_systems = eq.n_systems();
-		for (unsigned int i=0; i<num_systems; ++i)
-		{
-			const System & system = eq.get_system(i);
-			if (system.system_type() == "TransientNonlinearImplicit")
-				oss << std::setw(FIELD_WIDTH) << "Nonlinear System:" << '\n';
-			else if (system.system_type() == "TransientExplicit")
-				oss << std::setw(FIELD_WIDTH) << "Auxiliary System:" << '\n';
-			else
-				oss << std::setw(FIELD_WIDTH) << system.system_type() << '\n';
+  FEProblem *problem = _action_warehouse.problem();
+  if (problem)
+  {
+    EquationSystems & eq = _action_warehouse.problem()->es();
+    unsigned int num_systems = eq.n_systems();
+    for (unsigned int i=0; i<num_systems; ++i)
+    {
+      const System & system = eq.get_system(i);
+      if (system.system_type() == "TransientNonlinearImplicit")
+        oss << std::setw(FIELD_WIDTH) << "Nonlinear System:" << '\n';
+      else if (system.system_type() == "TransientExplicit")
+        oss << std::setw(FIELD_WIDTH) << "Auxiliary System:" << '\n';
+      else
+        oss << std::setw(FIELD_WIDTH) << system.system_type() << '\n';
 
-			if (system.n_dofs())
-			{
-				oss << std::setw(FIELD_WIDTH) << "	Num DOFs: " << system.n_dofs() << '\n'
-						<< std::setw(FIELD_WIDTH) << "	Num Local DOFs: " << system.n_local_dofs() << '\n';
+      if (system.n_dofs())
+      {
+        oss << std::setw(FIELD_WIDTH) << "	Num DOFs: " << system.n_dofs() << '\n'
+            << std::setw(FIELD_WIDTH) << "	Num Local DOFs: " << system.n_local_dofs() << '\n';
 
-				std::streampos begin_string_pos = oss.tellp();
-				std::streampos curr_string_pos = begin_string_pos;
-				oss << std::setw(FIELD_WIDTH) << "	Variables: ";
-				for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
-				{
-					const VariableGroup &vg_description (system.variable_group(vg));
+        std::streampos begin_string_pos = oss.tellp();
+        std::streampos curr_string_pos = begin_string_pos;
+        oss << std::setw(FIELD_WIDTH) << "	Variables: ";
+        for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+        {
+          const VariableGroup &vg_description (system.variable_group(vg));
 
-					if (vg_description.n_variables() > 1) oss << "{ ";
-					for (unsigned int vn=0; vn<vg_description.n_variables(); vn++)
-					{
-						oss << "\"" << vg_description.name(vn) << "\" ";
-						curr_string_pos = oss.tellp();
-						insertNewline(oss, begin_string_pos, curr_string_pos);
-					}
+          if (vg_description.n_variables() > 1) oss << "{ ";
+          for (unsigned int vn=0; vn<vg_description.n_variables(); vn++)
+          {
+            oss << "\"" << vg_description.name(vn) << "\" ";
+            curr_string_pos = oss.tellp();
+            insertNewline(oss, begin_string_pos, curr_string_pos);
+          }
 
-					if (vg_description.n_variables() > 1) oss << "} ";
-				}
-				oss << '\n';
+          if (vg_description.n_variables() > 1) oss << "} ";
+        }
+        oss << '\n';
 
-				begin_string_pos = oss.tellp();
-				curr_string_pos = begin_string_pos;
-				oss << std::setw(FIELD_WIDTH) << "	Finite Element Types: ";
+        begin_string_pos = oss.tellp();
+        curr_string_pos = begin_string_pos;
+        oss << std::setw(FIELD_WIDTH) << "	Finite Element Types: ";
 #ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
-				for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
-				{
-					oss << "\""
-							<< libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
-							<< "\" ";
-					curr_string_pos = oss.tellp();
-					insertNewline(oss, begin_string_pos, curr_string_pos);
-				}
-				oss << '\n';
+        for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+        {
+          oss << "\""
+              << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
+              << "\" ";
+          curr_string_pos = oss.tellp();
+          insertNewline(oss, begin_string_pos, curr_string_pos);
+        }
+        oss << '\n';
 #else
-				for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
-				{
-					oss << "\""
-							<< libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
-							<< "\", \""
-							<< libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().radial_family)
-							<< "\" ";
-					curr_string_pos = oss.tellp();
-					insertNewline(oss, begin_string_pos, curr_string_pos);
-				}
-				oss << '\n';
+        for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+        {
+          oss << "\""
+              << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
+              << "\", \""
+              << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().radial_family)
+              << "\" ";
+          curr_string_pos = oss.tellp();
+          insertNewline(oss, begin_string_pos, curr_string_pos);
+        }
+        oss << '\n';
 
-				begin_string_pos = oss.tellp();
-				curr_string_pos = begin_string_pos;
-				oss << std::setw(FIELD_WIDTH) << "	Infinite Element Mapping: ";
-				for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
-				{
-					oss << "\""
-							<< libMesh::Utility::enum_to_string<InfMapType>(system.get_dof_map().variable_group(vg).type().inf_map)
-							<< "\" ";
-					curr_string_pos = oss.tellp();
-					insertNewline(oss, begin_string_pos, curr_string_pos);
-				}
-				oss << '\n';
+        begin_string_pos = oss.tellp();
+        curr_string_pos = begin_string_pos;
+        oss << std::setw(FIELD_WIDTH) << "	Infinite Element Mapping: ";
+        for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+        {
+          oss << "\""
+              << libMesh::Utility::enum_to_string<InfMapType>(system.get_dof_map().variable_group(vg).type().inf_map)
+              << "\" ";
+          curr_string_pos = oss.tellp();
+          insertNewline(oss, begin_string_pos, curr_string_pos);
+        }
+        oss << '\n';
 #endif
 
-				begin_string_pos = oss.tellp();
-				curr_string_pos = begin_string_pos;
-				oss << std::setw(FIELD_WIDTH) << "	Approximation Orders: ";
-				for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
-				{
+        begin_string_pos = oss.tellp();
+        curr_string_pos = begin_string_pos;
+        oss << std::setw(FIELD_WIDTH) << "	Approximation Orders: ";
+        for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+        {
 #ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
-					oss << "\""
-							<< Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().order)
-							<< "\" ";
+          oss << "\""
+              << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().order)
+              << "\" ";
 #else
-					oss << "\""
-							<< Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().order)
-							<< "\", \""
-							<< Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().radial_order)
-							<< "\" ";
+          oss << "\""
+              << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().order)
+              << "\", \""
+              << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().radial_order)
+              << "\" ";
 #endif
-					curr_string_pos = oss.tellp();
-					insertNewline(oss, begin_string_pos, curr_string_pos);
-				}
-				oss << "\n\n";
-			}
-			else
-				oss << "	*** EMPTY ***\n\n";
-		}
+          curr_string_pos = oss.tellp();
+          insertNewline(oss, begin_string_pos, curr_string_pos);
+        }
+        oss << "\n\n";
+      }
+      else
+        oss << "	*** EMPTY ***\n\n";
+    }
 
-		oss << "Execution Information:\n"
-				<< std::setw(FIELD_WIDTH) << "	Executioner: " << demangle(typeid(*_executioner).name()) << '\n';
+    oss << "Execution Information:\n"
+        << std::setw(FIELD_WIDTH) << "	Executioner: " << demangle(typeid(*_executioner).name()) << '\n';
 
-		std::string time_stepper = _executioner->getTimeStepper();
-		if (time_stepper != "")
-			oss << std::setw(FIELD_WIDTH) << "	TimeStepper: " << time_stepper << '\n';
+    std::string time_stepper = _executioner->getTimeStepper();
+    if (time_stepper != "")
+      oss << std::setw(FIELD_WIDTH) << "	TimeStepper: " << time_stepper << '\n';
 
-		oss << std::setw(FIELD_WIDTH) << "	Solver Mode: " << Moose::stringify<Moose::SolveType>(_action_warehouse.problem()->solverParams()._type) << '\n';
-		oss << '\n';
-	}
+    oss << std::setw(FIELD_WIDTH) << "	Solver Mode: " << Moose::stringify<Moose::SolveType>(_action_warehouse.problem()->solverParams()._type) << '\n';
+    oss << '\n';
+  }
 
-	ostream << oss.str();
-	ostream.flush();
+  ostream << oss.str();
+  ostream.flush();
 }
