@@ -96,8 +96,12 @@ follows.
   reality, this is very similar to Chapters~\ref{bw} and~\ref{wli}:
   the only essential differences are the capillary and relative
   permeability functions.
-\item Chapter~\ref{bl} compares MOOSE with the analytic solution of
-  the Buckley-Leverett problem.
+\item Chapter~\ref{bl} compares a single-phase MOOSE simulation with
+  the analytic solution of the Buckley-Leverett problem.
+\item Chapter~\ref{ex} demonstrates that MOOSE yields the expected
+  answer for a simulation containing an excavation.
+\item Chapter~\ref{bl2} compares a two-phase MOOSE simulation with
+  the analytic solution of the Buckley-Leverett problem.
 \end{itemize}
 
 
@@ -1338,20 +1342,20 @@ $\mbox{}$\\
 \end{figure}
 
 
-\chapter{Buckley-Leverett}
+\chapter{The single-phase Buckley-Leverett problem}
 \label{bl}
 
-MOOSE compared with a simple one dimensional Buckley-Leverett
-problem\footnote{SE Buckley and MC Leverett (1942) ``Mechanism of
-  fluid displacements in sands''.  Transactions of the AIME {\bf 146}
-  107--116}.  The single-phase fluid moves in a region $0\leq x\leq
-15$\,m.  A fully-saturated front initially sits at position $x=5$,
-while the region $x>5$ is initially unsaturated.  With zero suction
-function $P_{c} = 0$, there is no diffusion of the sharp front, and it
-progresses towards the right.  This is a difficult problem to simulate
-numerically as maintaining the sharp front is hard.  The front's speed
-is independent of the relative permeability, since the fluid is
-flowing from a fully-saturated region (where
+MOOSE is compared with a simple single-phase one-dimensional
+Buckley-Leverett problem\footnote{SE Buckley and MC Leverett (1942)
+  ``Mechanism of fluid displacements in sands''.  Transactions of the
+  AIME {\bf 146} 107--116}.  The single-phase fluid moves in a region
+$0\leq x\leq 15$\,m.  A fully-saturated front initially sits at
+position $x=5$, while the region $x>5$ is initially unsaturated.  With
+zero suction function $P_{c} = 0$, there is no diffusion of the sharp
+front, and it progresses towards the right.  This is a difficult
+problem to simulate numerically as maintaining the sharp front is
+hard.  The front's speed is independent of the relative permeability,
+since the fluid is flowing from a fully-saturated region (where
 $\kappa_{\mathrm{rel}}=1$).  This problem is therefore a good test of
 the upwinding.
 
@@ -1456,6 +1460,212 @@ $\mbox{}$
 
 
 
+\chapter{An excavation}
+\label{ex}
+
+``Excavations'' are important in underground mining simulations.
+These are voids underground created by mining of material.  On the
+boundary of the void the porepressure is fixed to a user-defined
+value, typically atmostpheric pressure.  The size of the void changes
+with time as material is progressively mined.  As discussed in the
+Theory Manual, these time-dependent boundary conditions are
+conveniently defined through a function.  This section demonstrates
+that this procedure works as expected.
+
+As depicted in Figure~\ref{ex02_3D_mesh.fig}, a 3D simulation is run
+with region in the middle of the mesh that will be excavated.  The
+simulation is run for $3\times 10^{7}$\,s which is the time taken to
+excavate the entire panel.  Figure~\ref{ex02.fig} shows the
+porepressure distribution at the plane of the panel at two times, and
+demonstrates that the correct boundary conditions are being applied.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=10cm]{ex02_3D_mesh.eps}
+\caption{The 3D mesh used in the excavation test.  This view is
+  looking down on the mesh.  In the middle of
+  the solid there is a region that is excavated, and this is shown in
+  a darker colour.}
+\label{ex02_3D_mesh.fig}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\begin{tabular}{cc}
+\includegraphics[width=8cm]{ex02_1.5.eps} &
+\includegraphics[width=8cm]{ex02_3.eps}
+\end{tabular}
+\caption{The porepressure contoured on a horizontal slice through the
+  excavation region.  The excavation region is shown as a green
+  rectangle.  The excavation is completed in $3\times 10^{7}$\,s and
+  has $P=0$ on the boundary.  The left figure shows the porepressure
+  at $t=1.5\times 10^{7}$\,s, and the right figure shows $t=3\times
+  10^{7}$\,s.}
+\label{ex02.fig}
+\end{figure}
+
+
+
+
+\chapter{The two-phase Buckley-Leverett problem}
+\label{bl2}
+
+MOOSE is compared with a simple two-phase one-dimensional
+Buckley-Leverett problem\footnote{SE Buckley and MC Leverett (1942)
+  ``Mechanism of fluid displacements in sands''.  Transactions of the
+  AIME {\bf 146} 107--116}.  The fluids move in a region
+$0\leq x\leq 15$\,m.  A water-saturated front initially sits at
+position $x=5$, while the region $x>5$ is initially water-unsaturated.
+The water pressure is high in the region $x<5$.  With very small
+capillary suction function $P_{c} \sim 0$, there is virtually no
+diffusion of the sharp front, and it progresses towards the right,
+driven by the high water pressure.  This is a difficult problem to
+simulate numerically as maintaining the sharp front is hard.
+Moreoever, because it is impossible to use $P_{c}=0$ in the MOOSE
+implementation, it is necessary to use large porepressure changes
+around the front to create the front.  This is
+difficult to handle numerically.  The front's speed is independent of
+the relative permeability, since the fluid is flowing from a
+fully-saturated region (where $\kappa_{\mathrm{rel}}=1$).
+
+
+In the simulation below, the water pressure at the left boundary is
+kept fixed at $P_{0}=1$\,MPa, while the right boundary is kept fixed
+at $P_{15}=-10^{5}$\,Pa.  The water viscosity is $\mu = 10^{-3}$\,Pa.s.  In
+order to correspond as closely as possible to the single-phase version
+of this test (Chapter~\ref{bl}), the gas-phase viscosity is set to
+$10^{-6}$\,Pa.s.  This means it interferes very little in the
+progression of the water front.
+
+The parameters used are listed below
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Porosity & 0.15 \\
+Permeability & $ 10^{-10}$\,m$^{2}$ \\
+\hline
+Water base density & 1000\,kg.m$^{-3}$ \\
+Water viscosity & $10^{-3}$\,Pa.s \\
+Water bulk modulus & 2\,MPa \\
+Water relative perm power & 2 \\
+Water immobile saturation & 0.0 \\
+Water residual saturation & 0.0 \\
+\hline
+Gas base density & 1\,kg.m$^{-3}$ \\
+Gas viscosity & $10^{-6}$\,Pa.s \\
+Gas bulk modulus & 2\,MPa \\
+Gas relative perm power & 2 \\
+Gas immobile saturation & 0.0 \\
+Gas residual saturation & 0.0 \\
+\hline
+van Genuchten $\alpha$ & $10^{-4}$\,Pa$^{-1}$ \\
+van Genuchten $m$ & 0.8 \\
+\hline
+\end{tabular} \\
+\end{center}
+
+
+The initial condition is
+\begin{equation}
+P_{\mathrm{water}}(t=0) = \left\{
+\begin{array}{ll}
+10^{6}(1-x/5) & \ \ \ \mbox{for }\ \ x<5 \\
+-10^{5} & \ \ \ \mbox{for }\ \ x\geq 5  
+\end{array}
+\right. \ ,
+\end{equation}
+and
+\begin{equation}
+P_{\mathrm{gas}}(t=0) = \left\{
+\begin{array}{ll}
+10^{6}(1-x/5) + 10^{3} & \ \ \ \mbox{for }\ \ x<5 \\
+10^{3} & \ \ \ \mbox{for }\ \ x\geq 5  
+\end{array}
+\right. \ .
+\end{equation}
+which is shown in Figure~\ref{bl2_setup.figa}.  Using a slighly higher
+$P_{\mathrm{gas}}$ than $P_{\mathrm{water}}$ makes the problem more
+stable, as the gas equations do not vanish in the saturated zeon.
+With the suction function defined above this gives
+\begin{equation}
+S(t=0) = \left\{
+\begin{array}{ll}
+1 & \ \ \ \mbox{for }\ \ x < 5 \\
+10^{-4} & \ \ \ \mbox{for} \ \ x \geq 5  \ ,
+\end{array}
+\right.
+\end{equation}
+to within $10^{-6}$.
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=12cm]{bl2_initial.eps}
+\caption{Initial setup of the Buckley-Leverett problem where
+  porepressure is a piecewise linear function.  The region
+$x<5$ is fully water saturated, while the region $x>5$ has saturation
+  $10^{-4}$.  During simulation the values of porepressure at the end
+  points are held fixed.}
+\label{bl2_setup.figa}
+\end{center}
+\end{figure}
+
+The porepressures at the end and right of the model are held fixed.
+
+Good approximations for the water pressure $P(x,t)$
+and the front position $f(t)$ may be determined from
+\begin{eqnarray}
+\frac{{\mathrm d} f}{{\mathrm d} t} & = & -\frac{\kappa}{\phi\mu_{\mathrm{water}}}
+\left.\frac{\partial  P}{\partial x}\right|_{x = f} \ , \nonumber \\
+P(x,t) & = & P_{0} - (P_{0}-P_{f})x/f \ \ \ \mbox{ for } x\leq f  \ ,
+\ ,
+\label{eqn.predicted.bl2.posn.eqna}
+\end{eqnarray}
+where $P_{f}$ is the water porepressure at the front ($P_{f}=0$)
+which has solution
+\begin{equation}
+f(t) = \sqrt{f(0)^{2} + \frac{2\kappa}{\phi\mu_{\mathrm{water}}}(P_{0}-P_{f})t} \ .
+\end{equation}
+For the parameters listed above, the front will be at position
+$f=9.6$\,m at $t=50$\,s.  This solution is only valid for zero
+capillary suction.  A nonzero suction function will tend to diffuse
+the sharp front.
+
+Figure~\ref{satfront2.figa} shows the results from two MOOSE
+simulations which validate the MOOSE implementation of two-phase fluid
+flow.  The simulation details are:
+\begin{enumerate}
+\item A uniform mesh of size 0.1\,m, with timestep between
+  $10^{-4}$\,s and 0.2\,s.  The van Genuchten
+  $\alpha=10^{-4}$\,Pa$^{-1}$ and $m=0.8$.  At $t=50$\,s the mesh sits
+  between $x=9.6$\,m and $x=10.2$\,m.  This simulation uses 833
+  timesteps and takes 1\,minute
+  to run, so is marked as ``heavy'' in the test suite and is not run
+  every time the code is updated.
+\item A uniform mesh of size 0.5\,m, with timestep between 0.1\,s and
+  4\,s.  The van Genuchten 
+  $\alpha=10^{-5}$\,Pa$^{-1}$ and $m=0.8$.  Instead of $P=-10^{5}$\,Pa
+  at the $x=15$ end, $P=-3\times 10^{5}$\,Pa is used instead, which
+  means $s=0.01$ in the unsaturated zone.  At $t=50$\,s the mesh sits
+  between $x=9.3$\,m and $x=12.3$\,m.  This simulation uses 37
+  timesteps and takes 0.7\,seconds to run, so is part of the automatic
+  test suite.
+\end{enumerate}
+
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=10cm]{bl2_seff.eps} \\
+$\mbox{}$
+\includegraphics[width=10cm]{bl2_p.eps} \\
+\caption{The MOOSE solution of the two-phase Buckley-Leverett problem at
+  $t=50$\,s.  Top: saturation.  Bottom: water porepressure.  The red line in
+  each is the large $\alpha=10^{-4}$\,Pa$^{-1}$, and the black line is
+  the $\alpha=10^{-5}$\,Pa$^{-1}$.}
+\label{satfront2.figa}
+\end{center}
+\end{figure}
+
+
 
 
 %\chapter{Unsaturated flow in a bar - NEEDS UPDATE}
@@ -1528,16 +1738,6 @@ $\mbox{}$
 %\label{uf.result.fig}
 %\end{center}
 %\end{figure}
-
-
-
-\chapter{Future tests}
-
-See ''Benchmarking of Richards Model'' Yanlian Du, Wenqing Wang and
-Olaf Kolditz for a summary of the usual suspects.
-
-See Forsyth, Wu and Pruess for more tests.
-
 
 
 

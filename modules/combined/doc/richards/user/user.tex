@@ -56,7 +56,52 @@ or the {\em user} directory, which has path
 <install_dir>/trunk/elk/doc/richards/user
 \end{verbatim}
 
-\section{Convergence criteria}
+\section{Convergence and convergence criteria}
+
+As a general rule, the formulation of multiphase flow implemented in
+MOOSE is quite suitable to solve many different problems.  However,
+there are some situations where the implementation is not optimal,
+such as the tracking of fronts.  MOOSE may converge in these
+instances, but may take unacceptably short time steps, or it may not
+even converge at all.  In these cases it is probably best to either
+modify the problem to something more suitable, or use another code.
+
+For example, in simulations with sharp fronts, the user should ask
+whether it is truly necessary to accurately track the sharp front, or
+whether similar results could be taken by smoothing the fronts by
+using slightly different initial conditions, and/or by modifying the
+effective-saturation relationships, by making the van Genuchten
+parameter $\alpha$ smaller, for instance.  If tracking sharp fronts is
+vital to the problem then a code specifically designed to solve such
+problems will do it better than MOOSE, or perhaps MOOSE could be used
+with an ALE front-tracking algorithm.
+
+Below I list some general pointers that may help with problems that
+MOOSE is struggling with.
+\begin{itemize}
+\item Effective saturation curves that are too ``flat'' are not good.
+  For example, the van Genuchten parameter $m=0.6$ almost always gives
+  better convergence than $m=0.9$.
+\item Effective saturation curves that are too ``low'' are not good.
+  For example, the van Genuchten parameter $\alpha=10^{-6}$\,Pa$^{-1}$
+  almost always gives better convergence than
+  $\alpha=10^{-3}$\,Pa$^{-1}$.  Compare, for instance, the tests {\tt
+    buckley\_leverett/bl21.i} and {\tt buckley\_leverett/bl22.i}.
+\item Any discontinuities in the effective saturation, or its
+  derivative, are bad.  I suggest using van Genuchten parameter
+  $\alpha\geq 0.5$ for problems with both saturated and unsaturated zones.
+\item Highly nonlinear relative permeability curves make convergence
+  difficult in some cases.  For instance, a ``power'' relative
+  permeability curve with $n=20$ is much worse numerically than with
+  $n=2$.  See if you can reduce the nonlinearity in your curve.
+\item Any discontinuities in the relative permeability, or its derivative,
+  are bad.  For most curves coded into MOOSE this is not an issue, but
+  I recommend the {\tt RichardsRelPermVG1} curve over {\tt
+    RichardsRelPermVG}, since the former is smooth around
+  $S_{\mathrm{eff}}=1$.  See {\tt recharge\_discharge/rd01.i} in the
+  tests directory for an example of this.   I also suggest using the
+  ``power'' covers over the ``VG'' curves.
+\end{itemize}
 
 \section{Two-phase, almost saturated}
 
@@ -84,8 +129,21 @@ it is not necessary.
 
 \section{An excavation}
 
-In the user directory {\tt excav/ex01.i} contains a single excavation,
-and the associated mass flux and mass balance.
+In the test directory {\tt excav/ex01.i} and {\tt excav/ex02.i}
+contains a single excavation, and the associated mass flux and mass
+balance.
+
+\section{Bounding porepressure}
+
+Occasionally it might be useful to bound porepressure.  The test {\tt
+  buckley\_leverett/bl22.i} has ``bounds'' that do this.  Note that:
+\begin{itemize}
+\item The convergence is likely to be much slower when using bounds
+\item The {\tt -snes\_type} must be set to {\tt vinewtonssls} (see the
+  {\tt [Preconditioning]} block of the aforementioned test.
+\item The command line must contain the argument {\tt --use-petsc-dm}.
+\end{itemize}
+
 
 
 
