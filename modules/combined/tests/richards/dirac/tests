@@ -38,6 +38,14 @@
     rel_err = 1E-5
   [../]
 
+  [./test_bh27]
+    type = 'Exodiff'
+    input = 'bh27.i'
+    exodiff = 'bh27.e'
+    rel_err = 1E-5
+    skip = 'Needs DiracKernel::computeOffDiagQpJacobian'
+  [../]
+
   [./test_st01]
     type = 'CSVDiff'
     input = 'st01.i'
