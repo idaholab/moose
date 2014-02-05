@@ -1,8 +1,8 @@
-# RSC test with high-res time and spatial resolution
+# RSC test with low-res time and spatial resolution
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 600
+  nx = 200
   ny = 1
   xmin = 0
   xmax = 10 # x is the depth variable, called "zeta" in RSC
@@ -184,14 +184,14 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '3E-3 3E-2 0.05'
+    time_dt = '3E-2 5E-1 8E-1'
     time_t = '0 1 5'
   [../]
 []
 
 
 [Output]
-  file_base = rsc01
+  file_base = rsc02
   interval = 100000
   output_initial = true
   exodus = true
