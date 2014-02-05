@@ -38,7 +38,7 @@ RichardsSeff2gasRSC::dseff(std::vector<VariableValue *> p, unsigned int qp) cons
   Real pc = (*p[1])[qp] - (*p[0])[qp];
   std::vector<Real> answer(2);
   answer[1] = -RichardsSeffRSC::dseff(pc, _shift, _scale);
-  answer[0] = answer[1];
+  answer[0] = -answer[1];
   return answer;
 }
 
