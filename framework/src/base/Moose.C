@@ -281,8 +281,10 @@
 #include "SetupMeshAction.h"
 #include "AddMeshModifierAction.h"
 #include "SetupMeshCompleteAction.h"
-#include "SetupOutputNameAction.h"
-#include "SetupOutputAction.h"
+#include "SetupOutputNameAction.h" // \TODO: remove w/ update system upgraded
+#include "SetupOutputAction.h" // \TODO: remove w/ update system upgraded
+#include "AddOutputAction.h"
+#include "CommonOutputAction.h"
 #include "AddMaterialAction.h"
 #include "GlobalParamsAction.h"
 #include "AdaptivityAction.h"
@@ -313,6 +315,11 @@
 #include "AddMortarInterfaceAction.h"
 #include "SetupPostprocessorDataAction.h"
 
+
+// Outputs
+#include "Exodus.h"
+#include "Console.h"
+#include "CSV.h"
 
 namespace Moose {
 
@@ -561,6 +568,11 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppProjectionTransfer);
   registerTransfer(MultiAppPostprocessorToAuxScalarTransfer);
 
+  // Outputs
+  registerOutput(Exodus);
+  registerOutput(Console);
+  registerOutput(CSV);
+
   registered = true;
 }
 
@@ -622,6 +634,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_multi_app",                MultiApp,               false);
   registerMooseObjectTask("add_transfer",                 Transfer,               false);
 
+  registerMooseObjectTask("add_output",                   OutputBase,             false);
+
   registerTask("add_feproblem", false);
   registerTask("add_bounds_vectors", false);
   registerTask("add_periodic_bc", false);
@@ -635,6 +649,7 @@ addActionTypes(Syntax & syntax)
   registerTask("init_displaced_problem", false);
   registerTask("setup_output", false);
   registerTask("setup_output_name", true);
+
   registerTask("init_problem", true);
   registerTask("check_copy_nodal_vars", true);
   registerTask("copy_nodal_vars", true);
@@ -719,7 +734,7 @@ addActionTypes(Syntax & syntax)
 "(add_material)"
 "(add_postprocessor)"
 "(setup_pps_complete)"
-"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, add_output)"
 "(setup_output)"
 "(setup_oversampling)"
 "(setup_debug)"
@@ -773,8 +788,10 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
   registerAction(CreateProblemAction, "create_problem");
-  registerAction(SetupOutputAction, "setup_output");
-  registerAction(SetupOutputNameAction, "setup_output_name");
+  registerAction(SetupOutputAction, "setup_output"); // \TODO: remove w/ update system upgraded
+  registerAction(SetupOutputNameAction, "setup_output_name"); // \TODO: remove w/ update system upgraded
+  registerAction(AddOutputAction, "add_output");
+  registerAction(CommonOutputAction, "meta_action");
   registerAction(GlobalParamsAction, "set_global_params");
   registerAction(SetupPredictorAction, "setup_predictor");
 

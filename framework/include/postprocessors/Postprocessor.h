@@ -48,6 +48,12 @@ public:
   Moose::PPSOutputType getOutput() { return _output; }
 
   /**
+   * Get the list of output objects that this class is restricted
+   * @return A vector of OutputNames
+   */
+  std::set<OutputName> getOutputs(){ return std::set<OutputName>(_outputs.begin(), _outputs.end()); }
+
+  /**
    * Returns the name of the Postprocessor.
    */
   std::string PPName() { return _pp_name; }
@@ -57,6 +63,9 @@ protected:
 
   /// If and where is the postprocessor output
   Moose::PPSOutputType _output;
+
+  /// Vector of output names
+  std::vector<OutputName> _outputs;
 };
 
 #endif

@@ -123,8 +123,8 @@ SetupOutputAction::act()
   // Disable Perf Log if requested
   if (!getParam<bool>("perf_log"))
   {
-    Moose::perf_log.disable_logging();
-    Moose::setup_perf_log.disable_logging();
+    //Moose::perf_log.disable_logging();
+    //Moose::setup_perf_log.disable_logging();
   }
 
   mooseAssert(_problem, "This should never happen!");

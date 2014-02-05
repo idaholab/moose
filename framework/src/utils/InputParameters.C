@@ -368,3 +368,24 @@ InputParameters::hasDefaultPostprocessorValue(const std::string & name) const
 {
   return _default_postprocessor_value.find(name) != _default_postprocessor_value.end();
 }
+
+void
+InputParameters::applyParameters(const InputParameters & common)
+{
+  // Loop through the common parameters
+  for(InputParameters::const_iterator it = common.begin(); it != common.end(); ++it)
+  {
+    // Extract value for setting criteria
+    bool has = _values.find(it->first) != _values.end();
+    bool valid = isParamValid(it->first);
+    bool priv = isPrivate(it->first);
+
+    // Apply the common parameter if it exists, is not set valid, and is not private
+    if (has && !valid && !priv)
+    {
+      delete _values[it->first];
+      _values[it->first] = it->second->clone();
+      set_attributes(it->first, false);
+    }
+  }
+}

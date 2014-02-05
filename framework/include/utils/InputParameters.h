@@ -48,8 +48,7 @@ public:
   InputParameters(const InputParameters &rhs);
   InputParameters(const Parameters &rhs);
 
-  virtual ~InputParameters()
-    {}
+  virtual ~InputParameters(){}
 
   virtual void clear();
 
@@ -363,6 +362,23 @@ public:
    */
   bool hasDefaultPostprocessorValue(const std::string & name) const;
 
+  /*
+   * Method for apply common parameters
+   * @param common The set of parameters to apply to the parameters store in this object
+   *
+   * The parameters supplied as an argument are set if:
+   *  (1) The parameter exists
+   *  (2) The parameter does not already have a valid value
+   *  (3) The parameter is NOT private
+   *
+   * Output object have a set of common parameters that are passed
+   * down to each of the output object created. This method is used for
+   * apply those common parameters, but only if the parameter exists on the object
+   * and it has yet to be set to a valid value.
+   *
+   * @see CommonOutputAction AddOutputAction
+   */
+  void applyParameters(const InputParameters & common);
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters validParams<MooseObject>();
@@ -525,8 +541,7 @@ InputParameters::addPrivateParam(const std::string &name, const T &value)
   checkConsistentType<T>(name);
 
   InputParameters::set<T>(name) = value;
-  _private_params.insert(name);
-}
+  _private_params.insert(name);}
 
 template <typename T>
 void

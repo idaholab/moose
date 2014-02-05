@@ -62,6 +62,7 @@ public:
   const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
 
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+  ///@}a
 
   /**
    * Get the MooseApp this object is associated wth.

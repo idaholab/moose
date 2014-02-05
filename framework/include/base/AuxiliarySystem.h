@@ -63,6 +63,7 @@ public:
    * @param parameters Parameters for this kernel
    */
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
   /**
    * Adds a scalar kernel
    * @param kernel_name The type of the kernel

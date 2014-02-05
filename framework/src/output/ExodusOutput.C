@@ -81,8 +81,8 @@ ExodusOutput::output(const std::string & file_base, Real time, unsigned int /*t_
 {
   if (_out == NULL)
     allocateExodusObject();
-
   _num++;
+
   _out->write_timestep(getFileName(file_base), _es, _num, time + _app.getGlobalTimeOffset());
   _out->write_element_data(_es);
 }
@@ -191,6 +191,7 @@ ExodusOutput::setOutputPosition(const Point & /* p */)
 void
 ExodusOutput::allocateExodusObject()
 {
+  // Create the output object and set the variables
   _out = new ExodusII_IO(_es.get_mesh());
   _out->set_output_variables(_output_variables, /*allow_empty=*/false);
 

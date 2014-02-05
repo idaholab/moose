@@ -1,0 +1,16 @@
+[Tests]
+  [./time_step]
+    type = 'Exodiff'
+    input = 'intervals.i'
+    exodiff = 'intervals_out.e'
+		cli_args = 'Outputs/exodus/interval=5'
+  [../]
+  [./common_time_step]
+		# Same as above, but uses interval set via the common parameters
+    type = 'Exodiff'
+    input = 'intervals.i'
+    exodiff = 'intervals_out.e'
+		cli_args = 'Outputs/interval=5'
+		prereq = 'time_step'
+  [../]
+[]

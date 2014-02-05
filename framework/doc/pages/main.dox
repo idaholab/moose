@@ -1,0 +1,11 @@
+/**
+\mainpage MOOSE: Multiphysics Object Oriented Simulation Environment
+
+\tableofcontents
+
+\image html moose_logo.png
+
+\section moose_systems MOOSE Systems
+ - \subpage outputs
+
+*/

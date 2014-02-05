@@ -40,10 +40,6 @@ AppFactory::createApp(std::string app_type, int argc, char ** argv)
   app_params.set<char**>("_argv") = argv;
 
   MooseApp * app = AppFactory::instance().create(app_type, "main", app_params);
-
-  // print out the System Info here!
-  Moose::out << app->getSysInfo();
-
   return app;
 }
 

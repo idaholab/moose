@@ -117,6 +117,8 @@ protected:
   MooseMesh * & _mesh;
   MooseMesh * & _displaced_mesh;
   /// Convenience reference to a problem this action works on
+
+public:
   FEProblem * & _problem;
   /// Convenience reference to an executioner
   Executioner * & _executioner;

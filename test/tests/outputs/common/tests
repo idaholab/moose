@@ -1,0 +1,20 @@
+[Tests]
+	[./exodus]
+    # Test that the default, exodus = true, output is working
+		type = Exodiff
+		input = exodus.i
+		exodiff = 'exodus_out.e'
+  [../]
+	[./postprocessors]
+		# Tests if the header line for the postprocessor values table is correct
+    type = RunApp
+    input = 'console.i'
+    expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
+  [../]
+  [./scalar_variables]
+   	# Test that the first header line for the wrapped scalar AuxVariable table is correct
+  	type = RunApp
+  	input = 'console.i'
+  	expect_out = '\| time\s*?\| aux0_0\s*?\| aux0_1\s*?\| aux1\s*?\| aux2\s*?\|\n'
+  [../]
+[]

@@ -179,6 +179,9 @@ Transient::init()
   _time_stepper->init();
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
+
+  _output_warehouse.outputInitial();
+
   if (_output_initial)
   {
     _problem.output();
@@ -289,7 +292,6 @@ Transient::takeStep(Real input_dt)
   _problem.execMultiApps(EXEC_TIMESTEP_BEGIN);
 
   Moose::out << "\nTime Step ";
-
   {
     std::ostringstream out;
 
@@ -405,6 +407,7 @@ Transient::endStep()
       {
         if(_allow_output)
         {
+          _output_warehouse.output();
           _problem.output(true);
           _problem.outputPostprocessors(true);
           _problem.outputRestart(true);
@@ -421,6 +424,7 @@ Transient::endStep()
       // if _at_sync_point is true, force the output no matter what
       if(_allow_output)
       {
+        _output_warehouse.output();
         _problem.output(_at_sync_point);
         _problem.outputPostprocessors(_at_sync_point);
         _problem.outputRestart(_at_sync_point);
@@ -703,4 +707,3 @@ Transient::getTimeStepper()
   else
     return std::string();
 }
-

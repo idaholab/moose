@@ -60,7 +60,6 @@ class MachineWarehouse(object):
     # Return the result
     return on_network
 
-
   ## Return the hosts line and number of jobs (public)
   #  @param kwargs Optional keyword/value pairings
   #  @return DISTCC_HOSTS

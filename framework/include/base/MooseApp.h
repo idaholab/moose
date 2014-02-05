@@ -27,6 +27,7 @@
 #include "SystemInfo.h"
 #include "Factory.h"
 #include "ActionFactory.h"
+#include "OutputWarehouse.h"
 
 class Executioner;
 class MooseApp;
@@ -95,6 +96,8 @@ public:
   Parser & parser() { return _parser; }
 
   Syntax & syntax() { return _syntax; }
+
+  OutputWarehouse & getOutputWarehouse(){ return _output_warehouse; };
 
   /**
    * Set the input file name.
@@ -291,6 +294,10 @@ protected:
   ActionFactory _action_factory;
   /// Where built actions are stored
   ActionWarehouse _action_warehouse;
+
+  /// Output object storage
+  OutputWarehouse _output_warehouse;
+
   /// Parser for parsing the input file
   Parser _parser;
   /// Pointer to the executioner of this run (typically build by actions)
@@ -321,6 +328,7 @@ protected:
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;
+
 };
 
 #endif /* MOOSEAPP_H */

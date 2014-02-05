@@ -154,6 +154,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max())
 {
+
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
   this->parameters().set<std::vector<MooseEnum> >("petsc_options") = std::vector<MooseEnum>();
@@ -536,8 +537,9 @@ void FEProblem::initialSetup()
   _nl.initialSetupBCs();
   _nl.initialSetupKernels();
 
-  if (_output_setup_log_early)
-    Moose::setup_perf_log.print_log();
+  // \TODO: Remove when Output system is complete
+  //if (_output_setup_log_early)
+  //  Moose::setup_perf_log.print_log();
 
   _nl.initialSetup();
 
@@ -557,6 +559,9 @@ void FEProblem::initialSetup()
 
   if(isRestarting() || isRecovering())
     _resurrector->restartRestartableData();
+
+  // Initial setup of output objects
+//  _app.getOutputWarehouse().initialSetup();
 }
 
 void FEProblem::timestepSetup()
@@ -2944,6 +2949,7 @@ FEProblem::solve()
 #endif
 
   Moose::setSolverDefaults(*this);
+
   Moose::perf_log.push("solve()","Solve");
 //  _solve_only_perf_log.push("solve");
 
@@ -3325,6 +3331,7 @@ FEProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
     _displaced_problem->updateGeomSearch(type);
 }
 
+
 void
 FEProblem::output(bool force)
 {
@@ -3563,7 +3570,10 @@ FEProblem::meshChanged()
     }
 
   }
+
+  // Indicate that the Mesh has changed to the Output objects
   _out.meshChanged();
+  _app.getOutputWarehouse().meshChanged();
 
   _has_jacobian = false;                    // we have to recompute jacobian when mesh changed
 }

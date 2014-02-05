@@ -50,13 +50,11 @@
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
   num_steps = 4
   dt = 1
-
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
 []
 
 [Adaptivity]
@@ -74,9 +72,10 @@
   [../]
 []
 
-[Output]
-  output_initial = true
-  exodus = true
-  perf_log = true
+[Outputs]
+  [./exodus]
+    type = Exodus
+		output_initial = false
+		output_scalar_variables = false
+  [../]
 []
-

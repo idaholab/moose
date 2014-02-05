@@ -19,8 +19,8 @@
 #include "InputParameters.h"
 #include "ExecStore.h"
 #include "MooseArray.h"
-#include "XTermConstants.h"
 #include "MooseObject.h"
+#include "MooseUtils.h"
 
 // libMesh
 #include "libmesh/libmesh_common.h"
@@ -85,7 +85,25 @@ public:
    * @param color (from XTermConstants.h)
    */
   template <typename T>
-  std::string colorText(const std::string color, T text) const;
+  std::string colorText(std::string color, T text) const
+  {
+    if (_color_output)
+    {
+
+#if !defined(__INTEL_COMPILER)
+      if (_cli_option_found && color.length() == 5 && color[3] == '2')
+        color.replace(3, 1, "5", 1);
+#endif
+      return MooseUtils::colorText<T>(color, text);
+    }
+
+    else
+    {
+      std::ostringstream oss;
+      oss << text;
+      return oss.str();
+    }
+  }
 
   /**
    * For Internal Use
@@ -121,27 +139,5 @@ protected:
   /// True if we're going to attempt to write color output
   bool _color_output;
 };
-
-template <typename T>
-std::string
-Problem::colorText(std::string color, T text) const
-{
-  std::ostringstream oss;
-  oss << std::scientific;
-
-  if (_color_output)
-  {
-#if !defined(__INTEL_COMPILER)
-    if (_cli_option_found && color.length() == 5 && color[3] == '2')
-      color.replace(3, 1, "5", 1);
-#endif
-    oss << color << text << DEFAULT;
-  }
-  else
-    oss << text;
-
-  return oss.str();
-}
-
 
 #endif /* PROBLEM_H */

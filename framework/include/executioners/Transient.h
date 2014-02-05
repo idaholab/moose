@@ -210,6 +210,7 @@ public:
   virtual void setOutputPosition(const Point & p) { _problem.setOutputPosition(p); }
 
 protected:
+
   FEProblem & _problem;
 
   MooseEnum _time_scheme;

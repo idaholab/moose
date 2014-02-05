@@ -45,6 +45,7 @@
 #include "Split.h"
 #include "SplitBasedPreconditioner.h"
 #include "MooseMesh.h"
+#include "MooseUtils.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -212,6 +213,9 @@ NonlinearSystem::solve()
       _computing_initial_residual = false;
       _sys.rhs->close();
       _initial_residual = _sys.rhs->l2_norm();
+
+      // \TODO: Remove this after output system redo; this is not needed as it is the same as the
+      // first entry of the nonlinear residual output
       Moose::out << std::scientific << std::setprecision(6);
       Moose::out << " Initial |R| = " << _initial_residual << std::endl;
     }
@@ -2064,7 +2068,7 @@ NonlinearSystem::printVarNorms()
         color = RED;
 
       Moose::out << " " << it->first << ": " <<
-        _fe_problem.colorText(color, std::sqrt(it->second)) << '\n';
+        MooseUtils::colorText(color, std::sqrt(it->second)) << '\n';
     }
   }
 
@@ -2075,7 +2079,7 @@ NonlinearSystem::printVarNorms()
         it != other_var_norms.end();
         ++it)
       Moose::out << " " << it->first << ": " <<
-        _fe_problem.colorText(GREEN, std::sqrt(it->second)) << '\n';
+        MooseUtils::colorText(GREEN, std::sqrt(it->second)) << '\n';
   }
 
   Moose::out.flush();

@@ -17,7 +17,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <sstream>
 
+#include "XTermConstants.h"
 namespace MooseUtils
 {
   /**
@@ -81,6 +83,23 @@ namespace MooseUtils
         return true;
     return false;
   }
+
+  /**
+   * Returns a character string to produce a specific color in terminals supporting
+   * color. The list of color constants is available in XTermConstants.h
+   * @param color (from XTermConstants.h)
+   * @param text The output to be converted to text and colored
+   */
+  template <typename T>
+  std::string
+  colorText(std::string color, T text)
+  {
+    std::ostringstream oss;
+    oss << std::scientific;
+    oss << color << text << COLOR_DEFAULT;
+    return oss.str();
+  }
+
 }
 
 #endif //MOOSEUTILS_H

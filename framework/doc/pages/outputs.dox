@@ -1,0 +1,49 @@
+/**
+\page outputs Output System
+
+\dontinclude exodus/exodus.i
+\dontinclude common/exodus.i
+\dontinclude exodus/exodus_nodal.i
+\dontinclude exodus/exodus_oversample.i
+\dontinclude displaced/displaced_adapt_test.i
+
+\tableofcontents
+
+The Moose output system is designed to be just like any other system in Moose: modular and expandable.
+Thus, it is possible to create multiple output objects each outputting at different intervals, or different
+variables, or varying file types.
+
+\section outputs_syntax Input File Syntax
+
+The output system relies on an Outputs block in the input file that contains its own common parameters
+as well as sub-blocks that result in the creation of multiple Moose output objects. For example, the following input
+file snippet demonstrates the basic ExodusII output.
+
+\snippet exodus/exodus.i ExodusOutputBlock
+
+The output system has both common and block specific comments. For example, there are short-cut common parameters to the basic input types. The following input file snippet is \b exactly equivalent to including the basic block shown in the previous snippet.
+
+\snippet common/exodus.i CommonExodusOutput
+
+Beyond the short-cut methods other common parameters exists (e.g., 'interval' and 'output_initial'). The input file snippet below demonstrate the useage of a common value for 'output_initial' as well as the use of multiple output blocks.
+
+\snippet exodus/exodus_nodal.i MultipleOutputBlocks
+
+
+\section outputs_oversample Oversampling
+
+Oversampling is handled in via the 'oversample' input parameter, which by default is set to zero. To enable oversample 
+set this to positive non-zero value that represents the number of refinements to perform for the oversampling. For example,
+the following input file snippet creates an ExodusII file with two oversample refinements. Also, int includes a positional
+offset for the oversampled mesh. The resulting output is a single file, if both the original and oversampled mesh are desired
+an additional output block is required, on for the oversampled and one for the original. This is accomplished in the snippet below by using the 'exodus = true' short-cut syntax.
+
+\snippet exodus/exodus_oversample.i OversampleOutput
+
+\section outputs_displaced Displaced Mesh
+
+In similar fashion to oversampling, the displaced mesh may be output by setting 'use_displaced = true' within your output block, as shown below. Again, to output both the original and displaced mesh an additional output block is required.
+
+\snippet displaced/displaced_adapt_test.i OutputDisplaced
+
+*/

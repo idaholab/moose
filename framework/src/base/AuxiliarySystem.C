@@ -124,6 +124,9 @@ AuxiliarySystem::addScalarVariable(const std::string & var_name, Order order, Re
     _vars[tid].add(var_name, var);
     _scalar_vars[tid][var_name] = var;
   }
+
+  // Add the scalar variable to the list of variable names
+  _var_names.push_back(var_name);
 }
 
 void

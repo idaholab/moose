@@ -111,6 +111,13 @@ class PeacockApplication(object):
       type_options['std::vector<MultiAppName>'] = set(multi_app_names)
       type_options['MultiAppName'] = set(multi_app_names)
 
+    # Outputs
+    output_names = tree_widget.getChildNamesOfPath('Outputs')
+    if len(output_names):
+      type_options['std::vector<OutputName, std::allocator<OutputName> >'] = set(output_names)
+      type_options['std::vector<OutputName>'] = set(output_names)
+      type_options['OutputName'] = set(output_names)
+
     # Mesh stuff
     mesh_data = tree_widget.getMeshItemData()
     if mesh_data:

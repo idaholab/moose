@@ -68,6 +68,9 @@ Steady::init()
 
   _problem.initialSetup();
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
+
+  // Write the output (handling of outputing initial or not is handled by OutputBase)
+  _output_warehouse.outputInitial();
   if (_output_initial)
   {
     _problem.output();
@@ -114,6 +117,8 @@ Steady::execute()
     _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
     _problem.computeIndicatorsAndMarkers();
+
+    _output_warehouse.output();
 
     _problem.output();
     _problem.outputPostprocessors();

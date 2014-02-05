@@ -23,6 +23,9 @@
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 #include "MooseTypes.h"
+#include "MooseUtils.h"
+#include "CommandLine.h"
+#include "Console.h"
 
 //libMesh Includes
 #include "libmesh/libmesh_common.h"
@@ -53,6 +56,9 @@
 //PetscDMMoose include
 #include "PetscDMMoose.h"
 
+// Standard includes
+#include <fstream>
+#include <string>
 
 namespace Moose
 {
@@ -201,12 +207,12 @@ petscSetOptions(FEProblem & problem)
 
 }
 
-/// Quick helper to output the norm in color
-void outputNorm(Real old_norm, Real norm, Problem * problem)
+// Quick helper to output the norm in color
+void outputNorm(Real old_norm, Real norm, bool use_color)
 {
-  std::string color(DEFAULT);
+  std::string color(COLOR_DEFAULT);
 
-  if (problem->shouldColorOutput())
+  if (use_color)
   {
     // Red if the residual went up...
     if (norm > old_norm)
@@ -219,9 +225,10 @@ void outputNorm(Real old_norm, Real norm, Problem * problem)
       color = GREEN;
   }
 
-  libMesh::out << problem->colorText(color, norm) << std::endl;
+  libMesh::out << MooseUtils::colorText<Real>(color, norm) << std::endl;
 }
 
+// \TODO Remove after new build system is in place
 PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_ptr)
 {
   static Real old_norm;
@@ -231,17 +238,18 @@ PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_
   if(its == 0)
     old_norm = std::numeric_limits<Real>::max();
 
+
   libMesh::out << std::setw(2) << its
                << " Nonlinear |R| = ";
 
-  outputNorm(old_norm, fnorm, problem);
+  outputNorm(old_norm, fnorm, problem->shouldColorOutput());
 
   old_norm = fnorm;
 
   return 0;
 }
 
-
+// \TODO Remove after new output system is in place
 PetscErrorCode  linearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *void_ptr)
 {
   static Real old_norm;
@@ -258,10 +266,55 @@ PetscErrorCode  linearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *
                << std::scientific
                << " Linear |R| = ";
 
-  outputNorm(old_norm, rnorm, problem);
+  outputNorm(old_norm, rnorm, problem->shouldColorOutput());
 
   old_norm = rnorm;
 
+  return 0;
+}
+
+PetscErrorCode petscNonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_ptr)
+{
+  static Real old_norm;
+
+  if(its == 0)
+    old_norm = std::numeric_limits<Real>::max();
+
+  libMesh::out << std::setw(2) << its
+               << " Nonlinear |R| = ";
+
+  bool * use_color = static_cast<bool*>(void_ptr);
+  outputNorm(old_norm, fnorm, use_color);
+
+  old_norm = fnorm;
+
+  return 0;
+}
+
+PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *void_ptr)
+{
+  static Real old_norm;
+
+  if(its == 0)
+    old_norm = std::numeric_limits<Real>::max();
+
+  libMesh::out << std::setw(7) << its
+               << std::scientific
+               << " Linear |R| = ";
+
+  bool * use_color = static_cast<bool*>(void_ptr);
+  outputNorm(old_norm, rnorm, use_color);
+
+  old_norm = rnorm;
+
+  return 0;
+}
+
+PetscErrorCode petscSetupOutput(CommandLine * cmd_line)
+{
+  char code[10] = {45,45,109,111,111,115,101};
+  if (cmd_line->getPot()->search(code))
+    Console::petscSetupOutput();
   return 0;
 }
 
@@ -596,6 +649,7 @@ void petscSetDefaults(FEProblem & problem)
   }
 #endif
 
+  // \TODO: Remove this when new output system is in place
   {
     PetscErrorCode ierr;
 #if PETSC_VERSION_LESS_THAN(2,3,3)
@@ -606,6 +660,8 @@ void petscSetDefaults(FEProblem & problem)
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
 
+
+  // \TODO: Remove this when new output system is in place
   if(problem.shouldPrintLinearResiduals())
   {
     PetscErrorCode ierr;
@@ -616,6 +672,38 @@ void petscSetDefaults(FEProblem & problem)
 #endif
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
+}
+
+void petscPrintLinearResiduals(FEProblem * problem_ptr, bool use_color)
+{
+  NonlinearSystem & nl = problem_ptr->getNonlinearSystem();
+  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+  SNES snes = petsc_solver->snes();
+  KSP ksp;
+  SNESGetKSP(snes, &ksp);
+
+  PetscErrorCode ierr;
+#if PETSC_VERSION_LESS_THAN(2,3,3)
+  ierr = KSPSetMonitor (ksp, petscLinearMonitor, &use_color, PETSC_NULL);
+#else
+  ierr = KSPMonitorSet (ksp, petscLinearMonitor, &use_color, PETSC_NULL);
+#endif
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+}
+
+void petscPrintNonlinearResiduals(FEProblem * problem_ptr, bool use_color)
+{
+  NonlinearSystem & nl = problem_ptr->getNonlinearSystem();
+  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+  SNES snes = petsc_solver->snes();
+
+  PetscErrorCode ierr;
+#if PETSC_VERSION_LESS_THAN(2,3,3)
+  ierr = SNESSetMonitor (snes, petscNonlinearMonitor, &use_color, PETSC_NULL);
+#else
+  ierr = SNESMonitorSet (snes, petscNonlinearMonitor, &use_color, PETSC_NULL);
+#endif
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
 }
 
 } // Namespace PetscSupport

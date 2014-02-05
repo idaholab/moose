@@ -1,0 +1,66 @@
+[Tests]
+  [./basic]
+		# Tests the basic ExodusII output, using default settings
+    type = 'Exodiff'
+    input = 'exodus.i'
+    exodiff = 'exodus_out.e'
+  [../]
+
+  [./input]
+		# Test the ability to write the input file to the output; this currently just checks if
+    # Moose runs with the output_input = true
+    # \TODO Find a method for comparing files with and without information records
+    type = 'RunApp'
+    input = 'exodus_input.i'
+  [../]
+
+  [./disable_initial]
+	  # Tests the disabling of the initial condition for steady-state Executioner
+    type = 'Exodiff'
+		input = 'exodus.i'
+		exodiff = 'exodus_disable_initial_out.e'
+		cli_args = 'Outputs/exodus/output_initial=false Outputs/exodus/file_base=exodus_disable_initial_out'
+  [../]
+
+  [./output_all]
+		# Tests the default output of all types (nonlinear, scalars, and postprocessors)
+	  type = 'Exodiff'
+		input = 'variable_toggles.i'
+		exodiff = 'variable_toggles_out.e'
+  [../]
+
+	[./hide_output]
+	  # Test the hide_variables options (hides one of each type of output)
+	  type = 'Exodiff'
+		input = 'hide_variables.i'
+		exodiff = 'hide_variables_out.e'
+  [../]
+
+	[./invalid_hide]
+	  # Tests that the error message for hide/show variables input is working
+		type = 'RunException'
+		input = 'invalid_hide_variables.i'
+		expect_err = 'Output\(s\) do not exist \(must be variable, scalar, or postprocessor\): aux27'
+  [../]
+
+	[./nodal_output]
+    # Tests the elemental_as_nodal and scalar_as_nodal flags are working
+		type = 'Exodiff'
+		input = 'exodus_nodal.i'
+		exodiff = 'exodus_nodal_out.e'
+	[../]
+
+	[./oversample]
+	  # Tests that oversampling is functioning with a shift of position
+		type = 'Exodiff'
+		input = 'exodus_oversample.i'
+		exodiff = 'exodus_oversampled.e'
+  [../]
+
+	[./oversample_filemesh]
+	  # Tests that oversampling a file input and change in output base is functioning
+		type = 'Exodiff'
+		input = 'exodus_oversample_file.i'
+		exodiff = 'exodus_oversample_custom_name.e'
+	[../]
+[]

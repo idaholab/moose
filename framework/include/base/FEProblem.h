@@ -38,6 +38,7 @@
 #include "NonlinearSystem.h"
 #include "Restartable.h"
 #include "SolverParams.h"
+#include "OutputWarehouse.h"
 
 class DisplacedProblem;
 class OutputProblem;
@@ -588,6 +589,7 @@ public:
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
   // Output /////
+  // \TODO Remove after new output system implemented
   virtual Output & out() { return _out; }
   virtual void output(bool force = false);
   virtual void outputRestart(bool force = false);
@@ -595,22 +597,26 @@ public:
   virtual void outputSolutionHistory(bool state = true) { _output_solution_history = state; }
   virtual void outputESInfo(bool state = true) { _output_es_info = state; }
 
+  //void addOutput(std::string damper_name, const std::string & name, InputParameters parameters);
 
   /**
    * Whether or not we should be printing the linear residuals.
    * @param state True to print linear residuals.
    */
+  // \TODO Remove after new output system implemented
   virtual void printLinearResiduals(bool state) { _print_linear_residuals = state; }
 
   /**
    * Whether or not we should be printing the linear residuals.
    */
+  // \TODO Remove after new output system implemented
   virtual bool shouldPrintLinearResiduals() { return _print_linear_residuals; }
 
   /**
    * Set which variables will be written in output files
    * @param output_variables The list of variable names to write in the output files
    */
+  // \TODO Remove all after new output system implemented
   void setOutputVariables();
   void hideVariableFromOutput(const VariableName & var_name);
   void hideVariableFromOutput(const std::vector<VariableName> & var_names);
@@ -618,6 +624,8 @@ public:
   void showVariableInOutput(const std::vector<VariableName> & var_names);
 
   OutputProblem & getOutputProblem(unsigned int refinements, MeshFileName file = "");
+
+  // \TODO Remove after new output system implemented
   void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
   void setPPSFitScreen(MooseEnum m) { _pps_fit_to_screen = m; }
 
@@ -830,13 +838,13 @@ protected:
   std::map<std::string, RandomData *> _random_data_objects;
 
   /// Table with postprocessors that will go into files
-  FormattedTable & _pps_output_table_file;
+  FormattedTable & _pps_output_table_file; // \TODO Remove after new output system implemented
   /// Table with postprocessors that will go on screen
-  FormattedTable & _pps_output_table_screen;
-  unsigned int _pps_output_table_max_rows;
-  MooseEnum _pps_fit_to_screen;
+  FormattedTable & _pps_output_table_screen;// \TODO Remove after new output system implemented
+  unsigned int _pps_output_table_max_rows;// \TODO Remove after new output system implemented
+  MooseEnum _pps_fit_to_screen;// \TODO Remove after new output system implemented
 
-  bool _print_linear_residuals;
+  bool _print_linear_residuals;// \TODO Remove after new output system implemented
 
   void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
 
@@ -847,6 +855,7 @@ public:
    */
   unsigned int subspaceDim(const std::string& prefix) const {if(_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
 
+  // \TODO Remove after new output system implemented
   bool _postprocessor_screen_output;
   bool _postprocessor_csv_output;
   bool _postprocessor_gnuplot_output;
@@ -862,6 +871,7 @@ protected:
    * Add postprocessor values to the output table
    * @param type type of PPS to add to the table
    */
+  // \TODO Remove after new output system implemented
   void addPPSValuesToTable(ExecFlagType type);
 
   /**
@@ -908,8 +918,10 @@ protected:
 
 //  PerfLog _solve_only_perf_log;                         ///< Only times the solve
   /// Determines if the setup log is printed before the first time step
-  bool _output_setup_log_early;
+  bool _output_setup_log_early;  // \TODO Remove after new output system implemented
 
+
+  // \TODO Remove after new output system implemented
   std::vector<VariableName> _variable_white_list;
   std::vector<VariableName> _variable_black_list;
 

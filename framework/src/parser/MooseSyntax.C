@@ -88,6 +88,9 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("SetupOutputNameAction", "Output");
   syntax.registerActionSyntax("SetupOverSamplingAction", "Output/OverSampling");
 
+  syntax.registerActionSyntax("AddOutputAction", "Outputs/*");
+  syntax.registerActionSyntax("CommonOutputAction", "Outputs");
+
   // Note: Preconditioner Actions will be built by this setup action
   syntax.registerActionSyntax("SetupPreconditionerAction", "Preconditioning/*");
   syntax.registerActionSyntax("AddSplitAction","Splits/*");

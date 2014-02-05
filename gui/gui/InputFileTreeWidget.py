@@ -126,37 +126,67 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     return None
 
   def getOutputFileNames(self):
+
     output_item = self.findChildItemWithName(self, 'Output')
     oversampling_item = self.findChildItemWithName(output_item, 'OverSampling')
 
     file_names = []     
     file_base = ''
-
     output_data = None
 
-    if oversampling_item and oversampling_item.checkState(0) == QtCore.Qt.Checked:
-      output_data =  output_item.table_data
+    # Find the Outputs block items and the names of the sub-blocks
+    outputs = self.findChildItemWithName(self, 'Outputs')
+    outputs_children = self.getChildNames(outputs)
 
-      if output_data:
-        if 'file_base' in output_data:
-          file_base = output_data['file_base'] + '_oversample'
+    # Loop through each of the sub-blocks and grab the data
+    # if type = Exodus
+    for i in range(len(outputs_children)-1, 0, -1):
+      child = self.findChildItemWithName(outputs, outputs_children[i])
+      output_data = child.table_data
+      if output_data['type'] == 'Exodus':
+        
+        # Check for oversampling
+        if 'oversample' in output_data and output_data['oversample'] != '0':
+          if 'oversample_file_base' in output_data:
+            file_base = output_data['oversample_file_base']
+          else:
+            file_base = 'peacock_run_tmp_out_oversample' 
+
+        # Non-oversampled base file name
         else:
-          file_base = 'peacock_run_tmp_out_oversample'
-      
-    elif output_item.checkState(0) == QtCore.Qt.Checked:
-      output_data =  output_item.table_data
+          if 'file_base' in output_data:
+            file_base = output_data['file_base']
+          else:
+            file_base = 'peacock_run_tmp_out' 
+        
+        file_names.append(file_base + '.e')      
+        break
 
-      if output_data:
-        if 'file_base' in output_data:
-          file_base = output_data['file_base']
-        else:
-          file_base = 'peacock_run_tmp_out'
+    # Use the old system, if output_data is None
+    if output_data == None:
+      if oversampling_item and oversampling_item.checkState(0) == QtCore.Qt.Checked:
+        output_data =  output_item.table_data
+       
+        if output_data:
+          if 'file_base' in output_data:
+            file_base = output_data['file_base'] + '_oversample'
+          else:
+            file_base = 'peacock_run_tmp_out_oversample'
+        
+      elif output_item.checkState(0) == QtCore.Qt.Checked:
+        output_data =  output_item.table_data
+       
+        if output_data:
+          if 'file_base' in output_data:
+            file_base = output_data['file_base']
+          else:
+            file_base = 'peacock_run_tmp_out'
 
-    type_to_extension = {'exodus':'.e', 'tecplot':'.plt'}
+      type_to_extension = {'exodus':'.e', 'tecplot':'.plt'}
 
-    for atype,extension in type_to_extension.items():
-      if output_data and atype in output_data and (output_data[atype] == 'true' or output_data[atype] == '1'):
-        file_names.append(file_base + extension)
+      for atype,extension in type_to_extension.items():
+        if output_data and atype in output_data and (output_data[atype] == 'true' or output_data[atype] == '1'):
+          file_names.append(file_base + extension)
 
     # FIXME: Hack to make raven and r7 work for now
     if 'raven' in self.input_file_widget.app_path or 'r7' in self.input_file_widget.app_path:

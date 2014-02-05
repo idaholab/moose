@@ -2,28 +2,63 @@
 import sys, os, yaml, pickle, commands, time
 from PyQt4 import QtCore, QtGui
 
-def printYaml(data, level):
-  indent_string = ''
-  for i in xrange(0,level):
-    indent_string += ' '
-  print indent_string + str(data['name'])
-  
-  indent_string += ' '
-  
-  for item,value in data.items():
-    if item != 'name' and item != 'parameters' and item != 'subblocks':
-      print indent_string + item + ": " + str(value)
-      
-  if 'parameters' in data and data['parameters']:
-    for param in data['parameters']:
-      print indent_string + param['name']
-      for name, value in param.items():
-        print indent_string + ' ' + str(name) + ': ' + str(value)
+##
+# A helper function for printYaml (private)
+# Prints a Yaml data dictionary to the screen
+# @param data The dictionary to print
+# @param level The indentation level to utilize
+# @see printYaml
+def _printYamlDict(data, level=0):
 
-  if data['subblocks']:
-    for d in data['subblocks']:
-      printYaml(d, level+1)    
+  # Indent two spaces for each level
+  indent = '  '
 
+  # Iterate through the dictionary items
+  for key,value in data.items():
+
+    # Print the name as a header
+    if key == 'name':
+      print indent*level + str(value)
+
+    # The subblocks contain additional dictionaries; loop
+    # through each one and print at an increated indentation
+    elif key == 'subblocks':
+      if value != None:
+        for v in value:
+          _printYamlDict(v, level+1)
+
+    # The parameters contain additional dictionaries; loop 
+    # through the parameters and place the output under a parameter section
+    elif key == 'parameters':
+      print indent*(level+1) + 'parameters:'
+      if value != None:
+        for v in value:
+          _printYamlDict(v, level+2)
+
+    # The default case, print the key value pairings
+    else:
+      print (indent*(level+1) + str(key) + " = " + str(value)).rstrip('\n')
+
+##
+# A function for printing the YAML information to the screen (public)
+# @param data The YAML dump data (returned by GenSyntax::GetSynatx)
+# @param name Limits the output based on the supplied string, if the 
+#             supplied name is anywhere in the 'name' parameter of the 
+#             top level YAML data the corresponding dictionary is printed (optional)
+def printYaml(data, name = None):
+ 
+  # Print all output
+  if name == None:
+    for d in data:
+      _printYamlDict(d)
+
+  # Only print data that contains the given name string
+  else:
+    for d in data:
+      if name in d['name']:
+        _printYamlDict(d)
+    
+  
 class GenSyntax():
   def __init__(self, qt_app, app_path, use_cached_syntax):
     self.qt_app = qt_app
@@ -79,6 +114,7 @@ class GenSyntax():
       data = pickle.load(open(yaml_dump_file_name, 'rb'))
 
     self.saved_data = data
+
     return data
 
   def getRawDump(self):

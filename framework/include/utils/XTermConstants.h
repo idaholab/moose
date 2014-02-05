@@ -23,6 +23,6 @@
 #define MAGENTA  "\33[35m"
 #define CYAN     "\33[36m"
 #define WHITE    "\33[37m"
-#define DEFAULT  "\33[39m"
+#define COLOR_DEFAULT  "\33[39m"
 
 #endif

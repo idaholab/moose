@@ -19,6 +19,7 @@
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "Restartable.h"
+#include "OutputWarehouse.h"
 
 // System includes
 #include <string>
@@ -100,6 +101,10 @@ public:
   virtual void setOutputPosition(const Point & /* p */) {}
 
 protected:
+
+  /// Reference to OutputWarehouse (needed for outputing system information via Console object)
+  OutputWarehouse & _output_warehouse;
+
   /// output initial condition if true
   bool _output_initial;
   /// Initial Residual Variables

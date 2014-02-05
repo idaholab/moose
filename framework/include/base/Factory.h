@@ -55,6 +55,8 @@
 #define registerTimeIntegrator(name)                registerObject(name)
 #define registerPredictor(name)                     registerObject(name)
 #define registerSplit(name)                         registerObject(name)
+#define registerOutput(name)                        registerObject(name)
+
 
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)
@@ -78,6 +80,8 @@
 #define registerNamedTimeStepper(obj, name)         registerNamedObject(obj, name)
 #define registerNamedTimeIntegrator(obj, name)      registerNamedObject(obj, name)
 #define registerNamedPredictor(obj, name)           registerNamedObject(obj, name)
+#define registerNamedOutput(obj, name)              registerNamedObject(obj, name)
+
 
 // Macros for registering deprecated objects
 #define registerDeprecatedObject(name, time)        factory.regDeprecated<name>(stringifyName(name), time)
