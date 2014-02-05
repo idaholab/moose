@@ -135,7 +135,7 @@
     cli_args = 'Output/exodus=false'
     ratio_tol = 1E-7 
     difference_tol = 1E10
-    skip = 'snes test does not work with Dirac yet'
+    skip = 'snes test incorrect with Dirac - see ticket2379'
   [../]
 
   [./jn40]
