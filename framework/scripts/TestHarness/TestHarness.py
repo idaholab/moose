@@ -28,7 +28,6 @@ class TestHarness:
     self.host_name = gethostname()
     self.moose_dir = os.path.abspath(moose_dir) + '/'
     self.code = '2d2d6769726c2d6d6f6465'
-    self.processingPBS = False
     # Assume libmesh is a peer directory to MOOSE if not defined
     if os.environ.has_key("LIBMESH_DIR"):
       self.libmesh_dir = os.environ['LIBMESH_DIR']
@@ -71,9 +70,10 @@ class TestHarness:
 
     # PBS STUFF
     if self.options.pbs and os.path.exists(self.options.pbs):
-      self.processingPBS = True
+      self.options.processingPBS = True
       self.processPBSResults()
     else:
+      self.options.processingPBS = False
       for dirpath, dirnames, filenames in os.walk(os.getcwd(), followlinks=True):
         if (self.test_match.search(dirpath)):
           for file in filenames:
@@ -136,9 +136,9 @@ class TestHarness:
 
     self.runner.join()
     # Wait for all tests to finish
-    if self.options.pbs and self.processingPBS == False:
+    if self.options.pbs and self.options.processingPBS == False:
       print '\n< checking batch status >\n'
-      self.processingPBS = True
+      self.options.processingPBS = True
       self.processPBSResults()
       self.cleanupAndExit()
     else:
@@ -283,7 +283,7 @@ class TestHarness:
     if test.isValid('CAVEATS'):
       caveats = test['CAVEATS']
 
-    if self.options.pbs and self.processingPBS == False:
+    if self.options.pbs and self.options.processingPBS == False:
       (reason, output) = self.buildPBSBatch(output, tester)
     else:
       (reason, output) = tester.processResults(self.moose_dir, retcode, self.options, output)
@@ -301,7 +301,7 @@ class TestHarness:
             caveats.append(', '.join(test[check]))
       if len(caveats):
         result = '[' + ', '.join(caveats) + '] OK'
-      elif self.options.pbs and self.processingPBS == False:
+      elif self.options.pbs and self.options.processingPBS == False:
         result = 'LAUNCHED'
       else:
         result = 'OK'
@@ -361,16 +361,22 @@ class TestHarness:
 
             # Report the current status of JOB_ID
             if output_value == 'F':
-              # If the job is finished, analyze the results
+              # F = Finished. Get the exit code reported by qstat
+              exit_code = int(re.search(r'Exit_status = (\d+)', qstat_stdout).group(1))
+
+              # Read the stdout file
               if os.path.exists(job[2]):
                 output_file = open(job[2], 'r')
                 # Not sure I am doing this right: I have to change the TEST_DIR to match the temporary cluster_launcher TEST_DIR location, thus violating the tester.specs...
                 test[TEST_DIR] = '/'.join(job[2].split('/')[:-1])
-                self.testOutputAndFinish(tester, 0, output_file.read())
+                outfile = output_file.read()
                 output_file.close()
               else:
                 # I ran into this scenario when the cluster went down, but launched/completed my job :)
                 self.handleTestResult(tester.specs, '', 'FAILED (NO STDOUT FILE)', 0, 0, True)
+
+              self.testOutputAndFinish(tester, exit_code, outfile)
+
             elif output_value == 'R':
               # Job is currently running
               self.handleTestResult(tester.specs, '', 'RUNNING', 0, 0, True)
