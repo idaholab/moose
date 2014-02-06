@@ -9,7 +9,7 @@ InputParameters validParams<JIntegral>()
   params.addCoupledVar("q", "The q function, aux variable");
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
   params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front corresponding to this q function");
-  params.addParam<bool>("large", false, "Whether to include large or small Eshelpy tensor");
+  params.addParam<bool>("large", false, "Whether to include large or small Eshelby tensor");
   return params;
 }
 

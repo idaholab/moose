@@ -48,6 +48,7 @@
 #include "Pressure.h"
 #include "PressureAction.h"
 #include "SolidMechanicsAction.h"
+#include "JIntegralAction.h"
 #include "SolidMechInertialForce.h"
 #include "SolidMechImplicitEuler.h"
 #include "SolidModel.h"
@@ -130,9 +131,18 @@ Elk::SolidMechanics::associateSyntax(Syntax & syntax, ActionFactory & action_fac
 
   syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
+  syntax.registerActionSyntax("JIntegralAction", "JIntegral","add_user_object");
+  syntax.registerActionSyntax("JIntegralAction", "JIntegral","add_aux_variable");
+  syntax.registerActionSyntax("JIntegralAction", "JIntegral","add_aux_kernel");
+  syntax.registerActionSyntax("JIntegralAction", "JIntegral","add_postprocessor");
+
   registerAction(PressureAction, "add_bc");
   registerAction(PlenumPressureAction, "add_bc");
   registerAction(PlenumPressurePPAction, "add_postprocessor");
   registerAction(PlenumPressureUOAction, "add_user_object");
   registerAction(SolidMechanicsAction, "add_kernel");
+  registerAction(JIntegralAction, "add_user_object");
+  registerAction(JIntegralAction, "add_aux_variable");
+  registerAction(JIntegralAction, "add_aux_kernel");
+  registerAction(JIntegralAction, "add_postprocessor");
 }
