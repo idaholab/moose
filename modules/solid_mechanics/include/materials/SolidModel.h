@@ -72,6 +72,9 @@ protected:
   Real _cracking_alpha;
   std::vector<unsigned int> _active_crack_planes;
   const unsigned int _max_cracks;
+  const Real _cracking_neg_fraction;
+  // std::map<Point, unsigned> _cracked_this_step_count;
+  // std::map<Point, unsigned> _cracked_this_step;
 
   const bool _has_temp;
   VariableValue & _temperature;
@@ -129,6 +132,8 @@ protected:
   virtual void initQpStatefulProperties();
 
   virtual void initialSetup();
+  virtual void timestepSetup();
+  virtual void jacobianSetup();
 
   virtual void computeProperties();
 

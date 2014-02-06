@@ -37,6 +37,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<Real>("cracking_residual_stress", 0.0, "The fraction of the cracking stress allowed to be maintained following a crack.");
   params.addParam<std::vector<unsigned int> >("active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
+  params.addParam<Real>("cracking_neg_fraction", "The fraction of the cracking strain at which a transitition begins during decreasing strain to the original stiffness.");
   params.addParam<MooseEnum>("formulation", formulation, "Element formulation.  Choices are: " + formulation.getRawNames());
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen). For use with Nonlinear3D formulation.");
   params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ, SphericalR, and PlaneStrain formulations.");
@@ -79,70 +80,71 @@ namespace
 }
 
 SolidModel::SolidModel( const std::string & name,
-                        InputParameters parameters )
-  :Material( name, parameters ),
-   _appended_property_name( getParam<std::string>("appended_property_name") ),
-   _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
-   _lambda_set( parameters.isParamValid("lambda") ),
-   _poissons_ratio_set( parameters.isParamValid("poissons_ratio") ),
-   _shear_modulus_set( parameters.isParamValid("shear_modulus") ),
-   _youngs_modulus_set( parameters.isParamValid("youngs_modulus") ),
-   _bulk_modulus( _bulk_modulus_set ? getParam<Real>("bulk_modulus") : -1 ),
-   _lambda( _lambda_set ? getParam<Real>("lambda") : -1 ),
-   _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
-   _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
-   _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
-   _youngs_modulus_function( getParam<FunctionName>("youngs_modulus_function") != "" ? &getFunction("youngs_modulus_function") : NULL),
-   _poissons_ratio_function( getParam<FunctionName>("poissons_ratio_function") != "" ? &getFunction("poissons_ratio_function") : NULL),
-   _cracking_release( getCrackingModel( getParam<std::string>("cracking_release"))),
-   _cracking_stress( parameters.isParamValid("cracking_stress") ?
-                     (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
-   _cracking_residual_stress( getParam<Real>("cracking_residual_stress") ),
-   _cracking_alpha( 0 ),
-   _active_crack_planes(3,1),
-   _max_cracks( getParam<unsigned int>("max_cracks") ),
-   _has_temp(isCoupled("temp")),
-   _temperature(_has_temp ? coupledValue("temp") : _zero),
-   _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
-   _alpha(parameters.isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0.),
-   _alpha_function( parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
-   _has_stress_free_temp(false),
-   _stress_free_temp(0.0),
-   _volumetric_models(),
-   _stress(createProperty<SymmTensor>("stress")),
-   _stress_old_prop(createPropertyOld<SymmTensor>("stress")),
-   _stress_old(0),
-   _total_strain(createProperty<SymmTensor>("total_strain")),
-   _total_strain_old(createPropertyOld<SymmTensor>("total_strain")),
-   _elastic_strain(createProperty<SymmTensor>("elastic_strain")),
-   _elastic_strain_old(createPropertyOld<SymmTensor>("elastic_strain")),
-   _crack_flags(NULL),
-   _crack_flags_old(NULL),
-   _crack_flags_local(),
-   _crack_count(NULL),
-   _crack_count_old(NULL),
-   _crack_rotation(NULL),
-   _crack_rotation_old(NULL),
-   _crack_strain( NULL ),
-   _crack_strain_old( NULL ),
-   _crack_max_strain(NULL),
-   _crack_max_strain_old(NULL),
-   _principal_strain(3,1),
-   _elasticity_tensor(createProperty<SymmElasticityTensor>("elasticity_tensor")),
-   _Jacobian_mult(createProperty<SymmElasticityTensor>("Jacobian_mult")),
-   _d_strain_dT(),
-   _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
-   _total_strain_increment(0),
-   _strain_increment(0),
-   _SED(declareProperty<Real>("strain_energy_density")),
-   _SED_old(declarePropertyOld<Real>("strain_energy_density")),
-   _compute_JIntegral(getParam<bool>("compute_JIntegral")),
-   _Eshelby_tensor(declareProperty<ColumnMajorMatrix>("Eshelby_tensor")),
-   _Eshelby_tensor_small(declareProperty<ColumnMajorMatrix>("Eshelby_tensor_small")),
-   _block_id(std::vector<SubdomainID>(blockIDs().begin(), blockIDs().end())),
-   _constitutive_active(false),
-   _element(NULL),
-   _local_elasticity_tensor(NULL)
+                        InputParameters parameters ) :
+  Material( name, parameters ),
+  _appended_property_name( getParam<std::string>("appended_property_name") ),
+  _bulk_modulus_set( parameters.isParamValid("bulk_modulus") ),
+  _lambda_set( parameters.isParamValid("lambda") ),
+  _poissons_ratio_set( parameters.isParamValid("poissons_ratio") ),
+  _shear_modulus_set( parameters.isParamValid("shear_modulus") ),
+  _youngs_modulus_set( parameters.isParamValid("youngs_modulus") ),
+  _bulk_modulus( _bulk_modulus_set ? getParam<Real>("bulk_modulus") : -1 ),
+  _lambda( _lambda_set ? getParam<Real>("lambda") : -1 ),
+  _poissons_ratio( _poissons_ratio_set ?  getParam<Real>("poissons_ratio") : -1 ),
+  _shear_modulus( _shear_modulus_set ? getParam<Real>("shear_modulus") : -1 ),
+  _youngs_modulus( _youngs_modulus_set ? getParam<Real>("youngs_modulus") : -1 ),
+  _youngs_modulus_function( getParam<FunctionName>("youngs_modulus_function") != "" ? &getFunction("youngs_modulus_function") : NULL),
+  _poissons_ratio_function( getParam<FunctionName>("poissons_ratio_function") != "" ? &getFunction("poissons_ratio_function") : NULL),
+  _cracking_release( getCrackingModel( getParam<std::string>("cracking_release"))),
+  _cracking_stress( parameters.isParamValid("cracking_stress") ?
+                    (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
+  _cracking_residual_stress( getParam<Real>("cracking_residual_stress") ),
+  _cracking_alpha( 0 ),
+  _active_crack_planes(3,1),
+  _max_cracks( getParam<unsigned int>("max_cracks") ),
+  _cracking_neg_fraction( isParamValid("cracking_neg_fraction") ? getParam<Real>("cracking_neg_fraction") : 0 ),
+  _has_temp(isCoupled("temp")),
+  _temperature(_has_temp ? coupledValue("temp") : _zero),
+  _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
+  _alpha(parameters.isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0.),
+  _alpha_function( parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
+  _has_stress_free_temp(false),
+  _stress_free_temp(0.0),
+  _volumetric_models(),
+  _stress(createProperty<SymmTensor>("stress")),
+  _stress_old_prop(createPropertyOld<SymmTensor>("stress")),
+  _stress_old(0),
+  _total_strain(createProperty<SymmTensor>("total_strain")),
+  _total_strain_old(createPropertyOld<SymmTensor>("total_strain")),
+  _elastic_strain(createProperty<SymmTensor>("elastic_strain")),
+  _elastic_strain_old(createPropertyOld<SymmTensor>("elastic_strain")),
+  _crack_flags(NULL),
+  _crack_flags_old(NULL),
+  _crack_flags_local(),
+  _crack_count(NULL),
+  _crack_count_old(NULL),
+  _crack_rotation(NULL),
+  _crack_rotation_old(NULL),
+  _crack_strain( NULL ),
+  _crack_strain_old( NULL ),
+  _crack_max_strain(NULL),
+  _crack_max_strain_old(NULL),
+  _principal_strain(3,1),
+  _elasticity_tensor(createProperty<SymmElasticityTensor>("elasticity_tensor")),
+  _Jacobian_mult(createProperty<SymmElasticityTensor>("Jacobian_mult")),
+  _d_strain_dT(),
+  _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
+  _total_strain_increment(0),
+  _strain_increment(0),
+  _SED(declareProperty<Real>("strain_energy_density")),
+  _SED_old(declarePropertyOld<Real>("strain_energy_density")),
+  _compute_JIntegral(getParam<bool>("compute_JIntegral")),
+  _Eshelby_tensor(declareProperty<ColumnMajorMatrix>("Eshelby_tensor")),
+  _Eshelby_tensor_small(declareProperty<ColumnMajorMatrix>("Eshelby_tensor_small")),
+  _block_id(std::vector<SubdomainID>(blockIDs().begin(), blockIDs().end())),
+  _constitutive_active(false),
+  _element(NULL),
+  _local_elasticity_tensor(NULL)
 {
   bool same_coord_type = true;
 
@@ -193,6 +195,12 @@ SolidModel::SolidModel( const std::string & name,
         _cracking_residual_stress > 1 )
     {
       mooseError("cracking_residual_stress must be between 0 and 1");
+    }
+    if (isParamValid("cracking_neg_fraction") &&
+        (_cracking_neg_fraction <=0 ||
+         _cracking_neg_fraction > 1))
+    {
+      mooseError("cracking_neg_fraction must be > zero and <= 1");
     }
   }
 
@@ -353,6 +361,35 @@ SolidModel::createElasticityTensor()
 ////////////////////////////////////////////////////////////////////////
 
 void
+SolidModel::timestepSetup()
+{
+  // if (_cracking_stress > 0)
+  // {
+  //   _cracked_this_step_count.clear();
+  // }
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::jacobianSetup()
+{
+  // if (_cracking_stress > 0)
+  // {
+  //   for (std::map<Point, unsigned>::iterator i = _cracked_this_step.begin();
+  //        i != _cracked_this_step.end(); ++i)
+  //   {
+  //     if (i->second)
+  //     {
+  //       ++_cracked_this_step_count[i->first];
+  //     }
+  //   }
+  // }
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
 SolidModel::elasticityTensor( SymmElasticityTensor * e )
 {
   delete _local_elasticity_tensor;
@@ -481,7 +518,7 @@ SolidModel::initQpStatefulProperties()
         (*_crack_count)[_qp](2) =
         (*_crack_count_old)[_qp](0) =
         (*_crack_count_old)[_qp](1) =
-        (*_crack_count_old)[_qp](2) = 1;
+        (*_crack_count_old)[_qp](2) = 0;
     }
 
     (*_crack_rotation)[_qp].identity();
@@ -795,9 +832,33 @@ SolidModel::crackingStrainDirections()
     {
       (*_crack_max_strain)[_qp](i) = (*_crack_max_strain_old)[_qp](i);
 
-      if (ePrime(i,i) < 0)
+      if (_cracking_neg_fraction == 0 && ePrime(i,i) < 0)
       {
         _crack_flags_local(i) = 1;
+      }
+      else if (_cracking_neg_fraction > 0 &&
+               (*_crack_strain)[_qp](i)*_cracking_neg_fraction > ePrime(i,i))
+      {
+        if (-(*_crack_strain)[_qp](i)*_cracking_neg_fraction > ePrime(i,i))
+        {
+          _crack_flags_local(i) = 1;
+        }
+        else
+        {
+          // s = a*e^2 + b*e + c
+          // a = (Ec-Eo)/(4etr)
+          // b = (Ec+Eo)/2
+          // c = (Ec-Eo)*etr/4
+          // etr = _cracking_neg_fraction * strain when crack occurred
+          const Real etr = _cracking_neg_fraction * (*_crack_strain)[_qp](i);
+          const Real Eo = _cracking_stress / (*_crack_strain)[_qp](i);
+          const Real Ec = Eo * (*_crack_flags_old)[_qp](i);
+          const Real a = (Ec-Eo)/(4*etr);
+          const Real b = (Ec+Eo)/2;
+          // Compute the ratio of the current transition stiffness to the original stiffness
+          _crack_flags_local(i) = (2*a*etr+b)/Eo;
+          cracking_locally_active = true;
+        }
       }
       else
       {
@@ -949,6 +1010,7 @@ SolidModel::crackingStressRotation()
 
   if (_cracking_stress > 0)
   {
+
     computeCrackStrainAndOrientation( _principal_strain );
 
     for (unsigned i(0); i < 3; ++i)
@@ -993,17 +1055,23 @@ SolidModel::crackingStressRotation()
         }
       }
 
+      // _cracked_this_step[_q_point[_qp]] = 0;
       Real crackFactor(1);
       if ( _cracking_release == CR_POWER )
       {
         (*_crack_count)[_qp](i) = (*_crack_count_old)[_qp](i);
       }
-      if ( _cracking_release == CR_POWER &&
+      if ( (_cracking_release == CR_POWER &&
            sigma(i) > _cracking_stress &&
-           _active_crack_planes[i] == 1)
+           _active_crack_planes[i] == 1
+           // && (*_crack_count)[_qp](i) == 0
+            )
+           // || _cracked_this_step_count[_q_point[_qp]] > 5
+           )
       {
         cracked = true;
-        ++(*_crack_count)[_qp](i);
+        ++((*_crack_count)[_qp](i));
+        // _cracked_this_step[_q_point[_qp]] = 1;
         // Assume Poisson's ratio drops to zero for this direction.  Stiffness is then Young's modulus.
         const Real stiff = _youngs_modulus_function ? _youngs_modulus_function->value(_temperature[_qp], Point()) : _youngs_modulus;
 
@@ -1024,12 +1092,16 @@ SolidModel::crackingStressRotation()
         sigma(i) = (*_crack_flags)[_qp](i) * stiff * _principal_strain(i,0);
 
       }
-      else if ((*_crack_flags_old)[_qp](i) == 1 &&
-               sigma(i) > _cracking_stress &&
-               num_cracks < _max_cracks &&
-               _active_crack_planes[i] == 1)
+      else if ((_cracking_release != CR_POWER &&
+                (*_crack_flags_old)[_qp](i) == 1 &&
+                sigma(i) > _cracking_stress &&
+                num_cracks < _max_cracks &&
+                _active_crack_planes[i] == 1)
+           // || _cracked_this_step_count[_q_point[_qp]] > 5
+               )
       {
         // A new crack
+        // _cracked_this_step[_q_point[_qp]] = 1;
 
         cracked = true;
         new_crack = true;
@@ -1056,17 +1128,33 @@ SolidModel::crackingStressRotation()
 
       }
       else if (_cracking_release != CR_POWER &&
-               (*_crack_flags_old)[_qp](i) < 1)
+               (*_crack_flags_old)[_qp](i) < 1 &&
+               std::abs(_principal_strain(i,0) - (*_crack_max_strain)[_qp](i)) < 1e-10)
       {
-        // Previously cracked
+        // Previously cracked,
+        // Crack opening
         cracked = true;
-        if (std::abs(_principal_strain(i,0) - (*_crack_max_strain)[_qp](i)) < 1e-10)
-        {
-          // Crack opening
-          crackFactor = computeCrackFactor( i, sigma(i), (*_crack_flags)[_qp](i) );
-          (*_crack_flags)[_qp](i) = crackFactor;
-          _crack_flags_local(i) = crackFactor;
-        }
+        crackFactor = computeCrackFactor( i, sigma(i), (*_crack_flags)[_qp](i) );
+        (*_crack_flags)[_qp](i) = crackFactor;
+        _crack_flags_local(i) = crackFactor;
+      }
+      else if (_cracking_neg_fraction > 0 &&
+               (*_crack_strain)[_qp](i)*_cracking_neg_fraction > _principal_strain(i,0) &&
+               -(*_crack_strain)[_qp](i)*_cracking_neg_fraction < _principal_strain(i,0))
+      {
+        // s = a*e^2 + b*e + c
+        // a = (Ec-Eo)/(4etr)
+        // b = (Ec+Eo)/2
+        // c = (Ec-Eo)*etr/4
+        // etr = _cracking_neg_fraction * strain when crack occurred
+        cracked = true;
+        const Real etr = _cracking_neg_fraction * (*_crack_strain)[_qp](i);
+        const Real Eo = _cracking_stress / (*_crack_strain)[_qp](i);
+        const Real Ec = Eo * (*_crack_flags_old)[_qp](i);
+        const Real a = (Ec-Eo)/(4*etr);
+        const Real b = (Ec+Eo)/2;
+        const Real c = (Ec-Eo)*etr/4;
+        sigma(i) = (a*_principal_strain(i,0) + b)*_principal_strain(i,0) + c;
       }
     }
 
@@ -1099,9 +1187,11 @@ SolidModel::computeCrackFactor( int i, Real & sigma, Real & flagVal )
       mooseError( err.str() );
     }
     const Real crackMaxStrain( (*_crack_max_strain)[_qp](i) );
+    // Compute stress that follows exponental curve
     sigma = _cracking_stress*
            (_cracking_residual_stress + (1-_cracking_residual_stress)*
             std::exp(_cracking_alpha/_cracking_stress*(crackMaxStrain-(*_crack_strain)[_qp](i))));
+    // Compute ratio of current stiffness to original stiffness
     flagVal = sigma * (*_crack_strain)[_qp](i) /
         (crackMaxStrain * _cracking_stress);
   }
