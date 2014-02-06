@@ -37,7 +37,7 @@ public:
   virtual void outputInput();
 
   virtual void meshChanged();
-  virtual void sequence(bool state) { libMesh::print_trace();_seq = state; }
+  virtual void sequence(bool state) { _seq = state; }
 
   /// Set (or reset) the output position
   virtual void setOutputPosition(const Point & p);
