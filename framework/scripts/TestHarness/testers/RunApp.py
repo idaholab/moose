@@ -1,4 +1,4 @@
-from options import *
+#from options import *
 import re, os
 from Tester import Tester
 from RunParallel import RunParallel # For TIMEOUT value
@@ -37,7 +37,7 @@ class RunApp(Tester):
 
   def checkRunnable(self, options):
     if options.enable_recover:
-      if self.specs.isValid('expect_out') or self.specs[SHOULD_CRASH] == True:
+      if self.specs.isValid('expect_out') or self.specs['should_crash'] == True:
         reason = 'skipped (expect_out RECOVER)'
         return (False, reason)
     return (True, '')
@@ -58,33 +58,33 @@ class RunApp(Tester):
       timing_string = ' Output/perf_log=true '
 
     # Raise the floor
-    ncpus = max(default_ncpus, int(specs[MIN_PARALLEL]))
+    ncpus = max(default_ncpus, int(specs['min_parallel']))
     # Lower the ceiling
-    ncpus = min(ncpus, int(specs[MAX_PARALLEL]))
+    ncpus = min(ncpus, int(specs['max_parallel']))
 
     #Set number of threads to be used lower bound
-    nthreads = max(options.nthreads, int(specs[MIN_THREADS]))
+    nthreads = max(options.nthreads, int(specs['min_threads']))
     #Set number of threads to be used upper bound
-    nthreads = min(nthreads, int(specs[MAX_THREADS]))
+    nthreads = min(nthreads, int(specs['max_threads']))
 
     if nthreads > options.nthreads:
-      self.specs['CAVEATS'] = ['MIN_THREADS=' + str(nthreads)]
+      self.specs['caveats'] = ['min_threads=' + str(nthreads)]
     elif nthreads < options.nthreads:
-      self.specs['CAVEATS'] = ['MAX_THREADS=' + str(nthreads)]
+      self.specs['caveats'] = ['max_threads=' + str(nthreads)]
     # TODO: Refactor this caveats business
     if ncpus > default_ncpus:
-      self.specs['CAVEATS'] = ['MIN_CPUS=' + str(ncpus)]
+      self.specs['caveats'] = ['min_cpus=' + str(ncpus)]
     elif ncpus < default_ncpus:
-      self.specs['CAVEATS'] = ['MAX_CPUS=' + str(ncpus)]
+      self.specs['caveats'] = ['max_cpus=' + str(ncpus)]
     if options.parallel or ncpus > 1 or nthreads > 1:
-      command = 'mpiexec -host localhost -n ' + str(ncpus) + ' ' + specs[EXECUTABLE] + ' --n-threads=' + str(nthreads) + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' +  ' '.join(specs[CLI_ARGS])
-    elif options.valgrind_mode == specs[VALGRIND] or options.valgrind_mode == 'HEAVY' and specs[VALGRIND] == 'NORMAL':
-      command = 'valgrind --suppressions=' + specs[MOOSE_DIR] + 'scripts/TestHarness/suppressions/errors.supp --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs[EXECUTABLE] + ' ' + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
+      command = 'mpiexec -host localhost -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(specs['cli_args'])
+    elif options.valgrind_mode == specs['valgrind'] or options.valgrind_mode == 'HEAVY' and specs[VALGRIND] == 'NORMAL':
+      command = 'valgrind --suppressions=' + specs['moose_dir'] + 'scripts/TestHarness/suppressions/errors.supp --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
     else:
-      command = specs[EXECUTABLE] + timing_string + specs[INPUT_SWITCH] + ' ' + specs[INPUT] + ' ' + ' '.join(specs[CLI_ARGS])
+      command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
 
-    if options.scaling and specs[SCALE_REFINE] > 0:
-      command += ' -r ' + str(specs[SCALE_REFINE])
+    if options.scaling and specs['scale_refine'] > 0:
+      command += ' -r ' + str(specs['scale_refine'])
 
     if options.cli_args:
       command += ' ' + options.cli_args
@@ -100,38 +100,38 @@ class RunApp(Tester):
       default_ncpus = options.parallel
 
     # Raise the floor
-    ncpus = max(default_ncpus, int(self.specs[MIN_PARALLEL]))
+    ncpus = max(default_ncpus, int(self.specs['min_parallel']))
     # Lower the ceiling
-    ncpus = min(ncpus, int(self.specs[MAX_PARALLEL]))
+    ncpus = min(ncpus, int(self.specs['max_parallel']))
 
     #Set number of threads to be used lower bound
-    nthreads = max(options.nthreads, int(self.specs[MIN_THREADS]))
+    nthreads = max(options.nthreads, int(self.specs['min_threads']))
     #Set number of threads to be used upper bound
-    nthreads = min(nthreads, int(self.specs[MAX_THREADS]))
+    nthreads = min(nthreads, int(self.specs['max_threads']))
 
     extra_args = ''
     if options.parallel or ncpus > 1 or nthreads > 1:
-      extra_args = ' --n-threads=' + str(nthreads) + ' ' + ' '.join(self.specs[CLI_ARGS])
+      extra_args = ' --n-threads=' + str(nthreads) + ' ' + ' '.join(self.specs['cli_args'])
 
     # Append any extra args to the cluster_launcher
     if extra_args != '':
-      self.specs[CLI_ARGS] = extra_args
+      self.specs['cli_args'] = extra_args
     else:
-      self.specs[CLI_ARGS] = ' '.join(self.specs[CLI_ARGS])
-    self.specs[CLI_ARGS] = self.specs[CLI_ARGS].strip()
+      self.specs['cli_args'] = ' '.join(self.specs['cli_args'])
+    self.specs['cli_args'] = self.specs['cli_args'].strip()
 
     # Open our template. This should probably be done at the same time as cluster_handle.
-    template_script = open(self.specs[MOOSE_DIR] + 'scripts/TestHarness/pbs_template.i', 'r')
+    template_script = open(self.specs['moose_dir'] + 'scripts/TestHarness/pbs_template.i', 'r')
     content = template_script.read()
     template_script.close()
 
     # Convert MAX_TIME to hours:minutes for walltime use
-    hours = int(int(self.specs[MAX_TIME]) / 3600)
-    minutes = int(int(self.specs[MAX_TIME]) / 60) % 60
+    hours = int(int(self.specs['max_time']) / 3600)
+    minutes = int(int(self.specs['max_time']) / 60) % 60
     self.specs['walltime'] = '{:02,.0f}'.format(hours) + ':' + '{:02,.0f}'.format(minutes) + ':00'
 
     # Truncate JOB_NAME, as PBS can only accept 13 character -N (6 characters from test name + _TH (TestHarness) + _### (serialized number generated by cluster_launcher) = the 13 character limit)
-    self.specs['job_name'] = self.specs[INPUT][:6] + '_TH'
+    self.specs['job_name'] = self.specs['input'][:6] + '_TH'
     self.specs['job_name'] = self.specs['job_name'].replace('.', '')
     self.specs['job_name'] = self.specs['job_name'].replace('-', '')
 
@@ -152,14 +152,14 @@ class RunApp(Tester):
     # Write the cluster_launcher input file
     options.cluster_handle.write(content + '\n')
 
-    return self.specs[MOOSE_DIR] + 'scripts/cluster_launcher.py tests.cluster'
+    return self.specs['moose_dir'] + 'scripts/cluster_launcher.py tests.cluster'
 
 
   def processResults(self, moose_dir, retcode, options, output):
     reason = ''
     specs = self.specs
-    if specs.isValid(EXPECT_OUT):
-      out_ok = self.checkOutputForPattern(output, specs[EXPECT_OUT])
+    if specs.isValid('expect_out'):
+      out_ok = self.checkOutputForPattern(output, specs['expect_out'])
       if (out_ok and retcode != 0):
         reason = 'OUT FOUND BUT CRASH'
       elif (not out_ok):
@@ -168,13 +168,13 @@ class RunApp(Tester):
       # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
       # since a message to standard error might actually be a real error.  This case should be handled
       # in the derived class.
-      if options.valgrind_mode == '' and not specs.isValid(EXPECT_ERR) and len( filter( lambda x: x in output, specs[ERRORS] ) ) > 0:
+      if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( filter( lambda x: x in output, specs['errors'] ) ) > 0:
         reason = 'ERRMSG'
       elif retcode == RunParallel.TIMEOUT:
         reason = 'TIMEOUT'
-      elif retcode == 0 and specs[SHOULD_CRASH] == True:
+      elif retcode == 0 and specs['should_crash'] == True:
         reason = 'NO CRASH'
-      elif retcode != 0 and specs[SHOULD_CRASH] == False:
+      elif retcode != 0 and specs['should_crash'] == False:
         reason = 'CRASH'
       # Valgrind runs
       elif retcode == 0 and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:

@@ -1,5 +1,5 @@
 from RunApp import RunApp
-from options import *
+#from options import *
 from util import runCommand
 import os
 
@@ -23,10 +23,10 @@ class Exodiff(RunApp):
     RunApp.__init__(self, name, params)
 
   def prepare(self):
-    if self.specs[DELETE_OUTPUT_BEFORE_RUNNING] == True:
-      for file in self.specs[EXODIFF]:
+    if self.specs['delete_output_before_running'] == True:
+      for file in self.specs['exodiff']:
         try:
-          os.remove(os.path.join(self.specs[TEST_DIR], file))
+          os.remove(os.path.join(self.specs['test_dir'], file))
         except:
           pass
 
@@ -38,27 +38,27 @@ class Exodiff(RunApp):
       return (reason, output)
 
     # Don't Run Exodiff on Scaled Tests
-    if options.scaling and specs[SCALE_REFINE]:
+    if options.scaling and specs['scale_refine']:
       return (reason, output)
 
-    for file in specs[EXODIFF]:
+    for file in specs['exodiff']:
       custom_cmp = ''
       old_floor = ''
-      if specs.isValid(CUSTOM_CMP):
-         custom_cmp = ' -f ' + os.path.join(specs[TEST_DIR], specs[CUSTOM_CMP])
-      if specs[USE_OLD_FLOOR]:
+      if specs.isValid('custom_cmp'):
+         custom_cmp = ' -f ' + os.path.join(specs['test_dir'], specs['custom_cmp'])
+      if specs['use_old_floor']:
          old_floor = ' -use_old_floor'
 
-      if not os.path.exists(os.path.join(specs[TEST_DIR], specs[GOLD_DIR], file)):
-        output += "File Not Found: " + os.path.join(specs[TEST_DIR], specs[GOLD_DIR], file)
+      if not os.path.exists(os.path.join(specs['test_dir'], specs['gold_dir'], file)):
+        output += "File Not Found: " + os.path.join(specs['test_dir'], specs['gold_dir'], file)
         reason = 'MISSING GOLD FILE'
         break
       else:
-        command = moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F' + ' ' + str(specs[ABS_ZERO]) + old_floor + ' -t ' + str(specs[REL_ERR]) \
-            + ' ' + ' '.join(specs[EXODIFF_OPTS]) + ' ' + os.path.join(specs[TEST_DIR], specs[GOLD_DIR], file) + ' ' + os.path.join(specs[TEST_DIR], file)
+        command = moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F' + ' ' + str(specs['abs_zero']) + old_floor + ' -t ' + str(specs['rel_err']) \
+            + ' ' + ' '.join(specs['exodiff_opts']) + ' ' + os.path.join(specs['test_dir'], specs['gold_dir'], file) + ' ' + os.path.join(specs['test_dir'], file)
         exo_output = runCommand(command)
 
-        output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(specs[EXODIFF_OPTS])
+        output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(specs['exodiff_opts'])
 
         if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
           reason = 'EXODIFF'

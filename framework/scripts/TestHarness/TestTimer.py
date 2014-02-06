@@ -1,5 +1,5 @@
 from TestHarness import TestHarness
-from options import *
+#from options import *
 import os, time, sys
 
 CREATE_TABLE = """create table timing
@@ -63,10 +63,10 @@ class TestTimer(TestHarness):
     num = 0
     parse_failed = False
     # Were only interested in storing scaled data
-    if timing != None and test[SCALE_REFINE] != 0:
+    if timing != None and test['scale_refine'] != 0:
       sum_time += float(timing)
       num += 1
-      data.append( (self.app_name, test[TEST_NAME].split('/').pop(), self.options.revision, timestamp, timing, test[SCALE_REFINE], load) )
+      data.append( (self.app_name, test['test_name'].split('/').pop(), self.options.revision, timestamp, timing, test['scale_refine'], load) )
     # Insert the data into the database
     cr.executemany('insert into timing values (?,?,?,?,?,?,?)', data)
     con.commit()

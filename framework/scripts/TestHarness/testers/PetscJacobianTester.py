@@ -1,5 +1,5 @@
 from RunApp import RunApp
-from options import *
+#from options import *
 from util import runCommand
 import os, re
 
@@ -15,7 +15,7 @@ class PetscJacobianTester(RunApp):
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)
-    self.specs[CLI_ARGS].append('-snes_type test')
+    self.specs['cli_args'].append('-snes_type test')
 
   def processResults(self, moose_dir, retcode, options, output):
     m = re.search("Norm of matrix ratio (\S+) difference (\S+) \(user-defined state\)", output, re.MULTILINE | re.DOTALL);

@@ -1,4 +1,4 @@
-from options import *
+#from options import *
 from util import *
 from InputParameters import InputParameters
 
@@ -68,9 +68,9 @@ class Tester(object):
     reason = ''
 
     # Are we running only tests in a specific group?
-    if options.group <> 'ALL' and options.group not in self.specs[GROUP]:
+    if options.group <> 'ALL' and options.group not in self.specs['group']:
       return (False, reason)
-    if options.not_group <> '' and options.not_group in self.specs[GROUP]:
+    if options.not_group <> '' and options.not_group in self.specs['group']:
       return (False, reason)
 
     # Store regexp for matching tests if --re is used
@@ -78,59 +78,59 @@ class Tester(object):
       match_regexp = re.compile(options.reg_exp)
 
     # If --re then only test matching regexp. Needs to run before other SKIP methods
-    if options.reg_exp and not match_regexp.search(self.specs[TEST_NAME]):
+    if options.reg_exp and not match_regexp.search(self.specs['test_name']):
       return (False, reason)
 
     # Check for deleted tests
-    if self.specs.isValid(DELETED):
+    if self.specs.isValid('deleted'):
       if options.extra_info:
         # We might want to trim the string so it formats nicely
-        if len(self.specs[DELETED]) >= TERM_COLS - (len(self.specs[TEST_NAME])+21):
-          test_reason = (self.specs[DELETED])[:(TERM_COLS - (len(self.specs[TEST_NAME])+24))] + '...'
+        if len(self.specs['deleted']) >= TERM_COLS - (len(self.specs['test_name'])+21):
+          test_reason = (self.specs['deleted'])[:(TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
         else:
-          test_reason = self.specs[DELETED]
+          test_reason = self.specs['deleted']
         reason = 'deleted (' + test_reason + ')'
       return (False, reason)
 
     # Check for skipped tests
-    if self.specs.type(SKIP) is bool and self.specs[SKIP]:
+    if self.specs.type('skip') is bool and self.specs['skip']:
       # Backwards compatible (no reason)
       return (False, 'skipped')
-    elif self.specs.type(SKIP) is not bool and self.specs.isValid(SKIP):
-      skip_message = self.specs[SKIP]
+    elif self.specs.type('skip') is not bool and self.specs.isValid('skip'):
+      skip_message = self.specs['skip']
       # We might want to trim the string so it formats nicely
-      if len(skip_message) >= TERM_COLS - (len(self.specs[TEST_NAME])+21):
-        test_reason = (skip_message)[:(TERM_COLS - (len(self.specs[TEST_NAME])+24))] + '...'
+      if len(skip_message) >= TERM_COLS - (len(self.specs['test_name'])+21):
+        test_reason = (skip_message)[:(TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
       else:
         test_reason = skip_message
       reason = 'skipped (' + test_reason + ')'
       return (False, reason)
     # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
-    elif options.store_time and self.specs[SCALE_REFINE] == 0:
+    elif options.store_time and self.specs['scale_refine'] == 0:
       return (False, reason)
     # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
     elif options.valgrind_mode != '':
-      if self.specs[VALGRIND] == 'NONE':
+      if self.specs['valgrind'] == 'NONE':
         reason = 'skipped (Valgrind==NONE)'
-      elif self.specs[VALGRIND] == 'HEAVY' and options.valgrind_mode == 'NORMAL':
+      elif self.specs['valgrind'] == 'HEAVY' and options.valgrind_mode == 'NORMAL':
         reason = 'skipped (Valgrind==HEAVY)'
-      elif self.specs[MIN_PARALLEL] > 1 or self.specs[MIN_THREADS] > 1:
+      elif self.specs['min_parallel'] > 1 or self.specs['min_threads'] > 1:
         reason = 'skipped (Valgrind requires serial)'
       if reason != '':
         return (False, reason)
     # If we're running in recover mode skip tests that have recover = false
-    elif options.enable_recover and self.specs[RECOVER] == False:
+    elif options.enable_recover and self.specs['recover'] == False:
       reason = 'skipped (NO RECOVER)'
       return (False, reason)
 
     # Check for PETSc versions
     (petsc_status, logic_reason, petsc_version) = checkPetscVersion(checks, self.specs)
     if not petsc_status:
-      reason = 'skipped (using PETSc ' + str(checks[PETSC_VERSION]) + ' REQ: ' + logic_reason + ' ' + petsc_version + ')'
+      reason = 'skipped (using PETSc ' + str(checks['petsc_version']) + ' REQ: ' + logic_reason + ' ' + petsc_version + ')'
       return (False, reason)
 
     # PETSc is being explicitly checked above
-    local_checks = [PLATFORM, COMPILER, MESH_MODE, METHOD, LIBRARY_MODE, DTK, UNIQUE_IDS]
+    local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
     for check in local_checks:
       test_platforms = set()
       for x in self.specs[check]:
@@ -141,15 +141,15 @@ class Tester(object):
 
     # Check for heavy tests
     if options.all_tests or options.heavy_tests:
-      if not self.specs[HEAVY] and options.heavy_tests:
+      if not self.specs['heavy'] and options.heavy_tests:
         reason = 'skipped (NOT HEAVY)'
         return (False, reason)
-    elif self.specs[HEAVY]:
+    elif self.specs['heavy']:
       reason = 'skipped (HEAVY)'
       return (False, reason)
 
     # Check for positive scale refine values when using store timing options
-    if self.specs[SCALE_REFINE] == 0 and options.store_time:
+    if self.specs['scale_refine'] == 0 and options.store_time:
       return (False, reason)
 
     # Check the return values of the derived classes

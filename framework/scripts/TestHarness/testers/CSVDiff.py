@@ -1,5 +1,5 @@
 from RunApp import RunApp
-from options import *
+#from options import *
 from CSVDiffer import CSVDiffer
 
 class CSVDiff(RunApp):
@@ -19,10 +19,10 @@ class CSVDiff(RunApp):
     RunApp.__init__(self, name, params)
 
   def prepare(self):
-    if self.specs[DELETE_OUTPUT_BEFORE_RUNNING] == True:
-      for file in self.specs[CSVDIFF]:
+    if self.specs['delete_output_before_running'] == True:
+      for file in self.specs['csvdiff']:
         try:
-          os.remove(os.path.join(self.specs[TEST_DIR], file))
+          os.remove(os.path.join(self.specs['test_dir'], file))
         except:
           pass
 
@@ -34,11 +34,11 @@ class CSVDiff(RunApp):
       return (reason, output)
 
     # Don't Run CSVDiff on Scaled Tests
-    if options.scaling and specs[SCALE_REFINE]:
+    if options.scaling and specs['scale_refine']:
       return (reason, output)
 
-    if len(specs[CSVDIFF]) > 0:
-      differ = CSVDiffer( specs[TEST_DIR], specs[CSVDIFF], specs[ABS_ZERO], specs[REL_ERR] )
+    if len(specs['csvdiff']) > 0:
+      differ = CSVDiffer( specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'] )
       msg = differ.diff()
       output += 'Running CSVDiffer.py\n' + msg
       if msg != '':

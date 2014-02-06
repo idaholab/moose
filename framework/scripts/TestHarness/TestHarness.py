@@ -2,7 +2,7 @@ import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil
 import ParseGetPot
 import copy
 from socket import gethostname
-from options import *
+#from options import *
 from util import *
 from time import sleep
 from RunParallel import RunParallel
@@ -39,13 +39,13 @@ class TestHarness:
     self.parseCLArgs(argv)
 
     self.checks = {}
-    self.checks[PLATFORM] = getPlatforms()
-    self.checks[COMPILER] = getCompilers(self.libmesh_dir)
-    self.checks[PETSC_VERSION] = getPetscVersion(self.libmesh_dir)
-    self.checks[MESH_MODE] = getLibMeshConfigOption(self.libmesh_dir, MESH_MODE)
-    self.checks[DTK] =  getLibMeshConfigOption(self.libmesh_dir, DTK)
-    self.checks[LIBRARY_MODE] = getSharedOption(self.libmesh_dir)
-    self.checks[UNIQUE_IDS] = getLibMeshConfigOption(self.libmesh_dir, UNIQUE_IDS)
+    self.checks['platform'] = getPlatforms()
+    self.checks['compiler'] = getCompilers(self.libmesh_dir)
+    self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
+    self.checks['mesh_mode'] = getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
+    self.checks['dtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'dtk')
+    self.checks['library_mode'] = getSharedOption(self.libmesh_dir)
+    self.checks['unique_ids'] = getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
 
     # Override the MESH_MODE option if using '--parallel-mesh' option
     if self.options.parallel_mesh == True or \
@@ -55,12 +55,12 @@ class TestHarness:
       option_set = set()
       option_set.add('ALL')
       option_set.add('PARALLEL')
-      self.checks[MESH_MODE] = option_set
+      self.checks['mesh_mode'] = option_set
 
     method = set()
     method.add('ALL')
     method.add(self.options.method.upper())
-    self.checks[METHOD] = method
+    self.checks['method'] = method
 
     self.initialize(argv, app_name)
 
@@ -92,16 +92,16 @@ class TestHarness:
               # Go through the list of test specs and run them
               for test in tests:
                 # Strip begining and ending spaces to input file name
-                test[INPUT] = test[INPUT].strip()
+                test['input'] = test['input'].strip()
 
                 # Double the alloted time for tests when running with the valgrind option
                 if self.options.valgrind_mode == 'NORMAL':
-                  test[MAX_TIME] = test[MAX_TIME] * 2
+                  test['max_time'] = test['max_time'] * 2
                 elif self.options.valgrind_mode == 'HEAVY':
-                  test[MAX_TIME] = test[MAX_TIME] * 4
+                  test['max_time'] = test['max_time'] * 4
 
                 # Build the requested Tester object and run
-                tester = self.factory.create(test[TYPE], test)
+                tester = self.factory.create(test['type'], test)
 
                 # When running in valgrind mode, we end up with a ton of output for each failed
                 # test.  Therefore, we limit the number of fails...
@@ -124,7 +124,7 @@ class TestHarness:
                 else: # This job is skipped - notify the runner
                   if (reason != ''):
                     self.handleTestResult(test, '', reason)
-                  self.runner.jobSkipped(test[TEST_NAME])
+                  self.runner.jobSkipped(test['test_name'])
 
                 if self.options.cluster_handle != None:
                   self.options.cluster_handle.write('[]\n')
@@ -175,11 +175,11 @@ class TestHarness:
 
       for testname, test_node in tests_node.children.iteritems():
         # First retrieve the type so we can get the valid params
-        if TYPE not in test_node.params:
+        if 'type' not in test_node.params:
           print "Type missing in " + test_dir + filename
           sys.exit(1)
 
-        params = self.factory.getValidParams(test_node.params[TYPE])
+        params = self.factory.getValidParams(test_node.params['type'])
 
         # Now update all the base level keys
         params_parsed = set()
@@ -221,25 +221,25 @@ class TestHarness:
         # TODO: In progress formatting
         formatted_name = relative_path.replace('/tests/', '') + '.' + testname
 
-        params[TEST_NAME] = formatted_name
-        params[TEST_DIR] = test_dir
-        params[RELATIVE_PATH] = relative_path
-        params[EXECUTABLE] = self.executable
-        params[HOSTNAME] = self.host_name
-        params[MOOSE_DIR] = self.moose_dir
-        if params.isValid(PREREQ):
-          if type(params[PREREQ]) != list:
-            print "Option 'PREREQ' needs to be of type list in " + params[TEST_NAME]
+        params['test_name'] = formatted_name
+        params['test_dir'] = test_dir
+        params['relative_path'] = relative_path
+        params['executable'] = self.executable
+        params['hostname'] = self.host_name
+        params['moose_dir'] = self.moose_dir
+        if params.isValid('prereq'):
+          if type(params['prereq']) != list:
+            print "Option 'prereq' needs to be of type list in " + params['test_name']
             sys.exit(1)
-          params[PREREQ] = [relative_path.replace('/tests/', '') + '.' + item for item in params[PREREQ]]
+          params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
 
         # Build a list of test specs (dicts) to return
         tests.append(params)
     return tests
 
   def augmentTestSpecs(self, test):
-    test[EXECUTABLE] = self.executable
-    test[HOSTNAME] = self.host_name
+    test['executable'] = self.executable
+    test['hostname'] = self.host_name
 
   # This method splits a lists of tests into two pieces each, the first piece will run the test for
   # approx. half the number of timesteps and will write out a restart file.  The second test will
@@ -248,21 +248,21 @@ class TestHarness:
     new_tests = []
 
     for part1 in tests:
-      if part1[RECOVER] == True:
+      if part1['recover'] == True:
         # Clone the test specs
         part2 = copy.deepcopy(part1)
 
         # Part 1:
-        part1[TEST_NAME] += '_part1'
-        part1[CLI_ARGS].append('--half-transient')
-        part1[CLI_ARGS].append('Output/num_checkpoint_files=1')
+        part1['test_name'] += '_part1'
+        part1['cli_args'].append('--half-transient')
+        part1['cli_args'].append('Output/num_checkpoint_files=1')
         part1['skip_checks'] = True
 
         # Part 2:
-        part2[PREREQ].append(part1[TEST_NAME])
-        part2[DELETE_OUTPUT_BEFORE_RUNNING] = False
-        part2[CLI_ARGS].append('--recover')
-        part2.addParam('CAVEATS', ['RECOVER'], "")
+        part2['prereq'].append(part1['test_name'])
+        part2['delete_output_before_running'] = False
+        part2['cli_args'].append('--recover')
+        part2.addParam('caveats', ['recover'], "")
 
         new_tests.append(part2)
 
@@ -274,22 +274,22 @@ class TestHarness:
     caveats = []
     test = tester.specs  # Need to refactor
 
-    if test.isValid('CAVEATS'):
-      caveats = test['CAVEATS']
+    if test.isValid('caveats'):
+      caveats = test['caveats']
 
     if self.options.pbs and self.options.processingPBS == False:
       (reason, output) = self.buildPBSBatch(output, tester)
     else:
       (reason, output) = tester.processResults(self.moose_dir, retcode, self.options, output)
 
-    if self.options.scaling and test[SCALE_REFINE]:
-      caveats.append('SCALED')
+    if self.options.scaling and test['scale_refine']:
+      caveats.append('scaled')
 
     did_pass = True
     if reason == '':
       # It ran OK but is this test set to be skipped on any platform, compiler, so other reason?
       if self.options.extra_info:
-        checks = [PLATFORM, COMPILER, PETSC_VERSION, MESH_MODE, METHOD, LIBRARY_MODE, DTK, UNIQUE_IDS]
+        checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
         for check in checks:
           if not 'ALL' in test[check]:
             caveats.append(', '.join(test[check]))
@@ -340,9 +340,9 @@ class TestHarness:
         tests = self.parseGetPotTestFormat(file)
         for test in tests:
           # Build the requested Tester object
-          if job[1] == test[TEST_NAME]:
+          if job[1] == test['test_name']:
             # Create Test Type
-            tester = self.factory.create(test[TYPE], test)
+            tester = self.factory.create(test['type'], test)
 
             # Get job status via qstat
             qstat = ['qstat', '-f', '-x', str(job[0])]
@@ -362,7 +362,7 @@ class TestHarness:
               if os.path.exists(job[2]):
                 output_file = open(job[2], 'r')
                 # Not sure I am doing this right: I have to change the TEST_DIR to match the temporary cluster_launcher TEST_DIR location, thus violating the tester.specs...
-                test[TEST_DIR] = '/'.join(job[2].split('/')[:-1])
+                test['test_dir'] = '/'.join(job[2].split('/')[:-1])
                 outfile = output_file.read()
                 output_file.close()
               else:
@@ -402,10 +402,10 @@ class TestHarness:
       else:
         return ('QSTAT NOT FOUND', '')
 
-      # Write job_id, test[TEST_NAME], and Ouput_Path to the batch file
+      # Write job_id, test['test_name'], and Ouput_Path to the batch file
       file_name = self.options.pbs
-      job_list = open(os.path.abspath(os.path.join(tester.specs[EXECUTABLE], os.pardir)) + '/' + file_name, 'a')
-      job_list.write(str(job_id) + ':' + tester.specs[TEST_NAME] + ':' + output_value + ':' + self.options.input_file_name  + '\n')
+      job_list = open(os.path.abspath(os.path.join(tester.specs['executable'], os.pardir)) + '/' + file_name, 'a')
+      job_list.write(str(job_id) + ':' + tester.specs['test_name'] + ':' + output_value + ':' + self.options.input_file_name  + '\n')
       job_list.close()
 
       # Return to TestHarness and inform we have launched the job
@@ -462,9 +462,9 @@ class TestHarness:
     self.postRun(specs, timing)
 
     if self.options.show_directory:
-      print printResult(specs[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options)
+      print printResult(specs['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options)
     else:
-      print printResult(specs[TEST_NAME], result, timing, start, end, self.options)
+      print printResult(specs['test_name'], result, timing, start, end, self.options)
 
     if self.options.verbose or ('FAILED' in result and not self.options.quiet):
       output = output.replace('\r', '\n')  # replace the carriage returns with newlines
@@ -476,30 +476,30 @@ class TestHarness:
         color = 'RED'
       else:
         color = 'GREEN'
-      test_name = colorText(specs[TEST_NAME]  + ": ", self.options, color)
+      test_name = colorText(specs['test_name']  + ": ", self.options, color)
       output = ("\n" + test_name).join(lines)
       print output
 
       # Print result line again at the bottom of the output for failed tests
       if self.options.show_directory:
-        print printResult(specs[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options), "(reprint)"
+        print printResult(specs['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options), "(reprint)"
       else:
-        print printResult(specs[TEST_NAME], result, timing, start, end, self.options), "(reprint)"
+        print printResult(specs['test_name'], result, timing, start, end, self.options), "(reprint)"
 
 
     if not 'skipped' in result:
       if self.options.file:
         if self.options.show_directory:
-          self.file.write(printResult( specs[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options, color=False) + '\n')
+          self.file.write(printResult( specs['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options, color=False) + '\n')
           self.file.write(output)
         else:
-          self.file.write(printResult( specs[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
+          self.file.write(printResult( specs['test_name'], result, timing, start, end, self.options, color=False) + '\n')
           self.file.write(output)
 
       if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result.find('OK') != -1):
-        fname = os.path.join(specs[TEST_DIR], specs[TEST_NAME].split('/')[-1] + '.' + result[:6] + '.txt')
+        fname = os.path.join(specs['test_dir'], specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
         f = open(fname, 'w')
-        f.write(printResult( specs[TEST_NAME], result, timing, start, end, self.options, color=False) + '\n')
+        f.write(printResult( specs['test_name'], result, timing, start, end, self.options, color=False) + '\n')
         f.write(output)
         f.close()
 
@@ -519,9 +519,9 @@ class TestHarness:
       print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
       for (test, output, result, timing, start, end) in self.test_table:
         if self.options.show_directory:
-          print printResult(test[RELATIVE_PATH] + '/' + specs[TEST_NAME].split('/')[-1], result, timing, start, end, self.options)
+          print printResult(test['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options)
         else:
-          print printResult(test[TEST_NAME], result, timing, start, end, self.options)
+          print printResult(test['test_name'], result, timing, start, end, self.options)
 
     time = clock() - self.start_time
     print '-' * (TERM_COLS-1)

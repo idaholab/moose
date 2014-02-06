@@ -1,5 +1,5 @@
 from RunApp import RunApp
-from options import *
+#from options import *
 
 class RunException(RunApp):
 
@@ -28,12 +28,12 @@ class RunException(RunApp):
 
     # Expected errors and assertions might do a lot of things including crash so we
     # will handle them seperately
-    if specs.isValid(EXPECT_ERR):
-      if not self.checkOutputForPattern(output, specs[EXPECT_ERR]):
+    if specs.isValid('expect_err'):
+      if not self.checkOutputForPattern(output, specs['expect_err']):
         reason = 'NO EXPECTED ERR'
-    elif specs.isValid(EXPECT_ASSERT):
+    elif specs.isValid('expect_assert'):
       if options.method == 'dbg':  # Only check asserts in debug mode
-        if not self.checkOutputForPattern(output, specs[EXPECT_ASSERT]):
+        if not self.checkOutputForPattern(output, specs['expect_assert']):
           reason = 'NO EXPECTED ASSERT'
 
     if reason == '':

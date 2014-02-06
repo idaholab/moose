@@ -2,7 +2,7 @@ from subprocess import *
 from time import sleep
 from timeit import default_timer as clock
 
-from options import *
+#from options import *
 from tempfile import TemporaryFile
 #from Queue import Queue
 from collections import deque
@@ -55,7 +55,7 @@ class RunParallel:
       self.startReadyJobs()
 
     # Now make sure that this job doesn't have an unsatisfied prereq
-    if tester.specs[PREREQ] != None and len(set(tester.specs[PREREQ]) - self.finished_jobs):
+    if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs):
       self.queue.append([tester, command, os.getcwd()])
       return
 
@@ -105,7 +105,7 @@ class RunParallel:
 
     if p.poll() == None: # process has not completed, it timed out
       output = self.readOutput(f)
-      output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs[MAX_TIME]) + ' seconds)\n' + "#"*80 + '\n'
+      output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
       f.close()
       os.kill(p.pid, SIGTERM)        # Python 2.4 compatibility
       #p.terminate()                 # Python 2.6+
@@ -113,20 +113,20 @@ class RunParallel:
       if not self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock()):
         did_pass = False
     else:
-      output = 'Working Directory: ' + tester.specs[TEST_DIR] + '\nRunning command: ' + command + '\n'
+      output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
       output += self.readOutput(f)
       f.close()
 
       if tester in self.reported_jobs:
-        tester.specs.addParam('CAVEATS', ['FINISHED'], "")
+        tester.specs.addParam('caveats', ['FINISHED'], "")
 
       if not self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock()):
         did_pass = False
 
     if did_pass:
-      self.finished_jobs.add(tester.specs[TEST_NAME])
+      self.finished_jobs.add(tester.specs['test_name'])
     else:
-      self.skipped_jobs.add(tester.specs[TEST_NAME])
+      self.skipped_jobs.add(tester.specs['test_name'])
 
     self.jobs[job_index] = None
 
@@ -141,7 +141,7 @@ class RunParallel:
     for tuple in self.jobs:
       if tuple != None:
         (p, command, tester, start_time, f) = tuple
-        if p.poll() != None or now > (start_time + float(tester.specs[MAX_TIME])):
+        if p.poll() != None or now > (start_time + float(tester.specs['max_time'])):
           # finish up as many jobs as possible, don't sleep until
           # we've cleared all of the finished jobs
           self.returnToTestHarness(job_index)
@@ -156,12 +156,12 @@ class RunParallel:
         elif now > (self.reported_timer + 10.0):
           # Has the current test been previously reported?
           if tester not in self.reported_jobs:
-            if tester.specs.isValid(MIN_REPORTED_TIME):
-              start_min_threshold = start_time + float(tester.specs[MIN_REPORTED_TIME])
+            if tester.specs.isValid('min_reported_time'):
+              start_min_threshold = start_time + float(tester.specs['min_reported_time'])
             else:
-              start_min_threshold = start_time + (0.1 * float(tester.specs[MAX_TIME]))
+              start_min_threshold = start_time + (0.1 * float(tester.specs['max_time']))
 
-            threshold = max(start_min_threshold, (0.1 * float(tester.specs[MAX_TIME])))
+            threshold = max(start_min_threshold, (0.1 * float(tester.specs['max_time'])))
 
             if now >= threshold:
               self.harness.handleTestResult(tester.specs, '', 'RUNNING...', start_time, now, False)
@@ -195,9 +195,9 @@ class RunParallel:
         queue_items = len(self.queue)
         for i in range(0, queue_items):
           (tester, command, dirpath) = self.queue.popleft()
-          if len(set(tester.specs[PREREQ]) & self.skipped_jobs):
+          if len(set(tester.specs['prereq']) & self.skipped_jobs):
             self.harness.handleTestResult(tester.specs, '', 'skipped (skipped dependency)')
-            self.skipped_jobs.add(tester.specs[TEST_NAME])
+            self.skipped_jobs.add(tester.specs['test_name'])
             keep_going = True
           else:
             self.queue.append([tester, command, dirpath])
@@ -205,7 +205,7 @@ class RunParallel:
       if len(self.queue) != 0:
         print "Cyclic or Invalid Dependency Detected!"
         for (tester, command, dirpath) in self.queue:
-          print tester.specs[TEST_NAME]
+          print tester.specs['test_name']
         sys.exit(1)
 
   # This function reads output from the file (i.e. the test output)

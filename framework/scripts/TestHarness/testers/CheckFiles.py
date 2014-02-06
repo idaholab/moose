@@ -1,5 +1,5 @@
 from RunApp import RunApp
-from options import *
+#from options import *
 from util import runCommand
 import os
 
@@ -18,10 +18,10 @@ class CheckFiles(RunApp):
     RunApp.__init__(self, name, params)
 
   def prepare(self):
-    if self.specs[DELETE_OUTPUT_BEFORE_RUNNING] == True:
-      for file in self.specs[CHECK_FILES] + self.specs[CHECK_NOT_EXISTS]:
+    if self.specs['delete_output_before_running'] == True:
+      for file in self.specs['check_files'] + self.specs['check_not_exists']:
         try:
-          os.remove(os.path.join(self.specs[TEST_DIR], file))
+          os.remove(os.path.join(self.specs['test_dir'], file))
         except:
           pass
 
@@ -34,12 +34,12 @@ class CheckFiles(RunApp):
 
     if reason == '':
      # if still no errors, check other files (just for existence)
-     for file in self.specs[CHECK_FILES]:
-       if not os.path.isfile(os.path.join(self.specs[TEST_DIR], file)):
+     for file in self.specs['check_files']:
+       if not os.path.isfile(os.path.join(self.specs['test_dir'], file)):
          reason = 'MISSING FILES'
          break
-     for file in self.specs[CHECK_NOT_EXISTS]:
-       if os.path.isfile(os.path.join(self.specs[TEST_DIR], file)):
+     for file in self.specs['check_not_exists']:
+       if os.path.isfile(os.path.join(self.specs['test_dir'], file)):
          reason = 'UNEXPECTED FILES'
          break
 
