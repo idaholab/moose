@@ -24,7 +24,8 @@ InputParameters emptyInputParameters()
 
 InputParameters::InputParameters() :
     Parameters(),
-    _collapse_nesting(false)
+    _collapse_nesting(false),
+    _moose_object_syntax_visibility(true)
 {
 }
 
@@ -38,6 +39,7 @@ InputParameters::InputParameters(const Parameters &rhs)
 {
   Parameters::operator=(rhs);
   _collapse_nesting = false;
+  _moose_object_syntax_visibility = true;
 }
 
 void
@@ -55,6 +57,7 @@ InputParameters::clear()
   _default_coupled_value.clear();
   _default_postprocessor_value.clear();
   _collapse_nesting = false;
+  _moose_object_syntax_visibility = true;
 }
 
 void
@@ -98,6 +101,7 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_default_coupled_value = rhs._default_coupled_value;
   this->_default_postprocessor_value = rhs._default_postprocessor_value;
   _collapse_nesting = rhs._collapse_nesting;
+  _moose_object_syntax_visibility = rhs._moose_object_syntax_visibility;
 
   return *this;
 }
@@ -118,7 +122,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   _syntax.insert(rhs._syntax.begin(), rhs._syntax.end());
   _default_coupled_value.insert(rhs._default_coupled_value.begin(), rhs._default_coupled_value.end());
   _default_postprocessor_value.insert(rhs._default_postprocessor_value.begin(), rhs._default_postprocessor_value.end());
-  // Collapse nesting is not modified with +=
+  // Collapse nesting and moose object syntax hiding are not modified with +=
 
   return *this;
 }
@@ -226,6 +230,18 @@ bool
 InputParameters::collapseSyntaxNesting() const
 {
   return _collapse_nesting;
+}
+
+void
+InputParameters::mooseObjectSyntaxVisibility(bool visibility)
+{
+  _moose_object_syntax_visibility = visibility;
+}
+
+bool
+InputParameters::mooseObjectSyntaxVisibility() const
+{
+  return _moose_object_syntax_visibility;
 }
 
 void

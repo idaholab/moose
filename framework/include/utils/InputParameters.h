@@ -297,7 +297,9 @@ public:
 
   /**
    * This method is here to indicate which Moose types a particular Action may build. It takes a space
-   * delimited list of registered MooseObjects.
+   * delimited list of registered MooseObjects.  TODO: For now we aren't actually checking this list
+   * when we build objects. Since individual actions can do whatever they want it's not exactly trivial
+   * to check this without changing the user API.  This function properly restricts the syntax and yaml dumps.
    */
   void registerBuildableTypes(const std::string &names);
 
@@ -311,6 +313,12 @@ public:
    */
   void collapseSyntaxNesting(bool collapse);
   bool collapseSyntaxNesting() const;
+
+  /**
+   * Mutators for controlling whether or not the outermost level of syntax will be collapsed when printed.
+   */
+  void mooseObjectSyntaxVisibility(bool visibility);
+  bool mooseObjectSyntaxVisibility() const;
 
   /**
    * Copy and Copy/Add operators for the InputParameters object
@@ -410,6 +418,9 @@ private:
   /// This parameter collapses one level of nesting in the syntax blocks.  It is used
   /// in conjuction with MooseObjectAction derived Actions.
   bool _collapse_nesting;
+
+  /// This parameter hides derived MOOSE object types from appearing in syntax dumps
+  bool _moose_object_syntax_visibility;
 
   /// The set of parameters that are required (i.e. will cause an abort if not supplied)
   std::set<std::string> _required_params;

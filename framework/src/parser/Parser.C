@@ -365,7 +365,8 @@ Parser::buildFullTree(const std::string &search_string)
         if ((buildable_types.empty() ||                                                                                // Not restricted
              std::find(buildable_types.begin(), buildable_types.end(), moose_obj->first) != buildable_types.end()) &&  // Restricted but found
             moose_obj_params.have_parameter<std::string>("_moose_base") &&                                             // Has a registered base
-            _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"), task))                     // and that base is associated
+            _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"), task) &&                   // and that base is associated
+            action_obj_params.mooseObjectSyntaxVisibility())                                                           // and the Action says it's visible
         {
           std::string name;
           size_t pos = 0;
