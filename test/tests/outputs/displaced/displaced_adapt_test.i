@@ -95,18 +95,18 @@
 []
 
 [AuxVariables]
-	[./aux_v]
-		order = FIRST
-		family = LAGRANGE
-	[../]
+  [./aux_v]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [AuxKernels]
-	[./aux_k_1]
-		type = FunctionAux
-		variable = aux_v
-		function = aux_v_fn
-	[../]
+  [./aux_k_1]
+    type = FunctionAux
+    variable = aux_v
+    function = aux_v_fn
+  [../]
 []
 
 [Executioner]
@@ -123,12 +123,16 @@
   [../]
 []
 
+# Keep until Outputs based recovery system is operational
+[Output]
+[]
+
 ##! [OutputDisplaced]
 [Outputs]
- [./exodus_displaced]
+  [./exodus_displaced]
     type =	Exodus
     use_displaced = true
- [../]
+  [../]
 []
 ##! [OutputDisplaced]
 

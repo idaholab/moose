@@ -83,6 +83,10 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
+# Keep until Outputs based recovery system is operational
+[Output]
+[]
+
 [Outputs]
   [./exodus]
     type = Exodus
@@ -97,4 +101,3 @@
     type = ScalarComponentIC
   [../]
 []
-

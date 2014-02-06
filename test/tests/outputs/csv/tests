@@ -1,14 +1,16 @@
 [Tests]
   [./steady]
-	  # Tests output of postprocessors and scalars to CSC files for steady state problems
+    # Tests output of postprocessors and scalars to CSC files for steady state problems
     type = CSVDiff
-	  input = 'csv.i'
-		csvdiff = 'csv_out.csv'
+    input = 'csv.i'
+    csvdiff = 'csv_out.csv'
+    recover = false
   [../]
   [./transient]
-	  # Tests output of postprocessors and scalars to CSC files for transient propblems
+    # Tests output of postprocessors and scalars to CSC files for transient propblems
     type = CSVDiff
-	  input = 'csv_transient.i'
-		csvdiff = 'csv_transient_out.csv'
+    input = 'csv_transient.i'
+    csvdiff = 'csv_transient_out.csv'
+    recover = false
   [../]
 []

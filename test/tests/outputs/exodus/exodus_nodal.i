@@ -92,6 +92,10 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
+# Keep until Outputs based recovery system is operational
+[Output]
+[]
+
 ##! [MultipleOutputBlocks]
 [Outputs]
   output_initial = false                # common output_initial

@@ -1,10 +1,10 @@
 [Tests]
   [./use_displaced]
-		# Test the displaced mesh output; the gold file for this was generated from
-		# moose_test/tests/mesh/adapt/displaced_adapt_test.i
+    # Test the displaced mesh output; the gold file for this was generated from
+    # moose_test/tests/mesh/adapt/displaced_adapt_test.i
     type = 'Exodiff'
     input = 'displaced_adapt_test.i'
     exodiff = 'displaced_adapt_test_out.e-s003'
-    #max_parallel = 1
+    recover = false
   [../]
 []
