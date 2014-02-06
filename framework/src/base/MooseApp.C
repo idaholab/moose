@@ -69,12 +69,12 @@ InputParameters validParams<MooseApp>()
 // Free function for stringstream formating
 void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)
 {
-	if (curr - begin > LINE_LENGTH)
-	{
-		oss << "\n";
-		begin = oss.tellp();
-		oss << std::setw(FIELD_WIDTH + 2) << "";	// "{ "
-	}
+  if (curr - begin > LINE_LENGTH)
+  {
+    oss << "\n";
+    begin = oss.tellp();
+    oss << std::setw(FIELD_WIDTH + 2) << "";  // "{ "
+  }
 }
 
 MooseApp::MooseApp(const std::string & name, InputParameters parameters):
@@ -385,8 +385,8 @@ MooseApp::printSimulationInfo(std::ostream & ostream)
 
   oss << std::left << '\n'
       << "Parallelism:\n"
-      << std::setw(FIELD_WIDTH) << "	Num Processors: "			 << static_cast<std::size_t>(libMesh::n_processors()) << '\n'
-      << std::setw(FIELD_WIDTH) << "	Num Threads: "				 << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
+      << std::setw(FIELD_WIDTH) << "  Num Processors: "       << static_cast<std::size_t>(libMesh::n_processors()) << '\n'
+      << std::setw(FIELD_WIDTH) << "  Num Threads: "         << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
       << '\n';
 
   MooseMesh *moose_mesh = _action_warehouse.mesh();
@@ -395,20 +395,20 @@ MooseApp::printSimulationInfo(std::ostream & ostream)
     MeshBase & mesh = moose_mesh->getMesh();
 
     oss << std::setw(FIELD_WIDTH) << "Mesh: " << '\n'
-        << std::setw(FIELD_WIDTH) << "	Distribution: " << (moose_mesh->isParallelMesh() ? "parallel" : "serial")
+        << std::setw(FIELD_WIDTH) << "  Distribution: " << (moose_mesh->isParallelMesh() ? "parallel" : "serial")
         << (moose_mesh->isDistributionForced() ? " (forced) " : "") << '\n'
-        << std::setw(FIELD_WIDTH) << "	Mesh Dimension: " << mesh.mesh_dimension() << '\n'
-        << std::setw(FIELD_WIDTH) << "	Spatial Dimension: " << mesh.spatial_dimension() << '\n'
-        << std::setw(FIELD_WIDTH) << "	Nodes:" << '\n'
-        << std::setw(FIELD_WIDTH) << "		Total:" << mesh.n_nodes() << '\n'
-        << std::setw(FIELD_WIDTH) << "		Local:" << mesh.n_local_nodes() << '\n'
-        << std::setw(FIELD_WIDTH) << "	Elems:" << '\n'
-        << std::setw(FIELD_WIDTH) << "		Total:" << mesh.n_elem() << '\n'
-        << std::setw(FIELD_WIDTH) << "		Local:" << mesh.n_local_elem() << '\n'
-        << std::setw(FIELD_WIDTH) << "	Num Subdomains: "			 << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
-        << std::setw(FIELD_WIDTH) << "	Num Partitions: "			 << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
+        << std::setw(FIELD_WIDTH) << "  Mesh Dimension: " << mesh.mesh_dimension() << '\n'
+        << std::setw(FIELD_WIDTH) << "  Spatial Dimension: " << mesh.spatial_dimension() << '\n'
+        << std::setw(FIELD_WIDTH) << "  Nodes:" << '\n'
+        << std::setw(FIELD_WIDTH) << "    Total:" << mesh.n_nodes() << '\n'
+        << std::setw(FIELD_WIDTH) << "    Local:" << mesh.n_local_nodes() << '\n'
+        << std::setw(FIELD_WIDTH) << "  Elems:" << '\n'
+        << std::setw(FIELD_WIDTH) << "    Total:" << mesh.n_elem() << '\n'
+        << std::setw(FIELD_WIDTH) << "    Local:" << mesh.n_local_elem() << '\n'
+        << std::setw(FIELD_WIDTH) << "  Num Subdomains: "       << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
+        << std::setw(FIELD_WIDTH) << "  Num Partitions: "       << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
     if (libMesh::n_processors() > 1 && moose_mesh->partitionerName() != "")
-      oss << std::setw(FIELD_WIDTH) << "	Partitioner: "			 << moose_mesh->partitionerName()
+      oss << std::setw(FIELD_WIDTH) << "  Partitioner: "       << moose_mesh->partitionerName()
           << (moose_mesh->isPartitionerForced() ? " (forced) " : "")
           << '\n';
     oss << '\n';
@@ -431,12 +431,12 @@ MooseApp::printSimulationInfo(std::ostream & ostream)
 
       if (system.n_dofs())
       {
-        oss << std::setw(FIELD_WIDTH) << "	Num DOFs: " << system.n_dofs() << '\n'
-            << std::setw(FIELD_WIDTH) << "	Num Local DOFs: " << system.n_local_dofs() << '\n';
+        oss << std::setw(FIELD_WIDTH) << "  Num DOFs: " << system.n_dofs() << '\n'
+            << std::setw(FIELD_WIDTH) << "  Num Local DOFs: " << system.n_local_dofs() << '\n';
 
         std::streampos begin_string_pos = oss.tellp();
         std::streampos curr_string_pos = begin_string_pos;
-        oss << std::setw(FIELD_WIDTH) << "	Variables: ";
+        oss << std::setw(FIELD_WIDTH) << "  Variables: ";
         for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
         {
           const VariableGroup &vg_description (system.variable_group(vg));
@@ -455,7 +455,7 @@ MooseApp::printSimulationInfo(std::ostream & ostream)
 
         begin_string_pos = oss.tellp();
         curr_string_pos = begin_string_pos;
-        oss << std::setw(FIELD_WIDTH) << "	Finite Element Types: ";
+        oss << std::setw(FIELD_WIDTH) << "  Finite Element Types: ";
 #ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
         for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
         {
@@ -481,7 +481,7 @@ MooseApp::printSimulationInfo(std::ostream & ostream)
 
         begin_string_pos = oss.tellp();
         curr_string_pos = begin_string_pos;
-        oss << std::setw(FIELD_WIDTH) << "	Infinite Element Mapping: ";
+        oss << std::setw(FIELD_WIDTH) << "  Infinite Element Mapping: ";
         for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
         {
           oss << "\""
@@ -495,7 +495,7 @@ MooseApp::printSimulationInfo(std::ostream & ostream)
 
         begin_string_pos = oss.tellp();
         curr_string_pos = begin_string_pos;
-        oss << std::setw(FIELD_WIDTH) << "	Approximation Orders: ";
+        oss << std::setw(FIELD_WIDTH) << "  Approximation Orders: ";
         for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
         {
 #ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
@@ -515,17 +515,17 @@ MooseApp::printSimulationInfo(std::ostream & ostream)
         oss << "\n\n";
       }
       else
-        oss << "	*** EMPTY ***\n\n";
+        oss << "  *** EMPTY ***\n\n";
     }
 
     oss << "Execution Information:\n"
-        << std::setw(FIELD_WIDTH) << "	Executioner: " << demangle(typeid(*_executioner).name()) << '\n';
+        << std::setw(FIELD_WIDTH) << "  Executioner: " << demangle(typeid(*_executioner).name()) << '\n';
 
     std::string time_stepper = _executioner->getTimeStepper();
     if (time_stepper != "")
-      oss << std::setw(FIELD_WIDTH) << "	TimeStepper: " << time_stepper << '\n';
+      oss << std::setw(FIELD_WIDTH) << "  TimeStepper: " << time_stepper << '\n';
 
-    oss << std::setw(FIELD_WIDTH) << "	Solver Mode: " << Moose::stringify<Moose::SolveType>(_action_warehouse.problem()->solverParams()._type) << '\n';
+    oss << std::setw(FIELD_WIDTH) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(_action_warehouse.problem()->solverParams()._type) << '\n';
     oss << '\n';
   }
 

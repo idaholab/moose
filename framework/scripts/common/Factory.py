@@ -55,11 +55,11 @@ class Factory:
           required = 'Yes'
         default = ''
         if params.isValid(key):
-	  the_param = params[key]
-	  if type(the_param) == list:
+          the_param = params[key]
+          if type(the_param) == list:
             default = "'" + " ".join(the_param) + "'"
-	  else:
-	    default = str(the_param)
+          else:
+            default = str(the_param)
 
         print "%4s%-30s = %-30s # %s" % ('', key, default, params.getDescription(key))
       print "  [../]\n"

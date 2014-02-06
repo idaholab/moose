@@ -100,11 +100,11 @@ void indirectSort(RandomAccessIterator beg,
 // A generic indirect sort function templated on the iterator type *and* the comparison functor
 // to be used for the ordering.
 template <class RandomAccessIterator,
-	  class UserComparisonFunctor>
+    class UserComparisonFunctor>
 void indirectSort(RandomAccessIterator beg,
-		  RandomAccessIterator end,
-		  std::vector<size_t>& b,
-		  UserComparisonFunctor user_comp)
+      RandomAccessIterator end,
+      std::vector<size_t>& b,
+      UserComparisonFunctor user_comp)
 {
   // Space in b
   initialize_indirect_sort(beg, end, b);

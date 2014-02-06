@@ -99,11 +99,11 @@ SystemInfo::getTimeStamp(time_t *time_stamp)
   // Another way to use it is to totally customize the format...
   //    char pattern[]="%d %B %Y %I:%M:%S %p";
   //    tp.put(date_stream,                /*s*/
-  //	   date_stream,                /*str*/
-  //	   date_stream.fill(),         /*fill*/
-  //	   tm_struct,                  /*tm*/
-  //	   pattern,                    /*format begin*/
-  //	   pattern+sizeof(pattern)-1); /*format end  */
+  //     date_stream,                /*str*/
+  //     date_stream.fill(),         /*fill*/
+  //     tm_struct,                  /*tm*/
+  //     pattern,                    /*format begin*/
+  //     pattern+sizeof(pattern)-1); /*format end  */
 
   return date_stream.str();
 #else

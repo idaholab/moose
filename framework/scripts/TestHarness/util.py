@@ -6,32 +6,32 @@ from time import strftime, gmtime, ctime, localtime, asctime
 TERM_COLS = 110
 
 LIBMESH_OPTIONS = {
-   'mesh_mode' :    { 're_option' : r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)',
-                      'default'   : 'SERIAL',
-		      'options'   :
-		      {
-   	                'PARALLEL' : '1',
-		        'SERIAL'   : '0'
-		      }
-		    },
-   'unique_ids' :   { 're_option' : r'#define\s+LIBMESH_ENABLE_UNIQUE_ID\s+(\d+)',
-                      'default'   : 'FALSE',
-		      'options'   :
-		      {
-                        'TRUE'  : '1',
-                        'FALSE' : '0'
-		      }
-		    },
-   'dtk' :          { 're_option' : r'#define\s+LIBMESH_HAVE_DTK\s+(\d+)',
-                      'default'   : 'FALSE',
-		      'options'   :
-		      {
-                        'TRUE'  : '1',
-                        'FALSE' : '0'
-		      }
-		    }
+  'mesh_mode' :    { 're_option' : r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)',
+                     'default'   : 'SERIAL',
+                     'options'   :
+                       {
+      'PARALLEL' : '1',
+      'SERIAL'   : '0'
+      }
+                     },
+  'unique_ids' :   { 're_option' : r'#define\s+LIBMESH_ENABLE_UNIQUE_ID\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   :
+                       {
+      'TRUE'  : '1',
+      'FALSE' : '0'
+      }
+                     },
+  'dtk' :          { 're_option' : r'#define\s+LIBMESH_HAVE_DTK\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   :
+                       {
+      'TRUE'  : '1',
+      'FALSE' : '0'
+      }
+                     }
 
-                  }
+  }
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd):
@@ -278,9 +278,9 @@ def checkPetscVersion(checks, test):
     # Exact match
     if logic == '' or logic == '=':
       if version == checks[PETSC_VERSION]:
-	return (True, None, version)
+        return (True, None, version)
       else:
-	return (False, '!=', version)
+        return (False, '!=', version)
     # Logical match
     if logic == '>' and checks[PETSC_VERSION][0:3] > version[0:3]:
       return (True, None, version)
@@ -317,9 +317,9 @@ def getLibMeshConfigOption(libmesh_dir, option):
       info = LIBMESH_OPTIONS[option]
       m = re.search(info['re_option'], contents)
       if m != None:
-	for value, option in info['options'].iteritems():
-	  if m.group(1) == option:
-	    option_set.add(value)
+        for value, option in info['options'].iteritems():
+          if m.group(1) == option:
+            option_set.add(value)
       else:
         option_set.add(info['default'])
 

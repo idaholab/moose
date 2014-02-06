@@ -87,11 +87,11 @@ FDKernel::computeOffDiagJacobian(unsigned int jvar_index)
       unsigned int rows = ke.m();
       DenseVector<Number> diag(rows);
       for(unsigned int i=0; i<rows; i++)
-	diag(i) = _local_ke(i,i);
+  diag(i) = _local_ke(i,i);
 
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for(unsigned int i=0; i<_diag_save_in.size(); i++)
-	_diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+  _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
     }
   }
 }

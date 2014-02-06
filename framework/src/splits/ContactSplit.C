@@ -87,10 +87,10 @@ ContactSplit::setup(const std::string& prefix)
       ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
       CHKERRABORT(libMesh::COMM_WORLD,ierr);
       if (_contact_displaced[j]) {
-	opt = opt + "_displaced";
-	val = "yes";
-	ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-	CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  opt = opt + "_displaced";
+  val = "yes";
+  ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
       }
     }
   }
@@ -112,10 +112,10 @@ ContactSplit::setup(const std::string& prefix)
       ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
       CHKERRABORT(libMesh::COMM_WORLD,ierr);
       if (_uncontact_displaced[j]) {
-	opt = opt + "_displaced";
-	val = "yes";
-	ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-	CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  opt = opt + "_displaced";
+  val = "yes";
+  ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
+  CHKERRABORT(libMesh::COMM_WORLD,ierr);
       }
     }
   }

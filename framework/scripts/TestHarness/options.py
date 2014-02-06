@@ -7,7 +7,7 @@
 
 # General options
 INPUT         = 'input'          # The input.i file to use
-SKIP	      = 'skip'           # Give a reason to skip the test
+SKIP        = 'skip'           # Give a reason to skip the test
 MAX_TIME      = 'max_time'       # Test will fail if it exceeds this time in seconds (accuracy ~1s)
 MIN_REPORTED_TIME = 'min_reported_time'  # The minimum time elasped before a test will be reported as taking to long
 TEST_NAME     = 'test_name'      # The name of the test as it appears in output, this is
@@ -98,7 +98,7 @@ DEFAULTS = { EXODIFF : [],
              MESH_MODE : ['ALL'],
              METHOD : ['ALL'],
              LIBRARY_MODE : ['ALL'],
-	     DTK : ['ALL'],
+             DTK : ['ALL'],
              UNIQUE_IDS : ['ALL'],
              RECOVER : True,
              SHOULD_CRASH : False,
@@ -114,7 +114,7 @@ DEFAULTS = { EXODIFF : [],
              MAX_THREADS: 16,
              MAX_TIME : 300,
              SKIP : None,
-	     DELETED : None,
+             DELETED : None,
              ABS_ZERO : 1e-10,      # Exodiff option
              REL_ERR : 5.5e-6,      # Exodiff option
              CUSTOM_CMP : None,     # Exodiff option

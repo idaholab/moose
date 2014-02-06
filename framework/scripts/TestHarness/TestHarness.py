@@ -219,13 +219,7 @@ class TestHarness:
           print 'Ignored Parameter(s): ', params_ignored
 
         # TODO: In progress formatting
-#        formatted_name = relative_path + '.' + testname
         formatted_name = relative_path.replace('/tests/', '') + '.' + testname
-#	formatted_name = '/'.join(relative_path.split('/')[1:]) + '.' + testname
-#        formatted_name += ' (' + relative_path
-#        if test[INPUT] != 'input':  # See if a testname was provided
-#          formatted_name += '/' + test[INPUT]
-#        formatted_name += ')'
 
         params[TEST_NAME] = formatted_name
         params[TEST_DIR] = test_dir
