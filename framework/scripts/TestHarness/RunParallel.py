@@ -2,7 +2,6 @@ from subprocess import *
 from time import sleep
 from timeit import default_timer as clock
 
-#from options import *
 from tempfile import TemporaryFile
 #from Queue import Queue
 from collections import deque

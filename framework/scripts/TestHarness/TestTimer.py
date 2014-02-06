@@ -1,5 +1,4 @@
 from TestHarness import TestHarness
-#from options import *
 import os, time, sys
 
 CREATE_TABLE = """create table timing

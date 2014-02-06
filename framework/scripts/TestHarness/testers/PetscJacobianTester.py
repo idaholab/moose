@@ -1,5 +1,4 @@
 from RunApp import RunApp
-#from options import *
 from util import runCommand
 import os, re
 

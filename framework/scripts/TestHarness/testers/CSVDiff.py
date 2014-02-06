@@ -1,5 +1,4 @@
 from RunApp import RunApp
-#from options import *
 from CSVDiffer import CSVDiffer
 
 class CSVDiff(RunApp):

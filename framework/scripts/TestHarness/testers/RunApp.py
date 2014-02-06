@@ -1,4 +1,3 @@
-#from options import *
 import re, os
 from Tester import Tester
 from RunParallel import RunParallel # For TIMEOUT value

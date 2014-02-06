@@ -1,6 +1,5 @@
 import os, re
 from subprocess import *
-#from options import *
 from time import strftime, gmtime, ctime, localtime, asctime
 
 TERM_COLS = 110

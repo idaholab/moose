@@ -1,4 +1,3 @@
-#from options import *
 from util import *
 from InputParameters import InputParameters
 
