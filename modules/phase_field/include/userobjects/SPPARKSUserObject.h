@@ -93,8 +93,10 @@ protected:
 
   const std::string & _file;
   const bool _spparks_only;
-  const std::vector<unsigned> _ivar;
-  const std::vector<unsigned> _dvar;
+  const std::vector<unsigned> _from_ivar;
+  const std::vector<unsigned> _from_dvar;
+  const std::vector<unsigned> _to_ivar;
+  const std::vector<unsigned> _to_dvar;
   const Real _xmin;
   const Real _ymin;
   const Real _zmin;
@@ -141,6 +143,7 @@ protected:
   };
 
   void getSPPARKSData();
+  void setSPPARKSData();
 
   template
   <typename T>
@@ -149,6 +152,7 @@ protected:
     T * data;
     getSPPARKSDataPointer( data, string, index );
 
+    // Copy data from local SPPARKS node to local ELK node
     for (std::multimap<ELKID, SPPARKSID>::const_iterator i = _elk_to_spparks.begin(); i != _elk_to_spparks.end(); ++i)
     {
       // Index into storage is ELK node id.
@@ -160,6 +164,7 @@ protected:
       return;
     }
 
+    // Copy data across processors
     sendRecvSPPARKSData( data, storage );
   }
 
@@ -173,7 +178,7 @@ protected:
     const unsigned num_recvs = _sending_proc_to_elk_id.size();
     std::vector<Parallel::Request> recv_request(num_recvs);
 
-    std::map<unsigned, std::vector<T> > data_to_me;
+    std::map<unsigned, std::vector<T> > data_to_me; // sending proc, vector of SPPARKS values (one value per SPPARKS node)
     unsigned offset = 0;
     for (std::map<unsigned, std::vector<libMesh::dof_id_type> >::const_iterator i = _sending_proc_to_elk_id.begin();
          i != _sending_proc_to_elk_id.end(); ++i)
@@ -184,7 +189,7 @@ protected:
     }
 
 
-    std::map<unsigned, std::vector<T> > data_from_me;
+    std::map<unsigned, std::vector<T> > data_from_me; // Processor, list of SPPARKS values
     for (std::map<SPPARKSID, std::vector<unsigned> >::const_iterator i = _spparks_to_proc.begin(); i != _spparks_to_proc.end(); ++i)
     {
       for (unsigned j = 0; j < i->second.size(); ++j)
@@ -193,12 +198,9 @@ protected:
       }
     }
 
-    offset = 0;
     for (typename std::map<unsigned, std::vector<T> >::const_iterator i = data_from_me.begin(); i != data_from_me.end(); ++i)
     {
-      // Parallel::send(i->first, i->second, send_request[offset], comm_tag);
       Parallel::send(i->first, data_from_me[i->first], comm_tag);
-      ++offset;
     }
 
     Parallel::wait(recv_request);
@@ -211,24 +213,133 @@ protected:
       const std::vector<T> & v = data_to_me[i->first];
       for (unsigned j = 0; j < v.size(); ++j)
       {
+        // storage is ELK node id, value
         storage[id[j]] = v[j];
       }
     }
   }
 
 
+  template
+  <typename T>
+  void setSPPARKSData( T * data, char * string, unsigned index, MooseVariable & aux_var )
+  {
+
+    getSPPARKSDataPointer( data, string, index );
+
+    AuxiliarySystem & aux_sys = _fe_problem.getAuxiliarySystem();
+    NumericVector<Number> & aux_solution = aux_sys.solution();
+
+    // Extract ELK data
+    std::map<libMesh::dof_id_type, T> elk_data;
+    ConstNodeRange & node_range = *_fe_problem.mesh().getLocalNodeRange();
+    for ( ConstNodeRange::const_iterator i = node_range.begin(); i < node_range.end(); ++i )
+    {
+      // Get data
+      const Real value = aux_solution( (*i)->dof_number(aux_sys.number(), aux_var.index(), 0) );
+
+      elk_data[(*i)->id()] = value;
+
+    }
+    for (std::multimap<ELKID, SPPARKSID>::const_iterator i = _elk_to_spparks.begin(); i != _elk_to_spparks.end(); ++i)
+    {
+      // Index into data is SPPARKS node id.
+      data[i->second.index] = elk_data[i->first.id];
+    }
+
+    if ( libMesh::n_processors() == 1 )
+    {
+      return;
+    }
+
+
+    // Copy data across processors
+    sendRecvELKData( elk_data, data );
+
+    for (unsigned i = 0; i < _num_local_spparks_nodes; ++i)
+    {
+      data[i] = _int_data_for_spparks[index][i];
+    }
+
+  }
+
+  template
+  <typename T>
+  void sendRecvELKData( const std::map<libMesh::dof_id_type, T> & storage, T * const data )
+  {
+
+    Parallel::MessageTag comm_tag(101);
+
+    const unsigned num_recvs = _sending_proc_to_spparks_id.size();
+    std::vector<Parallel::Request> recv_request(num_recvs);
+
+    std::map<unsigned, std::vector<T> > data_to_me; // sending proc, vector of ELK values (one value per ELK node)
+    unsigned offset = 0;
+    for (std::map<unsigned, std::vector<unsigned> >::const_iterator i = _sending_proc_to_spparks_id.begin();
+         i != _sending_proc_to_spparks_id.end(); ++i)
+    {
+      data_to_me[i->first].resize( i->second.size() );
+      Parallel::receive(i->first, data_to_me[i->first], recv_request[offset], comm_tag);
+      ++offset;
+    }
+
+
+    std::map<unsigned, std::vector<T> > data_from_me; // Processor, list of ELK values
+    for (std::map<ELKID, std::vector<unsigned> >::const_iterator i = _elk_to_proc.begin(); i != _elk_to_proc.end(); ++i)
+    {
+      for (unsigned j = 0; j < i->second.size(); ++j)
+      {
+        data_from_me[i->second[j]].push_back( storage.find(i->first.id)->second );
+      }
+    }
+
+    for (typename std::map<unsigned, std::vector<T> >::const_iterator i = data_from_me.begin(); i != data_from_me.end(); ++i)
+    {
+      Parallel::send(i->first, data_from_me[i->first], comm_tag);
+    }
+
+    Parallel::wait(recv_request);
+
+    // Move data into storage
+    for (std::map<unsigned, std::vector<unsigned> >::const_iterator i = _sending_proc_to_spparks_id.begin();
+         i != _sending_proc_to_spparks_id.end(); ++i)
+    {
+      const std::vector<unsigned> & id = i->second;
+      const std::vector<T> & v = data_to_me[i->first];
+      if ( id.size() != v.size() )
+      {
+        mooseError("Mismatched communication vectors");
+      }
+      for (unsigned j = 0; j < v.size(); ++j)
+      {
+        // data is SPPARKS index, value
+        data[id[j]] = v[j];
+      }
+    }
+  }
+
+  std::vector<MooseVariable*> _int_aux_vars;
+  std::vector<MooseVariable*> _double_aux_vars;
+
   // Communication maps
-  std::map<SPPARKSID, std::vector<unsigned> > _spparks_to_proc;
-  std::map<unsigned, std::vector<libMesh::dof_id_type> > _sending_proc_to_elk_id;
+  std::map<SPPARKSID, std::vector<unsigned> > _spparks_to_proc; // SPPARKSID to vector of procs that need the value
+  std::map<unsigned, std::vector<libMesh::dof_id_type> > _sending_proc_to_elk_id; // Processor to list of ELK ids
+  std::map<ELKID, std::vector<unsigned> > _elk_to_proc; // ELKID to vector of procs that need the value
+  std::map<unsigned, std::vector<unsigned> > _sending_proc_to_spparks_id; // Processor to list of SPPARKS ids
 
   unsigned _num_local_elk_nodes;
+  unsigned _num_local_spparks_nodes;
 
-  std::map<SPPARKSID, ELKID> _spparks_to_elk;
-  std::multimap<ELKID, SPPARKSID> _elk_to_spparks;
+  std::map<SPPARKSID, ELKID> _spparks_to_elk;      // Local SPPARKSID to local ELKID
+  std::multimap<ELKID, SPPARKSID> _elk_to_spparks; // Local ELKID to local SPPARKSID
 
-  // Maps from ELK node id to data
+  // Maps from variable index to ELK node id to value
   std::map<unsigned, std::map<unsigned, int> > _int_data_for_elk;
   std::map<unsigned, std::map<unsigned, double> > _double_data_for_elk;
+
+  // Maps from variable index to value (vector index is array index)
+  std::map<unsigned, std::vector<int> > _int_data_for_spparks;
+  std::map<unsigned, std::vector<double> > _double_data_for_spparks;
 
 
   Real _last_time;

@@ -63,7 +63,7 @@
     type = SPPARKSUserObject
 #    file = in.potts
     file = in.potts2D
-    ivar = 1
+    from_ivar = 1
 #    spparks_only = true
   [../]
 []
