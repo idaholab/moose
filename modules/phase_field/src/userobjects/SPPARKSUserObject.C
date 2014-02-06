@@ -414,8 +414,8 @@ SPPARKSUserObject::initialSetup()
   std::vector<unsigned> num_elk_nodes(procs_overlapping_spparks_domain.size(), 0);
   std::vector<unsigned> num_spparks_nodes(procs_overlapping_elk_domain.size(), 0);
 
-  MPI_Request recv_request1[ std::max(procs_overlapping_spparks_domain.size(), procs_overlapping_elk_domain.size()) ];
-  MPI_Request recv_request2[ std::max(procs_overlapping_spparks_domain.size(), procs_overlapping_elk_domain.size()) ];
+  std::vector<MPI_Request> recv_request1( std::max(procs_overlapping_spparks_domain.size(), procs_overlapping_elk_domain.size()) );
+  std::vector<MPI_Request> recv_request2( std::max(procs_overlapping_spparks_domain.size(), procs_overlapping_elk_domain.size()) );
   int comm_tag = 100;
   for (unsigned i = 0; i < procs_overlapping_spparks_domain.size(); ++i)
   {
@@ -574,7 +574,7 @@ SPPARKSUserObject::initialSetup()
                  Point(remote_spparks_coords[offset*3+0],
                        remote_spparks_coords[offset*3+1],
                        remote_spparks_coords[offset*3+2]) );
-      std::set<ELKID>::iterator iter = elk_id.find( tmp );
+      std::multiset<ELKID>::iterator iter = elk_id.find( tmp );
       if ( iter != elk_id.end() )
       {
         elk_matches[i].push_back( tmp.id );
