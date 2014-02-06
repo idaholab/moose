@@ -7,7 +7,7 @@ InputParameters validParams<PlenumPressurePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<UserObjectName>("plenum_pressure_uo", "The PlenumPressureUserObject that computes the initial moles.");
-  params.addRequiredParam<std::string>("quantity", "The qunatity to report.");
+  params.addRequiredParam<std::string>("quantity", "The quantity to report.");
 
   params.set<bool>("use_displaced_mesh") = true;
 
