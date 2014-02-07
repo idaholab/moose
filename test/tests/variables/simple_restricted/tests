@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'simple_restricted.i'
+    exodiff = 'simple_restricted_out.e'
+  [../]
+[]
