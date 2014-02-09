@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  This post processor returns the mass value of a region.  It is used
 //  to check that mass is conserved
 //

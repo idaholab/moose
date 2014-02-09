@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 #ifndef RICHARDSFLUXJUMPINDICATOR_H
 #define RICHARDSFLUXJUMPINDICATOR_H
 

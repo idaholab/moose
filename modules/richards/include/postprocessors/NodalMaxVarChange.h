@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 #ifndef NODALMAXVARCHANGE_H
 #define NODALMAXVARCHANGE_H
 

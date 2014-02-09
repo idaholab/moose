@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  "Broadbridge-White" form of effective saturation for Kn small (P Broadbridge and I White ``Constant rate rainfall infiltration: A versatile nonlinear model 1. Analytic Solution'', Water Resources Research 24 (1988) 145-154)
 //
 #include "RichardsSeff1BWsmall.h"

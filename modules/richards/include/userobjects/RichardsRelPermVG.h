@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  van-Genuchten form of relative permeability
 //
 #ifndef RICHARDSRELPERMVG_H

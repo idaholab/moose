@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  Richards standard SUPG
 //
   /* here i use a formula for "tau" presented in Appendix A of

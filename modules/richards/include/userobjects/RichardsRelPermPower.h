@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  "Power" form of relative permeability
 //
 #ifndef RICHARDSRELPERMPOWER_H

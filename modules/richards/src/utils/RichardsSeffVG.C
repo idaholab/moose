@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  van-Genuchten effective saturation as a function of pressure (not capillary pressure)
 //
 #include "RichardsSeffVG.h"

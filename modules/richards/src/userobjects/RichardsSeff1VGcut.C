@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  "cut" van-Genuchten effective saturation as a function of pressure, and its derivs wrt p
 //
 #include "RichardsSeff1VGcut.h"

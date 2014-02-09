@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  This post processor returns the 2nd derivative of density wrt pressure
 //
 #include "RichardsDensityPrimePrimeAux.h"

@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  van-Genuchten water effective saturation as a function of (Pwater, Pgas), and its derivs wrt to that pressure
 //
 #include "RichardsSeff2waterVG.h"

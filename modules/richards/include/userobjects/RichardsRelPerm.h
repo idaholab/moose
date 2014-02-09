@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  Base class for relative permeability as a function of effective saturation
 //
 #ifndef RICHARDSRELPERM_H

@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  This post processor returns the effective saturation of a region.
 //
 #include "RichardsSeffAux.h"

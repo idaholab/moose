@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  This post processor returns the mass due to a half-gaussian sink flux from the boundary of a volume.
 //
 #include "RichardsHalfGaussianSinkFlux.h"

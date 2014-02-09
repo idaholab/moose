@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 #ifndef RICHARDSPOLYLINESINK_H
 #define RICHARDSPOLYLINESINK_H
 

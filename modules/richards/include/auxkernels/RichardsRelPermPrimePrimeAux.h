@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 #ifndef RICHARDSRELPERMPRIMEPRIMEAUX_H
 #define RICHARDSRELPERMPRIMEPRIMEAUX_H
 

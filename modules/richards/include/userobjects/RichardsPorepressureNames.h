@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  Holds maps between pressure_vars used in RichardsMaterial and the variable number used by MOOSE.
 //
 #ifndef RICHARDSPOREPRESSURENAMES_H

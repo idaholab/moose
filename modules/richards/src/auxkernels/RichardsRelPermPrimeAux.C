@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  This post processor returns d(relperm)/d(Seff)
 //
 #include "RichardsRelPermPrimeAux.h"

@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  Fluid density assuming constant bulk modulus
 //
 #include "RichardsDensityConstBulk.h"

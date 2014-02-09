@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  Rogers-Stallybrass-Clements version of effective saturation of water phase as a function of pressure, and derivatives wrt that pressure.
 //  This is mostly useful for 2phase, not single phase, models.
 //  valid for residual saturations = 0, and viscosityOil = 2*viscosityWater.  (the "2" is important here!).

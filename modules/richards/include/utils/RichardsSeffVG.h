@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  Utility functions for van-genuchten effective saturation as a function of pressure
 //
 #ifndef RICHARDSSEFFVG_H

@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 //  van-Genuchten gaseffective saturation as a function of (Pwater, Pgas), and its derivs wrt to that pressure
 //
 #ifndef RICHARDSSEFF2GASVG_H
