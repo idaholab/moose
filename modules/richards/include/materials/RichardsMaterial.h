@@ -75,6 +75,8 @@ private:
   MaterialProperty<std::vector<RealTensorValue> > & _dtauvel_SUPG_dgradp; // d (_tauvel_SUPG)/d(_grad_p)
   MaterialProperty<std::vector<RealVectorValue> > & _dtauvel_SUPG_dp; // d (_tauvel_SUPG)/d(p)
 
+  std::vector<VariableValue *> _perm_change;
+
   std::vector<VariableValue *> _pressure_vals;
   std::vector<VariableValue *> _pressure_old_vals;
   std::vector<VariableGradient *> _grad_p;

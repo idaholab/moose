@@ -9,8 +9,9 @@ InputParameters validParams<RichardsMaterial>()
   InputParameters params = validParams<Material>();
 
   params.addRequiredParam<Real>("mat_porosity", "The porosity of the material.  Should be between 0 and 1.  Eg, 0.1");
-  params.addRequiredParam<RealTensorValue>("mat_permeability", "The permeability tensor (m^2).");
   params.addCoupledVar("por_change", "An auxillary variable describing porosity changes.  Porosity = mat_porosity + por_change.  If this is not provided, zero is used.");
+  params.addRequiredParam<RealTensorValue>("mat_permeability", "The permeability tensor (m^2).");
+  params.addCoupledVar("perm_change", "A list of auxillary variable describing permeability changes.  There must be 9 of these, corresponding to the xx, xy, xz, yx, yy, yz, zx, zy, zz components respectively.  Permeability = mat_permeability*10^(perm_change).");
   params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
   params.addRequiredParam<std::vector<UserObjectName> >("relperm_UO", "List of names of user objects that define relative permeability");
   params.addRequiredParam<std::vector<UserObjectName> >("seff_UO", "List of name of user objects that define effective saturation as a function of pressure list");
@@ -30,7 +31,7 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     Material(name, parameters),
 
     _material_por(getParam<Real>("mat_porosity")),
-    _por_change(isCoupled("por_change") ? &coupledValue("por_change") : &_zero),
+    _por_change(isCoupled("por_change") ? &coupledValue("por_change") : &_zero), // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
     _por_change_old(isCoupled("por_change") ? &coupledValueOld("por_change") : &_zero),
 
     _material_perm(getParam<RealTensorValue>("mat_permeability")),
@@ -89,6 +90,13 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
   
   if (_material_por <= 0 || _material_por >= 1)
     mooseError("Porosity set to " << _material_por << " but it must be between 0 and 1");
+
+  if (isCoupled("perm_change") && (coupledComponents("perm_change") != 9))
+    mooseError("9 components of perm_change must be given to a RichardsMaterial.  You supplied " << coupledComponents("perm_change") << "\n");
+
+  _perm_change.resize(9);
+  for (unsigned int i=0 ; i<9 ; ++i)
+    _perm_change[i] = (isCoupled("perm_change")? &coupledValue("perm_change", i) : &_zero); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
 
   _pressure_vals.resize(_num_p);
   _pressure_old_vals.resize(_num_p);
@@ -164,6 +172,10 @@ RichardsMaterial::computeProperties()
       _porosity_old[qp] = _material_por + (*_por_change_old)[qp];
 
       _permeability[qp] = _material_perm;
+      for (unsigned int i=0; i<3; i++)
+	for (unsigned int j=0; j<3; j++)
+	  _permeability[qp](i,j) *= std::pow(10,(*_perm_change[3*i+j])[qp]);
+
       _gravity[qp] = _material_gravity;
 
       _viscosity[qp].resize(_num_p);
