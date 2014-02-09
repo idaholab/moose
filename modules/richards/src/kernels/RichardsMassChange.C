@@ -22,6 +22,7 @@ RichardsMassChange::RichardsMassChange(const std::string & name,
     _use_supg(getParam<bool>("use_supg")),
     // This kernel expects input parameters named "bulk_mod", etc
     _porosity(getMaterialProperty<Real>("porosity")),
+    _porosity_old(getMaterialProperty<Real>("porosity_old")),
 
     _sat_old(getMaterialProperty<std::vector<Real> >("sat_old")),
 
@@ -46,7 +47,7 @@ Real
 RichardsMassChange::computeQpResidual()
 {
   Real mass = _porosity[_qp]*_density[_qp][_pvar]*_sat[_qp][_pvar];
-  Real mass_old = _porosity[_qp]*_density_old[_qp][_pvar]*_sat_old[_qp][_pvar];
+  Real mass_old = _porosity_old[_qp]*_density_old[_qp][_pvar]*_sat_old[_qp][_pvar];
   
   Real test_fcn = _test[_i][_qp] ;
   if (_use_supg) {
@@ -59,7 +60,7 @@ Real
 RichardsMassChange::computeQpJacobian()
 {
   Real mass = _porosity[_qp]*_density[_qp][_pvar]*_sat[_qp][_pvar];
-  Real mass_old = _porosity[_qp]*_density_old[_qp][_pvar]*_sat_old[_qp][_pvar];
+  Real mass_old = _porosity_old[_qp]*_density_old[_qp][_pvar]*_sat_old[_qp][_pvar];
   Real mass_prime = _phi[_j][_qp]*_porosity[_qp]*(_ddensity[_qp][_pvar]*_sat[_qp][_pvar] + _density[_qp][_pvar]*_dsat[_qp][_pvar][_pvar]);
   
   //std::cout << _ddensity[_qp][_pvar] << " " << _sat[_qp][_pvar]  << " " <<  _density[_qp][_pvar] << " " << _dsat[_qp][_pvar][_pvar] << "\n";

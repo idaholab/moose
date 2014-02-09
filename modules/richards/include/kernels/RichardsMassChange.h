@@ -30,6 +30,7 @@ protected:
   bool _use_supg;
 
   MaterialProperty<Real> &_porosity;
+  MaterialProperty<Real> &_porosity_old;
 
   MaterialProperty<std::vector<Real> > &_sat_old;
 

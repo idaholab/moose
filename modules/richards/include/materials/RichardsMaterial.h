@@ -30,6 +30,9 @@ protected:
 private:
 
   Real _material_por;
+  VariableValue * _por_change;
+  VariableValue * _por_change_old;
+
   RealTensorValue _material_perm;
   std::vector<Real> _material_viscosity;
 
@@ -41,6 +44,7 @@ private:
   Real _trace_perm;
 
   MaterialProperty<Real> & _porosity;
+  MaterialProperty<Real> & _porosity_old;
   MaterialProperty<RealTensorValue> & _permeability;
   MaterialProperty<std::vector<Real> > & _viscosity;
   MaterialProperty<RealVectorValue> & _gravity;

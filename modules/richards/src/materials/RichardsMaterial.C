@@ -10,6 +10,7 @@ InputParameters validParams<RichardsMaterial>()
 
   params.addRequiredParam<Real>("mat_porosity", "The porosity of the material.  Should be between 0 and 1.  Eg, 0.1");
   params.addRequiredParam<RealTensorValue>("mat_permeability", "The permeability tensor (m^2).");
+  params.addCoupledVar("por_change", "An auxillary variable describing porosity changes.  Porosity = mat_porosity + por_change.  If this is not provided, zero is used.");
   params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
   params.addRequiredParam<std::vector<UserObjectName> >("relperm_UO", "List of names of user objects that define relative permeability");
   params.addRequiredParam<std::vector<UserObjectName> >("seff_UO", "List of name of user objects that define effective saturation as a function of pressure list");
@@ -27,7 +28,11 @@ InputParameters validParams<RichardsMaterial>()
 RichardsMaterial::RichardsMaterial(const std::string & name,
                                  InputParameters parameters) :
     Material(name, parameters),
+
     _material_por(getParam<Real>("mat_porosity")),
+    _por_change(isCoupled("por_change") ? &coupledValue("por_change") : &_zero),
+    _por_change_old(isCoupled("por_change") ? &coupledValueOld("por_change") : &_zero),
+
     _material_perm(getParam<RealTensorValue>("mat_permeability")),
     _material_viscosity(getParam<std::vector<Real> >("viscosity")),
 
@@ -41,6 +46,7 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     // Declare that this material is going to provide a Real
     // valued property named "porosity", etc, that Kernels can use.
     _porosity(declareProperty<Real>("porosity")),
+    _porosity_old(declareProperty<Real>("porosity_old")),
     _permeability(declareProperty<RealTensorValue>("permeability")),
 
     _viscosity(declareProperty<std::vector<Real> >("viscosity")),
@@ -154,7 +160,9 @@ RichardsMaterial::computeProperties()
   for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
     {
 
-      _porosity[qp] = _material_por;
+      _porosity[qp] = _material_por + (*_por_change)[qp];
+      _porosity_old[qp] = _material_por + (*_por_change_old)[qp];
+
       _permeability[qp] = _material_perm;
       _gravity[qp] = _material_gravity;
 
