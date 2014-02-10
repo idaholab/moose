@@ -140,7 +140,6 @@ SolidModel::SolidModel( const std::string & name,
   _SED_old(declarePropertyOld<Real>("strain_energy_density")),
   _compute_JIntegral(getParam<bool>("compute_JIntegral")),
   _Eshelby_tensor(declareProperty<ColumnMajorMatrix>("Eshelby_tensor")),
-  _Eshelby_tensor_small(declareProperty<ColumnMajorMatrix>("Eshelby_tensor_small")),
   _block_id(std::vector<SubdomainID>(blockIDs().begin(), blockIDs().end())),
   _constitutive_active(false),
   _element(NULL),
@@ -612,7 +611,6 @@ SolidModel::computeEshelby()
   FT = F.transpose();
   //
   ColumnMajorMatrix piola;
-  ColumnMajorMatrix piola_small;
   ColumnMajorMatrix R(3,3);
   SymmTensor dummy;
   Elk::SolidMechanics::Element::polarDecompositionEigen(F, R, dummy);
@@ -630,7 +628,6 @@ SolidModel::computeEshelby()
   unrotated_stress_CMM(2,2) = unrotated_stress.zz();
   //
   piola = stress_CMM * FinvT;
-  piola_small = unrotated_stress_CMM;
   piola *= detF;
 
 //  _FTP[_qp] = _FT * _det_F * stress_CMM * _FinvT;
@@ -652,13 +649,8 @@ SolidModel::computeEshelby()
   WI.identity();
   WI *= _SED[_qp];
   WI *= detF;
-  ColumnMajorMatrix WI_small;
-  WI_small.identity();
-  WI_small *= _SED[_qp];
   _Eshelby_tensor[_qp] = WI - FTP;
   _Eshelby_tensor[_qp] *= -1.0;
-  _Eshelby_tensor_small[_qp] = WI_small - piola_small;
-  _Eshelby_tensor_small[_qp] *= -1.0;
 }
 
 ////////////////////////////////////////////////////////////////////////

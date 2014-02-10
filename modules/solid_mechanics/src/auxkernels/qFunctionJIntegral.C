@@ -9,6 +9,7 @@ InputParameters validParams<qFunctionJIntegral>()
   params.addRequiredParam<Real>("j_integral_radius_outer", "Radius for J-Integral calculation");
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
   params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front corresponding to this q function");
+  params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
 

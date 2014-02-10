@@ -127,7 +127,6 @@ protected:
   MaterialProperty<Real> & _SED_old;
   const bool _compute_JIntegral;
   MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
-  MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor_small;
 
   virtual void initQpStatefulProperties();
 

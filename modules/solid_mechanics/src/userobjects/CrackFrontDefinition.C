@@ -10,7 +10,7 @@ InputParameters validParams<CrackFrontDefinition>()
   params.addRequiredParam<RealVectorValue>("crack_direction","Direction of crack propagation");
   params.addParam<bool>("2d", false, "Treat body as two-dimensional");
   params.addParam<unsigned int>("2d_axis", 2, "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
-  params.set<bool>("use_displaced_mesh") = true;
+  params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
 
@@ -32,17 +32,19 @@ CrackFrontDefinition::~CrackFrontDefinition()
 void
 CrackFrontDefinition::execute()
 {
-  updateCrackFrontGeometry();
+  //Nothing to do if using undeformed mesh (which I believe is the right thing to do).
+  //updateCrackFrontGeometry();
 }
 
 void
 CrackFrontDefinition::initialSetup()
 {
   //TODO:  This is an attempt to get the coordinates updated for the off-processor nodes.  It still doesn't work.
-  for(std::set<BoundaryID>::iterator biditer=boundaryIDs().begin(); biditer != boundaryIDs().end(); ++biditer)
-  {
-    _subproblem.addGhostedBoundary(*biditer);
-  }
+  //     No need to update coordinates if we're using the undeformed mesh
+  //for(std::set<BoundaryID>::iterator biditer=boundaryIDs().begin(); biditer != boundaryIDs().end(); ++biditer)
+  //{
+  //  _subproblem.addGhostedBoundary(*biditer);
+  //}
 
   std::set<unsigned int> nodes;
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();

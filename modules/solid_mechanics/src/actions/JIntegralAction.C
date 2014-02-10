@@ -17,7 +17,6 @@ InputParameters validParams<JIntegralAction>()
   params.addParam<unsigned int>("2d_axis", 2, "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
   params.addRequiredParam<std::vector<Real> >("radius_inner", "Inner radius for volume integral domain");
   params.addRequiredParam<std::vector<Real> >("radius_outer", "Outer radius for volume integral domain");
-  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
@@ -31,7 +30,7 @@ JIntegralAction::JIntegralAction(const std::string & name, InputParameters param
   _axis_2d(getParam<unsigned int>("2d_axis")),
   _radius_inner(getParam<std::vector<Real> >("radius_inner")),
   _radius_outer(getParam<std::vector<Real> >("radius_outer")),
-  _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
+  _use_displaced_mesh(false)
 {
   if (_radius_inner.size() != _radius_outer.size())
   {
@@ -95,8 +94,9 @@ JIntegralAction::act()
   {
     const std::string ak_type_name("qFunctionJIntegral");
     InputParameters params = _factory.getValidParams(ak_type_name);
-    params.set<MooseEnum>("execute_on") = "residual"; //TODO timestep?
+    params.set<MooseEnum>("execute_on") = "timestep";
     params.set<UserObjectName>("crack_front_definition") = uo_name;
+    params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
     for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
     {
@@ -132,6 +132,7 @@ JIntegralAction::act()
     InputParameters params = _factory.getValidParams(pp_type_name);
     params.set<MooseEnum>("execute_on") = "timestep";
     params.set<UserObjectName>("crack_front_definition") = uo_name;
+    params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
     for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
     {
       if (_treat_as_2d)
