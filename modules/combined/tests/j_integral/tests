@@ -1,4 +1,9 @@
 [Tests]
+ [./j_2d_test]
+   type = 'Exodiff'
+   input = 'j_integral_2d_test.i'
+   exodiff = 'j_integral_2d_test_out.e'
+ [../]
  [./j_3d_as_2d_test]
    type = 'Exodiff'
    input = 'j_integral_3d_as_2d_test.i'

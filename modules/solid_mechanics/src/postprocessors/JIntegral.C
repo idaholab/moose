@@ -68,6 +68,6 @@ JIntegral::computeQpIntegral()
     q_avg_seg = (_crack_front_definition->getCrackFrontForwardSegmentLength(_crack_front_node_index) +
                  _crack_front_definition->getCrackFrontBackwardSegmentLength(_crack_front_node_index)) / 2.0;
   }
-  
-  return eq/q_avg_seg;
+
+  return -eq/q_avg_seg;
 }

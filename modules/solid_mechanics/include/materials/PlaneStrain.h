@@ -21,6 +21,9 @@ protected:
                               SymmTensor & total_strain_new,
                               SymmTensor & strain_increment );
 
+  virtual void computeDeformationGradient( unsigned int qp,
+                                           ColumnMajorMatrix & F);
+
   virtual unsigned int getNumKnownCrackDirs() const
   {
     return 1;

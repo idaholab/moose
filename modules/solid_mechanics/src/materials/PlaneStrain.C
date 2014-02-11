@@ -45,6 +45,23 @@ PlaneStrain::computeStrain( const unsigned qp,
   strain_increment -= total_strain_old;
 }
 
+void
+PlaneStrain::computeDeformationGradient( unsigned int qp, ColumnMajorMatrix & F)
+{
+  mooseAssert(F.n() == 3 && F.m() == 3, "computeDefGrad requires 3x3 matrix");
+
+  F(0,0) = _grad_disp_x[qp](0) + 1.0;
+  F(0,1) = _grad_disp_x[qp](1);
+  F(0,2) = 0.0;
+  F(1,0) = _grad_disp_y[qp](0);
+  F(1,1) = _grad_disp_y[qp](1) + 1.0;
+  F(1,2) = 0.0;
+  F(2,0) = 0.0;
+  F(2,1) = 0.0;
+  F(2,2) = 1.0;
+}
+
+
 
 }
 }

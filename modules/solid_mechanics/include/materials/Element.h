@@ -60,10 +60,9 @@ public:
   virtual void init() {}
 
   virtual void computeDeformationGradient( unsigned int /*qp*/, ColumnMajorMatrix & /*F*/)
-
-    {
-       mooseError("You tried to compute the deformation gradient on an element other than a nonlinear 3D element");
-    }
+  {
+    mooseError("computeDeformationGradient not defined for element type used");
+  }
 
   virtual void computeStrain( const unsigned qp,
                               const SymmTensor & total_strain_old,

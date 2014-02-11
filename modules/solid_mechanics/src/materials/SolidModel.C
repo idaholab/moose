@@ -590,6 +590,7 @@ void SolidModel::computeStrainEnergyDensity()
 void
 SolidModel::computeEshelby()
 {
+  //Cauchy stress (sigma) in a colum major matrix:
   ColumnMajorMatrix stress_CMM;
   stress_CMM(0,0) = _stress[_qp].xx();
   stress_CMM(0,1) = _stress[_qp].xy();
@@ -600,6 +601,8 @@ SolidModel::computeEshelby()
   stress_CMM(2,0) = _stress[_qp].xz();
   stress_CMM(2,1) = _stress[_qp].yz();
   stress_CMM(2,2) = _stress[_qp].zz();
+
+  //Deformation gradient (F):
   ColumnMajorMatrix F;
   _element->computeDeformationGradient(_qp, F);
   Real detF = _element->detMatrix(F);
@@ -609,48 +612,21 @@ SolidModel::computeEshelby()
   FinvT = Finv.transpose();
   ColumnMajorMatrix FT;
   FT = F.transpose();
-  //
+
+  //1st Piola-Kirchoff Stress (P):
   ColumnMajorMatrix piola;
-  ColumnMajorMatrix R(3,3);
-  SymmTensor dummy;
-  Elk::SolidMechanics::Element::polarDecompositionEigen(F, R, dummy);
-  SymmTensor unrotated_stress;
-  Elk::SolidMechanics::Element::unrotateSymmetricTensor(R, _stress[_qp], unrotated_stress);
-  ColumnMajorMatrix unrotated_stress_CMM;
-  unrotated_stress_CMM(0,0) = unrotated_stress.xx();
-  unrotated_stress_CMM(0,1) = unrotated_stress.xy();
-  unrotated_stress_CMM(0,2) = unrotated_stress.xz();
-  unrotated_stress_CMM(1,0) = unrotated_stress.xy();
-  unrotated_stress_CMM(1,1) = unrotated_stress.yy();
-  unrotated_stress_CMM(1,2) = unrotated_stress.yz();
-  unrotated_stress_CMM(2,0) = unrotated_stress.xz();
-  unrotated_stress_CMM(2,1) = unrotated_stress.yz();
-  unrotated_stress_CMM(2,2) = unrotated_stress.zz();
-  //
   piola = stress_CMM * FinvT;
   piola *= detF;
 
-//  _FTP[_qp] = _FT * _det_F * stress_CMM * _FinvT;
+  //FTP = F^T * P = F^T * detF * sigma * FinvT;
   ColumnMajorMatrix FTP;
   FTP = FT * piola;
-//
-  ColumnMajorMatrix strain_increment_CMM;// D
-  strain_increment_CMM.zero();
-  strain_increment_CMM(0,0) = _strain_increment.xx();
-  strain_increment_CMM(0,1) = _strain_increment.xy();
-  strain_increment_CMM(0,2) = _strain_increment.xz();
-  strain_increment_CMM(1,0) = _strain_increment.xy();
-  strain_increment_CMM(1,1) = _strain_increment.yy();
-  strain_increment_CMM(1,2) = _strain_increment.yz();
-  strain_increment_CMM(2,0) = _strain_increment.xz();
-  strain_increment_CMM(2,1) = _strain_increment.yz();
-  strain_increment_CMM(2,2) = _strain_increment.zz();
+
   ColumnMajorMatrix WI;
   WI.identity();
   WI *= _SED[_qp];
   WI *= detF;
   _Eshelby_tensor[_qp] = WI - FTP;
-  _Eshelby_tensor[_qp] *= -1.0;
 }
 
 ////////////////////////////////////////////////////////////////////////

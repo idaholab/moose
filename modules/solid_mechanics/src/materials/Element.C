@@ -184,44 +184,42 @@ Element::unrotateSymmetricTensor( const ColumnMajorMatrix & R,
 void
 Element::polarDecompositionEigen( const ColumnMajorMatrix & Fhat, ColumnMajorMatrix & Rhat, SymmTensor & strain_increment )
 {
-      const int ND = 3;
+  const int ND = 3;
 
-    ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
-    ColumnMajorMatrix invUhat(ND,ND), logVhat(ND,ND);
-    ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
+  ColumnMajorMatrix eigen_value(ND,1), eigen_vector(ND,ND);
+  ColumnMajorMatrix invUhat(ND,ND), logVhat(ND,ND);
+  ColumnMajorMatrix n1(ND,1), n2(ND,1), n3(ND,1), N1(ND,1), N2(ND,1), N3(ND,1);
 
-    ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
+  ColumnMajorMatrix Chat = Fhat.transpose() * Fhat;
 
-    Chat.eigen(eigen_value,eigen_vector);
+  Chat.eigen(eigen_value,eigen_vector);
 
-    for(int i = 0; i < ND; i++)
-    {
-      N1(i) = eigen_vector(i,0);
-      N2(i) = eigen_vector(i,1);
-      N3(i) = eigen_vector(i,2);
-    }
-
-    const Real lamda1 = std::sqrt(eigen_value(0));
-    const Real lamda2 = std::sqrt(eigen_value(1));
-    const Real lamda3 = std::sqrt(eigen_value(2));
-
-
-    const Real log1 = std::log(lamda1);
-    const Real log2 = std::log(lamda2);
-    const Real log3 = std::log(lamda3);
-
-    ColumnMajorMatrix Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
-
-    invertMatrix(Uhat,invUhat);
-
-    Rhat = Fhat * invUhat;
-
-    strain_increment = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
-
+  for(int i = 0; i < ND; i++)
+  {
+    N1(i) = eigen_vector(i,0);
+    N2(i) = eigen_vector(i,1);
+    N3(i) = eigen_vector(i,2);
   }
 
-////////////////////////////////////////////////////////////////////////
+  const Real lamda1 = std::sqrt(eigen_value(0));
+  const Real lamda2 = std::sqrt(eigen_value(1));
+  const Real lamda3 = std::sqrt(eigen_value(2));
 
+
+  const Real log1 = std::log(lamda1);
+  const Real log2 = std::log(lamda2);
+  const Real log3 = std::log(lamda3);
+
+  ColumnMajorMatrix Uhat = N1 * N1.transpose() * lamda1 +  N2 * N2.transpose() * lamda2 +  N3 * N3.transpose() * lamda3;
+
+  invertMatrix(Uhat,invUhat);
+
+  Rhat = Fhat * invUhat;
+
+  strain_increment = N1 * N1.transpose() * log1 +  N2 * N2.transpose() * log2 +  N3 * N3.transpose() * log3;
+}
+
+////////////////////////////////////////////////////////////////////////
 
 void
 Element::fillMatrix( unsigned int qp,
