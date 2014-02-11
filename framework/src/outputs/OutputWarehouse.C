@@ -18,7 +18,7 @@
 #include "Console.h"
 
 OutputWarehouse::OutputWarehouse() :
-    _has_console(false)
+    _has_screen_console(false)
 {
 }
 
@@ -26,6 +26,21 @@ OutputWarehouse::~OutputWarehouse()
 {
   for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     delete *it;
+}
+
+void
+OutputWarehouse::initialSetup()
+{
+  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+    (*it)->initialSetup();
+}
+
+
+void
+OutputWarehouse::timestepSetup()
+{
+  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+    (*it)->timestepSetup();
 }
 
 void
@@ -43,14 +58,18 @@ OutputWarehouse::addOutput(OutputBase * output)
   if (ptr != NULL)
     addOutputFilename(ptr->filename());
 
-  // Warning if multiple Console objects are added
+  // Warning if multiple Console objects are added with 'screen=true' in the input file
   Console * c_ptr = dynamic_cast<Console *>(output);
-  if (c_ptr != NULL && _has_console)
-    mooseWarning("Multiple Console objects exists, this will likely cause duplicate messages printed to the screen");
-  else if (c_ptr != NULL)
-    _has_console = true;
-}
+  if (c_ptr != NULL)
+  {
+    bool screen = c_ptr->getParam<bool>("screen");
 
+    if (screen && _has_screen_console)
+      mooseWarning("Multiple Console output objects are writting to the screen, this will likely cause duplicate messages printed.");
+    else
+      _has_screen_console = true;
+  }
+}
 
 bool
 OutputWarehouse::hasOutput(std::string name)

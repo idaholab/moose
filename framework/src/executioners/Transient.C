@@ -291,54 +291,59 @@ Transient::takeStep(Real input_dt)
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   _problem.execMultiApps(EXEC_TIMESTEP_BEGIN);
 
-  Moose::out << "\nTime Step ";
+  // Only print this if the 'Output' block exists
+  // \TODO: Remove when old output system is removed
+  if (_app.hasLegacyOutput())
   {
-    std::ostringstream out;
-
-    out << std::setw(2)
-        << _t_step
-        << ", time = "
-        << std::setw(9)
-        << std::setprecision(6)
-        << std::setfill('0')
-        << std::showpoint
-        << std::left
-        << _time;
-    Moose::out << out.str() << std::endl;
-  }
-
-  {
-    std::ostringstream tstepstr;
-    tstepstr << _t_step;
-    unsigned int tsteplen = tstepstr.str().size();
-    if (tsteplen < 2)
-      tsteplen = 2;
-
-    std::ostringstream out;
-
-    if (_verbose)
+    Moose::out << "\nTime Step ";
     {
-      out << std::setw(tsteplen)
-          << "          old time = "
+      std::ostringstream out;
+
+      out << std::setw(2)
+          << _t_step
+          << ", time = "
           << std::setw(9)
           << std::setprecision(6)
           << std::setfill('0')
           << std::showpoint
           << std::left
-          << _time_old
-          << std::endl;
+          << _time;
+      Moose::out << out.str() << std::endl;
     }
 
-    out << std::setw(tsteplen)
-        <<"                dt = "
-        << std::setw(9)
-        << std::setprecision(6)
-        << std::setfill('0')
-        << std::showpoint
-        << std::left
-        << _dt;
+    {
+      std::ostringstream tstepstr;
+      tstepstr << _t_step;
+      unsigned int tsteplen = tstepstr.str().size();
+      if (tsteplen < 2)
+        tsteplen = 2;
 
-    Moose::out << out.str() << std::endl;
+      std::ostringstream out;
+
+      if (_verbose)
+      {
+        out << std::setw(tsteplen)
+            << "          old time = "
+            << std::setw(9)
+            << std::setprecision(6)
+            << std::setfill('0')
+            << std::showpoint
+            << std::left
+            << _time_old
+            << std::endl;
+      }
+
+      out << std::setw(tsteplen)
+          <<"                dt = "
+          << std::setw(9)
+          << std::setprecision(6)
+          << std::setfill('0')
+          << std::showpoint
+          << std::left
+          << _dt;
+
+      Moose::out << out.str() << std::endl;
+    }
   }
 
   preSolve();

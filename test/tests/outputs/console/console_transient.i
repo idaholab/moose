@@ -45,23 +45,26 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-	verbose = true
+  verbose = true
 []
 
-[Output]
-  linear_residuals = false
+#[Output]
+#  linear_residuals = false
 #  output_initial = true
 #  exodus = true
 #  perf_log = true
-[]
+#[]
 
 [Outputs]
-	[./screen]
-	  type = Console
-		output_initial = false
-		nonlinear_residuals =  false
-		linear_residuals = false
-		#perf_log = true
-		#show_setup_log_early = true
-  [../]
+  [./screen]
+    type = Console
+    output_initial = false
+    nonlinear_residuals =  true
+    linear_residuals = true
+    file = true
+    verbose = true
+    perf_log = true
+    show_perf_log_early = true
+ [../]
 []
+b

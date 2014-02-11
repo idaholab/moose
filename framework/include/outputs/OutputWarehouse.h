@@ -41,6 +41,18 @@ public:
   virtual ~OutputWarehouse();
 
   /**
+   * Calls the initialSetup function for each of the output objects
+   * @see FEProblem::initialSetup()
+   */
+  void initialSetup();
+
+  /**
+   * Calls the timestepSetup function for each of the output objects
+   * @see FEProblem::timestepSetup()
+   */
+  void timestepSetup();
+
+  /**
    * Adds an existing output object to the warehouse
    * @param output Pointer to the output object
    * It is the responsibility of the OutputWarehouse to delete the output objects
@@ -108,7 +120,7 @@ private:
   InputParameters * _common_params_ptr;
 
   /// True if multiple Console output objects are added to the warehouse
-  bool _has_console;
+  bool _has_screen_console;
 
 
 };

@@ -754,12 +754,12 @@ public:
    */
   const BoundaryID & getCurrentBoundaryID(){ return _current_boundary_id; }
 
-
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
   Moose::KernelType _kernel_type;
+
 
   /** Storage for current boundary id
    * getActiveBoundaryID returns a reference to this

@@ -19,9 +19,11 @@
 
 #ifdef LIBMESH_HAVE_PETSC
 
+// Moose includes
 #include "Problem.h"
 #include "NonlinearSystem.h"
 #include "CommandLine.h"
+#include "Console.h"
 
 // libMesh
 #include "libmesh/petsc_nonlinear_solver.h"
@@ -55,17 +57,18 @@ PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, vo
 /**
  * A function for turning on the printing of linear residuals to the screen
  * @param problem_ptr A pointer to FEProblem object
+ * @param console_ptr A pointer to the Console output object
  * @see Console
  */
-void petscPrintLinearResiduals(FEProblem * problem_ptr, bool use_color = false);
-
+void petscPrintLinearResiduals(FEProblem * problem_ptr, Console * console_ptr);
 
 /**
  * A function for turning on the printing of non linear residuals to the screen
  * @param problem_ptr A pointer to FEProblem object
+ * @param console_ptr A pointer to the Console output object
  * @see Console
  */
-void petscPrintNonlinearResiduals(FEProblem * problem_ptr, bool use_color = false);
+void petscPrintNonlinearResiduals(FEProblem * problem_ptr, Console * console_ptr);
 
 }
 }

@@ -83,22 +83,13 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Output]
-  postprocessor_screen = false
-[]
-
 [Outputs]
-	console = false
-	[./screen]
-	  type = Console
-		output_initial = false
-		fit_mode = 100
-		linear_residuals = true
-		nonlinear_residuals = true
-		#output_postprocessors = false
-		#output_scalar_variables = false
+  [./screen]
+    type = Console
+    output_initial = false
+    fit_mode = 100
   [../]
-[]g
+[]
 
 [ICs]
   [./aux0_IC]

@@ -538,8 +538,8 @@ void FEProblem::initialSetup()
   _nl.initialSetupKernels();
 
   // \TODO: Remove when Output system is complete
-  //if (_output_setup_log_early)
-  //  Moose::setup_perf_log.print_log();
+  if (_output_setup_log_early)
+    Moose::setup_perf_log.print_log();
 
   _nl.initialSetup();
 
@@ -561,7 +561,7 @@ void FEProblem::initialSetup()
     _resurrector->restartRestartableData();
 
   // Initial setup of output objects
-//  _app.getOutputWarehouse().initialSetup();
+  _app.getOutputWarehouse().initialSetup();
 }
 
 void FEProblem::timestepSetup()
@@ -596,6 +596,10 @@ void FEProblem::timestepSetup()
   _out.timestepSetup();
   if (_out_problem)
     _out_problem->timestepSetup();
+
+
+  // Timestep setup of output objects
+  _app.getOutputWarehouse().timestepSetup();
 }
 
 void

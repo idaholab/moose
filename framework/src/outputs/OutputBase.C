@@ -34,6 +34,7 @@ InputParameters validParams<OutputBase>()
   // General options (do not use default, this is a common parameter (see CommonOutputAction)
   params.addParam<bool>("output_initial", "Request that the initial condition is output to the solution file");
   params.addParam<bool>("output_input", false, "Output the input file");
+  params.addParam<bool>("output_system_information", true, "Toggles the display of the system information prior to the solve");
 
   // Hide/show variable output options
   params.addParam<std::vector<VariableName> >("hide", "A list of the variables and postprocessors that should NOT be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
@@ -70,11 +71,16 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     _problem_ptr(getParam<FEProblem *>("_fe_problem")),
     _es_ptr(getParam<bool>("use_displaced") ? &_problem_ptr->getDisplacedProblem()->es() : &_problem_ptr->es()),
     _time(_problem_ptr->time()),
+    _time_old(_problem_ptr->timeOld()),
     _t_step(_problem_ptr->timeStep()),
+    _dt(_problem_ptr->dt()),
+    _dt_old(_problem_ptr->dtOld()),
+    _transient(_problem_ptr->isTransient()),
     _output_initial(isParamValid("output_initial") ? getParam<bool>("output_initial") : true),
     _output_input(getParam<bool>("output_input")),
     _elemental_as_nodal(getParam<bool>("elemental_as_nodal")),
     _scalar_as_nodal(getParam<bool>("scalar_as_nodal")),
+    _system_information(getParam<bool>("output_system_information")),
     _mesh_changed(false),
     _sequence(getParam<bool>("use_displaced")),
     _num(declareRestartableData<int>("num", 0)),
@@ -138,6 +144,16 @@ OutputBase::outputSetup()
 }
 
 void
+OutputBase::initialSetup()
+{
+}
+
+void
+OutputBase::timestepSetup()
+{
+}
+
+void
 OutputBase::outputInitial()
 {
   if (_output_initial)
@@ -147,6 +163,7 @@ OutputBase::outputInitial()
 void
 OutputBase::output()
 {
+
   // Only continue with the output if it is on the inveval
   if (!checkInterval())
     return;

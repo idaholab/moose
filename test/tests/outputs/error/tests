@@ -1,14 +1,14 @@
 [Tests]
-	[./duplicate_objects]
+  [./duplicate_objects]
     # Test error when two outputs with the same name are created (two blocks)
-		type = RunException
-		input = duplicate_outputs.i
-		expect_err = "The output object named 'exodus' already exists"
+    type = RunException
+    input = duplicate_outputs.i
+    expect_err = "The output object named 'exodus' already exists"
   [../]
   [./duplicate_output_files]
     # Test error when two outputs with the same name are created (two blocks)
-		type = RunException
-		input = duplicate_output_files.i
-		expect_err = 'An output file with the name, duplicate_output_files_out.e, already exists.'
+    type = RunException
+    input = duplicate_output_files.i
+    expect_err = 'An output file with the name, duplicate_output_files_out.e, already exists.'
   [../]
 []

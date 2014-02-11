@@ -98,6 +98,25 @@ public:
    */
   virtual void output();
 
+  /**
+   * Initial setup function that is called prior to any output
+   * This method is called by FEProblem::initialSetup via the OutputWarehouse. It is the last initialSetup so
+   * all objects are setup at the time of the execution.
+   *
+   * For example, the Console object uses this function to write the system information which is desired to be before any
+   * other output.
+   *
+   * @see FEProblem::initialSetup Console
+   */
+  virtual void initialSetup();
+
+  /**
+   * Timestep setup function that is called at the beginning of the timestep
+   * This method is called by FEProblem::timestepSetup via the OutputWarhouse.
+   *
+   * @see FEProblem::timestepSetup()
+   */
+  virtual void timestepSetup();
 
   /**
    * This method is called initially by the output() method prior to any of the variable output methods.
@@ -130,9 +149,9 @@ public:
   virtual void outputInput();
 
   /**
+   * \TODO Make this call automatic in similar fashion to outputInput
    * Performs the output of system information
    * By default this method does nothing and is not called by output()
-   * @see MooseApp Console
    */
   virtual void outputSystemInformation();
 
@@ -263,8 +282,20 @@ protected:
   /// The current time
   Real & _time;
 
+  /// The old time
+  Real & _time_old;
+
   /// The current time step
   int & _t_step;
+
+  /// Time step delta
+  Real & _dt;
+
+  /// Old time step delta
+  Real & _dt_old;
+
+  /// Transient flag (true = transient)
+  bool _transient;
 
   /// Flag for outputing the initial solution
   bool _output_initial;
@@ -277,6 +308,9 @@ protected:
 
   /// Flag for outputting scalar AuxVaraiables as nodal
   bool _scalar_as_nodal;
+
+  /// System information output flag
+  bool _system_information;
 
   /// True if the meshChanged() function has been called
   bool _mesh_changed;

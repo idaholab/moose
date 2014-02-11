@@ -54,7 +54,7 @@
 [Outputs]
   console = false
   [./exodus]
-     type = Exodus
-     output_initial = false
+    type = Exodus
+    output_initial = false
   [../]
 []

@@ -85,15 +85,16 @@
 
 [Output]
   postprocessor_screen = false
-	#perf_log = true
 []
 
 [Outputs]
-	[./screen]
-	  type = Console
-		output_initial = true
-		perf_log = false
-		show_setup_log_early = true
+  console = false
+  [./screen_file]
+    type = FileConsole
+    output_initial = false
+    fit_mode = 100
+    linear_residuals = true
+    nonlinear_residuals = true
   [../]
 []
 

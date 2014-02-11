@@ -279,7 +279,10 @@ MooseApp::executeExecutioner()
   if (_executioner)
   {
     Moose::PetscSupport::petscSetupOutput(_command_line);
-    printSimulationInfo(Moose::out);
+
+    if (hasLegacyOutput())
+      printSimulationInfo(Moose::out);
+
     _executioner->init();
     _executioner->execute();
   }

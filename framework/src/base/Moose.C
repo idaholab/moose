@@ -573,6 +573,7 @@ registerObjects(Factory & factory)
   registerOutput(Console);
   registerOutput(CSV);
 
+
   registered = true;
 }
 
