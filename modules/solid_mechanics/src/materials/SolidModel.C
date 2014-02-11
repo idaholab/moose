@@ -1306,6 +1306,15 @@ SolidModel::createElement( const std::string & name,
       }
       element = new Elk::SolidMechanics::Nonlinear3D(name, parameters);
     }
+    else if (isCoupled("disp_x") &&
+             isCoupled("disp_y"))
+    {
+      if (isCoupled("disp_r"))
+      {
+        mooseError("Error with displacement specification in material " + name);
+      }
+      element = new Elk::SolidMechanics::PlaneStrain(name, parameters);
+    }
     else if (isCoupled("disp_r") &&
              isCoupled("disp_z"))
     {
