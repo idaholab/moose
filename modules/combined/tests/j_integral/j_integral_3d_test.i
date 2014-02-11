@@ -1,12 +1,12 @@
-#This tests the calculation for the j integral
-#Currently under development
-#With a refined mesh, the value for j should be 2.434
-#Analytical value is 2.425
-#National Agency for Finite Element Methods and Standards (U.K.): Test 1.1 from NAFEMS publication œôòü2D Test Cases in Linear Elastic Fracture Mechanics, œôòü R0020.
-#Currently, the ElementIntegralPostprocessor returns
-#different values for small strain J and large strain J
-#Even when the input (Eshelby tensor) is almost identical
-#More investigation required
+#This tests the J-Integral evaluation capability.
+#This is a 3d extrusion of a 2d plane strain model with 2 elements
+#through the thickness, and calculates the J-Integrals using options
+#to treat it as 3d.
+#The analytic solution for J1 is 2.434.  This model
+#converges to that solution with a refined mesh.
+#Reference: National Agency for Finite Element Methods and Standards (U.K.):
+#Test 1.1 from NAFEMS publication "Test Cases in Linear Elastic Fracture
+#Mechanics" R0020.
 
 
 
@@ -20,10 +20,10 @@
 []
 
 [Mesh]
-  file = crack.e
+  file = crack3d.e
   displacements = 'disp_x disp_y disp_z'
-  partitioner = centroid
-  centroid_partitioner_direction = z
+#  partitioner = centroid
+#  centroid_partitioner_direction = z
 []
 
 
@@ -73,10 +73,8 @@
 [JIntegral]
   boundary = 800
   crack_direction = '1 0 0'
-  2d = true
-  2d_axis = 2
-  radius_inner = '4.0 4.5 5.0 5.5 6.0'
-  radius_outer = '4.5 5.0 5.5 6.0 6.5'
+  radius_inner = '4.0 5.5'
+  radius_outer = '5.5 7.0'
 []
 
 [SolidMechanics]
@@ -169,6 +167,12 @@
     boundary = 500
     value = 0.0
   [../]
+  [./no_z2]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 510
+    value = 0.0
+  [../]
 
   [./no_x]
     type = DirichletBC
@@ -255,7 +259,7 @@
 
 [Output]
   linear_residuals = true
-  file_base = j_integral_test_action_out
+  file_base = j_integral_3d_test_out
   interval = 1
   output_initial = true
   exodus = true

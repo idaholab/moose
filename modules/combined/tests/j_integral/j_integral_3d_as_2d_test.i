@@ -1,12 +1,12 @@
-#This tests the calculation for the j integral
-#Currently under development
-#With a refined mesh, the value for j should be 2.434
-#Analytical value is 2.425
-#National Agency for Finite Element Methods and Standards (U.K.): Test 1.1 from NAFEMS publication œôòü2D Test Cases in Linear Elastic Fracture Mechanics, œôòü R0020.
-#Currently, the ElementIntegralPostprocessor returns
-#different values for small strain J and large strain J
-#Even when the input (Eshelby tensor) is almost identical
-#More investigation required
+#This tests the J-Integral evaluation capability.
+#This is a 3d extrusion of a 2d plane strain model with one element
+#through the thickness, and calculates the J-Integrals using options
+#to treat it as 2d.
+#The analytic solution for J1 is 2.434.  This model
+#converges to that solution with a refined mesh.
+#Reference: National Agency for Finite Element Methods and Standards (U.K.):
+#Test 1.1 from NAFEMS publication "Test Cases in Linear Elastic Fracture
+#Mechanics" R0020.
 
 
 
@@ -20,7 +20,7 @@
 []
 
 [Mesh]
-  file = crack.e
+  file = crack_3d_as_2d.e
   displacements = 'disp_x disp_y disp_z'
   partitioner = centroid
   centroid_partitioner_direction = z
@@ -38,16 +38,6 @@
 
 
 [AuxVariables]
-  [./q_1]
-  [../]
-  [./q_2]
-  [../]
-  [./q_3]
-  [../]
-  [./q_4]
-  [../]
-  [./q_5]
-  [../]
   [./stress_xx]      # stress aux variables are defined for output; this is a way to get integration point variables to the output file
     order = CONSTANT
     family = MONOMIAL
@@ -80,16 +70,13 @@
   [../]
 []
 
-[UserObjects]
-  [./crackFrontDefinition]
-    type = CrackFrontDefinition
-    boundary = 800
-    execute_on = residual
-    crack_direction = '1 0 0'
-    2d = true
-    2d_axis = 2
-    use_displaced_mesh = false
-  [../]
+[JIntegral]
+  boundary = 800
+  crack_direction = '1 0 0'
+  2d = true
+  2d_axis = 2
+  radius_inner = '4.0 4.5 5.0 5.5 6.0'
+  radius_outer = '4.5 5.0 5.5 6.0 6.5'
 []
 
 [SolidMechanics]
@@ -98,41 +85,6 @@
 []
 
 [AuxKernels]
-  [./q_1]
-    type = qFunctionJIntegral
-    variable = q_1
-    j_integral_radius_inner = 4
-    j_integral_radius_outer = 4.5
-    crack_front_definition = crackFrontDefinition
-  [../]
-  [./q_2]
-    type = qFunctionJIntegral
-    variable = q_2
-    j_integral_radius_inner = 4.5
-    j_integral_radius_outer = 5
-    crack_front_definition = crackFrontDefinition
-  [../]
-  [./q_3]
-    type = qFunctionJIntegral
-    variable = q_3
-    j_integral_radius_inner = 5
-    j_integral_radius_outer = 5.5
-    crack_front_definition = crackFrontDefinition
-  [../]
-  [./q_4]
-    type = qFunctionJIntegral
-    variable = q_4
-    j_integral_radius_inner = 5.5
-    j_integral_radius_outer = 6
-    crack_front_definition = crackFrontDefinition
-  [../]
-  [./q_5]
-    type = qFunctionJIntegral
-    variable = q_5
-    j_integral_radius_inner = 6
-    j_integral_radius_outer = 6.5
-    crack_front_definition = crackFrontDefinition
-  [../]
   [./stress_xx]               # computes stress components for output
     type = MaterialTensorAux
     tensor = stress
@@ -298,37 +250,12 @@
   [./lin_its]
     type = NumLinearIterations
   [../]
-  [./J_1]
-    type = JIntegral
-    q = q_1
-    crack_front_definition = crackFrontDefinition
-  [../]
-  [./J_2]
-    type = JIntegral
-    q = q_2
-    crack_front_definition = crackFrontDefinition
-  [../]
- [./J_3]
-    type = JIntegral
-    q = q_3
-    crack_front_definition = crackFrontDefinition
-  [../]
-  [./J_4]
-    type = JIntegral
-    q = q_4
-    crack_front_definition = crackFrontDefinition
-  [../]
-  [./J_5]
-    type = JIntegral
-    q = q_5
-    crack_front_definition = crackFrontDefinition
-  [../]
 []
 
 
 [Output]
   linear_residuals = true
-  file_base = j_integral_test_out
+  file_base = j_integral_3d_as_2d_test_out
   interval = 1
   output_initial = true
   exodus = true

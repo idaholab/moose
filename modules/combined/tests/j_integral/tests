@@ -1,13 +1,12 @@
 [Tests]
- [./j_test]
+ [./j_3d_as_2d_test]
    type = 'Exodiff'
-   input = 'j_integral_test.i'
-   exodiff = 'j_integral_test_out.e'
-#   skip = 'In development'
+   input = 'j_integral_3d_as_2d_test.i'
+   exodiff = 'j_integral_3d_as_2d_test_out.e'
  [../]
- [./j_action_test]
+ [./j_3d_test]
    type = 'Exodiff'
-   input = 'j_integral_test_action.i'
-   exodiff = 'j_integral_test_out.e'
+   input = 'j_integral_3d_test.i'
+   exodiff = 'j_integral_3d_test_out.e'
  [../]
 []

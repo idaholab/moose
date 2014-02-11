@@ -61,6 +61,13 @@ JIntegral::computeQpIntegral()
   grad_of_vector_q(2,2) = crack_direction(2)*_grad_of_scalar_q[_qp](2);
 
   Real eq = _Eshelby_tensor[_qp].doubleContraction(grad_of_vector_q);
+
+  Real q_avg_seg = 1.0;
+  if (!_crack_front_definition->treatAs2D())
+  {
+    q_avg_seg = (_crack_front_definition->getCrackFrontForwardSegmentLength(_crack_front_node_index) +
+                 _crack_front_definition->getCrackFrontBackwardSegmentLength(_crack_front_node_index)) / 2.0;
+  }
   
-  return eq;
+  return eq/q_avg_seg;
 }

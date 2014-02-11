@@ -79,7 +79,10 @@ qFunctionJIntegral::computeValue()
     {
       if (dist_along_tangent >= forward_segment_length)
       {
-        q = 0.0;
+        if (forward_segment_length > 0.0)
+        {
+          q = 0.0;
+        }
       }
       else
       {
@@ -90,7 +93,10 @@ qFunctionJIntegral::computeValue()
     {
       if (-dist_along_tangent >= backward_segment_length)
       {
-        q = 0.0;
+        if (backward_segment_length > 0.0)
+        {
+          q = 0.0;
+        }
       }
       else
       {

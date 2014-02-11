@@ -32,20 +32,13 @@ CrackFrontDefinition::~CrackFrontDefinition()
 void
 CrackFrontDefinition::execute()
 {
-  //Nothing to do if using undeformed mesh (which I believe is the right thing to do).
-  //updateCrackFrontGeometry();
+  //Because J-Integral is based on original geometry, the crack front geometry
+  //is never updated, so everything that needs to happen is done in initialSetup()
 }
 
 void
 CrackFrontDefinition::initialSetup()
 {
-  //TODO:  This is an attempt to get the coordinates updated for the off-processor nodes.  It still doesn't work.
-  //     No need to update coordinates if we're using the undeformed mesh
-  //for(std::set<BoundaryID>::iterator biditer=boundaryIDs().begin(); biditer != boundaryIDs().end(); ++biditer)
-  //{
-  //  _subproblem.addGhostedBoundary(*biditer);
-  //}
-
   std::set<unsigned int> nodes;
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
@@ -321,19 +314,19 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       }
 
       _segment_lengths.push_back(std::make_pair(back_segment_len,forward_segment_len));
-      //    std::cout<<"seg len: "<<back_segment_len<<" "<<forward_segment_len<<std::endl;
+      //std::cout<<"seg len: "<<back_segment_len<<" "<<forward_segment_len<<std::endl;
 
       RealVectorValue tangent_direction = back_segment + forward_segment;
       tangent_direction = tangent_direction / tangent_direction.size();
       _tangent_directions.push_back(tangent_direction);
-      //    std::cout<<"tan dir: "<<tangent_direction(0)<<" "<<tangent_direction(1)<<" "<<tangent_direction(2)<<std::endl;
+      //std::cout<<"tan dir: "<<tangent_direction(0)<<" "<<tangent_direction(1)<<" "<<tangent_direction(2)<<std::endl;
 
       _overall_length += forward_segment_len;
 
       back_segment = forward_segment;
       back_segment_len = forward_segment_len;
     }
-    //  std::cout<<"overall len: "<<_overall_length<<std::endl;
+    //std::cout<<"overall len: "<<_overall_length<<std::endl;
   }
 }
 

@@ -56,7 +56,7 @@ JIntegralAction::act()
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
-    params.set<MooseEnum>("execute_on") = "timestep";
+    params.set<MooseEnum>("execute_on") = "initial";
     params.set<RealVectorValue>("crack_direction") = _crack_direction;
     params.set<bool>("2d") = _treat_as_2d;
     params.set<unsigned int>("2d_axis") = _axis_2d;
@@ -94,7 +94,7 @@ JIntegralAction::act()
   {
     const std::string ak_type_name("qFunctionJIntegral");
     InputParameters params = _factory.getValidParams(ak_type_name);
-    params.set<MooseEnum>("execute_on") = "timestep";
+    params.set<MooseEnum>("execute_on") = "initial";
     params.set<UserObjectName>("crack_front_definition") = uo_name;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 

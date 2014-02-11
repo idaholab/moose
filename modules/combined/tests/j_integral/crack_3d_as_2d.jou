@@ -15,4 +15,4 @@ Sideset 500 surface 8 15 10 14
 Sideset 600 surface 16 9  
 Sideset 700 surface 4  
 nodeset 800 curve 14
-export mesh "crack.e" dimension 3 block 1 overwrite
+export mesh "crack_3d_as_2d.e" dimension 3 block 1 overwrite
