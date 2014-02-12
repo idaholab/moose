@@ -75,7 +75,7 @@ class TestHarness:
     else:
       self.options.processingPBS = False
       for dirpath, dirnames, filenames in os.walk(os.getcwd(), followlinks=True):
-        if (self.test_match.search(dirpath)):
+        if (self.test_match.search(dirpath) and "contrib" not in dirpath):
           for file in filenames:
             # set cluster_handle to be None initially (happens for each test)
             self.options.cluster_handle = None
