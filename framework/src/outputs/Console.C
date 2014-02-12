@@ -281,6 +281,7 @@ std::string Console::outputNorm(Real old_norm, Real norm)
 {
   std::string color(COLOR_DEFAULT);
 
+  // Use color
   if (_use_color)
   {
     // Red if the residual went up...
@@ -292,10 +293,15 @@ std::string Console::outputNorm(Real old_norm, Real norm)
     // Green if change is more than 5%
     else
       color = GREEN;
+    // Return the colored text
+    return MooseUtils::colorText<Real>(color, norm);
   }
 
-  return  MooseUtils::colorText<Real>(color, norm);
+  // Return the text without color codes
+  else
+    return Moose::stringify<Real>(norm);
 }
+
 
 // Free function for stringstream formating
 void Console::insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)

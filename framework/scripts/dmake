@@ -199,7 +199,7 @@ if __name__ == "__main__":
     distcc_hosts = 'localhost/' + str(jobs)
 
   # Build a new DISTCC_HOSTS line
-  elif dmakerc.needUpdate() or options.refresh:
+  elif dmakerc.needUpdate() or options.refresh or options.max:
 
     # Get hosts and jobs from warehouse
     opt = subOptions(options,'max','localhost','localslots','localslots_cpp')

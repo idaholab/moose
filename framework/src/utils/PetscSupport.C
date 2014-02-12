@@ -226,9 +226,14 @@ void outputNorm(Real old_norm, Real norm, bool use_color)
     // Green if change is more than 5%
     else
       color = GREEN;
+
+    // Show the norm in color
+    Moose::out << MooseUtils::colorText<Real>(color, norm) << std::endl;
   }
 
-  libMesh::out << MooseUtils::colorText<Real>(color, norm) << std::endl;
+  // Display the norm without color
+  else
+    Moose::out << norm << std::endl;
 }
 
 // \TODO Remove after new build system is in place
