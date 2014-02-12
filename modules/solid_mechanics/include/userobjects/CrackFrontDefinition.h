@@ -57,6 +57,7 @@ protected:
   std::vector<BoundaryName> _crack_mouth_boundary_names;
   std::vector<BoundaryID> _crack_mouth_boundary_ids;
   RealVectorValue _crack_mouth_coordinates;
+  RealVectorValue _crack_plane_normal_from_curved_front;
   bool _treat_as_2d;
   unsigned int _axis_2d;
 
@@ -64,7 +65,7 @@ protected:
   void orderCrackFrontNodes(std::set<unsigned int> nodes);
   void orderEndNodes(std::vector<unsigned int> &end_nodes);
   void updateCrackFrontGeometry();
-  void updateCrackMouthCoordinates();
+  void updateCrackDirectionCoords();
   RealVectorValue calculateCrackFrontDirection(const Node* crack_front_node,
                                                const RealVectorValue& tangent_direction) const;
 

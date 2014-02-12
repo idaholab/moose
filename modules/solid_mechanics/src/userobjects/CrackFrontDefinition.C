@@ -333,7 +333,7 @@ CrackFrontDefinition::orderEndNodes(std::vector<unsigned int> &end_nodes)
 void
 CrackFrontDefinition::updateCrackFrontGeometry()
 {
-  updateCrackMouthCoordinates();
+  updateCrackDirectionCoords();
 
   _segment_lengths.clear();
   _tangent_directions.clear();
@@ -394,34 +394,66 @@ CrackFrontDefinition::updateCrackFrontGeometry()
 }
 
 void
-CrackFrontDefinition::updateCrackMouthCoordinates()
+CrackFrontDefinition::updateCrackDirectionCoords()
 {
-  _crack_mouth_coordinates.zero();
-
-  std::set<Node*> crack_mouth_nodes;
-  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-  for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
+  if (_direction_method == CDM_CRACK_MOUTH)
   {
-    const BndNode * bnode = *nd;
-    BoundaryID boundary_id = bnode->_bnd_id;
+    _crack_mouth_coordinates.zero();
 
-    for (unsigned int ibid=0; ibid<_crack_mouth_boundary_ids.size(); ++ibid)
+    std::set<Node*> crack_mouth_nodes;
+    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
     {
-      if (boundary_id == _crack_mouth_boundary_ids[ibid])
+      const BndNode * bnode = *nd;
+      BoundaryID boundary_id = bnode->_bnd_id;
+
+      for (unsigned int ibid=0; ibid<_crack_mouth_boundary_ids.size(); ++ibid)
       {
-        crack_mouth_nodes.insert(bnode->_node);
-        break;
+        if (boundary_id == _crack_mouth_boundary_ids[ibid])
+        {
+          crack_mouth_nodes.insert(bnode->_node);
+          break;
+        }
       }
     }
-  }
 
-  for (std::set<Node*>::iterator nit=crack_mouth_nodes.begin();
-       nit != crack_mouth_nodes.end();
-       ++nit)
-  {
-    _crack_mouth_coordinates += **nit;
+    for (std::set<Node*>::iterator nit=crack_mouth_nodes.begin();
+         nit != crack_mouth_nodes.end();
+         ++nit)
+    {
+      _crack_mouth_coordinates += **nit;
+    }
+    _crack_mouth_coordinates /= (Real)crack_mouth_nodes.size();
   }
-  _crack_mouth_coordinates /= (Real)crack_mouth_nodes.size();
+  else if (_direction_method == CDM_CURVED_CRACK_FRONT)
+  {
+    _crack_plane_normal_from_curved_front.zero();
+
+    //Get 3 nodes on crack front
+    unsigned int num_nodes(_ordered_crack_front_nodes.size());
+    if (num_nodes<3)
+    {
+      mooseError("Crack front must contain at least 3 nodes to use CurvedCrackFront option");
+    }
+    unsigned int mid_id = (num_nodes-1)/2;
+    Node & start = _mesh.node(_ordered_crack_front_nodes[0]);
+    Node & mid   = _mesh.node(_ordered_crack_front_nodes[mid_id]);
+    Node & end   = _mesh.node(_ordered_crack_front_nodes[num_nodes-1]);
+
+    //Create two vectors connecting them
+    RealVectorValue v1 = mid-start;
+    RealVectorValue v2 = end-mid;
+
+    //Take cross product to get normal
+    _crack_plane_normal_from_curved_front = v1.cross(v2);
+
+    //Make sure they're not collinear
+    RealVectorValue zero_vec(0.0);
+    if (_crack_plane_normal_from_curved_front.absolute_fuzzy_equals(zero_vec,1.e-15))
+    {
+      mooseError("Nodes on crack front are too close to being collinear");
+    }
+  }
 }
 
 RealVectorValue
@@ -448,7 +480,7 @@ CrackFrontDefinition::calculateCrackFrontDirection(const Node* crack_front_node,
       mooseError("Vector from crack mouth to crack front node is collinear with crack front segment");
     }
 
-    crack_dir = crack_plane_normal.cross(tangent_direction);
+    crack_dir = tangent_direction.cross(crack_plane_normal);
     crack_dir = crack_dir.unit();
     Real dotprod = crack_dir*mouth_to_front;
     if (dotprod < 0)
@@ -458,7 +490,9 @@ CrackFrontDefinition::calculateCrackFrontDirection(const Node* crack_front_node,
   }
   else if (_direction_method == CDM_CURVED_CRACK_FRONT)
   {
-    mooseError("Not implemented yet");
+    crack_dir = tangent_direction.cross(_crack_plane_normal_from_curved_front);
+    crack_dir = crack_dir.unit();
+    std::cout<<"BWS crack_dir: "<<crack_dir<<std::endl;
   }
   return crack_dir;
 }
