@@ -37,6 +37,10 @@ JIntegralAction::JIntegralAction(const std::string & name, InputParameters param
     _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
     _have_crack_direction_vector = true;
   }
+  if (isParamValid("crack_mouth_boundary"))
+  {
+    _crack_mouth_boundary_names = getParam<std::vector<BoundaryName> >("crack_mouth_boundary");
+  }
   if (_radius_inner.size() != _radius_outer.size())
   {
     mooseError("Number of entries in 'radius_inner' and 'radius_outer' must match.");
@@ -66,6 +70,10 @@ JIntegralAction::act()
     if (_have_crack_direction_vector)
     {
       params.set<RealVectorValue>("crack_direction_vector") = _crack_direction_vector;
+    }
+    if (_crack_mouth_boundary_names.size() != 0)
+    {
+      params.set<std::vector<BoundaryName> >("crack_mouth_boundary") = _crack_mouth_boundary_names;
     }
     params.set<bool>("2d") = _treat_as_2d;
     params.set<unsigned int>("2d_axis") = _axis_2d;

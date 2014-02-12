@@ -11,4 +11,5 @@ sideset 100 curve 17
 sideset 400 curve 26 18
 sideset 700 curve 3
 nodeset 800 curve 14
+nodeset 900 curve 9
 export mesh "crack2d.e" dimension 2 block 1 overwrite

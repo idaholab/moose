@@ -256,7 +256,7 @@
 
 [Output]
   linear_residuals = true
-  file_base = j_integral_3d_as_2d_test_out
+  file_base = j_integral_3d_as_2d_out
   interval = 1
   output_initial = true
   exodus = true

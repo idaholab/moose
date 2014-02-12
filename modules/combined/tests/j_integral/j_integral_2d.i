@@ -1,7 +1,5 @@
 #This tests the J-Integral evaluation capability.
-#This is a 3d extrusion of a 2d plane strain model with 2 elements
-#through the thickness, and calculates the J-Integrals using options
-#to treat it as 3d.
+#This is a 2d plane strain model
 #The analytic solution for J1 is 2.434.  This model
 #converges to that solution with a refined mesh.
 #Reference: National Agency for Finite Element Methods and Standards (U.K.):
@@ -16,14 +14,11 @@
   family = LAGRANGE
   disp_x = disp_x
   disp_y = disp_y
-  disp_z = disp_z
 []
 
 [Mesh]
-  file = crack3d.e
-  displacements = 'disp_x disp_y disp_z'
-#  partitioner = centroid
-#  centroid_partitioner_direction = z
+  file = crack2d.e
+  displacements = 'disp_x disp_y'
 []
 
 
@@ -31,8 +26,6 @@
   [./disp_x]
   [../]
   [./disp_y]
-  [../]
-  [./disp_z]
   [../]
 []
 
@@ -74,8 +67,10 @@
   boundary = 800
   crack_direction_method = CrackDirectionVector
   crack_direction_vector = '1 0 0'
-  radius_inner = '4.0 5.5'
-  radius_outer = '5.5 7.0'
+  2d = true
+  2d_axis = 2
+  radius_inner = '4.0 4.5 5.0 5.5 6.0'
+  radius_outer = '4.5 5.0 5.5 6.0 6.5'
 []
 
 [SolidMechanics]
@@ -122,56 +117,10 @@
 
 [BCs]
 
-#  [./pin_x]
-#    type = DirichletBC
-#    variable = disp_x
-#    boundary = 200
-#    value = 0.0
-#  [../]
-# 
-#  [./pin_y]
-#    type = DirichletBC
-#    variable = disp_y
-#    boundary = 200
-#    value = 0.0
-#  [../]
-
   [./crack_y]
     type = DirichletBC
     variable = disp_y
     boundary = 100
-    value = 0.0
-  [../]
-
- # [./nocrack_y]
- #   type = DirichletBC
- #   variable = disp_y
- #   boundary = 600
- #   value = 0.0
- # [../]
-
-# [./no_x]
-#   type = DirichletBC
-#   variable = disp_x
-#   boundary = 500
-#   value = 0.0
-# [../]
-# [./no_y]
-#   type = DirichletBC
-#   variable = disp_y
-#   boundary = 500
-#   value = 0.0
-# [../]
-  [./no_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 500
-    value = 0.0
-  [../]
-  [./no_z2]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 510
     value = 0.0
   [../]
 
@@ -198,11 +147,11 @@
 
     disp_x = disp_x
     disp_y = disp_y
-    disp_z = disp_z
 
     youngs_modulus = 207000
     poissons_ratio = 0.3
     thermal_expansion = 1e-5
+    formulation = PlaneStrain
     compute_JIntegral = true
   [../]
 
@@ -260,7 +209,7 @@
 
 [Output]
   linear_residuals = true
-  file_base = j_integral_3d_test_out
+  file_base = j_integral_2d_out
   interval = 1
   output_initial = true
   exodus = true

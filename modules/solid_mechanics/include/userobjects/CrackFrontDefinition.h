@@ -11,7 +11,7 @@ class AuxiliarySystem;
 enum CDM_ENUM
 {
   CDM_CRACK_DIRECTION_VECTOR=1,
-  CDM_CRACK_MOUTH_NODES,
+  CDM_CRACK_MOUTH,
   CDM_CURVED_CRACK_FRONT
 };
 
@@ -36,12 +36,6 @@ public:
   virtual void execute();
   virtual void threadJoin(const UserObject & uo);
 
-  void orderCrackFrontNodes(std::set<unsigned int> nodes);
-  void orderEndNodes(std::vector<unsigned int> &end_nodes);
-  void updateCrackFrontGeometry();
-  RealVectorValue calculateCrackFrontDirection(const Node* crack_front_node,
-                                               const RealVectorValue& tangent_direction) const;
-
   const Node & getCrackFrontNode(const unsigned int node_index) const;
   const RealVectorValue & getCrackFrontTangent(const unsigned int node_index) const;
   Real getCrackFrontForwardSegmentLength(const unsigned int node_index) const;
@@ -60,9 +54,20 @@ protected:
   Real _overall_length;
   CDM_ENUM _direction_method;
   RealVectorValue _crack_direction_vector;
-  BoundaryName _crack_mouth_nodeset_name;
+  std::vector<BoundaryName> _crack_mouth_boundary_names;
+  std::vector<BoundaryID> _crack_mouth_boundary_ids;
+  RealVectorValue _crack_mouth_coordinates;
   bool _treat_as_2d;
   unsigned int _axis_2d;
+
+  void getCrackFrontNodes(std::set<unsigned int>& nodes);
+  void orderCrackFrontNodes(std::set<unsigned int> nodes);
+  void orderEndNodes(std::vector<unsigned int> &end_nodes);
+  void updateCrackFrontGeometry();
+  void updateCrackMouthCoordinates();
+  RealVectorValue calculateCrackFrontDirection(const Node* crack_front_node,
+                                               const RealVectorValue& tangent_direction) const;
+
 };
 
 

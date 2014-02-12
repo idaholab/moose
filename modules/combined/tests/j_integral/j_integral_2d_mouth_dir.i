@@ -1,5 +1,6 @@
 #This tests the J-Integral evaluation capability.
 #This is a 2d plane strain model
+#Crack direction is defined using the crack mouth coordinates.
 #The analytic solution for J1 is 2.434.  This model
 #converges to that solution with a refined mesh.
 #Reference: National Agency for Finite Element Methods and Standards (U.K.):
@@ -65,8 +66,8 @@
 
 [JIntegral]
   boundary = 800
-  crack_direction_method = CrackDirectionVector
-  crack_direction_vector = '1 0 0'
+  crack_direction_method = CrackMouth
+  crack_mouth_boundary = 900
   2d = true
   2d_axis = 2
   radius_inner = '4.0 4.5 5.0 5.5 6.0'
@@ -209,7 +210,7 @@
 
 [Output]
   linear_residuals = true
-  file_base = j_integral_2d_test_out
+  file_base = j_integral_2d_mouth_dir_out
   interval = 1
   output_initial = true
   exodus = true
