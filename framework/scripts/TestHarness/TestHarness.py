@@ -294,7 +294,7 @@ class TestHarness:
           if not 'ALL' in test[check]:
             caveats.append(', '.join(test[check]))
       if len(caveats):
-        result = '[' + ', '.join(caveats) + '] OK'
+        result = '[' + ', '.join(caveats).upper() + '] OK'
       elif self.options.pbs and self.options.processingPBS == False:
         result = 'LAUNCHED'
       else:
