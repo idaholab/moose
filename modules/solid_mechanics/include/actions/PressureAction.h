@@ -19,7 +19,6 @@ private:
   std::vector<bool> _has_save_in_vars;
 
   const Real _factor;
-  const std::string _function;
   const std::string _postprocessor;
 
 protected:

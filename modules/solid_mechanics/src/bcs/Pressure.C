@@ -8,7 +8,8 @@ InputParameters validParams<Pressure>()
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<int>("component", "The component for the Pressure");
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
-  params.addParam<FunctionName>("function", "", "The function that describes the pressure");
+  params.addParam<FunctionName>("function", "The function that describes the pressure");
+  params.addParam<PostprocessorName>("postprocessor", "Postprocessor that will supply the pressure value");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -17,7 +18,7 @@ Pressure::Pressure(const std::string & name, InputParameters parameters)
   :IntegratedBC(name, parameters),
    _component(getParam<int>("component")),
    _factor(getParam<Real>("factor")),
-   _function( getParam<FunctionName>("function") != "" ? &getFunction("function") : NULL ),
+   _function( isParamValid("function") ? &getFunction("function") : NULL ),
    _postprocessor( isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : NULL )
 {
 
