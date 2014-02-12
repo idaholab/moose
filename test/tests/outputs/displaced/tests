@@ -6,5 +6,6 @@
     input = 'displaced_adapt_test.i'
     exodiff = 'displaced_adapt_test_out.e-s003'
     recover = false
+    max_parallel = 1
   [../]
 []
