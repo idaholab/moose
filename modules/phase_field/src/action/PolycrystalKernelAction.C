@@ -10,9 +10,8 @@ InputParameters validParams<PolycrystalKernelAction>()
   
   params.addRequiredParam<unsigned int>("crys_num", "specifies the number of grains to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
-  params.addParam<bool>("with_bub",false,"specifies if the grain growth simulation is run with a bubble model or by itself");
-  params.addParam<std::string>("c_name","c","Name of coupled concentration variable");
-  params.addParam<Real>("en_ratio","Ratio of surface to GB energy");
+  params.addParam<VariableName>("c","NONE","Name of coupled concentration variable");
+  params.addParam<Real>("en_ratio",1.0,"Ratio of surface to GB energy");
   params.addParam<bool>("implicit",true,"Whether kernels are implicit or not");
   params.addParam<VariableName>("T","Name of temperature variable");
   
@@ -23,9 +22,7 @@ PolycrystalKernelAction::PolycrystalKernelAction(const std::string & name, Input
   :Action(name, params),
    _crys_num(getParam<unsigned int>("crys_num")),
    _var_name_base(getParam<std::string>("var_name_base")),
-   _with_bub(getParam<bool>("with_bub")),
-   _c_name(getParam<std::string>("c_name")),
-   _en_ratio(getParam<Real>("en_ratio")),
+   _c(getParam<VariableName>("c")),
    _implicit(getParam<bool>("implicit")),
    _T(getParam<VariableName>("T"))
 {}
@@ -100,15 +97,12 @@ PolycrystalKernelAction::act()
     
     _problem->addKernel("TimeDerivative", kernel_name, poly_params);
     /************/
-    if (_with_bub)//Add in Bubble interaction kernel, if using bubbles
+    if (_c != "NONE")//Add in Bubble interaction kernel, if using bubbles
     {
       poly_params = _factory.getValidParams("ACGBPoly");
       poly_params.set<NonlinearVariableName>("variable") = var_name;
-      std::vector<VariableName> c_bin(1);
-      c_bin[0] = _c_name;
-      
-      poly_params.set<std::vector<VariableName> >("c") =c_bin;
-      poly_params.set<Real>("en_ratio") = _en_ratio;
+      poly_params.set<std::vector<VariableName> >("c").push_back(_c);
+      poly_params.set<Real>("en_ratio") = getParam<Real>("en_ratio");
       poly_params.set<bool>("implicit")=getParam<bool>("implicit");
 
       kernel_name = "ACBubInteraction_";

@@ -13,9 +13,7 @@ public:
 private:
   unsigned int _crys_num;
   std::string _var_name_base;
-  bool _with_bub;
-  std::string _c_name;
-  Real _en_ratio;
+  VariableName _c;
   bool _implicit;
   VariableName _T;
 

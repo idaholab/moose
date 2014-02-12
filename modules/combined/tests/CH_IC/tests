@@ -2,10 +2,10 @@
   [./boxIC_test]
     type = 'Exodiff'
     input = 'CH_BndingBoxIC_test.i'
-    exodiff = 'box.e-s002'
+    exodiff = 'box.e'
     group = 'adaptive'
     scale_refine = 1
-    skip = 'skipped'
+    valgrind = 'HEAVY'
   [../]
 
   [./crossIC_test]

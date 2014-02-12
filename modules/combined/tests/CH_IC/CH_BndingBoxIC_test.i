@@ -1,23 +1,17 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 5
+  nx = 4
+  ny = 2
   nz = 0
-  xmin = 0
   xmax = 50
-  ymin = 0
   ymax = 25
-  zmin = 0
   zmax = 0
   elem_type = QUAD4
-
-  uniform_refine = 1
+  uniform_refine = 2
 []
 
 [Variables]
-  active = 'c'
-
   [./c]
     order = THIRD
     family = HERMITE
@@ -28,25 +22,22 @@
       y1 = 0.0
       y2 = 25.0
       inside = 1.0
-      outside = -1.0
+      outside = -0.8
+      variable = c
     [../]
   [../]
-[]	     
+[]
 
 [Kernels]
-  active = 'ie_c CHSolid CHInterface'
-
   [./ie_c]
     type = TimeDerivative
     variable = c
   [../]
-
   [./CHSolid]
     type = CHMath
     variable = c
     mob_name = M
   [../]
-
   [./CHInterface]
     type = CHInterface
     variable = c
@@ -57,24 +48,14 @@
 []
 
 [BCs]
-active = 'Periodic'
   [./Periodic]
-    [./left_right]
-      primary = 0
-      secondary = 2
-      translation = '0 25 0'
-    [../]
-
-    [./top_bottom]
-      primary = 1
-      secondary = 3
-      translation = '-50 0 0'
+    [./all]
+      auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-
   [./constant]
     type = PFMobility
     block = 0
@@ -84,32 +65,17 @@ active = 'Periodic'
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
-  scheme = 'crank-nicolson'
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-
-
-
+  scheme = bdf2
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 101'
-
   l_max_its = 15
   nl_max_its = 10
-
   start_time = 0.0
   num_steps = 2
   dt = 1.0
- 
-  [./Adaptivity]
-    initial_adaptivity = 1	
-    error_estimator = LaplacianErrorEstimator
-    refine_fraction = 0.2
-   coarsen_fraction = 0.25
-    max_h_level = 2
-  [../]
 []
 
 [Output]
@@ -120,5 +86,4 @@ active = 'Periodic'
   exodus = true
   perf_log = true
 []
-   
-    
+
