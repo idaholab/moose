@@ -23,7 +23,9 @@ private:
   const std::vector<BoundaryName> & _boundary_names;
   const std::string _order;
   const std::string _family;
-  RealVectorValue _crack_direction;
+  MooseEnum _direction_method_moose_enum;
+  bool _have_crack_direction_vector;
+  RealVectorValue _crack_direction_vector;
   bool _treat_as_2d;
   unsigned int _axis_2d;
   std::vector<Real> _radius_inner;

@@ -7,11 +7,19 @@ InputParameters validParams<CrackFrontDefinition>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params += validParams<BoundaryRestrictable>();
-  params.addRequiredParam<RealVectorValue>("crack_direction","Direction of crack propagation");
-  params.addParam<bool>("2d", false, "Treat body as two-dimensional");
-  params.addParam<unsigned int>("2d_axis", 2, "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
+  addCrackFrontDefinitionParams(params);
   params.set<bool>("use_displaced_mesh") = false;
   return params;
+}
+
+void addCrackFrontDefinitionParams(InputParameters& params)
+{
+  MooseEnum direction_method("CrackDirectionVector=1, CrackMouthNodes, CurvedCrackFront");
+  params.addRequiredParam<MooseEnum>("crack_direction_method", direction_method, "Method to determine direction of crack propagation.  Choices are: " + direction_method.getRawNames());
+  params.addParam<RealVectorValue>("crack_direction_vector","Direction of crack propagation");
+  params.addParam<BoundaryName>("crack_mouth_nodes","Nodeset whose average coordinate defines the crack mouth");
+  params.addParam<bool>("2d", false, "Treat body as two-dimensional");
+  params.addParam<unsigned int>("2d_axis", 2, "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
 }
 
 CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParameters parameters) :
@@ -19,10 +27,49 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
     BoundaryRestrictable(name, parameters),
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_subproblem.mesh()),
-    _crack_direction(getParam<RealVectorValue>("crack_direction")),
     _treat_as_2d(getParam<bool>("2d")),
     _axis_2d(getParam<unsigned int>("2d_axis"))
 {
+  MooseEnum direction_method_moose_enum = getParam<MooseEnum>("crack_direction_method");
+  if (direction_method_moose_enum.isValid())
+  {
+    _direction_method = CDM_ENUM(int(direction_method_moose_enum));
+    if (_direction_method == CDM_CRACK_DIRECTION_VECTOR)
+    {
+      if (!isParamValid("crack_direction_vector"))
+      {
+        mooseError("crack_direction_vector must be specified if crack_direction_method = CrackDirectionVector");
+      }
+      if (isParamValid("crack_mouth_nodes"))
+      {
+        mooseError("crack_mouth_nodes must not be specified if crack_direction_method = CrackDirectionVector");
+      }
+      _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
+    }
+    else if (_direction_method == CDM_CRACK_MOUTH_NODES)
+    {
+      if (isParamValid("crack_direction_vector"))
+      {
+        mooseError("crack_direction_vector must not be specified if crack_direction_method = CrackMouthNodes");
+      }
+      if (!isParamValid("crack_mouth_nodes"))
+      {
+        mooseError("crack_mouth_nodes must be specified if crack_direction_method = CrackMouthNodes");
+      }
+      _crack_mouth_nodeset_name = getParam<BoundaryName>("crack_mouth_nodes");
+    }
+    else if (_direction_method == CDM_CURVED_CRACK_FRONT)
+    {
+      if (isParamValid("crack_direction_vector"))
+      {
+        mooseError("crack_direction_vector must not be specified if crack_direction_method = CurvedCrackFront");
+      }
+      if (isParamValid("crack_mouth_nodes"))
+      {
+        mooseError("crack_mouth_nodes must not be specified if crack_direction_method = CurvedCrackFront");
+      }
+    }
+  }
 }
 
 CrackFrontDefinition::~CrackFrontDefinition()
@@ -283,6 +330,8 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     RealVectorValue tangent_direction;
     tangent_direction(_axis_2d) = 1.0;
     _tangent_directions.push_back(tangent_direction);
+    const Node* crack_front_node = _mesh.nodePtr(_ordered_crack_front_nodes[0]);
+    _crack_directions.push_back(calculateCrackFrontDirection(crack_front_node,tangent_direction));
     _segment_lengths.push_back(std::make_pair(0.0,0.0));
     _overall_length = 0.0;
   }
@@ -320,6 +369,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       tangent_direction = tangent_direction / tangent_direction.size();
       _tangent_directions.push_back(tangent_direction);
       //std::cout<<"tan dir: "<<tangent_direction(0)<<" "<<tangent_direction(1)<<" "<<tangent_direction(2)<<std::endl;
+      _crack_directions.push_back(calculateCrackFrontDirection(crack_front_nodes[i],tangent_direction));
 
       _overall_length += forward_segment_len;
 
@@ -328,6 +378,26 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     }
     //std::cout<<"overall len: "<<_overall_length<<std::endl;
   }
+}
+
+RealVectorValue
+CrackFrontDefinition::calculateCrackFrontDirection(const Node* crack_front_node,
+                                                   const RealVectorValue& tangent_direction) const
+{
+  RealVectorValue crack_dir;
+  if (_direction_method == CDM_CRACK_DIRECTION_VECTOR)
+  {
+    crack_dir = _crack_direction_vector;
+  }
+  else if (_direction_method == CDM_CRACK_MOUTH_NODES)
+  {
+    mooseError("Not implemented yet");
+  }
+  else if (_direction_method == CDM_CURVED_CRACK_FRONT)
+  {
+    mooseError("Not implemented yet");
+  }
+  return crack_dir;
 }
 
 const Node &
@@ -357,5 +427,5 @@ CrackFrontDefinition::getCrackFrontBackwardSegmentLength(const unsigned int node
 const RealVectorValue &
 CrackFrontDefinition::getCrackDirection(const unsigned int node_index) const
 {
-  return _crack_direction;
+  return _crack_directions[node_index];
 }

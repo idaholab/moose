@@ -4,17 +4,16 @@
 #include "FEProblem.h"
 #include "Parser.h"
 #include "libmesh/string_to_enum.h"
+#include "CrackFrontDefinition.h"
 
 template<>
 InputParameters validParams<JIntegralAction>()
 {
   InputParameters params = validParams<Action>();
+  addCrackFrontDefinitionParams(params);
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
   params.addParam<std::string>("order", "FIRST",  "Specifies the order of the FE shape function to use for q AuxVariables");
   params.addParam<std::string>("family", "LAGRANGE", "Specifies the family of FE shape functions to use for q AuxVariables");
-  params.addRequiredParam<RealVectorValue>("crack_direction","Direction of crack propagation");
-  params.addParam<bool>("2d", false, "Treat body as two-dimensional");
-  params.addParam<unsigned int>("2d_axis", 2, "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
   params.addRequiredParam<std::vector<Real> >("radius_inner", "Inner radius for volume integral domain");
   params.addRequiredParam<std::vector<Real> >("radius_outer", "Outer radius for volume integral domain");
   return params;
@@ -25,13 +24,19 @@ JIntegralAction::JIntegralAction(const std::string & name, InputParameters param
   _boundary_names(getParam<std::vector<BoundaryName> >("boundary")),
   _order(getParam<std::string>("order")),
   _family(getParam<std::string>("family")),
-  _crack_direction(getParam<RealVectorValue>("crack_direction")),
+  _direction_method_moose_enum(getParam<MooseEnum>("crack_direction_method")),
+  _have_crack_direction_vector(false),
   _treat_as_2d(getParam<bool>("2d")),
   _axis_2d(getParam<unsigned int>("2d_axis")),
   _radius_inner(getParam<std::vector<Real> >("radius_inner")),
   _radius_outer(getParam<std::vector<Real> >("radius_outer")),
   _use_displaced_mesh(false)
 {
+  if (isParamValid("crack_direction_vector"))
+  {
+    _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
+    _have_crack_direction_vector = true;
+  }
   if (_radius_inner.size() != _radius_outer.size())
   {
     mooseError("Number of entries in 'radius_inner' and 'radius_outer' must match.");
@@ -57,7 +62,11 @@ JIntegralAction::act()
 
     InputParameters params = _factory.getValidParams(uo_type_name);
     params.set<MooseEnum>("execute_on") = "initial";
-    params.set<RealVectorValue>("crack_direction") = _crack_direction;
+    params.set<MooseEnum>("crack_direction_method") = _direction_method_moose_enum;
+    if (_have_crack_direction_vector)
+    {
+      params.set<RealVectorValue>("crack_direction_vector") = _crack_direction_vector;
+    }
     params.set<bool>("2d") = _treat_as_2d;
     params.set<unsigned int>("2d_axis") = _axis_2d;
     params.set<std::vector<BoundaryName> >("boundary") = _boundary_names;

@@ -8,8 +8,16 @@
 class CrackFrontDefinition;
 class AuxiliarySystem;
 
+enum CDM_ENUM
+{
+  CDM_CRACK_DIRECTION_VECTOR=1,
+  CDM_CRACK_MOUTH_NODES,
+  CDM_CURVED_CRACK_FRONT
+};
+
 template<>
 InputParameters validParams<CrackFrontDefinition>();
+void addCrackFrontDefinitionParams(InputParameters& params);
 
 /**
  * Works on top of NodalNormalsPreprocessor
@@ -31,6 +39,8 @@ public:
   void orderCrackFrontNodes(std::set<unsigned int> nodes);
   void orderEndNodes(std::vector<unsigned int> &end_nodes);
   void updateCrackFrontGeometry();
+  RealVectorValue calculateCrackFrontDirection(const Node* crack_front_node,
+                                               const RealVectorValue& tangent_direction) const;
 
   const Node & getCrackFrontNode(const unsigned int node_index) const;
   const RealVectorValue & getCrackFrontTangent(const unsigned int node_index) const;
@@ -45,9 +55,12 @@ protected:
 
   std::vector<unsigned int> _ordered_crack_front_nodes;
   std::vector<RealVectorValue> _tangent_directions;
+  std::vector<RealVectorValue> _crack_directions;
   std::vector<std::pair<Real,Real> > _segment_lengths;
   Real _overall_length;
-  RealVectorValue _crack_direction;
+  CDM_ENUM _direction_method;
+  RealVectorValue _crack_direction_vector;
+  BoundaryName _crack_mouth_nodeset_name;
   bool _treat_as_2d;
   unsigned int _axis_2d;
 };
