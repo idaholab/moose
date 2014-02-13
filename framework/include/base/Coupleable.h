@@ -55,6 +55,7 @@ protected:
   /**
    * Returns true if a variables has been coupled as name.
    * @param var_name The name the kernel wants to refer to the variable as.
+   * @param i By default 0, in general the index to test in a vector of MooseVariable pointers.
    * @return True if a coupled variable has the supplied name
    */
   virtual bool isCoupled(const std::string & var_name, unsigned int i = 0);

@@ -35,6 +35,7 @@ public:
   /**
    * Constructor
    * @param name The full (unique) name for this piece of data.
+   * @param context 'typeless' pointer to user-specific data.
    */
   RestartableDataValue(std::string name, void * context) :
       _name(name),
@@ -87,6 +88,7 @@ public:
   /**
    * Constructor
    * @param name The full (unique) name for this piece of data.
+   * @param context 'typeless' pointer to user-specific data.
    */
   RestartableData(std::string name, void * context) :
       RestartableDataValue(name, context)

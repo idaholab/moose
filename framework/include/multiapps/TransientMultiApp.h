@@ -43,7 +43,7 @@ public:
    * But - in the case of doing transfer interpolation this might be different.
    *
    * @param app The global app number you want the transfer vector for.
-   * @param The name of the variable you are going to be transferring to.
+   * @param var_name The name of the variable you are going to be transferring to.
    * @return The vector to fill.
    */
   virtual NumericVector<Number> & appTransferVector(unsigned int app, std::string var_name);
@@ -69,6 +69,7 @@ public:
    * by a "new" piece of material.
    *
    * @param global_app The global app number to reset.
+   * @param time - The time to reset the app to.
    */
   virtual void resetApp(unsigned int global_app, Real time);
 

@@ -67,7 +67,7 @@ namespace Moose {
 
 /**
  * Convert point represented as std::vector into Point
- * @param pt Point represented as a vector
+ * @param pos Point represented as a vector
  * @return Converted point
  */
 Point toPoint(const std::vector<Real> & pos);

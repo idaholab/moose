@@ -38,7 +38,7 @@ public:
 
   /**
    * Set the file base name from which we will restart
-   * @param file_name The file base name of a restart file
+   * @param file_base The file base name of a restart file
    */
   void setRestartFile(const std::string & file_base);
 

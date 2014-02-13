@@ -60,7 +60,7 @@ public:
    * Class constructor
    * Populates the 'block' input parameters, see the general class documentation for details.
    * @param name The name of the class
-   * @param parameters The input parameters (see the detailed help for additional information)
+   * @param params The input parameters (see the detailed help for additional information)
    */
   BlockRestrictable(const std::string name, InputParameters & params);
 
@@ -171,7 +171,7 @@ private:
 
   /**
    * A helper function for extracting the subdomain IDs for a variable
-   * @param paramters A reference to the input parameters supplied to the object
+   * @param parameters A reference to the input parameters supplied to the object
    */
   std::set<SubdomainID> variableSubdomianIDs(InputParameters & parameters);
 

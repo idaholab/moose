@@ -88,7 +88,7 @@ OversampleBase::initOversample()
   // Extract the input parameters from FEProblem
   InputParameters params = _problem_ptr->parameters();
 
-  // Create the new mesh \TODO: Test the 'file' mesh workings
+  // Create the new mesh \todo{Test the 'file' mesh workings}
   if (params.isParamValid("file"))
   {
     InputParameters mesh_params = _problem_ptr->mesh().parameters();

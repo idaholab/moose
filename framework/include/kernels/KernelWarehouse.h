@@ -92,8 +92,6 @@ public:
 
   /**
    * Update the list of active kernels
-   * @param t Time
-   * @param dt Time step size
    * @param subdomain_id Domain ID
    */
   void updateActiveKernels(unsigned int subdomain_id);

@@ -27,7 +27,7 @@ InputParameters validParams<AddNodalNormalsAction>();
  * Action to setup computation of nodal normals.
  *
  * The machinery behind the normal computation is the following:
- * - NodalNormalsPreprocessor is ran over the elements and gather the \int \d grad_phi \over \d {x|y|z} \d Omega into three separate vectors
+ * - NodalNormalsPreprocessor is ran over the elements and gather the \f$ \int \d grad_phi \over \d {x|y|z} \d Omega \f$ into three separate vectors
  *   (that live on AuxiliarySystem) - each for one component of the normal.
  * - NodalNormalsEvaluator is than ran over the boundary nodes and takes the above computed integrals and normalizes it.
  *

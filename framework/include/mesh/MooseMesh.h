@@ -237,7 +237,7 @@ public:
   /**
    * Get the newly removed children element ids for an element that was just coarsened.
    *
-   * @parent_id The element ID of the parent element that was coarsened to.
+   * @param elem Pointer to the parent element that was coarsened to.
    * @return The child element ids in Elem::child() order.
    */
   std::vector<const Elem *> & coarsenedElementChildren(const Elem * elem);
@@ -381,6 +381,10 @@ public:
    * the geometric search system to do searches based on quadrature point locations....
    *
    * @param elem The element
+   * @param side The side number on which we want to add a quadrature node
+   * @param qp The number of the quadrature point
+   * @param bid The boundary ID for the point to be added with
+   * @param point The physical location of the point
    */
   Node * addQuadratureNode(const Elem * elem, const unsigned short int side, const unsigned int qp, BoundaryID bid, const Point & point);
 
@@ -510,8 +514,7 @@ public:
    * Create the refinement and coarsening maps necessary for projection of stateful material properties
    * when using adaptivity.
    *
-   * @param qrule A representative volume qrule
-   * @param qrule_face A representative face qrule
+   * @param assembly Pointer to the Assembly object for this Mesh.
    */
   void buildRefinementAndCoarseningMaps(Assembly * assembly);
 
@@ -520,8 +523,6 @@ public:
    * to copy from and to for stateful material properties on newly created elements from Adaptivity.
    *
    * @param elem The element that represents the element type you need the refinement map for.
-   * @param qrule The quadrature rule in use.
-   * @param qrule_face The current face quadrature rule
    * @param parent_side The side of the parent to map (-1 if not mapping parent sides)
    * @param child The child number (-1 if not mapping child internal sides)
    * @param child_side The side number of the child (-1 if not mapping sides)
@@ -533,8 +534,6 @@ public:
    * to copy from and to for stateful material properties on newly created elements from Adaptivity.
    *
    * @param elem The element that represents the element type you need the coarsening map for.
-   * @param qrule The quadrature rule in use.
-   * @param qrule_face The current face quadrature rule
    * @param input_side The side to map
    */
   const std::vector<std::pair<unsigned int, QpMap> > & getCoarseningMap(const Elem & elem, int input_side);
@@ -730,7 +729,7 @@ protected:
   /// list of nodes that belongs to a specified block (domain)
   std::map<unsigned int, std::set<SubdomainID> > _block_node_list;
 
-  /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> <array of node ids>
+  /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> [array of node ids]
   std::map<short int, std::vector<unsigned int> > _node_set_nodes;
 
   std::set<unsigned int> _ghosted_boundaries;
@@ -814,7 +813,7 @@ private:
    * Essentially, for each point in "from" find the closest point in "to".
    *
    * @param from The reference positions in the parent of the the points we're mapping _from_
-   * @param from The reference positions in the parent of the the points we're mapping _to_
+   * @param to The reference positions in the parent of the the points we're mapping _to_
    * @param qp_map This will be filled with QpMap objects holding the mappings.
    */
   void mapPoints(const std::vector<Point> & from, const std::vector<Point> & to, std::vector<QpMap> & qp_map);
@@ -833,8 +832,12 @@ private:
    *
    * @param template_elem An element of the type that we need to find the maps for
    * @param qrule The quadrature rule that we need to find the maps for
+   * @param qrule_face The face quadrature rule that we need to find the maps for
    * @param refinement_map The map to use when an element gets split
    * @param coarsen_map The map to use when an element is coarsened.
+   * @param parent_side - the id of the parent's side
+   * @param child - the id of the child element
+   * @param child_side - The id of the child's side
    */
   void findAdaptivityQpMaps(const Elem * template_elem,
                             QBase & qrule,

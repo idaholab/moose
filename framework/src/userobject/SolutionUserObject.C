@@ -458,7 +458,7 @@ SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_
 }
 
 Real
-SolutionUserObject::directValue(unsigned int dof_index) const
+SolutionUserObject::directValue(dof_id_type dof_index) const
 {
   Real val = (*_serialized_solution)(dof_index);
   if (_file_type==1 && _interpolate_times)

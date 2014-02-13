@@ -37,7 +37,6 @@ public:
    * Factory constructor initializes all internal references needed for residual computation.
    *
    * @param name The name of this kernel.
-   * @param moose_system The moose_system this kernel is associated with
    * @param parameters The parameters object for holding additional parameters for kernels and derived kernels
    */
   KernelGrad(const std::string & name, InputParameters parameters);

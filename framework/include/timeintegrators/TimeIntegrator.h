@@ -53,7 +53,7 @@ protected:
 
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
-  /// solution vector for {du^dot}\over{du}
+  /// solution vector for \f$ {du^dot}\over{du} \f$
   NumericVector<Number> & _du_dot_du;
   //
   int & _t_step;

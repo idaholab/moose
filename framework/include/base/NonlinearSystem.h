@@ -112,9 +112,9 @@ public:
 
   /**
    * Adds a Constraint
-   * @param bc_name The type of the boundary condition
-   * @param name The name of the boundary condition
-   * @param parameters Boundary condition parameters
+   * @param c_name The type of the constraint
+   * @param name The name of the constraint
+   * @param parameters Constraint parameters
    */
   void addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
 
@@ -181,6 +181,7 @@ public:
   /**
    * Add residual contributions from Constraints
    *
+   * @param residual - reference to the residual vector where constraint contributions will be computed
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
   void constraintResiduals(NumericVector<Number> & residual, bool displaced);
@@ -188,6 +189,7 @@ public:
   /**
    * Computes residual
    * @param residual Residual is formed in here
+   * @param type The type of kernels for which the residual is to be computed.
    */
   void computeResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
 
@@ -205,6 +207,7 @@ public:
   /**
    * Add jacobian contributions from Constraints
    *
+   * @param jacobian reference to the Jacobian matrix
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
   void constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced);
@@ -406,13 +409,13 @@ protected:
 
   /**
    * Compute the residual
-   * @param residual[out] Residual is formed here
+   * @param type The type of kernels for which the residual is to be computed.
    */
   void computeResidualInternal(Moose::KernelType type = Moose::KT_ALL);
 
   /**
    * Enforces nodal boundary conditions
-   * @param residual[in/out] Residual where nodal BCs are enforced
+   * @param residual Residual where nodal BCs are enforced (input/output)
    */
   void computeNodalBCs(NumericVector<Number> & residual);
 
@@ -444,7 +447,7 @@ protected:
   TimeIntegrator * _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
-  /// solution vector for {du^dot}\over{du}
+  /// solution vector for \f$ {du^dot}\over{du} \f$
   NumericVector<Number> & _du_dot_du;
   /// residual vector for time contributions
   NumericVector<Number> & _Re_time;

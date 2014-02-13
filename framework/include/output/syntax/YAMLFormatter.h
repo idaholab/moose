@@ -40,7 +40,7 @@ protected:
   /**
    * Method for building an output string that accounts for specific types (e.g., Point)
    * @param output Reference to the output string
-   * @param current InputParameters iterator that is being output
+   * @param iter InputParameters iterator that is being output
    */
   void buildOutputString(std::ostringstream & output, const InputParameters::iterator iter);
 };

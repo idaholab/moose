@@ -40,6 +40,7 @@ public:
 
   /**
    * Add a split
+   * @param name - name the split being added should have
    * @param split Split being added
    */
   void   addSplit(const std::string& name, Split* split);

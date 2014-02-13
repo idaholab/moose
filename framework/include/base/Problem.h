@@ -83,6 +83,7 @@ public:
    * Returns a character string to produce a specific color in terminals supporting
    * color. The list of color constants is available in XTermConstants.h
    * @param color (from XTermConstants.h)
+   * @param text The text which will be printed in color
    */
   template <typename T>
   std::string colorText(std::string color, T text) const
@@ -116,7 +117,6 @@ public:
    * Add a time period
    * @param name Name of the time period
    * @param start_time Start time of the time period
-   * @param end_time End time of the time period
    */
   TimePeriod & addTimePeriod(const std::string & name, Real start_time);
 

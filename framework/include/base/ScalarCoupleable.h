@@ -48,6 +48,7 @@ protected:
   /**
    * Returns true if a variables has been coupled_as name.
    * @param var_name The of the coupled variable
+   * @param i By default 0, in general the index to test in a vector of MooseVariable pointers.
    */
   virtual bool isCoupledScalar(const std::string & var_name, unsigned int i = 0);
 

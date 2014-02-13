@@ -51,10 +51,8 @@ public:
 
   /**
    * Get the list of all active Markers for a variable
-   * @param var The variable number
-   * @return The list of all active Markers
    */
-  //const std::vector<Marker *> & activeVar(unsigned int var) { return _active_var_Markers[var]; }
+  // const std::vector<Marker *> & activeVar(unsigned int var) { return _active_var_Markers[var]; }
 
   /**
    * Add a Markers
@@ -65,8 +63,6 @@ public:
 
   /**
    * Update the list of active Markers
-   * @param t Time
-   * @param dt Time step size
    * @param subdomain_id Domain ID
    */
   void updateActiveMarkers(unsigned int subdomain_id);

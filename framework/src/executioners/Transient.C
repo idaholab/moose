@@ -292,7 +292,7 @@ Transient::takeStep(Real input_dt)
   _problem.execMultiApps(EXEC_TIMESTEP_BEGIN);
 
   // Only print this if the 'Output' block exists
-  // \TODO: Remove when old output system is removed
+  /// \todo{Remove when old output system is removed}
   if (_app.hasLegacyOutput())
   {
     Moose::out << "\nTime Step ";

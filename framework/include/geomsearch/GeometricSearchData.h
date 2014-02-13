@@ -98,6 +98,7 @@ private:
   /**
    * Add Quadrature Nodes to the Mesh in support of mortar based penetration location and nearest node searching.
    *
+   * @param master_id The id of the master node
    * @param slave_id The actual slave_id (the one in the mesh)
    * @param qslave_id The "fictitious" slave_id that is going to be used for this quadrature nodeset
    */

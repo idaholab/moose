@@ -50,7 +50,7 @@ private:
 
   /**
    * Helper method for creating the short-cut actions
-   * @param String of the object type, i.e., the value of 'type=' in the input file
+   * @param object_type String of the object type, i.e., the value of 'type=' in the input file
    */
   void create(std::string object_type);
 

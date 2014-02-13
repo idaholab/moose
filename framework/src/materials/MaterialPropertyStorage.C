@@ -23,7 +23,7 @@ std::map<std::string, unsigned int> MaterialPropertyStorage::_prop_ids;
 
 /**
  * Shallow copy the material properties
- * @param prop_ids List of IDs with properties to shallow copy
+ * @param stateful_prop_ids List of IDs with properties to shallow copy
  * @param data Destination data
  * @param data_from Source data
  */

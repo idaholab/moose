@@ -151,7 +151,7 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
   // Store material properites for the boundary ids
   for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
   {
-    // \TODO: see ticket #2192
+    /// \todo{see ticket #2192}
     // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
     // if (!is_get)
     //  _supplied_props.insert(prop_name);

@@ -160,14 +160,21 @@ public:
    * supplies a value or even uses the default, a warning will be printed.
    *
    * @param name The name of the parameter
-   * @param value [Optional] The default value of this parameter if it requires one
    * @param doc_string Documentation.  This will be shown for --help
    * @param deprecation_message The message that will will print about why this param was deprecated.  It might mention the "new way".
    */
   template <typename T>
   void addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
+
+  /**
+   * @param name The name of the parameter
+   * @param value The default value of this parameter if it requires one
+   * @param doc_string Documentation.  This will be shown for --help
+   * @param deprecation_message The message that will will print about why this param was deprecated.  It might mention the "new way".
+   */
   template <typename T>
   void addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message);
+
   template <typename T>
   void addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
 

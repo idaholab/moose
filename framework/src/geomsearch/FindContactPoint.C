@@ -31,13 +31,12 @@ namespace Moose
 /**
  * Finds the closest point (called the contact point) on the master_elem on side "side" to the slave_point.
  *
- * @param master_elem The element on the master side of the interface
- * @param side The side number of the side of the master element
+ * @param p_info The penetration info object, contains master_elem, side, various other information
+ * @param _fe FE object that will provide quadrature and shape function data
+ * @param _fe_type The type of _fe, needed for inverse_map routines
+ * @param start_with_centroid if true, start inverse mapping procedure from element centroid
+ * @param tangential_tolerance 'tangential' tolerance for determining whether a contact point on a side
  * @param slave_point The physical space coordinates of the slave node
- * @param contact_ref The reference coordinate position of the contact point
- * @param contact_phys The physical space coordinates of the contact point
- * @param distance The distance between the slave_point and the contact point
- * @param normal The unit normal at the contact_point
  * @param contact_point_on_side whether or not the contact_point actually lies on _that_ side of the element.
  */
 void

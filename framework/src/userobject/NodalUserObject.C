@@ -26,7 +26,7 @@ InputParameters validParams<NodalUserObject>()
   params += validParams<BoundaryRestrictable>();
   params += validParams<RandomInterface>();
 
-  /// \TODO: The default for both Boundary and Block Restrictable should be ANY...
+  /// \todo{The default for both Boundary and Block Restrictable should be ANY...}
   return params;
 }
 

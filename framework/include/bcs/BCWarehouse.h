@@ -58,7 +58,7 @@ public:
 
   /**
    * Get list of active boundaries
-   * @param bnds[out] set of boundaries that are active
+   * @param bnds set of boundaries that are active
    */
   void activeBoundaries(std::set<BoundaryID> & bnds) const;
 

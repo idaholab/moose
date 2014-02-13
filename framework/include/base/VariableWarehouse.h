@@ -59,7 +59,7 @@ public:
 
   /**
    * Get a variable from the warehouse
-   * @param var_num The number of the variable to retrieve
+   * @param var_number The number of the variable to retrieve
    * @return The retrieved variable
    */
   MooseVariableBase * getVariable(unsigned int var_number);

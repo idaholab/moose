@@ -189,7 +189,7 @@ public:
    * Gets a reference to a scalar variable with specified number
    *
    * @param tid Thread id
-   * @param var_number variable number
+   * @param var_name A string which is the name of the variable to get.
    * @return reference the variable (class)
    */
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
@@ -433,6 +433,7 @@ public:
    * Adds a scalar variable
    * @param var_name The name of the variable
    * @param order The order of the variable
+   * @param scale_factor The scaling factor to be used with this scalar variable
    */
   virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
   {

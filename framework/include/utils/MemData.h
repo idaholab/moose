@@ -67,7 +67,7 @@ private:
    * .) On Mac OSX it returns the ru_maxrss value reported by getrusage,
    * which is actually in bytes rather than kilobytes as the man page says.
    *
-   * .) On linux, it returns the VmSize entry from the /proc/<PID>/status file
+   * .) On linux, it returns the VmSize entry from the /proc/PID/status file
    * for the current process.
    *
    * Obviously this should not be used to compare memory usage across different

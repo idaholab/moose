@@ -45,7 +45,7 @@ public:
    *
    * @param name The name of the object
    * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly correspond to the section in the input file so errors are easy to understand.
-   * @param fe_problem A reference to the fe_problem for this object
+   * @param subproblem A reference to the subproblem for this object
    * @param tid Optional thread id (will default to zero)
    */
   Restartable(std::string name, std::string system_name, SubProblem & subproblem, THREAD_ID tid = 0);
@@ -137,6 +137,7 @@ private:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param object_name A supplied name for the object that is declaring this data.
+   * @param context Context pointer that will be passed to the load and store functions
    */
   template<typename T>
   T & declareRestartableDataWithObjectNameWithContext(std::string data_name, std::string object_name, void * context);
@@ -174,10 +175,10 @@ private:
   template<typename T>
   T & declareRecoverableData(std::string data_name, const T & init_value);
 
-  /// Helper function so we don't have to #include SubProblem in the header
+  /// Helper function so we don't have to include SubProblem in the header
   void registerRestartableDataOnSubProblem(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
-  /// Helper function so we don't have to #include SubProblem in the header
+  /// Helper function so we don't have to include SubProblem in the header
   void registerRecoverableDataOnSubProblem(std::string name);
 
   /// The name of the object

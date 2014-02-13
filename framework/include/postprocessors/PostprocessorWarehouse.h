@@ -84,7 +84,7 @@ public:
 
   /**
    * Get a pointer to a postprocessor
-   * @param The name of the postprocessor to retrieve
+   * @param name The name of the postprocessor to retrieve
    * @return A postprocessor for the given name
    */
   Postprocessor * getPostprocessor(std::string name);

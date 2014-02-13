@@ -149,7 +149,7 @@ public:
   virtual void outputInput();
 
   /**
-   * \TODO Make this call automatic in similar fashion to outputInput
+   * \todo{Make this call automatic in similar fashion to outputInput}
    * Performs the output of system information
    * By default this method does nothing and is not called by output()
    */
@@ -319,7 +319,7 @@ private:
 
   /**
    * Returns true if the output interval is satisfied
-   * \TODO Implement additional types of intervals (e.g., simulation time and real time)
+   * \todo{Implement additional types of intervals (e.g., simulation time and real time)}
    */
   bool checkInterval();
 

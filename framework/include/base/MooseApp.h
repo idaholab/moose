@@ -182,13 +182,15 @@ public:
    */
   void disableCheckUnusedFlag();
 
-  //\TODO: this could likely be removed after the new input system is in place
+  /**
+   * \todo{this could likely be removed after the new input system is in place}
+   */
   std::string getSysInfo();
 
   /**
    * Prints the simulation information header
-   * \TODO: This can likely go away after the new output system is in place, this
-   * is now in the Console object
+   * \todo{This can likely go away after the new output system is in place, this
+   * is now in the Console object}
    */
   void printSimulationInfo(std::ostream & ostream);
 
@@ -258,13 +260,13 @@ public:
 
   /**
    * Returns true if the 'Output' block was included
-   * \TODO Remove this when the old system is removed
+   * \todo{Remove this when the old system is removed}
    */
   bool hasLegacyOutput(){ return _legacy_output;}
 
   /**
    * Set the legacy output flag
-   * \TODO Remove this when the old system is removed
+   * \todo{Remove this when the old system is removed}
    */
   void setLegacyOutput(bool state){ _legacy_output = state; }
 
@@ -274,7 +276,7 @@ protected:
 
   virtual void meshOnly(std::string mesh_file_name);
 
-  /// True if the old "Output" block was included (\TODO: remove when old output system is deleted)
+  /// True if the old "Output" block was included \todo{remove when old output system is deleted}
   bool _legacy_output;
 
   /// The name of this object

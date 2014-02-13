@@ -144,9 +144,9 @@ Console::~Console()
   if (_write_file)
     writeStream();
 
-  /* If an 'Output' block exists do not disable the logging b/c it
-     will disable the printing of the log as it was in the old system
-     \TODO: Remove this if when the old system is removed*/
+  /// If an 'Output' block exists do not disable the logging b/c it
+  /// will disable the printing of the log as it was in the old system
+  /// \todo{Remove this if when the old system is removed}
   if (!_app.hasLegacyOutput())
   {
     /* Disable the logs, without this the logs will be printed

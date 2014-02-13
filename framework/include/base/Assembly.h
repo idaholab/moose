@@ -261,6 +261,7 @@ public:
    * @param elem Element being reinitialized
    * @param side Side of the element
    * @param neighbor Neighbor facing the element on the side 'side'
+   * @param neighbor_side The side id on the neighboring element.
    */
   void reinitElemAndNeighbor(const Elem * elem, unsigned int side, const Elem * neighbor, unsigned int neighbor_side);
 

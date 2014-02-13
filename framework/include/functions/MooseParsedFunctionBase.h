@@ -43,8 +43,7 @@ class MooseParsedFunctionBase
 public:
 
   /**
-   * Class constructor for the interface.
-   * @param name The name of the object (currently not used)
+   * Class constructor for the interface.  The first parameter, 'name' is not currently used.
    * @param parameters Input parameters from the object, it must contain '_fe_problem'
    */
   MooseParsedFunctionBase(const std::string & /*name*/, InputParameters parameters);
@@ -59,8 +58,7 @@ protected:
    /**
    * A helper method to check if the function value contains quotes. This method should
    * be called from within the initialization list of the object inheriting the MooseParsedFunctionInterface
-   * @param name The name of the ParsedFunction
-   * @param value The function given as a std::string
+   * @param function_str The name of the ParsedFunction
    * @return The vector of strings, if the input function is valid
    * @see ParsedFunction
    */
@@ -79,14 +77,14 @@ protected:
 private:
   /**
    * Verifies that the 'vars' variable exists and that pre-defined variables are not used (i.e., x,y,z,t)
-   * @param vars A vector of variables (std::strings) that are given in the function
+   * @param parameters InputParameters object relevant to this function
    * @return The variables (i.e., vars)
    */
   const std::vector<std::string> verifyVars(const InputParameters & parameters);
 
   /**
    * Verifies that the 'vals' variable exists
-   * @param vars A vector of values (std::strings) that are given in the function
+   * @param parameters InputParameters object relevant to this function
    * @return The values (i.e., vals)
    */
   const std::vector<std::string> verifyVals(const InputParameters & parameters);

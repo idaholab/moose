@@ -61,6 +61,8 @@ public:
   /**
    * Called when doing boundary assembling
    *
+   * @param elem - The element we are checking is on the boundary.
+   * @param side - The side of the element in question.
    * @param bnd_id - ID of the boundary we are at
    */
   virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);

@@ -64,8 +64,6 @@ public:
 
   /**
    * Update the list of active Indicators
-   * @param t Time
-   * @param dt Time step size
    * @param subdomain_id Domain ID
    */
   void updateActiveIndicators(unsigned int subdomain_id);

@@ -281,8 +281,8 @@
 #include "SetupMeshAction.h"
 #include "AddMeshModifierAction.h"
 #include "SetupMeshCompleteAction.h"
-#include "SetupOutputNameAction.h" // \TODO: remove w/ update system upgraded
-#include "SetupOutputAction.h" // \TODO: remove w/ update system upgraded
+#include "SetupOutputNameAction.h" /// \todo{remove w/ update system upgraded}
+#include "SetupOutputAction.h" /// \todo{remove w/ update system upgraded}
 #include "AddOutputAction.h"
 #include "CommonOutputAction.h"
 #include "AddMaterialAction.h"
@@ -789,8 +789,8 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
   registerAction(CreateProblemAction, "create_problem");
-  registerAction(SetupOutputAction, "setup_output"); // \TODO: remove w/ update system upgraded
-  registerAction(SetupOutputNameAction, "setup_output_name"); // \TODO: remove w/ update system upgraded
+  registerAction(SetupOutputAction, "setup_output"); /// \todo{remove w/ update system upgraded}
+  registerAction(SetupOutputNameAction, "setup_output_name"); /// \todo{remove w/ update system upgraded}
   registerAction(AddOutputAction, "add_output");
   registerAction(CommonOutputAction, "meta_action");
   registerAction(GlobalParamsAction, "set_global_params");

@@ -26,6 +26,9 @@ class ComputeIndicatorThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
   /**
+   * @param fe_problem reference to the FEProblem we are computing on
+   * @param sys reference to the AuxSystem we are computing on
+   * @param indicator_whs Warehouse of Indicator objects.
    * @param finalize Whether or not we are just in the "finalize" stage or not.
    */
   ComputeIndicatorThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<IndicatorWarehouse> & indicator_whs, bool finalize = false);

@@ -324,6 +324,7 @@ private:
    * Helper method for performing material property checks
    * @param props Reference to the map of properties known
    * @param check_props Reference to the map of properties to check
+   * @param type - string describing the type of the material property being checked
    * \see checkBlockMatProps
    * \see checkBoundaryMatProps
    */

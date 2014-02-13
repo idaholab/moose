@@ -38,9 +38,10 @@ public:
 protected:
   /**
    * Return the nearest node to the point p.
-   * @param mesh The mesh you want to search.
    * @param p The point you want to find the nearest node to.
    * @param distance This will hold the distance between the returned node and p
+   * @param nodes_begin - iterator to the beginning of the node list
+   * @param nodes_end - iterator to the end of the node list
    * @return The Node closest to point p.
    */
   Node * getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end);

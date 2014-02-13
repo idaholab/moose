@@ -47,6 +47,7 @@ public:
    * Class constructor
    * Populates the _bnd_ids for the given boundary names supplied
    * with the 'boundary' input parameter
+   * @param name Name of this object
    * @param parameters The input parameters
    */
   BoundaryRestrictable(const std::string name, InputParameters & parameters);

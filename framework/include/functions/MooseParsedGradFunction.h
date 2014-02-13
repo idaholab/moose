@@ -60,7 +60,7 @@ public:
   /**
    * Compute the gradient of the function
    * @param t The current time
-   * @param pt The current point (x,y,z)
+   * @param p The current point (x,y,z)
    * @return Gradient of the function
    */
   virtual RealGradient gradient(Real t, const Point & p);

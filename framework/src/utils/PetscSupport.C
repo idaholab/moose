@@ -236,7 +236,7 @@ void outputNorm(Real old_norm, Real norm, bool use_color)
     Moose::out << norm << std::endl;
 }
 
-// \TODO Remove after new build system is in place
+/// \todo{Remove after new build system is in place}
 PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_ptr)
 {
   static Real old_norm;
@@ -257,7 +257,7 @@ PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_
   return 0;
 }
 
-// \TODO Remove after new output system is in place
+/// \todo{Remove after new output system is in place}
 PetscErrorCode  linearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *void_ptr)
 {
   static Real old_norm;
@@ -637,7 +637,7 @@ void petscSetDefaults(FEProblem & problem)
 
   if (problem.getMooseApp().hasLegacyOutput())
   {
-    // \TODO: Remove this when new output system is in place
+    /// \todo{Remove this when new output system is in place}
     {
       PetscErrorCode ierr;
 #if PETSC_VERSION_LESS_THAN(2,3,3)
@@ -648,7 +648,7 @@ void petscSetDefaults(FEProblem & problem)
       CHKERRABORT(libMesh::COMM_WORLD,ierr);
     }
 
-    // \TODO: Remove this when new output system is in place
+    /// \todo{Remove this when new output system is in place}
     if(problem.shouldPrintLinearResiduals())
     {
       PetscErrorCode ierr;

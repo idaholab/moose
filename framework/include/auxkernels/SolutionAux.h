@@ -35,7 +35,7 @@ public:
 
   /** Constructor
    * @param name The name of the SolutionAux kernel
-   * @param parameter The input parameters for the kernel
+   * @param parameters The input parameters for the kernel
    */
   SolutionAux(const std::string & name, InputParameters parameters);
 

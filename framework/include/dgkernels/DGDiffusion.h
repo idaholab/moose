@@ -27,10 +27,10 @@ InputParameters validParams<DGDiffusion>();
  * DG kernel for diffusion
  *
  * General DG kernel that this class can handle is:
- * { \grad u * n_e} [v] + epsilon { \grad v * n_e } [u] + (sigma / |e| * [u][v])
+ * \f$ { \grad u * n_e} [v] + epsilon { \grad v * n_e } [u] + (sigma / |e| * [u][v]) \f$
  *
- *  [a] = [ a_1 - a_2 ]
- *  {a} = 0.5 * (a_1 + a_2)
+ * \f$ [a] = [ a_1 - a_2 ] \f$
+ * \f$ {a} = 0.5 * (a_1 + a_2) \f$
  *
  */
 class DGDiffusion : public DGKernel

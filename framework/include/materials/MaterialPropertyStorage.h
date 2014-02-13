@@ -62,14 +62,15 @@ public:
    * 3. Child side to parent volume (parent_side = -1, child = 0+, child_side = 0+)
    *    Call on boundary MaterialPropertyStorage and pass volume MaterialPropertyStorage for parent_material_props
    *
+   * @param refinement_map - 2D array of QpMap objects
    * @param qrule The current quadrature rule
-   * @param qrule The current face qrule
+   * @param qrule_face The current face qrule
    * @param parent_material_props The place to pull parent material property values from
    * @param child_material_data MaterialData object used for computing the data
-   * @param mats Materials that will compute the initial values
-   * @param n_qpoints Number of quadrature points
    * @param elem The parent element that was just refined
-   * @param
+   * @param input_parent_side - the side of the parent for which material properties are prolonged
+   * @param input_child - the number of the child
+   * @param input_child_side - the side on the child where material properties will be prolonged
    */
   void prolongStatefulProps(const std::vector<std::vector<QpMap> > & refinement_map,
                             QBase & qrule,
@@ -84,13 +85,13 @@ public:
   /**
    * Creates storage for newly created elements from mesh Adaptivity.  Also, copies values from the children to the parent.
    *
+   * @param coarsening_map - map from unsigned ints to QpMap's
+   * @param coarsened_element_children - a pointer to a vector of coarsened element children
    * @param qrule The current quadrature rule
-   * @param qrule The current face qrule
-   * @param material_data MaterilData object used for computing the data
-   * @param mats Materials that will compute the initial values
-   * @param n_qpoints Number of quadrature points
+   * @param qrule_face The current face qrule
+   * @param material_data MaterialData object used for computing the data
    * @param elem The parent element that was just refined
-   * @param side Side of the element 'elem' (0 for volumetric material properties)
+   * @param input_side Side of the element 'elem' (0 for volumetric material properties)
    */
   void restrictStatefulProps(const std::vector<std::pair<unsigned int, QpMap> > & coarsening_map,
                              std::vector<const Elem *> & coarsened_element_children,

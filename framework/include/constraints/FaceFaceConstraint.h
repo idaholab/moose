@@ -30,13 +30,13 @@ InputParameters validParams<FaceFaceConstraint>();
  *
  * Indexing:
  *
- *              T_m             T_s        \lambda
+ *              T_m             T_s         lambda
  *         +--------------+-------------+-------------+
  * T_m     |  K_1         |             | SlaveMaster |
  *         +--------------+-------------+-------------+
  * T_s     |              |  K_2        | SlaveSlave  |
  *         +--------------+-------------+-------------+
- * \lambda | MasterMaster | MasterSlave |             |
+ * lambda  | MasterMaster | MasterSlave |             |
  *         +--------------+-------------+-------------+
  *
  */

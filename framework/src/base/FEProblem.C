@@ -537,7 +537,7 @@ void FEProblem::initialSetup()
   _nl.initialSetupBCs();
   _nl.initialSetupKernels();
 
-  // \TODO: Remove when Output system is complete
+  /// \todo{Remove when Output system is complete}
   if (_output_setup_log_early)
     Moose::setup_perf_log.print_log();
 
@@ -3646,7 +3646,7 @@ FEProblem::checkProblemIntegrity()
     if (check_material_coverage && !local_mesh_subs.empty())
     {
       std::stringstream extra_subdomain_ids;
-      /// <unsigned int> is necessary to print SubdomainIDs in the statement below
+      /// unsigned int is necessary to print SubdomainIDs in the statement below
       std::copy (local_mesh_subs.begin(), local_mesh_subs.end(), std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
       mooseError("The following blocks from your input mesh do not contain an active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");

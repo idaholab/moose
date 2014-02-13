@@ -69,6 +69,7 @@ public:
   /**
    * Get the list of all  elemental user_objects
    * @param block_id Block ID
+   * @param group - the type of user objects to return in the list, defaults to ALL
    * @return The list of all elemental user_objects
    */
   const std::vector<ElementUserObject *> & elementUserObjects(SubdomainID block_id, GROUP group = ALL);
@@ -76,12 +77,15 @@ public:
   /**
    * Get the list of side user_objects
    * @param boundary_id Boundary ID
+   * @param group - the type of user objects to return in the list, defaults to ALL
    * @return The list of side user_objects
    */
   const std::vector<SideUserObject *> & sideUserObjects(BoundaryID boundary_id, GROUP group = ALL);
 
   /**
    * Get the list of internal side user objects
+   * @param block_id - The subdomain on which to get the list of UserObjects
+   * @param group - the type of user objects to return in the list, defaults to ALL
    * @return The list of internal side user objects
    */
   const std::vector<InternalSideUserObject *> & internalSideUserObjects(SubdomainID block_id, GROUP group = ALL);
@@ -89,6 +93,7 @@ public:
   /**
    * Get the list of nodal user_objects
    * @param boundary_id Boundary ID
+   * @param group - the type of user objects to return in the list, defaults to ALL
    * @return The list of all nodal user_objects
    */
   const std::vector<NodalUserObject *> & nodalUserObjects(BoundaryID boundary_id, GROUP group = ALL);
@@ -96,12 +101,14 @@ public:
   /**
    * Get the list of nodal user_objects restricted on the specified subdomain
    * @param subdomain_id Subdomain ID
+   * @param group - the type of user objects to return in the list, defaults to ALL
    * @return The list of all block nodal user_objects
    */
   const std::vector<NodalUserObject *> & blockNodalUserObjects(SubdomainID subdomain_id, GROUP group = ALL);
 
   /**
    * Get the list general user_objects
+   * @param group - the type of user objects to return in the list, defaults to ALL
    * @return The list of general user_objects
    */
   const std::vector<GeneralUserObject *> & genericUserObjects(GROUP group = ALL);

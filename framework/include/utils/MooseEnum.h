@@ -36,8 +36,8 @@ public:
   /**
    * Constructor that takes a list of enumeration values, and a separate string to set a default for this instance
    * @param names - a list of names for this enumeration
-   * @default_name - the default value for this enumeration instance
-   * @allow_out_of_range - determines whether this enumeration will accept values outside of it's range of
+   * @param default_name - the default value for this enumeration instance
+   * @param allow_out_of_range - determines whether this enumeration will accept values outside of it's range of
    *                       defined values.
    */
   MooseEnum(std::string names, std::string default_name="", bool allow_out_of_range=false);

@@ -91,7 +91,7 @@ protected:
    *
    * Note that this returns a reference... and the return value should be stored as a reference!
    *
-   * @param indicatorThe name of the indicator to get an ErrorVector for.
+   * @param indicator The name of the indicator to get an ErrorVector for.
    */
   ErrorVector & getErrorVector(std::string indicator);
 

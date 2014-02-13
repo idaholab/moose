@@ -28,10 +28,10 @@ InputParameters validParams<DGFunctionDiffusionDirichletBC>();
  * Implements a simple BC for DG
  *
  * BC derived from diffusion problem that can handle:
- * { \grad u * n_e} [v] + epsilon { \grad v * n_e } [u] + (sigma / |e| * [u][v])
+ * \f$ { \grad u * n_e} [v] + epsilon { \grad v * n_e } [u] + (sigma / |e| * [u][v]) \f$
  *
- *  [a] = [ a_1 - a_2 ]
- *  {a} = 0.5 * (a_1 + a_2)
+ * \f$ [a] = [ a_1 - a_2 ] \f$
+ * \f$ {a} = 0.5 * (a_1 + a_2) \f$
  */
 class DGFunctionDiffusionDirichletBC : public IntegratedBC
 {

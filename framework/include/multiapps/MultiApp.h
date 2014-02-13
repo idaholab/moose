@@ -94,6 +94,7 @@ public:
   /**
    * Get a UserObject base for a specific global app
    * @param app The global app number you want to get a UserObject from.
+   * @param name The name of the UserObject.
    */
   const UserObject & appUserObjectBase(unsigned int app, const std::string & name);
 
@@ -109,7 +110,7 @@ public:
    * In general this is the Auxiliary system solution vector.
    *
    * @param app The global app number you want the transfer vector for.
-   * @param The name of the variable you are going to be transferring to.
+   * @param var_name The name of the variable you are going to be transferring to.
    * @return The vector to fill.
    */
   virtual NumericVector<Number> & appTransferVector(unsigned int app, std::string var_name);
@@ -136,7 +137,7 @@ public:
 
   /**
    * Whether or not the given global app number is on this processor.
-   * @param app The global app number in question
+   * @param global_app The global app number in question
    * @return True if the global app is on this processor
    */
   bool hasLocalApp(unsigned int global_app);
@@ -164,6 +165,7 @@ public:
   /**
    * Move the global_app to Point p.
    *
+   * @param global_app The global app number in question
    * @param p The new position of the App.
    */
   virtual void moveApp(unsigned int global_app, Point p);

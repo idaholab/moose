@@ -313,10 +313,10 @@ clean_up:
 # Misc
 #
 syntax:
-	python scripts/generate_input_syntax.py
+	$(shell python scripts/generate_input_syntax.py)
 
 doc:
-	doxygen doc/doxygen/Doxyfile
+	$(shell doxygen doc/doxygen/Doxyfile)
 
 depclean: cleandep
 cleandep: cleandep

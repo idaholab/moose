@@ -64,7 +64,7 @@ public:
 
   /**
    * Is the variable active on the subdomain?
-   * @param Subdomain id
+   * @param subdomain The subdomain id in question
    * @return true if active on subdomain, false otherwise
    */
   bool activeOnSubdomain(SubdomainID subdomain) const;
@@ -274,8 +274,8 @@ public:
 protected:
   /**
    * Get dof indices for the variable
-   * @param elem[in] Element whose DOFs we are requesting
-   * @param dof_indices[out] DOF indices for the given element
+   * @param elem Element whose DOFs we are requesting (input)
+   * @param dof_indices DOF indices for the given element (output)
    */
   void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices);
 

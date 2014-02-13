@@ -214,8 +214,8 @@ NonlinearSystem::solve()
       _sys.rhs->close();
       _initial_residual = _sys.rhs->l2_norm();
 
-      // \TODO: Remove this after output system redo; this is not needed as it is the same as the
-      // first entry of the nonlinear residual output
+      /// \todo{Remove this after output system redo; this is not needed as it is the same as the
+      /// first entry of the nonlinear residual output}
       Moose::out << std::scientific << std::setprecision(6);
       Moose::out << " Initial |R| = " << _initial_residual << std::endl;
     }
