@@ -19,10 +19,10 @@
 #include "OutputBase.h"
 #include "FormattedTable.h"
 
-class TableOutputBase;
+class TableOutputter;
 
 template<>
-InputParameters validParams<TableOutputBase>();
+InputParameters validParams<TableOutputter>();
 
 /**
  * Base class for scalar variables and postprocessors output objects
@@ -35,7 +35,7 @@ InputParameters validParams<TableOutputBase>();
  *
  * @see CSV Console
  */
-class TableOutputBase :
+class TableOutputter :
   public OutputBase
 {
 public:
@@ -43,12 +43,12 @@ public:
   /**
    * Class constructor.
    */
-  TableOutputBase(const std::string & name, InputParameters);
+  TableOutputter(const std::string & name, InputParameters);
 
   /**
    * Destructor
    */
-  virtual ~TableOutputBase();
+  virtual ~TableOutputter();
 
 protected:
 
@@ -89,4 +89,4 @@ protected:
   FormattedTable _all_data_table;
 };
 
-#endif /* TABLEOUTPUTBASE_H */
+#endif /* TABLEOUTPUTTER_H */

@@ -13,14 +13,14 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "OversampleBase.h"
+#include "OversampleOutputter.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "FileMesh.h"
 #include "MooseApp.h"
 
 template<>
-InputParameters validParams<OversampleBase>()
+InputParameters validParams<OversampleOutputter>()
 {
 
   // Get the parameters from the parent object
@@ -35,7 +35,7 @@ InputParameters validParams<OversampleBase>()
   return params;
 }
 
-OversampleBase::OversampleBase(const std::string & name, InputParameters & parameters) :
+OversampleOutputter::OversampleOutputter(const std::string & name, InputParameters & parameters) :
     OutputBase(name, parameters),
     _mesh_ptr(getParam<bool>("use_displaced") ?
               &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
@@ -47,7 +47,7 @@ OversampleBase::OversampleBase(const std::string & name, InputParameters & param
     initOversample();
 }
 
-OversampleBase::~OversampleBase()
+OversampleOutputter::~OversampleOutputter()
 {
   // When the Oversamle::initOversample() is called it creates new objects for the _mesh_ptr and _es_ptr
   // that contain the refined mesh and variables. Also, the _mesh_functions vector and _serialized_solution
@@ -71,7 +71,7 @@ OversampleBase::~OversampleBase()
 }
 
 void
-OversampleBase::output()
+OversampleOutputter::output()
 {
   // Perform oversample solution projection
   if (_oversample)
@@ -82,7 +82,7 @@ OversampleBase::output()
 }
 
 void
-OversampleBase::initOversample()
+OversampleOutputter::initOversample()
 {
 
   // Extract the input parameters from FEProblem
@@ -167,7 +167,7 @@ OversampleBase::initOversample()
 }
 
 void
-OversampleBase::oversample()
+OversampleOutputter::oversample()
 {
   // Get a reference to actual equation system
   EquationSystems & source_es = _problem_ptr->es();

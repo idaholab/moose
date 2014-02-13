@@ -103,6 +103,7 @@ Parser::isSectionActive(const std::string & s,
   return retValue;
 }
 
+
 std::string
 Parser::getFileName(bool stripLeadingPath) const
 {

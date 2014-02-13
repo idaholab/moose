@@ -32,8 +32,10 @@ InputParameters validParams<CommonOutputAction>()
 
    // Common parameters
    params.addParam<bool>("output_initial", true,  "Request that the initial condition is output to the solution file");
-   params.addParam<OutFileBase>("file_base", "Common file base name to be utilized with all output objects");
+   params.addParam<std::string>("file_base", "Common file base name to be utilized with all output objects");
    params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
+   params.addParam<std::vector<VariableName> >("hide", "A list of the variables and postprocessors that should NOT be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
+   params.addParam<std::vector<VariableName> >("show", "A list of the variables and postprocessors that should be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
 
    return params;
 

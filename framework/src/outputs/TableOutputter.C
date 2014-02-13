@@ -13,7 +13,7 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "TableOutputBase.h"
+#include "TableOutputter.h"
 #include "FEProblem.h"
 #include "Postprocessor.h"
 #include "PetscSupport.h"
@@ -25,7 +25,7 @@
 #include "libmesh/string_to_enum.h"
 
 template<>
-InputParameters validParams<TableOutputBase>()
+InputParameters validParams<TableOutputter>()
 {
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
@@ -43,29 +43,29 @@ InputParameters validParams<TableOutputBase>()
   return params;
 }
 
-TableOutputBase::TableOutputBase(const std::string & name, InputParameters parameters) :
+TableOutputter::TableOutputter(const std::string & name, InputParameters parameters) :
     OutputBase(name, parameters)
 {
 }
 
-TableOutputBase::~TableOutputBase()
+TableOutputter::~TableOutputter()
 {
 }
 
 void
-TableOutputBase::outputNodalVariables()
+TableOutputter::outputNodalVariables()
 {
-  mooseError("Nodal nonlinear variable output not supported by TableOutputBase output class");
+  mooseError("Nodal nonlinear variable output not supported by TableOutputter output class");
 }
 
 void
-TableOutputBase::outputElementalVariables()
+TableOutputter::outputElementalVariables()
 {
-  mooseError("Elemental nonlinear variable output not supported by TableOutputBase output class");
+  mooseError("Elemental nonlinear variable output not supported by TableOutputter output class");
 }
 
 void
-TableOutputBase::outputPostprocessors()
+TableOutputter::outputPostprocessors()
 {
   // List of names of the postprocessors to output
   const std::vector<std::string> & out = getPostprocessorOutput();
@@ -80,7 +80,7 @@ TableOutputBase::outputPostprocessors()
 }
 
 void
-TableOutputBase::outputScalarVariables()
+TableOutputter::outputScalarVariables()
 {
   // List of scalar variables
   const std::vector<std::string> & out = getScalarOutput();

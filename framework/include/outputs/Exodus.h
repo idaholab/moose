@@ -16,8 +16,8 @@
 #define EXODUS_H
 
 // MOOSE includes
-#include "FileOutputBase.h"
-#include "OversampleBase.h"
+#include "OversampleOutputter.h"
+#include "FileOutputInterface.h"
 
 // libMesh includes
 #include "libmesh/exodusII.h"
@@ -33,8 +33,8 @@ InputParameters validParams<Exodus>();
  * Class for output data to the ExodusII format
  */
 class Exodus :
-  public OversampleBase,
-  public FileOutputBase
+  public OversampleOutputter,
+  public FileOutputInterface
 {
 public:
 

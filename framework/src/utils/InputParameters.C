@@ -391,17 +391,30 @@ InputParameters::applyParameters(const InputParameters & common)
   // Loop through the common parameters
   for(InputParameters::const_iterator it = common.begin(); it != common.end(); ++it)
   {
-    // Extract value for setting criteria
-    bool has = _values.find(it->first) != _values.end();
-    bool valid = isParamValid(it->first);
-    bool priv = isPrivate(it->first);
+    // Common parameter name
+    const std::string & common_name = it->first;
 
-    // Apply the common parameter if it exists, is not set valid, and is not private
-    if (has && !valid && !priv)
+    // Does the paramter exist, is it valid, and is it private for this set of paramters
+    bool has = _values.find(common_name) != _values.end();
+    bool valid = isParamValid(common_name);
+    bool priv = isPrivate(common_name);
+
+    // Is the common parameter valid or private
+    bool common_valid = common.isParamValid(common_name);
+    bool common_priv= common.isPrivate(common_name);
+
+    /* Apply the common parameter if:
+     * (1) The common paramter exists on THIS set of parameters
+     * (2) THIS parameter is not already valid
+     * (3) THIS paramater is not private
+     * (4) The common parameter is valid
+     * (5) The common parameter is not private
+     */
+    if (has && !valid && !priv && common_valid && !common_priv)
     {
-      delete _values[it->first];
-      _values[it->first] = it->second->clone();
-      set_attributes(it->first, false);
+      delete _values[common_name];
+      _values[common_name] = it->second->clone();
+      set_attributes(common_name, false);
     }
   }
 }

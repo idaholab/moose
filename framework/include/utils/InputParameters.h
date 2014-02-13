@@ -378,13 +378,15 @@ public:
   bool hasDefaultPostprocessorValue(const std::string & name) const;
 
   /*
-   * Method for apply common parameters
+   * Method for applying common parameters
    * @param common The set of parameters to apply to the parameters store in this object
    *
    * The parameters supplied as an argument are set if:
-   *  (1) The parameter exists
-   *  (2) The parameter does not already have a valid value
-   *  (3) The parameter is NOT private
+   *  (1) The common parameter exists as a local parameter
+   *  (2) The local parameter is not valid
+   *  (3) The local parameter is not private
+   *  (4) The common parameter is valid
+   *  (5) The common parameter is not private
    *
    * Output object have a set of common parameters that are passed
    * down to each of the output object created. This method is used for

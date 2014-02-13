@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef OVERSAMPLEBASE_H
-#define OVERSAMPLEBASE_H
+#ifndef OVERSAMPLEOUTPUTTER_H
+#define OVERSAMPLEOUTPUTTER_H
 
 // MOOSE includes
 #include "OutputBase.h"
@@ -25,10 +25,10 @@
 #include "libmesh/mesh_function.h"
 
 // Forward declerations
-class OversampleBase;
+class OversampleOutputter;
 
 template<>
-InputParameters validParams<OversampleBase>();
+InputParameters validParams<OversampleOutputter>();
 
 /**
  * Based class for providing oversampling support to output objects
@@ -45,7 +45,7 @@ InputParameters validParams<OversampleBase>();
  *
  * @see Exodus
  */
-class OversampleBase :
+class OversampleOutputter :
   public OutputBase
 {
 public:
@@ -57,7 +57,7 @@ public:
    * required for oversampling.
    * @see initOversample()
    */
-  OversampleBase(const std::string & name, InputParameters & parameters);
+  OversampleOutputter(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
@@ -65,7 +65,7 @@ public:
    * Cleans up the various objects associated with the oversample EquationsSystem and Mesh
    * objects.
    */
-  virtual ~OversampleBase();
+  virtual ~OversampleOutputter();
 
   /**
    * Overloaded output() that include oversampling

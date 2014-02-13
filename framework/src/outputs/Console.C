@@ -27,8 +27,8 @@ InputParameters validParams<Console>()
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Get the parameters from the base class
-  InputParameters params = validParams<TableOutputBase>();
-  params += validParams<FileOutputBase>();
+  InputParameters params = validParams<TableOutputter>();
+  params += validParams<FileOutputInterface>();
 
   // Screen and file output toggles
   params.addParam<bool>("screen", true, "Output to the screen");
@@ -63,8 +63,8 @@ InputParameters validParams<Console>()
 }
 
 Console::Console(const std::string & name, InputParameters parameters) :
-    TableOutputBase(name, parameters),
-    FileOutputBase(name, parameters),
+    TableOutputter(name, parameters),
+    FileOutputInterface(name, parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _use_color(false),
@@ -331,7 +331,7 @@ Console::petscSetup()
 void
 Console::outputPostprocessors()
 {
-  TableOutputBase::outputPostprocessors();
+  TableOutputter::outputPostprocessors();
 
   if (!_postprocessor_table.empty())
   {
@@ -351,7 +351,7 @@ Console::outputPostprocessors()
 void
 Console::outputScalarVariables()
 {
-  TableOutputBase::outputScalarVariables();
+  TableOutputter::outputScalarVariables();
 
   if (!_scalar_table.empty())
   {

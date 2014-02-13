@@ -16,8 +16,8 @@
 #define CONSOLE_H
 
 // MOOSE includes
-#include "TableOutputBase.h"
-#include "FileOutputBase.h"
+#include "TableOutputter.h"
+#include "FileOutputInterface.h"
 #include "FormattedTable.h"
 #include "Conversion.h"
 
@@ -34,8 +34,8 @@ InputParameters validParams<Console>();
  * An output object for writting to the console (screen)
  */
 class Console :
-  public TableOutputBase,
-  public FileOutputBase
+  public TableOutputter,
+  public FileOutputInterface
 {
 public:
 

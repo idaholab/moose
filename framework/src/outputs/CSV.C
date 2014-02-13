@@ -19,15 +19,15 @@ template<>
 InputParameters validParams<CSV>()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<TableOutputBase>();
-  params += validParams<FileOutputBase>();
+  InputParameters params = validParams<TableOutputter>();
+  params += validParams<FileOutputInterface>();
 
   return params;
 }
 
 CSV::CSV(const std::string & name, InputParameters & parameters) :
-    FileOutputBase(name, parameters),
-    TableOutputBase(name, parameters)
+    TableOutputter(name, parameters),
+    FileOutputInterface(name, parameters)
 {
 }
 
@@ -45,7 +45,7 @@ void
 CSV::output()
 {
   // Call the base class output (populates tables)
-  TableOutputBase::output();
+  TableOutputter::output();
 
   // Print the table containing all the data to a file
   if (!_all_data_table.empty())

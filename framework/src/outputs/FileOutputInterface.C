@@ -12,48 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef FILEOUTPUTBASE_H
-#define FILEOUTPUTBASE_H
-
 // Moose includes
-#include "InputParameters.h"
-
-// Forward declerations
-class FileOutputBase;
+#include "FileOutputInterface.h"
 
 template<>
-InputParameters validParams<FileOutputBase>();
-
-/**
- * A stand-alone Base class for adding basic filename support to output objects
- *
- * @see Exodus
- */
-class FileOutputBase
+InputParameters validParams<FileOutputInterface>()
 {
-public:
+  // Create InputParameters object for this stand-alone object
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::string>("file_base", "The desired solution output name without an extension (Defaults appends '_out' to the input file name)");
+  return params;
+}
 
-  /**
-   * Class constructor
-   */
-  FileOutputBase(const std::string & name, InputParameters & parameters);
+FileOutputInterface::FileOutputInterface(const std::string & name, InputParameters & parameters) :
+    _file_base(parameters.get<std::string>("file_base"))
+{
+}
 
-  /**
-   * Class destructor
-   */
-  virtual ~FileOutputBase();
-
-  /**
-   * The filename for the output file
-   * @return A string of output file including the extension
-   */
-  virtual std::string filename() = 0;
-
-protected:
-
-  /// The base filename from the input paramaters
-  OutFileBase _file_base;
-
-};
-
-#endif /* FILEOUTPUTBASE_H */
+FileOutputInterface::~FileOutputInterface()
+{
+}

@@ -14,10 +14,9 @@
 
 #include "AddOutputAction.h"
 #include "FEProblem.h"
-#include "OutputWarehouse.h"
 #include "Factory.h"
+#include "OutputWarehouse.h"
 #include "OutputBase.h"
-#include "OversampleBase.h"
 #include "MooseApp.h"
 #include "FileMesh.h"
 #include "MooseApp.h"
@@ -42,7 +41,6 @@ AddOutputAction::AddOutputAction(const std::string & name, InputParameters param
 void
 AddOutputAction::act()
 {
-
   // Get the output object name
   std::string object_name = getShortName();
 
@@ -57,8 +55,22 @@ AddOutputAction::act()
   // Apply the common parameters
   _moose_object_pars.applyParameters(_output_warehouse.getCommonParameters());
 
+  // Set the file base, if it has not been set already
+  if (!_moose_object_pars.isParamValid("file_base"))
+    _moose_object_pars.set<std::string>("file_base") = getDefaultOutFileBase();
+
   // Create the object and add it to the warehouse
   OutputBase * output = static_cast<OutputBase *>(_factory.create(_type, object_name, _moose_object_pars));
   _output_warehouse.addOutput(output);
 
+}
+
+std::string
+AddOutputAction::getDefaultOutFileBase()
+{
+  std::string input_file_name = _app.getFileName();
+  mooseAssert(input_file_name != "", "Input Filename is NULL");
+  size_t pos = input_file_name.find_last_of('.');
+  mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
+  return input_file_name.substr(0,pos) + "_out";
 }

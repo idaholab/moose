@@ -14,7 +14,7 @@
 
 #include "OutputWarehouse.h"
 #include "OutputBase.h"
-#include "FileOutputBase.h"
+#include "FileOutputInterface.h"
 #include "Console.h"
 
 OutputWarehouse::OutputWarehouse() :
@@ -54,7 +54,7 @@ OutputWarehouse::addOutput(OutputBase * output)
   _output_names.insert(output->name());
 
   // If the output object is a FileOutputBase then store the output filename
-  FileOutputBase * ptr = dynamic_cast<FileOutputBase *>(output);
+  FileOutputInterface * ptr = dynamic_cast<FileOutputInterface *>(output);
   if (ptr != NULL)
     addOutputFilename(ptr->filename());
 

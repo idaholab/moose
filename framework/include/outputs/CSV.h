@@ -16,8 +16,8 @@
 #define CSV_H
 
 // MOOSE includes
-#include "FileOutputBase.h"
-#include "TableOutputBase.h"
+#include "TableOutputter.h"
+#include "FileOutputInterface.h"
 
 // Forward declerations
 class CSV;
@@ -31,8 +31,8 @@ InputParameters validParams<CSV>();
  * @see Exodus
  */
 class CSV :
-  public FileOutputBase,
-  public TableOutputBase
+  public TableOutputter,
+  public FileOutputInterface
 {
 public:
 
