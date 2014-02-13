@@ -427,7 +427,6 @@ public:
     else
       for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
         _var_map[var_num].insert(*it);
-    _var_names.push_back(var_name);
   }
 
   /**
@@ -470,7 +469,7 @@ public:
 
   virtual unsigned int nVariables() { return _vars[0].all().size(); }
 
-  const std::vector<VariableName> & getVariableNames() const { return _var_names; }
+  const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 
   virtual void computeVariables(const NumericVector<Number>& /*soln*/)
   {
@@ -571,7 +570,6 @@ protected:
   T & _sys;
   /// default kind of variables in this system
   Moose::VarKindType _var_kind;
-  std::vector<VariableName> _var_names;
 
   NumericVector<Number> & _solution;
   NumericVector<Number> & _solution_old;

@@ -65,6 +65,12 @@ public:
   MooseVariableBase * getVariable(unsigned int var_number);
 
   /**
+   * Get the list of all variable names
+   * @return The list of variable names
+   */
+  const std::vector<VariableName> & names() const;
+
+  /**
    * Get the list of all variables
    * @return The list of variables
    */
@@ -90,6 +96,8 @@ public:
   const std::vector<MooseVariableScalar *> & scalars();
 
 protected:
+  /// list of variable names
+  std::vector<VariableName> _names;
   /// list of all variables
   std::vector<MooseVariableBase *> _all;
   /// list of "normal" variables

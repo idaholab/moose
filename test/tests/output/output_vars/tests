@@ -9,6 +9,7 @@
     type = 'Exodiff'
     input = 'output_vars_hidden_test.i'
     exodiff = 'out_hidden.e'
+    skip = 'waiting for #1927'
   [../]
 
   [./test_hidden_shown]

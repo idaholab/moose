@@ -30,6 +30,7 @@ VariableWarehouse::~VariableWarehouse()
 void
 VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
 {
+  _names.push_back(var_name);
   _var_name[var_name] = var;
   _all.push_back(var);
 
@@ -72,6 +73,12 @@ VariableWarehouse::getVariable(unsigned int var_number)
     return _all[var_number];
   else
     return NULL;
+}
+
+const std::vector<VariableName> &
+VariableWarehouse::names() const
+{
+  return _names;
 }
 
 const std::vector<MooseVariableBase *> &

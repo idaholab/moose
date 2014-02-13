@@ -39,7 +39,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
 {
   _nodal_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());
-  _scalar_vars.resize(libMesh::n_threads());
 }
 
 AuxiliarySystem::~AuxiliarySystem()
@@ -93,40 +92,18 @@ AuxiliarySystem::jacobianSetup()
 void
 AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
-  unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
+  SystemTempl<TransientExplicitSystem>::addVariable(var_name, type, scale_factor, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
-    var->scalingFactor(scale_factor);
-    _vars[tid].add(var_name, var);
-    if (var->feType().family == LAGRANGE)
-      _nodal_vars[tid][var_name] = var;
-    else
-      _elem_vars[tid][var_name] = var;
+    MooseVariable * var = dynamic_cast<MooseVariable *>(_vars[tid].getVariable(var_name));
+    if (var != NULL)
+    {
+      if (var->feType().family == LAGRANGE)
+        _nodal_vars[tid][var_name] = var;
+      else
+        _elem_vars[tid][var_name] = var;
+    }
   }
-  if (active_subdomains == NULL)
-    _var_map[var_num] = std::set<SubdomainID>();
-  else
-    for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
-      _var_map[var_num].insert(*it);
-  _var_names.push_back(var_name);
-}
-
-void
-AuxiliarySystem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
-{
-  FEType type(order, SCALAR);
-  unsigned int var_num = _sys.add_variable(var_name, type);
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    MooseVariableScalar * var = new MooseVariableScalar(var_num, *this, _subproblem.assembly(tid), _var_kind);
-    var->scalingFactor(scale_factor);
-    _vars[tid].add(var_name, var);
-    _scalar_vars[tid][var_name] = var;
-  }
-
-  // Add the scalar variable to the list of variable names
-  _var_names.push_back(var_name);
 }
 
 void
@@ -322,9 +299,10 @@ AuxiliarySystem::computeScalarVars(std::vector<AuxWarehouse> & auxs)
         kernel->compute();
       }
 
-      for (std::map<std::string, MooseVariableScalar *>::iterator it = _scalar_vars[tid].begin(); it != _scalar_vars[tid].end(); ++it)
+      const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(tid);
+      for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin(); it != scalar_vars.end(); ++it)
       {
-        MooseVariableScalar * var = it->second;
+        MooseVariableScalar * var = *it;
         var->insert(solution());
       }
     }

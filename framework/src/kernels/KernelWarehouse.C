@@ -154,6 +154,8 @@ KernelWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, s
 {
   for (std::vector<Kernel *>::const_iterator it = _all_kernels.begin(); it != _all_kernels.end(); ++it)
     unique_variables.insert((*it)->variable().name());
+  for (std::vector<ScalarKernel *>::const_iterator it = _scalar_kernels.begin(); it != _scalar_kernels.end(); ++it)
+    unique_variables.insert((*it)->variable().name());
 
   if (!_time_global_kernels.empty() || !_nontime_global_kernels.empty() || !_scalar_kernels.empty())
     return true;

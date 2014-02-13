@@ -50,13 +50,6 @@ public:
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
 
   /**
-   * Adds a scalar variable
-   * @param var_name The name of the variable
-   * @param order The order of the variable
-   */
-  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor);
-
-  /**
    * Adds an auxiliary kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel
@@ -135,7 +128,6 @@ protected:
   // Variables
   std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
   std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
-  std::vector<std::map<std::string, MooseVariableScalar *> > _scalar_vars;
 
   ExecStore<AuxWarehouse> _auxs;
 
