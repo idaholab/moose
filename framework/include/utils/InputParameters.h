@@ -69,7 +69,7 @@ public:
   virtual void set_attributes(const std::string &name, bool inserted_only);
 
   /**
-   * Returns a writable reference to the named parametesr.  Note: This is not a virutal
+   * Returns a writable reference to the named parameters.  Note: This is not a virtual
    * function! Use caution when comparing to the parent class implementation
    */
   template <typename T> T & set (const std::string&);
@@ -140,7 +140,7 @@ public:
   void addPrivateParam(const std::string &name);
 
   /**
-   * Add parameters for retrieval from the commandline.
+   * Add parameters for retrieval from the command line.
    *
    * NOTE: This ONLY works for App objects!  This is not valid for normal MOOSE objects!
    *
@@ -192,7 +192,7 @@ public:
    * throws a MooseError if an inconsistent type is detected. While this state is supported by libMesh it brings
    * nothing but blood and tears for those who try ;)
    *
-   * @param name the name of the paramater
+   * @param name the name of the parameter
    */
   template <typename T>
   void checkConsistentType(const std::string &name) const;
@@ -217,7 +217,7 @@ public:
 
 
   /**
-   * This method supresses an inherited parameter so that it isn't required or valid
+   * This method suppresses an inherited parameter so that it isn't required or valid
    * in the derived class. The parameter is added to the private parameter list.
    * Suppressing a parameter can have dire consequences.
    * Use at your own risk!

@@ -16,7 +16,7 @@
     type = RunApp
     input = 'console.i'
     cli_args = 'Outputs/console=true Outputs/screen/file_base=console_warning_out'
-    expect_out = 'Multiple Console output objects are writting to the screen, this will likely cause duplicate messages printed.'
+    expect_out = 'Multiple Console output objects are writing to the screen, this will likely cause duplicate messages printed.'
   [../]
   [./file_system_information]
     # Test that file contains regex

@@ -117,7 +117,7 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
   // Disable output lists based on two items:
   //   (1) If the toggle parameter is invalid
   //   (2) If the toggle is set to false
-  // This is done after initlilization to allow for the appending of the elemental output to occur, because
+  // This is done after initialization to allow for the appending of the elemental output to occur, because
   // it is possible to output a scalar variable as a nodal, then disable the output of scalars, resulting
   // in only the nodal version of the scalar variable to be in the output file (Exodus supports this). The
   // same is true for elemental variables.

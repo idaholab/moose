@@ -65,7 +65,7 @@ OutputWarehouse::addOutput(OutputBase * output)
     bool screen = c_ptr->getParam<bool>("screen");
 
     if (screen && _has_screen_console)
-      mooseWarning("Multiple Console output objects are writting to the screen, this will likely cause duplicate messages printed.");
+      mooseWarning("Multiple Console output objects are writing to the screen, this will likely cause duplicate messages printed.");
     else
       _has_screen_console = true;
   }

@@ -44,7 +44,7 @@ AddOutputAction::act()
   // Get the output object name
   std::string object_name = getShortName();
 
-  // Check that an object by the same nome does not already exist; this must be done befor the object
+  // Check that an object by the same name does not already exist; this must be done before the object
   // is created to avoid getting misleading errors from the Parser
   if (_output_warehouse.hasOutput(object_name))
     mooseError("The output object named '" << object_name << "' already exists");
