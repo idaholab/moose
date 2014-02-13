@@ -194,7 +194,7 @@ SPPARKSUserObject::setSPPARKSData()
 {
   // Update the integer data
   char iarray[] = "iarray";
-  int * ip;
+  int * ip = NULL;
   for (unsigned i = 0; i < _to_ivar.size(); ++i)
   {
     setSPPARKSData( ip, iarray, _to_ivar[i], *_int_aux_vars[i] );
@@ -202,7 +202,7 @@ SPPARKSUserObject::setSPPARKSData()
 
   // Update the double data
   char darray[] = "darray";
-  double * dp;
+  double * dp = NULL;
   for (unsigned i = 0; i < _to_dvar.size(); ++i)
   {
     setSPPARKSData( dp, darray, _to_dvar[i], *_double_aux_vars[i] );

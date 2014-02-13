@@ -106,7 +106,7 @@ protected:
 
   int _dim;
 
-  class ELKID;
+  struct ELKID;
   struct SPPARKSID
   {
     SPPARKSID( unsigned indx, const Point & p ) :

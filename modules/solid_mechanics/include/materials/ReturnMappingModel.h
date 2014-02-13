@@ -23,7 +23,7 @@ public:
                               SymmTensor & strain_increment,
                               SymmTensor & stress_new );
 
-  void computeStress( const Elem & current_elem,
+  void computeStress( const Elem & /*current_elem*/,
                       unsigned qp,
                       const SymmElasticityTensor & elasticityTensor,
                       const SymmTensor & stress_old,

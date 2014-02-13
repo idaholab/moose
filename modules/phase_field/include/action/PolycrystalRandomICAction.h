@@ -18,7 +18,7 @@ private:
   static const Real _abs_zero_tol;
 
   unsigned int _crys_num;
-  unsigned int _grain_num;
+  //unsigned int _grain_num;
   std::string _var_name_base;
   MooseEnum _random_type;
   

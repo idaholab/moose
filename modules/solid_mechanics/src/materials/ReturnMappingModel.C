@@ -50,7 +50,7 @@ ReturnMappingModel::computeStress( const Elem & current_elem,
 }
 
 void
-ReturnMappingModel::computeStress( const Elem & current_elem, unsigned qp,
+ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
                                    const SymmElasticityTensor & elasticityTensor,
                                    const SymmTensor & stress_old,
                                    SymmTensor & strain_increment,

@@ -20,8 +20,8 @@ private:
   unsigned int _crys_num;
   unsigned int _grain_num;
   std::string _var_name_base;
-  unsigned int _rand_seed;
-  bool _cody_test;
+  //unsigned int _rand_seed;
+  //bool _cody_test;
 
 };
 

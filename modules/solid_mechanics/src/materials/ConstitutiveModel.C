@@ -33,8 +33,8 @@ ConstitutiveModel::ConstitutiveModel( const std::string & name,
 {}
 
 void
-ConstitutiveModel::computeStress( const Elem & current_elem,
-                                  unsigned qp,
+ConstitutiveModel::computeStress( const Elem & /*current_elem*/,
+                                  unsigned /*qp*/,
                                   const SymmElasticityTensor & elasticityTensor,
                                   const SymmTensor & stress_old,
                                   SymmTensor & strain_increment,

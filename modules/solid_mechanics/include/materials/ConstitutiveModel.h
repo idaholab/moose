@@ -19,8 +19,8 @@ public:
 
   virtual void initStatefulProperties(unsigned int n_points);
 
-  virtual void computeStress( const Elem & current_elem,
-                              unsigned qp,
+  virtual void computeStress( const Elem & /*current_elem*/,
+                              unsigned /*qp*/,
                               const SymmElasticityTensor & elasticityTensor,
                               const SymmTensor & stress_old,
                               SymmTensor & strain_increment,

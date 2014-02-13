@@ -233,14 +233,14 @@ NodalFloodCount::getElementalValue(unsigned int /*element_id*/) const
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &
-NodalFloodCount::getNodalValues(unsigned int node_id) const
+NodalFloodCount::getNodalValues(unsigned int /*node_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
   return _empty;
 }
 
 std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
-NodalFloodCount::getElementalValues(unsigned int elem_id) const
+NodalFloodCount::getElementalValues(unsigned int /*elem_id*/) const
 {
   std::vector<std::vector<std::pair<unsigned int, unsigned int> > > empty;
 

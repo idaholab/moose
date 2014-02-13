@@ -121,9 +121,6 @@ void
 GluedContactConstraint::updateContactSet(bool beginning_of_step)
 {
   std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
-  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
-  std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._locked_this_step;
-  std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
 
   std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
@@ -168,7 +165,6 @@ GluedContactConstraint::shouldApply()
 Real
 GluedContactConstraint::computeQpSlaveValue()
 {
-  PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
   return _u_slave[_qp];
 }
 
