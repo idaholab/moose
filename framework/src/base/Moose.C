@@ -320,6 +320,7 @@
 #include "Exodus.h"
 #include "Console.h"
 #include "CSV.h"
+#include "Checkpoint.h"
 
 namespace Moose {
 
@@ -572,7 +573,7 @@ registerObjects(Factory & factory)
   registerOutput(Exodus);
   registerOutput(Console);
   registerOutput(CSV);
-
+  registerOutput(Checkpoint);
 
   registered = true;
 }

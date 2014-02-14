@@ -273,6 +273,12 @@ protected:
 
 protected:
 
+  /**
+   * Returns true if the output interval is satisfied
+   * \todo{Implement additional types of intervals (e.g., simulation time and real time)}
+   */
+  bool checkInterval();
+
   /// Pointer the the FEProblem object for output object (use this)
   FEProblem * _problem_ptr;
 
@@ -316,12 +322,6 @@ protected:
   bool _mesh_changed;
 
 private:
-
-  /**
-   * Returns true if the output interval is satisfied
-   * \todo{Implement additional types of intervals (e.g., simulation time and real time)}
-   */
-  bool checkInterval();
 
   /**
    * Initializes the available lists for each of the output types
