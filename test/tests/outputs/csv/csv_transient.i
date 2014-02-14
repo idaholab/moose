@@ -83,15 +83,7 @@
   verbose = true
 []
 
-[Output]
-  # output_initial = true
-  # exodus = true
-  # perf_log = true
-  linear_residuals = false
-[]
-
 [Outputs]
   console = true
   csv = true
 []
-
