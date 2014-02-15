@@ -4,35 +4,24 @@
 #
 # Required Make variables
 # APPLICATION_NAME  - the name of this application (all lower case)
-# MOOSE_DIR	- location of the MOOSE framework
-# ELK_DIR	- location of ELK (if enabled)
+# CURR_DIR	    - current directory (DO NOT MODIFY THIS VARIABLE)
 #
 # Optional Environment variables
-# CURR_DIR	- current directory (DO NOT MODIFY THIS VARIABLE)
-#
-# Note: Make sure that there is no whitespace after the word 'yes' if enabling
-# an application
+# MOOSE_DIR	    - location of the MOOSE framework
 ###############################################################################
-CURR_DIR  ?= $(shell pwd)
-ROOT_DIR  ?= $(shell dirname `pwd`)
-
-ifeq ($(MOOSE_DEV),true)
-	MOOSE_DIR ?= $(ROOT_DIR)/devel/moose
-else
-	MOOSE_DIR ?= $(ROOT_DIR)/moose
-endif
-
-MOOSE_TEST_DIR   ?= $(ROOT_DIR)/moose_test
-
 APPLICATION_NAME := moose_test
+CURR_DIR         ?= $(shell pwd)
+
+MOOSE_DIR	 ?= $(shell dirname `pwd`)
 
 # Note: There are no applications that depend on moose_test so the test_up and up
 # targets are not very useful here.  Instead we will test up like this is MOOSE
-DEP_APPS    ?= $(shell $(MOOSE_DIR)/scripts/find_dep_apps.py MOOSE~$(APPLICATION_NAME))
+MOOSE_TEST_DIR  := $(MOOSE_DIR)/test
+DEP_APPS  := $(shell $(MOOSE_DIR)/framework/scripts/find_dep_apps.py MOOSE~$(APPLICATION_NAME))
 
 ###############################################################################
-include $(MOOSE_DIR)/build.mk
-include $(MOOSE_DIR)/moose.mk
+include $(MOOSE_DIR)/framework/build.mk
+include $(MOOSE_DIR)/framework/moose.mk
 include $(MOOSE_TEST_DIR)/moose_test.mk
 
 ###############################################################################

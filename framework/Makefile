@@ -1,24 +1,20 @@
 ###############################################################################
-################### MOOSE Application Standard Makefile #######################
+######################### MOOSE Framework Makefile  ###########################
 ###############################################################################
 #
 # Required Make variables
-# APPLICATION_NAME  - the name of this application (all lower case)
-# MOOSE_DIR	- location of the MOOSE framework
-# ELK_DIR	- location of ELK (if enabled)
-#
-# Optional Environment variables
 # CURR_DIR	- current directory (DO NOT MODIFY THIS VARIABLE)
 #
-# Note: Make sure that there is no whitespace after the word 'yes' if enabling
-# an application
+# Optional Environment variables
+# MOOSE_DIR	- location of the MOOSE repository directory
 ###############################################################################
-all::
+#all::
 
 CURR_DIR	?= $(shell pwd)
-MOOSE_DIR	?= $(shell pwd)
-ROOT_DIR        ?= $(shell scripts/find_dep_apps.py ROOT)
-DEP_APPS	?= $(shell scripts/find_dep_apps.py MOOSE)
+MOOSE_DIR	?= $(shell dirname `pwd`)
+
+#ROOT_DIR        ?= $(shell scripts/find_dep_apps.py ROOT)
+#DEP_APPS	?= $(shell scripts/find_dep_apps.py MOOSE)
 
 include build.mk
 include moose.mk

@@ -109,7 +109,7 @@ moose/include/base/Precompiled.h.gch
 .*.swp
 .*.swo
 
-moose/contrib/exodiff/exodiff
+framework/contrib/exodiff/exodiff
 
 # Mac garbage
 .DS_Store

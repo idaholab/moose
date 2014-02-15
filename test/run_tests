@@ -6,18 +6,17 @@ os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
 
 #### Set the name of the application here and moose directory relative to the application
 app_name = 'moose_test'
-MOOSE_DIR = '../moose'
+
+MOOSE_DIR = '../'
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
-elif os.environ.has_key("MOOSE_DEV"):
-  MOOSE_DIR = '../devel/moose'
 
 # Import the TestHarness and Helper functions from the MOOSE toolkit
-sys.path.append(MOOSE_DIR + '/scripts/common')
-sys.path.append(MOOSE_DIR + '/scripts/TestHarness')
+sys.path.append(MOOSE_DIR + 'framework/scripts/common')
+sys.path.append(MOOSE_DIR + 'framework/scripts/TestHarness')
 import tools
 
 # create an instance of the test harness passing in the main arg vector
 # and the name of the application
-tools.runTests(sys.argv, app_name, MOOSE_DIR)
+tools.runTests(sys.argv, app_name, MOOSE_DIR + '/framework/')

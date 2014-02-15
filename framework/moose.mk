@@ -1,33 +1,33 @@
 #
 # MOOSE
 #
-moose_SRC_DIRS := $(MOOSE_DIR)/src
-moose_SRC_DIRS += $(MOOSE_DIR)/contrib/mtwist-1.1
-moose_SRC_DIRS += $(MOOSE_DIR)/contrib/dtk_moab
+moose_SRC_DIRS := $(MOOSE_DIR)/framework/src
+moose_SRC_DIRS += $(MOOSE_DIR)/framework/contrib/mtwist-1.1
+moose_SRC_DIRS += $(MOOSE_DIR)/framework/contrib/dtk_moab
 
 #
 # pcre
 #
-pcre_DIR       := $(MOOSE_DIR)/contrib/pcre
+pcre_DIR       := $(MOOSE_DIR)/framework/contrib/pcre
 pcre_srcfiles  := $(shell find $(pcre_DIR) -name "*.cc")
 pcre_csrcfiles := $(shell find $(pcre_DIR) -name "*.c")
 pcre_objects   := $(patsubst %.cc, %.$(obj-suffix), $(pcre_srcfiles))
 pcre_objects   += $(patsubst %.c, %.$(obj-suffix), $(pcre_csrcfiles))
 pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
 
-moose_INC_DIRS := $(shell find $(MOOSE_DIR)/include -type d -not -path "*/.svn*")
-moose_INC_DIRS += $(shell find $(MOOSE_DIR)/contrib/*/include -type d -not -path "*/.svn*")
+moose_INC_DIRS := $(shell find $(MOOSE_DIR)/framework/include -type d -not -path "*/.svn*")
+moose_INC_DIRS += $(shell find $(MOOSE_DIR)/framework/contrib/*/include -type d -not -path "*/.svn*")
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 
 libmesh_INCLUDE := $(moose_INCLUDE) $(libmesh_INCLUDE)
 
 # Making a .la object instead.  This is what you make out of .lo objects...
-moose_LIB := $(MOOSE_DIR)/libmoose-$(METHOD).la
+moose_LIB := $(MOOSE_DIR)/framework/libmoose-$(METHOD).la
 
 LIBS += $(moose_LIB) $(pcre_LIB)
 
 # source files
-moose_precompiled_headers := $(MOOSE_DIR)/include/base/Precompiled.h
+moose_precompiled_headers := $(MOOSE_DIR)/framework/include/base/Precompiled.h
 moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name "*.C")
 moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.c")
 moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
@@ -50,12 +50,12 @@ moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
 moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
 
 # revision header
-revision_header = $(MOOSE_DIR)/include/base/HerdRevision.h
+revision_header = $(MOOSE_DIR)/framework/include/base/HerdRevision.h
 
 all:: herd_revision moose
 
 herd_revision:
-	$(shell $(MOOSE_DIR)/scripts/get_repo_revision.py $(MOOSE_DIR))
+	$(shell $(MOOSE_DIR)/framework/scripts/get_repo_revision.py $(MOOSE_DIR)/framework)
 
 moose: $(moose_LIB)
 
@@ -72,8 +72,8 @@ $(pcre_LIB): $(pcre_objects)
 $(moose_LIB): $(moose_precompiled_headers_objects) $(moose_objects) $(pcre_LIB)
 	@echo "Linking "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(MOOSE_DIR)
-	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(MOOSE_DIR)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(MOOSE_DIR)/framework
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(MOOSE_DIR)/framework
 
 ## Clang static analyzer
 sa:: $(moose_analyzer)
@@ -81,18 +81,18 @@ sa:: $(moose_analyzer)
 # include MOOSE dep files. Note: must use -include for deps, since they don't exist for first time builds.
 -include $(moose_deps)
 
--include $(wildcard $(MOOSE_DIR)/contrib/mtwist-1.1/src/*.d)
--include $(wildcard $(MOOSE_DIR)/contrib/dtk_moab/src/*.d)
--include $(wildcard $(MOOSE_DIR)/contrib/pcre/src/*.d)
+-include $(wildcard $(MOOSE_DIR)/framework/contrib/mtwist-1.1/src/*.d)
+-include $(wildcard $(MOOSE_DIR)/framework/contrib/dtk_moab/src/*.d)
+-include $(wildcard $(MOOSE_DIR)/framework/contrib/pcre/src/*.d)
 
 ifdef PRECOMPILED
--include $(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch.d
+-include $(MOOSE_DIR)/framework/include/base/Precompiled.h.gch/$(METHOD).h.gch.d
 endif
 
 #
 # exodiff
 #
-exodiff_DIR := $(MOOSE_DIR)/contrib/exodiff
+exodiff_DIR := $(MOOSE_DIR)/framework/contrib/exodiff
 exodiff_APP := $(exodiff_DIR)/exodiff
 exodiff_srcfiles := $(shell find $(exodiff_DIR) -name "*.C")
 exodiff_objfiles := $(patsubst %.C, %.$(obj-suffix), $(exodiff_srcfiles))
@@ -129,7 +129,7 @@ clobber::
 	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
 
 cleanall::
-	make -C $(MOOSE_DIR) clean
+	make -C $(MOOSE_DIR)/framework clean
 
 echo_include:
 	@echo $(libmesh_INCLUDE)
