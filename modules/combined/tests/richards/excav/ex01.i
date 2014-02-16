@@ -45,6 +45,7 @@
     start_time = 0
     end_posn = '0 500 0'
     end_time = 3E7
+    active_length = 1E4
   [../]
 
 # mass_bal_fcn calculates the mass balance

@@ -29,7 +29,7 @@ RichardsExcav::RichardsExcav(const std::string & name,
 bool
 RichardsExcav::shouldApply()
 {
-  if (_func.value(_t, *_current_node) < 1.0)
+  if (_func.value(_t, *_current_node) == 0.0)
     return false;
   else
     return true;
