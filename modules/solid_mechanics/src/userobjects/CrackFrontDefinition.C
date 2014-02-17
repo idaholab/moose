@@ -389,7 +389,24 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       back_segment = forward_segment;
       back_segment_len = forward_segment_len;
     }
-    //std::cout<<"overall len: "<<_overall_length<<std::endl;
+
+    Moose::out<<"Summary of J-Integral crack front geometry:"<<std::endl;
+    Moose::out<<"index   node id   x coord       y coord       z coord       x dir         y dir          z dir        seg length"<<std::endl;
+    for (unsigned int i=0; i<crack_front_nodes.size(); ++i)
+    {
+      Moose::out<<std::left
+                <<std::setw(8) <<i+1
+                <<std::setw(10)<<crack_front_nodes[i]->id()
+                <<std::setw(14)<<(*crack_front_nodes[i])(0)
+                <<std::setw(14)<<(*crack_front_nodes[i])(1)
+                <<std::setw(14)<<(*crack_front_nodes[i])(2)
+                <<std::setw(14)<<_crack_directions[i](0)
+                <<std::setw(14)<<_crack_directions[i](1)
+                <<std::setw(14)<<_crack_directions[i](2)
+                <<std::setw(14)<<(_segment_lengths[i].first+_segment_lengths[i].second)/2.0
+                <<std::endl;
+    }
+    std::cout<<"overall length: "<<_overall_length<<std::endl;
   }
 }
 
@@ -492,7 +509,6 @@ CrackFrontDefinition::calculateCrackFrontDirection(const Node* crack_front_node,
   {
     crack_dir = tangent_direction.cross(_crack_plane_normal_from_curved_front);
     crack_dir = crack_dir.unit();
-    std::cout<<"BWS crack_dir: "<<crack_dir<<std::endl;
   }
   return crack_dir;
 }
