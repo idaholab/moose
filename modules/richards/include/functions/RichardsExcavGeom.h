@@ -30,6 +30,7 @@ protected:
   RealVectorValue _end_posn;
   Real _end_time;
   Real _active_length;
+  Real _true_value;
   RealVectorValue _retreat_vel;
   Real _norm_retreat_vel;
 

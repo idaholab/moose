@@ -14,6 +14,7 @@ InputParameters validParams<RichardsExcavGeom>()
   params.addRequiredParam<RealVectorValue>("end_posn", "End position of the excavation.  This is an (x,y,z) point in the middle of the coal face at the very end of the panel.");
   params.addRequiredParam<Real>("end_time", "Time at the completion of the excavation");
   params.addRequiredParam<Real>("active_length", "This function is only active at a point if the distance between the point and the coal face <= active_length.");
+  params.addParam<Real>("true_value", 1.0, "Return this value if a point is in the active zone.  This is usually used for controlling permeability-changes");
   params.addClassDescription("This function defines excavation geometry.  It can be used to enforce pressures at the boundary of excavations, and to record fluid fluxes into excavations.");
   return params;
 }
@@ -25,6 +26,7 @@ RichardsExcavGeom::RichardsExcavGeom(const std::string & name, InputParameters p
   _end_posn(getParam<RealVectorValue>("end_posn")),
   _end_time(getParam<Real>("end_time")),
   _active_length(getParam<Real>("active_length")),
+  _true_value(getParam<Real>("true_value")),
   _retreat_vel(_end_posn - _start_posn)
 {
   if (_start_time >= _end_time)
@@ -63,6 +65,6 @@ RichardsExcavGeom::value(Real t, const Point & p)
     return 0.0;
   }
       
-  return 1.0;
+  return _true_value;
 }
 
