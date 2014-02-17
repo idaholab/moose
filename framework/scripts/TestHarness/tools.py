@@ -1,13 +1,13 @@
 import sys, os
 
-plugin_dir = '/scripts/TestHarness/testers'
+plugin_dir = '/framework/scripts/TestHarness/testers'
 
 module_path = os.path.dirname(__file__)
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
 else:
   MOOSE_DIR = os.path.abspath(module_path) + '/../..'
-sys.path.append(MOOSE_DIR + '/scripts/common')
+sys.path.append(MOOSE_DIR + '/framework/scripts/common')
 sys.path.append(MOOSE_DIR + plugin_dir)
 
 # Import the Two Harness classes

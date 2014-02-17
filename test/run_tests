@@ -13,10 +13,10 @@ if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
 
 # Import the TestHarness and Helper functions from the MOOSE toolkit
-sys.path.append(MOOSE_DIR + 'framework/scripts/common')
-sys.path.append(MOOSE_DIR + 'framework/scripts/TestHarness')
+sys.path.append(os.path.join(MOOSE_DIR, 'framework', 'scripts', 'common'))
+sys.path.append(os.path.join(MOOSE_DIR, 'framework', 'scripts', 'TestHarness'))
 import tools
 
 # create an instance of the test harness passing in the main arg vector
 # and the name of the application
-tools.runTests(sys.argv, app_name, MOOSE_DIR + '/framework/')
+tools.runTests(sys.argv, app_name, os.path.join(MOOSE_DIR, 'framework/'))
