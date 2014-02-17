@@ -39,6 +39,8 @@ public:
 
   ElasticityTensorR4 operator-(const ElasticityTensorR4 &a) const;
 
+  ElasticityTensorR4 operator - () const;
+
   ElasticityTensorR4 operator*(const Real &a);
 
   RankTwoTensor operator*(const RankTwoTensor &a);

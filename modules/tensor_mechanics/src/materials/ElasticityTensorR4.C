@@ -72,6 +72,20 @@ ElasticityTensorR4::operator-(const ElasticityTensorR4 &a) const
 }
 
 ElasticityTensorR4
+ElasticityTensorR4::operator - () const
+{
+  ElasticityTensorR4 result;
+
+  for(unsigned int i(0); i<N; i++)
+    for(unsigned int j(0); j<N; j++)
+      for(unsigned int k(0); k<N; k++)
+	for(unsigned int l(0); l<N; l++)
+	  result(i,j,k,l) = -_vals[i][j][k][l];
+
+  return result;
+}
+
+ElasticityTensorR4
 ElasticityTensorR4::operator*(const Real &a)
 {
   ElasticityTensorR4 result;
