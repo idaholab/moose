@@ -12,6 +12,7 @@
 #include "RichardsPorepressureNames.h"
 #include "RichardsDensityConstBulk.h"
 #include "RichardsDensityIdeal.h"
+#include "RichardsDensityMethane20degC.h"
 #include "RichardsRelPermMonomial.h"
 #include "RichardsRelPermPower.h"
 #include "RichardsRelPermVG.h"
@@ -85,6 +86,7 @@ Elk::Richards::registerObjects(Factory & factory)
   registerUserObject(RichardsPorepressureNames);
   registerUserObject(RichardsDensityConstBulk);
   registerUserObject(RichardsDensityIdeal);
+  registerUserObject(RichardsDensityMethane20degC);
   registerUserObject(RichardsRelPermMonomial);
   registerUserObject(RichardsRelPermPower);
   registerUserObject(RichardsRelPermVG);

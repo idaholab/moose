@@ -20,6 +20,9 @@
     p0 = 33333
     slope = 1.1E-2
   [../]
+  [./DensityMethane20degC]
+    type = RichardsDensityMethane20degC
+  [../]
 
   # following are unimportant in this test
   [./SeffVG]
@@ -89,6 +92,21 @@
     vars = 'p0 slope'
     vals = '33333 1.1E-2'
   [../]
+
+  [./answer_DensityMethane20degC]
+    type = ParsedFunction
+    value = 0.00654576947608E-3*x+1.04357716547E-13*x^2
+  [../]
+  [./answer_dDensityMethane20degC]
+    type = GradParsedFunction
+    direction = '1 0 0'
+    value = 0.00654576947608E-3*x+1.04357716547E-13*x^2
+  [../]
+  [./answer_d2DensityMethane20degC]
+    type = Grad2ParsedFunction
+    direction = '1 0 0'
+    value = 0.00654576947608E-3*x+1.04357716547E-13*x^2
+  [../]
 []
 
 [AuxVariables]
@@ -104,6 +122,13 @@
   [./dDensityIdeal_Aux]
   [../]
   [./d2DensityIdeal_Aux]
+  [../]
+
+  [./DensityMethane20degC_Aux]
+  [../]
+  [./dDensityMethane20degC_Aux]
+  [../]
+  [./d2DensityMethane20degC_Aux]
   [../]
 
   [./check_Aux]
@@ -149,10 +174,29 @@
     pressure_var = pressure
   [../]
 
+  [./DensityMethane20degC_AuxK]
+    type = RichardsDensityAux
+    variable = DensityMethane20degC_Aux
+    density_UO = DensityMethane20degC
+    pressure_var = pressure
+  [../]
+  [./dDensityMethane20degC_AuxK]
+    type = RichardsDensityPrimeAux
+    variable = dDensityMethane20degC_Aux
+    density_UO = DensityMethane20degC
+    pressure_var = pressure
+  [../]
+  [./d2DensityMethane20degC_AuxK]
+    type = RichardsDensityPrimePrimeAux
+    variable = d2DensityMethane20degC_Aux
+    density_UO = DensityMethane20degC
+    pressure_var = pressure
+  [../]
+
   [./check_AuxK]
     type = FunctionAux
     variable = check_Aux
-    function = answer_d2DensityConstBulk
+    function = answer_DensityMethane20degC
   [../]
 []
 
@@ -187,6 +231,22 @@
     type = NodalL2Error
     function = answer_d2DensityIdeal
     variable = d2DensityIdeal_Aux
+  [../]
+
+  [./cf_DensityMethane20degC]
+    type = NodalL2Error
+    function = answer_DensityMethane20degC
+    variable = DensityMethane20degC_Aux
+  [../]
+  [./cf_dDensityMethane20degC]
+    type = NodalL2Error
+    function = answer_dDensityMethane20degC
+    variable = dDensityMethane20degC_Aux
+  [../]
+  [./cf_d2DensityMethane20degC]
+    type = NodalL2Error
+    function = answer_d2DensityMethane20degC
+    variable = d2DensityMethane20degC_Aux
   [../]
 []
     
