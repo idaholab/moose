@@ -560,6 +560,10 @@ void FEProblem::initialSetup()
   if(isRestarting() || isRecovering())
     _resurrector->restartRestartableData();
 
+  // Scalar variables need to reinited for the initial conditions to be available for output
+  for(unsigned int tid = 0; tid < n_threads; tid++)
+    reinitScalars(tid);
+
   // Initial setup of output objects
   _app.getOutputWarehouse().initialSetup();
 }
