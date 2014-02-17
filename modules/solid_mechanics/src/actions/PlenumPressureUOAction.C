@@ -23,6 +23,9 @@ InputParameters validParams<PlenumPressureUOAction>()
   params.addParam<std::vector<Real> >("refab_volume", "The gas volume at refabrication.");
   params.addParam<std::vector<unsigned> >("refab_type", "The type of refabrication.  0 for instantaneous reset of gas, 1 for reset with constant fraction until next refabrication");
 
+  params += validParams<SetupInterface>();
+  params.set<MooseEnum>("execute_on") = "residual";
+
   return params;
 }
 
@@ -49,7 +52,7 @@ PlenumPressureUOAction::act()
 
   InputParameters params = _factory.getValidParams(uo_type_name);
 
-  params.set<MooseEnum>("execute_on") = "residual";
+  params.set<MooseEnum>("execute_on") = getParam<MooseEnum>("execute_on");
 
   params.set<Real>("initial_pressure") = _initial_pressure;
   params.set<std::vector<PostprocessorName> >("material_input") = _material_input;
