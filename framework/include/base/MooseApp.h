@@ -276,14 +276,14 @@ protected:
 
   virtual void meshOnly(std::string mesh_file_name);
 
-  /// True if the old "Output" block was included \todo{remove when old output system is deleted}
-  bool _legacy_output;
-
   /// The name of this object
   std::string _name;
 
   /// Parameters of this object
   InputParameters _pars;
+
+  /// True if the old "Output" block was included \todo{remove when old output system is deleted}
+  bool _legacy_output;
 
   /// Input file name used
   std::string _input_filename;
