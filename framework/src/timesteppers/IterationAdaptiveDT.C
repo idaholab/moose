@@ -1,7 +1,7 @@
 #include "IterationAdaptiveDT.h"
 
 #include "Function.h"
-#include "PiecewiseLinear.h"
+#include "Piecewise.h"
 #include "Transient.h"
 
 template<>
@@ -32,7 +32,7 @@ IterationAdaptiveDT::IterationAdaptiveDT(const std::string & name, InputParamete
   _linear_iteration_ratio(isParamValid("linear_iteration_ratio") ? getParam<unsigned>("linear_iteration_ratio") : 25),  // Default to 25
   _adaptive_timestepping(false),
   _timestep_limiting_function(NULL),
-  _piecewise_linear_timestep_limiting_function(NULL),
+  _piecewise_timestep_limiting_function(NULL),
   _times(0),
   _max_function_change(-1),
   _force_step_every_function_point(getParam<bool>("force_step_every_function_point")),
@@ -101,15 +101,19 @@ IterationAdaptiveDT::init()
   if (isParamValid("timestep_limiting_function"))
   {
     _timestep_limiting_function = &_fe_problem.getFunction(getParam<FunctionName>("timestep_limiting_function"), isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0);
-    _piecewise_linear_timestep_limiting_function = dynamic_cast<PiecewiseLinear*>(_timestep_limiting_function);
-    if(_piecewise_linear_timestep_limiting_function)
+    _piecewise_timestep_limiting_function = dynamic_cast<Piecewise*>(_timestep_limiting_function);
+    if(_piecewise_timestep_limiting_function)
     {
-      unsigned int time_size = _piecewise_linear_timestep_limiting_function->functionSize();
+      unsigned int time_size = _piecewise_timestep_limiting_function->functionSize();
       _times.resize(time_size);
       for (unsigned int i=0; i < time_size; ++i)
       {
-       _times[i] = _piecewise_linear_timestep_limiting_function->domain(i);
+       _times[i] = _piecewise_timestep_limiting_function->domain(i);
       }
+    }
+    else
+    {
+      mooseError("timestep_limiting_function must be a Piecewise function");
     }
   }
 
@@ -301,19 +305,19 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
       while (change > _max_function_change);
     }
   }
-  if (_piecewise_linear_timestep_limiting_function && _force_step_every_function_point)
+  if (_piecewise_timestep_limiting_function && _force_step_every_function_point)
   {
-    Point dummyPoint;
-     Real oldSlope = _piecewise_linear_timestep_limiting_function->timeDerivative(_time_old,dummyPoint);
-     Real newSlope = _piecewise_linear_timestep_limiting_function->timeDerivative(_time_old+limitedDT,dummyPoint);
-     for (unsigned int i=0; i < _times.size()-1; ++i)
+    for (unsigned int i=0; i < _times.size()-1; ++i)
+    {
       if(_time >= _times[i] && _time < _times[i+1])
-       {
-         if(limitedDT > _times[i+1] - _time)
-         {
-           limitedDT = _times[i+1] - _time;
-         }
-       }
+      {
+        if(limitedDT > _times[i+1] - _time)
+        {
+          limitedDT = _times[i+1] - _time;
+        }
+        break;
+      }
+    }
   }
 
   if (limitedDT < orig_dt)
