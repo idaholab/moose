@@ -48,14 +48,19 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Output]
-  # Test the checkpoint interval parameter
-  checkpoint_interval = 3  # output every third timestep
-  num_checkpoint_files = 2  # keep the last two most recent checkpoint copies
-
+[Outputs]
   linear_residuals = true
   output_initial = true
   exodus = true
-  perf_log = true
+  [./checkpoint]
+  # Test the checkpoint interval parameter	   
+    type = Checkpoint
+     interval = 3  # output every third timestep
+     num_files = 2  # keep the last two most recent checkpoint copies
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
 
