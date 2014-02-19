@@ -1,0 +1,24 @@
+[Tests]
+  [./files_serial]
+    # Check that the files are being created (serial)
+    type = 'CheckFiles'
+    input = 'vtk.i'
+    check_files = 'vtk_out_000.vtk vtk_out_000_0.vtu vtk_out_001.vtk vtk_out_001_0.vtu vtk_out_002.vtk vtk_out_002_0.vtu vtk_out_003.vtk vtk_out_003_0.vtu vtk_out_004.vtk vtk_out_004_0.vtu vtk_out_005.vtk vtk_out_005_0.vtu'
+    max_parallel = 1
+  [../]
+  [./files_parallel]
+    # Check that the files are being created (serial)
+    type = 'CheckFiles'
+    input = 'vtk.i'
+    check_files = 'vtk_out_000.vtk vtk_out_000_0.vtu vtk_out_000_1.vtu vtk_out_001.vtk vtk_out_001_0.vtu vtk_out_001_1.vtu vtk_out_002.vtk vtk_out_002_0.vtu vtk_out_002_1.vtu vtk_out_003.vtk vtk_out_003_0.vtu vtk_out_003_1.vtu vtk_out_004.vtk vtk_out_004_0.vtu vtk_out_004_1.vtu vtk_out_005.vtk vtk_out_005_0.vtu vtk_out_005_1.vtu'
+    max_parallel = 2
+    min_parallel = 2
+  [../]
+  [./diff]
+    # Check that actual solution, requires serial due to VTK parallel output
+    type = VTKDiff
+    vtkdiff = 'vtk_out_005.vtk vtk_out_005_0.vtu'
+    input = vtk.i
+    max_parallel = 1
+  [../]  
+[]

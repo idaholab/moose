@@ -30,10 +30,10 @@
     family = SCALAR
     initial_condition = 10
   [../]
-	[./aux3]
-	  family = MONOMIAL
-		order = CONSTANT
-	[../]
+  [./aux3]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [Kernels]

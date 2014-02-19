@@ -80,7 +80,6 @@ Exodus::outputSetup()
   // Utilize the spatial dimensions
   if (_es_ptr->get_mesh().mesh_dimension() != 1)
     _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
-
 }
 
 void
