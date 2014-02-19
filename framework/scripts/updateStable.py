@@ -2,7 +2,7 @@
 import os, sys, string, subprocess, re, socket, getopt
 
 # If hostname equals head_node, this script will run
-head_node = 'rocky'
+head_node = 'hpcbuild'
 
 # Moose stable and devel checkout locations
 moose_stable = 'https://hpcsc.inl.gov/svn/herd/trunk/moose'
@@ -149,7 +149,7 @@ def process_args():
   return opts[0]
 
 if __name__ == '__main__':
-  if head_node in socket.gethostname().split('.')[0]:
+  if os.getenv('STABLE'):
     runCMD(comment_syntax_cmd)
     runCMD(rsync_comment_syntax_cmd)
     arg_revision = process_args()
