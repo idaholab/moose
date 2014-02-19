@@ -34,6 +34,7 @@ public:
   virtual void initStatefulProperties( unsigned n_points );
 
   virtual void applyThermalStrain();
+  virtual void applyVolumetricStrain();
 
   static void rotateSymmetricTensor( const ColumnMajorMatrix & R, const SymmTensor & T,
                                      SymmTensor & result );

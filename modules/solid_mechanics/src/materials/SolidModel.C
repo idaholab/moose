@@ -416,12 +416,7 @@ SolidModel::modifyStrainIncrement()
     applyThermalStrain();
   }
 
-  const Real VoldV0 = _element->volumeRatioOld(_qp);
-  const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
-  for (unsigned int i(0); i < vm.size(); ++i)
-  {
-    vm[i]->modifyStrain(_qp, 1/VoldV0, _strain_increment, _d_strain_dT);
-  }
+  applyVolumetricStrain();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -449,6 +444,20 @@ SolidModel::applyThermalStrain()
     _strain_increment.addDiag( -tStrain );
 
     _d_strain_dT.addDiag( -alpha );
+  }
+}
+
+////////////////////////////////////////////////////////////////////////
+
+void
+SolidModel::applyVolumetricStrain()
+{
+  const SubdomainID current_block = _current_elem->subdomain_id();
+  const Real VoldV0 = _element->volumeRatioOld(_qp);
+  const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
+  for (unsigned int i(0); i < vm.size(); ++i)
+  {
+    vm[i]->modifyStrain(_qp, 1/VoldV0, _strain_increment, _d_strain_dT);
   }
 }
 
