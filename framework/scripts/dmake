@@ -187,10 +187,16 @@ if __name__ == "__main__":
   if options.kill or options.no_daemon:
     daemon.kill()
 
-  # Start the daemons
-  if options.refresh or (options.daemon and not options.no_daemon):
+  # Start the daemons when:
+  #  (1) --no_daemon is not used and any of the following occur
+  #  (2a) When the .dmakerc file is out-of-date
+  #  (2b) --refresh is specified
+  #  (2c) When the --daemon option is used
+  #  (2d) When --dedicated is used
+  if not options.no_daemon and (dmakerc.needUpdate() or options.refresh or options.daemon or options.dedicated):
     warehouse.buildMachines(dmakerc.get('HOST_LINES'), disable=dmakerc.get('DISABLE'), hammer=dmakerc.get('HAMMER'))
     daemon.start(warehouse.machines)
+    dmakerc.forceUpdate()
 
   # Exit if running basic daemon options
   if options.daemon or options.kill:
