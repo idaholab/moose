@@ -7,6 +7,7 @@ from util import *
 from time import sleep
 from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
+from XMLDiffer import XMLDiffer
 from Tester import Tester
 from PetscJacobianTester import PetscJacobianTester
 from InputParameters import InputParameters
