@@ -129,7 +129,9 @@
     variable = pwater
     boundary = 'left'
     pressures = '-1E10 1E10'
-    fluxes = '-1 -1'
+    bare_fluxes = '-1 -1'
+    use_mobility = false
+    use_relperm = false
   [../]
   [./fixedwater]
     type = DirichletBC

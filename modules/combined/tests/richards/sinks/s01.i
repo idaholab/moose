@@ -86,14 +86,18 @@
     boundary = left
     variable = pressure
     pressures = '0 1'
-    fluxes = '1 2'
+    bare_fluxes = '1 2'
+    use_mobility = false
+    use_relperm = false
   [../]
   [./right_flux_out]
     type = RichardsPiecewiseLinearSinkFlux
     boundary = right
     variable = pressure
     pressures = '0 1'
-    fluxes = '1 2'
+    bare_fluxes = '1 2'
+    use_mobility = false
+    use_relperm = false
   [../]
   [./p0]
     type = PointValue
@@ -111,15 +115,19 @@
     type = RichardsPiecewiseLinearSink
     boundary = left
     pressures = '0 1'
-    fluxes = '1 2'
+    bare_fluxes = '1 2'
     variable = pressure
+    use_mobility = false
+    use_relperm = false
   [../]
   [./right_flux]
     type = RichardsPiecewiseLinearSink
     boundary = right
     pressures = '0 1'
-    fluxes = '1 2'
+    bare_fluxes = '1 2'
     variable = pressure
+    use_mobility = false
+    use_relperm = false
   [../]
 []
 

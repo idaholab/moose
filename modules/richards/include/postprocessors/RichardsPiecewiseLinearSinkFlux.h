@@ -28,6 +28,8 @@ protected:
   virtual Real computeQpIntegral();
 
   FEProblem & _feproblem;
+  bool _use_mobility;
+  bool _use_relperm;
   LinearInterpolation _sink_func;
 
 };

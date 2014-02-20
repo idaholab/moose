@@ -96,7 +96,9 @@
     variable = pressure
     boundary = 'right'
     pressures = '-1E10 1E10'
-    fluxes = '-1.25 -1.25' # corresponds to Rstar=0.5 because i have to multiply by density*porosity
+    bare_fluxes = '-1.25 -1.25' # corresponds to Rstar=0.5 because i have to multiply by density*porosity
+    use_mobility = false
+    use_relperm = false
   [../]
 []
 

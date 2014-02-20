@@ -71,7 +71,9 @@
     type = RichardsPiecewiseLinearSink
     boundary = 'left right'
     pressures = '-0.9 0.9'
-    fluxes = '1E6 2E6'  # can't make too high as finite-difference constant state bums out due to precision loss
+    bare_fluxes = '1E6 2E6'  # can't make too high as finite-difference constant state bums out due to precision loss
+    use_mobility = false
+    use_relperm = false
     variable = pressure
   [../]
 []
