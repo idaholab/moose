@@ -53,12 +53,12 @@ XDAOutput::output(const std::string & file_base, Real /*time*/, unsigned int t_s
   if (_binary)
   {
     mesh.write(getFileName(file_base, t_step)+"_mesh.xdr");
-    _es.write (getFileName(file_base, t_step)+".xdr", libMeshEnums::ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
+    _es.write (getFileName(file_base, t_step)+".xdr", ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
   }
   else
   {
     mesh.write(getFileName(file_base, t_step)+"_mesh.xda");
-    _es.write (getFileName(file_base, t_step)+".xda", libMeshEnums::WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
+    _es.write (getFileName(file_base, t_step)+".xda", WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
   }
 }
 
