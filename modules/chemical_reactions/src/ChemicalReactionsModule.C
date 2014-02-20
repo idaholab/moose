@@ -10,6 +10,8 @@
 #include "CoupledConvectionReactionSub.h"
 #include "CoupledDiffusionReactionSub.h"
 #include "CoupledBEKinetic.h"
+#include "DesorptionFromMatrix.h"
+#include "DesorptionToPorespace.h"
 
 #include "AqueousEquilibriumRxnAux.h"
 #include "KineticDisPreConcAux.h"
@@ -24,6 +26,8 @@
 
 #include "ChemicalOutFlowBC.h"
 
+#include "LangmuirMaterial.h"
+
 void
 Elk::ChemicalReactions::registerObjects(Factory & factory)
 {
@@ -34,12 +38,16 @@ Elk::ChemicalReactions::registerObjects(Factory & factory)
   registerKernel(CoupledConvectionReactionSub);
   registerKernel(CoupledDiffusionReactionSub);
   registerKernel(CoupledBEKinetic);
+  registerKernel(DesorptionFromMatrix);
+  registerKernel(DesorptionToPorespace);
 
   registerAux(AqueousEquilibriumRxnAux);
   registerAux(KineticDisPreConcAux);
   registerAux(KineticDisPreRateAux);
     
   registerBoundaryCondition(ChemicalOutFlowBC);
+
+  registerMaterial(LangmuirMaterial);
 }
 
 void

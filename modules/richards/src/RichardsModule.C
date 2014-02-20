@@ -41,6 +41,7 @@
 #include "RichardsRelPermAux.h"
 #include "RichardsRelPermPrimeAux.h"
 #include "RichardsRelPermPrimePrimeAux.h"
+#include "FunctionOfVariableAux.h"
 
 // Materials
 #include "RichardsMaterial.h"
@@ -115,6 +116,7 @@ Elk::Richards::registerObjects(Factory & factory)
   registerAux(RichardsRelPermAux);
   registerAux(RichardsRelPermPrimeAux);
   registerAux(RichardsRelPermPrimePrimeAux);
+  registerAux(FunctionOfVariableAux);
 
   // Materials
   registerMaterial(RichardsMaterial);
