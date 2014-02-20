@@ -9,7 +9,7 @@ moose_stable = 'https://hpcsc.inl.gov/svn/herd/trunk/moose'
 moose_devel = 'https://hpcsc.inl.gov/svn/herd/trunk/devel/moose'
 
 # We exclude these applications:
-excluded_applications = set(['r7_moose', 'rattlesnake', 'moose_unit'])
+excluded_applications = set(['r7_moose', 'rattlesnake'])
 
 # Comment Syntax Coverage command:
 comment_syntax_cmd = [ 'moose/framework/contrib/nsiqcppstyle/nsiqcppstyle', '--quiet', '--basedir=/moose/framework', '-f', 'moose/framework/contrib/nsiqcppstyle/syntax_style', '--output=html', '--url=https://hpcsc.inl.gov/moose/browser/trunk', '-o', 'output.html', 'moose']
@@ -26,7 +26,7 @@ def buildStatus():
   tmp_apps = []
   tmp_passed = []
   # Open line itemed list of applications passing their tests
-  log_file = open('moose/test_results.log', 'r')
+  log_file = open('moose/framework/test_results.log', 'r')
   tmp_passed = string.split(log_file.read(), '\n')
   log_file.close()
   # Remove trailing \n element which creates an empty item
