@@ -31,7 +31,7 @@ DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_N
 include $(FRAMEWORK_DIR)/app.mk
 
 # Find all the MOOSE unit test source files and include their dependencies.
-moose_unit_srcfiles := $(shell find $(MOOSE_DIR)/moose_unit -name "*.C")
+moose_unit_srcfiles := $(shell find $(MOOSE_DIR)/unit -name "*.C")
 moose_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_unit_srcfiles))
 -include $(moose_unit_deps)
 
