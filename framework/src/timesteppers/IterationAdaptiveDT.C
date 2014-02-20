@@ -98,7 +98,7 @@ IterationAdaptiveDT::init()
   {
     _timestep_limiting_function = &_fe_problem.getFunction(getParam<FunctionName>("timestep_limiting_function"), isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0);
     _piecewise_timestep_limiting_function = dynamic_cast<Piecewise*>(_timestep_limiting_function);
-    if(_piecewise_timestep_limiting_function)
+    if (_piecewise_timestep_limiting_function)
     {
       unsigned int time_size = _piecewise_timestep_limiting_function->functionSize();
       _times.resize(time_size);
@@ -305,11 +305,11 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
   }
   if (_piecewise_timestep_limiting_function && _force_step_every_function_point)
   {
-    for (unsigned int i=0; i < _times.size()-1; ++i)
+    for (unsigned int i=0; i<_times.size()-1; ++i)
     {
-      if(_time >= _times[i] && _time < _times[i+1])
+      if (_time >= _times[i] && _time < _times[i+1])
       {
-        if(limitedDT > _times[i+1] - _time)
+        if (limitedDT > _times[i+1] - _time)
         {
           limitedDT = _times[i+1] - _time;
         }
