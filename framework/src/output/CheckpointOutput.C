@@ -65,12 +65,12 @@ CheckpointOutput::output(const std::string & file_base, Real /*time*/, unsigned 
   if (_binary)
   {
     io.write(getFileName(file_base, t_step)+"_mesh.cpr");
-    _es.write (getFileName(file_base, t_step)+".xdr", libMeshEnums::ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES, renumber);
+    _es.write (getFileName(file_base, t_step)+".xdr", ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES, renumber);
   }
   else
   {
     io.write(getFileName(file_base, t_step)+"_mesh.cpa");
-    _es.write (getFileName(file_base, t_step)+".xda", libMeshEnums::WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES, renumber);
+    _es.write (getFileName(file_base, t_step)+".xda", WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES, renumber);
   }
 }
 
