@@ -470,6 +470,8 @@ Residual fluid saturation & 0.1 \\
 Residual air saturation & 0.1 \\
 Van Genuchten $m$ & 0.5 \\
 Van Genuchten $\alpha$ & 1\,Pa$^{-1}$ \\
+Power-type relative permeabilty $n$ & 2 \\
+$\kappa_{xx}$ & $10^{-5}$\,m$^{2}$ \\
 Porosity & 0.1 \\
 \hline
 \end{tabular} 
@@ -480,7 +482,7 @@ Porosity & 0.1 \\
 \mbox{sink flux (kg.m$^{-1}$.s$^{-1}$)} = \left\{
 \begin{array}{ll}
 1 & \mbox{ for } p \leq 0 \\
-p & \mbox{ for } 0<p<1 \\
+1+p & \mbox{ for } 0<p<1 \\
 2 & \mbox{ for } p\geq 1 
 \end{array}
 \right.
@@ -544,6 +546,45 @@ Figure~\ref{s02.fig}.
   demonstrating that the recorded sink flux is truly reducing the mass
   in the correct way.}
 \label{s02.fig}
+\end{figure}
+
+
+\noindent In the third test a piecewise-linear sink with relative
+permeability and mobility affects is used.  The flux strength is:
+\begin{equation}
+\mbox{sink flux (kg.m$^{-1}$.s$^{-1}$)} = 
+\frac{\rho\kappa_{xx}\kappa_{\mathrm{rel}}}{\mu}
+\times \left\{
+\begin{array}{ll}
+100 & \mbox{ for } p \leq -1 \\
+150+50p& \mbox{ for } -1<p<1 \\
+200 & \mbox{ for } p\geq 1 
+\end{array}
+\right.
+\label{eqn.s03}
+\end{equation}
+The sink flux is recorded by into a Postprocessor by MOOSE.  It is
+remotely possible that the MOOSE implementation {\em applies} the sink
+flux incorrectly, but {\em records} it as a Postprocessor correctly as
+specified by Eqn~(\ref{eqn.s03}).  Therefore the simulation also
+records the fluid mass and mass-balance error in order to check that
+the fluid mass is indeed being reduced correctly by the sink flux.
+The initial condition is $p=2$\,Pa, and the simulation is run for
+0.2\,s with 100 time steps.  The expected behaviour is demonstrated in
+Figure~\ref{s03.fig}.
+
+\begin{figure}[htb]
+\centering
+\begin{tabular}{cc}
+\includegraphics[width=7cm]{s03.eps} &
+\includegraphics[width=7cm]{s03_mass_bal.eps}
+\end{tabular}
+\caption{Left: Comparison between the MOOSE result (in dots), and the
+  expected behaviour of the sink flux given by Eqn~(\ref{eqn.s03}).
+  Right: The mass-balance error is small for the simulation described
+  demonstrating that the recorded sink flux is truly reducing the mass
+  in the correct way.}
+\label{s03.fig}
 \end{figure}
 
 

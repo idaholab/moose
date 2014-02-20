@@ -164,7 +164,7 @@
     type = RichardsMaterial
     block = 0
     mat_porosity = 0.1
-    mat_permeability = '1E-5 0 0  0 1E-5 0  0 0 1E-5'
+    mat_permeability = '1E-5 2.1E-5 2.2E-5  2.1E-5 0.1E-5 3.3E-5  2.2E-5 3.3E-5 2E-5'
     density_UO = DensityConstBulk
     relperm_UO = RelPermPower
     SUPG_UO = SUPGstandard
