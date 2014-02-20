@@ -12,7 +12,7 @@ moose_devel = 'https://hpcsc.inl.gov/svn/herd/trunk/devel/moose'
 excluded_applications = set(['r7_moose', 'rattlesnake', 'moose_unit'])
 
 # Comment Syntax Coverage command:
-comment_syntax_cmd = [ 'moose/contrib/nsiqcppstyle/nsiqcppstyle', '--quiet', '--basedir=/moose/', '-f', 'moose/contrib/nsiqcppstyle/syntax_style', '--output=html', '--url=https://hpcsc.inl.gov/moose/browser/trunk', '-o', 'output.html', 'moose']
+comment_syntax_cmd = [ 'moose/framework/contrib/nsiqcppstyle/nsiqcppstyle', '--quiet', '--basedir=/moose/framework', '-f', 'moose/framework/contrib/nsiqcppstyle/syntax_style', '--output=html', '--url=https://hpcsc.inl.gov/moose/browser/trunk', '-o', 'output.html', 'moose']
 rsync_comment_syntax_cmd = ['/usr/bin/rsync', '-av', '--delete', 'output.html', os.getenv('TRAC_SERVER') + ':/srv/www/ssl/MOOSE/coverage/' ]
 
 _USAGE = """
@@ -58,8 +58,8 @@ def getCoverage():
 
   # Use the same commands from the coverage_html script to generate the raw.info file
   coverage_cmd = [ os.getenv('LCOV_BIN'),
-                   '--base-directory', 'moose',
-                   '--directory', 'moose/src/',
+                   '--base-directory', 'moose/framework',
+                   '--directory', 'moose/framework/src/',
                    '--capture',
                    '--ignore-errors', 'gcov,source',
                    '--output-file', 'raw.info'
