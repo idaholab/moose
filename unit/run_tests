@@ -5,9 +5,9 @@ if [ -z $METHOD ]; then
   export METHOD=opt
 fi
 
-if [ -e ./moose_unit/moose_unit-$METHOD ]
+if [ -e ./unit/moose_unit-$METHOD ]
 then
-  ./moose_unit/moose_unit-$METHOD
+  ./unit/moose_unit-$METHOD
 elif [ -e ./moose_unit-$METHOD ]
 then
   ./moose_unit-$METHOD
