@@ -71,6 +71,14 @@
     difference_tol = 1E10
   [../]
 
+  [./jn22]
+    type = 'PetscJacobianTester'
+    input = 'jn22.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
   [./jn38]
     type = 'PetscJacobianTester'
     input = 'jn38.i'
