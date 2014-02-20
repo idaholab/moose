@@ -93,7 +93,9 @@
     variable = pressure
     boundary = 'right'
     pressures = '0 1E9'
-    fluxes = '-2.315E-3 -2.315E-3'
+    bare_fluxes = '-2.315E-3 -2.315E-3'
+    use_relperm = false
+    use_mobility = false
   [../]
 []
 

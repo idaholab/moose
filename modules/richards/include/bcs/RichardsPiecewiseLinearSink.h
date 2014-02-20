@@ -8,6 +8,7 @@
 
 #include "IntegratedBC.h"
 #include "LinearInterpolation.h"
+#include "RichardsPorepressureNames.h"
 
 // Forward Declarations
 class RichardsPiecewiseLinearSink;
@@ -27,9 +28,22 @@ protected:
 
   virtual Real computeQpJacobian();
 
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+
   bool _use_mobility;
   bool _use_relperm;
   LinearInterpolation _sink_func;
+
+  const RichardsPorepressureNames & _pp_name_UO;
+  unsigned int _pvar;
+
+  MaterialProperty<std::vector<Real> > &_viscosity;
+  MaterialProperty<RealTensorValue> & _permeability;
+  MaterialProperty<std::vector<std::vector<Real> > > &_dseff;
+  MaterialProperty<std::vector<Real> > &_rel_perm;
+  MaterialProperty<std::vector<Real> > &_drel_perm;
+  MaterialProperty<std::vector<Real> > &_density;
+  MaterialProperty<std::vector<Real> > &_ddensity;
 };
 
 #endif //RichardsPiecewiseLinearSink
