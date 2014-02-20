@@ -189,6 +189,12 @@ class DmakeRC(object):
     return self._fail
 
 
+  ## Force an update to occur
+  # Sets the update flag to true
+  def forceUpdate(self):
+    self._update = True
+
+
   ## Return true of the distcc hosts requires update (public)
   # @return True if the ip addresses from the server differ from the stored
   def needUpdate(self):
