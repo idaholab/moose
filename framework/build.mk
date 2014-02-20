@@ -2,8 +2,13 @@
 # Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE.
 #       This can be overridden by using environment variables (MOOSE_DIR and/or FRAMEWORK_DIR)
 
-# Set LIBMESH_DIR if it is not already set in the environment
-LIBMESH_DIR     ?= /../../libmesh/installed
+# Set LIBMESH_DIR if it is not already set in the environment (try our best to guess!)
+IS_MOOSE_PROJECT  := $(shell dirname `pwd` | grep 'moose\>')
+ifeq (,$(IS_MOOSE_PROJECT))
+  LIBMESH_DIR     ?= ../libmesh/installed
+else
+  LIBMESH_DIR     ?= ../../libmesh/installed
+endif
 
 # If the user has no environment variable
 # called METHOD, he gets optimized mode.
