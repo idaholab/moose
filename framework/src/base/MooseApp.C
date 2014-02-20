@@ -80,6 +80,7 @@ void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos
 MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _name(name),
     _pars(parameters),
+    _legacy_output(false),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
