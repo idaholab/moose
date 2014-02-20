@@ -47,6 +47,7 @@
 [Outputs]
   [./exodus]
     type = Exodus
+    output_initial = true
   [../]
 []
 ##! [ExodusOutputBlock]

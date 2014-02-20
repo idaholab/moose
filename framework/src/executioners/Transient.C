@@ -98,7 +98,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
     _old_time_solution_norm(declareRestartableData<Real>("old_time_solution_norm", 0.0)),
-    _sync_times(getParam<std::vector<Real> >("sync_times").begin(),getParam<std::vector<Real> >("sync_times").end()),
+    _sync_times(_app.getOutputWarehouse().getSyncTimes()),
     _abort(getParam<bool>("abort_on_solve_fail")),
     _time_interval(declareRestartableData<bool>("time_interval", false)),
     _start_time(getParam<Real>("start_time")),
@@ -403,6 +403,9 @@ Transient::endStep()
     // Compute the Error Indicators and Markers
     _problem.computeIndicatorsAndMarkers();
 
+    // Perform the output of the current time step
+    _output_warehouse.outputStep();
+
     //output
     if(_time_interval)
     {
@@ -412,7 +415,6 @@ Transient::endStep()
       {
         if(_allow_output)
         {
-          _output_warehouse.output();
           _problem.output(true);
           _problem.outputPostprocessors(true);
           _problem.outputRestart(true);
@@ -429,7 +431,6 @@ Transient::endStep()
       // if _at_sync_point is true, force the output no matter what
       if(_allow_output)
       {
-        _output_warehouse.output();
         _problem.output(_at_sync_point);
         _problem.outputPostprocessors(_at_sync_point);
         _problem.outputRestart(_at_sync_point);
@@ -619,6 +620,10 @@ Transient::keepGoing()
     Moose::out << "Aborting as solve did not converge and input selected to abort" << std::endl;
     keep_going = false;
   }
+
+  if (!keep_going)
+    _output_warehouse.outputFinal();
+
   return keep_going;
 }
 

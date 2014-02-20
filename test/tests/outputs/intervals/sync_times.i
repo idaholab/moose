@@ -40,18 +40,20 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 20
+  num_steps = 15
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+sync_times = '1.5 3.75 8.92'
+  verbose = true
 []
 
 [Outputs]
   console = true
   [./exodus]
     type = Exodus
-    output_initial = false
-    interval = 5
+    sync_times = '0.15 0.375 0.892'
+    sync_only = true
   [../]
 []

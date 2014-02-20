@@ -52,19 +52,15 @@ public:
 
 protected:
 
+  //@{
   /**
-   * Produces an error, it is not possible to output nodal data to a table
+   * Produces an error, it is not possible to output nodal and elemental data to a table
    *
    * The call to this function is disable by suppressing the input parameter: output_nodal_variables
    */
   virtual void outputNodalVariables();
-
-  /**
-   * Produces an error, it is not possible to output element data to a table
-   *
-   * The call to this function is disable by suppressing the input parameter: output_elemental_variables
-   */
   virtual void outputElementalVariables();
+  //@}
 
   /**
    * Popules the tables with scalar aux variables

@@ -14,10 +14,10 @@
 []
 
 [Functions]
-	[./aux_v_fn]
-		type = ParsedFunction
-		value = x*(y-0.5)/5
-	[../]
+  [./aux_v_fn]
+    type = ParsedFunction
+    value = x*(y-0.5)/5
+  [../]
 []
 
 [Variables]
@@ -130,8 +130,9 @@
 ##! [OutputDisplaced]
 [Outputs]
   [./exodus_displaced]
-    type =	Exodus
+    type = Exodus
     use_displaced = true
+    output_initial = true
   [../]
 []
 ##! [OutputDisplaced]

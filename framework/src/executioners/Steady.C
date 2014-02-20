@@ -71,6 +71,7 @@ Steady::init()
 
   // Write the output (handling of outputing initial or not is handled by OutputBase)
   _output_warehouse.outputInitial();
+
   if (_output_initial)
   {
     _problem.output();
@@ -118,7 +119,7 @@ Steady::execute()
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
     _problem.computeIndicatorsAndMarkers();
 
-    _output_warehouse.output();
+    _output_warehouse.outputStep();
 
     _problem.output();
     _problem.outputPostprocessors();

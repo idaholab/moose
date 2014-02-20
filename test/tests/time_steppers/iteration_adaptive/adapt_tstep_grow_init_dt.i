@@ -55,7 +55,6 @@
 
   start_time = 0.0
   end_time = 20.0
-  sync_times = '0.5, 9.5'
   n_startup_steps = 2
   dtmax = 6.0
 
@@ -72,9 +71,13 @@
   [../]
 []
 
-[Output]
-  interval = 1
+[Outputs]
   output_initial = true
-  linear_residuals = true
   exodus = true
+  sync_times = '0.5 9.5'
+  [./console]
+    type = Console
+    linear_residuals = true
+    output_postprocessors = false
+  [../]
 []
