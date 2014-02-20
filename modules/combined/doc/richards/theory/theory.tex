@@ -516,8 +516,42 @@ implemented in MOOSE by making $F$ (the surface source) a
 piecewise-linear function of the porepressure:
 \begin{equation}
 F = F(P) \ .
+\label{piecewise.lineear.flux.bdy}
 \end{equation}
-Examples of different linear functions are given in Section~\ref{rainfall.recharge.sec}.
+Here $F$ has units kg.m$^{-2}.s^{-1}$, and examples of different
+linear functions are given in Section~\ref{rainfall.recharge.sec}.  A
+special form of $F$ suitable for evapotranspiration is described in
+Section~\ref{et.section.}.
+
+I have also coded up two other forms of
+boundary fluxes which are related to
+Eqn~\ref{piecewise.lineear.flux.bdy}.  These are
+\begin{equation}
+F = \rho\ n\cdot\kappa\cdot n \ f(P)/\mu \ ,
+\end{equation}
+and
+\begin{equation}
+F = \rho \ n\cdot\kappa\cdot n\ \kappa_{\mathrm{rel}} f(P)/\mu \ .
+\end{equation}
+In both of these
+\begin{itemize}
+\item $\rho$ and $\mu$ are, respectively, the fluid density and
+  viscosity at the boundary
+\item $n$ is the unit normal to the boundary, so $n \cdot \kappa \cdot
+  n$ is the component of the permeability tensor normal to the
+  boundary
+\item $f$ is a piecewise linear function of porepressure, defined by
+  the user.  It is measured in Pa.m$^{-1}$.
+\end{itemize}
+These two are used in preference to
+Eqn~(\ref{piecewise.lineear.flux.bdy}) in cases where it is more
+convenient to define $f$, rather than $F$, as a piecewise linear
+function.  For example, when fluid is seeping from a boundary in
+multiphase problems, the seepage rate will depend on the relative
+permeability.  Another example is in coupled problems when $\kappa$ is
+a function of time.
+
+
 
 
 \section{Rainfall recharge}
@@ -568,6 +602,7 @@ for porepressure $P_{\mathrm{big}}$ that is a little bigger than the
 modeller expects to see in the model.
 
 \section{Evapotranspiration}
+\label{et.section.}
 
 Evapotranspiration from a surface of the model is modelled using a
 half-Gaussian sink for the surface-source $F$:
