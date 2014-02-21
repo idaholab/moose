@@ -5,9 +5,9 @@
 # Set LIBMESH_DIR if it is not already set in the environment (try our best to guess!)
 IS_MOOSE_PROJECT  := $(shell dirname `pwd` | grep 'moose\>')
 ifeq (,$(IS_MOOSE_PROJECT))
-  LIBMESH_DIR     ?= ../libmesh/installed
+  LIBMESH_DIR     ?= ../moose/libmesh/installed
 else
-  LIBMESH_DIR     ?= ../../libmesh/installed
+  LIBMESH_DIR     ?= ../libmesh/installed
 endif
 
 # If the user has no environment variable
