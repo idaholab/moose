@@ -138,7 +138,7 @@ def parseArguments(args=None):
   parser.parse_args('-mqvlrbdpoce'.split())
 
   # Parse the input and return the options
-  (options, other_args) = parser.parse_known_args()
+  options = parser.parse_args()
 
   # Set the output to be verbose and refresh to be true if --summary is used
   if options.summary:
@@ -146,7 +146,7 @@ def parseArguments(args=None):
     options.refresh = True
 
   # Return the options
-  return (options, other_args)
+  return options
 
 
 ## Helper function to extract options for **kwargs input
@@ -161,8 +161,16 @@ def subOptions(options, *args):
 ## Main function
 if __name__ == "__main__":
 
+  # All arguments after '--' are passed directly to make
+  make_args = []
+  if '--' in sys.argv:
+    idx = sys.argv.index('--')
+    if len(sys.argv) > idx:
+      make_args = sys.argv[idx+1:]
+      sys.argv = sys.argv[0:idx]
+
   # Extract the options from the command line
-  (options, make_args) = parseArguments()
+  options = parseArguments()
 
   # Create the MachineWarehouse object, limit to the known networks
   opt = subOptions(options, 'allow')
@@ -179,10 +187,16 @@ if __name__ == "__main__":
   if options.kill or options.no_daemon:
     daemon.kill()
 
-  # Start the daemons
-  if options.refresh or (options.daemon and not options.no_daemon):
+  # Start the daemons when:
+  #  (1) --no_daemon is not used and any of the following occur
+  #  (2a) When the .dmakerc file is out-of-date
+  #  (2b) --refresh is specified
+  #  (2c) When the --daemon option is used
+  #  (2d) When --dedicated is used
+  if not options.no_daemon and (dmakerc.needUpdate() or options.refresh or options.daemon or options.dedicated):
     warehouse.buildMachines(dmakerc.get('HOST_LINES'), disable=dmakerc.get('DISABLE'), hammer=dmakerc.get('HAMMER'))
     daemon.start(warehouse.machines)
+    dmakerc.forceUpdate()
 
   # Exit if running basic daemon options
   if options.daemon or options.kill:
