@@ -1,4 +1,4 @@
 [submodule "libmesh"]
-	path = libmesh
-	url = git@github.com:libMesh/libmesh.git
+        path = libmesh
+        url = https://github.com/libMesh/libmesh.git
         ignore = dirty
