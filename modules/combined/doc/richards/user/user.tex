@@ -103,6 +103,64 @@ MOOSE is struggling with.
   ``power'' covers over the ``VG'' curves.
 \end{itemize}
 
+Choosing reasonable convergence criteria is very important.  The
+Theory Manual contains a section that explains the {\em minimum}
+residual that a user can expect to obtain in a model.  However, this
+minimum is usually much smaller than what is important from a
+practical point of view.  If a tiny residual is chosen, MOOSE will
+spend most of its time changing pressure values by tiny amounts as it
+attempts to converge to the tiny residual, and this is a waste of
+compute time.   This problem may be amplified if adaptive time-stepping is
+used since MOOSE doesn't realise that most of the compute time is
+spent ``doing nothing'', so keeps the timestep very small.  So, here
+are some guidelines for choosing an appropriate tolerance on the
+residual.
+\begin{enumerate}
+\item Determine an appopriate tolerance on what you mean by
+  ``steadystate''.  For instance, in a single-phase simulation with
+  reasonably large constant fluid bulk modulus, and gravity acting in
+  the $-z$ direction, the steadystate solution is $P = -\rho_{0}gz$
+  (up to a constant).  In the case of water, this reads $P=-10000z$.
+  Instead of this, suppose you would be happy to say the model is at
+  steadystate if $P = -(\rho_{0} g + \epsilon)z$.  For instance, for water,
+  $\epsilon=1$\,Pa.m$^{-1}$ might be suitable in your problem.  Then recall
+  that the residual is just
+\begin{equation}
+R = \left|\int
+\nabla_{i}\left(\frac{\kappa_{ij}\kappa_{\mathrm{rel}}\rho}{\mu}(\nabla_{j}P
++ \rho g_{j}) \right) \right|
+\label{eqn.res.int}
+\end{equation}
+Evaluate this for your ``steadystate'' solution.  For instance, in the
+case of water just quoted, $R = V|\kappa|\rho_{0}/\mu\epsilon =
+V|\kappa|\times 10^{6}\epsilon$, where: $V$ is the volume of the
+finite-element mesh, and I have inserted standard values for
+$\rho_{0}$ and $\mu$.  
+\item In the previous step, an appropriate tolernace on the residual
+  was given as $V|\kappa|\rho_{0}\epsilon/\mu$.  However, this is often too
+  large because of the factor of $V$.  The previous step assumed that
+  the solution was incorrect by a factor, $\epsilon$, which is constant
+  over the entire mesh.   More commonly, there is a small region of
+  the mesh where most of the interesting dynamics occurs, and the
+  remainder of the mesh exists just to provide reasonable boundary
+  conditions for this ``interesting'' region.  The residual in the
+  ``boring'' region can be thought of as virtually zero, while the
+  residual in the ``interesting'' region is
+  $V_{\mathrm{interesting}}|\kappa|\rho_{0}\epsilon/\mu$.  This is smaller
+  than the residual in the previous step, so provides a tighter
+  tolerance for MOOSE to strive towards.
+\item In the previous steps, I've implicitly assumed $\kappa$ is
+  constant, $\rho$ is virtually constant at $\rho_{0}$, only a
+  single-phase situation, etc.  In many cases these assumptions are
+  not valid, so the integral of Eqn~(\ref{eqn.res.int}) cannot be done
+  as trivially as in the previous steps.  In these cases, I simply
+  suggest to build a model with initial conditions like $P =
+  -(\rho_{0} g + \epsilon)z$, and just see what the initial residual is.
+  That will give you an idea of how big a reasonable residual
+  tolerance should be.
+\end{enumerate}
+
+
 \section{Two-phase, almost saturated}
 
 If a two-phase model has regions that are fully saturated with the

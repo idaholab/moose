@@ -95,17 +95,17 @@
 
   [./answer_DensityMethane20degC]
     type = ParsedFunction
-    value = 0.00654576947608E-3*x+1.04357716547E-13*x^2
+    value = max(x,0)/x*(0.00654576947608E-3*x+1.04357716547E-13*x^2)+min(x,0)/x*0.1*(e^(6.54576947608E-5*x)-1)
   [../]
   [./answer_dDensityMethane20degC]
     type = GradParsedFunction
     direction = '1 0 0'
-    value = 0.00654576947608E-3*x+1.04357716547E-13*x^2
+    value = max(x,0)/x*(0.00654576947608E-3*x+1.04357716547E-13*x^2)+min(x,0)/x*0.1*(e^(6.54576947608E-5*x)-1)
   [../]
   [./answer_d2DensityMethane20degC]
     type = Grad2ParsedFunction
     direction = '1 0 0'
-    value = 0.00654576947608E-3*x+1.04357716547E-13*x^2
+    value = max(x,0)/x*(0.00654576947608E-3*x+1.04357716547E-13*x^2)+min(x,0)/x*0.1*(e^(6.54576947608E-5*x)-1)
   [../]
 []
 
@@ -329,7 +329,7 @@
   linear_residuals = false
   file_base = uo2
   interval = 1
-  exodus = false
+  exodus = true
   postprocessor_csv = true
   perf_log = false
   hidden_variables = pressure
