@@ -551,6 +551,17 @@ multiphase problems, the seepage rate will depend on the relative
 permeability.  Another example is in coupled problems when $\kappa$ is
 a function of time.
 
+Finally, all these piecewise-linear sink fluxes may be multiplied by a
+user-defined function: 
+\begin{equation}
+F \rightarrow F\times g(t, x, y, z) \ ,
+\end{equation}
+if the user desires.  This is useful, for instance, if rainfall
+recharge is a known function of space and time, or in the case of
+applying sink fluxes at excavation boundaries whose position is a
+known function of space and time.
+
+
 
 
 
@@ -645,6 +656,15 @@ P_{\mathrm{air}} = 0$.  Typical tree roots reach to
 about 5\,m, so a standard value for $\sigma$ is $\sigma = 5\times
 10^{4}$\,Pa, assuming the density of fluid
 is 1000\,kg.m$^{-3}$ and gravity is 10\,m.s$^{-2}$.
+
+Finally, the half-Gaussian sink may be multiplied by a
+user-defined function: 
+\begin{equation}
+F \rightarrow F\times g(t, x, y, z) \ ,
+\end{equation}
+if the user desires.  This is useful, for instance, if
+evapotranspiration is a known function of space and time. 
+
 
 If the half-Gaussian sink is unsuitable, a piecewise-linear
 approximation to evapotranspiration could be used instead, similar to

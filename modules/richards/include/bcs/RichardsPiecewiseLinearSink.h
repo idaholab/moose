@@ -9,6 +9,7 @@
 #include "IntegratedBC.h"
 #include "LinearInterpolation.h"
 #include "RichardsPorepressureNames.h"
+#include "Function.h"
 
 // Forward Declarations
 class RichardsPiecewiseLinearSink;
@@ -33,6 +34,7 @@ protected:
   bool _use_mobility;
   bool _use_relperm;
   LinearInterpolation _sink_func;
+  Function * const _m_func;
 
   const RichardsPorepressureNames & _pp_name_UO;
   unsigned int _pvar;
@@ -44,6 +46,8 @@ protected:
   MaterialProperty<std::vector<Real> > &_drel_perm;
   MaterialProperty<std::vector<Real> > &_density;
   MaterialProperty<std::vector<Real> > &_ddensity;
+
+
 };
 
 #endif //RichardsPiecewiseLinearSink

@@ -29,6 +29,7 @@ protected:
   Real _maximum;
   Real _sd;
   Real _centre;
+  Function * const _m_func;
 };
 
 #endif //RICHARDSHALFGAUSSIANSINK

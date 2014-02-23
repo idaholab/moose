@@ -6,7 +6,7 @@ InputParameters validParams<FunctionOfVariableAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("t_variable", "Variable that will be substituted into the 't' slot of the function");
-  params.addRequiredParam<FunctionName>("function", "The function to use.  The debug_variable gets substituted in the 't' slot of this function");
+  params.addRequiredParam<FunctionName>("function", "The function to use.  The t_variable gets substituted in the 't' slot of this function");
   return params;
 }
 
