@@ -13,7 +13,6 @@
 /****************************************************************/
 
 // STL includes
-//#include <stdio.h>
 #include <sys/stat.h>
 
 // Moose includes
