@@ -67,7 +67,7 @@ CommonOutputAction::act()
     create("CSV");
 
   if (getParam<bool>("vtk"))
-    create("VTKOutputter");
+    create("VTK");
 }
 
 void

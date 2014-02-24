@@ -62,17 +62,25 @@ VTKOutputter::outputSetup()
   if (_vtk_io_ptr != NULL)
     delete _vtk_io_ptr;
 
-  // Create the new VTKOutputter object
+  
+#ifdef LIBMESH_HAVE_VTK
+  // Create the new VTKOutputter object and set compression
   _vtk_io_ptr = new VTKIO(_es_ptr->get_mesh());
-
-  // Set compression
   _vtk_io_ptr->set_compression(_binary);
+#else
+  mooseError("libMesh not configured with VTK");
+#endif
 }
 
 void
 VTKOutputter::outputNodalVariables()
 {
+#ifdef LIBMESH_HAVE_VTK
+  // Write the data
   _vtk_io_ptr->write_equation_systems(filename(), *_es_ptr);
+#else
+  mooseError("libMesh not configured with VTK");
+#endif
 }
 
 void

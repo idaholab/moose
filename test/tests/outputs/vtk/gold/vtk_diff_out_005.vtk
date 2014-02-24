@@ -12,6 +12,6 @@
     <PPoints>
       <PDataArray type="Float64" Name="Points" NumberOfComponents="3"/>
     </PPoints>
-    <Piece Source="vtk_out_005_0.vtu"/>
+    <Piece Source="vtk_diff_out_005_0.vtu"/>
   </PUnstructuredGrid>
 </VTKFile>
