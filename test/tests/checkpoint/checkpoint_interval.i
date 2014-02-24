@@ -53,7 +53,7 @@
   output_initial = true
   exodus = true
   [./checkpoint]
-  # Test the checkpoint interval parameter	   
+  # Test the checkpoint interval parameter
     type = Checkpoint
      interval = 3  # output every third timestep
      num_files = 2  # keep the last two most recent checkpoint copies
