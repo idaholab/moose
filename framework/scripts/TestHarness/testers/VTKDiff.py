@@ -58,7 +58,7 @@ class VTKDiff(RunApp):
 
           if differ.fail():
             reason = 'VTKDIFF'
-            output+= differ.message()
+            output += differ.message()
             break
 
     # Return to the test harness
