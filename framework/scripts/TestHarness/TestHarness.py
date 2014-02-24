@@ -7,6 +7,7 @@ from util import *
 from time import sleep
 from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
+from XMLDiffer import XMLDiffer
 from Tester import Tester
 from PetscJacobianTester import PetscJacobianTester
 from InputParameters import InputParameters
@@ -46,6 +47,7 @@ class TestHarness:
     self.checks['dtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'dtk')
     self.checks['library_mode'] = getSharedOption(self.libmesh_dir)
     self.checks['unique_ids'] = getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
+    self.checks['vtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'vtk')
 
     # Override the MESH_MODE option if using '--parallel-mesh' option
     if self.options.parallel_mesh == True or \
