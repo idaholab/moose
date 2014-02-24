@@ -29,6 +29,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("exodus", false, "Output the results using the default settings via the Exodus output");
    params.addParam<bool>("console", false, "Output the results to the screen using the default settings via the Console output");
    params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv file using the default CSV output.");
+   params.addParam<bool>("vtk", false, "Output the results using the default settings via the VTK output");
 
    // Common parameters
    params.addParam<bool>("output_initial", true,  "Request that the initial condition is output to the solution file");
@@ -64,6 +65,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("csv"))
     create("CSV");
+
+  if (getParam<bool>("vtk"))
+    create("VTKOutputter");
 }
 
 void
