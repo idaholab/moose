@@ -7,7 +7,8 @@
 # FRAMEWORK_DIR - Location of the MOOSE framework
 #
 ###############################################################################
-MOOSE_DIR          ?= $(shell dirname `pwd`)
+EXAMPLE_DIR        ?= $(shell dirname `pwd`)
+MOOSE_DIR          ?= $(shell dirname $(EXAMPLE_DIR))
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 ###############################################################################
 
