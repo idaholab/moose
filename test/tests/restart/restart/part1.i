@@ -74,12 +74,16 @@
   num_steps = 5
 []
 
-[Output]
+[Outputs]
   file_base = out_part1
-  output_initial = true
-  interval = 1
   exodus = true
-  xda = true
-  perf_log = true
-  num_checkpoint_files = 1
+  [./checkpoint]
+    type = Checkpoint
+    num_files = 1
+  [../]
+
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
