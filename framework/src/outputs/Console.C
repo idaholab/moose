@@ -356,7 +356,7 @@ Console::outputScalarVariables()
   if (!_scalar_table.empty())
   {
     std::stringstream oss;
-    oss << "\nScalar AuxVariable Values:\n";
+    oss << "\nScalar Variable Values:\n";
     _scalar_table.printTable(oss, _max_rows, _fit_mode);
     oss << std::endl;
 

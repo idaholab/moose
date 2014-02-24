@@ -3,28 +3,11 @@
   dim = 2
   nx = 10
   ny = 10
+  distribution = serial
 []
 
 [Variables]
   [./u]
-  [../]
-[]
-
-[AuxVariables]
-  [./aux0]
-    order = SECOND
-    family = SCALAR
-  [../]
-  [./aux1]
-    family = SCALAR
-    initial_condition = 5
-  [../]
-  [./aux2]
-    family = SCALAR
-    initial_condition = 10
-  [../]
-  [./aux_sum]
-    family = SCALAR
   [../]
 []
 
@@ -37,15 +20,6 @@
   [./time]
     type = TimeDerivative
     variable = u
-  [../]
-[]
-
-[AuxScalarKernels]
-  [./sum_nodal_aux]
-    type = SumNodalValuesAux
-    variable = aux_sum
-    sum_var = u
-    nodes = '1 2 3 4 5'
   [../]
 []
 
@@ -64,26 +38,22 @@
   [../]
 []
 
-[Postprocessors]
-  [./mid_point]
-    type = PointValue
-    variable = u
-    point = '0.5 0.5 0'
-  [../]
-[]
-
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 20
+  num_steps = 11
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  verbose = true
 []
 
 [Outputs]
+  exodus = true
   console = true
-  csv = true
+  [./checkpoint]
+    type = Checkpoint
+    interval = 3
+    num_files = 2
+  [../]
 []

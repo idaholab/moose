@@ -56,10 +56,11 @@
   restart_file_base = out_part1_cp/0005
 []
 
-[Output]
+[Outputs]
   file_base = out_part2
-  output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

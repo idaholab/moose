@@ -691,6 +691,23 @@ public:
   virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
   /**
+   * Return reference to the restatable data object
+   * @return A const reference to the restatable data object
+   */
+  const RestartableDatas & getRestartableData() { return _restartable_data; }
+
+  /**
+   * Return a reference to the recoverable data object
+   * @return A const reference to the recoverable data
+   */
+  std::set<std::string> & getRecoverableData() { return _recoverable_data; }
+
+  /** Return a reference to the material property storage
+   * @return A const reference to the material property storage
+   */
+  const MaterialPropertyStorage & getMaterialPropertyStorage() { return _material_props; }
+
+  /**
    * Get the solver parameters
    */
   SolverParams & solverParams();

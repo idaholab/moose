@@ -2,17 +2,17 @@
 import os, sys, string, subprocess, re, socket, getopt
 
 # If hostname equals head_node, this script will run
-head_node = 'rocky'
+head_node = 'hpcbuild'
 
 # Moose stable and devel checkout locations
 moose_stable = 'https://hpcsc.inl.gov/svn/herd/trunk/moose'
 moose_devel = 'https://hpcsc.inl.gov/svn/herd/trunk/devel/moose'
 
 # We exclude these applications:
-excluded_applications = set(['r7_moose', 'rattlesnake', 'moose_unit'])
+excluded_applications = set(['r7_moose', 'rattlesnake'])
 
 # Comment Syntax Coverage command:
-comment_syntax_cmd = [ 'moose/contrib/nsiqcppstyle/nsiqcppstyle', '--quiet', '--basedir=/moose/', '-f', 'moose/contrib/nsiqcppstyle/syntax_style', '--output=html', '--url=https://hpcsc.inl.gov/moose/browser/trunk', '-o', 'output.html', 'moose']
+comment_syntax_cmd = [ 'moose/framework/contrib/nsiqcppstyle/nsiqcppstyle', '--quiet', '--basedir=/moose/framework', '-f', 'moose/framework/contrib/nsiqcppstyle/syntax_style', '--output=html', '--url=https://hpcsc.inl.gov/moose/browser/trunk', '-o', 'output.html', 'moose']
 rsync_comment_syntax_cmd = ['/usr/bin/rsync', '-av', '--delete', 'output.html', os.getenv('TRAC_SERVER') + ':/srv/www/ssl/MOOSE/coverage/' ]
 
 _USAGE = """
@@ -26,7 +26,7 @@ def buildStatus():
   tmp_apps = []
   tmp_passed = []
   # Open line itemed list of applications passing their tests
-  log_file = open('moose/test_results.log', 'r')
+  log_file = open('moose/framework/test_results.log', 'r')
   tmp_passed = string.split(log_file.read(), '\n')
   log_file.close()
   # Remove trailing \n element which creates an empty item
@@ -58,8 +58,8 @@ def getCoverage():
 
   # Use the same commands from the coverage_html script to generate the raw.info file
   coverage_cmd = [ os.getenv('LCOV_BIN'),
-                   '--base-directory', 'moose',
-                   '--directory', 'moose/src/',
+                   '--base-directory', 'moose/framework',
+                   '--directory', 'moose/framework/src/',
                    '--capture',
                    '--ignore-errors', 'gcov,source',
                    '--output-file', 'raw.info'
@@ -149,7 +149,7 @@ def process_args():
   return opts[0]
 
 if __name__ == '__main__':
-  if head_node in socket.gethostname().split('.')[0]:
+  if os.getenv('STABLE'):
     runCMD(comment_syntax_cmd)
     runCMD(rsync_comment_syntax_cmd)
     arg_revision = process_args()

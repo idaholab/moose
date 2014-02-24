@@ -1,9 +1,9 @@
 # This file contains common MOOSE application settings
-# Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and optionally ELK.
-#       This can be overridden by using environment variables (MOOSE_DIR and/or ELK_DIR)
+# Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE.
+#       This can be overridden by using environment variables (MOOSE_DIR and/or FRAMEWORK_DIR)
 
-# Set LIBMESH_DIR if it is not already set in the environment
-LIBMESH_DIR     ?= $(ROOT_DIR)/libmesh/installed
+# Set LIBMESH_DIR if it is not already set in the environment (try our best to guess!)
+LIBMESH_DIR       ?= $(MOOSE_DIR)/../libmesh/installed
 
 # If the user has no environment variable
 # called METHOD, he gets optimized mode.
@@ -54,7 +54,7 @@ ifneq (,$(findstring mpi,$(cxx_compiler)))
 	cxx_compiler = $(shell $(libmesh_CXX) -show)
 endif
 
-MOOSE_PRECOMPILED ?= true
+MOOSE_PRECOMPILED ?= false
 PCH_FLAGS=
 PCH_MODE=
 PCH_DEP=
@@ -91,13 +91,13 @@ ifdef PRECOMPILED
 # system.
 %.h.gch/$(METHOD).h.gch : %.h
 	@echo "MOOSE Pre-Compiling Header (in "$(METHOD)" mode) "$<"..."
-	@mkdir -p $(MOOSE_DIR)/include/base/Precompiled.h.gch
+	@mkdir -p $(FRAMEWORK_DIR)/include/base/Precompiled.h.gch
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED $(libmesh_INCLUDE) -MMD -MF $@.d -c $< -o $@
 
 #
 # add dependency - all object files depend on the precompiled header file.
 #
-PCH_DEP=$(MOOSE_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch
+PCH_DEP=$(FRAMEWORK_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch
 
 PCH_FLAGS=-DPRECOMPILED -include Precompiled.h
 PCH_MODE="with PCH "
@@ -110,12 +110,12 @@ endif
 pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.C $(PCH_DEP)
 	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 #
 # Static Analysis
@@ -123,7 +123,7 @@ pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 
 %.plist.$(obj-suffix) : %.C
 	@echo "Clang Static Analysis (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) --analyze $< -o $@
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) --analyze $< -o $@
 
 #
 # C rules
@@ -132,12 +132,12 @@ pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 pcre%.$(obj-suffix) : pcre%.c
 	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.c
 	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 
 
@@ -148,7 +148,7 @@ pcre%.$(obj-suffix) : pcre%.c
 %.$(obj-suffix) : %.f
 	@echo "MOOSE Compiling Fortan (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_F77) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< -o $@
+	  $(libmesh_F77) $(libmesh_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< -o $@
 
 
 #
@@ -159,7 +159,7 @@ PreProcessed_FFLAGS := $(libmesh_FFLAGS)
 %.$(obj-suffix) : %.F
 	@echo "MOOSE Compiling Fortran (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_F90) $(PreProcessed_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
+	  $(libmesh_F90) $(PreProcessed_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
 #
 # Fortran90 rules
@@ -267,16 +267,16 @@ endif
 #
 %-$(METHOD).plugin : %.C
 	@echo "MOOSE Compiling C++ Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -shared -fPIC $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.c
 	@echo "MOOSE Compiling C Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -shared -fPIC $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(libmesh_CFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f
 	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_F77) $(libmesh_FFLAGS) -shared -fPIC $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_F77) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f90
 	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_F90) $(libmesh_FFLAGS) -shared -fPIC $(libmesh_INCLUDE) $< -o $@
+	@$(libmesh_F90) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 
 # Build appliations up the tree
 up: all
@@ -323,5 +323,5 @@ cleandep: cleandep
 cleandeps: cleandep
 
 cleandep:
-#	@echo @python $(MOOSE_DIR)/scripts/rm_outdated_deps.py $(ROOT_DIR)
-	@python $(MOOSE_DIR)/scripts/rm_outdated_deps.py $(ROOT_DIR)
+#	@echo @python $(FRAMEWORK_DIR)/scripts/rm_outdated_deps.py $(ROOT_DIR)
+	@python $(FRAMEWORK_DIR)/scripts/rm_outdated_deps.py $(ROOT_DIR)

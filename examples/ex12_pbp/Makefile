@@ -2,34 +2,32 @@
 ################### MOOSE Application Standard Makefile #######################
 ###############################################################################
 #
-# Required Make variables
-# APPLICATION_NAME  - the name of this application (all lower case)
-# MOOSE_DIR	        - location of the MOOSE framework
-#
 # Optional Environment variables
-# CURR_DIR	- current directory (DO NOT MODIFY THIS VARIABLE)
+# MOOSE_DIR     - Root directory of the MOOSE project
+# FRAMEWORK_DIR - Location of the MOOSE framework
 #
-# Note: Make sure that there is no whitespace after the word 'yes' if enabling
-# an application
 ###############################################################################
-CURR_DIR	?= $(shell pwd)
-ROOT_DIR        ?= $(shell pwd)/../..
+EXAMPLE_DIR        ?= $(shell dirname `pwd`)
+MOOSE_DIR          ?= $(shell dirname $(EXAMPLE_DIR))
+FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
+###############################################################################
 
-ifeq ($(MOOSE_DEV),true)
-	MOOSE_DIR ?= $(ROOT_DIR)/devel/moose
-else
-	MOOSE_DIR ?= $(ROOT_DIR)/moose
-endif
+# framework
+include $(FRAMEWORK_DIR)/build.mk
+include $(FRAMEWORK_DIR)/moose.mk
 
 APPLICATION_NAME := ex12
 
-include $(MOOSE_DIR)/build.mk
-include $(MOOSE_DIR)/moose.mk
-include $(MOOSE_DIR)/app.mk
-include ../test.mk
+# dep apps
+APPLICATION_DIR    := $(shell pwd)
+APPLICATION_NAME   := ex12
+BUILD_EXEC         := yes
+DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
+include            $(FRAMEWORK_DIR)/app.mk
+include            ../test.mk
 
 # Include dependency files for this example
-ex_srcfiles := $(shell find $(CURR_DIR) -name "*.C")
+ex_srcfiles := $(shell find $(APPLICATION_DIR) -name "*.C")
 ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
 -include $(ex_deps)
 
