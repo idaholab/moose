@@ -1,4 +1,4 @@
-import os, sys, traceback, numpy
+import os, sys, traceback
 import xml.etree.ElementTree as xml
 
 ##
