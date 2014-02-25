@@ -54,9 +54,9 @@ public:
    */
   virtual void outputSetup();
 
-  
+
 protected:
-  
+
   /**
    * Outputs nodal, nonlinear variables
    */
@@ -94,7 +94,7 @@ private:
 
   /// Flag for using binary compression
   bool _binary;
-  
+
 };
 
 #endif //VTK_H

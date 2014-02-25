@@ -19,7 +19,7 @@ InputParameters validParams<VTKOutputter>()
 {
   InputParameters params = validParams<OversampleOutputter>();
   params += validParams<FileOutputInterface>();
-  
+
   // Supress un-available parameters
   params.suppressParameter<bool>("output_scalar_variables");
   params.suppressParameter<bool>("output_postprocessors");
@@ -62,7 +62,7 @@ VTKOutputter::outputSetup()
   if (_vtk_io_ptr != NULL)
     delete _vtk_io_ptr;
 
-  
+
 #ifdef LIBMESH_HAVE_VTK
   // Create the new VTKOutputter object and set compression
   _vtk_io_ptr = new VTKIO(_es_ptr->get_mesh());
@@ -107,7 +107,7 @@ VTKOutputter::filename()
   // Append the .e extension on the base file name
   std::ostringstream output;
   output << _file_base;
-    
+
   // Add the _00x.vtk extension to the file
   output << "_"
          << std::setw(_padding)
