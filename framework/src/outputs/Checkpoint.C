@@ -21,6 +21,7 @@
 
 // libMesh includes
 #include "libmesh/checkpoint_io.h"
+#include "libmesh/enum_xdr_mode.h"
 
 template<>
 InputParameters validParams<Checkpoint>()
@@ -129,7 +130,7 @@ Checkpoint::output()
   io.write(current_file_struct.checkpoint);
 
   // Write the xdr
-  _es_ptr->write(current_file_struct.system, libMeshEnums::ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES, renumber);
+  _es_ptr->write(current_file_struct.system, ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES, renumber);
 
   // Write the restartable data
   _restartable_data_io.writeRestartableData(current_file_struct.restart, _restartable_data, _recoverable_data);
