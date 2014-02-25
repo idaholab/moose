@@ -59,7 +59,6 @@
 #include "RichardsFluxJumpIndicator.h"
 
 // Markers
-#include "LineMarker.h"
 #include "OrientedBoxMarker.h"
 
 // Postprocessors
@@ -138,7 +137,6 @@ Elk::Richards::registerObjects(Factory & factory)
   registerIndicator(RichardsFluxJumpIndicator);
 
   // Markers
-  registerMarker(LineMarker);
   registerMarker(OrientedBoxMarker);
 
   // Postprocessors
