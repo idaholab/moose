@@ -1,6 +1,15 @@
 #!/usr/bin/python
-import os, sys, PyQt4, getopt, subprocess
-from PyQt4 import QtCore, QtGui
+import os, sys, PySide, getopt, subprocess
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
 
 
 from OptionsGUI import OptionsGUI
@@ -20,12 +29,11 @@ class ExecuteWidget(QtGui.QWidget):
   class containing the general Peacock execute tab
   '''
   #signal available
-  oneRunInfoSetCopied     = QtCore.pyqtSignal()
-  run_started             = QtCore.pyqtSignal()
-  run_stopped             = QtCore.pyqtSignal()
-  timestep_begin          = QtCore.pyqtSignal()
-  timestep_end            = QtCore.pyqtSignal()
-
+  oneRunInfoSetCopied     = QtCore.Signal()
+  run_started             = QtCore.Signal()
+  run_stopped             = QtCore.Signal()
+  timestep_begin          = QtCore.Signal()
+  timestep_end            = QtCore.Signal()
   def __init__(self, app_path, input_file_widget, qt_app, win_parent=None):
     #set up the run info (multi simulation and one run setting) to default
     self.oneRunInfoSet('deafaultInMain')
@@ -59,7 +67,7 @@ class ExecuteWidget(QtGui.QWidget):
     self.cwd_layout.addWidget(self.cwd_text)
     self.cwd_layout.addWidget(self.cwd_button)
     #The advancement bar
-    self.pb_layout.addWidget(QtGui.QLabel("Progress:"), alignment=Qt.AlignLeft)
+    self.pb_layout.addWidget(QtGui.QLabel("Progress:"), alignment=QtCore.Qt.AlignLeft)
     self.pb = QtGui.QProgressBar(self)
     self.pb.hide()
     self.pb_layout.addWidget(self.pb)
@@ -79,20 +87,19 @@ class ExecuteWidget(QtGui.QWidget):
     self.kill_button.setToolTip('Stop the currently running simulation')
     self.kill_button.setDisabled(True)
     QtCore.QObject.connect(self.kill_button, QtCore.SIGNAL("clicked()"), self.clickedKill)
-    self.bottom_layout.addWidget(self.kill_button, alignment=Qt.AlignHCenter)
+    self.bottom_layout.addWidget(self.kill_button, alignment=QtCore.Qt.AlignHCenter)
     #the log clear button
     self.clear_button = QtGui.QPushButton("Clear Log")
     self.clear_button.setToolTip('Clear the text output from the box above')
     self.clear_button.setDisabled(True)
     QtCore.QObject.connect(self.clear_button, QtCore.SIGNAL("clicked()"), self.clickedClear)
-    self.bottom_layout.addWidget(self.clear_button, alignment=Qt.AlignHCenter)
+    self.bottom_layout.addWidget(self.clear_button, alignment=QtCore.Qt.AlignHCenter)
     #the save log button
     self.save_log_button = QtGui.QPushButton("Save Log")
     self.save_log_button.setToolTip('Save the current contents of the log to a file')
     self.save_log_button.setDisabled(True)
     QtCore.QObject.connect(self.save_log_button, QtCore.SIGNAL("clicked()"), self.clickedSaveLog)
-    self.bottom_layout.addWidget(self.save_log_button, alignment=Qt.AlignHCenter)
-
+    self.bottom_layout.addWidget(self.save_log_button, alignment=QtCore.Qt.AlignHCenter)
     #Placing everything in the main layout and than in the GUI object
     self.main_layout = QtGui.QVBoxLayout()
     self.main_layout.addLayout(self.top_layout)
@@ -295,7 +302,7 @@ class ExecuteWidget(QtGui.QWidget):
       _command = self.mpi_command + ' ' + self.mpi_proc + ' ' + _command
     if self.thread_proc != '':
       _command = _command + self.thread_command + self.thread_proc
-    if self.postprocessor_csv.checkState() == Qt.Checked:
+    if self.postprocessor_csv.checkState() == QtCore.Qt.Checked:
       _command += ' Output/postprocessor_csv=true '
 
     _command += ' ' + self.other_options
