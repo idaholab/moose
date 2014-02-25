@@ -55,6 +55,7 @@
 []
 
 [Outputs]
+  output_initial = true
   vtk = true
   [./console]
     type = Console
@@ -62,4 +63,3 @@
     linear_residuals = true
   [../]
 []
-
