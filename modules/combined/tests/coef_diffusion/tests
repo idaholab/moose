@@ -5,4 +5,10 @@
     exodiff = 'out.e'
     scale_refine = 5
   [../]
+  [./func]
+    type = 'Exodiff'
+    input = 'func_diffusion_test.i'
+    exodiff = 'out.e'
+    scale_refine = 5
+  [../]
 []

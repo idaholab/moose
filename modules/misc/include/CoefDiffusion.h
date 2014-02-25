@@ -2,6 +2,7 @@
 #define COEFDIFFUSION_H
 
 #include "Kernel.h"
+#include "Function.h"
 
 //Forward Declarations
 class CoefDiffusion;
@@ -22,5 +23,7 @@ protected:
 
 private:
   Real _coef;
+  Function * const _func;
+
 };
 #endif //COEFDIFFUSION_H
