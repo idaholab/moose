@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="9" NumberOfCells="5">
+      <PointData>
+        <DataArray type="Float64" Name="aux" format="ascii" RangeMin="0" RangeMax="0">
+          0 0 0 0 0 0
+          0 0 0
+        </DataArray>
+        <DataArray type="Float64" Name="u" format="ascii" RangeMin="0" RangeMax="0.99999999998">
+          0 0.074429857959 0.074429858084 0 0.99999999998 0.99999999998
+          0.074429858088 0 1.99999999998
+        </DataArray>
+      </PointData>
+      <CllData>
+        <DataArray type="Int32" Name="libmesh_elem_id" format="ascii" RangeMin="0" RangeMax="3">
+          0 1 2 3
+        </DataArray>
+        <DataArray type="Int32" Name="subdomain_id" format="ascii" RangeMin="0" RangeMax="0">
+          0 0 0 0
+        </DataArray>
+      </CllData>
+      <Points>
+        <DataArray type="Float64" Name="Points" NumberOfComponents="3" format="ascii" RangeMin="0" RangeMax="1.4142135624">
+          0 0 0 0.5 0 0
+          0.5 0.5 0 0 0.5 0
+          1 0 0 1 0.5 0
+          0.5 1 0 0 1 0
+          1 1 0
+        </DataArray>
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="ascii" RangeMin="0" RangeMax="8">
+          0 1 2 3 1 4
+          5 2 3 2 6 7
+          2 5 8 6
+        </DataArray>
+        <DataArray type="Int64" Name="offsets" format="ascii" RangeMin="4" RangeMax="16">
+          4 8 12 16
+        </DataArray>
+        <DataArray type="UInt8" Name="types" format="ascii" RangeMin="9" RangeMax="9">
+          9 9 9 9 9
+        </DataArray>
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+</VTKFile>

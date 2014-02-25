@@ -28,8 +28,15 @@ LIBMESH_OPTIONS = {
       'TRUE'  : '1',
       'FALSE' : '0'
       }
+                     },
+  'vtk' :          { 're_option' : r'#define\s+LIBMESH_HAVE_VTK\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   :
+                       {
+      'TRUE'  : '1',
+      'FALSE' : '0'
+      }
                      }
-
   }
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
