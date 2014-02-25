@@ -56,7 +56,7 @@ PolynomialFitTest::sample()
 {
   PolynomialFit poly( *_x, *_y, 2 );
   poly.generate();
-  
+
   CPPUNIT_ASSERT( std::abs(poly.sample( -2. ) - 4) < _tol );
   CPPUNIT_ASSERT( std::abs(poly.sample( -1. ) - 1) < _tol );
   CPPUNIT_ASSERT( std::abs(poly.sample(  0. ) - 0) < _tol );

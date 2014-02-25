@@ -26,6 +26,6 @@ class OptionsGUI(QtGui.QDialog):
 
   def accept_params(self):
     self.accept()
-    
+
   def reject_params(self):
     self.reject()

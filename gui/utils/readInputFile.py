@@ -15,10 +15,10 @@ class GPNode:
   """ Print this node and it's children """
   def Print(self, prefix=''):
     print prefix + self.name
-    
+
     for param in self.params_list:
       print prefix + param + ": " + str(self.params[param])
-      
+
     for child in self.children_list:
       self.children[child].Print(prefix + self.name + '/')
 
@@ -64,4 +64,4 @@ def readInputFile(file_name):
 
 if __name__ == '__main__':
   readInputFile('new_test.i').Print()
-  
+

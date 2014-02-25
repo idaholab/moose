@@ -11,7 +11,7 @@ class ActionSyntax():
     if not use_cached_syntax and not os.path.isfile(self.app_path):
       print 'ERROR: Executable ' + self.app_path + ' not found!'
       sys.exit(1)
-      
+
     executable = os.path.basename(self.app_path)
 
     data = None
@@ -49,14 +49,14 @@ class ActionSyntax():
       p = re.compile(modified)
 
       self.hard_path_patterns[hard_path] = p
-      
+
   def recursiveAddAllParents(self, the_set, path):
     if path != '':
       if '*' not in path:
         the_set.add(path)
       self.recursiveAddAllParents(the_set, os.path.dirname(path))
-    
-    
+
+
 
   """ Whether or not this is a hard path """
   def isPath(self, inpath):
@@ -79,7 +79,7 @@ class ActionSyntax():
         return hard_path
     return None
 
-    
+
 
   """ Whether or not this path has a star after it """
   def hasStar(self, inpath):

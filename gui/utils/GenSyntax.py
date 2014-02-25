@@ -27,7 +27,7 @@ def _printYamlDict(data, level=0):
         for v in value:
           _printYamlDict(v, level+1)
 
-    # The parameters contain additional dictionaries; loop 
+    # The parameters contain additional dictionaries; loop
     # through the parameters and place the output under a parameter section
     elif key == 'parameters':
       print indent*(level+1) + 'parameters:'
@@ -42,11 +42,11 @@ def _printYamlDict(data, level=0):
 ##
 # A function for printing the YAML information to the screen (public)
 # @param data The YAML dump data (returned by GenSyntax::GetSynatx)
-# @param name Limits the output based on the supplied string, if the 
-#             supplied name is anywhere in the 'name' parameter of the 
+# @param name Limits the output based on the supplied string, if the
+#             supplied name is anywhere in the 'name' parameter of the
 #             top level YAML data the corresponding dictionary is printed (optional)
 def printYaml(data, name = None):
- 
+
   # Print all output
   if name == None:
     for d in data:
@@ -57,16 +57,16 @@ def printYaml(data, name = None):
     for d in data:
       if name in d['name']:
         _printYamlDict(d)
-    
-  
+
+
 class GenSyntax():
   def __init__(self, qt_app, app_path, use_cached_syntax):
     self.qt_app = qt_app
     self.app_path = app_path
     self.use_cached_syntax = use_cached_syntax
     self.saved_raw_data = None
-    self.saved_data = None    
-    
+    self.saved_data = None
+
   def GetSyntax(self, recache):
     if not self.use_cached_syntax and not os.path.isfile(self.app_path):
       print 'ERROR: Executable ' + self.app_path + ' not found!'
@@ -75,7 +75,7 @@ class GenSyntax():
     self.executable_path = os.path.dirname(self.app_path)
     yaml_dump_file_name = self.executable_path + '/yaml_dump_' + self.executable
     raw_yaml_dump_file_name = self.executable_path + '/yaml_dump_' + self.executable + '_raw'
-    
+
     raw_data = self.getRawDump()
 
     if not self.saved_raw_data:
@@ -103,7 +103,7 @@ class GenSyntax():
 
       pickle.dump(raw_data, open(raw_yaml_dump_file_name, 'wb'))
       self.saved_raw_data = raw_data
-      
+
       data = yaml.load(raw_data)
       pickle.dump(data, open(yaml_dump_file_name, 'wb'))
 

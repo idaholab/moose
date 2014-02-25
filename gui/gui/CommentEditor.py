@@ -14,16 +14,16 @@ class CommentEditor(QtGui.QDialog):
   def __init__(self, item, win_parent=None):
     QtGui.QDialog.__init__(self, win_parent)
     self.item = item
-    
+
     self.layout = QtGui.QVBoxLayout()
     self.setLayout(self.layout)
-    
-    self.edit_box = QtGui.QTextEdit()    
+
+    self.edit_box = QtGui.QTextEdit()
     try:
       self.edit_box.insertPlainText(item.comment)
     except:
       pass
-    
+
     self.layout.addWidget(self.edit_box)
 
     self.button_layout = QHBoxLayout()

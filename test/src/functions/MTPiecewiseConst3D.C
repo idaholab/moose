@@ -36,7 +36,7 @@ MTPiecewiseConst3D::value(Real /*t*/, const Point & p)
     if      (x>=-0.75 && x<-0.50)val+=1.0/3.0;
     else if (x>=-0.25 && x< 0.25)val+=1.0/3.0;
     else if (x>= 0.50 && x< 0.75)val+=1.0/3.0;
-    
+
     if      (y>=-0.75 && y<-0.50)val+=1.0/3.0;
     else if (y>=-0.25 && y< 0.25)val+=1.0/3.0;
     else if (y>= 0.50 && y< 0.75)val+=1.0/3.0;

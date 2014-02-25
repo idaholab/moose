@@ -67,7 +67,7 @@
   [./a]
     type = FunctionAux
     variable = aux_u
-    function = aux_exact_fn 
+    function = aux_exact_fn
   [../]
 []
 
@@ -99,7 +99,7 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  
+
   dt = 0.01
   start_time = 0
   num_steps = 10

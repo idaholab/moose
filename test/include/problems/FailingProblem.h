@@ -31,7 +31,7 @@ class FailingProblem : public FEProblem
 public:
   FailingProblem(const std::string & name, InputParameters params);
   virtual bool converged();
-  
+
 protected:
   bool _failed;
   unsigned int _fail_step;

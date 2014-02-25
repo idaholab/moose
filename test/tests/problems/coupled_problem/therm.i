@@ -1,6 +1,6 @@
 #
 # thermal part of the tightly coupled problem
-# 
+#
 #
 
 [Mesh]
@@ -19,7 +19,7 @@
 [Functions]
   [./temp_exact]
     type = ParsedFunction
-    value = t*x 
+    value = t*x
   [../]
   [./temp_ffn]
     type = ParsedFunction

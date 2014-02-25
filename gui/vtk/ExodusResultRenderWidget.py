@@ -6,7 +6,7 @@ from ExodusResult import ExodusResult
 import glob, math
 from ContourChoices import *
 
-pathname = os.path.dirname(os.path.realpath(sys.argv[0]))        
+pathname = os.path.dirname(os.path.realpath(sys.argv[0]))
 pathname = os.path.abspath(pathname)
 
 try:
@@ -24,14 +24,14 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.plane = vtk.vtkPlane()
     self.plane.SetOrigin(-1000, 0, 0)
     self.plane.SetNormal(1, 0, 0)
-    
+
     self.exodus_result = None
-      
+
     # The multiple (from adaptivity)
     self.exodus_results = []
 
     self.timestep_to_exodus_result = {}
-    
+
     self.file_name = None
 
     self.setupLuts()
@@ -48,7 +48,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.timer.stop()
     self.timer.setInterval(100)
     self.timer.timeout.connect(self._updateData)
-    
+
     self.execution_widget = execution_widget
     self.execution_widget.run_started.connect(self._runStarted)
     self.execution_widget.run_stopped.connect(self._runStopped)
@@ -59,7 +59,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 #    self.main_layout.setSpacing(0)
 
     self.right_layout = QtGui.QVBoxLayout()
-    
+
     self.left_layout = QtGui.QVBoxLayout()
     self.left_widget = QtGui.QWidget()
     self.left_widget.setMaximumWidth(1)
@@ -70,7 +70,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.main_layout.addWidget(self.left_widget)
     self.right_layout.setStretchFactor(self.left_layout, 0.01)
     self.main_layout.addLayout(self.right_layout)
-    
+
 #    self.setMinimumWidth(700)
     self.setLayout(self.main_layout)
 
@@ -80,7 +80,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     # Create background, default to the gradient look
     self.renderer = vtk.vtkRenderer()
     self._showBlackBackgroundChanged(0)
-    self.renderer.ResetCamera()    
+    self.renderer.ResetCamera()
 
     self.right_layout.addWidget(self.vtkwidget)
     self.right_layout.setStretchFactor(self.vtkwidget, 100)
@@ -102,7 +102,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.current_variable = None
     self.current_component = None
-    
+
     # Holds a mapping of variable name to contour choices so they can be restored when variables are selected
     self.contour_choices = {}
 
@@ -123,9 +123,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def setupControls(self):
     self.controls_widget = QtGui.QWidget()
     self.controls_layout = QtGui.QVBoxLayout()
-    
+
     self.bottom_controls_layout = QtGui.QHBoxLayout()
-    
+
     self.left_layout.addLayout(self.controls_layout)
     self.main_layout.setStretchFactor(self.left_layout, 0.1)
 
@@ -138,7 +138,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
 #    self.block_view_group_box.setMaximumWidth(200)
 #    self.block_view_group_box.setMaximumHeight(200)
-    
+
     self.block_view_layout = QtGui.QVBoxLayout()
     self.block_view_list = QtGui.QListView()
     self.block_view_model = QtGui.QStandardItemModel()
@@ -156,7 +156,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.controls_layout.setStretchFactor(self.leftest_controls_layout,1.0)
     self.controls_layout.setStretchFactor(self.left_controls_layout,1.5)
-    self.controls_layout.setStretchFactor(self.right_controls_layout,4.0)    
+    self.controls_layout.setStretchFactor(self.right_controls_layout,4.0)
 
     self.automatic_update_checkbox = QtGui.QCheckBox("Automatically Update")
     self.automatic_update_checkbox.setToolTip('Toggle automattically reading new timesteps as they finish computing')
@@ -164,8 +164,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.automatically_update = True
     self.automatic_update_checkbox.stateChanged[int].connect(self._automaticUpdateChanged)
 #    self.left_controls_layout.addWidget(self.automatic_update_checkbox)
-    
-    # Create Group for viewer controls 
+
+    # Create Group for viewer controls
 
     # Create the View Mesh toggle
     self.toggle_groupbox = QtGui.QGroupBox("View")
@@ -189,7 +189,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.show_black_background_checkbox.setToolTip('Toggle a black/gradient background')
     self.show_black_background_checkbox.stateChanged[int].connect(self._showBlackBackgroundChanged)
     self.toggle_layout.addWidget(self.show_black_background_checkbox, alignment=QtCore.Qt.AlignHCenter)
-    
+
     # Create a vertical layout and add the toggles
     self.toggle_groupbox.setLayout(self.toggle_layout)
     self.reset_layout = QtGui.QVBoxLayout()
@@ -263,7 +263,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_groupbox.setMaximumHeight(70)
     self.clip_groupbox.toggled[bool].connect(self._clippingToggled)
     clip_layout = QtGui.QHBoxLayout()
-    
+
     self.clip_plane_combobox = QtGui.QComboBox()
     self.clip_plane_combobox.setToolTip('Direction of the normal for the clip plane')
     self.clip_plane_combobox.addItem('x')
@@ -272,7 +272,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_combobox.currentIndexChanged[str].connect(self._clipNormalChanged)
 
     clip_layout.addWidget(self.clip_plane_combobox)
-    
+
     self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
     self.clip_plane_slider.setToolTip('Slide to change plane position')
     self.clip_plane_slider.setRange(0, 100)
@@ -284,7 +284,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_groupbox.setLayout(clip_layout)
 
     self.reset_layout.addWidget(self.clip_groupbox)
-    
+
 
 
     self.view_layout = QtGui.QHBoxLayout()
@@ -333,7 +333,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 #    self.component_layout = QtGui.QHBoxLayout()
     self.component_label = QtGui.QLabel("Component:")
     self.variable_component = QtGui.QComboBox()
-    self.variable_component.setToolTip('If the variable is a vector this selects what component of that vector (or the Magnitude) to color by') 
+    self.variable_component.setToolTip('If the variable is a vector this selects what component of that vector (or the Magnitude) to color by')
     self.variable_component.currentIndexChanged[str].connect(self._variableComponentSelected)
 #    self.component_layout.addWidget(self.component_label, alignment=QtCore.Qt.AlignRight)
 #    self.component_layout.addWidget(self.variable_component, alignment=QtCore.Qt.AlignLeft)
@@ -349,7 +349,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.min_groupbox.setLayout(self.min_layout)
 
     self.min_radio_layout = QtGui.QVBoxLayout()
-    
+
     self.min_current_radio = QtGui.QRadioButton('Current')
     self.min_current_radio.setChecked(QtCore.Qt.Checked)
     self.min_current_radio.toggled.connect(self._updateContours)
@@ -357,7 +357,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.min_global_radio.toggled.connect(self._updateContours)
     self.min_radio_layout.addWidget(self.min_current_radio)
 #    self.min_radio_layout.addWidget(self.min_global_radio)
-    
+
     self.min_custom_layout = QtGui.QHBoxLayout()
     self.min_custom_layout.setSpacing(0)
     self.min_custom_radio = QtGui.QRadioButton()
@@ -372,7 +372,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.min_layout.addLayout(self.min_radio_layout)
     self.min_layout.addLayout(self.min_custom_layout)
-    
+
     self.minmax_contour_layout.addWidget(self.min_groupbox)
 
 
@@ -382,7 +382,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.max_groupbox.setLayout(self.max_layout)
 
     self.max_radio_layout = QtGui.QVBoxLayout()
-    
+
     self.max_current_radio = QtGui.QRadioButton('Current')
     self.max_current_radio.setChecked(QtCore.Qt.Checked)
     self.max_current_radio.toggled.connect(self._updateContours)
@@ -390,7 +390,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.max_global_radio.toggled.connect(self._updateContours)
     self.max_radio_layout.addWidget(self.max_current_radio)
 #    self.max_radio_layout.addWidget(self.max_global_radio)
-    
+
     self.max_custom_layout = QtGui.QHBoxLayout()
     self.max_custom_layout.setSpacing(0)
     self.max_custom_radio = QtGui.QRadioButton()
@@ -405,7 +405,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.max_layout.addLayout(self.max_radio_layout)
     self.max_layout.addLayout(self.max_custom_layout)
-    
+
     self.minmax_contour_layout.addWidget(self.max_groupbox)
 
 
@@ -470,10 +470,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
     self.time_slider.setToolTip('Slide to select a timestep to display')
 #    self.time_slider.setMaximumWidth(600)
-    
+
     self.time_slider.valueChanged.connect(self._timeSliderChanged)
     self.time_slider.sliderReleased.connect(self._timeSliderReleased)
-    
+
     self.time_slider_textbox = QtGui.QLineEdit()
     self.time_slider_textbox.setToolTip('Enter a number and press Enter to go to that timestep')
     self.time_slider_textbox.setMaximumWidth(30)
@@ -482,7 +482,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.time_groupbox = QtGui.QGroupBox("Time")
     self.time_groupbox.setMaximumHeight(70)
-    
+
     self.time_layout = QtGui.QHBoxLayout()
     self.time_layout.addWidget(self.beginning_button)
     self.time_layout.addWidget(self.back_button)
@@ -498,7 +498,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_groupbox.setLayout(self.time_layout)
 
     self.right_layout.addWidget(self.time_groupbox)
-    
+
 
 
   def _updateControls(self):
@@ -513,7 +513,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.variable_contour_is_nodal[item_num] = True
         if 'disp' in variable:
           self.has_displacements = True
-          
+
     for variable in self.exodus_result.current_elemental_variables:
       if 'ObjectId' not in variable:
         self.variable_contour.addItem(variable)
@@ -531,7 +531,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       block_display_name = str(block)
       if block in self.exodus_result.block_to_name:
         block_display_name += ' : ' + self.exodus_result.block_to_name[block]
-        
+
       item = QtGui.QStandardItem(str(block_display_name))
       item.exodus_block = block
       item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
@@ -543,8 +543,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     if found_index != -1:
       self.variable_contour.setCurrentIndex(found_index)
     else: # If this variable doesn't exist then we are probably running a new simulation... try to reset the camera
-      self._resetView()      
-      
+      self._resetView()
+
     self.time_slider.setMinimum(0)
     self.time_slider.setMaximum(self.current_max_timestep)
 
@@ -600,7 +600,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
   def _normalize(self, min, max, value):
     return (value - min) / (max - min)
-    
+
   def _blockViewItemChanged(self, item):
     if item.checkState() == QtCore.Qt.Checked:
       self.exodus_result.showBlock(item.exodus_block)
@@ -617,20 +617,20 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
   def _displaceToggled(self, value):
     self._timeSliderReleased()
-    
+
   def _scaleToggled(self, value):
     self._timeSliderReleased()
 
   def _displaceMagnitudeTextReturn(self):
     self.current_displacement_magnitude = float(self.displace_magnitude_text.text())
-    self._timeSliderReleased()    
+    self._timeSliderReleased()
 
   def _scaleMagnitudeTextReturn(self):
     self.current_scale_x_magnitude = float(self.scale_x_text.text())
     self.current_scale_y_magnitude = float(self.scale_y_text.text())
     self.current_scale_z_magnitude = float(self.scale_z_text.text())
-    self._timeSliderReleased()    
-    
+    self._timeSliderReleased()
+
   def _drawEdgesChanged(self, value):
     if value == QtCore.Qt.Checked:
       self.exodus_result.actor.GetProperty().EdgeVisibilityOn()
@@ -645,15 +645,15 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   # by the 'Hide Scalebar' toggle on the Visualize tab
   # @param value The interger value from the checkbox (1=checked)
   def _hideScalebarChanged(self, value):
-  
+
     # Show when checked
     if value == QtCore.Qt.Checked:
       self.exodus_result.scalar_bar.VisibilityOn()
- 
-    # Hide when unchecked 
+
+    # Hide when unchecked
     else:
-      self.exodus_result.scalar_bar.VisibilityOff() 
-    
+      self.exodus_result.scalar_bar.VisibilityOff()
+
     # Update the GUI
     self.vtkwidget.updateGL()
 
@@ -662,21 +662,21 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   # by the 'Black Background' toggle on the Visualize tab
   # @param value The interger value from the checkbox (1=checked)
   def _showBlackBackgroundChanged(self, value):
-  
+
     # Black when checked
     if value == QtCore.Qt.Checked:
       self.renderer.SetBackground(0,0,0)
       self.renderer.SetGradientBackground(0)
       #self.renderer.ResetCamera()
-      
-    # Gradient when unchecked 
+
+    # Gradient when unchecked
     else:
       self.renderer.SetBackground(0,0,0)
       self.renderer.SetBackground(0.2,0.2,0.2)
       self.renderer.SetBackground2(1,1,1)
       self.renderer.SetGradientBackground(1)
       #self.renderer.ResetCamera()
-    
+
     # Update thew GUI
     self.vtkwidget.updateGL()
 
@@ -690,12 +690,12 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.variable_component.addItem('Y')
     else:
       self.variable_component.setDisabled(True)
-      
+
     if num_components > 1 and  self.exodus_result.current_dim == 3:
       self.variable_component.addItem('Z')
-    
+
   def _contourVariableSelected(self, index):
-    
+
     value_string = str(self.variable_contour.itemText(index))
     self.current_variable = value_string
     self.current_variable_index = index
@@ -721,8 +721,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.contour_choices[self.current_variable].restore(self)
     self.currently_restoring_contours = False
-      
-    
+
+
   def _variableComponentSelected(self, value):
     value_string = str(value)
     self.current_component = value_string
@@ -750,7 +750,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     elif self.component_index == 2:
       self.exodus_result.lut.SetVectorModeToComponent()
       self.exodus_result.lut.SetVectorComponent(2)
-    
+
     if self.clip_groupbox.isChecked():
       self.exodus_result.clipper.Modified()
       self.exodus_result.clipper.Update()
@@ -769,7 +769,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.exodus_result.mapper.SelectColorArray(self.current_variable)
     self.exodus_result.clip_mapper.SelectColorArray(self.current_variable)
-    
+
     if data:
       self.current_range = data.GetRange(self.component_index)
 
@@ -791,13 +791,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       else:
         self.max_custom_text.setDisabled(True)
 
-      min = 0.0      
+      min = 0.0
       try:
         min = float(self.min_custom_text.displayText())
       except:
         min = 0.0
 
-      max = 0.0      
+      max = 0.0
       try:
         max = float(self.max_custom_text.displayText())
       except:
@@ -815,7 +815,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.exodus_result.mapper.SetScalarRange(the_range)
         self.exodus_result.clip_mapper.SetScalarRange(the_range)
 
-    
+
     self.exodus_result.scalar_bar.SetTitle(self.current_variable)
     self.renderer.AddActor2D(self.exodus_result.scalar_bar)
     self.vtkwidget.updateGL()
@@ -837,13 +837,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self._lastClicked() # Go to the last timestep
 
     self._resetView() # Reset the camera
-    
+
   def _clickedOpen(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Result", "~/", "Input Files (*.e)")
 
     if file_name:
       self._openFile(file_name)
-    
+
   def _resetView(self):
     self.renderer.ResetCamera()
     fp = self.renderer.GetActiveCamera().GetFocalPoint()
@@ -865,7 +865,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       writer.SetFileName(str(file_name))
       self.vtkwidget.GetRenderWindow().Render()
       writer.Write()
-    
+
   def _automaticUpdateChanged(self, value):
     if value == QtCore.Qt.Checked:
       self.automatically_update = True
@@ -879,7 +879,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _backClicked(self):
     self.time_slider.setSliderPosition(self.time_slider.sliderPosition()-1)
     self._timeSliderReleased()
-        
+
   def _playClicked(self):
     self.play_button.setDisabled(True)
     self.pause_button.setDisabled(False)
@@ -895,7 +895,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.qt_app.processEvents()
       if self.time_slider.sliderPosition() == self.time_slider.maximum():
         self.time_slider.setSliderPosition(0)
-        
+
       while self.time_slider.sliderPosition() < self.time_slider.maximum():
         self.time_slider.setSliderPosition(self.time_slider.sliderPosition()+1)
         self.qt_app.processEvents()
@@ -907,7 +907,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.play_button.setDisabled(False)
     self.pause_button.setDisabled(True)
-    
+
   def _pauseClicked(self):
     self.play_button.setDisabled(False)
     self.pause_button.setDisabled(True)
@@ -926,7 +926,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.currently_looping = True
     else:
       self.currently_looping = False
-    
+
   def _timeSliderChanged(self):
     self.time_slider_textbox.setText(str(self.time_slider.sliderPosition()))
 
@@ -939,7 +939,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       for actor in self.exodus_result.current_actors:
         self.renderer.RemoveActor(actor)
       self.exodus_result = self.timestep_to_exodus_result[int(textbox_string)]
-      
+
       if self.clip_groupbox.isChecked():
         self.renderer.AddActor(self.exodus_result.clip_actor)
         if self.draw_edges_checkbox.checkState() == QtCore.Qt.Checked:
@@ -978,7 +978,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.exodus_result.geom.Update()
       self.current_bounds = self.exodus_result.actor.GetBounds()
       self._updateContours()
-      
+
   def _sliderTextboxReturn(self):
     self.time_slider.setSliderPosition(int(self.time_slider_textbox.text()))
     self._timeSliderReleased()
@@ -995,7 +995,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.current_max_timestep += 1
         self.timestep_to_exodus_result[self.current_max_timestep] = result
         self.timestep_to_timestep[self.current_max_timestep] = timestep
-    
+
   def _updateData(self):
     # Check to see if there are new exodus files with adapted timesteps in them.
     if self.file_name and self.exodus_result:
@@ -1007,7 +1007,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           exodus_result.setFileName(file_name, self.current_lut)
           self.exodus_results.append(exodus_result)
           self.new_stuff_to_read = True
-      
+
     if not self.exodus_result:
       if not self.file_name: # Might have been set by opening a file
         output_file_names = self.input_file_widget.getOutputFileNames()
@@ -1018,7 +1018,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
       for file_name in output_file_names:
         if '.e' in file_name and os.path.exists(file_name):
-          file_stamp = os.path.getmtime(file_name)          
+          file_stamp = os.path.getmtime(file_name)
 
           if int(file_stamp) >= int(self.base_stamp) and int(file_stamp) <= int(time.time() - 1) and file_name not in self.file_names:
             self.file_name = file_name
@@ -1028,17 +1028,17 @@ class ExodusResultRenderWidget(QtGui.QWidget):
             self.current_max_timestep = self.exodus_result.max_timestep
             self.renderer.AddActor(self.exodus_result.actor)
             self._drawEdgesChanged(self.draw_edges_checkbox.checkState())
-   
+
             if self.first:
               self.first = False
               self.renderer.ResetCamera()
-   
+
             # Avoid z-buffer fighting
             vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
-   
+
             if self.clip_groupbox.isChecked():
               _clippingToggled(True)
-   
+
             self.vtkwidget.updateGL()
             self._updateControls()
             self.time_slider.setSliderPosition(self.current_max_timestep)
@@ -1066,7 +1066,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
   def _timestepBegin(self):
     self.new_stuff_to_read = True
-  
+
   def _timestepEnd(self):
     pass
 
@@ -1099,8 +1099,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     # Do it twice in case of adapted results
     self._updateData()
     self._updateData()
-    
-  def _runStopped(self):    
+
+  def _runStopped(self):
     self.timer.stop()
     self.run_stopped_timer = QtCore.QTimer()
     self.run_stopped_timer.setInterval(1000) # Wait a second before updating the plots one last time
@@ -1120,9 +1120,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.renderer.RemoveActor(self.exodus_result.current_actor)
       self.renderer.AddActor(self.exodus_result.actor)
       self.exodus_result.current_actor = self.exodus_result.actor
-      
-    self.vtkwidget.updateGL()    
-    
+
+    self.vtkwidget.updateGL()
+
   def _clipNormalChanged(self, value):
     self.plane.SetOrigin(self.current_bounds[0],
                          self.current_bounds[2],
@@ -1141,8 +1141,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
   def _clipSliderReleased(self):
     self._updateContours()
-    self.vtkwidget.updateGL()    
-  
+    self.vtkwidget.updateGL()
+
   def _clipSliderMoved(self, value):
     direction = str(self.clip_plane_combobox.currentText())
 
@@ -1158,7 +1158,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     elif direction == 'z':
       min = self.current_bounds[4]
       max = self.current_bounds[5]
-    
+
     step_size = (max - min)/100.0
     steps = value
     distance = float(steps)*step_size
@@ -1167,7 +1167,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     old = self.plane.GetOrigin()
     self.plane.SetOrigin(position if direction == 'x' else old[0],
                          position if direction == 'y' else old[1],
-                         position if direction == 'z' else old[2])    
+                         position if direction == 'z' else old[2])
 
     self._updateContours()
     self.vtkwidget.updateGL()

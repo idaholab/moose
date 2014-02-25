@@ -73,7 +73,7 @@ protected:
    * Needed for computing off-diagonal terms in Jacobian
    */
   unsigned int _x_var;
-  
+
   /**
    * Coupled scalar variable values
    */

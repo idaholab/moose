@@ -25,7 +25,7 @@ class ExodusRenderer(MeshRenderer):
     self.file_name = mesh_item_data['file']
 
     self.buildActors(self.file_name)
-    
+
   def buildActors(self, file_name):
     reader = vtk.vtkExodusIIReader()
     reader.SetFileName(self.file_name)
@@ -76,17 +76,17 @@ class ExodusRenderer(MeshRenderer):
     for i in xrange(num_blocks):
       block_id = reader.GetObjectId(vtk.vtkExodusIIReader.ELEM_BLOCK,i)
       self.blocks.append(block_id)
-      self.block_id_to_exodus_block[block_id] = i    
+      self.block_id_to_exodus_block[block_id] = i
       name = reader.GetObjectName(vtk.vtkExodusIIReader.ELEM_BLOCK,i).split(' ')
       if 'Unnamed' not in name:
         self.block_id_to_name[block_id] = name[0]
         self.name_to_block_id[name[0]] = block_id
-        
+
     reader.SetTimeStep(1)
     reader.Update()
 
     self.data = reader.GetOutput()
-    
+
     for i in xrange(num_sidesets):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.sideset_vtk_block, i)
       self.sideset_actors[str(self.sidesets[i])] = actor
@@ -95,7 +95,7 @@ class ExodusRenderer(MeshRenderer):
       clipped_actor = ClippedActor(actor, self.plane)
       self.clipped_sideset_actors[str(self.sidesets[i])] = clipped_actor
       self.all_actors.append(clipped_actor)
-      
+
     for i in xrange(num_nodesets):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.nodeset_vtk_block, i)
       self.nodeset_actors[str(self.nodesets[i])] = actor
@@ -113,4 +113,4 @@ class ExodusRenderer(MeshRenderer):
       clipped_actor = ClippedActor(actor, self.plane)
       self.clipped_block_actors[str(self.blocks[i])] = clipped_actor
       self.all_actors.append(clipped_actor)
-    
+

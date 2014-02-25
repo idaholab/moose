@@ -40,7 +40,7 @@ public:
 
 protected:
   const Real & _value;
-  
+
   const TrackDiracFront & _front_tracker;
 };
 

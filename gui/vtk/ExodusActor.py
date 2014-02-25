@@ -12,16 +12,16 @@ class ExodusActor(PeacockActor):
 
     self.solid_visible = False
     self.edges_visible = False
-    
+
     self.mesh = data.GetBlock(type).GetBlock(index)
-    
+
     self.geom = vtk.vtkDataSetSurfaceFilter()
     self.geom.SetInput(self.mesh)
     self.geom.Update()
-    
+
     self.mapper = vtk.vtkDataSetMapper()
     self.mapper.SetInput(self.mesh)
-    
+
     self.actor = vtk.vtkActor()
     self.actor.SetMapper(self.mapper)
     self.actor.GetProperty().SetPointSize(5)
@@ -39,13 +39,13 @@ class ExodusActor(PeacockActor):
 
   def _showEdges(self):
     self.actor.GetProperty().EdgeVisibilityOn()
-    
+
   def _hideEdges(self):
     self.actor.GetProperty().EdgeVisibilityOff()
 
   def _goSolid(self):
     self.actor.GetProperty().SetRepresentationToSurface()
-    
+
   def _goWireframe(self):
     self.actor.GetProperty().SetRepresentationToWireframe()
 

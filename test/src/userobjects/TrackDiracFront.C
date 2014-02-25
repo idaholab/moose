@@ -20,7 +20,7 @@ InputParameters validParams<TrackDiracFront>()
   InputParameters params = validParams<NodalUserObject>();
 
   params.addRequiredCoupledVar("var", "Wherever this variable is close to 0.5 a Dirac point will be generated");
-  
+
   return params;
 }
 
@@ -41,7 +41,7 @@ TrackDiracFront::execute()
 {
   // Is the value near 0.5?
   if(_var_value[_qp] > 0.4 && _var_value[_qp] < 0.6)
-  {      
+  {
     Elem * elem = localElementConnectedToCurrentNode();
     _dirac_points.push_back(std::make_pair(elem, *_current_node));
   }
@@ -51,7 +51,7 @@ void
 TrackDiracFront::threadJoin(const UserObject &y)
 {
   const TrackDiracFront & tdf = static_cast<const TrackDiracFront &>(y);
-  
+
   // Merge in the values from "y"
   _dirac_points.insert(_dirac_points.end(), tdf._dirac_points.begin(), tdf._dirac_points.end());
 }
@@ -77,7 +77,7 @@ TrackDiracFront::localElementConnectedToCurrentNode()
   for(unsigned int i=0; i<connected_elems.size(); i++)
   {
     Elem * elem = _mesh.elem(connected_elems[i]);
-    
+
     if(elem->processor_id() == pid) // Is this element owned by the local processor?
       return elem;
   }

@@ -15,7 +15,7 @@
     type = ParsedFunction
     value = x
   [../]
-  
+
   [./forcing_fn]
     type = ParsedFunction
     value = 0
@@ -28,7 +28,7 @@
     family = LAGRANGE
     block = '1 2'
   [../]
-  
+
   [./lm]
     order = FIRST
     family = LAGRANGE
@@ -64,7 +64,7 @@
     boundary = '1 2 3 4 5 6'
     function = exact_fn
   [../]
-  
+
   [./mortar]
     type = DiffusionFluxBC
     variable = u

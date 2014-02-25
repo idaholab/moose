@@ -15,12 +15,12 @@
     type = ParsedFunction
     value = 'x*x+y*y'
   [../]
-  
+
   [./ffn]
     type = ParsedFunction
     value = -4
   [../]
-  
+
   [./bottom_bc_fn]
     type = ParsedFunction
     value = -2*y
@@ -126,7 +126,7 @@
 
 [Preconditioning]
   active = 'pc'
-  
+
   [./pc]
     type = SMP
     full = true

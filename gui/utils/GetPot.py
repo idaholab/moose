@@ -1,24 +1,24 @@
-#  -*- python -*- 
+#  -*- python -*-
 #  GetPot Version 1.0                                        Sept/13/2002
-#  
+#
 #  WEBSITE: http://getpot.sourceforge.net
-#  
+#
 #  This library is  free software; you can redistribute  it and/or modify
 #  it  under  the terms  of  the GNU  Lesser  General  Public License  as
 #  published by the  Free Software Foundation; either version  2.1 of the
 #  License, or (at your option) any later version.
-#  
+#
 #  This library  is distributed in the  hope that it will  be useful, but
 #  WITHOUT   ANY  WARRANTY;   without  even   the  implied   warranty  of
 #  MERCHANTABILITY  or FITNESS  FOR A  PARTICULAR PURPOSE.   See  the GNU
 #  Lesser General Public License for more details.
-#  
+#
 #  You  should have  received a  copy of  the GNU  Lesser  General Public
 #  License along  with this library; if  not, write to  the Free Software
 #  Foundation, Inc.,  59 Temple Place,  Suite 330, Boston,  MA 02111-1307
 #  USA
-#  
-#  (C) 2001, 2002 Frank R. Schaefer  
+#
+#  (C) 2001, 2002 Frank R. Schaefer
 #==========================================================================
 #<<:BEGIN-FRAME FRAMEWORK/code.python>>
 import string
@@ -33,12 +33,12 @@ class GetPot_variable:
     def take(self, str_value):
         self.value    = string.split(str_value)
         self.original = str_value
-        
+
 
 class GetPot:
 #<<:BEGIN-FUNCTIONS>>
 
-#<<BEGIN init/code.python>> 
+#<<BEGIN init/code.python>>
     def __init__(self, Argv=None, Filename=None):
         # in case a search for a specific argument failed,
         # it effects the next functions block.
@@ -54,8 +54,8 @@ class GetPot:
         self.section_list = []
 
         self.comments = {}
-        
-        # cursor oriented functions (nect(), follow(), etc.): 
+
+        # cursor oriented functions (nect(), follow(), etc.):
         # pointer to actual position to be parsed.
         self.cursor         = 0
         self.nominus_cursor = -1
@@ -71,7 +71,7 @@ class GetPot:
 
         self.argv = self.__parse_argument_vector(Argv)
 
-#<<END init/code.python BEGIN parse_argv/code.python>> 
+#<<END init/code.python BEGIN parse_argv/code.python>>
     def __parse_argument_vector(self, argv_):
 
         self.section = ''
@@ -84,7 +84,7 @@ class GetPot:
 
             if len(arg) == 0: continue
             elif i == 0:      argv.append(arg); continue
-            
+
             # [section] ?
             if len(arg) > 1 and arg[0] == '[' and arg[-1] == ']':
                 name = self.DBE_expand_string(arg[1:-1])
@@ -95,7 +95,7 @@ class GetPot:
             else:
                 arg = self.section + self.DBE_expand_string(arg[:])
                 argv.append(arg)
-            
+
             # no-minus argument ?
             if arg[0] != '-': self.idx_nominus.append(i)
 
@@ -109,7 +109,7 @@ class GetPot:
                         v.take(arg[k+1:])
         return argv
 
-#<<END parse_argv/code.python BEGIN parse_file/code.python>> 
+#<<END parse_argv/code.python BEGIN parse_file/code.python>>
     # (*) file parsing
     def __read_in_file(self, Filename):
         """Parses a file and returns a vector of arguments."""
@@ -126,7 +126,7 @@ class GetPot:
             if self.current_comment != '':
                 self.comments[token] = self.current_comment
 
-        # -- reduce expressions of token1'='token2 to a single 
+        # -- reduce expressions of token1'='token2 to a single
         #    string 'token1=token2'
         # -- copy everything into 'argv'
         # -- arguments preceded by something like '[' name ']' (section)
@@ -135,9 +135,9 @@ class GetPot:
 
         argv = []
         # loop over brute tokens to create argv vector
-        while i1 < len(brute_tokens): 
+        while i1 < len(brute_tokens):
             SRef = brute_tokens[i1];
-        
+
             # concatinate 'variable' '=' 'value' to 'variable=value'
             if i2 < len(brute_tokens) and brute_tokens[i2] == '=':
                 if i3 >= len(brute_tokens):
@@ -149,7 +149,7 @@ class GetPot:
             else:
                 argv.append(SRef)
                 i1 = i2; i2 = i3; i3 += 1;
-                
+
         return argv
 
     def __skip_whitespace(self, FH):
@@ -157,12 +157,12 @@ class GetPot:
         tmp = ' '
         while 1+1==2:
             while tmp == ' ' or tmp == '\t' or tmp == '\n':
-                tmp = FH.read(1)                
+                tmp = FH.read(1)
                 if tmp == '': return     # end of file ?
 
-            # found a non whitespace 
+            # found a non whitespace
             if tmp != '#':
-                # put the last read letter back                
+                # put the last read letter back
                 FH.seek(-1,1) # (seek -1 backwards from current position (code=1))
                 return
 
@@ -212,7 +212,7 @@ class GetPot:
             if tmp == '': return str
             # un-backslashed quotes => it's the end of the string
             elif   tmp == '\'' and not last_letter == '\\':  return str
-            elif tmp == '\\' and not last_letter == '\\':  continue # don't append 
+            elif tmp == '\\' and not last_letter == '\\':  continue # don't append
 
             str += tmp
 
@@ -223,7 +223,7 @@ class GetPot:
         brackets = 1
         while 1 + 1 == 2:
             last_letter = tmp; tmp = FH.read(1)
-            if tmp == '':                           return str            
+            if tmp == '':                           return str
             elif tmp == '{' and last_letter == '$': brackets += 1
             elif tmp == '}':
                 brackets -= 1
@@ -231,16 +231,16 @@ class GetPot:
                 if brackets == 0: return str + '}'
             elif tmp == '\\' and not last_letter == '\\':
                 continue  # do not append an unbackslashed backslash
-            
+
             str += tmp
 
 
 
-    def __process_section_label(self, label, section_stack):                    
+    def __process_section_label(self, label, section_stack):
         #  1) subsection of actual section ('./' prefix)
         if len(label) >= 2 and label[:2] == "./":
             label = label[2:]
-            # a single [./] means 'the same section'                    
+            # a single [./] means 'the same section'
         #  2) subsection of parent section ('../' prefix)
         elif label[0:3] == "../":
             while label[0:3] == "../":
@@ -253,13 +253,13 @@ class GetPot:
         # 4) parse section name for slashes
         if label != "":
             i=0
-            while i < len(label): 
-                if label[i] == '/': 
+            while i < len(label):
+                if label[i] == '/':
                     section_stack.append(label[0:i])
                     if i+1 < len(label):
                         label = label[i+1:]
                         i = 0
-                else: 
+                else:
                     i += 1
             section_stack.append(label)
 
@@ -268,8 +268,8 @@ class GetPot:
             section += s + '/'
 
         return section
-    
-#<<END parse_file/code.python BEGIN convert_to_type/code.python>> 
+
+#<<END parse_file/code.python BEGIN convert_to_type/code.python>>
     def __convert_to_type(self, String, Default):
         """Converts a string into an object of the same type as 'Default'.
         Returns 'None' in case this is not possible."""
@@ -302,14 +302,14 @@ class GetPot:
             if start_i == 2: return number
             else:            return -number
 
-#<<END convert_to_type/code.python BEGIN search/code.python>> 
+#<<END convert_to_type/code.python BEGIN search/code.python>>
     def __get_remaining_string(self, String, Start):
         """Checks if 'String' begins with 'Start' and returns the remaining String.
         Returns None if String does not begin with Start."""
         if Start == "": return String
         if string.find(String, Start) == 0: return String[len(Start):]
         else:                               return None
-        
+
     #     -- search for a certain option and set cursor to position
     def search(self, *Args):
         """Search for a command line argument and set cursor. Starts search
@@ -329,10 +329,10 @@ class GetPot:
                         obj.cursor = i; obj.search_failed_f = 0
                         return 1
             return 0
-            
+
         # first run: from cursor to end
         if check_match(self.cursor, len(self.argv), Args) == 1: return 1
-                
+
         if self.search_loop_f == 0: return 0
 
         # second run: from 1 to old_cursor position
@@ -342,13 +342,13 @@ class GetPot:
         if check_match(1, old_cursor, Args) == 1: return 1
 
         return 0
-            
+
     def disable_loop(self):
         self.search_loop_f = 0
-        
+
     def enable_loop(self):
         self.search_loop_f = 1
-        
+
     #     -- reset cursor to initial position
     def reset_cursor(self):
         self.search_failed_f = 0; self.cursor = 0
@@ -361,8 +361,8 @@ class GetPot:
 
     def set_prefix(self, Prefix):
         self.prefix = Prefix
-        
-#<<END search/code.python BEGIN get/code.python>> 
+
+#<<END search/code.python BEGIN get/code.python>>
     # (*) direct access to command line arguments through []-operator
     def __getitem__(self, Idx):
         """Returns a specific argument indexed by Idx or 'None' if this
@@ -381,7 +381,7 @@ class GetPot:
         return len(self.argv)
 
 
-#<<END get/code.python BEGIN next/code.python>> 
+#<<END get/code.python BEGIN next/code.python>>
     #     -- get argument at cursor++
     def next(self, Default):
         """Tests if the following argument is of the same type as Default. If not
@@ -398,7 +398,7 @@ class GetPot:
         else:              return Default
 
 
-#<<END next/code.python BEGIN follow/code.python>> 
+#<<END next/code.python BEGIN follow/code.python>>
     #     -- search for option and get argument at cursor++
     def follow(self, Default, *Args):
         for arg in Args:
@@ -407,7 +407,7 @@ class GetPot:
         return Default
 
 
-#<<END follow/code.python BEGIN direct_follow/code.python>> 
+#<<END follow/code.python BEGIN direct_follow/code.python>>
     def direct_follow(self, Default, Arg):
         remaining_string = self.__match_starting_string(Arg)
 
@@ -446,7 +446,7 @@ class GetPot:
                 return self.argv[i][len(StartString):]
         return None
 
-#<<END direct_follow/code.python BEGIN flags/code.python>> 
+#<<END direct_follow/code.python BEGIN flags/code.python>>
     # (*) flags
     def  options_contain(self, FlagList):
         """Go through all arguments that start with a '-' and watch if they
@@ -456,7 +456,7 @@ class GetPot:
             if self.prefix != "": arg = self.__get_remaining_string(arg, self.prefix)
             if arg != None and len(arg) >= 2 and arg[0] == '-' and arg[1] != '-' \
                and self.__check_flags(arg, FlagList) == 1: return 1
-            
+
         return 0
 
     def  argument_contains(self, Idx, FlagList):
@@ -468,7 +468,7 @@ class GetPot:
         if self.prefix == "":
             # search argument for any flag in flag list
             return self.__check_flags(self.argv[Idx], FlagList)
-        
+
         # if a prefix is set, then the argument index is the index
         #   inside the 'namespace'
         # => only check list of arguments that start with prefix
@@ -491,7 +491,7 @@ class GetPot:
         return 0
 
 
-#<<END flags/code.python BEGIN nominus/code.python>> 
+#<<END flags/code.python BEGIN nominus/code.python>>
     # (*) nominus arguments
     def reset_nominus_cursor(self):
         self.nominus_cursor = -1
@@ -501,17 +501,17 @@ class GetPot:
         for i in self.idx_nominus:
             v_nm.append(self.argv[i])
         return v_nm
-    
+
     def nominus_size(self):
         return len(self.idx_nominus)
-    
+
     def next_nominus(self):
         if self.nominus_cursor >= len(self.idx_nominus)-1: return None
         self.nominus_cursor += 1
         return self.argv[self.idx_nominus[self.nominus_cursor]]
 
 
-#<<END nominus/code.python BEGIN variables/code.python>> 
+#<<END nominus/code.python BEGIN variables/code.python>>
     # (*) variables
     # helper to find arguments
     def get_variable_names(self):
@@ -530,7 +530,7 @@ class GetPot:
         """Search for a variable in the array of variables."""
         v_name = self.prefix + VarName
         for v in self.variables:
-            if v.name == v_name: return v        
+            if v.name == v_name: return v
         return None
 
     #     -- scalar values and vectors
@@ -547,12 +547,12 @@ class GetPot:
             if Idx >= len(v.value):
                 return Default
             return self.__convert_to_type(v.value[Idx], Default)
-        
+
     def vector_variable_size(self):
         return variables.size()
 
 
-#<<END variables/code.python BEGIN print/code.python>> 
+#<<END variables/code.python BEGIN print/code.python>>
     def Print(self):
         print "argc = %i" % len(self.argv)
         for arg in self.argv:
@@ -604,8 +604,8 @@ class GetPot:
     #              [1] ${: Das Marmorbild}
     #              [2] ${& Author= ${Eichendorf}}
     #
-    #           The each sub-expression is expanded using expand(). 
-    #---------------------------------------------------------------------------    
+    #           The each sub-expression is expanded using expand().
+    #---------------------------------------------------------------------------
     def DBE_expand_string(self, String):
         """Parses for closing operators '${ }' and expands them letting
            white spaces and other letters as they are."""
@@ -634,7 +634,7 @@ class GetPot:
             if letter != " " and letter != "\t" and letter != "\n":
                 break
             i += 1
-            
+
         expr_list = []
         open_brackets = 0
         start_idx = []
@@ -645,7 +645,7 @@ class GetPot:
             letter = String[i]
             # whitespace -> end of expression
             if (letter == " " or letter == "\t" or letter == "\n") \
-               and open_brackets == 0:                
+               and open_brackets == 0:
                 expr_list.append(String[start_new_string:i])
                 for i in range(i+1, L):
                     letter = String[i]
@@ -667,11 +667,11 @@ class GetPot:
                 Replacement = self.DBE_expand(String[start:i])
                 if start-2 <= 0: String = Replacement + String[i+1:]
                 else:            String = String[:start-2] + Replacement + String[i+1:]
-                L = len(String)                
+                L = len(String)
                 i = start + len(Replacement) - 3
                 open_brackets -= 1
             i += 1
-            
+
         expr_list.append(String[start_new_string:i])
         if len(expr_list) < ExpectedNumber:
             expr_list.extend(["<< ${ }: missing arguments>>"] * (ExpectedNumber - len(expr_list)))
@@ -717,7 +717,7 @@ class GetPot:
             return "%e" % (reduce(lambda a, b:
                                   self.__convert_to_type(a, 0.) + self.__convert_to_type(b,0.),
                                   A))
-        
+
         elif Expr[0] == "-":
             A = self.DBE_get_expr_list(Expr[1:], 2)
             return "%e" % reduce(lambda a, b:
@@ -746,7 +746,7 @@ class GetPot:
             return "%e" % reduce(lambda a, b:
                                  self.__convert_to_type(a, 0.) ** self.__convert_to_type(b,0.),
                                  A)
-        
+
         # ${==  } ${<=  } ${>= } comparisons (return the number of the first 'match'
         elif len(Expr) >= 2 and \
              (Expr[0:2] == "==" or Expr[0:2] == ">=" or Expr[0:2] == "<=" or \
@@ -755,19 +755,19 @@ class GetPot:
             if Expr[1] == "=": OP = Expr[0:2]; A = self.DBE_get_expr_list(Expr[2:], 2)
             else:              OP = Expr[0];   A = self.DBE_get_expr_list(Expr[1:], 2)
 
-            x_orig = A[0]            
+            x_orig = A[0]
             x = self.__convert_to_type(x_orig, 1e37)
             i = 1
 
             for y_orig in A[1:]:
                 y = self.__convert_to_type(y_orig, 1e37)
                 # set the strings as reference if one wasn't a number
-                if x == 1e37 or y == 1e37: xc = x_orig; y = y_orig;  
+                if x == 1e37 or y == 1e37: xc = x_orig; y = y_orig;
                 else:                      xc = x
 
                 if   OP == "==" and xc == y: return repr(i)
                 elif OP == ">=" and xc >= y: return repr(i)
-                elif OP == "<=" and xc <= y: return repr(i)                
+                elif OP == "<=" and xc <= y: return repr(i)
                 elif OP == ">"  and xc > y:  return repr(i)
                 elif OP == "<"  and xc < y:  return repr(i)
                 i += 1
@@ -775,7 +775,7 @@ class GetPot:
             # nothing fulfills the condition => return 0
             return repr(0)
 
-        # ${?? expr expr} select 
+        # ${?? expr expr} select
         elif len(Expr) >=2 and Expr[0:2] == "??":
             A = self.DBE_get_expr_list(Expr[2:], 2)
             X = self.__convert_to_type(A[0], 1e37)
@@ -784,14 +784,14 @@ class GetPot:
                 return A[-1]
             # round X to closest integer
             return A[int(X+0.5)]
-        
+
         # ${? expr expr expr} if then else conditions
         elif Expr[0] == "?":
             A = self.DBE_get_expr_list(Expr[1:], 2)
             if self.__convert_to_type(A[0], 0.0) == 1.0: return A[1]
             elif len(A) > 2:                             return A[2]
 
-        # ${! expr} maxro expansion 
+        # ${! expr} maxro expansion
         elif Expr[0] == "!":
             Var = self.DBE_get_variable(Expr[1:])
             # error
@@ -802,7 +802,7 @@ class GetPot:
 
         # ${@: } - string subscription
         elif len(Expr) >= 2 and Expr[0:2] == "@:":
-            A = self.DBE_get_expr_list(Expr[2:], 2)            
+            A = self.DBE_get_expr_list(Expr[2:], 2)
             X = self.__convert_to_type(A[1], 1e37)
 
             # last element is always the default argument
@@ -815,17 +815,17 @@ class GetPot:
                     return A[0][int(X+0.5):int(Y+1.5)]
                 elif Y == -1:
                     return A[0][int(X+0.5):]
-                return "<<2nd index out of range>>"                            
+                return "<<2nd index out of range>>"
             else:
                 return A[0][int(X+0.5)]
-        
+
         # ${@ } - vector subscription
         elif Expr[0] == "@":
             A = self.DBE_get_expr_list(Expr[1:], 2)
             Var = self.DBE_get_variable(A[0])
             # error
             if type(Var) == type(""): return Var
-            
+
             X = self.__convert_to_type(A[1], 1e37)
 
             # last element is always the default argument
@@ -839,12 +839,12 @@ class GetPot:
                 elif Y == -1:
                     Vec = Var.value[int(X+0.5):]
                 else:
-                    return "<<2nd index out of range>>" 
+                    return "<<2nd index out of range>>"
                 return reduce(lambda a,b: "%s %s" % (a,b), Vec)
             else:
                 return Var.value[int(X+0.5)]
 
-        
+
         A = self.DBE_get_expr_list(copy.copy(Expr), 1)
 
         B = self.DBE_get_variable(A[0])
@@ -878,7 +878,7 @@ class GetPot:
                 if len(arg) < 2:    continue
                 elif arg[0] != '-': continue
                 elif arg[1] == '-': continue
-                
+
                 for letter in arg[1:]:
                     if letter not in KnownFlags: ufos += letter;
         else:
@@ -901,7 +901,7 @@ class GetPot:
             var_name = self.__get_remaining_string(it.name, self.prefix)
             if var_name not in Knowns: ufos.append(it.name)
         return ufos
-        
+
     def unidentified_sections(self, *Knowns):
         ufos = []
         for it in self.section_list:
@@ -920,6 +920,6 @@ class GetPot:
 
             if arg not in Knowns: ufos.append(it)
         return ufos
-        
+
 #<<END print/code.python >>
 #<<:EPILOG>>
