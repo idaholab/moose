@@ -32,13 +32,13 @@ class GeneratedMeshActor(PeacockActor):
 
   def _showEdges(self):
     self.actor.GetProperty().EdgeVisibilityOn()
-    
+
   def _hideEdges(self):
     self.actor.GetProperty().EdgeVisibilityOff()
 
   def _goSolid(self):
     self.actor.GetProperty().SetRepresentationToSurface()
-    
+
   def _goWireframe(self):
     self.actor.GetProperty().SetRepresentationToWireframe()
 

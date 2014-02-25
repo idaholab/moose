@@ -1,5 +1,5 @@
 #
-# Coupling of time derivatives of aux variables is an error 
+# Coupling of time derivatives of aux variables is an error
 #
 
 [Mesh]
@@ -26,7 +26,7 @@
 		type = TimeDerivative
 		variable = u
 	[../]
-	
+
 	[./diff]
 		type = Diffusion
 		variable = u

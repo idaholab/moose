@@ -47,7 +47,7 @@
     boundary = '3'
     alpha = alpha
   [../]
-  
+
   [./right]
     type = DirichletBC
     variable = u
@@ -58,7 +58,7 @@
 
 [Preconditioning]
   active = 'pc'
-  
+
   [./pc]
     type = SMP
     full = true

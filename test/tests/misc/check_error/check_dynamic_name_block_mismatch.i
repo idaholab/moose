@@ -8,7 +8,7 @@
   block_name = 'wood steel copper'
 
   boundary_id = '1 2'
-  boundary_name = 'left right' 
+  boundary_name = 'left right'
 []
 
 [Variables]

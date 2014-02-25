@@ -8,7 +8,7 @@
   nx = 5
   ny = 5
   elem_type = QUAD4
-  
+
   displacements = 'u v'
 []
 
@@ -79,11 +79,11 @@
 
 [Executioner]
   type = Transient
-  
+
   dt = 0.1
   start_time = 0
   num_steps = 10
-    
+
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'

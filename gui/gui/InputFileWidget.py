@@ -28,7 +28,7 @@ class InputFileWidget(QtGui.QWidget):
     self.yaml_data = None
 
     self.recache()
-    
+
     self.action_syntax = ActionSyntax(app_path, options.use_cached_syntax)
 
     # Start with an input file template if this application has one
@@ -41,7 +41,7 @@ class InputFileWidget(QtGui.QWidget):
       input_file_template_name = os.path.dirname(os.path.realpath(sys.argv[0])) + '/input_template'
       self.input_file_template_root_node = readInputFile(input_file_template_name)
       self.input_file_template_getpot_data = GetPotData(self.input_file_template_root_node, self)
-      
+
     self.input_file_root_node = None
 
     self.constructed_data = {}
@@ -62,7 +62,7 @@ class InputFileWidget(QtGui.QWidget):
   ''' This will be called after the interface is completely setup to allow an application to modify this tab '''
   def modifyUI(self):
     pass
-    
+
   def initUI(self):
     # Just a holder so the edit param_widget can go in where we want
     self.edit_param_layout_spot = QtGui.QVBoxLayout()
@@ -77,7 +77,7 @@ class InputFileWidget(QtGui.QWidget):
     self.input_file_textbox = InputFileTextbox(self)
 #    self.input_file_textbox.hide()
     self.tree_widget = InputFileTreeWidget(self)
-    
+
     self.tree_widget_layout.addWidget(self.tree_widget)
     self.init_buttons(self.layoutH)
     self.tree_widget_layout.addLayout(self.layoutH)
@@ -120,15 +120,15 @@ class InputFileWidget(QtGui.QWidget):
     self.edit_menu = self.menubar.addMenu('&Edit')
     main_comment_action = QtGui.QAction("Main Comment", self)
     main_comment_action.triggered.connect(self._edit_main_comment)
-    self.edit_menu.addAction(main_comment_action)    
+    self.edit_menu.addAction(main_comment_action)
 
     self.view_menu = self.menubar.addMenu('&View')
     input_file_action = QtGui.QAction("Input File", self)
     input_file_action.triggered.connect(self._view_input_file)
-    self.view_menu.addAction(input_file_action)    
+    self.view_menu.addAction(input_file_action)
     mesh_view_action = QtGui.QAction("Mesh View", self)
     mesh_view_action.triggered.connect(self._view_mesh_view)
-    self.view_menu.addAction(mesh_view_action)    
+    self.view_menu.addAction(mesh_view_action)
 
   ''' Return the name to use for this tab '''
   def name(self):
@@ -148,10 +148,10 @@ class InputFileWidget(QtGui.QWidget):
     layout.addWidget(self.buttonSave)
     self.application.addRelapSave(layout)
     layout.addWidget(self.buttonClear)
-    
+
   def getOutputFileNames(self):
     return self.tree_widget.getOutputFileNames()
-    
+
   def openInputFile(self, file_name):
     if file_name and file_name != '':
       progress = QtGui.QProgressDialog("Reading Input File...", "Abort", 0, 100, self)
@@ -184,9 +184,9 @@ class InputFileWidget(QtGui.QWidget):
       progress.setValue(counter)
 
       main_comment = '\n'.join(self.input_file_root_node.comments)
-      
+
       self.tree_widget.comment = main_comment
-      
+
       main_sections = self.input_file_root_node.children
 
       self.tree_widget.loadData(counter, progress, main_sections)
@@ -198,7 +198,7 @@ class InputFileWidget(QtGui.QWidget):
       self.tree_widget.clear()
       self.tree_widget.addHardPathsToTree()
       self.openInputFile(file_name)
-    
+
   def click_clear(self):
     msgBox = QMessageBox()
     msgBox.setText("Clear Tree?")
@@ -217,7 +217,7 @@ class InputFileWidget(QtGui.QWidget):
       file = open(file_name,'w')
       output_string = self.input_file_textbox.buildInputString()
       file.write(output_string)
-      os.chdir(os.path.dirname(str(file_name)))    
+      os.chdir(os.path.dirname(str(file_name)))
 
   def _edit_main_comment(self):
     ce = CommentEditor(self.tree_widget)
@@ -235,7 +235,7 @@ class InputFileWidget(QtGui.QWidget):
       sizes = self.layout_with_textbox.sizes()
       sizes[2] = 50
       self.layout_with_textbox.setSizes(sizes)
-    
+
   def _view_mesh_view(self):
     if self.mesh_render_widget.isVisible():
       self.mesh_render_widget.hide()
@@ -247,7 +247,7 @@ class InputFileWidget(QtGui.QWidget):
       sizes = self.layout_with_textbox.sizes()
       sizes[1] = 600
       self.layout_with_textbox.setSizes(sizes)
-    
+
   def _selected_recache(self):
     self.recache(True)
 

@@ -7,4 +7,4 @@ class PeacockTab(QtGui.QWidget):
 
   def name(self):
     pass
-  
+

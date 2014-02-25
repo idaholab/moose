@@ -15,7 +15,7 @@
     type = ParsedFunction
     value = x*x+y*y+z*z
   [../]
-  
+
   [./forcing_fn]
     type = ParsedFunction
     value = -6
@@ -28,7 +28,7 @@
     family = LAGRANGE
     block = '1 2'
   [../]
-  
+
   [./lm]
     order = SECOND
     family = LAGRANGE

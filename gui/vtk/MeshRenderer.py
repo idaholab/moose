@@ -14,7 +14,7 @@ class MeshRenderer:
 
     self.block_actors = {}
     self.clipped_block_actors = {}
-    
+
     self.sideset_actors = {}
     self.clipped_sideset_actors = {}
 
@@ -22,6 +22,6 @@ class MeshRenderer:
     self.clipped_nodeset_actors = {}
 
 
-    
+
   def setFileName(self, file_name):
     raise NotImplementedError

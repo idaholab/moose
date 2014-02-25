@@ -22,7 +22,7 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-    
+
 #    [./InitialCondition]
 #      type = FunctionIC
  #     function = initial_value

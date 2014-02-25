@@ -17,26 +17,26 @@ class PostprocessorWidget(QtGui.QWidget):
     self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
     self.input_file_widget = input_file_widget
     self.execute_widget = execute_widget
-    
+
     self.current_file = None
     self.getFileName()
-    
+
     #Create the post processor list view
     self.post_processor_list_view = QtGui.QListView()
     self.post_processor_list_model = QtGui.QStandardItemModel()
     self.post_processor_list_view.setModel(self.post_processor_list_model)
     self.postProcessorModelFill()
-   
-    # adds a scroll layout to the main widget so all of the plots don't take up too much space       
-    # scroll area widget contents - layout                                                                                                                        
-    scroll = ResizeScrollArea()                                                                      
-    wrapper = QtGui.QWidget()                                                                        
+
+    # adds a scroll layout to the main widget so all of the plots don't take up too much space
+    # scroll area widget contents - layout
+    scroll = ResizeScrollArea()
+    wrapper = QtGui.QWidget()
     self.flow_layout = FlowLayout()
-    wrapper.setLayout(self.flow_layout)                                                               
-    scroll.setWidget(wrapper)                                                                        
-    scroll.setWidgetResizable(True)                                                                                                                                   
-    pal = QtGui.QPalette(scroll.palette())                                                           
-    pal.setColor(QtGui.QPalette.Window, QtGui.QColor('lightgray'))                                   
+    wrapper.setLayout(self.flow_layout)
+    scroll.setWidget(wrapper)
+    scroll.setWidgetResizable(True)
+    pal = QtGui.QPalette(scroll.palette())
+    pal.setColor(QtGui.QPalette.Window, QtGui.QColor('lightgray'))
     scroll.setPalette(pal)
 
     # adds a button to the widget that will be used to clear plot selections
@@ -60,10 +60,10 @@ class PostprocessorWidget(QtGui.QWidget):
     self.left_widget = QtGui.QWidget()
     self.left_layout = QtGui.QVBoxLayout()
     self.left_widget.setLayout(self.left_layout)
-    
+
     self.left_layout.addWidget(self.post_processor_list_view)
     self.left_layout.addLayout(self.button_layout)
-    
+
     self.top_layout = QtGui.QSplitter()
     self.top_layout.addWidget(self.left_widget)
     self.top_layout.addWidget(scroll)
@@ -71,27 +71,27 @@ class PostprocessorWidget(QtGui.QWidget):
     self.top_layout.setStretchFactor(0,0.1)
     self.top_layout.setStretchFactor(1,0.9)
 
-    self.top_layout.setSizes([100,500])    
-                                                                         
+    self.top_layout.setSizes([100,500])
+
     #assemble the overall layout
     self.main_layout = QtGui.QVBoxLayout()
     self.main_layout.addWidget(self.top_layout)
     self.setLayout(self.main_layout)
- 
-    self.timerSetUp()    
 
-    self.executeSignalLinking()        
+    self.timerSetUp()
+
+    self.executeSignalLinking()
 
     self.modifyUI()
     ''' This will be called after the interface is completely setup to allow an application to modify this tab '''
   def modifyUI(self):
       pass
-      
-      
+
+
   ''' Return the name to use for this tab '''
   def name(self):
       return 'Postprocess'
-  
+
   def getFileName(self):
     '''
     get the file name of the csv file
@@ -103,7 +103,7 @@ class PostprocessorWidget(QtGui.QWidget):
       outputTable_data = output_item.table_data
       if 'file_base' in outputTable_data:
         self.current_file = cwd +'/'+ outputTable_data['file_base'] + '.csv'
-          
+
   def postProcessorModelFill(self):
     '''
     clean (if needed) and fill  the post_processor_list_model
@@ -112,7 +112,7 @@ class PostprocessorWidget(QtGui.QWidget):
     self.plot_datas    = {} #kept updated by addPlot
     self.plot_handlers = {} #kept updated by addPlot
     if self.current_file and os.path.exists(self.current_file):
-      if os.path.getsize(self.current_file) > 0: 
+      if os.path.getsize(self.current_file) > 0:
         self.post_processor_list_model.clear()
         try:
           self.post_processor_list_model.itemChanged.disconnect(self.itemChangedOnPostProcessorList)
@@ -129,7 +129,7 @@ class PostprocessorWidget(QtGui.QWidget):
           item.setCheckState(QtCore.Qt.Unchecked)
           self.post_processor_list_model.appendRow(item)
         self.post_processor_list_model.itemChanged.connect(self.itemChangedOnPostProcessorList)
-      
+
   def itemChangedOnPostProcessorList(self,item):
     '''
     retrieve which item was changed and if present delete it otherwise add it
@@ -144,8 +144,8 @@ class PostprocessorWidget(QtGui.QWidget):
     else:
       self.addPlot(text)
 
-    
-  
+
+
   def addPlot(self, plotName):
     # when this method is called a new item is added to the plots dictionary
     # then the getPlotData function is called to begin the first plot
@@ -158,8 +158,8 @@ class PostprocessorWidget(QtGui.QWidget):
     self.flow_layout.addWidget(self.plot_objects[plotName])
     self.plot_handlers[plotName] = self.flow_layout.itemAt(self.flow_layout.count()-1).widget()
     self.updatePlots()
-  
-                    
+
+
   def updatePlots(self):
       # this method loops through all of the plot objects in the plot dictionary
       # and for each plot calls the getPlotData function to update every plot that has been selected
@@ -170,7 +170,7 @@ class PostprocessorWidget(QtGui.QWidget):
               self.time = []
 
               try:
-                  if self.data != None and len(self.data):        
+                  if self.data != None and len(self.data):
                       for line in self.data:
 
                           self.time.append(line[0])
@@ -186,13 +186,13 @@ class PostprocessorWidget(QtGui.QWidget):
               except:
                   pass
 
-  
+
   def getPlotData(self, plotName):
 #    print('getting plot data for '+str(plotName))
     index_col = self.names.index(plotName)
     for line in self.data:
         self.post_data.append(line[index_col])
-  
+
 
   def flushPlots(self):
     '''
@@ -207,8 +207,8 @@ class PostprocessorWidget(QtGui.QWidget):
       self.flow_layout.itemAt(0).widget().close()
       self.flow_layout.removeWidget(self.flow_layout.itemAt(0).widget())
       i +=1
-    
-  
+
+
   def rePlot(self):
     '''
     collect the active plot rebuild the list and reactivate same name plot
@@ -222,7 +222,7 @@ class PostprocessorWidget(QtGui.QWidget):
       except:
         pass
 
-  
+
   def openClick(self):
     '''
     open a new csv file, clean and rebuild Postprocessor list
@@ -232,20 +232,20 @@ class PostprocessorWidget(QtGui.QWidget):
       self.flushPlots()
       self.rePlot()
 
-       
+
   def clearClick(self):
     '''
-    retrive again the file name and rebuild 
+    retrive again the file name and rebuild
     '''
     self.flushPlots()
     self.getFileName()
     self.postProcessorModelFill()
-    
+
   def runClicked(self):
     self.flushPlots()
     self.getFileName()
     self.rePlot()
-    
+
   def timerSetUp(self):
     # start and connect the time controls for updating the plots
     self.timer = QtCore.QTimer()
@@ -266,28 +266,28 @@ class PostprocessorWidget(QtGui.QWidget):
     self.run_stopped_timer.setSingleShot(True)
     self.run_stopped_timer.timeout.connect(self.runStoppedExecute)
     self.run_stopped_timer.start()
-    
+
   def executeSignalLinking(self):
-    #set up the signals from the simulation 
+    #set up the signals from the simulation
     self.execute_widget.run_button.clicked.connect(self.runClicked)
     self.execute_widget.run_button.clicked.connect(self.timer.start)
     self.execute_widget.run_stopped.connect(self.runStopped)
-    
+
 class ResizeScrollArea(QtGui.QScrollArea):
-  
-  def __init(self, parent=None):  
+
+  def __init(self, parent=None):
     QtGui.QScrollArea.__init__(self, parent)
-  
+
   def resizeEvent(self, event):
     wrapper = self.findChild(QtGui.QWidget)
     flow = wrapper.findChild(FlowLayout)
-    
+
     width = self.viewport().width()
     height = flow.heightForWidth(width)
     size = QtCore.QSize(width, height)
     point = self.viewport().rect().topLeft()
-    
+
     flow.setGeometry(QtCore.QRect(point, size))
-    
-    self.viewport().update()  
+
+    self.viewport().update()
     QtGui.QScrollArea.resizeEvent(self, event)

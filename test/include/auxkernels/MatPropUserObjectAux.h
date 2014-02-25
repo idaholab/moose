@@ -33,7 +33,7 @@ public:
 
 protected:
   virtual Real computeValue();
-  
+
   const MaterialPropertyUserObject & _mat_uo;
 };
 

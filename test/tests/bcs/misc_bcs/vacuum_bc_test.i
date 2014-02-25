@@ -14,7 +14,7 @@
 
   [./u]
     order = FIRST
-    family = LAGRANGE    
+    family = LAGRANGE
   [../]
 []
 

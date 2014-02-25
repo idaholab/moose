@@ -30,9 +30,9 @@ class GeneratedMeshRenderer(MeshRenderer):
     self.ymin = 0.0
     self.zmin = 0.0
 
-    self.xmax = 1.0 
+    self.xmax = 1.0
     self.ymax = 1.0
-    self.zmax = 1.0 
+    self.zmax = 1.0
 
     if 'xmin' in mesh_item_data:
       self.xmin = float(mesh_item_data['xmin'])
@@ -56,7 +56,7 @@ class GeneratedMeshRenderer(MeshRenderer):
     self.nz = 1
 
     if self.dim >= 2:
-      self.ny = 2 
+      self.ny = 2
 
     if self.dim == 3:
       self.nz = 2
@@ -72,7 +72,7 @@ class GeneratedMeshRenderer(MeshRenderer):
     self.dx = 0.0
     self.dy = 0.0
     self.dz = 0.0
-    
+
     if self.nx:
       self.dx = (self.xmax - self.xmin)/float(self.nx-1)
 
@@ -81,7 +81,7 @@ class GeneratedMeshRenderer(MeshRenderer):
 
     if self.dim == 3 and self.nz:
       self.dz = (self.zmax - self.zmin)/float(self.nz-1)
-    
+
     self.x_coords = vtk.vtkFloatArray()
     self.y_coords = vtk.vtkFloatArray()
     self.z_coords = vtk.vtkFloatArray()
@@ -96,7 +96,7 @@ class GeneratedMeshRenderer(MeshRenderer):
       self.z_coords.InsertNextValue(self.zmin+(float(k)*self.dz))
 
     self.main_block = self.generateMesh(self.xmin,self.ymin,self.zmin,True,True,True)
-    
+
     self.block_actors['0'] = GeneratedMeshActor(self.renderer, self.main_block)
 
     if self.dim == 3:
@@ -104,7 +104,7 @@ class GeneratedMeshRenderer(MeshRenderer):
       self.sideset_actors['5'] = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmax,True,True,False))
       self.sideset_id_to_name[5] = 'front'
       self.name_to_sideset_id['front'] = 5
-      
+
       self.sideset_actors['0']  = GeneratedMeshActor(self.renderer, self.generateMesh(self.xmax,self.ymax,self.zmin,True,True,False))
       self.sideset_id_to_name[0] = 'back'
       self.name_to_sideset_id['back'] = 0
@@ -153,17 +153,17 @@ class GeneratedMeshRenderer(MeshRenderer):
 
     for actor_name, actor in self.sideset_actors.items():
       self.clipped_sideset_actors[actor_name] = ClippedActor(actor, self.plane)
-      
+
     for actor_name, actor in self.nodeset_actors.items():
       self.clipped_nodeset_actors[actor_name] = ClippedActor(actor, self.plane)
 
   def generateMesh(self, x, y, z, in_x, in_y, in_z):
     x_coord = vtk.vtkFloatArray()
     x_coord.InsertNextValue(x)
-    
+
     y_coord = vtk.vtkFloatArray()
     y_coord.InsertNextValue(y)
-    
+
     z_coord = vtk.vtkFloatArray()
     z_coord.InsertNextValue(z)
 
@@ -180,9 +180,9 @@ class GeneratedMeshRenderer(MeshRenderer):
     id_list = vtk.vtkIdList()
     for i in xrange(num_cells):
       id_list.InsertNextId(i)
-    
+
     extract = vtk.vtkExtractCells()
     extract.SetInput(grid)
     extract.SetCellList(id_list)
-    
+
     return extract.GetOutput()
