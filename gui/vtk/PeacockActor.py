@@ -3,12 +3,12 @@ from vtk.util.colors import peacock, tomato, red, white, black
 class PeacockActor:
   def __init__(self, renderer):
     self.renderer = renderer
-    
+
     self.visible = False
     self.edges_visible = False
     self.solid = True
     self.color = white
-    
+
   ''' Sync view options.  The view options for self will match the passed in object '''
   def sync(self, other_actor):
     if other_actor.visible:
@@ -27,9 +27,9 @@ class PeacockActor:
       self.goWireframe()
 
     self.setColor(other_actor.color)
-    
+
   def getBounds(self):
-    raise NotImplementedError    
+    raise NotImplementedError
 
   def show(self):
     self.visible = True
@@ -42,7 +42,7 @@ class PeacockActor:
   def showEdges(self):
     self.edges_visible = True
     self._showEdges()
-    
+
   def hideEdges(self):
     self.edges_visible = False
     self._hideEdges()
@@ -50,7 +50,7 @@ class PeacockActor:
   def goSolid(self):
     self.solid = True
     self._goSolid()
-    
+
   def goWireframe(self):
     self.solid = False
     self._goWireframe()
@@ -61,19 +61,19 @@ class PeacockActor:
 
   def _show(self):
     raise NotImplementedError
-  
+
   def _hide(self):
     raise NotImplementedError
 
   def _showEdges(self):
     raise NotImplementedError
-    
+
   def _hideEdges(self):
     raise NotImplementedError
 
   def _goSolid(self):
     raise NotImplementedError
-    
+
   def _goWireframe(self):
     raise NotImplementedError
 

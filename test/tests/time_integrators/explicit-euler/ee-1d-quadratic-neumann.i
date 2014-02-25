@@ -55,12 +55,12 @@
     variable = u
     implicit = true
   [../]
-  
+
   [./diff]
     type = Diffusion
     variable = u
   [../]
-  
+
   [./abs]
     type = Reaction
     variable = u

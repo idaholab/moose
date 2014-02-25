@@ -1,6 +1,6 @@
 [Mesh]
   file = 2blk-conf.e
-  
+
   [./MortarInterfaces]
     [./middle]
       master = 100
@@ -27,7 +27,7 @@
     family = LAGRANGE
     block = '1 2'
   [../]
-  
+
   [./lm]
     order = FIRST
     family = LAGRANGE
@@ -63,7 +63,7 @@
     boundary = '1 2 3 4'
     function = exact_sln
   [../]
-  
+
   [./mortar]
     type = DiffusionFluxBC
     variable = u

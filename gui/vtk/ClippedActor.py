@@ -25,7 +25,7 @@ class ClippedActor(PeacockActor):
 
   def movePlane(self):
     pass
-  
+
   def _show(self):
     self.original_actor.renderer.AddActor(self.clip_actor)
 
@@ -34,13 +34,13 @@ class ClippedActor(PeacockActor):
 
   def _showEdges(self):
     self.clip_actor.GetProperty().EdgeVisibilityOn()
-    
+
   def _hideEdges(self):
     self.clip_actor.GetProperty().EdgeVisibilityOff()
 
   def _goSolid(self):
     self.clip_actor.GetProperty().SetRepresentationToSurface()
-    
+
   def _goWireframe(self):
     self.clip_actor.GetProperty().SetRepresentationToWireframe()
 

@@ -32,12 +32,12 @@ class MeshRenderWidget(QtGui.QWidget):
     self.renderer.SetBackground2(1,1,1)
     self.renderer.SetGradientBackground(1)
     self.renderer.ResetCamera()
-    
+
     self.this_layout.addWidget(self.vtkwidget)
     self.this_layout.setStretchFactor(self.vtkwidget, 10)
 
     self.vtkwidget.setMinimumHeight(300)
-    self.vtkwidget.show()    
+    self.vtkwidget.show()
 
     self.vtkwidget.GetRenderWindow().AddRenderer(self.renderer)
 
@@ -48,7 +48,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
     self.block_view_group_box.setMaximumWidth(150)
 #    self.block_view_group_box.setMaximumHeight(200)
-    
+
     self.block_view_layout = QtGui.QVBoxLayout()
     self.block_view_list = QtGui.QListView()
     self.block_view_model = QtGui.QStandardItemModel()
@@ -116,7 +116,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.highlight_clear.setDisabled(True)
     self.highlight_clear.clicked.connect(self.clearHighlight)
     self.highlight_layout.addWidget(self.highlight_clear)
-    
+
     self.plane = vtk.vtkPlane()
     self.plane.SetOrigin(0, 0, 0)
     self.plane.SetNormal(1, 0, 0)
@@ -128,7 +128,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.clip_groupbox.setMaximumHeight(70)
     self.clip_groupbox.toggled[bool].connect(self._clippingToggled)
     clip_layout = QtGui.QHBoxLayout()
-    
+
     self.clip_plane_combobox = QtGui.QComboBox()
     self.clip_plane_combobox.setToolTip('Direction of the normal for the clip plane')
     self.clip_plane_combobox.addItem('x')
@@ -137,7 +137,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.clip_plane_combobox.currentIndexChanged[str].connect(self._clipNormalChanged)
 
     clip_layout.addWidget(self.clip_plane_combobox)
-    
+
     self.clip_plane_slider = QtGui.QSlider(QtCore.Qt.Horizontal)
     self.clip_plane_slider.setToolTip('Slide to change plane position')
     self.clip_plane_slider.setRange(0, 100)
@@ -168,13 +168,13 @@ class MeshRenderWidget(QtGui.QWidget):
 
     for block_actor_name, block_actor in self.current_block_actors.items():
       block_actor.hide()
-      
+
     for sideset_actor_name, sideset_actor in self.current_sideset_actors.items():
       sideset_actor.hide()
-      
+
     for nodeset_actor_name, nodeset_actor in self.current_nodeset_actors.items():
       nodeset_actor.hide()
-      
+
     self.current_block_actors = {}
     self.current_sideset_actors = {}
     self.current_nodeset_actors = {}
@@ -185,16 +185,16 @@ class MeshRenderWidget(QtGui.QWidget):
       self.highlight_block_combo.currentIndexChanged[str].disconnect(self.showBlockSelected)
       self.highlight_sideset_combo.currentIndexChanged[str].disconnect(self.showSidesetSelected)
       self.highlight_nodeset_combo.currentIndexChanged[str].disconnect(self.showNodesetSelected)
-    
+
     self.clear()
-    
+
     self.mesh_renderer = RendererFactory.getRenderer(self, item.table_data)
 
     if self.mesh_renderer:
       self.show()
     else:
       self.hide()
-      return 
+      return
 
     self.current_block_actors = self.mesh_renderer.block_actors
     self.current_sideset_actors = self.mesh_renderer.sideset_actors
@@ -205,7 +205,7 @@ class MeshRenderWidget(QtGui.QWidget):
       block_display_name = str(block)
       if block in self.mesh_renderer.block_id_to_name:
         block_display_name += ' : ' + self.mesh_renderer.block_id_to_name[block]
-        
+
       item = QtGui.QStandardItem(str(block_display_name))
       item.exodus_block = block
       item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
@@ -213,17 +213,17 @@ class MeshRenderWidget(QtGui.QWidget):
       self.block_view_model.appendRow(item)
 
     for block_actor_name, block_actor in self.current_block_actors.items():
-      block_actor.show()  
+      block_actor.show()
       block_actor.showEdges()
-      
+
     block_names = []
     for block_actor_id, block_actor in self.current_block_actors.items():
       name = block_actor_id.strip(' ')
       if int(name) in self.mesh_renderer.block_id_to_name:
         name += ' : ' + self.mesh_renderer.block_id_to_name[int(name)]
-        
+
       block_names.append(name)
-      
+
     self.highlight_block_combo.addItem('')
     for block_actor_name in sorted(block_names, key=lambda name: int(name.split(' ')[0])):
       self.highlight_block_combo.addItem(str(block_actor_name))
@@ -231,13 +231,13 @@ class MeshRenderWidget(QtGui.QWidget):
     sideset_names = []
     for sideset_actor_id, sideset_actor in self.current_sideset_actors.items():
       sideset_actor.setColor(red)
-      
+
       name = sideset_actor_id.strip(' ')
       if int(name) in self.mesh_renderer.sideset_id_to_name:
         name += ' : ' + self.mesh_renderer.sideset_id_to_name[int(name)]
-        
+
       sideset_names.append(name)
-      
+
     self.highlight_sideset_combo.addItem('')
     for sideset_actor_name in sorted(sideset_names, key=lambda name: int(name.split(' ')[0])):
       self.highlight_sideset_combo.addItem(sideset_actor_name)
@@ -245,13 +245,13 @@ class MeshRenderWidget(QtGui.QWidget):
     nodeset_names = []
     for nodeset_actor_id, nodeset_actor in self.current_nodeset_actors.items():
       nodeset_actor.setColor(red)
-      
+
       name = nodeset_actor_id.strip(' ')
       if int(name) in self.mesh_renderer.nodeset_id_to_name:
         name += ' : ' + self.mesh_renderer.nodeset_id_to_name[int(name)]
-        
+
       nodeset_names.append(name)
-      
+
     self.highlight_nodeset_combo.addItem('')
     for nodeset_actor_name in sorted(nodeset_names, key=lambda name: int(name.split(' ')[0])):
       self.highlight_nodeset_combo.addItem(nodeset_actor_name)
@@ -262,14 +262,14 @@ class MeshRenderWidget(QtGui.QWidget):
     self.highlight_nodeset_combo.currentIndexChanged[str].connect(self.showNodesetSelected)
 
     self.setBounds()
-    
+
      # Avoid z-buffer fighting
     vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
 
     self.renderer.ResetCamera()
-    self.vtkwidget.updateGL()    
-   
-    
+    self.vtkwidget.updateGL()
+
+
   def setBounds(self):
     for actor_name, actor in self.current_block_actors.items():
       current_bounds = actor.getBounds()
@@ -286,7 +286,7 @@ class MeshRenderWidget(QtGui.QWidget):
     for old_name, old_actor in current.items():
       new[old_name].sync(old_actor)
       old_actor.hide()
-      
+
   def _blockViewItemChanged(self, item):
     if item.checkState() == QtCore.Qt.Checked:
       self.current_block_actors[str(item.exodus_block)].show()
@@ -301,7 +301,7 @@ class MeshRenderWidget(QtGui.QWidget):
       self.swapActors(self.current_sideset_actors, self.mesh_renderer.clipped_sideset_actors)
       self.current_sideset_actors = self.mesh_renderer.clipped_sideset_actors
       self.swapActors(self.current_nodeset_actors, self.mesh_renderer.clipped_nodeset_actors)
-      self.current_nodeset_actors = self.mesh_renderer.clipped_nodeset_actors      
+      self.current_nodeset_actors = self.mesh_renderer.clipped_nodeset_actors
 
       self._clipNormalChanged(self.clip_plane_combobox.currentText())
     else:
@@ -311,9 +311,9 @@ class MeshRenderWidget(QtGui.QWidget):
       self.current_sideset_actors = self.mesh_renderer.sideset_actors
       self.swapActors(self.current_nodeset_actors, self.mesh_renderer.nodeset_actors)
       self.current_nodeset_actors = self.mesh_renderer.nodeset_actors
-    
+
     self.vtkwidget.updateGL()
-    
+
   def _clipNormalChanged(self, value):
     self.plane.SetOrigin(self.bounds['x'][0],
                          self.bounds['y'][0],
@@ -327,7 +327,7 @@ class MeshRenderWidget(QtGui.QWidget):
 
     self.clip_plane_slider.setSliderPosition(50)
     self._clipSliderMoved(50)
-  
+
   def _clipSliderMoved(self, value):
     direction = str(self.clip_plane_combobox.currentText())
     step_size = (self.bounds[direction][1] - self.bounds[direction][0])/100.0
@@ -339,7 +339,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.plane.SetOrigin(position if direction == 'x' else old[0],
                          position if direction == 'y' else old[1],
                          position if direction == 'z' else old[2])
-      
+
     for actor_name, actor in self.current_sideset_actors.items():
       actor.movePlane()
 
@@ -349,7 +349,7 @@ class MeshRenderWidget(QtGui.QWidget):
     for actor_name, actor in self.current_block_actors.items():
       actor.movePlane()
 
-    self.vtkwidget.updateGL()    
+    self.vtkwidget.updateGL()
 
   def viewMeshCheckboxChanged(self, value):
     if value == QtCore.Qt.Checked:
@@ -432,9 +432,9 @@ class MeshRenderWidget(QtGui.QWidget):
         self.current_sideset_actors[str(self.mesh_renderer.name_to_sideset_id[the_boundary])].show()
       elif the_boundary in self.mesh_renderer.name_to_nodeset_id:
         self.current_nodeset_actors[str(self.mesh_renderer.name_to_nodeset_id[the_boundary])].show()
-    
+
     self.vtkwidget.updateGL()
-    
+
   def highlightNodeset(self, boundary):
     self.highlight_clear.setDisabled(False)
     # Turn off all sidesets
@@ -456,7 +456,7 @@ class MeshRenderWidget(QtGui.QWidget):
         self.current_nodeset_actors[the_boundary].show()
       elif the_boundary in self.mesh_renderer.name_to_nodeset_id:
         self.current_nodeset_actors[str(self.mesh_renderer.name_to_nodeset_id[the_boundary])].show()
-    
+
     self.vtkwidget.updateGL()
 
   def highlightBlock(self, block):
@@ -482,7 +482,7 @@ class MeshRenderWidget(QtGui.QWidget):
       elif the_block in self.mesh_renderer.name_to_block_id:
         self.current_block_actors[str(self.mesh_renderer.name_to_block_id[the_block])].setColor(red)
         self.current_block_actors[str(self.mesh_renderer.name_to_block_id[the_block])].goSolid()
-    
+
     self.vtkwidget.updateGL()
 
   def clearActors(self):
@@ -498,7 +498,7 @@ class MeshRenderWidget(QtGui.QWidget):
     for actor_name, actor in self.current_block_actors.items():
       actor.setColor(white)
       actor.goSolid()
-        
+
     self.vtkwidget.updateGL()
 
   def clearHighlight(self):

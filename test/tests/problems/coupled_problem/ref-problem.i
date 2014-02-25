@@ -19,13 +19,13 @@
     type = ParsedFunction
     value = -(x*x+y*y)
   [../]
-  
+
   [./bc_fn_v]
     type = ParsedFunction
     value = (x*x+y*y)
   [../]
 
-  
+
   [./ffnv]
     type = ParsedFunction
     value = -1
@@ -54,7 +54,7 @@
     variable = u
     function = forcing_fn
   [../]
-  
+
   # V equation
   [./td_v]
     type = TimeDerivative
@@ -93,7 +93,7 @@
   # get 'er done
 #  nl_rel_tol = 1e-15
 #  nl_abs_tol = 1e-14
-  
+
   start_time = 0
   dt = 0.05
   num_steps = 10

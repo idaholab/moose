@@ -55,19 +55,19 @@ public:
   virtual void execute();
   virtual void threadJoin(const UserObject & y);
   virtual void finalize();
-  
+
   const std::vector<std::pair<Elem *, Point> > & getDiracPoints() const { return _dirac_points; }
-  
+
 protected:
   /**
    * Returns an element local to this processor that is connected to
    * the current node.
    */
   Elem * localElementConnectedToCurrentNode();
-  
+
   std::vector<std::pair<Elem *, Point> > _dirac_points;
 
-  VariableValue & _var_value;  
+  VariableValue & _var_value;
 };
 
 #endif //TRACKDIRACFRONT_H
