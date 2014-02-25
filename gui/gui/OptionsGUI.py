@@ -1,6 +1,15 @@
 #!/usr/bin/python
-from PyQt4 import QtCore, QtGui
-from PyQt4.Qt import *
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
+
 from GenSyntax import *
 from ParamTable import *
 

@@ -1,10 +1,21 @@
-import os, sys, PyQt4, getopt
-from PyQt4 import QtCore, QtGui
+import os, sys, getopt
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
+
 import vtk
 import time
 from ExodusResult import ExodusResult
 import glob, math
 from ContourChoices import *
+from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 pathname = os.path.dirname(os.path.realpath(sys.argv[0]))
 pathname = os.path.abspath(pathname)
@@ -74,7 +85,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 #    self.setMinimumWidth(700)
     self.setLayout(self.main_layout)
 
-    self.vtkwidget = vtk.QVTKWidget2()
+    self.vtkwidget = QVTKRenderWindowInteractor(self)
 #    self.vtkwidget.setMinimumHeight(300)
 
     # Create background, default to the gradient look
@@ -88,6 +99,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.vtkwidget.show()
 
     self.vtkwidget.GetRenderWindow().AddRenderer(self.renderer)
+    self.vtkwidget.GetRenderWindow().GetInteractor().SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
+    self.vtkwidget.Initialize()
+    self.vtkwidget.Start()
 
     self.first = True
 
@@ -638,7 +652,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     else:
       self.exodus_result.actor.GetProperty().EdgeVisibilityOff()
       self.exodus_result.clip_actor.GetProperty().EdgeVisibilityOff()
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   ##
   # A method for toggling visiability of the scale bar legend, it is controlled
@@ -655,7 +669,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.exodus_result.scalar_bar.VisibilityOff()
 
     # Update the GUI
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   ##
   # A method for toggling black background or gradient background, it is controlled
@@ -678,7 +692,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       #self.renderer.ResetCamera()
 
     # Update thew GUI
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def _fillComponentCombo(self, variable_name, components):
     self.variable_component.clear()
@@ -818,7 +832,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.exodus_result.scalar_bar.SetTitle(self.current_variable)
     self.renderer.AddActor2D(self.exodus_result.scalar_bar)
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def _colorSchemeSelected(self, value):
     self.current_lut = self.luts[self.color_scheme_component.currentIndex()]
@@ -851,7 +865,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     dist = math.sqrt( (p[0]-fp[0])**2 + (p[1]-fp[1])**2 + (p[2]-fp[2])**2 )
     self.renderer.GetActiveCamera().SetPosition(fp[0], fp[1], fp[2]+dist)
     self.renderer.GetActiveCamera().SetViewUp(0.0, 1.0, 0.0)
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def _saveView(self):
     file_name = QtGui.QFileDialog.getSaveFileName(self, "Image File Name", "~/", "Image Files (*.png)")
@@ -1039,7 +1053,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
             if self.clip_groupbox.isChecked():
               _clippingToggled(True)
 
-            self.vtkwidget.updateGL()
+            self.vtkwidget.repaint()
             self._updateControls()
             self.time_slider.setSliderPosition(self.current_max_timestep)
 
@@ -1058,7 +1072,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self._timeSliderReleased()
         if self.clip_groupbox.isChecked():
           self._clipSliderReleased()
-        self.vtkwidget.updateGL()
+        self.vtkwidget.repaint()
       else:
         self.time_slider.setMaximum(self.current_max_timestep)
 
@@ -1121,7 +1135,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       self.renderer.AddActor(self.exodus_result.actor)
       self.exodus_result.current_actor = self.exodus_result.actor
 
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def _clipNormalChanged(self, value):
     self.plane.SetOrigin(self.current_bounds[0],
@@ -1137,11 +1151,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.clip_plane_slider.setSliderPosition(50)
     self._clipSliderMoved(50)
 
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def _clipSliderReleased(self):
     self._updateContours()
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def _clipSliderMoved(self, value):
     direction = str(self.clip_plane_combobox.currentText())
@@ -1170,4 +1184,4 @@ class ExodusResultRenderWidget(QtGui.QWidget):
                          position if direction == 'z' else old[2])
 
     self._updateContours()
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
