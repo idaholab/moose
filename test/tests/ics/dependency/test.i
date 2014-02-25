@@ -20,7 +20,7 @@
 [Variables]
   [./u]
   [../]
-  
+
   [./v]
   [../]
 []
@@ -31,12 +31,12 @@
     variable = u
     value = -1
   [../]
-  
+
   [./v_ic]
     type = MTICSum
     variable = v
     var1 = u
-    var2 = a    
+    var2 = a
   [../]
 
   [./a_ic]
@@ -44,7 +44,7 @@
     variable = a
     value = 10
   [../]
-  
+
   [./b_ic]
     type = MTICMult
     variable = b

@@ -19,7 +19,7 @@ class YamlData():
 
   def recache(self, recache):
     self.yaml_data = self.gen_syntax.GetSyntax(recache)
-    
+
   def recursiveYamlDataSearch(self, path, current_yaml):
     if current_yaml['name'] == path:
       return current_yaml
@@ -27,7 +27,7 @@ class YamlData():
       if current_yaml['subblocks']:
         for child in current_yaml['subblocks']:
           yaml_data = self.recursiveYamlDataSearch(path, child)
-          
+
           if yaml_data:  # Found it in a child!
             return yaml_data
       else: # No children.. stop recursion
@@ -39,6 +39,6 @@ class YamlData():
 
       if yaml_data:
         return yaml_data
-      
-    # This means it wasn't found  
+
+    # This means it wasn't found
     return None

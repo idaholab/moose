@@ -10,7 +10,7 @@
       var_name = disp_y
     [../]
   [../]
-  
+
   [./mechanics]
     input_file = mech.i
     [./temp]

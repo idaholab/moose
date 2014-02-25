@@ -28,7 +28,7 @@ InputParameters validParams<BlockAverageDiffusionMaterial>()
 BlockAverageDiffusionMaterial::BlockAverageDiffusionMaterial(const std::string & name,
                                  InputParameters parameters) :
     Material(name, parameters),
-    
+
     // Declare that this material is going to provide a Real
     // valued property named "diffusivity" that Kernels can use.
     _diffusivity(declareProperty<Real>("diffusivity")),
@@ -43,9 +43,9 @@ void
 BlockAverageDiffusionMaterial::computeQpProperties()
 {
   // We will compute the diffusivity based on the average value of the variable on each block.
-  
+
   // We'll get that value from a UserObject that is computing it for us.
-  
+
   // To get the current block number we're going to query the "subdomain_id()" of the current element
   _diffusivity[_qp] = 0.5 * _block_average_value.averageValue(_current_elem->subdomain_id());
 }

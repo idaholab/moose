@@ -39,7 +39,7 @@
     boundary = left
     value = 0
   [../]
-  
+
   [./right]
     type = DirichletBC
     variable = u

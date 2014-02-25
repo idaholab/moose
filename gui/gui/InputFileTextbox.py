@@ -45,7 +45,7 @@ class InputFileTextbox(QtGui.QTextEdit):
         self.the_string += '# ' + line + '\n'
 
       self.the_string += '\n'
-    
+
     if self.input_file_widget.input_file_root_node:
       for section_name in self.input_file_widget.input_file_root_node.children_list:
         ordered_sections.append(section_name)
@@ -63,13 +63,13 @@ class InputFileTextbox(QtGui.QTextEdit):
       if search and len(search):
         item = search[0]
         self._inputStringRecurse(item, 0)
-        printed_sections.append(section_name)          
+        printed_sections.append(section_name)
 
     for i in range(child_count): # Print out all the other sections
       item = root.child(i)
       if item.text(0) not in printed_sections:
         self._inputStringRecurse(item, 0)
-        
+
     return self.the_string
 
   def updateTextBox(self):
@@ -83,17 +83,17 @@ class InputFileTextbox(QtGui.QTextEdit):
     self.verticalScrollBar().setValue(position)
 
 
-  def _inputStringRecurse(self, item, level):    
+  def _inputStringRecurse(self, item, level):
     indent_string = ''
     for i in xrange(0,level):
       indent_string += '  '
-      
+
     this_path = self.input_file_widget.tree_widget.generatePathFromItem(item)
 
     # Don't print hard paths that aren't checked
     if self.input_file_widget.action_syntax.isPath(this_path) and item.checkState(0) != QtCore.Qt.Checked:
       return
-    
+
     else:
       section = item.text(0)
       subchild_count = item.childCount()
@@ -122,7 +122,7 @@ class InputFileTextbox(QtGui.QTextEdit):
 
       active = []
       has_inactive_children = False # Whether or not it has inactive children
-      
+
       # Print the active line if necessary
       for j in range(subchild_count):
         subitem = item.child(j)
@@ -146,7 +146,7 @@ class InputFileTextbox(QtGui.QTextEdit):
           for param in gp_node.params_list:
             if param in item.table_data and param != 'Name' and param != 'parent_params':
               ordered_params.append(param)
-              
+
         if template_gp_node:
           for param in template_gp_node.params_list:
             if param in item.table_data and param != 'Name' and param != 'parent_params':
@@ -167,7 +167,7 @@ class InputFileTextbox(QtGui.QTextEdit):
 
           self.the_string += indent_string + '  ' + param + ' = ' + param_value + comment + '\n'
           printed_params.append(param)
-        
+
         for param,value in item.table_data.items():
           if param not in printed_params and param != 'Name' and param != 'parent_params':
             comment = ''
@@ -177,7 +177,7 @@ class InputFileTextbox(QtGui.QTextEdit):
             param_value = value
             if ' ' in param_value:
               param_value = "'"+param_value.strip("'")+"'"
-  
+
             self.the_string += indent_string + '  ' + param + ' = ' + param_value + comment + '\n'
       except:
         pass
@@ -197,7 +197,7 @@ class InputFileTextbox(QtGui.QTextEdit):
           template_children.append(child)
 
       mergeLists(ordered_children, template_children)
-      
+
       for child in ordered_children:
         for j in range(subchild_count):
           subitem = item.child(j)
@@ -207,11 +207,11 @@ class InputFileTextbox(QtGui.QTextEdit):
 
           self._inputStringRecurse(subitem, level+1)
           printed_children.append(child)
-      
+
       for j in range(subchild_count):
         subitem = item.child(j)
         if subitem.text(0) in printed_children:
-          continue        
+          continue
 
         self._inputStringRecurse(subitem, level+1)
 

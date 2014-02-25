@@ -1,6 +1,6 @@
 #
 # Solving a fake thermo-mechanics problem
-# 
+#
 #
 
 [Mesh]
@@ -19,13 +19,13 @@
 [Functions]
   [./temp_exact]
     type = ParsedFunction
-    value = t*x 
+    value = t*x
   [../]
   [./temp_ffn]
     type = ParsedFunction
     value = x
   [../]
-  
+
   [./disp_x_exact]
     type = ParsedFunction
     value = (t*x)/5
@@ -34,7 +34,7 @@
     type = ParsedFunction
     value = x/5
   [../]
-  
+
   [./disp_y_exact]
     type = ParsedFunction
     value = t*x*(y-0.5)/5
@@ -43,7 +43,7 @@
     type = ParsedFunction
     value = x*(y-0.5)/5
   [../]
-  
+
 []
 
 [Variables]

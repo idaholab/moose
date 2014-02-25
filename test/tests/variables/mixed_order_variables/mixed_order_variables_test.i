@@ -18,12 +18,12 @@
 		type = ParsedFunction
 		value = -4
 	[../]
-	
+
 	[./exact_fn]
 	  type = ParsedFunction
 	  value = (x*x)+(y*y)
 	[../]
-	
+
 	[./aux_fn]
 		type = ParsedFunction
 		value = (1-x*x)*(1-y*y)
