@@ -58,7 +58,7 @@ InputParameters validParams<OutputBase>()
   params.addParam<unsigned int>("interval", "The interval at which timesteps are output to the solution file");
 
   // 'Variables' Group
-  params.addParamNamesToGroup("hidr show output_nonlinear_variables output_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
+  params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
 
   // Register this class as base class
   params.registerBase("OutputBase");

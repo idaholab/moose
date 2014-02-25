@@ -62,6 +62,8 @@ traceout*.txt
 *.txt
 *.bib.bak
 *.out
+*.vtk
+*.vtu
 .depend
 
 # Allow .e files in gold directories (7 levels)
@@ -84,6 +86,26 @@ traceout*.txt
 !/*/*/*/*/*/gold/*.csv
 !/*/*/*/*/*/*/gold/*.csv
 !/*/*/*/*/*/*/*/gold/*.csv
+
+# Allow .vtk files in gold directories (7 levels)
+!/gold/*.vtk
+!/*/gold/*.vtk
+!/*/*/gold/*.vtk
+!/*/*/*/gold/*.vtk
+!/*/*/*/*/gold/*.vtk
+!/*/*/*/*/*/gold/*.vtk
+!/*/*/*/*/*/*/gold/*.vtk
+!/*/*/*/*/*/*/*/gold/*.vtk
+
+# Allow .vtu files in gold directories (7 levels)
+!/gold/*.vtu
+!/*/gold/*.vtu
+!/*/*/gold/*.vtu
+!/*/*/*/gold/*.vtu
+!/*/*/*/*/gold/*.vtu
+!/*/*/*/*/*/gold/*.vtu
+!/*/*/*/*/*/*/gold/*.vtu
+!/*/*/*/*/*/*/*/gold/*.vtu
 
 peacock_run_tmp.i
 yaml_dump*

@@ -28,6 +28,7 @@ class Tester(object):
     params.addParam('dtk',           ['ALL'], "A test that runs only if DTK is detected ('ALL', 'TRUE', 'FALSE')")
     params.addParam('unique_ids',    ['ALL'], "A test that runs only if UNIQUE_IDs are enabled ('ALL', 'TRUE', 'FALSE')")
     params.addParam('recover',       True,    "A test that runs with '--recover' mode enabled")
+    params.addParam('vtk',           ['ALL'], "A test that runs only if VTK is detected ('ALL', 'TRUE', 'FALSE')")
 
     return params
   getValidParams = staticmethod(getValidParams)
@@ -129,7 +130,7 @@ class Tester(object):
       return (False, reason)
 
     # PETSc is being explicitly checked above
-    local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
+    local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk']
     for check in local_checks:
       test_platforms = set()
       for x in self.specs[check]:
