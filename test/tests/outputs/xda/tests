@@ -1,0 +1,8 @@
+[Tests]
+  [./serial]
+    # Tests the for existence of XDA files
+    type = 'CheckFiles'
+    input = 'xda.i'
+    check_files = 'xda_out_0000.xdr xda_out_0000_mesh.xdr xda_out_0001.xdr xda_out_0001_mesh.xdr'
+  [../]
+[]
