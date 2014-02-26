@@ -33,6 +33,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output (ascii)");
    params.addParam<bool>("xdr", false, "Output the results using the default settings for XDA/XDR output (binary)");
    params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
+   params.addParam<bool>("gmv", false, "Output the results using the default settings for GMV output");
 
    // Common parameters
    params.addParam<bool>("output_initial", false,  "Request that the initial condition is output to the solution file");
@@ -84,6 +85,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("checkpoint"))
     create("Checkpoint");
+
+  if (getParam<bool>("gmv"))
+    create("GMV");
 }
 
 void
