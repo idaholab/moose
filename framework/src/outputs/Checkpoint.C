@@ -83,7 +83,6 @@ Checkpoint::directory()
   return _file_base + "_" + _suffix;
 }
 
-
 void
 Checkpoint::output()
 {
