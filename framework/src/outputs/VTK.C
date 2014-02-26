@@ -62,7 +62,6 @@ VTKOutputter::outputSetup()
   if (_vtk_io_ptr != NULL)
     delete _vtk_io_ptr;
 
-
 #ifdef LIBMESH_HAVE_VTK
   // Create the new VTKOutputter object and set compression
   _vtk_io_ptr = new VTKIO(_es_ptr->get_mesh());
@@ -73,7 +72,7 @@ VTKOutputter::outputSetup()
 }
 
 void
-VTKOutputter::outputNodalVariables()
+VTKOutputter::output()
 {
 #ifdef LIBMESH_HAVE_VTK
   // Write the data
@@ -82,24 +81,6 @@ VTKOutputter::outputNodalVariables()
   mooseError("libMesh not configured with VTK");
 #endif
 }
-
-void
-VTKOutputter::outputElementalVariables()
-{
-}
-
-void
-VTKOutputter::outputPostprocessors()
-{
-  mooseError("Postprocessor output not currently supported for VTKOutputter files");
-}
-
-void
-VTKOutputter::outputScalarVariables()
-{
-  mooseError("Postprocessor output not currently supported for VTKOutputter files");
-}
-
 
 std::string
 VTKOutputter::filename()
@@ -121,3 +102,26 @@ VTKOutputter::filename()
   return output.str();
 }
 
+void
+VTKOutputter::outputNodalVariables()
+{
+  mooseError("Individual output of nodal variables is not support for VTK output");
+}
+
+void
+VTKOutputter::outputElementalVariables()
+{
+  mooseError("Individual output of elemental variables is not support for VTK output");
+}
+
+void
+VTKOutputter::outputPostprocessors()
+{
+  mooseError("Individual output of postprocessors is not support for VTK output");
+}
+
+void
+VTKOutputter::outputScalarVariables()
+{
+  mooseError("Individual output of scalars is not support for VTK output");
+}

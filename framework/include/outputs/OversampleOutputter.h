@@ -68,9 +68,20 @@ public:
   virtual ~OversampleOutputter();
 
   /**
-   * Overloaded output() that include oversampling
+   * Performs the initial output, including the creation of the oversampled solution vector
    */
-  virtual void output();
+  void outputInitial();
+
+  /**
+   * Performs the output of a time step, including the creation of the oversampled solution vector
+   */
+  void outputStep();
+
+  /**
+   * Performs the final output, including the creation of the oversampled solution vector
+   */
+  void outputFinal();
+
 
 protected:
 

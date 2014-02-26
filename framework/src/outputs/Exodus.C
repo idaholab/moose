@@ -181,8 +181,7 @@ Exodus::output()
   // Call the output methods
   OversampleOutputter::output();
 
-  // Increment output call counter, which is reset by outputSetup and outputSetup
-  // is automatically called by OversampleBase::output()
+  // Increment output call counter, which is reset by outputSetup
   _exodus_num++;
 
   // Write the global variabls (populated by the output methods)

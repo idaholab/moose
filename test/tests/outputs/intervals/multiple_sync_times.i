@@ -49,9 +49,25 @@
 
 [Outputs]
   console = true
-  [./exodus]
+  [./exodus_3]
     type = Exodus
-    output_initial = false
+    interval = 3
+    file_base = multiple_sync_times_out_3
+  [../]
+  [./exodus_5]
+    type = Exodus
     interval = 5
+    file_base = multiple_sync_times_out_5
+  [../]
+  [./exodus_sync_0]
+    type = Exodus
+    sync_times = '0.45 0.525 0.6'
+    sync_only = true
+    file_base = multiple_sync_times_sync_0
+  [../]
+  [./exodus_sync_1]
+    type = Exodus
+    sync_times = '0.475 0.485'
+    file_base = multiple_sync_times_sync_1
   [../]
 []
