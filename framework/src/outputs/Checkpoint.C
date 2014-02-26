@@ -70,7 +70,7 @@ Checkpoint::filename()
 {
   // Get the time step with correct zero padding
   std::ostringstream output;
-  output << std::setw(4)
+  output << std::setw(_padding)
          << std::setprecision(0)
          << std::setfill('0')
          << std::right

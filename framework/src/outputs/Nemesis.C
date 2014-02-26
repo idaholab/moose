@@ -21,12 +21,8 @@ template<>
 InputParameters validParams<Nemesis>()
 {
   // Get the base class parameters
-
   InputParameters params = validParams<OversampleOutputter>();
   params += validParams<FileOutputInterface>();
-
-  params.addParam<unsigned int>("padding", 4, "The number of digits for the -s extension (e.g., out.e-s002)");
-  params.addParamNamesToGroup("padding", "Advanced");
 
   // Add description for the Nemesis class
   params.addClassDescription("Object for output data in the Nemesis format");
@@ -40,7 +36,6 @@ Nemesis::Nemesis(const std::string & name, InputParameters parameters) :
     FileOutputInterface(name, parameters),
     _nemesis_io_ptr(NULL),
     _file_num(0),
-    _padding(getParam<unsigned int>("padding")),
     _nemesis_num(0)
 {
 }

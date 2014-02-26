@@ -12,23 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef XDA_H
-#define XDA_H
+#ifndef TECPLOT_H
+#define TECPLOT_H
 
 // MOOSE includes
 #include "OversampleOutputter.h"
 #include "FileOutputInterface.h"
 
 // Forward declearations
-class XDA;
+class Tecplot;
 
 template<>
-InputParameters validParams<XDA>();
+InputParameters validParams<Tecplot>();
 
 /**
- * Class for output data to the XDAII format
+ * Class for output data to the TecplotII format
  */
-class XDA :
+class Tecplot :
   public OversampleOutputter,
   public FileOutputInterface
 {
@@ -37,12 +37,12 @@ public:
   /**
    * Class consturctor
    */
-  XDA(const std::string & name, InputParameters);
+  Tecplot(const std::string & name, InputParameters);
 
 protected:
 
   /**
-   * Overload the OutputBase::output method, this is required for XDA
+   * Overload the OutputBase::output method, this is required for Tecplot
    * output due to the method utlized for outputing single/global parameters
    */
   virtual void output();
@@ -55,7 +55,7 @@ protected:
 
   //@{
   /**
-   * Individual component output is not supported for XDA/XDR
+   * Individual component output is not supported for Tecplot
    */
   virtual void outputNodalVariables();
   virtual void outputElementalVariables();
@@ -69,4 +69,4 @@ private:
   bool _binary;
 };
 
-#endif /* XDA_H */
+#endif /* TECPLOT_H */

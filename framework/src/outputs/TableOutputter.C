@@ -27,8 +27,10 @@
 template<>
 InputParameters validParams<TableOutputter>()
 {
+  // Fit mode selection Enun
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
+  // Base class parameters
   InputParameters params = validParams<OutputBase>();
 
   // Suppressing the output of nodal and elemental variables disables this type of output
@@ -36,8 +38,6 @@ InputParameters validParams<TableOutputter>()
   params.suppressParameter<bool>("output_nodal_variables");
   params.suppressParameter<bool>("elemental_as_nodal");
   params.suppressParameter<bool>("scalar_as_nodal");
-
-  // This is not used currently, so suppress it
   params.suppressParameter<bool>("output_input");
 
   return params;
