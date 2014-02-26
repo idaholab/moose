@@ -33,9 +33,8 @@ InputParameters validParams<GMVOutputter>()
   params.suppressParameter<bool>("sequence");
 
   // Advanced file options
-  params.addParam<unsigned int>("padding", 4, "The number of digits for the file extension (e.g., out_002.xda");
   params.addParam<bool>("binary", true, "Output the file in binary format");
-  params.addParamNamesToGroup("padding binary", "Advanced");
+  params.addParamNamesToGroup("binary", "Advanced");
 
   // Add description for the GMVOutputter class
   params.addClassDescription("Object for outputting data in the GMVOutputter format");
@@ -47,7 +46,6 @@ InputParameters validParams<GMVOutputter>()
 GMVOutputter::GMVOutputter(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
     FileOutputInterface(name, parameters),
-    _padding(getParam<unsigned int>("padding")),
     _binary(getParam<bool>("binary"))
 {
   // Force sequence output

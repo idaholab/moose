@@ -22,6 +22,9 @@ InputParameters validParams<CSV>()
   InputParameters params = validParams<TableOutputter>();
   params += validParams<FileOutputInterface>();
 
+  // Suppress unused parameters
+  params.suppressParameter<unsigned int>("padding");
+
   return params;
 }
 
