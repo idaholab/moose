@@ -4,6 +4,7 @@
     type = Exodiff
     input = '3D_test.i'
     exodiff = '3D_out.e'
+    valgrind = 'HEAVY'
   [../]
   [./RZ]
     type = Exodiff
