@@ -318,6 +318,7 @@
 
 // Outputs
 #include "Exodus.h"
+#include "Nemesis.h"
 #include "Console.h"
 #include "CSV.h"
 #include "VTK.h"
@@ -573,6 +574,7 @@ registerObjects(Factory & factory)
 
   // Outputs
   registerOutput(Exodus);
+  registerOutput(Nemesis);
   registerOutput(Console);
   registerOutput(CSV);
   registerNamedOutput(VTKOutputter, "VTK");
