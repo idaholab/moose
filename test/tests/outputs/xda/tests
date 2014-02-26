@@ -1,5 +1,5 @@
 [Tests]
-  [./serial]
+  [./test]
     # Tests the for existence of XDA files
     type = 'CheckFiles'
     input = 'xda.i'

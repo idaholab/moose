@@ -32,6 +32,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("vtk", false, "Output the results using the default settings for VTK output");
    params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output");
    params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
+   params.addParam<bool>("gmv", false, "Output the results using the default settings for GMV output");
 
    // Common parameters
    params.addParam<bool>("output_initial", true,  "Request that the initial condition is output to the solution file");
@@ -76,6 +77,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("checkpoint"))
     create("Checkpoint");
+
+  if (getParam<bool>("gmv"))
+    create("GMV");
 }
 
 void
