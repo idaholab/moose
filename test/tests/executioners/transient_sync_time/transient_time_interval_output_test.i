@@ -57,10 +57,16 @@
   # These times will be sync'd in the output
 []
 
-[Output]
+[Outputs]
   file_base = out_tio
-  time_interval = 3
-  exodus = true
-  postprocessor_csv = true
-  perf_log = true
+  interval = 3
+  csv = true
+  [./exodus]
+    type = Exodus
+    output_final = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

@@ -55,7 +55,6 @@
 
   start_time = 0.0
   end_time = 20.0
-  sync_times = '0.5, 9.5'
   n_startup_steps = 2
   dtmax = 6.0
 
@@ -74,11 +73,17 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = adapt_tstep_grow_init_dt_out
-  interval = 1
   output_initial = true
-  linear_residuals = true
   exodus = true
-  num_checkpoint_files = 1
+  sync_times = '0.5 9.5'
+  [./console]
+    type = Console
+    inear_residuals = true
+  [../]
+  [./checkpoint]
+    type = Checkpoint
+    num_files = 1
+  [../]
 []

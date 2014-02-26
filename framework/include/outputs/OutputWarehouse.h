@@ -72,9 +72,14 @@ public:
   void outputInitial();
 
   /**
-   * Calls the output method for each output object
+   * Calls the outputStep method for each output object
    */
-  void output();
+  void outputStep();
+
+  /**
+   * Calls the outputFinal method for each output object
+   */
+  void outputFinal();
 
   /**
    * Calls the meshChanged method for every output object
@@ -94,6 +99,11 @@ public:
    * @return Reference to the common InputParameters object
    */
   InputParameters & getCommonParameters();
+
+  /**
+   * Return the sync times for all objects
+   */
+  std::set<Real> & getSyncTimes();
 
 protected:
 
@@ -122,6 +132,8 @@ private:
   /// True if multiple Console output objects are added to the warehouse
   bool _has_screen_console;
 
+  /// Sync times for all objects
+  std::set<Real> _sync_times;
 
 };
 
