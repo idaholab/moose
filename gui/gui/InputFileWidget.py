@@ -1,7 +1,15 @@
 #!/usr/bin/python
-import os, sys, PyQt4, getopt
-from PyQt4 import QtCore, QtGui
+import os, sys, getopt
 
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
 
 from GenSyntax import *
 from ActionSyntax import *
@@ -155,7 +163,7 @@ class InputFileWidget(QtGui.QWidget):
   def openInputFile(self, file_name):
     if file_name and file_name != '':
       progress = QtGui.QProgressDialog("Reading Input File...", "Abort", 0, 100, self)
-      progress.setWindowModality(Qt.WindowModal)
+      progress.setWindowModality(QtCore.Qt.WindowModal)
       counter = 0
 
       counter+=1

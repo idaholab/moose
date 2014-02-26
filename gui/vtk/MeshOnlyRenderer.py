@@ -1,4 +1,4 @@
-import os, sys, PyQt4, getopt
+import os, sys, getopt
 
 from ExodusRenderer import ExodusRenderer
 from MeshRenderer import MeshRenderer
