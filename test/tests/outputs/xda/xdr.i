@@ -40,5 +40,6 @@
 []
 
 [Outputs]
+  output_initial = true
   xdr = true
 []
