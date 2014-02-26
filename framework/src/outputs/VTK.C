@@ -26,10 +26,12 @@ InputParameters validParams<VTKOutputter>()
   params.suppressParameter<bool>("scalar_as_nodal");
   params.suppressParameter<bool>("sequence");
 
-  // Add a padding parameter
-  params.addParam<unsigned int>("padding", 3, "The number of digits for the -s extension (e.g., out.e-s002)");
+  // Set default padding to 3
+  params.set<unsigned int>("padding") = 3;
+
+  // Add binary toggle
   params.addParam<bool>("binary", false, "Set VTK files to output in binary format");
-  params.addParamNamesToGroup("padding", "Advanced");
+  params.addParamNamesToGroup("binary", "Advanced");
 
   return params;
 }
@@ -38,7 +40,6 @@ VTKOutputter::VTKOutputter(const std::string & name, InputParameters & parameter
     OversampleOutputter(name, parameters),
     FileOutputInterface(name, parameters),
     _vtk_io_ptr(NULL),
-    _padding(getParam<unsigned int>("padding")),
     _binary(getParam<bool>("binary"))
 {
   // VTK files must be written in sequence

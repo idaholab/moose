@@ -13,19 +13,22 @@
 /****************************************************************/
 
 // Moose includes
-#include "XDA.h"
+#include "Tecplot.h"
 #include "MooseApp.h"
 #include "FEProblem.h"
 
+// libMesh includes
+#include "libmesh/tecplot_io.h"
+
 template<>
-InputParameters validParams<XDA>()
+InputParameters validParams<Tecplot>()
 {
   // Get the base class parameters
 
   InputParameters params = validParams<OversampleOutputter>();
   params += validParams<FileOutputInterface>();
 
-  // Supress un-available parameters
+  // Supress un-available and meaningless parameters for this object
   params.suppressParameter<bool>("output_nodal_variables");
   params.suppressParameter<bool>("output_elemental_variables");
   params.suppressParameter<bool>("output_scalar_variables");
@@ -33,21 +36,21 @@ InputParameters validParams<XDA>()
   params.suppressParameter<bool>("scalar_as_nodal");
   params.suppressParameter<bool>("sequence");
 
-  // Add description for the XDA class
-  params.addClassDescription("Object for outputting data in the XDA/XDR format");
+  // Add binary toggle
+  params.addParam<bool>("binary", false, "Set VTK files to output in binary format");
+  params.addParamNamesToGroup("binary", "Advanced");
 
-  /* Set a private parameter for controlling the output type (XDR = binary), the value
-     of this parameter is set by the AddOutputAction*/
-  params.addPrivateParam<bool>("_binary", false);
+  // Add description for the Tecplot class
+  params.addClassDescription("Object for outputting data in the Tecplot format");
 
   // Return the InputParameters
   return params;
 }
 
-XDA::XDA(const std::string & name, InputParameters parameters) :
+Tecplot::Tecplot(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
     FileOutputInterface(name, parameters),
-    _binary(getParam<bool>("_binary"))
+    _binary(getParam<bool>("binary"))
 {
   // Force sequence output
   /* Note: This does not change the behavior for this object b/c outputSetup() is empty, but it is
@@ -56,46 +59,38 @@ XDA::XDA(const std::string & name, InputParameters parameters) :
 }
 
 void
-XDA::output()
+Tecplot::output()
 {
-  if (_binary)
-  {
-    _mesh_ptr->getMesh().write(filename()+"_mesh.xdr");
-    _es_ptr->write (filename()+".xdr", ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
-  }
-  else
-  {
-    _mesh_ptr->getMesh().write(filename()+"_mesh.xda");
-    _es_ptr->write (filename()+".xda", WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
-  }
+  TecplotIO out(*_mesh_ptr, _binary);
+  out.write_equation_systems(filename(), *_es_ptr);
 }
 
 void
-XDA::outputNodalVariables()
+Tecplot::outputNodalVariables()
 {
-  mooseError("Individual output of nodal variables is not support for XDA/XDR output");
+  mooseError("Individual output of nodal variables is not support for Tecplot output");
 }
 
 void
-XDA::outputElementalVariables()
+Tecplot::outputElementalVariables()
 {
-  mooseError("Individual output of elemental variables is not support for XDA/XDR output");
+  mooseError("Individual output of elemental variables is not support for Tecplot output");
 }
 
 void
-XDA::outputPostprocessors()
+Tecplot::outputPostprocessors()
 {
-  mooseError("Individual output of postprocessors is not support for XDA/XDR output");
+  mooseError("Individual output of postprocessors is not support for Tecplot output");
 }
 
 void
-XDA::outputScalarVariables()
+Tecplot::outputScalarVariables()
 {
-  mooseError("Individual output of scalars is not support for XDA/XDR output");
+  mooseError("Individual output of scalars is not support for Tecplot output");
 }
 
 std::string
-XDA::filename()
+Tecplot::filename()
 {
   // Append the padded time step to the file base
   std::ostringstream output;
@@ -106,5 +101,5 @@ XDA::filename()
          << std::setfill('0')
          << std::right
          << _t_step;
-  return output.str();
+  return output.str() + ".plt";
 }

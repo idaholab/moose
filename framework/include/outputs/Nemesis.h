@@ -102,9 +102,6 @@ protected:
 
 private:
 
-  /// Number of digits to pad the -s extensions
-  unsigned int _padding;
-
   /// Count of outputs per exodus file
   unsigned int _nemesis_num;
 

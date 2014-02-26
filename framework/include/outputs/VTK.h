@@ -82,9 +82,6 @@ private:
   /// Pointer to libMesh::VTKIO object
   VTKIO * _vtk_io_ptr;
 
-  /// Number of digits to pad the output files with
-  unsigned int _padding;
-
   /// Flag for using binary compression
   bool _binary;
 
