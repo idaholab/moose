@@ -50,7 +50,7 @@ InputParameters validParams<OutputBase>()
 
   // Control for outputing elemental variables as nodal variables
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental nonlinear variables as nodal");
-  params.addParam<bool>("scalar_as_nodal", false, "Output elemental nonlinear variables as nodal");
+  params.addParam<bool>("scalar_as_nodal", false, "Output scalar variables as nodal");
 
   // Output intervals and timing
   params.addParam<bool>("output_initial", "Request that the initial condition is output to the solution file");

@@ -26,8 +26,9 @@ InputParameters validParams<CommonOutputAction>()
    InputParameters params = validParams<Action>();
 
    // Short-cut methods for typical output objects
-   params.addParam<bool>("exodus", false, "Output the results using the default settings via the Exodus output");
-   params.addParam<bool>("console", false, "Output the results to the screen using the default settings via the Console output");
+   params.addParam<bool>("exodus", false, "Output the results using the default settings for Exodus output");
+   params.addParam<bool>("nemesis", false, "Output the results using the default settings for Nemesis output");
+   params.addParam<bool>("console", false, "Output the results using the default settings for Console output");
    params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv file using the default CSV output.");
    params.addParam<bool>("vtk", false, "Output the results using the default settings for VTK output");
    params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output (ascii)");
@@ -67,6 +68,9 @@ CommonOutputAction::act()
   // Create the actions for the short-cut methods
   if (getParam<bool>("exodus"))
     create("Exodus");
+
+  if (getParam<bool>("nemesis"))
+    create("Nemesis");
 
   if (getParam<bool>("console"))
     create("Console");

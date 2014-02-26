@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    # Tests the for existence of Nemesis files
+    type = 'CheckFiles'
+    input = 'nemesis.i'
+    check_files = 'nemesis_out.e.1.0'
+    max_parallel = 1
+  [../]
+[]
