@@ -323,6 +323,7 @@
 #include "VTK.h"
 #include "Checkpoint.h"
 #include "XDA.h"
+#include "GMVOutputter.h"
 
 namespace Moose {
 
@@ -579,6 +580,7 @@ registerObjects(Factory & factory)
   registerOutput(Checkpoint);
   registerNamedOutput(XDA, "XDR");
   registerOutput(XDA);
+  registerNamedOutput(GMVOutputter, "GMV");
 
   registered = true;
 }
