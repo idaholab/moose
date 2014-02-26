@@ -577,6 +577,7 @@ registerObjects(Factory & factory)
   registerOutput(CSV);
   registerNamedOutput(VTKOutputter, "VTK");
   registerOutput(Checkpoint);
+  registerNamedOutput(XDA, "XDR");
   registerOutput(XDA);
 
   registered = true;

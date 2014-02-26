@@ -59,10 +59,15 @@ AddOutputAction::act()
   if (!_moose_object_pars.isParamValid("file_base"))
     _moose_object_pars.set<std::string>("file_base") = getDefaultOutFileBase();
 
+  // Set the correct value for the binary flag for XDA/XDR output
+  if (_type.compare("XDR") == 0)
+    _moose_object_pars.set<bool>("_binary") = true;
+  else if (_type.compare("XDA") == 0)
+    _moose_object_pars.set<bool>("_binary") = false;
+
   // Create the object and add it to the warehouse
   OutputBase * output = static_cast<OutputBase *>(_factory.create(_type, object_name, _moose_object_pars));
   _output_warehouse.addOutput(output);
-
 }
 
 std::string

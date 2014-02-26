@@ -30,7 +30,8 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("console", false, "Output the results to the screen using the default settings via the Console output");
    params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv file using the default CSV output.");
    params.addParam<bool>("vtk", false, "Output the results using the default settings for VTK output");
-   params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output");
+   params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output (ascii)");
+   params.addParam<bool>("xdr", false, "Output the results using the default settings for XDA/XDR output (binary)");
    params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
 
    // Common parameters
@@ -73,6 +74,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("xda"))
     create("XDA");
+
+  if (getParam<bool>("xdr"))
+    create("XDR");
 
   if (getParam<bool>("checkpoint"))
     create("Checkpoint");

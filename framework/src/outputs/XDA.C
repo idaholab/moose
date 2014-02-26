@@ -32,12 +32,15 @@ InputParameters validParams<XDA>()
   params.suppressParameter<bool>("sequence");
 
   // Advanced file options
-  params.addParam<unsigned int>("padding", 4, "The number of digits for the file extension (e.g., out_002.xda");
-  params.addParam<bool>("binary", true, "Output the file in binary format");
-  params.addParamNamesToGroup("padding binary", "Advanced");
+  params.addParam<unsigned int>("padding", 4, "The number of digits for the file extension (e.g., out_0002.xda");
+  params.addParamNamesToGroup("padding", "Advanced");
 
   // Add description for the XDA class
-  params.addClassDescription("Object for outputting data in the XDA format");
+  params.addClassDescription("Object for outputting data in the XDA/XDR format");
+
+  /* Set a private parameter for controlling the output type (XDR = binary), the value
+     of this parameter is set by the AddOutputAction*/
+  params.addPrivateParam<bool>("_binary", false);
 
   // Return the InputParameters
   return params;
@@ -47,7 +50,7 @@ XDA::XDA(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
     FileOutputInterface(name, parameters),
     _padding(getParam<unsigned int>("padding")),
-    _binary(getParam<bool>("binary"))
+    _binary(getParam<bool>("_binary"))
 {
   // Force sequence output
   /* Note: This does not change the behavior for this object b/c outputSetup() is empty, but it is
