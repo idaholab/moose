@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    # Tests the for existence of tecplot files
+    type = 'CheckFiles'
+    input = 'tecplot.i'
+    check_files = 'tecplot_out_0000.plt tecplot_out_0001.plt'
+  [../]
+
+[]

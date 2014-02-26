@@ -65,9 +65,6 @@ protected:
 
 private:
 
-  /// Number of digits to pad the -s extensions
-  unsigned int _padding;
-
   /// Flag for binary output
   bool _binary;
 };
