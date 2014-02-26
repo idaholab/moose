@@ -31,8 +31,7 @@ InputParameters validParams<OutputBase>()
   // Get the parameters from the parent object
   InputParameters params = validParams<MooseObject>();
 
-  // General options (do not use default, this is a common parameter (see CommonOutputAction)
-  params.addParam<bool>("output_initial", "Request that the initial condition is output to the solution file");
+  // General options
   params.addParam<bool>("output_input", false, "Output the input file");
   params.addParam<bool>("output_system_information", true, "Toggles the display of the system information prior to the solve");
 
@@ -53,9 +52,15 @@ InputParameters validParams<OutputBase>()
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental nonlinear variables as nodal");
   params.addParam<bool>("scalar_as_nodal", false, "Output elemental nonlinear variables as nodal");
 
-  /* Output intervals (do not use a default here, this is a common parameter (see CommonOutputAction), adding a
-   * default will disable to common linkage */
+  // Output intervals and timing
+  params.addParam<bool>("output_initial", "Request that the initial condition is output to the solution file");
+  params.addParam<bool>("output_final", "Force the final timestep to be output, regardless of output interval");
   params.addParam<unsigned int>("interval", "The interval at which timesteps are output to the solution file");
+  params.addParam<std::vector<Real> >("sync_times", "Times at which the output and solution is forced to occur");
+  params.addParam<bool>("sync_only", false, "Only export results at sync times");
+
+  // 'Timing' group
+  params.addParamNamesToGroup("interval output_initial output_final sync_times sync_only", "Timing");
 
   // 'Variables' Group
   params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
@@ -76,7 +81,8 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     _dt(_problem_ptr->dt()),
     _dt_old(_problem_ptr->dtOld()),
     _transient(_problem_ptr->isTransient()),
-    _output_initial(isParamValid("output_initial") ? getParam<bool>("output_initial") : true),
+    _output_initial(isParamValid("output_initial") ? getParam<bool>("output_initial") : false),
+    _output_final(isParamValid("output_final") ? getParam<bool>("output_final") : false),
     _output_input(getParam<bool>("output_input")),
     _elemental_as_nodal(getParam<bool>("elemental_as_nodal")),
     _scalar_as_nodal(getParam<bool>("scalar_as_nodal")),
@@ -84,7 +90,12 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     _mesh_changed(false),
     _sequence(getParam<bool>("use_displaced")),
     _num(declareRestartableData<int>("num", 0)),
-    _interval(isParamValid("interval") ? getParam<unsigned int>("interval") : 1)
+    _interval(isParamValid("interval") ? getParam<unsigned int>("interval") : 1),
+    _sync_times(isParamValid("sync_times") ?
+                std::set<Real>(getParam<std::vector<Real> >("sync_times").begin(),
+                               getParam<std::vector<Real> >("sync_times").end()) :
+                std::set<Real>()),
+    _sync_only(getParam<bool>("sync_only"))
 {
 
   // Initialize the available output
@@ -156,14 +167,65 @@ OutputBase::timestepSetup()
 void
 OutputBase::outputInitial()
 {
+  // Output the initial condition, if desired
   if (_output_initial)
+  {
+    outputSetup();
     output();
+    _num++;
+  }
+
+  // Output the input, if desired and it has not been output previously
+  if ( _output_input )
+  {
+    // Produce warning if an input file does not exist
+    // (parser/action system are not mandatory subsystems)
+    if (_app.actionWarehouse().empty())
+      mooseWarning("There is no input file to be output");
+
+    // Call the input file output function
+    outputInput();
+
+    // Do not allow the input file to be written again
+    _output_input = false;
+  }
 }
+void
+OutputBase::outputFinal()
+{
+  // Do nothing if the final output is not desired
+  if (!_output_final)
+    return;
+
+  // If the mesh has changed or the sequence state is true, call the outputSetup() function
+  if (_mesh_changed || _sequence)
+    outputSetup();
+
+  // Perform the output
+  output();
+}
+
 
 void
 OutputBase::output()
 {
+  // Call the various output types, if data exists
+  if (hasNodalVariableOutput())
+    outputNodalVariables();
 
+  if (hasElementalVariableOutput())
+    outputElementalVariables();
+
+  if (hasPostprocessorOutput())
+    outputPostprocessors();
+
+  if (hasScalarOutput())
+    outputScalarVariables();
+}
+
+void
+OutputBase::outputStep()
+{
   // Only continue with the output if it is on the inveval
   if (!checkInterval())
     return;
@@ -181,33 +243,8 @@ OutputBase::output()
   // Update the output number
   _num++;
 
-  // Call the various output types, if data exists
-  if (hasNodalVariableOutput())
-    outputNodalVariables();
-
-  if (hasElementalVariableOutput())
-    outputElementalVariables();
-
-  if (hasPostprocessorOutput())
-    outputPostprocessors();
-
-  if (hasScalarOutput())
-    outputScalarVariables();
-
-  // Output the input, if desired and it has not been output previously
-  if ( _output_input )
-  {
-    // Produce warning if an input file does not exist
-    // (parser/action system are not mandatory subsystems)
-    if (_app.actionWarehouse().empty())
-      mooseWarning("There is no input file to be output");
-
-    // Call the input file output function
-    outputInput();
-
-    // Do not allow the input file to be written again
-    _output_input = false;
-  }
+  // Perform the output
+  output();
 }
 
 bool
@@ -297,12 +334,23 @@ OutputBase::sequence(bool state)
 bool
 OutputBase::checkInterval()
 {
+  // The output flag to return
+  bool output = false;
+
   // Return true if the current step on the current output interval
   if ( (_t_step % _interval) == 0)
-    return true;
+    output = true;
 
-  else
-    return false;
+  // Return false if 'sync_only' is set to true
+  if (_sync_only)
+    output = false;
+
+  // If sync times are not skipped, return true if the current time is a sync_time
+  if ( _sync_times.find(_time) != _sync_times.end() )
+    output = true;
+
+  // Return the output status
+  return output;
 }
 
 void

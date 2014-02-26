@@ -86,9 +86,6 @@ Checkpoint::directory()
 void
 Checkpoint::output()
 {
-  // Do nothing if not on the desired interval
-  if (!checkInterval())
-    return;
 
   // Start the performance log
   Moose::perf_log.push("output()", "Checkpoint");

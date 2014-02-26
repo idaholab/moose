@@ -70,15 +70,38 @@ OversampleOutputter::~OversampleOutputter()
   }
 }
 
+
 void
-OversampleOutputter::output()
+OversampleOutputter::outputInitial()
 {
   // Perform oversample solution projection
   if (_oversample)
     oversample();
 
-  // Call the various output methods
-  OutputBase::output();
+  // Call the initial output method
+  OutputBase::outputInitial();
+}
+
+void
+OversampleOutputter::outputStep()
+{
+  // Perform oversample solution projection
+  if (_oversample)
+    oversample();
+
+  // Call the step output method
+  OutputBase::outputStep();
+}
+
+void
+OversampleOutputter::outputFinal()
+{
+  // Perform oversample solution projection
+  if (_oversample)
+    oversample();
+
+  // Call the final output methods
+  OutputBase::outputFinal();
 }
 
 void
