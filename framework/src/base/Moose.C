@@ -322,6 +322,8 @@
 #include "CSV.h"
 #include "VTK.h"
 #include "Checkpoint.h"
+#include "XDA.h"
+#include "GMVOutputter.h"
 
 namespace Moose {
 
@@ -576,6 +578,8 @@ registerObjects(Factory & factory)
   registerOutput(CSV);
   registerNamedOutput(VTKOutputter, "VTK");
   registerOutput(Checkpoint);
+  registerOutput(XDA);
+  registerNamedOutput(GMVOutputter, "GMV");
 
   registered = true;
 }
