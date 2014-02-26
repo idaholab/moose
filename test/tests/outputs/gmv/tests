@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    # Tests the for existence of XDA files
+    type = 'CheckFiles'
+    input = 'gmv.i'
+    check_files = 'gmv_out_0000.gmv gmv_out_0001.gmv'
+  [../]
+[]
