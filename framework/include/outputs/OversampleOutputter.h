@@ -79,6 +79,15 @@ protected:
    */
   virtual void oversample();
 
+
+  /**
+   * A pointer to the current mesh
+   * When using oversampling this points to the created oversampled, which must
+   * be cleaned up by the destructor.
+   */
+  MooseMesh * _mesh_ptr;
+
+
 private:
 
   /**
@@ -88,13 +97,6 @@ private:
    * by the user as it will create a memory leak if called multiple times.
    */
   virtual void initOversample();
-
-  /**
-   * A pointer to the current mesh
-   * When using oversampling this points to the created oversampled, which must
-   * be cleaned up by the destructor.
-   */
-  MooseMesh * _mesh_ptr;
 
   /**
    * A vector of pointers to the mesh functions
