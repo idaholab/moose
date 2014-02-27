@@ -2,7 +2,7 @@
 # There are four variables and four functions of the same name; a,b,c, and d.  The diffusion equation is "solved"
 # for each of these variables with a boundary condition of type FunctionDirchletBC applied to a boundary
 # (i.e. node set) that includes every node in the element, so the solution is the boundary condition defined by the function.
-#  Each boundary condition uses a function of type PiecewiseLinearFile that gets its value from a file,
+#  Each boundary condition uses a function of type PiecewiseLinear that gets its value from a file,
 # which could be in comma separated or space separated format.  The input file can also contain comments.
 #
 # The files could have the form
@@ -51,22 +51,22 @@
 
 
   [./a]
-    type = PiecewiseLinearFile
+    type = PiecewiseLinear
     data_file = rows.csv
     format = rows
   [../]
   [./b]
-    type = PiecewiseLinearFile
+    type = PiecewiseLinear
     data_file = columns.csv
     format = columns
   [../]
   [./c]
-    type = PiecewiseLinearFile
+    type = PiecewiseLinear
     data_file = rows_space.dat
     format = rows
   [../]
   [./d]
-    type = PiecewiseLinearFile
+    type = PiecewiseLinear
     data_file = columns_space.dat
     format = columns
   [../]

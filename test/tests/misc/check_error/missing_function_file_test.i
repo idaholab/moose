@@ -19,7 +19,7 @@
 
 [Functions]
   [./ic_function]
-    type = PiecewiseLinearFile
+    type = PiecewiseLinear
     data_file = nonexistent_file #should generate error
     scale_factor = 1.0
   [../]
