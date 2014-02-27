@@ -12,10 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "OrientedBoxMarker.h"
+#include "OrientedBoxMarkerDepr.h"
 
 template<>
-InputParameters validParams<OrientedBoxMarker>()
+InputParameters validParams<OrientedBoxMarkerDepr>()
 {
   InputParameters params = validParams<Marker>();
   params.addRequiredParam<RealVectorValue>("centre", "The centre (many people spell this 'center') of the box.");
@@ -35,7 +35,7 @@ InputParameters validParams<OrientedBoxMarker>()
 }
 
 
-OrientedBoxMarker::OrientedBoxMarker(const std::string & name, InputParameters parameters) :
+OrientedBoxMarkerDepr::OrientedBoxMarkerDepr(const std::string & name, InputParameters parameters) :
   Marker(name, parameters),
   // overall strategy is to create a bounding_box centred at the origin, and translate and rotate element centroids to this box
   _xmax(0.5*getParam<Real>("width")),
@@ -57,16 +57,16 @@ OrientedBoxMarker::OrientedBoxMarker(const std::string & name, InputParameters p
 
   len = std::pow(_w*_w, 0.5);
   if (len == 0)
-    mooseError("Length of width_direction vector is zero in OrientedBoxMarker");
+    mooseError("Length of width_direction vector is zero in OrientedBoxMarkerDepr");
   _w /= len;
 
   len = std::pow(_l*_l, 0.5);
   if (len == 0)
-    mooseError("Length of length_direction vector is zero in OrientedBoxMarker");
+    mooseError("Length of length_direction vector is zero in OrientedBoxMarkerDepr");
   _l /= len;
 
   if (_w*_l > 1E-10)
-    mooseError("width_direction and length_direction are not perpendicular in OrientedBoxMarker");
+    mooseError("width_direction and length_direction are not perpendicular in OrientedBoxMarkerDepr");
 
   RealVectorValue h(_w(1)*_l(2)-_w(2)*_l(1), _w(2)*_l(0)-_w(0)*_l(2), _w(0)*_l(1)-_w(1)*_l(0)); // h=w cross l
   _rot_matrix(0, 0) = _w(0);
@@ -82,7 +82,7 @@ OrientedBoxMarker::OrientedBoxMarker(const std::string & name, InputParameters p
 }
 
 Marker::MarkerValue
-OrientedBoxMarker::computeElementMarker()
+OrientedBoxMarkerDepr::computeElementMarker()
 {
   RealVectorValue centroid = _current_elem->centroid();
   RealVectorValue transformed = _rot_matrix*(centroid - _centre);

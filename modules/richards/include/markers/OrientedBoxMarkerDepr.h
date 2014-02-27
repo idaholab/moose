@@ -12,24 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ORIENTEDBOXMARKER_H
-#define ORIENTEDBOXMARKER_H
+#ifndef ORIENTEDBOXMARKERDEPR_H
+#define ORIENTEDBOXMARKERDEPR_H
 
 #include "Marker.h"
 
 // libmesh includes
 #include "libmesh/mesh_tools.h"
 
-class OrientedBoxMarker;
+class OrientedBoxMarkerDepr;
 
 template<>
-InputParameters validParams<OrientedBoxMarker>();
+InputParameters validParams<OrientedBoxMarkerDepr>();
 
-class OrientedBoxMarker : public Marker
+class OrientedBoxMarkerDepr : public Marker
 {
 public:
-  OrientedBoxMarker(const std::string & name, InputParameters parameters);
-  virtual ~OrientedBoxMarker(){};
+  OrientedBoxMarkerDepr(const std::string & name, InputParameters parameters);
+  virtual ~OrientedBoxMarkerDepr(){};
 
 protected:
   virtual MarkerValue computeElementMarker();
@@ -53,4 +53,4 @@ protected:
 
 };
 
-#endif /* ORIENTEDBOXMARKER_H */
+#endif /* ORIENTEDBOXMARKERDEPR_H */

@@ -39,7 +39,7 @@
   marker = obm
   [./Markers]
     [./obm]
-      type = OrientedBoxMarker
+      type = OrientedBoxMarkerDepr
       centre = '-1 4 1'
       width = 5
       length = 10
