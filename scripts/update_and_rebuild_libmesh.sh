@@ -23,6 +23,7 @@ cd build
 
 ../configure --with-methods="${METHODS}" \
              --prefix=$LIBMESH_DIR \
+             --enable-default-comm-world \
              --enable-silent-rules \
              --enable-unique-id \
              --disable-warnings \
