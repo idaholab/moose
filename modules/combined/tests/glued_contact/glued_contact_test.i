@@ -52,6 +52,7 @@
     disp_z = disp_z
     penalty = 1e6
     model = glued
+    formulation = kinematic
   [../]
 []
 
@@ -139,7 +140,7 @@
   nl_max_its = 10
   dt = 0.1
   num_steps = 30
-  
+
   [./Predictor]
     type = SimplePredictor
     scale = 1.0
