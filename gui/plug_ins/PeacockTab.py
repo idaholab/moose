@@ -1,4 +1,12 @@
-from PyQt4 import QtCore, QtGui
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
 
 class PeacockTab(QtGui.QWidget):
   def __init__(self, main_window, win_parent=None):

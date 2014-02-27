@@ -1,6 +1,15 @@
 #!/usr/bin/python
-import os, sys, PyQt4, getopt
-from PyQt4 import QtCore, QtGui
+import os, sys, getopt
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
 
 
 from OptionsGUI import OptionsGUI

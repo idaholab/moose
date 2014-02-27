@@ -1,7 +1,18 @@
-import os, sys, PyQt4, getopt
-from PyQt4 import QtCore, QtGui
+import os, sys, getopt
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
+
 import vtk
 from vtk.util.colors import peacock, tomato, red, white, black
+from vtk.qt4.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from PeacockActor import PeacockActor
 from ClippedActor import ClippedActor
@@ -25,7 +36,7 @@ class MeshRenderWidget(QtGui.QWidget):
     self.this_layout = QtGui.QVBoxLayout()
     self.setLayout(self.this_layout)
 
-    self.vtkwidget = vtk.QVTKWidget2()
+    self.vtkwidget = QVTKRenderWindowInteractor(self)
 
     self.renderer = vtk.vtkRenderer()
     self.renderer.SetBackground(0.2,0.2,0.2)
@@ -37,9 +48,14 @@ class MeshRenderWidget(QtGui.QWidget):
     self.this_layout.setStretchFactor(self.vtkwidget, 10)
 
     self.vtkwidget.setMinimumHeight(300)
-    self.vtkwidget.show()
 
     self.vtkwidget.GetRenderWindow().AddRenderer(self.renderer)
+    self.interactor = self.vtkwidget.GetRenderWindow().GetInteractor()
+
+    self.interactor.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
+
+    self.vtkwidget.Initialize()
+    self.vtkwidget.Start()
 
     self.controls_layout = QtGui.QHBoxLayout()
 
@@ -267,8 +283,7 @@ class MeshRenderWidget(QtGui.QWidget):
     vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
 
     self.renderer.ResetCamera()
-    self.vtkwidget.updateGL()
-
+    self.vtkwidget.repaint()
 
   def setBounds(self):
     for actor_name, actor in self.current_block_actors.items():
@@ -292,7 +307,7 @@ class MeshRenderWidget(QtGui.QWidget):
       self.current_block_actors[str(item.exodus_block)].show()
     else:
       self.current_block_actors[str(item.exodus_block)].hide()
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def _clippingToggled(self, value):
     if value:
@@ -312,7 +327,7 @@ class MeshRenderWidget(QtGui.QWidget):
       self.swapActors(self.current_nodeset_actors, self.mesh_renderer.nodeset_actors)
       self.current_nodeset_actors = self.mesh_renderer.nodeset_actors
 
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def _clipNormalChanged(self, value):
     self.plane.SetOrigin(self.bounds['x'][0],
@@ -349,7 +364,7 @@ class MeshRenderWidget(QtGui.QWidget):
     for actor_name, actor in self.current_block_actors.items():
       actor.movePlane()
 
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def viewMeshCheckboxChanged(self, value):
     if value == QtCore.Qt.Checked:
@@ -366,7 +381,7 @@ class MeshRenderWidget(QtGui.QWidget):
         actor.hideEdges()
       for actor_name, actor in self.current_block_actors.items():
         actor.hideEdges()
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def clearBlockComboBox(self):
       self.highlight_block_combo.currentIndexChanged[str].disconnect(self.showBlockSelected)
@@ -433,7 +448,7 @@ class MeshRenderWidget(QtGui.QWidget):
       elif the_boundary in self.mesh_renderer.name_to_nodeset_id:
         self.current_nodeset_actors[str(self.mesh_renderer.name_to_nodeset_id[the_boundary])].show()
 
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def highlightNodeset(self, boundary):
     self.highlight_clear.setDisabled(False)
@@ -457,7 +472,7 @@ class MeshRenderWidget(QtGui.QWidget):
       elif the_boundary in self.mesh_renderer.name_to_nodeset_id:
         self.current_nodeset_actors[str(self.mesh_renderer.name_to_nodeset_id[the_boundary])].show()
 
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def highlightBlock(self, block):
     self.highlight_clear.setDisabled(False)
@@ -483,7 +498,7 @@ class MeshRenderWidget(QtGui.QWidget):
         self.current_block_actors[str(self.mesh_renderer.name_to_block_id[the_block])].setColor(red)
         self.current_block_actors[str(self.mesh_renderer.name_to_block_id[the_block])].goSolid()
 
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def clearActors(self):
     # Turn off all sidesets
@@ -499,7 +514,7 @@ class MeshRenderWidget(QtGui.QWidget):
       actor.setColor(white)
       actor.goSolid()
 
-    self.vtkwidget.updateGL()
+    self.vtkwidget.repaint()
 
   def clearHighlight(self):
     self.highlight_block_combo.setCurrentIndex(0)
