@@ -45,7 +45,7 @@ InputParameters validParams<SetupOutputAction>()
   params.addParam<bool>("postprocessor_screen",true, "Specifies that you would like PostProcessor output to the screen (stdout)");
   params.addParam<unsigned int>("max_pps_rows_screen", 15, "The maximum number of postprocessor values displayed on screen during a timestep (set to 0 for unlimited)");
   params.addParam<MooseEnum>("pps_fit_to_screen", pps_fit_mode, "Specifies the wrapping mode for post-processor tables that are printed to the screen "
-                             "(ENVIRONMENT: Read \"PPS_WIDTH\" for desired width, AUTO: Attempt to determine width automatically (serial only), <n>: Desired width");
+                             "(ENVIRONMENT: Read \"MOOSE_PPS_WIDTH\" for desired width, AUTO: Attempt to determine width automatically (serial only), <n>: Desired width");
   params.addParam<bool>("postprocessor_csv", false, "Specifies that you would like a PostProcessor comma separated values file");
   params.addParam<bool>("postprocessor_gnuplot", false, "Specifies that you would like plots of the postprocessor output");
   params.addParam<std::string>("gnuplot_format", "ps", "Specifies which output format gnuplot will produce. Currently supported: ps, gif, and png");
