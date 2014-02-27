@@ -428,7 +428,7 @@ registerObjects(Factory & factory)
   registerNamedFunction(MooseParsedVectorFunction, "ParsedVectorFunction");
   registerFunction(PiecewiseConstant);
   registerFunction(PiecewiseLinear);
-  registerNamedFunction(PiecewiseLinear, "PiecewiseLinearFile");
+  registerDeprecatedObjectName(PiecewiseLinear, "PiecewiseLinearFile", "02/27/2014 00:00");
   registerFunction(SolutionFunction);
   registerFunction(PiecewiseBilinear);
   registerFunction(SplineFunction);
