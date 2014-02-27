@@ -1,6 +1,15 @@
 #!/usr/bin/python
-import os, sys, PyQt4, getopt
-from PyQt4 import QtCore, QtGui
+import os, sys, getopt
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
 
 
 from OptionsGUI import OptionsGUI
@@ -19,9 +28,8 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class InputFileTreeWidget(QtGui.QTreeWidget):
-  tree_changed = QtCore.pyqtSignal()
-  mesh_item_changed = QtCore.pyqtSignal(QtGui.QTreeWidgetItem)
-  
+  tree_changed = QtCore.Signal()
+  mesh_item_changed = QtCore.Signal(QtGui.QTreeWidgetItem)
   def __init__(self, input_file_widget, win_parent=None):
     QtGui.QTreeWidget.__init__(self, win_parent)
 
@@ -34,15 +42,15 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     self.setExpandsOnDoubleClick(False)
     self.setMinimumWidth(200)
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-    self.connect(self,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self._newContext)    
+    self.connect(self,QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self._newContext)
     self.addHardPathsToTree()
-      
+
     self.header().close()
 
     QtCore.QObject.connect(self,
                            QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem *, int)"),
                            self._doubleClickedItem)
-    
+
     QtCore.QObject.connect(self,
                            QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"),
                            self._itemChanged)
@@ -51,7 +59,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
                            QtCore.SIGNAL("currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)"),
                            self._currentItemChanged)
 
-    
+
   def addHardPathsToTree(self):
     # Add every hard path
     for path in self.action_syntax.hard_paths:
@@ -75,8 +83,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     from_parent = ''
     if item.parent():
       from_parent = self.generatePathFromItem(item.parent())
-      
-    return from_parent + '/' + str(item.text(0))    
+
+    return from_parent + '/' + str(item.text(0))
 
   ''' Looks for a child item of parent named "name"... with return None if there is no child named that '''
   def findChildItemWithName(self, parent, name):
@@ -91,10 +99,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         child = parent.child(i)
       except:
         child = parent.topLevelItem(i)
-        
+
       if child.text(0) == name:
         return child
-      
+
     return None
 
   def getMeshItemData(self):
@@ -104,7 +112,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       return mesh_item.table_data
     except:
       pass
-    
+
     return None
 
   def getMeshFileName(self):
@@ -122,7 +130,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       return output_item.table_data
     except:
       pass
-    
+
     return None
 
   def getOutputFileNames(self):
@@ -130,7 +138,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     output_item = self.findChildItemWithName(self, 'Output')
     oversampling_item = self.findChildItemWithName(output_item, 'OverSampling')
 
-    file_names = []     
+    file_names = []
     file_base = ''
     output_data = None
 
@@ -144,38 +152,38 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       child = self.findChildItemWithName(outputs, outputs_children[i])
       output_data = child.table_data
       if output_data['type'] == 'Exodus':
-        
+
         # Check for oversampling
         if 'oversample' in output_data and output_data['oversample'] != '0':
           if 'oversample_file_base' in output_data:
             file_base = output_data['oversample_file_base']
           else:
-            file_base = 'peacock_run_tmp_out_oversample' 
+            file_base = 'peacock_run_tmp_out_oversample'
 
         # Non-oversampled base file name
         else:
           if 'file_base' in output_data:
             file_base = output_data['file_base']
           else:
-            file_base = 'peacock_run_tmp_out' 
-        
-        file_names.append(file_base + '.e')      
+            file_base = 'peacock_run_tmp_out'
+
+        file_names.append(file_base + '.e')
         break
 
     # Use the old system, if output_data is None
     if output_data == None:
       if oversampling_item and oversampling_item.checkState(0) == QtCore.Qt.Checked:
         output_data =  output_item.table_data
-       
+
         if output_data:
           if 'file_base' in output_data:
             file_base = output_data['file_base'] + '_oversample'
           else:
             file_base = 'peacock_run_tmp_out_oversample'
-        
+
       elif output_item.checkState(0) == QtCore.Qt.Checked:
         output_data =  output_item.table_data
-       
+
         if output_data:
           if 'file_base' in output_data:
             file_base = output_data['file_base']
@@ -193,7 +201,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       file_names = [file_base + '_displaced.e']
 
     return file_names
-    
+
   def _itemHasEditableParameters(self, item):
     this_path = self.generatePathFromItem(item)
     this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
@@ -209,7 +217,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
   def _addDataRecursively(self, parent_item, node):
     is_active = 'active' not in node.parent.params or node.parent.params['active'].find(node.name) != -1
-    
+
     table_data = node.params
     table_data['Name'] = node.name
 
@@ -226,7 +234,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       new_child.table_data = {}
       new_child.param_comments = []
       new_child.comment = ''
-      
+
 
     has_params = False
     # See if there are any actual parameters for this item
@@ -239,9 +247,9 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       if 'active' in new_child.table_data:
         del new_child.table_data['active']
       new_child.param_comments = param_comments
-      
+
     new_child.comment = comment
-    
+
     new_child.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
 
     if is_active:
@@ -259,7 +267,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         new_child.table_data['type'] = 'FEProblem'
 
     for child, child_node in node.children.items():
-      self._addDataRecursively(new_child, child_node)      
+      self._addDataRecursively(new_child, child_node)
 
   def _recursivelyAddTreeItems(self, split_path, parent):
     this_piece = split_path[0]
@@ -285,7 +293,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         child = parent.child(i)
       except:
         child = parent.topLevelItem(i)
-        
+
       if child.text(0) == this_piece:
         this_item = child
         found_it = True
@@ -302,7 +310,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
       this_path = self.generatePathFromItem(this_item)
       if self.action_syntax.hasStar(this_path):
-        this_item.setForeground(0, Qt.blue)
+        this_item.setForeground(0, QtCore.Qt.blue)
 
     if len(split_path) > 1:
       if not is_star:
@@ -330,9 +338,9 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         child = parent.child(i)
       except:
         child = parent.topLevelItem(i)
-        
+
       children_names.append(child.text(0))
-      
+
     return children_names
 
   def getChildNamesOfPathRecurse(self, current_item, path_pieces):
@@ -350,17 +358,17 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       return []
 
     return self.getChildNamesOfPathRecurse(next_item, path_pieces[1:])
-    
+
   ''' Pass in a path, get out the children names underneath that path
       Will return an empty list on failure '''
   def getChildNamesOfPath(self, path):
     path_pieces = path.strip('/').split('/')
     return self.getChildNamesOfPathRecurse(self, path_pieces)
-    
+
   def _doubleClickedItem(self, item, column):
     # Make sure the syntax is up to date
     self.input_file_widget.recache()
-    
+
     this_path = self.generatePathFromItem(item)
 
     if not self.action_syntax.isPath(this_path) or self._itemHasEditableParameters(item):
@@ -453,10 +461,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       item.setCheckState(0, QtCore.Qt.Checked)
       item.setExpanded(True)
       self.setCurrentItem(new_child)
-      
+
       if item.text(0) == 'Mesh':
         self.mesh_item_changed.emit(item)
-        
+
       self._updateOtherGUIElements()
       self.addHardPathsToTree() # We do this here because * paths might add more paths underneath the item we just added
 
@@ -466,7 +474,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     this_path = self.generatePathFromItem(item)
 
     menu = QtGui.QMenu(self)
-    
+
     # Don't allow deletion of hard paths
     if self.action_syntax.hasStar(this_path): # If it is a hard path allow them to add a child
       add_action = QtGui.QAction("Add...", self)
@@ -480,17 +488,17 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     comment_action = QtGui.QAction("Edit Comment...", self)
     comment_action.triggered.connect(self._editComment)
     menu.addAction(comment_action)
-      
+
     menu.popup(global_pos)
 
   def _updateOtherGUIElements(self):
     self.tree_changed.emit()
-    self.input_file_widget.input_file_textbox.updateTextBox()    
-      
+    self.input_file_widget.input_file_textbox.updateTextBox()
+
   def _currentItemChanged(self, current, previous):
     if not current:
       return
-    
+
     if 'boundary' in current.table_data:
       self.input_file_widget.mesh_render_widget.highlightBoundary(current.table_data['boundary'])
     elif 'master' in current.table_data:
@@ -502,4 +510,4 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       self.input_file_widget.mesh_render_widget.clearHighlight()
 #    except:
 #      pass
-      
+

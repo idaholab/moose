@@ -1,4 +1,13 @@
-from PyQt4 import QtCore, QtGui
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
+
 import MeshInfoFactory
 from MeshRenderWidget import *
 
@@ -36,7 +45,7 @@ class PeacockApplication(object):
   def typeOptions(self):
     input_file_widget = self.main_window.input_file_widget
     tree_widget = input_file_widget.tree_widget
-    
+
     type_options = {}
 
     # Variables
@@ -64,7 +73,7 @@ class PeacockApplication(object):
       type_options['std::vector<AuxVariableName, std::allocator<AuxVariableName> >'] = set(aux_variable_names)
       type_options['std::vector<AuxVariableName>'] = set(aux_variable_names)
       type_options['AuxVariableName'] = set(aux_variable_names)
-        
+
       type_options['std::vector<VariableName, std::allocator<VariableName> >'] |= set(aux_variable_names)
       type_options['std::vector<VariableName>'] |= set(aux_variable_names)
       type_options['VariableName'] |= set(aux_variable_names)
@@ -82,7 +91,7 @@ class PeacockApplication(object):
       type_options['std::vector<PostprocessorName, std::allocator<PostprocessorName> >'] = set(postprocessor_names)
       type_options['std::vector<PostprocessorName>'] = set(postprocessor_names)
       type_options['PostprocessorName'] = set(postprocessor_names)
-      
+
     # UserObjects
     user_object_names = tree_widget.getChildNamesOfPath('UserObjects')
     if len(user_object_names):
@@ -126,11 +135,11 @@ class PeacockApplication(object):
       if mesh_info:
         type_options['std::vector<BlockName>'] = mesh_info.blockNames()
         type_options['BlockName'] = mesh_info.blockNames()
-        
+
         type_options['std::vector<BoundaryName, std::allocator<BoundaryName> >'] = mesh_info.sidesetNames()
         type_options['std::vector<BoundaryName>'] = mesh_info.sidesetNames()
         type_options['BoundaryName'] = mesh_info.sidesetNames()
-        
+
         type_options['std::vector<BoundaryName, std::allocator<BoundaryName> >'].update(mesh_info.nodesetNames())
         type_options['std::vector<BoundaryName>'].update(mesh_info.nodesetNames())
         type_options['BoundaryName'].update(mesh_info.nodesetNames())
@@ -138,7 +147,7 @@ class PeacockApplication(object):
         type_options['std::vector<SubdomainName, std::allocator<SubdomainName> >'] = mesh_info.blockNames()
         type_options['std::vector<SubdomainName>'] = mesh_info.blockNames()
         type_options['SubdomainName'] = mesh_info.blockNames()
-      
+
     return type_options
 
   ''' This is the graphical view of the mesh that is shown next to the input file tree view.
@@ -164,7 +173,7 @@ class PeacockApplication(object):
     pass
 
 
-  def addRelapSave(self, layout):       
+  def addRelapSave(self, layout):
     pass
 
   def addNumberHistory(self, command_layout):

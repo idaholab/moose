@@ -25,7 +25,7 @@ InputParameters validParams<BlockAverageValue>()
   // Since we are inheriting from a Postprocessor we override this to make sure
   // That MOOSE (and Peacock) know that this object is _actually_ a UserObject
   params.set<std::string>("built_by_action") = "add_user_object";
-  
+
   return params;
 }
 
@@ -54,7 +54,7 @@ BlockAverageValue::initialize()
 
   // Set averages to 0 for each block
   const std::set<SubdomainID> & blocks = _subproblem.mesh().meshSubdomains();
-  
+
   for(std::set<SubdomainID>::const_iterator it = blocks.begin();
       it != blocks.end();
       ++it)

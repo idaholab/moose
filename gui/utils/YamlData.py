@@ -1,6 +1,15 @@
 #!/usr/bin/python
-import sys, os, commands, time, re, copy, PyQt4
-from PyQt4 import QtCore, QtGui
+import sys, os, commands, time, re, copy
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
 
 from GenSyntax import *
 
@@ -19,7 +28,7 @@ class YamlData():
 
   def recache(self, recache):
     self.yaml_data = self.gen_syntax.GetSyntax(recache)
-    
+
   def recursiveYamlDataSearch(self, path, current_yaml):
     if current_yaml['name'] == path:
       return current_yaml
@@ -27,7 +36,7 @@ class YamlData():
       if current_yaml['subblocks']:
         for child in current_yaml['subblocks']:
           yaml_data = self.recursiveYamlDataSearch(path, child)
-          
+
           if yaml_data:  # Found it in a child!
             return yaml_data
       else: # No children.. stop recursion
@@ -39,6 +48,6 @@ class YamlData():
 
       if yaml_data:
         return yaml_data
-      
-    # This means it wasn't found  
+
+    # This means it wasn't found
     return None

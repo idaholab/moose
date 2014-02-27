@@ -54,15 +54,15 @@
   start_time = 0
   end_time = 40
   num_steps = 1000
-
-  # These times will be sync'd in the output
-  sync_times = '10.5 20 30.5'
 []
 
-[Output]
+[Outputs]
   file_base = out
-  interval = 1
+  csv = true
   exodus = true
-  postprocessor_csv = true
-  perf_log = true
+  sync_times = '10.5 20 30.5'
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

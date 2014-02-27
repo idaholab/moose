@@ -55,11 +55,11 @@
 []
 
 [Outputs]
+  output_initial = true
   vtk = true
   [./console]
-    type = Console  
+    type = Console
     perf_log = true
-    linear_residuals = true	  
+    linear_residuals = true
   [../]
 []
-

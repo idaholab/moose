@@ -92,7 +92,7 @@
 # the definition of xaxis and yaxis define the "plane" of the radius.  For example,
 # xaxis = 0 and yaxis = 1 means that x and y components of the point are use to
 # calculate the radius.  xaxis = 1 and yaxis = 2 means that x and z components are used.
-# The first column is for time in this case.  xaxis and yaxis have to be specified and 
+# The first column is for time in this case.  xaxis and yaxis have to be specified and
 # radial = true for this to work, otherwise a MOOSE error will result.
 # This was developed so that an axisymmetric function could be defined for a 3D mesh.
 #
@@ -244,10 +244,10 @@
 #
 # Example 6 - variable R
 #
-# In this example, the variable is R and the parameters xaxis and yaxis are defined and 
-# given the values 0 and 1 respectivley.  The parameter radial is also defined and given 
-# the value true.  In this case, the x and y components of each point are used to 
-# calculate a radius.  This radius is used in the call to BilinearInterpolation.  
+# In this example, the variable is R and the parameters xaxis and yaxis are defined and
+# given the values 0 and 1 respectivley.  The parameter radial is also defined and given
+# the value true.  In this case, the x and y components of each point are used to
+# calculate a radius.  This radius is used in the call to BilinearInterpolation.
 # In fred.csv, the first row are the radius values.  The first column is time.
 #
 # At time = 1, the value of R at nodes with coordinates (x = 1, y = 1, or r = 1.414) is 1.414.
@@ -257,7 +257,7 @@
 # At time = 2, the value of R at nodes with coordinates (x = 1, y = 1, or r = 1.414) is 3.414.
 #            , the value of R at nodes with coordinates (x = 1, y = 2, or r = 2.236) is 4.236.
 #            , the value of R at nodes with coordinates (x = 2, y = 2, or r = 2.828) is 4.828.
-# 
+#
 # Note that the case of x = 2, y = 1 gives the same result as x = 1, y=2.
 #
 #

@@ -250,7 +250,7 @@ protected:
   Real _ss_tmin;
   Real & _old_time_solution_norm;
 
-  std::set<Real> _sync_times;
+  std::set<Real> & _sync_times;
 
   bool _abort;
   ///if to use time interval output

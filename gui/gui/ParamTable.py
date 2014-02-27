@@ -1,9 +1,18 @@
 #!/usr/bin/python
-from PyQt4 import QtCore, QtGui
-from PyQt4.Qt import *
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
+
 from GenSyntax import *
 
-pathname = os.path.dirname(os.path.realpath(sys.argv[0]))        
+pathname = os.path.dirname(os.path.realpath(sys.argv[0]))
 pathname = os.path.abspath(pathname)
 
 
@@ -22,7 +31,7 @@ class OptionsWidget(QtGui.QComboBox):
     for option in sorted(options):
       self.addItem(str(option))
 
-    self.setCurrentIndex(-1)  
+    self.setCurrentIndex(-1)
     self.currentIndexChanged[str].connect(self.itemClicked)
 
   def itemClicked(self, item):
@@ -32,7 +41,7 @@ class OptionsWidget(QtGui.QComboBox):
       table_value_item.setText(item)
     else:
       table_value_item.setText(str(table_value_item.text()).strip("'") + ' ' + item)
-  
+
     self.currentIndexChanged[str].disconnect(self.itemClicked)
     self.setCurrentIndex(-1)
     self.currentIndexChanged[str].connect(self.itemClicked)
@@ -44,12 +53,12 @@ class FileOpenWidget(QtGui.QPushButton):
     self.is_vector_type = is_vector_type
     QtGui.QPushButton.__init__(self,'Find File')
     QtCore.QObject.connect(self, QtCore.SIGNAL("clicked()"), self.clicked)
-    
+
   def clicked(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Find Mesh File", os.getcwd(), "File (*)")
 
     file_name = os.path.relpath(str(file_name))
-    
+
     if file_name:
       table_value_item = self.table_widget.item(self.row,1)
 
@@ -65,12 +74,12 @@ class FileNoExtensionOpenWidget(QtGui.QPushButton):
     self.is_vector_type = is_vector_type
     QtGui.QPushButton.__init__(self,'Find File')
     QtCore.QObject.connect(self, QtCore.SIGNAL("clicked()"), self.clicked)
-    
+
   def clicked(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Find Mesh File", os.getcwd(), "File (*)")
 
     file_name = os.path.relpath(str(file_name))
-    
+
     if file_name and file_name != '':
       table_value_item = self.table_widget.item(self.row,1)
 
@@ -99,8 +108,8 @@ class ParamTable:
       self.subblocks = main_data['subblocks']
     else:
       self.subblocks = None
-      
-    self.param_names = {}      
+
+    self.param_names = {}
     self.original_table_data = {}
     self.param_is_required = {}
 
@@ -137,19 +146,19 @@ class ParamTable:
 
     new_row_button = QtGui.QPushButton("New Parameter")
     cancel_button = QtGui.QPushButton("Cancel")
-    
+
     QtCore.QObject.connect(self.apply_button, QtCore.SIGNAL("clicked()"), self.click_add)
     QtCore.QObject.connect(new_row_button, QtCore.SIGNAL("clicked()"), self.click_new_row)
     QtCore.QObject.connect(cancel_button, QtCore.SIGNAL("clicked()"), self.click_cancel)
 
-    
+
 #    self.layoutV = QtGui.QVBoxLayout(self.main_layout)
     self.layoutV = QtGui.QVBoxLayout()
 
     self.init_menu(self.layoutV)
 
     self.splitter = QtGui.QSplitter()
-    self.splitter.setOrientation(Qt.Vertical)
+    self.splitter.setOrientation(QtCore.Qt.Vertical)
     self.layoutV.addWidget(self.splitter)
 
     self.tab_widget = QtGui.QTabWidget()
@@ -168,7 +177,7 @@ class ParamTable:
 
     self.comment_widget = QtGui.QWidget()
     self.comment_layout = QtGui.QVBoxLayout()
-    
+
     self.comment_widget.setLayout(self.comment_layout)
     self.comment_layout.addWidget(self.comment_label)
     self.comment_layout.addWidget(self.comment_box)
@@ -180,7 +189,7 @@ class ParamTable:
 
     if found_index == -1:
       found_index = self.drop_menu.findText('ParentParams')
-      
+
     self.drop_menu.setCurrentIndex(found_index)
 
     if self.incoming_data:
@@ -191,17 +200,17 @@ class ParamTable:
           found_index = self.drop_menu.findText(self.incoming_data['Name'])
           if found_index != -1:
             self.drop_menu.setCurrentIndex(found_index)
-              
+
       self.fillTableWithData(self.incoming_data, True)
 #      self.table_widget.cellChanged.disconnect(self.cellChanged)
     self.main_layout.addLayout(self.layoutV)
-    
+
     button_layout = QtGui.QHBoxLayout()
 
     button_layout.addWidget(self.apply_button)
     button_layout.addWidget(new_row_button)
     button_layout.addWidget(cancel_button)
-    
+
     self.layoutV.addLayout(button_layout)
 
     for group_name, table_widget in self.group_table_widgets.items():
@@ -255,7 +264,7 @@ class ParamTable:
           comment_item = QtGui.QTableWidgetItem(self.param_comments[name])
         else:
           comment_item = QtGui.QTableWidgetItem()
-          
+
         self.table_widget.setItem(self.table_widget.rowCount()-1,0,name_item)
         self.table_widget.setItem(self.table_widget.rowCount()-1,1,value_item)
         self.table_widget.setItem(self.table_widget.rowCount()-1,3,comment_item)
@@ -297,7 +306,7 @@ class ParamTable:
 #          else:
 #            if param_name in self.param_is_required and self.param_is_required[param_name]: #Pass through any 'required' parameters
 #              the_data[param_name] = param_value
-    return the_data 
+    return the_data
 
   ''' See if all of the required parameters are satisfied '''
   def possiblyActivateApply(self):
@@ -308,7 +317,7 @@ class ParamTable:
           param_name = str(table_widget.item(i,0).text())
           if param_name == 'Name' or (param_name in self.param_is_required and self.param_is_required[param_name]):
             param_value = None
-            
+
             if type(table_widget.cellWidget(i,1)) is QtGui.QComboBox:
               param_value = table_widget.cellWidget(i,1).currentText()
             elif table_widget.item(i,1):
@@ -319,9 +328,9 @@ class ParamTable:
 
             if param_value == '':
               disable_it = True
-              
+
     self.apply_button.setDisabled(disable_it)
-    
+
   def init_menu(self, layout):
     self.drop_menu = QtGui.QComboBox()
     self.has_type = False
@@ -339,7 +348,7 @@ class ParamTable:
         else:
           if not self.action_syntax.isPath(item['name']):
             self.drop_menu.addItem(name)
-    
+
 
     if not self.already_has_parent_params and self.main_data and self.main_data['parameters'] and len(self.main_data['parameters']) and ('subblocks' not in self.main_data or not self.main_data['subblocks'] or not self.has_type):
       self.drop_menu.addItem('ParentParams')
@@ -352,7 +361,7 @@ class ParamTable:
 
     for group_name,table_widget in self.group_table_widgets.items():
       table_widget.setCurrentCell(0,0)
-      
+
     self.table_data = self.tableToDict()
     self.parent_class.accept_params()
     return
@@ -396,7 +405,7 @@ class ParamTable:
       return True
 
     return False
-  
+
   def item_clicked(self, item):
     saved_data = {}
     saved_params = {}
@@ -423,7 +432,7 @@ class ParamTable:
 
     # Whether or not we've found the right data for this item
     found_it = False
-    
+
     has_parent_params_set = False
     has_type_subblock = False
 
@@ -435,7 +444,7 @@ class ParamTable:
           for param in new_text['parameters']:
             if 'default' not in param:
               param['default'] = ''
-              
+
             self.modifyCppType(param, new_text)
             the_table_data.append(param)
             self.param_is_required[param['name']] = param['required']
@@ -474,8 +483,8 @@ class ParamTable:
           continue
         if 'default' not in param:
           param['default'] = ''
-        self.modifyCppType(param, '')        
-          
+        self.modifyCppType(param, '')
+
         the_table_data.append(param)
         self.param_is_required[param['name']] = param['required']
 
@@ -497,7 +506,7 @@ class ParamTable:
 
         if param['group_name'] not in group_param_names:
           group_param_names[param['group_name']] = []
-          
+
         group_param_names[param['group_name']].append(param['name'])
 
     for group_name in sorted(group_param_names):
@@ -519,7 +528,7 @@ class ParamTable:
       table_widget = self.group_table_widgets[group_name]
 
       row = group_current_row[group_name]
-      
+
       # Populate table with data:
       name_item = QtGui.QTableWidgetItem(param['name'])
 
@@ -531,7 +540,7 @@ class ParamTable:
         color = QtGui.QColor()
 #        color.setNamedColor("red")
         color.setRgb(255,204,153)
-        name_item.setBackgroundColor(color)
+        name_item.setBackground(color)
 
       if has_parent_params_set and param['name'] == 'Name':
         value = 'ParentParams'
@@ -554,19 +563,19 @@ class ParamTable:
           value_item.setCurrentIndex(2)
         else:
           value_item.setCurrentIndex(0)
-          
+
         table_widget.setCellWidget(row, 1, value_item)
       else:
         if param['name'] != 'Name' and param['name'] in self.global_params and value == param['default']:
           value_item = QtGui.QTableWidgetItem(self.global_params[param_name])
           color = QtGui.QColor()
           color.setRgb(209,242,255)
-          value_item.setBackgroundColor(color)
+          value_item.setBackground(color)
         else:
           value_item = QtGui.QTableWidgetItem(value)
 
         table_widget.setItem(row, 1, value_item)
-        
+
       if 'cpp_type' in param and (param['cpp_type'] == 'MeshFileName' or param['cpp_type'] == 'FileName'):
         options_item = FileOpenWidget(table_widget,row,self.isVectorType(param['cpp_type']))
         table_widget.setCellWidget(row, 2, options_item)
@@ -587,7 +596,7 @@ class ParamTable:
         options = param['options'].split(' ') if param['options'] != None else ''
         options_item = OptionsWidget(table_widget,row,options, self.isVectorType(param['cpp_type']))
         table_widget.setCellWidget(row, 2, options_item)
-      
+
       name_item.setFlags(QtCore.Qt.ItemIsEnabled)
       name_item.setToolTip(param['description'])
 
@@ -596,10 +605,10 @@ class ParamTable:
         value_item.setFlags(QtCore.Qt.NoItemFlags)
 
       table_widget.setItem(row, 0, name_item)
-      
+
       comment_item = QtGui.QTableWidgetItem()
       table_widget.setItem(row, 3, comment_item)
-      
+
       group_current_row[group_name] += 1
 
 
@@ -609,6 +618,6 @@ class ParamTable:
 
     for group_name, table_widget in self.group_table_widgets.items():
       table_widget.resizeColumnsToContents()
-    
+
   def cellChanged(self, row, col):
     self.possiblyActivateApply()

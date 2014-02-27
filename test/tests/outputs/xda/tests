@@ -1,0 +1,14 @@
+[Tests]
+  [./xda]
+    # Tests the for existence of XDA files
+    type = 'CheckFiles'
+    input = 'xda.i'
+    check_files = 'xda_out_0000.xda xda_out_0000_mesh.xda xda_out_0001.xda xda_out_0001_mesh.xda'
+  [../]
+  [./xdr]
+    # Tests the for existence of XDA files
+    type = 'CheckFiles'
+    input = 'xdr.i'
+    check_files = 'xdr_out_0000.xdr xdr_out_0000_mesh.xdr xdr_out_0001.xdr xdr_out_0001_mesh.xdr'
+  [../]
+[]

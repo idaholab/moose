@@ -54,47 +54,37 @@ public:
    */
   virtual void outputSetup();
 
-  
+
 protected:
-  
-  /**
-   * Outputs nodal, nonlinear variables
-   */
-  virtual void outputNodalVariables();
 
   /**
-   * Outputs elemental, nonlinear variables
-   * This does not do anything for VTK files currently, the libMesh VTK API needs some work
-   * to function in this manner
+   * Perform the output of VTK
    */
-  virtual void outputElementalVariables();
-
-  /**
-   * Writes postprocessor values to global output parameters
-   */
-  virtual void outputPostprocessors();
-
-  /**
-   * Writes scalar AuxVariables to global output parameters
-   */
-  virtual void outputScalarVariables();
+  virtual void output();
 
   /**
    * Return the file name with the *.vtk extension
    */
   std::string filename();
 
+  //@{
+  /**
+   * Individual component output is not currently supported for VTK
+   */
+  virtual void outputNodalVariables();
+  virtual void outputElementalVariables();
+  virtual void outputPostprocessors();
+  virtual void outputScalarVariables();
+  //@}
+
 private:
 
   /// Pointer to libMesh::VTKIO object
   VTKIO * _vtk_io_ptr;
 
-  /// Number of digits to pad the output files with
-  unsigned int _padding;
-
   /// Flag for using binary compression
   bool _binary;
-  
+
 };
 
 #endif //VTK_H

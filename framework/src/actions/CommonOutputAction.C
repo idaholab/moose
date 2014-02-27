@@ -26,16 +26,25 @@ InputParameters validParams<CommonOutputAction>()
    InputParameters params = validParams<Action>();
 
    // Short-cut methods for typical output objects
-   params.addParam<bool>("exodus", false, "Output the results using the default settings via the Exodus output");
-   params.addParam<bool>("console", false, "Output the results to the screen using the default settings via the Console output");
+   params.addParam<bool>("exodus", false, "Output the results using the default settings for Exodus output");
+   params.addParam<bool>("nemesis", false, "Output the results using the default settings for Nemesis output");
+   params.addParam<bool>("console", false, "Output the results using the default settings for Console output");
    params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv file using the default CSV output.");
-   params.addParam<bool>("vtk", false, "Output the results using the default settings via the VTK output");
+   params.addParam<bool>("vtk", false, "Output the results using the default settings for VTK output");
+   params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output (ascii)");
+   params.addParam<bool>("xdr", false, "Output the results using the default settings for XDA/XDR output (binary)");
    params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
+   params.addParam<bool>("gmv", false, "Output the results using the default settings for GMV output");
+   params.addParam<bool>("tecplot", false, "Output the results using the default settings for Tecplot output");
 
    // Common parameters
-   params.addParam<bool>("output_initial", true,  "Request that the initial condition is output to the solution file");
+   params.addParam<bool>("output_initial", false,  "Request that the initial condition is output to the solution file");
+   params.addParam<bool>("output_final", false, "Force the final timestep to be output, regardless of output interval");
+
    params.addParam<std::string>("file_base", "Common file base name to be utilized with all output objects");
    params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
+   params.addParam<std::vector<Real> >("sync_times", "Times at which the output and solution is forced to occur");
+
    params.addParam<std::vector<VariableName> >("hide", "A list of the variables and postprocessors that should NOT be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
    params.addParam<std::vector<VariableName> >("show", "A list of the variables and postprocessors that should be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
 
@@ -61,6 +70,9 @@ CommonOutputAction::act()
   if (getParam<bool>("exodus"))
     create("Exodus");
 
+  if (getParam<bool>("nemesis"))
+    create("Nemesis");
+
   if (getParam<bool>("console"))
     create("Console");
 
@@ -70,9 +82,20 @@ CommonOutputAction::act()
   if (getParam<bool>("vtk"))
     create("VTK");
 
+  if (getParam<bool>("xda"))
+    create("XDA");
+
+  if (getParam<bool>("xdr"))
+    create("XDR");
+
   if (getParam<bool>("checkpoint"))
     create("Checkpoint");
 
+  if (getParam<bool>("gmv"))
+    create("GMV");
+
+  if (getParam<bool>("tecplot"))
+    create("Tecplot");
 }
 
 void

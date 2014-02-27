@@ -46,7 +46,7 @@ public:
 
   /**
    * This is the constructor declaration.  This class takes a
-   * string and a InputParameters object, just like other 
+   * string and a InputParameters object, just like other
    * Kernel-derived classes.
    */
   Convection(const std::string & name,

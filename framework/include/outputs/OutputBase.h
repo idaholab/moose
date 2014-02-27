@@ -87,18 +87,6 @@ public:
   virtual ~OutputBase();
 
   /**
-   * A single call to this function should output all the necessary data for a single timestep. By
-   * default this function performs the following operations:
-   * -# Calls outputSetup() prior to any other output methods and whenever the meshChanged() method was called
-   * -# Each of the variable output methods are called, if data exists and they have not been suppressed via the parameters
-   * -# The outputInput() method is called, if the corresponding parameters is set to true. This method is only called once
-   *    regardless of the number of calls to output()
-   *
-   * @see outputVariables outputScalarVariables outputPostprocessors
-   */
-  virtual void output();
-
-  /**
    * Initial setup function that is called prior to any output
    * This method is called by FEProblem::initialSetup via the OutputWarehouse. It is the last initialSetup so
    * all objects are setup at the time of the execution.
@@ -141,6 +129,23 @@ public:
    * @see output Steady Transient FEProblem
    */
   virtual void outputInitial();
+
+  /**
+   * Performes the output call, handling interval and outputSetup calls.
+   * This method is what is called by the internal MOOSE framework, this should \b not be called by a user. This method
+   * calls outputSetup() prior to output() anytime the meshChanged() method was called or the _sequence flag is true.
+   */
+  virtual void outputStep();
+
+  /**
+   * Force the output of the final timestep (if desired)
+   *
+   * This is called by the Transient executioner when the simulation is done, it will output the final solution regardless
+   * of interval settings if 'output_final = true'.
+   *
+   * @see Transient::keepGoing
+   */
+  void outputFinal();
 
   /**
    * Performs the output of the input file
@@ -244,6 +249,16 @@ public:
 protected:
 
   /**
+   * A single call to this function should output all the necessary data for a single timestep. By
+   * default this function performs calls each of the four virtual output methods: outputScalarVariables(),
+   * outputPostprocessors(), outputElementalVariables(), and outputNodalVariables(). But, only if output exists
+   * for each type.
+   *
+   * @see outputNodalVariables outputElementalVariables outputScalarVariables outputPostprocessors
+   */
+  virtual void output();
+
+  /**
    * Performs output of nodal nonlinear variables
    * The child class must define this method to output the nonlinear variables as desired
    * @see Exodus::outputNodalVariables
@@ -306,6 +321,9 @@ protected:
   /// Flag for outputing the initial solution
   bool _output_initial;
 
+  /// Flag for outputing the final step
+  bool _output_final;
+
   /// Flag for output the input file
   bool _output_input;
 
@@ -362,6 +380,12 @@ private:
 
   /// The output time step interval
   const unsigned int _interval;
+
+  /// Sync times for this outputter
+  std::set<Real> _sync_times;
+
+  /// Flag for only executing at sync times
+  bool _sync_only;
 
 };
 

@@ -47,14 +47,11 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-# Keep until Outputs based recovery system is operational
-[Output]
-[]
-
 [Outputs]
-  console = false
+  console = true
   [./exodus]
     type = Exodus
     output_initial = false
+    interval = 5
   [../]
 []

@@ -1,7 +1,17 @@
 #!usr/bin/python
 
 import sys, os, random
-from PyQt4 import QtGui, QtCore
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
+
 import numpy, csv
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -9,30 +19,30 @@ from matplotlib.figure import Figure
 
 class PlotWidget(FigureCanvas):
     """This is the canvas Widget. It allows for MPL plot embedding """
-    
+
     def __init__(self, parent=None, width=9.85, height=5 , dpi=50):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
         # We want the axes cleared every time plot() is called
         self.axes.hold(False)
-        
-        
+
+
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
-        
+
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Fixed,
                                    QtGui.QSizePolicy.Fixed)
-        
+
         FigureCanvas.updateGeometry(self)
 
 
 class MPLPlotter(QtGui.QWidget):
     """This is a widget that inherites from the plotWidget class that is used to update the plot with PP data"""
     def __init__(self, plotData, plotName, parent = None):
-        QtGui.QWidget.__init__(self, parent)  
-        
-        
+        QtGui.QWidget.__init__(self, parent)
+
+
         self.plotData = plotData
         self.plotName = plotName
         self.canvas = PlotWidget()
@@ -46,7 +56,7 @@ class MPLPlotter(QtGui.QWidget):
         # set button context menu policy
         self.canvas.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(self.canvas, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
-        
+
         # create color menu
         self.colorMenu = QtGui.QMenu('Plot Color', self)
         royalBlueLine = QtGui.QAction('Blue',self)
@@ -85,13 +95,13 @@ class MPLPlotter(QtGui.QWidget):
         self.popMenu.addSeparator()
         self.popMenu.addAction(closeAction)
 
-    
+
     def setPlotData(self, plotData, plotName):
         self.plotData = plotData
         self.plotName = plotName
         self.xData = self.plotData[0]
         self.yData = self.plotData[1]
-        
+
         # MPL plots
         self.canvas.axes.plot(self.xData, self.yData, self.plotColor, linewidth = 2.5)
         self.canvas.axes.set_xlabel('time')
@@ -109,7 +119,7 @@ class MPLPlotter(QtGui.QWidget):
             self.canvas.print_figure(path, dpi = 100)
     def closePlot(self):
         self.close()
-    
+
     def changeRoyalBlue(self):
         self.plotColor = "RoyalBlue"
         self.setPlotData(self.plotData,self.plotName)
@@ -146,4 +156,3 @@ class MPLPlotter(QtGui.QWidget):
             self.plotColor = "Tomato"
         else:
             self.plotColor = "Gold"
-        

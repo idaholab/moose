@@ -15,12 +15,12 @@
     type = ParsedFunction
     value = 'x*x+y*y'
   [../]
-  
+
   [./icfn]
     type = ConstantFunction
     value = 1
   [../]
-  
+
   [./ffn]
     type = ConstantFunction
     value = -4
@@ -33,7 +33,7 @@
     family = LAGRANGE
     [./InitialCondition]
       type = FunctionIC
-      function = icfn 
+      function = icfn
     [../]
   [../]
 []

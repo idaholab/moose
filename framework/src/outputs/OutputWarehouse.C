@@ -58,6 +58,13 @@ OutputWarehouse::addOutput(OutputBase * output)
   if (ptr != NULL)
     addOutputFilename(ptr->filename());
 
+  // Insert object sync times to the global set
+  if (output->parameters().isParamValid("sync_times"))
+  {
+    std::vector<Real> sync_times = output->parameters().get<std::vector<Real> >("sync_times");
+    _sync_times.insert(sync_times.begin(), sync_times.end());
+  }
+
   // Warning if multiple Console objects are added with 'screen=true' in the input file
   Console * c_ptr = dynamic_cast<Console *>(output);
   if (c_ptr != NULL)
@@ -94,10 +101,17 @@ OutputWarehouse::outputInitial()
 }
 
 void
-OutputWarehouse::output()
+OutputWarehouse::outputStep()
 {
   for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
-    (*it)->output();
+    (*it)->outputStep();
+}
+
+void
+OutputWarehouse::outputFinal()
+{
+  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+    (*it)->outputFinal();
 }
 
 void
@@ -120,4 +134,10 @@ OutputWarehouse::getCommonParameters()
     mooseError("No common input parameters are stored");
 
   return *_common_params_ptr;
+}
+
+std::set<Real> &
+OutputWarehouse::getSyncTimes()
+{
+  return _sync_times;
 }

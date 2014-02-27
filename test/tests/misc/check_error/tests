@@ -371,12 +371,6 @@
     expect_err = 'A UserObject with the name "\w+" already exists'
   [../]
 
-  [./windows_line_endings_test]
-    type = 'RunException'
-    input = 'windows_line_endings.i'
-    expect_err = "\S+ contains Windows\(DOS\) line endings"
-  [../]
-
   [./wrong_object_test]
     type = 'RunException'
     input = 'wrong_moose_object_test.i'

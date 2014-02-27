@@ -1,6 +1,15 @@
 #!/usr/bin/python
-import os, sys, PyQt4, re, inspect
-from PyQt4 import QtCore, QtGui
+import os, sys, re, inspect
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
 
 # Get the real path of peacock
 if(os.path.islink(sys.argv[0])):
@@ -15,14 +24,16 @@ for subdir in subdirs:
   sys.path.append(pathname + '/' + subdir)
 
 # Add the utilities/python_getpot directory
-MOOSE_DIR = pathname + '/../moose'
+MOOSE_DIR = os.path.abspath(os.path.join(pathname, '..'))
+FRAMEWORK_DIR = os.path.abspath(os.path.join(pathname, '..', 'framework'))
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
-elif os.environ.has_key("MOOSE_DEV"):
-  MOOSE_DIR = pathname + '/../devel/moose'
+  FRAMEWORK_DIR = os.path.join(MOOSE_DIR, 'framework')
+if os.environ.has_key("FRAMEWORK_DIR"):
+  FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
 
-sys.path.append(MOOSE_DIR + '/scripts/common')
+sys.path.append(os.path.join(FRAMEWORK_DIR, 'scripts', 'common'))
 
 os.environ["TERM"] = "peacock"
 

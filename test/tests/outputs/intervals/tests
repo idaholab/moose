@@ -14,4 +14,22 @@
     cli_args = 'Outputs/interval=5'
     prereq = 'time_step'
   [../]
+  [./output_final]
+    # Tests the final step output
+    type = Exodiff
+    input = output_final.i
+    exodiff = output_final_out.e
+  [../]
+  [./sync_times]
+    # Test useage of sync times in an output object
+    type = Exodiff
+    input = sync_times.i
+    exodiff = sync_times_out.e
+  [../]
+  [./multiple_sync_times]
+    # Tests the use of different sync times for outputs
+    type = Exodiff
+    input = multiple_sync_times.i
+    exodiff = 'multiple_sync_times_out_3.e multiple_sync_times_out_5.e multiple_sync_times_sync_0.e multiple_sync_times_sync_1.e'
+  [../]
 []

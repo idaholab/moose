@@ -1,4 +1,4 @@
-import os, sys, PyQt4, getopt
+import os, sys, getopt
 
 from ExodusRenderer import ExodusRenderer
 from MeshRenderer import MeshRenderer
@@ -14,7 +14,7 @@ class MeshOnlyRenderer(ExodusRenderer):
     tmp_file.close()
 
     os.system(render_widget.tree_widget.input_file_widget.app_path + ' -i peacock_run_tmp_mesh.i --mesh-only peacock_run_tmp_mesh.e > /dev/null')
-    
+
     self.file_name = 'peacock_run_tmp_mesh.e'
-    
+
     self.buildActors(self.file_name)

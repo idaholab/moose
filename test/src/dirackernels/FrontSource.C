@@ -21,7 +21,7 @@ InputParameters validParams<FrontSource>()
 
   params.addParam<Real>("value", 1.0, "The value of the strength of the point source.");
   params.addRequiredParam<UserObjectName>("front_uo", "A TrackDiracFront UserObject that will be supplying the positions");
-    
+
   return params;
 }
 

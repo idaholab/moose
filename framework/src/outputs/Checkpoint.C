@@ -21,6 +21,7 @@
 
 // libMesh includes
 #include "libmesh/checkpoint_io.h"
+#include "libmesh/enum_xdr_mode.h"
 
 template<>
 InputParameters validParams<Checkpoint>()
@@ -69,7 +70,7 @@ Checkpoint::filename()
 {
   // Get the time step with correct zero padding
   std::ostringstream output;
-  output << std::setw(4)
+  output << std::setw(_padding)
          << std::setprecision(0)
          << std::setfill('0')
          << std::right
@@ -83,13 +84,9 @@ Checkpoint::directory()
   return _file_base + "_" + _suffix;
 }
 
-
 void
 Checkpoint::output()
 {
-  // Do nothing if not on the desired interval
-  if (!checkInterval())
-    return;
 
   // Start the performance log
   Moose::perf_log.push("output()", "Checkpoint");
@@ -129,7 +126,7 @@ Checkpoint::output()
   io.write(current_file_struct.checkpoint);
 
   // Write the xdr
-  _es_ptr->write(current_file_struct.system, libMeshEnums::ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES, renumber);
+  _es_ptr->write(current_file_struct.system, ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA | EquationSystems::WRITE_PARALLEL_FILES, renumber);
 
   // Write the restartable data
   _restartable_data_io.writeRestartableData(current_file_struct.restart, _restartable_data, _recoverable_data);

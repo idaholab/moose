@@ -92,6 +92,7 @@ public:
 
   /**
    * Add a sync time
+   * \todo {Remove after old output system is removed; sync time are handled by OutputWarehouse}
    */
   void addSyncTime(Real sync_time);
 
@@ -130,6 +131,7 @@ protected:
   Real & _dt_max;
   Real & _end_time;
   std::set<Real> & _sync_times;
+
   Real & _timestep_tolerance;
 
   ///should detailed diagnostic output be printed

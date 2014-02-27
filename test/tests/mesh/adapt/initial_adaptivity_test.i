@@ -15,7 +15,7 @@
     type = ParsedFunction
     value = x*x+y*y
   [../]
-  
+
   [./ffn]
     type = ParsedFunction
     value = -4
@@ -43,7 +43,7 @@
     type = Diffusion
     variable = u
   [../]
-  
+
   [./forcing_fn]
     type = UserForcingFunction
     variable = u

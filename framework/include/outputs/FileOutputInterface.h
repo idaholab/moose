@@ -54,6 +54,9 @@ protected:
   /// The base filename from the input paramaters
   std::string _file_base;
 
+  /// Number of digits to pad the extensions
+  unsigned int _padding;
+
 };
 
 #endif /* FILEOUTPUTINTERFACE_H */

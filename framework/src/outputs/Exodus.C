@@ -24,12 +24,11 @@ template<>
 InputParameters validParams<Exodus>()
 {
   // Get the base class parameters
-
   InputParameters params = validParams<OversampleOutputter>();
   params += validParams<FileOutputInterface>();
 
-  params.addParam<unsigned int>("padding", 3, "The number of digits for the -s extension (e.g., out.e-s002)");
-  params.addParamNamesToGroup("padding", "Advanced");
+  // Set the default padding to 3
+  params.set<unsigned int>("padding") = 3;
 
   // Add description for the Exodus class
   params.addClassDescription("Object for output data in the Exodus II format");
@@ -44,7 +43,6 @@ Exodus::Exodus(const std::string & name, InputParameters parameters) :
     _exodus_io_ptr(NULL),
     _file_num(0),
     _initialized(false),
-    _padding(getParam<unsigned int>("padding")),
     _exodus_num(0)
 {
 }
@@ -181,8 +179,7 @@ Exodus::output()
   // Call the output methods
   OversampleOutputter::output();
 
-  // Increment output call counter, which is reset by outputSetup and outputSetup
-  // is automatically called by OversampleBase::output()
+  // Increment output call counter, which is reset by outputSetup
   _exodus_num++;
 
   // Write the global variabls (populated by the output methods)

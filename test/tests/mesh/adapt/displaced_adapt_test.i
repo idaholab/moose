@@ -1,7 +1,7 @@
 # Adaptivity on displaced problem
 # - testing initial_refinement and adaptivity as well
 #
-# variables: 
+# variables:
 # - u and v_aux are used for displacing the problem
 # - v is used to get some refinements
 #

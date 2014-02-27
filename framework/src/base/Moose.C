@@ -318,10 +318,14 @@
 
 // Outputs
 #include "Exodus.h"
+#include "Nemesis.h"
 #include "Console.h"
 #include "CSV.h"
 #include "VTK.h"
 #include "Checkpoint.h"
+#include "XDA.h"
+#include "GMVOutputter.h"
+#include "Tecplot.h"
 
 namespace Moose {
 
@@ -572,10 +576,15 @@ registerObjects(Factory & factory)
 
   // Outputs
   registerOutput(Exodus);
+  registerOutput(Nemesis);
   registerOutput(Console);
   registerOutput(CSV);
   registerNamedOutput(VTKOutputter, "VTK");
   registerOutput(Checkpoint);
+  registerNamedOutput(XDA, "XDR");
+  registerOutput(XDA);
+  registerNamedOutput(GMVOutputter, "GMV");
+  registerOutput(Tecplot);
 
   registered = true;
 }

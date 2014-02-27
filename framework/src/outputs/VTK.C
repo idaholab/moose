@@ -19,17 +19,19 @@ InputParameters validParams<VTKOutputter>()
 {
   InputParameters params = validParams<OversampleOutputter>();
   params += validParams<FileOutputInterface>();
-  
+
   // Supress un-available parameters
   params.suppressParameter<bool>("output_scalar_variables");
   params.suppressParameter<bool>("output_postprocessors");
   params.suppressParameter<bool>("scalar_as_nodal");
   params.suppressParameter<bool>("sequence");
 
-  // Add a padding parameter
-  params.addParam<unsigned int>("padding", 3, "The number of digits for the -s extension (e.g., out.e-s002)");
+  // Set default padding to 3
+  params.set<unsigned int>("padding") = 3;
+
+  // Add binary toggle
   params.addParam<bool>("binary", false, "Set VTK files to output in binary format");
-  params.addParamNamesToGroup("padding", "Advanced");
+  params.addParamNamesToGroup("binary", "Advanced");
 
   return params;
 }
@@ -38,7 +40,6 @@ VTKOutputter::VTKOutputter(const std::string & name, InputParameters & parameter
     OversampleOutputter(name, parameters),
     FileOutputInterface(name, parameters),
     _vtk_io_ptr(NULL),
-    _padding(getParam<unsigned int>("padding")),
     _binary(getParam<bool>("binary"))
 {
   // VTK files must be written in sequence
@@ -62,7 +63,6 @@ VTKOutputter::outputSetup()
   if (_vtk_io_ptr != NULL)
     delete _vtk_io_ptr;
 
-  
 #ifdef LIBMESH_HAVE_VTK
   // Create the new VTKOutputter object and set compression
   _vtk_io_ptr = new VTKIO(_es_ptr->get_mesh());
@@ -73,7 +73,7 @@ VTKOutputter::outputSetup()
 }
 
 void
-VTKOutputter::outputNodalVariables()
+VTKOutputter::output()
 {
 #ifdef LIBMESH_HAVE_VTK
   // Write the data
@@ -83,31 +83,13 @@ VTKOutputter::outputNodalVariables()
 #endif
 }
 
-void
-VTKOutputter::outputElementalVariables()
-{
-}
-
-void
-VTKOutputter::outputPostprocessors()
-{
-  mooseError("Postprocessor output not currently supported for VTKOutputter files");
-}
-
-void
-VTKOutputter::outputScalarVariables()
-{
-  mooseError("Postprocessor output not currently supported for VTKOutputter files");
-}
-
-
 std::string
 VTKOutputter::filename()
 {
   // Append the .e extension on the base file name
   std::ostringstream output;
   output << _file_base;
-    
+
   // Add the _00x.vtk extension to the file
   output << "_"
          << std::setw(_padding)
@@ -121,3 +103,26 @@ VTKOutputter::filename()
   return output.str();
 }
 
+void
+VTKOutputter::outputNodalVariables()
+{
+  mooseError("Individual output of nodal variables is not support for VTK output");
+}
+
+void
+VTKOutputter::outputElementalVariables()
+{
+  mooseError("Individual output of elemental variables is not support for VTK output");
+}
+
+void
+VTKOutputter::outputPostprocessors()
+{
+  mooseError("Individual output of postprocessors is not support for VTK output");
+}
+
+void
+VTKOutputter::outputScalarVariables()
+{
+  mooseError("Individual output of scalars is not support for VTK output");
+}

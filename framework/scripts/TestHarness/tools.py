@@ -6,7 +6,7 @@ module_path = os.path.dirname(__file__)
 if os.environ.has_key("FRAMEWORK_DIR"):
   FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
 elif os.environ.has_key("MOOSE_DIR"):
-  FRAMEWORK_DIR = os.path.join(os.environ['MOOSE_DIR'], 'framework') 
+  FRAMEWORK_DIR = os.path.join(os.environ['MOOSE_DIR'], 'framework')
 else:
   FRAMEWORK_DIR = os.path.abspath(module_path) + '/../..'
 sys.path.append(FRAMEWORK_DIR + '/scripts/common')

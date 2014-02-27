@@ -55,7 +55,6 @@
 
   start_time = 0.0
   end_time = 20.0
-  sync_times = '0.5, 9.5'
   n_startup_steps = 2
   dtmax = 6.0
   num_steps = 5
@@ -73,10 +72,16 @@
   [../]
 []
 
-[Output]
-  interval = 1
+[Outputs]
   output_initial = true
-  linear_residuals = true
   exodus = true
-  num_checkpoint_files = 1
+  sync_times = '0.5 9.5'
+  [./console]
+    type = Console
+    inear_residuals = true
+  [../]
+  [./checkpoint]
+    type = Checkpoint
+    num_files = 1
+  [../]
 []

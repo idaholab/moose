@@ -863,8 +863,13 @@ static PetscErrorCode DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
 
   PetscFunctionBegin;
   ierr = DMMooseGetNonlinearSystem(dm, nl);CHKERRQ(ierr);
+#if PETSC_VERSION_LESS_THAN(3,5,0) && PETSC_VERSION_RELEASE
   ierr = VecSet(xl, SNES_VI_NINF);CHKERRQ(ierr);
   ierr = VecSet(xu, SNES_VI_INF);CHKERRQ(ierr);
+#else
+  ierr = VecSet(xl, PETSC_NINFINITY);CHKERRQ(ierr);
+  ierr = VecSet(xu, PETSC_INFINITY);CHKERRQ(ierr);
+#endif
   if (nl->sys().nonlinear_solver->bounds != NULL) {
     nl->sys().nonlinear_solver->bounds(XL,XU,nl->sys());
   }

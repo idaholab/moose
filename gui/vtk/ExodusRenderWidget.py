@@ -1,5 +1,15 @@
-import os, sys, PyQt4, getopt
-from PyQt4 import QtCore, QtGui
+import os, sys, getopt
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
+
 import vtk
 from vtk.util.colors import peacock, tomato, red, white, black
 
@@ -23,7 +33,7 @@ class ExodusRenderer:
     self.render_widget = render_widget
     self.renderer = self.render_widget.renderer
     self.vtkwidget = self.renderer.vtkwidget
-    
+
   def setFileName(self, file_name):
     reader = vtk.vtkExodusIIReader()
     reader.SetFileName(self.file_name)
@@ -61,7 +71,7 @@ class ExodusRenderer:
       block_id = reader.GetObjectId(vtk.vtkExodusIIReader.ELEM_BLOCK,i)
       self.blocks.append(block_id)
       self.block_id_to_exodus_block[block_id] = i
-    
+
     reader.SetTimeStep(1)
     reader.Update()
 
@@ -71,7 +81,7 @@ class ExodusRenderer:
 
     self.sideset_actors = {}
     self.clipped_sideset_actors = {}
-    
+
     self.current_sideset_actors = self.sideset_actors
     for i in xrange(num_sidesets):
       actor = ExodusActor(self.renderer, self.data, ExodusMap.sideset_vtk_block, i)
@@ -82,7 +92,7 @@ class ExodusRenderer:
       clipped_actor = ClippedActor(actor, self.plane)
       self.clipped_sideset_actors[str(self.sidesets[i])] = clipped_actor
       self.all_actors.append(clipped_actor)
-      
+
       name = reader.GetObjectName(vtk.vtkExodusIIReader.SIDE_SET,i).split(' ')
       if 'Unnamed' not in name:
         self.sideset_actors[name[0]] = actor
@@ -122,16 +132,16 @@ class ExodusRenderer:
       clipped_actor = ClippedActor(actor, self.plane)
       self.clipped_block_actors[str(self.blocks[i])] = clipped_actor
       self.all_actors.append(clipped_actor)
-      
+
       name = reader.GetObjectName(vtk.vtkExodusIIReader.ELEM_BLOCK,i).split(' ')
       if 'Unnamed' not in name:
         self.block_actors[name[0]] = actor
         self.clipped_block_actors[name[0]] = clipped_actor
 
     self.setBounds()
-    
+
     # Avoid z-buffer fighting
     vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
 
     self.renderer.ResetCamera()
-    self.vtkwidget.updateGL()    
+    self.vtkwidget.updateGL()
