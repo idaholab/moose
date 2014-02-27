@@ -1,6 +1,15 @@
 #!/usr/bin/python
-from PyQt4 import QtCore, QtGui
-from PyQt4.Qt import *
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
+
 from GenSyntax import *
 
 pathname = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -149,7 +158,7 @@ class ParamTable:
     self.init_menu(self.layoutV)
 
     self.splitter = QtGui.QSplitter()
-    self.splitter.setOrientation(Qt.Vertical)
+    self.splitter.setOrientation(QtCore.Qt.Vertical)
     self.layoutV.addWidget(self.splitter)
 
     self.tab_widget = QtGui.QTabWidget()
@@ -531,7 +540,7 @@ class ParamTable:
         color = QtGui.QColor()
 #        color.setNamedColor("red")
         color.setRgb(255,204,153)
-        name_item.setBackgroundColor(color)
+        name_item.setBackground(color)
 
       if has_parent_params_set and param['name'] == 'Name':
         value = 'ParentParams'
@@ -561,7 +570,7 @@ class ParamTable:
           value_item = QtGui.QTableWidgetItem(self.global_params[param_name])
           color = QtGui.QColor()
           color.setRgb(209,242,255)
-          value_item.setBackgroundColor(color)
+          value_item.setBackground(color)
         else:
           value_item = QtGui.QTableWidgetItem(value)
 

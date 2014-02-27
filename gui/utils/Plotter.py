@@ -1,7 +1,17 @@
 #!usr/bin/python
 
 import sys, os, random
-from PyQt4 import QtGui, QtCore
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
+
 import numpy, csv
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -146,4 +156,3 @@ class MPLPlotter(QtGui.QWidget):
             self.plotColor = "Tomato"
         else:
             self.plotColor = "Gold"
-

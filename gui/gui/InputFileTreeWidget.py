@@ -1,6 +1,15 @@
 #!/usr/bin/python
-import os, sys, PyQt4, getopt
-from PyQt4 import QtCore, QtGui
+import os, sys, getopt
+
+try:
+    from PyQt4 import QtCore, QtGui
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+except ImportError:
+    try:
+        from PySide import QtCore, QtGui
+    except ImportError:
+        raise ImportError("Cannot load either PyQt or PySide")
 
 
 from OptionsGUI import OptionsGUI
@@ -19,9 +28,8 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class InputFileTreeWidget(QtGui.QTreeWidget):
-  tree_changed = QtCore.pyqtSignal()
-  mesh_item_changed = QtCore.pyqtSignal(QtGui.QTreeWidgetItem)
-
+  tree_changed = QtCore.Signal()
+  mesh_item_changed = QtCore.Signal(QtGui.QTreeWidgetItem)
   def __init__(self, input_file_widget, win_parent=None):
     QtGui.QTreeWidget.__init__(self, win_parent)
 
@@ -302,7 +310,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
       this_path = self.generatePathFromItem(this_item)
       if self.action_syntax.hasStar(this_path):
-        this_item.setForeground(0, Qt.blue)
+        this_item.setForeground(0, QtCore.Qt.blue)
 
     if len(split_path) > 1:
       if not is_star:
