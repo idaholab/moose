@@ -33,7 +33,7 @@ class TestHarness:
     if os.environ.has_key("LIBMESH_DIR"):
       self.libmesh_dir = os.environ['LIBMESH_DIR']
     else:
-      self.libmesh_dir = self.moose_dir + '../../libmesh/installed'
+      self.libmesh_dir = self.moose_dir + '../libmesh/installed'
     self.file = None
 
     # Parse arguments
