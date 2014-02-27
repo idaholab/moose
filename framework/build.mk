@@ -3,7 +3,7 @@
 #       This can be overridden by using environment variables (MOOSE_DIR and/or FRAMEWORK_DIR)
 
 # Set LIBMESH_DIR if it is not already set in the environment (try our best to guess!)
-LIBMESH_DIR       ?= $(MOOSE_DIR)/../libmesh/installed
+LIBMESH_DIR       ?= $(MOOSE_DIR)/libmesh/installed
 
 # If the user has no environment variable
 # called METHOD, he gets optimized mode.
