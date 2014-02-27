@@ -2,16 +2,18 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-echo $SCRIPT_DIR
-
 export LIBMESH_DIR=$SCRIPT_DIR/../libmesh/installed
 export METHODS=${METHODS:="opt oprof dbg"}
 export JOBS=${JOBS:=1}
 
 cd $SCRIPT_DIR/..
 
-git submodule init
-git submodule update
+# Test for git repository
+git rev-parse 2>/dev/null
+if [[ $? -eq 0 ]]; then
+  git submodule init
+  git submodule update
+fi
 
 cd $SCRIPT_DIR/../libmesh
 
