@@ -418,7 +418,7 @@ FormattedTable::getTermWidth(bool use_environment) const
 
   if (use_environment)
   {
-    char *pps_width = std::getenv("PPS_WIDTH");
+    char *pps_width = std::getenv("MOOSE_PPS_WIDTH");
     if (pps_width != NULL)
     {
       std::stringstream ss(pps_width);
