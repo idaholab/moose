@@ -502,7 +502,8 @@ contactFormulation(const std::string & the_name)
   ContactFormulation formulation(CF_INVALID);
   std::string name(the_name);
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-  if ("default" == name)
+  if ("default" == name ||
+      "kinematic" == name)
   {
     formulation = CF_DEFAULT;
   }

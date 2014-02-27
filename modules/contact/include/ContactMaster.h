@@ -20,6 +20,7 @@ enum ContactFormulation
 {
   CF_INVALID,
   CF_DEFAULT,
+  CF_KINEMATIC = CF_DEFAULT,
   CF_PENALTY,
   CF_AUGMENTED_LAGRANGE
 };
@@ -60,7 +61,7 @@ protected:
   unsigned int _z_var;
 
   const unsigned int _mesh_dimension;
-  
+
   RealVectorValue _vars;
 
   MooseVariable * _nodal_area_var;
