@@ -6,10 +6,10 @@ InputParameters validParams<LangmuirMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addRequiredParam<Real>("mat_desorption_time_const", "Time constant for Langmuir desorption (gas moving from matrix to porespace).  Units [s]");
-  params.addRequiredParam<Real>("mat_adsorption_time_const", "Time constant for Langmuir adsorption (gas moving from porespace to matrix).  Units [s]");
-  params.addCoupledVar("desorption_time_const_change", "An auxillary variable describing time_const changes.  time_const = mat_time_const + time_const_change.  If this is not provided, zero is used.");
-  params.addCoupledVar("adsorption_time_const_change", "An auxillary variable describing time_const changes.  time_const = mat_time_const + time_const_change.  If this is not provided, zero is used.");
+  params.addRequiredParam<Real>("mat_desorption_time_const", "Time constant for Langmuir desorption (gas moving from matrix to porespace).  If the total desorption time constant is nonpositive then no desorption takes place (so set this negative if you don't want desorption).  Units [s]");
+  params.addRequiredParam<Real>("mat_adsorption_time_const", "Time constant for Langmuir adsorption (gas moving from porespace to matrix).  Units [s].  If the total adsorption time constant is nonpositive no adsorption takes place (so set this negative if you don't want adsorption)");
+  params.addCoupledVar("desorption_time_const_change", "An auxillary variable describing time_const changes.  time_const = mat_time_const + time_const_change.  If this is not provided, zero is used.  If the total time_const is nonpositive, no desorption takes place.");
+  params.addCoupledVar("adsorption_time_const_change", "An auxillary variable describing time_const changes.  time_const = mat_time_const + time_const_change.  If this is not provided, zero is used.  If the total time_const is nonpositive then no adsorption takes place");
   params.addRequiredParam<Real>("mat_langmuir_density", "This is (Langmuir volume)*(density of gas at standard temp and pressure).  Langmuir volume is measured in (gas volume)/(matrix volume).  (Methane density(101kPa, 20degC) = 0.655kg/m^3.  Methane density(101kPa, 0degC) = 0.715kg/m^3.)  Units [kg/m^3]");
   params.addRequiredParam<Real>("mat_langmuir_pressure", "Langmuir pressure.  Units Pa");
   params.addRequiredCoupledVar("pressure_var", "The variable that is used to calculate equilibrium concentration");

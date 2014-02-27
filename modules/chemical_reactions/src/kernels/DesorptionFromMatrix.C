@@ -28,9 +28,13 @@ DesorptionFromMatrix::computeQpResidual()
 {
   if (_u[_qp] > _equilib_conc[_qp])
     {
-      return _test[_i][_qp]*(_u[_qp] - _equilib_conc[_qp])/_desorption_time_const[_qp];
+      if (_desorption_time_const[_qp] > 0)
+	return _test[_i][_qp]*(_u[_qp] - _equilib_conc[_qp])/_desorption_time_const[_qp];
+      return 0.0;
     }
-  return _test[_i][_qp]*(_u[_qp] - _equilib_conc[_qp])/_adsorption_time_const[_qp];
+  if (_adsorption_time_const[_qp] > 0)
+    return _test[_i][_qp]*(_u[_qp] - _equilib_conc[_qp])/_adsorption_time_const[_qp];
+  return 0.0;
 }
 
 Real
@@ -38,9 +42,13 @@ DesorptionFromMatrix::computeQpJacobian()
 {
   if (_u[_qp] > _equilib_conc[_qp])
     {
-      return _test[_i][_qp]*_phi[_j][_qp]/_desorption_time_const[_qp];
+      if (_desorption_time_const[_qp] > 0)
+	return _test[_i][_qp]*_phi[_j][_qp]/_desorption_time_const[_qp];
+      return 0.0;
     }
-  return _test[_i][_qp]*_phi[_j][_qp]/_adsorption_time_const[_qp];
+  if (_adsorption_time_const[_qp] > 0)
+    return _test[_i][_qp]*_phi[_j][_qp]/_adsorption_time_const[_qp];
+  return 0.0;
 }
 
 Real
@@ -50,7 +58,11 @@ DesorptionFromMatrix::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
   if (_u[_qp] > _equilib_conc[_qp])
     {
-      return -_test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]/_desorption_time_const[_qp];
+      if (_desorption_time_const[_qp] > 0)
+	return -_test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]/_desorption_time_const[_qp];
+      return 0.0;
     }
-  return -_test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]/_adsorption_time_const[_qp];
+  if (_adsorption_time_const[_qp] > 0)
+    return -_test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]/_adsorption_time_const[_qp];
+  return 0.0;
 }

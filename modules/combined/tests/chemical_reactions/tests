@@ -6,6 +6,20 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
   [../]
+  [./langmuir_jac2]
+    type = 'PetscJacobianTester'
+    input = 'langmuir_jac2.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./langmuir_jac3]
+    type = 'PetscJacobianTester'
+    input = 'langmuir_jac3.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
   [./langmuir_desorption]
     type = 'CSVDiff'
     input = 'langmuir_desorption.i'
