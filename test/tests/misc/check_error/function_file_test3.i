@@ -19,7 +19,7 @@
 
 [Functions]
   [./ic_function]
-    type = PiecewiseLinearFile
+    type = PiecewiseLinear
     data_file = piecewise_linear_mixed_lengths.csv #Will generate error because length of data doesn't match on all rows
     format = rows
     scale_factor = 1.0
