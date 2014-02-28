@@ -209,9 +209,9 @@ SetupOutputAction::act()
                  Moose::stringify(screen_interval) + ")\" and \"output_initial\" is set to false.");
   }
 
-  output.interval(getParam<unsigned int>("interval"));
-  output.screen_interval(getParam<unsigned int>("screen_interval"));
-  output.checkpoint_interval(getParam<unsigned int>("checkpoint_interval"));
+  output.interval(interval);
+  output.screen_interval(screen_interval);
+  output.checkpoint_interval(checkpoint_interval);
 
   output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
   if(isParamValid("time_interval"))
