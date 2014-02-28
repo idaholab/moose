@@ -117,16 +117,6 @@ DependencyResolverTest::resolverSets()
 
   const std::vector<std::set<std::string> > & sets = _resolver.getSortedValuesSets();
 
-  /*
-  // DEBUG Printout
-  for (std::vector<std::set<std::string> >::const_iterator i = sets.begin(); i != sets.end(); ++i)
-  {
-    for (std::set<std::string>::const_iterator j = i->begin(); j != i->end(); ++j)
-      std::cout << *j << "\t";
-    std::cout << "\n";
-  }
-  */
-
   CPPUNIT_ASSERT( sets.size() == 3 );
   CPPUNIT_ASSERT( sets[0].size() == 2);
   CPPUNIT_ASSERT( sets[0].find("a") != sets[0].end() );

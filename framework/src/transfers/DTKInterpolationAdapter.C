@@ -116,9 +116,6 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
     permutation_list[i] = i;
 
   /*
-  if(libMesh::processor_id() == 1)
-    sleep(1);
-
   Moose::out<<"n_nodes_per_elem: "<<n_nodes_per_elem<<std::endl;
 
   Moose::out<<"Dim: "<<dim<<std::endl;
