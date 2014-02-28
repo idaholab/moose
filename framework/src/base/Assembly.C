@@ -651,7 +651,7 @@ Assembly::init()
     {
       unsigned int i = (*it)->index();
       if ((*_cm)(i, j) != 0)
-        _cm_entry.push_back(std::pair<unsigned int, unsigned int>(i, j));
+        _cm_entry.push_back(std::pair<MooseVariable *, MooseVariable *>(*it, *jt));
     }
   }
 
@@ -706,13 +706,13 @@ Assembly::init()
 void
 Assembly::prepare()
 {
-  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
   {
-    unsigned int vi = (*it).first;
-    unsigned int vj = (*it).second;
+    MooseVariable & ivar = *(*it).first;
+    MooseVariable & jvar = *(*it).second;
 
-    MooseVariable & ivar = _sys.getVariable(_tid, vi);
-    MooseVariable & jvar = _sys.getVariable(_tid, vj);
+    unsigned int vi = ivar.index();
+    unsigned int vj = jvar.index();
 
     jacobianBlock(vi, vj).resize(ivar.dofIndices().size(), jvar.dofIndices().size());
     jacobianBlock(vi, vj).zero();
@@ -733,16 +733,16 @@ Assembly::prepare()
 void
 Assembly::prepareVariable(MooseVariable * var)
 {
-  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
   {
-    unsigned int vi = (*it).first;
-    unsigned int vj = (*it).second;
+    MooseVariable & ivar = *(*it).first;
+    MooseVariable & jvar = *(*it).second;
 
-    if(vi == var->index() || vj == var->index())
+    unsigned int vi = ivar.index();
+    unsigned int vj = jvar.index();
+
+    if (vi == var->index() || vj == var->index())
     {
-      MooseVariable & ivar = _sys.getVariable(_tid, vi);
-      MooseVariable & jvar = _sys.getVariable(_tid, vj);
-
       jacobianBlock(vi,vj).resize(ivar.dofIndices().size(), jvar.dofIndices().size());
     }
   }
@@ -757,13 +757,13 @@ Assembly::prepareVariable(MooseVariable * var)
 void
 Assembly::prepareNeighbor()
 {
-  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
+  for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = _cm_entry.begin(); it != _cm_entry.end(); ++it)
   {
-    unsigned int vi = (*it).first;
-    unsigned int vj = (*it).second;
+    MooseVariable & ivar = *(*it).first;
+    MooseVariable & jvar = *(*it).second;
 
-    MooseVariable & ivar = _sys.getVariable(_tid, vi);
-    MooseVariable & jvar = _sys.getVariable(_tid, vj);
+    unsigned int vi = ivar.index();
+    unsigned int vj = jvar.index();
 
     jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj).resize(ivar.dofIndices().size(), jvar.dofIndicesNeighbor().size());
     jacobianBlockNeighbor(Moose::ElementNeighbor, vi, vj).zero();

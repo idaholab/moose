@@ -39,14 +39,14 @@ ComputeFullJacobianThread::~ComputeFullJacobianThread()
 void
 ComputeFullJacobianThread::computeJacobian()
 {
-  std::vector<std::pair<unsigned int, unsigned int> > & ce = _fe_problem.couplingEntries(_tid);
-  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
+  for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
-    unsigned int ivar = (*it).first;
-    unsigned int jvar = (*it).second;
+    MooseVariable & ivariable = *(*it).first;
+    MooseVariable & jvariable = *(*it).second;
 
-    MooseVariable & ivariable = _sys.getVariable(_tid, ivar);
-    MooseVariable & jvariable = _sys.getVariable(_tid, jvar);
+    unsigned int ivar = ivariable.index();
+    unsigned int jvar = jvariable.index();
 
     if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain))
     {
@@ -100,13 +100,10 @@ ComputeFullJacobianThread::computeJacobian()
 void
 ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
-  std::vector<std::pair<unsigned int, unsigned int> > & ce = _fe_problem.couplingEntries(_tid);
-  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
+  for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
-    unsigned int ivar = (*it).first;
-    unsigned int jvar = (*it).second;
-
-    MooseVariable & var = _sys.getVariable(_tid, jvar);
+    MooseVariable & var = *(*it).first;
     if (var.activeOnSubdomain(_subdomain))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
@@ -114,8 +111,9 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       for (std::vector<IntegratedBC *>::iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
       {
         IntegratedBC * bc = *jt;
-        if (bc->shouldApply() && bc->variable().index() == ivar && bc->isImplicit())
+        if (bc->shouldApply() && bc->variable().index() == var.index() && bc->isImplicit())
         {
+          unsigned int jvar = (*it).second->index();
           bc->subProblem().prepareFaceShapes(jvar, _tid);
           bc->computeJacobianBlock(jvar);
         }
@@ -162,18 +160,17 @@ ComputeFullJacobianThread::computeInternalFaceJacobian()
   if(_sys._dg_kernels[_tid].active().empty())
     return;
 
-  std::vector<std::pair<unsigned int, unsigned int> > & ce = _fe_problem.couplingEntries(_tid);
-  for (std::vector<std::pair<unsigned int, unsigned int> >::iterator it = ce.begin(); it != ce.end(); ++it)
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
+  for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
-    unsigned int ivar = (*it).first;
-    unsigned int jvar = (*it).second;
-
     std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
-    for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+    for (std::vector<DGKernel *>::iterator dg_it = dgks.begin(); dg_it != dgks.end(); ++dg_it)
     {
-      DGKernel * dg = *it;
+      unsigned int ivar = (*it).first->index();
+      DGKernel * dg = *dg_it;
       if (dg->variable().index() == ivar && dg->isImplicit())
       {
+        unsigned int jvar = (*it).second->index();
         dg->subProblem().prepareNeighborShapes(jvar, _tid);
         dg->computeOffDiagJacobian(jvar);
       }

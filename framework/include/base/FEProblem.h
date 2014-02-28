@@ -125,7 +125,7 @@ public:
   void setCouplingMatrix(CouplingMatrix * cm);
   CouplingMatrix * & couplingMatrix() { return _cm; }
 
-  std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries(THREAD_ID tid) { return _assembly[tid]->couplingEntries(); }
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > & couplingEntries(THREAD_ID tid) { return _assembly[tid]->couplingEntries(); }
 
   /**
    * Check for converence of the nonlinear solution
