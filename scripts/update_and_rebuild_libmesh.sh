@@ -9,8 +9,9 @@ export JOBS=${JOBS:=1}
 cd $SCRIPT_DIR/..
 
 # Test for git repository
-git rev-parse 2>/dev/null
-if [[ $? -eq 0 ]]; then
+git_dir=`git rev-parse --show-cdup 2>/dev/null`
+if [[ $? == 0 && "x$git_dir" == "x" ]]; then
+  echo "here"
   git submodule init
   git submodule update
 fi
