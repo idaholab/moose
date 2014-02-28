@@ -29,7 +29,7 @@ InputParameters validParams<FileOutputInterface>()
   return params;
 }
 
-FileOutputInterface::FileOutputInterface(const std::string & name, InputParameters & parameters) :
+FileOutputInterface::FileOutputInterface(const std::string & /*name*/, InputParameters & parameters) :
     _file_base(parameters.get<std::string>("file_base")),
     _padding(parameters.get<unsigned int>("padding"))
 {
