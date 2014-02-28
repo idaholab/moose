@@ -366,7 +366,7 @@ public:
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id_type> & idof_indices, std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
 
-  std::vector<std::pair<unsigned int, unsigned int> > & couplingEntries() { return _cm_entry; }
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > & couplingEntries() { return _cm_entry; }
 
   const VariablePhiValue & phi() { return _phi; }
   const VariablePhiGradient & gradPhi() { return _grad_phi; }
@@ -426,8 +426,8 @@ protected:
   SystemBase & _sys;
   /// Reference to coupling matrix
   CouplingMatrix * & _cm;
-  /// Entries in the coupling matrix (only for element variables)
-  std::vector<std::pair<unsigned int, unsigned int> > _cm_entry;
+  /// Entries in the coupling matrix (only for field variables)
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > _cm_entry;
   /// DOF map
   const DofMap & _dof_map;
   /// Thread number (id)
