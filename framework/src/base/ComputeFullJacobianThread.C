@@ -103,19 +103,19 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
   std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
   for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
-    MooseVariable & var = *(*it).first;
-    if (var.activeOnSubdomain(_subdomain))
+    MooseVariable & ivar = *(*it).first;
+    MooseVariable & jvar = *(*it).second;
+    if (ivar.activeOnSubdomain(_subdomain) && jvar.activeOnSubdomain(_subdomain))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
       std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
       for (std::vector<IntegratedBC *>::iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
       {
         IntegratedBC * bc = *jt;
-        if (bc->shouldApply() && bc->variable().index() == var.index() && bc->isImplicit())
+        if (bc->shouldApply() && bc->variable().index() == ivar.index() && bc->isImplicit())
         {
-          unsigned int jvar = (*it).second->index();
-          bc->subProblem().prepareFaceShapes(jvar, _tid);
-          bc->computeJacobianBlock(jvar);
+          bc->subProblem().prepareFaceShapes(jvar.index(), _tid);
+          bc->computeJacobianBlock(jvar.index());
         }
       }
     }
