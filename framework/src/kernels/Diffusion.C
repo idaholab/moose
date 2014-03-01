@@ -38,7 +38,6 @@ Real
 Diffusion::computeQpResidual()
 {
   return _grad_u[_qp] * _grad_test[_i][_qp];
-  std::cout << "This statement is never executed, but shouldn't be here...\n";
 }
 
 Real
