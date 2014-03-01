@@ -2,9 +2,7 @@
 # Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and optionally ELK.
 #       This can be overridden by using environment variables (MOOSE_DIR and/or ELK_DIR)
 
-# include the library options determined by configure.  This will
-# set the variables INCLUDE and LIBS that we will need to build and
-# link with the library.
+-include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
 ##############################################################################
 ######################### Application Variables ##############################
