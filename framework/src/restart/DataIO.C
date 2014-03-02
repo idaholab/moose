@@ -87,11 +87,11 @@ dataStore(std::ostream & stream, const Elem * & e, void * context)
   // TODO: Write out the unique ID of this elem
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  if(e)
+  if (e)
   {
     id = e->id();
     // Moose::out<<"Storing Elem id: "<<id<<std::endl;
-    if(id == libMesh::DofObject::invalid_id)
+    if (id == libMesh::DofObject::invalid_id)
       mooseError("Can't output Elems with invalid ids!");
   }
   else
@@ -112,11 +112,11 @@ dataStore(std::ostream & stream, const Node * & n, void * context)
   // TODO: Write out the unique ID of this node
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  if(n)
+  if (n)
   {
     id = n->id();
     // Moose::out<<"Storing Node id: "<<id<<std::endl;
-    if(id == libMesh::DofObject::invalid_id)
+    if (id == libMesh::DofObject::invalid_id)
       mooseError("Can't output Nodes with invalid ids!");
   }
   else
@@ -137,11 +137,11 @@ dataStore(std::ostream & stream, Elem * & e, void * context)
   // TODO: Write out the unique ID of this elem
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  if(e)
+  if (e)
   {
     id = e->id();
     // Moose::out<<"Storing Elem id: "<<id<<std::endl;
-    if(id == libMesh::DofObject::invalid_id)
+    if (id == libMesh::DofObject::invalid_id)
       mooseError("Can't output Elems with invalid ids!");
   }
   else
@@ -162,11 +162,11 @@ dataStore(std::ostream & stream, Node * & n, void * context)
   // TODO: Write out the unique ID of this node
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  if(n)
+  if (n)
   {
     id = n->id();
     // Moose::out<<"Storing Node id: "<<id<<std::endl;
-    if(id == libMesh::DofObject::invalid_id)
+    if (id == libMesh::DofObject::invalid_id)
       mooseError("Can't output Nodes with invalid ids!");
   }
   else
@@ -266,7 +266,7 @@ template<>
 void
 dataLoad(std::istream & stream, const Elem * & e, void * context)
 {
-  if(!context)
+  if (!context)
     mooseError("Can only load Elem objects using a MooseMesh context!");
 
   MooseMesh * mesh = static_cast<MooseMesh *>(context);
@@ -278,7 +278,7 @@ dataLoad(std::istream & stream, const Elem * & e, void * context)
 
   loadHelper(stream, id, context);
 
-  if(id != libMesh::DofObject::invalid_id)
+  if (id != libMesh::DofObject::invalid_id)
   {
     e = mesh->elem(id);
     // Moose::out<<"Retrived Elem: "<<id<<std::endl;
@@ -296,7 +296,7 @@ template<>
 void
 dataLoad(std::istream & stream, const Node * & n, void * context)
 {
-  if(!context)
+  if (!context)
     mooseError("Can only load Node objects using a MooseMesh context!");
 
   MooseMesh * mesh = static_cast<MooseMesh *>(context);
@@ -308,7 +308,7 @@ dataLoad(std::istream & stream, const Node * & n, void * context)
 
   loadHelper(stream, id, context);
 
-  if(id != libMesh::DofObject::invalid_id)
+  if (id != libMesh::DofObject::invalid_id)
   {
     n = mesh->nodePtr(id);
     // Moose::out<<"Retrived Node: "<<id<<std::endl;
@@ -331,7 +331,7 @@ template<>
 void
 dataLoad(std::istream & stream, Elem * & e, void * context)
 {
-  if(!context)
+  if (!context)
     mooseError("Can only load Elem objects using a MooseMesh context!");
 
   MooseMesh * mesh = static_cast<MooseMesh *>(context);
@@ -343,7 +343,7 @@ dataLoad(std::istream & stream, Elem * & e, void * context)
 
   loadHelper(stream, id, context);
 
-  if(id != libMesh::DofObject::invalid_id)
+  if (id != libMesh::DofObject::invalid_id)
   {
     e = mesh->elem(id);
     // Moose::out<<"Retrived Elem: "<<id<<std::endl;
@@ -361,7 +361,7 @@ template<>
 void
 dataLoad(std::istream & stream, Node * & n, void * context)
 {
-  if(!context)
+  if (!context)
     mooseError("Can only load Node objects using a MooseMesh context!");
 
   MooseMesh * mesh = static_cast<MooseMesh *>(context);
@@ -373,7 +373,7 @@ dataLoad(std::istream & stream, Node * & n, void * context)
 
   loadHelper(stream, id, context);
 
-  if(id != libMesh::DofObject::invalid_id)
+  if (id != libMesh::DofObject::invalid_id)
   {
     n = mesh->nodePtr(id);
     // Moose::out<<"Retrived Node: "<<id<<std::endl;

@@ -58,14 +58,14 @@ MultiAppUserObjectTransfer::execute()
     {
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
-        if(_multi_app->hasLocalApp(i))
+        if (_multi_app->hasLocalApp(i))
         {
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
           System * to_sys = find_sys(_multi_app->appProblem(i)->es(), _to_var_name);
 
-          if(!to_sys)
+          if (!to_sys)
             mooseError("Cannot find variable "<<_to_var_name<<" for "<<_name<<" Transfer");
 
           unsigned int sys_num = to_sys->number();
@@ -75,7 +75,7 @@ MultiAppUserObjectTransfer::execute()
 
           MeshBase * mesh = NULL;
 
-          if(_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
+          if (_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
           {
             mesh = &_multi_app->appProblem(i)->getDisplacedProblem()->mesh().getMesh();
           }
@@ -86,7 +86,7 @@ MultiAppUserObjectTransfer::execute()
 
           const UserObject & user_object = _multi_app->problem()->getUserObjectBase(_user_object_name);
 
-          if(is_nodal)
+          if (is_nodal)
           {
             MeshBase::const_node_iterator node_it = mesh->local_nodes_begin();
             MeshBase::const_node_iterator node_end = mesh->local_nodes_end();
@@ -95,7 +95,7 @@ MultiAppUserObjectTransfer::execute()
             {
               Node * node = *node_it;
 
-              if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
+              if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = node->dof_number(sys_num, var_num, 0);
@@ -121,7 +121,7 @@ MultiAppUserObjectTransfer::execute()
 
               Point centroid = elem->centroid();
 
-              if(elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
+              if (elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
               {
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
@@ -171,7 +171,7 @@ MultiAppUserObjectTransfer::execute()
 
       MeshBase * to_mesh = NULL;
 
-      if(_displaced_target_mesh && to_problem.getDisplacedProblem())
+      if (_displaced_target_mesh && to_problem.getDisplacedProblem())
         to_mesh = &to_problem.getDisplacedProblem()->mesh().getMesh();
       else
         to_mesh = &to_problem.mesh().getMesh();
@@ -180,14 +180,14 @@ MultiAppUserObjectTransfer::execute()
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
-        if(!_multi_app->hasLocalApp(i))
+        if (!_multi_app->hasLocalApp(i))
           continue;
 
         Point app_position = _multi_app->position(i);
         MeshTools::BoundingBox app_box = _multi_app->getBoundingBox(i);
         const UserObject & user_object = _multi_app->appUserObjectBase(i, _user_object_name);
 
-        if(is_nodal)
+        if (is_nodal)
         {
           MeshBase::const_node_iterator node_it = to_mesh->nodes_begin();
           MeshBase::const_node_iterator node_end = to_mesh->nodes_end();
@@ -196,10 +196,10 @@ MultiAppUserObjectTransfer::execute()
           {
             Node * node = *node_it;
 
-            if(node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
+            if (node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
             {
               // See if this node falls in this bounding box
-              if(app_box.contains_point(*node))
+              if (app_box.contains_point(*node))
               {
                 dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
 
@@ -221,12 +221,12 @@ MultiAppUserObjectTransfer::execute()
           {
             Elem * elem = *elem_it;
 
-            if(elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
+            if (elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
             {
               Point centroid = elem->centroid();
 
               // See if this elem falls in this bounding box
-              if(app_box.contains_point(centroid))
+              if (app_box.contains_point(centroid))
               {
                 dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
 

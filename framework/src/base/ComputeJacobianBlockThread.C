@@ -117,7 +117,7 @@ ComputeJacobianBlockThread::operator() (const ConstElemRange & range, bool bypas
               for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
               {
                 IntegratedBC * bc = *it;
-                if(bc->variable().index() == _ivar)
+                if (bc->variable().index() == _ivar)
                 {
                   if (bc->shouldApply())
                   {
@@ -156,7 +156,7 @@ ComputeJacobianBlockThread::operator() (const ConstElemRange & range, bool bypas
               for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
               {
                 DGKernel * dg = *it;
-                if(dg->variable().index() == _ivar)
+                if (dg->variable().index() == _ivar)
                 {
                   dg->subProblem().prepareFaceShapes(_jvar, _tid);
                   dg->subProblem().prepareNeighborShapes(_jvar, _tid);

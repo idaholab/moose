@@ -53,7 +53,7 @@ PointValue::execute()
   // First find the element the hit lands in
   const Elem * elem = (*pl)(_point);
 
-  if(elem && elem->processor_id() == libMesh::processor_id())
+  if (elem && elem->processor_id() == libMesh::processor_id())
   {
     _subproblem.reinitElemPhys(elem, _point_vec, 0);
 

@@ -36,9 +36,9 @@ ErrorToleranceMarker::computeElementMarker()
 {
   Real error = _error_vector[_current_elem->id()];
 
-  if(error > _refine)
+  if (error > _refine)
     return REFINE;
-  else if(error < _coarsen)
+  else if (error < _coarsen)
     return COARSEN;
 
   return DO_NOTHING;

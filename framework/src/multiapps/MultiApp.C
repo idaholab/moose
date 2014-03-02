@@ -50,7 +50,7 @@ InputParameters validParams<MultiApp>()
   {
     app_types_strings << it->first;
     ++it;
-    if(it != AppFactory::instance().registeredObjectsEnd())
+    if (it != AppFactory::instance().registeredObjectsEnd())
       app_types_strings<< ", ";
   }
 
@@ -114,7 +114,7 @@ MultiApp::MultiApp(const std::string & name, InputParameters parameters):
 
 MultiApp::~MultiApp()
 {
-  if(!_has_an_app)
+  if (!_has_an_app)
     return;
 
   for(unsigned int i=0; i<_my_num_apps; i++)
@@ -128,12 +128,12 @@ MultiApp::~MultiApp()
 void
 MultiApp::init()
 {
-  if(isParamValid("positions"))
+  if (isParamValid("positions"))
     _positions = getParam<std::vector<Point> >("positions");
-  else if(isParamValid("positions_file"))
+  else if (isParamValid("positions_file"))
   {
     // Read the file on the root processor then broadcast it
-    if(libMesh::processor_id() == 0)
+    if (libMesh::processor_id() == 0)
     {
       std::string positions_file = getParam<FileName>("positions_file");
       MooseUtils::checkFileReadable(positions_file);
@@ -160,7 +160,7 @@ MultiApp::init()
   else
     mooseError("Must supply either 'positions' or 'positions_file' for MultiApp "<<_name);
 
-  if(_move_apps.size() != _move_positions.size())
+  if (_move_apps.size() != _move_positions.size())
     mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp "<<_name);
 
   _total_num_apps = _positions.size();
@@ -169,7 +169,7 @@ MultiApp::init()
   /// Set up our Comm and set the number of apps we're going to be working on
   buildComm();
 
-  if(!_has_an_app)
+  if (!_has_an_app)
     return;
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
@@ -187,7 +187,7 @@ void
 MultiApp::preTransfer(Real /*dt*/, Real target_time)
 {
   // First, see if any Apps need to be Reset
-  if(!_reset_happened && target_time + 1e-14 >= _reset_time)
+  if (!_reset_happened && target_time + 1e-14 >= _reset_time)
   {
     _reset_happened = true;
     for(unsigned int i=0; i<_reset_apps.size(); i++)
@@ -195,7 +195,7 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
   }
 
   // Now move any apps that should be moved
-  if(!_move_happened && target_time + 1e-14 >= _move_time)
+  if (!_move_happened && target_time + 1e-14 >= _move_time)
   {
     _move_happened = true;
     for(unsigned int i=0; i<_move_apps.size(); i++)
@@ -206,7 +206,7 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
 Executioner *
 MultiApp::getExecutioner(unsigned int app)
 {
-  if(!_has_an_app)
+  if (!_has_an_app)
     mooseError("No app for " << _name << " on processor " << _orig_rank);
 
   return _apps[globalAppToLocal(app)]->getExecutioner();
@@ -215,7 +215,7 @@ MultiApp::getExecutioner(unsigned int app)
 MeshTools::BoundingBox
 MultiApp::getBoundingBox(unsigned int app)
 {
-  if(!_has_an_app)
+  if (!_has_an_app)
     mooseError("No app for " << _name << " on processor " << _orig_rank);
 
   FEProblem * problem = appProblem(app);
@@ -243,7 +243,7 @@ MultiApp::getBoundingBox(unsigned int app)
 
   // If the problem is RZ then we're going to invent a box that would cover the whole "3D" app
   // FIXME: Assuming all subdomains are the same coordinate system type!
-  if(problem->getCoordSystem(*(problem->mesh().meshSubdomains().begin())) == Moose::COORD_RZ)
+  if (problem->getCoordSystem(*(problem->mesh().meshSubdomains().begin())) == Moose::COORD_RZ)
   {
     shifted_min(0) = -inflated_max(0);
     shifted_min(1) = inflated_min(1);
@@ -264,7 +264,7 @@ MultiApp::getBoundingBox(unsigned int app)
 FEProblem *
 MultiApp::appProblem(unsigned int app)
 {
-  if(!_has_an_app)
+  if (!_has_an_app)
     mooseError("No app for " << _name << " on processor " << _orig_rank);
 
   unsigned int local_app = globalAppToLocal(app);
@@ -278,7 +278,7 @@ MultiApp::appProblem(unsigned int app)
 const UserObject &
 MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
 {
-  if(!_has_an_app)
+  if (!_has_an_app)
     mooseError("No app for " << _name << " on processor " << _orig_rank);
 
   return appProblem(app)->getUserObjectBase(name);
@@ -287,7 +287,7 @@ MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
 Real
 MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
 {
-  if(!_has_an_app)
+  if (!_has_an_app)
     mooseError("No app for " << _name << " on processor " << _orig_rank);
 
   return appProblem(app)->getPostprocessorValue(name);
@@ -302,7 +302,7 @@ MultiApp::appTransferVector(unsigned int app, std::string /*var_name*/)
 bool
 MultiApp::hasLocalApp(unsigned int global_app)
 {
-  if(_has_an_app && global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps-1))
+  if (_has_an_app && global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps-1))
     return true;
 
   return false;
@@ -313,7 +313,7 @@ MultiApp::resetApp(unsigned int global_app, Real time)
 {
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
-  if(hasLocalApp(global_app))
+  if (hasLocalApp(global_app))
   {
     unsigned int local_app = globalAppToLocal(global_app);
     delete _apps[local_app];
@@ -332,11 +332,11 @@ MultiApp::moveApp(unsigned int global_app, Point p)
 {
   _positions[global_app] = p;
 
-  if(hasLocalApp(global_app))
+  if (hasLocalApp(global_app))
   {
     unsigned int local_app = globalAppToLocal(global_app);
 
-    if(_output_in_position)
+    if (_output_in_position)
       _apps[local_app]->setOutputPosition(p);
   }
 }
@@ -344,7 +344,7 @@ MultiApp::moveApp(unsigned int global_app, Point p)
 void
 MultiApp::parentOutputPositionChanged()
 {
-  if(getParam<bool>("output_in_position"))
+  if (getParam<bool>("output_in_position"))
   {
     Point parent_position = _app.getOutputPosition();
 
@@ -367,7 +367,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   // Create an output base by taking the output base of the master problem and appending
   // the name of the multiapp + a number to it
-  if(_fe_problem)
+  if (_fe_problem)
     output_base << _fe_problem->out().fileBase() << "_" ;
 
   output_base << _name
@@ -380,7 +380,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   _apps[i] = app;
 
   std::string input_file = "";
-  if(_input_files.size() == 1) // If only one input file was provided, use it for all the solves
+  if (_input_files.size() == 1) // If only one input file was provided, use it for all the solves
     input_file = _input_files[0];
   else
     input_file = _input_files[_first_local_app+i];
@@ -390,7 +390,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->setInputFileName(input_file);
   app->setOutputFileBase(output_base.str());
 
-  if(getParam<bool>("output_in_position"))
+  if (getParam<bool>("output_in_position"))
   {
     Point parent_position = _app.getOutputPosition();
     app->setOutputPosition(parent_position + _positions[_first_local_app + i]);
@@ -415,7 +415,7 @@ MultiApp::buildComm()
   _node_name = sysInfo.nodename;
 
   // If we have more apps than processors then we're just going to divide up the work
-  if(_total_num_apps >= (unsigned)_orig_num_procs)
+  if (_total_num_apps >= (unsigned)_orig_num_procs)
   {
     _my_comm = MPI_COMM_SELF;
     _my_rank = 0;
@@ -423,10 +423,10 @@ MultiApp::buildComm()
     _my_num_apps = _total_num_apps/_orig_num_procs;
     unsigned int jobs_left = _total_num_apps - (_my_num_apps * _orig_num_procs);
 
-    if(jobs_left != 0)
+    if (jobs_left != 0)
     {
       // Spread the remaining jobs out over the first set of processors
-      if((unsigned)_orig_rank < jobs_left)  // (these are the "jobs_left_pids" ie the pids that are snatching up extra jobs)
+      if ((unsigned)_orig_rank < jobs_left)  // (these are the "jobs_left_pids" ie the pids that are snatching up extra jobs)
       {
         _my_num_apps += 1;
         _first_local_app = _my_num_apps * _orig_rank;
@@ -451,20 +451,20 @@ MultiApp::buildComm()
 
   unsigned int procs_per_app = _orig_num_procs / _total_num_apps;
 
-  if(_max_procs_per_app < procs_per_app)
+  if (_max_procs_per_app < procs_per_app)
     procs_per_app = _max_procs_per_app;
 
   int my_app = rank / procs_per_app;
   unsigned int procs_for_my_app = procs_per_app;
 
-  if((unsigned int) my_app > _total_num_apps-1 && procs_for_my_app == _max_procs_per_app)
+  if ((unsigned int) my_app > _total_num_apps-1 && procs_for_my_app == _max_procs_per_app)
   {
     // If we've already hit the max number of procs per app then this processor
     // won't have an app at all
     _my_num_apps = 0;
     _has_an_app = false;
   }
-  else if((unsigned int) my_app >= _total_num_apps-1) // The last app will gain any left-over procs
+  else if ((unsigned int) my_app >= _total_num_apps-1) // The last app will gain any left-over procs
   {
     my_app = _total_num_apps - 1;
 //    procs_for_my_app += _orig_num_procs % _total_num_apps;
@@ -477,7 +477,7 @@ MultiApp::buildComm()
     _my_num_apps = 1;
   }
 
-  if(_has_an_app)
+  if (_has_an_app)
   {
     ierr = MPI_Comm_split(_orig_comm, _first_local_app, rank, &_my_comm); mooseCheckMPIErr(ierr);
     ierr = MPI_Comm_rank(_my_comm, &_my_rank); mooseCheckMPIErr(ierr);
@@ -492,7 +492,7 @@ MultiApp::buildComm()
 unsigned int
 MultiApp::globalAppToLocal(unsigned int global_app)
 {
-  if(global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps-1))
+  if (global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps-1))
     return global_app-_first_local_app;
 
   Moose::out << _first_local_app << " " << global_app << '\n';

@@ -49,7 +49,7 @@ AuxiliarySystem::~AuxiliarySystem()
 void
 AuxiliarySystem::init()
 {
-  if(_need_serialized_solution)
+  if (_need_serialized_solution)
     _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
 }
 
@@ -227,7 +227,7 @@ AuxiliarySystem::serializedSolution()
 void
 AuxiliarySystem::serializeSolution()
 {
-  if(_need_serialized_solution && _sys.n_dofs() > 0)            // libMesh does not like serializing of empty vectors
+  if (_need_serialized_solution && _sys.n_dofs() > 0)            // libMesh does not like serializing of empty vectors
     solution().localize(_serialized_solution);
 }
 
@@ -251,7 +251,7 @@ AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
     solution().close();
     _sys.update();
 
-    if(_need_serialized_solution)
+    if (_need_serialized_solution)
       serializeSolution();
   }
 }
@@ -357,7 +357,7 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
     for(unsigned int i=0; i<auxs.size(); i++)
       element_auxs_to_compute |= auxs[i].allElementKernels().size();
 
-    if(element_auxs_to_compute)
+    if (element_auxs_to_compute)
     {
       ConstElemRange & range = *_mesh.getActiveLocalElementRange();
       ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
@@ -367,7 +367,7 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
     bool bnd_auxs_to_compute = false;
     for(unsigned int i=0; i<auxs.size(); i++)
       bnd_auxs_to_compute |= auxs[i].allElementalBCs().size();
-    if(bnd_auxs_to_compute)
+    if (bnd_auxs_to_compute)
     {
       ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
       ComputeElemAuxBcsThread eabt(_mproblem, *this, auxs);

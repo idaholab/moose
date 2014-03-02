@@ -131,7 +131,7 @@ ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range, bool b
     _old_subdomain = _subdomain;
     _subdomain = cur_subdomain;
 
-    if(_subdomain != _old_subdomain)
+    if (_subdomain != _old_subdomain)
       subdomainChanged();
 
     onElement(elem);

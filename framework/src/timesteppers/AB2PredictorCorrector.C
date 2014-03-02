@@ -143,7 +143,7 @@ AB2PredictorCorrector::computeDT()
   _my_dt_old = _dt;
 
   _dt_steps_taken += 1;
-  if(_dt_steps_taken >= _steps_between_increase)
+  if (_dt_steps_taken >= _steps_between_increase)
   {
     Real new_dt = _dt_full * _scaling_parameter * std::pow(_infnorm * _e_tol / _error, 1.0 / 3.0);
 

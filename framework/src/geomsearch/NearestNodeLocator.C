@@ -70,7 +70,7 @@ NearestNodeLocator::findNodes()
    * If this is the first time through we're going to build up a "neighborhood" of nodes
    * surrounding each of the slave nodes.  This will speed searching later.
    */
-  if(_first)
+  if (_first)
   {
     _first=false;
 
@@ -88,7 +88,7 @@ NearestNodeLocator::findNodes()
     std::vector<Real> & inflation = _mesh.getGhostedBoundaryInflation();
 
     // This means there was a user specified inflation... so we can build a BB
-    if(inflation.size() > 0)
+    if (inflation.size() > 0)
     {
       MeshTools::BoundingBox my_box = MeshTools::processor_bounding_box(_mesh, libMesh::processor_id());
 
@@ -98,10 +98,10 @@ NearestNodeLocator::findNodes()
 
       distance_x = inflation[0];
 
-      if(inflation.size() > 1)
+      if (inflation.size() > 1)
         distance_y = inflation[1];
 
-      if(inflation.size() > 2)
+      if (inflation.size() > 2)
         distance_z = inflation[2];
 
       my_inflated_box = new MeshTools::BoundingBox(Point(my_box.first(0)-distance_x,
@@ -121,11 +121,11 @@ NearestNodeLocator::findNodes()
       unsigned int node_id = bnode->_node->id();
 
       // If we have a BB only consider saving this node if it's in our inflated BB
-      if(!my_inflated_box || (my_inflated_box->contains_point(*bnode->_node)))
+      if (!my_inflated_box || (my_inflated_box->contains_point(*bnode->_node)))
       {
-        if(boundary_id == _boundary1)
+        if (boundary_id == _boundary1)
           trial_master_nodes.push_back(node_id);
-        else if(boundary_id == _boundary2)
+        else if (boundary_id == _boundary2)
           trial_slave_nodes.push_back(node_id);
       }
     }

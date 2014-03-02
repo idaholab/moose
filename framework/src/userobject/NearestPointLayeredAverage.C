@@ -100,7 +100,7 @@ NearestPointLayeredAverage::nearestLayeredAverage(const Point & p) const
 
     Real current_distance = (p - current_point).size();
 
-    if(current_distance < closest_distance)
+    if (current_distance < closest_distance)
     {
       closest_distance = current_distance;
       closest = i;

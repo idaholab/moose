@@ -34,7 +34,7 @@ void
 AddMeshModifierAction::act()
 {
   // Don't do mesh modifiers when recovering!
-  if(_app.isRecovering())
+  if (_app.isRecovering())
     return;
 
   // Add a pointer to the mesh, this is required for this MeshModifier to inheret from the BlockRestrictable,

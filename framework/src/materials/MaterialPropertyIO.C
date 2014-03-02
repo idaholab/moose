@@ -68,13 +68,13 @@ MaterialPropertyIO::write(const std::string & file_name)
   storeHelper(out, props, &_mesh);
   storeHelper(out, propsOld, &_mesh);
 
-  if(_material_props.hasOlderProperties())
+  if (_material_props.hasOlderProperties())
     storeHelper(out, propsOlder, &_mesh);
 
   storeHelper(out, bnd_props, &_mesh);
   storeHelper(out, bnd_propsOld, &_mesh);
 
-  if(_bnd_material_props.hasOlderProperties())
+  if (_bnd_material_props.hasOlderProperties())
     storeHelper(out, bnd_propsOlder, &_mesh);
 
   out.close();
@@ -106,19 +106,19 @@ MaterialPropertyIO::read(const std::string & file_name)
   // version
   loadHelper(in, read_file_version, NULL);
 
-  if(read_file_version != file_version)
+  if (read_file_version != file_version)
     mooseError("The stateful MaterialProperty checkpoint file you are attempting to read is incompatible with this version of MOOSE!");
 
   loadHelper(in, props, &_mesh);
   loadHelper(in, propsOld, &_mesh);
 
-  if(_material_props.hasOlderProperties())
+  if (_material_props.hasOlderProperties())
     loadHelper(in, propsOlder, &_mesh);
 
   loadHelper(in, bnd_props, &_mesh);
   loadHelper(in, bnd_propsOld, &_mesh);
 
-  if(_bnd_material_props.hasOlderProperties())
+  if (_bnd_material_props.hasOlderProperties())
     loadHelper(in, bnd_propsOlder, &_mesh);
 
   in.close();

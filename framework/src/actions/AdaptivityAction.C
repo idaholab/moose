@@ -76,9 +76,9 @@ AdaptivityAction::act()
   int num_weight_names  = weight_names.size();
   int num_weight_values = weight_values.size();
 
-  if(num_weight_names)
+  if (num_weight_names)
   {
-    if(num_weight_names != num_weight_values)
+    if (num_weight_names != num_weight_values)
       mooseError("Number of weight_names must be equal to number of weight_values in Execution/Adaptivity");
 
     // If weights have been specified then set the default weight to zero

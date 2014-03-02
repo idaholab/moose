@@ -34,7 +34,7 @@ RandomHitMarker::RandomHitMarker(const std::string & name, InputParameters param
 Marker::MarkerValue
 RandomHitMarker::computeElementMarker()
 {
-  if(_random_hits.elementWasHit(_current_elem))
+  if (_random_hits.elementWasHit(_current_elem))
     return REFINE;
 
   return DONT_MARK;

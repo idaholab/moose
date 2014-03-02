@@ -58,7 +58,7 @@ Steady::problem()
 void
 Steady::init()
 {
-  if(_app.isRecovering())
+  if (_app.isRecovering())
   {
     Moose::out<<"\nCannot recover steady solves!\nExiting...\n"<<std::endl;
     return;
@@ -87,7 +87,7 @@ Steady::init()
 void
 Steady::execute()
 {
-  if(_app.isRecovering())
+  if (_app.isRecovering())
     return;
 
   Moose::out << "Time: " << _time_step << '\n';
@@ -126,7 +126,7 @@ Steady::execute()
     _problem.outputRestart();
 
 #ifdef LIBMESH_ENABLE_AMR
-    if(r_step != steps)
+    if (r_step != steps)
     {
       _problem.adaptMesh();
     }

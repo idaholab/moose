@@ -126,7 +126,7 @@ ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*ma
 {
   bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") && nfc->getParam<bool>("use_displaced_mesh");
 
-  if(displaced)
+  if (displaced)
     _displaced_node_face_constraints[slave].push_back(nfc);
   else
     _node_face_constraints[slave].push_back(nfc);

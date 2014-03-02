@@ -41,7 +41,7 @@ FullSolveMultiApp::init()
 {
   MultiApp::init();
 
-  if(_has_an_app)
+  if (_has_an_app)
   {
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -53,7 +53,7 @@ FullSolveMultiApp::init()
       MooseApp * app = _apps[i];
       Executioner * ex = app->getExecutioner();
 
-      if(!ex)
+      if (!ex)
         mooseError("Executioner does not exist!");
 
       _executioners[i] = ex;
@@ -66,10 +66,10 @@ FullSolveMultiApp::init()
 void
 FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/)
 {
-  if(!_has_an_app)
+  if (!_has_an_app)
     return;
 
-  if(_solved)
+  if (_solved)
     return;
 
   Moose::out << "Fully Solving MultiApp " << _name << std::endl;

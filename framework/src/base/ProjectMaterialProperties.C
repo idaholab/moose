@@ -73,7 +73,7 @@ ProjectMaterialProperties::onElement(const Elem *elem)
 {
   _assembly[_tid]->reinit(elem);
 
-  if(_refine)
+  if (_refine)
   {
     const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, -1, -1, -1);
 
@@ -110,7 +110,7 @@ ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, Bound
 
   _assembly[_tid]->reinit(elem, side);
 
-  if(_refine)
+  if (_refine)
   {
     const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, side, -1, side);
 
@@ -145,7 +145,7 @@ ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int /*side*
   if (!_sys.doingDG())
     return;
 
-  if(_refine) // If we're refining then we need to also project "internal" child sides.
+  if (_refine) // If we're refining then we need to also project "internal" child sides.
   {
     for(unsigned int child=0; child<elem->n_children(); child++)
     {
@@ -153,7 +153,7 @@ ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int /*side*
 
       for(unsigned int side=0; side<child_elem->n_sides(); side++)
       {
-        if(!elem->is_child_on_side(child, side)) // Otherwise we already projected it
+        if (!elem->is_child_on_side(child, side)) // Otherwise we already projected it
         {
           const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, -1, child, side);
 

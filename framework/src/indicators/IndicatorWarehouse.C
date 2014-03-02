@@ -55,12 +55,12 @@ IndicatorWarehouse::addIndicator(Indicator *Indicator, std::vector<SubdomainID> 
 
   bool internal_side_indicator = false;
 
-  if(dynamic_cast<InternalSideIndicator*>(Indicator))
+  if (dynamic_cast<InternalSideIndicator*>(Indicator))
     internal_side_indicator = true;
 
   if (block_ids.empty())
   {
-    if(internal_side_indicator)
+    if (internal_side_indicator)
       _global_internal_side_indicators.push_back(Indicator);
     else
       _global_indicators.push_back(Indicator);
@@ -71,7 +71,7 @@ IndicatorWarehouse::addIndicator(Indicator *Indicator, std::vector<SubdomainID> 
     {
       SubdomainID blk_id = *it;
 
-      if(internal_side_indicator)
+      if (internal_side_indicator)
         _block_internal_side_indicators[blk_id].push_back(Indicator);
       else
         _block_indicators[blk_id].push_back(Indicator);

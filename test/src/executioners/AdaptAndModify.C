@@ -33,7 +33,7 @@ AdaptAndModify::AdaptAndModify(const std::string & name, InputParameters paramet
 void
 AdaptAndModify::incrementStepOrReject()
 {
-  if(_last_solve_converged)
+  if (_last_solve_converged)
   {
     _time_old = _time;
     _t_step++;
@@ -73,13 +73,13 @@ AdaptAndModify::endStep()
     _problem.computeUserObjects(EXEC_CUSTOM);
 
     //output
-    if(_time_interval)
+    if (_time_interval)
     {
       //Force output if the current time is at an output interval
-      if(std::abs(_time-_next_interval_output_time)<=_timestep_tolerance
+      if (std::abs(_time-_next_interval_output_time)<=_timestep_tolerance
          || (_problem.out().interval() > 1 && _t_step % _problem.out().interval() == 0))
       {
-        if(_allow_output)
+        if (_allow_output)
         {
           _problem.output(true);
           _problem.outputPostprocessors(true);
@@ -95,7 +95,7 @@ AdaptAndModify::endStep()
     else
     {
       // if _at_sync_point is true, force the output no matter what
-      if(_allow_output)
+      if (_allow_output)
       {
         _problem.output(_at_sync_point);
         _problem.outputPostprocessors(_at_sync_point);

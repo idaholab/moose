@@ -563,7 +563,7 @@ public:
         io.copy_elemental_solution(_sys, vci._name, vci._name, vci._timestep);
     }
 
-    if(did_copy)
+    if (did_copy)
       _solution.close();
   }
 

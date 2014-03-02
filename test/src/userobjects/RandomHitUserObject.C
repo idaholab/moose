@@ -38,7 +38,7 @@ RandomHitUserObject::elementWasHit(const Elem * elem) const
   for(unsigned int i=0; i<_num_hits; i++)
   {
     was_hit = elem->contains_point(_hit_positions[i]);
-    if(was_hit)
+    if (was_hit)
       break;
   }
 

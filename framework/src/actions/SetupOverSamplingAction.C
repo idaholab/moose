@@ -73,12 +73,12 @@ SetupOverSamplingAction::act()
 
   Output & output = out_problem.out();  // can't use use this with coupled problems on different meshes
 
-  if(!_pars.isParamValid("output_variables"))
+  if (!_pars.isParamValid("output_variables"))
   {
     _pars.set<std::vector<VariableName> >("output_variables") = _problem->getVariableNames();
   }
 
-  if(_pars.isParamValid("position"))
+  if (_pars.isParamValid("position"))
     out_problem.setPosition(_pars.get<Point>("position"));
 
   std::string file_base = _problem->out().fileBase() + "_oversample";

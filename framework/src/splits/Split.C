@@ -66,7 +66,7 @@ Split::setup(const std::string& prefix)
     opt = dmprefix+"vars";
     val="";
     for (unsigned int j = 0; j < _vars.size(); ++j) {
-      if(j) val += ",";
+      if (j) val += ",";
       val += _vars[j];
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
@@ -77,7 +77,7 @@ Split::setup(const std::string& prefix)
     opt = dmprefix+"blocks";
     val="";
     for (unsigned int j = 0; j < _blocks.size(); ++j) {
-      if(j) val += ",";
+      if (j) val += ",";
       val += _blocks[j];
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
@@ -88,7 +88,7 @@ Split::setup(const std::string& prefix)
     opt = dmprefix+"sides";
     val="";
     for (unsigned int j = 0; j < _sides.size(); ++j) {
-      if(j) val += ",";
+      if (j) val += ",";
       val += _sides[j];
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
@@ -99,7 +99,7 @@ Split::setup(const std::string& prefix)
     opt = dmprefix+"unsides";
     val="";
     for (unsigned int j = 0; j < _unsides.size(); ++j) {
-      if(j) val += ",";
+      if (j) val += ",";
       val += _unsides[j];
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());

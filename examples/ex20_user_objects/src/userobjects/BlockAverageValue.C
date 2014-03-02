@@ -38,7 +38,7 @@ Real
 BlockAverageValue::averageValue(SubdomainID block) const
 {
   // Note that we can't use operator[] for a std::map in a const function!
-  if(_average_values.find(block) != _average_values.end())
+  if (_average_values.find(block) != _average_values.end())
     return _average_values.find(block)->second;
 
   mooseError("Unknown block requested for average value!");

@@ -29,7 +29,7 @@ class ComparePair
 public:
   bool operator()(std::pair<unsigned int, Real> & p1, std::pair<unsigned int, Real> & p2)
   {
-    if(p1.second > p2.second)
+    if (p1.second > p2.second)
       return true;
 
     return false;
@@ -110,7 +110,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
 
     bool need_to_track = false;
 
-    if(_mesh.node(node_id).processor_id() == processor_id)
+    if (_mesh.node(node_id).processor_id() == processor_id)
       need_to_track = true;
     else
     {
@@ -118,40 +118,40 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
         const std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[node_id];
 
         for(unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-          if(_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
+          if (_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
           {
             need_to_track = true;
             break; // Break out of element loop
           }
       }
 
-      if(!need_to_track)
+      if (!need_to_track)
       { // Now check the neighbor nodes to see if we own any of them
         for(unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
         {
           unsigned int neighbor_node_id = neighbor_nodes[neighbor_it];
 
-          if(_mesh.node(neighbor_node_id).processor_id() == processor_id)
+          if (_mesh.node(neighbor_node_id).processor_id() == processor_id)
             need_to_track = true;
           else // Now see if we own any of the elements connected to the neighbor nodes
           {
             const std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[neighbor_node_id];
 
             for(unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-              if(_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
+              if (_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
               {
                 need_to_track = true;
                 break; // Break out of element loop
               }
           }
 
-          if(need_to_track)
+          if (need_to_track)
             break; // Breaking out of neighbor loop
         }
       }
     }
 
-    if(need_to_track)
+    if (need_to_track)
     {
       // Add this node as a slave node to search in the future
       _slave_nodes.push_back(node_id);

@@ -37,7 +37,7 @@ SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const std::string & name, InputPa
     _sol_time_vs_dt(std::numeric_limits<Real>::max()),
     _adapt_log(getParam<bool>("adapt_log"))
 {
-  if((_adapt_log) && (libMesh::processor_id() == 0))
+  if ((_adapt_log) && (libMesh::processor_id() == 0))
   {
     _adaptive_log.open("adaptive_log");
     _adaptive_log<<"Adaptive Times Step Log"<<std::endl;

@@ -93,7 +93,7 @@ void Factory::deprecatedMessage(const std::string obj_name)
   std::ostringstream msg;
 
   // Expired object
-  if( now > t_end )
+  if ( now > t_end )
   {
     msg << "***** Invalid Object: " << obj_name << " *****\n";
     msg << "Expired on " << ctime(&t_end);

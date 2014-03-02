@@ -159,7 +159,7 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
 {
   _all_postprocessors.push_back(postprocessor);
 
-  if(dynamic_cast<ElementPostprocessor*>(postprocessor))
+  if (dynamic_cast<ElementPostprocessor*>(postprocessor))
   {
     ElementPostprocessor * elem_pp = dynamic_cast<ElementPostprocessor*>(postprocessor);
     const std::set<SubdomainID> & block_ids = dynamic_cast<ElementPostprocessor*>(elem_pp)->blockIDs();
@@ -171,7 +171,7 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     }
   }
 
-  else if(dynamic_cast<SidePostprocessor*>(postprocessor))
+  else if (dynamic_cast<SidePostprocessor*>(postprocessor))
   {
     SidePostprocessor * side_pp = dynamic_cast<SidePostprocessor*>(postprocessor);
     _all_side_postprocessors.push_back(side_pp);
@@ -184,7 +184,7 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     }
   }
 
-  else if(dynamic_cast<InternalSidePostprocessor*>(postprocessor))
+  else if (dynamic_cast<InternalSidePostprocessor*>(postprocessor))
   {
     InternalSidePostprocessor * internal_side_pp = dynamic_cast<InternalSidePostprocessor*>(postprocessor);
     _all_internal_side_postprocessors.push_back(internal_side_pp);
@@ -197,7 +197,7 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     }
   }
 
-  else if(dynamic_cast<NodalPostprocessor*>(postprocessor))
+  else if (dynamic_cast<NodalPostprocessor*>(postprocessor))
   {
     NodalPostprocessor * nodal_pp = dynamic_cast<NodalPostprocessor*>(postprocessor);
 

@@ -104,7 +104,7 @@ Checkpoint::output()
 
   // Set renumbering flag (renumber if adaptivity is on)
   bool renumber = false;
-  if(_problem_ptr->adaptivity().isOn())
+  if (_problem_ptr->adaptivity().isOn())
     renumber = true;
 
   // Create checkpoint file structure

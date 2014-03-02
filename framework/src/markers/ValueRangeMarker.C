@@ -48,7 +48,7 @@ ValueRangeMarker::ValueRangeMarker(const std::string & name, InputParameters par
     _variable_sys_solution(_variable_sys.currentSolution()),
     _variable_fe_type(_variable.feType())
 {
-  if(_variable_fe_type.family != LAGRANGE && _variable_fe_type != FEType(CONSTANT, MONOMIAL))
+  if (_variable_fe_type.family != LAGRANGE && _variable_fe_type != FEType(CONSTANT, MONOMIAL))
     mooseError("ValueRangeMarker can only be used with variables of type Lagrange or Constant Monomial!");
   if (_upper_bound < _lower_bound)
     mooseError("Invalid bounds specified (upper_bound < lower_bound)");

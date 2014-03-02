@@ -62,7 +62,7 @@ LayeredBase::integralValue(Point p) const
 
   for(unsigned int i=layer; i<_layer_values.size(); i++)
   {
-    if(_layer_has_value[i])
+    if (_layer_has_value[i])
     {
       higher_layer = i;
       break;
@@ -71,34 +71,34 @@ LayeredBase::integralValue(Point p) const
 
   for(int i=layer-1; i>=0; i--)
   {
-    if(_layer_has_value[i])
+    if (_layer_has_value[i])
     {
       lower_layer = i;
       break;
     }
   }
 
-  if(higher_layer == -1 && lower_layer == -1)
+  if (higher_layer == -1 && lower_layer == -1)
     return 0; // TODO: We could error here but there are startup dependency problems
 
   switch(_sample_type)
   {
     case 0: //direct
     {
-      if(higher_layer == -1) // Didn't find a higher layer
+      if (higher_layer == -1) // Didn't find a higher layer
         return _layer_values[lower_layer];
 
       if (unsigned(higher_layer) == layer) // constant in a layer
         return _layer_values[higher_layer];
 
-      if(lower_layer == -1) // Didn't find a lower layer
+      if (lower_layer == -1) // Didn't find a lower layer
         return _layer_values[higher_layer];
 
       return (_layer_values[higher_layer] + _layer_values[lower_layer]) / 2;
     }
     case 1: // interpolate
     {
-      if(higher_layer == -1) // Didn't find a higher layer
+      if (higher_layer == -1) // Didn't find a higher layer
         return _layer_values[lower_layer];
 
       Real layer_length = (_direction_max-_direction_min)/_num_layers;
@@ -121,16 +121,16 @@ LayeredBase::integralValue(Point p) const
       Real total = 0;
       unsigned int num_values = 0;
 
-      if(higher_layer != -1)
+      if (higher_layer != -1)
       {
         for(unsigned int i=0; i<_average_radius; i++)
         {
           int current_layer = higher_layer + i;
 
-          if((size_t)current_layer >= _layer_values.size())
+          if ((size_t)current_layer >= _layer_values.size())
             break;
 
-          if(_layer_has_value[current_layer])
+          if (_layer_has_value[current_layer])
           {
             total += _layer_values[current_layer];
             num_values += 1;
@@ -138,16 +138,16 @@ LayeredBase::integralValue(Point p) const
         }
       }
 
-      if(lower_layer != -1)
+      if (lower_layer != -1)
       {
         for(unsigned int i=0; i<_average_radius; i++)
         {
           int current_layer = lower_layer - i;
 
-          if(current_layer < 0)
+          if (current_layer < 0)
             break;
 
-          if(_layer_has_value[current_layer])
+          if (_layer_has_value[current_layer])
           {
             total += _layer_values[current_layer];
             num_values += 1;
@@ -193,7 +193,7 @@ LayeredBase::threadJoin(const UserObject & y)
 {
   const LayeredBase & lb = dynamic_cast<const LayeredBase &>(y);
   for(unsigned int i=0; i<_layer_values.size(); i++)
-    if(lb.layerHasValue(i))
+    if (lb.layerHasValue(i))
       setLayerValue(i, getLayerValue(i) + lb._layer_values[i]);
 }
 
@@ -202,12 +202,12 @@ LayeredBase::getLayer(Point p) const
 {
   Real direction_x = p(_direction);
 
-  if(direction_x < _direction_min)
+  if (direction_x < _direction_min)
     return 0;
 
   unsigned int layer = std::floor(((direction_x - _direction_min) / (_direction_max - _direction_min)) * (Real)_num_layers);
 
-  if(layer >= _num_layers)
+  if (layer >= _num_layers)
     layer = _num_layers-1;
 
   return layer;

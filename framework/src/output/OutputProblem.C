@@ -43,7 +43,7 @@ OutputProblem::OutputProblem(const std::string & name, InputParameters parameter
   MeshRefinement mesh_refinement(_mesh);
   mesh_refinement.uniformly_refine(parameters.get<unsigned int>("refinements"));
 
-  if(isParamValid("position"))
+  if (isParamValid("position"))
   {
     _position = getParam<Point>("position");
     moveMesh();
@@ -111,7 +111,7 @@ OutputProblem::init()
 
   for (unsigned int sys_num=0; sys_num < source_es.n_systems(); ++sys_num)
   {
-    if(_mesh_functions[sys_num].size())
+    if (_mesh_functions[sys_num].size())
     {
       System & source_sys = source_es.get_system(sys_num);
       System & dest_sys = _eq.get_system(sys_num);
@@ -202,7 +202,7 @@ OutputProblem::meshInitHelper(FEProblem & fe_problem, InputParameters & params)
   }
   else
   {
-    if(fe_problem.getMooseApp().isRecovering())
+    if (fe_problem.getMooseApp().isRecovering())
       mooseWarning("Recovering or Restarting with Oversampling may not work (especially with adapted meshes)!!  Refs #2295");
 
     mesh = &fe_problem.mesh().clone();

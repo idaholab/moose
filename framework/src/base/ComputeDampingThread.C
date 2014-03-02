@@ -52,7 +52,7 @@ ComputeDampingThread::onElement(const Elem *elem)
       ++damper_it)
   {
     Real cur_damping = (*damper_it)->computeDamping();
-    if(cur_damping < _damping)
+    if (cur_damping < _damping)
       _damping = cur_damping;
   }
 }
@@ -66,6 +66,6 @@ ComputeDampingThread::damping()
 void
 ComputeDampingThread::join(const ComputeDampingThread & y)
 {
-  if(y._damping < _damping)
+  if (y._damping < _damping)
     _damping = y._damping;
 }

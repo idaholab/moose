@@ -30,11 +30,11 @@ ConstantPointSource::ConstantPointSource(const std::string & name, InputParamete
 {
   _p(0) = _point_param[0];
 
-  if(_point_param.size() > 1)
+  if (_point_param.size() > 1)
   {
     _p(1) = _point_param[1];
 
-    if(_point_param.size() > 2)
+    if (_point_param.size() > 2)
     {
       _p(2) = _point_param[2];
     }

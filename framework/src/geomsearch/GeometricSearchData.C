@@ -48,9 +48,9 @@ GeometricSearchData::~GeometricSearchData()
 void
 GeometricSearchData::update(GeometricSearchType type)
 {
-  if(type == ALL || type == QUADRATURE || type == NEAREST_NODE)
+  if (type == ALL || type == QUADRATURE || type == NEAREST_NODE)
   {
-    if(_first) // Only do this once
+    if (_first) // Only do this once
     {
       _first = false;
 
@@ -67,11 +67,11 @@ GeometricSearchData::update(GeometricSearchType type)
       updateQuadratureNodes(*qbnd_it);
   }
 
-  if(type == ALL || type == MORTAR)
+  if (type == ALL || type == MORTAR)
     if (_mortar_boundaries.size() > 0)
       updateMortarNodes();
 
-  if(type == ALL || type == NEAREST_NODE)
+  if (type == ALL || type == NEAREST_NODE)
   {
     std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
     const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
@@ -84,7 +84,7 @@ GeometricSearchData::update(GeometricSearchType type)
     }
   }
 
-  if(type == ALL || type == PENETRATION)
+  if (type == ALL || type == PENETRATION)
   {
     std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_it = _penetration_locators.begin();
     std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_end = _penetration_locators.end();
@@ -141,7 +141,7 @@ GeometricSearchData::getPenetrationLocator(const BoundaryName & master, const Bo
 
   PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)];
 
-  if(!pl)
+  if (!pl)
   {
     pl = new PenetrationLocator(_subproblem, *this, _mesh, master_id, slave_id, order, getNearestNodeLocator(master_id, slave_id));
     _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)] = pl;
@@ -168,7 +168,7 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & master
 
   PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, qslave_id)];
 
-  if(!pl)
+  if (!pl)
   {
     pl = new PenetrationLocator(_subproblem, *this, _mesh, master_id, qslave_id, order, getQuadratureNearestNodeLocator(master_id, slave_id));
     _penetration_locators[std::pair<unsigned int, unsigned int>(master_id, qslave_id)] = pl;
@@ -202,7 +202,7 @@ GeometricSearchData::getMortarPenetrationLocator(const BoundaryName & master, co
   }
 
   PenetrationLocator * pl = _penetration_locators[std::pair<unsigned int, unsigned int>(boundary_id, mortar_boundary_id)];
-  if(!pl)
+  if (!pl)
   {
     pl = new PenetrationLocator(_subproblem, *this, _mesh, boundary_id, mortar_boundary_id, order, getMortarNearestNodeLocator(master_id, slave_id, side_type));
     _penetration_locators[std::pair<unsigned int, unsigned int>(boundary_id, mortar_boundary_id)] = pl;
@@ -231,7 +231,7 @@ GeometricSearchData::getNearestNodeLocator(const unsigned int master_id, const u
   _subproblem.addGhostedBoundary(master_id);
   _subproblem.addGhostedBoundary(slave_id);
 
-  if(!nnl)
+  if (!nnl)
   {
     nnl = new NearestNodeLocator(_subproblem, _mesh, master_id, slave_id);
     _nearest_node_locators[std::pair<unsigned int, unsigned int>(master_id, slave_id)] = nnl;
@@ -268,7 +268,7 @@ void
 GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int qslave_id)
 {
   // Have we already generated quadrature nodes for this boundary id?
-  if(_quadrature_boundaries.find(slave_id) != _quadrature_boundaries.end())
+  if (_quadrature_boundaries.find(slave_id) != _quadrature_boundaries.end())
     return;
 
   _quadrature_boundaries.insert(slave_id);
@@ -286,7 +286,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
 
     if (elem->processor_id() == libMesh::processor_id())
     {
-      if(boundary_id == (BoundaryID)slave_id)
+      if (boundary_id == (BoundaryID)slave_id)
       {
         _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
@@ -373,7 +373,7 @@ GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
 
     if (elem->processor_id() == libMesh::processor_id())
     {
-      if(boundary_id == (BoundaryID)slave_id)
+      if (boundary_id == (BoundaryID)slave_id)
       {
         _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);

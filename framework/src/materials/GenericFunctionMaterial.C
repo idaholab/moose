@@ -32,7 +32,7 @@ GenericFunctionMaterial::GenericFunctionMaterial(const std::string & name, Input
   unsigned int num_names = _prop_names.size();
   unsigned int num_values = _prop_values.size();
 
-  if(num_names != num_values)
+  if (num_names != num_values)
     mooseError("Number of prop_names much match the number of prop_values for a GenericFunctionMaterial!");
 
   _num_props = num_names;
