@@ -107,7 +107,7 @@ findContactPoint(PenetrationInfo & p_info,
 
   Point ref_point;
 
-  if(start_with_centroid)
+  if (start_with_centroid)
     ref_point = FEInterface::inverse_map(dim-1, _fe_type, side, side->centroid(), TOLERANCE, false);
   else
     ref_point = p_info._closest_point_ref;
@@ -127,7 +127,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     jac(0,0) = -(dxyz_dxi[0] * dxyz_dxi[0]);
 
-    if(dim-1 == 2)
+    if (dim-1 == 2)
     {
       jac(1,0) = -(dxyz_dxi[0] * dxyz_deta[0]);
 
@@ -139,7 +139,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     rhs(0) = dxyz_dxi[0]*d;
 
-    if(dim-1 == 2)
+    if (dim-1 == 2)
       rhs(1) = dxyz_deta[0]*d;
 
     DenseVector<Real> update(dim-1);
@@ -148,7 +148,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     ref_point(0) -= update(0);
 
-    if(dim-1 == 2)
+    if (dim-1 == 2)
       ref_point(1) -= update(1);
 
     points[0] = ref_point;
@@ -171,7 +171,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     jac(0,0) = (d2xyz_dxi2[0]*d)-(dxyz_dxi[0] * dxyz_dxi[0]);
 
-    if(dim-1 == 2)
+    if (dim-1 == 2)
     {
       jac(1,0) = (d2xyz_dxieta[0]*d)-(dxyz_dxi[0] * dxyz_deta[0]);
 
@@ -183,7 +183,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     rhs(0) = -dxyz_dxi[0]*d;
 
-    if(dim-1 == 2)
+    if (dim-1 == 2)
       rhs(1) = -dxyz_deta[0]*d;
 
     DenseVector<Real> update(dim-1);
@@ -192,7 +192,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     ref_point(0) += update(0);
 
-    if(dim-1 == 2)
+    if (dim-1 == 2)
       ref_point(1) += update(1);
 
     points[0] = ref_point;
@@ -203,7 +203,7 @@ findContactPoint(PenetrationInfo & p_info,
   }
 
 /*
-  if(nit == 12 && update_size > TOLERANCE*TOLERANCE)
+  if (nit == 12 && update_size > TOLERANCE*TOLERANCE)
     Moose::err<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
 */
 
@@ -211,7 +211,7 @@ findContactPoint(PenetrationInfo & p_info,
   p_info._closest_point = phys_point[0];
   p_info._distance = d.size();
 
-  if(dim-1 == 2)
+  if (dim-1 == 2)
   {
     p_info._normal = dxyz_dxi[0].cross(dxyz_deta[0]);
     p_info._normal /= p_info._normal.size();

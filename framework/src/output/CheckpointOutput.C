@@ -59,7 +59,7 @@ CheckpointOutput::output(const std::string & file_base, Real /*time*/, unsigned 
 
   bool renumber = true;
 
-  if(_fe_problem && !_fe_problem->adaptivity().isOn())
+  if (_fe_problem && !_fe_problem->adaptivity().isOn())
     renumber = false;
 
   if (_binary)

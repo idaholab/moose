@@ -42,7 +42,7 @@ MultiAppDTKUserObjectTransfer::MultiAppDTKUserObjectTransfer(const std::string &
 void
 MultiAppDTKUserObjectTransfer::execute()
 {
-  if(!_setup)
+  if (!_setup)
   {
     _setup = true;
 
@@ -59,7 +59,7 @@ MultiAppDTKUserObjectTransfer::execute()
     _src_to_tgt_map = new DataTransferKit::VolumeSourceMap<DataTransferKit::Box, GlobalOrdinal, DataTransferKit::MeshContainer<GlobalOrdinal> >(_comm_default, 3, true);
 
     Moose::out << "--Setting Up Transfer--" << std::endl;
-    if(_variable->isNodal())
+    if (_variable->isNodal())
       _src_to_tgt_map->setup(_multi_app_geom, _to_adapter->get_target_coords());
     else
       _src_to_tgt_map->setup(_multi_app_geom, _to_adapter->get_elem_target_coords());

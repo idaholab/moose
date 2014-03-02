@@ -56,7 +56,7 @@ ComputeDiracThread::onElement(const Elem * elem)
 {
   bool has_dirac_kernels_on_elem = _fe_problem.reinitDirac(elem, _tid);
 
-  if(has_dirac_kernels_on_elem)
+  if (has_dirac_kernels_on_elem)
   {
     for(std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _sys._dirac_kernels[_tid].all().begin();
         dirac_kernel_it != _sys._dirac_kernels[_tid].all().end();
@@ -64,9 +64,9 @@ ComputeDiracThread::onElement(const Elem * elem)
     {
       DiracKernel * dirac = *dirac_kernel_it;
 
-      if(dirac->hasPointsOnElem(elem))
+      if (dirac->hasPointsOnElem(elem))
       {
-        if(_jacobian == NULL)
+        if (_jacobian == NULL)
           dirac->computeResidual();
         else
         {

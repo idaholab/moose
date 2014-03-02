@@ -224,7 +224,7 @@ MooseVariable::reinitAux()
 void
 MooseVariable::reinitAuxNeighbor()
 {
-  if(_neighbor)
+  if (_neighbor)
   {
     _dof_map.dof_indices (_neighbor, _dof_indices_neighbor, _var_num);
     if (_neighbor->n_dofs(_sys.number(), _var_num) > 0)
@@ -379,27 +379,27 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
       _du_dot_du.resize(nqp);
     }
 
-    if(_need_u_old)
+    if (_need_u_old)
       _u_old_bak = _u_old;
       _u_old.resize(nqp);
 
-    if(_need_u_older)
+    if (_need_u_older)
       _u_older_bak = _u_older;
       _u_older.resize(nqp);
 
-    if(_need_grad_old)
+    if (_need_grad_old)
       _grad_u_old_bak = _grad_u_old;
       _grad_u_old.resize(nqp);
 
-    if(_need_grad_older)
+    if (_need_grad_older)
       _grad_u_older_bak = _grad_u_older;
       _grad_u_older.resize(nqp);
 
-    if(_need_second_old)
+    if (_need_second_old)
       _second_u_old_bak = _second_u_old;
       _second_u_old.resize(nqp);
 
-    if(_need_second_older)
+    if (_need_second_older)
       _second_u_older_bak = _second_u_older;
       _second_u_older.resize(nqp);
   }
@@ -420,22 +420,22 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
         _du_dot_du[i] = 0;
       }
 
-      if(_need_u_old)
+      if (_need_u_old)
         _u_old[i] = 0;
 
-      if(_need_u_older)
+      if (_need_u_older)
         _u_older[i] = 0;
 
-      if(_need_grad_old)
+      if (_need_grad_old)
         _grad_u_old[i] = 0;
 
-      if(_need_grad_older)
+      if (_need_grad_older)
         _grad_u_older[i] = 0;
 
-      if(_need_second_old)
+      if (_need_second_old)
         _second_u_old[i] = 0;
 
-      if(_need_second_older)
+      if (_need_second_older)
         _second_u_older[i] = 0;
     }
   }
@@ -486,10 +486,10 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
     }
     if (is_transient)
     {
-      if(_need_u_old || _need_grad_old || _need_second_old)
+      if (_need_u_old || _need_grad_old || _need_second_old)
         soln_old_local = solution_old(idx);
 
-      if(_need_u_older || _need_grad_older || _need_second_older)
+      if (_need_u_older || _need_grad_older || _need_second_older)
         soln_older_local = solution_older(idx);
 
       if (_is_nl)
@@ -506,12 +506,12 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
 
       grad_u_qp = &_grad_u[qp];
 
-      if(is_transient)
+      if (is_transient)
       {
-        if(_need_grad_old)
+        if (_need_grad_old)
           grad_u_old_qp = &_grad_u_old[qp];
 
-        if(_need_grad_older)
+        if (_need_grad_older)
           grad_u_older_qp = &_grad_u_older[qp];
       }
 
@@ -519,15 +519,15 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
       {
         d2phi_local = &(*_second_phi)[i][qp];
 
-        if(_need_second)
+        if (_need_second)
           second_u_qp = &_second_u[qp];
 
-        if(is_transient)
+        if (is_transient)
         {
-          if(_need_second_old)
+          if (_need_second_old)
             second_u_old_qp = &_second_u_old[qp];
 
-          if(_need_second_older)
+          if (_need_second_older)
             second_u_older_qp = &_second_u_older[qp];
         }
       }
@@ -547,22 +547,22 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
           _du_dot_du[qp]    += phi_local * du_dot_du_local;
         }
 
-        if(_need_u_old)
+        if (_need_u_old)
           _u_old[qp]        += phi_local * soln_old_local;
 
-        if(_need_u_older)
+        if (_need_u_older)
           _u_older[qp]      += phi_local * soln_older_local;
 
-        if(_need_grad_old)
+        if (_need_grad_old)
           grad_u_old_qp->add_scaled(*dphi_qp, soln_old_local);
 
-        if(_need_grad_older)
+        if (_need_grad_older)
           grad_u_older_qp->add_scaled(*dphi_qp, soln_older_local);
 
-        if(_need_second_old)
+        if (_need_second_old)
           second_u_old_qp->add_scaled(*d2phi_local, soln_old_local);
 
-        if(_need_second_older)
+        if (_need_second_older)
           second_u_older_qp->add_scaled(*d2phi_local, soln_older_local);
       }
     }
@@ -586,22 +586,22 @@ MooseVariable::restoreUnperturbedElemValues()
       _du_dot_du = _du_dot_du_bak;
     }
 
-    if(_need_u_old)
+    if (_need_u_old)
       _u_old = _u_old_bak;
 
-    if(_need_u_older)
+    if (_need_u_older)
       _u_older = _u_older_bak;
 
-    if(_need_grad_old)
+    if (_need_grad_old)
       _grad_u_old = _grad_u_old_bak;
 
-    if(_need_grad_older)
+    if (_need_grad_older)
       _grad_u_older = _grad_u_older_bak;
 
-    if(_need_second_old)
+    if (_need_second_old)
       _second_u_old = _second_u_old_bak;
 
-    if(_need_second_older)
+    if (_need_second_older)
       _second_u_older = _second_u_older_bak;
   }
 }
@@ -627,22 +627,22 @@ MooseVariable::computeElemValues()
       _du_dot_du.resize(nqp);
     }
 
-    if(_need_u_old)
+    if (_need_u_old)
       _u_old.resize(nqp);
 
-    if(_need_u_older)
+    if (_need_u_older)
       _u_older.resize(nqp);
 
-    if(_need_grad_old)
+    if (_need_grad_old)
       _grad_u_old.resize(nqp);
 
-    if(_need_grad_older)
+    if (_need_grad_older)
       _grad_u_older.resize(nqp);
 
-    if(_need_second_old)
+    if (_need_second_old)
       _second_u_old.resize(nqp);
 
-    if(_need_second_older)
+    if (_need_second_older)
       _second_u_older.resize(nqp);
   }
 
@@ -662,22 +662,22 @@ MooseVariable::computeElemValues()
         _du_dot_du[i] = 0;
       }
 
-      if(_need_u_old)
+      if (_need_u_old)
         _u_old[i] = 0;
 
-      if(_need_u_older)
+      if (_need_u_older)
         _u_older[i] = 0;
 
-      if(_need_grad_old)
+      if (_need_grad_old)
         _grad_u_old[i] = 0;
 
-      if(_need_grad_older)
+      if (_need_grad_older)
         _grad_u_older[i] = 0;
 
-      if(_need_second_old)
+      if (_need_second_old)
         _second_u_old[i] = 0;
 
-      if(_need_second_older)
+      if (_need_second_older)
         _second_u_older[i] = 0;
     }
   }
@@ -718,10 +718,10 @@ MooseVariable::computeElemValues()
 
     if (is_transient)
     {
-      if(_need_u_old || _need_grad_old || _need_second_old)
+      if (_need_u_old || _need_grad_old || _need_second_old)
         soln_old_local = solution_old(idx);
 
-      if(_need_u_older || _need_grad_older || _need_second_older)
+      if (_need_u_older || _need_grad_older || _need_second_older)
         soln_older_local = solution_older(idx);
 
       if (_is_nl)
@@ -738,12 +738,12 @@ MooseVariable::computeElemValues()
 
       grad_u_qp = &_grad_u[qp];
 
-      if(is_transient)
+      if (is_transient)
       {
-        if(_need_grad_old)
+        if (_need_grad_old)
           grad_u_old_qp = &_grad_u_old[qp];
 
-        if(_need_grad_older)
+        if (_need_grad_older)
           grad_u_older_qp = &_grad_u_older[qp];
       }
 
@@ -751,15 +751,15 @@ MooseVariable::computeElemValues()
       {
         d2phi_local = &(*_second_phi)[i][qp];
 
-        if(_need_second)
+        if (_need_second)
           second_u_qp = &_second_u[qp];
 
-        if(is_transient)
+        if (is_transient)
         {
-          if(_need_second_old)
+          if (_need_second_old)
             second_u_old_qp = &_second_u_old[qp];
 
-          if(_need_second_older)
+          if (_need_second_older)
             second_u_older_qp = &_second_u_older[qp];
         }
       }
@@ -779,22 +779,22 @@ MooseVariable::computeElemValues()
           _du_dot_du[qp]    += phi_local * du_dot_du_local;
         }
 
-        if(_need_u_old)
+        if (_need_u_old)
           _u_old[qp]        += phi_local * soln_old_local;
 
-        if(_need_u_older)
+        if (_need_u_older)
           _u_older[qp]      += phi_local * soln_older_local;
 
-        if(_need_grad_old)
+        if (_need_grad_old)
           grad_u_old_qp->add_scaled(*dphi_qp, soln_old_local);
 
-        if(_need_grad_older)
+        if (_need_grad_older)
           grad_u_older_qp->add_scaled(*dphi_qp, soln_older_local);
 
-        if(_need_second_old)
+        if (_need_second_old)
           second_u_old_qp->add_scaled(*d2phi_local, soln_old_local);
 
-        if(_need_second_older)
+        if (_need_second_older)
           second_u_older_qp->add_scaled(*d2phi_local, soln_older_local);
       }
     }
@@ -820,22 +820,22 @@ MooseVariable::computeElemValuesFace()
       _du_dot_du.resize(nqp);
     }
 
-    if(_need_u_old)
+    if (_need_u_old)
       _u_old.resize(nqp);
 
-    if(_need_u_older)
+    if (_need_u_older)
       _u_older.resize(nqp);
 
-    if(_need_grad_old)
+    if (_need_grad_old)
       _grad_u_old.resize(nqp);
 
-    if(_need_grad_older)
+    if (_need_grad_older)
       _grad_u_older.resize(nqp);
 
-    if(_need_second_old)
+    if (_need_second_old)
       _second_u_old.resize(nqp);
 
-    if(_need_second_older)
+    if (_need_second_older)
       _second_u_older.resize(nqp);
   }
 
@@ -852,25 +852,25 @@ MooseVariable::computeElemValuesFace()
         _du_dot_du[i] = 0;
       }
 
-      if(_need_u_old)
+      if (_need_u_old)
         _u_old[i] = 0;
 
-      if(_need_u_older)
+      if (_need_u_older)
         _u_older[i] = 0;
 
-      if(_need_grad_old)
+      if (_need_grad_old)
         _grad_u_old[i] = 0;
 
-      if(_need_grad_older)
+      if (_need_grad_older)
         _grad_u_older[i] = 0;
 
       if (_need_second)
         _second_u[i] = 0;
 
-      if(_need_second_old)
+      if (_need_second_old)
         _second_u_old[i] = 0;
 
-      if(_need_second_older)
+      if (_need_second_older)
         _second_u_older[i] = 0;
     }
   }
@@ -901,10 +901,10 @@ MooseVariable::computeElemValuesFace()
 
     if (is_transient)
     {
-      if(_need_u_old || _need_grad_old || _need_second_old)
+      if (_need_u_old || _need_grad_old || _need_second_old)
         soln_old_local = solution_old(idx);
 
-      if(_need_u_older || _need_grad_older || _need_second_older)
+      if (_need_u_older || _need_grad_older || _need_second_older)
         soln_older_local = solution_older(idx);
     }
 
@@ -936,10 +936,10 @@ MooseVariable::computeElemValuesFace()
         if (_need_u_older)
           _u_older[qp]      += phi_local * soln_older_local;
 
-        if(_need_grad_old)
+        if (_need_grad_old)
           _grad_u_old[qp]   += dphi_local * soln_old_local;
 
-        if(_need_grad_older)
+        if (_need_grad_older)
           _grad_u_older[qp] += dphi_local * soln_older_local;
 
         if (_need_second_old)
@@ -990,7 +990,7 @@ MooseVariable::computeNeighborValuesFace()
     _u_neighbor[i] = 0;
     _grad_u_neighbor[i] = 0;
 
-    if(_need_second_neighbor)
+    if (_need_second_neighbor)
       _second_u_neighbor[i] = 0;
 
     if (_subproblem.isTransient())
@@ -1037,10 +1037,10 @@ MooseVariable::computeNeighborValuesFace()
 
     if (is_transient)
     {
-      if(_need_u_old_neighbor || _need_grad_old_neighbor || _need_second_old_neighbor)
+      if (_need_u_old_neighbor || _need_grad_old_neighbor || _need_second_old_neighbor)
         soln_old_local = solution_old(idx);
 
-      if(_need_u_older_neighbor || _need_grad_older_neighbor || _need_second_older_neighbor)
+      if (_need_u_older_neighbor || _need_grad_older_neighbor || _need_second_older_neighbor)
         soln_older_local = solution_older(idx);
     }
 
@@ -1096,22 +1096,22 @@ MooseVariable::computeNeighborValues()
 
   if (is_transient)
   {
-    if(_need_u_old_neighbor)
+    if (_need_u_old_neighbor)
       _u_old_neighbor.resize(nqp);
 
-    if(_need_u_older_neighbor)
+    if (_need_u_older_neighbor)
       _u_older_neighbor.resize(nqp);
 
-    if(_need_grad_old_neighbor)
+    if (_need_grad_old_neighbor)
       _grad_u_old_neighbor.resize(nqp);
 
-    if(_need_grad_older_neighbor)
+    if (_need_grad_older_neighbor)
       _grad_u_older_neighbor.resize(nqp);
 
-    if(_need_second_old_neighbor)
+    if (_need_second_old_neighbor)
       _second_u_old_neighbor.resize(nqp);
 
-    if(_need_second_older_neighbor)
+    if (_need_second_older_neighbor)
       _second_u_older_neighbor.resize(nqp);
   }
 
@@ -1122,22 +1122,22 @@ MooseVariable::computeNeighborValues()
 
     if (_subproblem.isTransient())
     {
-      if(_need_u_old_neighbor)
+      if (_need_u_old_neighbor)
         _u_old_neighbor[i] = 0;
 
-      if(_need_u_older_neighbor)
+      if (_need_u_older_neighbor)
         _u_older_neighbor[i] = 0;
 
-      if(_need_grad_old_neighbor)
+      if (_need_grad_old_neighbor)
         _grad_u_old_neighbor[i] = 0;
 
-      if(_need_grad_older_neighbor)
+      if (_need_grad_older_neighbor)
         _grad_u_older_neighbor[i] = 0;
 
-      if(_need_second_old_neighbor)
+      if (_need_second_old_neighbor)
         _second_u_old_neighbor[i] = 0;
 
-      if(_need_second_older_neighbor)
+      if (_need_second_older_neighbor)
         _second_u_older_neighbor[i] = 0;
     }
   }
@@ -1164,10 +1164,10 @@ MooseVariable::computeNeighborValues()
 
     if (is_transient)
     {
-      if(_need_u_old_neighbor)
+      if (_need_u_old_neighbor)
         soln_old_local = solution_old(idx);
 
-      if(_need_u_older_neighbor)
+      if (_need_u_older_neighbor)
         soln_older_local = solution_older(idx);
     }
 
@@ -1279,7 +1279,7 @@ MooseVariable::setNodalValue(Number value, unsigned int idx/* = 0*/)
   _nodal_u[idx] = value;                  // update variable nodal value
   _has_nodal_value = true;
 
-  if(!isNodal()) // If this is an elemental variable, then update the qp values as well
+  if (!isNodal()) // If this is an elemental variable, then update the qp values as well
   {
     for(unsigned int qp=0; qp<_u.size(); qp++)
       _u[qp] = value;
@@ -1292,7 +1292,7 @@ MooseVariable::setNodalValueNeighbor(Number value)
   _nodal_u_neighbor[0] = value;                  // update variable nodal value
   _has_nodal_value_neighbor = true;
 
-  if(!isNodal()) // If this is an elemental variable, then update the qp values as well
+  if (!isNodal()) // If this is an elemental variable, then update the qp values as well
   {
     for(unsigned int qp=0; qp<_u_neighbor.size(); qp++)
       _u_neighbor[qp] = value;

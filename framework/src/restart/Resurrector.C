@@ -145,7 +145,7 @@ Resurrector::write()
 
         file_name_stream << "-" << proc_id;
 
-        if(n_threads > 1)
+        if (n_threads > 1)
           file_name_stream << "-" << tid;
 
         remove(file_name_stream.str().c_str());

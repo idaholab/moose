@@ -115,7 +115,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 
 
   // Either a start_time has been forced on us, or we want to tell the App about what our start time is (in case anyone else is interested.
-  if(_app.hasStartTime())
+  if (_app.hasStartTime())
     _start_time = _app.getStartTime();
   else
     _app.setStartTime(_start_time);
@@ -145,12 +145,12 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 
   setupTimeIntegrator();
 
-  if(_app.halfTransient()) // Cut timesteps and end_time in half...
+  if (_app.halfTransient()) // Cut timesteps and end_time in half...
   {
     _end_time /= 2.0;
     _num_steps /= 2.0;
 
-    if(_num_steps == 0) // Always do one step in the first half
+    if (_num_steps == 0) // Always do one step in the first half
       _num_steps = 1;
   }
 }
@@ -215,18 +215,18 @@ Transient::execute()
   // The reason is that we actually move the solution back in time before we actually start solving (which I think is wrong).  So this call here
   // is to maintain backward compatibility and so that MOOSE is giving the same answer.  However, we might remove this call and regold the test
   // in the future eventually.
-  if(!_app.isRecovering())
+  if (!_app.isRecovering())
     _problem.copyOldSolutions();
 
   // Start time loop...
   while (true)
   {
-    if(_first != true)
+    if (_first != true)
       incrementStepOrReject();
 
     _first = false;
 
-    if(!keepGoing())
+    if (!keepGoing())
       break;
 
     computeDT();
@@ -249,7 +249,7 @@ Transient::computeDT()
 void
 Transient::incrementStepOrReject()
 {
-  if(_last_solve_converged)
+  if (_last_solve_converged)
   {
 #ifdef LIBMESH_ENABLE_AMR
     if (_problem.adaptivity().isOn())
@@ -374,7 +374,7 @@ Transient::takeStep(Real input_dt)
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
 #if 0
     // User definable callback
-    if(_estimate_error)
+    if (_estimate_error)
     {
       estimateTimeError();
     }
@@ -407,13 +407,13 @@ Transient::endStep()
     _output_warehouse.outputStep();
 
     //output
-    if(_time_interval)
+    if (_time_interval)
     {
       //Force output if the current time is at an output interval
-      if(std::abs(_time-_next_interval_output_time)<=_timestep_tolerance
+      if (std::abs(_time-_next_interval_output_time)<=_timestep_tolerance
          || (_problem.out().interval() > 1 && _t_step % _problem.out().interval() == 0))
       {
-        if(_allow_output)
+        if (_allow_output)
         {
           _problem.output(true);
           _problem.outputPostprocessors(true);
@@ -429,7 +429,7 @@ Transient::endStep()
     else
     {
       // if _at_sync_point is true, force the output no matter what
-      if(_allow_output)
+      if (_allow_output)
       {
         _problem.output(_at_sync_point);
         _problem.outputPostprocessors(_at_sync_point);
@@ -443,7 +443,7 @@ Real
 Transient::computeConstrainedDT()
 {
 //  // If start up steps are needed
-//  if(_t_step == 1 && _n_startup_steps > 1)
+//  if (_t_step == 1 && _n_startup_steps > 1)
 //    _dt = _input_dt/(double)(_n_startup_steps);
 //  else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
 //    _dt = _input_dt;
@@ -531,7 +531,7 @@ Transient::computeConstrainedDT()
 
   // Constrain by what the multi apps are doing
   Real multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_BEGIN);
-  if(_use_multiapp_dt || multi_app_dt < dt_cur)
+  if (_use_multiapp_dt || multi_app_dt < dt_cur)
   {
     dt_cur = multi_app_dt;
     _at_sync_point = false;
@@ -545,7 +545,7 @@ Transient::computeConstrainedDT()
          << std::endl;
   }
   multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
-  if(multi_app_dt < dt_cur)
+  if (multi_app_dt < dt_cur)
   {
     dt_cur = multi_app_dt;
     _at_sync_point = false;
@@ -576,7 +576,7 @@ Transient::keepGoing()
 {
   bool keep_going = true;
   // Check for stop condition based upon steady-state check flag:
-  if(lastSolveConverged() && _trans_ss_check == true && _time > _ss_tmin)
+  if (lastSolveConverged() && _trans_ss_check == true && _time > _ss_tmin)
   {
     // Compute new time solution l2_norm
     Real new_time_solution_norm = _problem.getNonlinearSystem().currentSolution()->l2_norm();
@@ -585,7 +585,7 @@ Transient::keepGoing()
     Real ss_relerr_norm = fabs(new_time_solution_norm - _old_time_solution_norm)/new_time_solution_norm;
 
     // Check current solution relative error norm against steady-state tolerance
-    if(ss_relerr_norm < _ss_check_tol)
+    if (ss_relerr_norm < _ss_check_tol)
     {
       Moose::out << "Steady-State Solution Achieved at time: " << _time << std::endl;
       //Output last solve if not output previously by forcing it
@@ -601,21 +601,21 @@ Transient::keepGoing()
   }
 
   // Check for stop condition based upon number of simulation steps and/or solution end time:
-  if(static_cast<unsigned int>(_t_step) > _num_steps)
+  if (static_cast<unsigned int>(_t_step) > _num_steps)
     keep_going = false;
 
-  if((_time>_end_time) || (fabs(_time-_end_time)<=_timestep_tolerance))
+  if ((_time>_end_time) || (fabs(_time-_end_time)<=_timestep_tolerance))
     keep_going = false;
 
-  if(!keep_going && _steps_taken && !_problem.out().wasOutput() && !_app.halfTransient())
+  if (!keep_going && _steps_taken && !_problem.out().wasOutput() && !_app.halfTransient())
   {
     _problem.output(true);
-    if(_allow_output)
+    if (_allow_output)
       _problem.outputPostprocessors(true);
     _problem.outputRestart(true);
   }
 
-  if(!lastSolveConverged() && _abort)
+  if (!lastSolveConverged() && _abort)
   {
     Moose::out << "Aborting as solve did not converge and input selected to abort" << std::endl;
     keep_going = false;
@@ -641,7 +641,7 @@ Transient::lastSolveConverged()
 void
 Transient::preExecute()
 {
-  if(_problem.out().useTimeInterval())
+  if (_problem.out().useTimeInterval())
   {
     _time_interval = true;
     _time_interval_output_interval = _problem.out().timeinterval();

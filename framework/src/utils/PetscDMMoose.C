@@ -78,7 +78,7 @@ PetscErrorCode DMMooseGetContacts(DM dm, std::vector<std::pair<std::string,std::
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
   for (std::map<DM_Moose::ContactID,DM_Moose::ContactName>::const_iterator it = dmm->contactnames->begin(); it != dmm->contactnames->end(); ++it) {
     contactnames.push_back(it->second);
@@ -97,7 +97,7 @@ PetscErrorCode DMMooseGetUnContacts(DM dm, std::vector<std::pair<std::string,std
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
   for (std::map<DM_Moose::ContactID,DM_Moose::ContactName>::const_iterator it = dmm->uncontactnames->begin(); it != dmm->uncontactnames->end(); ++it) {
     uncontactnames.push_back(it->second);
@@ -116,7 +116,7 @@ PetscErrorCode DMMooseGetSides(DM dm, std::vector<std::string>& sidenames)
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
   for (std::map<std::string, BoundaryID>::const_iterator it = dmm->sideids->begin(); it != dmm->sideids->end(); ++it) sidenames.push_back(it->first);
   PetscFunctionReturn(0);
@@ -132,7 +132,7 @@ PetscErrorCode DMMooseGetUnSides(DM dm, std::vector<std::string>& sidenames)
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
   for (std::map<std::string, BoundaryID>::const_iterator it = dmm->unsideids->begin(); it != dmm->unsideids->end(); ++it) sidenames.push_back(it->first);
   PetscFunctionReturn(0);
@@ -148,7 +148,7 @@ PetscErrorCode DMMooseGetBlocks(DM dm, std::vector<std::string>& blocknames)
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
   for (std::map<std::string, unsigned int>::const_iterator it = dmm->blockids->begin(); it != dmm->blockids->end(); ++it) blocknames.push_back(it->first);
   PetscFunctionReturn(0);
@@ -164,7 +164,7 @@ PetscErrorCode DMMooseGetVariables(DM dm, std::vector<std::string>& varnames)
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)(dm->data);
   for (std::map<std::string, unsigned int>::const_iterator it = dmm->varids->begin(); it != dmm->varids->end(); ++it){
     varnames.push_back(it->first);
@@ -181,9 +181,9 @@ PetscErrorCode DMMooseSetNonlinearSystem(DM dm, NonlinearSystem& nl)
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   PetscBool ismoose;
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
 
-  if(dm->setupcalled) SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONGSTATE, "Cannot reset the NonlinearSystem after DM has been set up.");
+  if (dm->setupcalled) SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONGSTATE, "Cannot reset the NonlinearSystem after DM has been set up.");
   DM_Moose *dmm = (DM_Moose *)(dm->data);
   dmm->nl =&nl;
   PetscFunctionReturn(0);
@@ -200,8 +200,8 @@ PetscErrorCode DMMooseSetVariables(DM dm, const std::set<std::string>& vars)
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose); CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
-  if(dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
+  if (!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->vars) delete dmm->vars;
   dmm->vars = new std::set<std::string>(vars);
   PetscFunctionReturn(0);
@@ -218,8 +218,8 @@ PetscErrorCode DMMooseSetBlocks(DM dm, const std::set<std::string>& blocks)
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose); CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
-  if(dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
+  if (!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->blocks) delete dmm->blocks;
   dmm->blocks = new std::set<std::string>(blocks);
   PetscFunctionReturn(0);
@@ -236,8 +236,8 @@ PetscErrorCode DMMooseSetSides(DM dm, const std::set<std::string>& sides)
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose); CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
-  if(dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
+  if (!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->sides) delete dmm->sides;
   dmm->sides = new std::set<std::string>(sides);
   PetscFunctionReturn(0);
@@ -254,8 +254,8 @@ PetscErrorCode DMMooseSetUnSides(DM dm, const std::set<std::string>& unsides)
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose); CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
-  if(dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
+  if (!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->sides) delete dmm->sides;
   dmm->unsides = new std::set<std::string>(unsides);
   PetscFunctionReturn(0);
@@ -272,8 +272,8 @@ PetscErrorCode DMMooseSetContacts(DM dm, const std::vector<std::pair<std::string
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose); CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
-  if(dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
+  if (!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (contacts.size() != displaced.size()) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_SIZ, "Nonmatching sizes of the contact and displaced arrays: %D != %D", contacts.size(), displaced.size());
   if (dmm->contacts) delete dmm->contacts;
   dmm->contact_displaced->clear();
@@ -296,8 +296,8 @@ PetscErrorCode DMMooseSetUnContacts(DM dm, const std::vector<std::pair<std::stri
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose); CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
-  if(dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
+  if (!ismoose) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (uncontacts.size() != displaced.size()) SETERRQ2(PETSC_COMM_SELF, PETSC_ERR_ARG_SIZ, "Nonmatching sizes of the uncontact and displaced arrays: %D != %D", uncontacts.size(), displaced.size());
   if (dmm->uncontacts) delete dmm->uncontacts;
   dmm->uncontact_displaced->clear();
@@ -320,7 +320,7 @@ PetscErrorCode DMMooseGetNonlinearSystem(DM dm, NonlinearSystem*& nl)
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose); CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)(dm->data);
   nl = dmm->nl;
   PetscFunctionReturn(0);
@@ -337,7 +337,7 @@ PetscErrorCode DMMooseSetSplitNames(DM dm, const std::vector<std::string>& split
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   PetscBool ismoose;
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)(dm->data);
 
   if (dmm->splits) {
@@ -376,7 +376,7 @@ PetscErrorCode DMMooseGetSplitNames(DM dm, std::vector<std::string>& splitnames)
   PetscValidHeaderSpecific(dm,DM_CLASSID,1);
   PetscBool ismoose;
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
-  if(!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
+  if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)(dm->data);
   if (!dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM not set up");
   splitnames.clear();
@@ -439,7 +439,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
         dofmap.dof_indices(elem, evindices, v);
         for(dof_id_type i = 0; i < evindices.size(); ++i) {
     dof_id_type dof = evindices[i];
-    if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) /* might want to use variable_first/last_local_dof instead */
+    if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) /* might want to use variable_first/last_local_dof instead */
       indices.insert(dof);
         }
       }
@@ -465,7 +465,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
       if (dmm->sidenames->find(boundary_id) == dmm->sidenames->end()) continue;
       const Node*     node = bnode->_node;
       dof_id_type dof = node->dof_number(dmm->nl->sys().number(),v,0);
-      if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
+      if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
         indices.insert(dof);
       }
     }
@@ -479,7 +479,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
       if (dmm->unsidenames->find(boundary_id) == dmm->unsidenames->end()) continue;
       const Node*     node = bnode->_node;
       dof_id_type dof = node->dof_number(dmm->nl->sys().number(),v,0);
-      if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
+      if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
         unindices.insert(dof);
       }
     }
@@ -505,7 +505,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
         if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end()) continue;
         Node& slave_node = dmm->nl->sys().get_mesh().node(slave_nodes[i]);
         dof_id_type dof = slave_node.dof_number(dmm->nl->sys().number(),v,0);
-        if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
+        if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
     indices.insert(dof);
         }
       }
@@ -532,7 +532,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
         if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end()) continue;
         Node& slave_node = dmm->nl->sys().get_mesh().node(slave_nodes[i]);
         dof_id_type dof = slave_node.dof_number(dmm->nl->sys().number(),v,0);
-        if(dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
+        if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
     unindices.insert(dof);
         }
       }
@@ -574,11 +574,11 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
 
   PetscFunctionBegin;
   /* Only called after DMSetUp(). */
-  if(!dmm->splitlocs) PetscFunctionReturn(0);
+  if (!dmm->splitlocs) PetscFunctionReturn(0);
   *len = dmm->splitlocs->size();
-  if(namelist) {ierr = PetscMalloc(*len*sizeof(char*),namelist);CHKERRQ(ierr);}
-  if(islist)   {ierr = PetscMalloc(*len*sizeof(IS),islist);CHKERRQ(ierr);}
-  if(dmlist)   {ierr = PetscMalloc(*len*sizeof(DM),dmlist);CHKERRQ(ierr);}
+  if (namelist) {ierr = PetscMalloc(*len*sizeof(char*),namelist);CHKERRQ(ierr);}
+  if (islist)   {ierr = PetscMalloc(*len*sizeof(IS),islist);CHKERRQ(ierr);}
+  if (dmlist)   {ierr = PetscMalloc(*len*sizeof(DM),dmlist);CHKERRQ(ierr);}
   for (std::multimap<std::string, dof_id_type>::const_iterator dit = dmm->splitlocs->begin(); dit != dmm->splitlocs->end(); ++dit) {
     dof_id_type                             d = dit->second;
     std::string                          dname = dit->first;
@@ -591,14 +591,14 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
     }
     ierr = DMSetFromOptions(dinfo.dm);CHKERRQ(ierr);
     ierr = DMSetUp(dinfo.dm);CHKERRQ(ierr);
-    if(namelist) {
+    if (namelist) {
       ierr = PetscStrallocpy(dname.c_str(),(*namelist)+d);CHKERRQ(ierr);
     }
-    if(islist) {
+    if (islist) {
       if (!dinfo.rembedding) {
   IS dembedding, lembedding;
   ierr = DMMooseGetEmbedding_Private(dinfo.dm,&dembedding);CHKERRQ(ierr);
-  if(dmm->embedding) {
+  if (dmm->embedding) {
     /* Create a relative embedding into the parent's index space. */
 #if PETSC_VERSION_LT(3,4,0)
     ierr = ISMapFactorRight(dembedding,dmm->embedding, PETSC_TRUE, &lembedding); CHKERRQ(ierr);
@@ -609,7 +609,7 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
     PetscInt len,dlen,llen,*rindices,off,i;
     ierr = ISGetLocalSize(dembedding, &dlen); CHKERRQ(ierr);
     ierr = ISGetLocalSize(lembedding, &llen); CHKERRQ(ierr);
-    if(llen != dlen) SETERRQ1(((PetscObject)dm)->comm, PETSC_ERR_PLIB, "Failed to embed split %D", d);
+    if (llen != dlen) SETERRQ1(((PetscObject)dm)->comm, PETSC_ERR_PLIB, "Failed to embed split %D", d);
     ierr = ISDestroy(&dembedding); CHKERRQ(ierr);
     // Convert local embedding to global (but still relative) embedding
     ierr = PetscMalloc(llen*sizeof(PetscInt),&rindices);CHKERRQ(ierr);
@@ -646,7 +646,7 @@ static PetscErrorCode  DMCreateDomainDecomposition_Moose(DM dm, PetscInt *len, c
 
   PetscFunctionBegin;
   /* Use DMCreateFieldDecomposition_Moose() to obtain everything but outerislist, which is currently PETSC_NULL. */
-  if(outerislist)   *outerislist = PETSC_NULL; /* FIX: allow mesh-based overlap. */
+  if (outerislist)   *outerislist = PETSC_NULL; /* FIX: allow mesh-based overlap. */
   ierr = DMCreateFieldDecomposition_Moose(dm,len,namelist,innerislist,dmlist);CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
@@ -902,7 +902,7 @@ static PetscErrorCode DMCreateGlobalVector_Moose(DM dm, Vec *x)
   Vec                    v  = pv->vec();
   /* Unfortunately, currently this does not produce a ghosted vector, so nonlinear subproblem solves aren't going to be easily available.
      Should work fine for getting vectors out for linear subproblem solvers. */
-  if(dmm->embedding) {
+  if (dmm->embedding) {
     PetscInt n;
     ierr = VecCreate(((PetscObject)v)->comm, x);CHKERRQ(ierr);
     ierr = ISGetLocalSize(dmm->embedding, &n);CHKERRQ(ierr);
@@ -984,7 +984,7 @@ static PetscErrorCode  DMView_Moose(DM dm, PetscViewer viewer)
 
   PetscFunctionBegin;
   ierr = PetscObjectTypeCompare((PetscObject)viewer,PETSCVIEWERASCII,&isascii); CHKERRQ(ierr);
-  if(isascii) {
+  if (isascii) {
     ierr = PetscObjectGetName((PetscObject)dm, &name);     CHKERRQ(ierr);
     ierr = PetscObjectGetOptionsPrefix((PetscObject)dm, &prefix); CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer, "DM Moose with name %s and prefix %s\n", name, prefix); CHKERRQ(ierr);
@@ -1202,11 +1202,11 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
   ierr = DMMooseGetMeshBlocks_Private(dm,blocks);CHKERRQ(ierr);
   std::set<subdomain_id_type>::iterator bit = blocks.begin();
   std::set<subdomain_id_type>::iterator bend = blocks.end();
-  if(bit == bend) SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_PLIB, "No mesh blocks found.");
+  if (bit == bend) SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_PLIB, "No mesh blocks found.");
   for(; bit != bend; ++bit) {
     subdomain_id_type bid = *bit;
     std::string bname = mesh.subdomain_name(bid);
-    if(!bname.length()) {
+    if (!bname.length()) {
       /* Block names are currently implemented for Exodus II meshes
    only, so we might have to make up our own block names and
    maintain our own mapping of block ids to names.
@@ -1563,14 +1563,14 @@ static PetscErrorCode  DMDestroy_Moose(DM dm)
   if (dmm->uncontacts) delete dmm->uncontacts;
   delete dmm->uncontactnames;
   delete dmm->uncontact_displaced;
-  if(dmm->splits) {
+  if (dmm->splits) {
     for (std::map<std::string, DM_Moose::SplitInfo>::iterator sit = dmm->splits->begin(); sit != dmm->splits->end(); ++sit) {
       ierr = DMDestroy(&(sit->second.dm));CHKERRQ(ierr);
       ierr = ISDestroy(&(sit->second.rembedding));CHKERRQ(ierr);
     }
     delete dmm->splits;
   }
-  if(dmm->splitlocs) delete dmm->splitlocs;
+  if (dmm->splitlocs) delete dmm->splitlocs;
   ierr = ISDestroy(&dmm->embedding); CHKERRQ(ierr);
   ierr = PetscFree(dm->data); CHKERRQ(ierr);
   PetscFunctionReturn(0);

@@ -181,13 +181,13 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
 
     MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
-    if(direction == "x")
+    if (direction == "x")
       getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
-    else if(direction == "y")
+    else if (direction == "y")
       getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
-    else if(direction == "z")
+    else if (direction == "z")
       getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
-    else if(direction == "radial")
+    else if (direction == "radial")
       getMesh().partitioner() = AutoPtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
     break;
   }
@@ -372,7 +372,7 @@ MooseMesh::update()
 const Node &
 MooseMesh::node(const unsigned int i) const
 {
-  if(i > getMesh().max_node_id())
+  if (i > getMesh().max_node_id())
     return *(*_quadrature_nodes.find(i)).second;
 
   return getMesh().node(i);
@@ -381,7 +381,7 @@ MooseMesh::node(const unsigned int i) const
 Node &
 MooseMesh::node(const unsigned int i)
 {
-  if(i > getMesh().max_node_id())
+  if (i > getMesh().max_node_id())
     return *_quadrature_nodes[i];
 
   return getMesh().node(i);
@@ -390,7 +390,7 @@ MooseMesh::node(const unsigned int i)
 const Node*
 MooseMesh::nodePtr(const unsigned int i) const
 {
-  if(i > getMesh().max_node_id())
+  if (i > getMesh().max_node_id())
     return (*_quadrature_nodes.find(i)).second;
 
   return getMesh().node_ptr(i);
@@ -399,7 +399,7 @@ MooseMesh::nodePtr(const unsigned int i) const
 Node*
 MooseMesh::nodePtr(const unsigned int i)
 {
-  if(i > getMesh().max_node_id())
+  if (i > getMesh().max_node_id())
     return _quadrature_nodes[i];
 
   return getMesh().node_ptr(i);
@@ -527,16 +527,16 @@ public:
 
   bool operator()(const BndNode * const & lhs, const BndNode * const & rhs)
   {
-    if(lhs->_bnd_id < rhs->_bnd_id)
+    if (lhs->_bnd_id < rhs->_bnd_id)
       return true;
 
-    if(lhs->_bnd_id > rhs->_bnd_id)
+    if (lhs->_bnd_id > rhs->_bnd_id)
       return false;
 
-    if(lhs->_node->id() < rhs->_node->id())
+    if (lhs->_node->id() < rhs->_node->id())
       return true;
 
-    if(lhs->_node->id() > rhs->_node->id())
+    if (lhs->_node->id() > rhs->_node->id())
       return false;
 
     return false;
@@ -598,10 +598,10 @@ MooseMesh::buildBndElemList()
 std::map<unsigned int, std::vector<unsigned int> > &
 MooseMesh::nodeToElemMap()
 {
-  if(!_node_to_elem_map_built) // Guard the creation with a double checked lock
+  if (!_node_to_elem_map_built) // Guard the creation with a double checked lock
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    if(!_node_to_elem_map_built)
+    if (!_node_to_elem_map_built)
     {
       MeshBase::const_element_iterator       el  = getMesh().elements_begin();
       const MeshBase::const_element_iterator end = getMesh().elements_end();
@@ -817,14 +817,14 @@ MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, c
 {
   Node * qnode;
 
-  if(_elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side].find(qp) == _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side].end())
+  if (_elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side].find(qp) == _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side].end())
   {
     // Create a new node id starting from the max node id and counting down.  This will be the least
     // likely to collide with an existing node id.
     unsigned int max_id = std::numeric_limits<unsigned int>::max()-100;
     unsigned int new_id = max_id - _quadrature_nodes.size();
 
-    if(new_id <= getMesh().max_node_id())
+    if (new_id <= getMesh().max_node_id())
       mooseError("Quadrature node id collides with existing node id!");
 
     qnode = new Node(point, new_id);
@@ -1330,12 +1330,12 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     Elem * elem = *el;
     ElemType type = elem->type();
 
-    if(canonical_elems.find(type) == canonical_elems.end()) // If we haven't seen this type of elem before save it
+    if (canonical_elems.find(type) == canonical_elems.end()) // If we haven't seen this type of elem before save it
       canonical_elems[type] = elem;
     else
     {
       Elem * stored = canonical_elems[type];
-      if(elem->id() < stored->id()) // Arbitrarily keep the one with a lower id
+      if (elem->id() < stored->id()) // Arbitrarily keep the one with a lower id
         canonical_elems[type] = elem;
     }
   }
@@ -1370,7 +1370,7 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     // Child side to parent volume mapping for "internal" child sides
     for(unsigned int child=0; child<elem->n_children(); child++)
       for(unsigned int side=0; side<elem->n_sides(); side++) // Assume children have the same number of sides!
-        if(!elem->is_child_on_side(child, side)) // Otherwise we already computed that map
+        if (!elem->is_child_on_side(child, side)) // Otherwise we already computed that map
           buildRefinementMap(*elem, *qrule, *qrule_face, -1, child, side);
   }
 }
@@ -1378,13 +1378,13 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
 void
 MooseMesh::buildRefinementMap(const Elem & elem, QBase & qrule, QBase & qrule_face, int parent_side, int child, int child_side)
 {
-  if(child == -1) // Doing volume mapping or parent side mapping
+  if (child == -1) // Doing volume mapping or parent side mapping
   {
     mooseAssert(parent_side == child_side, "Parent side must match child_side if not passing a specific child!");
 
     std::pair<int, ElemType> the_pair(parent_side, elem.type());
 
-    if(_elem_type_to_refinement_map.find(the_pair) != _elem_type_to_refinement_map.end())
+    if (_elem_type_to_refinement_map.find(the_pair) != _elem_type_to_refinement_map.end())
       mooseError("Already built a qp refinement map!");
 
     std::vector<std::pair<unsigned int, QpMap> > coarsen_map;
@@ -1395,7 +1395,7 @@ MooseMesh::buildRefinementMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
   {
     std::pair<int, int> child_pair(child, child_side);
 
-    if(_elem_type_to_child_side_refinement_map.find(elem.type()) != _elem_type_to_child_side_refinement_map.end() &&
+    if (_elem_type_to_child_side_refinement_map.find(elem.type()) != _elem_type_to_child_side_refinement_map.end() &&
        _elem_type_to_child_side_refinement_map[elem.type()].find(child_pair) != _elem_type_to_child_side_refinement_map[elem.type()].end())
       mooseError("Already built a qp refinement map!");
 
@@ -1409,13 +1409,13 @@ MooseMesh::buildRefinementMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
 const std::vector<std::vector<QpMap> > &
 MooseMesh::getRefinementMap(const Elem & elem, int parent_side, int child, int child_side)
 {
-  if(child == -1) // Doing volume mapping or parent side mapping
+  if (child == -1) // Doing volume mapping or parent side mapping
   {
     mooseAssert(parent_side == child_side, "Parent side must match child_side if not passing a specific child!");
 
     std::pair<int, ElemType> the_pair(parent_side, elem.type());
 
-    if(_elem_type_to_refinement_map.find(the_pair) == _elem_type_to_refinement_map.end())
+    if (_elem_type_to_refinement_map.find(the_pair) == _elem_type_to_refinement_map.end())
       mooseError("Could not find a suitable qp refinement map!");
 
     return _elem_type_to_refinement_map[the_pair];
@@ -1424,7 +1424,7 @@ MooseMesh::getRefinementMap(const Elem & elem, int parent_side, int child, int c
   {
     std::pair<int, int> child_pair(child, child_side);
 
-    if(_elem_type_to_child_side_refinement_map.find(elem.type()) == _elem_type_to_child_side_refinement_map.end() ||
+    if (_elem_type_to_child_side_refinement_map.find(elem.type()) == _elem_type_to_child_side_refinement_map.end() ||
        _elem_type_to_child_side_refinement_map[elem.type()].find(child_pair) == _elem_type_to_child_side_refinement_map[elem.type()].end())
       mooseError("Could not find a suitable qp refinement map!");
 
@@ -1443,7 +1443,7 @@ MooseMesh::buildCoarseningMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
 {
   std::pair<int, ElemType> the_pair(input_side, elem.type());
 
-  if(_elem_type_to_coarsening_map.find(the_pair) != _elem_type_to_coarsening_map.end())
+  if (_elem_type_to_coarsening_map.find(the_pair) != _elem_type_to_coarsening_map.end())
     mooseError("Already built a qp coarsening map!");
 
   std::vector<std::vector<QpMap> > refinement_map;
@@ -1465,7 +1465,7 @@ MooseMesh::getCoarseningMap(const Elem & elem, int input_side)
 {
   std::pair<int, ElemType> the_pair(input_side, elem.type());
 
-  if(_elem_type_to_coarsening_map.find(the_pair) == _elem_type_to_coarsening_map.end())
+  if (_elem_type_to_coarsening_map.find(the_pair) == _elem_type_to_coarsening_map.end())
     mooseError("Could not find a suitable qp refinement map!");
 
   return _elem_type_to_coarsening_map[the_pair];
@@ -1490,7 +1490,7 @@ MooseMesh::mapPoints(const std::vector<Point> & from, const std::vector<Point> &
       const Point & to_point = to[j];
       Real distance = (from_point - to_point).size();
 
-      if(distance < current_map._distance)
+      if (distance < current_map._distance)
       {
         current_map._distance = distance;
         current_map._from = i;
@@ -1538,7 +1538,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   // The current q_points
   const std::vector<Point> * q_points;
 
-  if(parent_side != -1)
+  if (parent_side != -1)
   {
     fe_face->reinit(elem, parent_side);
     q_points = &q_points_face;
@@ -1563,7 +1563,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
 
   std::vector<unsigned int> children;
 
-  if(child != -1) // Passed in a child explicitly
+  if (child != -1) // Passed in a child explicitly
     children.push_back(child);
   else
   {
@@ -1576,12 +1576,12 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   {
     unsigned int child = children[i];
 
-    if((parent_side != -1 && !elem->is_child_on_side(child, parent_side)))
+    if ((parent_side != -1 && !elem->is_child_on_side(child, parent_side)))
       continue;
 
     const Elem * child_elem = elem->child(child);
 
-    if(child_side != -1)
+    if (child_side != -1)
     {
       fe_face->reinit(child_elem, child_side);
       q_points = &q_points_face;
@@ -1608,7 +1608,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   // For each parent qp find the closest child qp
   for(unsigned int child=0; child < n_children; child++)
   {
-    if(parent_side != -1 && !elem->is_child_on_side(child, child_side))
+    if (parent_side != -1 && !elem->is_child_on_side(child, child_side))
       continue;
 
     std::vector<Point> & child_ref_points = child_to_ref_points[child];
@@ -1627,7 +1627,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
 
       QpMap & current_map = qp_map[parent_qp];
 
-      if(current_map._distance < closest_map._distance)
+      if (current_map._distance < closest_map._distance)
       {
         closest_child = child;
         closest_map = current_map;
@@ -1680,7 +1680,7 @@ MooseMesh::getNormalByBoundaryID(BoundaryID id) const
 void
 MooseMesh::init()
 {
-  if(!_app.isRecovering() || !_allow_recovery)
+  if (!_app.isRecovering() || !_allow_recovery)
     buildMesh();
   else // When recovering just read the CPR file
     getMesh().read(_app.getRecoverFileBase() + "_mesh.cpr");
@@ -1882,7 +1882,7 @@ void
 MooseMesh::ghostGhostedBoundaries()
 {
   // No need to do this if using a serial mesh
-  if(!_use_parallel_mesh)
+  if (!_use_parallel_mesh)
     return;
 
   Moose::perf_log.push("ghostGhostedBoundaries()","MooseMesh");
@@ -1904,7 +1904,7 @@ MooseMesh::ghostGhostedBoundaries()
 
   for(unsigned int i=0; i<elems.size(); i++)
   {
-    if(_ghosted_boundaries.find(ids[i]) != _ghosted_boundaries.end())
+    if (_ghosted_boundaries.find(ids[i]) != _ghosted_boundaries.end())
     {
       Elem * elem = mesh.elem(elems[i]);
 

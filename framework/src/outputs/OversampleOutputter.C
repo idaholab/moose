@@ -126,7 +126,7 @@ OversampleOutputter::initOversample()
   }
   else
   {
-    if(_app.isRecovering())
+    if (_app.isRecovering())
       mooseWarning("Recovering or Restarting with Oversampling may not work (especially with adapted meshes)!!  Refs #2295");
 
     _mesh_ptr= &(_problem_ptr->mesh().clone());
@@ -137,7 +137,7 @@ OversampleOutputter::initOversample()
   mesh_refinement.uniformly_refine(_oversample);
 
   // Re-position the oversampled mesh
-  if(isParamValid("position"))
+  if (isParamValid("position"))
     for (MeshBase::node_iterator nd = _mesh_ptr->getMesh().nodes_begin(); nd != _mesh_ptr->getMesh().nodes_end(); ++nd)
       *(*nd) += _position;
 
@@ -198,7 +198,7 @@ OversampleOutputter::oversample()
   // Loop throuch each system
   for (unsigned int sys_num = 0; sys_num < source_es.n_systems(); ++sys_num)
   {
-    if(_mesh_functions[sys_num].size())
+    if (_mesh_functions[sys_num].size())
     {
       // Get references to the source and destination systems
       System & source_sys = source_es.get_system(sys_num);

@@ -81,14 +81,14 @@ MultiAppMeshFunctionTransfer::execute()
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
-        if(_multi_app->hasLocalApp(i))
+        if (_multi_app->hasLocalApp(i))
         {
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
           System * to_sys = find_sys(_multi_app->appProblem(i)->es(), _to_var_name);
 
-          if(!to_sys)
+          if (!to_sys)
             mooseError("Cannot find variable "<<_to_var_name<<" for "<<_name<<" Transfer");
 
           unsigned int sys_num = to_sys->number();
@@ -98,7 +98,7 @@ MultiAppMeshFunctionTransfer::execute()
           MeshBase & mesh = _multi_app->appProblem(i)->mesh().getMesh();
           bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
-          if(is_nodal)
+          if (is_nodal)
           {
             MeshBase::const_node_iterator node_it = mesh.local_nodes_begin();
             MeshBase::const_node_iterator node_end = mesh.local_nodes_end();
@@ -107,7 +107,7 @@ MultiAppMeshFunctionTransfer::execute()
             {
               Node * node = *node_it;
 
-              if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
+              if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = node->dof_number(sys_num, var_num, 0);
@@ -118,9 +118,9 @@ MultiAppMeshFunctionTransfer::execute()
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-                if(from_value != NOTFOUND)
+                if (from_value != NOTFOUND)
                   solution.set(dof, from_value);
-                else if(_error_on_miss)
+                else if (_error_on_miss)
                   mooseError("Point not found! " << *node+_multi_app->position(i) << std::endl);
               }
             }
@@ -136,7 +136,7 @@ MultiAppMeshFunctionTransfer::execute()
 
               Point centroid = elem->centroid();
 
-              if(elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
+              if (elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
               {
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
@@ -147,9 +147,9 @@ MultiAppMeshFunctionTransfer::execute()
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-                if(from_value != NOTFOUND)
+                if (from_value != NOTFOUND)
                   solution.set(dof, from_value);
-                else if(_error_on_miss)
+                else if (_error_on_miss)
                   mooseError("Point not found! " << centroid+_multi_app->position(i) << std::endl);
               }
             }
@@ -192,7 +192,7 @@ MultiAppMeshFunctionTransfer::execute()
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
-        if(!_multi_app->hasLocalApp(i))
+        if (!_multi_app->hasLocalApp(i))
           continue;
 
         MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
@@ -225,7 +225,7 @@ MultiAppMeshFunctionTransfer::execute()
         from_func.enable_out_of_mesh_mode(NOTFOUND);
         Moose::swapLibMeshComm(swapped);
 
-        if(is_nodal)
+        if (is_nodal)
         {
           MeshBase::const_node_iterator node_it = to_mesh.nodes_begin();
           MeshBase::const_node_iterator node_end = to_mesh.nodes_end();
@@ -234,10 +234,10 @@ MultiAppMeshFunctionTransfer::execute()
           {
             Node * node = *node_it;
 
-            if(node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
+            if (node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
             {
               // See if this node falls in this bounding box
-              if(app_box.contains_point(*node-app_position))
+              if (app_box.contains_point(*node-app_position))
               {
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
@@ -246,9 +246,9 @@ MultiAppMeshFunctionTransfer::execute()
                 Real from_value = from_func(*node-app_position);
                 Moose::swapLibMeshComm(swapped);
 
-                if(from_value != NOTFOUND)
+                if (from_value != NOTFOUND)
                   to_solution->set(dof, from_value);
-                else if(_error_on_miss)
+                else if (_error_on_miss)
                   mooseError("Point not found! " << *node-app_position <<std::endl);
               }
             }
@@ -263,12 +263,12 @@ MultiAppMeshFunctionTransfer::execute()
           {
             Elem * elem = *elem_it;
 
-            if(elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
+            if (elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
             {
               Point centroid = elem->centroid();
 
               // See if this elem falls in this bounding box
-              if(app_box.contains_point(centroid-app_position))
+              if (app_box.contains_point(centroid-app_position))
               {
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
@@ -277,9 +277,9 @@ MultiAppMeshFunctionTransfer::execute()
                 Real from_value = from_func(centroid-app_position);
                 Moose::swapLibMeshComm(swapped);
 
-                if(from_value != NOTFOUND)
+                if (from_value != NOTFOUND)
                   to_solution->set(dof, from_value);
-                else if(_error_on_miss)
+                else if (_error_on_miss)
                   mooseError("Point not found! " << centroid-app_position << std::endl);
               }
             }

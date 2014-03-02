@@ -222,7 +222,7 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
   _fe_problem.cacheJacobian(_tid);
   _num_cached++;
 
-  if(_num_cached % 20 == 0)
+  if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     _fe_problem.addCachedJacobian(_jacobian, _tid);

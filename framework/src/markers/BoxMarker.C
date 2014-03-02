@@ -43,7 +43,7 @@ BoxMarker::computeElementMarker()
 {
   RealVectorValue centroid = _current_elem->centroid();
 
-  if(_bounding_box.contains_point(centroid))
+  if (_bounding_box.contains_point(centroid))
     return _inside;
 
   return _outside;

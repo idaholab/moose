@@ -59,7 +59,7 @@ Damper::computeDamping()
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
   {
     cur_damping = computeQpDamping();
-    if(cur_damping < damping)
+    if (cur_damping < damping)
       damping = cur_damping;
   }
 

@@ -576,7 +576,7 @@ inline ColumnMajorMatrix &
 ColumnMajorMatrix::operator=(const TypeTensor<Real> & rhs)
 {
   // Resize the tensor if necessary
-  if((LIBMESH_DIM * LIBMESH_DIM) != _n_entries)
+  if ((LIBMESH_DIM * LIBMESH_DIM) != _n_entries)
   {
     _n_entries = LIBMESH_DIM * LIBMESH_DIM;
     _values.resize(_n_entries);

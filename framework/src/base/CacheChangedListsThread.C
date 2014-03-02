@@ -33,12 +33,12 @@ CacheChangedListsThread::~CacheChangedListsThread()
 void
 CacheChangedListsThread::onElement(const Elem *elem)
 {
-  if(elem->refinement_flag() == Elem::INACTIVE && elem->has_children() && elem->child(0)->refinement_flag() == Elem::JUST_REFINED)
+  if (elem->refinement_flag() == Elem::INACTIVE && elem->has_children() && elem->child(0)->refinement_flag() == Elem::JUST_REFINED)
     _refined_elements.push_back(elem);
 
-  if(elem->refinement_flag() == Elem::JUST_COARSENED)
+  if (elem->refinement_flag() == Elem::JUST_COARSENED)
   {
-    if(elem->has_children())
+    if (elem->has_children())
     {
       _coarsened_elements.push_back(elem);
 

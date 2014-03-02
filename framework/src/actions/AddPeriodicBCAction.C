@@ -71,7 +71,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
   if (isParamValid("auto_direction"))
   {
     // If we are working with a parallel mesh then we're going to ghost all the boundaries everywhere because we don't know what we need...
-    if(_mesh->isParallelMesh())
+    if (_mesh->isParallelMesh())
     {
       const std::set<BoundaryID> & ids = _mesh->meshBoundaryIds();
       for(std::set<BoundaryID>::const_iterator id_it = ids.begin();

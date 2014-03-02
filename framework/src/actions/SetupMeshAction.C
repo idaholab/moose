@@ -63,7 +63,7 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
 
   mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
-  if(isParamValid("ghosted_boundaries_inflation"))
+  if (isParamValid("ghosted_boundaries_inflation"))
   {
     std::vector<Real> ghosted_boundaries_inflation = getParam<std::vector<Real> >("ghosted_boundaries_inflation");
     mesh->setGhostedBoundaryInflation(ghosted_boundaries_inflation);

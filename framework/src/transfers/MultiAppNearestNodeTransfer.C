@@ -65,7 +65,7 @@ MultiAppNearestNodeTransfer::execute()
 
       MeshBase * from_mesh = NULL;
 
-      if(_displaced_source_mesh && from_problem.getDisplacedProblem())
+      if (_displaced_source_mesh && from_problem.getDisplacedProblem())
       {
         mooseError("Cannot use a NearestNode transfer from a displaced mesh to a MultiApp!");
         from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
@@ -94,14 +94,14 @@ MultiAppNearestNodeTransfer::execute()
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
-        if(_multi_app->hasLocalApp(i))
+        if (_multi_app->hasLocalApp(i))
         {
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
           System * to_sys = find_sys(_multi_app->appProblem(i)->es(), _to_var_name);
 
-          if(!to_sys)
+          if (!to_sys)
             mooseError("Cannot find variable "<<_to_var_name<<" for "<<_name<<" Transfer");
 
           unsigned int sys_num = to_sys->number();
@@ -111,14 +111,14 @@ MultiAppNearestNodeTransfer::execute()
 
           MeshBase * mesh = NULL;
 
-          if(_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
+          if (_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
             mesh = &_multi_app->appProblem(i)->getDisplacedProblem()->mesh().getMesh();
           else
             mesh = &_multi_app->appProblem(i)->mesh().getMesh();
 
           bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
-          if(is_nodal)
+          if (is_nodal)
           {
             MeshBase::const_node_iterator node_it = mesh->local_nodes_begin();
             MeshBase::const_node_iterator node_end = mesh->local_nodes_end();
@@ -129,7 +129,7 @@ MultiAppNearestNodeTransfer::execute()
 
               Point actual_position = *node+_multi_app->position(i);
 
-              if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
+              if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = node->dof_number(sys_num, var_num, 0);
@@ -144,7 +144,7 @@ MultiAppNearestNodeTransfer::execute()
 
                 Node * nearest_node = NULL;
 
-                if(_fixed_meshes)
+                if (_fixed_meshes)
                 {
                   if (_node_map.find(node->id()) == _node_map.end())  // Haven't cached it yet
                   {
@@ -184,7 +184,7 @@ MultiAppNearestNodeTransfer::execute()
               Point centroid = elem->centroid();
               Point actual_position = centroid+_multi_app->position(i);
 
-              if(elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
+              if (elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
               {
                 // The zero only works for LAGRANGE!
                 dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
@@ -199,7 +199,7 @@ MultiAppNearestNodeTransfer::execute()
 
                 Node * nearest_node = NULL;
 
-                if(_fixed_meshes)
+                if (_fixed_meshes)
                 {
                   if (_node_map.find(elem->id()) == _node_map.end())  // Haven't cached it yet
                   {
@@ -261,7 +261,7 @@ MultiAppNearestNodeTransfer::execute()
 
       MeshBase * to_mesh = NULL;
 
-      if(_displaced_target_mesh && to_problem.getDisplacedProblem())
+      if (_displaced_target_mesh && to_problem.getDisplacedProblem())
         to_mesh = &to_problem.getDisplacedProblem()->mesh().getMesh();
       else
         to_mesh = &to_problem.mesh().getMesh();
@@ -286,7 +286,7 @@ MultiAppNearestNodeTransfer::execute()
       std::vector<unsigned int> min_apps;
 
 
-      if(is_nodal)
+      if (is_nodal)
       {
         min_distances.resize(n_nodes, std::numeric_limits<Real>::max());
         min_nodes.resize(n_nodes);
@@ -303,7 +303,7 @@ MultiAppNearestNodeTransfer::execute()
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
-        if(!_multi_app->hasLocalApp(i))
+        if (!_multi_app->hasLocalApp(i))
           continue;
 
         MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
@@ -323,7 +323,7 @@ MultiAppNearestNodeTransfer::execute()
 
         MeshBase * from_mesh = NULL;
 
-        if(_displaced_source_mesh && from_problem.getDisplacedProblem())
+        if (_displaced_source_mesh && from_problem.getDisplacedProblem())
           from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
         else
           from_mesh = &from_problem.mesh().getMesh();
@@ -333,7 +333,7 @@ MultiAppNearestNodeTransfer::execute()
 
         Moose::swapLibMeshComm(swapped);
 
-        if(is_nodal)
+        if (is_nodal)
         {
           MeshBase::const_node_iterator to_node_it = to_mesh->nodes_begin();
           MeshBase::const_node_iterator to_node_end = to_mesh->nodes_end();
@@ -352,7 +352,7 @@ MultiAppNearestNodeTransfer::execute()
 
             Node * nearest_node = NULL;
 
-            if(_fixed_meshes)
+            if (_fixed_meshes)
             {
               if (_node_map.find(to_node->id()) == _node_map.end())  // Haven't cached it yet
               {
@@ -373,7 +373,7 @@ MultiAppNearestNodeTransfer::execute()
 
             // TODO: Logic bug when we are using caching.  "current_distance" is set by a call to getNearestNode which is
             // skipped in that case.  We shouldn't be relying on it or stuffing it in another data structure
-            if(current_distance < min_distances[to_node->id()])
+            if (current_distance < min_distances[to_node->id()])
             {
               min_distances[to_node_id] = current_distance;
               min_nodes[to_node_id] = nearest_node->id();
@@ -402,7 +402,7 @@ MultiAppNearestNodeTransfer::execute()
 
             Node * nearest_node = NULL;
 
-            if(_fixed_meshes)
+            if (_fixed_meshes)
             {
               if (_node_map.find(to_elem->id()) == _node_map.end())  // Haven't cached it yet
               {
@@ -423,7 +423,7 @@ MultiAppNearestNodeTransfer::execute()
 
             // TODO: Logic bug when we are using caching.  "current_distance" is set by a call to getNearestNode which is
             // skipped in that case.  We shouldn't be relying on it or stuffing it in another data structure
-            if(current_distance < min_distances[to_elem->id()])
+            if (current_distance < min_distances[to_elem->id()])
             {
               min_distances[to_elem_id] = current_distance;
               min_nodes[to_elem_id] = nearest_node->id();
@@ -439,14 +439,14 @@ MultiAppNearestNodeTransfer::execute()
       // but it's tough because this is a collective operation... so that would have to be coordinated
       std::vector<NumericVector<Number> *> serialized_from_solutions(_multi_app->numGlobalApps());
 
-      if(_multi_app->hasApp())
+      if (_multi_app->hasApp())
       {
         // Swap
         MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
         for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
         {
-          if(!_multi_app->hasLocalApp(i))
+          if (!_multi_app->hasLocalApp(i))
             continue;
 
           FEProblem & from_problem = *_multi_app->appProblem(i);
@@ -477,12 +477,12 @@ MultiAppNearestNodeTransfer::execute()
 
       for(unsigned int j=0; j<min_procs.size(); j++)
       {
-        if(min_procs[j] == proc_id) // This means that this processor really did find the minumum so we need to transfer the value
+        if (min_procs[j] == proc_id) // This means that this processor really did find the minumum so we need to transfer the value
         {
           // The zero only works for LAGRANGE!
           dof_id_type to_dof = 0;
 
-          if(is_nodal)
+          if (is_nodal)
           {
             Node & to_node = to_mesh->node(j);
             to_dof = to_node.dof_number(to_sys_num, to_var_num, 0);
@@ -514,7 +514,7 @@ MultiAppNearestNodeTransfer::execute()
 
           MeshBase * from_mesh = NULL;
 
-          if(_displaced_source_mesh && from_problem.getDisplacedProblem())
+          if (_displaced_source_mesh && from_problem.getDisplacedProblem())
             from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
           else
             from_mesh = &from_problem.mesh().getMesh();
@@ -552,7 +552,7 @@ Node * MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & dista
     Node & node = *(*node_it);
     Real current_distance = (p-node).size();
 
-    if(current_distance < distance)
+    if (current_distance < distance)
     {
       distance = current_distance;
       nearest = &node;

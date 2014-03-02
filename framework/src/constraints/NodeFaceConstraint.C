@@ -155,7 +155,7 @@ NodeFaceConstraint::computeJacobian()
   {
     _phi_slave[j].resize(1);
 
-    if(_connected_dof_indices[j] == _var.nodalDofIndex())
+    if (_connected_dof_indices[j] == _var.nodalDofIndex())
       _phi_slave[j][_qp] = 1.0;
     else
       _phi_slave[j][_qp] = 0.0;

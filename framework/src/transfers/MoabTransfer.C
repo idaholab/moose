@@ -61,7 +61,7 @@ MoabTransfer::MoabTransfer(const std::string & name, InputParameters parameters)
 void
 MoabTransfer::execute()
 {
-  if((int)_direction == 0)
+  if ((int)_direction == 0)
   {
     Teuchos::RCP<const Teuchos::Comm<int> > comm_default = Teuchos::DefaultComm<int>::getComm();
     EquationSystems * to_es = &_fe_problem.es();

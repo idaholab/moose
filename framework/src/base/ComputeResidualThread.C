@@ -151,7 +151,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 void
 ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 {
-  if(_sys._dg_kernels[_tid].active().empty())
+  if (_sys._dg_kernels[_tid].active().empty())
     return;
 
   // Pointer to the neighbor we are currently working on.
@@ -192,7 +192,7 @@ ComputeResidualThread::postElement(const Elem * /*elem*/)
   _fe_problem.cacheResidual(_tid);
   _num_cached++;
 
-  if(_num_cached % 20 == 0)
+  if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     _fe_problem.addCachedResidual(_tid);

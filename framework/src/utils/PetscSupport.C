@@ -243,7 +243,7 @@ PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_
 
   Problem * problem = static_cast<Problem*>(void_ptr);
 
-  if(its == 0)
+  if (its == 0)
     old_norm = std::numeric_limits<Real>::max();
 
 
@@ -264,10 +264,10 @@ PetscErrorCode  linearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *
 
   Problem * problem = static_cast<Problem*>(void_ptr);
 
-  if(!problem)
+  if (!problem)
     mooseError("What are you trying to solve?");
 
-  if(its == 0)
+  if (its == 0)
     old_norm = std::numeric_limits<Real>::max();
 
   libMesh::out << std::setw(7) << its
@@ -524,7 +524,7 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
     ghosted_w.close();
 
     damping = problem.computeDamping(ghosted_w, ghosted_y);
-    if(damping < 1.0)
+    if (damping < 1.0)
     {
       //recalculate w=-damping*y + x
       ierr = VecWAXPY(w, -damping, y, x); CHKERRABORT(libMesh::COMM_WORLD,ierr);
@@ -649,7 +649,7 @@ void petscSetDefaults(FEProblem & problem)
     }
 
     /// \todo{Remove this when new output system is in place}
-    if(problem.shouldPrintLinearResiduals())
+    if (problem.shouldPrintLinearResiduals())
     {
       PetscErrorCode ierr;
 #if PETSC_VERSION_LESS_THAN(2,3,3)

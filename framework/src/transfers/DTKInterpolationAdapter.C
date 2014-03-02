@@ -174,7 +174,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   mesh_manager = Teuchos::rcp(new DataTransferKit::MeshManager<MeshContainerType>(mesh_blocks, comm, dim) );
 
   // Pack the coordinates into a field, this will be the positions we'll ask for other systems fields at
-  if(from_dim == dim)
+  if (from_dim == dim)
     target_coords = Teuchos::rcp(new DataTransferKit::FieldManager<MeshContainerType>(mesh_container, comm));
   else
   {
@@ -208,7 +208,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
 DTKInterpolationAdapter::RCP_Evaluator
 DTKInterpolationAdapter::get_variable_evaluator(std::string var_name)
 {
-  if(evaluators.find(var_name) == evaluators.end()) // We haven't created an evaluator for the variable yet
+  if (evaluators.find(var_name) == evaluators.end()) // We haven't created an evaluator for the variable yet
   {
     System * sys = find_sys(var_name);
 
@@ -222,7 +222,7 @@ DTKInterpolationAdapter::get_variable_evaluator(std::string var_name)
 Teuchos::RCP<DataTransferKit::FieldManager<DTKInterpolationAdapter::FieldContainerType> >
 DTKInterpolationAdapter::get_values_to_fill(std::string var_name)
 {
-  if(values_to_fill.find(var_name) == values_to_fill.end())
+  if (values_to_fill.find(var_name) == values_to_fill.end())
   {
     System * sys = find_sys(var_name);
     unsigned int var_num = sys->variable_number(var_name);
@@ -230,7 +230,7 @@ DTKInterpolationAdapter::get_values_to_fill(std::string var_name)
 
     Teuchos::ArrayRCP<double> data_space;
 
-    if(is_nodal)
+    if (is_nodal)
       data_space = Teuchos::ArrayRCP<double>(vertices.size());
     else
       data_space = Teuchos::ArrayRCP<double>(elements.size());
@@ -268,7 +268,7 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
   for(FieldContainerType::iterator it=values->begin(); it != values->end(); ++it)
   {
     // If this point "missed" then skip it
-    if(missed[i])
+    if (missed[i])
     {
       i++;
       continue;
@@ -276,12 +276,12 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
 
     const DofObject * dof_object = NULL;
 
-    if(is_nodal)
+    if (is_nodal)
       dof_object = mesh.node_ptr(vertices[i]);
     else
       dof_object = mesh.elem(elements[i]);
 
-    if(dof_object->processor_id() == libMesh::processor_id())
+    if (dof_object->processor_id() == libMesh::processor_id())
     {
       // The 0 is for the component... this only works for LAGRANGE!
       dof_id_type dof = dof_object->dof_number(sys->number(), var_num, 0);
@@ -311,7 +311,7 @@ DTKInterpolationAdapter::find_sys(std::string var_name)
   // Find the system this variable is from
   for(unsigned int i=0; i<es.n_systems(); i++)
   {
-    if(es.get_system(i).has_variable(var_name))
+    if (es.get_system(i).has_variable(var_name))
     {
       sys = &es.get_system(i);
       break;
@@ -328,17 +328,17 @@ DTKInterpolationAdapter::get_element_topology(const Elem * elem)
 {
   ElemType type = elem->type();
 
-  if(type == EDGE2)
+  if (type == EDGE2)
     return DataTransferKit::DTK_LINE_SEGMENT;
-  else if(type == TRI3)
+  else if (type == TRI3)
     return DataTransferKit::DTK_TRIANGLE;
-  else if(type == QUAD4)
+  else if (type == QUAD4)
     return DataTransferKit::DTK_QUADRILATERAL;
-  else if(type == TET4)
+  else if (type == TET4)
     return DataTransferKit::DTK_TETRAHEDRON;
-  else if(type == HEX8)
+  else if (type == HEX8)
     return DataTransferKit::DTK_HEXAHEDRON;
-  else if(type == PYRAMID5)
+  else if (type == PYRAMID5)
     return DataTransferKit::DTK_PYRAMID;
 
   libMesh::err<<"Element type not supported by DTK!"<<std::endl;

@@ -36,7 +36,7 @@ MultiAppWarehouse::addMultiApp(MultiApp * multi_app)
 
   TransientMultiApp * trans_multi_app = dynamic_cast<TransientMultiApp *>(multi_app);
 
-  if(trans_multi_app)
+  if (trans_multi_app)
     _transient_multi_apps.push_back(trans_multi_app);
 }
 
@@ -44,7 +44,7 @@ bool
 MultiAppWarehouse::hasMultiApp(const std::string & multi_app_name)
 {
   for (std::vector<MultiApp *>::const_iterator i = _all_multi_apps.begin(); i != _all_multi_apps.end(); ++i)
-    if((*i)->name() == multi_app_name)
+    if ((*i)->name() == multi_app_name)
       return true;
 
   return false;
@@ -54,7 +54,7 @@ MultiApp *
 MultiAppWarehouse::getMultiApp(const std::string & multi_app_name)
 {
   for (std::vector<MultiApp *>::const_iterator i = _all_multi_apps.begin(); i != _all_multi_apps.end(); ++i)
-    if((*i)->name() == multi_app_name)
+    if ((*i)->name() == multi_app_name)
       return *i;
 
   mooseError("Unknown MultiApp: " << multi_app_name);

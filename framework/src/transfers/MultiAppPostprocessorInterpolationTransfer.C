@@ -88,7 +88,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       {
         for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
         {
-          if(_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
+          if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
           {
             src_pts.push_back(_multi_app->position(i));
             src_vals.push_back(_multi_app->appPostprocessorValue(i,_postprocessor));
@@ -122,7 +122,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
         {
           Node * node = *node_it;
 
-          if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
+          if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
           {
             std::vector<Point> pts;
             std::vector<Number> vals;

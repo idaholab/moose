@@ -63,13 +63,13 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     _first(declareRestartableData<bool>("first", true))
 {
   // Transfer interpolation only makes sense for sub-cycling solves
-  if(_interpolate_transfers && !_sub_cycling)
+  if (_interpolate_transfers && !_sub_cycling)
     mooseError("MultiApp " << _name << " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
 }
 
 TransientMultiApp::~TransientMultiApp()
 {
-  if(!_has_an_app)
+  if (!_has_an_app)
     return;
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
@@ -88,10 +88,10 @@ TransientMultiApp::~TransientMultiApp()
 NumericVector<Number> &
 TransientMultiApp::appTransferVector(unsigned int app, std::string var_name)
 {
-  if(std::find(_transferred_vars.begin(), _transferred_vars.end(), var_name) == _transferred_vars.end())
+  if (std::find(_transferred_vars.begin(), _transferred_vars.end(), var_name) == _transferred_vars.end())
     _transferred_vars.push_back(var_name);
 
-  if(_interpolate_transfers)
+  if (_interpolate_transfers)
     return appProblem(app)->getAuxiliarySystem().system().get_vector("transfer");
 
   return appProblem(app)->getAuxiliarySystem().solution();
@@ -102,12 +102,12 @@ TransientMultiApp::init()
 {
   MultiApp::init();
 
-  if(!_has_an_app)
+  if (!_has_an_app)
     return;
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
-  if(_has_an_app)
+  if (_has_an_app)
   {
     _transient_executioners.resize(_my_num_apps);
     // Grab Transient Executioners from each app
@@ -122,7 +122,7 @@ TransientMultiApp::init()
 void
 TransientMultiApp::solveStep(Real dt, Real target_time)
 {
-  if(!_has_an_app)
+  if (!_has_an_app)
     return;
 
   Moose::out << "Solving MultiApp " << _name << std::endl;
@@ -143,14 +143,14 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     // The App might have a different local time from the rest of the problem
     Real app_time_offset = _apps[i]->getGlobalTimeOffset();
 
-    if((ex->getTime() + app_time_offset) + 2e-14 >= target_time) // Maybe this MultiApp was already solved
+    if ((ex->getTime() + app_time_offset) + 2e-14 >= target_time) // Maybe this MultiApp was already solved
       continue;
 
-    if(_sub_cycling)
+    if (_sub_cycling)
     {
       Real time_old = ex->getTime() + app_time_offset;
 
-      if(_interpolate_transfers)
+      if (_interpolate_transfers)
       {
         FEProblem * problem = appProblem(_first_local_app + i);
         AuxiliarySystem & aux_system = problem->getAuxiliarySystem();
@@ -174,7 +174,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
         _transferred_dofs = aldit._all_dof_indices;
       }
 
-      if(_output_sub_cycles)
+      if (_output_sub_cycles)
         ex->allowOutput(true);
       else
         ex->allowOutput(false);
@@ -188,16 +188,16 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
       // Now do all of the solves we need
       while(true)
       {
-        if(_first != true)
+        if (_first != true)
           ex->incrementStepOrReject();
         _first = false;
 
-        if(!(!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time))
+        if (!(!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time))
           break;
 
         ex->computeDT();
 
-        if(_interpolate_transfers)
+        if (_interpolate_transfers)
         {
           // See what time this executioner is going to go to.
           Real future_time = ex->getTime() + app_time_offset + ex->getDT();
@@ -239,21 +239,21 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
         bool converged = ex->lastSolveConverged();
 
-        if(!converged)
+        if (!converged)
         {
           mooseWarning("While sub_cycling "<<_name<<_first_local_app+i<<" failed to converge!"<<std::endl);
           _failures++;
 
-          if(_failures > _max_failures)
+          if (_failures > _max_failures)
             mooseError("While sub_cycling "<<_name<<_first_local_app+i<<" REALLY failed!"<<std::endl);
         }
 
         Real solution_change_norm = ex->getSolutionChangeNorm();
 
-        if(_detect_steady_state)
+        if (_detect_steady_state)
           Moose::out << "Solution change norm: " << solution_change_norm << std::endl;
 
-        if(converged && _detect_steady_state && solution_change_norm < _steady_state_tol)
+        if (converged && _detect_steady_state && solution_change_norm < _steady_state_tol)
         {
           Moose::out << "Detected Steady State!  Fast-forwarding to " << target_time << std::endl;
 
@@ -273,10 +273,10 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
       }
 
       // If we were looking for a steady state, but didn't reach one, we still need to output one more time
-      if(!at_steady)
+      if (!at_steady)
         ex->forceOutput();
     }
-    else if(_tolerate_failure)
+    else if (_tolerate_failure)
     {
       ex->takeStep(dt);
       ex->setTime(target_time-app_time_offset);
@@ -286,17 +286,17 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     else
     {
       Moose::out << "Solving Normal Step!" << std::endl;
-      if(_first != true)
+      if (_first != true)
         ex->incrementStepOrReject();
 
       ex->takeStep(dt);
       ex->endStep();
 
-      if(!ex->lastSolveConverged())
+      if (!ex->lastSolveConverged())
       {
         mooseWarning(_name << _first_local_app+i << " failed to converge!" << std::endl);
 
-        if(_catch_up)
+        if (_catch_up)
         {
           Moose::out << "Starting Catch Up!" << std::endl;
 
@@ -316,9 +316,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
             ex->computeDT();
             ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
 
-            if(ex->lastSolveConverged())
+            if (ex->lastSolveConverged())
             {
-              if(ex->getTime() + app_time_offset + 2e-14 >= target_time)
+              if (ex->getTime() + app_time_offset + 2e-14 >= target_time)
               {
                 ex->forceOutput(); // This is here so that it is called before endStep()
                 caught_up = true;
@@ -332,7 +332,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
             catch_up_step++;
           }
 
-          if(!caught_up)
+          if (!caught_up)
             mooseError(_name << " Failed to catch up!\n");
 
           ex->allowOutput(true);
@@ -354,12 +354,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 Real
 TransientMultiApp::computeDT()
 {
-  if(_sub_cycling) // Bow out of the timestep selection dance
+  if (_sub_cycling) // Bow out of the timestep selection dance
     return std::numeric_limits<Real>::max();
 
   Real smallest_dt = std::numeric_limits<Real>::max();
 
-  if(_has_an_app)
+  if (_has_an_app)
   {
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -376,7 +376,7 @@ TransientMultiApp::computeDT()
     Moose::swapLibMeshComm(swapped);
   }
 
-  if(_tolerate_failure) // Bow out of the timestep selection dance, we do this down here because we need to call computeConstrainedDT at least once for these executioners...
+  if (_tolerate_failure) // Bow out of the timestep selection dance, we do this down here because we need to call computeConstrainedDT at least once for these executioners...
     return std::numeric_limits<Real>::max();
 
 
@@ -387,7 +387,7 @@ TransientMultiApp::computeDT()
 void
 TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: Note that we are passing in time but also grabbing it below
 {
-  if(hasLocalApp(global_app))
+  if (hasLocalApp(global_app))
   {
     unsigned int local_app = globalAppToLocal(global_app);
 
@@ -410,17 +410,17 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
 {
   MooseApp * app = _apps[i];
   Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
-  if(!ex)
+  if (!ex)
     mooseError("MultiApp " << _name << " is not using a Transient Executioner!");
 
-  if(!output_initial)
+  if (!output_initial)
     ex->outputInitial(false);
 
   ex->init();
 
   FEProblem * problem = appProblem(_first_local_app + i);
 
-  if(_interpolate_transfers)
+  if (_interpolate_transfers)
   {
     AuxiliarySystem & aux_system = problem->getAuxiliarySystem();
     System & libmesh_aux_system = aux_system.system();
@@ -436,7 +436,7 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
   problem->copyOldSolutions();
   _transient_executioners[i] = ex;
 
-  if(_detect_steady_state || _tolerate_failure)
+  if (_detect_steady_state || _tolerate_failure)
     ex->allowOutput(false);
 }
 

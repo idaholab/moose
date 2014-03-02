@@ -69,7 +69,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
-    if(var->feType() != _var.feType())
+    if (var->feType() != _var.feType())
       mooseError("Error in " + _name + ". When saving residual values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
 
     _save_in[i] = var;
@@ -83,7 +83,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
-    if(var->feType() != _var.feType())
+    if (var->feType() != _var.feType())
       mooseError("Error in " + _name + ". When saving diagonal Jacobian values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
 
     _diag_save_in[i] = var;
@@ -111,7 +111,7 @@ IntegratedBC::computeResidual()
 
   re += _local_re;
 
-  if(_has_save_in)
+  if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for(unsigned int i=0; i<_save_in.size(); i++)
@@ -133,7 +133,7 @@ IntegratedBC::computeJacobian()
 
   ke += _local_ke;
 
-  if(_has_diag_save_in)
+  if (_has_diag_save_in)
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);

@@ -49,7 +49,7 @@ SetupOutputNameAction::act()
   {
     Output & output = _problem->out();                       // can't use use this with coupled problems on different meshes
 
-    if(_pars.isParamValid("output_if_base_contains"))
+    if (_pars.isParamValid("output_if_base_contains"))
     {
       const std::vector<std::string> & strings = _pars.get<std::vector<std::string> >("output_if_base_contains");
 
@@ -57,7 +57,7 @@ SetupOutputNameAction::act()
       for(unsigned int i=0; i<strings.size(); i++)
         found_it = found_it || (file_base.find(strings[i]) != std::string::npos);
 
-      if(!found_it) // Didn't find a match so no output should be done
+      if (!found_it) // Didn't find a match so no output should be done
         return;
     }
 

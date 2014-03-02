@@ -64,7 +64,7 @@ AllLocalDofIndicesThread::operator() (const ConstElemRange & range)
       {
         dof_id_type dof = dof_indices[j];
 
-        if(dof >= local_dof_begin && dof < local_dof_end)
+        if (dof >= local_dof_begin && dof < local_dof_end)
           _all_dof_indices.insert(dof_indices[j]);
       }
     }

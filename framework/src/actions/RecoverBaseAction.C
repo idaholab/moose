@@ -51,10 +51,10 @@ RecoverBaseAction::RecoverBaseObject(Output & /*output*/, InputParameters & /*pa
 void
 RecoverBaseAction::act()
 {
-  if(_app.isRecovering())
+  if (_app.isRecovering())
   {
     // If this is the case then we need to find the newest recovery file.
-    if(_app.getRecoverFileBase().empty())
+    if (_app.getRecoverFileBase().empty())
     {
       if (!_pars.isParamValid("file_base"))
         mooseError("\"Output/file_base\" must be valid if no recovery file is specified!");
@@ -82,7 +82,7 @@ RecoverBaseAction::newestRestartFileWithBase(std::string base_name)
 
   tinydir_dir tdir;
 
-  if(tinydir_open(&tdir, dir.c_str()) == -1)
+  if (tinydir_open(&tdir, dir.c_str()) == -1)
     mooseError("Cannot open directory!");
 
   time_t newest_time = 0;
@@ -95,7 +95,7 @@ RecoverBaseAction::newestRestartFileWithBase(std::string base_name)
   {
     tinydir_file file;
 
-    if(tinydir_readfile(&tdir, &file) == -1)
+    if (tinydir_readfile(&tdir, &file) == -1)
     {
       tinydir_next(&tdir);
       continue;
@@ -103,7 +103,7 @@ RecoverBaseAction::newestRestartFileWithBase(std::string base_name)
 
     std::string file_name = file.name;
 
-    if((!file.is_dir))
+    if ((!file.is_dir))
     {
       struct stat stats;
 
@@ -113,13 +113,13 @@ RecoverBaseAction::newestRestartFileWithBase(std::string base_name)
 
       time_t mod_time = stats.st_mtime;
 
-      if(mod_time > newest_time)
+      if (mod_time > newest_time)
       {
         newest_restart_files.clear();
         newest_time = mod_time;
       }
 
-      if(mod_time == newest_time)
+      if (mod_time == newest_time)
         newest_restart_files.push_back(file_name);
     }
 
@@ -139,14 +139,14 @@ RecoverBaseAction::newestRestartFileWithBase(std::string base_name)
 
     re_base_and_file_num.FullMatch(file_name, &the_base, &file_num);
 
-    if(file_num > max_file_num)
+    if (file_num > max_file_num)
     {
       max_file_num = file_num;
       max_base = the_base;
     }
   }
 
-  if(max_file_num == -1)
+  if (max_file_num == -1)
     mooseError("Unable to find suitable recovery file!");
 
   return dir + "/" + max_base;

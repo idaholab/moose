@@ -47,7 +47,7 @@ ValueThresholdMarker::ValueThresholdMarker(const std::string & name, InputParame
     _variable_sys_solution(_variable_sys.currentSolution()),
     _variable_fe_type(_variable.feType())
 {
-  if(_variable_fe_type.family != LAGRANGE && _variable_fe_type != FEType(CONSTANT, MONOMIAL))
+  if (_variable_fe_type.family != LAGRANGE && _variable_fe_type != FEType(CONSTANT, MONOMIAL))
     mooseError("ValueThresholdMarker can only be used with variables of type Lagrange or Constant Monomial!");
 
   if (_refine_set && _coarsen_set)
@@ -73,20 +73,20 @@ ValueThresholdMarker::computeElementMarker()
     max_value = std::max(max_value, value);
   }
 
-  if(!_invert)
+  if (!_invert)
   {
-    if(_refine_set && max_value > _refine)
+    if (_refine_set && max_value > _refine)
       return REFINE;
 
-    if(_coarsen_set && max_value < _coarsen)
+    if (_coarsen_set && max_value < _coarsen)
       return COARSEN;
   }
   else
   {
-    if(_refine_set && max_value < _refine)
+    if (_refine_set && max_value < _refine)
       return REFINE;
 
-    if(_coarsen_set && max_value > _coarsen)
+    if (_coarsen_set && max_value > _coarsen)
       return COARSEN;
   }
 

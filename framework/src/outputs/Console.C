@@ -90,13 +90,13 @@ Console::Console(const std::string & name, InputParameters parameters) :
   }
 
   // Set output coloring
-  if(getParam<bool>("use_color"))
+  if (getParam<bool>("use_color"))
   {
     char * term_env = getenv("TERM");
-    if(term_env)
+    if (term_env)
     {
       std::string term(term_env);
-      if(term == "xterm-256color" || term == "xterm")
+      if (term == "xterm-256color" || term == "xterm")
         _use_color = true;
     }
   }

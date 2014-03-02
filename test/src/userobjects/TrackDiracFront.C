@@ -40,7 +40,7 @@ void
 TrackDiracFront::execute()
 {
   // Is the value near 0.5?
-  if(_var_value[_qp] > 0.4 && _var_value[_qp] < 0.6)
+  if (_var_value[_qp] > 0.4 && _var_value[_qp] < 0.6)
   {
     Elem * elem = localElementConnectedToCurrentNode();
     _dirac_points.push_back(std::make_pair(elem, *_current_node));
@@ -78,7 +78,7 @@ TrackDiracFront::localElementConnectedToCurrentNode()
   {
     Elem * elem = _mesh.elem(connected_elems[i]);
 
-    if(elem->processor_id() == pid) // Is this element owned by the local processor?
+    if (elem->processor_id() == pid) // Is this element owned by the local processor?
       return elem;
   }
 

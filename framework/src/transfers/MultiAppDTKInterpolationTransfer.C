@@ -53,7 +53,7 @@ MultiAppDTKInterpolationTransfer::execute()
         System * from_sys = find_sys(_multi_app->problem()->es(), _from_var_name);
         System * to_sys = NULL;
 
-        if(_multi_app->hasLocalApp(i))
+        if (_multi_app->hasLocalApp(i))
           to_sys = find_sys(_multi_app->appProblem(i)->es(), _to_var_name);
 
         _helper.transferWithOffset(0, i, &from_sys->variable(from_sys->variable_number(_from_var_name)),
@@ -68,7 +68,7 @@ MultiAppDTKInterpolationTransfer::execute()
         System * from_sys = NULL;
         System * to_sys = find_sys(_multi_app->problem()->es(), _to_var_name);
 
-        if(_multi_app->hasLocalApp(i))
+        if (_multi_app->hasLocalApp(i))
           from_sys = find_sys(_multi_app->appProblem(i)->es(), _from_var_name);
 
         _helper.transferWithOffset(i, 0, from_sys ? &from_sys->variable(from_sys->variable_number(_from_var_name)) : NULL,
@@ -80,7 +80,7 @@ MultiAppDTKInterpolationTransfer::execute()
 
       _multi_app->problem()->es().update();
 
-      if(_multi_app->hasLocalApp(i))
+      if (_multi_app->hasLocalApp(i))
         _multi_app->appProblem(i)->es().update();
     }
   }

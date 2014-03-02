@@ -88,7 +88,7 @@ ComputeElemAuxVarsThread::subdomainChanged()
 void
 ComputeElemAuxVarsThread::onElement(const Elem * elem)
 {
-  if(_auxs[_tid].activeBlockElementKernels(_subdomain).size() > 0 || _auxs[_tid].activeElementKernels().size() > 0)
+  if (_auxs[_tid].activeBlockElementKernels(_subdomain).size() > 0 || _auxs[_tid].activeElementKernels().size() > 0)
   {
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);

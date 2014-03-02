@@ -58,7 +58,7 @@ public:
   static void initialize()
   {
 #ifdef LIBMESH_HAVE_TBB_API
-    if(!initialized)
+    if (!initialized)
     {
       initialized = true;
       for(unsigned int i=0; i<libMesh::n_threads(); ++i)

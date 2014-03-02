@@ -62,7 +62,7 @@ RandomHitSolutionModifier::execute()
         Node * cur_node = elem->get_node(n);
         Real cur_distance = (hit - *cur_node).size();
 
-        if(cur_distance < closest_distance)
+        if (cur_distance < closest_distance)
         {
           closest_distance = cur_distance;
           closest_node = cur_node;

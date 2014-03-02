@@ -61,16 +61,16 @@ FlagElementsThread::onElement(const Elem *elem)
   Marker::MarkerValue marker_value = (Marker::MarkerValue)_serialized_solution[dof_number];
 
   // If no Markers cared about what happened to this element let's just leave it alone
-  if(marker_value == Marker::DONT_MARK)
+  if (marker_value == Marker::DONT_MARK)
     marker_value = Marker::DO_NOTHING;
 
   // Don't refine past the max level
-  if(_max_h_level && marker_value == Marker::REFINE && elem->level() >= _max_h_level)
+  if (_max_h_level && marker_value == Marker::REFINE && elem->level() >= _max_h_level)
     marker_value = Marker::DO_NOTHING;
 
   const_cast<Elem *>(elem)->set_refinement_flag((Elem::RefinementState)marker_value);
 
-  if(_displaced_problem)
+  if (_displaced_problem)
     _displaced_problem->mesh().elem(elem->id())->set_refinement_flag((Elem::RefinementState)marker_value);
 }
 

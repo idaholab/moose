@@ -866,7 +866,7 @@ public:
    * Dimension of the subspace spanned by vectors with a given prefix.
    * @param prefix Prefix of the vectors spanning the subspace.
    */
-  unsigned int subspaceDim(const std::string& prefix) const {if(_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
+  unsigned int subspaceDim(const std::string& prefix) const {if (_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
 
   /// \todo{Remove after new output system implemented}
   bool _postprocessor_screen_output;

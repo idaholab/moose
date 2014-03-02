@@ -95,7 +95,7 @@ AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<SubdomainID> block_ids)
   _all_aux_kernels.push_back(aux);
   if (block_ids.empty())
   {
-    if(aux->isNodal())
+    if (aux->isNodal())
     {
       _all_nodal_aux_kernels.push_back(aux);
       _active_nodal_aux_kernels.push_back(aux);
@@ -112,7 +112,7 @@ AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<SubdomainID> block_ids)
     {
       SubdomainID id = *it;
 
-      if(aux->isNodal())
+      if (aux->isNodal())
       {
         _all_nodal_aux_kernels.push_back(aux);
         _active_block_nodal_aux_kernels[id].push_back(aux);

@@ -107,12 +107,12 @@ InternalSideIndicator::finalize()
 {
   unsigned int n_flux_faces = 0;
 
-  if(_scale_by_flux_faces)
+  if (_scale_by_flux_faces)
   {
     // Figure out the total number of sides contributing to the error.
     // We'll scale by this so boundary elements are less penalized
     for (unsigned int side=0; side<_current_elem->n_sides(); side++)
-      if(_current_elem->neighbor(side) != NULL)
+      if (_current_elem->neighbor(side) != NULL)
         n_flux_faces++;
   }
   else

@@ -171,7 +171,7 @@ PhysicsBasedPreconditioner::init ()
   const unsigned int num_systems = _systems.size();
 
   //If no order was specified, just solve them in increasing order
-  if(_solve_order.size() == 0)
+  if (_solve_order.size() == 0)
   {
     _solve_order.resize(num_systems);
     for(unsigned int i=0;i<num_systems;i++)
@@ -183,7 +183,7 @@ PhysicsBasedPreconditioner::init ()
   {
     LinearImplicitSystem & u_system = *_systems[system_var];
 
-    if(!_preconditioners[system_var])
+    if (!_preconditioners[system_var])
       _preconditioners[system_var] = Preconditioner<Number>::build(libMesh::CommWorld);
 
     // we have to explicitly set the matrix in the preconditioner, because h-adaptivity could have changed it and we have to work with the current one

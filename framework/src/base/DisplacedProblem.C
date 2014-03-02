@@ -54,12 +54,12 @@ public:
     {
       std::string displacement_name = displacement_variables[i];
 
-      if(_problem._displaced_nl.sys().has_variable(displacement_name))
+      if (_problem._displaced_nl.sys().has_variable(displacement_name))
       {
          var_nums.push_back(_problem._displaced_nl.sys().variable_number(displacement_name));
          var_nums_directions.push_back(i);
       }
-      else if(_problem._displaced_aux.sys().has_variable(displacement_name))
+      else if (_problem._displaced_aux.sys().has_variable(displacement_name))
       {
          aux_var_nums.push_back(_problem._displaced_aux.sys().variable_number(displacement_name));
          aux_var_nums_directions.push_back(i);
@@ -208,7 +208,7 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
   Threads::parallel_for(*_mesh.getActiveSemiLocalNodeRange(), UpdateDisplacedMeshThread(*this));
 
   // Update the geometric searches that depend on the displaced mesh
-//  if(_displaced_nl.currentlyComputingJacobian())
+//  if (_displaced_nl.currentlyComputingJacobian())
     _geometric_search_data.update();
 
   Moose::perf_log.pop("updateDisplacedMesh()","Solve");
@@ -328,7 +328,7 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
   bool have_points = points_set.size();
 
-  if(have_points)
+  if (have_points)
   {
     std::vector<Point> points(points_set.size());
     std::copy(points_set.begin(), points_set.end(), points.begin());
