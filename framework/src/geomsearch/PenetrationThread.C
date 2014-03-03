@@ -123,7 +123,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
     bool info_set(false);
 
     // See if we already have info about this node
-    if(info)
+    if (info)
     {
       if ((!_update_location || !info->_update) && info->_distance >= 0)
       {
@@ -153,13 +153,13 @@ PenetrationThread::operator() (const NodeIdRange & range)
         Moose::findContactPoint(*info, fe, _fe_type, node,
                                 false, _tangential_tolerance, contact_point_on_side);
 
-        if(contact_point_on_side)
+        if (contact_point_on_side)
         {
           if (info->_tangential_distance <= 0.0) //on the face
           {
             info_set = true;
           }
-          else if(info->_tangential_distance > 0.0 && old_tangential_distance > 0.0)
+          else if (info->_tangential_distance > 0.0 && old_tangential_distance > 0.0)
           { //off the face but within tolerance, was that way on the last step too
             if (info->_side->dim()==2 && info->_off_edge_nodes.size()<2)
             { //Closest point on face is on a node rather than an edge.  Another
@@ -1156,7 +1156,7 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
   Real max_face_length = side->hmax() + twosqrt2*tangential_tolerance;
 
   RealVectorValue normal;
-  if(dim-1 == 2)
+  if (dim-1 == 2)
   {
     normal = dxyz_dxi[0].cross(dxyz_deta[0]);
   }
@@ -1715,7 +1715,7 @@ PenetrationThread::getSidesOnMasterBoundary(std::vector<unsigned int> &sides,
   sides.clear();
   for(unsigned int m=0; m<_n_elems; ++m)
   {
-    if(_elem_list[m] == elem->id())
+    if (_elem_list[m] == elem->id())
     {
       if (_id_list[m] == static_cast<short>(_master_boundary))
       {

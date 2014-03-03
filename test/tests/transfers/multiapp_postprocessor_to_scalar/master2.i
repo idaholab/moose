@@ -52,17 +52,17 @@
   [./point_value_0]
     type = ScalarVariable
     variable = from_sub_app
-		compontent = 0
+    compontent = 0
   [../]
   [./point_value_1]
     type = ScalarVariable
     variable = from_sub_app
-		component = 1
+    component = 1
   [../]
   [./point_value_2]
     type = ScalarVariable
     variable = from_sub_app
-		component = 2
+    component = 2
   [../]
 []
 

@@ -34,7 +34,7 @@
 [Postprocessors]
   [./all_pp]
     type = NumInternalSides
-		output = auto
+    output = auto
   [../]
   [./block_1_pp]
     type = NumInternalSides
@@ -57,6 +57,6 @@
   linear_residuals = true
   output_initial = true
   exodus = false
-	postprocessor_csv = true
+  postprocessor_csv = true
   perf_log = true
 []

@@ -33,7 +33,7 @@ DisplacedSystem::init()
 NumericVector<Number> &
 DisplacedSystem::getVector(std::string name)
 {
-  if(_sys.have_vector(name))
+  if (_sys.have_vector(name))
     return _sys.get_vector(name);
   else
     return _undisplaced_system.getVector(name);

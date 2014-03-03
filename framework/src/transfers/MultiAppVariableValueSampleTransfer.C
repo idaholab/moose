@@ -67,7 +67,7 @@ MultiAppVariableValueSampleTransfer::execute()
           // First find the element the hit lands in
           const Elem * elem = (*pl)(multi_app_position);
 
-          if(elem && elem->processor_id() == libMesh::processor_id())
+          if (elem && elem->processor_id() == libMesh::processor_id())
           {
             from_sub_problem.reinitElemPhys(elem, point_vec, 0);
 
@@ -78,7 +78,7 @@ MultiAppVariableValueSampleTransfer::execute()
           libMesh::Parallel::max(value);
         }
 
-        if(_multi_app->hasLocalApp(i))
+        if (_multi_app->hasLocalApp(i))
         {
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
@@ -99,7 +99,7 @@ MultiAppVariableValueSampleTransfer::execute()
           {
             Node * node = *node_it;
 
-            if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
+            if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
             {
               // The zero only works for LAGRANGE!
               dof_id_type dof = node->dof_number(sys_num, var_num, 0);

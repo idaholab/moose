@@ -49,7 +49,7 @@ KernelValue::computeResidual()
 
   re += _local_re;
 
-  if(_has_save_in)
+  if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for(unsigned int i=0; i<_save_in.size(); i++)
@@ -77,7 +77,7 @@ KernelValue::computeJacobian()
 
   ke += _local_ke;
 
-  if(_has_diag_save_in)
+  if (_has_diag_save_in)
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
@@ -100,7 +100,7 @@ KernelValue::computeOffDiagJacobian(unsigned int jvar)
   for (_j=0; _j<_phi.size(); _j++)
     for (_qp=0; _qp<_qrule->n_points(); _qp++)
     {
-      if(jvar == _var.index())
+      if (jvar == _var.index())
       {
         _value = _coord[_qp]*precomputeQpJacobian();
         for (_i=0; _i<_test.size(); _i++)

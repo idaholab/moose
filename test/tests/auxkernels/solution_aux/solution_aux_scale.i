@@ -70,7 +70,7 @@
 
 [Executioner]
   type = Steady
-	solve_type = 'PJFNK'
+  solve_type = 'PJFNK'
   nl_rel_tol = 1e-10
 []
 

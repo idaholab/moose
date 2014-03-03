@@ -181,7 +181,7 @@ ExodusOutput::outputInput()
 void
 ExodusOutput::setOutputPosition(const Point & /* p */)
 {
-  if(_file_num == 0) // This might happen in the case of a MultiApp reset
+  if (_file_num == 0) // This might happen in the case of a MultiApp reset
     _file_num = 1;
 
   sequence(true);
@@ -201,10 +201,10 @@ ExodusOutput::allocateExodusObject()
   if (_es.get_mesh().mesh_dimension() != 1)
     _out->use_mesh_dimension_instead_of_spatial_dimension(true);
 
-  if(_app.hasOutputPosition())
+  if (_app.hasOutputPosition())
     _out->set_coordinate_offset(_app.getOutputPosition());
 
-  if(_first || _mesh_just_changed)
+  if (_first || _mesh_just_changed)
     _file_num++;
 
   _first = false;
@@ -212,6 +212,6 @@ ExodusOutput::allocateExodusObject()
   _mesh_just_changed = false;
 
   // Set the append flag on the underlying ExodusII_IO object
-  if(!_mesh_just_changed)
+  if (!_mesh_just_changed)
     _out->append(_append);
 }

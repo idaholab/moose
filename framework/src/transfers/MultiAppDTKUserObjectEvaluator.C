@@ -49,7 +49,7 @@ MultiAppDTKUserObjectEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>&
   for (GlobalOrdinal i=0; i<num_values; i++)
   {
     // See if this app is on this processor
-    if(std::binary_search(_box_ids.begin(), _box_ids.end(), bids[i]))
+    if (std::binary_search(_box_ids.begin(), _box_ids.end(), bids[i]))
     {
       GlobalOrdinal app = bids[i];
 

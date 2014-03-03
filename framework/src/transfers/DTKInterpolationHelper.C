@@ -67,10 +67,10 @@ DTKInterpolationHelper::transferWithOffset(unsigned int from, unsigned int to, c
   Teuchos::RCP<const Teuchos::MpiComm<int> > from_comm;
   Teuchos::RCP<const Teuchos::MpiComm<int> > to_comm;
 
-  if(from_mpi_comm)
+  if (from_mpi_comm)
     from_comm = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(*from_mpi_comm))));
 
-  if(to_mpi_comm)
+  if (to_mpi_comm)
     to_comm = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(*to_mpi_comm))));
 
   // Create a union comm for the shared domain transfer
@@ -81,70 +81,70 @@ DTKInterpolationHelper::transferWithOffset(unsigned int from, unsigned int to, c
   EquationSystems * from_es = NULL;
   EquationSystems * to_es = NULL;
 
-  if(from_mpi_comm)
+  if (from_mpi_comm)
     from_es = &from_var->system()->get_equation_systems();
 
-  if(to_mpi_comm)
+  if (to_mpi_comm)
     to_es = &to_var->system()->get_equation_systems();
 
   unsigned int dim = 3;
 
-  if(from_es && to_es && (from_es->get_mesh().mesh_dimension() < to_es->get_mesh().mesh_dimension()))
+  if (from_es && to_es && (from_es->get_mesh().mesh_dimension() < to_es->get_mesh().mesh_dimension()))
     mooseError("Receiving system dimension should be less than or equal to the sending system dimension!");
 
-  if(from_es && to_es)
+  if (from_es && to_es)
     dim = std::max(from_es->get_mesh().mesh_dimension(), to_es->get_mesh().mesh_dimension());
-  else if(from_es)
+  else if (from_es)
     dim = from_es->get_mesh().mesh_dimension();
   else
     dim = to_es->get_mesh().mesh_dimension();
 
   // Possibly make an Adapter for from_es
-  if(from_mpi_comm && adapters.find(from_es) == adapters.end())
+  if (from_mpi_comm && adapters.find(from_es) == adapters.end())
     adapters[from_es] = new DTKInterpolationAdapter(from_comm, *from_es, from_offset, dim);
 
   // Possibly make an Adapter for to_es
-  if(to_mpi_comm && adapters.find(to_es) == adapters.end())
+  if (to_mpi_comm && adapters.find(to_es) == adapters.end())
     adapters[to_es] = new DTKInterpolationAdapter(to_comm, *to_es, to_offset, dim);
 
   DTKInterpolationAdapter * from_adapter = NULL;
   DTKInterpolationAdapter * to_adapter = NULL;
 
-  if(from_mpi_comm)
+  if (from_mpi_comm)
     from_adapter = adapters[from_es];
 
-  if(to_mpi_comm)
+  if (to_mpi_comm)
     to_adapter = adapters[to_es];
 
   std::pair<int, int> from_to(from, to);
 
   // If we haven't created a map for this pair of EquationSystems yet, do it now
-  if(dtk_maps.find(from_to) == dtk_maps.end())
+  if (dtk_maps.find(from_to) == dtk_maps.end())
   {
     shared_domain_map_type * map = NULL;
 
-    if(from_mpi_comm)
+    if (from_mpi_comm)
       map = new shared_domain_map_type(comm_union, from_es->get_mesh().mesh_dimension(), true);
-    else if(to_mpi_comm)
+    else if (to_mpi_comm)
       map = new shared_domain_map_type(comm_union, to_es->get_mesh().mesh_dimension(), true);
 
     dtk_maps[from_to] = map;
 
     // The tolerance here is for the "contains_point()" implementation in DTK.  Set a larger value for a looser tolerance...
-    if(from_mpi_comm && to_mpi_comm)
+    if (from_mpi_comm && to_mpi_comm)
     {
-      if(to_var->type() == FEType())
+      if (to_var->type() == FEType())
         map->setup(from_adapter->get_mesh_manager(), to_adapter->get_target_coords(), 200*Teuchos::ScalarTraits<double>::eps());
       else
         map->setup(from_adapter->get_mesh_manager(), to_adapter->get_elem_target_coords(), 200*Teuchos::ScalarTraits<double>::eps());
     }
-    else if(from_mpi_comm)
+    else if (from_mpi_comm)
       map->setup(from_adapter->get_mesh_manager(),
                  Teuchos::RCP<DataTransferKit::FieldManager<DTKInterpolationAdapter::MeshContainerType> >(),
                  200*Teuchos::ScalarTraits<double>::eps());
-    else if(to_mpi_comm)
+    else if (to_mpi_comm)
     {
-      if(to_var->type() == FEType())
+      if (to_var->type() == FEType())
         map->setup(Teuchos::RCP<DataTransferKit::MeshManager<DTKInterpolationAdapter::MeshContainerType> >(),
                    to_adapter->get_target_coords(),
                    200*Teuchos::ScalarTraits<double>::eps());
@@ -157,17 +157,17 @@ DTKInterpolationHelper::transferWithOffset(unsigned int from, unsigned int to, c
 
   DTKInterpolationAdapter::RCP_Evaluator from_evaluator;
 
-  if(from_mpi_comm)
+  if (from_mpi_comm)
     from_evaluator = from_adapter->get_variable_evaluator(from_var->name());
 
   Teuchos::RCP<DataTransferKit::FieldManager<DTKInterpolationAdapter::FieldContainerType> > to_values;
 
-  if(to_mpi_comm)
+  if (to_mpi_comm)
     to_values = to_adapter->get_values_to_fill(to_var->name());
 
   dtk_maps[from_to]->apply(from_evaluator, to_values);
 
-  if(to_mpi_comm)
+  if (to_mpi_comm)
     to_adapter->update_variable_values(to_var->name(), dtk_maps[from_to]->getMissedTargetPoints());
 }
 

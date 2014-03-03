@@ -144,5 +144,5 @@
 #  interval = 1
 #  exodus = true
 #  perf_log = true
-#	file_base = displaced_adapt_test_out
+#  file_base = displaced_adapt_test_out
 #[]

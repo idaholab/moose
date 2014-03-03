@@ -57,14 +57,14 @@ ComputeNodalAuxBcsThread::operator() (const ConstBndNodeRange & range)
       var->prepareAux();
     }
 
-    if(_auxs[_tid].activeBCs(boundary_id).size() > 0)
+    if (_auxs[_tid].activeBCs(boundary_id).size() > 0)
     {
       Node * node = bnode->_node;
 
-//      if(unlikely(_calculate_element_time))
+//      if (unlikely(_calculate_element_time))
 //        startNodeTiming(node.id());
 
-      if(node->processor_id() == libMesh::processor_id())
+      if (node->processor_id() == libMesh::processor_id())
       {
         _fe_problem.reinitNodeFace(node, boundary_id, _tid);
 
@@ -74,7 +74,7 @@ ComputeNodalAuxBcsThread::operator() (const ConstBndNodeRange & range)
           (*aux_it)->compute();
       }
 
-//      if(unlikely(_calculate_element_time))
+//      if (unlikely(_calculate_element_time))
 //        stopNodeTiming(node.id());
     }
 

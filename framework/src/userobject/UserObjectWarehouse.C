@@ -240,7 +240,7 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
   _name_to_user_objects[user_object->name()] = user_object;
 
   // Add an ElementUserObject
-  if(dynamic_cast<ElementUserObject*>(user_object))
+  if (dynamic_cast<ElementUserObject*>(user_object))
   {
     // Extract the BlockIDs (see BlockRestrictable)
     ElementUserObject * element_uo = dynamic_cast<ElementUserObject*>(user_object);
@@ -258,7 +258,7 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
   }
 
   // Add a SideUserObject
-  else if(dynamic_cast<SideUserObject*>(user_object))
+  else if (dynamic_cast<SideUserObject*>(user_object))
   {
     // Extract the BoundaryIDs (see BoundaryRestrictable)
     SideUserObject * side_uo = dynamic_cast<SideUserObject*>(user_object);
@@ -276,7 +276,7 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
   }
 
   // Add an InternalSideUserObject
-  else if(dynamic_cast<InternalSideUserObject*>(user_object))
+  else if (dynamic_cast<InternalSideUserObject*>(user_object))
   {
     // Extract the BlockIDs (see BlockRestrictable)
     InternalSideUserObject * element_uo = dynamic_cast<InternalSideUserObject*>(user_object);
@@ -294,7 +294,7 @@ UserObjectWarehouse::addUserObject(UserObject *user_object)
   }
 
   // Add a NodalUserObject
-  else if(dynamic_cast<NodalUserObject*>(user_object))
+  else if (dynamic_cast<NodalUserObject*>(user_object))
   {
     // Extract the Boundary and Block Ids (see BoundaryRestrictable and BlockRestrictable)
     NodalUserObject * nodal_uo = dynamic_cast<NodalUserObject*>(user_object);

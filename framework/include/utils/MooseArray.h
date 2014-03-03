@@ -203,7 +203,7 @@ inline
 void
 MooseArray<T>::resize(const unsigned int size)
 {
-  if(size <= _allocated_size)
+  if (size <= _allocated_size)
     _size = size;
   else
   {

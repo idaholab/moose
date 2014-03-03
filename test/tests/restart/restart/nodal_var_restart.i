@@ -33,13 +33,13 @@
     order = FIRST
     family = LAGRANGE
     [./InitialCondition]
-	    type = BoundingBoxIC
-	    x1 = 0.0
-	    x2 = 1.0
-	    y1 = 0.0
-	    y2 = 1.0
-	    inside = 3.0
-	    outside = 1.0
+      type = BoundingBoxIC
+      x1 = 0.0
+      x2 = 1.0
+      y1 = 0.0
+      y2 = 1.0
+      inside = 3.0
+      outside = 1.0
     [../]
   [../]
 []

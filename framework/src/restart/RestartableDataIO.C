@@ -36,7 +36,7 @@ RestartableDataIO::writeRestartableData(std::string base_file_name, const Restar
   {
     const std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
-    if(restartable_data.size())
+    if (restartable_data.size())
     {
       const unsigned int file_version = 1;
 
@@ -47,7 +47,7 @@ RestartableDataIO::writeRestartableData(std::string base_file_name, const Restar
 
       file_name_stream << "-" << proc_id;
 
-      if(n_threads > 1)
+      if (n_threads > 1)
         file_name_stream << "-" << tid;
 
       std::string file_name = file_name_stream.str();
@@ -126,14 +126,14 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
   {
     std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
-    if(restartable_data.size())
+    if (restartable_data.size())
     {
       std::ostringstream file_name_stream;
       file_name_stream << base_file_name;
 
       file_name_stream << "-" << proc_id;
 
-      if(n_threads > 1)
+      if (n_threads > 1)
         file_name_stream << "-" << tid;
 
       std::string file_name = file_name_stream.str();
@@ -158,20 +158,20 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
       in.read((char *)&this_n_threads, sizeof(this_n_threads));
 
       // check the header
-      if(id[0] != 'R' || id[1] != 'D')
+      if (id[0] != 'R' || id[1] != 'D')
         mooseError("Corrupted restartable data file!");
 
       // check the file version
-      if(this_file_version > file_version)
+      if (this_file_version > file_version)
         mooseError("Trying to restart from a newer file version - you need to update MOOSE");
 
-      if(this_file_version < file_version)
+      if (this_file_version < file_version)
         mooseError("Trying to restart from an older file version - you need to checkout an older version of MOOSE.");
 
-      if(this_n_procs != n_procs)
+      if (this_n_procs != n_procs)
         mooseError("Cannot restart using a different number of processors!");
 
-      if(this_n_threads != n_threads)
+      if (this_n_threads != n_threads)
         mooseError("Cannot restart using a different number of threads!");
 
       // number of data
@@ -204,7 +204,7 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
         unsigned int data_size = 0;
         in.read((char *) &data_size, sizeof(data_size));
 
-        if(restartable_data.find(current_name) != restartable_data.end() // Only restore values if they're currently being used
+        if (restartable_data.find(current_name) != restartable_data.end() // Only restore values if they're currently being used
            && (recovering || (_recoverable_data.find(current_name) == _recoverable_data.end())) // Only read this value if we're either recovering or this hasn't been specified to be recovery only data
           )
         {
@@ -225,7 +225,7 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
     }
   }
 
-  if(ignored_data.size())
+  if (ignored_data.size())
   {
     std::ostringstream names;
 

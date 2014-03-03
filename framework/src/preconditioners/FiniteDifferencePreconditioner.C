@@ -33,7 +33,7 @@ InputParameters validParams<FiniteDifferencePreconditioner>()
 FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const std::string & name, InputParameters params) :
     MoosePreconditioner(name, params)
 {
-  if(libMesh::n_processors() > 1)
+  if (libMesh::n_processors() > 1)
     mooseError("Can't use the Finite Difference Preconditioner in parallel yet!");
 
   NonlinearSystem & nl = _fe_problem.getNonlinearSystem();

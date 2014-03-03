@@ -115,7 +115,7 @@ Coupleable::getVar(const std::string & var_name, unsigned int comp)
 unsigned int
 Coupleable::coupled(const std::string & var_name, unsigned int comp)
 {
-  if(!isCoupled(var_name)) // If it's optionally coupled just return 0
+  if (!isCoupled(var_name)) // If it's optionally coupled just return 0
     return _optional_var_index[var_name];
 
   MooseVariable * var = getVar(var_name, comp);
@@ -130,7 +130,7 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 {
-  if(!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
+  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
   {
     VariableValue * value = _default_value[var_name];
     if (value == NULL)
@@ -152,7 +152,7 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 {
-  if(!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
+  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
   {
     VariableValue * value = _default_value[var_name];
     if (value == NULL)
@@ -174,7 +174,7 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 {
-  if(!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
+  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
   {
     VariableValue * value = _default_value[var_name];
     if (value == NULL)

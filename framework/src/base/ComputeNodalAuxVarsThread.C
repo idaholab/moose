@@ -54,7 +54,7 @@ ComputeNodalAuxVarsThread::operator() (const ConstNodeRange & range)
       var->prepareAux();
     }
 
-//  if(unlikely(_calculate_element_time))
+//  if (unlikely(_calculate_element_time))
 //    startNodeTiming(node->id());
 
     _fe_problem.reinitNode(node, _tid);
@@ -74,7 +74,7 @@ ComputeNodalAuxVarsThread::operator() (const ConstNodeRange & range)
         (*aux_it)->compute();
     }
 
-//  if(unlikely(_calculate_element_time))
+//  if (unlikely(_calculate_element_time))
 //    stopNodeTiming(node->id());
 
     // We are done, so update the solution vector

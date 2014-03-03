@@ -50,7 +50,7 @@ MaxQpsThread::operator() (const ConstElemRange & range)
 
     unsigned int qps = 4; // assembly.qPoints().size();
 
-    if(qps > _max)
+    if (qps > _max)
       _max = qps;
   }
 }
@@ -58,6 +58,6 @@ MaxQpsThread::operator() (const ConstElemRange & range)
 void
 MaxQpsThread::join(const MaxQpsThread & y)
 {
-  if(y._max > _max)
+  if (y._max > _max)
     _max = y._max;
 }

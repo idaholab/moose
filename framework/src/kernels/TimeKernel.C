@@ -44,7 +44,7 @@ TimeKernel::computeResidual()
 
   re += _local_re;
 
-  if(_has_save_in)
+  if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for(unsigned int i=0; i<_save_in.size(); i++)

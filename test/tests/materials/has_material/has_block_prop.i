@@ -50,7 +50,7 @@
 
 [Executioner]
   type = Steady
-	solve_type = 'PJFNK'
+  solve_type = 'PJFNK'
 []
 
 [Output]

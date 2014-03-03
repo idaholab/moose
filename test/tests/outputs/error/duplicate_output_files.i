@@ -40,10 +40,10 @@
 []
 
 [Outputs]
-	[./exodus]
+  [./exodus]
     type = 'Exodus'
-	[../]
-	[./exodus_two]
+  [../]
+  [./exodus_two]
     type = 'Exodus'
-	[../]
+  [../]
 []

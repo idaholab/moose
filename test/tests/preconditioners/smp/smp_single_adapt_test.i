@@ -5,14 +5,14 @@
 
 [Mesh]
   type = GeneratedMesh
-	dim = 2
-	xmin = 0
-	xmax = 1
-	ymin = 0
-	ymax = 1
-	nx = 5
-	ny = 5
-	elem_type = QUAD4
+  dim = 2
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+  nx = 5
+  ny = 5
+  elem_type = QUAD4
 []
 
 [Functions]
@@ -27,7 +27,7 @@
 []
 
 [Variables]
-	active = 'u v'
+  active = 'u v'
 
   [./u]
     order = FIRST

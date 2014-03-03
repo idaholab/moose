@@ -313,7 +313,7 @@ class ParamTable:
     disable_it = False
     for group_name,table_widget in self.group_table_widgets.items():
       for i in xrange(0,table_widget.rowCount()):
-        if(table_widget.item(i,0)):
+        if (table_widget.item(i,0)):
           param_name = str(table_widget.item(i,0).text())
           if param_name == 'Name' or (param_name in self.param_is_required and self.param_is_required[param_name]):
             param_value = None

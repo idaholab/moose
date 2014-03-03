@@ -22,8 +22,8 @@
 
 [Kernels]
   [./td]
-  	type = TimeDerivative
-  	variable = diffused
+    type = TimeDerivative
+    variable = diffused
   [../]
 
   [./diff]

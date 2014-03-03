@@ -1,10 +1,10 @@
 [Mesh]
- 	 type = GeneratedMesh
- 	 dim = 2
- 	 xmin = -1
- 	 ymin = -1
- 	 xmax = 1
- 	 ymax = 1
+    type = GeneratedMesh
+    dim = 2
+    xmin = -1
+    ymin = -1
+    xmax = 1
+    ymax = 1
    nx = 2
    ny = 2
    elem_type = QUAD4

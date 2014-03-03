@@ -180,7 +180,7 @@ Output::iterationOutput(SNES, PetscInt its, PetscReal /*fnorm*/, void * _output)
 
     // If the last iteration output time happened before the last solve finished then advance to after that time
     // if not just keep incrementing time
-    if(output->_last_iteration_output_time <= last_time)
+    if (output->_last_iteration_output_time <= last_time)
       output->_last_iteration_output_time = last_time + output->_dt*1e-2;
     else
       output->_last_iteration_output_time += output->_dt*1e-2;

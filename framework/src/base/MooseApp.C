@@ -100,7 +100,7 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _recover(false),
     _half_transient(false)
 {
-  if(isParamValid("_argc") && isParamValid("_argv"))
+  if (isParamValid("_argc") && isParamValid("_argv"))
   {
     int argc = getParam<int>("_argc");
     char ** argv = getParam<char**>("_argv");
@@ -133,7 +133,7 @@ MooseApp::setupOptions()
   if (isParamValid("parallel_mesh"))
     _parallel_mesh_on_command_line = true;
 
-  if(isParamValid("half_transient"))
+  if (isParamValid("half_transient"))
     _half_transient = true;
 
   if (isParamValid("trap_fpe"))
@@ -190,7 +190,7 @@ MooseApp::setupOptions()
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
   }
-  else if(_input_filename != "") // They already specified an input filename
+  else if (_input_filename != "") // They already specified an input filename
   {
     _parser.parse(_input_filename);
     _action_warehouse.build();
@@ -198,7 +198,7 @@ MooseApp::setupOptions()
   }
   else if (isParamValid("input_file"))
   {
-    if(isParamValid("recover"))
+    if (isParamValid("recover"))
     {
       _recover = true;
 
@@ -347,7 +347,7 @@ MooseApp::disableCheckUnusedFlag()
 std::string
 MooseApp::getSysInfo()
 {
-  if(_sys_info)
+  if (_sys_info)
     return _sys_info->getInfo();
   else
     return "";
@@ -373,7 +373,7 @@ MooseApp::setOutputPosition(Point p)
   _output_position_set = true;
   _output_position = p;
 
-  if(_executioner)
+  if (_executioner)
     _executioner->setOutputPosition(p);
 }
 

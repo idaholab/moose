@@ -21,12 +21,12 @@
 []
 
 [Functions]
-	active = 'func'
+  active = 'func'
 
-	[./func]
-		type = ParsedFunction
-		value = 2.0*t
-	[../]
+  [./func]
+    type = ParsedFunction
+    value = 2.0*t
+  [../]
 []
 
 [Kernels]

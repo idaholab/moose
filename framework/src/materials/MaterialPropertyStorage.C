@@ -104,7 +104,7 @@ MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMa
   unsigned int parent_side = input_parent_side == -1 ? 0 : input_parent_side;
   unsigned int child_side  = input_child_side  == -1 ? 0 : input_child_side;
 
-  if(input_child_side == -1) // Not doing side projection (ie, doing volume projection)
+  if (input_child_side == -1) // Not doing side projection (ie, doing volume projection)
     n_qpoints = qrule.n_points();
   else
     n_qpoints = qrule_face.n_points();
@@ -115,7 +115,7 @@ MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMa
 
   std::vector<unsigned int> children;
 
-  if(input_child != -1) // Passed in a child explicitly
+  if (input_child != -1) // Passed in a child explicitly
     children.push_back(input_child);
   else
   {
@@ -129,7 +129,7 @@ MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMa
     unsigned int child = children[i];
 
     // If we're not projecting an internal child side, but we are projecting sides, see if this child is on that side
-    if(input_child == -1 && input_child_side != -1 && !elem.is_child_on_side(child, parent_side))
+    if (input_child == -1 && input_child_side != -1 && !elem.is_child_on_side(child, parent_side))
       continue;
 
     const Elem * child_elem = elem.child(child);
@@ -176,7 +176,7 @@ MaterialPropertyStorage::restrictStatefulProps(const std::vector<std::pair<unsig
 
   unsigned int n_qpoints = 0;
 
-  if(!doing_a_side)
+  if (!doing_a_side)
   {
     side = 0; // Use 0 for the elem
     n_qpoints = qrule.n_points();

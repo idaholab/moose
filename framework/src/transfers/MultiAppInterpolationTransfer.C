@@ -76,7 +76,7 @@ MultiAppInterpolationTransfer::execute()
 
       MeshBase * from_mesh = NULL;
 
-      if(_displaced_source_mesh && from_problem.getDisplacedProblem())
+      if (_displaced_source_mesh && from_problem.getDisplacedProblem())
         from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
       else
         from_mesh = &from_problem.mesh().getMesh();
@@ -117,7 +117,7 @@ MultiAppInterpolationTransfer::execute()
       std::vector<std::string> vars;
       vars.push_back(_to_var_name);
 
-      if(from_is_nodal)
+      if (from_is_nodal)
       {
         MeshBase::const_node_iterator from_nodes_it    = from_mesh->local_nodes_begin();
         MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
@@ -155,14 +155,14 @@ MultiAppInterpolationTransfer::execute()
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
-        if(_multi_app->hasLocalApp(i))
+        if (_multi_app->hasLocalApp(i))
         {
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
           System * to_sys = find_sys(_multi_app->appProblem(i)->es(), _to_var_name);
 
-          if(!to_sys)
+          if (!to_sys)
             mooseError("Cannot find variable "<<_to_var_name<<" for "<<_name<<" Transfer");
 
           unsigned int sys_num = to_sys->number();
@@ -171,14 +171,14 @@ MultiAppInterpolationTransfer::execute()
 
           MeshBase * mesh = NULL;
 
-          if(_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
+          if (_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
             mesh = &_multi_app->appProblem(i)->getDisplacedProblem()->mesh().getMesh();
           else
             mesh = &_multi_app->appProblem(i)->mesh().getMesh();
 
           bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
-          if(is_nodal)
+          if (is_nodal)
           {
             MeshBase::const_node_iterator node_it = mesh->local_nodes_begin();
             MeshBase::const_node_iterator node_end = mesh->local_nodes_end();
@@ -189,7 +189,7 @@ MultiAppInterpolationTransfer::execute()
 
               Point actual_position = *node+_multi_app->position(i);
 
-              if(node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
+              if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
                 std::vector<Point> pts;
                 std::vector<Number> vals;
@@ -220,7 +220,7 @@ MultiAppInterpolationTransfer::execute()
               Point centroid = elem->centroid();
               Point actual_position = centroid+_multi_app->position(i);
 
-              if(elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
+              if (elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
               {
                 std::vector<Point> pts;
                 std::vector<Number> vals;
@@ -272,7 +272,7 @@ MultiAppInterpolationTransfer::execute()
 
       MeshBase * to_mesh = NULL;
 
-      if(_displaced_target_mesh && to_problem.getDisplacedProblem())
+      if (_displaced_target_mesh && to_problem.getDisplacedProblem())
         to_mesh = &to_problem.getDisplacedProblem()->mesh().getMesh();
       else
         to_mesh = &to_problem.mesh().getMesh();
@@ -305,7 +305,7 @@ MultiAppInterpolationTransfer::execute()
 
       for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
-        if(!_multi_app->hasLocalApp(i))
+        if (!_multi_app->hasLocalApp(i))
           continue;
 
         MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
@@ -327,14 +327,14 @@ MultiAppInterpolationTransfer::execute()
 
         MeshBase * from_mesh = NULL;
 
-        if(_displaced_source_mesh && from_problem.getDisplacedProblem())
+        if (_displaced_source_mesh && from_problem.getDisplacedProblem())
           from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
         else
           from_mesh = &from_problem.mesh().getMesh();
 
         Point app_position = _multi_app->position(i);
 
-        if(from_is_nodal)
+        if (from_is_nodal)
         {
           MeshBase::const_node_iterator from_nodes_it    = from_mesh->local_nodes_begin();
           MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
@@ -374,7 +374,7 @@ MultiAppInterpolationTransfer::execute()
       idi->prepare_for_use();
 
       // Now do the interpolation to the target system
-      if(is_nodal)
+      if (is_nodal)
       {
         MeshBase::const_node_iterator node_it = to_mesh->local_nodes_begin();
         MeshBase::const_node_iterator node_end = to_mesh->local_nodes_end();
@@ -383,7 +383,7 @@ MultiAppInterpolationTransfer::execute()
         {
           Node * node = *node_it;
 
-          if(node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
+          if (node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
           {
             std::vector<Point> pts;
             std::vector<Number> vals;
@@ -413,7 +413,7 @@ MultiAppInterpolationTransfer::execute()
 
           Point centroid = elem->centroid();
 
-          if(elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
+          if (elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
           {
             std::vector<Point> pts;
             std::vector<Number> vals;
@@ -454,7 +454,7 @@ Node * MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & dis
     Node & node = *(*node_it);
     Real current_distance = (p-node).size();
 
-    if(current_distance < distance)
+    if (current_distance < distance)
     {
       distance = current_distance;
       nearest = &node;

@@ -116,7 +116,7 @@ SystemBase::addVariableToZeroOnJacobian(std::string var_name)
 void
 SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
 {
-  if(vars_to_be_zeroed.size() > 0)
+  if (vars_to_be_zeroed.size() > 0)
   {
     NumericVector<Number> & solution = this->solution();
 
@@ -170,7 +170,7 @@ SystemBase::getMinQuadratureOrder()
 void
 SystemBase::prepare(THREAD_ID tid)
 {
-  if(_subproblem.hasActiveElementalMooseVariables(tid))
+  if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
     const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
@@ -180,7 +180,7 @@ SystemBase::prepare(THREAD_ID tid)
     for(std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
         it != active_elemental_moose_variables.end();
         ++it)
-      if(&(*it)->sys() == this)
+      if (&(*it)->sys() == this)
         (*it)->prepare();
   }
   else
@@ -197,7 +197,7 @@ SystemBase::prepare(THREAD_ID tid)
 void
 SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 {
-  if(_subproblem.hasActiveElementalMooseVariables(tid)) // We only need to do something if the element prepare was restricted
+  if (_subproblem.hasActiveElementalMooseVariables(tid)) // We only need to do something if the element prepare was restricted
   {
     const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
 
@@ -207,7 +207,7 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
     {
       MooseVariable *var = *it;
-      if(&var->sys() == this && !active_elemental_moose_variables.count(var)) // If it wasnt in the active list we need to prepare it
+      if (&var->sys() == this && !active_elemental_moose_variables.count(var)) // If it wasnt in the active list we need to prepare it
       {
         var->prepare();
         newly_prepared_vars.push_back(var);
@@ -215,7 +215,7 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     }
 
     // Make sure to resize the residual and jacobian datastructures for all the new variables
-    if(resize_data)
+    if (resize_data)
       for(unsigned int i=0; i<newly_prepared_vars.size(); i++)
         _subproblem.assembly(tid).prepareVariable(newly_prepared_vars[i]);
   }
@@ -238,12 +238,12 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
   const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
 
-  if(_subproblem.hasActiveElementalMooseVariables(tid))
+  if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
     for(std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
         it != active_elemental_moose_variables.end();
         ++it)
-      if(&(*it)->sys() == this)
+      if (&(*it)->sys() == this)
         (*it)->computeElemValues();
   }
   else
@@ -373,7 +373,7 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
   {
     Elem * elem = _mesh.elem(*elem_id);
 
-    if(elem->active())
+    if (elem->active())
     {
       dof_map.dof_indices(elem, dof_indices);
 
@@ -382,7 +382,7 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
         dof_id_type dof = dof_indices[i];
 
         // Only need to ghost it if it's actually not on this processor
-        if(dof < dof_map.first_dof() || dof >= dof_map.end_dof())
+        if (dof < dof_map.first_dof() || dof >= dof_map.end_dof())
           send_list.push_back(dof);
       }
     }

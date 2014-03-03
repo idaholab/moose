@@ -58,9 +58,9 @@ ErrorFractionMarker::computeElementMarker()
 {
   Real error = _error_vector[_current_elem->id()];
 
-  if(error > _refine_cutoff)
+  if (error > _refine_cutoff)
     return REFINE;
-  else if(error < _coarsen_cutoff)
+  else if (error < _coarsen_cutoff)
     return COARSEN;
 
   return DO_NOTHING;

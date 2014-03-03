@@ -177,7 +177,7 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
     local_out += _syntax_tree.printBlockOpen(name, depth, type);
 
     for (std::multimap<std::string, InputParameters *>::const_iterator a_it = _action_params.begin(); a_it != _action_params.end(); ++a_it)
-      if(a_it->first != "EmptyAction")
+      if (a_it->first != "EmptyAction")
       {
         local_out += _syntax_tree.printParams(name, *a_it->second, depth, local_search_string, local_found);
         found |= local_found;   // Update the current frame's found variable

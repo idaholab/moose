@@ -64,7 +64,7 @@ YAMLFormatter::printParams(const std::string &prefix, InputParameters &params, s
     oss << indent << "    default: !!str ";
 
     // Only output default if it has one
-    if(params.isParamValid(iter->first))
+    if (params.isParamValid(iter->first))
     {
       //prints the value, which is the default value when dumping the tree
       //because it hasn't been changed

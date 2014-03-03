@@ -36,7 +36,7 @@ TransferWarehouse::addTransfer(Transfer * transfer)
 
   MultiAppTransfer * multi_app_transfer = dynamic_cast<MultiAppTransfer *>(transfer);
 
-  if(multi_app_transfer)
+  if (multi_app_transfer)
     _multi_app_transfers.push_back(multi_app_transfer);
 }
 
@@ -44,7 +44,7 @@ bool
 TransferWarehouse::hasTransfer(const std::string & transfer_name)
 {
   for (std::vector<Transfer *>::const_iterator i = _all_transfers.begin(); i != _all_transfers.end(); ++i)
-    if((*i)->name() == transfer_name)
+    if ((*i)->name() == transfer_name)
       return true;
 
   return false;
@@ -54,7 +54,7 @@ Transfer *
 TransferWarehouse::getTransfer(const std::string & transfer_name)
 {
   for (std::vector<Transfer *>::const_iterator i = _all_transfers.begin(); i != _all_transfers.end(); ++i)
-    if((*i)->name() == transfer_name)
+    if ((*i)->name() == transfer_name)
       return *i;
 
   mooseError("Unknown Transfer: " << transfer_name);

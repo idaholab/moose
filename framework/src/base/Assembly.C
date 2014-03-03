@@ -121,7 +121,7 @@ Assembly::~Assembly()
 FEBase * &
 Assembly::getFE(FEType type)
 {
-  if(!_fe_shape_data[type])
+  if (!_fe_shape_data[type])
     _fe_shape_data[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
@@ -137,7 +137,7 @@ Assembly::getFE(FEType type)
 FEBase * &
 Assembly::getFEFace(FEType type)
 {
-  if(!_fe_shape_data_face[type])
+  if (!_fe_shape_data_face[type])
     _fe_shape_data_face[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
@@ -153,7 +153,7 @@ Assembly::getFEFace(FEType type)
 FEBase * &
 Assembly::getFEFaceNeighbor(FEType type)
 {
-  if(!_fe_shape_data_face_neighbor[type])
+  if (!_fe_shape_data_face_neighbor[type])
     _fe_shape_data_face_neighbor[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
@@ -194,7 +194,7 @@ Assembly::setVolumeQRule(QBase * qrule, unsigned int dim)
 {
   _current_qrule = qrule;
 
-  if(qrule) // Don't set a NULL qrule
+  if (qrule) // Don't set a NULL qrule
   {
     for (std::map<FEType, FEBase *>::iterator it = _fe[dim].begin(); it != _fe[dim].end(); ++it)
       it->second->attach_quadrature_rule(_current_qrule);
@@ -241,11 +241,11 @@ Assembly::reinitFE(const Elem * elem)
   // Whether or not we're going to do FE caching this time through
   bool do_caching = _should_use_fe_cache && _currently_fe_caching;
 
-  if(do_caching)
+  if (do_caching)
   {
     efesd = _element_fe_shape_data_cache[elem->id()];
 
-    if(!efesd)
+    if (!efesd)
     {
       efesd = new ElementFEShapeData;
       _element_fe_shape_data_cache[elem->id()] = efesd;
@@ -263,21 +263,21 @@ Assembly::reinitFE(const Elem * elem)
     FEShapeData * fesd = _fe_shape_data[fe_type];
 
     FEShapeData * cached_fesd = NULL;
-    if(do_caching)
+    if (do_caching)
       cached_fesd = efesd->_shape_data[fe_type];
 
-    if(!cached_fesd || efesd->_invalidated)
+    if (!cached_fesd || efesd->_invalidated)
     {
       fe->reinit(elem);
 
       fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe->get_phi()));
       fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe->get_dphi()));
-      if(_need_second_derivative[fe_type])
+      if (_need_second_derivative[fe_type])
         fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe->get_d2phi()));
 
-      if(do_caching)
+      if (do_caching)
       {
-        if(!cached_fesd)
+        if (!cached_fesd)
         {
           cached_fesd = new FEShapeData;
           efesd->_shape_data[fe_type] = cached_fesd;
@@ -290,19 +290,19 @@ Assembly::reinitFE(const Elem * elem)
     {
       fesd->_phi.shallowCopy(cached_fesd->_phi);
       fesd->_grad_phi.shallowCopy(cached_fesd->_grad_phi);
-      if(_need_second_derivative[fe_type])
+      if (_need_second_derivative[fe_type])
         fesd->_second_phi.shallowCopy(cached_fesd->_second_phi);
     }
   }
 
   // During that last loop the helper objects will have been reinitialized as well
   // We need to dig out the q_points and JxW from it.
-  if(!do_caching || efesd->_invalidated)
+  if (!do_caching || efesd->_invalidated)
   {
     _current_q_points.shallowCopy(const_cast<std::vector<Point> &>((*_holder_fe_helper[dim])->get_xyz()));
     _current_JxW.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_helper[dim])->get_JxW()));
 
-    if(do_caching)
+    if (do_caching)
     {
       efesd->_q_points = _current_q_points;
       efesd->_JxW = _current_JxW;
@@ -314,7 +314,7 @@ Assembly::reinitFE(const Elem * elem)
     _current_JxW.shallowCopy(efesd->_JxW);
   }
 
-  if(do_caching)
+  if (do_caching)
     efesd->_invalidated = false;
 }
 
@@ -333,7 +333,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
 
     fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_face->get_phi()));
     fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_face->get_dphi()));
-    if(_need_second_derivative[fe_type])
+    if (_need_second_derivative[fe_type])
       fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_face->get_d2phi()));
   }
 
@@ -355,7 +355,7 @@ Assembly::reinit(const Elem * elem)
   _current_qrule_volume = _holder_qrule_volume[elem_dimension];
 
   // Make sure the qrule is the right one
-  if(_current_qrule != _current_qrule_volume)
+  if (_current_qrule != _current_qrule_volume)
     setVolumeQRule(_current_qrule_volume, elem_dimension);
 
   _currently_fe_caching = true;
@@ -422,7 +422,7 @@ Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
   _current_qrule_arbitrary = _holder_qrule_arbitrary[elem_dimension];
 
   // Make sure the qrule is the right one
-  if(_current_qrule != _current_qrule_arbitrary)
+  if (_current_qrule != _current_qrule_arbitrary)
     setVolumeQRule(_current_qrule_arbitrary, elem_dimension);
 
   _current_qrule_arbitrary->setPoints(reference_points);
@@ -441,7 +441,7 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   unsigned int elem_dimension = _current_elem->dim();
 
-  if(_current_qrule_face != _holder_qrule_face[elem_dimension])
+  if (_current_qrule_face != _holder_qrule_face[elem_dimension])
   {
     _current_qrule_face = _holder_qrule_face[elem_dimension];
     setFaceQRule(_current_qrule_face, elem_dimension);
@@ -530,7 +530,7 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
 
     fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_neighbor->get_phi()));
     fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_neighbor->get_dphi()));
-    if(_need_second_derivative[fe_type])
+    if (_need_second_derivative[fe_type])
       fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_neighbor->get_d2phi()));
   }
 
@@ -603,7 +603,7 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, const std::vector<Poin
 DenseMatrix<Number> &
 Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar)
 {
-  if(_block_diagonal_matrix)
+  if (_block_diagonal_matrix)
     return _sub_Kee[ivar][0];
   else
     return _sub_Kee[ivar][jvar];
@@ -612,7 +612,7 @@ Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar)
 DenseMatrix<Number> &
 Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar)
 {
-  if(_block_diagonal_matrix)
+  if (_block_diagonal_matrix)
   {
     switch (type)
     {
@@ -667,7 +667,7 @@ Assembly::init()
     max_rows_per_column = std::max(max_rows_per_column, max_rows_per_this_column);
   }
 
-  if(max_rows_per_column == 1 && _sys.getScalarVariables(_tid).size() == 0)
+  if (max_rows_per_column == 1 && _sys.getScalarVariables(_tid).size() == 0)
     _block_diagonal_matrix = true;
 
   // two vectors: one for time residual contributions and one for non-time residual contributions
@@ -686,7 +686,7 @@ Assembly::init()
 
   for (unsigned int i = 0; i < n_vars; ++i)
   {
-    if(!_block_diagonal_matrix)
+    if (!_block_diagonal_matrix)
     {
       _sub_Kee[i].resize(n_vars);
       _sub_Ken[i].resize(n_vars);
@@ -859,7 +859,7 @@ Assembly::copyShapes(unsigned int var)
   _phi.shallowCopy(v.phi());
   _grad_phi.shallowCopy(v.gradPhi());
 
-  if(v.computingSecond())
+  if (v.computingSecond())
     _second_phi.shallowCopy(v.secondPhi());
 }
 
@@ -871,7 +871,7 @@ Assembly::copyFaceShapes(unsigned int var)
   _phi_face.shallowCopy(v.phiFace());
   _grad_phi_face.shallowCopy(v.gradPhiFace());
 
-  if(v.computingSecond())
+  if (v.computingSecond())
     _second_phi_face.shallowCopy(v.secondPhiFace());
 }
 
@@ -880,11 +880,11 @@ Assembly::copyNeighborShapes(unsigned int var)
 {
   MooseVariable & v = _sys.getVariable(_tid, var);
 
-  if(v.usesPhi())
+  if (v.usesPhi())
     _phi_face_neighbor.shallowCopy(v.phiFaceNeighbor());
-  if(v.usesGradPhi())
+  if (v.usesGradPhi())
     _grad_phi_face_neighbor.shallowCopy(v.gradPhiFaceNeighbor());
-  if(v.usesSecondPhi())
+  if (v.usesSecondPhi())
     _second_phi_face_neighbor.shallowCopy(v.secondPhiFaceNeighbor());
 }
 
@@ -1013,7 +1013,7 @@ Assembly::addCachedResidual(NumericVector<Number> & residual, Moose::KernelType 
 
   residual.add_vector(cached_residual_values, cached_residual_rows);
 
-  if(_max_cached_residuals < cached_residual_values.size())
+  if (_max_cached_residuals < cached_residual_values.size())
     _max_cached_residuals = cached_residual_values.size();
 
   // Try to be more efficient from now on
@@ -1137,7 +1137,7 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & jacobian)
   for(unsigned int i=0; i<_cached_jacobian_rows.size(); i++)
     jacobian.add(_cached_jacobian_rows[i], _cached_jacobian_cols[i], _cached_jacobian_values[i]);
 
-  if(_max_cached_jacobians < _cached_jacobian_values.size())
+  if (_max_cached_jacobians < _cached_jacobian_values.size())
     _max_cached_jacobians = _cached_jacobian_values.size();
 
   // Try to be more efficient from now on

@@ -13,7 +13,7 @@
 [AuxVariables]
   [./a_very_unique_auxiliary_variable_name_good_for_error_checking]
     order = FIRST
-		family = LAGRANGE
+    family = LAGRANGE
   [../]
 []
 

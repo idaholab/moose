@@ -57,14 +57,14 @@ NearestNodeThread::operator() (const NodeIdRange & range)
       const Node * cur_node = &_mesh.node(neighbor_nodes[k]);
       Real distance = ((*cur_node) - node).size();
 
-      if(distance < closest_distance)
+      if (distance < closest_distance)
       {
         closest_distance = distance;
         closest_node = cur_node;
       }
     }
 
-    if(closest_distance == std::numeric_limits<Real>::max())
+    if (closest_distance == std::numeric_limits<Real>::max())
       mooseError("Unable to find nearest node!");
 
     NearestNodeLocator::NearestNodeInfo & info = _nearest_node_info[node.id()];

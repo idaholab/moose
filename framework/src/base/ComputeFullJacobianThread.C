@@ -157,7 +157,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 void
 ComputeFullJacobianThread::computeInternalFaceJacobian()
 {
-  if(_sys._dg_kernels[_tid].active().empty())
+  if (_sys._dg_kernels[_tid].active().empty())
     return;
 
   std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);

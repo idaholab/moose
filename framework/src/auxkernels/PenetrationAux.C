@@ -121,7 +121,7 @@ PenetrationAux::computeValue()
 {
   const Node * current_node = NULL;
 
-  if(_nodal)
+  if (_nodal)
     current_node = _current_node;
   else
     current_node = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
@@ -129,7 +129,7 @@ PenetrationAux::computeValue()
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[current_node->id()];
 
   Real retVal(-999999);
-  if(pinfo)
+  if (pinfo)
   {
     if (_quantity == PA_DISTANCE)
       retVal = pinfo->_distance;

@@ -46,7 +46,7 @@ CoupledForce::computeQpJacobian()
 Real
 CoupledForce::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar == _v_var)
+  if (jvar == _v_var)
     return -_phi[_j][_qp]*_test[_i][_qp];
   return 0.0;
 }

@@ -156,7 +156,7 @@ SetupOutputAction::act()
     }
   }
 
-  if(_pars.isParamValid("position"))
+  if (_pars.isParamValid("position"))
     _app.setOutputPosition(_pars.get<Point>("position"));
 
   _problem->setOutputVariables();
@@ -214,33 +214,33 @@ SetupOutputAction::act()
   output.checkpoint_interval(checkpoint_interval);
 
   output.iterationPlotStartTime(getParam<Real>("iteration_plot_start_time"));
-  if(isParamValid("time_interval"))
+  if (isParamValid("time_interval"))
    {
      Real time_interval_out = getParam<Real>("time_interval");
      output.setTimeIntervalOutput(time_interval_out);
-     if(time_interval_out<=0)
+     if (time_interval_out<=0)
      {
        mooseError("time interval must be positive");
      }
    }
 
-  if(getParam<bool>("color_output"))
+  if (getParam<bool>("color_output"))
   {
     char * term_env = getenv("TERM");
 
-    if(term_env)
+    if (term_env)
     {
       std::string term(term_env);
 
       bool color = false;
 
-      if(term == "xterm-256color")
+      if (term == "xterm-256color")
         color = true;
 
-      if(term == "xterm")
+      if (term == "xterm")
         color = true;
 
-      if(color == true)
+      if (color == true)
         _problem->setColorOutput(true);
     }
   }

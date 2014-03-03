@@ -123,9 +123,9 @@ Adaptivity::adaptMesh()
   bool meshChanged = false;
   if (_mesh_refinement_on && (_start_time <= _t && _t < _stop_time))
   {
-    if(_use_new_system)
+    if (_use_new_system)
     {
-      if(_marker_variable_name != "") // Only flag if a marker variable name has been set
+      if (_marker_variable_name != "") // Only flag if a marker variable name has been set
       {
         _mesh_refinement->clean_refinement_flags();
 
@@ -176,7 +176,7 @@ Adaptivity::adaptMesh()
 void
 Adaptivity::initialAdaptMesh()
 {
-  if(_initial_marker_variable_name != "")
+  if (_initial_marker_variable_name != "")
   {
     std::string temp = _marker_variable_name;
     _marker_variable_name = _initial_marker_variable_name;
@@ -242,7 +242,7 @@ Adaptivity::getErrorVector(std::string indicator_field)
 {
   ErrorVector * ev = _indicator_field_to_error_vector[indicator_field];
 
-  if(!ev)
+  if (!ev)
   {
     ev = new ErrorVector;
     _indicator_field_to_error_vector[indicator_field] = ev;

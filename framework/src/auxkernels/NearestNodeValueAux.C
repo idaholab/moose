@@ -35,7 +35,7 @@ NearestNodeValueAux::NearestNodeValueAux(const std::string & name, InputParamete
     _serialized_solution(_nl_sys.currentSolution()),
     _paired_variable(coupled("paired_variable"))
 {
-  if(boundaryNames().size() > 1)
+  if (boundaryNames().size() > 1)
     mooseError("NearestNodeValueAux can only be used with one boundary at a time!");
 }
 

@@ -33,7 +33,7 @@ FailingProblem::FailingProblem(const std::string & name, InputParameters params)
 bool
 FailingProblem::converged()
 {
-  if(!_failed && (_t_step == static_cast<int>(_fail_step)))
+  if (!_failed && (_t_step == static_cast<int>(_fail_step)))
   {
     _failed = true;
     return false;

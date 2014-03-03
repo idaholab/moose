@@ -31,7 +31,7 @@ PostprocessorData::getPostprocessorValue(const PostprocessorName & name)
 {
   PostprocessorValue * & pp_val = _values[name];
 
-  if(pp_val == NULL)
+  if (pp_val == NULL)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values");
 
   return *pp_val;
@@ -42,7 +42,7 @@ PostprocessorData::getPostprocessorValueOld(const std::string & name)
 {
   PostprocessorValue * & pp_val = _values_old[name];
 
-  if(pp_val == NULL)
+  if (pp_val == NULL)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values_old");
 
   return *pp_val;

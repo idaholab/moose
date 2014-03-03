@@ -58,7 +58,7 @@ KernelGrad::computeResidual()
 
   re += _local_re;
 
-  if(_has_save_in)
+  if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for(unsigned int i=0; i<_save_in.size(); i++)
@@ -94,7 +94,7 @@ KernelGrad::computeJacobian()
 
   ke += _local_ke;
 
-  if(_has_diag_save_in)
+  if (_has_diag_save_in)
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
@@ -127,7 +127,7 @@ KernelGrad::computeOffDiagJacobian(unsigned int jvar)
       Real jxw = _JxW[_qp];
       Real coord = _coord[_qp];
 
-      if(jvar == var_num)
+      if (jvar == var_num)
       {
         _value = precomputeQpJacobian();
         for (_i=0; _i<n_test; _i++)

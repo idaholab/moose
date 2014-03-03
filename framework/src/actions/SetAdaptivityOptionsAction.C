@@ -42,9 +42,9 @@ SetAdaptivityOptionsAction::act()
 {
   Adaptivity & adapt = _problem->adaptivity();
 
-  if(isParamValid("marker"))
+  if (isParamValid("marker"))
     adapt.setMarkerVariableName(getParam<MarkerName>("marker"));
-  if(isParamValid("initial_marker"))
+  if (isParamValid("initial_marker"))
     adapt.setInitialMarkerVariableName(getParam<MarkerName>("initial_marker"));
 
   adapt.setMaxHLevel(getParam<unsigned int>("max_h_level"));

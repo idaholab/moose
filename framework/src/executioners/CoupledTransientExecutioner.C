@@ -64,7 +64,7 @@ CoupledTransientExecutioner::execute()
 
   for (_t_step = 0; _t_step < _n_steps; _t_step++)
   {
-    if(first != true)
+    if (first != true)
     {
       for (unsigned int i = 0; i < n_problems; i++)
         trans[i]->incrementStepOrReject();

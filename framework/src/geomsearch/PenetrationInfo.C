@@ -26,10 +26,10 @@ template<>
 void
 dataStore(std::ostream & stream, PenetrationInfo * & pinfo, void * context)
 {
-  if(!context)
+  if (!context)
     mooseError("Can only store PenetrationInfo objects using a MooseMesh context!");
 
-  if(pinfo)
+  if (pinfo)
   {
     // Store 1 so that we know that this pinfo really exists!
     unsigned int i = 1;
@@ -85,14 +85,14 @@ template<>
 void
 dataLoad(std::istream & stream, PenetrationInfo * & pinfo, void * context)
 {
-  if(!context)
+  if (!context)
     mooseError("Can only load PenetrationInfo objects using a MooseMesh context!");
 
   // First, see if this is supposed to be NULL
   unsigned int i = 0;
   loadHelper(stream, i, context);
 
-  if(i)
+  if (i)
   {
     pinfo = new PenetrationInfo();
 
