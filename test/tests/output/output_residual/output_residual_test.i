@@ -1,6 +1,6 @@
 [Mesh]
-	file = sq-2blk.e
-	uniform_refine = 3
+  file = sq-2blk.e
+  uniform_refine = 3
 []
 
 [Variables]
@@ -115,6 +115,6 @@
 []
 
 [Debug]
-	show_var_residual = 'u v'
+  show_var_residual = 'u v'
         show_var_residual_norms = true
 []

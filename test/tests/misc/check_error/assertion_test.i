@@ -1,7 +1,7 @@
 [Mesh]
-  file = square.e		# Read a Mesh
+  file = square.e    # Read a Mesh
 
-  [./Generation]		# AND create a Mesh...
+  [./Generation]    # AND create a Mesh...
     dim = 2
     nx = 2
     ny = 2

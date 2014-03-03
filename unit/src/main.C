@@ -58,9 +58,9 @@ int main(int argc, char **argv)
   }
 
   bool wasSucessful = runner.run(/*testPath=*/"",
-				 /*doWait=*/false,
-				 /*doPrintResult=*/true,
-				 /*doPrintProgress=*/false);
+         /*doWait=*/false,
+         /*doPrintResult=*/true,
+         /*doPrintProgress=*/false);
 
   return wasSucessful ? 0 : 1;
 }

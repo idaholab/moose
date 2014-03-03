@@ -88,10 +88,10 @@
 []
 
 [Outputs]
-	console = true
-	[./csv]
-	  type = CSV
-		output_initial = false
+  console = true
+  [./csv]
+    type = CSV
+    output_initial = false
   [../]
 []g
 

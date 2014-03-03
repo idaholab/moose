@@ -36,15 +36,15 @@
 [Materials]
   [./mat0]
     type = GenericConstantMaterial
-		block = '1'
+    block = '1'
     prop_names = 'a b'
-		prop_values = '1 2'
+    prop_values = '1 2'
   [../]
   [./mat1]
     type = GenericConstantMaterial
-		block = '2'
+    block = '2'
     prop_names = 'a'
-		prop_values = '10'
+    prop_values = '10'
   [../]
 []
 

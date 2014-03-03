@@ -41,18 +41,18 @@ Number ManSol4ADR1src(const Point& p, Real& A0, Real& B0, Real& C0,
 }
 
 Number ManSol4ADR1exv(const Point& p,
-  		      const InputParameters&,  // parameters, not needed
-  		      const std::string&, // sys_name, not needed
-  		      const std::string&) // unk_name, not needed
+            const InputParameters&,  // parameters, not needed
+            const std::string&, // sys_name, not needed
+            const std::string&) // unk_name, not needed
 {
   Real A0=1.,B0=1.2,C0=0.8;
   return A0*std::sin(3.*libMesh::pi*p(0))+B0*std::sin(3.*libMesh::pi*p(1))+C0*std::sin(libMesh::pi*p(0))*std::sin(libMesh::pi*p(1));
 }
 
 Gradient ManSol4ADR1exd(const Point& p,
-  		        const InputParameters&,  // parameters, not needed
-  		        const std::string&, // sys_name, not needed
-  		        const std::string&) // unk_name, not needed
+              const InputParameters&,  // parameters, not needed
+              const std::string&, // sys_name, not needed
+              const std::string&) // unk_name, not needed
 {
   Real A0=1.,B0=1.2,C0=0.8;
   Gradient gradu;
@@ -98,9 +98,9 @@ Number ManSol4ADR2src(const Point& p, Real& A0, Real& B0, Real& C0,
 }
 
 Number ManSol4ADR2exv(const Point& p,
-  		      const InputParameters &parameters,  // parameters, not needed
-  		      const std::string&, // sys_name, not needed
-  		      const std::string&) // unk_name, not needed
+            const InputParameters &parameters,  // parameters, not needed
+            const std::string&, // sys_name, not needed
+            const std::string&) // unk_name, not needed
 {
   Real A0=0.5,B0=0.5,C0=0.25,w=2.;
   Real time = parameters.get<Real>("time");
@@ -108,9 +108,9 @@ Number ManSol4ADR2exv(const Point& p,
 }
 
 Gradient ManSol4ADR2exd(const Point& p,
-  		        const InputParameters &parameters,  // parameters, not needed
-  		        const std::string&, // sys_name, not needed
-  		        const std::string&) // unk_name, not needed
+              const InputParameters &parameters,  // parameters, not needed
+              const std::string&, // sys_name, not needed
+              const std::string&) // unk_name, not needed
 {
   Real A0=0.5,B0=0.5,C0=0.25,w=2.;
   Real t = parameters.get<Real>("time");
@@ -134,17 +134,17 @@ Gradient ManSol4ADR2exd(const Point& p,
 }
 
 Number ManSolzeroV(const Point&,  // p not needed
-  		   const InputParameters&,  // parameters, not needed
-  		   const std::string&, // sys_name, not needed
-  		   const std::string&) // unk_name, not needed
+         const InputParameters&,  // parameters, not needed
+         const std::string&, // sys_name, not needed
+         const std::string&) // unk_name, not needed
 {
   return 0.0;
 }
 
 Gradient ManSolzeroG(const Point&,  // p not needed
-  		     const InputParameters&,  // parameters, not needed
-  		     const std::string&, // sys_name, not needed
-  		     const std::string&) // unk_name, not needed
+           const InputParameters&,  // parameters, not needed
+           const std::string&, // sys_name, not needed
+           const std::string&) // unk_name, not needed
 {
   Gradient gradu;
 

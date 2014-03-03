@@ -81,8 +81,8 @@
 [Postprocessors]
   [./aux_pp]
     type = ScalarVariable
-		variable = aux
-		output = none
+    variable = aux
+    output = none
   [../]
 []
 
@@ -96,12 +96,12 @@
 [Outputs]
   [./exodus]
     type = Exodus
-		output_initial = false
-		file_base = new_out
-		hide_variables = 'u box aux_pp'
-		scalar_as_nodal = true
-		#elemental_as_nodal = true
-		#output_input = true
-		output_scalar_variables = false
+    output_initial = false
+    file_base = new_out
+    hide_variables = 'u box aux_pp'
+    scalar_as_nodal = true
+    #elemental_as_nodal = true
+    #output_input = true
+    output_scalar_variables = false
   [../]
 []

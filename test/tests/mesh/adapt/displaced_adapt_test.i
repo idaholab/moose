@@ -14,10 +14,10 @@
 []
 
 [Functions]
-	[./aux_v_fn]
-		type = ParsedFunction
-		value = x*(y-0.5)/5
-	[../]
+  [./aux_v_fn]
+    type = ParsedFunction
+    value = x*(y-0.5)/5
+  [../]
 []
 
 [Variables]
@@ -95,18 +95,18 @@
 []
 
 [AuxVariables]
-	[./aux_v]
-		order = FIRST
-		family = LAGRANGE
-	[../]
+  [./aux_v]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [AuxKernels]
-	[./aux_k_1]
-		type = FunctionAux
-		variable = aux_v
-		function = aux_v_fn
-	[../]
+  [./aux_k_1]
+    type = FunctionAux
+    variable = aux_v
+    function = aux_v_fn
+  [../]
 []
 
 [Executioner]

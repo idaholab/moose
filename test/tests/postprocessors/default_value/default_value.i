@@ -18,7 +18,7 @@
     #pps_name = invalid_postprocessor_name
   [../]
 
-	# The gold file for this test was created with this Kernel
+  # The gold file for this test was created with this Kernel
   [./coef_diffusion]
     type = CoefDiffusion
     variable = u

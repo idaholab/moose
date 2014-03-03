@@ -33,22 +33,22 @@
 
 [Materials]
   [./right_bc]
-	  type = GenericConstantMaterial
+    type = GenericConstantMaterial
     boundary = 2
-		prop_names = 'right_bc'
+    prop_names = 'right_bc'
     prop_values = '2.0'
   [../]
   [./other]
-	  type = GenericConstantMaterial
+    type = GenericConstantMaterial
     boundary = 1
-		prop_names = 'other_value'
+    prop_names = 'other_value'
     prop_values = '1.0'
   [../]
 []
 
 [Executioner]
   type = Steady
-	solve_type = 'PJFNK'
+  solve_type = 'PJFNK'
 []
 
 [Output]

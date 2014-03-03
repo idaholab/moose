@@ -52,8 +52,8 @@
 [Materials]
   [./gfm]
     type = GenericFunctionMaterial
-  	block = 0
-	  prop_names = diffusion
+    block = 0
+    prop_names = diffusion
     prop_values = diff_func
   [../]
 []

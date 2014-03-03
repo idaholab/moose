@@ -1,13 +1,13 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-	xmin = 0
-	xmax = 1
-	ymin = 0
-	ymax = 1
-	nx = 2
-	ny = 2
-	elem_type = QUAD4
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+  nx = 2
+  ny = 2
+  elem_type = QUAD4
 
   uniform_refine = 3
 []
@@ -98,7 +98,7 @@
 
 [Postprocessors]
   [./dt]
-  	type = TimestepSize
+    type = TimestepSize
   [../]
 []
 
