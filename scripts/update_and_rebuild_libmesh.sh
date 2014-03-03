@@ -4,7 +4,6 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export LIBMESH_DIR=$SCRIPT_DIR/../libmesh/installed
 export METHODS=${METHODS:="opt oprof dbg"}
-export JOBS=${JOBS:=1}
 
 cd $SCRIPT_DIR/..
 
@@ -30,5 +29,10 @@ cd build
              --disable-warnings \
              --enable-openmp $*
 
-make -j $JOBS
+# let LIBMESH_JOBS be either MOOSE_JOBS, or 1 if MOOSE_JOBS 
+# is not set (not using our package). Make will then build
+# with either JOBS if set, or LIBMESH_JOBS.
+LIBMESH_JOBS=${MOOSE_JOBS:-1}
+
+make -j ${JOBS:-$LIBMESH_JOBS}
 make install
