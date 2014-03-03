@@ -10,6 +10,11 @@
 #include "Diffusion.h"
 #include "Material.h"
 
+namespace libMesh
+{
+class XFEM;
+}
+
 //Forward Declarations
 class HeatConductionKernel;
 
@@ -37,6 +42,8 @@ private:
   const unsigned _dim;
   const MaterialProperty<Real> & _diffusion_coefficient;
   const MaterialProperty<Real> * const _diffusion_coefficient_dT;
+  bool _has_xfem_volfrac;
+  VariableValue & _xfem_volfrac;
 };
 
 #endif //HEATCONDUCTIONKERNEL_H
