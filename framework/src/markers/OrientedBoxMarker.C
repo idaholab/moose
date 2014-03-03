@@ -26,7 +26,7 @@ template<>
 InputParameters validParams<OrientedBoxMarker>()
 {
   InputParameters params = validParams<Marker>();
-  params.addRequiredParam<RealVectorValue>("center", "The center (many people spell this 'center') of the box.");
+  params.addRequiredParam<Point>("center", "The center (many people spell this 'center') of the box.");
   params.addRequiredParam<Real>("width", "The width of the box");
   params.addRequiredParam<Real>("length", "The length of the box");
   params.addRequiredParam<Real>("height", "The height of the box");
@@ -70,7 +70,7 @@ OrientedBoxMarker::OrientedBoxMarker(const std::string & name, InputParameters p
   /*
    * Create the translation, which is just center
    */
-  _center(getParam<RealVectorValue>("center")),
+  _center(getParam<Point>("center")),
 
   _w(getParam<RealVectorValue>("width_direction")),
   _l(getParam<RealVectorValue>("length_direction")),

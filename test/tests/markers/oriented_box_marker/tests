@@ -2,8 +2,6 @@
   [./obm]
     type = 'Exodiff'
     input = 'obm.i'
-    exodiff = 'obm.e'
-    rel_err = 1E-5
-    use_old_floor = True
+    exodiff = 'obm_out.e'
   [../]
 []

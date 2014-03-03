@@ -12,14 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-/**
- * Creates a box of specified width, length and height,
- * with its center at specified position,
- * and with the direction along the width direction specified,
- * and with the direction along the length direction specified.
- * Then elements are marked as inside or outside this box
- */
-
 #ifndef ORIENTEDBOXMARKER_H
 #define ORIENTEDBOXMARKER_H
 
@@ -35,6 +27,13 @@ class OrientedBoxMarker;
 template<>
 InputParameters validParams<OrientedBoxMarker>();
 
+/**
+ * Creates a box of specified width, length and height,
+ * with its center at specified position,
+ * and with the direction along the width direction specified,
+ * and with the direction along the length direction specified.
+ * Then elements are marked as inside or outside this box
+ */
 class OrientedBoxMarker : public Marker
 {
 public:
@@ -52,7 +51,7 @@ protected:
 
   MeshTools::BoundingBox _bounding_box;
 
-  RealVectorValue _center;
+  Point _center;
   RealVectorValue _w;
   RealVectorValue _l;
 
