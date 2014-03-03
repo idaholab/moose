@@ -1,4 +1,5 @@
 # checks that OrientedBoxMarker behaves as desired
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -18,20 +19,15 @@
   [../]
 []
 
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = u
-  [../]
-  [./timed]
-    type = TimeDerivative
-    variable = u
-  [../]
+[Problem]
+  type = FEProblem
+  solve = false
+  kernel_coverage_check = false
 []
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = PJFNK
   end_time = 1
 []
 
@@ -53,11 +49,9 @@
 []
 
 [Output]
-  file_base = obm
   output_initial = true
   interval = 1
   exodus = true
   perf_log = true
 []
-
 
