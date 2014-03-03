@@ -14,7 +14,7 @@ def buildCMD(options):
       tmp_cmd.append([options.lcov_command[0],
                       '--capture',
                       '--initial',
-                      '--directory', os.getcwd() + '/' + options.application[0],
+                      '--directory', os.getcwd() + '/' + options.application[0] + '/framework/',
                       '--output-file', os.getcwd() + '/initialize.info'
                       ])
       tmp_cmd[0].extend(tmp_additional_directories)
@@ -22,7 +22,7 @@ def buildCMD(options):
       tmp_cmd.append([options.lcov_command[0],
                       '--capture',
                       '--initial',
-                      '--directory', os.getcwd() + '/' + options.application[0],
+                      '--directory', os.getcwd() + '/' + options.application[0] + '/framework/',
                       '--output-file', os.getcwd() + '/initialize.info'
                       ])
 
@@ -30,7 +30,7 @@ def buildCMD(options):
   if options.mode == 'generate':
     if len(options.application) > 1:
       tmp_cmd.append([options.lcov_command[0],
-                      '--directory', os.getcwd() + '/' + options.application[0],
+                      '--directory', os.getcwd() + '/' + options.application[0] + '/framework/',
                       '--capture',
                       '--ignore-errors', 'gcov,source',
                       '--output-file', os.getcwd() + '/covered.info'
@@ -38,7 +38,7 @@ def buildCMD(options):
       tmp_cmd[0].extend(tmp_additional_directories)
     else:
       tmp_cmd.append([options.lcov_command[0],
-                      '--directory', os.getcwd() + '/' + options.application[0],
+                      '--directory', os.getcwd() + '/' + options.application[0] + '/framework/',
                       '--capture',
                       '--ignore-errors', 'gcov,source',
                       '--output-file', os.getcwd() + '/covered.info'
@@ -52,8 +52,8 @@ def buildCMD(options):
 
     # Build lcov filter command
     tmp_cmd.append([options.lcov_command[0],
-                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/src*',
-                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/include*',
+                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/framework/src*',
+                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/framework/include*',
                     '--output-file', options.outfile ])
 
     # Build genhtml command if --generate-html was used
@@ -245,12 +245,6 @@ def _verifyOptions(options):
     error_list.append('genhtml command not found.')
   if options.rsync_command[0] == None:
     error_list.append('rsync command not found.')
-
-  # If --dryrun lets print some junk and return
-  if options.debug:
-    for item in error_list:
-      print '\n', item, '\n'
-    return options
 
   # Runs if our list of errors is greater then zero
   if len(error_list) > 0:
