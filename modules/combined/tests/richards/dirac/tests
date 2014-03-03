@@ -43,7 +43,7 @@
     input = 'bh27.i'
     exodiff = 'bh27.e'
     rel_err = 1E-5
-    skip = 'Needs DiracKernel::computeOffDiagQpJacobian'
+    skip = 'Needs DiracKernel::computeOffDiagQpJacobian - ticket #668'
   [../]
 
   [./test_st01]
