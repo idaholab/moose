@@ -13,7 +13,7 @@
 [AuxVariables]
   [./from_master_app]
     order = FIRST
-		family = SCALAR
+    family = SCALAR
   [../]
 []
 
@@ -47,7 +47,7 @@
 [Postprocessors]
   [./from_master]
     type = ScalarVariable
-		variable = from_master_app
+    variable = from_master_app
   [../]
 []
 

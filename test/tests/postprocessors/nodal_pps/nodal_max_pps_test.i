@@ -81,13 +81,13 @@
   [./max_nodal_pps]
     type = NodalMaxValue
     variable = u
-		block = ANY_BLOCK_ID
+    block = ANY_BLOCK_ID
   [../]
 
   [./max_node_id]
     type = NodalProxyMaxValue
     variable = u
-		block = ANY_BLOCK_ID
+    block = ANY_BLOCK_ID
   [../]
 []
 

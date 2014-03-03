@@ -2,32 +2,32 @@
 #
 
 [Mesh]
-	type = GeneratedMesh
-	dim = 2
-	xmin = -1
-	xmax = 1
-	ymin = -1
-	ymax = 1
-	nx = 10
-	ny = 10
-	elem_type = QUAD9
+  type = GeneratedMesh
+  dim = 2
+  xmin = -1
+  xmax = 1
+  ymin = -1
+  ymax = 1
+  nx = 10
+  ny = 10
+  elem_type = QUAD9
 []
 
 [Functions]
-	[./force_fn]
-		type = ParsedFunction
-		value = -4
-	[../]
+  [./force_fn]
+    type = ParsedFunction
+    value = -4
+  [../]
 
-	[./exact_fn]
-	  type = ParsedFunction
-	  value = (x*x)+(y*y)
-	[../]
+  [./exact_fn]
+    type = ParsedFunction
+    value = (x*x)+(y*y)
+  [../]
 
-	[./aux_fn]
-		type = ParsedFunction
-		value = (1-x*x)*(1-y*y)
-	[../]
+  [./aux_fn]
+    type = ParsedFunction
+    value = (1-x*x)*(1-y*y)
+  [../]
 []
 
 [Variables]
@@ -60,18 +60,18 @@
 
 
 [AuxVariables]
-	[./aux1]
-	  order = FIRST
-	  family = LAGRANGE
-	[../]
+  [./aux1]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [AuxKernels]
-	[./ak1]
-		type = FunctionAux
-		variable = aux1
-		function = aux_fn
-	[../]
+  [./ak1]
+    type = FunctionAux
+    variable = aux1
+    function = aux_fn
+  [../]
 []
 
 [Executioner]

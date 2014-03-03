@@ -91,24 +91,24 @@
 
 #            ca2+_ie              ca2+_pd             ca2+_conv
 #            ca2+_caco3(aq)_sub   ca2+_caco3(aq)_cd   ca2+_caco3(aq)_conv
-# 	   ca2+_cahco3+_sub     ca2+_cahco3+_cd     ca2+_cahco3+_conv
-# 	   ca2+_caoh+_sub       ca2+_caoh+_cd       ca2+_caoh+_conv
+#      ca2+_cahco3+_sub     ca2+_cahco3+_cd     ca2+_cahco3+_conv
+#      ca2+_caoh+_sub       ca2+_caoh+_cd       ca2+_caoh+_conv
 #            ca2+_calcite
 
 #            h+_ie                h+_pd               h+_conv
-# 	   h+_caco3(aq)_sub     h+_caco3(aq)_cd     h+_caco3(aq)_conv
-# 	   h+_caoh+_sub         h+_caoh+_cd         h+_caoh+_conv
-# 	   h+_co2(aq)_sub       h+_co2(aq)_cd       h+_co2(aq)_conv
-# 	   h+_co32-_sub         h+_co32-_cd         h+_co32-_conv
-# 	   h+_oh-_sub           h+_oh-_cd           h+_oh-_conv
-# 	   h+_calcite
+#      h+_caco3(aq)_sub     h+_caco3(aq)_cd     h+_caco3(aq)_conv
+#      h+_caoh+_sub         h+_caoh+_cd         h+_caoh+_conv
+#      h+_co2(aq)_sub       h+_co2(aq)_cd       h+_co2(aq)_conv
+#      h+_co32-_sub         h+_co32-_cd         h+_co32-_conv
+#      h+_oh-_sub           h+_oh-_cd           h+_oh-_conv
+#      h+_calcite
 
 #            hco3-_ie             hco3-_pd            hco3-_conv
 #            hco3-_caco3(aq)_sub  hco3-_caco3(aq)_cd  hco3-_caco3(aq)_conv
 #            hco3-_cahco3+_sub    hco3-_cahco3+_cd    hco3-_cahco3+_conv
 #            hco3-_co2(aq)_sub    hco3-_co2(aq)_cd    hco3-_co2(aq)_conv
 #            hco3-_co32-_sub      hco3-_co32-_cd      hco3-_co32-_conv
-# 	   hco3-_calcite'
+#      hco3-_calcite'
 
  active = 'pressure_ie          pressure_diff
 
@@ -116,17 +116,17 @@
 
            ca2+_ie              ca2+_pd             ca2+_conv
            ca2+_caco3(aq)_sub   ca2+_caco3(aq)_cd   ca2+_caco3(aq)_conv
-	   ca2+_cahco3+_sub     ca2+_cahco3+_cd     ca2+_cahco3+_conv
+     ca2+_cahco3+_sub     ca2+_cahco3+_cd     ca2+_cahco3+_conv
            ca2+_calcite
 
            h+_ie                h+_pd               h+_conv
- 	   h+_caco3(aq)_sub     h+_caco3(aq)_cd     h+_caco3(aq)_conv
-	   h+_calcite
+      h+_caco3(aq)_sub     h+_caco3(aq)_cd     h+_caco3(aq)_conv
+     h+_calcite
 
            hco3-_ie             hco3-_pd            hco3-_conv
            hco3-_caco3(aq)_sub  hco3-_caco3(aq)_cd  hco3-_caco3(aq)_conv
            hco3-_cahco3+_sub    hco3-_cahco3+_cd    hco3-_cahco3+_conv
-	   hco3-_calcite'
+     hco3-_calcite'
 
 # Pressure
   [./pressure_ie]
@@ -642,9 +642,9 @@
 [BCs]
   active = 'pressure_left pressure_right
             tracer_left     tracer_right
-            ca2+_left	  ca2+_right
-	    hco3-_left	  hco3-_right
-	    h+_left	  h+_right'
+            ca2+_left    ca2+_right
+      hco3-_left    hco3-_right
+      h+_left    h+_right'
 
 # pressure
   [./pressure_left]

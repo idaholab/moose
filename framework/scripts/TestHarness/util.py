@@ -284,7 +284,7 @@ def checkPetscVersion(checks, test):
     # Exact match
     if logic == '' or logic == '=':
       if version == checks['petsc_version']:
-	return (True, None, version)
+        return (True, None, version)
       else:
         return (False, '!=', version)
     # Logical match

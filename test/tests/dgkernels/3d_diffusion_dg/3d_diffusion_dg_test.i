@@ -52,7 +52,7 @@
     variable = u
   [../]
 
-  [./abs]					# u * v
+  [./abs]          # u * v
     type = Reaction
     variable = u
   [../]
@@ -68,10 +68,10 @@
   active = 'dg_diff'
 
   [./dg_diff]
-  	type = DGDiffusion
-  	variable = u
-  	epsilon = -1
-  	sigma = 6
+    type = DGDiffusion
+    variable = u
+    epsilon = -1
+    sigma = 6
   [../]
 []
 

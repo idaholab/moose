@@ -1,15 +1,15 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-	xmin = 0
-	xmax = 1
-	ymin = 0
-	ymax = 1
-	zmin = 0
-	zmax = 1
-	nx = 3
-	ny = 3
-	nz = 3
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+  zmin = 0
+  zmax = 1
+  nx = 3
+  ny = 3
+  nz = 3
 []
 
 # Nonlinear system
@@ -50,10 +50,10 @@
 # auxiliary system
 
 [AuxVariables]
-	[./matp]
-		order = CONSTANT
-		family = MONOMIAL
-	[../]
+  [./matp]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [AuxBCs]
