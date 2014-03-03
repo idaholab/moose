@@ -1,4 +1,4 @@
 Title: Physics Based Preconditioning
 ex12.i
-../../moose/include/kernels/CoupledForce.h
-../../moose/src/kernels/CoupledForce.C
+../../framework/include/kernels/CoupledForce.h
+../../framework/src/kernels/CoupledForce.C

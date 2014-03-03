@@ -3,6 +3,6 @@ ex01.i
 src/main.C
 include/base/ExampleApp.h
 src/base/ExampleApp.C
-../../moose/include/kernels/Diffusion.h
-../../moose/src/kernels/Diffusion.C
+../../framework/include/kernels/Diffusion.h
+../../framework/src/kernels/Diffusion.C
 
