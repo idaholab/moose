@@ -16,7 +16,8 @@ InputParameters validParams<RichardsBorehole>()
   params.addRequiredParam<std::string>("point_file", "The file containing the borehole radii and coordinates of the point sinks that approximate the borehole.  Each line in the file must contain a space-separated radius and coordinate.  Ie r x y z.  The last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  Note that you will get segementation faults if your points do not lie within your mesh!");
   params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the borehole for each time step.");
   params.addParam<Real>("re_constant", 0.28, "The dimensionless constant used in evaluating the borehole effective radius.  This depends on the meshing scheme.  Peacemann finite-difference calculations give 0.28, while for rectangular finite elements the result is closer to 0.1594.  (See  Eqn(4.13) of Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388.)");
-  params.addParam<bool>("MyNameIsAndyWilkins", true, "Used for debugging by Andy");
+  params.addParam<bool>("mesh_adaptivity", true, "If not using mesh adaptivity then set this false to substantially speed up the simulation by caching the element containing each Dirac point.");
+  params.addParam<bool>("MyNameIsAndyWilkins", false, "Used for debugging by Andy");
   params.addClassDescription("Approximates a borehole in the mesh with given bottomhole pressure, and radii using a number of point sinks whose positions are read from a file");
   return params;
 }
@@ -34,6 +35,8 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     _unit_weight(getParam<RealVectorValue>("unit_weight")),
 
     _re_constant(getParam<Real>("re_constant")),
+
+    _mesh_adaptivity(getParam<bool>("mesh_adaptivity")),
 
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
 
@@ -104,6 +107,10 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
       RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
       _rot_matrix[i] = rotVecToZ(v2);
     }
+
+  // size the array that holds elemental info
+  _elemental_info.resize(num_pts);
+  _have_constructed_elemental_info = false;
 
   // do debugging if AndyWilkins
   if (_debug_things)
@@ -223,10 +230,18 @@ RichardsBorehole::addPoints()
   // so this is a handy place to zero this out.
   _total_outflow_mass.zero();
 
-  for (unsigned int i = 0; i < _zs.size(); i++)
+  if (!_have_constructed_elemental_info || _mesh_adaptivity)
     {
-      addPoint(Point(_xs[i], _ys[i], _zs[i]));
+      for (unsigned int i = 0; i < _zs.size(); i++)
+	_elemental_info[i] = addPoint(Point(_xs[i], _ys[i], _zs[i]));
+      _have_constructed_elemental_info = true;
     }
+  else
+    {
+      for (unsigned int i = 0; i < _zs.size(); i++)
+	addPoint(_elemental_info[i], Point(_xs[i], _ys[i], _zs[i]));
+    }
+
 }
 
 Real

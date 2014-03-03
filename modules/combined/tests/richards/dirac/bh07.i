@@ -96,6 +96,7 @@
     unit_weight = '0 0 0'
     re_constant = 0.1594
     character = 2 # this is to make the length=1 borehole fill the entire z=2 height
+    mesh_adaptivity = false
     MyNameIsAndyWilkins = false
   [../]
 []

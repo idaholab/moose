@@ -97,6 +97,7 @@
     variable = pressure
     unit_weight = '0 0 0'
     character = -1
+    mesh_adaptivity = false
     MyNameIsAndyWilkins = false
   [../]
 []

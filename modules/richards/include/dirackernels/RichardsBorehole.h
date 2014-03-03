@@ -38,6 +38,8 @@ protected:
   RealVectorValue _unit_weight;
   Real _re_constant;
 
+  bool _mesh_adaptivity;
+
   MaterialProperty<std::vector<Real> > &_viscosity;
 
   MaterialProperty<RealTensorValue> & _permeability;
@@ -62,6 +64,9 @@ protected:
   std::vector<Real> _half_seg_len;
 
   std::vector<RealTensorValue> _rot_matrix;
+
+  std::vector<const Elem *> _elemental_info;
+  bool _have_constructed_elemental_info;
 
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
   RealTensorValue rotVecToZ(RealVectorValue v2);
