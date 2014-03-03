@@ -217,6 +217,7 @@
 #include "ComboMarker.h"
 #include "ValueThresholdMarker.h"
 #include "ValueRangeMarker.h"
+#include "OrientedBoxMarker.h"
 
 // time steppers
 #include "ConstantDT.h"
@@ -526,6 +527,7 @@ registerObjects(Factory & factory)
   registerMarker(ErrorFractionMarker);
   registerMarker(UniformMarker);
   registerMarker(BoxMarker);
+  registerMarker(OrientedBoxMarker);
   registerMarker(ComboMarker);
   registerMarker(ValueThresholdMarker);
   registerMarker(ValueRangeMarker);
