@@ -33,11 +33,11 @@ ExampleApp::registerApps()
 }
 
 void
-ExampleApp::registerObjects(Factory & factory)
+ExampleApp::registerObjects(Factory & /*factory*/)
 {
 }
 
 void
-ExampleApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }

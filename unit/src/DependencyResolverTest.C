@@ -70,7 +70,8 @@ DependencyResolverTest::ptrTest()
   sorted[2] = mat3;
 
 
-  const std::vector<std::set<int *> > & sets = resolver.getSortedValuesSets();
+  /*const std::vector<std::set<int *> > & sets =*/
+  resolver.getSortedValuesSets();
 
   std::sort(sorted.begin(), sorted.end(), resolver);
   CPPUNIT_ASSERT( sorted[0] == mat1);
@@ -101,7 +102,8 @@ DependencyResolverTest::simpleTest()
   sorted[2] = mat3;
 
 
-  const std::vector<std::set<int> > & sets = resolver.getSortedValuesSets();
+  /*const std::vector<std::set<int> > & sets =*/
+  resolver.getSortedValuesSets();
 
   std::sort(sorted.begin(), sorted.end(), resolver);
   CPPUNIT_ASSERT( sorted[0] == mat1);

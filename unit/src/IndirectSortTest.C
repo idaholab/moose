@@ -41,7 +41,7 @@ IndirectSort::realSort()
 void
 IndirectSort::intSort()
 {
-  const int length = 8;
+  const unsigned length = 8;
 
   std::vector<int> a(length);
   for (unsigned int i=0; i<length; ++i)

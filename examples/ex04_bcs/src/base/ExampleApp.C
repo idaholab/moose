@@ -48,6 +48,6 @@ ExampleApp::registerApps()
 }
 
 void
-ExampleApp::associateSyntax(Syntax& syntax, ActionFactory & action_factory)
+ExampleApp::associateSyntax(Syntax& /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }
