@@ -14,7 +14,7 @@ def buildCMD(options):
       tmp_cmd.append([options.lcov_command[0],
                       '--capture',
                       '--initial',
-                      '--directory', os.getcwd() + '/' + options.application[0] + '/framework/',
+                      '--directory', os.getcwd() + '/' + options.application[0],
                       '--output-file', os.getcwd() + '/initialize.info'
                       ])
       tmp_cmd[0].extend(tmp_additional_directories)
@@ -22,7 +22,7 @@ def buildCMD(options):
       tmp_cmd.append([options.lcov_command[0],
                       '--capture',
                       '--initial',
-                      '--directory', os.getcwd() + '/' + options.application[0] + '/framework/',
+                      '--directory', os.getcwd() + '/' + options.application[0],
                       '--output-file', os.getcwd() + '/initialize.info'
                       ])
 
@@ -30,7 +30,7 @@ def buildCMD(options):
   if options.mode == 'generate':
     if len(options.application) > 1:
       tmp_cmd.append([options.lcov_command[0],
-                      '--directory', os.getcwd() + '/' + options.application[0] + '/framework/',
+                      '--directory', os.getcwd() + '/' + options.application[0],
                       '--capture',
                       '--ignore-errors', 'gcov,source',
                       '--output-file', os.getcwd() + '/covered.info'
@@ -38,7 +38,7 @@ def buildCMD(options):
       tmp_cmd[0].extend(tmp_additional_directories)
     else:
       tmp_cmd.append([options.lcov_command[0],
-                      '--directory', os.getcwd() + '/' + options.application[0] + '/framework/',
+                      '--directory', os.getcwd() + '/' + options.application[0],
                       '--capture',
                       '--ignore-errors', 'gcov,source',
                       '--output-file', os.getcwd() + '/covered.info'
@@ -52,8 +52,8 @@ def buildCMD(options):
 
     # Build lcov filter command
     tmp_cmd.append([options.lcov_command[0],
-                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/framework/src*',
-                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/framework/include*',
+                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/src*',
+                    '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/include*',
                     '--output-file', options.outfile ])
 
     # Build genhtml command if --generate-html was used
