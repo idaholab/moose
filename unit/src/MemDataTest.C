@@ -47,21 +47,19 @@ void MemDataTest::test()
   mem_data.stop();
 
   // Compute result
-  long mem_used = mem_data.delta();
-
-  Real megs_used = static_cast<Real>(mem_used)/static_cast<Real>(1024);
+  // long mem_used = mem_data.delta();
 
   // Assert that the memory counter counted *at least* 4 Megabytes
 
   // TODO: Mem Data is not properly reporting memory usage on some systems (i.e. Rocky)
   // Disabling these assertions until a resolution can be found - Ticket #1512
+  // Real megs_used = static_cast<Real>(mem_used)/static_cast<Real>(1024);
   // CPPUNIT_ASSERT(megs_used >= 4.);
-
-  Real rel_diff = std::abs(megs_used-4.)/4.;
 
   // TODO: Mem Data is not properly reporting memory usage on some systems (i.e. Rocky)
   // Disabling these assertions until a resolution can be found - Ticket #1512
   // Assert that the memory counter counted *close* to 4 Megabytes
+  // Real rel_diff = std::abs(megs_used-4.)/4.;
   // CPPUNIT_ASSERT( rel_diff < 1.e-2 );
 
   // Clean up the dummy array we created
