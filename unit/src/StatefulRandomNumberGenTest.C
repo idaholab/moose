@@ -22,8 +22,8 @@ StatefulRandomNumberGenTest::testRandomGen()
 {
   MooseRandom mrand;
 
-  const int n_gens = 3;
-  const int n_nums = 2;
+  const unsigned n_gens = 3;
+  const unsigned n_nums = 2;
 
   for (unsigned int i=0; i<n_gens; ++i)
     mrand.seed(i, i);

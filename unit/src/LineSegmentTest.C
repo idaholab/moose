@@ -439,7 +439,7 @@ LineSegmentTest::lineIntersectTest()
   CPPUNIT_ASSERT( t1.intersect(_neg3y, result) == false );
 
   LineSegment t2(Point(0, 0, 0), Point(0, 0, 1));
-  bool ans = t1.intersect(t2, result);
+  /*bool ans = */ t1.intersect(t2, result);
   CPPUNIT_ASSERT( t1.intersect(t2, result) == false );
   CPPUNIT_ASSERT( t2.intersect(_pos3diag, result) == true );
   CPPUNIT_ASSERT( result == Point(0, 0, 0) );
