@@ -13,3 +13,4 @@ cp -r moose/scripts/timingHTML/resources html/
 # rsync everything but the svn files
 find html -type d -name ".svn" -depth -exec rm -rf {} \;
 rsync -ro html/* hpcsc:/srv/www/ssl/MOOSE/timing/
+rsync -r html/* moosebuild.com:/var/documents/MOOSE/timing/
