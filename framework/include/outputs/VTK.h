@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "OversampleOutputter.h"
-#include "FileOutputInterface.h"
 
 // libMesh includes
 #include "libmesh/vtk_io.h"
@@ -32,8 +31,7 @@ InputParameters validParams<VTKOutputter>();
  *
  */
 class VTKOutputter :
-  public OversampleOutputter,
-  public FileOutputInterface
+  public OversampleOutputter
 {
 public:
 

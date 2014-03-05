@@ -228,6 +228,12 @@ MooseApp::setInputFileName(std::string input_filename)
   _input_filename = input_filename;
 }
 
+std::string
+MooseApp::getOutputFileBase()
+{
+  return _output_file_base;
+}
+
 void
 MooseApp::runInputFile()
 {
@@ -374,7 +380,11 @@ MooseApp::setOutputPosition(Point p)
   _output_position = p;
 
   if (_executioner)
-    _executioner->setOutputPosition(p);
+  {
+    _executioner->setOutputPosition(p); // \todo{remove; it doesn't do anything anyway}
+    FEProblem * problem = dynamic_cast<FEProblem *> (&_executioner->problem());
+    problem->getOutputWarehouse().meshChanged();
+  }
 }
 
 std::string
@@ -528,7 +538,7 @@ MooseApp::printSimulationInfo(std::ostream & ostream)
     oss << "Execution Information:\n"
         << std::setw(FIELD_WIDTH) << "  Executioner: " << demangle(typeid(*_executioner).name()) << '\n';
 
-    std::string time_stepper = _executioner->getTimeStepper();
+    std::string time_stepper = _executioner->getTimeStepperName();
     if (time_stepper != "")
       oss << std::setw(FIELD_WIDTH) << "  TimeStepper: " << time_stepper << '\n';
 

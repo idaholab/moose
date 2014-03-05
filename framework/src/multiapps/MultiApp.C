@@ -19,6 +19,7 @@
 #include "Executioner.h"
 #include "UserObject.h"
 #include "FEProblem.h"
+#include "OutputWarehouse.h"
 #include "Output.h"
 #include "AppFactory.h"
 #include "MooseUtils.h"
@@ -275,6 +276,14 @@ MultiApp::appProblem(unsigned int app)
   return problem;
 }
 
+OutputWarehouse &
+MultiApp::appOutputWarehouse(unsigned int i)
+{
+  FEProblem * problem = appProblem(i);
+  return problem->getOutputWarehouse();
+}
+
+
 const UserObject &
 MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
 {
@@ -319,8 +328,9 @@ MultiApp::resetApp(unsigned int global_app, Real time)
     delete _apps[local_app];
     createApp(local_app, time);
 
-    // We do this to force it to write a new output file
-    _apps[local_app]->setOutputPosition(_positions[global_app]);
+    // We do this to force it to write a new output file \todo{Remove, the new system "handles" this above}
+    if (_apps[local_app]->hasLegacyOutput())
+      _apps[local_app]->setOutputPosition(_positions[global_app]);
   }
 
   // Swap back
@@ -362,21 +372,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblem *>("_parent_fep") = _fe_problem;
   MooseApp * app = AppFactory::instance().create(_app_type, "multi_app", app_params);
-
-  std::ostringstream output_base;
-
-  // Create an output base by taking the output base of the master problem and appending
-  // the name of the multiapp + a number to it
-  if (_fe_problem)
-    output_base << _fe_problem->out().fileBase() << "_" ;
-
-  output_base << _name
-              << std::setw(std::ceil(std::log10(_total_num_apps)))
-              << std::setprecision(0)
-              << std::setfill('0')
-              << std::right
-              << _first_local_app + i;
-
   _apps[i] = app;
 
   std::string input_file = "";
@@ -385,10 +380,54 @@ MultiApp::createApp(unsigned int i, Real start_time)
   else
     input_file = _input_files[_first_local_app+i];
 
-  app->setGlobalTimeOffset(start_time);
+  std::ostringstream output_base;
 
+  /* The following file_base needs to be improved (see #2554) */
+  // Create an output base by taking the output base of the master problem and appending
+  // the name of the multiapp + a number to it
+  if (_app.hasLegacyOutput())
+  {
+    if (_fe_problem)
+      output_base << _fe_problem->out().fileBase() << "_" ;
+  }
+
+  else
+  {
+    if (!_app.getOutputFileBase().empty())
+      output_base << _app.getOutputFileBase() + "_";
+    else
+    {
+      std::string base = _app.getFileName();
+      size_t pos = base.find_last_of('.');
+      output_base << base.substr(0, pos) + "_out_";
+    }
+  }
+
+  // Append the sub app name to the output file base
+  output_base << _name
+              << std::setw(std::ceil(std::log10(_total_num_apps)))
+              << std::setprecision(0)
+              << std::setfill('0')
+              << std::right
+              << _first_local_app + i;
+
+  // Propogate the output file numbers
+  /* The file numbering propogates from parent app to sub app, however one condition must
+   * be satisfied: The Outputs blocks in both the master and sub input files must contained
+   * similarily named blocks. That is both must contain outputters with the same name, if
+   * the input files are using the short-cut notation (exodus = true) then this condition is
+   * automatically satisified.
+   */
+  std::map<std::string, unsigned int> m;
+  if (!_app.getOutputFileNumbers().empty())
+    m = _app.getOutputFileNumbers();
+  else
+    m = _fe_problem->getOutputWarehouse().getFileNumbers();
+
+  app->setGlobalTimeOffset(start_time);
   app->setInputFileName(input_file);
   app->setOutputFileBase(output_base.str());
+  app->setOutputFileNumbers(m);
 
   if (getParam<bool>("output_in_position"))
   {
@@ -399,7 +438,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->setupOptions();
   app->runInputFile();
 }
-
 
 void
 MultiApp::buildComm()

@@ -22,7 +22,6 @@ InputParameters validParams<Nemesis>()
 {
   // Get the base class parameters
   InputParameters params = validParams<OversampleOutputter>();
-  params += validParams<FileOutputInterface>();
 
   // Add description for the Nemesis class
   params.addClassDescription("Object for output data in the Nemesis format");
@@ -33,7 +32,6 @@ InputParameters validParams<Nemesis>()
 
 Nemesis::Nemesis(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
-    FileOutputInterface(name, parameters),
     _nemesis_io_ptr(NULL),
     _file_num(0),
     _nemesis_num(0)
@@ -134,6 +132,9 @@ Nemesis::output()
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();
   _global_values.clear();
+
+  // Call the output methods
+  OversampleOutputter::output();
 
   // Write the data
   _nemesis_io_ptr->write_timestep(filename(), *_es_ptr, _nemesis_num, _time + _app.getGlobalTimeOffset());

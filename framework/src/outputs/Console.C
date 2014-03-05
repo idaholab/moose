@@ -28,11 +28,10 @@ InputParameters validParams<Console>()
 
   // Get the parameters from the base class
   InputParameters params = validParams<TableOutputter>();
-  params += validParams<FileOutputInterface>();
 
   // Screen and file output toggles
-  params.addParam<bool>("screen", true, "Output to the screen");
-  params.addParam<bool>("file", false, "Output to the file");
+  params.addParam<bool>("output_screen", true, "Output to the screen");
+  params.addParam<bool>("output_file", false, "Output to the file");
 
   // Table fitting options
   params.addParam<unsigned int>("max_rows", 15, "The maximum number of postprocessor/scalar values displayed on screen during a timestep (set to 0 for unlimited)");
@@ -59,19 +58,21 @@ InputParameters validParams<Console>()
   // Performance log group
   params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Performance Log");
 
+  // Set outputting of failed solves to true for Console outputters
+  params.set<bool>("output_failed") = true;
+
   return params;
 }
 
 Console::Console(const std::string & name, InputParameters parameters) :
     TableOutputter(name, parameters),
-    FileOutputInterface(name, parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _use_color(false),
     _print_linear(getParam<bool>("linear_residuals")),
     _print_nonlinear(getParam<bool>("nonlinear_residuals")),
-    _write_file(getParam<bool>("file")),
-    _write_screen(getParam<bool>("screen")),
+    _write_file(getParam<bool>("output_file")),
+    _write_screen(getParam<bool>("output_screen")),
     _verbose(getParam<bool>("verbose")),
     _old_linear_norm(std::numeric_limits<Real>::max()),
     _old_nonlinear_norm(std::numeric_limits<Real>::max()),
@@ -172,14 +173,24 @@ Console::initialSetup()
   // Ouput the system information
   if (_system_information)
     outputSystemInformation();
+
+  // Output the timestep information
+  timestepSetup();
 }
 
 void
 Console::timestepSetup()
 {
-  // Do nothing if the problem is transient
-  if (!_transient)
+  // Do nothing if the problem is transient or if it is not an output interval
+  if (!_transient || !checkInterval())
     return;
+
+  // Do nothing if output_intitial = false and the timestep is zero
+  if (!_output_initial && _t_step == 0)
+    return;
+
+  // Prepare the PETSc monitor functions
+  petscSetup();
 
   // Stream to build the time step information
   std::stringstream oss;
@@ -251,9 +262,6 @@ Console::output()
   // Write the file
   if (_write_file)
     writeStream();
-
-  // Prepare the PETSc monitor functions for the next timestep
-  petscSetup();
 }
 
 void
@@ -510,7 +518,7 @@ Console::outputSystemInformation()
   oss << "Execution Information:\n"
       << std::setw(_field_width) << "  Executioner: " << demangle(typeid(*_app.getExecutioner()).name()) << '\n';
 
-  std::string time_stepper = _app.getExecutioner()->getTimeStepper();
+  std::string time_stepper = _app.getExecutioner()->getTimeStepperName();
   if (time_stepper != "")
     oss << std::setw(_field_width) << "  TimeStepper: " << time_stepper << '\n';
 

@@ -81,6 +81,7 @@ CoupledExecutioner::addFEProblem(const std::string & name, const FileName & file
   awh->build();
 
   _name_index[name] = _awhs.size();
+  _input_file_names.push_back(file_name);
   _awhs.push_back(awh);
   _parsers.push_back(parser);
 }
@@ -157,6 +158,9 @@ CoupledExecutioner::build()
 
   for (unsigned int i = 0; i < n; i++)
   {
+      /* Need to set the input filename for the App, so that when AddOutputAction gets the
+         default output filename it is correct */
+    _awhs[i]->mooseApp().setInputFileName(_input_file_names[i]);
     _awhs[i]->executeAllActions();
     _executioners[i] = _awhs[i]->executioner();
     _fe_problems[i] = _awhs[i]->problem();
@@ -166,6 +170,7 @@ CoupledExecutioner::build()
   for (std::map<std::string, unsigned int>::iterator it = _name_index.begin(); it != _name_index.end(); ++it)
     _fep_mapping[_fe_problems[it->second]] = it->first;
 }
+
 
 void
 CoupledExecutioner::projectVariables(FEProblem & fep)

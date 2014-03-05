@@ -14,8 +14,8 @@
 
 #include "OutputWarehouse.h"
 #include "OutputBase.h"
-#include "FileOutputInterface.h"
 #include "Console.h"
+#include "FileOutputter.h"
 
 OutputWarehouse::OutputWarehouse() :
     _has_screen_console(false)
@@ -35,7 +35,6 @@ OutputWarehouse::initialSetup()
     (*it)->initialSetup();
 }
 
-
 void
 OutputWarehouse::timestepSetup()
 {
@@ -54,7 +53,7 @@ OutputWarehouse::addOutput(OutputBase * output)
   _output_names.insert(output->name());
 
   // If the output object is a FileOutputBase then store the output filename
-  FileOutputInterface * ptr = dynamic_cast<FileOutputInterface *>(output);
+  FileOutputter * ptr = dynamic_cast<FileOutputter *>(output);
   if (ptr != NULL)
     addOutputFilename(ptr->filename());
 
@@ -65,11 +64,11 @@ OutputWarehouse::addOutput(OutputBase * output)
     _sync_times.insert(sync_times.begin(), sync_times.end());
   }
 
-  // Warning if multiple Console objects are added with 'screen=true' in the input file
+  // Warning if multiple Console objects are added with 'output_screen=true' in the input file
   Console * c_ptr = dynamic_cast<Console *>(output);
   if (c_ptr != NULL)
   {
-    bool screen = c_ptr->getParam<bool>("screen");
+    bool screen = c_ptr->getParam<bool>("output_screen");
 
     if (screen && _has_screen_console)
       mooseWarning("Multiple Console output objects are writing to the screen, this will likely cause duplicate messages printed.");
@@ -101,6 +100,14 @@ OutputWarehouse::outputInitial()
 }
 
 void
+OutputWarehouse::outputFailedStep()
+{
+  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+    (*it)->outputFailedStep();
+}
+
+
+void
 OutputWarehouse::outputStep()
 {
   for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
@@ -119,6 +126,49 @@ OutputWarehouse::meshChanged()
 {
   for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->meshChanged();
+}
+
+void
+OutputWarehouse::allowOutput(bool state)
+{
+  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+    (*it)->allowOutput(state);
+}
+
+void
+OutputWarehouse::forceOutput()
+{
+  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+    (*it)->forceOutput();
+}
+
+void
+OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input)
+{
+  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  {
+    FileOutputter * ptr = dynamic_cast<FileOutputter *>(*it);
+    if (ptr != NULL)
+    {
+      std::map<std::string, unsigned int>::const_iterator it = input.find(ptr->name());
+      if (it != input.end())
+        ptr->setFileNumber(it->second);
+    }
+
+  }
+}
+
+std::map<std::string, unsigned int>
+OutputWarehouse::getFileNumbers()
+{
+  std::map<std::string, unsigned int> output;
+  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  {
+    FileOutputter * ptr = dynamic_cast<FileOutputter *>(*it);
+    if (ptr != NULL)
+      output[ptr->name()] = ptr->getFileNumber();
+  }
+  return output;
 }
 
 void

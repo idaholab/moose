@@ -20,7 +20,6 @@ InputParameters validParams<CSV>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutputter>();
-  params += validParams<FileOutputInterface>();
 
   // Suppress unused parameters
   params.suppressParameter<unsigned int>("padding");
@@ -29,8 +28,7 @@ InputParameters validParams<CSV>()
 }
 
 CSV::CSV(const std::string & name, InputParameters & parameters) :
-    TableOutputter(name, parameters),
-    FileOutputInterface(name, parameters)
+    TableOutputter(name, parameters)
 {
 }
 

@@ -767,12 +767,21 @@ public:
    */
   const BoundaryID & getCurrentBoundaryID(){ return _current_boundary_id; }
 
+  /**
+   * Return a reference to the OutputWarehouse
+   * @return Reference to the OutputWarehouse
+   */
+  OutputWarehouse & getOutputWarehouse() { return _output_warehouse; }
+
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
   Moose::KernelType _kernel_type;
 
+  // OutputWarehouse: storage of all output objects for this problem
+  OutputWarehouse _output_warehouse;
 
   /** Storage for current boundary id
    * getActiveBoundaryID returns a reference to this

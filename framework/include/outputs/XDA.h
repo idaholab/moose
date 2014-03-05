@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "OversampleOutputter.h"
-#include "FileOutputInterface.h"
 
 // Forward declearations
 class XDA;
@@ -29,8 +28,7 @@ InputParameters validParams<XDA>();
  * Class for output data to the XDAII format
  */
 class XDA :
-  public OversampleOutputter,
-  public FileOutputInterface
+  public OversampleOutputter
 {
 public:
 

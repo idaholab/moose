@@ -16,7 +16,7 @@
 #define TABLESOUTPUTBASE_H
 
 // MOOSE includes
-#include "OutputBase.h"
+#include "FileOutputter.h"
 #include "FormattedTable.h"
 
 class TableOutputter;
@@ -36,7 +36,7 @@ InputParameters validParams<TableOutputter>();
  * @see CSV Console
  */
 class TableOutputter :
-  public OutputBase
+  public FileOutputter
 {
 public:
 

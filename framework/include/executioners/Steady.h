@@ -59,6 +59,9 @@ public:
 protected:
   FEProblem & _problem;
 
+  /// Reference to OutputWarehouse (needed for outputing system information via Console object)
+  OutputWarehouse & _output_warehouse;
+
   int & _time_step;
   Real & _time;
 };

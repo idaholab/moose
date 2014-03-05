@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "OversampleOutputter.h"
-#include "FileOutputInterface.h"
 
 // Forward declearations
 class Tecplot;
@@ -29,8 +28,7 @@ InputParameters validParams<Tecplot>();
  * Class for output data to the TecplotII format
  */
 class Tecplot :
-  public OversampleOutputter,
-  public FileOutputInterface
+  public OversampleOutputter
 {
 public:
 
