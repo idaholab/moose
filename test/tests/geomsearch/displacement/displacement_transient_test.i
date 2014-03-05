@@ -89,15 +89,16 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
   output_initial = true
-  output_displaced = true
-  interval = 1
-  exodus = true
-  perf_log = true
+  use_displaced = true
+	[./exodus]
+    type = Exodus
+    append_displaced = true				
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-
-[Debug]
-  show_actions = true
-[]
-

@@ -78,11 +78,13 @@
   dt = .1
 []
 
-[Output]
+[Outputs]
   file_base = out
   output_initial = true
   exodus = true
-  perf_log = true
-  postprocessor_csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
+  csv = true
 []
-

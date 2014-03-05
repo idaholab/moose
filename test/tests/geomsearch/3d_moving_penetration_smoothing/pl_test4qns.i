@@ -287,11 +287,13 @@
   [../]
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = pl_test4qns_out
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    pref_log = true
+    linear_residuals = true
+  [../]
 []

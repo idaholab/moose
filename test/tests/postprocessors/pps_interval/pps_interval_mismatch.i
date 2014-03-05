@@ -129,14 +129,17 @@
 []
 
 [Output]
-  linear_residuals = true
-  file_base = ignore_bad
-  output_initial = true
-  postprocessor_csv = false
-  interval = 4
-  screen_interval = 3
-  exodus = true
-  perf_log = true
+  postprocessor_screen = false
 []
 
-
+[Outputs]
+  output_initial = true
+  interval = 4
+  exodus = true
+  [./console]
+    type = Console
+    interval = 3
+    perf_log = true
+    linear_residuals = true
+  [../]
+[]

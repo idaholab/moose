@@ -28,7 +28,6 @@ InputParameters validParams<Console>()
 
   // Get the parameters from the base class
   InputParameters params = validParams<TableOutputter>();
-  params += validParams<FileOutputInterface>();
 
   // Screen and file output toggles
   params.addParam<bool>("screen", true, "Output to the screen");
@@ -64,7 +63,6 @@ InputParameters validParams<Console>()
 
 Console::Console(const std::string & name, InputParameters parameters) :
     TableOutputter(name, parameters),
-    FileOutputInterface(name, parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _use_color(false),
@@ -172,13 +170,16 @@ Console::initialSetup()
   // Ouput the system information
   if (_system_information)
     outputSystemInformation();
+
+  // Output the timestep infromation
+  timestepSetup();
 }
 
 void
 Console::timestepSetup()
 {
-  // Do nothing if the problem is transient
-  if (!_transient)
+  // Do nothing if the problem is transient or if it is not an output interval
+  if (!_transient || !checkInterval())
     return;
 
   // Stream to build the time step information

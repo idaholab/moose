@@ -55,6 +55,13 @@
   type = Steady
 []
 
-[Output]
-  exodus = true
+[Outputs]
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

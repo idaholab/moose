@@ -50,16 +50,6 @@ public:
    */
   virtual void act();
 
-protected:
-
-  /**
-   * Returns the default output file base
-   * @return The name of the input file with '_out' append to the end
-   */
-  std::string getDefaultOutFileBase();
-
-  /// Reference to the output warehouse
-  OutputWarehouse & _output_warehouse;
 };
 
 #endif //ADDOUTPUTACTION_H

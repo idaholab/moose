@@ -133,14 +133,13 @@
   end_time = 0.3
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out_initial_pps
   output_initial = true
-  postprocessor_csv = false
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-
-

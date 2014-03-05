@@ -123,10 +123,6 @@
   [../]
 []
 
-# Keep until Outputs based recovery system is operational
-[Output]
-[]
-
 ##! [OutputDisplaced]
 [Outputs]
   [./exodus_displaced]
@@ -136,13 +132,3 @@
   [../]
 []
 ##! [OutputDisplaced]
-
-# This was used to create gold
-#[Output]
-#  output_initial = true
-#  output_displaced = true
-#  interval = 1
-#  exodus = true
-#  perf_log = true
-#  file_base = displaced_adapt_test_out
-#[]

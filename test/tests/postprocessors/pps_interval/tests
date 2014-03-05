@@ -5,18 +5,10 @@
     exodiff = 'pps_out_interval.e'
   [../]
 
-  [./test_bad_interval2]
-    type = 'RunException'
-    input = 'pps_bad_interval2.i'
-    expect_err = '"screen_interval \(\d+\)" must be less than or equal to "interval'
-    max_parallel = 1
-  [../]
-
-  [./test_bad_interval]
-    type = 'RunException'
-    input = 'pps_bad_interval.i'
-    expect_err = '"screen_interval \(\d+\)" must evenly divide "interval'
-    max_parallel = 1
+  [./test_interval_mismatch]
+    type = 'Exodiff'
+    input = 'pps_interval_mismatch.i'
+    exodiff = 'pps_interval_mismatch_out.e'
   [../]
 
   [./test_interval_verify]
@@ -24,12 +16,5 @@
     input = 'pps_out_interval.i'
     expect_out = '(?:^\|\s+\d\.\d.*\n){11}'
     prereq = 'test_interval'
-  [../]
-
-  [./test_bad_interval3]
-    type = 'RunException'
-    input = 'pps_bad_interval3.i'
-    expect_err = '"output_initial" is set to false'
-    max_parallel = 1
   [../]
 []

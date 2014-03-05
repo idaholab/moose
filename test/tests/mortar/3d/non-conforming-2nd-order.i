@@ -88,8 +88,10 @@
   nl_rel_tol = 1e-13
 []
 
-[Output]
-  interval = 1
+[Outputs]
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

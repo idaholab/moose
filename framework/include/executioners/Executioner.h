@@ -102,9 +102,6 @@ public:
 
 protected:
 
-  /// Reference to OutputWarehouse (needed for outputing system information via Console object)
-  OutputWarehouse & _output_warehouse;
-
   /// output initial condition if true
   bool _output_initial;
   /// Initial Residual Variables

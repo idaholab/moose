@@ -68,9 +68,7 @@
 
 []
 
-[Output]
+[Outputs]
   output_initial = true
-  interval = 1
   exodus = true
 []
-

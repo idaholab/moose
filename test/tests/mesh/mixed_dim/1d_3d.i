@@ -59,10 +59,14 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = 1d_3d_out
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+
 []

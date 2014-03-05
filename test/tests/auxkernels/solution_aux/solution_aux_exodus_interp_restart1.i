@@ -62,8 +62,11 @@
   dt = 0.5
 []
 
-[Output]
+[Outputs]
   exodus = true
   num_checkpoint_files = 1
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

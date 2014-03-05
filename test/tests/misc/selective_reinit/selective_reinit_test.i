@@ -83,11 +83,15 @@
   [../]
 []
 
-[Output]
+[Outputs]
   output_initial = true
   exodus = true
-  perf_log = true
-  output_variables = u
+  show = u
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residual = true
+  [../]
 []
 
 [LotsOfAuxVariables]
@@ -95,4 +99,3 @@
     number = 2000
   [../]
 []
-

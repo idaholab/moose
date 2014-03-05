@@ -1,9 +1,11 @@
-[Output]
+[Outputs]
   file_base = 2d_diffusion_reverse_out
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
 
 [Executioner]
@@ -53,5 +55,3 @@
   dim = 2
   file = square.e
 []
-
-

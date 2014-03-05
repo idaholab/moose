@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "OversampleOutputter.h"
-#include "FileOutputInterface.h"
 
 // libMesh includes
 #include "libmesh/exodusII.h"
@@ -33,8 +32,7 @@ InputParameters validParams<Exodus>();
  * Class for output data to the ExodusII format
  */
 class Exodus :
-  public OversampleOutputter,
-  public FileOutputInterface
+  public OversampleOutputter
 {
 public:
 
@@ -101,9 +99,6 @@ protected:
 
   /// Storage for names of the above scalar values
   std::vector<std::string> _global_names;
-
-  /// Current output filename; utlized by filename() to create the proper suffix
-  unsigned int _file_num;
 
   /**
    * Flag for indicating the status of the ExodusII file that is being written. The ExodusII_IO

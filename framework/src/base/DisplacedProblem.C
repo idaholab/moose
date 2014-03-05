@@ -169,7 +169,7 @@ DisplacedProblem::init()
 
   Moose::setup_perf_log.push("DisplacedProblem::init::meshChanged()","Setup");
   _mesh.meshChanged();
-  _app.getOutputWarehouse().meshChanged();
+  _mproblem.getOutputWarehouse().meshChanged();
   Moose::setup_perf_log.pop("DisplacedProblem::init::meshChanged()","Setup");
 
   _ex->setOutputVariables(_mproblem.getVariableNames());

@@ -12,51 +12,58 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef FILEOUTPUTINTERFACE_H
-#define FILEOUTPUTINTERFACE_H
+#ifndef GNUPlot_H
+#define GNUPlot_H
 
-// Moose includes
-#include "InputParameters.h"
+// MOOSE includes
+#include "TableOutputter.h"
 
 // Forward declerations
-class FileOutputInterface;
+class GNUPlot;
 
 template<>
-InputParameters validParams<FileOutputInterface>();
+InputParameters validParams<GNUPlot>();
 
 /**
- * A stand-alone Interface class for adding basic filename support to output objects
+ * Based class for adding basic filename support to output base class
  *
  * @see Exodus
  */
-class FileOutputInterface
+class GNUPlot :
+  public TableOutputter
 {
 public:
 
   /**
    * Class constructor
+   *
+   * The constructor performs all of the necessary initialization of the various
+   * output lists required for the various output types.
+   *
+   * @see initAvailable init seperate
    */
-  FileOutputInterface(const std::string & name, InputParameters & parameters);
+  GNUPlot(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
    */
-  virtual ~FileOutputInterface();
+  virtual ~GNUPlot();
+
+  /**
+   * Output the table to a *.csv file
+   */
+  virtual void output();
 
   /**
    * The filename for the output file
    * @return A string of output file including the extension
    */
-  virtual std::string filename() = 0;
+  virtual std::string filename();
 
-protected:
+private:
 
-  /// The base filename from the input paramaters
-  std::string _file_base;
-
-  /// Number of digits to pad the extensions
-  unsigned int _padding;
-
+  /// Desired file extension
+  std::string _extension;
 };
 
-#endif /* FILEOUTPUTINTERFACE_H */
+#endif /* GNUPlot_H */

@@ -80,11 +80,12 @@
   []
 []
 
-[Output]
+[Outputs]
   file_base = out_steady_adapt
-  output_initial = false
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
 

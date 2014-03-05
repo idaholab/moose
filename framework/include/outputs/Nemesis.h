@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "OversampleOutputter.h"
-#include "FileOutputInterface.h"
 
 // libMesh includes
 #include "libmesh/nemesis_io.h"
@@ -33,8 +32,7 @@ InputParameters validParams<Nemesis>();
  * Class for output data to the Nemesis format
  */
 class Nemesis :
-  public OversampleOutputter,
-  public FileOutputInterface
+  public OversampleOutputter
 {
 public:
 

@@ -13,7 +13,7 @@
   [./pps_file_out_warn_test]
     type = 'RunApp'
     input = 'pps_file_out_warn.i'
-    expect_out = 'Postprocessor file output has been requested'
+    expect_out = "Postprocessor 'avg_block' has requested to be output by the 'gmv' outputter, but postprocessor output is not support by this type of outputter."
   [../]
 
   [./gmv_out_test]
@@ -47,14 +47,14 @@
     type = 'CheckFiles'
     input = 'output_test_gnuplot.i'
     check_files = 'out_ps.gp out_ps.dat'
-    cli_args = 'Output/gnuplot_format=ps Output/file_base=out_ps'
+    cli_args = 'Outputs/gnuplot/extension=ps Outputs/file_base=out_ps'
   [../]
 
   [./gnuplot_png_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot.i'
     check_files = 'out_png.gp out_png.dat'
-    cli_args = 'Output/gnuplot_format=png Output/file_base=out_png'
+    cli_args = 'Outputs/file_base=out_png'
     prereq = 'gnuplot_ps_out_test'
   [../]
 
@@ -62,22 +62,14 @@
     type = 'CheckFiles'
     input = 'output_test_gnuplot.i'
     check_files = 'out_gif.gp out_gif.dat'
-    cli_args = 'Output/gnuplot_format=gif Output/file_base=out_gif'
+    cli_args = 'Outputs/gnuplot/extension=gif Outputs/file_base=out_gif'
     prereq = 'gnuplot_png_out_test'
-  [../]
-
-  [./gnuplot_bad_out_test]
-    type = 'RunException'
-    input = 'output_test_gnuplot.i'
-    expect_err = 'gnuplot format .*? is not supported'
-    cli_args = 'Output/gnuplot_format=magic'
-    prereq = 'gnuplot_gif_out_test'
   [../]
 
   [./pps_screen_out_warn_test]
     type = 'RunApp'
     input = 'pps_screen_out_warn.i'
-    expect_out = 'Postprocessor screen output has been requested'
+    expect_out = "A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disable for the 'console' outputter."
   [../]
 
   [./show_input_test]

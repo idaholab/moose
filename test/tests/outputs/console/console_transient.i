@@ -48,12 +48,6 @@
   verbose = true
 []
 
-#[Output]
-#  linear_residuals = false
-#  output_initial = true
-#  exodus = true
-#  perf_log = true
-#[]
 
 [Outputs]
   [./screen]

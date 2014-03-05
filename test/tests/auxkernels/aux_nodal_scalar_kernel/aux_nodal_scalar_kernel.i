@@ -62,7 +62,8 @@
   type = Steady
 []
 
-[Output]
+[Outputs]
   exodus = true
   output_initial = true
+  hide = 'bc_sum'
 []

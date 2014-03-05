@@ -79,8 +79,8 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
-  output_initial = true
-  interval = 1
+[Outputs]
   exodus = true
+  console = true
+  output_initial = true
 []
