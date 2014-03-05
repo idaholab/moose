@@ -565,7 +565,7 @@ void FEProblem::initialSetup()
     reinitScalars(tid);
 
   // Initial setup of output objects
-  _app.getOutputWarehouse().initialSetup();
+  getOutputWarehouse().initialSetup();
 }
 
 void FEProblem::timestepSetup()
@@ -603,7 +603,7 @@ void FEProblem::timestepSetup()
 
 
   // Timestep setup of output objects
-  _app.getOutputWarehouse().timestepSetup();
+  getOutputWarehouse().timestepSetup();
 }
 
 void
@@ -2606,6 +2606,7 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
   _multi_apps(type)[0].addMultiApp(multi_app);
+
   multi_app->init();
 }
 
@@ -3581,7 +3582,7 @@ FEProblem::meshChanged()
 
   // Indicate that the Mesh has changed to the Output objects
   _out.meshChanged();
-  _app.getOutputWarehouse().meshChanged();
+  getOutputWarehouse().meshChanged();
 
   _has_jacobian = false;                    // we have to recompute jacobian when mesh changed
 }

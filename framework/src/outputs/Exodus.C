@@ -25,7 +25,6 @@ InputParameters validParams<Exodus>()
 {
   // Get the base class parameters
   InputParameters params = validParams<OversampleOutputter>();
-  params += validParams<FileOutputInterface>();
 
   // Set the default padding to 3
   params.set<unsigned int>("padding") = 3;
@@ -39,9 +38,7 @@ InputParameters validParams<Exodus>()
 
 Exodus::Exodus(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
-    FileOutputInterface(name, parameters),
     _exodus_io_ptr(NULL),
-    _file_num(0),
     _initialized(false),
     _exodus_num(0)
 {
@@ -65,11 +62,11 @@ Exodus::outputSetup()
   if (_exodus_io_ptr != NULL)
     delete _exodus_io_ptr;
 
-  // Increment the file number
-  _file_num++;
-
   // Reset the number of outputs for this file
   _exodus_num = 1;
+
+  // Increment the file number
+  _file_num++;
 
   // Create the new ExodusII_IO object
   _exodus_io_ptr = new ExodusII_IO(_es_ptr->get_mesh());
@@ -78,6 +75,10 @@ Exodus::outputSetup()
   // Utilize the spatial dimensions
   if (_es_ptr->get_mesh().mesh_dimension() != 1)
     _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
+
+  // Adjust the position of the output
+  if (_app.hasOutputPosition())
+    _exodus_io_ptr->set_coordinate_offset(_app.getOutputPosition());
 }
 
 void
@@ -118,7 +119,6 @@ Exodus::outputPostprocessors()
     _global_names.push_back(*it);
     _global_values.push_back(_problem_ptr->getPostprocessorValue(*it));
   }
-
 }
 
 void
@@ -157,7 +157,6 @@ Exodus::outputScalarVariables()
 void
 Exodus::outputInput()
 {
-
   // Format the input file
   ExodusFormatter syntax_formatter;
   syntax_formatter.printInputFile(_app.actionWarehouse());
@@ -171,16 +170,12 @@ Exodus::outputInput()
 void
 Exodus::output()
 {
-
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();
   _global_values.clear();
 
   // Call the output methods
   OversampleOutputter::output();
-
-  // Increment output call counter, which is reset by outputSetup
-  _exodus_num++;
 
   // Write the global variabls (populated by the output methods)
   if (!_global_values.empty())
@@ -189,6 +184,9 @@ Exodus::output()
       outputEmptyTimestep();
     _exodus_io_ptr->write_global_data(_global_values, _global_names);
   }
+
+  // Increment output call counter, which is reset by outputSetup
+  _exodus_num++;
 }
 
 std::string

@@ -16,7 +16,7 @@
 #define OVERSAMPLEOUTPUTTER_H
 
 // MOOSE includes
-#include "OutputBase.h"
+#include "FileOutputter.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -46,7 +46,7 @@ InputParameters validParams<OversampleOutputter>();
  * @see Exodus
  */
 class OversampleOutputter :
-  public OutputBase
+  public FileOutputter
 {
 public:
 
@@ -89,7 +89,6 @@ protected:
    * Performs the update of the solution vector for the oversample mesh
    */
   virtual void oversample();
-
 
   /**
    * A pointer to the current mesh

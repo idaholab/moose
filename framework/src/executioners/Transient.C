@@ -77,6 +77,7 @@ InputParameters validParams<Transient>()
 Transient::Transient(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
+    _output_warehouse(_problem.getOutputWarehouse()),
     _time_scheme(getParam<MooseEnum>("scheme")),
     _time_stepper(NULL),
     _t_step(_problem.timeStep()),
@@ -98,7 +99,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
     _old_time_solution_norm(declareRestartableData<Real>("old_time_solution_norm", 0.0)),
-    _sync_times(_app.getOutputWarehouse().getSyncTimes()),
+    _sync_times(_output_warehouse.getSyncTimes()),
     _abort(getParam<bool>("abort_on_solve_fail")),
     _time_interval(declareRestartableData<bool>("time_interval", false)),
     _start_time(getParam<Real>("start_time")),

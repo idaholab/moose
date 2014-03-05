@@ -87,6 +87,24 @@ public:
   void meshChanged();
 
   /**
+   * Calls the allowOutput method for every output object
+   */
+  void allowOutput(bool state);
+
+  /**
+   * Calls the forceOutput method for every output object
+   */
+  void forceOutput();
+
+  /**
+   * Calls the setFileNumber method for every FileOutputter output object
+   */
+  void setFileNumbers(std::map<std::string, unsigned int> input);
+
+
+  std::map<std::string, unsigned int> getFileNumbers();
+
+  /**
    * Stores the common InputParameters object
    * @param params_ptr A pointer to the common parameters object to be stored
    *
@@ -134,6 +152,9 @@ private:
 
   /// Sync times for all objects
   std::set<Real> _sync_times;
+
+  /// Input file name for this output object
+  std::string _input_file_name;
 
 };
 

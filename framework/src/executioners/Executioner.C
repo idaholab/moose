@@ -44,7 +44,6 @@ Executioner::Executioner(const std::string & name, InputParameters parameters) :
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
     Restartable(name, parameters, "Executioners"),
-    _output_warehouse(_app.getOutputWarehouse()),
     _output_initial(false),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),

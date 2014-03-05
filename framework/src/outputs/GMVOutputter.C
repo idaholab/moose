@@ -24,7 +24,6 @@ InputParameters validParams<GMVOutputter>()
   // Get the base class parameters
 
   InputParameters params = validParams<OversampleOutputter>();
-  params += validParams<FileOutputInterface>();
 
   // Supress un-available parameters
   params.suppressParameter<bool>("output_scalar_variables");
@@ -45,7 +44,6 @@ InputParameters validParams<GMVOutputter>()
 
 GMVOutputter::GMVOutputter(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
-    FileOutputInterface(name, parameters),
     _binary(getParam<bool>("binary"))
 {
   // Force sequence output

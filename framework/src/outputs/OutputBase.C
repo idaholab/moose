@@ -28,6 +28,12 @@ template<>
 InputParameters validParams<OutputBase>()
 {
 
+  /* NOTE:
+   * The validParams from each output object is merged with the valdParams from CommonOutputAction. In order for the
+   * common parameters to be applied correctly any parameter that is a common parameter (e.g., output_initial) MUST NOT
+   * set a default value, this is because the default is extracted from the common parameters when the output object
+   * is being created within AddOutputAction. */
+
   // Get the parameters from the parent object
   InputParameters params = validParams<MooseObject>();
 
@@ -46,7 +52,9 @@ InputParameters validParams<OutputBase>()
   params.addParam<bool>("output_postprocessors", true, "Enable/disable the output of postprocessors");
 
   // Displaced Mesh options
-  params.addParam<bool>("use_displaced", false, "Enable/disable the use of the displaced mesh for outputing");
+  params.addParam<bool>("use_displaced", "Enable/disable the use of the displaced mesh for outputing");
+  params.addParam<bool>("append_displaced", "Append '_displaced' to the output file base");
+  params.addParamNamesToGroup("use_displaced, append_displaced", "Displaced");
 
   // Control for outputing elemental variables as nodal variables
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental nonlinear variables as nodal");
@@ -74,7 +82,8 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     MooseObject(name, parameters),
     Restartable(name, parameters, "OutputBase"),
     _problem_ptr(getParam<FEProblem *>("_fe_problem")),
-    _es_ptr(getParam<bool>("use_displaced") ? &_problem_ptr->getDisplacedProblem()->es() : &_problem_ptr->es()),
+    _use_displaced(isParamValid("use_displaced") ? getParam<bool>("use_displaced") : false),
+    _es_ptr(_use_displaced ? &_problem_ptr->getDisplacedProblem()->es() : &_problem_ptr->es()),
     _time(_problem_ptr->time()),
     _time_old(_problem_ptr->timeOld()),
     _t_step(_problem_ptr->timeStep()),
@@ -88,16 +97,17 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     _scalar_as_nodal(getParam<bool>("scalar_as_nodal")),
     _system_information(getParam<bool>("output_system_information")),
     _mesh_changed(false),
-    _sequence(getParam<bool>("use_displaced")),
+    _sequence(_use_displaced),
     _num(declareRestartableData<int>("num", 0)),
     _interval(isParamValid("interval") ? getParam<unsigned int>("interval") : 1),
     _sync_times(isParamValid("sync_times") ?
                 std::set<Real>(getParam<std::vector<Real> >("sync_times").begin(),
                                getParam<std::vector<Real> >("sync_times").end()) :
                 std::set<Real>()),
-    _sync_only(getParam<bool>("sync_only"))
+    _sync_only(getParam<bool>("sync_only")),
+    _allow_output(true),
+    _force_output(false)
 {
-
   // Initialize the available output
   initAvailable();
 
@@ -167,10 +177,15 @@ OutputBase::timestepSetup()
 void
 OutputBase::outputInitial()
 {
+  // Do nothing if output is not force or if output is disallowed
+  if (!_force_output && !_allow_output)
+    return;
+
   // Output the initial condition, if desired
-  if (_output_initial)
+  if (_force_output || _output_initial)
   {
     outputSetup();
+    _mesh_changed = false;
     output();
     _num++;
   }
@@ -189,12 +204,51 @@ OutputBase::outputInitial()
     // Do not allow the input file to be written again
     _output_input = false;
   }
+
+  // Set the force output flag to false
+  _force_output = false;
 }
+
+void
+OutputBase::outputStep()
+{
+  // Do nothing if output is not forced and is not allowed
+  if (!_force_output && !_allow_output)
+    return;
+
+  // Only continue if output is not forced and the output is on an inveval
+  if (!_force_output && !checkInterval())
+    return;
+
+  // If the mesh has changed or the sequence state is true, call the outputSetup() function
+  if (_mesh_changed || _sequence || _num == 0)
+  {
+    // Execute the setup function
+    outputSetup();
+
+    // Reset the _mesh_changed flag
+    _mesh_changed = false;
+  }
+
+  // Update the output number
+  _num++;
+
+  // Perform the output
+  output();
+
+  // Set the force output flag to false
+  _force_output = false;
+}
+
 void
 OutputBase::outputFinal()
 {
-  // Do nothing if the final output is not desired
-  if (!_output_final)
+  // Do nothing if output is not force or if output is disallowed
+  if (!_force_output && !_allow_output)
+    return;
+
+  // Do nothing if the output is not forced and final output is not desired
+  if (!_force_output && !_output_final)
     return;
 
   // If the mesh has changed or the sequence state is true, call the outputSetup() function
@@ -203,8 +257,10 @@ OutputBase::outputFinal()
 
   // Perform the output
   output();
-}
 
+  // Set the force output flag to false
+  _force_output = false;
+}
 
 void
 OutputBase::output()
@@ -224,27 +280,9 @@ OutputBase::output()
 }
 
 void
-OutputBase::outputStep()
+OutputBase::forceOutput()
 {
-  // Only continue with the output if it is on the inveval
-  if (!checkInterval())
-    return;
-
-  // If the mesh has changed or the sequence state is true, call the outputSetup() function
-  if (_mesh_changed || _sequence || _num == 0)
-  {
-    // Execute the setup function
-    outputSetup();
-
-    // Reset the _mesh_changed flag
-    _mesh_changed = false;
-  }
-
-  // Update the output number
-  _num++;
-
-  // Perform the output
-  output();
+  _force_output = true;
 }
 
 bool
@@ -326,6 +364,13 @@ OutputBase::meshChanged()
 }
 
 void
+OutputBase::allowOutput(bool state)
+{
+  _allow_output = state;
+}
+
+
+void
 OutputBase::sequence(bool state)
 {
   _sequence = state;
@@ -356,6 +401,9 @@ OutputBase::checkInterval()
 void
 OutputBase::initAvailable()
 {
+  /* This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
+     to produce an warning if postprocessor output is disabled*/
+  bool has_limited_pps = false;
 
   // Get a reference to the storage of the postprocessors
   ExecStore<PostprocessorWarehouse> & warehouse = _problem_ptr->getPostprocessorWarehouse();
@@ -375,12 +423,31 @@ OutputBase::initAvailable()
       Postprocessor *pps = *postprocessor_it;
       _postprocessor.available.push_back(pps->PPName());
 
-      // Apply postprocessor limits
+      // Extract the list of outputs
       std::set<OutputName> pps_outputs = pps->getOutputs();
-      if (pps_outputs.find(_name) != pps_outputs.end())
-        _postprocessor.show.push_back(pps->PPName());
+
+      // Hide the postprocessor if 'none' is used within the 'outputs' parameter
+      if (!pps_outputs.empty() && ( pps_outputs.find("none") != pps_outputs.end() || pps_outputs.find(_name) == pps_outputs.end() ) )
+        _postprocessor.hide.push_back(pps->PPName());
+
+      // Check that the output object allows postprocessor output
+      if ( pps_outputs.find(_name) != pps_outputs.end() )
+      {
+        if (!isParamValid("output_postprocessors"))
+          mooseWarning("Postprocessor '" << pps->PPName()
+                       << "' has requested to be output by the '" << _name
+                       << "' outputter, but postprocessor output is not support by this type of outputter.");
+      }
+
+      // Set the flag state for postprocessors that utilize 'outputs' parameter
+      if (!pps_outputs.empty())
+        has_limited_pps = true;
     }
   }
+
+  // Produce the warning when 'outputs' is used, but postprocessor output is disable
+  if (has_limited_pps && isParamValid("output_postprocessors") && getParam<bool>("output_postprocessors") == false)
+    mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disable for the '" << _name << "' outputter.");
 
   // Get a list of the available variables
   std::vector<VariableName> variables = _problem_ptr->getVariableNames();

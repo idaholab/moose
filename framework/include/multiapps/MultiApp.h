@@ -26,6 +26,7 @@ class MultiApp;
 class UserObject;
 class FEProblem;
 class Executioner;
+class OutputWarehouse;
 namespace libMesh{ namespace MeshTools { class BoundingBox; } }
 
 template<>
@@ -90,6 +91,12 @@ public:
    * @param app The global app number
    */
   FEProblem * appProblem(unsigned int app);
+
+  /**
+   * Get a reference to the output warehouse of a sub app
+   * @param i The global app number
+   */
+  OutputWarehouse & appOutputWarehouse(unsigned int i);
 
   /**
    * Get a UserObject base for a specific global app

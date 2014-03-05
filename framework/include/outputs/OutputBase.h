@@ -112,7 +112,8 @@ public:
    * output defines a pointer to the IO interface that is utlized for performing the data export.
    *
    * outputSetup() is also called  by the output() when the meshChanged() function is called; thus, the child class should
-   * use the _mesh_changed flag to indicate if something is different when the mesh changes.
+   * use the _mesh_changed flag to indicate if something is different when the mesh changes. After every call of
+   * outputSetup() _mesh_changed flag is set to false.
    */
   virtual void outputSetup();
 
@@ -145,7 +146,7 @@ public:
    *
    * @see Transient::keepGoing
    */
-  void outputFinal();
+  virtual void outputFinal();
 
   /**
    * Performs the output of the input file
@@ -245,6 +246,20 @@ public:
    */
   virtual void sequence(bool state);
 
+  /**
+   * A method for enable/disabing output.
+   * @param state A true/false flag that enables or disables all output, if set to false
+   * all subsequent calls to outputInitial(), outputStep(), and outputFinal() will not produce output.
+   * However, forceOutput() will always produce output.
+   */
+  void allowOutput(bool state);
+
+  /**
+   * A method for forcing output
+   * This will cause the next call to outputInitial, outputStep(), or outputFinal() to call output() method
+   * regardless of intervals, allow states, etc. The rules for calling outputSetup() are preserved.
+   */
+  void forceOutput();
 
 protected:
 
@@ -297,6 +312,9 @@ protected:
   /// Pointer the the FEProblem object for output object (use this)
   FEProblem * _problem_ptr;
 
+  /// Flag for using displaced mesh
+  bool _use_displaced;
+
   /// Reference the the libMesh::EquationSystems object that contains the data
   EquationSystems * _es_ptr;
 
@@ -339,7 +357,7 @@ protected:
   /// True if the meshChanged() function has been called
   bool _mesh_changed;
 
-private:
+protected:
 
   /**
    * Initializes the available lists for each of the output types
@@ -387,6 +405,11 @@ private:
   /// Flag for only executing at sync times
   bool _sync_only;
 
+  /// Flag for disabling/enabling outut
+  bool _allow_output;
+
+  /// Flag for forcing output
+  bool _force_output;
 };
 
 #endif /* OUTPUTBASE_H */

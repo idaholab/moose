@@ -228,6 +228,12 @@ MooseApp::setInputFileName(std::string input_filename)
   _input_filename = input_filename;
 }
 
+std::string
+MooseApp::getOutputFileBase()
+{
+  return _output_file_base;
+}
+
 void
 MooseApp::runInputFile()
 {
@@ -374,7 +380,11 @@ MooseApp::setOutputPosition(Point p)
   _output_position = p;
 
   if (_executioner)
-    _executioner->setOutputPosition(p);
+  {
+    _executioner->setOutputPosition(p); // \todo{remove; it doesn't do anything anyway}
+    FEProblem * problem = dynamic_cast<FEProblem *> (&_executioner->problem());
+    problem->getOutputWarehouse().meshChanged();
+  }
 }
 
 std::string

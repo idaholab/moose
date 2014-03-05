@@ -40,7 +40,7 @@ TimeStepper::TimeStepper(const std::string & name, InputParameters parameters) :
     _dt_min(_executioner.dtMin()),
     _dt_max(_executioner.dtMax()),
     _end_time(_executioner.endTime()),
-    _sync_times(_app.getOutputWarehouse().getSyncTimes()),
+    _sync_times(_fe_problem.getOutputWarehouse().getSyncTimes()),
     _timestep_tolerance(_executioner.timestepTol()),
     _verbose(_executioner.verbose()),
     _converged(true),

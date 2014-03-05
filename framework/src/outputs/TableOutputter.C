@@ -31,7 +31,7 @@ InputParameters validParams<TableOutputter>()
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Base class parameters
-  InputParameters params = validParams<OutputBase>();
+  InputParameters params = validParams<FileOutputter>();
 
   // Suppressing the output of nodal and elemental variables disables this type of output
   params.suppressParameter<bool>("output_elemental_variables");
@@ -44,7 +44,7 @@ InputParameters validParams<TableOutputter>()
 }
 
 TableOutputter::TableOutputter(const std::string & name, InputParameters parameters) :
-    OutputBase(name, parameters)
+    FileOutputter(name, parameters)
 {
 }
 

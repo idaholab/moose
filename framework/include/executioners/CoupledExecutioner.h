@@ -89,6 +89,9 @@ protected:
   /// FE Problem mapping: fe_problem -> its name
   std::map<FEProblem *, std::string> _fep_mapping;
 
+  /// List of input file names
+  std::vector<std::string> _input_file_names;
+
   /**
    * Create an action that adds a variable
    * @param task Type of action we are looking for

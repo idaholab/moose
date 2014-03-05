@@ -24,7 +24,7 @@ InputParameters validParams<OversampleOutputter>()
 {
 
   // Get the parameters from the parent object
-  InputParameters params = validParams<OutputBase>();
+  InputParameters params = validParams<FileOutputter>();
 
   params.addParam<unsigned int>("oversample", 0, "Number of uniform refinements for oversampling (0 disables oversampling)");
   params.addParam<Point>("position", "Set a positional offset, this vector will get added to the nodal cooardinates to move the domain.");
@@ -36,7 +36,7 @@ InputParameters validParams<OversampleOutputter>()
 }
 
 OversampleOutputter::OversampleOutputter(const std::string & name, InputParameters & parameters) :
-    OutputBase(name, parameters),
+    FileOutputter(name, parameters),
     _mesh_ptr(getParam<bool>("use_displaced") ?
               &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
     _oversample(getParam<unsigned int>("oversample")),
@@ -74,6 +74,10 @@ OversampleOutputter::~OversampleOutputter()
 void
 OversampleOutputter::outputInitial()
 {
+  // Perform filename check
+  if (!_output_file)
+    return;
+
   // Perform oversample solution projection
   if (_oversample)
     oversample();
@@ -85,6 +89,10 @@ OversampleOutputter::outputInitial()
 void
 OversampleOutputter::outputStep()
 {
+  // Perform filename check
+  if (!_output_file)
+    return;
+
   // Perform oversample solution projection
   if (_oversample)
     oversample();
@@ -96,6 +104,10 @@ OversampleOutputter::outputStep()
 void
 OversampleOutputter::outputFinal()
 {
+  // Perform filename check
+  if (!_output_file)
+    return;
+
   // Perform oversample solution projection
   if (_oversample)
     oversample();

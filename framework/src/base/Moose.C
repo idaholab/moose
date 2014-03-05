@@ -663,6 +663,7 @@ addActionTypes(Syntax & syntax)
   registerTask("prepare_mesh", false);
   registerTask("setup_mesh_complete", false);  // calls prepare
 
+  registerTask("common_output", false);
   registerTask("init_displaced_problem", false);
   registerTask("setup_output", false);
   registerTask("setup_output_name", true);
@@ -751,6 +752,7 @@ addActionTypes(Syntax & syntax)
 "(add_material)"
 "(add_postprocessor)"
 "(setup_pps_complete)"
+"(common_output)"
 "(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, add_output)"
 "(setup_output)"
 "(setup_oversampling)"
@@ -808,7 +810,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupOutputAction, "setup_output"); /// \todo{remove w/ update system upgraded}
   registerAction(SetupOutputNameAction, "setup_output_name"); /// \todo{remove w/ update system upgraded}
   registerAction(AddOutputAction, "add_output");
-  registerAction(CommonOutputAction, "meta_action");
+  registerAction(CommonOutputAction, "common_output");
   registerAction(GlobalParamsAction, "set_global_params");
   registerAction(SetupPredictorAction, "setup_predictor");
 

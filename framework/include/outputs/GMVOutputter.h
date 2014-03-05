@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "OversampleOutputter.h"
-#include "FileOutputInterface.h"
 
 // Forward declearations
 class GMVOutputter;
@@ -29,8 +28,7 @@ InputParameters validParams<GMVOutputter>();
  * Class for output data to the GMVOutputterII format
  */
 class GMVOutputter :
-  public OversampleOutputter,
-  public FileOutputInterface
+  public OversampleOutputter
 {
 public:
 

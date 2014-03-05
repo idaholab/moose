@@ -24,9 +24,7 @@ template<>
 InputParameters validParams<Tecplot>()
 {
   // Get the base class parameters
-
   InputParameters params = validParams<OversampleOutputter>();
-  params += validParams<FileOutputInterface>();
 
   // Supress un-available and meaningless parameters for this object
   params.suppressParameter<bool>("output_nodal_variables");
@@ -49,7 +47,6 @@ InputParameters validParams<Tecplot>()
 
 Tecplot::Tecplot(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
-    FileOutputInterface(name, parameters),
     _binary(getParam<bool>("binary"))
 {
   // Force sequence output

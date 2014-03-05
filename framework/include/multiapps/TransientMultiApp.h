@@ -107,6 +107,9 @@ private:
 
   /// The DoFs associated with all of the currently transferred variables.
   std::set<dof_id_type> _transferred_dofs;
+
+  std::vector<std::map<std::string, unsigned int> > _output_file_numbers;
+
 };
 
 #endif // TRANSIENTMULTIAPP_H
