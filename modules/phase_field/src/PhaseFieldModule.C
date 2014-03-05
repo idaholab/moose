@@ -24,6 +24,7 @@
 #include "NodalVolumeFraction.h"
 #include "BndsCalcAux.h"
 #include "ACGrGrPoly.h"
+#include "ACGBPoly.h"
 #include "GBEvolution.h"
 #include "HexPolycrystalIC.h"
 #include "PolycrystalRandomIC.h"
@@ -53,6 +54,7 @@ Elk::PhaseField::registerObjects(Factory & factory)
   registerKernel(SplitCHMath);
   registerKernel(CoupledImplicitEuler);
   registerKernel(ACGrGrPoly);
+  registerKernel(ACGBPoly);
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(RndSmoothCircleIC);

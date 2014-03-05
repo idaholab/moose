@@ -62,4 +62,10 @@
     input = 'GrGr_voronoi_columnar3D_test.i'
     exodiff = 'voronoi3D.e'
   [../]
+
+  [./GrGr_particle_test]
+    type = 'Exodiff'
+    input = 'GrGr_particle_test.i'
+    exodiff = 'particle.e-s005'
+  [../]
 []
