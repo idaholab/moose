@@ -6,7 +6,7 @@
 import subprocess, os, sys, re
 
 def findRepoRevision(moose_dir):
-  apps_file = '.build_apps'
+  apps_file = '.gitignore'
   revision = ""
   vcs = 'SVN'
 
@@ -19,7 +19,7 @@ def findRepoRevision(moose_dir):
       found_it = True
       break
   if not found_it:
-    # Unable to find .build_apps so we'll just give up
+    # Unable to find the apps file so we'll just give up
     return revision  # blank string
 
   # At this point apps_dir should contain the root of the repository
@@ -41,8 +41,8 @@ def findRepoRevision(moose_dir):
       regex = re.compile(r'r(\d+)')
     else:
       # It doesn't have a SVN remote -- get the git commit id
-      command = 'git log -n 1'
-      regex = re.compile(r'commit (\S+)')
+      command = 'git log -n 1 --pretty="%h"'
+      regex = re.compile(r'^(\S+)')
       vcs = 'GIT'
   elif os.path.exists(apps_dir + '.svn'):
     command = 'svnversion .'
