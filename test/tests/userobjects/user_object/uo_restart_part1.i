@@ -69,9 +69,12 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
   exodus = true
   output_initial = true
-  # restart
-  num_checkpoint_files = 1
+  console = true
+  [./checkpoint]
+    type = Checkpoint
+    num_files = 1
+  [../]
 []

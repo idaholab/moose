@@ -69,7 +69,8 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
   file_base = out
   exodus = true
+  console = true
 []

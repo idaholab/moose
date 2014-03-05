@@ -58,7 +58,7 @@
   num_steps = 10
 []
 
-[Output]
+[Outputs]
   output_initial = false
   exodus = true
 []

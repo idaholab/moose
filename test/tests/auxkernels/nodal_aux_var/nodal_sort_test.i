@@ -82,11 +82,11 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
-  output_initial = true
-  elemental_as_nodal = true
-  interval = 1
-  exodus = true
+[Outputs]
+  console = true
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+    output_initial = true
+  [../]
 []
-
-

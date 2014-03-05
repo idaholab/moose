@@ -128,15 +128,14 @@
   end_time = 1
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = ignore_bad
-  output_initial = false
-  postprocessor_csv = false
   interval = 2
-  screen_interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+    interval = 1
+  [../]
 []
-
-

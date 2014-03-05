@@ -57,8 +57,11 @@
   solve_type = NEWTON
 []
 
-[Output]
-  exodus = true
+[Outputs]
   output_initial = true
-  perf_log = true
+  exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

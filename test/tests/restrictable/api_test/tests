@@ -1,99 +1,99 @@
 [Tests]
   [./block_solution_working]
-	  type = 'Exodiff'
-		input = 'block_restrictable.i'
-		cli_args = "Output/file_base=solution_working_out"
-		exodiff = 'solution_working_out.e'
+    type = 'Exodiff'
+    input = 'block_restrictable.i'
+    cli_args = "Outputs/file_base=solution_working_out"
+    exodiff = 'solution_working_out.e'
   [../]
 
-	[./block_undefined_var_block]
+  [./block_undefined_var_block]
     type = 'RunException'
     input = 'block_restrictable.i'
-		cli_args = "Variables/u/block=1"
+    cli_args = "Variables/u/block=1"
     expect_err = "In object \w+\ the defined blocks are outside of the domain of the variable"
   [../]
 
-	[./blocks]
+  [./blocks]
     type = 'RunException'
     input = 'block_restrictable.i'
-		cli_args = "Kernels/diff/test=blocks"
+    cli_args = "Kernels/diff/test=blocks"
     expect_err = "Blocks testing passed"
   [../]
 
-	[./hasBlocks]
+  [./hasBlocks]
     type = 'RunException'
     input = 'block_restrictable.i'
-		cli_args = "Kernels/diff/test=hasBlocks"
+    cli_args = "Kernels/diff/test=hasBlocks"
     expect_err = "hasBlocks testing passed"
   [../]
 
-	[./blockIDs]
+  [./blockIDs]
     type = 'RunException'
     input = 'block_restrictable.i'
-		cli_args = "Kernels/diff/test=blockIDs"
+    cli_args = "Kernels/diff/test=blockIDs"
     expect_err = "blockIDs testing passed"
   [../]
 
   [./isBlockSubset]
     type = 'RunException'
     input = 'block_restrictable.i'
-		cli_args = "Kernels/diff/test=isBlockSubset"
+    cli_args = "Kernels/diff/test=isBlockSubset"
     expect_err = "isBlockSubset testing passed"
   [../]
 
-	[./hasBlockMaterialProperty=true]
-	  type = 'RunException'
-		input = 'block_restrictable.i'
-		cli_args = "Kernels/diff/test=hasBlockMaterialProperty_true"
-		expect_err = "hasBlockMaterialProperty is true, test passed"
-	[../]
+  [./hasBlockMaterialProperty=true]
+    type = 'RunException'
+    input = 'block_restrictable.i'
+    cli_args = "Kernels/diff/test=hasBlockMaterialProperty_true"
+    expect_err = "hasBlockMaterialProperty is true, test passed"
+  [../]
 
   [./hasBlockMaterialProperty=false]
-	  type = 'RunException'
-		input = 'block_restrictable.i'
-		cli_args = "Kernels/diff/test=hasBlockMaterialProperty_false"
-		expect_err = "hasBlockMaterialProperty is false, test passed"
-	[../]
+    type = 'RunException'
+    input = 'block_restrictable.i'
+    cli_args = "Kernels/diff/test=hasBlockMaterialProperty_false"
+    expect_err = "hasBlockMaterialProperty is false, test passed"
+  [../]
 
   [./boundary]
-	  type = 'RunException'
-		input = 'boundary_restrictable.i'
-		cli_args = "BCs/left/test=boundaryNames"
-		expect_err = "boundaryNames test passed"
-	[../]
+    type = 'RunException'
+    input = 'boundary_restrictable.i'
+    cli_args = "BCs/left/test=boundaryNames"
+    expect_err = "boundaryNames test passed"
+  [../]
 
   [./boundaryIDs]
-	  type = 'RunException'
-		input = 'boundary_restrictable.i'
-		cli_args = "BCs/left/test=boundaryIDs"
-		expect_err = "boundaryIDs test passed"
-	[../]
+    type = 'RunException'
+    input = 'boundary_restrictable.i'
+    cli_args = "BCs/left/test=boundaryIDs"
+    expect_err = "boundaryIDs test passed"
+  [../]
 
   [./hasBoundary]
-	  type = 'RunException'
-		input = 'boundary_restrictable.i'
-		cli_args = "BCs/left/test=hasBoundary"
-		expect_err = "hasBoundary testing passed"
-	[../]
+    type = 'RunException'
+    input = 'boundary_restrictable.i'
+    cli_args = "BCs/left/test=hasBoundary"
+    expect_err = "hasBoundary testing passed"
+  [../]
 
   [./isBoundarySubset]
-	  type = 'RunException'
-		input = 'boundary_restrictable.i'
-		cli_args = "BCs/left/test=isBoundarySubset"
-		expect_err = "isBoundarySubset test passed"
-	[../]
+    type = 'RunException'
+    input = 'boundary_restrictable.i'
+    cli_args = "BCs/left/test=isBoundarySubset"
+    expect_err = "isBoundarySubset test passed"
+  [../]
 
   [./hasBoundaryMaterialProperty=true]
-	  type = 'RunException'
-		input = 'boundary_restrictable.i'
-		cli_args = "BCs/left/test=hasBoundaryMaterialProperty_true"
-		expect_err = "hasBoundaryMaterialProperty is true, test passed"
-	[../]
+    type = 'RunException'
+    input = 'boundary_restrictable.i'
+    cli_args = "BCs/left/test=hasBoundaryMaterialProperty_true"
+    expect_err = "hasBoundaryMaterialProperty is true, test passed"
+  [../]
 
   [./hasBoundaryMaterialProperty=false]
-	  type = 'RunException'
-		input = 'boundary_restrictable.i'
-		cli_args = "BCs/left/test=hasBoundaryMaterialProperty_false"
-		expect_err = "hasBoundaryMaterialProperty is false, test passed"
-	[../]
+    type = 'RunException'
+    input = 'boundary_restrictable.i'
+    cli_args = "BCs/left/test=hasBoundaryMaterialProperty_false"
+    expect_err = "hasBoundaryMaterialProperty is false, test passed"
+  [../]
 []

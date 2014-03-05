@@ -95,10 +95,12 @@
   [../]
 []
 
-[Output]
+[Outputs]
   output_initial = false
-  postprocessor_csv = false
-  interval = 1
+  csv = false
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

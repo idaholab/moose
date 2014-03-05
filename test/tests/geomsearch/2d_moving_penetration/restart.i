@@ -226,11 +226,16 @@
   end_time = 0.5
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
-  num_checkpoint_files = 1
+  [./console]
+    type = Console
+    pref_log = true
+    linear_residuals = true
+  [../]
+  [./checkpoint]
+    type = Checkpoint
+    num_files = 1
+  [../]
 []

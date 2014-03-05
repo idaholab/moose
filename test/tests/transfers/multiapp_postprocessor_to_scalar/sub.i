@@ -1,4 +1,4 @@
-  [Mesh]
+[Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
@@ -63,9 +63,13 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   output_initial = true
   exodus = true
-  perf_log = true
+  hide = 'from_master_app'
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

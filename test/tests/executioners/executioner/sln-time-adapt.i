@@ -109,10 +109,11 @@
   num_steps = 5
 []
 
-[Output]
+[Outputs]
   file_base = out_sta
-  output_initial = false
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

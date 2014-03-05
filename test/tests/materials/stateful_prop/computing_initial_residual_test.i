@@ -78,11 +78,12 @@
   dt = .1
 []
 
-[Output]
+[Outputs]
   file_base = computing_initial_residual_test_out
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
-

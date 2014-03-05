@@ -51,6 +51,10 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
   exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

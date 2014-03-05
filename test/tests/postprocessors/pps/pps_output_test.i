@@ -100,27 +100,26 @@
     type = ElementL2Error
     variable = u
     function = exact_fn
-    output = both
   [../]
 
   [./node1]
     type = NodalVariableValue
     variable = u
     nodeid = 15
-    output = file
+    outputs = exodus
   [../]
 
   [./node4]
     type = NodalVariableValue
     variable = v
     nodeid = 10
-    output = screen
+    outputs = console
   [../]
 
   [./avg_v]
     type = AverageElementSize
     variable = v
-    output = none
+    outputs = none
   [../]
 []
 
@@ -135,13 +134,12 @@
   end_time = 1
 []
 
-[Output]
-  linear_residuals = true
-  output_initial = false
-  postprocessor_csv = false
-  interval = 1
+[Outputs]
   exodus = true
-  perf_log = true
+  #hide = 'avg_v node4'
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-
-

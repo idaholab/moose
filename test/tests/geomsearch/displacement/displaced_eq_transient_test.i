@@ -91,10 +91,14 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
+  file_base = displaced_eq_transient_test_out_displaced
   output_initial = true
-  output_displaced = true
-  interval = 1
+  use_displaced = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    pref_log = true
+    linear_residuals = true
+  [../]
 []

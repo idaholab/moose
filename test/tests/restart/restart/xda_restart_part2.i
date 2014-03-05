@@ -120,9 +120,8 @@
   num_steps = 8
 []
 
-[Output]
+[Outputs]
   file_base = out_xda_restart_part2
   output_initial = true
-  interval = 1
   exodus = true
 []

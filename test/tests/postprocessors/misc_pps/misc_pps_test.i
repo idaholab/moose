@@ -126,11 +126,15 @@
   dt = 0.25
 []
 
-[Output]
+[Outputs]
   file_base = pps_out
   output_initial = false
-  interval = 1
-  exodus = true
-  perf_log = true
+  [./exodus]
+    type = Exodus
+    output_scalar_variables = false
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
-

@@ -83,17 +83,13 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Output]
-  postprocessor_screen = false
-[]
-
 [Outputs]
-  console = true
-  [./csv]
-    type = CSV
-    output_initial = false
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
   [../]
-[]g
+[]
 
 [ICs]
   [./aux0_IC]

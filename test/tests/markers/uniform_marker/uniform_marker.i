@@ -51,9 +51,11 @@
   [../]
 []
 
-[Output]
+[Outputs]
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
-

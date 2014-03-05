@@ -116,11 +116,12 @@
 []
 
 
-[Output]
+[Outputs]
   file_base = 2_d_postprocessor_out
-  interval = 1
-  exodus = false
   output_initial = true
-  postprocessor_csv = true
-  perf_log = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
