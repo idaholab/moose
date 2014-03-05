@@ -36,6 +36,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
    params.addParam<bool>("gmv", false, "Output the results using the default settings for GMV output");
    params.addParam<bool>("tecplot", false, "Output the results using the default settings for Tecplot output");
+   params.addParam<bool>("gnuplot", false, "Output the scalar and postprocessor results using the default settings for GNUPlot output");
 
    // Common parameters
    params.addParam<bool>("output_initial", false,  "Request that the initial condition is output to the solution file");
@@ -96,6 +97,10 @@ CommonOutputAction::act()
 
   if (getParam<bool>("tecplot"))
     create("Tecplot");
+
+  if (getParam<bool>("gnuplot"))
+    create("GNUPlot");
+
 }
 
 void
