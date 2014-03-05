@@ -83,10 +83,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Output]
-  postprocessor_screen = false
-[]
-
 [Outputs]
   console = false
   [./screen_file]

@@ -70,16 +70,20 @@
   num_steps = 5
 []
 
-[Output]
-  file_base = out_file
+[Outputs]
   output_initial = true
-  interval = 1
-  exodus = true
-  perf_log = true
-
-  [./OverSampling]
-    exodus = true
-    refinements = 3
+  [./exodus]
+    type = Exodus
+    file_base = out_file
+  [../]
+  [./oversampling]
+    file_base = out_file_oversample
+    type = Exodus
+    oversample = 3
     output_initial = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
   [../]
 []

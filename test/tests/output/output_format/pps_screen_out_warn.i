@@ -49,7 +49,7 @@
   [./avg_block]
     type = ElementAverageValue
     variable = u
-    output = both
+    outputs = 'console'
   [../]
 []
 
@@ -60,7 +60,10 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
   exodus = true
-  postprocessor_screen = false
+  [./console]
+    type = Console
+    output_postprocessors = false
+  [../]
 []

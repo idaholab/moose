@@ -52,11 +52,13 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = out
   output_initial = true
-  interval = 1
   exodus = false
-  postprocessor_csv = true
-  perf_log = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

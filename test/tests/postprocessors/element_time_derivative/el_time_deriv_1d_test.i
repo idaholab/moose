@@ -74,8 +74,11 @@
   dt = 0.1
 []
 
-[Output]
+[Outputs]
   file_base = out_el_time_deriv_1d
-  perf_log = true
-  postprocessor_csv = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

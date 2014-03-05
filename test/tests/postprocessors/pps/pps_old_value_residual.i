@@ -82,14 +82,12 @@
   end_time = 3
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = pps_old_value_out
-  output_initial = false
-  postprocessor_csv = false
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-
-

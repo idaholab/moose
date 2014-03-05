@@ -124,14 +124,13 @@
   end_time = 1
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out_avg_nodal_var_value_ts_begin
   output_initial = false
-  postprocessor_csv = false
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-
-

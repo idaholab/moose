@@ -49,7 +49,7 @@
   [./avg_block]
     type = ElementAverageValue
     variable = u
-    output = both
+    outputs = gmv
   [../]
 []
 
@@ -60,6 +60,10 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
   gmv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

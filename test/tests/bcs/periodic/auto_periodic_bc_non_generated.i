@@ -67,10 +67,13 @@
   num_steps = 20
 []
 
-[Output]
+[Outputs]
   file_base = out_auto_non_generated
-  interval = 1
+  output_initial = false
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
 

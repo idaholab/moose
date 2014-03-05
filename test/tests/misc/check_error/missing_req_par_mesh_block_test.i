@@ -25,8 +25,8 @@
 
 [Variables]
   [./u]
-    family = MONOMIAL
-    order = CONSTANT
+   family = MONOMIAL
+   order = CONSTANT
   [../]
 []
 
@@ -55,6 +55,10 @@
   type = Steady
 []
 
-[Output]
-  exodus = true
+[Outputs]
+   exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

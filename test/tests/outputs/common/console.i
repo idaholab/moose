@@ -83,10 +83,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Output]
-  postprocessor_screen = false
-[]
-
 [Outputs]
   console = true # this is the default, this is what is being tested
 []

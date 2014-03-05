@@ -68,14 +68,11 @@
     boundary = '1 2'
     value = 0.0
   [../]
-
 []
 
 [Executioner]
   type = Transient
-
   solve_type = 'NEWTON'
-
   l_max_its = 800
   nl_rel_tol = 1e-10
   num_steps = 50
@@ -83,7 +80,10 @@
   dt = 0.5
 []
 
-[Output]
+[Outputs]
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

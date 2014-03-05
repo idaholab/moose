@@ -109,9 +109,11 @@
   []
 []
 
-[Output]
+[Outputs]
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

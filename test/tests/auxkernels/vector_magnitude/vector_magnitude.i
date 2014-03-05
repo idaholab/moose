@@ -84,8 +84,11 @@
   type = Steady
 []
 
-[Output]
+[Outputs]
   exodus = true
   output_initial = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
