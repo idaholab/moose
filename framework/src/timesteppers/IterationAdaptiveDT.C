@@ -44,7 +44,8 @@ IterationAdaptiveDT::IterationAdaptiveDT(const std::string & name, InputParamete
   _cutback_factor(getParam<Real>("cutback_factor")),
   _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
   _l_its(declareRestartableData<unsigned int>("l_its", 0)),
-  _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false))
+  _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false)),
+  _at_function_point(false)
 {
 
   if (isParamValid("optimal_iterations"))
@@ -303,6 +304,7 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
       while (change > _max_function_change);
     }
   }
+  _at_function_point = false;
   if (_piecewise_timestep_limiting_function && _force_step_every_function_point)
   {
     for (unsigned int i=0; i<_times.size()-1; ++i)
@@ -311,8 +313,9 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
       {
         if (limitedDT > _times[i+1] - _time)
         {
-          limitedDT = _times[i+1] - _time;
+          limitedDT = std::min(limitedDT, _times[i+1] - _time);
         }
+        _at_function_point = true;
         break;
       }
     }
@@ -448,7 +451,7 @@ IterationAdaptiveDT::acceptStep()
   _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
   _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
 
-  if (_executioner.atSyncPoint() &&
+  if ((_at_function_point || _executioner.atSyncPoint()) &&
       _dt + _timestep_tolerance < _executioner.unconstrainedDT())
   {
     _dt_old = _fe_problem.dtOld();
