@@ -28,6 +28,8 @@ class RunApp(Tester):
     # Valgrind
     params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
+    params.addParam('post_command',       "Command to be run after the MOOSE job is run")
+
     return params
   getValidParams = staticmethod(getValidParams)
 
@@ -90,6 +92,11 @@ class RunApp(Tester):
 
     if options.pbs:
       return self.getPBSCommand(options)
+
+    if self.specs.isValid('post_command'):
+      command += ';\n'
+      command += self.specs['post_command']
+
     return command
 
   def getPBSCommand(self, options):
