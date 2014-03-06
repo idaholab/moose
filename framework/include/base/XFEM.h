@@ -29,6 +29,16 @@
 
 #include "CutElemMesh.h"
 
+enum XFEM_CUTPLANE_QUANTITY
+{
+  XCC_ORIGIN_X=1,
+  XCC_ORIGIN_Y,
+  XCC_ORIGIN_Z,
+  XCC_NORMAL_X,
+  XCC_NORMAL_Y,
+  XCC_NORMAL_Z
+};
+
 class XFEM_geometric_cut;
 
 class XFEMCutElemNode
@@ -130,8 +140,7 @@ public:
   /**
    * Get specified component of normal or origin for cut plane for a given element
    */
-  Real get_cut_plane(const Elem* elem, const unsigned int index) const;
-
+  Real get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity) const;
 
 private:
   /**

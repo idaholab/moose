@@ -38,7 +38,7 @@ protected:
   virtual Real computeValue();
 
 private:
-  unsigned int _index;
+  XFEM_CUTPLANE_QUANTITY _quantity;
   XFEM *_xfem;
 };
 

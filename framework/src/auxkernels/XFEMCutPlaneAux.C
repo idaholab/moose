@@ -20,12 +20,14 @@ template<>
 InputParameters validParams<XFEMCutPlaneAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<unsigned int>("index", "The index of the local node for which the distance is to be output (0-n).");
+  MooseEnum quantity("origin_x=1, origin_y, origin_z, normal_x, normal_y, normal_z");
+  params.addRequiredParam<MooseEnum>("quantity", quantity, "The quantity to be extracted.  Choices: "+quantity.getRawNames());
   return params;
 }
 
 XFEMCutPlaneAux::XFEMCutPlaneAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters)
+  :AuxKernel(name, parameters),
+  _quantity(XFEM_CUTPLANE_QUANTITY(int(getParam<MooseEnum>("quantity"))))
 {
   FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
   if (fe_problem == NULL)
@@ -33,13 +35,12 @@ XFEMCutPlaneAux::XFEMCutPlaneAux(const std::string & name, InputParameters param
   _xfem = fe_problem->get_xfem();
   if (isNodal())
     mooseError("XFEMCutPlaneAux can only be run on an element variable");
-  _index=getParam<unsigned int>("index");
 }
 
 Real
 XFEMCutPlaneAux::computeValue()
 {
-  Real value = _xfem->get_cut_plane(_current_elem, _index);
+  Real value = _xfem->get_cut_plane(_current_elem, _quantity);
 
   return value;
 }

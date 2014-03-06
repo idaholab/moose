@@ -619,7 +619,7 @@ XFEM::get_elem_phys_volfrac(const Elem* elem) const
 
 Real
 XFEM::get_cut_plane(const Elem* elem,
-                    const unsigned int index) const
+                    const XFEM_CUTPLANE_QUANTITY quantity) const
 {
   Real comp=0.0;
   Real planedata[3];
@@ -628,15 +628,17 @@ XFEM::get_cut_plane(const Elem* elem,
   if (it != _cut_elem_map.end())
   {
     const XFEMCutElem *xfce = it->second;
-    if (index <= 2)
+    if ((unsigned int)quantity <= 3)
     {
+      unsigned int index = (unsigned int)quantity - 1;
       xfce->get_origin(planedata,_mesh2);
       comp = planedata[index];
     }
-    else if (index >= 3 && index <= 5)
+    else if ((unsigned int)quantity <= 6)
     {
+      unsigned int index = (unsigned int)quantity - 4;
       xfce->get_normal(planedata,_mesh2);
-      comp = planedata[index-3];
+      comp = planedata[index];
     }
     else
     {
