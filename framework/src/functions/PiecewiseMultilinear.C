@@ -33,7 +33,7 @@ InputParameters validParams<PiecewiseMultilinear>()
 
 /**
  * Most of the work here is done by GriddedData.
- * We just extract our own private variables, 
+ * We just extract our own private variables,
  * and check for any incompatibilities in the data
  */
 PiecewiseMultilinear::PiecewiseMultilinear(const std::string & name, InputParameters parameters) :
@@ -54,7 +54,7 @@ PiecewiseMultilinear::PiecewiseMultilinear(const std::string & name, InputParame
   std::set<int> s(_axes.begin(), _axes.end());
   if (s.size() != _dim)
     mooseError("PiecewiseMultilinear needs the AXES to be independent.  Check the AXES lines in your data file.\n");
-    
+
 }
 
 
@@ -139,7 +139,7 @@ PiecewiseMultilinear::sample(const std::vector<Real> & pt)
 	  }
       f += _gridded_data->evaluateFcn(arg)*weight;
     }
-  
+
   /*
    * finally divide by the volume of the hypercube
    */

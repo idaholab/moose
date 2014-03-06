@@ -78,7 +78,7 @@
     function = linear2_answer
     variable = linear2_var
   [../]
-[]    
+[]
 
 
 

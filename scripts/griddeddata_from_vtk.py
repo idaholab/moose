@@ -81,7 +81,7 @@ if len(vtr_files) > 1:
          sys.stderr.write("You must re-order your vtrfile inputs so that grid_times are monotonically increasing.\nCurrently they are: " + " ".join([str(grid_times[vtr_file]) for vtr_file in vtr_files]) + "\n")
          sys.exit(5)
 
-   
+
 f = open(grid_file, 'w')
 
 
@@ -170,7 +170,7 @@ for v in vtr_files:
          for i in range(r[v].GetXCoordinates().GetNumberOfTuples()):
             x = r[v].GetXCoordinates().GetValue(i)
             f.write(str(fcn_dict[tuple([x, y, z])]) + "\n");
-   
+
 f.close()
 
 sys.exit(0)

@@ -163,9 +163,9 @@ for i in range(len(t)):
    grid.Update()
    writer.SetInputConnection(grid.GetProducerPort())
    writer.Write()
-   
-   
 
-   
+
+
+
 sys.exit(0)
-   
+

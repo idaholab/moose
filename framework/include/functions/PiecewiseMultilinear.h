@@ -59,7 +59,7 @@ private:
    * if _axes[i] = 2 then the i_th axes of the grid lies along the MOOSE z direction
    * if _axes[i] = 3 then the i_th axes of the grid lies along the MOOSE time direction
    */
-  std::vector<int> _axes;  
+  std::vector<int> _axes;
 
   std::vector<std::vector<Real> > _grid; // the grid
 

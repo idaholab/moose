@@ -58,7 +58,7 @@
     function = bilinear1_answer
     variable = bilinear1_var
   [../]
-[]    
+[]
 
 
 

@@ -22,7 +22,7 @@
  *   (1,-1), (2,-1), (3,-1), (1,1), (2,1), (3,1)
  * The i_th axis of the grid corresponds to the axes[i] axis
  *   of the simulation: see the function getAxes
- * Values at each grid point are stored in _fcn. 
+ * Values at each grid point are stored in _fcn.
  *   They are ordered as in the example above.
  * _step is just a quantity used in evaluateFcn
  * The file must have the following format:
@@ -38,7 +38,7 @@
  *     AXIS T
  *   The next significant line should be a space-separated
  *   array of real numbers defining the grid along that axis
- *   direction.  
+ *   direction.
  *   Any number of AXIS and subsequent space-separated arrays
  *   can be defined, but if using this in conjunction with
  *   PiecewiseMultilinear, a maximum of 4 should be defined.
@@ -167,7 +167,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
   axes.resize(0);
   grid.resize(0);
   f.resize(0);
-  
+
   // open file and initialise quantities
   std::ifstream file(file_name.c_str());
   if (!file.good())
@@ -175,7 +175,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
   std::string line;
   bool reading_grid_data = false;
   bool reading_value_data = false;
-  
+
   // read file line-by-line extracting data
   while (getSignificantLine (file, line))
     {
@@ -205,7 +205,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
 	  reading_grid_data = true;
 	  axes.push_back(3);
 	}
-      
+
       // just found an AXIS keyword
       if (reading_grid_data)
 	{
@@ -215,15 +215,15 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
 	    splitToRealVec(line, grid[dim-1]);
 	  continue; // read next line from file
 	}
-      
+
       // previous significant line must have been DATA
       if (reading_value_data)
 	splitToRealVec(line, f);
-      
+
       // look for DATA keyword
       if (line.compare("DATA") == 0)
 	reading_value_data = true;
-      
+
       // ignore any other lines - if we get here probably the data file is corrupt
     }
 
@@ -233,7 +233,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
   step[0] = 1; // this is actually not used
   for (unsigned int i = 1; i < dim; ++i)
     step[i] = step[i-1]*grid[i-1].size();
-  
+
 
   // perform some checks
   if (dim == 0)
@@ -280,7 +280,7 @@ GriddedData::getSignificantLine(std::ifstream & file_stream, std::string & line)
  * Splits an input_string using space as the separator
  * Converts the resulting items to Real, and adds these
  * to the end of output_vec
- */  
+ */
 void
 GriddedData::splitToRealVec(const std::string & input_string, std::vector<Real> & output_vec)
 {
@@ -295,6 +295,6 @@ GriddedData::splitToRealVec(const std::string & input_string, std::vector<Real> 
     }
 }
 
-  
+
 
 

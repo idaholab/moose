@@ -232,7 +232,7 @@
     function = answer_fcn
     variable = other_axis3_var
   [../]
-[]    
+[]
 
 
 
