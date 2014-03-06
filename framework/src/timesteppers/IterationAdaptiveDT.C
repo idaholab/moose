@@ -313,7 +313,7 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
       {
         if (limitedDT > _times[i+1] - _time)
         {
-          limitedDT = std::min(limitedDT, _times[i+1] - _time);
+          limitedDT = _times[i+1] - _time;
         }
         _at_function_point = true;
         break;
@@ -323,8 +323,15 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
 
   if (limitedDT < orig_dt)
   {
-    diag << "Limiting dt to limit change in function. dt: "
-         << std::setw(9)
+    if (_at_function_point)
+    {
+      diag << "Limiting dt to match function point. dt: ";
+    }
+    else
+    {
+      diag << "Limiting dt to limit change in function. dt: ";
+    }
+    diag << std::setw(9)
          << std::setprecision(6)
          << std::setfill('0')
          << std::showpoint

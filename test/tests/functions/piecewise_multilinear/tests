@@ -7,7 +7,7 @@
   [./except2]
     type = 'RunException'
     input = 'except2.i'
-    expect_err = "PiecewiseMultilinear needs monotonically-increasing axis data.  Axis 0 contains non-monotinicity at value -1"
+    expect_err = "PiecewiseMultilinear needs monotonically-increasing axis data.  Axis 0 contains non-monotonicity at value -1"
   [../]
   [./except3]
     type = 'RunException'
