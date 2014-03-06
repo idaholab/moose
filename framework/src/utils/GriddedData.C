@@ -96,11 +96,11 @@ GriddedData::getGrid(std::vector<std::vector<Real> > & grid)
 {
   grid.resize(_dim);
   for (unsigned int i = 0; i < _dim; ++i)
-    {
-      grid[i].resize(_grid[i].size());
-      for (unsigned int j = 0; j < _grid[i].size(); ++j)
-	grid[i][j] = _grid[i][j];
-    }
+  {
+    grid[i].resize(_grid[i].size());
+    for (unsigned int j = 0; j < _grid[i].size(); ++j)
+      grid[i][j] = _grid[i][j];
+  }
 }
 
 /**
@@ -122,12 +122,12 @@ Real
 GriddedData::evaluateFcn(const std::vector<unsigned int> & ijk)
 {
   if (ijk.size() != _dim)
-    mooseError("Gridded data evaluateFcn called with " << ijk.size() << " arguments, but expected " << _dim << "\n");
+    mooseError("Gridded data evaluateFcn called with " << ijk.size() << " arguments, but expected " << _dim);
   unsigned int index = ijk[0];
   for (unsigned int i = 1; i < _dim; ++i)
-    index += ijk[i]*_step[i];
+    index += ijk[i] * _step[i];
   if (index >= _fcn.size())
-    mooseError("Gridded data evaluateFcn attempted to access index " << index << " of function, but it contains only " << _fcn.size() << " entries\n");
+    mooseError("Gridded data evaluateFcn attempted to access index " << index << " of function, but it contains only " << _fcn.size() << " entries");
   return _fcn[index];
 }
 
@@ -162,91 +162,91 @@ GriddedData::evaluateFcn(const std::vector<unsigned int> & ijk)
 void
 GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std::vector<Real> > & grid, std::vector<Real> & f, std::vector<unsigned int> & step, std::string file_name)
 {
-  // initialise
+  // initialize
   dim = 0;
   axes.resize(0);
   grid.resize(0);
   f.resize(0);
 
-  // open file and initialise quantities
+  // open file and initialize quantities
   std::ifstream file(file_name.c_str());
   if (!file.good())
-    mooseError("Error opening file '" + file_name + "' from GriddedData.\n");
+    mooseError("Error opening file '" + file_name + "' from GriddedData.");
   std::string line;
   bool reading_grid_data = false;
   bool reading_value_data = false;
 
   // read file line-by-line extracting data
   while (getSignificantLine (file, line))
+  {
+    // look for AXIS keywords
+    reading_grid_data = false;
+    if (line.compare("AXIS X") == 0)
     {
-      // look for AXIS keywords
-      reading_grid_data = false;
-      if (line.compare("AXIS X") == 0)
-	{
-	  dim += 1;
-	  reading_grid_data = true;
-	  axes.push_back(0);
-	}
-      else if (line.compare("AXIS Y") == 0)
-	{
-	  dim += 1;
-	  reading_grid_data = true;
-	  axes.push_back(1);
-	}
-      else if (line.compare("AXIS Z") == 0)
-	{
-	  dim += 1;
-	  reading_grid_data = true;
-	  axes.push_back(2);
-	}
-      else if (line.compare("AXIS T") == 0)
-	{
-	  dim += 1;
-	  reading_grid_data = true;
-	  axes.push_back(3);
-	}
-
-      // just found an AXIS keyword
-      if (reading_grid_data)
-	{
-	  grid.resize(dim); // add another dimension to the grid
-	  grid[dim-1].resize(0);
-	  if (getSignificantLine(file, line))
-	    splitToRealVec(line, grid[dim-1]);
-	  continue; // read next line from file
-	}
-
-      // previous significant line must have been DATA
-      if (reading_value_data)
-	splitToRealVec(line, f);
-
-      // look for DATA keyword
-      if (line.compare("DATA") == 0)
-	reading_value_data = true;
-
-      // ignore any other lines - if we get here probably the data file is corrupt
+      dim += 1;
+      reading_grid_data = true;
+      axes.push_back(0);
     }
+    else if (line.compare("AXIS Y") == 0)
+    {
+      dim += 1;
+      reading_grid_data = true;
+      axes.push_back(1);
+    }
+    else if (line.compare("AXIS Z") == 0)
+    {
+      dim += 1;
+      reading_grid_data = true;
+      axes.push_back(2);
+    }
+    else if (line.compare("AXIS T") == 0)
+    {
+      dim += 1;
+      reading_grid_data = true;
+      axes.push_back(3);
+    }
+
+    // just found an AXIS keyword
+    if (reading_grid_data)
+    {
+      grid.resize(dim); // add another dimension to the grid
+      grid[dim-1].resize(0);
+      if (getSignificantLine(file, line))
+        splitToRealVec(line, grid[dim - 1]);
+      continue; // read next line from file
+    }
+
+    // previous significant line must have been DATA
+    if (reading_value_data)
+      splitToRealVec(line, f);
+
+    // look for DATA keyword
+    if (line.compare("DATA") == 0)
+      reading_value_data = true;
+
+    // ignore any other lines - if we get here probably the data file is corrupt
+  }
 
 
   // step is useful in evaluateFcn
   step.resize(dim);
   step[0] = 1; // this is actually not used
   for (unsigned int i = 1; i < dim; ++i)
-    step[i] = step[i-1]*grid[i-1].size();
+    step[i] = step[i - 1] * grid[i - 1].size();
 
 
   // perform some checks
   if (dim == 0)
-    mooseError("No valid data found by GriddedData\n");
+    mooseError("No valid data found by GriddedData");
   unsigned int num_data_points = 1;
   for (unsigned int i = 0; i < dim; ++i)
-    {
-      if (grid[i].size() == 0)
-	mooseError("Axis " << i << " in your GriddedData has zero size\n");
-      num_data_points *= grid[i].size();
-    }
+  {
+    if (grid[i].size() == 0)
+      mooseError("Axis " << i << " in your GriddedData has zero size");
+    num_data_points *= grid[i].size();
+  }
   if (num_data_points != f.size())
-    mooseError("According to AXIS statements in GriddedData, number of data points is " << num_data_points << " but " << f.size() << " function values were read from file\n");
+    mooseError("According to AXIS statements in GriddedData, number of data points is " << num_data_points << " but " << f.size() << " function values were read from file");
 
 }
 
@@ -262,14 +262,14 @@ bool
 GriddedData::getSignificantLine(std::ifstream & file_stream, std::string & line)
 {
   while (getline(file_stream, line))
-    {
-      if (line.size() == 0) // empty line: read next line from file
-	continue;
-      if (line[0] == '#') // just a comment: read next line from file
-	continue;
-      // have got a significant line
-      return true;
-    }
+  {
+    if (line.size() == 0) // empty line: read next line from file
+      continue;
+    if (line[0] == '#') // just a comment: read next line from file
+      continue;
+    // have got a significant line
+    return true;
+  }
   // have run out of file
   return false;
 }
@@ -286,13 +286,13 @@ GriddedData::splitToRealVec(const std::string & input_string, std::vector<Real> 
 {
   std::istringstream linestream(input_string);
   std::string item;
-  while (getline (linestream, item, ' '))
-    {
-      std::istringstream i(item);
-      Real d;
-      i >> d;
-      output_vec.push_back(d);
-    }
+  while (getline(linestream, item, ' '))
+  {
+    std::istringstream i(item);
+    Real d;
+    i >> d;
+    output_vec.push_back(d);
+  }
 }
 
 

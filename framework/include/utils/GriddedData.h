@@ -29,7 +29,7 @@
  * The file contains the grid, which has dimension _dim, and consists
  *   of _dim vectors of Reals.
  * The file also contains the function values at each grid point.
- * The file also contains information on how to imbed the grid
+ * The file also contains information on how to embed the grid
  *   into a MOOSE simulation.  This is achieved through specifying the
  *   MOOSE direction that each grid axis corresponds to.  For instance,
  *   the first grid axis might correspond to the MOOSE "y" direction,

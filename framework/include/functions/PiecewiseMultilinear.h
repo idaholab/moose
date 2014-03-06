@@ -49,10 +49,12 @@ public:
 
 private:
 
-  GriddedData * _gridded_data; /// object to provide function evaluations at points on the grid
-  unsigned int _dim;  /// dimension of the grid
+  /// object to provide function evaluations at points on the grid
+  GriddedData * _gridded_data;
+  /// dimension of the grid
+  unsigned int _dim;
 
-  /*
+  /**
    * _axes specifies how to embed the grid into the MOOSE coordinate frame
    * if _axes[i] = 0 then the i_th axes of the grid lies along the MOOSE x direction
    * if _axes[i] = 1 then the i_th axes of the grid lies along the MOOSE y direction
@@ -61,7 +63,8 @@ private:
    */
   std::vector<int> _axes;
 
-  std::vector<std::vector<Real> > _grid; // the grid
+  /// the grid
+  std::vector<std::vector<Real> > _grid;
 
   /**
    * This does the core work.  Given a point, pt, defined
@@ -71,12 +74,17 @@ private:
   Real sample(const std::vector<Real> & pt);
 
   /**
-   * Operates on monotonically increasing inArr.
-   * Finds lowerX and upperX which satisfy inArr[lowerX] < x <= inArr[upperX].
-   * End conditions: if x<inArr[0] then lowerX = 0 = upperX is returned
-   *                 if x>inArr[N-1] then lowerX = N-1 = upperX is returned (N=size of inArr)
+   * Operates on monotonically increasing in_arr.
+   * Finds lower_x and upper_x which satisfy in_arr[lower_x] < x <= in_arr[upper_x].
+   * End conditions: if x<in_arr[0] then lower_x = 0 = upper_x is returned
+   *                 if x>in_arr[N-1] then lower_x = N-1 = upper_x is returned (N=size of in_arr)
+   *
+   * @param in_arr The monotonically increasing vector of real numbers
+   * @param x The real value for which we want the neighbor indices
+   * @param lower_x Upon return will contain lower_x specified above
+   * @param upper_x Upon return will contain upper_x specified above
    */
-  void getNeighborIndices(std::vector<Real> inArr, Real x, unsigned int & lowerX, unsigned int & upperX );
+  void getNeighborIndices(std::vector<Real> in_arr, Real x, unsigned int & lower_x, unsigned int & upper_x);
 };
 
 #endif //PIECEWISEMULTILINEAR_H
