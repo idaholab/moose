@@ -32,6 +32,12 @@
     exodiff = 'voronoi.e'
   [../]
 
+  [./GrGrBoundingBox_test]
+    type = 'Exodiff'
+    input = 'GrGr_boundingbox_test.i'
+    exodiff = 'bounding_box.e-s003'
+  [../]
+
   [./GBEvolution_test]
     type = 'Exodiff'
     input = 'GBEvolution_test.i'
