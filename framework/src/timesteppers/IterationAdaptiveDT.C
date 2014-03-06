@@ -44,7 +44,8 @@ IterationAdaptiveDT::IterationAdaptiveDT(const std::string & name, InputParamete
   _cutback_factor(getParam<Real>("cutback_factor")),
   _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
   _l_its(declareRestartableData<unsigned int>("l_its", 0)),
-  _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false))
+  _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false)),
+  _at_function_point(false)
 {
 
   if (isParamValid("optimal_iterations"))
@@ -303,6 +304,7 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
       while (change > _max_function_change);
     }
   }
+  _at_function_point = false;
   if (_piecewise_timestep_limiting_function && _force_step_every_function_point)
   {
     for (unsigned int i=0; i<_times.size()-1; ++i)
@@ -313,6 +315,7 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
         {
           limitedDT = _times[i+1] - _time;
         }
+        _at_function_point = true;
         break;
       }
     }
@@ -320,8 +323,15 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
 
   if (limitedDT < orig_dt)
   {
-    diag << "Limiting dt to limit change in function. dt: "
-         << std::setw(9)
+    if (_at_function_point)
+    {
+      diag << "Limiting dt to match function point. dt: ";
+    }
+    else
+    {
+      diag << "Limiting dt to limit change in function. dt: ";
+    }
+    diag << std::setw(9)
          << std::setprecision(6)
          << std::setfill('0')
          << std::showpoint
@@ -448,7 +458,7 @@ IterationAdaptiveDT::acceptStep()
   _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
   _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
 
-  if (_executioner.atSyncPoint() &&
+  if ((_at_function_point || _executioner.atSyncPoint()) &&
       _dt + _timestep_tolerance < _executioner.unconstrainedDT())
   {
     _dt_old = _fe_problem.dtOld();
