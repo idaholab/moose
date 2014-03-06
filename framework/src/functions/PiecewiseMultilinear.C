@@ -117,7 +117,7 @@ PiecewiseMultilinear::sample(const std::vector<Real> & pt)
   Real f = 0;
   Real weight;
   std::vector<unsigned int> arg(_dim);
-  for (unsigned int i = 0; i < std::pow(2, _dim); ++i)
+  for (unsigned int i = 0; i < std::pow(2, _dim); ++i) // number of points in hypercube = 2^_dim
     {
       weight = 1;
       for (unsigned int j = 0; j < _dim; ++j)
