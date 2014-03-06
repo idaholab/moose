@@ -1,0 +1,5 @@
+# This is a hat function
+AXIS X
+0 1 2
+DATA
+0 1 0
