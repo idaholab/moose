@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+#
+# Converts vtrfile info to griddata format
+# See doco below
+#
 
 import os
 import sys
