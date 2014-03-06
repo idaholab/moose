@@ -46,6 +46,13 @@
     csvdiff = 'twoDa.csv'
     abs_zero = 1E-8
   [../]
+  [./twoDb]
+    type = 'Exodiff'
+    input = 'twoDb.i'
+    exodiff = 'twoDb.e'
+    rel_err = 1E-5
+    use_old_floor = True
+  [../]
 
   [./fourDa]
     type = 'Exodiff'
