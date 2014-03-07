@@ -71,8 +71,8 @@ protected:
   {
   public:
     BubbleData(std::set<unsigned int> & nodes, unsigned int var_idx) :
-	_nodes(nodes),
-	_var_idx(var_idx)
+        _nodes(nodes),
+        _var_idx(var_idx)
       {}
 
     std::set<unsigned int> _nodes;
@@ -142,19 +142,19 @@ protected:
    */
   template<class InputIterator>
   inline bool setsIntersect(InputIterator first1, InputIterator last1, InputIterator first2, InputIterator last2) const
-  {
-    while (first1 != last1 && first2 != last2)
     {
-      if (*first1 == *first2)
-        return true;
+      while (first1 != last1 && first2 != last2)
+      {
+        if (*first1 == *first2)
+          return true;
 
-      if (*first1 < *first2)
-        ++first1;
-      else if (*first1 > *first2)
-        ++first2;
+        if (*first1 < *first2)
+          ++first1;
+        else if (*first1 > *first2)
+          ++first2;
+      }
+      return false;
     }
-    return false;
-  }
 
   // Attempt to make a lower bound computation of memory consumed by this object
   virtual unsigned long calculateUsage() const;

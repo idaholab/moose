@@ -30,11 +30,11 @@ Real
 DesorptionToPorespace::computeQpResidual()
 {
   if ((*_conc_val)[_qp] > _equilib_conc[_qp])
-    {
-      if (_desorption_time_const[_qp] > 0)
-	return -_test[_i][_qp]*((*_conc_val)[_qp] - _equilib_conc[_qp])/_desorption_time_const[_qp];
-      return 0.0;
-    }
+  {
+    if (_desorption_time_const[_qp] > 0)
+      return -_test[_i][_qp]*((*_conc_val)[_qp] - _equilib_conc[_qp])/_desorption_time_const[_qp];
+    return 0.0;
+  }
   if (_adsorption_time_const[_qp] > 0)
     return -_test[_i][_qp]*((*_conc_val)[_qp] - _equilib_conc[_qp])/_adsorption_time_const[_qp];
   return 0.0;
@@ -45,11 +45,11 @@ Real
 DesorptionToPorespace::computeQpJacobian()
 {
   if ((*_conc_val)[_qp] > _equilib_conc[_qp])
-    {
-      if (_desorption_time_const[_qp] > 0)
-	return _test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]/_desorption_time_const[_qp];
-      return 0.0;
-    }
+  {
+    if (_desorption_time_const[_qp] > 0)
+      return _test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]/_desorption_time_const[_qp];
+    return 0.0;
+  }
   if (_adsorption_time_const[_qp] > 0)
     return _test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]/_adsorption_time_const[_qp];
   return 0.0;
@@ -62,11 +62,11 @@ DesorptionToPorespace::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar != _conc_var)
     return 0.0;
   if ((*_conc_val)[_qp] > _equilib_conc[_qp])
-    {
-      if (_desorption_time_const[_qp] > 0)
-	return -_test[_i][_qp]*_phi[_j][_qp]/_desorption_time_const[_qp];
-      return 0.0;
-    }
+  {
+    if (_desorption_time_const[_qp] > 0)
+      return -_test[_i][_qp]*_phi[_j][_qp]/_desorption_time_const[_qp];
+    return 0.0;
+  }
   if (_adsorption_time_const[_qp] > 0)
     return -_test[_i][_qp]*_phi[_j][_qp]/_adsorption_time_const[_qp];
   return 0.0;

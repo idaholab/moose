@@ -62,23 +62,23 @@ FunctionControlledDT::init()
   const std::vector<std::string> & names( getParam<std::vector<std::string> >("functions") );
   const unsigned len( names.size() );
   if (_maximums.size() != len || _minimums.size() != len)
-    {
-      mooseError("The size of the functions, maximums and minimums vectors must be equal");
-    }
+  {
+    mooseError("The size of the functions, maximums and minimums vectors must be equal");
+  }
   _f.resize(len);
   for (unsigned i(0); i < len; ++i)
+  {
+    Function * const f = &getFunctionByName( names[i] );
+    if (!f)
     {
-      Function * const f = &getFunctionByName( names[i] );
-      if (!f)
-	{
-	  std::string msg("Error in FunctionControlledDT.");
-	  msg += "  Function ";
-	  msg += names[i];
-	  msg += " referenced but not found.";
-	  mooseError( msg );
-	}
-      _f[i] = f;
+      std::string msg("Error in FunctionControlledDT.");
+      msg += "  Function ";
+      msg += names[i];
+      msg += " referenced but not found.";
+      mooseError( msg );
     }
+    _f[i] = f;
+  }
 }
 
 
@@ -100,28 +100,28 @@ FunctionControlledDT::computeDT()
   Real local_dt = SolutionTimeAdaptiveDT::computeDT();
 
   if (_cutback_occurred)
-    {
-      _cutback_occurred = false;
-      return bounddt(local_dt*_decrement);
-    }
+  {
+    _cutback_occurred = false;
+    return bounddt(local_dt*_decrement);
+  }
 
   // if any functions > maximums then decrease
   for (unsigned i(0); i < _f.size(); ++i)
+  {
+    if (_f[i]->value(_time, Point(0)) > _maximums[i])
     {
-      if (_f[i]->value(_time, Point(0)) > _maximums[i])
-	{
-	  return bounddt(local_dt*_decrement);
-	}
+      return bounddt(local_dt*_decrement);
     }
+  }
 
   // if any functions > minimums then don't change
   for (unsigned i(0); i < _f.size(); ++i)
+  {
+    if (_f[i]->value(_time, Point(0)) > _minimums[i])
     {
-      if (_f[i]->value(_time, Point(0)) > _minimums[i])
-	{
-	  return bounddt(local_dt);
-	}
+      return bounddt(local_dt);
     }
+  }
 
   // all functions must be less than minimums
   return bounddt(local_dt*_increment);

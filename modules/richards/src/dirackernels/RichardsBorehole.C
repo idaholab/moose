@@ -40,18 +40,18 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
 
-    _permeability(getMaterialProperty<RealTensorValue>("permeability")),
+  _permeability(getMaterialProperty<RealTensorValue>("permeability")),
 
-    _dseff(getMaterialProperty<std::vector<std::vector<Real> > >("ds_eff")),
+  _dseff(getMaterialProperty<std::vector<std::vector<Real> > >("ds_eff")),
 
-    _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
-    _drel_perm(getMaterialProperty<std::vector<Real> >("drel_perm")),
+  _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
+  _drel_perm(getMaterialProperty<std::vector<Real> >("drel_perm")),
 
-    _density(getMaterialProperty<std::vector<Real> >("density")),
-    _ddensity(getMaterialProperty<std::vector<Real> >("ddensity")),
+  _density(getMaterialProperty<std::vector<Real> >("density")),
+  _ddensity(getMaterialProperty<std::vector<Real> >("ddensity")),
 
-    _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
-    _point_file(getParam<std::string>("point_file"))
+  _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
+  _point_file(getParam<std::string>("point_file"))
 
 {
   // zero the outflow mass
@@ -65,24 +65,24 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   // construct the arrays of radius, x, y and z
   std::vector<Real> scratch;
   while (parseNextLineReals(file, scratch))
-    {
-      if (scratch.size() >= 2){
-	_rs.push_back(scratch[0]);
-	_xs.push_back(scratch[1]);
-	if (scratch.size() >= 3){
-	  _ys.push_back(scratch[2]);
-	}
-	else{
-	  _ys.push_back(0.0);
-	}
-	if (scratch.size() >= 4){
-	  _zs.push_back(scratch[3]);
-	}
-	else{
-	  _zs.push_back(0.0);
-	}
+  {
+    if (scratch.size() >= 2){
+      _rs.push_back(scratch[0]);
+      _xs.push_back(scratch[1]);
+      if (scratch.size() >= 3){
+        _ys.push_back(scratch[2]);
+      }
+      else{
+        _ys.push_back(0.0);
+      }
+      if (scratch.size() >= 4){
+        _zs.push_back(scratch[3]);
+      }
+      else{
+        _zs.push_back(0.0);
       }
     }
+  }
 
   file.close();
 
@@ -94,19 +94,19 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   // construct the line-segment lengths between each point
   _half_seg_len.resize(num_pts-1);
   for (unsigned int i=0 ; i<_xs.size()-1; ++i)
-    {
-      _half_seg_len[i] = 0.5*std::sqrt(std::pow(_xs[i+1] - _xs[i], 2) + std::pow(_ys[i+1] - _ys[i], 2) + std::pow(_zs[i+1] - _zs[i], 2));
-      if (_half_seg_len[i] == 0)
-	mooseError("Borehole has a zero-segment length at (x,y,z) = " << _xs[i] << " " << _ys[i] << " " << _zs[i] << "\n");
-    }
+  {
+    _half_seg_len[i] = 0.5*std::sqrt(std::pow(_xs[i+1] - _xs[i], 2) + std::pow(_ys[i+1] - _ys[i], 2) + std::pow(_zs[i+1] - _zs[i], 2));
+    if (_half_seg_len[i] == 0)
+      mooseError("Borehole has a zero-segment length at (x,y,z) = " << _xs[i] << " " << _ys[i] << " " << _zs[i] << "\n");
+  }
 
   // construct the rotation matrix needed to rotate the permeability
   _rot_matrix.resize(num_pts-1);
   for (unsigned int i=0 ; i<_xs.size()-1; ++i)
-    {
-      RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
-      _rot_matrix[i] = rotVecToZ(v2);
-    }
+  {
+    RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
+    _rot_matrix[i] = rotVecToZ(v2);
+  }
 
   // size the array that holds elemental info
   _elemental_info.resize(num_pts);
@@ -114,44 +114,44 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
   // do debugging if AndyWilkins
   if (_debug_things)
+  {
+    std::cout << "Checking rotation matrices\n";
+    RealVectorValue zzz(0,0,1);
+    RealTensorValue iii;
+    iii(0,0) = 1;
+    iii(1,1) = 1;
+    iii(2,2) = 1;
+    RealVectorValue vec0;
+    RealTensorValue ten0;
+    Real the_sum;
+    for (unsigned int i=0 ; i<_xs.size()-1; ++i)
     {
-      std::cout << "Checking rotation matrices\n";
-      RealVectorValue zzz(0,0,1);
-      RealTensorValue iii;
-      iii(0,0) = 1;
-      iii(1,1) = 1;
-      iii(2,2) = 1;
-      RealVectorValue vec0;
-      RealTensorValue ten0;
-      Real the_sum;
-      for (unsigned int i=0 ; i<_xs.size()-1; ++i)
-	{
-	  // check rotation matrix does the correct rotation
-	  std::cout << i << "\n";
-	  RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
-	  v2 /= std::sqrt(v2*v2);
-	  vec0 = _rot_matrix[i]*v2 - zzz;
-	  if ((vec0*vec0) > 1E-20)
-	    mooseError("Rotation matrix for v2 = " << v2 << " is wrong.  It is " << _rot_matrix[i] << "\n");
+      // check rotation matrix does the correct rotation
+      std::cout << i << "\n";
+      RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
+      v2 /= std::sqrt(v2*v2);
+      vec0 = _rot_matrix[i]*v2 - zzz;
+      if ((vec0*vec0) > 1E-20)
+        mooseError("Rotation matrix for v2 = " << v2 << " is wrong.  It is " << _rot_matrix[i] << "\n");
 
-	  // check rotation matrix is orthogonal
-	  ten0 = _rot_matrix[i]*_rot_matrix[i].transpose() - iii;
-	  the_sum = 0;
-	  for (unsigned int j=0 ; j<3; ++j)
-	    for (unsigned int k=0 ; k<3; ++k)
-	      the_sum = ten0(j,k)*ten0(j,k);
-	  if (the_sum > 1E-20)
-	    mooseError("Rotation matrix for v2 = " << v2 << " does not obey R.R^T=I.  It is " << _rot_matrix[i] << "\n");
+      // check rotation matrix is orthogonal
+      ten0 = _rot_matrix[i]*_rot_matrix[i].transpose() - iii;
+      the_sum = 0;
+      for (unsigned int j=0 ; j<3; ++j)
+        for (unsigned int k=0 ; k<3; ++k)
+          the_sum = ten0(j,k)*ten0(j,k);
+      if (the_sum > 1E-20)
+        mooseError("Rotation matrix for v2 = " << v2 << " does not obey R.R^T=I.  It is " << _rot_matrix[i] << "\n");
 
-	  ten0 = _rot_matrix[i].transpose()*_rot_matrix[i] - iii;
-	  the_sum = 0;
-	  for (unsigned int j=0 ; j<3; ++j)
-	    for (unsigned int k=0 ; k<3; ++k)
-	      the_sum = ten0(j,k)*ten0(j,k);
-	  if (the_sum > 1E-20)
-	    mooseError("Rotation matrix for v2 = " << v2 << " does not obey R^T.R=I.  It is " << _rot_matrix[i] << "\n");
-	}
+      ten0 = _rot_matrix[i].transpose()*_rot_matrix[i] - iii;
+      the_sum = 0;
+      for (unsigned int j=0 ; j<3; ++j)
+        for (unsigned int k=0 ; k<3; ++k)
+          the_sum = ten0(j,k)*ten0(j,k);
+      if (the_sum > 1E-20)
+        mooseError("Rotation matrix for v2 = " << v2 << " does not obey R^T.R=I.  It is " << _rot_matrix[i] << "\n");
     }
+  }
 
 }
 
@@ -231,16 +231,16 @@ RichardsBorehole::addPoints()
   _total_outflow_mass.zero();
 
   if (!_have_constructed_elemental_info || _mesh_adaptivity)
-    {
-      for (unsigned int i = 0; i < _zs.size(); i++)
-	_elemental_info[i] = addPoint(Point(_xs[i], _ys[i], _zs[i]));
-      _have_constructed_elemental_info = true;
-    }
+  {
+    for (unsigned int i = 0; i < _zs.size(); i++)
+      _elemental_info[i] = addPoint(Point(_xs[i], _ys[i], _zs[i]));
+    _have_constructed_elemental_info = true;
+  }
   else
-    {
-      for (unsigned int i = 0; i < _zs.size(); i++)
-	addPoint(_elemental_info[i], Point(_xs[i], _ys[i], _zs[i]));
-    }
+  {
+    for (unsigned int i = 0; i < _zs.size(); i++)
+      addPoint(_elemental_info[i], Point(_xs[i], _ys[i], _zs[i]));
+  }
 
 }
 
@@ -259,24 +259,24 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
   Real eig_val2 = 0.5*trace2D - std::sqrt(0.25*trace2D*trace2D - det2D);
   RealVectorValue eig_vec1, eig_vec2;
   if (rot_perm(1,0) != 0)
-    {
-      eig_vec1(0) = eig_val1 - rot_perm(1,1);
-      eig_vec1(1) = rot_perm(1,0);
-      eig_vec2(0) = eig_val2 - rot_perm(1,1);
-      eig_vec1(1) = rot_perm(1,0);
-    }
+  {
+    eig_vec1(0) = eig_val1 - rot_perm(1,1);
+    eig_vec1(1) = rot_perm(1,0);
+    eig_vec2(0) = eig_val2 - rot_perm(1,1);
+    eig_vec1(1) = rot_perm(1,0);
+  }
   else if (rot_perm(0,1) != 0)
-    {
-      eig_vec1(0) = rot_perm(0,1);
-      eig_vec1(1) = eig_val1 - rot_perm(0,0);
-      eig_vec2(0) = rot_perm(0,1);
-      eig_vec2(1) = eig_val2 - rot_perm(0,0);
-    }
+  {
+    eig_vec1(0) = rot_perm(0,1);
+    eig_vec1(1) = eig_val1 - rot_perm(0,0);
+    eig_vec2(0) = rot_perm(0,1);
+    eig_vec2(1) = eig_val2 - rot_perm(0,0);
+  }
   else // off diagonal terms are both zero
-    {
-      eig_vec1(0) = 1;
-      eig_vec2(1) = 1;
-    }
+  {
+    eig_vec1(0) = 1;
+    eig_vec2(1) = 1;
+  }
 
   // finally, rotate these to original frame and normalise
   eig_vec1 = rot.transpose()*eig_vec1;
@@ -293,15 +293,15 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
   Real min2 = max2;
   Real proj;
   for (unsigned int i = 1; i < ele->n_nodes(); i++)
-    {
-      proj = eig_vec1*ele->point(i);
-      max1 = (max1 < proj) ? proj : max1;
-      min1 = (min1 < proj) ? min1 : proj;
+  {
+    proj = eig_vec1*ele->point(i);
+    max1 = (max1 < proj) ? proj : max1;
+    min1 = (min1 < proj) ? min1 : proj;
 
-      proj = eig_vec2*ele->point(i);
-      max2 = (max2 < proj) ? proj : max2;
-      min2 = (min2 < proj) ? min2 : proj;
-    }
+    proj = eig_vec2*ele->point(i);
+    max2 = (max2 < proj) ? proj : max2;
+    min2 = (min2 < proj) ? min2 : proj;
+  }
   Real ll1 = max1 - min1;
   Real ll2 = max2 - min2;
 
@@ -337,22 +337,22 @@ RichardsBorehole::computeQpResidual()
   Real wc(0.0);
   if (current_dirac_ptid > 0)
     // contribution from half-segment "behind" this point
-    {
-      wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
-      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
-	// injection, so outflow<0 || // production, so outflow>0
-	outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure);
-    }
+  {
+    wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
+    if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+      // injection, so outflow<0 || // production, so outflow>0
+      outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure);
+  }
 
   if (current_dirac_ptid < _zs.size() - 1)
     // contribution from half-segment "ahead of" this point
-    {
-      wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
-      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
-	// injection, so outflow<0 || // production, so outflow>0
-	outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure);
-        //outflow += _test[_i][_qp]*std::abs(_character)*wc*std::exp(_u[_qp]*10)*(_u[_qp] - bh_pressure)/_viscosity[_qp][_pvar];
-    }
+  {
+    wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
+    if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+      // injection, so outflow<0 || // production, so outflow>0
+      outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure);
+    //outflow += _test[_i][_qp]*std::abs(_character)*wc*std::exp(_u[_qp]*10)*(_u[_qp] - bh_pressure)/_viscosity[_qp][_pvar];
+  }
 
   _total_outflow_mass.add(outflow*_dt); // this is not thread safe, but DiracKernel's aren't currently threaded
   return outflow;
@@ -364,7 +364,7 @@ RichardsBorehole::computeQpJacobian()
   if (_character == 0.0) return 0.0;
 
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
-\
+  \
   Real mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
   Real mobp = (_drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]*_density[_qp][_pvar] + _rel_perm[_qp][_pvar]*_ddensity[_qp][_pvar])/_viscosity[_qp][_pvar];
 
@@ -375,21 +375,21 @@ RichardsBorehole::computeQpJacobian()
   Real wc(0.0);
   if (current_dirac_ptid > 0)
     // contribution from half-segment "behind" this point
-    {
-      wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
-      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
-	// injection, so outflow<0 || // production, so outflow>0
-	outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
-    }
+  {
+    wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
+    if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+      // injection, so outflow<0 || // production, so outflow>0
+      outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
+  }
 
   if (current_dirac_ptid < _zs.size() - 1)
     // contribution from half-segment "ahead of" this point
-    {
-      wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
-      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
-	// injection, so outflow<0 || // production, so outflow>0
-	outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
-    }
+  {
+    wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
+    if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+      // injection, so outflow<0 || // production, so outflow>0
+      outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
+  }
 
   return outflowp;
 }
@@ -415,21 +415,21 @@ RichardsBorehole::computeQpOffDiagJacobian(unsigned int jvar)
   Real wc(0.0);
   if (current_dirac_ptid > 0)
     // contribution from half-segment "behind" this point
-    {
-      wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
-      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
-	// injection, so outflow<0 || // production, so outflow>0
-	outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
-    }
+  {
+    wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
+    if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+      // injection, so outflow<0 || // production, so outflow>0
+      outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
+  }
 
   if (current_dirac_ptid < _zs.size() - 1)
     // contribution from half-segment "ahead of" this point
-    {
-      wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
-      if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
-	// injection, so outflow<0 || // production, so outflow>0
-	outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
-    }
+  {
+    wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
+    if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
+      // injection, so outflow<0 || // production, so outflow>0
+      outflowp += _test[_i][_qp]*std::abs(_character)*wc*(mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
+  }
 
   return outflowp;
 }

@@ -36,17 +36,17 @@ RichardsPolyLineSink::RichardsPolyLineSink(const std::string & name, InputParame
     if (scratch.size() >= 1) {
       _xs.push_back(scratch[0]);
       if (scratch.size() >= 2) {
-	    _ys.push_back(scratch[1]);
-	  }
-	  else {
-	    _ys.push_back(0.0);
-	  }
-	  if (scratch.size() >= 3) {
-	    _zs.push_back(scratch[2]);
-	  }
-	  else {
-	    _zs.push_back(0.0);
-	  }
+        _ys.push_back(scratch[1]);
+      }
+      else {
+        _ys.push_back(0.0);
+      }
+      if (scratch.size() >= 3) {
+        _zs.push_back(scratch[2]);
+      }
+      else {
+        _zs.push_back(0.0);
+      }
     }
   }
 
@@ -86,16 +86,16 @@ RichardsPolyLineSink::addPoints()
   _total_outflow_mass.zero();
 
   if (!_have_constructed_elemental_info || _mesh_adaptivity)
-    {
-      for (unsigned int i = 0; i < _zs.size(); i++)
-	_elemental_info[i] = addPoint(Point(_xs[i], _ys[i], _zs[i]));
-      _have_constructed_elemental_info = true;
-    }
+  {
+    for (unsigned int i = 0; i < _zs.size(); i++)
+      _elemental_info[i] = addPoint(Point(_xs[i], _ys[i], _zs[i]));
+    _have_constructed_elemental_info = true;
+  }
   else
-    {
-      for (unsigned int i = 0; i < _zs.size(); i++)
-	addPoint(_elemental_info[i], Point(_xs[i], _ys[i], _zs[i]));
-    }
+  {
+    for (unsigned int i = 0; i < _zs.size(); i++)
+      addPoint(_elemental_info[i], Point(_xs[i], _ys[i], _zs[i]));
+  }
 }
 
 

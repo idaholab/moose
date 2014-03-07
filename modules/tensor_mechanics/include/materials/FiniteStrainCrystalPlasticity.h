@@ -20,7 +20,7 @@ protected:
   virtual void computeQpElasticityTensor();
   virtual void initQpStatefulProperties();
   virtual void calc_resid_jacob(RankTwoTensor*,RankTwoTensor*,RankTwoTensor*,RankTwoTensor*,Real*,Real*,
-				RankTwoTensor*,RankFourTensor*);
+                                RankTwoTensor*,RankFourTensor*);
   virtual void get_slip_incr(Real*,Real*,Real*);
   virtual void update_gss(Real*);
 

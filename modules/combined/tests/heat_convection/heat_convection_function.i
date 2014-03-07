@@ -1,7 +1,7 @@
-[Mesh]		# Mesh Start
+[Mesh]    # Mesh Start
   file = patch_3d.e
 #
-[]		# Mesh END
+[]    # Mesh END
 
 [Functions]
   [./t_infinity]
@@ -14,33 +14,33 @@
   [../]
 []
 
-[Variables]	# Variables Start
+[Variables]  # Variables Start
   [./temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 294.26
   [../]
-[]		# Variables END
+[]    # Variables END
 
 
-[Kernels]	# Kernels Start
+[Kernels]  # Kernels Start
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
-[]		# Kernels END
+[]    # Kernels END
 
 
-[BCs]		# Boundary Conditions Start
+[BCs]    # Boundary Conditions Start
 # Heat transfer coefficient on outer parallelpiped radius and ends
-  [./convective_clad_surface]		# Convective Start
-    type = ConvectiveFluxFunction	# Convective flux, e.g. q'' = h*(Tw - Tf)
+  [./convective_clad_surface]    # Convective Start
+    type = ConvectiveFluxFunction  # Convective flux, e.g. q'' = h*(Tw - Tf)
     boundary = 12
     variable = temp
     coefficient = 5.7                   # convective heat transfer coefficient (w/m^2-K)[50 BTU/hr-ft^2-F]
     coefficient_function = htc
     T_infinity = t_infinity
-  [../]	                                # Convective End
+  [../]                                  # Convective End
 
   [./fixed]
     type = DirichletBC
@@ -48,9 +48,9 @@
     boundary = 10
     value = 100
   [../]
-[]		# BCs END
+[]    # BCs END
 
-[Materials]		# Materials Start
+[Materials]    # Materials Start
   [./thermal]
     type = HeatConductionMaterial
     block = '1 2 3 4 5 6 7'
@@ -63,9 +63,9 @@
     block = '1 2 3 4 5 6 7'
     density = 2405.28
   [../]
-[]			# Materials END
+[]      # Materials END
 
-[Executioner]		# Executioner Start
+[Executioner]    # Executioner Start
    type = Transient
 
   #Preconditioned JFNK (default)
@@ -83,13 +83,13 @@
    start_time = 0.0
    dt = 1
    num_steps = 1
-[]			# Executioner END
+[]      # Executioner END
 
-[Output]		# Output Start
+[Output]    # Output Start
   linear_residuals = true
   interval = 1
   output_initial = true
   exodus = true
   perf_log = true
-[]			# Output END
-#			# Input file END
+[]      # Output END
+#      # Input file END

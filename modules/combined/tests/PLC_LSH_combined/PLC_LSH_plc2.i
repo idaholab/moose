@@ -19,7 +19,7 @@
 #                    sigma = stress
 #                    n = power law exponent
 #                    Q = activation energy
-#	             R = gas constant
+#               R = gas constant
 #                    T = temperature
 #                    t = time
 #                    m = time hardening exponent

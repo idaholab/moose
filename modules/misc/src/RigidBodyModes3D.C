@@ -46,13 +46,13 @@ InputParameters validParams<RigidBodyModes3D>()
 }
 
 RigidBodyModes3D::RigidBodyModes3D(const std::string & name, InputParameters parameters) :
-  NodalUserObject(name, parameters),
-  _subspace_name(parameters.get<std::string>("subspace_name")),
-  _subspace_indices(parameters.get<std::vector<unsigned int> >("subspace_indices")),
-  _modes(parameters.get<std::vector<std::string> >("modes").begin(),parameters.get<std::vector<std::string> >("modes").end()),
-  _disp_x_i(coupled("disp_x")),
-  _disp_y_i(coupled("disp_y")),
-  _disp_z_i(coupled("disp_z"))
+    NodalUserObject(name, parameters),
+    _subspace_name(parameters.get<std::string>("subspace_name")),
+    _subspace_indices(parameters.get<std::vector<unsigned int> >("subspace_indices")),
+    _modes(parameters.get<std::vector<std::string> >("modes").begin(),parameters.get<std::vector<std::string> >("modes").end()),
+    _disp_x_i(coupled("disp_x")),
+    _disp_y_i(coupled("disp_y")),
+    _disp_z_i(coupled("disp_z"))
 {
   const char* all_modes_array[6] = {"trans_x", "trans_y", "trans_z", "rot_x", "rot_y", "rot_z"};
   std::set<std::string> all_modes(all_modes_array,all_modes_array+6);
@@ -69,8 +69,8 @@ RigidBodyModes3D::RigidBodyModes3D(const std::string & name, InputParameters par
       std::stringstream err;
       err << "Invalid 3D rigid body mode " << *it << "; must be one of: ";
       for (std::set<std::string>::iterator it = all_modes.begin(); it != all_modes.end(); ++it) {
-	if(it != all_modes.begin()) err << ", ";
-	err << *it;
+        if(it != all_modes.begin()) err << ", ";
+        err << *it;
       }
       err << "\n";
       mooseError(err.str());

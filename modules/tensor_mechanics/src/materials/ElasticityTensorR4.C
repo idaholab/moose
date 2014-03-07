@@ -4,8 +4,8 @@
 
 Real
 ElasticityTensorR4::elasticJacobian( const unsigned int i, const unsigned int k,
-                      const RealGradient & grad_test,
-                      const RealGradient & grad_phi)
+                                     const RealGradient & grad_test,
+                                     const RealGradient & grad_phi)
 {
   //Calculating Sum over (j,l) C_ijkl*grad_phi(k)[l]*grad_test(i)[j]
   Real a(0.0);
@@ -37,10 +37,10 @@ ElasticityTensorR4::operator/(const Real &a)
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
-	for(unsigned int l(0); l<N; l++)
-	  result(i,j,k,l) = _vals[i][j][k][l]/a;
+        for(unsigned int l(0); l<N; l++)
+          result(i,j,k,l) = _vals[i][j][k][l]/a;
 
-return result;
+  return result;
 }
 
 ElasticityTensorR4
@@ -51,8 +51,8 @@ ElasticityTensorR4::operator+(const ElasticityTensorR4 &a) const
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
-	for(unsigned int l(0); l<N; l++)
-	  result(i,j,k,l) = _vals[i][j][k][l] + a(i,j,k,l);
+        for(unsigned int l(0); l<N; l++)
+          result(i,j,k,l) = _vals[i][j][k][l] + a(i,j,k,l);
 
   return result;
 }
@@ -65,8 +65,8 @@ ElasticityTensorR4::operator-(const ElasticityTensorR4 &a) const
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
-	for(unsigned int l(0); l<N; l++)
-	  result(i,j,k,l) = _vals[i][j][k][l] - a(i,j,k,l);
+        for(unsigned int l(0); l<N; l++)
+          result(i,j,k,l) = _vals[i][j][k][l] - a(i,j,k,l);
 
   return result;
 }
@@ -79,8 +79,8 @@ ElasticityTensorR4::operator - () const
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
-	for(unsigned int l(0); l<N; l++)
-	  result(i,j,k,l) = -_vals[i][j][k][l];
+        for(unsigned int l(0); l<N; l++)
+          result(i,j,k,l) = -_vals[i][j][k][l];
 
   return result;
 }
@@ -93,10 +93,10 @@ ElasticityTensorR4::operator*(const Real &a)
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
-	for(unsigned int l(0); l<N; l++)
-	  result(i,j,k,l) = _vals[i][j][k][l]*a;
+        for(unsigned int l(0); l<N; l++)
+          result(i,j,k,l) = _vals[i][j][k][l]*a;
 
-return result;
+  return result;
 }
 
 RankTwoTensor
@@ -107,8 +107,8 @@ ElasticityTensorR4::operator*(const RankTwoTensor &a)
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
-	for(unsigned int l(0); l<N; l++)
-	  result(i,j) += _vals[i][j][k][l]*a(k,l);
+        for(unsigned int l(0); l<N; l++)
+          result(i,j) += _vals[i][j][k][l]*a(k,l);
 
   return result;
 }
@@ -122,10 +122,10 @@ ElasticityTensorR4::operator*(const RankFourTensor &a) const
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
-	for(unsigned int l(0); l<N; l++)
-	  for(unsigned int p(0); p<N; p++)
-	    for(unsigned int q(0); q<N; q++)
-	      result(i,j,k,l) += _vals[i][j][p][q]*a(p,q,k,l);
+        for(unsigned int l(0); l<N; l++)
+          for(unsigned int p(0); p<N; p++)
+            for(unsigned int q(0); q<N; q++)
+              result(i,j,k,l) += _vals[i][j][p][q]*a(p,q,k,l);
 
   return result;
 }

@@ -1,11 +1,11 @@
 #include "FiniteStrainPlasticMaterial.h"
 
 /**
-FiniteStrainPlasticMaterial integrates the rate independent J2 plasticity model in a
-finite strain framework using return mapping algorithm.
-Integration is performed in an incremental manner using Newton Raphson.
-Isotropic hardening has been incorporated where yield stress as a function of equivalent
-plastic strain has to be specified by the user.
+   FiniteStrainPlasticMaterial integrates the rate independent J2 plasticity model in a
+   finite strain framework using return mapping algorithm.
+   Integration is performed in an incremental manner using Newton Raphson.
+   Isotropic hardening has been incorporated where yield stress as a function of equivalent
+   plastic strain has to be specified by the user.
 */
 
 template<>
@@ -22,7 +22,7 @@ InputParameters validParams<FiniteStrainPlasticMaterial>()
 }
 
 FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const std::string & name,
-                                             InputParameters parameters)
+                                                         InputParameters parameters)
     : FiniteStrainMaterial(name, parameters),
       _yield_stress_vector(getParam< std::vector<Real> >("yield_stress")),//Read from input file
       _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
@@ -31,7 +31,7 @@ FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const std::string & nam
       _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
       _rtol(getParam<Real>("rtol")),
       _ftol(getParam<Real>("ftol")),
-      _eptol(getParam<Real>("eptol"))
+  _eptol(getParam<Real>("eptol"))
 {
 }
 
@@ -131,43 +131,43 @@ FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTenso
 
 
     while((err1 > _rtol || err2 > _ftol || err3 > _eptol) && iter < maxiter )//Stress update iteration (hardness fixed)
-      {
+    {
 
 
-        iter++;
+      iter++;
 
-        getJac(sig_new,E_ijkl,flow_incr,&dr_dsig);//Jacobian
-        dr_dsig_inv=dr_dsig.invSymm();
-	fq=getdYieldStressdPlasticStrain(eqvpstrain);
+      getJac(sig_new,E_ijkl,flow_incr,&dr_dsig);//Jacobian
+      dr_dsig_inv=dr_dsig.invSymm();
+      fq=getdYieldStressdPlasticStrain(eqvpstrain);
 
-	dflow_incr=(f-flow_tensor.doubleContraction(dr_dsig_inv*resid)+fq*rep)/(flow_tensor.doubleContraction(dr_dsig_inv*flow_dirn)-fq);
-        ddsig=dr_dsig_inv*(-resid-flow_dirn*dflow_incr);
+      dflow_incr=(f-flow_tensor.doubleContraction(dr_dsig_inv*resid)+fq*rep)/(flow_tensor.doubleContraction(dr_dsig_inv*flow_dirn)-fq);
+      ddsig=dr_dsig_inv*(-resid-flow_dirn*dflow_incr);
 
-        flow_incr+=dflow_incr;
-        delta_dp-=E_ijkl.invSymm()*ddsig;
-        sig_new+=ddsig;
-	deqvpstrain=rep+dflow_incr;
-	eqvpstrain+=deqvpstrain;
+      flow_incr+=dflow_incr;
+      delta_dp-=E_ijkl.invSymm()*ddsig;
+      sig_new+=ddsig;
+      deqvpstrain=rep+dflow_incr;
+      eqvpstrain+=deqvpstrain;
 
-        getFlowTensor(sig_new,&flow_tensor);
-        flow_dirn=flow_tensor;
+      getFlowTensor(sig_new,&flow_tensor);
+      flow_dirn=flow_tensor;
 
-        resid=flow_dirn*flow_incr-delta_dp;
-        f=getSigEqv(sig_new)-yield_stress;
-	rep=-eqvpstrain+eqvpstrain_old+flow_incr;
+      resid=flow_dirn*flow_incr-delta_dp;
+      f=getSigEqv(sig_new)-yield_stress;
+      rep=-eqvpstrain+eqvpstrain_old+flow_incr;
 
-        err1=resid.L2norm();
-        err2=fabs(f);
-	err3=fabs(rep);
+      err1=resid.L2norm();
+      err2=fabs(f);
+      err3=fabs(rep);
 
-      }
+    }
 
     if(iter>=maxiter)
-      {
-	_stress[_qp](2,2)=1e6;
-	printf("Constitutive Error: Too many iterations %f %f %f \n",err1,err2, err3);//Convergence failure
-	return;
-      }
+    {
+      _stress[_qp](2,2)=1e6;
+      printf("Constitutive Error: Too many iterations %f %f %f \n",err1,err2, err3);//Convergence failure
+      return;
+    }
 
     dpn=*dp+delta_dp;
 

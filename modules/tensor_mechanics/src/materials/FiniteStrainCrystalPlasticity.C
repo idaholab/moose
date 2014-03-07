@@ -22,7 +22,7 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
 }
 
 FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string & name,
-                                             InputParameters parameters)
+                                                             InputParameters parameters)
     : FiniteStrainMaterial(name, parameters),
       _nss(getParam<int>("nss")),
       _gprops(getParam<std::vector<Real> >("gprops")),
@@ -32,19 +32,19 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
       _euler_angle_file_name(getParam<std::string>("euler_angle_file_name")),
       _rtol(getParam<Real>("rtol")),
       _gtol(getParam<Real>("gtol")),
-      _slip_incr_tol(getParam<Real>("slip_incr_tol")),
-      _fp(declareProperty<RankTwoTensor>("fp")),
-      _fp_old(declarePropertyOld<RankTwoTensor>("fp")),
-      _pk2(declareProperty<RankTwoTensor>("pk2")),
-      _pk2_old(declarePropertyOld<RankTwoTensor>("pk2")),
-      _lag_e(declareProperty<RankTwoTensor>("lage")),
-      _gss(declareProperty<std::vector<Real> >("gss")),
-      _gss_old(declarePropertyOld<std::vector<Real> >("gss")),
-      _acc_slip(declareProperty<Real>("acc_slip")),
-      _acc_slip_old(declarePropertyOld<Real>("acc_slip")),
-      _update_rot(declareProperty<RankTwoTensor>("update_rot")),
-      _crysrot(declareProperty<RankTwoTensor>("crysrot")),
-      _crysrot_old(declarePropertyOld<RankTwoTensor>("crysrot"))
+  _slip_incr_tol(getParam<Real>("slip_incr_tol")),
+  _fp(declareProperty<RankTwoTensor>("fp")),
+  _fp_old(declarePropertyOld<RankTwoTensor>("fp")),
+  _pk2(declareProperty<RankTwoTensor>("pk2")),
+  _pk2_old(declarePropertyOld<RankTwoTensor>("pk2")),
+  _lag_e(declareProperty<RankTwoTensor>("lage")),
+  _gss(declareProperty<std::vector<Real> >("gss")),
+  _gss_old(declarePropertyOld<std::vector<Real> >("gss")),
+  _acc_slip(declareProperty<Real>("acc_slip")),
+  _acc_slip_old(declarePropertyOld<Real>("acc_slip")),
+  _update_rot(declareProperty<RankTwoTensor>("update_rot")),
+  _crysrot(declareProperty<RankTwoTensor>("crysrot")),
+  _crysrot_old(declarePropertyOld<RankTwoTensor>("crysrot"))
 
 
 {
@@ -78,21 +78,21 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
   flag=0;
   ind=-1;
   while(flag==0)
+  {
+    ind=ind+1;
+    is=data[ind];
+    ind=ind+1;
+    ie=data[ind];
+
+    if(ie==_nss)
+      flag=1;
+
+    ind=ind+1;
+    for(int i=is;i<=ie;i++)
     {
-      ind=ind+1;
-      is=data[ind];
-      ind=ind+1;
-      ie=data[ind];
-
-      if(ie==_nss)
-	flag=1;
-
-      ind=ind+1;
-      for(int i=is;i<=ie;i++)
-	{
-	  _gss[_qp][i-1]=_gprops[ind];
-	}
+      _gss[_qp][i-1]=_gprops[ind];
     }
+  }
 
 
   nsize=_hprops.size();
@@ -110,23 +110,23 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
   flag=0;
   ind=-1;
   while(flag==0)
+  {
+    ind=ind+1;
+    is=data[ind];
+    ind=ind+1;
+    ie=data[ind];
+
+    if(ie==_nss)
+      flag=1;
+
+    for(int i=is;i<=ie;i++)
     {
-      ind=ind+1;
-      is=data[ind];
-      ind=ind+1;
-      ie=data[ind];
-
-      if(ie==_nss)
-	flag=1;
-
-      for(int i=is;i<=ie;i++)
-	{
-	  _a0[i-1]=_flowprops[ind+1];
-	  _xm[i-1]=_flowprops[ind+2];
-	}
-
-      ind=ind+2;
+      _a0[i-1]=_flowprops[ind+1];
+      _xm[i-1]=_flowprops[ind+2];
     }
+
+    ind=ind+2;
+  }
 
 
   get_euler_ang();
@@ -179,103 +179,103 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 
   iterg=0;
   while(gmax > _gtol && iterg < maxiterg)
+  {
+
+    iter=0;
+
+    pk2=_pk2_old[_qp];
+
+    calc_resid_jacob(&pk2,&sig,&fp_old_inv,&fp_inv,slip_incr,tau,&resid,&jac);
+
+    slip_incr_max=0.0;
+
+    for(int i=0;i<_nss;i++)
+    {
+      if(fabs(slip_incr[i])>slip_incr_max)
+      {
+        slip_incr_max=fabs(slip_incr[i]);
+      }
+
+    }
+
+    fac=1.0;
+    if(slip_incr_max > _slip_incr_tol)
+    {
+      fac=0.1;
+      printf("slip_incr=%d %d %f\n",_current_elem->id(),_qp,slip_incr_max);
+      mooseError("Slip increment exceeds tolerance");
+    }
+
+    rnorm=resid.L2norm();
+
+
+    //      printf("rnorm=%d %f\n",iter,rnorm);
+
+    while (rnorm > _rtol && iter <  maxiter)
     {
 
-      iter=0;
+      dpk2=jac.invSymm()*resid;
 
-      pk2=_pk2_old[_qp];
+      pk2=pk2-dpk2*fac;
 
       calc_resid_jacob(&pk2,&sig,&fp_old_inv,&fp_inv,slip_incr,tau,&resid,&jac);
 
       slip_incr_max=0.0;
 
       for(int i=0;i<_nss;i++)
-	{
-	  if(fabs(slip_incr[i])>slip_incr_max)
-	    {
-	      slip_incr_max=fabs(slip_incr[i]);
-	    }
+      {
+        if(fabs(slip_incr[i])>slip_incr_max)
+        {
+          slip_incr_max=fabs(slip_incr[i]);
+        }
 
-	}
+      }
 
       fac=1.0;
       if(slip_incr_max > _slip_incr_tol)
-	{
-	  fac=0.1;
-	  printf("slip_incr=%d %d %f\n",_current_elem->id(),_qp,slip_incr_max);
-	  mooseError("Slip increment exceeds tolerance");
-	}
+      {
+        fac=0.1;
+        printf("slip_incr=%d %d %f\n",_current_elem->id(),_qp,slip_incr_max);
+        mooseError("Slip increment exceeds tolerance");
+      }
 
       rnorm=resid.L2norm();
 
-
-      //      printf("rnorm=%d %f\n",iter,rnorm);
-
-      while (rnorm > _rtol && iter <  maxiter)
-	{
-
-	  dpk2=jac.invSymm()*resid;
-
-	  pk2=pk2-dpk2*fac;
-
-	  calc_resid_jacob(&pk2,&sig,&fp_old_inv,&fp_inv,slip_incr,tau,&resid,&jac);
-
-	  slip_incr_max=0.0;
-
-	  for(int i=0;i<_nss;i++)
-	    {
-	      if(fabs(slip_incr[i])>slip_incr_max)
-		{
-		  slip_incr_max=fabs(slip_incr[i]);
-		}
-
-	    }
-
-	  fac=1.0;
-	  if(slip_incr_max > _slip_incr_tol)
-	    {
-	      fac=0.1;
-	      printf("slip_incr=%d %d %f\n",_current_elem->id(),_qp,slip_incr_max);
-	      mooseError("Slip increment exceeds tolerance");
-	    }
-
-	  rnorm=resid.L2norm();
-
-	  iter+=1;
+      iter+=1;
 
 
-	  //	  printf("rnorm=%d %f\n",iter,rnorm);
-
-	}
-
-      if(iter==maxiter)
-	mooseError("Stress Integration error \n");
-
-
-      for(int i=0;i<_nss;i++)
-	gss_prev[i]=_gss[_qp][i];
-
-      update_gss(slip_incr);
-
-      gmax=0.0;
-      for(int i=0;i<_nss;i++)
-	{
-	  gdiff=fabs(gss_prev[i]-_gss[_qp][i]);
-
-	  if(gdiff > gmax)
-	    gmax=gdiff;
-
-	}
-
-      iterg+=1;
+      //    printf("rnorm=%d %f\n",iter,rnorm);
 
     }
+
+    if(iter==maxiter)
+      mooseError("Stress Integration error \n");
+
+
+    for(int i=0;i<_nss;i++)
+      gss_prev[i]=_gss[_qp][i];
+
+    update_gss(slip_incr);
+
+    gmax=0.0;
+    for(int i=0;i<_nss;i++)
+    {
+      gdiff=fabs(gss_prev[i]-_gss[_qp][i]);
+
+      if(gdiff > gmax)
+        gmax=gdiff;
+
+    }
+
+    iterg+=1;
+
+  }
 
   if(iterg==maxiterg)
-    {
-      printf("gmax=%f\n",gmax);
-      mooseError("Hardness Integration error \n");
-    }
+  {
+    printf("gmax=%f\n",gmax);
+    mooseError("Hardness Integration error \n");
+  }
 
 
   _fp[_qp]=fp_inv.inverse();
@@ -344,59 +344,59 @@ FiniteStrainCrystalPlasticity::get_slip_sys()
     mooseError("Can't open slip system input file ");
 
   for(int i=0;i<_nss;i++)
-    {
-      for(int j=0;j<3;j++)
-	fileslipsys >> vec[j];
+  {
+    for(int j=0;j<3;j++)
+      fileslipsys >> vec[j];
 
-      Real mag;
-      mag=pow(vec[0],2)+pow(vec[1],2)+pow(vec[2],2);
-      mag=pow(mag,0.5);
+    Real mag;
+    mag=pow(vec[0],2)+pow(vec[1],2)+pow(vec[2],2);
+    mag=pow(mag,0.5);
 
-      for(int j=0;j<3;j++)
-	sn[i*3+j]=vec[j]/mag;
+    for(int j=0;j<3;j++)
+      sn[i*3+j]=vec[j]/mag;
 
 
-    }
+  }
 
   for(int i=0;i<_nss;i++)
-    {
-      for(int j=0;j<3;j++)
-	fileslipsys >> vec[j];
+  {
+    for(int j=0;j<3;j++)
+      fileslipsys >> vec[j];
 
 
 
-      Real mag;
-      mag=pow(vec[0],2)+pow(vec[1],2)+pow(vec[2],2);
-      mag=pow(mag,0.5);
+    Real mag;
+    mag=pow(vec[0],2)+pow(vec[1],2)+pow(vec[2],2);
+    mag=pow(mag,0.5);
 
-      for(int j=0;j<3;j++)
-	sd[i*3+j]=vec[j]/mag;
+    for(int j=0;j<3;j++)
+      sd[i*3+j]=vec[j]/mag;
 
 
-    }
+  }
 
   fileslipsys.close();
 
   for(int i=0;i<_nss;i++)
+  {
+
+    for(int j=0;j<3;j++)
     {
-
-      for(int j=0;j<3;j++)
-	{
-	  _mo[i*3+j]=0.0;
-	  for(int k=0;k<3;k++)
-	    _mo[i*3+j]=_mo[i*3+j]+_crysrot[_qp](j,k)*sd[i*3+k];
-
-	}
-
-      for(int j=0;j<3;j++)
-	{
-	  _no[i*3+j]=0.0;
-	  for(int k=0;k<3;k++)
-	    _no[i*3+j]=_no[i*3+j]+_crysrot[_qp](j,k)*sn[i*3+k];
-
-	}
+      _mo[i*3+j]=0.0;
+      for(int k=0;k<3;k++)
+        _mo[i*3+j]=_mo[i*3+j]+_crysrot[_qp](j,k)*sd[i*3+k];
 
     }
+
+    for(int j=0;j<3;j++)
+    {
+      _no[i*3+j]=0.0;
+      for(int k=0;k<3;k++)
+        _no[i*3+j]=_no[i*3+j]+_crysrot[_qp](j,k)*sn[i*3+k];
+
+    }
+
+  }
 
 
 }
@@ -430,34 +430,34 @@ FiniteStrainCrystalPlasticity::update_gss(Real *slip_incr)
 
 
   for(int i=0;i < _nss; i++)
+  {
+
+    _gss[_qp][i]=_gss_old[_qp][i];
+
+    for(int j=0;j < _nss; j++)
     {
+      int iplane,jplane;
+      iplane=i/3;
+      jplane=j/3;
 
-      _gss[_qp][i]=_gss_old[_qp][i];
-
-      for(int j=0;j < _nss; j++)
-	{
-	  int iplane,jplane;
-	  iplane=i/3;
-	  jplane=j/3;
-
-	  if(iplane==jplane)//Kalidindi
-	    qab=1.0;
-	  else
-	    qab=_r;
+      if(iplane==jplane)//Kalidindi
+        qab=1.0;
+      else
+        qab=_r;
 
 
-	  _gss[_qp][i]=_gss[_qp][i]+qab*hb[j]*fabs(slip_incr[j]);
+      _gss[_qp][i]=_gss[_qp][i]+qab*hb[j]*fabs(slip_incr[j]);
 
 
-	}
     }
+  }
 
 }
 
 
 void
 FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2,RankTwoTensor *sig, RankTwoTensor* fp_old_inv,RankTwoTensor* fp_inv,
-						Real* slip_incr,Real *tau, RankTwoTensor* resid, RankFourTensor *jac)
+                                                Real* slip_incr,Real *tau, RankTwoTensor* resid, RankFourTensor *jac)
 {
 
   RankTwoTensor fe,ce,ee,iden,ce_pk2;
@@ -485,14 +485,14 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2,RankTwoTensor
 
 
   for (int i=0;i<_nss;i++)
-    {
-      for (int j=0;j<3;j++)
-	for (int k=0;k<3;k++)
-	  s0[i](j,k)=_mo[i*3+j]*_no[i*3+k];
+  {
+    for (int j=0;j<3;j++)
+      for (int k=0;k<3;k++)
+        s0[i](j,k)=_mo[i*3+j]*_no[i*3+k];
 
-      tau[i]=ce_pk2.doubleContraction(s0[i]);
+    tau[i]=ce_pk2.doubleContraction(s0[i]);
 
-    }
+  }
 
 
   get_slip_incr(tau,slip_incr,dslipdtau);//Calculate dslip,dslipdtau
@@ -521,34 +521,34 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2,RankTwoTensor
   /*Calculate Jacobian*/
 
   for (int i=0;i<_nss;i++)
-    {
-      dtaudpk2[i]=s0[i];
-      dfpinvdslip[i]=-(*fp_old_inv)*s0[i];
-    }
+  {
+    dtaudpk2[i]=s0[i];
+    dfpinvdslip[i]=-(*fp_old_inv)*s0[i];
+  }
 
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
       for(int k=0;k<3;k++)
-	dfedfpinv(i,j,k,j)=_dfgrd[_qp](i,k);
+        dfedfpinv(i,j,k,j)=_dfgrd[_qp](i,k);
 
   deedfe.zero();
 
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
       for(int k=0;k<3;k++)
-	{
-	  deedfe(i,j,k,i)=deedfe(i,j,k,i)+fe(k,j)*0.5;
-	  deedfe(i,j,k,j)=deedfe(i,j,k,j)+fe(k,i)*0.5;
-	}
+      {
+        deedfe(i,j,k,i)=deedfe(i,j,k,i)+fe(k,j)*0.5;
+        deedfe(i,j,k,j)=deedfe(i,j,k,j)+fe(k,i)*0.5;
+      }
 
   dfpinvdpk2.zero();
   for(int i=0;i<_nss;i++)
-    {
-      temp2=dfpinvdslip[i]*dslipdtau[i];
-      temp4=outerProduct(temp2,dtaudpk2[i]);
-      dfpinvdpk2+=temp4;
+  {
+    temp2=dfpinvdslip[i]*dslipdtau[i];
+    temp4=outerProduct(temp2,dtaudpk2[i]);
+    dfpinvdpk2+=temp4;
 
-    }
+  }
 
 
 
@@ -575,15 +575,15 @@ void
 FiniteStrainCrystalPlasticity::get_slip_incr(Real* tau,Real *slip_incr,Real *dslipdtau)
 {
   for(int i=0;i<_nss;i++)
-    {
-      slip_incr[i]=_a0[i]*pow(fabs(tau[i]/_gss[_qp][i]),1.0/_xm[i])*copysign(1.0,tau[i])*_dt;
+  {
+    slip_incr[i]=_a0[i]*pow(fabs(tau[i]/_gss[_qp][i]),1.0/_xm[i])*copysign(1.0,tau[i])*_dt;
 
-    }
+  }
 
   for(int i=0;i<_nss;i++)
-    {
-      dslipdtau[i]=_a0[i]/_xm[i]*pow(fabs(tau[i]/_gss[_qp][i]),1.0/_xm[i]-1.0)/_gss[_qp][i]*_dt;
-    }
+  {
+    dslipdtau[i]=_a0[i]/_xm[i]*pow(fabs(tau[i]/_gss[_qp][i]),1.0/_xm[i]-1.0)/_gss[_qp][i]*_dt;
+  }
 
 }
 
@@ -594,8 +594,8 @@ RankFourTensor FiniteStrainCrystalPlasticity::outerProduct(RankTwoTensor &a, Ran
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
       for(int k=0;k<3;k++)
-	for(int l=0;l<3;l++)
-	  result(i,j,k,l)=a(i,j)*b(k,l);
+        for(int l=0;l<3;l++)
+          result(i,j,k,l)=a(i,j)*b(k,l);
 
   return result;
 
@@ -645,40 +645,40 @@ FiniteStrainCrystalPlasticity::get_euler_ang()
   int elemno;
 
   if(_euler_angle_file_name.length()!=0)
+  {
+
+    fileeuler.open(_euler_angle_file_name.c_str());
+
+    if (!fileeuler)
+      mooseError("Can't open euler angle input file ");
+    else
     {
 
-      fileeuler.open(_euler_angle_file_name.c_str());
+      while(!fileeuler.eof())
+      {
+        fileeuler >> elemno;
+        for(int i=0;i<3;i++)
+          fileeuler >> vec[i];
 
-      if (!fileeuler)
-	mooseError("Can't open euler angle input file ");
-      else
-	{
+        if(elemno-1==_current_elem->id())
+        {
+          _euler_angle_1=vec[0];
+          _euler_angle_2=vec[1];
+          _euler_angle_3=vec[2];
 
-	  while(!fileeuler.eof())
-	    {
-	      fileeuler >> elemno;
-	      for(int i=0;i<3;i++)
-		fileeuler >> vec[i];
+          fileeuler.close();
+          return;
 
-	      if(elemno-1==_current_elem->id())
-		{
-		  _euler_angle_1=vec[0];
-		  _euler_angle_2=vec[1];
-		  _euler_angle_3=vec[2];
-
-		  fileeuler.close();
-		  return;
-
-		}
+        }
 
 
-	    }
+      }
 
-	  fileeuler.close();
-
-	}
+      fileeuler.close();
 
     }
+
+  }
 
 
 }
@@ -698,22 +698,22 @@ void FiniteStrainCrystalPlasticity::computeQpElasticityTensor()
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
       for(int l=0;l<3;l++)
-	dfedf(i,j,i,l)=fp_inv(l,j);
+        dfedf(i,j,i,l)=fp_inv(l,j);
 
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
       for(int k=0;k<3;k++)
-	{
-	  deedfe(i,j,k,i)=deedfe(i,j,k,i)+fe(k,j)*0.5;
-	  deedfe(i,j,k,j)=deedfe(i,j,k,j)+fe(k,i)*0.5;
-	}
+      {
+        deedfe(i,j,k,i)=deedfe(i,j,k,i)+fe(k,j)*0.5;
+        deedfe(i,j,k,j)=deedfe(i,j,k,j)+fe(k,i)*0.5;
+      }
 
 
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
       for(int k=0;k<3;k++)
-	for(int l=0;l<3;l++)
-	  temp(i,j,k,l)=fe(i,k)*fe(j,l);
+        for(int l=0;l<3;l++)
+          temp(i,j,k,l)=fe(i,k)*fe(j,l);
 
   dsigdpk2dfe=temp*_elasticity_tensor[_qp]*deedfe;
 
@@ -723,10 +723,10 @@ void FiniteStrainCrystalPlasticity::computeQpElasticityTensor()
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
       for(int l=0;l<3;l++)
-	{
-	  tan_mod(i,j,i,l)=tan_mod(i,j,i,l)+pk2fet(l,j);
-	  tan_mod(i,j,j,l)=tan_mod(i,j,j,l)+fepk2(i,l);
-	}
+      {
+        tan_mod(i,j,i,l)=tan_mod(i,j,i,l)+pk2fet(l,j);
+        tan_mod(i,j,j,l)=tan_mod(i,j,j,l)+fepk2(i,l);
+      }
 
   tan_mod+=dsigdpk2dfe;
 

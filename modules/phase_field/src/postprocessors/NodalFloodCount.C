@@ -59,13 +59,13 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _var_number(_vars[0]->number()),
     _single_map_mode(getParam<bool>("use_single_map")),
     _condense_map_info(getParam<bool>("condense_map_info")),
-    _global_numbering(getParam<bool>("use_global_numbering")),
-    _var_index_mode(getParam<bool>("enable_var_coloring")),
-    _maps_size(_single_map_mode ? 1 : _vars.size()),
-    _pbs(NULL),
-    _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
-    _track_memory(getParam<bool>("track_memory_usage"))
-    //   _bubble_volume_file_name(parameters.isParamValid("bubble_volume_file") ? getParam<FileName>("bubble_volume_file") : "")
+  _global_numbering(getParam<bool>("use_global_numbering")),
+  _var_index_mode(getParam<bool>("enable_var_coloring")),
+  _maps_size(_single_map_mode ? 1 : _vars.size()),
+  _pbs(NULL),
+  _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
+  _track_memory(getParam<bool>("track_memory_usage"))
+  //   _bubble_volume_file_name(parameters.isParamValid("bubble_volume_file") ? getParam<FileName>("bubble_volume_file") : "")
 {
   // Size the data structures to hold the correct number of maps
   _bubble_maps.resize(_maps_size);
@@ -249,24 +249,24 @@ NodalFloodCount::getElementalValues(unsigned int /*elem_id*/) const
 }
 
 /*
-void
-NodalFloodCount::threadJoin(const UserObject &y)
-{
-   const NodalFloodCount & pps = dynamic_cast<const NodalFloodCount &>(y);
+  void
+  NodalFloodCount::threadJoin(const UserObject &y)
+  {
+  const NodalFloodCount & pps = dynamic_cast<const NodalFloodCount &>(y);
 
-   // Pack up the data on both of the threads
-   pack(_packed_data);
+  // Pack up the data on both of the threads
+  pack(_packed_data);
 
-   std::vector<unsigned int> pps_packed_data;
-   pps.pack(pps_packed_data);
+  std::vector<unsigned int> pps_packed_data;
+  pps.pack(pps_packed_data);
 
-   // Append the packed data structures together
-   std::copy(pps_packed_data.begin(), pps_packed_data.end(), std::back_inserter(_packed_data));
+  // Append the packed data structures together
+  std::copy(pps_packed_data.begin(), pps_packed_data.end(), std::back_inserter(_packed_data));
 
-   // Calculate thread Memory Usage
-   if (_track_memory)
-     _bytes_used += pps.calculateUsage();
-}
+  // Calculate thread Memory Usage
+  if (_track_memory)
+  _bytes_used += pps.calculateUsage();
+  }
 */
 
 void
@@ -296,7 +296,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
       // Reorganize the data by values
 
       for (std::map<unsigned int, int>::const_iterator it = _bubble_maps[map_num].begin(); it != end; ++it)
-	data[map_num][(it->second)].insert(it->first);
+        data[map_num][(it->second)].insert(it->first);
 
       // Append our periodic neighbor nodes to the data structure before packing
       if (merge_periodic_info)
@@ -330,19 +330,19 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
       // that into our packed data structure so start at 1 here!
       for (unsigned int i=1 /* Yes - start at 1 */; i<=_region_counts[map_num]; ++i)
       {
-	partial_packed_data[current_idx++] = data[map_num][i].size();     // The number of nodes in the current region
+        partial_packed_data[current_idx++] = data[map_num][i].size();     // The number of nodes in the current region
 
-	if (_single_map_mode)
-	{
-	  mooseAssert(i-1 < _region_to_var_idx.size(), "Index out of bounds in NodalFloodCounter");
-	  partial_packed_data[current_idx++] = _region_to_var_idx[i-1];   // The variable owning this bubble
-	}
-	else
-	  partial_packed_data[current_idx++] = map_num;                   // The variable owning this bubble
+        if (_single_map_mode)
+        {
+          mooseAssert(i-1 < _region_to_var_idx.size(), "Index out of bounds in NodalFloodCounter");
+          partial_packed_data[current_idx++] = _region_to_var_idx[i-1];   // The variable owning this bubble
+        }
+        else
+          partial_packed_data[current_idx++] = map_num;                   // The variable owning this bubble
 
-	std::set<unsigned int>::iterator end = data[map_num][i].end();
-	for (std::set<unsigned int>::iterator it = data[map_num][i].begin(); it != end; ++it)
-	  partial_packed_data[current_idx++] = *it;                       // The individual node ids
+        std::set<unsigned int>::iterator end = data[map_num][i].end();
+        for (std::set<unsigned int>::iterator it = data[map_num][i].begin(); it != end; ++it)
+          partial_packed_data[current_idx++] = *it;                       // The individual node ids
       }
 
       packed_data.insert(packed_data.end(), partial_packed_data.begin(), partial_packed_data.end());
@@ -367,10 +367,10 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
     {
       if (has_data_to_save)
       {
-	// See Note at the bottom of this routine
-	_bubble_sets[_single_map_mode ? 0 : curr_var_idx].push_back(BubbleData(curr_set, curr_var_idx));
-	_region_to_var_idx.push_back(curr_var_idx);
-	curr_set.clear();
+        // See Note at the bottom of this routine
+        _bubble_sets[_single_map_mode ? 0 : curr_var_idx].push_back(BubbleData(curr_set, curr_var_idx));
+        _region_to_var_idx.push_back(curr_var_idx);
+        curr_set.clear();
       }
 
       // Get the length of the next set
@@ -450,7 +450,7 @@ NodalFloodCount::mergeSets()
 void
 NodalFloodCount::updateFieldInfo()
 {
-   // This variable is only relevant in single map mode
+  // This variable is only relevant in single map mode
   _region_to_var_idx.resize(_bubble_sets[0].size());
 
   // Finally update the original bubble map with field data from the merged sets
@@ -462,7 +462,7 @@ NodalFloodCount::updateFieldInfo()
       for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
       {
         // Color the bubble map with a unique region
-	_bubble_maps[map_num][*it2] = counter;
+        _bubble_maps[map_num][*it2] = counter;
         if (_var_index_mode)
           _var_index_maps[map_num][*it2] = it1->_var_idx;
       }

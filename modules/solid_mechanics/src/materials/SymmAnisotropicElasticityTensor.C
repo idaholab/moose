@@ -3,22 +3,22 @@
 #include <ostream>
 
 SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor()
-  : SymmElasticityTensor(false),
-    _dmat(9,9),
-    _qdmat(9,9),
-    _dt(6,6),
-    _qdt(6,6),
-    _r(3,3),
-    _q(9,9),
-    _qt(9,9),
-    _euler_angle(3),
-    _trans_d6_to_d9(9,6),
-    //_transpose_trans_d6_to_d9(6,9),
-    _trans_d9_to_d6(6,9),
-    //_transpose_trans_d9_to_d6(9,6),
-    _c11(0),
-    _c12(0),
-    _c44(0)
+    : SymmElasticityTensor(false),
+      _dmat(9,9),
+      _qdmat(9,9),
+      _dt(6,6),
+      _qdt(6,6),
+      _r(3,3),
+      _q(9,9),
+      _qt(9,9),
+      _euler_angle(3),
+      _trans_d6_to_d9(9,6),
+      //_transpose_trans_d6_to_d9(6,9),
+      _trans_d9_to_d6(6,9),
+      //_transpose_trans_d9_to_d6(9,6),
+      _c11(0),
+      _c12(0),
+      _c44(0)
 {
   //form_transformation_t_matrix();
 }
@@ -67,10 +67,10 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Rea
 }
 
 SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(const SymmAnisotropicElasticityTensor & a)
-     : SymmElasticityTensor(false)
- {
-   *this = a;
- }
+    : SymmElasticityTensor(false)
+{
+  *this = a;
+}
 
 void SymmAnisotropicElasticityTensor::setFirstEulerAngle(const Real a1)
 {
@@ -235,10 +235,10 @@ SymmAnisotropicElasticityTensor::form_transformation_t_matrix()
   _trans_d6_to_d9(2,5) = _trans_d6_to_d9(6,5) = a;
 
   /*for(int i = 0; i < 9; ++i)
-  {
+    {
     for(int j = 0; j < 6; ++j)
     {
-      _transpose_trans_d6_to_d9(j,i) = _trans_d6_to_d9(i,j);
+    _transpose_trans_d6_to_d9(j,i) = _trans_d6_to_d9(i,j);
     }
     }*/
 
@@ -247,10 +247,10 @@ SymmAnisotropicElasticityTensor::form_transformation_t_matrix()
   _trans_d9_to_d6(3,3) = _trans_d9_to_d6(4,7) =  _trans_d9_to_d6(5,6) = 1.0;
 
   /*for(int i = 0; i < 6; ++i)
-  {
+    {
     for(int j = 0; j < 9; ++j)
     {
-      _transpose_trans_d9_to_d6(j,i) =  _trans_d9_to_d6(i,j);
+    _transpose_trans_d9_to_d6(j,i) =  _trans_d9_to_d6(i,j);
     }
     }*/
 
@@ -329,7 +329,7 @@ void SymmAnisotropicElasticityTensor::form_transformed_material_dt_matrix()
 void
 SymmAnisotropicElasticityTensor::form_rotated_material_qdmat_matrix()
 {
- // The function makes use of Q matrix to rotate
+  // The function makes use of Q matrix to rotate
   // Dmat[9][9] to QDmat[9][9]
   // QDmat = QT * Dmat * Q
 
@@ -392,7 +392,7 @@ void
 SymmAnisotropicElasticityTensor::show_r_matrix()
 {
   printf("\nSymmAnisotropicElasticityTensor::show_r_matrix()  Euler angles are (%f, %f, %f)\n",
-	 _euler_angle[0], _euler_angle[1], _euler_angle[2]);
+         _euler_angle[0], _euler_angle[1], _euler_angle[2]);
 
   for (int j = 0; j < 3; ++j)
   {
