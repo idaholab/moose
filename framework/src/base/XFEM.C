@@ -594,6 +594,20 @@ XFEM::cut_mesh_with_efa()
     }
   }
 
+  //Store information about crack tip elements
+  if (mesh_changed)
+  {
+    _crack_tip_elems.clear();
+    const std::set<CutElemMesh::element_t*> CrackTipElements = _efa_mesh.getCrackTipElements();
+    std::set<CutElemMesh::element_t*>::const_iterator sit;
+    for (sit = CrackTipElements.begin(); sit != CrackTipElements.end(); ++sit)
+    {
+      unsigned int eid = (*sit)->id;
+      Elem * crack_tip_elem = _mesh->elem(eid);
+      _crack_tip_elems.insert(crack_tip_elem);
+    }
+  }
+
   //store virtual nodes
   //store cut edge info
 
@@ -648,4 +662,18 @@ XFEM::get_cut_plane(const Elem* elem,
   }
 
   return comp;
+}
+
+bool
+XFEM::is_elem_at_crack_tip(const Elem* elem) const
+{
+  bool is_at_tip = false;
+  std::set<const Elem*>::const_iterator it;
+  it = _crack_tip_elems.find(elem);
+  if (it != _crack_tip_elems.end())
+  {
+    is_at_tip = true;
+  }
+
+  return is_at_tip;
 }

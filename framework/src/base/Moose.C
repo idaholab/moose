@@ -108,6 +108,7 @@
 #include "QuotientAux.h"
 #include "XFEMVolFracAux.h"
 #include "XFEMCutPlaneAux.h"
+#include "XFEMMarkerAux.h"
 #include "NormalizationAux.h"
 #include "VariableGradientComponent.h"
 #include "ParsedAux.h"
@@ -522,6 +523,7 @@ registerObjects(Factory & factory)
   registerAux(QuotientAux);
   registerAux(XFEMVolFracAux);
   registerAux(XFEMCutPlaneAux);
+  registerAux(XFEMMarkerAux);
   registerAux(NormalizationAux);
   registerAux(FunctionScalarAux);
   registerAux(VariableGradientComponent);

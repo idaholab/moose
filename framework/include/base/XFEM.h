@@ -142,6 +142,8 @@ public:
    */
   Real get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity) const;
 
+  bool is_elem_at_crack_tip(const Elem* elem) const;
+
 private:
   /**
    * Reference to the mesh.
@@ -151,6 +153,7 @@ private:
   std::vector<XFEM_geometric_cut *> _geometric_cuts;
 
   std::map<const Elem*, XFEMCutElem*> _cut_elem_map;
+  std::set<const Elem*> _crack_tip_elems;
 
   LocationMap<Node> _new_nodes_map;
   LocationMap<Node> _new_nodes_map2;

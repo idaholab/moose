@@ -103,6 +103,8 @@ class CutElemMesh
     //by looking at the ordering of the nodes.
     bool overlays_elem(node_t* other_edge_node1, node_t* other_edge_node2);
 
+    bool overlays_elem(element_t* other_elem);
+
     //Get the index of the specifed element in the edge_neighbors vector
     unsigned int get_neighbor_index(element_t * neighbor_elem);
 
@@ -186,10 +188,15 @@ class CutElemMesh
 
   void createChildElements();
   void connectFragments( bool mergeUncutVirtualEdges);
-  void mergeNodes(node_t *childNode,
-                  node_t *childOfNeighborNode,
+  void mergeNodes(node_t* &childNode,
+                  node_t* &childOfNeighborNode,
                   element_t* childElem,
                   element_t* childOfNeighborElem);
+
+  void addToMergedEdgeMap(node_t* node1,
+                          node_t* node2,
+                          element_t* elem1,
+                          element_t* elem2);
 
   void duplicateEmbeddedNode(element_t* currElem,
                              element_t* neighborElem,
@@ -200,12 +207,14 @@ class CutElemMesh
                              unsigned int edgeID);
 
   void sanityCheck();
+  void findCrackTipElements();
   void printMesh();
   void error(const std::string &error_string);
 
   const std::vector<element_t*> &getChildElements(){return ChildElements;};
   const std::vector<element_t*> &getParentElements(){return ParentElements;};
   const std::vector<node_t*> &getNewNodes(){return NewNodes;};
+  const std::set<element_t*> &getCrackTipElements(){return CrackTipElements;};
   element_t* getElemByID(unsigned int it);
 
   private:
@@ -214,6 +223,8 @@ class CutElemMesh
   std::map< unsigned int, node_t*> EmbeddedNodes;
   std::map< unsigned int, node_t*> TempNodes;
   std::map< unsigned int, element_t*> Elements;
+  std::map< std::set< node_t* >, std::set< element_t* > > MergedEdgeMap;
+  std::set< element_t*> CrackTipElements;
   std::vector< node_t* > NewNodes;
   std::vector< element_t* > ChildElements;
   std::vector< element_t* > ParentElements;

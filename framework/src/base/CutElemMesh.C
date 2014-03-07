@@ -128,6 +128,87 @@ CutElemMesh::element_t::is_partial()
   return partial;
 }
 
+bool
+CutElemMesh::element_t::overlays_elem(element_t* other_elem)
+{
+  bool overlays = false;
+  //Find common nodes
+  std::set<node_t*> e1nodes(nodes.begin(), nodes.end());
+  std::set<node_t*> e2nodes(other_elem->nodes.begin(), other_elem->nodes.end());
+  std::vector<node_t*> common_nodes;
+  std::set_intersection(e1nodes.begin(), e1nodes.end(),
+                        e2nodes.begin(), e2nodes.end(),
+                        std::inserter(common_nodes,common_nodes.end()));
+
+  //Find indices of common nodes
+  if (common_nodes.size() == 2)
+  {
+    std::vector< node_t* > common_nodes_vec(common_nodes.begin(),common_nodes.end());
+
+    unsigned int e1n1idx = num_nodes+1;
+    unsigned int e1n2idx = num_nodes+1;
+    for (unsigned int i=0; i<num_nodes; ++i)
+    {
+      if (nodes[i] == common_nodes_vec[0])
+      {
+        e1n1idx = i;
+      }
+      else if (nodes[i] == common_nodes_vec[1])
+      {
+        e1n2idx = i;
+      }
+    }
+    if (e1n1idx > num_nodes || e1n2idx > num_nodes)
+    {
+      CutElemMeshError("in overlays_elem() couldn't find common node");
+    }
+    bool e1ascend = true;
+    if (e1n2idx < e1n1idx)
+    {
+      if (!(e1n2idx == 0 && e1n1idx == num_nodes-1))
+      {
+        e1ascend=false;
+      }
+    }
+
+    unsigned int e2n1idx = other_elem->num_nodes+1;
+    unsigned int e2n2idx = other_elem->num_nodes+1;
+    for (unsigned int i=0; i<other_elem->num_nodes; ++i)
+    {
+      if (other_elem->nodes[i] == common_nodes_vec[0])
+      {
+        e2n1idx = i;
+      }
+      else if (other_elem->nodes[i] == common_nodes_vec[1])
+      {
+        e2n2idx = i;
+      }
+    }
+    if (e2n1idx > other_elem->num_nodes || e2n2idx > other_elem->num_nodes)
+    {
+      CutElemMeshError("in overlays_elem() couldn't find common node");
+    }
+    bool e2ascend = true;
+    if (e2n2idx < e2n1idx)
+    {
+      if (!(e2n2idx == 0 && e2n1idx == other_elem->num_nodes-1))
+      {
+        e2ascend=false;
+      }
+    }
+    //if indices both ascend or descend, they overlay
+    if ((e1ascend && e2ascend) ||
+        (!e1ascend && !e2ascend))
+    {
+      overlays = true;
+    }
+  }
+  else if (common_nodes.size() > 2)
+  {
+    CutElemMeshError("in overlays_elem() >2 common nodes");
+  }
+  return overlays;
+}
 
 bool
 CutElemMesh::element_t::overlays_elem(node_t* other_edge_node1, node_t* other_edge_node2)
@@ -942,12 +1023,15 @@ void CutElemMesh::updateTopology(bool mergeUncutVirtualEdges)
   NewNodes.clear();
   ChildElements.clear();
   ParentElements.clear();
+  MergedEdgeMap.clear();
+  CrackTipElements.clear();
 
   unsigned int first_new_node_id = getNewID(PermanentNodes);
 
   createChildElements();
   connectFragments(mergeUncutVirtualEdges);
   sanityCheck();
+  findCrackTipElements();
 
   std::map<unsigned int, node_t*>::iterator mit;
   for (mit = PermanentNodes.begin(); mit != PermanentNodes.end(); ++mit )
@@ -964,6 +1048,8 @@ void CutElemMesh::reset()
   NewNodes.clear();
   ChildElements.clear();
   ParentElements.clear();
+  MergedEdgeMap.clear();
+  CrackTipElements.clear();
 
   std::map<unsigned int, node_t*>::iterator mit;
   for (mit = PermanentNodes.begin(); mit != PermanentNodes.end(); ++mit )
@@ -1284,7 +1370,13 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
               //Check to see if the nodes are already merged.  There's nothing else to do in that case.
               if (childEdgeNodes[0] == childOfNeighborEdgeNodes[1] &&
                   childEdgeNodes[1] == childOfNeighborEdgeNodes[0])
+              {
+                //if (childElem->is_partial() || childOfNeighborElem->is_partial())
+                {
+                  addToMergedEdgeMap(childEdgeNodes[0], childEdgeNodes[1], childElem, childOfNeighborElem);
+                }
                 continue;
+              }
 
               //construct this set
               std::set<node_t*> neigh_link_nodes;
@@ -1300,6 +1392,7 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
 
               if (common_nodes.size() > 1)
               {
+                std::vector<node_t*> merged_nodes;
                 unsigned int num_edge_nodes = 2;
                 for (unsigned int i=0; i<num_edge_nodes; ++i)
                 {
@@ -1310,7 +1403,9 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
                   node_t* childOfNeighborNode = childOfNeighborEdgeNodes[neighborChildNodeIndex];
 
                   mergeNodes(childNode,childOfNeighborNode,childElem,childOfNeighborElem);
+                  merged_nodes.push_back(childNode);
                 }
+                addToMergedEdgeMap(merged_nodes[0], merged_nodes[1], childElem, childOfNeighborElem);
 
                 duplicateEmbeddedNode(childElem,childOfNeighborElem,j,neighbor_common_edge[j][k]);
               }
@@ -1400,8 +1495,8 @@ void CutElemMesh::connectFragments(bool mergeUncutVirtualEdges)
   }
 }
 
-void CutElemMesh::mergeNodes(node_t *childNode,
-                             node_t *childOfNeighborNode,
+void CutElemMesh::mergeNodes(node_t*  &childNode,
+                             node_t* &childOfNeighborNode,
                              element_t* childElem,
                              element_t* childOfNeighborElem)
 {
@@ -1419,6 +1514,7 @@ void CutElemMesh::mergeNodes(node_t *childNode,
             CutElemMeshError("Attempted to delete node: "<<childOfNeighborNode->id
                              <<" from PermanentNodes, but couldn't find it");
           }
+          childOfNeighborNode = childNode;
         }
         else if (childNode->parent == childOfNeighborNode)
         {
@@ -1428,6 +1524,7 @@ void CutElemMesh::mergeNodes(node_t *childNode,
             CutElemMeshError("Attempted to delete node: "<<childNode->id
                              <<" from PermanentNodes, but couldn't find it");
           }
+          childNode = childOfNeighborNode;
         }
         else
         {
@@ -1496,6 +1593,18 @@ void CutElemMesh::mergeNodes(node_t *childNode,
       childNode = newNode;
     }
   }
+}
+
+void CutElemMesh::addToMergedEdgeMap(node_t* node1,
+                                     node_t* node2,
+                                     element_t* elem1,
+                                     element_t* elem2)
+{
+  std::set<node_t*> edge_nodes;
+  edge_nodes.insert(node1);
+  edge_nodes.insert(node2);
+  MergedEdgeMap[edge_nodes].insert(elem1);
+  MergedEdgeMap[edge_nodes].insert(elem2);
 }
 
 //This version is for cases where there is a neighbor element
@@ -1708,6 +1817,77 @@ void CutElemMesh::sanityCheck()
     printMesh();
     exit(1);
   }
+}
+
+void CutElemMesh::findCrackTipElements()
+{
+  std::map<std::set<node_t*>, std::set<element_t*> >::iterator memit;
+  std::cout<<"BWS mergededgemap:"<<std::endl;
+  for (memit = MergedEdgeMap.begin(); memit != MergedEdgeMap.end(); ++memit)
+  {
+    std::cout<<"Elems: ";
+    std::set<element_t*> conn_elems = memit->second;
+    std::set<element_t*>::iterator setit;
+    for (setit = conn_elems.begin(); setit != conn_elems.end(); ++setit)
+    {
+      std::cout<<(*setit)->id<<" ";
+    }
+    std::cout<<std::endl;
+  }
+
+  for (memit = MergedEdgeMap.begin(); memit != MergedEdgeMap.end(); ++memit)
+  {
+    if (memit->second.size() < 2)
+    {
+      CutElemMeshError("in findCrackTipElements() cannot have <2 elements on common edge");
+    }
+    else if (memit->second.size() == 2)
+    {
+    }
+    else if (memit->second.size() == 3)
+    {
+      std::vector< element_t* > this_tip_elems(memit->second.begin(),memit->second.end());
+      bool olay01 = this_tip_elems[0]->overlays_elem(this_tip_elems[1]);
+      bool olay12 = this_tip_elems[1]->overlays_elem(this_tip_elems[2]);
+      bool olay20 = this_tip_elems[2]->overlays_elem(this_tip_elems[0]);
+
+      if (olay01)
+      {
+        if (olay12 || olay20)
+        {
+          CutElemMeshError("in findCrackTipElements() only 2 of elements on tip edge can overlay");
+        }
+        CrackTipElements.insert(this_tip_elems[2]);
+      }
+      else if (olay12)
+      {
+        if (olay01 || olay20)
+        {
+          CutElemMeshError("in findCrackTipElements() only 2 of elements on tip edge can overlay");
+        }
+        CrackTipElements.insert(this_tip_elems[0]);
+      }
+      else if (olay20)
+      {
+        if (olay01 || olay12)
+        {
+          CutElemMeshError("in findCrackTipElements() only 2 of elements on tip edge can overlay");
+        }
+        CrackTipElements.insert(this_tip_elems[1]);
+      }
+    }
+    else
+    {
+      CutElemMeshError("in findCrackTipElements() cannot have >3 elements on common edge");
+    }
+  }
+  std::cout<<"Crack tip elements: ";
+  std::set<element_t*>::iterator sit;
+  for (sit=CrackTipElements.begin(); sit!=CrackTipElements.end(); ++sit)
+  {
+    std::cout<<(*sit)->id<<" ";
+  }
+  std::cout<<std::endl;
 }
 
 void CutElemMesh::printMesh()
