@@ -1,0 +1,300 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "GriddedData.h"
+
+/**
+ * Creates a GriddedData object by reading info from file_name
+ * A grid is defined in _grid.
+ *   For example, if grid[0] = {1, 2, 3} and grid[1] = {-1, 1}
+ *   this defines a 2D grid (_dim = 2), with points
+ *   (1,-1), (2,-1), (3,-1), (1,1), (2,1), (3,1)
+ * The i_th axis of the grid corresponds to the axes[i] axis
+ *   of the simulation: see the function getAxes
+ * Values at each grid point are stored in _fcn.
+ *   They are ordered as in the example above.
+ * _step is just a quantity used in evaluateFcn
+ * The file must have the following format:
+ *   All blank lines and lines starting with # are ignored
+ *   The first significant line (not blank or starting with #)
+ *   should be either
+ *     AXIS X
+ *   or
+ *     AXIS Y
+ *   or
+ *     AXIS Z
+ *   or
+ *     AXIS T
+ *   The next significant line should be a space-separated
+ *   array of real numbers defining the grid along that axis
+ *   direction.
+ *   Any number of AXIS and subsequent space-separated arrays
+ *   can be defined, but if using this in conjunction with
+ *   PiecewiseMultilinear, a maximum of 4 should be defined.
+ *   The AXIS lines define the grid in the MOOSE simulation reference
+ *   frame, and is used by PiecewiseMultilinear, for instance.
+ *   The next significant line should be DATA
+ *   All significant lines after DATA should be the function values
+ *   at each grid point, on any number of lines of the file, but
+ *   each line must be space separated.  The ordering is such
+ *   that when the function is evaluated, f[i,j,k,l] corresponds
+ *   to the i + j*Ni + k*Ni*Nj + l*Ni*Nj*Nk data value.  Here
+ *   i>=0 corresponds to the index along the first AXIS, and Ni is
+ *   the number of grid points along that axis, etc.
+ *   See the function parse for an example.
+ */
+GriddedData::GriddedData(std::string file_name)
+{
+  parse(_dim, _axes, _grid, _fcn, _step, file_name);
+}
+
+
+/**
+ * Returns the dimensionality of the grid.
+ * This may have nothing to do with the dimensionality of
+ * the simulation.  Eg, a 2D grid with axes (Y,Z) (so dim=2)
+ * be used in a 3D simulation
+ */
+unsigned int
+GriddedData::getDim()
+{
+  return _dim;
+}
+
+/**
+ * Yields axes information.
+ * If axes[i] == 0 then the i_th axis in the grid data corresponds to the x axis in the simulation
+ * If axes[i] == 1 then the i_th axis in the grid data corresponds to the y axis in the simulation
+ * If axes[i] == 2 then the i_th axis in the grid data corresponds to the z axis in the simulation
+ * If axes[i] == 3 then the i_th axis in the grid data corresponds to the time in the simulation
+ */
+void
+GriddedData::getAxes(std::vector<int> & axes)
+{
+  axes.resize(_dim);
+  for (unsigned int i = 0; i < _dim; ++i)
+    axes[i] = _axes[i];
+}
+
+/**
+ * Yields the grid.
+ * grid[i] = a vector of Reals that define the i_th axis of the grid
+ */
+void
+GriddedData::getGrid(std::vector<std::vector<Real> > & grid)
+{
+  grid.resize(_dim);
+  for (unsigned int i = 0; i < _dim; ++i)
+  {
+    grid[i].resize(_grid[i].size());
+    for (unsigned int j = 0; j < _grid[i].size(); ++j)
+      grid[i][j] = _grid[i][j];
+  }
+}
+
+/**
+ * Yields the values defined at the grid points
+ */
+void
+GriddedData::getFcn(std::vector<Real> & fcn)
+{
+  fcn.resize(_fcn.size());
+  for (unsigned int i = 0; i < _fcn.size(); ++i)
+    fcn[i] = _fcn[i];
+}
+
+/**
+ * Evaluates the function at a given grid point
+ * for instance evaluateFcn({n,m}) = value at (grid[0][n], grid[1][m]), for a function defined on a 2D grid
+ */
+Real
+GriddedData::evaluateFcn(const std::vector<unsigned int> & ijk)
+{
+  if (ijk.size() != _dim)
+    mooseError("Gridded data evaluateFcn called with " << ijk.size() << " arguments, but expected " << _dim);
+  unsigned int index = ijk[0];
+  for (unsigned int i = 1; i < _dim; ++i)
+    index += ijk[i] * _step[i];
+  if (index >= _fcn.size())
+    mooseError("Gridded data evaluateFcn attempted to access index " << index << " of function, but it contains only " << _fcn.size() << " entries");
+  return _fcn[index];
+}
+
+
+
+/**
+ * parse the file_name extracting information.
+ * Here is an example file:
+ * # this is a comment line at start of file
+ * AXIS Y
+ * -1.5 0
+ * # there is no reason why the x axis can't be second
+ * AXIS X
+ * 1 2 3
+ * # This example has a 3D grid, but the 3rd direction is time
+ * AXIS T
+ * 0 199
+ * # now some data
+ * DATA
+ * # following for x=1, t=0
+ * 1 2
+ * # following for x=2, t=0
+ * 2 3
+ * # following for x=3, t=0
+ * 2 3
+ * # following for x=1, t=199
+ * 89 900
+ * # following for x=2, t=199, and x=3, t=199
+ * 1 -3 -5 -6.898
+ * # end of file
+ */
+void
+GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std::vector<Real> > & grid, std::vector<Real> & f, std::vector<unsigned int> & step, std::string file_name)
+{
+  // initialize
+  dim = 0;
+  axes.resize(0);
+  grid.resize(0);
+  f.resize(0);
+
+  // open file and initialize quantities
+  std::ifstream file(file_name.c_str());
+  if (!file.good())
+    mooseError("Error opening file '" + file_name + "' from GriddedData.");
+  std::string line;
+  bool reading_grid_data = false;
+  bool reading_value_data = false;
+
+  // read file line-by-line extracting data
+  while (getSignificantLine (file, line))
+  {
+    // look for AXIS keywords
+    reading_grid_data = false;
+    if (line.compare("AXIS X") == 0)
+    {
+      dim += 1;
+      reading_grid_data = true;
+      axes.push_back(0);
+    }
+    else if (line.compare("AXIS Y") == 0)
+    {
+      dim += 1;
+      reading_grid_data = true;
+      axes.push_back(1);
+    }
+    else if (line.compare("AXIS Z") == 0)
+    {
+      dim += 1;
+      reading_grid_data = true;
+      axes.push_back(2);
+    }
+    else if (line.compare("AXIS T") == 0)
+    {
+      dim += 1;
+      reading_grid_data = true;
+      axes.push_back(3);
+    }
+
+    // just found an AXIS keyword
+    if (reading_grid_data)
+    {
+      grid.resize(dim); // add another dimension to the grid
+      grid[dim-1].resize(0);
+      if (getSignificantLine(file, line))
+        splitToRealVec(line, grid[dim - 1]);
+      continue; // read next line from file
+    }
+
+    // previous significant line must have been DATA
+    if (reading_value_data)
+      splitToRealVec(line, f);
+
+    // look for DATA keyword
+    if (line.compare("DATA") == 0)
+      reading_value_data = true;
+
+    // ignore any other lines - if we get here probably the data file is corrupt
+  }
+
+
+  // step is useful in evaluateFcn
+  step.resize(dim);
+  step[0] = 1; // this is actually not used
+  for (unsigned int i = 1; i < dim; ++i)
+    step[i] = step[i - 1] * grid[i - 1].size();
+
+
+  // perform some checks
+  if (dim == 0)
+    mooseError("No valid data found by GriddedData");
+  unsigned int num_data_points = 1;
+  for (unsigned int i = 0; i < dim; ++i)
+  {
+    if (grid[i].size() == 0)
+      mooseError("Axis " << i << " in your GriddedData has zero size");
+    num_data_points *= grid[i].size();
+  }
+  if (num_data_points != f.size())
+    mooseError("According to AXIS statements in GriddedData, number of data points is " << num_data_points << " but " << f.size() << " function values were read from file");
+
+}
+
+
+/**
+ * Extracts the next line from file_stream that is:
+ *  - not empty
+ *  - does not start with #
+ * Returns true if such a line was found,
+ * otherwise returns false
+ */
+bool
+GriddedData::getSignificantLine(std::ifstream & file_stream, std::string & line)
+{
+  while (getline(file_stream, line))
+  {
+    if (line.size() == 0) // empty line: read next line from file
+      continue;
+    if (line[0] == '#') // just a comment: read next line from file
+      continue;
+    // have got a significant line
+    return true;
+  }
+  // have run out of file
+  return false;
+}
+
+
+
+/**
+ * Splits an input_string using space as the separator
+ * Converts the resulting items to Real, and adds these
+ * to the end of output_vec
+ */
+void
+GriddedData::splitToRealVec(const std::string & input_string, std::vector<Real> & output_vec)
+{
+  std::istringstream linestream(input_string);
+  std::string item;
+  while (getline(linestream, item, ' '))
+  {
+    std::istringstream i(item);
+    Real d;
+    i >> d;
+    output_vec.push_back(d);
+  }
+}
+
+
+
+

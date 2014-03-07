@@ -1,0 +1,8 @@
+# Following has AXIS X defined more than once - should produce an exception
+AXIS X
+-1 2
+AXIS X
+2 3
+DATA
+1 2 3 4
+

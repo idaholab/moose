@@ -1,0 +1,5 @@
+# Function that is 1 for all x, and data is defined on Y axis only
+AXIS Y
+1 2
+DATA
+1 1
