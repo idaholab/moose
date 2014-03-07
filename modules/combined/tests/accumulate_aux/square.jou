@@ -1,0 +1,11 @@
+brick x 1
+volume 1 size 1
+volume 1 move 0 0 -0.5
+mesh surface 1
+block 1 surface 1
+sideset 1 curve 4
+sideset 2 curve 1
+sideset 3 curve 2
+sideset 4 curve 3
+block 1 element type QUAD4
+export mesh "square.e" overwrite

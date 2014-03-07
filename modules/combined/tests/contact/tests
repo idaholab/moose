@@ -1,0 +1,35 @@
+[Tests]
+  [./pressureAugLag_test]
+    type = 'Exodiff'
+    input = 'pressureAugLag.i'
+    exodiff = 'pressureAugLag_out.e'
+    custom_cmp = 'pressure.exodiff'
+    petsc_version = '>=3.1'
+    max_parallel = 1
+  [../]
+
+  [./pressurePenalty_test]
+    type = 'Exodiff'
+    input = 'pressurePenalty.i'
+    exodiff = 'pressurePenalty_out.e'
+    custom_cmp = 'pressure.exodiff'
+    max_parallel = 1
+  [../]
+
+  [./4ElemTensionRelease]
+    type = 'Exodiff'
+    input = 4ElemTensionRelease.i
+    exodiff = 4ElemTensionRelease_out.e
+    custom_cmp = '4ElemTensionRelease.exodiff'
+    min_parallel = 4
+  [../]
+
+  [./8ElemTensionRelease]
+    type = 'Exodiff'
+    input = 8ElemTensionRelease.i
+    exodiff = 8ElemTensionRelease_out.e
+    custom_cmp = '8ElemTensionRelease.exodiff'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+[]

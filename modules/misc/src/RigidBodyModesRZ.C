@@ -1,0 +1,80 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "RigidBodyModesRZ.h"
+
+template<>
+InputParameters validParams<RigidBodyModesRZ>()
+{
+  InputParameters params = validParams<NodalUserObject>();
+  params.addRequiredParam<std::vector<unsigned int> >("subspace_name", "FEProblem subspace containing RZ rigid body modes");
+  params.addRequiredParam<std::vector<unsigned int> >("subspace_indices", "Indices of FEProblem subspace vectors containg rigid body modes");
+  params.addRequiredCoupledVar("disp_r", "r-displacement");
+  params.addRequiredCoupledVar("disp_z", "z-displacement");
+  return params;
+}
+
+RigidBodyModesRZ::RigidBodyModesRZ(const std::string & name, InputParameters parameters) :
+  NodalUserObject(name, parameters),
+  _subspace_name(parameters.get<std::string>("subspace_name")),
+  _subspace_indices(parameters.get<std::vector<unsigned int> >("subspace_indices")),
+  _disp_r_i(coupled("disp_r")),
+  _disp_z_i(coupled("disp_z"))
+{
+  if(_subspace_indices.size() != 1) {
+    std::stringstream err;
+    err << "Expected 1 RZ rigid body mode, got " << _subspace_indices.size()  << " instead\n";
+    mooseError(err.str());
+  }
+  for(unsigned int i = 0; i < _subspace_indices.size(); ++i)
+  {
+    if(_subspace_indices[i] >= _fe_problem.subspaceDim(_subspace_name))
+    {
+      std::stringstream err;
+      err << "Invalid " << i << "-th " << _subspace_name << " index " << _subspace_indices[i] << "; must be < " << _fe_problem.subspaceDim(_subspace_name) << "\n";
+      mooseError(err.str());
+    }
+  }
+}
+
+void
+RigidBodyModesRZ::execute()
+{
+  // Currently this only works for Lagrange displacement variables!
+  NonlinearSystem& nl = _fe_problem.getNonlinearSystem();
+  const Node& node = *_current_node;
+  // z-translation mode
+  {
+    std::stringstream postfix;
+    postfix << "_" << _subspace_indices[0];
+    NumericVector<Number>& mode = nl.getVector(_subspace_name+postfix.str());
+    unsigned int rdof = node.dof_number(nl.number(), _disp_r_i, 0);
+    mode.set(rdof,0.0);
+    unsigned int zdof = node.dof_number(nl.number(), _disp_z_i, 0);
+    mode.set(zdof,1.0);
+  }
+}
+
+void
+RigidBodyModesRZ::finalize()
+{
+  // Close the basis vectors
+  NonlinearSystem& nl = _fe_problem.getNonlinearSystem();
+  for(unsigned int i = 0; i < _subspace_indices.size(); ++i) {
+    std::stringstream postfix;
+    postfix << "_" << _subspace_indices[i];
+    NumericVector<Number>& mode = nl.getVector(_subspace_name+postfix.str());
+    mode.close();
+  }
+}

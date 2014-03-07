@@ -1,0 +1,44 @@
+#ifndef NSSTAGNATIONPRESSUREBC_H
+#define NSSTAGNATIONPRESSUREBC_H
+
+#include "NSStagnationBC.h"
+
+// Forward Declarations
+class NSStagnationPressureBC;
+
+
+// Specialization required of all user-level Moose objects
+template<>
+InputParameters validParams<NSStagnationPressureBC>();
+
+
+/**
+ * This Dirichlet condition imposes the condition p_0 = p_0_desired,
+ * where p_0 is the stagnation pressure, defined as:
+ * p_0 = p * (1 + (gam-1)/2 * M^2)^(gam/(gam-1))
+ */
+class NSStagnationPressureBC : public NSStagnationBC
+{
+public:
+  // Constructor
+  NSStagnationPressureBC(const std::string & name, InputParameters parameters);
+
+  // Destructor, better be virtual
+  virtual ~NSStagnationPressureBC(){}
+
+protected:
+
+  // NodalBC's can (currently) only specialize the computeQpResidual function,
+  // the computeQpJacobian() function automatically assembles a "1" onto the main
+  // diagonal for this DoF.
+  virtual Real computeQpResidual();
+
+  // Coupled variables
+  VariableValue& _pressure;
+
+  // Required paramters
+  Real _desired_stagnation_pressure;
+};
+
+
+#endif // NSSTAGNATIONPRESSUREBC_H

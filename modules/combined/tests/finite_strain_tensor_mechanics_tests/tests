@@ -1,0 +1,15 @@
+[Tests]
+  [./rotation_test]
+    type = 'Exodiff'
+    input = 'elastic_rotation_test.i'
+    exodiff = 'elastic_rotation.e'
+  [../]
+
+  [./test]
+    type = 'Exodiff'
+    input = 'finite_strain_elasticity_test.i'
+    exodiff = 'out.e'
+    scale_refine = 1
+    max_parallel = 1
+  [../]
+[]

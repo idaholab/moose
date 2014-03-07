@@ -1,0 +1,55 @@
+[Tests]
+  [./test_bh01]
+    type = 'CSVDiff'
+    input = 'bh01.i'
+    csvdiff = 'bh01.csv'
+    rel_err = 1.0E-4
+  [../]
+
+  [./test_bh02]
+    type = 'CSVDiff'
+    input = 'bh02.i'
+    csvdiff = 'bh02.csv'
+    rel_err = 1E-5
+  [../]
+  [./test_bh03]
+    type = 'CSVDiff'
+    input = 'bh03.i'
+    csvdiff = 'bh03.csv'
+    rel_err = 1E-5
+  [../]
+  [./test_bh04]
+    type = 'CSVDiff'
+    input = 'bh04.i'
+    csvdiff = 'bh04.csv'
+    rel_err = 1E-5
+  [../]
+  [./test_bh05]
+    type = 'CSVDiff'
+    input = 'bh05.i'
+    csvdiff = 'bh05.csv'
+    rel_err = 1E-5
+  [../]
+
+  [./test_bh07]
+    type = 'Exodiff'
+    input = 'bh07.i'
+    exodiff = 'bh07.e'
+    rel_err = 1E-5
+  [../]
+
+  [./test_bh27]
+    type = 'Exodiff'
+    input = 'bh27.i'
+    exodiff = 'bh27.e'
+    rel_err = 1E-5
+    skip = 'Needs DiracKernel::computeOffDiagQpJacobian - ticket #668'
+  [../]
+
+  [./test_st01]
+    type = 'CSVDiff'
+    input = 'st01.i'
+    csvdiff = 'st01.csv'
+    rel_err = 1E-5
+  [../]
+[]

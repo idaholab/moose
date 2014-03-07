@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'simplest_contact_test.i'
+    exodiff = 'out.e'
+  [../]
+
+  [./test_skew]
+    type = 'Exodiff'
+    input = 'simplest_contact_skew_test.i'
+    exodiff = 'out_skew.e'
+  [../]
+[]

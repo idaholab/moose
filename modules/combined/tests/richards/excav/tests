@@ -1,0 +1,18 @@
+[Tests]
+  [./ex01]
+    type = 'Exodiff'
+    input = 'ex01.i'
+    exodiff = 'ex01.e'
+    rel_err = 1E-5
+    use_old_floor = True
+  [../]
+  [./ex02]
+    type = 'Exodiff'
+    input = 'ex02.i'
+    exodiff = 'ex02.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+  [../]
+[]

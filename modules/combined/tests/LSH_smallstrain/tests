@@ -1,0 +1,16 @@
+[Tests]
+  [./test_rz]
+    type = 'Exodiff'
+    input = 'LSH_smallstrain_rz_test.i'
+    exodiff = 'out_rz.e'
+    abs_zero = 1e-09
+    scale_refine = 3
+  [../]
+  [./test]
+    type = 'Exodiff'
+    input = 'LSH_smallstrain_test.i'
+    exodiff = 'out.e'
+    abs_zero = 1e-09
+    scale_refine = 3
+  [../]
+[]

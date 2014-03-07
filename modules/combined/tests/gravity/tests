@@ -1,0 +1,34 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'gravity_test.i'
+    exodiff = 'out.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+  [../]
+
+  [./test_rz_quad8]
+    type = 'Exodiff'
+    input = 'gravity_rz_quad8_test.i'
+    exodiff = 'out_rz_quad8.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+  [../]
+
+  [./test_rz]
+    type = 'Exodiff'
+    input = 'gravity_rz_test.i'
+    exodiff = 'out_rz.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+  [../]
+
+  [./test_hex20]
+    type = 'Exodiff'
+    input = 'gravity_hex20_test.i'
+    exodiff = 'out_hex20.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+    max_parallel = 1
+  [../]
+[]

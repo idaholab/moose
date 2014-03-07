@@ -1,0 +1,29 @@
+#ifndef SHARPINTERFACEFORCING_H
+#define SHARPINTERFACEFORCING_H
+
+#include "Kernel.h"
+#include "Function.h"
+
+class SharpInterfaceForcing;
+
+template<>
+InputParameters validParams<SharpInterfaceForcing>();
+
+/**
+ * Note: Useful class for testing
+ */
+class SharpInterfaceForcing : public Kernel
+{
+public:
+
+  SharpInterfaceForcing(const std::string & name, InputParameters parameters);
+
+protected:
+  virtual Real computeQpResidual();
+
+  Function & _x_center;
+  Function & _y_center;
+  Real _amplitude;
+};
+
+#endif //SHARPINTERFACEFORCING_H

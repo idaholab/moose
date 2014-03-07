@@ -1,0 +1,463 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 9.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     15662,        454]
+NotebookOptionsPosition[     15063,        428]
+NotebookOutlinePosition[     15428,        444]
+CellTagsIndexPosition[     15385,        441]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{"SetDirectory", "[", "\"\<L:/moose/project2/trunk/elk\>\"", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.597620705997557*^9, 3.597620727705237*^9}}],
+
+Cell[BoxData["\<\"L:\\\\moose\\\\project2\\\\trunk\\\\elk\"\>"], "Output",
+ CellChangeTimes->{3.597620728110399*^9, 3.6006250560696287`*^9}]
+}, Open  ]],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"pWaterInit", "=", "0"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"pOilInit", "=", "15"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"viscOil", "=", 
+   RowBox[{"2", "/", "1000"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"viscWater", "=", 
+   RowBox[{"viscOil", "/", "2"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"densWater", "=", "10"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"densOil", "=", "20"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"qq", "=", 
+   RowBox[{"1", "/", "densWater"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"porosity", "=", 
+   RowBox[{"1", "/", "4"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"permeability", "=", 
+    RowBox[{"1", "/", "100000"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"scaleRatio", "=", 
+   RowBox[{"2", "*", "1000"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"beta", "=", 
+   RowBox[{"-", 
+    RowBox[{"Sqrt", "[", 
+     RowBox[{
+      RowBox[{"porosity", "/", "permeability"}], "/", "scaleRatio"}], 
+     "]"}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"delta", "=", 
+   RowBox[{"qq", "*", 
+    RowBox[{
+     RowBox[{"viscOil", "/", "porosity"}], "/", 
+     RowBox[{"(", 
+      RowBox[{"viscOil", "-", "viscWater"}], ")"}]}]}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"alpha", "=", 
+   RowBox[{
+    RowBox[{"-", 
+     RowBox[{"beta", "^", "2"}]}], "*", "qq", "*", "viscOil", "*", 
+    RowBox[{
+     RowBox[{"viscWater", "/", "porosity"}], "/", 
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{"viscOil", "-", "viscWater"}], ")"}], "^", "2"}]}]}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"gamma", "=", 
+    RowBox[{
+     RowBox[{"-", "beta"}], "*", 
+     RowBox[{"viscOil", "/", 
+      RowBox[{"(", 
+       RowBox[{"viscOil", "-", "viscWater"}], ")"}]}]}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"gravity", "=", "0"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"epsilon", "=", 
+   RowBox[{"permeability", "*", 
+    RowBox[{"(", 
+     RowBox[{"densOil", "-", "densWater"}], ")"}], "*", 
+    RowBox[{
+     RowBox[{"gravity", "/", "qq"}], "/", "viscOil"}]}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"alphaPrime", "=", 
+    RowBox[{"alpha", "*", 
+     RowBox[{"(", 
+      RowBox[{"1", "-", 
+       RowBox[{"epsilon", "*", 
+        RowBox[{"gamma", "/", "beta"}]}]}], ")"}]}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"deltaStar", "=", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"beta", "/", "porosity"}], "/", 
+      RowBox[{"(", 
+       RowBox[{"viscOil", "-", "viscWater"}], ")"}]}], "*", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{"permeability", "*", 
+        RowBox[{"(", 
+         RowBox[{"densWater", "-", "densOil"}], ")"}], "*", "gravity", "*", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"viscOil", "+", "viscWater"}], ")"}], "/", 
+         RowBox[{"(", 
+          RowBox[{"viscOil", "-", "viscWater"}], ")"}]}]}], "-", 
+       RowBox[{"qq", "*", "viscWater"}]}], ")"}]}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"ClearAll", "[", "seff", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"seff", "[", 
+    RowBox[{"pc_", ",", "shift_", ",", "scale_"}], "]"}], ":=", 
+   RowBox[{"1", "/", 
+    RowBox[{"Sqrt", "[", 
+     RowBox[{"1", "+", 
+      RowBox[{"Exp", "[", 
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{"pc", "-", "shift"}], ")"}], "/", "scale"}], "]"}]}], 
+     "]"}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"sWaterInit", "=", 
+   RowBox[{"seff", "[", 
+    RowBox[{
+     RowBox[{"pOilInit", "-", "pWaterInit"}], ",", "10", ",", 
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{"1", "/", "4"}], ")"}], "*", "scaleRatio", "*", "viscOil"}]}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"sOilInit", "=", 
+    RowBox[{"1", "-", "sWaterInit"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"epsilonStar", "=", 
+   RowBox[{"alphaPrime", "*", "permeability", "*", 
+    RowBox[{"(", 
+     RowBox[{"densWater", "-", "densOil"}], ")"}], "*", 
+    RowBox[{
+     RowBox[{"gravity", "/", "porosity"}], "/", 
+     RowBox[{"(", 
+      RowBox[{"viscOil", "-", "viscWater"}], ")"}]}]}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"betaStar", "=", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"-", "alphaPrime"}], "/", "beta"}], "/", 
+     RowBox[{"(", 
+      RowBox[{"sOilInit", "+", 
+       RowBox[{"gamma", "/", "beta"}]}], ")"}]}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"short", "=", 
+   RowBox[{"Sqrt", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"deltaStar", "^", "2"}], "/", "4"}], "-", "epsilonStar"}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"short2", "=", 
+    RowBox[{
+     RowBox[{"deltaStar", "/", "2"}], "-", "betaStar"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"ClearAll", "[", 
+   RowBox[{"sStar", ",", "sStarPrime", ",", "sOil", ",", "z"}], "]"}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"sStar", "[", 
+    RowBox[{"z_", ",", "t_"}], "]"}], ":=", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"1", "/", "2"}], ")"}], 
+     RowBox[{"Exp", "[", 
+      RowBox[{
+       RowBox[{"-", 
+        RowBox[{"(", 
+         RowBox[{"deltaStar", "*", 
+          RowBox[{"z", "/", "2"}]}], ")"}]}], "-", 
+       RowBox[{"epsilonStar", "*", "t"}]}], "]"}], "*", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Exp", "[", 
+         RowBox[{"z", "*", "short"}], "]"}], "*", 
+        RowBox[{"Erfc", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"z", "/", "2"}], "/", 
+           RowBox[{"Sqrt", "[", "t", "]"}]}], "+", 
+          RowBox[{
+           RowBox[{"Sqrt", "[", "t", "]"}], "*", "short"}]}], "]"}]}], "+", 
+       RowBox[{
+        RowBox[{"Exp", "[", 
+         RowBox[{
+          RowBox[{"-", "z"}], "*", "short"}], "]"}], "*", 
+        RowBox[{"Erfc", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"z", "/", "2"}], "/", 
+           RowBox[{"Sqrt", "[", "t", "]"}]}], "-", 
+          RowBox[{
+           RowBox[{"Sqrt", "[", "t", "]"}], "*", "short"}]}], "]"}]}]}], 
+      ")"}]}], "-", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"1", "/", "2"}], ")"}], 
+     RowBox[{"Exp", "[", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"betaStar", "^", "2"}], "-", 
+         RowBox[{"betaStar", "*", "deltaStar"}]}], ")"}], "*", "t"}], "]"}], 
+     "*", 
+     RowBox[{"(", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Exp", "[", 
+         RowBox[{
+          RowBox[{"-", "betaStar"}], "*", "z"}], "]"}], "*", 
+        RowBox[{"Erfc", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"z", "/", "2"}], "/", 
+           RowBox[{"Sqrt", "[", "t", "]"}]}], "+", 
+          RowBox[{"short2", "*", 
+           RowBox[{"Sqrt", "[", "t", "]"}]}]}], "]"}]}], "+", 
+       RowBox[{
+        RowBox[{"Exp", "[", 
+         RowBox[{
+          RowBox[{"(", 
+           RowBox[{"betaStar", "-", "deltaStar"}], ")"}], "z"}], "]"}], "*", 
+        RowBox[{"Erfc", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"z", "/", "2"}], "/", 
+           RowBox[{"Sqrt", "[", "t", "]"}]}], "-", 
+          RowBox[{"short2", "*", 
+           RowBox[{"Sqrt", "[", "t", "]"}]}]}], "]"}]}]}], ")"}]}], "+", 
+    RowBox[{"Exp", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", "betaStar"}], "*", "z"}], "+", 
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"betaStar", "^", "2"}], "-", 
+         RowBox[{"betaStar", "*", "deltaStar"}]}], ")"}], "*", "t"}]}], 
+     "]"}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"sStarPrime", "[", 
+     RowBox[{"z_", ",", "t_"}], "]"}], ":=", 
+    RowBox[{"Evaluate", "[", 
+     RowBox[{
+      RowBox[{"D", "[", 
+       RowBox[{
+        RowBox[{"sStar", "[", 
+         RowBox[{"zeta", ",", "t"}], "]"}], ",", "zeta"}], "]"}], "/.", 
+      RowBox[{"zeta", "\[Rule]", "z"}]}], "]"}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"sOil", "[", 
+    RowBox[{"zeta_", ",", "t_"}], "]"}], " ", ":=", " ", 
+   RowBox[{
+    RowBox[{"alphaPrime", "*", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"sStar", "[", 
+        RowBox[{"zeta", ",", "t"}], "]"}], "/", "beta"}], "/", 
+      RowBox[{"sStarPrime", "[", 
+       RowBox[{"zeta", ",", "t"}], "]"}]}]}], "-", 
+    RowBox[{"gamma", "/", "beta"}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"z", "[", 
+     RowBox[{"zeta_", ",", "t_"}], "]"}], ":=", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"1", "/", "alphaPrime"}], ")"}], "*", 
+     RowBox[{"(", 
+      RowBox[{"Log", "[", 
+       RowBox[{
+        RowBox[{"sStar", "[", 
+         RowBox[{"zeta", ",", "t"}], "]"}], "/", 
+        RowBox[{"sStar", "[", 
+         RowBox[{"0", ",", "t"}], "]"}]}], "]"}], ")"}]}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"ClearAll", "[", "ans", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"ans", "=", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"N", "[", 
+        RowBox[{"1", "-", 
+         RowBox[{"sOil", "[", 
+          RowBox[{"#", ",", "5"}], "]"}]}], "]"}], ",", 
+       RowBox[{"N", "[", 
+        RowBox[{"z", "[", 
+         RowBox[{"#", ",", "5"}], "]"}], "]"}]}], "}"}], "&"}], "/@", 
+    RowBox[{"Range", "[", 
+     RowBox[{"0", ",", "30", ",", "1"}], "]"}]}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.6006250681054983`*^9, 3.6006251039161196`*^9}, {
+   3.6006251358502526`*^9, 3.60062520864382*^9}, {3.6006252499033365`*^9, 
+   3.6006253318713255`*^9}, {3.6006253653771086`*^9, 
+   3.6006255275193977`*^9}, {3.6006255853709755`*^9, 3.60062559301149*^9}, {
+   3.6006256321408997`*^9, 3.6006257222963696`*^9}, {3.6006258082783637`*^9, 
+   3.6006258921341915`*^9}, {3.6006259287998695`*^9, 3.600626043679682*^9}, {
+   3.600626305912841*^9, 3.600626514848105*^9}, {3.6006266734445057`*^9, 
+   3.6006267232261143`*^9}, {3.6006268071894617`*^9, 
+   3.6006269311347847`*^9}, {3.6006270099254827`*^9, 3.600627025523241*^9}, {
+   3.600627064988449*^9, 3.6006272049004617`*^9}, {3.600627255882061*^9, 
+   3.6006273029512253`*^9}, {3.600627467842311*^9, 3.600627626259392*^9}, {
+   3.600627668454404*^9, 3.6006277035498857`*^9}, {3.6006278529150515`*^9, 
+   3.6006279855578365`*^9}, {3.6006280169177732`*^9, 
+   3.6006283595696487`*^9}, {3.600628446360918*^9, 3.6006285013638973`*^9}, {
+   3.600628752496972*^9, 3.600628761450235*^9}, {3.600629728654117*^9, 
+   3.6006297339611816`*^9}, {3.60062980621819*^9, 3.600629808126334*^9}, 
+   3.600631054469265*^9, 3.600631653829942*^9, {3.600631934680442*^9, 
+   3.60063193479451*^9}, {3.600631984227152*^9, 3.6006319944762974`*^9}, {
+   3.600632056682599*^9, 3.600632057438052*^9}, {3.600632933269788*^9, 
+   3.6006329333068104`*^9}, {3.600633294503011*^9, 3.6006333354473825`*^9}, {
+   3.6006333688777494`*^9, 3.6006333690358124`*^9}, {3.6006338665928645`*^9, 
+   3.600633891231592*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"ListLinePlot", "[", 
+  RowBox[{"ans", ",", 
+   RowBox[{"PlotRange", "\[Rule]", "All"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.59761976803269*^9, 3.5976197758000193`*^9}, {
+  3.597619810986539*^9, 3.597619817351533*^9}, {3.5976198687450037`*^9, 
+  3.5976198735552893`*^9}, {3.597619914089828*^9, 3.5976199147385406`*^9}, {
+  3.5976200708680944`*^9, 3.5976200739014273`*^9}}],
+
+Cell[BoxData[
+ GraphicsBox[{{}, {{}, {}, 
+    {RGBColor[0.24720000000000014`, 0.24, 0.6], LineBox[CompressedData["
+1:eJwBAQL+/SFib1JlAgAAAB8AAAACAAAAjMKmndvl7z8AAAAAAAAAAARJH1rP
+rO8/SQjxXZMowj+MEhTs/DzvP+YoY89lNNI/Vta15lOC7j+Yb4X992nbPz7J
+k/cLce0/O3iGL9Rg4j/oSI8OOQrsP9MKrPcKJec/jO2fMi9b6j/1ZI4BMgns
+P1ir6sa8eOg/Nil2RDiK8D9mD0vUannmP3q63zeGJvM/YsT8ikxx5D9dv81b
+GNz1P1Doe0oUcOI/elAyffGs+D/Cx0WC5YDgP2zAGauJmvs/xBeOxRpW3T8l
+MBjf2qX+P8gaJw4D5tk/0MKTcrbnAEAY6I8Dn7bWP1CAbdSuiwJAbKQdUbvK
+0z+agihhsj4EQNTRj+LwI9E/x3kLFWkABkBo3Acbw4bNPxz1eGRE0AdAcDuM
+Qj1UyT9tDdBFe60JQIA399JxssU/J6utggaXC0BISzsX5aLCPxf1UMOfiw1A
+KE5dBx8lwD8UT0OrxokPQDAewo1zabw/IDtgv+fHEEDAsvk+8I65P8+R6Ib+
+zRFAMEcZmNCYtz8bOB+3UdYSQIAOkV4RWrY/M5OR1iXgE0DwT4mfA6G1PziE
+aNzm6hRAcB0E6Hg/tT+mmVtZLPYVQIBBR64CEbU/Q0i+0LQBF0BAVCcrD/20
+P8n49dNbDRhAoFc7j1f1tD+GkvNkDxkZQKf+5fU=
+      "]]}}, {}},
+  AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+  Axes->True,
+  AxesLabel->{None, None},
+  AxesOrigin->{0.0818686222731615, 0.},
+  Method->{},
+  PlotRange->{All, All},
+  PlotRangeClipping->True,
+  PlotRangePadding->{Automatic, Automatic}]], "Output",
+ CellChangeTimes->{
+  3.5976197764002*^9, 3.597619824540432*^9, 3.597619878955222*^9, 
+   3.597619915170015*^9, 3.5976199533099227`*^9, {3.5976200673422203`*^9, 
+   3.597620101392352*^9}, 3.59762034705266*^9, 3.597621280735014*^9, 
+   3.597621521516468*^9, 3.5976217957431717`*^9, 3.5976218365414844`*^9, {
+   3.600633361542816*^9, 3.6006333715668244`*^9}, {3.6006338718966923`*^9, 
+   3.6006338944044952`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Export", "[", 
+  RowBox[{
+  "\"\<doc/richards/tests/data/rsc01_analytic.csv\>\"", ",", "ans", ",", 
+   "\"\<Table\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.597620739219841*^9, 3.59762075482408*^9}, {
+  3.5976208439348063`*^9, 3.5976208646244106`*^9}, {3.5976212848004513`*^9, 
+  3.5976212860662107`*^9}, {3.597621527799608*^9, 3.5976215283909035`*^9}, {
+  3.6006266301377616`*^9, 3.600626633548318*^9}, {3.600633447728256*^9, 
+  3.600633449078662*^9}}],
+
+Cell[BoxData["\<\"doc/richards/tests/data/rsc01_analytic.csv\"\>"], "Output",
+ CellChangeTimes->{3.5976208696649427`*^9, 3.5976212894332294`*^9, 
+  3.597621529916666*^9, 3.5976218056821456`*^9, 3.597621843010071*^9, 
+  3.6006333830073986`*^9, 3.6006334510892644`*^9}]
+}, Open  ]]
+},
+WindowSize->{1183, 1236},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+ShowSelection->True,
+FrontEndVersion->"9.0 for Microsoft Windows (64-bit) (January 25, 2013)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[579, 22, 168, 3, 31, "Input"],
+Cell[750, 27, 140, 1, 31, "Output"]
+}, Open  ]],
+Cell[905, 31, 11404, 332, 972, "Input"],
+Cell[CellGroupData[{
+Cell[12334, 367, 400, 7, 31, "Input"],
+Cell[12737, 376, 1522, 30, 245, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[14296, 411, 481, 9, 31, "Input"],
+Cell[14780, 422, 267, 3, 31, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

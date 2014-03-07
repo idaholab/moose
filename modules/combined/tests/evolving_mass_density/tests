@@ -1,0 +1,50 @@
+[Tests]
+  [./test_rz]
+    type = 'Exodiff'
+    input = 'rz.i'
+    exodiff = 'rz_out.e'
+    max_parallel = 1
+  [../]
+
+  [./test_shear_z]
+    type = 'Exodiff'
+    input = 'shear_z_test.i'
+    exodiff = 'shear_z_test_out.e'
+  [../]
+
+  [./test_shear_y]
+    type = 'Exodiff'
+    input = 'shear_y_test.i'
+    exodiff = 'shear_y_test_out.e'
+  [../]
+
+  [./test_shear_x]
+    type = 'Exodiff'
+    input = 'shear_x_test.i'
+    exodiff = 'shear_x_test_out.e'
+  [../]
+
+  [./test_uniform]
+    type = 'Exodiff'
+    input = 'uniform_expand_compress_test.i'
+    exodiff = 'uniform_expand_compress_test_out.e'
+  [../]
+
+  [./test_z]
+    type = 'Exodiff'
+    input = 'expand_compress_z_test.i'
+    exodiff = 'expand_compress_z_test_out.e'
+  [../]
+
+  [./test_y]
+    type = 'Exodiff'
+    input = 'expand_compress_y_test.i'
+    exodiff = 'expand_compress_y_test_out.e'
+  [../]
+
+  [./test_x]
+    type = 'Exodiff'
+    input = 'expand_compress_x_test.i'
+    exodiff = 'expand_compress_x_test_out.e'
+  [../]
+[]

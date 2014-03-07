@@ -1,0 +1,16 @@
+[Tests]
+  [./base]
+    type = 'Exodiff'
+    input = 'single_point_2d.i'
+    exodiff = 'single_point_2d_out.e'
+    custom_cmp = 'single_point_2d.cmp'
+    max_parallel = 1
+  [../]
+  [./predictor]
+    type = 'Exodiff'
+    input = 'single_point_2d_predictor.i'
+    exodiff = 'single_point_2d_predictor_out.e'
+    custom_cmp = 'single_point_2d.cmp'
+    max_parallel = 1
+  [../]
+[]

@@ -1,0 +1,15 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'hoop_stress.i'
+    exodiff = 'hoop_stress_out.e'
+    custom_cmp = 'hoop_stress.cmp'
+  [../]
+
+  [./test_default_yaxis]
+    type = 'Exodiff'
+    input = 'hoop_stress_default_yaxis.i'
+    exodiff = 'hoop_stress_default_yaxis_out.e'
+    custom_cmp = 'hoop_stress_default_yaxis.cmp'
+  [../]
+[]

@@ -1,0 +1,9 @@
+[Tests]
+  [./test_beam_pbp]
+    type = 'Exodiff'
+    input = 'beam_pbp_test.i'
+    exodiff = 'out.e'
+    abs_zero = 1e-07
+    scale_refine = 1
+  [../]
+[]

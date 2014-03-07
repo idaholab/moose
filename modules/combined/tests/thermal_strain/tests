@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'thermal_strain_test.i'
+    exodiff = 'out.e'
+    abs_zero = 1e-07
+    scale_refine = 1
+  [../]
+[]

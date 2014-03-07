@@ -1,0 +1,54 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'plenum_pressure.i'
+    exodiff = 'plenum_pressure_out.e'
+    abs_zero = 1e-10
+  [../]
+
+  [./test_rz]
+    type = 'Exodiff'
+    input = 'plenum_pressure_rz.i'
+    exodiff = 'plenum_pressure_rz_out.e'
+    abs_zero = 1e-10
+  [../]
+
+  [./test_rz_restart1]
+    type = RunApp
+    prereq = test_rz
+    input = 'plenum_pressure_rz.i'
+    cli_args = 'Output/num_checkpoint_files=1 Executioner/num_steps=1'
+  [../]
+ 
+  [./test_rz_restart2]
+    type = 'Exodiff'
+    prereq = 'test_rz_restart1'
+    input = 'plenum_pressure_rz.i'
+    exodiff = 'plenum_pressure_rz_out.e'
+    cli_args = '--recover plenum_pressure_rz_out_cp/0001'
+    delete_output_before_running = false
+  [../]
+ 
+
+  [./test_refab]
+    type = 'Exodiff'
+    input = 'plenum_pressure_refab.i'
+    exodiff = 'plenum_pressure_refab_out.e'
+    abs_zero = 1e-10
+  [../]
+
+  [./testRestart1]
+    type = RunApp
+    input = 'plenum_pressure_refab_restart1.i'
+    prereq = test_refab
+    min_parallel = 2
+  [../]
+  [./testRestart2]
+    type = Exodiff
+    input = 'plenum_pressure_refab_restart2.i'
+    prereq = testRestart1
+    exodiff = plenum_pressure_refab_out.e
+    exodiff_opts = -TM
+    min_parallel = 2
+  [../]
+[]

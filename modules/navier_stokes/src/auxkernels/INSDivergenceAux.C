@@ -1,0 +1,28 @@
+#include "INSDivergenceAux.h"
+
+template<>
+InputParameters validParams<INSDivergenceAux>()
+{
+  InputParameters params = validParams<AuxKernel>();
+
+  // Coupled variables
+  params.addRequiredCoupledVar("u", "x-velocity");
+  params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D
+  params.addCoupledVar("w", "z-velocity"); // only required in 3D
+
+  return params;
+}
+
+INSDivergenceAux::INSDivergenceAux(const std::string & name, InputParameters parameters)
+  :AuxKernel(name, parameters),
+  _grad_u_vel(coupledGradient("u")),
+  _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
+  _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero)
+{}
+
+Real
+INSDivergenceAux::computeValue()
+{
+  // div U = du/dx + dv/dy + dw/dz
+  return _grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2);
+}
