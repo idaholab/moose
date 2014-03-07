@@ -28,6 +28,7 @@ class TestHarness:
     self.num_pending = 0
     self.host_name = gethostname()
     self.moose_dir = os.path.abspath(moose_dir) + '/'
+    self.run_tests_dir = os.path.abspath('.')
     self.code = '2d2d6769726c2d6d6f6465'
     # Assume libmesh is a peer directory to MOOSE if not defined
     if os.environ.has_key("LIBMESH_DIR"):
@@ -149,9 +150,7 @@ class TestHarness:
   def parseGetPotTestFormat(self, filename):
     tests = []
     test_dir = os.path.abspath(os.path.dirname(filename))
-    # Get relative path to test[TEST_DIR]
-    executable_path = os.path.dirname(self.executable)
-    relative_path = test_dir.replace(executable_path, '')
+    relative_path = test_dir.replace(self.run_tests_dir, '')
 
     # Filter tests that we want to run
     # Under the new format, we will filter based on directory not filename since it is fixed
@@ -220,8 +219,14 @@ class TestHarness:
         if len(params_ignored):
           print 'Ignored Parameter(s): ', params_ignored
 
-        # TODO: In progress formatting
-        formatted_name = relative_path.replace('/tests/', '') + '.' + testname
+        # We are going to do some formatting of the path that is printed
+        # Case 1.  If the test directory (normally matches the input_file_name) comes first,
+        #          we will simply remove it from the path
+        # Case 2.  If the test directory is somewhere in the middle then we should preserve
+        #          the leading part of the path
+        relative_path = relative_path.replace('/' + self.options.input_file_name + '/', ':')
+        relative_path = re.sub('^[/:]*', '', relative_path)  # Trim slashes and colons
+        formatted_name = relative_path + '.' + testname
 
         params['test_name'] = formatted_name
         params['test_dir'] = test_dir
