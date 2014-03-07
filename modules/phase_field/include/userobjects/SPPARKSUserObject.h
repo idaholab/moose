@@ -1,3 +1,6 @@
+// temporarily disabled
+#if 0
+
 #ifndef SPPARKSUSEROBJECT_H
 #define SPPARKSUSEROBJECT_H
 
@@ -348,5 +351,7 @@ protected:
 
 template<>
 InputParameters validParams<SPPARKSUserObject>();
+
+#endif
 
 #endif

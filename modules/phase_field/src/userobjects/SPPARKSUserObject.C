@@ -1,3 +1,6 @@
+// temporarily disabled
+#if 0
+
 #include "SPPARKSUserObject.h"
 
 #include "libmesh/mesh_tools.h"
@@ -661,3 +664,5 @@ SPPARKSUserObject::initialSetup()
 
 
 }
+
+#endif

@@ -1,3 +1,6 @@
+// temporarily disabled
+#if 0
+
 #include "SPPARKSAux.h"
 
 #include "SPPARKSUserObject.h"
@@ -39,3 +42,5 @@ SPPARKSAux::computeValue()
   }
   return value;
 }
+
+#endif

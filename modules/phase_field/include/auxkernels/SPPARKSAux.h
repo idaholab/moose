@@ -1,3 +1,6 @@
+// temporarily disabled
+#if 0
+
 #ifndef SPPARKSAUX_H
 #define SPPARKSAUX_H
 
@@ -24,5 +27,7 @@ protected:
 
 template<>
 InputParameters validParams<SPPARKSAux>();
+
+#endif
 
 #endif
