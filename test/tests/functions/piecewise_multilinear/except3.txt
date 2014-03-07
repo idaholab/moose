@@ -1,0 +1,6 @@
+# Following has too many data points - should produce an exception
+AXIS X
+-1 2
+DATA
+1 2 3
+

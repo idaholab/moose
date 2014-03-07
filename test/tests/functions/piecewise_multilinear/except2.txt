@@ -1,0 +1,5 @@
+# Following grid is not monotonic - should produce an exception
+AXIS X
+1 -1
+DATA
+1 2
