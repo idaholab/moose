@@ -125,11 +125,11 @@ MultiDContactConstraint::updateContactSet()
     }
 
 //    if(hpit != has_penetrated.end() && resid < 0)
-//      std::cerr<<resid<<std::endl;
+//      Moose::err<<resid<<std::endl;
 /*
     if(hpit != has_penetrated.end() && resid < -.15)
     {
-      std::cerr<<std::endl<<"Unlocking node "<<node->id()<<" because resid: "<<resid<<std::endl<<std::endl;
+      Moose::err<<std::endl<<"Unlocking node "<<node->id()<<" because resid: "<<resid<<std::endl<<std::endl;
 
       has_penetrated.erase(hpit);
       unlocked_this_step[slave_node_num] = true;
@@ -137,7 +137,7 @@ MultiDContactConstraint::updateContactSet()
     else*/
     if (pinfo->_distance > 0 && hpit == has_penetrated.end())// && !unlocked_this_step[slave_node_num])
     {
-//      std::cerr<<std::endl<<"Locking node "<<node->id()<<" because distance: "<<pinfo->_distance<<std::endl<<std::endl;
+//      Moose::err<<std::endl<<"Locking node "<<node->id()<<" because distance: "<<pinfo->_distance<<std::endl<<std::endl;
 //      libMesh::print_trace();
 
       has_penetrated.insert(slave_node_num);
@@ -158,7 +158,7 @@ MultiDContactConstraint::computeQpSlaveValue()
 {
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 /*
-  std::cerr<<std::endl
+  Moose::err<<std::endl
            <<"Popping out node: "<<_current_node->id()<<std::endl
            <<"Closest Point "<<_component<<": "<<pinfo->_closest_point(_component)<<std::endl
            <<"Current Node "<<_component<<": "<<(*_current_node)(_component)<<std::endl

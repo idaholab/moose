@@ -61,7 +61,7 @@ Real NSSUPGEnergy::computeQpResidual()
 
   // For printing purposes only
   Real result = mass_term + mom_term + energy_term;
-  // std::cout << "result[" << _qp << "]=" << result << std::endl;
+  // Moose::out << "result[" << _qp << "]=" << result << std::endl;
 
   return result;
 }

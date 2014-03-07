@@ -83,7 +83,7 @@ Real
 OneDContactConstraint::computeQpSlaveValue()
 {
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
-  std::cerr<<std::endl
+  Moose::err<<std::endl
            <<"Popping out node: "<<_current_node->id()<<std::endl
            <<"Closest Point x: "<<pinfo->_closest_point(0)<<std::endl
            <<"Current Node x: "<<(*_current_node)(0)<<std::endl

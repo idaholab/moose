@@ -118,7 +118,7 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
 
   if (_output_iteration_info)
   {
-    std::cout << iter_output.str();
+    Moose::out << iter_output.str();
   }
 
   if(it == _max_its &&
@@ -127,7 +127,7 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
   {
     if (_output_iteration_info_on_error)
     {
-      std::cerr << iter_output.str();
+      Moose::err << iter_output.str();
     }
     mooseError("Max sub-newton iteration hit during nonlinear constitutive model solve!");
   }

@@ -44,7 +44,7 @@ AddSecondarySpeciesAction::act()
 
     for (unsigned int i=0; i < vars.size(); i++)
     {
-      std::cout << "aux variables: " << vars[i] << "\t";
+      Moose::out << "aux variables: " << vars[i] << "\t";
       FEType fe_type(Utility::string_to_enum<Order>("first"),
                      Utility::string_to_enum<FEFamily>("lagrange"));
       _problem->addAuxVariable(vars[i], fe_type);
@@ -71,13 +71,13 @@ AddSecondarySpeciesAction::act()
           if(stos_vars.size() == 1)
           {
             kin_species = stos_vars[0];
-            std::cout << "I'm here and the kin_species is: " << stos_vars[0] << "\n";
+            Moose::out << "I'm here and the kin_species is: " << stos_vars[0] << "\n";
 
           }
 //           else
 //             mooseError("There's no solid kinetic species.");
         }
-        std::cout << "the " << j+1 << "-th solid kinetic species: " << kin_species << "\n";
+        Moose::out << "the " << j+1 << "-th solid kinetic species: " << kin_species << "\n";
         FEType fe_type(Utility::string_to_enum<Order>("first"),
                        Utility::string_to_enum<FEFamily>("lagrange"));
         _problem->addAuxVariable(kin_species, fe_type);

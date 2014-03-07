@@ -53,12 +53,12 @@ NSThermalBC::computeQpResidual()
   // ***at a no-slip wall*** this further reduces to (no coupling to velocity variables):
   // rho*E - rho*cv*T = 0
 
-// std::ios_base::fmtflags flags = std::cout.flags();
-// std::cout << std::scientific << std::setprecision(16);
-// std::cout << "rho*E                        =" << _u[_qp] << std::endl;
-// std::cout << "(_p[_qp] * _c_v[_qp] * value)=" << (_p[_qp] * _c_v[_qp] * value) << std::endl;
-// //std::cout << "_c_v[_qp]                    =" << _c_v[_qp] << std::endl;
-// std::cout.flags(flags);
+// std::ios_base::fmtflags flags = Moose::out.flags();
+// Moose::out << std::scientific << std::setprecision(16);
+// Moose::out << "rho*E                        =" << _u[_qp] << std::endl;
+// Moose::out << "(_p[_qp] * _c_v[_qp] * value)=" << (_p[_qp] * _c_v[_qp] * value) << std::endl;
+// //Moose::out << "_c_v[_qp]                    =" << _c_v[_qp] << std::endl;
+// Moose::out.flags(flags);
 
   Real cv = _R / (_gamma-1.);
   return _u[_qp] - (_rho[_qp] * cv * value);

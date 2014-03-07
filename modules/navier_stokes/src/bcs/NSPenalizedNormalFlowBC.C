@@ -33,7 +33,7 @@ Real NSPenalizedNormalFlowBC::computeQpResidual()
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   Real residual = _penalty * ((vel*_normals[_qp]) - _specified_udotn) * _test[_i][_qp];
-  // std::cout << "residual[" << _qp << "]=" << residual << std::endl;
+  // Moose::out << "residual[" << _qp << "]=" << residual << std::endl;
 
   return residual;
 }
@@ -55,6 +55,3 @@ Real NSPenalizedNormalFlowBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
   // TODO
   return 0.;
 }
-
-
-

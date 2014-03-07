@@ -147,20 +147,20 @@ NavierStokesMaterial::computeProperties()
 
     // .) Compute SUPG element length scale.
     this->compute_h_supg(qp);
-    //std::cout << "_hsupg[" << qp << "]=" << _hsupg[qp] << std::endl;
+    //Moose::out << "_hsupg[" << qp << "]=" << _hsupg[qp] << std::endl;
 
     // .) Compute SUPG parameter values.  (Must call this after compute_h_supg())
     this->compute_tau(qp);
-    //std::cout << "_tauc[" << qp << "]=" << _tauc[qp] << ", ";
-    //std::cout << "_taum[" << qp << "]=" << _taum[qp] << ", ";
-    //std::cout << "_taue[" << qp << "]=" << _taue[qp] << std::endl;
+    //Moose::out << "_tauc[" << qp << "]=" << _tauc[qp] << ", ";
+    //Moose::out << "_taum[" << qp << "]=" << _taum[qp] << ", ";
+    //Moose::out << "_taue[" << qp << "]=" << _taue[qp] << std::endl;
 
     // .) Compute strong residual values.
     this->compute_strong_residuals(qp);
-    // std::cout << "_strong_residuals[" << qp << "]=";
+    // Moose::out << "_strong_residuals[" << qp << "]=";
     // for (unsigned i=0; i<_strong_residuals[qp].size(); ++i)
-    //   std::cout << _strong_residuals[qp][i] << " ";
-    // std::cout << std::endl;
+    //   Moose::out << _strong_residuals[qp][i] << " ";
+    // Moose::out << std::endl;
   }
 }
 
@@ -260,13 +260,13 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
                           _v_vel[qp]*_v_vel[qp] +
                           _w_vel[qp]*_w_vel[qp]);
 
-  // std::cout << "velmag=" << velmag << std::endl;
+  // Moose::out << "velmag=" << velmag << std::endl;
 
   // Make sure temperature >= 0 before trying to take sqrt
   // #ifdef DEBUG
   if (_temperature[qp] < 0.)
   {
-    std::cerr << "Negative temperature "
+    Moose::err << "Negative temperature "
               << _temperature[qp]
               << " found at quadrature point "
               << qp
@@ -342,9 +342,9 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
   }
 
   // Debugging
-  //std::cout << "_tauc[" << qp << "]=" << _tauc[qp] << std::endl;
-  //std::cout << "_hsupg[" << qp << "]=" << _hsupg[qp] << std::endl;
-  //std::cout << "velmag[" << qp << "]=" << velmag << std::endl;
+  //Moose::out << "_tauc[" << qp << "]=" << _tauc[qp] << std::endl;
+  //Moose::out << "_hsupg[" << qp << "]=" << _hsupg[qp] << std::endl;
+  //Moose::out << "velmag[" << qp << "]=" << velmag << std::endl;
 }
 
 
@@ -360,7 +360,7 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   // the parent pointer of the SubProblem.  Don't need this if we are not
   // approximating time derivatives ourselves.
   // Real dt = _subproblem.parent()->dt();
-  //std::cout << "dt=" << dt << std::endl;
+  //Moose::out << "dt=" << dt << std::endl;
 
   // Vector object for the velocity
   RealVectorValue vel(_u_vel[qp], _v_vel[qp], _w_vel[qp]);
@@ -373,7 +373,7 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   Real velmag2 = vel.size_sq();
 
   // Debugging: How large are the time derivative parts of the strong residuals?
-//  std::cout << "drho_dt=" << _drho_dt
+//  Moose::out << "drho_dt=" << _drho_dt
 //            << ", drhou_dt=" << _drhou_dt
 //            << ", drhov_dt=" << _drhov_dt
 //            << ", drhow_dt=" << _drhow_dt

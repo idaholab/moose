@@ -108,7 +108,7 @@ Nonlinear3D::computeIncrementalDeformationGradient( std::vector<ColumnMajorMatri
     Fhat[qp] *= factor;
 
   }
-//    std::cout << "Fhat(0,0)" << Fhat[0](0,0) << std::endl;
+//    Moose::out << "Fhat(0,0)" << Fhat[0](0,0) << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -276,10 +276,10 @@ Nonlinear3D::computePolarDecomposition( const ColumnMajorMatrix & Fhat )
   ColumnMajorMatrix Fhat_inverse;
   invertMatrix( Fhat, Fhat_inverse );
   Fhat_inverse = Fhat;
-  /*std::cout << "Fhat = " << std::endl;
+  /*Moose::out << "Fhat = " << std::endl;
   ColumnMajorMatrix out(Fhat);
   out.print();
-  std::cout << "Fhat_inverse = " << std::endl;
+  Moose::out << "Fhat_inverse = " << std::endl;
   out = Fhat_inverse;
   out.print();*/
 

@@ -45,7 +45,7 @@ void
 PolycrystalHexGrainICAction::act()
 {
 #ifdef DEBUG
-  std::cerr << "Inside the PolycrystalHexGrainICAction Object\n";
+  Moose::err << "Inside the PolycrystalHexGrainICAction Object\n";
 #endif
 
 // Loop through the number of order parameters

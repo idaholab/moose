@@ -56,7 +56,7 @@ RankTwoTensor::fillFromInputVector(const std::vector<Real> input)
 {
   if (input.size() == 6)
   {
-    std::cout << "Rank 2 tensor input size =" << input.size() << std::endl;
+    Moose::out << "Rank 2 tensor input size =" << input.size() << std::endl;
 
     _vals[0][0] = input[0]; //S11
     _vals[1][1] = input[1]; //S22
@@ -67,7 +67,7 @@ RankTwoTensor::fillFromInputVector(const std::vector<Real> input)
   }
   else if (input.size() == 9)
   {
-    std::cout << "Rank 2 tensor input size =" << input.size() << std::endl;
+    Moose::out << "Rank 2 tensor input size =" << input.size() << std::endl;
 
     _vals[0][0] = input[0]; //S11
     _vals[1][0] = input[1]; //S21
@@ -158,9 +158,9 @@ RankTwoTensor::rotateXyPlane(const Real a)
   xy /= 2.0;
 
 
-  /* std::cout<<"x="<<x<<std::endl;
-  std::cout<<"y="<<y<<std::endl;
-  std::cout<<"xy="<<xy<<std::endl; */
+  /* Moose::out<<"x="<<x<<std::endl;
+  Moose::out<<"y="<<y<<std::endl;
+  Moose::out<<"xy="<<xy<<std::endl; */
 
   b.setValue(x, 1, 1);
   b.setValue(y, 2, 2);
@@ -408,8 +408,8 @@ RankTwoTensor::print()
   for(unsigned int i=0; i<N; i++)
   {
     for(unsigned int j=0; j<N; j++)
-      std::cout << std::setw(15) <<_vals[i][j]<<" ";
-    std::cout <<std::endl;
+      Moose::out << std::setw(15) <<_vals[i][j]<<" ";
+    Moose::out <<std::endl;
   }
 }
 

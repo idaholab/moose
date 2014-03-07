@@ -86,7 +86,7 @@ CombinedCreepPlasticity::computeStress( const Elem & current_elem,
 
   if (_output_iteration_info == true)
   {
-    std::cout
+    Moose::out
       << std::endl
       << "iteration output for CombinedCreepPlasticity solve:"
       << " time=" <<_t
@@ -137,7 +137,7 @@ CombinedCreepPlasticity::computeStress( const Elem & current_elem,
 
     if (_output_iteration_info == true)
     {
-      std::cout
+      Moose::out
         << "stress_it=" << counter
         << " rel_delS=" << (0 == first_delS ? 0 : delS/first_delS)
         << " rel_tol="  << _relative_tolerance

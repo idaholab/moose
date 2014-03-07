@@ -94,12 +94,12 @@ CrackFrontDefinition::initialSetup()
 
   updateCrackFrontGeometry();
 
-//  std::cout<<"Ordered nodes: ";
+//  Moose::out<<"Ordered nodes: ";
 //  for (unsigned int i=0; i<_ordered_crack_front_nodes.size(); ++i)
 //  {
-//    std::cout<<_ordered_crack_front_nodes[i]<<" ";
+//    Moose::out<<_ordered_crack_front_nodes[i]<<" ";
 //  }
-//  std::cout<<std::endl;
+//  Moose::out<<std::endl;
 
 }
 
@@ -376,12 +376,12 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       }
 
       _segment_lengths.push_back(std::make_pair(back_segment_len,forward_segment_len));
-      //std::cout<<"seg len: "<<back_segment_len<<" "<<forward_segment_len<<std::endl;
+      //Moose::out<<"seg len: "<<back_segment_len<<" "<<forward_segment_len<<std::endl;
 
       RealVectorValue tangent_direction = back_segment + forward_segment;
       tangent_direction = tangent_direction / tangent_direction.size();
       _tangent_directions.push_back(tangent_direction);
-      //std::cout<<"tan dir: "<<tangent_direction(0)<<" "<<tangent_direction(1)<<" "<<tangent_direction(2)<<std::endl;
+      //Moose::out<<"tan dir: "<<tangent_direction(0)<<" "<<tangent_direction(1)<<" "<<tangent_direction(2)<<std::endl;
       _crack_directions.push_back(calculateCrackFrontDirection(crack_front_nodes[i],tangent_direction));
 
       _overall_length += forward_segment_len;
@@ -406,7 +406,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
                 <<std::setw(14)<<(_segment_lengths[i].first+_segment_lengths[i].second)/2.0
                 <<std::endl;
     }
-    std::cout<<"overall length: "<<_overall_length<<std::endl;
+    Moose::out<<"overall length: "<<_overall_length<<std::endl;
   }
 }
 

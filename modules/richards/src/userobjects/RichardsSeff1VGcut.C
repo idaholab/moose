@@ -34,7 +34,7 @@ RichardsSeff1VGcut::RichardsSeff1VGcut(const std::string & name, InputParameters
     mooseError("The p_cut parameter in the cut effective saturation relationship is " << _p_cut << " but it must be negative");
   _s_cut = RichardsSeffVG::seff(_p_cut, _al, _m);
   _ds_cut = RichardsSeffVG::dseff(_p_cut, _al, _m);
-  std::cout << "cut VG Seff has p_cut=" << _p_cut << " so seff_cut=" << _s_cut << " and seff=0 at p=" << -_s_cut/_ds_cut + _p_cut << "\n";
+  Moose::out << "cut VG Seff has p_cut=" << _p_cut << " so seff_cut=" << _s_cut << " and seff=0 at p=" << -_s_cut/_ds_cut + _p_cut << "\n";
 }
 
 

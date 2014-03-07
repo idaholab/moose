@@ -32,7 +32,7 @@ _darcy_mass_flux_water(getMaterialProperty<RealGradient>("darcy_mass_flux_water"
 Real
 FluidFluxPressure::computeQpResidual()
 {
-//  std::cout << _tau_water[_qp] << "\n";
+//  Moose::out << _tau_water[_qp] << "\n";
     return _tau_water[_qp]*Diffusion::computeQpResidual();
     //  return -_darcy_mass_flux_water[_qp]*_grad_test[_i][_qp]; //_tau_water[_qp]*Diffusion::computeQpResidual();
 }
@@ -42,4 +42,3 @@ FluidFluxPressure::computeQpJacobian()
 {
     return _tau_water[_qp]*Diffusion::computeQpJacobian();
 }
-

@@ -75,7 +75,7 @@ INSExplicitTimestepSelector::execute()
     Real combined_limit_dt = 2.*(_mu / _rho) / vel_mag / vel_mag;
 
     // // Debugging:
-    // std::cout << "courant_limit_dt   = " << courant_limit_dt   << "\n"
+    // Moose::out << "courant_limit_dt   = " << courant_limit_dt   << "\n"
     //           << "diffusive_limit_dt = " << diffusive_limit_dt << "\n"
     //           << "combined_limit_dt  = " << combined_limit_dt
     //           << std::endl;

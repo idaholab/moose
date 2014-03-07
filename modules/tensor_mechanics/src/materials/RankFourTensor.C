@@ -378,13 +378,13 @@ RankFourTensor::print()
   for(unsigned int i=0; i<N; i++)
     for(unsigned int j=0; j<N; j++)
     {
-      std::cout << "i = " << i << " j = " << j << std::endl;
+      Moose::out << "i = " << i << " j = " << j << std::endl;
       for(unsigned int k=0; k<N; k++)
       {
         for(unsigned int l=0; l<N; l++)
-          std::cout << std::setw(15) <<s(i,j,k,l)<<" ";
+          Moose::out << std::setw(15) <<s(i,j,k,l)<<" ";
 
-        std::cout <<std::endl;
+        Moose::out <<std::endl;
       }
     }
 

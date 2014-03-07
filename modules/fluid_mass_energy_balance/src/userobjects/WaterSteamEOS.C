@@ -352,7 +352,7 @@ while (itr < 151)                                           //exits if Newton it
 
     if (itr > 150)
     {
-      //std::cout << "water_eq_of_state: Newton iteration does not converge within 150 times. STOP." << std::endl;
+      //Moose::out << "water_eq_of_state: Newton iteration does not converge within 150 times. STOP." << std::endl;
       break;
     }
   }
@@ -528,7 +528,7 @@ Real WaterSteamEOS::steamEquationOfStatePH (Real enth_in, Real press_in, Real te
     if (itr > 150)
     {
 
-      //std::cout << "steam_eq_of_state: Newton iteration does not converge within 150 times. STOP." << std::endl;
+      //Moose::out << "steam_eq_of_state: Newton iteration does not converge within 150 times. STOP." << std::endl;
       break;
 
     }
@@ -997,4 +997,3 @@ Real WaterSteamEOS::waterAndSteamEquationOfStatePropertiesWithDerivativesPH (Rea
   }
   return (0);
 }
-

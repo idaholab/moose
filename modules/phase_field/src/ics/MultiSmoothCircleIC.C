@@ -57,7 +57,7 @@ MultiSmoothCircleIC::initialSetup()
        while (rr < _bubspac && num_tries < _numtries)
        {
          num_tries++;
-         //std::cout<<"num_tries: "<<num_tries<<std::endl;
+         //Moose::out<<"num_tries: "<<num_tries<<std::endl;
 
          Real ran1 = MooseRandom::rand();
          Real ran2 = MooseRandom::rand();
@@ -90,7 +90,7 @@ MultiSmoothCircleIC::initialSetup()
 
        if (num_tries == _numtries)
        {
-         std::cout<<"Too many tries in MultiSmoothCircle IC "<<std::endl;
+         Moose::out<<"Too many tries in MultiSmoothCircle IC "<<std::endl;
          mooseError("Toom many tried in MultiSmoothCircleIC");
        }
 

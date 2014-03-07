@@ -53,7 +53,7 @@ EnthalpyTimeDerivative::computeQpResidual()
           - ((_porosity[_qp] * _time_old_density[_qp] * _u_old[_qp]) + ((1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _time_old_temperature[_qp])))
     * _test[_i][_qp] /_dt;
   //REAL dphirho_dt = ((_porosity[_qp]*_density_water[_qp])-(_porosity_old[_qp]*_density_water_old[_qp]))/_dt;
-  // std::cout <<_porosity[_qp]<< "\n";
+  // Moose::out <<_porosity[_qp]<< "\n";
   /*
     Real tmp1=(((_porosity[_qp]*_density_water[_qp]*_specific_heat_water[_qp])+
     ((1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]))*_u[_qp]-

@@ -31,10 +31,10 @@ void
 PolycrystalKernelAction::act()
 {
 #ifdef DEBUG
-  std::cerr << "Inside the PolyCrystalKernelAction Object\n";
-  std::cerr << "var name base:" << _var_name_base;
+  Moose::err << "Inside the PolyCrystalKernelAction Object\n";
+  Moose::err << "var name base:" << _var_name_base;
 #endif
-  // std::cout << "Implicit = " << _implicit << std::cout;
+  // Moose::out << "Implicit = " << _implicit << Moose::out;
 
 
   for (unsigned int crys = 0; crys<_crys_num; crys++)

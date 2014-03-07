@@ -49,7 +49,7 @@ SolidMechanicsAction::act()
 
   if(isParamValid("block")) // Should it be restricted to certain blocks?
   {
-    std::cout<<"Restricting to blocks!"<<std::endl;
+    Moose::out<<"Restricting to blocks!"<<std::endl;
     std::vector<SubdomainName> block = getParam<std::vector<SubdomainName> >("block");
     for(unsigned int i=0; i < block.size(); i++)
       subdomains.insert(_problem->mesh().getSubdomainID(block[i]));

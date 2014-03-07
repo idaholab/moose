@@ -146,8 +146,8 @@ PolycrystalReducedIC::initialSetup()
           }
         _assigned_op[grain] = mx_ind;
       }
-      //std::cout << "For grain " << grain << ", center point = " << _centerpoints[grain](0) << " " << _centerpoints[grain](1) << "\n";
-      //std::cout << "Max index is " << _assigned_op[grain] << ", with a max distance of " << mx << "\n";
+      //Moose::out << "For grain " << grain << ", center point = " << _centerpoints[grain](0) << " " << _centerpoints[grain](1) << "\n";
+      //Moose::out << "Max index is " << _assigned_op[grain] << ", with a max distance of " << mx << "\n";
     }
 }
 
@@ -189,8 +189,3 @@ PolycrystalReducedIC::value(const Point & p)
   return val;
 
 }
-
-
-
-
-

@@ -35,7 +35,7 @@ LatticeSmoothCircleIC::initialSetup()
   for (unsigned int i = 0; i<3; ++i)
   circles_per_side[i] = _circles_per_side;*/
 
-  //std::cout << "1: "<< _circles_per_side[0] << " 2: "<< _circles_per_side[1] << " 3: " << _circles_per_side[2] << std::endl;
+  //Moose::out << "1: "<< _circles_per_side[0] << " 2: "<< _circles_per_side[1] << " 3: " << _circles_per_side[2] << std::endl;
 
   if (_Ly != 0.0 && _circles_per_side[1] == 0)
     mooseError("If domain is > 1D, circles_per_side must have more than one value");

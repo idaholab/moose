@@ -35,7 +35,7 @@ Real NSSUPGMass::computeQpResidual()
 
   // Debugging: Print results only if they are nonzero
 //  if (std::abs(result) > 0.)
-//    std::cout << "SUPGMass[" << _qp << "]=" << result << std::endl;
+//    Moose::out << "SUPGMass[" << _qp << "]=" << result << std::endl;
 
   return result;
 }
@@ -79,14 +79,14 @@ Real NSSUPGMass::compute_jacobian(unsigned var)
 
   // Debugging
   // if (time_part != 0.0)
-  //   std::cout << "time_part=" << time_part << std::endl;
+  //   Moose::out << "time_part=" << time_part << std::endl;
 
   // Store result so we can print it before returning
   Real result = _taum[_qp] * (time_part + _grad_test[_i][_qp] * (_calA[_qp][m] * _grad_phi[_j][_qp]));
 
   // Debugging
   // if (std::abs(result) > 0.0)
-  //   std::cout << "SUPG mass jacobian[qp=" << _qp << "] = " << result << std::endl;
+  //   Moose::out << "SUPG mass jacobian[qp=" << _qp << "] = " << result << std::endl;
 
   return result;
 }

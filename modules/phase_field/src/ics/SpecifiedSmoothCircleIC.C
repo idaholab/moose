@@ -36,7 +36,7 @@ SpecifiedSmoothCircleIC::initialSetup()
 
   unsigned int y_size, z_size, radii_size;
   _numbub = _x_positions.size();
-  //std::cout << "check 1" << "\n";
+  //Moose::out << "check 1" << "\n";
   y_size = _y_positions.size();
   z_size = _z_positions.size();
   radii_size = _radii.size();
@@ -45,7 +45,7 @@ SpecifiedSmoothCircleIC::initialSetup()
   if((_numbub != y_size)||(_numbub != z_size)||(_numbub != radii_size))
     mooseError("Please match the number of radii to the size of the position vectors.");
 
-  //std::cout << "check 2" << "\n";
+  //Moose::out << "check 2" << "\n";
 
   //resize the vector of Points
    _bubcent.resize(_numbub);
@@ -59,7 +59,5 @@ SpecifiedSmoothCircleIC::initialSetup()
     _bubcent[i](2) = _z_positions[i];
     _bubradi[i] = _radii[i];
   }
-  //std::cout << "check 3" << "\n";
+  //Moose::out << "check 3" << "\n";
 }
-
-

@@ -50,7 +50,7 @@ GBEvolution::GBEvolution(const std::string & name,
    _tgrad_corr_mult(declareProperty<Real>("tgrad_corr_mult")),
    _kb(8.617343e-5) //Boltzmann constant in eV/K
 {
-  //std::cout << "GB mob = " << _GBMobility << ", GBmob0 = " << _GBmob0 << std::endl;
+  //Moose::out << "GB mob = " << _GBMobility << ", GBmob0 = " << _GBmob0 << std::endl;
 
   if (_GBMobility == -1 && _GBmob0 == 0)
     mooseError("Either a value for GBMobility or for GBmob0 and Q must be provided");
@@ -101,4 +101,3 @@ GBEvolution::computeProperties()
 
   }
 }
-

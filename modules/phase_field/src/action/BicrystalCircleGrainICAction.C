@@ -53,7 +53,7 @@ void
 BicrystalCircleGrainICAction::act()
 {
 #ifdef DEBUG
-  std::cerr << "Inside the BicrystalCircleGrainICAction Object\n";
+  Moose::err << "Inside the BicrystalCircleGrainICAction Object\n";
 #endif
 
 // Loop through the number of order parameters

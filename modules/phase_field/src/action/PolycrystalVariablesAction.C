@@ -39,8 +39,8 @@ void
 PolycrystalVariablesAction::act()
 {
 #ifdef DEBUG
-  std::cerr << "Inside the PolycrystalVariablesAction Object\n";
-  std::cerr << "VariableBase: " << _var_name_base
+  Moose::err << "Inside the PolycrystalVariablesAction Object\n";
+  Moose::err << "VariableBase: " << _var_name_base
             << "\torder: " << getParam<std::string>("order")
             << "\tfamily: " << getParam<std::string>("family") << std::endl;
 #endif
@@ -61,4 +61,3 @@ PolycrystalVariablesAction::act()
                           getParam<Real>("scaling"));
   }
 }
-

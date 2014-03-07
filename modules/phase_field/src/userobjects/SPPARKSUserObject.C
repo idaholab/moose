@@ -77,7 +77,7 @@ SPPARKSUserObject::SPPARKSUserObject(const std::string & name, InputParameters p
 
 
 
-  std::cout << std::endl
+  Moose::out << std::endl
             << ">>>> STARTING SPPARKS <<<<" << std::endl;
   spparks_open( 0, NULL, libMesh::COMM_WORLD, &_spparks );
   if (!_spparks)
@@ -87,7 +87,7 @@ SPPARKSUserObject::SPPARKSUserObject(const std::string & name, InputParameters p
 
   char * file = new char[_file.length()+1];
   std::strcpy( file, _file.c_str() );
-  std::cout << std::endl
+  Moose::out << std::endl
             << ">>>> RUNNING SPPARKS FILE " << _file << " <<<<" << std::endl;
   spparks_file(_spparks, file);
 
@@ -96,37 +96,37 @@ SPPARKSUserObject::SPPARKSUserObject(const std::string & name, InputParameters p
   char dimension[] = "dimension";
   getSPPARKSPointer(iptr, dimension);
   _dim = *iptr;
-  std::cerr << std::endl
+  Moose::err << std::endl
             << ">>>> SPPARKS DIMENSION: " << _dim << " <<<<" << std::endl;
 
   double * dptr;
   char boxxlo[] = "boxxlo";
   getSPPARKSPointer(dptr, boxxlo);
   double xlo = *dptr;
-  std::cerr << std::endl
+  Moose::err << std::endl
             << ">>>> SPPARKS BOXXLO: " << xlo << " <<<<" << std::endl;
 
   char nlocal[] = "nlocal";
   getSPPARKSPointer(iptr, nlocal);
   int nlcl = *iptr;
-  std::cerr << std::endl
+  Moose::err << std::endl
             << ">>>> SPPARKS NLOCAL: " << nlcl << " <<<<" << std::endl;
 
   char id[] = "id";
   getSPPARKSPointer(iptr, id);
   int * id_array = iptr;
-  std::cerr << std::endl
+  Moose::err << std::endl
             << ">>>> SPPARKS ID: " << id_array << " <<<<" << std::endl;
 
   double ** ddptr;
   char xyz[] = "xyz";
   getSPPARKSPointer(ddptr, xyz);
   double ** xyz_array = ddptr;
-  std::cerr << std::endl
+  Moose::err << std::endl
             << ">>>> SPPARKS XYZ: " << xyz_array << " <<<<" << std::endl;
   // for (unsigned i = 0; i < nlcl; ++i)
   // {
-  //   std::cout << id_array[i] << "\t"
+  //   Moose::out << id_array[i] << "\t"
   //             << xyz_array[i][0] << " "
   //             << xyz_array[i][1] << " "
   //             << xyz_array[i][2] << std::endl;

@@ -229,7 +229,7 @@ RichardsMaterial::computeProperties()
 
       _sat_old[qp][i] = (*_material_sat_UO[i]).sat(_seff_old[qp][i]);
       _sat[qp][i] = (*_material_sat_UO[i]).sat(_seff[qp][i]);
-      //std::cout << "qp= " << qp << " i= " << i << " pressure= " << (*_pressure_vals[0])[qp] << " " << (*_pressure_vals[1])[qp] << " sat= " << _sat[qp][i] << "\n";
+      //Moose::out << "qp= " << qp << " i= " << i << " pressure= " << (*_pressure_vals[0])[qp] << " " << (*_pressure_vals[1])[qp] << " sat= " << _sat[qp][i] << "\n";
       _dsat[qp][i].resize(_num_p);
       for (unsigned int j=0 ; j<_num_p; ++j)
       {

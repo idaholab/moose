@@ -38,10 +38,10 @@ Convection::Convection(const std::string & name, InputParameters parameters)
 Real Convection::computeQpResidual()
 {
   /*
-  std::cout<<"phi : "<<_phi[_i][_qp]<<std::endl;
-  std::cout<<"test: "<<_test[_i][_qp]<<std::endl;
-  std::cout<<"res : "<<(velocity*_grad_u[_qp])<<std::endl;
-  std::cout<<"all : "<<_test[_i][_qp]*(velocity*_grad_u[_qp])<<std::endl;
+  Moose::out<<"phi : "<<_phi[_i][_qp]<<std::endl;
+  Moose::out<<"test: "<<_test[_i][_qp]<<std::endl;
+  Moose::out<<"res : "<<(velocity*_grad_u[_qp])<<std::endl;
+  Moose::out<<"all : "<<_test[_i][_qp]*(velocity*_grad_u[_qp])<<std::endl;
   */
 
   // velocity * _grad_u[_qp] is actually doing a dot product

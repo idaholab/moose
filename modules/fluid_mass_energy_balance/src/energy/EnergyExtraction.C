@@ -61,8 +61,8 @@ Real EnergyExtraction::computeQpResidual()
         zmax = _p(2) + _range_param[2]/2.0;
     }
 
-    //  std::cout << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<"\n";
-    //  std::cout << "_e=" <<xmin<<" "<<ymin<<" "<<zmin<<"\n";
+    //  Moose::out << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<"\n";
+    //  Moose::out << "_e=" <<xmin<<" "<<ymin<<" "<<zmin<<"\n";
 
     if(_point_param.size() > 2)
     {
@@ -71,7 +71,7 @@ Real EnergyExtraction::computeQpResidual()
             _q_point[_qp](1) >= ymin && _q_point[_qp](1) <= ymax &&
             _q_point[_qp](2) >= zmin && _q_point[_qp](2) <= zmax )
         {
-            //      std::cout << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<" "<<_value<<"\n";
+            //      Moose::out << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<" "<<_value<<"\n";
             return -_test[_i][_qp]*_value*_u[_qp]/_range_param[0]/_range_param[1]/_range_param[2];
         }
 
@@ -109,8 +109,8 @@ Real EnergyExtraction::computeQpJacobian()
         zmax = _p(2) + _range_param[2]/2.0;
     }
 
-    //  std::cout << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<"\n";
-    //  std::cout << "_e=" <<xmin<<" "<<ymin<<" "<<zmin<<"\n";
+    //  Moose::out << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<"\n";
+    //  Moose::out << "_e=" <<xmin<<" "<<ymin<<" "<<zmin<<"\n";
 
     if(_point_param.size() > 2)
     {
@@ -119,7 +119,7 @@ Real EnergyExtraction::computeQpJacobian()
             _q_point[_qp](1) >= ymin && _q_point[_qp](1) <= ymax &&
             _q_point[_qp](2) >= zmin && _q_point[_qp](2) <= zmax )
         {
-            //      std::cout << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<" "<<_value<<"\n";
+            //      Moose::out << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<" "<<_value<<"\n";
             return -_test[_i][_qp]*_value*_phi[_j][_qp]/_range_param[0]/_range_param[1]/_range_param[2];
         }
 
@@ -148,4 +148,3 @@ Real EnergyExtraction::computeQpOffDiagJacobian(unsigned int /*jvar*/)
    return 0.0;
 
 }
-

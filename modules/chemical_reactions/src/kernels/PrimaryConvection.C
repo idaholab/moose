@@ -34,7 +34,7 @@ Real PrimaryConvection::computeQpResidual()
   // _grad_p[_qp] * _grad_u[_qp] is actually doing a dot product
   RealGradient _Darcy_vel=-_grad_p[_qp]*_cond[_qp];
 
-//  std::cout << "Pore velocity " << _Darcy_vel(0) << std::endl;
+//  Moose::out << "Pore velocity " << _Darcy_vel(0) << std::endl;
 
   return _test[_i][_qp]*(_Darcy_vel*_grad_u[_qp]);
 }

@@ -39,7 +39,7 @@ RichardsRelPermVG1::RichardsRelPermVG1(const std::string & name, InputParameters
   _vg1_linear = RichardsRelPermVG::drelperm(_scut);
   _vg1_quad = RichardsRelPermVG::d2relperm(_scut);
   _vg1_cub = (1 - _vg1_const - _vg1_linear*(1 - _scut) - _vg1_quad*std::pow(1 - _scut, 2))/std::pow(1 - _scut, 3);
-  std::cout << "Relative permeability of VG1 type has cubic coefficients " << _vg1_const << " " << _vg1_linear << " " << _vg1_quad << " " << _vg1_cub << "\n";
+  Moose::out << "Relative permeability of VG1 type has cubic coefficients " << _vg1_const << " " << _vg1_linear << " " << _vg1_quad << " " << _vg1_cub << "\n";
 }
 
 
@@ -105,4 +105,3 @@ RichardsRelPermVG1::d2relperm(Real seff) const
   Real krelpp = 2*_vg1_quad + 6*_vg1_cub*(s_internal - _scut);
   return krelpp/std::pow(1.0 - _simm, 2);
 }
-

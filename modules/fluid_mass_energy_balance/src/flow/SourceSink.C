@@ -61,8 +61,8 @@ Real SourceSink::computeQpResidual()
     zmax = _p(2) + _range_param[2]/2.0;
   }
 
-//  std::cout << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<"\n";
-//  std::cout << "_e=" <<xmin<<" "<<ymin<<" "<<zmin<<"\n";
+//  Moose::out << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<"\n";
+//  Moose::out << "_e=" <<xmin<<" "<<ymin<<" "<<zmin<<"\n";
 
   if(_point_param.size() > 2)
   {
@@ -76,7 +76,7 @@ Real SourceSink::computeQpResidual()
       Real strength = -_test[_i][_qp]*_value/_range_param[0]/_range_param[1]/_range_param[2];
       //    Real strength2 = _value/_range_param[0]/_range_param[1]/_range_param[2];
       // if (strength !=0)
-      //   std::cout << "_E= " <<_q_point[_qp](0)<<" "<<_q_point[_qp](1)<<" "<<_q_point[_qp](2)<<" "<<_value<< " " <<strength2<<"\n";
+      //   Moose::out << "_E= " <<_q_point[_qp](0)<<" "<<_q_point[_qp](1)<<" "<<_q_point[_qp](2)<<" "<<_value<< " " <<strength2<<"\n";
 
       return strength;
       //  return -_test[_i][_qp]*_value/_range_param[0]/_range_param[1]/_range_param[2];

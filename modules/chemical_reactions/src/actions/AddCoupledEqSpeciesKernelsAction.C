@@ -85,10 +85,10 @@ AddCoupledEqSpeciesKernelsAction::act()
   while (re_reactions.FindAndConsume(&input, &single_reaction, &equal_coeff))
   {
     n_reactions += 1;
-    std::cout << "\n\n" << n_reactions << "_th reaction: " << single_reaction << std::endl;
+    Moose::out << "\n\n" << n_reactions << "_th reaction: " << single_reaction << std::endl;
 
     eq_const.push_back(equal_coeff);
-    std::cout << "\nEqualibrium: " << eq_const[n_reactions-1] << std::endl;
+    Moose::out << "\nEqualibrium: " << eq_const[n_reactions-1] << std::endl;
 
     // capture all of the terms
     std::string species, coeff_str;
@@ -124,7 +124,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         {
           local_stos.push_back(coeff);
           local_species_list.push_back(species);
-          std::cout << "\nSpecies: " << species << "\n"
+          Moose::out << "\nSpecies: " << species << "\n"
                     << "Coeff: " << coeff << std::endl;
         }
 
@@ -139,7 +139,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         }
         else
           sign = 1;
-        std::cout << "Operator: " << term << "\n\n";
+        Moose::out << "Operator: " << term << "\n\n";
 
         if (term == "=")
           secondary = true;
@@ -148,7 +148,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         mooseError("Error parsing term: " << term.as_string());
     }
 
-    std::cout << "\nEquilibrium Species: " << eq_species[n_reactions-1] << std::endl;
+    Moose::out << "\nEquilibrium Species: " << eq_species[n_reactions-1] << std::endl;
 
     stos.push_back(local_stos);
     primary_species_involved.push_back(local_species_list);
@@ -158,12 +158,12 @@ AddCoupledEqSpeciesKernelsAction::act()
   if (n_reactions == 0) mooseError("No equilibrium reaction provided!");
   // End parsing
 
-  std::cout << "Number of reactions: " << n_reactions << std::endl;
+  Moose::out << "Number of reactions: " << n_reactions << std::endl;
 
   // Start picking out primary species and coupled primary species and assigning corresponding stoichiomentric coefficients
   for (unsigned int i=0; i < vars.size(); i++)
   {
-    std::cout << "\nPrimary species - " << vars[i] << std::endl;
+    Moose::out << "\nPrimary species - " << vars[i] << std::endl;
 
     sto_u[i].resize(n_reactions);
     sto_v[i].resize(n_reactions);
@@ -178,7 +178,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         if (primary_species_involved[j][k] == vars[i]) primary_participation[i][j] = true;
       }
 
-      std::cout << "\nPrimary species " << vars[i] << " participation in " << j << "_th reaction (0 or 1): " << primary_participation[i][j] << std::endl;
+      Moose::out << "\nPrimary species " << vars[i] << " participation in " << j << "_th reaction (0 or 1): " << primary_participation[i][j] << std::endl;
 
       if (primary_participation[i][j])
       {
@@ -188,7 +188,7 @@ AddCoupledEqSpeciesKernelsAction::act()
           {
             sto_u[i][j] = stos[j][k];
             weight[j] = stos[j][k];
-            std::cout << "\nEq weight: " << weight[j] << std::endl;
+            Moose::out << "\nEq weight: " << weight[j] << std::endl;
           }
           else
           {
@@ -197,12 +197,12 @@ AddCoupledEqSpeciesKernelsAction::act()
           }
         }
 
-        std::cout << "\n#Coupled species: " << coupled_v[i][j].size() << std::endl;
-        std::cout << "\nCoupled species: ";
+        Moose::out << "\n#Coupled species: " << coupled_v[i][j].size() << std::endl;
+        Moose::out << "\nCoupled species: ";
 
         for (unsigned int m=0; m < coupled_v[i][j].size(); m++)
         {
-          std::cout <<  coupled_v[i][j][m] << "  " << std::endl;
+          Moose::out <<  coupled_v[i][j][m] << "  " << std::endl;
         }
 
       }
@@ -230,7 +230,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         params_sub.set<std::vector<VariableName> >("v") = coupled_v[i][j];
         _problem->addKernel("CoupledBEEquilibriumSub", vars[i]+"_"+eq_species[j]+"_sub", params_sub);
 
-        std::cout << vars[i]+"_"+eq_species[j]+"_sub" << "\n";
+        Moose::out << vars[i]+"_"+eq_species[j]+"_sub" << "\n";
         params_sub.print();
 
         InputParameters params_cd = _factory.getValidParams("CoupledDiffusionReactionSub");
@@ -242,10 +242,10 @@ AddCoupledEqSpeciesKernelsAction::act()
         params_cd.set<std::vector<VariableName> >("v") = coupled_v[i][j];
         _problem->addKernel("CoupledDiffusionReactionSub", vars[i]+"_"+eq_species[j]+"_cd", params_cd);
 
-        std::cout << vars[i]+"_"+eq_species[j]+"_diff" << "\n";
+        Moose::out << vars[i]+"_"+eq_species[j]+"_diff" << "\n";
         params_cd.print();
 
-        std::cout << "whether pressure is present" << _pars.isParamValid("pressure") << "\n";
+        Moose::out << "whether pressure is present" << _pars.isParamValid("pressure") << "\n";
 
         if (_pars.isParamValid("pressure"))
         {
@@ -253,7 +253,7 @@ AddCoupledEqSpeciesKernelsAction::act()
           p = getParam<std::string>("pressure");
           std::vector<VariableName> press(1);
           press[0] = p;
-          std::cout << "coupled gradient of p" << press[0] << "\n";
+          Moose::out << "coupled gradient of p" << press[0] << "\n";
 
           InputParameters params_conv = _factory.getValidParams("CoupledConvectionReactionSub");
           params_conv.set<NonlinearVariableName>("variable") = vars[i];
@@ -266,12 +266,11 @@ AddCoupledEqSpeciesKernelsAction::act()
           params_conv.set<std::vector<VariableName> >("p") = press;
           _problem->addKernel("CoupledConvectionReactionSub", vars[i]+"_"+eq_species[j]+"_conv", params_conv);
 
-          std::cout << vars[i]+"_"+eq_species[j]+"_conv" << "\n";
+          Moose::out << vars[i]+"_"+eq_species[j]+"_conv" << "\n";
           params_conv.print();
         }
       }
     }
   }
-  std::cout << "\n";
+  Moose::out << "\n";
 }
-

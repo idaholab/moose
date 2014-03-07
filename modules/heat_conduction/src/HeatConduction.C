@@ -91,7 +91,7 @@ HeatConductionKernel::computeQpResidual()
 //   }
 //   else
 //   {
-//     std::cerr << "NaN found at " << __LINE__ << " in " << __FILE__ << "!\n"
+//     Moose::err << "NaN found at " << __LINE__ << " in " << __FILE__ << "!\n"
 //               << "Processor: " << libMesh::processor_id() << "\n"
 //               << "_k[_qp]: " << _k[_qp] << "\n"
 //               << "Diffusion resid: " << Diffusion::computeQpResidual() << "\n"

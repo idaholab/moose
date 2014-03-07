@@ -44,7 +44,7 @@ void
 PolycrystalVoronoiICAction::act()
 {
 #ifdef DEBUG
-  std::cerr << "Inside the PolycrystalVoronoiICAction Object\n";
+  Moose::err << "Inside the PolycrystalVoronoiICAction Object\n";
 #endif
 
 // Loop through the number of order parameters

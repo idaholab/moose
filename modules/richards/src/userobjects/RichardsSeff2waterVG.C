@@ -35,7 +35,7 @@ Real
 RichardsSeff2waterVG::seff(std::vector<VariableValue *> p, unsigned int qp) const
 {
   Real negpc = (*p[0])[qp] - (*p[1])[qp];
-  //std::cout << "water negpc=" << negpc << " seff=" << RichardsSeffVG::seff(negpc, _al, _m) << "\n";
+  //Moose::out << "water negpc=" << negpc << " seff=" << RichardsSeffVG::seff(negpc, _al, _m) << "\n";
   return RichardsSeffVG::seff(negpc, _al, _m);
 }
 
@@ -62,4 +62,3 @@ RichardsSeff2waterVG::d2seff(std::vector<VariableValue *> p, unsigned int qp) co
   answer[1][1] = answer[0][0];
   return answer;
 }
-

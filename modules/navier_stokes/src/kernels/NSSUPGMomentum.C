@@ -55,7 +55,7 @@ Real NSSUPGMomentum::computeQpResidual()
       vel(_component) * U_grad_phi;
 
     mass_term = _tauc[_qp] * mass_coeff * _strong_residuals[_qp][0];
-    //std::cout << "mass_term[" << _qp << "]=" << mass_term << std::endl;
+    //Moose::out << "mass_term[" << _qp << "]=" << mass_term << std::endl;
 
     // 2.) The momentum-residual term:
     Real mom_term1 = U_grad_phi * _strong_residuals[_qp][_component+1]; // <- momentum indices are 1,2,3, _component is 0,1,2
@@ -63,16 +63,16 @@ Real NSSUPGMomentum::computeQpResidual()
     Real mom_term3 = vel(_component) * (_grad_test[_i][_qp]*Ru);
 
     mom_term = _taum[_qp] * (mom_term1 + mom_term2 + mom_term3);
-    //std::cout << "mom_term[" << _qp << "]=" << mom_term << std::endl;
+    //Moose::out << "mom_term[" << _qp << "]=" << mom_term << std::endl;
 
     // 3.) The energy-residual term:
     energy_term = _taue[_qp] * (_gamma-1.) * dphi_dxk * _strong_residuals[_qp][4];
-    //std::cout << "energy_term[" << _qp << "]=" << energy_term << std::endl;
+    //Moose::out << "energy_term[" << _qp << "]=" << energy_term << std::endl;
   }
 
   // For printing purposes only
   Real result = mass_term + mom_term + energy_term;
-  // std::cout << "result[" << _qp << "]=" << result << std::endl;
+  // Moose::out << "result[" << _qp << "]=" << result << std::endl;
 
   return result;
 }

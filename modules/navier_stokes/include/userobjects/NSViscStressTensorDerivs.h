@@ -34,14 +34,14 @@ private:
 template <class T>
 Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
 {
-  //  std::cout << "k=" << k << ", ell=" << ell << ", m=" << m << std::endl;
+  //  Moose::out << "k=" << k << ", ell=" << ell << ", m=" << m << std::endl;
 
   // Try to access underlying data.  Since this class is a friend, we can
   // directly access _qp and other protected data.  This only works if the
   // individual variables have the **same names** in all types T which may
   // be used to construct this class.
 
-  //  std::cout << "_data._qp=" << _data._qp << std::endl;
+  //  Moose::out << "_data._qp=" << _data._qp << std::endl;
 
   //
   // Some error checking on input indices...
@@ -101,7 +101,7 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
       term4 = 2./3./rho * (U*grad_phij + divU*phij);
     }
 
-    //std::cout << term1 << ", " << term2 << ", " << term3 << ", " << term4 << std::endl;
+    //Moose::out << term1 << ", " << term2 << ", " << term3 << ", " << term4 << std::endl;
 
     // Sum up result and return
     return nu*(term1 + term2 + term3 + term4);

@@ -178,12 +178,12 @@ ContactMaster::updateContactSet(bool beginning_of_step)
 
       Real resid( -(pinfo->_normal * pinfo->_contact_force) / area );
 
-      // std::cout << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
+      // Moose::out << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
       const Real distance( pinfo->_normal * (pinfo->_closest_point - _mesh.node(node->id())));
 
       if (hpit != has_penetrated.end() && resid < -_tension_release && locked_this_step[slave_node_num] < 2)
       {
-        std::cout << "Releasing node " << node->id() << " " << resid << " < " << -_tension_release << std::endl;
+        Moose::out << "Releasing node " << node->id() << " " << resid << " < " << -_tension_release << std::endl;
         has_penetrated.erase(hpit);
         pinfo->_contact_force.zero();
         pinfo->_mech_status=PenetrationInfo::MS_NO_CONTACT;
@@ -193,7 +193,7 @@ ContactMaster::updateContactSet(bool beginning_of_step)
       {
         if (hpit == has_penetrated.end())
         {
-          std::cout << "Capturing node " << node->id() << " " << distance << " " << unlocked_this_step[slave_node_num] <<  std::endl;
+          Moose::out << "Capturing node " << node->id() << " " << distance << " " << unlocked_this_step[slave_node_num] <<  std::endl;
           ++locked_this_step[slave_node_num];
           has_penetrated.insert(slave_node_num);
         }
