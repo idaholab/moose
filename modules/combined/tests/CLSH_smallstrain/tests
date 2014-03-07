@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'CLSH_smallstrain.i'
+    exodiff = 'CLSH_smallstrain_out.e'
+    abs_zero = 1e-09
+    scale_refine = 1
+  [../]
+[]

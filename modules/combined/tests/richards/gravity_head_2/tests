@@ -1,0 +1,75 @@
+[Tests]
+  [./test_gh01]
+    type = 'CSVDiff'
+    input = 'gh01.i'
+    csvdiff = 'gh01.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-5
+  [../]
+  [./test_gh02]
+    type = 'CSVDiff'
+    input = 'gh02.i'
+    csvdiff = 'gh02.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-5
+  [../]
+  [./test_gh03]
+    type = 'CSVDiff'
+    input = 'gh03.i'
+    csvdiff = 'gh03.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-5
+  [../]
+  [./test_gh04]
+    type = 'CSVDiff'
+    skip = 'This test fails badly for unknown reason on INL computers'
+    input = 'gh04.i'
+    csvdiff = 'gh04.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-5
+  [../]
+  [./test_gh05]
+    type = 'CSVDiff'
+    input = 'gh05.i'
+    csvdiff = 'gh05.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-5
+  [../]
+  [./test_gh06]
+    type = 'CSVDiff'
+    input = 'gh06.i'
+    csvdiff = 'gh06.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-5
+  [../]
+  [./test_gh07]
+    type = 'CSVDiff'
+    input = 'gh07.i'
+    csvdiff = 'gh07.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-5
+  [../]
+  [./test_gh08]
+    type = 'CSVDiff'
+    input = 'gh08.i'
+    csvdiff = 'gh08.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-5
+  [../]
+  [./test_gh17]
+    type = 'CSVDiff'
+    input = 'gh17.i'
+    csvdiff = 'gh17.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-5
+  [../]
+
+  [./test_gh18]
+    type = 'Exodiff'
+    input = 'gh18.i'
+    exodiff = 'gh18.e'
+    exodiff_opts = '-steps last'
+    rel_err = 1e-5
+    use_old_floor = True
+  [../]
+[]

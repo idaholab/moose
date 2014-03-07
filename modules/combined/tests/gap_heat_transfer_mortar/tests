@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = 'gap_heat_transfer_mortar.i'
+    exodiff = 'gap_heat_transfer_mortar_out.e'
+  [../]
+
+  [./displaced]
+    type = Exodiff
+    input = 'gap_heat_transfer_mortar_displaced.i'
+    exodiff = 'gap_heat_transfer_mortar_displaced_out.e'
+  [../]
+[]

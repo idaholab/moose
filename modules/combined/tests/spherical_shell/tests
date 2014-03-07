@@ -1,0 +1,21 @@
+[Tests]
+
+  [./3D]
+    type = Exodiff
+    input = '3D_test.i'
+    exodiff = '3D_out.e'
+    valgrind = 'HEAVY'
+  [../]
+  [./RZ]
+    type = Exodiff
+    input = '2D-RZ_test.i'
+    exodiff = '2D-RZ_out.e'
+  [../]
+  [./RSpherical]
+    type = Exodiff
+    input = '1D-SPH_test.i'
+    exodiff = '1D-SPH_out.e'
+    max_parallel = 2
+  [../]
+
+[]

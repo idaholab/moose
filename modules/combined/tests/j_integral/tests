@@ -1,0 +1,27 @@
+[Tests]
+ [./j_2d]
+   type = 'Exodiff'
+   input = 'j_integral_2d.i'
+   exodiff = 'j_integral_2d_out.e'
+ [../]
+ [./j_2d_mouth_dir]
+   type = 'Exodiff'
+   input = 'j_integral_2d_mouth_dir.i'
+   exodiff = 'j_integral_2d_mouth_dir_out.e'
+ [../]
+ [./j_3d_as_2d]
+   type = 'Exodiff'
+   input = 'j_integral_3d_as_2d.i'
+   exodiff = 'j_integral_3d_as_2d_out.e'
+ [../]
+ [./j_3d]
+   type = 'Exodiff'
+   input = 'j_integral_3d.i'
+   exodiff = 'j_integral_3d_out.e'
+ [../]
+ [./j_3d_mouth_dir]
+   type = 'Exodiff'
+   input = 'j_integral_3d_mouth_dir.i'
+   exodiff = 'j_integral_3d_mouth_dir_out.e'
+ [../]
+[]

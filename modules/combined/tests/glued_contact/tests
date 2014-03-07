@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'glued_contact_test.i'
+    exodiff = 'out.e'
+    abs_zero = 5e-05
+    max_parallel = 1
+  [../]
+[]

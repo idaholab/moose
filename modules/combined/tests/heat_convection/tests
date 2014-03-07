@@ -1,0 +1,35 @@
+[Tests]
+  [./test_3d_tf]
+    type = 'Exodiff'
+    input = 'heat_convection_3d_tf_test.i'
+    exodiff = 'out_3d_tf.e'
+    abs_zero = 1e-10
+  [../]
+
+  [./test_function]
+    type = 'Exodiff'
+    input = 'heat_convection_function.i'
+    exodiff = 'heat_convection_function_out.e'
+  [../]
+
+  [./test_rz]
+    type = 'Exodiff'
+    input = 'heat_convection_rz_test.i'
+    exodiff = 'out_rz.e'
+    abs_zero = 1e-10
+  [../]
+
+  [./test_3d]
+    type = 'Exodiff'
+    input = 'heat_convection_3d_test.i'
+    exodiff = 'out_3d.e'
+    abs_zero = 1e-10
+  [../]
+
+  [./test_rz_tf]
+    type = 'Exodiff'
+    input = 'heat_convection_rz_tf_test.i'
+    exodiff = 'out_rz_tf.e'
+    abs_zero = 1e-10
+  [../]
+[]

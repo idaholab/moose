@@ -1,0 +1,51 @@
+
+#  *****************************************************************
+#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF
+#
+#                       Version 2.46 (2011-07-11)
+#             Authors:  Richard Drake, rrdrake@sandia.gov
+#                       Greg Sjaardema, gdsjaar@sandia.gov
+#                       2013/06/20   13:23:03 MDT
+#
+#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF
+#  *****************************************************************
+
+#  FILE 1: /Users/halejd/gitProjects/code_trunk/elk/tests/nodal_area/nodal_area_Hex20_3_out.e
+#   Title: nodal_area_Hex20_3_out.e
+#          Dim = 3, Blocks = 2, Nodes = 445, Elements = 65, Nodesets = 6, Sidesets = 6
+#          Vars: Global = 2, Nodal = 9, Element = 1, Nodeset = 0, Sideset = 0, Times = 2
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation = 1e-05
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               1 @ t2
+
+GLOBAL VARIABLES relative 1.e-6 floor 1e-7
+	react_x     # min:               0 @ t1	max:       9.9995109 @ t2
+	total_area  # min:               0 @ t1	max:               1 @ t2
+
+NODAL VARIABLES relative 1.e-6 floor 1e-5
+	displ_x           # min:               0 @ t1,n1	max:           2e-05 @ t2,n1
+	displ_y           # min:               0 @ t1,n1	max:   5.2615946e-10 @ t2,n422
+	displ_z           # min:               0 @ t1,n1	max:    5.261572e-10 @ t2,n422
+	nodal_area_dummy_name        # min:               0 @ t1,n1	max:     0.041666667 @ t2,n387
+	react_x           # min:               0 @ t1,n1	max:      0.41664685 @ t2,n119
+	react_y relative 5e-5          # min:               0 @ t1,n1	max:   4.1620072e-05 @ t2,n350
+	react_z relative 5e-5          # min:               0 @ t1,n1	max:   4.1620062e-05 @ t2,n372
+	penetration       # min:               0 @ t1,n1	max:           1e-05 @ t1,n336
+	contact_pressure relative 5e-5 # min:               0 @ t1,n1	max:       9.9985806 @ t2,n366
+
+ELEMENT VARIABLES relative 1.e-6 floor 1e-4
+	stress_xx  # min:               0 @ t1,b1,e1	max:       9.9997349 @ t2,b1,e49
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES

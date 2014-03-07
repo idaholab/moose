@@ -1,0 +1,66 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#ifndef REFERENCERESIDUALPROBLEM_H
+#define REFERENCERESIDUALPROBLEM_H
+
+#include "FEProblem.h"
+
+class ReferenceResidualProblem;
+
+template<>
+InputParameters validParams<ReferenceResidualProblem>();
+
+/**
+ * FEProblem derived class to enable convergence checking relative to a user-specified postprocessor
+ */
+class ReferenceResidualProblem : public FEProblem
+{
+public:
+  ReferenceResidualProblem(const std::string & name, InputParameters params);
+  virtual ~ReferenceResidualProblem();
+
+  virtual void initialSetup();
+  virtual void timestepSetup();
+  void updateReferenceResidual();
+  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
+                                                                    const int it,
+                                                                    const Real xnorm,
+                                                                    const Real snorm,
+                                                                    const Real fnorm,
+                                                                    const Real rtol,
+                                                                    const Real stol,
+                                                                    const Real abstol,
+                                                                    const int nfuncs,
+                                                                    const int max_funcs,
+                                                                    const Real ref_resid,
+                                                                    const Real div_threshold);
+
+  bool checkConvergenceIndividVars(const Real fnorm,
+                                   const Real abstol,
+                                   const Real rtol,
+                                   const Real ref_resid);
+
+protected:
+  std::vector<std::string> _solnVarNames;
+  std::vector<std::string> _refResidVarNames;
+  std::vector<unsigned int> _solnVars;
+  std::vector<unsigned int> _refResidVars;
+  Real _accept_mult;
+  int _accept_iters;
+  std::vector<Real> _refResid;
+  std::vector<Real> _resid;
+};
+
+#endif /* REFERENCERESIDUALPROBLEM_H */
