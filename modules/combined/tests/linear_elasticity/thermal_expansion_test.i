@@ -1,4 +1,4 @@
-# This input file is designed to test the RankTwoAux and RankFourAux 
+# This input file is designed to test the RankTwoAux and RankFourAux
 # auxkernels, which report values out of the Tensors used in materials
 # properties.
 # Materials properties into AuxVariables - these are elemental variables, not nodal variables.

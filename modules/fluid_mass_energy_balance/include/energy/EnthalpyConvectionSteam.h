@@ -34,7 +34,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+
     MaterialProperty<Real> & _Dtau_steamDH;
     MaterialProperty<Real> & _Dtau_steamDP;
     MaterialProperty<RealGradient> & _darcy_mass_flux_steam;
@@ -45,6 +45,6 @@ protected:
 
     unsigned int  _p_var;
     VariableGradient & _grad_p;
-  
+
 };
 #endif //ENTHALPYCONVECTIONSTEAM

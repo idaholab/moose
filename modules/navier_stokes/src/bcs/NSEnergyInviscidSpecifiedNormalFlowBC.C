@@ -7,7 +7,7 @@ InputParameters validParams<NSEnergyInviscidSpecifiedNormalFlowBC>()
 
   // Coupled variables
   params.addRequiredCoupledVar("pressure", "");
-  
+
   // Required parameters
   params.addRequiredParam<Real>("un", "The specified value of u.n for this boundary");
 
@@ -57,7 +57,7 @@ Real NSEnergyInviscidSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jv
 Real NSEnergyInviscidSpecifiedNormalFlowBC::compute_jacobian(unsigned var_number)
 {
   // For specified u.n, term "A" is zero, see base class for details.
-  return 
+  return
     this->qp_jacobian_termB(var_number, _un) +
     this->qp_jacobian_termC(var_number, _un);
 }

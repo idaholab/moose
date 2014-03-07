@@ -22,7 +22,7 @@ private:
   const Point _line1;
   const Point _line2;
   const Real _dist_tol;
-  
+
   int _line_id;
 
 };

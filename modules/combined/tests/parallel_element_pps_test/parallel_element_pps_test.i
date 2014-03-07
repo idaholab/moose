@@ -45,7 +45,7 @@
 
 [Postprocessors]
    active = 'p_1 p_2 p_3 p_all'
- 
+
   [./p_1]
     type = ElementIntegralVariablePostprocessor
     variable = u
@@ -87,7 +87,7 @@
     prop_values = '0.8 0.8 0.8'
   [../]
 
-  [./constant3]	
+  [./constant3]
     type = GenericConstantMaterial
     block = 3
     prop_names = 'thermal_conductivity specific_heat density'

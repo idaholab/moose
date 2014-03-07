@@ -58,19 +58,19 @@ public:
   /**
    * @return the first Euler angle
    */
-  
+
   Real firstEulerAngle();
 
   /**
    * @return the first Euler angle
    */
-  
+
   Real secondEulerAngle();
 
   /**
    * @return the first Euler angle
    */
-  
+
   Real thirdEulerAngle();
 
   // Debugging functions

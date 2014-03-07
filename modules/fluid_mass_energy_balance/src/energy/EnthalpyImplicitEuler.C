@@ -25,7 +25,7 @@ InputParameters validParams<EnthalpyImplicitEuler>()
 
 EnthalpyImplicitEuler::EnthalpyImplicitEuler(const std::string & name, InputParameters parameters)
   :TimeDerivative(name, parameters),
-   
+
    _temperature(coupledValue("temperature")),
    _temperature_old(coupledValue("temperature_old")),
    _density(getMaterialProperty<Real>("density")),
@@ -34,17 +34,17 @@ EnthalpyImplicitEuler::EnthalpyImplicitEuler(const std::string & name, InputPara
    _porosity(getMaterialProperty<Real>("porosity")),
    _density_rock(getMaterialProperty<Real>("density_rock")),
    _u_old(valueOld())
-   
+
 
 {}
 
 Real
 EnthalpyImplicitEuler::computeQpResidual()
 {
-     
+
   Real Heat = (_porosity[_qp]* _density[_qp]*_u[_qp])+((1-_porosity[_qp])*_density_rock[_qp]*879*_temperature[_qp]);
   Real Heat_old = (_porosity[_qp]* _density_old[_qp]*_u_old[_qp])+((1-_porosity[_qp])*_density_rock[_qp]*879*_temperature_old[_qp]);
-    
+
    return _test[_i][_qp]*(Heat-Heat_old)/_dt;
 }
 
@@ -53,5 +53,5 @@ EnthalpyImplicitEuler::computeQpJacobian()
 {
 
    return (_porosity[_qp]* _density[_qp]*TimeDerivative::computeQpJacobian());
-  
+
 }

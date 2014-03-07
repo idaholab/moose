@@ -29,12 +29,12 @@ class WaterMassFluxPressure : public Diffusion
 public:
 
   WaterMassFluxPressure(const std::string & name, InputParameters parameters);
-    
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+
   unsigned int _h_var;
   VariableGradient & _grad_p;
   MaterialProperty<Real> & _Dtau_waterDP;

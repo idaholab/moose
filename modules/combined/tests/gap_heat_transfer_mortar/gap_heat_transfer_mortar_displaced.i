@@ -26,7 +26,7 @@
     variable = disp_x
     value = 0.1
   [../]
-  
+
   [./disp_y_kernel]
     type = ConstantAux
     variable = disp_y
@@ -40,7 +40,7 @@
     family = LAGRANGE
     block = '1 2'
   [../]
-  
+
   [./lm]
     order = FIRST
     family = LAGRANGE
@@ -55,7 +55,7 @@
     thermal_conductivity = 1000
     specific_heat = 1
   [../]
-  
+
   [./right]
     type = HeatConductionMaterial
     block = 2
@@ -90,14 +90,14 @@
     boundary = 'left'
     value = 1
   [../]
-  
+
   [./right]
     type = DirichletBC
     variable = temp
     boundary = 'right'
     value = 0
   [../]
-  
+
   [./mortar]
     type = HeatConductionBC
     variable = temp

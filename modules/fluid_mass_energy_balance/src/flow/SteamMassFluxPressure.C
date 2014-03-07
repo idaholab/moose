@@ -46,8 +46,8 @@ SteamMassFluxPressure::computeQpResidual()
 Real
 SteamMassFluxPressure::computeQpJacobian()
 {  // return _tau_steam[_qp]*Diffusion::computeQpJacobian();
-    
-  
+
+
     return _grad_test[_i][_qp]*(_tau_steam[_qp]*_grad_phi[_j][_qp]+_Dtau_steamDP[_qp]*_phi[_j][_qp]*_grad_p[_qp]);
 }
 
@@ -55,7 +55,7 @@ Real SteamMassFluxPressure::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if(jvar==_h_var)
   {
-    return _grad_test[_i][_qp]*_Dtau_steamDH[_qp]*_phi[_j][_qp]*_grad_p[_qp]; 
+    return _grad_test[_i][_qp]*_Dtau_steamDH[_qp]*_phi[_j][_qp]*_grad_p[_qp];
   }
   else
   {

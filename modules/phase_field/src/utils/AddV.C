@@ -1,11 +1,11 @@
 #include "AddV.h"
 
-InputParameters & 
+InputParameters &
 AddV(InputParameters & parameters, const std::string & var_name)
 {
   unsigned int crys_num = parameters.get<unsigned int>("crys_num");
   std::string var_name_base = parameters.get<std::string>("var_name_base");
-  
+
   //Create variable names
   std::vector<VariableName> v;
   v.resize(crys_num);
@@ -23,7 +23,7 @@ AddV(InputParameters & parameters, const std::string & var_name)
     parameters.remove(var_name);
     parameters.set<std::vector<VariableName> >(var_name) = v;
   }
-  
+
 
   return parameters;
 }

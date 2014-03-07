@@ -32,17 +32,17 @@ protected:
   void getJac(RankTwoTensor,RankFourTensor,Real,RankFourTensor*);
   void getFlowTensor(RankTwoTensor,RankTwoTensor*);
 
-  
+
   unsigned int isPlastic(RankTwoTensor,Real);
-  
+
   Real getSigEqv(RankTwoTensor);
   RankTwoTensor getSigDev(RankTwoTensor);
-  
+
   Real deltaFunc(int,int);
   Real getYieldStress(Real);
   Real getdYieldStressdPlasticStrain(Real);
-  
-  
+
+
 private:
 
 };

@@ -27,7 +27,7 @@ RichardsSeff2gasRSC::RichardsSeff2gasRSC(const std::string & name, InputParamete
   _shift(getParam<Real>("shift")),
   _scale(0.25*_scale_ratio*_oil_viscosity)
 {}
-      
+
 
 
 Real

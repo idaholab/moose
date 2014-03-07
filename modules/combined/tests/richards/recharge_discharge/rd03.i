@@ -50,8 +50,8 @@
     initial_from_file_var = pressure
   [../]
 []
-    
-  
+
+
 [Kernels]
   active = 'richardsf richardst'
   [./richardst]
@@ -64,11 +64,11 @@
   [../]
 []
 
-    
+
 [AuxVariables]
   [./Seff1VG_Aux]
   [../]
-[]  
+[]
 
 
 [AuxKernels]

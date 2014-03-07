@@ -22,13 +22,13 @@ public:
   virtual ~NSMomentumInviscidSpecifiedNormalFlowBC(){}
 
 protected:
-  
+
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Aux Variables
-  VariableValue& _pressure; 
+  VariableValue& _pressure;
 
   // Required parameters
   Real _rhou_udotn;

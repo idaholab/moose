@@ -111,8 +111,8 @@
   [./Seff1VG_Aux]
   [../]
 []
-    
-  
+
+
 [Kernels]
   active = 'richardsfwater richardstwater richardsfgas richardstgas'
   [./richardstwater]

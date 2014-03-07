@@ -55,8 +55,8 @@
     initial_condition = -72620.4
   [../]
 []
-    
-  
+
+
 [Kernels]
   active = 'richardsf richardst'
   [./richardst]
@@ -69,11 +69,11 @@
   [../]
 []
 
-    
+
 [AuxVariables]
   [./Seff1VG_Aux]
   [../]
-[]  
+[]
 
 
 [AuxKernels]

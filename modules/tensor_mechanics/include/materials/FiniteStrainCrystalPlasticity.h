@@ -30,10 +30,10 @@ protected:
   void get_euler_rot();
   RankFourTensor outerProduct(RankTwoTensor &a,RankTwoTensor &b);
   RankTwoTensor getmatrot(RankTwoTensor &a);
-  
-  
+
+
   const int _nss;
-  
+
   std::vector<Real> _gprops;
   std::vector<Real> _hprops;
   std::vector<Real> _flowprops;
@@ -41,7 +41,7 @@ protected:
 
   std::string _slip_sys_file_name;
   std::string _euler_angle_file_name;
-  
+
 
   std::vector<Real> _mo;
   std::vector<Real> _no;
@@ -56,8 +56,8 @@ protected:
   Real _rtol;
   Real _gtol;
   Real _slip_incr_tol;
-  
-    
+
+
 
   MaterialProperty<RankTwoTensor> & _fp;
   MaterialProperty<RankTwoTensor> & _fp_old;
@@ -73,7 +73,7 @@ protected:
   MaterialProperty<RankTwoTensor> & _crysrot_old;
 
 
-  
+
 private:
 
 };

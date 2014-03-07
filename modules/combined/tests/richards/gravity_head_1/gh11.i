@@ -67,8 +67,8 @@
     [../]
   [../]
 []
-    
-  
+
+
 [Kernels]
   active = 'richardsf richardst'
   [./richardst]

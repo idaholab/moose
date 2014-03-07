@@ -1,5 +1,5 @@
 # Seff User objects give the correct value
-# 
+#
 # If you want to add another test for another UserObject
 # then add the UserObject, add a Function defining the expected result,
 # add an AuxVariable and AuxKernel that will record the UserObject's value
@@ -270,7 +270,7 @@
     variable = d2Seff1RSC_Aux
   [../]
 []
-    
+
 
 
 #############################################################################
@@ -296,7 +296,7 @@
     [../]
   [../]
 []
-  
+
 [Kernels]
   active = 'richardsf richardst'
   [./richardst]

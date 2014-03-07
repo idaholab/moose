@@ -31,7 +31,7 @@ public:
 
 protected:
   virtual Real computeQpResidual();
-  
+
   Real _value;
 };
 

@@ -17,7 +17,7 @@ InputParameters validParams<PrimaryTimeDerivative>();
  * Define the Kernel for a CoupledConvectionReactionSub operator that looks like:
  *
  * storage * delta pressure / delta t
- * 
+ *
  * This first line is defining the name and inheriting from Kernel.
  */
 class PrimaryTimeDerivative : public TimeDerivative
@@ -25,7 +25,7 @@ class PrimaryTimeDerivative : public TimeDerivative
 public:
 
   PrimaryTimeDerivative(const std::string & name, InputParameters parameters);
-  
+
 protected:
   /**
    * Responsible for computing the residual at one quadrature point

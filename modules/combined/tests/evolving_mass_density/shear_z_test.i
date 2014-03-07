@@ -1,13 +1,13 @@
 #  Element mass tests
 
-#  This series of tests is designed to compute the mass of elements based on 
+#  This series of tests is designed to compute the mass of elements based on
 #  an evolving mass density calculation.  The tests consist of expansion and compression
-#  of the elastic patch test model along each axis, uniform expansion and compression, 
-#  and shear in each direction.  The expansion and compression tests change the volume of 
-#  the elements.  The corresponding change in density should compensate for this so the 
+#  of the elastic patch test model along each axis, uniform expansion and compression,
+#  and shear in each direction.  The expansion and compression tests change the volume of
+#  the elements.  The corresponding change in density should compensate for this so the
 #  mass remains constant.  The shear tests should not result in a volume change, and this
 #  is checked too.  The mass calculation is done with the post processor called Mass.
-  
+
 #  The tests/file names are as follows:
 
 #  Expansion and compression along a single axis
@@ -24,7 +24,7 @@
 #  shear_z_test.i
 
 #  The resulting mass calculation for these tests should always be = 1.
-  
+
 [Mesh]#Comment
   file = elastic_patch.e
   displacements = 'disp_x disp_y disp_z'

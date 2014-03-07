@@ -25,5 +25,5 @@ protected:
 
   Real _acceleration;
 };
- 
+
 #endif

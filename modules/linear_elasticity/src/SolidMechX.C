@@ -9,7 +9,7 @@ InputParameters validParams<SolidMechX>()
   return params;
 }
 
-SolidMechX::SolidMechX(const std::string & name, InputParameters parameters) :  
+SolidMechX::SolidMechX(const std::string & name, InputParameters parameters) :
     SolidMech(name, parameters),
     _mesh_dimension(_mesh.dimension()),
     _y_var(coupled("y")),
@@ -42,7 +42,7 @@ SolidMechX::computeQpResidual()
     }
 
     Real value = (_stress*_grad_test[_i][_qp]);
-    
+
     return value;
   }
 
@@ -62,7 +62,7 @@ SolidMechX::computeQpOffDiagJacobian(unsigned int jvar)
   {
     if(!_constant_properties)
       recomputeConstants();
-    
+
     RealGradient value = 0;
 
     if(jvar == _y_var)

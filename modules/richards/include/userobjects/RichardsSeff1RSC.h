@@ -29,7 +29,7 @@ class RichardsSeff1RSC : public RichardsSeff
   std::vector<std::vector<Real> > d2seff(std::vector<VariableValue *> p, unsigned int qp) const;
 
  protected:
-  
+
   Real _oil_viscosity;
   Real _scale_ratio;
   Real _shift;

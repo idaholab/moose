@@ -77,8 +77,8 @@
     boundary = left
     value = 980000
   [../]
-[]    
-  
+[]
+
 [Kernels]
   active = 'richardsf richardst'
 

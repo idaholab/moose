@@ -58,7 +58,7 @@ IsotropicElasticityTensor::calculateLameCoefficients()
 {
   if(_lambda_set && _mu_set) // First and second Lame
     return;
-  else if(_lambda_set && _nu_set) 
+  else if(_lambda_set && _nu_set)
     _mu = (_lambda * (1.0 - 2.0 * _nu)) / (2.0 * _nu);
   else if(_lambda_set && _k_set)
     _mu = ( 3.0 * (_k - _lambda) ) / 2.0;
@@ -97,7 +97,7 @@ IsotropicElasticityTensor::isotropicEntry(const unsigned int i, const unsigned j
 
 void
 IsotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
-{  
+{
   calculateLameCoefficients();
 
   unsigned int i, j, k, l;

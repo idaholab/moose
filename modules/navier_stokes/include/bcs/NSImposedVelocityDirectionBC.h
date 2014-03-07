@@ -15,9 +15,9 @@ InputParameters validParams<NSImposedVelocityDirectionBC>();
 
 /**
  * This class imposes a velocity direction component as a
- * Dirichlet condition on the appropriate momentum equation.  
+ * Dirichlet condition on the appropriate momentum equation.
  * For example, in the x-direction, the residual equation becomes:
- * 
+ *
  * u1/|u| - u1_hat_desired = 0
  *
  * or

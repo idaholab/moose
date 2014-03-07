@@ -55,7 +55,7 @@ void AnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
   Real sp1 = sin(phi1);
   Real sp2 = sin(phi2);
   Real sp = sin(phi);
-  
+
   DenseMatrix<Real> R; // Rotational Matrix
   R(0,0) = cp1 * cp2 - sp1 * sp2 * cp;
   R(0,1) = sp1 * cp2 + cp1 * sp2 * cp;
@@ -109,7 +109,7 @@ void AnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
    for(unsigned int i = 0; i < 6; i++)
      for(unsigned int j = 0; j < 9; j++)
        transpose_trans_d9_to_d6(j,i) =  trans_d9_to_d6(i,j);
-   
+
    // The function makes use of TransD6toD9 matrix to transfrom Dt[6][6] to Dmat[9][9]
    // Dmat = T * Dt * TT
 
@@ -121,7 +121,7 @@ void AnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
    DenseMatrix<Real> Dmat; // 9 x 9 Material Matrix
    Dmat = outputMatrix;
    Dmat.right_multiply(transpose_trans_d6_to_d9);
-  
+
   // The function makes use of Q matrix to rotate Dmat[9][9] to QDmat[9][9]
   // QDmat = QT * Dmat * Q
 
@@ -135,7 +135,7 @@ void AnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
   QDmat.right_multiply(Q);
 
   //Convert 9X9 matrix QDmat to 81 vector
-  
+
   unsigned int count = 0;
 
   for(unsigned int j = 0; j < 9; j++)

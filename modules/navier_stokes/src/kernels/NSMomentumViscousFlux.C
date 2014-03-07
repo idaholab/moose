@@ -1,5 +1,5 @@
 #include "NSMomentumViscousFlux.h"
- 
+
 
 template<>
 InputParameters validParams<NSMomentumViscousFlux>()
@@ -31,7 +31,7 @@ Real NSMomentumViscousFlux::computeQpResidual()
 {
   // Yay for less typing!
   RealTensorValue & vst = _viscous_stress_tensor[_qp];
-  
+
   // _component'th column of vst...
   RealVectorValue vec(vst(0,_component),
                       vst(1,_component),
@@ -49,8 +49,8 @@ Real NSMomentumViscousFlux::computeQpJacobian()
   // Set variable names as in the notes
   const unsigned k = _component;
   const unsigned m = _component+1; // _component = 0,1,2 -> m = 1,2,3 global variable number
-  
-  // Use external templated friend class for common viscous stress 
+
+  // Use external templated friend class for common viscous stress
   // tensor derivative computations.
   for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
     value += _vst_derivs.dtau(k, ell, m) * _grad_test[_i][_qp](ell);
@@ -67,7 +67,7 @@ Real NSMomentumViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
   const unsigned k = _component;
 
   // Map jvar into the variable m for our problem, regardless of
-  // how Moose has numbered things. 
+  // how Moose has numbered things.
   unsigned m = this->map_var_number(jvar);
 
   for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)

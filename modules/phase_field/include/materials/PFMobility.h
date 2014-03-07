@@ -14,20 +14,20 @@ class PFMobility : public Material
 public:
   PFMobility(const std::string & name,
           InputParameters parameters);
-  
+
 protected:
   virtual void computeProperties();
 
 private:
-  
+
   MaterialProperty<Real> & _M;
   MaterialProperty<RealGradient> & _grad_M;
   MaterialProperty<Real> & _kappa_c;
 
   Real _mob;
   Real _kappa;
-  
-  
+
+
 };
 
 #endif //PFMobility_H

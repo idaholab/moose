@@ -9,7 +9,7 @@ InputParameters validParams<ThermalCond>()
   params.addRequiredParam<Real>("T_hot","Temperature on 'hot' boundary in K");
   params.addParam<Real>("length_scale",1e-8,"lengthscale of the solution, default is 1e-8");
   params.addParam<Real>("k0",0.0,"Initial value of the thermal conductivity");
-  
+
   return params;
 }
 
@@ -28,7 +28,7 @@ ThermalCond::getValue()
   Real T_cold = SideAverageValue::getValue();
 
   Real Th_cond = 0.0;
-  
+
 
   if (std::abs(_T_hot - T_cold) > 1.0e-20)
     Th_cond = _flux*_dx/std::abs(_T_hot-T_cold); //Calculate effective thermal conductivity in W/(length_scale-K)
@@ -37,5 +37,5 @@ ThermalCond::getValue()
     return _k0;
   else
     return Th_cond/_length_scale; //In W/(m-K)
-  
+
 }

@@ -4,10 +4,10 @@ template<>
 InputParameters validParams<NSMomentumInviscidSpecifiedPressureBC>()
 {
   InputParameters params = validParams<NSMomentumInviscidBC>();
-  
+
   // Required parameters.
   params.addRequiredParam<Real>("specified_pressure", "The specified pressure for this boundary");
-  
+
   return params;
 }
 
@@ -35,8 +35,8 @@ Real NSMomentumInviscidSpecifiedPressureBC::computeQpResidual()
 
   // The current value of the vector (rho*u)(u.n)
   RealVectorValue rhou_udotn = u_dot_n * _rho[_qp] * vel;
-  
-  return 
+
+  return
     this->pressure_qp_residual(_specified_pressure) +
     this->convective_qp_residual( rhou_udotn(_component) );
 }

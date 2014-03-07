@@ -18,9 +18,9 @@
 # The tests assume an inner and outer radii of 5 and 10, with internal and external
 # pressures of 100 and 200, respectively. The resulting compressive tangential
 # stress is largest at the inner wall and, from the above equation, has a value
-# of -271.429. 
+# of -271.429.
 #
-# RESULTS are below. Since stresses are average element values, values for the 
+# RESULTS are below. Since stresses are average element values, values for the
 # edge element and one-element-in are used to extrapolate the stress to the
 # inner surface. The vesrion of the tests that are checked use the coarsest meshes.
 #
@@ -36,9 +36,9 @@
 #
 # 1D-SPH      100          -270.580      -268.932        -271.404
 # 2D-RZ       100          -270.587      -268.946        -271.408
-# 
+#
 # The numerical solution converges to the analytical solution as the mesh is
-# refined.       
+# refined.
 
 [GlobalParams]
   density = 10800.0          # kg/m^3
@@ -104,7 +104,7 @@
 []
 
 [Materials]
- [./fuel_disp]              
+ [./fuel_disp]
     type = Elastic
     block = 1
     disp_r = disp_x

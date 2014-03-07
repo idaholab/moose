@@ -27,8 +27,8 @@ InputParameters validParams<NewmarkAccelAux>()
 
 NewmarkAccelAux::NewmarkAccelAux(const std::string & name, InputParameters parameters) :
   AuxKernel(name, parameters),
-   _disp_old(coupledValueOld("displacement")), 
-   _disp(coupledValue("displacement")), 
+   _disp_old(coupledValueOld("displacement")),
+   _disp(coupledValue("displacement")),
    _vel_old(coupledValueOld("velocity")),
    _beta(getParam<Real>("beta"))
 {

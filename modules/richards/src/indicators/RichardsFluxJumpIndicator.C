@@ -39,9 +39,9 @@ RichardsFluxJumpIndicator::computeQpIntegral()
 {
   RealVectorValue gra = _density[_qp][_pvar]*_rel_perm[_qp][_pvar]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][_pvar]*_gravity[_qp]));
   RealVectorValue gra_n = _density_n[_qp][_pvar]*_rel_perm_n[_qp][_pvar]*(_permeability_n[_qp]*(_grad_u_neighbor[_qp] - _density_n[_qp][_pvar]*_gravity_n[_qp]));
-  
+
   Real jump = (gra - gra_n)*_normals[_qp];
-  
+
   return jump*jump;
 }
 

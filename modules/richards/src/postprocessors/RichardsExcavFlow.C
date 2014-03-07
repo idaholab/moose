@@ -28,7 +28,7 @@ RichardsExcavFlow::RichardsExcavFlow(const std::string & name, InputParameters p
     _gravity(getMaterialProperty<RealVectorValue>("gravity")),
     _permeability(getMaterialProperty<RealTensorValue>("permeability")),
     _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
-    _density(getMaterialProperty<std::vector<Real> >("density")), 
+    _density(getMaterialProperty<std::vector<Real> >("density")),
     _func(getFunction("excav_geom_function"))
 {}
 

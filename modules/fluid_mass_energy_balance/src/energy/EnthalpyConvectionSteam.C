@@ -20,7 +20,7 @@ InputParameters validParams<EnthalpyConvectionSteam>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("pressure","Use CoupledVariable pressure index here");
-  
+
   return params;
 }
 
@@ -34,7 +34,7 @@ EnthalpyConvectionSteam::EnthalpyConvectionSteam(const std::string & name, Input
      _denthalpy_steamdH_P(getMaterialProperty<Real>("denthalpy_steamdH_P")),
      _denthalpy_steamdP_H(getMaterialProperty<Real>("denthalpy_steamdP_H")),
      _p_var(coupled("pressure")),
-     _grad_p(coupledGradient("pressure"))  
+     _grad_p(coupledGradient("pressure"))
 {}
 
 Real EnthalpyConvectionSteam::computeQpResidual()

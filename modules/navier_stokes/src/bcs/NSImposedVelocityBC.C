@@ -9,11 +9,11 @@ InputParameters validParams<NSImposedVelocityBC>()
 
   // Declare variables as coupled...
   params.addRequiredCoupledVar("rho", "");
-  
+
   // New style.  Note, addRequiredParam is a templated function, templated
   // on the type of the parameter being added. (Second string argument is optional documentation.)
   params.addRequiredParam<Real>("desired_velocity", "");// make it required!
-  
+
   return params;
 }
 

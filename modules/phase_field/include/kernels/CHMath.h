@@ -19,12 +19,12 @@ class CHMath : public CHBulk
 public:
 
   CHMath(const std::string & name, InputParameters parameters);
-  
+
 protected:
-  
+
   virtual RealGradient computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c);
 
 private:
-  
+
 };
 #endif //CHMath_H

@@ -27,7 +27,7 @@
   [./SeffVG]
     type = RichardsSeff1VG
     m = 0.5
-    al = 1 
+    al = 1
   [../]
   [./RelPermPower]
     type = RichardsRelPermPower

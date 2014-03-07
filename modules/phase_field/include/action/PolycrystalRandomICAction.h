@@ -21,7 +21,7 @@ private:
   //unsigned int _grain_num;
   std::string _var_name_base;
   MooseEnum _random_type;
-  
+
 };
 
 template<>

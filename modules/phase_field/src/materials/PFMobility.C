@@ -4,10 +4,10 @@ template<>
 InputParameters validParams<PFMobility>()
 {
   InputParameters params = validParams<Material>();
-  
+
   params.addRequiredParam<Real>("mob", "The mobility value");
   params.addParam<Real>("kappa",1.0, "The kappa parameter for the vacancy concentration");
-  
+
   return params;
 }
 

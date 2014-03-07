@@ -29,7 +29,7 @@ class NavierStokesMaterial : public Material
 {
 public:
   NavierStokesMaterial(const std::string & name, InputParameters parameters);
-  
+
 protected:
 
   /**
@@ -38,7 +38,7 @@ protected:
   virtual void computeProperties();
 
   const unsigned int _mesh_dimension;
-  
+
   VariableGradient& _grad_u;
   VariableGradient& _grad_v;
   VariableGradient& _grad_w;
@@ -50,13 +50,13 @@ protected:
   // Also store the "cal A" matrices at each quadrature point as material
   // poperties.  These are defined in the compns notes and are needed for
   // computing strong and weak residual values and Jacobian entries, so it's
-  // good if we reuse them...  
+  // good if we reuse them...
   MaterialProperty<std::vector<RealTensorValue> >& _calA;
 
   // The "velocity column" matrices.  _calC[_qp][k] is a tensor with the
   // velocity vector in the k'th column.  See notes for additional details.
   MaterialProperty<std::vector<RealTensorValue> >& _calC;
-  
+
   // The energy equation inviscid flux matrix components.  There are n_vars of
   // these for each dimension, so in 3D, 3*5=15 different matrices.
   // See notes for additional details.
@@ -77,13 +77,13 @@ protected:
   VariableValue& _u_vel;
   VariableValue& _v_vel;
   VariableValue& _w_vel;
-  
+
   // Temperature is needed to compute speed of sound
   VariableValue& _temperature;
-  
+
   // Enthalpy is needed in computing energy equation strong residuals
   VariableValue& _enthalpy;
-  
+
   // Main solution variables are all needed for computing strong residuals
   VariableValue& _rho;
   VariableValue& _rho_u;
@@ -111,7 +111,7 @@ protected:
   MaterialProperty<Real>& _tauc;
   MaterialProperty<Real>& _taum;
   MaterialProperty<Real>& _taue;
-  
+
   // The (vector-valued) material property which is the strong-form
   // residual at each quadrature point.
   MaterialProperty<std::vector<Real> > & _strong_residuals;

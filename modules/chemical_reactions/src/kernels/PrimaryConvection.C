@@ -22,7 +22,7 @@ PrimaryConvection::PrimaryConvection(const std::string & name, InputParameters p
    //
    // Note that "some_var" is the name this Kernel expects... ie
    // what should be in "coupled_as"
-   // 
+   //
    // You can also use coupledValue() and coupledValueOld() if you want
    // values
    _grad_p(coupledGradient("p"))
@@ -35,7 +35,7 @@ Real PrimaryConvection::computeQpResidual()
   RealGradient _Darcy_vel=-_grad_p[_qp]*_cond[_qp];
 
 //  std::cout << "Pore velocity " << _Darcy_vel(0) << std::endl;
-    
+
   return _test[_i][_qp]*(_Darcy_vel*_grad_u[_qp]);
 }
 

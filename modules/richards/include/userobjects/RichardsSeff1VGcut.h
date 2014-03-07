@@ -26,13 +26,13 @@ class RichardsSeff1VGcut : public RichardsSeff1VG
   std::vector<std::vector<Real> > d2seff(std::vector<VariableValue *> p, unsigned int qp) const;
 
  protected:
-  
+
   Real _al;
   Real _m;
   Real _p_cut;
   Real _s_cut;
   Real _ds_cut;
-    
+
 
 };
 

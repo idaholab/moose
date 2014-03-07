@@ -19,11 +19,11 @@ class CHBulk : public KernelGrad
 public:
 
   CHBulk(const std::string & name, InputParameters parameters);
-  
+
 protected:
   std::string _mob_name;
   std::string _Dmob_name;
-  
+
   enum PFFunctionType
   {
     Jacobian,
@@ -32,7 +32,7 @@ protected:
   virtual RealGradient precomputeQpResidual();
   virtual RealGradient precomputeQpJacobian();
   virtual RealGradient computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c) = 0;
-  
+
   MaterialProperty<Real> & _M;
 
   bool _implicit;

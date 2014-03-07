@@ -36,7 +36,7 @@
     type = RichardsSUPGstandard
     p_SUPG = 1E8
   [../]
-  
+
   [./borehole_total_outflow_mass]
     type = RichardsSumQuantity
   [../]
@@ -72,8 +72,8 @@
   [./Seff1VG_Aux]
   [../]
 []
-    
-  
+
+
 [Kernels]
   active = 'richardsf richardst'
   [./richardst]

@@ -32,7 +32,7 @@ public:
   virtual ~NSMassBC(){}
 
 protected:
-  
+
   /**
    * Must be implemented in derived classes.
    */
@@ -49,8 +49,8 @@ protected:
 
   /**
    * Compute the Jacobian contribution due to variable
-   * number 'var_number'.  Note: if this is a specified 
-   * normal flow boundary, the Jacobian will be zero. 
+   * number 'var_number'.  Note: if this is a specified
+   * normal flow boundary, the Jacobian will be zero.
    */
   Real qp_jacobian(unsigned var_number);
 };

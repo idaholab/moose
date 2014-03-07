@@ -178,7 +178,7 @@ GluedContactConstraint::computeQpResidual(Moose::ConstraintType type)
       PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
       Real distance = (*_current_node)(_component) - pinfo->_closest_point(_component);
       Real pen_force = _penalty * distance;
-    
+
       Real resid = pen_force;
       pinfo->_contact_force(_component) = resid;
       pinfo->_mech_status=PenetrationInfo::MS_STICKING;
@@ -188,17 +188,17 @@ GluedContactConstraint::computeQpResidual(Moose::ConstraintType type)
     case Moose::Master:
     {
       PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
-      
+
       long int dof_number = _current_node->dof_number(0, _vars(_component), 0);
       Real resid = _residual_copy(dof_number);
-    
+
       pinfo->_contact_force(_component) = -resid;
       pinfo->_mech_status=PenetrationInfo::MS_STICKING;
-      
+
       return _test_master[_i][_qp] * resid;
     }
   }
-  
+
   return 0;
 }
 
@@ -214,7 +214,7 @@ GluedContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
     case Moose::SlaveMaster:
     {
       return _penalty*-_phi_master[_j][_qp]*_test_slave[_i][_qp];
-    } 
+    }
     case Moose::MasterSlave:
     {
       double slave_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
@@ -223,6 +223,6 @@ GluedContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
     case Moose::MasterMaster:
       return 0;
   }
-  
+
   return 0;
 }

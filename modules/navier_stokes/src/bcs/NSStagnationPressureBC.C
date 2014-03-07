@@ -12,7 +12,7 @@ InputParameters validParams<NSStagnationPressureBC>()
 
   // Required parameters
   params.addRequiredParam<Real>("desired_stagnation_pressure", "");
-  
+
   return params;
 }
 

@@ -14,7 +14,7 @@ class ACInterface : public KernelGrad
 public:
 
   ACInterface(const std::string & name, InputParameters parameters);
-  
+
 protected:
   enum PFFunctionType
   {
@@ -25,12 +25,12 @@ protected:
   virtual RealGradient precomputeQpJacobian();
   std::string _mob_name;
   std::string _kappa_name;
-  
+
 
 private:
-  
+
   MaterialProperty<Real> & _kappa;
   MaterialProperty<Real> & _L;
-  
+
 };
 #endif //ACInterface_H

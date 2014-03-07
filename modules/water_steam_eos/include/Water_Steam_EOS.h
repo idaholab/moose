@@ -2,33 +2,33 @@
 
 namespace Water_Steam_EOS
 {
-  extern "C" 
+  extern "C"
   {
 
     //subroutine TSAT(p, 100D0, Ts)
     //double TSAT_( double&, double&, double&);
-    
+
     //subroutine water_steam_prop_PH(p, h, Ts,T, Sw, Den, dTdp, dTdh, dDendp, dDendh,  ierr, dhwdp, dhsdp, dTdp)
-    void FORTRAN_CALL(water_steam_prop_ph)( double&, double&, double&, double&, double&, double&, double&, double&, double&, double&, 
+    void FORTRAN_CALL(water_steam_prop_ph)( double&, double&, double&, double&, double&, double&, double&, double&, double&, double&,
                                double&, double&, double&, double&, double&, int&, double&, double&,double&);
     // subroutine water_steam_prop_PH_noderiv(p, h, T, Sw, Den,Denw, Dens, hw, hs,visw,viss,ierror)
     void FORTRAN_CALL(water_steam_prop_ph_noderiv)(double&,double&, double&, double&, double&, double&, double&, double&, double&, double&, double&, int&);
-    
-    
+
+
     //subroutine  wateos_noderiv(T, p, dw, dwmol, hw, energyscale, ierr)
-    // extern "C" double watereos_( double&, double&, double&, double&, double&, double&, double&); 
+    // extern "C" double watereos_( double&, double&, double&, double&, double&, double&, double&);
     //void water_eos1_( double&, double&, double&);
-    
+
     //subroutine  wateos_noderiv(T, p, dw)  this one is faster, no derivatives calculated
     void FORTRAN_CALL(wateos_noderiv1)( double&, double&, double&);
 
-    //subroutine  VISW_noderiv1 (rho_s,tc,vs)  
-    void FORTRAN_CALL(viss_noderiv1)( double&, double&, double&);  
+    //subroutine  VISW_noderiv1 (rho_s,tc,vs)
+    void FORTRAN_CALL(viss_noderiv1)( double&, double&, double&);
 
     //================================================================================
     //
     //
-    // Following function/subroutines definitions are in source water_steam_functions.f90 
+    // Following function/subroutines definitions are in source water_steam_functions.f90
     //
     //--------------------------------------------------------------------------------
 
@@ -43,7 +43,7 @@ namespace Water_Steam_EOS
     //////////////////////////////////////////////////////////////////////////////////
     //
     //   A  list of functions used for BISON coolant channel model
-    // 
+    //
     //
     //   | Function name             | source code file           |
     //   |---------------------------+----------------------------|
@@ -58,7 +58,7 @@ namespace Water_Steam_EOS
     //
     //////////////////////////////////////////////////////////////////////////////////
 
-    
+
 
   }
 

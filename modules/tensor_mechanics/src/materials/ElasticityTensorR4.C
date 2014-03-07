@@ -25,7 +25,7 @@ ElasticityTensorR4::operator=(const ElasticityTensorR4 &a)
       for(unsigned int k(0); k<N; k++)
         for(unsigned int l(0); l<N; l++)
           _vals[i][j][k][l] = a._vals[i][j][k][l];
-  
+
   return *this;
 }
 

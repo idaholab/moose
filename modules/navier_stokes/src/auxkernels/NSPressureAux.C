@@ -4,14 +4,14 @@ template<>
 InputParameters validParams<NSPressureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  
+
   // Mark variables as required
   params.addRequiredCoupledVar("rho", "");
   params.addRequiredCoupledVar("u", "");
   params.addRequiredCoupledVar("v", "");
   params.addCoupledVar("w", ""); // Only required in 3D...
   params.addRequiredCoupledVar("rhoe", "");
-  
+
   // Parameters with default values
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
 

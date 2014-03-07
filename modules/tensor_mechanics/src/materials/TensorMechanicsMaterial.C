@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<TensorMechanicsMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");  
+  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
   params.addRequiredParam<bool>("all_21","If false, fill C_ijkl as: C1111, C1122, C1133, C2222, C2233, C3333, C2323, C1313, C1212; True if all 21 independent values are given (see ElasticityTensorR4 for details).");
   params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
   params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
@@ -26,7 +26,7 @@ InputParameters validParams<TensorMechanicsMaterial>()
   return params;
 }
 
-TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name, 
+TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
                                              InputParameters parameters)
     : Material(name, parameters),
       _grad_disp_x(coupledGradient("disp_x")),
@@ -51,7 +51,7 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
       _T(_has_T ? &coupledValue("temperature") : NULL)
 {
   // fill in the local tensors from the input vector information
-  
+
   _Cijkl.fillFromInputVector(_Cijkl_vector, _all_21);
 }
 
@@ -64,7 +64,7 @@ TensorMechanicsMaterial::computeProperties()
     computeQpElasticityTensor();
     computeQpStress();
   }
-  
+
 }
 
 void TensorMechanicsMaterial::computeQpElasticityTensor()
@@ -78,6 +78,6 @@ void TensorMechanicsMaterial::computeStrain()
 {
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     computeQpStrain();
-  
+
 }
 

@@ -27,7 +27,7 @@ NSThermalBC::NSThermalBC(const std::string & name, InputParameters parameters)
    _R(getParam<Real>("R")),
    _gamma(getParam<Real>("gamma"))
   {}
-  
+
 
 
 
@@ -37,14 +37,14 @@ NSThermalBC::computeQpResidual()
   Real value;
 
   // For constant temperature, set _initial = _final, or set _duration=0 and set _final.
-  //  
+  //
   // T(t) = T_i + (T_f - T_i) * sin (pi/2 * t/t_d)
   if (_t < _duration)
     value = _initial + (_final - _initial) * std::sin((0.5* libMesh::pi)  * _t/_duration);
   else
     value = _final;
 
-  // For the total energy, the essential BC is: 
+  // For the total energy, the essential BC is:
   // rho*E = rho*(c_v*T + |u|^2/2)
   //
   // or, in residual form, (In general, this BC is coupled to the velocity variables.)
@@ -53,7 +53,7 @@ NSThermalBC::computeQpResidual()
   // ***at a no-slip wall*** this further reduces to (no coupling to velocity variables):
   // rho*E - rho*cv*T = 0
 
-// std::ios_base::fmtflags flags = std::cout.flags();  
+// std::ios_base::fmtflags flags = std::cout.flags();
 // std::cout << std::scientific << std::setprecision(16);
 // std::cout << "rho*E                        =" << _u[_qp] << std::endl;
 // std::cout << "(_p[_qp] * _c_v[_qp] * value)=" << (_p[_qp] * _c_v[_qp] * value) << std::endl;

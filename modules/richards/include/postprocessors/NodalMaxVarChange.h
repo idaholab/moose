@@ -20,12 +20,12 @@ class NodalMaxVarChange : public NodalVariablePostprocessor
 {
  public:
   NodalMaxVarChange(const std::string & name, InputParameters parameters);
-  
+
   virtual void initialize();
   virtual void execute();
   virtual Real getValue();
   virtual void threadJoin(const UserObject & y);
-  
+
  protected:
 
   VariableValue & _u_old;   // Holds the old variable at current quadrature points

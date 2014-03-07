@@ -25,7 +25,7 @@ InputParameters validParams<CoupledDirectionalMeshHeightInterpolation>()
 
   MooseEnum directions("x, y, z");
   params.addRequiredParam<MooseEnum>("direction", directions, "The direction to interpolate in.");
-  
+
   return params;
 }
 
@@ -47,6 +47,6 @@ CoupledDirectionalMeshHeightInterpolation::computeValue()
   const Node & current_pos = *_current_node;
 
   Real percentage_along_direction = (current_pos(_direction)-_direction_min) / (_direction_max - _direction_min);
-  
+
   return percentage_along_direction * _coupled_val[_qp];
 }

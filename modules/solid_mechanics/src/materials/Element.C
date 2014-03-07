@@ -153,7 +153,7 @@ Element::unrotateSymmetricTensor( const ColumnMajorMatrix & R,
                                 SymmTensor & result )
 {
 
-  //     Rt           T         R    
+  //     Rt           T         R
   //  00 10 20    00 01 02   00 01 02
   //  01 11 21  * 10 11 12 * 10 11 12
   //  02 12 22    20 21 22   20 21 22

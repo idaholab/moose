@@ -21,5 +21,5 @@ private:
 
 template<>
 InputParameters validParams<PolycrystalKernelAction>();
-  
+
 #endif //POLYCRYSTALKERNELACTION_H

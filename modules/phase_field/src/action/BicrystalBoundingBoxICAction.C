@@ -50,14 +50,14 @@ BicrystalBoundingBoxICAction::BicrystalBoundingBoxICAction(const std::string & n
 }
 
 void
-BicrystalBoundingBoxICAction::act() 
-{ 
+BicrystalBoundingBoxICAction::act()
+{
 #ifdef DEBUG
   std::cerr << "Inside the BicrystalBoundingBoxICAction Object\n";
 #endif
 
 // Loop through the number of order parameters
-  
+
   for (unsigned int crys = 0; crys<_crys_num; crys++)
   {
     //Create variable names
@@ -90,8 +90,8 @@ BicrystalBoundingBoxICAction::act()
 
     //Add initial condition
     _problem->addInitialCondition("BoundingBoxIC", "InitialCondition", poly_params);
-    
-    
+
+
   }
 
 }

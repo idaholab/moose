@@ -36,7 +36,7 @@ InputParameters validParams<C1ICBase>()
 C1ICBase::C1ICBase(const std::string & name,
                    InputParameters parameters)
   :InitialCondition(name, parameters),
-   _average(parameters.get<Real>("average")),   
+   _average(parameters.get<Real>("average")),
    _amplitude(parameters.get<Real>("amplitude")),
    _length(parameters.get<Real>("length")),
    _width(parameters.get<Real>("width")),
@@ -68,4 +68,4 @@ C1ICBase::interfaceDerivative(Real r)
 }
 
 
-  
+

@@ -19,7 +19,7 @@ private:
 
   std::string _var_name_base;
   unsigned int _crys_num;
-  
+
 };
 
 template<>

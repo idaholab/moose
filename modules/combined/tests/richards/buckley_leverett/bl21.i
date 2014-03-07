@@ -86,7 +86,7 @@
   [../]
 []
 
-  
+
 [Kernels]
   active = 'richardsfwater richardstwater richardsfgas richardstgas'
   [./richardstwater]
@@ -171,7 +171,7 @@
     boundary = right
     value = 0+1000
   [../]
-[]    
+[]
 
 
 [Functions]

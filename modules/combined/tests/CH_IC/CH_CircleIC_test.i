@@ -31,7 +31,7 @@
       int_width = 0.0 #4.0
     [../]
   [../]
-[]	     
+[]
 
 [Kernels]
   active = 'ie_c CHSolid CHInterface'
@@ -103,9 +103,9 @@
   start_time = 0.0
   num_steps = 2
   dt = 2.0
- 
+
   [./Adaptivity]
-    initial_adaptivity = 1	
+    initial_adaptivity = 1
     error_estimator = LaplacianErrorEstimator
     refine_fraction = 0.8
     coarsen_fraction = 0.05
@@ -128,5 +128,5 @@
   [../]
 
 []
-   
-    
+
+

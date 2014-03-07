@@ -25,7 +25,7 @@ CHMath::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
   case Jacobian:
     return 6*c*_phi[_j][_qp]*grad_c + 3*c*c*_grad_phi[_j][_qp] - _grad_phi[_j][_qp]; //return Jacobian value
     break;
-    
+
   default:
     mooseError("Invalid type passed in");
     break;

@@ -44,7 +44,7 @@ RichardsExcavGeom::value(Real t, const Point & p)
     {
       return 0.0;
     }
-  
+
   RealVectorValue current_posn;
   if (t >= _end_time) {
     current_posn = _end_posn;
@@ -52,19 +52,19 @@ RichardsExcavGeom::value(Real t, const Point & p)
   else {
     current_posn = _start_posn + (t - _start_time)*_retreat_vel;
   }
-  
+
   Real distance_into_goaf = (current_posn - p)*_retreat_vel/_norm_retreat_vel;
-  
+
   if (distance_into_goaf < 0) {
     // point is ahead of current_posn
     return 0.0;
   }
-    
+
   if (distance_into_goaf > _active_length) {
     // point is too far into goaf
     return 0.0;
   }
-      
+
   return _true_value;
 }
 

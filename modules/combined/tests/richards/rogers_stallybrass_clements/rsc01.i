@@ -64,7 +64,7 @@
   [./poil]
   [../]
 []
-    
+
 [ICs]
   [./water_init]
     type = ConstantIC
@@ -77,7 +77,7 @@
     value = 15
   [../]
 []
-      
+
 [Kernels]
   [./richardstwater]
     type = RichardsMassChange
@@ -97,13 +97,13 @@
   [../]
 []
 
-    
+
 [AuxVariables]
   [./SWater]
   [../]
   [./SOil]
   [../]
-[]  
+[]
 
 
 [AuxKernels]

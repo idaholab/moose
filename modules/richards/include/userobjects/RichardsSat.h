@@ -30,7 +30,7 @@ class RichardsSat : public GeneralUserObject
   Real d2sat(Real /*seff*/) const;
 
  protected:
-  
+
   Real _s_res;
   Real _sum_s_res;
 

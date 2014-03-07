@@ -14,7 +14,7 @@ template<>
 InputParameters validParams<PolycrystalRandomIC>();
 
 /**
- * PolycrystalRandomIC allows a random initial condition of a 
+ * PolycrystalRandomIC allows a random initial condition of a
 */
 class PolycrystalRandomIC : public InitialCondition
 {

@@ -22,7 +22,7 @@ InputParameters validParams<NodalVolumeFraction>()
   params.addRequiredParam<PostprocessorName>("mesh_volume", "Postprocessor from which to get mesh volume");
   params.addParam<FileName>("Avrami_file", "filename for Avrami analysis info (ln time and Avrami)");
   params.addParam<Real>("equil_fraction", -1.0, "Equilibrium volume fraction of 2nd phase for Avrami analysis");
-    
+
   return params;
 }
 
@@ -84,7 +84,7 @@ void
 NodalVolumeFraction::calculateBubbleFraction()
 {
   Real volume(0.0);
-  
+
   //sum the values in the vector to get total volume
   for (std::vector<Real>::const_iterator it = _all_bubble_volumes.begin(); it != _all_bubble_volumes.end(); ++it)
   {

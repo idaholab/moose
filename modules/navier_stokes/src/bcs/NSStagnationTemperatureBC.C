@@ -9,7 +9,7 @@ InputParameters validParams<NSStagnationTemperatureBC>()
 
   // Required parameters
   params.addRequiredParam<Real>("desired_stagnation_temperature", "");
-  
+
   return params;
 }
 

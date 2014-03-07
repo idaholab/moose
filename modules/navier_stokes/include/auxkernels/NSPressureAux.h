@@ -9,7 +9,7 @@ class NSPressureAux;
 template<>
 InputParameters validParams<NSPressureAux>();
 
-/** 
+/**
  * Nodal auxiliary variable, for computing pressure at the nodes
  */
 class NSPressureAux : public AuxKernel
@@ -23,7 +23,7 @@ public:
   NSPressureAux(const std::string & name, InputParameters parameters);
 
   virtual ~NSPressureAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

@@ -24,9 +24,9 @@ public:
  void update(const RealVectorValue & Euler_angles);
 
 protected:
-  
+
 private:
-  
+
 };
 
 

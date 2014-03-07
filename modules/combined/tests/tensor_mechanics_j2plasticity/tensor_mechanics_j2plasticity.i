@@ -32,7 +32,7 @@
     order = FIRST
     family = LAGRANGE
   [../]
- 
+
  [./y_disp]
     order = FIRST
     family = LAGRANGE
@@ -59,8 +59,8 @@
   [./felastic]
     type = FiniteStrainPlasticMaterial
     block=0
-    all_21 = false	
-    disp_x = x_disp	
+    all_21 = false
+    disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
     C_ijkl = '2.827e5 1.21e5 1.21e5 2.827e5 1.21e5 2.827e5 0.808e5 0.808e5 0.808e5'
@@ -204,7 +204,7 @@
 
   petsc_options_iname = -pc_hypre_type
   petsc_options_value = boomerang
-  nl_abs_tol = 1e-10 
+  nl_abs_tol = 1e-10
 []
 
 

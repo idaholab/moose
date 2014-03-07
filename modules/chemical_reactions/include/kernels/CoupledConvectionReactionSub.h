@@ -23,7 +23,7 @@ InputParameters validParams<CoupledConvectionReactionSub>();
  * Define the Kernel for a CoupledConvectionReactionSub operator that looks like:
  *
  * weight * cond * grad_pressure * 10^log_k * u^sto_u * v^sto_v
- * 
+ *
  * This first line is defining the name and inheriting from Kernel.
  */
 class CoupledConvectionReactionSub : public Kernel
@@ -36,7 +36,7 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   CoupledConvectionReactionSub(const std::string & name, InputParameters parameters);
-  
+
 protected:
   /**
    * Responsible for computing the residual at one quadrature point
@@ -59,7 +59,7 @@ protected:
    */
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+
 private:
   /**
    * Coupled things come through as std::vector _refernces_.

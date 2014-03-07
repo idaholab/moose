@@ -15,12 +15,12 @@ class SolidMechTempCoupleZ : public SolidMechTempCouple
 public:
 
   SolidMechTempCoupleZ(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
-  
+
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+
 };
- 
+
 #endif //SOLIDMECHTEMPCOUPLEZ

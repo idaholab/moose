@@ -9,7 +9,7 @@ class NSEnthalpyAux;
 template<>
 InputParameters validParams<NSEnthalpyAux>();
 
-/** 
+/**
  * Nodal auxiliary variable, for computing enthalpy at the nodes.
  * The total enthalpy is given by:
  *
@@ -30,7 +30,7 @@ public:
   NSEnthalpyAux(const std::string & name, InputParameters parameters);
 
   virtual ~NSEnthalpyAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

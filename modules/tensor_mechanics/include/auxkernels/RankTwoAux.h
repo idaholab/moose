@@ -21,7 +21,7 @@ public:
   RankTwoAux(const std::string & name, InputParameters parameters);
 
   virtual ~ RankTwoAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

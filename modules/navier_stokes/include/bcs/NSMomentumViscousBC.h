@@ -31,7 +31,7 @@ public:
   virtual ~NSMomentumViscousBC(){}
 
 protected:
-  
+
   /**
    * Just like other kernels, we must overload the Residual and Jacobian contributions...
    */

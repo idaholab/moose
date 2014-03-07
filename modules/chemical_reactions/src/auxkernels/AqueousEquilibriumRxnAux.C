@@ -7,7 +7,7 @@ InputParameters validParams<AqueousEquilibriumRxnAux>()
 
   params.addParam< Real >("log_k",0.0,"The equilibrium constant in dissociation form");
   params.addRequiredParam<std::vector<Real> >("sto_v","The stochiometric coefficient of reactants");
-  
+
   params.addCoupledVar("v", "the list of primary spceies participating in this equilibrium species");
 
   return params;
@@ -29,7 +29,7 @@ Real
 AqueousEquilibriumRxnAux::computeValue()
 {
   Real conc_product = 1.0;
-  
+
   for (unsigned int i=0; i<_vals.size(); ++i)
     conc_product *= std::pow(((*_vals[i])[_qp]),_sto_v[i]);
 

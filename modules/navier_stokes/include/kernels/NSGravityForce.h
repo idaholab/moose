@@ -15,13 +15,13 @@ class NSGravityForce : public NSKernel
 public:
 
   NSGravityForce(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
-  virtual Real computeQpJacobian(); 
+  virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   Real _acceleration;
 };
- 
+
 #endif

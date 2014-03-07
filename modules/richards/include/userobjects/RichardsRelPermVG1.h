@@ -26,7 +26,7 @@ class RichardsRelPermVG1 : public RichardsRelPermVG
   Real d2relperm(Real seff) const;
 
  protected:
-  
+
   Real _simm;
   Real _m;
   Real _scut;

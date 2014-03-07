@@ -6,11 +6,11 @@ InputParameters validParams<ElementsOnLineAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
-  params.addRequiredParam<RealVectorValue>("line1","First point of line along which to pick elements"); 
-  params.addRequiredParam<RealVectorValue>("line2","Second point of line along which to pick elements"); 
+  params.addRequiredParam<RealVectorValue>("line1","First point of line along which to pick elements");
+  params.addRequiredParam<RealVectorValue>("line2","Second point of line along which to pick elements");
   params.addRequiredParam<Real>("dist_tol","Tolerance for distance between element and line");
   params.addParam<int>("line_id",1,"ID of the line along which to pick elements");
-  
+
   params.set<MooseEnum>("execute_on") = "initial";
 
   return params;
@@ -32,11 +32,11 @@ ElementsOnLineAux::compute()
 {
 
   const Point elem_pos(_current_elem->centroid());
-  
+
   const Point line_vec(_line2-_line1);
   const Real length(line_vec.size());
   const Point line_unit_vec(line_vec/length);
-  
+
   const Point line1_to_elem_vec(elem_pos-_line1);
   const Real proj(line1_to_elem_vec*line_unit_vec);
   const Point proj_vec(proj*line_unit_vec);
@@ -48,7 +48,7 @@ ElementsOnLineAux::compute()
   {
     _var.setNodalValue(_line_id); // update the variable data refernced by other kernels.  Note that this will update the values at the quadrature points too (because this is an Elemental variable)
   }
-  
+
 }
 
 Real

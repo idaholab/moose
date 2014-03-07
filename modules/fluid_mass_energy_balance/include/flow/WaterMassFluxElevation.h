@@ -29,7 +29,7 @@ class WaterMassFluxElevation : public Kernel
 public:
 
   WaterMassFluxElevation(const std::string & name, InputParameters parameters);
-    
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();

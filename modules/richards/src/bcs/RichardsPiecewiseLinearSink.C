@@ -41,7 +41,7 @@ RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const std::string & nam
     _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
     _drel_perm(getMaterialProperty<std::vector<Real> >("drel_perm")),
 
-    _density(getMaterialProperty<std::vector<Real> >("density")), 
+    _density(getMaterialProperty<std::vector<Real> >("density")),
     _ddensity(getMaterialProperty<std::vector<Real> >("ddensity"))
 {}
 
@@ -82,7 +82,7 @@ RichardsPiecewiseLinearSink::computeQpJacobian()
     {
       deriv = _rel_perm[_qp][_pvar]*deriv + _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]*flux;
     }
-  
+
   if (_m_func)
     deriv *= _m_func->value(_t, _q_point[_qp]);
 
@@ -109,6 +109,6 @@ RichardsPiecewiseLinearSink::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (_m_func)
     deriv *= _m_func->value(_t, _q_point[_qp]);
-  
+
   return _test[_i][_qp]*deriv*_phi[_j][_qp];
 }

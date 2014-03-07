@@ -43,5 +43,5 @@ protected:
 
   MaterialProperty<Real> & _c_v;
 };
- 
+
 #endif

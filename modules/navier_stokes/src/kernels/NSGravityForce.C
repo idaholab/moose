@@ -1,5 +1,5 @@
 #include "NSGravityForce.h"
- 
+
 template<>
 InputParameters validParams<NSGravityForce>()
 {

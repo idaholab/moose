@@ -59,9 +59,9 @@ public:
    * The graident of the variable at a point.
    */
   virtual RealGradient gradient(const Point & p);
-  Real _x1; 
-  Real _y1; 
-  Real _x2; 
+  Real _x1;
+  Real _y1;
+  Real _x2;
   Real _y2;
 };
 

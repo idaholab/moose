@@ -15,7 +15,7 @@ InputParameters validParams<Mass>()
 Mass::Mass(const std::string & name, InputParameters parameters) :
     ElementIntegralVariablePostprocessor(name, parameters),
     _density(getMaterialProperty<Real>("density"))
-    
+
 {
 }
 

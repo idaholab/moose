@@ -12,7 +12,7 @@ InputParameters validParams<NSMassSpecifiedNormalFlowBC>();
 
 /**
  * This class implements the mass equation boundary term with
- * a specified value of rho*(u.n) imposed weakly.  
+ * a specified value of rho*(u.n) imposed weakly.
  *
  * Note: if you wish to impose rho*(u.n) = 0 weakly, you don't
  * actually need this class, that is the natural boundary condition.

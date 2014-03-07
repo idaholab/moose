@@ -19,7 +19,7 @@ ElasticEnergyAux::ElasticEnergyAux( const std::string & name,
 Real
 ElasticEnergyAux::computeValue()
 {
-  return 0.5*_stress[_qp].doubleContraction(_elastic_strain[_qp]); 
+  return 0.5*_stress[_qp].doubleContraction(_elastic_strain[_qp]);
 }
 
 

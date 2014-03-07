@@ -74,7 +74,7 @@ RichardsRelPermBW::drelperm(Real seff) const
   if (seff >= _ss) {
     return 0.0;
   }
-  
+
   Real s_internal = (seff - _sn)/(_ss - _sn);
   Real krelp = _coef*( 2.0*s_internal/(_c - s_internal) + std::pow(s_internal, 2)/std::pow(_c - s_internal, 2));
   return krelp/(_ss - _sn);
@@ -87,11 +87,11 @@ RichardsRelPermBW::d2relperm(Real seff) const
   if (seff <= _sn) {
     return 0.0;
   }
-  
+
   if (seff >= _ss) {
     return 0.0;
   }
-  
+
   Real s_internal = (seff - _sn)/(_ss - _sn);
   Real krelpp = _coef*( 2.0/(_c - s_internal) + 4.0*s_internal/std::pow(_c - s_internal, 2) + 2*std::pow(s_internal, 2)/std::pow(_c - s_internal, 3) );
   return krelpp/std::pow(_ss - _sn, 2);

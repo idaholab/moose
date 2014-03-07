@@ -9,7 +9,7 @@
 # tensor components.
 # With Young's modulus at 1e6 and Poisson's ratio at 0, the shear
 # modulus is 5e5 (G=E/2/(1+nu)).  Therefore,
-# 
+#
 # stress xx = 1e6 * 1e-6 = 1
 # stress yy = 1e6 * 2e-6 = 2
 # stress zz = 1e6 * 3e-6 = 3

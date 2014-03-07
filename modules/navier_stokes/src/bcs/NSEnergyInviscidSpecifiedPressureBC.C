@@ -63,7 +63,7 @@ Real NSEnergyInviscidSpecifiedPressureBC::compute_jacobian(unsigned var_number)
   Real un = vel * _normals[_qp];
 
   // For specified pressure, term "C" is zero, see base class for details.
-  return 
+  return
     this->qp_jacobian_termA(var_number, _specified_pressure) +
     this->qp_jacobian_termB(var_number, un);
 }

@@ -34,8 +34,8 @@ protected:
   virtual void computeQpStrain();
 
   virtual void computeQpStress();
-  
-  
+
+
 private:
   Real _euler_angle_1;
   Real _euler_angle_2;
@@ -43,7 +43,7 @@ private:
 
   // vectors to get the input values
   std::vector<Real> _Cijkl_matrix_vector;
-  
+
   // bool to indicate if using 9 stiffness values or all 21
   bool _all_21;
 

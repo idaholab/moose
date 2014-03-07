@@ -46,7 +46,7 @@ protected:
   VariableValue & _disp;
   VariableValue & _vel_old;
   Real _beta;
-  
+
 };
 
 #endif //NewmarkAccelAux_H

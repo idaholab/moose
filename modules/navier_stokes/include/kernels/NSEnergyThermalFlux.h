@@ -21,7 +21,7 @@ class NSEnergyThermalFlux : public NSKernel
 public:
 
   NSEnergyThermalFlux(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -29,7 +29,7 @@ protected:
 
   // Gradients
   VariableGradient& _grad_temp;
-  
+
   // Material properties
   MaterialProperty<Real> &_thermal_conductivity;
 
@@ -44,7 +44,7 @@ protected:
 private:
 
   // Computes the Jacobian value (on or off-diagonal) for
-  // var_number, which has been mapped to 
+  // var_number, which has been mapped to
   // 0 = rho
   // 1 = rho*u
   // 2 = rho*v

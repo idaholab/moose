@@ -64,7 +64,7 @@
     velocity = vel_x
     acceleration = accel_x
     beta = 0.3025
-    gamma = 0.6        
+    gamma = 0.6
 #    save_in = saved_x
   [../]
   [./inertia_y]
@@ -73,7 +73,7 @@
     velocity = vel_y
     acceleration = accel_y
     beta = 0.3025
-    gamma = 0.6  
+    gamma = 0.6
 #    save_in = saved_y
   [../]
   [./inertia_z]
@@ -82,7 +82,7 @@
     velocity = vel_z
     acceleration = accel_z
     beta = 0.3025
-    gamma = 0.6  
+    gamma = 0.6
 #    save_in = saved_z
   [../]
 []
@@ -260,7 +260,7 @@
     x = '0.0 0.1      0.2     0.3    0.4        0.5      0.6   0.7      0.8    0.9    1.0'
     y = '0.0 0.000167 0.00133 0.0045 0.010667   0.020833 0.036 0.057167 0.0853 0.1215 0.16667'
     scale_factor = 1
-#    type = PiecewiseLinear 
+#    type = PiecewiseLinear
 #    data_file = wave_one_element.csv
 #    format = columns
   [../]
@@ -292,9 +292,9 @@
      type = NumNonlinearIterations
 #   [../]
 #     [./disp_8]
-#     type = 
+#     type =
    [../]
-  
+
 []
 
 [Output]

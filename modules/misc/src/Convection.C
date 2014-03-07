@@ -19,7 +19,7 @@ Convection::Convection(const std::string & name, InputParameters parameters)
   // The "true" here specifies that this Kernel is to be integrated
   // over the domain.
   :Kernel(name, parameters),
-   
+
    // This is the "Intialization List" it sets the values of class variables
    // Here we are grabbing the values of Parameters to use for a velocity vector
    _x(getParam<Real>("x")),

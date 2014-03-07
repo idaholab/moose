@@ -26,7 +26,7 @@ RichardsSeff1VGcut::RichardsSeff1VGcut(const std::string & name, InputParameters
   _s_cut(0),
   _ds_cut(0)
 {
-  if (_al < 0) 
+  if (_al < 0)
     mooseError("The van-Genuchten alpha parameter in the cut effective saturation relationship is " << _al << " but this must be positive");
   if (_m <=0 || _m >= 1)
     mooseError("The van-Genuchten m parameter in the cut effective saturation relationship is " << _m << " but this must be between zero and one");
@@ -36,7 +36,7 @@ RichardsSeff1VGcut::RichardsSeff1VGcut(const std::string & name, InputParameters
   _ds_cut = RichardsSeffVG::dseff(_p_cut, _al, _m);
   std::cout << "cut VG Seff has p_cut=" << _p_cut << " so seff_cut=" << _s_cut << " and seff=0 at p=" << -_s_cut/_ds_cut + _p_cut << "\n";
 }
-      
+
 
 
 Real
@@ -83,4 +83,4 @@ RichardsSeff1VGcut::d2seff(std::vector<VariableValue *> p, unsigned int qp) cons
       std::vector<std::vector <Real> > b(1, a);
       return b;
     }
-}    
+}

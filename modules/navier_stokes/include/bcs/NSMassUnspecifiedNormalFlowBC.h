@@ -12,7 +12,7 @@ InputParameters validParams<NSMassUnspecifiedNormalFlowBC>();
 
 /**
  * This class implements the mass equation boundary term with
- * the rho*(u.n) boundary integral computed implicitly.  
+ * the rho*(u.n) boundary integral computed implicitly.
  */
 class NSMassUnspecifiedNormalFlowBC : public NSMassBC
 {
@@ -23,7 +23,7 @@ public:
   virtual ~NSMassUnspecifiedNormalFlowBC(){}
 
 protected:
-  
+
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);

@@ -1,5 +1,5 @@
 #include "NSSUPGBase.h"
- 
+
 
 template<>
 InputParameters validParams<NSSUPGBase>()
@@ -18,12 +18,12 @@ InputParameters validParams<NSSUPGBase>()
 
 NSSUPGBase::NSSUPGBase(const std::string & name, InputParameters parameters)
     : NSKernel(name, parameters),
-      
+
       // Material properties
       _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor")),
       _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity")),
       _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
-      
+
       // SUPG-related material properties
       _hsupg(getMaterialProperty<Real>("hsupg")),
       _tauc(getMaterialProperty<Real>("tauc")),
@@ -47,7 +47,7 @@ NSSUPGBase::NSSUPGBase(const std::string & name, InputParameters parameters)
 //      _rho_w_old( _dim == 3 ? coupledValueOld("rhow") : _zero),
 //      _rho_e_old(coupledValueOld("rhoe")),
 
-      // Time derivative derivatives (no, that's not a typo).  You can 
+      // Time derivative derivatives (no, that's not a typo).  You can
       // just think of these as 1/dt for simplicity, they usually are...
       _d_rhodot_du(coupledDotDu("rho")),
       _d_rhoudot_du(coupledDotDu("rhou")),

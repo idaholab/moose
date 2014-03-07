@@ -14,7 +14,7 @@ class AqueousEquilibriumRxnAux;
 template<>
 InputParameters validParams<AqueousEquilibriumRxnAux>();
 
-/** 
+/**
  * Define the AuxKernel for the output of equilibrium species concentrations
  * according to mass action law.
  */
@@ -29,14 +29,14 @@ public:
   AqueousEquilibriumRxnAux(const std::string & name, InputParameters parameters);
 
   virtual ~AqueousEquilibriumRxnAux() {}
-  
+
 protected:
   /**
    * Conputes the equilibrium sepecies concentration.
    * @return The concentration of an equilibrium species.
    */
   virtual Real computeValue();
-  
+
   /// Equilibrium constant
   Real _log_k;
   /// Stochiometric coefficients for coupled primary species

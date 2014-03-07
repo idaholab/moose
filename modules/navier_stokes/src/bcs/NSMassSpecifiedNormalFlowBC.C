@@ -4,10 +4,10 @@ template<>
 InputParameters validParams<NSMassSpecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSMassBC>();
-  
+
   // Required parameters.
   params.addRequiredParam<Real>("rhoun", "The specified value of rho*(u.n) for this boundary");
-  
+
   return params;
 }
 

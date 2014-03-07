@@ -1,5 +1,5 @@
 #include "NSTemperatureL2.h"
- 
+
 
 template<>
 InputParameters validParams<NSTemperatureL2>()
@@ -57,7 +57,7 @@ NSTemperatureL2::computeQpJacobian()
   RealVectorValue vec(_u_vel[_qp],_v_vel[_qp],_w_vel[_qp]);
 
   value *= et - ((vec * vec) / 2.0);
-  
+
   return _phi[_j][_qp]*_test[_i][_qp];
 }
 
@@ -72,7 +72,7 @@ NSTemperatureL2::computeQpOffDiagJacobian(unsigned int jvar)
 
     value *= et;
 
-    return (-value)*_test[_i][_qp];    
+    return (-value)*_test[_i][_qp];
   }
   else if(jvar == _pe_var)
   {
@@ -82,9 +82,9 @@ NSTemperatureL2::computeQpOffDiagJacobian(unsigned int jvar)
 
     value *= et;
 
-    return (-value)*_test[_i][_qp];    
+    return (-value)*_test[_i][_qp];
   }
-  
+
   return 0;
 }
 

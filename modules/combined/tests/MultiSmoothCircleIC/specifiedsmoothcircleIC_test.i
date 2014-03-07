@@ -1,5 +1,5 @@
 [Mesh]
-  
+
   type = GeneratedMesh
   dim = 3
   nx = 22
@@ -29,10 +29,10 @@
        radii = '14 25 16'
        invalue = 1.0
        outvalue = 0.0001
-       int_width = 4 
+       int_width = 4
     [../]
   [../]
-[]	     
+[]
 
 [Kernels]
 active = 'ie_c diff'
@@ -96,7 +96,7 @@ active = 'ie_c diff'
   start_time = 0.0
   num_steps =1
   dt = 100.0
- 
+
   [./Adaptivity]
     refine_fraction = .5
   [../]
@@ -110,5 +110,5 @@ active = 'ie_c diff'
   exodus = true
   perf_log = true
 []
-   
-    
+
+

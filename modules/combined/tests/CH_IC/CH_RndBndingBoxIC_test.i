@@ -33,7 +33,7 @@
       mn_outvalue = -0.8
     [../]
   [../]
-[]	     
+[]
 
 [Kernels]
   active = 'ie_c CHSolid CHInterface'
@@ -104,9 +104,9 @@ active = 'Periodic'
   start_time = 0.0
   num_steps = 4
   dt = 2.0
- 
+
   [./Adaptivity]
-    initial_adaptivity = 1	
+    initial_adaptivity = 1
     error_estimator = LaplacianErrorEstimator
     refine_fraction = 0.8
    coarsen_fraction = 0.05
@@ -122,5 +122,5 @@ active = 'Periodic'
   exodus = true
   perf_log = true
 []
-   
-    
+
+

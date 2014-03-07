@@ -28,7 +28,7 @@ class RichardsSeff1BWsmall : public RichardsSeff
   std::vector<std::vector<Real> > d2seff(std::vector<VariableValue *> p, unsigned int qp) const;
 
  protected:
-  
+
   Real _sn;
   Real _ss;
   Real _c;

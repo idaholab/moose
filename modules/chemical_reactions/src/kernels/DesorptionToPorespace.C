@@ -38,7 +38,7 @@ DesorptionToPorespace::computeQpResidual()
   if (_adsorption_time_const[_qp] > 0)
     return -_test[_i][_qp]*((*_conc_val)[_qp] - _equilib_conc[_qp])/_adsorption_time_const[_qp];
   return 0.0;
-    
+
 }
 
 Real

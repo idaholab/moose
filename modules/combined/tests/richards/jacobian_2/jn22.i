@@ -113,8 +113,8 @@
     variable = pwater
   [../]
 []
-    
-  
+
+
 [Kernels]
   active = 'richardsfwater richardstwater richardsfgas richardstgas'
   [./richardstwater]

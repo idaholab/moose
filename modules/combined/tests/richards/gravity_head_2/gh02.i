@@ -93,8 +93,8 @@
     variable = pgas
   [../]
 []
-    
-  
+
+
 [Kernels]
   active = 'richardsfwater richardsfgas'
   [./richardstwater]

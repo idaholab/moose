@@ -20,7 +20,7 @@ public:
   RealTensorValueAux(const std::string & name, InputParameters parameters);
 
   virtual ~ RealTensorValueAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

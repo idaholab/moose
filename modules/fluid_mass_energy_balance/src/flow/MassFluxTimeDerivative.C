@@ -20,13 +20,13 @@ template<>
 InputParameters validParams<MassFluxTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
-  params.addCoupledVar("enthalpy"," Use Coupled enthalpy to calculate the time derivative");    
+  params.addCoupledVar("enthalpy"," Use Coupled enthalpy to calculate the time derivative");
   return params;
 }
 
 MassFluxTimeDerivative::MassFluxTimeDerivative(const std::string & name, InputParameters parameters)
     :TimeDerivative(name, parameters),
-   
+
      _density(getMaterialProperty<Real>("density")),
      _time_old_density(getMaterialProperty<Real>("time_old_density")),
      _ddensitydp_H(getMaterialProperty<Real>("ddensitydp_H")),
@@ -44,13 +44,13 @@ MassFluxTimeDerivative::computeQpResidual()
 
 Real
 MassFluxTimeDerivative::computeQpJacobian()
-{     
-  return (_porosity[_qp]*_ddensitydp_H[_qp]*_phi[_j][_qp])*_test[_i][_qp]/_dt;  
+{
+  return (_porosity[_qp]*_ddensitydp_H[_qp]*_phi[_j][_qp])*_test[_i][_qp]/_dt;
 }
 
 Real MassFluxTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar==_h_var)   
+  if (jvar==_h_var)
     return _porosity[_qp]*_ddensitydH_P[_qp]*_phi[_j][_qp]*_test[_i][_qp]/_dt;
   else
     return 0.0;

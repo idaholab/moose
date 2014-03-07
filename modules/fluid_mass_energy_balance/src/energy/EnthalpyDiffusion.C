@@ -28,9 +28,9 @@ InputParameters validParams<EnthalpyDiffusion>()
 
 EnthalpyDiffusion::EnthalpyDiffusion(const std::string & name, InputParameters parameters)
     :Diffusion(name, parameters),
-   
+
      _grad_T(coupledGradient("temperature")),
-     _p_var(coupled("pressure")), 
+     _p_var(coupled("pressure")),
      _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
      _dTdP_H(getMaterialProperty<Real>("dTdP_H")),
      _dTdH_P(getMaterialProperty<Real>("dTdH_P"))

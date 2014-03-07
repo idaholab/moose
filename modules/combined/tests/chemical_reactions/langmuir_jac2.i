@@ -29,8 +29,8 @@
     block = centre_block
   [../]
 []
-    
-  
+
+
 [Kernels]
   [./p_dot] # this is just so a kernel is defined everywhere
     type = TimeDerivative

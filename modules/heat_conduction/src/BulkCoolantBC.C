@@ -16,7 +16,7 @@ BulkCoolantBC::BulkCoolantBC(const std::string & name, InputParameters parameter
    _tempb(getParam<Real>("bulk_temperature")),
    _has_function(getParam<FunctionName>("function") != ""),
    _function( _has_function ? &getFunction("function") : NULL ),
-   _conductivity(getMaterialProperty<Real>("thermal_conductivity")) 
+   _conductivity(getMaterialProperty<Real>("thermal_conductivity"))
 
   {}
 
@@ -28,9 +28,9 @@ BulkCoolantBC::computeQpResidual()
 
     if ( _has_function )
     bulk_temp *= _function->value(_t, _q_point[_qp]);
-    
+
     return -( _test[_i][_qp]*(_alpha)/(_conductivity[_qp])*(bulk_temp - _u[_qp] ) );
-    
+
   }
 
 Real

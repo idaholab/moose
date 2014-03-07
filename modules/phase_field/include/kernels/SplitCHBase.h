@@ -15,7 +15,7 @@ class SplitCHBase : public Kernel
 public:
 
   SplitCHBase(const std::string & name, InputParameters parameters);
-  
+
 protected:
   enum PFFunctionType
   {
@@ -29,6 +29,6 @@ protected:
   virtual Real computeDEDC(PFFunctionType type);
 
 private:
-  
+
 };
 #endif //SPLITCHBase_H

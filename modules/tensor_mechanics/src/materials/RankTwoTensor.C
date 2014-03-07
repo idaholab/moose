@@ -14,12 +14,12 @@ RankTwoTensor::RankTwoTensor()
       _vals[i][j] = 0.0;
 }
 
-RankTwoTensor::RankTwoTensor(const TypeVector<Real> & row1, const TypeVector<Real> & row2, const TypeVector<Real> & row3) 
+RankTwoTensor::RankTwoTensor(const TypeVector<Real> & row1, const TypeVector<Real> & row2, const TypeVector<Real> & row3)
 {
   // Initialize the Tensor matrix from the passed in vectors
   for(unsigned int i=0; i<N; i++)
     _vals[0][i] = row1(i);
-  
+
   for(unsigned int i=0; i<N; i++)
     _vals[1][i] = row2(i);
 
@@ -45,7 +45,7 @@ RankTwoTensor::operator()(unsigned int i, unsigned int j)
   return _vals[i][j];
 }
 
-Real 
+Real
 RankTwoTensor::operator()(unsigned int i, unsigned int j) const
 {
   return _vals[i][j];
@@ -53,11 +53,11 @@ RankTwoTensor::operator()(unsigned int i, unsigned int j) const
 
 void
 RankTwoTensor::fillFromInputVector(const std::vector<Real> input)
-{   
+{
   if (input.size() == 6)
   {
     std::cout << "Rank 2 tensor input size =" << input.size() << std::endl;
-    
+
     _vals[0][0] = input[0]; //S11
     _vals[1][1] = input[1]; //S22
     _vals[2][2] = input[2]; //S33
@@ -68,7 +68,7 @@ RankTwoTensor::fillFromInputVector(const std::vector<Real> input)
   else if (input.size() == 9)
   {
     std::cout << "Rank 2 tensor input size =" << input.size() << std::endl;
-    
+
     _vals[0][0] = input[0]; //S11
     _vals[1][0] = input[1]; //S21
     _vals[2][0] = input[2]; //S31
@@ -81,7 +81,7 @@ RankTwoTensor::fillFromInputVector(const std::vector<Real> input)
   }
   else
     mooseError("Please check the number of entries in the eigenstrain input vector");
-} 
+}
 
 void
 RankTwoTensor::setValue(Real val, unsigned int i, unsigned int j)
@@ -101,7 +101,7 @@ RankTwoTensor::row(const unsigned int r) const
   RealVectorValue result;
   for (unsigned int i = 0; i<N; i++)
     result(i) = _vals[r][i];
-  
+
   return result;
 }
 
@@ -161,7 +161,7 @@ RankTwoTensor::rotateXyPlane(const Real a)
   /* std::cout<<"x="<<x<<std::endl;
   std::cout<<"y="<<y<<std::endl;
   std::cout<<"xy="<<xy<<std::endl; */
-  
+
   b.setValue(x, 1, 1);
   b.setValue(y, 2, 2);
   b.setValue(xy, 1, 2);
@@ -171,7 +171,7 @@ RankTwoTensor::rotateXyPlane(const Real a)
   b.setValue(_vals[1][2], 2, 3);
   b.setValue(_vals[2][1], 3, 2);
   b.setValue(_vals[2][2], 3, 3);
-  
+
   return b;
 }
 
@@ -189,7 +189,7 @@ RankTwoTensor::operator= (const RankTwoTensor &a)
   for(unsigned int i(0); i<N; i++)
       for(unsigned int j(0); j<N; j++)
         _vals[i][j] = a._vals[i][j];
-  
+
   return *this;
 }
 
@@ -206,7 +206,7 @@ RankTwoTensor
 RankTwoTensor::operator+ (const RankTwoTensor &a) const
 {
   RankTwoTensor result;
-  
+
    for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       result(i,j) = _vals[i][j] + a(i,j);
@@ -227,7 +227,7 @@ RankTwoTensor
 RankTwoTensor::operator- (const RankTwoTensor &a) const
 {
   RankTwoTensor result;
-  
+
    for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       result(i,j) = _vals[i][j] - a(i,j);
@@ -245,7 +245,7 @@ RankTwoTensor::operator - () const
       result(i,j) = -_vals[i][j];
 
   return result;
-}  
+}
 
 RankTwoTensor &
 RankTwoTensor::operator*=(const Real &a)
@@ -300,7 +300,7 @@ RankTwoTensor::operator*=(const RankTwoTensor &a)
     for(unsigned int j(0); j<N; j++)
       for(unsigned int k(0); k<N; k++)
         _vals[i][j] += s(i,j)*a(j,k);
-  
+
   return *this;
 }
 
@@ -334,7 +334,7 @@ Real
 RankTwoTensor::doubleContraction(const RankTwoTensor &a)
 {
   Real result(0.0);
-  
+
   for(unsigned int i(0); i<N; i++)
     for(unsigned int j(0); j<N; j++)
       result += _vals[i][j]* a(i,j);
@@ -343,7 +343,7 @@ RankTwoTensor::doubleContraction(const RankTwoTensor &a)
 }
 
 RankTwoTensor
-RankTwoTensor::transpose() 
+RankTwoTensor::transpose()
 {
   RankTwoTensor result;
 
@@ -358,7 +358,7 @@ Real
 RankTwoTensor::trace()
 {
   Real result(0.0);
-  
+
   for(unsigned int i(0); i<N; i++)
       result += _vals[i][i];
 
@@ -369,7 +369,7 @@ Real
 RankTwoTensor::det()
 {
   Real result(0.0);
-  
+
   result = _vals[0][0]*(_vals[1][1]*_vals[2][2] - _vals[2][1]*_vals[1][2]);
   result -= _vals[1][0]*(_vals[0][1]*_vals[2][2] - _vals[2][1]*_vals[0][2]);
   result += _vals[2][0]*(_vals[0][1]*_vals[1][2] - _vals[1][1]*_vals[0][2]);
@@ -378,7 +378,7 @@ RankTwoTensor::det()
 }
 
 RankTwoTensor
-RankTwoTensor::inverse() 
+RankTwoTensor::inverse()
 {
   RankTwoTensor result;
 
@@ -393,12 +393,12 @@ RankTwoTensor::inverse()
   result(2,2) = _vals[0][0]*_vals[1][1] - _vals[0][1]*_vals[1][0];
 
   Real det = (*this).det();
-  
+
   if (det == 0)
     mooseError("Rank Two Tensor is singular");
-  
+
   result /= det;
-  
+
   return result;
 }
 
@@ -426,16 +426,16 @@ RankTwoTensor::L2norm()
 
   Real norm;
   norm=0.0;
-  
-  
+
+
   for(unsigned int i=0; i<N; i++)
     for(unsigned int j=0; j<N; j++)
       norm+=_vals[i][j]*_vals[i][j];
 
   norm=pow(norm,0.5);
-  
+
   return norm;
-  
+
 }
 void
 RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> input)

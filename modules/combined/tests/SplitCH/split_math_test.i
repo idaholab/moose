@@ -25,9 +25,9 @@
   [../]
 
   [./w]
-    order = FIRST 
+    order = FIRST
     family = LAGRANGE
-  
+
   [../]
 
 
@@ -54,7 +54,7 @@ active = 'SMP'
 
   [./cres]
     type = SplitCHMath
-    variable = c 
+    variable = c
     kappa_name = kappa_c
     w = w
   [../]
@@ -67,7 +67,7 @@ active = 'SMP'
   [../]
 
   [./time]
-    type = CoupledImplicitEuler 
+    type = CoupledImplicitEuler
     variable = w
     v = c
   [../]
@@ -102,7 +102,7 @@ active = 'SMP'
 
 [Executioner]
    type = Transient
-   scheme = 'BDF2' 
+   scheme = 'BDF2'
    #petsc_options = '-snes_mf'
 
   #Preconditioned JFNK (default)
@@ -112,14 +112,14 @@ active = 'SMP'
 
    petsc_options_iname = '-pc_type'
    petsc_options_value = 'lu'
-  
+
   l_max_its = 30
   l_tol = 1.0e-3
 
   nl_max_its = 50
   nl_rel_tol = 1.0e-10
 
-  dt = 10.0 
+  dt = 10.0
   num_steps = 2
 []
 
@@ -132,5 +132,5 @@ active = 'SMP'
   perf_log = true
 []
 
-   
-    
+
+

@@ -21,7 +21,7 @@ class NSMomentumViscousFlux : public NSKernel
 public:
 
   NSMomentumViscousFlux(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -38,5 +38,5 @@ protected:
   template <class U>
   friend class NSViscStressTensorDerivs;
 };
- 
+
 #endif //  NSMOMENTUMVISCOUSFLUX_H

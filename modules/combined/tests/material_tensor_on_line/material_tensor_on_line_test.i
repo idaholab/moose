@@ -44,7 +44,7 @@
     order = CONSTANT
     family = MONOMIAL
  [../]
- [./stress_xx]	
+ [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
  [../]

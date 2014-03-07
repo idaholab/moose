@@ -51,7 +51,7 @@
     initial_condition = 2E6
   [../]
 []
-    
+
 [BCs]
   [./left]
     type = DirichletBC
@@ -64,7 +64,7 @@
 [AuxVariables]
   [./Seff1VG_Aux]
   [../]
-[]  
+[]
 
 
 [Kernels]

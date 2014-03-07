@@ -27,7 +27,7 @@ public:
   virtual ~NSStagnationBC(){}
 
 protected:
-  
+
   /**
    * Must be implemented in derived class.
    */

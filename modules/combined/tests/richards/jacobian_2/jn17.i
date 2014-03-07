@@ -106,7 +106,7 @@
     value = x+0.6*y+0.3*z
   [../]
 []
-  
+
 [Kernels]
   active = 'richardsfwater richardstwater richardsfgas richardstgas'
   [./richardstwater]

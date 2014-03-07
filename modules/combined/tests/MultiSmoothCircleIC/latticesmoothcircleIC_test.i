@@ -1,5 +1,5 @@
 [Mesh]
-  
+
   type = GeneratedMesh
   dim = 3
   nx = 22
@@ -26,7 +26,7 @@
        Ly = 100.0
        Lz = 100.0
        invalue = 1.0
-       outvalue = 0.0001 
+       outvalue = 0.0001
        circles_per_side = '3 3 3'
        Rnd_variation = 0.0
        radius = 10.0
@@ -34,7 +34,7 @@
        radius_variation = 0.2
     [../]
   [../]
-[]	     
+[]
 
 [Kernels]
 active = 'ie_c diff'
@@ -108,5 +108,5 @@ active = 'Dv'
   exodus = true
   perf_log = true
 []
-   
-    
+
+

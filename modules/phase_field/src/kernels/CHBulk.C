@@ -8,7 +8,7 @@ InputParameters validParams<CHBulk>()
   params.addParam<std::string>("Dmob_name","DM","The D mobility used with the kernel");
   params.addParam<bool>("implicit",true,"The kernel will be run with implicit time integration");
   params.addParam<bool>("has_MJac",false,"Jacobian information for the mobility is defined");
-  
+
   return params;
 }
 
@@ -22,7 +22,7 @@ CHBulk::CHBulk(const std::string & name, InputParameters parameters)
    _grad_u_old(_implicit ? _grad_zero : gradientOld()),
    _has_MJac(getParam<bool>("has_MJac")),
    _DM(_has_MJac ? &getMaterialProperty<Real>(_Dmob_name) : NULL)
-{  
+{
 }
 
 RealGradient
@@ -40,7 +40,7 @@ CHBulk::precomputeQpResidual()
     c = _u_old[_qp];
     grad_c = _grad_u_old[_qp];
   }
-  
+
   return _M[_qp] * computeGradDFDCons(Residual, c, grad_c);//Return residual
 }
 
@@ -67,9 +67,9 @@ CHBulk::precomputeQpJacobian()
     if (_has_MJac)
     {
       Real DMqp = (*_DM)[_qp];
-      grad_value += DMqp*_phi[_j][_qp]*computeGradDFDCons(Residual, c, grad_c); 
+      grad_value += DMqp*_phi[_j][_qp]*computeGradDFDCons(Residual, c, grad_c);
     }
-    
+
   }
 
   return grad_value; //Return jacobian

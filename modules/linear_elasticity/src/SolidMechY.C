@@ -42,7 +42,7 @@ SolidMechY::computeQpResidual()
     }
 
     Real value = (_stress*_grad_test[_i][_qp]);
-    
+
     return value;
   }
 
@@ -62,7 +62,7 @@ SolidMechY::computeQpOffDiagJacobian(unsigned int jvar)
   {
     if(!_constant_properties)
       recomputeConstants();
-    
+
     RealGradient value = 0;
 
     if(jvar == _x_var)

@@ -21,7 +21,7 @@ public:
   RankFourAux(const std::string & name, InputParameters parameters);
 
   virtual ~ RankFourAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

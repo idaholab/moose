@@ -41,14 +41,14 @@ RichardsSeff1BWsmall::RichardsSeff1BWsmall(const std::string & name, InputParame
   if (_las <= 0)
     mooseError("In BW effective saturation las set to " << _las << " but it must be positive");
 }
-      
+
 
 
 Real
 RichardsSeff1BWsmall::LambertW(const Real z) const
 {
-/* Lambert W function. 
-   Was ~/C/LambertW.c written K M Briggs Keith dot Briggs at bt dot com 97 May 21.  
+/* Lambert W function.
+   Was ~/C/LambertW.c written K M Briggs Keith dot Briggs at bt dot com 97 May 21.
    Revised KMB 97 Nov 20; 98 Feb 11, Nov 24, Dec 28; 99 Jan 13; 00 Feb 23; 01 Apr 09
 
    Computes Lambert W function, principal branch.
@@ -62,15 +62,15 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
    To solve (a+b*R)*exp(-c*R)-d=0 for R, use
    R=-(b*W(-exp(-a*c/b)/b*d*c)+a*c)/b/c
 
-   Test: 
+   Test:
      gcc -DTESTW LambertW.c -o LambertW -lm && LambertW
    Library:
-     gcc -O3 -c LambertW.c 
+     gcc -O3 -c LambertW.c
 
    Modified trially by Andy to use MOOSE things
 */
-  int i; 
-  const Real eps=4.0e-16, em1=0.3678794411714423215955237701614608; 
+  int i;
+  const Real eps=4.0e-16, em1=0.3678794411714423215955237701614608;
   Real p,e,t,w;
   //if (z<-em1 || isinf(z) || isnan(z)) { // Andy read this might not compile on some machines
   if (z<-em1) {
@@ -79,7 +79,7 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
   if (0.0==z) return 0.0;
   if (z<-em1+1e-4) { // series near -em1 in sqrt(q)
     Real q=z+em1,r=std::sqrt(q),q2=q*q,q3=q2*q;
-    return 
+    return
      -1.0
      +2.331643981597124203363536062168*r
      -1.812187885639363490240191647568*q
@@ -93,15 +93,15 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
   /* initial approx for iteration... */
   if (z<1.0) { /* series near 0 */
     p=std::sqrt(2.0*(2.7182818284590452353602874713526625*z+1.0));
-    w=-1.0+p*(1.0+p*(-0.333333333333333333333+p*0.152777777777777777777777)); 
-  } else 
+    w=-1.0+p*(1.0+p*(-0.333333333333333333333+p*0.152777777777777777777777));
+  } else
     w=std::log(z); /* asymptotic */
   if (z>3.0) w-=std::log(w); /* useful? */
   for (i=0; i<10; i++) { /* Halley iteration */
-    e=std::exp(w); 
+    e=std::exp(w);
     t=w*e-z;
     p=w+1.0;
-    t/=e*p-0.5*(p+1.0)*t/p; 
+    t/=e*p-0.5*(p+1.0)*t/p;
     w-=t;
     if (std::fabs(t)<eps*(1.0+std::fabs(w))) return w; /* rel-abs error */
   }

@@ -18,7 +18,7 @@ InputParameters validParams<StressDivergenceTensors>()
 //  params.set<bool>("use_displaced_mesh") = true;
   // Using the displaced mesh will be set in the solid mechanics action input now.
   params.set<bool>("use_displaced_mesh") = false;
-  
+
   return params;
 }
 

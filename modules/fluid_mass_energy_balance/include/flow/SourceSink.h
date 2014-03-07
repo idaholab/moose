@@ -27,7 +27,7 @@ InputParameters validParams<SourceSink>();
  * Define the Kernel for a SourceSink operator that looks like:
  *
  * grad_some_var dot u'
- * 
+ *
  * This first line is defining the name and inheriting from Kernel.
  */
 class SourceSink : public Kernel
@@ -35,7 +35,7 @@ class SourceSink : public Kernel
 public:
 
   SourceSink(const std::string & name, InputParameters parameters);
-  
+
 protected:
   /**
    * Responsible for computing the residual at one quadrature point
@@ -55,9 +55,9 @@ protected:
    * This should always be defined in the .C
    */
   virtual Real computeQpJacobian();
-  
+
 private:
-  
+
   Real _value;
   std::vector<Real> _point_param;
   std::vector<Real> _range_param;

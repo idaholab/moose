@@ -1,6 +1,6 @@
 # Relative-permeability User objects give the correct value
 # (note 0.01<=(x=p)<=0.99, and i use seff=p in the aux vars)
-# 
+#
 # If you want to add another test for another UserObject
 # then add the UserObject, add a Function defining the expected result,
 # add an AuxVariable and AuxKernel that will record the UserObject's value
@@ -467,7 +467,7 @@
     variable = d2RelPermMonomial_Aux
   [../]
 []
-    
+
 
 
 #############################################################################
@@ -493,7 +493,7 @@
     [../]
   [../]
 []
-  
+
 [Kernels]
   active = 'richardsf richardst'
   [./richardst]

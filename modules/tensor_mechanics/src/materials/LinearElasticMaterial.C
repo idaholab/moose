@@ -21,7 +21,7 @@ InputParameters validParams<LinearElasticMaterial>()
   return params;
 }
 
-LinearElasticMaterial::LinearElasticMaterial(const std::string & name, 
+LinearElasticMaterial::LinearElasticMaterial(const std::string & name,
                                              InputParameters parameters)
     : TensorMechanicsMaterial(name, parameters),
       _eigenstrain(declareProperty<RankTwoTensor>("eigenstrain")),
@@ -47,27 +47,27 @@ void LinearElasticMaterial::computeQpStrain()
 {
   //strain = (grad_disp + grad_disp^T)/2
   RankTwoTensor grad_tensor(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]);
-  
+
   if (_t_step > 1000000)
   {
     RankTwoTensor test = grad_tensor;
     test.addIa(1.0);
-    
+
     RankTwoTensor eye = test*test.inverse();
     eye.print();
   }
-  
+
   _elastic_strain[_qp] = (grad_tensor + grad_tensor.transpose())/2.0;
-  
+
 }
 
 void LinearElasticMaterial::computeQpStress()
 {
   //Calculation and Apply stress free strain
   RankTwoTensor stress_free_strain = computeStressFreeStrain();
-  
+
   _elastic_strain[_qp] += stress_free_strain;
-  
+
   // stress = C * e
   _stress[_qp] = _elasticity_tensor[_qp]*_elastic_strain[_qp];
 }
@@ -80,7 +80,7 @@ RankTwoTensor LinearElasticMaterial::computeStressFreeStrain()
     T = (*_T)[_qp];
   else
     T = _Temp;
-  
+
   RankTwoTensor stress_free_strain;
   stress_free_strain.addIa(-_thermal_expansion_coeff*(T - _T0));
 

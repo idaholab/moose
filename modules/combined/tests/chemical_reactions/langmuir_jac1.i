@@ -27,8 +27,8 @@
     max = 1
   [../]
 []
-    
-  
+
+
 [Kernels]
   [./flow_from_matrix]
     type = DesorptionFromMatrix

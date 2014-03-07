@@ -1,4 +1,4 @@
-# This input file is designed to test the RankTwoAux and RankFourAux 
+# This input file is designed to test the RankTwoAux and RankFourAux
 # auxkernels, which report values out of the Tensors used in materials
 # properties.
 
@@ -188,7 +188,7 @@
     type = Diffusion
     variable = diffused
   [../]
-[] 
+[]
 
 [AuxKernels]
   [./matl_C1111]
@@ -270,7 +270,7 @@
     index_l = 3
     variable = C2233_aux
   [../]
-  
+
   [./matl_C2223]
     type = RankFourAux
     rank_four_tensor = elasticity_tensor
@@ -408,7 +408,7 @@
     index_j = 1
     variable = s11_aux
   [../]
- 
+
  [./matl_s12]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -456,7 +456,7 @@
     block = 0
     disp_x = disp_x
     disp_y = disp_y
- 
+
     all_21 = true
    C_ijkl ='1111 1122 1133 1123 1113 1112 2222 2233 2223 2213 2212 3333 3323 3313 3312 2323 2313 2312 1313 1312 1212'
   [../]

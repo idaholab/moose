@@ -6,7 +6,7 @@ InputParameters validParams<MatDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
   params.addParam<std::string>("D_name","D","The name of the diffusivity");
-  
+
   return params;
 }
 
@@ -20,7 +20,7 @@ Real
 MatDiffusion::computeQpResidual()
 {
   return _D[_qp]*_grad_test[_i][_qp]*_grad_u[_qp];
-  
+
 }
 
 Real

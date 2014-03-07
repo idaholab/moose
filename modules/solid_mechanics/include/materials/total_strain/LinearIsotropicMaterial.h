@@ -34,7 +34,7 @@ protected:
   virtual void computeStrain(const SymmTensor & total_strain, SymmTensor & elastic_strain);
 
   virtual Real computeAlpha();
-  
+
   Real _youngs_modulus;
   Real _poissons_ratio;
 
@@ -45,7 +45,7 @@ protected:
 
   Real _pi;
   Real _tol;
-  
+
 };
 
 #endif //LINEARISOTROPICMATERIAL_H

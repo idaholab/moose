@@ -27,7 +27,7 @@ InputParameters validParams<RichardsMaterial>()
   params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-10)");
   //params.addRequiredCoupledVar("pressure_vars", "List of variables that represent the pressure");
   params.addParam<bool>("linear_shape_fcns", true, "If you are using second-order Lagrange shape functions you need to set this to false.");
-  
+
   return params;
 }
 
@@ -92,7 +92,7 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     for(unsigned int i=0; i<coupled_vars.size(); i++)
       addMooseVariableDependency(coupled_vars[i]);
   }
-  
+
   if (_material_por <= 0 || _material_por >= 1)
     mooseError("Porosity set to " << _material_por << " but it must be between 0 and 1");
 
@@ -112,7 +112,7 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
   _material_SUPG_UO.resize(_num_p);
   _grad_p.resize(_num_p);
 
-    
+
   for (unsigned int i=0 ; i<_num_p; ++i)
     {
       // DON'T WANT "pressure_vars" at all since pp_name_UO contains the same info
@@ -124,14 +124,14 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
       _pressure_old_vals[i] = _pp_name_UO.pp_vals_old(i);
       _grad_p[i] = _pp_name_UO.grad_pp(i);
 
-      // in the following.  first get the userobject names that were inputted, then get the i_th one of these, then get the actual userobject that this corresponds to, then finally & gives pointer to RichardsRelPerm object. 
-      _material_relperm_UO[i] = &getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[i]); 
-      _material_seff_UO[i] = &getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName> >("seff_UO")[i]); 
-      _material_sat_UO[i] = &getUserObjectByName<RichardsSat>(getParam<std::vector<UserObjectName> >("sat_UO")[i]); 
-      _material_density_UO[i] = &getUserObjectByName<RichardsDensity>(getParam<std::vector<UserObjectName> >("density_UO")[i]); 
-      _material_SUPG_UO[i] = &getUserObjectByName<RichardsSUPG>(getParam<std::vector<UserObjectName> >("SUPG_UO")[i]); 
+      // in the following.  first get the userobject names that were inputted, then get the i_th one of these, then get the actual userobject that this corresponds to, then finally & gives pointer to RichardsRelPerm object.
+      _material_relperm_UO[i] = &getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[i]);
+      _material_seff_UO[i] = &getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName> >("seff_UO")[i]);
+      _material_sat_UO[i] = &getUserObjectByName<RichardsSat>(getParam<std::vector<UserObjectName> >("sat_UO")[i]);
+      _material_density_UO[i] = &getUserObjectByName<RichardsDensity>(getParam<std::vector<UserObjectName> >("density_UO")[i]);
+      _material_SUPG_UO[i] = &getUserObjectByName<RichardsSUPG>(getParam<std::vector<UserObjectName> >("SUPG_UO")[i]);
     }
-  
+
 }
 
 /*
@@ -256,7 +256,7 @@ RichardsMaterial::computeProperties()
       _tauvel_SUPG[qp].resize(_num_p);
       _dtauvel_SUPG_dgradp[qp].resize(_num_p);
       _dtauvel_SUPG_dp[qp].resize(_num_p);
-      
+
       // Bounds checking on element data and putting into vector form
       mooseAssert(qp < dxidx.size(), "Insufficient data in dxidx array!");
       mooseAssert(qp < dxidy.size(), "Insufficient data in dxidy array!");

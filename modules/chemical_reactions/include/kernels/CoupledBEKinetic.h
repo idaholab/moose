@@ -20,7 +20,7 @@ class CoupledBEKinetic : public Kernel
 public:
 
   CoupledBEKinetic(const std::string & name, InputParameters parameters);
-  
+
 protected:
 
   /**
@@ -41,7 +41,7 @@ protected:
    * @return The diagonal jacobian of mass accumulation of the coupled kinetic mineral species concentration.
    */
   virtual Real computeQpJacobian();
-//  virtual Real computeQpOffDiagJacobian(unsigned int jvar);  
+//  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
   /// Material property of porosity.

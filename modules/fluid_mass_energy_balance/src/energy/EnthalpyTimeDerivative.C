@@ -48,8 +48,8 @@ _u_old(valueOld())
 
 Real
 EnthalpyTimeDerivative::computeQpResidual()
-{   
-  return (((_porosity[_qp] * _density[_qp] * _u[_qp]) + ((1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _temperature[_qp])) 
+{
+  return (((_porosity[_qp] * _density[_qp] * _u[_qp]) + ((1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _temperature[_qp]))
           - ((_porosity[_qp] * _time_old_density[_qp] * _u_old[_qp]) + ((1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _time_old_temperature[_qp])))
     * _test[_i][_qp] /_dt;
   //REAL dphirho_dt = ((_porosity[_qp]*_density_water[_qp])-(_porosity_old[_qp]*_density_water_old[_qp]))/_dt;
@@ -58,8 +58,8 @@ EnthalpyTimeDerivative::computeQpResidual()
     Real tmp1=(((_porosity[_qp]*_density_water[_qp]*_specific_heat_water[_qp])+
     ((1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]))*_u[_qp]-
     ((_porosity[_qp]*_density_water_old[_qp]*_specific_heat_water[_qp])+
-    ((1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]))*_u_old[_qp])*_test[_i][_qp]/_dt;    
-  */    
+    ((1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]))*_u_old[_qp])*_test[_i][_qp]/_dt;
+  */
 }
 
 Real
@@ -68,7 +68,7 @@ EnthalpyTimeDerivative::computeQpJacobian()
   return (_porosity[_qp] * (_density[_qp] * _phi[_j][_qp] + _ddensitydH_P[_qp] * _u[_qp] * _phi[_j][_qp])
           + (1.0-_porosity[_qp]) * _density_rock[_qp] * _specific_heat_rock[_qp] * _dTdH_P[_qp] * _phi[_j][_qp])
     *_test[_i][_qp] /_dt;
-  /*    
+  /*
         Real tmp1 = (((_porosity[_qp]*_density_water[_qp]*_specific_heat_water[_qp])+
         ((1.0-_porosity[_qp])*_density_rock[_qp]*_specific_heat_rock[_qp]))*_phi[_j][_qp])*_test[_i][_qp]/_dt;
         Real tmp2 = _porosity[_qp]*_dwdt[_qp]*_specific_heat_water[_qp]*_u[_qp]*_test[_i][_qp]/_dt;

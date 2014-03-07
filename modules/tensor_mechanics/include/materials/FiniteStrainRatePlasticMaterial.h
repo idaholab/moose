@@ -27,7 +27,7 @@ protected:
   Real _exponent;
 
   Real macaulayBracket(Real);
-  
+
 private:
 
 };

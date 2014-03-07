@@ -45,7 +45,7 @@ protected:
   VariableValue & _accel_old;
   VariableValue & _accel;
   Real _gamma;
-  
+
 };
 
 #endif //NewmarkVelAux_H

@@ -43,7 +43,7 @@ public:
   virtual void updateContactSet();
 
   virtual Real computeQpSlaveValue();
-  
+
   virtual Real computeQpResidual(Moose::ConstraintType type);
 
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
@@ -55,9 +55,9 @@ protected:
   bool _jacobian_update;
 
   const unsigned int _component;
-  
+
   const ContactModel _model;
-  
+
   Real _penalty;
 
   unsigned int _x_var;

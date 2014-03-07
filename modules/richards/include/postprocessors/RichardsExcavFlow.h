@@ -18,7 +18,7 @@ class Function;
 template<>
 InputParameters validParams<RichardsExcavFlow>();
 
-class RichardsExcavFlow : 
+class RichardsExcavFlow :
 public SideIntegralVariablePostprocessor,
 public FunctionInterface
 {

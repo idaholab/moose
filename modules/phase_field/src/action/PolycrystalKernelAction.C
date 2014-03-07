@@ -7,14 +7,14 @@ template<>
 InputParameters validParams<PolycrystalKernelAction>()
 {
   InputParameters params = validParams<Action>();
-  
+
   params.addRequiredParam<unsigned int>("crys_num", "specifies the number of grains to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<VariableName>("c","NONE","Name of coupled concentration variable");
   params.addParam<Real>("en_ratio",1.0,"Ratio of surface to GB energy");
   params.addParam<bool>("implicit",true,"Whether kernels are implicit or not");
   params.addParam<VariableName>("T","Name of temperature variable");
-  
+
   return params;
 }
 
@@ -28,15 +28,15 @@ PolycrystalKernelAction::PolycrystalKernelAction(const std::string & name, Input
 {}
 
 void
-PolycrystalKernelAction::act() 
+PolycrystalKernelAction::act()
 {
 #ifdef DEBUG
   std::cerr << "Inside the PolyCrystalKernelAction Object\n";
   std::cerr << "var name base:" << _var_name_base;
 #endif
   // std::cout << "Implicit = " << _implicit << std::cout;
-  
-  
+
+
   for (unsigned int crys = 0; crys<_crys_num; crys++)
   {
     //Create variable names
@@ -52,8 +52,8 @@ PolycrystalKernelAction::act()
 
     for (unsigned int j = 0; j<_crys_num; j++)
     {
-      
-      if (j != crys) 
+
+      if (j != crys)
       {
         std::string coupled_var_name = _var_name_base;
         std::stringstream out2;
@@ -62,7 +62,7 @@ PolycrystalKernelAction::act()
         v[ind] = coupled_var_name;
         ind++;
       }
-    }    
+    }
 
     InputParameters poly_params = _factory.getValidParams("ACGrGrPoly");
     poly_params.set<NonlinearVariableName>("variable") = var_name;
@@ -70,31 +70,31 @@ PolycrystalKernelAction::act()
     poly_params.set<bool>("implicit")=_implicit;
     if (!_T.empty())
       poly_params.set<std::vector<VariableName> >("T").push_back(_T);
-    
+
     std::string kernel_name = "ACBulk_";
     kernel_name.append(var_name);
-    
+
     _problem->addKernel("ACGrGrPoly", kernel_name, poly_params);
 
     /************/
-    
+
     poly_params = _factory.getValidParams("ACInterface");
     poly_params.set<NonlinearVariableName>("variable") = var_name;
     poly_params.set<bool>("implicit")=getParam<bool>("implicit");
 
     kernel_name = "ACInt_";
     kernel_name.append(var_name);
-    
+
     _problem->addKernel("ACInterface", kernel_name, poly_params);
     //*******************
-    
+
     poly_params = _factory.getValidParams("TimeDerivative");
     poly_params.set<NonlinearVariableName>("variable") = var_name;
     poly_params.set<bool>("implicit") = true;
-    
+
     kernel_name = "IE_";
     kernel_name.append(var_name);
-    
+
     _problem->addKernel("TimeDerivative", kernel_name, poly_params);
     /************/
     if (_c != "NONE")//Add in Bubble interaction kernel, if using bubbles
@@ -107,10 +107,10 @@ PolycrystalKernelAction::act()
 
       kernel_name = "ACBubInteraction_";
       kernel_name.append(var_name);
-    
+
       _problem->addKernel("ACGBPoly", kernel_name, poly_params);
     }
   }
-  
-  
+
+
 }

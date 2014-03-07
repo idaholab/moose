@@ -36,8 +36,8 @@ PolycrystalVariablesAction::PolycrystalVariablesAction(const std::string & name,
 {}
 
 void
-PolycrystalVariablesAction::act() 
-{ 
+PolycrystalVariablesAction::act()
+{
 #ifdef DEBUG
   std::cerr << "Inside the PolycrystalVariablesAction Object\n";
   std::cerr << "VariableBase: " << _var_name_base
@@ -46,7 +46,7 @@ PolycrystalVariablesAction::act()
 #endif
 
 // Loop through the number of order parameters
-  
+
   for (unsigned int crys = 0; crys<_crys_num; crys++)
   {
     //Create variable names
@@ -54,7 +54,7 @@ PolycrystalVariablesAction::act()
     std::stringstream out;
     out << crys;
     var_name.append(out.str());
-    
+
     _problem->addVariable(var_name,
                           FEType(Utility::string_to_enum<Order>(getParam<std::string>("order")),
                                  Utility::string_to_enum<FEFamily>(getParam<std::string>("family"))),

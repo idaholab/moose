@@ -9,7 +9,7 @@ class NSTemperatureAux;
 template<>
 InputParameters validParams<NSTemperatureAux>();
 
-/** 
+/**
  * Temperature is an auxiliary value computed from the total energy
  * and the velocity magnitude (e_i = internal energy, e_t = total energy):
  * T = e_i / c_v
@@ -26,7 +26,7 @@ public:
   NSTemperatureAux(const std::string & name, InputParameters parameters);
 
   virtual ~NSTemperatureAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

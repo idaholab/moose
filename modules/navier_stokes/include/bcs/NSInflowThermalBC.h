@@ -19,13 +19,13 @@ class NSInflowThermalBC : public NodalBC
 public:
 
   NSInflowThermalBC(const std::string & name, InputParameters parameters);
-  
+
   virtual ~NSInflowThermalBC(){}
 
 protected:
   // In general, the residual equation is u-u_d=0, where u_d
   // is a Dirichlet value.  Note that no computeQpJacobian()
-  // function can be specified in this class... it is assumed 
+  // function can be specified in this class... it is assumed
   // to simply have a 1 on the diagonal.
   virtual Real computeQpResidual();
 

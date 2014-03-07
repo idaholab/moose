@@ -17,7 +17,7 @@ InputParameters validParams<NavierStokesMaterial>()
 
   params.addRequiredCoupledVar("temperature", "");
   params.addRequiredCoupledVar("enthalpy", "");
-  
+
   params.addRequiredCoupledVar("rho", "density");
   params.addRequiredCoupledVar("rhou", "x-momentum");
   params.addRequiredCoupledVar("rhov", "y-momentum");
@@ -37,14 +37,14 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _grad_u(coupledGradient("u")),
     _grad_v(coupledGradient("v")),
     _grad_w(_mesh_dimension == 3 ? coupledGradient("w") : _grad_zero),
-   
+
     _viscous_stress_tensor(declareProperty<RealTensorValue>("viscous_stress_tensor")),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
 
     // Declared here but _not_ calculated here
     // (See e.g. derived class, bighorn/include/materials/FluidTC1.h)
     _dynamic_viscosity(declareProperty<Real>("dynamic_viscosity")),
-    
+
     // The momentum components of the inviscid flux Jacobians.
     _calA(declareProperty<std::vector<RealTensorValue> >("calA")),
 
@@ -58,7 +58,7 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _R(getParam<Real>("R")),
     _gamma(getParam<Real>("gamma")),
     _Pr(getParam<Real>("Pr")),
-    
+
     // Coupled solution values needed for computing SUPG stabilization terms
     _u_vel(coupledValue("u")),
     _v_vel(coupledValue("v")),
@@ -73,14 +73,14 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
     _rho_v(coupledValue("rhov")),
     _rho_w(_mesh.dimension() == 3 ? coupledValue("rhow") : _zero),
     _rho_e(coupledValue("rhoe")),
-    
+
     // Time derivative values
     _drho_dt(coupledDot("rho")),
     _drhou_dt(coupledDot("rhou")),
     _drhov_dt(coupledDot("rhov")),
     _drhow_dt( _mesh.dimension() == 3 ? coupledDot("rhow") : _zero),
     _drhoe_dt(coupledDot("rhoe")),
-    
+
     // Gradients
     _grad_rho(coupledGradient("rho")),
     _grad_rho_u(coupledGradient("rhou")),
@@ -109,9 +109,9 @@ NavierStokesMaterial::NavierStokesMaterial(const std::string & name,
  */
 void
 NavierStokesMaterial::computeProperties()
-{  
+{
   for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
-  {  
+  {
     /******* Viscous Stress Tensor *******/
     //Technically... this _is_ the transpose (since we are loading these by rows)
     //But it doesn't matter....
@@ -128,7 +128,7 @@ NavierStokesMaterial::computeProperties()
       grad_outter_u(i,i) -= (2.0/3.0) * div_vel;
 
     grad_outter_u *= _dynamic_viscosity[qp];
-    
+
     _viscous_stress_tensor[qp] = grad_outter_u;
 
     // Tabulated values of thermal conductivity vs. Temperature for air (k increases slightly with T):
@@ -189,11 +189,11 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
   mooseAssert(qp < dxidx.size(), "Insufficient data in dxidx array!");
   mooseAssert(qp < dxidy.size(), "Insufficient data in dxidy array!");
   mooseAssert(qp < dxidz.size(), "Insufficient data in dxidz array!");
-    
+
   mooseAssert(qp < detadx.size(), "Insufficient data in detadx array!");
   mooseAssert(qp < detady.size(), "Insufficient data in detady array!");
   mooseAssert(qp < detadz.size(), "Insufficient data in detadz array!");
-    
+
   if (_mesh_dimension == 3)
   {
     mooseAssert(qp < dzetadx.size(), "Insufficient data in dzetadx array!");
@@ -206,7 +206,7 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
 
   // Pull out element inverse map values at the current qp into a little dense matrix
   Real dxi_dx[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
-  
+
   dxi_dx[0][0] = dxidx[qp];  dxi_dx[0][1] = dxidy[qp];
   dxi_dx[1][0] = detadx[qp]; dxi_dx[1][1] = detady[qp];
 
@@ -224,7 +224,7 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
     dxi_dx[2][0] = dzetadx[qp];   dxi_dx[2][1] = dzetady[qp];   dxi_dx[2][2] = dzetadz[qp];
   }
 
-  // Construct the g_ij = d(xi_k)/d(x_j) * d(xi_k)/d(x_i) matrix 
+  // Construct the g_ij = d(xi_k)/d(x_j) * d(xi_k)/d(x_i) matrix
   // from Ben and Bova's paper by summing over k...
   Real g[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
   for (unsigned i=0; i<3; ++i)
@@ -239,7 +239,7 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
       denom += U(j) * g[i][j] * U(i);
 
   // Compute h_supg.  Some notes:
-  // .) The 2 coefficient in this term should be a 1 if we are using tets/triangles.  
+  // .) The 2 coefficient in this term should be a 1 if we are using tets/triangles.
   // .) The denominator will be identically zero only if the velocity
   //    is identically zero, in which case we can't divide by it.
   if (denom != 0.0)
@@ -256,8 +256,8 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
 
 void NavierStokesMaterial::compute_tau(unsigned qp)
 {
-  Real velmag = std::sqrt(_u_vel[qp]*_u_vel[qp] + 
-                          _v_vel[qp]*_v_vel[qp] + 
+  Real velmag = std::sqrt(_u_vel[qp]*_u_vel[qp] +
+                          _v_vel[qp]*_v_vel[qp] +
                           _w_vel[qp]*_w_vel[qp]);
 
   // std::cout << "velmag=" << velmag << std::endl;
@@ -280,7 +280,7 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
   // The speed of sound for an ideal gas, sqrt(gamma * R * T).  Not needed unless
   // we want to use a form of Tau that requires it.
   // Real soundspeed = std::sqrt(_gamma * _R * _temperature[qp]);
-  
+
   // If velmag == 0, then _hsupg should be zero as well.  Then tau
   // will have only the time-derivative contribution (or zero, if we
   // are not including dt terms in our taus!)  Note that using the
@@ -304,7 +304,7 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
 
     // The viscosity-based term
     Real visc_term = _dynamic_viscosity[qp] / _rho[qp] / h2;
-    
+
     // The thermal conductivity-based term, cp = gamma * cv
     Real cv = _R / (_gamma-1.);
     Real k_term = _thermal_conductivity[qp] / _rho[qp] / (_gamma*cv) / h2;
@@ -324,7 +324,7 @@ void NavierStokesMaterial::compute_tau(unsigned qp)
     // so there would basically never be any stabilization...
     // _tauc[qp] = (_hsupg[qp] * velmag) / (velmag*velmag + soundspeed*soundspeed);
 
-    // For use with option "1", 
+    // For use with option "1",
     // (tau_c)^{-2}
     //    Real taucm2 = 1./_tauc[qp]/_tauc[qp];
     //    _taum[qp] = 1. / std::sqrt(taucm2 + visc_term*visc_term);
@@ -355,7 +355,7 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   // Create storage at this qp for the strong residuals of all the equations.
   // In 2D, the value for the z-velocity equation will just be zero.
   _strong_residuals[qp].resize(5);
-  
+
   // The timestep is stored in the Problem object, which can be accessed through
   // the parent pointer of the SubProblem.  Don't need this if we are not
   // approximating time derivatives ourselves.
@@ -460,26 +460,26 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
       _calE[qp][k][m](k,m_local) = _enthalpy[qp];           // H * D_{km}
       _calE[qp][k][m] += (1.-_gamma) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
     }
-    
+
     // E_{k4} (energy gradient term)
     _calE[qp][k][4].zero();
     _calE[qp][k][4] = _gamma * Ck_T;
   }
-  
+
   // Compute the sum over ell of: A_ell grad(U_ell), store in DenseVector or Gradient object?
-  // The gradient object might be more useful, since we are multiplying by VariableGradient 
+  // The gradient object might be more useful, since we are multiplying by VariableGradient
   // (which is a MooseArray of RealGradients) objects?
-  RealVectorValue mom_resid = 
+  RealVectorValue mom_resid =
     _calA[qp][0]*_grad_rho[qp] +
     _calA[qp][1]*_grad_rho_u[qp] +
     _calA[qp][2]*_grad_rho_v[qp] +
     _calA[qp][3]*_grad_rho_w[qp] +
     _calA[qp][4]*_grad_rho_e[qp];
-  
+
   // No matrices/vectors for the energy residual strong form... just write it out like
-  // the mass equation residual.  See "Momentum SUPG terms prop. to energy residual" 
+  // the mass equation residual.  See "Momentum SUPG terms prop. to energy residual"
   // section of the notes.
-  Real energy_resid = 
+  Real energy_resid =
     (0.5*(_gamma-1.)*velmag2 - _enthalpy[qp])*(vel * _grad_rho[qp]) +
     _enthalpy[qp]*divU +
     (1.-_gamma)*(vel(0)*(vel*_grad_rho_u[qp]) +

@@ -13,10 +13,10 @@ InputParameters validParams<DoubleWellPotential>()
 
 DoubleWellPotential::DoubleWellPotential(const std::string & name, InputParameters parameters) :
   ACBulk( name, parameters )
-{ 
+{
 }
 
-Real  
+Real
 DoubleWellPotential::computeDFDOP(PFFunctionType type)
 {
   switch (type)

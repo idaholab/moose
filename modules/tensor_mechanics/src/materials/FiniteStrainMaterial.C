@@ -10,10 +10,10 @@ InputParameters validParams<FiniteStrainMaterial>()
   return params;
 }
 
-FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name, 
+FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
                                              InputParameters parameters)
-    : TensorMechanicsMaterial(name, parameters),      
-      _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),  
+    : TensorMechanicsMaterial(name, parameters),
+      _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
       _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
       _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
       _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
@@ -42,15 +42,15 @@ void FiniteStrainMaterial::computeStrain()
   {
     //Deformation gradient
     RankTwoTensor A(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]); //Deformation gradient
-    RankTwoTensor Fbar(_grad_disp_x_old[_qp],_grad_disp_y_old[_qp],_grad_disp_z_old[_qp]); //Old Deformation gradient 
-  
+    RankTwoTensor Fbar(_grad_disp_x_old[_qp],_grad_disp_y_old[_qp],_grad_disp_z_old[_qp]); //Old Deformation gradient
+
     _dfgrd[_qp]=A;
     _dfgrd[_qp].addIa(1.0);//Gauss point deformation gradient
 
     A -= Fbar; //A = gradU - gradUold
-    
+
     Fbar.addIa(1.0); //Fbar = ( I + gradUold)
-  
+
     //Incremental deformation gradient Fhat = I + A Fbar^-1
     Fhat[_qp] = A*Fbar.inverse();
     Fhat[_qp].addIa(1.0);
@@ -66,12 +66,12 @@ void FiniteStrainMaterial::computeStrain()
 
   ave_Fhat /= volume; //This is needed for volumetric locking correction
   ave_dfgrd_det /=volume; //Average deformation gradient
- 
+
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     Real factor( std::pow( ave_Fhat.det()/Fhat[_qp].det(), 1.0/3.0));
     Fhat[_qp] *= factor; //Finalize volumetric locking correction
-    
+
     computeQpStrain(Fhat[_qp]);
 
     factor=pow(ave_dfgrd_det/_dfgrd[_qp].det(), 1.0/3.0);//Volumetric locking correction
@@ -80,7 +80,7 @@ void FiniteStrainMaterial::computeStrain()
   }
 
 
-  
+
 }
 void FiniteStrainMaterial::computeQpStrain()
 {
@@ -101,38 +101,38 @@ void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
   /*RankTwoTensor Chat = Fhat.transpose()*Fhat;
   RankTwoTensor A = Chat;
   A.addIa(-1.0);
-  
+
   RankTwoTensor B = Chat*0.25;
   B.addIa(-0.75);
   _strain_increment[_qp] = -B*A;*/
-  
+
   RankTwoTensor D = _strain_increment[_qp]/_t_step;
   _strain_rate[_qp] = D;
 
   //Calculate rotation R_incr
   RankTwoTensor invFhat(Fhat.inverse());
-  
+
   std::vector<Real> a(3);
   a[0] = invFhat(1,2) - invFhat(2,1);
   a[1] = invFhat(2,0) - invFhat(0,2);
   a[2] = invFhat(0,1) - invFhat(1,0);
   Real q = (a[0]*a[0] + a[1]*a[1] + a[2]*a[2])/4.0;
   Real trFhatinv_1 = invFhat.trace() - 1.0;
-  Real p = trFhatinv_1*trFhatinv_1/4.0;  
+  Real p = trFhatinv_1*trFhatinv_1/4.0;
 //  Real y = 1.0/((q + p)*(q + p)*(q + p));
 
   /*Real C1 = std::sqrt(p * (1 + (p*(q+q+(q+p))) * (1-(q+p)) * y));
   Real C2 = 0.125 + q * 0.03125 * (p*p - 12*(p-1)) / (p*p);
   Real C3 = 0.5 * std::sqrt( (p*q*(3-q) + p*p*p + q*q)*y );
   */
-    
+
   Real C1 = std::sqrt(p + 3.0*p*p*(1.0 - (p + q))/((p+q)*(p+q)) - 2.0*p*p*p*(1-(p+q))/((p+q)*(p+q)*(p+q))); //cos theta_a
   Real C2 = 0.0;
   if (q > 0.01)
     C2 = (1.0 - C1)/(4.0*q); // (1-cos theta_a)/4q
   else //alternate form for small q
     C2 = 0.125 + q*0.03125*(p*p - 12*(p-1))/(p*p) + q*q*(p - 2.0)*(p*p - 10.0*p + 32.0)/(p*p*p) + q*q*q*(1104.0 - 992.0*p + 376.0*p*p - 72*p*p*p + 5.0*p*p*p*p)/(512.0*p*p*p*p);
-  
+
   Real C3 = 0.5*std::sqrt((p*q*(3.0 - q) + p*p*p + q*q)/((p + q)*(p + q)*(p + q))); //sin theta_a/(2 sqrt(q))
 
   //Calculate incremental rotation. Note that this value is the transpose of that from Rashid, 93, so we transpose it before storing
@@ -141,7 +141,7 @@ void FiniteStrainMaterial::computeQpStrain(RankTwoTensor Fhat)
   for (unsigned int i=0; i<3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
       R_incr(i,j) += C2*a[i]*a[j];
-         
+
   R_incr(0,1) += C3*a[2];
   R_incr(0,2) -= C3*a[1];
   R_incr(1,0) -= C3*a[2];

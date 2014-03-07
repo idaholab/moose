@@ -6,7 +6,7 @@ template<>
 InputParameters validParams<CoupledConvectionReactionSub>()
 {
   InputParameters params = validParams<Kernel>();
-  
+
   params.addParam<Real>("weight",1.0,"Weight of the equilibrium species");
   params.addParam<Real>("log_k",0.0,"Equilibrium constant of dissociation equilibrium reaction");
 
@@ -42,7 +42,7 @@ CoupledConvectionReactionSub::CoupledConvectionReactionSub(const std::string & n
     _vars[i] = coupled("v", i);
     _vals[i] = &coupledValue("v", i);
     _grad_vals[i] = &coupledGradient("v", i);
-  }    
+  }
 
 }
 
@@ -53,10 +53,10 @@ Real CoupledConvectionReactionSub::computeQpResidual()
   RealGradient d_u = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_grad_u[_qp];
 
   RealGradient d_var_sum(0.0,0.0,0.0);
-  
+
   Real d_v_u = std::pow(_u[_qp],_sto_u);
-  
-  if (_vals.size()) 
+
+  if (_vals.size())
   {
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
@@ -71,11 +71,11 @@ Real CoupledConvectionReactionSub::computeQpResidual()
       }
 
       d_var_sum += d_var;
-      
+
     }
 
   }
-  
+
   return _weight*std::pow(10.0,_log_k)*_test[_i][_qp]*darcy_vel*(d_u + d_var_sum);
 }
 
@@ -84,24 +84,24 @@ Real CoupledConvectionReactionSub::computeQpJacobian()
 // the partial derivative of _grad_u is just _dphi[_j]
 
   RealGradient darcy_vel=-_grad_p[_qp]*_cond[_qp];
-  
+
   RealGradient d_u_1=_sto_u*std::pow(_u[_qp],_sto_u-1.0)*_grad_phi[_j][_qp];
 
   RealGradient d_u_2=_phi[_j][_qp]*_sto_u*(_sto_u-1.0)*std::pow(_u[_qp],_sto_u-2.0)*_grad_u[_qp];
 
   RealGradient d_u;
-  
+
   RealGradient d_var_sum(0.0,0.0,0.0);
 
   Real d_v_u = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_phi[_j][_qp];
-  
-  if (_vals.size()) 
+
+  if (_vals.size())
   {
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
       d_u_1 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
       d_u_2 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
-      
+
       RealGradient d_var = d_v_u * _sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*(*_grad_vals[i])[_qp];
 
       for (unsigned int j=0; j<_vals.size(); ++j)
@@ -111,7 +111,7 @@ Real CoupledConvectionReactionSub::computeQpJacobian()
       }
 
       d_var_sum += d_var;
-      
+
     }
   }
 
@@ -139,7 +139,7 @@ Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
         diff1 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
       }
     }
-    
+
     Real val_u = std::pow(_u[_qp],_sto_u);
 
 
@@ -156,7 +156,7 @@ Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
     }
 
     RealGradient diff2 = val_u * (diff2_1 + diff2_2);
-    
+
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
       if(jvar != _vars[i])
@@ -164,15 +164,15 @@ Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
         diff2 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
       }
     }
-    
+
     RealGradient diff3;
-  
+
     RealGradient diff3_sum(0.0,0.0,0.0);
 
     Real val_jvar;
-    
+
     unsigned int var;
-    
+
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
       if(jvar == _vars[i])
@@ -181,7 +181,7 @@ Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
         val_jvar = val_u*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
       }
     }
-    
+
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
       if(i != var)
@@ -196,7 +196,7 @@ Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
         diff3_sum += diff3;
       }
     }
-    
+
     return  _weight*std::pow(10.0,_log_k)*_test[_i][_qp]*darcy_vel*(diff1 + diff2 + diff3_sum);
   }
   else

@@ -6,10 +6,10 @@ template<>
 InputParameters validParams<ACGrGrPoly>()
 {
   InputParameters params = validParams<ACBulk>();
-  
+
   params.addRequiredCoupledVar("v", "Array of coupled variable names");
   params.addCoupledVar("T","temperature");
-  
+
   return params;
 }
 
@@ -32,7 +32,7 @@ ACGrGrPoly::ACGrGrPoly(const std::string & name, InputParameters parameters)
     //Loop through grains and load coupled variables into the arrays
     _vals[i] = &coupledValue("v", i);
     _vals_var[i] = coupled("v",i);
-  }  
+  }
 }
 
 Real
@@ -51,18 +51,18 @@ ACGrGrPoly::computeDFDOP(PFFunctionType type)
   {
     if (_has_T)
       tgrad_correction = _tgrad_corr_mult[_qp]*_grad_u[_qp]*(*_grad_T)[_qp];
-        
+
     return _mu[_qp]*(_u[_qp]*_u[_qp]*_u[_qp] - _u[_qp] + 2.0*_gamma[_qp]*_u[_qp]*SumEtaj) + tgrad_correction;
   }
-  
+
   case Jacobian:
   {
     if (_has_T)
       tgrad_correction = _tgrad_corr_mult[_qp]*_grad_phi[_j][_qp]*(*_grad_T)[_qp];
-        
+
     return _mu[_qp]*(_phi[_j][_qp]*(3*_u[_qp]*_u[_qp] - 1.0 + 2.0*_gamma[_qp]*SumEtaj)) + tgrad_correction;
   }
-  
+
   }
 
   mooseError("Invalid type passed in");
@@ -77,7 +77,7 @@ ACGrGrPoly::computeQpOffDiagJacobian(unsigned int jvar)
       Real dSumEtaj = 2.0*(*_vals[i])[_qp]*_phi[_j][_qp]; //Derivative of SumEtaj
 
       Real dDFDOP = _mu[_qp]*2.0*_gamma[_qp]*_u[_qp]*dSumEtaj;
-      
+
       return _L[_qp]*_test[_i][_qp]*dDFDOP;
     }
 

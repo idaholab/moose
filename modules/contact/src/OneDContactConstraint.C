@@ -88,7 +88,7 @@ OneDContactConstraint::computeQpSlaveValue()
            <<"Closest Point x: "<<pinfo->_closest_point(0)<<std::endl
            <<"Current Node x: "<<(*_current_node)(0)<<std::endl
            <<"Current Value: "<<_u_slave[_qp]<<std::endl<<std::endl;
-  
+
   return pinfo->_closest_point(0) - ((*_current_node)(0) - _u_slave[_qp]);
 }
 

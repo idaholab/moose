@@ -17,7 +17,7 @@ InputParameters validParams<RichardsSUPGnone>()
 
 RichardsSUPGnone::RichardsSUPGnone(const std::string & name, InputParameters parameters) :
   RichardsSUPG(name, parameters)
-{}      
+{}
 
 RealVectorValue
 RichardsSUPGnone::velSUPG(RealTensorValue /*perm*/, RealVectorValue /*gradp*/, Real /*density*/, RealVectorValue /*gravity*/) const

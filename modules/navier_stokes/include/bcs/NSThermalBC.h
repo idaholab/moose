@@ -15,7 +15,7 @@ class NSThermalBC : public NodalBC
 public:
 
   NSThermalBC(const std::string & name, InputParameters parameters);
-  
+
   virtual ~NSThermalBC(){}
 
 protected:

@@ -14,14 +14,14 @@ InputParameters validParams<BulkCoolantBC>();
 class BulkCoolantBC : public IntegratedBC
 {
 public:
-  
+
   BulkCoolantBC(const std::string & name, InputParameters parameters);
 
   virtual ~BulkCoolantBC(){}
 
 protected:
   virtual Real computeQpResidual();
-  
+
   virtual Real computeQpJacobian();
 
 private:

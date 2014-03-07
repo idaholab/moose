@@ -18,19 +18,19 @@ class CHInterface : public Kernel
 public:
 
   CHInterface(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
 private:
-  
+
   std::string _kappa_name;
   std::string _mob_name;
   std::string _Dmob_name;
   std::string _grad_mob_name;
   bool _implicit;
-  
+
   MaterialProperty<Real> & _kappa;
   MaterialProperty<Real> & _M;
   bool _has_MJac;

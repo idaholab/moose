@@ -4,12 +4,12 @@ template<>
 InputParameters validParams<NSEnthalpyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  
+
   // Mark variables as required
   params.addRequiredCoupledVar("rho", "");
   params.addRequiredCoupledVar("rhoe", "");
   params.addRequiredCoupledVar("pressure", "");
-  
+
   // Parameters with default values
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
 
@@ -21,7 +21,7 @@ NSEnthalpyAux::NSEnthalpyAux(const std::string & name, InputParameters parameter
    _rho(coupledValue("rho")),
    _rhoe(coupledValue("rhoe")),
    _pressure(coupledValue("pressure")),
-   _gamma(getParam<Real>("gamma")) 
+   _gamma(getParam<Real>("gamma"))
 {}
 
 Real

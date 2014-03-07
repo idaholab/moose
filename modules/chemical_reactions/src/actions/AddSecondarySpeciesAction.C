@@ -41,7 +41,7 @@ AddSecondarySpeciesAction::act()
   if (_pars.isParamValid("secondary_species"))
   {
     std::vector<AuxVariableName> vars = getParam<std::vector<AuxVariableName> >("secondary_species");
-    
+
     for (unsigned int i=0; i < vars.size(); i++)
     {
       std::cout << "aux variables: " << vars[i] << "\t";
@@ -60,10 +60,10 @@ AddSecondarySpeciesAction::act()
       {
         std::vector<std::string> tokens;
         std::string kin_species;
-    
+
         // Parsing each reaction
         MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
-    
+
         for (unsigned int k=0; k < tokens.size(); k++)
         {
           std::vector<std::string> stos_vars;
@@ -72,7 +72,7 @@ AddSecondarySpeciesAction::act()
           {
             kin_species = stos_vars[0];
             std::cout << "I'm here and the kin_species is: " << stos_vars[0] << "\n";
-            
+
           }
 //           else
 //             mooseError("There's no solid kinetic species.");
@@ -81,10 +81,10 @@ AddSecondarySpeciesAction::act()
         FEType fe_type(Utility::string_to_enum<Order>("first"),
                        Utility::string_to_enum<FEFamily>("lagrange"));
         _problem->addAuxVariable(kin_species, fe_type);
-        
+
       }
-      
+
     }
   }
-  
+
 }

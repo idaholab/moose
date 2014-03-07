@@ -25,7 +25,7 @@ RichardsPorepressureNames::RichardsPorepressureNames(const std::string & name, I
 
 {
   unsigned int max_moose_var_num_seen(0);
-  
+
   _moose_var_num.resize(_num_p);
   _moose_var_value.resize(_num_p);
   _moose_var_value_old.resize(_num_p);

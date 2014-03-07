@@ -4,9 +4,9 @@ template<>
 InputParameters validParams<CoupledImplicitEuler>()
 {
   InputParameters params = validParams<Kernel>();
-  
+
   params.addRequiredCoupledVar("v","Coupled variable");
-  
+
   return params;
 }
 

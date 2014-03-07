@@ -27,5 +27,5 @@ public:
 
 private:
 };
- 
+
 #endif

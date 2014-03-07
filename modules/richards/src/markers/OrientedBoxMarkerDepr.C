@@ -48,7 +48,7 @@ OrientedBoxMarkerDepr::OrientedBoxMarkerDepr(const std::string & name, InputPara
   _centre(getParam<RealVectorValue>("centre")),
   _w(getParam<RealVectorValue>("width_direction")),
   _l(getParam<RealVectorValue>("length_direction")),
-  
+
   _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
   _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside"))
 {
@@ -78,7 +78,7 @@ OrientedBoxMarkerDepr::OrientedBoxMarkerDepr(const std::string & name, InputPara
   _rot_matrix(2, 0) = h(0);
   _rot_matrix(2, 1) = h(1);
   _rot_matrix(2, 2) = h(2);
-    
+
 }
 
 Marker::MarkerValue

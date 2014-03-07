@@ -55,7 +55,7 @@ SolidMechZ::computeQpOffDiagJacobian(unsigned int jvar)
   {
     if(!_constant_properties)
       recomputeConstants();
-    
+
     RealGradient value = 0;
 
     if(jvar == _x_var)

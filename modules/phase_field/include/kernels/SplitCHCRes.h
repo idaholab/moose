@@ -15,7 +15,7 @@ class SplitCHCRes : public SplitCHBase
 public:
 
   SplitCHCRes(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -27,6 +27,6 @@ private:
   unsigned int _w_var;
   VariableValue & _w;
   VariableGradient & _grad_w;
-  
+
 };
 #endif //SPLITCHCRes_H

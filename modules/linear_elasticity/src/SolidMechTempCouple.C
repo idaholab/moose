@@ -30,9 +30,9 @@ void
 SolidMechTempCouple::recomputeCouplingConstants()
 {
   recomputeConstants();
-  
+
   _c4 = _E/(1.-_nu);
-  
+
   if (_mesh_dimension == 3)
     _c4 = _E/(1.-2.*_nu);
 }

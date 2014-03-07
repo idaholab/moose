@@ -34,15 +34,15 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);  
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   MaterialProperty<Real> & _density;
   MaterialProperty<Real> & _time_old_density;
   MaterialProperty<Real> & _ddensitydp_H;
   MaterialProperty<Real> & _ddensitydH_P;
 
   unsigned int _h_var;
-    
-  MaterialProperty<Real> & _porosity;  
+
+  MaterialProperty<Real> & _porosity;
 
   VariableValue & _u_old;
 };

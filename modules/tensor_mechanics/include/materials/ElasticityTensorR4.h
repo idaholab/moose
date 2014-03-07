@@ -6,7 +6,7 @@
  *
  * ElasticityTensorR4 holds the 81 separate C_ijkl entries; the entries are accessed by index, with
  * i, j, k, and l equal to 0, 1, 2
- * 
+ *
  */
 
 #ifndef ELASTICITYTENSORR4_H
@@ -19,11 +19,11 @@ class ElasticityTensorR4 : public RankFourTensor
 {
 public:
 
-  
+
   virtual ~ElasticityTensorR4() {}
-  
- 
-  
+
+
+
   /**
  * calculates the Jacobian of the elastic stiffness tensor.
  */
@@ -46,7 +46,7 @@ public:
   RankTwoTensor operator*(const RankTwoTensor &a);
 
   ElasticityTensorR4 operator*(const RankFourTensor &a) const;
-  
+
  protected:
 
 private:

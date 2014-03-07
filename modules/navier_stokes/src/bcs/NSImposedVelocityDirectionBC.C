@@ -15,7 +15,7 @@ InputParameters validParams<NSImposedVelocityDirectionBC>()
 
   // Coupled parameters
   params.addRequiredParam<Real>("desired_unit_velocity_component", "");
-  
+
   return params;
 }
 
@@ -25,7 +25,7 @@ InputParameters validParams<NSImposedVelocityDirectionBC>()
 // Constructor, be sure to call the base class constructor first!
 NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const std::string & name, InputParameters parameters)
     : NodalBC(name, parameters),
-    
+
       // Coupled variables
       _rho(coupledValue("rho")),
       _u_vel(coupledValue("u")),

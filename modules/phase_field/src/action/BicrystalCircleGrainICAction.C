@@ -50,14 +50,14 @@ BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const std::string & n
 }
 
 void
-BicrystalCircleGrainICAction::act() 
-{ 
+BicrystalCircleGrainICAction::act()
+{
 #ifdef DEBUG
   std::cerr << "Inside the BicrystalCircleGrainICAction Object\n";
 #endif
 
 // Loop through the number of order parameters
-  
+
   for (unsigned int crys = 0; crys<_crys_num; crys++)
   {
     //Create variable names
@@ -90,8 +90,8 @@ BicrystalCircleGrainICAction::act()
 
     //Add initial condition
     _problem->addInitialCondition("SmoothCircleIC", "InitialCondition", poly_params);
-    
-    
+
+
   }
 
 }

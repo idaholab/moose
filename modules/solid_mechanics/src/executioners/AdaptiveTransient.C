@@ -52,7 +52,7 @@ InputParameters validParams<AdaptiveTransient>()
   params.addParam<std::string> ("timestep_limiting_function", "A function used to control the timestep by limiting the change in the function over a timestep");
   params.addParam<Real> ("max_function_change", "The absolute value of the maximum change in timestep_limiting_function over a timestep");
   params.addParam<MooseEnum>("scheme",     schemes,  "Time integration scheme used.");
-  
+
   return params;
 }
 

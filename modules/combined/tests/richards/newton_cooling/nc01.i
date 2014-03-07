@@ -71,8 +71,8 @@
     use_mobility = false
     use_relperm = false
   [../]
-[]    
-  
+[]
+
 [Kernels]
   active = 'richardsf richardst'
   [./richardst]

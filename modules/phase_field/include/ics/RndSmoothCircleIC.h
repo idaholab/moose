@@ -51,7 +51,7 @@ private:
   Real _radius;
 
   Point _center;
-  
+
 };
 
 #endif //SMOOTHCIRCLEIC_H

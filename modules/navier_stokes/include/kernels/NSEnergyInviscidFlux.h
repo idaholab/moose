@@ -14,7 +14,7 @@ class NSEnergyInviscidFlux : public NSKernel
 public:
 
   NSEnergyInviscidFlux(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -23,5 +23,5 @@ protected:
   // Coupled variables
   VariableValue & _enthalpy;
 };
- 
+
 #endif

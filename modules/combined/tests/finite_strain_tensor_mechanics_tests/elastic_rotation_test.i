@@ -1,13 +1,13 @@
-# 
+#
 # Rotation Test
-# 
+#
 # This test is designed to compute a uniaxial stress and then follow that
 # stress as the mesh is rotated 90 degrees.
-# 
+#
 # The mesh is composed of one block with a single element.  The nodal
 # displacements in the x and y directions are prescribed.  Poisson's
 # ratio is zero.
-# 
+#
 
 [Mesh]
   # Comment
@@ -260,7 +260,7 @@ active = ''
   interval = 1
   output_initial = true
   elemental_as_nodal = true
-  exodus = true 
+  exodus = true
   perf_log = true
 []
 

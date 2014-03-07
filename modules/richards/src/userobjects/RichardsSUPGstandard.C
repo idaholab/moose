@@ -26,7 +26,7 @@ RichardsSUPGstandard::RichardsSUPGstandard(const std::string & name, InputParame
   if (_p_SUPG <= 0)
     mooseError("The p_SUPG parameter is " << _p_SUPG << " but this parameter must be positive");
 }
-      
+
 
 
 RealVectorValue
@@ -105,17 +105,17 @@ RichardsSUPGstandard::tauSUPG(RealVectorValue vel, Real traceperm, RealVectorVal
 {
   // vel = velocity, b = bb
   Real norm_v = std::pow(vel*vel, 0.5);
- 
+
   Real norm_b = std::pow(b*b, 0.5); // Hughes et al investigate infinity-norm and 2-norm.  i just use 2-norm here.   norm_b ~ 2|a|/ele_length_in_direction_of_a
-  
+
   if (norm_b == 0)
     return 0.0; // Only way for norm_b=0 is for zero ele size, or vel=0.  Either way we don't have to upwind.
 
   Real h = 2*norm_v/norm_b; // h is a measure of the element length in the "a" direction
   Real alpha = 0.5*norm_v*h/traceperm/_p_SUPG;   // this is the Peclet number
-  
+
   Real xi_tilde = RichardsSUPGstandard::cosh_relation(alpha);
-  
+
   return xi_tilde/norm_b;
 }
 
@@ -128,7 +128,7 @@ RichardsSUPGstandard::dtauSUPG_dgradp(RealVectorValue vel, RealTensorValue dvel_
     return RealVectorValue();
   RealVectorValue norm_vel_dgradp(dvel_dgradp*vel/norm_vel);
 
-  Real norm_b = std::pow(b*b, 0.5); 
+  Real norm_b = std::pow(b*b, 0.5);
   if (norm_b == 0)
     return RealVectorValue();
   RealVectorValue norm_b_dgradp = db2_dgradp/2/norm_b;
@@ -156,7 +156,7 @@ RichardsSUPGstandard::dtauSUPG_dp(RealVectorValue vel, RealVectorValue dvel_dp, 
     return 0.0; // this deriv is not necessarily correct, but i can't see a better thing to do
   Real norm_vel_dp(dvel_dp*vel/norm_vel);
 
-  Real norm_b = std::pow(b*b, 0.5); 
+  Real norm_b = std::pow(b*b, 0.5);
   if (norm_b == 0)
     return 0.0; // this deriv is not necessarily correct, but i can't see a better thing to do
   Real norm_b_dp = db2_dp/2/norm_b;

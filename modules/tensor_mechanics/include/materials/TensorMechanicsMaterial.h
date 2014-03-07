@@ -40,7 +40,7 @@ protected:
   VariableGradient & _grad_disp_x;
   VariableGradient & _grad_disp_y;
   VariableGradient & _grad_disp_z;
-  
+
   VariableGradient & _grad_disp_x_old;
   VariableGradient & _grad_disp_y_old;
   VariableGradient & _grad_disp_z_old;
@@ -53,16 +53,16 @@ protected:
   Real _euler_angle_1;
   Real _euler_angle_2;
   Real _euler_angle_3;
-  
+
   // vectors to get the input values
   std::vector<Real> _Cijkl_vector;
-  
+
   // bool to indicate if using 9 stiffness values or all 21
   bool _all_21;
 
   //Individual material information
   ElasticityTensorR4 _Cijkl;
-  
+
 //  MaterialProperty<RankTwoTensor> & _d_stress_dT;
   RankTwoTensor _strain_increment;
 
@@ -70,7 +70,7 @@ protected:
 
 // Current deformation gradient
   RankTwoTensor _dfgrd;
-  
+
   bool _has_T;
   VariableValue * _T; //pointer rather than reference
 

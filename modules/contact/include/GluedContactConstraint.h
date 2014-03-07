@@ -43,7 +43,7 @@ public:
   virtual void updateContactSet(bool beginning_of_step = false);
 
   virtual Real computeQpSlaveValue();
-  
+
   virtual Real computeQpResidual(Moose::ConstraintType type);
 
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);

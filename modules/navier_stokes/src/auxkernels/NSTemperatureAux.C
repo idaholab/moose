@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<NSTemperatureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  
+
   // Mark variables as required
   params.addRequiredCoupledVar("rho", "");
   params.addRequiredCoupledVar("u", "");
@@ -36,12 +36,12 @@ NSTemperatureAux::NSTemperatureAux(const std::string & name, InputParameters par
 Real
 NSTemperatureAux::computeValue()
 {
-  Real V2 = 
-    _u_vel[_qp]*_u_vel[_qp] + 
-    _v_vel[_qp]*_v_vel[_qp] + 
+  Real V2 =
+    _u_vel[_qp]*_u_vel[_qp] +
+    _v_vel[_qp]*_v_vel[_qp] +
     _w_vel[_qp]*_w_vel[_qp];
-  
-  // Internal Energy = Total Energy - Kinetic 
+
+  // Internal Energy = Total Energy - Kinetic
   Real e_i = (_rhoe[_qp] / _rho[_qp]) - 0.5*V2;
 
   // T = e_i / cv

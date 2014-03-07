@@ -13,7 +13,7 @@ InputParameters validParams<KineticDisPreRateAux>()
   params.addParam<Real>("gas_const",8.31434,"Gas constant, in J/mol K");
   params.addParam<Real>("ref_temp",298.15,"Reference temperature, K");
   params.addParam<Real>("sys_temp",298.15,"System temperature at simulation, K");
-  
+
   params.addCoupledVar("v", "The list of reactant species");
 
   return params;
@@ -43,7 +43,7 @@ KineticDisPreRateAux::computeValue()
   Real kconst = _ref_kconst*exp(-_e_act*(1/_ref_temp-1/_sys_temp)/_gas_const);
   Real omega = 1.0;
 
-  if (_vals.size()) 
+  if (_vals.size())
   {
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
@@ -51,7 +51,7 @@ KineticDisPreRateAux::computeValue()
       omega *= std::pow((*_vals[i])[_qp],_sto_v[i]);
     }
   }
-  
+
   Real saturation_SI=omega/std::pow(10.0,_log_k);
   Real kinetic_rate=_r_area*kconst*(1.0-saturation_SI);
 

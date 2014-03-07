@@ -8,13 +8,13 @@ InputParameters validParams<RndSmoothCircleIC>()
   params.addRequiredParam<Real>("x1", "The x coordinate of the circle center");
   params.addRequiredParam<Real>("y1", "The y coordinate of the circle center");
   params.addParam<Real>("z1", 0.0, "The z coordinate of the circle center");
-  
+
   params.addRequiredParam<Real>("mx_invalue", "The max variable value inside the circle");
   params.addRequiredParam<Real>("mx_outvalue", "The max variable value outside the circle");
   params.addRequiredParam<Real>("mn_invalue", "The min variable value inside the circle");
   params.addRequiredParam<Real>("mn_outvalue", "The min variable value outside the circle");
   params.addRequiredParam<Real>("radius", "The radius of a circle");
-  
+
   params.addParam<unsigned int>("seed", 12345, "Seed value for the random number generator");
   return params;
 }
@@ -43,17 +43,17 @@ Real
 RndSmoothCircleIC::value(const Point & p)
 {
   Real value = 0.0;
-  
+
   Real rad = 0.0;
-  
-  for(unsigned int i=0; i<LIBMESH_DIM; i++) 
+
+  for(unsigned int i=0; i<LIBMESH_DIM; i++)
     rad += (p(i)-_center(i)) * (p(i)-_center(i));
 
   rad = sqrt(rad);
-  
+
   //Random number between 0 and 1
   Real rand_num = MooseRandom::rand();
-  
+
   if (rad <= _radius)
     value = _mn_invalue + rand_num*(_range_invalue);
   else if (rad < 1.5*_radius)
@@ -66,10 +66,10 @@ RndSmoothCircleIC::value(const Point & p)
     value = _mx_outvalue + rand_num*(_range_outvalue);
 
   return value;
-  
+
 }
 
-  
 
 
-  
+
+

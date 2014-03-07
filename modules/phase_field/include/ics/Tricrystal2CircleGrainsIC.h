@@ -48,7 +48,7 @@ protected:
   Point _bottom_left;
   Point _top_right;
   Point _range;
-  
+
 };
 
 #endif //TRICRYSTAL2CIRCLEGRAINSIC_H

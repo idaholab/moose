@@ -101,7 +101,7 @@ public:
 //  int MatrixInversion(double *, int, double* );//Added
 
   int MatrixInversion(double *, int);//Added
-  
+
   virtual void surfaceFillFromInputVector(const std::vector<Real> input);
 
    /**
@@ -110,7 +110,7 @@ public:
   * C_ijkl = C_ijlk, C_ijkl = C_jikl
   */
   void fillFromInputVector(const std::vector<Real> input, bool all);
-  
+
 protected:
 
 /**

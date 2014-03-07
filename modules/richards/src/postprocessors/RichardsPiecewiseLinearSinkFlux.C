@@ -46,6 +46,6 @@ RichardsPiecewiseLinearSinkFlux::computeQpIntegral()
     }
   if (_use_relperm)
     flux *= _rel_perm[_qp][_pvar];
-  
+
   return flux*_feproblem.dt();
 }

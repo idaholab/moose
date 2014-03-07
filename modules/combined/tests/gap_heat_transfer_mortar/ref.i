@@ -17,7 +17,7 @@
     thermal_conductivity = 1000
     specific_heat = 1
   [../]
-  
+
   [./right]
     type = HeatConductionMaterial
     block = 2
@@ -48,7 +48,7 @@
     boundary = 'left'
     value = 1
   [../]
-  
+
   [./right]
     type = DirichletBC
     variable = temp

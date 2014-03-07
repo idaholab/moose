@@ -5,7 +5,7 @@
  *
  * RankTwoTensor holds the 9 separate Sigma_ij or Epsilon_ij entries; the entries are accessed by
  * index, with i, j equal to 1, 2, or 3.
- *  
+ *
  */
 
 #ifndef RANKTWOTENSOR_H
@@ -28,7 +28,7 @@ public:
   * Default constructor; fills to zero
   */
   RankTwoTensor();
-  
+
  /**
    * Constructor that takes in 3 vectors and uses them to create rows
    */
@@ -43,9 +43,9 @@ public:
    * Copy constructor from RealTensorValue
    */
   RankTwoTensor(const TypeTensor<Real> &a);
-  
+
   ~RankTwoTensor() {}
-  
+
   /**
    * Gets the value for the index specified.  Takes index = 0,1,2
    */
@@ -87,7 +87,7 @@ public:
    *rotates the tensor data around the z-axis given an angle in radians
    */
   virtual RankTwoTensor rotateXyPlane(const Real a);
-  
+
   void zero();
 
   /**
@@ -119,10 +119,10 @@ public:
   RankTwoTensor operator/ (const Real &a) const;
 
   RankTwoTensor & operator*= (const RankTwoTensor &a);
-  
+
   //Defines multiplication with another RankTwoTensor
   RankTwoTensor operator* (const RankTwoTensor &a) const;
-  
+
   //Defines multiplication with a TypeTensor<Real>
   RankTwoTensor operator* (const TypeTensor<Real> &a) const;
 
@@ -138,18 +138,18 @@ public:
 
   //Print the rank two tensor
   void print();
-  
+
   //Add identity times a
   void addIa(const Real &a);
 
   Real L2norm();
   void surfaceFillFromInputVector(const std::vector<Real> input);
-  
+
 protected:
-  
+
 private:
   static const unsigned int N = 3;
-  
+
   Real _vals[N][N];
 };
 

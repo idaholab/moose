@@ -20,7 +20,7 @@ class NSSUPGBase : public NSKernel
 public:
 
   NSSUPGBase(const std::string & name, InputParameters parameters);
-  
+
 protected:
   /**
    * This kernel is not actually called at quadrature points:
@@ -29,12 +29,12 @@ protected:
   //virtual Real computeQpResidual();
   //virtual Real computeQpJacobian();
   //virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+
   // Material properties
   MaterialProperty<RealTensorValue>& _viscous_stress_tensor;
   MaterialProperty<Real>& _dynamic_viscosity;
   MaterialProperty<Real>& _thermal_conductivity;
-  
+
   // SUPG-related material properties.
   MaterialProperty<Real> & _hsupg;
   MaterialProperty<Real> & _tauc;
@@ -47,7 +47,7 @@ protected:
 
   // "velocity column" matrices
   MaterialProperty<std::vector<RealTensorValue> >& _calC;
-  
+
   // Energy equation inviscid flux matrices
   MaterialProperty<std::vector<std::vector<RealTensorValue> > >& _calE;
 
@@ -72,5 +72,5 @@ protected:
   // Enthalpy aux variable
   VariableValue& _enthalpy;
 };
- 
+
 #endif //  NSSUPGBASE_H

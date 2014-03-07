@@ -14,7 +14,7 @@ class KineticDisPreConcAux;
 template<>
 InputParameters validParams<KineticDisPreConcAux>();
 
-/** 
+/**
  * Define the AuxKernel for the kinetic mineral species concentrations
  * according to transient state theory rate law.
  */
@@ -29,7 +29,7 @@ public:
   KineticDisPreConcAux(const std::string & name, InputParameters parameters);
 
   virtual ~KineticDisPreConcAux() {}
-  
+
 protected:
   /**
    * Conputes the kinetic mineral sepecies concentration.

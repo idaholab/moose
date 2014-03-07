@@ -36,7 +36,7 @@ protected:
 
   VariableValue & _temperature;
   VariableValue & _temperature_old;
-  
+
   MaterialProperty<Real> & _density;
   MaterialProperty<Real> & _density_old;
 

@@ -19,7 +19,7 @@
       radius = 12
       invalue = 1.0
       outvalue = 0
-      int_width = 12 
+      int_width = 12
       3D_spheres = false
       z1 = 25
     [../]

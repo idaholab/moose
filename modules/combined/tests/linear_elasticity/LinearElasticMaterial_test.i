@@ -1,4 +1,4 @@
-# This input file is designed to test the LinearElasticMaterial class. 
+# This input file is designed to test the LinearElasticMaterial class.
 
 [Mesh]
   type = GeneratedMesh
@@ -81,7 +81,7 @@
     type = Diffusion
     variable = diffused
   [../]
-[] 
+[]
 
 [AuxKernels]
   [./matl_s11]
@@ -91,7 +91,7 @@
     index_j = 1
     variable = s11_aux
   [../]
- 
+
  [./matl_s12]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -139,11 +139,11 @@
     block = 0
     disp_x = disp_x
     disp_y = disp_y
- 
-    #set from elk/tests/anisotropic_path/anisotropic_patch_test.i 
+
+    #set from elk/tests/anisotropic_path/anisotropic_patch_test.i
     all_21 = false
     #reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
-    C_ijkl ='1.0e6  0.0   0.0 1.0e6  0.0  1.0e6 0.5e6 0.5e6 0.5e6'	
+    C_ijkl ='1.0e6  0.0   0.0 1.0e6  0.0  1.0e6 0.5e6 0.5e6 0.5e6'
   [../]
 []
 

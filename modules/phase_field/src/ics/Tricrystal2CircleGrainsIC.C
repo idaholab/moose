@@ -7,7 +7,7 @@ InputParameters validParams<Tricrystal2CircleGrainsIC>()
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<unsigned int>("crys_num","Number of crystals");
   params.addRequiredParam<unsigned int>("crys_index", "The index for the current crystal");
-  
+
   return params;
 }
 
@@ -21,7 +21,7 @@ Tricrystal2CircleGrainsIC::Tricrystal2CircleGrainsIC(const std::string & name,
 {
   if (_crys_num != 3)
     mooseError("Tricrystal ICs must have crys_num = 3");
-  
+
   //Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
   {
@@ -34,17 +34,17 @@ Tricrystal2CircleGrainsIC::Tricrystal2CircleGrainsIC(const std::string & name,
 Real
 Tricrystal2CircleGrainsIC::value(const Point & p)
 {
-  
+
   Point grain_center_left;
   grain_center_left(0) = _bottom_left(0) + _range(0)/4.0;
   grain_center_left(1) = _bottom_left(1) + _range(1)/2.0;
   grain_center_left(2) = _bottom_left(2) + _range(2)/2.0;
-  
+
   Point grain_center_right;
   grain_center_right(0) = _bottom_left(0) + _range(0)*3.0/4.0;
   grain_center_right(1) = _bottom_left(1) + _range(1)/2.0;
   grain_center_right(2) = _bottom_left(2) + _range(2)/2.0;
-      
+
   Real radius = _range(0)/5.0;
   Real dist_left = (p - grain_center_left).size();
   Real dist_right = (p - grain_center_right).size();
@@ -53,5 +53,5 @@ Tricrystal2CircleGrainsIC::value(const Point & p)
     return 1.0;
   else
     return 0.0;
-    
+
 }

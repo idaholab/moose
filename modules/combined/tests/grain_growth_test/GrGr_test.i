@@ -69,7 +69,7 @@
     wGB = 60 # nm
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
-    GBenergy = 0.708 #GB energy in J/m^2    
+    GBenergy = 0.708 #GB energy in J/m^2
   [../]
 []
 

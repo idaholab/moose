@@ -77,8 +77,8 @@
     boundary = left
     value = 980000
   [../]
-[]    
-  
+[]
+
 [Kernels]
   active = 'richardsf richardst'
 
@@ -142,7 +142,7 @@
     type = SolutionTimeAdaptiveDT
     dt = 0.01
   [../]
-      
+
 []
 
 [Output]

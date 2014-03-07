@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<NSEnergyThermalFlux>()
 {
   InputParameters params = validParams<NSKernel>();
-  
+
   // Required coupled variables for residual terms
   params.addRequiredCoupledVar("temperature", "");
 
@@ -17,7 +17,7 @@ InputParameters validParams<NSEnergyThermalFlux>()
 
 NSEnergyThermalFlux::NSEnergyThermalFlux(const std::string & name, InputParameters parameters)
     : NSKernel(name, parameters),
-      
+
       // Gradients
       _grad_temp(coupledGradient("temperature")),
 
@@ -93,7 +93,7 @@ Real NSEnergyThermalFlux::compute_jacobian_value(unsigned var_number)
       // hess_term += get_hess(m,n) * gradU[n](ell); // ideally... but you can't have a vector<VariableGradient&> :-(
       hess_term += _temp_derivs.get_hess(var_number,n) * (*_gradU[n])[_qp](ell); // dereference pointer to get value
     }
-    
+
     // Accumulate the second dot product term
     intermediate_result += hess_term * _phi[_j][_qp];
 

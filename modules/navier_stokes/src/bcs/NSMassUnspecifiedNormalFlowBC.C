@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<NSMassUnspecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSMassBC>();
-  
+
   return params;
 }
 

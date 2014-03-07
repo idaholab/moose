@@ -32,7 +32,7 @@ public:
                          InputParameters parameters);
 
   virtual void initialSetup();
-  
+
   virtual Real value(const Point & p);
   virtual RealGradient gradient(const Point & p);
 
@@ -45,13 +45,13 @@ protected:
 
   unsigned int _rnd_seed, _numtries;
   Real _radius_variation;
-  
+
   std::vector<Point> _bubcent;
   std::vector<Real> _bubradi;
-  
-  
+
+
 // private:
-  
+
 };
 
 #endif //MULTISMOOTHCIRCLEIC_H

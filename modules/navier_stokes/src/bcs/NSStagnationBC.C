@@ -16,7 +16,7 @@ InputParameters validParams<NSStagnationBC>()
   // Required parameters
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
   params.addRequiredParam<Real>("R", "Gas constant.");
-  
+
   return params;
 }
 

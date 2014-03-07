@@ -22,12 +22,12 @@ RichardsSeff1VG::RichardsSeff1VG(const std::string & name, InputParameters param
   _al(getParam<Real>("al")),
   _m(getParam<Real>("m"))
 {
-  if (_al < 0) 
+  if (_al < 0)
     mooseError("The van-Genuchten alpha parameter in the effective saturation relationship is " << _al << " but this must be positive");
   if (_m <=0 || _m >= 1)
     mooseError("The van-Genuchten m parameter in the effective saturation relationship is " << _m << " but this must be between zero and one");
 }
-      
+
 
 
 Real

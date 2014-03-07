@@ -55,7 +55,7 @@
     order = FIRST
     family = LAGRANGE
   [../]
-[]	     
+[]
 
 [Kernels]
 
@@ -97,7 +97,7 @@
     wGB = 60 # nm
     GBmob0 = 2.5e-6 #m^4/(Js) from Schoenfelder 1997
     Q = 0.23 #Migration energy in eV
-    GBenergy = 0.708 #GB energy in J/m^2    
+    GBenergy = 0.708 #GB energy in J/m^2
   [../]
 []
 
@@ -128,7 +128,7 @@
    petsc_options_value = 'hypre boomeramg 31'
    #petsc_options_iname = '-pc_type'
    #petsc_options_value = 'lu'
-  
+
    l_tol = 1.0e-4
    l_max_its = 30
 
@@ -155,6 +155,6 @@
   exodus = true
   perf_log = true
 []
-   
-    
+
+
 

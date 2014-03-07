@@ -21,7 +21,7 @@ InputParameters validParams<NSEnergyViscousBC>();
  * A typical use for this kernel would be a subsonic outflow BC in
  * which the pressure is specified.  In this case, the
  * residual and Jacobian contrbutions of the k*grad(T) and
- * n.tau*u terms are computed and added to the matrix/rhs.  
+ * n.tau*u terms are computed and added to the matrix/rhs.
  */
 class NSEnergyViscousBC : public NSIntegratedBC
 {
@@ -32,7 +32,7 @@ public:
   virtual ~NSEnergyViscousBC(){}
 
 protected:
-  
+
   /**
    * Just like other kernels, we must overload the Residual and Jacobian contributions...
    */

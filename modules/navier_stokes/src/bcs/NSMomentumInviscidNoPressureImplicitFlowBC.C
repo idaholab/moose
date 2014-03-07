@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<NSMomentumInviscidNoPressureImplicitFlowBC>()
 {
   InputParameters params = validParams<NSMomentumInviscidBC>();
-  
+
   return params;
 }
 
@@ -29,8 +29,8 @@ Real NSMomentumInviscidNoPressureImplicitFlowBC::computeQpResidual()
 
   // The current value of the vector (rho*u)(u.n)
   RealVectorValue rhou_udotn = u_dot_n * _rho[_qp] * vel;
-  
-  return 
+
+  return
     this->convective_qp_residual( rhou_udotn(_component) );
 }
 

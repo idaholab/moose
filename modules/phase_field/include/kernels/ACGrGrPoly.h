@@ -28,7 +28,7 @@ private:
    * Since this is a reference it MUST be set in the Initialization List of the
    * constructor!
    */
-  
+
   std::vector<VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;
 
@@ -38,10 +38,10 @@ private:
 
   bool _has_T;
   VariableGradient * _grad_T;
-  
+
   unsigned int _ncrys;
 
 //  Real _gamma;
-  
+
 };
 #endif //ACGRGRPOLY_H

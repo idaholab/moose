@@ -6,7 +6,7 @@ InputParameters validParams<SolidMech>()
   InputParameters params = validParams<Kernel>();
   params.set<bool>("use_displaced_mesh") = false;
   params.addParam("constant_properties", false, "Whether or not some optimizations can be made because the properties are going to be constant on each subdomain.  Note that they can still change from one subdomain to the next.");
-  
+
   return params;
 }
 
@@ -41,7 +41,7 @@ SolidMech::recomputeConstants()
   _B11=TensorValue<Number>(1., 0., 0.,
                            0., _c3, 0.,
                            0., 0., _c3);
-  
+
   _B12=TensorValue<Number>(0., _c2, 0.,
                            _c3, 0., 0.,
                            0., 0., 0.);
@@ -50,7 +50,7 @@ SolidMech::recomputeConstants()
                            0., 0., 0.,
                            _c3, 0., 0.);
 
-  
+
   _B21=TensorValue<Number>(0., _c3, 0.,
                            _c2, 0., 0.,
                            0., 0., 0.);
@@ -58,13 +58,13 @@ SolidMech::recomputeConstants()
   _B22=TensorValue<Number>(_c3, 0., 0.,
                            0., 1., 0.,
                            0., 0., _c3);
-  
+
   _B23=TensorValue<Number>(0., 0., 0.,
                            0., 0., _c2,
                            0., _c3, 0.);
 
 
-    
+
   _B31=TensorValue<Number>(0., 0., _c3,
                            0., 0., 0.,
                            _c2, 0., 0.);

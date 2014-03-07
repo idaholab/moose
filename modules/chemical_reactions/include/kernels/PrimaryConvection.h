@@ -13,7 +13,7 @@ InputParameters validParams<PrimaryConvection>();
  * Define the Kernel for a PrimaryConvection operator that looks like:
  *
  * cond * grad_pressure * grad_u
- * 
+ *
  * This first line is defining the name and inheriting from Kernel.
  */
 class PrimaryConvection : public Kernel
@@ -26,7 +26,7 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   PrimaryConvection(const std::string & name, InputParameters parameters);
-  
+
 protected:
   /**
    * Responsible for computing the residual at one quadrature point
@@ -49,7 +49,7 @@ protected:
    */
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+
   /// Material property of hydraulic conductivity
   MaterialProperty<Real> & _cond;
 

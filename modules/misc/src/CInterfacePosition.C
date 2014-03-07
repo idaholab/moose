@@ -25,7 +25,7 @@ InputParameters validParams<CInterfacePosition>()
 
   params.addParam<Real>("RefVal",0.5,"Variable value used to determine interface position");
   params.addRequiredParam<unsigned int>("direction_index", "The index of the direction the position is measured in");
-  
+
   return params;
 }
 
@@ -43,7 +43,7 @@ CInterfacePosition::computeValue()
   Real val = -std::abs(_RefVal - _u[_qp]);
 
   return val;
-  
+
 }
 
 

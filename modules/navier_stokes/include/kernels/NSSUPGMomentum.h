@@ -22,7 +22,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+
   // This kernel is to be used for the x, y, and z momentum equations.
   // The _component parameter tells you which equation you are currently
   // solving.
@@ -30,7 +30,7 @@ protected:
 
 private:
   // Single function for computing on and off-diagonal Jacobian
-  // entries in a single function.  The input index is in Moose 
+  // entries in a single function.  The input index is in Moose
   // variable numbering.
   Real compute_jacobian(unsigned var);
 };

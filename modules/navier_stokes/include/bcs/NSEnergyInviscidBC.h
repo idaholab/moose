@@ -35,7 +35,7 @@ public:
   virtual ~NSEnergyInviscidBC(){}
 
 protected:
-  
+
   /**
    * Must be implemented in derived classes.
    */
@@ -44,7 +44,7 @@ protected:
 //  virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Aux vars
-  VariableValue& _temperature; 
+  VariableValue& _temperature;
 
   // An object for computing pressure derivatives.
   // Constructed via a reference to ourself

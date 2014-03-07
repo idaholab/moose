@@ -23,7 +23,7 @@ public:
   NSKernel(const std::string & name, InputParameters parameters);
 
   virtual ~NSKernel(){}
-  
+
 protected:
   /**
    * Not defined here, need to be defined in derived classes.
@@ -62,7 +62,7 @@ protected:
   Real _R;
 
   // Integrated BC can use Mat. properties...
-  MaterialProperty<Real> & _dynamic_viscosity; 
+  MaterialProperty<Real> & _dynamic_viscosity;
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor; // Includes _dynamic_viscosity
 
   // Helper function for mapping Moose variable numberings into

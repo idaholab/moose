@@ -129,7 +129,7 @@
 #    boundary = 200
 #    value = 0.0
 #  [../]
-# 
+#
 #  [./pin_y]
 #    type = DirichletBC
 #    variable = disp_y

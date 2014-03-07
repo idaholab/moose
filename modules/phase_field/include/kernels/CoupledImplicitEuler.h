@@ -16,7 +16,7 @@ class CoupledImplicitEuler : public Kernel
 public:
 
   CoupledImplicitEuler(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -26,7 +26,7 @@ private:
   VariableValue & _v_dot;
   VariableValue & _dv_dot;
   unsigned int _v_var;
-  
+
 
 };
 #endif //IMPLICITEULER

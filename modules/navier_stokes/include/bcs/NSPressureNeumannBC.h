@@ -2,17 +2,17 @@
 
 // #ifndef NSPRESSURENEUMANNBC_H
 // #define NSPRESSURENEUMANNBC_H
-// 
+//
 // #include "NSIntegratedBC.h"
 // #include "NSPressureDerivs.h"
-// 
-// 
+//
+//
 // // Forward Declarations
 // class NSPressureNeumannBC;
-// 
+//
 // template<>
 // InputParameters validParams<NSPressureNeumannBC>();
-// 
+//
 // /**
 //  * This kernel is appropriate for use with a "zero normal flow"
 //  * boundary condition in the context of the Euler equations.
@@ -27,36 +27,36 @@
 // class NSPressureNeumannBC : public NSIntegratedBC
 // {
 // public:
-// 
+//
 //   NSPressureNeumannBC(const std::string & name, InputParameters parameters);
-// 
+//
 //   virtual ~NSPressureNeumannBC(){}
-// 
+//
 // protected:
-// 
+//
 //   virtual Real computeQpResidual();
 //   virtual Real computeQpJacobian();
 //   virtual Real computeQpOffDiagJacobian(unsigned jvar);
-//   
+//
 //   // Coupled vars
-//   VariableValue & _pressure; 
-//   
+//   VariableValue & _pressure;
+//
 //   // Required parameters
 //   unsigned _component;
 //   Real _gamma;
-// 
+//
 //   // An object for computing pressure derivatives.
 //   // Constructed via a reference to ourself
 //   NSPressureDerivs<NSPressureNeumannBC> _pressure_derivs;
-// 
+//
 //   // Declare ourselves friend to the helper class.
 //   template <class U>
 //   friend class NSPressureDerivs;
-// 
+//
 // private:
 //   // Computes the Jacobian value for this term for variable 'm'
 //   // in the canonical ordering.
 //   Real compute_jacobian(unsigned m);
 // };
-// 
+//
 // #endif //PRESSURENEUMANNBC_H

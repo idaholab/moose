@@ -44,7 +44,7 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Rea
 // test the input vector length to make sure it's correct
   if ((all_21==true && init_list.size()!=21) ||(all_21==false && init_list.size()!=9) )
     mooseError("Please correct the number of entries in the stiffness input.");
-  
+
   if(all_21 == true)
   {
     for (int i = 0; i < 21; i++)
@@ -62,7 +62,7 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Rea
     _val[18] = init_list[7];  //C1313
     _val[20] = init_list[8];  //C1212
   }
-  
+
   //form_transformation_t_matrix();
 }
 
@@ -180,7 +180,7 @@ void
 SymmAnisotropicElasticityTensor::initialize_material_dt_matrix()
 {
 // This function initializes the 6 x 6 material Dt matrix for a cubic material
-  
+
   _dt(0,0) = _dt(1,1) = _dt(2,2) = _c11;
   _dt(0,1) = _dt(0,2) = _dt(1,0) = _dt(2,0) = _dt(1,2) = _dt(2,1) = _c12;
   // beware the factor of two here
@@ -279,7 +279,7 @@ void SymmAnisotropicElasticityTensor::form_transformed_material_dmat_matrix()
   copyValues(temp_dt);
 
   ColumnMajorMatrix temp_dmat = temp_dt.columnMajorMatrix9x9();
-  
+
   for (unsigned j(0); j < 9; ++j)
   {
     for (unsigned i(0); i < 9; ++i)
@@ -352,7 +352,7 @@ SymmAnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
   setMaterialConstantc11(_c11);
   setMaterialConstantc12(_c12);
   setMaterialConstantc44(_c44);
-  
+
   form_r_matrix();
   //initialize_material_anisotropic_dt_matrix();
   form_rotational_q_matrix();
@@ -376,7 +376,7 @@ void
 SymmAnisotropicElasticityTensor::show_dt_matrix()
 {
   printf("\nSymmAnisotropicElasticityTensor::show_dt_matrix()\n");
-  
+
   for (int j = 0; j < 6; ++j)
   {
     printf("  ");
@@ -393,7 +393,7 @@ SymmAnisotropicElasticityTensor::show_r_matrix()
 {
   printf("\nSymmAnisotropicElasticityTensor::show_r_matrix()  Euler angles are (%f, %f, %f)\n",
 	 _euler_angle[0], _euler_angle[1], _euler_angle[2]);
-  
+
   for (int j = 0; j < 3; ++j)
   {
     printf("  ");

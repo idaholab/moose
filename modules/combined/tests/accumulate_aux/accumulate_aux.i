@@ -24,7 +24,7 @@
 [Kernels]
   [./diff]
     type = Diffusion
-    variable = v 
+    variable = v
   [../]
 []
 

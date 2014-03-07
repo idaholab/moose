@@ -51,7 +51,7 @@ protected:
 
   MaterialProperty<std::vector<Real> > &_density;
   MaterialProperty<std::vector<Real> > &_ddensity;
-  
+
   RichardsSumQuantity & _total_outflow_mass;
   std::string _point_file;
 

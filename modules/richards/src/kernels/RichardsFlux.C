@@ -37,7 +37,7 @@ RichardsFlux::RichardsFlux(const std::string & name,
     _drel_perm(getMaterialProperty<std::vector<Real> >("drel_perm")),
     _d2rel_perm(getMaterialProperty<std::vector<Real> >("d2rel_perm")),
 
-    _density(getMaterialProperty<std::vector<Real> >("density")), 
+    _density(getMaterialProperty<std::vector<Real> >("density")),
     _ddensity(getMaterialProperty<std::vector<Real> >("ddensity")),
     _d2density(getMaterialProperty<std::vector<Real> >("d2density")),
 
@@ -58,10 +58,10 @@ RichardsFlux::computeQpResidual()
   Real mob = mobility(_density[_qp][_pvar], _rel_perm[_qp][_pvar]);
   RealVectorValue pot = _permeability[_qp]*(_grad_u[_qp] - _density[_qp][_pvar]*_gravity[_qp]);
   Real flux_part = _grad_test[_i][_qp]*mob*pot;
-  
+
   Real supg_test = _tauvel_SUPG[_qp][_pvar]*_grad_test[_i][_qp];
   Real supg_kernel = 0.0;
-  
+
   if (supg_test != 0)
     {
       Real dmob_dp = dmobility_dp(_density[_qp][_pvar], _ddensity[_qp][_pvar], _rel_perm[_qp][_pvar], _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]);
@@ -70,7 +70,7 @@ RichardsFlux::computeQpResidual()
       Real div_pot = (_permeability[_qp]*_second_u[_qp]).tr() - (_permeability[_qp]*_grad_u[_qp])*_ddensity[_qp][_pvar]*_gravity[_qp];
       supg_kernel = -grad_mob*pot - mob*div_pot;
     }
-  
+
   return (flux_part + supg_test*supg_kernel)/_viscosity[_qp][_pvar];
 }
 
@@ -82,29 +82,29 @@ RichardsFlux::computeQpJacobian()
   Real dmob_dp = dmobility_dp(_density[_qp][_pvar], _ddensity[_qp][_pvar], _rel_perm[_qp][_pvar], _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]);
   RealVectorValue pot = _permeability[_qp]*(_grad_u[_qp] - _density[_qp][_pvar]*_gravity[_qp]);
   RealVectorValue dpot_dp = _permeability[_qp]*(_grad_phi[_j][_qp] - _phi[_j][_qp]*_ddensity[_qp][_pvar]*_gravity[_qp]); // note: includes _phi
-  
+
   Real dflux_dp = _grad_test[_i][_qp]*(dmob_dp*_phi[_j][_qp]*pot + mob*dpot_dp);
-  
+
   Real supg_test = _tauvel_SUPG[_qp][_pvar]*_grad_test[_i][_qp];
   Real supg_test_prime = _grad_phi[_j][_qp]*(_dtauvel_SUPG_dgradp[_qp][_pvar]*_grad_test[_i][_qp]) + _phi[_j][_qp]*_dtauvel_SUPG_dp[_qp][_pvar]*_grad_test[_i][_qp];
   Real supg_kernel = 0.0;
   Real supg_kernel_prime = 0.0;
-  
+
   if (supg_test != 0)
     {
       RealVectorValue grad_mob = dmob_dp*_grad_u[_qp];
       // NOTE: since Libmesh does not correctly calculate grad(_grad_u) correctly, so following might not be correct
       Real div_pot = ((_permeability[_qp]*_second_u[_qp]).tr() - (_permeability[_qp]*_grad_u[_qp])*_ddensity[_qp][_pvar]*_gravity[_qp]);
       supg_kernel = -grad_mob*pot - mob*div_pot;
-      
+
       Real d2mob_dp2 = d2mobility_dp2(_density[_qp][_pvar], _ddensity[_qp][_pvar], _d2density[_qp][_pvar], _rel_perm[_qp][_pvar], _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar], _d2rel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]*_dseff[_qp][_pvar][_pvar] + _drel_perm[_qp][_pvar]*_d2seff[_qp][_pvar][_pvar][_pvar]);
       RealVectorValue dgrad_mob_dp = d2mob_dp2*_phi[_j][_qp]*_grad_u[_qp] + dmob_dp*_grad_phi[_j][_qp];
       Real ddiv_pot_dp = -(_permeability[_qp]*_grad_phi[_j][_qp])*_ddensity[_qp][_pvar]*_gravity[_qp]  - (_permeability[_qp]*_grad_u[_qp])*_d2density[_qp][_pvar]*_phi[_j][_qp]*_gravity[_qp];
       //ddiv_pot_dp += (_permeability[_qp]*_second_phi[_j][_qp]).tr(); // crashes because _second_phi_zero is not done correctly
-      
+
       supg_kernel_prime = -dgrad_mob_dp*pot - grad_mob*dpot_dp - dmob_dp*_phi[_j][_qp]*div_pot - mob*ddiv_pot_dp;
     }
-  
+
   return (dflux_dp + supg_test_prime*supg_kernel + supg_test*supg_kernel_prime)/_viscosity[_qp][_pvar];
 }
 
@@ -116,7 +116,7 @@ RichardsFlux::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
   unsigned int dvar = _pp_name_UO.pressure_var_num(jvar);
   Real flux_prime = _grad_test[_i][_qp]*(_density[_qp][_pvar]*_drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][dvar]*_phi[_j][_qp]/_viscosity[_qp][_pvar]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][_pvar]*_gravity[_qp])));
-  
+
   Real supg_test = _tauvel_SUPG[_qp][_pvar]*_grad_test[_i][_qp];
   Real supg_test_prime = 0.0;
   Real supg_kernel = 0.0;
@@ -129,7 +129,7 @@ RichardsFlux::computeQpOffDiagJacobian(unsigned int jvar)
       supg_kernel_prime -= _density[_qp][_pvar]*_drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][dvar]*_phi[_j][_qp]/_viscosity[_qp][_pvar]*((_permeability[_qp]*_second_u[_qp]).tr() - (_permeability[_qp]*_grad_u[_qp])*_ddensity[_qp][_pvar]*_gravity[_qp]);
     }
   return flux_prime + (supg_test_prime*supg_kernel + supg_test*supg_kernel_prime);
-}    
+}
 
 
 // mobility

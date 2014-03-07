@@ -32,7 +32,7 @@ public:
 
 protected:
   virtual Real computeValue();
-  
+
   Real _RefVal;
   unsigned int _direction_index;
   MooseMesh & _mesh;

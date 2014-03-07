@@ -15,12 +15,12 @@ class NSMomentumInviscidFluxWithGradP : public NSKernel
 public:
 
   NSMomentumInviscidFluxWithGradP(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+
   // Coupled gradients
   VariableGradient& _grad_p;
 
@@ -45,5 +45,5 @@ private:
   template <class U>
   friend class NSPressureDerivs;
 };
- 
+
 #endif

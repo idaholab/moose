@@ -28,17 +28,17 @@ class EnthalpyDiffusion : public Diffusion
 public:
 
   EnthalpyDiffusion(const std::string & name, InputParameters parameters);
-    
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  
+
     VariableGradient & _grad_T;
     unsigned int _p_var;
     MaterialProperty<Real> &_thermal_conductivity;
       MaterialProperty<Real> &_dTdP_H;
     MaterialProperty<Real> &_dTdH_P;
-  
+
 };
 #endif //ENTHALPYDIFFUSION

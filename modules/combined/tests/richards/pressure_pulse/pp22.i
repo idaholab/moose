@@ -93,7 +93,7 @@
   [../]
 []
 
-    
+
 [BCs]
   [./left]
     type = DirichletBC
@@ -112,7 +112,7 @@
 [AuxVariables]
   [./Seff1VG_Aux]
   [../]
-[]  
+[]
 
 
 [Kernels]

@@ -1,4 +1,4 @@
-# exploring CONSTANT MONOMIAL 
+# exploring CONSTANT MONOMIAL
 [Mesh]
   type = FileMesh
   file = three_eles.e
@@ -34,8 +34,8 @@
     block = centre_block
   [../]
 []
-    
-  
+
+
 [Kernels]
   [./c_dot]
     type = TimeDerivative

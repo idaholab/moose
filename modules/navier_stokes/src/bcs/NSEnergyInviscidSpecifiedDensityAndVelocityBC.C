@@ -22,7 +22,7 @@ InputParameters validParams<NSEnergyInviscidSpecifiedDensityAndVelocityBC>()
 
 NSEnergyInviscidSpecifiedDensityAndVelocityBC::NSEnergyInviscidSpecifiedDensityAndVelocityBC(const std::string & name, InputParameters parameters)
     : NSEnergyInviscidBC(name, parameters),
-      
+
       // Aux Variables
       _pressure(coupledValue("pressure")),
 
@@ -39,8 +39,8 @@ NSEnergyInviscidSpecifiedDensityAndVelocityBC::NSEnergyInviscidSpecifiedDensityA
 
 Real NSEnergyInviscidSpecifiedDensityAndVelocityBC::computeQpResidual()
 {
-  return this->qp_residual(_specified_density, 
-                           RealVectorValue(_specified_u, _specified_v, _specified_w), 
+  return this->qp_residual(_specified_density,
+                           RealVectorValue(_specified_u, _specified_v, _specified_w),
                            _pressure[_qp]);
 }
 

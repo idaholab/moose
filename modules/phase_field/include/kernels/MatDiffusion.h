@@ -23,7 +23,7 @@ protected:
 
 private:
   std::string _D_name;
-  
+
   MaterialProperty<Real> & _D;
 };
 #endif //COEFDIFFUSION_H

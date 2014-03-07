@@ -15,11 +15,11 @@ class SplitCHMath : public SplitCHCRes
 public:
 
   SplitCHMath(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeDFDC(PFFunctionType type);
 
 private:
-  
+
 };
 #endif //SPLITCHMath_H

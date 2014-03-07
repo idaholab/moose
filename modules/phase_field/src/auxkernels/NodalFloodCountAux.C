@@ -20,7 +20,7 @@ template<>
 InputParameters validParams<NodalFloodCountAux>()
 {
   MooseEnum field_display("UNIQUE_REGION, VARIABLE_COLORING, ACTIVE_BOUNDS, CENTROID", "UNIQUE_REGION");
-  
+
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>("bubble_object", "The NodalFloodCount UserObject to get values from.");
   params.addParam<unsigned int>("map_index", 0, "The index of which map to retrieve values from when using NodalFloodCount with multiple maps.");
@@ -62,7 +62,7 @@ NodalFloodCountAux::computeValue()
     {
       size_t size=0;
       std::vector<std::vector<std::pair<unsigned int, unsigned int> > > values = _flood_counter.getElementalValues(_current_elem->id());
-      
+
       for (unsigned int i=0; i<values.size(); ++i)
         size += values[i].size();
       return size;

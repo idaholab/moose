@@ -51,11 +51,11 @@
     initial_condition = -1.0
   [../]
 []
-    
+
 [AuxVariables]
   [./Seff1VG_Aux]
   [../]
-[]  
+[]
 
 
 [Kernels]

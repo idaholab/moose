@@ -44,12 +44,12 @@ public:
   virtual Real value(const Point & p);
 
 private:
-  Real _x1; 
-  Real _y1; 
-  Real _z1; 
-  Real _x2; 
-  Real _y2; 
-  Real _z2; 
+  Real _x1;
+  Real _y1;
+  Real _z1;
+  Real _x2;
+  Real _y2;
+  Real _z2;
   Real _mx_invalue;
   Real _mx_outvalue;
   Real _mn_invalue;

@@ -26,22 +26,22 @@ public:
    * constructor.
    */
   ChemicalOutFlowBC(const std::string & name, InputParameters parameters);
-  
+
  virtual ~ChemicalOutFlowBC(){}
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  
+
 private:
   /**
    * Vector to dot with the normal.
    */
   MaterialProperty<Real> & _diff;
   MaterialProperty<Real> & _porosity;
-  
+
 //  std::vector<RealGradient> & _grad_p;
-  
+
 };
 
 #endif //NEUMANNBC_H

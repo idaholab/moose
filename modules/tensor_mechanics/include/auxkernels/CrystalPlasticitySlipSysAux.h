@@ -13,14 +13,14 @@ class CrystalPlasticitySlipSysAux : public AuxKernel
 {
  public:
   CrystalPlasticitySlipSysAux(const std::string & name, InputParameters parameters);
-  
+
   virtual ~CrystalPlasticitySlipSysAux() {}
 
  protected:
   virtual Real computeValue();
 
  private:
-  
+
   MaterialProperty< std::vector<Real> > & _slipsysvar;
   const int _i;
 

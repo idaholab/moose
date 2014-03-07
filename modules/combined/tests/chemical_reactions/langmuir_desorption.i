@@ -1,4 +1,4 @@
-# exploring CONSTANT MONOMIAL 
+# exploring CONSTANT MONOMIAL
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -28,8 +28,8 @@
     value = 1.0
   [../]
 []
-    
-  
+
+
 [Kernels]
   [./c_dot]
     type = TimeDerivative

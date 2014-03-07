@@ -15,7 +15,7 @@ public:
       _zz(0)
     {}
   explicit
-  
+
   DiagTensor(Real init) :
       _xx(init),
       _yy(init),
@@ -44,21 +44,21 @@ public:
       _xx(init_list[0]),
       _yy(init_list[1]),
       _zz(init_list[2])
-      
+
     {
       // test the length to make sure it's 3 long
       if(init_list.size() != 3)
         mooseError("please enter a vector with 3 entries.");
     }
-  
+
   DiagTensor(const DiagTensor &a)
     {
       *this = a;
     }
-  
-  
+
+
   ~DiagTensor() {}
-  
+
 
   Real rowDot(const unsigned int r,
               const libMesh::TypeVector<Real> & v) const
@@ -82,21 +82,21 @@ public:
       }
       return 0;
     }
-  
-  libMesh::TypeVector<Real> operator*(const libMesh::TypeVector<Real> & v) const 
+
+  libMesh::TypeVector<Real> operator*(const libMesh::TypeVector<Real> & v) const
     {
       libMesh::TypeVector<Real> r_val(v);
-      
+
       r_val(0) = _xx * v(0);
       r_val(1) = _yy * v(1);
       r_val(2) = _zz * v(2);
       return r_val;
     }
 
- libMesh::VectorValue<Real> operator*(const libMesh::VectorValue<Real> & v) const 
+ libMesh::VectorValue<Real> operator*(const libMesh::VectorValue<Real> & v) const
     {
       libMesh::VectorValue<Real> r_val(v);
-      
+
       r_val(0) = _xx * v(0);
       r_val(1) = _yy * v(1);
       r_val(2) = _zz * v(2);
@@ -104,12 +104,12 @@ public:
     }
 
 
-  
+
   Real trace() const
   {
     return _xx + _yy + _zz;
   }
-  
+
   Real component( unsigned int i ) const
     {
       if (0 == i)
@@ -172,14 +172,14 @@ public:
       }
     return *rVal;
     }
-  
+
   Real doubleContraction( const DiagTensor & rhs ) const
     {
       return _xx*rhs._xx + _yy*rhs._yy + _zz*rhs._zz;
     }
-  
 
-  void assign( unsigned int i, Real val ) 
+
+  void assign( unsigned int i, Real val )
     {
       if (0 == i)
       {
@@ -198,7 +198,7 @@ public:
         mooseError( "Invalid entry requested for DiagTensor" );
       }
     }
-  
+
   void xyz( Real xx, Real yy,Real zz )
     {
       _xx = xx;
@@ -217,7 +217,7 @@ public:
     {
       _zz = zz;
     }
-  
+
   void zero()
     {
       _xx = _yy = _zz =  0;
@@ -243,7 +243,7 @@ public:
     {
       return !operator==(rhs);
     }
-  
+
   DiagTensor & operator+=(const DiagTensor & t)
     {
       _xx += t._xx;
@@ -251,7 +251,7 @@ public:
       _zz += t._zz;
       return *this;
     }
-  
+
   DiagTensor & operator-=(const DiagTensor & t)
     {
       _xx -= t._xx;
@@ -259,7 +259,7 @@ public:
       _zz -= t._zz;
       return *this;
     }
-  
+
   DiagTensor operator+(const DiagTensor & t) const
     {
       DiagTensor r_val;
@@ -268,7 +268,7 @@ public:
       r_val._zz = _zz + t._zz;
       return r_val;
     }
-  
+
   DiagTensor  inverse() const
     {
       DiagTensor r_val;
@@ -287,7 +287,7 @@ public:
       r_val._zz=0;
 
       Real _eps=1e-15;
-      
+
       if(_xx!=0)
         r_val._xx = 1./(_xx+_eps);
       if(_yy!=0)
@@ -297,11 +297,11 @@ public:
 
       return r_val;
     }
-  
-  DiagTensor operator*(Real t) const 
+
+  DiagTensor operator*(Real t) const
     {
       DiagTensor r_val;
-    
+
       r_val._xx = _xx * t;
       r_val._yy = _yy * t;
       r_val._zz = _zz * t;
@@ -309,17 +309,17 @@ public:
   }
 
 
-  DiagTensor operator*(DiagTensor & t) const 
+  DiagTensor operator*(DiagTensor & t) const
     {
       DiagTensor r_val;
-    
+
       r_val._xx = _xx * t._xx;
       r_val._yy = _yy * t._yy;
       r_val._zz = _zz * t._zz;
       return r_val;
   }
- 
-  
+
+
   DiagTensor operator-(const DiagTensor & t) const
     {
       DiagTensor r_val;
@@ -328,7 +328,7 @@ public:
       r_val._zz = _zz - t._zz;
       return r_val;
     }
-  
+
   DiagTensor & operator+=(const ColumnMajorMatrix & cmm)
     {
       mooseAssert(cmm.numEntries() == 9, "Cannot add ColumnMajorMatrix to DiagTensor.  Wrong number of entries.");
@@ -338,7 +338,7 @@ public:
       _zz += data[8];
       return *this;
     }
-  
+
   DiagTensor & operator-=(const ColumnMajorMatrix & cmm)
     {
       mooseAssert(cmm.numEntries() == 9, "Cannot add ColumnMajorMatrix to DiagTensor.  Wrong number of entries.");
@@ -348,7 +348,7 @@ public:
       _zz -= data[8];
       return *this;
     }
-  
+
   DiagTensor & operator=(const ColumnMajorMatrix & cmm)
     {
       mooseAssert(cmm.numEntries() == 9, "Cannot set DiagTensor to ColumnMajorMatrix.  Wrong number of entries.");
@@ -358,7 +358,7 @@ public:
       _zz = data[8];
       return *this;
     }
-  
+
   DiagTensor & operator=(Real val)
     {
       _xx = val;
@@ -366,7 +366,7 @@ public:
       _zz = val;
       return *this;
     }
-  
+
   DiagTensor & operator*=(Real val)
   {
     _xx *= val;
@@ -374,7 +374,7 @@ public:
     _zz *= val;
     return *this;
   }
-  
+
   ColumnMajorMatrix columnMajorMatrix() const
     {
       ColumnMajorMatrix cmm(3, 3);
@@ -389,9 +389,9 @@ public:
       cmm(2,2) = _zz;
     return cmm;
   }
-  
+
   friend std::ostream & operator<<(std::ostream & stream, const DiagTensor & obj);
-  
+
 /**
  * Rotate the strain around the c-axis
  */
@@ -400,11 +400,11 @@ public:
       Real angle = a*pi/180.0;
       Real s = std::sin(angle);
       Real c = std::cos(angle);
-      
+
       _xx = _xx*c*c + _yy*s*s ;
       _yy = _xx*s*s + _yy*c*c ;
      }
-  
+
   void fillFromInputVector(std::vector<Real> input)
     {
       if (input.size() != 3)
@@ -413,7 +413,7 @@ public:
       _yy = input[1];
       _zz = input[2];
     }
-  
+
 private:
   Real _xx;
   Real _yy;

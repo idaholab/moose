@@ -13,7 +13,7 @@ InputParameters validParams<NSInflowThermalBC>()
   params.addRequiredParam<Real>("specified_rho", "Density of incoming flow");
   params.addRequiredParam<Real>("specified_temperature", "Temperature of incoming flow");
   params.addParam<Real>("specified_velocity_magnitude", 0., "Velocity magnitude of incoming flow");
-  
+
   return params;
 }
 
@@ -35,7 +35,7 @@ NSInflowThermalBC::NSInflowThermalBC(const std::string & name, InputParameters p
 Real
 NSInflowThermalBC::computeQpResidual()
 {
-  // For the total energy, the essential BC is: 
+  // For the total energy, the essential BC is:
   // rho*E = rho*(c_v*T + 0.5*|u|^2)
   //
   // or, in residual form, (In general, this BC is coupled to the velocity variables.)
@@ -43,7 +43,7 @@ NSInflowThermalBC::computeQpResidual()
   //
   // ***at a no-slip wall*** this further reduces to (no coupling to velocity variables):
   // rho*E - rho*cv*T = 0
-  
+
   Real cv = _R / (_gamma-1.);
   return _u[_qp] - _specified_rho * (cv * _specified_temperature + 0.5*_specified_velocity_magnitude*_specified_velocity_magnitude);
 }

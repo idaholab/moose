@@ -23,12 +23,12 @@ ChemicalOutFlowBC::computeQpResidual()
 //    std::cout << "porosity,diffusivity, cond " << _porosity <<" " << _diff <<" "<< _cond << std::endl;
 
   Real var = -_test[_i][_qp]*_porosity[_qp]*_diff[_qp]*_grad_u[_qp]*_normals[_qp];
-    
+
 //    if (var <= 1.0e-12)
 //      var=0.0;
-    
+
 //    std::cout << "utlet_flux " << var << std::endl;
-    
+
   return var;
 }
 

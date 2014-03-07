@@ -64,7 +64,7 @@ Real NSEnergyInviscidUnspecifiedBC::compute_jacobian(unsigned var_number)
 
   // When both u.n and pressure are unspecified, all 3 Jacobian terms apply.
   // See base class for details.
-  return 
+  return
     this->qp_jacobian_termA(var_number, _pressure[_qp]) +
     this->qp_jacobian_termB(var_number, un) +
     this->qp_jacobian_termC(var_number, un);

@@ -36,15 +36,15 @@ PolycrystalRandomICAction::PolycrystalRandomICAction(const std::string & name, I
 {}
 
 void
-PolycrystalRandomICAction::act() 
-{ 
+PolycrystalRandomICAction::act()
+{
 #ifdef DEBUG
   std::cerr << "Inside the PolycrystalRandomICAction Object\n";
 #endif
 
 // Loop through the number of order parameters
-  
-  
+
+
   for (unsigned int crys = 0; crys<_crys_num; crys++)
   {
     //Create variable names
@@ -59,8 +59,8 @@ PolycrystalRandomICAction::act()
     poly_params.set<unsigned int>("crys_num") = _crys_num;
     poly_params.set<unsigned int>("crys_index") = crys;
     poly_params.set<unsigned int>("typ") = _random_type;
-    
-    
+
+
     //Add initial condition
     _problem->addInitialCondition("PolycrystalRandomIC", "InitialCondition", poly_params);
   }

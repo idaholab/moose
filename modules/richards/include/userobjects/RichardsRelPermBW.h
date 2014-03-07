@@ -25,7 +25,7 @@ class RichardsRelPermBW : public RichardsRelPerm
   Real d2relperm(Real seff) const;
 
  protected:
-  
+
   Real _sn;
   Real _ss;
   Real _kn;

@@ -27,11 +27,11 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Aux Variables
-  VariableValue& _pressure; 
+  VariableValue& _pressure;
 
 private:
   // Helper Jacobian function
   Real compute_jacobian(unsigned var_number);
 };
 
-#endif // NSENERGYINVISCIDUNSPECIFIEDBC_H 
+#endif // NSENERGYINVISCIDUNSPECIFIEDBC_H

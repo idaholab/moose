@@ -14,13 +14,13 @@
 # This mesh has an interior sideset called excav_bdy
 [Mesh]
   type = FileMesh
-  file = ex01_input.e  
+  file = ex01_input.e
 []
 
 
 
 # This is a boundary condition acting on excav_bdy
-# All it does is to set the pressure to p_excav=0 
+# All it does is to set the pressure to p_excav=0
 # at places on excav_bdy wherever excav_fcn tells it to.
 [BCs]
   [./excav_bdy]
@@ -171,8 +171,8 @@
   [./Seff1VG_Aux]
   [../]
 []
-    
-  
+
+
 [Kernels]
   active = 'richardsf richardst'
   [./richardst]

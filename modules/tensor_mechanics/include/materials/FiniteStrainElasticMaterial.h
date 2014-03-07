@@ -19,7 +19,7 @@ public:
 
 protected:
   virtual void computeQpStress();
-  
+
 private:
 
 };

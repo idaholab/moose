@@ -39,8 +39,8 @@ TensorMechanicsAction::act()
   std::vector<std::string> keys;
   std::vector<VariableName> vars;
   std::string type("StressDivergenceTensors");
-  
-      
+
+
   /* if (_problem->coordSystem() == Moose::COORD_RZ)
   {
     rz = true;

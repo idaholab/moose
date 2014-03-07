@@ -29,7 +29,7 @@ InputParameters validParams<AddCoupledSolidKinSpeciesAuxKernelsAction>()
   params.addRequiredParam<Real>("gas_constant", "Gas constant, 8.314 (J/mol/K)");
   params.addRequiredParam<std::vector<Real> >("reference_temperature", "The list of reference temperatures for all reactions, (K)");
   params.addRequiredParam<std::vector<Real> >("system_temperature", "The list of system temperatures for all reactions, (K)");
-  
+
   return params;
 }
 
@@ -50,20 +50,20 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
   Real gas_const = getParam<Real>("gas_constant");
   std::vector<Real> ref_temp = getParam<std::vector<Real> >("reference_temperature");
   std::vector<Real> sys_temp = getParam<std::vector<Real> >("system_temperature");
-  
+
 // NEED TO ADD AN ERROR MESSAGE IF THE SIZES OF ABOVE ARRAYS ARE NOT THE SAME //
-  
+
   for (unsigned int j=0; j < reactions.size(); j++)
   {
     std::vector<std::string> tokens;
     std::vector<std::string> solid_kin_species(reactions.size());
-    
+
     // Parsing each reaction
     MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
-    
+
     std::vector<Real> stos(tokens.size()-1);
     std::vector<VariableName> rxn_vars(tokens.size()-1);
-    
+
     for (unsigned int k=0; k < tokens.size(); k++)
     {
       std::cout << tokens[k] << "\t";
@@ -97,9 +97,9 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
     params_kin.set<std::vector<Real> >("sto_v") = stos;
     params_kin.set<std::vector<VariableName> >("v") = rxn_vars;
     _problem->addAuxKernel("KineticDisPreConcAux", "aux_"+solid_kin_species[j], params_kin);
-    
+
     std::cout << "aux_"+solid_kin_species[j] << "\n";
     params_kin.print();
   }
-    
+
 }

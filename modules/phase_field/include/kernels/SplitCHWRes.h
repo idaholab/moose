@@ -15,7 +15,7 @@ class SplitCHWRes : public Kernel
 public:
 
   SplitCHWRes(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();

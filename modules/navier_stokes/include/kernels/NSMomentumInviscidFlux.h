@@ -21,7 +21,7 @@ class NSMomentumInviscidFlux : public NSKernel
 public:
 
   NSMomentumInviscidFlux(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
@@ -40,5 +40,5 @@ private:
   // Moose's numbering.
   Real compute_jacobian(unsigned m);
 };
- 
+
 #endif

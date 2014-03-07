@@ -13,13 +13,13 @@ InputParameters validParams<NSMomentumInviscidBC>();
 
 /**
  * This class corresponds to the inviscid part of the "natural"
- * boundary condition for the momentum equations, i.e. 
+ * boundary condition for the momentum equations, i.e.
  *
  * int_{Gamma} n . (rho*uu + Ip) . v
  *
  * While this kernel implements the convective and pressure term
  * residuals and jacobians, it does not itself implement any of
- * the computeQp* functions.  For that, use one of the derived 
+ * the computeQp* functions.  For that, use one of the derived
  * classes:
  * 1.) NSMomentumInviscidSpecifiedPressureBC
  * 2.) NSMomentumInviscidSpecifiedNormalFlowBC
@@ -58,7 +58,7 @@ public:
   virtual ~NSMomentumInviscidBC(){}
 
 protected:
-  
+
   /**
    * Must be implemented in derived classes.
    */

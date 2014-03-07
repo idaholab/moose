@@ -17,7 +17,7 @@ InputParameters validParams<PrimaryDiffusion>();
  * Define the Kernel for a CoupledConvectionReactionSub operator that looks like:
  *
  * grad (diff * grad_u)
- * 
+ *
  * This first line is defining the name and inheriting from Kernel.
  */
 class PrimaryDiffusion : public Diffusion

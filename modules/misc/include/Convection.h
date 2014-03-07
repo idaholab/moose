@@ -23,7 +23,7 @@ InputParameters validParams<Convection>();
  * Define the Kernel for a convection operator that looks like:
  *
  * velocity dot u'
- * 
+ *
  * This first line is defining the name and inheriting from Kernel.
  */
 class Convection : public Kernel

@@ -14,9 +14,9 @@ InputParameters validParams<MultiSmoothCircleIC>()
   params.addParam<unsigned int>("numtries", 1000,"The number of tries");
   params.addParam<Real>("radius_variation",0.0,"Plus or minus Percent of random variation in the bubble radius");
   //These are SmoothCircleIC inputs that are not needed here.
-  params.set<Real>("x1") = 0.0; 
+  params.set<Real>("x1") = 0.0;
   params.set<Real>("y1") = 0.0;
-  
+
   return params;
 }
 
@@ -39,7 +39,7 @@ MultiSmoothCircleIC::initialSetup()
 {
    _bubcent.resize(_numbub);
    _bubradi.resize(_numbub);
-   
+
    MooseRandom::seed(_rnd_seed);
    for(unsigned int i=0; i<_numbub; i++)
      {
@@ -50,32 +50,32 @@ MultiSmoothCircleIC::initialSetup()
 
        //Vary circle positions
        unsigned int num_tries = 0;
-         
+
        Real rr = 0.0;
        Real xx, yy, zz;
-         
+
        while (rr < _bubspac && num_tries < _numtries)
-       {  
+       {
          num_tries++;
          //std::cout<<"num_tries: "<<num_tries<<std::endl;
-         
+
          Real ran1 = MooseRandom::rand();
          Real ran2 = MooseRandom::rand();
          Real ran3 = MooseRandom::rand();
 
          xx = ran1*(_Lx - _bubspac) + 0.5*_bubspac;
          yy = ran2*(_Ly - _bubspac) + 0.5*_bubspac;
-       
+
          if (_Lz == 0.0)
            zz = 0.0;
          else
            zz = ran3*(_Lz - _bubspac) + 0.5*_bubspac;
-         
+
          for(unsigned int j=0; j<i; j++)
          {
            if (j==0)
              rr = 1000.0;
-           
+
            Real rx = abs(xx-_bubcent[j](0));
            Real ry = abs(yy-_bubcent[j](1));
            Real rz = abs(zz-_bubcent[j](2));
@@ -85,16 +85,16 @@ MultiSmoothCircleIC::initialSetup()
          }
          if (i==0)
            rr = _Lx;
-         
+
        }
-       
+
        if (num_tries == _numtries)
        {
          std::cout<<"Too many tries in MultiSmoothCircle IC "<<std::endl;
          mooseError("Toom many tried in MultiSmoothCircleIC");
        }
-       
-       
+
+
        _bubcent[i](0) =   xx;
        _bubcent[i](1) =   yy;
        _bubcent[i](2) =   zz;
@@ -104,7 +104,7 @@ MultiSmoothCircleIC::initialSetup()
 Real
 MultiSmoothCircleIC::value(const Point & p)
 {
-  Real val = _outvalue; 
+  Real val = _outvalue;
   Real val2 = 0.0;
   for(unsigned int i=0; i<_numbub; i++)
     {
@@ -126,7 +126,7 @@ MultiSmoothCircleIC::gradient(const Point & p)
 {
   RealGradient grad = Gradient(0.0,0.0,0.0);
   RealGradient grad2;
-  
+
   for(unsigned int i=0; i<_numbub; i++)
     {
       _radius = _bubradi[i];
@@ -138,6 +138,6 @@ MultiSmoothCircleIC::gradient(const Point & p)
           grad = grad2;
       }
     }
-  
+
   return grad;
 }

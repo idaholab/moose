@@ -23,7 +23,7 @@ public:
   NSIntegratedBC(const std::string & name, InputParameters parameters);
 
   virtual ~NSIntegratedBC(){}
-  
+
 protected:
   /**
    * Not defined here, need to be defined in derived classes.
@@ -31,7 +31,7 @@ protected:
   // virtual Real computeQpResidual();
   // virtual Real computeQpJacobian();
   // virtual Real computeQpOffDiagJacobian(unsigned jvar);
-  
+
   // Coupled variables
   VariableValue& _u_vel;
   VariableValue& _v_vel;
@@ -58,13 +58,13 @@ protected:
   unsigned _rhoe_var_number;
 
   // Integrated BC can use Mat. properties...
-  MaterialProperty<Real> & _dynamic_viscosity; 
+  MaterialProperty<Real> & _dynamic_viscosity;
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor; // Includes _dynamic_viscosity
 
   // Required parameters
   Real _gamma;
   Real _R;
-  
+
   // Helper function for mapping Moose variable numberings into
   // the "canonical" numbering for the compressible NS equations.
   unsigned map_var_number(unsigned var);

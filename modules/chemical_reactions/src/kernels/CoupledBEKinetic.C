@@ -23,7 +23,7 @@ CoupledBEKinetic::CoupledBEKinetic(const std::string & name, InputParameters par
 //    _vars.resize(n);
     _vals.resize(n);
     _vals_old.resize(n);
-  
+
   for (unsigned int i=0; i<_vals.size(); ++i)
   {
     //    _vars[i] = coupled("v", i);
@@ -35,7 +35,7 @@ CoupledBEKinetic::CoupledBEKinetic(const std::string & name, InputParameters par
 Real CoupledBEKinetic::computeQpResidual()
 {
   Real assemble_conc = 0.0;
-  
+
   for (unsigned int i=0; i<_vals.size(); ++i)
     assemble_conc +=  _weight[i]*((*_vals[i])[_qp]-(*_vals_old[i])[_qp])/_dt;
 

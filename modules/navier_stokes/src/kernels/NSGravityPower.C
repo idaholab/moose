@@ -1,5 +1,5 @@
 #include "NSGravityPower.h"
- 
+
 template<>
 InputParameters validParams<NSGravityPower>()
 {
@@ -7,7 +7,7 @@ InputParameters validParams<NSGravityPower>()
 
   // This term is coupled to the momentum variable for whichever equation this is
   params.addRequiredCoupledVar("momentum", "");
-  
+
   // Don't hard-code any defaults here, its too hard to keep all your defaults synchronized.
   params.addRequiredParam<Real>("acceleration", "The body force vector component.");
 

@@ -10,7 +10,7 @@ InputParameters validParams<CHInterface>()
   params.addRequiredParam<std::string>("grad_mob_name","The gradient of the mobility used with the kernel");
   params.addParam<bool>("implicit",true,"The kernel will be run with implicit time integration");
   params.addParam<bool>("has_MJac",false,"Jacobian information for the mobility is defined");
-  
+
   return params;
 }
 
@@ -41,7 +41,7 @@ CHInterface::computeQpResidual()
   //Actual value to return
   Real value = 0.0;
   RealTensor second_c;
-  
+
 
   if (_implicit)
     second_c = _second_u[_qp];
@@ -49,7 +49,7 @@ CHInterface::computeQpResidual()
     second_c = _second_u_old[_qp];
 
   value = _kappa[_qp]*second_c.tr()*(_M[_qp]*_second_test[_i][_qp].tr() + _grad_M[_qp]*_grad_test[_i][_qp]);
-  
+
   return value;
 }
 
@@ -73,4 +73,4 @@ CHInterface::computeQpJacobian()
 
   return value;
 }
-  
+

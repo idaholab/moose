@@ -4,10 +4,10 @@ template<>
 InputParameters validParams<NSMomentumInviscidSpecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSMomentumInviscidBC>();
-  
+
   // Coupled variables
   params.addRequiredCoupledVar("pressure", "");
-  
+
   // Required parameters
   params.addRequiredParam<Real>("rhou_udotn", "The _component'th entry of the (rho*u)(u.n) vector for this boundary");
 
@@ -33,7 +33,7 @@ NSMomentumInviscidSpecifiedNormalFlowBC::NSMomentumInviscidSpecifiedNormalFlowBC
 
 Real NSMomentumInviscidSpecifiedNormalFlowBC::computeQpResidual()
 {
-  return 
+  return
     this->pressure_qp_residual(_pressure[_qp]) +
     this->convective_qp_residual(_rhou_udotn);
 }

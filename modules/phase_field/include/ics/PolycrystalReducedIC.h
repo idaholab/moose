@@ -58,11 +58,11 @@ public:
   Point _bottom_left;
   Point _top_right;
   Point _range;
-  
+
 
   std::vector<Point> _centerpoints;
   std::vector<Real> _assigned_op;
-  
+
 };
 
 #endif //POLYCRYSTALREDUCEDIC_H

@@ -1,5 +1,5 @@
 [Mesh]
-  
+
   type = GeneratedMesh
   dim = 3
   nx = 22
@@ -27,7 +27,7 @@
        Ly = 100.0
        Lz = 100.0
        invalue = 1.0
-       outvalue = 0.0001 
+       outvalue = 0.0001
        bubspac = 30.0 #This spacing is from bubble center to bubble center
        numbub = 10
        radius = 10.0
@@ -35,7 +35,7 @@
        radius_variation = 0.2
     [../]
   [../]
-[]	     
+[]
 
 [Kernels]
 active = 'ie_c diff'
@@ -99,7 +99,7 @@ active = 'ie_c diff'
   start_time = 0.0
   num_steps =1
   dt = 100.0
- 
+
   [./Adaptivity]
     refine_fraction = .5
   [../]
@@ -113,5 +113,5 @@ active = 'ie_c diff'
   exodus = true
   perf_log = true
 []
-   
-    
+
+

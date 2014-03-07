@@ -21,9 +21,9 @@ public:
   SolidMech(const std::string & name, InputParameters parameters);
 
   virtual void subdomainSetup();
-  
+
   void recomputeConstants();
-  
+
 protected:
   Real _E;
   Real _nu;
@@ -51,6 +51,6 @@ protected:
 
   bool _constant_properties;
 };
- 
+
 
 #endif //SOLIDMECH_H

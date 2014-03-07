@@ -1,5 +1,5 @@
 /*Obtains equivalent plastic strain for output
- */ 
+ */
 #include "FiniteStrainPlasticAux.h"
 
 template<>

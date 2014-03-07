@@ -47,9 +47,9 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
     _drel_perm(getMaterialProperty<std::vector<Real> >("drel_perm")),
 
-    _density(getMaterialProperty<std::vector<Real> >("density")), 
+    _density(getMaterialProperty<std::vector<Real> >("density")),
     _ddensity(getMaterialProperty<std::vector<Real> >("ddensity")),
-  
+
     _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
     _point_file(getParam<std::string>("point_file"))
 
@@ -133,7 +133,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 	  vec0 = _rot_matrix[i]*v2 - zzz;
 	  if ((vec0*vec0) > 1E-20)
 	    mooseError("Rotation matrix for v2 = " << v2 << " is wrong.  It is " << _rot_matrix[i] << "\n");
-	  
+
 	  // check rotation matrix is orthogonal
 	  ten0 = _rot_matrix[i]*_rot_matrix[i].transpose() - iii;
 	  the_sum = 0;
@@ -165,7 +165,7 @@ RichardsBorehole::rotVecToZ(RealVectorValue v2)
   // construct v0 and v1 to be orthonormal to v2
   // and form a RH basis, that is, so v1 x v2 = v0
 
-  // Use Gram-Schmidt method to find v1.  
+  // Use Gram-Schmidt method to find v1.
   RealVectorValue v1;
   // Need a prototype for v1 first, and this is done by looking at the smallest component of v2
   if ( (v2(2) >= v2(1) && v2(1) >= v2(0)) || (v2(1) >= v2(2) && v2(2) >= v2(0)) )
@@ -273,7 +273,7 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
       eig_vec2(1) = eig_val2 - rot_perm(0,0);
     }
   else // off diagonal terms are both zero
-    { 
+    {
       eig_vec1(0) = 1;
       eig_vec2(1) = 1;
     }
@@ -304,11 +304,11 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
     }
   Real ll1 = max1 - min1;
   Real ll2 = max2 - min2;
-    
+
   //std::cout << " max1, min1, max2, min2 " << max1 << " " << min1 << " " << max2 << " " << min2 << "\n";
 
   Real r0 = _re_constant*std::sqrt( std::sqrt(eig_val1/eig_val2)*std::pow(ll2, 2) + std::sqrt(eig_val2/eig_val1)*std::pow(ll1, 2)) / ( std::pow(eig_val1/eig_val2, 0.25) + std::pow(eig_val2/eig_val1, 0.25) );
-  
+
   Real effective_perm = std::sqrt(det2D);
   //std::cout << "eff = " << effective_perm << " rot_perm=" << rot_perm << "\n";
 
@@ -316,7 +316,7 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
 
   if (r0 <= rad)
     mooseError("The effective element size (about 0.2-times-true-ele-size) for an element containing a RichardsBorehole must be (much) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size " << r0 << " and the borehole radius is " << rad << "\n");
-  
+
   //std::cout << "computed wc= " << 4*halfPi*effective_perm*half_len/std::log(r0/rad) << "\n";
   return 4*halfPi*effective_perm*half_len/std::log(r0/rad);
 }
@@ -341,7 +341,7 @@ RichardsBorehole::computeQpResidual()
       wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
       if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
 	// injection, so outflow<0 || // production, so outflow>0
-	outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure); 
+	outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure);
     }
 
   if (current_dirac_ptid < _zs.size() - 1)
@@ -350,8 +350,8 @@ RichardsBorehole::computeQpResidual()
       wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
       if ((_character < 0.0 && _u[_qp] < bh_pressure) || (_character > 0.0 && _u[_qp] > bh_pressure))
 	// injection, so outflow<0 || // production, so outflow>0
-	outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure); 
-        //outflow += _test[_i][_qp]*std::abs(_character)*wc*std::exp(_u[_qp]*10)*(_u[_qp] - bh_pressure)/_viscosity[_qp][_pvar]; 
+	outflow += _test[_i][_qp]*std::abs(_character)*wc*mob*(_u[_qp] - bh_pressure);
+        //outflow += _test[_i][_qp]*std::abs(_character)*wc*std::exp(_u[_qp]*10)*(_u[_qp] - bh_pressure)/_viscosity[_qp][_pvar];
     }
 
   _total_outflow_mass.add(outflow*_dt); // this is not thread safe, but DiracKernel's aren't currently threaded

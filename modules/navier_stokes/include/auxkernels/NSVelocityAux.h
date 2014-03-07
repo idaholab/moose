@@ -9,7 +9,7 @@ class NSVelocityAux;
 template<>
 InputParameters validParams<NSVelocityAux>();
 
-/** 
+/**
  * Velocity auxiliary value
  */
 class NSVelocityAux : public AuxKernel
@@ -23,7 +23,7 @@ public:
   NSVelocityAux(const std::string & name, InputParameters parameters);
 
   virtual ~NSVelocityAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

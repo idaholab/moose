@@ -18,7 +18,7 @@ public:
   AbaqusUmatMaterial(const std::string & name,
                   InputParameters parameters);
   virtual ~AbaqusUmatMaterial();
-  
+
 protected:
   FileName _plugin;
   std::vector<Real> _mechanical_constants;
@@ -56,7 +56,7 @@ protected:
   MaterialProperty<ColumnMajorMatrix> & _Fbar_old;
   MaterialProperty<Real> & _elastic_strain_energy;
   MaterialProperty<Real> & _plastic_dissipation;
-  MaterialProperty<Real> & _creep_dissipation;  
+  MaterialProperty<Real> & _creep_dissipation;
 };
 
 #endif //ABAQUSUMATMATERIAL_H

@@ -34,4 +34,4 @@ private:
   Real compute_jacobian(unsigned var_number);
 };
 
-#endif // NSENERGYINVISCIDSPECIFIEDPRESSUREBC_H 
+#endif // NSENERGYINVISCIDSPECIFIEDPRESSUREBC_H

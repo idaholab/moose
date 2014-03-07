@@ -42,7 +42,7 @@ private:
   std::vector<Real> _material_viscosity;
 
   const RichardsPorepressureNames & _pp_name_UO;
-  unsigned int _num_p; 
+  unsigned int _num_p;
 
   RealVectorValue _material_gravity;
   // Following is for SUPG

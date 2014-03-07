@@ -23,7 +23,7 @@ InputParameters validParams<AddCoupledSolidKinSpeciesKernelsAction>()
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<NonlinearVariableName> >("primary_species", "The list of primary species to add");
   params.addRequiredParam<std::vector<std::string> >("kin_reactions", "The list of solid kinetic reactions");
-  
+
   return params;
 }
 
@@ -38,7 +38,7 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
 {
   std::vector<NonlinearVariableName> vars = getParam<std::vector<NonlinearVariableName> >("primary_species");
   std::vector<std::string> reactions = getParam<std::vector<std::string> >("kin_reactions");
-  
+
   std::cout<< "Solid kinetic reaction list:" << "\n";
   for (unsigned int i=0; i < reactions.size(); i++)
   {
@@ -51,17 +51,17 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
     std::vector<bool> primary_participation(reactions.size(), false);
     std::vector<std::string> solid_kin_species(reactions.size());
     std::vector<Real> weight;
-    
+
     for (unsigned int j=0; j < reactions.size(); j++)
     {
       std::vector<std::string> tokens;
 
       // Parsing each reaction
       MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
-      
+
       std::vector<Real> stos(tokens.size()-1);
       std::vector<std::string> rxn_vars(tokens.size()-1);
-      
+
       for (unsigned int k=0; k < tokens.size(); k++)
       {
         std::cout << tokens[k] << "\t";
@@ -86,7 +86,7 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
       }
       // Done parsing, recorded stochiometric and variables into separate arrays
       std::cout << "whether primary present (0 is not): " << primary_participation[j] << "\n";
-      
+
 
       if(primary_participation[j])
       {
@@ -103,14 +103,14 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
 
         std::vector<VariableName> coupled_var(1);
         coupled_var[0] = solid_kin_species[j];
-        
+
         // Building kernels for solid kinetic species
         InputParameters params_kin = _factory.getValidParams("CoupledBEKinetic");
         params_kin.set<NonlinearVariableName>("variable") = vars[i];
         params_kin.set<std::vector<Real> >("weight") = weight;
         params_kin.set<std::vector<VariableName> >("v") = coupled_var;
         _problem->addKernel("CoupledBEKinetic", vars[i]+"_"+solid_kin_species[j]+"_kin", params_kin);
-        
+
         std::cout << vars[i]+"_"+solid_kin_species[j]+"_kin" << "\n";
         params_kin.print();
       }

@@ -33,15 +33,15 @@ Tricrystal2CircleGrainsICAction::Tricrystal2CircleGrainsICAction(const std::stri
 {}
 
 void
-Tricrystal2CircleGrainsICAction::act() 
-{ 
+Tricrystal2CircleGrainsICAction::act()
+{
 #ifdef DEBUG
   std::cerr << "Inside the Tricrystal2CircleGrainsICAction Object\n";
 #endif
 
 // Loop through the number of order parameters
-  
-  
+
+
   for (unsigned int crys = 0; crys<_crys_num; crys++)
   {
     //Create variable names
@@ -55,8 +55,8 @@ Tricrystal2CircleGrainsICAction::act()
     poly_params.set<VariableName>("variable") = var_name;
     poly_params.set<unsigned int>("crys_num") = _crys_num;
     poly_params.set<unsigned int>("crys_index") = crys;
-    
-    
+
+
     //Add initial condition
     _problem->addInitialCondition("Tricrystal2CircleGrainsIC", "InitialCondition", poly_params);
   }

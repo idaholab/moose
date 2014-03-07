@@ -32,16 +32,16 @@ public:
                          InputParameters parameters);
 
   virtual void initialSetup();
-  
+
 protected:
   std::vector<Real> _x_positions;
   std::vector<Real> _y_positions;
   std::vector<Real> _z_positions;
   std::vector<Real> _radii;
-  
-  
+
+
 // private:
-  
+
 };
 
 #endif //SPECIFIEDSMOOTHCIRCLEIC_H

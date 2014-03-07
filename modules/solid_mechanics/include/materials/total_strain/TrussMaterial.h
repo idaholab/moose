@@ -39,7 +39,7 @@ protected:
   VariableValue & _temp;
   Real _t_ref;
   Real _alpha;
-  
+
   unsigned int _dim;
 };
 
