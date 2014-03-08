@@ -66,6 +66,9 @@ class ExecuteWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.cwd_button, QtCore.SIGNAL("clicked()"), self.clickedCwd)
     self.cwd_layout.addWidget(self.cwd_text)
     self.cwd_layout.addWidget(self.cwd_button)
+
+    self.input_file_widget.directory_changed.connect(self.directoryChanged)
+
     #The advancement bar
     self.pb_layout.addWidget(QtGui.QLabel("Progress:"), alignment=QtCore.Qt.AlignLeft)
     self.pb = QtGui.QProgressBar(self)
@@ -351,12 +354,12 @@ class ExecuteWidget(QtGui.QWidget):
     self.isItRunning = False
 
   def clickedKill(self):
-    msgBox = QMessageBox();
+    msgBox = QtGui.QMessageBox();
     msgBox.setText("Terminate current run?");
-    msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No);
-    msgBox.setDefaultButton(QMessageBox.No);
+    msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No);
+    msgBox.setDefaultButton(QtGui.QMessageBox.No);
     ret = msgBox.exec_();
-    if ret == QMessageBox.Yes:
+    if ret == QtGui.QMessageBox.Yes:
       self.killIt()
 
   def killIt(self):
@@ -364,12 +367,12 @@ class ExecuteWidget(QtGui.QWidget):
       self.processFinished()
 
   def clickedClear(self):
-    msgBox = QMessageBox();
+    msgBox = QtGui.QMessageBox();
     msgBox.setText("Clear log?");
-    msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No);
-    msgBox.setDefaultButton(QMessageBox.No);
+    msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No);
+    msgBox.setDefaultButton(QtGui.QMessageBox.No);
     ret = msgBox.exec_();
-    if ret == QMessageBox.Yes:
+    if ret == QtGui.QMessageBox.Yes:
       self.execution_text.setText('')
       if not self.isItRunning:
         self.clear_button.setDisabled(True)
@@ -377,6 +380,10 @@ class ExecuteWidget(QtGui.QWidget):
 
   def clickedSaveLog(self):
     file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Log", "~/", "Log Files (*.log)")
+
+    if not isinstance(file_name, basestring): # This happens when using pyside
+        file_name = file_name[0]
+
     if file_name != '':
       tmp_file = open(file_name,'w')
       tmp_file.write(self.execution_text.toPlainText())
@@ -385,16 +392,11 @@ class ExecuteWidget(QtGui.QWidget):
   def clickedCwd(self):
     dir_name = QtGui.QFileDialog.getExistingDirectory(self, "Choose CWD")
     if dir_name != '':
-      self.cwdText.setText(dir_name)
+      self.cwd_text.setText(dir_name)
       os.chdir(dir_name)
 
-  def click_open(self):
-    self.cwdText.setText(os.getcwd())
-
-  def click_save(self):
-    self.cwdText.setText(os.getcwd())
-
-
+  def directoryChanged(self):
+    self.cwd_text.setText(os.getcwd())
 
   ''' Return the name to use for this tab '''
   def name(self):

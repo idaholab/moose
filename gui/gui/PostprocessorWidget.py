@@ -31,6 +31,8 @@ class PostprocessorWidget(QtGui.QWidget):
     self.current_file = None
     self.getFileName()
 
+    self.input_file_widget.input_file_opened.connect(self.inputFileOpened)
+
     #Create the post processor list view
     self.post_processor_list_view = QtGui.QListView()
     self.post_processor_list_model = QtGui.QStandardItemModel()
@@ -134,7 +136,7 @@ class PostprocessorWidget(QtGui.QWidget):
         for index in range(len(self.names)-1):
           item = QtGui.QStandardItem(self.names[index+1])
           item.setFlags(item.flags()|QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-          item.setData(QtCore.QVariant(QtCore.Qt.Checked), QtCore.Qt.CheckStateRole) #add the QtCore.Qt.Checked data (in a q form) to _item and set the QtCore.Qt.CheckStateRole as visualizzation rule
+          item.setData(QtCore.Qt.Checked, QtCore.Qt.CheckStateRole) #add the QtCore.Qt.Checked data (in a q form) to _item and set the QtCore.Qt.CheckStateRole as visualizzation rule
           item.setEditable(False)
           item.setCheckState(QtCore.Qt.Unchecked)
           self.post_processor_list_model.appendRow(item)
@@ -238,6 +240,10 @@ class PostprocessorWidget(QtGui.QWidget):
     open a new csv file, clean and rebuild Postprocessor list
     '''
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open CSV File", "~/", "CSV Files (*.csv)")
+
+    if not isinstance(file_name, basestring): # This happens when using pyside
+      file_name = file_name[0]
+
     if file_name:
       self.flushPlots()
       self.rePlot()
@@ -255,6 +261,16 @@ class PostprocessorWidget(QtGui.QWidget):
     self.flushPlots()
     self.getFileName()
     self.rePlot()
+
+  def inputFileOpened(self):
+    '''
+    Clear everything
+    '''
+    self.flushPlots()
+    self.plot_objects  = {} #kept updated by addPlot
+    self.plot_datas    = {} #kept updated by addPlot
+    self.plot_handlers = {} #kept updated by addPlot
+    self.post_processor_list_model.clear()
 
   def timerSetUp(self):
     # start and connect the time controls for updating the plots

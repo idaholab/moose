@@ -57,6 +57,9 @@ class FileOpenWidget(QtGui.QPushButton):
   def clicked(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Find Mesh File", os.getcwd(), "File (*)")
 
+    if not isinstance(file_name, basestring): # This happens when using pyside
+        file_name = file_name[0]
+
     file_name = os.path.relpath(str(file_name))
 
     if file_name:
@@ -77,6 +80,9 @@ class FileNoExtensionOpenWidget(QtGui.QPushButton):
 
   def clicked(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Find Mesh File", os.getcwd(), "File (*)")
+
+    if not isinstance(file_name, basestring): # This happens when using pyside
+        file_name = file_name[0]
 
     file_name = os.path.relpath(str(file_name))
 
