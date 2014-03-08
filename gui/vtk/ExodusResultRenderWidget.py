@@ -855,6 +855,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _clickedOpen(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Result", "~/", "Input Files (*.e)")
 
+    if not isinstance(file_name, basestring): # This happens when using pyside
+        file_name = file_name[0]
+
     if file_name:
       self._openFile(file_name)
 
@@ -869,6 +872,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
   def _saveView(self):
     file_name = QtGui.QFileDialog.getSaveFileName(self, "Image File Name", "~/", "Image Files (*.png)")
+
+    if not isinstance(file_name, basestring): # This happens when using pyside
+        file_name = file_name[0]
 
     if file_name != '':
       w2i = vtk.vtkWindowToImageFilter()

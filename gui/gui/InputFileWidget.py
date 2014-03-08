@@ -26,6 +26,9 @@ except AttributeError:
   _fromUtf8 = lambda s: s
 
 class InputFileWidget(QtGui.QWidget):
+  directory_changed = QtCore.Signal()
+  input_file_opened = QtCore.Signal()
+
   def __init__(self, app_path, options, peacock_ui, qt_app, application, win_parent=None):
     QtGui.QWidget.__init__(self, win_parent)
     self.app_path = app_path
@@ -181,6 +184,7 @@ class InputFileWidget(QtGui.QWidget):
       progress.setValue(counter)
 
       os.chdir(os.path.dirname(str(file_name)))
+      self.directory_changed.emit()
 
       counter+=1
       progress.setValue(counter)
@@ -199,9 +203,15 @@ class InputFileWidget(QtGui.QWidget):
 
       self.tree_widget.loadData(counter, progress, main_sections)
 
+      self.input_file_opened.emit()
+
 
   def click_open(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Input File", "~/", "Input Files (*.i)")
+
+    if not isinstance(file_name, basestring): # This happens when using pyside
+        file_name = file_name[0]
+
     if file_name:
       self.tree_widget.clear()
       self.tree_widget.addHardPathsToTree()
@@ -221,11 +231,15 @@ class InputFileWidget(QtGui.QWidget):
   def click_save(self):
     file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Input File", "~/", "Input Files (*.i)")
 
+    if not isinstance(file_name, basestring): # This happens when using pyside
+        file_name = file_name[0]
+
     if file_name != '':
       file = open(file_name,'w')
       output_string = self.input_file_textbox.buildInputString()
       file.write(output_string)
       os.chdir(os.path.dirname(str(file_name)))
+      self.directory_changed.emit()
 
   def _edit_main_comment(self):
     ce = CommentEditor(self.tree_widget)
