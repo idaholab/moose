@@ -75,12 +75,10 @@ endif
 # Target-specific Variable Values (See GNU-make manual)
 $(app_LIB): curr_objs := $(app_objects)
 $(app_LIB): curr_dir := $(APPLICATION_DIR)
-$(app_LIB): curr_other_libs := $(app_LIBS_other)
-#$(app_LIB): $(app_objects) $(app_plugin_deps) $(app_LIBS_other)
 $(app_LIB): $(app_objects) $(app_LIBS_other) $(app_plugin_deps)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(curr_other_libs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
 $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object)
