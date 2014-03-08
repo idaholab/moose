@@ -114,9 +114,14 @@ class MPLPlotter(QtGui.QWidget):
             self.popMenu.exec_(self.canvas.mapToGlobal(point))
 
     def savePlot(self):
-        path = unicode(QtGui.QFileDialog.getSaveFileName(self, 'Save file', self.plotTitle,"Images (*.pdf)" ))
-        if path:
-            self.canvas.print_figure(path, dpi = 100)
+        file_name = QtGui.QFileDialog.getSaveFileName(self, 'Save file', self.plotTitle, "Images (*.pdf)")
+
+        if not isinstance(file_name, basestring): # This happens when using pyside
+            file_name = file_name[0]
+
+        if file_name != '':
+            self.canvas.print_figure(unicode(file_name), dpi = 100)
+
     def closePlot(self):
         self.close()
 

@@ -20,7 +20,7 @@ C
      1     DDSDDT(6),DRPLDE(6),STRAN(6),DSTRAN(NTENS),
      2     PREDEF(1),DPRED(1),PROPS(NPROPS),COORDS(3),DROT(3,3),
      3     DFGRD0(3,3), DFGRD1(3,3), TIME(2)
-      
+
       PARAMETER(ZERO=0.D0, ONE=1.D0, TWO=2.D0, THREE=3.D0)
 
 C ----------------------------------------------------------------

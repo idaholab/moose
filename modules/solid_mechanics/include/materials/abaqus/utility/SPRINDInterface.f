@@ -22,7 +22,7 @@ C-----------
 C  INPUT :
 C-----------
 C  S     	: STRESS OR STRAIN TENSOR
-C  LSTR 	: FLAG DETERMINING STRESS OR STRAIN CALCULATION 
+C  LSTR 	: FLAG DETERMINING STRESS OR STRAIN CALCULATION
 C  NDI  	: NUMBER OF DIRECT STRESS/STRAIN COMPONENTS
 C  NSHR         : NUMBER OF SHEAR COMPONENTS
 C-----------
@@ -41,7 +41,7 @@ C     Calculate stress or strain invariants based on LSTR value
      1        -(S(4)**2)-(S(5)**2)-(S(6)**2)
          I3 = (S(1)*S(2)*S(3))+(2*S(4)*S(5)*S(6))-(S(1)*S(5)**2)
      1        -(S(2)*S(6)**2)-(S(3)*S(4)**2)
-         
+
          R = (THIRD*I1**2)-I2
          T = SQRT(TWENTYSEVENTH*R**3)
          Q = (THIRD*I1*I2)-I3-(TWOTWENTYSEVENTH*I1**3)
@@ -51,7 +51,7 @@ C     Calculate stress or strain invariants based on LSTR value
          END IF
          ALP = ACOS(ARG)
          SCALC = SQRT(THIRD*R)
-         
+
          PRINC1 = (2*SCALC*COS(ALP/THREE))+(THIRD*I1)
          PRINC2 = (2*SCALC*COS((ALP/THREE)+TWOFORTYDEG))+(THIRD*I1)
          PRINC3 = (2*SCALC*COS((ALP/THREE)+ONETWENTYDEG))+(THIRD*I1)
@@ -83,7 +83,7 @@ C
       PS(1) = PRINC1
       PS(2) = PRINC2
       PS(3) = PRINC3
-      
+
 C
 C     Calculate cofactors and factor
 C
@@ -92,7 +92,7 @@ C
          B(K)=-(S(4)*(S(3)-S(K)))-(S(5)*S(6))
          C(K)=(S(4)*S(5))-((S(2)-S(K))*S(6))
       END DO
-      
+
 C      PRINT *, A
 C      PRINT *, B
 C      PRINT *, C

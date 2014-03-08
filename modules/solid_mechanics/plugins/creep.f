@@ -4,18 +4,18 @@ C
      2     COORDS,NSTATV,NOEL,NPT,LAYER,KSPT,KSTEP,KINC)
 C
 C      INCLUDE 'ABA_PARAM.INC'
-C     
+C
       CHARACTER*80 CMNAME
-C     
+C
       DIMENSION DECRA(5),DESWA(5),STATEV(*),PREDEF(*),DPRED(*),
      1     TIME(2),COORDS(*),EC(2),ESW(2)
-C     
+C
 C     DEFINE CONSTANTS
-C     
+C
       A=2.5E-27
       SIG0=10
       AN=-0.2
-C     
+C
       T1=EXP(QTILD/SIG0)
       T2=EXP(-QTILD/SIG0)
       IF (T1-T2.EQ.0.0) THEN
@@ -32,6 +32,6 @@ C
      1           SIG0*.5*(T1+T2)
          END IF
       END IF
-C     
+C
       RETURN
       END
