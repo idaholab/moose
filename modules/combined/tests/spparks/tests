@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'spparks.i'
+    exodiff = 'spparks_out.e'
+    platform = DARWIN
+    method = 'OPT OPROF'
+    skip = 'Sparks not in modules'
+  [../]
+[]

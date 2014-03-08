@@ -1,0 +1,47 @@
+#include "SphericalR.h"
+
+#include "Problem.h"
+#include "VolumetricModel.h"
+
+namespace Elk
+{
+namespace SolidMechanics
+{
+
+SphericalR::SphericalR(const std::string & name,
+                       InputParameters parameters)
+  :Element(name, parameters),
+   _disp_r(coupledValue("disp_r")),
+   _large_strain(getParam<bool>("large_strain")),
+   _grad_disp_r(coupledGradient("disp_r"))
+{
+}
+
+SphericalR::~SphericalR()
+{
+}
+
+void
+SphericalR::computeStrain( const unsigned qp,
+                           const SymmTensor & total_strain_old,
+                           SymmTensor & total_strain_new,
+                           SymmTensor & strain_increment )
+{
+  strain_increment.xx() = _grad_disp_r[qp](0);
+  strain_increment.yy() = (_q_point[qp](0) != 0.0 ? _disp_r[qp]/_q_point[qp](0) : 0.0);
+  strain_increment.zz() = strain_increment.yy();
+  if (_large_strain)
+  {
+    strain_increment.xx() += 0.5*(_grad_disp_r[qp](0)*_grad_disp_r[qp](0));
+    strain_increment.yy() += 0.5*(strain_increment.yy()*strain_increment.yy());
+    strain_increment.zz() += 0.5*(strain_increment.zz()*strain_increment.zz());
+  }
+
+  total_strain_new = strain_increment;
+
+  strain_increment -= total_strain_old;
+}
+
+
+}
+}

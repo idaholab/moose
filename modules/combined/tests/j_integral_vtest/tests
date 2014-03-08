@@ -1,0 +1,14 @@
+[Tests]
+ [./j_ellip]
+   type = 'Exodiff'
+   input = 'j_int_surfbreak_ellip_crack_sym_mm.i'
+   exodiff = 'j_int_surfbreak_ellip_crack_sym_mm_out.e'
+   skip = "Exodiffs 2/20/2014"
+ [../]
+ [./J_ellip_cm]
+   type = 'Exodiff'
+   input = 'j_int_surfbreak_ellip_crack_sym_mm_cm.i'
+   exodiff = 'j_int_surfbreak_ellip_crack_sym_mm_cm_out.e'
+   skip = "Exodiffs 2/20/2014"
+ [../]
+[]

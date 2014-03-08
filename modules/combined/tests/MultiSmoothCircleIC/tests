@@ -1,0 +1,25 @@
+[Tests]
+  [./multi_test]
+    type = 'Exodiff'
+    input = 'multismoothcircleIC_test.i'
+    exodiff = 'multismoothcircleIC_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./lattice_test]
+    type = 'Exodiff'
+    input = 'latticesmoothcircleIC_test.i'
+    exodiff = 'latticesmoothcircleIC_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./specified_test]
+    type = 'Exodiff'
+    input = 'specifiedsmoothcircleIC_test.i'
+    exodiff = 'specifiedsmoothcircleIC_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+[]

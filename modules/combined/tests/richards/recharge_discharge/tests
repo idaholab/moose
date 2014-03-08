@@ -1,0 +1,27 @@
+[Tests]
+  [./test_rd01]
+    type = 'Exodiff'
+    input = 'rd01.i'
+    exodiff = 'rd01.e'
+    rel_err = 1E-6
+    heavy = true
+    use_old_floor = True
+    max_time = 1000
+  [../]
+  [./test_rd02]
+    type = 'Exodiff'
+    input = 'rd02.i'
+    exodiff = 'rd02.e'
+    rel_err = 1E-6
+    heavy = true
+    use_old_floor = True
+    max_time = 1000
+  [../]
+  [./test_rd03]
+    type = 'Exodiff'
+    input = 'rd03.i'
+    exodiff = 'rd03.e'
+    rel_err = 1E-6
+    use_old_floor = True
+  [../]
+[]

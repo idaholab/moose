@@ -1,0 +1,26 @@
+[Tests]
+  [./bl01]
+    type = 'Exodiff'
+    input = 'bl01.i'
+    exodiff = 'bl01.e'
+    rel_err = 1E-5
+    use_old_floor = True
+  [../]
+
+  [./bl20]
+    type = 'Exodiff'
+    input = 'bl20.i'
+    exodiff = 'bl20.e'
+    rel_err = 1E-5
+    use_old_floor = True
+  [../]
+  [./bl22]
+    type = 'Exodiff'
+    input = 'bl22.i'
+    exodiff = 'bl22.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+  [../]
+[]

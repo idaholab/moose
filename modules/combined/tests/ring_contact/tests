@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'ring_contact.i'
+    exodiff = 'out.e'
+    abs_zero = 5e-07
+    use_old_floor = True
+    max_parallel = 1
+  [../]
+[]

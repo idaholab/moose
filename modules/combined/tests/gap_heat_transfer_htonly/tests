@@ -1,0 +1,32 @@
+[Tests]
+
+  [./3D]
+    type = Exodiff
+    input = 'gap_heat_transfer_htonly_test.i'
+    exodiff = 'gap_heat_transfer_htonly_test_out.e'
+    abs_zero = 1e-6
+  [../]
+
+  [./3D_Iters]
+    type = Exodiff
+    input = 'gap_heat_transfer_htonly_it_plot_test.i'
+    exodiff = 'out_it_plot.e'
+    custom_cmp = 'gap_heat_transfer_htonly_it_plot_test.cmp'
+  [../]
+
+  [./RZ]
+    type = Exodiff
+    input = 'gap_heat_transfer_htonly_rz_test.i'
+    exodiff = 'out_rz.e'
+    abs_zero = 1e-9
+    rel_err = 5e-3
+  [../]
+
+  [./RSpherical]
+    type = Exodiff
+    input = 'gap_heat_transfer_htonly_rspherical.i'
+    exodiff = 'gap_heat_transfer_htonly_rspherical_out.e'
+    custom_cmp = 'gap_heat_transfer_htonly_rspherical.exodiff'
+  [../]
+
+[]

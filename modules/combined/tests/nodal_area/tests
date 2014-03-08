@@ -1,0 +1,67 @@
+[Tests]
+  [./3D]
+    type = 'Exodiff'
+    input = 'nodal_area_3D.i'
+    exodiff = 'nodal_area_3D_out.e'
+  [../]
+  [./3D2Proc]
+    type = 'Exodiff'
+    input = 'nodal_area_3D.i'
+    exodiff = 'nodal_area_3D_out.e'
+    prereq = 3D
+    min_parallel = 2
+  [../]
+  [./2D]
+    type = 'Exodiff'
+    input = 'nodal_area_2D.i'
+    exodiff = 'nodal_area_2D_out.e'
+  [../]
+  [./2D2Proc]
+    type = 'Exodiff'
+    input = 'nodal_area_2D.i'
+    exodiff = 'nodal_area_2D_out.e'
+    prereq = 2D
+    min_parallel = 2
+  [../]
+  [./Hex20]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex20.i'
+    exodiff = 'nodal_area_Hex20_out.e'
+    custom_cmp = 'nodal_area_Hex20.exodiff'
+  [../]
+  [./Hex20_2]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex20_2.i'
+    exodiff = 'nodal_area_Hex20_out.e'
+    custom_cmp = 'nodal_area_Hex20.exodiff'
+    prereq = Hex20
+  [../]
+  [./Hex20_3]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex20_3.i'
+    exodiff = 'nodal_area_Hex20_3_out.e'
+    custom_cmp = 'nodal_area_Hex20_3.exodiff'
+  [../]
+  [./Hex202Proc]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex20.i'
+    exodiff = 'nodal_area_Hex20_out.e'
+    custom_cmp = 'nodal_area_Hex20.exodiff'
+    prereq = Hex20_2
+    min_parallel = 2
+  [../]
+  [./Hex27]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex27.i'
+    exodiff = 'nodal_area_Hex27_out.e'
+    custom_cmp = 'nodal_area_Hex27.exodiff'
+  [../]
+  [./Hex272Proc]
+    type = 'Exodiff'
+    input = 'nodal_area_Hex27.i'
+    exodiff = 'nodal_area_Hex27_out.e'
+    custom_cmp = 'nodal_area_Hex27.exodiff'
+    prereq = Hex27
+    min_parallel = 2
+  [../]
+[]

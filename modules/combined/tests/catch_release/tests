@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'catch_release.i'
+    exodiff = 'catch_release_out.e'
+    custom_cmp = 'catch_release.exodiff'
+    petsc_version = '>=3.1'
+  [../]
+[]

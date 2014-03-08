@@ -1,0 +1,52 @@
+[Tests]
+  [./test_rspherical]
+    type = 'CSVDiff'
+    input = 'internal_volume_rspherical.i'
+    csvdiff = 'internal_volume_rspherical_out.csv'
+  [../]
+
+  [./test_rz]
+    type = 'CSVDiff'
+    input = 'internal_volume_rz.i'
+    csvdiff = 'out_rz.csv'
+  [../]
+
+  [./test_hex20]
+    type = 'CSVDiff'
+    input = 'internal_volume_hex20.i'
+    csvdiff = 'out.csv'
+    prereq = 'test'
+    max_parallel = 1
+  [../]
+
+  [./test_quad8_rz]
+    type = 'CSVDiff'
+    input = 'internal_volume_rz_quad8.i'
+    csvdiff = 'out_rz.csv'
+    prereq = 'test_rz'
+  [../]
+
+  [./test_rz_cone]
+    type = 'CSVDiff'
+    input = 'internal_volume_rz_cone.i'
+    csvdiff = 'internal_volume_rz_cone_out.csv'
+  [../]
+
+  [./test]
+    type = 'CSVDiff'
+    input = 'internal_volume.i'
+    csvdiff = 'out.csv'
+  [../]
+
+  [./test_rz_displaced]
+    type = 'CSVDiff'
+    input = 'internal_volume_rz_displaced.i'
+    csvdiff = 'internal_volume_rz_displaced_out.csv'
+  [../]
+
+  [./test_rz_displaced_quad8]
+    type = 'CSVDiff'
+    input = 'internal_volume_rz_displaced_quad8.i'
+    csvdiff = 'internal_volume_rz_displaced_quad8_out.csv'
+  [../]
+[]

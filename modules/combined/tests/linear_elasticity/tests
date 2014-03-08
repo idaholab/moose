@@ -1,0 +1,31 @@
+[Tests]
+  [./linear_elastic_material_test]
+    type = 'Exodiff'
+    input = 'LinearElasticMaterial_test.i'
+    exodiff = 'LinearElasticMaterial.e'
+  [../]
+
+  [./linear_general_anisotropic_elasticity_test]
+    type = 'Exodiff'
+    input = 'Linear_Material_test.i'
+    exodiff = 'Linear_General_Anisotropic_Material_out.e'
+  [../]
+
+  [./appl_str_test]
+    type = 'Exodiff'
+    input = 'applied_strain_test.i'
+    exodiff = 'applied_strain.e'
+  [../]
+
+  [./tensor_test]
+    type = 'Exodiff'
+    input = 'Tensor_test.i'
+    exodiff = 'Tensor_test.e'
+  [../]
+
+  [./th_exp_test]
+    type = 'Exodiff'
+    input = 'thermal_expansion_test.i'
+    exodiff = 'thermal_expansion.e'
+  [../]
+[]

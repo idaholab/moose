@@ -1,0 +1,26 @@
+[Tests]
+  [./test_th01]
+    type = 'CSVDiff'
+    input = 'th01.i'
+    heavy = true
+    csvdiff = 'th01.csv'
+    rel_err = 1.0E-5
+    max_time = 1000
+  [../]
+
+  [./test_th02]
+    type = 'CSVDiff'
+    input = 'th02.i'
+    csvdiff = 'th02.csv'
+    rel_err = 1.0E-5
+  [../]
+
+  [./test_th22]
+    type = 'CSVDiff'
+    input = 'th22.i'
+    csvdiff = 'th22.csv'
+    rel_err = 1.0E-5
+    heavy = true
+    max_time = 1000
+  [../]
+[]

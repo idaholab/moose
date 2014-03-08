@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'parallel_element_pps_test.i'
+    exodiff = 'out.e'
+    min_parallel = '2'
+    platform = 'DARWIN'
+  [../]
+[]

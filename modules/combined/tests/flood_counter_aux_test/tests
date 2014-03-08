@@ -1,0 +1,19 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'flood_aux.i'
+    exodiff = 'out.e'
+  [../]
+
+  [./simple_test]
+    type = 'Exodiff'
+    input = 'simple_test.i'
+    exodiff = 'simple_test_out.e'
+  [../]
+
+  [./two_var_test]
+    type = 'Exodiff'
+    input = 'nodal_flood_periodic_2var.i'
+    exodiff = 'out_2var.e'
+  [../]
+[]

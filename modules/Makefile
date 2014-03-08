@@ -16,12 +16,12 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## ELK MODULES ################################
-#ALL_MODULES := yes
+ALL_MODULES := yes
 include modules.mk
 ###############################################################################
 
 # Build the Module executable
-APPLICATION_DIR    := $(MOOSE_DIR)/modules
+APPLICATION_DIR    := $(MOOSE_DIR)/modules/combined
 APPLICATION_NAME   := modules
 BUILD_EXEC         := yes
 # Note: There are no applications that depend on moose_test so the test_up and up

@@ -1,0 +1,19 @@
+[Tests]
+
+  [./3D]
+    type = Exodiff
+    input = 'pressure_test.i'
+    exodiff = 'pressure_test_out.e'
+  [../]
+  [./RZ]
+    type = Exodiff
+    input = 'pressure_rz_test.i'
+    exodiff = 'pressure_rz_test_out.e'
+  [../]
+  [./RSpherical]
+    type = Exodiff
+    input = 'pressure_rspherical.i'
+    exodiff = 'pressure_rspherical_out.e'
+  [../]
+
+[]

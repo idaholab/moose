@@ -1,0 +1,63 @@
+#include "MaterialVectorAux.h"
+
+template<>
+InputParameters validParams<MaterialVectorAux>()
+{
+  MooseEnum quantities("length=1");
+
+  InputParameters params = validParams<AuxKernel>();
+  params.addRequiredParam<std::string>("vector", "The material tensor name.");
+  params.addParam<int>("index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
+  params.addParam<MooseEnum>("quantity", quantities, "A scalar quantity to compute: (only option is Length).");
+  return params;
+}
+
+MaterialVectorAux::MaterialVectorAux( const std::string & name,
+                                      InputParameters parameters )
+  :AuxKernel( name, parameters ),
+   _vector( getMaterialProperty<RealVectorValue>( getParam<std::string>("vector") ) ),
+   _index( getParam<int>("index") ),
+   _quantity_moose_enum( getParam<MooseEnum>("quantity") )
+{
+  if (_quantity_moose_enum.isValid())
+  {
+    if ( _index > 0 )
+      mooseError("Cannot define an index and a quantity in " + _name);
+    else
+      _quantity = MVA_ENUM(int(_quantity_moose_enum));
+  }
+  else
+  {
+    if ( _index < 0 )
+      mooseError("Neither an index nor a quantity listed for " + _name);
+    else
+      _quantity = MVA_COMPONENT;  // default
+  }
+
+  if (_index > -1 && _index > 2)
+  {
+    mooseError("MaterialVectorAux requires the index to be >= 0 and <= 2 OR < 0 (off).");
+  }
+}
+
+Real
+MaterialVectorAux::computeValue()
+{
+  Real value(0);
+  const RealVectorValue & vector( _vector[_qp] );
+  if (_quantity == MVA_COMPONENT)
+  {
+    value = vector(_index);
+  }
+  else if ( _quantity == MVA_LENGTH )
+  {
+    value = vector.size();
+  }
+  else
+  {
+    mooseError("Internal logic error from " + name());
+  }
+  return value;
+}
+
+

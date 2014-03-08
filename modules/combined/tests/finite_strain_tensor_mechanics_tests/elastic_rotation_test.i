@@ -1,0 +1,266 @@
+#
+# Rotation Test
+#
+# This test is designed to compute a uniaxial stress and then follow that
+# stress as the mesh is rotated 90 degrees.
+#
+# The mesh is composed of one block with a single element.  The nodal
+# displacements in the x and y directions are prescribed.  Poisson's
+# ratio is zero.
+#
+
+[Mesh]
+  # Comment
+  # Mesh
+  file = rotation_test.e
+  displacements = 'disp_x disp_y disp_z'
+[]
+
+[Functions]
+  # Functions
+  [./x_200]
+    type = ParsedFunction
+    vars = 'delta t0'
+    vals = '-1e-6 1.0'
+    value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2*(t-t0)) - 1.0)'
+  [../]
+  [./y_200]
+    type = ParsedFunction
+    vars = 'delta t0'
+    vals = '-1e-6 1.0'
+    value = 'if(t<=1.0, 0.0, (1.0+delta)*sin(pi/2*(t-t0)))'
+  [../]
+  [./x_300]
+    type = ParsedFunction
+    vars = 'delta t0'
+    vals = '-1e-6 1.0'
+    value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2.0*(t-t0)) - sin(pi/2.0*(t-t0)) - 1.0)'
+  [../]
+  [./y_300]
+    type = ParsedFunction
+    vars = 'delta t0'
+    vals = '-1e-6 1.0'
+    value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) + (1+delta)*sin(pi/2.0*(t-t0)) - 1.0)'
+  [../]
+  [./x_400]
+    type = ParsedFunction
+    vars = 'delta t0'
+    vals = '-1e-6 1.0'
+    value = 'if(t<=1.0, 0.0, -sin(pi/2.0*(t-t0)))'
+  [../]
+  [./y_400]
+    type = ParsedFunction
+    vars = 'delta t0'
+    vals = '-1e-6 1.0'
+    value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) - 1.0)'
+  [../]
+[]
+
+[Variables]
+  # Variables
+  [./disp_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[AuxVariables]
+  # AuxVariables
+active = ''
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_xy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_zx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[TensorMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+  [../]
+[]
+
+[AuxKernels]
+  # AuxKernels
+active = ''
+  [./stress_xx]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xx
+    index_i = 1
+    index_j = 1
+  [../]
+  [./stress_yy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_yy
+    index_i = 2
+    index_j = 2
+  [../]
+  [./stress_xy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xy
+    index_i = 1
+    index_j = 2
+  [../]
+  [./stress_yz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_yz
+    index_i = 2
+    index_j = 3
+  [../]
+  [./stress_zx]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_zx
+    index_i = 3
+    index_j = 1
+  [../]
+[]
+
+[BCs]
+  # BCs
+  [./no_x]
+    type = PresetBC
+    variable = disp_x
+    boundary = 100
+    value = 0.0
+  [../]
+  [./no_y]
+    type = PresetBC
+    variable = disp_y
+    boundary = 100
+    value = 0.0
+  [../]
+  [./x_200]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = 200
+    function = x_200
+  [../]
+  [./y_200]
+    type = FunctionPresetBC
+    variable = disp_y
+    boundary = 200
+    function = y_200
+  [../]
+  [./x_300]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = 300
+    function = x_300
+  [../]
+  [./y_300]
+    type = FunctionPresetBC
+    variable = disp_y
+    boundary = 300
+    function = y_300
+  [../]
+  [./x_400]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = 400
+    function = x_400
+  [../]
+  [./y_400]
+    type = FunctionPresetBC
+    variable = disp_y
+    boundary = 400
+    function = y_400
+  [../]
+  [./no_z]
+    type = PresetBC
+    variable = disp_z
+    boundary = '100 200 300 400'
+    value = 0.0
+  [../]
+[]
+
+[Materials]
+  # Materials
+  [./test]
+    # reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
+    type = FiniteStrainElasticMaterial
+    block = 1
+    all_21 = false
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    C_ijkl = '10.0e6  0.0   0.0 10.0e6  0.0  10.0e6 5e6 5e6 5e6'
+  [../]
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  # Executioner
+  type = Transient
+
+  solve_type = 'NEWTON'
+
+
+  petsc_options_iname = '-pc_type '
+  petsc_options_value = 'lu'
+  nl_rel_tol = 1e-30
+  nl_abs_tol = 1e-20
+  l_max_its = 20
+  start_time = 0.0
+  dt = 0.01
+  end_time = 2.0
+[]
+
+[Postprocessors]
+active = ''
+  [./stress_xx]
+    type = ElementAverageValue
+    variable = stress_xx
+  [../]
+  [./stress_yy]
+    type = ElementAverageValue
+    variable = stress_yy
+  [../]
+[]
+
+[Output]
+  linear_residuals = true
+  # Output
+  file_base = elastic_rotation
+  interval = 1
+  output_initial = true
+  elemental_as_nodal = true
+  exodus = true
+  perf_log = true
+[]
+

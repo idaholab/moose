@@ -1,0 +1,20 @@
+COORDINATES absolute 1.e-6
+
+TIME STEPS relative 1.e-6 floor 0.0
+
+GLOBAL VARIABLES relative 1.e-6 floor 1.e-10
+	nonlinear_its relative 0.5 #Timestep 1: 5 iters, timestep 2: 1  This allows large variation in the 1st step, but not in the 2nd
+	ref_resid_t    # min:               0 @ t1	max:    0.0030935922 @ t3
+	ref_resid_x    # min:               0 @ t1	max:    0.0061990214 @ t2
+	ref_resid_y    # min:               0 @ t1	max:     0.032165928 @ t3
+	ref_resid_z    # min:               0 @ t1	max:    0.0061990214 @ t3
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-10
+	disp_x   # min:               0 @ t1,n1	max:     0.016256892 @ t2,n113
+	disp_y   # min:               0 @ t1,n1	max:             0.1 @ t2,n41
+	disp_z   # min:               0 @ t1,n1	max:     0.016256892 @ t2,n62
+	temp     # min:               0 @ t1,n1	max:              20 @ t2,n41
+	saved_x  # min:               0 @ t1,n1	max:    0.0015523626 @ t2,n2
+	saved_y  # min:               0 @ t1,n1	max:     0.006039676 @ t2,n96
+	saved_z  # min:               0 @ t1,n1	max:    0.0015523626 @ t2,n76
+	saved_t  # min:               0 @ t1,n1	max:        0.000625 @ t2,n82

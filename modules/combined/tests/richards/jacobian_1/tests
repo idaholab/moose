@@ -1,0 +1,156 @@
+[Tests]
+  [./jn01]
+    type = 'PetscJacobianTester'
+    input = 'jn01.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn02]
+    type = 'PetscJacobianTester'
+    input = 'jn02.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn03]
+    type = 'PetscJacobianTester'
+    input = 'jn03.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn04]
+    type = 'PetscJacobianTester'
+    input = 'jn04.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn05]
+    type = 'PetscJacobianTester'
+    input = 'jn05.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn06]
+    type = 'PetscJacobianTester'
+    input = 'jn06.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn07]
+    type = 'PetscJacobianTester'
+    input = 'jn07.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn08]
+    type = 'PetscJacobianTester'
+    input = 'jn08.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn09]
+    type = 'PetscJacobianTester'
+    input = 'jn09.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn10]
+    type = 'PetscJacobianTester'
+    input = 'jn10.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn11]
+    type = 'PetscJacobianTester'
+    input = 'jn11.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn12]
+    type = 'PetscJacobianTester'
+    input = 'jn12.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn13]
+    type = 'PetscJacobianTester'
+    input = 'jn13.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn14]
+    type = 'PetscJacobianTester'
+    input = 'jn14.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn15]
+    type = 'PetscJacobianTester'
+    input = 'jn15.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn16]
+    type = 'PetscJacobianTester'
+    input = 'jn16.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./jn20]
+    type = 'PetscJacobianTester'
+    input = 'jn20.i'
+    cli_args = 'Output/exodus=false'
+    # can't make too tight as finite-difference constant state bums out due to precision loss
+    ratio_tol = 1E-5 
+    difference_tol = 1E10
+  [../]
+  [./jn21]
+    type = 'PetscJacobianTester'
+    input = 'jn21.i'
+    cli_args = 'Output/exodus=false'
+    # can't make too tight as finite-difference constant state bums out due to precision loss
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
+  [./jn22]
+    type = 'PetscJacobianTester'
+    input = 'jn22.i'
+    cli_args = 'Output/exodus=false'
+    # can't make too tight as finite-difference constant state bums out due to precision loss
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+
+  [./jn30]
+    type = 'PetscJacobianTester'
+    input = 'jn30.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7 
+    difference_tol = 1E10
+    skip = 'snes test incorrect with Dirac - see ticket2379'
+  [../]
+
+  [./jn40]
+    type = 'PetscJacobianTester'
+    input = 'jn40.i'
+    cli_args = 'Output/exodus=false'
+    ratio_tol = 1E-7 
+    difference_tol = 1E10
+  [../]
+[]

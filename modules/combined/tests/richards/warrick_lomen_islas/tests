@@ -1,0 +1,10 @@
+[Tests]
+  [./test_wli02]
+    type = 'Exodiff'
+    input = 'wli02.i'
+    exodiff = 'wli02.e'
+    exodiff_opts = '-steps last'
+    rel_err = 1e-3
+    use_old_floor = True
+  [../]
+[]
