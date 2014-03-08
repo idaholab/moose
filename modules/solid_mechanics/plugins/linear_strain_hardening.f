@@ -32,7 +32,7 @@ C
       PARAMETER (ONE=1.0,TWO=2.0,THREE=3.0)
 C
       DIMENSION DPSTRAN(6), STRESSOLD(6), DESTRAN(6), DSTRESS(6),
-     +          PS(3), DIR(6), STRESSROT(NTENS)    
+     +          PS(3), DIR(6), STRESSROT(NTENS)
 C
 C
 C     PROPS(1) - E
@@ -48,23 +48,23 @@ C
       YIELD = PROPS(3)
       H = PROPS(4)
       ALPHA = 0.2418E-6
-      BETA = 0.1135  
-C 
+      BETA = 0.1135
 C
-C    RECOVER EFFECTIVE PLASTIC STRAIN, P, AND ISOTROPIC 
+C
+C    RECOVER EFFECTIVE PLASTIC STRAIN, P, AND ISOTROPIC
 C    HARDENING VARIABLE, R,FROM PREVIOUS TIME STEP
 C
       P = STATEV(1)
       R = STATEV(2)
 C
-C 
+C
 C    SET UP ELASTICITY MATRIX
-C   
+C
       EBULK3 = E/(ONE-TWO*XNUE)
       XK = EBULK3/THREE
       EG2 = E/(ONE+XNUE)
       EG = EG2/TWO
-      ELAM = (EBULK3-EG2)/THREE 
+      ELAM = (EBULK3-EG2)/THREE
 C
 C
 C     ELASTIC STIFFNESS
@@ -104,7 +104,7 @@ C
 C      PRINT *, PS
 C    DETERMINE EFFECTIVE TRIAL STRESS
 C
-      PJ = (ONE/SQRT(TWO))*SQRT((PS(1)-PS(2))**2 + 
+      PJ = (ONE/SQRT(TWO))*SQRT((PS(1)-PS(2))**2 +
      +     (PS(2)-PS(3))**2 + (PS(3)-PS(1))**2)
 C      PRINT *, PJ
 C
@@ -113,7 +113,7 @@ C
 C      PRINT *, FLOW
 
       STATEV(3) = FLOW
-      
+
       XDP = 0.
       XFLOW = 1.
       XPHI = 1.
@@ -132,7 +132,7 @@ C
             XPHI =  ALPHA*SINH(XFLOW)
             XPHIDP = -THREE*EG*ALPHA*BETA*COSH(XFLOW)
             XPHIR = -ALPHA*BETA*COSH(XFLOW)
-            XRES = XPHI - (XDP/DTIME) 
+            XRES = XPHI - (XDP/DTIME)
             DEQPL = XRES/((ONE/DTIME) - XPHIDP - (H*XPHIR))
             XDP = XDP + DEQPL
             R = R0 + H*XDP
@@ -175,12 +175,12 @@ C      PRINT *, DIR
       END DO
 
 C      PRINT *, DPSTRAN
-C      
-C     CALCULATE THE ELASTIC STRAIN INCREMENTS      
-C      
+C
+C     CALCULATE THE ELASTIC STRAIN INCREMENTS
+C
       DO K=1,NTENS
          DESTRAN(K)=DSTRAN(K)-DPSTRAN(K)
-      END DO  
+      END DO
 C
 C
 C     DETERMINE STRESS INCREMENT
@@ -209,7 +209,7 @@ C
 C
       P = P + XDP
 C
-C       
+C
 C     STORE UPDATED STATE VARIABLES
 C
       STATEV(1) = P
@@ -224,7 +224,7 @@ C
 ***************************************************
 *USER SUBROUTINE
       SUBROUTINE KMLT1(DM1,DM2,DM,NTENS)
-C      
+C
 C      INCLUDE 'ABA_PARAM.INC'
 C
 C
@@ -232,7 +232,7 @@ C
 C
       DO 10 I=1,NTENS
          X=0.0
-         DO 20 K=1,NTENS 
+         DO 20 K=1,NTENS
             Y=DM1(I,K)*DM2(K)
             X=X+Y
  20      CONTINUE
