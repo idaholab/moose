@@ -7,10 +7,10 @@
 ****************************************************************************************
 
       SUBROUTINE ROTSIG (S, DROT, SPRIME, LSTR, NDI, NSHR)
-      
+
       DOUBLE PRECISION S(NDI+NSHR), R(3,3), RINV(3,3), SPRIME(NDI+NSHR),
      1     DROT(3,3)
-      INTEGER LSTR, NDI, NSHR    
+      INTEGER LSTR, NDI, NSHR
 C
 C======================================================================+
 C-----------
@@ -18,7 +18,7 @@ C  INPUT :
 C-----------
 C  DROT  	: ROTATION INCREMENT MATRIX
 C  S     	: STRESS OR STRAIN TENSOR TO BE ROTATED
-C  LSTR 	: FLAG DETERMINING STRESS OR STRAIN CALCULATION 
+C  LSTR 	: FLAG DETERMINING STRESS OR STRAIN CALCULATION
 C  NDI  	: NUMBER OF DIRECT STRESS/STRAIN COMPONENTS
 C-----------
 C  OUTPUT :
@@ -66,7 +66,7 @@ C
 C
 C     Calculate rotated stress/strain tensor based on LSTR value
 C     LSTR = 1 for stresses
-C     LSTR = 2 for strains - Equations must be added    
+C     LSTR = 2 for strains - Equations must be added
 C
          IF ((LSTR.EQ.1).OR.(LSTR.EQ.2)) THEN
             SPRIME(1) = RINV(1,1)*S(1)+RINV(2,1)*S(4)+RINV(3,1)*S(6)

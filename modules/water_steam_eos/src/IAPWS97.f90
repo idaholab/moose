@@ -2,7 +2,7 @@ module IAPWS97
 
   !  IAPWS-97 industrial thermodynamic formulation, as described by:
 
-  ! Wagner, W., Cooper, J.R., Dittman, A., Kijima, J., Kretzschmar, H.-J., Kruse, A., Mares, R., 
+  ! Wagner, W., Cooper, J.R., Dittman, A., Kijima, J., Kretzschmar, H.-J., Kruse, A., Mares, R.,
   ! Oguchi, K., Sato, H., Stocker, I., Sifner, O., Takaishi, Y., Tanishita, I., Trubenbach, J. and
   ! Willkommen, Th., 1997.  The IAPWS Industrial Formulation 1997 for the Thermodynamic Properties of
   ! Water and Steam.  Trans. ASME 150(122), 150-182.
@@ -102,7 +102,7 @@ module IAPWS97
        0.16436278447961d0, -0.13503372241348d-1, -0.14834345352472d-1,0.57922953628084d-3,&
        0.32308904703711d-2, 0.80964802996215d-4, -0.16557679795037d-3,-0.44923899061815d-4/)
 
-  integer, parameter, private:: ir3(40)=&                            ! powers i 
+  integer, parameter, private:: ir3(40)=&                            ! powers i
        (/0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2,&
        3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 8, 9,&
        9 , 10, 10, 11/)
@@ -166,12 +166,12 @@ logical function cowat(t,p,d,h)
   double precision:: pspow(-1:32),tspow(-42:17)
   integer:: i
   ! This tolerance allows cowat to be called just outside its
-  ! nominal operating range when doing transitions to supercritical:      
+  ! nominal operating range when doing transitions to supercritical:
   double precision, parameter:: ttol=1.0d-3
 
   ! Check input:
   if ((t<=350.0d0+ttol).and.(p<=100.d6)) then
-     !      
+     !
      tk=t+tc_k
      pi=p/pstar1
      tau=tstar1/tk
@@ -196,7 +196,7 @@ logical function cowat(t,p,d,h)
      pspow(32)=pspow(28)*pspow(4)
      pspow(-1)=1.d0/pspow(1)
 
-     ! Calculate required powers of shifted tau:        
+     ! Calculate required powers of shifted tau:
      tspow(0)=1.d0
      tspow(1)=tau-1.222d0
      tspow(2)=tspow(1)*tspow(1)
@@ -228,7 +228,7 @@ logical function cowat(t,p,d,h)
      tspow(-39)=tspow(-32)*tspow(-7)
      tspow(-40)=tspow(-32)*tspow(-8)
      tspow(-41)=tspow(-32)*tspow(-9)
-     tspow(-42)=tspow(-39)*tspow(-3)        
+     tspow(-42)=tspow(-39)*tspow(-3)
 
      gampi=0.0d0
      gamt=0.0d0
@@ -289,7 +289,7 @@ logical function supst(t,p,d,h)
      taupow(-5)=taupow(-3)*taupow(-2)
      taupow(-6)=taupow(-3)*taupow(-3)
 
-     ! Calculate required powers of pi:              
+     ! Calculate required powers of pi:
      pipow(0)=1.d0
      pipow(1)=pi
      pipow(2)=pipow(1)*pipow(1)
@@ -383,7 +383,7 @@ logical function supst(t,p,d,h)
 
   end if
 
-  return            
+  return
 end function supst
 
 !------------------------------------------------------------------------
@@ -463,9 +463,9 @@ logical function super(d,t,p,h)
   u=rt*tau*phitau
   h=u+p/d
   ! Check output:
-  super=(p<=100.0d6) 
+  super=(p<=100.0d6)
 
-  return            
+  return
 end function super
 
 !------------------------------------------------------------------------
@@ -485,7 +485,7 @@ logical function sat(t,p)
   double precision:: theta,theta2,a,b,c,x
 
   if ((t>=0.d0).and.(t<=tcritical)) then
-     tk=t+tc_k      
+     tk=t+tc_k
      theta=tk+nr4(9)/(tk-nr4(10))
      theta2=theta*theta
      a=theta2+nr4(1)*theta+nr4(2)
@@ -612,11 +612,11 @@ double precision function b23p(t)
   implicit none
   double precision, intent(in):: t
 
-  ! Local variable:      
+  ! Local variable:
   double precision:: tk
 
   tk=t+tc_k
-  b23p=1.d6*(nr23(1)+tk*(nr23(2)+tk*nr23(3))) 
+  b23p=1.d6*(nr23(1)+tk*(nr23(2)+tk*nr23(3)))
 
   return
 end function b23p
@@ -629,9 +629,9 @@ double precision function b23t(p)
   ! given a pressure p (Pa).
 
   implicit none
-  double precision, intent(in):: p      
+  double precision, intent(in):: p
 
-  b23t=nr23(4)+dsqrt((p/1.d6-nr23(5))/nr23(3))-tc_k 
+  b23t=nr23(4)+dsqrt((p/1.d6-nr23(5))/nr23(3))-tc_k
 
   return
 end function b23t

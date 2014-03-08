@@ -22,14 +22,14 @@
 !       nerr, error code
 !             = 0 no error
 !             = 1 error occured in calling module IAPWS subroutines
-!             = 2 error in input region number 
-! 
+!             = 2 error in input region number
+!
 !
 !  Dependency:
 !        subroutines/functions in module IAPWS97, cowat, supst, and super
 !
 !  Note:
-!        
+!
 !--------------------------------------------------------------------------------
 
 subroutine enthalpy_density_pt(H, D, P, T, ierr, nRegion)
@@ -54,7 +54,7 @@ logical ierr
 nerr    = 0
 
 select case(nRegion)
-case(1) 
+case(1)
    ierr = cowat(T,P,D,H)
 case(2)
    ierr = supst(T,P,D,H)
@@ -76,19 +76,19 @@ end subroutine enthalpy_density_pt
 !--------------------------------------------------------------------------------
 !
 ! subroutine boundary_23(P, T, N)
-! 
+!
 ! This subroutine wraps the functions in the module IAPWS97 to calculate pressure
-! as a funciton of tempeature or temperature as a function of pressure on the 
+! as a funciton of tempeature or temperature as a function of pressure on the
 ! boundary curve that seperates region 2 and region 3 specified in IAPWS-IF97
 !
 ! Input/Output:
 !
 !   P, pressure (Pa)
 !   T, temperature (C)
-!  
+!
 ! Input:
 ! -----
-!   N, 
+!   N,
 !      = 1, T is input and P is output
 !      otherwise, T is output and P is input
 !
@@ -116,19 +116,19 @@ end subroutine boundary_23
 !--------------------------------------------------------------------------------
 !
 ! subroutine saturation(P, T, N, nerr)
-! 
+!
 ! This subroutine wraps the functions in the module IAPWS97 to calculate pressure
-! as a funciton of tempeature or temperature as a function of pressure on the 
+! as a funciton of tempeature or temperature as a function of pressure on the
 ! saturation curve (region 4) specified in IAPWS-IF97
 !
 ! Input/Output:
 !
 !   P, pressure (Pa)
 !   T, temperature (C)
-!  
+!
 ! Input:
 ! -----
-!   N, 
+!   N,
 !      = 1, T is input and P is output
 !      otherwise, T is output and P is input
 !
@@ -140,7 +140,7 @@ end subroutine boundary_23
 !
 !  Dependency:
 !        subroutines/functions in module IAPWS97: tsat, sat
-! 
+!
 !--------------------------------------------------------------------------------
 
 subroutine saturation(P, T, N, nerr)
@@ -166,13 +166,13 @@ if(ierr) then
 else
    nerr = 1
 endif
-     
+
 end subroutine saturation
 
 !--------------------------------------------------------------------------------
 !
 !  double precision function viscosity(rho, T)
-!  
+!
 !  The function wrapps the function in module IAPWS to calculate viscosity of water
 !  as a function of density and temperature.
 !
