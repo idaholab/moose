@@ -121,8 +121,10 @@ private:
   void outputEmptyTimestep();
 
   /// Count of outputs per exodus file
-  unsigned int _exodus_num;
+  unsigned int & _exodus_num;
 
+  /// Flag indicating MOOSE is recovering via --recover command-line option
+  bool _recovering;
 };
 
 #endif /* EXODUS_H */

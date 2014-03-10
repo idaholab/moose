@@ -55,4 +55,9 @@
     perf_log = true
     linear_residuals = true
   [../]
+#  checkpoint = true
+#  [./checkpoint]
+#    type = Checkpoint
+#    num_files = 1
+#  [../]
 []

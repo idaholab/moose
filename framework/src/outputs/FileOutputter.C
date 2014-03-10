@@ -15,6 +15,7 @@
 // MOOSE includes
 #include "FileOutputter.h"
 #include "MooseApp.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<FileOutputter>()
@@ -36,14 +37,17 @@ InputParameters validParams<FileOutputter>()
 FileOutputter::FileOutputter(const std::string & name, InputParameters & parameters) :
     OutputBase(name, parameters),
     _file_base(getParam<std::string>("file_base")),
-    _file_num(0),
+    _file_num(declareRecoverableData<unsigned int>("file_num", 0)),
     _padding(getParam<unsigned int>("padding")),
     _output_file(true)
 {
+  // If restarting reset the file number
+  if (_problem_ptr->isRestarting())
+    _file_num = 0;
 
   // Set the file base, if it has not been set already
   if (!isParamValid("file_base"))
-    _file_base = getOutputFileBase();
+    _file_base = getOutputFileBase(_app);
 
   // Check the file directory of file_base
   std::string base = "./" + _file_base;
@@ -78,7 +82,6 @@ FileOutputter::outputInitial()
 void
 FileOutputter::outputStep()
 {
-
   // Perform filename check
   if (!_output_file)
     return;
@@ -99,20 +102,20 @@ FileOutputter::outputFinal()
 }
 
 std::string
-FileOutputter::getOutputFileBase()
+FileOutputter::getOutputFileBase(MooseApp & app)
 {
   // If the App has an outputfile, then use it (MultiApp scenario)
-  if (!_app.getOutputFileBase().empty())
-    return _app.getOutputFileBase();
+  if (!app.getOutputFileBase().empty())
+    return app.getOutputFileBase();
 
   // If the output base is not set it must be determined from the input file
   /* This will only return a non-empty string if the setInputFileName() was called, which is
    * generally not the case. One exception is when CoupledExecutioner is used */
-  std::string input_filename = _app.getInputFileName();
+  std::string input_filename = app.getInputFileName();
   if (input_filename.empty())
-    input_filename = _app.getFileName();
+    input_filename = app.getFileName();
 
-  // Asset that the filename is not empty
+  // Assert that the filename is not empty
   mooseAssert(!input_filename.empty(), "Input Filename is NULL");
 
   // Determine location of "." in extension, assert if it is not found

@@ -227,7 +227,10 @@ Transient::execute()
     _first = false;
 
     if (!keepGoing())
+    {
+      _output_warehouse.outputFinal();
       break;
+    }
 
     computeDT();
     takeStep();
@@ -403,6 +406,7 @@ void
 Transient::endStep()
 {
   _last_solve_converged = lastSolveConverged();
+
   if (_last_solve_converged)
   {
     // Compute the Error Indicators and Markers
@@ -625,9 +629,6 @@ Transient::keepGoing()
     Moose::out << "Aborting as solve did not converge and input selected to abort" << std::endl;
     keep_going = false;
   }
-
-  if (!keep_going)
-    _output_warehouse.outputFinal();
 
   return keep_going;
 }

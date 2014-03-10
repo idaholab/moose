@@ -12,13 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GNUPlot_H
-#define GNUPlot_H
+#ifndef GNUPLOT_H
+#define GNUPLOT_H
 
 // MOOSE includes
 #include "TableOutputter.h"
 
-// Forward declerations
+// Forward declarations
 class GNUPlot;
 
 template<>
@@ -66,4 +66,4 @@ private:
   std::string _extension;
 };
 
-#endif /* GNUPlot_H */
+#endif /* GNUPLOT_H */

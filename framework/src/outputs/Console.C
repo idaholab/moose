@@ -102,12 +102,10 @@ Console::Console(const std::string & name, InputParameters parameters) :
     }
   }
 
-  // If file output is desired, wipe out an existing file
-  if (_write_file)
+  // If file output is desired, wipe out the existing file if not recovering
+  if (_write_file && !_app.isRecovering())
     writeStream(false);
 
-  // Call the PETSc setup function, this sets up the monitor functions for the upcoming timestep
-  petscSetup();
 }
 
 Console::~Console()
@@ -151,7 +149,7 @@ Console::~Console()
   if (!_app.hasLegacyOutput())
   {
     /* Disable the logs, without this the logs will be printed
-       during the destructors of the logs themselves*/
+       during the destructors of the logs themselves */
     Moose::perf_log.disable_logging();
     Moose::setup_perf_log.disable_logging();
   }
@@ -181,8 +179,15 @@ Console::initialSetup()
 void
 Console::timestepSetup()
 {
-  // Do nothing if the problem is transient or if it is not an output interval
-  if (!_transient || !checkInterval())
+  // If the problem is Steady, initialize PETSc monitors and then exit
+  // if (!_transient)
+  // {
+  //  petscSetup();
+  //  return;
+  // }
+
+  // Do nothing if the problem is steady or if it is not an output interval
+  if (!checkInterval())
     return;
 
   // Do nothing if output_intitial = false and the timestep is zero
@@ -195,28 +200,31 @@ Console::timestepSetup()
   // Stream to build the time step information
   std::stringstream oss;
 
-  // Get the length of the time step string
-  std::ostringstream time_step_string;
-  time_step_string << _t_step;
-  unsigned int n = time_step_string.str().size();
-  if (n < 2)
-    n = 2;
+  // Write timestep data for transient executioners
+  if (_transient)
+  {
+    // Get the length of the time step string
+    std::ostringstream time_step_string;
+    time_step_string << _t_step;
+    unsigned int n = time_step_string.str().size();
+    if (n < 2)
+      n = 2;
 
-  // Write time step and time information
-  oss << std::endl <<  "Time Step " << std::setw(n) << _t_step
+    // Write time step and time information
+    oss << std::endl <<  "Time Step " << std::setw(n) << _t_step
       << ", time = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _time
       << std::endl;
+    // Show old time information, if desired
+    if (_verbose)
+      oss << std::setw(n) << "          old time = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _time_old << std::endl;
 
-  // Show old time information, if desired
-  if (_verbose)
-    oss << std::setw(n) << "          old time = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _time_old << std::endl;
+    // Show the time delta information
+    oss << std::setw(2) << "                dt = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _dt << std::endl;
 
-  // Show the time delta information
-  oss << std::setw(2) << "                dt = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _dt << std::endl;
-
-  // Show the old time delta information, if desired
-  if (_verbose)
-    oss << std::setw(2) << "            old dt = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _dt_old << std::endl;
+    // Show the old time delta information, if desired
+    if (_verbose)
+      oss << std::setw(2) << "            old dt = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _dt_old << std::endl;
+  }
 
   // Output to the screen
   if (_write_screen)

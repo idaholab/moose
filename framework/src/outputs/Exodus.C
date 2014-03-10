@@ -40,7 +40,8 @@ Exodus::Exodus(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
     _exodus_io_ptr(NULL),
     _initialized(false),
-    _exodus_num(0)
+    _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
+    _recovering(_app.isRecovering())
 {
 }
 
@@ -62,15 +63,31 @@ Exodus::outputSetup()
   if (_exodus_io_ptr != NULL)
     delete _exodus_io_ptr;
 
-  // Reset the number of outputs for this file
-  _exodus_num = 1;
-
-  // Increment the file number
-  _file_num++;
-
   // Create the new ExodusII_IO object
   _exodus_io_ptr = new ExodusII_IO(_es_ptr->get_mesh());
-  _exodus_io_ptr->append(false);
+
+  /* Increment file number and set appending status, append if all the following conditions are met:
+     (1) If the application is recovering (not restarting)
+     (2) The mesh has not changed
+     (3) An existing Exodus file exists for appending (_exodus_num > 0)
+     (4) Sequential output is NOT desired */
+  if (_recovering && !_mesh_changed && _exodus_num > 0 && !_sequence)
+  {
+    // Set the recovering flag to false so that this special case is not triggered again
+    _recovering = false;
+
+    // Set the append flag to true b/c on revover the file is being appended
+    _exodus_io_ptr->append(true);
+  }
+  else
+  {
+    // Increment file counter and reset exodus file number count
+    _file_num++;
+    _exodus_num = 1;
+
+    // Do not append the existing file
+    _exodus_io_ptr->append(false);
+  }
 
   // Utilize the spatial dimensions
   if (_es_ptr->get_mesh().mesh_dimension() != 1)
@@ -173,6 +190,12 @@ Exodus::outputInput()
 void
 Exodus::output()
 {
+  std::cout << "Exodus::output() - " << _name << std::endl;
+  std::cout << "  filename() = " << filename() << std::endl;
+  std::cout << "  _file_num = " << _file_num << std::endl;
+  std::cout << "  _exodus_num = " << _exodus_num << std::endl;
+  std::cout << "  _exodus_io_ptr = " << _exodus_io_ptr << std::endl;
+
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();
   _global_values.clear();

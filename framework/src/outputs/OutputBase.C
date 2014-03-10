@@ -52,7 +52,10 @@ InputParameters validParams<OutputBase>()
   params.addParam<bool>("output_postprocessors", true, "Enable/disable the output of postprocessors");
 
   // Displaced Mesh options
-  params.addParam<bool>("use_displaced", "Enable/disable the use of the displaced mesh for outputing");
+  params.addParam<bool>("use_displaced", false, "Enable/disable the use of the displaced mesh for outputing");
+
+  // Enable sequential file output
+  params.addParam<bool>("sequence", "Enable/disable sequential file output (enable by default when 'use_displace = true', otherwise defaults to false");
 
   // Control for outputing elemental variables as nodal variables
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental nonlinear variables as nodal");
@@ -82,7 +85,7 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     Restartable(name, parameters, "OutputBase"),
     _problem_ptr(getParam<FEProblem *>("_fe_problem")),
     _transient(_problem_ptr->isTransient()),
-    _use_displaced(isParamValid("use_displaced") ? getParam<bool>("use_displaced") : false),
+    _use_displaced(getParam<bool>("use_displaced")),
     _es_ptr(_use_displaced ? &_problem_ptr->getDisplacedProblem()->es() : &_problem_ptr->es()),
     _time(_problem_ptr->time()),
     _time_old(_problem_ptr->timeOld()),
@@ -95,20 +98,27 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     _elemental_as_nodal(getParam<bool>("elemental_as_nodal")),
     _scalar_as_nodal(getParam<bool>("scalar_as_nodal")),
     _system_information(getParam<bool>("output_system_information")),
-    _mesh_changed(false),
-    _sequence(_use_displaced),
-    _num(declareRestartableData<int>("num", 0)),
+    _mesh_changed(declareRestartableData<bool>("mesh_changed", false)),
+    _sequence(declareRestartableData<bool>("sequence", isParamValid("sequence") ? getParam<bool>("sequence") : false)),
+    _num(declareRestartableData<unsigned int>("num", 0)),
     _interval(isParamValid("interval") ? getParam<unsigned int>("interval") : 1),
     _sync_times(isParamValid("sync_times") ?
-                std::set<Real>(getParam<std::vector<Real> >("sync_times").begin(),
-                               getParam<std::vector<Real> >("sync_times").end()) :
+                std::set<Real>(getParam<std::vector<Real> >("sync_times").begin(), getParam<std::vector<Real> >("sync_times").end()) :
                 std::set<Real>()),
     _sync_only(getParam<bool>("sync_only")),
     _allow_output(true),
     _force_output(false),
-    _output_failed(false)
+    _output_failed(false),
+    _output_setup_called(false)
 {
+  // If recovering disable output of initial condition to avoid duplicate files
+  if (_app.isRecovering())
+    _output_initial = false;
 
+  // Set the sequence flag to true if it has not been set and 'use_displaced = true'
+  if (!isParamValid("sequence") && _use_displaced)
+    sequence(true);
+  
   // Initialize the available output
   initAvailableLists();
 
@@ -177,7 +187,7 @@ OutputBase::timestepSetup()
 void
 OutputBase::outputInitial()
 {
-  // Do nothing if output is not force or if output is disallowed
+  // Do Nothing if output is not force or if output is disallowed
   if (!_force_output && !_allow_output)
     return;
 
@@ -186,6 +196,7 @@ OutputBase::outputInitial()
   {
     outputSetup();
     _mesh_changed = false;
+    _output_setup_called = true;
     output();
     _num++;
   }
@@ -227,14 +238,17 @@ OutputBase::outputStep()
   if (!_force_output && !checkInterval())
     return;
 
-  // If the mesh has changed or the sequence state is true, call the outputSetup() function
-  if (_mesh_changed || _sequence || _num == 0)
+  // If the mesh has changed or the sequence state is true or if it has not been called, call the outputSetup() function
+  if (_mesh_changed || _sequence || _num == 0 || !_output_setup_called)
   {
     // Execute the setup function
     outputSetup();
 
     // Reset the _mesh_changed flag
     _mesh_changed = false;
+
+    // outputSetup has been called
+    _output_setup_called = true;
   }
 
   // Update the output number
@@ -259,8 +273,11 @@ OutputBase::outputFinal()
     return;
 
   // If the mesh has changed or the sequence state is true, call the outputSetup() function
-  if (_mesh_changed || _sequence)
+  if (_mesh_changed || _sequence || !_output_setup_called)
+  {
     outputSetup();
+    _output_setup_called = true;
+  }
 
   // Perform the output
   output();

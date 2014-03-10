@@ -30,9 +30,9 @@ public:
   RecoverBaseAction(const std::string & name, InputParameters params);
 
   virtual void act();
-  void RecoverBaseObject(Output & output, InputParameters & params);
 
 protected:
+
   /**
    * Small helper to grab the newest restart file.
    *

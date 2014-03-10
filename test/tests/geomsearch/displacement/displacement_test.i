@@ -50,8 +50,10 @@
 [Outputs]
   file_base = out_displaced
   output_initial = true
-  use_displaced = true
-  exodus = true
+  [./exodus]
+    type = Exodus
+    use_displaced = true
+  [../]
   [./console]
     type = Console
     pref_log = true

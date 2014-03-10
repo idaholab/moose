@@ -19,8 +19,11 @@
 #include <vector>
 
 // MOOSE includes
-#include "OutputBase.h"
 #include "InputParameters.h"
+
+// Forward declarations
+class OutputBase;
+class Checkpoint;
 
 /**
  * Class for storing and utilizing output objects
@@ -106,7 +109,10 @@ public:
    */
   void setFileNumbers(std::map<std::string, unsigned int> input);
 
-
+  /**
+   * Extracts the file numbers from the outputters
+   * @return Map of file numbers for the output objects
+   */
   std::map<std::string, unsigned int> getFileNumbers();
 
   /**

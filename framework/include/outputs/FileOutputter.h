@@ -80,13 +80,18 @@ public:
    */
   unsigned int getFileNumber();
 
-protected:
-
   /**
    * Returns the default output file base
    * @return The name of the input file with '_out' append to the end
+   *
+   * This method is static to allow for outside objects to call it, namely
+   * CommonOutputAction::setRecoverFileBase().
+   *
+   * @see CommonOutputAction::setRecoverFileBase()
    */
-  std::string getOutputFileBase();
+  static std::string getOutputFileBase(MooseApp & app);
+
+protected:
 
   /**
    * Checks the filename for output
@@ -98,8 +103,8 @@ protected:
   /// The base filename from the input paramaters
   std::string _file_base;
 
-  /// A file number counter, initialized to 1 (this must be controlled by the child class, see Exodus)
-  unsigned int _file_num;
+  /// A file number counter, initialized to 0 (this must be controlled by the child class, see Exodus)
+  unsigned int & _file_num;
 
   /// Number of digits to pad the extensions
   unsigned int _padding;

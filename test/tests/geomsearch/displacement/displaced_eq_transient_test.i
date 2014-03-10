@@ -92,13 +92,15 @@
 []
 
 [Outputs]
-  file_base = displaced_eq_transient_test_out_displaced
   output_initial = true
-  use_displaced = true
-  exodus = true
+  [./exodus]
+    type = Exodus
+    use_displaced = true
+    append_displaced = true
+  [../]
   [./console]
     type = Console
-    pref_log = true
+    perf_log = true
     linear_residuals = true
   [../]
 []

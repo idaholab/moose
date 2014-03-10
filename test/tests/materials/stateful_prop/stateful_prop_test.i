@@ -86,5 +86,4 @@
     type = Console
     perf_log = true
   [../]
-  csv = true
 []

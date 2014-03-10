@@ -69,6 +69,10 @@ AddOutputAction::act()
   else if (_type.compare("XDA") == 0)
     _moose_object_pars.set<bool>("_binary") = false;
 
+  // Adjust the checkpoint suffix if auto recovery was enabled
+  if (object_name.compare("auto_recovery_checkpoint") == 0)
+    _moose_object_pars.set<std::string>("suffix") = "auto_recovery";
+
   // Create the object and add it to the warehouse
   OutputBase * output = static_cast<OutputBase *>(_factory.create(_type, object_name, _moose_object_pars));
   output_warehouse.addOutput(output);

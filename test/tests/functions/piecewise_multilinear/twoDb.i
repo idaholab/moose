@@ -56,12 +56,13 @@
   end_time = 10
 []
 
-[Output]
+[Outputs]
   file_base = twoDb
-  interval = 1
-  hidden_variables = dummy
+  hide = dummy
   exodus = true
-  output_initial = false
-  perf_log = true
-  postprocessor_csv = false
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

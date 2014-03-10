@@ -310,8 +310,6 @@ protected:
    */
   virtual void outputPostprocessors() = 0;
 
-private:
-
   /**
    * Returns true if the output interval is satisfied
    * \todo{Implement additional types of intervals (e.g., simulation time and real time)}
@@ -363,10 +361,13 @@ private:
   /// System information output flag
   bool _system_information;
 
-  /// True if the meshChanged() function has been called
-  bool _mesh_changed;
+  /// True if the meshChanged() function has been called (restartable)
+  bool & _mesh_changed;
 
-protected:
+  /// Flag for forcing call to outputSetup() with every call to output() (restartable)
+  bool & _sequence;
+
+private:
 
   /**
    * Initializes the available lists for each of the output types
@@ -399,11 +400,8 @@ protected:
   /// Storage structure for the variable lists for scalar output
   OutputData _scalar;
 
-  /// Flag for forcing call to outputSetup() with every call to output()
-  bool _sequence;
-
-  /// The number of outputs written
-  unsigned int _num;
+  /// The number of outputs written (restartable)
+  unsigned int & _num;
 
   /// The output time step interval
   const unsigned int _interval;
@@ -422,6 +420,11 @@ protected:
 
   /// Flag for outputting faild time steps
   bool _output_failed;
+
+  /// True if outputSetup was called
+  /* Note, this is needed by recovery system to guarantee that outputStep was called. Normal runs rely on _num == 0, but when
+     recovering _num will likely be non-zero */
+  bool _output_setup_called;
 };
 
 #endif /* OUTPUTBASE_H */

@@ -16,6 +16,9 @@
 
 #include "MooseApp.h"
 #include "MooseUtils.h"
+#include "FEProblem.h"
+#include "ActionWarehouse.h"
+#include "MooseObjectAction.h"
 
 #include "tinydir.h"
 #include "pcrecpp.h"
@@ -44,17 +47,12 @@ RecoverBaseAction::RecoverBaseAction(const std::string & name, InputParameters p
 }
 
 void
-RecoverBaseAction::RecoverBaseObject(Output & /*output*/, InputParameters & /*params*/)
-{
-}
-
-void
 RecoverBaseAction::act()
 {
   if (_app.isRecovering())
   {
     // If this is the case then we need to find the newest recovery file.
-    if (_app.getRecoverFileBase().empty())
+    if (_app.getRecoverFileBase().empty()) // && _app.hasLegacyOutput())
     {
       if (!_pars.isParamValid("file_base"))
         mooseError("\"Output/file_base\" must be valid if no recovery file is specified!");

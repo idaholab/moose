@@ -234,20 +234,20 @@
   [../]
 []
 
-
-
 [Executioner]
   type = Transient
   dt = 0.5
   end_time = 1
 []
 
-[Output]
+[Outputs]
   file_base = oneDa
-  interval = 1
-  hidden_variables = dummy
+  hide = dummy
   exodus = false
   output_initial = false
-  perf_log = true
-  postprocessor_csv = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

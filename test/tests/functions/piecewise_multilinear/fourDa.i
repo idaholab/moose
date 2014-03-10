@@ -57,11 +57,13 @@
   end_time = 10
 []
 
-[Output]
+[Outputs]
   file_base = fourDa
-  interval = 1
-  exodus = true
   output_initial = true
-  hidden_variables = dummy
-  perf_log = true
+  exodus = true
+  hide = dummy
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

@@ -83,6 +83,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("AddDamperAction", "Dampers/*");
 
+  // \todo{remove after new output system is in place}
   syntax.registerActionSyntax("RecoverBaseAction", "Output");
   syntax.registerActionSyntax("SetupOutputAction", "Output");
   syntax.registerActionSyntax("SetupOutputNameAction", "Output");

@@ -18,6 +18,7 @@
 // Moose includes
 #include "Checkpoint.h"
 #include "FEProblem.h"
+#include "MooseApp.h"
 
 // libMesh includes
 #include "libmesh/checkpoint_io.h"
@@ -68,7 +69,9 @@ Checkpoint::filename()
 {
   // Get the time step with correct zero padding
   std::ostringstream output;
-  output << std::setw(_padding)
+  output << directory()
+         << "/"
+         << std::setw(_padding)
          << std::setprecision(0)
          << std::setfill('0')
          << std::right
@@ -85,7 +88,6 @@ Checkpoint::directory()
 void
 Checkpoint::output()
 {
-
   // Start the performance log
   Moose::perf_log.push("output()", "Checkpoint");
 
@@ -94,7 +96,7 @@ Checkpoint::output()
   mkdir(cp_dir.c_str(),  S_IRWXU | S_IRGRP);
 
   // Create the output filename
-  std::string current_file = cp_dir + "/" + filename();
+  std::string current_file = filename();
 
   // Create the libMesh Checkpoint_IO object
   MeshBase & mesh = _es_ptr->get_mesh();

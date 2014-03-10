@@ -77,6 +77,11 @@ public:
    * Returns the base filename for the checkpoint files
    */
   std::string filename();
+  /**
+   * Retrieve the checkpoint output directory
+   * @return String containing the checkpoint output directory
+   */
+  std::string directory();
 
 protected:
 
@@ -93,12 +98,6 @@ protected:
   void updateCheckpointFiles(CheckpointFileNames file_struct);
 
 private:
-
-  /**
-   * Retrieve the checkpoint output directory
-   * @return String containing the checkpoint output directory
-   */
-  std::string directory();
 
   /// Max no. of output files to store
   unsigned int _num_files;

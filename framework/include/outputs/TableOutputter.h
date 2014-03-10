@@ -75,14 +75,14 @@ protected:
    */
   virtual void outputPostprocessors();
 
-  /// Table containing postprocessor data
-  FormattedTable _postprocessor_table;
+  /// Table containing postprocessor data (restartable)
+  FormattedTable & _postprocessor_table;
 
-  /// Table containing scalar aux variables
-  FormattedTable _scalar_table;
+  /// Table containing scalar aux variables (restartable)
+  FormattedTable & _scalar_table;
 
-  /// Table containing postprocessor values and scalar aux variablesv
-  FormattedTable _all_data_table;
+  /// Table containing postprocessor values and scalar aux variables (restartable)
+  FormattedTable & _all_data_table;
 };
 
 #endif /* TABLEOUTPUTTER_H */

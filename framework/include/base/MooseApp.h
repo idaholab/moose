@@ -308,8 +308,8 @@ public:
    */
   void setOutputWarehouse(OutputWarehouse * owh){ _alternate_output_warehouse = owh; }
 
-
 protected:
+
   MooseApp(const std::string & name, InputParameters parameters);
 
   virtual void meshOnly(std::string mesh_file_name);

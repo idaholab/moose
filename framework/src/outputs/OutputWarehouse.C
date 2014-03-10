@@ -12,10 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "OutputWarehouse.h"
 #include "OutputBase.h"
 #include "Console.h"
 #include "FileOutputter.h"
+#include "Checkpoint.h"
+
+#include <libgen.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include "tinydir.h"
+#include "pcrecpp.h"
+
 
 OutputWarehouse::OutputWarehouse() :
     _has_screen_console(false)
@@ -154,7 +165,6 @@ OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input)
       if (it != input.end())
         ptr->setFileNumber(it->second);
     }
-
   }
 }
 
