@@ -46,6 +46,7 @@ InputParameters validParams<SolidModel>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addParam<std::vector<std::string> >("volumetric_strain", "Names of volumetric strain contributions");
 
   params.addParam<std::string>("constitutive_model", "ConstitutiveModel to use (optional)");
   return params;
@@ -111,6 +112,8 @@ SolidModel::SolidModel( const std::string & name,
   _has_stress_free_temp(false),
   _stress_free_temp(0.0),
   _volumetric_models(),
+  _volumetric_strain(),
+  _volumetric_strain_old(),
   _stress(createProperty<SymmTensor>("stress")),
   _stress_old_prop(createPropertyOld<SymmTensor>("stress")),
   _stress_old(0),
@@ -154,6 +157,16 @@ SolidModel::SolidModel( const std::string & name,
   // Use the first block to figure out the coordinate system (the above check ensures that they are the same)
   _coord_type = _subproblem.getCoordSystem(_block_id[0]);
   _element = createElement(name, parameters);
+
+  if (isParamValid("volumetric_strain"))
+  {
+    const std::vector<std::string> & vs = getParam<std::vector<std::string> >("volumetric_strain");
+    for (unsigned i = 0; i < vs.size(); ++i)
+    {
+      _volumetric_strain.push_back( &getMaterialProperty<Real>( vs[i] ) );
+      _volumetric_strain_old.push_back( &getMaterialPropertyOld<Real>( vs[i] ) );
+    }
+  }
 
 
   _cracking_alpha = -_youngs_modulus;
@@ -452,12 +465,20 @@ SolidModel::applyThermalStrain()
 void
 SolidModel::applyVolumetricStrain()
 {
+  const Real oneThird = 1./3.;
+  const Real V0Vold = 1/_element->volumeRatioOld(_qp);
+  for (unsigned i = 0; i < _volumetric_strain.size(); ++i)
+  {
+    const Real v_strain = std::pow(( (*_volumetric_strain[i])[_qp]    +1) * V0Vold, oneThird) -
+                          std::pow(( (*_volumetric_strain_old[i])[_qp]+1) * V0Vold, oneThird);
+    _strain_increment.addDiag( -v_strain );
+  }
+
   const SubdomainID current_block = _current_elem->subdomain_id();
-  const Real VoldV0 = _element->volumeRatioOld(_qp);
   const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
   for (unsigned int i(0); i < vm.size(); ++i)
   {
-    vm[i]->modifyStrain(_qp, 1/VoldV0, _strain_increment, _d_strain_dT);
+    vm[i]->modifyStrain(_qp, V0Vold, _strain_increment, _d_strain_dT);
   }
 }
 

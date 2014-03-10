@@ -86,6 +86,8 @@ protected:
   Real _stress_free_temp;
 
   std::map<SubdomainID, std::vector<VolumetricModel*> > _volumetric_models;
+  std::vector<MaterialProperty<Real>*> _volumetric_strain;
+  std::vector<MaterialProperty<Real>*> _volumetric_strain_old;
 
   MaterialProperty<SymmTensor> & _stress;
 private:
