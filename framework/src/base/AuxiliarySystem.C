@@ -236,18 +236,18 @@ AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
 {
   if (_vars[0].scalars().size() > 0)
   {
-    computeScalarVars(_auxs(type));
+    computeScalarVars(type);
     solution().close();
     _sys.update();
   }
 
   if (_vars[0].variables().size() > 0)
   {
-    computeNodalVars(_auxs(type));
+    computeNodalVars(type);
     solution().close();
     _sys.update();
 
-    computeElementalVars(_auxs(type));
+    computeElementalVars(type);
     solution().close();
     _sys.update();
 
@@ -282,8 +282,10 @@ AuxiliarySystem::addVector(const std::string & vector_name, const bool project, 
 }
 
 void
-AuxiliarySystem::computeScalarVars(std::vector<AuxWarehouse> & auxs)
+AuxiliarySystem::computeScalarVars(ExecFlagType type)
 {
+  std::vector<AuxWarehouse> & auxs = _auxs(type);
+
   Moose::perf_log.push("update_aux_vars_scalar()","Solve");
   PARALLEL_TRY {
     // FIXME: run multi-threaded
@@ -312,8 +314,10 @@ AuxiliarySystem::computeScalarVars(std::vector<AuxWarehouse> & auxs)
 }
 
 void
-AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
+AuxiliarySystem::computeNodalVars(ExecFlagType type)
 {
+  std::vector<AuxWarehouse> & auxs = _auxs(type);
+
   // Do we have some kernels to evaluate?
   bool have_block_kernels = false;
   for(std::set<SubdomainID>::const_iterator subdomain_it = _mesh.meshSubdomains().begin();
@@ -348,8 +352,11 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
 }
 
 void
-AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
+AuxiliarySystem::computeElementalVars(ExecFlagType type)
 {
+  std::vector<AuxWarehouse> & auxs = _auxs(type);
+  bool need_materials = type != EXEC_INITIAL;
+
   Moose::perf_log.push("update_aux_vars_elemental()","Solve");
   PARALLEL_TRY {
     bool element_auxs_to_compute = false;
@@ -360,7 +367,7 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
     if (element_auxs_to_compute)
     {
       ConstElemRange & range = *_mesh.getActiveLocalElementRange();
-      ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
+      ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs, need_materials);
       Threads::parallel_reduce(range, eavt);
     }
 
@@ -370,7 +377,7 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
     if (bnd_auxs_to_compute)
     {
       ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
-      ComputeElemAuxBcsThread eabt(_mproblem, *this, auxs);
+      ComputeElemAuxBcsThread eabt(_mproblem, *this, auxs, need_materials);
       Threads::parallel_reduce(bnd_elems, eabt);
     }
 

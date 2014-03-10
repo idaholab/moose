@@ -69,6 +69,8 @@ MaterialPropertyUserObject::computeQpIntegral()
 Real
 MaterialPropertyUserObject::getElementalValue(unsigned int elem_id) const
 {
-
-  return _elem_integrals.at(elem_id);
+  if (_elem_integrals.size() > 0)
+    return _elem_integrals[elem_id];
+  else
+    return 0.;
 }

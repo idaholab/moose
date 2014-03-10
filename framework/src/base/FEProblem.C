@@ -1678,7 +1678,7 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 }
 
 void
-FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid)
+FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool reinit)
 {
   if (_materials[tid].hasMaterials(blk_id))
   {
@@ -1687,12 +1687,13 @@ FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid)
     if (_material_data[tid]->nQPoints() != n_points)
       _material_data[tid]->size(n_points);
     _material_data[tid]->swap(*elem, 0);
-    _material_data[tid]->reinit(_materials[tid].getMaterials(blk_id));
+    if (reinit)
+      _material_data[tid]->reinit(_materials[tid].getMaterials(blk_id));
   }
 }
 
 void
-FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid)
+FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool reinit)
 {
   if (_materials[tid].hasFaceMaterials(blk_id))
   {
@@ -1705,12 +1706,13 @@ FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid)
     if (!_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
 
-    _bnd_material_data[tid]->reinit(_materials[tid].getFaceMaterials(blk_id));
+    if (reinit)
+      _bnd_material_data[tid]->reinit(_materials[tid].getFaceMaterials(blk_id));
   }
 }
 
 void
-FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid)
+FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool reinit)
 {
   if (_materials[tid].hasNeighborMaterials(blk_id)/* && _nl.doingDG()*/)
   {
@@ -1721,12 +1723,13 @@ FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid)
     if (_neighbor_material_data[tid]->nQPoints() != n_points)
       _neighbor_material_data[tid]->size(n_points);
     _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
-    _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id));
+    if (reinit)
+      _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id));
   }
 }
 
 void
-FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid)
+FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool reinit)
 {
   if (_materials[tid].hasBoundaryMaterials(boundary_id)/* && _nl.hasActiveIntegratedBCs(boundary_id, tid)*/)
   {
@@ -1738,7 +1741,8 @@ FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid)
     if (!_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
 
-    _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(boundary_id));
+    if (reinit)
+      _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(boundary_id));
   }
 }
 
@@ -2024,8 +2028,9 @@ FEProblem::computeIndicatorsAndMarkers()
 }
 
 void
-FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
+FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group)
 {
+  std::vector<UserObjectWarehouse> & pps = _user_objects(type);
   if (pps[0].blockIds().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0 || pps[0].internalSideUserObjects(group).size() > 0)
   {
 
@@ -2042,7 +2047,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
       if (_displaced_problem != NULL)
         _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
-      _aux.compute();
+      _aux.compute(type);
     }
 
     // init
@@ -2393,7 +2398,7 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectW
   case EXEC_CUSTOM:
     break;
   }
-  computeUserObjectsInternal(_user_objects(type), group);
+  computeUserObjectsInternal(type, group);
 
   Moose::perf_log.pop("compute_user_objects()","Solve");
 }

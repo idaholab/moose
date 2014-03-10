@@ -20,12 +20,11 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblem & problem,
-                                                 AuxiliarySystem & sys,
-                                                 std::vector<AuxWarehouse> & auxs) :
+ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs, bool need_materials) :
     _problem(problem),
     _sys(sys),
-    _auxs(auxs)
+    _auxs(auxs),
+    _need_materials(need_materials)
 {
 }
 
@@ -33,7 +32,8 @@ ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblem & problem,
 ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split /*split*/) :
     _problem(x._problem),
     _sys(x._sys),
-    _auxs(x._auxs)
+    _auxs(x._auxs),
+    _need_materials(x._need_materials)
 {
 }
 
@@ -64,7 +64,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       {
         _problem.prepare(elem, _tid);
         _problem.reinitElemFace(elem, side, boundary_id, _tid);
-        _problem.reinitMaterialsBoundary(boundary_id, _tid);
+        _problem.reinitMaterialsBoundary(boundary_id, _tid, _need_materials);
 
         const std::vector<AuxKernel*> & bcs = _auxs[_tid].elementalBCs(boundary_id);
         for (std::vector<AuxKernel*>::const_iterator element_bc_it = bcs.begin();

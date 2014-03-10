@@ -367,10 +367,10 @@ public:
    */
   virtual void prepareMaterials(SubdomainID blk_id, THREAD_ID tid);
 
-  virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid);
-  virtual void reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid);
-  virtual void reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid);
-  virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid);
+  virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool reinit = true);
+  virtual void reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool reinit = true);
+  virtual void reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool reinit = true);
+  virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool reinit = true);
   /*
    * Swap back underlying data storing stateful material properties
    */
@@ -859,7 +859,7 @@ protected:
 
   bool _print_linear_residuals; /// \todo{Remove after new output system implemented}
 
-  void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
+  void computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group);
 
 public:
   /**

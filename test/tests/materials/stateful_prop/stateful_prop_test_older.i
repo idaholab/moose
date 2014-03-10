@@ -32,6 +32,13 @@
 []
 
 [AuxKernels]
+  [./prop1_output_init]
+    type = MaterialRealAux
+    variable = prop1
+    property = thermal_conductivity
+    execute_on = initial
+  [../]
+
   [./prop1_output]
     type = MaterialRealAux
     variable = prop1
