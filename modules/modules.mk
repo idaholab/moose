@@ -112,7 +112,7 @@ ifeq ($(WATER_STEAM_EOS),yes)
 endif
 
 ifeq ($(ALL_MODULES),yes)
-  ifeq ($(INCLUDE_COMBINED),yes)
+  ifneq ($(INCLUDE_COMBINED),no)
     APPLICATION_DIR    := $(MOOSE_DIR)/modules/combined
     APPLICATION_NAME   := combined
     include $(FRAMEWORK_DIR)/app.mk
