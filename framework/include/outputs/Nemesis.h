@@ -22,7 +22,7 @@
 #include "libmesh/nemesis_io.h"
 #include "libmesh/parallel_mesh.h"
 
-// Forward declearations
+// Forward declarations
 class Nemesis;
 
 template<>
@@ -37,7 +37,7 @@ class Nemesis :
 public:
 
   /**
-   * Class consturctor
+   * Class constructor
    */
   Nemesis(const std::string & name, InputParameters);
 
@@ -48,7 +48,7 @@ public:
 
   /**
    * Overload the OutputBase::output method, this is required for Nemesis
-   * output due to the method utlized for outputing single/global parameters
+   * output due to the method utilized for outputing single/global parameters
    */
   virtual void output();
 
@@ -82,7 +82,7 @@ protected:
   /**
    * Returns the current filename, this method handles the -s000 suffix
    * common to NemesisII files.
-   * @return A string containg the current filename to be written
+   * @return A string containing the current filename to be written
    */
   std::string filename();
 
@@ -95,7 +95,7 @@ protected:
   /// Storage for names of the above scalar values
   std::vector<std::string> _global_names;
 
-  /// Current output filename; utlized by filename() to create the proper suffix
+  /// Current output filename; utilized by filename() to create the proper suffix
   unsigned int _file_num;
 
 private:

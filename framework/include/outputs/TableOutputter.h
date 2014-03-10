@@ -63,7 +63,7 @@ protected:
   //@}
 
   /**
-   * Popules the tables with scalar aux variables
+   * Populates the tables with scalar aux variables
    *
    * If an aux variable contains multiple components the output name for the
    * variable is appended with the component number (e.g., aux_0, aux_1, ...)
@@ -83,6 +83,7 @@ protected:
 
   /// Table containing postprocessor values and scalar aux variables (restartable)
   FormattedTable & _all_data_table;
+
 };
 
 #endif /* TABLEOUTPUTTER_H */

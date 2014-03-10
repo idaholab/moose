@@ -142,7 +142,7 @@ Nemesis::output()
   // Increment output call counter for the current file
   _nemesis_num++;
 
-  // Write the global variabls (populated by the output methods)
+  // Write the global variables (populated by the output methods)
   if (!_global_values.empty())
     _nemesis_io_ptr->write_global_data(_global_values, _global_names);
 }

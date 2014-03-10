@@ -114,7 +114,7 @@ Exodus::outputNodalVariables()
 void
 Exodus::outputElementalVariables()
 {
-  // Make sure the the file is ready for writting of elemental data
+  // Make sure the the file is ready for writing of elemental data
   if (!_initialized)
     outputEmptyTimestep();
 
@@ -190,12 +190,6 @@ Exodus::outputInput()
 void
 Exodus::output()
 {
-  std::cout << "Exodus::output() - " << _name << std::endl;
-  std::cout << "  filename() = " << filename() << std::endl;
-  std::cout << "  _file_num = " << _file_num << std::endl;
-  std::cout << "  _exodus_num = " << _exodus_num << std::endl;
-  std::cout << "  _exodus_io_ptr = " << _exodus_io_ptr << std::endl;
-
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();
   _global_values.clear();
@@ -203,7 +197,7 @@ Exodus::output()
   // Call the output methods
   OversampleOutputter::output();
 
-  // Write the global variabls (populated by the output methods)
+  // Write the global variables (populated by the output methods)
   if (!_global_values.empty())
   {
     if (!_initialized)

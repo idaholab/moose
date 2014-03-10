@@ -18,7 +18,7 @@
 // MOOSE includes
 #include "TableOutputter.h"
 
-// Forward declerations
+// Forward declarations
 class CSV;
 
 template<>
@@ -40,7 +40,7 @@ public:
    * The constructor performs all of the necessary initialization of the various
    * output lists required for the various output types.
    *
-   * @see initAvailable init seperate
+   * @see initAvailable init separate
    */
   CSV(const std::string & name, InputParameters & parameters);
 

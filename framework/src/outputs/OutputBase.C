@@ -118,14 +118,14 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
   // Set the sequence flag to true if it has not been set and 'use_displaced = true'
   if (!isParamValid("sequence") && _use_displaced)
     sequence(true);
-  
+
   // Initialize the available output
   initAvailableLists();
 
   // Seperate the hide/show list into components
   initShowHideLists(getParam<std::vector<VariableName> >("show"), getParam<std::vector<VariableName> >("hide"));
 
-  // Intialize the show/hide/output lists for each of the types of output
+  // Initialize the show/hide/output lists for each of the types of output
   initOutputList(_nonlinear_elemental);
   initOutputList(_nonlinear_nodal);
   initOutputList(_scalar);
@@ -202,7 +202,7 @@ OutputBase::outputInitial()
   }
 
   // Output the input, if desired and it has not been output previously
-  if ( _output_input )
+  if (_output_input)
   {
     // Produce warning if an input file does not exist
     // (parser/action system are not mandatory subsystems)
@@ -407,7 +407,7 @@ OutputBase::checkInterval()
   bool output = false;
 
   // Return true if the current step on the current output interval
-  if ( (_t_step % _interval) == 0)
+  if ((_t_step % _interval) == 0)
     output = true;
 
   // Return false if 'sync_only' is set to true
@@ -415,7 +415,7 @@ OutputBase::checkInterval()
     output = false;
 
   // If sync times are not skipped, return true if the current time is a sync_time
-  if ( _sync_times.find(_time) != _sync_times.end() )
+  if (_sync_times.find(_time) != _sync_times.end())
     output = true;
 
   // Return the output status
@@ -435,7 +435,7 @@ OutputBase::initAvailableLists()
   // Possible execution type flags
   ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
 
-  // Loop through each of the execution flsgs
+  // Loop through each of the execution flags
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
   {
     // Loop through each of the postprocessors
@@ -574,7 +574,7 @@ OutputBase::initOutputList(OutputData & data)
   else if (!show.empty() && hide.empty())
     output.assign(show.begin(), show.end());
 
-  // Only show is empty (show all execpt those hidden)
+  // Only show is empty (show all except those hidden)
   else if (show.empty() && !hide.empty())
     std::set_difference(avail.begin(), avail.end(), hide.begin(), hide.end(), std::back_inserter(output));
 

@@ -25,7 +25,7 @@ InputParameters validParams<GMVOutputter>()
 
   InputParameters params = validParams<OversampleOutputter>();
 
-  // Supress un-available parameters
+  // Suppress unavailable parameters
   params.suppressParameter<bool>("output_scalar_variables");
   params.suppressParameter<bool>("output_postprocessors");
   params.suppressParameter<bool>("scalar_as_nodal");

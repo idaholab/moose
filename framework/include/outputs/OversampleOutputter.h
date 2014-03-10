@@ -41,7 +41,7 @@ InputParameters validParams<OversampleOutputter>();
  * points to the correct mesh depending on the use of oversampling.
  *
  * The use of oversampling is triggered by setting the oversample input parameter to a
- * interger value greater than 0, indicating the number of refinements to perform.
+ * integer value greater than 0, indicating the number of refinements to perform.
  *
  * @see Exodus
  */
@@ -53,7 +53,7 @@ public:
   /**
    * Class constructor
    *
-   * If oversampling is desired the constuctor will perform the correct initialization
+   * If oversampling is desired the constructor will perform the correct initialization
    * required for oversampling.
    * @see initOversample()
    */

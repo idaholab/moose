@@ -26,7 +26,7 @@ InputParameters validParams<Tecplot>()
   // Get the base class parameters
   InputParameters params = validParams<OversampleOutputter>();
 
-  // Supress un-available and meaningless parameters for this object
+  // Suppress unavailable and meaningless parameters for this object
   params.suppressParameter<bool>("output_nodal_variables");
   params.suppressParameter<bool>("output_elemental_variables");
   params.suppressParameter<bool>("output_scalar_variables");

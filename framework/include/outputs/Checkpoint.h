@@ -22,7 +22,7 @@
 #include "MaterialPropertyIO.h"
 #include "RestartableDataIO.h"
 
-// Forward declerations
+// Forward declarations
 class Checkpoint;
 struct CheckpointFileNames;
 

@@ -27,7 +27,7 @@
 template<>
 InputParameters validParams<TableOutputter>()
 {
-  // Fit mode selection Enun
+  // Fit mode selection Enum
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Base class parameters
@@ -102,7 +102,7 @@ TableOutputter::outputScalarVariables()
       _all_data_table.addData(*it, variable[0], _time);
     }
 
-    // Multi-component variables are appened with the component index
+    // Multi-component variables are appended with the component index
     else
       for (unsigned int i = 0; i < n; ++i)
       {

@@ -27,7 +27,7 @@ InputParameters validParams<OversampleOutputter>()
   InputParameters params = validParams<FileOutputter>();
 
   params.addParam<bool>("oversample", false, "Set to true to enable oversampling");
-  params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling (0 disables oversampling)");
+  params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling");
   params.addParam<Point>("position", "Set a positional offset, this vector will get added to the nodal cooardinates to move the domain.");
   params.addParam<bool>("append_oversample", false, "Append '_oversample' to the output file base");
   params.addParam<MeshFileName>("file", "The name of the mesh file to read, for oversampling");
@@ -150,7 +150,7 @@ OversampleOutputter::init()
   // Reference the system from which we are copying
   EquationSystems & source_es = _problem_ptr->es();
 
-  // Initialize the _mesh_functions vectort
+  // Initialize the _mesh_functions vector
   unsigned int num_systems = source_es.n_systems();
   _mesh_functions.resize(num_systems);
 

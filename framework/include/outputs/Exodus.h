@@ -22,7 +22,7 @@
 #include "libmesh/exodusII.h"
 #include "libmesh/exodusII_io.h"
 
-// Forward declearations
+// Forward declarations
 class Exodus;
 
 template<>
@@ -37,7 +37,7 @@ class Exodus :
 public:
 
   /**
-   * Class consturctor
+   * Class constructor
    */
   Exodus(const std::string & name, InputParameters);
 
@@ -48,7 +48,7 @@ public:
 
   /**
    * Overload the OutputBase::output method, this is required for ExodusII
-   * output due to the method utlized for outputing single/global parameters
+   * output due to the method utilized for outputing single/global parameters
    */
   virtual void output();
 
@@ -87,7 +87,7 @@ protected:
   /**
    * Returns the current filename, this method handles the -s000 suffix
    * common to ExodusII files.
-   * @return A string containg the current filename to be written
+   * @return A string containing the current filename to be written
    */
   std::string filename();
 
