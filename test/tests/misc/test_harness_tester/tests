@@ -54,6 +54,13 @@
     min_threads = 2
   [../]
 
+  [./test_post_cmd_test]
+    type = 'RunApp'
+    input = '2d_diffusion_test.i'
+    post_command = 'echo string_to_test_post_command'
+    expect_out = 'string_to_test_post_command'
+  [../]
+
 #  # Turn these tests on for debugging
 #  [./test_skip_depend_test]
 #    type = 'Exodiff'
