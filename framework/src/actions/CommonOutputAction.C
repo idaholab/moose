@@ -37,6 +37,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("gmv", false, "Output the results using the default settings for GMV output");
    params.addParam<bool>("tecplot", false, "Output the results using the default settings for Tecplot output");
    params.addParam<bool>("gnuplot", false, "Output the scalar and postprocessor results using the default settings for GNUPlot output");
+   params.addParam<bool>("solution_history", false, "Print a solution history file (.slh) using the default settings");
 
    // Common parameters
    params.addParam<bool>("output_initial", false,  "Request that the initial condition is output to the solution file");
@@ -101,6 +102,8 @@ CommonOutputAction::act()
   if (getParam<bool>("gnuplot"))
     create("GNUPlot");
 
+  if (getParam<bool>("solution_history"))
+    create("SolutionHistory");
 }
 
 void
