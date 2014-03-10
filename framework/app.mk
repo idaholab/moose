@@ -59,7 +59,7 @@ else
   app_plugin_deps :=
 endif
 
-app_LIBS       += $(app_LIB)
+app_LIBS       := $(app_LIB) $(app_LIBS)
 app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
 app_INCLUDES   += $(app_INCLUDE)
 app_DIRS       += $(APPLICATION_DIR)
@@ -75,7 +75,7 @@ endif
 # Target-specific Variable Values (See GNU-make manual)
 $(app_LIB): curr_objs := $(app_objects)
 $(app_LIB): curr_dir := $(APPLICATION_DIR)
-$(app_LIB): $(app_objects) $(app_LIBS_other) $(app_plugin_deps)
+$(app_LIB): $(app_objects) $(app_plugin_deps)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib
@@ -88,28 +88,3 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object)
 
 # Clang static analyzer
 sa:: $(app_analyzer)
-
-#cleanall:: curr_dir := $(APPLICATION_DIR)
-#cleanall::
-#	make -C $(curr_dir) clean
-#cleanall:
-#	@ $(shell find $(app_DIRS))
-#	@echo $(app_DIRS)
-
-delete_list += $(APPLICATION_NAME)-* lib$(APPLICATION_NAME)-*
-
-# Clean only the opt intermediate files
-#cleanopt::
-#	@rm -fr $(APPLICATION_NAME)-opt* lib$(APPLICATION_NAME)-opt*
-#	@$(shell find . \( -name "*opt.o" -or -name "*opt.d" \) -exec rm '{}' \;)
-
-# Clean only the dbg intermediate files
-#cleandbg::
-#	@rm -fr $(APPLICATION_NAME)-dbg* lib$(APPLICATION_NAME)-dbg*
-#	@$(shell find . \( -name "*dbg.o" -or -name "*dbg.d" \) -exec rm '{}' \;)
-
-## Clean only the prof intermediate files
-#cleanpro::
-#	@rm -fr $(APPLICATION_NAME)-pro* lib$(APPLICATION_NAME)-pro*
-#	@$(shell find . \( -name "*pro.o" -or -name "*pro.d" \) -exec rm '{}' \;)
-
