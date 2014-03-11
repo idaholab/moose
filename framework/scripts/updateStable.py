@@ -9,7 +9,7 @@ moose_stable = 'https://hpcsc.inl.gov/svn/herd/trunk/moose'
 moose_devel = 'https://hpcsc.inl.gov/svn/herd/trunk/devel/moose'
 
 # We exclude these applications:
-excluded_applications = set(['r7_moose', 'rattlesnake'])
+excluded_applications = set(['r7_moose', 'rattlesnake', 'elk'])
 
 # Comment Syntax Coverage command:
 comment_syntax_cmd = [ 'moose/framework/contrib/nsiqcppstyle/nsiqcppstyle', '--quiet', '--basedir=/moose/framework', '-f', 'moose/framework/contrib/nsiqcppstyle/syntax_style', '--output=html', '--url=https://hpcsc.inl.gov/moose/browser/trunk', '-o', 'output.html', 'moose']
