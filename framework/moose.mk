@@ -115,33 +115,36 @@ $(exodiff_APP): $(exodiff_objfiles)
 # Maintenance
 #
 .PHONY: clean clobber cleanall echo_include echo_library
-delete_list := $(moose_LIB) $(exodiff_APP) $(pcre_LIB) libmoose-$(METHOD).* $(pcre_DIR)/libpcre-$(METHOD).*
+app_LIB      := $(moose_LIBS) $(exodiff_APP)
 
 clean::
-	@rm -fr $(delete_list)
+	@rm -fr $(app_LIB)
 	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                           -or -name "*.lo" -or -name "*.la" -or -name "*.plist" \) -exec rm '{}' \;)
+                           -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \) -exec rm '{}' \;)
 	@$(shell find . \( -name *.gch \) | xargs rm -rf)
 	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
 
 clobber::
-	@rm -fr $(delete_list)
+	@rm -fr $(app_LIB)
 	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                           -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "*.lo" -or -name "*.la" \
-			   -or -name "*.plist" \) -exec rm '{}' \;)
+                           -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \
+                           -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \) -exec rm '{}' \;)
 	@$(shell find . \( -name *.gch \) | xargs rm -rf)
 	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
 
 cleanall::
 	@echo "Cleaning in:\n" $(patsubst %,%"\n",$(app_DIRS))
-	@rm -fr $(delete_list)
-	@$(shell find $(app_DIRS) \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                           -or -name "*.lo" -or -name "*.la" -or -name "*.plist" \) -exec rm '{}' \;)
-	@$(shell find $(app_DIRS) \( -name *.gch \) | xargs rm -rf)
-	@$(shell find $(app_DIRS) -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
+	@rm -fr $(app_LIBS) $(moose_LIBS) $(exodiff_APP)
+	@for dir in $(app_DIRS); \
+	do \
+		find $${dir} \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
+                           -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \) -exec rm '{}' \; ; \
+		find $${dir} -name *.gch | xargs rm -rf; \
+		find $${dir} -type d -name .libs | xargs rm -rf; \
+	done
 
 echo_include:
-	@echo $(libmesh_INCLUDE)
+	@echo $(app_INCLUDES) $(libmesh_INCLUDE)
 
 echo_library:
-	@echo $(app_libraries)
+	@echo $(app_LIBS)
