@@ -43,7 +43,7 @@ void
 AddOutputAction::act()
 {
   // Get a reference to the OutputWarehouse
-  OutputWarehouse & output_warehouse = _problem->getOutputWarehouse();
+  OutputWarehouse & output_warehouse = _app.getOutputWarehouse();
 
   // Get the output object name
   std::string object_name = getShortName();

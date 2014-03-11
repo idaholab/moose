@@ -565,7 +565,7 @@ void FEProblem::initialSetup()
     reinitScalars(tid);
 
   // Init function and Initial setup of output objects;
-  getOutputWarehouse().initialSetup();
+  _app.getOutputWarehouse().initialSetup();
 }
 
 void FEProblem::timestepSetup()
@@ -603,7 +603,7 @@ void FEProblem::timestepSetup()
 
 
   // Timestep setup of output objects
-  getOutputWarehouse().timestepSetup();
+  _app.getOutputWarehouse().timestepSetup();
 }
 
 void
@@ -3582,7 +3582,7 @@ FEProblem::meshChanged()
 
   // Indicate that the Mesh has changed to the Output objects
   _out.meshChanged();
-  getOutputWarehouse().meshChanged();
+  _app.getOutputWarehouse().meshChanged();
 
   _has_jacobian = false;                    // we have to recompute jacobian when mesh changed
 }

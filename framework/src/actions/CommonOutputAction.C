@@ -66,7 +66,7 @@ void
 CommonOutputAction::act()
 {
   // Store the common output parameters in the OutputWarehouse
-  _problem->getOutputWarehouse().setCommonParameters(&_pars);
+  _app.getOutputWarehouse().setCommonParameters(&_pars);
 
   // Create the actions for the short-cut methods
   if (getParam<bool>("exodus"))

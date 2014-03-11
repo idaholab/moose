@@ -276,14 +276,6 @@ MultiApp::appProblem(unsigned int app)
   return problem;
 }
 
-OutputWarehouse &
-MultiApp::appOutputWarehouse(unsigned int i)
-{
-  FEProblem * problem = appProblem(i);
-  return problem->getOutputWarehouse();
-}
-
-
 const UserObject &
 MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
 {
@@ -422,7 +414,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (!_app.getOutputFileNumbers().empty())
     m = _app.getOutputFileNumbers();
   else
-    m = _fe_problem->getOutputWarehouse().getFileNumbers();
+    m = _app.getOutputWarehouse().getFileNumbers();
 
   app->setGlobalTimeOffset(start_time);
   app->setInputFileName(input_file);

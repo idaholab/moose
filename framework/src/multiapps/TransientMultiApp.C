@@ -140,7 +140,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
   {
 
     FEProblem * problem = appProblem(_first_local_app + i);
-    OutputWarehouse & output_warehouse = problem->getOutputWarehouse();
+    OutputWarehouse & output_warehouse = _apps[i]->getOutputWarehouse();
 
     Transient * ex = _transient_executioners[i];
 
@@ -421,13 +421,13 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
     Real time = _transient_executioners[local_app]->getTime() + _apps[local_app]->getGlobalTimeOffset();
 
     // Extract the file numbers from the output, so that the numbering is maintained after reset
-    std::map<std::string, unsigned int> m = appOutputWarehouse(global_app).getFileNumbers();
+    std::map<std::string, unsigned int> m = _apps[local_app]->getOutputWarehouse().getFileNumbers();
 
     // Reset the Multiapp
     MultiApp::resetApp(global_app, time);
 
     // Reset the file numbers of the newly reset apps
-    appOutputWarehouse(global_app).setFileNumbers(m);
+    _apps[local_app]->getOutputWarehouse().setFileNumbers(m);
 
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -449,7 +449,7 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
 
   // Get the FEProblem and OutputWarehouse for the current MultiApp
   FEProblem * problem = appProblem(_first_local_app + i);
-  OutputWarehouse & output_warehouse = problem->getOutputWarehouse();
+  OutputWarehouse & output_warehouse = _apps[i]->getOutputWarehouse();
 
   if (!output_initial)
   {
@@ -484,7 +484,7 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
 
   if (_detect_steady_state || _tolerate_failure)
   {
-    problem->getOutputWarehouse().allowOutput(false);
+    _apps[i]->getOutputWarehouse().allowOutput(false);
     ex->allowOutput(false);
   }
 }

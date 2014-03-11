@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "CoupledExecutioner.h"
 #include "CoupledProblem.h"
 #include "Factory.h"
@@ -21,7 +22,7 @@
 #include "Parser.h"
 #include "Action.h"
 #include "ActionFactory.h"
-
+#include "OutputWarehouse.h"
 
 template<>
 InputParameters validParams<CoupledExecutioner>()
@@ -50,6 +51,7 @@ CoupledExecutioner::~CoupledExecutioner()
     delete _awhs[i];
     delete _parsers[i];
     delete _executioners[i];
+    delete _owhs[i];
     // Note: _fe_problems are destroyed by executioners' destructors
   }
 
@@ -76,6 +78,7 @@ CoupledExecutioner::addFEProblem(const std::string & name, const FileName & file
 {
   ActionWarehouse * awh = new ActionWarehouse(_app, _app.syntax(), _app.getActionFactory());
   Parser * parser = new Parser(_app, *awh);
+  OutputWarehouse * owh = new OutputWarehouse();
 
   parser->parse(file_name);
   awh->build();
@@ -84,6 +87,7 @@ CoupledExecutioner::addFEProblem(const std::string & name, const FileName & file
   _input_file_names.push_back(file_name);
   _awhs.push_back(awh);
   _parsers.push_back(parser);
+  _owhs.push_back(owh);
 }
 
 void
@@ -158,9 +162,12 @@ CoupledExecutioner::build()
 
   for (unsigned int i = 0; i < n; i++)
   {
-      /* Need to set the input filename for the App, so that when AddOutputAction gets the
-         default output filename it is correct */
+    // Set the input filename for the App, so that when AddOutputAction gets the default output filename that is correct
     _awhs[i]->mooseApp().setInputFileName(_input_file_names[i]);
+
+    // Set the App to return a reference to the OutputWarehouse stored in this Executioner rather than in the MooseApp
+    _awhs[i]->mooseApp().setOutputWarehouse(_owhs[i]);
+
     _awhs[i]->executeAllActions();
     _executioners[i] = _awhs[i]->executioner();
     _fe_problems[i] = _awhs[i]->problem();

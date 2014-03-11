@@ -93,12 +93,6 @@ public:
   FEProblem * appProblem(unsigned int app);
 
   /**
-   * Get a reference to the output warehouse of a sub app
-   * @param i The global app number
-   */
-  OutputWarehouse & appOutputWarehouse(unsigned int i);
-
-  /**
    * Get a UserObject base for a specific global app
    * @param app The global app number you want to get a UserObject from.
    * @param name The name of the UserObject.

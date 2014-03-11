@@ -22,6 +22,7 @@ class CoupledProblem;
 class ActionWarehouse;
 class FEProblem;
 class Parser;
+class OutputWarehouse;
 
 
 template<>
@@ -91,6 +92,9 @@ protected:
 
   /// List of input file names
   std::vector<std::string> _input_file_names;
+
+  /// Vector of OutputWarehouse object pointers
+  std::vector<OutputWarehouse *> _owhs;
 
   /**
    * Create an action that adds a variable

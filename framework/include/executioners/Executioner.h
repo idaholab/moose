@@ -117,6 +117,9 @@ protected:
 
   // Splitting
   std::vector<std::string> _splitting;
+
+  /// Reference to the OutputWarehouse object
+  OutputWarehouse & _output_warehouse;
 };
 
 #endif //EXECUTIONER_H

@@ -219,9 +219,6 @@ protected:
 
   FEProblem & _problem;
 
-  /// Reference to OutputWarehouse
-  OutputWarehouse & _output_warehouse;
-
   MooseEnum _time_scheme;
   TimeStepper * _time_stepper;
 
