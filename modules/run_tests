@@ -7,8 +7,9 @@ os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
 #### Set the name of the application here and moose directory relative to the application
 app_name = 'combined/modules'
 
-MOOSE_DIR = os.path.abspath(os.path.join('..'))
-FRAMEWORK_DIR = os.path.abspath(os.path.join('..', 'framework'))
+MODULE_DIR = os.path.abspath('.')
+MOOSE_DIR = os.path.abspath(os.path.join(MODULE_DIR, '..'))
+FRAMEWORK_DIR = os.path.abspath(os.path.join(MOOSE_DIR, 'framework'))
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
