@@ -40,6 +40,11 @@ plugins	    += $(patsubst %.f90, %-$(METHOD).plugin, $(f90plugfiles))
 main_src    := $(APPLICATION_DIR)/src/main.C    # Main must be located here!
 main_object := $(patsubst %.C, %.$(obj-suffix), $(main_src))
 
+# dependency files
+app_deps    := $(patsubst %.C, %.$(obj-suffix).d, $(srcfiles)) \
+               $(patsubst %.c, %.$(obj-suffix).d, $(csrcfiles)) \
+               $(patsubst %.C, %.$(obj-suffix).d, $(main_src))
+
 # header files
 include_dirs	:= $(shell find $(APPLICATION_DIR)/include -type d | grep -v "\.svn")
 app_INCLUDE     := $(foreach i, $(include_dirs), -I$(i)) $(ADDITIONAL_INCLUDES)
@@ -63,6 +68,9 @@ app_LIBS       := $(app_LIB) $(app_LIBS)
 app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
 app_INCLUDES   += $(app_INCLUDE)
 app_DIRS       += $(APPLICATION_DIR)
+
+# dependencies
+-include $(app_deps)
 
 ###############################################################################
 # Build Rules:
