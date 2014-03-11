@@ -52,7 +52,7 @@ DIV.tabs FORM
 DIV.tabs A
 {
    float            : left;
-   font-size        : 80%;
+   font-size        : 100%;
    font-weight      : bold;
    text-decoration  : none;
 }
@@ -65,7 +65,7 @@ DIV.tabs A:hover
 DIV.tabs A:link, DIV.tabs A:visited,
 DIV.tabs A:active, DIV.tabs A:hover
 {
-       color: #1A419D;
+       color: #777777;
 }
 
 DIV.tabs SPAN
@@ -87,7 +87,7 @@ DIV.tabs #MSearchBox
 
 DIV.tabs TD
 {
-   font-size        : 80%;
+   font-size        : 100%;
    font-weight      : bold;
    text-decoration  : none;
 }
