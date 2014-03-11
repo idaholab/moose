@@ -33,7 +33,7 @@ public:
                     bool do_normal_smoothing,
                     Real normal_smoothing_distance,
                     PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
-                    std::vector<FEBase * > & fes,
+                    std::vector<std::vector<FEBase *> > & fes,
                     FEType & fe_type,
                     NearestNodeLocator & nearest_node,
                     std::map<unsigned int, std::vector<unsigned int> > & node_to_elem_map,
@@ -67,7 +67,7 @@ protected:
   MooseVariable * _nodal_normal_y;
   MooseVariable * _nodal_normal_z;
 
-  std::vector<FEBase * > & _fes;
+  std::vector<std::vector<FEBase *> > & _fes;
 
   FEType & _fe_type;
 

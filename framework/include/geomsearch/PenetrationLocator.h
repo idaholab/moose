@@ -99,8 +99,8 @@ public:
 
   FEType _fe_type;
 
-  // One FE for each thread
-  std::vector<FEBase * > _fe;
+  // One FE for each thread and for each dimension
+  std::vector<std::vector<FEBase *> > _fe;
 
   NearestNodeLocator & _nearest_node;
 

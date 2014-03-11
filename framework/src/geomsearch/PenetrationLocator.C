@@ -50,11 +50,16 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
     _normal_smoothing_distance(0.0),
     _normal_smoothing_method(NSM_EDGE_BASED)
 {
-  // Preconstruct an FE object for each thread we're going to use
+  // Preconstruct an FE object for each thread we're going to use and for each lower-dimensional element
   // This is a time savings so that the thread objects don't do this themselves multiple times
   _fe.resize(libMesh::n_threads());
   for(unsigned int i=0; i < libMesh::n_threads(); i++)
-    _fe[i] = FEBase::build(_mesh.dimension()-1, _fe_type).release();
+  {
+    unsigned int n_dims = _mesh.dimension();
+    _fe[i].resize(n_dims);
+    for (unsigned int dim = 0; dim < n_dims; dim++)
+      _fe[i][dim] = FEBase::build(dim, _fe_type).release();
+  }
 
   if (_normal_smoothing_method == NSM_NODAL_NORMAL_BASED)
   {
@@ -70,7 +75,8 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
 PenetrationLocator::~PenetrationLocator()
 {
   for(unsigned int i=0; i < libMesh::n_threads(); i++)
-    delete _fe[i];
+    for (unsigned int dim = 0; dim < _fe[i].size(); dim++)
+      delete _fe[i][dim];
 
   for (std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_info.begin(); it != _penetration_info.end(); ++it)
     delete it->second;
