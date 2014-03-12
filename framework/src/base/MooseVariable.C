@@ -202,18 +202,21 @@ MooseVariable::reinitNodeNeighbor()
     _is_defined_neighbor = false;
 }
 
-
 void
 MooseVariable::reinitAux()
 {
+  /* FIXME: this method is only for elemental auxiliary variables, so
+   * we may want to rename it */
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
   if (_elem->n_dofs(_sys.number(), _var_num) > 0)
   {
+    // FIXME: check if the following is equivalent with '_nodal_dof_index = _dof_indices[0];'?
     _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
-    _nodal_u.resize(1);
 
+    _nodal_u.resize(_dof_indices.size());
     const NumericVector<Real> & current_solution = *_sys.currentSolution();
-    _nodal_u[0] = current_solution(_nodal_dof_index);
+    for (unsigned int i=0; i<_dof_indices.size(); i++)
+      _nodal_u[i] = current_solution(_dof_indices[i]);
 
     _is_defined = true;
   }
@@ -230,11 +233,12 @@ MooseVariable::reinitAuxNeighbor()
     if (_neighbor->n_dofs(_sys.number(), _var_num) > 0)
     {
       _nodal_dof_index_neighbor = _neighbor->dof_number(_sys.number(), _var_num, 0);
-      _nodal_u_neighbor.resize(1);
 
+      _nodal_u_neighbor.resize(_dof_indices_neighbor.size());
       const NumericVector<Real> & current_solution = *_sys.currentSolution();
-      _nodal_u_neighbor[0] = current_solution(_nodal_dof_index_neighbor);
-
+      for (unsigned int i=0; i<_dof_indices_neighbor.size(); i++)
+        _nodal_u_neighbor[i] = current_solution(_dof_indices_neighbor[i]);
+      
       _is_defined_neighbor = true;
     }
     else
@@ -277,20 +281,32 @@ void
 MooseVariable::insert(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)
-    residual.set(_nodal_dof_index, _nodal_u[0]);
+  {
+    for (unsigned int i=0; i<_nodal_u.size(); i++)
+      residual.set(_dof_indices[i], _nodal_u[i]);
+  }
 
   if (_has_nodal_value_neighbor)
-    residual.set(_nodal_dof_index_neighbor, _nodal_u_neighbor[0]);
+  {
+    for (unsigned int i=0; i<_nodal_u_neighbor.size(); i++)
+      residual.set(_dof_indices_neighbor[i], _nodal_u_neighbor[0]);
+  }
 }
 
 void
 MooseVariable::add(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)
-    residual.add(_nodal_dof_index, _nodal_u[0]);
+  {
+    for (unsigned int i=0; i<_nodal_u.size(); i++)
+      residual.add(_dof_indices[i], _nodal_u[i]);
+  }
 
   if (_has_nodal_value_neighbor)
-    residual.add(_nodal_dof_index_neighbor, _nodal_u_neighbor[0]);
+  {
+    for (unsigned int i=0; i<_nodal_u_neighbor.size(); i++)
+      residual.add(_dof_indices_neighbor[i], _nodal_u_neighbor[0]);
+  }
 }
 
 const VariablePhiValue &
@@ -1274,6 +1290,47 @@ MooseVariable::computeNodalNeighborValues()
 }
 
 void
+MooseVariable::setNodalValue(const DenseVector<Number> & values)
+{
+  for (unsigned int i=0; i<values.size(); i++)
+    _nodal_u[i] = values(i);
+  
+  _has_nodal_value = true;
+
+  if(isNodal())
+    mooseError("Variable " + name() + " has to be nodal!");
+  else
+  {
+    for(unsigned int qp=0; qp<_u.size(); qp++)
+    {
+      _u[qp] = 0;
+      for (unsigned int i=0; i < _nodal_u.size(); i++)
+        _u[qp] += _phi[i][qp] * _nodal_u[i];
+    }
+  }
+}
+
+void
+MooseVariable::setNodalValueNeighbor(const DenseVector<Number> & values)
+{
+  for (unsigned int i=0; i<values.size(); i++)
+    _nodal_u_neighbor[i] = values(i);
+  _has_nodal_value_neighbor = true;
+
+  if(isNodal())
+    mooseError("Variable " + name() + " has to be nodal!");
+  else
+  {
+    for(unsigned int qp=0; qp<_u_neighbor.size(); qp++)
+    {
+      _u_neighbor[qp] = 0;
+      for (unsigned int i=0; i < _nodal_u_neighbor.size(); i++)
+        _u_neighbor[qp] = _phi_face_neighbor[i][qp] * _nodal_u_neighbor[i];
+    }
+  }
+}
+
+void
 MooseVariable::setNodalValue(Number value, unsigned int idx/* = 0*/)
 {
   _nodal_u[idx] = value;                  // update variable nodal value
@@ -1367,11 +1424,10 @@ MooseVariable::getValue(const Elem * elem, const std::vector<std::vector<Real> >
 }
 
 Real
-MooseVariable::getElementalValue(const Elem * elem) const
+MooseVariable::getElementalValue(const Elem * elem, unsigned int idx) const
 {
   std::vector<dof_id_type> dof_indices;
   _dof_map.dof_indices(elem, dof_indices, _var_num);
 
-  mooseAssert(dof_indices.size() == 1, "Wrong size for dof indices");
-  return (*_sys.currentSolution())(dof_indices[0]);
+  return (*_sys.currentSolution())(dof_indices[idx]);
 }
