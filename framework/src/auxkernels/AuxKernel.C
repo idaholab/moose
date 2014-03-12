@@ -84,6 +84,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _u(_nodal ? _var.nodalSln() : _var.sln()),
     _u_old(_nodal ? _var.nodalSlnOld() : _var.slnOld()),
     _u_older(_nodal ? _var.nodalSlnOlder() : _var.slnOlder()),
+    _test(_var.phi()),
 
     _current_elem(_var.currentElem()),
     _current_side(_var.currentSide()),
@@ -140,22 +141,54 @@ AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
 void
 AuxKernel::compute()
 {
-  Real value = 0;
-  if (isNodal())
+  if (isNodal())           /* nodal variables */
   {
     if (_var.isNodalDefined())
     {
       _qp = 0;
-      value = computeValue();
-      _var.setNodalValue(value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
+      Real value = computeValue();
+      // update variable data, which is referenced by other kernels, so the value is up-to-date
+      _var.setNodalValue(value);
     }
   }
-  else
+  else                     /* elemental variables */
   {
-    for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      value += _JxW[_qp]*_coord[_qp]*computeValue();
-    value /= (_bnd ? _current_side_volume : _current_elem_volume);
-    _var.setNodalValue(value); // update the variable data refernced by other kernels.  Note that this will update the values at the quadrature points too (because this is an Elemental variable)
+    _n_local_dofs = _var.numberOfDofs();
+
+    if (_n_local_dofs==1)  /* p0 */
+    {
+      Real value = 0;
+      for (_qp=0; _qp<_qrule->n_points(); _qp++)
+        value += _JxW[_qp]*_coord[_qp]*computeValue();
+      value /= (_bnd ? _current_side_volume : _current_elem_volume);
+      // update the variable data refernced by other kernels.
+      // Note that this will update the values at the quadrature points too
+      // (because this is an Elemental variable)
+      _var.setNodalValue(value);
+    }
+    else                   /* high-order */
+    {
+      _local_re.resize(_n_local_dofs);
+      _local_re.zero();
+      _local_ke.resize(_n_local_dofs, _n_local_dofs);
+      _local_ke.zero();
+
+      // assemble the local mass matrix and the load
+      for (unsigned int i = 0; i < _test.size(); i++)
+        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        {
+          Real t = _JxW[_qp] * _coord[_qp] * _test[i][_qp];
+          _local_re(i) += t * computeValue();
+          for (unsigned int j = 0; j < _test.size(); j++)
+            _local_ke(i, j) += t * _test[j][_qp];
+        }
+
+      // mass matrix is always SPD
+      _local_sol.resize(_n_local_dofs);
+      _local_ke.cholesky_solve(_local_re, _local_sol);
+
+      _var.setNodalValue(_local_sol);
+    }
   }
 }
 
