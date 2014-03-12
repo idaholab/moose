@@ -1197,6 +1197,11 @@ tr.heading h2 {
         margin-bottom: 4px;
 }
 
+.ttc {
+        position: absolute;
+        display: none;
+}
+
 @media print
 {
   #top { display: none; }
