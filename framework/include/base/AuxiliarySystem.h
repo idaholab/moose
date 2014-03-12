@@ -110,6 +110,11 @@ public:
    */
   NumericVector<Number> & addVector(const std::string & vector_name, const bool project, const ParallelType type);
 
+  /**
+   * Get the minimum quadrature order for evaluating elemental auxiliary variables
+   */
+  virtual Order getMinQuadratureOrder();
+
 protected:
   void computeScalarVars(std::vector<AuxWarehouse> & auxs);
   void computeNodalVars(std::vector<AuxWarehouse> & auxs);
