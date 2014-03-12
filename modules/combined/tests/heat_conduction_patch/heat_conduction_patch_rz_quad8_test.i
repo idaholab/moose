@@ -108,11 +108,13 @@
 
 [] # Executioner
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out_rz_quad8
-  interval = 1
   output_initial = true
   exodus = true
-  perf_log = true
-[] # Output
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+[] # Outputs

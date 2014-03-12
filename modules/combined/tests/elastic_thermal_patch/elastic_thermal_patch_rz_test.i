@@ -260,12 +260,16 @@
   end_time = 1.0
 [] # Executioner
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out_rz
-  interval = 1
   output_initial = true
-  elemental_as_nodal = true
-  exodus = true
-  perf_log = true
-[] # Output
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+[] # Outputs

@@ -113,20 +113,21 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = circle
   output_initial = true
-  interval = 1
-  exodus = false
-  perf_log = true
-
-  [./OverSampling]
-    exodus = true
+  exodus = true
+  [./oversampled]
+    type = Exodus
+    oversample = true
     refinements = 3
-    output_initial = true
-    interval = 1
+    append_oversample = true
   [../]
-
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
 
 

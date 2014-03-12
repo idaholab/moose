@@ -145,25 +145,25 @@
     type = RichardsMass
     variable = pwater
     execute_on = timestep_begin
-    output = None
+    outputs = None
   [../]
   [./mgas_init]
     type = RichardsMass
     variable = pgas
     execute_on = timestep_begin
-    output = None
+    outputs = None
   [../]
   [./mwater_fin]
     type = RichardsMass
     variable = pwater
     execute_on = timestep
-    output = None
+    outputs = None
   [../]
   [./mgas_fin]
     type = RichardsMass
     variable = pgas
     execute_on = timestep
-    output = None
+    outputs = None
   [../]
 
   [./mass_error_water]
@@ -179,13 +179,13 @@
     type = PointValue
     point = '0 0 0'
     variable = pwater
-    output = None
+    outputs = None
   [../]
   [./pw_right]
     type = PointValue
     point = '1 0 0'
     variable = pwater
-    output = None
+    outputs = None
   [../]
   [./error_water]
     type = PlotFunction
@@ -196,13 +196,13 @@
     type = PointValue
     point = '0 0 0'
     variable = pgas
-    output = None
+    outputs = None
   [../]
   [./pg_right]
     type = PointValue
     point = '1 0 0'
     variable = pgas
-    output = None
+    outputs = None
   [../]
   [./error_gas]
     type = PlotFunction
@@ -277,12 +277,14 @@
     time_t = '0 1E-1 1E0 1E1 1E2 1E3 1E4 1E5 1E6'
 []
 
-[Output]
+[Outputs]
   file_base = gh18
   output_initial = true
+  output_final = true
   interval = 100000
   exodus = true
-  perf_log = false
-  linear_residuals = false
-  postprocessor_csv = false
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

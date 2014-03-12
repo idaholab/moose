@@ -276,12 +276,16 @@
     time_t = '0 1E-1 1E0 1E1 1E2 1E3 1E4 1E5 1E6'
 []
 
-[Output]
+[Outputs]
   file_base = gh16
   output_initial = true
+  output_final = true
   interval = 100000
   exodus = true
+  csv = true
   perf_log = false
-  linear_residuals = false
-  postprocessor_csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

@@ -199,10 +199,15 @@
   nl_abs_step_tol = 1e-10
 []
 
-[Output]
+[Outputs]
   file_base = out
   output_initial = true
   exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
 
 [TensorMechanics]
@@ -212,4 +217,3 @@
     disp_x = ux
   [../]
 []
-

@@ -130,15 +130,15 @@
   end_time = 1.0
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out_smp
-  interval = 1
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
   # To ensure that the test doesn't start requiring more iterations.
-  iteration_plot_start_time = 0.0
+  #iteration_plot_start_time = 0.0
 []
-
-

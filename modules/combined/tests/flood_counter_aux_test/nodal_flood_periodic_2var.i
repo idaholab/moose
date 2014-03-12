@@ -173,10 +173,12 @@
   num_steps = 5
 []
 
-[Output]
+[Outputs]
   file_base = out_2var
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-

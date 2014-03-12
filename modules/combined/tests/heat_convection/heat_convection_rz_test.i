@@ -144,12 +144,14 @@
 
 []      # Executioner END
 
-[Output]    # Output Start
-  linear_residuals = true
+[Outputs]    # Output Start
   file_base =  out_rz
-  interval = 1
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
  []      # Output END
 #      # Input file END

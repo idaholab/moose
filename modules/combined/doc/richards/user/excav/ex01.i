@@ -231,12 +231,14 @@
   solve_type = NEWTON
 []
 
-[Output]
+[Outputs]
   file_base = ex01
-  output_initial = true
-  interval = 1
+  output_intial = true
   exodus = true
-  perf_log = true
-  linear_residuals = false
-  postprocessor_csv = false
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

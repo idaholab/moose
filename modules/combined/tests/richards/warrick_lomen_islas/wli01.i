@@ -145,11 +145,14 @@
 []
 
 
-[Output]
+[Outputs]
   file_base = wli01
   interval = 10000
   output_initial = true
+  output_final = true
   exodus = true
-  perf_log = true
-  linear_residuals = false
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

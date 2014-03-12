@@ -116,14 +116,15 @@
   dt = 0.01
   end_time = 2
 []
-
-[Output]
+[Outputs]
   file_base = langmuir_desorption
   output_initial = true
   interval = 10
-  screen_interval = 10
-  exodus = false
-  perf_log = false
-  postprocessor_csv = true
-  linear_residuals = false
+  exodus = true
+  csv = 10
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
+[] # Outputs
 []

@@ -192,11 +192,14 @@
 []
 
 
-[Output]
+[Outputs]
   file_base = rsc01
   interval = 100000
   output_initial = true
+  output_final = true
   exodus = true
-  perf_log = true
-  linear_residuals = false
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

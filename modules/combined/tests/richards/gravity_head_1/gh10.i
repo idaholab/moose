@@ -116,10 +116,12 @@
   end_time = 1E10
 []
 
-[Output]
+[Outputs]
   file_base = gh10
   output_initial = false
   exodus = true
-  perf_log = false
-  linear_residuals = false
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

@@ -282,12 +282,12 @@
   solve_type = Newton
 []
 
-[Output]
+[Outputs]
   file_base = gh04
   output_initial = false
-  interval = 1
-  exodus = false
-  perf_log = false
-  linear_residuals = false
-  postprocessor_csv = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

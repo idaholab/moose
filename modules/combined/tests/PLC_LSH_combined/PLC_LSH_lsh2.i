@@ -189,11 +189,13 @@
   dt = 1e-3
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = PLC_LSH_lsh_out
-  interval = 1
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

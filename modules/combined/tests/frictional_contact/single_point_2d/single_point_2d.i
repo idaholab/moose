@@ -205,14 +205,16 @@
   l_tol = 1e-3
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = single_point_2d_out
-  interval = 1
   output_initial = true
   exodus = true
-  perf_log = true
-  max_pps_rows_screen = 5
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+    max_rows = 5
+  [../]
 []
 
 [Contact]

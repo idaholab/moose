@@ -177,11 +177,16 @@
   [../]
 []
 
-[Output]
+[Outputs]
   output_initial = true
-  elemental_as_nodal = true
-  interval = 1
-  exodus = true
-  perf_log = true
-  max_pps_rows_screen = 10
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+    max_rows = 10
+  [../]
 []

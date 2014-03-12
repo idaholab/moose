@@ -60,10 +60,12 @@
   num_steps = 2
 []
 
-[Output]
+[Outputs]
   file_base = nodal_flood_particle_distribution
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-

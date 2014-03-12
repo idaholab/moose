@@ -85,11 +85,13 @@
    num_steps = 1
 []      # Executioner END
 
-[Output]    # Output Start
-  linear_residuals = true
-  interval = 1
+[Outputs]    # Output Start
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []      # Output END
 #      # Input file END

@@ -259,10 +259,13 @@
 []
 
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = j_integral_3d_mouth_dir_out
-  interval = 1
   output_initial = true
   exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

@@ -94,12 +94,16 @@
   dt = 0.08
 []
 
-[Output]
+[Outputs]
   file_base = explicit
   output_initial = true
-  postprocessor_csv = true
+  output_final = true
+  csv = true
   interval = 20
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-

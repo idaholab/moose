@@ -173,11 +173,13 @@
 
 []
 
-[Output]
+[Outputs]
   file_base = bl01_adapt
   output_initial = true
   interval = 10000
   exodus = true
-  linear_residuals = 0
-  postprocessor_csv = 0
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

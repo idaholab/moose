@@ -421,11 +421,13 @@
 []
 
 
-[Output]
-  linear_residuals = true
-  perf_log = true
+[Outputs]
   output_initial = true
-  interval = 1
   exodus = true
-  postprocessor_csv = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
