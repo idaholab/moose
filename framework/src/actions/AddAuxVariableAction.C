@@ -44,7 +44,7 @@ AddAuxVariableAction::getAuxVariableFamilies()
 MooseEnum
 AddAuxVariableAction::getAuxVariableOrders()
 {
-  return MooseEnum("CONSTANT, FIRST, SECOND", "FIRST", true);
+  return MooseEnum("CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH, NINTH", "FIRST", true);
 }
 
 void
@@ -66,8 +66,8 @@ AddAuxVariableAction::act()
     else
     {
       // Check that the order is valid (CONSTANT, FIRST, or SECOND)
-      if (_fe_type.order > 2)
-        mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, or SECOND order (" << _fe_type.order << " supplied)");
+      if (_fe_type.order > 9)
+        mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH or NINTH order (" << _fe_type.order << " supplied)");
 
       if (blocks.empty())
         _problem->addAuxVariable(var_name, _fe_type);
