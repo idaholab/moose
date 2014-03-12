@@ -23,7 +23,6 @@
     <!-- IMPORTANT: these need to be in the same order as the TAB_NAMES variable -->
     <div id="testTabs">
       <ul>
-        <li><a href="elk/elk.html"><span>ELK</span></a></li>
         <li><a href="moose_test/moose_test.html"><span>MOOSE</span></a></li>
       </ul>
     </div>
@@ -59,7 +58,7 @@
     </div>
 
 <script id="source">
-var TAB_NAMES = ["elk", "moose_test"];
+var TAB_NAMES = ["moose_test"];
 
 //holds the data currently to be plotted indexed by url (same info as global_data)
 var global_plots = {};
@@ -71,7 +70,7 @@ var loaded_plots = {};
 var global_data = [];
 
 //what is currently being plotted, byrev or bytime
-var global_plotby = "byrev";
+var global_plotby = "bytime";
 
 //the plot and miniature plot used for zooming
 var plot;
@@ -87,7 +86,7 @@ var main_options = {
     yaxis: { ticks: 5,
              tickFormatter: function(val, axis) { return val.toFixed(axis.tickDecimals) + "s"; }
            },
-    xaxis: { minTickSize: 1, tickDecimals: 0 },
+    xaxis: { ticks: 5, tickDecimals: 0 , mode: "time", timeformat: "%m/%d/%y"},
     grid: { clickable: true, color: "#999" },
     selection: { mode: "xy" }
 };
@@ -99,7 +98,7 @@ var min_options = {
         lines: { show: true, lineWidth: 1 },
         shadowSize: 0
     },
-    xaxis: { ticks: 3 },
+    xaxis: { ticks: 3, mode: "time", timeformat: "%m/%d/%y"},
     yaxis: { ticks: 3 },
     grid: { color: "#999" },
     selection: { mode: "xy" }
@@ -115,18 +114,19 @@ function getAppName() {
 //utility function that returns what the plot is plotting by, it is used to
 //construct the url to the data. Returns "rev" for revision or "time"
 function getPlotBy() {
-  return "rev"; // currently only plotting by rev is supported
+  return "time"; // currently only plotting by rev is supported
 }
 
 //this function is the ajax callback when new plot data is received
 function onDataReceived(series) {
+  // alert("Stuff");
   //reconstruct the url, the label is appname.testname
-  label = series["byrev"]["label"];
+  label = series["bytime"]["label"];
   pt = label.indexOf(".");
   url = label.substring(0,pt) + "/" + label.substring(pt+1) + ".json";
   //alert("Received: " + url);
   loaded_plots[url] = series;
-  global_plots[url] = series["byrev"];
+  global_plots[url] = series["bytime"];
   redrawPlotData();
 }
 
@@ -134,7 +134,10 @@ function onDataReceived(series) {
 function redrawPlotData() {
   global_data = [];
   for (var key in global_plots)
+  {
+    //alert(key)
     global_data.push(global_plots[key]);
+  }
 
   //save ranges and keep plot in the same range after data is changed
   xaxis = plot.getAxes().xaxis;
@@ -187,7 +190,7 @@ function checkboxClickCallback(event) {
   plotBy = getPlotBy();
   testName = this.id;
   url = appName + "/" + testName + ".json";
-  //alert(url);
+  // alert(url);
 
   // if it's checked, add the data to the plot
   if (this.checked)
@@ -204,8 +207,10 @@ function checkboxClickCallback(event) {
         url: url,
         method: "GET",
         dataType: "json",
+	async: false,
         success: onDataReceived
-      });
+      })
+      //alert("fetched it");
     }
   }
   else // remove the data from the plot
@@ -310,7 +315,7 @@ $(function () {
       //put that data into the html for the user to see
       $("#tb_app").html(data[0]);
       $("#tb_test").html(data[1]);
-      $("#tb_rev").html("<a href='https://hpcsc.inl.gov/moose/changeset/" + data[2] + "'>" + data[2] + "</a>");
+      $("#tb_rev").html("<a href='https://github.com/idaholab/moose/commit/" + data[2] + "'>" + data[2] + "</a>");
       $("#tb_timing").html(data[3]);
       $("#tb_date").html(data[4]);
       $("#tb_scale").html(data[5]);
@@ -322,8 +327,8 @@ $(function () {
   $("#plotby").change(function() {
     plotby = $("#plotby").val();
     if (plotby === "time") {
-      main_options.xaxis.mode = "time";
-      min_options.xaxis.mode = "time";
+      main_options.xaxis.mode = date;
+      min_options.xaxis.mode = date;
       delete main_options.xaxis["minTickSize"];
       delete main_options.xaxis["tickDecimals"];
     }
