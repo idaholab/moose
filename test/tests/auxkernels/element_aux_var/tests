@@ -10,4 +10,10 @@
     input = 'elemental_sort_test.i'
     exodiff = 'elemental_sort_test_out.e'
   [../]
+
+  [./high_order_test]
+    type = 'Exodiff'
+    input = 'element_high_order_aux_test.i'
+    exodiff = 'ho.e'
+  [../]
 []
