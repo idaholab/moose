@@ -5,7 +5,7 @@ CREATE_TABLE = """create table timing
 (
   app_name text,
   test_name text,
-  revision int,
+  revision text,
   date int,
   seconds real,
   scale int,
