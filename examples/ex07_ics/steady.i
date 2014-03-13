@@ -56,13 +56,14 @@
 
 []
 
-[Output]
+[Outputs]
   # Request that we output the initial condition so we can inspect
   # the values with our visualization tool
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-
-

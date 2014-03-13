@@ -4,11 +4,14 @@
 []
 
 # Note: This output block is out of its normal place (should be at the bottom)
-[Output]
+[Outputs]
   file_base = out
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
 
 # Note: The executioner is out of its normal place (should be just about the output block)
@@ -64,5 +67,3 @@
     value = 1
   [../]
 []
-
-
