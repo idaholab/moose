@@ -133,7 +133,8 @@ clobber::
 	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
 
 cleanall::
-	@echo "Cleaning in:\n" $(patsubst %,%"\n",$(app_DIRS))
+	@echo "Cleaning in:"
+	@for i in $(app_DIRS); do echo \ $$i; done
 	@rm -fr $(app_LIBS) $(moose_LIBS) $(exodiff_APP)
 	@for dir in $(app_DIRS); \
 	do \
