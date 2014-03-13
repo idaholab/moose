@@ -48,7 +48,7 @@ TableOutputter::TableOutputter(const std::string & name, InputParameters paramet
     _postprocessor_table(declareRestartableData<FormattedTable>("postprocessor_table")),
     _scalar_table(declareRestartableData<FormattedTable>("scalar_table")),
     _all_data_table(declareRestartableData<FormattedTable>("all_data_table"))
-{  
+{
 }
 
 TableOutputter::~TableOutputter()

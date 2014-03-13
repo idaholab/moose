@@ -60,7 +60,7 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Outputs]   
+[Outputs]
   output_initial = true
   exodus = true
   [./console]
