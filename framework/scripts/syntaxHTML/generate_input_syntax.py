@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 import sys, os
 
-# get the location of this script
-app_path = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), ".."))
+if len(sys.argv) < 2:
+  print 'Usage: generate_input_syntax.py app_path app_name'
+  exit(1)
 
-# Set the name of the application here and moose directory relative to the application
-app_name = 'bison'
+app_path = sys.argv[1]
 
-MOOSE_DIR = os.path.abspath(os.path.join(app_path, '..'))
-FRAMEWORK_DIR = os.path.abspath(os.path.join(app_path, '..', 'framework'))
+app_name = sys.argv[2]
+
+MOOSE_DIR = os.path.abspath(os.path.join(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '../../..'))))
+
+FRAMEWORK_DIR = os.path.abspath(os.path.join(MOOSE_DIR, 'framework'))
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
@@ -16,7 +19,7 @@ if os.environ.has_key("MOOSE_DIR"):
 if os.environ.has_key("FRAMEWORK_DIR"):
   FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
 
-sys.path.append(MOOSE_DIR + '/scripts/syntaxHTML')
+sys.path.append(MOOSE_DIR + '/framework/scripts/syntaxHTML')
 import genInputFileSyntaxHTML
 
 # this will automatically copy the documentation to the base directory
