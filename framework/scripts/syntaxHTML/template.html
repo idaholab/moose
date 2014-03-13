@@ -12,11 +12,11 @@
       <%doc>Generate parameters, required ones are red</%doc>
       % if block['parameters'] != None:
         % for param in block['parameters']:
-          <li><div class="
+          <li class="
             % if param['required'] == True:
               required
             % endif
-            "><a>${param['name']}</a></div>
+            "><a>${param['name']}</a>
               <ul>
                 % if param['default'] != None:
                   <li><a>Default: ${param['default']}</a></li>
@@ -41,11 +41,11 @@
 <head>
   <title>${project} Input File Syntax</title>
 
-  <link rel="stylesheet" type="text/css" href="static/styles.css"/>
+  <link rel="stylesheet" href="static/themes/default/style.css" />
 
   <!-- based off of http://www.jstree.com/documentation/core -->
-  <script type="text/javascript" src="static/jquery.js"></script> 
-  <script type="text/javascript" src="static/jquery.jstree.min.js"></script> 
+  <script type="text/javascript" src="static/jquery.min.js"></script> 
+  <script type="text/javascript" src="static/jstree.min.js"></script> 
 </head>
 <body>
   <h1>${project} Input File Syntax</h1>
@@ -62,21 +62,23 @@
   </form>
   
   <div id="openclose">
-    <a href='javascript:$.jstree._focused().open_all();'>[expand all]</a>
-    <a href='javascript:$.jstree._focused().close_all();'>[collapse all]</a>
+    <a href='javascript:openAll();'>[expand all]</a>
+    <a href='javascript:closeAll();'>[collapse all]</a>
   </div>
 
-  <ul id="tree">
+  <div id="tree">
+    <ul>
     % for block in data:
       ${genBlock( block )}
     % endfor
-  </ul>
+    </ul>
+  </div>
 
   <script type="text/javascript" class="source"> 
   $(function () {
     //initialize jstree
     $("#tree")
-      .jstree({ plugins : [ "themes", "html_data", "search" ], core : { html_titles : true }, search : { case_insensitive : true } })
+      .jstree({ plugins : [ "themes", "html_data", "search" ], core : { "themes":{ "icons":false }, html_titles : true }, search : { case_insensitive : true } })
       .bind( "search.jstree", function( e, data ) {
         //alert( "Found " + data.rslt.nodes.length + " nodes matching '" + data.rslt.str + "'.");
         document.getElementById("results").innerHTML="Found " + data.rslt.nodes.length + " results matching '" + data.rslt.str + "'.";
@@ -104,6 +106,17 @@
     if( val == "" )
       document.getElementById("searchBox").value = "search";
   }
+
+  function openAll()
+  {
+    $("#tree").jstree("open_all");
+  }
+
+  function closeAll()
+  {
+    $("#tree").jstree("close_all");
+  }
+
   </script> 
 
   <div id="footer">
