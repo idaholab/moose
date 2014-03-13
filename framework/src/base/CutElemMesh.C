@@ -289,7 +289,7 @@ CutElemMesh::element_t::will_crack_tip_extend(std::vector<unsigned int> &split_n
   bool will_extend = false;
   if (interior_links.size() == 1)
   {
-    if (crack_tip_element)
+    if (crack_tip_split_element)
     {
       for (unsigned int i=0; i<crack_tip_neighbors.size(); ++i)
       {
@@ -726,16 +726,18 @@ void CutElemMesh::initCrackTipTopology()
         }
 
         //Make sure the current elment hasn't been flagged as a tip element
-        if (curr_elem->crack_tip_element)
+        if (curr_elem->crack_tip_split_element)
         {
-          CutElemMeshError("crack_tip_element already flagged.  In elem: "<<curr_elem->id
-                           << " flags: "<<curr_elem->crack_tip_element
-                           <<" "<<edge_neighbors[0]->crack_tip_element
-                           <<" "<<edge_neighbors[1]->crack_tip_element);
+          CutElemMeshError("crack_tip_split_element already flagged.  In elem: "<<curr_elem->id
+                           << " flags: "<<curr_elem->crack_tip_split_element
+                           <<" "<<edge_neighbors[0]->crack_tip_split_element
+                           <<" "<<edge_neighbors[1]->crack_tip_split_element);
         }
 
-        edge_neighbors[0]->crack_tip_element = true;
-        edge_neighbors[1]->crack_tip_element = true;
+        CrackTipElements.insert(curr_elem);
+
+        edge_neighbors[0]->crack_tip_split_element = true;
+        edge_neighbors[1]->crack_tip_split_element = true;
 
         edge_neighbors[0]->add_crack_tip_neighbor(curr_elem);
         edge_neighbors[1]->add_crack_tip_neighbor(curr_elem);
@@ -1654,7 +1656,7 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
       if (hasSiblingWithSameEmbeddedNode)
         current_split = true;
     }
-    else if (currElem->parent->crack_tip_element)
+    else if (currElem->parent->crack_tip_split_element)
     {
       for (unsigned int i=0; i<currElem->parent->crack_tip_neighbors.size(); ++i)
       {
@@ -1685,7 +1687,7 @@ void CutElemMesh::duplicateEmbeddedNode(element_t* currElem,
       if (hasSiblingWithSameEmbeddedNode)
         neighbor_split = true;
     }
-    else if (neighborElem->parent->crack_tip_element)
+    else if (neighborElem->parent->crack_tip_split_element)
     {
       for (unsigned int i=0; i<neighborElem->parent->crack_tip_neighbors.size(); ++i)
       {
@@ -1821,6 +1823,19 @@ void CutElemMesh::sanityCheck()
 
 void CutElemMesh::findCrackTipElements()
 {
+  std::set<element_t*>::iterator sit;
+  //Delete all elements that were previously flagged as crack tip elements if they have
+  //been split (and hence appear in ParentElements).
+  for (unsigned int i=0; i<ParentElements.size(); ++i)
+  {
+    sit = CrackTipElements.find(ParentElements[i]);
+    if (sit != CrackTipElements.end())
+    {
+      CrackTipElements.erase(sit);
+    }
+  }
+
+  //Debug: print MergedEdgeMap
   std::map<std::set<node_t*>, std::set<element_t*> >::iterator memit;
   std::cout<<"BWS mergededgemap:"<<std::endl;
   for (memit = MergedEdgeMap.begin(); memit != MergedEdgeMap.end(); ++memit)
@@ -1835,6 +1850,8 @@ void CutElemMesh::findCrackTipElements()
     std::cout<<std::endl;
   }
 
+  //Go through MergedEdgeMap to find elements that are newly at the crack tip due to
+  //crack growth.
   for (memit = MergedEdgeMap.begin(); memit != MergedEdgeMap.end(); ++memit)
   {
     if (memit->second.size() < 2)
@@ -1882,7 +1899,6 @@ void CutElemMesh::findCrackTipElements()
     }
   }
   std::cout<<"Crack tip elements: ";
-  std::set<element_t*>::iterator sit;
   for (sit=CrackTipElements.begin(); sit!=CrackTipElements.end(); ++sit)
   {
     std::cout<<(*sit)->id<<" ";

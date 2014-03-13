@@ -83,7 +83,7 @@ class CutElemMesh
       parent(NULL),
       edge_neighbors(num_edges,std::vector<element_t*>(1,NULL)),
       nb_frags(0),
-      crack_tip_element(false)
+      crack_tip_split_element(false)
     {};
 
     ~element_t(){};
@@ -148,7 +148,7 @@ class CutElemMesh
     //set of children
     std::vector< element_t* > children;
     //special case at crack tip
-    bool crack_tip_element;
+    bool crack_tip_split_element;
     std::vector<unsigned int> crack_tip_neighbors;
   };
 
