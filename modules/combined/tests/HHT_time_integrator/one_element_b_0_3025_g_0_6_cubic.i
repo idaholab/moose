@@ -297,11 +297,13 @@
 
 []
 
-[Output]
+[Outputs]
   file_base = one_element_b_0_3025_g_0_6_cubic_out
-  interval = 1
   output_initial = true
-  linear_residuals=true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

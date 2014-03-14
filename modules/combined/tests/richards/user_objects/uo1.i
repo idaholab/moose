@@ -543,12 +543,13 @@
   dt = 1E-100
 []
 
-[Output]
-  linear_residuals = false
+[Outputs]
   file_base = uo1
   interval = 1
-  exodus = false
-  postprocessor_csv = true
-  perf_log = false
-  hidden_variables = pressure
+   csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
+  hide = pressure
 []

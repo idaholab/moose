@@ -145,11 +145,13 @@
 
 []
 
-[Output]
+[Outputs]
   file_base = bl02
   output_initial = true
   interval = 1000000
   exodus = true
-  linear_residuals = 0
-  postprocessor_csv = 0
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

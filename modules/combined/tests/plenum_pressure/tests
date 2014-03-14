@@ -17,18 +17,18 @@
     type = RunApp
     prereq = test_rz
     input = 'plenum_pressure_rz.i'
-    cli_args = 'Output/num_checkpoint_files=1 Executioner/num_steps=1'
+    cli_args = 'Executioner/num_steps=1'
   [../]
- 
+
   [./test_rz_restart2]
     type = 'Exodiff'
     prereq = 'test_rz_restart1'
     input = 'plenum_pressure_rz.i'
     exodiff = 'plenum_pressure_rz_out.e'
-    cli_args = '--recover plenum_pressure_rz_out_cp/0001'
+    cli_args = 'Executioner/restart_from_file=plenum_pressure_rz_out_cp/0001'
     delete_output_before_running = false
   [../]
- 
+
 
   [./test_refab]
     type = 'Exodiff'

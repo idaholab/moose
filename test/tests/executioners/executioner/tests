@@ -6,7 +6,7 @@
     group = 'adaptive'
   [../]
 
-  [./test_stead_state_check]
+  [./test_steady_state_check]
     type = 'Exodiff'
     input = 'steady_state_check_test.i'
     exodiff = 'out_ss_check.e'

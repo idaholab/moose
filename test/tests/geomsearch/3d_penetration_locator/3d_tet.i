@@ -55,9 +55,12 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Output]
+[Outputs]
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    pref_log = true
+    linear_residuals = true
+  [../]
 []
-

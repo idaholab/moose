@@ -51,7 +51,6 @@
   console = true
   [./exodus]
     type = Exodus
-    output_initial = false
     output_final = true
     interval = 5
   [../]

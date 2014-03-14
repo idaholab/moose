@@ -139,6 +139,12 @@ public:
   Real getSolutionChangeNorm();
 
   /**
+   * Pointer to the TimeStepper
+   * @return Pointer to the time stepper for this Executioner
+   */
+  TimeStepper * getTimeStepper(){ return _time_stepper; }
+
+  /**
    * Set the timestepper to use.
    *
    * @param ts The TimeStepper to use
@@ -148,7 +154,7 @@ public:
   /**
    * Get the timestepper.
    */
-  virtual std::string getTimeStepper();
+  virtual std::string getTimeStepperName();
 
   /**
    * Get the time scheme used

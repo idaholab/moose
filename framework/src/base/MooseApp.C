@@ -22,6 +22,7 @@
 #include "PetscSupport.h"
 #include "Conversion.h"
 
+// libMesh includes
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/string_to_enum.h"
 
@@ -98,7 +99,8 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _initial_from_file(false),
     _parallel_mesh_on_command_line(false),
     _recover(false),
-    _half_transient(false)
+    _half_transient(false),
+    _alternate_output_warehouse(NULL)
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -226,6 +228,12 @@ void
 MooseApp::setInputFileName(std::string input_filename)
 {
   _input_filename = input_filename;
+}
+
+std::string
+MooseApp::getOutputFileBase()
+{
+  return _output_file_base;
 }
 
 void
@@ -372,9 +380,10 @@ MooseApp::setOutputPosition(Point p)
 {
   _output_position_set = true;
   _output_position = p;
+  _output_warehouse.meshChanged();
 
   if (_executioner)
-    _executioner->setOutputPosition(p);
+    _executioner->setOutputPosition(p); // \todo{remove; it doesn't do anything anyway}
 }
 
 std::string
@@ -383,6 +392,14 @@ MooseApp::getFileName(bool stripLeadingPath) const
   return _parser.getFileName(stripLeadingPath);
 }
 
+OutputWarehouse &
+MooseApp::getOutputWarehouse()
+{
+  if (_alternate_output_warehouse == NULL)
+    return _output_warehouse;
+  else
+    return *_alternate_output_warehouse;
+}
 
 void
 MooseApp::printSimulationInfo(std::ostream & ostream)
@@ -528,7 +545,7 @@ MooseApp::printSimulationInfo(std::ostream & ostream)
     oss << "Execution Information:\n"
         << std::setw(FIELD_WIDTH) << "  Executioner: " << demangle(typeid(*_executioner).name()) << '\n';
 
-    std::string time_stepper = _executioner->getTimeStepper();
+    std::string time_stepper = _executioner->getTimeStepperName();
     if (time_stepper != "")
       oss << std::setw(FIELD_WIDTH) << "  TimeStepper: " << time_stepper << '\n';
 

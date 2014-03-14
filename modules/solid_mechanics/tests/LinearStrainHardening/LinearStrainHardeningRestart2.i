@@ -187,14 +187,14 @@
 
 
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = LinearStrainHardening_test_out
-  interval = 1
   output_initial = true
   exodus = true
-  postprocessor_csv = true
-#  gmv = true
-#  tecplot = true
-  perf_log = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

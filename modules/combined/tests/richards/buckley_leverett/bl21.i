@@ -239,12 +239,13 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = bl21
   output_initial = true
   interval = 10000
   exodus = true
-  linear_residuals = false
-  postprocessor_csv = 0
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

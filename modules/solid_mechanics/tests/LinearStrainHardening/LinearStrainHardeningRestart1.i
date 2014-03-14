@@ -185,15 +185,17 @@
 
 
 
-[Output]
-  linear_residuals = true
-  interval = 1
+[Outputs]
   output_initial = true
   exodus = true
-  postprocessor_csv = true
-#  gmv = true
-#  tecplot = true
-  perf_log = true
-
-  num_checkpoint_files = 1
+  csv = true
+  [./checkpoint]
+    type = Checkpoint
+    num_files = 1
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

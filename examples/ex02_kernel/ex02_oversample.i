@@ -49,14 +49,16 @@
 
 []
 
-[Output]
+[Outputs]
   file_base = out_os
-  interval = 1
-  exodus = true
-  perf_log = true
-  [./OverSampling]
-    exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+  [./oversample]
+    type = Exodus
+    oversample = true
     refinements = 4
   [../]
 []
-

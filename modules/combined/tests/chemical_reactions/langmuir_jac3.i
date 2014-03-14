@@ -165,10 +165,13 @@
   dt = 1E3 # get rid of the large c_dot contribution
 []
 
-[Output]
+[Outputs]
   file_base = langmuir_jac3
   output_initial = false
   exodus = false
-  perf_log = false
-  linear_residuals = false
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

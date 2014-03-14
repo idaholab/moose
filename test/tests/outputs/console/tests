@@ -22,7 +22,7 @@
     # Test that file contains regex
     type = CheckFiles
     input = 'console.i'
-    cli_args = 'Outputs/screen/file=true Outputs/screen/file_base=console_file_system_information_out'
+    cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_system_information_out'
     check_files = 'console_file_system_information_out.txt'
     file_expect_out = 'Num\s*DOFs:\s*242'
   [../]
@@ -30,7 +30,7 @@
     # Test that file contains regex
     type = CheckFiles
     input = 'console.i'
-    cli_args = 'Outputs/screen/file=true Outputs/screen/file_base=console_file_postprocessor_out'
+    cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_postprocessor_out'
     check_files = 'console_file_postprocessor_out.txt'
     file_expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
   [../]
@@ -38,7 +38,7 @@
     # Test that file contains regex
     type = CheckFiles
     input = 'console.i'
-    cli_args = 'Outputs/screen/file=true Outputs/screen/file_base=console_file_scalar_aux_out'
+    cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_scalar_aux_out'
     check_files = 'console_file_scalar_aux_out.txt'
     file_expect_out = '\| time\s*?\| aux0_0\s*?\|\n'
   [../]
@@ -46,7 +46,7 @@
     # Test that file contains regex
     type = CheckFiles
     input = 'console.i'
-    cli_args = 'Outputs/screen/file=true Outputs/screen/solve_log=true Outputs/screen/file_base=console_file_solve_log_out'
+    cli_args = 'Outputs/screen/output_file=true Outputs/screen/solve_log=true Outputs/screen/file_base=console_file_solve_log_out'
     check_files = 'console_file_solve_log_out.txt'
     file_expect_out = 'Moose\sTest\sPerformance:'
   [../]
@@ -54,7 +54,7 @@
     # Test that file contains regex
     type = CheckFiles
     input = 'console.i'
-    cli_args = 'Outputs/screen/file=true Outputs/screen/setup_log=true Outputs/screen/file_base=console_file_setup_log_out'
+    cli_args = 'Outputs/screen/output_file=true Outputs/screen/setup_log=true Outputs/screen/file_base=console_file_setup_log_out'
     check_files = 'console_file_setup_log_out.txt'
     file_expect_out = 'Setup\sPerformance:'
   [../]

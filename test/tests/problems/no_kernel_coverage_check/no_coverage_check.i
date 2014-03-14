@@ -56,7 +56,7 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
   output_initial = true
   exodus = true
 []

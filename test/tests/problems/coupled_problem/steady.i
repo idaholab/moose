@@ -58,7 +58,8 @@
   solve_type = NEWTON
 []
 
-[Output]
+[Outputs]
   output_initial = false
   exodus = true
+  console = true
 []

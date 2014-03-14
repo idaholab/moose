@@ -161,11 +161,14 @@
   [../]
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out
   interval = 4      #Just output the last step to avoid comparing nl iters on other steps
   output_initial = true
   exodus = true
-  perf_log = true
-[] # Output
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+[] # Outputs

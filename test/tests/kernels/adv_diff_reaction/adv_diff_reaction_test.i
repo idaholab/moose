@@ -113,12 +113,13 @@
   petsc_options_value  = 'ilu 20 rcm'
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out
-  interval = 1
   output_initial = true
   exodus = true
-  #tecplot = true
-  perf_log             = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

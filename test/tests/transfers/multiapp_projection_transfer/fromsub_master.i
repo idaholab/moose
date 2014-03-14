@@ -41,13 +41,18 @@
   num_steps = 1
   dt = 1
   solve_type = 'NEWTON'
-  print_linear_residuals = true
 []
 
-[Output]
+[Outputs]
   output_initial = true
-  exodus = true
-  perf_log = true
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
 
 [MultiApps]
@@ -99,4 +104,3 @@
     family = LAGRANGE
   [../]
 []
-

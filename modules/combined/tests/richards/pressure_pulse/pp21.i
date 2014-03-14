@@ -183,10 +183,11 @@
   solve_type = Newton
 []
 
-[Output]
+[Outputs]
   file_base = pp21
-  output_initial = false
   exodus = true
-  perf_log = false
-  linear_residuals = false
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

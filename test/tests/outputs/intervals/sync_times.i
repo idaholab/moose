@@ -45,7 +45,6 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-sync_times = '1.5 3.75 8.92'
   verbose = true
 []
 

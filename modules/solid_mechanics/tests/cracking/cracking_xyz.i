@@ -313,12 +313,12 @@
   [../]
 []
 
-[Output]
-  linear_residuals = true
-  interval = 1
+[Outputs]
   output_initial = true
   exodus = true
-  perf_log = true
-
-#  iteration_plot_start_time = 0
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

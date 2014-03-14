@@ -149,13 +149,15 @@
 
 [] # Executioner
 
-[Output]
-  linear_residuals = true
-  interval = 1
+[Outputs]
   output_initial = true
   exodus = true
-  perf_log = true
-[] # Output
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+[] # Outputs
 
 [Postprocessors]
   [./k_xx]

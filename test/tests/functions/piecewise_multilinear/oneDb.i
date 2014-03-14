@@ -80,20 +80,18 @@
   [../]
 []
 
-
-
 [Executioner]
   type = Transient
   dt = 1
   end_time = 1
 []
 
-[Output]
+[Outputs]
   file_base = oneDb
-  interval = 1
-  hidden_variables = dummy
-  exodus = false
-  output_initial = false
-  perf_log = true
-  postprocessor_csv = true
+  hide = dummy
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

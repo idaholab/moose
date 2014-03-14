@@ -75,10 +75,12 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = adapt_tstep_shrink_init_dt_out
-  interval = 1
   output_initial = true
-  linear_residuals = true
   exodus = true
+  [./console]
+    type = Console
+    linear_residuals = true
+  [../]
 []

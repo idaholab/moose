@@ -107,11 +107,13 @@
   dt = 80.0
 []
 
-[Output]
+[Outputs]
   file_base = voronoi
-  interval = 1
   exodus = true
-  perf_log = true
   output_initial = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-

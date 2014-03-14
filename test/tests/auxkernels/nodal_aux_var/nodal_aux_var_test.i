@@ -101,12 +101,12 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
-  file_base = out
+[Outputs]
   output_initial = true
-  interval = 1
+  file_base = out
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
-
-

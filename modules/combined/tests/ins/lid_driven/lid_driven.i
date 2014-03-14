@@ -270,9 +270,13 @@
 
 
 
-[Output]
+[Outputs]
   file_base = lid_driven_out
-  interval = 1
   output_initial = true
   exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

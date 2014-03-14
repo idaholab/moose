@@ -54,6 +54,16 @@ private:
    */
   void create(std::string object_type);
 
+  /**
+   * Helper method for creating Checkpoint object for auto recovery testing
+   */
+  void createAutoRecoveryCheckpointObject();
+
+
+  void setRecoverFileBase();
+
+  std::string getRecoveryDirectory();
+
   /// Parameters from the action being created (AddOutputAction)
   InputParameters _action_params;
 };

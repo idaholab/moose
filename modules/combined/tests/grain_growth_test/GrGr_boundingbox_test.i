@@ -106,10 +106,13 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = bounding_box
-  postprocessor_csv = true
+  csv = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-

@@ -17,25 +17,23 @@
 
 // MOOSE includes
 #include "TableOutputter.h"
-#include "FileOutputInterface.h"
 #include "FormattedTable.h"
 #include "Conversion.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"
 
-// Forward declerations
+// Forward declarations
 class Console;
 
 template<>
 InputParameters validParams<Console>();
 
 /**
- * An output object for writting to the console (screen)
+ * An output object for writing to the console (screen)
  */
 class Console :
-  public TableOutputter,
-  public FileOutputInterface
+  public TableOutputter
 {
 public:
 
@@ -63,7 +61,7 @@ public:
   virtual void timestepSetup();
 
   /**
-   * Adds a outputting of nonlinear/linear reisdual printing to the base class output() method
+   * Adds a outputting of nonlinear/linear residual printing to the base class output() method
    *
    * @see petscOutput
    */
@@ -72,13 +70,13 @@ public:
   /**
    * Creates the output file name
    * Appends the user-supplied 'file_base' input parameter with a '.txt' extension
-   * @return A string containg the output filename
+   * @return A string containing the output filename
    */
   virtual std::string filename();
 
   /**
    * A helper function for printing linear residuals via PETSc
-   * @param its A reference to the iteration numbe from PETSc
+   * @param its A reference to the iteration number from PETSc
    * @param norm A reference to the linear residual norm from PETSc
    * @see PetscSupport::petscLinearMonitor
    */
@@ -86,7 +84,7 @@ public:
 
   /**
    * A helper function for printing linear residuals via PETSc
-   * @param its A reference to the iteration numbe from PETSc
+   * @param its A reference to the iteration number from PETSc
    * @param norm A reference to the linear residual norm from PETSc
    * @see PetscSupport::petscLinearMonitor
    */
@@ -175,7 +173,7 @@ protected:
   /// State for all performance logging
   bool _perf_log;
 
-  /// State for solve performace log
+  /// State for solve performance log
   bool _solve_log;
 
   /// State for setup performance log

@@ -52,7 +52,7 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Output]
+[Outputs]
   linear_residuals = true
   output_initial = true
   exodus = true

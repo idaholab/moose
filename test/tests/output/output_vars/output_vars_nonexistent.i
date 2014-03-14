@@ -181,11 +181,13 @@
   num_steps = 10
 []
 
-[Output]
+[Outputs]
   file_base = out_nonexistent
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
-  output_variables = 'u elemental nodal x foo1 foo2'
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
+  show = 'u elemental nodal x foo1 foo2'
 []

@@ -70,6 +70,10 @@
   num_steps = 5
 []
 
-[Output]
+[Outputs]
   exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

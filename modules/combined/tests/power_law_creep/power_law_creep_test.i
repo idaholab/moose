@@ -253,10 +253,12 @@
   dt = 1.e-1
 []
 
-[Output]
-  linear_residuals = true
-  interval = 1
+[Outputs]
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

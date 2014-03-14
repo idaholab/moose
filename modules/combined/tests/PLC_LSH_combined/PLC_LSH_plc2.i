@@ -297,12 +297,14 @@
   dt = 0.1
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = PLC_LSH_plc_out
-  interval = 1
   output_initial = true
   exodus = true
-  postprocessor_csv = true
-  perf_log = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

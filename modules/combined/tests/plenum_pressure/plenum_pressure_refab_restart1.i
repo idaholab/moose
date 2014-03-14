@@ -338,12 +338,19 @@
 
 []
 
-[Output]
-  linear_residuals = true
-  interval = 1
+[Outputs]
   output_initial = true
-  elemental_as_nodal = true
-  exodus = true
-  perf_log = true
-  num_checkpoint_files = 1
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+  [./checkpoint]
+    type = Checkpoint
+    num_files = 1
+  [../]
 []

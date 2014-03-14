@@ -137,7 +137,8 @@
   num_steps = 5
 []
 
-[Output]
+[Outputs]
   exodus = true
   output_initial = true
+  console = true
 []

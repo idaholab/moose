@@ -1,7 +1,14 @@
 [Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'stateful_prop_test.i'
+    exodiff = 'out.e'
+  [../]
+
   [./test_csv]
     type = 'CSVDiff'
     input = 'stateful_prop_test.i'
+	  cli_args = 'Outputs/csv=true'
     csvdiff = 'out.csv'
     prereq = 'test'
   [../]
@@ -27,15 +34,10 @@
   [./test_older_csv]
     type = 'CSVDiff'
     input = 'stateful_prop_test_older.i'
-    csvdiff = 'out_older.csv'
+    csvdiff = 'out_older.csv' 
+    cli_args = 'Outputs/csv=true'
     max_parallel = 1
     prereq = 'test_older'
-  [../]
-
-  [./test]
-    type = 'Exodiff'
-    input = 'stateful_prop_test.i'
-    exodiff = 'out.e'
   [../]
 
   [./adaptivity]

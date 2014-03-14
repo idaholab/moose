@@ -39,15 +39,13 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-# Keep until Outputs based recovery system is operational
-[Output]
-[]
-
 [Outputs]
+  console = true
   [./exodus]
     type = Exodus
     output_initial = false
-    oversample = 2
+    oversample = true
+    refinements = 2
     file_base = exodus_oversample_custom_name
   [../]
 []

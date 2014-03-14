@@ -97,12 +97,15 @@ public:
 
   Syntax & syntax() { return _syntax; }
 
-  OutputWarehouse & getOutputWarehouse(){ return _output_warehouse; };
-
   /**
    * Set the input file name.
    */
   void setInputFileName(std::string input_file_name);
+
+  /**
+   * Returns the input file name that was set with setInputFileName
+   */
+  std::string getInputFileName(){ return _input_filename; }
 
   /**
    * Override the selection of the output file base name.
@@ -112,7 +115,7 @@ public:
   /**
    * Override the selection of the output file base name.
    */
-  std::string getOutputFileBase() { return _output_file_base; }
+  std::string getOutputFileBase();
 
   /**
    * Tell the app to output in a specific position.
@@ -270,8 +273,43 @@ public:
    */
   void setLegacyOutput(bool state){ _legacy_output = state; }
 
+  /**
+   * Store a map of outputter names and file numbers
+   * The MultiApp system requires this to get the file numbering to propogate down through the
+   * multiapps.
+   * @param numbers Map of outputter names and file numbers
+   *
+   * @see MultiApp TransientMultiApp OutputWarehouse
+   */
+  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers){ _output_file_numbers = numbers; }
+
+  /**
+   * Store a map of outputter names and file numbers
+   * The MultiApp system requires this to get the file numbering to propogate down through the
+   * multiapps.
+   *
+   * @see MultiApp TransientMultiApp
+   */
+  std::map<std::string, unsigned int> & getOutputFileNumbers(){ return _output_file_numbers; }
+
+  /**
+   * The OutputWarehouse for this App
+   * @return Reference to the OutputWarehouse object
+   */
+  OutputWarehouse & getOutputWarehouse();
+
+  /**
+   * Set the OutputWarehouse object
+   * The CoupledExecutioner requires multiple OutputWarehouses, this allows the warehouses
+   * to be swapped out.
+   *
+   * If this function is called then getOutputWarehouse will return a reference to the
+   * _alternate_output_warehouse rather than _output_warehouse.
+   */
+  void setOutputWarehouse(OutputWarehouse * owh){ _alternate_output_warehouse = owh; }
 
 protected:
+
   MooseApp(const std::string & name, InputParameters parameters);
 
   virtual void meshOnly(std::string mesh_file_name);
@@ -316,9 +354,6 @@ protected:
   /// Where built actions are stored
   ActionWarehouse _action_warehouse;
 
-  /// Output object storage
-  OutputWarehouse _output_warehouse;
-
   /// Parser for parsing the input file
   Parser _parser;
   /// Pointer to the executioner of this run (typically build by actions)
@@ -350,6 +385,14 @@ protected:
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;
 
+  /// Map of outputer name and file number (used by MultiApps to propogate file numbers down through the multiapps)
+  std::map<std::string, unsigned int> _output_file_numbers;
+
+  /// OutputWarehouse object for this App
+  OutputWarehouse _output_warehouse;
+
+  /// An alternate OutputWarehouse object (required for CoupledExecutioner)
+  OutputWarehouse * _alternate_output_warehouse;
 };
 
 #endif /* MOOSEAPP_H */

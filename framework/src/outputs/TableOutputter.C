@@ -27,11 +27,11 @@
 template<>
 InputParameters validParams<TableOutputter>()
 {
-  // Fit mode selection Enun
+  // Fit mode selection Enum
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Base class parameters
-  InputParameters params = validParams<OutputBase>();
+  InputParameters params = validParams<FileOutputter>();
 
   // Suppressing the output of nodal and elemental variables disables this type of output
   params.suppressParameter<bool>("output_elemental_variables");
@@ -44,7 +44,10 @@ InputParameters validParams<TableOutputter>()
 }
 
 TableOutputter::TableOutputter(const std::string & name, InputParameters parameters) :
-    OutputBase(name, parameters)
+    FileOutputter(name, parameters),
+    _postprocessor_table(declareRestartableData<FormattedTable>("postprocessor_table")),
+    _scalar_table(declareRestartableData<FormattedTable>("scalar_table")),
+    _all_data_table(declareRestartableData<FormattedTable>("all_data_table"))
 {
 }
 
@@ -99,7 +102,7 @@ TableOutputter::outputScalarVariables()
       _all_data_table.addData(*it, variable[0], _time);
     }
 
-    // Multi-component variables are appened with the component index
+    // Multi-component variables are appended with the component index
     else
       for (unsigned int i = 0; i < n; ++i)
       {

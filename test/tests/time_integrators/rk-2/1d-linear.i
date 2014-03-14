@@ -89,8 +89,8 @@
   l_tol = 1e-15
 []
 
-[Output]
+[Outputs]
   output_initial = true
-  interval = 1
+  console = true
   exodus = true
 []

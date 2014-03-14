@@ -73,9 +73,12 @@
   num_steps = 10
 []
 
-[Output]
-  interval = 1
+[Outputs]
+  output_initial = false
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
 

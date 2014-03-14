@@ -62,10 +62,14 @@
   nl_rel_tol = 1e-10
 []
 
-[Output]
+
+[Outputs]
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
 
 [MultiApps]
@@ -93,4 +97,3 @@
     multi_app = sub_app
   [../]
 []
-

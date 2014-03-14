@@ -22,6 +22,7 @@ class CoupledProblem;
 class ActionWarehouse;
 class FEProblem;
 class Parser;
+class OutputWarehouse;
 
 
 template<>
@@ -88,6 +89,12 @@ protected:
   std::map<std::string, std::vector<ProjInfo *> > _var_mapping;
   /// FE Problem mapping: fe_problem -> its name
   std::map<FEProblem *, std::string> _fep_mapping;
+
+  /// List of input file names
+  std::vector<std::string> _input_file_names;
+
+  /// Vector of OutputWarehouse object pointers
+  std::vector<OutputWarehouse *> _owhs;
 
   /**
    * Create an action that adds a variable

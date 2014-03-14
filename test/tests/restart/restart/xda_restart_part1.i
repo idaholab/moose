@@ -89,12 +89,13 @@
   num_steps = 5
 []
 
-[Output]
+[Outputs]
   file_base = out_xda_restart_part1
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
-  # restart
-  num_checkpoint_files = 2
+  checkpoint = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

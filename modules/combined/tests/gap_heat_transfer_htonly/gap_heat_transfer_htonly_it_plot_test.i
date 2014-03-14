@@ -154,12 +154,14 @@
   [../]
 
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out_it_plot
-  interval = 1
   output_initial = true
   exodus = true
-  iteration_plot_start_time = 0
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+  #iteration_plot_start_time = 0
 []

@@ -60,12 +60,12 @@
   dt = .1
 []
 
-[Output]
+[Outputs]
   file_base = exodus_refined_restart_2
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
-
-

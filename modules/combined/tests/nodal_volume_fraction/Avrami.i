@@ -65,11 +65,13 @@
   num_steps = 2
 []
 
-[Output]
+[Outputs]
   file_base = Avrami
-  interval = 1
   exodus = true
-  perf_log = true
   output_initial = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-

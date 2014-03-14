@@ -202,15 +202,19 @@
   [../]
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = sliding_elastic_blocks_2d_out
-  interval = 1
   output_initial = true
-  elemental_as_nodal = true
-  exodus = true
-  perf_log = true
-#  iteration_plot_start_time = 0.0
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+    max_rows = 5
+  [../]
 []
 
 [Contact]
@@ -223,4 +227,3 @@
     penalty = 1e+6
   [../]
 []
-

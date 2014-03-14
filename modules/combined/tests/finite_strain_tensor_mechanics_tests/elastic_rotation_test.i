@@ -253,14 +253,13 @@ active = ''
   [../]
 []
 
-[Output]
-  linear_residuals = true
-  # Output
+[Outputs]
   file_base = elastic_rotation
-  interval = 1
   output_initial = true
-  elemental_as_nodal = true
   exodus = true
-  perf_log = true
-[]
-
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+[] # Outputs

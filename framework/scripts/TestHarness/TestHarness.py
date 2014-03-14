@@ -262,12 +262,13 @@ class TestHarness:
         # Part 1:
         part1['test_name'] += '_part1'
         part1['cli_args'].append('--half-transient')
-        part1['cli_args'].append('Output/num_checkpoint_files=1')
+        part1['cli_args'].append('Outputs/auto_recovery_part1=true')
         part1['skip_checks'] = True
 
         # Part 2:
         part2['prereq'].append(part1['test_name'])
         part2['delete_output_before_running'] = False
+        part2['cli_args'].append('Outputs/auto_recovery_part2=true')
         part2['cli_args'].append('--recover')
         part2.addParam('caveats', ['recover'], "")
 

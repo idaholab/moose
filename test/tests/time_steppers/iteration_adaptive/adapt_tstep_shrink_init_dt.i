@@ -73,9 +73,11 @@
   [../]
 []
 
-[Output]
-  interval = 1
+[Outputs]
   output_initial = true
-  linear_residuals = true
   exodus = true
+  [./console]
+    type = Console
+    linear_residuals = true
+  [../]
 []

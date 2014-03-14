@@ -328,6 +328,8 @@
 #include "XDA.h"
 #include "GMVOutputter.h"
 #include "Tecplot.h"
+#include "GNUPlot.h"
+#include "SolutionHistory.h"
 
 namespace Moose {
 
@@ -589,6 +591,8 @@ registerObjects(Factory & factory)
   registerOutput(XDA);
   registerNamedOutput(GMVOutputter, "GMV");
   registerOutput(Tecplot);
+  registerOutput(GNUPlot);
+  registerOutput(SolutionHistory);
 
   registered = true;
 }

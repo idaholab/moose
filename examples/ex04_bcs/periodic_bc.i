@@ -71,10 +71,13 @@
   num_steps = 20
 []
 
-[Output]
+[Outputs]
   file_base = out_pbc
   interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-

@@ -75,6 +75,7 @@
   nl_rel_tol = 1e-13
 []
 
-[Output]
+[Outputs]
   exodus = true
+  output_initial = false
 []

@@ -49,12 +49,10 @@
   end_time = 1
 []
 
-[Output]
-  file_base = except3
-  interval = 1
-  hidden_variables = dummy
-  exodus = false
-  output_initial = false
-  perf_log = true
-  postprocessor_csv = false
+[Outputs]
+  hide = dummy
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
