@@ -1,19 +1,12 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 2
-  ny = 2
+  nx = 10
+  ny = 10
 []
 
 [Variables]
   [./u]
-  [../]
-[]
-
-[AuxVariables]
-  [./aux]
-    family = MONOMIAL
-    order = CONSTANT
   [../]
 []
 
@@ -47,7 +40,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 5
+  num_steps = 20
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -55,11 +48,18 @@
 []
 
 [Outputs]
-  output_initial = true
-  vtk = true
   [./console]
     type = Console
     perf_log = true
     linear_residuals = true
+  [../]
+  [./out]
+    type = Exodus
+    nonlinear_residuals = true
+    linear_residuals = true
+    nonlinear_residual_dt_divisor = 100
+    linear_residual_dt_divisor = 100
+    start_time = 1.8
+    end_time = 1.85
   [../]
 []

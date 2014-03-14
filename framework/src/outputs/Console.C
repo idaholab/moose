@@ -42,8 +42,6 @@ InputParameters validParams<Console>()
 
   // Basic table output controls
   params.addParam<bool>("use_color", true, "If true, color will be added to the output");
-  params.addParam<bool>("linear_residuals", true, "Specifies whether the linear residuals are printed during the solve");
-  params.addParam<bool>("nonlinear_residuals", true, "Specifies whether the nonlinear residuals are printed during the solve");
 
   // Performance Logging
   params.addParam<bool>("perf_log", false, "If true, all performance logs will be printed. The individual log settings will override this option.");
@@ -58,6 +56,9 @@ InputParameters validParams<Console>()
   // Performance log group
   params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Performance Log");
 
+  // By default the Console object outputs non linear iterations
+  params.set<bool>("nonlinear_residuals") = true;
+
   // Set outputting of failed solves to true for Console outputters
   params.set<bool>("output_failed") = true;
 
@@ -69,8 +70,6 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _use_color(false),
-    _print_linear(getParam<bool>("linear_residuals")),
-    _print_nonlinear(getParam<bool>("nonlinear_residuals")),
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _verbose(getParam<bool>("verbose")),
@@ -105,12 +104,10 @@ Console::Console(const std::string & name, InputParameters parameters) :
   // If file output is desired, wipe out the existing file if not recovering
   if (_write_file && !_app.isRecovering())
     writeStream(false);
-
 }
 
 Console::~Console()
 {
-
   // Write the libMesh performance log header
   if (_perf_header)
   {
@@ -179,13 +176,6 @@ Console::initialSetup()
 void
 Console::timestepSetup()
 {
-  // If the problem is Steady, initialize PETSc monitors and then exit
-  // if (!_transient)
-  // {
-  //  petscSetup();
-  //  return;
-  // }
-
   // Do nothing if the problem is steady or if it is not an output interval
   if (!checkInterval())
     return;
@@ -193,9 +183,6 @@ Console::timestepSetup()
   // Do nothing if output_intitial = false and the timestep is zero
   if (!_output_initial && _t_step == 0)
     return;
-
-  // Prepare the PETSc monitor functions
-  petscSetup();
 
   // Stream to build the time step information
   std::stringstream oss;
@@ -264,32 +251,33 @@ Console::writeStream(bool append)
 void
 Console::output()
 {
+  // Print Non-linear Residual
+  if (onNonlinearResidual())
+  {
+    if (_write_screen)
+      Moose::out << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
+
+    if (_write_file)
+      _file_output_stream << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << std::scientific << _norm << std::endl;
+  }
+
+  // Print Linear Residual
+  else if (onLinearResidual())
+  {
+    if (_write_screen)
+      Moose::out << std::setw(7) << _linear_iter << " Linear |R| = " << std::scientific << outputNorm(_old_linear_norm, _norm) << std::endl;
+
+    if (_write_file)
+      _file_output_stream << std::setw(7) << _linear_iter << std::scientific << " Linear |R| = " << std::scientific << _norm << std::endl;
+  }
+
   // Call the base class output function
-  OutputBase::output();
+  else
+    TableOutputter::output();
 
   // Write the file
   if (_write_file)
     writeStream();
-}
-
-void
-Console::linearMonitor(PetscInt & its, PetscReal & norm)
-{
-  if (_write_screen)
-    Moose::out << std::setw(7) << its << " Linear |R| = " << std::scientific << outputNorm(_old_linear_norm, norm) << std::endl;
-
-  if (_write_file)
-    _file_output_stream << std::setw(7) << its << std::scientific << " Linear |R| = " << std::scientific << norm << std::endl;
-}
-
-void
-Console::nonlinearMonitor(PetscInt & its, PetscReal & norm)
-{
-  if (_write_screen)
-    Moose::out << std::setw(2) << its << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, norm) << std::endl;
-
-  if (_write_file)
-    _file_output_stream << std::setw(2) << its << " Nonlinear |R| = " << std::scientific << norm << std::endl;
 }
 
 // Quick helper to output the norm in color
@@ -333,20 +321,6 @@ Console::insertNewline(std::stringstream &oss, std::streampos &begin, std::strea
 }
 
 void
-Console::petscSetup()
-{
-  // Enable/disable the printing of linear residuals
-  if (_print_nonlinear)
-  {
-    Moose::PetscSupport::petscPrintNonlinearResiduals(_problem_ptr, this);
-
-    // Enable/disable the printing of nonlinear residuals
-    if (_print_linear)
-      Moose::PetscSupport::petscPrintLinearResiduals(_problem_ptr, this);
-  }
-}
-
-void
 Console::outputPostprocessors()
 {
   TableOutputter::outputPostprocessors();
@@ -386,7 +360,6 @@ Console::outputScalarVariables()
   }
 }
 
-
 void
 Console::outputSystemInformation()
 {
@@ -395,7 +368,6 @@ Console::outputSystemInformation()
 
   // Framework information
   oss << _app.getSysInfo();
-
 
   oss << std::left << "\n"
       << "Parallelism:\n"

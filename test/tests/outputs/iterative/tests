@@ -1,0 +1,30 @@
+[Tests]
+  [./exodus]
+    type = 'Exodiff'
+    input = 'iterative.i'
+    exodiff = 'iterative_out.e'
+
+    # This test relies on number of residuals being the same, so run it serially
+    max_parallel = 1
+    max_threads = 1 
+  [../]
+  [./vtk]
+    type = 'VTKDiff'
+    input = 'iterative_vtk.i'
+    vtkdiff = 'iterative_vtk_out_003_0.vtu'
+
+    # This test relies on number of residuals being the same, so run it serially
+    max_parallel = 1
+    max_threads = 1
+    vtk = true 
+  [../]
+  [./csv]
+    type = 'CSVDiff'
+    input = 'iterative_csv.i'
+    csvdiff = 'iterative_csv_out.csv'
+    
+    # This test relies on number of residuals being the same, so run it serially
+    max_parallel = 1
+    max_threads = 1 
+  [../]
+[]

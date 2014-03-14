@@ -44,7 +44,7 @@ CSV::filename()
 
 void
 CSV::output()
-{
+{  
   // Call the base class output (populates tables)
   TableOutputter::output();
 

@@ -24,7 +24,7 @@ InputParameters validParams<OversampleOutputter>()
 {
 
   // Get the parameters from the parent object
-  InputParameters params = validParams<FileOutputter>();
+  InputParameters params = validParams<PetscOutputter>();
 
   params.addParam<bool>("oversample", false, "Set to true to enable oversampling");
   params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling");
@@ -39,7 +39,7 @@ InputParameters validParams<OversampleOutputter>()
 }
 
 OversampleOutputter::OversampleOutputter(const std::string & name, InputParameters & parameters) :
-    FileOutputter(name, parameters),
+    PetscOutputter(name, parameters),
     _mesh_ptr(getParam<bool>("use_displaced") ?
               &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
     _oversample(getParam<bool>("oversample")),
