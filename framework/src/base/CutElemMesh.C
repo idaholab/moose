@@ -162,12 +162,19 @@ CutElemMesh::element_t::overlays_elem(element_t* other_elem)
     {
       CutElemMeshError("in overlays_elem() couldn't find common node");
     }
-    bool e1ascend = true;
-    if (e1n2idx < e1n1idx)
+
+    bool e1ascend = false;
+    unsigned int e1n1idx_plus1(e1n1idx<(num_nodes-1) ? e1n1idx+1 : 0);
+    unsigned int e1n1idx_minus1(e1n1idx>0 ? e1n1idx-1 : num_nodes-1);
+    if (e1n2idx == e1n1idx_plus1)
     {
-      if (!(e1n2idx == 0 && e1n1idx == num_nodes-1))
+      e1ascend = true;
+    }
+    else
+    {
+      if (e1n2idx != e1n1idx_minus1)
       {
-        e1ascend=false;
+        CutElemMeshError("in overlays_elem() common nodes must be adjacent to each other");
       }
     }
 
@@ -188,14 +195,22 @@ CutElemMesh::element_t::overlays_elem(element_t* other_elem)
     {
       CutElemMeshError("in overlays_elem() couldn't find common node");
     }
-    bool e2ascend = true;
-    if (e2n2idx < e2n1idx)
+
+    bool e2ascend = false;
+    unsigned int e2n1idx_plus1(e2n1idx<(num_nodes-1) ? e2n1idx+1 : 0);
+    unsigned int e2n1idx_minus1(e2n1idx>0 ? e2n1idx-1 : num_nodes-1);
+    if (e2n2idx == e2n1idx_plus1)
     {
-      if (!(e2n2idx == 0 && e2n1idx == other_elem->num_nodes-1))
+      e2ascend = true;
+    }
+    else
+    {
+      if (e2n2idx != e2n1idx_minus1)
       {
-        e2ascend=false;
+        CutElemMeshError("in overlays_elem() common nodes must be adjacent to each other");
       }
     }
+
     //if indices both ascend or descend, they overlay
     if ((e1ascend && e2ascend) ||
         (!e1ascend && !e2ascend))
@@ -205,7 +220,8 @@ CutElemMesh::element_t::overlays_elem(element_t* other_elem)
   }
   else if (common_nodes.size() > 2)
   {
-    CutElemMeshError("in overlays_elem() >2 common nodes");
+    //TODO: We probably need more error checking here.
+    overlays = true;
   }
   return overlays;
 }
@@ -1892,10 +1908,6 @@ void CutElemMesh::findCrackTipElements()
         }
         CrackTipElements.insert(this_tip_elems[1]);
       }
-    }
-    else
-    {
-      CutElemMeshError("in findCrackTipElements() cannot have >3 elements on common edge");
     }
   }
   std::cout<<"Crack tip elements: ";
