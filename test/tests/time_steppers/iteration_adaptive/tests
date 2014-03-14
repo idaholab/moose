@@ -1,4 +1,10 @@
 [Tests]
+  [./test_hit_knot]
+    type = 'Exodiff'
+    input = 'hit_function_knot.i'
+    exodiff = 'hit_function_knot_out.e'
+  [../]
+
   [./test_grow_init_dt]
     type = 'Exodiff'
     input = 'adapt_tstep_grow_init_dt.i'
