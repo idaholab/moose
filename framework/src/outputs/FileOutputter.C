@@ -17,6 +17,8 @@
 #include "MooseApp.h"
 #include "FEProblem.h"
 
+#include <unistd.h>
+
 template<>
 InputParameters validParams<FileOutputter>()
 {
