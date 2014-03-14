@@ -73,10 +73,13 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = adapt_tstep_grow_dtfunc_out
-  interval = 1
   output_initial = true
-  linear_residuals = true
   exodus = true
+  [./console]
+    type = Console
+    linear_residuals = true
+    perf_log = true
+  [../]
 []

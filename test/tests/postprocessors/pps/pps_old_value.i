@@ -80,13 +80,11 @@
   end_time = 3
 []
 
-[Output]
-  linear_residuals = true
-  output_initial = false
-  postprocessor_csv = false
-  interval = 1
+[Outputs]
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-
-

@@ -28,11 +28,10 @@ InputParameters validParams<Console>()
 
   // Get the parameters from the base class
   InputParameters params = validParams<TableOutputter>();
-  params += validParams<FileOutputInterface>();
 
   // Screen and file output toggles
-  params.addParam<bool>("screen", true, "Output to the screen");
-  params.addParam<bool>("file", false, "Output to the file");
+  params.addParam<bool>("output_screen", true, "Output to the screen");
+  params.addParam<bool>("output_file", false, "Output to the file");
 
   // Table fitting options
   params.addParam<unsigned int>("max_rows", 15, "The maximum number of postprocessor/scalar values displayed on screen during a timestep (set to 0 for unlimited)");
@@ -59,19 +58,21 @@ InputParameters validParams<Console>()
   // Performance log group
   params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Performance Log");
 
+  // Set outputting of failed solves to true for Console outputters
+  params.set<bool>("output_failed") = true;
+
   return params;
 }
 
 Console::Console(const std::string & name, InputParameters parameters) :
     TableOutputter(name, parameters),
-    FileOutputInterface(name, parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _use_color(false),
     _print_linear(getParam<bool>("linear_residuals")),
     _print_nonlinear(getParam<bool>("nonlinear_residuals")),
-    _write_file(getParam<bool>("file")),
-    _write_screen(getParam<bool>("screen")),
+    _write_file(getParam<bool>("output_file")),
+    _write_screen(getParam<bool>("output_screen")),
     _verbose(getParam<bool>("verbose")),
     _old_linear_norm(std::numeric_limits<Real>::max()),
     _old_nonlinear_norm(std::numeric_limits<Real>::max()),
@@ -101,12 +102,10 @@ Console::Console(const std::string & name, InputParameters parameters) :
     }
   }
 
-  // If file output is desired, wipe out an existing file
-  if (_write_file)
+  // If file output is desired, wipe out the existing file if not recovering
+  if (_write_file && !_app.isRecovering())
     writeStream(false);
 
-  // Call the PETSc setup function, this sets up the monitor functions for the upcoming timestep
-  petscSetup();
 }
 
 Console::~Console()
@@ -150,7 +149,7 @@ Console::~Console()
   if (!_app.hasLegacyOutput())
   {
     /* Disable the logs, without this the logs will be printed
-       during the destructors of the logs themselves*/
+       during the destructors of the logs themselves */
     Moose::perf_log.disable_logging();
     Moose::setup_perf_log.disable_logging();
   }
@@ -169,43 +168,63 @@ Console::initialSetup()
       _file_output_stream << Moose::setup_perf_log.get_perf_info() << std::endl;
   }
 
-  // Ouput the system information
+  // Output the system information
   if (_system_information)
     outputSystemInformation();
+
+  // Output the timestep information
+  timestepSetup();
 }
 
 void
 Console::timestepSetup()
 {
-  // Do nothing if the problem is transient
-  if (!_transient)
+  // If the problem is Steady, initialize PETSc monitors and then exit
+  // if (!_transient)
+  // {
+  //  petscSetup();
+  //  return;
+  // }
+
+  // Do nothing if the problem is steady or if it is not an output interval
+  if (!checkInterval())
     return;
+
+  // Do nothing if output_intitial = false and the timestep is zero
+  if (!_output_initial && _t_step == 0)
+    return;
+
+  // Prepare the PETSc monitor functions
+  petscSetup();
 
   // Stream to build the time step information
   std::stringstream oss;
 
-  // Get the length of the time step string
-  std::ostringstream time_step_string;
-  time_step_string << _t_step;
-  unsigned int n = time_step_string.str().size();
-  if (n < 2)
-    n = 2;
+  // Write timestep data for transient executioners
+  if (_transient)
+  {
+    // Get the length of the time step string
+    std::ostringstream time_step_string;
+    time_step_string << _t_step;
+    unsigned int n = time_step_string.str().size();
+    if (n < 2)
+      n = 2;
 
-  // Write time step and time information
-  oss << std::endl <<  "Time Step " << std::setw(n) << _t_step
+    // Write time step and time information
+    oss << std::endl <<  "Time Step " << std::setw(n) << _t_step
       << ", time = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _time
       << std::endl;
+    // Show old time information, if desired
+    if (_verbose)
+      oss << std::setw(n) << "          old time = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _time_old << std::endl;
 
-  // Show old time information, if desired
-  if (_verbose)
-    oss << std::setw(n) << "          old time = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _time_old << std::endl;
+    // Show the time delta information
+    oss << std::setw(2) << "                dt = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _dt << std::endl;
 
-  // Show the time delta information
-  oss << std::setw(2) << "                dt = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _dt << std::endl;
-
-  // Show the old time delta information, if desired
-  if (_verbose)
-    oss << std::setw(2) << "            old dt = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _dt_old << std::endl;
+    // Show the old time delta information, if desired
+    if (_verbose)
+      oss << std::setw(2) << "            old dt = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _dt_old << std::endl;
+  }
 
   // Output to the screen
   if (_write_screen)
@@ -251,9 +270,6 @@ Console::output()
   // Write the file
   if (_write_file)
     writeStream();
-
-  // Prepare the PETSc monitor functions for the next timestep
-  petscSetup();
 }
 
 void
@@ -277,7 +293,8 @@ Console::nonlinearMonitor(PetscInt & its, PetscReal & norm)
 }
 
 // Quick helper to output the norm in color
-std::string Console::outputNorm(Real old_norm, Real norm)
+std::string
+Console::outputNorm(Real old_norm, Real norm)
 {
   std::string color(COLOR_DEFAULT);
 
@@ -304,7 +321,8 @@ std::string Console::outputNorm(Real old_norm, Real norm)
 
 
 // Free function for stringstream formating
-void Console::insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)
+void
+Console::insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)
 {
    if (curr - begin > _line_length)
    {
@@ -510,7 +528,7 @@ Console::outputSystemInformation()
   oss << "Execution Information:\n"
       << std::setw(_field_width) << "  Executioner: " << demangle(typeid(*_app.getExecutioner()).name()) << '\n';
 
-  std::string time_stepper = _app.getExecutioner()->getTimeStepper();
+  std::string time_stepper = _app.getExecutioner()->getTimeStepperName();
   if (time_stepper != "")
     oss << std::setw(_field_width) << "  TimeStepper: " << time_stepper << '\n';
 
@@ -530,6 +548,6 @@ Console::outputSystemInformation()
 void
 Console::petscSetupOutput()
 {
-char c[] =  {32,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,13,10,124,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,124,13,10,124,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,124,13,10,32,92,32,32,32,32,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,32,32,32,32,47,13,10,32,32,92,95,95,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,95,95,95,45,45,45,95,95,95,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,95,95,47,13,10,32,32,32,32,32,45,45,45,95,95,95,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,92,32,32,32,32,32,32,32,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,45,95,95,95,32,32,124,32,32,32,32,32,32,32,32,32,124,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,45,45,124,32,32,95,32,32,32,95,32,32,124,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,124,111,124,32,124,111,124,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,45,32,32,32,45,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,95,95,95,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,45,45,32,32,32,45,45,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,32,47,92,32,32,32,32,32,47,92,32,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,92,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,47,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,92,32,32,92,95,95,95,95,95,95,95,95,95,95,95,95,32,47,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,92,32,32,32,32,32,39,95,95,95,39,32,32,32,32,32,47,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,47,92,32,32,32,32,32,92,32,45,45,95,95,45,45,45,95,95,45,45,32,47,32,32,32,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,47,32,32,92,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,47,32,32,92,13,10,32,32,32,32,32,32,32,32,47,32,32,32,47,32,32,32,32,32,32,32,77,46,79,46,79,46,83,46,69,32,32,32,32,32,32,32,92,32,32,32,92,13,10,32,32,32,32,32,32,32,47,32,32,32,124,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,92,13,10,32,32,32,32,32,32,124,32,32,32,32,124,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,124,32,32,32,32,124,13,10,32,32,32,32,32,32,32,92,32,32,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,47,13,10,32,32,32,32,32,32,32,32,32,92,92,32,92,95,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,95,47,32,47,47,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,45,45,45,95,95,95,95,95,45,45,45,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,86,32,32,32,32,32,92,32,47,32,32,32,32,86,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,95,124,95,95,95,95,95,124,32,124,95,95,95,95,124,95,95,124};
-Moose::out << std::string(c) << std::endl << std::endl;
+  char c[] =  {32,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,13,10,124,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,124,13,10,124,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,124,13,10,32,92,32,32,32,32,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,32,32,32,32,47,13,10,32,32,92,95,95,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,95,95,95,45,45,45,95,95,95,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,95,95,47,13,10,32,32,32,32,32,45,45,45,95,95,95,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,92,32,32,32,32,32,32,32,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,45,95,95,95,32,32,124,32,32,32,32,32,32,32,32,32,124,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,45,45,124,32,32,95,32,32,32,95,32,32,124,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,124,111,124,32,124,111,124,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,45,32,32,32,45,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,95,95,95,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,45,45,32,32,32,45,45,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,32,47,92,32,32,32,32,32,47,92,32,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,92,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,47,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,92,32,32,92,95,95,95,95,95,95,95,95,95,95,95,95,32,47,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,92,32,32,32,32,32,39,95,95,95,39,32,32,32,32,32,47,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,47,92,32,32,32,32,32,92,32,45,45,95,95,45,45,45,95,95,45,45,32,47,32,32,32,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,47,32,32,92,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,47,32,32,92,13,10,32,32,32,32,32,32,32,32,47,32,32,32,47,32,32,32,32,32,32,32,77,46,79,46,79,46,83,46,69,32,32,32,32,32,32,32,92,32,32,32,92,13,10,32,32,32,32,32,32,32,47,32,32,32,124,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,92,13,10,32,32,32,32,32,32,124,32,32,32,32,124,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,124,32,32,32,32,124,13,10,32,32,32,32,32,32,32,92,32,32,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,47,13,10,32,32,32,32,32,32,32,32,32,92,92,32,92,95,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,95,47,32,47,47,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,45,45,45,95,95,95,95,95,45,45,45,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,86,32,32,32,32,32,92,32,47,32,32,32,32,86,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,95,124,95,95,95,95,95,124,32,124,95,95,95,95,124,95,95,124};
+  Moose::out << std::string(c) << std::endl << std::endl;
 }

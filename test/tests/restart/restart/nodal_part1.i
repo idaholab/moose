@@ -73,11 +73,13 @@
   num_steps = 5
 []
 
-[Output]
+[Outputs]
   file_base = out_nodal_part1
   output_initial = true
-  interval = 1
   exodus = true
   xda = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

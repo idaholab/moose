@@ -106,15 +106,17 @@
   dt = 0.1
 []
 
-[Output]
+[Outputs]
   file_base = out
   output_initial = false
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
 
 [Debug]
   show_var_residual = 'u v'
-        show_var_residual_norms = true
+  show_var_residual_norms = true
 []

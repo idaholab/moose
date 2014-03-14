@@ -76,10 +76,12 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
-  file_base = out_multi_elem_var
+[Outputs]
   output_initial = true
-  interval = 1
+  file_base = out_multi_elem_var
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

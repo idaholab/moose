@@ -18,6 +18,7 @@
 // Moose includes
 #include "Checkpoint.h"
 #include "FEProblem.h"
+#include "MooseApp.h"
 
 // libMesh includes
 #include "libmesh/checkpoint_io.h"
@@ -27,8 +28,7 @@ template<>
 InputParameters validParams<Checkpoint>()
 {
   // Get the parameters from the base classes
-  InputParameters params = validParams<OutputBase>();
-  params += validParams<FileOutputInterface>();
+  InputParameters params = validParams<FileOutputter>();
 
   // Typical checkpoint options
   params.addParam<unsigned int>("num_files", 2, "Number of the restart files to save");
@@ -48,8 +48,7 @@ InputParameters validParams<Checkpoint>()
 }
 
 Checkpoint::Checkpoint(const std::string & name, InputParameters & parameters) :
-    OutputBase(name, parameters),
-    FileOutputInterface(name, parameters),
+    FileOutputter(name, parameters),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
@@ -70,7 +69,9 @@ Checkpoint::filename()
 {
   // Get the time step with correct zero padding
   std::ostringstream output;
-  output << std::setw(_padding)
+  output << directory()
+         << "/"
+         << std::setw(_padding)
          << std::setprecision(0)
          << std::setfill('0')
          << std::right
@@ -87,7 +88,6 @@ Checkpoint::directory()
 void
 Checkpoint::output()
 {
-
   // Start the performance log
   Moose::perf_log.push("output()", "Checkpoint");
 
@@ -96,7 +96,7 @@ Checkpoint::output()
   mkdir(cp_dir.c_str(),  S_IRWXU | S_IRGRP);
 
   // Create the output filename
-  std::string current_file = cp_dir + "/" + filename();
+  std::string current_file = filename();
 
   // Create the libMesh Checkpoint_IO object
   MeshBase & mesh = _es_ptr->get_mesh();

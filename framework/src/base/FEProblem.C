@@ -564,7 +564,7 @@ void FEProblem::initialSetup()
   for(unsigned int tid = 0; tid < n_threads; tid++)
     reinitScalars(tid);
 
-  // Initial setup of output objects
+  // Init function and Initial setup of output objects;
   _app.getOutputWarehouse().initialSetup();
 }
 
@@ -2606,6 +2606,7 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
   _multi_apps(type)[0].addMultiApp(multi_app);
+
   multi_app->init();
 }
 

@@ -86,13 +86,6 @@
   [../]
 []
 
-#[Output]
-#  output_initial = false
-#  exodus = false
-#  perf_log = true
-#  elemental_as_nodal = true
-#[]
-
 [Outputs]
   [./exodus]
     type = Exodus
@@ -100,8 +93,10 @@
     file_base = new_out
     hide_variables = 'u box aux_pp'
     scalar_as_nodal = true
-    #elemental_as_nodal = true
-    #output_input = true
     output_scalar_variables = false
+  [../]
+  [./console]
+    Type = Console
+    perf_log = true
   [../]
 []

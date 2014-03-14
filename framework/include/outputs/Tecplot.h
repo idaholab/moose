@@ -17,9 +17,8 @@
 
 // MOOSE includes
 #include "OversampleOutputter.h"
-#include "FileOutputInterface.h"
 
-// Forward declearations
+// Forward declarations
 class Tecplot;
 
 template<>
@@ -29,13 +28,12 @@ InputParameters validParams<Tecplot>();
  * Class for output data to the TecplotII format
  */
 class Tecplot :
-  public OversampleOutputter,
-  public FileOutputInterface
+  public OversampleOutputter
 {
 public:
 
   /**
-   * Class consturctor
+   * Class constructor
    */
   Tecplot(const std::string & name, InputParameters);
 
@@ -43,13 +41,13 @@ protected:
 
   /**
    * Overload the OutputBase::output method, this is required for Tecplot
-   * output due to the method utlized for outputing single/global parameters
+   * output due to the method utilized for outputing single/global parameters
    */
   virtual void output();
 
   /**
    * Returns the current filename, this method handles adding the timestep suffix
-   * @return A string containg the current filename to be written
+   * @return A string containing the current filename to be written
    */
   std::string filename();
 

@@ -48,12 +48,10 @@
 
 [Executioner]
   type = Steady
-  [../]
 []
 
-[Output]
-  file_base = out
-  interval = 1
+[Outputs]
   exodus = true
-  perf_log = true
+  file_base = out
+  output_initial = false
 []

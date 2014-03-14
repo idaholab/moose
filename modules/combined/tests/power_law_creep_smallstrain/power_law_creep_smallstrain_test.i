@@ -239,13 +239,17 @@
   dt = 1.e-1
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out
-  interval = 1
   output_initial = true
-  elemental_as_nodal = true
-  exodus = true
-  postprocessor_csv = true
-  perf_log = true
+  csv = true
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

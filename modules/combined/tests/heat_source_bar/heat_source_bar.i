@@ -117,11 +117,13 @@
   num_steps = 5000
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = heat_source_bar_out
-  interval = 1
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

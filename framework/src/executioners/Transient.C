@@ -98,7 +98,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
     _old_time_solution_norm(declareRestartableData<Real>("old_time_solution_norm", 0.0)),
-    _sync_times(_app.getOutputWarehouse().getSyncTimes()),
+    _sync_times(_output_warehouse.getSyncTimes()),
     _abort(getParam<bool>("abort_on_solve_fail")),
     _time_interval(declareRestartableData<bool>("time_interval", false)),
     _start_time(getParam<Real>("start_time")),
@@ -227,7 +227,10 @@ Transient::execute()
     _first = false;
 
     if (!keepGoing())
+    {
+      _output_warehouse.outputFinal();
       break;
+    }
 
     computeDT();
     takeStep();
@@ -388,7 +391,12 @@ Transient::takeStep(Real input_dt)
     _problem.execMultiApps(EXEC_TIMESTEP);
   }
   else
+  {
     Moose::out << "Solve Did NOT Converge!" << std::endl;
+
+    // Perform the output of the current, failed time step (this only occurs if desired)
+    _output_warehouse.outputFailedStep();
+  }
 
   postSolve();
   _time_stepper->postSolve();
@@ -398,6 +406,7 @@ void
 Transient::endStep()
 {
   _last_solve_converged = lastSolveConverged();
+
   if (_last_solve_converged)
   {
     // Compute the Error Indicators and Markers
@@ -406,7 +415,7 @@ Transient::endStep()
     // Perform the output of the current time step
     _output_warehouse.outputStep();
 
-    //output
+    //output \todo{Remove after old output system is removed}
     if (_time_interval)
     {
       //Force output if the current time is at an output interval
@@ -621,9 +630,6 @@ Transient::keepGoing()
     keep_going = false;
   }
 
-  if (!keep_going)
-    _output_warehouse.outputFinal();
-
   return keep_going;
 }
 
@@ -709,8 +715,9 @@ Transient::setupTimeIntegrator()
   }
 }
 
+
 std::string
-Transient::getTimeStepper()
+Transient::getTimeStepperName()
 {
   if (_time_stepper != NULL)
     return demangle(typeid(*_time_stepper).name());

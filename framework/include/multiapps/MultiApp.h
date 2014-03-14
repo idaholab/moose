@@ -26,6 +26,7 @@ class MultiApp;
 class UserObject;
 class FEProblem;
 class Executioner;
+class OutputWarehouse;
 namespace libMesh{ namespace MeshTools { class BoundingBox; } }
 
 template<>

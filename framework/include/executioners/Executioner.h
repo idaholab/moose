@@ -91,7 +91,11 @@ public:
 
   virtual Problem & problem() = 0;
 
-  virtual std::string getTimeStepper() { return std::string(); }
+  /** The name of the TimeStepper
+   * This is an empty string for non-Transient executioners
+   * @return A string of giving the TimeStepper name
+   */
+  virtual std::string getTimeStepperName();
 
   void outputInitial(bool out_init);
 
@@ -101,9 +105,6 @@ public:
   virtual void setOutputPosition(const Point & /* p */) {}
 
 protected:
-
-  /// Reference to OutputWarehouse (needed for outputing system information via Console object)
-  OutputWarehouse & _output_warehouse;
 
   /// output initial condition if true
   bool _output_initial;
@@ -116,6 +117,9 @@ protected:
 
   // Splitting
   std::vector<std::string> _splitting;
+
+  /// Reference to the OutputWarehouse object
+  OutputWarehouse & _output_warehouse;
 };
 
 #endif //EXECUTIONER_H

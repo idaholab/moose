@@ -107,10 +107,12 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
   file_base = out_ts
-  output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  output_initial = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

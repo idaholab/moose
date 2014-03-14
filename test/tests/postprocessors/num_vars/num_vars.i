@@ -179,8 +179,10 @@
   nl_rel_tol = 1e-15
 []
 
-[Output]
-  postprocessor_csv = true
-  perf_log = true
+[Outputs]
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
-

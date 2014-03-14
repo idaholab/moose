@@ -167,10 +167,14 @@
   n_startup_steps = 0.0
 []
 
-[Output]
+[Outputs]
   file_base = out
   output_initial = true
   exodus = true
-  postprocessor_csv = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-

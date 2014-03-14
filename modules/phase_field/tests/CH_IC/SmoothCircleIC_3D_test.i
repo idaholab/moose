@@ -72,10 +72,14 @@
   dt = 2.0
 []
 
-[Output]
+[Outputs]
   file_base = circle_3D
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
 

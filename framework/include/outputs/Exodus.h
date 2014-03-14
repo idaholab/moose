@@ -17,13 +17,12 @@
 
 // MOOSE includes
 #include "OversampleOutputter.h"
-#include "FileOutputInterface.h"
 
 // libMesh includes
 #include "libmesh/exodusII.h"
 #include "libmesh/exodusII_io.h"
 
-// Forward declearations
+// Forward declarations
 class Exodus;
 
 template<>
@@ -33,13 +32,12 @@ InputParameters validParams<Exodus>();
  * Class for output data to the ExodusII format
  */
 class Exodus :
-  public OversampleOutputter,
-  public FileOutputInterface
+  public OversampleOutputter
 {
 public:
 
   /**
-   * Class consturctor
+   * Class constructor
    */
   Exodus(const std::string & name, InputParameters);
 
@@ -50,7 +48,7 @@ public:
 
   /**
    * Overload the OutputBase::output method, this is required for ExodusII
-   * output due to the method utlized for outputing single/global parameters
+   * output due to the method utilized for outputing single/global parameters
    */
   virtual void output();
 
@@ -89,7 +87,7 @@ protected:
   /**
    * Returns the current filename, this method handles the -s000 suffix
    * common to ExodusII files.
-   * @return A string containg the current filename to be written
+   * @return A string containing the current filename to be written
    */
   std::string filename();
 
@@ -101,9 +99,6 @@ protected:
 
   /// Storage for names of the above scalar values
   std::vector<std::string> _global_names;
-
-  /// Current output filename; utlized by filename() to create the proper suffix
-  unsigned int _file_num;
 
   /**
    * Flag for indicating the status of the ExodusII file that is being written. The ExodusII_IO
@@ -126,8 +121,10 @@ private:
   void outputEmptyTimestep();
 
   /// Count of outputs per exodus file
-  unsigned int _exodus_num;
+  unsigned int & _exodus_num;
 
+  /// Flag indicating MOOSE is recovering via --recover command-line option
+  bool _recovering;
 };
 
 #endif /* EXODUS_H */

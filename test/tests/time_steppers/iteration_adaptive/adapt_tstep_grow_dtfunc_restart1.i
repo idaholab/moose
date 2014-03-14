@@ -72,10 +72,16 @@
   [../]
 []
 
-[Output]
-  interval = 1
+[Outputs]
   output_initial = true
-  linear_residuals = true
   exodus = true
-  num_checkpoint_files = 1
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+  [./checkpoint]
+    type = Checkpoint
+    num_files = 1
+  [../]
 []

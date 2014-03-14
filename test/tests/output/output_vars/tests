@@ -5,22 +5,15 @@
     exodiff = 'out.e'
   [../]
 
-  [./test_hidden]
-    type = 'Exodiff'
-    input = 'output_vars_hidden_test.i'
-    exodiff = 'out_hidden.e'
-    skip = 'waiting for #1927'
-  [../]
-
   [./test_hidden_shown]
     type = 'RunException'
     input = 'output_vars_hidden_shown_check.i'
-    expect_err = 'One or more variables was specified to be both shown and hidden:'
+    expect_err = 'Output\(s\) specified to be both shown and hidden: nodal, u'
   [../]
 
   [./test_nonexistent]
     type = 'RunException'
     input = 'output_vars_nonexistent.i'
-    expect_err = 'Requested output for the following variables which do not exist:'
+    expect_err = 'Output\(s\) do not exist \(must be variable, scalar, or postprocessor\): foo1, foo2'
   [../]
 []

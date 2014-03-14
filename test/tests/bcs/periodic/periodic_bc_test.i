@@ -65,10 +65,13 @@
   solve_type = NEWTON
 []
 
-[Output]
+[Outputs]
   file_base = out
-  interval = 1
+  output_initial = false
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
 

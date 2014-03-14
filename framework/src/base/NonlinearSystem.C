@@ -46,6 +46,7 @@
 #include "SplitBasedPreconditioner.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
+#include "MooseApp.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -216,8 +217,11 @@ NonlinearSystem::solve()
 
       /// \todo{Remove this after output system redo; this is not needed as it is the same as the
       /// first entry of the nonlinear residual output}
-      Moose::out << std::scientific << std::setprecision(6);
-      Moose::out << " Initial |R| = " << _initial_residual << std::endl;
+      if (_app.hasLegacyOutput())
+      {
+        Moose::out << std::scientific << std::setprecision(6);
+        Moose::out << " Initial |R| = " << _initial_residual << std::endl;
+      }
     }
   }
   catch (MooseException & e)

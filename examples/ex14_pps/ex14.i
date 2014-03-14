@@ -101,10 +101,13 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = out
-  interval = 1
   exodus = true
-  postprocessor_csv = true
-  perf_log = true
+  csv = true
+  x[./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

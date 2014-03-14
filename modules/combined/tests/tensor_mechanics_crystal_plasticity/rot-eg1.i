@@ -165,14 +165,19 @@
   dtmin = 0.01
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = rot_eg1
   output_initial = true
-  exodus = true
-  perf_log = true
-  output_solution_history = true
-  output_displaced = true
+  solution_history = true
+  [./exodus]
+    type = Exodus
+    use_displaced = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
 
 [TensorMechanics]
@@ -225,4 +230,3 @@
     boundary = 13
   [../]
 []
-

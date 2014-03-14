@@ -18,7 +18,6 @@ template<>
 InputParameters validParams<VTKOutputter>()
 {
   InputParameters params = validParams<OversampleOutputter>();
-  params += validParams<FileOutputInterface>();
 
   // Supress un-available parameters
   params.suppressParameter<bool>("output_scalar_variables");
@@ -38,7 +37,6 @@ InputParameters validParams<VTKOutputter>()
 
 VTKOutputter::VTKOutputter(const std::string & name, InputParameters & parameters) :
     OversampleOutputter(name, parameters),
-    FileOutputInterface(name, parameters),
     _vtk_io_ptr(NULL),
     _binary(getParam<bool>("binary"))
 {

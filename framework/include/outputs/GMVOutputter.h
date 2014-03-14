@@ -17,9 +17,8 @@
 
 // MOOSE includes
 #include "OversampleOutputter.h"
-#include "FileOutputInterface.h"
 
-// Forward declearations
+// Forward declarations
 class GMVOutputter;
 
 template<>
@@ -29,13 +28,12 @@ InputParameters validParams<GMVOutputter>();
  * Class for output data to the GMVOutputterII format
  */
 class GMVOutputter :
-  public OversampleOutputter,
-  public FileOutputInterface
+  public OversampleOutputter
 {
 public:
 
   /**
-   * Class consturctor
+   * Class constructor
    */
   GMVOutputter(const std::string & name, InputParameters);
 
@@ -43,13 +41,13 @@ protected:
 
   /**
    * Overload the OutputBase::output method, this is required for GMVOutputter
-   * output due to the method utlized for outputing
+   * output due to the method utilized for outputing
    */
   virtual void output();
 
   /**
    * Returns the current filename, this method handles adding the timestep suffix
-   * @return A string containg the current filename to be written
+   * @return A string containing the current filename to be written
    */
   std::string filename();
 

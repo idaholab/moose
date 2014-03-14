@@ -129,10 +129,12 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = wT
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-

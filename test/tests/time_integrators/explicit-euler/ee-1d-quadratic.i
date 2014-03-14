@@ -89,10 +89,12 @@
   dt = 0.00005
 []
 
-[Output]
+[Outputs]
   output_initial = true
-  interval = 1
   exodus = true
-  max_pps_rows_screen = 10
+  [./console]
+    type = Console
+    perf_log = true
+    max_rows = 10
+  [../]
 []
-

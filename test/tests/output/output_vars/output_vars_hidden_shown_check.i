@@ -181,12 +181,14 @@
   num_steps = 10
 []
 
-[Output]
+[Outputs]
   file_base = out_hidden
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
-  hidden_variables = 'u elemental nodal x'
-  output_variables = 'u'
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
+  hide = 'u elemental nodal x'
+  show = 'u'
 []

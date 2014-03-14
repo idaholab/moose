@@ -63,19 +63,17 @@
   num_steps = 3
 []
 
-[Output]
+[Outputs]
   file_base = out_wedge
   output_initial = true
-  interval = 1
-  exodus = true
-  perf_log = true
-
-  [./OverSampling]
-    # Here we use the over sampling system to write
-    # to a first order mesh for vizualization purposes
-    file = wedge6_mesh.e
-    exodus = true
-    refinements = 0
-    output_initial = true
+  [./exodus]
+    type = Exodus
+    oversample = true
+    append_oversample = true
+    file = wedge6_mesh.e # Oversample to another mesh file
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
   [../]
 []

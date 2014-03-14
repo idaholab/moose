@@ -114,11 +114,11 @@
   end_time = 1E-10
 []
 
-[Output]
+[Outputs]
   file_base = m01
-  output_initial = false
-  exodus = false
-  perf_log = false
-  linear_residuals = false
-  postprocessor_csv = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

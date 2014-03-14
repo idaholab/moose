@@ -123,11 +123,14 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = gh23
   output_initial = true
+  output_final = true
   interval = 10000
   exodus = true
-  perf_log = false
-  linear_residuals = false
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

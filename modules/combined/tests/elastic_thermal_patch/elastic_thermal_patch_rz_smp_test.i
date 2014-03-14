@@ -279,13 +279,17 @@
   end_time = 1.0
 [] # Executioner
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out_rz_smp
-  interval = 1
   output_initial = true
-  elemental_as_nodal = true
-  exodus = true
-  perf_log = true
-  iteration_plot_start_time = 0.0
-[] # Output
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+  #iteration_plot_start_time = 0.0 #This doesn't exist yet
+[] # Outputs

@@ -16,7 +16,7 @@
   [./test_jacobian]
     type = 'PetscJacobianTester'
     input = '2d_diffusion_test.i'
-    cli_args = 'Output/exodus=false'
+    cli_args = 'Outputs/exodus=false'
     recover = false
   [../]
 []

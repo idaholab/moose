@@ -49,12 +49,12 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
-  linear_residuals = true
-  # Note: file_base is optional in which case it'll come out as the
-  #       mesh's filename with "_out" appended ( # file_base = square_out.e )
+[Outputs]
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

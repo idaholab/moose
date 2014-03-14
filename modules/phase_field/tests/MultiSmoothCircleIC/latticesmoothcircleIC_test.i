@@ -101,12 +101,12 @@ active = 'Dv'
   dt = 100.0
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-
-

@@ -201,12 +201,14 @@
 
 []
 
-[Output]
+[Outputs]
   file_base = bh03
   output_initial = true
-  interval = 1
   exodus = false
-  perf_log = true
-  linear_residuals = true
-  postprocessor_csv = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+  csv = true
 []

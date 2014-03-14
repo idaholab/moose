@@ -69,7 +69,7 @@ Steady::init()
   _problem.initialSetup();
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
 
-  // Write the output (handling of outputing initial or not is handled by OutputBase)
+  // Write the output
   _output_warehouse.outputInitial();
 
   if (_output_initial)
@@ -90,7 +90,8 @@ Steady::execute()
   if (_app.isRecovering())
     return;
 
-  Moose::out << "Time: " << _time_step << '\n';
+  if (_app.hasLegacyOutput())
+    Moose::out << "Time: " << _time_step << '\n';
   preExecute();
 
   // first step in any steady state solve is always 1 (preserving backwards compatibility)

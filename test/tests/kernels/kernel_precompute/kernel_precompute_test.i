@@ -58,11 +58,11 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
   file_base = out
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
-
-

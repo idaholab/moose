@@ -156,10 +156,12 @@
   dt = 1E-5
 []
 
-[Output]
+[Outputs]
   file_base = jn07
   output_initial = false
   exodus = false
-  perf_log = false
-  linear_residuals = false
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

@@ -47,11 +47,16 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   output_initial = true
   exodus = true
-  num_checkpoint_files = 100
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+  [./checkpoint]
+    type = Checkpoint
+    num_files = 100
+  [../]
 []
-

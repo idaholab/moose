@@ -70,10 +70,13 @@
   solve_type = Newton
 []
 
-[Output]
+[Outputs]
   file_base = langmuir_jac1
   output_initial = false
   exodus = false
-  perf_log = false
-  linear_residuals = false
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

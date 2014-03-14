@@ -80,11 +80,11 @@
   petsc_options_value = '    gmres         left       lu'
 []
 
-[Output]
+[Outputs]
   linear_residuals = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
-
-

@@ -174,11 +174,12 @@
   end_time = 0.2
 []
 
-[Output]
+[Outputs]
   file_base = s01
   output_initial = true
-  exodus = false
-  perf_log = false
-  linear_residuals = false
-  postprocessor_csv = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

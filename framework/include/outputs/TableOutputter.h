@@ -16,7 +16,7 @@
 #define TABLESOUTPUTBASE_H
 
 // MOOSE includes
-#include "OutputBase.h"
+#include "FileOutputter.h"
 #include "FormattedTable.h"
 
 class TableOutputter;
@@ -36,7 +36,7 @@ InputParameters validParams<TableOutputter>();
  * @see CSV Console
  */
 class TableOutputter :
-  public OutputBase
+  public FileOutputter
 {
 public:
 
@@ -63,7 +63,7 @@ protected:
   //@}
 
   /**
-   * Popules the tables with scalar aux variables
+   * Populates the tables with scalar aux variables
    *
    * If an aux variable contains multiple components the output name for the
    * variable is appended with the component number (e.g., aux_0, aux_1, ...)
@@ -75,14 +75,15 @@ protected:
    */
   virtual void outputPostprocessors();
 
-  /// Table containing postprocessor data
-  FormattedTable _postprocessor_table;
+  /// Table containing postprocessor data (restartable)
+  FormattedTable & _postprocessor_table;
 
-  /// Table containing scalar aux variables
-  FormattedTable _scalar_table;
+  /// Table containing scalar aux variables (restartable)
+  FormattedTable & _scalar_table;
 
-  /// Table containing postprocessor values and scalar aux variablesv
-  FormattedTable _all_data_table;
+  /// Table containing postprocessor values and scalar aux variables (restartable)
+  FormattedTable & _all_data_table;
+
 };
 
 #endif /* TABLEOUTPUTTER_H */

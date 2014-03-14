@@ -93,10 +93,13 @@
   end_time = 1
 []
 
-[Output]
+[Outputs]
   file_base = langmuir_lumping_problem
   output_initial = true
   exodus = true
-  perf_log = false
-  linear_residuals = false
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

@@ -207,10 +207,13 @@
 []
 
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = j_integral_2d_out
-  interval = 1
   output_initial = true
   exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

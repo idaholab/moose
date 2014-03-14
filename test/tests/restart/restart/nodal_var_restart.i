@@ -92,9 +92,8 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
+[Outputs]
   file_base = out_nodal_var_restart
   output_initial = true
-  interval = 1
   exodus = true
 []

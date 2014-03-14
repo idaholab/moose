@@ -139,7 +139,12 @@
   nl_rel_tol = 1e-15
 []
 
-[Output]
+[Outputs]
   output_initial = true
   exodus = true
+  hide = 'lambda'
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

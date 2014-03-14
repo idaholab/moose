@@ -116,12 +116,13 @@
   nl_rel_tol = 1e-14
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = applied_strain
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
-

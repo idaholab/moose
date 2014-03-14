@@ -19,8 +19,11 @@
 #include <vector>
 
 // MOOSE includes
-#include "OutputBase.h"
 #include "InputParameters.h"
+
+// Forward declarations
+class OutputBase;
+class Checkpoint;
 
 /**
  * Class for storing and utilizing output objects
@@ -72,6 +75,11 @@ public:
   void outputInitial();
 
   /**
+   * Calls the outputFailedStep method for each output object
+   */
+  void outputFailedStep();
+
+  /**
    * Calls the outputStep method for each output object
    */
   void outputStep();
@@ -85,6 +93,27 @@ public:
    * Calls the meshChanged method for every output object
    */
   void meshChanged();
+
+  /**
+   * Calls the allowOutput method for every output object
+   */
+  void allowOutput(bool state);
+
+  /**
+   * Calls the forceOutput method for every output object
+   */
+  void forceOutput();
+
+  /**
+   * Calls the setFileNumber method for every FileOutputter output object
+   */
+  void setFileNumbers(std::map<std::string, unsigned int> input);
+
+  /**
+   * Extracts the file numbers from the outputters
+   * @return Map of file numbers for the output objects
+   */
+  std::map<std::string, unsigned int> getFileNumbers();
 
   /**
    * Stores the common InputParameters object
@@ -134,6 +163,9 @@ private:
 
   /// Sync times for all objects
   std::set<Real> _sync_times;
+
+  /// Input file name for this output object
+  std::string _input_file_name;
 
 };
 

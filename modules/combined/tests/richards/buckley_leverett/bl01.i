@@ -139,11 +139,14 @@
   dt = 2
 []
 
-[Output]
+[Outputs]
   file_base = bl01
   output_initial = true
+  output_final = true
   interval = 10000
   exodus = true
-  linear_residuals = 0
-  postprocessor_csv = 0
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

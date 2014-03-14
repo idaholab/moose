@@ -147,11 +147,13 @@
 []
 
 
-[Output]
+[Outputs]
   file_base = bw01
-  interval = 1
   output_initial = true
   exodus = true
-  perf_log = true
-  linear_residuals = false
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

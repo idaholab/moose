@@ -252,11 +252,13 @@
   restart_file_base = power_law_creep_restart1_out_cp/0006
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = power_law_creep_test_out
-  interval = 1
   output_initial = true
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []

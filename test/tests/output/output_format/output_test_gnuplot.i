@@ -58,11 +58,13 @@
   solve_type = 'PJFNK'
 []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = out
   output_initial = true
-  interval = 1
-  postprocessor_gnuplot = true
-  perf_log = true
+  gnuplot = true
+  [./console]
+    type = Console
+    linear_residuals = true
+    perf_log = true
+  [../]
 []

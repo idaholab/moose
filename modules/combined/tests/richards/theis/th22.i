@@ -210,12 +210,13 @@
 
 []
 
-[Output]
+[Outputs]
   file_base = th22
   output_initial = true
-  interval = 1
   exodus = true
-  perf_log = true
-  linear_residuals = false
-  postprocessor_csv = true
+  csv = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

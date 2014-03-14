@@ -16,7 +16,7 @@
 #define OVERSAMPLEOUTPUTTER_H
 
 // MOOSE includes
-#include "OutputBase.h"
+#include "FileOutputter.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -31,7 +31,7 @@ template<>
 InputParameters validParams<OversampleOutputter>();
 
 /**
- * Based class for providing oversampling support to output objects
+ * Based class for providing re-positioning and oversampling support to output objects
  *
  * This class performs the actual oversampling calculations and makes the correct
  * changes to the libMesh::EquationsSystems() pointer (_es_ptr), i.e., this pointer is
@@ -41,19 +41,19 @@ InputParameters validParams<OversampleOutputter>();
  * points to the correct mesh depending on the use of oversampling.
  *
  * The use of oversampling is triggered by setting the oversample input parameter to a
- * interger value greater than 0, indicating the number of refinements to perform.
+ * integer value greater than 0, indicating the number of refinements to perform.
  *
  * @see Exodus
  */
 class OversampleOutputter :
-  public OutputBase
+  public FileOutputter
 {
 public:
 
   /**
    * Class constructor
    *
-   * If oversampling is desired the constuctor will perform the correct initialization
+   * If oversampling is desired the constructor will perform the correct initialization
    * required for oversampling.
    * @see initOversample()
    */
@@ -86,10 +86,9 @@ public:
 protected:
 
   /**
-   * Performs the update of the solution vector for the oversample mesh
+   * Performs the update of the solution vector for the oversample/re-positioned mesh
    */
-  virtual void oversample();
-
+  virtual void update();
 
   /**
    * A pointer to the current mesh
@@ -98,16 +97,22 @@ protected:
    */
   MooseMesh * _mesh_ptr;
 
-
 private:
 
   /**
-   * Setups the output object to produce oversampled results.
+   * Setups the output object to produce re-positioned and/or oversampled results.
    * This is accomplished by creating a new, finer mesh that the existing solution is projected
    * upon. This function is called by the creating action (addOutputAction) and should not be called
    * by the user as it will create a memory leak if called multiple times.
    */
-  virtual void initOversample();
+  void init();
+
+  /**
+   * Clone mesh in preperation for re-positioning or oversampling.
+   * This changes the pointer, _mesh_ptr, with a clone of the current mesh so that it may
+   * be modified to perform the necessary oversample/positioning actions
+   */
+  void cloneMesh();
 
   /**
    * A vector of pointers to the mesh functions
@@ -123,8 +128,14 @@ private:
    */
   NumericVector<Number> * _serialized_solution;
 
-  /// The number of oversampling refinements (0 = do not oversample)
-  const unsigned int _oversample;
+  /// Flag for enableing oversampling
+  bool _oversample;
+
+  /// The number of oversampling refinements
+  const unsigned int _refinements;
+
+  /// Flag for re-positioning
+  bool _change_position;
 
   /// When oversampling, the output is shift by this amount
   Point _position;
