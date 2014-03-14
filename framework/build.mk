@@ -279,35 +279,47 @@ endif
 	@$(libmesh_F90) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 
 # Build appliations up the tree
-up: all
-	@echo ====== Building the following applications: $(CURRENT_APP) $(DEP_APPS) ======
-	@for app in $(CURRENT_APP) $(DEP_APPS); \
+up:
+	@echo ======================================================
+	@echo Building the following applications: 
+	@for app in $(DEP_APPS); do echo \ $$app; done
+	@echo ======================================================
+	@echo
+	@for app in $(DEP_APPS); \
 	do \
 		echo ====== Making in $${app} ====== ; \
-		$(MAKE) -C $(ROOT_DIR)/$$app || exit; \
+		$(MAKE) -C $${app} || exit; \
 	done
 
 
-test_up: all up
-	@echo ====== Testing the following applications: $(CURRENT_APP) $(DEP_APPS) ======
-	@for app in $(CURRENT_APP) $(DEP_APPS); \
+test_up: up
+	@echo ======================================================
+	@echo Testing the following applications: 
+	@for app in $(DEP_APPS); do echo \ $$app; done
+	@echo ======================================================
+	@echo
+	@for app in $(DEP_APPS); \
 	do \
 		echo ====== Testing in $${app} ====== ; \
-		(cd $(ROOT_DIR)/$$app && ./run_tests -q -j $(JOBS)) ; \
+		(cd $${app} && ./run_tests -q -j $(MOOSE_JOBS)) ; \
 	done
 
 clean_up:
-	@echo ====== Cleaning the following applications: $(CURRENT_APP) $(DEP_APPS) ======
-	@for app in $(CURRENT_APP) $(DEP_APPS); \
+	@echo ======================================================
+	@echo Cleaning the following applications: 
+	@for app in $(DEP_APPS); do echo \ $$app; done
+	@echo ======================================================
+	@echo
+	@for app in $(DEP_APPS); \
 	do \
 		echo ====== Cleaning $${app} ====== ; \
-		$(MAKE) -C $(ROOT_DIR)/$$app clean; \
+		$(MAKE) -C $${app} clean; \
 	done
 
 #
 # Maintenance
 #
-.PHONY: cleanall clean doc sa
+.PHONY: cleanall clean clean_up doc sa 
 
 #
 # Misc
@@ -323,5 +335,7 @@ cleandep: cleandep
 cleandeps: cleandep
 
 cleandep:
-#	@echo @python $(FRAMEWORK_DIR)/scripts/rm_outdated_deps.py $(ROOT_DIR)
-	@python $(FRAMEWORK_DIR)/scripts/rm_outdated_deps.py $(ROOT_DIR)
+	@for app in $(DEP_APPS); \
+	do \
+		@echo @python $(FRAMEWORK_DIR)/scripts/rm_outdated_deps.py $$app; \
+	done
