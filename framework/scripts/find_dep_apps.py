@@ -66,11 +66,11 @@ def findDepApps(dep_names):
 
   # moose, elk and modules have special rules
   if dep_name == "moose":
-    dep_app_re=re.compile(r"\bmoose.mk\b")
+    dep_app_re=re.compile(r"\bmoose\.mk\b")
   elif dep_name == "modules":
-    dep_app_re=re.compile(r"\bmodules.mk\b")
+    dep_app_re=re.compile(r"\bmodules\.mk\b")
   elif dep_name == "elk":
-    dep_app_re=re.compile(r"\belk_modules.mk\b")
+    dep_app_re=re.compile(r"\belk(?:_module)?\.mk\b")
   else:
     dep_app_re=re.compile(r"^\s*APPLICATION_NAME\s*:=\s*"+dep_name,re.MULTILINE)
 
