@@ -42,7 +42,7 @@ class RichardsRelPermPowerGas : public RichardsRelPerm
   Real d2relperm(Real seff) const;
 
  protected:
-  
+
   /// immobile saturation
   Real _simm;
 
