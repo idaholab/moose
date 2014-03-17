@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "OutputBase.h"
+#include "MooseTypes.h"
 
 // Forward declerations
 class FileOutputter;
@@ -89,7 +90,7 @@ public:
    *
    * @see CommonOutputAction::setRecoverFileBase()
    */
-  static std::string getOutputFileBase(MooseApp & app);
+  static OutFileBase getOutputFileBase(MooseApp & app);
 
 protected:
 
@@ -101,7 +102,7 @@ protected:
   bool checkFilename();
 
   /// The base filename from the input paramaters
-  std::string _file_base;
+  OutFileBase _file_base;
 
   /// A file number counter, initialized to 0 (this must be controlled by the child class, see Exodus)
   unsigned int & _file_num;
