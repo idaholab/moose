@@ -21,7 +21,6 @@
 #include <set>
 
 #include "Moose.h"
-#include "MooseTypes.h"
 #include "Parser.h"
 #include "MooseSyntax.h"
 #include "ActionWarehouse.h"
@@ -111,12 +110,12 @@ public:
   /**
    * Override the selection of the output file base name.
    */
-  void setOutputFileBase(OutFileBase output_file_base) { _output_file_base = output_file_base; }
+  void setOutputFileBase(std::string output_file_base) { _output_file_base = output_file_base; }
 
   /**
    * Override the selection of the output file base name.
    */
-  OutFileBase getOutputFileBase();
+  std::string getOutputFileBase();
 
   /**
    * Tell the app to output in a specific position.
@@ -328,7 +327,7 @@ protected:
   std::string _input_filename;
 
   /// The output file basename
-  OutFileBase _output_file_base;
+  std::string _output_file_base;
 
   /// Whether or not an output position has been set for this app
   bool _output_position_set;
