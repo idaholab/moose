@@ -52,7 +52,7 @@ InputParameters validParams<CommonOutputAction>()
    // Common parameters
    params.addParam<bool>("output_initial", false,  "Request that the initial condition is output to the solution file");
    params.addParam<bool>("output_final", false, "Force the final timestep to be output, regardless of output interval");
-   params.addParam<std::string>("file_base", "Common file base name to be utilized with all output objects");
+   params.addParam<OutFileBase>("file_base", "Common file base name to be utilized with all output objects");
    params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputing only a subset of outputs when using MultiApps.");
    params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
    params.addParam<std::vector<Real> >("sync_times", "Times at which the output and solution is forced to occur");
@@ -253,9 +253,9 @@ CommonOutputAction::getRecoveryDirectory()
   // The TestHarness uses a specific checkpoint outputter and naming
   if (getParam<bool>("auto_recovery_part2"))
   {
-    std::string file_base;
+    OutFileBase file_base;
     if (isParamValid("file_base"))
-      file_base = _pars.get<std::string>("file_base");
+      file_base = _pars.get<OutFileBase>("file_base");
     if (file_base.empty())
       file_base = FileOutputter::getOutputFileBase(_app);
 
@@ -290,12 +290,12 @@ CommonOutputAction::getRecoveryDirectory()
       InputParameters & obj_pars = cp->getObjectParams();
 
       // Get the file base, checking the common and local parameters before using the default.
-      std::string file_base;
+      OutFileBase file_base;
       if (isParamValid("file_base"))
-        file_base = _pars.get<std::string>("file_base");
+        file_base = _pars.get<OutFileBase>("file_base");
 
       if (obj_pars.isParamValid("file_base"))
-        file_base = obj_pars.get<std::string>("file_base");
+        file_base = obj_pars.get<OutFileBase>("file_base");
 
       if (file_base.empty())
         file_base = FileOutputter::getOutputFileBase(_app);
