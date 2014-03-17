@@ -13,6 +13,7 @@ InputParameters validParams<RichardsRelPermMonomial>()
   InputParameters params = validParams<RichardsRelPerm>();
   params.addRequiredParam<Real>("simm", "Immobile saturation.  Must be between 0 and 1.   Define s = (seff - simm)/(1 - simm).  Then relperm = s^n");
   params.addRequiredParam<Real>("n", "Exponent.  Must be >= 0.   Define s = (seff - simm)/(1 - simm).  Then relperm = s^n");
+  params.addParam<Real>("zero_to_the_zero", 0.0, "If n=0, this is the value of relative permeability for s<=simm");
   params.addClassDescription("Monomial form of relative permeability.  Define s = (seff - simm)/(1 - simm).  Then relperm = s^n if s<simm, otherwise relperm=1");
   return params;
 }
@@ -20,7 +21,8 @@ InputParameters validParams<RichardsRelPermMonomial>()
 RichardsRelPermMonomial::RichardsRelPermMonomial(const std::string & name, InputParameters parameters) :
   RichardsRelPerm(name, parameters),
   _simm(getParam<Real>("simm")),
-  _n(getParam<Real>("n"))
+  _n(getParam<Real>("n")),
+  _zero_to_the_zero(getParam<Real>("zero_to_the_zero"))
 {
   if (_simm < 0 || _simm > 1)
     mooseError("Immobile saturation set to " << _simm << " in relative permeability function but it must not be less than zero or greater than 1");
@@ -35,6 +37,9 @@ RichardsRelPermMonomial::relperm(Real seff) const
   if (seff >= 1.0) {
     return 1.0;
   }
+
+  if (_n == 0 && seff <= _simm)
+    return _zero_to_the_zero;
 
   if (seff <= _simm) {
     return 0.0;
@@ -61,6 +66,9 @@ RichardsRelPermMonomial::drelperm(Real seff) const
     return 0.0;
   }
 
+  if (_n == 0)
+    return 0.0;
+
   Real s_internal = (seff - _simm)/(1.0 - _simm);
   Real krelp = _n*std::pow(s_internal, _n - 1);
   return krelp/(1.0 - _simm);
@@ -77,6 +85,9 @@ RichardsRelPermMonomial::d2relperm(Real seff) const
   if (seff <= _simm) {
     return 0.0;
   }
+
+  if (_n == 0)
+    return 0.0;
 
   Real s_internal = (seff - _simm)/(1.0 - _simm);
   Real krelpp = _n*(_n - 1)*std::pow(s_internal, _n - 2);
