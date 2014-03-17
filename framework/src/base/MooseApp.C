@@ -230,7 +230,7 @@ MooseApp::setInputFileName(std::string input_filename)
   _input_filename = input_filename;
 }
 
-OutFileBase
+std::string
 MooseApp::getOutputFileBase()
 {
   return _output_file_base;

@@ -24,7 +24,7 @@ InputParameters validParams<FileOutputter>()
 {
   // Create InputParameters object for this stand-alone object
   InputParameters params = validParams<OutputBase>();
-  params.addParam<OutFileBase>("file_base", "The desired solution output name without an extension (Defaults appends '_out' to the input file name)");
+  params.addParam<std::string>("file_base", "The desired solution output name without an extension (Defaults appends '_out' to the input file name)");
   params.addParam<bool>("append_displaced", false, "Append '_displaced' to the output file base");
   params.addParamNamesToGroup("append_displaced", "Displaced");
 
@@ -38,7 +38,7 @@ InputParameters validParams<FileOutputter>()
 
 FileOutputter::FileOutputter(const std::string & name, InputParameters & parameters) :
     OutputBase(name, parameters),
-    _file_base(getParam<OutFileBase>("file_base")),
+    _file_base(getParam<std::string>("file_base")),
     _file_num(declareRecoverableData<unsigned int>("file_num", 0)),
     _padding(getParam<unsigned int>("padding")),
     _output_file(true)
@@ -103,7 +103,7 @@ FileOutputter::outputFinal()
   OutputBase::outputFinal();
 }
 
-OutFileBase
+std::string
 FileOutputter::getOutputFileBase(MooseApp & app)
 {
   // If the App has an outputfile, then use it (MultiApp scenario)
