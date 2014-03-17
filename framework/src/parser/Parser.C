@@ -503,23 +503,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       }
     }
 
-    if (!found)
-    {
-      // In the case where we have OutFileName but it wasn't actually found in the input filename,
-      // we will populate it with the actual parsed filename which is available here in the parser.
-
-      InputParameters::Parameter<OutFileBase> * scalar_p = dynamic_cast<InputParameters::Parameter<OutFileBase>*>(it->second);
-      if (scalar_p)
-      {
-        std::string input_file_name = getFileName();
-        mooseAssert(input_file_name != "", "Input Filename is NULL");
-        size_t pos = input_file_name.find_last_of('.');
-        mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
-        scalar_p->set() = input_file_name.substr(0,pos) + "_out";
-        p.set_attributes(it->first, false);
-      }
-    }
-    else
+    if (found)
     {
       /**
        * Scalar types
