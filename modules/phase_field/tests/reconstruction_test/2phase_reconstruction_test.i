@@ -134,7 +134,7 @@
   [../]
 []
 
-[Output]
+[Outputs]
   linear_residuals = true
   file_base = 2phase_reconstruction_test
   output_initial = true

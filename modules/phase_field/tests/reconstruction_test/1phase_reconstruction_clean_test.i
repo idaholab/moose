@@ -216,14 +216,17 @@
  #[../]
  # []
 
-[Output]
-  linear_residuals = true
+[Outputs]
   file_base = Small_IN100_1_partitioned_Marmot
-  postprocessor_csv = true
+  csv = true
   output_initial = true
   #interval = 1
   exodus = true
-  perf_log = true
-  max_pps_rows_screen = 20
-  show_setup_log_early = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+    setup_log_early = true
+    max_rows = 20
+  [../]
 []
