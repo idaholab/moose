@@ -246,12 +246,12 @@
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
-	  nonlinear_residuals = true
+    nonlinear_residuals = true
     nonlinear_residual_dt_divisor = 100
   [../]
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true 
+    linear_residuals = true
   [../]
 [] # Outputs

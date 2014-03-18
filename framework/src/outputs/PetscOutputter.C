@@ -35,7 +35,7 @@ InputParameters validParams<PetscOutputter>()
   params.addParam<Real>("linear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outtputting linear residuals");
   params.addParamNamesToGroup("nonlinear_residual_dt_divisor linear_residual_dt_divisor", "Advanced");
 #endif
-  
+
   return params;
 }
 

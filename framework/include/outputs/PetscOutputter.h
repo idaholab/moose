@@ -62,7 +62,7 @@ public:
    * this time and it should be used in place of _time from Outputter.
    */
   Real time();
-  
+
 protected:
 
   /// Current norm returned from PETSc
