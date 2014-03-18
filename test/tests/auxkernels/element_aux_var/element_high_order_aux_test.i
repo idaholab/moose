@@ -89,11 +89,13 @@
  [../]
 []
 
-[Output]
-  file_base = ho
-  output_initial = true
-  elemental_as_nodal = true
-  interval = 1
-  exodus = true
+[Outputs]
   perf_log = true
+  [./ex_out]
+    type = Exodus
+    file_base = ho
+    output_initial = true
+    elemental_as_nodal = true
+    interval = 1
+  [../]
 []
