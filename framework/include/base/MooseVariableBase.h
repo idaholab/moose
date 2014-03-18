@@ -97,6 +97,8 @@ public:
 
   std::vector<dof_id_type> & dofIndices() { return _dof_indices; }
 
+  unsigned int numberOfDofs() { return _dof_indices.size(); }
+
   /**
    * Is this variable nodal
    * @return true if it nodal, otherwise false

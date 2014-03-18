@@ -385,3 +385,21 @@ AuxiliarySystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
                                  std::vector<unsigned int> & /*n_oz*/)
 {
 }
+
+Order
+AuxiliarySystem::getMinQuadratureOrder()
+{
+  Order order = CONSTANT;
+  std::vector<MooseVariable *> vars = _vars[0].variables();
+  for (std::vector<MooseVariable *>::iterator it = vars.begin(); it != vars.end(); ++it)
+  {
+    if (!(*it)->isNodal()) // nodal aux variables do not need quadrature
+    {
+      FEType fe_type = (*it)->feType();
+      if (fe_type.default_quadrature_order() > order)
+        order = fe_type.default_quadrature_order();
+    }
+  }
+
+  return order;
+}
