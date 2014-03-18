@@ -14,7 +14,6 @@
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
     max_parallel = 1
-    skip = 'see #2617'
   [../]
 
   [./test_rz]
@@ -32,6 +31,5 @@
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
     max_parallel = 1
-    skip = 'see #2617'
   [../]
 []

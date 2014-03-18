@@ -12,6 +12,5 @@
     exodiff = 'out_smp.e'
     custom_cmp = 'thermo_mech_test.cmp'
     max_parallel = 1
-    skip = 'see #2617'
   [../]
 []
