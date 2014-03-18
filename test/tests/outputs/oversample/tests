@@ -1,0 +1,22 @@
+[Tests]
+  [./oversample]
+    # Tests that oversampling is functioning with a shift of position
+    type = 'Exodiff'
+    input = 'oversample.i'
+    exodiff = 'oversample_out.e'
+  [../]
+
+  [./oversample_filemesh]
+    # Tests that oversampling a file input and change in output base is functioning
+    type = 'Exodiff'
+    input = 'oversample_file.i'
+    exodiff = 'exodus_oversample_custom_name.e'
+  [../]
+
+  [./adapt]
+    # Tests that we can oversample an adapted mesh from the original
+    type = Exodiff
+    input = 'adapt.i'
+    exodiff = 'adapt_out_oversample.e adapt_out.e-s003'
+  [../]
+[]
