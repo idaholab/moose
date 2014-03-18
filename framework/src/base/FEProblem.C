@@ -2817,6 +2817,7 @@ FEProblem::createQRules(QuadratureType type, Order order)
     // automatically determine the integration order
     Moose::setup_perf_log.push("getMinQuadratureOrder()","Setup");
     _quadrature_order = _nl.getMinQuadratureOrder();
+    if (_quadrature_order<_aux.getMinQuadratureOrder()) _quadrature_order = _aux.getMinQuadratureOrder();
     Moose::setup_perf_log.pop("getMinQuadratureOrder()","Setup");
   }
   else

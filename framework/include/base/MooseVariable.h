@@ -201,14 +201,22 @@ public:
    */
   void computeNodalNeighborValues();
   /**
-   * Set the nodal value for this variable (to keep everything up to date
+   * Set the nodal value for this variable to keep everything up to date
    */
   void setNodalValue(Number value, unsigned int idx = 0);
+  /**
+   * Set values for this variable to keep everything up to date
+   */
+  void setNodalValue(const DenseVector<Number> & value);
 
   /**
    * Set the neighbor nodal value for this variable
    */
   void setNodalValueNeighbor(Number value);
+  /**
+   * Set the neighbor values for this variable
+   */
+  void setNodalValueNeighbor(const DenseVector<Number> & value);
 
   /**
    * Compute damping for this variable based on increment_vec
@@ -220,6 +228,8 @@ public:
    * @return
    */
   std::vector<dof_id_type> & dofIndicesNeighbor() { return _dof_indices_neighbor; }
+
+  unsigned int numberOfDofsNeighbor() { return _dof_indices_neighbor.size(); }
 
   void insert(NumericVector<Number> & residual);
   void add(NumericVector<Number> & residual);
@@ -250,7 +260,7 @@ public:
    * @param elem The element we are computing on
    * @return The variable value
    */
-  Number getElementalValue(const Elem * elem) const;
+  Number getElementalValue(const Elem * elem, unsigned int idx=0) const;
 
   /**
    * Whether or not this variable is actually using the shape function value.

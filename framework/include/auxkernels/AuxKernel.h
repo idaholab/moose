@@ -146,6 +146,8 @@ protected:
   VariableValue & _u_old;
   /// Holds the t-2 solution at the current quadrature point.
   VariableValue & _u_older;
+  /// holds the the test functions
+  const VariableTestValue & _test;
 
   /// Current element (valid only for elemental kernels)
   const Elem * & _current_elem;
@@ -172,6 +174,16 @@ protected:
 
   /// Depend UserObjects
   std::set<std::string> _depend_uo;
+
+  /// number of local dofs for elemental variables
+  unsigned int _n_local_dofs;
+
+  /// for holding local load
+  DenseVector<Number> _local_re;
+  /// for holding local solution
+  DenseVector<Number> _local_sol;
+  /// for holding local mass matrix
+  DenseMatrix<Number> _local_ke;
 };
 
 template<typename T>
