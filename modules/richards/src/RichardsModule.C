@@ -18,6 +18,7 @@
 #include "RichardsRelPermVG.h"
 #include "RichardsRelPermVG1.h"
 #include "RichardsRelPermBW.h"
+#include "RichardsRelPermPowerGas.h"
 #include "RichardsSeff1VG.h"
 #include "RichardsSeff1VGcut.h"
 #include "RichardsSeff1BWsmall.h"
@@ -96,6 +97,7 @@ Elk::Richards::registerObjects(Factory & factory)
   registerUserObject(RichardsRelPermVG);
   registerUserObject(RichardsRelPermVG1);
   registerUserObject(RichardsRelPermBW);
+  registerUserObject(RichardsRelPermPowerGas);
   registerUserObject(RichardsSeff1VG);
   registerUserObject(RichardsSeff1VGcut);
   registerUserObject(RichardsSeff1BWsmall);
