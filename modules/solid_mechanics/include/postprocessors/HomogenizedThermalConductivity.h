@@ -30,6 +30,7 @@ private:
   MaterialProperty<Real> & _thermal_conductivity;
   Real _volume;
   Real _integral_value;
+  const Real _scale;
 };
 
 template<>
