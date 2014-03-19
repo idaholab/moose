@@ -105,7 +105,7 @@ Exodus::outputNodalVariables()
   _exodus_io_ptr->set_output_variables(getNodalVariableOutput());
 
   // Write the data via libMesh::ExodusII_IO
-  _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, _time + _app.getGlobalTimeOffset());
+  _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
 
   // This satisfies the initialization of the ExodusII_IO object
   _initialized = true;
@@ -234,6 +234,6 @@ Exodus::outputEmptyTimestep()
 {
   // Write a timestep with no variables
   _exodus_io_ptr->set_output_variables(std::vector<std::string>());
-  _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, _time + _app.getGlobalTimeOffset());
+  _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
   _initialized = true;
 }

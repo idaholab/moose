@@ -31,7 +31,7 @@ InputParameters validParams<TableOutputter>()
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Base class parameters
-  InputParameters params = validParams<FileOutputter>();
+  InputParameters params = validParams<PetscOutputter>();
 
   // Suppressing the output of nodal and elemental variables disables this type of output
   params.suppressParameter<bool>("output_elemental_variables");
@@ -44,7 +44,7 @@ InputParameters validParams<TableOutputter>()
 }
 
 TableOutputter::TableOutputter(const std::string & name, InputParameters parameters) :
-    FileOutputter(name, parameters),
+    PetscOutputter(name, parameters),
     _postprocessor_table(declareRestartableData<FormattedTable>("postprocessor_table")),
     _scalar_table(declareRestartableData<FormattedTable>("scalar_table")),
     _all_data_table(declareRestartableData<FormattedTable>("all_data_table"))
@@ -77,8 +77,8 @@ TableOutputter::outputPostprocessors()
   for (std::vector<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
   {
     PostprocessorValue value = _problem_ptr->getPostprocessorValue(*it);
-    _postprocessor_table.addData(*it, value, _time);
-    _all_data_table.addData(*it, value, _time);
+    _postprocessor_table.addData(*it, value, time());
+    _all_data_table.addData(*it, value, time());
   }
 }
 
@@ -98,8 +98,8 @@ TableOutputter::outputScalarVariables()
     // If the variable has a single component, simply output the value with the name
     if (n == 1)
     {
-      _scalar_table.addData(*it, variable[0], _time);
-      _all_data_table.addData(*it, variable[0], _time);
+      _scalar_table.addData(*it, variable[0], time());
+      _all_data_table.addData(*it, variable[0], time());
     }
 
     // Multi-component variables are appended with the component index
@@ -108,8 +108,8 @@ TableOutputter::outputScalarVariables()
       {
         std::ostringstream os;
         os << *it << "_" << i;
-        _scalar_table.addData(os.str(), variable[i], _time);
-        _all_data_table.addData(os.str(), variable[i], _time);
+        _scalar_table.addData(os.str(), variable[i], time());
+        _all_data_table.addData(os.str(), variable[i], time());
       }
   }
 }

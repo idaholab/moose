@@ -246,11 +246,12 @@
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
+    nonlinear_residuals = true
+    nonlinear_residual_dt_divisor = 100
   [../]
   [./console]
     type = Console
     perf_log = true
     linear_residuals = true
   [../]
-  #iteration_plot_start_time = 0.0 #This doesn't exist yet
 [] # Outputs

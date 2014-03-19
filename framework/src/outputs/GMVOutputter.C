@@ -57,6 +57,7 @@ GMVOutputter::output()
 {
   GMVIO out(_es_ptr->get_mesh());
   out.write_equation_systems(filename(), *_es_ptr);
+  _file_num++;
 }
 
 void
@@ -94,6 +95,6 @@ GMVOutputter::filename()
          << std::setprecision(0)
          << std::setfill('0')
          << std::right
-         << _t_step;
+         << _file_num;
   return output.str() + ".gmv";
 }

@@ -16,7 +16,7 @@
 #define OVERSAMPLEOUTPUTTER_H
 
 // MOOSE includes
-#include "FileOutputter.h"
+#include "PetscOutputter.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -46,7 +46,7 @@ InputParameters validParams<OversampleOutputter>();
  * @see Exodus
  */
 class OversampleOutputter :
-  public FileOutputter
+  public PetscOutputter
 {
 public:
 

@@ -210,7 +210,7 @@ petscSetOptions(FEProblem & problem)
 
 }
 
-// Quick helper to output the norm in color
+// Quick helper to output the norm in color \todo{Remove after new output system is in place}
 void outputNorm(Real old_norm, Real norm, bool use_color)
 {
   std::string color(COLOR_DEFAULT);
@@ -236,7 +236,7 @@ void outputNorm(Real old_norm, Real norm, bool use_color)
     Moose::out << norm << std::endl;
 }
 
-/// \todo{Remove after new build system is in place}
+/// \todo{Remove after new output system is in place}
 PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_ptr)
 {
   static Real old_norm;
@@ -278,20 +278,6 @@ PetscErrorCode  linearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *
 
   old_norm = rnorm;
 
-  return 0;
-}
-
-PetscErrorCode petscNonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_ptr)
-{
-  Console * console_ptr = static_cast<Console *>(void_ptr);
-  console_ptr->nonlinearMonitor(its, fnorm);
-  return 0;
-}
-
-PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *void_ptr)
-{
- Console * console_ptr = static_cast<Console *>(void_ptr);
- console_ptr->linearMonitor(its, rnorm);
   return 0;
 }
 
@@ -660,42 +646,7 @@ void petscSetDefaults(FEProblem & problem)
       CHKERRABORT(libMesh::COMM_WORLD,ierr);
     }
   }
-
 }
-
-void petscPrintLinearResiduals(FEProblem * problem_ptr, Console * console_ptr)
-{
-  NonlinearSystem & nl = problem_ptr->getNonlinearSystem();
-  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
-  SNES snes = petsc_solver->snes();
-  KSP ksp;
-  SNESGetKSP(snes, &ksp);
-
-  PetscErrorCode ierr;
-#if PETSC_VERSION_LESS_THAN(2,3,3)
-  ierr = KSPSetMonitor (ksp, petscLinearMonitor, console_ptr, PETSC_NULL);
-#else
-  ierr = KSPMonitorSet (ksp, petscLinearMonitor, console_ptr, PETSC_NULL);
-#endif
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-}
-
-void petscPrintNonlinearResiduals(FEProblem * problem_ptr, Console * console_ptr)
-{
-  NonlinearSystem & nl = problem_ptr->getNonlinearSystem();
-  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
-  SNES snes = petsc_solver->snes();
-
-  PetscErrorCode ierr;
-#if PETSC_VERSION_LESS_THAN(2,3,3)
-  ierr = SNESSetMonitor (snes, petscNonlinearMonitor, console_ptr, PETSC_NULL);
-#else
-  ierr = SNESMonitorSet (snes, petscNonlinearMonitor, console_ptr, PETSC_NULL);
-#endif
-
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-}
-
 } // Namespace PetscSupport
 } // Namespace MOOSE
 

@@ -75,22 +75,6 @@ public:
   virtual std::string filename();
 
   /**
-   * A helper function for printing linear residuals via PETSc
-   * @param its A reference to the iteration number from PETSc
-   * @param norm A reference to the linear residual norm from PETSc
-   * @see PetscSupport::petscLinearMonitor
-   */
-  void linearMonitor(PetscInt & its, PetscReal & norm);
-
-  /**
-   * A helper function for printing linear residuals via PETSc
-   * @param its A reference to the iteration number from PETSc
-   * @param norm A reference to the linear residual norm from PETSc
-   * @see PetscSupport::petscLinearMonitor
-   */
-  void nonlinearMonitor(PetscInt & its, PetscReal & norm);
-
-  /**
    * Display the system information
    */
   void outputSystemInformation();
@@ -111,11 +95,6 @@ protected:
    * Prints the postprocessor table to the screen
    */
   virtual void outputPostprocessors();
-
-  /**
-   * Setups up PETSc to output the nonlinear/linear residuals
-   */
-   virtual void petscSetup();
 
   /**
    * A helper function for outputing norms in color
@@ -145,12 +124,6 @@ protected:
 
   /// Toggle for controlling the use of color output
   bool _use_color;
-
-  /// Toggle for controlling the printing of linear residuals (requires _print_nonlinear = true)
-  bool _print_linear;
-
-  /// Toggle for controlling the printing of nonlinear residuals
-  bool _print_nonlinear;
 
   /// Flag for controlling outputing console information to a file
   bool _write_file;

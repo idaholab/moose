@@ -141,6 +141,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
     FEProblem * problem = appProblem(_first_local_app + i);
     OutputWarehouse & output_warehouse = _apps[i]->getOutputWarehouse();
+    output_warehouse.timestepSetup();
 
     Transient * ex = _transient_executioners[i];
 

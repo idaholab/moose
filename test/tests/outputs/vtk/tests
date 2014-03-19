@@ -23,5 +23,5 @@
     input = vtk_diff.i
     max_parallel = 1
     vtk = true
-  [../]  
+  [../]
 []

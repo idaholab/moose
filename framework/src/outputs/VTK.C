@@ -76,6 +76,7 @@ VTKOutputter::output()
 #ifdef LIBMESH_HAVE_VTK
   // Write the data
   _vtk_io_ptr->write_equation_systems(filename(), *_es_ptr);
+  _file_num++;
 #else
   mooseError("libMesh not configured with VTK");
 #endif
@@ -94,7 +95,7 @@ VTKOutputter::filename()
          << std::setprecision(0)
          << std::setfill('0')
          << std::right
-         << _t_step
+         << _file_num
          << ".vtk";
 
   // Return the filename

@@ -137,7 +137,7 @@ Nemesis::output()
   OversampleOutputter::output();
 
   // Write the data
-  _nemesis_io_ptr->write_timestep(filename(), *_es_ptr, _nemesis_num, _time + _app.getGlobalTimeOffset());
+  _nemesis_io_ptr->write_timestep(filename(), *_es_ptr, _nemesis_num, time() + _app.getGlobalTimeOffset());
 
   // Increment output call counter for the current file
   _nemesis_num++;

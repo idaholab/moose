@@ -60,6 +60,7 @@ Tecplot::output()
 {
   TecplotIO out(*_mesh_ptr, _binary);
   out.write_equation_systems(filename(), *_es_ptr);
+  _file_num++;
 }
 
 void
@@ -97,6 +98,6 @@ Tecplot::filename()
          << std::setprecision(0)
          << std::setfill('0')
          << std::right
-         << _t_step;
+         << _file_num;
   return output.str() + ".plt";
 }

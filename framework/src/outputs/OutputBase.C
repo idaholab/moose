@@ -68,9 +68,11 @@ InputParameters validParams<OutputBase>()
   params.addParam<bool>("output_failed", false, "When true all time attempted time steps are output");
   params.addParam<std::vector<Real> >("sync_times", "Times at which the output and solution is forced to occur");
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
+  params.addParam<Real>("start_time", 0, "Time at which this outputter begins");
+  params.addParam<Real>("end_time", "Time at which this outputter ends");
 
   // 'Timing' group
-  params.addParamNamesToGroup("interval output_initial output_final sync_times sync_only", "Timing");
+  params.addParamNamesToGroup("interval output_initial output_final sync_times sync_only start_time end_timemt ", "Timing");
 
   // 'Variables' Group
   params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
@@ -105,6 +107,8 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     _sync_times(isParamValid("sync_times") ?
                 std::set<Real>(getParam<std::vector<Real> >("sync_times").begin(), getParam<std::vector<Real> >("sync_times").end()) :
                 std::set<Real>()),
+    _start_time(getParam<Real>("start_time")),
+    _end_time(isParamValid("end_time") ? getParam<Real>("end_time") : std::numeric_limits<Real>::max()),
     _sync_only(getParam<bool>("sync_only")),
     _allow_output(true),
     _force_output(false),
@@ -181,6 +185,11 @@ OutputBase::initialSetup()
 
 void
 OutputBase::timestepSetup()
+{
+}
+
+void
+OutputBase::timestepSetupInternal()
 {
 }
 
@@ -406,8 +415,8 @@ OutputBase::checkInterval()
   // The output flag to return
   bool output = false;
 
-  // Return true if the current step on the current output interval
-  if ((_t_step % _interval) == 0)
+  // Return true if the current step on the current output interval and within the output time range
+  if (_time >= _start_time && _time <= _end_time && (_t_step % _interval) == 0 )
     output = true;
 
   // Return false if 'sync_only' is set to true

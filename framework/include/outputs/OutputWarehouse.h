@@ -44,18 +44,6 @@ public:
   virtual ~OutputWarehouse();
 
   /**
-   * Calls the initialSetup function for each of the output objects
-   * @see FEProblem::initialSetup()
-   */
-  void initialSetup();
-
-  /**
-   * Calls the timestepSetup function for each of the output objects
-   * @see FEProblem::timestepSetup()
-   */
-  void timestepSetup();
-
-  /**
    * Adds an existing output object to the warehouse
    * @param output Pointer to the output object
    * It is the responsibility of the OutputWarehouse to delete the output objects
@@ -149,6 +137,18 @@ private:
    */
   void addOutputFilename(OutFileBase filename);
 
+  /**
+   * Calls the initialSetup function for each of the output objects
+   * @see FEProblem::initialSetup()
+   */
+  void initialSetup();
+
+  /**
+   * Calls the timestepSetup function for each of the output objects
+   * @see FEProblem::timestepSetup()
+   */
+  void timestepSetup();
+
   /// List of object names
   std::set<OutFileBase> _filenames;
 
@@ -167,6 +167,9 @@ private:
   /// Input file name for this output object
   std::string _input_file_name;
 
+  // Allow complete access to
+  friend class FEProblem;
+  friend class TransientMultiApp;
 };
 
 #endif // OUTPUTWAREHOUSE_H
