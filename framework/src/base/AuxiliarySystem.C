@@ -235,21 +235,12 @@ void
 AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
 {
   if (_vars[0].scalars().size() > 0)
-  {
     computeScalarVars(_auxs(type));
-    solution().close();
-    _sys.update();
-  }
 
   if (_vars[0].variables().size() > 0)
   {
     computeNodalVars(_auxs(type));
-    solution().close();
-    _sys.update();
-
     computeElementalVars(_auxs(type));
-    solution().close();
-    _sys.update();
 
     if (_need_serialized_solution)
       serializeSolution();
@@ -309,6 +300,9 @@ AuxiliarySystem::computeScalarVars(std::vector<AuxWarehouse> & auxs)
   }
   PARALLEL_CATCH;
   Moose::perf_log.pop("update_aux_vars_scalar()","Solve");
+
+  solution().close();
+  _sys.update();
 }
 
 void
@@ -330,6 +324,9 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
       ComputeNodalAuxVarsThread navt(_mproblem, *this, auxs);
       Threads::parallel_reduce(range, navt);
+
+      solution().close();
+      _sys.update();
     }
   }
   PARALLEL_CATCH;
@@ -342,6 +339,9 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
     ComputeNodalAuxBcsThread nabt(_mproblem, *this, auxs);
     Threads::parallel_reduce(bnd_nodes, nabt);
+
+    solution().close();
+    _sys.update();
   }
   PARALLEL_CATCH;
   Moose::perf_log.pop("update_aux_vars_nodal_bcs()","Solve");
@@ -362,6 +362,9 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
       ConstElemRange & range = *_mesh.getActiveLocalElementRange();
       ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
       Threads::parallel_reduce(range, eavt);
+
+      solution().close();
+      _sys.update();
     }
 
     bool bnd_auxs_to_compute = false;
@@ -372,6 +375,9 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
       ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
       ComputeElemAuxBcsThread eabt(_mproblem, *this, auxs);
       Threads::parallel_reduce(bnd_elems, eabt);
+
+      solution().close();
+      _sys.update();
     }
 
   }
