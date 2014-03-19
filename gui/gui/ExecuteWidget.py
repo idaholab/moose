@@ -306,7 +306,7 @@ class ExecuteWidget(QtGui.QWidget):
     if self.thread_proc != '':
       _command = _command + self.thread_command + self.thread_proc
     if self.postprocessor_csv.checkState() == QtCore.Qt.Checked:
-      _command += ' Output/postprocessor_csv=true '
+      _command += ' Outputs/csv=true '
 
     _command += ' ' + self.other_options
 
@@ -381,6 +381,9 @@ class ExecuteWidget(QtGui.QWidget):
   def clickedSaveLog(self):
     file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Log", "~/", "Log Files (*.log)")
 
+    if isinstance(file_name, QtCore.QString):
+        file_name = str(file_name)
+
     if not isinstance(file_name, basestring): # This happens when using pyside
         file_name = file_name[0]
 
@@ -391,6 +394,13 @@ class ExecuteWidget(QtGui.QWidget):
 
   def clickedCwd(self):
     dir_name = QtGui.QFileDialog.getExistingDirectory(self, "Choose CWD")
+
+    if isinstance(file_name, QtCore.QString):
+        dir_name = str(file_name)
+
+    if not isinstance(file_name, basestring): # This happens when using pyside
+        dir_name = file_name[0]
+
     if dir_name != '':
       self.cwd_text.setText(dir_name)
       os.chdir(dir_name)

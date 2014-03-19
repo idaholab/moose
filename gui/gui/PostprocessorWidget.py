@@ -108,7 +108,10 @@ class PostprocessorWidget(QtGui.QWidget):
     '''
     get the file name of the csv file
     '''
-    output_item = self.input_file_widget.tree_widget.findItems("Output", QtCore.Qt.MatchExactly)[0]
+    output_item = ''
+    output_items = self.input_file_widget.tree_widget.findItems("Output", QtCore.Qt.MatchExactly)
+    if len(output_items) > 0:
+      output_item = output_items[0] 
     cwd = str(self.execute_widget.cwd_text.text())
     self.current_file = cwd +'/peacock_run_tmp_out.csv'
     if output_item:
@@ -240,6 +243,9 @@ class PostprocessorWidget(QtGui.QWidget):
     open a new csv file, clean and rebuild Postprocessor list
     '''
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open CSV File", "~/", "CSV Files (*.csv)")
+
+    if isinstance(file_name, QtCore.QString):
+        file_name = str(file_name)
 
     if not isinstance(file_name, basestring): # This happens when using pyside
       file_name = file_name[0]

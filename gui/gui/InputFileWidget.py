@@ -62,10 +62,10 @@ class InputFileWidget(QtGui.QWidget):
       if os.path.isfile(abs_input_file):
         self.openInputFile(abs_input_file)
       else:
-        msgBox = QMessageBox()
+        msgBox = QtGui.QMessageBox()
         msgBox.setText("Warning: Input file, " + options.input_file + ", not found!")
-        msgBox.setStandardButtons(QMessageBox.Ok)
-        msgBox.setDefaultButton(QMessageBox.Ok)
+        msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
+        msgBox.setDefaultButton(QtGui.QMessageBox.Ok)
         msgBox.exec_()
 
     self.modifyUI()
@@ -209,6 +209,9 @@ class InputFileWidget(QtGui.QWidget):
   def click_open(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Open Input File", "~/", "Input Files (*.i)")
 
+    if isinstance(file_name, QtCore.QString):
+        file_name = str(file_name)
+
     if not isinstance(file_name, basestring): # This happens when using pyside
         file_name = file_name[0]
 
@@ -218,18 +221,21 @@ class InputFileWidget(QtGui.QWidget):
       self.openInputFile(file_name)
 
   def click_clear(self):
-    msgBox = QMessageBox()
+    msgBox = QtGui.QMessageBox()
     msgBox.setText("Clear Tree?")
-    msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-    msgBox.setDefaultButton(QMessageBox.No)
+    msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+    msgBox.setDefaultButton(QtGui.QMessageBox.No)
     ret = msgBox.exec_()
-    if ret == QMessageBox.Yes:
+    if ret == QtGui.QMessageBox.Yes:
       self.tree_widget.clear()
       self.tree_widget.addHardPathsToTree()
 
 
   def click_save(self):
     file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Input File", "~/", "Input Files (*.i)")
+
+    if isinstance(file_name, QtCore.QString):
+        file_name = str(file_name)
 
     if not isinstance(file_name, basestring): # This happens when using pyside
         file_name = file_name[0]

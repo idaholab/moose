@@ -54,8 +54,8 @@ class MeshRenderWidget(QtGui.QWidget):
 
     self.interactor.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
 
-    self.vtkwidget.Initialize()
-    self.vtkwidget.Start()
+    self.show()
+    self.interactor.Initialize()
 
     self.controls_layout = QtGui.QHBoxLayout()
 

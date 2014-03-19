@@ -136,7 +136,12 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
   def getOutputFileNames(self):
 
     output_item = self.findChildItemWithName(self, 'Output')
-    oversampling_item = self.findChildItemWithName(output_item, 'OverSampling')
+
+    oversampling_item = None
+
+    if output_item:
+      oversampling_item = self.findChildItemWithName(output_item, 'OverSampling')
+    
 
     file_names = []
     file_base = ''
@@ -146,12 +151,24 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     outputs = self.findChildItemWithName(self, 'Outputs')
     outputs_children = self.getChildNames(outputs)
 
+    # Check for default stuff:
+    if outputs:
+      if outputs.table_data['exodus'] == 'true':
+        output_data = outputs.table_data
+        
+        if 'file_base' in output_data:
+          file_base = output_data['file_base']
+        else:
+          file_base = 'peacock_run_tmp_out'
+
+        file_names.append(file_base + '.e')
+
     # Loop through each of the sub-blocks and grab the data
     # if type = Exodus
     for i in range(len(outputs_children)-1, 0, -1):
       child = self.findChildItemWithName(outputs, outputs_children[i])
-      output_data = child.table_data
       if output_data['type'] == 'Exodus':
+        output_data = child.table_data
 
         # Check for oversampling
         if 'oversample' in output_data and output_data['oversample'] != '0':
@@ -380,7 +397,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
       parent_path = ''
 
+      this_path_is_hard = False
+
       if self.action_syntax.isPath(this_path):
+        this_path_is_hard = True
         this_path = '/' + self.action_syntax.getPath(this_path) # Get the real action path associated with this item
         parent_path = this_path
       else:
@@ -395,7 +415,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       if global_params_item and 'GlobalParams' not in this_path:
         global_params = global_params_item.table_data
 
-      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self.application.typeOptions(), global_params)
+      new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self.application.typeOptions(), global_params, this_path_is_hard)
 
       if item.table_data:
         new_gui.incoming_data = item.table_data
