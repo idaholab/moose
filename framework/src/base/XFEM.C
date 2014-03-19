@@ -271,6 +271,19 @@ XFEM::addGeometricCut(XFEM_geometric_cut* geometric_cut)
   _geometric_cuts.push_back(geometric_cut);
 }
 
+void
+XFEM::addStateMarkedElem(const Elem *elem, RealVectorValue normal)
+{
+  std::map<const Elem*, RealVectorValue>::iterator mit;
+  mit = _state_marked_elems.find(elem);
+  if (mit != _state_marked_elems.end())
+  {
+    libMesh::err << " ERROR: element "<<elem->id()<<" already marked for crack growth."<<std::endl;
+    exit(1);
+  }
+  _state_marked_elems[elem] = normal;
+}
+
 bool
 XFEM::update(Real time)
 {
@@ -309,6 +322,7 @@ XFEM::update(Real time)
       _mesh2->prepare_for_use(true);
     }
   }
+  _state_marked_elems.clear();
 
   return mesh_changed;
 }
@@ -391,6 +405,15 @@ bool
 XFEM::mark_cut_edges(Real time)
 {
   bool marked_edges = false;
+  marked_edges = mark_cut_edges_by_geometry(time);
+  marked_edges |= mark_cut_edges_by_state();
+  return marked_edges;
+}
+
+bool
+XFEM::mark_cut_edges_by_geometry(Real time)
+{
+  bool marked_edges = false;
 
   MeshBase::element_iterator       elem_it  = _mesh->elements_begin();
   const MeshBase::element_iterator elem_end = _mesh->elements_end();
@@ -444,6 +467,96 @@ XFEM::mark_cut_edges(Real time)
       _efa_mesh.addEdgeIntersection(elem->id(),side_id,distance);
       marked_edges = true;
     }
+  }
+
+  return marked_edges;
+}
+
+bool
+XFEM::mark_cut_edges_by_state()
+{
+  bool marked_edges = false;
+
+  std::map<const Elem*, RealVectorValue>::iterator pmeit;
+  for (pmeit = _state_marked_elems.begin(); pmeit != _state_marked_elems.end(); ++pmeit)
+  {
+    const Elem *elem = pmeit->first;
+    RealVectorValue &normal = pmeit->second;
+    CutElemMesh::element_t * CEMElem = _efa_mesh.getElemByID(elem->id());
+
+    //find existing cut edge
+    unsigned int nsides = 4;
+    unsigned int nnodes = elem->n_nodes();
+    unsigned int orig_cut_side_id = 999999;
+    Real orig_cut_distance = -1.0;
+    for (unsigned int i=0; i<nsides; ++i)
+    {
+      if (CEMElem->local_edge_has_intersection[i])
+      {
+        if (orig_cut_side_id != 999999)
+        {
+          libMesh::err << " ERROR: multiple cuts in element "<<elem->id()<<std::endl;
+          exit(1);
+        }
+        orig_cut_side_id = i;
+        orig_cut_distance = CEMElem->intersection_x[i];
+      }
+    }
+    if (orig_cut_side_id == 999999)
+    {
+      libMesh::err << " ERROR: element "<<elem->id()<<" flagged for state-based growth, but has no edge intersections"<<std::endl;
+      exit(1);
+    }
+
+    //find position of existing edge cut to use for cutting plane origin
+    Node *node1 = elem->get_node(orig_cut_side_id);
+    Node *node2 = elem->get_node(orig_cut_side_id<nsides-1?orig_cut_side_id+1:0);
+
+    Real cut_origin_x = orig_cut_distance*(*node1)(0) + (1.0-orig_cut_distance)*(*node2)(0);
+    Real cut_origin_y = orig_cut_distance*(*node1)(1) + (1.0-orig_cut_distance)*(*node2)(1);
+
+    //loop through nodes, find distance from cut plane
+    std::vector<Real> plane_to_node_dist;
+    plane_to_node_dist.reserve(nnodes);
+
+    for (unsigned int i=0; i<nnodes; ++i)
+    {
+      Node *curr_node = elem->get_node(i);
+      Real cut_to_node_x = (*curr_node)(0) - cut_origin_x;
+      Real cut_to_node_y = (*curr_node)(1) - cut_origin_y;
+      plane_to_node_dist.push_back(normal(0)*cut_to_node_x + normal(1)*cut_to_node_y);
+    }
+
+    //loop through edges, see if they are cut, and add intersections if they are
+    unsigned int num_cut = 1;
+    for (unsigned int i=0; i<nsides; ++i)
+    {
+      if (i != orig_cut_side_id)
+      {
+        unsigned int node1idx = i;
+        unsigned int node2idx = i<nsides-1?i+1:0;
+        if (plane_to_node_dist[node1idx]*plane_to_node_dist[node2idx] < 0.0)
+        {
+          if (num_cut > 1)
+          {
+            libMesh::err << " ERROR: element "<<elem->id()<<" has too many cuts"<<std::endl;
+            exit(1);
+          }
+          Real distance = -plane_to_node_dist[node1idx] /
+                           (plane_to_node_dist[node2idx] - plane_to_node_dist[node1idx]);
+          _efa_mesh.addEdgeIntersection(elem->id(),i,distance);
+          ++num_cut;
+        }
+      }
+    }
+
+    if (num_cut != 2)
+    {
+      libMesh::err << " ERROR: element "<<elem->id()<<" must have two cuts"<<std::endl;
+      exit(1);
+    }
+
+    marked_edges = true;
   }
 
   return marked_edges;

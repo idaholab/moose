@@ -22,6 +22,7 @@
 #include "libmesh/mesh.h"
 #include "libmesh/elem.h"
 #include "libmesh/node.h"
+#include "libmesh/vector_value.h"
 #include "libmesh/point_locator_base.h"
 
 // C++ Includes   -----------------------------------
@@ -123,6 +124,8 @@ public:
 
   void addGeometricCut(XFEM_geometric_cut* geometric_cut);
 
+  void addStateMarkedElem(const Elem *elem, RealVectorValue normal);
+
   /**
    * Method to update the mesh due to modified cut planes
    */
@@ -130,6 +133,8 @@ public:
 
   void build_efa_mesh();
   bool mark_cut_edges(Real time);
+  bool mark_cut_edges_by_geometry(Real time);
+  bool mark_cut_edges_by_state();
   bool cut_mesh_with_efa();
 
   /**
@@ -154,6 +159,8 @@ private:
 
   std::map<const Elem*, XFEMCutElem*> _cut_elem_map;
   std::set<const Elem*> _crack_tip_elems;
+
+  std::map<const Elem*, RealVectorValue> _state_marked_elems;
 
   LocationMap<Node> _new_nodes_map;
   LocationMap<Node> _new_nodes_map2;
