@@ -717,6 +717,7 @@ void CutElemMesh::updateEdgeNeighbors()
 
 void CutElemMesh::initCrackTipTopology()
 {
+  CrackTipElements.clear();
   std::map<unsigned int, element_t*>::iterator eit;
   for (eit = Elements.begin(); eit != Elements.end(); ++eit)
   {
@@ -1042,7 +1043,6 @@ void CutElemMesh::updateTopology(bool mergeUncutVirtualEdges)
   ChildElements.clear();
   ParentElements.clear();
   MergedEdgeMap.clear();
-  CrackTipElements.clear();
 
   unsigned int first_new_node_id = getNewID(PermanentNodes);
 
