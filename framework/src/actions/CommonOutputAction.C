@@ -122,8 +122,7 @@ CommonOutputAction::act()
   if (getParam<bool>("auto_recovery_part1"))
     createAutoRecoveryCheckpointObject();
 
-  // Set the App recovery file base, if recovering
-  if (_app.isRecovering())
+  if (_app.isRecovering() && !_app.hasRecoverFileBase())
     setRecoverFileBase();
 }
 

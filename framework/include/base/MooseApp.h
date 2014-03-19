@@ -247,6 +247,11 @@ public:
   bool isRecovering() { return _recover; }
 
   /**
+   * Return true if the recovery file base is set
+   */
+  bool hasRecoverFileBase() { return !_recover_base.empty(); }
+
+  /**
    * The file_base for the recovery file.
    */
   std::string getRecoverFileBase() { return _recover_base; }

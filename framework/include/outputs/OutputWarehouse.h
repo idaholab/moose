@@ -122,11 +122,6 @@ public:
    */
   std::set<Real> & getSyncTimes();
 
-protected:
-
-  /// The list of all output objects
-  std::vector<OutputBase *> _object_ptrs;
-
 private:
 
   /**
@@ -148,6 +143,9 @@ private:
    * @see FEProblem::timestepSetup()
    */
   void timestepSetup();
+
+  /// The list of all output objects
+  std::vector<OutputBase *> _object_ptrs;
 
   /// List of object names
   std::set<OutFileBase> _filenames;
