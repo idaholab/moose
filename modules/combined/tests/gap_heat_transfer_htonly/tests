@@ -12,7 +12,6 @@
     input = 'gap_heat_transfer_htonly_it_plot_test.i'
     exodiff = 'out_it_plot.e'
     custom_cmp = 'gap_heat_transfer_htonly_it_plot_test.cmp'
-    skip = 'see #2617'
   [../]
 
   [./RZ]

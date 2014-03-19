@@ -56,4 +56,7 @@ GNUPlot::output()
   // Print the table containing all the data to a file
   if (!_all_data_table.empty())
     _all_data_table.makeGnuplot(filename(), _extension);
+
+  // Update the file number
+  _file_num++;
 }

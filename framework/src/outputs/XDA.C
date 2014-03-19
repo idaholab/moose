@@ -66,6 +66,7 @@ XDA::output()
     _mesh_ptr->getMesh().write(filename()+"_mesh.xda");
     _es_ptr->write (filename()+".xda", WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
   }
+  _file_num++;
 }
 
 void
@@ -103,6 +104,6 @@ XDA::filename()
          << std::setprecision(0)
          << std::setfill('0')
          << std::right
-         << _t_step;
+         << _file_num;
   return output.str();
 }
