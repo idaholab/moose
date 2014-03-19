@@ -16,4 +16,10 @@
     input = 'element_high_order_aux_test.i'
     exodiff = 'ho.e'
   [../]
+
+  [./high_order_l2_test]
+    type = 'Exodiff'
+    input = 'l2_element_aux_var_test.i'
+    exodiff = 'l2elemaux.e'
+  [../]
 []
