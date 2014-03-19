@@ -11,6 +11,7 @@ InputParameters validParams<HomogenizedThermalConductivity>()
   params.addCoupledVar("temp_y", "solution in y");
   params.addCoupledVar("temp_z", "solution in z");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction this pp acts in (0 for x, 1 for y, 2 for z)");
+  params.addParam<Real>("scale_factor", 1, "Scale factor");
   return params;
 }
 
@@ -22,7 +23,8 @@ HomogenizedThermalConductivity::HomogenizedThermalConductivity(const std::string
    _component(getParam<unsigned int>("component")),
    _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
    _volume(0),
-   _integral_value(0)
+   _integral_value(0),
+   _scale(getParam<Real>("scale_factor"))
 {
   if (_component > 2)
   {
@@ -82,5 +84,5 @@ HomogenizedThermalConductivity::computeQpIntegral()
     value += _grad_temp_z[_qp](2);
   }
 
-  return _thermal_conductivity[_qp] * value;
+  return _scale * _thermal_conductivity[_qp] * value;
 }
