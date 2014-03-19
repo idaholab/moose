@@ -68,8 +68,8 @@ FaceFaceConstraint::reinit()
   _phys_points_master.resize(nqp);
   _u_slave.resize(nqp);
   _phys_points_slave.resize(nqp);
-  _test = _assembly.getFE(_var.feType())->get_phi();                     // yes we need to do a copy here
-  _JxW_lm = _assembly.getFE(_var.feType())->get_JxW();                   // another copy here to preserve the right JxW
+  _test = _assembly.getFE(_var.feType(), _dim-1)->get_phi();                     // yes we need to do a copy here
+  _JxW_lm = _assembly.getFE(_var.feType(), _dim-1)->get_JxW();                   // another copy here to preserve the right JxW
 
   for (_qp = 0; _qp < nqp; _qp++)
   {
@@ -152,9 +152,9 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
 
   _phys_points_master.resize(nqp);
   _phys_points_slave.resize(nqp);
-  _test = _assembly.getFE(_var.feType())->get_phi();               // yes we need to do a copy here
-  _phi = _assembly.getFE(_var.feType())->get_phi();                // yes we need to do a copy here
-  _JxW_lm = _assembly.getFE(_var.feType())->get_JxW();             // another copy here to preserve the right JxW
+  _test = _assembly.getFE(_var.feType(), _dim-1)->get_phi();               // yes we need to do a copy here
+  _phi = _assembly.getFE(_var.feType(), _dim-1)->get_phi();                // yes we need to do a copy here
+  _JxW_lm = _assembly.getFE(_var.feType(), _dim-1)->get_JxW();             // another copy here to preserve the right JxW
 
   for (_qp = 0; _qp < nqp; _qp++)
   {
