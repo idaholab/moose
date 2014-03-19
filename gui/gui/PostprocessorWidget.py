@@ -112,7 +112,7 @@ class PostprocessorWidget(QtGui.QWidget):
     output_item = ''
     output_items = self.input_file_widget.tree_widget.findItems("Output", QtCore.Qt.MatchExactly)
     if len(output_items) > 0:
-      output_item = output_items[0] 
+      output_item = output_items[0]
     cwd = str(self.execute_widget.cwd_text.text())
     self.current_file = cwd +'/peacock_run_tmp_out.csv'
     if output_item:
