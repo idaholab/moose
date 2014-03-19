@@ -142,7 +142,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     if output_item:
       oversampling_item = self.findChildItemWithName(output_item, 'OverSampling')
-    
+
 
     file_names = []
     file_base = ''
@@ -156,7 +156,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     if outputs:
       if outputs.table_data['exodus'] == 'true':
         output_data = outputs.table_data
-        
+
         if 'file_base' in output_data:
           file_base = output_data['file_base']
         else:
