@@ -61,10 +61,14 @@ void
 OutputWarehouse::addOutput(OutputBase * output)
 {
 
-  // Add the object to the warehouse storage
-  _object_ptrs.push_back(output);
+  // Add the object to the warehouse storage, Checkpoint placed at end so they are called last
+  Checkpoint * cp = dynamic_cast<Checkpoint *>(output);
+  if (cp != NULL)
+    _object_ptrs.push_back(output);
+  else
+    _object_ptrs.insert(_object_ptrs.begin(), output);
 
-  // Store the name
+  // Store the names
   _output_names.insert(output->name());
 
   // If the output object is a FileOutputBase then store the output filename

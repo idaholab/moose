@@ -1,0 +1,19 @@
+[Tests]
+  [./part1]
+    # Run simple transient problem to 5 time steps, with checkpoint files enabled
+    type = 'CheckFiles'
+    input = 'recover1.i'
+    check_files = 'test_recover_dir_cp/0005.xdr'
+    cli_args = 'Executioner/num_steps=5'
+  [../]
+  [./part2]
+    # Recover the solve from part1 with a specified file
+    type = 'Exodiff'
+    input = 'recover2.i'
+    exodiff = 'recover_out.e'
+    cli_args = '--recover test_recover_dir_cp/0005'
+    prereq = 'part1'
+    delete_output_before_running = false
+    recover = false
+  [../]
+[]
