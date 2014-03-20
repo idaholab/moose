@@ -70,9 +70,10 @@ InputParameters validParams<OutputBase>()
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
   params.addParam<Real>("start_time", 0, "Time at which this outputter begins");
   params.addParam<Real>("end_time", "Time at which this outputter ends");
+  params.addParam<Real>("time_tolerance", 1e-14, "Time tolerance utlized checking start and end times");
 
   // 'Timing' group
-  params.addParamNamesToGroup("interval output_initial output_final sync_times sync_only start_time end_timemt ", "Timing");
+  params.addParamNamesToGroup("time_tolerance interval output_initial output_final sync_times sync_only start_time end_timemt ", "Timing");
 
   // 'Variables' Group
   params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
@@ -109,6 +110,7 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
                 std::set<Real>()),
     _start_time(getParam<Real>("start_time")),
     _end_time(isParamValid("end_time") ? getParam<Real>("end_time") : std::numeric_limits<Real>::max()),
+    _t_tol(getParam<Real>("time_tolerance")),
     _sync_only(getParam<bool>("sync_only")),
     _allow_output(true),
     _force_output(false),

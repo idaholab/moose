@@ -33,7 +33,16 @@ InputParameters validParams<PetscOutputter>()
   // Psuedo time step divisors
   params.addParam<Real>("nonlinear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outtputting non-linear residuals");
   params.addParam<Real>("linear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outtputting linear residuals");
-  params.addParamNamesToGroup("nonlinear_residual_dt_divisor linear_residual_dt_divisor", "Advanced");
+
+  // Start times for residual output
+  params.addParam<Real>("linear_residual_start_time", "Specifies a start time to begin output on each linear residual evaluation");
+  params.addParam<Real>("nonlinear_residual_start_time", "Specifies a start time to begin output on each nonlinear residual evaluation");
+
+  // End time for residual output
+  params.addParam<Real>("linear_residual_end_time", "Specifies an end time to begin output on each linear residual evaluation");
+  params.addParam<Real>("nonlinear_residual_end_time", "Specifies an end time to begin output on each nonlinear residual evaluation");
+
+  params.addParamNamesToGroup("linear_residuals nonlinear_residuals linear_residual_start_time nonlinear_residual_start_time linear_residual_end_time nonlinear_residual_end_time  nonlinear_residual_dt_divisor linear_residual_dt_divisor", "PETSc");
 #endif
 
   return params;
@@ -48,7 +57,15 @@ PetscOutputter::PetscOutputter(const std::string & name, InputParameters & param
     _on_linear_residual(false),
     _on_nonlinear_residual(false),
     _nonlinear_dt_divisor(getParam<Real>("nonlinear_residual_dt_divisor")),
-    _linear_dt_divisor(getParam<Real>("linear_residual_dt_divisor"))
+    _linear_dt_divisor(getParam<Real>("linear_residual_dt_divisor")),
+    _nonlinear_start_time(isParamValid("nonlinear_residual_start_time") ?
+                          getParam<Real>("nonlinear_residual_start_time") : std::numeric_limits<Real>::max()),
+    _linear_start_time(isParamValid("linear_residual_start_time") ?
+                       getParam<Real>("linear_residual_start_time") : std::numeric_limits<Real>::max()),
+    _nonlinear_end_time(isParamValid("nonlinear_residual_end_time") ?
+                        getParam<Real>("nonlinear_residual_end_time") : std::numeric_limits<Real>::min()),
+    _linear_end_time(isParamValid("linear_residual_end_time") ?
+                     getParam<Real>("linear_residual_end_time") : std::numeric_limits<Real>::min())
 {
 }
 
@@ -75,13 +92,13 @@ PetscOutputter::timestepSetupInternal()
   _linear_dt = _nonlinear_dt/_linear_dt_divisor; // set the pseudo linear timestep
 
   // Set the PETSc monitor functions
-  if (_output_nonlinear)
+  if (_output_nonlinear || (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol) )
   {
     PetscErrorCode ierr = SNESMonitorSet(snes, petscNonlinearOutput, this, PETSC_NULL);
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
 
-  if (_output_linear)
+  if (_output_linear || (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol) )
   {
     PetscErrorCode ierr = KSPMonitorSet(ksp, petscLinearOutput, this, PETSC_NULL);
     CHKERRABORT(libMesh::COMM_WORLD,ierr);

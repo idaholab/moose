@@ -1,14 +1,16 @@
 [Tests]
   [./exodus]
+    # Test the output of linear and nonlinear iterations to Exodus
     type = 'Exodiff'
     input = 'iterative.i'
     exodiff = 'iterative_out.e'
 
     # This test relies on number of residuals being the same, so run it serially
     max_parallel = 1
-    max_threads = 1 
+    max_threads = 1
   [../]
   [./vtk]
+    # Test the output of linear and nonlinear iterations to VTK
     type = 'VTKDiff'
     input = 'iterative_vtk.i'
     vtkdiff = 'iterative_vtk_out_003_0.vtu'
@@ -16,15 +18,27 @@
     # This test relies on number of residuals being the same, so run it serially
     max_parallel = 1
     max_threads = 1
-    vtk = true 
+    vtk = true
   [../]
   [./csv]
+    # Test the output of linear and nonlinear iterations to CSV
     type = 'CSVDiff'
     input = 'iterative_csv.i'
     csvdiff = 'iterative_csv_out.csv'
-    
+
     # This test relies on number of residuals being the same, so run it serially
     max_parallel = 1
-    max_threads = 1 
+    max_threads = 1
+  [../]
+
+  [./exodus_inline]
+    # Test the output of linear and nonlinear iterations to Exodus with inline start times
+    type = 'CSVDiff'
+    input = 'iterative_inline.i'
+    exodiff = 'iterative_inline_out.e'
+
+    # This test relies on number of residuals being the same, so run it serially
+    max_parallel = 1
+    max_threads = 1
   [../]
 []

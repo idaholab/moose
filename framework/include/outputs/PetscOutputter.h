@@ -126,6 +126,17 @@ private:
 
   /// Pseudo linear timestep divisor
   Real _linear_dt_divisor;
-};
 
+  /// Non-linear residual output start time
+  Real _nonlinear_start_time;
+
+  /// Linear residual output start time
+  Real _linear_start_time;
+
+  /// Non-linear residual output end time
+  Real _nonlinear_end_time;
+
+  /// Linear residual output end time
+  Real _linear_end_time;
+};
 #endif //PETSCOUTPUTTER_H
