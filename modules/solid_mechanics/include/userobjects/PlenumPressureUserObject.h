@@ -36,6 +36,8 @@ protected:
   const Real _R;
 
   const Real & _temperature;
+  const bool _init_temp_given;
+  const Real _init_temp;
 
   const Real & _volume;
 
