@@ -76,8 +76,11 @@
   [../]
 []
 
-[Output]
+[Outputs]
   file_base = out
   exodus = true
-  perf_log = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []
