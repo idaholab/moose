@@ -87,7 +87,10 @@ OversampleOutputter::outputInitial()
 
   // Perform oversample solution projection
   if (_oversample || _change_position)
+  {
+    _mesh_changed = false; // oversampling uses the original and it doesn't change
     update();
+  }
 
   // Call the initial output method
   OutputBase::outputInitial();
@@ -102,7 +105,10 @@ OversampleOutputter::outputStep()
 
   // Perform oversample solution projection
   if (_oversample || _change_position)
+  {
+    _mesh_changed = false; // oversampling uses the original and it doesn't change
     update();
+  }
 
   // Call the step output method
   OutputBase::outputStep();
@@ -117,7 +123,10 @@ OversampleOutputter::outputFinal()
 
   // Perform oversample solution projection
   if (_oversample || _change_position)
+  {
+    _mesh_changed = false; // oversampling uses the original and it doesn't change
     update();
+  }
 
   // Call the final output methods
   OutputBase::outputFinal();

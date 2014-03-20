@@ -49,18 +49,4 @@
     input = 'exodus_nodal.i'
     exodiff = 'exodus_nodal_out.e'
   [../]
-
-  [./oversample]
-    # Tests that oversampling is functioning with a shift of position
-    type = 'Exodiff'
-    input = 'exodus_oversample.i'
-    exodiff = 'exodus_oversampled.e'
-  [../]
-
-  [./oversample_filemesh]
-    # Tests that oversampling a file input and change in output base is functioning
-    type = 'Exodiff'
-    input = 'exodus_oversample_file.i'
-    exodiff = 'exodus_oversample_custom_name.e'
-  [../]
 []

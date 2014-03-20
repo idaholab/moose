@@ -39,18 +39,13 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-
-##! [OversampleOutput]
 [Outputs]
-  exodus = true
   console = true
-  [./exodus_oversample]
+  [./oversample]
     type = Exodus
     output_initial = true
     refinements = 2
     oversample = true
     position = '1 1 0'
-    file_base = 'exodus_oversampled'
   [../]
 []
-##! [OversampleOutput]
