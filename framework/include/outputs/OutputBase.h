@@ -430,6 +430,9 @@ private:
   /// End outputting time
   Real _end_time;
 
+  /// Time checking tolerance
+  Real _t_tol;
+
   /// Flag for only executing at sync times
   bool _sync_only;
 
