@@ -1,16 +1,16 @@
 
 #  *****************************************************************
-#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  
-#                                                                   
+#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF
+#
 #                        Version: 2.18 (2008-01-08)
-#           Authors : Richard Drake, rrdrake@sandia.gov             
-#                     Greg Sjaardema, gdsjaar@sandia.gov            
-#                                                                   
-#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  
+#           Authors : Richard Drake, rrdrake@sandia.gov
+#                     Greg Sjaardema, gdsjaar@sandia.gov
+#
+#    EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF  EXODIFF
 #  *****************************************************************
 
 #  FILE 1: gold/gap_heat_transfer_htonly_rspherical_out.e
-#   Title: 
+#   Title:
 #          Dim = 3, Blocks = 2, Nodes = 42, Elements = 40, Nodesets = 4, Sidesets = 4
 #          Vars: Global = 4, Nodal = 3, Element = 1, Nodeset = 0, Sideset = 0, Times = 21
 
@@ -35,7 +35,7 @@ GLOBAL VARIABLES relative 1.e-6 floor 0.0
 
 NODAL VARIABLES relative 1.e-6 floor 0.0
 	temp         # min:             100 @ t1,n1	max:             200 @ t11,n1
-	gap_temp     # min:               0 @ t1,n1	max:             100 @ t11,n21
+	paired_temp  # min:               0 @ t1,n1	max:             100 @ t11,n21
 	penetration  # min:               0 @ t1,n1	max:               1 @ t1,n21
 
 ELEMENT VARIABLES relative 1.e-6 floor 0.0
@@ -44,4 +44,3 @@ ELEMENT VARIABLES relative 1.e-6 floor 0.0
 # No NODESET VARIABLES
 
 # No SIDESET VARIABLES
-
