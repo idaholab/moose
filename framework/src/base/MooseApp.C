@@ -287,8 +287,9 @@ MooseApp::executeExecutioner()
   // run the simulation
   if (_executioner)
   {
+#ifdef LIBMESH_HAVE_PETSC
     Moose::PetscSupport::petscSetupOutput(_command_line);
-
+#endif
     if (hasLegacyOutput())
     {
       Moose::out << getSysInfo();
