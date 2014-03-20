@@ -13,13 +13,13 @@ public:
   static std::string
   getGapValueName(const InputParameters & param)
   {
-    return "gap_" + param.get<NonlinearVariableName>("variable");
+    return "paired_" + param.get<NonlinearVariableName>("variable");
   }
 
   static std::string
   getGapConductivityName(const InputParameters & param)
   {
-    return "gap_k_" + param.get<NonlinearVariableName>("variable");
+    return "paired_k_" + param.get<NonlinearVariableName>("variable");
   }
 
 };
