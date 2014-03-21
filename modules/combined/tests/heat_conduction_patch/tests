@@ -26,4 +26,12 @@
     exodiff = 'out_hex20.e'
     max_parallel = 1
   [../]
+
+  [./test_hex20_aniso]
+    type = 'Exodiff'
+    input = 'heat_conduction_patch_hex20_aniso.i'
+    exodiff = 'out_hex20.e'
+    max_parallel = 1
+    prereq = test_hex20
+  [../]
 []

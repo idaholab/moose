@@ -29,10 +29,8 @@ protected:
 
 private:
   const unsigned _dim;
-  MaterialProperty<Real> * const _k;
+  MaterialProperty<Real> & _k;
   MaterialProperty<Real> * const _k_dT;
 
-  MaterialProperty<Real> * _k_i[3];
-  MaterialProperty<Real> * _k_i_dT[3];
 };
 #endif //HEATCONDUCTIONKERNEL_H
