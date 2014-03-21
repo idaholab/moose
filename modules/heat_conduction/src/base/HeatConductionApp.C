@@ -9,8 +9,10 @@
 #include "GapHeatPointSourceMaster.h"
 #include "GapHeatTransfer.h"
 #include "HeatConduction.h"
+#include "AnisoHeatConduction.h"
 #include "HeatConductionTimeDerivative.h"
 #include "HeatConductionMaterial.h"
+#include "AnisoHeatConductionMaterial.h"
 #include "HeatConductionBC.h"
 #include "BulkCoolantBC.h"
 #include "ThermalContactAuxBCsAction.h"
@@ -56,6 +58,7 @@ void
 HeatConductionApp::registerObjects(Factory & factory)
 {
   registerNamedKernel(HeatConductionKernel, "HeatConduction");
+  registerKernel(AnisoHeatConduction);
   registerKernel(HeatConductionTimeDerivative);
   registerKernel(HeatSource);
   registerBoundaryCondition(HeatConductionBC);
@@ -65,6 +68,7 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerBoundaryCondition(CoupledConvectiveFlux);
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
+  registerMaterial(AnisoHeatConductionMaterial);
   registerDiracKernel(GapHeatPointSourceMaster);
   registerPostprocessor(ThermalCond);
   registerConstraint(GapConductanceConstraint);
