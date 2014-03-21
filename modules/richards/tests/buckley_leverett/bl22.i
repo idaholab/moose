@@ -241,11 +241,16 @@
 
 [Outputs]
   file_base = bl22
-  output_initial = true
-  interval = 10000
-  exodus = true
+  [./exodus]
+    type = Exodus
+    output_initial = true
+    interval = 100000
+    output_final = true
+  [../]
   [./console]
     type = Console
     perf_log = true
+    linear_residuals = false
+    nonlinear_residuals = false
   [../]
 []
