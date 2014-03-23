@@ -466,7 +466,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     if global_params_item:
       global_params = global_params_item.table_data
 
-    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, None, None, False, self.application.typeOptions(), global_params)
+    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, None, None, False, self.application.typeOptions(), global_params, False)
     if self.new_gui.exec_():
       table_data = self.new_gui.result()
       param_comments = self.new_gui.param_table.param_comments
