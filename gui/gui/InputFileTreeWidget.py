@@ -145,7 +145,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
 
     file_names = []
-    file_base = ''
+    file_base = 'peacock_run_tmp_out'
+    main_file_base = ''
     output_data = None
 
     # Find the Outputs block items and the names of the sub-blocks
@@ -154,27 +155,33 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     # Check for default stuff:
     if outputs:
-      if outputs.table_data['exodus'] == 'true':
-        output_data = outputs.table_data
+      output_data = outputs.table_data
+      if 'file_base' in output_data:
+        file_base = output_data['file_base']
 
-        if 'file_base' in output_data:
-          file_base = output_data['file_base']
-        else:
-          file_base = 'peacock_run_tmp_out'
-
+      if outputs.table_data and 'exodus' in outputs.table_data and outputs.table_data['exodus'] == 'true':
         file_names.append(file_base + '.e')
+
+    main_file_base = file_base
 
     # Loop through each of the sub-blocks and grab the data
     # if type = Exodus
     for i in range(len(outputs_children)-1, 0, -1):
       child = self.findChildItemWithName(outputs, outputs_children[i])
-      if output_data['type'] == 'Exodus':
-        output_data = child.table_data
-
+      output_data = child.table_data
+      if output_data and output_data['type'] == 'Exodus':
         # Check for oversampling
         if 'oversample' in output_data and output_data['oversample'] != '0':
-          if 'oversample_file_base' in output_data:
-            file_base = output_data['oversample_file_base']
+          if 'file_base' in output_data:
+            file_base = output_data['file_base']
+          else:
+            file_base = main_file_base
+
+
+          if 'append_oversample' in output_data:
+            file_base = file_base + '_oversample'
+          elif main_file_base:
+            file_base = main_file_base
           else:
             file_base = 'peacock_run_tmp_out_oversample'
 
@@ -466,7 +473,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     if global_params_item:
       global_params = global_params_item.table_data
 
-    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, None, None, False, self.application.typeOptions(), global_params)
+    self.new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(0), None, None, None, False, self.application.typeOptions(), global_params, False)
     if self.new_gui.exec_():
       table_data = self.new_gui.result()
       param_comments = self.new_gui.param_table.param_comments
