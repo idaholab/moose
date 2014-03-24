@@ -215,9 +215,11 @@ class TestHarness:
         # Make sure that all required parameters are supplied
         required_params_missing = params.required_keys() - params_parsed
         if len(required_params_missing):
-          print 'Required Missing Parameter(s): ', required_params_missing
+          print "Error detected during test specification parsing\n  File: " + os.path.join(test_dir, filename)
+          print '       Required Missing Parameter(s): ', required_params_missing
         if len(params_ignored):
-          print 'Ignored Parameter(s): ', params_ignored
+          print "Warning detected during test specification parsing\n  File: " + os.path.join(test_dir, filename)
+          print '       Ignored Parameter(s): ', params_ignored
 
         # We are going to do some formatting of the path that is printed
         # Case 1.  If the test directory (normally matches the input_file_name) comes first,
