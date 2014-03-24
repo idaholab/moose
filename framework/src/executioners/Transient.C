@@ -422,7 +422,7 @@ Transient::endStep()
       if (std::abs(_time-_next_interval_output_time)<=_timestep_tolerance
          || (_problem.out().interval() > 1 && _t_step % _problem.out().interval() == 0))
       {
-        if (_allow_output)
+        if (_allow_output && _app.hasLegacyOutput())
         {
           _problem.output(true);
           _problem.outputPostprocessors(true);
@@ -438,7 +438,7 @@ Transient::endStep()
     else
     {
       // if _at_sync_point is true, force the output no matter what
-      if (_allow_output)
+      if (_allow_output && _app.hasLegacyOutput())
       {
         _problem.output(_at_sync_point);
         _problem.outputPostprocessors(_at_sync_point);
