@@ -306,6 +306,9 @@ protected:
   /// Flag for outputing the initial solution
   bool _output_initial;
 
+  /// Flag for outputting intermediate steps
+  bool _output_intermediate;
+
   /// Flag for outputing the final step
   bool _output_final;
 

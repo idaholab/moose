@@ -51,6 +51,7 @@ InputParameters validParams<CommonOutputAction>()
 
    // Common parameters
    params.addParam<bool>("output_initial", false,  "Request that the initial condition is output to the solution file");
+   params.addParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output");
    params.addParam<bool>("output_final", false, "Force the final timestep to be output, regardless of output interval");
    params.addParam<std::string>("file_base", "Common file base name to be utilized with all output objects");
    params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputing only a subset of outputs when using MultiApps.");
