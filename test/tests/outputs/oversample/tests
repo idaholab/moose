@@ -18,5 +18,6 @@
     type = Exodiff
     input = 'adapt.i'
     exodiff = 'adapt_out_oversample.e adapt_out.e-s003'
+    recover = false #see #2295
   [../]
 []
