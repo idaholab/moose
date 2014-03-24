@@ -115,6 +115,8 @@ public:
    */
   void showActions(bool state = true) { _show_actions = state; }
 
+  void showParser(bool state = true) { _show_parser = state; }
+
   //// Getters
   Syntax & syntax() { return _syntax; }
   MooseMesh * & mesh() { return _mesh; }
@@ -156,6 +158,7 @@ protected:
 
   // DEBUGGING
   bool _show_actions;
+  bool _show_parser;
 
   // When executing the actions in the warehouse, this string will always contain
   // the current task name

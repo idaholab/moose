@@ -126,6 +126,9 @@ protected:
   /// Reference to an object that defines input file syntax
   Syntax & _syntax;
 
+  /// Appends sections from the CLI Reorders section names so that Debugging options can be enabled before parsing begins
+  void appendAndReorderSectionNames(std::vector<std::string> & section_names);
+
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are called only from this Object
