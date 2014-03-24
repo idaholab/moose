@@ -46,31 +46,46 @@ public:
   virtual ~Assembly();
 
   /**
-   * Get a reference to a pointer that will contain the current "volume" FE.
-   * Note that when returned the pointer might initially be NULL.
-   * It won't get an actual value until reinit is called.
+   * Build FEs with a type
    * @param type The type of FE
+   */
+  void buildFE(FEType type);
+
+  /**
+   * Build FEs for a face with a type
+   * @param type The type of FE
+   */
+  void buildFaceFE(FEType type);
+
+  /**
+   * Build FEs for a neighbor face with a type
+   * @param type The type of FE
+   */
+  void buildFaceNeighborFE(FEType type);
+
+   /**
+   * Get a reference to a pointer that will contain the current volume FE.
+   * @param type The type of FE
+   * @param dim The dimension of the current volume
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEBase * & getFE(FEType type);
+  FEBase * & getFE(FEType type, unsigned int dim);
 
   /**
    * Get a reference to a pointer that will contain the current "face" FE.
-   * Note that when returned the pointer might initially be NULL.
-   * It won't get an actual value until reinit is called.
    * @param type The type of FE
+   * @param dim The dimension of the current face
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEBase * & getFEFace(FEType type);
+  FEBase * & getFEFace(FEType type, unsigned int dim);
 
   /**
    * Get a reference to a pointer that will contain the current "neighbor" FE.
-   * Note that when returned the pointer might initially be NULL.
-   * It won't get an actual value until reinit is called.
    * @param type The type of FE
+   * @param dim The dimension of the neighbor face
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
-  FEBase * & getFEFaceNeighbor(FEType type);
+  FEBase * & getFEFaceNeighbor(FEType type, unsigned int dim);
 
   /**
    * Returns the reference to the current quadrature being used
@@ -381,17 +396,17 @@ public:
   const VariablePhiSecond & secondPhiFaceNeighbor() { return _second_phi_face_neighbor; }
 
 
-  const VariablePhiValue & fePhi(FEType type)             { getFE(type); return _fe_shape_data[type]->_phi; }
-  const VariablePhiGradient & feGradPhi(FEType type) { getFE(type); return _fe_shape_data[type]->_grad_phi; }
-  const VariablePhiSecond & feSecondPhi(FEType type) { getFE(type); _need_second_derivative[type] = true; return _fe_shape_data[type]->_second_phi; }
+  const VariablePhiValue & fePhi(FEType type)             { buildFE(type); return _fe_shape_data[type]->_phi; }
+  const VariablePhiGradient & feGradPhi(FEType type) { buildFE(type); return _fe_shape_data[type]->_grad_phi; }
+  const VariablePhiSecond & feSecondPhi(FEType type) { buildFE(type); _need_second_derivative[type] = true; return _fe_shape_data[type]->_second_phi; }
 
-  const VariablePhiValue & fePhiFace(FEType type)             { getFEFace(type); return _fe_shape_data_face[type]->_phi; }
-  const VariablePhiGradient & feGradPhiFace(FEType type) { getFEFace(type); return _fe_shape_data_face[type]->_grad_phi; }
-  const VariablePhiSecond & feSecondPhiFace(FEType type) { getFEFace(type); _need_second_derivative[type] = true; return _fe_shape_data_face[type]->_second_phi; }
+  const VariablePhiValue & fePhiFace(FEType type)             { buildFaceFE(type); return _fe_shape_data_face[type]->_phi; }
+  const VariablePhiGradient & feGradPhiFace(FEType type) { buildFaceFE(type); return _fe_shape_data_face[type]->_grad_phi; }
+  const VariablePhiSecond & feSecondPhiFace(FEType type) { buildFaceFE(type); _need_second_derivative[type] = true; return _fe_shape_data_face[type]->_second_phi; }
 
-  const VariablePhiValue & fePhiFaceNeighbor(FEType type)             { getFEFaceNeighbor(type); return _fe_shape_data_face_neighbor[type]->_phi; }
-  const VariablePhiGradient & feGradPhiFaceNeighbor(FEType type) { getFEFaceNeighbor(type); return _fe_shape_data_face_neighbor[type]->_grad_phi; }
-  const VariablePhiSecond & feSecondPhiFaceNeighbor(FEType type) { getFEFaceNeighbor(type); _need_second_derivative[type] = true; return _fe_shape_data_face_neighbor[type]->_second_phi; }
+  const VariablePhiValue & fePhiFaceNeighbor(FEType type)             { buildFaceNeighborFE(type); return _fe_shape_data_face_neighbor[type]->_phi; }
+  const VariablePhiGradient & feGradPhiFaceNeighbor(FEType type) { buildFaceNeighborFE(type); return _fe_shape_data_face_neighbor[type]->_grad_phi; }
+  const VariablePhiSecond & feSecondPhiFaceNeighbor(FEType type) { buildFaceNeighborFE(type); _need_second_derivative[type] = true; return _fe_shape_data_face_neighbor[type]->_second_phi; }
 
   /**
    * Invalidate any currently cached data.  In particular this will cause FE data to get recached.
