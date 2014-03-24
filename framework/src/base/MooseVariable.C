@@ -74,7 +74,13 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _node(_assembly.node()),
     _is_defined_neighbor(false),
     _node_neighbor(_assembly.nodeNeighbor())
-{}
+{
+  _assembly.buildFE(feType());
+
+  // FIXME: continuity of FE type seems equivalent with the definition of nodal variables.
+  //        Continuity does not depend on the FE dimension, so we just pass in a valid dimension.
+  _is_nodal = _assembly.getFE(feType(), _sys.mesh().dimension())->get_continuity() != DISCONTINUOUS;
+}
 
 MooseVariable::~MooseVariable()
 {
@@ -134,8 +140,7 @@ MooseVariable::activeOnSubdomain(SubdomainID subdomain) const
 bool
 MooseVariable::isNodal() const
 {
-  // FIXME: improve this fix (currently we use only monomials as elemental variables)
-  return feType().family != MONOMIAL;
+  return _is_nodal;
 }
 
 void

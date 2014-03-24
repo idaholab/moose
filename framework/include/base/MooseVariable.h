@@ -405,6 +405,9 @@ protected:
   VariableValue _nodal_u_old_neighbor;
   VariableValue _nodal_u_older_neighbor;
 
+  /// if variable is nodal
+  bool _is_nodal;
+
   // damping
   VariableValue _increment;
 

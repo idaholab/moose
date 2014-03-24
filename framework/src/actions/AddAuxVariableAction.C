@@ -38,7 +38,7 @@ AddAuxVariableAction::AddAuxVariableAction(const std::string & name, InputParame
 MooseEnum
 AddAuxVariableAction::getAuxVariableFamilies()
 {
-  return MooseEnum("LAGRANGE, MONOMIAL, SCALAR", "LAGRANGE");
+  return MooseEnum("LAGRANGE, MONOMIAL, SCALAR", "LAGRANGE", true);
 }
 
 MooseEnum

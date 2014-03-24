@@ -59,8 +59,8 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _block_diagonal_matrix(false)
 {
   // Build fe's for the helpers
-  getFE(FEType(FIRST, LAGRANGE));
-  getFEFace(FEType(FIRST, LAGRANGE));
+  buildFE(FEType(FIRST, LAGRANGE));
+  buildFaceFE(FEType(FIRST, LAGRANGE));
 
   // Build an FE helper object for this type for each dimension up to the dimension of the current mesh
   for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
@@ -118,8 +118,8 @@ Assembly::~Assembly()
   _coord.release();
 }
 
-FEBase * &
-Assembly::getFE(FEType type)
+void
+Assembly::buildFE(FEType type)
 {
   if (!_fe_shape_data[type])
     _fe_shape_data[type] = new FEShapeData;
@@ -130,12 +130,10 @@ Assembly::getFE(FEType type)
     if (!_fe[dim][type])
       _fe[dim][type] = FEBase::build(dim, type).release();
   }
-
-  return _current_fe[type];
 }
 
-FEBase * &
-Assembly::getFEFace(FEType type)
+void
+Assembly::buildFaceFE(FEType type)
 {
   if (!_fe_shape_data_face[type])
     _fe_shape_data_face[type] = new FEShapeData;
@@ -146,12 +144,10 @@ Assembly::getFEFace(FEType type)
     if (!_fe_face[dim][type])
       _fe_face[dim][type] = FEBase::build(dim, type).release();
   }
-
-  return _current_fe_face[type];
 }
 
-FEBase * &
-Assembly::getFEFaceNeighbor(FEType type)
+void
+Assembly::buildFaceNeighborFE(FEType type)
 {
   if (!_fe_shape_data_face_neighbor[type])
     _fe_shape_data_face_neighbor[type] = new FEShapeData;
@@ -162,8 +158,27 @@ Assembly::getFEFaceNeighbor(FEType type)
     if (!_fe_neighbor[dim][type])
       _fe_neighbor[dim][type] = FEBase::build(dim, type).release();
   }
+}
 
-  return _current_fe_neighbor[type];
+FEBase * &
+Assembly::getFE(FEType type, unsigned int dim)
+{
+  buildFE(type);
+  return _fe[dim][type];
+}
+
+FEBase * &
+Assembly::getFEFace(FEType type, unsigned int dim)
+{
+  buildFaceFE(type);
+  return _fe_face[dim][type];
+}
+
+FEBase * &
+Assembly::getFEFaceNeighbor(FEType type, unsigned int dim)
+{
+  buildFaceNeighborFE(type);
+  return _fe_neighbor[dim][type];
 }
 
 void

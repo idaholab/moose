@@ -172,7 +172,7 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
   // Grab reference to linear Lagrange finite element object pointer,
   // currently this is always a linear Lagrange element, so this might need to
   // be generalized if we start working with higher-order elements...
-  FEBase*& fe(_assembly.getFE(FEType()));
+  FEBase*& fe(_assembly.getFE(FEType(), _current_elem->dim()));
 
   // Grab references to FE object's mapping data from the _subproblem's FE object
   const std::vector<Real>& dxidx(fe->get_dxidx());
