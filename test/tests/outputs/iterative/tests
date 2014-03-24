@@ -33,7 +33,7 @@
 
   [./exodus_inline]
     # Test the output of linear and nonlinear iterations to Exodus with inline start times
-    type = 'CSVDiff'
+    type = 'Exodiff'
     input = 'iterative_inline.i'
     exodiff = 'iterative_inline_out.e'
 
