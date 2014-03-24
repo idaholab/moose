@@ -63,6 +63,7 @@ InputParameters validParams<OutputBase>()
 
   // Output intervals and timing
   params.addParam<bool>("output_initial", "Request that the initial condition is output to the solution file");
+  params.addParam<bool>("output_intermediate", "Request that all intermediate steps (not initial or final) are output");
   params.addParam<bool>("output_final", "Force the final timestep to be output, regardless of output interval");
   params.addParam<unsigned int>("interval", "The interval at which timesteps are output to the solution file");
   params.addParam<bool>("output_failed", false, "When true all time attempted time steps are output");
@@ -96,6 +97,7 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     _dt(_problem_ptr->dt()),
     _dt_old(_problem_ptr->dtOld()),
     _output_initial(isParamValid("output_initial") ? getParam<bool>("output_initial") : false),
+    _output_intermediate(isParamValid("output_intermediate") ? getParam<bool>("output_intermediate") : false),
     _output_final(isParamValid("output_final") ? getParam<bool>("output_final") : false),
     _output_input(getParam<bool>("output_input")),
     _elemental_as_nodal(getParam<bool>("elemental_as_nodal")),
@@ -131,25 +133,29 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
   // Seperate the hide/show list into components
   initShowHideLists(getParam<std::vector<VariableName> >("show"), getParam<std::vector<VariableName> >("hide"));
 
-  // Initialize the show/hide/output lists for each of the types of output
-  initOutputList(_nonlinear_elemental);
-  initOutputList(_nonlinear_nodal);
-  initOutputList(_scalar);
-  initOutputList(_postprocessor);
-
   // If 'elemental_as_nodal = true' the elemental variable names must be appended to the
   // nodal variable names. Thus, when libMesh::EquationSystem::build_solution_vector is called
   // it will create the correct nodal variable from the elemental
   if (_elemental_as_nodal)
-      _nonlinear_nodal.output.insert(_nonlinear_nodal.output.end(),
-                                     _nonlinear_elemental.output.begin(),
-                                     _nonlinear_elemental.output.end());
+  {
+    _nonlinear_nodal.show.insert(_nonlinear_nodal.show.end(), _nonlinear_elemental.show.begin(), _nonlinear_elemental.show.end());
+    _nonlinear_nodal.hide.insert(_nonlinear_nodal.hide.end(), _nonlinear_elemental.hide.begin(), _nonlinear_elemental.hide.end());
+    _nonlinear_nodal.available.insert(_nonlinear_nodal.available.end(), _nonlinear_elemental.available.begin(), _nonlinear_elemental.available.end());
+  }
 
-  // Similarly as above, if 'scalar_as_nodal = true' append the elemental variable list
+  // Similarly as above, if 'scalar_as_nodal = true' append the elemental variable lists
   if (_scalar_as_nodal)
-      _nonlinear_nodal.output.insert(_nonlinear_nodal.output.end(),
-                                     _scalar.output.begin(),
-                                     _scalar.output.end());
+  {
+    _nonlinear_nodal.show.insert(_nonlinear_nodal.show.end(), _scalar.show.begin(), _scalar.show.end());
+    _nonlinear_nodal.hide.insert(_nonlinear_nodal.hide.end(), _scalar.hide.begin(), _scalar.hide.end());
+    _nonlinear_nodal.available.insert(_nonlinear_nodal.available.end(), _scalar.available.begin(), _scalar.available.end());
+  }
+
+  // Initialize the show/hide/output lists for each of the types of output
+  initOutputList(_nonlinear_nodal);
+  initOutputList(_nonlinear_elemental);
+  initOutputList(_scalar);
+  initOutputList(_postprocessor);
 
   // Disable output lists based on two items:
   //   (1) If the toggle parameter is invalid
@@ -241,6 +247,10 @@ OutputBase::outputFailedStep()
 void
 OutputBase::outputStep()
 {
+  // Do nothing if intermediate steps are disable
+  if (!_output_intermediate)
+    return;
+
   // Do nothing if output is not forced and is not allowed
   if (!_force_output && !_allow_output)
     return;
@@ -275,7 +285,11 @@ OutputBase::outputStep()
 void
 OutputBase::outputFinal()
 {
-  // Do nothing if output is not force or if output is disallowed
+  // If the intermediate steps are being output and the final time step is on an interval it will already have benn output by outputStep, so do nothing
+  if (checkInterval() && _output_intermediate)
+    return;
+
+  // Do nothing if output is not forced or if output is disallowed
   if (!_force_output && !_allow_output)
     return;
 
@@ -589,7 +603,7 @@ OutputBase::initOutputList(OutputData & data)
   else if (show.empty() && !hide.empty())
     std::set_difference(avail.begin(), avail.end(), hide.begin(), hide.end(), std::back_inserter(output));
 
-  // Both hide and empty are present (show all those listed)
+  // Both hide and show are present (show all those listed)
   else
   {
     // Check if variables are in both, which is invalid

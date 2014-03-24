@@ -32,4 +32,22 @@
     input = 'multiple_sync_times.i'
     exodiff = 'multiple_sync_times_out_3.e multiple_sync_times_out_5.e multiple_sync_times_sync_0.e multiple_sync_times_sync_1.e'
   [../]
+  [./no_output]
+    # Test if all output being disabled works
+    type = CheckFiles
+    input = no_output.i
+    check_not_exists = no_output_out.e
+  [../]
+  [./no_intermediate]
+    # Test that intermediate steps may be disabled
+    type = Exodiff
+    input = no_intermediate.i
+    exodiff = no_intermediate_out.e
+  [../]
+  [./no_final_repeat]
+    # Test that the final time step is not repeated
+    type = Exodiff
+    input = no_final_repeat.i
+    exodiff = no_final_repeat_out.e
+  [../]
 []
