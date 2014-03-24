@@ -8,6 +8,7 @@ InputParameters validParams<PlenumPressureUserObject>()
   params.addParam<std::vector<PostprocessorName> >("material_input", "The name of the postprocessor(s) that holds the amount of material injected into the plenum.");
   params.addRequiredParam<Real>("R", "The universal gas constant for the units used.");
   params.addRequiredParam<PostprocessorName>("temperature", "The name of the average temperature postprocessor value.");
+  params.addParam<Real>("initial_temperature", "Initial temperature (optional)");
   params.addRequiredParam<PostprocessorName>("volume", "The name of the internal volume postprocessor value.");
   params.addParam<Real>("startup_time", 0, "The amount of time during which the pressure will ramp from zero to its true value.");
   params.addParam<std::vector<Real> >("refab_time", "The time at which the plenum pressure must be reinitialized due to fuel rod refabrication.");
@@ -31,6 +32,8 @@ PlenumPressureUserObject::PlenumPressureUserObject(const std::string & name, Inp
    _material_input(),
    _R(getParam<Real>("R")),
    _temperature( getPostprocessorValue("temperature")),
+   _init_temp_given( isParamValid("initial_temperature") ),
+   _init_temp( _init_temp_given ? getParam<Real>("initial_temperature") : 0 ),
    _volume( getPostprocessorValue("volume")),
    _start_time(0),
    _startup_time( getParam<Real>("startup_time")),
@@ -106,7 +109,12 @@ PlenumPressureUserObject::initialize()
 {
   if (!_initialized)
   {
-    _n0 = _initial_pressure * _volume / (_R * _temperature);
+    Real init_temp = _temperature;
+    if (_init_temp_given)
+    {
+      init_temp = _init_temp;
+    }
+    _n0 = _initial_pressure * _volume / (_R * init_temp);
 
     _start_time = _t - _dt;
     const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t-_start_time) / _startup_time;
