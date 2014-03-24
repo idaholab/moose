@@ -2026,7 +2026,7 @@ FEProblem::computeIndicatorsAndMarkers()
 void
 FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
 {
-  if (pps[0].blockIds().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0 || pps[0].internalSideUserObjects(group).size() > 0)
+  if (pps[0].blockIds().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0)
   {
 
     /* Note: The fact that we compute the aux system when we compute the user_objects
@@ -2082,11 +2082,18 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
         }
       }
 
-      const std::vector<InternalSideUserObject *> & isuos = pps[tid].internalSideUserObjects(group);
-      for (std::vector<InternalSideUserObject *>::const_iterator it = isuos.begin(); it != isuos.end(); ++it)
+      for (std::set<SubdomainID>::const_iterator block_ids_it = pps[tid].blockIds().begin();
+           block_ids_it != pps[tid].blockIds().end();
+           ++block_ids_it)
       {
-        (*it)->initialize();
-        have_internal_uo = true;
+        SubdomainID block_id = *block_ids_it;
+
+        const std::vector<InternalSideUserObject *> & isuos = pps[tid].internalSideUserObjects(block_id, group);
+        for (std::vector<InternalSideUserObject *>::const_iterator it = isuos.begin(); it != isuos.end(); ++it)
+        {
+          (*it)->initialize();
+          have_internal_uo = true;
+        }
       }
 
       for (std::set<BoundaryID>::const_iterator boundary_it = pps[tid].nodesetIds().begin();
