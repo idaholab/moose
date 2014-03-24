@@ -71,7 +71,7 @@ public:
    * for the current node.
    * @return - The formatted parameters string for a Node.
    */
-  virtual std::string printParams(const std::string &prefix, InputParameters &params, short depth, const std::string &search_string, bool &found) = 0;
+  virtual std::string printParams(const std::string &prefix, const std::string &fully_qualified_name, InputParameters &params, short depth, const std::string &search_string, bool &found) = 0;
 };
 
 #endif /* SYNTAXFORMATTERINTERFACE_H */
