@@ -6,6 +6,13 @@
     abs_zero = 1e-10
   [../]
 
+  [./test_init_temp]
+    type = 'Exodiff'
+    input = 'plenum_pressure_init_temp.i'
+    exodiff = 'plenum_pressure_init_temp_out.e'
+    abs_zero = 1e-10
+  [../]
+
   [./test_rz]
     type = 'Exodiff'
     input = 'plenum_pressure_rz.i'
