@@ -39,7 +39,8 @@ YAMLFormatter::postscript() const
 }
 
 std::string
-YAMLFormatter::printParams(const std::string &prefix, InputParameters &params, short depth, const std::string &search_string, bool &found)
+YAMLFormatter::printParams(const std::string &prefix, const std::string & /*fully_qualified_name*/,
+                           InputParameters &params, short depth, const std::string &search_string, bool &found)
 {
   std::ostringstream oss;
   std::string indent(depth*2, ' ');
