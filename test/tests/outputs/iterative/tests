@@ -29,8 +29,8 @@
     # This test relies on number of residuals being the same, so run it serially
     max_parallel = 1
     max_threads = 1
+    recover = false #no. of iterations is not recoverable
   [../]
-
   [./exodus_inline]
     # Test the output of linear and nonlinear iterations to Exodus with inline start times
     type = 'Exodiff'
