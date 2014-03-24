@@ -210,7 +210,7 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariable *getVar(const std::string & var_name, unsigned int comp);
+  MooseVariable *getVar(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Checks to make sure that the current Executioner has set "_it_transient" when old/older values
