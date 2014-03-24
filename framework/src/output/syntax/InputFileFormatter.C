@@ -50,7 +50,8 @@ InputFileFormatter::printBlockClose(const std::string & /*name*/, short depth) c
 }
 
 std::string
-InputFileFormatter::printParams(const std::string &prefix, InputParameters &params, short depth, const std::string &search_string, bool &found)
+InputFileFormatter::printParams(const std::string & /*prefix*/, const std::string &fully_qualified_name, InputParameters &params,
+                                short depth, const std::string &search_string, bool &found)
 {
   std::stringstream oss;
 
@@ -69,7 +70,7 @@ InputFileFormatter::printParams(const std::string &prefix, InputParameters &para
   for (InputParameters::iterator iter = params.begin(); iter != params.end(); ++iter)
   {
     // We only want non-private params and params that we haven't already seen
-    if (params.isPrivate(iter->first) || haveSeenIt(prefix, iter->first))
+    if (params.isPrivate(iter->first) || haveSeenIt(fully_qualified_name, iter->first))
       continue;
 
     std::string value;
@@ -94,7 +95,7 @@ InputFileFormatter::printParams(const std::string &prefix, InputParameters &para
       }
 
       // Mark it as "seen"
-      // seenIt(prefix, iter->first); // TODO: This line is no longer necessary after Action System refactor.
+      seenIt(fully_qualified_name, iter->first);
 
       // Don't print type if it is blank
       if (iter->first == "type")
