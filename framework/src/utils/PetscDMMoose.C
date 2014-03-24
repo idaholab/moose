@@ -771,7 +771,11 @@ static PetscErrorCode SNESFunction_DMMoose(SNES, Vec x, Vec r, void *ctx)
 
 #undef __FUNCT__
 #define __FUNCT__ "DMMooseJacobian"
+#if PETSC_VERSION_LT(3,5,0)
 static PetscErrorCode DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc, MatStructure *msflag)
+#else
+static PetscErrorCode DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
+#endif
 {
   PetscErrorCode ierr;
   NonlinearSystem *nl;
@@ -833,21 +837,30 @@ static PetscErrorCode DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc, MatStructur
   the_pc.close();
   Jac.close();
   X_global.close();
-
+#if PETSC_VERSION_LT(3,5,0)
   *msflag = SAME_NONZERO_PATTERN;
+#endif
   PetscFunctionReturn(0);
 }
 
 #if !PETSC_VERSION_LT(3,4,0)
 #undef  __FUNCT__
 #define __FUNCT__ "SNESJacobian_DMMoose"
+#if PETSC_VERSION_LT(3,5,0)
 static PetscErrorCode SNESJacobian_DMMoose(SNES,Vec x,Mat *jac,Mat *pc, MatStructure* flag, void* ctx)
+#else
+static PetscErrorCode SNESJacobian_DMMoose(SNES,Vec x,Mat jac,Mat pc, void* ctx)
+#endif
 {
   DM dm = (DM)ctx;
   PetscErrorCode ierr;
 
   PetscFunctionBegin;
+#if PETSC_VERSION_LT(3,5,0)
   ierr = DMMooseJacobian(dm,x,*jac,*pc,flag); CHKERRQ(ierr);
+#else
+  ierr = DMMooseJacobian(dm,x,jac,pc); CHKERRQ(ierr);
+#endif
   PetscFunctionReturn(0);
 }
 #endif
