@@ -1,5 +1,5 @@
 #
-# Plenum Pressure Test
+# Cavity Pressure Test
 #
 # This test is designed to compute an internal pressure based on
 #   p = n * R * T / V
@@ -39,7 +39,7 @@
 []
 
 [Mesh]#Comment
-  file = plenum_pressure_rz.e
+  file = cavity_pressure_rz.e
 []
 
 [Functions]
@@ -110,7 +110,7 @@
     variable = temp
   [../]
 
-  [./PlenumPressure]
+  [./CavityPressure]
     [./1]
       boundary = 2
       initial_pressure = 100

@@ -39,11 +39,11 @@
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
-#include "PlenumPressureAction.h"
-#include "PlenumPressurePostprocessor.h"
-#include "PlenumPressurePPAction.h"
-#include "PlenumPressureUserObject.h"
-#include "PlenumPressureUOAction.h"
+#include "CavityPressureAction.h"
+#include "CavityPressurePostprocessor.h"
+#include "CavityPressurePPAction.h"
+#include "CavityPressureUserObject.h"
+#include "CavityPressureUOAction.h"
 #include "PresetVelocity.h"
 #include "Pressure.h"
 #include "PressureAction.h"
@@ -140,22 +140,22 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(Mass);
   registerPostprocessor(JIntegral);
-  registerPostprocessor(PlenumPressurePostprocessor);
+  registerPostprocessor(CavityPressurePostprocessor);
 
   registerTimeStepper(AdaptiveDT);
 
   registerUserObject(MaterialTensorOnLine);
-  registerUserObject(PlenumPressureUserObject);
+  registerUserObject(CavityPressureUserObject);
   registerUserObject(CrackFrontDefinition);
 }
 
 void
 SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("EmptyAction", "BCs/PlenumPressure");
-  syntax.registerActionSyntax("PlenumPressureAction", "BCs/PlenumPressure/*");
-  syntax.registerActionSyntax("PlenumPressurePPAction", "BCs/PlenumPressure/*");
-  syntax.registerActionSyntax("PlenumPressureUOAction", "BCs/PlenumPressure/*");
+  syntax.registerActionSyntax("EmptyAction", "BCs/CavityPressure");
+  syntax.registerActionSyntax("CavityPressureAction", "BCs/CavityPressure/*");
+  syntax.registerActionSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
+  syntax.registerActionSyntax("CavityPressureUOAction", "BCs/CavityPressure/*");
 
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
@@ -168,9 +168,9 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   syntax.registerActionSyntax("JIntegralAction", "JIntegral","add_postprocessor");
 
   registerAction(PressureAction, "add_bc");
-  registerAction(PlenumPressureAction, "add_bc");
-  registerAction(PlenumPressurePPAction, "add_postprocessor");
-  registerAction(PlenumPressureUOAction, "add_user_object");
+  registerAction(CavityPressureAction, "add_bc");
+  registerAction(CavityPressurePPAction, "add_postprocessor");
+  registerAction(CavityPressureUOAction, "add_user_object");
   registerAction(SolidMechanicsAction, "add_kernel");
   registerAction(JIntegralAction, "add_user_object");
   registerAction(JIntegralAction, "add_aux_variable");

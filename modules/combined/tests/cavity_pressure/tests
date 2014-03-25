@@ -1,0 +1,38 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'cavity_pressure.i'
+    exodiff = 'cavity_pressure_out.e'
+    abs_zero = 1e-10
+  [../]
+
+  [./test_init_temp]
+    type = 'Exodiff'
+    input = 'cavity_pressure_init_temp.i'
+    exodiff = 'cavity_pressure_init_temp_out.e'
+    abs_zero = 1e-10
+  [../]
+
+  [./test_rz]
+    type = 'Exodiff'
+    input = 'cavity_pressure_rz.i'
+    exodiff = 'cavity_pressure_rz_out.e'
+    abs_zero = 1e-10
+  [../]
+
+  [./test_rz_restart1]
+    type = RunApp
+    prereq = test_rz
+    input = 'cavity_pressure_rz.i'
+    cli_args = 'Executioner/num_steps=1'
+  [../]
+
+  [./test_rz_restart2]
+    type = 'Exodiff'
+    prereq = 'test_rz_restart1'
+    input = 'cavity_pressure_rz.i'
+    exodiff = 'cavity_pressure_rz_out.e'
+    cli_args = 'Executioner/restart_from_file=cavity_pressure_rz_out_cp/0001'
+    delete_output_before_running = false
+  [../]
+[]

@@ -1,5 +1,5 @@
 #
-# Plenum Pressure Test
+# Cavity Pressure Test
 #
 # This test is designed to compute an internal pressure based on
 #   p = n * R * T / V
@@ -32,7 +32,7 @@
 #
 # The parameters combined at t=1 gives p = 301.
 #
-# This test sets the initial temperature to 500, but the PlenumPressure
+# This test sets the initial temperature to 500, but the CavityPressure
 #   is told that that initial temperature is T0.  Thus, the final solution
 #   is unchanged.
 #
@@ -44,7 +44,7 @@
 []
 
 [Mesh]#Comment
-  file = plenum_pressure.e
+  file = cavity_pressure.e
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -294,7 +294,7 @@
   [../]
 
 
-  [./PlenumPressure]
+  [./CavityPressure]
     [./1]
       boundary = 100
       initial_pressure = 100
