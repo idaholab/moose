@@ -21,8 +21,8 @@
   xmax = 1.0
   ymin = 0
   ymax = 1.0
-  nx = 160
-  ny = 160
+  nx = 16
+  ny = 16
   elem_type = QUAD9
 []
 
@@ -141,7 +141,6 @@
    variable = T
    u = u
    v = v
-   p = p
  [../]
 []
 
@@ -162,7 +161,7 @@
     variable = u
     # boundary = '2'
     boundary = 'top'
-    value = 100.0
+    value = 10.0
   [../]
 
   [./y_no_slip]
@@ -200,36 +199,13 @@
 
 
 [Preconditioning]
-# [./FDP_Newton]
-#   type = FDP
-#   full = true
-#   petsc_options = '-snes'
-#   #petsc_options_iname = '-mat_fd_coloring_err'
-#   #petsc_options_value = '1.e-10'
-# [../]
+  [./SMP_PJFNK]
+    type = SMP
+    full = true
 
-# FSP options to recursive split (u,v,p,T) -> ((u,v,p), T) -> (((u,v), p), T)
-# 0 = (u,v,p), 00 = (u,v), 01 = (p)
-# 1 = (T)
-# -pc_type fieldsplit -dm_moose_nfieldsplits 2 -dm_moose_fieldsplit_0_vars u,v,p -dm_moose_fieldsplit_1_vars T -pc_fieldsplit_type additive -ksp_monitor -fieldsplit_0_pc_type fieldsplit -fieldsplit_0_dm_moose_nfieldsplits 2 -fieldsplit_0_dm_moose_fieldsplit_0_vars u,v -fieldsplit_0_dm_moose_fieldsplit_1_vars p -fieldsplit_0_pc_fieldsplit_type schur -fieldsplit_0_ksp_monitor -fieldsplit_0_fieldsplit_0_pc_type lu
-
-
-# Options to use "LSC" for the Schur complement solve:
-# -pc_type fieldsplit -dm_moose_nfieldsplits 2 -dm_moose_fieldsplit_0_vars u,v,p -dm_moose_fieldsplit_1_vars T -pc_fieldsplit_type additive -fieldsplit_0_pc_type fieldsplit -fieldsplit_0_dm_moose_nfieldsplits 2 -fieldsplit_0_dm_moose_fieldsplit_0_vars u,v -fieldsplit_0_dm_moose_fieldsplit_1_vars p -fieldsplit_0_pc_fieldsplit_type schur -fieldsplit_0_fieldsplit_0_pc_type lu -fieldsplit_0_pc_schur_precondition self -fieldsplit_0_fieldsplit_1_pc_type lsc
-# [./FSP]
-#   type = FSP
-#   full = true
-# [../]
-
-[./SMP_PJFNK]
-  type = SMP
-  full = true
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-
-[../]
+    # Preconditioned JFNK (default)
+    solve_type = 'PJFNK'
+  [../]
 []
 
 
@@ -237,14 +213,11 @@
   type = Transient
   dt = 1.e-2
   dtmin = 1.e-2
-  perf_log = true
 
   # Basic GMRES/linesearch options only
   petsc_options_iname = '-ksp_gmres_restart '
   petsc_options_value = '300                '
-
   line_search = 'none'
-
 
   # MOOSE does not correctly read these options!! Always run with actual command line arguments if
   # you want to guarantee you are getting pilut!  Also, even though there are pilut defaults,
@@ -259,12 +232,12 @@
   # ASM options (to be used in conjunction with ILU sub_pc)
   # -pc_type asm -pc_asm_overlap 2
 
-  nl_rel_tol = 1e-5
+  nl_rel_tol = 1e-9
   nl_max_its = 6
   l_tol = 1e-6
   l_max_its = 500
   start_time = 0.0
-  num_steps = 40
+  num_steps = 2
 []
 
 
@@ -272,11 +245,12 @@
 
 [Outputs]
   file_base = lid_driven_out
+  interval = 1
   output_initial = true
   exodus = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    linear_residuals = false
   [../]
 []
