@@ -53,7 +53,12 @@ public:
   /**
    * Advance all of the apps one timestep.
    */
-  void solveStep(Real dt, Real target_time);
+  void solveStep(Real dt, Real target_time, bool auto_advance=true);
+
+  /**
+   * Actually advances time and causes output.
+   */
+  virtual void advanceStep();
 
   /**
    * Finds the smallest dt from among any of the apps.
@@ -110,6 +115,7 @@ private:
 
   std::vector<std::map<std::string, unsigned int> > _output_file_numbers;
 
+  bool _auto_advance;
 };
 
 #endif // TRANSIENTMULTIAPP_H

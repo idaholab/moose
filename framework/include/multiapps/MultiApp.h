@@ -56,8 +56,23 @@ public:
 
   /**
    * Re-solve all of the Apps.
+   *
+   * Can be called multiple times to resolve the same timestep
+   * if auto_advance=false. Time is not actually advanced until
+   * advanceStep() is called.
+   *
+   * Note that auto_advance=false might not be compatible with
+   * the options for the MultiApp
    */
-  virtual void solveStep(Real dt, Real target_time) = 0;
+  virtual void solveStep(Real dt, Real target_time, bool auto_advance=true) = 0;
+
+  /**
+   * Actually advances time and causes output.
+   *
+   * If auto_advance=true was used in solveStep() then this function
+   * will do nothing.
+   */
+  virtual void advanceStep() = 0;
 
   /**
    * @param app The global app number to get the Executioner for
