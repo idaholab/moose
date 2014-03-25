@@ -7,6 +7,5 @@
     #deleted = 'Ticket #1647'
     rel_err = 5.e-5
     recover = false
-    skip = 'see #2629'
   [../]
 []

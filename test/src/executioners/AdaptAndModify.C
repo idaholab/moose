@@ -61,6 +61,8 @@ AdaptAndModify::endStep()
       // Compute the Error Indicators and Markers
       _problem.computeIndicatorsAndMarkers();
 
+      _output_warehouse.outputStep();
+
 #ifdef LIBMESH_ENABLE_AMR
       if (_problem.adaptivity().isOn())
       {
@@ -104,5 +106,3 @@ AdaptAndModify::endStep()
     }
   }
 }
-
-
