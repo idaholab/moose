@@ -40,13 +40,14 @@ ThermalContactMaterialsAction::ThermalContactMaterialsAction( const std::string 
 void
 ThermalContactMaterialsAction::act()
 {
-  bool quadrature = getParam<bool>("quadrature");
-
-  std::string type("GapConductance");
-  if (getParam<std::string>("type") == "GapHeatTransferLWR")
+  if (getParam<std::string>("type") != "GapHeatTransfer")
   {
-    type += "LWR";
+    return;
   }
+
+  const bool quadrature = getParam<bool>("quadrature");
+
+  const std::string type("GapConductance");
 
   InputParameters params = _factory.getValidParams(type);
   // Extract global params
@@ -89,17 +90,6 @@ ThermalContactMaterialsAction::act()
 
   params.set<std::string>("conductivity_name") = getParam<std::string>("conductivity_name");
 
-  if (getParam<std::string>("type") == "GapHeatTransferLWR")
-  {
-    std::vector<VariableName> v(1, ThermalContactAuxVarsAction::getGapConductivityName(_pars));
-    params.set<std::vector<VariableName> >("gap_k") = v;
-    if (isParamValid("contact_pressure"))
-    {
-      v[0] = getParam<VariableName>("contact_pressure");
-      params.set<std::vector<VariableName> >("contact_pressure") = v;
-    }
-  }
-
   _problem->addMaterial(type,
     "gap_value_" + Moose::stringify(n),
     params);
@@ -110,10 +100,6 @@ ThermalContactMaterialsAction::act()
 
     std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
-    if (getParam<std::string>("type") == "GapHeatTransferLWR")
-    {
-      params.set<bool>("slave_side") = false;
-    }
 
     params.set<std::string>("conductivity_name") = getParam<std::string>("conductivity_master_name");
 
