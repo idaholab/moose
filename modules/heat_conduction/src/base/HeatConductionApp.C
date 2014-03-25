@@ -16,7 +16,6 @@
 #include "HeatConductionBC.h"
 #include "BulkCoolantBC.h"
 #include "ThermalContactAuxBCsAction.h"
-#include "ThermalContactAuxKernelsAction.h"
 #include "ThermalContactAuxVarsAction.h"
 #include "ThermalContactBCsAction.h"
 #include "ThermalContactDiracKernelsAction.h"
@@ -86,15 +85,13 @@ HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
 
 
   syntax.registerActionSyntax("ThermalContactAuxBCsAction",       "ThermalContact/*", "add_aux_kernel");
-  syntax.registerActionSyntax("ThermalContactAuxKernelsAction",   "ThermalContact/*", "add_aux_kernel");
   syntax.registerActionSyntax("ThermalContactAuxVarsAction",      "ThermalContact/*", "add_aux_variable");
   syntax.registerActionSyntax("ThermalContactBCsAction",          "ThermalContact/*", "add_bc");
   syntax.registerActionSyntax("ThermalContactDiracKernelsAction", "ThermalContact/*", "add_dirac_kernel");
   syntax.registerActionSyntax("ThermalContactMaterialsAction",    "ThermalContact/*", "add_material");
 
   registerAction(ThermalContactAuxBCsAction,       "add_aux_kernel");
-  registerAction(ThermalContactAuxKernelsAction,   "add_aux_kernel");
-  registerAction(ThermalContactAuxVarsAction,      "add_aux_variablekernel");
+  registerAction(ThermalContactAuxVarsAction,      "add_aux_variable");
   registerAction(ThermalContactBCsAction,          "add_bc");
   registerAction(ThermalContactDiracKernelsAction, "add_dirac_kernel");
   registerAction(ThermalContactMaterialsAction,    "add_material");
