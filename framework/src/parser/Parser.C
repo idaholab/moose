@@ -144,6 +144,8 @@ Parser::parse(const std::string &input_filename)
   _inactive_strings.clear();
 
   section_names = _getpot_file.get_section_names();
+  appendAndReorderSectionNames(section_names);
+
   // Set the class variable to indicate that sections names have been read, this is used later by the checkOverriddenParams function
   _sections_read = true;
 
@@ -298,6 +300,58 @@ Parser::checkOverriddenParams(bool error_on_warn)
     else
       Moose::out << oss.str();
   }
+}
+
+void
+Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
+{
+  CommandLine *cmd_line = _app.commandLine();
+  if (cmd_line)
+  {
+    GetPot *get_pot = cmd_line->getPot();
+    mooseAssert(get_pot, "GetPot object is NULL");
+
+    std::vector<std::string> cli_variables = get_pot->get_variable_names();
+    for (unsigned int i=0; i<cli_variables.size(); ++i)
+    {
+      std::string::size_type pos = cli_variables[i].find_last_of('/');
+      if (pos != std::string::npos)
+      {
+        // If the user supplies a CLI argument whose section doesn't exist in the input file, we'll append it here
+        std::string section = cli_variables[i].substr(0, pos+1);
+        if (std::find(section_names.begin(), section_names.end(), section) == section_names.end())
+          section_names.push_back(section);
+      }
+    }
+  }
+
+  /**
+   * There are a few order dependent actions that have to be built first in
+   * order for the parser to function properly:
+   *
+   * SetupDebugAction: This action can contain an option for monitoring the parser progress. It must be parsed first
+   *                   to capture all of the parsing output.
+   *
+   * GlobalParamsAction: This block is checked during the parameter extraction routines of all subsequent blocks.
+   *                     It must be parsed early since it must exist during subsequent parameter extraction.
+   */
+
+  std::vector<std::string>::iterator swap_position = section_names.begin();
+  // Locate the debug action (See Moose.C for registration)
+  std::string debug_syntax = _syntax.getSyntaxByAction("SetupDebugAction", "setup_debug");
+  debug_syntax += '/';   // section names *always* have trailing slashes
+
+  std::vector<std::string>::iterator pos = std::find(section_names.begin(), section_names.end(), debug_syntax);
+  if (pos != section_names.end())
+    std::iter_swap(swap_position++, pos);
+
+  // Locate the global params section
+  std::string global_syntax = _syntax.getSyntaxByAction("GlobalParamsAction", "set_global_params");
+  global_syntax += '/';   // section names *always* have trailing slashes
+
+  pos = std::find(section_names.begin(), section_names.end(), global_syntax);
+  if (pos != section_names.end())
+    std::iter_swap(swap_position, pos);
 }
 
 void
@@ -466,9 +520,9 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
 void
 Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
-  static const std::string global_params_block_name = "GlobalParams";
-
   static const std::string global_params_task = "set_global_params";
+  static const std::string global_params_block_name = _syntax.getSyntaxByAction("GlobalParamsAction", global_params_task);
+
   ActionIterator act_iter = _action_wh.actionBlocksWithActionBegin(global_params_task);
   GlobalParamsAction *global_params_block = NULL;
 
