@@ -370,7 +370,14 @@ public:
   void printTopResiduals(const NumericVector<Number> & residual, unsigned int n);
 
   /**
+   * Return the last nonlinear norm
+   * @return A Real containing the last computed residual norm
+   */
+  Real nonlinearNorm() { return _last_nl_rnorm; }
+
+  /**
    * Force the printing of all variable norms after each solve.
+   * \todo{Remove after output update
    */
   void printAllVariableNorms(bool state) { _print_all_var_norms = state; }
 

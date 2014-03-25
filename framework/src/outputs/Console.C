@@ -50,11 +50,24 @@ InputParameters validParams<Console>()
   params.addParam<bool>("solve_log", "Toggles the printing of the 'Moose Test Performance' log");
   params.addParam<bool>("perf_header", true, "Print the libMesh performance log header (requires that 'perf_log = true')");
 
+  // Toggle for printing variable normas
+  params.addParam<bool>("outlier_variable_norms", true, "If true, outlier variable norms will be printed after each solve");
+  params.addParam<bool>("all_variable_norms", false, "If true, all variable norms will be printed after each solve");
+
+  // Mutpliers for coloring of variable residual norms
+  std::vector<Real> multiplier;
+  multiplier.push_back(0.8);
+  multiplier.push_back(2);
+  params.addParam<std::vector<Real> >("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
+
   // Advanced group
   params.addParamNamesToGroup("max_rows fit_node verbose", "Advanced");
 
   // Performance log group
   params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Performance Log");
+
+  // Variable norms group
+  params.addParamNamesToGroup("outlier_variable_norms all_variable_norms outlier_multiplier", "Variable Norms");
 
   // By default the Console object outputs non linear iterations
   params.set<bool>("nonlinear_residuals") = true;
@@ -79,7 +92,10 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _solve_log(isParamValid("solve_log") ? getParam<bool>("solve_log") : _perf_log),
     _setup_log(isParamValid("setup_log") ? getParam<bool>("setup_log") : _perf_log),
     _setup_log_early(getParam<bool>("setup_log_early")),
-    _perf_header(isParamValid("perf_header") ? getParam<bool>("perf_header") : _perf_log)
+    _perf_header(isParamValid("perf_header") ? getParam<bool>("perf_header") : _perf_log),
+    _all_variable_norms(getParam<bool>("all_variable_norms")),
+    _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
+    _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier"))
 {
 
   // Disable performance logging (all log input options must be false)
@@ -273,11 +289,96 @@ Console::output()
 
   // Call the base class output function
   else
+  {
+    writeVariableNorms();
     TableOutputter::output();
+  }
 
   // Write the file
   if (_write_file)
     writeStream();
+}
+
+void
+Console::writeVariableNorms()
+{
+  // If all_variable_norms is true, then so should outlier printing
+  if (_all_variable_norms)
+    _outlier_variable_norms = true;
+
+  // Flag set when header prints
+  bool header = false;
+
+  // String stream for variable norm information
+  std::ostringstream oss;
+
+  // Get a references to the NonlinearSystem and libMesh system
+  NonlinearSystem & nl = _problem_ptr->getNonlinearSystem();
+  TransientNonlinearImplicitSystem & sys = nl.sys();
+
+  // Storage for norm outputs
+  std::map<std::string, Real> other;
+  std::map<std::string, Real> outlier;
+
+  // Average norm
+  unsigned int n_vars = sys.n_vars();
+  Real avg_norm = (nl.nonlinearNorm() * nl.nonlinearNorm()) / n_vars;
+
+  // Compute the norms for each of the variables
+  for (unsigned int i = 0; i < n_vars; i++)
+  {
+    // Compute the norm and extract the variable name
+    Real var_norm = sys.calculate_norm(*sys.rhs, i, DISCRETE_L2);
+    var_norm *= var_norm; // use the norm squared
+    std::string var_name = sys.variable_name(i);
+
+    // Outlier if the variable norm is greater than twice (default) of the average norm
+    if (_outlier_variable_norms && (var_norm > _outlier_multiplier[1] * avg_norm) )
+    {
+      // Print the header
+      if (!header)
+      {
+        oss << "\nVariable Residual Norms:\n";
+        header = true;
+      }
+
+      // Set the color, RED if the variable norm is 0.8 (default) of the total norm
+      std::string color = YELLOW;
+      if (_outlier_variable_norms && (var_norm > _outlier_multiplier[0] * avg_norm * n_vars) )
+        color = RED;
+
+      // Display the residual
+      oss << "  " << var_name << ": ";
+      if (_use_color)
+        oss << MooseUtils::colorText(color, std::sqrt(var_norm)) << '\n';
+      else
+        oss << std::sqrt(var_norm) << '\n';
+    }
+
+    // GREEN
+    else if (_all_variable_norms)
+    {
+      // Print the header if it doesn't already exist
+      if (!header)
+      {
+        oss << "\nVariable Residual Norms:\n";
+        header = true;
+      }
+
+      oss << "  " << var_name << ": ";
+      if (_use_color)
+        oss << MooseUtils::colorText(GREEN, std::sqrt(var_norm)) << '\n';
+      else
+        oss << std::sqrt(var_norm) << '\n';
+    }
+  }
+
+  // Update the output streams
+  if (_write_screen)
+    Moose::out << oss.str() << std::endl;
+
+  if (_write_file)
+    _file_output_stream << oss.str() << std::endl;
 }
 
 // Quick helper to output the norm in color
