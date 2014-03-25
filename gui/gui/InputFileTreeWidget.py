@@ -424,10 +424,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         global_params = global_params_item.table_data
 
       # Hack!
-      if 'Mesh' in this_path:
-          new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self.application.typeOptions(), global_params, False)
-      else:
+      if 'Outputs' in this_path:
           new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self.application.typeOptions(), global_params, this_path_is_hard)
+      else:
+          new_gui = OptionsGUI(yaml_entry, self.action_syntax, item.text(column), item.table_data, item.param_comments, item.comment, False, self.application.typeOptions(), global_params, False)
 
 
       if item.table_data:
