@@ -60,7 +60,8 @@ TransientMultiApp::TransientMultiApp(const std::string & name, InputParameters p
     _failures(0),
     _catch_up(getParam<bool>("catch_up")),
     _max_catch_up_steps(getParam<Real>("max_catch_up_steps")),
-    _first(declareRestartableData<bool>("first", true))
+    _first(declareRestartableData<bool>("first", true)),
+    _auto_advance(false)
 {
   // Transfer interpolation only makes sense for sub-cycling solves
   if (_interpolate_transfers && !_sub_cycling)
@@ -120,10 +121,18 @@ TransientMultiApp::init()
 }
 
 void
-TransientMultiApp::solveStep(Real dt, Real target_time)
+TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
+  if (_sub_cycling && !auto_advance)
+    mooseError("TransientMultiApp with sub_cycling=true is not compatible with auto_advance=false");
+
+  if (_catch_up && !auto_advance)
+    mooseError("TransientMultiApp with catch_up=true is not compatible with auto_advance=false");
+
   if (!_has_an_app)
     return;
+
+  _auto_advance = auto_advance;
 
   Moose::out << "Solving MultiApp " << _name << std::endl;
 
@@ -270,9 +279,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
           at_steady = true;
 
-          // Set the time for the problem to the target time we were looking for
-          ex->setTime(target_time-app_time_offset);
-
           // Force it to output right now \todo{Remove}
           ex->forceOutput();
 
@@ -280,7 +286,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
           output_warehouse.forceOutput();
 
           // Clean up the end
-          ex->endStep();
+          ex->endStep(target_time-app_time_offset);
         }
         else
           ex->endStep();
@@ -298,71 +304,76 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
     else if (_tolerate_failure)
     {
       ex->takeStep(dt);
-      ex->setTime(target_time-app_time_offset);
       ex->forceOutput(); // \todo{Remove}
       output_warehouse.forceOutput();
-      ex->endStep();
+      ex->endStep(target_time-app_time_offset);
     }
     else
     {
       Moose::out << "Solving Normal Step!" << std::endl;
-      if (_first != true)
-        ex->incrementStepOrReject();
+      if (auto_advance)
+        if (_first != true)
+          ex->incrementStepOrReject();
 
-      output_warehouse.allowOutput(true);
+      if (auto_advance)
+        output_warehouse.allowOutput(true);
 
       ex->takeStep(dt);
-      ex->endStep();
 
-      if (!ex->lastSolveConverged())
+      if (auto_advance)
       {
-        mooseWarning(_name << _first_local_app+i << " failed to converge!" << std::endl);
+        ex->endStep();
 
-        if (_catch_up)
+        if (!ex->lastSolveConverged())
         {
-          Moose::out << "Starting Catch Up!" << std::endl;
+          mooseWarning(_name << _first_local_app+i << " failed to converge!" << std::endl);
 
-          bool caught_up = false;
-
-          unsigned int catch_up_step = 0;
-
-          Real catch_up_dt = dt/2;
-
-          ex->allowOutput(false); // Don't output while catching up \todo{Remove}
-          //  output_warehouse.allowOutput(false);
-
-          while(!caught_up && catch_up_step < _max_catch_up_steps)
+          if (_catch_up)
           {
-            Moose::err << "Solving " << _name << "catch up step " << catch_up_step << std::endl;
-            ex->incrementStepOrReject();
+            Moose::out << "Starting Catch Up!" << std::endl;
 
-            ex->computeDT();
-            ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
+            bool caught_up = false;
 
-            if (ex->lastSolveConverged())
+            unsigned int catch_up_step = 0;
+
+            Real catch_up_dt = dt/2;
+
+            ex->allowOutput(false); // Don't output while catching up \todo{Remove}
+            //  output_warehouse.allowOutput(false);
+
+            while(!caught_up && catch_up_step < _max_catch_up_steps)
             {
-              if (ex->getTime() + app_time_offset + ex->timestepTol()*std::abs(ex->getTime()) >= target_time)
+              Moose::err << "Solving " << _name << "catch up step " << catch_up_step << std::endl;
+              ex->incrementStepOrReject();
+
+              ex->computeDT();
+              ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
+
+              if (ex->lastSolveConverged())
               {
-                ex->forceOutput(); // This is here so that it is called before endStep() // \todo{Remove}
-                output_warehouse.forceOutput();
-                output_warehouse.outputStep();
-                caught_up = true;
+                if (ex->getTime() + app_time_offset + ex->timestepTol()*std::abs(ex->getTime()) >= target_time)
+                {
+                  ex->forceOutput(); // This is here so that it is called before endStep() // \todo{Remove}
+                  output_warehouse.forceOutput();
+                  output_warehouse.outputStep();
+                  caught_up = true;
+                }
               }
+              else
+                catch_up_dt /= 2.0;
+
+              //output_warehouse.forceOutput();
+              ex->endStep(); // This is here so it is called after forceOutput()
+
+              catch_up_step++;
             }
-            else
-              catch_up_dt /= 2.0;
 
-            //output_warehouse.forceOutput();
-            ex->endStep(); // This is here so it is called after forceOutput()
+            if (!caught_up)
+              mooseError(_name << " Failed to catch up!\n");
 
-            catch_up_step++;
+            output_warehouse.allowOutput(true);
+            ex->allowOutput(true); // \todo{Remove}
           }
-
-          if (!caught_up)
-            mooseError(_name << " Failed to catch up!\n");
-
-          output_warehouse.allowOutput(true);
-          ex->allowOutput(true); // \todo{Remove}
         }
       }
     }
@@ -376,6 +387,26 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
   _transferred_vars.clear();
 
   Moose::out << "Finished Solving MultiApp " << _name << std::endl;
+}
+
+void
+TransientMultiApp::advanceStep()
+{
+  if (!_auto_advance)
+  {
+    for(unsigned int i=0; i<_my_num_apps; i++)
+    {
+      FEProblem * problem = appProblem(_first_local_app + i);
+      OutputWarehouse & output_warehouse = _apps[i]->getOutputWarehouse();
+      output_warehouse.timestepSetup();
+
+      Transient * ex = _transient_executioners[i];
+
+      output_warehouse.allowOutput(true);
+      ex->endStep();
+      ex->incrementStepOrReject();
+    }
+  }
 }
 
 Real

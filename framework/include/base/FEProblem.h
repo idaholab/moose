@@ -482,7 +482,12 @@ public:
   /**
    * Execute the MultiApps associated with the ExecFlagType
    */
-  void execMultiApps(ExecFlagType type);
+  void execMultiApps(ExecFlagType type, bool auto_advance = true);
+
+  /**
+   * Advance the MultiApps associated with the ExecFlagType
+   */
+  void advanceMultiApps(ExecFlagType type);
 
   /**
    * Find the smallest timestep over all MultiApps
@@ -509,6 +514,14 @@ public:
   void computeTransientImplicitJacobian(Real time, const NumericVector<Number>& u, const NumericVector<Number>& udot, Real shift, SparseMatrix<Number> &jacobian);
 
   ////
+
+  /**
+   * Computes the residual using whatever is sitting in the current solution vector then returns the L2 norm.
+   *
+   * @return The L2 norm of the residual
+   */
+  virtual Real computeResidualL2Norm();
+
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual );
   virtual void computeResidualType(const NumericVector<Number> & soln, NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
