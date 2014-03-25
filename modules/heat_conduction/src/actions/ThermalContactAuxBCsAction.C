@@ -42,17 +42,6 @@ ThermalContactAuxBCsAction::act()
 {
   bool quadrature = getParam<bool>("quadrature");
 
-  const std::string cond_name = getParam<std::string>("conductivity_name");
-  const std::string cond_master_name = getParam<std::string>("conductivity_master_name");
-  bool different = (cond_name != cond_master_name);
-  std::string slave("");
-  std::string master("");
-  if (different)
-  {
-    slave = "slave_";
-    master = "master_";
-  }
-
   InputParameters params = _factory.getValidParams(getParam<std::string>("gap_type"));
 
   params.set<AuxVariableName>("variable") = ThermalContactAuxVarsAction::getGapValueName(_pars);
@@ -115,50 +104,6 @@ ThermalContactAuxBCsAction::act()
   _problem->addAuxBoundaryCondition("PenetrationAux",
       "penetration_" + Moose::stringify(n),
       params);
-
-
-  if (getParam<std::string>("type") == "GapHeatTransferLWR")
-  {
-    params = _factory.getValidParams(getParam<std::string>("gap_type"));
-    params.set<AuxVariableName>("variable") = ThermalContactAuxVarsAction::getGapConductivityName(_pars);
-    params.set<std::vector<BoundaryName> >("boundary") = bnds;
-    params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
-
-    params.set<VariableName>("paired_variable") = "conductivity_"+master+getParam<NonlinearVariableName>("variable");
-
-    params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
-    if (isParamValid("tangential_tolerance"))
-    {
-      params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
-    }
-    if (isParamValid("normal_smoothing_distance"))
-    {
-      params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
-    }
-    if (isParamValid("normal_smoothing_method"))
-    {
-      params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
-    }
-
-    // For efficiency, run this at the beginning of each step...
-    params.set<MooseEnum>("execute_on") = "timestep_begin";
-
-    params.set<bool>("warnings") = getParam<bool>("warnings");
-
-    _problem->addAuxBoundaryCondition(getParam<std::string>("gap_type"),
-        ThermalContactAuxVarsAction::getGapConductivityName(_pars)+"_slave_"+Moose::stringify(n),
-        params);
-
-    std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
-    params.set<std::vector<BoundaryName> >("boundary") = bnds;
-    params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
-    params.set<VariableName>("paired_variable") = "conductivity_"+slave+getParam<NonlinearVariableName>("variable");
-
-    _problem->addAuxBoundaryCondition(getParam<std::string>("gap_type"),
-            ThermalContactAuxVarsAction::getGapConductivityName(_pars)+"_master_"+Moose::stringify(n),
-            params);
-
-  }
 
   ++n;
 }

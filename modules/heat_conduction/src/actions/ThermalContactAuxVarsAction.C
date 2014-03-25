@@ -68,30 +68,4 @@ ThermalContactAuxVarsAction::act()
     FEType(Utility::string_to_enum<Order>(order),
            Utility::string_to_enum<FEFamily>(family)));
 
-  if (getParam<std::string>("type") == "GapHeatTransferLWR")
-  {
-    _problem->addAuxVariable(getGapConductivityName(_pars),
-      FEType(Utility::string_to_enum<Order>(order),
-             Utility::string_to_enum<FEFamily>(family)));
-
-    const std::string cond_name = getParam<std::string>("conductivity_name");
-    const std::string cond_master_name = getParam<std::string>("conductivity_master_name");
-    bool different = (cond_name != cond_master_name);
-    std::string slave("");
-    std::string master("");
-    if (different)
-    {
-      slave = "slave_";
-      master = "master_";
-    }
-
-    // Now add constant conductivity variable
-    _problem->addAuxVariable("conductivity_"+slave+getParam<NonlinearVariableName>("variable"),
-      FEType(Utility::string_to_enum<Order>("CONSTANT"),
-             Utility::string_to_enum<FEFamily>("MONOMIAL")));
-    _problem->addAuxVariable("conductivity_"+master+getParam<NonlinearVariableName>("variable"),
-      FEType(Utility::string_to_enum<Order>("CONSTANT"),
-             Utility::string_to_enum<FEFamily>("MONOMIAL")));
-
-  }
 }
