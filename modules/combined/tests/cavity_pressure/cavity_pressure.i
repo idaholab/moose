@@ -1,5 +1,5 @@
 #
-# Plenum Pressure Test
+# Cavity Pressure Test
 #
 # This test is designed to compute an internal pressure based on
 #   p = n * R * T / V
@@ -13,22 +13,24 @@
 # The mesh is composed of one block (1) with an interior cavity of volume 8.
 #   Block 2 sits in the cavity and has a volume of 1.  Thus, the total
 #   initial volume is 7.
-#
-# The test includes a refabrication step in which the amount of gas is reset.
-#   n = n0 + alpha*t
-#   T = 70
-#   V = 7
+# The test adjusts n, T, and V in the following way:
+#   n => n0 + alpha*t
+#   T => T0 + beta*t
+#   V => V0 + gamma*t
 # with
 #   alpha = n0
-#   n0 = 1/R
+#   beta = T0/2
+#   gamma = -(0.003322259...)*V0
+#   T0 = 240.54443866068704
+#   V0 = 7
+#   n0 = f(p0)
+#   p0 = 100
 #   R = 8.314472 J* K^(−1)*mol^(−1)
 #
-# So, p0 = n*R*T/V = 1/R * R * 70 / 7
-#        = 10
-# and p(1) = 20.
+# So, n0 = p0*V0/R/T0 = 100*7/8.314472/240.544439
+#        = 0.35
 #
-# The amount of gas is reset to n0 just after time 1.
-# So, p(2) = 20.
+# The parameters combined at t=1 gives p = 301.
 #
 
 [GlobalParams]
@@ -38,7 +40,7 @@
 []
 
 [Mesh]#Comment
-  file = plenum_pressure.e
+  file = cavity_pressure.e
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -46,22 +48,23 @@
   [./displ_positive]
     type = PiecewiseLinear
     x = '0 1'
-    y = '0 0'
+    y = '0 0.0029069767441859684'
   [../]
   [./displ_negative]
     type = PiecewiseLinear
     x = '0 1'
-    y = '0 0'
+    y = '0 -0.0029069767441859684'
   [../]
   [./temp1]
     type = PiecewiseLinear
-    x = '0 2'
-    y = '70 70'
+    x = '0 1'
+    y = '1 1.5'
+    scale_factor = 240.54443866068704
   [../]
   [./material_input_function]
     type = PiecewiseLinear
-    x = '0 2'
-    y = '0 0.24054443866068703' # 2/R
+    x = '0    1'
+    y = '0 0.35'
   [../]
 []
 
@@ -85,16 +88,30 @@
   [./temp]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 240.54443866068704
   [../]
 
   [./material_input]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 0
   [../]
 []
 
 [AuxVariables]
 
+  [./pressure_residual_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./pressure_residual_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./pressure_residual_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -192,53 +209,99 @@
   [./no_x_exterior]
     type = DirichletBC
     variable = disp_x
-    boundary = '7 8 100'
+    boundary = '7 8'
     value = 0.0
   [../]
   [./no_y_exterior]
     type = DirichletBC
     variable = disp_y
-    boundary = '9 10 100'
+    boundary = '9 10'
     value = 0.0
   [../]
   [./no_z_exterior]
     type = DirichletBC
     variable = disp_z
-    boundary = '11 12 100'
+    boundary = '11 12'
+    value = 0.0
+  [../]
+
+  [./prescribed_left]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = 13
+    function = displ_positive
+  [../]
+  [./prescribed_right]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = 14
+    function = displ_negative
+  [../]
+
+  [./no_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = '15 16'
+    value = 0.0
+  [../]
+
+  [./no_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = '17 18'
+    value = 0.0
+  [../]
+
+  [./no_x_interior]
+    type = DirichletBC
+    variable = disp_x
+    boundary = '1 2'
+    value = 0.0
+  [../]
+
+  [./no_y_interior]
+    type = DirichletBC
+    variable = disp_y
+    boundary = '3 4'
+    value = 0.0
+  [../]
+
+  [./no_z_interior]
+    type = DirichletBC
+    variable = disp_z
+    boundary = '5 6'
     value = 0.0
   [../]
 
 
 
-
   [./temperatureInterior]
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     boundary = 100
     function = temp1
     variable = temp
   [../]
   [./MaterialInput]
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     boundary = '100 13 14 15 16'
     function = material_input_function
     variable = material_input
   [../]
 
 
-  [./PlenumPressure]
+  [./CavityPressure]
     [./1]
       boundary = 100
-      initial_pressure = 10
+      initial_pressure = 100
       material_input = materialInput
       R = 8.314472
       temperature = aveTempInterior
       volume = internalVolume
+      startup_time = 0.5
       output = ppress
-      output_initial_moles = initial_moles
-      refab_time = 1.01
-      refab_pressure = 10
-      refab_temperature = 350
-      refab_volume = 35
+      save_in_disp_x = pressure_residual_x
+      save_in_disp_y = pressure_residual_y
+      save_in_disp_z = pressure_residual_z
     [../]
   [../]
 
@@ -288,6 +351,7 @@
     disp_y = disp_y
     disp_z = disp_z
   [../]
+
 []
 
 [Executioner]
@@ -303,16 +367,13 @@
   petsc_options_value = 'asm       lu'
 
   nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-10
   l_tol = 1e-12
 
   l_max_its = 20
 
-  start_time = 1.5
+  start_time = 0.0
   dt = 0.5
-  end_time = 2.0
-
-  restart_file_base = plenum_pressure_refab_restart1_out_cp/0003
+  end_time = 1.0
 []
 
 [Postprocessors]
@@ -338,12 +399,8 @@
 []
 
 [Outputs]
-  file_base = plenum_pressure_refab_out
   output_initial = true
-  [./exodus]
-    type = Exodus
-    elemental_as_nodal = true
-  [../]
+  exodus = true
   [./console]
     type = Console
     perf_log = true

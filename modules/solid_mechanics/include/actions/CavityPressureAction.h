@@ -1,18 +1,18 @@
-#ifndef PLENUMPRESSUREACTION_H
-#define PLENUMPRESSUREACTION_H
+#ifndef CAVITYPRESSUREACTION_H
+#define CAVITYPRESSUREACTION_H
 
 #include "Action.h"
 #include "MooseTypes.h"
 
-class PlenumPressureAction;
+class CavityPressureAction;
 
 template<>
-InputParameters validParams<PlenumPressureAction>();
+InputParameters validParams<CavityPressureAction>();
 
-class PlenumPressureAction: public Action
+class CavityPressureAction: public Action
 {
 public:
-  PlenumPressureAction(const std::string & name, InputParameters params);
+  CavityPressureAction(const std::string & name, InputParameters params);
 
   virtual void act();
 
@@ -30,4 +30,4 @@ protected:
 };
 
 
-#endif // PLENUMPRESSUREACTION_H
+#endif // CAVITYPRESSUREACTION_H

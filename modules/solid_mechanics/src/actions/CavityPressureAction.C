@@ -1,11 +1,11 @@
-#include "PlenumPressureAction.h"
+#include "CavityPressureAction.h"
 
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
 
 template<>
-InputParameters validParams<PlenumPressureAction>()
+InputParameters validParams<CavityPressureAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
@@ -22,7 +22,7 @@ InputParameters validParams<PlenumPressureAction>()
   return params;
 }
 
-PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParameters params) :
+CavityPressureAction::CavityPressureAction(const std::string & name, InputParameters params) :
   Action(name, params),
   _boundary(getParam<std::vector<BoundaryName> >("boundary")),
   _disp_x(getParam<NonlinearVariableName>("disp_x")),
@@ -42,7 +42,7 @@ PlenumPressureAction::PlenumPressureAction(const std::string & name, InputParame
 }
 
 void
-PlenumPressureAction::act()
+CavityPressureAction::act()
 {
   // Determine number of dimensions
   unsigned int dim(1);
@@ -63,7 +63,7 @@ PlenumPressureAction::act()
   else
   {
     std::string short_name(_name);
-    // Chop off "BCs/PlenumPressure/"
+    // Chop off "BCs/CavityPressure/"
     short_name.erase(0, 19);
     ppname = short_name;
   }
