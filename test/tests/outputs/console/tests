@@ -58,4 +58,12 @@
     check_files = 'console_file_setup_log_out.txt'
     file_expect_out = 'Setup\sPerformance:'
   [../]
+  [./norms]
+    # Test that the variable norms are being output
+    type = RunApp
+    input = 'console.i'
+    cli_args = 'Outputs/screen/all_variable_norms=true'
+    expect_out = 'Variable Residual Norms:'
+    #expect_out = 'Variable Residual Norms:\n\s*u:\s.*\n\s*v:'
+  [../]
 []
