@@ -28,6 +28,7 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     MooseVariableBase(var_num, sys, assembly, var_kind),
     _fe_type(fe_type),
 
+    _qorder(_fe_type.default_quadrature_order()),
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
     _qrule_neighbor(_assembly.qRuleNeighbor()),

@@ -80,6 +80,11 @@ public:
   Order getOrder() const { return _fe_type.order; }
 
   /**
+   * Get the required quadrature order of this variable
+   */
+  Order getRequiredQOrder() const { return _qorder; }
+
+  /**
    * Is this variable nodal
    * @return true if it nodal, otherwise false
    */
@@ -294,6 +299,9 @@ protected:
   THREAD_ID _tid;
   /// The FEType associated with this variable
   FEType _fe_type;
+
+  /// quadrature order
+  Order _qorder;
 
   /// Quadrature rule for interior
   QBase * & _qrule;
