@@ -30,6 +30,7 @@ ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory 
     _action_factory(factory),
     _generator_valid(false),
     _show_actions(false),
+    _show_parser(false),
     _mesh(NULL),
     _displaced_mesh(NULL),
     _problem(NULL),
@@ -77,12 +78,11 @@ ActionWarehouse::addActionBlock(Action * action)
   std::string registered_identifier = action->getParams().get<std::string>("registered_identifier");
   std::set<std::string> tasks;
 
-# if DEBUG_PARSER
-  Moose::err << COLOR_DEFAULT << "Parsing Syntax:        " << GREEN   << action->name() << '\n'
-             << COLOR_DEFAULT << "Building Action:       " << DEFAULT << action->type() << '\n'
-             << COLOR_DEFAULT << "Registered Identifier: " << GREEN   << registered_identifier << '\n'
-             << COLOR_DEFAULT << "Specific Task:         " << CYAN    << action->specificTaskName() << '\n';
-# endif
+  if (_show_parser)
+    Moose::err << COLOR_DEFAULT << "Parsing Syntax:        " << GREEN   << action->name() << '\n'
+               << COLOR_DEFAULT << "Building Action:       " << COLOR_DEFAULT << action->type() << '\n'
+               << COLOR_DEFAULT << "Registered Identifier: " << GREEN   << registered_identifier << '\n'
+               << COLOR_DEFAULT << "Specific Task:         " << CYAN    << action->specificTaskName() << '\n';
 
   /**
    * We need to see if the current Action satisfies multiple tasks. There are a few cases to consider:
@@ -143,17 +143,15 @@ ActionWarehouse::addActionBlock(Action * action)
     // Add the current task to current action
     action->appendTask(*it);
 
-#   if DEBUG_PARSER
-    Moose::err << YELLOW << "Adding Action:         " << COLOR_DEFAULT << action->type() << " (" << YELLOW << *it << COLOR_DEFAULT << ")\n";
-#   endif
+    if (_show_parser)
+      Moose::err << YELLOW << "Adding Action:         " << COLOR_DEFAULT << action->type() << " (" << YELLOW << *it << COLOR_DEFAULT << ")\n";
 
     // Add it to the warehouse
     _action_blocks[*it].push_back(action);
   }
-# if DEBUG_PARSER
-  Moose::err << std::endl;
-# endif
 
+  if (_show_parser)
+    Moose::err << std::endl;
 }
 
 ActionIterator
