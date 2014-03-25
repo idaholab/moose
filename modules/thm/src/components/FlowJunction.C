@@ -72,7 +72,7 @@ FlowJunction::addMooseObjects()
     InputParameters params = _factory.getValidParams("PressureCB");
     params.set<std::vector<unsigned int> >("r7:boundary") = _bnd_id;
     params.set<MooseEnum>("execute_on") = execute_options;
-    params.set<MooseEnum>("output") = "none";
+    params.set<std::string>("r7:output") = "none";
     params.set<UserObjectName>("eos")  = getParam<UserObjectName>("eos");
     // coupling
     params.set<std::vector<VariableName> >("area") = cv_area;
