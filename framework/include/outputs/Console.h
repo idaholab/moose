@@ -116,6 +116,11 @@ protected:
    */
   void writeStream(bool append = true);
 
+  /**
+   * Print the L2-norms for each variable
+   */
+  void writeVariableNorms();
+
   /// The max number of table rows
   unsigned int _max_rows;
 
@@ -157,6 +162,15 @@ protected:
 
   /// State for the performance log header information
   bool _perf_header;
+
+  /// Flag for writing all variable norms
+  bool _all_variable_norms;
+
+  /// Flag for writing outlier variable norms
+  bool _outlier_variable_norms;
+
+  /// Multipliers for coloring variable residual norms (default [2, 0.8])
+  std::vector<Real> _outlier_multiplier;
 
   /// Width used for printing simulation information
   static const unsigned int _field_width = 25;

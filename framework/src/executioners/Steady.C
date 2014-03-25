@@ -79,8 +79,6 @@ Steady::init()
     _problem.outputRestart();
   }
 
-
-
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
 
@@ -122,9 +120,12 @@ Steady::execute()
 
     _output_warehouse.outputStep();
 
-    _problem.output();
-    _problem.outputPostprocessors();
-    _problem.outputRestart();
+    if (_app.hasLegacyOutput())
+    {
+      _problem.output();
+      _problem.outputPostprocessors();
+      _problem.outputRestart();
+    }
 
 #ifdef LIBMESH_ENABLE_AMR
     if (r_step != steps)
