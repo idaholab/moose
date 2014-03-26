@@ -157,6 +157,11 @@ protected:
   /// State for setup performance log
   bool _setup_log;
 
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+  /// Control the display libMesh performance log
+  bool _libmesh_log;
+#endif
+
   /// State for early setup log printing
   bool _setup_log_early;
 
@@ -177,6 +182,11 @@ protected:
 
   /// Line length for printing simulation information
   static const unsigned int _line_length = 100;
+
+private:
+
+  /// State of the --timing command line argument from MooseApp
+  bool _timing;
 };
 
 #endif /* CONSOLE_H */

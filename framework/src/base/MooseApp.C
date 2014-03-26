@@ -61,6 +61,8 @@ InputParameters validParams<MooseApp>()
 
   params.addCommandLineParam<bool>("trap_fpe", "--trap-fpe", "Enable Floating Point Exception handling in critical sections of code.  This is enabled automatically in DEBUG mode");
 
+  params.addCommandLineParam<bool>("timing", "-t --timing", "Enable all performance logging for timing purposes. This will disable all screen output of performance logs for all Console objects.");
+
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
 
@@ -137,6 +139,9 @@ MooseApp::setupOptions()
 
   if (isParamValid("half_transient"))
     _half_transient = true;
+
+  if (isParamValid("timing"))
+    _pars.set<bool>("timing") = true;
 
   if (isParamValid("trap_fpe"))
     // Seting Global Variable

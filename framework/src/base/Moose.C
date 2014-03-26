@@ -316,7 +316,7 @@
 #include "SetupPredictorAction.h"
 #include "AddMortarInterfaceAction.h"
 #include "SetupPostprocessorDataAction.h"
-
+#include "PerfLogOutputAction.h"
 
 // Outputs
 #include "Exodus.h"
@@ -701,6 +701,8 @@ addActionTypes(Syntax & syntax)
   registerTask("ready_to_init", true);
   registerTask("setup_pps_complete", false);
 
+  registerTask("perf_log_output", true);
+
   /**************************/
   /****** Dependencies ******/
   /**************************/
@@ -756,6 +758,7 @@ addActionTypes(Syntax & syntax)
 "(add_postprocessor)"
 "(setup_pps_complete)"
 "(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, add_output)"
+"(perf_log_output)"
 "(setup_output)"
 "(setup_oversampling)"
 "(setup_debug)"
@@ -766,8 +769,7 @@ addActionTypes(Syntax & syntax)
 
 /**
  * Multiple Action class can be associated with a single input file section, in which case all associated Actions
- * will be created and "acted" on when the associated input file section is seen.
- *
+ * will be created and "acted" on when the associated input file section is seen.b *
  * Example:
  *  "setup_mesh" <-----------> SetupMeshAction <---------
  *                                                        \
@@ -815,6 +817,10 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(CommonOutputAction, "meta_action");
   registerAction(GlobalParamsAction, "set_global_params");
   registerAction(SetupPredictorAction, "setup_predictor");
+
+  /* The display of performance long is controlled by the Console outputter, if there is not one present
+     logging must be disable externally from the object, this action does this */
+  registerAction(PerfLogOutputAction, "perf_log_output");
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");
