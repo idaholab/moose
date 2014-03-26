@@ -52,7 +52,7 @@ InputParameters validParams<OutputBase>()
   params.addParam<bool>("output_postprocessors", true, "Enable/disable the output of postprocessors");
 
   // Displaced Mesh options
-  params.addParam<bool>("use_displaced", false, "Enable/disable the use of the displaced mesh for outputing");
+  params.addParam<bool>("use_displaced", false, "Enable/disable the use of the displaced mesh for outputting");
 
   // Enable sequential file output
   params.addParam<bool>("sequence", "Enable/disable sequential file output (enable by default when 'use_displace = true', otherwise defaults to false");
@@ -64,17 +64,17 @@ InputParameters validParams<OutputBase>()
   // Output intervals and timing
   params.addParam<bool>("output_initial", "Request that the initial condition is output to the solution file");
   params.addParam<bool>("output_intermediate", "Request that all intermediate steps (not initial or final) are output");
-  params.addParam<bool>("output_final", "Force the final timestep to be output, regardless of output interval");
-  params.addParam<unsigned int>("interval", "The interval at which timesteps are output to the solution file");
+  params.addParam<bool>("output_final", "Force the final time step to be output, regardless of output interval");
+  params.addParam<unsigned int>("interval", "The interval at which time steps are output to the solution file");
   params.addParam<bool>("output_failed", false, "When true all time attempted time steps are output");
   params.addParam<std::vector<Real> >("sync_times", "Times at which the output and solution is forced to occur");
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
-  params.addParam<Real>("start_time", 0, "Time at which this outputter begins");
+  params.addParam<Real>("start_time", "Time at which this outputter begins");
   params.addParam<Real>("end_time", "Time at which this outputter ends");
-  params.addParam<Real>("time_tolerance", 1e-14, "Time tolerance utlized checking start and end times");
+  params.addParam<Real>("time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
 
   // 'Timing' group
-  params.addParamNamesToGroup("time_tolerance interval output_initial output_final sync_times sync_only start_time end_timemt ", "Timing");
+  params.addParamNamesToGroup("time_tolerance interval output_initial output_final sync_times sync_only start_time end_time ", "Timing");
 
   // 'Variables' Group
   params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
@@ -110,7 +110,7 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     _sync_times(isParamValid("sync_times") ?
                 std::set<Real>(getParam<std::vector<Real> >("sync_times").begin(), getParam<std::vector<Real> >("sync_times").end()) :
                 std::set<Real>()),
-    _start_time(getParam<Real>("start_time")),
+    _start_time(isParamValid("start_time") ? getParam<Real>("start_time") : -std::numeric_limits<Real>::max()),
     _end_time(isParamValid("end_time") ? getParam<Real>("end_time") : std::numeric_limits<Real>::max()),
     _t_tol(getParam<Real>("time_tolerance")),
     _sync_only(getParam<bool>("sync_only")),
@@ -130,7 +130,7 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
   // Initialize the available output
   initAvailableLists();
 
-  // Seperate the hide/show list into components
+  // Separate the hide/show list into components
   initShowHideLists(getParam<std::vector<VariableName> >("show"), getParam<std::vector<VariableName> >("hide"));
 
   // If 'elemental_as_nodal = true' the elemental variable names must be appended to the

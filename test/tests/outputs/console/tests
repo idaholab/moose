@@ -72,5 +72,10 @@
     cli_args = 'Outputs/screen/perf_log=false --timing'
     expect_out = 'Moose\sTest\sPerformance:'
   [../]
-
+  [./transient]
+    # Test the transient console output, with negative start-time
+    type = RunApp
+    input = 'console_transient.i'
+    expect_out = 'Time Step  4, time = -0.600000'
+  [../]
 []
