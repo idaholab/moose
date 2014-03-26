@@ -6,8 +6,8 @@ InputParameters validParams<MaterialVectorAux>()
   MooseEnum quantities("length=1");
 
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<std::string>("vector", "The material tensor name.");
-  params.addParam<int>("index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
+  params.addRequiredParam<std::string>("vector", "The material vector name.");
+  params.addParam<int>("index", -1, "The index into the tensor, from 0 to 2.");
   params.addParam<MooseEnum>("quantity", quantities, "A scalar quantity to compute: (only option is Length).");
   return params;
 }
