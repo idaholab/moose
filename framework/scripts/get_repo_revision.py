@@ -19,14 +19,20 @@ def findRepoRevision(moose_dir):
       found_it = True
       break
   if not found_it:
-    # Unable to find the apps file so we'll just give up
+    # We need to see if we are in a git repo
+    p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=None, shell=True)
+    p.wait()
+    if p.returncode == 0:
+      git_dir = p.communicate()[0]
+      app_dir = os.path.abspath(os.path.join(os.getcwd(), git_dir))
+
     return revision  # blank string
 
   # At this point apps_dir should contain the root of the repository
 
   # See if this is an SVN checkout
   regex = ''
-  if os.path.exists(apps_dir + '.git'):
+  if os.path.exists(os.path.join(apps_dir, '.git')):
     # See if this git project has a SVN remote
     saved_dir = os.getcwd()
     os.chdir(apps_dir)
