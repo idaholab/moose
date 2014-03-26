@@ -334,24 +334,31 @@ Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
    *
    * GlobalParamsAction: This block is checked during the parameter extraction routines of all subsequent blocks.
    *                     It must be parsed early since it must exist during subsequent parameter extraction.
+   *
+   * Note: I realize that doing inserts and deletes in a vector are "slow".  Swapping is not an option due to the
+   *       way that active_lists are constucted.  These are small vectors ;)
    */
-
-  std::vector<std::string>::iterator swap_position = section_names.begin();
-  // Locate the debug action (See Moose.C for registration)
-  std::string debug_syntax = _syntax.getSyntaxByAction("SetupDebugAction", "setup_debug");
-  debug_syntax += '/';   // section names *always* have trailing slashes
-
-  std::vector<std::string>::iterator pos = std::find(section_names.begin(), section_names.end(), debug_syntax);
-  if (pos != section_names.end())
-    std::iter_swap(swap_position++, pos);
-
   // Locate the global params section
   std::string global_syntax = _syntax.getSyntaxByAction("GlobalParamsAction", "set_global_params");
   global_syntax += '/';   // section names *always* have trailing slashes
 
-  pos = std::find(section_names.begin(), section_names.end(), global_syntax);
+  std::vector<std::string>::iterator pos = std::find(section_names.begin(), section_names.end(), global_syntax);
   if (pos != section_names.end())
-    std::iter_swap(swap_position, pos);
+  {
+    section_names.erase(pos);
+    section_names.insert(section_names.begin(), global_syntax);
+  }
+
+  // Locate the debug action (See Moose.C for registration)
+  std::string debug_syntax = _syntax.getSyntaxByAction("SetupDebugAction", "setup_debug");
+  debug_syntax += '/';   // section names *always* have trailing slashes
+
+  pos = std::find(section_names.begin(), section_names.end(), debug_syntax);
+  if (pos != section_names.end())
+  {
+    section_names.erase(pos);
+    section_names.insert(section_names.begin(), debug_syntax);
+  }
 }
 
 void
