@@ -22,6 +22,8 @@ public:
   virtual void addMooseObjects();
 
 protected:
+  virtual void addMooseObjects1Phase();
+  virtual void addMooseObjects2Phase();
 };
 
 #endif /* SOLIDWALL_H */
