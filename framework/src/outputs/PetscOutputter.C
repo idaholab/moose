@@ -39,6 +39,7 @@ InputParameters validParams<PetscOutputter>()
   params.addParam<Real>("nonlinear_residual_start_time", "Specifies a start time to begin output on each nonlinear residual evaluation");
 
   // End time for residual output
+  /* Note, No default is given here so that in Peacock giant numbers do not show up by default, the defaults are set in the initialization list */
   params.addParam<Real>("linear_residual_end_time", "Specifies an end time to begin output on each linear residual evaluation");
   params.addParam<Real>("nonlinear_residual_end_time", "Specifies an end time to begin output on each nonlinear residual evaluation");
 
@@ -63,9 +64,9 @@ PetscOutputter::PetscOutputter(const std::string & name, InputParameters & param
     _linear_start_time(isParamValid("linear_residual_start_time") ?
                        getParam<Real>("linear_residual_start_time") : std::numeric_limits<Real>::max()),
     _nonlinear_end_time(isParamValid("nonlinear_residual_end_time") ?
-                        getParam<Real>("nonlinear_residual_end_time") : std::numeric_limits<Real>::min()),
+                        getParam<Real>("nonlinear_residual_end_time") : -std::numeric_limits<Real>::max()),
     _linear_end_time(isParamValid("linear_residual_end_time") ?
-                     getParam<Real>("linear_residual_end_time") : std::numeric_limits<Real>::min())
+                     getParam<Real>("linear_residual_end_time") : -std::numeric_limits<Real>::max())
 {
 }
 
@@ -106,7 +107,7 @@ PetscOutputter::timestepSetupInternal()
 #endif
 }
 
-// Only define the montior functions if PETSc exists
+// Only define the monitor functions if PETSc exists
 #ifdef LIBMESH_HAVE_PETSC
 PetscErrorCode
 PetscOutputter::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, void * void_ptr)
@@ -114,7 +115,7 @@ PetscOutputter::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, void * 
   // Get the outputter object
   PetscOutputter * ptr = static_cast<PetscOutputter *>(void_ptr);
 
-  // Update the psuedo times
+  // Update the pseudo times
   ptr->_nonlinear_time += ptr->_nonlinear_dt;
   ptr->_linear_time = ptr->_nonlinear_time;
 
@@ -122,7 +123,7 @@ PetscOutputter::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, void * 
   ptr->_norm = norm;
   ptr->_nonlinear_iter = its;
 
-  // Set the flag indicating that output is occuriong on the non-linear residual
+  // Set the flag indicating that output is occurring on the non-linear residual
   ptr->_on_nonlinear_residual = true;
 
   // Perform the output
@@ -141,14 +142,14 @@ PetscOutputter::petscLinearOutput(KSP, PetscInt its, PetscReal norm, void * void
   // Get the Outputter object
   PetscOutputter * ptr = static_cast<PetscOutputter *>(void_ptr);
 
-  // Update the psuedo time
+  // Update the pseudo time
   ptr->_linear_time += ptr->_linear_dt;
 
   // Set the current norm and iteration number
   ptr->_norm = norm;
   ptr->_linear_iter = its;
 
-  // Set the flag indicating that output is occuriong on the non-linear residual
+  // Set the flag indicating that output is occurring on the non-linear residual
   ptr->_on_linear_residual = true;
 
   // Perform the output
