@@ -40,7 +40,8 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 20
+  start_time = -1
+  end_time = 0
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
