@@ -1,5 +1,18 @@
-#ifndef _PETSCDMMOOSE
-#define _PETSCDMMOOSE
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+#ifndef PETSCDMMOOSE_H
+#define PETSCDMMOOSE_H
 
 #include "libmesh/petsc_macro.h"
 // This only works with petsc-3.3 and above.
@@ -41,4 +54,4 @@ extern PetscErrorCode DMMooseGetSplitSides(DM,const std::string&,std::set<std::s
 extern PetscErrorCode SNESUpdateDMMoose(SNES snes, PetscInt iteration);
 
 #endif // #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-#endif // #ifdef _PETSCDMMOOSE
+#endif // #ifdef PETSCDMMOOSE_H
