@@ -9,9 +9,11 @@ template<>
 InputParameters validParams<MaterialTensorOnLine>()
 {
   InputParameters params = validParams<ElementUserObject>();
+  params += validParams<MaterialTensorCalculator>();
 
-  addMaterialTensorParams(params);
-
+  params.addRequiredParam<std::string>("tensor", "The material tensor name.");
+  params.addParam<RealVectorValue>("line_point1", RealVectorValue(0, 0, 0), "Start point of line along which material data is output");
+  params.addParam<RealVectorValue>("line_point2", RealVectorValue(0, 1, 0), "End point of line along which material data is output");
   params.addCoupledVar("element_line_id","Element line ID: if not zero, output stress at integration points");
   params.addRequiredParam<std::string>("filename","Output file name");
   params.addParam<int>("line_id",1,"ID of the line of elements to output stresses on");
@@ -22,22 +24,15 @@ InputParameters validParams<MaterialTensorOnLine>()
 
 MaterialTensorOnLine :: MaterialTensorOnLine(const std::string & name, InputParameters parameters) :
   ElementUserObject(name, parameters),
-
+  _material_tensor_calculator( name, parameters),
   _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) ),
-  _index( getParam<int>("index") ),
-  _quantity_moose_enum( getParam<MooseEnum>("quantity") ),
-  _p1( getParam<RealVectorValue>("point1") ),
-  _p2( getParam<RealVectorValue>("point2") ),
+  _lp1( getParam<RealVectorValue>("line_point1") ),
+  _lp2( getParam<RealVectorValue>("line_point2") ),
   _line_id( getParam<int>("line_id") ),
   _file_name( getParam<std::string>("filename") ),
-
   _stream_open(false),
-
   _elem_line_id(coupledValue("element_line_id"))
-
 {
-
-  MaterialTensorAux::checkMaterialTensorParams(_quantity,_quantity_moose_enum,_index,_name);
 
   if (!_stream_open && libMesh::processor_id() == 0)
   {
@@ -74,7 +69,7 @@ MaterialTensorOnLine::execute()
   if (id == _line_id)
   {
 
-    const Point line_vec(_p2-_p1);
+    const Point line_vec(_lp2-_lp1);
     const Real length(line_vec.size());
     const Point line_unit_vec(line_vec/length);
 
@@ -82,7 +77,7 @@ MaterialTensorOnLine::execute()
     {
       const Point qp_pos(_q_point[qp]);
 
-      const Point line1_qp_vec(qp_pos-_p1);
+      const Point line1_qp_vec(qp_pos-_lp1);
       const Real proj(line1_qp_vec*line_unit_vec);
       const Point proj_vec(proj*line_unit_vec);
 
@@ -90,12 +85,13 @@ MaterialTensorOnLine::execute()
       const Real distance(dist_vec.size());
 
       const SymmTensor & tensor( _tensor[qp] );
+      RealVectorValue direction;
 
 //      _dist[_current_elem->id()] = distance;
 //      _value[_current_elem->id()] = tensor.component(_index);
       _dist[std::make_pair(_current_elem->id(),qp)] = distance;
 //      _value[std::make_pair(_current_elem->id(),qp)] = tensor.component(_index);
-      _value[std::make_pair(_current_elem->id(),qp)] = MaterialTensorAux::getTensorQuantity(tensor,_quantity,_quantity_moose_enum,_index,&_q_point[qp],&_p1,&_p2);
+      _value[std::make_pair(_current_elem->id(),qp)] = _material_tensor_calculator.getTensorQuantity(tensor,&_q_point[qp],direction);
 
     }
   }

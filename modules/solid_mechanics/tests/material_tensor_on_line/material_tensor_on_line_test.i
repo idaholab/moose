@@ -85,8 +85,8 @@
     filename = vonmises.dat
     tensor = stress
     quantity = vonmises
-    point1 = '2. 0.5 -0.5'
-    point2 = '0. 0.5 -0.5'
+    line_point1 = '2. 0.5 -0.5'
+    line_point2 = '0. 0.5 -0.5'
   [../]
   [./stressxxprofile]
     type = MaterialTensorOnLine
@@ -95,8 +95,8 @@
     filename = stress_xx.dat
     tensor = stress
     index = 0
-    point1 = '2. 0.5 -0.5'
-    point2 = '0. 0.5 -0.5'
+    line_point1 = '2. 0.5 -0.5'
+    line_point2 = '0. 0.5 -0.5'
   [../]
 []
 
