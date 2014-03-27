@@ -60,7 +60,7 @@ class RunApp(Tester):
 
     timing_string = ' '
     if options.timing:
-      timing_string = ' Output/perf_log=true '
+      specs['cli_args'].append('--timing')
 
     # Raise the floor
     ncpus = max(default_ncpus, int(specs['min_parallel']))
