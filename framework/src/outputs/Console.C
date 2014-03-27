@@ -48,13 +48,17 @@ InputParameters validParams<Console>()
   params.addParam<bool>("setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled if ""perf_log"" is false");
   params.addParam<bool>("setup_log", "Toggles the printing of the 'Setup Performance' log");
   params.addParam<bool>("solve_log", "Toggles the printing of the 'Moose Test Performance' log");
-  params.addParam<bool>("perf_header", true, "Print the libMesh performance log header (requires that 'perf_log = true')");
+  params.addParam<bool>("perf_header", "Print the libMesh performance log header (requires that 'perf_log = true')");
 
-  // Toggle for printing variable normas
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+  params.addParam<bool>("libmesh_log", true, "Print the libMesh performance log, requires libMesh to be configured with --enable-perflog");
+#endif
+
+  // Toggle for printing variable normals
   params.addParam<bool>("outlier_variable_norms", true, "If true, outlier variable norms will be printed after each solve");
   params.addParam<bool>("all_variable_norms", false, "If true, all variable norms will be printed after each solve");
 
-  // Mutpliers for coloring of variable residual norms
+  // Multipliers for coloring of variable residual norms
   std::vector<Real> multiplier;
   multiplier.push_back(0.8);
   multiplier.push_back(2);
@@ -65,6 +69,9 @@ InputParameters validParams<Console>()
 
   // Performance log group
   params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Performance Log");
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+  params.addParamNamesToGroup("libmesh_log", "Performance Log");
+#endif
 
   // Variable norms group
   params.addParamNamesToGroup("outlier_variable_norms all_variable_norms outlier_multiplier", "Variable Norms");
@@ -91,18 +98,31 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _perf_log(getParam<bool>("perf_log")),
     _solve_log(isParamValid("solve_log") ? getParam<bool>("solve_log") : _perf_log),
     _setup_log(isParamValid("setup_log") ? getParam<bool>("setup_log") : _perf_log),
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+    _libmesh_log(getParam<bool>("libmesh_log")),
+#endif
     _setup_log_early(getParam<bool>("setup_log_early")),
     _perf_header(isParamValid("perf_header") ? getParam<bool>("perf_header") : _perf_log),
     _all_variable_norms(getParam<bool>("all_variable_norms")),
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
-    _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier"))
+    _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier")),
+    _timing(_app.getParam<bool>("timing"))
 {
-
-  // Disable performance logging (all log input options must be false)
-  if (!_perf_log && !_setup_log && !_solve_log && !_perf_header && !_setup_log_early)
+  // If --timing was used from the command-line, do nothing, all logs are enabled
+  if (!_timing)
   {
-    Moose::perf_log.disable_logging();
-    Moose::setup_perf_log.disable_logging();
+    // Disable performance logging (all log input options must be false)
+    if (!_perf_log && !_setup_log && !_solve_log && !_perf_header && !_setup_log_early)
+    {
+      Moose::perf_log.disable_logging();
+      Moose::setup_perf_log.disable_logging();
+    }
+
+    // Disable libMesh log
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+    if (!_libmesh_log)
+      libMesh::perflog.disable_logging();
+#endif
   }
 
   // Set output coloring
@@ -127,7 +147,7 @@ Console::~Console()
   // Write the libMesh performance log header
   if (_perf_header)
   {
-    if (_write_screen)
+    if (_write_screen && !_timing)
       Moose::out << Moose::perf_log.get_info_header();
 
     if (_write_file)
@@ -137,7 +157,7 @@ Console::~Console()
   // Write the solve log (Moose Test Performance)
   if (_solve_log)
   {
-    if (_write_screen)
+    if (_write_screen && !_timing)
       Moose::out << Moose::perf_log.get_perf_info();
     if (_write_file)
       _file_output_stream << Moose::perf_log.get_perf_info();
@@ -146,25 +166,39 @@ Console::~Console()
   // Write the setup log (Setup Performance)
   if (_setup_log)
   {
-    if (_write_screen)
+    if (_write_screen && !_timing)
       Moose::out << Moose::setup_perf_log.get_perf_info();
     if (_write_file)
       _file_output_stream << Moose::setup_perf_log.get_perf_info();
   }
 
+  // Write the libMesh log
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+  if (_libmesh_log)
+  {
+    if (_write_screen && !_timing)
+      Moose::out << libMesh::perflog.get_perf_info();
+    if (_write_file)
+      _file_output_stream << libMesh::perflog.get_perf_info();
+  }
+#endif
+
   // Write the file output stream
   if (_write_file)
     writeStream();
 
-  /// If an 'Output' block exists do not disable the logging b/c it
-  /// will disable the printing of the log as it was in the old system
-  /// \todo{Remove this if when the old system is removed}
-  if (!_app.hasLegacyOutput())
+  /* If --timing was not used disable the logging b/c the destructor of these
+   * object does the output, if --timing was used do nothing because all other
+   * screen related output was disabled above */
+  if (!_timing)
   {
     /* Disable the logs, without this the logs will be printed
        during the destructors of the logs themselves */
     Moose::perf_log.disable_logging();
     Moose::setup_perf_log.disable_logging();
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+    libMesh::perflog.disable_logging();
+#endif
   }
 }
 
@@ -196,7 +230,7 @@ Console::timestepSetup()
   if (!checkInterval())
     return;
 
-  // Do nothing if output_intitial = false and the timestep is zero
+  // Do nothing if output_initial = false and the timestep is zero
   if (!_output_initial && _t_step == 0)
     return;
 
@@ -409,7 +443,7 @@ Console::outputNorm(Real old_norm, Real norm)
 }
 
 
-// Free function for stringstream formating
+// Free function for stringstream formatting
 void
 Console::insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)
 {

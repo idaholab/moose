@@ -54,7 +54,6 @@ OutputWarehouse::timestepSetup()
     (*it)->timestepSetupInternal();
     (*it)->timestepSetup();
   }
-
 }
 
 void
@@ -100,6 +99,12 @@ bool
 OutputWarehouse::hasOutput(std::string name)
 {
   return _output_names.find(name) != _output_names.end();
+}
+
+const std::vector<OutputBase *> &
+OutputWarehouse::getOutputs()
+{
+  return _object_ptrs;
 }
 
 void
