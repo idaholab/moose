@@ -1,33 +1,28 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #ifndef MATERIALTENSORAUX_H
 #define MATERIALTENSORAUX_H
 
 #include "AuxKernel.h"
+#include "MaterialTensorCalculator.h"
 
 class MaterialTensorAux;
 class SymmTensor;
 
-enum MTA_ENUM
-{
-  MTA_COMPONENT,
-  MTA_VONMISES,
-  MTA_PLASTICSTRAINMAG,
-  MTA_HYDROSTATIC,
-  MTA_HOOP,
-  MTA_RADIAL,
-  MTA_AXIAL,
-  MTA_MAXPRINCIPAL,
-  MTA_MEDPRINCIPAL,
-  MTA_MINPRINCIPAL,
-  MTA_FIRSTINVARIANT,
-  MTA_SECONDINVARIANT,
-  MTA_THIRDINVARIANT,
-  MTA_TRIAXIALITY,
-  MTA_VOLUMETRICSTRAIN
-};
-
 template<>
 InputParameters validParams<MaterialTensorAux>();
-void addMaterialTensorParams(InputParameters& params);
 
 class MaterialTensorAux : public AuxKernel
 {
@@ -36,32 +31,11 @@ public:
 
   virtual ~MaterialTensorAux() {}
 
-  static void checkMaterialTensorParams(MTA_ENUM & quantity,
-                                        const MooseEnum & quantity_moose_enum,
-                                        const int index,
-                                        const std::string & name);
-
-  static Real getTensorQuantity(const SymmTensor & tensor,
-                                const MTA_ENUM quantity,
-                                const MooseEnum & quantity_moose_enum,
-                                const int index,
-                                const Point * curr_point,
-                                const Point * p1,
-                                const Point * p2);
-
 protected:
 
-  virtual Real computeValue();
-
-  static Real principalValue( const SymmTensor & tensor, unsigned int index );
-
+  MaterialTensorCalculator _material_tensor_calculator;
   MaterialProperty<SymmTensor> & _tensor;
-  const int _index;
-  MooseEnum _quantity_moose_enum;
-  MTA_ENUM _quantity;
-
-  const Point _p1;
-  const Point _p2;
+  virtual Real computeValue();
 
 };
 
