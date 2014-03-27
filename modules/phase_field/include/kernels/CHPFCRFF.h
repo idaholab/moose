@@ -38,6 +38,10 @@ private:
   std::vector<VariableGradient *> _grad_vals;
   unsigned int _num_L;
   unsigned int _n_exp_terms;
+  Real _a;
+  Real _b;
+  Real _c;
+  
   
   
   

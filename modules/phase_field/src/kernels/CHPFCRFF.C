@@ -15,6 +15,10 @@ InputParameters validParams<CHPFCRFF>()
   params.addParam<std::string>("mob_name","M","The mobility used with the kernel");
   params.addParam<std::string>("Dmob_name","DM","The D mobility used with the kernel");
   params.addParam<bool>("has_MJac",false,"Jacobian information for the mobility is defined");
+  params.addParam<Real>("a", 1.0, "Constants on Taylor Series");
+  params.addParam<Real>("b", 1.0, "Constants on Taylor Series");
+  params.addParam<Real>("c", 1.0, "Constants on Taylor Series");
+  
 
   return params;
 }
@@ -28,7 +32,10 @@ CHPFCRFF::CHPFCRFF(const std::string & name, InputParameters parameters)
      _DM(_has_MJac ? &getMaterialProperty<Real>(_Dmob_name) : NULL),
      _log_approach(getParam<MooseEnum>("log_approach")),
      _tol(getParam<Real>("tol")),
-     _n_exp_terms(getParam<Real>("n_exp_terms"))
+     _n_exp_terms(getParam<Real>("n_exp_terms")),
+     _a(getParam<Real>("a")),
+     _b(getParam<Real>("b")),
+     _c(getParam<Real>("c"))
 {
   _num_L = coupledComponents("v"); //Determine the number of L variables
   _grad_vals.resize(_num_L); //Resize variable array
@@ -66,14 +73,25 @@ CHPFCRFF::computeQpResidual()
       frac = 1.0/(1.0 + c);
     break;
     
-  case 2: //Approach using substitution
-    ln_expansion = _u[_qp] - 0.6917*std::pow(_u[_qp],2)/double(2) + 0.0854*std::pow(_u[_qp],3)/double(3);
+  case 2:
+
+    for (unsigned int i=1; i<_n_exp_terms; ++i)
+    {
+      // Apply Coefficents to Taylor Series defined in input file
+      Real temp_coeff;
+      if (i == 1)
+        temp_coeff = _c;
+      else if (i == 2)
+        temp_coeff = _a;
+      else if (i == 3)
+        temp_coeff = _b;
+      else
+        temp_coeff = 1.0;
+        
+      ln_expansion += temp_coeff*std::pow(double(-1),int(i+1))*std::pow(_u[_qp],int(i-1));
+    }
     break;
     
-
-    // for (unsigned int i=1; i<_n_exp_terms; ++i)
-    // ln_expansion += std::pow(double(-1),int(i+1))*std::pow(_u[_qp],int(i-1))/double(i);
-    // break;
     
   }
   
@@ -133,12 +151,26 @@ CHPFCRFF::computeQpJacobian()
     }
     break;
     
-  case 2: //Approach using substitution
+  case 2:
+
     for (unsigned int i=1; i<_n_exp_terms; ++i)
-      ln_expansion += std::pow(double(-1),int(i+1))*std::pow(_u[_qp],int(i-1));
-    break;
-    
+    {
+      // Apply Coefficents to Taylor Series defined in input file
+      Real temp_coeff;
+      if (i == 1)
+        temp_coeff = _c;
+      else if (i == 2)
+        temp_coeff = _a;
+      else if (i == 3)
+        temp_coeff = _b;
+      else
+        temp_coeff = 1.0;
+        
+      ln_expansion += temp_coeff*std::pow(double(-1),int(i+1))*std::pow(_u[_qp],int(i-1));
+      break;
+    }
   }
+  
   
   RealGradient dGradDFDConsdC;
   
@@ -155,8 +187,21 @@ CHPFCRFF::computeQpJacobian()
     break;
     
   case 2: //appraoch using substitution
-    for (unsigned int i=2; i<_n_exp_terms; ++i)
-      Dln_expansion += std::pow(double(-1),int(i+1))*(i - 1.0)*std::pow(_u[_qp],int(i - 2));
+    for (unsigned int i=2; i<(_n_exp_terms+1); ++i)
+    {
+      Real temp_coeff;
+      if (i == 2)
+        temp_coeff = _c;
+      else if (i == 3)
+        temp_coeff = _a;
+      else if (i == 4)
+        temp_coeff = _b;
+      else
+        temp_coeff = 1.0;
+      
+      Dln_expansion += temp_coeff*std::pow(double(-1),int(i+1))*(i - 1.0)*std::pow(_u[_qp],int(i - 2));
+    }
+    
     dGradDFDConsdC = ln_expansion*_grad_phi[_j][_qp] + _phi[_j][_qp]*Dln_expansion*grad_c;
     break;
     

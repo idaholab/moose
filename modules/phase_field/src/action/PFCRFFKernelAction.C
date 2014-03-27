@@ -16,6 +16,9 @@ InputParameters validParams<PFCRFFKernelAction>()
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol",1.0e-9,"Tolerance used when the tolerance approach is chosen");
   params.addParam<Real>("n_exp_terms",4,"Number of terms used in the Taylor expansion of the natural log term");
+  params.addParam<Real>("a", 1.0, "Parameter in the taylor series expansion");
+  params.addParam<Real>("b", 1.0, "Parameter in the taylor series expansion");
+  params.addParam<Real>("c", 1.0, "Parameter in the taylor series expansion");
   
   return params;
 }
@@ -63,6 +66,9 @@ PFCRFFKernelAction::act()
   poly_params.set<MooseEnum>("log_approach") = getParam<MooseEnum>("log_approach");
   poly_params.set<Real>("tol") = getParam<Real>("tol");
   poly_params.set<Real>("n_exp_terms") = getParam<Real>("n_exp_terms");
+  poly_params.set<Real>("a") = getParam<Real>("a");
+  poly_params.set<Real>("b") = getParam<Real>("b");
+  poly_params.set<Real>("b") = getParam<Real>("c");
     
   _problem->addKernel("CHPFCRFF", "CH_bulk_n", poly_params);
 
