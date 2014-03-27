@@ -64,6 +64,13 @@
     input = 'console.i'
     cli_args = 'Outputs/screen/all_variable_norms=true'
     expect_out = 'Variable Residual Norms:'
-    #expect_out = 'Variable Residual Norms:\n\s*u:\s.*\n\s*v:'
   [../]
+  [./timing]
+    # Tests that the --timing enables all logs
+    type = RunApp
+    input = 'console.i'
+    cli_args = 'Outputs/screen/perf_log=false --timing'
+    expect_out = 'Moose\sTest\sPerformance:'
+  [../]
+
 []

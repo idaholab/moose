@@ -52,6 +52,12 @@ public:
   void addOutput(OutputBase * output);
 
   /**
+   * Get a complete list of all output objects
+   * @return A vector of pointers to each of the output objects
+   */
+  const std::vector<OutputBase *> & getOutputs();
+
+  /**
    * Returns true if the output object exists
    * @param name The name of the output object for which to test for existence within the warehouse
    */
