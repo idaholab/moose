@@ -402,4 +402,10 @@
     input = 'ic_bnd_for_non_nodal.i'
     expect_err = "You are trying to set a boundary restricted variable on non-nodal variable.  That is not allowed."
   [../]
+
+  [./old_integrity_check]
+    type = 'RunException'
+    input = 'old_integrity_check.i'
+    expect_err = 'You may not couple in old or older values of \S+ when using a \"Steady\" executioner.'
+  [../]
 []
