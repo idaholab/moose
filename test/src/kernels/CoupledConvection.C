@@ -5,12 +5,13 @@ InputParameters validParams<CoupledConvection>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("velocity_vector", "Velocity Vector for the Convection Kernel");
+  params.addParam<bool>("lag_coupling", false, "Tells the object to use the old velocity vector instead of the current vector");
   return params;
 }
 
 CoupledConvection::CoupledConvection(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
-  _velocity_vector(coupledGradient("velocity_vector"))
+  _velocity_vector(getParam<bool>("lag_coupling") ? coupledGradientOld("velocity_vector") : coupledGradient("velocity_vector"))
 {}
 
 Real

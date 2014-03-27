@@ -177,6 +177,8 @@ protected:
   virtual VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
 
 protected:
+  // Reference to FEProblem
+  FEProblem & _c_fe_problem;
 
   /// Coupled vars whose values we provide
   std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;
@@ -202,7 +204,6 @@ protected:
   /// This will always be zero because the default values for optionally coupled variables is always constant
   VariableSecond _default_second;
 
-
   /**
    * Extract pointer to a coupled variable
    * @param var_name Name of parameter desired
@@ -211,9 +212,14 @@ protected:
    */
   MooseVariable *getVar(const std::string & var_name, unsigned int comp);
 
+  /**
+   * Checks to make sure that the current Executioner has set "_it_transient" when old/older values
+   * are coupled in.
+   * @param name the name of the varaible
+   */
+  void validateExecutionerType(const std::string & name) const;
 
 private:
-
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;
 

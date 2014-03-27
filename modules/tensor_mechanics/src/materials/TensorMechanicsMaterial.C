@@ -32,9 +32,9 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
       _grad_disp_x(coupledGradient("disp_x")),
       _grad_disp_y(coupledGradient("disp_y")),
       _grad_disp_z(_mesh.dimension() == 3 ? coupledGradient("disp_z") : _grad_zero),
-      _grad_disp_x_old(coupledGradientOld("disp_x")),
-      _grad_disp_y_old(coupledGradientOld("disp_y")),
-      _grad_disp_z_old(_mesh.dimension() == 3 ? coupledGradientOld("disp_z") : _grad_zero),
+      _grad_disp_x_old(_fe_problem.isTransient() ? coupledGradientOld("disp_x") : _grad_zero),
+      _grad_disp_y_old(_fe_problem.isTransient() ? coupledGradientOld("disp_y") : _grad_zero),
+      _grad_disp_z_old(_fe_problem.isTransient() && _mesh.dimension() == 3 ? coupledGradientOld("disp_z") : _grad_zero),
       _stress(declareProperty<RankTwoTensor>("stress")),
       _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
       _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
@@ -80,4 +80,3 @@ void TensorMechanicsMaterial::computeStrain()
     computeQpStrain();
 
 }
-
