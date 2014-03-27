@@ -272,8 +272,9 @@ XFEM::addGeometricCut(XFEM_geometric_cut* geometric_cut)
 }
 
 void
-XFEM::addStateMarkedElem(const Elem *elem, RealVectorValue normal)
+XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue normal)
 {
+  Elem *elem = _mesh->elem(elem_id);
   std::map<const Elem*, RealVectorValue>::iterator mit;
   mit = _state_marked_elems.find(elem);
   if (mit != _state_marked_elems.end())

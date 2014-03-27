@@ -34,16 +34,17 @@ public:
 
   virtual ~XFEMMarkerUserObject() {}
 
-protected:
   virtual void initialize();
   virtual void execute();
   virtual void threadJoin(const UserObject &y);
   virtual void finalize();
 
-//  virtual Real computeValue();
+protected:
+  virtual bool doesElementCrack(RealVectorValue &direction);
 
 private:
   XFEM *_xfem;
+  std::map<unsigned int, RealVectorValue> _marked_elems;
 };
 
 template<>

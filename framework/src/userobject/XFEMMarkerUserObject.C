@@ -36,36 +36,58 @@ XFEMMarkerUserObject::XFEMMarkerUserObject(const std::string & name, InputParame
 
 void
 XFEMMarkerUserObject::initialize()
-{}
+{
+  _marked_elems.clear();
+}
 
 void
 XFEMMarkerUserObject::execute()
 {
+  RealVectorValue direction;
   bool isCTE = _xfem->is_elem_at_crack_tip(_current_elem);
-  if (isCTE)
+  if (isCTE && doesElementCrack(direction))
   {
-    RealVectorValue normal(0,1,0);
-    _xfem->addStateMarkedElem(_current_elem, normal);
+    unsigned int _current_eid = _current_elem->id();
+    std::map<unsigned int, RealVectorValue>::iterator mit;
+    mit = _marked_elems.find(_current_eid);
+    if (mit != _marked_elems.end())
+    {
+      mooseError("ERROR: element "<<_current_eid<<" already marked for crack growth.");
+    }
+    _marked_elems[_current_eid] = direction;
   }
 }
 
 void
 XFEMMarkerUserObject::threadJoin(const UserObject &y)
-{}
+{
+  const XFEMMarkerUserObject &xmuo = dynamic_cast<const XFEMMarkerUserObject &>(y);
+
+  for ( std::map<unsigned int, RealVectorValue>::const_iterator mit = xmuo._marked_elems.begin();
+        mit != xmuo._marked_elems.end();
+        ++mit )
+  {
+    _marked_elems[mit->first] = mit->second; //TODO do error checking for duplicates here too
+  }
+}
 
 void
 XFEMMarkerUserObject::finalize()
-{}
+{
+  //TODO: This doesn't compile.  My guess is that it's because of the RealVectorValue.
+  //Parallel::set_union(_marked_elems); //TODO do error checking for duplicates here too
 
-//Real
-//XFEMMarkerUserObject::computeValue()
-//{
-//  bool isCTE = _xfem->is_elem_at_crack_tip(_current_elem);
-//  Real value = 0.0;
-//  if (isCTE)
-//  {
-//    value = 1.0;
-//  }
-//
-//  return value;
-//}
+  std::map<unsigned int, RealVectorValue>::iterator mit;
+  for (mit = _marked_elems.begin(); mit != _marked_elems.end(); ++mit)
+  {
+    _xfem->addStateMarkedElem(mit->first, mit->second);
+  }
+  _marked_elems.clear();
+}
+
+bool
+XFEMMarkerUserObject::doesElementCrack(RealVectorValue &direction)
+{
+  direction(1) = 1.0;
+  return true;
+}

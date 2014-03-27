@@ -124,7 +124,7 @@ public:
 
   void addGeometricCut(XFEM_geometric_cut* geometric_cut);
 
-  void addStateMarkedElem(const Elem *elem, RealVectorValue normal);
+  void addStateMarkedElem(unsigned int elem_id, RealVectorValue normal);
 
   /**
    * Method to update the mesh due to modified cut planes
