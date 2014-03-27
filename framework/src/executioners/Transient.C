@@ -619,7 +619,7 @@ Transient::keepGoing()
   if (!keep_going && _steps_taken && !_problem.out().wasOutput() && !_app.halfTransient())
   {
     _problem.output(true);
-    if (_allow_output)
+    if (_allow_output && _app.hasLegacyOutput())
       _problem.outputPostprocessors(true);
     _problem.outputRestart(true);
   }
