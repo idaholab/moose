@@ -114,7 +114,7 @@ CrackFrontDefinition::finalize()
 }
 
 void
-CrackFrontDefinition::threadJoin(const UserObject & uo)
+CrackFrontDefinition::threadJoin(const UserObject & /*uo*/)
 {
 }
 

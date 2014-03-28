@@ -155,11 +155,11 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
 void FiniteStrainCrystalPlasticity::computeQpStress()
 {
 
-  Real gss_prev[_nss], slip_incr[_nss],tau[_nss];
+  std::vector<Real> gss_prev(_nss), slip_incr(_nss), tau(_nss);
   RankTwoTensor pk2,fp_old_inv,fp_inv,resid,dpk2,sig,rot;
   Real gmax,gdiff,rnorm;
   RankFourTensor jac;
-  Real slip_incr_max,slip_incr_tol,fac;
+  Real slip_incr_max,fac;
   int iter,iterg,maxiter,maxiterg;
 
 
@@ -185,7 +185,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 
     pk2=_pk2_old[_qp];
 
-    calc_resid_jacob(&pk2,&sig,&fp_old_inv,&fp_inv,slip_incr,tau,&resid,&jac);
+    calc_resid_jacob(&pk2,&sig,&fp_old_inv,&fp_inv,&slip_incr[0],&tau[0],&resid,&jac);
 
     slip_incr_max=0.0;
 
@@ -218,7 +218,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 
       pk2=pk2-dpk2*fac;
 
-      calc_resid_jacob(&pk2,&sig,&fp_old_inv,&fp_inv,slip_incr,tau,&resid,&jac);
+      calc_resid_jacob(&pk2,&sig,&fp_old_inv,&fp_inv,&slip_incr[0],&tau[0],&resid,&jac);
 
       slip_incr_max=0.0;
 
@@ -255,7 +255,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
     for(int i=0;i<_nss;i++)
       gss_prev[i]=_gss[_qp][i];
 
-    update_gss(slip_incr);
+    update_gss(&slip_incr[0]);
 
     gmax=0.0;
     for(int i=0;i<_nss;i++)
@@ -334,7 +334,7 @@ void
 FiniteStrainCrystalPlasticity::get_slip_sys()
 {
 
-  Real sd[3*_nss], sn[3*_nss];
+  std::vector<Real> sd(3*_nss), sn(3*_nss);
   Real vec[3];
   std::ifstream fileslipsys;
 
@@ -404,13 +404,10 @@ FiniteStrainCrystalPlasticity::get_slip_sys()
 void
 FiniteStrainCrystalPlasticity::update_gss(Real *slip_incr)
 {
-
-  Real hab;
-  Real hb[_nss];
+  std::vector<Real> hb(_nss);
   Real qab,val;
   Real *data;//Kalidindi
 
-  int nsize=_hprops.size();//Kalidindi
   data=_hprops.data();//Kalidindi
   Real a=data[4];//Kalidindi
 
@@ -464,7 +461,7 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2,RankTwoTensor
   RankTwoTensor eqv_slip_incr,pk2_new;
   std::vector<RankTwoTensor> s0(_nss),dtaudpk2(_nss),dfpinvdslip(_nss);
   RankTwoTensor temp2;
-  Real dslipdtau[_nss];
+  std::vector<Real> dslipdtau(_nss);
   RankFourTensor dfedfpinv,deedfe,dfpinvdpk2,idenFour;
   RankFourTensor temp4;
 
@@ -495,7 +492,7 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2,RankTwoTensor
   }
 
 
-  get_slip_incr(tau,slip_incr,dslipdtau);//Calculate dslip,dslipdtau
+  get_slip_incr(tau,slip_incr,&dslipdtau[0]);//Calculate dslip,dslipdtau
 
   eqv_slip_incr.zero();
   for (int i=0;i<_nss;i++)
@@ -660,7 +657,7 @@ FiniteStrainCrystalPlasticity::get_euler_ang()
         for(int i=0;i<3;i++)
           fileeuler >> vec[i];
 
-        if(elemno-1==_current_elem->id())
+        if (static_cast<dof_id_type>(elemno-1) == _current_elem->id())
         {
           _euler_angle_1=vec[0];
           _euler_angle_2=vec[1];

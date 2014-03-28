@@ -32,11 +32,11 @@ WaterSteamEOSApp::registerApps()
 }
 
 void
-WaterSteamEOSApp::registerObjects(Factory & factory)
+WaterSteamEOSApp::registerObjects(Factory & /*factory*/)
 {
 }
 
 void
-WaterSteamEOSApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+WaterSteamEOSApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }

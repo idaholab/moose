@@ -52,6 +52,6 @@ LinearElasticityApp::registerObjects(Factory & factory)
 }
 
 void
-LinearElasticityApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+LinearElasticityApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }
