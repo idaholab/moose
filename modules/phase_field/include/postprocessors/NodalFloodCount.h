@@ -107,12 +107,6 @@ protected:
   void mergeSets();
 
   /**
-   * This routine returns whether or not a nodal value is valid on a particular processor
-   * (i.e. includes values owned by this processor and ghost nodes)
-   */
-  bool isNodeValueValid(unsigned int node_id) const;
-
-  /**
    * This routine adds the periodic node information to our data structure prior to packing the data
    * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
    */
