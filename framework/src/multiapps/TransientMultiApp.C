@@ -341,7 +341,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time)
 
             if (ex->lastSolveConverged())
             {
-              if (ex->getTime() + app_time_offset + 2e-14 >= target_time)
+              if (ex->getTime() + app_time_offset + ex->timestepTol()*std::abs(ex->getTime()) >= target_time)
               {
                 ex->forceOutput(); // This is here so that it is called before endStep() // \todo{Remove}
                 output_warehouse.forceOutput();
