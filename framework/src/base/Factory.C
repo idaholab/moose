@@ -59,7 +59,7 @@ time_t Factory::parseTime(const std::string t_str)
 {
   // The string must be a certain length to be valid
   if (t_str.size() != 16)
-    mooseError("The deprected time not formatted correctly; it must be given as mm/dd/yyyy HH:MM");
+    mooseError("The deprecated time not formatted correctly; it must be given as mm/dd/yyyy HH:MM");
 
   // Store the time, the time must be specified as: mm/dd/yyyy HH:MM
   time_t t_end;

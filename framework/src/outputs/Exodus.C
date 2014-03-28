@@ -76,7 +76,7 @@ Exodus::outputSetup()
     // Set the recovering flag to false so that this special case is not triggered again
     _recovering = false;
 
-    // Set the append flag to true b/c on revover the file is being appended
+    // Set the append flag to true b/c on recover the file is being appended
     _exodus_io_ptr->append(true);
   }
   else
