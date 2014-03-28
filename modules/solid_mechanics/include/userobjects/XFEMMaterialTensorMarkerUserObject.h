@@ -19,6 +19,7 @@ protected:
   MaterialTensorCalculator _material_tensor_calculator;
   MaterialProperty<SymmTensor> & _tensor;
   Real _threshold;
+  bool _average;
 
   virtual bool doesElementCrack(RealVectorValue &direction);
 };
