@@ -72,6 +72,6 @@ MiscApp::registerObjects(Factory & factory)
 }
 
 void
-MiscApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }

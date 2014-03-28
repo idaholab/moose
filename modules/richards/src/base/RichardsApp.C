@@ -192,6 +192,6 @@ RichardsApp::registerObjects(Factory & factory)
 }
 
 void
-RichardsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+RichardsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }
