@@ -262,8 +262,8 @@ MaterialTensorCalculator::principalValue( const SymmTensor & tensor, unsigned in
   tensor.columnMajorMatrix().eigen(eval, evec);
   // Eigen computes low to high.  We want high first.
   int i = -index + 2;
-  direction(0) = evec(i,0);
-  direction(1) = evec(i,1);
-  direction(2) = evec(i,2);
+  direction(0) = evec(0,i);
+  direction(1) = evec(1,i);
+  direction(2) = evec(2,i);
   return eval(i);
 }
