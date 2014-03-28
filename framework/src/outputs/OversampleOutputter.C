@@ -48,7 +48,7 @@ OversampleOutputter::OversampleOutputter(const std::string & name, InputParamete
     _position(_change_position ? getParam<Point>("position") : Point())
 {
   // Call the initialization method
-  init();
+  initOversample();
 
   // Append the '_oversample' to the file base, if desired and oversampling is being used
   if (_oversample && isParamValid("append_oversample") && getParam<bool>("append_oversample"))
@@ -133,7 +133,7 @@ OversampleOutputter::outputFinal()
 }
 
 void
-OversampleOutputter::init()
+OversampleOutputter::initOversample()
 {
   // Perform the mesh cloning, if needed
   if (_change_position || _oversample)

@@ -105,7 +105,7 @@ private:
    * upon. This function is called by the creating action (addOutputAction) and should not be called
    * by the user as it will create a memory leak if called multiple times.
    */
-  void init();
+  void initOversample();
 
   /**
    * Clone mesh in preperation for re-positioning or oversampling.

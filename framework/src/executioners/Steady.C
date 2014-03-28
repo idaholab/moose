@@ -65,8 +65,8 @@ Steady::init()
   }
 
   checkIntegrity();
-
   _problem.initialSetup();
+
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
 
   // Write the output
