@@ -539,8 +539,5 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         self.input_file_widget.mesh_render_widget.highlightBoundary(current.table_data['master']+' '+current.table_data['slave'])
     elif 'block' in current.table_data:
       self.input_file_widget.mesh_render_widget.highlightBlock(current.table_data['block'])
-    elif previous and ('boundary' in previous.table_data or 'block' in previous.table_data or ('master' in previous.table_data and 'slave' in previous.table_data)):
+    elif previous and hasattr(previous, 'table_data') and ('boundary' in previous.table_data or 'block' in previous.table_data or ('master' in previous.table_data and 'slave' in previous.table_data)):
       self.input_file_widget.mesh_render_widget.clearHighlight()
-#    except:
-#      pass
-
