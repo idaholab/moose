@@ -140,8 +140,11 @@ MooseApp::setupOptions()
   if (isParamValid("half_transient"))
     _half_transient = true;
 
+  // Set the timing parameter (see src/outputs/Console.C)
   if (isParamValid("timing"))
     _pars.set<bool>("timing") = true;
+  else
+    _pars.set<bool>("timing") = false;
 
   if (isParamValid("trap_fpe"))
     // Seting Global Variable

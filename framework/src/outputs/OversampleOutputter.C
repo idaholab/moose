@@ -28,7 +28,7 @@ InputParameters validParams<OversampleOutputter>()
 
   params.addParam<bool>("oversample", false, "Set to true to enable oversampling");
   params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling");
-  params.addParam<Point>("position", "Set a positional offset, this vector will get added to the nodal cooardinates to move the domain.");
+  params.addParam<Point>("position", "Set a positional offset, this vector will get added to the nodal coordinates to move the domain.");
   params.addParam<bool>("append_oversample", false, "Append '_oversample' to the output file base");
   params.addParam<MeshFileName>("file", "The name of the mesh file to read, for oversampling");
 
@@ -57,7 +57,7 @@ OversampleOutputter::OversampleOutputter(const std::string & name, InputParamete
 
 OversampleOutputter::~OversampleOutputter()
 {
-  // When the Oversamle::initOversample() is called it creates new objects for the _mesh_ptr and _es_ptr
+  // When the Oversample::initOversample() is called it creates new objects for the _mesh_ptr and _es_ptr
   // that contain the refined mesh and variables. Also, the _mesh_functions vector and _serialized_solution
   // pointer are populated. In this case, it is the responsibility of the output object to clean these things
   // up. If oversampling is not being used then you must not delete the _mesh_ptr and _es_ptr because
