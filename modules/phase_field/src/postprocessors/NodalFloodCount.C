@@ -512,22 +512,10 @@ NodalFloodCount::flood(const Node *node, int current_idx, unsigned int live_regi
   // Flood neighboring nodes that are also above this threshold with recursion
   for (unsigned int i=0; i<neighbors.size(); ++i)
   {
-    // Only recurse on nodes this processor owns
-    if (isNodeValueValid(neighbors[i]->id()))
-    {
+    // Only recurse on nodes this processor can see
+    if (_mesh.isSemiLocal(const_cast<Node *>(neighbors[i])))
       flood(neighbors[i], current_idx, _bubble_maps[map_num][node_id]);
-    }
   }
-}
-
-bool
-NodalFloodCount::isNodeValueValid(unsigned int node_id) const
-{
-  for (unsigned int j=0; j < _nodes_to_elem_map[node_id].size(); ++j)
-    if (_nodes_to_elem_map[node_id][j]->processor_id() == libMesh::processor_id())
-      return true;
-
-  return false;
 }
 
 unsigned int
