@@ -81,6 +81,6 @@ FluidMassEnergyBalanceApp::registerObjects(Factory & factory)
 }
 
 void
-FluidMassEnergyBalanceApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+FluidMassEnergyBalanceApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }

@@ -176,6 +176,6 @@ NavierStokesApp::registerObjects(Factory & factory)
 }
 
 void
-NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+NavierStokesApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }

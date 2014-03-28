@@ -92,12 +92,11 @@ FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTenso
   RankTwoTensor resid,ddsig;
   RankFourTensor dr_dsig,dr_dsig_inv;
   Real /*sig_eqv,*/flow_incr,f,dflow_incr;
-  Real err1,err2,err3,tol1,tol2,tol3;
+  Real err1,err2,err3;
   unsigned int plastic_flag;
-  unsigned int iterisohard,iter,maxiterisohard=20,maxiter=100;
-  Real flow_incr_tmp;
+  unsigned int iter,maxiter=100;
   Real eqvpstrain,eqvpstrain_old,deqvpstrain,fq,rep;
-  Real yield_stress,yield_stress_prev;
+  Real yield_stress;
 
 
   sig_new=sig_old+E_ijkl*delta_d;
@@ -376,7 +375,6 @@ FiniteStrainPlasticMaterial::getdYieldStressdPlasticStrain(Real eqpe)
   }
 
   int ind=0;
-  Real tol=1e-8;
 
 
 
