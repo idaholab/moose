@@ -249,18 +249,18 @@ Console::timestepSetup()
 
     // Write time step and time information
     oss << std::endl <<  "Time Step " << std::setw(n) << _t_step
-      << ", time = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _time
+      << ", time = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _time
       << std::endl;
     // Show old time information, if desired
     if (_verbose)
-      oss << std::setw(n) << "          old time = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _time_old << std::endl;
+      oss << std::setw(n) << "          old time = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _time_old << std::endl;
 
     // Show the time delta information
-    oss << std::setw(2) << "                dt = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _dt << std::endl;
+    oss << std::setw(2) << "                dt = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _dt << std::endl;
 
     // Show the old time delta information, if desired
     if (_verbose)
-      oss << std::setw(2) << "            old dt = " << std::setw(9) << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << _dt_old << std::endl;
+      oss << std::setw(2) << "            old dt = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _dt_old << std::endl;
   }
 
   // Output to the screen
