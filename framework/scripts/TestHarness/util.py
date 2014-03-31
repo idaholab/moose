@@ -62,7 +62,7 @@ def printResult(test_name, result, timing, start, end, options, color=True):
     # Color leading paths
     m = re.search(r'(.*):(.*)', test_name)
     if m:
-      test_name = colorText(m.group(1), options, 'YELLOW') + ':' + m.group(2)
+      test_name = colorText(m.group(1), options, 'CYAN') + ':' + m.group(2)
     # Color the Caveats CYAN
     m = re.search(r'(\[.*?\])', result)
     if m:
