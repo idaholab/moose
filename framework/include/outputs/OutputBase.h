@@ -339,6 +339,12 @@ protected:
 private:
 
   /**
+   * Initialization method.
+   * This populates the various data structures needed to control the output
+   */
+  void init();
+
+  /**
    * Performs initial output (if desired)
    *
    * If the output_initial input options is true calling this method will call the output() method, it
@@ -452,6 +458,9 @@ private:
   /* Note, this is needed by recovery system to guarantee that outputStep was called. Normal runs rely on _num == 0, but when
      recovering _num will likely be non-zero */
   bool _output_setup_called;
+
+  /// True if init() has been called
+  bool _initialized;
 
   // Allow complete access
   friend class OutputWarehouse;

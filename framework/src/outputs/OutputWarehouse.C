@@ -42,8 +42,17 @@ OutputWarehouse::~OutputWarehouse()
 void
 OutputWarehouse::initialSetup()
 {
+  libMesh::print_trace();
   for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->initialSetup();
+}
+
+
+void
+OutputWarehouse::init()
+{
+  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+    (*it)->init();
 }
 
 void
@@ -59,7 +68,6 @@ OutputWarehouse::timestepSetup()
 void
 OutputWarehouse::addOutput(OutputBase * output)
 {
-
   // Add the object to the warehouse storage, Checkpoint placed at end so they are called last
   Checkpoint * cp = dynamic_cast<Checkpoint *>(output);
   if (cp != NULL)

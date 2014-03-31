@@ -39,7 +39,7 @@ InputParameters validParams<Exodus>()
 Exodus::Exodus(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
     _exodus_io_ptr(NULL),
-    _initialized(false),
+    _exodus_initialized(false),
     _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
     _recovering(_app.isRecovering())
 {
@@ -108,14 +108,14 @@ Exodus::outputNodalVariables()
   _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
 
   // This satisfies the initialization of the ExodusII_IO object
-  _initialized = true;
+  _exodus_initialized = true;
 }
 
 void
 Exodus::outputElementalVariables()
 {
   // Make sure the the file is ready for writing of elemental data
-  if (!_initialized)
+  if (!_exodus_initialized)
     outputEmptyTimestep();
 
   std::vector<std::string> v = getElementalVariableOutput();
@@ -200,7 +200,7 @@ Exodus::output()
   // Write the global variables (populated by the output methods)
   if (!_global_values.empty())
   {
-    if (!_initialized)
+    if (!_exodus_initialized)
       outputEmptyTimestep();
     _exodus_io_ptr->write_global_data(_global_values, _global_names);
   }
@@ -235,5 +235,5 @@ Exodus::outputEmptyTimestep()
   // Write a timestep with no variables
   _exodus_io_ptr->set_output_variables(std::vector<std::string>());
   _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
-  _initialized = true;
+  _exodus_initialized = true;
 }
