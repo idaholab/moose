@@ -38,6 +38,13 @@
     rel_err = 1E-5
   [../]
 
+  [./bh07_aux]
+    type = 'Exodiff'
+    input = 'bh07_aux.i'
+    exodiff = 'bh07_aux.e'
+    rel_err = 1E-5
+  [../]
+
   [./test_bh27]
     type = 'Exodiff'
     input = 'bh27.i'

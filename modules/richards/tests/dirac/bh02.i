@@ -96,7 +96,7 @@
     SumQuantityUO = borehole_total_outflow_mass
     variable = pressure
     unit_weight = '0 0 0'
-    character = 1
+    character = one
     mesh_adaptivity = false
     MyNameIsAndyWilkins = false
   [../]
@@ -139,8 +139,6 @@
 
 
 [Functions]
- active = 'mass_bal_fcn initial_pressure'
-
   [./initial_pressure]
     type = ParsedFunction
     value = 1E7
@@ -151,6 +149,11 @@
     value = abs((a-c+d)/2/(a+c))
     vars = 'a c d'
     vals = 'fluid_mass1 fluid_mass0 bh_report'
+  [../]
+
+  [./one]
+    type = ConstantFunction
+    value = 1
   [../]
 []
 
