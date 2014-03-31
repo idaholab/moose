@@ -151,7 +151,7 @@
     variable = pwater
     unit_weight = '0 0 0'
     re_constant = 0.1594
-    character = 2 # this is to make the length=1 borehole fill the entire z=2 height
+    character = two # this is to make the length=1 borehole fill the entire z=2 height
     MyNameIsAndyWilkins = false
   [../]
 []
@@ -178,6 +178,10 @@
   [./initial_pressure]
     type = ParsedFunction
     value = 1E7
+  [../]
+  [./two]
+    type = ConstantFunction
+    value = 2
   [../]
 []
 

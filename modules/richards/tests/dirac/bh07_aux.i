@@ -1,17 +1,6 @@
-# fully-saturated
-# injection
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 1
-  ny = 1
-  nz = 1
-  xmin = -1
-  xmax = 1
-  ymin = -1
-  ymax = 1
-  zmin = -1
-  zmax = 1
+  type = FileMesh
+  file = bh07_input.e
 []
 
 [GlobalParams]
@@ -70,8 +59,27 @@
   [../]
 []
 
+[BCs]
+  [./fix_outer]
+    type = DirichletBC
+    boundary = perimeter
+    variable = pressure
+    value = 1E7
+  [../]
+[]
+
 [AuxVariables]
   [./Seff1VG_Aux]
+  [../]
+  [./dseff]
+  [../]
+  [./relperm]
+  [../]
+  [./drelperm]
+  [../]
+  [./density]
+  [../]
+  [./ddensity]
   [../]
 []
 
@@ -91,14 +99,20 @@
 [DiracKernels]
   [./bh]
     type = RichardsBorehole
-    bottom_pressure = 1E7
-    point_file = bh03.bh
+    bottom_pressure = 0
+    point_file = bh07.bh
     SumQuantityUO = borehole_total_outflow_mass
     variable = pressure
     unit_weight = '0 0 0'
-    character = neg_one
+    re_constant = 0.1594
+    character = two # this is to make the length=1 borehole fill the entire z=2 height
     mesh_adaptivity = false
     MyNameIsAndyWilkins = false
+    dseff_var = dseff
+    relperm_var = relperm
+    drelperm_var = drelperm
+    density_var = density
+    ddensity_var = ddensity
   [../]
 []
 
@@ -109,31 +123,9 @@
     uo = borehole_total_outflow_mass
   [../]
 
-  [./fluid_mass0]
+  [./fluid_mass]
     type = RichardsMass
     variable = pressure
-    execute_on = timestep_begin
-    #output = file
-  [../]
-
-  [./fluid_mass1]
-    type = RichardsMass
-    variable = pressure
-    execute_on = timestep
-    #output = file
-  [../]
-
-  [./zmass_error]
-    type = PlotFunction
-    function = mass_bal_fcn
-    execute_on = timestep
-  [../]
-
-  [./p0]
-    type = PointValue
-    variable = pressure
-    point = '1 1 1'
-    execute_on = timestep
   [../]
 []
 
@@ -141,19 +133,11 @@
 [Functions]
   [./initial_pressure]
     type = ParsedFunction
-    value = 0
+    value = 1E7
   [../]
-
-  [./mass_bal_fcn]
-    type = ParsedFunction
-    value = abs((a-c+d)/2/(a+c))
-    vars = 'a c d'
-    vals = 'fluid_mass1 fluid_mass0 bh_report'
-  [../]
-
-  [./neg_one]
+  [./two]
     type = ConstantFunction
-    value = -1
+    value = 2
   [../]
 []
 
@@ -161,10 +145,10 @@
 [Materials]
   [./all]
     type = RichardsMaterial
-    block = 0
+    block = 1
     viscosity = 1E-3
     mat_porosity = 0.1
-    mat_permeability = '1E-12 0 0  0 1E-12 0  0 0 1E-12'
+    mat_permeability = '1E-11 0 0  0 1E-11 0  0 0 1E-11'
     density_UO = DensityConstBulk
     relperm_UO = RelPermPower
     sat_UO = Saturation
@@ -182,6 +166,37 @@
     seff_UO = Seff1VG
     pressure_vars = pressure
   [../]
+  [./dSeff1VGwater_AuxK]
+    type = RichardsSeffPrimeAux
+    variable = dseff
+    seff_UO = Seff1VG
+    pressure_vars = pressure
+    wrtnum = 0
+  [../]
+  [./relperm_AuxK]
+    type = RichardsRelPermAux
+    variable = relperm
+    relperm_UO = RelPermPower
+    seff_var = Seff1VG_Aux
+  [../]
+  [./drelperm_AuxK]
+    type = RichardsRelPermPrimeAux
+    variable = drelperm
+    relperm_UO = RelPermPower
+    seff_var = Seff1VG_Aux
+  [../]
+  [./density_AuxK]
+    type = RichardsDensityAux
+    density_UO = DensityConstBulk
+    variable = density
+    pressure_var = pressure
+  [../]
+  [./ddensity_AuxK]
+    type = RichardsDensityPrimeAux
+    density_UO = DensityConstBulk
+    variable = ddensity
+    pressure_var = pressure
+  [../]
 []
 
 
@@ -198,20 +213,27 @@
 
 [Executioner]
   type = Transient
-  end_time = 0.5
-  dt = 1E-2
+  end_time = 1000
   solve_type = NEWTON
+
+  [./TimeStepper]
+    # get only marginally better results for smaller time steps
+    type = FunctionDT
+    time_dt = '1000 10000'
+    time_t = '100 1000'
+  [../]
 
 []
 
 [Outputs]
-  file_base = bh03
+  file_base = bh07_aux
   output_initial = true
-  exodus = false
+  output_final = true
+  interval = 10000
+  exodus = true
+  hide = 'dseff relperm drelperm density ddensity'
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
   [../]
-  csv = true
 []
