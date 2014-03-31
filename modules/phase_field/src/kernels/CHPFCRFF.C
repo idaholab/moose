@@ -167,8 +167,8 @@ CHPFCRFF::computeQpJacobian()
         temp_coeff = 1.0;
         
       ln_expansion += temp_coeff*std::pow(double(-1),int(i+1))*std::pow(_u[_qp],int(i-1));
-      break;
     }
+    break;
   }
   
   

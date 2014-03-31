@@ -87,9 +87,9 @@ PFCFreezingIC::value(const Point & p)
   {
       for (unsigned int i=0; i<_icdim; i++) 
       {
-          val += std::cos((1.0/_lc*p(i))*libMesh::pi);
+          val += std::cos((2.0/_lc*p(i))*libMesh::pi);
       }
-      val /= 3;
+      val /= _icdim;
       val = std::pow(val,2);
   }
   Real amp = _inside - _outside;
