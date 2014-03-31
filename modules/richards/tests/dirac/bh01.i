@@ -96,7 +96,7 @@
     SumQuantityUO = borehole_total_outflow_mass
     variable = pressure
     unit_weight = '0 0 0'
-    character = 0
+    character = zero
     MyNameIsAndyWilkins = true
   [../]
 []
@@ -111,9 +111,12 @@
 
 
 [Functions]
- active = 'initial_pressure'
   [./initial_pressure]
     type = ParsedFunction
+    value = 0
+  [../]
+  [./zero]
+    type = ConstantFunction
     value = 0
   [../]
 []
