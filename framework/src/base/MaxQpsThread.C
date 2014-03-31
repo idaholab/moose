@@ -48,7 +48,7 @@ MaxQpsThread::operator() (const ConstElemRange & range)
 
     assembly.reinit(elem);
 
-    unsigned int qps = 4; // assembly.qPoints().size();
+    unsigned int qps = assembly.qPoints().size();
 
     if (qps > _max)
       _max = qps;
