@@ -99,7 +99,7 @@ public:
    * These methods add an option parameter and a documentation string to the InputParameters object.
    * The first version of this function takes a default value which is used if the parameter
    * is not found in the input file.  The second method will leave the parameter uninitialized
-   * but can be checked with "isValid" before use
+   * but can be checked with "isParamValid" before use
    */
   template <typename T>
   void addParam(const std::string &name, const T & value, const std::string &doc_string);
