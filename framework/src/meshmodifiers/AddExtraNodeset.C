@@ -77,6 +77,8 @@ AddExtraNodeset::modify()
       p(j) = coord[i*dim+j];
 
     const Elem* elem = _mesh_ptr->getMesh().point_locator() (p);
+    if (!elem)
+      mooseError("Unable to locate the following point within the domain, please check its coordinates:\n" << p);
 
     bool on_node = false;
     for (unsigned int j=0; j<elem->n_nodes(); j++)
