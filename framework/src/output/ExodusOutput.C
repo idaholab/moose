@@ -144,7 +144,6 @@ ExodusOutput::outputPps(const std::string & /*file_base*/, const FormattedTable 
     global_var_names.push_back( (*ii).first );
     global_vars.push_back( (*ii).second );
   }
-
   _out->write_global_data( global_vars, global_var_names );
 }
 

@@ -62,4 +62,3 @@
     show_perf_log_early = true
  [../]
 []
-b

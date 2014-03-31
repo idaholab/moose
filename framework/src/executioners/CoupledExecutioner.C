@@ -169,6 +169,7 @@ CoupledExecutioner::build()
     _awhs[i]->mooseApp().setOutputWarehouse(_owhs[i]);
 
     _awhs[i]->executeAllActions();
+    _owhs[i]->init();
     _executioners[i] = _awhs[i]->executioner();
     _fe_problems[i] = _awhs[i]->problem();
   }
@@ -209,7 +210,7 @@ CoupledExecutioner::projectVariables(FEProblem & fep)
     std::set<unsigned int> dest_var_indices;
     dest_sys.system().local_dof_indices(dest_vn, dest_var_indices);
 
-    // NOTE: this is not very robust code. It relies on the smae node numbering and that inserting values in the set in the same order will result
+    // NOTE: this is not very robust code. It relies on the same node numbering and that inserting values in the set in the same order will result
     // in a std::set with the same ordering, i.e. items in src_var_indices and dest_var_indices correspond to each other.
 
     // copy the values from src solution vector to dest solution vector

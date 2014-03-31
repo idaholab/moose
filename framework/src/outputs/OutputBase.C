@@ -23,6 +23,7 @@
 #include "Postprocessor.h"
 #include "Restartable.h"
 #include "FileMesh.h"
+#include "CoupledExecutioner.h"
 
 template<>
 InputParameters validParams<OutputBase>()
@@ -117,8 +118,19 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
     _allow_output(true),
     _force_output(false),
     _output_failed(false),
-    _output_setup_called(false)
+    _output_setup_called(false),
+    _initialized(false)
 {
+}
+
+void
+OutputBase::init()
+{
+  // Do not initialize more than once
+  /* This check is needed for YAK which calls Executioners from within Executioners */
+  if (_initialized)
+    return;
+
   // If recovering disable output of initial condition to avoid duplicate files
   if (_app.isRecovering())
     _output_initial = false;
@@ -175,6 +187,9 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
 
   if (isParamValid("output_postprocessors") ? !getParam<bool>("output_postprocessors") : true)
     _postprocessor.output.clear();
+
+  // Set the initialization flag
+  _initialized = true;
 }
 
 OutputBase::~OutputBase()
@@ -255,7 +270,7 @@ OutputBase::outputStep()
   if (!_force_output && !_allow_output)
     return;
 
-  // Only continue if output is not forced and the output is on an inveval
+  // Only continue if output is not forced and the output is on an interval
   if (!_force_output && !checkInterval())
     return;
 

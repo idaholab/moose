@@ -109,7 +109,7 @@ protected:
    * methods to check that the ExodusII file is in the proper state prior to writing data.
    * @see outputEmptyTimestep()
    */
-  bool _initialized;
+  bool _exodus_initialized;
 
 private:
 

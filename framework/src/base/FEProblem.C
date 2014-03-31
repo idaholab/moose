@@ -564,7 +564,8 @@ void FEProblem::initialSetup()
   for(unsigned int tid = 0; tid < n_threads; tid++)
     reinitScalars(tid);
 
-  // Init function and Initial setup of output objects;
+  // Init function and initial setup of output objects;
+  _app.getOutputWarehouse().init();
   _app.getOutputWarehouse().initialSetup();
 }
 
@@ -600,7 +601,6 @@ void FEProblem::timestepSetup()
   _out.timestepSetup();
   if (_out_problem)
     _out_problem->timestepSetup();
-
 
   // Timestep setup of output objects
   _app.getOutputWarehouse().timestepSetup();
@@ -2468,7 +2468,6 @@ FEProblem::reinitBecauseOfGhosting()
 void
 FEProblem::outputPostprocessors(bool force/* = false*/)
 {
-
   ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
   for (unsigned int i = 0; i < LENGTHOF(types); i++)
     addPPSValuesToTable(types[i]);
@@ -2936,7 +2935,6 @@ FEProblem::init()
   init2();
 
   _out.init();
-
   _initialized = true;
 }
 

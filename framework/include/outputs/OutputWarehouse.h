@@ -138,6 +138,8 @@ private:
    */
   void addOutputFilename(OutFileBase filename);
 
+  void init();
+
   /**
    * Calls the initialSetup function for each of the output objects
    * @see FEProblem::initialSetup()
@@ -174,6 +176,7 @@ private:
   // Allow complete access to
   friend class FEProblem;
   friend class TransientMultiApp;
+  friend class CoupledExecutioner;
 };
 
 #endif // OUTPUTWAREHOUSE_H
