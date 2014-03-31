@@ -13,7 +13,7 @@ def findDepApps(dep_names):
   apps = ['framework', 'moose', 'test', 'unit', 'modules']
 
   # First see if we are in a git repo
-  p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=None, shell=True)
+  p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   p.wait()
   if p.returncode == 0:
     git_dir = p.communicate()[0]
