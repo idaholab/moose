@@ -298,7 +298,7 @@ Parser::checkOverriddenParams(bool error_on_warn)
     if (error_on_warn)
       mooseError(oss.str());
     else
-      Moose::out << oss.str();
+      Moose::out << oss.str() << std::flush;
   }
 }
 

@@ -55,28 +55,12 @@ ComputeElemAuxVarsThread::subdomainChanged()
       aux_it++)
     (*aux_it)->subdomainSetup();
 
-  // global setup
-  for(std::vector<AuxKernel *>::const_iterator aux_it=_auxs[_tid].activeElementKernels().begin();
-      aux_it != _auxs[_tid].activeElementKernels().end();
-      aux_it++)
-    (*aux_it)->subdomainSetup();
-
   std::set<MooseVariable *> needed_moose_vars;
 
-  // block
   for(std::vector<AuxKernel*>::const_iterator block_element_aux_it = _auxs[_tid].activeBlockElementKernels(_subdomain).begin();
       block_element_aux_it != _auxs[_tid].activeBlockElementKernels(_subdomain).end(); ++block_element_aux_it)
   {
     const std::set<MooseVariable *> & mv_deps = (*block_element_aux_it)->getMooseVariableDependencies();
-    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-  }
-
-  // global
-  for(std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeElementKernels().begin();
-      aux_it!=_auxs[_tid].activeElementKernels().end();
-      aux_it++)
-  {
-    const std::set<MooseVariable *> & mv_deps = (*aux_it)->getMooseVariableDependencies();
     needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
   }
 
@@ -88,22 +72,15 @@ ComputeElemAuxVarsThread::subdomainChanged()
 void
 ComputeElemAuxVarsThread::onElement(const Elem * elem)
 {
-  if (_auxs[_tid].activeBlockElementKernels(_subdomain).size() > 0 || _auxs[_tid].activeElementKernels().size() > 0)
+  if (! _auxs[_tid].activeBlockElementKernels(_subdomain).empty())
   {
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
     _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-    // block
     for(std::vector<AuxKernel*>::const_iterator block_element_aux_it = _auxs[_tid].activeBlockElementKernels(_subdomain).begin();
         block_element_aux_it != _auxs[_tid].activeBlockElementKernels(_subdomain).end(); ++block_element_aux_it)
       (*block_element_aux_it)->compute();
-
-    // global
-    for(std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeElementKernels().begin();
-        aux_it!=_auxs[_tid].activeElementKernels().end();
-        aux_it++)
-      (*aux_it)->compute();
 
     _fe_problem.swapBackMaterials(_tid);
 
