@@ -40,5 +40,5 @@ PFCElementEnergyIntegral::computeQpIntegral()
 {
   Real kb = 1.3806488e-23;  // A^2 kg s^-2 K^-1
   Real p0 = 0.0801; // A^-3
-  return _u[_qp]*(kb*_temp);
+  return _u[_qp]; //*(kb*_temp);
 }
