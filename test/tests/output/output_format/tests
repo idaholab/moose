@@ -33,7 +33,7 @@
   [./tecplot_out_test]
     type = 'CheckFiles'
     input = 'output_test_tecplot.i'
-    check_files = 'out_0000.plt'
+    check_files = 'out_0000.dat'
   [../]
 
   [./dump_test]

@@ -35,7 +35,7 @@ InputParameters validParams<Tecplot>()
   params.suppressParameter<bool>("sequence");
 
   // Add binary toggle
-  params.addParam<bool>("binary", false, "Set VTK files to output in binary format");
+  params.addParam<bool>("binary", false, "Set Tecplot files to output in binary format");
   params.addParamNamesToGroup("binary", "Advanced");
 
   // Add description for the Tecplot class
@@ -99,5 +99,11 @@ Tecplot::filename()
          << std::setfill('0')
          << std::right
          << _file_num;
-  return output.str() + ".plt";
+
+  // .plt extension is for binary files
+  // .dat extension is for ASCII files
+  if (_binary)
+    return output.str() + ".plt";
+  else
+    return output.str() + ".dat";
 }
