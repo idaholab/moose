@@ -42,7 +42,6 @@ OutputWarehouse::~OutputWarehouse()
 void
 OutputWarehouse::initialSetup()
 {
-  libMesh::print_trace();
   for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->initialSetup();
 }
@@ -137,7 +136,6 @@ OutputWarehouse::outputFailedStep()
   for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->outputFailedStep();
 }
-
 
 void
 OutputWarehouse::outputStep()
