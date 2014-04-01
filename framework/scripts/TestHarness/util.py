@@ -36,6 +36,14 @@ LIBMESH_OPTIONS = {
       'TRUE'  : '1',
       'FALSE' : '0'
       }
+                     },
+  'tecplot' :      { 're_option' : r'#define\s+LIBMESH_HAVE_TECPLOT_API\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   :
+                       {
+      'TRUE'  : '1',
+      'FALSE' : '0'
+      }
                      }
   }
 

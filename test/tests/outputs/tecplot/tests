@@ -1,9 +1,17 @@
 [Tests]
   [./test]
-    # Tests the for existence of tecplot files
+    # Tests the for existence of ASCII tecplot files
     type = 'CheckFiles'
     input = 'tecplot.i'
-    check_files = 'tecplot_out_0000.plt tecplot_out_0001.plt'
+    check_files = 'tecplot_out_0000.dat tecplot_out_0001.dat'
   [../]
 
+  [./test_binary]
+    # Tests the for existence of binary tecplot files.  This requires libmesh
+    # to be configured with --enable-tecplot or --enable-tecio.
+    type = 'CheckFiles'
+    input = 'tecplot_binary.i'
+    check_files = 'tecplot_binary_out_0000.plt tecplot_binary_out_0001.plt'
+    tecplot = true
+  [../]
 []
