@@ -97,13 +97,13 @@ protected:
   virtual void outputPostprocessors();
 
   /**
-   * A helper function for outputing norms in color
+   * A helper function for outputting norms in color
    * @param old_norm The old residual norm to compare against
    * @param norm The current residual norm
    */
   std::string outputNorm(Real old_norm, Real norm);
 
-  /** Helper function function for stringstream formating
+  /** Helper function function for stringstream formatting
    * @see outputSimulationInformation()
    */
   void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr);
@@ -130,10 +130,13 @@ protected:
   /// Toggle for controlling the use of color output
   bool _use_color;
 
-  /// Flag for controlling outputing console information to a file
+  /// Toggle for outputting time in time and dt in scientific notation
+  bool _scientific_time;
+
+  /// Flag for controlling outputting console information to a file
   bool _write_file;
 
-  /// Flag for controlling outputing console information to screen
+  /// Flag for controlling outputting console information to screen
   bool _write_screen;
 
   /// Flag for writing detailed time step information
