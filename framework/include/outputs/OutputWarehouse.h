@@ -128,6 +128,8 @@ public:
    */
   std::set<Real> & getSyncTimes();
 
+  void init();
+
 private:
 
   /**
@@ -137,8 +139,6 @@ private:
    * @param filename Name of an output file (extracted from filename() method of the objects)
    */
   void addOutputFilename(OutFileBase filename);
-
-  void init();
 
   /**
    * Calls the initialSetup function for each of the output objects
@@ -176,7 +176,6 @@ private:
   // Allow complete access to
   friend class FEProblem;
   friend class TransientMultiApp;
-  friend class CoupledExecutioner;
 };
 
 #endif // OUTPUTWAREHOUSE_H
