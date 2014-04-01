@@ -138,7 +138,6 @@ MultiDContactConstraint::updateContactSet()
     if (pinfo->_distance > 0 && hpit == has_penetrated.end())// && !unlocked_this_step[slave_node_num])
     {
 //      Moose::err<<std::endl<<"Locking node "<<node->id()<<" because distance: "<<pinfo->_distance<<std::endl<<std::endl;
-//      libMesh::print_trace();
 
       has_penetrated.insert(slave_node_num);
       locked_this_step[slave_node_num] = true;
