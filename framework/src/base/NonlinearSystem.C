@@ -2059,7 +2059,7 @@ NonlinearSystem::printVarNorms()
       other_var_norms[s.variable_name(var_num)] = var_norm;
   }
 
-  if (outlier_var_norms.size())
+  if (outlier_var_norms.size() && _app.hasLegacyOutput())
   {
     Moose::out << "Outlier Variable Residual Norms:\n";
     for(std::map<std::string, Real>::iterator it = outlier_var_norms.begin();
@@ -2076,7 +2076,7 @@ NonlinearSystem::printVarNorms()
     }
   }
 
-  if (_print_all_var_norms)
+  if (_print_all_var_norms && _app.hasLegacyOutput())
   {
     Moose::out << "Variable Residual Norms:\n";
     for(std::map<std::string, Real>::iterator it = other_var_norms.begin();

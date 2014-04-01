@@ -42,6 +42,7 @@ InputParameters validParams<Console>()
 
   // Basic table output controls
   params.addParam<bool>("use_color", true, "If true, color will be added to the output");
+  params.addParam<bool>("scientific_time", false, "Control the printing of time and dt in scientific notation");
 
   // Performance Logging
   params.addParam<bool>("perf_log", false, "If true, all performance logs will be printed. The individual log settings will override this option.");
@@ -68,13 +69,13 @@ InputParameters validParams<Console>()
   params.addParamNamesToGroup("max_rows fit_node verbose", "Advanced");
 
   // Performance log group
-  params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Performance Log");
+  params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Perf Log");
 #ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
   params.addParamNamesToGroup("libmesh_log", "Performance Log");
 #endif
 
   // Variable norms group
-  params.addParamNamesToGroup("outlier_variable_norms all_variable_norms outlier_multiplier", "Variable Norms");
+  params.addParamNamesToGroup("outlier_variable_norms all_variable_norms outlier_multiplier", "Norms");
 
   // By default the Console object outputs non linear iterations
   params.set<bool>("nonlinear_residuals") = true;
@@ -90,6 +91,7 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _use_color(false),
+    _scientific_time(getParam<bool>("scientific_time")),
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _verbose(getParam<bool>("verbose")),
@@ -248,9 +250,15 @@ Console::timestepSetup()
       n = 2;
 
     // Write time step and time information
-    oss << std::endl <<  "Time Step " << std::setw(n) << _t_step
-      << ", time = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _time
-      << std::endl;
+    oss << std::endl <<  "Time Step " << std::setw(n) << _t_step;
+
+    // Show scientific notation
+    if (_scientific_time)
+      oss << std::scientific;
+
+    // Print the time
+    oss  << ", time = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _time << std::endl;
+
     // Show old time information, if desired
     if (_verbose)
       oss << std::setw(n) << "          old time = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _time_old << std::endl;
@@ -315,7 +323,7 @@ Console::output()
   else if (onLinearResidual())
   {
     if (_write_screen)
-      Moose::out << std::setw(7) << _linear_iter << " Linear |R| = " << std::scientific << outputNorm(_old_linear_norm, _norm) << std::endl;
+      Moose::out << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
 
     if (_write_file)
       _file_output_stream << std::setw(7) << _linear_iter << std::scientific << " Linear |R| = " << std::scientific << _norm << std::endl;
@@ -372,7 +380,7 @@ Console::writeVariableNorms()
       // Print the header
       if (!header)
       {
-        oss << "\nVariable Residual Norms:\n";
+        oss << "\nOutlier Variable Residual Norms:\n";
         header = true;
       }
 
@@ -382,11 +390,7 @@ Console::writeVariableNorms()
         color = RED;
 
       // Display the residual
-      oss << "  " << var_name << ": ";
-      if (_use_color)
-        oss << MooseUtils::colorText(color, std::sqrt(var_norm)) << '\n';
-      else
-        oss << std::sqrt(var_norm) << '\n';
+      oss << "  " << var_name << ": " << MooseUtils::colorText(color, std::sqrt(var_norm), _use_color) << '\n';
     }
 
     // GREEN
@@ -398,12 +402,7 @@ Console::writeVariableNorms()
         oss << "\nVariable Residual Norms:\n";
         header = true;
       }
-
-      oss << "  " << var_name << ": ";
-      if (_use_color)
-        oss << MooseUtils::colorText(GREEN, std::sqrt(var_norm)) << '\n';
-      else
-        oss << std::sqrt(var_norm) << '\n';
+      oss << "  " << var_name << ": " <<  MooseUtils::colorText(GREEN, std::sqrt(var_norm), _use_color) << '\n';
     }
   }
 
@@ -419,7 +418,7 @@ Console::writeVariableNorms()
 std::string
 Console::outputNorm(Real old_norm, Real norm)
 {
-  std::string color(COLOR_DEFAULT);
+  std::string color(GREEN);
 
   // Use color
   if (_use_color)
@@ -430,16 +429,10 @@ Console::outputNorm(Real old_norm, Real norm)
     // Yellow if change is less than 5%
     else if ((old_norm - norm) / old_norm <= 0.05)
       color = YELLOW;
-    // Green if change is more than 5%
-    else
-      color = GREEN;
-    // Return the colored text
-    return MooseUtils::colorText<Real>(color, norm);
   }
 
-  // Return the text without color codes
-  else
-    return Moose::stringify<Real>(norm);
+  // Return the colored text
+  return MooseUtils::colorText<Real>(color, norm, _use_color);
 }
 
 
