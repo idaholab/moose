@@ -158,7 +158,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.output_control_layout = QtGui.QVBoxLayout() # creates a layout
     self.output_control = QtGui.QComboBox() # adds the actual dropdown menu
     self.output_control.setToolTip('Select output file to view') # sets menu tooltip
-    self.output_control.currentIndexChanged[str].connect(self._outputChanged) # set the callback function
+    self.output_control.addItems(self.input_file_widget.getOutputFileNames())
+    self.output_control.activated[str].connect(self._outputChanged) # set the callback function
     self.output_control_layout.addWidget(self.output_control) # add the dropdown widget to the layout
     self.output_control_group_box.setLayout(self.output_control_layout) # add the layout to the box
     self.leftest_controls_layout.addWidget(self.output_control_group_box) # add the box to the gui control layout
@@ -577,16 +578,20 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider.setMinimum(0)
     self.time_slider.setMaximum(self.current_max_timestep)
 
-    # Update the Output Control items
+  ##
+  # Updates the list of available output file names
+  def updateOutputControl(self):
+    name = self.output_control.currentText()
     self.output_control.clear()
     self.output_control.addItems(self.input_file_widget.getOutputFileNames())
+    idx = self.output_control.findText(name)
+    if idx != -1:
+      self.output_control.setCurrentIndex(idx)
 
+  ##
+  # Executes when the user selects an item from the output selection dropdown box
   def _outputChanged(self):
-    print "You selected " + self.output_control.currentText()
-    #self.file_name = None
-    #self.file_names = []
-    #self.exodus_result = None
-    #self._updateData()
+    self._openFile(self.output_control.currentText())
 
   def setupLuts(self):
     self.luts = []
@@ -1063,25 +1068,24 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           self.new_stuff_to_read = True
 
     if not self.exodus_result:
-      if self.output_control.count() == 0:
-        self.output_control.addItems(self.input_file_widget.getOutputFileNames())
 
-      if not self.file_name: # Might have been set by opening a file
-        output_file_names = self.input_file_widget.getOutputFileNames()
-      else:
-        output_file_names = [self.file_name]
+      #if self.output_control.count() == 0:
+      #  self.output_control.addItems(self.input_file_widget.getOutputFileNames())
 
+      # These statments need to go away
+      #if not self.file_name: # Might have been set by opening a file
+      #  output_file_names = self.input_file_widget.getOutputFileNames()
+      #else:
+      #  output_file_names = [self.file_name]
 
-      #print 'output_file_names:'
-      #print output_file_names
-      #output_file = ''
-
-      file_name = self.output_control.currentText()
-      print 'file_name = ' + file_name
+      # Need to be able to get the file_name like this, if I do this, things do not work
+      output_file_names = [self.output_control.currentText()]
 
       for file_name in output_file_names:
         if '.e' in file_name and os.path.exists(file_name):
+          print "Reading " + file_name
           file_stamp = os.path.getmtime(file_name)
+
 
           if int(file_stamp) >= int(self.base_stamp) and int(file_stamp) <= int(time.time() - 1) and file_name not in self.file_names:
             print 'self.file_name = ' + file_name

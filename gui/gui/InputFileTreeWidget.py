@@ -60,10 +60,6 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
                            QtCore.SIGNAL("currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)"),
                            self._currentItemChanged)
 
-    # Storage for the file and block names for each Exodus outputter
-    self._output_file_names = []
-    self._output_block_names = []
-
   def addHardPathsToTree(self):
     # Add every hard path
     for path in self.action_syntax.hard_paths:
@@ -143,8 +139,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
   def getOutputFileNames(self):
 
     # Check that the list is initialized
-    if (len(self._output_file_names) == 0):
-      self.__initOutputFileNamesAndBlocks()
+    self.__initOutputFileNamesAndBlocks()
 
     # Return the list of file names
     return self._output_file_names
@@ -155,8 +150,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
   def getOutputBlockNames(self):
 
     # Check that the list is initialized
-    if (len(self._output_block_names) == 0):
-      self.__initOutputFileNamesAndBlocks()
+    self.__initOutputFileNamesAndBlocks()
 
     # Return the list of block names
     return self._output_block_names
@@ -168,6 +162,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     # Storage for file_base as a common parameter
     common_file_base = ''
+    self._output_file_names = []
+    self._output_block_names = []
 
     # Find the Outputs block items and the names of the sub-blocks
     outputs = self.findChildItemWithName(self, 'Outputs')
@@ -207,56 +203,6 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         # Append the file_base and object name to the lists
         self._output_file_names.append(file_base + '.e')
         self._output_block_names.append(output_data['Name'])
-
-#  file_names.append(output_data)
-        #    file_base = output_data['file_base']
-        #  else:
-        #    file_base = main_file_base
-
-
-        #  if 'append_oversample' in output_data:
-        #    file_base = file_base + '_oversample'
-        #  elif main_file_base:
-        #    file_base = main_file_base
-        #  else:
-        #    file_base = 'peacock_run_tmp_out_oversample'
-
-        # Non-oversampled base file name
-        #else:
-        #  if 'file_base' in output_data:
-        #    file_base = output_data['file_base']
-        #  else:
-        #    file_base = 'peacock_run_tmp_out'
-
-        #file_names.append(file_base + '.e')
-        #Xwbreak
-
-
-    # Use the old system, if output_data is None
-    #if output_data == None:
-    #  if oversampling_item and oversampling_item.checkState(0) == QtCore.Qt.Checked:
-    #    output_data =  output_item.table_data
-    #
-    #    if output_data:
-    #      if 'file_base' in output_data:
-    #        file_base = output_data['file_base'] + '_oversample'
-    #      else:
-    #        file_base = 'peacock_run_tmp_out_oversample'
-#
-#      elif output_item.checkState(0) == QtCore.Qt.Checked:
-#        output_data =  output_item.table_data
-#
-#        if output_data:
-#          if 'file_base' in output_data:
-#            file_base = output_data['file_base']
-#          else:
-#            file_base = 'peacock_run_tmp_out'
-#
-#      type_to_extension = {'exodus':'.e', 'tecplot':'.plt'}
-#
-#      for atype,extension in type_to_extension.items():
-#        if output_data and atype in output_data and (output_data[atype] == 'true' or output_data[atype] == '1'):
-#          file_names.append(file_base + extension)
 
     # FIXME: Hack to make raven and r7 work for now
     if 'raven' in self.input_file_widget.app_path or 'r7' in self.input_file_widget.app_path:
@@ -562,6 +508,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
   def _updateOtherGUIElements(self):
     self.tree_changed.emit()
     self.input_file_widget.input_file_textbox.updateTextBox()
+    # Call ExodusResultRenderWidget::updateOutputControl (is this possible)
 
   def _currentItemChanged(self, current, previous):
     if not current:
