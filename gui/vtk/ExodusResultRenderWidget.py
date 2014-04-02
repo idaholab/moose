@@ -583,7 +583,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
   def _outputChanged(self):
     print "You selected " + self.output_control.currentText()
-
+    #self.file_name = None
+    #self.file_names = []
+    #self.exodus_result = None
+    #self._updateData()
 
   def setupLuts(self):
     self.luts = []
@@ -1045,6 +1048,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.timestep_to_timestep[self.current_max_timestep] = timestep
 
   def _updateData(self):
+    #print self.file_name
+    #print self.exodus_result
+
     # Check to see if there are new exodus files with adapted timesteps in them.
     if self.file_name and self.exodus_result:
       for file_name in sorted(glob.glob(self.file_name + '-s*')):
@@ -1057,18 +1063,28 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           self.new_stuff_to_read = True
 
     if not self.exodus_result:
+      if self.output_control.count() == 0:
+        self.output_control.addItems(self.input_file_widget.getOutputFileNames())
+
       if not self.file_name: # Might have been set by opening a file
         output_file_names = self.input_file_widget.getOutputFileNames()
       else:
         output_file_names = [self.file_name]
 
-      output_file = ''
+
+      #print 'output_file_names:'
+      #print output_file_names
+      #output_file = ''
+
+      file_name = self.output_control.currentText()
+      print 'file_name = ' + file_name
 
       for file_name in output_file_names:
         if '.e' in file_name and os.path.exists(file_name):
           file_stamp = os.path.getmtime(file_name)
 
           if int(file_stamp) >= int(self.base_stamp) and int(file_stamp) <= int(time.time() - 1) and file_name not in self.file_names:
+            print 'self.file_name = ' + file_name
             self.file_name = file_name
             self.exodus_result = ExodusResult(self, self.plane)
             self.exodus_result.setFileName(file_name, self.current_lut)

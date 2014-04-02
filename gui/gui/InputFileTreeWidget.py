@@ -60,6 +60,9 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
                            QtCore.SIGNAL("currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)"),
                            self._currentItemChanged)
 
+    # Storage for the file and block names for each Exodus outputter
+    self._output_file_names = []
+    self._output_block_names = []
 
   def addHardPathsToTree(self):
     # Add every hard path
@@ -134,98 +137,130 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     return None
 
+  ##
+  # Return the possible ExodusII output file names (public)
+  # @return List of output file names
   def getOutputFileNames(self):
 
-    output_item = self.findChildItemWithName(self, 'Output')
+    # Check that the list is initialized
+    if (len(self._output_file_names) == 0):
+      self.__initOutputFileNamesAndBlocks()
 
-    oversampling_item = None
+    # Return the list of file names
+    return self._output_file_names
 
-    if output_item:
-      oversampling_item = self.findChildItemWithName(output_item, 'OverSampling')
+  ##
+  # Return the possible ExodusII output block names (public)
+  # @return List of output block names
+  def getOutputBlockNames(self):
 
+    # Check that the list is initialized
+    if (len(self._output_block_names) == 0):
+      self.__initOutputFileNamesAndBlocks()
 
-    file_names = []
-    file_base = 'peacock_run_tmp_out'
-    main_file_base = ''
-    output_data = None
+    # Return the list of block names
+    return self._output_block_names
+
+  ##
+  # Initialize the list of output file and block names (private)
+  # This function initilizes self._output_file_names and self._output_block_names
+  def __initOutputFileNamesAndBlocks(self):
+
+    # Storage for file_base as a common parameter
+    common_file_base = ''
 
     # Find the Outputs block items and the names of the sub-blocks
     outputs = self.findChildItemWithName(self, 'Outputs')
     outputs_children = self.getChildNames(outputs)
 
-    # Check for default stuff:
-    if outputs:
-      output_data = outputs.table_data
-      if 'file_base' in output_data:
-        file_base = output_data['file_base']
+    # Check for short-cut syntax (i.e., exodus = true)
+    output_data = outputs.table_data
+    if 'file_base' in output_data:
+      common_file_base = output_data['file_base']
+    else:
+      common_file_base = 'peacock_run_tmp_out'
 
-      if outputs.table_data and 'exodus' in outputs.table_data and outputs.table_data['exodus'] == 'true':
-        file_names.append(file_base + '.e')
+    # Check for short-cut syntax (i.e., exodus = true)
+    if outputs.table_data and 'exodus' in outputs.table_data and outputs.table_data['exodus'] == 'true':
+      self._output_file_names.append(common_file_base + '.e')
+      self._output_block_names.append('exodus')
 
-    main_file_base = file_base
+    # Loop through each of the sub-blocks and grab the data, if type = Exodus
+    for item in outputs_children:
 
-    # Loop through each of the sub-blocks and grab the data
-    # if type = Exodus
-    for i in range(len(outputs_children)-1, 0, -1):
-      child = self.findChildItemWithName(outputs, outputs_children[i])
+      # Extract the data for the sub-block
+      child = self.findChildItemWithName(outputs, item)
       output_data = child.table_data
+
+      # If the object is of type = Exodus, then extract the filename
       if output_data and output_data['type'] == 'Exodus':
-        # Check for oversampling
-        if 'oversample' in output_data and output_data['oversample'] != '0':
-          if 'file_base' in output_data:
-            file_base = output_data['file_base']
-          else:
-            file_base = main_file_base
+        file_base = common_file_base
+
+        # Check for file_base
+        if ('file_base' in output_data) and (output_data['file_base'] != ''):
+          file_base = output_data['file_base']
+
+        # Check for oversampling and appending of '_oversample'
+        if ('oversample' in output_data) and (output_data['oversample'] != '0') and ('append_oversample' in output_data) and (output_data['oversample'] != '0'):
+          file_base = file_base + '_oversample'
+
+        # Append the file_base and object name to the lists
+        self._output_file_names.append(file_base + '.e')
+        self._output_block_names.append(output_data['Name'])
+
+#  file_names.append(output_data)
+        #    file_base = output_data['file_base']
+        #  else:
+        #    file_base = main_file_base
 
 
-          if 'append_oversample' in output_data:
-            file_base = file_base + '_oversample'
-          elif main_file_base:
-            file_base = main_file_base
-          else:
-            file_base = 'peacock_run_tmp_out_oversample'
+        #  if 'append_oversample' in output_data:
+        #    file_base = file_base + '_oversample'
+        #  elif main_file_base:
+        #    file_base = main_file_base
+        #  else:
+        #    file_base = 'peacock_run_tmp_out_oversample'
 
         # Non-oversampled base file name
-        else:
-          if 'file_base' in output_data:
-            file_base = output_data['file_base']
-          else:
-            file_base = 'peacock_run_tmp_out'
+        #else:
+        #  if 'file_base' in output_data:
+        #    file_base = output_data['file_base']
+        #  else:
+        #    file_base = 'peacock_run_tmp_out'
 
-        file_names.append(file_base + '.e')
-        break
+        #file_names.append(file_base + '.e')
+        #Xwbreak
+
 
     # Use the old system, if output_data is None
-    if output_data == None:
-      if oversampling_item and oversampling_item.checkState(0) == QtCore.Qt.Checked:
-        output_data =  output_item.table_data
-
-        if output_data:
-          if 'file_base' in output_data:
-            file_base = output_data['file_base'] + '_oversample'
-          else:
-            file_base = 'peacock_run_tmp_out_oversample'
-
-      elif output_item.checkState(0) == QtCore.Qt.Checked:
-        output_data =  output_item.table_data
-
-        if output_data:
-          if 'file_base' in output_data:
-            file_base = output_data['file_base']
-          else:
-            file_base = 'peacock_run_tmp_out'
-
-      type_to_extension = {'exodus':'.e', 'tecplot':'.plt'}
-
-      for atype,extension in type_to_extension.items():
-        if output_data and atype in output_data and (output_data[atype] == 'true' or output_data[atype] == '1'):
-          file_names.append(file_base + extension)
+    #if output_data == None:
+    #  if oversampling_item and oversampling_item.checkState(0) == QtCore.Qt.Checked:
+    #    output_data =  output_item.table_data
+    #
+    #    if output_data:
+    #      if 'file_base' in output_data:
+    #        file_base = output_data['file_base'] + '_oversample'
+    #      else:
+    #        file_base = 'peacock_run_tmp_out_oversample'
+#
+#      elif output_item.checkState(0) == QtCore.Qt.Checked:
+#        output_data =  output_item.table_data
+#
+#        if output_data:
+#          if 'file_base' in output_data:
+#            file_base = output_data['file_base']
+#          else:
+#            file_base = 'peacock_run_tmp_out'
+#
+#      type_to_extension = {'exodus':'.e', 'tecplot':'.plt'}
+#
+#      for atype,extension in type_to_extension.items():
+#        if output_data and atype in output_data and (output_data[atype] == 'true' or output_data[atype] == '1'):
+#          file_names.append(file_base + extension)
 
     # FIXME: Hack to make raven and r7 work for now
     if 'raven' in self.input_file_widget.app_path or 'r7' in self.input_file_widget.app_path:
-      file_names = [file_base + '_displaced.e']
-
-    return file_names
+      self._output_file_names = [common_file_base + '_displaced.e']
 
   def _itemHasEditableParameters(self, item):
     this_path = self.generatePathFromItem(item)
