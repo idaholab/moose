@@ -63,7 +63,7 @@ public:
   virtual void execute();
 
   /**
-   * This should execute the solve for one timestep.
+   * Do whatever is necessary to advance one step.
    */
   virtual void takeStep(Real input_dt = -1.0);
 
@@ -99,7 +99,7 @@ public:
    */
   virtual void incrementStepOrReject();
 
-  virtual void endStep();
+  virtual void endStep(Real input_time = -1.0);
 
   /**
    * Can be used to set the next "target time" which is a time to nail perfectly.
@@ -216,6 +216,10 @@ public:
   virtual void setOutputPosition(const Point & p) { _problem.setOutputPosition(p); }
 
 protected:
+  /**
+   * This should execute the solve for one timestep.
+   */
+  virtual void solveStep(Real input_dt = -1.0);
 
   FEProblem & _problem;
 
@@ -270,6 +274,17 @@ protected:
   bool _use_multiapp_dt;
 
   bool _allow_output;
+
+  /**
+   * Picard Related
+   */
+  /// Number of Picard iterations to perform
+  int  _picard_it;
+  Real _picard_max_its;
+  bool _picard_converged;
+  Real _picard_initial_norm;
+  Real _picard_rel_tol;
+  Real _picard_abs_tol;
 
   ///should detailed diagnostic output be printed
   bool _verbose;
