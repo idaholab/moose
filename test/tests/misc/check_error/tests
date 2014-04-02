@@ -1,7 +1,7 @@
 [Tests]
   [./range_check_param]
-    type = 'RunExecption'
-    input = range_check_param.i
+    type = 'RunException'
+    input = 'range_check_param.i'
     expect_err = 'Range check failed for parameter \S'
   [../]
 
