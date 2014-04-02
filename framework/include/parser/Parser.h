@@ -33,10 +33,9 @@ class MooseApp;
 class Factory;
 class ActionFactory;
 
-#define DEBUG_PARSER 0
-
 /**
- * Class for parsing input files.
+ * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and parsing files. It is not
+ * currently designed for extensibility. If you wish to build your own parser, please contact the MOOSE team for guidance.
  */
 class Parser
 {
@@ -115,6 +114,37 @@ public:
   void checkOverriddenParams(bool error_on_warn);
 
 protected:
+  /// Appends sections from the CLI Reorders section names so that Debugging options can be enabled before parsing begins
+  void appendAndReorderSectionNames(std::vector<std::string> & section_names);
+
+  /**
+   * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
+   * since they are called only from this Object
+   */
+  /// Template method for setting any scalar type parameter read from the input file or command line
+  template<typename T>
+  void setScalarParameter(const std::string & full_name, const std::string & short_name,
+                          InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
+
+  template<typename T, typename UP_T>
+  void setScalarValueTypeParameter(const std::string & full_name, const std::string & short_name,
+                                   InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
+
+  /// Template method for setting any vector type parameter read from the input file or command line
+  template<typename T>
+  void setVectorParameter(const std::string & full_name, const std::string & short_name,
+                          InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
+
+  /// Template method for setting any multivalue "scalar" type parameter read from the input file or command line.  Examples include "Point" and "RealVectorValue"
+  template<typename T>
+  void setScalarComponentParameter(const std::string & full_name, const std::string & short_name,
+                                   InputParameters::Parameter<T> * param, bool in_global, GlobalParamsAction * global_block);
+
+  /// Template method for setting several multivalue "scalar" type parameter read from the input file or command line.  Examples include "Point" and "RealVectorValue"
+  template<typename T>
+  void setVectorComponentParameter(const std::string & full_name, const std::string & short_name,
+                                   InputParameters::Parameter<std::vector<T> > * param, bool in_global, GlobalParamsAction * global_block);
+
   /// The MooseApp this Parser is part of
   MooseApp & _app;
   /// The Factory associated with that MooseApp
@@ -126,44 +156,30 @@ protected:
   /// Reference to an object that defines input file syntax
   Syntax & _syntax;
 
-  /// Appends sections from the CLI Reorders section names so that Debugging options can be enabled before parsing begins
-  void appendAndReorderSectionNames(std::vector<std::string> & section_names);
-
-  /**
-   * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
-   * since they are called only from this Object
-   */
-  template<typename T>
-  void setScalarParameter(const std::string & full_name, const std::string & short_name,
-                          InputParameters::Parameter<T>* param, bool in_global, GlobalParamsAction *global_block);
-
-  template<typename T>
-  void setVectorParameter(const std::string & full_name, const std::string & short_name,
-                          InputParameters::Parameter<std::vector<T> >* param, bool in_global, GlobalParamsAction *global_block);
-
-  template<typename T>
-  void setScalarComponentParameter(const std::string & full_name, const std::string & short_name,
-                                   InputParameters::Parameter<T> * param, bool in_global, GlobalParamsAction * global_block);
-
-  template<typename T>
-  void setVectorComponentParameter(const std::string & full_name, const std::string & short_name,
-                                   InputParameters::Parameter<std::vector<T> > * param, bool in_global, GlobalParamsAction * global_block);
-
-
+  /// Object for holding the syntax parse tree
   SyntaxTree * _syntax_formatter;
 
   /// Contains all of the sections that are not active during the parse phase so that blocks
   /// nested more than one level deep can detect that the grandparent is not active
   std::set<std::string> _inactive_strings;
 
+  /// Boolean indicating whether the getpot parser has been initialized
   bool _getpot_initialized;
+
+  /// The getpot object used for extracting parameters
   GetPot _getpot_file;
+
+  /// The input file name that is used for parameter extraction
   std::string _input_filename;
 
   /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;
 
+  /// Boolean to indicate whether parsing has started (sections have been extracted)
   bool _sections_read;
+
+  /// The current parameter object for which parameters are being extracted
+  InputParameters * _current_params;
 };
 
 
