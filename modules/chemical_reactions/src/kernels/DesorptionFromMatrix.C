@@ -13,11 +13,11 @@ InputParameters validParams<DesorptionFromMatrix>()
 }
 
 DesorptionFromMatrix::DesorptionFromMatrix(const std::string & name,
-                                           InputParameters parameters) :
+                                             InputParameters parameters) :
     Kernel(name,parameters),
     _pressure_var(coupled("pressure_var")),
-    _desorption_time_const(getMaterialProperty<Real>("desorption_time_const")),
-    _adsorption_time_const(getMaterialProperty<Real>("adsorption_time_const")),
+    _one_over_desorption_time_const(getMaterialProperty<Real>("one_over_desorption_time_const")),
+    _one_over_adsorption_time_const(getMaterialProperty<Real>("one_over_adsorption_time_const")),
     _equilib_conc(getMaterialProperty<Real>("desorption_equilib_conc")),
     _equilib_conc_prime(getMaterialProperty<Real>("desorption_equilib_conc_prime"))
 {}
@@ -28,12 +28,12 @@ DesorptionFromMatrix::computeQpResidual()
 {
   if (_u[_qp] > _equilib_conc[_qp])
   {
-    if (_desorption_time_const[_qp] > 0)
-      return _test[_i][_qp]*(_u[_qp] - _equilib_conc[_qp])/_desorption_time_const[_qp];
+    if (_one_over_desorption_time_const[_qp] > 0)
+      return _test[_i][_qp]*(_u[_qp] - _equilib_conc[_qp])*_one_over_desorption_time_const[_qp];
     return 0.0;
   }
-  if (_adsorption_time_const[_qp] > 0)
-    return _test[_i][_qp]*(_u[_qp] - _equilib_conc[_qp])/_adsorption_time_const[_qp];
+  if (_one_over_adsorption_time_const[_qp] > 0)
+    return _test[_i][_qp]*(_u[_qp] - _equilib_conc[_qp])*_one_over_adsorption_time_const[_qp];
   return 0.0;
 }
 
@@ -42,12 +42,12 @@ DesorptionFromMatrix::computeQpJacobian()
 {
   if (_u[_qp] > _equilib_conc[_qp])
   {
-    if (_desorption_time_const[_qp] > 0)
-      return _test[_i][_qp]*_phi[_j][_qp]/_desorption_time_const[_qp];
+    if (_one_over_desorption_time_const[_qp] > 0)
+      return _test[_i][_qp]*_phi[_j][_qp]*_one_over_desorption_time_const[_qp];
     return 0.0;
   }
-  if (_adsorption_time_const[_qp] > 0)
-    return _test[_i][_qp]*_phi[_j][_qp]/_adsorption_time_const[_qp];
+  if (_one_over_adsorption_time_const[_qp] > 0)
+    return _test[_i][_qp]*_phi[_j][_qp]*_one_over_adsorption_time_const[_qp];
   return 0.0;
 }
 
@@ -58,11 +58,11 @@ DesorptionFromMatrix::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
   if (_u[_qp] > _equilib_conc[_qp])
   {
-    if (_desorption_time_const[_qp] > 0)
-      return -_test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]/_desorption_time_const[_qp];
+    if (_one_over_desorption_time_const[_qp] > 0)
+      return -_test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]*_one_over_desorption_time_const[_qp];
     return 0.0;
   }
-  if (_adsorption_time_const[_qp] > 0)
-    return -_test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]/_adsorption_time_const[_qp];
+  if (_one_over_adsorption_time_const[_qp] > 0)
+    return -_test[_i][_qp]*_equilib_conc_prime[_qp]*_phi[_j][_qp]*_one_over_adsorption_time_const[_qp];
   return 0.0;
 }
