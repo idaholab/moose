@@ -153,6 +153,17 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.left_controls_layout = QtGui.QVBoxLayout()
     self.right_controls_layout = QtGui.QVBoxLayout()
 
+    # Output selection controls
+    self.output_control_group_box = QtGui.QGroupBox("Select Output") # adds a box for storing widget
+    self.output_control_layout = QtGui.QVBoxLayout() # creates a layout
+    self.output_control = QtGui.QComboBox() # adds the actual dropdown menu
+    self.output_control.setToolTip('Select output file to view') # sets menu tooltip
+    self.output_control.currentIndexChanged[str].connect(self._outputChanged) # set the callback function
+    self.output_control_layout.addWidget(self.output_control) # add the dropdown widget to the layout
+    self.output_control_group_box.setLayout(self.output_control_layout) # add the layout to the box
+    self.leftest_controls_layout.addWidget(self.output_control_group_box) # add the box to the gui control layout
+
+
     self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
 #    self.block_view_group_box.setMaximumWidth(200)
 #    self.block_view_group_box.setMaximumHeight(200)
@@ -565,6 +576,13 @@ class ExodusResultRenderWidget(QtGui.QWidget):
 
     self.time_slider.setMinimum(0)
     self.time_slider.setMaximum(self.current_max_timestep)
+
+    # Update the Output Control items
+    self.output_control.clear()
+    self.output_control.addItems(self.input_file_widget.getOutputFileNames())
+
+  def _outputChanged(self):
+    print "You selected " + self.output_control.currentText()
 
 
   def setupLuts(self):
