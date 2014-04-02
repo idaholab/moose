@@ -66,9 +66,16 @@ InputParameters validParams<Transient>()
 
   params.addParam<bool>("use_multiapp_dt", false, "If true then the dt for the simulation will be chosen by the MultiApps.  If false (the default) then the minimum over the master dt and the MultiApps is used");
 
+  params.addParam<unsigned int>("picard_max_its", 1, "Number of times each timestep will be solved.  Mainly used when wanting to do Picard iterations with MultiApps that are set to execute_on timestep or timestep_begin");
+  params.addParam<Real>("picard_rel_tol", 1e-8, "The relative nonlinear residual drop to shoot for during Picard iterations.  This check is performed based on the Master app's nonlinear residual.");
+  params.addParam<Real>("picard_abs_tol", 1e-50, "The absolute nonlinear residual to shoot for during Picard iterations.  This check is performed based on the Master app's nonlinear residual.");
+
   params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol ss_tmin sync_times time_t time_dt growth_factor predictor_scale use_AB2 use_littlef abort_on_solve_fail output_to_file file_name estimate_time_error timestep_tolerance use_multiapp_dt", "Advanced");
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
+
+  params.addParamNamesToGroup("picard_max_its picard_rel_tol picard_abs_tol", "Picard");
+
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
 
   return params;
@@ -106,6 +113,12 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _target_time(declareRestartableData<Real>("target_time", -1)),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
     _allow_output(true),
+    _picard_it(0),
+    _picard_max_its(getParam<unsigned int>("picard_max_its")),
+    _picard_converged(false),
+    _picard_initial_norm(0.0),
+    _picard_rel_tol(getParam<Real>("picard_rel_tol")),
+    _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _verbose(getParam<bool>("verbose"))
 {
   _problem.getNonlinearSystem().setDecomposition(_splitting);
@@ -233,7 +246,9 @@ Transient::execute()
     }
 
     computeDT();
+
     takeStep();
+
     endStep();
 
     _steps_taken++;
@@ -258,7 +273,8 @@ Transient::incrementStepOrReject()
     if (_problem.adaptivity().isOn())
       _problem.adaptMesh();
 #endif
-    _time_old = _time;
+
+    _time_old = _time; // = _time_old + _dt;
     _t_step++;
 
     _problem.copyOldSolutions();
@@ -274,6 +290,18 @@ Transient::incrementStepOrReject()
 
 void
 Transient::takeStep(Real input_dt)
+{
+  for (_picard_it=0; _picard_it<_picard_max_its && _picard_converged==false; _picard_it++)
+  {
+    if (_picard_max_its > 1)
+      Moose::out<<"Beginning Picard Iteration "<<_picard_it<<"\n"<<std::endl;
+
+    solveStep(input_dt);
+  }
+}
+
+void
+Transient::solveStep(Real input_dt)
 {
   _problem.out().setOutput(false);
 
@@ -292,7 +320,7 @@ Transient::takeStep(Real input_dt)
   _time = _time_old + _dt;
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
-  _problem.execMultiApps(EXEC_TIMESTEP_BEGIN);
+  _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);
 
   // Only print this if the 'Output' block exists
   /// \todo{Remove when old output system is removed}
@@ -363,6 +391,29 @@ Transient::takeStep(Real input_dt)
   // Compute Post-Aux User Objects (Timestep begin)
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
+
+  if (_picard_max_its > 1)
+  {
+    Real current_norm = _problem.computeResidualL2Norm();
+    if (_picard_it == 0) // First Picard iteration - need to save off the initial nonlinear residual
+    {
+      _picard_initial_norm = current_norm;
+      Moose::out<<"Initial Picard Norm: "<<_picard_initial_norm<<std::endl;
+    }
+    else
+      Moose::out<<"Current Picard Norm: "<<current_norm<<std::endl;
+
+    Real relative_drop = current_norm / _picard_initial_norm;
+
+    if (current_norm < _picard_abs_tol || relative_drop < _picard_rel_tol)
+    {
+      Moose::out<<"Picard converged!"<<std::endl;
+
+      _picard_converged = true;
+      return;
+    }
+  }
+
   _time_stepper->step();
 
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
@@ -388,7 +439,7 @@ Transient::takeStep(Real input_dt)
     _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
     _problem.execTransfers(EXEC_TIMESTEP);
-    _problem.execMultiApps(EXEC_TIMESTEP);
+    _problem.execMultiApps(EXEC_TIMESTEP, _picard_max_its == 1);
   }
   else
   {
@@ -400,11 +451,22 @@ Transient::takeStep(Real input_dt)
 
   postSolve();
   _time_stepper->postSolve();
+
+  // Reset time in case we solve again
+  _dt = _time - _time_old; // Compute the total _dt (_dt might be smaller than this at this point for multistep methods)
+  _time = _time_old;
 }
 
 void
-Transient::endStep()
+Transient::endStep(Real input_time)
 {
+  if (input_time == -1.0)
+    _time = _time_old + _dt;
+  else
+    _time = input_time;
+
+  _picard_converged=false;
+
   _last_solve_converged = lastSolveConverged();
 
   if (_last_solve_converged)
@@ -414,6 +476,13 @@ Transient::endStep()
 
     // Perform the output of the current time step
     _output_warehouse.outputStep();
+
+    // Output MultiApps if we were doing Picard iterations
+    if (_picard_max_its > 1)
+    {
+      _problem.advanceMultiApps(EXEC_TIMESTEP_BEGIN);
+      _problem.advanceMultiApps(EXEC_TIMESTEP);
+    }
 
     //output \todo{Remove after old output system is removed}
     if (_time_interval)

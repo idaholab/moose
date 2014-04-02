@@ -42,7 +42,12 @@ public:
   /**
    * Completely solve all of the Apps
    */
-  virtual void solveStep(Real dt, Real target_time);
+  virtual void solveStep(Real dt, Real target_time, bool auto_advance=true);
+
+  /**
+   * Actually advances time and causes output.
+   */
+  virtual void advanceStep(){}
 
 private:
   std::vector<Executioner *> _executioners;

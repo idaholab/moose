@@ -64,8 +64,11 @@ FullSolveMultiApp::init()
 }
 
 void
-FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/)
+FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advance)
 {
+  if (!auto_advance)
+    mooseError("FullSolveMultiApp is not compatible with auto_advance=false");
+
   if (!_has_an_app)
     return;
 
