@@ -1,4 +1,10 @@
 [Tests]
+  [./range_check_param]
+    type = 'RunException'
+    input = 'range_check_param.i'
+    expect_err = 'Range check failed for parameter \S'
+  [../]
+
   [./checked_pointer_param_test]
     type = 'RunException'
     input = 'checked_pointer_param_test.i'

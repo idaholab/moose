@@ -21,11 +21,20 @@
 
 // libMesh
 #include "libmesh/parameters.h"
+#include "libmesh/parsed_function.h"
 
 #include "MooseError.h"
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 #include "MooseUtils.h"
+
+#ifdef LIBMESH_HAVE_FPARSER
+#include "libmesh/fparser.hh"
+#else
+template <typename T>
+class FunctionParserBase
+{};
+#endif
 
 class MooseObject;
 class GlobalParamsAction;
@@ -48,7 +57,7 @@ public:
   InputParameters(const InputParameters &rhs);
   InputParameters(const Parameters &rhs);
 
-  virtual ~InputParameters(){}
+  virtual ~InputParameters() {}
 
   virtual void clear();
 
@@ -73,6 +82,12 @@ public:
    * function! Use caution when comparing to the parent class implementation
    */
   template <typename T> T & set (const std::string&);
+
+  /**
+   * Runs a range on the supplied parameter if it exists and throws an error if that check fails.
+   * @returns Boolean indicating whether range check exists
+   */
+  template <typename T, typename UP_T> bool rangeCheck(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T> * param);
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
@@ -105,6 +120,17 @@ public:
   void addParam(const std::string &name, const T & value, const std::string &doc_string);
   template <typename T>
   void addParam(const std::string &name, const std::string &doc_string);
+
+  /**
+   * These methods add an range checked parameters. A lower and upper bound can be supplied and the
+   * supplied parameter will be checked to fall within that range.
+   */
+  template <typename T>
+  void addRequiredRangeCheckedParam(const std::string &name, const std::string &parsed_function, const std::string &doc_string);
+  template <typename T>
+  void addRangeCheckedParam(const std::string &name, const T & value, const std::string &parsed_function, const std::string &doc_string);
+  template <typename T>
+  void addRangeCheckedParam(const std::string &name, const std::string &parsed_function, const std::string &doc_string);
 
   /**
    * Method for adding a input parameter that expects a postprocessor name, but provides a default value
@@ -420,6 +446,9 @@ private:
   /// The names of the parameters organized into groups
   std::map<std::string, std::string> _group;
 
+  /// The map of functions used for range checked parameters
+  std::map<std::string, std::string> _range_functions;
+
   /// The parameter is used to restrict types that can be built.  Typically this
   /// is used for MooseObjectAction derived Actions.
   std::vector<std::string> _buildable_types;
@@ -470,6 +499,25 @@ InputParameters::set (const std::string& name)
   return libmesh_cast_ptr<Parameter<T>*>(_values[name])->set();
 }
 
+template <typename T, typename UP_T>
+bool
+InputParameters::rangeCheck(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T> * param)
+{
+  if (_range_functions.find(short_name) == _range_functions.end())
+    return false;
+
+  // We require a non-const value for the implicit upscaling of the parameter type
+  UP_T value = param->set();
+
+  FunctionParserBase<UP_T> fp;
+  fp.Parse(_range_functions[short_name], short_name);
+
+  if (!fp.Eval(&value))
+    mooseError("Range check failed for parameter " << full_name << "\n\tExpression: " << _range_functions[short_name] << "\n\tValue: " << value << '\n');
+
+  return true;
+}
+
 template <typename T>
 T
 InputParameters::getCheckedPointerParam(const std::string &name, const std::string &error_string)
@@ -518,6 +566,30 @@ InputParameters::addParam(const std::string &name, const std::string &doc_string
 
   InputParameters::insert<T>(name);
   _doc_string[name] = doc_string;
+}
+
+template <typename T>
+void
+InputParameters::addRequiredRangeCheckedParam(const std::string &name, const std::string &parsed_function, const std::string &doc_string)
+{
+  addRequiredParam<T>(name, doc_string);
+  _range_functions[name] = parsed_function;
+}
+
+template <typename T>
+void
+InputParameters::addRangeCheckedParam(const std::string &name, const T & value, const std::string &parsed_function, const std::string &doc_string)
+{
+  addParam<T>(name, value, doc_string);
+  _range_functions[name] = parsed_function;
+}
+
+template <typename T>
+void
+InputParameters::addRangeCheckedParam(const std::string &name, const std::string &parsed_function, const std::string &doc_string)
+{
+  addParam<T>(name, doc_string);
+  _range_functions[name] = parsed_function;
 }
 
 template <typename T>

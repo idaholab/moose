@@ -53,10 +53,10 @@ Parser::Parser(MooseApp & app, ActionWarehouse & action_wh) :
     _syntax(_action_wh.syntax()),
     _syntax_formatter(NULL),
     _getpot_initialized(false),
-    _sections_read(false)
+    _sections_read(false),
+    _current_params(NULL)
 {
 }
-
 
 Parser::~Parser()
 {
@@ -515,6 +515,13 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
       setScalarParameter<type>(full_name, short_name, scalar_p, in_global, global_block);                                               \
   } while(0)
 
+#define dynamicCastAndExtractScalarValueType(type, up_type, param, full_name, short_name, in_global, global_block)                      \
+  do                                                                                                                                    \
+  {                                                                                                                                     \
+    InputParameters::Parameter<type> * scalar_p = dynamic_cast<InputParameters::Parameter<type>*>(param);                               \
+    if (scalar_p)                                                                                                                       \
+      setScalarValueTypeParameter<type, up_type>(full_name, short_name, scalar_p, in_global, global_block);                             \
+  } while(0)
 
 #define dynamicCastAndExtractVector(type, param, full_name, short_name, in_global, global_block)                                        \
   do                                                                                                                                    \
@@ -537,6 +544,8 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
   if (act_iter != _action_wh.actionBlocksWithActionEnd(global_params_task))
     global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
 
+  // Set a pointer to the current InputParameters object being parsed so that it can be refered to in the extraction routines
+  _current_params = &p;
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
   {
     bool found = false;
@@ -586,14 +595,17 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
        * Scalar types
        */
       // built-ins
-      dynamicCastAndExtractScalar(Real                  , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar(int                   , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar(unsigned int          , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar(bool                  , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalarValueType(Real, Real         , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalarValueType(int,  long         , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalarValueType(long, long         , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalarValueType(unsigned int, long , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(bool                        , it->second, full_name, it->first, in_global, global_params_block);
 
       // Moose Scalars
       dynamicCastAndExtractScalar(SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
+
+      // Moose Compound Scalars
       dynamicCastAndExtractScalar(RealVectorValue       , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(Point                 , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(MooseEnum             , it->second, full_name, it->first, in_global, global_params_block);
@@ -667,12 +679,26 @@ void Parser::setScalarParameter(const std::string & full_name, const std::string
     gp = &_getpot_file;
 
   T value = gp->get_value_no_default(full_name.c_str(), param->get());
+
+  // Set the value here
   param->set() = value;
+
   if (in_global)
   {
     global_block->remove(short_name);
     global_block->setScalarParam<T>(short_name) = value;
   }
+}
+
+template<typename T, typename UP_T>
+void Parser::setScalarValueTypeParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  setScalarParameter<T>(full_name, short_name, param, in_global, global_block);
+
+  // If this is a range checked param, we need to make sure that the value falls within the reqested range
+  mooseAssert(_current_params, "Current params is NULL");
+
+  _current_params->rangeCheck<T, UP_T>(full_name, short_name, param);
 }
 
 template<typename T>

@@ -19,4 +19,4 @@ Some of the capability at your fingertips:
 More Information
 ================
 
-**For more information, including installation instructions, please see the official website: [http://mooseframework.com](http://mooseframework.com)**
+**For more information, including installation instructions, please see the official website: [http://mooseframework.org](http://mooseframework.org)**

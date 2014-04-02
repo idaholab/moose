@@ -16,6 +16,8 @@
 #include "MooseTypes.h"
 #include "MooseUtils.h"
 
+#include <cmath>
+
 InputParameters emptyInputParameters()
 {
   InputParameters params;
@@ -49,6 +51,7 @@ InputParameters::clear()
   _doc_string.clear();
   _custom_type.clear();
   _group.clear();
+  _range_functions.clear();
   _required_params.clear();
   _valid_params.clear();
   _private_params.clear();
@@ -92,6 +95,7 @@ InputParameters::operator=(const InputParameters &rhs)
   this->_doc_string = rhs._doc_string;
   this->_custom_type = rhs._custom_type;
   this->_group = rhs._group;
+  this->_range_functions = rhs._range_functions;
   this->_buildable_types = rhs._buildable_types;
   this->_required_params = rhs._required_params;
   this->_private_params = rhs._private_params;
@@ -114,6 +118,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   _doc_string.insert(rhs._doc_string.begin(), rhs._doc_string.end());
   _custom_type.insert(rhs._custom_type.begin(), rhs._custom_type.end());
   _group.insert(rhs._group.begin(), rhs._group.end());
+  _range_functions.insert(rhs._range_functions.begin(), rhs._range_functions.end());
   _buildable_types.insert(_buildable_types.end(), rhs._buildable_types.begin(), rhs._buildable_types.end());
   _required_params.insert(rhs._required_params.begin(), rhs._required_params.end());
   _private_params.insert(rhs._private_params.begin(), rhs._private_params.end());
