@@ -32,9 +32,9 @@ InputParameters validParams<GeneratedMesh>()
   MooseEnum dims("1 = 1, 2, 3");
   params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated"); // Make this parameter required
 
-  params.addParam<int>("nx", 1, "Number of elements in the X direction");
-  params.addParam<int>("ny", 1, "Number of elements in the Y direction");
-  params.addParam<int>("nz", 1, "Number of elements in the Z direction");
+  params.addRangeCheckedParam<int>("nx", 1, "nx>0", "Number of elements in the X direction");
+  params.addRangeCheckedParam<int>("ny", 1, "ny>=0", "Number of elements in the Y direction");
+  params.addRangeCheckedParam<int>("nz", 1, "nz>=0", "Number of elements in the Z direction");
   params.addParam<Real>("xmin", 0.0, "Lower X Coordinate of the generated mesh");
   params.addParam<Real>("ymin", 0.0, "Lower Y Coordinate of the generated mesh");
   params.addParam<Real>("zmin", 0.0, "Lower Z Coordinate of the generated mesh");
