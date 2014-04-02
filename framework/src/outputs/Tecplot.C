@@ -58,7 +58,7 @@ Tecplot::Tecplot(const std::string & name, InputParameters parameters) :
 void
 Tecplot::output()
 {
-  TecplotIO out(*_mesh_ptr, _binary);
+  TecplotIO out(*_mesh_ptr, _binary, time() + _app.getGlobalTimeOffset());
   out.write_equation_systems(filename(), *_es_ptr);
   _file_num++;
 }
