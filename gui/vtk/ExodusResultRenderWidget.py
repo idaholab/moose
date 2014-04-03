@@ -153,6 +153,18 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.left_controls_layout = QtGui.QVBoxLayout()
     self.right_controls_layout = QtGui.QVBoxLayout()
 
+    # Output selection controls
+    self.output_control_group_box = QtGui.QGroupBox("Select Output") # adds a box for storing widget
+    self.output_control_layout = QtGui.QVBoxLayout() # creates a layout
+    self.output_control = QtGui.QComboBox() # adds the actual dropdown menu
+    self.output_control.setToolTip('Select output file to view') # sets menu tooltip
+    self.output_control.addItems(self.input_file_widget.getOutputFileNames())
+    self.output_control.activated[str].connect(self._outputChanged) # set the callback function
+    self.output_control_layout.addWidget(self.output_control) # add the dropdown widget to the layout
+    self.output_control_group_box.setLayout(self.output_control_layout) # add the layout to the box
+    self.leftest_controls_layout.addWidget(self.output_control_group_box) # add the box to the gui control layout
+
+
     self.block_view_group_box = QtGui.QGroupBox('Show Blocks')
 #    self.block_view_group_box.setMaximumWidth(200)
 #    self.block_view_group_box.setMaximumHeight(200)
@@ -566,6 +578,20 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.time_slider.setMinimum(0)
     self.time_slider.setMaximum(self.current_max_timestep)
 
+  ##
+  # Updates the list of available output file names
+  def updateOutputControl(self):
+    name = self.output_control.currentText()
+    self.output_control.clear()
+    self.output_control.addItems(self.input_file_widget.getOutputFileNames())
+    idx = self.output_control.findText(name)
+    if idx != -1:
+      self.output_control.setCurrentIndex(idx)
+
+  ##
+  # Executes when the user selects an item from the output selection dropdown box
+  def _outputChanged(self):
+    self._openFile(self.output_control.currentText())
 
   def setupLuts(self):
     self.luts = []
@@ -1027,6 +1053,9 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         self.timestep_to_timestep[self.current_max_timestep] = timestep
 
   def _updateData(self):
+    #print self.file_name
+    #print self.exodus_result
+
     # Check to see if there are new exodus files with adapted timesteps in them.
     if self.file_name and self.exodus_result:
       for file_name in sorted(glob.glob(self.file_name + '-s*')):
@@ -1039,18 +1068,27 @@ class ExodusResultRenderWidget(QtGui.QWidget):
           self.new_stuff_to_read = True
 
     if not self.exodus_result:
-      if not self.file_name: # Might have been set by opening a file
-        output_file_names = self.input_file_widget.getOutputFileNames()
-      else:
-        output_file_names = [self.file_name]
 
-      output_file = ''
+      #if self.output_control.count() == 0:
+      #  self.output_control.addItems(self.input_file_widget.getOutputFileNames())
+
+      # These statments need to go away
+      #if not self.file_name: # Might have been set by opening a file
+      #  output_file_names = self.input_file_widget.getOutputFileNames()
+      #else:
+      #  output_file_names = [self.file_name]
+
+      # Need to be able to get the file_name like this, if I do this, things do not work
+      output_file_names = [self.output_control.currentText()]
 
       for file_name in output_file_names:
         if '.e' in file_name and os.path.exists(file_name):
+          print "Reading " + file_name
           file_stamp = os.path.getmtime(file_name)
 
+
           if int(file_stamp) >= int(self.base_stamp) and int(file_stamp) <= int(time.time() - 1) and file_name not in self.file_names:
+            print 'self.file_name = ' + file_name
             self.file_name = file_name
             self.exodus_result = ExodusResult(self, self.plane)
             self.exodus_result.setFileName(file_name, self.current_lut)
