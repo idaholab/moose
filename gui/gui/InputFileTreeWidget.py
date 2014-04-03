@@ -188,8 +188,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       child = self.findChildItemWithName(outputs, item)
       output_data = child.table_data
 
-      # If the object is of type = Exodus, then extract the filename
-      if output_data and output_data['type'] == 'Exodus':
+      # If the object is active (checked), it contains output_data, and is of type = Exodus, then extract the filename
+      if child.checkState(0) > 0 and ('type' in output_data) and (output_data['type'] == 'Exodus'):
         file_base = common_file_base
 
         # Check for file_base
@@ -508,7 +508,10 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
   def _updateOtherGUIElements(self):
     self.tree_changed.emit()
     self.input_file_widget.input_file_textbox.updateTextBox()
-    # Call ExodusResultRenderWidget::updateOutputControl (is this possible)
+
+    # Update the output selection box
+    if hasattr(self.application.main_window, "visualize_widget"):
+      self.application.main_window.visualize_widget.updateOutputControl()
 
   def _currentItemChanged(self, current, previous):
     if not current:
