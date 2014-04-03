@@ -108,7 +108,7 @@ public:
 
   /**
    * This function checks to see if there were any overridden parameters in the input file.
-   * (i.e. suplied more than once)
+   * (i.e. supplied more than once)
    * @param error_on_warn a Boolean that will trigger an error if this case is detected
    */
   void checkOverriddenParams(bool error_on_warn);
@@ -180,6 +180,9 @@ protected:
 
   /// The current parameter object for which parameters are being extracted
   InputParameters * _current_params;
+
+  /// The current stream object used for capturing errors during extraction
+  std::ostringstream * _current_error_stream;
 };
 
 

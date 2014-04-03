@@ -249,21 +249,46 @@ InputParameters::mooseObjectSyntaxVisibility() const
   return _moose_object_syntax_visibility;
 }
 
+#define dynamicCastRangeCheck(type, up_type, long_name, short_name, param, oss) \
+  do                                                                                                            \
+  {                                                                                                             \
+    InputParameters::Parameter<type> * scalar_p = dynamic_cast<InputParameters::Parameter<type>*>(param);       \
+    if (scalar_p)                                                                                               \
+      rangeCheck<type, up_type>(long_name, short_name, scalar_p, oss); \
+  } while(0)
+
+
 void
-InputParameters::checkParams(const std::string &prefix) const
+InputParameters::checkParams(const std::string &prefix)
 {
   std::string l_prefix = this->have_parameter<std::string>("long_name") ? this->get<std::string>("long_name") : prefix;
 
+  std::ostringstream oss;
+  // Required parameters
   for (InputParameters::const_iterator it = this->begin(); it != this->end(); ++it)
   {
     if (!isParamValid(it->first) && isParamRequired(it->first))
     {
       // The parameter is required but missing
-      std::string doc = getDocString(it->first);
-      mooseError("The required parameter '" + l_prefix + "/" + it->first + "' is missing\nDoc String: \"" +
-                 getDocString(it->first) + "\"");
+      if (oss.str().empty())
+        oss << "The following required parameters are missing:\n";
+      oss << l_prefix << "/" << it->first << "\n\tDoc String: \"" + getDocString(it->first) + "\"";
     }
   }
+
+  // Range checked parameters
+  for (InputParameters::const_iterator it = this->begin(); it != this->end(); ++it)
+  {
+    std::string long_name(l_prefix + "/" + it->first);
+
+    dynamicCastRangeCheck(Real, Real,         long_name, it->first, it->second, oss);
+    dynamicCastRangeCheck(int,  long,         long_name, it->first, it->second, oss);
+    dynamicCastRangeCheck(long, long,         long_name, it->first, it->second, oss);
+    dynamicCastRangeCheck(unsigned int, long, long_name, it->first, it->second, oss);
+  }
+
+  if (!oss.str().empty())
+    mooseError(oss.str());
 }
 
 Real
