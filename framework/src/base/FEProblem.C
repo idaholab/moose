@@ -606,6 +606,14 @@ void FEProblem::timestepSetup()
   _app.getOutputWarehouse().timestepSetup();
 }
 
+unsigned int
+FEProblem::getMaxQps() const
+{
+  if (_max_qps == std::numeric_limits<unsigned int>::max())
+    mooseError("Max QPS uninitialized");
+  return _max_qps;
+}
+
 void
 FEProblem::prepare(const Elem * elem, THREAD_ID tid)
 {

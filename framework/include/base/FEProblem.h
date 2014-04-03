@@ -220,7 +220,7 @@ public:
   /**
    * @return The maximum number of quadrature points in use on any element in this problem.
    */
-  unsigned int getMaxQps() { mooseAssert(_max_qps < std::numeric_limits<unsigned int>::max(), "Max QPS uninitialized"); return _max_qps; }
+  unsigned int getMaxQps() const;
 
   virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
 
