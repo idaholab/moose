@@ -164,6 +164,9 @@ class InputFileWidget(QtGui.QWidget):
   def getOutputFileNames(self):
     return self.tree_widget.getOutputFileNames()
 
+  def getOutputBlockNames(self):
+    return self.tree_widget.getOutputBlockNames()
+
   def openInputFile(self, file_name):
     if file_name and file_name != '':
       progress = QtGui.QProgressDialog("Reading Input File...", "Abort", 0, 100, self)
