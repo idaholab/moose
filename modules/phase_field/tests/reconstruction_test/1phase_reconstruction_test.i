@@ -106,6 +106,10 @@
     type = NumNodes
     execute_on = timestep
   [../]
+
+[./DOFs]
+    type = NumDOFs
+  [../]
 []
 
 [Executioner]
@@ -115,17 +119,15 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold' 
   petsc_options_value = 'hypre boomeramg 31 0.7'
   l_tol = 1.0e-4
-  l_max_its = 15
+  l_max_its = 20
   nl_rel_tol = 1.0e-9
   nl_max_its = 20
   start_time = 0.0
   num_steps = 3
-  dt = 0.1
+  dt = 0.05
 
 [./Adaptivity]
    initial_adaptivity = 1
@@ -136,12 +138,17 @@
 []
 
 [Outputs]
-  linear_residuals = true
   file_base = 1phase_reconstruction_test
   output_initial = true
   interval = 1
   exodus = true
-  perf_log = true
+
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+    nonlinear_residuals = true
+  [../]  
 []
    
     

@@ -160,11 +160,6 @@
 #[]
 
 [Postprocessors]
-  [./comp_time]
-    type = RunTime
-    time_type = active
-  [../]
-
 #  [./grain_tracker]
 #    type = GrainTracker
 #    threshold = 0.2
@@ -199,12 +194,12 @@
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold' 
   petsc_options_value = 'hypre boomeramg 31 0.7'
   l_tol = 1.0e-4
-  l_max_its = 15
-  nl_rel_tol = 1.0e-8
+  l_max_its = 20
+  nl_rel_tol = 1.0e-9
   nl_max_its = 20
   start_time = 0.0
   num_steps = 2
-  dt = 0.2
+  dt = 0.1
 []
   
  #[./Adaptivity]
@@ -218,15 +213,14 @@
 
 [Outputs]
   file_base = Small_IN100_1_partitioned_Marmot
-  csv = true
   output_initial = true
-  #interval = 1
+  interval = 1
   exodus = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
-    setup_log_early = true
-    max_rows = 20
+    linear_residuals = true 
+    nonlinear_residuals = true  
+#    max_rows = 20
   [../]
 []
