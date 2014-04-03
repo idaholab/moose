@@ -268,25 +268,25 @@
   [./missing_req_par_action_obj_test]
     type = 'RunException'
     input = 'missing_req_par_action_obj_test.i'
-    expect_err = "The required parameter '\S+' is missing"
+    expect_err = "The following required parameters are missing:"
   [../]
 
   [./missing_req_par_mesh_block_test]
     type = 'RunException'
     input = 'missing_req_par_mesh_block_test.i'
-    expect_err = "The required parameter '\S+' is missing"
+    expect_err = "The following required parameters are missing:"
   [../]
 
   [./missing_req_par_moose_obj_test]
     type = 'RunException'
     input = 'missing_req_par_moose_obj_test.i'
-    expect_err = "The required parameter '\S+' is missing"
+    expect_err = "The following required parameters are missing:"
   [../]
 
   [./missing_required_coupled_test]
     type = 'RunException'
     input = 'missing_required_coupled.i'
-    expect_err = "The required parameter '\S+' is missing"
+    expect_err = "The following required parameters are missing:"
   [../]
 
   [./multi_precond_test]
@@ -400,7 +400,7 @@
   [./ics_missing_variable]
     type = 'RunException'
     input = 'ic_variable_not_specified.i'
-    expect_err = "The required parameter '\S+' is missing."
+    expect_err = "The following required parameters are missing:"
   [../]
 
   [./ic_bnd_for_non_nodal]
