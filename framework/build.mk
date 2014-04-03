@@ -5,6 +5,9 @@
 # Set LIBMESH_DIR if it is not already set in the environment (try our best to guess!)
 LIBMESH_DIR       ?= $(MOOSE_DIR)/libmesh/installed
 
+# Default number of parallel jobs to use for run_tests
+MOOSE_JOBS        ?= 8
+
 # If the user has no environment variable
 # called METHOD, he gets optimized mode.
 ifeq (x$(METHOD),x)
@@ -74,10 +77,6 @@ ifneq (,$(filter $(cxx_compiler), clang++))
 	libmesh_CXXFLAGS += -mmacosx-version-min=10.7
   endif
 endif
-
-# Number of JOBS to run in parallel used in run_tests
-JOBS ?= 1
-
 
 all::
 ifdef PRECOMPILED
@@ -278,6 +277,12 @@ endif
 	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F90) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 
+test:	all
+	@echo ======================================================
+	@echo Testing $(CURRENT_APP)
+	@echo ======================================================
+	@(./run_tests -j $(MOOSE_JOBS))
+
 # Build appliations up the tree
 up:
 	@echo ======================================================
@@ -319,7 +324,7 @@ clean_up:
 #
 # Maintenance
 #
-.PHONY: cleanall clean clean_up doc sa 
+.PHONY: cleanall clean clean_up doc sa test
 
 #
 # Misc
