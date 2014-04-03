@@ -82,6 +82,9 @@ RungeKutta2::solve()
   Moose::setSolverDefaults(_fe_problem);
 
   _fe_problem.getNonlinearSystem().sys().solve();
+
+  // Reset time_old back to what it was
+  _fe_problem.timeOld() = time_old;
 }
 
 void

@@ -312,7 +312,7 @@ Transient::solveStep(Real input_dt)
   else
     _dt = input_dt;
 
-  Real current_dt;
+  Real current_dt = _dt;
 
   _problem.onTimestepBegin();
   if (lastSolveConverged())
