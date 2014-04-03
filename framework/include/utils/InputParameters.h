@@ -18,6 +18,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <sstream>
 
 // libMesh
 #include "libmesh/parameters.h"
@@ -87,7 +88,8 @@ public:
    * Runs a range on the supplied parameter if it exists and throws an error if that check fails.
    * @returns Boolean indicating whether range check exists
    */
-  template <typename T, typename UP_T> bool rangeCheck(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T> * param);
+  template <typename T, typename UP_T> void rangeCheck(const std::string & full_name, const std::string & short_name,
+                                                       InputParameters::Parameter<T> * param, std::ostream & oss=Moose::out);
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
@@ -318,7 +320,7 @@ public:
   std::string type(const std::string &name);
 
   /**
-   * Returns a boolean indicating whether the specified parameter is private or not
+   * Returns a Boolean indicating whether the specified parameter is private or not
    */
   bool isPrivate(const std::string &name) const;
 
@@ -367,7 +369,7 @@ public:
    *   Required parameters are verified as valid meaning that they were either initialized when
    *   they were created, or were read from an input file or some other valid source
    */
-  void checkParams(const std::string & prefix) const;
+  void checkParams(const std::string & prefix);
 
   /**
    * Methods returning iterators to the coupled variables names stored in this
@@ -500,22 +502,34 @@ InputParameters::set (const std::string& name)
 }
 
 template <typename T, typename UP_T>
-bool
-InputParameters::rangeCheck(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T> * param)
+void
+InputParameters::rangeCheck(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<T> * param, std::ostream & oss)
 {
+  mooseAssert(param, "Parameter is NULL");
+
   if (_range_functions.find(short_name) == _range_functions.end())
-    return false;
+    return;
+
+  // Parse the expression
+  FunctionParserBase<UP_T> fp;
+  if (fp.Parse(_range_functions[short_name], short_name) != -1) // -1 for success
+  {
+    oss << "Error parsing expression: " << _range_functions[short_name] << '\n';
+    return;
+  }
 
   // We require a non-const value for the implicit upscaling of the parameter type
-  UP_T value = param->set();
+  std::vector<UP_T> value(1, param->set());
+  UP_T result = fp.Eval(&value[0]);
 
-  FunctionParserBase<UP_T> fp;
-  fp.Parse(_range_functions[short_name], short_name);
+  if (fp.EvalError())
+  {
+    oss << "Error evaluating expression: " << _range_functions[short_name] << "\nPerhaps you used the wrong variable name?\n";
+    return;
+  }
 
-  if (!fp.Eval(&value))
-    mooseError("Range check failed for parameter " << full_name << "\n\tExpression: " << _range_functions[short_name] << "\n\tValue: " << value << '\n');
-
-  return true;
+  if (!result)
+    oss << "Range check failed for parameter " << full_name << "\n\tExpression: " << _range_functions[short_name] << "\n\tValue: " << value[0] << '\n';
 }
 
 template <typename T>

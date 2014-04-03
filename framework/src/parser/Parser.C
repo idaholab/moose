@@ -54,7 +54,8 @@ Parser::Parser(MooseApp & app, ActionWarehouse & action_wh) :
     _syntax_formatter(NULL),
     _getpot_initialized(false),
     _sections_read(false),
-    _current_params(NULL)
+    _current_params(NULL),
+    _current_error_stream(NULL)
 {
 }
 
@@ -534,6 +535,7 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
 void
 Parser::extractParams(const std::string & prefix, InputParameters &p)
 {
+  std::ostringstream error_stream;
   static const std::string global_params_task = "set_global_params";
   static const std::string global_params_block_name = _syntax.getSyntaxByAction("GlobalParamsAction", global_params_task);
 
@@ -546,6 +548,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
 
   // Set a pointer to the current InputParameters object being parsed so that it can be refered to in the extraction routines
   _current_params = &p;
+  _current_error_stream = &error_stream;
   for (InputParameters::iterator it = p.begin(); it != p.end(); ++it)
   {
     bool found = false;
@@ -595,6 +598,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
        * Scalar types
        */
       // built-ins
+      // NOTE: Similar dynamic casting is done in InputParameters.C, please update appropriately
       dynamicCastAndExtractScalarValueType(Real, Real         , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalarValueType(int,  long         , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalarValueType(long, long         , it->second, full_name, it->first, in_global, global_params_block);
@@ -664,6 +668,10 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractVector(OutputName            , it->second, full_name, it->first, in_global, global_params_block);
     }
   }
+
+  // All of the parameters for this object have been extracted.  See if there are any errors
+  if (!error_stream.str().empty())
+    mooseError(error_stream.str());
 }
 
 template<typename T>
@@ -695,10 +703,10 @@ void Parser::setScalarValueTypeParameter(const std::string & full_name, const st
 {
   setScalarParameter<T>(full_name, short_name, param, in_global, global_block);
 
-  // If this is a range checked param, we need to make sure that the value falls within the reqested range
+  // If this is a range checked param, we need to make sure that the value falls within the requested range
   mooseAssert(_current_params, "Current params is NULL");
 
-  _current_params->rangeCheck<T, UP_T>(full_name, short_name, param);
+  _current_params->rangeCheck<T, UP_T>(full_name, short_name, param, *_current_error_stream);
 }
 
 template<typename T>
