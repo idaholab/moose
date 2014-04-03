@@ -1090,6 +1090,10 @@ class ExodusResultRenderWidget(QtGui.QWidget):
       if not self.file_name: # Might have been set by opening a file or from drop-down
         idx = self.output_control.currentIndex()
         file_name = self.output_control.itemData(idx)
+
+        if isinstance(file_name, QtCore.QVariant):
+          file_name = str(file_name.toString())
+
       else:
         file_name = self.file_name
 
