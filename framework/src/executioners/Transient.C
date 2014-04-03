@@ -312,6 +312,8 @@ Transient::solveStep(Real input_dt)
   else
     _dt = input_dt;
 
+  Real current_dt = _dt;
+
   _problem.onTimestepBegin();
   if (lastSolveConverged())
     _problem.updateMaterials();             // Update backward material data structures
@@ -453,7 +455,7 @@ Transient::solveStep(Real input_dt)
   _time_stepper->postSolve();
 
   // Reset time in case we solve again
-  _dt = _time - _time_old; // Compute the total _dt (_dt might be smaller than this at this point for multistep methods)
+  _dt = current_dt; // _dt might be smaller than this at this point for multistep methods
   _time = _time_old;
 }
 
