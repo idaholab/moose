@@ -28,7 +28,6 @@
 template<>
 InputParameters validParams<OutputBase>()
 {
-
   /* NOTE:
    * The validParams from each output object is merged with the valdParams from CommonOutputAction. In order for the
    * common parameters to be applied correctly any parameter that is a common parameter (e.g., output_initial) MUST NOT
