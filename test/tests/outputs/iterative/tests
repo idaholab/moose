@@ -41,4 +41,14 @@
     max_parallel = 1
     max_threads = 1
   [../]
+  [./exodus_start_time]
+    # Test that the nonlinear residuals will operate with only a start time
+    type = 'Exodiff'
+    input = 'iterative_start_time.i'
+    exodiff = 'iterative_start_time_out.e'
+
+    # This test relies on number of residuals being the same, so run it serially
+    max_parallel = 1
+    max_threads = 1
+  [../]
 []
