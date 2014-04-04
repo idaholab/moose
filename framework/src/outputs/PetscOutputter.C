@@ -59,15 +59,33 @@ PetscOutputter::PetscOutputter(const std::string & name, InputParameters & param
     _on_nonlinear_residual(false),
     _nonlinear_dt_divisor(getParam<Real>("nonlinear_residual_dt_divisor")),
     _linear_dt_divisor(getParam<Real>("linear_residual_dt_divisor")),
-    _nonlinear_start_time(isParamValid("nonlinear_residual_start_time") ?
-                          getParam<Real>("nonlinear_residual_start_time") : std::numeric_limits<Real>::max()),
-    _linear_start_time(isParamValid("linear_residual_start_time") ?
-                       getParam<Real>("linear_residual_start_time") : std::numeric_limits<Real>::max()),
-    _nonlinear_end_time(isParamValid("nonlinear_residual_end_time") ?
-                        getParam<Real>("nonlinear_residual_end_time") : -std::numeric_limits<Real>::max()),
-    _linear_end_time(isParamValid("linear_residual_end_time") ?
-                     getParam<Real>("linear_residual_end_time") : -std::numeric_limits<Real>::max())
+    _nonlinear_start_time(-std::numeric_limits<Real>::max()),
+    _linear_start_time(-std::numeric_limits<Real>::max()),
+    _nonlinear_end_time(-std::numeric_limits<Real>::max()),
+    _linear_end_time(-std::numeric_limits<Real>::max())
 {
+
+  // Nonlinear residual start-time supplied by user
+  if (isParamValid("nonlinear_residual_start_time"))
+  {
+    _nonlinear_start_time = getParam<Real>("nonlinear_residual_start_time");
+    _nonlinear_end_time = std::numeric_limits<Real>::max(); // max end time
+  }
+
+  // Nonlinear residual end-time supplied by user
+  if (isParamValid("nonlinear_residual_end_time"))
+    _nonlinear_end_time = getParam<Real>("nonlinear_residual_end_time");
+
+  // Linear residual start-time supplied by user
+  if (isParamValid("linear_residual_start_time"))
+  {
+    _linear_start_time = getParam<Real>("linear_residual_start_time");
+    _linear_end_time = std::numeric_limits<Real>::max(); // max end time
+  }
+
+  // Linear residual end-time supplied by user
+  if (isParamValid("linear_residual_end_time"))
+    _linear_end_time = getParam<Real>("linear_residual_end_time");
 }
 
 PetscOutputter::~PetscOutputter()
