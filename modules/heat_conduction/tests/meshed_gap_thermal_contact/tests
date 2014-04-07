@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'meshed_gap_thermal_contact.i'
+    exodiff = 'meshed_gap_thermal_contact_out.e'
+  [../]
+[]
