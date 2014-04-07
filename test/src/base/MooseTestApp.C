@@ -15,6 +15,7 @@
 #include "RestartDiffusion.h"
 #include "MatCoefDiffusion.h"
 #include "FuncCoefDiffusion.h"
+#include "CoefReaction.h"
 #include "Convection.h"
 #include "PolyDiffusion.h"
 #include "PolyConvection.h"
@@ -130,6 +131,7 @@
 #include "InsideValuePPS.h"
 #include "BoundaryValuePPS.h"
 #include "NumInternalSides.h"
+#include "ElementL2Diff.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -208,6 +210,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(RestartDiffusion);
   registerKernel(MatCoefDiffusion);
   registerKernel(FuncCoefDiffusion);
+  registerKernel(CoefReaction);
   registerKernel(Convection);
   registerKernel(PolyDiffusion);
   registerKernel(PolyConvection);
@@ -344,6 +347,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
   registerPostprocessor(BoundaryValuePPS);
+  registerPostprocessor(NumInternalSides);
+  registerPostprocessor(ElementL2Diff);
 
   registerMarker(RandomHitMarker);
 
@@ -353,7 +358,6 @@ MooseTestApp::registerObjects(Factory & factory)
 
   registerProblem(MooseTestProblem);
   registerProblem(FailingProblem);
-  registerProblem(NumInternalSides);
 }
 
 void
