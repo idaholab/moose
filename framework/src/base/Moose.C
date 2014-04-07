@@ -50,6 +50,7 @@
 #include "BodyForce.h"
 #include "Reaction.h"
 #include "RealPropertyOutput.h"
+#include "EigenKernel.h"
 
 // bcs
 #include "ConvectiveFluxBC.h"
@@ -143,6 +144,7 @@
 #include "NumNodes.h"
 #include "NumNonlinearIterations.h"
 #include "NumLinearIterations.h"
+#include "ProblemRealParameter.h"
 #include "Residual.h"
 #include "ScalarVariable.h"
 #include "NumVars.h"
@@ -367,6 +369,7 @@ registerObjects(Factory & factory)
   registerKernel(BodyForce);
   registerKernel(Reaction);
   registerKernel(RealPropertyOutput);
+  registerKernel(EigenKernel);
 
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);
@@ -464,6 +467,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumNodes);
   registerPostprocessor(NumNonlinearIterations);
   registerPostprocessor(NumLinearIterations);
+  registerPostprocessor(ProblemRealParameter);
   registerPostprocessor(Residual);
   registerPostprocessor(ScalarVariable);
   registerPostprocessor(NumVars);

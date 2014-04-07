@@ -398,6 +398,8 @@ public:
 
   bool hasActiveIntegratedBCs(BoundaryID bnd_id, THREAD_ID tid) { return ! _bcs[tid].activeIntegrated(bnd_id).empty(); }
 
+  const std::set<VariableName> & getEigenVariableNames() const { return _eigen_var_names; }
+
 public:
   FEProblem & _fe_problem;
   // FIXME: make these protected and create getters/setters
@@ -537,6 +539,8 @@ protected:
   bool _computing_initial_residual;
 
   bool _print_all_var_norms;
+
+  std::set<VariableName> _eigen_var_names;
 
 public:
   friend class ComputeResidualThread;

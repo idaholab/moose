@@ -47,6 +47,7 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
+#include "EigenKernel.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -498,6 +499,9 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
     // Create the kernel object via the factory
     KernelBase *kernel = static_cast<KernelBase *>(_factory.create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
+
+    EigenKernel * ekernel = dynamic_cast<EigenKernel *>(kernel);
+    if (ekernel) _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
 
     // Extract the SubdomainIDs from the object (via BlockRestrictable class)
     std::set<SubdomainID> blk_ids = kernel->blockIDs();
