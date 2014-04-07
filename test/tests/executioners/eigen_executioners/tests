@@ -1,0 +1,12 @@
+[Tests]
+  [./test_inverse_power_method]
+    type = 'Exodiff'
+    input = 'ipm.i'
+    exodiff = 'ipm.e'
+  [../]
+  [./test_nonlinear_eigen]
+    type = 'Exodiff'
+    input = 'ne.i'
+    exodiff = 'ne.e'
+  [../]
+[]
