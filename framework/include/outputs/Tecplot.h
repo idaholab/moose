@@ -65,6 +65,9 @@ private:
 
   /// Flag for binary output
   bool _binary;
+
+  /// Flag for turning on appending to ASCII files
+  bool _ascii_append;
 };
 
 #endif /* TECPLOT_H */
