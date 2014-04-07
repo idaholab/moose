@@ -102,6 +102,8 @@
 // executioners
 #include "Steady.h"
 #include "Transient.h"
+#include "InversePowerMethod.h"
+#include "NonlinearEigen.h"
 #include "PetscTSExecutioner.h"
 #include "CoupledTransientExecutioner.h"
 
@@ -420,6 +422,8 @@ registerObjects(Factory & factory)
   // executioners
   registerExecutioner(Steady);
   registerExecutioner(Transient);
+  registerExecutioner(InversePowerMethod);
+  registerExecutioner(NonlinearEigen);
   registerExecutioner(CoupledTransientExecutioner);
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
 #if 0 // This seems to be broken right now -- doesn't work wiith petsc >= 3.4 either
