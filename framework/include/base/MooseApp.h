@@ -186,18 +186,6 @@ public:
   void disableCheckUnusedFlag();
 
   /**
-   * \todo{this could likely be removed after the new input system is in place}
-   */
-  std::string getSysInfo();
-
-  /**
-   * Prints the simulation information header
-   * \todo{This can likely go away after the new output system is in place, this
-   * is now in the Console object}
-   */
-  void printSimulationInfo(std::ostream & ostream);
-
-  /**
    * Retrieve the Executioner for this App.
    */
   Executioner * getExecutioner() { return _executioner; }
@@ -272,18 +260,6 @@ public:
   bool halfTransient() { return _half_transient; }
 
   /**
-   * Returns true if the 'Output' block was included
-   * \todo{Remove this when the old system is removed}
-   */
-  bool hasLegacyOutput(){ return _legacy_output;}
-
-  /**
-   * Set the legacy output flag
-   * \todo{Remove this when the old system is removed}
-   */
-  void setLegacyOutput(bool state){ _legacy_output = state; }
-
-  /**
    * Store a map of outputter names and file numbers
    * The MultiApp system requires this to get the file numbering to propogate down through the
    * multiapps.
@@ -303,6 +279,11 @@ public:
   std::map<std::string, unsigned int> & getOutputFileNumbers(){ return _output_file_numbers; }
 
   /**
+   * Return true if the output position has been set
+   */
+  bool hasOutputWarehouse(){ return _output_position_set; }
+
+  /**
    * The OutputWarehouse for this App
    * @return Reference to the OutputWarehouse object
    */
@@ -318,6 +299,12 @@ public:
    */
   void setOutputWarehouse(OutputWarehouse * owh){ _alternate_output_warehouse = owh; }
 
+  /**
+   * Get SystemInfo object
+   * @return A pointer to the SystemInformation object
+   */
+  SystemInfo * getSystemInfo() { return _sys_info; }
+
 protected:
 
   MooseApp(const std::string & name, InputParameters parameters);
@@ -329,9 +316,6 @@ protected:
 
   /// Parameters of this object
   InputParameters _pars;
-
-  /// True if the old "Output" block was included \todo{remove when old output system is deleted}
-  bool _legacy_output;
 
   /// Input file name used
   std::string _input_filename;

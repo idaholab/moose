@@ -53,7 +53,7 @@
   exodus = true
   [./console]
     type = Console
-    perf_log = true
+    perf_log = false
     linear_residuals = true
   [../]
 []

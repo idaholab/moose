@@ -234,11 +234,6 @@ public:
   Real computeDamping(const NumericVector<Number>& update);
 
   /**
-   * Print the L2-norm of variable residuals
-   */
-  void printVarNorms();
-
-  /**
    * Called at the beginning of the time step
    */
   void onTimestepBegin();

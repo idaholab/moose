@@ -16,7 +16,6 @@
 #include "Factory.h"
 #include "MooseUtils.h"
 #include "DisplacedProblem.h"
-#include "OutputProblem.h"
 #include "MaterialData.h"
 #include "ComputeUserObjectsThread.h"
 #include "ComputeNodalUserObjectsThread.h"
@@ -36,7 +35,6 @@
 #include "Function.h"
 #include "Material.h"
 #include "PetscSupport.h"
-#include "SetupOutputAction.h"
 #include "RandomInterface.h"
 #include "RandomData.h"
 #include "EigenSystem.h"
@@ -118,17 +116,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
     _quadrature_order(CONSTANT),
-    _pps_output_table_file(declareRestartableData<FormattedTable>("pps_output_table_file")),
-    _pps_output_table_screen(declareRestartableData<FormattedTable>("pps_output_table_screen")),
-    _pps_output_table_max_rows(0),
-    _pps_fit_to_screen(FormattedTable::getWidthModes()),
-    _print_linear_residuals(false),
-    _postprocessor_screen_output(true),
-    _postprocessor_csv_output(false),
-    _postprocessor_gnuplot_output(false),
-    _gnuplot_format("ps"),
-    _out(*this, _eq),
-    _out_problem(NULL),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif
@@ -137,19 +124,12 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _geometric_search_data(*this, _mesh),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
-    _output_displaced(false),
-    _output_solution_history(false),
-    _output_es_info(true),
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
     _has_initialized_stateful(false),
-    _resurrector(NULL),
-//    _solve_only_perf_log("Solve Only"),
-    _output_setup_log_early(false),
-    // debugging
     _dbg_top_residuals(0),
-    _dbg_print_var_rnorms(false),
+    _resurrector(NULL),
     _const_jacobian(false),
     _has_jacobian(false),
     _restarting(false),
@@ -258,9 +238,6 @@ FEProblem::~FEProblem()
   delete _displaced_mesh;
   delete _displaced_problem;
   delete &_nl;
-
-  if (_out_problem)
-    delete _out_problem;
 
   for(unsigned int i=0; i<n_threads; i++)
     delete _pps_data[i];
@@ -528,21 +505,8 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
   }
 
-
-  // Moose::setup_perf_log.push("Output Initial Condition","Setup");
-  // if (_output_initial)
-  // {
-  //   output();
-  //   outputPostprocessors();
-  // }
-  // Moose::setup_perf_log.pop("Output Initial Condition","Setup");
-
   _nl.initialSetupBCs();
   _nl.initialSetupKernels();
-
-  /// \todo{Remove when Output system is complete}
-  if (_output_setup_log_early)
-    Moose::setup_perf_log.print_log();
 
   _nl.initialSetup();
 
@@ -601,11 +565,7 @@ void FEProblem::timestepSetup()
       it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
   }
 
-  _out.timestepSetup();
-  if (_out_problem)
-    _out_problem->timestepSetup();
-
-  // Timestep setup of output objects
+   // Timestep setup of output objects
   _app.getOutputWarehouse().timestepSetup();
 }
 
@@ -1889,14 +1849,6 @@ FEProblem::getPostprocessorWarehouse()
 }
 
 void
-FEProblem::clearPostprocessorTables()
-{
-  // Clear the tables for cases when this routine is called multiple times by an executioner
-  _pps_output_table_file.clear();
-  _pps_output_table_screen.clear();
-}
-
-void
 FEProblem::addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
@@ -1972,6 +1924,13 @@ Real &
 FEProblem::getPostprocessorValueOld(const std::string & name, THREAD_ID tid)
 {
   return _pps_data[tid]->getPostprocessorValueOld(name);
+}
+
+void
+FEProblem::setOutputPosition(const Point & p)
+{
+  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
+    _multi_apps(Moose::exec_types[i])[0].parentOutputPositionChanged();
 }
 
 void
@@ -2422,49 +2381,6 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectW
 }
 
 void
-FEProblem::addPPSValuesToTable(ExecFlagType type)
-{
-
-  // Get a reference to a vector of all the postprocessors
-  const std::vector<Postprocessor *> & pps_ptrs = _pps(type)[0].all();
-
-  // Loop through the postprocessors
-  for (std::vector<Postprocessor*>::const_iterator it=pps_ptrs.begin(); it!=pps_ptrs.end(); ++it)
-  {
-    // Get the name and value from the iterator
-    std::string name = (*it)->PPName();
-    PostprocessorValue value = _pps_data[0]->getPostprocessorValue(name);
-
-    // Set the output type, defaults to auto if the postprocessor was not found
-    Moose::PPSOutputType out_type = (*it)->getOutput();
-
-    // Produce the correct output
-    if (out_type != Moose::PPS_OUTPUT_NONE)
-    {
-      switch (out_type)
-      {
-      case Moose::PPS_OUTPUT_FILE:
-        _pps_output_table_file.addData(name, value, _time);
-        break;
-
-      case Moose::PPS_OUTPUT_SCREEN:
-        _pps_output_table_screen.addData(name, value, _time);
-        break;
-
-      case Moose::PPS_OUTPUT_BOTH:
-      case Moose::PPS_OUTPUT_AUTO:
-        _pps_output_table_file.addData(name, value, _time);
-        _pps_output_table_screen.addData(name, value, _time);
-        break;
-
-      default:
-        break;
-      }
-    }
-  }
-}
-
-void
 FEProblem::reinitBecauseOfGhosting()
 {
   // Need to see if _any_ processor has ghosted elems
@@ -2478,42 +2394,6 @@ FEProblem::reinitBecauseOfGhosting()
 
     if (_displaced_mesh)
       _displaced_problem->es().reinit();
-  }
-}
-
-void
-FEProblem::outputPostprocessors(bool force/* = false*/)
-{
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    addPPSValuesToTable(Moose::exec_types[i]);
-
-  if (!_pps_output_table_screen.empty())
-  {
-    if (force || (_postprocessor_screen_output && (_t_step % out().screen_interval() == 0)))
-    {
-      Moose::out << "\nPostprocessor Values:\n";
-      _pps_output_table_screen.printTable(Moose::out, _pps_output_table_max_rows, _pps_fit_to_screen);
-      Moose::out << std::endl;
-    }
-  }
-
-  if (!_pps_output_table_file.empty())
-  {
-    if (force || (_t_step % out().interval() == 0))
-    {
-      // FIXME: if exodus output is enabled?
-      _out.outputPps(_pps_output_table_file);
-      if (_displaced_problem)
-        _displaced_problem->outputPps(_pps_output_table_file);
-      if (_out_problem)
-        _out_problem->outputPps(_pps_output_table_file);
-
-      if (_postprocessor_csv_output)
-        _pps_output_table_file.printCSV(_out.fileBase() + ".csv", out().screen_interval());
-
-      if (_postprocessor_gnuplot_output)
-        _pps_output_table_file.makeGnuplot(_out.fileBase(), _gnuplot_format);
-    }
   }
 }
 
@@ -2644,7 +2524,7 @@ FEProblem::getMultiApp(const std::string & multi_app_name)
 void
 FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+ std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
 
   // Do anything that needs to be done to Apps before transfers
   for(unsigned int i=0; i<multi_apps.size(); i++)
@@ -2966,8 +2846,6 @@ FEProblem::init()
   Moose::setup_perf_log.pop("FEProblem::init::meshChanged()","Setup");
 
   init2();
-
-  _out.init();
   _initialized = true;
 }
 
@@ -3082,7 +2960,6 @@ FEProblem::onTimestepBegin()
 void
 FEProblem::onTimestepEnd()
 {
-  _nl.printVarNorms();
 }
 
 void
@@ -3387,184 +3264,6 @@ FEProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
     _displaced_problem->updateGeomSearch(type);
 }
 
-
-void
-FEProblem::output(bool force)
-{
-  if ((_t_step % out().interval() == 0) || force)
-  {
-    _out.setOutput(true);
-    _out.output();
-
-    // if the OverSample problem is setup, output it's solution
-    if (_out_problem)
-    {
-      _out_problem->init();
-      _out_problem->output(force);
-    }
-
-    if (_output_solution_history)
-      _out.outputSolutionHistory();
-
-    if (_displaced_problem != NULL && _output_displaced)
-      _displaced_problem->output();
-
-    // save the input file if we did not do so already
-    if (!_input_file_saved)
-    {
-      _out.outputInput();
-      if (_out_problem)
-        _out_problem->outputInput();
-      _input_file_saved = true;
-    }
-  }
-}
-
-void
-FEProblem::outputRestart(bool force)
-{
-  if ((_t_step % out().checkpoint_interval() == 0) || force)
-    _resurrector->write();
-}
-
-void
-FEProblem::setOutputVariables()
-{
-  // If both the white list and black list are empty, then do nothing
-  if (_variable_white_list.empty() && _variable_black_list.empty())
-    return;
-
-  std::vector<VariableName> output_vars;
-  // If the white list is populated then we'll use that as a starting point for variables to output
-  if (!_variable_white_list.empty())
-  {
-    //Make sure that all of the variables in the whitelist actually exist
-    //Get list of variable names
-    std::vector<VariableName> available_vars = getVariableNames();
-
-    //Get names of scalar variables, add to list
-    std::vector<MooseVariableScalar*> scalar_vars = _nl.getScalarVariables(0);
-    for (std::vector<MooseVariableScalar*>::iterator i = scalar_vars.begin(); i != scalar_vars.end();  ++i)
-      available_vars.push_back((*i)->name());
-    scalar_vars = _aux.getScalarVariables(0);
-    for (std::vector<MooseVariableScalar*>::iterator i = scalar_vars.begin(); i != scalar_vars.end();  ++i)
-      available_vars.push_back((*i)->name());
-
-    //Get names of postprocessors, add to list
-    for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    {
-      for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(Moose::exec_types[i])[0].all().begin();
-           postprocessor_it != _pps(Moose::exec_types[i])[0].all().end();
-           ++postprocessor_it)
-      {
-        Postprocessor *pps = *postprocessor_it;
-
-        Moose::PPSOutputType out_type = pps->getOutput();
-        if (out_type != Moose::PPS_OUTPUT_NONE)
-          available_vars.push_back(pps->PPName());
-      }
-    }
-
-    std::sort(available_vars.begin(), available_vars.end());
-    std::sort(_variable_white_list.begin(), _variable_white_list.end());
-
-    std::vector<std::string> nonexistent_whitelist_vars;
-    std::set_difference(_variable_white_list.begin(), _variable_white_list.end(),
-                        available_vars.begin(), available_vars.end(),
-                        std::back_inserter(nonexistent_whitelist_vars));
-    if (!nonexistent_whitelist_vars.empty())
-    {
-      std::ostringstream oss;
-      oss << "Requested output for the following variables which do not exist:\n";
-      for (std::vector<std::string>::iterator i = nonexistent_whitelist_vars.begin(); i != nonexistent_whitelist_vars.end();  ++i)
-        oss << *i << "\n";
-      mooseError(oss.str());
-    }
-    else
-    {
-      output_vars = _variable_white_list;
-    }
-  }
-  else
-    output_vars = getVariableNames();
-
-  // If the black list is populated then we'll take those variables out of the list
-  if (!_variable_black_list.empty())
-  {
-    std::vector<VariableName> temp_output_vars(output_vars);
-    output_vars.clear();
-
-    std::sort(temp_output_vars.begin(), temp_output_vars.end());
-    std::sort(_variable_black_list.begin(), _variable_black_list.end());
-
-    // Make sure that the user didn't specify to both show and hide any particular variable
-    if (!_variable_white_list.empty())
-    {
-      std::set_intersection(temp_output_vars.begin(), temp_output_vars.end(),
-                            _variable_black_list.begin(), _variable_black_list.end(), std::back_inserter(output_vars));
-
-      if (!output_vars.empty())
-      {
-        std::ostringstream oss;
-        oss << "One or more variables was specified to be both shown and hidden:\n";
-        for (std::vector<VariableName>::iterator i = output_vars.begin(); i != output_vars.end();  ++i)
-          oss << *i << "\n";
-        mooseError(oss.str());
-      }
-    }
-
-    std::set_difference(temp_output_vars.begin(), temp_output_vars.end(),
-                        _variable_black_list.begin(), _variable_black_list.end(), std::back_inserter(output_vars));
-  }
-
-  _out.setOutputVariables(output_vars);
-  if (_displaced_problem)
-    _displaced_problem->setOutputVariables(output_vars);
-}
-
-void
-FEProblem::hideVariableFromOutput(const VariableName & var_name)
-{
-  _variable_black_list.push_back(var_name);
-}
-
-void
-FEProblem::hideVariableFromOutput(const std::vector<VariableName> & var_names)
-{
-  _variable_black_list.insert(_variable_black_list.end(), var_names.begin(), var_names.end());
-}
-
-void
-FEProblem::showVariableInOutput(const VariableName & var_name)
-{
-  _variable_white_list.push_back(var_name);
-}
-
-void
-FEProblem::showVariableInOutput(const std::vector<VariableName> & var_names)
-{
-  _variable_white_list.insert(_variable_white_list.end(), var_names.begin(), var_names.end());
-}
-
-OutputProblem &
-FEProblem::getOutputProblem(unsigned int refinements, MeshFileName file)
-{
-  // TODO: When do we build this?
-  if (!_out_problem)
-  {
-    InputParameters params = _app.getFactory().getValidParams("OutputProblem");
-    params.set<FEProblem *>("mproblem") = this;
-    params.set<unsigned int>("refinements") = refinements;
-    params.set<MooseMesh *>("mesh") = &_mesh;
-    params.set<bool>("nemesis") = false;
-    params.set<bool>("skip_partitioning") = false;
-    if (file != "")
-      params.set<MeshFileName>("file") = file;
-    _out_problem = static_cast<OutputProblem *>(_factory.create("OutputProblem", "Output Problem", params));
-  }
-  return *_out_problem;
-}
-
 #ifdef LIBMESH_ENABLE_AMR
 void
 FEProblem::adaptMesh()
@@ -3627,7 +3326,6 @@ FEProblem::meshChanged()
   }
 
   // Indicate that the Mesh has changed to the Output objects
-  _out.meshChanged();
   _app.getOutputWarehouse().meshChanged();
 
   _has_jacobian = false;                    // we have to recompute jacobian when mesh changed
@@ -3762,20 +3460,6 @@ FEProblem::checkUserObjects()
     if (names.find(it->first) == names.end())
       mooseError("Postprocessor '" + it->first + "' requested but not specified in the input file.");
   }
-
-  // check to see if we have inconsistent output requests
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-  {
-    for (std::vector<Postprocessor *>::const_iterator it = _pps(Moose::exec_types[i])[0].all().begin(); it != _pps(Moose::exec_types[i])[0].all().end(); ++it)
-    {
-      Moose::PPSOutputType out_type = (*it)->getOutput();
-
-      if ((out_type == Moose::PPS_OUTPUT_FILE || out_type == Moose::PPS_OUTPUT_BOTH) && _out.PpsFileOutputEnabled() == false)
-        mooseWarning("Postprocessor file output has been requested, but there are no file formats enabled that support this feature.");
-      else if ((out_type == Moose::PPS_OUTPUT_SCREEN || out_type == Moose::PPS_OUTPUT_BOTH) && _postprocessor_screen_output == false)
-        mooseWarning("Postprocessor screen output has been requested, but it has been turned off.");
-    }
-  }
 }
 
 void
@@ -3801,53 +3485,6 @@ FEProblem::serializeSolution()
   _aux.serializeSolution();
 }
 
-void
-FEProblem::setOutputPosition(Point p)
-{
-  _out.setOutputPosition(p);
-
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    _multi_apps(Moose::exec_types[i])[0].parentOutputPositionChanged();
-}
-
-
-void
-FEProblem::setRestartFile(const std::string & file_name)
-{
-  _restarting = true;
-  _resurrector->setRestartFile(file_name);
-}
-
-void
-FEProblem::setNumRestartFiles(unsigned int num_files)
-{
-  _resurrector->setNumRestartFiles(num_files);
-}
-
-void
-FEProblem::setCheckpointDirSuffix(std::string suffix)
-{
-  _checkpoint_dir_suffix = suffix;
-}
-
-std::string
-FEProblem::getCheckpointDirSuffix()
-{
-  return _checkpoint_dir_suffix;
-}
-
-std::string
-FEProblem::getCheckpointDir()
-{
-  return out().fileBase() + "_" + getCheckpointDirSuffix();
-}
-
-unsigned int
-FEProblem::getNumRestartFiles()
-{
-  return _resurrector->getNumRestartFiles();
-}
-
 bool
 FEProblem::isRestarting()
 {
@@ -3858,6 +3495,13 @@ bool
 FEProblem::isRecovering()
 {
   return _app.isRecovering();
+}
+
+void
+FEProblem::setRestartFile(const std::string & file_name)
+{
+  _restarting = true;
+  _resurrector->setRestartFile(file_name);
 }
 
 void
@@ -3891,9 +3535,6 @@ FEProblem::getVariableNames()
   return names;
 }
 
-
-
-
 MooseNonlinearConvergenceReason
 FEProblem::checkNonlinearConvergence(std::string &msg,
                                      const int it,
@@ -3910,29 +3551,6 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
 {
   NonlinearSystem & system = getNonlinearSystem();
   MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
-
-  if (_dbg_print_var_rnorms)
-  {
-    std::ostringstream oss;
-    TransientNonlinearImplicitSystem &s = system.sys();
-    unsigned int max_name_size=0;
-    for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
-    {
-      unsigned int var_name_size = s.variable_name(var_num).size();
-      if (var_name_size > max_name_size)
-        max_name_size = var_name_size;
-    }
-
-    oss << "    |residual|_2 of individual variables:\n";
-    for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
-    {
-      Real varResid = s.calculate_norm(*s.rhs,var_num,DISCRETE_L2);
-      oss << std::setw(27-max_name_size) << " " << std::setw(max_name_size+2) //match position of overall NL residual
-          << std::left << s.variable_name(var_num) + ":" << varResid << "\n";
-    }
-    Moose::out << oss.str();
-    Moose::out.flush();
-  }
 
   std::ostringstream oss;
   if (fnorm != fnorm)

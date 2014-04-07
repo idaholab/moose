@@ -112,6 +112,8 @@ protected:
   /// True if the file should be output (used for 'output_if_base_constains'
   bool _output_file;
 
+  // OutputWarehouse needs access to _file_num for MultiApp ninja wizardry (see OutputWarehouse::merge)
+  friend class OutputWarehouse;
 };
 
 #endif /* FILEOUTPUTTER_H */

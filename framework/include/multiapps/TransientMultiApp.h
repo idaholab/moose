@@ -116,6 +116,8 @@ private:
   std::vector<std::map<std::string, unsigned int> > _output_file_numbers;
 
   bool _auto_advance;
+
+  std::set<unsigned int> _reset;
 };
 
 #endif // TRANSIENTMULTIAPP_H

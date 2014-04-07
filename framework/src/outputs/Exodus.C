@@ -98,6 +98,7 @@ Exodus::outputSetup()
     _exodus_io_ptr->set_coordinate_offset(_app.getOutputPosition());
 }
 
+
 void
 Exodus::outputNodalVariables()
 {

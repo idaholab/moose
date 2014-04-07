@@ -17,6 +17,8 @@
 #include "LayeredSideFluxAverage.h"
 #include "AllLocalDofIndicesThread.h"
 
+#include "OutputBase.h"
+
 // libMesh
 #include "libmesh/mesh_tools.h"
 
@@ -75,7 +77,7 @@ TransientMultiApp::~TransientMultiApp()
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
-  for(unsigned int i=0; i<_my_num_apps; i++)
+  for(unsigned int i = 0; i < _my_num_apps; i++)
   {
     Transient * ex = _transient_executioners[i];
 
@@ -136,7 +138,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
   Moose::out << "Solving MultiApp " << _name << std::endl;
 
-  // "target_time" must always be in global time
+// "target_time" must always be in global time
   target_time += _app.getGlobalTimeOffset();
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
@@ -145,12 +147,11 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   int ierr;
   ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
 
-  for(unsigned int i=0; i<_my_num_apps; i++)
+  for (unsigned int i=0; i<_my_num_apps; i++)
   {
 
     FEProblem * problem = appProblem(_first_local_app + i);
     OutputWarehouse & output_warehouse = _apps[i]->getOutputWarehouse();
-    output_warehouse.timestepSetup();
 
     Transient * ex = _transient_executioners[i];
 
@@ -187,17 +188,10 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         _transferred_dofs = aldit._all_dof_indices;
       }
 
-      /// \todo{remove ex->allowOutput()}
       if (_output_sub_cycles)
-      {
-        ex->allowOutput(true);
         output_warehouse.allowOutput(true);
-      }
       else
-      {
-        ex->allowOutput(false);
         output_warehouse.allowOutput(false);
-      }
 
       ex->setTargetTime(target_time-app_time_offset);
 
@@ -279,10 +273,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           at_steady = true;
 
-          // Force it to output right now \todo{Remove}
-          ex->forceOutput();
-
-          // Indicate that the next output call (occurs in ex->endStep()) should output, regarless of intervals etc...
+         // Indicate that the next output call (occurs in ex->endStep()) should output, regarless of intervals etc...
           output_warehouse.forceOutput();
 
           // Clean up the end
@@ -297,14 +288,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       {
         output_warehouse.forceOutput();
         output_warehouse.outputStep();
-        ex->forceOutput(); // \todo{Remove}
-      }
+     }
 
     }
     else if (_tolerate_failure)
     {
       ex->takeStep(dt);
-      ex->forceOutput(); // \todo{Remove}
       output_warehouse.forceOutput();
       ex->endStep(target_time-app_time_offset);
     }
@@ -338,9 +327,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
             Real catch_up_dt = dt/2;
 
-            ex->allowOutput(false); // Don't output while catching up \todo{Remove}
-            //  output_warehouse.allowOutput(false);
-
             while(!caught_up && catch_up_step < _max_catch_up_steps)
             {
               Moose::err << "Solving " << _name << "catch up step " << catch_up_step << std::endl;
@@ -353,7 +339,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
               {
                 if (ex->getTime() + app_time_offset + ex->timestepTol()*std::abs(ex->getTime()) >= target_time)
                 {
-                  ex->forceOutput(); // This is here so that it is called before endStep() // \todo{Remove}
                   output_warehouse.forceOutput();
                   output_warehouse.outputStep();
                   caught_up = true;
@@ -362,8 +347,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
               else
                 catch_up_dt /= 2.0;
 
-              //output_warehouse.forceOutput();
-              ex->endStep(); // This is here so it is called after forceOutput()
+              ex->endStep();
 
               catch_up_step++;
             }
@@ -372,8 +356,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
               mooseError(_name << " Failed to catch up!\n");
 
             output_warehouse.allowOutput(true);
-            ex->allowOutput(true); // \todo{Remove}
-          }
+           }
         }
       }
     }
@@ -396,13 +379,9 @@ TransientMultiApp::advanceStep()
   {
     for(unsigned int i=0; i<_my_num_apps; i++)
     {
-//      FEProblem * problem = appProblem(_first_local_app + i);
-      OutputWarehouse & output_warehouse = _apps[i]->getOutputWarehouse();
-      output_warehouse.timestepSetup();
-
+      FEProblem * problem = appProblem(_first_local_app + i);
       Transient * ex = _transient_executioners[i];
 
-      output_warehouse.allowOutput(true);
       ex->endStep();
       ex->incrementStepOrReject();
     }
@@ -452,14 +431,8 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
     // Grab the current time the App is at so we can start the new one at the same place
     Real time = _transient_executioners[local_app]->getTime() + _apps[local_app]->getGlobalTimeOffset();
 
-    // Extract the file numbers from the output, so that the numbering is maintained after reset
-    std::map<std::string, unsigned int> m = _apps[local_app]->getOutputWarehouse().getFileNumbers();
-
     // Reset the Multiapp
     MultiApp::resetApp(global_app, time);
-
-    // Reset the file numbers of the newly reset apps
-    _apps[local_app]->getOutputWarehouse().setFileNumbers(m);
 
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -473,7 +446,6 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
 void
 TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial)  // FIXME: Should we be passing time?
 {
-
   MooseApp * app = _apps[i];
   Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
   if (!ex)
@@ -483,14 +455,12 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
   FEProblem * problem = appProblem(_first_local_app + i);
   OutputWarehouse & output_warehouse = _apps[i]->getOutputWarehouse();
 
+  // Disable output if the initial condition is not desired (required by resetApp)
   if (!output_initial)
-  {
-    ex->outputInitial(false);//\todo{Remove; handled within ex->init()}
     output_warehouse.allowOutput(false);
-  }
 
-  // Set the file numbers of the i-th app to that of the parent app
-  output_warehouse.setFileNumbers(app->getOutputFileNumbers());
+  // Update the file numbers for the outputs from the parent application
+  output_warehouse.setFileNumbers(_app.getOutputFileNumbers());
 
   // Call initialization method of Executioner (Note, this preforms the output of the initial time step, if desired)
   ex->init();
@@ -515,8 +485,5 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
   _transient_executioners[i] = ex;
 
   if (_detect_steady_state || _tolerate_failure)
-  {
     _apps[i]->getOutputWarehouse().allowOutput(false);
-    ex->allowOutput(false);
-  }
 }

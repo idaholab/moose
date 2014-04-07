@@ -467,6 +467,7 @@ private:
   friend class FileOutputter;
   friend class OversampleOutputter;
   friend class PetscOutputter;
+  friend class TransientMultiApp;
 };
 
 #endif /* OUTPUTBASE_H */

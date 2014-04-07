@@ -54,7 +54,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output");
    params.addParam<bool>("output_final", false, "Force the final timestep to be output, regardless of output interval");
    params.addParam<std::string>("file_base", "Common file base name to be utilized with all output objects");
-   params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputing only a subset of outputs when using MultiApps.");
+   params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputting only a subset of outputs when using MultiApps.");
    params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
    params.addParam<std::vector<Real> >("sync_times", "Times at which the output and solution is forced to occur");
    params.addParam<std::vector<VariableName> >("hide", "A list of the variables and postprocessors that should NOT be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");

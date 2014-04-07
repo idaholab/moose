@@ -204,11 +204,7 @@ AdaptiveTransient::init()
   _problem.initialSetup();
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
-  if (_output_initial)
-  {
-    _problem.output();
-    _problem.outputPostprocessors();
-  }
+  _output_warehouse.outputInitial();
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
   // If this is the first step
@@ -345,8 +341,11 @@ void
 AdaptiveTransient::endStep()
 {
   // if _synced_last_step is true, force the output no matter what
-  _problem.output(_synced_last_step);
-  _problem.outputPostprocessors(_synced_last_step);
+  if (_synced_last_step)
+  {
+    _output_warehouse.forceOutput();
+    _output_warehouse.outputStep();
+  }
 
 #ifdef LIBMESH_ENABLE_AMR
   if (_problem.adaptivity().isOn())

@@ -68,10 +68,8 @@ AdaptAndModify::endStep(Real input_time)
 
 #ifdef LIBMESH_ENABLE_AMR
       if (_problem.adaptivity().isOn())
-      {
         _problem.adaptMesh();
-        _problem.out().meshChanged();
-      }
+
 #endif
     }
 
@@ -80,31 +78,10 @@ AdaptAndModify::endStep(Real input_time)
     //output
     if (_time_interval)
     {
-      //Force output if the current time is at an output interval
-      if (std::abs(_time-_next_interval_output_time)<=_timestep_tolerance
-         || (_problem.out().interval() > 1 && _t_step % _problem.out().interval() == 0))
-      {
-        if (_allow_output)
-        {
-          _problem.output(true);
-          _problem.outputPostprocessors(true);
-          _problem.outputRestart(true);
-        }
-      }
       //Set the time for the next output interval if we're at or beyond an output interval
       if (_time + _timestep_tolerance >= _next_interval_output_time)
       {
         _next_interval_output_time += _time_interval_output_interval;
-      }
-    }
-    else
-    {
-      // if _at_sync_point is true, force the output no matter what
-      if (_allow_output)
-      {
-        _problem.output(_at_sync_point);
-        _problem.outputPostprocessors(_at_sync_point);
-        _problem.outputRestart();
       }
     }
   }

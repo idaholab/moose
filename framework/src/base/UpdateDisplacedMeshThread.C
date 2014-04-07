@@ -17,7 +17,6 @@
 #include "MooseMesh.h"
 
 #include "SubProblem.h"
-#include "ExodusOutput.h"
 
 UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(DisplacedProblem & problem) :
       _problem(problem),

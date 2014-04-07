@@ -74,6 +74,12 @@ protected:
   /// Current linear iteration returned from PETSc
   int _linear_iter;
 
+  /// True when the user desires output on non-linear iterations
+  bool _output_nonlinear;
+
+  /// True when the user desires output on linear-iterations
+  bool _output_linear;
+
 private:
 
   /**
@@ -96,12 +102,6 @@ private:
    */
   static PetscErrorCode petscLinearOutput(KSP, PetscInt its, PetscReal fnorm, void * void_ptr);
 #endif
-
-  /// True when the user desires output on non-linear iterations
-  bool _output_nonlinear;
-
-  /// True when the user desires output on linear-iterations
-  bool _output_linear;
 
   /// The psuedo non-linear time
   Real _nonlinear_time;
