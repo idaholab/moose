@@ -134,38 +134,14 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     return None
 
   ##
-  # Return the possible ExodusII output file names (public)
-  # @return List of output file names
-  def getOutputFileNames(self):
-
-    # Check that the list is initialized
-    if not hasattr(self, '_output_file_names') or len(self._output_file_names) != 0:
-      self.__initOutputFileNamesAndBlocks()
-
-    # Return the list of file names
-    return self._output_file_names
-
-  ##
-  # Return the possible ExodusII output block names (public)
-  # @return List of output block names
-  def getOutputBlockNames(self):
-
-    # Check that the list is initialized
-    if not hasattr(self, '_output_file_names') or len(self._output_file_names) != 0:
-      self.__initOutputFileNamesAndBlocks()
-
-    # Return the list of block names
-    return self._output_block_names
-
-  ##
   # Initialize the list of output file and block names (private)
-  # This function initilizes self._output_file_names and self._output_block_names
-  def __initOutputFileNamesAndBlocks(self):
+  # This function initializes self._output_file_names and self._output_block_names
+  def getOutputFileAndBlockNames(self):
 
     # Storage for file_base as a common parameter
     common_file_base = ''
-    self._output_file_names = []
-    self._output_block_names = []
+    _output_file_names = []
+    _output_block_names = []
 
     # Find the Outputs block items and the names of the sub-blocks
     outputs = self.findChildItemWithName(self, 'Outputs')
@@ -180,8 +156,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     # Check for short-cut syntax (i.e., exodus = true)
     if outputs.table_data and 'exodus' in outputs.table_data and outputs.table_data['exodus'] == 'true':
-      self._output_file_names.append(common_file_base + '.e')
-      self._output_block_names.append('exodus')
+      _output_file_names.append(common_file_base + '.e')
+      _output_block_names.append('exodus')
 
     # Loop through each of the sub-blocks and grab the data, if type = Exodus
     for item in outputs_children:
@@ -203,8 +179,11 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
           file_base = file_base + '_oversample'
 
         # Append the file_base and object name to the lists
-        self._output_file_names.append(file_base + '.e')
-        self._output_block_names.append(output_data['Name'])
+        _output_file_names.append(file_base + '.e')
+        _output_block_names.append(output_data['Name'])
+
+      # Return the list of file and block names
+      return (_output_file_names, _output_block_names)
 
     # FIXME: Hack to make raven and r7 work for now
     if 'raven' in self.input_file_widget.app_path or 'r7' in self.input_file_widget.app_path:
