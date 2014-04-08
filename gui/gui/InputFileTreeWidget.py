@@ -140,8 +140,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     # Storage for file_base as a common parameter
     common_file_base = ''
-    _output_file_names = []
-    _output_block_names = []
+    output_file_names = []
+    output_block_names = []
 
     # Find the Outputs block items and the names of the sub-blocks
     outputs = self.findChildItemWithName(self, 'Outputs')
@@ -156,8 +156,8 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
     # Check for short-cut syntax (i.e., exodus = true)
     if outputs.table_data and 'exodus' in outputs.table_data and outputs.table_data['exodus'] == 'true':
-      _output_file_names.append(common_file_base + '.e')
-      _output_block_names.append('exodus')
+      output_file_names.append(common_file_base + '.e')
+      output_block_names.append('exodus')
 
     # Loop through each of the sub-blocks and grab the data, if type = Exodus
     for item in outputs_children:
@@ -179,15 +179,15 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
           file_base = file_base + '_oversample'
 
         # Append the file_base and object name to the lists
-        _output_file_names.append(file_base + '.e')
-        _output_block_names.append(output_data['Name'])
+        output_file_names.append(file_base + '.e')
+        output_block_names.append(output_data['Name'])
 
       # Return the list of file and block names
-      return (_output_file_names, _output_block_names)
+      return [output_file_names, output_block_names]
 
     # FIXME: Hack to make raven and r7 work for now
     if 'raven' in self.input_file_widget.app_path or 'r7' in self.input_file_widget.app_path:
-      self._output_file_names = [common_file_base + '_displaced.e']
+      output_file_names = [common_file_base + '_displaced.e']
 
   def _itemHasEditableParameters(self, item):
     this_path = self.generatePathFromItem(item)
