@@ -15,7 +15,7 @@
 #include "NonlinearSystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
-#include "Kernel.h"
+#include "KernelBase.h"
 #include "IntegratedBC.h"
 #include "DGKernel.h"
 #include "Material.h"
@@ -52,8 +52,8 @@ ComputeResidualThread::subdomainChanged()
     _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
 
   std::set<MooseVariable *> needed_moose_vars;
-  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
-  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+  const std::vector<KernelBase *> & kernels = _sys._kernels[_tid].active();
+  for (std::vector<KernelBase *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
   {
     const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
     needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
@@ -101,14 +101,14 @@ ComputeResidualThread::onElement(const Elem *elem)
   _fe_problem.reinitElem(elem, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-  const std::vector<Kernel *> * kernels = NULL;
+  const std::vector<KernelBase *> * kernels = NULL;
   switch (_kernel_type)
   {
   case Moose::KT_ALL: kernels = & _sys._kernels[_tid].active(); break;
   case Moose::KT_TIME: kernels = & _sys._kernels[_tid].activeTime(); break;
   case Moose::KT_NONTIME: kernels = & _sys._kernels[_tid].activeNonTime(); break;
   }
-  for (std::vector<Kernel *>::const_iterator it = kernels->begin(); it != kernels->end(); ++it)
+  for (std::vector<KernelBase *>::const_iterator it = kernels->begin(); it != kernels->end(); ++it)
   {
     (*it)->computeResidual();
   }

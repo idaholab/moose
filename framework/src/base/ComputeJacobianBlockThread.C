@@ -83,10 +83,10 @@ ComputeJacobianBlockThread::operator() (const ConstElemRange & range, bool bypas
       _fe_problem.reinitMaterials(cur_subdomain, _tid);
 
       //Kernels
-      std::vector<Kernel *> kernels = _nl._kernels[_tid].active();
-      for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); it++)
+      std::vector<KernelBase *> kernels = _nl._kernels[_tid].active();
+      for (std::vector<KernelBase *>::const_iterator it = kernels.begin(); it != kernels.end(); it++)
       {
-        Kernel * kernel = *it;
+        KernelBase * kernel = *it;
         if (kernel->variable().index() == _ivar)
         {
           kernel->subProblem().prepareShapes(_jvar, _tid);
