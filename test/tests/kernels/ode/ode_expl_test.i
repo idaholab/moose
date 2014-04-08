@@ -69,7 +69,6 @@
   [./ode1]
     type = ExplicitODE
     variable = y
-    execute_on = timestep_begin
   [../]
 []
 

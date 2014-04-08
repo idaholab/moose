@@ -56,9 +56,8 @@
     output_initial = false
     nonlinear_residuals =  true
     linear_residuals = true
-    file = true
     verbose = true
     perf_log = true
-    show_perf_log_early = true
+    setup_log_early = true
  [../]
 []

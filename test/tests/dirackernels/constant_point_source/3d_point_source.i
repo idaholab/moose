@@ -58,12 +58,11 @@
 []
 
 [Outputs]
-  linear_residuals = true
   output_initial = true
   exodus = true
   [./console]
     type = Console
     perf_log = true
+    linear_residuals = true
   [../]
 []
-
