@@ -242,26 +242,15 @@
   [../]
 []
 
-[Output]
-  file_base = out
-  output_initial = true
-  interval = 1
-  exodus = true
-  xda = true
-  num_restart_files = 2
-  print_linear_residuals = true
-  perf_log = true
-[]
-
 [Outputs]
-  file_base = out
   output_initial = true
-  interval = 1
   exodus = true
-  xda = true
-  num_restart_files = 2
-  print_linear_residuals = true
-  perf_log = true
+  checkpoint = true
+  [./console]
+    type = Console
+    print_linear_residuals = true
+    perf_log = true
+  [../]
 []
 
 [MultiApps]

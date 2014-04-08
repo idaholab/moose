@@ -594,9 +594,11 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.output_control.clear()
 
     # Update the list block names and store the filename as data
-    files, blocks = self.input_file_widget.getOutputFileAndBlockNames();
-    for i in range(len(files)):
-      self.output_control.addItem(blocks[i], files[i])
+    data = self.input_file_widget.getOutputFileAndBlockNames();
+
+    if data != None:
+      for i in range(len(data[0])):
+        self.output_control.addItem(data[1][i], data[0][i])
 
     # Restore the selected name, if it is available
     idx = self.output_control.findText(name)
