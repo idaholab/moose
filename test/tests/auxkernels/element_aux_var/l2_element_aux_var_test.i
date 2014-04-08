@@ -110,12 +110,15 @@
 []
 
 [Outputs]
-  perf_log = true
   [./ex_out]
     type = Exodus
     file_base = l2elemaux
     output_initial = true
     elemental_as_nodal = true
     interval = 1
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
   [../]
 []

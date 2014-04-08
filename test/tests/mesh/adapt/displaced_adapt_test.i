@@ -128,10 +128,10 @@
 
 [Outputs]
   output_initial = true
-  output_displaced = true
   exodus = true
   [./console]
     type = Console
     perf_log = true
+    use_displaced = true
   [../]
 []
