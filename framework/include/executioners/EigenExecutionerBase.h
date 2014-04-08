@@ -145,39 +145,6 @@ protected:
    */
   virtual void printEigenvalue();
 
-  /**
-   * Print solution vector on screen. Use this only for debugging purpose
-   */
-  virtual void printSolution();
-  virtual void printSolutionOld();
-
-  /**
-   * Print variable list
-   */
-  virtual void printVariables();
-
-  /**
-   * Scale the solution vector
-   *
-   * @param factor The scaling factor.
-   */
-  virtual void scaleEigenSolution(Real factor);
-
-  /**
-   * Linear combination of the solution vectors
-   *
-   * @param fcoef Coefficients for current, old and older solutions.
-   */
-  virtual void combineEigenSolution(std::vector<Real> & fcoef);
-
-  /**
-   * Initialize the solution vector with a constant value
-   *
-   * @param v The value.
-   */
-  virtual void initEigenSolution(Real v);
-  virtual void initEigenSolutionOld(Real v);
-
   // the fe problem
   FEProblem & _problem;
 
@@ -199,9 +166,6 @@ protected:
 
   // to control custom userobject evaluation
   const bool _run_custom_uo;
-
-  // for EigenKernel
-  bool & _current;
 
   // Chebyshev acceleration
   class Chebyshev_Parameters

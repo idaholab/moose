@@ -53,13 +53,13 @@ InversePowerMethod::execute()
 
   // save the initial guess and mark a new time step
   _problem.copyOldSolutions();
-  _problem.timeStep() = 1;
 
   preSolve();
   // we currently do not check the solution difference
   Real initial_res;
+  Real t0 = INIT_END;
   inversePowerIteration(_min_iter, _max_iter, _pfactor, _cheb_on, _eig_check_tol, DBL_MAX,
-                        true, getParam<bool>("output_pi_history"), 0.0,
+                        true, getParam<bool>("output_pi_history"), t0,
                         _eigenvalue, initial_res);
   postSolve();
 
@@ -69,6 +69,7 @@ InversePowerMethod::execute()
   _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
   if (_run_custom_uo) _problem.computeUserObjects(EXEC_CUSTOM);
 
+  _problem.timeStep() = POWERITERATION_END;
   Real t = _problem.time();
   _problem.time() = _problem.timeStep();
   _output_warehouse.outputStep();
@@ -81,7 +82,7 @@ InversePowerMethod::execute()
 
   if (s!=1.0)
   {
-    _problem.timeStep() = 2;
+    _problem.timeStep() = FINAL;
     Real t = _problem.time();
     _problem.time() = _problem.timeStep();
     _output_warehouse.outputStep();

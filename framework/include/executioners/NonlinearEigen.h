@@ -31,6 +31,14 @@ public:
 
   virtual void execute();
 
+  enum CheckPoint
+  {
+    INIT_END = 0,
+    POWERITERATION_END = 1,
+    NONLINEAR_SOLVE_END = 2,
+    FINAL = 3
+  };
+
 protected:
   virtual void postSolve();
 

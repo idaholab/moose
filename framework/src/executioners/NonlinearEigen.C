@@ -14,8 +14,6 @@
 
 #include "NonlinearEigen.h"
 
-#include <cfloat>
-
 template<>
 InputParameters validParams<NonlinearEigen>()
 {
@@ -54,21 +52,17 @@ NonlinearEigen::execute()
   {
     // free power iterations
     Moose::out << std::endl << " Free power iteration starts"  << std::endl;
-    _problem.timeStep() = 1;
 
-    inversePowerIteration(_free_iter, _free_iter, _pfactor, false, 0.0, DBL_MAX,
+    inversePowerIteration(_free_iter, _free_iter, _pfactor, false, 0.0, std::numeric_limits<Real>::max(),
                           true, getParam<bool>("output_pi_history"), 0.0,
                           _eigenvalue, initial_res);
-
-    Real t = _problem.time();
-    _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep();
-    _problem.time() = t;
-
-    _problem.timeStep() = 2;
   }
-  else
-    _problem.timeStep() = 1;
+
+  _problem.timeStep() = POWERITERATION_END;
+  Real t = _problem.time();
+  _problem.time() = _problem.timeStep();
+  _output_warehouse.outputStep();
+  _problem.time() = t;
 
   Moose::out << " Nonlinear iteration starts"  << std::endl;
 
@@ -96,7 +90,8 @@ NonlinearEigen::execute()
   _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
   if (_run_custom_uo) _problem.computeUserObjects(EXEC_CUSTOM);
 
-  Real t = _problem.time();
+  _problem.timeStep() = NONLINEAR_SOLVE_END;
+  t = _problem.time();
   _problem.time() = _problem.timeStep();
   _output_warehouse.outputStep();
   _problem.time() = t;
@@ -105,6 +100,15 @@ NonlinearEigen::execute()
                              _norm_execflag!=EXEC_RESIDUAL);
 
   Moose::out << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
+
+  if (s!=1.0)
+  {
+    _problem.timeStep() = FINAL;
+    Real t = _problem.time();
+    _problem.time() = _problem.timeStep();
+    _output_warehouse.outputStep();
+    _problem.time() = t;
+  }
 
   postExecute();
 }

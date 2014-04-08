@@ -316,7 +316,6 @@ NonlinearSystem::timestepSetup()
   }
 }
 
-
 void
 NonlinearSystem::setupFiniteDifferencedPreconditioner()
 {
@@ -2279,4 +2278,173 @@ NonlinearSystem::setPCSide(MooseEnum pcs)
     _pc_side = Moose::PCS_SYMMETRIC;
   else
     mooseError("Unknown PC side specified.");
+}
+
+void
+NonlinearSystem::buildSystemDoFIndices(SYSTEMTAG tag)
+{
+  if (tag==ALL)
+  {
+  }
+  else if (tag==EIGEN)
+  {
+    // build DoF indices for the eigen system
+    _eigen_var_indices.clear();
+    _all_eigen_vars = getEigenVariableNames().size()==getVariableNames().size();
+    if (!_all_eigen_vars)
+    {
+      for (std::set<VariableName>::const_iterator it=getEigenVariableNames().begin();
+           it!=getEigenVariableNames().end(); it++)
+      {
+        unsigned int i = sys().variable_number(*it);
+        sys().local_dof_indices(i, _eigen_var_indices);
+      }
+    }
+  }
+}
+
+void
+NonlinearSystem::scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor)
+{
+  if (tag==ALL)
+  {
+    solution().scale(scaling_factor);
+  }
+  else if (tag==EIGEN)
+  {
+    if (_all_eigen_vars)
+    {
+      solution().scale(scaling_factor);
+    }
+    else
+    {
+      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
+      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
+
+      for(; it !=it_end; ++it)
+        solution().set( *it, solution()(*it)*scaling_factor );
+    }
+  }
+  solution().close();
+  update();
+}
+
+void
+NonlinearSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coefficients)
+{
+  mooseAssert(coefficients.size()>0 && coefficients.size()<=3, "Size error on coefficients");
+  if (tag==ALL)
+  {
+    solution().scale(coefficients[0]);
+    if (coefficients.size()>1) solution().add(coefficients[1], solutionOld());
+    if (coefficients.size()>2) solution().add(coefficients[2], solutionOlder());
+  }
+  else if (tag==EIGEN)
+  {
+    if (_all_eigen_vars)
+    {
+      solution().scale(coefficients[0]);
+      if (coefficients.size()>1) solution().add(coefficients[1], solutionOld());
+      if (coefficients.size()>2) solution().add(coefficients[2], solutionOlder());
+    }
+    else
+    {
+      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
+      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
+
+      if (coefficients.size()>2)
+      {
+        for(; it !=it_end; ++it)
+        {
+          Real t = solution()(*it) * coefficients[0];
+          t += solutionOld()(*it) * coefficients[1];
+          t += solutionOlder()(*it) * coefficients[2];
+          solution().set( *it, t );
+        }
+      }
+      else if (coefficients.size()>1)
+      {
+        for(; it !=it_end; ++it)
+        {
+          Real t = solution()(*it) * coefficients[0];
+          t += solutionOld()(*it) * coefficients[1];
+          solution().set( *it, t );
+        }
+      }
+      else
+      {
+        for(; it !=it_end; ++it)
+        {
+          Real t = solution()(*it) * coefficients[0];
+          solution().set( *it, t );
+        }
+      }
+    }
+  }
+  solution().close();
+  update();
+}
+
+void
+NonlinearSystem::initSystemSolution(SYSTEMTAG tag, Real v)
+{
+  if (tag==ALL)
+  {
+    solution() = v;
+  }
+  else if (tag==EIGEN)
+  {
+    if (_all_eigen_vars)
+    {
+      solution() = v;
+    }
+    else
+    {
+      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
+      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
+
+      for(; it !=it_end; ++it)
+        solution().set( *it, v );
+    }
+  }
+  solution().close();
+  update();
+}
+
+void
+NonlinearSystem::initSystemSolutionOld(SYSTEMTAG tag, Real v)
+{
+  if (tag==ALL)
+  {
+    solutionOld() = v;
+  }
+  else if (tag==EIGEN)
+  {
+    if (_all_eigen_vars)
+    {
+      solutionOld() = v;
+    }
+    else
+    {
+      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
+      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
+
+      for(; it !=it_end; ++it)
+        solutionOld().set( *it, v );
+    }
+  }
+  solutionOld().close();
+  update();
+}
+
+void
+NonlinearSystem::eigenKernelOnOld()
+{
+  _fe_problem.parameters().set<bool>("eigen_on_current") = false;
+}
+
+void
+NonlinearSystem::eigenKernelOnCurrent()
+{
+  _fe_problem.parameters().set<bool>("eigen_on_current") = true;
 }
