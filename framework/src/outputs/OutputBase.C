@@ -471,15 +471,12 @@ OutputBase::initAvailableLists()
   // Get a reference to the storage of the postprocessors
   ExecStore<PostprocessorWarehouse> & warehouse = _problem_ptr->getPostprocessorWarehouse();
 
-  // Possible execution type flags
-  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
-
   // Loop through each of the execution flags
-  for (unsigned int i = 0; i < LENGTHOF(types); i++)
+  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
   {
     // Loop through each of the postprocessors
-    for (std::vector<Postprocessor *>::const_iterator postprocessor_it = warehouse(types[i])[0].all().begin();
-         postprocessor_it != warehouse(types[i])[0].all().end();
+    for (std::vector<Postprocessor *>::const_iterator postprocessor_it = warehouse(Moose::exec_types[i])[0].all().begin();
+         postprocessor_it != warehouse(Moose::exec_types[i])[0].all().end();
          ++postprocessor_it)
     {
       // Store the name in the available postprocessors
