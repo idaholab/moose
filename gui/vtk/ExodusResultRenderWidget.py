@@ -594,8 +594,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
     self.output_control.clear()
 
     # Update the list block names and store the filename as data
-    files = self.input_file_widget.getOutputFileNames()
-    blocks = self.input_file_widget.getOutputBlockNames()
+    files, blocks = self.input_file_widget.getOutputFileAndBlockNames();
     for i in range(len(files)):
       self.output_control.addItem(blocks[i], files[i])
 
@@ -609,6 +608,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
   def _outputChanged(self):
     idx = self.output_control.currentIndex()
     name = self.output_control.itemData(idx)
+    if hasattr(QtCore, 'QVariant') and isinstance(name, QtCore.QVariant):
+      name = str(name.toString())
     self._openFile(name, False)
 
   def setupLuts(self):
@@ -1091,8 +1092,8 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         idx = self.output_control.currentIndex()
         file_name = self.output_control.itemData(idx)
 
-        if isinstance(file_name, QtCore.QVariant):
-          file_name = str(file_name.toString())
+        if hasattr(QtCore, 'QVariant') and isinstance(file_name, QtCore.QVariant):
+          file_name = str(name.toString())
 
       else:
         file_name = self.file_name
