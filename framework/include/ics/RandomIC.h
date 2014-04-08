@@ -15,7 +15,6 @@
 #ifndef RANDOMIC_H
 #define RANDOMIC_H
 
-#include "Kernel.h"
 #include "InitialCondition.h"
 #include "InputParameters.h"
 

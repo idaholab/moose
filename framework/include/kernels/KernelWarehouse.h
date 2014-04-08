@@ -21,7 +21,7 @@
 
 #include "MooseTypes.h"
 
-class Kernel;
+class KernelBase;
 class ScalarKernel;
 
 /**
@@ -43,33 +43,33 @@ public:
    * Get list of all kernels
    * @return The list of all active kernels
    */
-  const std::vector<Kernel *> & all() { return _all_kernels; }
+  const std::vector<KernelBase *> & all() { return _all_kernels; }
 
   /**
    * Get the list of all active kernels
    * @return The list of all active kernels
    */
-  const std::vector<Kernel *> & active() { return _active_kernels; }
+  const std::vector<KernelBase *> & active() { return _active_kernels; }
 
   /**
    * Get the list of all active time kernels
    * @return The list of all active time kernels
    */
-  const std::vector<Kernel *> & activeTime(){ return _time_kernels;}
+  const std::vector<KernelBase *> & activeTime(){ return _time_kernels;}
 
 
   /**
    * Get the list of all active non-time kernels
    * @return The list of all active non-time kernels
    */
-  const std::vector<Kernel *> & activeNonTime(){ return _non_time_kernels;}
+  const std::vector<KernelBase *> & activeNonTime(){ return _non_time_kernels;}
 
   /**
    * Get the list of all active kernels for a variable
    * @param var The variable number
    * @return The list of all active kernels
    */
-  const std::vector<Kernel *> & activeVar(unsigned int var) { return _active_var_kernels[var]; }
+  const std::vector<KernelBase *> & activeVar(unsigned int var) { return _active_var_kernels[var]; }
 
   /**
    * Get list of scalar kernels
@@ -82,7 +82,7 @@ public:
    * @param kernel Kernel being added
    * @param block_ids Set of active domain where the kernel is defined
    */
-  void addKernel(Kernel *kernel, const std::set<SubdomainID> & block_ids);
+  void addKernel(KernelBase *kernel, const std::set<SubdomainID> & block_ids);
 
   /**
    * Add a scalar kernels
@@ -110,26 +110,26 @@ public:
 
 protected:
   /// Kernels active on a block and in specified time
-  std::vector<Kernel *> _active_kernels;
+  std::vector<KernelBase *> _active_kernels;
   ///  active TimeDerivitive Kernels
-  std::vector<Kernel *> _time_kernels;
+  std::vector<KernelBase *> _time_kernels;
 
   /// active NonTimeDerivitive Kernels
-  std::vector<Kernel *> _non_time_kernels;
+  std::vector<KernelBase *> _non_time_kernels;
 
   /// Kernels active on a block and in specified time per variable
-  std::map<unsigned int, std::vector<Kernel *> > _active_var_kernels;
+  std::map<unsigned int, std::vector<KernelBase *> > _active_var_kernels;
   /// All instances of kernels
-  std::vector<Kernel *> _all_kernels;
+  std::vector<KernelBase *> _all_kernels;
   /// Kernels that live everywhere (on the whole domain)
-  std::vector<Kernel *> _time_global_kernels;
+  std::vector<KernelBase *> _time_global_kernels;
 
   /// Kernels that live everywhere (on the whole domain)
-  std::vector<Kernel *> _nontime_global_kernels;
+  std::vector<KernelBase *> _nontime_global_kernels;
   /// Kernels that live on a specified block
-  std::map<SubdomainID, std::vector<Kernel *> > _time_block_kernels;
+  std::map<SubdomainID, std::vector<KernelBase *> > _time_block_kernels;
   /// Kernels that live on a specified block
-  std::map<SubdomainID, std::vector<Kernel *> > _nt_block_kernels;
+  std::map<SubdomainID, std::vector<KernelBase *> > _nt_block_kernels;
   /// Scalar kernels
   std::vector<ScalarKernel *> _scalar_kernels;
 };
