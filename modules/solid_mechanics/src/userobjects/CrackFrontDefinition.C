@@ -14,9 +14,13 @@ InputParameters validParams<CrackFrontDefinition>()
 
 void addCrackFrontDefinitionParams(InputParameters& params)
 {
-  MooseEnum direction_method("CrackDirectionVector=1, CrackMouth, CurvedCrackFront");
+  MooseEnum direction_method("CrackDirectionVector, CrackMouth, CurvedCrackFront");
+  MooseEnum end_direction_method("NoSpecialTreatment, CrackDirectionVector", "NoSpecialTreatment");
   params.addRequiredParam<MooseEnum>("crack_direction_method", direction_method, "Method to determine direction of crack propagation.  Choices are: " + direction_method.getRawNames());
+  params.addParam<MooseEnum>("crack_end_direction_method", end_direction_method, "Method to determine direction of crack propagation at ends of crack.  Choices are: " + end_direction_method.getRawNames());
   params.addParam<RealVectorValue>("crack_direction_vector","Direction of crack propagation");
+  params.addParam<RealVectorValue>("crack_direction_vector_end_1","Direction of crack propagation for the node at end 1 of the crack");
+  params.addParam<RealVectorValue>("crack_direction_vector_end_2","Direction of crack propagation for the node at end 2 of the crack");
   params.addParam<std::vector<BoundaryName> >("crack_mouth_boundary","Boundaries whose average coordinate defines the crack mouth");
   params.addParam<bool>("2d", false, "Treat body as two-dimensional");
   params.addParam<unsigned int>("2d_axis", 2, "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
@@ -33,8 +37,8 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
   MooseEnum direction_method_moose_enum = getParam<MooseEnum>("crack_direction_method");
   if (direction_method_moose_enum.isValid())
   {
-    _direction_method = CDM_ENUM(int(direction_method_moose_enum));
-    if (_direction_method == CDM_CRACK_DIRECTION_VECTOR)
+    _direction_method = DIRECTION_METHOD(int(direction_method_moose_enum));
+    if (_direction_method == CRACK_DIRECTION_VECTOR)
     {
       if (!isParamValid("crack_direction_vector"))
       {
@@ -46,7 +50,7 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
       }
       _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
     }
-    else if (_direction_method == CDM_CRACK_MOUTH)
+    else if (_direction_method == CRACK_MOUTH)
     {
       if (isParamValid("crack_direction_vector"))
       {
@@ -58,7 +62,7 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
       }
       _crack_mouth_boundary_names = getParam<std::vector<BoundaryName> >("crack_mouth_boundary");
     }
-    else if (_direction_method == CDM_CURVED_CRACK_FRONT)
+    else if (_direction_method == CURVED_CRACK_FRONT)
     {
       if (isParamValid("crack_direction_vector"))
       {
@@ -68,6 +72,25 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
       {
         mooseError("crack_mouth_boundary must not be specified if crack_direction_method = CurvedCrackFront");
       }
+    }
+  }
+
+  MooseEnum end_direction_method_moose_enum = getParam<MooseEnum>("crack_end_direction_method");
+  if (end_direction_method_moose_enum.isValid())
+  {
+    _end_direction_method = END_DIRECTION_METHOD(int(end_direction_method_moose_enum));
+    if (_end_direction_method == END_CRACK_DIRECTION_VECTOR)
+    {
+      if (!isParamValid("crack_direction_vector_end_1"))
+      {
+        mooseError("crack_direction_vector_end_1 must be specified if crack_end_direction_method = CrackDirectionVector");
+      }
+      if (!isParamValid("crack_direction_vector_end_2"))
+      {
+        mooseError("crack_direction_vector_end_2 must be specified if crack_end_direction_method = CrackDirectionVector");
+      }
+      _crack_direction_vector_end_1 = getParam<RealVectorValue>("crack_direction_vector_end_1");
+      _crack_direction_vector_end_2 = getParam<RealVectorValue>("crack_direction_vector_end_2");
     }
   }
 }
@@ -93,14 +116,6 @@ CrackFrontDefinition::initialSetup()
   orderCrackFrontNodes(nodes);
 
   updateCrackFrontGeometry();
-
-//  Moose::out<<"Ordered nodes: ";
-//  for (unsigned int i=0; i<_ordered_crack_front_nodes.size(); ++i)
-//  {
-//    Moose::out<<_ordered_crack_front_nodes[i]<<" ";
-//  }
-//  Moose::out<<std::endl;
-
 }
 
 void
@@ -333,7 +348,7 @@ CrackFrontDefinition::orderEndNodes(std::vector<unsigned int> &end_nodes)
 void
 CrackFrontDefinition::updateCrackFrontGeometry()
 {
-  updateCrackDirectionCoords();
+  updateDataForCrackDirection();
 
   _segment_lengths.clear();
   _tangent_directions.clear();
@@ -345,18 +360,19 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     tangent_direction(_axis_2d) = 1.0;
     _tangent_directions.push_back(tangent_direction);
     const Node* crack_front_node = _mesh.nodePtr(_ordered_crack_front_nodes[0]);
-    _crack_directions.push_back(calculateCrackFrontDirection(crack_front_node,tangent_direction));
+    _crack_directions.push_back(calculateCrackFrontDirection(crack_front_node,tangent_direction,MIDDLE_NODE));
     _segment_lengths.push_back(std::make_pair(0.0,0.0));
     _overall_length = 0.0;
   }
   else
   {
+    unsigned int num_crack_front_nodes = _ordered_crack_front_nodes.size();
     std::vector<Node*> crack_front_nodes;
-    crack_front_nodes.reserve(_ordered_crack_front_nodes.size());
-    _segment_lengths.reserve(_ordered_crack_front_nodes.size());
-    _tangent_directions.reserve(_ordered_crack_front_nodes.size());
-    _crack_directions.reserve(_ordered_crack_front_nodes.size());
-    for (unsigned int i=0; i<_ordered_crack_front_nodes.size(); ++i)
+    crack_front_nodes.reserve(num_crack_front_nodes);
+    _segment_lengths.reserve(num_crack_front_nodes);
+    _tangent_directions.reserve(num_crack_front_nodes);
+    _crack_directions.reserve(num_crack_front_nodes);
+    for (unsigned int i=0; i<num_crack_front_nodes; ++i)
     {
       crack_front_nodes.push_back(_mesh.nodePtr(_ordered_crack_front_nodes[i]));
     }
@@ -365,11 +381,21 @@ CrackFrontDefinition::updateCrackFrontGeometry()
 
     RealVectorValue back_segment;
     Real back_segment_len = 0.0;
-    for (unsigned int i=0; i<crack_front_nodes.size(); ++i)
+    for (unsigned int i=0; i<num_crack_front_nodes; ++i)
     {
+      CRACK_NODE_TYPE ntype = MIDDLE_NODE;
+      if (i==0)
+      {
+        ntype = END_1_NODE;
+      }
+      else if (i==num_crack_front_nodes-1)
+      {
+        ntype = END_2_NODE;
+      }
+
       RealVectorValue forward_segment;
       Real forward_segment_len = 0.0;
-      if (i!=crack_front_nodes.size()-1)
+      if (ntype != END_2_NODE)
       {
         forward_segment = *crack_front_nodes[i+1] - *crack_front_nodes[i];
         forward_segment_len = forward_segment.size();
@@ -382,7 +408,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       tangent_direction = tangent_direction / tangent_direction.size();
       _tangent_directions.push_back(tangent_direction);
       //Moose::out<<"tan dir: "<<tangent_direction(0)<<" "<<tangent_direction(1)<<" "<<tangent_direction(2)<<std::endl;
-      _crack_directions.push_back(calculateCrackFrontDirection(crack_front_nodes[i],tangent_direction));
+      _crack_directions.push_back(calculateCrackFrontDirection(crack_front_nodes[i],tangent_direction,ntype));
 
       _overall_length += forward_segment_len;
 
@@ -411,9 +437,9 @@ CrackFrontDefinition::updateCrackFrontGeometry()
 }
 
 void
-CrackFrontDefinition::updateCrackDirectionCoords()
+CrackFrontDefinition::updateDataForCrackDirection()
 {
-  if (_direction_method == CDM_CRACK_MOUTH)
+  if (_direction_method == CRACK_MOUTH)
   {
     _crack_mouth_coordinates.zero();
 
@@ -442,7 +468,7 @@ CrackFrontDefinition::updateCrackDirectionCoords()
     }
     _crack_mouth_coordinates /= (Real)crack_mouth_nodes.size();
   }
-  else if (_direction_method == CDM_CURVED_CRACK_FRONT)
+  else if (_direction_method == CURVED_CRACK_FRONT)
   {
     _crack_plane_normal_from_curved_front.zero();
 
@@ -475,41 +501,61 @@ CrackFrontDefinition::updateCrackDirectionCoords()
 
 RealVectorValue
 CrackFrontDefinition::calculateCrackFrontDirection(const Node* crack_front_node,
-                                                   const RealVectorValue& tangent_direction) const
+                                                   const RealVectorValue& tangent_direction,
+                                                   const CRACK_NODE_TYPE ntype) const
 {
   RealVectorValue crack_dir;
   RealVectorValue zero_vec(0.0);
-  if (_direction_method == CDM_CRACK_DIRECTION_VECTOR)
-  {
-    crack_dir = _crack_direction_vector;
-  }
-  else if (_direction_method == CDM_CRACK_MOUTH)
-  {
-    if (_crack_mouth_coordinates.absolute_fuzzy_equals(*crack_front_node,1.e-15))
-    {
-      mooseError("Crack mouth too close to crack front node");
-    }
-    RealVectorValue mouth_to_front = *crack_front_node - _crack_mouth_coordinates;
 
-    RealVectorValue crack_plane_normal = mouth_to_front.cross(tangent_direction);
-    if (crack_plane_normal.absolute_fuzzy_equals(zero_vec,1.e-15))
-    {
-      mooseError("Vector from crack mouth to crack front node is collinear with crack front segment");
-    }
-
-    crack_dir = tangent_direction.cross(crack_plane_normal);
-    crack_dir = crack_dir.unit();
-    Real dotprod = crack_dir*mouth_to_front;
-    if (dotprod < 0)
-    {
-      crack_dir = -crack_dir;
-    }
-  }
-  else if (_direction_method == CDM_CURVED_CRACK_FRONT)
+  bool calc_dir = true;
+  if (_end_direction_method == END_CRACK_DIRECTION_VECTOR)
   {
-    crack_dir = tangent_direction.cross(_crack_plane_normal_from_curved_front);
-    crack_dir = crack_dir.unit();
+    if (ntype == END_1_NODE)
+    {
+      crack_dir = _crack_direction_vector_end_1;
+      calc_dir = false;
+    }
+    else if (ntype == END_2_NODE)
+    {
+      crack_dir = _crack_direction_vector_end_2;
+      calc_dir = false;
+    }
   }
+
+  if (calc_dir)
+  {
+    if (_direction_method == CRACK_DIRECTION_VECTOR)
+    {
+      crack_dir = _crack_direction_vector;
+    }
+    else if (_direction_method == CRACK_MOUTH)
+    {
+      if (_crack_mouth_coordinates.absolute_fuzzy_equals(*crack_front_node,1.e-15))
+      {
+        mooseError("Crack mouth too close to crack front node");
+      }
+      RealVectorValue mouth_to_front = *crack_front_node - _crack_mouth_coordinates;
+
+      RealVectorValue crack_plane_normal = mouth_to_front.cross(tangent_direction);
+      if (crack_plane_normal.absolute_fuzzy_equals(zero_vec,1.e-15))
+      {
+        mooseError("Vector from crack mouth to crack front node is collinear with crack front segment");
+      }
+
+      crack_dir = tangent_direction.cross(crack_plane_normal);
+      Real dotprod = crack_dir*mouth_to_front;
+      if (dotprod < 0)
+      {
+        crack_dir = -crack_dir;
+      }
+    }
+    else if (_direction_method == CURVED_CRACK_FRONT)
+    {
+      crack_dir = tangent_direction.cross(_crack_plane_normal_from_curved_front);
+    }
+  }
+  crack_dir = crack_dir.unit();
+
   return crack_dir;
 }
 
