@@ -1095,7 +1095,7 @@ class ExodusResultRenderWidget(QtGui.QWidget):
         file_name = self.output_control.itemData(idx)
 
         if hasattr(QtCore, 'QVariant') and isinstance(file_name, QtCore.QVariant):
-          file_name = str(name.toString())
+          file_name = str(file_name.toString())
 
       else:
         file_name = self.file_name
