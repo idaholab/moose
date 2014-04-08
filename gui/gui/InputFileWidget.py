@@ -161,11 +161,8 @@ class InputFileWidget(QtGui.QWidget):
     self.application.addRelapSave(layout)
     layout.addWidget(self.buttonClear)
 
-  def getOutputFileNames(self):
-    return self.tree_widget.getOutputFileNames()
-
-  def getOutputBlockNames(self):
-    return self.tree_widget.getOutputBlockNames()
+  def getOutputFileAndBlockNames(self):
+    return self.tree_widget.getOutputFileAndBlockNames()
 
   def openInputFile(self, file_name):
     if file_name and file_name != '':
