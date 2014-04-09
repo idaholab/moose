@@ -15,7 +15,6 @@
 #include "Transient.h"
 
 //Moose includes
-#include "Kernel.h"
 #include "Factory.h"
 #include "SubProblem.h"
 #include "TimePeriod.h"

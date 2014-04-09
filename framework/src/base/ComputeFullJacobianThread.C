@@ -15,7 +15,7 @@
 #include "ComputeFullJacobianThread.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
-#include "Kernel.h"
+#include "KernelBase.h"
 #include "IntegratedBC.h"
 #include "DGKernel.h"
 // libmesh includes
@@ -51,10 +51,10 @@ ComputeFullJacobianThread::computeJacobian()
     if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
-      const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeVar(ivar);
-      for (std::vector<Kernel *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
+      const std::vector<KernelBase *> & kernels = _sys._kernels[_tid].activeVar(ivar);
+      for (std::vector<KernelBase *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
       {
-        Kernel * kernel = *kt;
+        KernelBase * kernel = *kt;
         if ((kernel->variable().index() == ivar) && kernel->isImplicit())
         {
           kernel->subProblem().prepareShapes(jvar, _tid);
@@ -75,10 +75,10 @@ ComputeFullJacobianThread::computeJacobian()
       if (ivar.activeOnSubdomain(_subdomain) > 0)
       {
         // for each variable get the list of active kernels
-        const std::vector<Kernel *> & kernels = _sys._kernels[_tid].activeVar(ivar.index());
-        for (std::vector<Kernel *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
+        const std::vector<KernelBase *> & kernels = _sys._kernels[_tid].activeVar(ivar.index());
+        for (std::vector<KernelBase *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
         {
-          Kernel * kernel = *kt;
+          KernelBase * kernel = *kt;
           if (kernel->isImplicit())
           {
             // now, get the list of coupled scalar vars and compute their off-diag jacobians

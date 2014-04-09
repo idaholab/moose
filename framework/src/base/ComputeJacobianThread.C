@@ -46,10 +46,10 @@ ComputeJacobianThread::~ComputeJacobianThread()
 void
 ComputeJacobianThread::computeJacobian()
 {
-  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
-  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+  const std::vector<KernelBase *> & kernels = _sys._kernels[_tid].active();
+  for (std::vector<KernelBase *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
   {
-    Kernel * kernel = *it;
+    KernelBase * kernel = *it;
     if (kernel->isImplicit())
     {
       kernel->subProblem().prepareShapes(kernel->variable().index(), _tid);
@@ -98,8 +98,8 @@ ComputeJacobianThread::subdomainChanged()
 
   std::set<MooseVariable *> needed_moose_vars;
 
-  const std::vector<Kernel *> & kernels = _sys._kernels[_tid].active();
-  for (std::vector<Kernel *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+  const std::vector<KernelBase *> & kernels = _sys._kernels[_tid].active();
+  for (std::vector<KernelBase *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
   {
     const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
     needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());

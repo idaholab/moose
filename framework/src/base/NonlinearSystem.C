@@ -496,7 +496,7 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
     // Create the kernel object via the factory
-    Kernel *kernel = static_cast<Kernel *>(_factory.create(kernel_name, name, parameters));
+    KernelBase *kernel = static_cast<KernelBase *>(_factory.create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
     // Extract the SubdomainIDs from the object (via BlockRestrictable class)
@@ -798,7 +798,7 @@ void
 NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
 {
   //Global Kernels
-  for(std::vector<Kernel *>::const_iterator kernel_it = _kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)
+  for(std::vector<KernelBase *>::const_iterator kernel_it = _kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)
     (*kernel_it)->subdomainSetup();
 }
 
@@ -2193,7 +2193,7 @@ bool
 NonlinearSystem::containsTimeKernel()
 {
   bool time_kernels = false;
-  for (std::vector<Kernel *>::const_iterator it = _kernels[0].all().begin(); it != _kernels[0].all().end(); ++it)
+  for (std::vector<KernelBase *>::const_iterator it = _kernels[0].all().begin(); it != _kernels[0].all().end(); ++it)
     if (dynamic_cast<TimeKernel *>(*it) != NULL)
       time_kernels = true;
 

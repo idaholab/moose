@@ -66,6 +66,6 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residual = true
+    linear_residuals = true
   [../]
 []

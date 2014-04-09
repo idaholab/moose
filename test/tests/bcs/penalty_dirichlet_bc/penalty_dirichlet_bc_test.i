@@ -99,7 +99,7 @@
   output_initial = false
   interval = 1
   exodus = true
-  postprocessor_csv = true
+  csv = true
   [./console]
     type = Console
     perf_log = true

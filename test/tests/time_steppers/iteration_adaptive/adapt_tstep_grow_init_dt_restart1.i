@@ -78,7 +78,7 @@
   sync_times = '0.5 9.5'
   [./console]
     type = Console
-    inear_residuals = true
+    linear_residuals = true
   [../]
   [./checkpoint]
     type = Checkpoint
