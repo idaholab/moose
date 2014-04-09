@@ -32,6 +32,8 @@
 #include "RichardsSumQuantity.h"
 
 // AuxKernels
+#include "RichardsSatAux.h"
+#include "RichardsSatPrimeAux.h"
 #include "RichardsSeffAux.h"
 #include "RichardsSeffPrimeAux.h"
 #include "RichardsSeffPrimePrimeAux.h"
@@ -74,6 +76,7 @@
 
 // Kernels
 #include "RichardsMassChange.h"
+#include "RichardsLumpedMassChange.h"
 #include "RichardsFlux.h"
 #include "RichardsPPenalty.h"
 
@@ -140,6 +143,8 @@ RichardsApp::registerObjects(Factory & factory)
   registerUserObject(RichardsSumQuantity);
 
   // AuxKernels
+  registerAux(RichardsSatAux);
+  registerAux(RichardsSatPrimeAux);
   registerAux(RichardsSeffAux);
   registerAux(RichardsSeffPrimeAux);
   registerAux(RichardsSeffPrimePrimeAux);
@@ -182,6 +187,7 @@ RichardsApp::registerObjects(Factory & factory)
 
   // Kernels
   registerKernel(RichardsMassChange);
+  registerKernel(RichardsLumpedMassChange);
   registerKernel(RichardsFlux);
   registerKernel(RichardsPPenalty);
 

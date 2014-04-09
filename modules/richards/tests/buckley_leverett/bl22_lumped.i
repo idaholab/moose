@@ -11,6 +11,11 @@
 
 [GlobalParams]
   porepressureNames_UO = PPNames
+  density_UO = 'DensityWater DensityGas'
+  relperm_UO = 'RelPermWater RelPermGas'
+  SUPG_UO = 'SUPGwater SUPGgas'
+  sat_UO = 'SatWater SatGas'
+  seff_UO = 'SeffWater SeffGas'
 []
 
 [UserObjects]
@@ -90,7 +95,7 @@
 [Kernels]
   active = 'richardsfwater richardstwater richardsfgas richardstgas'
   [./richardstwater]
-    type = RichardsMassChange
+    type = RichardsLumpedMassChange
     variable = pwater
   [../]
   [./richardsfwater]
@@ -98,7 +103,7 @@
     variable = pwater
   [../]
   [./richardstgas]
-    type = RichardsMassChange
+    type = RichardsLumpedMassChange
     variable = pgas
   [../]
   [./richardsfgas]
@@ -193,11 +198,6 @@
     block = 0
     mat_porosity = 0.15
     mat_permeability = '1E-10 0 0  0 1E-10 0  0 0 1E-10'
-    density_UO = 'DensityWater DensityGas'
-    relperm_UO = 'RelPermWater RelPermGas'
-    SUPG_UO = 'SUPGwater SUPGgas'
-    sat_UO = 'SatWater SatGas'
-    seff_UO = 'SeffWater SeffGas'
     viscosity = '1E-3 1E-6'
     gravity = '0 0 0'
     linear_shape_fcns = true
@@ -240,7 +240,7 @@
 []
 
 [Outputs]
-  file_base = bl22
+  file_base = bl22_lumped
   [./exodus]
     type = Exodus
     output_initial = true

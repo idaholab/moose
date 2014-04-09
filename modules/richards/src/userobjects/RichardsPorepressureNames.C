@@ -30,6 +30,7 @@ RichardsPorepressureNames::RichardsPorepressureNames(const std::string & name, I
   _moose_var_value.resize(_num_p);
   _moose_var_value_old.resize(_num_p);
   _moose_grad_var.resize(_num_p);
+  _moose_raw_var.resize(_num_p);
   for (unsigned int i=0 ; i<_num_p; ++i)
     {
       _moose_var_num[i] = coupled("porepressure_vars", i);
@@ -37,6 +38,7 @@ RichardsPorepressureNames::RichardsPorepressureNames(const std::string & name, I
       _moose_var_value[i] = &coupledValue("porepressure_vars", i); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
       _moose_var_value_old[i] = (_is_transient ? &coupledValueOld("porepressure_vars", i) : &_zero);
       _moose_grad_var[i] = &coupledGradient("porepressure_vars", i);
+      _moose_raw_var[i] = getVar("porepressure_vars", i);
       _the_names += getVar("porepressure_vars", i)->name() + " ";
     }
   _the_names.erase(_the_names.end() - 1, _the_names.end()); // remove trailing space
@@ -113,6 +115,12 @@ VariableGradient *
 RichardsPorepressureNames::grad_pp(unsigned int pressure_var_num) const
 {
   return _moose_grad_var[pressure_var_num];
+}
+
+MooseVariable *
+RichardsPorepressureNames::raw_pp(unsigned int pressure_var_num) const
+{
+  return _moose_raw_var[pressure_var_num];
 }
 
 

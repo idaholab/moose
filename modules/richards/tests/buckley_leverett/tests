@@ -23,4 +23,29 @@
     heavy = true
     max_time = 1000
   [../]
+
+  [./bl01_lumped]
+    type = 'Exodiff'
+    input = 'bl01_lumped.i'
+    exodiff = 'bl01_lumped.e'
+    rel_err = 1E-5
+    use_old_floor = True
+  [../]
+
+  [./bl20_lumped]
+    type = 'Exodiff'
+    input = 'bl20_lumped.i'
+    exodiff = 'bl20_lumped.e'
+    rel_err = 1E-2
+    use_old_floor = True
+  [../]
+  [./bl22_lumped]
+    type = 'Exodiff'
+    input = 'bl22_lumped.i'
+    exodiff = 'bl22_lumped.e'
+    rel_err = 1E-2
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+  [../]
 []
