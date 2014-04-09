@@ -1930,10 +1930,9 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 const UserObject &
 FEProblem::getUserObjectBase(const std::string & name)
 {
-  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
-  for (unsigned int i = 0; i < LENGTHOF(types); i++)
-    if (_user_objects(types[i])[0].hasUserObject(name))
-      return *_user_objects(types[i])[0].getUserObjectByName(name);
+  for (unsigned int i = 0; i < Moose::exec_types.size(); ++i)
+    if (_user_objects(Moose::exec_types[i])[0].hasUserObject(name))
+      return *_user_objects(Moose::exec_types[i])[0].getUserObjectByName(name);
 
   mooseError("Unable to find user object with name '" + name + "'");
 }
@@ -1941,9 +1940,8 @@ FEProblem::getUserObjectBase(const std::string & name)
 bool
 FEProblem::hasUserObject(const std::string & name)
 {
-  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
-  for (unsigned int i = 0; i < LENGTHOF(types); i++)
-    if (_user_objects(types[i])[0].hasUserObject(name))
+  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
+    if (_user_objects(Moose::exec_types[i])[0].hasUserObject(name))
       return true;
   return false;
 }
@@ -2476,9 +2474,8 @@ FEProblem::reinitBecauseOfGhosting()
 void
 FEProblem::outputPostprocessors(bool force/* = false*/)
 {
-  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
-  for (unsigned int i = 0; i < LENGTHOF(types); i++)
-    addPPSValuesToTable(types[i]);
+  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
+    addPPSValuesToTable(Moose::exec_types[i]);
 
   if (!_pps_output_table_screen.empty())
   {
@@ -2627,10 +2624,9 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
 MultiApp *
 FEProblem::getMultiApp(const std::string & multi_app_name)
 {
-  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
-  for (unsigned int i = 0; i < LENGTHOF(types); i++)
-    if (_multi_apps(types[i])[0].hasMultiApp(multi_app_name))
-      return _multi_apps(types[i])[0].getMultiApp(multi_app_name);
+  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
+    if (_multi_apps(Moose::exec_types[i])[0].hasMultiApp(multi_app_name))
+      return _multi_apps(Moose::exec_types[i])[0].getMultiApp(multi_app_name);
 
   mooseError("MultiApp "<<multi_app_name<<" not found!");
 }
@@ -3445,11 +3441,10 @@ FEProblem::setOutputVariables()
       available_vars.push_back((*i)->name());
 
     //Get names of postprocessors, add to list
-    ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
-    for (unsigned int i = 0; i < LENGTHOF(types); i++)
+    for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
     {
-      for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(types[i])[0].all().begin();
-           postprocessor_it != _pps(types[i])[0].all().end();
+      for (std::vector<Postprocessor *>::const_iterator postprocessor_it = _pps(Moose::exec_types[i])[0].all().begin();
+           postprocessor_it != _pps(Moose::exec_types[i])[0].all().end();
            ++postprocessor_it)
       {
         Postprocessor *pps = *postprocessor_it;
@@ -3728,13 +3723,12 @@ FEProblem::checkUserObjects()
   // gather names of all user_objects that were defined in the input file
   // and the blocks that they are defined on
   std::set<std::string> names;
-  ExecFlagType types[] = { EXEC_INITIAL, EXEC_RESIDUAL, EXEC_JACOBIAN, EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_CUSTOM };
-  for (unsigned int i = 0; i < LENGTHOF(types); i++)
+  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
   {
-    for (std::vector<UserObject *>::const_iterator it = _user_objects(types[i])[0].all().begin(); it != _user_objects(types[i])[0].all().end(); ++it)
+    for (std::vector<UserObject *>::const_iterator it = _user_objects(Moose::exec_types[i])[0].all().begin(); it != _user_objects(Moose::exec_types[i])[0].all().end(); ++it)
       names.insert((*it)->name());
 
-    user_objects_blocks.insert(_user_objects(types[i])[0].blockIds().begin(), _user_objects(types[i])[0].blockIds().end());
+    user_objects_blocks.insert(_user_objects(Moose::exec_types[i])[0].blockIds().begin(), _user_objects(Moose::exec_types[i])[0].blockIds().end());
   }
 
   // See if all referenced blocks are covered
@@ -3760,9 +3754,9 @@ FEProblem::checkUserObjects()
   }
 
   // check to see if we have inconsistent output requests
-  for (unsigned int i = 0; i < LENGTHOF(types); i++)
+  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
   {
-    for (std::vector<Postprocessor *>::const_iterator it = _pps(types[i])[0].all().begin(); it != _pps(types[i])[0].all().end(); ++it)
+    for (std::vector<Postprocessor *>::const_iterator it = _pps(Moose::exec_types[i])[0].all().begin(); it != _pps(Moose::exec_types[i])[0].all().end(); ++it)
     {
       Moose::PPSOutputType out_type = (*it)->getOutput();
 
@@ -3802,9 +3796,8 @@ FEProblem::setOutputPosition(Point p)
 {
   _out.setOutputPosition(p);
 
-  ExecFlagType types[] = { EXEC_TIMESTEP, EXEC_TIMESTEP_BEGIN, EXEC_INITIAL, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_CUSTOM };
-  for (unsigned int i = 0; i < LENGTHOF(types); i++)
-    _multi_apps(types[i])[0].parentOutputPositionChanged();
+  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
+    _multi_apps(Moose::exec_types[i])[0].parentOutputPositionChanged();
 }
 
 

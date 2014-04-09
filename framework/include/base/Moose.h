@@ -51,6 +51,8 @@ class Syntax;
 class FEProblem;
 
 /// Execution flags - when is the object executed/evaluated
+// Note: If this enum is changed, make sure to modify the local
+// function populateExecTypes in Moose.C.
 enum ExecFlagType {
   /// Object is evaluated only once at the beginning of the simulation
   EXEC_INITIAL,
@@ -86,6 +88,11 @@ extern PerfLog setup_perf_log;
 extern bool __trap_fpe;
 
 /**
+ * A static list of all the exec types.
+ */
+extern const std::vector<ExecFlagType> exec_types;
+
+/**
  * Import libMesh::out, and libMesh::err for use in MOOSE.
  */
 using libMesh::out;
@@ -108,8 +115,5 @@ MPI_Comm swapLibMeshComm(MPI_Comm new_comm);
 void enableFPE(bool on = true);
 
 } // namespace Moose
-
-
-#define LENGTHOF(a) (sizeof(a)/sizeof(a[0]))
 
 #endif /* MOOSE_H */
