@@ -40,7 +40,7 @@
   [../]
 
   [./rhs]
-    type = EigenKernel
+    type = MassEigenKernel
     variable = u
   [../]
 []

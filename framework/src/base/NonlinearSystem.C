@@ -495,19 +495,42 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
-    // Create the kernel object via the factory
-    KernelBase *kernel = static_cast<KernelBase *>(_factory.create(kernel_name, name, parameters));
-    mooseAssert(kernel != NULL, "Not a Kernel object");
+    // In the case of EigenKernels, we need to add two to the system
+    if (parameters.have_parameter<bool>("_eigen"))
+    {
+      {
+        // EigenKernel
+        EigenKernel *ekernel = static_cast<EigenKernel *>(_factory.create(kernel_name, name, parameters));
+        mooseAssert(ekernel != NULL, "Not an EigenKernel object");
+        _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
+        // Extract the SubdomainIDs from the object (via BlockRestrictable class)
+        std::set<SubdomainID> blk_ids = ekernel->blockIDs();
+        _kernels[tid].addKernel(ekernel, blk_ids);
+        _fe_problem._objects_by_name[tid][name].push_back(ekernel);
+      }
+      {
+        // EigenKernel_old
+        parameters.set<bool>("_is_implicit") = true;
+        std::string old_name(name + "_old");
 
-    EigenKernel * ekernel = dynamic_cast<EigenKernel *>(kernel);
-    if (ekernel) _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
-
-    // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-    std::set<SubdomainID> blk_ids = kernel->blockIDs();
-
-    // Add the kernel to the warehouse
-    _kernels[tid].addKernel(kernel, blk_ids);
-    _fe_problem._objects_by_name[tid][name].push_back(kernel);
+        EigenKernel *ekernel = static_cast<EigenKernel *>(_factory.create(kernel_name, old_name, parameters));
+        _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
+        // Extract the SubdomainIDs from the object (via BlockRestrictable class)
+        std::set<SubdomainID> blk_ids = ekernel->blockIDs();
+        _kernels[tid].addKernel(ekernel, blk_ids);
+        _fe_problem._objects_by_name[tid][old_name].push_back(ekernel);
+      }
+    }
+    else // Standard nonlinear system kernel
+    {
+      // Create the kernel object via the factory
+      KernelBase *kernel = static_cast<KernelBase *>(_factory.create(kernel_name, name, parameters));
+      mooseAssert(kernel != NULL, "Not a Kernel object");
+      // Extract the SubdomainIDs from the object (via BlockRestrictable class)
+      std::set<SubdomainID> blk_ids = kernel->blockIDs();
+      _kernels[tid].addKernel(kernel, blk_ids);
+      _fe_problem._objects_by_name[tid][name].push_back(kernel);
+    }
   }
 }
 

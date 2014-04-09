@@ -17,25 +17,74 @@
 template<>
 InputParameters validParams<EigenKernel>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<KernelBase>();
+  params.addPrivateParam<bool>("_eigen", true);
+  params.registerBase("EigenKernel");
   return params;
 }
 
-EigenKernel::EigenKernel(const std::string & name, InputParameters parameters)
-    :Kernel(name,parameters),
-     _u_old(valueOld()), // old solution is made available by eigensolvers
-     _current(_fe_problem.parameters().set<bool>("eigen_on_current")),
-     _eigen_pp(_fe_problem.parameters().set<PostprocessorName>("eigen_postprocessor")),
-     _eigen(getPostprocessorValueByName(_eigen_pp)),
-     _eigen_old(getPostprocessorValueOldByName(_eigen_pp))
+EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
+    KernelBase(name,parameters),
+    _u(_is_implicit ? _var.sln() : _var.slnOld()),
+    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
+    _u_dot(_var.uDot()),
+    _du_dot_du(_var.duDotDu()),
+    _eigen_pp(_fe_problem.parameters().set<PostprocessorName>("eigen_postprocessor")),
+    _eigen(_is_implicit ? getPostprocessorValueByName(_eigen_pp) : getPostprocessorValueOldByName(_eigen_pp))
 {
 }
 
-Real
-EigenKernel::computeQpResidual()
+void
+EigenKernel::computeResidual()
 {
-  if (_current)
-    return -_u[_qp] / _eigen * _test[_i][_qp];
-  else
-    return -_u_old[_qp] / _eigen_old * _test[_i][_qp];
+  DenseVector<Number> & re = _assembly.residualBlock(_var.index());
+  _local_re.resize(re.size());
+  _local_re.zero();
+
+  Real one_over_eigen = 1.0/_eigen;
+  for (_i = 0; _i < _test.size(); _i++)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      _local_re(_i) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpResidual();
+
+  re += _local_re;
+
+  if (_has_save_in)
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for(unsigned int i=0; i<_save_in.size(); i++)
+      _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
+  }
+}
+
+void
+EigenKernel::computeJacobian()
+{
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), _var.index());
+  _local_ke.resize(ke.m(), ke.n());
+  _local_ke.zero();
+
+  for (_i = 0; _i < _test.size(); _i++)
+    for (_j = 0; _j < _phi.size(); _j++)
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+
+  ke += _local_ke;
+
+  if (_has_diag_save_in)
+  {
+    unsigned int rows = ke.m();
+    DenseVector<Number> diag(rows);
+    for(unsigned int i=0; i<rows; i++)
+      diag(i) = _local_ke(i,i);
+
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for(unsigned int i=0; i<_diag_save_in.size(); i++)
+      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+  }
+}
+
+Real
+EigenKernel::computeQpJacobian()
+{
+  return 0;
 }

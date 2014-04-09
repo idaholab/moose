@@ -50,7 +50,7 @@
 #include "BodyForce.h"
 #include "Reaction.h"
 #include "RealPropertyOutput.h"
-#include "EigenKernel.h"
+#include "MassEigenKernel.h"
 
 // bcs
 #include "ConvectiveFluxBC.h"
@@ -371,7 +371,7 @@ registerObjects(Factory & factory)
   registerKernel(BodyForce);
   registerKernel(Reaction);
   registerKernel(RealPropertyOutput);
-  registerKernel(EigenKernel);
+  registerKernel(MassEigenKernel);
 
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);
@@ -613,7 +613,7 @@ addActionTypes(Syntax & syntax)
    * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they have
    * not been explicitly created by the parser or some other mechanism.
    *
-   * Note: Many of the actions in the "Mimimal Problem" section are marked as false.  However, we can generally
+   * Note: Many of the actions in the "Minimal Problem" section are marked as false.  However, we can generally
    * force creation of these "Action"s as needed by registering them to syntax that we expect to see even
    * if those "Action"s  don't normally pick up parameters from the input file.
    */
@@ -628,6 +628,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
 
   registerMooseObjectTask("add_kernel",                   Kernel,                 false);
+  appendMooseObjectTask  ("add_kernel",                   EigenKernel);
+
   registerMooseObjectTask("add_material",                 Material,               false);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
   registerMooseObjectTask("add_function",                 Function,               false);

@@ -15,7 +15,7 @@
 #ifndef EIGENKERNEL_H
 #define EIGENKERNEL_H
 
-#include "Kernel.h"
+#include "KernelBase.h"
 
 //Forward Declarations
 class EigenKernel;
@@ -29,20 +29,35 @@ InputParameters validParams<EigenKernel>();
  * This kernel also obtain the postprocessor for eigenvalue by one problem-wise global parameter
  *    eigen_postprocessor - string, the name of the postprocessor to obtain the eigenvalue
  */
-class EigenKernel : public Kernel
+class EigenKernel : public KernelBase
 {
 public:
+  // See KernelBase base for documentation of these overridden methods
+  virtual void computeResidual();
+  virtual void computeJacobian();
+  virtual void computeOffDiagJacobian(unsigned int jvar) {}
+  virtual void computeOffDiagJacobianScalar(unsigned int jvar) {}
 
   EigenKernel(const std::string & name, InputParameters parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() = 0;
+  virtual Real computeQpJacobian();
 
-  VariableValue & _u_old;
+  /// Holds the solution at current quadrature points
+  VariableValue & _u;
 
-  const bool & _current;
+  /// Holds the solution gradient at the current quadrature points
+  VariableGradient & _grad_u;
+
+  /// Time derivative of u
+  VariableValue & _u_dot;
+
+  /// Derivative of u_dot with respect to u
+  VariableValue & _du_dot_du;
+
   const PostprocessorName & _eigen_pp;
   const Real & _eigen;
-  const Real & _eigen_old;
 };
+
 #endif //EIGENKERNEL_H
