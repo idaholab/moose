@@ -182,12 +182,13 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
         output_file_names.append(file_base + '.e')
         output_block_names.append(output_data['Name'])
 
-      # Return the list of file and block names
-      return [output_file_names, output_block_names]
 
     # FIXME: Hack to make raven and r7 work for now
     if 'raven' in self.input_file_widget.app_path or 'r7' in self.input_file_widget.app_path:
       output_file_names = [common_file_base + '_displaced.e']
+
+    # Return the list of file and block names
+    return [output_file_names, output_block_names]
 
   def _itemHasEditableParameters(self, item):
     this_path = self.generatePathFromItem(item)

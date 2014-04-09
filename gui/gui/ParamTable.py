@@ -53,9 +53,9 @@ class FileOpenWidget(QtGui.QPushButton):
     self.row = row
     self.is_vector_type = is_vector_type
     QtGui.QPushButton.__init__(self,'Find File')
-    QtCore.QObject.connect(self, QtCore.SIGNAL("clicked()"), self.clicked)
+    QtCore.QObject.connect(self, QtCore.SIGNAL("clicked()"), self.fileOpenCallback)
 
-  def clicked(self):
+  def fileOpenCallback(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Find Mesh File", os.getcwd(), "File (*)")
 
     if isinstance(file_name, QtCore.QString):
@@ -80,9 +80,9 @@ class FileNoExtensionOpenWidget(QtGui.QPushButton):
     self.row = row
     self.is_vector_type = is_vector_type
     QtGui.QPushButton.__init__(self,'Find File')
-    QtCore.QObject.connect(self, QtCore.SIGNAL("clicked()"), self.clicked)
+    QtCore.QObject.connect(self, QtCore.SIGNAL("clicked()"), self.fileOpenCallback)
 
-  def clicked(self):
+  def fileOpenCallback(self):
     file_name = QtGui.QFileDialog.getOpenFileName(self, "Find Mesh File", os.getcwd(), "File (*)")
 
     if isinstance(file_name, QtCore.QString):
@@ -596,10 +596,6 @@ class ParamTable:
 
       if 'cpp_type' in param and param['cpp_type'] == 'FileNameNoExtension':
         options_item = FileNoExtensionOpenWidget(table_widget,row,self.isVectorType(param['cpp_type']))
-        table_widget.setCellWidget(row, 2, options_item)
-
-      if 'cpp_type' in param and param['cpp_type'] == 'MeshFileName':
-        options_item = FileOpenWidget(table_widget,row,self.isVectorType(param['cpp_type']))
         table_widget.setCellWidget(row, 2, options_item)
 
       if 'cpp_type' in param and param['cpp_type'] in self.type_options:
