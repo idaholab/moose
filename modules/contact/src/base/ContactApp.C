@@ -14,7 +14,7 @@
 #include "OneDContactConstraint.h"
 #include "MultiDContactConstraint.h"
 #include "GluedContactConstraint.h"
-#include "SparsityBasedGluedContactConstraint.h"
+#include "SparsityBasedContactConstraint.h"
 #include "FrictionalContactProblem.h"
 #include "ReferenceResidualProblem.h"
 #include "NodalArea.h"
@@ -58,7 +58,7 @@ ContactApp::registerObjects(Factory & factory)
   registerConstraint(OneDContactConstraint);
   registerConstraint(MultiDContactConstraint);
   registerConstraint(GluedContactConstraint);
-  registerConstraint(SparsityBasedGluedContactConstraint);
+  registerConstraint(SparsityBasedContactConstraint);
   registerProblem(FrictionalContactProblem);
   registerProblem(ReferenceResidualProblem);
   registerUserObject(NodalArea);
