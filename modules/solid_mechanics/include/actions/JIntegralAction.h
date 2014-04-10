@@ -24,8 +24,13 @@ private:
   const std::string _order;
   const std::string _family;
   MooseEnum _direction_method_moose_enum;
+  MooseEnum _end_direction_method_moose_enum;
   bool _have_crack_direction_vector;
   RealVectorValue _crack_direction_vector;
+  bool _have_crack_direction_vector_end_1;
+  RealVectorValue _crack_direction_vector_end_1;
+  bool _have_crack_direction_vector_end_2;
+  RealVectorValue _crack_direction_vector_end_2;
   std::vector<BoundaryName> _crack_mouth_boundary_names;
   bool _treat_as_2d;
   unsigned int _axis_2d;
