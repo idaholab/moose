@@ -1,0 +1,31 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
+//  This post processor returns the saturation of a region.
+//
+#include "RichardsSatAux.h"
+
+template<>
+InputParameters validParams<RichardsSatAux>()
+{
+  InputParameters params = validParams<AuxKernel>();
+  params.addRequiredCoupledVar("seff_var", "Variable that is the effective saturation");
+  params.addRequiredParam<UserObjectName>("sat_UO", "Name of user object that defines saturation.");
+  params.addClassDescription("auxillary variable which is saturation");
+  return params;
+}
+
+RichardsSatAux::RichardsSatAux(const std::string & name, InputParameters parameters) :
+  AuxKernel(name, parameters),
+  _seff_var(coupledValue("seff_var")),
+  _sat_UO(getUserObject<RichardsSat>("sat_UO"))
+{}
+
+
+Real
+RichardsSatAux::computeValue()
+{
+  return _sat_UO.sat(_seff_var[_qp]);
+}
