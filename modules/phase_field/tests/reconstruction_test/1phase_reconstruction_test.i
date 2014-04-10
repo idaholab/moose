@@ -126,7 +126,7 @@
   nl_rel_tol = 1.0e-9
   nl_max_its = 20
   start_time = 0.0
-  num_steps = 3
+  num_steps = 2
   dt = 0.05
 
 [./Adaptivity]
@@ -142,7 +142,6 @@
   output_initial = true
   interval = 1
   exodus = true
-
   [./console]
     type = Console
     perf_log = true
