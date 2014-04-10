@@ -24,7 +24,7 @@ InputParameters validParams<GluedContactConstraint>()
 {
   MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
 
-  InputParameters params = validParams<NodeFaceConstraint>();
+  InputParameters params = validParams<SparsityBasedContactConstraint>();
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
@@ -49,7 +49,7 @@ InputParameters validParams<GluedContactConstraint>()
 }
 
 GluedContactConstraint::GluedContactConstraint(const std::string & name, InputParameters parameters) :
-    NodeFaceConstraint(name, parameters),
+    SparsityBasedContactConstraint(name, parameters),
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
   _formulation(contactFormulation(getParam<std::string>("formulation"))),

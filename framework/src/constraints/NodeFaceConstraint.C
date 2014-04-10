@@ -116,25 +116,7 @@ NodeFaceConstraint::computeResidual()
 void
 NodeFaceConstraint::computeJacobian()
 {
-  std::vector<dof_id_type> & elems = _node_to_elem_map[_current_node->id()];
-
-  _connected_dof_indices.clear();
-  std::set<dof_id_type> unique_dof_indices;
-
-  // Get the dof indices from each elem connected to the node
-  for(unsigned int el=0; el < elems.size(); ++el)
-  {
-    dof_id_type cur_elem = elems[el];
-
-    std::vector<dof_id_type> dof_indices;
-    _var.getDofIndices(_mesh.elem(cur_elem), dof_indices);
-
-    for(unsigned int di=0; di < dof_indices.size(); di++)
-      unique_dof_indices.insert(dof_indices[di]);
-  }
-
-  for(std::set<dof_id_type>::iterator sit=unique_dof_indices.begin(); sit != unique_dof_indices.end(); ++sit)
-    _connected_dof_indices.push_back(*sit);
+  getConnectedDofIndices();
 
   //  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
   DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.index(), _var.index());
@@ -178,6 +160,30 @@ NodeFaceConstraint::computeJacobian()
   for (_i=0; _i<_test_master.size(); _i++)
     for (_j=0; _j<_phi_master.size(); _j++)
       Knn(_i,_j) += computeQpJacobian(Moose::MasterMaster);
+}
+
+void
+NodeFaceConstraint::getConnectedDofIndices()
+{
+  _connected_dof_indices.clear();
+  std::set<dof_id_type> unique_dof_indices;
+
+  std::vector<dof_id_type> & elems = _node_to_elem_map[_current_node->id()];
+
+  // Get the dof indices from each elem connected to the node
+  for(unsigned int el=0; el < elems.size(); ++el)
+  {
+    dof_id_type cur_elem = elems[el];
+
+    std::vector<dof_id_type> dof_indices;
+    _var.getDofIndices(_mesh.elem(cur_elem), dof_indices);
+
+    for(unsigned int di=0; di < dof_indices.size(); di++)
+      unique_dof_indices.insert(dof_indices[di]);
+  }
+
+  for(std::set<dof_id_type>::iterator sit=unique_dof_indices.begin(); sit != unique_dof_indices.end(); ++sit)
+    _connected_dof_indices.push_back(*sit);
 }
 
 bool

@@ -16,7 +16,7 @@
 #define GLUEDCONTACTCONSTRAINT_H
 
 //MOOSE includes
-#include "NodeFaceConstraint.h"
+#include "SparsityBasedContactConstraint.h"
 
 //ELK includes
 #include "ContactMaster.h"
@@ -31,7 +31,7 @@ InputParameters validParams<GluedContactConstraint>();
  * A GluedContactConstraint forces the value of a variable to be the same on both sides of an interface.
  */
 class GluedContactConstraint :
-  public NodeFaceConstraint
+  public SparsityBasedContactConstraint
 {
 public:
   GluedContactConstraint(const std::string & name, InputParameters parameters);
