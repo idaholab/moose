@@ -156,12 +156,6 @@
     thermal_expansion = 1e-5
     compute_JIntegral = true
   [../]
-
-  [./density]
-    type = Density
-    block = '1'
-    density = 1.0
-  [../]
 []
 
 

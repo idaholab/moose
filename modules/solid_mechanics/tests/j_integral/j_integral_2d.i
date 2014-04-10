@@ -154,12 +154,6 @@
     formulation = PlaneStrain
     compute_JIntegral = true
   [../]
-
-  [./density]
-    type = Density
-    block = '1'
-    density = 8000.0
-  [../]
 []
 
 
