@@ -51,20 +51,25 @@ InputParameters validParams<Tecplot>()
 Tecplot::Tecplot(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
     _binary(getParam<bool>("binary")),
-    _ascii_append(getParam<bool>("ascii_append"))
+    _ascii_append(getParam<bool>("ascii_append")),
+    _first_time(declareRestartableData<bool>("first_time", true))
 {
-  // Force sequence output
-  /* Note: This does not change the behavior for this object b/c outputSetup() is empty, but it is
-   * place here for consistency */
+  // Force sequence output Note: This does not change the behavior for
+  // this object b/c outputSetup() is empty, but it is placed here for
+  // consistency.
   sequence(true);
 }
+
+
 
 void
 Tecplot::output()
 {
   TecplotIO out(*_mesh_ptr, _binary, time() + _app.getGlobalTimeOffset());
 
-  if (_ascii_append)
+  // Only set the append flag on the TecplotIO object if the user has
+  // asked for it, and this is not the first time we called output().
+  if (_ascii_append && !_first_time)
     out.ascii_append() = true;
 
   out.write_equation_systems(filename(), *_es_ptr);
@@ -73,31 +78,46 @@ Tecplot::output()
   // we'll use the same filename each time.
   if (_binary || !_ascii_append)
     _file_num++;
+
+  // If this was the first time we called output(), the next time will not be
+  // the first time.
+  if (_first_time)
+    _first_time = false;
 }
+
+
 
 void
 Tecplot::outputNodalVariables()
 {
-  mooseError("Individual output of nodal variables is not support for Tecplot output");
+  mooseError("Individual output of nodal variables is not supported for Tecplot output");
 }
+
+
 
 void
 Tecplot::outputElementalVariables()
 {
-  mooseError("Individual output of elemental variables is not support for Tecplot output");
+  mooseError("Individual output of elemental variables is not supported for Tecplot output");
 }
+
+
 
 void
 Tecplot::outputPostprocessors()
 {
-  mooseError("Individual output of postprocessors is not support for Tecplot output");
+  mooseError("Individual output of postprocessors is not supported for Tecplot output");
 }
+
+
 
 void
 Tecplot::outputScalarVariables()
 {
-  mooseError("Individual output of scalars is not support for Tecplot output");
+  mooseError("Individual output of scalars is not supported for Tecplot output");
 }
+
+
 
 std::string
 Tecplot::filename()
