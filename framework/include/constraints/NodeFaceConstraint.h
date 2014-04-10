@@ -63,6 +63,11 @@ public:
   virtual void computeJacobian();
 
   /**
+   * Gets the indices for all dofs conected to the constraint
+   */
+  virtual void getConnectedDofIndices();
+
+  /**
    * Compute the value the slave node should have at the beginning of a timestep.
    */
   virtual Real computeQpSlaveValue() = 0;

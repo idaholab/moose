@@ -47,10 +47,10 @@ public:
   }
 
   /**
-   * Compute the constraint Jacobian for the current element.
-   * Transfer all of the slave Jacobian columns, not only those based on the mesh connectivity.
+   * Gets the indices for all dofs conected to the constraint
+   * Get indices for all the slave Jacobian columns, not only those based on the mesh connectivity.
    */
-  virtual void computeJacobian();
+  virtual void getConnectedDofIndices();
 
 };
 
