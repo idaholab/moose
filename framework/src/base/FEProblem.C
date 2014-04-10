@@ -39,6 +39,7 @@
 #include "SetupOutputAction.h"
 #include "RandomInterface.h"
 #include "RandomData.h"
+#include "EigenSystem.h"
 
 #include "ScalarInitialCondition.h"
 #include "ElementPostprocessor.h"
@@ -84,6 +85,7 @@ InputParameters validParams<FEProblem>()
   params.addParam<unsigned int>("dimNullSpace", 0, "The dimension of the nullspace");
   params.addParam<unsigned int>("dimNearNullSpace", 0, "The dimension of the near nullspace");
   params.addParam<bool>("solve", true, "Whether or not to actually solve the Nonlinear system.  This is handy in the case that all you want to do is execute AuxKernels, Transfers, etc. without actually solving anything");
+  params.addParam<bool>("use_nonlinear", true, "Determines whether to use a Nonlinear vs a Eigenvalue system (Automatically determined based on executioner)");
   return params;
 }
 
@@ -111,7 +113,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
 
-    _nl(*this, name_sys("nl", _n)),
+    _nl(getParam<bool>("use_nonlinear") ? *(new NonlinearSystem(*this, name_sys("nl", _n))) : *(new EigenSystem(*this, name_sys("nl", _n)))),
     _aux(*this, name_sys("aux", _n)),
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
@@ -255,6 +257,7 @@ FEProblem::~FEProblem()
   delete &_mesh;
   delete _displaced_mesh;
   delete _displaced_problem;
+  delete &_nl;
 
   if (_out_problem)
     delete _out_problem;

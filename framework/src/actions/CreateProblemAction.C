@@ -15,6 +15,7 @@
 #include "CreateProblemAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<CreateProblemAction>()
@@ -52,6 +53,7 @@ CreateProblemAction::act()
     // build the problem only if we have mesh
     {
       _moose_object_pars.set<MooseMesh *>("mesh") = _mesh;
+      _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
       _problem = dynamic_cast<FEProblem *>(_factory.create(_type, _problem_name, _moose_object_pars));
       if (_problem == NULL)
         mooseError("Problem has to be of a FEProblem type");

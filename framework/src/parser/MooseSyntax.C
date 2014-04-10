@@ -97,6 +97,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("SetupPreconditionerAction", "Preconditioning/*");
   syntax.registerActionSyntax("AddSplitAction","Splits/*");
 
+  syntax.registerActionSyntax("DetermineSystemType", "Executioner");
   syntax.registerActionSyntax("CreateExecutionerAction", "Executioner");
   syntax.registerActionSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
   syntax.registerActionSyntax("SetupTimePeriodsAction", "Executioner/TimePeriods/*");

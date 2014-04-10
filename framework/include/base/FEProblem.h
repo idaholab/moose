@@ -805,7 +805,7 @@ protected:
   /// Objects by names, indexing: [thread][name]->array of moose objects with name 'name'
   std::vector<std::map<std::string, std::vector<MooseObject *> > > _objects_by_name;
 
-  NonlinearSystem _nl;
+  NonlinearSystem & _nl;
   AuxiliarySystem _aux;
 
   Moose::CouplingType _coupling;                        ///< Type of variable coupling
@@ -997,6 +997,7 @@ private:
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;
+  friend class EigenSystem;
   friend class Resurrector;
   friend class MaterialPropertyIO;
   friend class RestartableDataIO;

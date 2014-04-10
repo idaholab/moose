@@ -203,6 +203,11 @@ public:
   Executioner * getExecutioner() { return _executioner; }
 
   /**
+   * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
+   */
+  bool & useNonlinear() { return _use_nonlinear; }
+
+  /**
    * Retrieve the Factory associated with this App.
    */
   Factory & getFactory() { return _factory; }
@@ -363,6 +368,10 @@ protected:
   Parser _parser;
   /// Pointer to the executioner of this run (typically build by actions)
   Executioner * _executioner;
+
+  /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
+  bool _use_nonlinear;
+
   /// System Information
   SystemInfo * _sys_info;
 
