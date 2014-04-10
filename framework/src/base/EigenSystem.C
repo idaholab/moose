@@ -38,8 +38,8 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
-    // In the case of EigenKernels, we need to add two to the system
-    if (parameters.have_parameter<bool>("_eigen"))
+    // In the case of EigenKernels, we might need to add two to the system
+    if (parameters.have_parameter<bool>("eigen"))
     {
       {
         // EigenKernel
@@ -52,6 +52,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
         _kernels[tid].addKernel(ekernel, blk_ids);
         _fe_problem._objects_by_name[tid][name].push_back(ekernel);
       }
+      if (parameters.get<bool>("eigen"))
       {
         // EigenKernel_old
         parameters.set<bool>("implicit") = false;
