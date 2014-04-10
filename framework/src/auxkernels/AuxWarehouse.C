@@ -34,9 +34,6 @@ void
 AuxWarehouse::initialSetup()
 {
   // Sort the auxKernels
-  sortAuxKernels(_active_nodal_aux_kernels);
-  sortAuxKernels(_active_element_aux_kernels);
-
   for (std::map<SubdomainID, std::vector<AuxKernel *> >::iterator i = _active_block_nodal_aux_kernels.begin();
        i != _active_block_nodal_aux_kernels.end(); ++i)
     sortAuxKernels(i->second);
@@ -92,43 +89,33 @@ AuxWarehouse::addActiveBC(BoundaryID boundary_id, AuxKernel *aux)
 void
 AuxWarehouse::addAuxKernel(AuxKernel *aux, std::set<SubdomainID> block_ids)
 {
-  _all_aux_kernels.push_back(aux);
-  if (block_ids.empty())
-  {
-    if (aux->isNodal())
-    {
-      _all_nodal_aux_kernels.push_back(aux);
-      _active_nodal_aux_kernels.push_back(aux);
-    }
-    else
-    {
-      _all_element_aux_kernels.push_back(aux);
-      _active_element_aux_kernels.push_back(aux);
-    }
-  }
-  else
-  {
-    for(std::set<SubdomainID>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
-    {
-      SubdomainID id = *it;
+  mooseAssert(aux, "Auxkernel is NULL");
 
-      if (aux->isNodal())
-      {
-        _all_nodal_aux_kernels.push_back(aux);
-        _active_block_nodal_aux_kernels[id].push_back(aux);
-      }
-      else
-      {
-        _all_element_aux_kernels.push_back(aux);
-        _active_block_element_aux_kernels[id].push_back(aux);
-      }
-    }
+  if (block_ids.empty())
+    mooseError("No block ids determined for: " << aux->name());
+
+  _all_aux_kernels.push_back(aux);
+  if (aux->isNodal())
+    _all_nodal_aux_kernels.push_back(aux);
+  else
+    _all_element_aux_kernels.push_back(aux);
+
+  for(std::set<SubdomainID>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+  {
+    SubdomainID id = *it;
+
+    if (aux->isNodal())
+      _active_block_nodal_aux_kernels[id].push_back(aux);
+    else
+      _active_block_element_aux_kernels[id].push_back(aux);
   }
 }
 
 void
 AuxWarehouse::addScalarKernel(AuxScalarKernel *kernel)
 {
+  mooseAssert(kernel, "ScalarAuxkernel is NULL");
+
   _scalar_kernels.push_back(kernel);
 }
 

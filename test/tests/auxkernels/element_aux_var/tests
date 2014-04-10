@@ -22,4 +22,10 @@
     input = 'l2_element_aux_var_test.i'
     exodiff = 'l2elemaux.e'
   [../]
+
+  [./block_global_depend_resolve]
+    type = 'Exodiff'
+    input = 'block_global_depend_elem_aux.i'
+    exodiff = 'block_global_depend_elem_aux_out.e'
+  [../]
 []
