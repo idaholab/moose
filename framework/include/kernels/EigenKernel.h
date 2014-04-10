@@ -19,6 +19,7 @@
 
 //Forward Declarations
 class EigenKernel;
+class EigenSystem;
 
 template<>
 InputParameters validParams<EigenKernel>();
@@ -39,10 +40,14 @@ public:
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) {}
 
   EigenKernel(const std::string & name, InputParameters parameters);
+  virtual bool isActive();
 
 protected:
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
+
+  /// EigenKernel always lives in EigenSystem
+  EigenSystem & _eigen_sys;
 
   /// Holds the solution at current quadrature points
   VariableValue & _u;

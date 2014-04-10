@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "EigenKernel.h"
+#include "EigenSystem.h"
 
 template<>
 InputParameters validParams<EigenKernel>()
@@ -25,6 +26,7 @@ InputParameters validParams<EigenKernel>()
 
 EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
     KernelBase(name,parameters),
+    _eigen_sys(static_cast<EigenSystem &>(_fe_problem.getNonlinearSystem())),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _u_dot(_var.uDot()),
@@ -87,4 +89,15 @@ Real
 EigenKernel::computeQpJacobian()
 {
   return 0;
+}
+
+bool
+EigenKernel::isActive()
+{
+  bool flag = TransientInterface::isActive();
+
+  if (_is_implicit)
+    return flag && (!_eigen_sys.activeOnOld());
+  else
+    return flag && _eigen_sys.activeOnOld();
 }

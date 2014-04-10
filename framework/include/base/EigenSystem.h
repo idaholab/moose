@@ -17,14 +17,6 @@
 
 #include "NonlinearSystem.h"
 
-// libMesh includes
-//#include "libmesh/transient_system.h"
-//#include "libmesh/nonlinear_implicit_system.h"
-//#include "libmesh/numeric_vector.h"
-//#include "libmesh/sparse_matrix.h"
-//#include "libmesh/petsc_matrix.h"
-//#include "libmesh/coupling_matrix.h"
-
 class FEProblem;
 
 class EigenSystem : public NonlinearSystem
@@ -86,6 +78,11 @@ public:
    */
   void buildSystemDoFIndices(SYSTEMTAG tag = ALL);
 
+  /**
+   * Return if eigen kernels should be on old solution
+   */
+  bool activeOnOld();
+
 protected:
   /**
    * Get variable names of the eigen system
@@ -95,6 +92,8 @@ protected:
   std::set<VariableName> _eigen_var_names;
   bool _all_eigen_vars;
   std::set<dof_id_type> _eigen_var_indices;
+
+  bool _active_on_old;
 };
 
 #endif /* EIGENSYSTEM_H */

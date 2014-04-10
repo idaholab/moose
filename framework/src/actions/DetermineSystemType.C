@@ -36,5 +36,5 @@ DetermineSystemType::act()
    * set a flag on MooseApp that can be used during problem construction.
    */
   if (_moose_object_pars.isParamValid("_eigen") && _moose_object_pars.get<bool>("_eigen"))
-    _app.useNonlinear() = false;    
+    _app.useNonlinear() = false;
 }

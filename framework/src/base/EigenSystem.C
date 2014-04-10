@@ -14,71 +14,14 @@
 #include "EigenSystem.h"
 #include "KernelWarehouse.h"
 
-//#include "AuxiliarySystem.h"
-//#include "Problem.h"
-//#include "FEProblem.h"
-//#include "MooseVariable.h"
-//#include "PetscSupport.h"
-//#include "Factory.h"
-//#include "ParallelUniqueId.h"
-//#include "ThreadedElementLoop.h"
 #include "MaterialData.h"
 #include "Factory.h"
-//#include "ComputeResidualThread.h"
-//#include "ComputeJacobianThread.h"
-//#include "ComputeFullJacobianThread.h"
-//#include "ComputeJacobianBlockThread.h"
-//#include "ComputeDiracThread.h"
-//#include "ComputeDampingThread.h"
-//#include "TimeKernel.h"
-//#include "BoundaryCondition.h"
-//#include "PresetNodalBC.h"
-//#include "NodalBC.h"
-//#include "IntegratedBC.h"
-//#include "DGKernel.h"
-//#include "Damper.h"
-//#include "DisplacedProblem.h"
-//#include "NearestNodeLocator.h"
-//#include "PenetrationLocator.h"
-//#include "NodalConstraint.h"
-//#include "NodeFaceConstraint.h"
-//#include "FaceFaceConstraint.h"
-//#include "ScalarKernel.h"
-//#include "Parser.h"
-//#include "Split.h"
-//#include "SplitBasedPreconditioner.h"
-//#include "MooseMesh.h"
-//#include "MooseUtils.h"
-//#include "MooseApp.h"
 #include "EigenKernel.h"
-//
-//// libMesh
-//#include "libmesh/nonlinear_solver.h"
-//#include "libmesh/quadrature_gauss.h"
-//#include "libmesh/dense_vector.h"
-//#include "libmesh/boundary_info.h"
-//#include "libmesh/petsc_matrix.h"
-//#include "libmesh/petsc_vector.h"
-//#include "libmesh/petsc_nonlinear_solver.h"
-//#include "libmesh/numeric_vector.h"
-//#include "libmesh/mesh.h"
-//#include "libmesh/dense_subvector.h"
-//#include "libmesh/dense_submatrix.h"
-//#include "libmesh/dof_map.h"
-//// PETSc
-//#ifdef LIBMESH_HAVE_PETSC
-//#include "petscsnes.h"
-//#if !PETSC_VERSION_LESS_THAN(3,3,0)
-//#include <PetscDMMoose.h>
-//EXTERN_C_BEGIN
-//extern PetscErrorCode DMCreate_Moose(DM);
-//EXTERN_C_END
-//#endif
-//#endif
 
 EigenSystem::EigenSystem(FEProblem & fe_problem, const std::string & name) :
     NonlinearSystem(fe_problem, name),
-    _all_eigen_vars(false)
+    _all_eigen_vars(false),
+    _active_on_old(false)
 {
 }
 
@@ -100,6 +43,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
     {
       {
         // EigenKernel
+        parameters.set<bool>("implicit") = true;
         EigenKernel *ekernel = static_cast<EigenKernel *>(_factory.create(kernel_name, name, parameters));
         mooseAssert(ekernel != NULL, "Not an EigenKernel object");
         _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
@@ -110,7 +54,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
       }
       {
         // EigenKernel_old
-        parameters.set<bool>("_is_implicit") = true;
+        parameters.set<bool>("implicit") = false;
         std::string old_name(name + "_old");
 
         EigenKernel *ekernel = static_cast<EigenKernel *>(_factory.create(kernel_name, old_name, parameters));
@@ -271,13 +215,19 @@ EigenSystem::initSystemSolutionOld(SYSTEMTAG tag, Real v)
 void
 EigenSystem::eigenKernelOnOld()
 {
-  _fe_problem.parameters().set<bool>("eigen_on_current") = false;
+  _active_on_old = true;
 }
 
 void
 EigenSystem::eigenKernelOnCurrent()
 {
-  _fe_problem.parameters().set<bool>("eigen_on_current") = true;
+  _active_on_old = false;
+}
+
+bool
+EigenSystem::activeOnOld()
+{
+  return _active_on_old;
 }
 
 void
