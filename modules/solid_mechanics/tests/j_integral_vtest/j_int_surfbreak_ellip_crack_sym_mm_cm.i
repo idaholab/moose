@@ -63,6 +63,9 @@
   boundary = 1001
   crack_direction_method = CrackMouth
   crack_mouth_boundary = 11
+  crack_end_direction_method = CrackDirectionVector
+  crack_direction_vector_end_1 = '0.0 1.0 0.0'
+  crack_direction_vector_end_2 = '1.0 0.0 0.0'
   radius_inner = '12.5 25.0 37.5'
   radius_outer = '25.0 37.5 50.0'
 []
