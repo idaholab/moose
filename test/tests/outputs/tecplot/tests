@@ -6,6 +6,12 @@
     check_files = 'tecplot_out_0000.dat tecplot_out_0001.dat'
   [../]
 
+  [./test_append]
+    type = 'CheckFiles'
+    input = 'tecplot_append.i'
+    check_files = 'tecplot_append_out.dat'
+  [../]
+
   [./test_binary]
     # Tests the for existence of binary tecplot files.  This requires libmesh
     # to be configured with --enable-tecplot or --enable-tecio.
