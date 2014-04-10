@@ -54,16 +54,7 @@ ComputeNodalAuxVarsThread::operator() (const ConstNodeRange & range)
       var->prepareAux();
     }
 
-//  if (unlikely(_calculate_element_time))
-//    startNodeTiming(node->id());
-
     _fe_problem.reinitNode(node, _tid);
-
-    // compute global aux kernels
-    for (std::vector<AuxKernel *>::const_iterator aux_it = _auxs[_tid].activeNodalKernels().begin();
-        aux_it != _auxs[_tid].activeNodalKernels().end();
-        ++aux_it)
-      (*aux_it)->compute();
 
     const std::set<SubdomainID> & block_ids = _sys.mesh().getNodeBlockIds(*node);
     for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
@@ -73,9 +64,6 @@ ComputeNodalAuxVarsThread::operator() (const ConstNodeRange & range)
           ++aux_it)
         (*aux_it)->compute();
     }
-
-//  if (unlikely(_calculate_element_time))
-//    stopNodeTiming(node->id());
 
     // We are done, so update the solution vector
     {

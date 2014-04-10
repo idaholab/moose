@@ -50,7 +50,12 @@ CoupledAux::computeValue()
     // We are going to do division for this operation
     // This is useful for testing evalutation order
     // when we attempt to divide by zero!
+  {
+    if (_coupled_val[_qp] == 0)
+      mooseError("Floating point exception in coupled_value");
+
     return _value / _coupled_val[_qp];
+  }
 
   // Won't reach this statement
   return 0;

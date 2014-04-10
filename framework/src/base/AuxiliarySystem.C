@@ -120,7 +120,13 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
 
     std::set<SubdomainID> blk_ids;
     if (!parameters.isParamValid("block"))
+    {
       blk_ids = _var_map[kernel->variable().index()];
+
+      // If there is no block supplied and the variable is not restricted, get all the blocks from the mesh
+      if (blk_ids.empty())
+        blk_ids = _mesh.meshSubdomains();
+    }
     else
     {
       std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
@@ -134,6 +140,9 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
           mooseError("AuxKernel (" + kernel->name() + "): block outside of the domain of the variable");
       }
     }
+
+    if (blk_ids.empty())
+      mooseError("No block ids determined for: " << kernel->name());
 
     _auxs(kernel->execFlag())[tid].addAuxKernel(kernel, blk_ids);
     _mproblem._objects_by_name[tid][name].push_back(kernel);
@@ -319,7 +328,7 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
 
   Moose::perf_log.push("update_aux_vars_nodal()","Solve");
   PARALLEL_TRY {
-    if (auxs[0].activeNodalKernels().size() > 0 || have_block_kernels)
+    if (have_block_kernels)
     {
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
       ComputeNodalAuxVarsThread navt(_mproblem, *this, auxs);

@@ -46,9 +46,6 @@ public:
   const std::vector<AuxKernel *> & allElementKernels() { return _all_element_aux_kernels; }
   const std::vector<AuxKernel *> & allNodalKernels() { return _all_nodal_aux_kernels; }
 
-  const std::vector<AuxKernel *> & activeNodalKernels() { return _active_nodal_aux_kernels; }
-  const std::vector<AuxKernel *> & activeElementKernels() { return _active_element_aux_kernels; }
-
   const std::vector<AuxKernel *> & activeBlockNodalKernels(SubdomainID block) { return _active_block_nodal_aux_kernels[block]; }
   const std::vector<AuxKernel *> & activeBlockElementKernels(SubdomainID block) { return _active_block_element_aux_kernels[block]; }
 
@@ -90,10 +87,6 @@ protected:
   /// all nodal aux kernels
   std::vector<AuxKernel *> _all_nodal_aux_kernels;
 
-  /// nodal kernels active everywhere
-  std::vector<AuxKernel *> _active_nodal_aux_kernels;
-  /// elemental kernels active everywhere
-  std::vector<AuxKernel *> _active_element_aux_kernels;
   /// nodal kernels active on a block
   std::map<SubdomainID, std::vector<AuxKernel *> > _active_block_nodal_aux_kernels;
   /// elemental kernels active on a block
