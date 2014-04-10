@@ -38,6 +38,9 @@ InputParameters validParams<Tecplot>()
   params.addParam<bool>("binary", false, "Set Tecplot files to output in binary format");
   params.addParamNamesToGroup("binary", "Advanced");
 
+  // Add optional parameter to turn on appending to ASCII files
+  params.addParam<bool>("ascii_append", false, "If true, append to an existing ASCII file rather than creating a new file each time");
+
   // Add description for the Tecplot class
   params.addClassDescription("Object for outputting data in the Tecplot format");
 
@@ -47,7 +50,8 @@ InputParameters validParams<Tecplot>()
 
 Tecplot::Tecplot(const std::string & name, InputParameters parameters) :
     OversampleOutputter(name, parameters),
-    _binary(getParam<bool>("binary"))
+    _binary(getParam<bool>("binary")),
+    _ascii_append(getParam<bool>("ascii_append"))
 {
   // Force sequence output
   /* Note: This does not change the behavior for this object b/c outputSetup() is empty, but it is
@@ -59,8 +63,16 @@ void
 Tecplot::output()
 {
   TecplotIO out(*_mesh_ptr, _binary, time() + _app.getGlobalTimeOffset());
+
+  if (_ascii_append)
+    out.ascii_append() = true;
+
   out.write_equation_systems(filename(), *_es_ptr);
-  _file_num++;
+
+  // If we're not appending, increment the file number.  If we are appending,
+  // we'll use the same filename each time.
+  if (_binary || !_ascii_append)
+    _file_num++;
 }
 
 void
@@ -90,15 +102,17 @@ Tecplot::outputScalarVariables()
 std::string
 Tecplot::filename()
 {
-  // Append the padded time step to the file base
   std::ostringstream output;
-  output << _file_base
-         << "_"
-         << std::setw(_padding)
-         << std::setprecision(0)
-         << std::setfill('0')
-         << std::right
-         << _file_num;
+  output << _file_base;
+
+  // If not appending, put the padded time step in the filename.
+  if (_binary || !_ascii_append)
+    output << "_"
+           << std::setw(_padding)
+           << std::setprecision(0)
+           << std::setfill('0')
+           << std::right
+           << _file_num;
 
   // .plt extension is for binary files
   // .dat extension is for ASCII files
