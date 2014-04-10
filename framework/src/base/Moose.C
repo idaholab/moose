@@ -41,6 +41,7 @@
 #include "FEProblem.h"
 #include "OutputProblem.h"
 #include "CoupledProblem.h"
+
 // kernels
 #include "TimeDerivative.h"
 #include "Diffusion.h"
@@ -280,6 +281,7 @@
 #include "AddDamperAction.h"
 #include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
+#include "DetermineSystemType.h"
 #include "SetupTimePeriodsAction.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
@@ -624,6 +626,10 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("create_problem",               Problem,                 true);
   registerMooseObjectTask("setup_executioner",            Executioner,             true);
 
+  // This task does not construct an object, but it needs all of the parameters that
+  // would normally be used to construct an object.
+  registerMooseObjectTask("determine_system_type",        Executioner,             true);
+
   registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
   registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
 
@@ -734,6 +740,7 @@ addActionTypes(Syntax & syntax)
 "(add_mesh_modifier)"
 "(add_mortar_interface)"
 "(setup_mesh_complete)"
+"(determine_system_type)"
 "(create_problem)"
 "(setup_executioner)"
 "(setup_time_stepper)"
@@ -820,6 +827,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupTimeStepperAction, "setup_time_stepper");
   registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
+  registerAction(DetermineSystemType, "determine_system_type");
   registerAction(CreateProblemAction, "create_problem");
   registerAction(SetupOutputAction, "setup_output"); /// \todo{remove w/ update system upgraded}
   registerAction(SetupOutputNameAction, "setup_output_name"); /// \todo{remove w/ update system upgraded}

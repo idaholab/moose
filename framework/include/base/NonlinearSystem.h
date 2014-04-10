@@ -92,7 +92,7 @@ public:
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  virtual void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a scalar kernel
@@ -398,51 +398,6 @@ public:
 
   bool hasActiveIntegratedBCs(BoundaryID bnd_id, THREAD_ID tid) { return ! _bcs[tid].activeIntegrated(bnd_id).empty(); }
 
-  /**
-   * System or kernel tags
-   */
-  enum SYSTEMTAG
-  {
-    ALL,
-    EIGEN
-  };
-
-  /**
-   * Scale the solution vector
-   *
-   * @param tag System tag.
-   * @param factor The scaling factor.
-   */
-  void scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor);
-
-  /**
-   * Linear combination of the solution vectors
-   *
-   * @param tag System tag.
-   * @param fcoef Coefficients for current, old and older solutions.
-   */
-  void combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coefficients);
-
-  /**
-   * Initialize the solution vector with a constant value
-   *
-   * @param tag System tag.
-   * @param v The value.
-   */
-  void initSystemSolution(SYSTEMTAG tag, Real v);
-  void initSystemSolutionOld(SYSTEMTAG tag, Real v);
-
-  /**
-   * Ask eigenkernels to operate on old or current solution vectors
-   */
-  void eigenKernelOnOld();
-  void eigenKernelOnCurrent();
-
-  /**
-   * Build DoF indices for a system
-   */
-  void buildSystemDoFIndices(SYSTEMTAG tag = ALL);
-
 public:
   FEProblem & _fe_problem;
   // FIXME: make these protected and create getters/setters
@@ -483,10 +438,6 @@ protected:
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
   void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
 
-  /**
-   * Get variable names of the eigen system
-   */
-  const std::set<VariableName> & getEigenVariableNames() const { return _eigen_var_names; }
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
@@ -586,10 +537,6 @@ protected:
   bool _computing_initial_residual;
 
   bool _print_all_var_norms;
-
-  std::set<VariableName> _eigen_var_names;
-  bool _all_eigen_vars;
-  std::set<dof_id_type> _eigen_var_indices;
 
 public:
   friend class ComputeResidualThread;

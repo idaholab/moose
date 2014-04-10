@@ -47,7 +47,6 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
-#include "EigenKernel.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -316,6 +315,7 @@ NonlinearSystem::timestepSetup()
   }
 }
 
+
 void
 NonlinearSystem::setupFiniteDifferencedPreconditioner()
 {
@@ -495,42 +495,16 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
-    // In the case of EigenKernels, we need to add two to the system
-    if (parameters.have_parameter<bool>("_eigen"))
-    {
-      {
-        // EigenKernel
-        EigenKernel *ekernel = static_cast<EigenKernel *>(_factory.create(kernel_name, name, parameters));
-        mooseAssert(ekernel != NULL, "Not an EigenKernel object");
-        _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
-        // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-        std::set<SubdomainID> blk_ids = ekernel->blockIDs();
-        _kernels[tid].addKernel(ekernel, blk_ids);
-        _fe_problem._objects_by_name[tid][name].push_back(ekernel);
-      }
-      {
-        // EigenKernel_old
-        parameters.set<bool>("_is_implicit") = true;
-        std::string old_name(name + "_old");
+    // Create the kernel object via the factory
+    KernelBase *kernel = static_cast<KernelBase *>(_factory.create(kernel_name, name, parameters));
+    mooseAssert(kernel != NULL, "Not a Kernel object");
 
-        EigenKernel *ekernel = static_cast<EigenKernel *>(_factory.create(kernel_name, old_name, parameters));
-        _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
-        // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-        std::set<SubdomainID> blk_ids = ekernel->blockIDs();
-        _kernels[tid].addKernel(ekernel, blk_ids);
-        _fe_problem._objects_by_name[tid][old_name].push_back(ekernel);
-      }
-    }
-    else // Standard nonlinear system kernel
-    {
-      // Create the kernel object via the factory
-      KernelBase *kernel = static_cast<KernelBase *>(_factory.create(kernel_name, name, parameters));
-      mooseAssert(kernel != NULL, "Not a Kernel object");
-      // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-      std::set<SubdomainID> blk_ids = kernel->blockIDs();
-      _kernels[tid].addKernel(kernel, blk_ids);
-      _fe_problem._objects_by_name[tid][name].push_back(kernel);
-    }
+    // Extract the SubdomainIDs from the object (via BlockRestrictable class)
+    std::set<SubdomainID> blk_ids = kernel->blockIDs();
+
+    // Add the kernel to the warehouse
+    _kernels[tid].addKernel(kernel, blk_ids);
+    _fe_problem._objects_by_name[tid][name].push_back(kernel);
   }
 }
 
@@ -2301,173 +2275,4 @@ NonlinearSystem::setPCSide(MooseEnum pcs)
     _pc_side = Moose::PCS_SYMMETRIC;
   else
     mooseError("Unknown PC side specified.");
-}
-
-void
-NonlinearSystem::buildSystemDoFIndices(SYSTEMTAG tag)
-{
-  if (tag==ALL)
-  {
-  }
-  else if (tag==EIGEN)
-  {
-    // build DoF indices for the eigen system
-    _eigen_var_indices.clear();
-    _all_eigen_vars = getEigenVariableNames().size()==getVariableNames().size();
-    if (!_all_eigen_vars)
-    {
-      for (std::set<VariableName>::const_iterator it=getEigenVariableNames().begin();
-           it!=getEigenVariableNames().end(); it++)
-      {
-        unsigned int i = sys().variable_number(*it);
-        sys().local_dof_indices(i, _eigen_var_indices);
-      }
-    }
-  }
-}
-
-void
-NonlinearSystem::scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor)
-{
-  if (tag==ALL)
-  {
-    solution().scale(scaling_factor);
-  }
-  else if (tag==EIGEN)
-  {
-    if (_all_eigen_vars)
-    {
-      solution().scale(scaling_factor);
-    }
-    else
-    {
-      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
-      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
-
-      for(; it !=it_end; ++it)
-        solution().set( *it, solution()(*it)*scaling_factor );
-    }
-  }
-  solution().close();
-  update();
-}
-
-void
-NonlinearSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coefficients)
-{
-  mooseAssert(coefficients.size()>0 && coefficients.size()<=3, "Size error on coefficients");
-  if (tag==ALL)
-  {
-    solution().scale(coefficients[0]);
-    if (coefficients.size()>1) solution().add(coefficients[1], solutionOld());
-    if (coefficients.size()>2) solution().add(coefficients[2], solutionOlder());
-  }
-  else if (tag==EIGEN)
-  {
-    if (_all_eigen_vars)
-    {
-      solution().scale(coefficients[0]);
-      if (coefficients.size()>1) solution().add(coefficients[1], solutionOld());
-      if (coefficients.size()>2) solution().add(coefficients[2], solutionOlder());
-    }
-    else
-    {
-      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
-      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
-
-      if (coefficients.size()>2)
-      {
-        for(; it !=it_end; ++it)
-        {
-          Real t = solution()(*it) * coefficients[0];
-          t += solutionOld()(*it) * coefficients[1];
-          t += solutionOlder()(*it) * coefficients[2];
-          solution().set( *it, t );
-        }
-      }
-      else if (coefficients.size()>1)
-      {
-        for(; it !=it_end; ++it)
-        {
-          Real t = solution()(*it) * coefficients[0];
-          t += solutionOld()(*it) * coefficients[1];
-          solution().set( *it, t );
-        }
-      }
-      else
-      {
-        for(; it !=it_end; ++it)
-        {
-          Real t = solution()(*it) * coefficients[0];
-          solution().set( *it, t );
-        }
-      }
-    }
-  }
-  solution().close();
-  update();
-}
-
-void
-NonlinearSystem::initSystemSolution(SYSTEMTAG tag, Real v)
-{
-  if (tag==ALL)
-  {
-    solution() = v;
-  }
-  else if (tag==EIGEN)
-  {
-    if (_all_eigen_vars)
-    {
-      solution() = v;
-    }
-    else
-    {
-      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
-      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
-
-      for(; it !=it_end; ++it)
-        solution().set( *it, v );
-    }
-  }
-  solution().close();
-  update();
-}
-
-void
-NonlinearSystem::initSystemSolutionOld(SYSTEMTAG tag, Real v)
-{
-  if (tag==ALL)
-  {
-    solutionOld() = v;
-  }
-  else if (tag==EIGEN)
-  {
-    if (_all_eigen_vars)
-    {
-      solutionOld() = v;
-    }
-    else
-    {
-      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
-      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
-
-      for(; it !=it_end; ++it)
-        solutionOld().set( *it, v );
-    }
-  }
-  solutionOld().close();
-  update();
-}
-
-void
-NonlinearSystem::eigenKernelOnOld()
-{
-  _fe_problem.parameters().set<bool>("eigen_on_current") = false;
-}
-
-void
-NonlinearSystem::eigenKernelOnCurrent()
-{
-  _fe_problem.parameters().set<bool>("eigen_on_current") = true;
 }

@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "EigenExecutionerBase.h"
+#include "EigenSystem.h"
 
 #include "MooseApp.h"
 
@@ -28,12 +29,15 @@ InputParameters validParams<EigenExecutionerBase>()
   //FIXME: remove this when EXEC_FINAL is available in MOOSE
   params.addParam<bool>("evaluate_custom_uo", true, "True to evaluate custom user objects at the end");
   params.addParam<Real>("time", 0.0, "System time");
+
+  params.addPrivateParam<bool>("_eigen", true);
   return params;
 }
 
 EigenExecutionerBase::EigenExecutionerBase(const std::string & name, InputParameters parameters)
     :Executioner(name, parameters),
      _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
+     _eigen_sys(static_cast<EigenSystem &>(_problem.getNonlinearSystem())),
      _eigenvalue(_problem.parameters().set<Real>("eigenvalue")), // used for storing the eigenvalue
      _source_integral(getPostprocessorValue("bx_norm")),
      _source_integral_old(getPostprocessorValueOld("bx_norm")),
@@ -87,16 +91,16 @@ EigenExecutionerBase::init()
   }
 
   checkIntegrity();
-  _problem.getNonlinearSystem().buildSystemDoFIndices(NonlinearSystem::EIGEN);
+  _eigen_sys.buildSystemDoFIndices(EigenSystem::EIGEN);
 
   if (getParam<bool>("auto_initialization"))
   {
     // Initialize the solution of the eigen variables
     // Note: initial conditions will override this if there is any by _problem.initialSetup()
-    _problem.getNonlinearSystem().initSystemSolution(NonlinearSystem::EIGEN, 1.0);
+    _eigen_sys.initSystemSolution(EigenSystem::EIGEN, 1.0);
   }
   _problem.initialSetup();
-  _problem.getNonlinearSystem().initSystemSolutionOld(NonlinearSystem::EIGEN, 0.0);
+  _eigen_sys.initSystemSolutionOld(EigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated
   _bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execFlag();
@@ -114,14 +118,13 @@ EigenExecutionerBase::init()
   //        Has been taken care of by problem initial setup? so simply comment out the following line
   _problem.computeUserObjects(_bx_execflag);
   if (_source_integral==0.0) mooseError("|Bx| cannot be zero for the inverse power method");
-  _problem.getNonlinearSystem().scaleSystemSolution(NonlinearSystem::EIGEN, _eigenvalue/_source_integral);
+  _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, _eigenvalue/_source_integral);
   // update all aux variables
-  ExecFlagType types[] = { EXEC_INITIAL, EXEC_TIMESTEP_BEGIN, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_TIMESTEP, EXEC_CUSTOM };
-  for (unsigned int i=0; i<LENGTHOF(types); i++)
+  for (unsigned int i=0; i<Moose::exec_types.size(); i++)
   {
-    _problem.computeUserObjects(types[i], UserObjectWarehouse::PRE_AUX);
-    _problem.computeAuxiliaryKernels(types[i]);
-    _problem.computeUserObjects(types[i], UserObjectWarehouse::POST_AUX);
+    _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::PRE_AUX);
+    _problem.computeAuxiliaryKernels(Moose::exec_types[i]);
+    _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::POST_AUX);
   }
   Moose::out << " |Bx_0| = " << _source_integral << std::endl;
 
@@ -152,7 +155,7 @@ void
 EigenExecutionerBase::checkIntegrity()
 {
   // check to make sure that we don't have any time kernels in this simulation
-  if (_problem.getNonlinearSystem().containsTimeKernel())
+  if (_eigen_sys.containsTimeKernel())
     mooseError("You have specified time kernels in your steady state eigenvalue simulation");
 }
 
@@ -193,20 +196,20 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   if (max_iter==0) return;
 
   // turn off nonlinear flag so that RHS kernels opterate on previous solutions
-  _problem.getNonlinearSystem().eigenKernelOnOld();
+  _eigen_sys.eigenKernelOnOld();
 
   // FIXME: currently power iteration use old and older solutions,
   // so save old and older solutions before they are changed by the power iteration
   if (!_sys_sol_old)
-    _sys_sol_old= &_problem.getNonlinearSystem().addVector("save_flux_old", false, PARALLEL);
+    _sys_sol_old= &_eigen_sys.addVector("save_flux_old", false, PARALLEL);
   if (!_aux_sol_old)
     _aux_sol_old = &_problem.getAuxiliarySystem().addVector("save_aux_old",  false, PARALLEL);
   if (!_sys_sol_older)
-    _sys_sol_older = &_problem.getNonlinearSystem().addVector("save_flux_older", false, PARALLEL);
+    _sys_sol_older = &_eigen_sys.addVector("save_flux_older", false, PARALLEL);
   if (!_aux_sol_older)
     _aux_sol_older = &_problem.getAuxiliarySystem().addVector("save_aux_older",  false, PARALLEL);
-  *_sys_sol_old   = _problem.getNonlinearSystem().solutionOld();
-  *_sys_sol_older = _problem.getNonlinearSystem().solutionOlder();
+  *_sys_sol_old   = _eigen_sys.solutionOld();
+  *_sys_sol_older = _eigen_sys.solutionOlder();
   *_aux_sol_old   = _problem.getAuxiliarySystem().solutionOld();
   *_aux_sol_older = _problem.getAuxiliarySystem().solutionOlder();
 
@@ -261,7 +264,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     _problem.onTimestepEnd();
 
     // save the initial residual
-    if (iter==0) initial_res = _problem.getNonlinearSystem()._initial_residual;
+    if (iter==0) initial_res = _eigen_sys._initial_residual;
 
     // update eigenvalue
     k = k_old * _source_integral / _source_integral_old;
@@ -373,8 +376,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   _problem.es().parameters.set<unsigned int>("nonlinear solver maximum iterations") = num1;
 
   //FIXME: currently power iteration use old and older solutions, so restore them
-  _problem.getNonlinearSystem().solutionOld() = *_sys_sol_old;
-  _problem.getNonlinearSystem().solutionOlder() = *_sys_sol_older;
+  _eigen_sys.solutionOld() = *_sys_sol_old;
+  _eigen_sys.solutionOlder() = *_sys_sol_older;
   _problem.getAuxiliarySystem().solutionOld() = *_aux_sol_old;
   _problem.getAuxiliarySystem().solutionOlder() = *_aux_sol_older;
 }
@@ -401,14 +404,13 @@ EigenExecutionerBase::normalizeSolution(bool force)
   Real scaling = _normalization/factor;
   if (scaling != 1.0)
   {
-    _problem.getNonlinearSystem().scaleSystemSolution(NonlinearSystem::EIGEN, scaling);
+    _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, scaling);
     // update all aux variables and user objects
-    ExecFlagType types[] = { EXEC_INITIAL, EXEC_TIMESTEP_BEGIN, EXEC_JACOBIAN, EXEC_RESIDUAL, EXEC_TIMESTEP, EXEC_CUSTOM };
-    for (unsigned int i=0; i<LENGTHOF(types); i++)
+    for (unsigned int i=0; i<Moose::exec_types.size(); i++)
     {
-      _problem.computeUserObjects(types[i], UserObjectWarehouse::PRE_AUX);
-      _problem.computeAuxiliaryKernels(types[i]);
-      _problem.computeUserObjects(types[i], UserObjectWarehouse::POST_AUX);
+      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::PRE_AUX);
+      _problem.computeAuxiliaryKernels(Moose::exec_types[i]);
+      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::POST_AUX);
     }
   }
   return scaling;
@@ -417,9 +419,9 @@ EigenExecutionerBase::normalizeSolution(bool force)
 void
 EigenExecutionerBase::printEigenvalue()
 {
-  _problem.getNonlinearSystem().printVarNorms();
+  _eigen_sys.printVarNorms();
 
-  std::stringstream ss;
+  std::ostringstream ss;
   ss << std::endl;
   ss << "******************************************************* " << std::endl;
   ss << " Eigenvalue = " << std::fixed << std::setprecision(10) << _eigenvalue << std::endl;
@@ -472,7 +474,7 @@ EigenExecutionerBase::chebyshev(unsigned int iter)
       std::vector<double> coef(2);
       coef[0] = alp;
       coef[1] = 1-alp;
-      _problem.getNonlinearSystem().combineSystemSolution(NonlinearSystem::EIGEN, coef);
+      _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
       _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::PRE_AUX);
       _problem.computeAuxiliaryKernels(EXEC_RESIDUAL);
       _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::POST_AUX);
@@ -495,7 +497,7 @@ EigenExecutionerBase::chebyshev(unsigned int iter)
       coef[0] = alp;
       coef[1] = 1-alp+beta;
       coef[2] = -beta;
-      _problem.getNonlinearSystem().combineSystemSolution(NonlinearSystem::EIGEN, coef);
+      _eigen_sys.combineSystemSolution(NonlinearSystem::EIGEN, coef);
     }
     else
     {*/
@@ -528,7 +530,7 @@ EigenExecutionerBase::chebyshev(unsigned int iter)
         coef[0] = alp;
         coef[1] = 1-alp+beta;
         coef[2] = -beta;
-        _problem.getNonlinearSystem().combineSystemSolution(NonlinearSystem::EIGEN, coef);
+        _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
         _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::PRE_AUX);
         _problem.computeAuxiliaryKernels(EXEC_RESIDUAL);
         _problem.computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::POST_AUX);
@@ -550,7 +552,7 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
     mooseError("rhs postprocessor for the nonlinear eigenvalue solve must be executed on residual");
 
   // turn on nonlinear flag so that RHS kernels opterate on the current solutions
-  _problem.getNonlinearSystem().eigenKernelOnCurrent();
+  _eigen_sys.eigenKernelOnCurrent();
 
   // set nonlinear solver controls
   Real tol1 = _problem.es().parameters.get<Real> ("nonlinear solver absolute residual tolerance");

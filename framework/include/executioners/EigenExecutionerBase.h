@@ -20,6 +20,7 @@
 
 // Forward Declarations
 class EigenExecutionerBase;
+class EigenSystem;
 
 template<>
 InputParameters validParams<EigenExecutionerBase>();
@@ -147,6 +148,7 @@ protected:
 
   // the fe problem
   FEProblem & _problem;
+  EigenSystem & _eigen_sys;
 
   // eigenvalue
   Real & _eigenvalue;
