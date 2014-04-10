@@ -25,7 +25,10 @@ JIntegralAction::JIntegralAction(const std::string & name, InputParameters param
   _order(getParam<std::string>("order")),
   _family(getParam<std::string>("family")),
   _direction_method_moose_enum(getParam<MooseEnum>("crack_direction_method")),
+  _end_direction_method_moose_enum(getParam<MooseEnum>("crack_end_direction_method")),
   _have_crack_direction_vector(false),
+  _have_crack_direction_vector_end_1(false),
+  _have_crack_direction_vector_end_2(false),
   _treat_as_2d(getParam<bool>("2d")),
   _axis_2d(getParam<unsigned int>("2d_axis")),
   _radius_inner(getParam<std::vector<Real> >("radius_inner")),
@@ -36,6 +39,16 @@ JIntegralAction::JIntegralAction(const std::string & name, InputParameters param
   {
     _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
     _have_crack_direction_vector = true;
+  }
+  if (isParamValid("crack_direction_vector_end_1"))
+  {
+    _crack_direction_vector_end_1 = getParam<RealVectorValue>("crack_direction_vector_end_1");
+    _have_crack_direction_vector_end_1 = true;
+  }
+  if (isParamValid("crack_direction_vector_end_2"))
+  {
+    _crack_direction_vector_end_2 = getParam<RealVectorValue>("crack_direction_vector_end_2");
+    _have_crack_direction_vector_end_2 = true;
   }
   if (isParamValid("crack_mouth_boundary"))
   {
@@ -67,9 +80,18 @@ JIntegralAction::act()
     InputParameters params = _factory.getValidParams(uo_type_name);
     params.set<MooseEnum>("execute_on") = "initial";
     params.set<MooseEnum>("crack_direction_method") = _direction_method_moose_enum;
+    params.set<MooseEnum>("crack_end_direction_method") = _end_direction_method_moose_enum;
     if (_have_crack_direction_vector)
     {
       params.set<RealVectorValue>("crack_direction_vector") = _crack_direction_vector;
+    }
+    if (_have_crack_direction_vector_end_1)
+    {
+      params.set<RealVectorValue>("crack_direction_vector_end_1") = _crack_direction_vector_end_1;
+    }
+    if (_have_crack_direction_vector_end_2)
+    {
+      params.set<RealVectorValue>("crack_direction_vector_end_2") = _crack_direction_vector_end_2;
     }
     if (_crack_mouth_boundary_names.size() != 0)
     {
