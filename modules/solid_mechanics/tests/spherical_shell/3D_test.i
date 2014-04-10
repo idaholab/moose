@@ -41,7 +41,6 @@
 # refined.
 
 [GlobalParams]
-  density = 10800.0          # kg/m^3
   order = SECOND
   family = LAGRANGE
   disp_x = disp_x
@@ -174,13 +173,6 @@
     youngs_modulus = 1e10
     poissons_ratio = .345
     thermal_expansion = 0
-  [../]
-
-  [./fuel_den]
-    type = Density
-    block = 1
-    disp_r = disp_x
-    disp_z = disp_y
   [../]
 []
 
