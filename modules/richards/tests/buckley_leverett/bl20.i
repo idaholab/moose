@@ -244,6 +244,7 @@
   output_final = true
   interval = 10000
   exodus = true
+  hide = pgas
   [./console]
     type = Console
     perf_log = true

@@ -40,6 +40,7 @@ public ZeroInterface
   VariableValue * pp_vals(unsigned int pressure_var_num) const;
   VariableValue * pp_vals_old(unsigned int pressure_var_num) const;
   VariableGradient * grad_pp(unsigned int pressure_var_num) const;
+  MooseVariable * raw_pp(unsigned int pressure_var_num) const;
 
  protected:
   unsigned int _num_p;
@@ -49,6 +50,7 @@ public ZeroInterface
   std::vector<VariableValue *> _moose_var_value; // this is a vector of pointers to VariableValues
   std::vector<VariableValue *> _moose_var_value_old;
   std::vector<VariableGradient *> _moose_grad_var;
+  std::vector<MooseVariable *> _moose_raw_var;
 
 };
 

@@ -1,9 +1,8 @@
 # two-phase version
-# super-sharp front version
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 150
+  nx = 30
   xmin = 0
   xmax = 15
 []
@@ -11,6 +10,11 @@
 
 [GlobalParams]
   porepressureNames_UO = PPNames
+  density_UO = 'DensityWater DensityGas'
+  relperm_UO = 'RelPermWater RelPermGas'
+  SUPG_UO = 'SUPGwater SUPGgas'
+  sat_UO = 'SatWater SatGas'
+  seff_UO = 'SeffWater SeffGas'
 []
 
 [UserObjects]
@@ -31,12 +35,12 @@
   [./SeffWater]
     type = RichardsSeff2waterVG
     m = 0.8
-    al = 1E-4
+    al = 1E-5
   [../]
   [./SeffGas]
     type = RichardsSeff2gasVG
     m = 0.8
-    al = 1E-4
+    al = 1E-5
   [../]
   [./RelPermWater]
     type = RichardsRelPermPower
@@ -80,17 +84,14 @@
 []
 
 [AuxVariables]
-  [./Seff1VG_Aux]
-  [../]
-  [./bounds_dummy]
+  [./w_aux_seff]
   [../]
 []
 
 
 [Kernels]
-  active = 'richardsfwater richardstwater richardsfgas richardstgas'
   [./richardstwater]
-    type = RichardsMassChange
+    type = RichardsLumpedMassChange
     variable = pwater
   [../]
   [./richardsfwater]
@@ -98,37 +99,21 @@
     variable = pwater
   [../]
   [./richardstgas]
-    type = RichardsMassChange
+    type = RichardsLumpedMassChange
     variable = pgas
   [../]
   [./richardsfgas]
     type = RichardsFlux
     variable = pgas
   [../]
-  [./richardsppenalty]
-    type = RichardsPPenalty
-    variable = pgas
-    a = 1E-18
-    lower_var = pwater
-  [../]
 []
 
 [AuxKernels]
-  [./Seff1VG_AuxK]
+  [./w_aux_seff_auxk]
     type = RichardsSeffAux
-    variable = Seff1VG_Aux
     seff_UO = SeffWater
     pressure_vars = 'pwater pgas'
-  [../]
-[]
-
-[Bounds]
-  [./pwater_bounds]
-    type = BoundsAux
-    variable = bounds_dummy
-    bounded_variable = pwater
-    upper = 1E7
-    lower = -110000
+    variable = w_aux_seff
   [../]
 []
 
@@ -163,7 +148,7 @@
     type = DirichletBC
     variable = pwater
     boundary = right
-    value = -100000
+    value = -300000
   [../]
   [./right_g]
     type = DirichletBC
@@ -177,8 +162,8 @@
 [Functions]
   [./initial_water]
     type = ParsedFunction
-    value = 1000000*(1-min(x/5,1))-100000*(max(x-5,0)/max(abs(x-5),1E-10))
-    #value = max(1000000*(1-x/5),-100000)
+    value = 1000000*(1-min(x/5,1))-300000*(max(x-5,0)/max(abs(x-5),1E-10))
+    #value = max(1000000*(1-x/5),-300000)
   [../]
   [./initial_gas]
     type = ParsedFunction
@@ -193,11 +178,6 @@
     block = 0
     mat_porosity = 0.15
     mat_permeability = '1E-10 0 0  0 1E-10 0  0 0 1E-10'
-    density_UO = 'DensityWater DensityGas'
-    relperm_UO = 'RelPermWater RelPermGas'
-    SUPG_UO = 'SUPGwater SUPGgas'
-    sat_UO = 'SatWater SatGas'
-    seff_UO = 'SeffWater SeffGas'
     viscosity = '1E-3 1E-6'
     gravity = '0 0 0'
     linear_shape_fcns = true
@@ -222,7 +202,7 @@
     full = true
     petsc_options = '-snes_converged_reason'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_rtol -ksp_atol'
-    petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 20 1E-20 1E-20'
+    petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 2000 1E-20 1E-20'
   [../]
 
 []
@@ -234,24 +214,22 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1E-4 1E-3 1E-2 2E-2 5E-2 6E-2 0.1 0.2'
-    time_t =  '0    1E-2 1E-1 1    5    20   40  41'
+    time_dt = '0.1 0.5 0.5 1 2  4'
+    time_t =  '0   0.1 1   5 40 42'
   [../]
 []
 
 [Outputs]
-  file_base = bl22
-  [./exodus]
-    type = Exodus
-    output_initial = true
-    interval = 100000
-    output_final = true
-    hide = pgas
-  [../]
-  [./console]
+  file_base = bl20_lumped
+  output_initial = true
+  output_final = true
+  interval = 100000
+  exodus = true
+  hide = pgas
+  [./console_out]
     type = Console
+    interval = 1
+    nonlinear_residuals = true
     perf_log = true
-    linear_residuals = false
-    nonlinear_residuals = false
   [../]
 []
