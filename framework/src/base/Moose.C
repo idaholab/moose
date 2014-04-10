@@ -41,6 +41,7 @@
 #include "FEProblem.h"
 #include "OutputProblem.h"
 #include "CoupledProblem.h"
+
 // kernels
 #include "TimeDerivative.h"
 #include "Diffusion.h"
@@ -50,6 +51,7 @@
 #include "BodyForce.h"
 #include "Reaction.h"
 #include "RealPropertyOutput.h"
+#include "MassEigenKernel.h"
 
 // bcs
 #include "ConvectiveFluxBC.h"
@@ -101,6 +103,8 @@
 // executioners
 #include "Steady.h"
 #include "Transient.h"
+#include "InversePowerMethod.h"
+#include "NonlinearEigen.h"
 #include "PetscTSExecutioner.h"
 #include "CoupledTransientExecutioner.h"
 
@@ -143,6 +147,7 @@
 #include "NumNodes.h"
 #include "NumNonlinearIterations.h"
 #include "NumLinearIterations.h"
+#include "ProblemRealParameter.h"
 #include "Residual.h"
 #include "ScalarVariable.h"
 #include "NumVars.h"
@@ -276,6 +281,7 @@
 #include "AddDamperAction.h"
 #include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
+#include "DetermineSystemType.h"
 #include "SetupTimePeriodsAction.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
@@ -367,6 +373,7 @@ registerObjects(Factory & factory)
   registerKernel(BodyForce);
   registerKernel(Reaction);
   registerKernel(RealPropertyOutput);
+  registerKernel(MassEigenKernel);
 
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);
@@ -417,6 +424,8 @@ registerObjects(Factory & factory)
   // executioners
   registerExecutioner(Steady);
   registerExecutioner(Transient);
+  registerExecutioner(InversePowerMethod);
+  registerExecutioner(NonlinearEigen);
   registerExecutioner(CoupledTransientExecutioner);
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,4,0)
 #if 0 // This seems to be broken right now -- doesn't work wiith petsc >= 3.4 either
@@ -464,6 +473,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NumNodes);
   registerPostprocessor(NumNonlinearIterations);
   registerPostprocessor(NumLinearIterations);
+  registerPostprocessor(ProblemRealParameter);
   registerPostprocessor(Residual);
   registerPostprocessor(ScalarVariable);
   registerPostprocessor(NumVars);
@@ -605,7 +615,7 @@ addActionTypes(Syntax & syntax)
    * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they have
    * not been explicitly created by the parser or some other mechanism.
    *
-   * Note: Many of the actions in the "Mimimal Problem" section are marked as false.  However, we can generally
+   * Note: Many of the actions in the "Minimal Problem" section are marked as false.  However, we can generally
    * force creation of these "Action"s as needed by registering them to syntax that we expect to see even
    * if those "Action"s  don't normally pick up parameters from the input file.
    */
@@ -616,10 +626,16 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("create_problem",               Problem,                 true);
   registerMooseObjectTask("setup_executioner",            Executioner,             true);
 
+  // This task does not construct an object, but it needs all of the parameters that
+  // would normally be used to construct an object.
+  registerMooseObjectTask("determine_system_type",        Executioner,             true);
+
   registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
   registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
 
   registerMooseObjectTask("add_kernel",                   Kernel,                 false);
+  appendMooseObjectTask  ("add_kernel",                   EigenKernel);
+
   registerMooseObjectTask("add_material",                 Material,               false);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
   registerMooseObjectTask("add_function",                 Function,               false);
@@ -724,6 +740,7 @@ addActionTypes(Syntax & syntax)
 "(add_mesh_modifier)"
 "(add_mortar_interface)"
 "(setup_mesh_complete)"
+"(determine_system_type)"
 "(create_problem)"
 "(setup_executioner)"
 "(setup_time_stepper)"
@@ -810,6 +827,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupTimeStepperAction, "setup_time_stepper");
   registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
+  registerAction(DetermineSystemType, "determine_system_type");
   registerAction(CreateProblemAction, "create_problem");
   registerAction(SetupOutputAction, "setup_output"); /// \todo{remove w/ update system upgraded}
   registerAction(SetupOutputNameAction, "setup_output_name"); /// \todo{remove w/ update system upgraded}

@@ -92,7 +92,7 @@ public:
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  virtual void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a scalar kernel

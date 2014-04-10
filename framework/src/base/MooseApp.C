@@ -93,6 +93,7 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
     _executioner(NULL),
+    _use_nonlinear(true),
     _sys_info(NULL),
     _enable_unused_check(WARN_UNUSED),
     _factory(*this),
