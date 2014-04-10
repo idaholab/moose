@@ -50,6 +50,7 @@
 #include "OptionallyCoupledForce.h"
 #include "FDDiffusion.h"
 #include "FDAdvection.h"
+#include "MaterialEigenKernel.h"
 
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
@@ -92,6 +93,7 @@
 #include "CoupledMaterial2.h"
 #include "LinearInterpolationMaterial.h"
 #include "VarCouplingMaterial.h"
+#include "VarCouplingMaterialEigen.h"
 #include "BadStatefulMaterial.h"
 
 #include "DGMatDiffusion.h"
@@ -245,6 +247,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(OptionallyCoupledForce);
   registerKernel(FDDiffusion);
   registerKernel(FDAdvection);
+  registerKernel(MaterialEigenKernel);
 
   // Aux kernels
   registerAux(CoupledAux);
@@ -302,6 +305,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(CoupledMaterial2);
   registerMaterial(LinearInterpolationMaterial);
   registerMaterial(VarCouplingMaterial);
+  registerMaterial(VarCouplingMaterialEigen);
   registerMaterial(BadStatefulMaterial);
 
   registerScalarKernel(ExplicitODE);

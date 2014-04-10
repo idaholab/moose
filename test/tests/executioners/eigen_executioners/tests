@@ -9,4 +9,9 @@
     input = 'ne.i'
     exodiff = 'ne.e'
   [../]
+  [./test_nonlinear_eigen_material]
+    type = 'Exodiff'
+    input = 'ne_mat.i'
+    exodiff = 'ne_mat.e'
+  [../]
 []
