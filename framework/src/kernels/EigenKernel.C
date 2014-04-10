@@ -61,14 +61,17 @@ EigenKernel::computeResidual()
 void
 EigenKernel::computeJacobian()
 {
+  if (!_is_implicit) return;
+
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), _var.index());
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
+  Real one_over_eigen = 1.0/_eigen;
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpJacobian();
 
   ke += _local_ke;
 

@@ -35,5 +35,5 @@ MassEigenKernel::computeQpResidual()
 Real
 MassEigenKernel::computeQpJacobian()
 {
-  return 0;
+  return -_phi[_j][_qp] * _test[_i][_qp];
 }

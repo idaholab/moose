@@ -83,11 +83,12 @@ public:
    */
   bool activeOnOld();
 
-protected:
   /**
    * Get variable names of the eigen system
    */
   const std::set<VariableName> & getEigenVariableNames() const { return _eigen_var_names; }
+
+protected:
 
   std::set<VariableName> _eigen_var_names;
   bool _all_eigen_vars;
