@@ -29,6 +29,7 @@ InputParameters validParams<EigenExecutionerBase>()
   //FIXME: remove this when EXEC_FINAL is available in MOOSE
   params.addParam<bool>("evaluate_custom_uo", true, "True to evaluate custom user objects at the end");
   params.addParam<Real>("time", 0.0, "System time");
+  params.addParam<bool>("output_on_final", false, "True to disable all the intemediate exodus outputs");
 
   params.addPrivateParam<bool>("_eigen", true);
   return params;
@@ -183,7 +184,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
                                             Real & k,
                                             Real & initial_res)
 {
-  mooseAssert(max_iter>min_iter, "Maximum number of power iterations must be greater than its minimum");
+  mooseAssert(max_iter>=min_iter, "Maximum number of power iterations must be greater than or equal to its minimum");
   mooseAssert(pfactor>0.0, "Invaid linear convergence tolerance");
   mooseAssert(tol_eig>0.0, "Invalid eigenvalue tolerance");
   mooseAssert(tol_x>0.0, "Invalid solution norm tolerance");
