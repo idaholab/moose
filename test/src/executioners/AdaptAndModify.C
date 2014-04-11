@@ -50,8 +50,13 @@ AdaptAndModify::incrementStepOrReject()
 }
 
 void
-AdaptAndModify::endStep()
+AdaptAndModify::endStep(Real input_time)
 {
+  if (input_time == -1.0)
+    _time = _time_old + _dt;
+  else
+    _time = input_time;
+
   _last_solve_converged = lastSolveConverged();
   if (_last_solve_converged)
   {
@@ -104,5 +109,3 @@ AdaptAndModify::endStep()
     }
   }
 }
-
-
