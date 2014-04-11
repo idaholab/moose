@@ -1476,10 +1476,17 @@ FEProblem::projectSolution()
   ComputeInitialConditionThread cic(*this);
   Threads::parallel_reduce(elem_range, cic);
 
+  // Need to close the solution vector here so that boundary ICs take precendence
+  _nl.solution().close();
+  _aux.solution().close();
+
   // now run boundary-restricted initial conditions
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
   ComputeBoundaryInitialConditionThread cbic(*this);
   Threads::parallel_reduce(bnd_nodes, cbic);
+
+  _nl.solution().close();
+  _aux.solution().close();
 
   // Also, load values into the SCALAR dofs
   // Note: We assume that all SCALAR dofs are on the
