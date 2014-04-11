@@ -72,9 +72,6 @@ OversampleOutputter::~OversampleOutputter()
     for (unsigned int sys_num=0; sys_num < _mesh_functions.size(); ++sys_num)
       for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
         delete _mesh_functions[sys_num][var_num];
-
-    // Delete the oversampled solution vector
-    delete _serialized_solution;
   }
 }
 
@@ -177,18 +174,18 @@ OversampleOutputter::initOversample()
     if (num_vars > 0)
     {
       _mesh_functions[sys_num].resize(num_vars);
-      _serialized_solution = NumericVector<Number>::build().release();
-      _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+      AutoPtr<NumericVector<Number> > serialized_solution = NumericVector<Number>::build();
+      serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
 
       // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-      source_sys.solution->localize(*_serialized_solution);
+      source_sys.solution->localize(*serialized_solution);
 
       // Add the variables to the system... simultaneously creating MeshFunctions for them.
       for (unsigned int var_num = 0; var_num < num_vars; var_num++)
       {
         // Create a variable in the dest_sys to match... but of LINEAR LAGRANGE type
         dest_sys.add_variable(source_sys.variable_name(var_num), FEType());
-        _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
+        _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *serialized_solution, source_sys.get_dof_map(), var_num);
         _mesh_functions[sys_num][var_num]->init();
       }
     }
@@ -214,16 +211,16 @@ OversampleOutputter::update()
       System & dest_sys = _es_ptr->get_system(sys_num);
 
       // Update the solution for the oversampled mesh
-      _serialized_solution->clear();
-      _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
-      source_sys.solution->localize(*_serialized_solution);
+      AutoPtr<NumericVector<Number> > serialized_solution = NumericVector<Number>::build();
+      serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+      source_sys.solution->localize(*serialized_solution);
 
       // Update the mesh functions
       // TODO: Why do we need to recreate these MeshFunctions each time?
       for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
       {
         delete _mesh_functions[sys_num][var_num];
-        _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
+        _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *serialized_solution, source_sys.get_dof_map(), var_num);
         _mesh_functions[sys_num][var_num]->init();
       }
 
