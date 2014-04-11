@@ -46,23 +46,23 @@ protected:
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
 
-  /// EigenKernel always lives in EigenSystem
-  EigenSystem & _eigen_sys;
-
   /// Holds the solution at current quadrature points
   VariableValue & _u;
 
   /// Holds the solution gradient at the current quadrature points
   VariableGradient & _grad_u;
 
-  /// Time derivative of u
-  VariableValue & _u_dot;
+  /// flag for as an eigen kernel or a normal kernel
+  bool _eigen;
 
-  /// Derivative of u_dot with respect to u
-  VariableValue & _du_dot_du;
+  /// EigenKernel always lives in EigenSystem
+  EigenSystem * _eigen_sys;
 
-  const PostprocessorName & _eigen_pp;
-  const Real & _eigen;
+  /// name of the postprocessor for evaluating eigenvalue
+  PostprocessorName _eigen_pp;
+
+  /// eigenvalue
+  const Real * _eigenvalue;
 };
 
 #endif //EIGENKERNEL_H

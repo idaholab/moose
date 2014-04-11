@@ -19,21 +19,30 @@ template<>
 InputParameters validParams<EigenKernel>()
 {
   InputParameters params = validParams<KernelBase>();
-  params.addPrivateParam<bool>("_eigen", true);
+  params.addParam<bool>("eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
   params.registerBase("EigenKernel");
   return params;
 }
 
 EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
     KernelBase(name,parameters),
-    _eigen_sys(static_cast<EigenSystem &>(_fe_problem.getNonlinearSystem())),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
-    _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu()),
-    _eigen_pp(_fe_problem.parameters().set<PostprocessorName>("eigen_postprocessor")),
-    _eigen(_is_implicit ? getPostprocessorValueByName(_eigen_pp) : getPostprocessorValueOldByName(_eigen_pp))
+    _eigen(getParam<bool>("eigen")),
+    _eigen_sys(NULL),
+    _eigenvalue(NULL)
 {
+  if (_eigen)
+  {
+    _eigen_sys = static_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem());
+    _eigen_pp = _fe_problem.parameters().set<PostprocessorName>("eigen_postprocessor");
+    if (_is_implicit)
+      _eigenvalue = &getPostprocessorValueByName(_eigen_pp);
+    else
+      _eigenvalue = &getPostprocessorValueOldByName(_eigen_pp);
+  }
+  else
+    mooseAssert(_is_implicit, "EigenKernel on source problem should be implicit always");
 }
 
 void
@@ -43,7 +52,8 @@ EigenKernel::computeResidual()
   _local_re.resize(re.size());
   _local_re.zero();
 
-  Real one_over_eigen = 1.0/_eigen;
+  Real one_over_eigen = 1.0;
+  if (_eigen) one_over_eigen /= *_eigenvalue;
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpResidual();
@@ -67,7 +77,8 @@ EigenKernel::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
-  Real one_over_eigen = 1.0/_eigen;
+  Real one_over_eigen = 1.0;
+  if (_eigen) one_over_eigen /= *_eigenvalue;
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -98,9 +109,13 @@ bool
 EigenKernel::isActive()
 {
   bool flag = TransientInterface::isActive();
-
-  if (_is_implicit)
-    return flag && (!_eigen_sys.activeOnOld());
+  if (_eigen)
+  {
+    if (_is_implicit)
+      return flag && (!_eigen_sys->activeOnOld());
+    else
+      return flag && _eigen_sys->activeOnOld();
+  }
   else
-    return flag && _eigen_sys.activeOnOld();
+    return flag;
 }
