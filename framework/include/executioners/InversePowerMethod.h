@@ -46,6 +46,7 @@ protected:
   const Real & _eig_check_tol;
   const Real & _pfactor;
   const bool & _cheb_on;
+  bool _output_pi;
 };
 
 #endif //INVERSEPOWERMETHOD_H

@@ -3,20 +3,50 @@
     type = 'Exodiff'
     input = 'ipm.i'
     exodiff = 'ipm.e'
+    abs_zero = 1e-09
+# because convergence history is outputted in this test,
+# we have to use one processor due the the preconditioner change.
+    max_parallel = 1
+  [../]
+  [./test_inverse_power_method_parallel]
+    type = 'Exodiff'
+    input = 'ipm.i'
+    exodiff = 'ipm_final.e'
+    abs_zero = 1e-09
+# because we only output the final solution, we can test with parallelization.
+    cli_args = 'Executioner/output_on_final=true Outputs/file_base=ipm_final'
+    rel_err = 5e-05
   [../]
   [./test_nonlinear_eigen]
     type = 'Exodiff'
     input = 'ne.i'
     exodiff = 'ne.e'
+    abs_zero = 1e-09
+# because convergence history is outputted in this test,
+# we have to use one processor due the the preconditioner change.
+    max_parallel = 1
+  [../]
+  [./test_nonlinear_eigen_parallel]
+    type = 'Exodiff'
+    input = 'ne.i'
+    exodiff = 'ne_final.e'
+    abs_zero = 1e-09
+# because we only output the final solution, we can test with parallelization.
+    cli_args = 'Executioner/output_on_final=true Outputs/file_base=ne_final Postprocessors/udiff/outputs=console'
   [../]
   [./test_nonlinear_eigen_material]
     type = 'Exodiff'
     input = 'ne_mat.i'
     exodiff = 'ne_mat.e'
+    abs_zero = 1e-09
+# because convergence history is outputted in this test,
+# we have to use one processor due the the preconditioner change.
+    max_parallel = 1
   [../]
   [./test_normal_eigenkernel]
     type = 'Exodiff'
     input = 'normal_eigen_kernel.i'
     exodiff = 'normal_eigen_kernel.e'
+    abs_zero = 1e-09
   [../]
 []
