@@ -68,6 +68,15 @@ private:
 
   /// Flag for turning on appending to ASCII files
   bool _ascii_append;
+
+  /// True if this is the first time the file has been written to,
+  /// gets set to false after the first call to output().  If the user
+  /// has set _ascii_append but _first_time==true, we won't actually
+  /// append.  This prevents old data files in a directory from being
+  /// appended to.  Declared as a reference so it can be restartable
+  /// data, that way if we restart, we don't think it's the first time
+  /// again.
+  bool & _first_time;
 };
 
 #endif /* TECPLOT_H */
