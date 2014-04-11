@@ -14,4 +14,9 @@
     input = 'ne_mat.i'
     exodiff = 'ne_mat.e'
   [../]
+  [./test_normal_eigenkernel]
+    type = 'Exodiff'
+    input = 'normal_eigen_kernel.i'
+    exodiff = 'normal_eigen_kernel.e'
+  [../]
 []
