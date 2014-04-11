@@ -121,13 +121,6 @@ private:
    */
   std::vector<std::vector<MeshFunction *> > _mesh_functions;
 
-  /**
-   * A pointer to the oversampled solution
-   * When using oversampling this points to the created oversampled solution, which must
-   * be cleaned up by the destructor.
-   */
-  NumericVector<Number> * _serialized_solution;
-
   /// Flag for enableing oversampling
   bool _oversample;
 
