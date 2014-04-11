@@ -462,7 +462,7 @@ EigenExecutionerBase::chebyshev(unsigned int iter)
       chebyshev_parameters.icho = 0;
     }
 
-    if (iter>int(chebyshev_parameters.finit) &&
+    if (iter > chebyshev_parameters.finit &&
         chebyshev_parameters.ratio>=0.4 &&
         chebyshev_parameters.ratio<=1)
     {

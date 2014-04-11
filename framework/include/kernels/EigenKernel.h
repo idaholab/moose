@@ -36,8 +36,8 @@ public:
   // See KernelBase base for documentation of these overridden methods
   virtual void computeResidual();
   virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar) {}
-  virtual void computeOffDiagJacobianScalar(unsigned int jvar) {}
+  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) {}
+  virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) {}
 
   EigenKernel(const std::string & name, InputParameters parameters);
   virtual bool isActive();

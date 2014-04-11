@@ -396,7 +396,7 @@ TransientMultiApp::advanceStep()
   {
     for(unsigned int i=0; i<_my_num_apps; i++)
     {
-      FEProblem * problem = appProblem(_first_local_app + i);
+//      FEProblem * problem = appProblem(_first_local_app + i);
       OutputWarehouse & output_warehouse = _apps[i]->getOutputWarehouse();
       output_warehouse.timestepSetup();
 
