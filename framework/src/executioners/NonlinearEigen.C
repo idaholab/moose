@@ -33,10 +33,17 @@ NonlinearEigen::NonlinearEigen(const std::string & name, InputParameters paramet
      _free_iter(getParam<unsigned int>("free_power_iterations")),
      _abs_tol(getParam<Real>("source_abs_tol")),
      _rel_tol(getParam<Real>("source_rel_tol")),
-     _pfactor(getParam<Real>("pfactor"))
+     _pfactor(getParam<Real>("pfactor")),
+     _output_pi(getParam<bool>("output_pi_history"))
 {
   _eigenvalue = getParam<Real>("k0");
   addRealParameterReporter("eigenvalue");
+
+  if (getParam<bool>("output_on_final") && _output_pi)
+  {
+    mooseWarning("Only final solution will be outputted, output_pi_history=true will be ignored!");
+    _output_pi = false;
+  }
 }
 
 void
@@ -53,16 +60,20 @@ NonlinearEigen::execute()
     // free power iterations
     Moose::out << std::endl << " Free power iteration starts"  << std::endl;
 
-    inversePowerIteration(_free_iter, _free_iter, _pfactor, false, 0.0, std::numeric_limits<Real>::max(),
-                          true, getParam<bool>("output_pi_history"), 0.0,
+    inversePowerIteration(_free_iter, _free_iter, _pfactor, false,
+                          std::numeric_limits<Real>::min(), std::numeric_limits<Real>::max(),
+                          true, _output_pi, 0.0,
                           _eigenvalue, initial_res);
   }
 
-  _problem.timeStep() = POWERITERATION_END;
-  Real t = _problem.time();
-  _problem.time() = _problem.timeStep();
-  _output_warehouse.outputStep();
-  _problem.time() = t;
+  if (!getParam<bool>("output_on_final"))
+  {
+    _problem.timeStep() = POWERITERATION_END;
+    Real t = _problem.time();
+    _problem.time() = _problem.timeStep();
+    _output_warehouse.outputStep();
+    _problem.time() = t;
+  }
 
   Moose::out << " Nonlinear iteration starts"  << std::endl;
 
@@ -90,18 +101,21 @@ NonlinearEigen::execute()
   _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
   if (_run_custom_uo) _problem.computeUserObjects(EXEC_CUSTOM);
 
-  _problem.timeStep() = NONLINEAR_SOLVE_END;
-  t = _problem.time();
-  _problem.time() = _problem.timeStep();
-  _output_warehouse.outputStep();
-  _problem.time() = t;
+  if (!getParam<bool>("output_on_final"))
+  {
+    _problem.timeStep() = NONLINEAR_SOLVE_END;
+    Real t = _problem.time();
+    _problem.time() = _problem.timeStep();
+    _output_warehouse.outputStep();
+    _problem.time() = t;
+  }
 
   Real s = normalizeSolution(_norm_execflag!=EXEC_CUSTOM && _norm_execflag!=EXEC_TIMESTEP &&
                              _norm_execflag!=EXEC_RESIDUAL);
 
   Moose::out << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
 
-  if (s!=1.0)
+  if (getParam<bool>("output_on_final") || std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
   {
     _problem.timeStep() = FINAL;
     Real t = _problem.time();

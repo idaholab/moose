@@ -46,6 +46,7 @@ protected:
   const Real & _abs_tol;
   const Real & _rel_tol;
   const Real & _pfactor;
+  bool _output_pi;
 };
 
 #endif //NONLINEAREIGEN_H
