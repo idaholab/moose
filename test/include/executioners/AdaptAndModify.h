@@ -31,7 +31,7 @@ public:
 
   virtual void incrementStepOrReject();
 
-  virtual void endStep();
+  virtual void endStep(Real input_time = -1.0);
 
 protected:
   unsigned int _adapt_cycles;
