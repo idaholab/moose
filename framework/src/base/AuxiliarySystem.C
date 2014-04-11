@@ -98,7 +98,7 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
     MooseVariable * var = dynamic_cast<MooseVariable *>(_vars[tid].getVariable(var_name));
     if (var != NULL)
     {
-      if (var->feType().family == LAGRANGE)
+      if (var->isNodal())
         _nodal_vars[tid][var_name] = var;
       else
         _elem_vars[tid][var_name] = var;
@@ -410,9 +410,8 @@ AuxiliarySystem::getMinQuadratureOrder()
   {
     if (!(*it)->isNodal()) // nodal aux variables do not need quadrature
     {
-      FEType fe_type = (*it)->feType();
-      if (fe_type.default_quadrature_order() > order)
-        order = fe_type.default_quadrature_order();
+      if ((*it)->getRequiredQOrder() > order)
+        order = (*it)->getRequiredQOrder();
     }
   }
 

@@ -159,9 +159,8 @@ SystemBase::getMinQuadratureOrder()
   std::vector<MooseVariable *> vars = _vars[0].variables();
   for (std::vector<MooseVariable *>::iterator it = vars.begin(); it != vars.end(); ++it)
   {
-    FEType fe_type = (*it)->feType();
-    if (fe_type.default_quadrature_order() > order)
-      order = fe_type.default_quadrature_order();
+    if ((*it)->getRequiredQOrder() > order)
+      order = (*it)->getRequiredQOrder();
   }
 
   return order;
