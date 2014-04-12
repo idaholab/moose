@@ -538,7 +538,14 @@ InitialCondition::compute()
       // We may be projecting a new zero value onto
       // an old nonzero approximation - RHS
       // if (Ue(i) != 0.)
-      if ((dof_indices[i] >= first) && (dof_indices[i] < last))
+
+      // This is commented out because of subdomain restricted variables.
+      // It can be the case that if a subdomain restricted variable's boundary
+      // aligns perfectly with a processor boundary that the variable will get
+      // no value.  To counteract this we're going to let every processor set a
+      // value at every node and then let PETSc figure it out.
+      // Later we can choose to do something different / better.
+//      if ((dof_indices[i] >= first) && (dof_indices[i] < last))
       {
         solution.set(dof_indices[i], Ue(i));
         if (cont == C_ZERO)
