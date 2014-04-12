@@ -47,12 +47,12 @@ GLOBAL VARIABLES relative 1.e-3 floor 0.0
 	J_6_1    # min:               0 @ t1	max:   0.00018758836 @ t2
 	J_6_2    # min:               0 @ t1	max:   0.00021383097 @ t2
 	J_6_3    # min:               0 @ t1	max:   0.00021710596 @ t2
-	J_7_1    # min:               0 @ t1	max:   0.00069651808 @ t2
-	J_7_2    # min:               0 @ t1	max:   0.00069651808 @ t2
-	J_7_3    # min:               0 @ t1	max:   0.00069651808 @ t2
+	J_7_1    relative 5e-3 # min:               0 @ t1	max:   0.00069651808 @ t2
+	J_7_2    relative 5e-3 # min:               0 @ t1	max:   0.00069651808 @ t2
+	J_7_3    relative 5e-3 # min:               0 @ t1	max:   0.00069651808 @ t2
 	_dt      # min:               0 @ t1	max:               1 @ t2
-	lin_its  # min:               0 @ t1	max:              23 @ t2
-	nl_its   # min:               0 @ t1	max:               4 @ t2
+#	lin_its  # min:               0 @ t1	max:              23 @ t2
+#	nl_its   # min:               0 @ t1	max:               4 @ t2
 	react_z  # min:               0 @ t1	max:        17237466 @ t2
 
 NODAL VARIABLES relative 1.e-5 floor 0.0
