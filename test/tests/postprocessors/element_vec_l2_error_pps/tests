@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'element_vec_l2_error.i'
+    csvdiff = 'out.csv'
+  [../]
+[]

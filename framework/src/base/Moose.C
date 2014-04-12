@@ -136,6 +136,7 @@
 #include "ElementIntegralVariablePostprocessor.h"
 #include "ElementIntegralMaterialProperty.h"
 #include "ElementL2Error.h"
+#include "ElementVectorL2Error.h"
 #include "EmptyPostprocessor.h"
 #include "NodalVariableValue.h"
 
@@ -462,6 +463,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ElementIntegralVariablePostprocessor);
   registerPostprocessor(ElementIntegralMaterialProperty);
   registerPostprocessor(ElementL2Error);
+  registerPostprocessor(ElementVectorL2Error);
   registerPostprocessor(ScalarL2Error);
   registerPostprocessor(EmptyPostprocessor);
   registerPostprocessor(NodalVariableValue);
