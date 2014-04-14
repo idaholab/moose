@@ -90,7 +90,7 @@ class MachineWarehouse(object):
       return
 
     # Handle empty host lines
-    if len(host_lines) == 0:
+    if host_lines == None or len(host_lines) == 0:
       return
 
     # Get the disable list and hammer list
