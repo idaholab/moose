@@ -1,5 +1,5 @@
 # Load the required modules
-import os, subprocess, re, time, errno, signal
+import sys, os, subprocess, re, time, errno, signal
 
 ## @class DistccDaemon
 # Class for managing the distccd daemons
@@ -60,9 +60,12 @@ class DistccDaemon(object):
     os.environ['DISTCC_BACKOFF_PERIOD'] = '6000'
 
     # Run the daemon
-    sub = subprocess.Popen(distccd_cmd)
-    sub.wait()
-
+    try:
+      sub = subprocess.Popen(distccd_cmd)
+      sub.wait()
+    except:
+      print 'distccd failed to execute, do you have it?'
+      sys.exit()
 
   ## Stops all running distccd processes (public)
   # @see start

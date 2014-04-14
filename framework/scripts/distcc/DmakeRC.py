@@ -102,7 +102,7 @@ class DmakeRC(object):
       # Append the existing list
       else:
         if disable not in self.get('DISABLE'):
-          self.set(DISABLE=self.get('DISABLE') + kwargs['disable'])
+          self.set(DISABLE=self.get('DISABLE') + disable)
       self._update = True
 
     # Set the hammer list to be the same as the input, requires update
