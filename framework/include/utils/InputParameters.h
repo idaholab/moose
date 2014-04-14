@@ -389,7 +389,14 @@ public:
    *
    * @param coupling_name The name of the coupling parameter to get the default value for.
    */
-  Real defaultCoupledValue(std::string coupling_name);
+  Real defaultCoupledValue(const std::string & coupling_name) const;
+
+  /**
+   * Set the default value for an optionally coupled variable (called by the Parser).
+   *
+   * @param coupling_name The name of the coupling parameter to get the default value for.
+   */
+  void defaultCoupledValue(const std::string & coupling_name, Real value);
 
   /**
    * Get the default value for a postprocessor added with addPostprocessor

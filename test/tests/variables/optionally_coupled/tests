@@ -1,7 +1,14 @@
 [Tests]
-  [./test]
+  [./use_default]
     type = 'Exodiff'
     input = 'optionally_coupled.i'
     exodiff = 'optionally_coupled_out.e'
+  [../]
+
+  [./use_real_input_param]
+    type = 'Exodiff'
+    input = 'optionally_coupled.i'
+    exodiff = 'optionally_coupled_real_out.e'
+    cli_args = 'Kernels/optional_coupling/v=2.2 Outputs/file_base=optionally_coupled_real_out'
   [../]
 []
