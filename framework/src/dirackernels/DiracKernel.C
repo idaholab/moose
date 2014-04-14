@@ -18,18 +18,19 @@
 #include "SystemBase.h"
 #include "Problem.h"
 
-// libMesh includes
-#include "libmesh/parallel.h"
-#include "libmesh/point_locator_base.h"
-#include "libmesh/libmesh_common.h"
-
 template<>
 InputParameters validParams<DiracKernel>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this kernel operates on");
+  params.addRequiredParam<NonlinearVariableName>("variable",
+                                                 "The name of the variable that this kernel operates on");
 
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParam<bool>("use_displaced_mesh",
+                        false,
+                        "Whether or not this object should use the displaced mesh for computation. "
+                        "Note that in the case this is true but no displacements are provided in "
+                        "the Mesh block the undisplaced mesh will still be used.");
+
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   params.registerBase("DiracKernel");
@@ -55,22 +56,17 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
-//    _dim(_mesh.dimension()),
     _coord_sys(_assembly.coordSystem()),
     _dirac_kernel_info(_subproblem.diracKernelInfo()),
-
     _current_elem(_var.currentElem()),
     _q_point(_assembly.qPoints()),
     _physical_point(_assembly.physicalPoints()),
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
-
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
-
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
-
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
     _u_dot(_var.uDot()),

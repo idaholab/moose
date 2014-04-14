@@ -15,10 +15,7 @@
 #ifndef DIRACKERNEL_H
 #define DIRACKERNEL_H
 
-#include <string>
-
 //MOOSE includes
-#include "DiracKernelData.h"
 #include "DiracKernelInfo.h"
 #include "MooseObject.h"
 #include "SetupInterface.h"
@@ -34,12 +31,6 @@
 #include "MooseMesh.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
-//libMesh includes
-#include "libmesh/libmesh_common.h"
-#include "libmesh/elem.h"
-#include "libmesh/point.h"
-#include "libmesh/sparse_matrix.h"
-//#include "ValidParams.h"
 
 //Forward Declarations
 class Assembly;
@@ -101,7 +92,7 @@ public:
   /**
    * This is the virtual that derived classes should override for computing the residual.
    */
-  virtual Real computeQpResidual()=0;
+  virtual Real computeQpResidual() = 0;
 
   /**
    * This is the virtual that derived classes should override for computing the Jacobian.
@@ -117,16 +108,6 @@ public:
    * Whether or not this DiracKernel has something to distribute at this Point.
    */
   bool isActiveAtPoint(const Elem * elem, const Point & p);
-
-//  /**
-//   * Get a reference to a copy of the residual vector.
-//   */
-//  NumericVector<Number> & residualCopy();
-//
-//  /**
-//   * Get a reference to a copy of the jacoian vector.
-//   */
-//  SparseMatrix<Number> & jacobianCopy();
 
   /**
    * Remove all of the current points and elements.
@@ -154,24 +135,25 @@ protected:
   THREAD_ID _tid;
 
   Assembly & _assembly;
+
   /// Variable this kernel acts on
   MooseVariable & _var;
+
   /// Mesh this kernels acts on
   MooseMesh & _mesh;
 
-  /// Dimension of the problem
-//  unsigned int _dim;
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
 
+  /// Place for storing Point/Elem information shared across all
+  /// DiracKernel objects.
   DiracKernelInfo & _dirac_kernel_info;
 
   /// The list of elements that need distributions
   std::set<const Elem *> _elements;
+
   /// The list of physical xyz Points that need to be evaluated in each element
   std::map<const Elem *, std::set<Point> > _points;
-
-  //std::vector<Point> & _current_points;               ///< The points on the current element
 
   /// The current point
   Point _current_point;
