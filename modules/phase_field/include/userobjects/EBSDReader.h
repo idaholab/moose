@@ -35,51 +35,39 @@ public:
   virtual void finalize() {}
 
   /**
-   * Returns the Euler angle "phi1" at Point p in O(1) access time.
+   * Get the requested type of data at the point p.
    */
-  Real phi1(const Point& p) const;
+  Real get_data(const Point & p, MooseEnum data_type) const;
 
   /**
-   * Returns the Euler angle "PHI" at Point p in O(1) access time.
+   * Returns a MooseEnum object associated with the C++ DataType enum
+   * defined in this class.  This should be maintained in the same order
+   * as the C++ DataType enum.
    */
-  Real phi(const Point& p) const;
-
-  /**
-   * Returns the Euler angle "phi2" at Point p in O(1) access time.
-   */
-  Real phi2(const Point& p) const;
-
-  /**
-   * Returns the centroid x-coordinate from the EBSD data at Point p in O(1) access time.
-   */
-  Real x_centroid(const Point& p) const;
-
-  /**
-   * Returns the centroid y-coordinate from the EBSD data at Point p in O(1) access time.
-   */
-  Real y_centroid(const Point& p) const;
-
-  /**
-   * Returns the centroid z-coordinate from the EBSD data at Point p in O(1) access time.
-   */
-  Real z_centroid(const Point& p) const;
-
-  /**
-   * Returns the grain number at Point p in O(1) access time.
-   */
-  unsigned grain(const Point& p) const;
-
-  /**
-   * Returns the phase number at Point p in O(1) access time.
-   */
-  unsigned phase(const Point& p) const;
-
-  /**
-   * Returns the symmetry class at Point p in O(1) access time.
-   */
-  unsigned symmetry_class(const Point& p) const;
+  MooseEnum getDataType (const std::string & type) const
+    {
+      return MooseEnum("PHI1, PHI, PHI2, X, Y, Z, GRAIN, PHASE, SYMMETRY_CLASS", type);
+    }
 
 protected:
+
+  /**
+   * An enum, which is used in conjunction with a MooseEnum, for
+   * determining which type of data to return.
+   */
+  enum DataType
+  {
+    PHI1=0,
+    PHI,
+    PHI2,
+    X,
+    Y,
+    Z,
+    GRAIN,
+    PHASE,
+    SYMMETRY_CLASS
+  };
+
   /// Name of the file containing the EBSD data
   std::string _filename;
 

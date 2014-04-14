@@ -158,74 +158,57 @@ EBSDReader::~EBSDReader()
 
 
 
-Real EBSDReader::phi1(const Point& p) const
+Real
+EBSDReader::get_data(const Point & p, MooseEnum data_type) const
 {
-  // phi1 is entry [0] at each centroid
-  return _data[index_from_point(p)][0];
+  // TODO: If we always keep these in order, we can just return
+  // _data[index_from_point(p)][data_type]...
+
+  switch (data_type)
+  {
+  case PHI1:
+    // phi1 is entry [0] at each centroid
+    return _data[index_from_point(p)][0];
+
+  case PHI:
+    // phi is entry [1] at each centroid
+    return _data[index_from_point(p)][1];
+
+  case PHI2:
+    // phi2 is entry [2] at each centroid
+    return _data[index_from_point(p)][2];
+
+  case X:
+    // x is entry [3] at each centroid
+    return _data[index_from_point(p)][3];
+
+  case Y:
+    // y is entry [4] at each centroid
+    return _data[index_from_point(p)][4];
+
+  case Z:
+    // z is entry [5] at each centroid
+    return _data[index_from_point(p)][5];
+
+  case GRAIN:
+    // grain is entry [6] at each centroid
+    return _data[index_from_point(p)][6];
+
+  case PHASE:
+    // grain is entry [7] at each centroid
+    return _data[index_from_point(p)][7];
+
+  case SYMMETRY_CLASS:
+    // symmetry is entry [8] at each centroid
+    return _data[index_from_point(p)][8];
+
+  default:
+    mooseError("Invalid DataType " << data_type << " requested.");
+  }
 }
 
 
 
-Real EBSDReader::phi(const Point& p) const
-{
-  // phi is entry [1] at each centroid
-  return _data[index_from_point(p)][1];
-}
-
-
-
-Real EBSDReader::phi2(const Point& p) const
-{
-  // phi2 is entry [2] at each centroid
-  return _data[index_from_point(p)][2];
-}
-
-
-Real EBSDReader::x_centroid(const Point& p) const
-{
-  // x is entry [3] at each centroid
-  return _data[index_from_point(p)][3];
-}
-
-
-
-Real EBSDReader::y_centroid(const Point& p) const
-{
-  // y is entry [4] at each centroid
-  return _data[index_from_point(p)][4];
-}
-
-
-
-Real EBSDReader::z_centroid(const Point& p) const
-{
-  // z is entry [5] at each centroid
-  return _data[index_from_point(p)][5];
-}
-
-
-
-unsigned EBSDReader::grain(const Point& p) const
-{
-  // grain is entry [6] at each centroid
-  return _data[index_from_point(p)][6];
-}
-
-
-
-unsigned EBSDReader::phase(const Point& p) const
-{
-  // grain is entry [7] at each centroid
-  return _data[index_from_point(p)][7];
-}
-
-
-
-unsigned EBSDReader::symmetry_class(const Point& p) const
-{
-  // symmetry is entry [8] at each centroid
-  return _data[index_from_point(p)][8];
-}
 
 
 
