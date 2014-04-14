@@ -414,4 +414,11 @@
     input = 'old_integrity_check.i'
     expect_err = 'You may not couple in old or older values of \S+ when using a \"Steady\" executioner.'
   [../]
+
+  [./node_value_off_block]
+    type = 'RunException'
+    input = 'nodal_value_off_block.i'
+    expect_err = 'Node 0 does not contain any dofs for the v variable'
+    method = 'dbg'
+  [../]
 []
