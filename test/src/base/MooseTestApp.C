@@ -150,6 +150,7 @@
 // DiracKernels
 #include "ReportingConstantSource.h"
 #include "FrontSource.h"
+#include "MaterialPointSource.h"
 
 // markers
 #include "RandomHitMarker.h"
@@ -335,6 +336,7 @@ MooseTestApp::registerObjects(Factory & factory)
   // DiracKernels
   registerDiracKernel(ReportingConstantSource);
   registerDiracKernel(FrontSource);
+  registerDiracKernel(MaterialPointSource);
 
   // meshes
   registerObject(StripeMesh);
