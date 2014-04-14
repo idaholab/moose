@@ -31,34 +31,15 @@ class MachineWarehouse(object):
   #    allow_off_network = True | {False} - if true, the above restrictions are ignored
   #
   # @see DmakeRC
-  def __init__(self, **kwargs):
+  def __init__(self, master, **kwargs):
 
     # Set default values for public/private members
     self.machines = []
     self.down = []
 
     # Build the master machine
-    self.master = Machine(localhost=True)
+    self.master = master
 
-
-  ## Check network
-  # @param restrict A list of ip addresses to consider for local build restriction, if the
-  #                 local machine starts with any of the values in this list,
-  #                 erform a local build
-  # @return True if the machine is on the restricted network(s)
-  def onNetwork(self, restrict):
-
-    # Assume off network
-    on_network = False
-
-    # Check the master against the list of restrited ip addresses
-    for r in restrict:
-      if self.master.address.startswith(r):
-        on_network = True
-        break
-
-    # Return the result
-    return on_network
 
   ## Return the hosts line and number of jobs (public)
   #  @param kwargs Optional keyword/value pairings
