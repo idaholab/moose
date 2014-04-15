@@ -6,6 +6,7 @@
 //  This post processor returns the mass due to a flux from the boundary of a volume.
 //
 #include "RichardsPiecewiseLinearSinkFlux.h"
+#include "Function.h"
 
 template<>
 InputParameters validParams<RichardsPiecewiseLinearSinkFlux>()
@@ -16,15 +17,20 @@ InputParameters validParams<RichardsPiecewiseLinearSinkFlux>()
   params.addRequiredParam<std::vector<Real> >("pressures", "Tuple of pressure values.  Must be monotonically increasing.");
   params.addRequiredParam<std::vector<Real> >("bare_fluxes", "Tuple of flux values (measured in kg.m^-2.s^-1 for use_mobility=false, and in Pa.s^-1 if use_mobility=true).  A piecewise-linear fit is performed to the (pressure,bare_fluxes) pairs to obtain the flux at any arbitrary pressure.  If a quad-point pressure is less than the first pressure value, the first bare_flux value is used.  If quad-point pressure exceeds the final pressure value, the final bare_flux value is used.  This flux is OUT of the medium: hence positive values of flux means this will be a SINK, while negative values indicate this flux will be a SOURCE.");
   params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
+  params.addParam<FunctionName>("multiplying_fcn", "The flux will be multiplied by this spatially-and-temporally varying function.  This is useful if the boundary is a moving boundary controlled by RichardsExcav.");
+  params.addClassDescription("Records the fluid flow into a sink (positive values indicate fluid is flowing from porespace into the sink).");
   return params;
 }
 
 RichardsPiecewiseLinearSinkFlux::RichardsPiecewiseLinearSinkFlux(const std::string & name, InputParameters parameters) :
     SideIntegralVariablePostprocessor(name, parameters),
-    _feproblem(dynamic_cast<FEProblem &>(_subproblem)),
+    FunctionInterface(parameters),
+    _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("bare_fluxes")),
+
     _use_mobility(getParam<bool>("use_mobility")),
     _use_relperm(getParam<bool>("use_relperm")),
-    _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("bare_fluxes")),
+
+    _m_func(parameters.isParamValid("multiplying_fcn") ? &getFunction("multiplying_fcn") : NULL),
 
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
     _pvar(_pp_name_UO.pressure_var_num(_var.index())),
@@ -39,6 +45,10 @@ Real
 RichardsPiecewiseLinearSinkFlux::computeQpIntegral()
 {
   Real flux = _sink_func.sample(_u[_qp]);
+
+  if(_m_func)
+    flux *= _m_func->value(_t, _q_point[_qp]);
+
   if (_use_mobility)
     {
       Real k = (_permeability[_qp]*_normals[_qp])*_normals[_qp];
@@ -47,5 +57,5 @@ RichardsPiecewiseLinearSinkFlux::computeQpIntegral()
   if (_use_relperm)
     flux *= _rel_perm[_qp][_pvar];
 
-  return flux*_feproblem.dt();
+  return flux*_dt;
 }
