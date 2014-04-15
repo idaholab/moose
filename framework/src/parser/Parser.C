@@ -506,6 +506,10 @@ template<>
 void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
                                            InputParameters::Parameter<std::vector<MooseEnum> > * param, bool in_global, GlobalParamsAction * global_block);
 
+template<>
+void Parser::setVectorParameter<VariableName>(const std::string & full_name, const std::string & short_name,
+                                              InputParameters::Parameter<std::vector<VariableName> > * param, bool in_global, GlobalParamsAction * global_block);
+
 
 // Macros for parameter extraction
 #define dynamicCastAndExtractScalar(type, param, full_name, short_name, in_global, global_block)                                        \
@@ -917,5 +921,50 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
     global_block->setVectorParam<MooseEnum>(short_name).resize(vec_size, enum_values[0]);
     for (int i = 0; i < vec_size; ++i)
       global_block->setVectorParam<MooseEnum>(short_name)[i] = values[0];
+  }
+}
+
+template<>
+void Parser::setVectorParameter<VariableName>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<VariableName> > * param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
+  else
+    gp = &_getpot_file;
+
+  int vec_size = gp->vector_variable_size(full_name.c_str());
+  std::vector<VariableName> var_names(vec_size);
+
+  bool has_var_names = false;
+  for (int i = 0; i < vec_size; ++i)
+  {
+    VariableName var_name = gp->get_value_no_default(full_name.c_str(), param->get()[i], i);
+
+    Real real_value;
+    std::istringstream ss(var_name);
+
+    // If we are able to convert this value into a Real, then set a default coupled value
+    if (ss >> real_value && ss.eof())
+      _current_params->defaultCoupledValue(short_name, real_value);
+    else
+    {
+      var_names[i] = var_name;
+      has_var_names = true;
+    }
+  }
+
+  if (has_var_names)
+  {
+    param->set().resize(vec_size);
+
+    for (int i = 0; i < vec_size; ++i)
+      if (var_names[i] == "")
+        mooseError("MOOSE does not currently support a coupled vector where some parameters are reals and others are variables");
+      else
+        param->set()[i] = var_names[i];
   }
 }
