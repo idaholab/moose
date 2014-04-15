@@ -9,6 +9,9 @@
 #include "SideIntegralVariablePostprocessor.h"
 #include "LinearInterpolation.h"
 #include "RichardsPorepressureNames.h"
+#include "FunctionInterface.h"
+
+class Function;
 
 //Forward Declarations
 class RichardsPiecewiseLinearSinkFlux;
@@ -17,10 +20,17 @@ template<>
 InputParameters validParams<RichardsPiecewiseLinearSinkFlux>();
 
 /**
- * This postprocessor computes the fluid mass by integrating the density over the volume
- *
+ * This postprocessor computes the fluid flux to a RichardsPiecewiseLinearSink.
+ * The flux is integral_over_boundary of
+ * _sink_func*_dt  (here _sink_func is a function of porepressure)
+ * and if _use_relperm = true, this integrand is multiplied by _rel_perm
+ * and if _m_func is entered, this integrand is multiplied by _m_func at the quad point
+ * and if _use_mobility = true, this integrand is multiplied by density*knn/viscosity,
+ *      where knn is n.permeability.n where n is the normal to the boundary
  */
-class RichardsPiecewiseLinearSinkFlux: public SideIntegralVariablePostprocessor
+class RichardsPiecewiseLinearSinkFlux:
+  public SideIntegralVariablePostprocessor,
+  public FunctionInterface
 {
 public:
   RichardsPiecewiseLinearSinkFlux(const std::string & name, InputParameters parameters);
@@ -28,17 +38,38 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-  FEProblem & _feproblem;
-  bool _use_mobility;
-  bool _use_relperm;
+  /// the sink function, which is a piecewise linear function of porepressure values
   LinearInterpolation _sink_func;
 
+  /// whether to include density*permeability_nn/viscosity in the flux
+  bool _use_mobility;
+
+  /// whether to include relative permeability in the flux
+  bool _use_relperm;
+
+  /// the multiplier function
+  Function * const _m_func;
+
+  /// holds info regarding the porepressure names, and their values in the simulation
   const RichardsPorepressureNames & _pp_name_UO;
+
+  /**
+   * the index into _pp_name_UO corresponding to this Postprocessor's variable
+   * eg, if the porepressure names are 'pwater pgas poil pplasma'
+   * and the variable of this Postprocessor is pgas, then _pvar=1
+   */
   unsigned int _pvar;
 
+  /// fluid viscosity
   MaterialProperty<std::vector<Real> > &_viscosity;
+
+  /// medium permeability
   MaterialProperty<RealTensorValue> & _permeability;
+
+  /// fluid relative permeability
   MaterialProperty<std::vector<Real> > &_rel_perm;
+
+  /// fluid density
   MaterialProperty<std::vector<Real> > &_density;
 
 };
