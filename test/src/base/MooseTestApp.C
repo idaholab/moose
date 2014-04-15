@@ -63,6 +63,7 @@
 #include "SumNodalValuesAux.h"
 #include "UniqueIDAux.h"
 #include "RandomAux.h"
+#include "PostprocessorAux.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -261,6 +262,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(SumNodalValuesAux);
   registerAux(UniqueIDAux);
   registerAux(RandomAux);
+  registerAux(PostprocessorAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
