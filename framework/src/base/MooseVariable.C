@@ -1382,7 +1382,13 @@ MooseVariable::getNodalValue(const Node & node)
 {
   mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
 
+  // Make sure that the node has DOFs
+  /* Note, this is a reproduction of an assert within libMesh::Node::dof_number, this is done to produce a
+   * better error (see misc/check_error.node_value_off_block) */
+  mooseAssert(node.n_dofs(_sys.number(), _var_num) > 0, "Node " << node.id() << " does not contain any dofs for the " << _sys.system().variable_name(_var_num) << " variable");
+
   dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
+
   return (*_sys.currentSolution())(dof);
 }
 
@@ -1390,6 +1396,11 @@ Number
 MooseVariable::getNodalValueOld(const Node & node)
 {
   mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
+
+  // Make sure that the node has DOFs
+  /* Note, this is a reproduction of an assert within libMesh::Node::dof_number, this is done to produce a
+   * better error (see misc/check_error.node_value_off_block) */
+  mooseAssert(node.n_dofs(_sys.number(), _var_num) > 0, "Node " << node.id() << " does not contain any dofs for the " << _sys.system().variable_name(_var_num) << " variable");
 
   dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
   return _sys.solutionOld()(dof);
@@ -1399,6 +1410,11 @@ Number
 MooseVariable::getNodalValueOlder(const Node & node)
 {
   mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
+
+  // Make sure that the node has DOFs
+  /* Note, this is a reproduction of an assert within libMesh::Node::dof_number, this is done to produce a
+   * better error (see misc/check_error.node_value_off_block) */
+  mooseAssert(node.n_dofs(_sys.number(), _var_num) > 0, "Node " << node.id() << " does not contain any dofs for the " << _sys.system().variable_name(_var_num) << " variable");
 
   dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
   return _sys.solutionOlder()(dof);
