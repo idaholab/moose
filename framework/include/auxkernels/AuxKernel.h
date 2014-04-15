@@ -108,6 +108,10 @@ public:
 
   const UserObject & getUserObjectBase(const std::string & name);
 
+
+  virtual PostprocessorValue & getPostprocessorValue(const std::string & name);
+  virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
+
 protected:
   virtual Real computeValue() = 0;
 

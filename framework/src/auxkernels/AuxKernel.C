@@ -127,6 +127,20 @@ AuxKernel::getUserObjectBase(const std::string & name)
 }
 
 
+PostprocessorValue &
+AuxKernel::getPostprocessorValue(const std::string & name)
+{
+  _depend_uo.insert(_pars.get<PostprocessorName>(name));
+  return PostprocessorInterface::getPostprocessorValue(name);
+}
+
+const PostprocessorValue &
+AuxKernel::getPostprocessorValueByName(const PostprocessorName & name)
+{
+  _depend_uo.insert(name);
+  return PostprocessorInterface::getPostprocessorValueByName(name);
+}
+
 void
 AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
 {
