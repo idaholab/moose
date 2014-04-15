@@ -35,7 +35,7 @@ EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
   if (_eigen)
   {
     _eigen_sys = static_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem());
-    _eigen_pp = _fe_problem.parameters().set<PostprocessorName>("eigen_postprocessor");
+    _eigen_pp = _fe_problem.parameters().get<PostprocessorName>("eigen_postprocessor");
     if (_is_implicit)
       _eigenvalue = &getPostprocessorValueByName(_eigen_pp);
     else

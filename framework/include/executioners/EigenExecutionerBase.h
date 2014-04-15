@@ -192,15 +192,8 @@ protected:
   Chebyshev_Parameters  chebyshev_parameters;
   void chebyshev(unsigned int iter);
 
-  // DoF indices of the eigen system, empty if the eigen system is the entire system
-  std::set<dof_id_type> _var_indices;
-
-  // save old flux so that it wont be accidentally changed
-  // FIXME: can be removed in the future when STEP is available.
-  NumericVector<Real> * _sys_sol_old;
-  NumericVector<Real> * _sys_sol_older;
-  NumericVector<Real> * _aux_sol_old;
-  NumericVector<Real> * _aux_sol_older;
+private:
+  const Real _consistency_tolerance;
 };
 
 #endif //EIGENEXECUTIONERBASE_H
