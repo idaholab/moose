@@ -85,6 +85,8 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
       }
       oss << tmp_str;
     }
+    else if (params.hasDefaultCoupledValue(iter->first))
+      oss <<  params.defaultCoupledValue(iter->first);
 
     std::string doc = params.getDocString(iter->first);
     MooseUtils::escape(doc);
