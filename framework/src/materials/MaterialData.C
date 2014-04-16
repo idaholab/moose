@@ -85,24 +85,6 @@ MaterialData::swapBack(const Elem & elem, unsigned int side/* = 0*/)
 }
 
 bool
-MaterialData::have_property_name(const std::string & prop_name) const
-{
-  return _storage.hasProperty(prop_name);
-}
-
-bool
-MaterialData::have_property_name_old(const std::string & prop_name) const
-{
-  return _storage.hasProperty(prop_name);
-}
-
-bool
-MaterialData::have_property_name_older(const std::string & prop_name) const
-{
-  return _storage.hasProperty(prop_name);
-}
-
-bool
 MaterialData::isSwapped()
 {
   return _swapped;
