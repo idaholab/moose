@@ -296,4 +296,4 @@ if __name__ == "__main__":
     sub.wait()
 
   # Run Make
-  runMake(distcc_hosts, jobs, make_args=make_args, cwd=make_dir, **opt)
+  runMake(distcc_hosts, jobs, make_args=make_args, cwd=make_dir, **dmake_make_options)
