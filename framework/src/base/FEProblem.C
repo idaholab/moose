@@ -1670,7 +1670,7 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 }
 
 void
-FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid)
+FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
   if (_materials[tid].hasMaterials(blk_id))
   {
@@ -1678,13 +1678,17 @@ FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid)
     unsigned int n_points = _assembly[tid]->qRule()->n_points();
     if (_material_data[tid]->nQPoints() != n_points)
       _material_data[tid]->size(n_points);
-    _material_data[tid]->swap(*elem, 0);
+
+    // Only swap if requested
+    if (swap_stateful)
+      _material_data[tid]->swap(*elem);
+
     _material_data[tid]->reinit(_materials[tid].getMaterials(blk_id));
   }
 }
 
 void
-FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid)
+FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
   if (_materials[tid].hasFaceMaterials(blk_id))
   {
@@ -1694,7 +1698,8 @@ FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid)
 
     if (_bnd_material_data[tid]->nQPoints() != n_points)
       _bnd_material_data[tid]->size(n_points);
-    if (!_bnd_material_data[tid]->isSwapped())
+
+    if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
 
     _bnd_material_data[tid]->reinit(_materials[tid].getFaceMaterials(blk_id));
@@ -1702,7 +1707,7 @@ FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid)
 }
 
 void
-FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid)
+FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
   if (_materials[tid].hasNeighborMaterials(blk_id)/* && _nl.doingDG()*/)
   {
@@ -1712,13 +1717,17 @@ FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid)
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     if (_neighbor_material_data[tid]->nQPoints() != n_points)
       _neighbor_material_data[tid]->size(n_points);
-    _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
+
+    // Only swap if requested
+    if (swap_stateful)
+      _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
+
     _neighbor_material_data[tid]->reinit(_materials[tid].getNeighborMaterials(blk_id));
   }
 }
 
 void
-FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid)
+FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful)
 {
   if (_materials[tid].hasBoundaryMaterials(boundary_id)/* && _nl.hasActiveIntegratedBCs(boundary_id, tid)*/)
   {
@@ -1727,7 +1736,8 @@ FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid)
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     if (_bnd_material_data[tid]->nQPoints() != n_points)
       _bnd_material_data[tid]->size(n_points);
-    if (!_bnd_material_data[tid]->isSwapped())
+
+    if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
 
     _bnd_material_data[tid]->reinit(_materials[tid].getBoundaryMaterials(boundary_id));
