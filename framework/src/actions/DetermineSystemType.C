@@ -19,6 +19,7 @@ template<>
 InputParameters validParams<DetermineSystemType>()
 {
   InputParameters params = validParams<MooseObjectAction>();
+  params.mooseObjectSyntaxVisibility(false);
   return params;
 }
 
