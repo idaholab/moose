@@ -23,5 +23,6 @@ protected:
 
   std::string _prop_name;
   MaterialProperty<Real> & _diff;
+  Real _offset;
 };
 #endif //DIFFMKERNEL_H

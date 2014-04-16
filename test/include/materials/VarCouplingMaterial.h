@@ -20,6 +20,8 @@ protected:
   virtual void computeQpProperties();
 
   VariableValue & _var;
+  Real _base;
+  Real _coef;
   MaterialProperty<Real> & _diffusion;
 };
 

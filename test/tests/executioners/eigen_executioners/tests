@@ -55,4 +55,10 @@
     exodiff = 'ane.e'
     abs_zero = 1e-09
   [../]
+  [./test_coupled_nonlinear_eigen]
+    type = 'Exodiff'
+    input = 'ne_coupled.i'
+    exodiff = 'ne_coupled.e'
+    abs_zero = 1e-09
+  [../]
 []
