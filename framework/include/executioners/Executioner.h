@@ -106,8 +106,6 @@ public:
 
 protected:
 
-  /// output initial condition if true
-  bool _output_initial;
   /// Initial Residual Variables
   Real _initial_residual_norm;
   Real _old_initial_residual_norm;

@@ -495,7 +495,8 @@ Console::outputSystemInformation()
   std::stringstream oss;
 
   // Framework information
-  oss << _app.getSysInfo();
+  if (_app.getSystemInfo() != NULL)
+    oss << _app.getSystemInfo()->getInfo();
 
   oss << std::left << "\n"
       << "Parallelism:\n"

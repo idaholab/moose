@@ -15,15 +15,14 @@
 #include "DisplacedProblem.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "ExodusOutput.h"
 #include "UpdateDisplacedMeshThread.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<DisplacedProblem>()
 {
   InputParameters params = validParams<SubProblem>();
   params.addPrivateParam<std::vector<std::string> >("displacements");
-  params.addPrivateParam<bool>("sequence", true);
   return params;
 }
 
@@ -36,12 +35,8 @@ DisplacedProblem::DisplacedProblem(FEProblem & mproblem, MooseMesh & displaced_m
     _displacements(params.get<std::vector<std::string> >("displacements")),
     _displaced_nl(*this, _mproblem.getNonlinearSystem(), _mproblem.getNonlinearSystem().name() + "_displaced", Moose::VAR_NONLINEAR),
     _displaced_aux(*this, _mproblem.getAuxiliarySystem(), _mproblem.getAuxiliarySystem().name() + "_displaced", Moose::VAR_AUXILIARY),
-    _geometric_search_data(_mproblem, _mesh),
-    _ex(new ExodusOutput(_app, _eq, true, *this, "DisplacedExodusOutput")),
-    _seq(params.get<bool>("sequence"))
+    _geometric_search_data(_mproblem, _mesh)
 {
-  _ex->sequence(_seq);
-
   unsigned int n_threads = libMesh::n_threads();
   _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
@@ -52,8 +47,6 @@ DisplacedProblem::~DisplacedProblem()
 {
   for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
     delete _assembly[i];
-
-  delete _ex;
 }
 
 void
@@ -92,16 +85,11 @@ DisplacedProblem::init()
   _mesh.meshChanged();
   _app.getOutputWarehouse().meshChanged();
   Moose::setup_perf_log.pop("DisplacedProblem::init::meshChanged()","Setup");
-
-  _ex->setOutputVariables(_mproblem.getVariableNames());
 }
 
 void
 DisplacedProblem::initAdaptivity()
 {
-  // with adaptivity, each time step must go into a separate file
-  _seq = true;
-  _ex->sequence(_seq);
 }
 
 void
@@ -504,14 +492,6 @@ DisplacedProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type
 }
 
 void
-DisplacedProblem::output(bool /*force*/)
-{
-  _ex->output(_mproblem.out().fileBase() + "_displaced", _mproblem.time(), _mproblem.timeStep());
-  if (_seq)
-    _ex->meshChanged();
-}
-
-void
 DisplacedProblem::meshChanged()
 {
   // mesh changed
@@ -522,18 +502,6 @@ DisplacedProblem::meshChanged()
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i]->invalidateCache();
   _geometric_search_data.update();
-}
-
-void
-DisplacedProblem::outputPps(const FormattedTable & table)
-{
-  _ex->outputPps(_mproblem.out().fileBase() + "_displaced", table, _mproblem.time());
-}
-
-void
-DisplacedProblem::setOutputVariables(std::vector<VariableName> output_variables)
-{
-  _ex->setOutputVariables(output_variables);
 }
 
 void

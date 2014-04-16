@@ -16,6 +16,9 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
+#include "OutputBase.h"
+#include "MooseApp.h"
+#include "MooseObjectAction.h"
 
 template<>
 InputParameters validParams<SetupDebugAction>()
@@ -31,10 +34,14 @@ InputParameters validParams<SetupDebugAction>()
 
 SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
     Action(name, parameters),
-    _top_residuals(getParam<unsigned int>("show_top_residuals"))
+    _top_residuals(getParam<unsigned int>("show_top_residuals")),
+    _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
   _awh.showActions(getParam<bool>("show_actions"));
   _awh.showParser(getParam<bool>("show_parser"));
+
+  // Set the ActionWarehouse pointer in the parameters that will be passed to the actions created with this action
+  _action_params.set<ActionWarehouse *>("awh") = &_awh;
 }
 
 SetupDebugAction::~SetupDebugAction()
@@ -44,10 +51,22 @@ SetupDebugAction::~SetupDebugAction()
 void
 SetupDebugAction::act()
 {
+  // If the user desires residual debugging, create an action for creating the debug outputter
+  if (_pars.get<bool>("show_var_residual_norms"))
+  {
+    // Set the 'type =' parameters for the desired object
+    _action_params.set<std::string>("type") = "DebugOutputter";
+
+    // Create the action
+    MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", "Outputs/moose_debug_outputter", _action_params));
+
+    // Add the action to the warehouse
+    _awh.addActionBlock(action);
+  }
+
   if (_problem != NULL)
   {
     _problem->setDebugTopResiduals(_top_residuals);
-    _problem->setDebugPrintVarResidNorms(getParam<bool>("show_var_residual_norms"));
     if (getParam<bool>("show_material_props"))
       _problem->printMaterialMap();
   }

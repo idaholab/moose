@@ -210,77 +210,6 @@ petscSetOptions(FEProblem & problem)
 
 }
 
-// Quick helper to output the norm in color \todo{Remove after new output system is in place}
-void outputNorm(Real old_norm, Real norm, bool use_color)
-{
-  std::string color(COLOR_DEFAULT);
-
-  if (use_color)
-  {
-    // Red if the residual went up...
-    if (norm > old_norm)
-      color = RED;
-    // Yellow if change is less than 5%
-    else if ((old_norm - norm) / old_norm <= 0.05)
-      color = YELLOW;
-    // Green if change is more than 5%
-    else
-      color = GREEN;
-
-    // Show the norm in color
-    Moose::out << MooseUtils::colorText<Real>(color, norm) << std::endl;
-  }
-
-  // Display the norm without color
-  else
-    Moose::out << norm << std::endl;
-}
-
-/// \todo{Remove after new output system is in place}
-PetscErrorCode nonlinearMonitor(SNES, PetscInt its, PetscReal fnorm, void *void_ptr)
-{
-  static Real old_norm;
-
-  Problem * problem = static_cast<Problem*>(void_ptr);
-
-  if (its == 0)
-    old_norm = std::numeric_limits<Real>::max();
-
-
-  libMesh::out << std::setw(2) << its
-               << " Nonlinear |R| = ";
-
-  outputNorm(old_norm, fnorm, problem->shouldColorOutput());
-
-  old_norm = fnorm;
-
-  return 0;
-}
-
-/// \todo{Remove after new output system is in place}
-PetscErrorCode  linearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *void_ptr)
-{
-  static Real old_norm;
-
-  Problem * problem = static_cast<Problem*>(void_ptr);
-
-  if (!problem)
-    mooseError("What are you trying to solve?");
-
-  if (its == 0)
-    old_norm = std::numeric_limits<Real>::max();
-
-  libMesh::out << std::setw(7) << its
-               << std::scientific
-               << " Linear |R| = ";
-
-  outputNorm(old_norm, rnorm, problem->shouldColorOutput());
-
-  old_norm = rnorm;
-
-  return 0;
-}
-
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line)
 {
   char code[10] = {45,45,109,111,111,115,101};
@@ -619,33 +548,6 @@ void petscSetDefaults(FEProblem & problem)
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
 #endif
-
-
-  if (problem.getMooseApp().hasLegacyOutput())
-  {
-    /// \todo{Remove this when new output system is in place}
-    {
-      PetscErrorCode ierr;
-#if PETSC_VERSION_LESS_THAN(2,3,3)
-      ierr = SNESSetMonitor (snes, nonlinearMonitor, &problem, PETSC_NULL);
-#else
-      ierr = SNESMonitorSet (snes, nonlinearMonitor, &problem, PETSC_NULL);
-#endif
-      CHKERRABORT(libMesh::COMM_WORLD,ierr);
-    }
-
-    /// \todo{Remove this when new output system is in place}
-    if (problem.shouldPrintLinearResiduals())
-    {
-      PetscErrorCode ierr;
-#if PETSC_VERSION_LESS_THAN(2,3,3)
-      ierr = KSPSetMonitor (ksp, linearMonitor, &problem, PETSC_NULL);
-#else
-      ierr = KSPMonitorSet (ksp, linearMonitor, &problem, PETSC_NULL);
-#endif
-      CHKERRABORT(libMesh::COMM_WORLD,ierr);
-    }
-  }
 }
 } // Namespace PetscSupport
 } // Namespace MOOSE

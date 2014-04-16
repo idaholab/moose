@@ -68,17 +68,7 @@ Steady::init()
   _problem.initialSetup();
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
-
-  // Write the output
   _output_warehouse.outputInitial();
-
-  if (_output_initial)
-  {
-    _problem.output();
-    _problem.outputPostprocessors();
-    _problem.outputRestart();
-  }
-
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
 
@@ -88,8 +78,6 @@ Steady::execute()
   if (_app.isRecovering())
     return;
 
-  if (_app.hasLegacyOutput())
-    Moose::out << "Time: " << _time_step << '\n';
   preExecute();
 
   // first step in any steady state solve is always 1 (preserving backwards compatibility)
@@ -119,13 +107,6 @@ Steady::execute()
     _problem.computeIndicatorsAndMarkers();
 
     _output_warehouse.outputStep();
-
-    if (_app.hasLegacyOutput())
-    {
-      _problem.output();
-      _problem.outputPostprocessors();
-      _problem.outputRestart();
-    }
 
 #ifdef LIBMESH_ENABLE_AMR
     if (r_step != steps)

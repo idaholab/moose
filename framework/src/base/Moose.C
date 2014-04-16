@@ -39,7 +39,6 @@
 
 // problems
 #include "FEProblem.h"
-#include "OutputProblem.h"
 #include "CoupledProblem.h"
 
 // kernels
@@ -290,8 +289,6 @@
 #include "SetupMeshAction.h"
 #include "AddMeshModifierAction.h"
 #include "SetupMeshCompleteAction.h"
-#include "SetupOutputNameAction.h" /// \todo{remove w/ update system upgraded}
-#include "SetupOutputAction.h" /// \todo{remove w/ update system upgraded}
 #include "AddOutputAction.h"
 #include "CommonOutputAction.h"
 #include "AddMaterialAction.h"
@@ -303,7 +300,6 @@
 #include "SetupPreconditionerAction.h"
 #include "SetupDebugAction.h"
 #include "SetupResidualDebugAction.h"
-#include "SetupOverSamplingAction.h"
 #include "DeprecatedBlockAction.h"
 #include "AddConstraintAction.h"
 #include "InitDisplacedProblemAction.h"
@@ -337,6 +333,7 @@
 #include "Tecplot.h"
 #include "GNUPlot.h"
 #include "SolutionHistory.h"
+#include "DebugOutputter.h"
 
 namespace Moose {
 
@@ -362,7 +359,6 @@ registerObjects(Factory & factory)
 
   // problems
   registerProblem(FEProblem);
-  registerProblem(OutputProblem);
   registerProblem(CoupledProblem);
 
   // kernels
@@ -605,6 +601,7 @@ registerObjects(Factory & factory)
   registerOutput(Tecplot);
   registerOutput(GNUPlot);
   registerOutput(SolutionHistory);
+  registerOutput(DebugOutputter);
 
   registered = true;
 }
@@ -776,11 +773,9 @@ addActionTypes(Syntax & syntax)
 "(add_material)"
 "(add_postprocessor)"
 "(setup_pps_complete)"
+"(setup_debug)"
 "(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, add_output)"
 "(perf_log_output)"
-"(setup_output)"
-"(setup_oversampling)"
-"(setup_debug)"
 "(check_integrity)"
 );
 
@@ -831,8 +826,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(InitDisplacedProblemAction, "init_displaced_problem");
   registerAction(DetermineSystemType, "determine_system_type");
   registerAction(CreateProblemAction, "create_problem");
-  registerAction(SetupOutputAction, "setup_output"); /// \todo{remove w/ update system upgraded}
-  registerAction(SetupOutputNameAction, "setup_output_name"); /// \todo{remove w/ update system upgraded}
   registerAction(AddOutputAction, "add_output");
   registerAction(CommonOutputAction, "meta_action");
   registerAction(GlobalParamsAction, "set_global_params");
@@ -872,7 +865,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddSplitAction, "add_split");
   registerAction(SetupPreconditionerAction, "add_preconditioning");
   registerAction(SetupQuadratureAction, "setup_quadrature");
-  registerAction(SetupOverSamplingAction, "setup_oversampling");
   registerAction(DeprecatedBlockAction, "deprecated_block");
   registerAction(AddConstraintAction, "add_constraint");
   registerAction(AddUserObjectAction, "add_user_object");

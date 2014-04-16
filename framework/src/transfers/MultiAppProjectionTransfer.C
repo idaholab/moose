@@ -85,7 +85,7 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const std::string & name,
 
             _proj_sys[app] = &proj_sys;
 
-            to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
+            //to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
 
             Moose::swapLibMeshComm(swapped);
           }
@@ -110,7 +110,7 @@ MultiAppProjectionTransfer::MultiAppProjectionTransfer(const std::string & name,
 
         _proj_sys[0] = &proj_sys;
 
-        to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
+        // to_problem.hideVariableFromOutput("var");           // hide the auxiliary projection variable
       }
       break;
   }

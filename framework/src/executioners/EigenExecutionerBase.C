@@ -141,14 +141,6 @@ EigenExecutionerBase::init()
   _problem.time() = _problem.timeStep();
   _output_warehouse.outputInitial();
   _problem.time() = t;
-
-  if (_output_initial)
-  {
-    _problem.output();
-    _problem.outputPostprocessors();
-    _problem.outputRestart();
-  }
-
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
 
@@ -420,8 +412,6 @@ EigenExecutionerBase::normalizeSolution(bool force)
 void
 EigenExecutionerBase::printEigenvalue()
 {
-  _eigen_sys.printVarNorms();
-
   std::ostringstream ss;
   ss << std::endl;
   ss << "******************************************************* " << std::endl;

@@ -16,7 +16,6 @@
 #define RESURRECTOR_H
 
 #include "Moose.h"
-#include "CheckpointOutput.h"
 #include "MaterialPropertyIO.h"
 #include "RestartableDataIO.h"
 
@@ -51,23 +50,6 @@ public:
 
   void restartRestartableData();
 
-  /**
-   * Set the number of restart file to store
-   * @param num_files Number of files to keep around
-   */
-  void setNumRestartFiles(unsigned int num_files);
-
-  /**
-   * Gets the number of restart files to save
-   * @return the number of files to keep around
-   */
-  unsigned int getNumRestartFiles();
-
-  /**
-   * Write out a restart file and rotate already written ones
-   */
-  void write();
-
 protected:
 
   /// Reference to a FEProblem being restarted
@@ -76,17 +58,11 @@ protected:
   /// name of the file that we restart from
   std::string _restart_file_base;
 
-  /// number of checkpoint files to keep around
-  unsigned int _num_checkpoint_files;
-  /// Checkpoint writer
-  CheckpointOutput _checkpoint;
   /// Stateful material property output
   MaterialPropertyIO _mat;
+
   /// Restartable Data
   RestartableDataIO _restartable;
-
-  /// list of file names we keep around
-  std::list<std::string> _restart_file_names;
 
   static const std::string MAT_PROP_EXT;
   static const std::string RESTARTABLE_DATA_EXT;

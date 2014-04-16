@@ -214,14 +214,6 @@ NonlinearSystem::solve()
       _computing_initial_residual = false;
       _sys.rhs->close();
       _initial_residual = _sys.rhs->l2_norm();
-
-      /// \todo{Remove this after output system redo; this is not needed as it is the same as the
-      /// first entry of the nonlinear residual output}
-      if (_app.hasLegacyOutput())
-      {
-        Moose::out << std::scientific << std::setprecision(6);
-        Moose::out << " Initial |R| = " << _initial_residual << std::endl;
-      }
     }
   }
   catch (MooseException & e)
@@ -2034,59 +2026,6 @@ NonlinearSystem::serializedSolution()
 
   _need_serialized_solution = true;
   return _serialized_solution;
-}
-
-void
-NonlinearSystem::printVarNorms()
-{
-  TransientNonlinearImplicitSystem &s = static_cast<TransientNonlinearImplicitSystem &>(_sys);
-
-  std::map<std::string, Real> other_var_norms;
-  std::map<std::string, Real> outlier_var_norms;
-
-  unsigned int n_vars = _sys.n_vars();
-
-  Real average_norm = (_last_nl_rnorm*_last_nl_rnorm) / n_vars;
-
-  for (unsigned int var_num = 0; var_num < _sys.n_vars(); var_num++)
-  {
-    Real var_norm = s.calculate_norm(*s.rhs,var_num,DISCRETE_L2);
-    var_norm *= var_norm; // use the norm squared
-
-    if (var_norm > 2 * average_norm)
-      outlier_var_norms[s.variable_name(var_num)] = var_norm;
-    else
-      other_var_norms[s.variable_name(var_num)] = var_norm;
-  }
-
-  if (outlier_var_norms.size() && _app.hasLegacyOutput())
-  {
-    Moose::out << "Outlier Variable Residual Norms:\n";
-    for(std::map<std::string, Real>::iterator it = outlier_var_norms.begin();
-        it != outlier_var_norms.end();
-        ++it)
-    {
-      std::string color(YELLOW);
-
-      if (it->second > 0.8 * _last_nl_rnorm*_last_nl_rnorm)
-        color = RED;
-
-      Moose::out << " " << it->first << ": " <<
-        MooseUtils::colorText(color, std::sqrt(it->second)) << '\n';
-    }
-  }
-
-  if (_print_all_var_norms && _app.hasLegacyOutput())
-  {
-    Moose::out << "Variable Residual Norms:\n";
-    for(std::map<std::string, Real>::iterator it = other_var_norms.begin();
-        it != other_var_norms.end();
-        ++it)
-      Moose::out << " " << it->first << ": " <<
-        MooseUtils::colorText(GREEN, std::sqrt(it->second)) << '\n';
-  }
-
-  Moose::out.flush();
 }
 
 void

@@ -24,7 +24,6 @@
 #include "MaterialPropertyStorage.h"
 #include "PostprocessorWarehouse.h"
 #include "PostprocessorData.h"
-#include "Output.h"
 #include "Adaptivity.h"
 #include "Resurrector.h"
 #include "IndicatorWarehouse.h"
@@ -41,7 +40,7 @@
 #include "OutputWarehouse.h"
 
 class DisplacedProblem;
-class OutputProblem;
+
 class FEProblem;
 class MooseMesh;
 class NonlinearSystem;
@@ -387,8 +386,6 @@ public:
    */
   void initPostprocessorData(const std::string & name);
 
-  void clearPostprocessorTables();
-
   // UserObjects /////
   virtual void addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters);
 
@@ -451,7 +448,6 @@ public:
 
   virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
   virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_RESIDUAL);
-  virtual void outputPostprocessors(bool force = false);
 
   // Dampers /////
   void addDamper(std::string damper_name, const std::string & name, InputParameters parameters);
@@ -597,88 +593,11 @@ public:
 
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
-  // Output /////
-  /// \todo{Remove after new output system implemented}
-  virtual Output & out() { return _out; }
-  virtual void output(bool force = false);
-  virtual void outputRestart(bool force = false);
-  virtual void outputDisplaced(bool state = true) { _output_displaced = state; }
-  virtual void outputSolutionHistory(bool state = true) { _output_solution_history = state; }
-  virtual void outputESInfo(bool state = true) { _output_es_info = state; }
-
-  //void addOutput(std::string damper_name, const std::string & name, InputParameters parameters);
-
   /**
-   * Whether or not we should be printing the linear residuals.
-   * @param state True to print linear residuals.
+   * Communicate to the Resurector the name of the restart filer
+   * @param file_name The file name for restarting from
    */
-  /// \todo{Remove after new output system implemented}
-  virtual void printLinearResiduals(bool state) { _print_linear_residuals = state; }
-
-  /**
-   * Whether or not we should be printing the linear residuals.
-   * \todo{Remove after new output system implemented}
-   */
-  virtual bool shouldPrintLinearResiduals() { return _print_linear_residuals; }
-
-  /**
-   * Set which variables will be written in output files
-   * \todo{Remove all after new output system implemented}
-   */
-  void setOutputVariables();
-  void hideVariableFromOutput(const VariableName & var_name);
-  void hideVariableFromOutput(const std::vector<VariableName> & var_names);
-  void showVariableInOutput(const VariableName & var_name);
-  void showVariableInOutput(const std::vector<VariableName> & var_names);
-
-  OutputProblem & getOutputProblem(unsigned int refinements, MeshFileName file = "");
-
-  /// \todo{Remove after new output system implemented}
-  void setMaxPPSRowsScreen(unsigned int n) { _pps_output_table_max_rows = n; }
-  void setPPSFitScreen(MooseEnum m) { _pps_fit_to_screen = m; }
-
-  /**
-   * Set (or reset) the output position of the problem.
-   */
-  void setOutputPosition(Point p);
-
-  // Restart //////
-
-  /**
-   * Set a file we will restart from
-   * @param file_name The file name we will restart from
-   */
-  virtual void setRestartFile(const std::string & file_name);
-
-  /**
-   * Set the number of restart files to save
-   * @param num_files Number of files to keep around
-   */
-  virtual void setNumRestartFiles(unsigned int num_files);
-
-  /**
-   * Set the suffix for the checkpoint directory
-   *
-   * This will be appended to the output file base to create
-   * the directory name for checkpoint files.
-   */
-  virtual void setCheckpointDirSuffix(std::string suffix);
-
-  /**
-   * Get the checkpoint dir suffix
-   */
-  virtual std::string getCheckpointDirSuffix();
-
-  /**
-   * Get the checkpoint dir
-   */
-  virtual std::string getCheckpointDir();
-
-  /**
-   * Gets the number of restart files to save
-   * @return the number of files to keep around
-   */
-  virtual unsigned int getNumRestartFiles();
+  void setRestartFile(const std::string & file_name);
 
   /**
    * Was this subproblem initialized from a restart file
@@ -736,16 +655,7 @@ public:
 
   void serializeSolution();
 
-  inline void setEarlyPerfLogPrint(bool val) { _output_setup_log_early = val; }
-
   // debugging iface /////
-
-  /**
-   * Set the number of top residual to be printed out (0 = no output)
-   */
-  void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
-
-  void setDebugPrintVarResidNorms(bool should_print) { _dbg_print_var_rnorms = should_print; }
 
   void setKernelTypeResidual(Moose::KernelType kt) { _kernel_type = kt; }
 
@@ -779,6 +689,15 @@ public:
    */
   const BoundaryID & getCurrentBoundaryID(){ return _current_boundary_id; }
 
+  /**
+   * Set the output position for the app and sub-apps
+   */
+  void setOutputPosition(const Point & p);
+
+  /**
+   * Enable printing of top residuals
+   */
+  void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
 
 protected:
   MooseMesh & _mesh;
@@ -862,15 +781,6 @@ protected:
   /// A map of objects that consume random numbers
   std::map<std::string, RandomData *> _random_data_objects;
 
-  /// Table with postprocessors that will go into files
-  FormattedTable & _pps_output_table_file; /// \todo{Remove after new output system implemented}
-  /// Table with postprocessors that will go on screen
-  FormattedTable & _pps_output_table_screen; /// \todo{Remove after new output system implemented}
-  unsigned int _pps_output_table_max_rows; /// \todo{Remove after new output system implemented}
-  MooseEnum _pps_fit_to_screen; /// \todo{Remove after new output system implemented}
-
-  bool _print_linear_residuals; /// \todo{Remove after new output system implemented}
-
   void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
 
 public:
@@ -880,12 +790,6 @@ public:
    */
   unsigned int subspaceDim(const std::string& prefix) const {if (_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
 
-  /// \todo{Remove after new output system implemented}
-  bool _postprocessor_screen_output;
-  bool _postprocessor_csv_output;
-  bool _postprocessor_gnuplot_output;
-  std::string _gnuplot_format;
-
 protected:
   void checkUserObjects();
 
@@ -893,20 +797,9 @@ protected:
   void checkCoordinateSystems();
 
   /**
-   * Add postprocessor values to the output table
-   * @param type type of PPS to add to the table
-   * \todo{Remove after new output system implemented}
-   */
-  void addPPSValuesToTable(ExecFlagType type);
-
-  /**
    * Call when it is possible that the needs for ghosted elements has changed.
    */
   void reinitBecauseOfGhosting();
-
-  // Output system
-  Output _out;
-  OutputProblem * _out_problem;
 
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
@@ -919,12 +812,6 @@ protected:
 
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;
-  /// true for outputting displaced problem
-  bool _output_displaced;
-  /// true for outputting solution history
-  bool _output_solution_history;
-  /// true for outputting equations systems information
-  bool _output_es_info;
 
   /// whether input file has been written
   bool _input_file_saved;
@@ -938,23 +825,11 @@ protected:
   /// Whether nor not stateful materials have been initialized
   bool _has_initialized_stateful;
 
+  /// Flag for print top residuals
+  bool _dbg_top_residuals;
+
   /// Object responsible for restart (read/write)
   Resurrector * _resurrector;
-
-//  PerfLog _solve_only_perf_log;                         ///< Only times the solve
-  /// Determines if the setup log is printed before the first time step
-  bool _output_setup_log_early;  /// \todo{Remove after new output system implemented}
-
-
-  /// \todo{Remove after new output system implemented}
-  std::vector<VariableName> _variable_white_list;
-  std::vector<VariableName> _variable_black_list;
-
-  /// Number of top residual to print out
-  unsigned int _dbg_top_residuals;
-
-  // Should we print out residuals of individaul variables at NL iterations?
-  bool _dbg_print_var_rnorms;
 
   /// true if the Jacobian is constant
   bool _const_jacobian;
@@ -963,13 +838,10 @@ protected:
 
   SolverParams _solver_params;
 
-  /// The suffix to append to the output base to create the checkpoint directory
-  std::string _checkpoint_dir_suffix;
-
   /// True if we're doing a _restart_ (note: this is _not_ true when recovering!)
   bool _restarting;
 
-  /// Determies whether a check to verify an active kernel on every subdomain
+  /// Determines whether a check to verify an active kernel on every subdomain
   bool _kernel_coverage_check;
 
   /// Maximum number of quadrature points used in the problem

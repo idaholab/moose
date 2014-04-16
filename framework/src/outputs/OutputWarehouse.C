@@ -18,6 +18,7 @@
 #include "Console.h"
 #include "FileOutputter.h"
 #include "Checkpoint.h"
+#include "FEProblem.h"
 
 #include <libgen.h>
 #include <sys/types.h>
@@ -75,7 +76,10 @@ OutputWarehouse::addOutput(OutputBase * output)
     _object_ptrs.insert(_object_ptrs.begin(), output);
 
   // Store the names
-  _output_names.insert(output->name());
+  _object_names.insert(output->name());
+
+  // Store the name and pointer in map
+  _object_map[output->name()] = output;
 
   // If the output object is a FileOutputBase then store the output filename
   FileOutputter * ptr = dynamic_cast<FileOutputter *>(output);
@@ -105,11 +109,11 @@ OutputWarehouse::addOutput(OutputBase * output)
 bool
 OutputWarehouse::hasOutput(std::string name)
 {
-  return _output_names.find(name) != _output_names.end();
+  return _object_names.find(name) != _object_names.end();
 }
 
 const std::vector<OutputBase *> &
-OutputWarehouse::getOutputs()
+OutputWarehouse::getOutputs() const
 {
   return _object_ptrs;
 }
@@ -173,7 +177,7 @@ OutputWarehouse::forceOutput()
 }
 
 void
-OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input)
+OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset)
 {
   for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
   {
@@ -182,7 +186,13 @@ OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input)
     {
       std::map<std::string, unsigned int>::const_iterator it = input.find(ptr->name());
       if (it != input.end())
-        ptr->setFileNumber(it->second);
+      {
+        int value = it->second + offset;
+        if (value < 0)
+          ptr->setFileNumber(0);
+        else
+          ptr->setFileNumber(it->second + offset);
+      }
     }
   }
 }
