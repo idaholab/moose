@@ -134,6 +134,11 @@ public:
    */
   void init();
 
+  /**
+   * Return an Outputter object by name
+   */
+  OutputBase * getOutputByName(std::string name);
+
 private:
 
   /**
@@ -164,9 +169,6 @@ private:
 
   /// List of object names
   std::set<OutFileBase> _filenames;
-
-  /// List of output object names
-  std::set<std::string> _object_names;
 
   /// Pointer to the common InputParameters (@see CommonOutputAction)
   InputParameters * _common_params_ptr;

@@ -75,9 +75,6 @@ OutputWarehouse::addOutput(OutputBase * output)
   else
     _object_ptrs.insert(_object_ptrs.begin(), output);
 
-  // Store the names
-  _object_names.insert(output->name());
-
   // Store the name and pointer in map
   _object_map[output->name()] = output;
 
@@ -109,7 +106,7 @@ OutputWarehouse::addOutput(OutputBase * output)
 bool
 OutputWarehouse::hasOutput(std::string name)
 {
-  return _object_names.find(name) != _object_names.end();
+  return _object_map.find(name) != _object_map.end();
 }
 
 const std::vector<OutputBase *> &
@@ -229,4 +226,13 @@ std::set<Real> &
 OutputWarehouse::getSyncTimes()
 {
   return _sync_times;
+}
+
+OutputBase *
+OutputWarehouse::getOutputByName(std::string name)
+{
+  if (!hasOutput(name))
+    mooseError("An outputter with the name " << name << " does not exist.");
+
+  return _object_map[name];
 }
