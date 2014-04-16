@@ -925,7 +925,7 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
 }
 
 template<>
-void Parser::setVectorParameter<VariableName>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<VariableName> > * param, bool in_global, GlobalParamsAction * global_block)
+void Parser::setVectorParameter<VariableName>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<VariableName> > * param, bool /*in_global*/, GlobalParamsAction * /*global_block*/)
 {
   GetPot *gp;
 
@@ -942,7 +942,7 @@ void Parser::setVectorParameter<VariableName>(const std::string & full_name, con
   bool has_var_names = false;
   for (int i = 0; i < vec_size; ++i)
   {
-    VariableName var_name = gp->get_value_no_default(full_name.c_str(), param->get()[i], i);
+    VariableName var_name = gp->get_value_no_default(full_name.c_str(), "", i);
 
     Real real_value;
     std::istringstream ss(var_name);
