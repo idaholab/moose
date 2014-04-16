@@ -1,0 +1,7 @@
+[Tests]
+  [./normalization_aux]
+    type = 'Exodiff'
+    input = 'normalization_aux.i'
+    exodiff = 'normalization_aux_out.e'
+  [../]
+[]
