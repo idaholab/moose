@@ -35,7 +35,7 @@ include            $(FRAMEWORK_DIR)/app.mk
 
 # This target will build the individual executables in each module
 # and run their respective tests.
-MODULE_DIRS_ALL    := $(shell find $(MOOSE_DIR)/modules -type d -depth 1)
+MODULE_DIRS_ALL    := $(shell find $(MOOSE_DIR)/modules -maxdepth 1 -mindepth 1 -type d)
 MODULE_DIRS        := $(filter-out %combined, $(MODULE_DIRS_ALL))
 
 test_subs:
