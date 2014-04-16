@@ -111,7 +111,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRestartableData<Real>("target_time", -1)),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
-    _allow_output(true),
     _picard_it(0),
     _picard_max_its(getParam<unsigned int>("picard_max_its")),
     _picard_converged(false),
@@ -124,7 +123,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
   _t_step = 0;
   _dt = 0;
   _next_interval_output_time = 0.0;
-
 
   // Either a start_time has been forced on us, or we want to tell the App about what our start time is (in case anyone else is interested.
   if (_app.hasStartTime())
@@ -191,15 +189,7 @@ Transient::init()
   _time_stepper->init();
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
-
   _output_warehouse.outputInitial();
-
-  if (_output_initial)
-  {
-    _problem.output();
-    _problem.outputPostprocessors();
-    _problem.outputRestart();
-  }
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
   // If this is the first step
@@ -302,8 +292,6 @@ Transient::takeStep(Real input_dt)
 void
 Transient::solveStep(Real input_dt)
 {
-  _problem.out().setOutput(false);
-
   _dt_old = _dt;
 
   if (input_dt == -1.0)
@@ -322,61 +310,6 @@ Transient::solveStep(Real input_dt)
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);
-
-  // Only print this if the 'Output' block exists
-  /// \todo{Remove when old output system is removed}
-  if (_app.hasLegacyOutput())
-  {
-    Moose::out << "\nTime Step ";
-    {
-      std::ostringstream out;
-
-      out << std::setw(2)
-          << _t_step
-          << ", time = "
-          << std::setw(9)
-          << std::setprecision(6)
-          << std::setfill('0')
-          << std::showpoint
-          << std::left
-          << _time;
-      Moose::out << out.str() << std::endl;
-    }
-
-    {
-      std::ostringstream tstepstr;
-      tstepstr << _t_step;
-      unsigned int tsteplen = tstepstr.str().size();
-      if (tsteplen < 2)
-        tsteplen = 2;
-
-      std::ostringstream out;
-
-      if (_verbose)
-      {
-        out << std::setw(tsteplen)
-            << "          old time = "
-            << std::setw(9)
-            << std::setprecision(6)
-            << std::setfill('0')
-            << std::showpoint
-            << std::left
-            << _time_old
-            << std::endl;
-      }
-
-      out << std::setw(tsteplen)
-          <<"                dt = "
-          << std::setw(9)
-          << std::setprecision(6)
-          << std::setfill('0')
-          << std::showpoint
-          << std::left
-          << _dt;
-
-      Moose::out << out.str() << std::endl;
-    }
-  }
 
   preSolve();
   _time_stepper->preSolve();
@@ -488,31 +421,10 @@ Transient::endStep(Real input_time)
     //output \todo{Remove after old output system is removed}
     if (_time_interval)
     {
-      //Force output if the current time is at an output interval
-      if (std::abs(_time-_next_interval_output_time)<=_timestep_tolerance
-         || (_problem.out().interval() > 1 && _t_step % _problem.out().interval() == 0))
-      {
-        if (_allow_output && _app.hasLegacyOutput())
-        {
-          _problem.output(true);
-          _problem.outputPostprocessors(true);
-          _problem.outputRestart(true);
-        }
-      }
       //Set the time for the next output interval if we're at or beyond an output interval
       if (_time + _timestep_tolerance >= _next_interval_output_time)
       {
         _next_interval_output_time += _time_interval_output_interval;
-      }
-    }
-    else
-    {
-      // if _at_sync_point is true, force the output no matter what
-      if (_allow_output && _app.hasLegacyOutput())
-      {
-        _problem.output(_at_sync_point);
-        _problem.outputPostprocessors(_at_sync_point);
-        _problem.outputRestart(_at_sync_point);
       }
     }
   }
@@ -686,14 +598,6 @@ Transient::keepGoing()
   if ((_time>_end_time) || (fabs(_time-_end_time)<=_timestep_tolerance))
     keep_going = false;
 
-  if (!keep_going && _steps_taken && !_problem.out().wasOutput() && !_app.halfTransient())
-  {
-    _problem.output(true);
-    if (_allow_output && _app.hasLegacyOutput())
-      _problem.outputPostprocessors(true);
-    _problem.outputRestart(true);
-  }
-
   if (!lastSolveConverged() && _abort)
   {
     Moose::out << "Aborting as solve did not converge and input selected to abort" << std::endl;
@@ -717,12 +621,15 @@ Transient::lastSolveConverged()
 void
 Transient::preExecute()
 {
+  /*
   if (_problem.out().useTimeInterval())
   {
     _time_interval = true;
     _time_interval_output_interval = _problem.out().timeinterval();
     _next_interval_output_time = _time + _time_interval_output_interval;
   }
+  */
+
   // Add time period start times to sync times
   const std::vector<TimePeriod *> time_periods = _problem.getTimePeriods();
   for (unsigned int i = 0; i < time_periods.size(); ++i)
@@ -747,14 +654,6 @@ void
 Transient::setTargetTime(Real target_time)
 {
   _target_time = target_time;
-}
-
-void
-Transient::forceOutput()
-{
-  _problem.output(true);
-  _problem.outputPostprocessors(true);
-  _problem.outputRestart(true);
 }
 
 Real

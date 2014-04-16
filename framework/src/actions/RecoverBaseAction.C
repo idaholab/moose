@@ -52,8 +52,7 @@ RecoverBaseAction::act()
   if (_app.isRecovering())
   {
     // If this is the case then we need to find the newest recovery file.
-    if (_app.getRecoverFileBase().empty()) // && _app.hasLegacyOutput())
-    {
+    if (_app.getRecoverFileBase().empty()){
       if (!_pars.isParamValid("file_base"))
         mooseError("\"Output/file_base\" must be valid if no recovery file is specified!");
 

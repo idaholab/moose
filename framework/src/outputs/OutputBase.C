@@ -57,7 +57,7 @@ InputParameters validParams<OutputBase>()
   // Enable sequential file output
   params.addParam<bool>("sequence", "Enable/disable sequential file output (enable by default when 'use_displace = true', otherwise defaults to false");
 
-  // Control for outputing elemental variables as nodal variables
+  // Control for outputting elemental variables as nodal variables
   params.addParam<bool>("elemental_as_nodal", false, "Output elemental nonlinear variables as nodal");
   params.addParam<bool>("scalar_as_nodal", false, "Output scalar variables as nodal");
 
@@ -218,7 +218,7 @@ OutputBase::timestepSetupInternal()
 void
 OutputBase::outputInitial()
 {
-  // Do Nothing if output is not force or if output is disallowed
+  // Do Nothing if output is not forced or if output is disallowed
   if (!_force_output && !_allow_output)
     return;
 
@@ -249,6 +249,7 @@ OutputBase::outputInitial()
 
   // Set the force output flag to false
   _force_output = false;
+  _output_initial = false;
 }
 
 void

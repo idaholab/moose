@@ -24,6 +24,7 @@
 // Forward declarations
 class OutputBase;
 class Checkpoint;
+class FEProblem;
 
 /**
  * Class for storing and utilizing output objects
@@ -55,7 +56,7 @@ public:
    * Get a complete list of all output objects
    * @return A vector of pointers to each of the output objects
    */
-  const std::vector<OutputBase *> & getOutputs();
+  const std::vector<OutputBase *> & getOutputs() const;
 
   /**
    * Returns true if the output object exists
@@ -101,7 +102,7 @@ public:
   /**
    * Calls the setFileNumber method for every FileOutputter output object
    */
-  void setFileNumbers(std::map<std::string, unsigned int> input);
+  void setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset = 0);
 
   /**
    * Extracts the file numbers from the outputters
@@ -128,6 +129,9 @@ public:
    */
   std::set<Real> & getSyncTimes();
 
+  /**
+   * Call the init() method for each of the Outputters
+   */
   void init();
 
 private:
@@ -155,11 +159,14 @@ private:
   /// The list of all output objects
   std::vector<OutputBase *> _object_ptrs;
 
+  /// A map of the output pointers
+  std::map<std::string, OutputBase *> _object_map;
+
   /// List of object names
   std::set<OutFileBase> _filenames;
 
-  /// List of output names
-  std::set<std::string> _output_names;
+  /// List of output object names
+  std::set<std::string> _object_names;
 
   /// Pointer to the common InputParameters (@see CommonOutputAction)
   InputParameters * _common_params_ptr;
@@ -173,9 +180,8 @@ private:
   /// Input file name for this output object
   std::string _input_file_name;
 
-  // Allow complete access to
+  // Allow complete access to FEProblem for calling initial/timestepSetup functions
   friend class FEProblem;
-  friend class TransientMultiApp;
 };
 
 #endif // OUTPUTWAREHOUSE_H

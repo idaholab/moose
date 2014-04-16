@@ -20,7 +20,6 @@
 #include "UserObject.h"
 #include "FEProblem.h"
 #include "OutputWarehouse.h"
-#include "Output.h"
 #include "AppFactory.h"
 #include "MooseUtils.h"
 
@@ -76,9 +75,9 @@ InputParameters validParams<MultiApp>()
 
   params.addParam<bool>("output_in_position", false, "If true this will cause the output from the MultiApp to be 'moved' by its position vector");
 
-  params.addParam<Real>("reset_time", std::numeric_limits<Real>::max(), "The time at which to reset Apps given by the 'reset_apps' parameter.  Reseting an App means that it is destroyed and recreated, possibly modeling the insertion of 'new' material for that app.");
+  params.addParam<Real>("reset_time", std::numeric_limits<Real>::max(), "The time at which to reset Apps given by the 'reset_apps' parameter.  Resetting an App means that it is destroyed and recreated, possibly modeling the insertion of 'new' material for that app.");
 
-  params.addParam<std::vector<unsigned int> >("reset_apps", "The Apps that will be reset when 'reset_time' is hit.  These are the App 'numbers' starting with 0 corresponding to the order of the App positions.  Reseting an App means that it is destroyed and recreated, possibly modeling the insertion of 'new' material for that app.");
+  params.addParam<std::vector<unsigned int> >("reset_apps", "The Apps that will be reset when 'reset_time' is hit.  These are the App 'numbers' starting with 0 corresponding to the order of the App positions.  Resetting an App means that it is destroyed and recreated, possibly modeling the insertion of 'new' material for that app.");
 
   params.addParam<Real>("move_time", std::numeric_limits<Real>::max(), "The time at which Apps designated by move_apps are moved to move_positions.");
 
@@ -155,9 +154,11 @@ MultiApp::init()
 
     _positions.reserve(num_values / LIBMESH_DIM);
 
-    for(unsigned int i=0; i<num_values; i+=3)
+    for (unsigned int i = 0; i < num_values; i += 3)
       _positions.push_back(Point(_positions_vec[i], _positions_vec[i+1], _positions_vec[i+2]));
+
   }
+
   else
     mooseError("Must supply either 'positions' or 'positions_file' for MultiApp "<<_name);
 
@@ -317,12 +318,16 @@ MultiApp::resetApp(unsigned int global_app, Real time)
   if (hasLocalApp(global_app))
   {
     unsigned int local_app = globalAppToLocal(global_app);
+
+    // Extract the file numbers from the output, so that the numbering is maintained after reset
+    std::map<std::string, unsigned int> m = _apps[local_app]->getOutputWarehouse().getFileNumbers();
+
+    // Delete and create a new App
     delete _apps[local_app];
     createApp(local_app, time);
 
-    // We do this to force it to write a new output file \todo{Remove, the new system "handles" this above}
-    if (_apps[local_app]->hasLegacyOutput())
-      _apps[local_app]->setOutputPosition(_positions[global_app]);
+    // Reset the file numbers of the newly reset apps
+    _apps[local_app]->getOutputWarehouse().setFileNumbers(m);
   }
 
   // Swap back
@@ -332,6 +337,7 @@ MultiApp::resetApp(unsigned int global_app, Real time)
 void
 MultiApp::moveApp(unsigned int global_app, Point p)
 {
+
   _positions[global_app] = p;
 
   if (hasLocalApp(global_app))
@@ -347,15 +353,8 @@ void
 MultiApp::parentOutputPositionChanged()
 {
   if (getParam<bool>("output_in_position"))
-  {
-    Point parent_position = _app.getOutputPosition();
-
-    for(unsigned int i=0; i<_apps.size(); i++)
-    {
-      MooseApp * app = _apps[i];
-      app->setOutputPosition(parent_position + _positions[_first_local_app + i]);
-    }
-  }
+    for (unsigned int i = 0; i < _apps.size(); i++)
+      _apps[i]->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
 }
 
 void
@@ -377,22 +376,13 @@ MultiApp::createApp(unsigned int i, Real start_time)
   /* The following file_base needs to be improved (see #2554) */
   // Create an output base by taking the output base of the master problem and appending
   // the name of the multiapp + a number to it
-  if (_app.hasLegacyOutput())
-  {
-    if (_fe_problem)
-      output_base << _fe_problem->out().fileBase() << "_" ;
-  }
-
+  if (!_app.getOutputFileBase().empty())
+    output_base << _app.getOutputFileBase() + "_";
   else
   {
-    if (!_app.getOutputFileBase().empty())
-      output_base << _app.getOutputFileBase() + "_";
-    else
-    {
-      std::string base = _app.getFileName();
-      size_t pos = base.find_last_of('.');
-      output_base << base.substr(0, pos) + "_out_";
-    }
+    std::string base = _app.getFileName();
+    size_t pos = base.find_last_of('.');
+    output_base << base.substr(0, pos) + "_out_";
   }
 
   // Append the sub app name to the output file base
@@ -403,29 +393,13 @@ MultiApp::createApp(unsigned int i, Real start_time)
               << std::right
               << _first_local_app + i;
 
-  // Propogate the output file numbers
-  /* The file numbering propogates from parent app to sub app, however one condition must
-   * be satisfied: The Outputs blocks in both the master and sub input files must contained
-   * similarily named blocks. That is both must contain outputters with the same name, if
-   * the input files are using the short-cut notation (exodus = true) then this condition is
-   * automatically satisified.
-   */
-  std::map<std::string, unsigned int> m;
-  if (!_app.getOutputFileNumbers().empty())
-    m = _app.getOutputFileNumbers();
-  else
-    m = _app.getOutputWarehouse().getFileNumbers();
-
   app->setGlobalTimeOffset(start_time);
   app->setInputFileName(input_file);
   app->setOutputFileBase(output_base.str());
-  app->setOutputFileNumbers(m);
+  app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
 
   if (getParam<bool>("output_in_position"))
-  {
-    Point parent_position = _app.getOutputPosition();
-    app->setOutputPosition(parent_position + _positions[_first_local_app + i]);
-  }
+    app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
 
   app->setupOptions();
   app->runInputFile();

@@ -65,47 +65,6 @@ public:
 
   virtual void init() = 0;
 
-  // Output system /////
-  virtual void output(bool force = false) = 0;
-
-  /**
-   * Whether or not to color output to the terminal.
-   * @param state Pass true for color, false to not color.
-   */
-  void setColorOutput(bool state) { _color_output = state; }
-
-  /**
-   * Return the current status of whether or not to color terminal output.
-   */
-  bool shouldColorOutput() const { return _color_output; }
-
-  /**
-   * Returns a character string to produce a specific color in terminals supporting
-   * color. The list of color constants is available in XTermConstants.h
-   * @param color (from XTermConstants.h)
-   * @param text The text which will be printed in color
-   */
-  template <typename T>
-  std::string colorText(std::string color, T text) const
-  {
-    if (_color_output)
-    {
-
-#if !defined(__INTEL_COMPILER)
-      if (_cli_option_found && color.length() == 5 && color[3] == '2')
-        color.replace(3, 1, "5", 1);
-#endif
-      return MooseUtils::colorText<T>(color, text);
-    }
-
-    else
-    {
-      std::ostringstream oss;
-      oss << text;
-      return oss.str();
-    }
-  }
-
   /**
    * For Internal Use
    */
