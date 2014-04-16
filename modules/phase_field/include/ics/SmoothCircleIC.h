@@ -43,6 +43,7 @@ public:
 
 protected:
 
+  MooseMesh & _mesh;
   Real _x1;
   Real _y1;
   Real _z1;

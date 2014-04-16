@@ -21,6 +21,7 @@ InputParameters validParams<SmoothCircleIC>()
 SmoothCircleIC::SmoothCircleIC(const std::string & name,
                                InputParameters parameters)
   :InitialCondition(name, parameters),
+   _mesh(_fe_problem.mesh()),
    _x1(parameters.get<Real>("x1")),
    _y1(parameters.get<Real>("y1")),
    _z1(parameters.get<Real>("z1")),
@@ -39,24 +40,27 @@ SmoothCircleIC::value(const Point & p)
 {
   Real value = 0.0;
 
-  Real rad = 0.0;
-
   if (_num_dim < 1) //Loop dimension never initialized
     mooseError("Loop dimension in SmoothCircleIC was never initialized");
 
-  for(unsigned int i=0; i<_num_dim; i++)
-    rad += (p(i)-_center(i)) * (p(i)-_center(i));
-
-  rad = sqrt(rad);
-
-  if (rad <= _radius - _int_width/2.0)
+  //determine distance between current point and circle center
+  Point p2 = p;
+  Point center2 = _center;
+  if (!_3D_spheres) //Create 3D cylinders instead of spheres
+  {
+    p2(2) = 0.0;
+    center2(2) = 0.0;
+  }
+  Real rad = _mesh.minPeriodicDistance(_var.number(),p2,center2);
+  //Set value for outside the circle, inside the circle, and on the smooth interface
+  if (rad <= _radius - _int_width/2.0) //Inside circle
     value = _invalue;
-  else if (rad < _radius + _int_width/2.0)
+  else if (rad < _radius + _int_width/2.0) //Smooth interface
   {
     Real int_pos = (rad - _radius + _int_width/2.0)/_int_width;
     value = _outvalue + (_invalue-_outvalue)*(1+cos(int_pos*libMesh::pi))/2.0;
   }
-  else
+  else //Outside circle
     value = _outvalue;
 
   return value;
@@ -69,21 +73,24 @@ SmoothCircleIC::gradient(const Point & p)
 {
   Real DvalueDr = 0.0;
 
-  Real rad = 0.0;
-
-  for(unsigned int i=0; i<_num_dim; i++)
-    rad += (p(i)-_center(i)) * (p(i)-_center(i));
-
-  rad = sqrt(rad);
-
+  //determine distance between current point and circle center
+  Point p2 = p;
+  Point center2 = _center;
+  if (!_3D_spheres) //Create 3D cylinders instead of spheres
+  {
+    p2(2) = 0.0;
+    center2(2) = 0.0;
+  }
+  Real rad = _mesh.minPeriodicDistance(_var.number(),p2,center2);
+  //Determine derivative values over the smooth interface
   if (rad < _radius + _int_width/2.0 && rad > _radius - _int_width/2.0)
   {
     Real int_pos = (rad - _radius + _int_width/2.0)/_int_width;
     Real Dint_posDr = 1.0/_int_width;
     DvalueDr = Dint_posDr*(_invalue-_outvalue)*(-sin(int_pos*libMesh::pi)*libMesh::pi)/2.0;
   }
-
-  if (rad != 0.0)
+  //Set gradient over the smooth interface
+  if (rad != 0)
     return Gradient((p(0) - _center(0))*DvalueDr/rad,
                     (p(1) - _center(1))*DvalueDr/rad,
                     (p(2) - _center(2))*DvalueDr/rad);
@@ -91,8 +98,3 @@ SmoothCircleIC::gradient(const Point & p)
     return Gradient(0.0,0.0,0.0);
 
 }
-
-
-
-
-
