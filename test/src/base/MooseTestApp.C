@@ -51,6 +51,8 @@
 #include "FDDiffusion.h"
 #include "FDAdvection.h"
 #include "MaterialEigenKernel.h"
+#include "PHarmonic.h"
+#include "PMassEigenKernel.h"
 
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
@@ -249,6 +251,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(FDDiffusion);
   registerKernel(FDAdvection);
   registerKernel(MaterialEigenKernel);
+  registerKernel(PHarmonic);
+  registerKernel(PMassEigenKernel);
 
   // Aux kernels
   registerAux(CoupledAux);

@@ -5,6 +5,8 @@ InputParameters validParams<VarCouplingMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("var", "The variable to be coupled in");
+  params.addParam<Real>("base", 0.0, "The baseline of the property");
+  params.addParam<Real>("coef", 1.0, "The linear coefficient of the coupled var");
   return params;
 }
 
@@ -12,6 +14,8 @@ InputParameters validParams<VarCouplingMaterial>()
 VarCouplingMaterial::VarCouplingMaterial(const std::string & name, InputParameters parameters) :
     Material(name, parameters),
     _var(coupledValue("var")),
+    _base(getParam<Real>("base")),
+    _coef(getParam<Real>("coef")),
     _diffusion(declareProperty<Real>("diffusion"))
 {
 }
@@ -19,5 +23,5 @@ VarCouplingMaterial::VarCouplingMaterial(const std::string & name, InputParamete
 void
 VarCouplingMaterial::computeQpProperties()
 {
-  _diffusion[_qp] = _var[_qp];
+  _diffusion[_qp] = _base + _coef * _var[_qp];
 }

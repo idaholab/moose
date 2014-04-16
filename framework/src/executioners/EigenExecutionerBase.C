@@ -46,10 +46,7 @@ EigenExecutionerBase::EigenExecutionerBase(const std::string & name, InputParame
      _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
                     : getPostprocessorValue("bx_norm")), // use |Bx| for normalization by default
      _run_custom_uo(getParam<bool>("evaluate_custom_uo")),
-     _sys_sol_old(NULL),
-     _sys_sol_older(NULL),
-     _aux_sol_old(NULL),
-     _aux_sol_older(NULL)
+     _consistency_tolerance(1e-12)
 {
   _eigenvalue = 1.0;
 
@@ -114,20 +111,25 @@ EigenExecutionerBase::init()
   else
     _norm_execflag = _bx_execflag;
 
-  // scale the solution so that the postprocessor is equal to one
-  // FIXME: we need to update all dependent auxilary variables.
-  //        Has been taken care of by problem initial setup? so simply comment out the following line
-  _problem.computeUserObjects(_bx_execflag);
-  if (_source_integral==0.0) mooseError("|Bx| cannot be zero for the inverse power method");
-  _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, _eigenvalue/_source_integral);
-  // update all aux variables
-  for (unsigned int i=0; i<Moose::exec_types.size(); i++)
+  // Scale the solution so that the postprocessor is equal to one.
+  // We have a fix point loop here, in case the postprocessor is a nonlinear function of the scaling factor.
+  // FIXME: We have assumed this loop always converges.
+  while(std::fabs(_eigenvalue-_source_integral)>_consistency_tolerance/10.0*std::fabs(_eigenvalue))
   {
-    _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::PRE_AUX);
-    _problem.computeAuxiliaryKernels(Moose::exec_types[i]);
-    _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::POST_AUX);
+    // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
+    if (_source_integral==0.0) mooseError("|Bx| cannot be zero for the inverse power method");
+    _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, _eigenvalue/_source_integral);
+    // update all aux variables
+    for (unsigned int i=0; i<Moose::exec_types.size(); i++)
+    {
+      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::PRE_AUX);
+      _problem.computeAuxiliaryKernels(Moose::exec_types[i]);
+      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::POST_AUX);
+    }
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(10) << _source_integral;
+    Moose::out << " |Bx_0| = " << ss.str() << std::endl;
   }
-  Moose::out << " |Bx_0| = " << _source_integral << std::endl;
 
   /* a time step check point */
   _problem.onTimestepEnd();
@@ -193,18 +195,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // FIXME: currently power iteration use old and older solutions,
   // so save old and older solutions before they are changed by the power iteration
-  if (!_sys_sol_old)
-    _sys_sol_old= &_eigen_sys.addVector("save_flux_old", false, PARALLEL);
-  if (!_aux_sol_old)
-    _aux_sol_old = &_problem.getAuxiliarySystem().addVector("save_aux_old",  false, PARALLEL);
-  if (!_sys_sol_older)
-    _sys_sol_older = &_eigen_sys.addVector("save_flux_older", false, PARALLEL);
-  if (!_aux_sol_older)
-    _aux_sol_older = &_problem.getAuxiliarySystem().addVector("save_aux_older",  false, PARALLEL);
-  *_sys_sol_old   = _eigen_sys.solutionOld();
-  *_sys_sol_older = _eigen_sys.solutionOlder();
-  *_aux_sol_old   = _problem.getAuxiliarySystem().solutionOld();
-  *_aux_sol_older = _problem.getAuxiliarySystem().solutionOlder();
+  _eigen_sys.saveOldSolutions();
 
   // _es.parameters.print(Moose::out);
   // save solver control parameters to be modified by the power iteration
@@ -232,6 +223,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // power iteration loop...
   // Note: |Bx|/k will stay constant one!
+  if (std::fabs(k-_source_integral)>_consistency_tolerance*std::fabs(k))
+    mooseError("Solution has to be initialized to make |Bx|=k_0!");
   while (true)
   {
     // important: solutions of aux system is also copied
@@ -317,9 +310,12 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
       Moose::out.precision(pcs);
     }
 
+    // increment iteration number here
+    iter++;
+
     if (cheb_on)
     {
-      chebyshev(iter+1);
+      chebyshev(iter);
       if (echo)
         Moose::out << "Power iteration= "<< iter
                   << " Chebyshev step: " << chebyshev_parameters.icheb << std::endl;
@@ -331,9 +327,6 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     if (echo)
       Moose::out << " ________________________________________________________________________________ "
                 << std::endl;
-
-    // increment iteration number here
-    iter++;
 
     // not perform any convergence check when number of iterations is less than min_iter
     if (iter>=min_iter)
@@ -369,10 +362,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   _problem.es().parameters.set<unsigned int>("nonlinear solver maximum iterations") = num1;
 
   //FIXME: currently power iteration use old and older solutions, so restore them
-  _eigen_sys.solutionOld() = *_sys_sol_old;
-  _eigen_sys.solutionOlder() = *_sys_sol_older;
-  _problem.getAuxiliarySystem().solutionOld() = *_aux_sol_old;
-  _problem.getAuxiliarySystem().solutionOlder() = *_aux_sol_older;
+  _eigen_sys.restoreOldSolutions();
 }
 
 void
@@ -541,6 +531,8 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   PostprocessorName bxp = getParam<PostprocessorName>("bx_norm");
   if ( _problem.getUserObject<UserObject>(bxp).execFlag() != EXEC_RESIDUAL)
     mooseError("rhs postprocessor for the nonlinear eigenvalue solve must be executed on residual");
+  if (std::fabs(k-_source_integral)>_consistency_tolerance*std::fabs(k))
+    mooseError("Solution has to be initialized to make |Bx|=k_0!");
 
   // turn on nonlinear flag so that RHS kernels opterate on the current solutions
   _eigen_sys.eigenKernelOnCurrent();
