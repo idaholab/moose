@@ -88,6 +88,16 @@ public:
    */
   const std::set<VariableName> & getEigenVariableNames() const { return _eigen_var_names; }
 
+  /**
+   * Save the old solutions
+   */
+  void saveOldSolutions();
+
+  /**
+   * Restore the old solutions
+   */
+  void restoreOldSolutions();
+
 protected:
 
   std::set<VariableName> _eigen_var_names;
@@ -95,6 +105,13 @@ protected:
   std::set<dof_id_type> _eigen_var_indices;
 
   bool _active_on_old;
+
+  // Used for saving old solutions so that they wont be accidentally changed
+  // FIXME: can be removed in the future when STEP is available.
+  NumericVector<Real> * _sys_sol_old;
+  NumericVector<Real> * _sys_sol_older;
+  NumericVector<Real> * _aux_sol_old;
+  NumericVector<Real> * _aux_sol_older;
 };
 
 #endif /* EIGENSYSTEM_H */

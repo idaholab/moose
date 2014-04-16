@@ -5,6 +5,7 @@ InputParameters validParams<DiffMKernel>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<std::string>("mat_prop", "the name of the material property we are going to use");
+  params.addParam<Real>("offset", 4.0, "Offset on residual evaluation");
   return params;
 }
 
@@ -12,14 +13,15 @@ InputParameters validParams<DiffMKernel>()
 DiffMKernel::DiffMKernel(const std::string & name, InputParameters parameters)
   : Kernel(name, parameters),
     _prop_name(getParam<std::string>("mat_prop")),
-    _diff(getMaterialProperty<Real>(_prop_name))
+    _diff(getMaterialProperty<Real>(_prop_name)),
+    _offset(getParam<Real>("offset"))
 {
 }
 
 Real
 DiffMKernel::computeQpResidual()
 {
-  return _diff[_qp] * _grad_test[_i][_qp] * _grad_u[_qp] - 4.0;
+  return _diff[_qp] * _grad_test[_i][_qp] * _grad_u[_qp] - _offset;
 }
 
 Real
