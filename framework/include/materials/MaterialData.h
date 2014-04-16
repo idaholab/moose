@@ -73,11 +73,6 @@ public:
   template<typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
 
-  /* Non-templated property routines */
-  bool have_property_name(const std::string & prop_name) const;
-  bool have_property_name_old(const std::string & prop_name) const;
-  bool have_property_name_older(const std::string & prop_name) const;
-
   // material properties for given element (and possible side)
   void swap(const Elem & elem, unsigned int side = 0);
   // Reinit material properties for given element (and possible side)
