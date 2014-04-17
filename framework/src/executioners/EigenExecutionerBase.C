@@ -378,15 +378,23 @@ EigenExecutionerBase::postStep()
 Real
 EigenExecutionerBase::normalizeSolution(bool force)
 {
-  if (force) _problem.computeUserObjects(_norm_execflag);
+  if (force)
+  {
+    _problem.computeUserObjects(_norm_execflag);
+    _problem.computeAuxiliaryKernels(_norm_execflag);
+    _problem.computeUserObjects(_norm_execflag, UserObjectWarehouse::POST_AUX);
+  }
+
   Real factor;
   if (isParamValid("normal_factor"))
     factor = getParam<Real>("normal_factor");
   else
     factor = _eigenvalue;
-  Real scaling = _normalization/factor;
+  Real scaling = factor/_normalization;
+
   if (scaling != 1.0)
   {
+    //FIXME: we assume linear scaling here!
     _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, scaling);
     // update all aux variables and user objects
     for (unsigned int i=0; i<Moose::exec_types.size(); i++)
