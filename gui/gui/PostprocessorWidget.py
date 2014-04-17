@@ -110,7 +110,7 @@ class PostprocessorWidget(QtGui.QWidget):
     get the file name of the csv file
     '''
     output_item = ''
-    output_items = self.input_file_widget.tree_widget.findItems("Output", QtCore.Qt.MatchExactly)
+    output_items = self.input_file_widget.tree_widget.findItems("Outputs", QtCore.Qt.MatchExactly)
     if len(output_items) > 0:
       output_item = output_items[0]
     cwd = str(self.execute_widget.cwd_text.text())

@@ -36,9 +36,9 @@ def mergeLists(master, slave):
 
 
 if __name__ == '__main__':
-  input = ['Variables','Functions','Kernels','BCs','Executioner','Output','Outputs']
+  input = ['Variables','Functions','Kernels','BCs','Executioner','Outputs']
 #  input = []
-  template = ['Variables','AuxVariables','Kernels','AuxKernels','BCs','AuxBCs','Postprocessors','Executioner','Output','Outputs']
+  template = ['Variables','AuxVariables','Kernels','AuxKernels','BCs','AuxBCs','Postprocessors','Executioner','Outputs']
 #  template = ['Variables','AuxVariables']
 #  template = []
   mergeLists(input, template)
