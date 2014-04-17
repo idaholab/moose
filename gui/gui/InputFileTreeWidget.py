@@ -124,7 +124,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       return None
 
   def getOutputItemData(self):
-    output_item = self.findChildItemWithName(self, 'Output')
+    output_item = self.findChildItemWithName(self, 'Outputs')
     data = None
     try:
       return output_item.table_data
