@@ -43,6 +43,7 @@ InitialCondition::InitialCondition(const std::string & name, InputParameters par
     DependencyResolverInterface(),
     Restartable(name, parameters, "InitialConditions"),
     ZeroInterface(parameters),
+    MaterialPropertyInterface(parameters),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(getParam<THREAD_ID>("_tid")),
