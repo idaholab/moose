@@ -25,6 +25,8 @@
 #include "DependencyResolverInterface.h"
 #include "BoundaryRestrictable.h"
 #include "ZeroInterface.h"
+#include "MaterialPropertyInterface.h"
+
 // System includes
 #include <string>
 
@@ -55,7 +57,8 @@ class InitialCondition :
   public BoundaryRestrictable,
   public DependencyResolverInterface,
   public Restartable,
-  public ZeroInterface
+  public ZeroInterface,
+  public MaterialPropertyInterface
 {
 public:
   /**

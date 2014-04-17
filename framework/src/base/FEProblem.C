@@ -1382,6 +1382,8 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
         for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
         {
           parameters.set<THREAD_ID>("_tid") = tid;
+          parameters.set<MaterialData *>("_material_data") = _material_data[tid];
+
           for (unsigned int i = 0; i < boundaries.size(); i++)
           {
             BoundaryID bnd_id = _mesh.getBoundaryID(boundaries[i]);
@@ -1399,6 +1401,8 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
       for(unsigned int tid=0; tid < libMesh::n_threads(); tid++)
       {
         parameters.set<THREAD_ID>("_tid") = tid;
+        parameters.set<MaterialData *>("_material_data") = _material_data[tid];
+
         if (blocks.size() > 0)
           for (unsigned int i = 0; i < blocks.size(); i++)
           {
@@ -1420,6 +1424,7 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
     for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
+      parameters.set<MaterialData *>("_material_data") = _material_data[tid];
       _ics[tid].addScalarInitialCondition(var_name, static_cast<ScalarInitialCondition *>(_factory.create(ic_name, name, parameters)));
     }
   }
