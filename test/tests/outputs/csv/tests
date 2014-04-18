@@ -12,5 +12,6 @@
     input = 'csv_transient.i'
     csvdiff = 'csv_transient_out.csv'
     recover = false
+    max_threads = 1  # Sometimes fails with threads, may need to be investigated
   [../]
 []

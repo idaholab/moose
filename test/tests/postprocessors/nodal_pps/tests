@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'nodal_nodeset_pps_test.i'
     exodiff = 'nodal_nodeset_pps_test_out.e'
+    max_threads = 1 # Issue 2370
   [../]
 
   [./nodal_extreme]
