@@ -6,9 +6,9 @@ InputParameters validParams<PFCRFFEnergyDensity>()
 {
    InputParameters params = validParams<AuxKernel>();
    params.addRequiredCoupledVar( "v", "Array of coupled variables" );
-   params.addParam( "a", 1.0, "Modified Coefficent in Taylor Series Expanstion");
-   params.addParam( "b", 1.0, "Modified Coefficent in Taylor Series Expanstion");
-   params.addParam( "c", 1.0, "Modified Coefficent in Taylor Series Expanstion");
+   params.addParam<Real>( "a", 1.0, "Modified Coefficent in Taylor Series Expanstion");
+   params.addParam<Real>( "b", 1.0, "Modified Coefficent in Taylor Series Expanstion");
+   params.addParam<Real>( "c", 1.0, "Modified Coefficent in Taylor Series Expanstion");
 
    return params;
 }
