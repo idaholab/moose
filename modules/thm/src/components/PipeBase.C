@@ -8,7 +8,7 @@ template<>
 InputParameters validParams<PipeBase>()
 {
   InputParameters params = validParams<GeometricalComponent>();
-  params.addParam("component_type", PipeBase::_type, "The type of the component");
+  params.addParam<std::string>("component_type", PipeBase::_type, "The type of the component");
   //Input parameters [NO] default values should be given.
 
   return params;
