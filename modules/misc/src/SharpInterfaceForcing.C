@@ -6,7 +6,7 @@ InputParameters validParams<SharpInterfaceForcing>()
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<FunctionName>("x_center", "The parametric x center of the forcing function");
   params.addRequiredParam<FunctionName>("y_center", "The parametric y center of the forcing function");
-  params.addParam("amplitude", 1.0, "The amplitude of the forcing function");
+  params.addParam<Real>("amplitude", 1.0, "The amplitude of the forcing function");
   return params;
 }
 

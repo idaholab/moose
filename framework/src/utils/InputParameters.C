@@ -380,7 +380,6 @@ InputParameters::addParamNamesToGroup(const std::string &space_delim_names, cons
 
 }
 
-
 std::vector<std::string>
 InputParameters::getSyntax(const std::string &name)
 {
@@ -396,16 +395,6 @@ InputParameters::getGroupName(const std::string &param_name) const
     return it->second;
   else
     return std::string();
-}
-
-void
-InputParameters::addPostprocessor(const std::string & name, Real default_value, const std::string &doc_string)
-{
-  // Add the postprocessor name parameter in traditional manner
-  addParam<PostprocessorName>(name, doc_string);
-
-  // Store the default value
-  _default_postprocessor_value[name] = default_value;
 }
 
 PostprocessorValue &

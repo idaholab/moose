@@ -118,8 +118,8 @@ public:
    * is not found in the input file.  The second method will leave the parameter uninitialized
    * but can be checked with "isParamValid" before use
    */
-  template <typename T>
-  void addParam(const std::string &name, const T & value, const std::string &doc_string);
+  template <typename T, typename S>
+  void addParam(const std::string &name, const S & value, const std::string &doc_string);
   template <typename T>
   void addParam(const std::string &name, const std::string &doc_string);
 
@@ -133,17 +133,6 @@ public:
   void addRangeCheckedParam(const std::string &name, const T & value, const std::string &parsed_function, const std::string &doc_string);
   template <typename T>
   void addRangeCheckedParam(const std::string &name, const std::string &parsed_function, const std::string &doc_string);
-
-  /**
-   * Method for adding a input parameter that expects a postprocessor name, but provides a default value
-   * in the case where the postprocessor name provided is not valid or not provided.
-   * @param name The name of the input file parameter that is expecting a PostprocessorName
-   * @param default_value The default value to use in the case that the postprocessor does not exist
-   * @param doc_string Documentation string for this parameter
-   *
-   * This parameter works with the PostprocessorInterface to return the default value when getPostprocessorValue is called
-   */
-  void addPostprocessor(const std::string & name, Real default_value, const std::string & doc_string);
 
   /**
    * These methods add an option parameter and with a customer type to the InputParameters object.  The custom
@@ -450,6 +439,10 @@ private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
 
+  /// This method is called when adding a Parameter with a default value, can be specialzed for non-matching types
+  template <typename T, typename S>
+  void setParamHelper(const std::string &name, T &l_value, const S &r_value);
+
   /// The documentation strings for each parameter
   std::map<std::string, std::string> _doc_string;
 
@@ -576,14 +569,17 @@ InputParameters::addRequiredParam(const std::string & /*name*/, const T & /*valu
   mooseError("You cannot call addRequiredParam and supply a default value for this type, please use addParam instead");
 }
 
-template <typename T>
+template <typename T, typename S>
 void
-InputParameters::addParam(const std::string &name, const T &value, const std::string &doc_string)
+InputParameters::addParam(const std::string &name, const S &value, const std::string &doc_string)
 {
   checkConsistentType<T>(name);
 
-  InputParameters::set<T>(name) = value;                    // valid parameter is set by set_attributes
+  T & l_value = InputParameters::set<T>(name);
   _doc_string[name] = doc_string;
+
+  // Set the parameter now
+  setParamHelper(name, l_value, value);
 }
 
 template <typename T>
@@ -594,6 +590,13 @@ InputParameters::addParam(const std::string &name, const std::string &doc_string
 
   InputParameters::insert<T>(name);
   _doc_string[name] = doc_string;
+}
+
+template <typename T, typename S>
+void
+InputParameters::setParamHelper(const std::string & /*name*/, T &l_value, const S &r_value)
+{
+  l_value = r_value;
 }
 
 template <typename T>
@@ -776,6 +779,16 @@ void
 InputParameters::addParam<std::vector<MooseEnum> >(const std::string & /*name*/, const std::string & /*doc_string*/)
 {
   mooseError("You must supply a vector of MooseEnum object(s) when using addParam, even if the parameter is not required!");
+}
+
+// Specialization for setParamHelper
+template<>
+inline
+void
+InputParameters::setParamHelper<PostprocessorName, Real>(const std::string &name, PostprocessorName &l_value, const Real &r_value)
+{
+  // Store the default value
+  _default_postprocessor_value[name] = r_value;
 }
 
 InputParameters emptyInputParameters();
