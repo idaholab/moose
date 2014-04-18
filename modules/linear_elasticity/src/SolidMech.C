@@ -5,7 +5,7 @@ InputParameters validParams<SolidMech>()
 {
   InputParameters params = validParams<Kernel>();
   params.set<bool>("use_displaced_mesh") = false;
-  params.addParam("constant_properties", false, "Whether or not some optimizations can be made because the properties are going to be constant on each subdomain.  Note that they can still change from one subdomain to the next.");
+  params.addParam<bool>("constant_properties", false, "Whether or not some optimizations can be made because the properties are going to be constant on each subdomain.  Note that they can still change from one subdomain to the next.");
 
   return params;
 }
