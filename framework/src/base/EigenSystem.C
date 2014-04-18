@@ -50,7 +50,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
         parameters.set<bool>("implicit") = true;
         EigenKernel *ekernel = static_cast<EigenKernel *>(_factory.create(kernel_name, name, parameters));
         mooseAssert(ekernel != NULL, "Not an EigenKernel object");
-        _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
+        markEigenVariable(parameters.get<NonlinearVariableName>("variable"));
         // Extract the SubdomainIDs from the object (via BlockRestrictable class)
         std::set<SubdomainID> blk_ids = ekernel->blockIDs();
         _kernels[tid].addKernel(ekernel, blk_ids);
@@ -81,6 +81,12 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
       _fe_problem._objects_by_name[tid][name].push_back(kernel);
     }
   }
+}
+
+void
+EigenSystem::markEigenVariable(const VariableName & var_name)
+{
+  _eigen_var_names.insert(var_name);
 }
 
 void

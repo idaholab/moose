@@ -27,11 +27,17 @@ public:
 
   /**
    * Adds a kernel
-   * @param kernel_name The type of the kernel
-   * @param name The name of the kernel
-   * @param parameters Kernel parameters
+   * @param kernel_name The type of the kernel.
+   * @param name The name of the kernel.
+   * @param parameters Kernel parameters.
    */
   virtual void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Mark a variable as a variable of the eigen system
+   * @param var_name The name of the variable.
+   */
+  virtual void markEigenVariable(const VariableName & var_name);
 
   /**
    * System or kernel tags

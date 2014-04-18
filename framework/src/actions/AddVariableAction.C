@@ -21,6 +21,7 @@
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseEnum.h"
+#include "EigenSystem.h"
 
 // libMesh includes
 #include "libmesh/libmesh.h"
@@ -46,6 +47,7 @@ InputParameters validParams<AddVariableAction>()
   params.addParam<MooseEnum>("order", orders,  "Specifies the order of the FE shape function to use for this variable (additional orders not listed are allowed)");
   params.addParam<Real>("initial_condition", 0.0, "Specifies the initial condition for this variable");
   params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
+  params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
 
   // Advanced input options
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
@@ -95,6 +97,12 @@ AddVariableAction::act()
     // Non-block restricted variable
     else
       _problem->addVariable(var_name, _fe_type, scale_factor, &blocks);
+
+    if (getParam<bool>("eigen"))
+    {
+      EigenSystem & esys(static_cast<EigenSystem &>(_problem->getNonlinearSystem()));
+      esys.markEigenVariable(var_name);
+    }
   }
 
   // Set the initial condition

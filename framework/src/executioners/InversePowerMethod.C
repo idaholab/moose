@@ -71,7 +71,12 @@ InversePowerMethod::execute()
   _problem.onTimestepEnd();
   _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
   _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
-  if (_run_custom_uo) _problem.computeUserObjects(EXEC_CUSTOM);
+  if (_run_custom_uo)
+  {
+    _problem.computeUserObjects(EXEC_CUSTOM);
+    _problem.computeAuxiliaryKernels(EXEC_CUSTOM);
+    _problem.computeUserObjects(EXEC_CUSTOM, UserObjectWarehouse::POST_AUX);
+  }
 
   if (!getParam<bool>("output_on_final"))
   {
