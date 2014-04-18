@@ -73,13 +73,19 @@ InputFileFormatter::printParams(const std::string & /*prefix*/, const std::strin
     if (params.isPrivate(iter->first) || haveSeenIt(fully_qualified_name, iter->first))
       continue;
 
-    std::string value;
+    std::string value = "INVALID";
     if (params.isParamValid(iter->first))
     {
       // Print the parameter's value to a stringstream.
       std::ostringstream toss;
       iter->second->print(toss);
       value = MooseUtils::trim(toss.str());
+    }
+    else if (params.hasDefaultCoupledValue(iter->first))
+    {
+      std::ostringstream toss;
+      toss << params.defaultCoupledValue(iter->first);
+      value = toss.str();
     }
 
     // See if we match the search string
@@ -110,7 +116,7 @@ InputFileFormatter::printParams(const std::string & /*prefix*/, const std::strin
       oss << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
       size_t l_offset = 30;
 
-      if (!_dump_mode || params.isParamValid(iter->first))
+      if (!_dump_mode || value != "INVALID")
       {
         // If the value has spaces, surround it with quotes, otherwise no quotes
         if (value.find(' ') != std::string::npos)

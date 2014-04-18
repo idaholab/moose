@@ -19,7 +19,7 @@ InputParameters validParams<SlaveConstraint>()
   params.addRequiredParam<BoundaryName>("master", "The master boundary");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addRequiredCoupledVar("disp_x", "The x displacement");
-  params.addRequiredCoupledVar("disp_y", "The y displacement");
+  params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
@@ -43,7 +43,7 @@ SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters param
    _penalty(getParam<Real>("penalty")),
    _friction_coefficient(getParam<Real>("friction_coefficient")),
    _residual_copy(_sys.residualGhosted()),
-   _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
+   _x_var(coupled("disp_x")),
    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
    _mesh_dimension(_mesh.dimension()),
