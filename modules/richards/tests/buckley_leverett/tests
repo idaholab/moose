@@ -38,6 +38,10 @@
     exodiff = 'bl20_lumped.e'
     rel_err = 1E-2
     use_old_floor = True
+
+    # Need to investigate these restrictions
+    compiler = GCC
+    platform = LINUX
   [../]
   [./bl22_lumped]
     type = 'Exodiff'
