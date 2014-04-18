@@ -61,4 +61,10 @@
     exodiff = 'ne_coupled.e'
     abs_zero = 1e-09
   [../]
+  [./test_deficient_B_eigen]
+    type = 'Exodiff'
+    input = 'ne_deficient_b.i'
+    exodiff = 'ne_deficient_b.e'
+    abs_zero = 1e-09
+  [../]
 []
