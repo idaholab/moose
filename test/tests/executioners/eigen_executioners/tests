@@ -7,6 +7,7 @@
 # because convergence history is outputted in this test,
 # we have to use one processor due to the the preconditioner change.
     max_parallel = 1
+    recover = false
   [../]
   [./test_inverse_power_method_parallel]
     type = 'Exodiff'
@@ -16,6 +17,7 @@
 # because we only output the final solution, we can test with parallelization.
     cli_args = 'Executioner/output_on_final=true Outputs/file_base=ipm_final'
     rel_err = 5e-05
+    recover = false
   [../]
   [./test_nonlinear_eigen]
     type = 'Exodiff'
@@ -25,6 +27,7 @@
 # because convergence history is outputted in this test,
 # we have to use one processor due to the the preconditioner change.
     max_parallel = 1
+    recover = false
   [../]
   [./test_nonlinear_eigen_parallel]
     type = 'Exodiff'
@@ -33,6 +36,7 @@
     abs_zero = 1e-09
 # because we only output the final solution, we can test with parallelization.
     cli_args = 'Executioner/output_on_final=true Outputs/file_base=ne_final Postprocessors/udiff/outputs=console'
+    recover = false
   [../]
   [./test_nonlinear_eigen_material]
     type = 'Exodiff'
@@ -42,29 +46,34 @@
 # because convergence history is outputted in this test,
 # we have to use one processor due to the the preconditioner change.
     max_parallel = 1
+    recover = false
   [../]
   [./test_normal_eigenkernel]
     type = 'Exodiff'
     input = 'normal_eigen_kernel.i'
     exodiff = 'normal_eigen_kernel.e'
     abs_zero = 1e-09
+    recover = false
   [../]
   [./test_another_nonlinear_eigen]
     type = 'Exodiff'
     input = 'ane.i'
     exodiff = 'ane.e'
     abs_zero = 1e-09
+    recover = false
   [../]
   [./test_coupled_nonlinear_eigen]
     type = 'Exodiff'
     input = 'ne_coupled.i'
     exodiff = 'ne_coupled.e'
     abs_zero = 1e-09
+    recover = false
   [../]
   [./test_deficient_B_eigen]
     type = 'Exodiff'
     input = 'ne_deficient_b.i'
     exodiff = 'ne_deficient_b.e'
     abs_zero = 1e-09
+    recover = false
   [../]
 []

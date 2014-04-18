@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'picard_master.i'
     exodiff = 'picard_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
   [../]
 
   [./rel_tol]
