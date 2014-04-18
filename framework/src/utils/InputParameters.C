@@ -135,25 +135,23 @@ InputParameters::operator+=(const InputParameters &rhs)
 void
 InputParameters::addCoupledVar(const std::string &name, Real value, const std::string &doc_string)
 {
+  //std::vector<VariableName>(1, Moose::stringify(value)),
+  addParam<std::vector<VariableName> >(name, doc_string);
+  _coupled_vars.insert(name);
   _default_coupled_value[name] = value;
-
-  addCoupledVar(name, doc_string);
 }
 
 void
 InputParameters::addCoupledVar(const std::string &name, const std::string &doc_string)
 {
-  InputParameters::set<std::vector<VariableName> >(name);
-  _doc_string[name] = doc_string;
+  addParam<std::vector<VariableName> >(name, doc_string);
   _coupled_vars.insert(name);
 }
 
 void
 InputParameters::addRequiredCoupledVar(const std::string &name, const std::string &doc_string)
 {
-  InputParameters::insert<std::vector<VariableName> >(name);
-  _required_params.insert(name);
-  _doc_string[name] = doc_string;
+  addRequiredParam<std::vector<VariableName> >(name, doc_string);
   _coupled_vars.insert(name);
 }
 
@@ -289,6 +287,12 @@ InputParameters::checkParams(const std::string &prefix)
 
   if (!oss.str().empty())
     mooseError(oss.str());
+}
+
+bool
+InputParameters::hasDefaultCoupledValue(const std::string & coupling_name) const
+{
+  return _default_coupled_value.find(coupling_name) != _default_coupled_value.end();
 }
 
 void

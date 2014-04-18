@@ -385,6 +385,13 @@ public:
   }
 
   /**
+   * Return whether or not the requested parameter has a default coupled value.
+   *
+   * @param coupling_name The name of the coupling parameter to get the default value for.
+   */
+  bool hasDefaultCoupledValue(const std::string & coupling_name) const;
+
+  /**
    * Get the default value for an optionally coupled variable.
    *
    * @param coupling_name The name of the coupling parameter to get the default value for.
