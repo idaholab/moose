@@ -42,7 +42,10 @@ EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
       _eigenvalue = &getPostprocessorValueOldByName(_eigen_pp);
   }
   else
-    mooseAssert(_is_implicit, "EigenKernel on source problem should be implicit always");
+  {
+    _fe_problem.parameters().set<Real>("eigenvalue") = 1.0;
+    _eigenvalue = &_fe_problem.parameters().get<Real>("eigenvalue");
+  }
 }
 
 void
@@ -53,7 +56,7 @@ EigenKernel::computeResidual()
   _local_re.zero();
 
   Real one_over_eigen = 1.0;
-  if (_eigen) one_over_eigen /= *_eigenvalue;
+  one_over_eigen /= *_eigenvalue;
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpResidual();
@@ -78,7 +81,7 @@ EigenKernel::computeJacobian()
   _local_ke.zero();
 
   Real one_over_eigen = 1.0;
-  if (_eigen) one_over_eigen /= *_eigenvalue;
+  one_over_eigen /= *_eigenvalue;
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
