@@ -109,7 +109,7 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
 }
 
 const std::vector<SubdomainName> &
-BlockRestrictable::blocks()
+BlockRestrictable::blocks() const
 {
   return _blocks;
 }
@@ -121,13 +121,13 @@ BlockRestrictable::blockIDs() const
 }
 
 unsigned int
-BlockRestrictable::numBlocks()
+BlockRestrictable::numBlocks() const
 {
   return (unsigned int) _blk_ids.size();
 }
 
 bool
-BlockRestrictable::hasBlocks(SubdomainName name)
+BlockRestrictable::hasBlocks(SubdomainName name) const
 {
   // Create a vector and utilize the getSubdomainIDs function, which
   // handles the ANY_BLOCK_ID (getSubdomainID does not)
@@ -137,26 +137,26 @@ BlockRestrictable::hasBlocks(SubdomainName name)
 }
 
 bool
-BlockRestrictable::hasBlocks(std::vector<SubdomainName> names)
+BlockRestrictable::hasBlocks(std::vector<SubdomainName> names) const
 {
   return hasBlocks(_blk_mesh->getSubdomainIDs(names));
 }
 
 bool
-BlockRestrictable::hasBlocks(SubdomainID id)
+BlockRestrictable::hasBlocks(SubdomainID id) const
 {
   return _blk_ids.find(id) != _blk_ids.end();
 }
 
 bool
-BlockRestrictable::hasBlocks(std::vector<SubdomainID> ids)
+BlockRestrictable::hasBlocks(std::vector<SubdomainID> ids) const
 {
   std::set<SubdomainID> ids_set(ids.begin(), ids.end());
   return hasBlocks(ids_set);
 }
 
 bool
-BlockRestrictable::hasBlocks(std::set<SubdomainID> ids)
+BlockRestrictable::hasBlocks(std::set<SubdomainID> ids) const
 {
   // An empty input is assumed to be ANY_BLOCK_ID
   if (ids.empty() || ids.count(Moose::ANY_BLOCK_ID) > 0)
@@ -166,7 +166,7 @@ BlockRestrictable::hasBlocks(std::set<SubdomainID> ids)
 }
 
 bool
-BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids)
+BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids) const
 {
   // An empty input is assumed to be ANY_BLOCK_ID
   if (ids.empty() || ids.count(Moose::ANY_BLOCK_ID)  > 0)
@@ -176,14 +176,14 @@ BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids)
 }
 
 bool
-BlockRestrictable::isBlockSubset(std::vector<SubdomainID> ids)
+BlockRestrictable::isBlockSubset(std::vector<SubdomainID> ids) const
 {
   std::set<SubdomainID> ids_set(ids.begin(), ids.end());
   return isBlockSubset(ids_set);
 }
 
 std::set<SubdomainID>
-BlockRestrictable::variableSubdomianIDs(InputParameters & parameters)
+BlockRestrictable::variableSubdomianIDs(InputParameters & parameters) const
 {
   // Return an empty set if _sys is not defined
   if (!parameters.isParamValid("_sys"))
@@ -207,7 +207,7 @@ BlockRestrictable::variableSubdomianIDs(InputParameters & parameters)
 }
 
 bool
-BlockRestrictable::hasBlockMaterialProperty(const std::string & name)
+BlockRestrictable::hasBlockMaterialProperty(const std::string & name) const
 {
   // Get reference to the blocks for the material
   const std::set<SubdomainID> & mat_blk = _blk_feproblem->getMaterialPropertyBlocks(name);
