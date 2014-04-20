@@ -45,8 +45,7 @@ EigenExecutionerBase::EigenExecutionerBase(const std::string & name, InputParame
      _solution_diff(isParamValid("xdiff") ? &getPostprocessorValue("xdiff") : NULL),
      _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
                     : getPostprocessorValue("bx_norm")), // use |Bx| for normalization by default
-     _run_custom_uo(getParam<bool>("evaluate_custom_uo")),
-     _consistency_tolerance(1e-12)
+     _run_custom_uo(getParam<bool>("evaluate_custom_uo"))
 {
   _eigenvalue = 1.0;
 
@@ -98,6 +97,7 @@ EigenExecutionerBase::init()
     _eigen_sys.initSystemSolution(EigenSystem::EIGEN, 1.0);
   }
   _problem.initialSetup();
+  if (_source_integral==0.0) mooseError("|Bx| = 0!");
   _eigen_sys.initSystemSolutionOld(EigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated
@@ -111,25 +111,8 @@ EigenExecutionerBase::init()
   else
     _norm_execflag = _bx_execflag;
 
-  // Scale the solution so that the postprocessor is equal to one.
-  // We have a fix point loop here, in case the postprocessor is a nonlinear function of the scaling factor.
-  // FIXME: We have assumed this loop always converges.
-  while(std::fabs(_eigenvalue-_source_integral)>_consistency_tolerance/10.0*std::fabs(_eigenvalue))
-  {
-    // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
-    if (_source_integral==0.0) mooseError("|Bx| cannot be zero for the inverse power method");
-    _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, _eigenvalue/_source_integral);
-    // update all aux variables
-    for (unsigned int i=0; i<Moose::exec_types.size(); i++)
-    {
-      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::PRE_AUX);
-      _problem.computeAuxiliaryKernels(Moose::exec_types[i]);
-      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::POST_AUX);
-    }
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(10) << _source_integral;
-    Moose::out << " |Bx_0| = " << ss.str() << std::endl;
-  }
+  // normalize solution to make |Bx|=_eigenvalue
+  makeBXConsistent(_eigenvalue);
 
   /* a time step check point */
   _problem.onTimestepEnd();
@@ -144,6 +127,31 @@ EigenExecutionerBase::init()
   _output_warehouse.outputInitial();
   _problem.time() = t;
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
+}
+
+void
+EigenExecutionerBase::makeBXConsistent(Real k)
+{
+  Real consistency_tolerance = 1e-12;
+
+  // Scale the solution so that the postprocessor is equal to one.
+  // We have a fix point loop here, in case the postprocessor is a nonlinear function of the scaling factor.
+  // FIXME: We have assumed this loop always converges.
+  while(std::fabs(k-_source_integral)>consistency_tolerance*std::fabs(k))
+  {
+    // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
+    _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, k/_source_integral);
+    // update all aux variables
+    for (unsigned int i=0; i<Moose::exec_types.size(); i++)
+    {
+      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::PRE_AUX);
+      _problem.computeAuxiliaryKernels(Moose::exec_types[i]);
+      _problem.computeUserObjects(Moose::exec_types[i], UserObjectWarehouse::POST_AUX);
+    }
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(10) << _source_integral;
+    Moose::out << " |Bx_0| = " << ss.str() << std::endl;
+  }
 }
 
 void
@@ -223,8 +231,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // power iteration loop...
   // Note: |Bx|/k will stay constant one!
-  if (std::fabs(k-_source_integral)>_consistency_tolerance*std::fabs(k))
-    mooseError("Solution has to be initialized to make |Bx|=k_0!");
+  makeBXConsistent(k);
   while (true)
   {
     // important: solutions of aux system is also copied
@@ -539,8 +546,7 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   PostprocessorName bxp = getParam<PostprocessorName>("bx_norm");
   if ( _problem.getUserObject<UserObject>(bxp).execFlag() != EXEC_RESIDUAL)
     mooseError("rhs postprocessor for the nonlinear eigenvalue solve must be executed on residual");
-  if (std::fabs(k-_source_integral)>_consistency_tolerance*std::fabs(k))
-    mooseError("Solution has to be initialized to make |Bx|=k_0!");
+  makeBXConsistent(k);
 
   // turn on nonlinear flag so that RHS kernels opterate on the current solutions
   _eigen_sys.eigenKernelOnCurrent();
