@@ -51,6 +51,11 @@ public:
   virtual void init();
 
   /**
+   * Normalize solution so that |Bx| = k
+   */
+  virtual void makeBXConsistent(Real k);
+
+  /**
    * Make sure time kernel is not presented
    */
   virtual void checkIntegrity();
@@ -191,9 +196,6 @@ protected:
   };
   Chebyshev_Parameters  chebyshev_parameters;
   void chebyshev(unsigned int iter);
-
-private:
-  const Real _consistency_tolerance;
 };
 
 #endif //EIGENEXECUTIONERBASE_H
