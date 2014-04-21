@@ -131,7 +131,7 @@ def parseArguments(args=None):
   # Make related options
   make = parser.add_argument_group('Compiler Options')
   make.add_argument('--jobs', '-j', type=int, help='Override the automatic job count settings')
-  make.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs available (plese be nice)')
+  make.add_argument('--max', '-m',  action='store_true', help='Use maximum jobs available (please be nice)')
   make.add_argument('--dbg', '-d', action='store_true', help='Build in debug mode')
   make.add_argument('--oprof', '-p', action='store_true', help='Build in oprof mode')
   make.add_argument('--opt', '-o', action='store_true', help='Build in opt mode')
@@ -147,7 +147,7 @@ def parseArguments(args=None):
   distcc = parser.add_argument_group('Advanced distcc Options')
   distcc.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
   distcc.add_argument('--disable', nargs='+', help='Remove username/hostname/IP(s) from your DISTCC_HOSTS list')
-  distcc.add_argument('--enable','-e', action='store_true', help='Enable the previousily disabled machines')
+  distcc.add_argument('--enable','-e', action='store_true', help='Enable the previously disabled machines')
   distcc.add_argument('--hammer', nargs='+', help='Set username/hostname/IP(s) from your DISTCC_HOSTS list to use max available processors')
   distcc.add_argument('--normal','-n', action='store_true', help='Reset the machines to utilize the normal number of cores')
   distcc.add_argument('--allow_off_network', action='store_true', help='Allow for off INL network to use distcc pool')
@@ -158,20 +158,24 @@ def parseArguments(args=None):
   daemon.add_argument('--kill', action='store_true', help='Kill distcc as a daemon (no make)')
   daemon.add_argument('--no-daemon', action='store_true', help='Do not launch any daemon processes and kill existing')
   daemon.add_argument('--dedicated', action='store_true', help='Identify this machine as a dedicated build box')
-  daemon.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarly add hostname/IP to your allow list')
+  daemon.add_argument('--allow', nargs='+', metavar=['hostname'], help='Temporarily add hostname/IP to your allow list')
 
   # Advanced options
   misc = parser.add_argument_group('Misc. Options')
   misc.add_argument('--clean', '-c', action='store_true', help='Clean up .dmake and .dmake_hosts files')
   misc.add_argument('--refresh-time', help='Number of minutes before the cached hosts are refreshed (uses 10 if this has not been set previously)')
   misc.add_argument('--buck', action='store_true', help='Use the distcc file generator from buck')
-  misc.add_argument('--serial', action='store_true', help='Disable the parallel creating of the Machine objects; this also will print the information for each object created for debuggin purposes')
+  misc.add_argument('--serial', action='store_true', help='Disable the parallel creating of the Machine objects; this also will print the information for each object created for debugging purposes')
 
   # Allow flags to be run together
   parser.parse_args('-mqvlrbdpoce'.split())
 
   # Parse the input and return the options
   options, unknown = parser.parse_known_args()
+
+  # Set state related options to use --summary
+  if options.disable or options.enable or options.hammer or options.normal:
+    options.summary = True
 
   # Set the output to be verbose and refresh to be true if --summary is used
   if options.summary:
