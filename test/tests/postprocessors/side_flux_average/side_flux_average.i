@@ -12,12 +12,9 @@
 
 [Functions]
   [./right_bc]
+    # Flux BC for computing the analytical solution in the postprocessor
     type = ParsedFunction
     value = exp(y)+1
-  [../]
-  [./source_func]
-    type = ParsedFunction
-    value = -x*exp(y)*pow(ln(exp()),2)
   [../]
 []
 
@@ -25,11 +22,6 @@
   [./diff]
     type = Diffusion
     variable = u
-  [../]
-  [./source]
-    type = BodyForce
-    variable = u
-    function = source_func
   [../]
 []
 
@@ -41,7 +33,7 @@
     value = 0
   [../]
   [./right]
-    type = FunctionDirichletBC
+    type = FunctionNeumannBC
     variable = u
     boundary = right
     function = right_bc
@@ -59,6 +51,7 @@
 
 [Postprocessors]
   [./avg_flux_right]
+    # Computes -\int(exp(y)+1) from 0 to 1 which is -2.718281828
     type = SideFluxAverage
     variable = u
     boundary = right
