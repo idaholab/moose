@@ -2,12 +2,19 @@
 import os, sys, re, shutil
 from optparse import OptionParser, OptionGroup, Values
 
+MOOSE_DIR = os.path.abspath(os.path.join('..', 'moose'))
+FRAMEWORK_DIR = os.path.abspath(os.path.join('..', 'moose', 'framework'))
+#### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
-else:
-  MOOSE_DIR = os.path.abspath(os.path.dirname(sys.argv[0])) + '/..'
-sys.path.append(MOOSE_DIR + '/scripts/common')
-sys.path.append(MOOSE_DIR + '/scripts/ClusterLauncher')
+  FRAMEWORK_DIR = os.path.join(MOOSE_DIR, 'framework')
+if os.environ.has_key("FRAMEWORK_DIR"):
+  FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
+
+# Import the TestHarness and Helper functions from the MOOSE toolkit
+sys.path.append(os.path.join(FRAMEWORK_DIR, 'scripts', 'common'))
+sys.path.append(os.path.join(FRAMEWORK_DIR, 'scripts', 'TestHarness'))
+sys.path.append(os.path.join(FRAMEWORK_DIR, 'scripts', 'ClusterLauncher'))
 
 import ParseGetPot
 from InputParameters import InputParameters
