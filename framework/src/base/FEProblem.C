@@ -1927,7 +1927,7 @@ FEProblem::getPostprocessorValueOld(const std::string & name, THREAD_ID tid)
 }
 
 void
-FEProblem::setOutputPosition(const Point & p)
+FEProblem::parentOutputPositionChanged()
 {
   for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
     _multi_apps(Moose::exec_types[i])[0].parentOutputPositionChanged();

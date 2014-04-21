@@ -378,7 +378,7 @@ MooseApp::setOutputPosition(Point p)
   _output_warehouse.meshChanged();
 
   if (_executioner != NULL)
-    _executioner->setOutputPosition(p);
+    _executioner->parentOutputPositionChanged();
 }
 
 std::string
