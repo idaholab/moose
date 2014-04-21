@@ -52,7 +52,7 @@ BoundaryRestrictable::BoundaryRestrictable(const std::string name, InputParamete
 
   // Check that the mesh pointer was defined, it is required for this class to operate
   if (_bnd_mesh == NULL)
-    mooseError("The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
+    mooseError("The input parameters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
 
   // If the user supplies boundary IDs
   if (!_boundary_names.empty())
