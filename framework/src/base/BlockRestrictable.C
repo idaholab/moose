@@ -21,7 +21,7 @@ InputParameters validParams<BlockRestrictable>()
   InputParameters params = emptyInputParameters();
 
   // Add the user-facing 'block' input parameter
-  params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (SubdomainID) that this kernel will be applied to");
+  params.addParam<std::vector<SubdomainName> >("block", "The list of block ids (SubdomainID) that this object will be applied");
 
   // Add the private parameter that is populated by this class that contains valid block ids for the
   // object inheriting from this class
@@ -49,7 +49,7 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
 
   // Check that the mesh pointer was defined, it is required for this class to operate
   if (_blk_mesh == NULL)
-    mooseError("The input paramters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
+    mooseError("The input parameters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
 
   // The 'block' input is defined
   if (parameters.isParamValid("block"))
