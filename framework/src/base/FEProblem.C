@@ -38,6 +38,7 @@
 #include "RandomInterface.h"
 #include "RandomData.h"
 #include "EigenSystem.h"
+#include "MooseParsedFunction.h"
 
 #include "ScalarInitialCondition.h"
 #include "ElementPostprocessor.h"
@@ -1115,12 +1116,25 @@ FEProblem::hasFunction(const std::string & name, THREAD_ID tid)
 Function &
 FEProblem::getFunction(const std::string & name, THREAD_ID tid)
 {
-  Function * function = _functions[tid][name];
-  if (!function)
+  if (!hasFunction(name, tid))
   {
-    mooseError("Unable to find function " + name);
+    // If we didn't find a function, it might be a default function, attempt to construct one now
+    FunctionParserBase<Real> fp;
+    std::string vars = "x,y,z,t";
+    if (fp.Parse(name, vars) == -1) // -1 for success
+    {
+      // It parsed ok, so build a MooseParsedFunction
+      InputParameters params = _factory.getValidParams("ParsedFunction");
+      params.set<std::string>("value") = name;
+      addFunction("ParsedFunction", name, params);
+    }
+
+    // Try once more
+    if (!hasFunction(name, tid))
+      mooseError("Unable to find function " + name);
   }
-  return *function;
+
+  return *(_functions[tid][name]);
 }
 
 void
