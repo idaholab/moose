@@ -244,7 +244,7 @@ FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries,
   // Now print the remaining data rows
   for ( ; i != _data.end(); ++i)
   {
-    out << "|" << std::right << std::setw(_column_width) << i->first << " |";
+    out << "|" << std::right << std::setw(_column_width) << std::scientific << i->first << " |";
     for (header = col_begin; header != col_end; ++header)
     {
       std::map<std::string, Real> &tmp = i->second;
