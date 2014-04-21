@@ -17,7 +17,6 @@
 
 #include "AddSideSetsBase.h"
 #include "BlockRestrictable.h"
-#include "BoundaryRestrictableRequired.h"
 
 class SideSetsAroundSubdomain;
 
@@ -26,8 +25,7 @@ InputParameters validParams<SideSetsAroundSubdomain>();
 
 class SideSetsAroundSubdomain :
   public MeshModifier,
-  public BlockRestrictable,
-  public BoundaryRestrictableRequired
+  public BlockRestrictable
 {
 public:
   SideSetsAroundSubdomain(const std::string & name, InputParameters parameters);
@@ -37,6 +35,8 @@ public:
   virtual void modify();
 
 protected:
+
+  std::vector<BoundaryName> _boundary_names;
 
 };
 
