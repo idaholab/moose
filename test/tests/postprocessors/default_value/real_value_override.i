@@ -14,7 +14,7 @@
   [./diff]
     type = DefaultPostprocessorDiffusion
     variable = u
-    #pps_name = invalid_postprocessor_name
+    pps_name = 0.5  # Here we supply a real value to use as the Postprocessor
   [../]
   [./time]
     type = TimeDerivative
