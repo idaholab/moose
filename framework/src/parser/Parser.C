@@ -486,6 +486,10 @@ void Parser::setScalarParameter<Point>(const std::string & full_name, const std:
                                        InputParameters::Parameter<Point> * param, bool in_global, GlobalParamsAction * global_block);
 
 template<>
+void Parser::setScalarParameter<PostprocessorName>(const std::string & full_name, const std::string & short_name,
+                                                   InputParameters::Parameter<PostprocessorName>* param, bool in_global, GlobalParamsAction *global_block);
+
+template<>
 void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
                                            InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
 
@@ -875,6 +879,36 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
   }
 }
 
+// Specialization for coupling a Real value where a postprocessor would be needed in MOOSE
+template<>
+void Parser::setScalarParameter<PostprocessorName>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<PostprocessorName> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
+  else
+    gp = &_getpot_file;
+
+  PostprocessorName pps_name = gp->get_value_no_default(full_name.c_str(), param->get());
+  // Set the value here
+  param->set() = pps_name;
+
+  Real real_value;
+  std::istringstream ss(pps_name);
+
+  if (ss >> real_value && ss.eof())
+    _current_params->defaultPostprocessorValue(short_name) = real_value;
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setScalarParam<PostprocessorName>(short_name) = pps_name;
+  }
+}
+
 template<>
 void Parser::setVectorParameter<RealVectorValue>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<RealVectorValue> > * param, bool in_global, GlobalParamsAction * global_block)
 {
@@ -924,6 +958,7 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
   }
 }
 
+// Specialization for coupling a Real value to any coupling term in MOOSE
 template<>
 void Parser::setVectorParameter<VariableName>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<VariableName> > * param, bool /*in_global*/, GlobalParamsAction * /*global_block*/)
 {
