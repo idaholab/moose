@@ -31,13 +31,9 @@ protected:
   };
   virtual RealGradient precomputeQpResidual();
   virtual RealGradient precomputeQpJacobian();
-  virtual RealGradient computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c) = 0;
+  virtual RealGradient computeGradDFDCons(PFFunctionType type) = 0;
 
   MaterialProperty<Real> & _M;
-
-  bool _implicit;
-  VariableValue & _u_old;
-  VariableGradient & _grad_u_old;
 
 private:
   bool _has_MJac;
