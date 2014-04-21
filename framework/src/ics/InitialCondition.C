@@ -526,9 +526,10 @@ InitialCondition::compute()
 
   NumericVector<Number> & solution = _var.sys().solution();
 
-  const dof_id_type
-    first = solution.first_local_index(),
-    last  = solution.last_local_index();
+  // 'first' and 'last' are no longer used, see note about subdomain-restricted variables below
+  // const dof_id_type
+  //   first = solution.first_local_index(),
+  //   last  = solution.last_local_index();
 
   // Lock the new_vector since it is shared among threads.
   {

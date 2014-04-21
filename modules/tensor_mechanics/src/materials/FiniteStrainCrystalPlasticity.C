@@ -52,7 +52,7 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
 
 void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
 {
-  int nsize,ind,is,ie,flag;
+  int ind,is,ie,flag;
   Real *data;
   RealTensorValue rot;
 
@@ -72,7 +72,6 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
   _a0.resize(_nss);
   _xm.resize(_nss);
 
-  nsize=_gprops.size();
   data=_gprops.data();
 
   flag=0;
@@ -95,7 +94,6 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
   }
 
 
-  nsize=_hprops.size();
   data=_hprops.data();
 
   _r=data[0];
@@ -103,7 +101,6 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
   _tau_init=data[2];
   _tau_sat=data[3];
 
-  nsize=_flowprops.size();
   data=_flowprops.data();
 
 

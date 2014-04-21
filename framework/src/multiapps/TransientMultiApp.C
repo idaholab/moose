@@ -379,7 +379,7 @@ TransientMultiApp::advanceStep()
   {
     for(unsigned int i=0; i<_my_num_apps; i++)
     {
-      FEProblem * problem = appProblem(_first_local_app + i);
+      /*FEProblem * problem =*/ appProblem(_first_local_app + i);
       Transient * ex = _transient_executioners[i];
 
       ex->endStep();
