@@ -180,6 +180,9 @@ protected:
   /// Multipliers for coloring variable residual norms (default [2, 0.8])
   std::vector<Real> _outlier_multiplier;
 
+  /// Number of significant digits
+  unsigned int _precision;
+
   /// Width used for printing simulation information
   static const unsigned int _field_width = 25;
 
