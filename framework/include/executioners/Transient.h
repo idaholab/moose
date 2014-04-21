@@ -199,10 +199,7 @@ public:
    */
   Real unconstrainedDT() { return _unconstrained_dt; }
 
-  void setOutputPosition(const Point & p)
-    {
-      _problem.setOutputPosition(p);
-    }
+  void parentOutputPositionChanged() { _problem.parentOutputPositionChanged(); }
 
 
 protected:

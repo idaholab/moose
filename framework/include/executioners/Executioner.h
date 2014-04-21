@@ -100,9 +100,10 @@ public:
   void outputInitial(bool out_init);
 
   /**
-   * Set (or reset) the output position of the application.
+   * Can be used by subsclasses to call parentOutputPositionChanged()
+   * on the underlying FEProblem.
    */
-  virtual void setOutputPosition(const Point & /* p */) {}
+  virtual void parentOutputPositionChanged() {}
 
 protected:
 

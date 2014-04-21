@@ -690,9 +690,9 @@ public:
   const BoundaryID & getCurrentBoundaryID(){ return _current_boundary_id; }
 
   /**
-   * Set the output position for the app and sub-apps
+   * Calls parentOutputPositionChanged() on all sub apps.
    */
-  void setOutputPosition(const Point & p);
+  void parentOutputPositionChanged();
 
   /**
    * Enable printing of top residuals
