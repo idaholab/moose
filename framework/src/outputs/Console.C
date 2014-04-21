@@ -43,6 +43,7 @@ InputParameters validParams<Console>()
   // Basic table output controls
   params.addParam<bool>("use_color", true, "If true, color will be added to the output");
   params.addParam<bool>("scientific_time", false, "Control the printing of time and dt in scientific notation");
+  params.addParam<unsigned int>("time_precision", "The number of significant digits that are printed on time related outputs");
 
   // Performance Logging
   params.addParam<bool>("perf_log", false, "If true, all performance logs will be printed. The individual log settings will override this option.");
@@ -108,6 +109,7 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _all_variable_norms(getParam<bool>("all_variable_norms")),
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
     _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier")),
+    _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
     _timing(_app.getParam<bool>("timing"))
 {
   // If --timing was used from the command-line, do nothing, all logs are enabled
@@ -252,23 +254,27 @@ Console::timestepSetup()
     // Write time step and time information
     oss << std::endl <<  "Time Step " << std::setw(n) << _t_step;
 
+    // Set precision
+    if (_precision > 0)
+      oss << std::setw(_precision) << std::setprecision(_precision) << std::setfill('0') << std::showpoint;
+
     // Show scientific notation
     if (_scientific_time)
       oss << std::scientific;
 
     // Print the time
-    oss  << ", time = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _time << std::endl;
+    oss << ", time = " << _time << std::endl;
 
     // Show old time information, if desired
     if (_verbose)
-      oss << std::setw(n) << "          old time = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _time_old << std::endl;
+      oss << "          old time = " << std::left << _time_old << std::endl;
 
     // Show the time delta information
-    oss << std::setw(2) << "                dt = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _dt << std::endl;
+    oss  << "                dt = "<< std::left <<  _dt << std::endl;
 
     // Show the old time delta information, if desired
     if (_verbose)
-      oss << std::setw(2) << "            old dt = " << std::setw(9) << std::setprecision(9) << std::setfill('0') << std::showpoint << std::left << _dt_old << std::endl;
+      oss  << "            old dt = "<< std::left << std::endl;
   }
 
   // Output to the screen

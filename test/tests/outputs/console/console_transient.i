@@ -59,5 +59,6 @@
     verbose = true
     perf_log = true
     setup_log_early = true
+    time_precision = 6
  [../]
 []
