@@ -785,10 +785,15 @@ InputParameters::addParam<std::vector<MooseEnum> >(const std::string & /*name*/,
 template<>
 inline
 void
-InputParameters::setParamHelper<PostprocessorName, Real>(const std::string &name, PostprocessorName & /*l_value*/, const Real &r_value)
+InputParameters::setParamHelper<PostprocessorName, Real>(const std::string &name, PostprocessorName & l_value, const Real &r_value)
 {
   // Store the default value
   _default_postprocessor_value[name] = r_value;
+
+  // Assign the default value so that it appears in the dump
+  std::ostringstream oss;
+  oss << r_value;
+  l_value = oss.str();
 }
 
 InputParameters emptyInputParameters();
