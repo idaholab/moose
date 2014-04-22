@@ -104,14 +104,7 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
   if (_blk_ids.empty())
   {
     _blk_ids.insert(Moose::ANY_BLOCK_ID);
-    for (std::set<SubdomainID>::iterator it = _blk_mesh->meshSubdomains().begin();
-         it != _blk_mesh->meshSubdomains().end(); it++)
-    {
-      std::stringstream ss;
-      ss << *it;
-      _blocks.push_back(ss.str());
-      ss.str("");
-    }
+    _blocks = std::vector<SubdomainName>(1,"ANY_BLOCK_ID");
   }
 
   // Store the private parameter that contains the set of block ids
