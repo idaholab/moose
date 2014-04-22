@@ -1,0 +1,30 @@
+[Tests]
+  [./getOutput]
+    type = RunException
+    input = warehouse_access.i
+    cli_args = 'Outputs/test/test_type=getOutput'
+    expect_err = "getOutput test passed"
+    max_parallel = 1
+  [../]
+  [./getOutputs]
+    type = RunException
+    input = warehouse_access.i
+    cli_args = 'Outputs/test/test_type=getOutputs'
+    expect_err = "getOutputs test passed"
+    max_parallel = 1
+  [../]
+  [./getOutputs_with_names]
+    type = RunException
+    input = warehouse_access.i
+    cli_args = 'Outputs/test/test_type=getOutputs-names'
+    expect_err = "getOutputs-names test passed"
+    max_parallel = 1
+  [../]
+  [./getOutputNames]
+    type = RunException
+    input = warehouse_access.i
+    cli_args = 'Outputs/test/test_type=getOutputNames'
+    expect_err = "getOutputsNames test passed"
+    max_parallel = 1
+  [../]
+[]
