@@ -1,16 +1,20 @@
 from InputParameters import InputParameters
 import os, sys, shutil
 
+MOOSE_DIR = os.path.abspath(os.path.join('..', 'moose'))
+FRAMEWORK_DIR = os.path.abspath(os.path.join('..', 'moose', 'framework'))
+#### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
-else:
-  MOOSE_DIR = os.path.abspath(os.path.dirname(sys.argv[0])) + '/..'
+  FRAMEWORK_DIR = os.path.join(MOOSE_DIR, 'framework')
+if os.environ.has_key("FRAMEWORK_DIR"):
+  FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
 
 class Job(object):
   def getValidParams():
     params = InputParameters()
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
-    params.addParam('template_script', MOOSE_DIR + '/scripts/ClusterLauncher/pbs_submit.sh', "The template job script to use.")
+    params.addParam('template_script', FRAMEWORK_DIR + '/scripts/ClusterLauncher/pbs_submit.sh', "The template job script to use.")
     return params
   getValidParams = staticmethod(getValidParams)
 
