@@ -813,7 +813,7 @@ InputParameters::setParamHelper<PostprocessorName, int>(const std::string &name,
 template<>
 inline
 void
-InputParameters::setParamHelper<FunctionName, Real>(const std::string &name, FunctionName & l_value, const Real &r_value)
+InputParameters::setParamHelper<FunctionName, Real>(const std::string & /*name*/, FunctionName & l_value, const Real &r_value)
 {
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
@@ -824,7 +824,7 @@ InputParameters::setParamHelper<FunctionName, Real>(const std::string &name, Fun
 template<>
 inline
 void
-InputParameters::setParamHelper<FunctionName, int>(const std::string &name, FunctionName & l_value, const int &r_value)
+InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/, FunctionName & l_value, const int &r_value)
 {
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
