@@ -29,7 +29,6 @@ private:
   std::string _mob_name;
   std::string _Dmob_name;
   std::string _grad_mob_name;
-  bool _implicit;
 
   MaterialProperty<Real> & _kappa;
   MaterialProperty<Real> & _M;
@@ -40,7 +39,6 @@ private:
   MaterialProperty<Real> * _Dgrad_Mngp;
 
   VariableSecond & _second_u;
-  VariableSecond & _second_u_old;
   VariableTestSecond & _second_test;
   VariablePhiSecond & _second_phi;
 };
