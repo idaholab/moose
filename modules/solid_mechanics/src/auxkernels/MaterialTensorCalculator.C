@@ -18,13 +18,14 @@ template<>
 InputParameters validParams<MaterialTensorCalculator>()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Hoop, Radial, Axial, MaxPrincipal, MedPrincipal, MinPrincipal, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality, VolumetricStrain");
+  MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Direction, Hoop, Radial, Axial, MaxPrincipal, MedPrincipal, MinPrincipal, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality, VolumetricStrain");
 
   params.addParam<int>("index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
   params.addParam<MooseEnum>("quantity", quantities, "A scalar quantity to compute: " + quantities.getRawNames());
 
   params.addParam<RealVectorValue>("point1", RealVectorValue(0, 0, 0), "Start point for axis used to calculate some material tensor quantities");
   params.addParam<RealVectorValue>("point2", RealVectorValue(0, 1, 0), "End point for axis used to calculate some material tensor quantities");
+  params.addParam<RealVectorValue>("direction", RealVectorValue(1, 0, 0), "Direction vector");
   return params;
 }
 
@@ -32,7 +33,8 @@ MaterialTensorCalculator::MaterialTensorCalculator(const std::string &name, Inpu
   _index(parameters.get<int>("index")),
   _quantity_moose_enum(parameters.get<MooseEnum>("quantity")),
   _p1(parameters.get<RealVectorValue>("point1")),
-  _p2(parameters.get<RealVectorValue>("point2"))
+  _p2(parameters.get<RealVectorValue>("point2")),
+  _direction(parameters.get<RealVectorValue>("direction")/parameters.get<RealVectorValue>("direction").size())
 {
   if (_quantity_moose_enum.isValid())
   {
@@ -102,6 +104,16 @@ MaterialTensorCalculator::getTensorQuantity(const SymmTensor & tensor,
   else if ( _quantity == HYDROSTATIC )
   {
     value = tensor.trace()/3.0;
+  }
+  else if ( _quantity == DIRECTION )
+  {
+    const Real p0 = _direction(0);
+    const Real p1 = _direction(1);
+    const Real p2 = _direction(2);
+    value = (p0*tensor(0,0)+p1*tensor(1,0)+p2*tensor(2,0))*p0 +
+            (p0*tensor(0,1)+p1*tensor(1,1)+p2*tensor(2,1))*p1 +
+            (p0*tensor(0,2)+p1*tensor(1,2)+p2*tensor(2,2))*p2;
+    direction = _direction;
   }
   else if ( _quantity == HOOP )
   {
