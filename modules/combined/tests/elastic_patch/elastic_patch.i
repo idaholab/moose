@@ -141,6 +141,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./direction]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 
 [] # AuxVariables
 
@@ -241,6 +245,13 @@
     tensor = stress
     variable = minprincipal
     quantity = MiNPRiNCIpAl
+  [../]
+  [./direction]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = direction
+    quantity = direction
+    direction = '1 1 1'
   [../]
 
 

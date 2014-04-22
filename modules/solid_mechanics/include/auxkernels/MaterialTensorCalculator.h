@@ -34,6 +34,7 @@ public:
     VONMISES,
     PLASTICSTRAINMAG,
     HYDROSTATIC,
+    DIRECTION,
     HOOP,
     RADIAL,
     AXIAL,
@@ -57,6 +58,7 @@ protected:
 
   const Point _p1;
   const Point _p2;
+  const Point _direction;
 
 public:
   Real getTensorQuantity(const SymmTensor & tensor,
