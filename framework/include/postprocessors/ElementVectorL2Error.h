@@ -41,13 +41,13 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-  Function * const _funcx;
-  Function * const _funcy;
-  Function * const _funcz;
+  Function & _funcx;
+  Function & _funcy;
+  Function & _funcz;
 
-  const VariableValue * _u; // FE solution in x
-  const VariableValue * _v; // FE solution in y
-  const VariableValue * _w; // FE solution in z
+  const VariableValue & _u; // FE solution in x
+  const VariableValue & _v; // FE solution in y
+  const VariableValue & _w; // FE solution in z
 };
 
 #endif //ELEMENTVECTORL2ERROR_H

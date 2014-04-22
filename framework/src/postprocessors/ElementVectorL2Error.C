@@ -20,35 +20,24 @@ InputParameters validParams<ElementVectorL2Error>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   params.addRequiredParam<FunctionName>("function_x", "The analytic solution to compare against");
-  params.addParam<FunctionName>("function_y", "The analytic solution to compare against");
-  params.addParam<FunctionName>("function_z", "The analytic solution to compare against");
+  params.addParam<FunctionName>("function_y", 0, "The analytic solution to compare against");
+  params.addParam<FunctionName>("function_z", 0, "The analytic solution to compare against");
   params.addRequiredCoupledVar("var_x","The FE solution in x direction");
-  params.addCoupledVar("var_y","The FE solution in y direction");
-  params.addCoupledVar("var_z","The FE solution in z direction");
+  params.addCoupledVar("var_y", 0, "The FE solution in y direction");
+  params.addCoupledVar("var_z", 0, "The FE solution in z direction");
   return params;
 }
 
 ElementVectorL2Error::ElementVectorL2Error(const std::string & name, InputParameters parameters) :
     ElementIntegralPostprocessor(name, parameters),
     FunctionInterface(parameters),
-    _funcx(&getFunction("function_x")),
-    _funcy(parameters.isParamValid("function_y") ? &getFunction("function_y") : NULL),
-    _funcz(parameters.isParamValid("function_z") ? &getFunction("function_z") : NULL),
-    _u(&coupledValue("var_x")),
-    _v(isCoupled("var_y") ? &coupledValue("var_y") : NULL),
-    _w(isCoupled("var_z") ? &coupledValue("var_z") : NULL)
+    _funcx(getFunction("function_x")),
+    _funcy(getFunction("function_y")),
+    _funcz(getFunction("function_z")),
+    _u(coupledValue("var_x")),
+    _v(coupledValue("var_y")),
+    _w(coupledValue("var_z"))
 {
-  int num_func = 1; // input function counter
-  int num_var = 1;  // input variable counter
-
-  if (_v) num_var += 1;
-  if (_w) num_var += 1;
-
-  if (_funcy) num_func += 1;
-  if (_funcz) num_func += 1;
-
-  if (num_func != num_var)
-    mooseError("Number of input functions and number of input variables are not equal.");
 }
 
 Real
@@ -63,14 +52,14 @@ ElementVectorL2Error::computeQpIntegral()
   RealVectorValue sol_val(0.0,0.0,0.0);
   RealVectorValue func_val(0.0,0.0,0.0);
 
-  sol_val(0) = (*_u)[_qp]; // required variable
-  func_val(0) = _funcx->value(_t, _q_point[_qp]); // required function
+  sol_val(0) = _u[_qp]; // required variable
+  func_val(0) = _funcx.value(_t, _q_point[_qp]); // required function
 
-  if (_v) sol_val(1) = (*_v)[_qp];
-  if (_w) sol_val(2) = (*_w)[_qp];
+  sol_val(1) = _v[_qp];
+  sol_val(2) = _w[_qp];
 
-  if (_funcy) func_val(1) = _funcy->value(_t, _q_point[_qp]);
-  if (_funcz) func_val(2) = _funcz->value(_t, _q_point[_qp]);
+  func_val(1) = _funcy.value(_t, _q_point[_qp]);
+  func_val(2) = _funcz.value(_t, _q_point[_qp]);
 
   return (sol_val - func_val).size_sq(); // dot product of difference vector
 }
