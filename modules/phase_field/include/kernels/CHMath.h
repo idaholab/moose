@@ -22,7 +22,7 @@ public:
 
 protected:
 
-  virtual RealGradient computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c);
+  virtual RealGradient computeGradDFDCons(PFFunctionType type);
 
 private:
 

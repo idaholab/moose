@@ -14,16 +14,16 @@ CHMath::CHMath(const std::string & name, InputParameters parameters)
 }
 
 RealGradient  //Use This an example of the the function should look like
-CHMath::computeGradDFDCons(PFFunctionType type, Real c, RealGradient grad_c)
+CHMath::computeGradDFDCons(PFFunctionType type)
 {
   switch (type)
   {
   case Residual:
-    return 3*c*c*grad_c - grad_c; // return Residual value
+    return 3*_u[_qp]*_u[_qp]*_grad_u[_qp] - _grad_u[_qp]; // return Residual value
     break;
 
   case Jacobian:
-    return 6*c*_phi[_j][_qp]*grad_c + 3*c*c*_grad_phi[_j][_qp] - _grad_phi[_j][_qp]; //return Jacobian value
+    return 6*_u[_qp]*_phi[_j][_qp]*_grad_u[_qp] + 3*_u[_qp]*_u[_qp]*_grad_phi[_j][_qp] - _grad_phi[_j][_qp]; //return Jacobian value
     break;
 
   default:
