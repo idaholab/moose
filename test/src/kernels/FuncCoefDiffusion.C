@@ -5,7 +5,7 @@ template<>
 InputParameters validParams<FuncCoefDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<FunctionName>("coef", "The function for conductivity");
+  params.addParam<FunctionName>("coef", "0.5*x+0.5*y", "The function for conductivity");
   return params;
 }
 
