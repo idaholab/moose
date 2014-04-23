@@ -23,7 +23,7 @@ void addCrackFrontDefinitionParams(InputParameters& params)
   params.addParam<RealVectorValue>("crack_direction_vector_end_2","Direction of crack propagation for the node at end 2 of the crack");
   params.addParam<std::vector<BoundaryName> >("crack_mouth_boundary","Boundaries whose average coordinate defines the crack mouth");
   params.addParam<bool>("2d", false, "Treat body as two-dimensional");
-  params.addParam<unsigned int>("2d_axis", 2, "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
+  params.addRangeCheckedParam<unsigned int>("axis_2d", 2, "axis_2d>=0 & axis_2d<=2", "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
 }
 
 CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParameters parameters) :
@@ -32,7 +32,7 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_subproblem.mesh()),
     _treat_as_2d(getParam<bool>("2d")),
-    _axis_2d(getParam<unsigned int>("2d_axis"))
+    _axis_2d(getParam<unsigned int>("axis_2d"))
 {
   MooseEnum direction_method_moose_enum = getParam<MooseEnum>("crack_direction_method");
   if (direction_method_moose_enum.isValid())
@@ -147,6 +147,57 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
       nodes.insert(bnode->_node->id());
     }
   }
+  if (_treat_as_2d)
+  {
+    if (nodes.size() > 1)
+    {
+      //Delete all but one node if they are collinear in the axis normal to the 2d plane
+      unsigned int axis0;
+      unsigned int axis1;
+      Real tol = 1e-14;
+
+      switch (_axis_2d)
+      {
+        case 0:
+          axis0 = 1;
+          axis1 = 2;
+          break;
+        case 1:
+          axis0 = 0;
+          axis1 = 2;
+          break;
+        case 2:
+          axis0 = 0;
+          axis1 = 1;
+          break;
+      }
+
+      Real node0coor0;
+      Real node0coor1;
+
+      for(std::set<unsigned int>::iterator sit=nodes.begin(); sit != nodes.end(); ++sit)
+      {
+        Node & curr_node = _mesh.node(*sit);
+        if (sit == nodes.begin())
+        {
+          node0coor0 = curr_node(axis0);
+          node0coor1 = curr_node(axis1);
+        }
+        else
+        {
+          if ((std::abs(curr_node(axis0) - node0coor0) > tol) ||
+              (std::abs(curr_node(axis1) - node0coor1) > tol))
+          {
+            mooseError("Boundary provided in CrackFrontDefinition contains "<<nodes.size()<<" nodes, which are not collinear in the "<<_axis_2d<<" axis.  Must contain either 1 node or collinear nodes to treat as 2D.");
+          }
+        }
+      }
+
+      std::set<unsigned int>::iterator second_node = nodes.begin();
+      ++second_node;
+      nodes.erase(second_node,nodes.end());
+    }
+  }
 }
 
 void
@@ -161,10 +212,13 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> nodes)
   {
     _ordered_crack_front_nodes.push_back(*nodes.begin());
     if (!_treat_as_2d)
-      mooseError("Nodeset provided in CrackFrontDefinition contains 1 node, but model is not treated as 2d");
+      mooseError("Boundary provided in CrackFrontDefinition contains 1 node, but model is not treated as 2d");
   }
   else // nodes.size() > 1
   {
+    if (_treat_as_2d)
+      mooseError("Boundary provided in CrackFrontDefinition contains "<<nodes.size()<<" nodes.  Must contain 1 node to treat as 2D.");
+
     //Loop through the set of crack front nodes, and create a node to element map for just the crack front nodes
     //The main reason for creating a second map is that we need to do a sort prior to the set_intersection.
     //The original map contains vectors, and we can't sort them, so we create sets in the local map.
@@ -249,40 +303,33 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> nodes)
     //Create an ordered list of the nodes going along the line of the crack front
     _ordered_crack_front_nodes.push_back(end_nodes[0]);
 
-    if (_treat_as_2d)
+    unsigned int last_node = end_nodes[0];
+    unsigned int second_last_node = last_node;
+    while(last_node != end_nodes[1])
     {
-      mooseWarning("Nodeset provided in CrackFrontDefinition contains multiple nodes, but model treated as 2d. Using node "<<_ordered_crack_front_nodes[0]);
-    }
-    else
-    {
-      unsigned int last_node = end_nodes[0];
-      unsigned int second_last_node = last_node;
-      while(last_node != end_nodes[1])
+      std::vector<unsigned int> & curr_node_line_elems = node_to_line_elem_map[last_node];
+      bool found_new_node = false;
+      for (unsigned int i=0; i<curr_node_line_elems.size(); ++i)
       {
-        std::vector<unsigned int> & curr_node_line_elems = node_to_line_elem_map[last_node];
-        bool found_new_node = false;
-        for (unsigned int i=0; i<curr_node_line_elems.size(); ++i)
+        std::vector<unsigned int> curr_line_elem = line_elems[curr_node_line_elems[i]];
+        for (unsigned int j=0; j<curr_line_elem.size(); ++j)
         {
-          std::vector<unsigned int> curr_line_elem = line_elems[curr_node_line_elems[i]];
-          for (unsigned int j=0; j<curr_line_elem.size(); ++j)
+          unsigned int line_elem_node = curr_line_elem[j];
+          if (line_elem_node != last_node &&
+              line_elem_node != second_last_node)
           {
-            unsigned int line_elem_node = curr_line_elem[j];
-            if (line_elem_node != last_node &&
-                line_elem_node != second_last_node)
-            {
-              _ordered_crack_front_nodes.push_back(line_elem_node);
-              found_new_node = true;
-              break;
-            }
-          }
-          if (found_new_node)
-          {
+            _ordered_crack_front_nodes.push_back(line_elem_node);
+            found_new_node = true;
             break;
           }
         }
-        second_last_node = last_node;
-        last_node = _ordered_crack_front_nodes[_ordered_crack_front_nodes.size()-1];
+        if (found_new_node)
+        {
+          break;
+        }
       }
+      second_last_node = last_node;
+      last_node = _ordered_crack_front_nodes[_ordered_crack_front_nodes.size()-1];
     }
   }
 }
