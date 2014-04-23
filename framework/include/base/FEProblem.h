@@ -366,10 +366,10 @@ public:
    */
   virtual void prepareMaterials(SubdomainID blk_id, THREAD_ID tid);
 
-  virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid);
-  virtual void reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid);
-  virtual void reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid);
-  virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid);
+  virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
+  virtual void reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
+  virtual void reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
+  virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
   /*
    * Swap back underlying data storing stateful material properties
    */

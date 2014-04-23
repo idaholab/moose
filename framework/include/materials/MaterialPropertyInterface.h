@@ -97,6 +97,18 @@ public:
   template<typename T>
   bool hasMaterialProperty(const std::string & name);
 
+  /**
+   * Derived classes can declare whether or not they work with
+   * stateful material properties.  See, for example, DiracKernel.  By
+   * default, they are allowed.
+   */
+  void statefulPropertiesAllowed(bool);
+
+  /**
+   * Returns true if getMaterialProperty() has been called, false otherwise.
+   */
+  bool getMaterialPropertyCalled() const { return _get_material_property_called; }
+
 protected:
 
   /// Reference to the materail data class that stores properties
@@ -117,6 +129,19 @@ protected:
    * getMaterialProperty method
    */
   void checkMaterialProperty(const std::string & name);
+
+  /**
+   * True by default. If false, this class throws an error if any of
+   * the stateful material properties interfaces are used.
+   */
+  bool _stateful_allowed;
+
+  /**
+   * Initialized to false.  Gets set to true when getMaterialProperty()
+   * is called.  Clients of this class can inquire whether getMaterialProperty()
+   * has been called by calling getMaterialPropertyCalled().
+   */
+  bool _get_material_property_called;
 };
 
 template<typename T>
@@ -124,6 +149,13 @@ MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
   checkMaterialProperty(name);
+
+  if (!_stateful_allowed && _material_data.getMaterialPropertyStorage().hasStatefulProperties())
+    mooseError("Error: Stateful material properties not allowed for this object.");
+
+  // Update the boolean flag.
+  _get_material_property_called = true;
+
   return _material_data.getProperty<T>(name);
 }
 
@@ -131,6 +163,9 @@ template<typename T>
 MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
+  if (!_stateful_allowed)
+    mooseError("Error: Stateful material properties not allowed for this object.");
+
   return _material_data.getPropertyOld<T>(name);
 }
 
@@ -138,6 +173,9 @@ template<typename T>
 MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
+  if (!_stateful_allowed)
+    mooseError("Error: Stateful material properties not allowed for this object.");
+
   return _material_data.getPropertyOlder<T>(name);
 }
 

@@ -21,7 +21,9 @@ MaterialPropertyInterface::MaterialPropertyInterface(InputParameters & parameter
     _mi_block_ids(parameters.isParamValid("_block_ids") ?
                   parameters.get<std::vector<SubdomainID> >("_block_ids") : std::vector<SubdomainID>()),
     _mi_boundary_ids(parameters.isParamValid("_boundary_ids") ?
-                     parameters.get<std::vector<BoundaryID> >("_boundary_ids") : std::vector<BoundaryID>())
+                     parameters.get<std::vector<BoundaryID> >("_boundary_ids") : std::vector<BoundaryID>()),
+    _stateful_allowed(true),
+    _get_material_property_called(false)
 {
 }
 
@@ -60,4 +62,10 @@ MaterialPropertyInterface::checkMaterialProperty(const std::string & name)
   if (!_mi_boundary_ids.empty())
     for (std::vector<BoundaryID>::iterator it = _mi_boundary_ids.begin(); it != _mi_boundary_ids.end(); ++it)
       _mi_feproblem.storeDelayedCheckMatProp(*it, name);
+}
+
+void
+MaterialPropertyInterface::statefulPropertiesAllowed(bool stateful_allowed)
+{
+  _stateful_allowed = stateful_allowed;
 }

@@ -108,6 +108,11 @@ public:
    */
   bool isSwapped();
 
+  /**
+   * Provide read-only access to the underlying MaterialPropertyStorage object.
+   */
+  const MaterialPropertyStorage & getMaterialPropertyStorage() const { return _storage; }
+
 protected:
 
   MaterialPropertyStorage & _storage;
