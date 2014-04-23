@@ -17,7 +17,7 @@
 #include "LayeredSideFluxAverage.h"
 #include "AllLocalDofIndicesThread.h"
 
-#include "OutputBase.h"
+#include "Output.h"
 
 // libMesh
 #include "libmesh/mesh_tools.h"

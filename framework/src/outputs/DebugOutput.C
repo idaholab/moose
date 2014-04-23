@@ -13,7 +13,7 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "DebugOutputter.h"
+#include "DebugOutput.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
 //#include "Actions.h"
@@ -21,9 +21,9 @@
 
 
 template<>
-InputParameters validParams<DebugOutputter>()
+InputParameters validParams<DebugOutput>()
 {
-  InputParameters params = validParams<PetscOutputter>();
+  InputParameters params = validParams<PetscOutput>();
 
   // Suppress unnecessary parameters
   params.suppressParameter<bool>("output_scalar_variables");
@@ -42,8 +42,8 @@ InputParameters validParams<DebugOutputter>()
   return params;
 }
 
-DebugOutputter::DebugOutputter(const std::string & name, InputParameters & parameters) :
-    PetscOutputter(name, parameters),
+DebugOutput::DebugOutput(const std::string & name, InputParameters & parameters) :
+    PetscOutput(name, parameters),
     _show_var_residual_norms(getParam<bool>("show_var_residual_norms")),
     _sys(_problem_ptr->getNonlinearSystem().sys())
 {
@@ -51,7 +51,7 @@ DebugOutputter::DebugOutputter(const std::string & name, InputParameters & param
   _output_nonlinear = true;
 
   // Check the name of the object to see if was created by SetupDebugAction
-  if (name.compare("moose_debug_outputter") == 0)
+  if (name.compare("moose_debug_output") == 0)
   {
     // Extract the SetupDebugAction object
     std::vector<Action *> actions = _app.actionWarehouse().getActionsByName("setup_debug");
@@ -63,12 +63,12 @@ DebugOutputter::DebugOutputter(const std::string & name, InputParameters & param
   }
 }
 
-DebugOutputter::~DebugOutputter()
+DebugOutput::~DebugOutput()
 {
 }
 
 void
-DebugOutputter::output()
+DebugOutput::output()
 {
   if (_show_var_residual_norms && onNonlinearResidual())
   {
@@ -99,31 +99,31 @@ DebugOutputter::output()
 }
 
 std::string
-DebugOutputter::filename()
+DebugOutput::filename()
 {
   return std::string();
 }
 
 void
-DebugOutputter::outputNodalVariables()
+DebugOutput::outputNodalVariables()
 {
   mooseError("Individual output of nodal variables is not support for Debug output");
 }
 
 void
-DebugOutputter::outputElementalVariables()
+DebugOutput::outputElementalVariables()
 {
   mooseError("Individual output of elemental variables is not support for Debug output");
 }
 
 void
-DebugOutputter::outputPostprocessors()
+DebugOutput::outputPostprocessors()
 {
   mooseError("Individual output of postprocessors is not support for Debug output");
 }
 
 void
-DebugOutputter::outputScalarVariables()
+DebugOutput::outputScalarVariables()
 {
   mooseError("Individual output of scalars is not support for Debug output");
 }

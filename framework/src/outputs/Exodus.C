@@ -24,7 +24,7 @@ template<>
 InputParameters validParams<Exodus>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<OversampleOutputter>();
+  InputParameters params = validParams<OversampleOutput>();
 
   // Set the default padding to 3
   params.set<unsigned int>("padding") = 3;
@@ -37,7 +37,7 @@ InputParameters validParams<Exodus>()
 }
 
 Exodus::Exodus(const std::string & name, InputParameters parameters) :
-    OversampleOutputter(name, parameters),
+    OversampleOutput(name, parameters),
     _exodus_io_ptr(NULL),
     _exodus_initialized(false),
     _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
@@ -196,7 +196,7 @@ Exodus::output()
   _global_values.clear();
 
   // Call the output methods
-  OversampleOutputter::output();
+  OversampleOutput::output();
 
   // Write the global variables (populated by the output methods)
   if (!_global_values.empty())

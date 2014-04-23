@@ -17,7 +17,7 @@
 #include "FEProblem.h"
 #include "Factory.h"
 #include "OutputWarehouse.h"
-#include "OutputBase.h"
+#include "Output.h"
 #include "MooseApp.h"
 #include "FileMesh.h"
 #include "MooseApp.h"
@@ -79,6 +79,6 @@ AddOutputAction::act()
     _moose_object_pars.set<std::string>("suffix") = "auto_recovery";
 
   // Create the object and add it to the warehouse
-  OutputBase * output = static_cast<OutputBase *>(_factory.create(_type, object_name, _moose_object_pars));
+  Output * output = static_cast<Output *>(_factory.create(_type, object_name, _moose_object_pars));
   output_warehouse.addOutput(output);
 }

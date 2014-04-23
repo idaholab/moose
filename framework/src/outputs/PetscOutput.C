@@ -13,7 +13,7 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "PetscOutputter.h"
+#include "PetscOutput.h"
 #include "FEProblem.h"
 
 // libMesh includes
@@ -21,9 +21,9 @@
 #include "libmesh/petsc_nonlinear_solver.h"
 
 template<>
-InputParameters validParams<PetscOutputter>()
+InputParameters validParams<PetscOutput>()
 {
-  InputParameters params = validParams<FileOutputter>();
+  InputParameters params = validParams<FileOutput>();
 
   // Toggled for outputting nonlinear and linear residuals, only if we have PETSc
 #ifdef LIBMESH_HAVE_PETSC
@@ -49,8 +49,8 @@ InputParameters validParams<PetscOutputter>()
   return params;
 }
 
-PetscOutputter::PetscOutputter(const std::string & name, InputParameters & parameters) :
-    FileOutputter(name, parameters),
+PetscOutput::PetscOutput(const std::string & name, InputParameters & parameters) :
+    FileOutput(name, parameters),
     _nonlinear_iter(0),
     _linear_iter(0),
     _output_nonlinear(getParam<bool>("nonlinear_residuals")),
@@ -88,12 +88,12 @@ PetscOutputter::PetscOutputter(const std::string & name, InputParameters & param
     _linear_end_time = getParam<Real>("linear_residual_end_time");
 }
 
-PetscOutputter::~PetscOutputter()
+PetscOutput::~PetscOutput()
 {
 }
 
 void
-PetscOutputter::timestepSetupInternal()
+PetscOutput::timestepSetupInternal()
 {
 // Only execute if PETSc exists
 #ifdef LIBMESH_HAVE_PETSC
@@ -128,10 +128,10 @@ PetscOutputter::timestepSetupInternal()
 // Only define the monitor functions if PETSc exists
 #ifdef LIBMESH_HAVE_PETSC
 PetscErrorCode
-PetscOutputter::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, void * void_ptr)
+PetscOutput::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, void * void_ptr)
 {
   // Get the outputter object
-  PetscOutputter * ptr = static_cast<PetscOutputter *>(void_ptr);
+  PetscOutput * ptr = static_cast<PetscOutput *>(void_ptr);
 
   // Update the pseudo times
   ptr->_nonlinear_time += ptr->_nonlinear_dt;
@@ -155,10 +155,10 @@ PetscOutputter::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, void * 
 }
 
 PetscErrorCode
-PetscOutputter::petscLinearOutput(KSP, PetscInt its, PetscReal norm, void * void_ptr)
+PetscOutput::petscLinearOutput(KSP, PetscInt its, PetscReal norm, void * void_ptr)
 {
   // Get the Outputter object
-  PetscOutputter * ptr = static_cast<PetscOutputter *>(void_ptr);
+  PetscOutput * ptr = static_cast<PetscOutput *>(void_ptr);
 
   // Update the pseudo time
   ptr->_linear_time += ptr->_linear_dt;
@@ -182,7 +182,7 @@ PetscOutputter::petscLinearOutput(KSP, PetscInt its, PetscReal norm, void * void
 #endif
 
 Real
-PetscOutputter::time()
+PetscOutput::time()
 {
   if (_on_nonlinear_residual)
     return _nonlinear_time;

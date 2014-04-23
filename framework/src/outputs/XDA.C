@@ -22,7 +22,7 @@ InputParameters validParams<XDA>()
 {
   // Get the base class parameters
 
-  InputParameters params = validParams<OversampleOutputter>();
+  InputParameters params = validParams<OversampleOutput>();
 
   // Supress un-available parameters
   params.suppressParameter<bool>("output_nodal_variables");
@@ -44,7 +44,7 @@ InputParameters validParams<XDA>()
 }
 
 XDA::XDA(const std::string & name, InputParameters parameters) :
-    OversampleOutputter(name, parameters),
+    OversampleOutput(name, parameters),
     _binary(getParam<bool>("_binary"))
 {
   // Force sequence output

@@ -12,36 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef FILEOUTPUTTER_H
-#define FILEOUTPUTTER_H
+#ifndef FILEOUTPUT_H
+#define FILEOUTPUT_H
 
 // MOOSE includes
-#include "OutputBase.h"
+#include "Output.h"
 
 // Forward declerations
-class FileOutputter;
+class FileOutput;
 
 template<>
-InputParameters validParams<FileOutputter>();
+InputParameters validParams<FileOutput>();
 
 /**
  * An outputter with filename support
  *
  * @see Exodus
  */
-class FileOutputter : public OutputBase
+class FileOutput : public Output
 {
 public:
 
   /**
    * Class constructor
    */
-  FileOutputter(const std::string & name, InputParameters & parameters);
+  FileOutput(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
    */
-  virtual ~FileOutputter();
+  virtual ~FileOutput();
 
   /**
    * The filename for the output file
@@ -116,4 +116,4 @@ protected:
   friend class OutputWarehouse;
 };
 
-#endif /* FILEOUTPUTTER_H */
+#endif /* FILEOUTPUT_H */

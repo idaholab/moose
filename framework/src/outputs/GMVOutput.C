@@ -13,17 +13,17 @@
 /****************************************************************/
 
 // Moose includes
-#include "GMVOutputter.h"
+#include "GMVOutput.h"
 
 // libMesh includes
 #include "libmesh/gmv_io.h"
 
 template<>
-InputParameters validParams<GMVOutputter>()
+InputParameters validParams<GMVOutput>()
 {
   // Get the base class parameters
 
-  InputParameters params = validParams<OversampleOutputter>();
+  InputParameters params = validParams<OversampleOutput>();
 
   // Suppress unavailable parameters
   params.suppressParameter<bool>("output_scalar_variables");
@@ -35,15 +35,15 @@ InputParameters validParams<GMVOutputter>()
   params.addParam<bool>("binary", true, "Output the file in binary format");
   params.addParamNamesToGroup("binary", "Advanced");
 
-  // Add description for the GMVOutputter class
-  params.addClassDescription("Object for outputting data in the GMVOutputter format");
+  // Add description for the GMVOutput class
+  params.addClassDescription("Object for outputting data in the GMVOutput format");
 
   // Return the InputParameters
   return params;
 }
 
-GMVOutputter::GMVOutputter(const std::string & name, InputParameters parameters) :
-    OversampleOutputter(name, parameters),
+GMVOutput::GMVOutput(const std::string & name, InputParameters parameters) :
+    OversampleOutput(name, parameters),
     _binary(getParam<bool>("binary"))
 {
   // Force sequence output
@@ -53,7 +53,7 @@ GMVOutputter::GMVOutputter(const std::string & name, InputParameters parameters)
 }
 
 void
-GMVOutputter::output()
+GMVOutput::output()
 {
   GMVIO out(_es_ptr->get_mesh());
   out.write_equation_systems(filename(), *_es_ptr);
@@ -61,31 +61,31 @@ GMVOutputter::output()
 }
 
 void
-GMVOutputter::outputNodalVariables()
+GMVOutput::outputNodalVariables()
 {
   mooseError("Individual output of nodal variables is not support for GMV output");
 }
 
 void
-GMVOutputter::outputElementalVariables()
+GMVOutput::outputElementalVariables()
 {
   mooseError("Individual output of elemental variables is not support for GMV output");
 }
 
 void
-GMVOutputter::outputPostprocessors()
+GMVOutput::outputPostprocessors()
 {
   mooseError("Individual output of postprocessors is not support for GMV output");
 }
 
 void
-GMVOutputter::outputScalarVariables()
+GMVOutput::outputScalarVariables()
 {
   mooseError("Individual output of scalars is not support for GMV output");
 }
 
 std::string
-GMVOutputter::filename()
+GMVOutput::filename()
 {
   // Append the padded time step to the file base
   std::ostringstream output;

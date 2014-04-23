@@ -13,17 +13,17 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "FileOutputter.h"
+#include "FileOutput.h"
 #include "MooseApp.h"
 #include "FEProblem.h"
 
 #include <unistd.h>
 
 template<>
-InputParameters validParams<FileOutputter>()
+InputParameters validParams<FileOutput>()
 {
   // Create InputParameters object for this stand-alone object
-  InputParameters params = validParams<OutputBase>();
+  InputParameters params = validParams<Output>();
   params.addParam<std::string>("file_base", "The desired solution output name without an extension (Defaults appends '_out' to the input file name)");
   params.addParam<bool>("append_displaced", false, "Append '_displaced' to the output file base");
   params.addParamNamesToGroup("append_displaced", "Displaced");
@@ -36,8 +36,8 @@ InputParameters validParams<FileOutputter>()
   return params;
 }
 
-FileOutputter::FileOutputter(const std::string & name, InputParameters & parameters) :
-    OutputBase(name, parameters),
+FileOutput::FileOutput(const std::string & name, InputParameters & parameters) :
+    Output(name, parameters),
     _file_base(getParam<std::string>("file_base")),
     _file_num(declareRecoverableData<unsigned int>("file_num", 0)),
     _padding(getParam<unsigned int>("padding")),
@@ -66,45 +66,45 @@ FileOutputter::FileOutputter(const std::string & name, InputParameters & paramet
   _output_file = checkFilename();
 }
 
-FileOutputter::~FileOutputter()
+FileOutput::~FileOutput()
 {
 }
 
 void
-FileOutputter::outputInitial()
+FileOutput::outputInitial()
 {
   // Perform filename check
   if (!_output_file)
     return;
 
   // Call the initial output method
-  OutputBase::outputInitial();
+  Output::outputInitial();
 }
 
 void
-FileOutputter::outputStep()
+FileOutput::outputStep()
 {
   // Perform filename check
   if (!_output_file)
     return;
 
   // Call the step output method
-  OutputBase::outputStep();
+  Output::outputStep();
 }
 
 void
-FileOutputter::outputFinal()
+FileOutput::outputFinal()
 {
   // Perform filename check
   if (!_output_file)
     return;
 
   // Call the final output methods
-  OutputBase::outputFinal();
+  Output::outputFinal();
 }
 
 std::string
-FileOutputter::getOutputFileBase(MooseApp & app)
+FileOutput::getOutputFileBase(MooseApp & app)
 {
   // If the App has an outputfile, then use it (MultiApp scenario)
   if (!app.getOutputFileBase().empty())
@@ -129,7 +129,7 @@ FileOutputter::getOutputFileBase(MooseApp & app)
 }
 
 bool
-FileOutputter::checkFilename()
+FileOutput::checkFilename()
 {
   // Return true if 'output_if_base_contains' is not utilized
   if (!isParamValid("output_if_base_contains"))
@@ -162,13 +162,13 @@ FileOutputter::checkFilename()
 
 
 void
-FileOutputter::setFileNumber(unsigned int num)
+FileOutput::setFileNumber(unsigned int num)
 {
   _file_num = num;
 }
 
 unsigned int
-FileOutputter::getFileNumber()
+FileOutput::getFileNumber()
 {
   return _file_num;
 }

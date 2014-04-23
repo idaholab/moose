@@ -16,7 +16,7 @@
 #define GNUPLOT_H
 
 // MOOSE includes
-#include "TableOutputter.h"
+#include "TableOutput.h"
 
 // Forward declarations
 class GNUPlot;
@@ -30,7 +30,7 @@ InputParameters validParams<GNUPlot>();
  * @see Exodus
  */
 class GNUPlot :
-  public TableOutputter
+  public TableOutput
 {
 public:
 

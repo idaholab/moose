@@ -327,14 +327,14 @@
 #include "Nemesis.h"
 #include "Console.h"
 #include "CSV.h"
-#include "VTK.h"
+#include "VTKOutput.h"
 #include "Checkpoint.h"
 #include "XDA.h"
-#include "GMVOutputter.h"
+#include "GMVOutput.h"
 #include "Tecplot.h"
 #include "GNUPlot.h"
 #include "SolutionHistory.h"
-#include "DebugOutputter.h"
+#include "DebugOutput.h"
 
 namespace Moose {
 
@@ -595,15 +595,15 @@ registerObjects(Factory & factory)
   registerOutput(Nemesis);
   registerOutput(Console);
   registerOutput(CSV);
-  registerNamedOutput(VTKOutputter, "VTK");
+  registerNamedOutput(VTKOutput, "VTK");
   registerOutput(Checkpoint);
   registerNamedOutput(XDA, "XDR");
   registerOutput(XDA);
-  registerNamedOutput(GMVOutputter, "GMV");
+  registerNamedOutput(GMVOutput, "GMV");
   registerOutput(Tecplot);
   registerOutput(GNUPlot);
   registerOutput(SolutionHistory);
-  registerOutput(DebugOutputter);
+  registerOutput(DebugOutput);
 
   registered = true;
 }
@@ -672,7 +672,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_multi_app",                MultiApp,               false);
   registerMooseObjectTask("add_transfer",                 Transfer,               false);
 
-  registerMooseObjectTask("add_output",                   OutputBase,             false);
+  registerMooseObjectTask("add_output",                   Output,             false);
 
   registerTask("add_feproblem", false);
   registerTask("add_bounds_vectors", false);

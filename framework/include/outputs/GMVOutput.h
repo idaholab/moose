@@ -12,35 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef GMVOUTPUTTER_H
-#define GMVOUTPUTTER_H
+#ifndef GMVOUTPUT_H
+#define GMVOUTPUT_H
 
 // MOOSE includes
-#include "OversampleOutputter.h"
+#include "OversampleOutput.h"
 
 // Forward declarations
-class GMVOutputter;
+class GMVOutput;
 
 template<>
-InputParameters validParams<GMVOutputter>();
+InputParameters validParams<GMVOutput>();
 
 /**
- * Class for output data to the GMVOutputterII format
+ * Class for output data to the GMVOutputII format
  */
-class GMVOutputter :
-  public OversampleOutputter
+class GMVOutput :
+  public OversampleOutput
 {
 public:
 
   /**
    * Class constructor
    */
-  GMVOutputter(const std::string & name, InputParameters);
+  GMVOutput(const std::string & name, InputParameters);
 
 protected:
 
   /**
-   * Overload the OutputBase::output method, this is required for GMVOutputter
+   * Overload the Output::output method, this is required for GMVOutput
    * output due to the method utilized for outputing
    */
   virtual void output();
@@ -53,7 +53,7 @@ protected:
 
   //@{
   /**
-   * Individual component output is not supported for GMVOutputter
+   * Individual component output is not supported for GMVOutput
    */
   virtual void outputNodalVariables();
   virtual void outputElementalVariables();
@@ -67,4 +67,4 @@ private:
   bool _binary;
 };
 
-#endif /* GMVOUTPUTTER_H */
+#endif /* GMVOUTPUT_H */

@@ -12,77 +12,61 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef VTK_H
-#define VTK_H
+#ifndef DEBUGOUTPUT_H
+#define DEBUGOUTPUT_H
 
 // MOOSE includes
-#include "OversampleOutputter.h"
-
-// libMesh includes
-#include "libmesh/vtk_io.h"
+#include "PetscOutput.h"
+#include "FEProblem.h"
 
 // Forward declerations
-class VTKOutputter;
+class DebugOutput;
 
 template<>
-InputParameters validParams<VTKOutputter>();
+InputParameters validParams<DebugOutput>();
 
 /**
  *
  */
-class VTKOutputter :
-  public OversampleOutputter
+class DebugOutput : public PetscOutput
 {
 public:
 
   /**
    * Class constructor
-   * @param name Object name
-   * @param parameters Object parameters
+   * @param name
+   * @param parameters
    */
-  VTKOutputter(const std::string & name, InputParameters & parameters);
+  DebugOutput(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
    */
-  virtual ~VTKOutputter();
-
-  /**
-   * Creates the libMes::VTKIO object for outputting the current timestep
-   */
-  virtual void outputSetup();
-
+  virtual ~DebugOutput();
 
 protected:
 
   /**
-   * Perform the output of VTK
+   * Perform the debugging output
    */
   virtual void output();
 
-  /**
-   * Return the file name with the *.vtk extension
-   */
-  std::string filename();
-
   //@{
   /**
-   * Individual component output is not currently supported for VTK
+   * Individual component output is not supported for DebugOutput
    */
+  std::string filename();
   virtual void outputNodalVariables();
   virtual void outputElementalVariables();
   virtual void outputPostprocessors();
   virtual void outputScalarVariables();
   //@}
 
-private:
+  /// Flag for outputting variable norms
+  bool _show_var_residual_norms;
 
-  /// Pointer to libMesh::VTKIO object
-  VTKIO * _vtk_io_ptr;
-
-  /// Flag for using binary compression
-  bool _binary;
-
+  // Reference to libMesh system
+  TransientNonlinearImplicitSystem & _sys;
 };
 
-#endif //VTK_H
+#endif //DEBUGOUTPUT_H

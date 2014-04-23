@@ -27,7 +27,7 @@ InputParameters validParams<Console>()
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Get the parameters from the base class
-  InputParameters params = validParams<TableOutputter>();
+  InputParameters params = validParams<TableOutput>();
 
   // Screen and file output toggles
   params.addParam<bool>("output_screen", true, "Output to the screen");
@@ -88,7 +88,7 @@ InputParameters validParams<Console>()
 }
 
 Console::Console(const std::string & name, InputParameters parameters) :
-    TableOutputter(name, parameters),
+    TableOutput(name, parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _use_color(false),
@@ -339,7 +339,7 @@ Console::output()
   else
   {
     writeVariableNorms();
-    TableOutputter::output();
+    TableOutput::output();
   }
 
   // Write the file
@@ -457,7 +457,7 @@ Console::insertNewline(std::stringstream &oss, std::streampos &begin, std::strea
 void
 Console::outputPostprocessors()
 {
-  TableOutputter::outputPostprocessors();
+  TableOutput::outputPostprocessors();
 
   if (!_postprocessor_table.empty())
   {
@@ -477,7 +477,7 @@ Console::outputPostprocessors()
 void
 Console::outputScalarVariables()
 {
-  TableOutputter::outputScalarVariables();
+  TableOutput::outputScalarVariables();
 
   if (!_scalar_table.empty())
   {
