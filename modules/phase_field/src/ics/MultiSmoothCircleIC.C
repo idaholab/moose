@@ -31,6 +31,9 @@ MultiSmoothCircleIC::MultiSmoothCircleIC(const std::string & name,
     _numtries(getParam<unsigned int>("numtries")),
     _radius_variation(getParam<Real>("radius_variation"))
 {
+  /// Implicitly assumed by the algorithm!
+  if (_outvalue > _invalue)
+    mooseError("outvalue needs to be smaller than invalue");
 }
 
 void
@@ -67,15 +70,15 @@ MultiSmoothCircleIC::initialSetup()
       if (_Lz == 0.0)
         zz = 0.0;
       else
-        zz = ran3*(_Lz - _bubspac) + 0.5*_bubspac;
+        zz = ran3 * (_Lz - _bubspac) + 0.5 * _bubspac;
 
       for (unsigned int j = 0; j < i; j++)
       {
         if (j == 0) rr = 1000.0;
 
-        Real rx = abs(xx-_bubcent[j](0));
-        Real ry = abs(yy-_bubcent[j](1));
-        Real rz = abs(zz-_bubcent[j](2));
+        Real rx = abs(xx - _bubcent[j](0));
+        Real ry = abs(yy - _bubcent[j](1));
+        Real rz = abs(zz - _bubcent[j](2));
         Real tmp_rr = std::sqrt(rx*rx + ry*ry + rz*rz);
         if (tmp_rr < rr)
           rr = tmp_rr;
@@ -96,10 +99,12 @@ MultiSmoothCircleIC::initialSetup()
 Real
 MultiSmoothCircleIC::value(const Point & p)
 {
+  // if outvalue were larger than invalue, no bubbles would be generated
   Real val = _outvalue;
   Real val2 = 0.0;
 
-  for (unsigned int i = 0; i < _numbub; i++)
+  // iterate ove all bubbles, or until we hit an interior point
+  for (unsigned int i = 0; i < _numbub && val < _invalue; i++)
   {
     _radius = _bubradi[i];
     _center = _bubcent[i];
@@ -115,15 +120,20 @@ RealGradient
 MultiSmoothCircleIC::gradient(const Point & p)
 {
   RealGradient grad = Gradient(0.0, 0.0, 0.0);
-  RealGradient grad2;
+  Real val = _outvalue;
+  Real val2 = 0.0;
 
-  for (unsigned int i = 0; i < _numbub; i++)
+  // iterate over all bubbles, or until we hit an interior point
+  for (unsigned int i = 0; i < _numbub && val < _invalue; i++)
   {
     _radius = _bubradi[i];
     _center = _bubcent[i];
 
-    grad2 = SmoothCircleIC::gradient(p)/_numbub;
-    if (grad.size() < grad2.size()) grad = grad2;
+    val2 = SmoothCircleIC::value(p);
+    if (val2 > val) {
+      val = val2;
+      grad = SmoothCircleIC::gradient(p);
+    }
   }
 
   return grad;
