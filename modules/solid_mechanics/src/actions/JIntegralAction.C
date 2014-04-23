@@ -30,7 +30,7 @@ JIntegralAction::JIntegralAction(const std::string & name, InputParameters param
   _have_crack_direction_vector_end_1(false),
   _have_crack_direction_vector_end_2(false),
   _treat_as_2d(getParam<bool>("2d")),
-  _axis_2d(getParam<unsigned int>("2d_axis")),
+  _axis_2d(getParam<unsigned int>("axis_2d")),
   _radius_inner(getParam<std::vector<Real> >("radius_inner")),
   _radius_outer(getParam<std::vector<Real> >("radius_outer")),
   _use_displaced_mesh(false)
@@ -98,7 +98,7 @@ JIntegralAction::act()
       params.set<std::vector<BoundaryName> >("crack_mouth_boundary") = _crack_mouth_boundary_names;
     }
     params.set<bool>("2d") = _treat_as_2d;
-    params.set<unsigned int>("2d_axis") = _axis_2d;
+    params.set<unsigned int>("axis_2d") = _axis_2d;
     params.set<std::vector<BoundaryName> >("boundary") = _boundary_names;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 

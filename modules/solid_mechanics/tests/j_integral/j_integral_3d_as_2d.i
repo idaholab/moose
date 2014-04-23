@@ -75,7 +75,7 @@
   crack_direction_method = CrackDirectionVector
   crack_direction_vector = '1 0 0'
   2d = true
-  2d_axis = 2
+  axis_2d = 2
   radius_inner = '4.0 4.5 5.0 5.5 6.0'
   radius_outer = '4.5 5.0 5.5 6.0 6.5'
 []
