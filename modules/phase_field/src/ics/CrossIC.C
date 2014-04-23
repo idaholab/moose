@@ -32,12 +32,12 @@ InputParameters validParams<CrossIC>()
 }
 
 CrossIC::CrossIC(const std::string & name,
-                 InputParameters parameters)
-  :C1ICBase(name, parameters),
-   _x1(parameters.get<Real>("x1")),
-   _y1(parameters.get<Real>("y1")),
-   _x2(parameters.get<Real>("x2")),
-   _y2(parameters.get<Real>("y2"))
+                 InputParameters parameters) :
+    C1ICBase(name, parameters),
+    _x1(parameters.get<Real>("x1")),
+    _y1(parameters.get<Real>("y1")),
+    _x2(parameters.get<Real>("x2")),
+    _y2(parameters.get<Real>("y2"))
 {}
 
 Real
@@ -221,7 +221,7 @@ CrossIC::value(const Point & p)
     {
       Real xd = x - (.5 - _width/2.);
       Real yd = y - (.5 - _length/2.);
-      Real r = std::sqrt(xd*xd+yd*yd);
+      Real r = std::sqrt(xd*xd + yd*yd);
       return interfaceValue(r);
     }
     else
@@ -271,9 +271,9 @@ CrossIC::value(const Point & p)
     }
     else if (y > .5 - _width/2. - _buffer - _interface)
     {
-      Real xd = x - (.5 - _length/2.);
-      Real yd = y - .5 + _width/2.;
-      Real r = std::sqrt(xd*xd+yd*yd);
+      Real xd = x - (.5 - _length / 2.);
+      Real yd = y - .5 + _width / 2.;
+      Real r = std::sqrt(xd*xd + yd*yd);
       return interfaceValue(r);
     }
     else
@@ -294,10 +294,12 @@ RealGradient CrossIC::gradient(const Point & p)
   pyminus(1) -= TOLERANCE;
   pxplus(0)  += TOLERANCE;
   pyplus(1)  += TOLERANCE;
+
   Number uxminus = value(pxminus),
-    uxplus  = value(pxplus),
-    uyminus = value(pyminus),
-    uyplus  = value(pyplus);
-  return Gradient((uxplus-uxminus)/2./TOLERANCE,
-                  (uyplus-uyminus)/2./TOLERANCE);
+         uxplus  = value(pxplus),
+         uyminus = value(pyminus),
+         uyplus  = value(pyplus);
+
+  return Gradient((uxplus - uxminus) / 2.0 / TOLERANCE,
+                  (uyplus - uyminus) / 2.0 / TOLERANCE);
 }

@@ -4,15 +4,15 @@ template<>
 InputParameters validParams<ACBulk>()
 {
   InputParameters params = validParams<KernelValue>();
-  params.addParam<std::string>("mob_name","L","The mobility used with the kernel");
+  params.addParam<std::string>("mob_name", "L", "The mobility used with the kernel");
 
   return params;
 }
 
-ACBulk::ACBulk(const std::string & name, InputParameters parameters)
-  :KernelValue(name, parameters),
-   _mob_name(getParam<std::string>("mob_name")),
-   _L(getMaterialProperty<Real>(_mob_name))
+ACBulk::ACBulk(const std::string & name, InputParameters parameters) :
+    KernelValue(name, parameters),
+    _mob_name(getParam<std::string>("mob_name")),
+    _L(getMaterialProperty<Real>(_mob_name))
 {
 }
 
@@ -36,7 +36,7 @@ ACBulk::precomputeQpResidual()
 {
   Real dFdeta = computeDFDOP(Residual);
 
-  return  _L[_qp]*(dFdeta) ;
+  return  _L[_qp] * (dFdeta) ;
 }
 
 Real
@@ -44,5 +44,5 @@ ACBulk::precomputeQpJacobian()
 {
   Real dFdeta = computeDFDOP(Jacobian);
 
-  return _L[_qp]*(dFdeta);
+  return _L[_qp] * (dFdeta);
 }

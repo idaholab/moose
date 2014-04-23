@@ -32,22 +32,23 @@ InputParameters validParams<SPPARKSUserObject>()
   return params;
 }
 
-SPPARKSUserObject::SPPARKSUserObject(const std::string & name, InputParameters params)
-  :GeneralUserObject(name, params),
-   _spparks(NULL),
-   _file(getParam<std::string>("file")),
-   _spparks_only(getParam<bool>("spparks_only")),
-   _from_ivar(isParamValid("from_ivar") ? getParam<std::vector<unsigned> >("from_ivar") : std::vector<unsigned>()),
-   _from_dvar(isParamValid("from_dvar") ? getParam<std::vector<unsigned> >("from_dvar") : std::vector<unsigned>()),
-   _to_ivar(isParamValid("to_ivar") ? getParam<std::vector<unsigned> >("to_ivar") : std::vector<unsigned>()),
-   _to_dvar(isParamValid("to_dvar") ? getParam<std::vector<unsigned> >("to_dvar") : std::vector<unsigned>()),
-   _xmin(getParam<Real>("xmin")),
-   _ymin(getParam<Real>("ymin")),
-   _zmin(getParam<Real>("zmin")),
-   _xmax(getParam<Real>("xmax")),
-   _ymax(getParam<Real>("ymax")),
-   _zmax(getParam<Real>("zmax")),
-   _last_time(std::numeric_limits<Real>::min())
+SPPARKSUserObject::SPPARKSUserObject(const std::string & name,
+                                     InputParameters params) :
+    GeneralUserObject(name, params),
+    _spparks(NULL),
+    _file(getParam<std::string>("file")),
+    _spparks_only(getParam<bool>("spparks_only")),
+    _from_ivar(isParamValid("from_ivar") ? getParam<std::vector<unsigned> >("from_ivar") : std::vector<unsigned>()),
+    _from_dvar(isParamValid("from_dvar") ? getParam<std::vector<unsigned> >("from_dvar") : std::vector<unsigned>()),
+    _to_ivar(isParamValid("to_ivar") ? getParam<std::vector<unsigned> >("to_ivar") : std::vector<unsigned>()),
+    _to_dvar(isParamValid("to_dvar") ? getParam<std::vector<unsigned> >("to_dvar") : std::vector<unsigned>()),
+    _xmin(getParam<Real>("xmin")),
+    _ymin(getParam<Real>("ymin")),
+    _zmin(getParam<Real>("zmin")),
+    _xmax(getParam<Real>("xmax")),
+    _ymax(getParam<Real>("ymax")),
+    _zmax(getParam<Real>("zmax")),
+    _last_time(std::numeric_limits<Real>::min())
 {
 
   if (isParamValid("int_aux_vars"))

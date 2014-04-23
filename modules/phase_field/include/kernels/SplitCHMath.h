@@ -1,5 +1,5 @@
-#ifndef SPLITCHMath_H
-#define SPLITCHMath_H
+#ifndef SPLITCHMATH_H
+#define SPLITCHMATH_H
 
 #include "SplitCHCRes.h"
 
@@ -13,13 +13,10 @@ InputParameters validParams<SplitCHMath>();
 class SplitCHMath : public SplitCHCRes
 {
 public:
-
   SplitCHMath(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeDFDC(PFFunctionType type);
-
-private:
-
 };
-#endif //SPLITCHMath_H
+
+#endif //SPLITCHMATH_H

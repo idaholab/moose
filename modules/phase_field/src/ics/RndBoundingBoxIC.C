@@ -22,22 +22,22 @@ InputParameters validParams<RndBoundingBoxIC>()
 }
 
 RndBoundingBoxIC::RndBoundingBoxIC(const std::string & name,
-                             InputParameters parameters)
-  :InitialCondition(name, parameters),
-   _x1(parameters.get<Real>("x1")),
-   _y1(parameters.get<Real>("y1")),
-   _z1(parameters.get<Real>("z1")),
-   _x2(parameters.get<Real>("x2")),
-   _y2(parameters.get<Real>("y2")),
-   _z2(parameters.get<Real>("z2")),
-   _mx_invalue(parameters.get<Real>("mx_invalue")),
-   _mx_outvalue(parameters.get<Real>("mx_outvalue")),
-   _mn_invalue(parameters.get<Real>("mn_invalue")),
-   _mn_outvalue(parameters.get<Real>("mn_outvalue")),
-   _range_invalue(_mx_invalue - _mn_invalue),
-   _range_outvalue(_mx_outvalue - _mn_outvalue),
-   _bottom_left(_x1,_y1,_z1),
-   _top_right(_x2,_y2,_z2)
+                                   InputParameters parameters) :
+    InitialCondition(name, parameters),
+    _x1(parameters.get<Real>("x1")),
+    _y1(parameters.get<Real>("y1")),
+    _z1(parameters.get<Real>("z1")),
+    _x2(parameters.get<Real>("x2")),
+    _y2(parameters.get<Real>("y2")),
+    _z2(parameters.get<Real>("z2")),
+    _mx_invalue(parameters.get<Real>("mx_invalue")),
+    _mx_outvalue(parameters.get<Real>("mx_outvalue")),
+    _mn_invalue(parameters.get<Real>("mn_invalue")),
+    _mn_outvalue(parameters.get<Real>("mn_outvalue")),
+    _range_invalue(_mx_invalue - _mn_invalue),
+    _range_outvalue(_mx_outvalue - _mn_outvalue),
+    _bottom_left(_x1,_y1,_z1),
+    _top_right(_x2,_y2,_z2)
 {
   mooseAssert(_range_invalue >= 0.0, "Inside Min > Inside Max for RandomIC!");
   mooseAssert(_range_outvalue >= 0.0, "Outside Min > Outside Max for RandomIC!");
@@ -49,14 +49,9 @@ RndBoundingBoxIC::value(const Point & p)
   //Random number between 0 and 1
   Real rand_num = MooseRandom::rand();
 
-  for(unsigned int i=0; i<LIBMESH_DIM; i++)
-    if(p(i) < _bottom_left(i) || p(i) > _top_right(i))
-      return rand_num*_range_outvalue + _mn_outvalue;
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    if (p(i) < _bottom_left(i) || p(i) > _top_right(i))
+      return rand_num * _range_outvalue + _mn_outvalue;
 
-  return rand_num*_range_invalue + _mn_invalue;
+  return rand_num * _range_invalue + _mn_invalue;
 }
-
-
-
-
-

@@ -19,7 +19,6 @@ InputParameters validParams<ThumbIC>();
 class ThumbIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *
@@ -38,13 +37,11 @@ public:
   virtual Real value(const Point & p);
 
 protected:
-
   Real _xcoord;
   Real _width;
   Real _height;
   Real _invalue;
   Real _outvalue;
-
 };
 
 #endif //THUMBIC_H

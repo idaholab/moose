@@ -8,8 +8,8 @@ InputParameters validParams<SplitCHMath>()
   return params;
 }
 
-SplitCHMath::SplitCHMath(const std::string & name, InputParameters parameters)
-  :SplitCHCRes(name, parameters)
+SplitCHMath::SplitCHMath(const std::string & name, InputParameters parameters) :
+    SplitCHCRes(name, parameters)
 {
 }
 
@@ -18,14 +18,12 @@ SplitCHMath::computeDFDC(PFFunctionType type)
 {
   switch (type)
   {
-  case Residual:
-    return _u[_qp]*_u[_qp]*_u[_qp] - _u[_qp]; // return Residual value
+    case Residual:
+      return _u[_qp]*_u[_qp]*_u[_qp] - _u[_qp]; // return Residual value
 
-  case Jacobian:
-    return (3.0*_u[_qp]*_u[_qp] - 1.0)*_phi[_j][_qp]; //return Jacobian value
-  default:
-    mooseError("Invalid type passed in");
-    break;
+    case Jacobian:
+      return (3.0*_u[_qp]*_u[_qp] - 1.0) * _phi[_j][_qp]; //return Jacobian value
   }
-  return 0;
+
+  mooseError("Invalid type passed in");
 }

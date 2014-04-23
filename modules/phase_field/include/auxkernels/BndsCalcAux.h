@@ -20,6 +20,6 @@ protected:
 
   std::vector<VariableValue *> _vals;
   unsigned int _ncrys;
-
 };
+
 #endif //BndsCalcAux_H

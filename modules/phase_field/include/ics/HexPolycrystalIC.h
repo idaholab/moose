@@ -20,7 +20,6 @@ InputParameters validParams<HexPolycrystalIC>();
 class HexPolycrystalIC : public PolycrystalReducedIC
 {
 public:
-
   /**
    * Constructor
    *

@@ -21,7 +21,6 @@ InputParameters validParams<SmoothCircleIC>();
 class SmoothCircleIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *
@@ -55,7 +54,6 @@ protected:
   Point _center;
 
   unsigned int _num_dim;
-
 };
 
 #endif //SMOOTHCIRCLEIC_H

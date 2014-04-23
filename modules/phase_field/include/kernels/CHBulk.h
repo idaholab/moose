@@ -1,5 +1,5 @@
-#ifndef CHBulk_H
-#define CHBulk_H
+#ifndef CHBULK_H
+#define CHBULK_H
 
 #include "KernelGrad.h"
 
@@ -39,4 +39,5 @@ private:
   bool _has_MJac;
   MaterialProperty<Real> * _DM;
 };
-#endif //CHBulk_H
+
+#endif //CHBULK_H

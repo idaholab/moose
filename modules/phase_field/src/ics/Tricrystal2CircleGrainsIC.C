@@ -5,19 +5,19 @@ template<>
 InputParameters validParams<Tricrystal2CircleGrainsIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.addRequiredParam<unsigned int>("crys_num","Number of crystals");
+  params.addRequiredParam<unsigned int>("crys_num", "Number of crystals");
   params.addRequiredParam<unsigned int>("crys_index", "The index for the current crystal");
 
   return params;
 }
 
 Tricrystal2CircleGrainsIC::Tricrystal2CircleGrainsIC(const std::string & name,
-                             InputParameters parameters)
-  :InitialCondition(name, parameters),
-   _mesh(_fe_problem.mesh()),
-   _nl(_fe_problem.getNonlinearSystem()),
-   _crys_num(getParam<unsigned int>("crys_num")),
-   _crys_index(getParam<unsigned int>("crys_index"))
+                                                     InputParameters parameters) :
+    InitialCondition(name, parameters),
+    _mesh(_fe_problem.mesh()),
+    _nl(_fe_problem.getNonlinearSystem()),
+    _crys_num(getParam<unsigned int>("crys_num")),
+    _crys_index(getParam<unsigned int>("crys_index"))
 {
   if (_crys_num != 3)
     mooseError("Tricrystal ICs must have crys_num = 3");
@@ -34,7 +34,6 @@ Tricrystal2CircleGrainsIC::Tricrystal2CircleGrainsIC(const std::string & name,
 Real
 Tricrystal2CircleGrainsIC::value(const Point & p)
 {
-
   Point grain_center_left;
   grain_center_left(0) = _bottom_left(0) + _range(0)/4.0;
   grain_center_left(1) = _bottom_left(1) + _range(1)/2.0;
@@ -53,5 +52,4 @@ Tricrystal2CircleGrainsIC::value(const Point & p)
     return 1.0;
   else
     return 0.0;
-
 }

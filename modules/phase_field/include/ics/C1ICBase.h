@@ -37,7 +37,6 @@ InputParameters validParams<C1ICBase>();
 class C1ICBase : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *

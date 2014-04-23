@@ -11,13 +11,13 @@ InputParameters validParams<CHBulk>()
   return params;
 }
 
-CHBulk::CHBulk(const std::string & name, InputParameters parameters)
-  :KernelGrad(name, parameters),
-   _mob_name(getParam<std::string>("mob_name")),
-   _Dmob_name(getParam<std::string>("Dmob_name")),
-   _M(getMaterialProperty<Real>(_mob_name)),
-   _has_MJac(getParam<bool>("has_MJac")),
-   _DM(_has_MJac ? &getMaterialProperty<Real>(_Dmob_name) : NULL)
+CHBulk::CHBulk(const std::string & name, InputParameters parameters) :
+    KernelGrad(name, parameters),
+    _mob_name(getParam<std::string>("mob_name")),
+    _Dmob_name(getParam<std::string>("Dmob_name")),
+    _M(getMaterialProperty<Real>(_mob_name)),
+    _has_MJac(getParam<bool>("has_MJac")),
+    _DM(_has_MJac ? &getMaterialProperty<Real>(_Dmob_name) : NULL)
 {
 }
 
@@ -37,9 +37,8 @@ CHBulk::precomputeQpJacobian()
     if (_has_MJac)
     {
       Real DMqp = (*_DM)[_qp];
-      grad_value += DMqp*_phi[_j][_qp]*computeGradDFDCons(Residual);
+      grad_value += DMqp*_phi[_j][_qp] * computeGradDFDCons(Residual);
     }
-
   }
 
   return grad_value; //Return jacobian

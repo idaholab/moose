@@ -1,5 +1,5 @@
 #ifndef MATDIFFUSION_H
-#define MATFDIFFUSION_H
+#define MATDIFFUSION_H
 
 #include "Diffusion.h"
 #include "Material.h"
@@ -13,12 +13,10 @@ InputParameters validParams<MatDiffusion>();
 class MatDiffusion : public Diffusion
 {
 public:
-
   MatDiffusion(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
-
   virtual Real computeQpJacobian();
 
 private:
@@ -26,4 +24,5 @@ private:
 
   MaterialProperty<Real> & _D;
 };
-#endif //COEFDIFFUSION_H
+
+#endif //MATDIFFUSION_H

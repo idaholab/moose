@@ -22,7 +22,6 @@ protected:
   const SPPARKSUserObject & _spparks;
   const int _ivar;
   const int _dvar;
-
 };
 
 template<>

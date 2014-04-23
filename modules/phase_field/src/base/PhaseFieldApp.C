@@ -98,9 +98,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(NodalFloodCount);
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);
-//  registerAux(SPPARKSAux);
+  // registerAux(SPPARKSAux);
   registerUserObject(NodalVolumeFraction);
-//  registerUserObject(SPPARKSUserObject);
+  // registerUserObject(SPPARKSUserObject);
 }
 
 void

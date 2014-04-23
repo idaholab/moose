@@ -21,15 +21,15 @@ InputParameters validParams<Tricrystal2CircleGrainsICAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<unsigned int>("crys_num", "number of order parameters to create");
-  params.addRequiredParam<std::string>("var_name_base","specifies the base name of the variables");
+  params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
 
   return params;
 }
 
-Tricrystal2CircleGrainsICAction::Tricrystal2CircleGrainsICAction(const std::string & name, InputParameters params)
-  :Action(name, params),
-   _var_name_base(getParam<std::string>("var_name_base")),
-   _crys_num(getParam<unsigned int>("crys_num"))
+Tricrystal2CircleGrainsICAction::Tricrystal2CircleGrainsICAction(const std::string & name, InputParameters params) :
+    Action(name, params),
+    _var_name_base(getParam<std::string>("var_name_base")),
+    _crys_num(getParam<unsigned int>("crys_num"))
 {}
 
 void
@@ -39,10 +39,8 @@ Tricrystal2CircleGrainsICAction::act()
   Moose::err << "Inside the Tricrystal2CircleGrainsICAction Object\n";
 #endif
 
-// Loop through the number of order parameters
-
-
-  for (unsigned int crys = 0; crys<_crys_num; crys++)
+  // Loop through the number of order parameters
+  for (unsigned int crys = 0; crys < _crys_num; crys++)
   {
     //Create variable names
     std::string var_name = _var_name_base;
@@ -60,5 +58,4 @@ Tricrystal2CircleGrainsICAction::act()
     //Add initial condition
     _problem->addInitialCondition("Tricrystal2CircleGrainsIC", "InitialCondition", poly_params);
   }
-
 }

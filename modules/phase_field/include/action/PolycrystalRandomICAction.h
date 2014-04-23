@@ -3,10 +3,10 @@
 
 #include "InputParameters.h"
 #include "Action.h"
+
 /**
  * Automatically generates all variables to model a polycrystal with crys_num orderparameters
  */
-
 class PolycrystalRandomICAction: public Action
 {
 public:
@@ -21,7 +21,6 @@ private:
   //unsigned int _grain_num;
   std::string _var_name_base;
   MooseEnum _random_type;
-
 };
 
 template<>

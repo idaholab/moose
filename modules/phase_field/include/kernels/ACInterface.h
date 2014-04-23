@@ -12,7 +12,6 @@ InputParameters validParams<ACInterface>();
 class ACInterface : public KernelGrad
 {
 public:
-
   ACInterface(const std::string & name, InputParameters parameters);
 
 protected:
@@ -28,9 +27,8 @@ protected:
 
 
 private:
-
   MaterialProperty<Real> & _kappa;
   MaterialProperty<Real> & _L;
-
 };
+
 #endif //ACInterface_H
