@@ -11,9 +11,10 @@ namespace Elk
 namespace SolidMechanics
 {
 
-Nonlinear3D::Nonlinear3D( const std::string & name,
+Nonlinear3D::Nonlinear3D( SolidModel & solid_model,
+                          const std::string & name,
                           InputParameters parameters )
-  :Element( name, parameters ),
+  :Element( solid_model, name, parameters ),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(coupledGradient("disp_y")),
    _grad_disp_z(coupledGradient("disp_z")),
@@ -25,7 +26,7 @@ Nonlinear3D::Nonlinear3D( const std::string & name,
    _Uhat(3,3)
 {
 
-  std::string increment_calculation = getParam<std::string>("increment_calculation");
+  std::string increment_calculation = solid_model.getParam<std::string>("increment_calculation");
   std::transform( increment_calculation.begin(), increment_calculation.end(),
                   increment_calculation.begin(), ::tolower );
   if ( increment_calculation == "rashidapprox" )
@@ -63,9 +64,9 @@ Nonlinear3D::computeIncrementalDeformationGradient( std::vector<ColumnMajorMatri
   ColumnMajorMatrix Fhat_average;
   Real volume(0);
 
-  _Fbar.resize(_qrule->n_points());
+  _Fbar.resize(_solid_model.qrule()->n_points());
 
-  for ( unsigned qp= 0; qp < _qrule->n_points(); ++qp )
+  for ( unsigned qp= 0; qp < _solid_model.qrule()->n_points(); ++qp )
   {
     fillMatrix( qp, _grad_disp_x, _grad_disp_y, _grad_disp_z, A );
     fillMatrix( qp, _grad_disp_x_old, _grad_disp_y_old, _grad_disp_z_old, Fbar);
@@ -89,9 +90,9 @@ Nonlinear3D::computeIncrementalDeformationGradient( std::vector<ColumnMajorMatri
 
 
     // Now include the contribution for the integration of Fhat over the element
-    Fhat_average += Fhat[qp] * _JxW[qp];
+    Fhat_average += Fhat[qp] * _solid_model.JxW(qp);
 
-    volume += _JxW[qp];  // Accumulate original configuration volume
+    volume += _solid_model.JxW(qp);  // Accumulate original configuration volume
   }
 
   Fhat_average /= volume;
@@ -100,7 +101,7 @@ Nonlinear3D::computeIncrementalDeformationGradient( std::vector<ColumnMajorMatri
 
 
   // Finalize volumetric locking correction
-  for ( unsigned qp=0; qp < _qrule->n_points(); ++qp )
+  for ( unsigned qp=0; qp < _solid_model.qrule()->n_points(); ++qp )
   {
     const Real det_Fhat( detMatrix( Fhat[qp] ) );
     const Real factor( std::pow( det_Fhat_average/det_Fhat, third ) );
@@ -352,7 +353,7 @@ Nonlinear3D::computeStrain( const unsigned qp,
 void
 Nonlinear3D::init()
 {
-  _Fhat.resize(_qrule->n_points());
+  _Fhat.resize(_solid_model.qrule()->n_points());
 
   computeIncrementalDeformationGradient(_Fhat);
 }

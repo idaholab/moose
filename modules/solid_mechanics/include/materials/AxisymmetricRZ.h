@@ -13,7 +13,7 @@ namespace SolidMechanics
 class AxisymmetricRZ : public Element
 {
 public:
-  AxisymmetricRZ(const std::string & name, InputParameters parameters);
+  AxisymmetricRZ(SolidModel & solid_model, const std::string & name, InputParameters parameters);
   virtual ~AxisymmetricRZ();
 
 protected:
