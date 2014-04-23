@@ -27,6 +27,7 @@
 #include <iterator>
 
 #include "libmesh/periodic_boundaries.h"
+
 //Forward Declarations
 class NodalFloodCount;
 class MooseMesh;
@@ -73,7 +74,7 @@ protected:
     BubbleData(std::set<unsigned int> & nodes, unsigned int var_idx) :
         _nodes(nodes),
         _var_idx(var_idx)
-      {}
+    {}
 
     std::set<unsigned int> _nodes;
     unsigned int _var_idx;
@@ -298,4 +299,4 @@ NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<T> 
 }
 
 
-#endif
+#endif //NODALFLOODCOUNT_H

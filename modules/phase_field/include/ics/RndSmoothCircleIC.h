@@ -20,7 +20,6 @@ InputParameters validParams<RndSmoothCircleIC>();
 class RndSmoothCircleIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *
@@ -51,7 +50,6 @@ private:
   Real _radius;
 
   Point _center;
-
 };
 
 #endif //SMOOTHCIRCLEIC_H

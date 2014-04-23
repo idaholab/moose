@@ -21,29 +21,29 @@ InputParameters validParams<BicrystalCircleGrainICAction>()
 {
   InputParameters params = validParams<Action>();
 
-  params.addRequiredParam<std::string>("var_name_base","specifies the base name of the variables");
-  params.addRequiredParam<unsigned int>("crys_num","Number of grains, should be 2");
-  params.addRequiredParam<Real>("radius","Void radius");
-  params.addRequiredParam<Real>("x","The x coordinate of the circle grain center");
-  params.addRequiredParam<Real>("y","The y coordinate of the circle grain center");
-  params.addParam<Real>("z",0.0, "The z coordinate of the circle grain center");
-  params.addParam<Real>("int_width",0.0,"The interfacial width of the void surface.  Defaults to sharp interface");
+  params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
+  params.addRequiredParam<unsigned int>("crys_num", "Number of grains, should be 2");
+  params.addRequiredParam<Real>("radius", "Void radius");
+  params.addRequiredParam<Real>("x", "The x coordinate of the circle grain center");
+  params.addRequiredParam<Real>("y", "The y coordinate of the circle grain center");
+  params.addParam<Real>("z", 0.0, "The z coordinate of the circle grain center");
+  params.addParam<Real>("int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
 
-  params.addParam<bool>("3D_sphere",true,"in 3D, whether the smaller grain is a spheres or columnar grain");
+  params.addParam<bool>("3D_sphere", true, "in 3D, whether the smaller grain is a spheres or columnar grain");
 
   return params;
 }
 
-BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const std::string & name, InputParameters params)
-  :Action(name, params),
-   _var_name_base(getParam<std::string>("var_name_base")),
-   _crys_num(getParam<unsigned int>("crys_num")),
-   _radius(getParam<Real>("radius")),
-   _x(getParam<Real>("x")),
-   _y(getParam<Real>("y")),
-   _z(getParam<Real>("z")),
-   _int_width(getParam<Real>("int_width")),
-   _3D_sphere(getParam<bool>("3D_sphere"))
+BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const std::string & name, InputParameters params) :
+    Action(name, params),
+    _var_name_base(getParam<std::string>("var_name_base")),
+    _crys_num(getParam<unsigned int>("crys_num")),
+    _radius(getParam<Real>("radius")),
+    _x(getParam<Real>("x")),
+    _y(getParam<Real>("y")),
+    _z(getParam<Real>("z")),
+    _int_width(getParam<Real>("int_width")),
+    _3D_sphere(getParam<bool>("3D_sphere"))
 {
   if (_crys_num != 2)
     mooseError("crys_num must equal 2 for bicrystal ICs");
@@ -56,9 +56,8 @@ BicrystalCircleGrainICAction::act()
   Moose::err << "Inside the BicrystalCircleGrainICAction Object\n";
 #endif
 
-// Loop through the number of order parameters
-
-  for (unsigned int crys = 0; crys<_crys_num; crys++)
+  // Loop through the number of order parameters
+  for (unsigned int crys = 0; crys < _crys_num; crys++)
   {
     //Create variable names
     std::string var_name = _var_name_base;
@@ -90,8 +89,5 @@ BicrystalCircleGrainICAction::act()
 
     //Add initial condition
     _problem->addInitialCondition("SmoothCircleIC", "InitialCondition", poly_params);
-
-
   }
-
 }

@@ -1,7 +1,5 @@
-#ifndef DoubleWellPotential_H
-#define DoubleWellPotential_H
-
-// Algebraic double well potential.
+#ifndef DOUBLEWELLPOTENTIAL_H
+#define DOUBLEWELLPOTENTIAL_H
 
 #include "ACBulk.h"
 
@@ -11,18 +9,16 @@ class DoubleWellPotential;
 template<>
 InputParameters validParams<DoubleWellPotential>();
 
+/**
+ * Algebraic double well potential.
+ */
 class DoubleWellPotential : public ACBulk
 {
 public:
-
   DoubleWellPotential(const std::string & name, InputParameters parameters);
 
 protected:
-
   virtual Real computeDFDOP(PFFunctionType type);
-
-private:
-
-
 };
-#endif //DoubleWellPotential_H
+
+#endif //DOUBLEWELLPOTENTIAL_H

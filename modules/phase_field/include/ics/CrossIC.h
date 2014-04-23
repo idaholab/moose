@@ -39,7 +39,6 @@ InputParameters validParams<CrossIC>();
 class CrossIC : public C1ICBase
 {
 public:
-
   /**
    * Constructor
    *

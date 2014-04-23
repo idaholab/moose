@@ -16,7 +16,6 @@ private:
   VariableName _c;
   bool _implicit;
   VariableName _T;
-
 };
 
 template<>

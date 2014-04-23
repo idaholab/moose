@@ -5,5 +5,4 @@
 
 InputParameters & AddV(InputParameters & parameters, const std::string & var_name = "v");
 
-
 #endif //ADDV_H

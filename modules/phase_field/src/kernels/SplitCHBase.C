@@ -8,8 +8,8 @@ InputParameters validParams<SplitCHBase>()
   return params;
 }
 
-SplitCHBase::SplitCHBase(const std::string & name, InputParameters parameters)
-  :Kernel(name, parameters)
+SplitCHBase::SplitCHBase(const std::string & name, InputParameters parameters) :
+    Kernel(name, parameters)
 {
 }
 
@@ -38,7 +38,6 @@ SplitCHBase::computeQpResidual()
   Real residual = (f_prime_zero + e_prime) *_test[_i][_qp];
 
   return residual;
-
 }
 
 Real
@@ -50,13 +49,11 @@ SplitCHBase::computeQpJacobian()
   Real jacobian = (df_prime_zero_dc + de_prime_dc) *_test[_i][_qp];
 
   return jacobian;
-
 }
 
 Real
 SplitCHBase::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
-
   return 0.0;
 }
 
@@ -71,4 +68,3 @@ SplitCHBase::computeDEDC(PFFunctionType /*type*/)
 {
   return 0.0;
 }
-

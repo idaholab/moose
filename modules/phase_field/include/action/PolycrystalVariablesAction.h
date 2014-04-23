@@ -3,10 +3,10 @@
 
 #include "InputParameters.h"
 #include "Action.h"
+
 /**
  * Automatically generates all variables to model a polycrystal with crys_num orderparameters
  */
-
 class PolycrystalVariablesAction: public Action
 {
 public:

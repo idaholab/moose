@@ -20,7 +20,6 @@ InputParameters validParams<LatticeSmoothCircleIC>();
 class LatticeSmoothCircleIC : public MultiSmoothCircleIC
 {
 public:
-
   /**
    * Constructor
    *
@@ -36,9 +35,6 @@ public:
 protected:
   Real _Rnd_variation;
   std::vector<unsigned int> _circles_per_side;
-
-// private:
-
 };
 
 #endif //LATTICESMOOTHCIRCLEIC_H

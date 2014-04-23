@@ -22,7 +22,6 @@ InputParameters validParams<PolycrystalReducedIC>();
 class PolycrystalReducedIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *
@@ -62,7 +61,6 @@ public:
 
   std::vector<Point> _centerpoints;
   std::vector<Real> _assigned_op;
-
 };
 
 #endif //POLYCRYSTALREDUCEDIC_H

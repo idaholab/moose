@@ -1,5 +1,5 @@
-#ifndef SPLITCHCRes_H
-#define SPLITCHCRes_H
+#ifndef SPLITCHCRES_H
+#define SPLITCHCRES_H
 
 #include "SplitCHBase.h"
 
@@ -13,7 +13,6 @@ InputParameters validParams<SplitCHCRes>();
 class SplitCHCRes : public SplitCHBase
 {
 public:
-
   SplitCHCRes(const std::string & name, InputParameters parameters);
 
 protected:
@@ -27,6 +26,6 @@ private:
   unsigned int _w_var;
   VariableValue & _w;
   VariableGradient & _grad_w;
-
 };
-#endif //SPLITCHCRes_H
+
+#endif //SPLITCHCRES_H

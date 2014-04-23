@@ -19,7 +19,6 @@ InputParameters validParams<PolycrystalRandomIC>();
 class PolycrystalRandomIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *
@@ -38,11 +37,9 @@ public:
   virtual Real value(const Point & p);
 
 private:
-
   unsigned int _crys_num;
   unsigned int _crys_index;
   unsigned int _typ;
-
 };
 
 #endif //POLYCRYSTALRANDOMIC_H

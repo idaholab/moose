@@ -34,16 +34,16 @@ InputParameters validParams<BicrystalBoundingBoxICAction>()
   return params;
 }
 
-BicrystalBoundingBoxICAction::BicrystalBoundingBoxICAction(const std::string & name, InputParameters params)
-  :Action(name, params),
-   _var_name_base(getParam<std::string>("var_name_base")),
-   _crys_num(getParam<unsigned int>("crys_num")),
-  _x1(getParam<Real>("x1")),
-  _y1(getParam<Real>("y1")),
-  _z1(getParam<Real>("z1")),
-  _x2(getParam<Real>("x2")),
-  _y2(getParam<Real>("y2")),
-  _z2(getParam<Real>("z2"))
+BicrystalBoundingBoxICAction::BicrystalBoundingBoxICAction(const std::string & name, InputParameters params) :
+    Action(name, params),
+    _var_name_base(getParam<std::string>("var_name_base")),
+    _crys_num(getParam<unsigned int>("crys_num")),
+    _x1(getParam<Real>("x1")),
+    _y1(getParam<Real>("y1")),
+    _z1(getParam<Real>("z1")),
+    _x2(getParam<Real>("x2")),
+    _y2(getParam<Real>("y2")),
+    _z2(getParam<Real>("z2"))
 {
   if (_crys_num != 2)
     mooseError("crys_num must equal 2 for bicrystal ICs");
@@ -56,9 +56,8 @@ BicrystalBoundingBoxICAction::act()
   Moose::err << "Inside the BicrystalBoundingBoxICAction Object\n";
 #endif
 
-// Loop through the number of order parameters
-
-  for (unsigned int crys = 0; crys<_crys_num; crys++)
+  // Loop through the number of order parameters
+  for (unsigned int crys = 0; crys < _crys_num; crys++)
   {
     //Create variable names
     std::string var_name = _var_name_base;
@@ -90,8 +89,5 @@ BicrystalBoundingBoxICAction::act()
 
     //Add initial condition
     _problem->addInitialCondition("BoundingBoxIC", "InitialCondition", poly_params);
-
-
   }
-
 }

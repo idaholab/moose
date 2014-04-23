@@ -11,7 +11,7 @@ InputParameters validParams<HexPolycrystalIC>()
   params.addParam<Real>("x_offset", 0.5, "Specifies offset of hexagon grid in x-direction");
   params.addParam<Real>("perturbation_percent", 0.0, "The percent to randomly perturbate centers of grains relative to the size of the grain");
 
-  params.addParam<unsigned int>("rand_seed",12444,"The random seed");
+  params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
 
   params.set<int>("typ") = 1;
 
@@ -19,10 +19,10 @@ InputParameters validParams<HexPolycrystalIC>()
 }
 
 HexPolycrystalIC::HexPolycrystalIC(const std::string & name,
-                             InputParameters parameters)
-  :PolycrystalReducedIC(name, parameters),
-   _x_offset(getParam<Real>("x_offset")),
-   _perturbation_percent(getParam<Real>("perturbation_percent"))
+                                   InputParameters parameters) :
+    PolycrystalReducedIC(name, parameters),
+    _x_offset(getParam<Real>("x_offset")),
+    _perturbation_percent(getParam<Real>("perturbation_percent"))
 {
   if (_perturbation_percent < 0.0 || _perturbation_percent > 1.0)
     mooseError("perturbation_percent out of range");
@@ -45,7 +45,7 @@ HexPolycrystalIC::initialSetup()
   unsigned int third_dimension_iterations = _mesh.dimension() == 3 ? root : 1;
   Real ndist = 1.0/root;
 
- //Set up domain bounds with mesh tools
+  // Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
   {
     _bottom_left(i) = _mesh.getMinInDimension(i);
@@ -63,15 +63,15 @@ HexPolycrystalIC::initialSetup()
   std::vector<Point> holder(_grain_num);
 
   unsigned int count = 0;
-  //Assign the relative center points positions, defining the grains according to a hexagonal pattern
-  for (unsigned int k = 0; k<third_dimension_iterations; ++k)
-    for (unsigned int j = 0; j<root; ++j)
-      for (unsigned int i = 0; i<root; ++i)
+  // Assign the relative center points positions, defining the grains according to a hexagonal pattern
+  for (unsigned int k = 0; k < third_dimension_iterations; ++k)
+    for (unsigned int j = 0; j < root; ++j)
+      for (unsigned int i = 0; i < root; ++i)
       {
-        //Set x-coordinate
+        // set x-coordinate
         holder[count](0) = i*ndist + (0.5*ndist*(j%2)) + _x_offset*ndist;
 
-        //set y-coordinate
+        // set y-coordinate
         holder[count](1) = j*ndist + (0.5*ndist*(k%2));
 
         // set z-coordinate
@@ -81,9 +81,9 @@ HexPolycrystalIC::initialSetup()
         count++;
       }
 
-  //Assign center point values
-  for (unsigned int grain=0; grain<_grain_num; grain++)
-    for (unsigned int i = 0; i<LIBMESH_DIM; i++)
+  // Assign center point values
+  for (unsigned int grain=0; grain < _grain_num; grain++)
+    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
     {
       if (_range(i) == 0)
         continue;
@@ -118,7 +118,7 @@ HexPolycrystalIC::initialSetup()
       }
     }
 
-    //Assign the current center point to the order parameter that is furthest away.
+    // Assign the current center point to the order parameter that is furthest away.
     Real mx;
     if (grain < _op_num)
       _assigned_op[grain] = grain;
@@ -134,6 +134,7 @@ HexPolycrystalIC::initialSetup()
         }
       _assigned_op[grain] = mx_ind;
     }
+
     //Moose::out << "For grain " << grain << ", center point = " << _centerpoints[grain](0) << " " << _centerpoints[grain](1) << "\n";
     //Moose::out << "Max index is " << _assigned_op[grain] << ", with a max distance of " << mx << "\n";
   }

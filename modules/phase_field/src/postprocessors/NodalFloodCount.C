@@ -59,13 +59,13 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _var_number(_vars[0]->number()),
     _single_map_mode(getParam<bool>("use_single_map")),
     _condense_map_info(getParam<bool>("condense_map_info")),
-  _global_numbering(getParam<bool>("use_global_numbering")),
-  _var_index_mode(getParam<bool>("enable_var_coloring")),
-  _maps_size(_single_map_mode ? 1 : _vars.size()),
-  _pbs(NULL),
-  _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
-  _track_memory(getParam<bool>("track_memory_usage"))
-  //   _bubble_volume_file_name(parameters.isParamValid("bubble_volume_file") ? getParam<FileName>("bubble_volume_file") : "")
+    _global_numbering(getParam<bool>("use_global_numbering")),
+    _var_index_mode(getParam<bool>("enable_var_coloring")),
+    _maps_size(_single_map_mode ? 1 : _vars.size()),
+    _pbs(NULL),
+    _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
+    _track_memory(getParam<bool>("track_memory_usage"))
+    // _bubble_volume_file_name(parameters.isParamValid("bubble_volume_file") ? getParam<FileName>("bubble_volume_file") : "")
 {
   // Size the data structures to hold the correct number of maps
   _bubble_maps.resize(_maps_size);
@@ -98,7 +98,7 @@ NodalFloodCount::initialize()
   _pbs = dynamic_cast<FEProblem *>(&_subproblem)->getNonlinearSystem().dofMap().get_periodic_boundaries();
 
   // Clear the bubble marking maps and region counters and other data structures
-  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
     _bubble_maps[map_num].clear();
     _bubble_sets[map_num].clear();
@@ -108,7 +108,9 @@ NodalFloodCount::initialize()
     if (_var_index_mode)
       _var_index_maps[map_num].clear();
   }
-  for (unsigned int var_num=0; var_num < _vars.size(); ++var_num)
+
+  // TODO: use iterator
+  for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
     _nodes_visited[var_num].clear();
 
   // Clear the packed data structure
@@ -192,7 +194,7 @@ NodalFloodCount::getValue()
 {
   unsigned int count = 0;
 
-  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     count += _bubble_sets[map_num].size();
 
   return count;
@@ -328,7 +330,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
       mooseAssert(data[map_num][0].empty(), "We have nodes marked with zeros - something is not correct");
       // Note: The zeroth "region" is everything outside of a bubble - we don't want to put
       // that into our packed data structure so start at 1 here!
-      for (unsigned int i=1 /* Yes - start at 1 */; i<=_region_counts[map_num]; ++i)
+      for (unsigned int i = 1 /* Yes - start at 1 */; i <= _region_counts[map_num]; ++i)
       {
         partial_packed_data[current_idx++] = data[map_num][i].size();     // The number of nodes in the current region
 
@@ -361,7 +363,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
   unsigned int curr_var_idx = std::numeric_limits<unsigned int>::max();
 
   _region_to_var_idx.clear();
-  for (unsigned int i=0; i<packed_data.size(); ++i)
+  for (unsigned int i = 0; i < packed_data.size(); ++i)
   {
     if (start_next_set)
     {
@@ -574,7 +576,7 @@ NodalFloodCount::calculateBubbleVolumes()
     unsigned int elem_n_nodes = elem->n_nodes();
     Real curr_volume = elem->volume();
 
-    for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     {
       unsigned int bubble_counter = 0;
       std::list<BubbleData>::const_iterator end = _bubble_sets[map_num].end();
@@ -598,7 +600,7 @@ NodalFloodCount::calculateBubbleVolumes()
   }
 
   // Stick all the partial bubble volumes in one long single vector to be gathered on the root processor
-  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     _all_bubble_volumes.insert(_all_bubble_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
 
   Parallel::sum(_all_bubble_volumes); //do all the sums!
