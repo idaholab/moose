@@ -102,7 +102,10 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
 
   // If no blocks were defined above, specify that it is valid on all blocks
   if (_blk_ids.empty())
+  {
     _blk_ids.insert(Moose::ANY_BLOCK_ID);
+    _blocks = std::vector<SubdomainName>(1,"ANY_BLOCK_ID");
+  }
 
   // Store the private parameter that contains the set of block ids
   parameters.set<std::vector<SubdomainID> >("_block_ids") = std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end());
