@@ -1115,6 +1115,7 @@ SolidModel::crackingStressRotation()
         }
 
         crackFactor = computeCrackFactor( i, sigma(i), (*_crack_flags)[_qp](i) );
+
         (*_crack_flags)[_qp](i) = crackFactor;
         _crack_flags_local(i) = crackFactor;
 
@@ -1257,7 +1258,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("Nonlinear3D formulation requested for coord_type = RZ problem");
     }
-    element = new Elk::SolidMechanics::Nonlinear3D(name, parameters);
+    element = new Elk::SolidMechanics::Nonlinear3D(*this, name, parameters);
   }
   else if ( formulation == "axisymmetricrz" )
   {
@@ -1266,7 +1267,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("AxisymmetricRZ must define disp_r and disp_z");
     }
-    element = new Elk::SolidMechanics::AxisymmetricRZ(name, parameters);
+    element = new Elk::SolidMechanics::AxisymmetricRZ(*this, name, parameters);
   }
   else if ( formulation == "sphericalr" )
   {
@@ -1274,7 +1275,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("SphericalR must define disp_r");
     }
-    element = new Elk::SolidMechanics::SphericalR(name, parameters);
+    element = new Elk::SolidMechanics::SphericalR(*this, name, parameters);
   }
   else if ( formulation == "planestrain" )
   {
@@ -1283,7 +1284,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("PlaneStrain must define disp_x and disp_y");
     }
-    element = new Elk::SolidMechanics::PlaneStrain(name, parameters);
+    element = new Elk::SolidMechanics::PlaneStrain(*this, name, parameters);
   }
   else if ( formulation == "linear" )
   {
@@ -1295,7 +1296,7 @@ SolidModel::createElement( const std::string & name,
     {
       mooseError("Linear formulation requested for coord_type = RZ problem");
     }
-    element = new Elk::SolidMechanics::Linear(name, parameters);
+    element = new Elk::SolidMechanics::Linear(*this, name, parameters);
   }
   else if ( formulation != "" )
   {
@@ -1311,7 +1312,7 @@ SolidModel::createElement( const std::string & name,
       err += ": RZ coord sys requires disp_r and disp_z for AxisymmetricRZ formulation";
       mooseError(err);
     }
-    element = new Elk::SolidMechanics::AxisymmetricRZ(name, parameters);
+    element = new Elk::SolidMechanics::AxisymmetricRZ(*this, name, parameters);
   }
   else if ( !element && _coord_type == Moose::COORD_RSPHERICAL )
   {
@@ -1321,7 +1322,7 @@ SolidModel::createElement( const std::string & name,
       err += ": RSPHERICAL coord sys requires disp_r for SphericalR formulation";
       mooseError(err);
     }
-    element = new Elk::SolidMechanics::SphericalR(name, parameters);
+    element = new Elk::SolidMechanics::SphericalR(*this, name, parameters);
   }
 
   if (!element)
@@ -1334,7 +1335,7 @@ SolidModel::createElement( const std::string & name,
       {
         mooseError("Error with displacement specification in material " + name);
       }
-      element = new Elk::SolidMechanics::Nonlinear3D(name, parameters);
+      element = new Elk::SolidMechanics::Nonlinear3D(*this, name, parameters);
     }
     else if (isCoupled("disp_x") &&
              isCoupled("disp_y"))
@@ -1343,7 +1344,7 @@ SolidModel::createElement( const std::string & name,
       {
         mooseError("Error with displacement specification in material " + name);
       }
-      element = new Elk::SolidMechanics::PlaneStrain(name, parameters);
+      element = new Elk::SolidMechanics::PlaneStrain(*this, name, parameters);
     }
     else if (isCoupled("disp_r") &&
              isCoupled("disp_z"))
@@ -1352,7 +1353,7 @@ SolidModel::createElement( const std::string & name,
       {
         mooseError("RZ coord system not specified, but disp_r and disp_z are");
       }
-      element = new Elk::SolidMechanics::AxisymmetricRZ( name, parameters );
+      element = new Elk::SolidMechanics::AxisymmetricRZ( *this, name, parameters );
     }
     else if (isCoupled("disp_r"))
     {
@@ -1360,11 +1361,11 @@ SolidModel::createElement( const std::string & name,
       {
         mooseError("RSPHERICAL coord system not specified, but disp_r is");
       }
-      element = new Elk::SolidMechanics::SphericalR( name, parameters );
+      element = new Elk::SolidMechanics::SphericalR( *this, name, parameters );
     }
     else if (isCoupled("disp_x"))
     {
-      element = new Elk::SolidMechanics::Linear( name, parameters );
+      element = new Elk::SolidMechanics::Linear( *this, name, parameters );
     }
     else
     {

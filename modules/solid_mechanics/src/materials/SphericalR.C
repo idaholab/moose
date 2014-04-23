@@ -2,17 +2,19 @@
 
 #include "Problem.h"
 #include "VolumetricModel.h"
+#include "SolidModel.h"
 
 namespace Elk
 {
 namespace SolidMechanics
 {
 
-SphericalR::SphericalR(const std::string & name,
+SphericalR::SphericalR(SolidModel & solid_model,
+                       const std::string & name,
                        InputParameters parameters)
-  :Element(name, parameters),
+  :Element(solid_model, name, parameters),
    _disp_r(coupledValue("disp_r")),
-   _large_strain(getParam<bool>("large_strain")),
+   _large_strain(solid_model.getParam<bool>("large_strain")),
    _grad_disp_r(coupledGradient("disp_r"))
 {
 }
@@ -28,7 +30,7 @@ SphericalR::computeStrain( const unsigned qp,
                            SymmTensor & strain_increment )
 {
   strain_increment.xx() = _grad_disp_r[qp](0);
-  strain_increment.yy() = (_q_point[qp](0) != 0.0 ? _disp_r[qp]/_q_point[qp](0) : 0.0);
+  strain_increment.yy() = (_solid_model.q_point(qp)(0) != 0.0 ? _disp_r[qp]/_solid_model.q_point(qp)(0) : 0.0);
   strain_increment.zz() = strain_increment.yy();
   if (_large_strain)
   {

@@ -18,7 +18,8 @@ namespace SolidMechanics
 class Nonlinear3D : public Element
 {
 public:
-  Nonlinear3D( const std::string & name,
+  Nonlinear3D( SolidModel & solid_model,
+               const std::string & name,
                InputParameters parameters );
 
   virtual ~Nonlinear3D();

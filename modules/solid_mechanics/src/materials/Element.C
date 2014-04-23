@@ -8,9 +8,12 @@ namespace SolidMechanics
 {
 
 
-Element::Element( const std::string & name,
+Element::Element( SolidModel & solid_model,
+                  const std::string & /*name*/,
                   InputParameters parameters ) :
-  Material(name+"_Element", parameters)
+  Coupleable(parameters, false),
+  ZeroInterface(parameters),
+  _solid_model( solid_model )
 {
 }
 
