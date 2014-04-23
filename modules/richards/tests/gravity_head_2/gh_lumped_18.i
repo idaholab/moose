@@ -1,7 +1,9 @@
-# unsaturated = false
+# with immobile saturation
+# unsaturated = true
 # gravity = true
 # supg = true
 # transient = true
+# lumped = true
 
 [Mesh]
   type = GeneratedMesh
@@ -14,6 +16,13 @@
 
 [GlobalParams]
   porepressureNames_UO = PPNames
+  density_UO = 'DensityWater DensityGas'
+  relperm_UO = 'RelPermWater RelPermGas'
+  SUPG_UO = 'SUPGwater SUPGgas'
+  sat_UO = 'SatWater SatGas'
+  seff_UO = 'SeffWater SeffGas'
+  viscosity = '1E-3 0.5E-3'
+  gravity = '-1 0 0'
 []
 
 [UserObjects]
@@ -43,13 +52,13 @@
   [../]
   [./RelPermWater]
     type = RichardsRelPermPower
-    simm = 0.0
+    simm = 0.4
     n = 2
   [../]
   [./RelPermGas]
     type = RichardsRelPermPower
-    simm = 0.0
-    n = 3
+    simm = 0.3
+    n = 2
   [../]
   [./SatWater]
     type = RichardsSat
@@ -63,11 +72,11 @@
   [../]
   [./SUPGwater]
     type = RichardsSUPGstandard
-    p_SUPG = 0.1
+    p_SUPG = 1E-5
   [../]
   [./SUPGgas]
     type = RichardsSUPGstandard
-    p_SUPG = 0.01
+    p_SUPG = 1E-5
   [../]
 []
 
@@ -90,7 +99,7 @@
   [../]
   [./gas_ic]
     type = ConstantIC
-    value = 1
+    value = 2
     variable = pgas
   [../]
 []
@@ -99,7 +108,7 @@
 [Kernels]
   active = 'richardsfwater richardstwater richardsfgas richardstgas'
   [./richardstwater]
-    type = RichardsMassChange
+    type = RichardsLumpedMassChange
     variable = pwater
   [../]
   [./richardsfwater]
@@ -107,7 +116,7 @@
     variable = pwater
   [../]
   [./richardstgas]
-    type = RichardsMassChange
+    type = RichardsLumpedMassChange
     variable = pgas
   [../]
   [./richardsfgas]
@@ -190,6 +199,23 @@
     type = PlotFunction
     function = fcn_error_water
   [../]
+
+  [./pg_left]
+    type = PointValue
+    point = '0 0 0'
+    variable = pgas
+    outputs = None
+  [../]
+  [./pg_right]
+    type = PointValue
+    point = '1 0 0'
+    variable = pgas
+    outputs = None
+  [../]
+  [./error_gas]
+    type = PlotFunction
+    function = fcn_error_gas
+  [../]
 []
 
 [Functions]
@@ -211,6 +237,12 @@
     vars = 'b gdens0 p0 xval p1'
     vals = '1E2 -1 pw_left 1 pw_right'
   [../]
+  [./fcn_error_gas]
+    type = ParsedFunction
+    value = 'abs((-b*log(-(gdens0*xval+(-b*exp(-p0/b)))/b)-p1)/p1)'
+    vars = 'b gdens0 p0 xval p1'
+    vals = '0.5E2 -0.5 pg_left 1 pg_right'
+  [../]
 []
 
 [Materials]
@@ -219,13 +251,6 @@
     block = 0
     mat_porosity = 0.1
     mat_permeability = '1E-5 0 0  0 1E-5 0  0 0 1E-5'
-    density_UO = 'DensityWater DensityGas'
-    relperm_UO = 'RelPermWater RelPermGas'
-    SUPG_UO = 'SUPGwater SUPGgas'
-    sat_UO = 'SatWater SatGas'
-    seff_UO = 'SeffWater SeffGas'
-    viscosity = '1E-3 0.5E-3'
-    gravity = '-1 0 0'
     linear_shape_fcns = true
   [../]
 []
@@ -238,7 +263,7 @@
     full = true
     #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-15 1E-15 10000'
+    petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10'
   [../]
 []
 
@@ -249,14 +274,16 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1E-2 1E-1 1E0 1E1 1E3 1E4 1E5 1E6 1E7'
+    time_dt = '1E-2 1E-1 1E0 0.5E1 0.5E2 0.4E4 1E5 1E6 1E7'
     time_t = '0 1E-1 1E0 1E1 1E2 1E3 1E4 1E5 1E6'
-  [../]
 []
 
 [Outputs]
-  file_base = gh17
-  csv = true
+  file_base = gh_lumped_18
+  output_initial = true
+  output_final = true
+  interval = 100000
+  exodus = true
   [./console]
     type = Console
     perf_log = true
