@@ -125,6 +125,11 @@ SymmIsotropicElasticityTensor::setEntries( Real C11, Real C12, Real C44 )
   _val[ 0] = _val[ 6] = _val[11] = C11;
   _val[ 1] = _val[ 2] = _val[ 7] = C12;
   _val[15] = _val[18] = _val[20] = C44;
+  _val[ 3] = _val[ 4] = _val[ 5] = 0;
+  _val[ 8] = _val[ 9] = _val[10] = 0;
+  _val[12] = _val[13] = _val[14] = 0;
+  _val[16] = _val[17] = 0;
+  _val[19] = 0;
 }
 
 Real
