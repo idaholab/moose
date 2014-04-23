@@ -135,9 +135,39 @@ public:
   void init();
 
   /**
-   * Return an Outputter object by name
+   * Return an Output object by name
+   * @tparam T The Output object type to return
+   * @param The name of the output object
+   * @return A pointer to the output object
    */
-  OutputBase * getOutputByName(std::string name);
+  template<typename T>
+  T * getOutput(std::string name);
+
+  /**
+   * Return a vector of objects by names
+   * @tparam T The Output object type to return
+   * @param names A vector of names of the output object
+   * @return A pointer to the output object
+   */
+  template<typename T>
+  std::vector<T *> getOutputs(std::vector<std::string> names);
+
+  /**
+   * Return a vector of objects of a given type
+   * @tparam T The Output object type to return
+   * @return A pointer to the output object
+   */
+  template<typename T>
+  std::vector<T *> getOutputs();
+
+  /**
+   * Return a list of output objects with a given type
+   * @tparam T The output object type
+   * @return A vector of names
+   */
+  template<typename T>
+  std::vector<std::string> getOutputNames();
+
 
 private:
 
@@ -185,5 +215,82 @@ private:
   // Allow complete access to FEProblem for calling initial/timestepSetup functions
   friend class FEProblem;
 };
+
+template<typename T>
+T *
+OutputWarehouse::getOutput(std::string name)
+{
+  // Check that the object exists
+  if (!hasOutput(name))
+    mooseError("An output object with the name '" << name << "' does not exist.");
+
+  // Attempt to cast the object to the correct type
+  T * output = dynamic_cast<T*>(_object_map[name]);
+
+  // Error if the cast fails
+  if (output == NULL)
+    mooseError("An output object with the name '" << name << "' for the specified type does not exist");
+
+  // Return the object
+  return output;
+}
+
+template<typename T>
+std::vector<T *>
+OutputWarehouse::getOutputs(std::vector<std::string> names)
+{
+  // The vector to output
+  std::vector<T *> outputs;
+
+  // Populate the vector
+  for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it)
+    outputs.push_back(getOutput<T>(*it));
+
+  // Return the objects
+  return outputs;
+}
+
+template<typename T>
+std::vector<T *>
+OutputWarehouse::getOutputs()
+{
+  // The vector to output
+  std::vector<T *> outputs;
+
+  // Populate the vector
+  for (std::map<std::string, OutputBase *>::iterator it = _object_map.begin(); it != _object_map.end(); ++it)
+  {
+    T * output = dynamic_cast<T*>(it->second);
+    if (output != NULL)
+      outputs.push_back(output);
+  }
+
+  // Return the objects
+  return outputs;
+}
+
+/**
+ * Return a list of output objects with a given type
+ * @tparam T The output object type
+ * @return A vector of names
+ */
+template<typename T>
+std::vector<std::string>
+OutputWarehouse::getOutputNames()
+{
+  // The output vector
+  std::vector<std::string> names;
+
+  // Loop through the objects and store the name if the type cast succeeds
+  for (std::map<std::string, OutputBase *>::iterator it = _object_map.begin(); it != _object_map.end(); ++it)
+  {
+    T * output = dynamic_cast<T*>(it->second);
+    if (output != NULL)
+      names.push_back(it->first);
+  }
+
+  // Return the names
+  return names;
+}
 
 #endif // OUTPUTWAREHOUSE_H

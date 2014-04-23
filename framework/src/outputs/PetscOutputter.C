@@ -31,8 +31,8 @@ InputParameters validParams<PetscOutputter>()
   params.addParam<bool>("nonlinear_residuals", false, "Specifies whether output occurs on each nonlinear residual evaluation");
 
   // Psuedo time step divisors
-  params.addParam<Real>("nonlinear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outtputting non-linear residuals");
-  params.addParam<Real>("linear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outtputting linear residuals");
+  params.addParam<Real>("nonlinear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outputting non-linear residuals");
+  params.addParam<Real>("linear_residual_dt_divisor", 1000, "Number of divisions applied to time step when outputting linear residuals");
 
   // Start times for residual output
   params.addParam<Real>("linear_residual_start_time", "Specifies a start time to begin output on each linear residual evaluation");

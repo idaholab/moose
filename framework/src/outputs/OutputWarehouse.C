@@ -227,12 +227,3 @@ OutputWarehouse::getSyncTimes()
 {
   return _sync_times;
 }
-
-OutputBase *
-OutputWarehouse::getOutputByName(std::string name)
-{
-  if (!hasOutput(name))
-    mooseError("An outputter with the name " << name << " does not exist.");
-
-  return _object_map[name];
-}

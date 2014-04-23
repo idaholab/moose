@@ -171,6 +171,8 @@
 // From MOOSE
 #include "AddVariableAction.h"
 
+// Outputs
+#include "OutputObjectTest.h"
 
 template<>
 InputParameters validParams<MooseTestApp>()
@@ -370,6 +372,9 @@ MooseTestApp::registerObjects(Factory & factory)
 
   registerProblem(MooseTestProblem);
   registerProblem(FailingProblem);
+
+  // Outputs
+  registerOutput(OutputObjectTest);
 }
 
 void
