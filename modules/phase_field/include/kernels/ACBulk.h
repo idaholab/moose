@@ -1,5 +1,5 @@
-#ifndef ACBulk_H
-#define ACBulk_H
+#ifndef ACBULK_H
+#define ACBULK_H
 
 #include "KernelValue.h"
 
@@ -12,7 +12,6 @@ InputParameters validParams<ACBulk>();
 class ACBulk : public KernelValue
 {
 public:
-
   ACBulk(const std::string & name, InputParameters parameters);
 
 protected:
@@ -21,15 +20,13 @@ protected:
     Jacobian,
     Residual
   };
+
   virtual Real precomputeQpResidual();
   virtual Real precomputeQpJacobian();
   virtual Real computeDFDOP(PFFunctionType type) = 0;
+
   std::string _mob_name;
   MaterialProperty<Real> & _L;
-
-
-private:
-
-
 };
-#endif //ACBulk_H
+
+#endif //ACBULK_H

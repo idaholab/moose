@@ -10,21 +10,21 @@ InputParameters validParams<PolycrystalKernelAction>()
 
   params.addRequiredParam<unsigned int>("crys_num", "specifies the number of grains to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
-  params.addParam<VariableName>("c","NONE","Name of coupled concentration variable");
-  params.addParam<Real>("en_ratio",1.0,"Ratio of surface to GB energy");
-  params.addParam<bool>("implicit",true,"Whether kernels are implicit or not");
-  params.addParam<VariableName>("T","Name of temperature variable");
+  params.addParam<VariableName>("c", "NONE", "Name of coupled concentration variable");
+  params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
+  params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
+  params.addParam<VariableName>("T", "Name of temperature variable");
 
   return params;
 }
 
-PolycrystalKernelAction::PolycrystalKernelAction(const std::string & name, InputParameters params)
-  :Action(name, params),
-   _crys_num(getParam<unsigned int>("crys_num")),
-   _var_name_base(getParam<std::string>("var_name_base")),
-   _c(getParam<VariableName>("c")),
-   _implicit(getParam<bool>("implicit")),
-   _T(getParam<VariableName>("T"))
+PolycrystalKernelAction::PolycrystalKernelAction(const std::string & name, InputParameters params) :
+    Action(name, params),
+    _crys_num(getParam<unsigned int>("crys_num")),
+    _var_name_base(getParam<std::string>("var_name_base")),
+    _c(getParam<VariableName>("c")),
+    _implicit(getParam<bool>("implicit")),
+    _T(getParam<VariableName>("T"))
 {}
 
 void
@@ -36,8 +36,7 @@ PolycrystalKernelAction::act()
 #endif
   // Moose::out << "Implicit = " << _implicit << Moose::out;
 
-
-  for (unsigned int crys = 0; crys<_crys_num; crys++)
+  for (unsigned int crys = 0; crys < _crys_num; crys++)
   {
     //Create variable names
     std::string var_name = _var_name_base;
@@ -50,9 +49,8 @@ PolycrystalKernelAction::act()
 
     unsigned int ind = 0;
 
-    for (unsigned int j = 0; j<_crys_num; j++)
+    for (unsigned int j = 0; j < _crys_num; j++)
     {
-
       if (j != crys)
       {
         std::string coupled_var_name = _var_name_base;
@@ -111,6 +109,4 @@ PolycrystalKernelAction::act()
       _problem->addKernel("ACGBPoly", kernel_name, poly_params);
     }
   }
-
-
 }

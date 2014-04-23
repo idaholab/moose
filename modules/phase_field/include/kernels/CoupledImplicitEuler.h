@@ -1,5 +1,5 @@
-#ifndef COUPLEDIMPLICITEULER
-#define COUPLEDIMPLICITEULER
+#ifndef COUPLEDIMPLICITEULER_H
+#define COUPLEDIMPLICITEULER_H
 
 #include "Kernel.h"
 
@@ -8,13 +8,13 @@ class CoupledImplicitEuler;
 
 template<>
 InputParameters validParams<CoupledImplicitEuler>();
+
 /**
  * This calculates the time derivative for a coupled variable
  **/
 class CoupledImplicitEuler : public Kernel
 {
 public:
-
   CoupledImplicitEuler(const std::string & name, InputParameters parameters);
 
 protected:
@@ -26,7 +26,6 @@ private:
   VariableValue & _v_dot;
   VariableValue & _dv_dot;
   unsigned int _v_var;
-
-
 };
-#endif //IMPLICITEULER
+
+#endif //COUPLEDIMPLICITEULER_H

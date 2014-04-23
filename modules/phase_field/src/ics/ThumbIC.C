@@ -14,13 +14,13 @@ InputParameters validParams<ThumbIC>()
 }
 
 ThumbIC::ThumbIC(const std::string & name,
-                               InputParameters parameters)
-  :InitialCondition(name, parameters),
-   _xcoord(parameters.get<Real>("xcoord")),
-   _width(parameters.get<Real>("width")),
-   _height(parameters.get<Real>("height")),
-   _invalue(parameters.get<Real>("invalue")),
-   _outvalue(parameters.get<Real>("outvalue"))
+                 InputParameters parameters) :
+    InitialCondition(name, parameters),
+    _xcoord(parameters.get<Real>("xcoord")),
+    _width(parameters.get<Real>("width")),
+    _height(parameters.get<Real>("height")),
+    _invalue(parameters.get<Real>("invalue")),
+    _outvalue(parameters.get<Real>("outvalue"))
 {}
 
 Real
@@ -32,8 +32,8 @@ ThumbIC::value(const Point & p)
   {
     Real rad = 0.0;
     Point center(_xcoord,_height,0.0);
-    for(unsigned int i=0; i<2; i++)
-      rad += (p(i)-center(i)) * (p(i)-center(i));
+    for (unsigned int i=0; i<2; ++i)
+      rad += (p(i) - center(i)) * (p(i) - center(i));
 
     rad = sqrt(rad);
 
@@ -43,12 +43,12 @@ ThumbIC::value(const Point & p)
       value = _outvalue;
   }
   else
+  {
     if (p(0) > _xcoord - _width/2.0 && p(0) < _xcoord + _width/2.0)
       value = _invalue;
     else
       value = _outvalue;
+  }
 
   return value;
-
 }
-

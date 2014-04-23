@@ -25,7 +25,6 @@ InputParameters validParams<RndBoundingBoxIC>();
 class RndBoundingBoxIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *

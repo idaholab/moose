@@ -6,30 +6,30 @@ template<>
 InputParameters validParams<PolycrystalReducedIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.addRequiredParam<unsigned int>("crys_num","Number of order parameters");
-  params.addRequiredParam<unsigned int>("grain_num","Number of grains being represented by the order parameters");
+  params.addRequiredParam<unsigned int>("crys_num", "Number of order parameters");
+  params.addRequiredParam<unsigned int>("grain_num", "Number of grains being represented by the order parameters");
   params.addRequiredParam<unsigned int>("crys_index", "The index for the current order parameter");
 
-  params.addParam<unsigned int>("rand_seed",12444,"The random seed");
+  params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
 
-  params.addParam<bool>("cody_test",false,"Use set grain center points for Cody's test. Grain num MUST equal 10");
+  params.addParam<bool>("cody_test", false, "Use set grain center points for Cody's test. Grain num MUST equal 10");
 
-  params.addParam<bool>("columnar_3D",false,"3D microstructure will be columnar in the z-direction?");
+  params.addParam<bool>("columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
 
   return params;
 }
 
 PolycrystalReducedIC::PolycrystalReducedIC(const std::string & name,
-                             InputParameters parameters)
-  :InitialCondition(name, parameters),
-   _mesh(_fe_problem.mesh()),
-   _nl(_fe_problem.getNonlinearSystem()),
-   _op_num(getParam<unsigned int>("crys_num")),
-   _grain_num(getParam<unsigned int>("grain_num")),
-   _op_index(getParam<unsigned int>("crys_index")),
-   _rand_seed(getParam<unsigned int>("rand_seed")),
-   _cody_test(getParam<bool>("cody_test")),
-   _columnar_3D(getParam<bool>("columnar_3D"))
+                                           InputParameters parameters) :
+    InitialCondition(name, parameters),
+    _mesh(_fe_problem.mesh()),
+    _nl(_fe_problem.getNonlinearSystem()),
+    _op_num(getParam<unsigned int>("crys_num")),
+    _grain_num(getParam<unsigned int>("grain_num")),
+    _op_index(getParam<unsigned int>("crys_index")),
+    _rand_seed(getParam<unsigned int>("rand_seed")),
+    _cody_test(getParam<bool>("cody_test")),
+    _columnar_3D(getParam<bool>("columnar_3D"))
 {
 }
 
@@ -80,9 +80,9 @@ PolycrystalReducedIC::initialSetup()
   }
 
   //Assign actual center point positions
-  for (unsigned int grain=0; grain<_grain_num; grain++)
+  for (unsigned int grain = 0; grain < _grain_num; grain++)
   {
-    for (unsigned int i = 0; i<LIBMESH_DIM; i++)
+    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
     {
       if (_cody_test)
         _centerpoints[grain](i) = _bottom_left(i) + _range(i)*holder[grain](i);
@@ -108,8 +108,8 @@ PolycrystalReducedIC::initialSetup()
     _assigned_op[9] = 4;
   }
   else
-
-    for (unsigned int grain=0; grain<_grain_num; grain++) //Assign grains to specific order parameters in a way that maximized the distance
+  {
+    for (unsigned int grain = 0; grain < _grain_num; grain++) //Assign grains to specific order parameters in a way that maximized the distance
     {
       std::vector<int> min_op_ind;
       std::vector<Real> min_op_dist;
@@ -119,9 +119,9 @@ PolycrystalReducedIC::initialSetup()
       if (grain >= _op_num)
       {
         std::fill(min_op_dist.begin() , min_op_dist.end(), _range.size());
-        for (unsigned int i=0; i<grain; i++)
+        for (unsigned int i = 0; i < grain; i++)
         {
-          Real dist =  _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
+          Real dist = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
           if (min_op_dist[_assigned_op[i]] > dist)
           {
             min_op_dist[_assigned_op[i]] = dist;
@@ -144,18 +144,20 @@ PolycrystalReducedIC::initialSetup()
             mx = min_op_dist[i];
             mx_ind = i;
           }
+
         _assigned_op[grain] = mx_ind;
       }
       //Moose::out << "For grain " << grain << ", center point = " << _centerpoints[grain](0) << " " << _centerpoints[grain](1) << "\n";
       //Moose::out << "Max index is " << _assigned_op[grain] << ", with a max distance of " << mx << "\n";
     }
+  }
 }
 
 Real
 PolycrystalReducedIC::value(const Point & p)
 {
   // Assumption: We are going to assume that all variables are periodic together
-//  _mesh.initPeriodicDistanceForVariable(_nl, _var.number());
+  // _mesh.initPeriodicDistanceForVariable(_nl, _var.number());
 
   Real min_distance = _top_right(0)*1e5;
   Real val = 0.0;
@@ -170,7 +172,6 @@ PolycrystalReducedIC::value(const Point & p)
       min_distance = distance;
       min_index = grain;
     }
-
   }
 
   if (min_index > _grain_num)
@@ -180,12 +181,11 @@ PolycrystalReducedIC::value(const Point & p)
   if (_assigned_op[min_index] == _op_index) //Make sure that the _op_index goes from 0 to _op_num-1
     val = 1.0;
 
-  if (val > 1)
+  if (val > 1.0)
     val = 1.0;
 
   if (val < 0.0)
     val = 0.0;
 
   return val;
-
 }

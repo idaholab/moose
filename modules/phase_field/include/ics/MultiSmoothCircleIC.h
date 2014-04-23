@@ -20,7 +20,6 @@ InputParameters validParams<MultiSmoothCircleIC>();
 class MultiSmoothCircleIC : public SmoothCircleIC
 {
 public:
-
   /**
    * Constructor
    *
@@ -48,10 +47,6 @@ protected:
 
   std::vector<Point> _bubcent;
   std::vector<Real> _bubradi;
-
-
-// private:
-
 };
 
 #endif //MULTISMOOTHCIRCLEIC_H

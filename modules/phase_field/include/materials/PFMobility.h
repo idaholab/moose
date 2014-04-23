@@ -1,5 +1,5 @@
-#ifndef PFMobility_H
-#define PFMobility_H
+#ifndef PFMOBILITY_H
+#define PFMOBILITY_H
 
 #include "Material.h"
 
@@ -13,21 +13,18 @@ class PFMobility : public Material
 {
 public:
   PFMobility(const std::string & name,
-          InputParameters parameters);
+             InputParameters parameters);
 
 protected:
   virtual void computeProperties();
 
 private:
-
   MaterialProperty<Real> & _M;
   MaterialProperty<RealGradient> & _grad_M;
   MaterialProperty<Real> & _kappa_c;
 
   Real _mob;
   Real _kappa;
-
-
 };
 
-#endif //PFMobility_H
+#endif //PFMOBILITY_H

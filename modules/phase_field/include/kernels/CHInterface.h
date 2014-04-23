@@ -1,5 +1,5 @@
-#ifndef CHInterface_H
-#define CHInterface_H
+#ifndef CHINTERFACE_H
+#define CHINTERFACE_H
 
 #include "Kernel.h"
 #include "Material.h"
@@ -9,14 +9,14 @@ class CHInterface;
 
 template<>
 InputParameters validParams<CHInterface>();
-/** This is the Cahn-Hilliard equation base class that implements the interfacial or gradient energy term of the equation.
- *  See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20–29 for more information.
- **/
 
+/**
+ * This is the Cahn-Hilliard equation base class that implements the interfacial or gradient energy term of the equation.
+ * See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20–29 for more information.
+ */
 class CHInterface : public Kernel
 {
 public:
-
   CHInterface(const std::string & name, InputParameters parameters);
 
 protected:
@@ -24,7 +24,6 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-
   std::string _kappa_name;
   std::string _mob_name;
   std::string _Dmob_name;
@@ -42,4 +41,5 @@ private:
   VariableTestSecond & _second_test;
   VariablePhiSecond & _second_phi;
 };
-#endif //CHInterface_H
+
+#endif //CHINTERFACE_H

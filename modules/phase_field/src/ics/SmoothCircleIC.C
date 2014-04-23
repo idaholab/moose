@@ -11,27 +11,27 @@ InputParameters validParams<SmoothCircleIC>()
   params.addRequiredParam<Real>("invalue", "The variable value inside the circle");
   params.addRequiredParam<Real>("outvalue", "The variable value outside the circle");
   params.addRequiredParam<Real>("radius", "The radius of a circle");
-  params.addParam<Real>("int_width",0.0,"The interfacial width of the void surface.  Defaults to sharp interface");
+  params.addParam<Real>("int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
 
-  params.addParam<bool>("3D_spheres",true,"in 3D, whether the objects are spheres or columns");
+  params.addParam<bool>("3D_spheres", true, "in 3D, whether the objects are spheres or columns");
 
   return params;
 }
 
 SmoothCircleIC::SmoothCircleIC(const std::string & name,
-                               InputParameters parameters)
-  :InitialCondition(name, parameters),
-   _mesh(_fe_problem.mesh()),
-   _x1(parameters.get<Real>("x1")),
-   _y1(parameters.get<Real>("y1")),
-   _z1(parameters.get<Real>("z1")),
-   _invalue(parameters.get<Real>("invalue")),
-   _outvalue(parameters.get<Real>("outvalue")),
-   _radius(parameters.get<Real>("radius")),
-   _int_width(parameters.get<Real>("int_width")),
-   _3D_spheres(parameters.get<bool>("3D_spheres")),
-   _center(_x1,_y1,_z1),
-   _num_dim(_3D_spheres ? 3 : 2)
+                               InputParameters parameters) :
+    InitialCondition(name, parameters),
+    _mesh(_fe_problem.mesh()),
+    _x1(parameters.get<Real>("x1")),
+    _y1(parameters.get<Real>("y1")),
+    _z1(parameters.get<Real>("z1")),
+    _invalue(parameters.get<Real>("invalue")),
+    _outvalue(parameters.get<Real>("outvalue")),
+    _radius(parameters.get<Real>("radius")),
+    _int_width(parameters.get<Real>("int_width")),
+    _3D_spheres(parameters.get<bool>("3D_spheres")),
+    _center(_x1, _y1, _z1),
+    _num_dim(_3D_spheres ? 3 : 2)
 {
 }
 
@@ -51,8 +51,9 @@ SmoothCircleIC::value(const Point & p)
     p2(2) = 0.0;
     center2(2) = 0.0;
   }
-  Real rad = _mesh.minPeriodicDistance(_var.number(),p2,center2);
+
   //Set value for outside the circle, inside the circle, and on the smooth interface
+  Real rad = _mesh.minPeriodicDistance(_var.number(),p2,center2);
   if (rad <= _radius - _int_width/2.0) //Inside circle
     value = _invalue;
   else if (rad < _radius + _int_width/2.0) //Smooth interface
@@ -64,7 +65,6 @@ SmoothCircleIC::value(const Point & p)
     value = _outvalue;
 
   return value;
-
 }
 
 
@@ -81,20 +81,21 @@ SmoothCircleIC::gradient(const Point & p)
     p2(2) = 0.0;
     center2(2) = 0.0;
   }
-  Real rad = _mesh.minPeriodicDistance(_var.number(),p2,center2);
+
   //Determine derivative values over the smooth interface
+  Real rad = _mesh.minPeriodicDistance(_var.number(), p2, center2);
   if (rad < _radius + _int_width/2.0 && rad > _radius - _int_width/2.0)
   {
-    Real int_pos = (rad - _radius + _int_width/2.0)/_int_width;
-    Real Dint_posDr = 1.0/_int_width;
-    DvalueDr = Dint_posDr*(_invalue-_outvalue)*(-sin(int_pos*libMesh::pi)*libMesh::pi)/2.0;
+    Real int_pos = (rad - _radius + _int_width / 2.0) / _int_width;
+    Real Dint_posDr = 1.0 / _int_width;
+    DvalueDr = Dint_posDr * (_invalue - _outvalue) * (-sin(int_pos * libMesh::pi) * libMesh::pi) / 2.0;
   }
   //Set gradient over the smooth interface
-  if (rad != 0)
-    return Gradient((p(0) - _center(0))*DvalueDr/rad,
-                    (p(1) - _center(1))*DvalueDr/rad,
-                    (p(2) - _center(2))*DvalueDr/rad);
+  if (rad != 0) {
+    return Gradient((p(0) - _center(0)) * DvalueDr / rad,
+                    (p(1) - _center(1)) * DvalueDr / rad,
+                    (p(2) - _center(2)) * DvalueDr / rad);
+  }
   else
-    return Gradient(0.0,0.0,0.0);
-
+    return Gradient(0.0, 0.0, 0.0);
 }

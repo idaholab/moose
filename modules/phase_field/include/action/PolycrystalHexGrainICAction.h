@@ -3,10 +3,10 @@
 
 #include "InputParameters.h"
 #include "Action.h"
+
 /**
  * Automatically generates ic for polycrystal hexagonal grain structure. Must have squared number of grains and periodic BCs.
  */
-
 class PolycrystalHexGrainICAction: public Action
 {
 public:
