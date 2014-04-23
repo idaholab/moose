@@ -420,8 +420,14 @@ SolidModel::modifyStrainIncrement()
   if (_constitutive_active)
   {
     ConstitutiveModel * cm = _constitutive_model[current_block];
-    modified |= cm->modifyStrainIncrement(*_current_elem, _qp,
-                                          _strain_increment, _d_strain_dT);
+
+    // Let's be a little careful and check for a non-existent
+    // ConstitutiveModel, which could be returned as a default value
+    // from std::map::operator[]
+    if (!cm)
+      mooseError("ConstitutiveModel not available for block " << current_block);
+
+    modified |= cm->modifyStrainIncrement(*_current_elem, _qp, _strain_increment, _d_strain_dT);
   }
 
   if (!modified)
@@ -671,11 +677,16 @@ SolidModel::computeConstitutiveModelStress()
 
   const SubdomainID current_block = _current_elem->subdomain_id();
   ConstitutiveModel* cm = _constitutive_model[current_block];
-  mooseAssert(_constitutive_active, "Logic error.  ConstitutiveModel not active.");
-  mooseAssert(cm, "Logic error.  No ConstitutiveModel.");
 
-  cm->computeStress( *_current_elem, _qp, *elasticityTensor(), _stress_old, _strain_increment,
-                     _stress[_qp] );
+  mooseAssert(_constitutive_active, "Logic error.  ConstitutiveModel not active.");
+
+  // Let's be a little careful and check for a non-existent
+  // ConstitutiveModel, which could be returned as a default value
+  // from std::map::operator[]
+  if (!cm)
+    mooseError("Logic error.  No ConstitutiveModel for current_block=" << current_block << ".");
+
+  cm->computeStress(*_current_elem, _qp, *elasticityTensor(), _stress_old, _strain_increment, _stress[_qp]);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -710,6 +721,13 @@ SolidModel::updateElasticityTensor(SymmElasticityTensor & tensor)
   {
     const SubdomainID current_block = _current_elem->subdomain_id();
     ConstitutiveModel* cm = _constitutive_model[current_block];
+
+    // Let's be a little careful and check for a non-existent
+    // ConstitutiveModel, which could be returned as a default value
+    // from std::map::operator[]
+    if (!cm)
+      mooseError("ConstitutiveModel not available for block " << current_block);
+
     changed |= cm->updateElasticityTensor( _qp, tensor );
   }
 

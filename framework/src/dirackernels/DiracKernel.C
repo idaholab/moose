@@ -72,6 +72,8 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())
 {
+  // Stateful material properties are not allowed on DiracKernels
+  statefulPropertiesAllowed(false);
 }
 
 void

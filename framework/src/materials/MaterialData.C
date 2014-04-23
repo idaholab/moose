@@ -77,7 +77,7 @@ MaterialData::reinit(std::vector<Material *> & mats)
 void
 MaterialData::swapBack(const Elem & elem, unsigned int side/* = 0*/)
 {
-  if (_storage.hasStatefulProperties())
+  if (_swapped && _storage.hasStatefulProperties())
   {
     _storage.swapBack(*this, elem, side);
     _swapped = false;
