@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<GNUPlot>()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<TableOutputter>();
+  InputParameters params = validParams<TableOutput>();
 
   // Set an enum for the possible file extensions
   MooseEnum ext("png ps gif", "png", "GNU plot file extension");
@@ -32,7 +32,7 @@ InputParameters validParams<GNUPlot>()
 }
 
 GNUPlot::GNUPlot(const std::string & name, InputParameters & parameters) :
-    TableOutputter(name, parameters),
+    TableOutput(name, parameters),
     _extension(getParam<MooseEnum>("extension"))
 {
 }
@@ -51,7 +51,7 @@ void
 GNUPlot::output()
 {
   // Call the base class output (populates tables)
-  TableOutputter::output();
+  TableOutput::output();
 
   // Print the table containing all the data to a file
   if (!_all_data_table.empty())

@@ -12,11 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef OVERSAMPLEOUTPUTTER_H
-#define OVERSAMPLEOUTPUTTER_H
+#ifndef OVERSAMPLEOUTPUT_H
+#define OVERSAMPLEOUTPUT_H
 
 // MOOSE includes
-#include "PetscOutputter.h"
+#include "PetscOutput.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -25,10 +25,10 @@
 #include "libmesh/mesh_function.h"
 
 // Forward declerations
-class OversampleOutputter;
+class OversampleOutput;
 
 template<>
-InputParameters validParams<OversampleOutputter>();
+InputParameters validParams<OversampleOutput>();
 
 /**
  * Based class for providing re-positioning and oversampling support to output objects
@@ -45,8 +45,8 @@ InputParameters validParams<OversampleOutputter>();
  *
  * @see Exodus
  */
-class OversampleOutputter :
-  public PetscOutputter
+class OversampleOutput :
+  public PetscOutput
 {
 public:
 
@@ -57,7 +57,7 @@ public:
    * required for oversampling.
    * @see initOversample()
    */
-  OversampleOutputter(const std::string & name, InputParameters & parameters);
+  OversampleOutput(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
@@ -65,7 +65,7 @@ public:
    * Cleans up the various objects associated with the oversample EquationsSystem and Mesh
    * objects.
    */
-  virtual ~OversampleOutputter();
+  virtual ~OversampleOutput();
 
   /**
    * Performs the initial output, including the creation of the oversampled solution vector
@@ -135,4 +135,4 @@ private:
 
 };
 
-#endif // OVERSAMPLEBSE_H
+#endif // OVERSAMPLEOUTPUT_H

@@ -14,9 +14,9 @@
 
 // MOOSE includes
 #include "OutputWarehouse.h"
-#include "OutputBase.h"
+#include "Output.h"
 #include "Console.h"
-#include "FileOutputter.h"
+#include "FileOutput.h"
 #include "Checkpoint.h"
 #include "FEProblem.h"
 
@@ -36,14 +36,14 @@ OutputWarehouse::OutputWarehouse() :
 
 OutputWarehouse::~OutputWarehouse()
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     delete *it;
 }
 
 void
 OutputWarehouse::initialSetup()
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->initialSetup();
 }
 
@@ -51,14 +51,14 @@ OutputWarehouse::initialSetup()
 void
 OutputWarehouse::init()
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->init();
 }
 
 void
 OutputWarehouse::timestepSetup()
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
   {
     (*it)->timestepSetupInternal();
     (*it)->timestepSetup();
@@ -66,7 +66,7 @@ OutputWarehouse::timestepSetup()
 }
 
 void
-OutputWarehouse::addOutput(OutputBase * output)
+OutputWarehouse::addOutput(Output * output)
 {
   // Add the object to the warehouse storage, Checkpoint placed at end so they are called last
   Checkpoint * cp = dynamic_cast<Checkpoint *>(output);
@@ -78,8 +78,8 @@ OutputWarehouse::addOutput(OutputBase * output)
   // Store the name and pointer in map
   _object_map[output->name()] = output;
 
-  // If the output object is a FileOutputBase then store the output filename
-  FileOutputter * ptr = dynamic_cast<FileOutputter *>(output);
+  // If the output object is a FileOutput then store the output filename
+  FileOutput * ptr = dynamic_cast<FileOutput *>(output);
   if (ptr != NULL)
     addOutputFilename(ptr->filename());
 
@@ -109,7 +109,7 @@ OutputWarehouse::hasOutput(std::string name)
   return _object_map.find(name) != _object_map.end();
 }
 
-const std::vector<OutputBase *> &
+const std::vector<Output *> &
 OutputWarehouse::getOutputs() const
 {
   return _object_ptrs;
@@ -127,58 +127,58 @@ OutputWarehouse::addOutputFilename(OutFileBase filename)
 void
 OutputWarehouse::outputInitial()
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->outputInitial();
 }
 
 void
 OutputWarehouse::outputFailedStep()
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->outputFailedStep();
 }
 
 void
 OutputWarehouse::outputStep()
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->outputStep();
 }
 
 void
 OutputWarehouse::outputFinal()
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->outputFinal();
 }
 
 void
 OutputWarehouse::meshChanged()
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->meshChanged();
 }
 
 void
 OutputWarehouse::allowOutput(bool state)
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->allowOutput(state);
 }
 
 void
 OutputWarehouse::forceOutput()
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     (*it)->forceOutput();
 }
 
 void
 OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset)
 {
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
   {
-    FileOutputter * ptr = dynamic_cast<FileOutputter *>(*it);
+    FileOutput * ptr = dynamic_cast<FileOutput *>(*it);
     if (ptr != NULL)
     {
       std::map<std::string, unsigned int>::const_iterator it = input.find(ptr->name());
@@ -198,9 +198,9 @@ std::map<std::string, unsigned int>
 OutputWarehouse::getFileNumbers()
 {
   std::map<std::string, unsigned int> output;
-  for (std::vector<OutputBase *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
   {
-    FileOutputter * ptr = dynamic_cast<FileOutputter *>(*it);
+    FileOutput * ptr = dynamic_cast<FileOutput *>(*it);
     if (ptr != NULL)
       output[ptr->name()] = ptr->getFileNumber();
   }

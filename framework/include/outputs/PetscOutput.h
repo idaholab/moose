@@ -12,22 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PETSCOUTPUTTER_H
-#define PETSCOUTPUTTER_H
+#ifndef PETSCOUTPUT_H
+#define PETSCOUTPUT_H
 
 // MOOSE includes
-#include "FileOutputter.h"
+#include "FileOutput.h"
 
 // Forward declerations
-class PetscOutputter;
+class PetscOutput;
 
 template<>
-InputParameters validParams<PetscOutputter>();
+InputParameters validParams<PetscOutput>();
 
 /**
  * Adds the ability to output on every nonlinear and/or linear residual
  */
-class PetscOutputter : public FileOutputter
+class PetscOutput : public FileOutput
 {
 public:
 
@@ -36,12 +36,12 @@ public:
    * @param name Outputter name
    * @param parameters Outputter input file parameters
    */
-  PetscOutputter(const std::string & name, InputParameters & parameters);
+  PetscOutput(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
    */
-  virtual ~PetscOutputter();
+  virtual ~PetscOutput();
 
   /**
    * Linear residual output status
@@ -139,4 +139,4 @@ private:
   /// Linear residual output end time
   Real _linear_end_time;
 };
-#endif //PETSCOUTPUTTER_H
+#endif //PETSCOUTPUT_H

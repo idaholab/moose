@@ -13,7 +13,7 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "TableOutputter.h"
+#include "TableOutput.h"
 #include "FEProblem.h"
 #include "Postprocessor.h"
 #include "PetscSupport.h"
@@ -25,13 +25,13 @@
 #include "libmesh/string_to_enum.h"
 
 template<>
-InputParameters validParams<TableOutputter>()
+InputParameters validParams<TableOutput>()
 {
   // Fit mode selection Enum
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Base class parameters
-  InputParameters params = validParams<PetscOutputter>();
+  InputParameters params = validParams<PetscOutput>();
 
   // Suppressing the output of nodal and elemental variables disables this type of output
   params.suppressParameter<bool>("output_elemental_variables");
@@ -43,32 +43,32 @@ InputParameters validParams<TableOutputter>()
   return params;
 }
 
-TableOutputter::TableOutputter(const std::string & name, InputParameters parameters) :
-    PetscOutputter(name, parameters),
+TableOutput::TableOutput(const std::string & name, InputParameters parameters) :
+    PetscOutput(name, parameters),
     _postprocessor_table(declareRestartableData<FormattedTable>("postprocessor_table")),
     _scalar_table(declareRestartableData<FormattedTable>("scalar_table")),
     _all_data_table(declareRestartableData<FormattedTable>("all_data_table"))
 {
 }
 
-TableOutputter::~TableOutputter()
+TableOutput::~TableOutput()
 {
 }
 
 void
-TableOutputter::outputNodalVariables()
+TableOutput::outputNodalVariables()
 {
-  mooseError("Nodal nonlinear variable output not supported by TableOutputter output class");
+  mooseError("Nodal nonlinear variable output not supported by TableOutput output class");
 }
 
 void
-TableOutputter::outputElementalVariables()
+TableOutput::outputElementalVariables()
 {
-  mooseError("Elemental nonlinear variable output not supported by TableOutputter output class");
+  mooseError("Elemental nonlinear variable output not supported by TableOutput output class");
 }
 
 void
-TableOutputter::outputPostprocessors()
+TableOutput::outputPostprocessors()
 {
   // List of names of the postprocessors to output
   const std::vector<std::string> & out = getPostprocessorOutput();
@@ -83,7 +83,7 @@ TableOutputter::outputPostprocessors()
 }
 
 void
-TableOutputter::outputScalarVariables()
+TableOutput::outputScalarVariables()
 {
   // List of scalar variables
   const std::vector<std::string> & out = getScalarOutput();

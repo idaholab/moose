@@ -13,18 +13,18 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "OversampleOutputter.h"
+#include "OversampleOutput.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "FileMesh.h"
 #include "MooseApp.h"
 
 template<>
-InputParameters validParams<OversampleOutputter>()
+InputParameters validParams<OversampleOutput>()
 {
 
   // Get the parameters from the parent object
-  InputParameters params = validParams<PetscOutputter>();
+  InputParameters params = validParams<PetscOutput>();
 
   params.addParam<bool>("oversample", false, "Set to true to enable oversampling");
   params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling");
@@ -38,8 +38,8 @@ InputParameters validParams<OversampleOutputter>()
   return params;
 }
 
-OversampleOutputter::OversampleOutputter(const std::string & name, InputParameters & parameters) :
-    PetscOutputter(name, parameters),
+OversampleOutput::OversampleOutput(const std::string & name, InputParameters & parameters) :
+    PetscOutput(name, parameters),
     _mesh_ptr(getParam<bool>("use_displaced") ?
               &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
     _oversample(getParam<bool>("oversample")),
@@ -55,7 +55,7 @@ OversampleOutputter::OversampleOutputter(const std::string & name, InputParamete
     _file_base = _file_base + "_oversample";
 }
 
-OversampleOutputter::~OversampleOutputter()
+OversampleOutput::~OversampleOutput()
 {
   // When the Oversample::initOversample() is called it creates new objects for the _mesh_ptr and _es_ptr
   // that contain the refined mesh and variables. Also, the _mesh_functions vector and _serialized_solution
@@ -76,7 +76,7 @@ OversampleOutputter::~OversampleOutputter()
 }
 
 void
-OversampleOutputter::outputInitial()
+OversampleOutput::outputInitial()
 {
   // Perform filename check
   if (!_output_file)
@@ -90,11 +90,11 @@ OversampleOutputter::outputInitial()
   }
 
   // Call the initial output method
-  OutputBase::outputInitial();
+  Output::outputInitial();
 }
 
 void
-OversampleOutputter::outputStep()
+OversampleOutput::outputStep()
 {
   // Perform filename check
   if (!_output_file)
@@ -108,11 +108,11 @@ OversampleOutputter::outputStep()
   }
 
   // Call the step output method
-  OutputBase::outputStep();
+  Output::outputStep();
 }
 
 void
-OversampleOutputter::outputFinal()
+OversampleOutput::outputFinal()
 {
   // Perform filename check
   if (!_output_file)
@@ -126,11 +126,11 @@ OversampleOutputter::outputFinal()
   }
 
   // Call the final output methods
-  OutputBase::outputFinal();
+  Output::outputFinal();
 }
 
 void
-OversampleOutputter::initOversample()
+OversampleOutput::initOversample()
 {
   // Perform the mesh cloning, if needed
   if (_change_position || _oversample)
@@ -196,7 +196,7 @@ OversampleOutputter::initOversample()
 }
 
 void
-OversampleOutputter::update()
+OversampleOutput::update()
 {
   // Get a reference to actual equation system
   EquationSystems & source_es = _problem_ptr->es();
@@ -233,7 +233,7 @@ OversampleOutputter::update()
 }
 
 void
-OversampleOutputter::cloneMesh()
+OversampleOutput::cloneMesh()
 {
   // Create the new mesh from a file
   if (isParamValid("file"))

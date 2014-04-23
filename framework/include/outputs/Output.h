@@ -28,10 +28,10 @@
 
 // Forward declarations
 class Problem;
-class OutputBase;
+class Output;
 
 template<>
-InputParameters validParams<OutputBase>();
+InputParameters validParams<Output>();
 
 /**
  * A structure for storing the various lists that contain
@@ -62,7 +62,7 @@ struct OutputData
  *
  * @see Exodus Console CSV
  */
-class OutputBase :
+class Output :
   public MooseObject,
   public Restartable
 {
@@ -76,12 +76,12 @@ public:
    *
    * @see initAvailable init separate
    */
-  OutputBase(const std::string & name, InputParameters & parameters);
+  Output(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
    */
-  virtual ~OutputBase();
+  virtual ~Output();
 
   /**
    * Returns true if any of the other has methods return true.
@@ -394,7 +394,7 @@ private:
    * just prior to timestepSetup(). This method is meant for internal use only.
    * This method is called by FEProblem::timestepSetup via the OutputWarhouse.
    *
-   * @see PetscOutputter
+   * @see PetscOutput
    */
   virtual void timestepSetupInternal();
 
@@ -464,9 +464,9 @@ private:
 
   // Allow complete access
   friend class OutputWarehouse;
-  friend class FileOutputter;
-  friend class OversampleOutputter;
-  friend class PetscOutputter;
+  friend class FileOutput;
+  friend class OversampleOutput;
+  friend class PetscOutput;
   friend class TransientMultiApp;
 };
 

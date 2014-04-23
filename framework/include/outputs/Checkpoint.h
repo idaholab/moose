@@ -16,7 +16,7 @@
 #define CHECKPOINT_H
 
 // MOOSE includes
-#include "FileOutputter.h"
+#include "FileOutput.h"
 #include "MaterialPropertyStorage.h"
 #include "RestartableData.h"
 #include "MaterialPropertyIO.h"
@@ -51,7 +51,7 @@ struct CheckpointFileNames
  *
  */
 class Checkpoint:
-  public FileOutputter
+  public FileOutput
 {
 public:
 

@@ -28,7 +28,7 @@
 // Forward declerations
 class AddOutputAction;
 class OutputWarehouse;
-class OutputBase;
+class Output;
 
 template<>
 InputParameters validParams<AddOutputAction>();
