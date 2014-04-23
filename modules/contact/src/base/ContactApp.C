@@ -14,6 +14,7 @@
 #include "OneDContactConstraint.h"
 #include "MultiDContactConstraint.h"
 #include "GluedContactConstraint.h"
+#include "MechanicalContactConstraint.h"
 #include "SparsityBasedContactConstraint.h"
 #include "FrictionalContactProblem.h"
 #include "ReferenceResidualProblem.h"
@@ -58,6 +59,7 @@ ContactApp::registerObjects(Factory & factory)
   registerConstraint(OneDContactConstraint);
   registerConstraint(MultiDContactConstraint);
   registerConstraint(GluedContactConstraint);
+  registerConstraint(MechanicalContactConstraint);
   registerConstraint(SparsityBasedContactConstraint);
   registerProblem(FrictionalContactProblem);
   registerProblem(ReferenceResidualProblem);
