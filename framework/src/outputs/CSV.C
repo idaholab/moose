@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<CSV>()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<TableOutputter>();
+  InputParameters params = validParams<TableOutput>();
 
   // Suppress unused parameters
   params.suppressParameter<unsigned int>("padding");
@@ -28,7 +28,7 @@ InputParameters validParams<CSV>()
 }
 
 CSV::CSV(const std::string & name, InputParameters & parameters) :
-    TableOutputter(name, parameters)
+    TableOutput(name, parameters)
 {
 }
 
@@ -46,7 +46,7 @@ void
 CSV::output()
 {
   // Call the base class output (populates tables)
-  TableOutputter::output();
+  TableOutput::output();
 
   // Print the table containing all the data to a file
   if (!_all_data_table.empty())

@@ -16,13 +16,13 @@
 #define TABLESOUTPUTBASE_H
 
 // MOOSE includes
-#include "PetscOutputter.h"
+#include "PetscOutput.h"
 #include "FormattedTable.h"
 
-class TableOutputter;
+class TableOutput;
 
 template<>
-InputParameters validParams<TableOutputter>();
+InputParameters validParams<TableOutput>();
 
 /**
  * Base class for scalar variables and postprocessors output objects
@@ -35,20 +35,20 @@ InputParameters validParams<TableOutputter>();
  *
  * @see CSV Console
  */
-class TableOutputter :
-  public PetscOutputter
+class TableOutput :
+  public PetscOutput
 {
 public:
 
   /**
    * Class constructor.
    */
-  TableOutputter(const std::string & name, InputParameters);
+  TableOutput(const std::string & name, InputParameters);
 
   /**
    * Destructor
    */
-  virtual ~TableOutputter();
+  virtual ~TableOutput();
 
 protected:
 
@@ -86,4 +86,4 @@ protected:
 
 };
 
-#endif /* TABLEOUTPUTTER_H */
+#endif /* TABLEOUTPUT_H */

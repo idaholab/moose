@@ -16,7 +16,7 @@
 #define SOLUTIONHISTORY_H
 
 // MOOSE includes
-#include "FileOutputter.h"
+#include "FileOutput.h"
 
 // Forward declerations
 class SolutionHistory;
@@ -30,7 +30,7 @@ InputParameters validParams<SolutionHistory>();
  * @see Exodus
  */
 class SolutionHistory :
-  public FileOutputter
+  public FileOutput
 {
 public:
 

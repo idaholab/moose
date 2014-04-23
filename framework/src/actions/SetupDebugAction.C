@@ -16,7 +16,7 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
-#include "OutputBase.h"
+#include "Output.h"
 #include "MooseApp.h"
 #include "MooseObjectAction.h"
 
@@ -55,10 +55,10 @@ SetupDebugAction::act()
   if (_pars.get<bool>("show_var_residual_norms"))
   {
     // Set the 'type =' parameters for the desired object
-    _action_params.set<std::string>("type") = "DebugOutputter";
+    _action_params.set<std::string>("type") = "DebugOutput";
 
     // Create the action
-    MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", "Outputs/moose_debug_outputter", _action_params));
+    MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", "Outputs/moose_debug_output", _action_params));
 
     // Add the action to the warehouse
     _awh.addActionBlock(action);

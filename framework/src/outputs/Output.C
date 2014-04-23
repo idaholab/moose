@@ -16,7 +16,7 @@
 #include <math.h>
 
 // MOOSE includes
-#include "OutputBase.h"
+#include "Output.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "MooseApp.h"
@@ -26,7 +26,7 @@
 #include "CoupledExecutioner.h"
 
 template<>
-InputParameters validParams<OutputBase>()
+InputParameters validParams<Output>()
 {
   /* NOTE:
    * The validParams from each output object is merged with the valdParams from CommonOutputAction. In order for the
@@ -80,13 +80,13 @@ InputParameters validParams<OutputBase>()
   params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
 
   // Register this class as base class
-  params.registerBase("OutputBase");
+  params.registerBase("Output");
   return params;
 }
 
-OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
+Output::Output(const std::string & name, InputParameters & parameters) :
     MooseObject(name, parameters),
-    Restartable(name, parameters, "OutputBase"),
+    Restartable(name, parameters, "Output"),
     _problem_ptr(getParam<FEProblem *>("_fe_problem")),
     _transient(_problem_ptr->isTransient()),
     _use_displaced(getParam<bool>("use_displaced")),
@@ -123,7 +123,7 @@ OutputBase::OutputBase(const std::string & name, InputParameters & parameters) :
 }
 
 void
-OutputBase::init()
+Output::init()
 {
   // Do not initialize more than once
   /* This check is needed for YAK which calls Executioners from within Executioners */
@@ -191,32 +191,32 @@ OutputBase::init()
   _initialized = true;
 }
 
-OutputBase::~OutputBase()
+Output::~Output()
 {
 }
 
 void
-OutputBase::outputSetup()
+Output::outputSetup()
 {
 }
 
 void
-OutputBase::initialSetup()
+Output::initialSetup()
 {
 }
 
 void
-OutputBase::timestepSetup()
+Output::timestepSetup()
 {
 }
 
 void
-OutputBase::timestepSetupInternal()
+Output::timestepSetupInternal()
 {
 }
 
 void
-OutputBase::outputInitial()
+Output::outputInitial()
 {
   // Do Nothing if output is not forced or if output is disallowed
   if (!_force_output && !_allow_output)
@@ -253,14 +253,14 @@ OutputBase::outputInitial()
 }
 
 void
-OutputBase::outputFailedStep()
+Output::outputFailedStep()
 {
   if (_output_failed)
     outputStep();
 }
 
 void
-OutputBase::outputStep()
+Output::outputStep()
 {
   // Do nothing if intermediate steps are disable
   if (!_output_intermediate)
@@ -298,7 +298,7 @@ OutputBase::outputStep()
 }
 
 void
-OutputBase::outputFinal()
+Output::outputFinal()
 {
   // If the intermediate steps are being output and the final time step is on an interval it will already have benn output by outputStep, so do nothing
   if (checkInterval() && _output_intermediate)
@@ -327,7 +327,7 @@ OutputBase::outputFinal()
 }
 
 void
-OutputBase::output()
+Output::output()
 {
   // Call the various output types, if data exists
   if (hasNodalVariableOutput())
@@ -344,13 +344,13 @@ OutputBase::output()
 }
 
 void
-OutputBase::forceOutput()
+Output::forceOutput()
 {
   _force_output = true;
 }
 
 bool
-OutputBase::hasOutput()
+Output::hasOutput()
 {
   // Test all the possible output formats, return true if any of them are true
   if (hasNodalVariableOutput() || hasElementalVariableOutput() ||
@@ -361,87 +361,87 @@ OutputBase::hasOutput()
 }
 
 void
-OutputBase::outputInput()
+Output::outputInput()
 {
   // Empty function
 }
 
 void
-OutputBase::outputSystemInformation()
+Output::outputSystemInformation()
 {
   // Empty function
 }
 
 bool
-OutputBase::hasNodalVariableOutput()
+Output::hasNodalVariableOutput()
 {
   return !_nonlinear_nodal.output.empty();
 }
 
 const std::vector<std::string> &
-OutputBase::getNodalVariableOutput()
+Output::getNodalVariableOutput()
 {
   return _nonlinear_nodal.output;
 }
 
 bool
-OutputBase::hasElementalVariableOutput()
+Output::hasElementalVariableOutput()
 {
   return !_nonlinear_elemental.output.empty();
 }
 
 const std::vector<std::string> &
-OutputBase::getElementalVariableOutput()
+Output::getElementalVariableOutput()
 {
   return _nonlinear_elemental.output;
 }
 
 
 bool
-OutputBase::hasScalarOutput()
+Output::hasScalarOutput()
 {
   return !_scalar.output.empty();
 }
 
 const std::vector<std::string> &
-OutputBase::getScalarOutput()
+Output::getScalarOutput()
 {
   return _scalar.output;
 }
 
 bool
-OutputBase::hasPostprocessorOutput()
+Output::hasPostprocessorOutput()
 {
   return !_postprocessor.output.empty();
 }
 
 const std::vector<std::string> &
-OutputBase::getPostprocessorOutput()
+Output::getPostprocessorOutput()
 {
   return _postprocessor.output;
 }
 
 void
-OutputBase::meshChanged()
+Output::meshChanged()
 {
   _mesh_changed = true;
 }
 
 void
-OutputBase::allowOutput(bool state)
+Output::allowOutput(bool state)
 {
   _allow_output = state;
 }
 
 
 void
-OutputBase::sequence(bool state)
+Output::sequence(bool state)
 {
   _sequence = state;
 }
 
 bool
-OutputBase::checkInterval()
+Output::checkInterval()
 {
   // The output flag to return
   bool output = false;
@@ -463,7 +463,7 @@ OutputBase::checkInterval()
 }
 
 void
-OutputBase::initAvailableLists()
+Output::initAvailableLists()
 {
   /* This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
      to produce an warning if postprocessor output is disabled*/
@@ -532,7 +532,7 @@ OutputBase::initAvailableLists()
 }
 
 void
-OutputBase::initShowHideLists(const std::vector<VariableName> & show, const std::vector<VariableName> & hide)
+Output::initShowHideLists(const std::vector<VariableName> & show, const std::vector<VariableName> & hide)
 {
 
   // Storage for user-supplied input that is unknown as a variable or postprocessor
@@ -590,7 +590,7 @@ OutputBase::initShowHideLists(const std::vector<VariableName> & show, const std:
 }
 
 void
-OutputBase::initOutputList(OutputData & data)
+Output::initOutputList(OutputData & data)
 {
   // References to the vectors of variable names
   std::vector<std::string> & hide  = data.hide;

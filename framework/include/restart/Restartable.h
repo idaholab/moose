@@ -200,8 +200,7 @@ private:
   friend class PostprocessorData;
   friend class NearestNodeLocator;
   friend class ReportableData;
-  friend class ExodusOutput;
-  friend class FileOutputter;
+  friend class FileOutput;
 };
 
 template<typename T>

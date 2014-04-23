@@ -20,7 +20,7 @@
 #include "ActionFactory.h"
 #include "Exodus.h"
 #include "OutputWarehouse.h"
-#include "FileOutputter.h"
+#include "FileOutput.h"
 
 // Extrnal includes
 #include "tinydir.h"
@@ -40,7 +40,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("nemesis", false, "Output the results using the default settings for Nemesis output");
    params.addParam<bool>("console", false, "Output the results using the default settings for Console output");
    params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv file using the default CSV output.");
-   params.addParam<bool>("vtk", false, "Output the results using the default settings for VTK output");
+   params.addParam<bool>("vtk", false, "Output the results using the default settings for VTKOutput output");
    params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output (ascii)");
    params.addParam<bool>("xdr", false, "Output the results using the default settings for XDA/XDR output (binary)");
    params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
@@ -257,7 +257,7 @@ CommonOutputAction::getRecoveryDirectory()
     if (isParamValid("file_base"))
       file_base = _pars.get<std::string>("file_base");
     if (file_base.empty())
-      file_base = FileOutputter::getOutputFileBase(_app);
+      file_base = FileOutput::getOutputFileBase(_app);
 
     // Build and return the complete name for the recovery directory
     return file_base + "_auto_recovery";
@@ -298,7 +298,7 @@ CommonOutputAction::getRecoveryDirectory()
         file_base = obj_pars.get<std::string>("file_base");
 
       if (file_base.empty())
-        file_base = FileOutputter::getOutputFileBase(_app);
+        file_base = FileOutput::getOutputFileBase(_app);
 
       // Build the complete name for the recovery directory
       full_name = file_base + "_" + cp->getObjectParams().get<std::string>("suffix");

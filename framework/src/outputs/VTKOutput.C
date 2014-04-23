@@ -12,12 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "VTK.h"
+#include "VTKOutput.h"
 
 template<>
-InputParameters validParams<VTKOutputter>()
+InputParameters validParams<VTKOutput>()
 {
-  InputParameters params = validParams<OversampleOutputter>();
+  InputParameters params = validParams<OversampleOutput>();
 
   // Supress un-available parameters
   params.suppressParameter<bool>("output_scalar_variables");
@@ -29,61 +29,61 @@ InputParameters validParams<VTKOutputter>()
   params.set<unsigned int>("padding") = 3;
 
   // Add binary toggle
-  params.addParam<bool>("binary", false, "Set VTK files to output in binary format");
+  params.addParam<bool>("binary", false, "Set VTKOutput files to output in binary format");
   params.addParamNamesToGroup("binary", "Advanced");
 
   return params;
 }
 
-VTKOutputter::VTKOutputter(const std::string & name, InputParameters & parameters) :
-    OversampleOutputter(name, parameters),
+VTKOutput::VTKOutput(const std::string & name, InputParameters & parameters) :
+    OversampleOutput(name, parameters),
     _vtk_io_ptr(NULL),
     _binary(getParam<bool>("binary"))
 {
-  // VTK files must be written in sequence
+  // VTKOutput files must be written in sequence
   sequence(true);
 }
 
-VTKOutputter::~VTKOutputter()
+VTKOutput::~VTKOutput()
 {
   delete _vtk_io_ptr;
 }
 
 void
-VTKOutputter::outputSetup()
+VTKOutput::outputSetup()
 {
-  // The libMesh::ExodusII_IO will fail when it is closed if the object is created but
+  // The libMesh::VTK_IO will fail when it is closed if the object is created but
   // nothing is written to the file. This checks that at least something will be written.
   if (!hasOutput())
-    mooseError("The current settings result in nothing being output to the VTKOutputter file.");
+    mooseError("The current settings result in nothing being output to the VTKOutput file.");
 
-  // Delete existing VTKIO objects
+  // Delete existing VTKOutputIO objects
   if (_vtk_io_ptr != NULL)
     delete _vtk_io_ptr;
 
 #ifdef LIBMESH_HAVE_VTK
-  // Create the new VTKOutputter object and set compression
+  // Create the new VTKOutput object and set compression
   _vtk_io_ptr = new VTKIO(_es_ptr->get_mesh());
   _vtk_io_ptr->set_compression(_binary);
 #else
-  mooseError("libMesh not configured with VTK");
+  mooseError("libMesh not configured with VTKOutput");
 #endif
 }
 
 void
-VTKOutputter::output()
+VTKOutput::output()
 {
 #ifdef LIBMESH_HAVE_VTK
   // Write the data
   _vtk_io_ptr->write_equation_systems(filename(), *_es_ptr);
   _file_num++;
 #else
-  mooseError("libMesh not configured with VTK");
+  mooseError("libMesh not configured with VTKOutput");
 #endif
 }
 
 std::string
-VTKOutputter::filename()
+VTKOutput::filename()
 {
   // Append the .e extension on the base file name
   std::ostringstream output;
@@ -103,25 +103,25 @@ VTKOutputter::filename()
 }
 
 void
-VTKOutputter::outputNodalVariables()
+VTKOutput::outputNodalVariables()
 {
-  mooseError("Individual output of nodal variables is not support for VTK output");
+  mooseError("Individual output of nodal variables is not support for VTKOutput output");
 }
 
 void
-VTKOutputter::outputElementalVariables()
+VTKOutput::outputElementalVariables()
 {
-  mooseError("Individual output of elemental variables is not support for VTK output");
+  mooseError("Individual output of elemental variables is not support for VTKOutput output");
 }
 
 void
-VTKOutputter::outputPostprocessors()
+VTKOutput::outputPostprocessors()
 {
-  mooseError("Individual output of postprocessors is not support for VTK output");
+  mooseError("Individual output of postprocessors is not support for VTKOutput output");
 }
 
 void
-VTKOutputter::outputScalarVariables()
+VTKOutput::outputScalarVariables()
 {
-  mooseError("Individual output of scalars is not support for VTK output");
+  mooseError("Individual output of scalars is not support for VTKOutput output");
 }

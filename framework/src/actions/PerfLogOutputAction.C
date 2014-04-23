@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "PerfLogOutputAction.h"
-#include "OutputBase.h"
+#include "Output.h"
 #include "Console.h"
 #include "MooseApp.h"
 
@@ -40,8 +40,8 @@ PerfLogOutputAction::act()
 
   // Search for the existence of a Console outputter
   bool has_console = false;
-  const std::vector<OutputBase *> & ptrs = _app.getOutputWarehouse().getOutputs();
-  for (std::vector<OutputBase *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)
+  const std::vector<Output *> & ptrs = _app.getOutputWarehouse().getOutputs();
+  for (std::vector<Output *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)
   {
     Console * c_ptr = dynamic_cast<Console *>(*it);
     if (c_ptr != NULL)

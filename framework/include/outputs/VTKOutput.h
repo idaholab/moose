@@ -12,61 +12,77 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DEBUGOUTPUTTER_H
-#define DEBUGOUTPUTTER_H
+#ifndef VTKOUTPUT_H
+#define VTKOUTPUT_H
 
 // MOOSE includes
-#include "PetscOutputter.h"
-#include "FEProblem.h"
+#include "OversampleOutput.h"
+
+// libMesh includes
+#include "libmesh/vtk_io.h"
 
 // Forward declerations
-class DebugOutputter;
+class VTKOutput;
 
 template<>
-InputParameters validParams<DebugOutputter>();
+InputParameters validParams<VTKOutput>();
 
 /**
  *
  */
-class DebugOutputter : public PetscOutputter
+class VTKOutput :
+  public OversampleOutput
 {
 public:
 
   /**
    * Class constructor
-   * @param name
-   * @param parameters
+   * @param name Object name
+   * @param parameters Object parameters
    */
-  DebugOutputter(const std::string & name, InputParameters & parameters);
+  VTKOutput(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
    */
-  virtual ~DebugOutputter();
+  virtual ~VTKOutput();
+
+  /**
+   * Creates the libMes::VTKOutputIO object for outputting the current timestep
+   */
+  virtual void outputSetup();
+
 
 protected:
 
   /**
-   * Perform the debugging output
+   * Perform the output of VTKOutput
    */
   virtual void output();
 
-  //@{
   /**
-   * Individual component output is not supported for DebugOutputter
+   * Return the file name with the *.vtk extension
    */
   std::string filename();
+
+  //@{
+  /**
+   * Individual component output is not currently supported for VTKOutput
+   */
   virtual void outputNodalVariables();
   virtual void outputElementalVariables();
   virtual void outputPostprocessors();
   virtual void outputScalarVariables();
   //@}
 
-  /// Flag for outputting variable norms
-  bool _show_var_residual_norms;
+private:
 
-  // Reference to libMesh system
-  TransientNonlinearImplicitSystem & _sys;
+  /// Pointer to libMesh::VTKIO object
+  VTKIO * _vtk_io_ptr;
+
+  /// Flag for using binary compression
+  bool _binary;
+
 };
 
-#endif //DEBUGOUTPUTTER_H
+#endif //VTKOUTPUT_H

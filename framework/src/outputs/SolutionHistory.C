@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<SolutionHistory>()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<FileOutputter>();
+  InputParameters params = validParams<FileOutput>();
 
   // Suppress unused parameters
   params.suppressParameter<unsigned int>("padding");
@@ -37,7 +37,7 @@ InputParameters validParams<SolutionHistory>()
 }
 
 SolutionHistory::SolutionHistory(const std::string & name, InputParameters & parameters) :
-    FileOutputter(name, parameters)
+    FileOutput(name, parameters)
 {
 }
 

@@ -22,7 +22,7 @@
 #include "InputParameters.h"
 
 // Forward declarations
-class OutputBase;
+class Output;
 class Checkpoint;
 class FEProblem;
 
@@ -50,13 +50,13 @@ public:
    * It is the responsibility of the OutputWarehouse to delete the output objects
    * add using this method
    */
-  void addOutput(OutputBase * output);
+  void addOutput(Output * output);
 
   /**
    * Get a complete list of all output objects
    * @return A vector of pointers to each of the output objects
    */
-  const std::vector<OutputBase *> & getOutputs() const;
+  const std::vector<Output *> & getOutputs() const;
 
   /**
    * Returns true if the output object exists
@@ -100,7 +100,7 @@ public:
   void forceOutput();
 
   /**
-   * Calls the setFileNumber method for every FileOutputter output object
+   * Calls the setFileNumber method for every FileOutput output object
    */
   void setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset = 0);
 
@@ -192,10 +192,10 @@ private:
   void timestepSetup();
 
   /// The list of all output objects
-  std::vector<OutputBase *> _object_ptrs;
+  std::vector<Output *> _object_ptrs;
 
   /// A map of the output pointers
-  std::map<std::string, OutputBase *> _object_map;
+  std::map<std::string, Output *> _object_map;
 
   /// List of object names
   std::set<OutFileBase> _filenames;
@@ -258,7 +258,7 @@ OutputWarehouse::getOutputs()
   std::vector<T *> outputs;
 
   // Populate the vector
-  for (std::map<std::string, OutputBase *>::iterator it = _object_map.begin(); it != _object_map.end(); ++it)
+  for (std::map<std::string, Output *>::iterator it = _object_map.begin(); it != _object_map.end(); ++it)
   {
     T * output = dynamic_cast<T*>(it->second);
     if (output != NULL)
@@ -282,7 +282,7 @@ OutputWarehouse::getOutputNames()
   std::vector<std::string> names;
 
   // Loop through the objects and store the name if the type cast succeeds
-  for (std::map<std::string, OutputBase *>::iterator it = _object_map.begin(); it != _object_map.end(); ++it)
+  for (std::map<std::string, Output *>::iterator it = _object_map.begin(); it != _object_map.end(); ++it)
   {
     T * output = dynamic_cast<T*>(it->second);
     if (output != NULL)
