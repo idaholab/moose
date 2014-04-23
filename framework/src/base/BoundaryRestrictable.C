@@ -72,7 +72,10 @@ BoundaryRestrictable::BoundaryRestrictable(const std::string name, InputParamete
 
   // Store ANY_BOUNDARY_ID if empty
   if (_bnd_ids.empty())
+  {
     _bnd_ids.insert(Moose::ANY_BOUNDARY_ID);
+    _boundary_names = std::vector<BoundaryName>(1,"ANY_BOUNDARY_ID");
+  }
 
   // Store the ids in the input parameters
   parameters.set<std::vector<BoundaryID> >("_boundary_ids") = std::vector<BoundaryID>(_bnd_ids.begin(), _bnd_ids.end());

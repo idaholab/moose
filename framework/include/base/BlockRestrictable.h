@@ -154,10 +154,10 @@ public:
 
 private:
 
-  /// Set of block ids
+  /// Set of block ids supplied by the user via the input file
   std::set<SubdomainID> _blk_ids;
 
-  /// Vector the block names
+  /// Vector the block names supplied by the user via the input file
   std::vector<SubdomainName> _blocks;
 
   /// Flag for allowing dual restriction
