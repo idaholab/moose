@@ -1,4 +1,5 @@
 #include "AxisymmetricRZ.h"
+#include "SolidModel.h"
 
 #include "Problem.h"
 #include "VolumetricModel.h"
@@ -8,12 +9,13 @@ namespace Elk
 namespace SolidMechanics
 {
 
-AxisymmetricRZ::AxisymmetricRZ(const std::string & name,
+AxisymmetricRZ::AxisymmetricRZ(SolidModel & solid_model,
+                               const std::string & name,
                                InputParameters parameters)
-  :Element(name, parameters),
+  :Element(solid_model, name, parameters),
    _disp_r(coupledValue("disp_r")),
    _disp_z(coupledValue("disp_z")),
-   _large_strain(getParam<bool>("large_strain")),
+   _large_strain(solid_model.getParam<bool>("large_strain")),
    _grad_disp_r(coupledGradient("disp_r")),
    _grad_disp_z(coupledGradient("disp_z"))
 {
@@ -31,7 +33,7 @@ AxisymmetricRZ::computeStrain( const unsigned qp,
 {
   strain_increment.xx() = _grad_disp_r[qp](0);
   strain_increment.yy() = _grad_disp_z[qp](1);
-  strain_increment.zz() = (_q_point[qp](0) != 0.0 ? _disp_r[qp]/_q_point[qp](0) : 0.0);
+  strain_increment.zz() = (_solid_model.q_point(qp)(0) != 0.0 ? _disp_r[qp]/_solid_model.q_point(qp)(0) : 0.0);
   strain_increment.xy() = 0.5*(_grad_disp_r[qp](1) + _grad_disp_z[qp](0));
   if (_large_strain)
   {

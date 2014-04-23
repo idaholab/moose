@@ -1,14 +1,16 @@
 #include "PlaneStrain.h"
+#include "SolidModel.h"
 
 namespace Elk
 {
 namespace SolidMechanics
 {
 
-PlaneStrain::PlaneStrain(const std::string & name,
+PlaneStrain::PlaneStrain(SolidModel & solid_model,
+                         const std::string & name,
                          InputParameters parameters)
-  :Element(name, parameters),
-   _large_strain(getParam<bool>("large_strain")),
+  :Element(solid_model, name, parameters),
+   _large_strain(solid_model.getParam<bool>("large_strain")),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(coupledGradient("disp_y"))
 {
