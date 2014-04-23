@@ -43,6 +43,8 @@ protected:
   VariableValue & _u_neighbor;
 
   Real _value;
+  std::string _diffusivity;
+  MaterialProperty<Real> * _diffusivity_prop;
 };
 
 #endif /* INSIDEUSEROBJECT_H */

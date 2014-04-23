@@ -17,6 +17,7 @@
 
 #include "ParallelUniqueId.h"
 #include "MooseMesh.h"
+#include "MooseTypes.h"
 
 /**
  * Base class for assembling-like calculations
@@ -88,10 +89,10 @@ protected:
   THREAD_ID _tid;
 
   /// The subdomain for the current element
-  unsigned int _subdomain;
+  SubdomainID _subdomain;
 
   /// The subdomain for the last element
-  unsigned int _old_subdomain;
+  SubdomainID _old_subdomain;
 };
 
 

@@ -130,31 +130,40 @@ BCWarehouse::activeBoundaries(std::set<BoundaryID> & bnds) const
 }
 
 std::vector<IntegratedBC *>
-BCWarehouse::activeIntegrated(BoundaryID boundary_id)
+BCWarehouse::activeIntegrated(BoundaryID boundary_id) const
 {
   std::vector<IntegratedBC *> active;
-  for (std::vector<IntegratedBC *>::iterator it = _bcs[boundary_id].begin(); it != _bcs[boundary_id].end(); ++it)
-    if ((*it)->isActive())
-      active.push_back(*it);
+
+  if (_bcs.find(boundary_id) != _bcs.end())
+    for (std::vector<IntegratedBC *>::const_iterator it = _bcs.at(boundary_id).begin(); it != _bcs.at(boundary_id).end(); ++it)
+      if ((*it)->isActive())
+        active.push_back(*it);
+
   return active;
 }
 
 std::vector<NodalBC *>
-BCWarehouse::activeNodal(BoundaryID boundary_id)
+BCWarehouse::activeNodal(BoundaryID boundary_id) const
 {
   std::vector<NodalBC *> active;
-  for (std::vector<NodalBC *>::iterator it = _nodal_bcs[boundary_id].begin(); it != _nodal_bcs[boundary_id].end(); ++it)
-    if ((*it)->isActive())
-      active.push_back(*it);
+
+  if (_nodal_bcs.find(boundary_id) != _nodal_bcs.end())
+    for (std::vector<NodalBC *>::const_iterator it = _nodal_bcs.at(boundary_id).begin(); it != _nodal_bcs.at(boundary_id).end(); ++it)
+      if ((*it)->isActive())
+        active.push_back(*it);
+
   return active;
 }
 
 std::vector<PresetNodalBC *>
-BCWarehouse::activePresetNodal(BoundaryID boundary_id)
+BCWarehouse::activePresetNodal(BoundaryID boundary_id) const
 {
   std::vector<PresetNodalBC *> active;
-  for (std::vector<PresetNodalBC *>::iterator it = _preset_nodal_bcs[boundary_id].begin(); it != _preset_nodal_bcs[boundary_id].end(); ++it)
-    if ((*it)->isActive())
-      active.push_back(*it);
+
+  if (_preset_nodal_bcs.find(boundary_id) != _preset_nodal_bcs.end())
+    for (std::vector<PresetNodalBC *>::const_iterator it = _preset_nodal_bcs.at(boundary_id).begin(); it != _preset_nodal_bcs.at(boundary_id).end(); ++it)
+      if ((*it)->isActive())
+        active.push_back(*it);
+
   return active;
 }

@@ -418,3 +418,14 @@ AuxiliarySystem::getMinQuadratureOrder()
 
   return order;
 }
+
+bool
+AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
+{
+  for (unsigned int i=0; i < Moose::exec_types.size(); ++i)
+    if (!_auxs(Moose::exec_types[i])[0].activeBCs(bnd_id).empty() ||
+        !_auxs(Moose::exec_types[i])[0].activeBCs(Moose::ANY_BOUNDARY_ID).empty())
+      return true;
+
+  return false;
+}

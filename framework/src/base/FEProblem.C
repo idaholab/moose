@@ -206,6 +206,9 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
   _active_elemental_moose_variables.resize(n_threads);
 
+  _block_mat_side_cache.resize(n_threads);
+  _bnd_mat_side_cache.resize(n_threads);
+
   _resurrector = new Resurrector(*this);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
@@ -1894,7 +1897,8 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
     // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
     // to be otherwise
     MaterialData * mat_data = _material_data[tid];
-    if (parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
+    if ((parameters.isParamValid("use_bnd_material") && parameters.get<bool>("use_bnd_material")) ||
+        (parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal")))
        mat_data = _bnd_material_data[tid];
 
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -3742,4 +3746,52 @@ FEProblem::registerRandomInterface(RandomInterface & random_interface, const std
   }
   else
     random_interface.setRandomDataPointer(_random_data_objects[name]);
+}
+
+bool
+FEProblem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
+{
+  if (_bnd_mat_side_cache[tid].find(bnd_id) == _bnd_mat_side_cache[tid].end())
+  {
+    _bnd_mat_side_cache[tid][bnd_id] = false;
+
+    if (_nl.needMaterialOnSide(bnd_id, tid) || _aux.needMaterialOnSide(bnd_id, tid))
+      _bnd_mat_side_cache[tid][bnd_id] = true;
+    else
+    {
+      for (unsigned int i=0; i < Moose::exec_types.size(); ++i)
+        if (!_user_objects(Moose::exec_types[i])[tid].sideUserObjects(bnd_id).empty() ||
+            !_user_objects(Moose::exec_types[i])[tid].sideUserObjects(Moose::ANY_BOUNDARY_ID).empty())
+        {
+          _bnd_mat_side_cache[tid][bnd_id] = true;
+          break;
+        }
+    }
+  }
+
+  return _bnd_mat_side_cache[tid][bnd_id];
+}
+
+bool
+FEProblem::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
+{
+  if (_block_mat_side_cache[tid].find(subdomain_id) == _block_mat_side_cache[tid].end())
+  {
+    _block_mat_side_cache[tid][subdomain_id] = false;
+
+    if (_nl.needMaterialOnSide(subdomain_id, tid))
+      _block_mat_side_cache[tid][subdomain_id] = true;
+    else
+    {
+      for (unsigned int i=0; i < Moose::exec_types.size(); ++i)
+        if (!_user_objects(Moose::exec_types[i])[tid].internalSideUserObjects(subdomain_id).empty() ||
+            !_user_objects(Moose::exec_types[i])[tid].internalSideUserObjects(Moose::ANY_BLOCK_ID).empty())
+        {
+          _block_mat_side_cache[tid][subdomain_id] = true;
+          break;
+        }
+    }
+  }
+
+  return _block_mat_side_cache[tid][subdomain_id];
 }
