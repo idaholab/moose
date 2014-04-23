@@ -60,7 +60,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<std::vector<VariableName> >("hide", "A list of the variables and postprocessors that should NOT be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
    params.addParam<std::vector<VariableName> >("show", "A list of the variables and postprocessors that should be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
 
-   // Add super-secret parameeters for creating running --recover via the test harness
+   // Add super-secret parameters for creating and running --recover via the test harness
    params.addPrivateParam<bool>("auto_recovery_part1", false);
    params.addPrivateParam<bool>("auto_recovery_part2", false);
 
@@ -140,6 +140,9 @@ CommonOutputAction::create(std::string object_type)
 
   // Create the action
   MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", long_name, _action_params));
+
+  // Set flag indicating that the object to be created was created with short-cut syntax
+  action->getObjectParams().set<bool>("_short_cut") = true;
 
   // Add the action to the warehouse
   _awh.addActionBlock(action);
@@ -298,7 +301,12 @@ CommonOutputAction::getRecoveryDirectory()
         file_base = obj_pars.get<std::string>("file_base");
 
       if (file_base.empty())
-        file_base = FileOutput::getOutputFileBase(_app);
+      {
+        if (obj_pars.get<bool>("_short_cut"))
+          file_base = FileOutput::getOutputFileBase(_app);
+        else
+          file_base = FileOutput::getOutputFileBase(_app, "_" + name);
+      }
 
       // Build the complete name for the recovery directory
       full_name = file_base + "_" + cp->getObjectParams().get<std::string>("suffix");
@@ -310,7 +318,7 @@ CommonOutputAction::getRecoveryDirectory()
 
   // Produce warning when multiple checkpoint outputters exist
   if (cnt > 1)
-    mooseWarning("Multiple Checkpoint outputters detected, consider providing a file base to the --recover option.");
+    mooseWarning("Multiple Checkpoint output objects detected, consider providing a file base to the --recover option.");
 
   // Return the directory
   return full_name;

@@ -79,6 +79,9 @@ InputParameters validParams<Output>()
   // 'Variables' Group
   params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
 
+  // Add a private parameter for indicating if it was created with short-cut syntax
+  params.addPrivateParam<bool>("_short_cut", false);
+
   // Register this class as base class
   params.registerBase("Output");
   return params;
