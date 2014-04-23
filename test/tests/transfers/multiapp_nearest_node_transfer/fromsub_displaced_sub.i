@@ -55,7 +55,7 @@
 
 [Outputs]
   output_initial = true
-  [./exodus]
+  [./out]
     type = Exodus
     use_displaced = true
   [../]

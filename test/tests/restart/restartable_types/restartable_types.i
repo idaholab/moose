@@ -58,7 +58,7 @@
     type = Console
     perf_log = true
   [../]
-  [./checkpoint]
+  [./out]
     type = Checkpoint
     num_files = 1
   [../]

@@ -91,7 +91,7 @@
 
 [Outputs]
   output_initial = true
-  [./exodus]
+  [./out]
     type = Exodus
     append_displaced = true
     use_displaced = true

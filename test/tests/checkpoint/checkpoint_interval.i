@@ -51,7 +51,7 @@
 [Outputs]
   output_initial = true
   exodus = true
-  [./checkpoint]
+  [./out]
   # Test the checkpoint interval parameter
     type = Checkpoint
      interval = 3  # output every third timestep

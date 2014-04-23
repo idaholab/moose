@@ -84,7 +84,7 @@
 
 [Outputs]
   console = true
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
     output_initial = true

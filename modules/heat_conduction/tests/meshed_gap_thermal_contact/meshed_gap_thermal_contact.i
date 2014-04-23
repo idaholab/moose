@@ -72,8 +72,7 @@
     perf_log = true
     linear_residuals = true
   [../]
-  [./exo]
+  [./out]
     type = Exodus
   [../]
 []
-

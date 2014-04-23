@@ -49,7 +49,7 @@
 
 [Outputs]
   console = true
-  [./exodus]
+  [./out]
     type = Exodus
     output_final = true
     interval = 5

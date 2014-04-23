@@ -41,7 +41,7 @@
 
 [Outputs]
   output_initial = true
-  [./Tecplot]
+  [./out]
     type = Tecplot
     ascii_append = true
   [../]
