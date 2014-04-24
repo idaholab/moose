@@ -21,13 +21,19 @@
 template<>
 InputParameters validParams<Steady>()
 {
-  return validParams<Executioner>();
+  InputParameters params = validParams<Executioner>();
+#ifdef LIBMESH_ENABLE_AMR
+  params.addParam<bool>("output_amr_steps", true, "True to output solutions on intermediate AMR steps");
+#endif
+  return params;
 }
-
 
 Steady::Steady(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
+#ifdef LIBMESH_ENABLE_AMR
+    _output_amr_steps(getParam<bool>("output_amr_steps")),
+#endif
     _time_step(_problem.timeStep()),
     _time(_problem.time())
 {
@@ -68,7 +74,12 @@ Steady::init()
   _problem.initialSetup();
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
+  // first step in any steady state solve is always 1 (preserving backwards compatibility)
+  _time_step = 0;
+  Real t = _time;
+  _time = _time_step;                 // need to keep _time in sync with _time_step to get correct output
   _output_warehouse.outputInitial();
+  _time = t;
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
 
@@ -80,12 +91,15 @@ Steady::execute()
 
   preExecute();
 
-  // first step in any steady state solve is always 1 (preserving backwards compatibility)
-  _time_step = 1;
-  _time = _time_step;                 // need to keep _time in sync with _time_step to get correct output
+  takeStep();
 
+  postExecute();
+}
+
+void
+Steady::takeStep()
+{
 #ifdef LIBMESH_ENABLE_AMR
-
   // Define the refinement loop
   unsigned int steps = _problem.adaptivity().getSteps();
   for(unsigned int r_step=0; r_step<=steps; r_step++)
@@ -106,20 +120,31 @@ Steady::execute()
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
     _problem.computeIndicatorsAndMarkers();
 
-    _output_warehouse.outputStep();
-
 #ifdef LIBMESH_ENABLE_AMR
     if (r_step != steps)
     {
+      if (_output_amr_steps)
+      {
+        _time_step++;
+        Real t = _time;
+        _time = _time_step;                 // need to keep _time in sync with _time_step to get correct output
+        _output_warehouse.outputStep();
+        _time = t;
+      }
       _problem.adaptMesh();
     }
-
-    _time_step++;
-    _time = _time_step;                 // need to keep _time in sync with _time_step to get correct output
   }
 #endif
+}
 
-  postExecute();
+void
+Steady::postExecute()
+{
+  _time_step++;
+  Real t = _time;
+  _time = _time_step;                 // need to keep _time in sync with _time_step to get correct output
+  _output_warehouse.outputStep();
+  _time = t;
 }
 
 void
