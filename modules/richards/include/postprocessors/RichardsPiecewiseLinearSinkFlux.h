@@ -48,7 +48,7 @@ protected:
   bool _use_relperm;
 
   /// the multiplier function
-  Function * const _m_func;
+  Function & _m_func;
 
   /// holds info regarding the porepressure names, and their values in the simulation
   const RichardsPorepressureNames & _pp_name_UO;

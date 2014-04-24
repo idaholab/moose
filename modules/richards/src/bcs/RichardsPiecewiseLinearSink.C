@@ -16,7 +16,7 @@ InputParameters validParams<RichardsPiecewiseLinearSink>()
   params.addRequiredParam<bool>("use_relperm", "If true, then fluxes are multiplied by relative permeability.  This can be used in conjunction with use_mobility");
   params.addRequiredParam<std::vector<Real> >("pressures", "Tuple of pressure values.  Must be monotonically increasing.");
   params.addRequiredParam<std::vector<Real> >("bare_fluxes", "Tuple of flux values (measured in kg.m^-2.s^-1 for use_mobility=false, and in Pa.s^-1 if use_mobility=true).  A piecewise-linear fit is performed to the (pressure,bare_fluxes) pairs to obtain the flux at any arbitrary pressure.  If a quad-point pressure is less than the first pressure value, the first bare_flux value is used.  If quad-point pressure exceeds the final pressure value, the final bare_flux value is used.  This flux is OUT of the medium: hence positive values of flux means this will be a SINK, while negative values indicate this flux will be a SOURCE.");
-  params.addParam<FunctionName>("multiplying_fcn", "If this function is provided, the flux will be multiplied by this function.  This is useful for spatially or temporally varying sinks");
+  params.addParam<FunctionName>("multiplying_fcn", 1.0, "If this function is provided, the flux will be multiplied by this function.  This is useful for spatially or temporally varying sinks");
   params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
   return params;
 }
@@ -28,7 +28,7 @@ RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const std::string & nam
     _use_relperm(getParam<bool>("use_relperm")),
     _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("bare_fluxes")),
 
-    _m_func(parameters.isParamValid("multiplying_fcn") ? &getFunction("multiplying_fcn") : NULL),
+    _m_func(getFunction("multiplying_fcn")),
 
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
     _pvar(_pp_name_UO.pressure_var_num(_var.index())),
@@ -59,8 +59,7 @@ RichardsPiecewiseLinearSink::computeQpResidual()
   if (_use_relperm)
     flux *= _rel_perm[_qp][_pvar];
 
-  if (_m_func)
-    flux *= _m_func->value(_t, _q_point[_qp]);
+  flux *= _m_func.value(_t, _q_point[_qp]);
 
   return flux;
 }
@@ -83,8 +82,7 @@ RichardsPiecewiseLinearSink::computeQpJacobian()
       deriv = _rel_perm[_qp][_pvar]*deriv + _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]*flux;
     }
 
-  if (_m_func)
-    deriv *= _m_func->value(_t, _q_point[_qp]);
+  deriv *= _m_func.value(_t, _q_point[_qp]);
 
   return _test[_i][_qp]*deriv*_phi[_j][_qp];
 }
@@ -107,8 +105,7 @@ RichardsPiecewiseLinearSink::computeQpOffDiagJacobian(unsigned int jvar)
     }
   Real deriv = _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][dvar]*flux;
 
-  if (_m_func)
-    deriv *= _m_func->value(_t, _q_point[_qp]);
+  deriv *= _m_func.value(_t, _q_point[_qp]);
 
   return _test[_i][_qp]*deriv*_phi[_j][_qp];
 }
