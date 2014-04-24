@@ -218,7 +218,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   {
     Moose::out << std::endl;
     Moose::out << " Power iterations starts" << std::endl;
-    Moose::out << " ________________________________________________________________________________ "<<std::endl;
+    Moose::out << " ________________________________________________________________________________ " << std::endl;
   }
 
   // some iteration variables
@@ -246,9 +246,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_BEGIN);
     _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
-    preStep();
+    preIteration();
     _problem.solve();
-    postStep();
+    postIteration();
 
     // FIXME: timestep needs to be changed to step
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
@@ -288,9 +288,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
         }
         for (; j<keff_history.size(); j++)
           Moose::out <<  "| " << std::setw(14) << j
-                    << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
-                    << " | " << std::setw(19) << std::scientific << std::setprecision(8) << diff_history[j]
-                    << " |\n";
+                     << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
+                     << " | " << std::setw(19) << std::scientific << std::setprecision(8) << diff_history[j]
+                     << " |\n";
         Moose::out << "+================+=====================+=====================+\n" << std::flush;
         Moose::out << std::endl;
       }
@@ -308,8 +308,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
         }
         for (; j<keff_history.size(); j++)
           Moose::out <<  "| " << std::setw(14) << j
-                    << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
-                    << " |\n";
+                     << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
+                     << " |\n";
         Moose::out << "+================+=====================+\n" << std::flush;
         Moose::out << std::endl;
       }
@@ -325,7 +325,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
       chebyshev(iter);
       if (echo)
         Moose::out << "Power iteration= "<< iter
-                  << " Chebyshev step: " << chebyshev_parameters.icheb << std::endl;
+                   << " Chebyshev step: " << chebyshev_parameters.icheb << std::endl;
     }
     else
       if (echo)
@@ -333,7 +333,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
     if (echo)
       Moose::out << " ________________________________________________________________________________ "
-                << std::endl;
+                 << std::endl;
 
     // not perform any convergence check when number of iterations is less than min_iter
     if (iter>=min_iter)
@@ -373,13 +373,47 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 }
 
 void
-EigenExecutionerBase::preStep()
+EigenExecutionerBase::preIteration()
 {
 }
 
 void
-EigenExecutionerBase::postStep()
+EigenExecutionerBase::postIteration()
 {
+}
+
+void
+EigenExecutionerBase::postExecute()
+{
+  if (_run_custom_uo)
+  {
+    _problem.computeUserObjects(EXEC_CUSTOM);
+    _problem.computeAuxiliaryKernels(EXEC_CUSTOM);
+    _problem.computeUserObjects(EXEC_CUSTOM, UserObjectWarehouse::POST_AUX);
+  }
+
+  if (!getParam<bool>("output_on_final"))
+  {
+    _problem.timeStep()++;
+    Real t = _problem.time();
+    _problem.time() = _problem.timeStep();
+    _output_warehouse.outputStep();
+    _problem.time() = t;
+  }
+
+  Real s = normalizeSolution(_norm_execflag!=EXEC_CUSTOM && _norm_execflag!=EXEC_TIMESTEP &&
+                             _norm_execflag!=EXEC_RESIDUAL);
+
+  Moose::out << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
+
+  if (getParam<bool>("output_on_final") || std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
+  {
+    _problem.timeStep()++;
+    Real t = _problem.time();
+    _problem.time() = _problem.timeStep();
+    _output_warehouse.outputStep();
+    _problem.time() = t;
+  }
 }
 
 Real

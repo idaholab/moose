@@ -20,7 +20,7 @@ InputParameters validParams<NonlinearEigen>()
   InputParameters params = validParams<EigenExecutionerBase>();
   params.addParam<unsigned int>("free_power_iterations", 4, "The number of free power iterations");
   params.addParam<Real>("source_abs_tol", 1e-06, "Absolute tolernance on residual norm");
-  params.addParam<Real>("source_rel_tol", 1e-50, "Relative tolernance on residual norm");
+  params.addParam<Real>("source_rel_tol", 1e-50, "Relative tolernance on residual norm after free power iterations");
   params.addParam<Real>("pfactor", 1e-2, "The factor of residual to be reduced per power iteration");
   params.addParam<Real>("k0", 1.0, "Initial guess of the eigenvalue");
   params.addParam<bool>("output_pi_history", false, "True to output solutions durint PI");
@@ -47,98 +47,69 @@ NonlinearEigen::NonlinearEigen(const std::string & name, InputParameters paramet
 }
 
 void
-NonlinearEigen::execute()
+NonlinearEigen::init()
 {
-  preExecute();
+  EigenExecutionerBase::init();
 
-  // save the initial guess
-  _problem.copyOldSolutions();
-
-  Real initial_res = 0.0;
   if (_free_iter>0)
   {
+    // save the initial guess
+    _problem.copyOldSolutions();
+
     // free power iterations
     Moose::out << std::endl << " Free power iteration starts"  << std::endl;
 
+    Real initial_res;
     inversePowerIteration(_free_iter, _free_iter, _pfactor, false,
                           std::numeric_limits<Real>::min(), std::numeric_limits<Real>::max(),
-                          true, _output_pi, 0.0,
-                          _eigenvalue, initial_res);
+                          true, _output_pi, 0.0, _eigenvalue, initial_res);
 
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
     _problem.onTimestepEnd();
     _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+
+    if (!getParam<bool>("output_on_final"))
+    {
+      _problem.timeStep()++;
+      Real t = _problem.time();
+      _problem.time() = _problem.timeStep();
+      _output_warehouse.outputStep();
+      _problem.time() = t;
+    }
   }
+}
 
-  if (!getParam<bool>("output_on_final"))
-  {
-    _problem.timeStep() = POWERITERATION_END;
-    Real t = _problem.time();
-    _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep();
-    _problem.time() = t;
-  }
+void
+NonlinearEigen::execute()
+{
+  preExecute();
 
-  Moose::out << " Nonlinear iteration starts"  << std::endl;
-
-  _problem.timestepSetup();
-  _problem.copyOldSolutions();
-
-  Real rel_tol = _rel_tol;
-  Real abs_tol = _abs_tol;
-  if (_free_iter>0)
-  {
-    Moose::out << " Initial |R| = " << initial_res << std::endl;
-    abs_tol = _rel_tol*initial_res;
-    if (abs_tol<_abs_tol) abs_tol = _abs_tol;
-    rel_tol = 1e-50;
-  }
-
-  // nonlinear solve
-  preSolve();
-  nonlinearSolve(rel_tol, abs_tol, _pfactor, _eigenvalue);
-  postSolve();
-
-  _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
-  _problem.onTimestepEnd();
-  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-  _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
-  if (_run_custom_uo)
-  {
-    _problem.computeUserObjects(EXEC_CUSTOM);
-    _problem.computeAuxiliaryKernels(EXEC_CUSTOM);
-    _problem.computeUserObjects(EXEC_CUSTOM, UserObjectWarehouse::POST_AUX);
-  }
-
-  if (!getParam<bool>("output_on_final"))
-  {
-    _problem.timeStep() = NONLINEAR_SOLVE_END;
-    Real t = _problem.time();
-    _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep();
-    _problem.time() = t;
-  }
-
-  Real s = normalizeSolution(_norm_execflag!=EXEC_CUSTOM && _norm_execflag!=EXEC_TIMESTEP &&
-                             _norm_execflag!=EXEC_RESIDUAL);
-
-  Moose::out << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
-
-  if (getParam<bool>("output_on_final") || std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
-  {
-    _problem.timeStep() = FINAL;
-    Real t = _problem.time();
-    _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep();
-    _problem.time() = t;
-  }
+  takeStep();
 
   postExecute();
 }
 
 void
-NonlinearEigen::postSolve()
+NonlinearEigen::takeStep()
 {
+  Moose::out << " Nonlinear iteration starts"  << std::endl;
+
+  // nonlinear solve
+  _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);
+  preSolve();
+  _problem.updateMaterials();
+  _problem.timestepSetup();
+  _problem.copyOldSolutions();
+  _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
+
+  nonlinearSolve(_rel_tol, _abs_tol, _pfactor, _eigenvalue);
+
+  postSolve();
   printEigenvalue();
+
+  _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+  _problem.onTimestepEnd();
+  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
+  _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
 }

@@ -88,12 +88,17 @@ public:
   /**
    * Override this for actions that should take place before linear solve of each inverse power iteration
    */
-  virtual void preStep();
+  virtual void preIteration();
 
   /**
    * Override this for actions that should take place after linear solve of each inverse power iteration
    */
-  virtual void postStep();
+  virtual void postIteration();
+
+  /**
+   * Override this for actions that should take place after the main solve
+   */
+  virtual void postExecute();
 
   /**
    * Normalize the solution vector based on the postprocessor value for normalization

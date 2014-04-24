@@ -31,15 +31,8 @@ public:
 
   virtual void execute();
 
-  enum CheckPoint
-  {
-    INIT_END = 0,
-    POWERITERATION_END = 1,
-    FINAL = 2
-  };
-
 protected:
-  virtual void postSolve();
+  virtual void takeStep();
 
   const unsigned int & _min_iter;
   const unsigned int & _max_iter;
