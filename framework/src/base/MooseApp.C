@@ -104,6 +104,7 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _parallel_mesh_on_command_line(false),
     _recover(false),
     _half_transient(false),
+    _output_warehouse(new OutputWarehouse),
     _alternate_output_warehouse(NULL)
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
@@ -123,6 +124,9 @@ MooseApp::~MooseApp()
   delete _sys_info;
   delete _executioner;
   _action_warehouse.clear();
+
+  // MUST be deleted before _comm is destroyed!
+  delete _output_warehouse;
 
   // Note: Communicator MUST be destroyed last because everything else is using it!
   delete _comm;
@@ -380,7 +384,7 @@ MooseApp::setOutputPosition(Point p)
 
   _output_position_set = true;
   _output_position = p;
-  _output_warehouse.meshChanged();
+  _output_warehouse->meshChanged();
 
   if (_executioner != NULL)
     _executioner->parentOutputPositionChanged();
@@ -396,7 +400,7 @@ OutputWarehouse &
 MooseApp::getOutputWarehouse()
 {
   if (_alternate_output_warehouse == NULL)
-    return _output_warehouse;
+    return *_output_warehouse;
   else
     return *_alternate_output_warehouse;
 }

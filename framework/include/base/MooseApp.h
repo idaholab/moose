@@ -393,7 +393,7 @@ protected:
   std::map<std::string, unsigned int> _output_file_numbers;
 
   /// OutputWarehouse object for this App
-  OutputWarehouse _output_warehouse;
+  OutputWarehouse * _output_warehouse;
 
   /// An alternate OutputWarehouse object (required for CoupledExecutioner)
   OutputWarehouse * _alternate_output_warehouse;
