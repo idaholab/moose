@@ -42,8 +42,10 @@
 [Outputs]
   [./exodus]
     type = 'Exodus'
+    file_base = duplicate_output_files_out
   [../]
   [./exodus_two]
     type = 'Exodus'
+    file_base = duplicate_output_files_out
   [../]
 []

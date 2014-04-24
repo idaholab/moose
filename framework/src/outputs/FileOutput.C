@@ -24,13 +24,13 @@ InputParameters validParams<FileOutput>()
 {
   // Create InputParameters object for this stand-alone object
   InputParameters params = validParams<Output>();
-  params.addParam<std::string>("file_base", "The desired solution output name without an extension (Defaults appends '_out' to the input file name)");
+  params.addParam<std::string>("file_base", "The desired solution output name without an extension");
   params.addParam<bool>("append_displaced", false, "Append '_displaced' to the output file base");
   params.addParamNamesToGroup("append_displaced", "Displaced");
 
   // Add the padding option and list it as 'Advanced'
   params.addParam<unsigned int>("padding", 4, "The number of for extension suffix (e.g., out.e-s002)");
-  params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputing only a subset of outputs when using MultiApps.");
+  params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputting only a subset of outputs when using MultiApps.");
   params.addParamNamesToGroup("padding output_if_base_contains", "Advanced");
 
   return params;
@@ -49,7 +49,12 @@ FileOutput::FileOutput(const std::string & name, InputParameters & parameters) :
 
   // Set the file base, if it has not been set already
   if (!isParamValid("file_base"))
-    _file_base = getOutputFileBase(_app);
+  {
+    if (getParam<bool>("_short_cut"))
+      _file_base = getOutputFileBase(_app);
+    else
+      _file_base = getOutputFileBase(_app, "_" + name);
+  }
 
   // Check the file directory of file_base
   std::string base = "./" + _file_base;
@@ -104,7 +109,7 @@ FileOutput::outputFinal()
 }
 
 std::string
-FileOutput::getOutputFileBase(MooseApp & app)
+FileOutput::getOutputFileBase(MooseApp & app, std::string suffix)
 {
   // If the App has an outputfile, then use it (MultiApp scenario)
   if (!app.getOutputFileBase().empty())
@@ -125,7 +130,7 @@ FileOutput::getOutputFileBase(MooseApp & app)
   mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
 
   // Append the "_out" to the name and return it
-  return input_filename.substr(0, pos) + "_out";
+  return input_filename.substr(0, pos) + suffix;
 }
 
 bool

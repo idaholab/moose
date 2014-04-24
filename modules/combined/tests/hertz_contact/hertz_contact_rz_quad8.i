@@ -266,7 +266,7 @@
 [Outputs]
   output_initial = true
   elemental_as_nodal = true
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]

@@ -19,7 +19,7 @@
     type = 'Exodiff'
     input = 'exodus.i'
     exodiff = 'exodus_disable_initial_out.e'
-    cli_args = 'Outputs/exodus/output_initial=false Outputs/exodus/file_base=exodus_disable_initial_out'
+    cli_args = 'Outputs/out/output_initial=false Outputs/out/file_base=exodus_disable_initial_out'
   [../]
 
   [./output_all]

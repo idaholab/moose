@@ -41,7 +41,7 @@
 
 [Outputs]
   console = true
-  [./oversample]
+  [./out]
     type = Exodus
     output_initial = true
     refinements = 2

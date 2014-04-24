@@ -95,7 +95,7 @@
 ##! [MultipleOutputBlocks]
 [Outputs]
   output_initial = false                # common output_initial
-  [./exodus]
+  [./out]
     # Setup the output system to output only aux2 and aux3 as nodal variables
     type = Exodus
     hide = 'u v aux0 aux1'              # disables variables

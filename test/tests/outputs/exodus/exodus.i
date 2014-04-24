@@ -39,10 +39,8 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-##! [ExodusOutputBlock]
 [Outputs]
-  [./exodus]
+  [./out]
     type = Exodus
   [../]
 []
-##! [ExodusOutputBlock]

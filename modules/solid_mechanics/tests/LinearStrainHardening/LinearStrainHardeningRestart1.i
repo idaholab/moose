@@ -189,7 +189,7 @@
   output_initial = true
   exodus = true
   csv = true
-  [./checkpoint]
+  [./out]
     type = Checkpoint
     num_files = 1
   [../]

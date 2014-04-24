@@ -64,7 +64,7 @@
 
 [Outputs]
   exodus = true
-  [./checkpoint]
+  [./out]
     type = Checkpoint
     num_files = 1
   [../]

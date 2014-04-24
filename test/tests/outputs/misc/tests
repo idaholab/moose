@@ -27,4 +27,9 @@
     expect_err = "getOutputsNames test passed"
     max_parallel = 1
   [../]
+  [./default_names]
+    type = CheckFiles
+    input = default_names.i
+    check_files = 'default_names_out.e default_names_oversample.e'
+  [../]
 []

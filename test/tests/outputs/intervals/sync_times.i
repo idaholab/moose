@@ -50,7 +50,7 @@
 
 [Outputs]
   console = true
-  [./exodus]
+  [./out]
     type = Exodus
     sync_times = '0.15 0.375 0.892'
     sync_only = true

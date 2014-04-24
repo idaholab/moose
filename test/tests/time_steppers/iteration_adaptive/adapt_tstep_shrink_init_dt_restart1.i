@@ -81,7 +81,7 @@
     type = Console
     linear_residuals = true
   [../]
-  [./checkpoint]
+  [./out]
     type = Checkpoint
     num_files = 1
   [../]
