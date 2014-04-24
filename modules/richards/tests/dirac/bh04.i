@@ -96,7 +96,7 @@
     SumQuantityUO = borehole_total_outflow_mass
     variable = pressure
     unit_weight = '0 0 0'
-    character = one
+    character = 1
     mesh_adaptivity = false
     MyNameIsAndyWilkins = false
   [../]
@@ -151,10 +151,6 @@
     vals = 'fluid_mass1 fluid_mass0 bh_report'
   [../]
 
-  [./one]
-    type = ConstantFunction
-    value = 1
-  [../]
 []
 
 
