@@ -24,6 +24,7 @@
 #include "SubProblem.h"
 #include "MooseVariableScalar.h"
 #include "MooseException.h"
+
 // libMesh
 #include "libmesh/equation_systems.h"
 #include "libmesh/dof_map.h"
@@ -31,6 +32,7 @@
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/point.h"
+#include "libmesh/parallel_object.h"
 
 class Factory;
 class MooseApp;
@@ -54,7 +56,7 @@ void extraSparsity(SparsityPattern::Graph & sparsity,
  * Base class for a system (of equations)
  *
  */
-class SystemBase
+class SystemBase : public libMesh::ParallelObject
 {
 public:
   SystemBase(SubProblem & subproblem, const std::string & name);
@@ -600,7 +602,7 @@ protected:
     _exception = e;                                                                     \
   }                                                                                     \
   {                                                                                     \
-    Parallel::max<MooseException>(_exception);                                          \
+    _communicator.max<MooseException>(_exception);                                          \
     if (_exception > 0)                                                                 \
       throw _exception;                                                                 \
   }
@@ -611,7 +613,7 @@ protected:
     _exception = e;                                                                     \
   }                                                                                     \
   {                                                                                     \
-    Parallel::max<MooseException>(_exception);                                          \
+    _communicator.max<MooseException>(_exception);                                          \
     if (_exception > 0)                                                                 \
       throw _exception;                                                                 \
   }

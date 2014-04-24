@@ -81,8 +81,10 @@ void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos
 }
 
 MooseApp::MooseApp(const std::string & name, InputParameters parameters):
+    ParallelObject(*parameters.get<Parallel::Communicator *>("_comm")), // Can't call getParam() before pars is set
     _name(name),
     _pars(parameters),
+    _comm(getParam<Parallel::Communicator *>("_comm")),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
@@ -121,6 +123,9 @@ MooseApp::~MooseApp()
   delete _sys_info;
   delete _executioner;
   _action_warehouse.clear();
+
+  // Note: Communicator MUST be destroyed last because everything else is using it!
+  delete _comm;
 }
 
 void

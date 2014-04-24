@@ -44,6 +44,7 @@ void extraSparsity(SparsityPattern::Graph & sparsity,
 }
 
 SystemBase::SystemBase(SubProblem & subproblem, const std::string & name) :
+    libMesh::ParallelObject(subproblem),
     _subproblem(subproblem),
     _app(subproblem.getMooseApp()),
     _factory(_app.getFactory()),

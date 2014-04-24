@@ -78,19 +78,19 @@ ContactSplit::setup(const std::string& prefix)
       val  =  oval.str();
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
     for (unsigned int j = 0;  j < _contact_master.size(); ++j) {
       std::ostringstream oopt;
       oopt << dmprefix << "contact_" << j;
       opt = oopt.str();
       val = _contact_master[j]+","+_contact_slave[j];
       ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-      CHKERRABORT(libMesh::COMM_WORLD,ierr);
+      CHKERRABORT(_communicator.get(),ierr);
       if (_contact_displaced[j]) {
   opt = opt + "_displaced";
   val = "yes";
   ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(_communicator.get(),ierr);
       }
     }
   }
@@ -103,19 +103,19 @@ ContactSplit::setup(const std::string& prefix)
       val  =  oval.str();
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
     for (unsigned int j = 0;  j < _uncontact_master.size(); ++j) {
       std::ostringstream oopt;
       oopt << dmprefix << "uncontact_" << j;
       opt = oopt.str();
       val = _uncontact_master[j]+","+_uncontact_slave[j];
       ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-      CHKERRABORT(libMesh::COMM_WORLD,ierr);
+      CHKERRABORT(_communicator.get(),ierr);
       if (_uncontact_displaced[j]) {
   opt = opt + "_displaced";
   val = "yes";
   ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(_communicator.get(),ierr);
       }
     }
   }

@@ -133,7 +133,7 @@ MultiApp::init()
   else if (isParamValid("positions_file"))
   {
     // Read the file on the root processor then broadcast it
-    if (libMesh::processor_id() == 0)
+    if (processor_id() == 0)
     {
       std::string positions_file = getParam<FileName>("positions_file");
       MooseUtils::checkFileReadable(positions_file);
@@ -144,11 +144,11 @@ MultiApp::init()
     }
     unsigned int num_values = _positions_vec.size();
 
-    Parallel::broadcast(num_values);
+    _communicator.broadcast(num_values);
 
     _positions_vec.resize(num_values);
 
-    Parallel::broadcast(_positions_vec);
+    _communicator.broadcast(_positions_vec);
 
     mooseAssert(num_values % LIBMESH_DIM == 0, "Wrong number of entries in 'positions'");
 
@@ -362,7 +362,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
 {
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblem *>("_parent_fep") = _fe_problem;
-  MooseApp * app = AppFactory::instance().create(_app_type, "multi_app", app_params);
+  MooseApp * app = AppFactory::instance().create(_app_type, "multi_app", app_params, _my_comm);
   _apps[i] = app;
 
   std::string input_file = "";

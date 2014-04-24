@@ -69,6 +69,8 @@ public:
    * a filename is supplied opening and closing of the file is properly handled.  In the
    * screen version of the method, an optional parameters can be passed to print only the last
    * "n" entries.  A value of zero means don't skip any rows
+   *
+   * Note: Only call these from processor 0!
    */
   void printTable(std::ostream & out, unsigned int last_n_entries=0);
   void printTable(std::ostream & out, unsigned int last_n_entries, const MooseEnum & suggested_term_width);
@@ -76,6 +78,8 @@ public:
 
   /**
    * Method for dumping the table to a csv file - opening and closing the file handle is handled
+   *
+   * Note: Only call this on processor 0!
    */
   void printCSV(const std::string & file_name, int interval=1);
 

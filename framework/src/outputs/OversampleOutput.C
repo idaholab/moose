@@ -174,7 +174,7 @@ OversampleOutput::initOversample()
     if (num_vars > 0)
     {
       _mesh_functions[sys_num].resize(num_vars);
-      AutoPtr<NumericVector<Number> > serialized_solution = NumericVector<Number>::build();
+      AutoPtr<NumericVector<Number> > serialized_solution = NumericVector<Number>::build(_communicator);
       serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
 
       // Need to pull down a full copy of this vector on every processor so we can get values in parallel
@@ -211,7 +211,7 @@ OversampleOutput::update()
       System & dest_sys = _es_ptr->get_system(sys_num);
 
       // Update the solution for the oversampled mesh
-      AutoPtr<NumericVector<Number> > serialized_solution = NumericVector<Number>::build();
+      AutoPtr<NumericVector<Number> > serialized_solution = NumericVector<Number>::build(_communicator);
       serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
       source_sys.solution->localize(*serialized_solution);
 

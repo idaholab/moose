@@ -718,7 +718,7 @@ static PetscErrorCode DMMooseFunction(DM dm, Vec x, Vec r)
   ierr = DMMooseGetNonlinearSystem(dm, nl); CHKERRQ(ierr);
   PetscVector<Number>& X_sys = *libmesh_cast_ptr<PetscVector<Number>* >(nl->sys().solution.get());
   PetscVector<Number>& R_sys = *libmesh_cast_ptr<PetscVector<Number>* >(nl->sys().rhs);
-  PetscVector<Number> X_global(x, libMesh::CommWorld), R(r, libMesh::CommWorld);
+  PetscVector<Number> X_global(x, nl->comm()), R(r, nl->comm());
 
   // Use the systems update() to get a good local version of the parallel solution
   X_global.swap(X_sys);
@@ -796,11 +796,11 @@ static PetscErrorCode DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   PetscFunctionBegin;
   ierr = DMMooseGetNonlinearSystem(dm, nl);CHKERRQ(ierr);
 
-  PetscMatrix<Number>  the_pc(pc);
-  PetscMatrix<Number>  Jac(jac);
+  PetscMatrix<Number>  the_pc(pc, nl->comm());
+  PetscMatrix<Number>  Jac(jac, nl->comm());
   PetscVector<Number>& X_sys = *libmesh_cast_ptr<PetscVector<Number>*>(nl->sys().solution.get());
   PetscMatrix<Number>& Jac_sys = *libmesh_cast_ptr<PetscMatrix<Number>*>(nl->sys().matrix);
-  PetscVector<Number>  X_global(x, libMesh::CommWorld);
+  PetscVector<Number>  X_global(x, nl->comm());
 
   // Set the dof maps
   the_pc.attach_dof_map(nl->sys().get_dof_map());
@@ -884,11 +884,13 @@ static PetscErrorCode DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
 {
   PetscErrorCode ierr;
   NonlinearSystem* nl;
-  PetscVector<Number> XL(xl, libMesh::CommWorld);
-  PetscVector<Number> XU(xu, libMesh::CommWorld);
 
   PetscFunctionBegin;
   ierr = DMMooseGetNonlinearSystem(dm, nl);CHKERRQ(ierr);
+
+  PetscVector<Number> XL(xl, nl->comm());
+  PetscVector<Number> XU(xu, nl->comm());
+
 #if PETSC_VERSION_LESS_THAN(3,5,0) && PETSC_VERSION_RELEASE
   ierr = VecSet(xl, SNES_VI_NINF);CHKERRQ(ierr);
   ierr = VecSet(xu, SNES_VI_INF);CHKERRQ(ierr);
@@ -1107,7 +1109,7 @@ static PetscErrorCode  DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id
   for (; el!=end; ++el)
     blocks.insert((*el)->subdomain_id());
   // Some subdomains may only live on other processors
-  CommWorld.set_union(blocks);
+  mesh.comm().set_union(blocks);
   PetscFunctionReturn(0);
 }
 

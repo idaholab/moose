@@ -44,7 +44,7 @@ ElementalVariableValue::getValue()
 {
   Real value = 0;
 
-  if (_element && (_element->processor_id() == libMesh::processor_id()))
+  if (_element && (_element->processor_id() == processor_id()))
   {
     _subproblem.prepare(_element, _tid);
     _subproblem.reinitElem(_element, _tid);

@@ -29,6 +29,9 @@
 #include "ActionFactory.h"
 #include "OutputWarehouse.h"
 
+// libMesh includes
+#include "libmesh/parallel_object.h"
+
 class Executioner;
 class MooseApp;
 class RecoverBaseAction;
@@ -46,7 +49,7 @@ InputParameters validParams<MooseApp>();
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp
+class MooseApp : public libMesh::ParallelObject
 {
 public:
   virtual ~MooseApp();
@@ -316,6 +319,9 @@ protected:
 
   /// Parameters of this object
   InputParameters _pars;
+
+  /// The MPI communicator this App is going to use
+  const Parallel::Communicator * _comm;
 
   /// Input file name used
   std::string _input_filename;

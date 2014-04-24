@@ -20,6 +20,10 @@
 #include <sstream>
 
 #include "XTermConstants.h"
+
+// libMesh includes
+#include "libmesh/parallel.h"
+
 namespace MooseUtils
 {
   /**
@@ -62,7 +66,7 @@ namespace MooseUtils
    * This function implements a parallel barrier function but writes progress
    * to stdout.
    */
-  void parallelBarrierNotify();
+  void parallelBarrierNotify(const Parallel::Communicator & comm);
 
   /**
    * Function tests if the supplied filename as the desired extension

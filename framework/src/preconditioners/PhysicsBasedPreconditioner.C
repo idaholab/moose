@@ -46,7 +46,7 @@ InputParameters validParams<PhysicsBasedPreconditioner>()
 
 PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const std::string & name, InputParameters params) :
     MoosePreconditioner(name, params),
-    Preconditioner<Number>(libMesh::CommWorld),
+    Preconditioner<Number>(MoosePreconditioner::_communicator),
     _nl(_fe_problem.getNonlinearSystem())
 {
   unsigned int num_systems = _nl.sys().n_vars();
@@ -184,7 +184,7 @@ PhysicsBasedPreconditioner::init ()
     LinearImplicitSystem & u_system = *_systems[system_var];
 
     if (!_preconditioners[system_var])
-      _preconditioners[system_var] = Preconditioner<Number>::build(libMesh::CommWorld);
+      _preconditioners[system_var] = Preconditioner<Number>::build(MoosePreconditioner::_communicator);
 
     // we have to explicitly set the matrix in the preconditioner, because h-adaptivity could have changed it and we have to work with the current one
     Preconditioner<Number> * preconditioner = _preconditioners[system_var];

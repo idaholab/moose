@@ -88,27 +88,27 @@ public:
   template <typename T>
   void gatherSum(T & value)
   {
-    Parallel::sum(value);
+    _communicator.sum(value);
   }
 
   template <typename T>
   void gatherMax(T & value)
   {
-    Parallel::max(value);
+    _communicator.max(value);
   }
 
   template <typename T>
   void gatherMin(T & value)
   {
-    Parallel::min(value);
+    _communicator.min(value);
   }
 
   template <typename T1, typename T2>
   void gatherProxyValueMax(T1 & value, T2 & proxy)
   {
     unsigned int rank;
-    Parallel::maxloc(value, rank);
-    Parallel::broadcast(proxy, rank);
+    _communicator.maxloc(value, rank);
+    _communicator.broadcast(proxy, rank);
   }
 
 protected:

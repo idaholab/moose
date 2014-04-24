@@ -67,7 +67,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
           // First find the element the hit lands in
           const Elem * elem = (*pl)(multi_app_position);
 
-          if (elem && elem->processor_id() == libMesh::processor_id())
+          if (elem && elem->processor_id() == from_mesh.processor_id())
           {
             from_sub_problem.reinitElemPhys(elem, point_vec, 0);
 
@@ -75,7 +75,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
             value = from_var.sln()[0];
           }
 
-          libMesh::Parallel::max(value);
+          _communicator.max(value);
         }
 
         if (_multi_app->hasLocalApp(i))

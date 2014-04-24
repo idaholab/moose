@@ -49,6 +49,6 @@ CSV::output()
   TableOutput::output();
 
   // Print the table containing all the data to a file
-  if (!_all_data_table.empty())
+  if (!_all_data_table.empty() && processor_id() == 0)
     _all_data_table.printCSV(filename());
 }

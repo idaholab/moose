@@ -51,7 +51,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
     unsigned short int side = belem->_side;
     BoundaryID boundary_id = belem->_bnd_id;
 
-    if (elem->processor_id() == libMesh::processor_id())
+    if (elem->processor_id() == _problem.processor_id())
     {
       // prepare variables
       for (std::map<std::string, MooseVariable *>::iterator it = _sys._elem_vars[_tid].begin(); it != _sys._elem_vars[_tid].end(); ++it)

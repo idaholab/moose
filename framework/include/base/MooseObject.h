@@ -17,6 +17,9 @@
 
 #include "InputParameters.h"
 
+// libMesh includes
+#include "libmesh/parallel_object.h"
+
 class MooseApp;
 class MooseObject;
 
@@ -26,7 +29,7 @@ InputParameters validParams<MooseObject>();
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class MooseObject
+class MooseObject : public libMesh::ParallelObject
 {
 public:
   MooseObject(const std::string & name, InputParameters parameters);

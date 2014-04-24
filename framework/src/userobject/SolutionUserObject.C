@@ -224,7 +224,7 @@ SolutionUserObject::readExodusII()
     _system2->get_all_variable_numbers(var_num2);
 
     // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-    _serialized_solution2 = NumericVector<Number>::build().release();
+    _serialized_solution2 = NumericVector<Number>::build(_communicator).release();
     _serialized_solution2->init(_system2->n_dofs(), false, SERIAL);
     _system2->solution->localize(*_serialized_solution2);
 
@@ -318,7 +318,7 @@ SolutionUserObject::initialSetup()
   // Create a libmesh::Mesh object for storing the loaded data.  Since
   // SolutionUserObject is restricted to only work with SerialMesh
   // (see above) we can force the Mesh used here to be a SerialMesh.
-  _mesh = new SerialMesh;
+  _mesh = new SerialMesh(_communicator);
 
   // ExodusII mesh file supplied
   if (MooseUtils::hasExtension(_mesh_file, "e"))
@@ -339,7 +339,7 @@ SolutionUserObject::initialSetup()
     mooseError("In SolutionUserObject, invalid file type (only .xda and .e supported)");
 
   // Intilize the serial solution vector
-  _serialized_solution = NumericVector<Number>::build().release();
+  _serialized_solution = NumericVector<Number>::build(_communicator).release();
   _serialized_solution->init(_system->n_dofs(), false, SERIAL);
 
   // Pull down a full copy of this vector on every processor so we can get values in parallel
