@@ -143,11 +143,11 @@ NodalFloodCount::execute()
   {
     Elem *current_elem = *el;
     unsigned int n_nodes = current_elem->n_vertices();
-    for (unsigned int i=0; i < n_nodes; ++i)
+    for (unsigned int i = 0; i < n_nodes; ++i)
     {
       const Node *node = current_elem->get_node(i);
 
-      for (unsigned int var_num=0; var_num<_vars.size(); ++var_num)
+      for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
         flood(node, var_num, 0);
     }
   }
@@ -288,7 +288,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
    **/
   std::vector<std::vector<std::set<unsigned int> > > data(_maps_size);
 
-  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
     data[map_num].resize(_region_counts[map_num]+1);
 
@@ -358,7 +358,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
   bool start_next_set = true;
   bool has_data_to_save = false;
 
-  unsigned int curr_set_length=0;
+  unsigned int curr_set_length = 0;
   std::set<unsigned int> curr_set;
   unsigned int curr_var_idx = std::numeric_limits<unsigned int>::max();
 
@@ -409,11 +409,11 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
 void
 NodalFloodCount::mergeSets()
 {
-  Moose::perf_log.push("mergeSets()","NodalFloodCount");
+  Moose::perf_log.push("mergeSets()", "NodalFloodCount");
   std::set<unsigned int> set_union;
   std::insert_iterator<std::set<unsigned int> > set_union_inserter(set_union, set_union.begin());
 
-  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
     std::list<BubbleData>::iterator end = _bubble_sets[map_num].end();
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != end; /* No increment */)
@@ -446,7 +446,7 @@ NodalFloodCount::mergeSets()
         ++it1;
     }
   }
-  Moose::perf_log.pop("mergeSets()","NodalFloodCount");
+  Moose::perf_log.pop("mergeSets()", "NodalFloodCount");
 }
 
 void
@@ -456,7 +456,7 @@ NodalFloodCount::updateFieldInfo()
   _region_to_var_idx.resize(_bubble_sets[0].size());
 
   // Finally update the original bubble map with field data from the merged sets
-  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
     unsigned int counter = 1;
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
@@ -512,7 +512,7 @@ NodalFloodCount::flood(const Node *node, int current_idx, unsigned int live_regi
   std::vector< const Node * > neighbors;
   MeshTools::find_nodal_neighbors(_mesh.getMesh(), *node, _nodes_to_elem_map, neighbors);
   // Flood neighboring nodes that are also above this threshold with recursion
-  for (unsigned int i=0; i<neighbors.size(); ++i)
+  for (unsigned int i = 0; i < neighbors.size(); ++i)
   {
     // Only recurse on nodes this processor can see
     if (_mesh.isSemiLocal(const_cast<Node *>(neighbors[i])))
@@ -559,11 +559,11 @@ NodalFloodCount::updateRegionOffsets()
 void
 NodalFloodCount::calculateBubbleVolumes()
 {
-  Moose::perf_log.push("calculateBubbleVolume()","NodalFloodCount");
+  Moose::perf_log.push("calculateBubbleVolume()", "NodalFloodCount");
 
   // Size our temporary data structure
   std::vector<std::vector<Real> > bubble_volumes(_maps_size);
-  for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
     bubble_volumes[map_num].resize(_bubble_sets[map_num].size());
   }
@@ -583,7 +583,7 @@ NodalFloodCount::calculateBubbleVolumes()
       for (std::list<BubbleData>::const_iterator bubble_it1 = _bubble_sets[map_num].begin(); bubble_it1 != end; ++bubble_it1)
       {
         unsigned int flooded_nodes = 0;
-        for (unsigned int node = 0; node<elem_n_nodes; ++node)
+        for (unsigned int node = 0; node < elem_n_nodes; ++node)
         {
           unsigned int node_id = elem->node(node);
           if (bubble_it1->_nodes.find(node_id) != bubble_it1->_nodes.end())
@@ -607,7 +607,7 @@ NodalFloodCount::calculateBubbleVolumes()
 
   std::sort(_all_bubble_volumes.begin(), _all_bubble_volumes.end(), std::greater<Real>());
 
-  Moose::perf_log.pop("calculateBubbleVolume()","NodalFloodCount");
+  Moose::perf_log.pop("calculateBubbleVolume()", "NodalFloodCount");
 }
 
 template<>

@@ -59,7 +59,7 @@ SmoothCircleIC::value(const Point & p)
   else if (rad < _radius + _int_width/2.0) //Smooth interface
   {
     Real int_pos = (rad - _radius + _int_width/2.0)/_int_width;
-    value = _outvalue + (_invalue - _outvalue) * (1.0 + cos(int_pos * libMesh::pi)) / 2.0;
+    value = _outvalue + (_invalue - _outvalue) * (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
   }
   else //Outside circle
     value = _outvalue;
@@ -88,7 +88,7 @@ SmoothCircleIC::gradient(const Point & p)
   {
     Real int_pos = (rad - _radius + _int_width / 2.0) / _int_width;
     Real Dint_posDr = 1.0 / _int_width;
-    DvalueDr = Dint_posDr * (_invalue - _outvalue) * (-sin(int_pos * libMesh::pi) * libMesh::pi) / 2.0;
+    DvalueDr = Dint_posDr * (_invalue - _outvalue) * (-std::sin(int_pos * libMesh::pi) * libMesh::pi) / 2.0;
   }
   //Set gradient over the smooth interface
   if (rad != 0.0) {

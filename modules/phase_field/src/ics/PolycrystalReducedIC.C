@@ -64,19 +64,19 @@ PolycrystalReducedIC::initialSetup()
   if (_cody_test)
   {
     holder.resize(_grain_num);
-    holder[0] = Point(0.2,0.85,0.0);
-    holder[1] = Point(0.50,0.85,0.0);
-    holder[2] = Point(0.8,0.85,0.0);
+    holder[0] = Point(0.2, 0.85, 0.0);
+    holder[1] = Point(0.5, 0.85, 0.0);
+    holder[2] = Point(0.8, 0.85, 0.0);
 
-    holder[3] = Point(0.2,0.5,0.0);
-    holder[4] = Point(0.50,0.5,0.0);
-    holder[5] = Point(0.8,0.5,0.0);
+    holder[3] = Point(0.2, 0.5, 0.0);
+    holder[4] = Point(0.5, 0.5, 0.0);
+    holder[5] = Point(0.8, 0.5, 0.0);
 
-    holder[6] = Point(0.1,0.1,0.0);
-    holder[7] = Point(0.50,0.05,0.0);
-    holder[8] = Point(0.9,0.1,0.0);
+    holder[6] = Point(0.1, 0.1, 0.0);
+    holder[7] = Point(0.5, 0.05, 0.0);
+    holder[8] = Point(0.9, 0.1, 0.0);
 
-    holder[9] = Point(0.50,0.1,0.0);
+    holder[9] = Point(0.5, 0.1, 0.0);
   }
 
   //Assign actual center point positions
@@ -96,16 +96,16 @@ PolycrystalReducedIC::initialSetup()
   //Assign grains to each order parameter
   if (_cody_test)
   {
-    _assigned_op[0] = 0;
-    _assigned_op[1] = 0;
-    _assigned_op[2] = 0;
-    _assigned_op[3] = 1;
-    _assigned_op[4] = 1;
-    _assigned_op[5] = 1;
-    _assigned_op[6] = 2;
-    _assigned_op[7] = 3;
-    _assigned_op[8] = 2;
-    _assigned_op[9] = 4;
+    _assigned_op[0] = 0.0;
+    _assigned_op[1] = 0.0;
+    _assigned_op[2] = 0.0;
+    _assigned_op[3] = 1.0;
+    _assigned_op[4] = 1.0;
+    _assigned_op[5] = 1.0;
+    _assigned_op[6] = 2.0;
+    _assigned_op[7] = 3.0;
+    _assigned_op[8] = 2.0;
+    _assigned_op[9] = 4.0;
   }
   else
   {
@@ -163,7 +163,7 @@ PolycrystalReducedIC::value(const Point & p)
   Real val = 0.0;
   unsigned int min_index = _grain_num + 100;
   //Loops through all of the grain centers and finds the center that is closest to the point p
-  for (unsigned int grain=0; grain<_grain_num; grain++)
+  for (unsigned int grain = 0; grain < _grain_num; grain++)
   {
     Real distance = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], p);
 

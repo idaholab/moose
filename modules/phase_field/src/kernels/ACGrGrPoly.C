@@ -30,7 +30,7 @@ ACGrGrPoly::ACGrGrPoly(const std::string & name, InputParameters parameters) :
   for (unsigned int i = 0; i < _ncrys; ++i)
   {
     _vals[i] = &coupledValue("v", i);
-    _vals_var[i] = coupled("v",i);
+    _vals_var[i] = coupled("v", i);
   }
 }
 
@@ -38,7 +38,7 @@ Real
 ACGrGrPoly::computeDFDOP(PFFunctionType type)
 {
   Real SumEtaj = 0.0;
-  for (unsigned int i=0; i<_ncrys; ++i)
+  for (unsigned int i = 0; i < _ncrys; ++i)
     SumEtaj += (*_vals[i])[_qp]*(*_vals[i])[_qp]; //Sum all other order parameters
 
   Real tgrad_correction = 0.0;

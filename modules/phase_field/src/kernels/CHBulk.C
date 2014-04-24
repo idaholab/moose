@@ -4,9 +4,9 @@ template<>
 InputParameters validParams<CHBulk>()
 {
   InputParameters params = validParams<KernelGrad>();
-  params.addParam<std::string>("mob_name","M","The mobility used with the kernel");
-  params.addParam<std::string>("Dmob_name","DM","The D mobility used with the kernel");
-  params.addParam<bool>("has_MJac",false,"Jacobian information for the mobility is defined");
+  params.addParam<std::string>("mob_name", "M", "The mobility used with the kernel");
+  params.addParam<std::string>("Dmob_name", "DM", "The D mobility used with the kernel");
+  params.addParam<bool>("has_MJac", false, "Jacobian information for the mobility is defined");
 
   return params;
 }

@@ -31,8 +31,8 @@ ThumbIC::value(const Point & p)
   if (p(1) > _height)
   {
     Real rad = 0.0;
-    Point center(_xcoord,_height,0.0);
-    for (unsigned int i=0; i<2; ++i)
+    Point center(_xcoord, _height, 0.0);
+    for (unsigned int i = 0; i < 2; ++i)
       rad += (p(i) - center(i)) * (p(i) - center(i));
 
     rad = sqrt(rad);
