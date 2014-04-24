@@ -84,7 +84,7 @@
 []
 
 [Outputs]
-  [./exodus]
+  [./out]
     type = Exodus
     output_initial = false
   [../]

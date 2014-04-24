@@ -80,6 +80,6 @@
     output_initial = true
     refinements = 2
     oversample = true
-    append_oversample = true
+    file_base = adapt_out_oversample
   [../]
 []

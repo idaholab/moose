@@ -12,12 +12,7 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
-    variable = u
-    coef = 0.1
-  [../]
-  [./time]
-    type = TimeDerivative
+    type = Diffusion
     variable = u
   [../]
 []
@@ -38,20 +33,27 @@
 []
 
 [Executioner]
+  type = Steady
+
   # Preconditioned JFNK (default)
-  type = Transient
-  num_steps = 6
-  dt = 0.1
-  solve_type = PJFNK
+  solve_type = 'PJFNK'
+
+
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
-  console = true
-  [./out]
+  output_initial = true
+  exodus = true
+  [./oversample]
     type = Exodus
-    output_final = true
-    interval = 5
+    oversample = true
+    refinements = 1
+  [../]
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
   [../]
 []

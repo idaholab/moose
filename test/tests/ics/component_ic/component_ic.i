@@ -104,7 +104,7 @@
 
 [Outputs]
   output_initial = true
-  [./exodus]
+  [./out]
     type = Exodus
     output_scalar_variables = false
   [../]

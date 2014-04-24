@@ -4,7 +4,7 @@
     type = 'Exodiff'
     input = 'intervals.i'
     exodiff = 'intervals_out.e'
-    cli_args = 'Outputs/exodus/interval=5'
+    cli_args = 'Outputs/out/interval=5'
   [../]
   [./common_time_step]
     # Same as above, but uses interval set via the common parameters

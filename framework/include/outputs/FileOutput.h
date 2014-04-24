@@ -89,7 +89,7 @@ public:
    *
    * @see CommonOutputAction::setRecoverFileBase()
    */
-  static std::string getOutputFileBase(MooseApp & app);
+  static std::string getOutputFileBase(MooseApp & app, std::string suffix = "_out");
 
 protected:
 

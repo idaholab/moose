@@ -44,7 +44,7 @@
 
 [Outputs]
   output_initial = true
-  [./exodus]
+  [./out]
     type = Exodus
     position = '1 1 0'
   [../]

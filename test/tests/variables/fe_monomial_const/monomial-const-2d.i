@@ -148,7 +148,7 @@
 [Outputs]
   output_initial = false
   csv = true
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]
