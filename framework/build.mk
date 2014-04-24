@@ -309,6 +309,18 @@ test_up: up
 		(cd $${app} && ./run_tests -q -j $(MOOSE_JOBS)) ; \
 	done
 
+test_only_up:
+	@echo ======================================================
+	@echo Testing the following applications:
+	@for app in $(DEP_APPS); do echo \ $$app; done
+	@echo ======================================================
+	@echo
+	@for app in $(DEP_APPS); \
+	do \
+		echo ====== Testing in $${app} ====== ; \
+		(cd $${app} && ./run_tests -q -j $(MOOSE_JOBS)) ; \
+	done
+
 clean_up:
 	@echo ======================================================
 	@echo Cleaning the following applications: 
@@ -324,7 +336,7 @@ clean_up:
 #
 # Maintenance
 #
-.PHONY: cleanall clean clean_up doc sa test
+.PHONY: cleanall clean doc sa test up test_up test_only_up clean_up
 
 #
 # Misc
