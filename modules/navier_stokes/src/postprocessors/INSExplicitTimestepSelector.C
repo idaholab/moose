@@ -89,7 +89,7 @@ INSExplicitTimestepSelector::execute()
 Real
 INSExplicitTimestepSelector::getValue()
 {
-  Parallel::min(_value);
+  _communicator.min(_value);
   return _value;
 }
 

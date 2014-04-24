@@ -281,7 +281,7 @@ template <class T>
 void
 NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<T> data)
 {
-  if (libMesh::processor_id() == 0)
+  if (processor_id() == 0)
   {
     std::map<std::string, std::ofstream *>::iterator handle_it = _file_handles.find(file_name);
     if (handle_it == _file_handles.end())
