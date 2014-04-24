@@ -97,6 +97,12 @@ public:
   const std::vector<Action *> & getActionsByName(const std::string & task) const;
 
   /**
+   * Retrieve a vector of constant action pointers in a specific type.
+   */
+  template<typename T>
+  const T * getActionsByType(const std::string & task) const;
+
+  /**
    * This method loops over all actions in the warehouse and executes them.  Meta-actions
    * may add new actions to the warehouse on the fly and they will still be executed in order
    */
@@ -177,5 +183,26 @@ protected:
   /// Executioner for the simulation (top-level class, is stored in MooseApp, where it is freed)
   Executioner * _executioner;
 };
+
+template<typename T>
+const T *
+ActionWarehouse::getActionsByType(const std::string & task) const
+{
+  std::map<std::string, std::vector<Action *> >::const_iterator it = _action_blocks.find(task);
+
+  const T * action = NULL;
+  unsigned int count = 0;
+  for (unsigned int i=0; i<it->second.size(); i++)
+  {
+    const T a = dynamic_cast<const T *>(it->second[i]);
+    if (a)
+    {
+      action = a;
+      count++;
+    }
+  }
+  if (count != 1) mooseError("Action is either not found or found more than one");
+  return action;
+}
 
 #endif // ACTIONWAREHOUSE_H
