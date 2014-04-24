@@ -2215,3 +2215,15 @@ NonlinearSystem::setPCSide(MooseEnum pcs)
   else
     mooseError("Unknown PC side specified.");
 }
+
+bool
+NonlinearSystem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
+{
+  return !_bcs[tid].activeIntegrated(bnd_id).empty();
+}
+
+bool
+NonlinearSystem::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid) const
+{
+  return _doing_dg;
+}

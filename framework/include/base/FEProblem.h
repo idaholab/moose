@@ -699,6 +699,30 @@ public:
    */
   void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
 
+  /**
+   * These methods are used to determine whether stateful material properties need to be stored on
+   * internal sides.  There are four situations where this may be the case: 1) DGKernels
+   * 2) IntegratedBCs 3)InternalSideUserObjects 4)ElementalAuxBCs
+   *
+   * Method 1:
+   * @param bnd_id the boundary id for which to see if stateful material properties need to be stored
+   * @param tid the THREAD_ID of the caller
+   * @return Boolean indicating whether material properties need to be stored
+   *
+   * Method 2:
+   * @param subdomain_id the subdomain id for which to see if stateful material properties need to be stored
+   * @param tid the THREAD_ID of the caller
+   * @return Boolean indicating whether material properties need to be stored
+   */
+  bool needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid);
+  bool needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid);
+
+  /**
+   * Dimension of the subspace spanned by vectors with a given prefix.
+   * @param prefix Prefix of the vectors spanning the subspace.
+   */
+  unsigned int subspaceDim(const std::string& prefix) const {if (_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
@@ -781,14 +805,13 @@ protected:
   /// A map of objects that consume random numbers
   std::map<std::string, RandomData *> _random_data_objects;
 
-  void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
+  // Cache for calculating materials on side
+  std::vector<LIBMESH_BEST_UNORDERED_MAP<SubdomainID, bool> > _block_mat_side_cache;
 
-public:
-  /**
-   * Dimension of the subspace spanned by vectors with a given prefix.
-   * @param prefix Prefix of the vectors spanning the subspace.
-   */
-  unsigned int subspaceDim(const std::string& prefix) const {if (_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
+  // Cache for calculating materials on side
+  std::vector<LIBMESH_BEST_UNORDERED_MAP<BoundaryID, bool> > _bnd_mat_side_cache;
+
+  void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
 
 protected:
   void checkUserObjects();

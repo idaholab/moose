@@ -37,7 +37,8 @@ ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
   _material_props(material_props),
   _bnd_material_props(bnd_material_props),
   _materials(materials),
-  _assembly(assembly)
+  _assembly(assembly),
+  _need_internal_side_material(false)
 {
 }
 
@@ -51,7 +52,8 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
     _material_props(x._material_props),
     _bnd_material_props(x._bnd_material_props),
     _materials(x._materials),
-    _assembly(x._assembly)
+    _assembly(x._assembly),
+    _need_internal_side_material(x._need_internal_side_material)
 {
 }
 
@@ -62,6 +64,8 @@ ComputeMaterialsObjectThread::~ComputeMaterialsObjectThread()
 void
 ComputeMaterialsObjectThread::subdomainChanged()
 {
+  _need_internal_side_material = _fe_problem.needMaterialOnSide(_subdomain, _tid);
+
   mooseAssert(_materials[_tid].hasMaterials(_subdomain), "No materials on subdomain block");
   _fe_problem.subdomainSetup(_subdomain, _tid);
 }
@@ -78,25 +82,25 @@ ComputeMaterialsObjectThread::onElement(const Elem *elem)
 void
 ComputeMaterialsObjectThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
-//  if (!_sys.hasActiveIntegratedBCs(bnd_id, _tid) && !_sys.doingDG())
-//    return;
-
-  _fe_problem.setCurrentBoundaryID(bnd_id);
-  _assembly[_tid]->reinit(elem, side);
-  unsigned int n_points = _assembly[_tid]->qRuleFace()->n_points();
-  _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), n_points, *elem, side);
-  _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
+  if (_fe_problem.needMaterialOnSide(bnd_id, _tid))
+  {
+    _fe_problem.setCurrentBoundaryID(bnd_id);
+    _assembly[_tid]->reinit(elem, side);
+    unsigned int n_points = _assembly[_tid]->qRuleFace()->n_points();
+    _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), n_points, *elem, side);
+    _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
+  }
 }
 
 void
 ComputeMaterialsObjectThread::onInternalSide(const Elem *elem, unsigned int side)
 {
-  if (!_sys.doingDG())
-    return;
-
-  _assembly[_tid]->reinit(elem, side);
-  unsigned int n_points = _assembly[_tid]->qRuleFace()->n_points();
-  _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), n_points, *elem, side);
+  if (_need_internal_side_material)
+  {
+    _assembly[_tid]->reinit(elem, side);
+    unsigned int n_points = _assembly[_tid]->qRuleFace()->n_points();
+    _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), n_points, *elem, side);
+  }
 }
 
 void
