@@ -130,7 +130,6 @@
     input = 'jn30.i'
     ratio_tol = 1E-7 
     difference_tol = 1E10
-    skip = 'snes test incorrect with Dirac - see ticket2379'
   [../]
 
   [./jn40]

@@ -30,7 +30,7 @@
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
     dens0 = 1
-    bulk_mod = 1.0E-1 # notice small quantity, so PETSc's "constant state" works
+    bulk_mod = 1.0E0 # notice small quantity, so PETSc's "constant state" works
   [../]
   [./SeffVG]
     type = RichardsSeff1VG

@@ -95,7 +95,7 @@
     variable = pressure
     unit_weight = '0 0 0'
     re_constant = 0.1594
-    character = two # this is to make the length=1 borehole fill the entire z=2 height
+    character = 2
     mesh_adaptivity = false
     MyNameIsAndyWilkins = false
   [../]
@@ -119,10 +119,6 @@
   [./initial_pressure]
     type = ParsedFunction
     value = 1E7
-  [../]
-  [./two]
-    type = ConstantFunction
-    value = 2
   [../]
 []
 
