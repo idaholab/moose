@@ -115,6 +115,12 @@ public:
    */
   virtual Order getMinQuadratureOrder();
 
+  /**
+   * Indicated whether this system needs material properties on boundaries.
+   * @return Boolean if IntegratedBCs are active
+   */
+  bool needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid);
+
 protected:
   void computeScalarVars(std::vector<AuxWarehouse> & auxs);
   void computeNodalVars(std::vector<AuxWarehouse> & auxs);

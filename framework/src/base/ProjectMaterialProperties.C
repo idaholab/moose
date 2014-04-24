@@ -40,7 +40,8 @@ ProjectMaterialProperties::ProjectMaterialProperties(bool refine,
     _material_props(material_props),
     _bnd_material_props(bnd_material_props),
     _materials(materials),
-    _assembly(assembly)
+    _assembly(assembly),
+    _need_internal_side_material(false)
 {
 }
 
@@ -55,7 +56,8 @@ ProjectMaterialProperties::ProjectMaterialProperties(ProjectMaterialProperties &
     _material_props(x._material_props),
     _bnd_material_props(x._bnd_material_props),
     _materials(x._materials),
-    _assembly(x._assembly)
+    _assembly(x._assembly),
+    _need_internal_side_material(x._need_internal_side_material)
 {
 }
 
@@ -66,6 +68,7 @@ ProjectMaterialProperties::~ProjectMaterialProperties()
 void
 ProjectMaterialProperties::subdomainChanged()
 {
+  _need_internal_side_material = _fe_problem.needMaterialOnSide(_subdomain, _tid);
 }
 
 void
@@ -102,56 +105,53 @@ ProjectMaterialProperties::onElement(const Elem *elem)
 void
 ProjectMaterialProperties::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
-  // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
-  _fe_problem.setCurrentBoundaryID(bnd_id);
-
-  if (!_sys.hasActiveIntegratedBCs(bnd_id, _tid))
-    return;
-
-  _assembly[_tid]->reinit(elem, side);
-
-  if (_refine)
+  if (_fe_problem.needMaterialOnSide(bnd_id, _tid))
   {
-    const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, side, -1, side);
+    // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
+    _fe_problem.setCurrentBoundaryID(bnd_id);
 
-    _bnd_material_props.prolongStatefulProps(refinement_map,
-                                             *_assembly[_tid]->qRule(),
-                                             *_assembly[_tid]->qRuleFace(),
-                                             _bnd_material_props, // Passing in the same properties to do side_to_side projection
-                                             *_bnd_material_data[_tid],
-                                             *elem,
-                                             side,-1,side); // Gets us side to side projection
+    _assembly[_tid]->reinit(elem, side);
+
+    if (_refine)
+    {
+      const std::vector<std::vector<QpMap> > & refinement_map  = _mesh.getRefinementMap(*elem, side, -1, side);
+
+      _bnd_material_props.prolongStatefulProps(refinement_map,
+                                               *_assembly[_tid]->qRule(),
+                                               *_assembly[_tid]->qRuleFace(),
+                                               _bnd_material_props, // Passing in the same properties to do side_to_side projection
+                                               *_bnd_material_data[_tid],
+                                               *elem,
+                                               side,-1,side); // Gets us side to side projection
+    }
+    else
+    {
+      const std::vector<std::pair<unsigned int, QpMap> > & coarsening_map = _mesh.getCoarseningMap(*elem, side);
+
+      _bnd_material_props.restrictStatefulProps(coarsening_map,
+                                                _mesh.coarsenedElementChildren(elem),
+                                                *_assembly[_tid]->qRule(),
+                                                *_assembly[_tid]->qRuleFace(),
+                                                *_material_data[_tid],
+                                                *elem, side);
+    }
+
+    // Set the active boundary id to invalid
+    _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
+
   }
-  else
-  {
-    const std::vector<std::pair<unsigned int, QpMap> > & coarsening_map = _mesh.getCoarseningMap(*elem, side);
-
-    _bnd_material_props.restrictStatefulProps(coarsening_map,
-                                              _mesh.coarsenedElementChildren(elem),
-                                              *_assembly[_tid]->qRule(),
-                                              *_assembly[_tid]->qRuleFace(),
-                                              *_material_data[_tid],
-                                              *elem, side);
-  }
-
-  // Set the active boundary id to invalid
-  _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
-
 }
 
 void
 ProjectMaterialProperties::onInternalSide(const Elem *elem, unsigned int /*side*/)
 {
-  if (!_sys.doingDG())
-    return;
-
-  if (_refine) // If we're refining then we need to also project "internal" child sides.
+  if (_need_internal_side_material && _refine) // If we're refining then we need to also project "internal" child sides.
   {
-    for(unsigned int child=0; child<elem->n_children(); child++)
+    for (unsigned int child=0; child<elem->n_children(); child++)
     {
       Elem * child_elem = elem->child(child);
 
-      for(unsigned int side=0; side<child_elem->n_sides(); side++)
+      for (unsigned int side=0; side<child_elem->n_sides(); side++)
       {
         if (!elem->is_child_on_side(child, side)) // Otherwise we already projected it
         {

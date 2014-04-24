@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'internal_side_uo_stateful.i'
+    exodiff = 'internal_side_uo_stateful_out.e'
+  [../]
+[]

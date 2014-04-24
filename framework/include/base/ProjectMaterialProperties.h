@@ -58,6 +58,7 @@ protected:
   MaterialPropertyStorage & _bnd_material_props;
   std::vector<MaterialWarehouse> & _materials;
   std::vector<Assembly *> & _assembly;
+  bool _need_internal_side_material;
 };
 
 #endif //PROJECTMATERIALPROPERTIES_H

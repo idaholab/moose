@@ -19,7 +19,7 @@ InputParameters validParams<InternalSideUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<BlockRestrictable>();
-  //params.addParam<bool>(
+  params.addPrivateParam<bool>("use_bnd_material", true);
   return params;
 }
 

@@ -33,6 +33,8 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/coupling_matrix.h"
+#include "libmesh/libmesh_common.h"
+#include LIBMESH_INCLUDE_UNORDERED_MAP
 
 class FEProblem;
 class MoosePreconditioner;
@@ -389,9 +391,17 @@ public:
 
   Moose::PCSideType getPCSide() { return _pc_side; }
 
-  bool doingDG() { return _doing_dg; }
+  /**
+   * Indicated whether this system needs material properties on boundaries.
+   * @return Boolean if IntegratedBCs are active
+   */
+  bool needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const;
 
-  bool hasActiveIntegratedBCs(BoundaryID bnd_id, THREAD_ID tid) { return ! _bcs[tid].activeIntegrated(bnd_id).empty(); }
+  /**
+   * Indicates whether this system needs material properties on internal sides.
+   * @return Boolean if DGKernels are active
+   */
+  bool needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid) const;
 
 public:
   FEProblem & _fe_problem;
