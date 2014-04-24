@@ -53,7 +53,7 @@ MultiSmoothCircleIC::initialSetup()
     unsigned int num_tries = 0;
 
     Real rr = 0.0;
-    Real xx, yy, zz;
+    Point newcenter = 0.0;
 
     while (rr < _bubspac && num_tries < _numtries)
     {
@@ -64,35 +64,28 @@ MultiSmoothCircleIC::initialSetup()
       Real ran2 = MooseRandom::rand();
       Real ran3 = MooseRandom::rand();
 
-      xx = ran1*(_Lx - _bubspac) + 0.5*_bubspac;
-      yy = ran2*(_Ly - _bubspac) + 0.5*_bubspac;
+      newcenter(0) = ran1*(_Lx - _bubspac) + 0.5*_bubspac;
+      newcenter(1) = ran2*(_Ly - _bubspac) + 0.5*_bubspac;
 
-      if (_Lz == 0.0)
-        zz = 0.0;
-      else
-        zz = ran3 * (_Lz - _bubspac) + 0.5 * _bubspac;
+      if (_Lz != 0.0)
+        newcenter(2) = ran3 * (_Lz - _bubspac) + 0.5 * _bubspac;
 
       for (unsigned int j = 0; j < i; j++)
       {
         if (j == 0) rr = 1000.0;
 
-        Real rx = abs(xx - _bubcent[j](0));
-        Real ry = abs(yy - _bubcent[j](1));
-        Real rz = abs(zz - _bubcent[j](2));
-        Real tmp_rr = std::sqrt(rx*rx + ry*ry + rz*rz);
+        Real tmp_rr = _mesh.minPeriodicDistance(_var.number(), _bubcent[j], newcenter);
         if (tmp_rr < rr)
           rr = tmp_rr;
       }
 
-      if (i == 0) rr = _Lx;
+      if (i == 0) rr = _Lx; // TODO: this is sketchy!
     }
 
     if (num_tries == _numtries)
-      mooseError("Toom many tries in MultiSmoothCircleIC");
+      mooseError("Too many tries in MultiSmoothCircleIC");
 
-    _bubcent[i](0) = xx;
-    _bubcent[i](1) = yy;
-    _bubcent[i](2) = zz;
+    _bubcent[i] = newcenter;
   }
 }
 
