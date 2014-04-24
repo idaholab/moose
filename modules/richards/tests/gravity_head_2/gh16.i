@@ -178,13 +178,13 @@
     type = PointValue
     point = '0 0 0'
     variable = pwater
-    output = None
+    outputs = None
   [../]
   [./pw_right]
     type = PointValue
     point = '1 0 0'
     variable = pwater
-    output = None
+    outputs = None
   [../]
   [./error_water]
     type = PlotFunction
@@ -195,13 +195,13 @@
     type = PointValue
     point = '0 0 0'
     variable = pgas
-    output = None
+    outputs = None
   [../]
   [./pg_right]
     type = PointValue
     point = '1 0 0'
     variable = pgas
-    output = None
+    outputs = None
   [../]
   [./error_gas]
     type = PlotFunction

@@ -167,6 +167,7 @@ AuxiliarySystem::addScalarKernel(const  std::string & kernel_name, const std::st
 void
 AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
+
   parameters.set<AuxiliarySystem *>("_aux_sys") = this;
   std::vector<BoundaryName> boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
 

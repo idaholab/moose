@@ -12,51 +12,49 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef POSTPROCESSOR_H
-#define POSTPROCESSOR_H
+#ifndef MATERIALREALTENSORVALUEAUX_H
+#define MATERIALREALTENSORVALUEAUX_H
 
-#include <string>
 // MOOSE includes
-#include "InputParameters.h"
-#include "Restartable.h"
+#include "MaterialAuxBase.h"
 
-// libMesh
-#include "libmesh/parallel.h"
-
-class Postprocessor;
+// Forward declerations
+class MaterialRealTensorValueAux;
 
 template<>
-InputParameters validParams<Postprocessor>();
+InputParameters validParams<MaterialRealTensorValueAux>();
 
-
-class Postprocessor
+/**
+ * AuxKernel for outputting a RealTensorValue material property component to an AuxVariable
+ */
+class MaterialRealTensorValueAux : public MaterialAuxBase<RealTensorValue>
 {
 public:
-  Postprocessor(const std::string & name, InputParameters parameters);
-
-  virtual ~Postprocessor(){ }
 
   /**
-   * This will get called to actually grab the final value the postprocessor has calculated.
+   * Class constructor
+   * @param name The name of the AuxKernel
+   * @param parameters The input parameters for this AuxKernel
    */
-  virtual PostprocessorValue getValue() = 0;
+  MaterialRealTensorValueAux(const std::string & name, InputParameters parameters);
 
   /**
-   * Get the list of output objects that this class is restricted
-   * @return A vector of OutputNames
+   * Class destructor
    */
-  std::set<OutputName> getOutputs(){ return std::set<OutputName>(_outputs.begin(), _outputs.end()); }
-
-  /**
-   * Returns the name of the Postprocessor.
-   */
-  std::string PPName() { return _pp_name; }
+  virtual ~MaterialRealTensorValueAux();
 
 protected:
-  std::string _pp_name;
 
-  /// Vector of output names
-  std::vector<OutputName> _outputs;
+  /**
+   * Computes the component of the tensor for output
+   */
+  virtual Real computeValue();
+
+  /// The row index to output
+  unsigned int _row;
+
+  /// The column index to output
+  unsigned int _col;
 };
 
-#endif
+#endif //MATERIALREALTENSORVALUEAUX_H

@@ -95,6 +95,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 
     _solution(_aux_sys.solution())
 {
+
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
   std::map<std::string, std::vector<MooseVariable *> > coupled_vars = getCoupledVars();

@@ -12,51 +12,46 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef POSTPROCESSOR_H
-#define POSTPROCESSOR_H
+#ifndef MATERIALREALVECTORVALUEAUX_H
+#define MATERIALREALVECTORVALUEAUX_H
 
-#include <string>
 // MOOSE includes
-#include "InputParameters.h"
-#include "Restartable.h"
+#include "MaterialAuxBase.h"
 
-// libMesh
-#include "libmesh/parallel.h"
-
-class Postprocessor;
+// Forward declarations
+class MaterialRealVectorValueAux;
 
 template<>
-InputParameters validParams<Postprocessor>();
+InputParameters validParams<MaterialRealVectorValueAux>();
 
-
-class Postprocessor
+/**
+ * AuxKernel for outputting a RealVectorValue material property component to an AuxVariable
+ */
+class MaterialRealVectorValueAux : public MaterialAuxBase<RealVectorValue>
 {
 public:
-  Postprocessor(const std::string & name, InputParameters parameters);
-
-  virtual ~Postprocessor(){ }
 
   /**
-   * This will get called to actually grab the final value the postprocessor has calculated.
+   * Class constructor
+   * @param name AuxKernel name
+   * @param parameters The input parameters for this object
    */
-  virtual PostprocessorValue getValue() = 0;
+  MaterialRealVectorValueAux(const std::string & name, InputParameters parameters);
 
   /**
-   * Get the list of output objects that this class is restricted
-   * @return A vector of OutputNames
+   * Class destructor
    */
-  std::set<OutputName> getOutputs(){ return std::set<OutputName>(_outputs.begin(), _outputs.end()); }
-
-  /**
-   * Returns the name of the Postprocessor.
-   */
-  std::string PPName() { return _pp_name; }
+  virtual ~MaterialRealVectorValueAux();
 
 protected:
-  std::string _pp_name;
 
-  /// Vector of output names
-  std::vector<OutputName> _outputs;
+  /**
+   * Compute the value of the material property for the given component
+   */
+  virtual Real computeValue();
+
+  /// The vector component to output
+  unsigned int _component;
 };
 
-#endif
+#endif //MATERIALREALVECTORVALUEAUX_H

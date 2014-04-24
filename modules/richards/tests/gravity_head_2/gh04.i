@@ -145,49 +145,49 @@
     type = RichardsMass
     variable = pwater
     execute_on = timestep_begin
-    output = None
+    outputs = None
   [../]
   [./mgas_init]
     type = RichardsMass
     variable = pgas
     execute_on = timestep_begin
-    output = None
+    outputs = None
   [../]
   [./mwater_fin]
     type = RichardsMass
     variable = pwater
     execute_on = timestep
-    output = None
+    outputs = None
   [../]
   [./mgas_fin]
     type = RichardsMass
     variable = pgas
     execute_on = timestep
-    output = None
+    outputs = None
   [../]
 
   [./mass_error_water]
     type = PlotFunction
     function = fcn_mass_error_w
-    output = None # no reason why mass should be conserved
+    outputs = None # no reason why mass should be conserved
   [../]
   [./mass_error_gas]
     type = PlotFunction
     function = fcn_mass_error_g
-    output = None # no reason why mass should be conserved
+    outputs = None # no reason why mass should be conserved
   [../]
 
   [./pw_left]
     type = PointValue
     point = '0 0 0'
     variable = pwater
-    output = None
+    outputs = None
   [../]
   [./pw_right]
     type = PointValue
     point = '1 0 0'
     variable = pwater
-    output = None
+    outputs = None
   [../]
   [./error_water]
     type = PlotFunction
@@ -198,13 +198,13 @@
     type = PointValue
     point = '0 0 0'
     variable = pgas
-    output = None
+    outputs = None
   [../]
   [./pg_right]
     type = PointValue
     point = '1 0 0'
     variable = pgas
-    output = None
+    outputs = None
   [../]
   [./error_gas]
     type = PlotFunction

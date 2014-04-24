@@ -12,22 +12,45 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MaterialRealAux.h"
+#ifndef OUTPUTTESTMATERIAL_H
+#define OUTPUTTESTMATERIAL_H
+
+// MOOSE includes
+#include "Material.h"
+
+// Forward declarations
+class OutputTestMaterial;
 
 template<>
-InputParameters validParams<MaterialRealAux>()
-{
-  InputParameters params = validParams<MaterialAuxBase<Real> >();
-  return params;
-}
+InputParameters validParams<OutputTestMaterial>();
 
-MaterialRealAux::MaterialRealAux(const std::string & name, InputParameters parameters):
-    MaterialAuxBase(name, parameters)
+/**
+ *
+ */
+class OutputTestMaterial : public Material
 {
-}
+public:
 
-Real
-MaterialRealAux::computeValue()
-{
-  return _factor * _prop[_qp] + _offset;
-}
+  /**
+   * Class constructor
+   * @param prop_name
+   */
+  OutputTestMaterial(const std::string & name, InputParameters parameters);
+
+  /**
+   * Class destructor
+   */
+  virtual ~OutputTestMaterial();
+
+  void computeQpProperties();
+
+protected:
+
+  MaterialProperty<Real> & _real_property;
+  MaterialProperty<RealVectorValue> & _vector_property;
+  MaterialProperty<RealTensorValue> & _tensor_property;
+
+  Real _factor;
+};
+
+#endif //OUTPUTTESTMATERIAL_H

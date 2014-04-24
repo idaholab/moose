@@ -491,7 +491,7 @@ Output::initAvailableLists()
       std::set<OutputName> pps_outputs = pps->getOutputs();
 
       // Hide the postprocessor if 'none' is used within the 'outputs' parameter
-      if (!pps_outputs.empty() && ( pps_outputs.find("none") != pps_outputs.end() || pps_outputs.find(_name) == pps_outputs.end() ) )
+      if (!pps_outputs.empty() && ( pps_outputs.find("none") != pps_outputs.end() || pps_outputs.find(_name) == pps_outputs.end()))
         _postprocessor.hide.push_back(pps->PPName());
 
       // Check that the output object allows postprocessor output
@@ -600,6 +600,10 @@ Output::initOutputList(OutputData & data)
   std::vector<std::string> & show  = data.show;
   std::vector<std::string> & avail = data.available;
   std::vector<std::string> & output = data.output;
+
+  // Append the hide list from automatic material property output
+  std::vector<std::string> material_hide = _app.getOutputWarehouse().getMaterialOutputHideList(_name);
+  hide.insert(hide.end(), material_hide.begin(), material_hide.end());
 
   // Sort the vectors
   std::sort(avail.begin(), avail.end());

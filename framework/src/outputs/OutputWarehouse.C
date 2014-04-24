@@ -227,3 +227,32 @@ OutputWarehouse::getSyncTimes()
 {
   return _sync_times;
 }
+
+void
+OutputWarehouse::updateMaterialOutput(std::vector<OutputName> outputs, std::set<AuxVariableName> variables)
+{
+  for (std::vector<OutputName>::iterator it = outputs.begin(); it != outputs.end(); ++it)
+    _material_output_map[*it].insert(variables.begin(), variables.end());
+}
+
+void
+OutputWarehouse::setMaterialOutputVariables(std::set<AuxVariableName> variables)
+{
+  _all_material_output_variables = variables;
+}
+
+std::vector<std::string>
+OutputWarehouse::getMaterialOutputHideList(std::string name)
+{
+  // The hide list to return
+  std::vector<std::string> hide;
+
+  // Get the difference of all the material output variables and those for the given output name
+  if (_material_output_map.find(name) != _material_output_map.end())
+    std::set_difference(_all_material_output_variables.begin(), _all_material_output_variables.end(),
+                        _material_output_map[name].begin(), _material_output_map[name].end(),
+                        std::back_inserter(hide));
+
+  // Return the list of material property AuxVariables to hide from output
+  return hide;
+}

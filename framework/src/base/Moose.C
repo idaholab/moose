@@ -77,6 +77,8 @@
 #include "SelfAux.h"
 #include "GapValueAux.h"
 #include "MaterialRealAux.h"
+#include "MaterialRealVectorValueAux.h"
+#include "MaterialRealTensorValueAux.h"
 #include "DebugResidualAux.h"
 #include "BoundsAux.h"
 #include "SpatialUserObjectAux.h"
@@ -322,6 +324,7 @@
 #include "AddMortarInterfaceAction.h"
 #include "SetupPostprocessorDataAction.h"
 #include "PerfLogOutputAction.h"
+#include "MaterialOutputAction.h"
 
 // Outputs
 #include "Exodus.h"
@@ -404,6 +407,8 @@ registerObjects(Factory & factory)
   registerAux(SelfAux);
   registerAux(GapValueAux);
   registerAux(MaterialRealAux);
+  registerAux(MaterialRealVectorValueAux);
+  registerAux(MaterialRealTensorValueAux);
   registerAux(DebugResidualAux);
   registerAux(BoundsAux);
   registerAux(SpatialUserObjectAux);
@@ -693,8 +698,6 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_mesh_complete", false);  // calls prepare
 
   registerTask("init_displaced_problem", false);
-  registerTask("setup_output", false);
-  registerTask("setup_output_name", true);
 
   registerTask("init_problem", true);
   registerTask("check_copy_nodal_vars", true);
@@ -727,6 +730,7 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_pps_complete", false);
 
   registerTask("perf_log_output", true);
+  registerTask("setup_material_output", true);
 
   /**************************/
   /****** Dependencies ******/
@@ -774,13 +778,13 @@ addActionTypes(Syntax & syntax)
 "(setup_dampers)"
 "(setup_residual_debug)"
 "(add_bounds_vectors)"
-"(setup_output_name)"
 "(add_multi_app)"
 "(add_transfer)"
-"(init_problem)"
 "(copy_nodal_vars, copy_nodal_aux_vars)"
 "(initial_mesh_refinement)"
 "(add_material)"
+"(setup_material_output)"
+"(init_problem)"
 "(add_postprocessor)"
 "(setup_pps_complete)"
 "(setup_debug)"
@@ -844,6 +848,9 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   /* The display of performance long is controlled by the Console outputter, if there is not one present
      logging must be disable externally from the object, this action does this */
   registerAction(PerfLogOutputAction, "perf_log_output");
+
+  // Enable automatic output of material properties
+  registerAction(MaterialOutputAction, "setup_material_output");
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");

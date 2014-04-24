@@ -100,6 +100,19 @@ public:
   void forceOutput();
 
   /**
+   * Creates a list of automatically generated material property AuxVariable to hide
+   * @param name The name of the output object to compose the list of hidden variables
+   *
+   * The Material system has the ability to automatically generate AuxVariables for
+   * material property outputting. This includes the ability to control which output
+   * object the variables are written. This method extracts the list of AuxVariables
+   * that should be hidden for the supplied output object name.
+   *
+   * @see Output::initOutputList
+   */
+  std::vector<std::string> getMaterialOutputHideList(std::string name);
+
+  /**
    * Calls the setFileNumber method for every FileOutput output object
    */
   void setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset = 0);
@@ -191,6 +204,18 @@ private:
    */
   void timestepSetup();
 
+  /**
+   * Method for populating and updating variables associated with automatic material output
+   * @param outputs A vector output object names
+   * @param variables A set of variables names to be output for the given output names
+   *
+   * This is a private function that is called by the friend class MaterialOutputAction, it is not
+   * intended for any other purpose than automatic material property output control.
+   */
+  void updateMaterialOutput(std::vector<OutputName> outputs, std::set<AuxVariableName> variables);
+
+  void setMaterialOutputVariables(std::set<AuxVariableName> variables);
+
   /// The list of all output objects
   std::vector<Output *> _object_ptrs;
 
@@ -212,8 +237,15 @@ private:
   /// Input file name for this output object
   std::string _input_file_name;
 
+  ///
+  std::map<OutputName, std::set<AuxVariableName> > _material_output_map;
+  std::set<AuxVariableName> _all_material_output_variables;
+
+
   // Allow complete access to FEProblem for calling initial/timestepSetup functions
   friend class FEProblem;
+  friend class MaterialOutputAction;
+
 };
 
 template<typename T>

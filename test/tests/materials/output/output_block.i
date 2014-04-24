@@ -1,12 +1,18 @@
 [Mesh]
-  type = GeneratedMesh
+  type = FileMesh
+  file = rectangle.e
   dim = 2
-  nx = 10
-  ny = 10
 []
 
 [Variables]
   [./u]
+  [../]
+[]
+
+[Functions]
+  [./func]
+    type = ParsedFunction
+    value = x*y+t
   [../]
 []
 
@@ -16,7 +22,7 @@
     variable = u
     coef = 0.1
   [../]
-  [./td]
+  [./time]
     type = TimeDerivative
     variable = u
   [../]
@@ -26,30 +32,43 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = left
+    boundary = 1
     value = 0
   [../]
   [./right]
     type = DirichletBC
     variable = u
-    boundary = right
-    value = 2
+    boundary = 2
+    value = 1
   [../]
 []
 
-[Postprocessors]
-  [./point_value]
-    type = PointValue
-    variable = u
-    point = '1 1 0'
+[Materials]
+  [./block_1]
+    type = OutputTestMaterial
+    block = 1
+    output_properties = 'real_property'
+    outputs = exodus
+  [../]
+  [./block_2]
+    type = OutputTestMaterial
+    block = 2
+    output_properties = 'vector_property'
+    outputs = exodus
+  [../]
+  [./all]
+    type = OutputTestMaterial
+    block = '1 2'
+    output_properties = 'tensor_property'
+    outputs = exodus
   [../]
 []
 
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 1
-  dt = 1
+  num_steps = 20
+  dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -61,6 +80,7 @@
   [./console]
     type = Console
     perf_log = true
+    nonlinear_residuals = true
     linear_residuals = true
   [../]
 []

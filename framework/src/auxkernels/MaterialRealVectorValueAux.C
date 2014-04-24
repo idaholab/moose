@@ -12,22 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MaterialRealAux.h"
+#include "MaterialRealVectorValueAux.h"
 
 template<>
-InputParameters validParams<MaterialRealAux>()
+InputParameters validParams<MaterialRealVectorValueAux>()
 {
-  InputParameters params = validParams<MaterialAuxBase<Real> >();
+  InputParameters params = validParams<MaterialAuxBase<RealVectorValue> >();
+  params.addParam<unsigned int>("component", 0, "The vector component to consider for this kernel");
+
   return params;
 }
 
-MaterialRealAux::MaterialRealAux(const std::string & name, InputParameters parameters):
-    MaterialAuxBase(name, parameters)
+MaterialRealVectorValueAux::MaterialRealVectorValueAux(const std::string & name, InputParameters parameters) :
+    MaterialAuxBase(name, parameters),
+    _component(getParam<unsigned int>("component"))
+{
+  if (_component > LIBMESH_DIM)
+    mooseError("The component " << _component << " does not exist for " << LIBMESH_DIM << " dimensional problems");
+}
+
+MaterialRealVectorValueAux::~MaterialRealVectorValueAux()
 {
 }
 
 Real
-MaterialRealAux::computeValue()
+MaterialRealVectorValueAux::computeValue()
 {
-  return _factor * _prop[_qp] + _offset;
+  return _factor * _prop[_qp](_component) + _offset;
 }

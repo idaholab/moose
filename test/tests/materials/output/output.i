@@ -10,13 +10,20 @@
   [../]
 []
 
+[Functions]
+  [./func]
+    type = ParsedFunction
+    value = x*y+t
+  [../]
+[]
+
 [Kernels]
   [./diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
   [../]
-  [./td]
+  [./time]
     type = TimeDerivative
     variable = u
   [../]
@@ -33,23 +40,23 @@
     type = DirichletBC
     variable = u
     boundary = right
-    value = 2
+    value = 1
   [../]
 []
 
-[Postprocessors]
-  [./point_value]
-    type = PointValue
-    variable = u
-    point = '1 1 0'
+[Materials]
+  [./function_material]
+    type = OutputTestMaterial
+    block = 0
+    outputs = exodus
   [../]
 []
 
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 1
-  dt = 1
+  num_steps = 20
+  dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -61,6 +68,7 @@
   [./console]
     type = Console
     perf_log = true
+    nonlinear_residuals = true
     linear_residuals = true
   [../]
 []

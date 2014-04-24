@@ -24,21 +24,14 @@ InputParameters validParams<Postprocessor>()
 {
   InputParameters params = validParams<UserObject>();
 
-  MooseEnum output_opts("none, auto, screen, file, both", "auto");
-  params.addParam<MooseEnum>("output", output_opts,
-                             "The values are: none, screen, file, both, auto (no output, output to screen only, output to files only, output both to screen and files, same as both but no warnings if output options conflict.)");
-
-  params.addParamNamesToGroup("output", "Advanced");
-  params.addParam<std::vector<OutputName> >("outputs", "Vector of output names were you would like to restrict the output of postprocessors");
-  params.addParamNamesToGroup("output outputs", "Advanced");
-
+  params.addParamNamesToGroup("outputs", "Advanced");
+  params.addParam<std::vector<OutputName> >("outputs", "Vector of output names were you would like to restrict the output of this postprocessor (empty outputs to all)");
   params.registerBase("Postprocessor");
   return params;
 }
 
 Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
     _pp_name(name),
-    _output(Moose::stringToEnum<Moose::PPSOutputType>(parameters.get<MooseEnum>("output"))),
     _outputs(parameters.get<std::vector<OutputName> >("outputs"))
 {
 }

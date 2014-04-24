@@ -298,7 +298,7 @@
       temperature = aveTempInterior
       volume = internalVolume
       startup_time = 0.5
-      output = ppress
+      outputs = ppress
       save_in_disp_x = pressure_residual_x
       save_in_disp_y = pressure_residual_y
       save_in_disp_z = pressure_residual_z
