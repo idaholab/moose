@@ -5,8 +5,6 @@ libmesh_INCLUDE := $(CROW_INCLUDE) $(libmesh_INCLUDE)
 
 CROW_LIB := $(CROW_DIR)/libCROW-$(METHOD).la
 
-CROW_APP := $(CROW_DIR)/CROW-$(METHOD)
-
 # source files
 CROW_srcfiles    := $(shell find $(CROW_DIR)/src -name "*.C" -not -name main.C)
 CROW_csrcfiles   := $(shell find $(CROW_DIR)/src -name "*.c")
@@ -31,14 +29,9 @@ CROW_plugins += $(patsubst %.c, %-$(METHOD).plugin, $(CROW_cplugfiles))
 CROW_plugins += $(patsubst %.f, %-$(METHOD).plugin, $(CROW_fplugfiles))
 CROW_plugins += $(patsubst %.f90, %-$(METHOD).plugin, $(CROW_f90plugfiles))
 
-# CROW main
-CROW_main_src    := $(CROW_DIR)/src/main.C
-CROW_app_objects := $(patsubst %.C, %.$(obj-suffix), $(CROW_main_src))
-
 # dependency files
-CROW_deps := $(patsubst %.C, %.$(obj-suffix).d, $(CROW_srcfiles)) \
-	      $(patsubst %.c, %.$(obj-suffix).d, $(CROW_csrcfiles)) \
-	      $(patsubst %.C, %.$(obj-suffix).d, $(CROW_main_src))
+ CROW_deps := $(patsubst %.C, %.$(obj-suffix).d, $(CROW_srcfiles)) \
+	      $(patsubst %.c, %.$(obj-suffix).d, $(CROW_csrcfiles))
 
 # clang static analyzer files
 CROW_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(CROW_srcfiles))
@@ -64,17 +57,9 @@ sa:: $(CROW_analyzer)
 # include CROW dep files
 -include $(CROW_deps)
 
-# how to build CROW application
-ifeq ($(APPLICATION_NAME),CROW)
 all:: CROW
 
 CROW_MODULES = $(CROW_DIR)/control_modules
-
-$(CROW_DIR)/src/executioners/PythonControl.$(obj-suffix): $(CROW_DIR)/src/executioners/PythonControl.C
-	@echo "Override PythonControl Compile"
-	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(PYTHON_INCLUDE) $(app_INCLUDES) -DCROW_MODULES='"$(CROW_MODULES)"' $(libmesh_INCLUDE) -MMD -MF $@.d -MT $@ -c $< -o $@
-
 
 ifeq ($(UNAME),Darwin)
 DISTRIBUTION_KLUDGE=$(CROW_LIB)
@@ -136,14 +121,7 @@ $(CROW_DIR)/control_modules/_crowtools.so : $(CROW_DIR)/control_modules/crowtool
 	ln -s libcrowtools.$(crow_shared_ext) $(CROW_MODULES)/_crowtools.so
 
 
-CROW: $(CROW_APP) $(CONTROL_MODULES) $(PYTHON_MODULES)
-
-$(CROW_APP): $(moose_LIB) $(elk_MODULES) $(r7_LIB) $(CROW_LIB) $(CROW_app_objects)
-	@echo "Linking "$@"..."
-	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(CROW_app_objects) $(CROW_LIB) $(r7_LIB) $(elk_MODULES) $(moose_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(ADDITIONAL_LIBS) $(PYTHON_LIB) $(app_LIBS)
-
-endif
+CROW: $(CONTROL_MODULES) $(PYTHON_MODULES)
 
 delete_list := $(CROW_APP) $(CROW_LIB) $(CROW_DIR)/libCROW-$(METHOD).*
 
@@ -158,7 +136,8 @@ clean::
 	  $(CROW_DIR)/control_modules/*.so* \
 	  $(CROW_DIR)/python_modules/*.so* \
 	  $(CROW_DIR)/python_modules/*_wrap.cxx \
-	  $(CROW_DIR)/python_modules/*py[23].py
+	  $(CROW_DIR)/python_modules/*py[23].py \
+	  $(CROW_LIB) $(CROW_DIR)/libCROW-$(METHOD).*
 
 clobber::
 	@rm -f $(CROW_DIR)/control_modules/_distribution1D.so \
