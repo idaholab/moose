@@ -152,11 +152,11 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     if 'file_base' in output_data:
       common_file_base = output_data['file_base']
     else:
-      common_file_base = 'peacock_run_tmp_out'
+      common_file_base = 'peacock_run_tmp'
 
     # Check for short-cut syntax (i.e., exodus = true)
     if outputs.table_data and 'exodus' in outputs.table_data and outputs.table_data['exodus'] == 'true':
-      output_file_names.append(common_file_base + '.e')
+      output_file_names.append(common_file_base + '_out.e')
       output_block_names.append('exodus')
 
     # Loop through each of the sub-blocks and grab the data, if type = Exodus
@@ -168,7 +168,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
 
       # If the object is active (checked), it contains output_data, and is of type = Exodus, then extract the filename
       if child.checkState(0) > 0 and ('type' in output_data) and (output_data['type'] == 'Exodus'):
-        file_base = common_file_base
+        file_base = common_file_base + "_" + output_data['Name']
 
         # Check for file_base
         if ('file_base' in output_data) and (output_data['file_base'] != ''):
