@@ -1,14 +1,11 @@
-tests/core_example/PWR_CoreChannel_controlled_var_restart_test_out_restart_0020.ravenaux
-tests/core_example/PWR_CoreChannel_controlled_var_test_out_restart_0020.ravenaux
-*.ravencntr
 control_modules/distribution1D.py
 control_modules/distribution1D_wrap.cxx
-control_modules/raventools.py
-control_modules/raventools_wrap.cxx
+control_modules/crowtools.py
+control_modules/crowtools_wrap.cxx
 control_modules/libdistribution1D.so*
 control_modules/libdistribution1D.so*
-control_modules/libraventools.so*
-control_modules/libraventools.so*
+control_modules/libcrowtools.so*
+control_modules/libcrowtools.so*
 python_modules/distribution1Dpy2.py
 python_modules/distribution1Dpy2_wrap.cxx
 python_modules/distribution1Dpy3.py
@@ -25,22 +22,6 @@ python_modules/libinterpolationNDpy2.so*
 python_modules/libinterpolationNDpy2.so*
 python_modules/libinterpolationNDpy3.so*
 python_modules/libinterpolationNDpy3.so*
-libRAVEN*.so*
-RAVEN-devel
-tests/framework/DataBaseStorage/
-tests/framework/GridTestBison/CustomSampler/
-tests/framework/GridTestRaven/FirstMRun/
-tests/framework/LHStestBison/myLHS/
-tests/framework/LHStestRaven/FirstMRun/
-tests/framework/MCTestBison/CustomSampler/
-tests/framework/MCTestBison/CustomSampler_noalias/
-tests/framework/branch/DETrunTest/
-tests/framework/mode_test/FirstMRun/
-tests/framework/output_check/*.png
-tests/framework/output_check/FirstMRun/
-tests/framework/revirD_tset/FirstMRun/
-tests/framework/test_extract_data_s_from_hdf5/MonteCarlo/
-tests/framework/test_rom_trainer/MC_for_rom_trainer/
 
 
 
