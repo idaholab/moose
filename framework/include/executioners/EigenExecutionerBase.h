@@ -176,9 +176,6 @@ protected:
   Real & _normalization;
   ExecFlagType _norm_execflag;
 
-  // to control custom userobject evaluation
-  const bool _run_custom_uo;
-
   // Chebyshev acceleration
   class Chebyshev_Parameters
   {
