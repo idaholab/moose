@@ -88,12 +88,17 @@ public:
   /**
    * Override this for actions that should take place before linear solve of each inverse power iteration
    */
-  virtual void preStep();
+  virtual void preIteration();
 
   /**
    * Override this for actions that should take place after linear solve of each inverse power iteration
    */
-  virtual void postStep();
+  virtual void postIteration();
+
+  /**
+   * Override this for actions that should take place after the main solve
+   */
+  virtual void postExecute();
 
   /**
    * Normalize the solution vector based on the postprocessor value for normalization
@@ -170,9 +175,6 @@ protected:
   // postprocessor for normalization
   Real & _normalization;
   ExecFlagType _norm_execflag;
-
-  // to control custom userobject evaluation
-  const bool _run_custom_uo;
 
   // Chebyshev acceleration
   class Chebyshev_Parameters
