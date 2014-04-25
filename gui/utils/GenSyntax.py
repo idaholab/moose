@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys, os, yaml, pickle, commands, time
+import sys, os, yaml, pickle, subprocess, time
 
 try:
     from PyQt4 import QtCore, QtGui
@@ -130,7 +130,11 @@ class GenSyntax():
   def getRawDump(self):
 
     if not self.use_cached_syntax:
-      data = commands.getoutput( self.app_path + " --yaml" )
+      try:
+        data = subprocess.check_output([self.app_path, '--yaml'])
+      except:
+        print '\n\nPeacock: Error executing ' + self.app_path + '\nPlease make sure your application is built and able to execute with the "--yaml" flag'
+        sys.exit(1)
       data = data.split('**START YAML DATA**\n')[1]
       data = data.split('**END YAML DATA**')[0]
     else:
