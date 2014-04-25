@@ -55,57 +55,29 @@ InversePowerMethod::execute()
 {
   preExecute();
 
+  takeStep();
+
+  postExecute();
+}
+
+void
+InversePowerMethod::takeStep()
+{
   // save the initial guess and mark a new time step
   _problem.copyOldSolutions();
 
   preSolve();
   // we currently do not check the solution difference
   Real initial_res;
-  Real t0 = INIT_END;
+  Real t0 = _problem.timeStep();
   inversePowerIteration(_min_iter, _max_iter, _pfactor, _cheb_on, _eig_check_tol,
                         std::numeric_limits<Real>::max(), true, _output_pi, t0,
                         _eigenvalue, initial_res);
   postSolve();
+  printEigenvalue();
 
   _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
   _problem.onTimestepEnd();
   _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
   _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
-  if (_run_custom_uo)
-  {
-    _problem.computeUserObjects(EXEC_CUSTOM);
-    _problem.computeAuxiliaryKernels(EXEC_CUSTOM);
-    _problem.computeUserObjects(EXEC_CUSTOM, UserObjectWarehouse::POST_AUX);
-  }
-
-  if (!getParam<bool>("output_on_final"))
-  {
-    _problem.timeStep() = POWERITERATION_END;
-    Real t = _problem.time();
-    _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep();
-    _problem.time() = t;
-  }
-
-  Real s = normalizeSolution(_norm_execflag!=EXEC_CUSTOM && _norm_execflag!=EXEC_TIMESTEP &&
-                             _norm_execflag!=EXEC_RESIDUAL);
-
-  Moose::out << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
-
-  if (getParam<bool>("output_on_final") || std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
-  {
-    _problem.timeStep() = FINAL;
-    Real t = _problem.time();
-    _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep();
-    _problem.time() = t;
-  }
-
-  postExecute();
-}
-
-void
-InversePowerMethod::postSolve()
-{
-  printEigenvalue();
 }

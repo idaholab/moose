@@ -29,18 +29,11 @@ public:
 
   NonlinearEigen(const std::string & name, InputParameters parameters);
 
+  virtual void init();
   virtual void execute();
 
-  enum CheckPoint
-  {
-    INIT_END = 0,
-    POWERITERATION_END = 1,
-    NONLINEAR_SOLVE_END = 2,
-    FINAL = 3
-  };
-
 protected:
-  virtual void postSolve();
+  virtual void takeStep();
 
   const unsigned int & _free_iter;
   const Real & _abs_tol;
