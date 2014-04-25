@@ -1270,8 +1270,8 @@ MooseMesh::isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int com
     return false;
 }
 
-Real
-MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q) const
+RealVectorValue
+MooseMesh::minPeriodicVector(unsigned int nonlinear_var_num, Point p, Point q) const
 {
   for (unsigned int i=0; i<dimension(); ++i)
   {
@@ -1292,7 +1292,13 @@ MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q)
     }
   }
 
-  return (p-q).size();
+  return q-p;
+}
+
+Real
+MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q) const
+{
+  return minPeriodicVector(nonlinear_var_num, p, q).size();
 }
 
 std::pair<BoundaryID, BoundaryID> *
