@@ -31,7 +31,7 @@ InputParameters validParams<ContactApp>()
 ContactApp::ContactApp(const std::string & name, InputParameters parameters) :
     MooseApp(name, parameters)
 {
-  srand(libMesh::processor_id());
+  srand(processor_id());
 
   Moose::registerObjects(_factory);
   ContactApp::registerObjects(_factory);

@@ -114,13 +114,13 @@ PetscOutput::timestepSetupInternal()
   if (_output_nonlinear || (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol) )
   {
     PetscErrorCode ierr = SNESMonitorSet(snes, petscNonlinearOutput, this, PETSC_NULL);
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
   }
 
   if (_output_linear || (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol) )
   {
     PetscErrorCode ierr = KSPMonitorSet(ksp, petscLinearOutput, this, PETSC_NULL);
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
   }
 #endif
 }

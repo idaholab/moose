@@ -138,24 +138,24 @@ void petscSetupDM (NonlinearSystem & nl) {
 
   // Initialize the part of the DM package that's packaged with Moose; in the PETSc source tree this call would be in DMInitializePackage()
   ierr = DMMooseRegisterAll();
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(nl.comm().get(),ierr);
   // Create and set up the DM that will consume the split options and deal with block matrices.
   PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();
   /* FIXME: reset the DM, do not recreate it anew every time? */
   DM dm = PETSC_NULL;
-  ierr = DMCreateMoose(libMesh::COMM_WORLD, nl, &dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  ierr = DMCreateMoose(nl.comm().get(), nl, &dm);
+  CHKERRABORT(nl.comm().get(),ierr);
   ierr = DMSetFromOptions(dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(nl.comm().get(),ierr);
   ierr = DMSetUp(dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(nl.comm().get(),ierr);
   ierr = SNESSetDM(snes,dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(nl.comm().get(),ierr);
   ierr = DMDestroy(&dm);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(nl.comm().get(),ierr);
   ierr = SNESSetUpdate(snes,SNESUpdateDMMoose);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(nl.comm().get(),ierr);
 #endif
 }
 
@@ -220,6 +220,10 @@ PetscErrorCode petscSetupOutput(CommandLine * cmd_line)
 
 PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
 {
+  // Cast the context pointer coming from PETSc to an FEProblem& and
+  // get a reference to the System from it.
+  FEProblem & problem = *static_cast<FEProblem *>(ctx);
+
   // Let's be nice and always check PETSc error codes.
   PetscErrorCode ierr = 0;
 
@@ -229,7 +233,7 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
   // to be on the safe side, we push a different error handler before
   // calling KSPDefaultConverged().
   ierr = PetscPushErrorHandler(PetscReturnErrorHandler, /*void* ctx=*/ PETSC_NULL);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(problem.comm().get(),ierr);
 
 #if PETSC_VERSION_LESS_THAN(3,0,0)
   // Prior to PETSc 3.0.0, you could call KSPDefaultConverged with a NULL context
@@ -255,7 +259,7 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
   // Pop the Error handler we pushed on the stack to go back
   // to default PETSc error handling behavior.
   ierr = PetscPopErrorHandler();
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(problem.comm().get(),ierr);
 
   // Get tolerances from the KSP object
   PetscReal rtol = 0.;
@@ -263,11 +267,7 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
   PetscReal dtol = 0.;
   PetscInt maxits = 0;
   ierr = KSPGetTolerances(ksp, &rtol, &atol, &dtol, &maxits);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
-
-  // Cast the context pointer coming from PETSc to an FEProblem& and
-  // get a reference to the System from it.
-  FEProblem & problem = *static_cast<FEProblem *>(ctx);
+  CHKERRABORT(problem.comm().get(),ierr);
 
   // Now do some additional MOOSE-specific tests...
   std::string msg;
@@ -317,12 +317,12 @@ PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, 
                            &stol,
                            &maxit,
                            &maxf);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(problem.comm().get(),ierr);
 
   // Get current number of function evaluations done by SNES.
   PetscInt nfuncs = 0;
   ierr = SNESGetNumberFunctionEvals(snes, &nfuncs);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(problem.comm().get(),ierr);
 
   // Error message that will be set by the FEProblem.
   std::string msg;
@@ -421,7 +421,7 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
 
   {
     // cls is a PetscVector wrapper around the Vec in current_local_solution
-    PetscVector<Number> cls(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec(), libMesh::CommWorld);
+    PetscVector<Number> cls(static_cast<PetscVector<Number> *>(system.current_local_solution.get())->vec(), problem.comm());
 
     // Create new NumericVectors with the right ghosting - note: these will be destroyed
     // when this function exits, so nobody better hold pointers to them any more!
@@ -429,11 +429,11 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
     AutoPtr<NumericVector<Number> > ghosted_w_aptr( cls.zero_clone() );
 
     // Create PetscVector wrappers around the Vecs.
-    PetscVector<Number> ghosted_y( static_cast<PetscVector<Number> *>(ghosted_y_aptr.get())->vec(), libMesh::CommWorld);
-    PetscVector<Number> ghosted_w( static_cast<PetscVector<Number> *>(ghosted_w_aptr.get())->vec(), libMesh::CommWorld);
+    PetscVector<Number> ghosted_y( static_cast<PetscVector<Number> *>(ghosted_y_aptr.get())->vec(), problem.comm());
+    PetscVector<Number> ghosted_w( static_cast<PetscVector<Number> *>(ghosted_w_aptr.get())->vec(), problem.comm());
 
-    ierr = VecCopy(y, ghosted_y.vec()); CHKERRABORT(libMesh::COMM_WORLD,ierr);
-    ierr = VecCopy(w, ghosted_w.vec()); CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    ierr = VecCopy(y, ghosted_y.vec()); CHKERRABORT(problem.comm().get(),ierr);
+    ierr = VecCopy(w, ghosted_w.vec()); CHKERRABORT(problem.comm().get(),ierr);
 
     ghosted_y.close();
     ghosted_w.close();
@@ -442,7 +442,7 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
     if (damping < 1.0)
     {
       //recalculate w=-damping*y + x
-      ierr = VecWAXPY(w, -damping, y, x); CHKERRABORT(libMesh::COMM_WORLD,ierr);
+      ierr = VecWAXPY(w, -damping, y, x); CHKERRABORT(problem.comm().get(),ierr);
       *changed_w = PETSC_TRUE;
     }
 
@@ -452,12 +452,12 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
       //Update the ghosted copy of w
       if (*changed_w == PETSC_TRUE)
       {
-        ierr = VecCopy(w, ghosted_w.vec()); CHKERRABORT(libMesh::COMM_WORLD,ierr);
+        ierr = VecCopy(w, ghosted_w.vec()); CHKERRABORT(problem.comm().get(),ierr);
         ghosted_w.close();
       }
 
       //Create vector to directly modify w
-      PetscVector<Number> vec_w(w, libMesh::CommWorld);
+      PetscVector<Number> vec_w(w, problem.comm());
 
       bool updatedSolution = problem.updateSolution(vec_w, ghosted_w);
       if (updatedSolution)
@@ -486,10 +486,10 @@ void petscSetupDampers(NonlinearImplicitSystem& sys)
 #else
   PetscErrorCode ierr = SNESGetLineSearch(snes, &linesearch);
 #endif
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(problem->comm().get(),ierr);
 
   ierr = SNESLineSearchSetPostCheck(linesearch, dampedCheck, problem);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(problem->comm().get(),ierr);
 #endif
 }
 
@@ -540,12 +540,12 @@ void petscSetDefaults(FEProblem & problem)
                                                 petscConverged,
                                                 &problem,
                                                 PETSC_NULL);
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(nl.comm().get(),ierr);
     ierr = SNESSetConvergenceTest(snes,
                                   petscNonlinearConverged,
                                   &problem,
                                   PETSC_NULL);
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(nl.comm().get(),ierr);
   }
 #endif
 }

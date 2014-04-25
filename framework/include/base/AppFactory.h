@@ -97,7 +97,7 @@ public:
    * @param parameters Parameters this object should have
    * @return The created object
    */
-  virtual MooseApp *create(const std::string & obj_name, const std::string & name, InputParameters parameters);
+  virtual MooseApp *create(const std::string & obj_name, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN);
 
   registeredMooseAppIterator registeredObjectsBegin() { return _name_to_params_pointer.begin(); }
   registeredMooseAppIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }

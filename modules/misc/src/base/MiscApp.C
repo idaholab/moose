@@ -27,7 +27,7 @@ InputParameters validParams<MiscApp>()
 MiscApp::MiscApp(const std::string & name, InputParameters parameters) :
     MooseApp(name, parameters)
 {
-  srand(libMesh::processor_id());
+  srand(processor_id());
 
   Moose::registerObjects(_factory);
   MiscApp::registerObjects(_factory);

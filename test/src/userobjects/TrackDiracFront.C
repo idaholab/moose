@@ -71,7 +71,7 @@ TrackDiracFront::localElementConnectedToCurrentNode()
 
   const std::vector< unsigned int > & connected_elems = _node_to_elem_map.at(id);
 
-  unsigned int pid = libMesh::processor_id(); // This processor id
+  unsigned int pid = processor_id(); // This processor id
 
   // Look through all of the elements connected to this node and find one owned by the local processor
   for(unsigned int i=0; i<connected_elems.size(); i++)
@@ -84,4 +84,3 @@ TrackDiracFront::localElementConnectedToCurrentNode()
 
   mooseError("Unable to locate a local element connected to this node!");
 }
-

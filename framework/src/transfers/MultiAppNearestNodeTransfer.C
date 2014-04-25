@@ -86,7 +86,7 @@ MultiAppNearestNodeTransfer::execute()
       // EquationSystems & from_es = from_sys.get_equation_systems();
 
       //Create a serialized version of the solution vector
-      NumericVector<Number> * serialized_solution = NumericVector<Number>::build().release();
+      NumericVector<Number> * serialized_solution = NumericVector<Number>::build(from_sys.comm()).release();
       serialized_solution->init(from_sys.n_dofs(), false, SERIAL);
 
       // Need to pull down a full copy of this vector on every processor so we can get values in parallel
@@ -328,7 +328,7 @@ MultiAppNearestNodeTransfer::execute()
         else
           from_mesh = &from_problem.mesh().getMesh();
 
-        MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(*from_mesh, libMesh::processor_id());
+        MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(*from_mesh, from_mesh->processor_id());
         Point app_position = _multi_app->position(i);
 
         Moose::swapLibMeshComm(swapped);
@@ -469,11 +469,11 @@ MultiAppNearestNodeTransfer::execute()
 */
 
       // We've found the nearest nodes for this processor.  We need to see which processor _actually_ found the nearest though
-      Parallel::minloc(min_distances, min_procs);
+      _communicator.minloc(min_distances, min_procs);
 
       // Now loop through min_procs and see if _this_ processor had the actual minimum for any nodes.
       // If it did then we're going to go get the value from that nearest node and transfer its value
-      processor_id_type proc_id = libMesh::processor_id();
+      processor_id_type proc_id = processor_id();
 
       for(unsigned int j=0; j<min_procs.size(); j++)
       {

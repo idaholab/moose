@@ -273,7 +273,7 @@ Adaptivity::updateErrorVectors()
   for(std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
       it != _indicator_field_to_error_vector.end();
       ++it)
-    Parallel::sum((std::vector<float>&)*(it->second));
+    _subproblem.comm().sum((std::vector<float>&)*(it->second));
 }
 
 #endif //LIBMESH_ENABLE_AMR

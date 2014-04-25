@@ -483,7 +483,8 @@ Console::outputScalarVariables()
   {
     std::stringstream oss;
     oss << "\nScalar Variable Values:\n";
-    _scalar_table.printTable(oss, _max_rows, _fit_mode);
+    if(processor_id() == 0)
+      _scalar_table.printTable(oss, _max_rows, _fit_mode);
     oss << std::endl;
 
     if (_write_screen)
@@ -506,8 +507,8 @@ Console::outputSystemInformation()
 
   oss << std::left << "\n"
       << "Parallelism:\n"
-      << std::setw(_field_width) << "  Num Processors: "       << static_cast<std::size_t>(libMesh::n_processors()) << '\n'
-      << std::setw(_field_width) << "  Num Threads: "         << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
+      << std::setw(_field_width) << "  Num Processors: "       << static_cast<std::size_t>(n_processors()) << '\n'
+      << std::setw(_field_width) << "  Num Threads: "         << static_cast<std::size_t>(n_threads()) << '\n'
       << '\n';
 
   MooseMesh & moose_mesh = _problem_ptr->mesh();
@@ -525,7 +526,7 @@ Console::outputSystemInformation()
       << std::setw(_field_width) << "    Local:" << mesh.n_local_elem() << '\n'
       << std::setw(_field_width) << "  Num Subdomains: "       << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
       << std::setw(_field_width) << "  Num Partitions: "       << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
-  if (libMesh::n_processors() > 1 && moose_mesh.partitionerName() != "")
+  if (n_processors() > 1 && moose_mesh.partitionerName() != "")
     oss << std::setw(_field_width) << "  Partitioner: "       << moose_mesh.partitionerName()
         << (moose_mesh.isPartitionerForced() ? " (forced) " : "")
         << '\n';

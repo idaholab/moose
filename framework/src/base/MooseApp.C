@@ -81,8 +81,10 @@ void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos
 }
 
 MooseApp::MooseApp(const std::string & name, InputParameters parameters):
+    ParallelObject(*parameters.get<Parallel::Communicator *>("_comm")), // Can't call getParam() before pars is set
     _name(name),
     _pars(parameters),
+    _comm(getParam<Parallel::Communicator *>("_comm")),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
@@ -102,6 +104,7 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _parallel_mesh_on_command_line(false),
     _recover(false),
     _half_transient(false),
+    _output_warehouse(new OutputWarehouse),
     _alternate_output_warehouse(NULL)
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
@@ -121,6 +124,12 @@ MooseApp::~MooseApp()
   delete _sys_info;
   delete _executioner;
   _action_warehouse.clear();
+
+  // MUST be deleted before _comm is destroyed!
+  delete _output_warehouse;
+
+  // Note: Communicator MUST be destroyed last because everything else is using it!
+  delete _comm;
 }
 
 void
@@ -375,7 +384,7 @@ MooseApp::setOutputPosition(Point p)
 
   _output_position_set = true;
   _output_position = p;
-  _output_warehouse.meshChanged();
+  _output_warehouse->meshChanged();
 
   if (_executioner != NULL)
     _executioner->parentOutputPositionChanged();
@@ -391,7 +400,7 @@ OutputWarehouse &
 MooseApp::getOutputWarehouse()
 {
   if (_alternate_output_warehouse == NULL)
-    return _output_warehouse;
+    return *_output_warehouse;
   else
     return *_alternate_output_warehouse;
 }

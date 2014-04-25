@@ -34,7 +34,7 @@
 AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & name) :
     SystemTempl<TransientExplicitSystem>(subproblem, name, Moose::VAR_AUXILIARY),
     _mproblem(subproblem),
-    _serialized_solution(*NumericVector<Number>::build().release()),
+    _serialized_solution(*NumericVector<Number>::build(_mproblem.comm()).release()),
     _need_serialized_solution(false)
 {
   _nodal_vars.resize(libMesh::n_threads());

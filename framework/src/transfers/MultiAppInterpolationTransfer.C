@@ -98,10 +98,10 @@ MultiAppInterpolationTransfer::execute()
       switch(_interp_type)
       {
         case 0:
-          idi = new InverseDistanceInterpolation<LIBMESH_DIM>(libMesh::CommWorld, _num_points, _power);
+          idi = new InverseDistanceInterpolation<LIBMESH_DIM>(from_sys.comm(), _num_points, _power);
           break;
         case 1:
-          idi = new RadialBasisInterpolation<LIBMESH_DIM>(libMesh::CommWorld, _radius);
+          idi = new RadialBasisInterpolation<LIBMESH_DIM>(from_sys.comm(), _radius);
           break;
         default:
           mooseError("Unknown interpolation type!");
@@ -284,10 +284,10 @@ MultiAppInterpolationTransfer::execute()
       switch(_interp_type)
       {
         case 0:
-          idi = new InverseDistanceInterpolation<LIBMESH_DIM>(libMesh::CommWorld, _num_points, _power);
+          idi = new InverseDistanceInterpolation<LIBMESH_DIM>(to_sys.comm(), _num_points, _power);
           break;
         case 1:
-          idi = new RadialBasisInterpolation<LIBMESH_DIM>(libMesh::CommWorld, _radius);
+          idi = new RadialBasisInterpolation<LIBMESH_DIM>(to_sys.comm(), _radius);
           break;
         default:
           mooseError("Unknown interpolation type!");
@@ -463,4 +463,3 @@ Node * MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & dis
 
   return nearest;
 }
-

@@ -60,15 +60,10 @@ VerifyNodalUniqueID::finalize()
 {
   // On Parallel Mesh we have to look at all the ids over all the processors
   if (_subproblem.mesh().isParallelMesh())
-    Parallel::allgather(_all_ids);
+    _communicator.allgather(_all_ids);
 
   std::sort(_all_ids.begin(), _all_ids.end());
   std::vector<dof_id_type>::iterator it_end = std::unique(_all_ids.begin(), _all_ids.end());
   if (it_end != _all_ids.end())
     mooseError("Duplicate unique_ids found!");
 }
-
-
-
-
-

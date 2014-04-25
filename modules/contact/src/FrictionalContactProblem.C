@@ -402,7 +402,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
 
     vec_solution.close();
 
-    Parallel::max(updatedSolution);
+    _communicator.max(updatedSolution);
 
     if (updatedSolution)
     {
@@ -495,7 +495,7 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
             PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
             const Node * node = info._node;
 
-            if (node->processor_id() == libMesh::processor_id())
+            if (node->processor_id() == processor_id())
             {
 
               std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
@@ -557,14 +557,14 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
       }
     }
 
-    Parallel::sum(_num_contact_nodes);
-    Parallel::sum(_num_slipping);
-    Parallel::sum(_num_slipped_too_far);
-    Parallel::sum(_slip_residual);
+    _communicator.sum(_num_contact_nodes);
+    _communicator.sum(_num_slipping);
+    _communicator.sum(_num_slipped_too_far);
+    _communicator.sum(_slip_residual);
     _slip_residual = std::sqrt(_slip_residual);
-    Parallel::sum(_it_slip_norm);
+    _communicator.sum(_it_slip_norm);
     _it_slip_norm = std::sqrt(_it_slip_norm);
-    Parallel::sum(_inc_slip_norm);
+    _communicator.sum(_inc_slip_norm);
     _inc_slip_norm = std::sqrt(_inc_slip_norm);
     if (_num_slipping > 0)
       updatedSolution = true;
@@ -730,7 +730,7 @@ FrictionalContactProblem::applySlip(NumericVector<Number>& vec_solution,
   aux_solution.close();
   vec_solution.close();
   unsigned int num_slipping_nodes = iterative_slip.size();
-  Parallel::sum(num_slipping_nodes);
+  _communicator.sum(num_slipping_nodes);
   if (num_slipping_nodes > 0)
   {
     ghosted_solution = vec_solution;

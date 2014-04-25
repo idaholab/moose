@@ -39,7 +39,7 @@ AppFactory::createApp(std::string app_type, int argc, char ** argv)
   app_params.set<int>("_argc") = argc;
   app_params.set<char**>("_argv") = argv;
 
-  MooseApp * app = AppFactory::instance().create(app_type, "main", app_params);
+  MooseApp * app = AppFactory::instance().create(app_type, "main", app_params, MPI_COMM_WORLD);
   return app;
 }
 
@@ -54,13 +54,18 @@ AppFactory::getValidParams(const std::string & name)
 }
 
 MooseApp *
-AppFactory::create(const std::string & obj_name, const std::string & name, InputParameters parameters)
+AppFactory::create(const std::string & obj_name, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN)
 {
   if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
     mooseError("Object '" + obj_name + "' was not registered.");
 
   // Check to make sure that all required parameters are supplied
   parameters.checkParams("");
+
+  // Note - this must be deleted by the Application
+  Parallel::Communicator * comm = new Parallel::Communicator(COMM_WORLD_IN);
+
+  parameters.set<Parallel::Communicator *>("_comm") = comm;
 
   return (*_name_to_build_pointer[obj_name])(name, parameters);
 }

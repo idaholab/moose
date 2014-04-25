@@ -86,7 +86,7 @@ SlaveConstraint::addPoints()
     const Node * node = pinfo->_node;
 
     std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
-    if(hpit != has_penetrated.end() && node->processor_id() == libMesh::processor_id())
+    if(hpit != has_penetrated.end() && node->processor_id() == processor_id())
     {
       // Find an element that is connected to this node that and that is also on this processor
 
@@ -97,7 +97,7 @@ SlaveConstraint::addPoints()
       for(unsigned int i=0; i<connected_elems.size() && !elem; ++i)
       {
         Elem * cur_elem = _mesh.elem(connected_elems[i]);
-        if(cur_elem->processor_id() == libMesh::processor_id())
+        if(cur_elem->processor_id() == processor_id())
           elem = cur_elem;
       }
 

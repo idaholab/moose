@@ -69,7 +69,7 @@ MultiAppMeshFunctionTransfer::execute()
       EquationSystems & from_es = from_sys.get_equation_systems();
 
       //Create a serialized version of the solution vector
-      NumericVector<Number> * serialized_solution = NumericVector<Number>::build().release();
+      NumericVector<Number> * serialized_solution = NumericVector<Number>::build(from_sys.comm()).release();
       serialized_solution->init(from_sys.n_dofs(), false, SERIAL);
 
       // Need to pull down a full copy of this vector on every processor so we can get values in parallel
@@ -210,14 +210,14 @@ MultiAppMeshFunctionTransfer::execute()
         EquationSystems & from_es = from_sys.get_equation_systems();
 
         //Create a serialized version of the solution vector
-        NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build().release();
+        NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build(from_sys.comm()).release();
         serialized_from_solution->init(from_sys.n_dofs(), false, SERIAL);
 
         // Need to pull down a full copy of this vector on every processor so we can get values in parallel
         from_sys.solution->localize(*serialized_from_solution);
 
         MeshBase & from_mesh = from_es.get_mesh();
-        MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(from_mesh, libMesh::processor_id());
+        MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(from_mesh, from_mesh.processor_id());
         Point app_position = _multi_app->position(i);
 
         MeshFunction from_func(from_es, *serialized_from_solution, from_sys.get_dof_map(), from_var_num);
@@ -297,4 +297,3 @@ MultiAppMeshFunctionTransfer::execute()
 
   Moose::out << "Finished MeshFunctionTransfer " << _name << std::endl;
 }
-

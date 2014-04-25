@@ -34,7 +34,7 @@ InputParameters validParams<HeatConductionApp>()
 HeatConductionApp::HeatConductionApp(const std::string & name, InputParameters parameters) :
     MooseApp(name, parameters)
 {
-  srand(libMesh::processor_id());
+  srand(processor_id());
 
   Moose::registerObjects(_factory);
   HeatConductionApp::registerObjects(_factory);

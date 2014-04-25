@@ -54,7 +54,7 @@ RandomElementalUserObject::execute()
 void
 RandomElementalUserObject::finalize()
 {
-  Parallel::set_union(_random_data);
+  _communicator.set_union(_random_data);
 }
 
 void
