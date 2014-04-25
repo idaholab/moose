@@ -16,7 +16,7 @@ template<>
 InputParameters validParams<decayHeat>();
 
 
-class decayHeat : public RavenTools{
+class decayHeat : public CrowTools{
 public:
   decayHeat(const std::string & name, InputParameters parameters);
   virtual ~decayHeat();

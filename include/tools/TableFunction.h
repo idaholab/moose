@@ -17,7 +17,7 @@ template<>
 InputParameters validParams<TableFunction>();
 
 
-class TableFunction : public RavenTools{
+class TableFunction : public CrowTools{
 public:
   TableFunction(const std::string & name, InputParameters parameters);
   virtual ~TableFunction();

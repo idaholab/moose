@@ -14,7 +14,7 @@
 template<>
 InputParameters validParams<decayHeat>(){
 
-   InputParameters params = validParams<RavenTools>();
+   InputParameters params = validParams<CrowTools>();
 
    params.addRequiredParam<int>   ("eq_type", "Equation Type (1/2)");
    params.addRequiredParam<double>("initial_pow", "Initial Power (W)");
@@ -24,7 +24,7 @@ InputParameters validParams<decayHeat>(){
 }
 
 decayHeat::decayHeat(const std::string & name, InputParameters parameters):
-  RavenTools(name,parameters)
+  CrowTools(name,parameters)
 {
   _tool_parameters["initial_pow"      ] = getParam<double>("initial_pow");
   _tool_parameters["operating_time"   ] = getParam<double>("operating_time");

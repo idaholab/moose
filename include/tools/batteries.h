@@ -16,7 +16,7 @@ template<>
 InputParameters validParams<batteries>();
 
 
-class batteries : public RavenTools{
+class batteries : public CrowTools{
 
 public:
   //batteries(bool BATTstatus, double BATTintialLife);

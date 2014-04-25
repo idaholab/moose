@@ -1,12 +1,12 @@
 /*
- * RavenTools.h
+ * CrowTools.h
  *
  *  Created on: May 28, 2013
  *      Author: alfoa
  */
 
-#ifndef RAVENTOOLS_H_
-#define RAVENTOOLS_H_
+#ifndef CROWTOOLS_H_
+#define CROWTOOLS_H_
 
 #include "Interpolation_Functions.h"
 #include "MooseObject.h"
@@ -14,28 +14,28 @@
 
 
 template<>
-InputParameters validParams<RavenTools>();
+InputParameters validParams<CrowTools>();
 
-class RavenTools : public MooseObject
+class CrowTools : public MooseObject
 {
 public:
-   //> constructor for built-in raven tools
-   RavenTools(const std::string & name, InputParameters parameters);
+   //> constructor for built-in crow tools
+   CrowTools(const std::string & name, InputParameters parameters);
 
-   virtual ~RavenTools();
+   virtual ~CrowTools();
    /*
     * All variables except status ones
     */
    double  getVariable(std::string variableName);                     ///< getVariable from mapping
    void updateVariable(std::string variableName, double & newValue);  ///< update variable into the mapping//   void updateVariable(const char variableName, double & newValue);
    virtual double compute(double value);
-   std::string & getType();                                             ///< Get RavenTool type
+   std::string & getType();                                             ///< Get CrowTool type
    std::vector<std::string> getVariableNames();                         ///< Get variable Names
 
 protected:
-   std::string                       _type;               ///< RavenTools' type
-   std::map <std::string,double>     _tool_parameters  ;  ///< RavenTools' parameters
+   std::string                       _type;               ///< CrowTools' type
+   std::map <std::string,double>     _tool_parameters  ;  ///< CrowTools' parameters
    //void addVariable(std::string & variableName, double & newValue);
 };
 
-#endif /* RAVENTOOLS_H_ */
+#endif /* CROWTOOLS_H_ */

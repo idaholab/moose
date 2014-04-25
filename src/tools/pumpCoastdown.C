@@ -16,7 +16,7 @@
 template<>
 InputParameters validParams<pumpCoastdownExponential>(){
 
-   InputParameters params = validParams<RavenTools>();
+   InputParameters params = validParams<CrowTools>();
 
    params.addRequiredParam<double>("coefficient", "Exponential constant coefficient");
    params.addRequiredParam<double>("initial_flow_rate", "Initial flow rate");
@@ -26,7 +26,7 @@ InputParameters validParams<pumpCoastdownExponential>(){
 
 
 pumpCoastdownExponential::pumpCoastdownExponential(const std::string & name, InputParameters parameters):
-  RavenTools(name,parameters)
+  CrowTools(name,parameters)
 {
   _tool_parameters["coefficient"      ] = getParam<double>("coefficient");
   _tool_parameters["initial_flow_rate"] = getParam<double>("initial_flow_rate");
@@ -50,7 +50,7 @@ pumpCoastdownExponential::compute(double time)
 //template<>
 //InputParameters validParams<pumpCoastdownCurve>(){
 //
-//   InputParameters params = validParams<RavenTools>();
+//   InputParameters params = validParams<CrowTools>();
 //
 //   params.addRequiredParam<std::vector <double> >("time_points", "Time points");
 //   params.addRequiredParam<std::vector <double> >("flow_rate_points", "Flow rate points");
@@ -61,7 +61,7 @@ pumpCoastdownExponential::compute(double time)
 //}
 
 //pumpCoastdownCurve::pumpCoastdownCurve(const std::string & name, InputParameters parameters):
-//  RavenTools(name,parameters)
+//  CrowTools(name,parameters)
 //
 //{
 //  _tool_parameters["initial_flow_rate"       ] = getParam<double>("initial_flow_rate");

@@ -1,12 +1,12 @@
 /*
- * RavenToolsContainer.h
+ * CrowToolsContainer.h
  *
  *  Created on: May 30, 2013
  *      Author: alfoa
  */
 
-#ifndef RAVENTOOLSCONTAINER_H_
-#define RAVENTOOLSCONTAINER_H_
+#ifndef CROWTOOLSCONTAINER_H_
+#define CROWTOOLSCONTAINER_H_
 
 #include <iostream>
 #include <vector>
@@ -16,24 +16,24 @@
 
 using namespace std;
 
-class RavenToolsContainer;
+class CrowToolsContainer;
 
 class InputParameters;
 
-class RavenToolsContainer{
+class CrowToolsContainer{
      public:
-     static RavenToolsContainer & Instance();
+     static CrowToolsContainer & Instance();
      /*
       * Function to construct on the fly this class through the action system
       */
      //void addToolInContainer(const std::string & type, const std::string & name, InputParameters params);
-     void addToolInContainer(const std::string & type, const std::string & name, RavenTools * tool);
+     void addToolInContainer(const std::string & type, const std::string & name, CrowTools * tool);
 
 
      bool isEmpty(){return _tool_by_name.empty();};
      /*
       * Function to get the enum of the distribution called ToolAlias
-      * @  ToolAlias, alias of the raven tool from which retrieving the parameter
+      * @  ToolAlias, alias of the crow tool from which retrieving the parameter
       */
      std::string getType (const char * ToolAlias);
      std::string getType (const std::string ToolAlias);
@@ -46,27 +46,27 @@ class RavenToolsContainer{
 
      double compute(const char *ToolAlias, double value);
      double compute(const std::string ToolAlias, double value);
-     std::vector<std::string> getRavenToolNames();
-     //std::vector<std::string> getRavenToolVariableNames(char * ToolAlias);
-     std::vector<std::string> getRavenToolVariableNames(const std::string ToolAlias);
+     std::vector<std::string> getToolNames();
+     //std::vector<std::string> getToolVariableNames(char * ToolAlias);
+     std::vector<std::string> getToolVariableNames(const std::string ToolAlias);
 
 
      protected:
      std::map < std::string, int > _vector_pos_map;
      /// mapping from tool name and tool itself
-     std::map<std::string, RavenTools *> _tool_by_name;
+     std::map<std::string, CrowTools *> _tool_by_name;
      /// "Buckets" of tools based on their types
-     std::map<std::string, std::vector<RavenTools *> > _tool_by_type;
+     std::map<std::string, std::vector<CrowTools *> > _tool_by_type;
 
      /*
       * Constructor(empty)
       */
-     RavenToolsContainer();
+     CrowToolsContainer();
      /*
       * Destructor
       */
-     virtual ~RavenToolsContainer();
-     static RavenToolsContainer * _instance; // = NULL
+     virtual ~CrowToolsContainer();
+     static CrowToolsContainer * _instance; // = NULL
 };
 
-#endif /* RAVENTOOLSCONTAINER_H_ */
+#endif /* CROWTOOLSCONTAINER_H_ */

@@ -17,7 +17,7 @@ class pumpCoastdownExponential;
 template<>
 InputParameters validParams<pumpCoastdownExponential>();
 
-class pumpCoastdownExponential : public RavenTools{
+class pumpCoastdownExponential : public CrowTools{
 
 public:
   pumpCoastdownExponential(const std::string & name, InputParameters parameters);
@@ -34,7 +34,7 @@ protected:
 //template<>
 //InputParameters validParams<pumpCoastdownCurve>();
 //
-//class pumpCoastdownCurve : public RavenTools{
+//class pumpCoastdownCurve : public CrowTools{
 //
 //public:
 //  pumpCoastdownCurve(const std::string & name, InputParameters parameters);

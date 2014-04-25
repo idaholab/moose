@@ -12,7 +12,7 @@
 template<>
 InputParameters validParams<TableFunction>(){
 
-   InputParameters params = validParams<RavenTools>();
+   InputParameters params = validParams<CrowTools>();
 
    params.addRequiredParam<std::vector<double> >("x_coordinates", "x values (1D array)");
    params.addRequiredParam<std::vector<double> >("y_coordinates", "y values (1D array)");
@@ -23,7 +23,7 @@ InputParameters validParams<TableFunction>(){
 }
 
 TableFunction::TableFunction(const std::string & name, InputParameters parameters):
-  RavenTools(name,parameters)
+  CrowTools(name,parameters)
 {
   _tool_parameters["scaling_factor"] = getParam<double>("scaling_factor");
   _interpolation=Interpolation_Functions(getParam<std::vector<double> >("x_coordinates"),

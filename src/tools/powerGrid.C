@@ -11,14 +11,14 @@
 template<>
 InputParameters validParams<powerGrid>(){
 
-   InputParameters params = validParams<RavenTools>();
+   InputParameters params = validParams<CrowTools>();
 
    params.addRequiredParam<double>("status", "Power Grid status (1 = ON,0 = OFF)");
    return params;
 }
 
 powerGrid::powerGrid(const std::string & name, InputParameters parameters):
-  RavenTools(name,parameters)
+  CrowTools(name,parameters)
 {
   _tool_parameters["status"      ] = getParam<double>("status");
 }

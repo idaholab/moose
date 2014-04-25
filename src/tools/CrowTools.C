@@ -1,5 +1,5 @@
 /*
- * RavenTools.C
+ * CrowTools.C
  *
  *  Created on: May 28, 2013
  *      Author: alfoa
@@ -10,38 +10,38 @@
 using namespace std;
 
 template<>
-InputParameters validParams<RavenTools>(){
+InputParameters validParams<CrowTools>(){
 
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<std::string>("type","Raven Tool type");
-  params.registerBase("RavenTools");
+  params.addRequiredParam<std::string>("type","Crow Tool type");
+  params.registerBase("CrowTools");
   return params;
 }
 
-RavenTools::RavenTools(const std::string & name, InputParameters parameters):
+CrowTools::CrowTools(const std::string & name, InputParameters parameters):
     MooseObject(name,parameters)
 {
   _type=getParam<std::string>("type");
 }
 
-RavenTools::~RavenTools()
+CrowTools::~CrowTools()
 {
 }
 double
-RavenTools::getVariable(std::string variableName)
+CrowTools::getVariable(std::string variableName)
 {
   double res;
   if(_tool_parameters.find(variableName) != _tool_parameters.end()){
      res = _tool_parameters.find(variableName) ->second;
   }
   else{
-    mooseError("Parameter " << variableName << " was not found in RavenTool type " << _type <<".");
+    mooseError("Parameter " << variableName << " was not found in CrowTool type " << _type <<".");
   }
   return res;
 }
 
 std::vector<std::string>
-RavenTools::getVariableNames(){
+CrowTools::getVariableNames(){
   std::vector<std::string> paramtersNames;
   for (std::map<std::string,double>::iterator it = _tool_parameters.begin(); it!= _tool_parameters.end();it++){
     paramtersNames.push_back(it->first);
@@ -51,7 +51,7 @@ RavenTools::getVariableNames(){
 
 
 void
-RavenTools::updateVariable(std::string variableName, double & newValue)
+CrowTools::updateVariable(std::string variableName, double & newValue)
 {
   if(_tool_parameters.find(variableName) != _tool_parameters.end()){
     // we are sure the variableName is already present in the mapping =>
@@ -59,15 +59,15 @@ RavenTools::updateVariable(std::string variableName, double & newValue)
     _tool_parameters[variableName] = newValue;
   }
   else{
-    mooseError("Parameter " << variableName << " was not found in RavenTool type " << _type << ".");
+    mooseError("Parameter " << variableName << " was not found in CrowTool type " << _type << ".");
   }
 }
 
 double
-RavenTools::compute(double value){return value;}
+CrowTools::compute(double value){return value;}
 
 std::string &
-RavenTools::getType()
+CrowTools::getType()
 {
   return _type;
 }
@@ -75,29 +75,29 @@ RavenTools::getType()
  * external functions for Python interface
  */
 std::string
-getRavenToolType(RavenTools & tool)
+getCrowToolType(CrowTools & tool)
 {
   return tool.getType();
 }
 double
-getRavenToolVariable(RavenTools & tool,const std::string & variableName)
+getCrowToolVariable(CrowTools & tool,const std::string & variableName)
 {
   return tool.getVariable(variableName);
 }
 
 void
-updateRavenToolVariable(RavenTools & tool,const std::string & variableName, double newValue)
+updateCrowToolVariable(CrowTools & tool,const std::string & variableName, double newValue)
 {
   tool.updateVariable(variableName,newValue);
 }
 
 double
-computeRavenTool(RavenTools & tool,double value)
+computeCrowTool(CrowTools & tool,double value)
 {
   return tool.compute(value);
 }
 std::vector<std::string>
-getToolVariableNames(RavenTools & tool)
+getToolVariableNames(CrowTools & tool)
 {
   return tool.getVariableNames();
 }

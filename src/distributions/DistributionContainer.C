@@ -248,11 +248,11 @@ DistributionContainer::getDistributionNames(){
 }
 
 std::vector<std::string>
-DistributionContainer::getRavenDistributionVariableNames(const std::string DistAlias){
+DistributionContainer::getDistributionVariableNames(const std::string DistAlias){
   if(_dist_by_name.find(DistAlias) != _dist_by_name.end())
   {
      BasicDistribution * dist = _dist_by_name.find(DistAlias)->second;
-     return getDistributionVariableNames(*dist);
+     return ::getDistributionVariableNames(*dist);
   }
   else if(_dist_nd_by_name.find(DistAlias) != _dist_nd_by_name.end())
   {
@@ -263,7 +263,7 @@ DistributionContainer::getRavenDistributionVariableNames(const std::string DistA
   }
   else
   {
-  throwError("getRavenDistributionVariableNames: Distribution " + DistAlias + " was not found in distribution container.");
+  throwError("getDistributionVariableNames: Distribution " + DistAlias + " was not found in distribution container.");
   }
 }
 

@@ -16,7 +16,7 @@ template<>
 InputParameters validParams<DieselGeneratorBase>();
 
 
-class DieselGeneratorBase : public RavenTools{
+class DieselGeneratorBase : public CrowTools{
 
 public:
   DieselGeneratorBase(const std::string & name, InputParameters parameters);

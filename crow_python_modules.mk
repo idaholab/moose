@@ -1,7 +1,5 @@
 
 CROW_PMODULES=$(CROW_DIR)/python_modules
-# look for numpy include directory
-#NUMPY_INCLUDE = $(shell python $(RAVEN_DIR)/scripts/find_numpy_include.py include_numpy)
 
 DISTRIBUTION_COMPILE_COMMAND=@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -I$(CROW_LIB_INCLUDE_DIR) -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/  -MMD -MF $@.d -MT $@ -c $< -o $@

@@ -11,7 +11,7 @@
 template<>
 InputParameters validParams<batteries>(){
 
-   InputParameters params = validParams<RavenTools>();
+   InputParameters params = validParams<CrowTools>();
 
    params.addRequiredParam<double>("initial_life", "Initial battery life");
    params.addRequiredParam<double>("start_time", "Start time for using battery");
@@ -22,7 +22,7 @@ InputParameters validParams<batteries>(){
 
 
 batteries::batteries(const std::string & name, InputParameters parameters) :
-  RavenTools(name,parameters)
+  CrowTools(name,parameters)
 {
   if((getParam<double>("initial_life") > 0)  & (getParam<double>("status") != 1)) throw("Bad input - batteries values do not agree");
   if((getParam<double>("initial_life") <= 0) & (getParam<double>("status") != 0)) throw("Bad input - batteries values do not agree");

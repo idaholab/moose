@@ -15,7 +15,7 @@ class powerGrid;
 template<>
 InputParameters validParams<powerGrid>();
 
-class powerGrid : public RavenTools{
+class powerGrid : public CrowTools{
 
 public:
   powerGrid(const std::string & name, InputParameters parameters);

@@ -51,7 +51,7 @@ class DistributionContainer{
      void updateVariable(const char * DistAlias,const char * paramName,double newValue);
      void updateVariable(const std::string DistAlias,const std::string paramName,double newValue);
 
-     std::vector<std::string> getRavenDistributionVariableNames(const std::string DistAlias);
+     std::vector<std::string> getDistributionVariableNames(const std::string DistAlias);
      std::vector<std::string> getDistributionNames();
 
      double Pdf(const char * DistAlias, double x);

@@ -11,7 +11,7 @@
 template<>
 InputParameters validParams<DieselGeneratorBase>(){
 
-   InputParameters params = validParams<RavenTools>();
+   InputParameters params = validParams<CrowTools>();
 
    params.addRequiredParam<double>("supply_time", "Supply");
    params.addRequiredParam<double>("start_time", "start_time");
@@ -20,7 +20,7 @@ InputParameters validParams<DieselGeneratorBase>(){
 }
 
 DieselGeneratorBase::DieselGeneratorBase(const std::string & name, InputParameters parameters):
-  RavenTools(name,parameters)
+  CrowTools(name,parameters)
 {
   if((getParam<double>("supply_time") > 0)  & (getParam<double>("status") != 1)) throw("Bad input - diesel generators' values do not agree");
   if((getParam<double>("supply_time") <= 0) & (getParam<double>("status") != 0)) throw("Bad input - diesel generators' values do not agree");
