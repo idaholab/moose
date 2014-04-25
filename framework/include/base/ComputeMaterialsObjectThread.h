@@ -30,9 +30,9 @@ class ComputeMaterialsObjectThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
   ComputeMaterialsObjectThread(FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,
-                               std::vector<MaterialData *> & bmd_material_data, MaterialPropertyStorage & material_props,
-                               MaterialPropertyStorage & bnd_material_props, std::vector<MaterialWarehouse> & materials,
-                               std::vector<Assembly *> & assembly);
+                               std::vector<MaterialData *> & bnd_material_data, std::vector<MaterialData *> & neighbor_material_data,
+                               MaterialPropertyStorage & material_props, MaterialPropertyStorage & bnd_material_props,
+                               std::vector<MaterialWarehouse> & materials, std::vector<Assembly *> & assembly);
 
   // Splitting Constructor
   ComputeMaterialsObjectThread(ComputeMaterialsObjectThread & x, Threads::split split);
@@ -51,6 +51,7 @@ protected:
   NonlinearSystem & _sys;
   std::vector<MaterialData *> & _material_data;
   std::vector<MaterialData *> & _bnd_material_data;
+  std::vector<MaterialData *> & _neighbor_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
   std::vector<MaterialWarehouse> & _materials;

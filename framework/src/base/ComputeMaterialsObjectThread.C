@@ -26,14 +26,15 @@
 #include "libmesh/threads.h"
 
 ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,
-                                                           std::vector<MaterialData *> & bnd_material_data, MaterialPropertyStorage & material_props,
-                                                           MaterialPropertyStorage & bnd_material_props, std::vector<MaterialWarehouse> & materials,
-                                                           std::vector<Assembly *> & assembly) :
+                                                           std::vector<MaterialData *> & bnd_material_data, std::vector<MaterialData *> & neighbor_material_data,
+                                                           MaterialPropertyStorage & material_props, MaterialPropertyStorage & bnd_material_props,
+                                                           std::vector<MaterialWarehouse> & materials, std::vector<Assembly *> & assembly) :
 ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
   _fe_problem(fe_problem),
   _sys(sys),
   _material_data(material_data),
   _bnd_material_data(bnd_material_data),
+  _neighbor_material_data(neighbor_material_data),
   _material_props(material_props),
   _bnd_material_props(bnd_material_props),
   _materials(materials),
@@ -49,6 +50,7 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
     _sys(x._sys),
     _material_data(x._material_data),
     _bnd_material_data(x._bnd_material_data),
+    _neighbor_material_data(x._neighbor_material_data),
     _material_props(x._material_props),
     _bnd_material_props(x._bnd_material_props),
     _materials(x._materials),
@@ -98,8 +100,19 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem *elem, unsigned int side
   if (_need_internal_side_material)
   {
     _assembly[_tid]->reinit(elem, side);
-    unsigned int n_points = _assembly[_tid]->qRuleFace()->n_points();
-    _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), n_points, *elem, side);
+    unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
+    _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), face_n_points, *elem, side);
+
+    const Elem * neighbor = elem->neighbor(side);
+    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
+    const unsigned int elem_id = elem->id();
+    const unsigned int neighbor_id = neighbor->id();
+    unsigned int neighbor_n_points = _assembly[_tid]->qRule()->n_points();
+    if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+    {
+      _assembly[_tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);
+      _bnd_material_props.initStatefulProps(*_neighbor_material_data[_tid], _materials[_tid].getNeighborMaterials(_subdomain), face_n_points, *neighbor, neighbor_side);
+    }
   }
 }
 
