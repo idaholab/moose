@@ -1103,7 +1103,7 @@ static PetscErrorCode  DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id
   const MeshBase& mesh = dmm->nl->sys().get_mesh();
   /* The following effectively is a verbatim copy of MeshBase::n_subdomains(). */
   // This requires an inspection on every processor
-  parallel_only();
+  libmesh_parallel_only(mesh.comm());
   MeshBase::const_element_iterator       el  = mesh.active_elements_begin();
   const MeshBase::const_element_iterator end = mesh.active_elements_end();
   for (; el!=end; ++el)
