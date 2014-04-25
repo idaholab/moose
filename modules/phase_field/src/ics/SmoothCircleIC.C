@@ -90,12 +90,10 @@ SmoothCircleIC::gradient(const Point & p)
     Real Dint_posDr = 1.0 / _int_width;
     DvalueDr = Dint_posDr * (_invalue - _outvalue) * (-std::sin(int_pos * libMesh::pi) * libMesh::pi) / 2.0;
   }
+
   //Set gradient over the smooth interface
-  if (rad != 0.0) {
-    return Gradient((p(0) - _center(0)) * DvalueDr / rad,
-                    (p(1) - _center(1)) * DvalueDr / rad,
-                    (p(2) - _center(2)) * DvalueDr / rad);
-  }
+  if (rad != 0.0)
+    return _mesh.minPeriodicVector(_var.number(), _center, p) * (DvalueDr / rad);
   else
     return Gradient(0.0, 0.0, 0.0);
 }
