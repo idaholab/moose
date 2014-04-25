@@ -20,7 +20,7 @@ InputParameters validParams<RndSmoothCircleIC>()
 }
 
 RndSmoothCircleIC::RndSmoothCircleIC(const std::string & name,
-                               InputParameters parameters) :
+                                     InputParameters parameters) :
     InitialCondition(name, parameters),
     _x1(parameters.get<Real>("x1")),
     _y1(parameters.get<Real>("y1")),
@@ -32,7 +32,7 @@ RndSmoothCircleIC::RndSmoothCircleIC(const std::string & name,
     _range_invalue(_mx_invalue - _mn_invalue),
     _range_outvalue(_mx_outvalue - _mn_outvalue),
     _radius(parameters.get<Real>("radius")),
-    _center(_x1,_y1,_z1)
+    _center(_x1, _y1, _z1)
 {
   mooseAssert(_range_invalue >= 0.0, "Inside Min > Max for RndSmoothCircleIC!");
   mooseAssert(_range_outvalue >= 0.0, "Outside Min > Max for RndSmoothCircleIC!");

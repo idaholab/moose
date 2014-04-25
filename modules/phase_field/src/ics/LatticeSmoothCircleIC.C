@@ -31,7 +31,7 @@ LatticeSmoothCircleIC::initialSetup()
   /*std::vector<unsigned int> circles_per_side;
   circles_per_side.resize(3);
 
-  for (unsigned int i = 0; i<3; ++i)
+  for (unsigned int i = 0; i < 3; ++i)
   circles_per_side[i] = _circles_per_side;*/
 
   //Moose::out << "1: "<< _circles_per_side[0] << " 2: "<< _circles_per_side[1] << " 3: " << _circles_per_side[2] << std::endl;
@@ -87,7 +87,7 @@ LatticeSmoothCircleIC::initialSetup()
          //Vary circle radius
         _bubradi[cnt] = _radius*(1.0 + (1.0 - 2.0*MooseRandom::rand())*_radius_variation);
 
-        if (_bubradi[cnt]<0.0) _bubradi[cnt] = 0.0;
+        if (_bubradi[cnt] < 0.0) _bubradi[cnt] = 0.0;
 
         Real xx = x_sep/2.0 + i*x_sep;
         Real yy = y_sep/2.0 + j*y_sep;
