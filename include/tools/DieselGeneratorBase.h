@@ -8,7 +8,7 @@
 #ifndef DIESELGENERATORBASE_H_
 #define DIESELGENERATORBASE_H_
 
-#include "RavenTools.h"
+#include "CrowTools.h"
 
 class DieselGeneratorBase;
 
