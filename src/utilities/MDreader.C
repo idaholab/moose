@@ -1,0 +1,219 @@
+//
+//  Multi-dimensional array reader
+//  
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <stdexcept>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <sstream>
+
+#include "MDreader.h"
+
+using namespace std;
+
+#define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
+
+void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::vector< std::vector<double> > & discretizationValues, vector<double> & values){
+    //FILE* pFile = fopen("filename", "rb");
+    // file structure
+    // - int number of dimensions                                   1
+    // - [int] number of discretization points for each dimension   N
+    // - [[double]] discretizations points for each dimension       sum (N_i*d_i)
+    // - [[double]] CDF value for each discretization point
+    
+    // location of first CDF value point = 1 + N + sum (N_i*d_i)
+
+	std::cerr << "readOrderedNDarray" << std::endl;
+    
+	std::vector<double> data;
+	data = read1Darray(filename);
+
+	int startingPoint = 0;
+	numberOfDimensions = data[startingPoint];
+	std::cerr << "numberOfDimensions: " << numberOfDimensions << std::endl;
+    
+    std::vector<int> discretizations (numberOfDimensions);
+
+    startingPoint++;
+    std::cerr << "discretizations" << std::endl;
+    for (int i=0; i<numberOfDimensions; i++){
+        discretizations[i] = data[startingPoint];
+        std::cerr << "discretizations["<< i << "]: " << discretizations[i] << std::endl;
+        startingPoint++;
+    }
+
+    for (int i=0; i<numberOfDimensions; i++){
+    	std::cerr << "Dimension: " << i << std::endl;
+        std::vector<double> tempDiscretization;
+        for (int j=0; j<discretizations[i]; j++){
+            tempDiscretization.push_back(data[startingPoint]);
+            std::cerr << data[startingPoint] << " , " ;
+            startingPoint++;
+        }
+        std::cerr << " - " <<  tempDiscretization.size() << std::endl;
+        discretizationValues.push_back(tempDiscretization);
+    }
+
+    int numberofValues = 1;
+    for (int i=0; i<numberOfDimensions; i++)
+    	numberofValues *= discretizations[i];
+
+    for (int n=0; n<numberofValues; n++){
+    	values.push_back(data[startingPoint]);
+    	startingPoint++;
+    }
+
+    std::cerr << "End creating ND data array" << std::endl;
+}
+
+void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int & numberOfPoints, std::vector< std::vector<double> > & pointcoordinates, std::vector<double> & values){
+	// int - number of dimensions d
+	// int - number of points n
+	// [[double]]  - point coordinates
+	// [double]  - point values
+
+	std::vector<double> data;
+	data = read1Darray(filename);
+
+	numberOfDimensions = data[0];
+
+	numberOfPoints = data[1];
+
+	int startingPoint = 2;
+
+	for (int n=0; n<numberOfPoints; n++){
+		std::vector<double> tempVector (numberOfDimensions);
+		for (int nDim=0; nDim<numberOfDimensions; nDim++){
+			tempVector[nDim] = data[startingPoint];
+			startingPoint += 1;
+		}
+		pointcoordinates.push_back(tempVector);
+	}
+
+	//startingPoint += numberOfPoints * numberOfDimensions;
+
+	for (int n=0; n<numberOfPoints; n++){
+		values.push_back(data[startingPoint]);
+		startingPoint += 1;
+	}
+
+	std::cerr << " completed readScatteredNDarray" << std::endl;
+
+	//check that data info is consistent
+	if (values.size() != pointcoordinates.size())
+		throwError("Data contained in " << filename << " is not complete: point coordinates and values do not match.");
+	if (numberOfPoints != pointcoordinates.size())
+		throwError("Data contained in " << filename << " is not complete: expected number of points and point coordinates do not match.");
+}
+
+void readMatrix(std::string filename, int & rows, int & columns, std::vector< std::vector<double> > & matrix){
+	// Data format: row1
+	//              row2
+	//              row3
+
+    vector <double> v;
+
+    import_matrix_from_txt_file(filename,v,rows,columns);
+}
+
+
+int ReadNumbers(const string & s, vector <double> & v ) {
+    istringstream is( s );
+    double n;
+    while( is >> n )
+        v.push_back( n );
+
+    return v.size();
+}
+
+
+
+void import_matrix_from_txt_file(std::string filename_X, vector <double>& v, int& rows, int& cols){
+    ifstream file_X;
+    string line;
+
+    file_X.open(filename_X.c_str());
+    if (file_X.is_open())
+    {
+        int i=0;
+        getline(file_X, line);
+
+        cols =ReadNumbers( line, v );
+        cout << "cols:" << cols << endl;
+
+        for ( i=1;i<32767;i++){
+            if ( getline(file_X, line) == 0 ) break;
+            ReadNumbers( line, v );
+        }
+
+        rows=i;
+        cout << "rows :" << rows << endl;
+        if(rows >32766) cout<< "N must be smaller than MAX_INT";
+
+        file_X.close();
+    }
+    else{
+        cout << "file open failed";
+    }
+
+    cout << "v:" << endl;
+    for (int i=0;i<rows;i++){
+        for (int j=0;j<cols;j++)
+            cout << v[i*cols+j] << "\t" ;
+        cout << endl;
+    }
+}
+
+
+
+std::vector<double> read1Darray(std::string filename){
+	//numbers are separated by newlines
+
+	vector<double> data;
+	ifstream in(filename.c_str());
+	if(not in)
+		throwError("The filename " << filename << " does not exist!!!!");
+	if(in)
+		std::cerr << "The file" << filename << " was succesfully found" << std::endl;
+
+	double number;
+    while (in >> number){
+    	data.push_back(number);
+    }
+	in.close();
+
+	std::cerr << "Done reading file" << std::endl;
+
+	return data;
+}
+
+
+//double returnCDFvalue(vector<double> coordinates){
+//	double value;
+//	std::vector<double> indices;
+//
+//	for (i=0; i<N_dimensions; i++)
+//		if (coordinates[i] > discretizations[i][discretizations.size()])
+//			mooseError("Error in CDF evaluation for custom distribution");
+//		else
+//			indices[i] = findIndex(coordinates[i], discretizations[i]);
+//
+//	return value;
+//}
+//
+//int findIndex(double pivot, vector<double> discretizations){
+//	// given an arrays of values and a pivot point, this function returns
+//	int index=discretizations.size();
+//
+//	for (i=1; i<index; i++){
+//		if ((pivot<discretizations[i]) && (pivot>discretizations[i-1]))
+//			index= i-1;
+//	}
+//
+//	return index;
+//}
