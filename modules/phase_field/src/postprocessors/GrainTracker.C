@@ -169,7 +169,7 @@ GrainTracker::finalize()
 
   // Exchange data in parallel
   pack(_packed_data, false);                 // Make sure we delay packing of periodic neighbor information
-  Parallel::allgather(_packed_data, false);
+  _communicator.allgather(_packed_data, false);
   unpack(_packed_data);
   mergeSets();
 
@@ -180,7 +180,7 @@ GrainTracker::finalize()
 //  NodalFloodCount::updateFieldInfo();
   _packed_data.clear();
   pack(_packed_data, true);                  // Pack the data again but this time add periodic neighbor information
-  Parallel::allgather(_packed_data, false);
+  _communicator.allgather(_packed_data, false);
   unpack(_packed_data);
   mergeSets();
 
@@ -225,7 +225,7 @@ GrainTracker::finalize()
   if (_track_memory)
   {
     _bytes_used += calculateUsage();
-    Parallel::sum(_bytes_used);
+    _communicator.sum(_bytes_used);
     formatBytesUsed();
   }
 }
@@ -308,8 +308,8 @@ GrainTracker::buildBoundingSpheres()
       ++set_counter;
     }
 
-    Parallel::min(min_points);
-    Parallel::max(max_points);
+    _communicator.min(min_points);
+    _communicator.max(max_points);
 
     set_counter = 0;
     for (std::list<BubbleData>::const_iterator it1 = _bubble_sets[map_num].begin();
@@ -671,7 +671,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
   {
     Node *curr_node = mesh.query_node_ptr(*node_it);
 
-    if (curr_node && curr_node->processor_id() == libMesh::processor_id())
+    if (curr_node && curr_node->processor_id() == processor_id())
     {
       _subproblem.reinitNode(curr_node, 0);
 
