@@ -1,8 +1,8 @@
-%module raventools
+%module crowtools
 %{
-#include "RavenToolsContainer.h"
+#include "CrowToolsContainer.h"
 %}
-%include "RavenToolsContainer.h"
+%include "CrowToolsContainer.h"
 
 
 /*
