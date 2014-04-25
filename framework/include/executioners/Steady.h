@@ -48,9 +48,19 @@ public:
   virtual void init();
 
   /**
-   * This will call solve() on the NonlinearSystem.
+   * This controls the solve.
    */
   virtual void execute();
+
+  /**
+   * This will call solve() on the NonlinearSystem with AMR if AMR is turned on.
+   */
+  virtual void takeStep();
+
+  /**
+   * This will output the final solution.
+   */
+  virtual void postExecute();
 
   virtual Problem & problem();
 
@@ -59,6 +69,9 @@ public:
 protected:
   FEProblem & _problem;
 
+#ifdef LIBMESH_ENABLE_AMR
+  bool _output_amr_steps;
+#endif
   int & _time_step;
   Real & _time;
 };
