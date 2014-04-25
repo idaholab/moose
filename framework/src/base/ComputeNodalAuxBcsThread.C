@@ -64,7 +64,7 @@ ComputeNodalAuxBcsThread::operator() (const ConstBndNodeRange & range)
 //      if (unlikely(_calculate_element_time))
 //        startNodeTiming(node.id());
 
-      if (node->processor_id() == libMesh::processor_id())
+      if (node->processor_id() == _fe_problem.processor_id())
       {
         _fe_problem.reinitNodeFace(node, boundary_id, _tid);
 

@@ -116,8 +116,8 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _current_nl_its(0),
     _current_solution(NULL),
     _residual_ghosted(addVector("residual_ghosted", false, GHOSTED)),
-    _serialized_solution(*NumericVector<Number>::build().release()),
-    _residual_copy(*NumericVector<Number>::build().release()),
+    _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
+    _residual_copy(*NumericVector<Number>::build(_communicator).release()),
     _time_integrator(NULL),
     _u_dot(addVector("u_dot", true, GHOSTED)),
     _du_dot_du(addVector("du_dot_du", true, GHOSTED)),
@@ -348,7 +348,7 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
 #elif PETSC_VERSION_LT(3,5,0)
   // PETSc 3.3.x, 3.4.x
   ierr = MatGetColoring(petsc_mat->mat(), MATCOLORINGLF, &iscoloring);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(_communicator.get(),ierr);
 #else
   // PETSc 3.5.x
   MatColoring matcoloring;
@@ -760,7 +760,7 @@ NonlinearSystem::setInitialSolution()
     BoundaryID boundary_id = bnode->_bnd_id;
     Node * node = bnode->_node;
 
-    if (node->processor_id() == libMesh::processor_id())
+    if (node->processor_id() == processor_id())
     {
       // reinit variables in nodes
       _fe_problem.reinitNodeFace(node, boundary_id, 0);
@@ -923,7 +923,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
         dof_id_type slave_node_num = slave_nodes[i];
         Node & slave_node = _mesh.node(slave_node_num);
 
-        if (slave_node.processor_id() == libMesh::processor_id())
+        if (slave_node.processor_id() == processor_id())
         {
           if (pen_loc._penetration_info[slave_node_num])
           {
@@ -960,7 +960,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
   }
 
   // See if constraints were applied anywhere
-  Parallel::max(constraints_applied);
+  _communicator.max(constraints_applied);
 
   if (constraints_applied)
   {
@@ -1017,7 +1017,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
         dof_id_type slave_node_num = slave_nodes[i];
         Node & slave_node = _mesh.node(slave_node_num);
 
-        if (slave_node.processor_id() == libMesh::processor_id())
+        if (slave_node.processor_id() == processor_id())
         {
           if (pen_loc._penetration_info[slave_node_num])
           {
@@ -1064,7 +1064,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       // and will need to contribute their former slaves' contributions
       // to the future masters.
       // See if constraints were applied anywhere
-      Parallel::max(constraints_applied);
+      _communicator.max(constraints_applied);
 
       if (constraints_applied)
       {
@@ -1081,7 +1081,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
   }
   if (!_assemble_constraints_separately)
   {
-    Parallel::max(constraints_applied);
+    _communicator.max(constraints_applied);
 
     if (constraints_applied)
     {
@@ -1246,7 +1246,7 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
       BoundaryID boundary_id = bnode->_bnd_id;
       Node * node = bnode->_node;
 
-      if (node->processor_id() == libMesh::processor_id())
+      if (node->processor_id() == processor_id())
       {
         // reinit variables in nodes
         _fe_problem.reinitNodeFace(node, boundary_id, 0);
@@ -1426,7 +1426,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
         dof_id_type slave_node_num = slave_nodes[i];
         Node & slave_node = _mesh.node(slave_node_num);
 
-        if (slave_node.processor_id() == libMesh::processor_id())
+        if (slave_node.processor_id() == processor_id())
         {
           if (pen_loc._penetration_info[slave_node_num])
           {
@@ -1485,7 +1485,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
     if (_assemble_constraints_separately)
     {
       // See if constraints were applied anywhere
-      Parallel::max(constraints_applied);
+      _communicator.max(constraints_applied);
 
       if (constraints_applied)
       {
@@ -1517,7 +1517,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
   if (!_assemble_constraints_separately)
   {
     // See if constraints were applied anywhere
-    Parallel::max(constraints_applied);
+    _communicator.max(constraints_applied);
 
     if (constraints_applied)
     {
@@ -1716,7 +1716,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
       BoundaryID boundary_id = bnode->_bnd_id;
       Node * node = bnode->_node;
 
-      if (node->processor_id() == libMesh::processor_id())
+      if (node->processor_id() == processor_id())
       {
         _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
@@ -1823,7 +1823,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
       std::vector<NodalBC *> bcs = _bcs[0].activeNodal(boundary_id);
       if (bcs.size() > 0)
       {
-        if (node->processor_id() == libMesh::processor_id())
+        if (node->processor_id() == processor_id())
         {
           _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
@@ -1874,7 +1874,7 @@ NonlinearSystem::computeDamping(const NumericVector<Number>& update)
     damping = cid.damping();
   }
 
-  Parallel::min(damping);
+  _communicator.min(damping);
 
   Moose::perf_log.pop("compute_dampers()","Solve");
 
@@ -1955,8 +1955,8 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
     if (_fe_problem.getDisplacedProblem())
       findImplicitGeometricCouplingEntries(_fe_problem.getDisplacedProblem()->geomSearchData(), graph);
 
-    const dof_id_type first_dof_on_proc = dofMap().first_dof(libMesh::processor_id());
-    const dof_id_type end_dof_on_proc   = dofMap().end_dof(libMesh::processor_id());
+    const dof_id_type first_dof_on_proc = dofMap().first_dof(processor_id());
+    const dof_id_type end_dof_on_proc   = dofMap().end_dof(processor_id());
 
     for(std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
     {
@@ -2189,7 +2189,7 @@ NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsig
   // sort vec by residuals
   std::sort(vec.begin(), vec.end(), dbg_sort_residuals);
   // print out
-  Moose::err << "[DBG][" << libMesh::processor_id() << "] Max " << n << " residuals";
+  Moose::err << "[DBG][" << processor_id() << "] Max " << n << " residuals";
   if (j < n)
   {
     n = j;
@@ -2199,7 +2199,7 @@ NonlinearSystem::printTopResiduals(const NumericVector<Number> & residual, unsig
 
   for (unsigned int i = 0; i < n; ++i)
   {
-    fprintf(stderr, "[DBG][%d]  % .15e '%s' at node %d\n", libMesh::processor_id(), vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
+    fprintf(stderr, "[DBG][%d]  % .15e '%s' at node %d\n", processor_id(), vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
   }
 }
 

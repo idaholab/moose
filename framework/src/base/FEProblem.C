@@ -799,7 +799,7 @@ FEProblem::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
 void
 FEProblem::addGhostedElem(dof_id_type elem_id)
 {
-  if (_mesh.elem(elem_id)->processor_id() != libMesh::processor_id())
+  if (_mesh.elem(elem_id)->processor_id() != processor_id())
     _ghosted_elems.insert(elem_id);
 }
 
@@ -1468,7 +1468,7 @@ FEProblem::projectSolution()
   // Also, load values into the SCALAR dofs
   // Note: We assume that all SCALAR dofs are on the
   // processor with highest ID
-  if (libMesh::processor_id() == (libMesh::n_processors()-1))
+  if (processor_id() == (n_processors()-1))
   {
     THREAD_ID tid = 0;
 
@@ -2413,7 +2413,7 @@ FEProblem::reinitBecauseOfGhosting()
 {
   // Need to see if _any_ processor has ghosted elems
   dof_id_type ghosted = _ghosted_elems.size();
-  Parallel::sum(ghosted);
+  _communicator.sum(ghosted);
 
   if (ghosted)
   {
@@ -2526,7 +2526,7 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
 
   parameters.set<THREAD_ID>("_tid") = 0;
 
-  parameters.set<MPI_Comm>("_mpi_comm") = libMesh::COMM_WORLD;
+  parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
 
   MooseObject * mo = _factory.create(multi_app_name, name, parameters);
 
@@ -2574,7 +2574,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
       multi_apps[i]->solveStep(_dt, _time, auto_advance);
 
     Moose::out << "--Waiting For Other Processors To Finish--" << std::endl;
-    MooseUtils::parallelBarrierNotify();
+    MooseUtils::parallelBarrierNotify(_communicator);
 
     Moose::out << "--Finished Executing MultiApps--" << std::endl;
   }
@@ -2589,7 +2589,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
         transfers[i]->execute();
 
       Moose::out << "--Waiting For Transfers To Finish--" << std::endl;
-      MooseUtils::parallelBarrierNotify();
+      MooseUtils::parallelBarrierNotify(_communicator);
 
       Moose::out << "--Transfers To Finished--" << std::endl;
     }
@@ -2609,7 +2609,7 @@ FEProblem::advanceMultiApps(ExecFlagType type)
       multi_apps[i]->advanceStep();
 
     Moose::out << "--Waiting For Other Processors To Finish--" << std::endl;
-    MooseUtils::parallelBarrierNotify();
+    MooseUtils::parallelBarrierNotify(_communicator);
 
     Moose::out << "--Finished Advancing MultiApps--" << std::endl;
   }
@@ -2962,7 +2962,7 @@ FEProblem::solutionChangeNorm()
   NumericVector<Number> & current_solution  = (*_nl.sys().current_local_solution);
   NumericVector<Number> & old_solution = (*_nl.sys().old_local_solution);
 
-  NumericVector<Number> & difference = *NumericVector<Number>::build().release();
+  NumericVector<Number> & difference = *NumericVector<Number>::build(_communicator).release();
   difference.init(current_solution, true);
 
   difference = current_solution;
@@ -3382,7 +3382,7 @@ FEProblem::checkProblemIntegrity()
     {
       Moose::out << "Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!\n";
 
-      if (libMesh::n_processors() > 1)
+      if (n_processors() > 1)
       {
         Moose::out << "\nWarning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imbalances and degraded performance!!\n\n";
         _mesh.getMesh().skip_partitioning(true);

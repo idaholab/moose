@@ -70,7 +70,7 @@ Split::setup(const std::string& prefix)
       val += _vars[j];
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
   }
   // block options
   if (_blocks.size()) {
@@ -81,7 +81,7 @@ Split::setup(const std::string& prefix)
       val += _blocks[j];
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
   }
   // side options
   if (_sides.size()) {
@@ -92,7 +92,7 @@ Split::setup(const std::string& prefix)
       val += _sides[j];
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
   }
   // unside options
   if (_unsides.size()) {
@@ -103,7 +103,7 @@ Split::setup(const std::string& prefix)
       val += _unsides[j];
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
   }
 
   if (_splitting.size()) {
@@ -112,28 +112,28 @@ Split::setup(const std::string& prefix)
     opt = prefix+"pc_type";
     val = "fieldsplit";
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
 
     SplittingType dtype = getSplittingType(_splitting_type,val);
     opt = prefix+"pc_fieldsplit_type";
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
 
     if (dtype == SplittingTypeSchur) {
       getSchurType(_schur_type,val); // validation
       opt = prefix+"pc_fieldsplit_schur_fact_type";
       ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-      CHKERRABORT(libMesh::COMM_WORLD,ierr);
+      CHKERRABORT(_communicator.get(),ierr);
 
       getSchurPre(_schur_pre,val); // validation
       opt = prefix+"pc_fieldsplit_schur_precondition";
       ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-      CHKERRABORT(libMesh::COMM_WORLD,ierr);
+      CHKERRABORT(_communicator.get(),ierr);
 
       getSchurAinv(_schur_ainv,val);
       opt = prefix+"mat_schur_complement_ainv_type";
       ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-      CHKERRABORT(libMesh::COMM_WORLD,ierr);
+      CHKERRABORT(_communicator.get(),ierr);
 
     }
     // FIXME: How would we support the user-provided Pmat?
@@ -142,14 +142,14 @@ Split::setup(const std::string& prefix)
     opt = dmprefix+"nfieldsplits";
     {std::ostringstream sval; sval << _splitting.size(); val = sval.str();}
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
     opt = dmprefix+"fieldsplit_names";
     val = "";
     for (unsigned int i = 0; i < _splitting.size(); ++i) {
       if (i) val += ","; val += _splitting[i];
     }
     ierr = PetscOptionsSetValue(opt.c_str(),val.c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
 
     // Finally, recursively configure the splits contained within this split.
     for (unsigned int i = 0; i < _splitting.size(); ++i) {
@@ -170,7 +170,7 @@ Split::setup(const std::string& prefix)
     }
     std::string opt = prefix+op.substr(1);
     ierr = PetscOptionsSetValue(opt.c_str(),PETSC_NULL);
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
   }
   for (unsigned j = 0; j < _petsc_options_iname.size(); ++j) {
     // Need to prepend the prefix and strip off the leading '-' on the option name.
@@ -182,7 +182,7 @@ Split::setup(const std::string& prefix)
     }
     std::string opt = prefix+op.substr(1);
     ierr = PetscOptionsSetValue(opt.c_str(),_petsc_options_value[j].c_str());
-    CHKERRABORT(libMesh::COMM_WORLD,ierr);
+    CHKERRABORT(_communicator.get(),ierr);
   }
 }
 

@@ -34,7 +34,7 @@ MaterialTensorOnLine :: MaterialTensorOnLine(const std::string & name, InputPara
   _elem_line_id(coupledValue("element_line_id"))
 {
 
-  if (!_stream_open && libMesh::processor_id() == 0)
+  if (!_stream_open && processor_id() == 0)
   {
     _output_file.open(_file_name.c_str(), std::ios::trunc | std::ios::out);
     _stream_open = true;
@@ -44,7 +44,7 @@ MaterialTensorOnLine :: MaterialTensorOnLine(const std::string & name, InputPara
 
 MaterialTensorOnLine::~MaterialTensorOnLine()
 {
-  if (_stream_open && libMesh::processor_id() == 0)
+  if (_stream_open && processor_id() == 0)
   {
     _output_file.close();
     _stream_open = false;
@@ -119,10 +119,10 @@ void
 MaterialTensorOnLine::finalize()
 {
 
-    Parallel::set_union(_dist);
-    Parallel::set_union(_value);
+    _communicator.set_union(_dist);
+    _communicator.set_union(_value);
 
-   if (libMesh::processor_id() == 0)
+   if (processor_id() == 0)
    {
      std::vector<std::pair<Real, Real> > table;
 //     std::map<unsigned int, Real>::iterator id(_dist.begin());
@@ -149,4 +149,3 @@ MaterialTensorOnLine::finalize()
    }
 
 }
-

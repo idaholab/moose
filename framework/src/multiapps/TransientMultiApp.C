@@ -417,7 +417,7 @@ TransientMultiApp::computeDT()
     return std::numeric_limits<Real>::max();
 
 
-  Parallel::min(smallest_dt);
+  _communicator.min(smallest_dt);
   return smallest_dt;
 }
 

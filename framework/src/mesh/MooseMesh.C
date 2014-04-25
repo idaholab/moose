@@ -142,7 +142,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
 
   if (_use_parallel_mesh)
   {
-    _mesh = new ParallelMesh(dim);
+    _mesh = new ParallelMesh(_communicator, dim);
     if (_partitioner_name != "default" && _partitioner_name != "parmetis")
     {
       _partitioner_name = "parmetis";
@@ -151,7 +151,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
   }
   else
   {
-    _mesh = new SerialMesh(dim);
+    _mesh = new SerialMesh(_communicator, dim);
   }
 
   // Set the partitioner
@@ -328,7 +328,7 @@ MooseMesh::prepare(bool force)
                                                     _mesh_subdomains.end());
 
     // Gather them all into an enlarged vector
-    Parallel::allgather(mesh_subdomains_vector);
+    _communicator.allgather(mesh_subdomains_vector);
 
     // Attempt to insert any new IDs into the set (any existing ones will be skipped)
     _mesh_subdomains.insert(mesh_subdomains_vector.begin(),
@@ -339,7 +339,7 @@ MooseMesh::prepare(bool force)
                                                      _mesh_boundary_ids.end());
 
     // Gather them all into an enlarged vector
-    Parallel::allgather(mesh_boundary_ids_vector);
+    _communicator.allgather(mesh_boundary_ids_vector);
 
     // Attempt to insert any new IDs into the set (any existing ones will be skipped)
     _mesh_boundary_ids.insert(mesh_boundary_ids_vector.begin(),
@@ -1516,7 +1516,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
                                 int child,
                                 int child_side)
 {
-  SerialMesh mesh;
+  SerialMesh mesh(_communicator);
   mesh.skip_partitioning(true);
 
   unsigned int dim = template_elem->dim();

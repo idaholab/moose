@@ -102,7 +102,7 @@ GapValueAux::computeValue()
       msg << "No gap value information found for node ";
       msg << current_node->id();
       msg << " on processor ";
-      msg << libMesh::processor_id();
+      msg << processor_id();
       mooseWarning( msg.str() );
     }
   }

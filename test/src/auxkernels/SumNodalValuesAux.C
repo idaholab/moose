@@ -40,7 +40,7 @@ SumNodalValuesAux::compute()
   for (_i = 0; _i < _var.order(); ++_i)
   {
     Real value = computeValue();
-    libMesh::Parallel::sum(value);
+    _communicator.sum(value);
     _var.setValue(_i, value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
   }
 }

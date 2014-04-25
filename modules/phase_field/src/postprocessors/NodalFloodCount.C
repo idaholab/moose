@@ -158,7 +158,7 @@ NodalFloodCount::finalize()
 {
   // Exchange data in parallel
   pack(_packed_data);
-  Parallel::allgather(_packed_data, false);
+  _communicator.allgather(_packed_data, false);
   unpack(_packed_data);
 
   mergeSets();
@@ -184,7 +184,7 @@ NodalFloodCount::finalize()
   if (_track_memory)
   {
     _bytes_used += calculateUsage();
-    Parallel::sum(_bytes_used);
+    _communicator.sum(_bytes_used);
     formatBytesUsed();
   }
 }
@@ -603,7 +603,7 @@ NodalFloodCount::calculateBubbleVolumes()
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     _all_bubble_volumes.insert(_all_bubble_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
 
-  Parallel::sum(_all_bubble_volumes); //do all the sums!
+  _communicator.sum(_all_bubble_volumes); //do all the sums!
 
   std::sort(_all_bubble_volumes.begin(), _all_bubble_volumes.end(), std::greater<Real>());
 

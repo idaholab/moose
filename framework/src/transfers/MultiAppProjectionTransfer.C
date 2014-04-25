@@ -132,7 +132,7 @@ MultiAppProjectionTransfer::assembleL2To(EquationSystems & es, const std::string
   System & from_sys = from_var.sys().system();
   unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-  NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build().release();
+  NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build(from_sys.comm()).release();
   serialized_from_solution->init(from_sys.n_dofs(), false, SERIAL);
   // Need to pull down a full copy of this vector on every processor so we can get values in parallel
   from_sys.solution->localize(*serialized_from_solution);
@@ -219,14 +219,14 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
     FEProblem & from_problem = *_multi_app->appProblem(i);
     EquationSystems & from_es = from_problem.es();
     MeshBase & from_mesh = from_es.get_mesh();
-    MeshTools::BoundingBox * app_box = new MeshTools::BoundingBox(MeshTools::processor_bounding_box(from_mesh, libMesh::processor_id()));
+    MeshTools::BoundingBox * app_box = new MeshTools::BoundingBox(MeshTools::processor_bounding_box(from_mesh, from_mesh.processor_id()));
     from_bbs[i] = app_box;
 
     MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-    NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build().release();
+    NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build(from_sys.comm()).release();
     serialized_from_solution->init(from_sys.n_dofs(), false, SERIAL);
     // Need to pull down a full copy of this vector on every processor so we can get values in parallel
     from_sys.solution->localize(*serialized_from_solution);

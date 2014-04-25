@@ -82,7 +82,7 @@ InputParameters validParams<NavierStokesApp>()
 NavierStokesApp::NavierStokesApp(const std::string & name, InputParameters parameters) :
     MooseApp(name, parameters)
 {
-  srand(libMesh::processor_id());
+  srand(processor_id());
 
   Moose::registerObjects(_factory);
   NavierStokesApp::registerObjects(_factory);

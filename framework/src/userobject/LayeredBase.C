@@ -184,8 +184,8 @@ LayeredBase::initialize()
 void
 LayeredBase::finalize()
 {
-  Parallel::sum(_layer_values);
-  Parallel::max(_layer_has_value);
+  _layered_base_subproblem.comm().sum(_layer_values);
+  _layered_base_subproblem.comm().max(_layer_has_value);
 }
 
 void

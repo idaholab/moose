@@ -116,27 +116,27 @@ checkFileWriteable(const std::string & filename)
 }
 
 void
-parallelBarrierNotify()
+parallelBarrierNotify(const Parallel::Communicator & comm)
 {
   processor_id_type slave_processor_id;
 
-  if (libMesh::processor_id() == 0)
+  if (comm.rank() == 0)
   {
     // The master process is already through, so report it
-    Moose::out << "Jobs complete: 1/" << libMesh::n_processors() << "\r" << std::flush;
-    for (unsigned int i=2; i<=libMesh::n_processors(); ++i)
+    Moose::out << "Jobs complete: 1/" << comm.size() << "\r" << std::flush;
+    for (unsigned int i=2; i<=comm.size(); ++i)
     {
-      Parallel::receive(MPI_ANY_SOURCE, slave_processor_id);
-      Moose::out << "Jobs complete: " << i << "/" << libMesh::n_processors() << (i == libMesh::n_processors() ? "\n" : "\r") << std::flush;
+      comm.receive(MPI_ANY_SOURCE, slave_processor_id);
+      Moose::out << "Jobs complete: " << i << "/" << comm.size() << (i == comm.size() ? "\n" : "\r") << std::flush;
     }
   }
   else
   {
-    slave_processor_id = libMesh::processor_id();
-    Parallel::send(0, slave_processor_id);
+    slave_processor_id = comm.rank();
+    comm.send(0, slave_processor_id);
   }
 
-  Parallel::barrier();
+  comm.barrier();
 }
 
 bool

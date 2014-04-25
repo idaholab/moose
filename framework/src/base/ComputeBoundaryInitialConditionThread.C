@@ -48,7 +48,7 @@ ComputeBoundaryInitialConditionThread::operator() (const ConstBndNodeRange & ran
     for (std::vector<InitialCondition *>::const_iterator it = ics.begin(); it != ics.end(); ++it)
     {
       InitialCondition * ic = (*it);
-      if (node->processor_id() == libMesh::processor_id())
+      if (node->processor_id() == _fe_problem.processor_id())
       {
         MooseVariable & var = ic->variable();
         var.reinitNode();

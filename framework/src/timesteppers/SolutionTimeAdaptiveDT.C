@@ -37,7 +37,7 @@ SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const std::string & name, InputPa
     _sol_time_vs_dt(std::numeric_limits<Real>::max()),
     _adapt_log(getParam<bool>("adapt_log"))
 {
-  if ((_adapt_log) && (libMesh::processor_id() == 0))
+  if ((_adapt_log) && (processor_id() == 0))
   {
     _adaptive_log.open("adaptive_log");
     _adaptive_log<<"Adaptive Times Step Log"<<std::endl;
@@ -92,7 +92,7 @@ SolutionTimeAdaptiveDT::computeDT()
 //  if (_t_step > 1)
   Real local_dt =  _dt + _dt * _percent_change*_direction;
 
-  if ((_adapt_log) && (libMesh::processor_id() == 0))
+  if ((_adapt_log) && (processor_id() == 0))
   {
     Real out_dt = getCurrentDT();
     if (out_dt > _dt_max)

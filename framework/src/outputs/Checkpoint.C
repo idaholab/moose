@@ -159,7 +159,7 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     _file_names.erase(_file_names.begin());
 
     // Get thread and proc information
-    processor_id_type proc_id = libMesh::processor_id();
+    processor_id_type proc_id = processor_id();
 
     // Delete checkpoint files (_mesh.cpr)
     remove(delete_files.checkpoint.c_str());

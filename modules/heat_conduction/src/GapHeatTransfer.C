@@ -251,7 +251,7 @@ GapHeatTransfer::computeGapValues()
         msg << "No gap value information found for node ";
         msg << qnode->id();
         msg << " on processor ";
-        msg << libMesh::processor_id();
+        msg << processor_id();
         mooseWarning( msg.str() );
       }
     }
