@@ -12,14 +12,14 @@ using namespace std;
 template<>
 InputParameters validParams<RavenTools>(){
 
-  InputParameters params = validParams<RavenObject>();
+  InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<std::string>("type","Raven Tool type");
   params.registerBase("RavenTools");
   return params;
 }
 
 RavenTools::RavenTools(const std::string & name, InputParameters parameters):
-    RavenObject(name,parameters)
+    MooseObject(name,parameters)
 {
   _type=getParam<std::string>("type");
 }

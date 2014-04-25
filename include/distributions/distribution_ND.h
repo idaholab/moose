@@ -11,7 +11,7 @@
 
 #include <string>
 #include <vector>
-#include "RavenObject.h"
+#include "MooseObject.h"
 #include "distribution_base_ND.h"
 #include "ND_Interpolation_Functions.h"
 
@@ -20,7 +20,7 @@ class distributionND;
 template<>
 InputParameters validParams<distributionND>();
 
-class distributionND : public RavenObject , public virtual BasicDistributionND
+class distributionND : public MooseObject , public virtual BasicDistributionND
 {
  public:
    //> constructor for built-in distributions

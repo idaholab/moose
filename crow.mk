@@ -79,7 +79,7 @@ $(CROW_DIR)/src/executioners/PythonControl.$(obj-suffix): $(CROW_DIR)/src/execut
 ifeq ($(UNAME),Darwin)
 DISTRIBUTION_KLUDGE=$(CROW_LIB)
 else
-DISTRIBUTION_KLUDGE=$(CROW_DIR)/src/distributions/distribution_1D.$(obj-suffix)  $(CROW_DIR)/src/distributions/distributionFunctions.$(obj-suffix) $(CROW_DIR)/src/base/RavenObject.$(obj-suffix) $(CROW_DIR)/src/distributions/distribution_base_ND.$(obj-suffix) $(CROW_DIR)/src/distributions/distribution.$(obj-suffix) $(CROW_DIR)/src/distributions/DistributionContainer.$(obj-suffix)
+DISTRIBUTION_KLUDGE=$(CROW_DIR)/src/distributions/distribution_1D.$(obj-suffix)  $(CROW_DIR)/src/distributions/distributionFunctions.$(obj-suffix) $(CROW_DIR)/src/distributions/distribution_base_ND.$(obj-suffix) $(CROW_DIR)/src/distributions/distribution.$(obj-suffix) $(CROW_DIR)/src/distributions/DistributionContainer.$(obj-suffix)
 endif
 
 $(CROW_DIR)/control_modules/_distribution1D.so : $(CROW_DIR)/control_modules/distribution1D.i \

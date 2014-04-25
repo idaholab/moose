@@ -12,7 +12,7 @@
 template<>
 InputParameters validParams<distribution>(){
 
-   InputParameters params = validParams<RavenObject>();
+   InputParameters params = validParams<MooseObject>();
 
    params.addParam<double>("xMin", "Lower bound");
    params.addParam<double>("xMax", "Upper bound");
@@ -38,7 +38,7 @@ InputParameters validParams<distribution>(){
 class distribution;
 
 distribution::distribution(const std::string & name, InputParameters parameters):
-      RavenObject(name,parameters)
+      MooseObject(name,parameters)
 {
    _type=getParam<std::string>("type");
    if(_type != "CustomDistribution"){

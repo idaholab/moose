@@ -9,14 +9,14 @@
 #define RAVENTOOLS_H_
 
 #include "Interpolation_Functions.h"
-#include "RavenObject.h"
+#include "MooseObject.h"
 #include "RavenTools_min.h"
 
 
 template<>
 InputParameters validParams<RavenTools>();
 
-class RavenTools : public RavenObject
+class RavenTools : public MooseObject
 {
 public:
    //> constructor for built-in raven tools

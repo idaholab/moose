@@ -8,14 +8,14 @@
 #define DISTRIBUTION_PARAMS_H_
 
 
-#include "RavenObject.h"
+#include "MooseObject.h"
 #include "distribution.h"
 #include "distribution_1D.h"
 
 template<>
 InputParameters validParams<distribution>();
 
-class distribution : public RavenObject, public virtual BasicDistribution
+class distribution : public MooseObject, public virtual BasicDistribution
 {
  public:
    //> constructor for built-in distributions

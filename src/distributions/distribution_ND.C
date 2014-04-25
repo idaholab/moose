@@ -15,7 +15,7 @@
 template<>
 InputParameters validParams<distributionND>()
 {
-  InputParameters params = validParams<RavenObject>();
+  InputParameters params = validParams<MooseObject>();
   params.addParam<double>("ProbabilityThreshold", 1.0, "Probability Threshold");
   params.addRequiredParam<std::string>("type","distribution type");
   params.addRequiredParam<std::string>("data_filename","Name of the file containing the data points to be interpolated");
@@ -29,7 +29,7 @@ InputParameters validParams<distributionND>()
 class distributionND;
 
 distributionND::distributionND(const std::string & name, InputParameters parameters):
-      RavenObject(name,parameters)
+      MooseObject(name,parameters)
 {
    _type          = getParam<std::string>("type");
    _data_filename = getParam<std::string>("data_filename");
