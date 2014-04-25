@@ -494,6 +494,15 @@ public:
   bool isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int component) const;
 
   /**
+   * This function returns the minimum vector between two points on the mesh taking into account periodicity
+   * for the given variable number.
+   * @param nonlinear_var_num - The nonlinear variable number
+   * @param p, q - The points between which to compute a minimum vector
+   * @return RealVectorValue - The vector pointing from p to q
+   */
+  RealVectorValue minPeriodicVector(unsigned int nonlinear_var_num, Point p, Point q) const;
+
+  /**
    * This function returns the distance between two points on the mesh taking into account periodicity
    * for the given variable number.
    * @param nonlinear_var_num - The nonlinear variable number
