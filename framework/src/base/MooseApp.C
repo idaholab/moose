@@ -340,16 +340,34 @@ MooseApp::meshOnly(std::string mesh_file_name)
     size_t pos = mesh_file_name.find_last_of('.');
 
     // Default to writing out an ExodusII mesh base on the input filename.
-    mesh_file_name = mesh_file_name.substr(0,pos) + "_in.e";
+    mesh_file_name = mesh_file_name.substr(0, pos) + "_in.e";
   }
 
-  mesh->getMesh().write(mesh_file_name);
+  // If we're writing an Exodus file, write the Mesh using its logical
+  // element dimension rather than the spatial dimension, unless it's
+  // a 1D Mesh.  One reason to prefer this approach is that sidesets
+  // are displayed incorrectly for 2D triangular elements in both
+  // Paraview and Cubit if num_dim==3 in the Exodus file. We do the
+  // same thing in MOOSE's Exodus Output object, so we are mimicking
+  // that behavior here.
+  if (mesh_file_name.find(".e") + 2 == mesh_file_name.size())
+  {
+    ExodusII_IO exio(mesh->getMesh());
+    if (mesh->getMesh().mesh_dimension() != 1)
+      exio.use_mesh_dimension_instead_of_spatial_dimension(true);
+
+    exio.write(mesh_file_name);
+  }
+  else
+  {
+    // Just write the file using the name requested by the user.
+    mesh->getMesh().write(mesh_file_name);
+  }
 
   // Since we are not going to create a problem the mesh
   // will not get cleaned up, so we'll do it here
   delete mesh;
   delete _action_warehouse.displacedMesh();
-
 }
 
 void
