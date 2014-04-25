@@ -36,8 +36,8 @@ RndBoundingBoxIC::RndBoundingBoxIC(const std::string & name,
     _mn_outvalue(parameters.get<Real>("mn_outvalue")),
     _range_invalue(_mx_invalue - _mn_invalue),
     _range_outvalue(_mx_outvalue - _mn_outvalue),
-    _bottom_left(_x1,_y1,_z1),
-    _top_right(_x2,_y2,_z2)
+    _bottom_left(_x1, _y1, _z1),
+    _top_right(_x2, _y2, _z2)
 {
   mooseAssert(_range_invalue >= 0.0, "Inside Min > Inside Max for RandomIC!");
   mooseAssert(_range_outvalue >= 0.0, "Outside Min > Outside Max for RandomIC!");

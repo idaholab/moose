@@ -97,7 +97,7 @@ HexPolycrystalIC::initialSetup()
         _centerpoints[grain](i) = _bottom_left(i);
     }
 
-  for (unsigned int grain=0; grain<_grain_num; grain++) //Assign grains to specific order parameters in a way that maximized the distance
+  for (unsigned int grain = 0; grain < _grain_num; grain++) //Assign grains to specific order parameters in a way that maximized the distance
   {
     std::vector<int> min_op_ind;
     std::vector<Real> min_op_dist;
@@ -107,7 +107,7 @@ HexPolycrystalIC::initialSetup()
     if (grain >= _op_num)
     {
       std::fill(min_op_dist.begin() , min_op_dist.end(), _range.size());
-      for (unsigned int i=0; i<grain; i++)
+      for (unsigned int i = 0; i < grain; i++)
       {
         Real dist =  _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
         if (min_op_dist[_assigned_op[i]] > dist)

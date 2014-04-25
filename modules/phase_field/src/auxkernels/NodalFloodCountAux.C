@@ -62,7 +62,7 @@ NodalFloodCountAux::computeValue()
       size_t size=0;
       std::vector<std::vector<std::pair<unsigned int, unsigned int> > > values = _flood_counter.getElementalValues(_current_elem->id());
 
-      for (unsigned int i=0; i<values.size(); ++i)
+      for (unsigned int i = 0; i < values.size(); ++i)
         size += values[i].size();
       return size;
     }
