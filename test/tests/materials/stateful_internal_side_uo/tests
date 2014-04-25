@@ -3,5 +3,7 @@
     type = 'Exodiff'
     input = 'internal_side_uo_stateful.i'
     exodiff = 'internal_side_uo_stateful_out.e'
+    max_paralle = 1 # Restricting due to stateful neighbor material issues #2972
+    max_threads = 1
   [../]
 []
