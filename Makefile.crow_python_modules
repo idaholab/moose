@@ -29,8 +29,8 @@ include $(FRAMEWORK_DIR)/build.mk
 #include $(FRAMEWORK_DIR)/build.mk
 # deps
 #include $(FRAMEWORK_DIR)/moose.mk
-include $(HERD_TRUNK_DIR)/raven/config.mk
-include $(HERD_TRUNK_DIR)/raven/raven_python_modules.mk
+include $(HERD_TRUNK_DIR)/crow/config.mk
+include $(HERD_TRUNK_DIR)/crow/crow_python_modules.mk
 
 all:: $(PYTHON_MODULES)
 ###############################################################################
