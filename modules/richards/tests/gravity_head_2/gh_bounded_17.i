@@ -2,6 +2,13 @@
 # gravity = true
 # supg = true
 # transient = true
+# using RichardsMultiphaseProblem to bound pgas.  i take big timesteps to illustrate that the bounding works.  Note that s_res for gas = 0, in order to prevent the simulation from trying to reduce pgas at small x in order to conserve fluid mass by decreasing the density.  Because there is zero gas to begin with, but due to numerical inprecisions there is some gas at the end, the mass error for the gas is 0.5.
+
+[Problem]
+  type = RichardsMultiphaseProblem
+  bounded_var = pgas
+  lower_var = pwater
+[]
 
 [Mesh]
   type = GeneratedMesh
@@ -14,6 +21,13 @@
 
 [GlobalParams]
   porepressureNames_UO = PPNames
+  density_UO = 'DensityWater DensityGas'
+  relperm_UO = 'RelPermWater RelPermGas'
+  SUPG_UO = 'SUPGwater SUPGgas'
+  sat_UO = 'SatWater SatGas'
+  seff_UO = 'SeffWater SeffGas'
+  viscosity = '1E-3 0.5E-3'
+  gravity = '-1 0 0'
 []
 
 [UserObjects]
@@ -54,12 +68,12 @@
   [./SatWater]
     type = RichardsSat
     s_res = 0.1
-    sum_s_res = 0.15
+    sum_s_res = 0.1
   [../]
   [./SatGas]
     type = RichardsSat
-    s_res = 0.05
-    sum_s_res = 0.15
+    s_res = 0.00
+    sum_s_res = 0.1
   [../]
   [./SUPGwater]
     type = RichardsSUPGstandard
@@ -99,7 +113,7 @@
 [Kernels]
   active = 'richardsfwater richardstwater richardsfgas richardstgas'
   [./richardstwater]
-    type = RichardsMassChange
+    type = RichardsLumpedMassChange
     variable = pwater
   [../]
   [./richardsfwater]
@@ -107,7 +121,7 @@
     variable = pwater
   [../]
   [./richardstgas]
-    type = RichardsMassChange
+    type = RichardsLumpedMassChange
     variable = pgas
   [../]
   [./richardsfgas]
@@ -219,13 +233,6 @@
     block = 0
     mat_porosity = 0.1
     mat_permeability = '1E-5 0 0  0 1E-5 0  0 0 1E-5'
-    density_UO = 'DensityWater DensityGas'
-    relperm_UO = 'RelPermWater RelPermGas'
-    SUPG_UO = 'SUPGwater SUPGgas'
-    sat_UO = 'SatWater SatGas'
-    seff_UO = 'SeffWater SeffGas'
-    viscosity = '1E-3 0.5E-3'
-    gravity = '-1 0 0'
     linear_shape_fcns = true
   [../]
 []
@@ -246,16 +253,17 @@
   type = Transient
   solve_type = Newton
   end_time = 1E6
+  dt = 1E6
 
-  [./TimeStepper]
-    type = FunctionDT
-    time_dt = '1E-2 1E-1 1E0 1E1 1E3 1E4 1E5 1E6 1E7'
-    time_t = '0 1E-1 1E0 1E1 1E2 1E3 1E4 1E5 1E6'
-  [../]
+  #[./TimeStepper]
+  #  type = FunctionDT
+  #  time_dt = '1E-2 1E-1 1E0 1E1 1E3 1E4 1E5 1E6 1E7'
+  #  time_t = '0 1E-1 1E0 1E1 1E2 1E3 1E4 1E5 1E6'
+  #[../]
 []
 
 [Outputs]
-  file_base = gh17
+  file_base = gh_bounded_17
   csv = true
   [./console]
     type = Console

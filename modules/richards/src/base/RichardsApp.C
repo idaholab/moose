@@ -85,6 +85,8 @@
 #include "RichardsPiecewiseLinearSink.h"
 #include "RichardsHalfGaussianSink.h"
 
+// Problems
+#include "RichardsMultiphaseProblem.h"
 
 template<>
 InputParameters validParams<RichardsApp>()
@@ -195,6 +197,9 @@ RichardsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(RichardsExcav);
   registerBoundaryCondition(RichardsPiecewiseLinearSink);
   registerBoundaryCondition(RichardsHalfGaussianSink);
+
+  // Problems
+  registerProblem(RichardsMultiphaseProblem);
 }
 
 void
