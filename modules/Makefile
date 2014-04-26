@@ -37,6 +37,10 @@ include            $(FRAMEWORK_DIR)/app.mk
 # and run their respective tests.
 MODULE_DIRS_ALL    := $(shell find $(MOOSE_DIR)/modules -maxdepth 1 -mindepth 1 -type d)
 MODULE_DIRS        := $(filter-out %combined, $(MODULE_DIRS_ALL))
+MOOSE_COLOR        ?= true
+ifneq ($(MOOSE_COLOR),true)
+  COLOR_STRING = '--no-color'
+endif
 
 test_subs:
 	@echo ======================================================
@@ -48,6 +52,6 @@ test_subs:
 	for app in $(MODULE_DIRS); \
 	do \
 		echo ====== Testing in $${app} ====== ; \
-		cd $${app} && $(MAKE) && ./run_tests -j $(MOOSE_JOBS) || ret_val=1; \
+		cd $${app} && $(MAKE) && ./run_tests $(COLOR_STRING) -j $(MOOSE_JOBS) || ret_val=1; \
 	done; \
 	exit $$ret_val;)
