@@ -436,6 +436,11 @@ Output::allowOutput(bool state)
   _allow_output = state;
 }
 
+bool
+Output::outputAllowed() const
+{
+  return _allow_output;
+}
 
 void
 Output::sequence(bool state)

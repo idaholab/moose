@@ -177,6 +177,11 @@ public:
   void allowOutput(bool state);
 
   /**
+   * A method telling if the output is currently enabled
+   */
+  bool outputAllowed() const;
+
+  /**
    * A method for forcing output
    * This will cause the next call to outputInitial, outputStep(), or outputFinal() to call output() method
    * regardless of intervals, allow states, etc. The rules for calling outputSetup() are preserved.
