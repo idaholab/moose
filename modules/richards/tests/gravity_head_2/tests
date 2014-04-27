@@ -4,21 +4,21 @@
     input = 'gh01.i'
     csvdiff = 'gh01.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
   [./gh02]
     type = 'CSVDiff'
     input = 'gh02.i'
     csvdiff = 'gh02.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
   [./gh03]
     type = 'CSVDiff'
     input = 'gh03.i'
     csvdiff = 'gh03.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
   [./gh04]
     type = 'CSVDiff'
@@ -33,21 +33,21 @@
     input = 'gh05.i'
     csvdiff = 'gh05.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
   [./gh06]
     type = 'CSVDiff'
     input = 'gh06.i'
     csvdiff = 'gh06.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
   [./gh08]
     type = 'CSVDiff'
     input = 'gh08.i'
     csvdiff = 'gh08.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
 
   [./gh17]
@@ -55,7 +55,7 @@
     input = 'gh17.i'
     csvdiff = 'gh17.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
 
   [./gh18]
@@ -72,14 +72,14 @@
     input = 'gh_lumped_07.i'
     csvdiff = 'gh_lumped_07.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
   [./gh_lumped_08]
     type = 'CSVDiff'
     input = 'gh_lumped_08.i'
     csvdiff = 'gh_lumped_08.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
 
   [./gh_lumped_17]
@@ -87,7 +87,7 @@
     input = 'gh_lumped_17.i'
     csvdiff = 'gh_lumped_17.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
 
   [./gh_lumped_18]
@@ -104,6 +104,6 @@
     input = 'gh_bounded_17.i'
     csvdiff = 'gh_bounded_17.csv'
     rel_err = 1e-5
-    abs_zero = 1e-5
+    abs_zero = 1e-4
   [../]
 []
