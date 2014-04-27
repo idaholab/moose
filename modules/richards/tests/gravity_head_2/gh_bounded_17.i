@@ -183,10 +183,6 @@
     type = PlotFunction
     function = fcn_mass_error_w
   [../]
-  [./mass_error_gas]
-    type = PlotFunction
-    function = fcn_mass_error_g
-  [../]
 
   [./pw_left]
     type = PointValue
@@ -212,12 +208,6 @@
     value = 'abs(0.5*(mi-mf)/(mi+mf))'
     vars = 'mi mf'
     vals = 'mwater_init mwater_fin'
-  [../]
-  [./fcn_mass_error_g]
-    type = ParsedFunction
-    value = 'abs(0.5*(mi-mf)/(mi+mf))'
-    vars = 'mi mf'
-    vals = 'mgas_init mgas_fin'
   [../]
   [./fcn_error_water]
     type = ParsedFunction
