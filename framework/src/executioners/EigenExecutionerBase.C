@@ -108,7 +108,7 @@ EigenExecutionerBase::init()
   else
     _norm_execflag = _bx_execflag;
 
-  // normalize solution to make |Bx|=_eigenvalue
+  // normalize solution to make |Bx|=_eigenvalue, _eigenvalue at this point has the initialized value
   makeBXConsistent(_eigenvalue);
 
   /* a time step check point */
@@ -129,7 +129,7 @@ EigenExecutionerBase::init()
 void
 EigenExecutionerBase::makeBXConsistent(Real k)
 {
-  Real consistency_tolerance = 1e-12;
+  Real consistency_tolerance = 1e-10;
 
   // Scale the solution so that the postprocessor is equal to one.
   // We have a fix point loop here, in case the postprocessor is a nonlinear function of the scaling factor.
@@ -263,8 +263,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     // update eigenvalue
     k = k_old * _source_integral / _source_integral_old;
 
-    // for output purpose
+    // synchronize _eigenvalue with |Bx| for output purpose
     // Note: if using MOOSE output system, eigenvalue output will be one iteration behind.
+    //       Also this will affect EigenKernels with eigen=false.
     _eigenvalue = k;
 
     if (echo && (!output_convergence))
@@ -604,64 +605,4 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   _problem.es().parameters.set<Real> ("nonlinear solver absolute residual tolerance") = tol1;
   _problem.es().parameters.set<Real> ("linear solver tolerance") = tol2;
   _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = tol3;
-}
-
-void
-EigenExecutionerBase::combinedSolve(Real rel_tol, Real abs_tol, Real pfactor, unsigned int fpi, Real & k)
-{
-  Real a_tol = abs_tol;
-  if (fpi>0)
-  {
-    // free power iterations
-    Moose::out << std::endl << " Free power iteration starts"  << std::endl;
-    Real initial_res = 0.0;
-    inversePowerIteration(fpi, fpi, pfactor, false, 0.0, std::numeric_limits<Real>::max(),
-                          true, false, 0.0, k, initial_res);
-    Real a_tol = rel_tol*initial_res;
-    if (a_tol<abs_tol) a_tol = abs_tol;
-    rel_tol = 1e-50;
-  }
-  _problem.timestepSetup();
-  nonlinearSolve(rel_tol, a_tol, pfactor, k);
-}
-
-Real
-EigenExecutionerBase::eigenvalueCoefficient(Real p, unsigned int free_iter, Real abs_tol, Real pfactor,
-                                            bool output, Real tp, Real & ev)
-{
-  // perturbation strength
-  Real eps = 1e-6;
-
-  setSystemParameter(p);
-
-  ev = _eigenvalue;
-  combinedSolve(1e-50, abs_tol, pfactor, free_iter, ev);
-
-  if (output)
-  {
-    // we need to tempararily change system time to obtain the right output
-    // FIXME: if 'step' capability is available, we will not need to do this.
-    Real t = _problem.time();
-    _problem.time() = tp;
-    _output_warehouse.outputStep();
-    _problem.time() = t;
-  }
-
-  Moose::out << std::endl;
-  Moose::out << "\n Perturbing the system to evaluate dk/dp at " << p << "\n";
-  Moose::out << std::endl;
-
-  _problem.timestepSetup();
-  setSystemParameter(p*(1+eps));
-  Real evnew = ev;
-  nonlinearSolve(1e-50, abs_tol*pfactor, pfactor, evnew);
-
-  Real jac = (evnew-ev)/eps/p;
-  return jac;
-}
-
-void
-EigenExecutionerBase::setSystemParameter(Real /*p*/)
-{
-  mooseError("EigenExecutionerBase::setSystemParameter needs to be implemented!");
 }
