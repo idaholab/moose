@@ -162,7 +162,8 @@
     type = DirichletBC
     variable = pgas
     boundary = left
-    value = 1E6+1000
+    ####value = 1E6+1000
+    value = 1000
   [../]
   [./right_w]
     type = DirichletBC
@@ -182,12 +183,14 @@
 [Functions]
   [./initial_water]
     type = ParsedFunction
-    value = 1000000*(1-min(x/5,1))-100000*(max(x-5,0)/max(abs(x-5),1E-10))
+    value = 1000000*(1-min(x/5,1))-if(x<5,0,100000)
+    #value = 1000000*(1-min(x/5,1))-100000*(max(x-5,0)/max(abs(x-5),1E-10))
     #value = max(1000000*(1-x/5),-100000)
   [../]
   [./initial_gas]
     type = ParsedFunction
-    value = max(1000000*(1-x/5),0)+1000
+    ####value = max(1000000*(1-x/5),0)+1000
+    value = 1000
   [../]
 []
 
@@ -246,7 +249,7 @@
     output_initial = true
     interval = 100000
     output_final = true
-    hide = pgas
+    hide = 'pgas bounds_dummy'
   [../]
   [./console]
     type = Console
