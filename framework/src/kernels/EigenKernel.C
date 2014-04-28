@@ -43,7 +43,8 @@ EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
   }
   else
   {
-    _fe_problem.parameters().set<Real>("eigenvalue") = 1.0;
+    if (!_fe_problem.parameters().isParamValid("eigenvalue"))
+      _fe_problem.parameters().set<Real>("eigenvalue") = 1.0;
     _eigenvalue = &_fe_problem.parameters().get<Real>("eigenvalue");
   }
 }

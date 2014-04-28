@@ -118,37 +118,6 @@ public:
    */
   virtual void nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k);
 
-  /**
-   * Perform nonlinear solve with the initial guess from several free power iterations
-   *
-   * @param rel_tol Relative tolerance on system residual.
-   * @param abs_tol Absolute tolerance on system residual.
-   * @param pfactor The factor on reducing the residual norm of each linear iteration.
-   * @param fpi Number of free power iteration
-   * @param k Eigenvalue, input as the initial guess.
-   */
-  virtual void combinedSolve(Real rel_tol, Real abs_tol, Real pfactor, unsigned int fpi, Real & k);
-
-  /**
-   * Get differentiation of eigenvalue with respect a parameter at a value
-   *
-   * @param p Value of the parameter.
-   * @param free_iter Number of free power iterations on solving at p.
-   * @param abs_tol How tightly the solves need to be done.
-   * @param pfactor Linear relative tolerance
-   * @param output True to ouput solutions at p with MOOSE output system.
-   * @param tp Time used for outputting.
-   * @param ev Eigenvalue at p.
-   * Returns de/dp at p.
-   */
-  virtual Real eigenvalueCoefficient(Real p, unsigned int free_iter, Real abs_tol, Real pfactor,
-                                     bool output, Real tp, Real & ev);
-
-  /**
-   * Set the system prarameter for evaluating the differentiation of eigenvalue
-   */
-  virtual void setSystemParameter(Real p);
-
 protected:
 
   /**
