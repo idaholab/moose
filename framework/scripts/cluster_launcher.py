@@ -2,8 +2,16 @@
 import os, sys, re, shutil
 from optparse import OptionParser, OptionGroup, Values
 
-MOOSE_DIR = os.path.abspath(os.path.join('..', 'moose'))
-FRAMEWORK_DIR = os.path.abspath(os.path.join('..', 'moose', 'framework'))
+# Get the real path of cluster_launcher
+if(os.path.islink(sys.argv[0])):
+  pathname = os.path.dirname(os.path.realpath(sys.argv[0]))
+else:
+  pathname = os.path.dirname(sys.argv[0])
+  pathname = os.path.abspath(pathname)
+
+# Add the utilities/python_getpot directory
+MOOSE_DIR = os.path.abspath(os.path.join(pathname, '../../'))
+FRAMEWORK_DIR = os.path.abspath(os.path.join(pathname, '../../', 'framework'))
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
