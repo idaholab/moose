@@ -591,11 +591,17 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppPostprocessorToAuxScalarTransfer);
 
   // Outputs
+#ifdef LIBMESH_HAVE_EXODUS_API
   registerOutput(Exodus);
+#endif
+#ifdef LIBMESH_HAVE_NEMESIS_API
   registerOutput(Nemesis);
+#endif
   registerOutput(Console);
   registerOutput(CSV);
+#ifdef LIBMESH_HAVE_VTK
   registerNamedOutput(VTKOutput, "VTK");
+#endif
   registerOutput(Checkpoint);
   registerNamedOutput(XDA, "XDR");
   registerOutput(XDA);

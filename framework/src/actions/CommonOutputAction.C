@@ -36,11 +36,17 @@ InputParameters validParams<CommonOutputAction>()
    InputParameters params = validParams<Action>();
 
    // Short-cut methods for typical output objects
+#ifdef LIBMESH_HAVE_EXODUS_API
    params.addParam<bool>("exodus", false, "Output the results using the default settings for Exodus output");
+#endif
+#ifdef LIBMESH_HAVE_NEMESIS_API
    params.addParam<bool>("nemesis", false, "Output the results using the default settings for Nemesis output");
+#endif
    params.addParam<bool>("console", false, "Output the results using the default settings for Console output");
    params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv file using the default CSV output.");
+#ifdef LIBMESH_HAVE_VTK
    params.addParam<bool>("vtk", false, "Output the results using the default settings for VTKOutput output");
+#endif
    params.addParam<bool>("xda", false, "Output the results using the default settings for XDA/XDR output (ascii)");
    params.addParam<bool>("xdr", false, "Output the results using the default settings for XDA/XDR output (binary)");
    params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
@@ -83,11 +89,15 @@ CommonOutputAction::act()
   _app.getOutputWarehouse().setCommonParameters(&_pars);
 
   // Create the actions for the short-cut methods
+#ifdef LIBMESH_HAVE_EXODUS_API
   if (getParam<bool>("exodus"))
     create("Exodus");
+#endif
 
+#ifdef LIBMESH_HAVE_NEMESIS_API
   if (getParam<bool>("nemesis"))
     create("Nemesis");
+#endif
 
   if (getParam<bool>("console"))
     create("Console");
@@ -95,8 +105,10 @@ CommonOutputAction::act()
   if (getParam<bool>("csv"))
     create("CSV");
 
+#ifdef LIBMESH_HAVE_VTK
   if (getParam<bool>("vtk"))
     create("VTK");
+#endif
 
   if (getParam<bool>("xda"))
     create("XDA");
