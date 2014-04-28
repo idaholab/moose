@@ -128,9 +128,6 @@ protected:
 
   /// scaling factor for this variable
   Real _scaling_factor;
-
-  /// true if this variable is non-linear
-  bool _is_nl;
 };
 
 #endif /* MOOSEVARIABLEBASE_H */

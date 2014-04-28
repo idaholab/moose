@@ -14,6 +14,7 @@
 
 #include "TimeIntegrator.h"
 #include "FEProblem.h"
+#include "SystemBase.h"
 #include "NonlinearSystem.h"
 
 template<>
@@ -28,9 +29,13 @@ TimeIntegrator::TimeIntegrator(const std::string & name, InputParameters paramet
     MooseObject(name, parameters),
     Restartable(name, parameters, "TimeIntegrators"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _nl(_fe_problem.getNonlinearSystem()),
-    _u_dot(_nl.solutionUDot()),
-    _du_dot_du(_nl.solutionDuDotDu()),
+    _u_dot(_sys.solutionUDot()),
+    _du_dot_du(_sys.solutionDuDotDu()),
+    _solution(_sys.currentSolution()),
+    _solution_old(_sys.solutionOld()),
+    _solution_older(_sys.solutionOlder()),
     _t_step(_fe_problem.timeStep()),
     _dt(_fe_problem.dt()),
     _dt_old(_fe_problem.dtOld()),

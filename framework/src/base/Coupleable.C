@@ -209,8 +209,6 @@ VariableValue &
 Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);
-  if (var->kind() == Moose::VAR_AUXILIARY)
-    mooseError("Coupling time derivative of an auxiliary variable is not allowed.");
 
   if (_nodal)
     return var->nodalSlnDot();
@@ -222,8 +220,6 @@ VariableValue &
 Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);
-  if (var->kind() == Moose::VAR_AUXILIARY)
-    mooseError("Coupling time derivative of an auxiliary variable is not allowed.");
 
   if (_nodal)
     return var->nodalSlnDuDotDu();

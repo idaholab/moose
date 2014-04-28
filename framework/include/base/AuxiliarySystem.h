@@ -19,6 +19,7 @@
 #include "SystemBase.h"
 #include "ExecStore.h"
 #include "AuxWarehouse.h"
+#include "TimeIntegrator.h"
 
 // libMesh include
 #include "libmesh/equation_systems.h"
@@ -50,6 +51,14 @@ public:
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
 
   /**
+   * Add a time integrator
+   * @param type Type of the integrator
+   * @param name The name of the integrator
+   * @param parameters Integrator params
+   */
+  void addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
+
+  /**
    * Adds an auxiliary kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel
@@ -76,6 +85,9 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
 
   virtual const NumericVector<Number> * & currentSolution() { _current_solution = _sys.current_local_solution.get(); return _current_solution; }
+
+  virtual NumericVector<Number> & solutionUDot();
+  virtual NumericVector<Number> & solutionDuDotDu();
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution();
@@ -132,6 +144,12 @@ protected:
   const NumericVector<Number> * _current_solution;
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
+  /// Time integrator
+  TimeIntegrator * _time_integrator;
+  /// solution vector for u^dot
+  NumericVector<Number> & _u_dot;
+  /// solution vector for \f$ {du^dot}\over{du} \f$
+  NumericVector<Number> & _du_dot_du;
 
   /// Whether or not a copy of the residual needs to be made
   bool _need_serialized_solution;

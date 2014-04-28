@@ -401,7 +401,7 @@ public:
       _solution(*_sys.solution),
       _solution_old(*_sys.old_local_solution),
       _solution_older(*_sys.older_local_solution),
-      _dummy_sln(NULL),
+      _dummy_vec(NULL),
       _exception(0)
   {
   }
@@ -482,11 +482,13 @@ public:
   virtual NumericVector<Number> & solutionOld() { return _solution_old; }
   virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
 
-  virtual NumericVector<Number> & solutionUDot() { return *_dummy_sln; }
-  virtual NumericVector<Number> & solutionDuDotDu() { return *_dummy_sln; }
+  virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
+  virtual NumericVector<Number> & solutionDuDotDu() { return *_dummy_vec; }
 
   virtual bool hasVector(std::string name) { return _sys.have_vector(name); }
   virtual NumericVector<Number> & getVector(std::string name) { return _sys.get_vector(name); }
+
+  virtual NumericVector<Number> & residualVector(Moose::KernelType /*type*/) { return *_dummy_vec; }
 
   virtual void init()
   {
@@ -578,7 +580,7 @@ protected:
   NumericVector<Number> & _solution_old;
   NumericVector<Number> & _solution_older;
 
-  NumericVector<Number> * _dummy_sln;                     // to satisfy the interface
+  NumericVector<Number> * _dummy_vec;                     // to satisfy the interface
 
   std::vector<VarCopyInfo> _var_to_copy;
 

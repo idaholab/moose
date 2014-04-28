@@ -3001,6 +3001,7 @@ FEProblem::addTimeIntegrator(const std::string & type, const std::string & name,
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
+  _aux.addTimeIntegrator(type, name + ":aux", parameters);
   _nl.addTimeIntegrator(type, name, parameters);
 }
 

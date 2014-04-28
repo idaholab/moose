@@ -21,6 +21,7 @@
 
 class TimeIntegrator;
 class FEProblem;
+class SystemBase;
 class NonlinearSystem;
 
 template<>
@@ -28,6 +29,13 @@ InputParameters validParams<TimeIntegrator>();
 
 /**
  * Base class for time integrators
+ *
+ * Time integrators fulfill two functions:
+ * 1) computing u_dot vector (used for computing time derivatives in kernels) and its derivative
+ * 2) combining the residual vectors into the final one
+ *
+ * Capability (1) is used by both NonlinearSystem and AuxiliarySystem, while (2) can be obviously used
+ * only by NonlinearSystem (AuxiliarySystem does not produce residual).
  */
 class TimeIntegrator :
   public MooseObject,
@@ -49,12 +57,17 @@ public:
 protected:
 
   FEProblem & _fe_problem;
+  SystemBase & _sys;
   NonlinearSystem & _nl;
 
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
   /// solution vector for \f$ {du^dot}\over{du} \f$
   NumericVector<Number> & _du_dot_du;
+  /// solution vectors
+  const NumericVector<Number> * & _solution;
+  const NumericVector<Number> & _solution_old;
+  const NumericVector<Number> & _solution_older;
   //
   int & _t_step;
   //
