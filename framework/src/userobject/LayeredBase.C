@@ -24,7 +24,8 @@ InputParameters validParams<LayeredBase>()
   MooseEnum directions("x, y, z");
 
   params.addRequiredParam<MooseEnum>("direction", directions, "The direction of the layers.");
-  params.addRequiredParam<unsigned int>("num_layers", "The number of layers.");
+  params.addParam<unsigned int>("num_layers", "The number of layers.");
+  params.addParam<std::vector<Real> >("bounds", "The 'bounding' positions of the layers i.e.: '0, 1.2, 3.7, 4.2' will mean 3 layers between those positions.");
 
   MooseEnum sample_options("direct, interpolate, average", "direct");
   params.addParam<MooseEnum>("sample_type", sample_options, "How to sample the layers.  'direct' means get the value of the layer the point falls in directly (or average if that layer has no value).  'interpolate' does a linear interpolation between the two closest layers.  'average' averages the two closest layers.");
@@ -39,11 +40,35 @@ LayeredBase::LayeredBase(const std::string & name, InputParameters parameters) :
     _layered_base_params(parameters),
     _direction_enum(parameters.get<MooseEnum>("direction")),
     _direction(_direction_enum),
-    _num_layers(parameters.get<unsigned int>("num_layers")),
     _sample_type(parameters.get<MooseEnum>("sample_type")),
     _average_radius(parameters.get<unsigned int>("average_radius")),
     _layered_base_subproblem(*parameters.get<SubProblem *>("_subproblem"))
 {
+  if (_layered_base_params.isParamValid("num_layers") && _layered_base_params.isParamValid("bounds"))
+    mooseError("'bounds' and 'num_layers' cannot both be set in " << name);
+
+  if (_layered_base_params.isParamValid("num_layers"))
+  {
+    _num_layers = _layered_base_params.get<unsigned int>("num_layers");
+    _interval_based = true;
+  }
+  else if (_layered_base_params.isParamValid("bounds"))
+  {
+    _interval_based = false;
+
+    _layer_bounds = _layered_base_params.get<std::vector<Real> >("bounds");
+
+    // Make sure the bounds are sorted - we're going to depend on this
+    std::sort(_layer_bounds.begin(), _layer_bounds.end());
+
+    _num_layers = _layer_bounds.size() - 1;  // Layers are only in-between the bounds
+  }
+  else
+    mooseError("One of 'bounds' or 'num_layers' must be specified for " << name);
+
+  if (!_interval_based && _sample_type == 1)
+    mooseError("'sample_type = interpolate' not supported with 'bounds' in " << name);
+
   MeshTools::BoundingBox bounding_box = MeshTools::bounding_box(_layered_base_subproblem.mesh());
   _layer_values.resize(_num_layers);
   _layer_has_value.resize(_num_layers);
@@ -205,12 +230,30 @@ LayeredBase::getLayer(Point p) const
   if (direction_x < _direction_min)
     return 0;
 
-  unsigned int layer = std::floor(((direction_x - _direction_min) / (_direction_max - _direction_min)) * (Real)_num_layers);
+  if(_interval_based)
+  {
+    unsigned int layer = std::floor(((direction_x - _direction_min) / (_direction_max - _direction_min)) * (Real)_num_layers);
 
-  if (layer >= _num_layers)
-    layer = _num_layers-1;
+    if (layer >= _num_layers)
+      layer = _num_layers-1;
 
-  return layer;
+    return layer;
+  }
+  else // Figure out what layer we are in from the bounds
+  {
+    // This finds the first entry in the vector that is larger than what we're looking for
+    std::vector<Real>::const_iterator one_higher = std::upper_bound(_layer_bounds.begin(), _layer_bounds.end(), direction_x);
+
+    if (one_higher == _layer_bounds.end())
+    {
+      return _layer_bounds.size() - 2; // Just return the last layer.  -2 because layers are "in-between" bounds
+    }
+    else if(one_higher == _layer_bounds.begin())
+      return 0; // Return the first layer
+    else
+      // The -1 is because the interval that we fall in is just _before_ the number that is bigger (which is what we found
+      return std::distance(_layer_bounds.begin(), one_higher-1);
+  }
 }
 
 void
