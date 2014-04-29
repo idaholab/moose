@@ -148,40 +148,42 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
     outputs_children = self.getChildNames(outputs)
 
     # Check for short-cut syntax (i.e., exodus = true)
-    output_data = outputs.table_data
-    if 'file_base' in output_data:
-      common_file_base = output_data['file_base']
-    else:
-      common_file_base = 'peacock_run_tmp'
+    # Make sure that the node has table_data before going on...not all do!
+    if hasattr(outputs, 'table_data'):
+      output_data = outputs.table_data
 
-    # Check for short-cut syntax (i.e., exodus = true)
-    if outputs.table_data and 'exodus' in outputs.table_data and outputs.table_data['exodus'] == 'true':
-      output_file_names.append(common_file_base + '_out.e')
-      output_block_names.append('exodus')
+      if 'file_base' in output_data:
+        common_file_base = output_data['file_base']
+      else:
+        common_file_base = 'peacock_run_tmp'
 
-    # Loop through each of the sub-blocks and grab the data, if type = Exodus
-    for item in outputs_children:
+      # Check for short-cut syntax (i.e., exodus = true)
+      if outputs.table_data and 'exodus' in outputs.table_data and outputs.table_data['exodus'] == 'true':
+        output_file_names.append(common_file_base + '_out.e')
+        output_block_names.append('exodus')
 
-      # Extract the data for the sub-block
-      child = self.findChildItemWithName(outputs, item)
-      output_data = child.table_data
+      # Loop through each of the sub-blocks and grab the data, if type = Exodus
+      for item in outputs_children:
 
-      # If the object is active (checked), it contains output_data, and is of type = Exodus, then extract the filename
-      if child.checkState(0) > 0 and ('type' in output_data) and (output_data['type'] == 'Exodus'):
-        file_base = common_file_base + "_" + output_data['Name']
+        # Extract the data for the sub-block
+        child = self.findChildItemWithName(outputs, item)
+        output_data = child.table_data
 
-        # Check for file_base
-        if ('file_base' in output_data) and (output_data['file_base'] != ''):
-          file_base = output_data['file_base']
+        # If the object is active (checked), it contains output_data, and is of type = Exodus, then extract the filename
+        if child.checkState(0) > 0 and ('type' in output_data) and (output_data['type'] == 'Exodus'):
+          file_base = common_file_base + "_" + output_data['Name']
 
-        # Check for oversampling and appending of '_oversample'
-        if ('oversample' in output_data) and (output_data['oversample'] != '0') and ('append_oversample' in output_data) and (output_data['oversample'] != '0'):
-          file_base = file_base + '_oversample'
+          # Check for file_base
+          if ('file_base' in output_data) and (output_data['file_base'] != ''):
+            file_base = output_data['file_base']
 
-        # Append the file_base and object name to the lists
-        output_file_names.append(file_base + '.e')
-        output_block_names.append(output_data['Name'])
+          # Check for oversampling and appending of '_oversample'
+          if ('oversample' in output_data) and (output_data['oversample'] != '0') and ('append_oversample' in output_data) and (output_data['oversample'] != '0'):
+            file_base = file_base + '_oversample'
 
+          # Append the file_base and object name to the lists
+          output_file_names.append(file_base + '.e')
+          output_block_names.append(output_data['Name'])
 
     # FIXME: Hack to make raven and r7 work for now
     if 'raven' in self.input_file_widget.app_path or 'r7' in self.input_file_widget.app_path:
@@ -314,6 +316,9 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
           self._recursivelyAddTreeItems(split_path[1:], child)
 
   def getChildNames(self, parent):
+    if not parent:
+      return []
+
     try: # This will fail when we're dealing with the QTreeWidget itself
       num_children = parent.childCount()
     except:
