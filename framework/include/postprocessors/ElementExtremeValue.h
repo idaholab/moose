@@ -12,23 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef NODALEXTREMEVALUE_H
-#define NODALEXTREMEVALUE_H
+#ifndef ELEMENTEXTREMEVALUE_H
+#define ELEMENTEXTREMEVALUE_H
 
-#include "NodalVariablePostprocessor.h"
+#include "ElementVariablePostprocessor.h"
 
 //Forward Declarations
-class NodalExtremeValue;
+class ElementExtremeValue;
 
 // Input parameters
 template<>
-InputParameters validParams<NodalExtremeValue>();
+InputParameters validParams<ElementExtremeValue>();
 
 /// A postprocessor for collecting the nodal min or max value
-class NodalExtremeValue : public NodalVariablePostprocessor
+class ElementExtremeValue : public ElementVariablePostprocessor
 {
 public:
-  /// What type of extreme value we are going to compute
+  /// Type of extreme value we are going to compute
   enum ExtremeType
   {
     MAX,
@@ -40,14 +40,16 @@ public:
    * @param name The name of the postprocessor
    * @param parameters The input parameters
    */
-  NodalExtremeValue(const std::string & name, InputParameters parameters);
+  ElementExtremeValue(const std::string & name, InputParameters parameters);
   virtual void initialize();
-  virtual void execute();
   virtual Real getValue();
   virtual void threadJoin(const UserObject & y);
 
 protected:
-  /// The extreme value type ("min" or "max")
+  /// Get the extreme value at each quadrature point
+  virtual void computeQpValue();
+
+  /// The extreme value type
   ExtremeType _type;
 
   /// The extreme value

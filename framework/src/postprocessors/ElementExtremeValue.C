@@ -12,31 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "NodalExtremeValue.h"
+#include "ElementExtremeValue.h"
 
 #include <algorithm>
 #include <limits>
 
 template<>
-InputParameters validParams<NodalExtremeValue>()
+InputParameters validParams<ElementExtremeValue>()
 {
   // Define the min/max enumeration
   MooseEnum type_options("max=0, min=1", "max");
 
   // Define the parameters
-  InputParameters params = validParams<NodalVariablePostprocessor>();
+  InputParameters params = validParams<ElementVariablePostprocessor>();
+
   params.addParam<MooseEnum>("value_type", type_options, "Type of extreme value to return. 'max' returns the maximum value. 'min' returns the minimum value.");
+
   return params;
 }
 
-NodalExtremeValue::NodalExtremeValue(const std::string & name, InputParameters parameters) :
-  NodalVariablePostprocessor(name, parameters),
+ElementExtremeValue::ElementExtremeValue(const std::string & name, InputParameters parameters) :
+  ElementVariablePostprocessor(name, parameters),
   _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
   _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max())
 {}
 
 void
-NodalExtremeValue::initialize()
+ElementExtremeValue::initialize()
 {
   switch (_type)
   {
@@ -51,7 +53,7 @@ NodalExtremeValue::initialize()
 }
 
 void
-NodalExtremeValue::execute()
+ElementExtremeValue::computeQpValue()
 {
   switch (_type)
   {
@@ -66,7 +68,7 @@ NodalExtremeValue::execute()
 }
 
 Real
-NodalExtremeValue::getValue()
+ElementExtremeValue::getValue()
 {
   switch (_type)
   {
@@ -82,9 +84,9 @@ NodalExtremeValue::getValue()
 }
 
 void
-NodalExtremeValue::threadJoin(const UserObject & y)
+ElementExtremeValue::threadJoin(const UserObject & y)
 {
-  const NodalExtremeValue & pps = static_cast<const NodalExtremeValue &>(y);
+  const ElementExtremeValue & pps = static_cast<const ElementExtremeValue &>(y);
 
   switch (_type)
   {
