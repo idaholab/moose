@@ -1,30 +1,44 @@
 [Tests]
-  [./test_pp01]
+  [./pp01]
     type = 'Exodiff'
     input = 'pp01.i'
     exodiff = 'pp01.e'
     rel_err = 1E-8
     use_old_floor = True
   [../]
-  [./test_pp02]
+  [./pp02]
     type = 'Exodiff'
     input = 'pp02.i'
     exodiff = 'pp02.e'
     rel_err = 1E-4
     use_old_floor = True
   [../]
+  [./pp_lumped_02]
+    type = 'Exodiff'
+    input = 'pp_lumped_02.i'
+    exodiff = 'pp_lumped_02.e'
+    rel_err = 1E-4
+    use_old_floor = True
+  [../]
 
-  [./test_pp21]
+  [./pp21]
     type = 'Exodiff'
     input = 'pp21.i'
     exodiff = 'pp21.e'
     rel_err = 1E-8
     use_old_floor = True
   [../]
-  [./test_pp22]
+  [./pp22]
     type = 'Exodiff'
     input = 'pp22.i'
     exodiff = 'pp22.e'
+    rel_err = 1E-4
+    use_old_floor = True
+  [../]
+  [./pp_lumped_22]
+    type = 'Exodiff'
+    input = 'pp_lumped_22.i'
+    exodiff = 'pp_lumped_22.e'
     rel_err = 1E-4
     use_old_floor = True
   [../]

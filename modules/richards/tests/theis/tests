@@ -1,5 +1,5 @@
 [Tests]
-  [./test_th01]
+  [./th01]
     type = 'CSVDiff'
     input = 'th01.i'
     heavy = true
@@ -8,17 +8,42 @@
     max_time = 1000
   [../]
 
-  [./test_th02]
+  [./th02]
     type = 'CSVDiff'
     input = 'th02.i'
     csvdiff = 'th02.csv'
     rel_err = 1.0E-5
   [../]
 
-  [./test_th22]
+  [./th22]
     type = 'CSVDiff'
     input = 'th22.i'
     csvdiff = 'th22.csv'
+    rel_err = 1.0E-5
+    heavy = true
+    max_time = 1000
+  [../]
+
+  [./th_lumped_01]
+    type = 'CSVDiff'
+    input = 'th_lumped_01.i'
+    heavy = true
+    csvdiff = 'th_lumped_01.csv'
+    rel_err = 1.0E-5
+    max_time = 1000
+  [../]
+
+  [./th_lumped_02]
+    type = 'CSVDiff'
+    input = 'th_lumped_02.i'
+    csvdiff = 'th_lumped_02.csv'
+    rel_err = 1.0E-5
+  [../]
+
+  [./th_lumped_22]
+    type = 'CSVDiff'
+    input = 'th_lumped_22.i'
+    csvdiff = 'th_lumped_22.csv'
     rel_err = 1.0E-5
     heavy = true
     max_time = 1000

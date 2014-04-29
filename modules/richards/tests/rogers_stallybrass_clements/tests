@@ -8,6 +8,15 @@
     heavy = true
     max_time = 1000
   [../]
+  [./rsc_lumped_01]
+    type = 'Exodiff'
+    input = 'rsc_lumped_01.i'
+    exodiff = 'rsc_lumped_01.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+  [../]
   [./rsc02]
     type = 'Exodiff'
     input = 'rsc02.i'
