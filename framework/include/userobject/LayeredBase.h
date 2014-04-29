@@ -86,8 +86,14 @@ protected:
   /// The component direction the layers are going in.  We cache this for speed (so we're not always going through the MooseEnum)
   unsigned int _direction;
 
+  /// Whether or not this object is based on equally spaced intervals or "bounds"
+  bool _interval_based;
+
   /// Number of layers to split the mesh into
   unsigned int _num_layers;
+
+  /// The boundaries of the layers
+  std::vector<Real> _layer_bounds;
 
   /// How to sample the values
   unsigned int _sample_type;
@@ -97,7 +103,6 @@ protected:
 
   Real _direction_min;
   Real _direction_max;
-
 private:
   /// Value of the integral for each layer
   std::vector<Real> _layer_values;
