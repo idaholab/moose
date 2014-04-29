@@ -1267,6 +1267,219 @@ convergence when simulations start to reach steady state as the upwinding direct
 
 
 
+\section{Explicit worked examples of Richards upwinding}
+
+Consider the 1D situation shown in Figure~\ref{eg_richards_supg.fig}.
+This shows 2 elements, each of length $L$, and the corresponding shape
+(or test) functions.  Define the potential function
+\begin{equation}
+\phi = P + \rho|g|z \ ,
+\end{equation}
+and the mobility function
+\begin{equation}
+\lambda = \frac{\rho \kappa_{\mathrm{rel}}}{\mu} \ .
+\end{equation}
+The isoparametric coordinate for the first element is $\xi =
+\frac{z-L/2}{L/2}$, which yields $b=2v/L$
+(Eqn~(\ref{eqn.b.params.supg}).  When $P_{\mathrm{SUPG}}$ is set
+small, the upwinding parameter 
+\begin{equation}
+\tau = \left|\frac{L}{2v}\right| \ .
+\end{equation}
+Here the velocity is just $v = -\kappa \partial_{z}\phi$.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=9cm]{eg_richards_supg.eps}
+\caption{Two elements of length $L$.  Linear Lagrange shape/test
+  functions for each node are shown in red.  Gravity acts in the
+  direction $-z$.  Gauss points are shown in green.}
+\label{eg_richards_supg.fig}
+\end{figure}
+
+Consider the flux part of Eqn~(\ref{supg.general.eqn}):
+\begin{equation}
+I = \int \tilde{\psi}\partial_{z}(-\lambda\partial_{z}\phi) \ ,
+\end{equation}
+integrated against the zeroth test function
+$\tilde{\psi}=\tilde{\psi}_{0}$ (this is called $S0$ in
+Figure~\ref{eg_richards_supg.fig}).  Then, for Linear Lagrange elements,
+\begin{eqnarray}
+I & = & \int \partial_{z}\psi_{0}\lambda \kappa\partial_{z}\phi - \int
+\frac{L}{2}\frac{v}{|v|}\partial_{z}\psi_{0}\partial_{z}\lambda
+\kappa\partial_{z} \phi \nonumber \\
+& = & -\kappa \frac{\phi_{1}-\phi_{0}}{L} \left(
+\frac{\lambda_{a}+\lambda_{b}}{2} - \frac{L}{2}\frac{v}{|v|}
+\frac{\lambda'_{a} + \lambda'_{b}}{2} \frac{\phi_{1}-\phi_{0}}{L}
+\right) \ .
+\label{eqn.i.eg.supg.a.b}
+\end{eqnarray}
+Here I've used $\partial_{z}\psi_{0} = -1/L$, and $\partial_{z}\phi =
+(\phi_{1}-\phi_{0})/L$, where $\phi_{0}$ is the value of $\phi$ at
+node 0.  I have also evaluated the integrands at the Gauss points $a$ and $b$
+as labelled in Figure~\ref{eg_richards_supg.fig}.  Define
+\begin{equation}
+\Delta = \frac{\phi_{1}-\phi_{0}}{L} \ ,
+\end{equation}
+and define $l$ to be the distance of Gauss point $a$ from $z=0$ (this
+is $L(1 - 1/\sqrt{3})/2$ for a Linear Lagrange element).
+By performing a
+Taylor expansion of the nonlinear function $\lambda=\lambda(\phi)$ it
+is not too difficult to show that
+\begin{eqnarray}
+\mbox{$\frac{1}{2}$}(\lambda_{a}+\lambda_{b}) & = &
+\mbox{$\frac{1}{2}$}(\lambda_{0}+\lambda_{0}) +
+\mbox{$\frac{1}{4}$}\left( (L-l)^{2} + l^{2} - L^{2}
+\right)\Delta^{2}\lambda_{0}'{}' + \mbox{$\frac{1}{12}$} \left(
+(L-l)^{3} + l^{3} - L^{3} \right) \Delta^{3}\lambda_{0}'{}'{}' \\
+\mbox{$\frac{1}{2}$}(\lambda'_{a}+\lambda'_{b})\Delta & = &
+\frac{\lambda_{0}+\lambda_{1}}{L} +  \mbox{$\frac{1}{12}$} \left(
+2L^{2} + 3(L-l)^{2} + 3l^{2} \right) \Delta^{3}\lambda_{0}'{}'{}'
+\end{eqnarray}
+The important result is that to second order
+\begin{equation}
+I = \left\{
+\begin{array}{ll}
+-\kappa \frac{\phi_{1}-\phi_{0}}{L} \lambda_{1} + O(\lambda_{0}'{}') & \ \ \ \mbox{for }
+\ \ v<0 \\
+-\kappa \frac{\phi_{1}-\phi_{0}}{L} \lambda_{0} + O(\lambda_{0}'{}')& \ \ \ \mbox{for } \ \ v>0
+\end{array}
+\right.
+\label{eqn.supg.eg.2nd.order}
+\end{equation}
+Hence, to second order,
+upwinding is achieved.  Therefore, for linear functions $\lambda$,
+SUPG upwinding is identical to a fully upwinding method (in 1D with
+Linear Lagrange elements).  For nonlinear functions, this is not true.
+
+Now consider the situation where Node 1 is at immobile saturation.  The
+potential will attempt to transfer fluid from Node 1 to Node 0, but
+fluid transfer shouldn't occur in reality since the mobility
+$\lambda_{1}=0$.  Without SUPG, however, some transfer will take place
+(assuming Node 0 is not also at immobile saturation), since
+$\lambda_{a}> 0$ and $\lambda_{b}>0$ in
+Eqn~(\ref{eqn.i.eg.supg.a.b}).  This means that the saturation at Node
+1 will reduce below immobile saturation.  With SUPG this effect is
+reduced due to the fluid transfer depending only on $\lambda_{1}=0$ to second
+order (Eqn~(\ref{eqn.supg.eg.2nd.order})).
+
+
+
+\chapter{Discretisation of the time derivative}
+\label{discret.chap}
+
+\section{The time derivative and mass conseration}
+
+The time derivative is discretised as
+\begin{equation}
+\psi\phi \frac{\rho S -
+  \rho_{\mathrm{old}}S_{\mathrm{old}}}{\mathrm{d}t} \ ,
+\label{eqn.time.deriv.discre}
+\end{equation}
+(both for the lumped and nonlumped case) instead of the perhaps more
+common $\psi\phi (\rho S)'\dot{P}$.  Eqn~(\ref{eqn.time.deriv.discre})
+conserves fluid mass more effectively.
+
+
+\section{General comments regarding lumping}
+
+All nonlinear functions ($\rho$, $S$ and $\kappa_{\mathrm{rel}}$) are
+evaluated at each quadrature point as functions of the porepressure at
+that quadrature point.  For the flux term (the right-hand side of
+Eqn~(\ref{richards.eqn})), this is standard, but in most other
+finite-element solvers of Richards' equation, the time-derivative term
+is lumped to the nodes.  That is, the part of the residual at a node
+that comes from $\partial(\phi\rho S)/\partial t$ just depends on the
+porepressure at that node.  It has been shown in many papers that this
+lumping is advantageous for mass conservation and reduces spurious
+oscillations of the pressure around sharp fronts~\cite{celiaET1990}.
+This is explained in Section~\ref{sec.lumping.timde.deriv}.  Currently
+lumping is not standard in MOOSE, however, lumping has been
+implemented in the Richards' equation.  The unlumped kernel is {\tt
+  RichardsMassChange} and the lumped version is {\tt
+  RichardsLumpedMassChange}.  I suggest using the lumped version.
+
+\section{An explicit example where lumping is necessary}
+\label{sec.lumping.timde.deriv}
+
+Consider the situation in Figure~\ref{eg_richards_supg.fig}, and
+suppose that Node 2 has high potential, and that nodes 0 and 1 are at
+immobile saturation.  Then fluid will flow from node 2 to node 1 (and
+then to node 0 in the next time step).  For simplicity, imagine that
+$\phi\rho S$ is a linear
+function of the potential $\phi$.  Then, up to constants, the
+discretised Richard's equation reads
+\begin{equation}
+\left(
+\begin{array}{ccc}
+2 & 1 & 0 \\
+1 & 4 & 1 \\
+0 & 1 & 2
+\end{array}
+\right)
+\left(
+\begin{array}{c}
+\dot{(\rho S)}_{0} \\
+\dot{(\rho S)}_{1} \\
+\dot{(\rho S)}_{2}
+\end{array}
+\right)
+=
+\left(
+\begin{array}{c}
+0 \\
+1 \\
+-1
+\end{array}
+\right)
+\end{equation}
+The matrix on the LHS comes from performing the numerical integration
+of $\dot{(\rho S)}$ over the two elements.  Note that it is not diagonal
+because the integration over an element depends on the potential at
+both of its two nodes.  The RHS encodes that no fluid is flowing
+between nodes 0 and 1, but fluid is flowing from node 2 to node 1.
+
+The important point is the solution of these sets of equations is
+\begin{equation}
+\dot{(\rho S)}_{0} < 0 \ .
+\end{equation}
+This means the finite element solution of Richard's equation will be
+oscillatory around fronts.  This is why lumping is
+necessary~\cite{celiaET1990}.  With lumping the matrix in the above
+equation becomes diagonal, and the solution is $\dot{(\rho S)}_{0} =
+0$.
+
+\section{Comparisons of lumped and unlumped 2-phase Buckley-Leverett problem}
+
+The Buckley-Leverett problem is described fully in the Tests
+documentation.  Tollowing is a brief description with reference to
+Figure~\ref{bl_lump.fig}.  Initially a front of water sits at $x=5$,
+with water completely occupying the region $x\leq 5$, and gas
+occupying the region $x>5$.  The water porepressure is held at
+$P=1$\,MPa at $x=0$ and, initially reduces linearly with $x$ to $P=0$
+at $x=5$.  Due to the fixed porepressure at $x=0$, the water moves to
+the right, displacing the gas.  For the parameters described in the
+Test documentation, at $t=50$\,s the front is at $x\sim 10$, and the
+water porepressure is as shown in Figure~\ref{bl_lump.fig}.  Notice
+that in this case both the lumped and unlumped versions yield
+basically the same position for the front, but the lumped version does
+not suffer from spurious oscillations of the porepressure.
+
+\begin{figure}[htb]
+\centering
+\begin{tabular}{cc}
+\includegraphics[width=7cm]{bl_lumped_unlumped.eps} &
+\includegraphics[width=7cm]{bl_lumped_unlumped_zoom.eps}
+\end{tabular}
+\caption{The water porepressure at $t=50$\,s in the Buckley Leverett
+  problem.  Right: zoomed in on the region $x\rightarrow 10$.  Notice
+  the oscillatory behaviour in the unlumped version.}
+\label{bl_lump.fig}
+\end{figure}
+
+
+
+
 \chapter{Multi-phase Richards' equations}
 \label{chap.multi}
 
@@ -1462,192 +1675,6 @@ The standard part of this has been considered in
 Section~\ref{min.res.sec.temp}.  The SUPG part of $\tilde{\psi}$ is
 $\tau v_{i}\nabla_{i}\psi$ which is approximately $1$.  Hence the
 addition of SUPG does not affect any considerations of minimum residual.
-
-
-
-
-\chapter{Discretisation}
-\label{discret.chap}
-
-\section{General comments}
-
-All nonlinear functions ($\rho$, $S$ and $\kappa_{\mathrm{rel}}$) are
-evaluated at each quadrature point as functions of the porepressure at
-that quadrature point.  For the flux term (the right-hand side of
-Eqn~(\ref{richards.eqn})), this is standard, but in most other
-finite-element solvers of Richards' equation, the time-derivative term
-is lumped to the nodes.  That is, the part of the residual at a node
-that comes from $\partial(\phi\rho S)/\partial t$ just depends on the
-porepressure at that node.  It has been shown in many papers that this
-lumping is advantageous for mass consideration and reduces spurious
-oscillations of the pressure around sharp fronts~\cite{celiaET1990}.
-This is explained in Section~\ref{sec.lumping.timde.deriv}.  In the
-current implementation of Richards' equation in MOOSE, this residual
-depends on the porepressure at all the quadrature points surrounding
-the node, and I'm not sure how to implement lumping in MOOSE.
-
-
-
-\section{Examples of Richards upwinding}
-
-Consider the 1D situation shown in Figure~\ref{eg_richards_supg.fig}.
-This shows 2 elements, each of length $L$, and the corresponding shape
-(or test) functions.  Define the potential function
-\begin{equation}
-\phi = P + \rho|g|z \ ,
-\end{equation}
-and the mobility function
-\begin{equation}
-\lambda = \frac{\rho \kappa_{\mathrm{rel}}}{\mu} \ .
-\end{equation}
-The isoparametric coordinate for the first element is $\xi =
-\frac{z-L/2}{L/2}$, which yields $b=2v/L$
-(Eqn~(\ref{eqn.b.params.supg}).  When $P_{\mathrm{SUPG}}$ is set
-small, the upwinding parameter 
-\begin{equation}
-\tau = \left|\frac{L}{2v}\right| \ .
-\end{equation}
-Here the velocity is just $v = -\kappa \partial_{z}\phi$.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=9cm]{eg_richards_supg.eps}
-\caption{Two elements of length $L$.  Linear Lagrange shape/test
-  functions for each node are shown in red.  Gravity acts in the
-  direction $-z$.  Gauss points are shown in green.}
-\label{eg_richards_supg.fig}
-\end{figure}
-
-Consider the flux part of Eqn~(\ref{supg.general.eqn}):
-\begin{equation}
-I = \int \tilde{\psi}\partial_{z}(-\lambda\partial_{z}\phi) \ ,
-\end{equation}
-integrated against the zeroth test function
-$\tilde{\psi}=\tilde{\psi}_{0}$ (this is called $S0$ in
-Figure~\ref{eg_richards_supg.fig}).  Then, for Linear Lagrange elements,
-\begin{eqnarray}
-I & = & \int \partial_{z}\psi_{0}\lambda \kappa\partial_{z}\phi - \int
-\frac{L}{2}\frac{v}{|v|}\partial_{z}\psi_{0}\partial_{z}\lambda
-\kappa\partial_{z} \phi \nonumber \\
-& = & -\kappa \frac{\phi_{1}-\phi_{0}}{L} \left(
-\frac{\lambda_{a}+\lambda_{b}}{2} - \frac{L}{2}\frac{v}{|v|}
-\frac{\lambda'_{a} + \lambda'_{b}}{2} \frac{\phi_{1}-\phi_{0}}{L}
-\right) \ .
-\label{eqn.i.eg.supg.a.b}
-\end{eqnarray}
-Here I've used $\partial_{z}\psi_{0} = -1/L$, and $\partial_{z}\phi =
-(\phi_{1}-\phi_{0})/L$, where $\phi_{0}$ is the value of $\phi$ at
-node 0.  I have also evaluated the integrands at the Gauss points $a$ and $b$
-as labelled in Figure~\ref{eg_richards_supg.fig}.  Define
-\begin{equation}
-\Delta = \frac{\phi_{1}-\phi_{0}}{L} \ ,
-\end{equation}
-and define $l$ to be the distance of Gauss point $a$ from $z=0$ (this
-is $L(1 - 1/\sqrt{3})/2$ for a Linear Lagrange element).
-By performing a
-Taylor expansion of the nonlinear function $\lambda=\lambda(\phi)$ it
-is not too difficult to show that
-\begin{eqnarray}
-\mbox{$\frac{1}{2}$}(\lambda_{a}+\lambda_{b}) & = &
-\mbox{$\frac{1}{2}$}(\lambda_{0}+\lambda_{0}) +
-\mbox{$\frac{1}{4}$}\left( (L-l)^{2} + l^{2} - L^{2}
-\right)\Delta^{2}\lambda_{0}'{}' + \mbox{$\frac{1}{12}$} \left(
-(L-l)^{3} + l^{3} - L^{3} \right) \Delta^{3}\lambda_{0}'{}'{}' \\
-\mbox{$\frac{1}{2}$}(\lambda'_{a}+\lambda'_{b})\Delta & = &
-\frac{\lambda_{0}+\lambda_{1}}{L} +  \mbox{$\frac{1}{12}$} \left(
-2L^{2} + 3(L-l)^{2} + 3l^{2} \right) \Delta^{3}\lambda_{0}'{}'{}'
-\end{eqnarray}
-The important result is that to second order
-\begin{equation}
-I = \left\{
-\begin{array}{ll}
--\kappa \frac{\phi_{1}-\phi_{0}}{L} \lambda_{1} + O(\lambda_{0}'{}') & \ \ \ \mbox{for }
-\ \ v<0 \\
--\kappa \frac{\phi_{1}-\phi_{0}}{L} \lambda_{0} + O(\lambda_{0}'{}')& \ \ \ \mbox{for } \ \ v>0
-\end{array}
-\right.
-\label{eqn.supg.eg.2nd.order}
-\end{equation}
-Hence, to second order,
-upwinding is achieved.  Therefore, for linear functions $\lambda$,
-SUPG upwinding is identical to a fully upwinding method (in 1D with
-Linear Lagrange elements).  For nonlinear functions, this is not true.
-
-Now consider the situation where Node 1 is at immobile saturation.  The
-potential will attempt to transfer fluid from Node 1 to Node 0, but
-fluid transfer shouldn't occur in reality since the mobility
-$\lambda_{1}=0$.  Without SUPG, however, some transfer will take place
-(assuming Node 0 is not also at immobile saturation), since
-$\lambda_{a}> 0$ and $\lambda_{b}>0$ in
-Eqn~(\ref{eqn.i.eg.supg.a.b}).  This means that the saturation at Node
-1 will reduce below immobile saturation.  With SUPG this effect is
-reduced due to the fluid transfer depending only on $\lambda_{1}=0$ to second
-order (Eqn~(\ref{eqn.supg.eg.2nd.order})).
-
-
-
-\section{The time derivative and mass conseration}
-
-The time derivative is discretised as
-\begin{equation}
-\psi\phi \frac{\rho S -
-  \rho_{\mathrm{old}}S_{\mathrm{old}}}{\mathrm{d}t} \ ,
-\label{eqn.time.deriv.discre}
-\end{equation}
-instead of the perhaps more common $\psi\phi (\rho S)'\dot{P}$.
-Eqn~(\ref{eqn.time.deriv.discre}) conserves fluid mass more
-effectively.
-
-
-\section{Lumping the time derivative}
-\label{sec.lumping.timde.deriv}
-
-Consider the situation in Figure~\ref{eg_richards_supg.fig}, and
-suppose that Node 2 has high potential, and that nodes 0 and 1 are at
-immobile saturation.  Then fluid will flow from node 2 to node 1 (and
-then to node 0 in the next time step).  For simplicity, imagine that
-$\phi\rho S$ is a linear
-function of the potential $\phi$.  Then, up to constants, the
-discretised Richard's equation reads
-\begin{equation}
-\left(
-\begin{array}{ccc}
-2 & 1 & 0 \\
-1 & 4 & 1 \\
-0 & 1 & 2
-\end{array}
-\right)
-\left(
-\begin{array}{c}
-\dot{(\rho S)}_{0} \\
-\dot{(\rho S)}_{1} \\
-\dot{(\rho S)}_{2}
-\end{array}
-\right)
-=
-\left(
-\begin{array}{c}
-0 \\
-1 \\
--1
-\end{array}
-\right)
-\end{equation}
-The matrix on the LHS comes from performing the numerical integration
-of $\dot{(\rho S)}$ over the two elements.  Note that it is not diagonal
-because the integration over an element depends on the potential at
-both of its two nodes.  The RHS encodes that no fluid is flowing
-between nodes 0 and 1, but fluid is flowing from node 2 to node 1.
-
-The important point is the solution of these sets of equations is
-\begin{equation}
-\dot{(\rho S)}_{0} < 0 \ .
-\end{equation}
-This means the finite element solution of Richard's equation will be
-oscillatory around fronts.  This is why lumping is
-necessary~\cite{celiaET1990}.  With lumping the matrix in the above
-equation becomes diagonal, and the solution is $\dot{(\rho S)}_{0} =
-0$.
 
 
 

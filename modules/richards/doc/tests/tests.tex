@@ -49,7 +49,7 @@ input syntax that users can utilise when building models.
 
 The test suite does not {\em prove} that the Richards' equation is
 correctly implemented in MOOSE, as the expected results might be
-obtained by pure luck.  At present over 90\% of the 1754 lines of C++
+obtained by pure luck.  At present around 90\% of C++
 code are covered by the tests, with much of the remainder being
 exception catching in object constructors (checking user input is
 correctly formatted, etc).  The tests are ordered approximately by
@@ -261,11 +261,11 @@ performed which are all possible combinations of:
 \item Fully-saturated or unsaturated initial conditions
 \item With or without gravity
 \item With or without SUPG
-\item With or without time derivatives
+\item With or without unlumped time derivatives
 \end{itemize}
 Of course, the unsaturated case with gravity, SUPG and time
 derivatives is the most complicated, but the other cases are useful
-for debugging.
+for debugging.  In addition, the Jacobian of the lumped time derivative is checked.
 
 The `OffDiagonal' terms only appear if there is more than one pressure
 variable, that is for multi-phase problems.  A two-phase
@@ -276,14 +276,18 @@ of:
 \begin{itemize}
 \item With or without gravity
 \item With or without SUPG
-\item With or without time derivatives
+\item With or without unlumped time derivatives
 \end{itemize}
 Two other tests are also performed: the first with random initial
 conditions subject to $P_{1}=P_{2}$ so that the system is fully
 saturated with the ``1'' phase; and the second with random initial
 conditions subject to $P_{1}\ll P_{2}$ so the system is almost fully
-saturated with the ``2'' phase.  Both these tests have gravity, SUPG
-and time derivatives.
+saturated with the ``2'' phase.
+
+In addition to these tests, a lumped time derivative is used in three
+two-phase tests: with gravity and SUPG; with gravity, SUPG and fully
+saturated with the ``1'' phase; with gravity and SUPG and almost fully
+saturated with the ``2'' phase.
 
 In addition to these tests, the Jacobians for the following sinks/sources are tested:
 \begin{itemize}
@@ -390,6 +394,7 @@ are all possible combinations of:
 \item With or without SUPG
 \item Transient or Steadystate
 \end{itemize}
+A test with gravity and SUPG using the lumped time derivative is also run.
 In the two-phase situation, Eqn~(\ref{grav.head.eqn}) must hold for
 each phase, and the constant $P_{0}$ for each phase is determined
 through conservation of mass of each phase.  (In the steadystate
@@ -416,15 +421,23 @@ also part of the automatic test suite:
   pressure head for $S>S_{\mathrm{imm}}$.
 \item A two-phase situation that starts with $P_{1}=P_{2}$, that is
   fully saturated.  A single element is used, along with gravity,
-  SUPG, and transient analysis.  This simulation checks that the MOOSE
+  SUPG, and transient analysis.  Three simulations are performed:
+\begin{enumerate}
+\item with an unlumped time derivative
+\item with a lumped time derivative
+\item using a {\tt RichardsMultiphaseProblem} object to maintain the
+  bound $P_{2}\geq P_{1}$.
+\end{enumerate}
+These simulations checks that the MOOSE
   implementation yields the correct long-time behaviour for
   fully-saturated two-phase simulations.
 \item A two-phase simulation with nonzero immobile saturations for
-  both phases.  The automatic test suite contains a 20-element
-  version, and the results are similar to the 200-element results
-  shown in Figure~\ref{gh2.fig}, but have mild oscillations as in
-  Figure~\ref{gh.fig}.
-
+  both phases.  Both the unlumped time derivative and lumped time
+  derivative are tested The automatic test suite contains 20-element
+  versions, and the results are shown in Figure~\ref{gh2.fig}, along
+  with the results from a 200-element version.  This figure
+  demonstrates the reduction in spurious oscillations obtained by
+  using a lumped time derivative.
 \end{enumerate}
 
 \begin{figure}[htb]
@@ -448,10 +461,14 @@ $\mbox{}$ \\
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=10cm]{gh2.eps}
+\begin{tabular}{cc}
+\includegraphics[width=8cm]{gh2_20.eps} &
+\includegraphics[width=8cm]{gh2.eps}
+\end{tabular}{cc}
 \caption{Two-phase long-time results for
   $S^{\mathrm{gas}}_{\mathrm{imm}}=0.3$ and
-  $S^{\mathrm{water}}_{\mathrm{imm}}=0.4$ in a 200-element simulation.}
+  $S^{\mathrm{water}}_{\mathrm{imm}}=0.4$.  Left: 20-element
+  simulation with and without time-derivative lumping.  Right: 200-element simulation.}
 \label{gh2.fig}
 \end{figure}
 
@@ -699,14 +716,16 @@ The solution of the above differential equation is well known to be
 \end{equation}
 where Erf is the error function.
 
-This is verified by using the following four tests on a line of
+This is verified by using the following six tests on a line of
 10 elements.
 \begin{enumerate}
 \item Steady state 1-phase analysis to demonstrate that the
   steady-state of $\rho = \rho_{\infty}$ is achieved.
-\item Transient 1-phase analysis.
+\item Transient 1-phase analysis with an unlumped time derivative.
+\item Transient 1-phase analysis with a lumped time derivative.
 \item Steady state 2-phase analysis with a fully-water saturated configuration.
-\item Transient 2-phase analysis.
+\item Transient 2-phase analysis with unlumped time derivatives.
+\item Transient 2-phase analysis with lumped time derivatives.
 \end{enumerate}
 An example verification is shown in Figure~\ref{pressure_pulse.fig}.
 These tests run rapidly and are part of the automatic test suite.
@@ -813,13 +832,15 @@ Conductance $C$ & 0.05389\,m$^{-1}$ \\
 \end{center}
 This conductance is chosen so at steadystate $\rho(x=L)=2000$\,kg.m$^{-3}$.
 
-The problem is solved using 1000 elements along the $x$
-direction ($L=100$\,m), and using 100 time-steps of size $10^6$\,s.
-Using fewer elements or fewer timesteps means the agreement with the
-theory is marginally poorer.  The problem is also solved using the
-steadystate solver.  In this case the initial condition is
-$P=2-x/L$\,MPa, since the uniform $P=2$\,MPa does not converge.  The
-results are shown in Figure~\ref{nc.fig}.
+The problem is solved using 1000 elements along the $x$ direction
+($L=100$\,m), and using 100 time-steps of size $10^6$\,s.  Using fewer
+elements or fewer timesteps means the agreement with the theory is
+marginally poorer.  Two tests are performed: one with a lumped time
+derivative and one with an unlumped derivative, giving almost
+indistinguishable results.  The problem is also
+solved using the steadystate solver.  In this case the initial
+condition is $P=2-x/L$\,MPa, since the uniform $P=2$\,MPa does not
+converge.  The results are shown in Figure~\ref{nc.fig}.
 
 \begin{figure}[htb]
 \begin{center}
@@ -976,19 +997,22 @@ above yields $u^{-1}e^{-u} \ll 2.5\times 10^{6}$, or $u\gg 4\times
 
 Figure~\ref{th01.fig} shows good agreement between the Theis solution
 and the MOOSE implementation.  Both 1-phase and fully-water-saturated
-2-phase models give the same result.  This test is not part of the
-automatic test suite since it takes 17\,seconds to complete.  It is
-therefore marked as ``heavy'' and is not run every time the code is
-updated.  However, a similar tests (both 1-phase and
-fully-water-saturated 2-phase) on a coarser mesh with only 272
-elements, that also takes larger timesteps, that gives similar
-drawdowns (to within 0.1\,m) is part of the automatic test suite.
+2-phase models give the same result, both with and without
+time-derivative lumping.  These four tests are not part of the
+automatic test suite since they take around 20\,seconds to complete.
+They are therefore marked as ``heavy'' and is not run every time the
+code is updated.  However, four similar tests (both 1-phase and
+fully-water-saturated 2-phase, both with and without mass lumping) on
+a coarser mesh with only 272 elements, that also take larger
+timesteps, give similar drawdowns (to within 0.1\,m), and are part of
+the automatic test suite.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=14cm]{th01.eps}
-\caption{Comparison between the MOOSE result (in dots, both 1-phase
-  and 2-phase fully-saturated give indistinguishable results) and the
+\caption{Comparison between the MOOSE result (in dots: both 1-phase
+  and 2-phase fully-saturated, both with and without mass lumping give
+  indistinguishable results and the
   expected behaviour of the drawdown as given by Eqn~(\ref{eqn.theis})
   (drawdown is $P/\rho g$, or $P/10000$ in this model).}
 \label{th01.fig}
@@ -1123,11 +1147,12 @@ from Eqn~(\ref{bh.propto.eqn}) (see Theory Manual for more details).
 
 Chen and Zhang (see Theory manual) have derived an expression for $W$
 in the case where this borehole is placed at a node in a square mesh.
-The following test is part of the automatic test suite:
+The following two tests are part of the automatic test suite:
 \begin{itemize}
 \item The steadystate solution with a single borehole with $W$ defined by
 Chen and Zhang's formula is compared with Eqn~(\ref{eqn.log.bh}) to
 illustrate that the MOOSE implementation of a borehole is correct.
+\item The same test using a lumped time derivative.
 \end{itemize}
 Figure~\ref{bh07.fig} shows this comparison.  Most parameters in this
 study are identical to those given in the above table with the
@@ -1252,8 +1277,8 @@ minor discrepancies for small values of saturation: these get smaller
 as the temporal and spatial resolution is increased, but never totally
 disappear due to the initial condition of $P=-900$\,Pa.
 
-This test is part of the automatic test suite that is run every time
-the code is updated.
+Two tests (with and without mass lumping) are part of the automatic
+test suite that is run every time the code is updated.
 
 \begin{figure}[htb]
 \centering
@@ -1504,7 +1529,8 @@ unsaturated region.  Using an initial mesh of element size 1\,m, and a
 minimum size of 0.125\,m, with a maximum timestep of 0.3\,s (to give
 the mesh time to adapt around the front),the front at $t=50$\,s sits
 between between $x=9.9$\,m and $x=10.35$\,m, and the simulation takes
-only 3 seconds.  The automatic test suite contains a simulation with
+only 3 seconds.  The automatic test suite contains two simulations
+(with and without mass lumping) with
 elements of size 0.1\,m using a timestep of 2\,s, which gives results
 very similar to these, and takes less than 2 seconds to run.
 
@@ -1644,9 +1670,11 @@ suggested by the two comparisons in that figure.
 
 The ``low-resolution'' test, which has 200 elements in $0\leq z\leq
 10$ and uses 15 time steps, is part of the automatic test suite that
-is run every time the code is updated.  The ``high-resolution'' test,
-which has 600 elements, and uses 190 time steps, is marked as
-``heavy'' and so must be run manually.
+is run every time the code is updated.  Two ``high-resolution'' tests
+(one with mass lumping, the other without),
+which have 600 elements, and use 190 time steps, are marked as
+``heavy'' and so must be run manually.  The mass lumping makes
+negligable difference to the result in this case.
 
 \begin{figure}[htb]
 \begin{center}
@@ -1689,7 +1717,7 @@ the relative permeability, since the fluid is flowing from a
 fully-saturated region (where $\kappa_{\mathrm{rel}}=1$).
 
 
-In the simulation below, the water pressure at the left boundary is
+In the simulations below, the water pressure at the left boundary is
 kept fixed at $P_{0}=1$\,MPa, while the right boundary is kept fixed
 at $P_{15}=-10^{5}$\,Pa.  The water viscosity is $\mu = 10^{-3}$\,Pa.s.  In
 order to correspond as closely as possible to the single-phase version
@@ -1792,24 +1820,29 @@ the sharp front.
 
 Figure~\ref{satfront2.figa} shows the results from two MOOSE
 simulations which validate the MOOSE implementation of two-phase fluid
-flow.  The simulation details are:
+flow.  Four simulations in total are part of the test suite:
 \begin{enumerate}
-\item A uniform mesh of size 0.1\,m, with timestep between
+\item ``High res''.  A uniform mesh of size 0.1\,m, with timestep between
   $10^{-4}$\,s and 0.2\,s.  The van Genuchten
   $\alpha=10^{-4}$\,Pa$^{-1}$ and $m=0.8$.  At $t=50$\,s the mesh sits
-  between $x=9.6$\,m and $x=10.2$\,m.  This simulation uses 833
-  timesteps and takes 1\,minute
-  to run, so is marked as ``heavy'' in the test suite and is not run
+  between $x=9.6$\,m and $x=10.2$\,m.  One simulation uses mass
+  lumping while the other does not.  These simulations use 833
+  timesteps and take 1\,minute
+  to run, so are marked as ``heavy'' in the test suite and are not run
   every time the code is updated.
-\item A uniform mesh of size 0.5\,m, with timestep between 0.1\,s and
+\item ``Low res''.  A uniform mesh of size 0.5\,m, with timestep between 0.1\,s and
   4\,s.  The van Genuchten 
   $\alpha=10^{-5}$\,Pa$^{-1}$ and $m=0.8$.  Instead of $P=-10^{5}$\,Pa
   at the $x=15$ end, $P=-3\times 10^{5}$\,Pa is used instead, which
   means $s=0.01$ in the unsaturated zone.  At $t=50$\,s the mesh sits
-  between $x=9.3$\,m and $x=12.3$\,m.  This simulation uses 37
-  timesteps and takes 0.7\,seconds to run, so is part of the automatic
+  between $x=9.3$\,m and $x=12.3$\,m.  One simulation uses mass
+  lumping while the other does not.  These simulations uses 37
+  timesteps and take 0.7\,seconds to run, so are part of the automatic
   test suite.
 \end{enumerate}
+Mass lumping removes the oscillatory behaviour of the solution, as
+shown in Figure~\ref{bl_lump.fig}.
+
 
 
 \begin{figure}[htb]
@@ -1820,9 +1853,23 @@ $\mbox{}$
 \caption{The MOOSE solution of the two-phase Buckley-Leverett problem at
   $t=50$\,s.  Top: saturation.  Bottom: water porepressure.  The red line in
   each is the large $\alpha=10^{-4}$\,Pa$^{-1}$, and the black line is
-  the $\alpha=10^{-5}$\,Pa$^{-1}$.}
+  the $\alpha=10^{-5}$\,Pa$^{-1}$.  Both these simulations utilise
+  mass lumping.}
 \label{satfront2.figa}
 \end{center}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\begin{tabular}{cc}
+\includegraphics[width=7cm]{bl_lumped_unlumped.eps} &
+\includegraphics[width=7cm]{bl_lumped_unlumped_zoom.eps}
+\end{tabular}
+\caption{Comparison of the two-phase Buckley-Leverett solution at
+  $t=50$\,s with and without mass lumping for the ``high res'' case
+  with $\alpha = 10^{-4}$\,Pa$^{-1}$.  Note the oscillatory
+  behaviour in the unlumped version.}
+\label{bl_lump.fig}
 \end{figure}
 
 
