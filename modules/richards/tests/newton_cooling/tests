@@ -1,5 +1,5 @@
 [Tests]
-  [./test_nc01]
+  [./nc01]
     type = 'Exodiff'
     input = 'nc01.i'
     exodiff = 'nc01.e'
@@ -8,7 +8,16 @@
     heavy = True
     max_time = 1000
   [../]
-  [./test_nc02]
+  [./nc_lumped_01]
+    type = 'Exodiff'
+    input = 'nc_lumped_01.i'
+    exodiff = 'nc_lumped_01.e'
+    rel_err = 1E-4
+    use_old_floor = True
+    heavy = True
+    max_time = 1000
+  [../]
+  [./nc02]
     type = 'Exodiff'
     input = 'nc02.i'
     exodiff = 'nc02.e'

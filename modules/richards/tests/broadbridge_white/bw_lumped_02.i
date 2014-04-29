@@ -11,6 +11,11 @@
 
 [GlobalParams]
   porepressureNames_UO = PPNames
+  density_UO = DensityConstBulk
+  relperm_UO = RelPermBW
+  SUPG_UO = SUPGstandard
+  sat_UO = Saturation
+  seff_UO = SeffBW
 []
 
 [UserObjects]
@@ -63,7 +68,7 @@
 [Kernels]
   active = 'richardsf richardst'
   [./richardst]
-    type = RichardsMassChange
+    type = RichardsLumpedMassChange
     variable = pressure
   [../]
   [./richardsf]
@@ -109,11 +114,6 @@
     block = 0
     mat_porosity = 0.25
     mat_permeability = '1 0 0  0 1 0  0 0 1'
-    density_UO = DensityConstBulk
-    relperm_UO = RelPermBW
-    SUPG_UO = SUPGstandard
-    sat_UO = Saturation
-    seff_UO = SeffBW
     viscosity = 4
     gravity = '-0.1 0 0'
     linear_shape_fcns = true
@@ -141,14 +141,14 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1E-5 1E-2 1E-2 1E-1'
-    time_t = '0 1E-5 1 10'
+    time_dt = '1E-1 5E-1 5E-1'
+    time_t = '0 1 10'
   [../]
 []
 
 
 [Outputs]
-  file_base = bw01
+  file_base = bw_lumped_02
   interval = 10000
   output_initial = true
   output_final = true

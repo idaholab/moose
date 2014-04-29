@@ -49,11 +49,11 @@ to validate the code.
 
 Each example is located in the {\em test} directory, which has path
 \begin{verbatim}
-<install_dir>/trunk/elk/tests/richards
+<install_dir>/moose/modules/richards/tests
 \end{verbatim}
 or the {\em user} directory, which has path
 \begin{verbatim}
-<install_dir>/trunk/elk/doc/richards/user
+<install_dir>/moose/modules/richards/doc/user
 \end{verbatim}
 
 \section{Convergence and convergence criteria}
@@ -171,7 +171,13 @@ phase subsequently infiltrates to these regions, an initially crazy
 $P_{2}$ might affect the results.  This sometimes also holds for
 almost-saturated situations, depending on the exact simulation.
 
-In these cases it is useful to add a penalty term to the residual to
+In these cases, one way of avoiding problems is to implement the
+constraint $P_{1}\leq P_{2}$ using a {\tt RichardsMultiphaseProblem}
+Problem object.  This gets around the problem of chosing the $a$ in
+the penalty term described in the next paragraph.
+See Section~\ref{sec.bound.pp} for more comments.
+
+Another way is to add a penalty term to the residual to
 ensure that $P_{1}\leq P_{2}$.  An example can be found in the tests
 directory {\tt pressure\_pulse/pp22.i}.  The choice of the $a$
 parameter is sometimes difficult: too big and the penalty term
@@ -185,6 +191,8 @@ The penalty term should {\em not} be used unless absolutely necessary
 as it will lead to poorer convergence characteristics.  In many cases
 it is not necessary.
 
+
+
 \section{An excavation}
 
 In the test directory {\tt excav/ex01.i} and {\tt excav/ex02.i}
@@ -192,6 +200,7 @@ contains a single excavation, and the associated mass flux and mass
 balance.
 
 \section{Bounding porepressure}
+\label{sec.bound.pp}
 
 Occasionally it might be useful to bound porepressure.  The test {\tt
   buckley\_leverett/bl22.i} has ``bounds'' that do this.  Note that:
@@ -201,6 +210,28 @@ Occasionally it might be useful to bound porepressure.  The test {\tt
   {\tt [Preconditioning]} block of the aforementioned test.
 \item The command line must contain the argument {\tt --use-petsc-dm}.
 \end{itemize}
+
+\noindent The ``bounds'' just described uses PETSc to enforce $P\geq a$, for
+some fixed $a$.  In two-phase situations, one often wants to
+enforce $P_{1}\geq P_{2}$.  To do this a {\tt
+  RichardsMultiphaseProblem} object can be used.  See for example {\tt
+  gravity\_head\_2/gh\_bounded\_17.i}, which may be compared to {\tt
+  gravity\_head\_2/gh\_lumped\_17.i} to see how easy it is to use
+this in an input file.  Note that:
+\begin{itemize}
+\item The convergence is likely to be much slower when using a {\tt
+  RichardsMultiphaseProblem} object.
+\item The use of this object will likely avoid crazy behaviour of a
+  gas phase's porepressure when the phase is completely or almost
+  completely absent in a region.
+\item Care must be taken: in the example {\tt gh\_bounded\_17.i}, I
+  had to use zero residual saturations, otherwise the simulation keeps
+  trying to reduce {\tt pgas} below {\tt pwater} to conserve gas
+  mass.  If you see your nonlinear residual not decreasing, you might
+  be using {\tt RichardsMultiphaseProblem} to enforce a constraint
+  which does not make physical sense (eg, it causes nonconservation of mass).
+\end{itemize}
+
 
 
 
