@@ -230,6 +230,10 @@ Console::initialSetup()
 void
 Console::timestepSetup()
 {
+  // Do nothing if output is turned off
+  if (!outputAllowed())
+    return;
+
   // Do nothing if the problem is steady or if it is not an output interval
   if (!checkInterval())
     return;
