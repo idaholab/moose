@@ -5,6 +5,32 @@
     exodiff = 'layered_average_out.e'
   [../]
 
+  [./bounds]
+    type = 'Exodiff'
+    input = 'layered_average_bounds.i'
+    exodiff = 'layered_average_bounds_out.e'
+  [../]
+
+  [./bounds_and_num_layers]
+    type = 'RunException'
+    input = 'layered_average_bounds.i'
+    expect_err = "'bounds' and 'num_layers' cannot both be set"
+    cli_args = 'UserObjects/average/num_layers=2'
+  [../]
+
+  [./bounds_and_interp]
+    type = 'RunException'
+    input = 'layered_average_bounds.i'
+    expect_err = "'sample_type = interpolate' not supported with 'bounds' in"
+    cli_args = 'UserObjects/average/sample_type=interpolate'
+  [../]
+
+  [./no_bounds_or_num_layers]
+    type = 'RunException'
+    input = 'layered_average_bounds_error.i'
+    expect_err = "One of 'bounds' or 'num_layers' must be specified for"
+  [../]
+
   [./interpolate]
     type = 'Exodiff'
     input = 'layered_average_interpolate.i'
