@@ -7,7 +7,8 @@ InputParameters validParams<OneDMomentumFriction>()
   InputParameters params = validParams<Kernel>();
 
   // Required coupled variables
-  params.addRequiredCoupledVar("rhoA", "density multiplied by area");
+  params.addRequiredCoupledVar("rhoA", "density term");
+  params.addRequiredCoupledVar("rhouA", "momentum term");
   params.addRequiredCoupledVar("u", "velocity");
   params.addRequiredCoupledVar("hydraulic_diameter", "The hydraulic diameter. Depends on A(x).");
 
@@ -17,6 +18,7 @@ InputParameters validParams<OneDMomentumFriction>()
 OneDMomentumFriction::OneDMomentumFriction(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
     _u_vel(coupledValue("u")),
+    _rhouA(coupledValue("rhouA")),
     _hydraulic_diameter(coupledValue("hydraulic_diameter")),
     _rhoA_var_number(coupled("rhoA")),
     _friction(getMaterialProperty<Real>("friction"))
@@ -27,7 +29,7 @@ Real
 OneDMomentumFriction::computeQpResidual()
 {
   // Contribution due to friction.
-  return (0.5*_friction[_qp]/_hydraulic_diameter[_qp]) * _u[_qp] * std::abs(_u_vel[_qp]) * _test[_i][_qp];
+  return (0.5*_friction[_qp]/_hydraulic_diameter[_qp]) * _rhouA[_qp] * std::abs(_u_vel[_qp]) * _test[_i][_qp];
 }
 
 Real

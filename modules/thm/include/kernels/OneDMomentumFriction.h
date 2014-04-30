@@ -26,6 +26,7 @@ protected:
 
   // Coupled variables
   VariableValue & _u_vel;
+  VariableValue & _rhouA;
   VariableValue & _hydraulic_diameter;
 
   // IDs of coupled variables (for computing Jacobians)
