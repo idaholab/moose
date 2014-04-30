@@ -57,6 +57,7 @@ Coupleable::Coupleable(InputParameters & parameters, bool nodal) :
       _optional_var_index[name] = std::numeric_limits<unsigned int>::max() - _optional_var_index.size();
   }
 
+  _default_value_zero.resize(_coupleable_max_qps);
   _default_gradient.resize(_coupleable_max_qps);
   _default_second.resize(_coupleable_max_qps);
 }
@@ -115,7 +116,7 @@ Coupleable::getVar(const std::string & var_name, unsigned int comp)
 unsigned int
 Coupleable::coupled(const std::string & var_name, unsigned int comp)
 {
-  if (!isCoupled(var_name)) // If it's optionally coupled just return 0
+  if (!isCoupled(var_name))
     return _optional_var_index[var_name];
 
   MooseVariable * var = getVar(var_name, comp);
@@ -208,6 +209,9 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 {
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_value_zero;
+
   MooseVariable * var = getVar(var_name, comp);
 
   if (_nodal)
@@ -219,6 +223,9 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 VariableValue &
 Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_value_zero;
+
   MooseVariable * var = getVar(var_name, comp);
 
   if (_nodal)
@@ -231,6 +238,9 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
 VariableGradient &
 Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
 {
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_gradient;
+
   coupledCallback(var_name, false);
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
@@ -242,6 +252,9 @@ Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
 VariableGradient &
 Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
 {
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_gradient;
+
   coupledCallback(var_name, true);
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
@@ -254,6 +267,9 @@ Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
 VariableGradient &
 Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp)
 {
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_gradient;
+
   coupledCallback(var_name, true);
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
@@ -269,6 +285,9 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
 VariableSecond &
 Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
 {
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_second;
+
   coupledCallback(var_name, false);
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
@@ -280,6 +299,9 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
 VariableSecond &
 Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
 {
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_second;
+
   coupledCallback(var_name, true);
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
@@ -292,6 +314,9 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
 VariableSecond &
 Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
 {
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_second;
+
   coupledCallback(var_name, true);
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
