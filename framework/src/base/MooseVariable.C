@@ -392,13 +392,10 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
 
   if (is_transient)
   {
-    if (_is_nl)
-    {
-      _u_dot_bak = _u_dot;
-      _u_dot.resize(nqp);
-      _du_dot_du_bak = _du_dot_du;
-      _du_dot_du.resize(nqp);
-    }
+    _u_dot_bak = _u_dot;
+    _u_dot.resize(nqp);
+    _du_dot_du_bak = _du_dot_du;
+    _du_dot_du.resize(nqp);
 
     if (_need_u_old)
       _u_old_bak = _u_old;
@@ -435,11 +432,8 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
 
     if (is_transient)
     {
-      if (_is_nl)
-      {
-        _u_dot[i] = 0;
-        _du_dot_du[i] = 0;
-      }
+      _u_dot[i] = 0;
+      _du_dot_du[i] = 0;
 
       if (_need_u_old)
         _u_old[i] = 0;
@@ -513,11 +507,8 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
       if (_need_u_older || _need_grad_older || _need_second_older)
         soln_older_local = solution_older(idx);
 
-      if (_is_nl)
-      {
-        u_dot_local        = u_dot(idx);
-        du_dot_du_local    = du_dot_du(idx);
-      }
+      u_dot_local        = u_dot(idx);
+      du_dot_du_local    = du_dot_du(idx);
     }
 
     for (unsigned int qp=0; qp < nqp; qp++)
@@ -562,11 +553,8 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
 
       if (is_transient)
       {
-        if (_is_nl)
-        {
-          _u_dot[qp]        += phi_local * u_dot_local;
-          _du_dot_du[qp]    += phi_local * du_dot_du_local;
-        }
+        _u_dot[qp]        += phi_local * u_dot_local;
+        _du_dot_du[qp]    += phi_local * du_dot_du_local;
 
         if (_need_u_old)
           _u_old[qp]        += phi_local * soln_old_local;
@@ -601,11 +589,8 @@ MooseVariable::restoreUnperturbedElemValues()
 
   if (_subproblem.isTransient())
   {
-    if (_is_nl)
-    {
-      _u_dot = _u_dot_bak;
-      _du_dot_du = _du_dot_du_bak;
-    }
+    _u_dot = _u_dot_bak;
+    _du_dot_du = _du_dot_du_bak;
 
     if (_need_u_old)
       _u_old = _u_old_bak;
@@ -642,11 +627,8 @@ MooseVariable::computeElemValues()
 
   if (is_transient)
   {
-    if (_is_nl)
-    {
-      _u_dot.resize(nqp);
-      _du_dot_du.resize(nqp);
-    }
+    _u_dot.resize(nqp);
+    _du_dot_du.resize(nqp);
 
     if (_need_u_old)
       _u_old.resize(nqp);
@@ -677,11 +659,8 @@ MooseVariable::computeElemValues()
 
     if (is_transient)
     {
-      if (_is_nl)
-      {
-        _u_dot[i] = 0;
-        _du_dot_du[i] = 0;
-      }
+      _u_dot[i] = 0;
+      _du_dot_du[i] = 0;
 
       if (_need_u_old)
         _u_old[i] = 0;
@@ -745,11 +724,8 @@ MooseVariable::computeElemValues()
       if (_need_u_older || _need_grad_older || _need_second_older)
         soln_older_local = solution_older(idx);
 
-      if (_is_nl)
-      {
-        u_dot_local        = u_dot(idx);
-        du_dot_du_local    = du_dot_du(idx);
-      }
+      u_dot_local        = u_dot(idx);
+      du_dot_du_local    = du_dot_du(idx);
     }
 
     for (unsigned int qp=0; qp < nqp; qp++)
@@ -794,11 +770,8 @@ MooseVariable::computeElemValues()
 
       if (is_transient)
       {
-        if (_is_nl)
-        {
-          _u_dot[qp]        += phi_local * u_dot_local;
-          _du_dot_du[qp]    += phi_local * du_dot_du_local;
-        }
+        _u_dot[qp]        += phi_local * u_dot_local;
+        _du_dot_du[qp]    += phi_local * du_dot_du_local;
 
         if (_need_u_old)
           _u_old[qp]        += phi_local * soln_old_local;
@@ -835,11 +808,8 @@ MooseVariable::computeElemValuesFace()
 
   if (is_transient)
   {
-    if (_is_nl)
-    {
-      _u_dot.resize(nqp);
-      _du_dot_du.resize(nqp);
-    }
+    _u_dot.resize(nqp);
+    _du_dot_du.resize(nqp);
 
     if (_need_u_old)
       _u_old.resize(nqp);
@@ -867,11 +837,8 @@ MooseVariable::computeElemValuesFace()
 
     if (_subproblem.isTransient())
     {
-      if (_is_nl)
-      {
-        _u_dot[i] = 0;
-        _du_dot_du[i] = 0;
-      }
+      _u_dot[i] = 0;
+      _du_dot_du[i] = 0;
 
       if (_need_u_old)
         _u_old[i] = 0;
@@ -945,11 +912,8 @@ MooseVariable::computeElemValuesFace()
 
       if (is_transient)
       {
-        if (_is_nl)
-        {
-          _u_dot[qp]        += phi_local * u_dot(idx);
-          _du_dot_du[qp]    += phi_local * du_dot_du(idx);
-        }
+        _u_dot[qp]        += phi_local * u_dot(idx);
+        _du_dot_du[qp]    += phi_local * du_dot_du(idx);
 
         if (_need_u_old)
           _u_old[qp]        += phi_local * soln_old_local;
@@ -1242,11 +1206,8 @@ MooseVariable::computeNodalValues()
     {
       _nodal_u_old.resize(n);
       _nodal_u_older.resize(n);
-      if (_is_nl)
-      {
-        _nodal_u_dot.resize(n);
-        _nodal_du_dot_du.resize(n);
-      }
+      _nodal_u_dot.resize(n);
+      _nodal_du_dot_du.resize(n);
     }
 
     for (unsigned int i = 0; i < n; i++)
@@ -1258,11 +1219,8 @@ MooseVariable::computeNodalValues()
         _nodal_u_old[i] = _sys.solutionOld()(_dof_indices[i]);
         _nodal_u_older[i] = _sys.solutionOlder()(_dof_indices[i]);
 
-        if (_is_nl)
-        {
-          _nodal_u_dot[i] = _sys.solutionUDot()(_dof_indices[i]);
-          _nodal_du_dot_du[i] = _sys.solutionDuDotDu()(_dof_indices[i]);
-        }
+        _nodal_u_dot[i] = _sys.solutionUDot()(_dof_indices[i]);
+        _nodal_du_dot_du[i] = _sys.solutionDuDotDu()(_dof_indices[i]);
       }
     }
   }

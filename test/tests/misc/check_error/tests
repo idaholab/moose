@@ -78,12 +78,6 @@
     method = 'DBG'
   [../]
 
-  [./coupled_dot_aux_var_test]
-    type = 'RunException'
-    input = 'coupled_dot_aux_var_test.i'
-    expect_err = "Coupling time derivative of an auxiliary variable is not allowed."
-  [../]
-
   [./deprecated_block_test]
     type = 'RunException'
     input = 'deprecated_block_test.i'

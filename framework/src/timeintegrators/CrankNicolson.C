@@ -37,8 +37,8 @@ CrankNicolson::~CrankNicolson()
 void
 CrankNicolson::computeTimeDerivatives()
 {
-  _u_dot  = *_nl.currentSolution();
-  _u_dot -= _nl.solutionOld();
+  _u_dot  = *_solution;
+  _u_dot -= _solution_old;
   _u_dot *= 2. / _dt;
   _u_dot.close();
 
@@ -59,7 +59,7 @@ CrankNicolson::preSolve()
     _du_dot_du.close();
 
     // for the first time step, compute residual for the old time step
-    _fe_problem.computeResidualType(_nl.solutionOld(), *_nl.sys().rhs, Moose::KT_NONTIME);
+    _fe_problem.computeResidualType(_solution_old, *_nl.sys().rhs, Moose::KT_NONTIME);
     _residual_old = *_nl.sys().rhs;
     _residual_old.close();
   }
