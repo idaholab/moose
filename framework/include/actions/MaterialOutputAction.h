@@ -60,7 +60,7 @@ private:
    * @param property_name The name of the property to test
    */
   template<typename T>
-  bool hasProperty(std::string property_name);
+  bool hasProperty(const std::string & property_name);
 
   /**
    * Template method for creating the necessary objects for the various material property types
@@ -73,7 +73,7 @@ private:
    * act() method.
    */
   template<typename T>
-  void materialOutputHelper(std::string property_name, Material * material);
+  void materialOutputHelper(const std::string & property_name, Material * material);
 
   /**
    * A method for creating an AuxVariable and associated action
@@ -82,7 +82,8 @@ private:
    * @param variable_name The AuxVariable name to create
    * @param material A pointer to the Material object containing the property of interest
    */
-  MooseObjectAction * createAction(std::string type, std::string property_name, std::string variable_name, Material * material);
+  MooseObjectAction * createAction(const std::string & type, const std::string & property_name,
+                                   const std::string & variable_name, Material * material);
 
   /// Pointer the MaterialData object storing the block restricted materials
   MaterialData * _block_material_data;
@@ -104,14 +105,14 @@ private:
 
 template<typename T>
 void
-MaterialOutputAction::materialOutputHelper(std::string property_name, Material * material)
+MaterialOutputAction::materialOutputHelper(const std::string & /*property_name*/, Material * /*material*/)
 {
   mooseError("Unknown type, you must create a specialization of materialOutputHelper");
 }
 
 template<typename T>
 bool
-MaterialOutputAction::hasProperty(std::string property_name)
+MaterialOutputAction::hasProperty(const std::string & property_name)
 {
   if (_block_material_data->haveProperty<T>(property_name) || _boundary_material_data->haveProperty<T>(property_name))
     return true;

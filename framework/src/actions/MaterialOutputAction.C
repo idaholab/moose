@@ -19,13 +19,13 @@
 
 // Declare the output helper specializations
 template<>
-void MaterialOutputAction::materialOutputHelper<Real>(std::string material_name, Material * material);
+void MaterialOutputAction::materialOutputHelper<Real>(const std::string & material_name, Material * material);
 
 template<>
-void MaterialOutputAction::materialOutputHelper<RealVectorValue>(std::string material_name, Material * material);
+void MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & material_name, Material * material);
 
 template<>
-void MaterialOutputAction::materialOutputHelper<RealTensorValue>(std::string material_name, Material * material);
+void MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & material_name, Material * material);
 
 
 template<>
@@ -127,7 +127,8 @@ MaterialOutputAction::act()
 }
 
 MooseObjectAction *
-MaterialOutputAction::createAction(std::string type, std::string property_name, std::string variable_name, Material * material)
+MaterialOutputAction::createAction(const std::string & type, const std::string & property_name,
+                                   const std::string & variable_name, Material * material)
 {
   // Declare the pointer to be returned by this method
   MooseObjectAction * action;
@@ -197,7 +198,7 @@ MaterialOutputAction::createAction(std::string type, std::string property_name, 
 
 template<>
 void
-MaterialOutputAction::materialOutputHelper<Real>(std::string property_name, Material * material)
+MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_name, Material * material)
 {
   MooseObjectAction * action = createAction("MaterialRealAux", property_name, property_name, material);
   _awh.addActionBlock(action);
@@ -205,7 +206,7 @@ MaterialOutputAction::materialOutputHelper<Real>(std::string property_name, Mate
 
 template<>
 void
-MaterialOutputAction::materialOutputHelper<RealVectorValue>(std::string property_name, Material * material)
+MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & property_name, Material * material)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
@@ -222,7 +223,7 @@ MaterialOutputAction::materialOutputHelper<RealVectorValue>(std::string property
 
 template<>
 void
-MaterialOutputAction::materialOutputHelper<RealTensorValue>(std::string property_name, Material * material)
+MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & property_name, Material * material)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
