@@ -174,6 +174,10 @@ CommonOutputAction::createAutoRecoveryCheckpointObject()
 
   // Set the suffix for the auto recovery checkpoint output so when recovering the location is known
   action->getObjectParams().set<std::string>("suffix") = "auto_recovery";
+  if (isParamValid("file_base"))
+    action->getObjectParams().set<std::string>("file_base") = getParam<std::string>("file_base");
+  else
+    action->getObjectParams().set<std::string>("file_base") = FileOutput::getOutputFileBase(_app);
 
   // Add the action to the warehouse
   _awh.addActionBlock(action);
@@ -265,12 +269,12 @@ CommonOutputAction::setRecoverFileBase()
 std::string
 CommonOutputAction::getRecoveryDirectory()
 {
-  // The TestHarness uses a specific checkpoint outputter and naming
+  // The TestHarness uses a specific checkpoint output and naming
   if (getParam<bool>("auto_recovery_part2"))
   {
     std::string file_base;
     if (isParamValid("file_base"))
-      file_base = _pars.get<std::string>("file_base");
+      file_base = getParam<std::string>("file_base");
     if (file_base.empty())
       file_base = FileOutput::getOutputFileBase(_app);
 
