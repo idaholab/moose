@@ -149,6 +149,8 @@ MaterialOutputAction::createAction(std::string type, std::string property_name, 
     InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
     action_params.set<std::string>("type") = type;
     action_params.set<ActionWarehouse *>("awh") = &_awh;
+    action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
+    action_params.set<std::string>("task") = "add_aux_kernel";
 
     // Create the action
     action = static_cast<MooseObjectAction *>(_action_factory.create("AddKernelAction", long_name, action_params));
@@ -159,7 +161,6 @@ MaterialOutputAction::createAction(std::string type, std::string property_name, 
     object_params.set<AuxVariableName>("variable") = variable_name;
     object_params.set<MooseEnum>("execute_on") = "timestep_begin";
     object_params.set<std::vector<SubdomainName> >("block") = material->blocks();
-    action->appendTask("add_aux_kernel");
   }
 
   // Boundary restricted
@@ -175,6 +176,9 @@ MaterialOutputAction::createAction(std::string type, std::string property_name, 
     action_params.set<ActionWarehouse *>("awh") = &_awh;
     action_params.set<std::vector<BoundaryName> >("boundary") = material->boundaryNames();
     action_params.set<NonlinearVariableName>("variable") = variable_name; // needed to avoid error
+    action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
+    action_params.set<std::string>("task") = "add_aux_bc";
+
 
     // Create the action
     action = static_cast<MooseObjectAction *>(_action_factory.create("AddBCAction", long_name, action_params));
@@ -185,7 +189,6 @@ MaterialOutputAction::createAction(std::string type, std::string property_name, 
     object_params.set<AuxVariableName>("variable") = variable_name;
     object_params.set<MooseEnum>("execute_on") = "timestep_begin";
     object_params.set<std::vector<BoundaryName> >("boundary") = material->boundaryNames();
-    action->appendTask("add_aux_bc");
   }
 
   // Return the create action
