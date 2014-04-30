@@ -52,11 +52,8 @@ MooseVariableScalar::reinit()
   _u.resize(n);
   _u_old.resize(n);
   _u_older.resize(n);
-  if (_is_nl)
-  {
-    _u_dot.resize(n);
-    _du_dot_du.resize(n);
-  }
+  _u_dot.resize(n);
+  _du_dot_du.resize(n);
 
   for (dof_id_type i = 0; i < n; i++)
   {
@@ -65,11 +62,8 @@ MooseVariableScalar::reinit()
     _u_old[i] = solution_old(idx);
     _u_older[i] = solution_older(idx);
 
-    if (_is_nl)
-    {
-      _u_dot[i]        = u_dot(idx);
-      _du_dot_du[i]    = du_dot_du(idx);
-    }
+    _u_dot[i]        = u_dot(idx);
+    _du_dot_du[i]    = du_dot_du(idx);
   }
 }
 

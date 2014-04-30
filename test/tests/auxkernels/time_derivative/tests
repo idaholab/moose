@@ -1,0 +1,7 @@
+[Tests]
+  [./implicit_euler]
+    type = 'Exodiff'
+    input = 'time_derivative.i'
+    exodiff = 'time_derivative_out.e'
+  [../]
+[]

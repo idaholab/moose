@@ -35,6 +35,9 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
     SystemTempl<TransientExplicitSystem>(subproblem, name, Moose::VAR_AUXILIARY),
     _mproblem(subproblem),
     _serialized_solution(*NumericVector<Number>::build(_mproblem.comm()).release()),
+    _time_integrator(NULL),
+    _u_dot(addVector("u_dot", true, GHOSTED)),
+    _du_dot_du(addVector("du_dot_du", true, GHOSTED)),
     _need_serialized_solution(false)
 {
   _nodal_vars.resize(libMesh::n_threads());
@@ -104,6 +107,16 @@ AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, 
         _elem_vars[tid][var_name] = var;
     }
   }
+}
+
+void
+AuxiliarySystem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
+{
+  parameters.set<SystemBase *>("_sys") = this;
+  TimeIntegrator * ti = static_cast<TimeIntegrator *>(_factory.create(type, name, parameters));
+  if (ti == NULL)
+    mooseError("Not an time integrator object.");
+  _time_integrator = ti;
 }
 
 void
@@ -227,6 +240,18 @@ AuxiliarySystem::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, Bo
 }
 
 NumericVector<Number> &
+AuxiliarySystem::solutionUDot()
+{
+  return _u_dot;
+}
+
+NumericVector<Number> &
+AuxiliarySystem::solutionDuDotDu()
+{
+  return _du_dot_du;
+}
+
+NumericVector<Number> &
 AuxiliarySystem::serializedSolution()
 {
   _need_serialized_solution = true;
@@ -254,6 +279,11 @@ AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
     if (_need_serialized_solution)
       serializeSolution();
   }
+
+  // can compute time derivatives _after_ the current values were updated
+  // also, at the very beginning, avoid division by dt which might be zero.
+  if (_mproblem.dt() > 0.)
+    _time_integrator->computeTimeDerivatives();
 }
 
 std::set<std::string>

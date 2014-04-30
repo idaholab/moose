@@ -51,8 +51,8 @@ BDF2::computeTimeDerivatives()
 {
   if (_t_step == 1)
   {
-    _u_dot  = *_nl.currentSolution();
-    _u_dot -= _nl.solutionOld();
+    _u_dot  = *_solution;
+    _u_dot -= _solution_old;
     _u_dot *= 1 / _dt;
     _u_dot.close();
 
@@ -62,9 +62,9 @@ BDF2::computeTimeDerivatives()
   else
   {
     _u_dot.zero();
-    _u_dot.add(_weight[0], *_nl.currentSolution());
-    _u_dot.add(_weight[1], _nl.solutionOld());
-    _u_dot.add(_weight[2], _nl.solutionOlder());
+    _u_dot.add(_weight[0], *_solution);
+    _u_dot.add(_weight[1], _solution_old);
+    _u_dot.add(_weight[2], _solution_older);
     _u_dot.scale(1. / _dt);
     _u_dot.close();
 

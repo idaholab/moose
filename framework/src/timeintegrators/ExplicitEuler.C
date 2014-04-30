@@ -37,8 +37,8 @@ ExplicitEuler::~ExplicitEuler()
 void
 ExplicitEuler::computeTimeDerivatives()
 {
-  _u_dot  = *_nl.currentSolution();
-  _u_dot -= _nl.solutionOld();
+  _u_dot  = *_solution;
+  _u_dot -= _solution_old;
   _u_dot *= 1 / _dt;
   _u_dot.close();
 

@@ -472,6 +472,7 @@ NonlinearSystem::converged()
 void
 NonlinearSystem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
 {
+  parameters.set<SystemBase *>("_sys") = this;
   TimeIntegrator * ti = static_cast<TimeIntegrator *>(_factory.create(type, name, parameters));
   if (ti == NULL)
     mooseError("Not an time integrator object.");

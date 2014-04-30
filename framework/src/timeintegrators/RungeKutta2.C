@@ -44,11 +44,11 @@ RungeKutta2::preSolve()
 void
 RungeKutta2::computeTimeDerivatives()
 {
-  _u_dot  = *_nl.currentSolution();
+  _u_dot  = *_solution;
   if (_stage == 1)
-    _u_dot -= _nl.solutionOld();
+    _u_dot -= _solution_old;
   else
-    _u_dot -= _nl.solutionOlder();
+    _u_dot -= _solution_older;
   _u_dot *= 1. / _dt;
 
   _du_dot_du = 1. / _dt;
