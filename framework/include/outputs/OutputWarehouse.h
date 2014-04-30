@@ -62,7 +62,7 @@ public:
    * Returns true if the output object exists
    * @param name The name of the output object for which to test for existence within the warehouse
    */
-  bool hasOutput(std::string name);
+  bool hasOutput(const std::string & name);
 
   /**
    * Calls the outputInitial method for each of the output objects
@@ -110,7 +110,7 @@ public:
    *
    * @see Output::initOutputList
    */
-  std::vector<std::string> getMaterialOutputHideList(std::string name);
+  std::vector<std::string> getMaterialOutputHideList(const std::string & name);
 
   /**
    * Calls the setFileNumber method for every FileOutput output object
@@ -143,9 +143,17 @@ public:
   std::set<Real> & getSyncTimes();
 
   /**
-   * Call the init() method for each of the Outputters
+   * Call the init() method for each of the Outputs
    */
   void init();
+
+  /**
+   * Test that the output names exist
+   * @param A vector of names to check
+   * This method will produce an error if any of the supplied
+   * names do not exist in the warehouse. Reserved names are not considered.
+   */
+  void checkOutputs(const std::set<OutputName> & names);
 
   /**
    * Return an Output object by name
@@ -154,7 +162,7 @@ public:
    * @return A pointer to the output object
    */
   template<typename T>
-  T * getOutput(std::string name);
+  T * getOutput(const std::string & name);
 
   /**
    * Return a vector of objects by names
@@ -163,7 +171,7 @@ public:
    * @return A pointer to the output object
    */
   template<typename T>
-  std::vector<T *> getOutputs(std::vector<std::string> names);
+  std::vector<T *> getOutputs(const std::vector<std::string> & names);
 
   /**
    * Return a vector of objects of a given type
@@ -181,6 +189,18 @@ public:
   template<typename T>
   std::vector<std::string> getOutputNames();
 
+  /**
+   * Return a set of reserved output names
+   * @return A std::set of reserved names
+   */
+  const std::set<std::string> & getReservedNames();
+
+  /**
+   * Test if the given name is reserved
+   * @param name The name to test
+   * @return True if the name is reserved
+   */
+  bool isReservedName(const std::string & name);
 
 private:
 
@@ -212,9 +232,16 @@ private:
    * This is a private function that is called by the friend class MaterialOutputAction, it is not
    * intended for any other purpose than automatic material property output control.
    */
-  void updateMaterialOutput(std::vector<OutputName> outputs, std::set<AuxVariableName> variables);
+  void updateMaterialOutput(const std::set<OutputName> & outputs, const std::set<AuxVariableName> & variables);
 
-  void setMaterialOutputVariables(std::set<AuxVariableName> variables);
+  /**
+   * Method for setting the complete list of auto generated material property output AuxVariables
+   * @param variables The set of variables to store as the complete list
+   *
+   * This complete list is compared with the output specific lists by getMaterialOutputHideList to
+   * generate this variables that should be hidden for a given output object
+   */
+  void setMaterialOutputVariables(const std::set<AuxVariableName> & variables);
 
   /// The list of all output objects
   std::vector<Output *> _object_ptrs;
@@ -237,20 +264,23 @@ private:
   /// Input file name for this output object
   std::string _input_file_name;
 
-  ///
+  /// Map of output name and AuxVariable names to be output (used by auto Material output)
   std::map<OutputName, std::set<AuxVariableName> > _material_output_map;
+
+  /// List of all variable created by auto material output
   std::set<AuxVariableName> _all_material_output_variables;
 
+  /// List of reserved names
+  std::set<std::string> _reserved;
 
   // Allow complete access to FEProblem for calling initial/timestepSetup functions
   friend class FEProblem;
   friend class MaterialOutputAction;
-
 };
 
 template<typename T>
 T *
-OutputWarehouse::getOutput(std::string name)
+OutputWarehouse::getOutput(const std::string & name)
 {
   // Check that the object exists
   if (!hasOutput(name))
@@ -269,13 +299,13 @@ OutputWarehouse::getOutput(std::string name)
 
 template<typename T>
 std::vector<T *>
-OutputWarehouse::getOutputs(std::vector<std::string> names)
+OutputWarehouse::getOutputs(const std::vector<std::string> & names)
 {
   // The vector to output
   std::vector<T *> outputs;
 
   // Populate the vector
-  for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it)
+  for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
     outputs.push_back(getOutput<T>(*it));
 
   // Return the objects
@@ -290,7 +320,7 @@ OutputWarehouse::getOutputs()
   std::vector<T *> outputs;
 
   // Populate the vector
-  for (std::map<std::string, Output *>::iterator it = _object_map.begin(); it != _object_map.end(); ++it)
+  for (std::map<std::string, Output *>::const_iterator it = _object_map.begin(); it != _object_map.end(); ++it)
   {
     T * output = dynamic_cast<T*>(it->second);
     if (output != NULL)
@@ -314,7 +344,7 @@ OutputWarehouse::getOutputNames()
   std::vector<std::string> names;
 
   // Loop through the objects and store the name if the type cast succeeds
-  for (std::map<std::string, Output *>::iterator it = _object_map.begin(); it != _object_map.end(); ++it)
+  for (std::map<std::string, Output *>::const_iterator it = _object_map.begin(); it != _object_map.end(); ++it)
   {
     T * output = dynamic_cast<T*>(it->second);
     if (output != NULL)

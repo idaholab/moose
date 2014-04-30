@@ -134,6 +134,12 @@ public:
 
   void checkStatefulSanity() const;
 
+  /**
+   * Get the list of output objects that this class is restricted
+   * @return A vector of OutputNames
+   */
+  std::set<OutputName> getOutputs();
+
 protected:
   SubProblem & _subproblem;
 

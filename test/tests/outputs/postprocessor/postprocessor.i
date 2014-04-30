@@ -76,6 +76,15 @@
     system = auxiliary
     outputs = 'exodus'
   [../]
+  [./num_nonlinear]
+    type = NumVars
+    system = nonlinear
+    outputs = 'all'
+  [../]
+  [./num_dofs]
+    type = NumDOFs
+    outputs = 'none'
+  [../]
 []
 
 [Executioner]

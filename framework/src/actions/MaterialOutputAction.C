@@ -73,20 +73,19 @@ MaterialOutputAction::act()
   // Loop through each material object
   for (std::vector<Material *>::iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
   {
-
     // Extract the names of the output objects to which the material properties will be exported
-    std::vector<OutputName> outputs = (*material_iter)->getParam<std::vector<OutputName> >("outputs");
+    std::set<OutputName> outputs = (*material_iter)->getOutputs();
 
     // Extract the property names that will actually be output
     std::vector<std::string> output_properties = (*material_iter)->getParam<std::vector<std::string> >("output_properties");
 
-    /* Clear the list of variable names for the current material object, this list will be popupated with all the
+    /* Clear the list of variable names for the current material object, this list will be populated with all the
     variables names for the current material object and is needed for purposes of controlling the which output objects
     show the material property data */
     _material_variable_names.clear();
 
     // Only continue if the the 'outputs' input parameter is not equal to 'none'
-    if (std::find(outputs.begin(), outputs.end(), "none") == outputs.end())
+    if (outputs.find("none") == outputs.end())
     {
       // Loop over the material property names
       const std::set<std::string> names = (*material_iter)->getSuppliedItems();

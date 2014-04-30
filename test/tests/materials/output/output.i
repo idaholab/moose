@@ -48,7 +48,7 @@
   [./function_material]
     type = OutputTestMaterial
     block = 0
-    outputs = exodus
+    outputs = all
   [../]
 []
 

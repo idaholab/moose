@@ -325,6 +325,7 @@
 #include "SetupPostprocessorDataAction.h"
 #include "PerfLogOutputAction.h"
 #include "MaterialOutputAction.h"
+#include "CheckMaterialOutputAction.h"
 
 // Outputs
 #include "Exodus.h"
@@ -731,6 +732,7 @@ addActionTypes(Syntax & syntax)
 
   registerTask("perf_log_output", true);
   registerTask("setup_material_output", true);
+  registerTask("check_material_output", true);
 
   /**************************/
   /****** Dependencies ******/
@@ -789,7 +791,7 @@ addActionTypes(Syntax & syntax)
 "(setup_pps_complete)"
 "(setup_debug)"
 "(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, add_output)"
-"(perf_log_output)"
+"(perf_log_output, check_material_output)"
 "(check_integrity)"
 );
 
@@ -851,6 +853,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   // Enable automatic output of material properties
   registerAction(MaterialOutputAction, "setup_material_output");
+  registerAction(CheckMaterialOutputAction, "check_material_output");
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");

@@ -163,3 +163,9 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
     _subproblem.storeMatPropName(*it, prop_name);
   }
 }
+
+std::set<OutputName>
+Material::getOutputs()
+{
+  return std::set<OutputName>(getParam<std::vector<OutputName> >("outputs").begin(), getParam<std::vector<OutputName> >("outputs").end());
+}

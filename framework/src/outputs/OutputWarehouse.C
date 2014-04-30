@@ -32,6 +32,10 @@
 OutputWarehouse::OutputWarehouse() :
     _has_screen_console(false)
 {
+  // Set the reserved names
+  _reserved.insert("none");                  // allows 'none' to be used as a keyword in 'outputs' parameter
+  _reserved.insert("all");                   // allows 'all' to be used as a keyword in 'outputs' parameter
+  _reserved.insert("moose_debug_outputter"); // the [Debug] block creates this object
 }
 
 OutputWarehouse::~OutputWarehouse()
@@ -104,7 +108,7 @@ OutputWarehouse::addOutput(Output * output)
 }
 
 bool
-OutputWarehouse::hasOutput(std::string name)
+OutputWarehouse::hasOutput(const std::string & name)
 {
   return _object_map.find(name) != _object_map.end();
 }
@@ -229,20 +233,20 @@ OutputWarehouse::getSyncTimes()
 }
 
 void
-OutputWarehouse::updateMaterialOutput(std::vector<OutputName> outputs, std::set<AuxVariableName> variables)
+OutputWarehouse::updateMaterialOutput(const std::set<OutputName> & outputs, const std::set<AuxVariableName> & variables)
 {
-  for (std::vector<OutputName>::iterator it = outputs.begin(); it != outputs.end(); ++it)
+  for (std::set<OutputName>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
     _material_output_map[*it].insert(variables.begin(), variables.end());
 }
 
 void
-OutputWarehouse::setMaterialOutputVariables(std::set<AuxVariableName> variables)
+OutputWarehouse::setMaterialOutputVariables(const std::set<AuxVariableName> & variables)
 {
   _all_material_output_variables = variables;
 }
 
 std::vector<std::string>
-OutputWarehouse::getMaterialOutputHideList(std::string name)
+OutputWarehouse::getMaterialOutputHideList(const std::string & name)
 {
   // The hide list to return
   std::vector<std::string> hide;
@@ -255,4 +259,24 @@ OutputWarehouse::getMaterialOutputHideList(std::string name)
 
   // Return the list of material property AuxVariables to hide from output
   return hide;
+}
+
+void
+OutputWarehouse::checkOutputs(const std::set<OutputName> & names)
+{
+  for (std::set<OutputName>::const_iterator it = names.begin(); it != names.end(); ++it)
+    if (!isReservedName(*it) && !hasOutput(*it))
+      mooseError("The output object '" << *it << "' is not a defined output object");
+}
+
+const std::set<std::string> &
+OutputWarehouse::getReservedNames()
+{
+  return _reserved;
+}
+
+bool
+OutputWarehouse::isReservedName(const std::string & name)
+{
+  return _reserved.find(name) != _reserved.end();
 }

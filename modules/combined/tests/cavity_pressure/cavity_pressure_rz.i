@@ -118,7 +118,7 @@
       temperature = aveTempInterior
       volume = internalVolume
       startup_time = 0.5
-      outputs = ppress
+      output = ppress
     [../]
   [../]
 

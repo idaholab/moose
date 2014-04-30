@@ -11,4 +11,16 @@
     input = duplicate_output_files.i
     expect_err = 'An output file with the name, duplicate_output_files_out.e, already exists.'
   [../]
+  [./none_reserved]
+    # Test that the "none" keyword is actually reserved
+    type = RunException
+    input = none_reserved.i
+    expect_err = "The name 'none' is a reserved name for output objects"
+  [../]
+  [./all_reserved]
+    # Test that the "all" keyword is actually reserved
+    type = RunException
+    input = all_reserved.i
+    expect_err = "The name 'all' is a reserved name for output objects"
+  [../]
 []
