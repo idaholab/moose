@@ -28,6 +28,10 @@ OptionallyCoupledForce::OptionallyCoupledForce(const std::string & name, InputPa
     Kernel(name, parameters),
     _v_var(coupled("v")),
     _v(coupledValue("v")),
+    _grad_v(coupledGradient("v")),
+    _second_v(coupledSecond("v")),
+    _v_dot(coupledDot("v")),
+    _v_dot_du(coupledDotDu("v")),
     _v_coupled(isCoupled("v"))
 {
   if (!_v_coupled && _v_var < 64)

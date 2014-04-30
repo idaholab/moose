@@ -41,6 +41,10 @@ protected:
 private:
   unsigned int _v_var;
   VariableValue & _v;
+  VariableGradient & _grad_v;
+  VariableSecond & _second_v;
+  VariableValue & _v_dot;
+  VariableValue & _v_dot_du;
   bool _v_coupled;
 };
 

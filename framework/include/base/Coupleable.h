@@ -198,6 +198,9 @@ protected:
   /// Will hold the default value for optional coupled variables.
   std::map<std::string, VariableValue *> _default_value;
 
+  /// This will always be zero because the default values for optionally coupled variables is always constant and this is used for time derivative info
+  VariableValue _default_value_zero;
+
   /// This will always be zero because the default values for optionally coupled variables is always constant
   VariableGradient _default_gradient;
 
