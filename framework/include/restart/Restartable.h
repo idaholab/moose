@@ -202,6 +202,8 @@ private:
   friend class NearestNodeLocator;
   friend class ReportableData;
   friend class FileOutput;
+  friend class FEProblem;
+  friend class Transient;
 };
 
 template<typename T>

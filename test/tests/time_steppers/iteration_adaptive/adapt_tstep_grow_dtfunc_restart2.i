@@ -55,6 +55,7 @@
 
   start_time = 0.0
   end_time = 20.0
+  num_steps = 5
 
   [./TimeStepper]
     type = IterationAdaptiveDT
@@ -74,7 +75,7 @@
 []
 
 [Outputs]
-  file_base = adapt_tstep_grow_dtfunc_out
+  file_base = adapt_tstep_grow_dtfunc_out_2
   output_initial = true
   exodus = true
   [./console]

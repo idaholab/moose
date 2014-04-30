@@ -232,7 +232,7 @@ public:
   virtual void executeExecutioner();
 
   /**
-   * Returns true if the user specifed --parallel-mesh on the command line and false
+   * Returns true if the user specified --parallel-mesh on the command line and false
    * otherwise.
    */
   bool getParallelMeshOnCommandLine() const { return _parallel_mesh_on_command_line; }
@@ -264,8 +264,7 @@ public:
 
   /**
    * Store a map of outputter names and file numbers
-   * The MultiApp system requires this to get the file numbering to propogate down through the
-   * multiapps.
+   * The MultiApp system requires this to get the file numbering to propagate down through the Multiapps.
    * @param numbers Map of outputter names and file numbers
    *
    * @see MultiApp TransientMultiApp OutputWarehouse
@@ -382,6 +381,9 @@ protected:
 
   /// Whether or not this is a recovery run
   bool _recover;
+
+  /// Whether or not this is a restart run
+  bool _restart;
 
   /// The base name to recover from.  If blank then we will find the newest recovery file.
   std::string _recover_base;

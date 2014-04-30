@@ -88,7 +88,7 @@ CSV::output()
            << std::setprecision(0)
            << std::setfill('0')
            << std::right
-           << _t_step;
+           << timeStep();
 
     output << ".csv";
 

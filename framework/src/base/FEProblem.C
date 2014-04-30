@@ -115,7 +115,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _transient(false),
     _time(declareRestartableData<Real>("time")),
     _time_old(declareRestartableData<Real>("time_old")),
-    _t_step(declareRestartableData<int>("t_step")),
+    _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
 
