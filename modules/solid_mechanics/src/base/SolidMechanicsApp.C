@@ -4,7 +4,6 @@
 
 #include "AbaqusCreepMaterial.h"
 #include "AbaqusUmatMaterial.h"
-#include "AdaptiveDT.h"
 #include "AdaptiveTransient.h"
 #include "CLSHPlasticMaterial.h"
 #include "CLSHPlasticModel.h"
@@ -141,8 +140,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(Mass);
   registerPostprocessor(JIntegral);
   registerPostprocessor(CavityPressurePostprocessor);
-
-  registerTimeStepper(AdaptiveDT);
 
   registerUserObject(MaterialTensorOnLine);
   registerUserObject(CavityPressureUserObject);
