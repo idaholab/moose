@@ -29,6 +29,7 @@ private:
   const std::string _model;
   const std::string _formulation;
   const MooseEnum _order;
+  const MooseEnum _system;
 };
 
 
