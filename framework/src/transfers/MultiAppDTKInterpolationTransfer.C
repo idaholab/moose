@@ -59,7 +59,7 @@ MultiAppDTKInterpolationTransfer::execute()
         _helper.transferWithOffset(0, i, &from_sys->variable(from_sys->variable_number(_from_var_name)),
                                    to_sys ? &to_sys->variable(to_sys->variable_number(_to_var_name)) : NULL,
                                    _master_position, _multi_app->position(i),
-                                   &libMesh::COMM_WORLD, to_sys ? &_multi_app->comm() : NULL);
+                                   const_cast<libMesh::Parallel::communicator*>(&_communicator.get()), to_sys ? &_multi_app->comm() : NULL);
         break;
       }
 
@@ -74,7 +74,7 @@ MultiAppDTKInterpolationTransfer::execute()
         _helper.transferWithOffset(i, 0, from_sys ? &from_sys->variable(from_sys->variable_number(_from_var_name)) : NULL,
                                    &to_sys->variable(to_sys->variable_number(_to_var_name)),
                                    _multi_app->position(i), _master_position,
-                                   from_sys ? &_multi_app->comm() : NULL, &libMesh::COMM_WORLD);
+                                   from_sys ? &_multi_app->comm() : NULL, const_cast<libMesh::Parallel::communicator*>(&_communicator.get()));
         break;
       }
 
