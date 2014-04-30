@@ -410,19 +410,17 @@ public:
 
   /*
    * Method for applying common parameters
-   * @param common The set of parameters to apply to the parameters store in this object
+   * @param common The set of parameters to apply to the parameters stored in this object
    *
-   * The parameters supplied as an argument are set if:
-   *  (1) The common parameter exists as a local parameter
-   *  (2) The local parameter is not valid
-   *  (3) The local parameter is not private
-   *  (4) The common parameter is valid
-   *  (5) The common parameter is not private
+   * In order to apply common parameter 4 statements must be satisfied
+   *   (1) A local parameter must exist with the same name as common parameter
+   *   (2) Common parameter must valid
+   *   (3) Local parameter must be invalid OR not have been set from its default
+   *   (4) Neither may be private
    *
-   * Output object have a set of common parameters that are passed
-   * down to each of the output object created. This method is used for
-   * apply those common parameters, but only if the parameter exists on the object
-   * and it has yet to be set to a valid value.
+   * Output objects have a set of common parameters that are passed
+   * down to each of the output objects created. This method is used for
+   * applying those common parameters.
    *
    * @see CommonOutputAction AddOutputAction
    */
@@ -439,7 +437,7 @@ private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
 
-  /// This method is called when adding a Parameter with a default value, can be specialzed for non-matching types
+  /// This method is called when adding a Parameter with a default value, can be specialized for non-matching types
   template <typename T, typename S>
   void setParamHelper(const std::string &name, T &l_value, const S &r_value);
 
@@ -463,7 +461,7 @@ private:
   std::vector<std::string> _buildable_types;
 
   /// This parameter collapses one level of nesting in the syntax blocks.  It is used
-  /// in conjuction with MooseObjectAction derived Actions.
+  /// in conjunction with MooseObjectAction derived Actions.
   bool _collapse_nesting;
 
   /// This parameter hides derived MOOSE object types from appearing in syntax dumps
@@ -490,6 +488,9 @@ private:
 
   /// The default value for postprocessors
   std::map<std::string, PostprocessorValue> _default_postprocessor_value;
+
+  /// If a parameters value was set by addParam, and not set again, it will appear in this list (see applyParameters)
+  std::set<std::string> _set_by_add_param;
 
 };
 
@@ -580,6 +581,10 @@ InputParameters::addParam(const std::string &name, const S &value, const std::st
 
   // Set the parameter now
   setParamHelper(name, l_value, value);
+
+  /* Indicate the default value, as set via addParam, is being used. The parameter is removed from the list whenever
+     is changes, see set_attributes */
+  _set_by_add_param.insert(name);
 }
 
 template <typename T>

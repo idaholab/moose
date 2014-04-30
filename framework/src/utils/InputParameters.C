@@ -75,6 +75,10 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
   // valid_params don't make sense for MooseEnums
   if (!inserted_only && !have_parameter<MooseEnum>(name))
     _valid_params.insert(name);
+
+  /* If set_attributes is called then the user has changed it from the default value
+     set by addParam, thus remove if from the list */
+  _set_by_add_param.erase(name);
 }
 
 std::string
@@ -419,28 +423,28 @@ void
 InputParameters::applyParameters(const InputParameters & common)
 {
   // Loop through the common parameters
-  for(InputParameters::const_iterator it = common.begin(); it != common.end(); ++it)
+  for (InputParameters::const_iterator it = common.begin(); it != common.end(); ++it)
   {
     // Common parameter name
     const std::string & common_name = it->first;
 
-    // Does the paramter exist, is it valid, and is it private for this set of paramters
-    bool has = _values.find(common_name) != _values.end();
-    bool valid = isParamValid(common_name);
-    bool priv = isPrivate(common_name);
+    // Extract the properties from the local parameter for the current common parameter name
+    bool local_exist = _values.find(common_name) != _values.end();
+    bool local_set   = _set_by_add_param.find(common_name) == _set_by_add_param.end();
+    bool local_priv  = isPrivate(common_name);
+    bool local_valid = isParamValid(common_name);
 
-    // Is the common parameter valid or private
+    // Extract the properties from the common parameter
     bool common_valid = common.isParamValid(common_name);
-    bool common_priv= common.isPrivate(common_name);
+    bool common_priv  = common.isPrivate(common_name);
 
-    /* Apply the common parameter if:
-     * (1) The common paramter exists on THIS set of parameters
-     * (2) THIS parameter is not already valid
-     * (3) THIS paramater is not private
-     * (4) The common parameter is valid
-     * (5) The common parameter is not private
+    /* In order to apply common parameter 4 statements must be satisfied
+     * (1) A local parameter must exist with the same name as common parameter
+     * (2) Common parameter must valid
+     * (3) Local parameter must be invalid OR not have been set from its default
+     * (4) Neither may be private
      */
-    if (has && !valid && !priv && common_valid && !common_priv)
+    if ( local_exist && common_valid && (!local_valid || !local_set) && (!common_priv || !local_priv))
     {
       delete _values[common_name];
       _values[common_name] = it->second->clone();
