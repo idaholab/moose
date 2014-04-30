@@ -35,7 +35,7 @@
  *
  * PiecewisBilinear also sends samples to BilinearInterpolation.  These samples are the z-coordinate of the current
  * integration point, and the current value of time.  The name of the file that contains this data has to be included
- * in the function block of the inpute file like this...yourFileName = example.csv.
+ * in the function block of the inpute file like this...data_file = example.csv.
  */
 
 #include "PiecewiseBilinear.h"
@@ -45,7 +45,6 @@ InputParameters validParams<PiecewiseBilinear>()
 {
   InputParameters params = validParams<Function>();
   params.addParam<std::string>("data_file", "File holding csv data for use with PiecewiseBilinear");
-  params.addParam<std::string>("yourFileName", "File holding csv data for use with PiecewiseBilinear (Deprecated)");
   params.addParam<int>("axis", -1, "The axis used (0, 1, or 2 for x, y, or z).");
   params.addParam<int>("xaxis", -1, "The coordinate used for x-axis data (0, 1, or 2 for x, y, or z).");
   params.addParam<int>("yaxis", -1, "The coordinate used for y-axis data (0, 1, or 2 for x, y, or z).");
@@ -57,8 +56,7 @@ InputParameters validParams<PiecewiseBilinear>()
 PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters parameters) :
   Function(name, parameters),
   _bilinear_interp( NULL ),
-  _data_file_name( isParamValid("yourFileName") ? getParam<std::string>("yourFileName") :
-              (isParamValid("data_file") ? getParam<std::string>("data_file") : "")),
+  _data_file_name( isParamValid("data_file") ? getParam<std::string>("data_file") : ""),
   _axis(getParam<int>("axis")),
   _yaxis(getParam<int>("yaxis")),
   _xaxis(getParam<int>("xaxis")),
@@ -68,16 +66,7 @@ PiecewiseBilinear::PiecewiseBilinear(const std::string & name, InputParameters p
   _scale_factor( getParam<Real>("scale_factor") ),
   _radial(getParam<bool>("radial"))
 {
-  if (parameters.isParamValid("yourFileName"))
-  {
-    mooseWarning("In PiecewiseBilinear, 'yourFileName' is Deprecated.  Use 'data_file' instead.");
-
-    if (parameters.isParamValid("data_file"))
-    {
-      mooseError("In PiecewiseBilinear, cannot specify both 'yourFileName' and 'data_file'.");
-    }
-  }
-  else if (!parameters.isParamValid("data_file"))
+  if (!parameters.isParamValid("data_file"))
   {
     mooseError("In PiecewiseBilinear, 'data_file' must be specified.");
   }
