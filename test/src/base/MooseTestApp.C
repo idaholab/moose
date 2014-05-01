@@ -85,6 +85,7 @@
 #include "MTICSum.h"
 #include "MTICMult.h"
 
+// Materials
 #include "MTMaterial.h"
 #include "Diff1Material.h"
 #include "Diff2Material.h"
@@ -99,6 +100,7 @@
 #include "VarCouplingMaterial.h"
 #include "VarCouplingMaterialEigen.h"
 #include "BadStatefulMaterial.h"
+#include "OutputTestMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -319,6 +321,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(VarCouplingMaterial);
   registerMaterial(VarCouplingMaterialEigen);
   registerMaterial(BadStatefulMaterial);
+  registerMaterial(OutputTestMaterial);
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);

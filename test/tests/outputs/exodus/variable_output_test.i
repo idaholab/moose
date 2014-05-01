@@ -82,7 +82,7 @@
   [./aux_pp]
     type = ScalarVariable
     variable = aux
-    output = none
+    outputs = none
   [../]
 []
 

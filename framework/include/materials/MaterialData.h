@@ -93,7 +93,6 @@ public:
   template <typename T>
   bool havePropertyOlder(const std::string & prop_name) const;
 
-
   template <typename T>
   MaterialProperty<T> & getProperty(const std::string & prop_name);
 
@@ -132,7 +131,6 @@ protected:
 
 };
 
-
 template <typename T>
 inline bool
 MaterialData::haveProperty (const std::string & prop_name) const
@@ -154,6 +152,7 @@ template <typename T>
 inline bool
 MaterialData::havePropertyOld (const std::string & prop_name) const
 {
+
   if (!_storage.hasProperty(prop_name))
     return false;
 

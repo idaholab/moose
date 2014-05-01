@@ -15,7 +15,8 @@
 #ifndef MATERIALREALAUX_H
 #define MATERIALREALAUX_H
 
-#include "AuxKernel.h"
+// MOOSE includes
+#include "MaterialAuxBase.h"
 
 //Forward Declarations
 class MaterialRealAux;
@@ -23,20 +24,26 @@ class MaterialRealAux;
 template<>
 InputParameters validParams<MaterialRealAux>();
 
-class MaterialRealAux : public AuxKernel
+/**
+ * Object for passing a scalar, REAL material property to an AuxVariable
+ */
+class MaterialRealAux : public MaterialAuxBase<Real>
 {
 public:
 
+  /**
+   * Class constructor.
+   * @param name Name of the object
+   * @param parameters Input parameters for this object
+   */
   MaterialRealAux(const std::string & name, InputParameters parameters);
 
 protected:
 
+  /**
+   * Compute the material property and apply the factor and offset parameters
+   */
   virtual Real computeValue();
-
-  MaterialProperty<Real> & _prop;
-  const Real _factor;
-  const Real _offset;
-
 };
 
 #endif //MATERIALREALAUX_H

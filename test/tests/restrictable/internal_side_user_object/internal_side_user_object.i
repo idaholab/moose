@@ -34,8 +34,7 @@
 [Postprocessors]
   [./all_pp]
     type = NumInternalSides
-    output = auto
-  [../]
+   [../]
   [./block_1_pp]
     type = NumInternalSides
     block = 1

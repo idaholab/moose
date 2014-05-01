@@ -116,11 +116,8 @@ void
 Exodus::outputElementalVariables()
 {
   // Make sure the the file is ready for writing of elemental data
-  if (!_exodus_initialized)
+  if (!_exodus_initialized || !hasNodalVariableOutput())
     outputEmptyTimestep();
-
-  std::vector<std::string> v = getElementalVariableOutput();
-  for (std::vector<std::string>::iterator it = v.begin(); it != v.end(); ++it)
 
   // Write the elemental data
   _exodus_io_ptr->set_output_variables(getElementalVariableOutput());
