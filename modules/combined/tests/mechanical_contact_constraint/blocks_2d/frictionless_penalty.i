@@ -15,10 +15,6 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./nodal_area]
-    order = FIRST
-    family = LAGRANGE
-  [../]
   [./inc_slip_x]
   [../]
   [./inc_slip_y]
@@ -169,43 +165,15 @@
   [../]
 []
 
-[UserObjects]
-  [./nodal_area]
-    type = NodalArea
-    variable = nodal_area
-    boundary = 3
-    execute_on = timestep_begin
-    use_displaced_mesh = true
-  [../]
-[]
-
-[Constraints]
-  [./leftrightx]
-    type = MechanicalContactConstraint
-    variable = disp_x
-    component = 0
-    boundary = 2
+[Contact]
+  [./leftright]
+    system = Constraint
     master = 2
     slave = 3
-    disp_y = disp_y
     disp_x = disp_x
+    disp_y = disp_y
     model = frictionless
     formulation = penalty
     penalty = 1e+7
-    nodal_area = nodal_area
-  [../]
-  [./leftrighty]
-    type = MechanicalContactConstraint
-    variable = disp_y
-    component = 1
-    boundary = 2
-    master = 2
-    slave = 3
-    disp_y = disp_y
-    disp_x = disp_x
-    model = frictionless
-    formulation = penalty
-    penalty = 1e+7
-    nodal_area = nodal_area
   [../]
 []

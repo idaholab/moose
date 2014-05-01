@@ -13,6 +13,7 @@ InputParameters validParams<ContactAction>()
 {
   MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
   MooseEnum formulation("DEFAULT, KINEMATIC, PENALTY, AUGMENTED_LAGRANGE", "DEFAULT");
+  MooseEnum system("DiracKernel, Constraint", "DiracKernel");
 
   InputParameters params = validParams<Action>();
   params.addRequiredParam<BoundaryName>("master", "The master surface");
@@ -29,6 +30,7 @@ InputParameters validParams<ContactAction>()
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
   params.addParam<MooseEnum>("formulation", formulation, "The contact formulation: default, penalty, augmented_lagrange");
+  params.addParam<MooseEnum>("system", system, "System to use for constraint enforcement.  Options are: " + system.getRawNames());
   return params;
 }
 
@@ -44,7 +46,8 @@ ContactAction::ContactAction(const std::string & name, InputParameters params) :
   _tension_release(getParam<Real>("tension_release")),
   _model(getParam<std::string>("model")),
   _formulation(getParam<MooseEnum>("formulation")),
-  _order(getParam<MooseEnum>("order"))
+  _order(getParam<MooseEnum>("order")),
+  _system(getParam<MooseEnum>("system"))
 {
 }
 
@@ -52,20 +55,15 @@ void
 ContactAction::act()
 {
   if (!_problem->getDisplacedProblem())
-  {
     mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
-  }
 
   // Determine number of dimensions
   unsigned int dim(1);
   if (_disp_y != "")
-  {
     ++dim;
-  }
+
   if (_disp_z != "")
-  {
     ++dim;
-  }
 
   std::string short_name(_name);
   // Chop off "Contact/"
@@ -76,8 +74,9 @@ ContactAction::act()
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
 
+  if (_system == "Constraint")
   {
-    InputParameters params = _factory.getValidParams("ContactMaster");
+    InputParameters params = _factory.getValidParams("MechanicalContactConstraint");
 
     // Extract global params
     _app.parser().extractParams(_name, params);
@@ -93,30 +92,26 @@ ContactAction::act()
     params.set<Real>("tension_release") = _tension_release;
     params.addRequiredCoupledVar("nodal_area", "The nodal area");
     params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+short_name);
+
     if (isParamValid("tangential_tolerance"))
-    {
       params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
-    }
+
     if (isParamValid("normal_smoothing_distance"))
-    {
       params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
-    }
+
     if (isParamValid("normal_smoothing_method"))
-    {
       params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
-    }
+
     params.addCoupledVar("disp_x", "The x displacement");
     params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1, _disp_x);
+
     params.addCoupledVar("disp_y", "The y displacement");
     if (dim > 1)
-    {
       params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1, _disp_y);
-    }
+
     params.addCoupledVar("disp_z", "The z displacement");
     if (dim == 3)
-    {
       params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1, _disp_z);
-    }
 
     params.set<bool>("use_displaced_mesh") = true;
 
@@ -124,75 +119,131 @@ ContactAction::act()
     {
       std::stringstream name;
       name << short_name;
-      name << "_master_";
+      name << "_constraint_";
       name << i;
 
       params.set<unsigned int>("component") = i;
       params.set<NonlinearVariableName>("variable") = vars[i];
 
-      _problem->addDiracKernel("ContactMaster",
-                               name.str(),
-                               params);
+      _problem->addConstraint("MechanicalContactConstraint",
+                              name.str(),
+                              params);
     }
   }
-
+  else if (_system == "DiracKernel")
   {
-    InputParameters params = _factory.getValidParams("SlaveConstraint");
-
-    // Extract global params
-    _app.parser().extractParams(_name, params);
-
-    // Create slave objects
-    params.set<std::string>("model") = _model;
-    params.set<std::string>("formulation") = _formulation;
-    params.set<MooseEnum>("order") = _order;
-    params.set<BoundaryName>("boundary") = _slave;
-    params.set<BoundaryName>("master") = _master;
-    params.set<Real>("penalty") = _penalty;
-    params.set<Real>("friction_coefficient") = _friction_coefficient;
-    params.addRequiredCoupledVar("nodal_area", "The nodal area");
-    params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+short_name);
-    if (isParamValid("tangential_tolerance"))
     {
-      params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+      InputParameters params = _factory.getValidParams("ContactMaster");
+
+      // Extract global params
+      _app.parser().extractParams(_name, params);
+
+      // Create master objects
+      params.set<std::string>("model") = _model;
+      params.set<std::string>("formulation") = _formulation;
+      params.set<MooseEnum>("order") = _order;
+      params.set<BoundaryName>("boundary") = _master;
+      params.set<BoundaryName>("slave") = _slave;
+      params.set<Real>("penalty") = _penalty;
+      params.set<Real>("friction_coefficient") = _friction_coefficient;
+      params.set<Real>("tension_release") = _tension_release;
+      params.addRequiredCoupledVar("nodal_area", "The nodal area");
+      params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+short_name);
+
+      if (isParamValid("tangential_tolerance"))
+        params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+
+      if (isParamValid("normal_smoothing_distance"))
+        params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
+
+      if (isParamValid("normal_smoothing_method"))
+        params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
+
+      params.addCoupledVar("disp_x", "The x displacement");
+      params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1, _disp_x);
+
+      params.addCoupledVar("disp_y", "The y displacement");
+      if (dim > 1)
+        params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1, _disp_y);
+
+      params.addCoupledVar("disp_z", "The z displacement");
+      if (dim == 3)
+        params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1, _disp_z);
+
+      params.set<bool>("use_displaced_mesh") = true;
+
+      for (unsigned int i(0); i < dim; ++i)
+      {
+        std::stringstream name;
+        name << short_name;
+        name << "_master_";
+        name << i;
+
+        params.set<unsigned int>("component") = i;
+        params.set<NonlinearVariableName>("variable") = vars[i];
+
+        _problem->addDiracKernel("ContactMaster",
+                                 name.str(),
+                                 params);
+      }
     }
-    if (isParamValid("normal_smoothing_distance"))
-    {
-      params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
-    }
-    if (isParamValid("normal_smoothing_method"))
-    {
-      params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
-    }
-    params.addCoupledVar("disp_x", "The x displacement");
-    params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1, _disp_x);
-    params.addCoupledVar("disp_y", "The y displacement");
-    if (dim > 1)
-    {
-      params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1, _disp_y);
-    }
-    params.addCoupledVar("disp_z", "The z displacement");
-    if (dim == 3)
-    {
-      params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1, _disp_z);
-    }
 
-    params.set<bool>("use_displaced_mesh") = true;
-
-    for (unsigned int i(0); i < dim; ++i)
     {
-      std::stringstream name;
-      name << short_name;
-      name << "_slave_";
-      name << i;
+      InputParameters params = _factory.getValidParams("SlaveConstraint");
 
-      params.set<unsigned int>("component") = i;
-      params.set<NonlinearVariableName>("variable") = vars[i];
+      // Extract global params
+      _app.parser().extractParams(_name, params);
 
-      _problem->addDiracKernel("SlaveConstraint",
-                               name.str(),
-                               params);
+      // Create slave objects
+      params.set<std::string>("model") = _model;
+      params.set<std::string>("formulation") = _formulation;
+      params.set<MooseEnum>("order") = _order;
+      params.set<BoundaryName>("boundary") = _slave;
+      params.set<BoundaryName>("master") = _master;
+      params.set<Real>("penalty") = _penalty;
+      params.set<Real>("friction_coefficient") = _friction_coefficient;
+      params.addRequiredCoupledVar("nodal_area", "The nodal area");
+      params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+short_name);
+      if (isParamValid("tangential_tolerance"))
+        params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
+
+      if (isParamValid("normal_smoothing_distance"))
+        params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
+
+      if (isParamValid("normal_smoothing_method"))
+        params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
+
+      params.addCoupledVar("disp_x", "The x displacement");
+      params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1, _disp_x);
+
+      params.addCoupledVar("disp_y", "The y displacement");
+      if (dim > 1)
+        params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1, _disp_y);
+
+      params.addCoupledVar("disp_z", "The z displacement");
+      if (dim == 3)
+        params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1, _disp_z);
+
+      params.set<bool>("use_displaced_mesh") = true;
+
+      for (unsigned int i(0); i < dim; ++i)
+      {
+        std::stringstream name;
+        name << short_name;
+        name << "_slave_";
+        name << i;
+
+        params.set<unsigned int>("component") = i;
+        params.set<NonlinearVariableName>("variable") = vars[i];
+
+        _problem->addDiracKernel("SlaveConstraint",
+                                 name.str(),
+                                 params);
+      }
     }
   }
+  else
+    mooseError("Invalid system for contact constraint enforcement: "<<_system);
+
   ++counter;
 }
