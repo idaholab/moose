@@ -47,6 +47,7 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
 AuxiliarySystem::~AuxiliarySystem()
 {
   delete &_serialized_solution;
+  delete _time_integrator;
 }
 
 void
