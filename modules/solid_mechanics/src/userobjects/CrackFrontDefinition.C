@@ -400,14 +400,31 @@ CrackFrontDefinition::updateCrackFrontGeometry()
   _segment_lengths.clear();
   _tangent_directions.clear();
   _crack_directions.clear();
+  _rot_matrix.clear();
 
   if (_treat_as_2d)
   {
     RealVectorValue tangent_direction;
+    RealVectorValue crack_direction;
     tangent_direction(_axis_2d) = 1.0;
     _tangent_directions.push_back(tangent_direction);
     const Node* crack_front_node = _mesh.nodePtr(_ordered_crack_front_nodes[0]);
-    _crack_directions.push_back(calculateCrackFrontDirection(crack_front_node,tangent_direction,MIDDLE_NODE));
+    crack_direction = calculateCrackFrontDirection(crack_front_node,tangent_direction,MIDDLE_NODE);
+    _crack_directions.push_back(crack_direction);
+    _crack_plane_normal = crack_direction.cross(tangent_direction);
+    ColumnMajorMatrix rot_mat;
+    rot_mat(0,0) = crack_direction(0);
+    rot_mat(0,1) = crack_direction(1);
+    rot_mat(0,2) = crack_direction(2);
+    rot_mat(1,0) = _crack_plane_normal(0);
+    rot_mat(1,1) = _crack_plane_normal(1);
+    rot_mat(1,2) = _crack_plane_normal(2);
+    rot_mat(2,0) = 0.0;
+    rot_mat(2,1) = 0.0;
+    rot_mat(2,2) = 0.0;
+    rot_mat(2,_axis_2d) = 1.0;
+    _rot_matrix.push_back(rot_mat);
+
     _segment_lengths.push_back(std::make_pair(0.0,0.0));
     _overall_length = 0.0;
   }
@@ -461,6 +478,35 @@ CrackFrontDefinition::updateCrackFrontGeometry()
 
       back_segment = forward_segment;
       back_segment_len = forward_segment_len;
+
+    }
+
+    //For CURVED_CRACK_FRONT, _crack_plane_normal gets computed in updateDataForCrackDirection
+    if (_direction_method != CURVED_CRACK_FRONT)
+    {
+      unsigned int mid_id = (num_crack_front_nodes-1)/2;
+      _crack_plane_normal = _tangent_directions[mid_id].cross(_crack_directions[mid_id]);
+
+      //Make sure the normal vector is non-zero
+      RealVectorValue zero_vec(0.0);
+      if (_crack_plane_normal.absolute_fuzzy_equals(zero_vec,1.e-15))
+        mooseError("Crack plane normal vector evaluates to zero");
+    }
+
+    // Create rotation matrix
+    for (unsigned int i=0; i<num_crack_front_nodes; ++i)
+    {
+      ColumnMajorMatrix rot_mat;
+      rot_mat(0,0) = _crack_directions[i](0);
+      rot_mat(0,1) = _crack_directions[i](1);
+      rot_mat(0,2) = _crack_directions[i](2);
+      rot_mat(1,0) = _crack_plane_normal(0);
+      rot_mat(1,1) = _crack_plane_normal(1);
+      rot_mat(1,2) = _crack_plane_normal(2);
+      rot_mat(2,0) = _tangent_directions[i](0);
+      rot_mat(2,1) = _tangent_directions[i](1);
+      rot_mat(2,2) = _tangent_directions[i](2);
+      _rot_matrix.push_back(rot_mat);
     }
 
     Moose::out<<"Summary of J-Integral crack front geometry:"<<std::endl;
@@ -517,7 +563,7 @@ CrackFrontDefinition::updateDataForCrackDirection()
   }
   else if (_direction_method == CURVED_CRACK_FRONT)
   {
-    _crack_plane_normal_from_curved_front.zero();
+    _crack_plane_normal.zero();
 
     //Get 3 nodes on crack front
     unsigned int num_nodes(_ordered_crack_front_nodes.size());
@@ -535,11 +581,12 @@ CrackFrontDefinition::updateDataForCrackDirection()
     RealVectorValue v2 = end-mid;
 
     //Take cross product to get normal
-    _crack_plane_normal_from_curved_front = v1.cross(v2);
+    _crack_plane_normal = v1.cross(v2);
+    _crack_plane_normal = _crack_plane_normal.unit();
 
     //Make sure they're not collinear
     RealVectorValue zero_vec(0.0);
-    if (_crack_plane_normal_from_curved_front.absolute_fuzzy_equals(zero_vec,1.e-15))
+    if (_crack_plane_normal.absolute_fuzzy_equals(zero_vec,1.e-15))
     {
       mooseError("Nodes on crack front are too close to being collinear");
     }
@@ -598,7 +645,7 @@ CrackFrontDefinition::calculateCrackFrontDirection(const Node* crack_front_node,
     }
     else if (_direction_method == CURVED_CRACK_FRONT)
     {
-      crack_dir = tangent_direction.cross(_crack_plane_normal_from_curved_front);
+      crack_dir = tangent_direction.cross(_crack_plane_normal);
     }
   }
   crack_dir = crack_dir.unit();
@@ -618,6 +665,12 @@ CrackFrontDefinition::getCrackFrontTangent(const unsigned int node_index) const
   return _tangent_directions[node_index];
 }
 
+const RealVectorValue &
+CrackFrontDefinition::getCrackFrontNormal() const
+{
+  return _crack_plane_normal;
+}
+
 Real
 CrackFrontDefinition::getCrackFrontForwardSegmentLength(const unsigned int node_index) const
 {
@@ -635,3 +688,133 @@ CrackFrontDefinition::getCrackDirection(const unsigned int node_index) const
 {
   return _crack_directions[node_index];
 }
+
+RealVectorValue
+CrackFrontDefinition::rotateToCrackFrontCoords(const RealVectorValue vector, const unsigned int node_index) const
+{
+  ColumnMajorMatrix vec3x1;
+  vec3x1 = _rot_matrix[node_index] * vector;
+  RealVectorValue vec;
+  vec(0) = vec3x1(0,0);
+  vec(1) = vec3x1(1,0);
+  vec(2) = vec3x1(2,0);
+  return vec;
+}
+
+ColumnMajorMatrix
+CrackFrontDefinition::rotateToCrackFrontCoords(const SymmTensor tensor, const unsigned int node_index) const
+{
+  ColumnMajorMatrix tensor_CMM;
+  tensor_CMM(0,0) = tensor.xx();
+  tensor_CMM(0,1) = tensor.xy();
+  tensor_CMM(0,2) = tensor.xz();
+  tensor_CMM(1,0) = tensor.xy();
+  tensor_CMM(1,1) = tensor.yy();
+  tensor_CMM(1,2) = tensor.yz();
+  tensor_CMM(2,0) = tensor.xz();
+  tensor_CMM(2,1) = tensor.yz();
+  tensor_CMM(2,2) = tensor.zz();
+
+  ColumnMajorMatrix tmp = _rot_matrix[node_index] * tensor_CMM;
+  ColumnMajorMatrix rotT = _rot_matrix[node_index].transpose();
+  ColumnMajorMatrix rotated_tensor = tmp * rotT;
+
+  return rotated_tensor;
+}
+
+ColumnMajorMatrix
+CrackFrontDefinition::rotateToCrackFrontCoords(const ColumnMajorMatrix tensor, const unsigned int node_index) const
+{
+  ColumnMajorMatrix tmp = _rot_matrix[node_index] * tensor;
+  ColumnMajorMatrix rotT = _rot_matrix[node_index].transpose();
+  ColumnMajorMatrix rotated_tensor = tmp * rotT;
+
+  return rotated_tensor;
+}
+
+void
+CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned int node_index, Real & r, Real & theta) const
+{
+  unsigned int num_nodes(_ordered_crack_front_nodes.size());
+  Point p = qp;
+
+  // Loop over nodes to find the two crack front nodes closest to the point qp
+  Real mindist1(1.0e30);
+  Real mindist2(1.0e30);
+  Point closest_node1(0.0);
+  Point closest_node2(0.0);
+  for (unsigned int nit = 0; nit != num_nodes; ++nit)
+  {
+    Node & crack_front_node = _mesh.node(_ordered_crack_front_nodes[nit]);
+    RealVectorValue crack_node_to_current_node = p - crack_front_node;
+    Real dist = crack_node_to_current_node.size();
+
+    if (dist < mindist1)
+    {
+      mindist2 = mindist1;
+      closest_node2 = closest_node1;
+      mindist1 = dist;
+      closest_node1 = crack_front_node;
+    }
+    else if (dist < mindist2 && dist != mindist1)
+    {
+      mindist2 = dist;
+      closest_node2 = crack_front_node;
+    }
+
+  }
+
+  //Rotate coordinates to crack front coordinate system
+  closest_node1 = rotateToCrackFrontCoords(closest_node1,node_index);
+  closest_node2 = rotateToCrackFrontCoords(closest_node2,node_index);
+  if (closest_node1(2) > closest_node2(2))
+  {
+    RealVectorValue tmp = closest_node2;
+    closest_node2 = closest_node1;
+    closest_node1 = tmp;
+  }
+  p = rotateToCrackFrontCoords(p,node_index);
+
+  //Find r, the distance between the qp and the crack front
+  RealVectorValue crack_front_edge = closest_node2 - closest_node1;
+  Real edge_length_sq = crack_front_edge.size_sq();
+  RealVectorValue closest_node1_to_p = p - closest_node1;
+  Real perp = crack_front_edge * closest_node1_to_p;
+  Real dist_along_edge = perp / edge_length_sq;
+  RealVectorValue point_on_edge = closest_node1 + crack_front_edge * dist_along_edge;
+  RealVectorValue r_vec = p - point_on_edge;
+  r = r_vec.size();
+
+  //Find theta, the angle between r and the crack front plane
+  RealVectorValue crack_plane_normal = rotateToCrackFrontCoords(_crack_plane_normal,node_index);
+  Real p_to_plane_dist = std::abs(closest_node1_to_p*crack_plane_normal);
+
+  //Determine if p is above or below the crack plane
+  Real y_local = p(1) - closest_node1(1);
+  //Determine if p is in front of or behind the crack front
+  RealVectorValue p2(p);
+  p2(1) = 0;
+  RealVectorValue p2_vec = p2 - closest_node1;
+  Real ahead = crack_front_edge(2) * p2_vec(0) - crack_front_edge(0) * p2_vec(2);
+  Real x_local(0);
+  if (ahead >= 0)
+    x_local = 1;
+  else
+    x_local = -1;
+
+  //Calculate theta based on in which quadrant in the crack front coordinate
+  //system the qp is located
+  if (x_local >= 0 && y_local >= 0)
+    theta = std::asin(p_to_plane_dist/r);
+
+  else if (x_local < 0 && y_local >= 0)
+    theta = libMesh::pi - std::asin(p_to_plane_dist/r);
+
+  else if (x_local < 0 && y_local < 0)
+    theta = -(libMesh::pi - std::asin(p_to_plane_dist/r));
+
+  else if (x_local >= 0 && y_local < 0)
+    theta = -std::asin(p_to_plane_dist/r);
+
+}
+
