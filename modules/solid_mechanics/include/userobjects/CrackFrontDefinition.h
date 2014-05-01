@@ -4,6 +4,7 @@
 #include "GeneralUserObject.h"
 #include "BoundaryRestrictable.h"
 #include <set>
+#include "SymmTensor.h"
 
 class CrackFrontDefinition;
 class AuxiliarySystem;
@@ -31,10 +32,15 @@ public:
 
   const Node & getCrackFrontNode(const unsigned int node_index) const;
   const RealVectorValue & getCrackFrontTangent(const unsigned int node_index) const;
+  const RealVectorValue & getCrackFrontNormal() const;
   Real getCrackFrontForwardSegmentLength(const unsigned int node_index) const;
   Real getCrackFrontBackwardSegmentLength(const unsigned int node_index) const;
   const RealVectorValue & getCrackDirection(const unsigned int node_index) const;
   bool treatAs2D() const {return _treat_as_2d;}
+  RealVectorValue rotateToCrackFrontCoords(const RealVectorValue vector, const unsigned int node_index) const;
+  ColumnMajorMatrix rotateToCrackFrontCoords(const SymmTensor tensor, const unsigned int node_index) const;
+  ColumnMajorMatrix rotateToCrackFrontCoords(const ColumnMajorMatrix tensor, const unsigned int node_index) const;
+  void calculateRThetaToCrackFront(const Point qp, const unsigned int node_index, Real & r, Real & theta) const;
 
 protected:
 
@@ -65,6 +71,7 @@ protected:
   std::vector<RealVectorValue> _tangent_directions;
   std::vector<RealVectorValue> _crack_directions;
   std::vector<std::pair<Real,Real> > _segment_lengths;
+  std::vector<ColumnMajorMatrix> _rot_matrix;
   Real _overall_length;
   DIRECTION_METHOD _direction_method;
   END_DIRECTION_METHOD _end_direction_method;
@@ -74,7 +81,7 @@ protected:
   std::vector<BoundaryName> _crack_mouth_boundary_names;
   std::vector<BoundaryID> _crack_mouth_boundary_ids;
   RealVectorValue _crack_mouth_coordinates;
-  RealVectorValue _crack_plane_normal_from_curved_front;
+  RealVectorValue _crack_plane_normal;
   bool _treat_as_2d;
   unsigned int _axis_2d;
 
