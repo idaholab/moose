@@ -275,7 +275,7 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
     else
       dof_object = mesh.elem(elements[i]);
 
-    if (dof_object->processor_id() == libMesh::processor_id())
+    if (dof_object->processor_id() == mesh.processor_id())
     {
       // The 0 is for the component... this only works for LAGRANGE!
       dof_id_type dof = dof_object->dof_number(sys->number(), var_num, 0);

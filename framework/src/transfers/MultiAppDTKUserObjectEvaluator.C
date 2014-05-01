@@ -38,7 +38,7 @@ MultiAppDTKUserObjectEvaluator::~MultiAppDTKUserObjectEvaluator()
 DataTransferKit::FieldContainer<double>
 MultiAppDTKUserObjectEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>& bids, const Teuchos::ArrayRCP<double>& coords)
 {
-  Teuchos::RCP<const Teuchos::Comm<int> > comm = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(libMesh::COMM_WORLD))));
+  Teuchos::RCP<const Teuchos::Comm<int> > comm = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(_multi_app.comm()))));
 
   int num_values = bids.size();
 
