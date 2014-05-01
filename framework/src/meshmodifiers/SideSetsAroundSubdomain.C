@@ -24,7 +24,7 @@ InputParameters validParams<SideSetsAroundSubdomain>()
 {
   InputParameters params = validParams<MeshModifier>();
   params += validParams<BlockRestrictable>();
-  params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this object is to be applied");
+  params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs to create on the supplied subdomain");
   return params;
 }
 

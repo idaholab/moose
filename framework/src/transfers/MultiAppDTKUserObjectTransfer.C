@@ -46,7 +46,7 @@ MultiAppDTKUserObjectTransfer::execute()
   {
     _setup = true;
 
-    _comm_default = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(libMesh::COMM_WORLD))));
+    _comm_default = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(_communicator.get()))));
 
     _multi_app_user_object_evaluator = Teuchos::rcp(new MultiAppDTKUserObjectEvaluator(*_multi_app, _user_object_name));
 
