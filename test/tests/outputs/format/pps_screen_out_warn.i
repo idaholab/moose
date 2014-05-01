@@ -61,7 +61,6 @@
 []
 
 [Outputs]
-  exodus = true
   [./console]
     type = Console
     output_postprocessors = false

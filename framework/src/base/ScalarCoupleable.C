@@ -96,9 +96,6 @@ VariableValue &
 ScalarCoupleable::coupledScalarDot(const std::string & var_name, unsigned int comp)
 {
   MooseVariableScalar * var = getScalarVar(var_name, comp);
-  if (var->kind() == Moose::VAR_AUXILIARY)
-    mooseError("Coupling time derivative of an auxiliary variable is not allowed.");
-
   return var->uDot();
 }
 
@@ -106,9 +103,6 @@ VariableValue &
 ScalarCoupleable::coupledScalarDotDu(const std::string & var_name, unsigned int comp)
 {
   MooseVariableScalar * var = getScalarVar(var_name, comp);
-  if (var->kind() == Moose::VAR_AUXILIARY)
-    mooseError("Coupling time derivative of an auxiliary variable is not allowed.");
-
   return var->duDotDu();
 }
 

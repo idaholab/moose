@@ -490,28 +490,37 @@ Output::initAvailableLists()
       // Extract the list of outputs
       std::set<OutputName> pps_outputs = pps->getOutputs();
 
-      // Hide the postprocessor if 'none' is used within the 'outputs' parameter
-      if (!pps_outputs.empty() && ( pps_outputs.find("none") != pps_outputs.end() || pps_outputs.find(_name) == pps_outputs.end() ) )
+      // Check that the outputs are valid
+      _app.getOutputWarehouse().checkOutputs(pps_outputs);
+
+      /* Hide the postprocessor if:
+       *  (1) The "outputs" parameter is NOT empty and
+       *  (1) 'all' is NOT found in the 'outputs' parameter and
+       *  (2) 'none' is used within the 'outputs' parameter or
+       *  (3) this output object name is not found in the list of output names
+       */
+      if ( !pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end() &&
+           (pps_outputs.find("none") != pps_outputs.end() || pps_outputs.find(_name) == pps_outputs.end()) )
         _postprocessor.hide.push_back(pps->PPName());
 
-      // Check that the output object allows postprocessor output
-      if ( pps_outputs.find(_name) != pps_outputs.end() )
+      // Check that the output object allows postprocessor output, account for "all" keyword (if it is present assume "all" was desired)
+      if ( pps_outputs.find(_name) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end() )
       {
         if (!isParamValid("output_postprocessors"))
           mooseWarning("Postprocessor '" << pps->PPName()
                        << "' has requested to be output by the '" << _name
-                       << "' outputter, but postprocessor output is not support by this type of outputter.");
+                       << "' output, but postprocessor output is not support by this type of output object.");
       }
 
       // Set the flag state for postprocessors that utilize 'outputs' parameter
-      if (!pps_outputs.empty())
+      if (!pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end())
         has_limited_pps = true;
     }
   }
 
   // Produce the warning when 'outputs' is used, but postprocessor output is disable
   if (has_limited_pps && isParamValid("output_postprocessors") && getParam<bool>("output_postprocessors") == false)
-    mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disable for the '" << _name << "' outputter.");
+    mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disable for the '" << _name << "' output object.");
 
   // Get a list of the available variables
   std::vector<VariableName> variables = _problem_ptr->getVariableNames();
@@ -600,6 +609,10 @@ Output::initOutputList(OutputData & data)
   std::vector<std::string> & show  = data.show;
   std::vector<std::string> & avail = data.available;
   std::vector<std::string> & output = data.output;
+
+  // Append the hide list from automatic material property output
+  std::vector<std::string> material_hide = _app.getOutputWarehouse().getMaterialOutputHideList(_name);
+  hide.insert(hide.end(), material_hide.begin(), material_hide.end());
 
   // Sort the vectors
   std::sort(avail.begin(), avail.end());

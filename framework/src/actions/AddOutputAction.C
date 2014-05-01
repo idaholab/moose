@@ -42,11 +42,6 @@ AddOutputAction::AddOutputAction(const std::string & name, InputParameters param
 void
 AddOutputAction::act()
 {
-  // Create a list of reserved names
-  std::set<std::string> reserved;
-  reserved.insert("none");                  // allows 'none' to be used as a keyword in the postprocessors 'outputs' parameter
-//  reserved.insert("moose_debug_outputter"); // the [Debug] block creates this object
-
   // Get a reference to the OutputWarehouse
   OutputWarehouse & output_warehouse = _app.getOutputWarehouse();
 
@@ -54,8 +49,8 @@ AddOutputAction::act()
   std::string object_name = getShortName();
 
   // Reject the reserved names
-  if (reserved.find(object_name) != reserved.end())
-    mooseError("The name " << object_name << " is a reserved name for outputters");
+  if (output_warehouse.isReservedName(object_name))
+    mooseError("The name '" << object_name << "' is a reserved name for output objects");
 
   // Check that an object by the same name does not already exist; this must be done before the object
   // is created to avoid getting misleading errors from the Parser

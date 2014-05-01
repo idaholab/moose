@@ -75,9 +75,6 @@ MooseVariableInterface::valueOlder()
 VariableValue &
 MooseVariableInterface::dot()
 {
-  if (_variable->kind() == Moose::VAR_AUXILIARY)
-    mooseError("Can't get time derivative of auxiliary variables!");
-
   if (_nodal)
     return _variable->nodalSlnDot();
   else
@@ -87,9 +84,6 @@ MooseVariableInterface::dot()
 VariableValue &
 MooseVariableInterface::dotDu()
 {
-  if (_variable->kind() == Moose::VAR_AUXILIARY)
-    mooseError("Can't get time derivative of auxiliary variables!");
-
   if (_nodal)
     return _variable->nodalSlnDuDotDu();
   else

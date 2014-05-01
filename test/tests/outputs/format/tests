@@ -13,7 +13,7 @@
   [./pps_file_out_warn_test]
     type = 'RunApp'
     input = 'pps_file_out_warn.i'
-    expect_out = "Postprocessor 'avg_block' has requested to be output by the 'gmv' outputter, but postprocessor output is not support by this type of outputter."
+    expect_out = "Postprocessor 'avg_block' has requested to be output by the 'gmv' output, but postprocessor output is not support by this type of output object."
   [../]
 
   [./gmv_out_test]
@@ -65,7 +65,7 @@
   [./pps_screen_out_warn_test]
     type = 'RunApp'
     input = 'pps_screen_out_warn.i'
-    expect_out = "A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disable for the 'console' outputter."
+    expect_out = "A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disable for the 'console' output object."
   [../]
 
   [./show_input_test]

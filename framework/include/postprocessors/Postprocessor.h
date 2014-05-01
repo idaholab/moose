@@ -42,12 +42,6 @@ public:
   virtual PostprocessorValue getValue() = 0;
 
   /**
-   * Get the postprocessor output type
-   * @return postprocessor output type
-   */
-  Moose::PPSOutputType getOutput() { return _output; }
-
-  /**
    * Get the list of output objects that this class is restricted
    * @return A vector of OutputNames
    */
@@ -60,9 +54,6 @@ public:
 
 protected:
   std::string _pp_name;
-
-  /// If and where is the postprocessor output
-  Moose::PPSOutputType _output;
 
   /// Vector of output names
   std::vector<OutputName> _outputs;

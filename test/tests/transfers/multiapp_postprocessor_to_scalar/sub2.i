@@ -42,7 +42,6 @@
     type = PointValue
     variable = u
     point = '1 1 0'
-    output = none
   [../]
 []
 

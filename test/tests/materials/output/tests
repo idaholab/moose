@@ -1,0 +1,34 @@
+[Tests]
+  [./all]
+    type = 'Exodiff'
+    input = 'output.i'
+    exodiff = 'output_out.e'
+  [../]
+  [./block]
+    type = 'Exodiff'
+    input = 'output_block.i'
+    exodiff = 'output_block_out.e'
+  [../]
+  [./boundary]
+    type = 'Exodiff'
+    input = 'output_boundary.i'
+    exodiff = 'output_boundary_out.e'
+  [../]
+  [./uniform_refine]
+    type = RunApp
+    input = output.i
+    cli_args = 'Mesh/uniform_refine=1 Outputs/exodus=false'
+    expect_out = 'Auto material output is not supported with uniform mesh refinement'
+  [../]
+  [./multiple_files]
+    type = Exodiff
+    input = output_multiple_files.i
+    exodiff = 'output_multiple_files_out.e output_multiple_files_exodus1.e output_multiple_files_exodus2.e'
+  [../]
+  [./invalid_outputs]
+    type = RunException
+    input = output.i
+    expect_err = "The output object 'garbage' is not a defined output object"
+    cli_args = 'Outputs/exodus=false Materials/function_material/outputs=garbage'
+  [../]
+[]

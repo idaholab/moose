@@ -1,0 +1,15 @@
+[Tests]
+  [./limit]
+    # Test the postprocessor limiting functions operate correctly
+    type = 'Exodiff'
+    input = 'postprocessor.i'
+    exodiff = 'postprocessor_exodus.e postprocessor_exodus2.e'
+  [../]
+  [./invalid_outputs]
+    # Test that an invalid outputer name in the "output" parameter is caught
+    type = 'RunException'
+    input = 'postprocessor.i'
+    expect_err = "The output object 'garbage' is not a defined output object"
+    cli_args = 'Postprocessors/num_dofs/outputs=garbage'
+  [../]
+[]

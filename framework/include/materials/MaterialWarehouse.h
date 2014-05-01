@@ -59,6 +59,7 @@ public:
 
   std::vector<Material *> & getMaterialsByName(const std::string & name);
 
+  std::vector<Material *> & getMaterials(){ return _mats;}
   std::vector<Material *> & getMaterials(SubdomainID block_id);
   std::vector<Material *> & getFaceMaterials(SubdomainID block_id);
   std::vector<Material *> & getNeighborMaterials(SubdomainID block_id);

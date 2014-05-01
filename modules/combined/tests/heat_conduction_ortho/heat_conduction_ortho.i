@@ -123,16 +123,16 @@
   [./tcx]
     type = PlotFunction
     function = 1000
-    output = none
+    outputs = none
   [../]
   [./tcy]
     type = PlotFunction
     function = 100
-    output = none
+    outputs = none
   [../]
   [./tcz]
     type = PlotFunction
     function = 10
-    output = none
+    outputs = none
   [../]
 []

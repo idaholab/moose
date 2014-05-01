@@ -49,7 +49,6 @@
   [./avg_block]
     type = ElementAverageValue
     variable = u
-    output = both
   [../]
 []
 

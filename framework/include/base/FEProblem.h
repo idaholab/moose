@@ -699,6 +699,7 @@ public:
    */
   void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
 
+  ///@{
   /**
    * These methods are used to determine whether stateful material properties need to be stored on
    * internal sides.  There are four situations where this may be the case: 1) DGKernels
@@ -716,12 +717,29 @@ public:
    */
   bool needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid);
   bool needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid);
+  ///@}
 
   /**
    * Dimension of the subspace spanned by vectors with a given prefix.
    * @param prefix Prefix of the vectors spanning the subspace.
    */
   unsigned int subspaceDim(const std::string& prefix) const {if (_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
+
+  /*
+   * Return a reference to the MaterialWarehouse
+   */
+  MaterialWarehouse & getMaterialWarehouse(THREAD_ID tid) { return _materials[tid]; }
+
+  /*
+   * Return a pointer to the MaterialData
+   */
+  MaterialData * getMaterialData(THREAD_ID tid) { return _material_data[tid]; }
+
+  /*
+   * Return a pointer to the MaterialData for boundary properties
+   */
+  MaterialData * getBoundaryMaterialData(THREAD_ID tid) { return _bnd_material_data[tid]; }
+
 
 protected:
   MooseMesh & _mesh;
