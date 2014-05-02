@@ -583,7 +583,7 @@ InputParameters::addParam(const std::string &name, const S &value, const std::st
   setParamHelper(name, l_value, value);
 
   /* Indicate the default value, as set via addParam, is being used. The parameter is removed from the list whenever
-     is changes, see set_attributes */
+     it changes, see set_attributes */
   _set_by_add_param.insert(name);
 }
 
@@ -669,7 +669,9 @@ InputParameters::addPrivateParam(const std::string &name, const T &value)
   checkConsistentType<T>(name);
 
   InputParameters::set<T>(name) = value;
-  _private_params.insert(name);}
+  _private_params.insert(name);
+  _set_by_add_param.insert(name);
+}
 
 template <typename T>
 void

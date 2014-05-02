@@ -96,20 +96,21 @@ InputParameters::operator=(const InputParameters &rhs)
 {
   Parameters::operator=(rhs);
 
-  this->_doc_string = rhs._doc_string;
-  this->_custom_type = rhs._custom_type;
-  this->_group = rhs._group;
-  this->_range_functions = rhs._range_functions;
-  this->_buildable_types = rhs._buildable_types;
-  this->_required_params = rhs._required_params;
-  this->_private_params = rhs._private_params;
-  this->_valid_params = rhs._valid_params;
-  this->_coupled_vars = rhs._coupled_vars;
-  this->_syntax = rhs._syntax;
-  this->_default_coupled_value = rhs._default_coupled_value;
-  this->_default_postprocessor_value = rhs._default_postprocessor_value;
+  _doc_string = rhs._doc_string;
+  _custom_type = rhs._custom_type;
+  _group = rhs._group;
+  _range_functions = rhs._range_functions;
+  _buildable_types = rhs._buildable_types;
   _collapse_nesting = rhs._collapse_nesting;
   _moose_object_syntax_visibility = rhs._moose_object_syntax_visibility;
+  _required_params = rhs._required_params;
+  _private_params = rhs._private_params;
+  _valid_params = rhs._valid_params;
+  _coupled_vars = rhs._coupled_vars;
+  _syntax = rhs._syntax;
+  _default_coupled_value = rhs._default_coupled_value;
+  _default_postprocessor_value = rhs._default_postprocessor_value;
+  _set_by_add_param = rhs._set_by_add_param;
 
   return *this;
 }
@@ -124,6 +125,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   _group.insert(rhs._group.begin(), rhs._group.end());
   _range_functions.insert(rhs._range_functions.begin(), rhs._range_functions.end());
   _buildable_types.insert(_buildable_types.end(), rhs._buildable_types.begin(), rhs._buildable_types.end());
+  // Collapse nesting and moose object syntax hiding are not modified with +=
   _required_params.insert(rhs._required_params.begin(), rhs._required_params.end());
   _private_params.insert(rhs._private_params.begin(), rhs._private_params.end());
   _valid_params.insert(rhs._valid_params.begin(), rhs._valid_params.end());
@@ -131,7 +133,7 @@ InputParameters::operator+=(const InputParameters &rhs)
   _syntax.insert(rhs._syntax.begin(), rhs._syntax.end());
   _default_coupled_value.insert(rhs._default_coupled_value.begin(), rhs._default_coupled_value.end());
   _default_postprocessor_value.insert(rhs._default_postprocessor_value.begin(), rhs._default_postprocessor_value.end());
-  // Collapse nesting and moose object syntax hiding are not modified with +=
+  _set_by_add_param.insert(rhs._set_by_add_param.begin(), rhs._set_by_add_param.end());
 
   return *this;
 }
