@@ -15,7 +15,7 @@ InputParameters validParams<ExampleApp>()
 ExampleApp::ExampleApp(const std::string & name, InputParameters parameters) :
     MooseApp(name, parameters)
 {
-  srand(libMesh::processor_id());
+  srand(processor_id());
 
   Moose::registerObjects(_factory);
   ExampleApp::registerObjects(_factory);
