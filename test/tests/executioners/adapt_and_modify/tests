@@ -4,9 +4,7 @@
     input = 'adapt_and_modify.i'
     exodiff = 'adapt_and_modify_out.e-s005'
     compiler = 'GCC'
-    #deleted = 'Ticket #1647'
     rel_err = 5.e-5
     recover = false
-    skip = 'see #2629'
   [../]
 []
