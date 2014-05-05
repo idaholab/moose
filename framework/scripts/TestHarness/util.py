@@ -44,8 +44,15 @@ LIBMESH_OPTIONS = {
       'TRUE'  : '1',
       'FALSE' : '0'
       }
-                     }
-  }
+                     },
+  'petsc_major' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_PETSC_VERSION_MAJOR\s+(\d+)',
+                     'default'   : '1'
+                   },
+  'petsc_minor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_PETSC_VERSION_MINOR\s+(\d+)',
+                     'default'   : '1'
+                   },
+}
+
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd):
@@ -222,66 +229,13 @@ def getCompilers(libmesh_dir):
   return compilers
 
 def getPetscVersion(libmesh_dir):
-  # We'll use PETSc's own header file to determine the PETSc version
-  # (major.minor).  If necessary in the future we'll also detect subminor...
-  #
-  # Note: we used to find this info in Make.common, but in the
-  # automake version of libmesh, this information is no longer stored
-  # in Make.common, but rather in
-  #
-  # $LIBMESH_DIR/lib/${AC_ARCH}_${METHOD}/pkgconfig/Make.common.${METHOD}
-  #
-  # where ${AC_ARCH} is an architecture-dependent string determined by
-  # libmesh's config.guess.  So we could try to look there, but it's
-  # easier and more portable to look in ${PETSC_DIR}.
-
-  # Default to something that doesn't make sense
-  petsc_version_major = 'x'
-  petsc_version_minor = 'x'
-
-  # Get user's PETSC_DIR from environment.
-  petsc_dir = os.environ.get('PETSC_DIR')
-
-  # environ.get returns 'none' if no such environment variable exists.
-  if petsc_dir == 'none':
-    print "PETSC_DIR not found in environment!  Cannot detect PETSc version!"
+  major_version = getLibMeshConfigOption(libmesh_dir, 'petsc_major')
+  minor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_minor')
+  if len(major_version) != 1 or len(minor_version) != 1:
+    printf("Error determining PETSC version")
     exit(1)
 
-  # FIXME: handle I/O exceptions when opening this file
-  f = open(petsc_dir + '/include/petscversion.h')
-
-  # The version lines are (hopefully!) always going to be of the form
-  # #define PETSC_VERSION_MAJOR      X
-  # where X is some number, so in python, we can split the string and
-  # pop the last substring (the version) off the end.
-  for line in f.readlines():
-    if line.find('#define PETSC_VERSION_MAJOR') != -1:
-      petsc_version_major = line.split().pop()
-
-    elif line.find('#define PETSC_VERSION_MINOR') != -1:
-      petsc_version_minor = line.split().pop()
-
-    # See if we're done.
-    if (petsc_version_major != 'x' and petsc_version_minor != 'x'):
-      break
-
-  # Done with the file, so we can close it now
-  f.close()
-
-  # If either version was not found, then we can't continue :(
-  if petsc_version_major == 'x':
-    print("Error: could not determine valid PETSc major version.")
-    exit(1)
-
-  if petsc_version_minor == 'x':
-    print("Error: could not determine valid PETSc minor version.")
-    exit(1)
-
-  petsc_version = petsc_version_major + '.' + petsc_version_minor
-
-  # print "Running tests assuming PETSc version", petsc_version
-
-  return petsc_version
+  return major_version.pop() + '.' + minor_version.pop()
 
 # Break down petsc version logic in a new define
 # TODO: find a way to eval() logic instead
@@ -334,9 +288,13 @@ def getLibMeshConfigOption(libmesh_dir, option):
       info = LIBMESH_OPTIONS[option]
       m = re.search(info['re_option'], contents)
       if m != None:
-        for value, option in info['options'].iteritems():
-          if m.group(1) == option:
-            option_set.add(value)
+        if 'options' in info:
+          for value, option in info['options'].iteritems():
+            if m.group(1) == option:
+              option_set.add(value)
+        else:
+          option_set.clear()
+          option_set.add(m.group(1))
       else:
         option_set.add(info['default'])
 
