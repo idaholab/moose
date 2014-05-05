@@ -56,13 +56,6 @@ MaterialOutputAction::act()
     return;
   }
 
-  // Produce a warning and do not create automatic output if uniform refinement is being used, it doesn't work
-  if (_problem->mesh().uniformRefineLevel() > 0)
-  {
-    mooseWarning("Auto material output is not supported with uniform mesh refinement");
-    return;
-  }
-
   // Set the pointers to the MaterialData objects (Note, these pointers are not available at construction)
   _block_material_data = _problem->getMaterialData(0);
   _boundary_material_data = _problem->getBoundaryMaterialData(0);
