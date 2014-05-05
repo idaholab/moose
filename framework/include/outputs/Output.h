@@ -336,6 +336,9 @@ protected:
   /// Flag for forcing call to outputSetup() with every call to output() (restartable)
   bool & _sequence;
 
+  /// Flag for disabling/enabling outut
+  bool _allow_output;
+
 private:
 
   /**
@@ -444,9 +447,6 @@ private:
 
   /// Flag for only executing at sync times
   bool _sync_only;
-
-  /// Flag for disabling/enabling outut
-  bool _allow_output;
 
   /// Flag for forcing output
   bool _force_output;

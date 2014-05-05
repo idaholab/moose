@@ -230,12 +230,10 @@ Console::initialSetup()
 void
 Console::timestepSetup()
 {
+  // Do nothing if output is turned off
   // Do nothing if the problem is steady or if it is not an output interval
-  if (!checkInterval())
-    return;
-
   // Do nothing if output_initial = false and the timestep is zero
-  if (!_output_initial && _t_step == 0)
+  if (!_allow_output || !checkInterval() || (!_output_initial && _t_step == 0))
     return;
 
   // Stream to build the time step information
