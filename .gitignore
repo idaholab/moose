@@ -162,6 +162,7 @@ libmoose-dbg*
 #doxygen generated
 */doc/doxygen/html/*
 moose/doc/doxygen/html/*
+modules/*/doc/doxygen/html/*
 
 # Restartable Data
 *.rd
