@@ -23,7 +23,7 @@ template<>
 InputParameters validParams<DiffusionFluxBC>();
 
 /**
- * \f$ F(u) = - \int_Gamma \grad u * \hat n * phi dGamma \f$
+ * \f$ F(u) = - \int_{\Gamma} \nabla u * \hat n * \phi d\Gamma \f$
  */
 class DiffusionFluxBC : public FluxBC
 {
