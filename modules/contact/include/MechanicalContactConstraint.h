@@ -16,7 +16,7 @@
 #define MECHANICALCONTACTCONSTRAINT_H
 
 //MOOSE includes
-#include "SparsityBasedContactConstraint.h"
+#include "NodeFaceConstraint.h"
 
 #include "ContactMaster.h"
 
@@ -30,7 +30,7 @@ InputParameters validParams<MechanicalContactConstraint>();
  * A MechanicalContactConstraint forces the value of a variable to be the same on both sides of an interface.
  */
 class MechanicalContactConstraint :
-  public SparsityBasedContactConstraint
+  public NodeFaceConstraint
 {
 public:
   MechanicalContactConstraint(const std::string & name, InputParameters parameters);

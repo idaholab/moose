@@ -1372,7 +1372,6 @@ NonlinearSystem::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jaco
     for(unsigned int i=0; i<row.size(); i++)
     {
       dof_id_type coupled_dof = row[i];
-//          if (slave_dof_indices[l] >= _sys.get_dof_map().first_dof() && slave_dof_indices[l] < _sys.get_dof_map().end_dof())
       jacobian.add(dof, coupled_dof, 0);
     }
   }
@@ -1381,6 +1380,12 @@ NonlinearSystem::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jaco
 void
 NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced)
 {
+
+//  This is here for debugging constraint Jacobians.  Since it's kind of a nontrivial line of code
+//  I would like to leave it here for ease of turning it on.  I will eventually remove it.
+//  TODO: Remove this.
+//  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+
   std::vector<numeric_index_type> zero_rows;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = NULL;
 
