@@ -24,7 +24,7 @@ InputParameters validParams<MaterialRealVectorValueAux>()
 }
 
 MaterialRealVectorValueAux::MaterialRealVectorValueAux(const std::string & name, InputParameters parameters) :
-    MaterialAuxBase(name, parameters),
+    MaterialAuxBase<RealVectorValue>(name, parameters),
     _component(getParam<unsigned int>("component"))
 {
   if (_component > LIBMESH_DIM)

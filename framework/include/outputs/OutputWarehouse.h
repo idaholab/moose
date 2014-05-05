@@ -118,7 +118,7 @@ public:
   void setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset = 0);
 
   /**
-   * Extracts the file numbers from the outputters
+   * Extracts the file numbers from the output objects
    * @return Map of file numbers for the output objects
    */
   std::map<std::string, unsigned int> getFileNumbers();

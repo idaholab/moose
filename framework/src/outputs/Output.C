@@ -28,12 +28,6 @@
 template<>
 InputParameters validParams<Output>()
 {
-  /* NOTE:
-   * The validParams from each output object is merged with the valdParams from CommonOutputAction. In order for the
-   * common parameters to be applied correctly any parameter that is a common parameter (e.g., output_initial) MUST NOT
-   * set a default value, this is because the default is extracted from the common parameters when the output object
-   * is being created within AddOutputAction. */
-
   // Get the parameters from the parent object
   InputParameters params = validParams<MooseObject>();
 
@@ -54,7 +48,7 @@ InputParameters validParams<Output>()
   // Displaced Mesh options
   params.addParam<bool>("use_displaced", false, "Enable/disable the use of the displaced mesh for outputting");
 
-  // Enable sequential file output
+  // Enable sequential file output (do not set default, the use_displace criteria relies on isParamValid, see Constructor)
   params.addParam<bool>("sequence", "Enable/disable sequential file output (enable by default when 'use_displace = true', otherwise defaults to false");
 
   // Control for outputting elemental variables as nodal variables
@@ -62,15 +56,15 @@ InputParameters validParams<Output>()
   params.addParam<bool>("scalar_as_nodal", false, "Output scalar variables as nodal");
 
   // Output intervals and timing
-  params.addParam<bool>("output_initial", "Request that the initial condition is output to the solution file");
-  params.addParam<bool>("output_intermediate", "Request that all intermediate steps (not initial or final) are output");
-  params.addParam<bool>("output_final", "Force the final time step to be output, regardless of output interval");
-  params.addParam<unsigned int>("interval", "The interval at which time steps are output to the solution file");
+  params.addParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file");
+  params.addParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output");
+  params.addParam<bool>("output_final", false, "Force the final time step to be output, regardless of output interval");
+  params.addParam<unsigned int>("interval", 1, "The interval at which time steps are output to the solution file");
   params.addParam<bool>("output_failed", false, "When true all time attempted time steps are output");
   params.addParam<std::vector<Real> >("sync_times", "Times at which the output and solution is forced to occur");
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
-  params.addParam<Real>("start_time", "Time at which this outputter begins");
-  params.addParam<Real>("end_time", "Time at which this outputter ends");
+  params.addParam<Real>("start_time", "Time at which this output object begins to operate");
+  params.addParam<Real>("end_time", "Time at which this output object stop operating");
   params.addParam<Real>("time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
 
   // 'Timing' group
@@ -99,9 +93,9 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _t_step(_problem_ptr->timeStep()),
     _dt(_problem_ptr->dt()),
     _dt_old(_problem_ptr->dtOld()),
-    _output_initial(isParamValid("output_initial") ? getParam<bool>("output_initial") : false),
-    _output_intermediate(isParamValid("output_intermediate") ? getParam<bool>("output_intermediate") : false),
-    _output_final(isParamValid("output_final") ? getParam<bool>("output_final") : false),
+    _output_initial(getParam<bool>("output_initial")),
+    _output_intermediate(getParam<bool>("output_intermediate")),
+    _output_final(getParam<bool>("output_final")),
     _output_input(getParam<bool>("output_input")),
     _elemental_as_nodal(getParam<bool>("elemental_as_nodal")),
     _scalar_as_nodal(getParam<bool>("scalar_as_nodal")),
@@ -109,10 +103,8 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _mesh_changed(declareRestartableData<bool>("mesh_changed", false)),
     _sequence(declareRestartableData<bool>("sequence", isParamValid("sequence") ? getParam<bool>("sequence") : false)),
     _num(declareRestartableData<unsigned int>("num", 0)),
-    _interval(isParamValid("interval") ? getParam<unsigned int>("interval") : 1),
-    _sync_times(isParamValid("sync_times") ?
-                std::set<Real>(getParam<std::vector<Real> >("sync_times").begin(), getParam<std::vector<Real> >("sync_times").end()) :
-                std::set<Real>()),
+    _interval(getParam<unsigned int>("interval")),
+    _sync_times(std::set<Real>(getParam<std::vector<Real> >("sync_times").begin(), getParam<std::vector<Real> >("sync_times").end())),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time") : -std::numeric_limits<Real>::max()),
     _end_time(isParamValid("end_time") ? getParam<Real>("end_time") : std::numeric_limits<Real>::max()),
     _t_tol(getParam<Real>("time_tolerance")),

@@ -22,7 +22,7 @@ InputParameters validParams<MaterialRealAux>()
 }
 
 MaterialRealAux::MaterialRealAux(const std::string & name, InputParameters parameters):
-    MaterialAuxBase(name, parameters)
+    MaterialAuxBase<Real>(name, parameters)
 {
 }
 

@@ -24,7 +24,7 @@ InputParameters validParams<MaterialRealTensorValueAux>()
 }
 
 MaterialRealTensorValueAux::MaterialRealTensorValueAux(const std::string & name, InputParameters parameters) :
-    MaterialAuxBase(name, parameters),
+    MaterialAuxBase<RealTensorValue>(name, parameters),
     _row(getParam<unsigned int>("row")),
     _col(getParam<unsigned int>("column"))
 {
