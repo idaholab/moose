@@ -79,7 +79,8 @@ double
 BasicDistribution::getRandom(double x)
 {
   if(forcingMethod() == NO_FORCING) {
-    return InverseCdf(x);
+    return windowProcessing(x);
+    //return InverseCdf(x);
   } else if(forcingMethod() == FORCED_VALUE) {
     return forcedConstant();
   } else if(forcingMethod() == FORCED_PROBABILITY) {
@@ -135,7 +136,7 @@ double DistributionCdf(BasicDistribution & dist, double x){
   return dist.Cdf(x);
 }
 
-double windowProcessing(BasicDistribution & dist, double RNG){
+double BasicDistribution::windowProcessing(double RNG){
         double value;
 
 //	if (dist.getVariableVector(std::string("PBwindow")).size()==1) // value Pb window
@@ -156,29 +157,29 @@ double windowProcessing(BasicDistribution & dist, double RNG){
 //	else	// DEFAULT
 //		value = dist.InverseCdf(RNG);
 
-   if(dist.getVariable(std::string("PB_window_Low")) != 0.0 || dist.getVariable(std::string("PB_window_Up")) != 1.0){	// interval Pb window
-                double pbLOW = dist.getVariable(std::string("PB_window_Low"));
-                double pbUP  = dist.getVariable(std::string("PB_window_Up"));
+   if(getVariable(std::string("PB_window_Low")) != 0.0 || getVariable(std::string("PB_window_Up")) != 1.0){	// interval Pb window
+                double pbLOW = getVariable(std::string("PB_window_Low"));
+                double pbUP  = getVariable(std::string("PB_window_Up"));
                 double pb = pbLOW + (pbUP-pbLOW) * RNG;
-                value = dist.InverseCdf(pb);
+                value = InverseCdf(pb);
                 //std::cerr << " pbLOW " << pbLOW << " pbUP " << pbUP << " pb " << pb << " value " << value << std::endl;
-        }else if(dist.getVariable(std::string("V_window_Low")) != -std::numeric_limits<double>::max() && dist.getVariable(std::string("V_window_Up")) != std::numeric_limits<double>::max( )){	// interval V window
-                double valLOW = dist.getVariable(std::string("V_window_Low"));
-                double valUP  = dist.getVariable(std::string("V_window_Up"));
+        }else if(getVariable(std::string("V_window_Low")) != -std::numeric_limits<double>::max() && getVariable(std::string("V_window_Up")) != std::numeric_limits<double>::max( )){	// interval V window
+                double valLOW = getVariable(std::string("V_window_Low"));
+                double valUP  = getVariable(std::string("V_window_Up"));
                 value=valLOW+(valUP-valLOW)*RNG;
                 //std::cerr << " valLOW " << valLOW << " valUP " << valUP << " value " << value << std::endl;
         }
         else	// DEFAULT
-                value = dist.InverseCdf(RNG);
+                value = InverseCdf(RNG);
 
         return value;
 }
 
 double DistributionInverseCdf(BasicDistribution & dist, double x){
-  //double standardRNG = dist.InverseCdf(x);
-  double windowedRNG = windowProcessing(dist, x);
+  return dist.InverseCdf(x);
+  //double windowedRNG = windowProcessing(dist, x);
 
-  return windowedRNG;
+  //return windowedRNG;
 }
 
 double untrDistributionPdf(BasicDistribution & dist, double & x){

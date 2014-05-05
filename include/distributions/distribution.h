@@ -61,6 +61,9 @@ protected:
    virtual double forcedConstant();
    virtual void setForcingMethod(force_random forcingMethod);
    virtual void setForcedConstant(double forcedConstant);
+
+   virtual double windowProcessing(double RNG);
+
    force_random _forcingMethod;
    double _forcedConstant;
 
