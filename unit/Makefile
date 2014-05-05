@@ -24,6 +24,11 @@ ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
+################################## MODULES ####################################
+SOLID_MECHANICS   := yes
+include           $(MOOSE_DIR)/modules/modules.mk
+###############################################################################
+
 APPLICATION_DIR := $(MOOSE_DIR)/unit
 APPLICATION_NAME := moose_unit
 BUILD_EXEC       := yes
