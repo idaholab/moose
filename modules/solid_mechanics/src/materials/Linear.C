@@ -5,8 +5,6 @@
 #include "VolumetricModel.h"
 
 
-namespace Elk
-{
 namespace SolidMechanics
 {
 
@@ -65,5 +63,4 @@ Linear::computeStrain( const unsigned qp,
 }
 
 
-}
 }

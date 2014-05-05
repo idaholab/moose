@@ -8,13 +8,11 @@
 // Forward declarations
 class SolidModel;
 
-namespace Elk
-{
 namespace SolidMechanics
 {
 
 /**
- * Element is the base class for all solid mechanics element formulations in Elk.
+ * Element is the base class for all of this module's solid mechanics element formulations.
  */
 class Element :
     public Coupleable,
@@ -77,7 +75,6 @@ private:
 };
 
 } // namespace solid_mechanics
-} // namespace elk
 
 
 #endif

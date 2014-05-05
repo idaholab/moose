@@ -4,8 +4,6 @@
 #include "Problem.h"
 #include "VolumetricModel.h"
 
-namespace Elk
-{
 namespace SolidMechanics
 {
 
@@ -52,5 +50,4 @@ AxisymmetricRZ::computeStrain( const unsigned qp,
 }
 
 
-}
 }

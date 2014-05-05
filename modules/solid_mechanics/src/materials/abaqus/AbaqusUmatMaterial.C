@@ -169,7 +169,7 @@ void AbaqusUmatMaterial::initQpStatefulProperties()
 
 void AbaqusUmatMaterial::computeStress()
 {
-  //Calculate deformation gradient - modeled from "/elk/src/solid_mechanics/materials/Nonlinear3D.C"
+  //Calculate deformation gradient - modeled from "solid_mechanics/src/materials/Nonlinear3D.C"
   // Fbar = 1 + grad(u(k))
   ColumnMajorMatrix Fbar;
 

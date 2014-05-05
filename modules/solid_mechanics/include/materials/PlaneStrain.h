@@ -3,8 +3,6 @@
 
 #include "Element.h"
 
-namespace Elk
-{
 namespace SolidMechanics
 {
 
@@ -36,7 +34,6 @@ protected:
 
 };
 
-}
 }
 
 #endif //SOLIDMECHANICSMATERIALRZ_H

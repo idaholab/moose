@@ -7,13 +7,11 @@
 class MaterialModel;
 class VolumetricModel;
 
-namespace Elk
-{
 namespace SolidMechanics
 {
 
 /**
- * Nonlinear3D is the base class for all solid mechanics material models in Elk.
+ * Nonlinear3D is the base class for all 3D nonlinear solid mechanics material models.
  */
 class Nonlinear3D : public Element
 {
@@ -86,7 +84,6 @@ protected:
 };
 
 } // namespace solid_mechanics
-} // namespace elk
 
 
 #endif
