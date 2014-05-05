@@ -39,8 +39,8 @@ public:
   /// A flag changing the behavior of hasBoundary
   enum TEST_TYPE
   {
-   ALL,
-   ANY
+    ALL,
+    ANY
   };
 
   /**
@@ -77,7 +77,7 @@ public:
 
   /**
    * Test if the supplied boundary name is valid for this object
-c   * @param name A BoundaryName to check
+   * @param name A BoundaryName to check
    * @return True if the given id is valid for this object
    */
   bool hasBoundary(BoundaryName name) const;
@@ -104,7 +104,7 @@ c   * @param name A BoundaryName to check
    * match those of the object
    * @return True if the all of the given ids are found within the ids for this object
    */
-   bool hasBoundary(std::vector<BoundaryID> ids, TEST_TYPE type=ALL) const;
+  bool hasBoundary(std::vector<BoundaryID> ids, TEST_TYPE type=ALL) const;
 
   /**
    * Test if the supplied set of boundary ids are valid for this object
