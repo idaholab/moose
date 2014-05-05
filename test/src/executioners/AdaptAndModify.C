@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<AdaptAndModify>()
 {
   InputParameters params = validParams<Transient>();
-  params.addParam<unsigned int>("adapt_cycles", 1, "Number of adaptivity cylces to do.");
+  params.addParam<unsigned int>("adapt_cycles", 1, "Number of adaptivity cycles to do.");
   return params;
 }
 
@@ -72,7 +72,6 @@ AdaptAndModify::endStep(Real input_time)
 
 #endif
     }
-
     _problem.computeUserObjects(EXEC_CUSTOM);
 
     //output
@@ -85,4 +84,7 @@ AdaptAndModify::endStep(Real input_time)
       }
     }
   }
+
+  _output_warehouse.outputStep();
+
 }
