@@ -277,7 +277,9 @@ endif
 	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F90) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 
-test:	all
+# Define the "test" target, we'll use a variable name so that we can override it without warnings if needed
+TEST ?= test
+$(TEST): all
 	@echo ======================================================
 	@echo Testing $(CURRENT_APP)
 	@echo ======================================================
