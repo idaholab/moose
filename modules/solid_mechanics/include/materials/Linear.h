@@ -5,8 +5,7 @@
 
 //Forward Declarations
 class SymmElasticityTensor;
-namespace Elk
-{
+
 namespace SolidMechanics
 {
 
@@ -31,7 +30,6 @@ protected:
 
 };
 
-}
 }
 
 #endif

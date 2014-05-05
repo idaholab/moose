@@ -1,6 +1,4 @@
 #include "LinearIsotropicMaterial.h"
-
-// Elk Includes
 #include "ColumnMajorMatrix.h"
 #include "SolidMechanicsMaterial.h"
 #include "SymmIsotropicElasticityTensor.h"

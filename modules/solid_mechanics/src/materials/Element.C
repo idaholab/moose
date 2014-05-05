@@ -2,8 +2,6 @@
 
 #include "Nonlinear3D.h"
 
-namespace Elk
-{
 namespace SolidMechanics
 {
 
@@ -240,4 +238,3 @@ Element::fillMatrix( unsigned int qp,
 
 
 } // namespace solid_mechanics
-} // namespace elk

@@ -1,8 +1,6 @@
 #include "PlaneStrain.h"
 #include "SolidModel.h"
 
-namespace Elk
-{
 namespace SolidMechanics
 {
 
@@ -65,5 +63,4 @@ PlaneStrain::computeDeformationGradient( unsigned int qp, ColumnMajorMatrix & F)
 
 
 
-}
 }

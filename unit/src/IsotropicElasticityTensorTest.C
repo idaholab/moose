@@ -12,12 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifdef ELK_TEST
-
 #include <math.h>
 #include "IsotropicElasticityTensorTest.h"
 
-//Moose includes
+// Moose modules includes
 #include "IsotropicElasticityTensor.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( IsotropicElasticityTensorTest );
@@ -269,5 +267,3 @@ double IsotropicElasticityTensorTest::_eK[9][9] = {
   { 0, 0, 0.433027, 0, 0, 0, 0.433027, 0, 0 },
   { 0, 0, 0, 0, 0, 0.433027, 0, 0.433027, 0 },
   { 2.28132, 0, 0, 0, 2.28132, 0, 0, 0, 3.14737 } };
-
-#endif //ELK_TEST: testing if elk library is included
