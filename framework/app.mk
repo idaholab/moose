@@ -1,6 +1,6 @@
 # This file contains common MOOSE application settings
-# Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and optionally ELK.
-#       This can be overridden by using environment variables (MOOSE_DIR and/or ELK_DIR)
+# Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and its modules.
+#       This can be overridden by using the MOOSE_DIR environment variable
 
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
