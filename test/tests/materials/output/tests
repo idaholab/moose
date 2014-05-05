@@ -14,12 +14,6 @@
     input = 'output_boundary.i'
     exodiff = 'output_boundary_out.e'
   [../]
-  [./uniform_refine]
-    type = RunApp
-    input = output.i
-    cli_args = 'Mesh/uniform_refine=1 Outputs/exodus=false'
-    expect_out = 'Auto material output is not supported with uniform mesh refinement'
-  [../]
   [./multiple_files]
     type = Exodiff
     input = output_multiple_files.i
