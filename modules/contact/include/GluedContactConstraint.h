@@ -18,7 +18,6 @@
 //MOOSE includes
 #include "SparsityBasedContactConstraint.h"
 
-//ELK includes
 #include "ContactMaster.h"
 
 //Forward Declarations

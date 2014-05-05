@@ -6,8 +6,6 @@
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
 
-namespace Elk
-{
 namespace SolidMechanics
 {
 
@@ -360,5 +358,4 @@ Nonlinear3D::init()
 
 ////////////////////////////////////////////////////////////////////////
 
-}
 }

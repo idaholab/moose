@@ -1,6 +1,4 @@
 #include "LinearAnisotropicMaterial.h"
-
-// Elk Includes
 #include "SymmAnisotropicElasticityTensor.h"
 
 template<>

@@ -4,8 +4,6 @@
 #include "VolumetricModel.h"
 #include "SolidModel.h"
 
-namespace Elk
-{
 namespace SolidMechanics
 {
 
@@ -45,5 +43,4 @@ SphericalR::computeStrain( const unsigned qp,
 }
 
 
-}
 }

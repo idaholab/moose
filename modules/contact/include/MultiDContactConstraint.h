@@ -18,7 +18,6 @@
 //MOOSE includes
 #include "NodeFaceConstraint.h"
 
-//ELK includes
 #include "ContactMaster.h"
 
 //Forward Declarations

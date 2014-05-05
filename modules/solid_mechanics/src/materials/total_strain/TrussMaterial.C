@@ -1,8 +1,6 @@
 #include "TrussMaterial.h"
 
 #include "Material.h"
-
-// Elk Includes
 #include "ColumnMajorMatrix.h"
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
