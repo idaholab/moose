@@ -24,7 +24,7 @@ InputParameters validParams<MechanicalContactConstraint>()
 {
   MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
 
-  InputParameters params = validParams<SparsityBasedContactConstraint>();
+  InputParameters params = validParams<NodeFaceConstraint>();
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
@@ -49,7 +49,7 @@ InputParameters validParams<MechanicalContactConstraint>()
 }
 
 MechanicalContactConstraint::MechanicalContactConstraint(const std::string & name, InputParameters parameters) :
-    SparsityBasedContactConstraint(name, parameters),
+  NodeFaceConstraint(name, parameters),
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
   _formulation(contactFormulation(getParam<std::string>("formulation"))),
@@ -417,8 +417,8 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           {
             case CF_DEFAULT:
             {
-              double curr_jac = (*_jacobian)( _connected_dof_indices[_j], _current_node->dof_number(0, _vars(_component), 0));
-              //TODO:  Need off-diagonal terms
+              double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
+              //TODO:  Need off-diagonal term/s
               return (-curr_jac + _phi_slave[_j][_qp] * _penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
             }
             case CF_PENALTY:
@@ -435,7 +435,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           {
             case CF_DEFAULT:
             {
-              double curr_jac = (*_jacobian)( _connected_dof_indices[_j], _current_node->dof_number(0, _vars(_component), 0));
+              double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
               return -curr_jac + _phi_slave[_j][_qp] * _penalty * _test_slave[_i][_qp];
             }
             case CF_PENALTY:
@@ -458,7 +458,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             case CF_DEFAULT:
             {
               Node * curr_master_node = _current_master->get_node(_j);
-              double curr_jac = (*_jacobian)( curr_master_node->dof_number(0, _vars(_component), 0), _current_node->dof_number(0, _vars(_component), 0));
+              double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), curr_master_node->dof_number(0, _vars(_component), 0));
               //TODO:  Need off-diagonal terms
               return (-curr_jac - _phi_master[_j][_qp] * _penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
             }
@@ -477,7 +477,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             case CF_DEFAULT:
             {
               Node * curr_master_node = _current_master->get_node(_j);
-              double curr_jac = (*_jacobian)( curr_master_node->dof_number(0, _vars(_component), 0), _current_node->dof_number(0, _vars(_component), 0));
+              double curr_jac = (*_jacobian)( _current_node->dof_number(0, _vars(_component), 0), curr_master_node->dof_number(0, _vars(_component), 0));
               return -curr_jac - _phi_master[_j][_qp] * _penalty * _test_slave[_i][_qp];
             }
             case CF_PENALTY:
