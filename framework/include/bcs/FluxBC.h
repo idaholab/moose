@@ -23,9 +23,9 @@ template<>
 InputParameters validParams<FluxBC>();
 
 /**
- * Boundary condition of a flux type \f$ <\arrow q * \arrow n, v> \f$.
+ * Boundary condition of a flux type \f$ <\vec q * \vec n, v> \f$.
  *
- * User needs to provide vector \f$ \arrow q \f$.
+ * User needs to provide vector \f$ \vec q \f$.
  */
 class FluxBC : public IntegratedBC
 {
