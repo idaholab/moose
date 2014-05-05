@@ -399,7 +399,7 @@ public:
    * @param name The name of the postprocessor
    * @return The default value for the postprocessor
    */
-  PostprocessorValue & defaultPostprocessorValue(const std::string & name);
+  PostprocessorValue & defaultPostprocessorValue(const std::string & name, bool suppress_error=false);
 
   /**
    * Returns true if a default PostprocessorValue is defined

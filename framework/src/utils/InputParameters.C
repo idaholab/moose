@@ -405,10 +405,10 @@ InputParameters::getGroupName(const std::string &param_name) const
 }
 
 PostprocessorValue &
-InputParameters::defaultPostprocessorValue(const std::string & name)
+InputParameters::defaultPostprocessorValue(const std::string & name, bool suppress_error)
 {
   // Check that a default exists, error if it does not
-  if (!hasDefaultPostprocessorValue(name))
+  if (!(suppress_error || hasDefaultPostprocessorValue(name)))
     mooseError("A default PostprcessorValue does not exist for the given name: " << name);
 
   // Return the value
