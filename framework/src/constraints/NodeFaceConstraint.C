@@ -176,6 +176,9 @@ NodeFaceConstraint::getConnectedDofIndices()
     dof_id_type cur_elem = elems[el];
 
     std::vector<dof_id_type> dof_indices;
+
+    //    TODO: Can use this call to get all dofs - including off-diagonal - but we have to have parity between this and addImplicitGeometricCouplingEntries()
+    //    _dof_map.dof_indices(_mesh.elem(cur_elem), dof_indices);
     _var.getDofIndices(_mesh.elem(cur_elem), dof_indices);
 
     for(unsigned int di=0; di < dof_indices.size(); di++)
