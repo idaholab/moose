@@ -56,7 +56,7 @@ OutputObjectTest::initialSetup()
 
   else if (_type == "getOutputs-names")
   {
-    std::vector<std::string> names;
+    std::vector<OutputName> names;
     names.push_back("exodus2");
     names.push_back("exodus");
     std::vector<Exodus *> ptrs = _app.getOutputWarehouse().getOutputs<Exodus>(names);
@@ -66,7 +66,7 @@ OutputObjectTest::initialSetup()
 
   else if (_type == "getOutputNames")
   {
-    std::vector<std::string> names = _app.getOutputWarehouse().getOutputNames<Exodus>();
+    std::vector<OutputName> names = _app.getOutputWarehouse().getOutputNames<Exodus>();
     if (names.size() == 2 && names[0].compare("exodus") == 0 && names[1].compare("exodus2") == 0)
       mooseError("getOutputsNames test passed");
   }

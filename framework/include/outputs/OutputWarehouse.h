@@ -162,7 +162,7 @@ public:
    * @return A pointer to the output object
    */
   template<typename T>
-  T * getOutput(const std::string & name);
+  T * getOutput(const OutputName & name);
 
   /**
    * Return a vector of objects by names
@@ -171,7 +171,7 @@ public:
    * @return A pointer to the output object
    */
   template<typename T>
-  std::vector<T *> getOutputs(const std::vector<std::string> & names);
+  std::vector<T *> getOutputs(const std::vector<OutputName> & names);
 
   /**
    * Return a vector of objects of a given type
@@ -187,7 +187,7 @@ public:
    * @return A vector of names
    */
   template<typename T>
-  std::vector<std::string> getOutputNames();
+  std::vector<OutputName> getOutputNames();
 
   /**
    * Return a set of reserved output names
@@ -247,7 +247,7 @@ private:
   std::vector<Output *> _object_ptrs;
 
   /// A map of the output pointers
-  std::map<std::string, Output *> _object_map;
+  std::map<OutputName, Output *> _object_map;
 
   /// List of object names
   std::set<OutFileBase> _filenames;
@@ -255,7 +255,7 @@ private:
   /// Pointer to the common InputParameters (@see CommonOutputAction)
   InputParameters * _common_params_ptr;
 
-  /// True if multiple Console output objects are added to the warehouse
+  /// True if a Console output object is added to the warehouse, used to check for multiple screen outputs
   bool _has_screen_console;
 
   /// Sync times for all objects
@@ -280,7 +280,7 @@ private:
 
 template<typename T>
 T *
-OutputWarehouse::getOutput(const std::string & name)
+OutputWarehouse::getOutput(const OutputName & name)
 {
   // Check that the object exists
   if (!hasOutput(name))
@@ -299,13 +299,13 @@ OutputWarehouse::getOutput(const std::string & name)
 
 template<typename T>
 std::vector<T *>
-OutputWarehouse::getOutputs(const std::vector<std::string> & names)
+OutputWarehouse::getOutputs(const std::vector<OutputName> & names)
 {
   // The vector to output
   std::vector<T *> outputs;
 
   // Populate the vector
-  for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+  for (std::vector<OutputName>::const_iterator it = names.begin(); it != names.end(); ++it)
     outputs.push_back(getOutput<T>(*it));
 
   // Return the objects
@@ -320,7 +320,7 @@ OutputWarehouse::getOutputs()
   std::vector<T *> outputs;
 
   // Populate the vector
-  for (std::map<std::string, Output *>::const_iterator it = _object_map.begin(); it != _object_map.end(); ++it)
+  for (std::map<OutputName, Output *>::const_iterator it = _object_map.begin(); it != _object_map.end(); ++it)
   {
     T * output = dynamic_cast<T*>(it->second);
     if (output != NULL)
@@ -337,14 +337,14 @@ OutputWarehouse::getOutputs()
  * @return A vector of names
  */
 template<typename T>
-std::vector<std::string>
+std::vector<OutputName>
 OutputWarehouse::getOutputNames()
 {
   // The output vector
-  std::vector<std::string> names;
+  std::vector<OutputName> names;
 
   // Loop through the objects and store the name if the type cast succeeds
-  for (std::map<std::string, Output *>::const_iterator it = _object_map.begin(); it != _object_map.end(); ++it)
+  for (std::map<OutputName, Output *>::const_iterator it = _object_map.begin(); it != _object_map.end(); ++it)
   {
     T * output = dynamic_cast<T*>(it->second);
     if (output != NULL)
