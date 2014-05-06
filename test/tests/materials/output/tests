@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'output.i'
     exodiff = 'output_out.e'
+    recover = false # see 3082
   [../]
   [./block]
     type = 'Exodiff'
