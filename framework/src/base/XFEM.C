@@ -641,6 +641,11 @@ XFEM::cut_mesh_with_efa()
         libmesh_node = _mesh->node_ptr(node_id);
 
       libmesh_elem->set_node(j) = libmesh_node;
+
+      Node *parent_node = parent_elem->get_node(j);
+      std::vector<boundary_id_type> parent_node_boundary_ids = _mesh->boundary_info->boundary_ids(parent_node);
+      _mesh->boundary_info->add_node(libmesh_node, parent_node_boundary_ids);
+
       if (_mesh2)
       {
         std::map<unsigned int, Node*>::iterator nit2 = efa_id_to_new_node2.find(node_id);
@@ -650,6 +655,11 @@ XFEM::cut_mesh_with_efa()
           libmesh_node = _mesh2->node_ptr(node_id);
 
         libmesh_elem2->set_node(j) = libmesh_node;
+
+        parent_node = parent_elem2->get_node(j);
+        parent_node_boundary_ids.clear();
+        parent_node_boundary_ids = _mesh2->boundary_info->boundary_ids(parent_node);
+        _mesh->boundary_info->add_node(libmesh_node, parent_node_boundary_ids);
       }
     }
 
@@ -675,6 +685,38 @@ XFEM::cut_mesh_with_efa()
       std::cout<<"XFEM2 added elem "<<libmesh_elem2->id()+1<<std::endl;
     }
 
+    unsigned int n_sides = parent_elem->n_sides();
+    for (unsigned int side=0; side<n_sides; ++side)
+    {
+      std::vector<boundary_id_type> parent_elem_boundary_ids = _mesh->boundary_info->boundary_ids(parent_elem, side);
+      _mesh->boundary_info->add_side(libmesh_elem, side, parent_elem_boundary_ids);
+    }
+    if (_mesh2)
+    {
+      n_sides = parent_elem2->n_sides();
+      for (unsigned int side=0; side<n_sides; ++side)
+      {
+        std::vector<boundary_id_type> parent_elem_boundary_ids = _mesh2->boundary_info->boundary_ids(parent_elem2, side);
+        _mesh->boundary_info->add_side(libmesh_elem2, side, parent_elem_boundary_ids);
+      }
+    }
+
+    unsigned int n_edges = parent_elem->n_edges();
+    for (unsigned int edge=0; edge<n_edges; ++edge)
+    {
+      std::vector<boundary_id_type> parent_elem_boundary_ids = _mesh->boundary_info->edge_boundary_ids(parent_elem, edge);
+      _mesh->boundary_info->add_edge(libmesh_elem, edge, parent_elem_boundary_ids);
+    }
+    if (_mesh2)
+    {
+      n_edges = parent_elem2->n_edges();
+      for (unsigned int edge=0; edge<n_edges; ++edge)
+      {
+        std::vector<boundary_id_type> parent_elem_boundary_ids = _mesh2->boundary_info->edge_boundary_ids(parent_elem2, edge);
+        _mesh->boundary_info->add_edge(libmesh_elem2, edge, parent_elem_boundary_ids);
+      }
+    }
+
     mesh_changed = true;
   }
 
@@ -692,7 +734,7 @@ XFEM::cut_mesh_with_efa()
       _cut_elem_map.erase(cemit);
     }
 
-//BWS TODO   elem_to_delete->nullify_neighbors();
+    elem_to_delete->nullify_neighbors();
     _mesh->boundary_info->remove(elem_to_delete);
     _mesh->delete_elem(elem_to_delete);
     std::cout<<"XFEM deleted elem "<<elem_to_delete->id()+1<<std::endl;
@@ -701,7 +743,7 @@ XFEM::cut_mesh_with_efa()
     if (_mesh2)
     {
       Elem *elem_to_delete2 = _mesh2->elem(DeleteElements[i]->id);
-//BWS TODO      elem_to_delete2->nullify_neighbors();
+      elem_to_delete2->nullify_neighbors();
       _mesh2->boundary_info->remove(elem_to_delete2);
       _mesh2->delete_elem(elem_to_delete2);
       std::cout<<"XFEM2 deleted elem "<<elem_to_delete2->id()+1<<std::endl;
