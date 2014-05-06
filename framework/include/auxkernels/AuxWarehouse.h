@@ -64,14 +64,14 @@ public:
    * @param boundary_id Boundary ID this kernel works on
    * @param aux BC kernel being added
    */
-  void addActiveBC(BoundaryID boundary_id, AuxKernel *aux);
+  void addActiveBC(AuxKernel *aux);
 
   /**
    * Adds an auxiliary kernel
    * @param aux Kernel being added
    * @param block_ids Set of subdomain this kernel is active on
    */
-  void addAuxKernel(AuxKernel *aux, std::set<SubdomainID> block_ids);
+  void addAuxKernel(AuxKernel *aux);
 
   /**
    * Add a scalar kernels
