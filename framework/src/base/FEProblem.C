@@ -76,6 +76,8 @@ std::string name_sys(const std::string & name, unsigned int n)
   return os.str();
 }
 
+Threads::spin_mutex get_function_mutex;
+
 template<>
 InputParameters validParams<FEProblem>()
 {
@@ -1121,17 +1123,34 @@ FEProblem::hasFunction(const std::string & name, THREAD_ID tid)
 Function &
 FEProblem::getFunction(const std::string & name, THREAD_ID tid)
 {
+  // This thread lock is necessary since this method will create functions
+  // for all threads if one is missing.
+  Threads::spin_mutex::scoped_lock lock(get_function_mutex);
+
   if (!hasFunction(name, tid))
   {
     // If we didn't find a function, it might be a default function, attempt to construct one now
-    FunctionParserBase<Real> fp;
-    std::string vars = "x,y,z,t";
-    if (fp.Parse(name, vars) == -1) // -1 for success
+    std::istringstream ss(name);
+    Real real_value;
+
+    // First see if it's just a constant. If it is, build a ConstantFunction
+    if (ss >> real_value && ss.eof())
     {
-      // It parsed ok, so build a MooseParsedFunction
-      InputParameters params = _factory.getValidParams("ParsedFunction");
-      params.set<std::string>("value") = name;
-      addFunction("ParsedFunction", name, params);
+      InputParameters params = _factory.getValidParams("ConstantFunction");
+      params.set<Real>("value") = real_value;
+      addFunction("ConstantFunction", ss.str(), params);
+    }
+    else
+    {
+      FunctionParserBase<Real> fp;
+      std::string vars = "x,y,z,t";
+      if (fp.Parse(name, vars) == -1) // -1 for success
+      {
+        // It parsed ok, so build a MooseParsedFunction
+        InputParameters params = _factory.getValidParams("ParsedFunction");
+        params.set<std::string>("value") = name;
+        addFunction("ParsedFunction", name, params);
+      }
     }
 
     // Try once more
