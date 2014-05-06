@@ -1,9 +1,17 @@
 [Tests]
-  [./test]
+  [./around]
     type = 'Exodiff'
     input = 'around.i'
     cli_args = '--mesh-only'
     exodiff = 'around_in.e'
+    recover = false
+  [../]
+
+  [./around_normals]
+    type = 'Exodiff'
+    input = 'around_normals.i'
+    cli_args = '--mesh-only'
+    exodiff = 'around_normals_in.e'
     recover = false
   [../]
 []
