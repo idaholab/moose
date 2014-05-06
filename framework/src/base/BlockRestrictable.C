@@ -222,3 +222,9 @@ BlockRestrictable::hasBlockMaterialProperty(const std::string & name) const
   else
     return isBlockSubset(mat_blk);
 }
+
+const std::set<SubdomainID> &
+BlockRestrictable::meshBlockIDs()
+{
+  return _blk_mesh->meshSubdomains();
+}
