@@ -69,6 +69,7 @@ Coupleable::~Coupleable()
     it->second->release();
     delete it->second;
   }
+  _default_value_zero.release();
   _default_gradient.release();
   _default_second.release();
 }
