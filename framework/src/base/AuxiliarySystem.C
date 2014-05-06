@@ -132,33 +132,7 @@ AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string &
     AuxKernel *kernel = static_cast<AuxKernel *>(_factory.create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
 
-    std::set<SubdomainID> blk_ids;
-    if (!parameters.isParamValid("block"))
-    {
-      blk_ids = _var_map[kernel->variable().index()];
-
-      // If there is no block supplied and the variable is not restricted, get all the blocks from the mesh
-      if (blk_ids.empty())
-        blk_ids = _mesh.meshSubdomains();
-    }
-    else
-    {
-      std::vector<SubdomainName> blocks = parameters.get<std::vector<SubdomainName> >("block");
-      for (unsigned int i=0; i<blocks.size(); ++i)
-      {
-        SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
-
-        if (_var_map[kernel->variable().index()].count(blk_id) > 0 || _var_map[kernel->variable().index()].size() == 0)
-          blk_ids.insert(blk_id);
-        else
-          mooseError("AuxKernel (" + kernel->name() + "): block outside of the domain of the variable");
-      }
-    }
-
-    if (blk_ids.empty())
-      mooseError("No block ids determined for: " << kernel->name());
-
-    _auxs(kernel->execFlag())[tid].addAuxKernel(kernel, blk_ids);
+    _auxs(kernel->execFlag())[tid].addAuxKernel(kernel);
     _mproblem._objects_by_name[tid][name].push_back(kernel);
   }
 }
@@ -183,26 +157,22 @@ AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::st
 {
 
   parameters.set<AuxiliarySystem *>("_aux_sys") = this;
-  std::vector<BoundaryName> boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
+  parameters.set<bool>("_on_boundary") = true;
 
-  for (unsigned int i=0; i<boundaries.size(); ++i)
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    BoundaryID boundary = _mesh.getBoundaryID(boundaries[i]);
-    parameters.set<BoundaryID>("_boundary_id") = boundary;
+    parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
 
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    {
-      parameters.set<THREAD_ID>("_tid") = tid;
-      parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
+    AuxKernel * kernel = static_cast<AuxKernel *>(_factory.create(bc_name, name, parameters));
+    mooseAssert(kernel != NULL, "Not a boundary restricted AuxAuxKernel object");
 
-      AuxKernel * bc = static_cast<AuxKernel *>(_factory.create(bc_name, name, parameters));
-      mooseAssert(bc != NULL, "Not a AuxBoundaryCondition object");
+    _auxs(kernel->execFlag())[tid].addActiveBC(kernel);
+    _mproblem._objects_by_name[tid][name].push_back(kernel);
 
-      _auxs(bc->execFlag())[tid].addActiveBC(boundary, bc);
-      _mproblem._objects_by_name[tid][name].push_back(bc);
-
-      _vars[tid].addBoundaryVar(boundary, &bc->variable());
-    }
+    const std::set<BoundaryID> & boundary_ids = kernel->boundaryIDs();
+    for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+      _vars[tid].addBoundaryVar(*it, &kernel->variable());
   }
 }
 

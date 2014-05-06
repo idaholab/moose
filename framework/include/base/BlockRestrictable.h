@@ -152,6 +152,12 @@ public:
    */
   bool hasBlockMaterialProperty(const std::string & name) const;
 
+  /**
+   * Return all of the SubdomainIDs for the mesh
+   * @return A set of all subdomians for the entire domain
+   */
+  const std::set<SubdomainID> & meshBlockIDs();
+
 private:
 
   /// Set of block ids supplied by the user via the input file
@@ -176,6 +182,5 @@ private:
   std::set<SubdomainID> variableSubdomianIDs(InputParameters & parameters) const;
 
 };
-
 
 #endif // BLOCKRESTRICTABLE_H

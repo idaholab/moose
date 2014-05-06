@@ -40,6 +40,9 @@ InputParameters validParams<AuxKernel>()
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
+  // This flag is set to true if the AuxKernel is being used on a boundary
+  params.addPrivateParam<bool>("_on_boundary", false);
+
   params.registerBase("AuxKernel");
 
   return params;
@@ -71,10 +74,9 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     _var(_aux_sys.getVariable(_tid, parameters.get<AuxVariableName>("variable"))),
     _nodal(_var.isNodal()),
 
-    _bnd(parameters.have_parameter<BoundaryID>("_boundary_id")),
+    _bnd(parameters.get<bool>("_on_boundary")),
 
     _mesh(_subproblem.mesh()),
-//    _dim(_mesh.dimension()),
 
     _q_point(_bnd ? _assembly.qPointsFace() : _assembly.qPoints()),
     _qrule(_bnd ? _assembly.qRuleFace() : _assembly.qRule()),
