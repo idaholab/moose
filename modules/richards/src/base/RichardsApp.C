@@ -71,9 +71,6 @@
 #include "RichardsExcavFlow.h"
 #include "RichardsPlotQuantity.h"
 
-// TimeSteppers
-#include "FunctionControlledDT.h"
-
 // Kernels
 #include "RichardsMassChange.h"
 #include "RichardsLumpedMassChange.h"
@@ -183,9 +180,6 @@ RichardsApp::registerObjects(Factory & factory)
   registerPostprocessor(NodalMaxVarChange);
   registerPostprocessor(RichardsExcavFlow);
   registerPostprocessor(RichardsPlotQuantity);
-
-  // TimeSteppers
-  registerTimeStepper(FunctionControlledDT);
 
   // Kernels
   registerKernel(RichardsMassChange);
