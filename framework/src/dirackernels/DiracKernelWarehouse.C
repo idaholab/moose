@@ -57,7 +57,7 @@ DiracKernelWarehouse::jacobianSetup()
 
 
 void
-DiracKernelWarehouse::addDiracKernel(DiracKernel *DiracKernel)
+DiracKernelWarehouse::addDiracKernel(DiracKernel * kernel)
 {
-  _dirac_kernels.push_back(DiracKernel);
+  _dirac_kernels.push_back(kernel);
 }
