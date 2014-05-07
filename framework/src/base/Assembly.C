@@ -737,6 +737,7 @@ Assembly::prepare()
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
+
     for (unsigned int i = 0; i < _sub_Re.size(); i++)
     {
       _sub_Re[i][ivar.number()].resize(ivar.dofIndices().size());

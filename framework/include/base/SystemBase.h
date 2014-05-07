@@ -182,7 +182,7 @@ public:
    * Gets a reference to a variable with specified number
    *
    * @param tid Thread id
-   * @param var_number variable number
+   * @param var_number libMesh variable number
    * @return reference the variable (class)
    */
   virtual MooseVariable & getVariable(THREAD_ID tid, unsigned int var_number);
@@ -200,7 +200,7 @@ public:
    * Gets a reference to a variable with specified number
    *
    * @param tid Thread id
-   * @param var_number variable number
+   * @param var_number libMesh variable number
    * @return reference the variable (class)
    */
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, unsigned int var_number);

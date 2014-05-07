@@ -124,6 +124,7 @@ ContactAction::act()
 
       params.set<unsigned int>("component") = i;
       params.set<NonlinearVariableName>("variable") = vars[i];
+      params.set<std::vector<VariableName> >("master_variable") = std::vector<VariableName>(1,vars[i]);
 
       _problem->addConstraint("MechanicalContactConstraint",
                               name.str(),

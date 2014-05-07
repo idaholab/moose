@@ -31,12 +31,16 @@ InputParameters validParams<NodeFaceConstraint>()
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
+
+  params.addRequiredCoupledVar("master_variable", "The variable on the master side of the domain");
+
   return params;
 }
 
 NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters parameters) :
     Constraint(name, parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
+    // The slave side is at nodes (hence passing 'true').  The neighbor side is the master side and it is not at nodes (so passing false)
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, true, false),
     _slave(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
     _master(_mesh.getBoundaryID(getParam<BoundaryName>("master"))),
 
@@ -52,14 +56,17 @@ NodeFaceConstraint::NodeFaceConstraint(const std::string & name, InputParameters
     _phi_slave(1),  // One entry
     _test_slave(1),  // One entry
 
+    _master_var(*getVar("master_variable", 0)),
+    _master_var_num(_master_var.number()),
+
     _phi_master(_assembly.phiFaceNeighbor()),
     _grad_phi_master(_assembly.gradPhiFaceNeighbor()),
 
     _test_master(_var.phiFaceNeighbor()),
     _grad_test_master(_var.gradPhiFaceNeighbor()),
 
-    _u_master(_var.slnNeighbor()),
-    _grad_u_master(_var.gradSlnNeighbor()),
+    _u_master(_master_var.slnNeighbor()),
+    _grad_u_master(_master_var.gradSlnNeighbor()),
 
     _dof_map(_sys.dofMap()),
     _node_to_elem_map(_mesh.nodeToElemMap()),
@@ -101,7 +108,7 @@ void
 NodeFaceConstraint::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_var.number());
+  DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_master_var.number());
 
   _qp=0;
 
@@ -116,13 +123,13 @@ NodeFaceConstraint::computeResidual()
 void
 NodeFaceConstraint::computeJacobian()
 {
-  getConnectedDofIndices();
+  getConnectedDofIndices(_var.number());
 
   //  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
   DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
 
   //  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number());
-  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), _var.number());
 
   _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
   _Kne.resize(_test_master.size(), _connected_dof_indices.size());
@@ -148,23 +155,75 @@ NodeFaceConstraint::computeJacobian()
     for (_j=0; _j<_connected_dof_indices.size(); _j++)
       _Kee(_i,_j) += computeQpJacobian(Moose::SlaveSlave);
 
-  for (_i=0; _i<_test_slave.size(); _i++)
-    for (_j=0; _j<_phi_master.size(); _j++)
-      Ken(_i,_j) += computeQpJacobian(Moose::SlaveMaster);
+  if(Ken.m() && Ken.n())
+    for (_i=0; _i<_test_slave.size(); _i++)
+      for (_j=0; _j<_phi_master.size(); _j++)
+        Ken(_i,_j) += computeQpJacobian(Moose::SlaveMaster);
 
   for (_i=0; _i<_test_master.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j=0; _j<_connected_dof_indices.size(); _j++)
       _Kne(_i,_j) += computeQpJacobian(Moose::MasterSlave);
 
-  for (_i=0; _i<_test_master.size(); _i++)
-    for (_j=0; _j<_phi_master.size(); _j++)
-      Knn(_i,_j) += computeQpJacobian(Moose::MasterMaster);
+  if(Knn.m() && Knn.n())
+    for (_i=0; _i<_test_master.size(); _i++)
+      for (_j=0; _j<_phi_master.size(); _j++)
+        Knn(_i,_j) += computeQpJacobian(Moose::MasterMaster);
 }
 
 void
-NodeFaceConstraint::getConnectedDofIndices()
+NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
 {
+  getConnectedDofIndices(jvar);
+
+  _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
+  _Kne.resize(_test_master.size(), _connected_dof_indices.size());
+
+  DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), jvar);
+
+  _phi_slave.resize(_connected_dof_indices.size());
+
+  _qp = 0;
+
+  // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
+  // This corresponds to evaluating all of the connected shape functions at _this_ node
+  for(unsigned int j=0; j<_connected_dof_indices.size(); j++)
+  {
+    _phi_slave[j].resize(1);
+
+    if (_connected_dof_indices[j] == _var.nodalDofIndex())
+      _phi_slave[j][_qp] = 1.0;
+    else
+      _phi_slave[j][_qp] = 0.0;
+  }
+
+  for (_i=0; _i<_test_slave.size(); _i++)
+    // Loop over the connected dof indices so we can get all the jacobian contributions
+    for (_j=0; _j<_connected_dof_indices.size(); _j++)
+      _Kee(_i,_j) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
+
+  for (_i=0; _i<_test_slave.size(); _i++)
+    for (_j=0; _j<_phi_master.size(); _j++)
+      Ken(_i,_j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
+
+  if(_Kne.m() && _Kne.n())
+    for (_i=0; _i<_test_master.size(); _i++)
+      // Loop over the connected dof indices so we can get all the jacobian contributions
+      for (_j=0; _j<_connected_dof_indices.size(); _j++)
+        _Kne(_i,_j) += computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
+
+  for (_i=0; _i<_test_master.size(); _i++)
+    for (_j=0; _j<_phi_master.size(); _j++)
+      Knn(_i,_j) += computeQpOffDiagJacobian(Moose::MasterMaster, jvar);
+}
+
+
+void
+NodeFaceConstraint::getConnectedDofIndices(unsigned int var_num)
+{
+  MooseVariable & var = _sys.getVariable(0, var_num);
+
   _connected_dof_indices.clear();
   std::set<dof_id_type> unique_dof_indices;
 
@@ -177,9 +236,7 @@ NodeFaceConstraint::getConnectedDofIndices()
 
     std::vector<dof_id_type> dof_indices;
 
-    //    TODO: Can use this call to get all dofs - including off-diagonal - but we have to have parity between this and addImplicitGeometricCouplingEntries()
-    //    _dof_map.dof_indices(_mesh.elem(cur_elem), dof_indices);
-    _var.getDofIndices(_mesh.elem(cur_elem), dof_indices);
+    var.getDofIndices(_mesh.elem(cur_elem), dof_indices);
 
     for(unsigned int di=0; di < dof_indices.size(); di++)
       unique_dof_indices.insert(dof_indices[di]);

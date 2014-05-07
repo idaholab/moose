@@ -207,6 +207,7 @@
 
 // Constraints
 #include "TiedValueConstraint.h"
+#include "CoupledTiedValueConstraint.h"
 #include "AddBoundsVectorsAction.h"
 #include "EqualValueConstraint.h"
 
@@ -533,6 +534,7 @@ registerObjects(Factory & factory)
 
   // Constraints
   registerConstraint(TiedValueConstraint);
+  registerConstraint(CoupledTiedValueConstraint);
   registerConstraint(EqualValueConstraint);
 
   // Scalar kernels
