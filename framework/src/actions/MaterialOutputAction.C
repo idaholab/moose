@@ -136,7 +136,7 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
   {
     // Generate the name
     std::string long_name("AuxKernels/");
-    long_name += variable_name;
+    long_name += material->name() + "_" + variable_name;
 
     // Set the action parameters
     InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
@@ -152,7 +152,7 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
     InputParameters & object_params = action->getObjectParams();
     object_params.set<std::string>("property") = property_name;
     object_params.set<AuxVariableName>("variable") = variable_name;
-    object_params.set<MooseEnum>("execute_on") = "timestep_begin";
+    object_params.set<MooseEnum>("execute_on") = "timestep";
     object_params.set<std::vector<SubdomainName> >("block") = material->blocks();
   }
 
@@ -161,7 +161,7 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
   {
     // Create the name
     std::string long_name("AuxBCs/");
-    long_name += variable_name;
+    long_name += material->name() + "_" + variable_name;
 
     // Set the action parmeters
     InputParameters action_params = _action_factory.getValidParams("AddBCAction");
@@ -172,7 +172,6 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
     action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
     action_params.set<std::string>("task") = "add_aux_bc";
 
-
     // Create the action
     action = static_cast<MooseObjectAction *>(_action_factory.create("AddBCAction", long_name, action_params));
 
@@ -180,7 +179,7 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
     InputParameters & object_params = action->getObjectParams();
     object_params.set<std::string>("property") = property_name;
     object_params.set<AuxVariableName>("variable") = variable_name;
-    object_params.set<MooseEnum>("execute_on") = "timestep_begin";
+    object_params.set<MooseEnum>("execute_on") = "timestep";
     object_params.set<std::vector<BoundaryName> >("boundary") = material->boundaryNames();
   }
 

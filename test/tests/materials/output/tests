@@ -24,6 +24,11 @@
     type = RunException
     input = output.i
     expect_err = "The output object 'garbage' is not a defined output object"
-    cli_args = 'Outputs/exodus=false Materials/function_material/outputs=garbage'
+    cli_args = 'Outputs/exodus=false Materials/test_material/outputs=garbage'
+  [../]
+  [./steady]
+    type = Exodiff
+    input = output_steady.i
+    exodiff = output_steady_out.e
   [../]
 []
