@@ -3,12 +3,12 @@
 import sys
 
 sys.path.append('.')
-import ParseGetPot 
+import ParseGetPot, Factory
 
 
 class Parser:
-  def __init__(self):
-    return
+  def __init__(self, factory):
+    self.factory = factory
 
   def parse(self, filename):
 
@@ -21,6 +21,8 @@ class Parser:
     self._parseNode(root)
 
   def _parseNode(self, node):
+    
+
     # Loop over the section names
     for child in node.children_list:
       print node.children[child].fullName()
@@ -29,13 +31,20 @@ class Parser:
 
 class Syntax:
   def __init__(self):
-    self. 
+    self.associated_objects = {}
     return
 
-  def registerSyntax():
-    
+  def registerSyntax(self, ):
+    return  
 
 
 if __name__ == '__main__':
-  parser = Parser()
+  factory = Factory.Factory()
+
+  # For now we'll just use the Testers
+  factory.loadPlugins('../..', '/scripts/TestHarness/testers', Tester
+
+  parser = Parser(factory)
   parser.parse('tests')
+
+  

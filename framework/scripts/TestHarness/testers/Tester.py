@@ -1,10 +1,11 @@
 from util import *
 from InputParameters import InputParameters
+from MooseObject import MooseObject
 
-class Tester(object):
+class Tester(MooseObject):
   # Static Method
   def getValidParams():
-    params = InputParameters()
+    params = MooseObject.validParams()
 
     # Common Options
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
