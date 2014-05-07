@@ -87,7 +87,7 @@
   [./CuGrGr]
     type = CuGrGr
     block = 0
-    temp = 500 #K
+    T = 500 #K
     wGB = 0.75 #micron
     length_scale = 1.0e-6
     time_scale = 1.0e-4
