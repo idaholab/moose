@@ -93,7 +93,7 @@
   [./CuGrGr]
     type = CuGrGr
     block = 0
-    temp = 500 # K
+    T = 500 # K
     wGB = 75 # nm
   [../]
 []
