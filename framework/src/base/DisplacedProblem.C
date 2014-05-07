@@ -233,15 +233,12 @@ DisplacedProblem::prepareAssemblyNeighbor(THREAD_ID tid)
 bool
 DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 {
-  std::set<Point> & points_set = _dirac_kernel_info._points[elem];
+  std::vector<Point> & points = _dirac_kernel_info.getPoints()[elem];
 
-  bool have_points = points_set.size();
+  bool have_points = points.size();
 
   if (have_points)
   {
-    std::vector<Point> points(points_set.size());
-    std::copy(points_set.begin(), points_set.end(), points.begin());
-
     _assembly[tid]->reinitAtPhysical(elem, points);
 
     _displaced_nl.prepare(tid);
@@ -364,7 +361,7 @@ DisplacedProblem::reinitScalars(THREAD_ID tid)
 void
 DisplacedProblem::getDiracElements(std::set<const Elem *> & elems)
 {
-  elems = _dirac_kernel_info._elements;
+  elems = _dirac_kernel_info.getElements();
 }
 
 void
