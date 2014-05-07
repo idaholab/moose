@@ -20,17 +20,6 @@ ROOT_DIR    := $(HERD_TRUNK_DIR)
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-################################## MODULES ####################################
-ALL_MODULES := yes
-include           $(MOOSE_DIR)/modules/modules.mk
-###############################################################################
-
-# dep apps
-APPLICATION_DIR    := $(HERD_TRUNK_DIR)/r7_moose
-APPLICATION_NAME   := r7_moose
-DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
-include            $(FRAMEWORK_DIR)/app.mk
-
 APPLICATION_DIR    := $(HERD_TRUNK_DIR)/crow
 APPLICATION_NAME   := CROW
 
