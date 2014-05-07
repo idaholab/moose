@@ -73,5 +73,5 @@ GBEvolution::computeQpProperties()
   _molar_volume[_qp] = _molar_vol/(_length_scale*_length_scale*_length_scale); //m^3/mol converted to ls^3/mol
   _act_wGB[_qp] = 0.5e-9/_length_scale;
   _tgrad_corr_mult[_qp] = _mu[_qp]*9.0/8.0;
-  
+
 }

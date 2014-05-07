@@ -29,7 +29,7 @@ private:
   Real _GBMobility;
   Real _molar_vol;
 
-  VariableValue & _T; 
+  VariableValue & _T;
 
   MaterialProperty<Real> & _sigma;
   MaterialProperty<Real> & _M_GB;
