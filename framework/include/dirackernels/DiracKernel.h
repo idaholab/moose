@@ -119,7 +119,7 @@ protected:
    * Add the physical x,y,z point located in the element "elem" to the list of points
    * this DiracKernel will be asked to evaluate a value at.
    */
-  void addPoint(const Elem * elem, Point p);
+  void addPoint(const Elem * elem, Point p, unsigned id=libMesh::invalid_uint);
 
   /**
    * This is a highly inefficient way to add a point where this DiracKernel needs to be
@@ -127,7 +127,7 @@ protected:
    *
    * This spawns a search for the element containing that point!
    */
-  const Elem * addPoint(Point p);
+  const Elem * addPoint(Point p, unsigned id=libMesh::invalid_uint);
 
   SubProblem & _subproblem;
   SystemBase & _sys;
@@ -195,6 +195,10 @@ protected:
   VariableValue & _u_dot;
   /// Derivative of u_dot wrt u
   VariableValue & _du_dot_du;
+
+  /// Data structure for caching user-defined IDs which can be mapped to
+  /// specific std::pair<const Elem*, Point> and avoid the PointLocator Elem lookup.
+  std::map<unsigned, std::pair<const Elem*, Point> > _point_cache;
 };
 
 #endif

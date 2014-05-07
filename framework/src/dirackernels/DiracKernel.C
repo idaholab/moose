@@ -116,7 +116,7 @@ DiracKernel::computeQpJacobian()
 }
 
 void
-DiracKernel::addPoint(const Elem * elem, Point p)
+DiracKernel::addPoint(const Elem * elem, Point p, unsigned id)
 {
   if (!elem || (elem->processor_id() != processor_id()))
     return;
@@ -126,11 +126,41 @@ DiracKernel::addPoint(const Elem * elem, Point p)
 }
 
 const Elem *
-DiracKernel::addPoint(Point p)
+DiracKernel::addPoint(Point p, unsigned id)
 {
+  if (id != libMesh::invalid_uint)
+  {
+    // OK, the user gave us an ID, let's see if we already have it...
+    std::map<unsigned, std::pair<const Elem*, Point> >::iterator it = _point_cache.find(id);
+
+    if (it != _point_cache.end())
+    {
+      // We have something cached, now make sure it's actually the same Point.
+      // TODO: we should probably use this same comparison in the DiracKernelInfo code!
+      Point cached_point = (it->second).second;
+
+      if (cached_point.relative_fuzzy_equals(p))
+      {
+        // use cached data and call the other addPoint() method
+        const Elem * cached_elem = (it->second).first;
+        addPoint(cached_elem, p, id);
+        return cached_elem;
+      }
+      else
+        mooseError("Cached Dirac point " << cached_point << " already exists with ID: " << id << " and does not match point " << p);
+    }
+  }
+
+  // If we made it here, we either didn't have the point already cached or
+  // id == libMesh::invalid_uint.  So now do the expensive PointLocator lookup,
+  // possibly cache the result, and call the other addPoint() method.
   AutoPtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, _mesh);
   const Elem * elem = (*pl)(p);
-  addPoint(elem, p);
+
+  if (id != libMesh::invalid_uint)
+    _point_cache[id] = std::make_pair(elem, p);
+
+  addPoint(elem, p, id);
   return elem;
 }
 
