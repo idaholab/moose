@@ -45,8 +45,8 @@ ComputeFullJacobianThread::computeJacobian()
     MooseVariable & ivariable = *(*it).first;
     MooseVariable & jvariable = *(*it).second;
 
-    unsigned int ivar = ivariable.index();
-    unsigned int jvar = jvariable.index();
+    unsigned int ivar = ivariable.number();
+    unsigned int jvar = jvariable.number();
 
     if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain))
     {
@@ -55,7 +55,7 @@ ComputeFullJacobianThread::computeJacobian()
       for (std::vector<KernelBase *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
       {
         KernelBase * kernel = *kt;
-        if ((kernel->variable().index() == ivar) && kernel->isImplicit())
+        if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
           kernel->subProblem().prepareShapes(jvar, _tid);
           kernel->computeOffDiagJacobian(jvar);
@@ -75,7 +75,7 @@ ComputeFullJacobianThread::computeJacobian()
       if (ivar.activeOnSubdomain(_subdomain) > 0)
       {
         // for each variable get the list of active kernels
-        const std::vector<KernelBase *> & kernels = _sys._kernels[_tid].activeVar(ivar.index());
+        const std::vector<KernelBase *> & kernels = _sys._kernels[_tid].activeVar(ivar.number());
         for (std::vector<KernelBase *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
         {
           KernelBase * kernel = *kt;
@@ -88,7 +88,7 @@ ComputeFullJacobianThread::computeJacobian()
               MooseVariableScalar & jvar = *(*jt);
               // Do: dvar / dscalar_var
               if (_sys.hasScalarVariable(jvar.name()))              // want to process only nl-variables (not aux ones)
-                kernel->computeOffDiagJacobianScalar(jvar.index());
+                kernel->computeOffDiagJacobianScalar(jvar.number());
             }
           }
         }
@@ -112,10 +112,10 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       for (std::vector<IntegratedBC *>::iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
       {
         IntegratedBC * bc = *jt;
-        if (bc->shouldApply() && bc->variable().index() == ivar.index() && bc->isImplicit())
+        if (bc->shouldApply() && bc->variable().number() == ivar.number() && bc->isImplicit())
         {
-          bc->subProblem().prepareFaceShapes(jvar.index(), _tid);
-          bc->computeJacobianBlock(jvar.index());
+          bc->subProblem().prepareFaceShapes(jvar.number(), _tid);
+          bc->computeJacobianBlock(jvar.number());
         }
       }
     }
@@ -136,7 +136,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
         for (std::vector<IntegratedBC *>::iterator kt = bcs.begin(); kt != bcs.end(); ++kt)
         {
           IntegratedBC * bc = *kt;
-          if (bc->variable().index() == ivar.index() && bc->isImplicit())
+          if (bc->variable().number() == ivar.number() && bc->isImplicit())
           {
             // now, get the list of coupled scalar vars and compute their off-diag jacobians
             const std::vector<MooseVariableScalar *> coupled_scalar_vars = bc->getCoupledMooseScalarVars();
@@ -145,7 +145,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
               MooseVariableScalar & jvar = *(*jt);
               // Do: dvar / dscalar_var
               if (_sys.hasScalarVariable(jvar.name()))              // want to process only nl-variables (not aux ones)
-                bc->computeJacobianBlockScalar(jvar.index());
+                bc->computeJacobianBlockScalar(jvar.number());
             }
           }
         }
@@ -166,11 +166,11 @@ ComputeFullJacobianThread::computeInternalFaceJacobian()
     std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
     for (std::vector<DGKernel *>::iterator dg_it = dgks.begin(); dg_it != dgks.end(); ++dg_it)
     {
-      unsigned int ivar = (*it).first->index();
+      unsigned int ivar = (*it).first->number();
       DGKernel * dg = *dg_it;
-      if (dg->variable().index() == ivar && dg->isImplicit())
+      if (dg->variable().number() == ivar && dg->isImplicit())
       {
-        unsigned int jvar = (*it).second->index();
+        unsigned int jvar = (*it).second->number();
         dg->subProblem().prepareNeighborShapes(jvar, _tid);
         dg->computeOffDiagJacobian(jvar);
       }

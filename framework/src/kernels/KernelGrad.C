@@ -38,7 +38,7 @@ KernelGrad::computeResidual()
 {
 //  Moose::perf_log.push("computeResidual()","KernelGrad");
 
-  DenseVector<Number> & re = _assembly.residualBlock(_var.index());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   _local_re.resize(re.size());
   _local_re.zero();
 
@@ -70,7 +70,7 @@ KernelGrad::computeResidual()
 void
 KernelGrad::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), _var.index());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
@@ -112,12 +112,12 @@ KernelGrad::computeOffDiagJacobian(unsigned int jvar)
 {
 //  Moose::perf_log.push("computeOffDiagJacobian()",_name);
 
-  DenseMatrix<Number> & Ke = _assembly.jacobianBlock(_var.index(), jvar);
+  DenseMatrix<Number> & Ke = _assembly.jacobianBlock(_var.number(), jvar);
 
   unsigned int n_qp = _qrule->n_points();
   unsigned int n_phi = _phi.size();
   unsigned int n_test = _test.size();
-  unsigned int var_num = _var.index();
+  unsigned int var_num = _var.number();
 
   for (_j=0; _j<n_phi; _j++)
     for (_qp=0; _qp<n_qp; _qp++)

@@ -52,8 +52,8 @@ SplitBasedPreconditioner::SplitBasedPreconditioner (const std::string & name, In
     std::vector<std::vector<unsigned int> > off_diag(n_vars);
     for(unsigned int i = 0; i < getParam<std::vector<std::string> >("off_diag_row").size(); i++)
     {
-      unsigned int row = _nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_row")[i]).index();
-      unsigned int column = _nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_column")[i]).index();
+      unsigned int row = _nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_row")[i]).number();
+      unsigned int column = _nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_column")[i]).number();
       (*cm)(row, column) = 1;
     }
   }

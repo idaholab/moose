@@ -102,12 +102,12 @@ TrussMaterial::computeProperties()
   NonlinearSystem & nonlinear_sys = _fe_problem.getNonlinearSystem();
   const NumericVector<Number>& ghosted_solution = *nonlinear_sys.currentSolution();
 
-  VectorValue<unsigned int> disp_dofs0(node0->dof_number(nonlinear_sys.number(), _disp_x_var->index(), 0),
-                                       (_disp_y_var ? node0->dof_number(nonlinear_sys.number(), _disp_y_var->index(), 0) : 0),
-                                       (_disp_z_var ? node0->dof_number(nonlinear_sys.number(), _disp_z_var->index(), 0) : 0));
-  VectorValue<unsigned int> disp_dofs1(node1->dof_number(nonlinear_sys.number(), _disp_x_var->index(), 0),
-                                       (_disp_y_var ? node1->dof_number(nonlinear_sys.number(), _disp_y_var->index(), 0) : 0),
-                                       (_disp_z_var ? node1->dof_number(nonlinear_sys.number(), _disp_z_var->index(), 0) : 0));
+  VectorValue<unsigned int> disp_dofs0(node0->dof_number(nonlinear_sys.number(), _disp_x_var->number(), 0),
+                                       (_disp_y_var ? node0->dof_number(nonlinear_sys.number(), _disp_y_var->number(), 0) : 0),
+                                       (_disp_z_var ? node0->dof_number(nonlinear_sys.number(), _disp_z_var->number(), 0) : 0));
+  VectorValue<unsigned int> disp_dofs1(node1->dof_number(nonlinear_sys.number(), _disp_x_var->number(), 0),
+                                       (_disp_y_var ? node1->dof_number(nonlinear_sys.number(), _disp_y_var->number(), 0) : 0),
+                                       (_disp_z_var ? node1->dof_number(nonlinear_sys.number(), _disp_z_var->number(), 0) : 0));
 
   RealVectorValue disp_vec0;
   RealVectorValue disp_vec1;

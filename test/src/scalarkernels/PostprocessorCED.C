@@ -29,7 +29,7 @@ PostprocessorCED::reinit()
 void
 PostprocessorCED::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.index());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   for (_i = 0; _i < re.size(); _i++)
     re(_i) += computeQpResidual();
 }
@@ -43,7 +43,7 @@ PostprocessorCED::computeQpResidual()
 void
 PostprocessorCED::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), _var.index());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   for (_i = 0; _i < ke.m(); _i++)
     ke(_i, _i) += computeQpJacobian();
 }

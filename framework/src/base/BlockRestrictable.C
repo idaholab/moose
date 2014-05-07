@@ -206,7 +206,7 @@ BlockRestrictable::variableSubdomianIDs(InputParameters & parameters) const
     var = &_blk_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
 
   // Return the block ids for the variable
-  return sys->getSubdomainsForVar(var->index());
+  return sys->getSubdomainsForVar(var->number());
 }
 
 bool
