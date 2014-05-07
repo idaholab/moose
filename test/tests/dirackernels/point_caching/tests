@@ -1,0 +1,7 @@
+[Tests]
+  [./point_caching]
+    type = 'Exodiff'
+    input = 'point_caching.i'
+    exodiff = 'out.e'
+  [../]
+[]
