@@ -16,10 +16,9 @@ public:
               InputParameters parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties();
 
 private:
-  Real _temp;
   Real _f0s;
   Real _wGB;
   Real _length_scale;
@@ -27,12 +26,10 @@ private:
   Real _GBmob0;
   Real _Q;
   Real _GBenergy;
-  bool _has_T;
   Real _GBMobility;
   Real _molar_vol;
 
-  VariableValue * _T; //pointer rather than reference
-  //VariableValue & _cg;
+  VariableValue & _T; 
 
   MaterialProperty<Real> & _sigma;
   MaterialProperty<Real> & _M_GB;
