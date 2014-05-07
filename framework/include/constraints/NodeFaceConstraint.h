@@ -63,7 +63,7 @@ public:
   virtual void computeJacobian();
 
   /**
-   * Gets the indices for all dofs conected to the constraint
+   * Gets the indices for all dofs connected to the constraint
    */
   virtual void getConnectedDofIndices();
 
