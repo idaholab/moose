@@ -36,12 +36,6 @@ MooseVariableBase::~MooseVariableBase()
 }
 
 unsigned int
-MooseVariableBase::index() const
-{
-  return _var_num;
-}
-
-unsigned int
 MooseVariableBase::number() const
 {
   return _var_num;

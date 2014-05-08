@@ -58,21 +58,21 @@ FDKernel::perturbedResidual(unsigned int varnum, unsigned int perturbationj, Rea
 void
 FDKernel::computeJacobian()
 {
-  computeOffDiagJacobian(_var.index());
+  computeOffDiagJacobian(_var.number());
 }
 
 void
 FDKernel::computeOffDiagJacobian(unsigned int jvar_index)
 {
 
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), jvar_index);
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_index);
   DenseMatrix<Number> local_ke;
   local_ke.resize(ke.m(), ke.n());
   local_ke.zero();
 
   // FIXME: pull out the already computed element residual instead of recomputing it
   Real h;
-  DenseVector<Number> re = perturbedResidual(_var.index(),0,0.0,h);
+  DenseVector<Number> re = perturbedResidual(_var.number(),0,0.0,h);
   for (_j = 0; _j < _phi.size(); _j++) {
     DenseVector<Number> p_re = perturbedResidual(jvar_index,_j,_scale,h);
     for(_i = 0; _i < _test.size(); _i++) {
@@ -81,7 +81,7 @@ FDKernel::computeOffDiagJacobian(unsigned int jvar_index)
   }
   ke += local_ke;
 
-  if (jvar_index == _var.index()) {
+  if (jvar_index == _var.number()) {
     _local_ke = local_ke;
     if (_has_diag_save_in) {
       unsigned int rows = ke.m();
@@ -101,7 +101,7 @@ FDKernel::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
 {
   // FIXME: implement me.
   /*
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), jvar);
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
     MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
 
     for (_i = 0; _i < _test.size(); _i++)

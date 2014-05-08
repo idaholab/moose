@@ -46,7 +46,7 @@ Kernel::~Kernel()
 void
 Kernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.index());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   _local_re.resize(re.size());
   _local_re.zero();
 
@@ -68,7 +68,7 @@ Kernel::computeResidual()
 void
 Kernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), _var.index());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
@@ -95,11 +95,11 @@ Kernel::computeJacobian()
 void
 Kernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _var.index())
+  if (jvar == _var.number())
     computeJacobian();
   else
   {
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), jvar);
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
     for (_i=0; _i<_test.size(); _i++)
       for (_j=0; _j<_phi.size(); _j++)
@@ -113,7 +113,7 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
 void
 Kernel::computeOffDiagJacobianScalar(unsigned int jvar)
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), jvar);
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
 
   for (_i = 0; _i < _test.size(); _i++)

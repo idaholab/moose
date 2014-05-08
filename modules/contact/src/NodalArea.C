@@ -78,7 +78,7 @@ NodalArea::finalize()
   for ( std::map<const Node *, Real>::iterator it = _node_areas.begin(); it != it_end; ++it )
   {
     const Node * const node = it->first;
-    unsigned int dof = node->dof_number(_system.number(), _variable->index(), 0);
+    unsigned int dof = node->dof_number(_system.number(), _variable->number(), 0);
     _aux_solution.set( dof, 0 );
   }
   _aux_solution.close();
@@ -86,7 +86,7 @@ NodalArea::finalize()
   for ( std::map<const Node *, Real>::iterator it = _node_areas.begin(); it != it_end; ++it )
   {
     const Node * const node = it->first;
-    unsigned int dof = node->dof_number(_system.number(), _variable->index(), 0);
+    unsigned int dof = node->dof_number(_system.number(), _variable->number(), 0);
     _aux_solution.add( dof, it->second );
   }
   _aux_solution.close();

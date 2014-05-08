@@ -33,7 +33,7 @@ FlagElementsThread::FlagElementsThread(FEProblem & fe_problem,
     _system_number(_aux_sys.number()),
     _adaptivity(_fe_problem.adaptivity()),
     _field_var(_adaptivity.getMarkerVariable()),
-    _field_var_number(_field_var.index()),
+    _field_var_number(_field_var.number()),
     _serialized_solution(serialized_solution),
     _max_h_level(max_h_level)
 {

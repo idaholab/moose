@@ -79,7 +79,7 @@ DiracKernel::DiracKernel(const std::string & name, InputParameters parameters) :
 void
 DiracKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.index());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -95,7 +95,7 @@ DiracKernel::computeResidual()
 void
 DiracKernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), _var.index());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {

@@ -22,7 +22,7 @@ RichardsMassChange::RichardsMassChange(const std::string & name,
                                              InputParameters parameters) :
     TimeDerivative(name,parameters),
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.index())),
+    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
 
     _use_supg(getParam<bool>("use_supg")),
     // This kernel expects input parameters named "bulk_mod", etc

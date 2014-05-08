@@ -29,8 +29,8 @@ ScalarLagrangeMultiplier::computeQpResidual()
 void
 ScalarLagrangeMultiplier::computeOffDiagJacobianScalar(unsigned int jvar)
 {
-  DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.index(), jvar);
-  DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.index());
+  DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar);
+  DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
 
   for (_i = 0; _i < _test.size(); _i++)

@@ -1461,8 +1461,8 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
               {
                 constraints_applied = true;
 
-                nfc->subProblem().prepareShapes(nfc->variable().index(), 0);
-                nfc->subProblem().prepareNeighborShapes(nfc->variable().index(), 0);
+                nfc->subProblem().prepareShapes(nfc->variable().number(), 0);
+                nfc->subProblem().prepareNeighborShapes(nfc->variable().number(), 0);
 
                 nfc->computeJacobian();
 
@@ -1573,7 +1573,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
         for (std::vector<FaceFaceConstraint *>::iterator fc_it = face_constraints.begin(); fc_it != face_constraints.end(); ++fc_it)
         {
           FaceFaceConstraint * ffc = *fc_it;
-          ffc->subProblem().prepareShapes(ffc->variable().index(), tid);
+          ffc->subProblem().prepareShapes(ffc->variable().number(), tid);
           ffc->computeJacobian(jacobian);
         }
       }
@@ -1599,7 +1599,7 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 
       kernel->reinit();
       kernel->computeJacobian();
-      _fe_problem.addJacobianOffDiagScalar(jacobian, kernel->variable().index());
+      _fe_problem.addJacobianOffDiagScalar(jacobian, kernel->variable().number());
     }
     _fe_problem.addJacobianScalar(jacobian);
   }
@@ -1836,7 +1836,7 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
           for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
           {
             NodalBC * bc = *it;
-            if (bc->variable().index() == ivar && bc->shouldApply())
+            if (bc->variable().number() == ivar && bc->shouldApply())
             {
               //The first zero is for the variable number... there is only one variable in each mini-system
               //The second zero only works with Lagrange elements!

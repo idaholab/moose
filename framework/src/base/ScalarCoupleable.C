@@ -74,7 +74,7 @@ ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
 unsigned int
 ScalarCoupleable::coupledScalar(const std::string & var_name, unsigned int comp)
 {
-  return getScalarVar(var_name, comp)->index();
+  return getScalarVar(var_name, comp)->number();
 }
 
 

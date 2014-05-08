@@ -24,7 +24,7 @@ RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name,
     TimeKernel(name,parameters),
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
     _num_p(_pp_name_UO.num_pp()),
-    _pvar(_pp_name_UO.pressure_var_num(_var.index())),
+    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
 
     _porosity(getMaterialProperty<Real>("porosity")),
     _porosity_old(getMaterialProperty<Real>("porosity_old")),

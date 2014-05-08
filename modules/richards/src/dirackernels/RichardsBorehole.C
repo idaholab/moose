@@ -40,7 +40,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     _ddensity_val(&coupledValue("ddensity_var")),
 
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.index())),
+    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
 
     _character(getFunction("character")),
     _p_bot(getParam<Real>("bottom_pressure")),

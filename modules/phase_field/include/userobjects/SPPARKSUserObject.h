@@ -239,7 +239,7 @@ protected:
     for ( ConstNodeRange::const_iterator i = node_range.begin(); i < node_range.end(); ++i )
     {
       // Get data
-      const Real value = aux_solution( (*i)->dof_number(aux_sys.number(), aux_var.index(), 0) );
+      const Real value = aux_solution( (*i)->dof_number(aux_sys.number(), aux_var.number(), 0) );
 
       elk_data[(*i)->id()] = value;
 
