@@ -47,8 +47,8 @@ RichardsMultiphaseProblem::initialSetup()
     mooseError("Both the bounded and lower variables must have the same order (eg FIRST) in RichardsMultiphaseProblem");
 
   // extract the required info
-  _bounded_var_num = bounded.index();
-  _lower_var_num = lower.index();
+  _bounded_var_num = bounded.number();
+  _lower_var_num = lower.number();
   /*
   Moose::out << "bounded_var_num = " << _bounded_var_num << "\n";
   Moose::out << "lower_var_num = " << _lower_var_num << "\n";

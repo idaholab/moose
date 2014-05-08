@@ -161,7 +161,7 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     {
       const Node * node = pinfo->_node;
 
-      unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->index(), 0);
+      unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
 
       Real area = (*_aux_solution)( dof );
       if (area == 0)
@@ -205,7 +205,7 @@ ContactMaster::updateContactSet(bool beginning_of_step)
       {
         const Node * node = pinfo->_node;
 
-        unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->index(), 0);
+        unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
 
         Real area = (*_aux_solution)( dof );
         if (area == 0)

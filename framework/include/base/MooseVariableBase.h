@@ -47,14 +47,6 @@ public:
   virtual ~MooseVariableBase();
 
   /**
-   * Get the variable index.
-   *
-   * Used to index into the vector of residuals, jacobians blocks, etc.
-   * @return The variable index
-   */
-  unsigned int index() const;
-
-  /**
    * Get variable number coming from libMesh
    * @return the libmesh variable number
    */

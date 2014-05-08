@@ -21,7 +21,7 @@ RichardsMass::RichardsMass(const std::string & name, InputParameters parameters)
     ElementIntegralVariablePostprocessor(name, parameters),
 
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.index())),
+    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
 
     _porosity(getMaterialProperty<Real>("porosity")),
     _sat(getMaterialProperty<std::vector<Real> >("sat")),

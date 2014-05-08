@@ -22,7 +22,7 @@ RichardsFlux::RichardsFlux(const std::string & name,
                                              InputParameters parameters) :
     Kernel(name,parameters),
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.index())),
+    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
 
     // This kernel gets lots of things from the material
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),

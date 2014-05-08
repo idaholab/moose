@@ -100,7 +100,7 @@ FaceFaceConstraint::reinit()
 void
 FaceFaceConstraint::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.index());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       re(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidual();
@@ -116,7 +116,7 @@ FaceFaceConstraint::computeResidualSide()
     _assembly.prepare();
     _assembly.reinitAtPhysical(_elem_master, _phys_points_master);
 
-    DenseVector<Number> & re_master = _assembly.residualBlock(_master_var.index());
+    DenseVector<Number> & re_master = _assembly.residualBlock(_master_var.number());
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       for (_i = 0; _i < _test_master.size(); _i++)
@@ -132,7 +132,7 @@ FaceFaceConstraint::computeResidualSide()
     _assembly.prepare();
     _assembly.reinitAtPhysical(_elem_slave, _phys_points_slave);
 
-    DenseVector<Number> & re_slave = _assembly.residualBlock(_slave_var.index());
+    DenseVector<Number> & re_slave = _assembly.residualBlock(_slave_var.number());
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       for (_i = 0; _i < _test_slave.size(); _i++)
@@ -175,7 +175,7 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
 
   // fill in the diagonal block
   {
-    DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.index(), _var.index());
+    DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (_i = 0; _i < _test.size(); _i++)
@@ -191,8 +191,8 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
     _assembly.prepare();
     _assembly.reinitAtPhysical(_elem_master, _phys_points_master);
 
-    DenseMatrix<Number> & Ken_master = _assembly.jacobianBlock(_var.index(), _master_var.index());
-    DenseMatrix<Number> & Kne_master = _assembly.jacobianBlock(_master_var.index(), _var.index());
+    DenseMatrix<Number> & Ken_master = _assembly.jacobianBlock(_var.number(), _master_var.number());
+    DenseMatrix<Number> & Kne_master = _assembly.jacobianBlock(_master_var.number(), _var.number());
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (_i = 0; _i < _test_master.size(); _i++)
@@ -213,8 +213,8 @@ FaceFaceConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
     _assembly.prepare();
     _assembly.reinitAtPhysical(_elem_slave, _phys_points_slave);
 
-    DenseMatrix<Number> & Ken_slave = _assembly.jacobianBlock(_var.index(), _slave_var.index());
-    DenseMatrix<Number> & Kne_slave = _assembly.jacobianBlock(_slave_var.index(), _var.index());
+    DenseMatrix<Number> & Ken_slave = _assembly.jacobianBlock(_var.number(), _slave_var.number());
+    DenseMatrix<Number> & Kne_slave = _assembly.jacobianBlock(_slave_var.number(), _var.number());
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (_i = 0; _i < _test_slave.size(); _i++)
       {

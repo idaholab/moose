@@ -19,7 +19,7 @@ RichardsFluxJumpIndicator::RichardsFluxJumpIndicator(const std::string & name, I
     JumpIndicator(name, parameters),
 
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.index())),
+    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
 
     _density(getMaterialProperty<std::vector<Real> >("density")),
     _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),

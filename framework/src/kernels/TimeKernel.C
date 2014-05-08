@@ -33,7 +33,7 @@ TimeKernel::~TimeKernel()
 void
 TimeKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.index(), Moose::KT_TIME);
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number(), Moose::KT_TIME);
   _local_re.resize(re.size());
   _local_re.zero();
 

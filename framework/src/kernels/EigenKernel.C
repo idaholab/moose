@@ -52,7 +52,7 @@ EigenKernel::EigenKernel(const std::string & name, InputParameters parameters) :
 void
 EigenKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.index());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   _local_re.resize(re.size());
   _local_re.zero();
 
@@ -77,7 +77,7 @@ EigenKernel::computeJacobian()
 {
   if (!_is_implicit) return;
 
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.index(), _var.index());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 

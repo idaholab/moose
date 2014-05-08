@@ -22,7 +22,7 @@ RichardsExcavFlow::RichardsExcavFlow(const std::string & name, InputParameters p
     FunctionInterface(parameters),
 
     _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.index())),
+    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
 
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
     _gravity(getMaterialProperty<RealVectorValue>("gravity")),
