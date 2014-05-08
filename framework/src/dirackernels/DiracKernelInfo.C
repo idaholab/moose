@@ -26,7 +26,12 @@ void
 DiracKernelInfo::addPoint(const Elem * elem, Point p)
 {
   _elements.insert(elem);
-  _points[elem].insert(p);
+
+  if (!hasPoint(elem, p))
+  {
+    std::vector<Point> & point_list = _points[elem];
+    point_list.push_back(p);
+  }
 }
 
 void
@@ -34,4 +39,27 @@ DiracKernelInfo::clearPoints()
 {
   _elements.clear();
   _points.clear();
+}
+
+
+
+bool
+DiracKernelInfo::hasPoint(const Elem * elem, Point p)
+{
+  std::vector<Point> & point_list = _points[elem];
+
+  std::vector<Point>::iterator
+    it = point_list.begin(),
+    end = point_list.end();
+
+  for (; it != end; ++it)
+  {
+    Real delta = (*it - p).size_sq();
+
+    if (delta < TOLERANCE*TOLERANCE)
+      return true;
+  }
+
+  // If we haven't found it, we don't have it.
+  return false;
 }

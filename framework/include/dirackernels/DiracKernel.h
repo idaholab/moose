@@ -149,11 +149,8 @@ protected:
   /// DiracKernel objects.
   DiracKernelInfo & _dirac_kernel_info;
 
-  /// The list of elements that need distributions
-  std::set<const Elem *> _elements;
-
-  /// The list of physical xyz Points that need to be evaluated in each element
-  std::map<const Elem *, std::set<Point> > _points;
+  /// Place for storing Point/Elem information only for this DiracKernel
+  DiracKernelInfo _local_dirac_kernel_info;
 
   /// The current point
   Point _current_point;
