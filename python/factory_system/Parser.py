@@ -3,7 +3,7 @@
 import os, sys, re
 
 sys.path.append('.')
-sys.path.append('../../scripts/TestHarness')
+sys.path.append('../../framework/scripts/TestHarness')
 import ParseGetPot, Factory
 from MooseObject import MooseObject
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
   warehouse = Warehouse()
 
   # For now we'll just use the Testers
-  factory.loadPlugins([os.path.abspath('../..')], '/scripts/TestHarness/testers', MooseObject)
+  factory.loadPlugins([os.path.abspath('../../framework/scripts')], '/TestHarness/testers', MooseObject)
 
   parser = Parser(factory, warehouse)
   parser.parse('tests')
@@ -114,6 +114,3 @@ if __name__ == '__main__':
     print moose_object.name()
     moose_object.parameters().printParams()
     print '\n\n\n\n'
-
-  
-  
