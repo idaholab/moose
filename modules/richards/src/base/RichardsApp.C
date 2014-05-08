@@ -60,9 +60,6 @@
 // Indicators
 #include "RichardsFluxJumpIndicator.h"
 
-// Markers
-#include "OrientedBoxMarkerDepr.h"
-
 // Postprocessors
 #include "RichardsMass.h"
 #include "RichardsPiecewiseLinearSinkFlux.h"
@@ -169,9 +166,6 @@ RichardsApp::registerObjects(Factory & factory)
 
   // Indicators
   registerIndicator(RichardsFluxJumpIndicator);
-
-  // Markers
-  registerMarker(OrientedBoxMarkerDepr);
 
   // Postprocessors
   registerPostprocessor(RichardsMass);
