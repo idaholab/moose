@@ -122,8 +122,7 @@ DiracKernel::addPoint(const Elem * elem, Point p)
     return;
 
   _dirac_kernel_info.addPoint(elem, p);
-  _elements.insert(elem);
-  _points[elem].insert(p);
+  _local_dirac_kernel_info.addPoint(elem, p);
 }
 
 const Elem *
@@ -138,20 +137,19 @@ DiracKernel::addPoint(Point p)
 bool
 DiracKernel::hasPointsOnElem(const Elem * elem)
 {
-  return _elements.count(_mesh.elem(elem->id())) != 0;
+  return _local_dirac_kernel_info.getElements().count(_mesh.elem(elem->id())) != 0;
 }
 
 bool
 DiracKernel::isActiveAtPoint(const Elem * elem, const Point & p)
 {
-  return _points[elem].count(p) != 0;
+  return _local_dirac_kernel_info.hasPoint(elem, p);
 }
 
 void
 DiracKernel::clearPoints()
 {
-  _elements.clear();
-  _points.clear();
+  _local_dirac_kernel_info.clearPoints();
 }
 
 MooseVariable &
