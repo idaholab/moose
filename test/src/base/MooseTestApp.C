@@ -159,6 +159,7 @@
 #include "MaterialPointSource.h"
 #include "StatefulPointSource.h"
 #include "CachingPointSource.h"
+#include "BadCachingPointSource.h"
 
 // markers
 #include "RandomHitMarker.h"
@@ -352,6 +353,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerDiracKernel(MaterialPointSource);
   registerDiracKernel(StatefulPointSource);
   registerDiracKernel(CachingPointSource);
+  registerDiracKernel(BadCachingPointSource);
 
   // meshes
   registerObject(StripeMesh);

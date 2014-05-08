@@ -4,4 +4,10 @@
     input = 'point_caching.i'
     exodiff = 'out.e'
   [../]
+
+  [./point_caching_error]
+    type = 'RunException'
+    input = 'point_caching_error.i'
+    expect_err = "does not match point"
+  [../]
 []
