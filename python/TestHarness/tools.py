@@ -1,16 +1,16 @@
 import sys, os
 
-plugin_dir = '/scripts/TestHarness/testers'
+plugin_dir = '/TestHarness/testers'
 
-module_path = os.path.dirname(__file__)
-if os.environ.has_key("FRAMEWORK_DIR"):
-  FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
-elif os.environ.has_key("MOOSE_DIR"):
-  FRAMEWORK_DIR = os.path.join(os.environ['MOOSE_DIR'], 'framework')
-else:
-  FRAMEWORK_DIR = os.path.abspath(module_path) + '/../..'
-sys.path.append(FRAMEWORK_DIR + '/scripts/common')
-sys.path.append(FRAMEWORK_DIR + plugin_dir)
+#module_path = os.path.dirname(__file__)
+#if os.environ.has_key("FRAMEWORK_DIR"):
+#  FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
+#elif os.environ.has_key("MOOSE_DIR"):
+#  FRAMEWORK_DIR = os.path.join(os.environ['MOOSE_DIR'], 'framework')
+#else:
+#  FRAMEWORK_DIR = os.path.abspath(module_path) + '/../..'
+#sys.path.append(os.path.join(MOOSE_DIR, 'python', 'TestHarness')
+#sys.path.append(FRAMEWORK_DIR + plugin_dir)
 
 # Import the Two Harness classes
 from TestTimer import TestTimer
@@ -36,7 +36,7 @@ def runTests(argv, app_name, moose_dir):
 
   # TODO: We need to cascade the testers so that each app can use any
   # tester available in each parent application
-  dirs = [os.path.abspath(os.path.dirname(sys.argv[0])), FRAMEWORK_DIR]
+  dirs = [os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), 'scripts')), os.path.join(moose_dir, 'python')]
 
   # Load the tester plugins into the factory reference
   factory.loadPlugins(dirs, plugin_dir, Tester)

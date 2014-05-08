@@ -1,4 +1,8 @@
 import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil
+import path_tool
+
+path_tool.activate_module('FactorySystem')
+
 import ParseGetPot
 import copy
 from socket import gethostname
@@ -27,7 +31,7 @@ class TestHarness:
     self.num_skipped = 0
     self.num_pending = 0
     self.host_name = gethostname()
-    self.moose_dir = os.path.abspath(moose_dir) + '/'
+    self.moose_dir = os.path.join(moose_dir, 'framework')
     self.run_tests_dir = os.path.abspath('.')
     self.code = '2d2d6769726c2d6d6f6465'
     # Assume libmesh is a peer directory to MOOSE if not defined
@@ -105,7 +109,7 @@ class TestHarness:
                   test['max_time'] = test['max_time'] * 4
 
                 # Build the requested Tester object and run
-                tester = self.factory.create(test['type'], test)
+                tester = self.factory.create(test['type'], 'ignored', test)
 
                 # When running in valgrind mode, we end up with a ton of output for each failed
                 # test.  Therefore, we limit the number of fails...
