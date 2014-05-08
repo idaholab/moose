@@ -86,7 +86,7 @@
   [./Copper]
     type = GBEvolution
     block = 0
-    temp = 500 # K
+    T = 500 # K
     wGB = 60 # nm
     GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
     Q = 0.23 # Migration energy in eV

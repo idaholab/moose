@@ -63,7 +63,7 @@
     block = 0
     time_scale = 1.0
     GBmob0 = 3.986e-6
-    temp = 500 # K
+    T = 500 # K
     wGB = 60 # nm
     Q = 1.0307
     GBenergy = 2.4
