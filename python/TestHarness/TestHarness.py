@@ -25,6 +25,19 @@ class TestHarness:
   def __init__(self, argv, app_name, moose_dir):
     self.factory = Factory()
 
+    # Get dependant applications and load dynamic tester plugins
+    # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
+    dirs = [os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))]
+    sys.path.append(os.path.join(moose_dir, 'framework', 'scripts'))
+
+    # Use the find_dep_apps script to get the dependant applications for an app
+    import find_dep_apps
+    depend_app_dirs = find_dep_apps.findDepApps(app_name)
+    dirs.extend([os.path.join(my_dir, 'scripts', 'TestHarness') for my_dir in depend_app_dirs.split('\n')])
+
+    # Finally load the plugins!
+    self.factory.loadPlugins(dirs, 'testers', Tester)
+
     self.test_table = []
     self.num_passed = 0
     self.num_failed = 0
@@ -38,7 +51,7 @@ class TestHarness:
     if os.environ.has_key("LIBMESH_DIR"):
       self.libmesh_dir = os.environ['LIBMESH_DIR']
     else:
-      self.libmesh_dir = self.moose_dir + '../libmesh/installed'
+      self.libmesh_dir = self.moose_dir + os.path.join('..', 'libmesh', 'installed')
     self.file = None
 
     # Parse arguments
@@ -723,18 +736,3 @@ class TestHarness:
     if self.options.pbs_cleanup:
       self.cleanPBSBatch()
       sys.exit(0)
-
-  def populateParams(self, params, test):
-    # TODO: Print errors or warnings about unused parameters
-    # Set difference
-
-    # viewkeys does not work with older Python...
-#    unused_params = test.viewkeys() - params.desc
-    params.valid = test
-    return params
-
-  def getFactory(self):
-    return self.factory
-
-# Notes:
-# SHOULD_CRASH returns > 0, cuz < 0 means process interrupted

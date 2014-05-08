@@ -26,7 +26,7 @@ class Factory:
 
   def loadPlugins(self, base_dirs, plugin_path, module):
     for dir in base_dirs:
-      dir = dir + plugin_path
+      dir = os.path.join(dir, plugin_path)
       if not os.path.exists(dir):
         continue
 
