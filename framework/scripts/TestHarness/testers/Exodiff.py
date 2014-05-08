@@ -4,8 +4,8 @@ import os
 
 class Exodiff(RunApp):
 
-  def getValidParams():
-    params = RunApp.getValidParams()
+  def validParams():
+    params = RunApp.validParams()
     params.addRequiredParam('exodiff',   [], "A list of files to exodiff.")
     params.addParam('exodiff_opts',      [], "Additional arguments to be passed to invocations of exodiff.")
     params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
@@ -16,7 +16,7 @@ class Exodiff(RunApp):
     params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
 
     return params
-  getValidParams = staticmethod(getValidParams)
+  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)

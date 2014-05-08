@@ -3,8 +3,8 @@ from CSVDiffer import CSVDiffer
 
 class CSVDiff(RunApp):
 
-  def getValidParams():
-    params = RunApp.getValidParams()
+  def validParams():
+    params = RunApp.validParams()
     params.addRequiredParam('csvdiff',   [], "A list of files to run CSVDiff on.")
     params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
     params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exodiff comparisons.")
@@ -12,7 +12,7 @@ class CSVDiff(RunApp):
     params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
 
     return params
-  getValidParams = staticmethod(getValidParams)
+  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)

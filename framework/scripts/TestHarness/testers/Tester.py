@@ -4,7 +4,7 @@ from MooseObject import MooseObject
 
 class Tester(MooseObject):
   # Static Method
-  def getValidParams():
+  def validParams():
     params = MooseObject.validParams()
 
     # Common Options
@@ -33,9 +33,10 @@ class Tester(MooseObject):
     params.addParam('tecplot',       ['ALL'], "A test that runs only if Tecplot is detected ('ALL', 'TRUE', 'FALSE')")
 
     return params
-  getValidParams = staticmethod(getValidParams)
+  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
+    MooseObject.__init__(self, name, params)
     self.specs = params
 
 

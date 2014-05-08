@@ -16,7 +16,7 @@ class MooseObject(object):
   def name(self):
     return self._name
 
-  def parameters():
+  def parameters(self):
     return self._pars
 
   def getParam(self, name):

@@ -39,8 +39,7 @@ def runTests(argv, app_name, moose_dir):
   dirs = [os.path.abspath(os.path.dirname(sys.argv[0])), FRAMEWORK_DIR]
 
   # Load the tester plugins into the factory reference
-  factory.loadPlugins(dirs, plugin_dir, Tester, factory)
+  factory.loadPlugins(dirs, plugin_dir, Tester)
 
   # Finally find and run the tests
   harness.findAndRunTests()
-

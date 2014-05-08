@@ -4,8 +4,8 @@ from RunParallel import RunParallel # For TIMEOUT value
 
 class RunApp(Tester):
 
-  def getValidParams():
-    params = Tester.getValidParams()
+  def validParams():
+    params = Tester.validParams()
     params.addRequiredParam('input',      "The input file to use for this test.")
     params.addParam('test_name',          "The name of the test - populated automatically")
     params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
@@ -31,7 +31,7 @@ class RunApp(Tester):
     params.addParam('post_command',       "Command to be run after the MOOSE job is run")
 
     return params
-  getValidParams = staticmethod(getValidParams)
+  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
     Tester.__init__(self, name, params)

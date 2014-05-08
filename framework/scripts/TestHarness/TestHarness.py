@@ -181,7 +181,7 @@ class TestHarness:
           print "Type missing in " + test_dir + filename
           sys.exit(1)
 
-        params = self.factory.getValidParams(test_node.params['type'])
+        params = self.factory.validParams(test_node.params['type'])
 
         # Now update all the base level keys
         params_parsed = set()

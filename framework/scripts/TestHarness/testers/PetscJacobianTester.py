@@ -4,13 +4,13 @@ import os, re
 
 class PetscJacobianTester(RunApp):
 
-  def getValidParams():
-    params = RunApp.getValidParams()
+  def validParams():
+    params = RunApp.validParams()
     params.addParam('ratio_tol', 1e-8, "Relative tolerance to compare the ration against.")
     params.addParam('difference_tol', 1e-8, "Relative tolerance to compare the difference against.")
 
     return params
-  getValidParams = staticmethod(getValidParams)
+  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)
