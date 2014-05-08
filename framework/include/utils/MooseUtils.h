@@ -66,7 +66,7 @@ namespace MooseUtils
    * This function implements a parallel barrier function but writes progress
    * to stdout.
    */
-  void parallelBarrierNotify(const Parallel::Communicator & comm);
+  void parallelBarrierNotify(const libMesh::Parallel::Communicator & comm);
 
   /**
    * Function tests if the supplied filename as the desired extension
