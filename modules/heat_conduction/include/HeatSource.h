@@ -13,13 +13,6 @@ class HeatSource : public BodyForce
 {
 public:
   HeatSource(const std::string & name, InputParameters parameters);
-
-//protected:
-//  virtual Real computeQpResidual();
-
-//private:
-//  Function * const _heat;
-
 };
 
 #endif

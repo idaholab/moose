@@ -34,8 +34,7 @@ protected:
   virtual Real computeQpResidual();
 
   Real _value;
-  const bool _has_function;
-  Function * const _function;
+  Function & _function;
 };
 
 #endif

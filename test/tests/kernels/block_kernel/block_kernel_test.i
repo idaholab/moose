@@ -1,19 +1,17 @@
 [Mesh]
   file = rectangle.e
+  uniform_refine = 1
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 1.0
   [../]
 []
 
 [Kernels]
-  active = 'diff body_force'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -24,19 +22,16 @@
     variable = u
     block = 1
     value = 10
+    function = 'x+y'
+  [../]
+
+  [./time]
+    type = TimeDerivative
+    variable = u
   [../]
 []
 
 [BCs]
-  active = 'right'
-
-  [./left]
-    type = DirichletBC
-    variable = u
-    boundary = 1
-    value = 1
-  [../]
-
   [./right]
     type = DirichletBC
     variable = u
@@ -46,14 +41,10 @@
 []
 
 [Executioner]
-  type = Steady
-#  solve_type = 'PJFNK'
-#  preconditioner = 'ILU'
-
-  # Preconditioned JFNK (default)
+  type = Transient
   solve_type = 'PJFNK'
-#  petsc_options_iname = '-pc_type -pc_hypre_type'
-#  petsc_options_value = 'hypre boomeramg'
+  dt = 0.1
+  num_steps = 10
 []
 
 [Outputs]
