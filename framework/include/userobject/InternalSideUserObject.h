@@ -17,7 +17,7 @@
 
 #include "UserObject.h"
 #include "BlockRestrictable.h"
-#include "Coupleable.h"
+#include "NeighborCoupleable.h"
 #include "MaterialPropertyInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "UserObjectInterface.h"
