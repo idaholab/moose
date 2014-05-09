@@ -2,6 +2,7 @@
   type = FileMesh
   file = rectangle.e
   dim = 2
+  uniform_refine = 2
 []
 
 [Variables]
