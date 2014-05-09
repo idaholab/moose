@@ -156,7 +156,7 @@ public:
    * Calls BoundaryInfo::build_side_list().
    * Fills in the three passed vectors with list logical (element, side, id) tuples.
    */
-  void buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il);
+  void buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il);
 
   /**
    * Calls BoundaryInfo::side_with_boundary_id().
@@ -364,7 +364,7 @@ public:
    * Return a writable reference to a vector of node IDs that belong
    * to nodeset_id.
    */
-  std::vector<unsigned int> & getNodeList(short int nodeset_id);
+  std::vector<unsigned int> & getNodeList(boundary_id_type nodeset_id);
 
   /**
    * Add a new node to the mesh.  If there is already a node located at the point passed
@@ -569,6 +569,24 @@ public:
   bool isBoundaryNode(unsigned int node_id);
 
   /**
+   * Returns true if the requested node is in the list of boundary
+   * nodes for the specified boundary, false otherwise.
+   */
+  bool isBoundaryNode(unsigned int node_id, BoundaryID bnd_id);
+
+  /**
+   * Returns true if the requested element is in the list of boundary
+   * elements, false otherwise.
+   */
+  bool isBoundaryElem(unsigned int elem_id);
+
+  /**
+   * Returns true if the requested element is in the list of boundary
+   * elements for the specified boundary, false otherwise.
+   */
+  bool isBoundaryElem(unsigned int elem_id, BoundaryID bnd_id);
+
+  /**
    * Generate a unified error message if the underlying libMesh mesh
    * is a ParallelMesh.  Clients of MooseMesh can use this function to
    * throw an error if they know they don't work with ParallelMesh.
@@ -723,13 +741,15 @@ protected:
   std::vector<BndNode *> _bnd_nodes;
   typedef std::vector<BndNode *>::iterator             bnd_node_iterator_imp;
   typedef std::vector<BndNode *>::const_iterator const_bnd_node_iterator_imp;
-  /// Set of node IDs that are boundary nodes
-  std::set<unsigned int> _bnd_node_ids;
+  /// Map of sets of node IDs in each boundary
+  std::map<boundary_id_type, std::set<unsigned int> > _bnd_node_ids;
 
   /// array of boundary elems
   std::vector<BndElement *> _bnd_elems;
   typedef std::vector<BndElement *>::iterator             bnd_elem_iterator_imp;
   typedef std::vector<BndElement *>::const_iterator const_bnd_elem_iterator_imp;
+  /// Map of set of elem IDs connected to each boundary
+  std::map<boundary_id_type, std::set<unsigned int> > _bnd_elem_ids;
 
   std::map<unsigned int, Node *> _quadrature_nodes;
   std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, Node *> > > _elem_to_side_to_qp_to_quadrature_nodes;
@@ -739,7 +759,7 @@ protected:
   std::map<unsigned int, std::set<SubdomainID> > _block_node_list;
 
   /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> [array of node ids]
-  std::map<short int, std::vector<unsigned int> > _node_set_nodes;
+  std::map<boundary_id_type, std::vector<unsigned int> > _node_set_nodes;
 
   std::set<unsigned int> _ghosted_boundaries;
   std::vector<Real> _ghosted_boundaries_inflation;

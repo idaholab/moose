@@ -278,9 +278,11 @@ MooseMesh::freeBndNodes()
   for (std::vector<BndNode *>::iterator it = _bnd_nodes.begin(); it != _bnd_nodes.end(); ++it)
     delete (*it);
 
-  for (std::map<short int, std::vector<unsigned int> >::iterator it = _node_set_nodes.begin(); it != _node_set_nodes.end(); ++it)
+  for (std::map<boundary_id_type, std::vector<unsigned int> >::iterator it = _node_set_nodes.begin(); it != _node_set_nodes.end(); ++it)
     it->second.clear();
   _node_set_nodes.clear();
+  for (std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_node_ids.begin(); it != _bnd_node_ids.end(); ++it)
+    it->second.clear();
   _bnd_node_ids.clear();
 }
 
@@ -290,6 +292,9 @@ MooseMesh::freeBndElems()
   // free memory
   for (std::vector<BndElement *>::iterator it = _bnd_elems.begin(); it != _bnd_elems.end(); ++it)
     delete (*it);
+  for (std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_elem_ids.begin(); it != _bnd_elem_ids.end(); ++it)
+    it->second.clear();
+  _bnd_elem_ids.clear();
 }
 
 void
@@ -550,7 +555,7 @@ MooseMesh::buildNodeList()
 
   /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
   std::vector<unsigned int> nodes;
-  std::vector<short int> ids;
+  std::vector<boundary_id_type> ids;
   getMesh().boundary_info->build_node_list(nodes, ids);
 
   int n = nodes.size();
@@ -559,7 +564,7 @@ MooseMesh::buildNodeList()
   {
     _bnd_nodes[i] = new BndNode(&getMesh().node(nodes[i]), ids[i]);
     _node_set_nodes[ids[i]].push_back(nodes[i]);
-    _bnd_node_ids.insert(nodes[i]);
+    _bnd_node_ids[ids[i]].insert(nodes[i]);
   }
 
   _bnd_nodes.reserve(_bnd_nodes.size() + _extra_bnd_nodes.size());
@@ -567,7 +572,7 @@ MooseMesh::buildNodeList()
   {
     BndNode * bnode = new BndNode(_extra_bnd_nodes[i]._node, _extra_bnd_nodes[i]._bnd_id);
     _bnd_nodes.push_back(bnode);
-    _bnd_node_ids.insert(_extra_bnd_nodes[i]._node->id());
+    _bnd_node_ids[ids[i]].insert(_extra_bnd_nodes[i]._node->id());
   }
 
   BndNodeCompare mein_kompfare;
@@ -592,6 +597,7 @@ MooseMesh::buildBndElemList()
   for (int i = 0; i < n; i++)
   {
     _bnd_elems[i] = new BndElement(getMesh().elem(elems[i]), sides[i], ids[i]);
+    _bnd_elem_ids[ids[i]].insert(elems[i]);
   }
 }
 
@@ -840,7 +846,7 @@ MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, c
 
   BndNode * bnode = new BndNode(qnode, bid);
   _bnd_nodes.push_back(bnode);
-  _bnd_node_ids.insert(qnode->id());
+  _bnd_node_ids[bid].insert(qnode->id());
 
   _extra_bnd_nodes.push_back(*bnode);
 
@@ -1717,7 +1723,7 @@ MooseMesh::buildNodeListFromSideList()
 }
 
 void
-MooseMesh::buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<short int> & il)
+MooseMesh::buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il)
 {
   getMesh().boundary_info->build_side_list(el, sl, il);
 }
@@ -1979,7 +1985,7 @@ void MooseMesh::printInfo(std::ostream &os)
 }
 
 std::vector<unsigned int> &
-MooseMesh::getNodeList(short int nodeset_id)
+MooseMesh::getNodeList(boundary_id_type nodeset_id)
 {
   return _node_set_nodes[nodeset_id];
 }
@@ -1993,7 +1999,53 @@ MooseMesh::getSubdomainBoundaryIds(unsigned int subdomain_id)
 bool
 MooseMesh::isBoundaryNode(unsigned int node_id)
 {
-  return _bnd_node_ids.find(node_id) != _bnd_node_ids.end();
+  bool found_node = false;
+  for (std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_node_ids.begin(); it != _bnd_node_ids.end(); ++it)
+  {
+    if (it->second.find(node_id) != it->second.end())
+    {
+      found_node = true;
+      break;
+    }
+  }
+  return found_node;
+}
+
+bool
+MooseMesh::isBoundaryNode(unsigned int node_id, BoundaryID bnd_id)
+{
+  bool found_node = false;
+  std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_node_ids.find(bnd_id);
+  if (it != _bnd_node_ids.end())
+    if (it->second.find(node_id) != it->second.end())
+      found_node = true;
+  return found_node;
+}
+
+bool
+MooseMesh::isBoundaryElem(unsigned int elem_id)
+{
+  bool found_elem = false;
+  for (std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_elem_ids.begin(); it != _bnd_elem_ids.end(); ++it)
+  {
+    if (it->second.find(elem_id) != it->second.end())
+    {
+      found_elem = true;
+      break;
+    }
+  }
+  return found_elem;
+}
+
+bool
+MooseMesh::isBoundaryElem(unsigned int elem_id, BoundaryID bnd_id)
+{
+  bool found_elem = false;
+  std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_elem_ids.find(bnd_id);
+  if (it != _bnd_elem_ids.end())
+    if (it->second.find(elem_id) != it->second.end())
+      found_elem = true;
+  return found_elem;
 }
 
 void
