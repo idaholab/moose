@@ -3,9 +3,6 @@
   dim = 2
   nx = 10
   ny = 10
-  xmax = 10
-  ymax = 10
-  uniform_refine = 1
 []
 
 [Variables]
@@ -14,9 +11,9 @@
 []
 
 [Functions]
-  [./func]
+  [./bc_func]
     type = ParsedFunction
-    value = x*y+t
+    value = 0.5*y
   [../]
 []
 
@@ -24,20 +21,17 @@
   [./diff]
     type = CoefDiffusion
     variable = u
-    coef = 1
-  [../]
-  [./time]
-    type = TimeDerivative
-    variable = u
+    block = 0
+    coef = 0.1
   [../]
 []
 
 [BCs]
   [./left]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = u
     boundary = left
-    value = 0
+    function = bc_func
   [../]
   [./right]
     type = DirichletBC
@@ -48,19 +42,17 @@
 []
 
 [Materials]
-  [./test_material]
+  [./k]
     type = OutputTestMaterial
     block = 0
-    variable = u
     outputs = all
+    variable = u
   [../]
 []
 
 [Executioner]
   # Preconditioned JFNK (default)
-  type = Transient
-  num_steps = 5
-  dt = 0.1
+  type = Steady
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -72,7 +64,7 @@
   [./console]
     type = Console
     perf_log = true
-    nonlinear_residuals = true
     linear_residuals = true
   [../]
 []
+
