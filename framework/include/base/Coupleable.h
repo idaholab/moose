@@ -218,7 +218,7 @@ protected:
   /**
    * Checks to make sure that the current Executioner has set "_it_transient" when old/older values
    * are coupled in.
-   * @param name the name of the varaible
+   * @param name the name of the variable
    */
   void validateExecutionerType(const std::string & name) const;
 
@@ -230,31 +230,4 @@ private:
   std::map<std::string, unsigned int> _optional_var_index;
 };
 
-/**
- * Enhances Coupleable interface to also couple the values from neighbor elements
- *
- */
-class NeighborCoupleable : public Coupleable
-{
-public:
-  /**
-   * Constructing the object
-   * @param parameters Parameters that come from constructing the object
-   * @param nodal true if we need to couple with nodal values, otherwise false
-   */
-  NeighborCoupleable(InputParameters & parameters, bool nodal);
-
-  virtual ~NeighborCoupleable();
-
-  // neighbor
-  virtual VariableValue & coupledNeighborValue(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & coupledNeighborValueOld(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & coupledNeighborValueOlder(const std::string & var_name, unsigned int comp = 0);
-
-  virtual VariableGradient & coupledNeighborGradient(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableGradient & coupledNeighborGradientOld(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableGradient & coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
-
-  virtual VariableSecond & coupledNeighborSecond(const std::string & var_name, unsigned int i = 0);
-};
 #endif /* COUPLEABLE_H */

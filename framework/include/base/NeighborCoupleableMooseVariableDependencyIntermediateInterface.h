@@ -15,7 +15,7 @@
 #ifndef NEIGHBORCOUPLEABLEMOOSEVARIABLEDEPENDENCYINTERMEDIATEINTERFACE_H
 #define NEIGHBORCOUPLEABLEMOOSEVARIABLEDEPENDENCYINTERMEDIATEINTERFACE_H
 
-#include "Coupleable.h"
+#include "NeighborCoupleable.h"
 #include "ScalarCoupleable.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
