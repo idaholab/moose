@@ -11,9 +11,9 @@ template<>
 InputParameters validParams<RichardsSat>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addClassDescription("User object yielding saturation as a function of effective saturation");
-  params.addRequiredParam<Real>("s_res", "Residual fluid saturation.  0 <= s_res < 1.");
-  params.addRequiredParam<Real>("sum_s_res", "Sum of s_res over all phases.  s_res <= sum_s_res < 1.  It is up to you to ensure the sum is done correctly.");
+  params.addRequiredRangeCheckedParam<Real>("s_res", "s_res >= 0 & s_res < 1", "Residual fluid saturation for the phase.  0 <= s_res < 1.");
+  params.addRequiredRangeCheckedParam<Real>("sum_s_res", "sum_s_res < 1", "Sum of s_res over all phases.  s_res <= sum_s_res < 1.  It is up to you to ensure the sum is done correctly.");
+  params.addClassDescription("User object yielding saturation for a phase as a function of effective saturation of that phase");
   return params;
 }
 
@@ -22,9 +22,7 @@ RichardsSat::RichardsSat(const std::string & name, InputParameters parameters) :
   _s_res(getParam<Real>("s_res")),
   _sum_s_res(getParam<Real>("sum_s_res"))
 {
-  if (_s_res < 0 || _s_res >= 1)
-    mooseError("Residual saturation set to " << _s_res << " but it must obey 0 <= s_res < 1");
-  if (_sum_s_res < _s_res || _sum_s_res >= 1)
+  if (_sum_s_res < _s_res)
     mooseError("sum_s_res set to " << _sum_s_res << " but it must obey s_res <= sum_s_res < 1");
 }
 

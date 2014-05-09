@@ -11,8 +11,8 @@ template<>
 InputParameters validParams<RichardsRelPermMonomial>()
 {
   InputParameters params = validParams<RichardsRelPerm>();
-  params.addRequiredParam<Real>("simm", "Immobile saturation.  Must be between 0 and 1.   Define s = (seff - simm)/(1 - simm).  Then relperm = s^n");
-  params.addRequiredParam<Real>("n", "Exponent.  Must be >= 0.   Define s = (seff - simm)/(1 - simm).  Then relperm = s^n");
+  params.addRequiredRangeCheckedParam<Real>("simm", "simm >= 0 & simm < 1", "Immobile saturation.  Must be between 0 and 1.   Define s = (seff - simm)/(1 - simm).  Then relperm = s^n");
+  params.addRequiredRangeCheckedParam<Real>("n", "n >= 0", "Exponent.  Must be >= 0.   Define s = (seff - simm)/(1 - simm).  Then relperm = s^n");
   params.addParam<Real>("zero_to_the_zero", 0.0, "If n=0, this is the value of relative permeability for s<=simm");
   params.addClassDescription("Monomial form of relative permeability.  Define s = (seff - simm)/(1 - simm).  Then relperm = s^n if s<simm, otherwise relperm=1");
   return params;
@@ -24,10 +24,6 @@ RichardsRelPermMonomial::RichardsRelPermMonomial(const std::string & name, Input
   _n(getParam<Real>("n")),
   _zero_to_the_zero(getParam<Real>("zero_to_the_zero"))
 {
-  if (_simm < 0 || _simm > 1)
-    mooseError("Immobile saturation set to " << _simm << " in relative permeability function but it must not be less than zero or greater than 1");
-  if (_n < 0)
-    mooseError("The exponent, n, in the monomial relative permeability function is set to " << _n << " but it must not be less than 0");
 }
 
 

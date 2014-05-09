@@ -1,3 +1,8 @@
+/*****************************************/
+/* Written by andrew.wilkins@csiro.au    */
+/* Please contact me if you make changes */
+/*****************************************/
+
 #ifndef FUNCTIONOFVARIABLEAUX_H
 #define FUNCTIONOFVARIABLEAUX_H
 
@@ -10,6 +15,11 @@ class FunctionOfVariableAux;
 template<>
 InputParameters validParams<FunctionOfVariableAux>();
 
+/**
+ * Aux variable that is a function of another variable
+ * The function is specified and the variable is passed into
+ * its "t" slot.  This is a bit bodgy but i find it quite useful
+ */
 class FunctionOfVariableAux : public AuxKernel
 {
 public:
@@ -19,7 +29,10 @@ public:
 protected:
   virtual Real computeValue();
 
+  /// the variable that you want to take a function of
   VariableValue & _t_variable;
+
+  /// the function that you want to use
   Function & _func;
 };
 

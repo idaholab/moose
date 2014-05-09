@@ -3,8 +3,6 @@
 /* Please contact me if you make changes */
 /*****************************************/
 
-//  "PowerGas" form of relative permeability
-//
 #ifndef RICHARDSRELPERMPOWERGAS_H
 #define RICHARDSRELPERMPOWERGAS_H
 
@@ -28,16 +26,19 @@ class RichardsRelPermPowerGas : public RichardsRelPerm
 
   /**
    * Relative permeability
+   * @param seff effective saturation
    */
   Real relperm(Real seff) const;
 
   /**
    * Derivative of relative permeability wrt seff
+   * @param seff effective saturation
    */
   Real drelperm(Real seff) const;
 
   /**
    * Second derivative of relative permeability wrt seff
+   * @param seff effective saturation
    */
   Real d2relperm(Real seff) const;
 

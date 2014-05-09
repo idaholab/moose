@@ -16,6 +16,9 @@ class NodalMaxVarChange;
 template<>
 InputParameters validParams<NodalMaxVarChange>();
 
+/**
+ * Maximum change of a variable
+ */
 class NodalMaxVarChange : public NodalVariablePostprocessor
 {
  public:
@@ -28,8 +31,11 @@ class NodalMaxVarChange : public NodalVariablePostprocessor
 
  protected:
 
-  VariableValue & _u_old;   // Holds the old variable at current quadrature points
-  Real _value; // holds max(abs(_u - _u_old))
+  /// old variable value at quad points
+  VariableValue & _u_old;
+
+  /// max(abs(_u - _u_old))
+  Real _value;
 };
 
 #endif // NODALMAXVARCHANGE_H

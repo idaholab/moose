@@ -15,7 +15,7 @@ InputParameters validParams<RichardsSumQuantity>()
 
 RichardsSumQuantity::RichardsSumQuantity(const std::string & name, InputParameters parameters) :
     GeneralUserObject(name, parameters),
-    _total_outflow_mass(0)
+    _total(0)
 {
 }
 
@@ -26,13 +26,13 @@ RichardsSumQuantity::~RichardsSumQuantity()
 void
 RichardsSumQuantity::zero()
 {
-  _total_outflow_mass = 0;
+  _total = 0;
 }
 
 void
 RichardsSumQuantity::add(Real contrib)
 {
-  _total_outflow_mass += contrib;
+  _total += contrib;
 }
 
 void
@@ -48,11 +48,11 @@ RichardsSumQuantity::execute()
 void
 RichardsSumQuantity::finalize()
 {
-  gatherSum(_total_outflow_mass);
+  gatherSum(_total);
 }
 
 Real
 RichardsSumQuantity::getValue() const
 {
-  return _total_outflow_mass;
+  return _total;
 }

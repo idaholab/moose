@@ -3,8 +3,6 @@
 /* Please contact me if you make changes */
 /*****************************************/
 
-//  "Monomial" form of relative permeability
-//
 #ifndef RICHARDSRELPERMMONOMIAL_H
 #define RICHARDSRELPERMMONOMIAL_H
 
@@ -29,16 +27,19 @@ class RichardsRelPermMonomial : public RichardsRelPerm
 
   /**
    * Relative permeability
+   * @param seff effective saturation
    */
   Real relperm(Real seff) const;
 
   /**
    * Derivative of elative permeability wrt seff
+   * @param seff effective saturation
    */
   Real drelperm(Real seff) const;
 
   /**
    * Second derivative of elative permeability wrt seff
+   * @param seff effective saturation
    */
   Real d2relperm(Real seff) const;
 
@@ -46,8 +47,10 @@ class RichardsRelPermMonomial : public RichardsRelPerm
 
   /// immobile saturation
   Real _simm;
+
   /// exponent, must be >= 0
   Real _n;
+
   /// 0^0, which is used if _n=0
   Real _zero_to_the_zero;
 

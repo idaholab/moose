@@ -3,8 +3,6 @@
 /* Please contact me if you make changes */
 /*****************************************/
 
-//  "Power" form of relative permeability
-//
 #ifndef RICHARDSRELPERMPOWER_H
 #define RICHARDSRELPERMPOWER_H
 
@@ -16,18 +14,39 @@ class RichardsRelPermPower;
 template<>
 InputParameters validParams<RichardsRelPermPower>();
 
+/**
+ * Power form of relative permeability, usually
+ * used for water
+ */
 class RichardsRelPermPower : public RichardsRelPerm
 {
  public:
   RichardsRelPermPower(const std::string & name, InputParameters parameters);
 
+  /**
+   * relative permeability as a function of effective saturation
+   * @param seff effective sasturation
+   */
   Real relperm(Real seff) const;
+
+  /**
+   * derivative of relative permeability wrt effective saturation
+   * @param seff effective sasturation
+   */
   Real drelperm(Real seff) const;
+
+  /**
+   * second derivative of relative permeability wrt effective saturation
+   * @param seff effective sasturation
+   */
   Real d2relperm(Real seff) const;
 
  protected:
 
+  /// immobile saturation
   Real _simm;
+
+  /// exponent used in the power relationship
   Real _n;
 
 };

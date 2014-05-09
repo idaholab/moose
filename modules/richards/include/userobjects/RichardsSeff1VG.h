@@ -3,8 +3,6 @@
 /* Please contact me if you make changes */
 /*****************************************/
 
-//  van-Genuchten effective saturation as a function of single pressure, and its derivs wrt to that pressure
-//
 #ifndef RICHARDSSEFF1VG_H
 #define RICHARDSSEFF1VG_H
 
@@ -17,18 +15,44 @@ class RichardsSeff1VG;
 template<>
 InputParameters validParams<RichardsSeff1VG>();
 
+/**
+ * Effective saturation as a function of porepressure
+ * using the van Genuchten formula.  Note this is not a function
+ * of capillary pressure: i use porepressure instead, so
+ * seff = 1 for p >= 0.
+ */
 class RichardsSeff1VG : public RichardsSeff
 {
  public:
   RichardsSeff1VG(const std::string & name, InputParameters parameters);
 
+  /**
+   * effective saturation as a function of porepressure
+   * @param p porepressure in the element.  Note that (*p[0])[qp] is the porepressure at quadpoint qp
+   * @param qp the quad point to evaluate effective saturation at
+   */
   Real seff(std::vector<VariableValue *> p, unsigned int qp) const;
+
+  /**
+   * derivative of effective saturation wrt porepressure
+   * @param p porepressure in the element.  Note that (*p[0])[qp] is the porepressure at quadpoint qp
+   * @param qp the quad point to evaluate effective saturation at
+   */
   std::vector<Real> dseff(std::vector<VariableValue *> p, unsigned int qp) const;
+
+  /**
+   * second derivative of effective saturation wrt porepressure
+   * @param p porepressure in the element.  Note that (*p[0])[qp] is the porepressure at quadpoint qp
+   * @param qp the quad point to evaluate effective saturation at
+   */
   std::vector<std::vector<Real> > d2seff(std::vector<VariableValue *> p, unsigned int qp) const;
 
  protected:
 
+  /// van Genuchten alpha parameter
   Real _al;
+
+  /// van Genuchten m parameter
   Real _m;
 
 };
