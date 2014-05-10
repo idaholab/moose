@@ -3,6 +3,12 @@
 
 #include "Action.h"
 
+//Forward Declarations
+class PFCRFFKernelAction;
+
+template<>
+InputParameters validParams<PFCRFFKernelAction>();
+
 class PFCRFFKernelAction: public Action
 {
 public:
@@ -11,15 +17,9 @@ public:
   virtual void act();
 
 private:
-
   unsigned int _num_L;
   std::string _L_name_base;
   std::string _n_name;
-  
-
 };
 
-template<>
-InputParameters validParams<PFCRFFKernelAction>();
-  
 #endif //PFCRFFKERNELACTION_H

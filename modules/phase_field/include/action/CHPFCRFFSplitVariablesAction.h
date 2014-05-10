@@ -3,10 +3,16 @@
 
 #include "InputParameters.h"
 #include "Action.h"
+
+//Forward Declarations
+class CHPFCRFFSplitVariablesAction;
+
+template<>
+InputParameters validParams<CHPFCRFFSplitVariablesAction>();
+
 /**
  * Automatically generates all the L variables for the RFF phase field crystal model.
  */
-
 class CHPFCRFFSplitVariablesAction: public Action
 {
 public:
@@ -22,8 +28,5 @@ private:
   std::vector<std::string> _sub_filenames;
   std::string _n_name;
 };
-
-template<>
-InputParameters validParams<CHPFCRFFSplitVariablesAction>();
 
 #endif //CHPFCRFFSPLITVARIABLESACTION_H
