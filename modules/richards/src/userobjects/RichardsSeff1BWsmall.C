@@ -7,18 +7,16 @@
 //
 #include "RichardsSeff1BWsmall.h"
 
-// following for LambertW
-//#include <math.h>
 #include <cmath>
 
 template<>
 InputParameters validParams<RichardsSeff1BWsmall>()
 {
   InputParameters params = validParams<RichardsSeff>();
-  params.addRequiredParam<Real>("Sn", "Low saturation.  This must be < Ss, and non-negative.  This is BW's initial effective saturation, below which effective saturation never goes in their simulations/models.  If Kn=0 then Sn is the immobile saturation.  This form of effective saturation is only correct for Kn small.");
-  params.addParam<Real>("Ss", 1.0, "High saturation.  This must be > Sn and <= 1.  Effective saturation where porepressure = 0.  Effective saturation never exceeds this value in BW's simulations/models.");
-  params.addRequiredParam<Real>("C", "BW's C parameter.  Must be > 1.  Typical value would be 1.05.");
-  params.addRequiredParam<Real>("las", "BW's lambda_s parameter multiplied by (fluiddensity*gravity).  Must be > 0.  Typical value would be 1E5");
+  params.addRequiredRangeCheckedParam<Real>("Sn", "Sn >= 0", "Low saturation.  This must be < Ss, and non-negative.  This is BW's initial effective saturation, below which effective saturation never goes in their simulations/models.  If Kn=0 then Sn is the immobile saturation.  This form of effective saturation is only correct for Kn small.");
+  params.addRangeCheckedParam<Real>("Ss", 1.0, "Ss <= 1", "High saturation.  This must be > Sn and <= 1.  Effective saturation where porepressure = 0.  Effective saturation never exceeds this value in BW's simulations/models.");
+  params.addRequiredRangeCheckedParam<Real>("C", "C > 1", "BW's C parameter.  Must be > 1.  Typical value would be 1.05.");
+  params.addRequiredRangeCheckedParam<Real>("las", "las > 0", "BW's lambda_s parameter multiplied by (fluiddensity*gravity).  Must be > 0.  Typical value would be 1E5");
   params.addClassDescription("Broadbridge-white form of effective saturation for negligable Kn.  Then porepressure = -las*( (1-th)/th - (1/c)Ln((C-th)/((C-1)th))), for th = (Seff - Sn)/(Ss - Sn).  A Lambert-W function must be evaluated to express Seff in terms of porepressure, which can be expensive");
   return params;
 }
@@ -30,16 +28,8 @@ RichardsSeff1BWsmall::RichardsSeff1BWsmall(const std::string & name, InputParame
   _c(getParam<Real>("C")),
   _las(getParam<Real>("las"))
 {
-  if (_sn < 0)
-    mooseError("Sn in BW effective saturation set to " << _sn << " but it must be non-negative");
-  if (_ss > 1)
-    mooseError("Ss in BW effective saturation set to " << _ss << " but it must not be greater than 1");
   if (_ss <= _sn)
     mooseError("In BW effective saturation Sn set to " << _sn << " and Ss set to " << _ss << " but these must obey Ss > Sn");
-  if (_c <= 1)
-    mooseError("In BW effective saturation C set to " << _c << " but it must be greater than 1");
-  if (_las <= 0)
-    mooseError("In BW effective saturation las set to " << _las << " but it must be positive");
 }
 
 

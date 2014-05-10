@@ -16,6 +16,9 @@ class RichardsDensityPrimeAux;
 template<>
 InputParameters validParams<RichardsDensityPrimeAux>();
 
+/**
+ * Derivative of fluid density wrt porepressure
+ */
 class RichardsDensityPrimeAux: public AuxKernel
 {
 public:
@@ -24,7 +27,10 @@ public:
 protected:
   virtual Real computeValue();
 
+  /// porepressure
   VariableValue & _pressure_var;
+
+  /// userobject that defines density as a fcn of porepressure
   const RichardsDensity & _density_UO;
 };
 

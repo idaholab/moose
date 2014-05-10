@@ -11,9 +11,9 @@ template<>
 InputParameters validParams<RichardsRelPermVG1>()
 {
   InputParameters params = validParams<RichardsRelPermVG>();
-  params.addRequiredParam<Real>("simm", "Immobile saturation.  Must be between 0 and 1.  Define s = (seff - simm)/(1 - simm).  Then relperm = s^(1/2) * (1 - (1 - s^(1/m))^m)^2");
-  params.addRequiredParam<Real>("m", "van-Genuchten m parameter.  Must be between 0 and 1, and optimally should be set >0.5.  Define s = (seff - simm)/(1 - simm).  Then relperm = s^(1/2) * (1 - (1 - s^(1/m))^m)^2");
-  params.addRequiredParam<Real>("scut", "cutoff in effective saturation.");
+  params.addRequiredRangeCheckedParam<Real>("simm", "simm >=0 & simm < 1", "Immobile saturation.  Must be between 0 and 1.  Define s = (seff - simm)/(1 - simm).  Then relperm = s^(1/2) * (1 - (1 - s^(1/m))^m)^2");
+  params.addRequiredRangeCheckedParam<Real>("m", "m > 0 & m < 1", "van-Genuchten m parameter.  Must be between 0 and 1, and optimally should be set >0.5.  Define s = (seff - simm)/(1 - simm).  Then relperm = s^(1/2) * (1 - (1 - s^(1/m))^m)^2");
+  params.addRequiredRangeCheckedParam<Real>("scut", "scut > 0 & scut < 1", "cutoff in effective saturation.");
   params.addClassDescription("VG1 form of relative permeability.  Define s = (seff - simm)/(1 - simm).  Then relperm = s^(1/2) * (1 - (1 - s^(1/m))^m)^2, if s>0, and relperm=0 otherwise");
   return params;
 }
@@ -28,13 +28,6 @@ RichardsRelPermVG1::RichardsRelPermVG1(const std::string & name, InputParameters
   _vg1_quad(0),
   _vg1_cub(0)
 {
-  if (_simm < 0 || _simm > 1)
-    mooseError("Immobile saturation set to " << _simm << " in relative permeability function but it must not be less than zero or greater than 1");
-  if (_m <= 0 || _m >= 1)
-    mooseError("Van Genuchten m parameter in relative permeability is set to " << _m << " but it must be between 0 and 1, and optimally >0.5");
-  if (_scut <= 0 || _scut >= 1)
-    mooseError("The cutoff saturation in the VG1 type of relative permeability is set to " << _scut << " but this must be between 0 and 1");
-
   _vg1_const = RichardsRelPermVG::relperm(_scut);
   _vg1_linear = RichardsRelPermVG::drelperm(_scut);
   _vg1_quad = RichardsRelPermVG::d2relperm(_scut);

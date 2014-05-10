@@ -16,6 +16,9 @@ class RichardsSatPrimeAux;
 template<>
 InputParameters validParams<RichardsSatPrimeAux>();
 
+/**
+ * Derivative of fluid Saturation wrt effective saturation
+ */
 class RichardsSatPrimeAux: public AuxKernel
 {
 public:
@@ -24,7 +27,10 @@ public:
 protected:
   virtual Real computeValue();
 
+  /// effective saturation
   VariableValue & _seff_var;
+
+  /// User object defining saturation as a function of effective saturation
   const RichardsSat & _sat_UO;
 };
 

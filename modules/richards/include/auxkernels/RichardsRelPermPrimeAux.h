@@ -16,6 +16,9 @@ class RichardsRelPermPrimeAux;
 template<>
 InputParameters validParams<RichardsRelPermPrimeAux>();
 
+/**
+ * Derivative of relative Permeability wrt effective saturation
+ */
 class RichardsRelPermPrimeAux: public AuxKernel
 {
 public:
@@ -24,7 +27,10 @@ public:
 protected:
   virtual Real computeValue();
 
+  /// effective saturation
   VariableValue & _seff_var;
+
+  /// userobject that defines relative permeability function
   const RichardsRelPerm & _relperm_UO;
 };
 

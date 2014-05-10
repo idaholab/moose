@@ -14,6 +14,12 @@ class GradParsedFunction;
 template<>
 InputParameters validParams<GradParsedFunction>();
 
+/**
+ * returns the central difference approx to the derivative
+ * of the function, ie
+ * (f(t, p + direction) - f(t, p - direction))/2/|direction|
+ * This derives from MooseParsedFunction, so it already knows about a function
+ */
 class GradParsedFunction :
   public MooseParsedFunction
 {
@@ -25,7 +31,10 @@ public:
 
 protected:
 
+  /// central difference direction
   RealVectorValue _direction;
+
+  /// 2*|_direction|
   Real _len;
 
 };

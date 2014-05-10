@@ -32,7 +32,7 @@ public:
   /// returns true, indicating that updateSolution should be run
   virtual bool shouldUpdateSolution();
 
-  /*
+  /**
    * Does the bounding by modifying vec_solution, and then ghosted_solution
    * @param vec_solution is the solution that Petsc says we should use.
    * @param ghosted_solution is a ghosted version of vec_solution.
