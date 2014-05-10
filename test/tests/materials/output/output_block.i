@@ -2,6 +2,7 @@
   type = FileMesh
   file = rectangle.e
   dim = 2
+  uniform_refine = 1
 []
 
 [Variables]
@@ -9,18 +10,11 @@
   [../]
 []
 
-[Functions]
-  [./func]
-    type = ParsedFunction
-    value = x*y+t
-  [../]
-[]
-
 [Kernels]
   [./diff]
     type = CoefDiffusion
     variable = u
-    coef = 0.1
+    coef = 0.5
   [../]
   [./time]
     type = TimeDerivative
@@ -39,7 +33,7 @@
     type = DirichletBC
     variable = u
     boundary = 2
-    value = 1
+    value = 2
   [../]
 []
 
@@ -47,27 +41,30 @@
   [./block_1]
     type = OutputTestMaterial
     block = 1
-    output_properties = 'real_property'
+    output_properties = real_property
     outputs = exodus
+    variable = u
   [../]
   [./block_2]
     type = OutputTestMaterial
     block = 2
-    output_properties = 'vector_property'
+    output_properties = vector_property
     outputs = exodus
+    variable = u
   [../]
   [./all]
     type = OutputTestMaterial
     block = '1 2'
-    output_properties = 'tensor_property'
+    output_properties = tensor_property
     outputs = exodus
+    variable = u
   [../]
 []
 
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 20
+  num_steps = 5
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -84,3 +81,4 @@
     linear_residuals = true
   [../]
 []
+
