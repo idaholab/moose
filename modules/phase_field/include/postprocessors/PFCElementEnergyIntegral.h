@@ -25,7 +25,7 @@ template<>
 InputParameters validParams<PFCElementEnergyIntegral>();
 
 /**
- * This postprocessor computes a volume integral of the specified variable.
+ * Compute a volume integral of the specified variable.
  *
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
@@ -44,11 +44,15 @@ protected:
 
   /// Holds the solution at current quadrature points
   VariableValue & _u;
+
   /// Holds the solution gradient at the current quadrature points
   VariableGradient & _grad_u;
+
   /// Holds the solution derivative at the current quadrature points
   VariableValue & _u_dot;
-  Real _temp;
+
+  /// Temperature
+  const Real _temp;
 };
 
 #endif

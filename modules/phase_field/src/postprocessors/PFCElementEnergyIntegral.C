@@ -19,7 +19,7 @@ InputParameters validParams<PFCElementEnergyIntegral>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "The name of the variable that this object operates on");
-  params.addParam<Real>("temp",1833.0,"Temperature of simulation");
+  params.addParam<Real>("temp", 1833.0, "Temperature of simulation");
   return params;
 }
 
@@ -38,7 +38,8 @@ PFCElementEnergyIntegral::PFCElementEnergyIntegral(const std::string & name, Inp
 Real
 PFCElementEnergyIntegral::computeQpIntegral()
 {
-  Real kb = 1.3806488e-23;  // A^2 kg s^-2 K^-1
-  Real p0 = 0.0801; // A^-3
-  return _u[_qp]; //*(kb*_temp);
+  const Real kb = 1.3806488e-23;  // A^2 kg s^-2 K^-1
+  const Real p0 = 0.0801; // A^-3
+
+  return _u[_qp]; // * (kb * _temp);
 }
