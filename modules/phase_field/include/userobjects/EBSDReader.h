@@ -8,7 +8,6 @@ class EBSDReader;
 template<>
 InputParameters validParams<EBSDReader>();
 
-
 /**
  * A GeneralUserObject that reads an EBSD file and stores the centroid
  * data in a data structure which indexes on element centroids.
@@ -85,6 +84,5 @@ protected:
   /// *centroid* point.
   unsigned index_from_point(const Point& p) const;
 };
-
 
 #endif /* EBSDREADER_H */
