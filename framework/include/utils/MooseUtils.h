@@ -18,6 +18,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <algorithm>
 
 #include "XTermConstants.h"
 
@@ -113,6 +114,66 @@ namespace MooseUtils
     return oss.str();
   }
 
+
+
+
+
+
+  /*
+   * a function object that allows to compare
+   * the iterators by the value they point to
+   *
+   * Inspired by behzad.nouri from http://stackoverflow.com/questions/1577475/c-sorting-and-keeping-track-of-indexes
+   */
+  template <class RAIter, class Compare>
+  class IterSortComp
+  {
+  public:
+    IterSortComp(Compare comp) : m_comp(comp) {}
+
+    inline bool operator() (const RAIter & i, const RAIter & j) const
+    {
+      return m_comp(*i, *j);
+    }
+
+  private:
+    const Compare m_comp;
+  };
+
+  template <class INIter, class RAIter, class Compare>
+  void itersort(INIter first, INIter last, std::vector<RAIter> & idx, Compare comp)
+  {
+    idx.resize(std::distance(first, last));
+    for (typename std::vector<RAIter>::iterator j = idx.begin(); first != last; ++j, ++first)
+      *j = first;
+
+    std::sort(idx.begin(), idx.end(), IterSortComp<RAIter, Compare>(comp));
+  }
+
+  template <class T, class U, class Compare>
+  void indirectSortInto(const T & sort_this, const U &  by_this, T & into_this, Compare comp)
+  {
+    std::vector<typename U::const_iterator > idx;
+    itersort(by_this.begin(), by_this.end(), idx, comp);
+
+    into_this.resize(sort_this.size());
+
+    for (unsigned int i=0; i<idx.size(); i++)
+      into_this[i] = sort_this[std::distance(by_this.begin(), idx[i])];
+
+  }
+
+  template <class T, class Compare>
+  void getSortIndices(const T & sort_by, Compare comp, std::vector<unsigned int> & sorted_indices)
+  {
+    std::vector<typename T::const_iterator > idx;
+    itersort(sort_by.begin(), sort_by.end(), idx, comp);
+
+    sorted_indices.resize(idx.size());
+
+    for (unsigned int i=0; i<idx.size(); i++)
+      sorted_indices[i] = std::distance(sort_by.begin(), idx[i]);
+  }
 }
 
 #endif //MOOSEUTILS_H
