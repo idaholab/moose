@@ -17,9 +17,7 @@ InputParameters validParams<TestEBSDAux>();
 class TestEBSDAux : public AuxKernel
 {
 public:
-
   TestEBSDAux(const std::string & name, InputParameters parameters);
-
 
 protected:
   virtual Real computeValue();
@@ -31,4 +29,4 @@ protected:
   MooseEnum _data_type;
 };
 
-#endif
+#endif //TESTEBSDAUX_H
