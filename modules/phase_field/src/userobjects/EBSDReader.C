@@ -8,7 +8,6 @@ InputParameters validParams<EBSDReader>()
   return params;
 }
 
-
 EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     GeneralUserObject(name, params),
     _filename(getParam<FileName>("filename")),
@@ -150,13 +149,9 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
   }
 }
 
-
-
 EBSDReader::~EBSDReader()
 {
 }
-
-
 
 Real
 EBSDReader::get_data(const Point & p, MooseEnum data_type) const
@@ -166,51 +161,45 @@ EBSDReader::get_data(const Point & p, MooseEnum data_type) const
 
   switch (data_type)
   {
-  case PHI1:
-    // phi1 is entry [0] at each centroid
-    return _data[index_from_point(p)][0];
+    case PHI1:
+      // phi1 is entry [0] at each centroid
+      return _data[index_from_point(p)][0];
 
-  case PHI:
-    // phi is entry [1] at each centroid
-    return _data[index_from_point(p)][1];
+    case PHI:
+      // phi is entry [1] at each centroid
+      return _data[index_from_point(p)][1];
 
-  case PHI2:
-    // phi2 is entry [2] at each centroid
-    return _data[index_from_point(p)][2];
+    case PHI2:
+      // phi2 is entry [2] at each centroid
+      return _data[index_from_point(p)][2];
 
-  case X:
-    // x is entry [3] at each centroid
-    return _data[index_from_point(p)][3];
+    case X:
+      // x is entry [3] at each centroid
+      return _data[index_from_point(p)][3];
 
-  case Y:
-    // y is entry [4] at each centroid
-    return _data[index_from_point(p)][4];
+    case Y:
+      // y is entry [4] at each centroid
+      return _data[index_from_point(p)][4];
 
-  case Z:
-    // z is entry [5] at each centroid
-    return _data[index_from_point(p)][5];
+    case Z:
+      // z is entry [5] at each centroid
+      return _data[index_from_point(p)][5];
 
-  case GRAIN:
-    // grain is entry [6] at each centroid
-    return _data[index_from_point(p)][6];
+    case GRAIN:
+      // grain is entry [6] at each centroid
+      return _data[index_from_point(p)][6];
 
-  case PHASE:
-    // grain is entry [7] at each centroid
-    return _data[index_from_point(p)][7];
+    case PHASE:
+      // grain is entry [7] at each centroid
+      return _data[index_from_point(p)][7];
 
-  case SYMMETRY_CLASS:
-    // symmetry is entry [8] at each centroid
-    return _data[index_from_point(p)][8];
-
-  default:
-    mooseError("Invalid DataType " << data_type << " requested.");
+    case SYMMETRY_CLASS:
+      // symmetry is entry [8] at each centroid
+      return _data[index_from_point(p)][8];
   }
+
+  mooseError("Invalid DataType " << data_type << " requested.");
 }
-
-
-
-
-
 
 unsigned EBSDReader::index_from_point(const Point& p) const
 {
