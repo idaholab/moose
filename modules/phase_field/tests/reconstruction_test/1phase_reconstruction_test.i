@@ -78,7 +78,7 @@
   [../]
     
   [./rgb]
-    type = Euler2RgbAux
+    type = Euler2RGBAux
     variable = rgb   
     execute_on = timestep
   [../]
