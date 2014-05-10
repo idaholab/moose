@@ -105,23 +105,29 @@ VTKOutput::filename()
 void
 VTKOutput::outputNodalVariables()
 {
-  mooseError("Individual output of nodal variables is not support for VTKOutput output");
+  mooseError("Individual output of nodal variables is not supported for VTKOutput output");
 }
 
 void
 VTKOutput::outputElementalVariables()
 {
-  mooseError("Individual output of elemental variables is not support for VTKOutput output");
+  mooseError("Individual output of elemental variables is not supported for VTKOutput output");
 }
 
 void
 VTKOutput::outputPostprocessors()
 {
-  mooseError("Individual output of postprocessors is not support for VTKOutput output");
+  mooseError("Individual output of postprocessors is not supported for VTKOutput output");
+}
+
+void
+VTKOutput::outputVectorPostprocessors()
+{
+  mooseError("Individual output of VectorPostprocessors is not supported for VTKOutput output");
 }
 
 void
 VTKOutput::outputScalarVariables()
 {
-  mooseError("Individual output of scalars is not support for VTKOutput output");
+  mooseError("Individual output of scalars is not supported for VTKOutput output");
 }

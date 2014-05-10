@@ -40,7 +40,7 @@
     # Tests that the error message for hide/show variables input is working
     type = 'RunException'
     input = 'invalid_hide_variables.i'
-    expect_err = 'Output\(s\) do not exist \(must be variable, scalar, or postprocessor\): aux27'
+    expect_err = 'Output\(s\) do not exist \(must be variable, scalar, postprocessor, or vector postprocessor\):'
   [../]
 
   [./nodal_output]

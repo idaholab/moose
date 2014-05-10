@@ -70,23 +70,29 @@ SolutionHistory::output()
 void
 SolutionHistory::outputNodalVariables()
 {
-  mooseError("Individual output of nodal variables is not support for solution hisotry output");
+  mooseError("Individual output of nodal variables is not supported for solution hisotry output");
 }
 
 void
 SolutionHistory::outputElementalVariables()
 {
-  mooseError("Individual output of elemental variables is not support for solution history output");
+  mooseError("Individual output of elemental variables is not supported for solution history output");
 }
 
 void
 SolutionHistory::outputPostprocessors()
 {
-  mooseError("Individual output of postprocessors is not support for solution history output");
+  mooseError("Individual output of postprocessors is not supported for solution history output");
+}
+
+void
+SolutionHistory::outputVectorPostprocessors()
+{
+  mooseError("Individual output of VectorPostprocessors is not supported for solution history output");
 }
 
 void
 SolutionHistory::outputScalarVariables()
 {
-  mooseError("Individual output of scalars is not support for solution history output");
+  mooseError("Individual output of scalars is not supported for solution history output");
 }

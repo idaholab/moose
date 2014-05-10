@@ -123,6 +123,12 @@ DebugOutput::outputPostprocessors()
 }
 
 void
+DebugOutput::outputVectorPostprocessors()
+{
+  mooseError("Individual output of VectorPostprocessors is not support for Debug output");
+}
+
+void
 DebugOutput::outputScalarVariables()
 {
   mooseError("Individual output of scalars is not support for Debug output");

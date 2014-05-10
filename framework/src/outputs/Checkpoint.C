@@ -218,3 +218,9 @@ Checkpoint::outputPostprocessors()
 {
   mooseError("Invalid for Checkpoint output type");
 }
+
+void
+Checkpoint::outputVectorPostprocessors()
+{
+  mooseError("Invalid for Checkpoint output type");
+}

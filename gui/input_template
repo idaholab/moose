@@ -154,6 +154,14 @@
   [../]
 []
 
+[VectorPostprocessors]
+  [./*]
+    type = ConstantVectorPostprocessor
+    variable = u
+    value = '1.5 2.7'
+  [../]
+[]
+
 [UserObjects]
   [./*]
     type = MTUserData

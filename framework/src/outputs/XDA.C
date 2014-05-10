@@ -72,25 +72,31 @@ XDA::output()
 void
 XDA::outputNodalVariables()
 {
-  mooseError("Individual output of nodal variables is not support for XDA/XDR output");
+  mooseError("Individual output of nodal variables is not supported for XDA/XDR output");
 }
 
 void
 XDA::outputElementalVariables()
 {
-  mooseError("Individual output of elemental variables is not support for XDA/XDR output");
+  mooseError("Individual output of elemental variables is not supported for XDA/XDR output");
 }
 
 void
 XDA::outputPostprocessors()
 {
-  mooseError("Individual output of postprocessors is not support for XDA/XDR output");
+  mooseError("Individual output of postprocessors is not supported for XDA/XDR output");
+}
+
+void
+XDA::outputVectorPostprocessors()
+{
+  mooseError("Individual output of VectorPostprocessors is not supported for XDA/XDR output");
 }
 
 void
 XDA::outputScalarVariables()
 {
-  mooseError("Individual output of scalars is not support for XDA/XDR output");
+  mooseError("Individual output of scalars is not supported for XDA/XDR output");
 }
 
 std::string

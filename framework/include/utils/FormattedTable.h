@@ -62,6 +62,11 @@ public:
 
   void clear();
 
+  /**
+   * Set whether or not to output time column.
+   */
+  void outputTimeColumn(bool output_time) { _output_time = output_time; }
+
   const std::map<Real, std::map<std::string, Real> > & getData() const { return _data; }
 
   /**
@@ -130,6 +135,9 @@ protected:
 
   /// The last key value inserted
   Real _last_key;
+
+  /// Whether or not to output the Time column
+  bool _output_time;
 
   friend void dataStore<FormattedTable>(std::ostream & stream, FormattedTable & table, void * context);
   friend void dataLoad<FormattedTable>(std::istream & stream, FormattedTable & v, void * context);

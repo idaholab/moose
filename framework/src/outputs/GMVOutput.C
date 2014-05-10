@@ -63,25 +63,31 @@ GMVOutput::output()
 void
 GMVOutput::outputNodalVariables()
 {
-  mooseError("Individual output of nodal variables is not support for GMV output");
+  mooseError("Individual output of nodal variables is not supported for GMV output");
 }
 
 void
 GMVOutput::outputElementalVariables()
 {
-  mooseError("Individual output of elemental variables is not support for GMV output");
+  mooseError("Individual output of elemental variables is not supported for GMV output");
 }
 
 void
 GMVOutput::outputPostprocessors()
 {
-  mooseError("Individual output of postprocessors is not support for GMV output");
+  mooseError("Individual output of postprocessors is not supported for GMV output");
+}
+
+void
+GMVOutput::outputVectorPostprocessors()
+{
+  mooseError("Individual output of VectorPostprocessors is not supported for GMV output");
 }
 
 void
 GMVOutput::outputScalarVariables()
 {
-  mooseError("Individual output of scalars is not support for GMV output");
+  mooseError("Individual output of scalars is not supported for GMV output");
 }
 
 std::string

@@ -112,6 +112,14 @@ Tecplot::outputPostprocessors()
 
 
 void
+Tecplot::outputVectorPostprocessors()
+{
+  mooseError("Individual output of VectorPostprocessors is not supported for Tecplot output");
+}
+
+
+
+void
 Tecplot::outputScalarVariables()
 {
   mooseError("Individual output of scalars is not supported for Tecplot output");

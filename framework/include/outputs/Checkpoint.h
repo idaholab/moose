@@ -93,6 +93,7 @@ protected:
   virtual void outputElementalVariables();
   virtual void outputScalarVariables();
   virtual void outputPostprocessors();
+  virtual void outputVectorPostprocessors();
   //@}
 
   void updateCheckpointFiles(CheckpointFileNames file_struct);
