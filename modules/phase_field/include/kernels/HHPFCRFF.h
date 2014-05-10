@@ -12,7 +12,6 @@ InputParameters validParams<HHPFCRFF>();
 class HHPFCRFF : public KernelValue
 {
 public:
-
   HHPFCRFF(const std::string & name, InputParameters parameters);
 
 protected:
@@ -22,14 +21,13 @@ protected:
 
   bool _positive;
   Real _kernel_sign;
+
   std::string _prop_name;
   MaterialProperty<Real> & _prop;
+
   bool _has_coupled_var;
   VariableValue * _coupled_var;
   unsigned int _coupled_var_var;
-
-private:
-
-
 };
+
 #endif //HHFPCRFF_H
