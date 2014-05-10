@@ -21,7 +21,7 @@ InputParameters validParams<CHPFCRFFSplitKernelAction>()
 }
 
 CHPFCRFFSplitKernelAction::CHPFCRFFSplitKernelAction(const std::string & name,
-                                                     InputParameters params):
+                                                     InputParameters params) :
     Action(name, params),
     _num_L(getParam<unsigned int>("num_L")),
     _L_name_base(getParam<std::string>("L_name_base")),

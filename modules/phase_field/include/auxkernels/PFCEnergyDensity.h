@@ -1,6 +1,5 @@
-
-#ifndef PFC_ENERGY_DENSITY_h
-#define PFC_ENERGY_DENSITY_h
+#ifndef PFC_ENERGY_DENSITY_H
+#define PFC_ENERGY_DENSITY_H
 
 #include "AuxKernel.h"
 #include <sstream>
@@ -16,14 +15,14 @@ public:
    PFCEnergyDensity( const std::string& name, InputParameters parameters );
 
 protected:
-  Real computeValue();
-  
+  virtual Real computeValue();
+
+  std::vector<VariableValue *> _vals;
+  std::vector<MaterialProperty<Real>* > _coeff;
+
   unsigned int _order;
   MaterialProperty<Real> & _a;
   MaterialProperty<Real> & _b;
-  std::vector<MaterialProperty<Real>* > _coeff;
-  std::vector<VariableValue *> _vals;
-  
 };
 
-#endif
+#endif //PFC_ENERGY_DENSITY_H

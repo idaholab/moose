@@ -1,6 +1,6 @@
 
-#ifndef PFCRFF_ENERGY_DENSITY_h
-#define PFCRFF_ENERGY_DENSITY_h
+#ifndef PFCRFF_ENERGY_DENSITY_H
+#define PFCRFF_ENERGY_DENSITY_H
 
 #include "AuxKernel.h"
 #include <sstream>
@@ -16,14 +16,14 @@ public:
    PFCRFFEnergyDensity( const std::string& name, InputParameters parameters );
 
 protected:
-  Real computeValue();
-  
+  virtual Real computeValue();
+
   unsigned int _order;
+  std::vector<VariableValue *> _vals;
+
   Real _a;
   Real _b;
   Real _c;
-  std::vector<VariableValue *> _vals;
-  
 };
 
-#endif
+#endif //PFCRFF_ENERGY_DENSITY_H
