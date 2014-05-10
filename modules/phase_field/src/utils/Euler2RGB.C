@@ -35,6 +35,7 @@
 
 // Include files
 #include "Euler2RGB.h"
+#include "MathUtils.h"
 
 Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, unsigned int sym)
 {
@@ -290,12 +291,12 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     while ((exit_flag == false) && (index < nsym))
     {
       // Form orientation matrix
-      for (unsigned int i = 0; i < 3; i++)
+      for (unsigned int i = 0; i < 3; ++i)
       {
-        for (unsigned int j = 0; j < 3; j++)
+        for (unsigned int j = 0; j < 3; ++j)
         {
           S[i][j] = 0.0;
-          for (unsigned int k = 0; k < 3; k++)
+          for (unsigned int k = 0; k < 3; ++k)
           {
             S[i][j] += SymOps[index][i][k] * g[k][j];
           }
@@ -313,8 +314,8 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
       }
 
       // Convert to spherical coordinates (ignore "r" variable since r=1)
-      eta = std::fabs(std::atan2(hkl[1], hkl[0]));
-      chi = std::acos(std::fabs(hkl[2]));
+      eta = std::abs(std::atan2(hkl[1], hkl[0]));
+      chi = std::acos(std::abs(hkl[2]));
 
       // Continue if eta and chi values are within the SST
       if (eta >= eta_min && eta < eta_max && chi >= eta_min && chi < chi_max)
@@ -340,8 +341,8 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     }
 
     //  Calculate the RGB color values and make adjustments to maximize colorspace
-    red = std::fabs(1.0 - (chi / chi_max2));
-    blue = std::fabs((eta - eta_min) / (eta_max -  eta_min));
+    red = std::abs(1.0 - (chi / chi_max2));
+    blue = std::abs((eta - eta_min) / (eta_max -  eta_min));
     green = 1.0 - blue;
 
     blue = blue * (chi / chi_max2);
@@ -368,7 +369,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     }
 
     //  Convert RGB tuple to scalar and return integer value
-    RGBint = (round(RGB[0] * 255) * std::pow( 256.0, 2)) + (round (RGB[1] * 255) * 256) + round (RGB[2] *255);
+    RGBint = (round(RGB[0] * 255) * std::pow( 256.0, 2)) + (MathUtils::round(RGB[1] * 255) * 256) + MathUtils::round(RGB[2] *255);
   }
   return RGBint;
 }
