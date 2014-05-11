@@ -15,7 +15,7 @@ template<>
 InputParameters validParams<RichardsPlotQuantity>();
 
 /**
- * Just extracts the value from RichardsTotalOutflowMass
+ * Extracts the value from RichardsSumQuantity userobject
  */
 class RichardsPlotQuantity : public GeneralPostprocessor
 {
@@ -25,9 +25,13 @@ public:
 
   virtual void initialize();
   virtual void execute();
+
+  /// returns the value of the RichardsSumQuantity
   virtual PostprocessorValue getValue();
 
 protected:
+
+  /// the RichardsSumQuantity userobject
   const RichardsSumQuantity & _total_mass;
 };
 

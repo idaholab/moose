@@ -14,6 +14,12 @@ class Grad2ParsedFunction;
 template<>
 InputParameters validParams<Grad2ParsedFunction>();
 
+/**
+ * returns the central difference approx to the derivative (direction.nabla)^2 function
+ * viz
+ * (f(t, p + direction) - 2*f(t, p) + f(t, p - direction))/|direction|^2
+ * This derives from MooseParsedFunction, so it already knows about a function
+ */
 class Grad2ParsedFunction :
   public MooseParsedFunction
 {
@@ -25,7 +31,10 @@ public:
 
 protected:
 
+  /// central difference direction
   RealVectorValue _direction;
+
+  /// |_direction|^2
   Real _len2;
 
 };

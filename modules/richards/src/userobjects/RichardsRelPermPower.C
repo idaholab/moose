@@ -11,8 +11,8 @@ template<>
 InputParameters validParams<RichardsRelPermPower>()
 {
   InputParameters params = validParams<RichardsRelPerm>();
-  params.addRequiredParam<Real>("simm", "Immobile saturation.  Must be between 0 and 1.   Define s = (seff - simm)/(1 - simm).  Then relperm = (n+1)s^n - ns^(n+1)");
-  params.addRequiredParam<Real>("n", "Exponent.  Must be >= 2.   Define s = (seff - simm)/(1 - simm).  Then relperm = (n+1)s^n - ns^(n+1)");
+  params.addRequiredRangeCheckedParam<Real>("simm", "simm >= 0 & simm < 1", "Immobile saturation.  Must be between 0 and 1.   Define s = (seff - simm)/(1 - simm).  Then relperm = (n+1)s^n - ns^(n+1)");
+  params.addRequiredRangeCheckedParam<Real>("n", "n >= 2", "Exponent.  Must be >= 2.   Define s = (seff - simm)/(1 - simm).  Then relperm = (n+1)s^n - ns^(n+1)");
   params.addClassDescription("Power form of relative permeability.  Define s = (seff - simm)/(1 - simm).  Then relperm = (n+1)s^n - ns^(n+1) if s<simm, otherwise relperm=1");
   return params;
 }
@@ -22,10 +22,6 @@ RichardsRelPermPower::RichardsRelPermPower(const std::string & name, InputParame
   _simm(getParam<Real>("simm")),
   _n(getParam<Real>("n"))
 {
-  if (_simm < 0 || _simm > 1)
-    mooseError("Immobile saturation set to " << _simm << " in relative permeability function but it must not be less than zero or greater than 1");
-  if (_n < 2)
-    mooseError("The exponent, n, in the power relative permeability function is set to " << _n << " but it must not be less than 2");
 }
 
 

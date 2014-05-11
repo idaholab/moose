@@ -60,9 +60,6 @@
 // Indicators
 #include "RichardsFluxJumpIndicator.h"
 
-// Markers
-#include "OrientedBoxMarkerDepr.h"
-
 // Postprocessors
 #include "RichardsMass.h"
 #include "RichardsPiecewiseLinearSinkFlux.h"
@@ -70,9 +67,6 @@
 #include "NodalMaxVarChange.h"
 #include "RichardsExcavFlow.h"
 #include "RichardsPlotQuantity.h"
-
-// TimeSteppers
-#include "FunctionControlledDT.h"
 
 // Kernels
 #include "RichardsMassChange.h"
@@ -173,9 +167,6 @@ RichardsApp::registerObjects(Factory & factory)
   // Indicators
   registerIndicator(RichardsFluxJumpIndicator);
 
-  // Markers
-  registerMarker(OrientedBoxMarkerDepr);
-
   // Postprocessors
   registerPostprocessor(RichardsMass);
   registerPostprocessor(RichardsPiecewiseLinearSinkFlux);
@@ -183,9 +174,6 @@ RichardsApp::registerObjects(Factory & factory)
   registerPostprocessor(NodalMaxVarChange);
   registerPostprocessor(RichardsExcavFlow);
   registerPostprocessor(RichardsPlotQuantity);
-
-  // TimeSteppers
-  registerTimeStepper(FunctionControlledDT);
 
   // Kernels
   registerKernel(RichardsMassChange);

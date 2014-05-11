@@ -26,14 +26,10 @@ RichardsSeffPrimeAux::RichardsSeffPrimeAux(const std::string & name, InputParame
   int n = coupledComponents("pressure_vars");
   if (_wrt1 < 0 || _wrt1 >= n)
     mooseError("Your wrtnum is " << _wrt1 << " but it must obey 0 <= wrtnum < " << n << ".");
-  _pressure_vars.resize(n);
   _pressure_vals.resize(n);
 
   for (int i=0 ; i<n; ++i)
-    {
-      _pressure_vars[i] = coupled("pressure_vars", i);
-      _pressure_vals[i] = &coupledValue("pressure_vars", i);
-    }
+    _pressure_vals[i] = &coupledValue("pressure_vars", i);
 }
 
 
