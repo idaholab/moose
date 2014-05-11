@@ -179,6 +179,7 @@
 #include "ConstantVectorPostprocessor.h"
 #include "NodalValueSampler.h"
 #include "SideValueSampler.h"
+#include "PointValueSampler.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -514,6 +515,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(ConstantVectorPostprocessor);
   registerVectorPostprocessor(NodalValueSampler);
   registerVectorPostprocessor(SideValueSampler);
+  registerVectorPostprocessor(PointValueSampler);
 
   // user objects
   registerUserObject(LayeredIntegral);
