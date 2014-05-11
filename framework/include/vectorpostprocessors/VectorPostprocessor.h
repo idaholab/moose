@@ -24,6 +24,8 @@
 // libMesh
 #include "libmesh/parallel.h"
 
+class SamplerBase;
+
 class VectorPostprocessor;
 
 template<>
@@ -66,6 +68,8 @@ protected:
 
   /// The VectorPostprocessorData backend that is holding the vectors for this object...
   VectorPostprocessorData & _vpp_data;
+
+  friend class SamplerBase;
 };
 
 #endif

@@ -16,6 +16,7 @@
 #define NODALVALUES_H
 
 #include "NodalVariableVectorPostprocessor.h"
+#include "SamplerBase.h"
 
 //Forward Declarations
 class NodalValueSampler;
@@ -23,7 +24,9 @@ class NodalValueSampler;
 template<>
 InputParameters validParams<NodalValueSampler>();
 
-class NodalValueSampler : public NodalVariableVectorPostprocessor
+class NodalValueSampler :
+  public NodalVariableVectorPostprocessor,
+  protected SamplerBase
 {
 public:
   NodalValueSampler(const std::string & name, InputParameters parameters);
@@ -37,31 +40,8 @@ public:
   virtual void threadJoin(const UserObject & y);
 
 protected:
-  unsigned int _sort_by;
-
-  /// x coordinate of the points
-  VectorPostprocessorValue & _x;
-  /// y coordinate of the points
-  VectorPostprocessorValue & _y;
-  /// x coordinate of the points
-  VectorPostprocessorValue & _z;
-
-  /// The node ID of each point
-  VectorPostprocessorValue & _id;
-
-  std::vector<VectorPostprocessorValue *> _values;
-
-  /// x coordinate of the points
-  VectorPostprocessorValue _x_tmp;
-  /// y coordinate of the points
-  VectorPostprocessorValue _y_tmp;
-  /// x coordinate of the points
-  VectorPostprocessorValue _z_tmp;
-
-  /// The node ID of each point
-  VectorPostprocessorValue _id_tmp;
-
-  std::vector<VectorPostprocessorValue> _values_tmp;
+  /// So we don't have to create and destroy this vector over and over again
+  std::vector<Real> _values;
 };
 
 #endif
