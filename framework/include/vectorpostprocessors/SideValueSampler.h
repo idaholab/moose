@@ -12,26 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef NODALVALUESAMPLER_H
-#define NODALVALUESAMPLER_H
+#ifndef SIDEVALUESAMPLER_H
+#define SIDEVALUESAMPLER_H
 
-#include "NodalVariableVectorPostprocessor.h"
+#include "SideVectorPostprocessor.h"
 #include "SamplerBase.h"
 
 //Forward Declarations
-class NodalValueSampler;
+class SideValueSampler;
 
 template<>
-InputParameters validParams<NodalValueSampler>();
+InputParameters validParams<SideValueSampler>();
 
-class NodalValueSampler :
-  public NodalVariableVectorPostprocessor,
+class SideValueSampler :
+  public SideVectorPostprocessor,
   protected SamplerBase
 {
 public:
-  NodalValueSampler(const std::string & name, InputParameters parameters);
+  SideValueSampler(const std::string & name, InputParameters parameters);
 
-  virtual ~NodalValueSampler() {}
+  virtual ~SideValueSampler() {}
 
   virtual void initialize();
   virtual void execute();
@@ -42,6 +42,8 @@ public:
 protected:
   /// So we don't have to create and destroy this vector over and over again
   std::vector<Real> _values;
+
+  unsigned int _qp;
 };
 
 #endif

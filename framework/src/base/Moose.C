@@ -178,6 +178,7 @@
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
 #include "NodalValueSampler.h"
+#include "SideValueSampler.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -512,6 +513,7 @@ registerObjects(Factory & factory)
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
   registerVectorPostprocessor(NodalValueSampler);
+  registerVectorPostprocessor(SideValueSampler);
 
   // user objects
   registerUserObject(LayeredIntegral);
