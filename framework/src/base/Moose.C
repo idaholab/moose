@@ -180,6 +180,7 @@
 #include "NodalValueSampler.h"
 #include "SideValueSampler.h"
 #include "PointValueSampler.h"
+#include "LineValueSampler.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -516,6 +517,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(NodalValueSampler);
   registerVectorPostprocessor(SideValueSampler);
   registerVectorPostprocessor(PointValueSampler);
+  registerVectorPostprocessor(LineValueSampler);
 
   // user objects
   registerUserObject(LayeredIntegral);

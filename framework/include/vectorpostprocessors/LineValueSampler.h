@@ -12,24 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef POINTVALUESAMPLER_H
-#define POINTVALUESAMPLER_H
+#ifndef LINEVALUESAMPLER_H
+#define LINEVALUESAMPLER_H
 
 #include "GeneralVectorPostprocessor.h"
 #include "PointSamplerBase.h"
 
 //Forward Declarations
-class PointValueSampler;
+class LineValueSampler;
 
 template<>
-InputParameters validParams<PointValueSampler>();
+InputParameters validParams<LineValueSampler>();
 
-class PointValueSampler : public PointSamplerBase
+class LineValueSampler : public PointSamplerBase
 {
 public:
-  PointValueSampler(const std::string & name, InputParameters parameters);
+  LineValueSampler(const std::string & name, InputParameters parameters);
 
-  virtual ~PointValueSampler() {}
+  virtual ~LineValueSampler() {}
 };
 
 #endif

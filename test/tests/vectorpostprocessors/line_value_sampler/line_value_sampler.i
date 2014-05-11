@@ -51,11 +51,13 @@
 []
 
 [VectorPostprocessors]
-  [./point_sample]
-    type = PointValueSampler
+  [./line_sample]
+    type = LineValueSampler
     variable = 'u v'
-    points = '0.1 0.1 0  0.23 0.4 0  0.78 0.2 0'
-    sort_by = x
+    start_point = '0 0.5 0'
+    end_point = '1 0.5 0'
+    num_points = 11
+    sort_by = id
   [../]
 []
 
