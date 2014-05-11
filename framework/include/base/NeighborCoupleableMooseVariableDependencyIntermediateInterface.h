@@ -31,8 +31,8 @@ class NeighborCoupleableMooseVariableDependencyIntermediateInterface :
   public MooseVariableDependencyInterface
 {
 public:
-  NeighborCoupleableMooseVariableDependencyIntermediateInterface(InputParameters & parameters, bool nodal) :
-    NeighborCoupleable(parameters, nodal),
+  NeighborCoupleableMooseVariableDependencyIntermediateInterface(InputParameters & parameters, bool nodal, bool neighbor_nodal) :
+    NeighborCoupleable(parameters, nodal, neighbor_nodal),
     ScalarCoupleable(parameters),
     NeighborMooseVariableInterface(parameters, nodal)
   {

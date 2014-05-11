@@ -43,7 +43,7 @@ InputParameters validParams<InternalSideIndicator>()
 
 InternalSideIndicator::InternalSideIndicator(const std::string & name, InputParameters parameters) :
     Indicator(name, parameters),
-    NeighborCoupleable(parameters, false),
+    NeighborCoupleable(parameters, false, false),
     ScalarCoupleable(parameters),
     NeighborMooseVariableInterface(parameters, false),
     TwoMaterialPropertyInterface(parameters),

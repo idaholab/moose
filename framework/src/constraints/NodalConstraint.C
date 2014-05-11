@@ -25,7 +25,7 @@ InputParameters validParams<NodalConstraint>()
 
 NodalConstraint::NodalConstraint(const std::string & name, InputParameters parameters) :
     Constraint(name, parameters),
-    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, true, true),
     _master_node_id(getParam<unsigned int>("master")),
     _master_node(_assembly.node()),
     _slave_node(_assembly.nodeNeighbor()),

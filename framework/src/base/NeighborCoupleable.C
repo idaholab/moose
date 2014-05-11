@@ -18,8 +18,9 @@
 #include "FEProblem.h"
 
 
-NeighborCoupleable::NeighborCoupleable(InputParameters & parameters, bool nodal) :
-    Coupleable(parameters, nodal)
+NeighborCoupleable::NeighborCoupleable(InputParameters & parameters, bool nodal, bool neighbor_nodal) :
+    Coupleable(parameters, nodal),
+    _neighbor_nodal(neighbor_nodal)
 {
 }
 
@@ -31,7 +32,7 @@ VariableValue &
 NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);
-  if (_nodal)
+  if (_neighbor_nodal)
     return (_c_is_implicit) ? var->nodalSlnNeighbor() : var->nodalSlnOldNeighbor();
   else
     return (_c_is_implicit) ? var->slnNeighbor() : var->slnOldNeighbor();
@@ -43,7 +44,7 @@ NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsign
   validateExecutionerType(var_name);
 
   MooseVariable * var = getVar(var_name, comp);
-  if (_nodal)
+  if (_neighbor_nodal)
     return (_c_is_implicit) ? var->nodalSlnOldNeighbor() : var->nodalSlnOlderNeighbor();
   else
     return (_c_is_implicit) ? var->slnOldNeighbor() : var->slnOlderNeighbor();
@@ -55,7 +56,7 @@ NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsi
   validateExecutionerType(var_name);
 
   MooseVariable * var = getVar(var_name, comp);
-  if (_nodal)
+  if (_neighbor_nodal)
   {
     if (_c_is_implicit)
       return var->nodalSlnOlderNeighbor();
@@ -74,7 +75,7 @@ NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsi
 VariableGradient &
 NeighborCoupleable::coupledNeighborGradient(const std::string & var_name, unsigned int comp)
 {
-  if (_nodal)
+  if (_neighbor_nodal)
     mooseError("Nodal variables do not have gradients");
 
   MooseVariable * var = getVar(var_name, comp);
@@ -84,7 +85,7 @@ NeighborCoupleable::coupledNeighborGradient(const std::string & var_name, unsign
 VariableGradient &
 NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name, unsigned int comp)
 {
-  if (_nodal)
+  if (_neighbor_nodal)
     mooseError("Nodal variables do not have gradients");
 
   validateExecutionerType(var_name);
@@ -95,7 +96,7 @@ NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name, uns
 VariableGradient &
 NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp)
 {
-  if (_nodal)
+  if (_neighbor_nodal)
     mooseError("Nodal variables do not have gradients");
 
   validateExecutionerType(var_name);
@@ -109,7 +110,7 @@ NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name, u
 VariableSecond &
 NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned int comp)
 {
-  if (_nodal)
+  if (_neighbor_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
   MooseVariable * var = getVar(var_name, comp);
