@@ -44,6 +44,7 @@
   [./contact_x]
     type = MultiDContactConstraint
     variable = disp_x
+    master_variable = disp_x
     component = 0
     slave = 2
     master = 3
@@ -55,6 +56,7 @@
   [./contact_y]
     type = MultiDContactConstraint
     variable = disp_y
+    master_variable = disp_y
     component = 1
     slave = 2
     master = 3

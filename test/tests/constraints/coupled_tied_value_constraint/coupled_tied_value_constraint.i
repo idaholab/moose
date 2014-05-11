@@ -1,29 +1,32 @@
-# [Debug]
-# show_top_residuals = 5
-# []
-
 [Mesh]
   type = FileMesh
-  file = constraint_test.e
+  file = split_blocks.e
 []
 
 [Variables]
   [./u]
-    order = FIRST
-    family = LAGRANGE
+    block = left
+  [../]
+  [./v]
+    block = right
   [../]
 []
 
 [Kernels]
-  # active = 'diff'
-  [./diff]
+  [./diff_u]
     type = Diffusion
     variable = u
+    block = left
+  [../]
+  [./diff_v]
+    type = Diffusion
+    variable = v
+    block = right
   [../]
 []
 
 [BCs]
-  # active = 'left right'
+  active = 'right left'
   [./left]
     type = DirichletBC
     variable = u
@@ -32,7 +35,7 @@
   [../]
   [./right]
     type = DirichletBC
-    variable = u
+    variable = v
     boundary = 4
     value = 1
   [../]
@@ -40,32 +43,27 @@
 
 [Constraints]
   [./value]
-    type = TiedValueConstraint
+    type = CoupledTiedValueConstraint
     variable = u
     slave = 2
     master = 3
-    master_variable = u
+    master_variable = v
   [../]
 []
 
 [Preconditioning]
-  # active = 'FDP'
-  active = ''
-  [./FDP]
-    # full = true
-    # off_diag_row    = 'v'
-    # off_diag_column = 'u'
-    type = FDP
+  active = 'SMP'
+  [./SMP]
+    type = SMP
+    full = true
   [../]
 []
 
 [Executioner]
-  # l_tol = 1e-1
-  # l_tol = 1e-
-  # nl_rel_tol = 1e-14
   type = Steady
   solve_type = NEWTON
   l_max_its = 100
+  nl_max_its = 2
 []
 
 [Outputs]
@@ -75,6 +73,6 @@
   [./console]
     type = Console
     perf_log = true
+    linear_residuals = true
   [../]
 []
-

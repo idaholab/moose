@@ -49,7 +49,7 @@ DGKernel::DGKernel(const std::string & name, InputParameters parameters) :
     TransientInterface(parameters, name, "dgkernels"),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, false, false),
     TwoMaterialPropertyInterface(parameters),
     Restartable(name, parameters, "DGKernels"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

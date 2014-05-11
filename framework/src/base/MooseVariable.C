@@ -190,7 +190,10 @@ MooseVariable::reinitNode()
     _is_defined = true;
   }
   else
+  {
+    _dof_indices.clear(); // Clear these so Assembly doesn't think there's dofs here
     _is_defined = false;
+  }
 }
 
 void
@@ -204,7 +207,10 @@ MooseVariable::reinitNodeNeighbor()
     _is_defined_neighbor = true;
   }
   else
+  {
+    _dof_indices_neighbor.clear(); // Clear these so Assembly doesn't think there's dofs here
     _is_defined_neighbor = false;
+  }
 }
 
 void

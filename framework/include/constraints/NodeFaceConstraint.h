@@ -18,6 +18,7 @@
 //MOOSE includes
 #include "Constraint.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TransientInterface.h"
 #include "GeometricSearchInterface.h"
 
@@ -41,7 +42,7 @@ InputParameters validParams<NodeFaceConstraint>();
  */
 class NodeFaceConstraint :
   public Constraint,
-  public CoupleableMooseVariableDependencyIntermediateInterface
+  public NeighborCoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   NodeFaceConstraint(const std::string & name, InputParameters parameters);
@@ -63,9 +64,14 @@ public:
   virtual void computeJacobian();
 
   /**
+   * Computes d-residual / d-jvar...
+   */
+  virtual void computeOffDiagJacobian(unsigned int jvar);
+
+  /**
    * Gets the indices for all dofs connected to the constraint
    */
-  virtual void getConnectedDofIndices();
+  virtual void getConnectedDofIndices(unsigned int var_num);
 
   /**
    * Compute the value the slave node should have at the beginning of a timestep.
@@ -81,6 +87,11 @@ public:
    * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) = 0;
+
+  /**
+   * This is the virtual that derived classes should override for computing the off-diag Jacobian.
+   */
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned int jvar) { return 0; };
 
   /**
    * Whether or not this constraint should be applied.
@@ -105,11 +116,40 @@ public:
    */
   virtual bool overwriteSlaveJacobian(){return overwriteSlaveResidual();};
 
+  /**
+   * The variable on the Master side of the domain.
+   */
+  virtual MooseVariable & masterVariable() { return _master_var; }
+
   // TODO: Make this protected or add an accessor
   // Do the same for all the other public members
   SparseMatrix<Number> * _jacobian;
 
 protected:
+  /// coupling interface:
+
+  virtual VariableValue & coupledSlaveValue(const std::string & var_name, unsigned int comp = 0) { return coupledValue(var_name, comp); }
+  virtual VariableValue & coupledSlaveValueOld(const std::string & var_name, unsigned int comp = 0){ return coupledValueOld(var_name, comp); }
+  virtual VariableValue & coupledSlaveValueOlder(const std::string & var_name, unsigned int comp = 0){ return coupledValueOlder(var_name, comp); }
+
+  virtual VariableGradient & coupledSlaveGradient(const std::string & var_name, unsigned int comp = 0){ return coupledGradient(var_name, comp); }
+  virtual VariableGradient & coupledSlaveGradientOld(const std::string & var_name, unsigned int comp = 0){ return coupledGradientOld(var_name, comp); }
+  virtual VariableGradient & coupledSlaveGradientOlder(const std::string & var_name, unsigned int comp = 0){ return coupledGradientOlder(var_name, comp); }
+
+  virtual VariableSecond & coupledSlaveSecond(const std::string & var_name, unsigned int comp = 0){ return coupledSecond(var_name, comp); }
+
+
+  virtual VariableValue & coupledMasterValue(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValue(var_name, comp); }
+  virtual VariableValue & coupledMasterValueOld(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValueOld(var_name, comp); }
+  virtual VariableValue & coupledMasterValueOlder(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValueOlder(var_name, comp); }
+
+  virtual VariableGradient & coupledMasterGradient(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradient(var_name, comp); }
+  virtual VariableGradient & coupledMasterGradientOld(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradientOld(var_name, comp); }
+  virtual VariableGradient & coupledMasterGradientOlder(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradientOlder(var_name, comp); }
+
+  virtual VariableSecond & coupledMasterSecond(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborSecond(var_name, comp); }
+
+
   /// Boundary ID for the slave surface
   unsigned int _slave;
   /// Boundary ID for the master surface
@@ -133,6 +173,12 @@ protected:
   VariablePhiValue _phi_slave;
   /// Shape function on the slave side.  This will always only have one entry and that entry will always be "1"
   VariableTestValue _test_slave;
+
+  /// Master side variable
+  MooseVariable & _master_var;
+
+  /// Number for the master variable
+  unsigned int _master_var_num;
 
   /// Side shape function.
   const VariablePhiValue & _phi_master;

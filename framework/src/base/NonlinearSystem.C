@@ -1027,9 +1027,12 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
             const Elem * master_elem = info._elem;
             unsigned int master_side = info._side_num;
 
-            // reinit variables at the node
+            // *These next steps MUST be done in this order!*
+
+            // This reinits the variables that exist on the slave node
             _fe_problem.reinitNodeFace(&slave_node, slave_boundary, 0);
 
+            // This will set aside residual and jacobian space for the variables that have dofs on the slave node
             _fe_problem.prepareAssembly(0);
 
             std::vector<Point> points;
@@ -1052,7 +1055,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
                 else
                   _fe_problem.cacheResidual(0);
                 _fe_problem.cacheResidualNeighbor(0);
-             }
+              }
             }
           }
         }
@@ -1478,10 +1481,42 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
                 _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
                 // Cache the jacobian block for the master side
-                _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne, nfc->variable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
+                _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne, nfc->masterVariable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
                 _fe_problem.cacheJacobian(0);
                 _fe_problem.cacheJacobianNeighbor(0);
+
+                // Do the off-diagonals next
+                const std::vector<MooseVariable *> coupled_vars = nfc->getCoupledMooseVars();
+                for (std::vector<MooseVariable *>::const_iterator jt = coupled_vars.begin(); jt != coupled_vars.end(); jt++)
+                {
+                  MooseVariable & jvar = *(*jt);
+
+                  // Only compute jacobians for nonlinear variables
+                  if(jvar.kind() != Moose::VAR_NONLINEAR)
+                    continue;
+
+                  // Only compute Jacobian entries if this coupling is being used by the preconditioner
+                  if(!_fe_problem.areCoupled(nfc->variable().number(), jvar.number()))
+                    continue;
+
+                  // Need to zero out the matrices first
+                  _fe_problem.prepareAssembly(0);
+
+                  nfc->subProblem().prepareShapes(nfc->variable().number(), 0);
+                  nfc->subProblem().prepareNeighborShapes(jvar.number(), 0);
+
+                  nfc->computeOffDiagJacobian(jvar.number());
+
+                  // Cache the jacobian block for the slave side
+                  _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, nfc->variable().scalingFactor());
+
+                  // Cache the jacobian block for the master side
+                  _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne, nfc->variable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
+
+                  _fe_problem.cacheJacobian(0);
+                  _fe_problem.cacheJacobianNeighbor(0);
+                }
               }
             }
           }

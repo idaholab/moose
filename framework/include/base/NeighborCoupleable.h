@@ -32,7 +32,7 @@ public:
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if we need to couple with nodal values, otherwise false
    */
-  NeighborCoupleable(InputParameters & parameters, bool nodal);
+  NeighborCoupleable(InputParameters & parameters, bool nodal, bool neighbor_nodal);
 
   virtual ~NeighborCoupleable();
 
@@ -46,6 +46,9 @@ public:
   virtual VariableGradient & coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
   virtual VariableSecond & coupledNeighborSecond(const std::string & var_name, unsigned int i = 0);
+
+protected:
+  bool _neighbor_nodal;
 };
 
 #endif /* NEIGHBORCOUPLEABLE_H */

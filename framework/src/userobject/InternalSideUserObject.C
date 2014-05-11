@@ -27,7 +27,7 @@ InternalSideUserObject::InternalSideUserObject(const std::string & name, InputPa
     UserObject(name, parameters),
     BlockRestrictable(name, parameters),
     MaterialPropertyInterface(parameters),
-    NeighborCoupleable(parameters, false),
+    NeighborCoupleable(parameters, false, false),
     MooseVariableDependencyInterface(),
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "internal_side_user_object"),
