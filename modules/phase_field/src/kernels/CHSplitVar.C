@@ -9,10 +9,10 @@ InputParameters validParams<CHSplitVar>()
   return params;
 }
 
-CHSplitVar::CHSplitVar(const std::string & name, InputParameters parameters)
-  :KernelGrad(name, parameters),
-   _var_c(coupled("c")),
-   _grad_c(coupledGradient("c"))
+CHSplitVar::CHSplitVar(const std::string & name, InputParameters parameters) :
+    KernelGrad(name, parameters),
+    _var_c(coupled("c")),
+    _grad_c(coupledGradient("c"))
 {
 }
 
