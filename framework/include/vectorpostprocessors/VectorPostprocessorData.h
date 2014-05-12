@@ -38,7 +38,7 @@ public:
    * @param vpp_name The name of the VectorPostprocessor
    * @param vector_name The name of the vector
    */
-  VectorPostprocessorValue & registerVector(const std::string & vpp_name, const std::string & vector_name);
+  VectorPostprocessorValue & declareVector(const std::string & vpp_name, const std::string & vector_name);
 
   /**
    * Returns a true value if the VectorPostprocessor exists

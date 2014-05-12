@@ -47,7 +47,7 @@ VectorPostprocessor::getVector(const std::string & vector_name)
 }
 
 VectorPostprocessorValue &
-VectorPostprocessor::registerVector(const std::string & vector_name)
+VectorPostprocessor::declareVector(const std::string & vector_name)
 {
-  return _vpp_data.registerVector(_vpp_name, vector_name);
+  return _vpp_data.declareVector(_vpp_name, vector_name);
 }

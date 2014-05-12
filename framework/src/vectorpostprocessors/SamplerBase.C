@@ -30,10 +30,10 @@ SamplerBase::SamplerBase(const std::string & name, InputParameters parameters, V
     _vpp(vpp),
     _comm(comm),
     _sort_by(parameters.get<MooseEnum>("sort_by")),
-    _x(vpp->registerVector("x")),
-    _y(vpp->registerVector("y")),
-    _z(vpp->registerVector("z")),
-    _id(vpp->registerVector("id"))
+    _x(vpp->declareVector("x")),
+    _y(vpp->declareVector("y")),
+    _z(vpp->declareVector("z")),
+    _id(vpp->declareVector("id"))
 {
 }
 
@@ -46,7 +46,7 @@ SamplerBase::setupVariables(std::vector<std::string> variable_names)
   _values_tmp.resize(variable_names.size());
 
   for (unsigned int i=0; i<variable_names.size(); i++)
-    _values[i] = &_vpp->registerVector(variable_names[i]);
+    _values[i] = &_vpp->declareVector(variable_names[i]);
 }
 
 void

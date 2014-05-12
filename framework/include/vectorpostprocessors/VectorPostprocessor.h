@@ -59,7 +59,7 @@ protected:
   /**
    * Register a new vector to fill up.
    */
-  VectorPostprocessorValue & registerVector(const std::string & vector_name);
+  VectorPostprocessorValue & declareVector(const std::string & vector_name);
 
   std::string _vpp_name;
 

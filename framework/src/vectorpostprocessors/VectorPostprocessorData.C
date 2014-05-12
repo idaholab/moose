@@ -50,7 +50,7 @@ VectorPostprocessorData::getVectorPostprocessorValueOld(const VectorPostprocesso
 
 
 VectorPostprocessorValue &
-VectorPostprocessorData::registerVector(const std::string & vpp_name, const std::string & vector_name)
+VectorPostprocessorData::declareVector(const std::string & vpp_name, const std::string & vector_name)
 {
 
   getVectorPostprocessorValueOld(vpp_name, vector_name);

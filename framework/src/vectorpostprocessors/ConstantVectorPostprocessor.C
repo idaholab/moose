@@ -25,7 +25,7 @@ InputParameters validParams<ConstantVectorPostprocessor>()
 
 ConstantVectorPostprocessor::ConstantVectorPostprocessor(const std::string & name, InputParameters parameters) :
     GeneralVectorPostprocessor(name, parameters),
-    _value(registerVector("value"))
+    _value(declareVector("value"))
 {
   _value = getParam<VectorPostprocessorValue>("value");
 }
