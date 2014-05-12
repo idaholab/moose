@@ -67,9 +67,8 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
         _problem.reinitMaterialsBoundary(boundary_id, _tid);
 
         const std::vector<AuxKernel*> & bcs = _auxs[_tid].elementalBCs(boundary_id);
-        for (std::vector<AuxKernel*>::const_iterator element_bc_it = bcs.begin();
-            element_bc_it != bcs.end(); ++element_bc_it)
-          (*element_bc_it)->compute();
+        for (std::vector<AuxKernel*>::const_iterator element_bc_it = bcs.begin(); element_bc_it != bcs.end(); ++element_bc_it)
+            (*element_bc_it)->compute();
 
         _problem.swapBackMaterialsFace(_tid);
       }

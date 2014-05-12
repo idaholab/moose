@@ -10,6 +10,29 @@
   [../]
 []
 
+[AuxVariables]
+  [./real_property]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
+[AuxBCs]
+  [./real_property]
+    type = MaterialRealAux
+    variable = real_property
+    property = real_property
+    boundary = '1 2'
+  [../]
+[]
+
+[Functions]
+  [./func]
+    type = ParsedFunction
+    value = x*y+t
+  [../]
+[]
+
 [Kernels]
   [./diff]
     type = CoefDiffusion
@@ -38,35 +61,24 @@
 []
 
 [Materials]
-  [./block]
-    type = OutputTestMaterial
-    block = '1 2'
-    output_properties = tensor_property
-    variable = u
-    outputs = exodus
-  [../]
   [./boundary_1]
     type = OutputTestMaterial
     boundary = 1
-    output_properties = real_property
-    outputs = exodus
-    variable = u
     real_factor = 2
+    variable = u
   [../]
   [./boundary_2]
     type = OutputTestMaterial
     boundary = 2
-    output_properties = 'real_property vector_property'
     real_factor = 2
     variable = u
-    outputs = exodus
-  [../]
+ [../]
 []
 
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 5
+  num_steps = 2
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
