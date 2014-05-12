@@ -32,6 +32,8 @@ InputParameters validParams<Exodus>()
   // Add description for the Exodus class
   params.addClassDescription("Object for output data in the Exodus II format");
 
+  params.suppressParameter<bool>("output_vector_postprocessors");
+
   // Return the InputParameters
   return params;
 }

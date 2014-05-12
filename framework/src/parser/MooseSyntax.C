@@ -81,6 +81,8 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("SetupPostprocessorDataAction", "Postprocessors/*");
   syntax.registerActionSyntax("AddPostprocessorAction", "Postprocessors/*");
 
+  syntax.registerActionSyntax("AddVectorPostprocessorAction", "VectorPostprocessors/*");
+
   syntax.registerActionSyntax("AddDamperAction", "Dampers/*");
 
   syntax.registerActionSyntax("AddOutputAction", "Outputs/*");

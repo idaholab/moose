@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'line_value_sampler.i'
+    csvdiff = 'line_value_sampler_out_line_sample_0001.csv'
+  [../]
+[]

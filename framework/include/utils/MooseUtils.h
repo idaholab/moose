@@ -18,6 +18,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <algorithm>
 
 #include "XTermConstants.h"
 
@@ -112,7 +113,6 @@ namespace MooseUtils
     // Return string
     return oss.str();
   }
-
 }
 
 #endif //MOOSEUTILS_H

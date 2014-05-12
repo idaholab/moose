@@ -36,8 +36,8 @@ public:
     infix_ostream_iterator(ostream_type& s)
         : os(&s),delimiter(0), first_elem(true)
     {}
-    infix_ostream_iterator(ostream_type& s, charT const *d)
-        : os(&s),delimiter(d), first_elem(true)
+    infix_ostream_iterator(ostream_type& s, charT const *d, bool first=true)
+        : os(&s),delimiter(d), first_elem(first)
     {}
     infix_ostream_iterator<T,charT,traits>& operator=(T const &item)
     {

@@ -14,6 +14,7 @@
 
 #include "FormattedTable.h"
 #include "MooseError.h"
+#include "InfixIterator.h"
 
 #include <iomanip>
 #include <iterator>
@@ -54,13 +55,15 @@ dataLoad(std::istream & stream, FormattedTable & table, void * context)
 
 FormattedTable::FormattedTable() :
     _stream_open(false),
-    _last_key(-1)
+    _last_key(-1),
+    _output_time(true)
 {}
 
 FormattedTable::FormattedTable(const FormattedTable &o) :
     _column_names(o._column_names),
     _stream_open(o._stream_open),
-    _last_key(o._last_key)
+    _last_key(o._last_key),
+    _output_time(o._output_time)
 {
   if (_stream_open)
     mooseError ("Copying a FormattedTable with an open stream is not supported");
@@ -265,11 +268,20 @@ FormattedTable::printCSV(const std::string & file_name, int interval)
   }
 
   _output_file.seekp(0, std::ios::beg);
-  _output_file << "time";
-  for (header = _column_names.begin(); header != _column_names.end(); ++header)
-  {
-    _output_file << "," << *header;
+
+
+  { // Output Header
+    bool first = true;
+
+    if (_output_time)
+    {
+      _output_file << "time";
+      first = false;
+    }
+
+    std::copy(_column_names.begin(), _column_names.end(), infix_ostream_iterator<std::string>(_output_file, ",", first));
   }
+
   _output_file << "\n";
 
   int counter = 0;
@@ -277,11 +289,24 @@ FormattedTable::printCSV(const std::string & file_name, int interval)
   {
     if (counter++ % interval == 0)
     {
-      _output_file << i->first;
+      bool first = true;
+
+      if (_output_time)
+      {
+        _output_file << i->first;
+        first = false;
+      }
+
       for (header = _column_names.begin(); header != _column_names.end(); ++header)
       {
         std::map<std::string, Real> &tmp = i->second;
-        _output_file << "," << std::setprecision(14) << tmp[*header];
+
+        if (!first)
+          _output_file << ",";
+        else
+          first = false;
+
+        _output_file<< std::setprecision(14) << tmp[*header];
       }
       _output_file << "\n";
     }

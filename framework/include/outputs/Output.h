@@ -152,6 +152,20 @@ public:
   const std::vector<std::string> & getPostprocessorOutput();
 
   /**
+   * Returns true if there exists VectorPostprocessors for output
+   * @return True if VectorPostprocessor output exists
+   * @see getVectorPostprocessorOutput
+   */
+  bool hasVectorPostprocessorOutput();
+
+  /**
+   * The list of VectorPostprocessor names that are set for output
+   * @return A vector of strings containing the names of the VectorPostprocessor variables for output
+   * @see hasVectorPostprocessorOutput
+   */
+  const std::vector<std::string> & getVectorPostprocessorOutput();
+
+  /**
    * This is called any time that the mesh changes
    * This class simply changes the _mesh_changed member variable to true, which is used by output()
    * to trigger a call of the outputSetup() method.
@@ -222,6 +236,12 @@ protected:
    * @see Exodus::outputPostprocessors
    */
   virtual void outputPostprocessors() = 0;
+
+  /**
+   * Performs output of VectorPostprocessors
+   * The child class must define this method to output the VectorPostprocessors as desired
+   */
+  virtual void outputVectorPostprocessors() = 0;
 
   /**
    * Initial setup function that is called prior to any output
@@ -423,6 +443,9 @@ private:
 
   /// Storage structure for the variable lists for postprocessor output
   OutputData _postprocessor;
+
+  /// Storage structure for the variable lists for vector postprocessor output
+  OutputData _vector_postprocessor;
 
   /// Storage structure for the variable lists for scalar output
   OutputData _scalar;

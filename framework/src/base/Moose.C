@@ -175,6 +175,13 @@
 #include "NodalExtremeValue.h"
 #include "ElementExtremeValue.h"
 
+// vector PPS
+#include "ConstantVectorPostprocessor.h"
+#include "NodalValueSampler.h"
+#include "SideValueSampler.h"
+#include "PointValueSampler.h"
+#include "LineValueSampler.h"
+
 // user objects
 #include "LayeredIntegral.h"
 #include "LayeredAverage.h"
@@ -283,6 +290,7 @@
 #include "AddVariableAction.h"
 #include "AddAuxVariableAction.h"
 #include "AddPostprocessorAction.h"
+#include "AddVectorPostprocessorAction.h"
 #include "AddDamperAction.h"
 #include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
@@ -505,6 +513,13 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalExtremeValue);
   registerPostprocessor(ElementExtremeValue);
 
+  // vector PPS
+  registerVectorPostprocessor(ConstantVectorPostprocessor);
+  registerVectorPostprocessor(NodalValueSampler);
+  registerVectorPostprocessor(SideValueSampler);
+  registerVectorPostprocessor(PointValueSampler);
+  registerVectorPostprocessor(LineValueSampler);
+
   // user objects
   registerUserObject(LayeredIntegral);
   registerUserObject(LayeredAverage);
@@ -681,6 +696,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_user_object",              UserObject,             false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
   registerMooseObjectTask("add_postprocessor",            Postprocessor,          false);
+  registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,    false);
 
   registerMooseObjectTask("add_indicator",                Indicator,              false);
   registerMooseObjectTask("add_marker",                   Marker,                 false);
@@ -790,6 +806,7 @@ addActionTypes(Syntax & syntax)
 "(setup_material_output)"
 "(init_problem)"
 "(add_postprocessor)"
+"(add_vector_postprocessor)"
 "(setup_pps_complete)"
 "(setup_debug)"
 "(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, add_output)"
@@ -883,6 +900,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddBCAction, "add_aux_bc");
   registerAction(AddMaterialAction, "add_material");
   registerAction(AddPostprocessorAction, "add_postprocessor");
+  registerAction(AddVectorPostprocessorAction, "add_vector_postprocessor");
   registerAction(AddDamperAction, "add_damper");
   registerAction(AddSplitAction, "add_split");
   registerAction(SetupPreconditionerAction, "add_preconditioning");

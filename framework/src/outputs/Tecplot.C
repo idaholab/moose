@@ -31,6 +31,7 @@ InputParameters validParams<Tecplot>()
   params.suppressParameter<bool>("output_elemental_variables");
   params.suppressParameter<bool>("output_scalar_variables");
   params.suppressParameter<bool>("output_postprocessors");
+  params.suppressParameter<bool>("output_vector_postprocessors");
   params.suppressParameter<bool>("scalar_as_nodal");
   params.suppressParameter<bool>("sequence");
 
@@ -85,15 +86,11 @@ Tecplot::output()
     _first_time = false;
 }
 
-
-
 void
 Tecplot::outputNodalVariables()
 {
   mooseError("Individual output of nodal variables is not supported for Tecplot output");
 }
-
-
 
 void
 Tecplot::outputElementalVariables()
@@ -101,23 +98,23 @@ Tecplot::outputElementalVariables()
   mooseError("Individual output of elemental variables is not supported for Tecplot output");
 }
 
-
-
 void
 Tecplot::outputPostprocessors()
 {
   mooseError("Individual output of postprocessors is not supported for Tecplot output");
 }
 
-
+void
+Tecplot::outputVectorPostprocessors()
+{
+  mooseError("Individual output of VectorPostprocessors is not supported for Tecplot output");
+}
 
 void
 Tecplot::outputScalarVariables()
 {
   mooseError("Individual output of scalars is not supported for Tecplot output");
 }
-
-
 
 std::string
 Tecplot::filename()

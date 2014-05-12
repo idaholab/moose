@@ -58,6 +58,7 @@ protected:
   virtual void outputNodalVariables();
   virtual void outputElementalVariables();
   virtual void outputPostprocessors();
+  virtual void outputVectorPostprocessors();
   virtual void outputScalarVariables();
   //@}
 

@@ -97,6 +97,11 @@ protected:
   virtual void outputPostprocessors();
 
   /**
+   * Not implemented.
+   */
+  virtual void outputVectorPostprocessors() { mooseError("Can't currently output VectorPostprocessors to the screen"); };
+
+  /**
    * A helper function for outputting norms in color
    * @param old_norm The old residual norm to compare against
    * @param norm The current residual norm

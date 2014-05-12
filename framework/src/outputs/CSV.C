@@ -51,4 +51,22 @@ CSV::output()
   // Print the table containing all the data to a file
   if (!_all_data_table.empty() && processor_id() == 0)
     _all_data_table.printCSV(filename());
+
+  // Output each VectorPostprocessor's data to a file
+  for (std::map<std::string, FormattedTable>::iterator it = _vector_postprocessor_tables.begin(); it != _vector_postprocessor_tables.end(); ++it)
+  {
+    std::ostringstream output;
+    output << _file_base << "_" << it->first;
+
+    output << "_"
+           << std::setw(_padding)
+           << std::setprecision(0)
+           << std::setfill('0')
+           << std::right
+           << _t_step;
+
+    output << ".csv";
+
+    it->second.printCSV(output.str());
+  }
 }

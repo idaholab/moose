@@ -75,8 +75,16 @@ protected:
    */
   virtual void outputPostprocessors();
 
+  /**
+   * Populates the tables with VectorPostprocessor values
+   */
+  virtual void outputVectorPostprocessors();
+
   /// Table containing postprocessor data (restartable)
   FormattedTable & _postprocessor_table;
+
+  /// Formatted tables for outputting vector postprocessor data.  One per VectorPostprocessor
+  std::map<std::string, FormattedTable> _vector_postprocessor_tables;
 
   /// Table containing scalar aux variables (restartable)
   FormattedTable & _scalar_table;

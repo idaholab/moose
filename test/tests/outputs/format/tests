@@ -65,7 +65,7 @@
   [./pps_screen_out_warn_test]
     type = 'RunApp'
     input = 'pps_screen_out_warn.i'
-    expect_out = "A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disable for the 'console' output object."
+    expect_out = "A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the 'console' output object."
   [../]
 
   [./show_input_test]
