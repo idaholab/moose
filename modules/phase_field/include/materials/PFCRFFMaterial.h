@@ -14,7 +14,7 @@ class PFCRFFMaterial : public Material
 public:
   PFCRFFMaterial(const std::string & name,
           InputParameters parameters);
-  
+
 protected:
   virtual void computeQpProperties();
 
@@ -42,7 +42,6 @@ private:
   MaterialProperty<Real> & _A_I_4;
 
   unsigned int _num_L;
-  
 };
 
 #endif //PFCRFFMATERIAL_H

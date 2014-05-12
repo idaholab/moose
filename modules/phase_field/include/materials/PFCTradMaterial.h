@@ -13,8 +13,8 @@ class PFCTradMaterial : public Material
 {
 public:
   PFCTradMaterial(const std::string & name,
-          InputParameters parameters);
-  
+                  InputParameters parameters);
+
 protected:
   virtual void computeQpProperties();
 
@@ -28,7 +28,6 @@ private:
   MaterialProperty<Real> & _C4;
   MaterialProperty<Real> & _C6;
   MaterialProperty<Real> & _C8;
-  
 };
 
 #endif //PFCTRADMATERIAL_H
