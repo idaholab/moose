@@ -57,12 +57,6 @@ RichardsPolyLineSink::RichardsPolyLineSink(const std::string & name, InputParame
   }
 
   file.close();
-
-  // size the array that holds elemental info
-  int num_pts = _zs.size();
-  _elemental_info.resize(num_pts);
-  _have_constructed_elemental_info = false;
-
 }
 
 bool RichardsPolyLineSink::parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
@@ -91,16 +85,23 @@ RichardsPolyLineSink::addPoints()
 {
   _total_outflow_mass.zero();
 
-  if (!_have_constructed_elemental_info || _mesh_adaptivity)
+  if (_mesh_adaptivity)
   {
     for (unsigned int i = 0; i < _zs.size(); i++)
-      _elemental_info[i] = addPoint(Point(_xs[i], _ys[i], _zs[i]));
-    _have_constructed_elemental_info = true;
+    {
+      // Add points the slow way (don't attempt caching) when doing mesh adaptivity.
+      const Elem* dirac_elem = addPoint(Point(_xs[i], _ys[i], _zs[i]));
+      if (!dirac_elem)
+        mooseError("RichardsPolyLineSink: the point " << _xs[i] << " " << _ys[i] << " " << _zs[i] << " was not added since it is not in any element");
+    }
   }
   else
   {
+    // Add point using the unique ID "i", let the DiracKernel take
+    // care of the caching.  This should be fast after the first call,
+    // as long as the points don't move around.
     for (unsigned int i = 0; i < _zs.size(); i++)
-      addPoint(_elemental_info[i], Point(_xs[i], _ys[i], _zs[i]));
+      addPoint(Point(_xs[i], _ys[i], _zs[i]), i);
   }
 }
 

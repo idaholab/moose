@@ -127,10 +127,6 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     _rot_matrix[i] = RotationMatrix::rotVecToZ(v2);
   }
 
-  // size the array that holds elemental info
-  _elemental_info.resize(num_pts);
-  _have_constructed_elemental_info = false;
-
   // do debugging if AndyWilkins
   if (_debug_things)
   {
@@ -208,22 +204,24 @@ RichardsBorehole::addPoints()
   // so this is a handy place to zero this out.
   _total_outflow_mass.zero();
 
-  if (!_have_constructed_elemental_info || _mesh_adaptivity)
+  if (_mesh_adaptivity)
   {
     for (unsigned int i = 0; i < _zs.size(); i++)
     {
-      _elemental_info[i] = addPoint(Point(_xs[i], _ys[i], _zs[i]));
-      if (!_elemental_info[i])
+      // Add points the slow way (don't attempt caching) when doing mesh adaptivity.
+      const Elem* dirac_elem = addPoint(Point(_xs[i], _ys[i], _zs[i]));
+      if (!dirac_elem)
         mooseError("RichardsBorehole: the point " << _xs[i] << " " << _ys[i] << " " << _zs[i] << " was not added since it is not in any element");
     }
-    _have_constructed_elemental_info = true;
   }
   else
   {
+    // Add point using the unique ID "i", let the DiracKernel take
+    // care of the caching.  This should be fast after the first call,
+    // as long as the points don't move around.
     for (unsigned int i = 0; i < _zs.size(); i++)
-      addPoint(_elemental_info[i], Point(_xs[i], _ys[i], _zs[i]));
+      addPoint(Point(_xs[i], _ys[i], _zs[i]), i);
   }
-
 }
 
 Real
@@ -385,11 +383,12 @@ RichardsBorehole::computeQpResidual()
 
 
 
+  // Get the ID we initially assigned to this point
+  unsigned current_dirac_ptid = currentPointCachedID();
 
-  // when we can query for the current_dirac_ptid replace this complete bodge:
-  unsigned int current_dirac_ptid = 0;
-  if (_zs.size() > 2)
-    current_dirac_ptid = 1;
+  // If getting the ID failed, fall back to the old bodge!
+  if (current_dirac_ptid == libMesh::invalid_uint)
+    current_dirac_ptid = (_zs.size() > 2) ? 1 : 0;
 
   Real outflow(0.0); // this is the flow rate from porespace out of the system
 
@@ -469,10 +468,12 @@ RichardsBorehole::jac(unsigned int wrt_num)
     phi = 1;
   }
 
-  // when we can query for the current_dirac_ptid replace this complete bodge:
-  unsigned int current_dirac_ptid = 0;
-  if (_zs.size() > 2)
-    current_dirac_ptid = 1;
+  // Get the ID we initially assigned to this point
+  unsigned current_dirac_ptid = currentPointCachedID();
+
+  // If getting the ID failed, fall back to the old bodge!
+  if (current_dirac_ptid == libMesh::invalid_uint)
+    current_dirac_ptid = (_zs.size() > 2) ? 1 : 0;
 
   Real outflowp(0.0);
 

@@ -192,11 +192,8 @@ protected:
   /// rotation matrix used in well_constant calculation
   std::vector<RealTensorValue> _rot_matrix;
 
-  /// the cache of elements containing the Dirac Points
-  std::vector<const Elem *> _elemental_info;
-
-  /// whether _elemental_info has been constructed
-  bool _have_constructed_elemental_info;
+  /// whether using the _dseff_val, _relperm_val, etc (otherwise values from RichardsMaterial are used)
+  bool _using_coupled_vars;
 
   /**
    * Holds the values of pressures at all the nodes of the element

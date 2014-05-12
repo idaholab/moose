@@ -116,7 +116,7 @@ DiracKernel::computeQpJacobian()
 }
 
 void
-DiracKernel::addPoint(const Elem * elem, Point p, unsigned id)
+DiracKernel::addPoint(const Elem * elem, Point p, unsigned /*id*/)
 {
   if (!elem || (elem->processor_id() != processor_id()))
     return;

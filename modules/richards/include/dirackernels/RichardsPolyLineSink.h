@@ -85,13 +85,6 @@ protected:
   /// vector of Dirac Points' z positions
   std::vector<Real> _zs;
 
-  /// the elements that contain the Dirac Points
-  std::vector<const Elem *> _elemental_info;
-
-  /// whether have constructed _elemental_info
-  bool _have_constructed_elemental_info;
-
-
   /**
    * reads a space-separated line of floats from ifs and puts in myvec
    * @param ifs the file stream
