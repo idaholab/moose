@@ -50,7 +50,7 @@ PFCFreezingIC::PFCFreezingIC(const std::string & name,
 {
   std::cout << "MooseEnum? " << _crystal_structure << std::endl;
 
-  for(unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
     mooseAssert(_range(i) >= 0.0, "x1, y1 or z1 is not less than x2, y2 or z2");
 
   MooseRandom::seed(getParam<unsigned int>("seed"));
@@ -67,8 +67,8 @@ Real
 PFCFreezingIC::value(const Point & p)
 {
   //If out of bounds, set random value
-  for(unsigned int i=0; i<LIBMESH_DIM; i++)
-    if(p(i) < _bottom_left(i) || p(i) > _top_right(i))
+  for (unsigned int i=0; i<LIBMESH_DIM; i++)
+    if (p(i) < _bottom_left(i) || p(i) > _top_right(i))
       return _min + _val_range * MooseRandom::rand();
 
   //If in bounds, set sinusoid IC to make atoms

@@ -10,7 +10,7 @@ InputParameters validParams<HHPFCRFF>()
   return params;
 }
 
-HHPFCRFF::HHPFCRFF(const std::string & name, InputParameters parameters):
+HHPFCRFF::HHPFCRFF(const std::string & name, InputParameters parameters) :
     KernelValue(name, parameters),
     _positive(getParam<bool>("positive")),
     _prop_name(getParam<std::string>("prop_name")),
