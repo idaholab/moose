@@ -11,7 +11,6 @@
  * boolean input value given.  This can be extended or simplified to specify HCP, monoclinic,
  * cubic, etc as needed.
  */
-
 class SimpleEigenStrainMaterial : public EigenStrainBaseMaterial
 {
 public:
@@ -24,7 +23,6 @@ protected:
 private:
   Real _epsilon0;
   Real _c0;
-
 };
 
 #endif //SIMPLEEIGENSTRAINMATERIAL_H
