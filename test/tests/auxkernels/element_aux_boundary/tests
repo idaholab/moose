@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'element_aux_boundary.i'
+    exodiff = 'element_aux_boundary_out.e'
+  [../]
+[]
