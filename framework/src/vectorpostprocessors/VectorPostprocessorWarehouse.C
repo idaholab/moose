@@ -37,28 +37,28 @@ VectorPostprocessorWarehouse::~VectorPostprocessorWarehouse()
 void
 VectorPostprocessorWarehouse::initialSetup()
 {
-  for(std::vector<ElementVectorPostprocessor *>::const_iterator i=_all_element_VectorPostprocessors.begin();
+  for (std::vector<ElementVectorPostprocessor *>::const_iterator i=_all_element_VectorPostprocessors.begin();
       i!=_all_element_VectorPostprocessors.end();
       ++i)
     (*i)->initialSetup();
 
-  for(std::vector<NodalVectorPostprocessor *>::const_iterator i=_all_nodal_VectorPostprocessors.begin();
+  for (std::vector<NodalVectorPostprocessor *>::const_iterator i=_all_nodal_VectorPostprocessors.begin();
       i!=_all_nodal_VectorPostprocessors.end();
       ++i)
     (*i)->initialSetup();
 
-  for(std::vector<SideVectorPostprocessor *>::const_iterator i=_all_side_VectorPostprocessors.begin();
+  for (std::vector<SideVectorPostprocessor *>::const_iterator i=_all_side_VectorPostprocessors.begin();
       i!=_all_side_VectorPostprocessors.end();
       ++i)
     (*i)->initialSetup();
 
-  for(std::vector<InternalSideVectorPostprocessor *>::const_iterator i=_all_internal_side_VectorPostprocessors.begin();
+  for (std::vector<InternalSideVectorPostprocessor *>::const_iterator i=_all_internal_side_VectorPostprocessors.begin();
       i!=_all_internal_side_VectorPostprocessors.end();
       ++i)
     (*i)->initialSetup();
 
 
-  for(std::vector<GeneralVectorPostprocessor *>::const_iterator i=_all_generic_VectorPostprocessors.begin();
+  for (std::vector<GeneralVectorPostprocessor *>::const_iterator i=_all_generic_VectorPostprocessors.begin();
       i!=_all_generic_VectorPostprocessors.end();
       ++i)
     (*i)->initialSetup();
@@ -67,28 +67,28 @@ VectorPostprocessorWarehouse::initialSetup()
 void
 VectorPostprocessorWarehouse::timestepSetup()
 {
-  for(std::vector<ElementVectorPostprocessor *>::const_iterator i=_all_element_VectorPostprocessors.begin();
+  for (std::vector<ElementVectorPostprocessor *>::const_iterator i=_all_element_VectorPostprocessors.begin();
       i!=_all_element_VectorPostprocessors.end();
       ++i)
     (*i)->timestepSetup();
 
-  for(std::vector<NodalVectorPostprocessor *>::const_iterator i=_all_nodal_VectorPostprocessors.begin();
+  for (std::vector<NodalVectorPostprocessor *>::const_iterator i=_all_nodal_VectorPostprocessors.begin();
       i!=_all_nodal_VectorPostprocessors.end();
       ++i)
     (*i)->timestepSetup();
 
-  for(std::vector<SideVectorPostprocessor *>::const_iterator i=_all_side_VectorPostprocessors.begin();
+  for (std::vector<SideVectorPostprocessor *>::const_iterator i=_all_side_VectorPostprocessors.begin();
       i!=_all_side_VectorPostprocessors.end();
       ++i)
     (*i)->timestepSetup();
 
-  for(std::vector<InternalSideVectorPostprocessor *>::const_iterator i=_all_internal_side_VectorPostprocessors.begin();
+  for (std::vector<InternalSideVectorPostprocessor *>::const_iterator i=_all_internal_side_VectorPostprocessors.begin();
       i!=_all_internal_side_VectorPostprocessors.end();
       ++i)
     (*i)->timestepSetup();
 
 
-  for(std::vector<GeneralVectorPostprocessor *>::const_iterator i=_all_generic_VectorPostprocessors.begin();
+  for (std::vector<GeneralVectorPostprocessor *>::const_iterator i=_all_generic_VectorPostprocessors.begin();
       i!=_all_generic_VectorPostprocessors.end();
       ++i)
     (*i)->timestepSetup();
@@ -97,27 +97,27 @@ VectorPostprocessorWarehouse::timestepSetup()
 void
 VectorPostprocessorWarehouse::residualSetup()
 {
-  for(std::vector<ElementVectorPostprocessor *>::const_iterator i=_all_element_VectorPostprocessors.begin();
+  for (std::vector<ElementVectorPostprocessor *>::const_iterator i=_all_element_VectorPostprocessors.begin();
       i!=_all_element_VectorPostprocessors.end();
       ++i)
     (*i)->residualSetup();
 
-  for(std::vector<NodalVectorPostprocessor *>::const_iterator i=_all_nodal_VectorPostprocessors.begin();
+  for (std::vector<NodalVectorPostprocessor *>::const_iterator i=_all_nodal_VectorPostprocessors.begin();
       i!=_all_nodal_VectorPostprocessors.end();
       ++i)
     (*i)->residualSetup();
 
-  for(std::vector<SideVectorPostprocessor *>::const_iterator i=_all_side_VectorPostprocessors.begin();
+  for (std::vector<SideVectorPostprocessor *>::const_iterator i=_all_side_VectorPostprocessors.begin();
       i!=_all_side_VectorPostprocessors.end();
       ++i)
     (*i)->residualSetup();
 
-  for(std::vector<InternalSideVectorPostprocessor *>::const_iterator i=_all_internal_side_VectorPostprocessors.begin();
+  for (std::vector<InternalSideVectorPostprocessor *>::const_iterator i=_all_internal_side_VectorPostprocessors.begin();
       i!=_all_internal_side_VectorPostprocessors.end();
       ++i)
     (*i)->residualSetup();
 
-  for(std::vector<GeneralVectorPostprocessor *>::const_iterator i=_all_generic_VectorPostprocessors.begin();
+  for (std::vector<GeneralVectorPostprocessor *>::const_iterator i=_all_generic_VectorPostprocessors.begin();
       i!=_all_generic_VectorPostprocessors.end();
       ++i)
     (*i)->residualSetup();
@@ -126,28 +126,28 @@ VectorPostprocessorWarehouse::residualSetup()
 void
 VectorPostprocessorWarehouse::jacobianSetup()
 {
-  for(std::vector<ElementVectorPostprocessor *>::const_iterator i=_all_element_VectorPostprocessors.begin();
+  for (std::vector<ElementVectorPostprocessor *>::const_iterator i=_all_element_VectorPostprocessors.begin();
       i!=_all_element_VectorPostprocessors.end();
       ++i)
     (*i)->jacobianSetup();
 
-  for(std::vector<NodalVectorPostprocessor *>::const_iterator i=_all_nodal_VectorPostprocessors.begin();
+  for (std::vector<NodalVectorPostprocessor *>::const_iterator i=_all_nodal_VectorPostprocessors.begin();
       i!=_all_nodal_VectorPostprocessors.end();
       ++i)
     (*i)->jacobianSetup();
 
-  for(std::vector<SideVectorPostprocessor *>::const_iterator i=_all_side_VectorPostprocessors.begin();
+  for (std::vector<SideVectorPostprocessor *>::const_iterator i=_all_side_VectorPostprocessors.begin();
       i!=_all_side_VectorPostprocessors.end();
       ++i)
     (*i)->jacobianSetup();
 
-  for(std::vector<InternalSideVectorPostprocessor *>::const_iterator i=_all_internal_side_VectorPostprocessors.begin();
+  for (std::vector<InternalSideVectorPostprocessor *>::const_iterator i=_all_internal_side_VectorPostprocessors.begin();
       i!=_all_internal_side_VectorPostprocessors.end();
       ++i)
     (*i)->jacobianSetup();
 
 
-  for(std::vector<GeneralVectorPostprocessor *>::const_iterator i=_all_generic_VectorPostprocessors.begin();
+  for (std::vector<GeneralVectorPostprocessor *>::const_iterator i=_all_generic_VectorPostprocessors.begin();
       i!=_all_generic_VectorPostprocessors.end();
       ++i)
     (*i)->jacobianSetup();
@@ -170,7 +170,6 @@ VectorPostprocessorWarehouse::addVectorPostprocessor(VectorPostprocessor *Vector
       _block_ids_with_VectorPostprocessors.insert(*it);
     }
   }
-
   else if (dynamic_cast<SideVectorPostprocessor*>(VectorPostprocessor))
   {
     SideVectorPostprocessor * side_pp = dynamic_cast<SideVectorPostprocessor*>(VectorPostprocessor);
@@ -183,7 +182,6 @@ VectorPostprocessorWarehouse::addVectorPostprocessor(VectorPostprocessor *Vector
       _boundary_ids_with_VectorPostprocessors.insert(*it);
     }
   }
-
   else if (dynamic_cast<InternalSideVectorPostprocessor*>(VectorPostprocessor))
   {
     InternalSideVectorPostprocessor * internal_side_pp = dynamic_cast<InternalSideVectorPostprocessor*>(VectorPostprocessor);
@@ -196,7 +194,6 @@ VectorPostprocessorWarehouse::addVectorPostprocessor(VectorPostprocessor *Vector
       _block_ids_with_VectorPostprocessors.insert(*it);
     }
   }
-
   else if (dynamic_cast<NodalVectorPostprocessor*>(VectorPostprocessor))
   {
     NodalVectorPostprocessor * nodal_pp = dynamic_cast<NodalVectorPostprocessor*>(VectorPostprocessor);
@@ -225,8 +222,7 @@ VectorPostprocessorWarehouse::addVectorPostprocessor(VectorPostprocessor *Vector
       }
 
   }
-
-  else
+  else if (dynamic_cast<GeneralVectorPostprocessor*>(VectorPostprocessor))
   {
     GeneralVectorPostprocessor * general_pp = dynamic_cast<GeneralVectorPostprocessor*>(VectorPostprocessor);
 
@@ -234,6 +230,8 @@ VectorPostprocessorWarehouse::addVectorPostprocessor(VectorPostprocessor *Vector
     _generic_VectorPostprocessors.push_back(general_pp);
     _all_generic_VectorPostprocessors.push_back(general_pp);
   }
+  else
+    mooseError("Unknown type of VectorPostprocessor!");
 }
 
 VectorPostprocessor *

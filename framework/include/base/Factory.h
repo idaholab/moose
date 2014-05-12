@@ -64,7 +64,7 @@
 #define registerNamedAux(obj, name)                 registerNamedObject(obj, name)
 #define registerNamedMaterial(obj, name)            registerNamedObject(obj, name)
 #define registerNamedPostprocessor(obj, name)       registerNamedObject(obj, name)
-#define registerNamedVecgtorPostprocessor(obj, name) registerNamedObject(obj, name)
+#define registerNamedVectorPostprocessor(obj, name) registerNamedObject(obj, name)
 #define registerNamedInitialCondition(obj, name)    registerNamedObject(obj, name)
 #define registerNamedDamper(obj, name)              registerNamedObject(obj, name)
 #define registerNamedDiracKernel(obj, name)         registerNamedObject(obj, name)

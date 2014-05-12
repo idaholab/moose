@@ -37,7 +37,7 @@ class VectorPostprocessor
 public:
   VectorPostprocessor(const std::string & name, InputParameters parameters);
 
-  virtual ~VectorPostprocessor(){ }
+  virtual ~VectorPostprocessor(){}
 
   /**
    * This will get called to actually grab the final value the VectorPostprocessor has calculated.

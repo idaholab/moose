@@ -45,7 +45,7 @@ public:
    *
    * see getVectorPostprocessorValueOld getVectorPostprocessorValueByName getVectorPostprocessorValueOldByName
    */
-  virtual VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name, const std::string & vector_name);
+  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name, const std::string & vector_name);
 
   /**
    * Retrieve the value of the VectorPostprocessor
@@ -70,7 +70,7 @@ public:
    *
    * see getVectorPostprocessorValue
    */
-  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name);
+  const VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name);
 
   /**
    * Retrieve the old value of a VectorPostprocessor
@@ -93,7 +93,7 @@ public:
    *
    * @see hasVectorPostprocessorByName getVectorPostprocessorValue
    */
-  bool hasVectorPostprocessor(const std::string & name);
+  bool hasVectorPostprocessor(const std::string & name) const;
 
   /**
    * Determine if the VectorPostprocessor exists
@@ -102,7 +102,7 @@ public:
    *
    * @see hasVectorPostprocessor getVectorPostprocessorValueByName
    */
-  bool hasVectorPostprocessorByName(const VectorPostprocessorName & name);
+  bool hasVectorPostprocessorByName(const VectorPostprocessorName & name) const;
 
 
 private:

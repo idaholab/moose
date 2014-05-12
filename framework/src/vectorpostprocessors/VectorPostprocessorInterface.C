@@ -21,10 +21,9 @@ VectorPostprocessorInterface::VectorPostprocessorInterface(InputParameters & par
     _vpi_feproblem(*params.get<FEProblem *>("_fe_problem")),
     _vpi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
     _vpi_params(params)
-{
-}
+{}
 
-VectorPostprocessorValue &
+const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValue(const std::string & name, const std::string & vector_name)
 {
   return _vpi_feproblem.getVectorPostprocessorValue(_vpi_params.get<VectorPostprocessorName>(name), vector_name);
@@ -36,7 +35,7 @@ VectorPostprocessorInterface::getVectorPostprocessorValueByName(const VectorPost
   return _vpi_feproblem.getVectorPostprocessorValue(name, vector_name);
 }
 
-VectorPostprocessorValue &
+const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name)
 {
   return _vpi_feproblem.getVectorPostprocessorValueOld(_vpi_params.get<VectorPostprocessorName>(name), vector_name);
@@ -49,13 +48,13 @@ VectorPostprocessorInterface::getVectorPostprocessorValueOldByName(const VectorP
 }
 
 bool
-VectorPostprocessorInterface::hasVectorPostprocessor(const std::string & name)
+VectorPostprocessorInterface::hasVectorPostprocessor(const std::string & name) const
 {
   return _vpi_feproblem.hasVectorPostprocessor(_vpi_params.get<VectorPostprocessorName>(name));
 }
 
 bool
-VectorPostprocessorInterface::hasVectorPostprocessorByName(const VectorPostprocessorName & name)
+VectorPostprocessorInterface::hasVectorPostprocessorByName(const VectorPostprocessorName & name) const
 {
   return _vpi_feproblem.hasVectorPostprocessor(name);
 }

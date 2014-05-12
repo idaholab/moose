@@ -37,28 +37,28 @@ PostprocessorWarehouse::~PostprocessorWarehouse()
 void
 PostprocessorWarehouse::initialSetup()
 {
-  for(std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
+  for (std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
       i!=_all_element_postprocessors.end();
       ++i)
     (*i)->initialSetup();
 
-  for(std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
+  for (std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
       i!=_all_nodal_postprocessors.end();
       ++i)
     (*i)->initialSetup();
 
-  for(std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
+  for (std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
       i!=_all_side_postprocessors.end();
       ++i)
     (*i)->initialSetup();
 
-  for(std::vector<InternalSidePostprocessor *>::const_iterator i=_all_internal_side_postprocessors.begin();
+  for (std::vector<InternalSidePostprocessor *>::const_iterator i=_all_internal_side_postprocessors.begin();
       i!=_all_internal_side_postprocessors.end();
       ++i)
     (*i)->initialSetup();
 
 
-  for(std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
+  for (std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
       i!=_all_generic_postprocessors.end();
       ++i)
     (*i)->initialSetup();
@@ -67,28 +67,28 @@ PostprocessorWarehouse::initialSetup()
 void
 PostprocessorWarehouse::timestepSetup()
 {
-  for(std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
+  for (std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
       i!=_all_element_postprocessors.end();
       ++i)
     (*i)->timestepSetup();
 
-  for(std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
+  for (std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
       i!=_all_nodal_postprocessors.end();
       ++i)
     (*i)->timestepSetup();
 
-  for(std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
+  for (std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
       i!=_all_side_postprocessors.end();
       ++i)
     (*i)->timestepSetup();
 
-  for(std::vector<InternalSidePostprocessor *>::const_iterator i=_all_internal_side_postprocessors.begin();
+  for (std::vector<InternalSidePostprocessor *>::const_iterator i=_all_internal_side_postprocessors.begin();
       i!=_all_internal_side_postprocessors.end();
       ++i)
     (*i)->timestepSetup();
 
 
-  for(std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
+  for (std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
       i!=_all_generic_postprocessors.end();
       ++i)
     (*i)->timestepSetup();
@@ -97,27 +97,27 @@ PostprocessorWarehouse::timestepSetup()
 void
 PostprocessorWarehouse::residualSetup()
 {
-  for(std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
+  for (std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
       i!=_all_element_postprocessors.end();
       ++i)
     (*i)->residualSetup();
 
-  for(std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
+  for (std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
       i!=_all_nodal_postprocessors.end();
       ++i)
     (*i)->residualSetup();
 
-  for(std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
+  for (std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
       i!=_all_side_postprocessors.end();
       ++i)
     (*i)->residualSetup();
 
-  for(std::vector<InternalSidePostprocessor *>::const_iterator i=_all_internal_side_postprocessors.begin();
+  for (std::vector<InternalSidePostprocessor *>::const_iterator i=_all_internal_side_postprocessors.begin();
       i!=_all_internal_side_postprocessors.end();
       ++i)
     (*i)->residualSetup();
 
-  for(std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
+  for (std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
       i!=_all_generic_postprocessors.end();
       ++i)
     (*i)->residualSetup();
@@ -126,28 +126,28 @@ PostprocessorWarehouse::residualSetup()
 void
 PostprocessorWarehouse::jacobianSetup()
 {
-  for(std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
+  for (std::vector<ElementPostprocessor *>::const_iterator i=_all_element_postprocessors.begin();
       i!=_all_element_postprocessors.end();
       ++i)
     (*i)->jacobianSetup();
 
-  for(std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
+  for (std::vector<NodalPostprocessor *>::const_iterator i=_all_nodal_postprocessors.begin();
       i!=_all_nodal_postprocessors.end();
       ++i)
     (*i)->jacobianSetup();
 
-  for(std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
+  for (std::vector<SidePostprocessor *>::const_iterator i=_all_side_postprocessors.begin();
       i!=_all_side_postprocessors.end();
       ++i)
     (*i)->jacobianSetup();
 
-  for(std::vector<InternalSidePostprocessor *>::const_iterator i=_all_internal_side_postprocessors.begin();
+  for (std::vector<InternalSidePostprocessor *>::const_iterator i=_all_internal_side_postprocessors.begin();
       i!=_all_internal_side_postprocessors.end();
       ++i)
     (*i)->jacobianSetup();
 
 
-  for(std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
+  for (std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
       i!=_all_generic_postprocessors.end();
       ++i)
     (*i)->jacobianSetup();
@@ -170,7 +170,6 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
       _block_ids_with_postprocessors.insert(*it);
     }
   }
-
   else if (dynamic_cast<SidePostprocessor*>(postprocessor))
   {
     SidePostprocessor * side_pp = dynamic_cast<SidePostprocessor*>(postprocessor);
@@ -183,7 +182,6 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
       _boundary_ids_with_postprocessors.insert(*it);
     }
   }
-
   else if (dynamic_cast<InternalSidePostprocessor*>(postprocessor))
   {
     InternalSidePostprocessor * internal_side_pp = dynamic_cast<InternalSidePostprocessor*>(postprocessor);
@@ -196,7 +194,6 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
       _block_ids_with_postprocessors.insert(*it);
     }
   }
-
   else if (dynamic_cast<NodalPostprocessor*>(postprocessor))
   {
     NodalPostprocessor * nodal_pp = dynamic_cast<NodalPostprocessor*>(postprocessor);
@@ -225,8 +222,7 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
       }
 
   }
-
-  else
+  else if (dynamic_cast<GeneralPostprocessor*>(postprocessor))
   {
     GeneralPostprocessor * general_pp = dynamic_cast<GeneralPostprocessor*>(postprocessor);
 
@@ -234,6 +230,8 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
     _generic_postprocessors.push_back(general_pp);
     _all_generic_postprocessors.push_back(general_pp);
   }
+  else
+    mooseError("Unknown type of Postprocessor!");
 }
 
 Postprocessor *

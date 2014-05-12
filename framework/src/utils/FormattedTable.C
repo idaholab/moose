@@ -14,6 +14,7 @@
 
 #include "FormattedTable.h"
 #include "MooseError.h"
+#include "InfixIterator.h"
 
 #include <iomanip>
 #include <iterator>
@@ -278,15 +279,7 @@ FormattedTable::printCSV(const std::string & file_name, int interval)
       first = false;
     }
 
-    for (header = _column_names.begin(); header != _column_names.end(); ++header)
-    {
-      if (!first)
-        _output_file << ",";
-      else
-        first = false;
-
-      _output_file << *header;
-    }
+    std::copy(_column_names.begin(), _column_names.end(), infix_ostream_iterator<std::string>(_output_file, ",", first));
   }
 
   _output_file << "\n";
