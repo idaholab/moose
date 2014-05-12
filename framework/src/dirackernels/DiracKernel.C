@@ -158,10 +158,45 @@ DiracKernel::addPoint(Point p, unsigned id)
   const Elem * elem = (*pl)(p);
 
   if (id != libMesh::invalid_uint)
+  {
+    // Add the point to the cache...
     _point_cache[id] = std::make_pair(elem, p);
+
+    // ... and to the reverse cache.
+    std::vector<std::pair<Point, unsigned> > & points = _reverse_point_cache[elem];
+    points.push_back(std::make_pair(p, id));
+  }
 
   addPoint(elem, p, id);
   return elem;
+}
+
+unsigned
+DiracKernel::currentPointCachedID()
+{
+  std::map<const Elem*, std::vector<std::pair<Point, unsigned> > >::iterator it =
+    _reverse_point_cache.find(_current_elem);
+
+  // If the current Elem is not in the cache, return invalid_uint
+  if (it == _reverse_point_cache.end())
+    return libMesh::invalid_uint;
+
+  // Do a linear search in the (hopefully small) vector of Points for this Elem
+  std::vector<std::pair<Point, unsigned> > & points = it->second;
+
+  std::vector<std::pair<Point, unsigned> >::iterator
+    points_it = points.begin(),
+    points_end = points.end();
+
+  for (; points_it != points_end; ++points_it)
+  {
+    // If the current_point equals the cached point, return the associated id
+    if (_current_point.relative_fuzzy_equals(points_it->first))
+      return points_it->second;
+  }
+
+  // If we made it here, we didn't find the cached point, so return invalid_uint
+  return libMesh::invalid_uint;
 }
 
 bool

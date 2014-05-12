@@ -129,6 +129,14 @@ protected:
    */
   const Elem * addPoint(Point p, unsigned id=libMesh::invalid_uint);
 
+  /**
+   * Returns the user-assigned ID of the current Dirac point if it
+   * exits, and libMesh::invalid_uint otherwise.  Can be used e.g. in
+   * the computeQpResidual() function to determine the cached ID of
+   * the current point, in case this information is relevant.
+   */
+  unsigned currentPointCachedID();
+
   SubProblem & _subproblem;
   SystemBase & _sys;
 
@@ -196,9 +204,15 @@ protected:
   /// Derivative of u_dot wrt u
   VariableValue & _du_dot_du;
 
+private:
   /// Data structure for caching user-defined IDs which can be mapped to
   /// specific std::pair<const Elem*, Point> and avoid the PointLocator Elem lookup.
   std::map<unsigned, std::pair<const Elem*, Point> > _point_cache;
+
+  /// Map from Elem* to a list of (Dirac point, id) pairs which can be used
+  /// in a user's computeQpResidual() routine to determine the user-defined ID for
+  /// the current Dirac point, if one exists.
+  std::map<const Elem*, std::vector<std::pair<Point, unsigned> > > _reverse_point_cache;
 };
 
 #endif
