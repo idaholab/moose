@@ -2,6 +2,6 @@
   [./test]
     type = 'CSVDiff'
     input = 'point_value_sampler.i'
-    csvdiff = 'point_value_sampler_vpp_csv_point_sample_0001.csv'
+    csvdiff = 'point_value_sampler_out_point_sample_0001.csv'
   [../]
 []

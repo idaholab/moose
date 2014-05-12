@@ -68,12 +68,9 @@
 []
 
 [Outputs]
+  csv = true
   [./console]
     type = Console
     perf_log = true
-  [../]
-  [./vpp_csv]
-    output_vector_postprocessors = true
-    type = CSV
   [../]
 []

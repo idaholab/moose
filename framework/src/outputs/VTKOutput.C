@@ -22,6 +22,7 @@ InputParameters validParams<VTKOutput>()
   // Supress un-available parameters
   params.suppressParameter<bool>("output_scalar_variables");
   params.suppressParameter<bool>("output_postprocessors");
+  params.suppressParameter<bool>("output_vector_postprocessors");
   params.suppressParameter<bool>("scalar_as_nodal");
   params.suppressParameter<bool>("sequence");
 

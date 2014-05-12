@@ -29,6 +29,7 @@ InputParameters validParams<XDA>()
   params.suppressParameter<bool>("output_elemental_variables");
   params.suppressParameter<bool>("output_scalar_variables");
   params.suppressParameter<bool>("output_postprocessors");
+  params.suppressParameter<bool>("output_vector_postprocessors");
   params.suppressParameter<bool>("scalar_as_nodal");
   params.suppressParameter<bool>("sequence");
 

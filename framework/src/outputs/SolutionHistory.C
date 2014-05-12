@@ -29,6 +29,7 @@ InputParameters validParams<SolutionHistory>()
   params.suppressParameter<bool>("output_elemental_variables");
   params.suppressParameter <bool>("output_scalar_variables");
   params.suppressParameter<bool>("output_postprocessors");
+  params.suppressParameter<bool>("output_vector_postprocessors");
 
 
   // Return the parameters

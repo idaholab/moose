@@ -21,6 +21,8 @@ InputParameters validParams<GNUPlot>()
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
 
+  params.suppressParameter<bool>("output_vector_postprocessors");
+
   // Set an enum for the possible file extensions
   MooseEnum ext("png ps gif", "png", "GNU plot file extension");
   params.addParam<MooseEnum>("extension", ext, "GUN plot file extension");

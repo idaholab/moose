@@ -45,7 +45,7 @@ InputParameters validParams<Output>()
   params.addParam<bool>("output_elemental_variables", true, "Enable/disable the output of elemental nonlinear variables");
   params.addParam<bool>("output_scalar_variables", true, "Enable/disable the output of aux scalar variables");
   params.addParam<bool>("output_postprocessors", true, "Enable/disable the output of postprocessors");
-  params.addParam<bool>("output_vector_postprocessors", false, "Enable/disable the output of VectorPostprocessors");
+  params.addParam<bool>("output_vector_postprocessors", true, "Enable/disable the output of VectorPostprocessors");
 
   // Displaced Mesh options
   params.addParam<bool>("use_displaced", false, "Enable/disable the use of the displaced mesh for outputting");

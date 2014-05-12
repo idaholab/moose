@@ -30,6 +30,7 @@ InputParameters validParams<GMVOutput>()
   params.suppressParameter<bool>("output_postprocessors");
   params.suppressParameter<bool>("scalar_as_nodal");
   params.suppressParameter<bool>("sequence");
+  params.suppressParameter<bool>("output_vector_postprocessors");
 
   // Advanced file options
   params.addParam<bool>("binary", true, "Output the file in binary format");

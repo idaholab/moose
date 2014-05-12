@@ -23,6 +23,8 @@ InputParameters validParams<Nemesis>()
   // Get the base class parameters
   InputParameters params = validParams<OversampleOutput>();
 
+  params.suppressParameter<bool>("output_vector_postprocessors");
+
   // Add description for the Nemesis class
   params.addClassDescription("Object for output data in the Nemesis format");
 
