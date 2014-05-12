@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "SamplerBase.h"
+#include "IndirectSort.h"
 
 template<>
 InputParameters validParams<SamplerBase>()
@@ -87,21 +88,21 @@ SamplerBase::finalize()
     _comm.allgather(_values_tmp[i], false);
 
   // Next... figure out the correct sorted positions of each value
-  std::vector<unsigned int> sorted_indices;
+  std::vector<size_t> sorted_indices;
 
   switch(_sort_by)
   {
     case 0: // x
-      MooseUtils::getSortIndices(_x_tmp, std::less<Real>(), sorted_indices);
+      Moose::indirectSort(_x_tmp.begin(), _x_tmp.end(), sorted_indices);
       break;
     case 1: // y
-      MooseUtils::getSortIndices(_y_tmp, std::less<Real>(), sorted_indices);
+      Moose::indirectSort(_y_tmp.begin(), _y_tmp.end(), sorted_indices);
       break;
     case 2: // z
-      MooseUtils::getSortIndices(_z_tmp, std::less<Real>(), sorted_indices);
+      Moose::indirectSort(_z_tmp.begin(), _z_tmp.end(), sorted_indices);
       break;
     case 3: // id
-      MooseUtils::getSortIndices(_id_tmp, std::less<Real>(), sorted_indices);
+      Moose::indirectSort(_id_tmp.begin(), _id_tmp.end(), sorted_indices);
       break;
   }
 
