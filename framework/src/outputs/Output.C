@@ -24,6 +24,7 @@
 #include "Restartable.h"
 #include "FileMesh.h"
 #include "CoupledExecutioner.h"
+#include "VectorPostprocessor.h"
 
 template<>
 InputParameters validParams<Output>()
@@ -44,6 +45,7 @@ InputParameters validParams<Output>()
   params.addParam<bool>("output_elemental_variables", true, "Enable/disable the output of elemental nonlinear variables");
   params.addParam<bool>("output_scalar_variables", true, "Enable/disable the output of aux scalar variables");
   params.addParam<bool>("output_postprocessors", true, "Enable/disable the output of postprocessors");
+  params.addParam<bool>("output_vector_postprocessors", true, "Enable/disable the output of VectorPostprocessors");
 
   // Displaced Mesh options
   params.addParam<bool>("use_displaced", false, "Enable/disable the use of the displaced mesh for outputting");
@@ -71,7 +73,7 @@ InputParameters validParams<Output>()
   params.addParamNamesToGroup("time_tolerance interval output_initial output_final sync_times sync_only start_time end_time ", "Timing");
 
   // 'Variables' Group
-  params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
+  params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_vector_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_short_cut", false);
@@ -162,6 +164,7 @@ Output::init()
   initOutputList(_nonlinear_elemental);
   initOutputList(_scalar);
   initOutputList(_postprocessor);
+  initOutputList(_vector_postprocessor);
 
   // Disable output lists based on two items:
   //   (1) If the toggle parameter is invalid
@@ -181,6 +184,9 @@ Output::init()
 
   if (isParamValid("output_postprocessors") ? !getParam<bool>("output_postprocessors") : true)
     _postprocessor.output.clear();
+
+  if (isParamValid("output_vector_postprocessors") ? !getParam<bool>("output_vector_postprocessors") : true)
+    _vector_postprocessor.output.clear();
 
   // Set the initialization flag
   _initialized = true;
@@ -334,6 +340,9 @@ Output::output()
   if (hasPostprocessorOutput())
     outputPostprocessors();
 
+  if (hasVectorPostprocessorOutput())
+    outputVectorPostprocessors();
+
   if (hasScalarOutput())
     outputScalarVariables();
 }
@@ -349,7 +358,7 @@ Output::hasOutput()
 {
   // Test all the possible output formats, return true if any of them are true
   if (hasNodalVariableOutput() || hasElementalVariableOutput() ||
-      hasScalarOutput() || hasPostprocessorOutput())
+      hasScalarOutput() || hasPostprocessorOutput() || hasVectorPostprocessorOutput())
     return true;
   else
     return false;
@@ -416,6 +425,18 @@ Output::getPostprocessorOutput()
   return _postprocessor.output;
 }
 
+bool
+Output::hasVectorPostprocessorOutput()
+{
+  return !_vector_postprocessor.output.empty();
+}
+
+const std::vector<std::string> &
+Output::getVectorPostprocessorOutput()
+{
+  return _vector_postprocessor.output;
+}
+
 void
 Output::meshChanged()
 {
@@ -457,33 +478,28 @@ Output::checkInterval()
   return output;
 }
 
+/// Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
+template <typename warehouse_type, typename postprocessor_type>
 void
-Output::initAvailableLists()
+initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_type & warehouse, bool & has_limited_pps, MooseApp & app, std::string & name, InputParameters & params)
 {
-  /* This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
-     to produce an warning if postprocessor output is disabled*/
-  bool has_limited_pps = false;
-
-  // Get a reference to the storage of the postprocessors
-  ExecStore<PostprocessorWarehouse> & warehouse = _problem_ptr->getPostprocessorWarehouse();
-
   // Loop through each of the execution flags
   for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
   {
     // Loop through each of the postprocessors
-    for (std::vector<Postprocessor *>::const_iterator postprocessor_it = warehouse(Moose::exec_types[i])[0].all().begin();
+    for (typename std::vector<postprocessor_type *>::const_iterator postprocessor_it = warehouse(Moose::exec_types[i])[0].all().begin();
          postprocessor_it != warehouse(Moose::exec_types[i])[0].all().end();
          ++postprocessor_it)
     {
       // Store the name in the available postprocessors
-      Postprocessor *pps = *postprocessor_it;
-      _postprocessor.available.push_back(pps->PPName());
+      postprocessor_type *pps = *postprocessor_it;
+      output_data.available.push_back(pps->PPName());
 
       // Extract the list of outputs
       std::set<OutputName> pps_outputs = pps->getOutputs();
 
       // Check that the outputs are valid
-      _app.getOutputWarehouse().checkOutputs(pps_outputs);
+      app.getOutputWarehouse().checkOutputs(pps_outputs);
 
       /* Hide the postprocessor if:
        *  (1) The "outputs" parameter is NOT empty and
@@ -492,15 +508,15 @@ Output::initAvailableLists()
        *  (3) this output object name is not found in the list of output names
        */
       if ( !pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end() &&
-           (pps_outputs.find("none") != pps_outputs.end() || pps_outputs.find(_name) == pps_outputs.end()) )
-        _postprocessor.hide.push_back(pps->PPName());
+           (pps_outputs.find("none") != pps_outputs.end() || pps_outputs.find(name) == pps_outputs.end()) )
+        output_data.hide.push_back(pps->PPName());
 
       // Check that the output object allows postprocessor output, account for "all" keyword (if it is present assume "all" was desired)
-      if ( pps_outputs.find(_name) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end() )
+      if ( pps_outputs.find(name) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end() )
       {
-        if (!isParamValid("output_postprocessors"))
+        if (!params.isParamValid("output_postprocessors"))
           mooseWarning("Postprocessor '" << pps->PPName()
-                       << "' has requested to be output by the '" << _name
+                       << "' has requested to be output by the '" << name
                        << "' output, but postprocessor output is not support by this type of output object.");
       }
 
@@ -509,10 +525,42 @@ Output::initAvailableLists()
         has_limited_pps = true;
     }
   }
+}
+
+
+void
+Output::initAvailableLists()
+{
+  /* This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
+     to produce an warning if postprocessor output is disabled*/
+  bool has_limited_pps = false;
+
+  /* This flag is set to true if any vector postprocessor has the 'outputs' parameter set, it is then used
+     to produce an warning if postprocessor output is disabled*/
+  bool has_limited_vector_pps = false;
+
+  {
+    // Get a reference to the storage of the postprocessors
+    ExecStore<PostprocessorWarehouse> & warehouse = _problem_ptr->getPostprocessorWarehouse();
+
+    initPostprocessorOrVectorPostprocessorLists<ExecStore<PostprocessorWarehouse>, Postprocessor>(_postprocessor, warehouse, has_limited_pps, _app, _name, _pars);
+  }
+
+  {
+    // Get a reference to the storage of the vector postprocessors
+    ExecStore<VectorPostprocessorWarehouse> & warehouse = _problem_ptr->getVectorPostprocessorWarehouse();
+
+    initPostprocessorOrVectorPostprocessorLists<ExecStore<VectorPostprocessorWarehouse>, VectorPostprocessor>(_vector_postprocessor, warehouse, has_limited_vector_pps, _app, _name, _pars);
+  }
+
 
   // Produce the warning when 'outputs' is used, but postprocessor output is disable
   if (has_limited_pps && isParamValid("output_postprocessors") && getParam<bool>("output_postprocessors") == false)
-    mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disable for the '" << _name << "' output object.");
+    mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '" << _name << "' output object.");
+
+  // Produce the warning when 'outputs' is used, but postprocessor output is disable
+  if (has_limited_vector_pps && isParamValid("output_vector_postprocessors") && getParam<bool>("output_vector_postprocessors") == false)
+    mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '" << _name << "' output object.");
 
   // Get a list of the available variables
   std::vector<VariableName> variables = _problem_ptr->getVariableNames();
@@ -558,6 +606,8 @@ Output::initShowHideLists(const std::vector<VariableName> & show, const std::vec
       _scalar.show.push_back(*it);
     else if (_problem_ptr->hasPostprocessor(*it))
       _postprocessor.show.push_back(*it);
+    else if (_problem_ptr->hasVectorPostprocessor(*it))
+      _vector_postprocessor.show.push_back(*it);
     else
       unknown.push_back(*it);
   }
@@ -578,6 +628,8 @@ Output::initShowHideLists(const std::vector<VariableName> & show, const std::vec
       _scalar.hide.push_back(*it);
     else if (_problem_ptr->hasPostprocessor(*it))
       _postprocessor.hide.push_back(*it);
+    else if (_problem_ptr->hasVectorPostprocessor(*it))
+      _vector_postprocessor.hide.push_back(*it);
     else
       unknown.push_back(*it);
   }
@@ -586,7 +638,7 @@ Output::initShowHideLists(const std::vector<VariableName> & show, const std::vec
   if (!unknown.empty())
   {
     std::ostringstream oss;
-    oss << "Output(s) do not exist (must be variable, scalar, or postprocessor): " << (*unknown.begin());
+    oss << "Output(s) do not exist (must be variable, scalar, postprocessor, or vector postprocessor): " << (*unknown.begin());
     for (std::vector<std::string>::iterator it = unknown.begin()+1; it != unknown.end();  ++it)
       oss << ", " << *it;
     mooseError(oss.str());

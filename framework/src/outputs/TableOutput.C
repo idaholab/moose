@@ -83,6 +83,34 @@ TableOutput::outputPostprocessors()
 }
 
 void
+TableOutput::outputVectorPostprocessors()
+{
+  // List of names of the postprocessors to output
+  const std::vector<std::string> & out = getVectorPostprocessorOutput();
+
+  // Loop through the postprocessor names and extract the values from the VectorPostprocessorData storage
+  for (std::vector<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
+  {
+    std::string vpp_name = *it;
+
+    const std::map<std::string, VectorPostprocessorValue*> & vectors = _problem_ptr->getVectorPostprocessorVectors(vpp_name);
+
+    FormattedTable & table = _vector_postprocessor_tables[vpp_name];
+
+    table.clear();
+    table.outputTimeColumn(false);
+
+    for (std::map<std::string, VectorPostprocessorValue*>::const_iterator vec_it = vectors.begin(); vec_it != vectors.end(); ++vec_it)
+    {
+      VectorPostprocessorValue vector = *(vec_it->second);
+
+      for (unsigned int i=0; i<vector.size(); i++)
+        table.addData(vec_it->first, vector[i], i);
+    }
+  }
+}
+
+void
 TableOutput::outputScalarVariables()
 {
   // List of scalar variables

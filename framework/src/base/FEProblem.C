@@ -46,6 +46,11 @@
 #include "SidePostprocessor.h"
 #include "InternalSidePostprocessor.h"
 #include "GeneralPostprocessor.h"
+#include "ElementVectorPostprocessor.h"
+#include "NodalVectorPostprocessor.h"
+#include "SideVectorPostprocessor.h"
+#include "InternalSideVectorPostprocessor.h"
+#include "GeneralVectorPostprocessor.h"
 #include "Indicator.h"
 #include "Marker.h"
 
@@ -200,6 +205,11 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
   for(unsigned int i=0; i<n_threads; i++)
     _pps_data[i] = new PostprocessorData(*this, i);
+
+  _vpps_data.resize(n_threads);
+
+  for(unsigned int i=0; i<n_threads; i++)
+    _vpps_data[i] = new VectorPostprocessorData(*this, i);
 
   _objects_by_name.resize(n_threads);
 
@@ -1893,6 +1903,101 @@ FEProblem::getPostprocessorWarehouse()
   return _pps;
 }
 
+/**
+ * Small helper function used by addVectorPostprocessor to try to get a VectorPostprocessor pointer from a MooseObject
+ */
+VectorPostprocessor *
+getVectorPostprocessorPointer(MooseObject * mo)
+{
+  {
+    ElementVectorPostprocessor * intermediate = dynamic_cast<ElementVectorPostprocessor *>(mo);
+    if (intermediate)
+      return static_cast<VectorPostprocessor *>(intermediate);
+  }
+
+  {
+    NodalVectorPostprocessor * intermediate = dynamic_cast<NodalVectorPostprocessor *>(mo);
+    if (intermediate)
+      return static_cast<VectorPostprocessor *>(intermediate);
+  }
+
+  {
+    InternalSideVectorPostprocessor * intermediate = dynamic_cast<InternalSideVectorPostprocessor *>(mo);
+    if (intermediate)
+      return static_cast<VectorPostprocessor *>(intermediate);
+  }
+
+  {
+    SideVectorPostprocessor * intermediate = dynamic_cast<SideVectorPostprocessor *>(mo);
+    if (intermediate)
+      return static_cast<VectorPostprocessor *>(intermediate);
+  }
+
+  {
+    GeneralVectorPostprocessor * intermediate = dynamic_cast<GeneralVectorPostprocessor *>(mo);
+    if (intermediate)
+      return static_cast<VectorPostprocessor *>(intermediate);
+  }
+
+  return NULL;
+}
+
+void
+FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
+  else
+    parameters.set<SubProblem *>("_subproblem") = this;
+
+  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
+
+  // Check for name collision
+  if (_user_objects(type)[0].getUserObjectByName(name))
+    mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
+
+  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  {
+    parameters.set<THREAD_ID>("_tid") = tid;
+    parameters.set<VectorPostprocessorData *>("_vector_postprocessor_data") = _vpps_data[tid];
+
+    // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
+    // to be otherwise
+    MaterialData * mat_data = _material_data[tid];
+    if (parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
+       mat_data = _bnd_material_data[tid];
+
+    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+      _reinit_displaced_face = true;
+
+    parameters.set<MaterialData *>("_material_data") = mat_data;
+
+    MooseObject * mo = _factory.create(pp_name, name, parameters);
+    if (!mo)
+      mooseError("Unable to determine type for VectorPostprocessor: " + mo->name());
+
+    VectorPostprocessor * pp = getVectorPostprocessorPointer(mo);
+    _vpps(type)[tid].addVectorPostprocessor(pp);
+    _objects_by_name[tid][name].push_back(mo);
+
+    // Add it to the user object warehouse as well...
+    {
+      UserObject * user_object = dynamic_cast<UserObject *>(mo);
+      if (!user_object)
+        mooseError("Unknown user object type: " + pp_name);
+
+      _user_objects(type)[tid].addUserObject(user_object);
+    }
+  }
+}
+
+ExecStore<VectorPostprocessorWarehouse> &
+FEProblem::getVectorPostprocessorWarehouse()
+{
+  return _vpps;
+}
+
 void
 FEProblem::addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters)
 {
@@ -1960,16 +2065,40 @@ FEProblem::hasPostprocessor(const std::string & name, THREAD_ID tid)
   return _pps_data[tid]->hasPostprocessor(name);
 }
 
-Real &
+PostprocessorValue &
 FEProblem::getPostprocessorValue(const PostprocessorName & name, THREAD_ID tid)
 {
   return _pps_data[tid]->getPostprocessorValue(name);
 }
 
-Real &
+PostprocessorValue &
 FEProblem::getPostprocessorValueOld(const std::string & name, THREAD_ID tid)
 {
   return _pps_data[tid]->getPostprocessorValueOld(name);
+}
+
+bool
+FEProblem::hasVectorPostprocessor(const std::string & name)
+{
+  return _vpps_data[0]->hasVectorPostprocessor(name);
+}
+
+VectorPostprocessorValue &
+FEProblem::getVectorPostprocessorValue(const VectorPostprocessorName & name, const std::string & vector_name)
+{
+  return _vpps_data[0]->getVectorPostprocessorValue(name, vector_name);
+}
+
+VectorPostprocessorValue &
+FEProblem::getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name)
+{
+  return _vpps_data[0]->getVectorPostprocessorValueOld(name, vector_name);
+}
+
+const std::map<std::string, VectorPostprocessorValue*> &
+FEProblem::getVectorPostprocessorVectors(const std::string & vpp_name)
+{
+  return _vpps_data[0]->vectors(vpp_name);
 }
 
 void

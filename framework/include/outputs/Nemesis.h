@@ -75,6 +75,11 @@ protected:
   virtual void outputPostprocessors();
 
   /**
+   * Not implemented.
+   */
+  virtual void outputVectorPostprocessors() { mooseError("Can't currently output VectorPostprocessors to Nemesis"); };
+
+  /**
    * Writes scalar AuxVariables to global output parameters
    */
   virtual void outputScalarVariables();

@@ -32,6 +32,7 @@
  * MOOSE typedefs
  */
 typedef Real                     PostprocessorValue;
+typedef std::vector<Real>        VectorPostprocessorValue;
 typedef boundary_id_type         BoundaryID;
 typedef subdomain_id_type        SubdomainID;
 
@@ -223,6 +224,9 @@ DerivativeStringClass(SubdomainName);
 
 /// This type is used for objects that expect Postprocessor objects
 DerivativeStringClass(PostprocessorName);
+
+/// This type is used for objects that expect VectorPostprocessor objects
+DerivativeStringClass(VectorPostprocessorName);
 
 /// This type is used for objects that expect Moose Function objects
 DerivativeStringClass(FunctionName);

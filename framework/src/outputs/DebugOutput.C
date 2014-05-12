@@ -28,6 +28,7 @@ InputParameters validParams<DebugOutput>()
   // Suppress unnecessary parameters
   params.suppressParameter<bool>("output_scalar_variables");
   params.suppressParameter<bool>("output_postprocessors");
+  params.suppressParameter<bool>("output_vector_postprocessors");
   params.suppressParameter<bool>("scalar_as_nodal");
   params.suppressParameter<bool>("sequence");
   params.suppressParameter<bool>("elemental_as_nodal");
@@ -120,6 +121,12 @@ void
 DebugOutput::outputPostprocessors()
 {
   mooseError("Individual output of postprocessors is not support for Debug output");
+}
+
+void
+DebugOutput::outputVectorPostprocessors()
+{
+  mooseError("Individual output of VectorPostprocessors is not support for Debug output");
 }
 
 void

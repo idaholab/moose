@@ -24,6 +24,8 @@
 #include "MaterialPropertyStorage.h"
 #include "PostprocessorWarehouse.h"
 #include "PostprocessorData.h"
+#include "VectorPostprocessorWarehouse.h"
+#include "VectorPostprocessorData.h"
 #include "Adaptivity.h"
 #include "Resurrector.h"
 #include "IndicatorWarehouse.h"
@@ -382,6 +384,9 @@ public:
   // Postprocessors /////
   virtual void addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
 
+  // VectorPostprocessors /////
+  virtual void addVectorPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
+
   /**
    * Initializes the postprocessor data
    * @see SetupPostprocessorDataAction
@@ -433,7 +438,7 @@ public:
   /**
    * Get a reference to the value associated with the postprocessor.
    */
-  Real & getPostprocessorValue(const PostprocessorName & name, THREAD_ID tid = 0);
+  PostprocessorValue & getPostprocessorValue(const PostprocessorName & name, THREAD_ID tid = 0);
 
   /**
    * Get the reference to the old value of a post-processor
@@ -441,12 +446,44 @@ public:
    * @param tid Thread ID
    * @return The reference to the old value
    */
-  Real & getPostprocessorValueOld(const std::string & name, THREAD_ID tid = 0);
+  PostprocessorValue & getPostprocessorValueOld(const std::string & name, THREAD_ID tid = 0);
 
   /**
    * Get a reference to the PostprocessorWarehouse ExecStore object
    */
   ExecStore<PostprocessorWarehouse> & getPostprocessorWarehouse();
+
+  /**
+   * Check existence of the VectorPostprocessor.
+   * @param name The name of the post-processor
+   * @return true if it exists, otherwise false
+   */
+  bool hasVectorPostprocessor(const std::string & name);
+
+  /**
+   * Get a reference to the value associated with the VectorPostprocessor.
+   */
+  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name, const std::string & vector_name);
+
+  /**
+   * Get the reference to the old value of a post-processor
+   * @param name The name of the post-processor
+   * @param tid Thread ID
+   * @return The reference to the old value
+   */
+  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name);
+
+  /**
+   * Get the vectors for a specific VectorPostprocessor.
+   * @param vpp_name The name of the VectorPostprocessor
+   */
+  const std::map<std::string, VectorPostprocessorValue*> & getVectorPostprocessorVectors(const std::string & vpp_name);
+
+  /**
+   * Get a reference to the VectorPostprocessorWarehouse ExecStore object
+   */
+  ExecStore<VectorPostprocessorWarehouse> & getVectorPostprocessorWarehouse();
+
 
   virtual void computeUserObjects(ExecFlagType type = EXEC_TIMESTEP, UserObjectWarehouse::GROUP group = UserObjectWarehouse::ALL);
   virtual void computeAuxiliaryKernels(ExecFlagType type = EXEC_RESIDUAL);
@@ -807,6 +844,10 @@ protected:
   // postprocessors
   std::vector<PostprocessorData*> _pps_data;
   ExecStore<PostprocessorWarehouse> _pps;
+
+  // VectorPostprocessors
+  std::vector<VectorPostprocessorData *> _vpps_data;
+  ExecStore<VectorPostprocessorWarehouse> _vpps;
 
   // user objects
   ExecStore<UserObjectWarehouse> _user_objects;

@@ -14,6 +14,6 @@
   [./test_nonexistent]
     type = 'RunException'
     input = 'output_vars_nonexistent.i'
-    expect_err = 'Output\(s\) do not exist \(must be variable, scalar, or postprocessor\): foo1, foo2'
+    expect_err = 'Output\(s\) do not exist \(must be variable, scalar, postprocessor, or vector postprocessor\): foo1, foo2'
   [../]
 []

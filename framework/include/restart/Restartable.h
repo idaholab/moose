@@ -198,6 +198,7 @@ private:
 
   /// For access to registerRestartableDataOnSubProblem()
   friend class PostprocessorData;
+  friend class VectorPostprocessorData;
   friend class NearestNodeLocator;
   friend class ReportableData;
   friend class FileOutput;
