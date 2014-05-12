@@ -126,6 +126,8 @@ public:
 
   void addStateMarkedElem(unsigned int elem_id, RealVectorValue normal);
 
+  void clearStateMarkedElems();
+
   /**
    * Method to update the mesh due to modified cut planes
    */

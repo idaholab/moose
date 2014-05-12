@@ -810,7 +810,7 @@ public:
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }
   virtual void adaptMesh();
-  virtual void xfemUpdateMesh();
+  virtual bool xfemUpdateMesh();
 #endif //LIBMESH_ENABLE_AMR
   virtual void meshChanged();
 

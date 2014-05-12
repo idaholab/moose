@@ -285,6 +285,12 @@ XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue normal)
   _state_marked_elems[elem] = normal;
 }
 
+void
+XFEM::clearStateMarkedElems()
+{
+  _state_marked_elems.clear();
+}
+
 bool
 XFEM::update(Real time)
 {

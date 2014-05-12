@@ -82,6 +82,7 @@ InputParameters validParams<Transient>()
   params.addParamNamesToGroup("picard_max_its picard_rel_tol picard_abs_tol", "Picard");
 
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
+  params.addParam<unsigned int>("max_xfem_update", std::numeric_limits<unsigned int>::max(), "Maximum number of times to update XFEM crack topology in a step due to evolving cracks");
 
   return params;
 }
@@ -98,8 +99,11 @@ Transient::Transient(const InputParameters & parameters) :
     _unconstrained_dt(declareRecoverableData<Real>("unconstrained_dt", -1)),
     _at_sync_point(declareRecoverableData<bool>("at_sync_point", false)),
     _first(declareRecoverableData<bool>("first", true)),
-    _multiapps_converged(declareRecoverableData<bool>("multiapps_converged", true)),
-    _last_solve_converged(declareRecoverableData<bool>("last_solve_converged", true)),
+    _multiapps_converged(declareRestartableData<bool>("multiapps_converged", true)),
+    _last_solve_converged(declareRestartableData<bool>("last_solve_converged", true)),
+    _xfem_repeat_step(false),
+    _xfem_update_count(0),
+    _max_xfem_update(getParam<unsigned int>("max_xfem_update")),
     _end_time(getParam<Real>("end_time")),
     _dtmin(getParam<Real>("dtmin")),
     _dtmax(getParam<Real>("dtmax")),
@@ -269,22 +273,28 @@ Transient::incrementStepOrReject()
 {
   if (lastSolveConverged())
   {
+    if (_xfem_repeat_step)
+    {
+      _time = _time_old;
+    }
+    else
+    {
 #ifdef LIBMESH_ENABLE_AMR
-    if (_problem.adaptivity().isOn())
-      _problem.adaptMesh();
-    _problem.xfemUpdateMesh();
+      if (_problem.adaptivity().isOn())
+        _problem.adaptMesh();
 #endif
 
-    _time_old = _time; // = _time_old + _dt;
-    _t_step++;
+      _time_old = _time; // = _time_old + _dt;
+      _t_step++;
 
-    _problem.advanceState();
+      _problem.advanceState();
 
-    // Advance (and Output) MultiApps if we were doing Picard iterations
-    if (_picard_max_its > 1)
-    {
-      _problem.advanceMultiApps(EXEC_TIMESTEP_BEGIN);
-      _problem.advanceMultiApps(EXEC_TIMESTEP_END);
+      // Advance (and Output) MultiApps if we were doing Picard iterations
+      if (_picard_max_its > 1)
+      {
+        _problem.advanceMultiApps(EXEC_TIMESTEP_BEGIN);
+        _problem.advanceMultiApps(EXEC_TIMESTEP_END);
+      }
     }
   }
   else
@@ -370,6 +380,8 @@ Transient::solveStep(Real input_dt)
   Real current_dt = _dt;
 
   _problem.onTimestepBegin();
+  if (lastSolveConverged() && !_xfem_repeat_step)
+    _problem.updateMaterials();             // Update backward material data structures
 
   // Increment time
   _time = _time_old + _dt;
@@ -407,19 +419,45 @@ Transient::solveStep(Real input_dt)
   {
     _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
 
-    if (_picard_max_its <= 1)
-      _time_stepper->acceptStep();
+    if ((_xfem_update_count < _max_xfem_update) &&
+        _problem.xfemUpdateMesh())
+    {
+      Moose::out << "XFEM modifying mesh, repeating step"<<std::endl;
+      _xfem_repeat_step = true;
+      ++_xfem_update_count;
+      _output_warehouse.outputFailedStep();
+    }
+    else
+    {
+      _xfem_repeat_step = false;
+      _xfem_update_count = 0;
+      Moose::out << "XFEM not modifying mesh, continuing"<<std::endl;
+      if (_picard_max_its <= 1)
+        _time_stepper->acceptStep();
 
-    _solution_change_norm = _problem.solutionChangeNorm();
+      _solution_change_norm = _problem.solutionChangeNorm();
 
-    _problem.onTimestepEnd();
-    _problem.execute(EXEC_TIMESTEP_END);
+      _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
+#if 0
+    // User definable callback
+    if (_estimate_error)
+      estimateTimeError();
+#endif
 
-    _problem.execTransfers(EXEC_TIMESTEP_END);
-    _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
+      _problem.onTimestepEnd();
+      _problem.execute(EXEC_TIMESTEP_END);
 
-    if (!_multiapps_converged)
-      return;
+      _problem.execTransfers(EXEC_TIMESTEP_END);
+      _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
+
+      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
+      _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
+      _problem.execTransfers(EXEC_TIMESTEP_END);
+      _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
+
+      if (!_multiapps_converged)
+        return;
+    }
   }
   else
   {
@@ -447,7 +485,7 @@ Transient::endStep(Real input_time)
 
   _last_solve_converged = lastSolveConverged();
 
-  if (_last_solve_converged)
+  if (_last_solve_converged && !_xfem_repeat_step)
   {
     // Compute the Error Indicators and Markers
     _problem.computeIndicatorsAndMarkers();
@@ -598,7 +636,9 @@ Transient::keepGoing()
   bool keep_going = !_problem.isSolveTerminationRequested();
 
   // Check for stop condition based upon steady-state check flag:
-  if (lastSolveConverged() && _trans_ss_check == true && _time > _ss_tmin)
+  if (lastSolveConverged() &&
+      !_xfem_repeat_step &&
+      _trans_ss_check == true && _time > _ss_tmin)
   {
     // Compute new time solution l2_norm
     Real new_time_solution_norm = _problem.getNonlinearSystem().currentSolution()->l2_norm();

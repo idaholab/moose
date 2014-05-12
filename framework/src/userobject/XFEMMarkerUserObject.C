@@ -77,6 +77,7 @@ XFEMMarkerUserObject::finalize()
   //TODO: This doesn't compile.  My guess is that it's because of the RealVectorValue.
   //Parallel::set_union(_marked_elems); //TODO do error checking for duplicates here too
 
+  _xfem->clearStateMarkedElems();
   std::map<unsigned int, RealVectorValue>::iterator mit;
   for (mit = _marked_elems.begin(); mit != _marked_elems.end(); ++mit)
   {
