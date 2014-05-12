@@ -586,7 +586,7 @@ XFEM::mark_cut_edges_by_state()
 
     if (num_cut != 2)
     {
-      libMesh::err << " ERROR: element "<<elem->id()<<" must have two cuts"<<std::endl;
+      libMesh::err << " ERROR: element "<<elem->id()<<" must have two cuts.  num: "<<num_cut<<std::endl;
       exit(1);
     }
 

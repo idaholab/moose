@@ -84,7 +84,7 @@ XFEMMaterialTensorMarkerUserObject::doesElementCrack(RealVectorValue &direction)
     if (max_quantity > _threshold)
     {
       does_it_crack = true;
-      direction = tensor_quantities[max_index];
+      direction = directions[max_index];
     }
   }
 
