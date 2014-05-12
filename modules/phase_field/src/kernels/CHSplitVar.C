@@ -31,7 +31,7 @@ CHSplitVar::precomputeQpJacobian()
 Real
 CHSplitVar::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar == _var_c)
+  if (jvar == _var_c)
     return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 
   return 0.0;
