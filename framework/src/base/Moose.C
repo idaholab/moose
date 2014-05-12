@@ -675,6 +675,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
   registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
   registerMooseObjectTask("add_coupled_variable",         AuxKernel,              false);
+  registerMooseObjectTask("add_aux_bc",                   AuxKernel,              false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
@@ -890,6 +891,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(AddKernelAction, "add_kernel");
   registerAction(AddKernelAction, "add_aux_kernel");
+  registerAction(AddKernelAction, "add_aux_bc");
   registerAction(AddScalarKernelAction, "add_scalar_kernel");
   registerAction(AddScalarKernelAction, "add_aux_scalar_kernel");
   registerAction(AddDGKernelAction, "add_dg_kernel");

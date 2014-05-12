@@ -34,6 +34,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("AddKernelAction", "Kernels/*", "add_kernel");
   syntax.registerActionSyntax("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
+  syntax.registerActionSyntax("AddKernelAction", "AuxBCs/*", "add_aux_bc");
   syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");
 
   syntax.registerActionSyntax("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
