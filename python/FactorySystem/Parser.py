@@ -6,6 +6,7 @@ sys.path.append('.')
 sys.path.append('../../framework/scripts/TestHarness')
 import ParseGetPot, Factory
 from MooseObject import MooseObject
+from Warehouse import Warehouse
 
 
 class Parser:
@@ -22,14 +23,14 @@ class Parser:
       print "Parse Error: " + filename
       sys.exit(1)
 
-    self.parseNode(root)
+    self._parseNode(root)
 
     if len(self.params_ignored):
       print "Warning detected during test specification parsing\n  File: " #+ os.path.join(test_dir, filename)
       print '       Ignored Parameter(s): ', self.params_ignored
 
 
-  def parseNode(self, node):
+  def _parseNode(self, node):
     if 'type' in node.params:
       moose_type = node.params['type']
 
@@ -47,7 +48,7 @@ class Parser:
 
     # Loop over the section names and parse them
     for child in node.children_list:
-      self.parseNode(node.children[child])
+      self._parseNode(node.children[child])
 
 
   def extractParams(self, params, getpot_node):
@@ -64,7 +65,7 @@ class Parser:
         if params.type(key) == list:
           params[key] = value.split(' ')
         else:
-          if re.match('",*"', value):   # Strip quotes
+          if re.match('".*"', value):   # Strip quotes
             params[key] = value[1:-1]
           else:
             # Prevent bool types from being stored as strings.  This can lead to the
@@ -90,14 +91,6 @@ class Parser:
     if len(required_params_missing):
       print "Error detected during test specification parsing\n  File: " #+ os.path.join(test_dir, filename)
       print '       Required Missing Parameter(s): ', required_params_missing
-
-
-class Warehouse:
-  def __init__(self):
-    self.objects = []
-
-  def addObject(self, moose_object):
-    self.objects.append(moose_object)
 
 
 if __name__ == '__main__':

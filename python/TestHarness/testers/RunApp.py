@@ -40,12 +40,15 @@ class RunApp(Tester):
     else:
       self.mpi_command = 'mpiexec -host localhost'
 
+
   def checkRunnable(self, options):
     if options.enable_recover:
       if self.specs.isValid('expect_out') or self.specs['should_crash'] == True:
         reason = 'skipped (expect_out RECOVER)'
         return (False, reason)
     return (True, '')
+
+
 
   def getCommand(self, options):
     # Create the command line string to run
@@ -84,7 +87,7 @@ class RunApp(Tester):
     if options.parallel or ncpus > 1 or nthreads > 1:
       command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(specs['cli_args'])
     elif options.valgrind_mode == specs['valgrind'] or options.valgrind_mode == 'HEAVY' and specs[VALGRIND] == 'NORMAL':
-      command = 'valgrind --suppressions=' + specs['moose_dir'] + 'scripts/TestHarness/suppressions/errors.supp --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
+      command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
     else:
       command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
 
@@ -131,7 +134,7 @@ class RunApp(Tester):
     self.specs['cli_args'] = self.specs['cli_args'].strip()
 
     # Open our template. This should probably be done at the same time as cluster_handle.
-    template_script = open(self.specs['moose_dir'] + 'scripts/TestHarness/pbs_template.i', 'r')
+    template_script = open(os.path.join(self.specs['moose_dir'], 'python', 'TestHarness', 'pbs_template.i'), 'r')
     content = template_script.read()
     template_script.close()
 
@@ -162,7 +165,7 @@ class RunApp(Tester):
     # Write the cluster_launcher input file
     options.cluster_handle.write(content + '\n')
 
-    return self.specs['moose_dir'] + 'scripts/cluster_launcher.py tests.cluster'
+    return os.path.join(self.specs['moose_dir'], 'framework', 'scripts', 'cluster_launcher.py') + ' tests.cluster'
 
 
   def processResults(self, moose_dir, retcode, options, output):

@@ -53,7 +53,7 @@ class Exodiff(RunApp):
         reason = 'MISSING GOLD FILE'
         break
       else:
-        command = os.path.join(moose_dir, 'contrib', 'exodiff', 'exodiff') + ' -m' + custom_cmp + ' -F' + ' ' + str(specs['abs_zero']) + old_floor + ' -t ' + str(specs['rel_err']) \
+        command = os.path.join(moose_dir, 'framework', 'contrib', 'exodiff', 'exodiff') + ' -m' + custom_cmp + ' -F' + ' ' + str(specs['abs_zero']) + old_floor + ' -t ' + str(specs['rel_err']) \
             + ' ' + ' '.join(specs['exodiff_opts']) + ' ' + os.path.join(specs['test_dir'], specs['gold_dir'], file) + ' ' + os.path.join(specs['test_dir'], file)
         exo_output = runCommand(command)
 

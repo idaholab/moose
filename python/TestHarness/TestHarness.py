@@ -16,6 +16,8 @@ from Tester import Tester
 from PetscJacobianTester import PetscJacobianTester
 from InputParameters import InputParameters
 from Factory import Factory
+from Parser import Parser
+from Warehouse import Warehouse
 
 import argparse
 from optparse import OptionParser, OptionGroup, Values
@@ -28,7 +30,7 @@ class TestHarness:
     # Get dependant applications and load dynamic tester plugins
     # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
     dirs = [os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))]
-    sys.path.append(os.path.join(moose_dir, 'framework', 'scripts'))
+    sys.path.append(os.path.join(moose_dir, 'framework', 'scripts'))   # For find_dep_apps.py
 
     # Use the find_dep_apps script to get the dependant applications for an app
     import find_dep_apps
@@ -44,14 +46,14 @@ class TestHarness:
     self.num_skipped = 0
     self.num_pending = 0
     self.host_name = gethostname()
-    self.moose_dir = os.path.join(moose_dir, 'framework')
+    self.moose_dir = moose_dir
     self.run_tests_dir = os.path.abspath('.')
     self.code = '2d2d6769726c2d6d6f6465'
     # Assume libmesh is a peer directory to MOOSE if not defined
     if os.environ.has_key("LIBMESH_DIR"):
       self.libmesh_dir = os.environ['LIBMESH_DIR']
     else:
-      self.libmesh_dir = self.moose_dir + os.path.join('..', 'libmesh', 'installed')
+      self.libmesh_dir = os.path.join(self.moose_dir, 'libmesh', 'installed')
     self.file = None
 
     # Parse arguments
@@ -105,24 +107,33 @@ class TestHarness:
               saved_cwd = os.getcwd()
               sys.path.append(os.path.abspath(dirpath))
               os.chdir(dirpath)
-              tests = self.parseGetPotTestFormat(file)
+
+              if self.prunePath(file):
+                continue
+
+              # Build a Warehouse to hold the MooseObjects
+              warehouse = Warehouse()
+
+              # Build a Parser to parse the objects
+              parser = Parser(self.factory, warehouse)
+
+              # Parse it
+              parser.parse(file)
+
+              # Retrieve the tests from the warehouse
+              testers = warehouse.getAllObjects()
+
+              # Augment the Testers with additional information directly from the TestHarness
+              for tester in testers:
+                self.augmentParameters(file, tester)
 
               if self.options.enable_recover:
-                tests = self.appendRecoverableTests(tests)
+                testers = self.appendRecoverableTests(testers)
 
-              # Go through the list of test specs and run them
-              for test in tests:
-                # Strip begining and ending spaces to input file name
-                test['input'] = test['input'].strip()
-
+              # Go through the Testers and run them
+              for tester in testers:
                 # Double the alloted time for tests when running with the valgrind option
-                if self.options.valgrind_mode == 'NORMAL':
-                  test['max_time'] = test['max_time'] * 2
-                elif self.options.valgrind_mode == 'HEAVY':
-                  test['max_time'] = test['max_time'] * 4
-
-                # Build the requested Tester object and run
-                tester = self.factory.create(test['type'], 'ignored', test)
+                tester.setValgrindMode(self.options.valgrind_mode)
 
                 # When running in valgrind mode, we end up with a ton of output for each failed
                 # test.  Therefore, we limit the number of fails...
@@ -144,8 +155,8 @@ class TestHarness:
                   self.runner.run(tester, command)
                 else: # This job is skipped - notify the runner
                   if (reason != ''):
-                    self.handleTestResult(test, '', reason)
-                  self.runner.jobSkipped(test['test_name'])
+                    self.handleTestResult(tester.parameters(), '', reason)
+                  self.runner.jobSkipped(tester.parameters()['test_name'])
 
                 if self.options.cluster_handle != None:
                   self.options.cluster_handle.write('[]\n')
@@ -165,137 +176,79 @@ class TestHarness:
     else:
       self.cleanupAndExit()
 
-  def parseGetPotTestFormat(self, filename):
-    tests = []
+  def prunePath(self, filename):
     test_dir = os.path.abspath(os.path.dirname(filename))
-    relative_path = test_dir.replace(self.run_tests_dir, '')
 
     # Filter tests that we want to run
     # Under the new format, we will filter based on directory not filename since it is fixed
-    will_run = False
+    prune = True
     if len(self.tests) == 0:
-      will_run = True
+      prune = False # No filter
     else:
       for item in self.tests:
         if test_dir.find(item) > -1:
-          will_run = True
-    if not will_run:
-      return tests
+          prune = False
 
-    try:
-      data = ParseGetPot.readInputFile(filename)
-    except:        # ParseGetPot class
-      print "Parse Error: " + test_dir + "/" + filename
-      return tests
+    # Return the inverse of will_run to indicate that this path should be pruned
+    return prune
 
-    # We expect our root node to be called "Tests"
-    if 'Tests' in data.children:
-      tests_node = data.children['Tests']
+  def augmentParameters(self, filename, tester):
+    params = tester.parameters()
 
-      for testname, test_node in tests_node.children.iteritems():
-        # First retrieve the type so we can get the valid params
-        if 'type' not in test_node.params:
-          print "Type missing in " + test_dir + filename
-          sys.exit(1)
+    # We are going to do some formatting of the path that is printed
+    # Case 1.  If the test directory (normally matches the input_file_name) comes first,
+    #          we will simply remove it from the path
+    # Case 2.  If the test directory is somewhere in the middle then we should preserve
+    #          the leading part of the path
+    test_dir = os.path.abspath(os.path.dirname(filename))
+    relative_path = test_dir.replace(self.run_tests_dir, '')
+    relative_path = relative_path.replace('/' + self.options.input_file_name + '/', ':')
+    relative_path = re.sub('^[/:]*', '', relative_path)  # Trim slashes and colons
+    formatted_name = relative_path + '.' + tester.name()
 
-        params = self.factory.validParams(test_node.params['type'])
+    params['test_name'] = formatted_name
+    params['test_dir'] = test_dir
+    params['relative_path'] = relative_path
+    params['executable'] = self.executable
+    params['hostname'] = self.host_name
+    params['moose_dir'] = self.moose_dir
 
-        # Now update all the base level keys
-        params_parsed = set()
-        params_ignored = set()
-        for key, value in test_node.params.iteritems():
-          params_parsed.add(key)
-          if key in params:
-            if params.type(key) == list:
-              params[key] = value.split(' ')
-            else:
-              if re.match('".*"', value):  # Strip quotes
-                params[key] = value[1:-1]
-              else:
-                # Prevent bool types from being stored as strings.  This can lead to the
-                # strange situation where string('False') evaluates to true...
-                if params.isValid(key) and (type(params[key]) == type(bool())):
-                  # We support using the case-insensitive strings {true, false} and the string '0', '1'.
-                  if (value.lower()=='true') or (value=='1'):
-                    params[key] = True
-                  elif (value.lower()=='false') or (value=='0'):
-                    params[key] = False
-                  else:
-                    print "Unrecognized (key,value) pair: (", key, ',', value, ")"
-                    sys.exit(1)
-
-                # Otherwise, just do normal assignment
-                else:
-                  params[key] = value
-          else:
-            params_ignored.add(key)
-
-        # Make sure that all required parameters are supplied
-        required_params_missing = params.required_keys() - params_parsed
-        if len(required_params_missing):
-          print "Error detected during test specification parsing\n  File: " + os.path.join(test_dir, filename)
-          print '       Required Missing Parameter(s): ', required_params_missing
-        if len(params_ignored):
-          print "Warning detected during test specification parsing\n  File: " + os.path.join(test_dir, filename)
-          print '       Ignored Parameter(s): ', params_ignored
-
-        # We are going to do some formatting of the path that is printed
-        # Case 1.  If the test directory (normally matches the input_file_name) comes first,
-        #          we will simply remove it from the path
-        # Case 2.  If the test directory is somewhere in the middle then we should preserve
-        #          the leading part of the path
-        relative_path = relative_path.replace('/' + self.options.input_file_name + '/', ':')
-        relative_path = re.sub('^[/:]*', '', relative_path)  # Trim slashes and colons
-        formatted_name = relative_path + '.' + testname
-
-        params['test_name'] = formatted_name
-        params['test_dir'] = test_dir
-        params['relative_path'] = relative_path
-        params['executable'] = self.executable
-        params['hostname'] = self.host_name
-        params['moose_dir'] = self.moose_dir
-        if params.isValid('prereq'):
-          if type(params['prereq']) != list:
-            print "Option 'prereq' needs to be of type list in " + params['test_name']
-            sys.exit(1)
-          params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
-
-        # Build a list of test specs (dicts) to return
-        tests.append(params)
-    return tests
-
-  def augmentTestSpecs(self, test):
-    test['executable'] = self.executable
-    test['hostname'] = self.host_name
+    if params.isValid('prereq'):
+      if type(params['prereq']) != list:
+        print "Option 'prereq' needs to be of type list in " + params['test_name']
+        sys.exit(1)
+      params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
 
   # This method splits a lists of tests into two pieces each, the first piece will run the test for
   # approx. half the number of timesteps and will write out a restart file.  The second test will
   # then complete the run using the MOOSE recover option.
-  def appendRecoverableTests(self, tests):
+  def appendRecoverableTests(self, testers):
     new_tests = []
 
-    for part1 in tests:
-      if part1['recover'] == True:
+    for part1 in testers:
+      if part1.parameters()['recover'] == True:
         # Clone the test specs
         part2 = copy.deepcopy(part1)
 
         # Part 1:
-        part1['test_name'] += '_part1'
-        part1['cli_args'].append('--half-transient')
-        part1['cli_args'].append('Outputs/auto_recovery_part1=true')
-        part1['skip_checks'] = True
+        part1_params = part1.parameters()
+        part1_params['test_name'] += '_part1'
+        part1_params['cli_args'].append('--half-transient')
+        part1_params['cli_args'].append('Outputs/auto_recovery_part1=true')
+        part1_params['skip_checks'] = True
 
         # Part 2:
-        part2['prereq'].append(part1['test_name'])
-        part2['delete_output_before_running'] = False
-        part2['cli_args'].append('Outputs/auto_recovery_part2=true')
-        part2['cli_args'].append('--recover')
-        part2.addParam('caveats', ['recover'], "")
+        part2_params = part2.parameters()
+        part2_params['prereq'].append(part1.parameters()['test_name'])
+        part2_params['delete_output_before_running'] = False
+        part2_params['cli_args'].append('Outputs/auto_recovery_part2=true')
+        part2_params['cli_args'].append('--recover')
+        part2_params.addParam('caveats', ['recover'], "")
 
         new_tests.append(part2)
 
-    tests.extend(new_tests)
-    return tests
+    testers.extend(new_tests)
+    return testers
 
   ## Finish the test by inspecting the raw output
   def testOutputAndFinish(self, tester, retcode, output, start=0, end=0):

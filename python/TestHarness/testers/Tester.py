@@ -40,6 +40,14 @@ class Tester(MooseObject):
     self.specs = params
 
 
+  def setValgrindMode(self, mode):
+    # Increase the alloted time for tests when running with the valgrind option
+    if mode == 'NORMAL':
+      self.specs['max_time'] = self.specs['max_time'] * 2
+    elif mode == 'NORMAL':
+      self.specs['max_time'] = self.specs['max_time'] * 4
+
+
   # Override this method to tell the harness whether or not this test should run.
   # This function should return a tuple (Boolean, reason)
   # If a reason is provided it'll be printed and counted as skipped.  If the reason
