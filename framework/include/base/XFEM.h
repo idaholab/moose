@@ -125,6 +125,7 @@ public:
   void addGeometricCut(XFEM_geometric_cut* geometric_cut);
 
   void addStateMarkedElem(unsigned int elem_id, RealVectorValue normal);
+  void addStateMarkedElem(unsigned int elem_id, RealVectorValue normal, unsigned int marked_side);
 
   void clearStateMarkedElems();
 
@@ -150,6 +151,7 @@ public:
   Real get_cut_plane(const Elem* elem, const XFEM_CUTPLANE_QUANTITY quantity) const;
 
   bool is_elem_at_crack_tip(const Elem* elem) const;
+  bool is_elem_cut(const Elem* elem) const;
 
 private:
   /**
@@ -163,6 +165,7 @@ private:
   std::set<const Elem*> _crack_tip_elems;
 
   std::map<const Elem*, RealVectorValue> _state_marked_elems;
+  std::map<const Elem*, unsigned int> _state_marked_elem_sides;
 
   LocationMap<Node> _new_nodes_map;
   LocationMap<Node> _new_nodes_map2;

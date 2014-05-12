@@ -43,8 +43,11 @@ protected:
   virtual bool doesElementCrack(RealVectorValue &direction);
 
 private:
+  MooseMesh & _mesh;
+  std::vector<BoundaryID> _initiation_boundary_ids;
   XFEM *_xfem;
   std::map<unsigned int, RealVectorValue> _marked_elems;
+  std::map<unsigned int, unsigned int> _marked_elem_sides;
 };
 
 template<>

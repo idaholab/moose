@@ -286,9 +286,25 @@ XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue normal)
 }
 
 void
+XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue normal, unsigned int marked_side)
+{
+  addStateMarkedElem(elem_id, normal);
+  Elem *elem = _mesh->elem(elem_id);
+  std::map<const Elem*, unsigned int>::iterator mit;
+  mit = _state_marked_elem_sides.find(elem);
+  if (mit != _state_marked_elem_sides.end())
+  {
+    libMesh::err << " ERROR: side of element "<<elem->id()<<" already marked for crack initiation."<<std::endl;
+    exit(1);
+  }
+  _state_marked_elem_sides[elem] = marked_side;
+}
+
+void
 XFEM::clearStateMarkedElems()
 {
   _state_marked_elems.clear();
+  _state_marked_elem_sides.clear();
 }
 
 bool
@@ -329,7 +345,7 @@ XFEM::update(Real time)
       _mesh2->prepare_for_use(true);
     }
   }
-  _state_marked_elems.clear();
+  clearStateMarkedElems();
 
   return mesh_changed;
 }
@@ -511,8 +527,19 @@ XFEM::mark_cut_edges_by_state()
     }
     if (orig_cut_side_id == 999999)
     {
-      libMesh::err << " ERROR: element "<<elem->id()<<" flagged for state-based growth, but has no edge intersections"<<std::endl;
-      exit(1);
+      std::map<const Elem*, unsigned int>::iterator mit;
+      mit = _state_marked_elem_sides.find(elem);
+      if (mit != _state_marked_elem_sides.end())
+      {
+        orig_cut_side_id = mit->second;
+        orig_cut_distance = 0.5;
+        _efa_mesh.addEdgeIntersection(elem->id(),orig_cut_side_id,orig_cut_distance);
+      }
+      else
+      {
+        libMesh::err << " ERROR: element "<<elem->id()<<" flagged for state-based growth, but has no edge intersections"<<std::endl;
+        exit(1);
+      }
     }
 
     //find position of existing edge cut to use for cutting plane origin
@@ -829,13 +856,11 @@ XFEM::get_cut_plane(const Elem* elem,
 bool
 XFEM::is_elem_at_crack_tip(const Elem* elem) const
 {
-  bool is_at_tip = false;
-  std::set<const Elem*>::const_iterator it;
-  it = _crack_tip_elems.find(elem);
-  if (it != _crack_tip_elems.end())
-  {
-    is_at_tip = true;
-  }
+  return (_crack_tip_elems.find(elem) != _crack_tip_elems.end());
+}
 
-  return is_at_tip;
+bool
+XFEM::is_elem_cut(const Elem* elem) const
+{
+  return (_cut_elem_map.find(elem) != _cut_elem_map.end());
 }

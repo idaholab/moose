@@ -20,11 +20,13 @@ template<>
 InputParameters validParams<XFEMMarkerUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
+  params.addParam<std::vector<BoundaryName> >("initiate_on_boundary","Permit cracks to initiate in elements adjacent to specified boundaries");
   return params;
 }
 
 XFEMMarkerUserObject::XFEMMarkerUserObject(const std::string & name, InputParameters parameters)
-  :ElementUserObject(name, parameters)
+  :ElementUserObject(name, parameters),
+  _mesh(_subproblem.mesh())
 {
   FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
   if (fe_problem == NULL)
@@ -32,29 +34,55 @@ XFEMMarkerUserObject::XFEMMarkerUserObject(const std::string & name, InputParame
   _xfem = fe_problem->get_xfem();
   if (isNodal())
     mooseError("XFEMMarkerUserObject can only be run on an element variable");
+
+  if (isParamValid("initiate_on_boundary"))
+  {
+    std::vector<BoundaryName> initiation_boundary_names = getParam<std::vector<BoundaryName> >("initiate_on_boundary");
+    _initiation_boundary_ids = _mesh.getBoundaryIDs(initiation_boundary_names,true);
+  }
 }
 
 void
 XFEMMarkerUserObject::initialize()
 {
   _marked_elems.clear();
+  _marked_elem_sides.clear();
 }
 
 void
 XFEMMarkerUserObject::execute()
 {
   RealVectorValue direction;
-  bool isCTE = _xfem->is_elem_at_crack_tip(_current_elem);
-  if (isCTE && doesElementCrack(direction))
+  bool isCut = _xfem->is_elem_cut(_current_elem);
+  if (!isCut)
   {
-    unsigned int _current_eid = _current_elem->id();
-    std::map<unsigned int, RealVectorValue>::iterator mit;
-    mit = _marked_elems.find(_current_eid);
-    if (mit != _marked_elems.end())
+    bool isCTE = _xfem->is_elem_at_crack_tip(_current_elem);
+    bool isOnBoundary = false;
+    unsigned int boundarySide = 99999;
+    for (unsigned int i=0; i<_initiation_boundary_ids.size(); ++i)
     {
-      mooseError("ERROR: element "<<_current_eid<<" already marked for crack growth.");
+      if (_mesh.isBoundaryElem(_current_elem->id(),_initiation_boundary_ids[i]))
+      {
+        isOnBoundary = true;
+        boundarySide = _mesh.sideWithBoundaryID(_current_elem, _initiation_boundary_ids[i]);
+      }
     }
-    _marked_elems[_current_eid] = direction;
+    if ((isCTE || isOnBoundary)
+        && doesElementCrack(direction))
+    {
+      unsigned int _current_eid = _current_elem->id();
+      std::map<unsigned int, RealVectorValue>::iterator mit;
+      mit = _marked_elems.find(_current_eid);
+      if (mit != _marked_elems.end())
+      {
+        mooseError("ERROR: element "<<_current_eid<<" already marked for crack growth.");
+      }
+      _marked_elems[_current_eid] = direction;
+      if (isOnBoundary)
+      {
+        _marked_elem_sides[_current_eid] = boundarySide;
+      }
+    }
   }
 }
 
@@ -69,6 +97,13 @@ XFEMMarkerUserObject::threadJoin(const UserObject &y)
   {
     _marked_elems[mit->first] = mit->second; //TODO do error checking for duplicates here too
   }
+
+  for ( std::map<unsigned int, unsigned int>::const_iterator mit = xmuo._marked_elem_sides.begin();
+        mit != xmuo._marked_elem_sides.end();
+        ++mit )
+  {
+    _marked_elem_sides[mit->first] = mit->second; //TODO do error checking for duplicates here too
+  }
 }
 
 void
@@ -81,9 +116,17 @@ XFEMMarkerUserObject::finalize()
   std::map<unsigned int, RealVectorValue>::iterator mit;
   for (mit = _marked_elems.begin(); mit != _marked_elems.end(); ++mit)
   {
-    _xfem->addStateMarkedElem(mit->first, mit->second);
+    if (_marked_elem_sides.find(mit->first) != _marked_elem_sides.end())
+    {
+      _xfem->addStateMarkedElem(mit->first, mit->second, _marked_elem_sides[mit->first]);
+    }
+    else
+    {
+      _xfem->addStateMarkedElem(mit->first, mit->second);
+    }
   }
   _marked_elems.clear();
+  _marked_elem_sides.clear();
 }
 
 bool
