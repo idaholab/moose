@@ -28,21 +28,17 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// MOOSE's internal variable number corresonding to the porepressure - need this for OffDiagJacobian calculation
+  /// moose internal variable number corresponding to the porepressure (need this of OffDiagJacobian)
   unsigned int _pressure_var;
 
-  /// reciprocal of desorption time constant (got from LangmuirMaterial, for instance)
-  MaterialProperty<Real> &_one_over_desorption_time_const;
+  /// mass flow rate from matrix = mass flow rate to porespace
+  MaterialProperty<Real> & _mass_rate_from_matrix;
 
-  /// reciprocal of adsorption time constant (got from LangmuirMaterial, for instance)
-  MaterialProperty<Real> &_one_over_adsorption_time_const;
+  /// derivative of mass flow rate from matrix wrt concentration
+  MaterialProperty<Real> & _dmass_rate_from_matrix_dC;
 
-  /// equilibrium concentration of the adsorbed fluid
-  MaterialProperty<Real> &_equilib_conc;
-
-  /// derivative of equilibrium concentration of the adsorbed fluid wrt the porepressure
-  MaterialProperty<Real> &_equilib_conc_prime;
-
+  /// derivative of mass flow rate from matrix wrt pressure
+  MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
 
 #endif //DESORPTIONFROMMATRIX

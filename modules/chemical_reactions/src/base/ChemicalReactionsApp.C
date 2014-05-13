@@ -26,6 +26,7 @@
 #include "ChemicalOutFlowBC.h"
 
 #include "LangmuirMaterial.h"
+#include "MollifiedLangmuirMaterial.h"
 
 template<>
 InputParameters validParams<ChemicalReactionsApp>()
@@ -76,6 +77,7 @@ ChemicalReactionsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(ChemicalOutFlowBC);
 
   registerMaterial(LangmuirMaterial);
+  registerMaterial(MollifiedLangmuirMaterial);
 }
 
 void

@@ -1,4 +1,4 @@
-# testing the entire desorption DEs
+# testing the entire desorption DEs with mollification
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -89,7 +89,7 @@
 
 [Materials]
   [./lang_stuff]
-    type = LangmuirMaterial
+    type = MollifiedLangmuirMaterial
     block = 0
     one_over_desorption_time_const = 0.90909091
     one_over_adsorption_time_const = 0.90909091
@@ -97,6 +97,7 @@
     langmuir_pressure = 1.23
     pressure_var = pressure
     conc_var = conc
+    mollifier = 1E-4
   [../]
 []
 
@@ -118,7 +119,7 @@
   end_time = 2
 []
 [Outputs]
-  file_base = langmuir_desorption
+  file_base = mollified_langmuir_desorption
   output_initial = true
   interval = 10
   exodus = true
