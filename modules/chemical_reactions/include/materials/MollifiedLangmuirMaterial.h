@@ -1,22 +1,22 @@
-#ifndef LANGMUIRMATERIAL_H
-#define LANGMUIRMATERIAL_H
+#ifndef MOLLFIEDLANGMUIRMATERIAL_H
+#define MOLLFIEDLANGMUIRMATERIAL_H
 
 #include "Material.h"
 
 //Forward Declarations
-class LangmuirMaterial;
+class MollifiedLangmuirMaterial;
 
 template<>
-InputParameters validParams<LangmuirMaterial>();
+InputParameters validParams<MollifiedLangmuirMaterial>();
 
 /**
  * Holds Langmuir parameters associated with desorption
  * Calculates mass-flow rates and derivatives thereof for use by kernels
  */
-class LangmuirMaterial : public Material
+class MollifiedLangmuirMaterial : public Material
 {
 public:
-  LangmuirMaterial(const std::string & name,
+  MollifiedLangmuirMaterial(const std::string & name,
                   InputParameters parameters);
 
 protected:
@@ -45,6 +45,14 @@ private:
   /// porespace pressure (or partial pressure if multiphase flow scenario)
   VariableValue * _pressure;
 
+  /**
+   * mollifying parameter.  the time constants are
+   * one_over_time_const * tanh( |_conc - equilib_conc|/(mollifier*_langmuir_dens) )
+   * Here equilib_conc = langmuir_dens*_pressure/(_pressure + _langmuir_p)
+   * which is the langmuir expression
+   */
+  Real _mollifier;
+
   /// mass flow rate from the matrix = mass flow rate to the porespace
   MaterialProperty<Real> & _mass_rate_from_matrix;
 
@@ -53,6 +61,7 @@ private:
 
   /// derivative of mass flow rate wrt pressure
   MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
+
 };
 
-#endif //LANGMUIRMATERIAL_H
+#endif //MOLLFIEDLANGMUIRMATERIAL_H

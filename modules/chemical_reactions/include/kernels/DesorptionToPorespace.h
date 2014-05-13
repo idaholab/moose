@@ -11,8 +11,9 @@ template<>
 InputParameters validParams<DesorptionToPorespace>();
 
 /**
- * Mass flow rate of fluid from the matrix to porespace
- * Add this to variable's equation so fluid contained in the matrix will desorbe to the variable's porespace mass
+ * Mass flow rate of fluid to the porespace from the matrix
+ * Add this to the DE for the porepressure variable to get
+ * fluid flowing from the matrix to the porespace
  */
 class DesorptionToPorespace : public Kernel
 {
@@ -28,23 +29,17 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// Variable that is the concentration of fluid adsorbed inside the rock matrix
-  VariableValue * _conc_val;
-
-  /// MOOSE's internal variable number corresponding to _conc_val.  This is necessary for OffDiagJacobian computation
+  /// moose internal variable number corresponding to the concentration in the matrix (needed for OffDiagJacobian)
   unsigned int _conc_var;
 
-  /// reciprocal of desorption time constant (got from LangmuirMaterial, for instance)
-  MaterialProperty<Real> &_one_over_desorption_time_const;
+  /// mass flow rate from matrix = mass flow rate to porespace
+  MaterialProperty<Real> & _mass_rate_from_matrix;
 
-  /// reciprocal of adsorption time constant (got from LangmuirMaterial, for instance)
-  MaterialProperty<Real> &_one_over_adsorption_time_const;
+  /// derivative of mass flow rate from matrix wrt concentration
+  MaterialProperty<Real> & _dmass_rate_from_matrix_dC;
 
-  /// equilibrium concentration of the adsorbed fluid
-  MaterialProperty<Real> &_equilib_conc;
-
-  /// derivative of equilibrium concentration of the adsorbed fluid wrt the porepressure
-  MaterialProperty<Real> &_equilib_conc_prime;
+  /// derivative of mass flow rate from matrix wrt pressure
+  MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
 
 #endif //DESORPTIONTOPORESPACE
