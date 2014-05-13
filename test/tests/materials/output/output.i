@@ -13,18 +13,11 @@
   [../]
 []
 
-[Functions]
-  [./func]
-    type = ParsedFunction
-    value = x*y+t
-  [../]
-[]
-
 [Kernels]
   [./diff]
     type = CoefDiffusion
     variable = u
-    coef = 1
+    coef = 10
   [../]
   [./time]
     type = TimeDerivative
