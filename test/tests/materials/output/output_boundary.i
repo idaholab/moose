@@ -14,7 +14,7 @@
   [./diff]
     type = CoefDiffusion
     variable = u
-    coef = 0.1
+    coef = 1
   [../]
   [./time]
     type = TimeDerivative
