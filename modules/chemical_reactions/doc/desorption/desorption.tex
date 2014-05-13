@@ -122,14 +122,27 @@ the porespace that appears in Eqn~(\ref{porespace.eqn}).
 The RHSs of Eqn~(\ref{eqn.adde}) and Eqn~(\ref{porespace.eqn}) (without
 the $\ldots$ terms) have been coded as two Kernels.  The reason for
 having two, rather than one, is to make the Jacobian contributions
-simple.
+simple.  Each time constant is an auxillary variable, to allow more
+flexibility with choosing time and spatial dependencies.
 
 The Langmuir equilibrium concentration, Eqn~(\ref{langmuir.ce}), has
 been coded into a Material class, which stores $\rho_{L}$ and $P_{L}$,
-and calculates $C_{\mathrm{e}}$ as well as its derivative with respect
-to $P$.  By doing this, rather than getting the Kernels to calculate
-$C_{\mathrm{e}}$, I hope future developers will be able to more
-easily code different forms for $C_{\mathrm{e}}$.
+calculates $C_{\mathrm{e}}$, and provides the mass-flow rates to the
+kernels, and the derivatives of the mass-flow rates for Jacobian
+computations.
+
+A Mollified Langmuir material class has also been coded.  This makes
+the transition between adsorption and desorption smoother.  The each
+time constant is
+\begin{equation}
+\frac{1}{\tau} = \frac{1}{\tau_{mathrm{a}\ \mathrm{or}\ \mathrm{d}}}
+\tanh \left| \frac{C-C_{\mathrm{e}}}{m\rho_{L}}\right| \,
+\end{equation}
+for $C_{\mathrm{e}}$ given by the Langmuir expression of
+Eqn~(\ref{langmuir.ce}).  
+Here $m$ is a mollification parameter.  As $m \rightarrow 0^{+}$ the
+mollified version tends to the original Langmuir version.
+
 
 
 \chapter{Tests}
@@ -145,13 +158,20 @@ These equations are not supposed to be physically meaningful (for
 instance, $P_{L}$ has dimensions mass/volume), but they have simple
 solutions.  I have used $\tau = \tau_{d} = \tau_{a}$.
 
-\section{A test of the Jacobian}
+\section{Tests of the Jacobian}
 
 The Jacobians of the two Kernels both involve diagonal terms
 (derivatives wrt the variable) and off-diagonal terms (derivatives wrt
 the other variable).  The automatic test suite uses PETSc's {\tt
   snes\_type=test} (a finite-difference) to test that these Jacobian
-entries are correct.
+entries are correct.  A number of tests are made:
+\begin{itemize}
+\item Desorption only
+\item Adsorption only
+\item Desorption with mollification
+\item Adsorption with mollification
+\item Mollified Langmuir with large mollifying parameter
+\end{itemize}
 
 \section{A test of the dynamics}
 

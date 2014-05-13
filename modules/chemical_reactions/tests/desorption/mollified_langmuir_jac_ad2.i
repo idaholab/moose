@@ -1,16 +1,16 @@
-# testing whether when we have a centre block containing 'conc' which is a CONSTANT MONOMIAL, we get the correct Jacobian
+# testing adsorption jacobian with large mollification parameter
 [Mesh]
-  type = FileMesh
-  file = three_eles.e
+  type = GeneratedMesh
+  dim = 1
+  nx = 1
+  xmin = -1
+  xmax = 1
 []
 
 [Variables]
   [./pressure]
   [../]
   [./conc]
-    family = MONOMIAL
-    order = CONSTANT
-    block = centre_block
   [../]
 []
 
@@ -18,7 +18,7 @@
   [./p_ic]
     type = RandomIC
     variable = pressure
-    min = -1
+    min = 0
     max = 1
   [../]
   [./conc_ic]
@@ -26,44 +26,34 @@
     variable = conc
     min = -1
     max = 1
-    block = centre_block
   [../]
 []
 
 
 [Kernels]
-  [./p_dot] # this is just so a kernel is defined everywhere
-    type = TimeDerivative
-    variable = pressure
-  [../]
   [./flow_from_matrix]
     type = DesorptionFromMatrix
-    block = centre_block
     variable = conc
     pressure_var = pressure
   [../]
   [./flux_to_porespace]
     type = DesorptionToPorespace
-    block = centre_block
     variable = pressure
     conc_var = conc
   [../]
 []
 
 [Materials]
-  [./nothing] # when any block contains a material, all blocks need to
-    type = GenericConstantMaterial
-    block = 'left_block centre_block right_block'
-  [../]
-  [./langmuir_params]
+  [./mollified_langmuir_params]
     type = MollifiedLangmuirMaterial
-    block = centre_block
-    one_over_desorption_time_const = 0.813E-10
-    one_over_adsorption_time_const = 0.813E-10
-    langmuir_density = 2.34
+    block = 0
+    one_over_desorption_time_const = 0
+    one_over_adsorption_time_const = 0.813
+    langmuir_density = 6.34
     langmuir_pressure = 1.5
-    pressure_var = pressure
     conc_var = conc
+    pressure_var = pressure
+    mollifier = 1E2
   [../]
 []
 
@@ -84,7 +74,7 @@
 []
 
 [Outputs]
-  file_base = langmuir_jac2
+  file_base = langmuir_jac1
   output_initial = false
   exodus = false
   [./console]

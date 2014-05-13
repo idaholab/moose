@@ -140,11 +140,12 @@
   [./langmuir_params]
     type = LangmuirMaterial
     block = centre_block
-    mat_desorption_time_const = 1.23
-    mat_adsorption_time_const = 1.23
-    mat_langmuir_density = 20.0
-    mat_langmuir_pressure = 1.5E6
+    one_over_desorption_time_const = 0.813
+    one_over_adsorption_time_const = 0.813
+    langmuir_density = 20.0
+    langmuir_pressure = 1.5E6
     pressure_var = pgas
+    conc_var = conc
   [../]
 []
 

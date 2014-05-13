@@ -1,3 +1,4 @@
+# testing adsorption jacobian
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -17,7 +18,7 @@
   [./p_ic]
     type = RandomIC
     variable = pressure
-    min = -1
+    min = 0
     max = 1
   [../]
   [./conc_ic]
@@ -43,13 +44,14 @@
 []
 
 [Materials]
-  [./langmuir_params]
-    type = LangmuirMaterial
+  [./mollified_langmuir_params]
+    type = MollifiedLangmuirMaterial
     block = 0
-    mat_desorption_time_const = 1.23
-    mat_adsorption_time_const = 1.23
-    mat_langmuir_density = 2.34
-    mat_langmuir_pressure = 1.5
+    one_over_desorption_time_const = 0
+    one_over_adsorption_time_const = 0.813
+    langmuir_density = 6.34
+    langmuir_pressure = 1.5
+    conc_var = conc
     pressure_var = pressure
   [../]
 []
