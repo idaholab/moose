@@ -35,7 +35,7 @@ bool
 RandomHitUserObject::elementWasHit(const Elem * elem) const
 {
   bool was_hit = false;
-  for(unsigned int i=0; i<_num_hits; i++)
+  for (unsigned int i=0; i<_num_hits; i++)
   {
     was_hit = elem->contains_point(_hit_positions[i]);
     if (was_hit)
@@ -48,6 +48,6 @@ RandomHitUserObject::elementWasHit(const Elem * elem) const
 void
 RandomHitUserObject::execute()
 {
-  for(unsigned int i=0; i<_num_hits; i++)
+  for (unsigned int i=0; i<_num_hits; i++)
     _hit_positions[i] = Point(_random.rand(),_random.rand(),0);
 }

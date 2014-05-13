@@ -61,7 +61,7 @@ AdaptAndModify::endStep(Real input_time)
   if (_last_solve_converged)
   {
     // Compute the Error Indicators and Markers
-    for(unsigned int i=0; i<_adapt_cycles; i++)
+    for (unsigned int i=0; i<_adapt_cycles; i++)
     {
       // Compute the Error Indicators and Markers
       _problem.computeIndicatorsAndMarkers();

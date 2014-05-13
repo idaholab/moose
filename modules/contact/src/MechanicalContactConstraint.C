@@ -264,7 +264,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
 
   RealVectorValue res_vec;
   // Build up residual vector
-  for(unsigned int i=0; i<_mesh_dimension; ++i)
+  for (unsigned int i=0; i<_mesh_dimension; ++i)
   {
     long int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
@@ -339,7 +339,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
       break;
     case CM_GLUED:
     case CM_TIED:
-      switch(_formulation)
+      switch (_formulation)
       {
         case CF_DEFAULT:
           pinfo->_contact_force =  -res_vec;
@@ -376,7 +376,7 @@ MechanicalContactConstraint::computeQpResidual(Moose::ConstraintType type)
   computeContactForce(pinfo);
   Real resid = pinfo->_contact_force(_component);
 
-  switch(type)
+  switch (type)
   {
     case Moose::Slave:
       if (_formulation == CF_DEFAULT)
@@ -406,10 +406,10 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
 {
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
-  switch(type)
+  switch (type)
   {
     case Moose::SlaveSlave:
-      switch(_model)
+      switch (_model)
       {
         case CM_FRICTIONLESS:
         case CM_EXPERIMENTAL:
@@ -449,7 +449,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       }
 
     case Moose::SlaveMaster:
-      switch(_model)
+      switch (_model)
       {
         case CM_FRICTIONLESS:
         case CM_EXPERIMENTAL:
@@ -491,7 +491,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       }
 
     case Moose::MasterSlave:
-      switch(_model)
+      switch (_model)
       {
         case CM_FRICTIONLESS:
         case CM_EXPERIMENTAL:
@@ -533,7 +533,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       }
 
     case Moose::MasterMaster:
-      switch(_model)
+      switch (_model)
       {
         case CM_FRICTIONLESS:
         case CM_EXPERIMENTAL:

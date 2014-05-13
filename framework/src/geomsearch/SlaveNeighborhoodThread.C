@@ -77,7 +77,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
     unsigned int n_master_nodes = _trial_master_nodes.size();
 
     // Get a list, in descending order of distance, of master nodes in relation to this node
-    for(unsigned int k=0; k<n_master_nodes; k++)
+    for (unsigned int k=0; k<n_master_nodes; k++)
     {
       unsigned int master_id = _trial_master_nodes[k];
       const Node * cur_node = &_mesh.node(master_id);
@@ -92,7 +92,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
     neighbor_nodes.resize(patch_size);
 
     // Grab the closest "patch_size" worth of nodes to save off
-    for(unsigned int t=0; t<patch_size; t++)
+    for (unsigned int t=0; t<patch_size; t++)
     {
       std::pair<unsigned int, Real> neighbor_info = neighbors.top();
       neighbors.pop();
@@ -117,7 +117,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
       { // See if we own any of the elements connected to the slave node
         const std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[node_id];
 
-        for(unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
+        for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
           if (_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
           {
             need_to_track = true;
@@ -127,7 +127,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
 
       if (!need_to_track)
       { // Now check the neighbor nodes to see if we own any of them
-        for(unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
+        for (unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
         {
           unsigned int neighbor_node_id = neighbor_nodes[neighbor_it];
 
@@ -137,7 +137,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
           {
             const std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[neighbor_node_id];
 
-            for(unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
+            for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
               if (_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
               {
                 need_to_track = true;
@@ -162,16 +162,16 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
       { // Add the elements connected to the slave node to the ghosted list
         const std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[node_id];
 
-        for(unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
+        for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
           _ghosted_elems.insert(elems_connected_to_node[elem_id_it]);
       }
 
       // Now add elements connected to the neighbor nodes to the ghosted list
-      for(unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
+      for (unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
       {
         const std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[neighbor_nodes[neighbor_it]];
 
-        for(unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
+        for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
           _ghosted_elems.insert(elems_connected_to_node[elem_id_it]);
       }
     }

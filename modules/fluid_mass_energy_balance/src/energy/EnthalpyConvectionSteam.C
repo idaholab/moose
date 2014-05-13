@@ -56,7 +56,7 @@ Real EnthalpyConvectionSteam::computeQpJacobian()
 
 Real EnthalpyConvectionSteam::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar==_p_var)
+  if (jvar==_p_var)
     // return  _grad_test[_i][_qp]*(_tau_steam[_qp]*_grad_phi[_j][_qp]*_enthalpy_steam[_qp]);
     return _grad_test[_i][_qp]*(_Dtau_steamDP[_qp]*_phi[_j][_qp]*_grad_p[_qp]*_enthalpy_steam[_qp]
                                 +_tau_steam[_qp]*_grad_phi[_j][_qp]*_enthalpy_steam[_qp]
@@ -64,4 +64,3 @@ Real EnthalpyConvectionSteam::computeQpOffDiagJacobian(unsigned int jvar)
   else
     return 0.0;
 }
-

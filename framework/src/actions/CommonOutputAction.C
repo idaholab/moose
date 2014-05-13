@@ -203,7 +203,7 @@ CommonOutputAction::setRecoverFileBase()
   // First, the newest candidate files.
   // Note that these might have the same modification time if the simulation was fast
   // In that case we're going to save all of the "newest" files and sort it out momentarily
-  while(tdir.has_next)
+  while (tdir.has_next)
   {
     tinydir_file file;
 
@@ -241,7 +241,7 @@ CommonOutputAction::setRecoverFileBase()
   std::string max_base;
 
   // Now, out of the newest files find the one with the largest number in it
-  for(unsigned int i=0; i<newest_restart_files.size(); i++)
+  for (unsigned int i=0; i<newest_restart_files.size(); i++)
   {
     std::string file_name = newest_restart_files[i];
 

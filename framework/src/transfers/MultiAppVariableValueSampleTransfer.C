@@ -41,7 +41,7 @@ MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const s
 void
 MultiAppVariableValueSampleTransfer::execute()
 {
-  switch(_direction)
+  switch (_direction)
   {
     case TO_MULTIAPP:
     {
@@ -54,7 +54,7 @@ MultiAppVariableValueSampleTransfer::execute()
 
       AutoPtr<PointLocatorBase> pl = from_mesh.getMesh().sub_point_locator();
 
-      for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
         Real value = -std::numeric_limits<Real>::max();
 
@@ -95,7 +95,7 @@ MultiAppVariableValueSampleTransfer::execute()
           MeshBase::const_node_iterator node_it = mesh.localNodesBegin();
           MeshBase::const_node_iterator node_end = mesh.localNodesEnd();
 
-          for(; node_it != node_end; ++node_it)
+          for (; node_it != node_end; ++node_it)
           {
             Node * node = *node_it;
 

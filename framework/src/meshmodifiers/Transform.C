@@ -42,7 +42,7 @@ Transform::~Transform()
 void
 Transform::modify()
 {
-  switch(_transform)
+  switch (_transform)
   {
   case 1:
     MeshTools::Modification::translate(*_mesh_ptr, _vector_value(0), _vector_value(1), _vector_value(2)); break;

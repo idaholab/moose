@@ -76,7 +76,7 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
 
       // remove additional '\n' possibly generated in output (breaks YAML parsing)
       std::string tmp_str = toss.str();
-      for(std::string::iterator it=tmp_str.begin(); it!=tmp_str.end(); ++it)
+      for (std::string::iterator it=tmp_str.begin(); it!=tmp_str.end(); ++it)
       {
         if ( *it == '\n')
         {

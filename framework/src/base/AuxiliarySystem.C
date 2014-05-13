@@ -60,7 +60,7 @@ AuxiliarySystem::init()
 void
 AuxiliarySystem::initialSetup()
 {
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _auxs(EXEC_RESIDUAL)[i].initialSetup();
     _auxs(EXEC_TIMESTEP)[i].initialSetup();
@@ -71,7 +71,7 @@ AuxiliarySystem::initialSetup()
 void
 AuxiliarySystem::timestepSetup()
 {
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _auxs(EXEC_RESIDUAL)[i].timestepSetup();
     _auxs(EXEC_TIMESTEP)[i].timestepSetup();
@@ -82,14 +82,14 @@ AuxiliarySystem::timestepSetup()
 void
 AuxiliarySystem::residualSetup()
 {
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
     _auxs(EXEC_RESIDUAL)[i].residualSetup();
 }
 
 void
 AuxiliarySystem::jacobianSetup()
 {
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
     _auxs(EXEC_RESIDUAL)[i].jacobianSetup();
 }
 
@@ -321,7 +321,7 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
 {
   // Do we have some kernels to evaluate?
   bool have_block_kernels = false;
-  for(std::set<SubdomainID>::const_iterator subdomain_it = _mesh.meshSubdomains().begin();
+  for (std::set<SubdomainID>::const_iterator subdomain_it = _mesh.meshSubdomains().begin();
       subdomain_it != _mesh.meshSubdomains().end();
       ++subdomain_it)
   {
@@ -365,7 +365,7 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
   PARALLEL_TRY {
     bool element_auxs_to_compute = false;
 
-    for(unsigned int i=0; i<auxs.size(); i++)
+    for (unsigned int i=0; i<auxs.size(); i++)
       element_auxs_to_compute |= auxs[i].allElementKernels().size();
 
     if (element_auxs_to_compute)
@@ -379,7 +379,7 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
     }
 
     bool bnd_auxs_to_compute = false;
-    for(unsigned int i=0; i<auxs.size(); i++)
+    for (unsigned int i=0; i<auxs.size(); i++)
       bnd_auxs_to_compute |= auxs[i].allElementalBCs().size();
     if (bnd_auxs_to_compute)
     {

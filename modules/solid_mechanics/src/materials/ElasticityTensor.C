@@ -8,7 +8,7 @@ ElasticityTensor::ElasticityTensor(const bool constant)
 
 void ElasticityTensor::calculate(unsigned int qp)
 {
-  if(!_constant || !_values_computed)
+  if (!_constant || !_values_computed)
   {
     calculateEntries(qp);
     _values_computed = true;

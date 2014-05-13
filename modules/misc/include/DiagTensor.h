@@ -47,7 +47,7 @@ public:
 
     {
       // test the length to make sure it's 3 long
-      if(init_list.size() != 3)
+      if (init_list.size() != 3)
         mooseError("please enter a vector with 3 entries.");
     }
 
@@ -288,11 +288,11 @@ public:
 
       Real _eps=1e-15;
 
-      if(_xx!=0)
+      if (_xx!=0)
         r_val._xx = 1./(_xx+_eps);
-      if(_yy!=0)
+      if (_yy!=0)
         r_val._yy = 1./(_yy+_eps);
-      if(_zz!=0)
+      if (_zz!=0)
         r_val._zz = 1./(_zz+_eps);
 
       return r_val;

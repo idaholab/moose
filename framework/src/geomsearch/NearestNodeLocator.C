@@ -144,7 +144,7 @@ NearestNodeLocator::findNodes()
     _slave_nodes = snt._slave_nodes;
     _neighbor_nodes = snt._neighbor_nodes;
 
-    for(std::set<unsigned int>::iterator it = snt._ghosted_elems.begin();
+    for (std::set<unsigned int>::iterator it = snt._ghosted_elems.begin();
         it != snt._ghosted_elems.end();
         ++it)
       _subproblem.addGhostedElem(*it);

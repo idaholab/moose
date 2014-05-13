@@ -38,7 +38,7 @@ ReturnMappingModel::computeStress( const Elem & current_elem,
 {
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
-  if(_t_step == 0) return;
+  if (_t_step == 0) return;
 
   stress_new = elasticityTensor * strain_increment;
   stress_new += stress_old;
@@ -78,7 +78,7 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
 
   std::stringstream iter_output;
 
-  while(it < _max_its &&
+  while (it < _max_its &&
         norm_residual > _absolute_tolerance &&
         (norm_residual/first_norm_residual) > _relative_tolerance)
   {
@@ -121,7 +121,7 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
     Moose::out << iter_output.str();
   }
 
-  if(it == _max_its &&
+  if (it == _max_its &&
      norm_residual > _absolute_tolerance &&
      (norm_residual/first_norm_residual) > _relative_tolerance)
   {

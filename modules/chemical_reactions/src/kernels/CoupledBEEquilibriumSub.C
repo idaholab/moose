@@ -92,7 +92,7 @@ Real CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
     for (unsigned int i=0; i<_vars.size(); ++i)
     {
 
-      if(jvar == _vars[i])
+      if (jvar == _vars[i])
       {
         _val_new *= _sto_v[i]*std::pow((*_v_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
       }
@@ -111,4 +111,3 @@ Real CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
 
 }
-

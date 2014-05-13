@@ -51,7 +51,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   {
     GlobalOrdinal i = 0;
 
-    for(std::set<GlobalOrdinal>::iterator it = semi_local_nodes.begin();
+    for (std::set<GlobalOrdinal>::iterator it = semi_local_nodes.begin();
         it != semi_local_nodes.end();
         ++it)
     {
@@ -59,10 +59,10 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
 
       vertices[i] = node.id();
 
-      for(GlobalOrdinal j=0; j<dim; j++)
+      for (GlobalOrdinal j=0; j<dim; j++)
         coordinates[(j*num_local_nodes) + i] = node(j) + offset(j);
 
-      for(GlobalOrdinal j=0; j<from_dim; j++)
+      for (GlobalOrdinal j=0; j<from_dim; j++)
         target_coordinates[(j*num_local_nodes) + i] = node(j) + offset(j);
 
       i++;
@@ -85,19 +85,19 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
     GlobalOrdinal i = 0;
 
     MeshBase::const_element_iterator end = mesh.local_elements_end();
-    for(MeshBase::const_element_iterator it = mesh.local_elements_begin();
+    for (MeshBase::const_element_iterator it = mesh.local_elements_begin();
         it != end;
         ++it)
     {
       const Elem & elem = *(*it);
       elements[i] = elem.id();
 
-      for(GlobalOrdinal j=0; j<n_nodes_per_elem; j++)
+      for (GlobalOrdinal j=0; j<n_nodes_per_elem; j++)
         connectivity[(j*n_local_elem)+i] = elem.node(j);
 
       {
         Point centroid = elem.centroid();
-        for(GlobalOrdinal j=0; j<from_dim; j++)
+        for (GlobalOrdinal j=0; j<from_dim; j++)
           elem_centroid_coordinates[(j*n_local_elem) + i] = centroid(j) + offset(j);
       }
 
@@ -118,7 +118,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   {
     Moose::err<<libMesh::processor_id()<<" Vertices: ";
 
-    for(unsigned int i=0; i<vertices.size(); i++)
+    for (unsigned int i=0; i<vertices.size(); i++)
       Moose::err<<vertices[i]<<" ";
 
     Moose::err<<std::endl;
@@ -128,7 +128,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   {
     Moose::err<<libMesh::processor_id()<<" Coordinates: ";
 
-    for(unsigned int i=0; i<coordinates.size(); i++)
+    for (unsigned int i=0; i<coordinates.size(); i++)
       Moose::err<<coordinates[i]<<" ";
 
     Moose::err<<std::endl;
@@ -138,7 +138,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   {
     Moose::err<<libMesh::processor_id()<<" Connectivity: ";
 
-    for(unsigned int i=0; i<connectivity.size(); i++)
+    for (unsigned int i=0; i<connectivity.size(); i++)
       Moose::err<<connectivity[i]<<" ";
 
     Moose::err<<std::endl;
@@ -148,7 +148,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   {
     Moose::err<<libMesh::processor_id()<<" Permutation_List: ";
 
-    for(unsigned int i=0; i<permutation_list.size(); i++)
+    for (unsigned int i=0; i<permutation_list.size(); i++)
       Moose::err<<permutation_list[i]<<" ";
 
     Moose::err<<std::endl;
@@ -252,14 +252,14 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
   // We're only going to update values for points that were not missed
   std::vector<bool> missed(values->size(), false);
 
-  for(Teuchos::ArrayView<const GlobalOrdinal>::const_iterator i=missed_points.begin();
+  for (Teuchos::ArrayView<const GlobalOrdinal>::const_iterator i=missed_points.begin();
       i != missed_points.end();
       ++i)
     missed[*i] = true;
 
   unsigned int i=0;
   // Loop over the values (one for each node) and assign the value of this variable at each node
-  for(FieldContainerType::iterator it=values->begin(); it != values->end(); ++it)
+  for (FieldContainerType::iterator it=values->begin(); it != values->end(); ++it)
   {
     // If this point "missed" then skip it
     if (missed[i])
@@ -303,7 +303,7 @@ DTKInterpolationAdapter::find_sys(std::string var_name)
   System * sys = NULL;
 
   // Find the system this variable is from
-  for(unsigned int i=0; i<es.n_systems(); i++)
+  for (unsigned int i=0; i<es.n_systems(); i++)
   {
     if (es.get_system(i).has_variable(var_name))
     {
@@ -343,13 +343,13 @@ void
 DTKInterpolationAdapter::get_semi_local_nodes(std::set<GlobalOrdinal> & semi_local_nodes)
 {
   MeshBase::const_element_iterator end = mesh.local_elements_end();
-  for(MeshBase::const_element_iterator it = mesh.local_elements_begin();
+  for (MeshBase::const_element_iterator it = mesh.local_elements_begin();
       it != end;
       ++it)
   {
     const Elem & elem = *(*it);
 
-    for(unsigned int j=0; j<elem.n_nodes(); j++)
+    for (unsigned int j=0; j<elem.n_nodes(); j++)
       semi_local_nodes.insert(elem.node(j));
   }
 }

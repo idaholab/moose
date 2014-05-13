@@ -27,7 +27,7 @@ MaterialSymmElasticityTensorAux::MaterialSymmElasticityTensorAux(const std::stri
      _index(getParam<int>("index")),
      _tensor_prop(getMaterialProperty<SymmElasticityTensor>(_tensor_matpro))
 {
-  if(_index < 0 || _index > 20)
+  if (_index < 0 || _index > 20)
     mooseError("Please check your index specified for MaterialSymmElasticityTensorAux (between 0 and 20).");
 }
 

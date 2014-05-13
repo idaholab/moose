@@ -59,41 +59,41 @@ HomogenizedElasticConstants::HomogenizedElasticConstants(const std::string & nam
 {
 
 
-  if(_column == 0)
+  if (_column == 0)
   {
     _k = 0;
     _l = 0;
   }
 
 
-  if(_column == 1)
+  if (_column == 1)
   {
     _k = 1;
     _l = 1;
   }
 
 
-  if(_column == 2)
+  if (_column == 2)
   {
     _k = 2;
     _l = 2;
   }
 
 
-  if(_column == 3)
+  if (_column == 3)
   {
     _k = 0;
     _l = 1;
   }
 
 
-  if(_column == 4)
+  if (_column == 4)
   {
     _k = 1;
     _l = 2;
   }
 
-  if(_column == 5)
+  if (_column == 5)
   {
     _k = 2;
     _l = 0;
@@ -103,41 +103,41 @@ HomogenizedElasticConstants::HomogenizedElasticConstants(const std::string & nam
 
 
 
-  if(_row == 0)
+  if (_row == 0)
   {
     _i = 0;
     _j = 0;
   }
 
 
-  if(_row == 1)
+  if (_row == 1)
   {
     _i = 1;
     _j = 1;
   }
 
 
-  if(_row == 2)
+  if (_row == 2)
   {
     _i = 2;
     _j = 2;
   }
 
 
-  if(_row == 3)
+  if (_row == 3)
   {
     _i = 0;
     _j = 1;
   }
 
 
-  if(_row == 4)
+  if (_row == 4)
   {
     _i = 1;
     _j = 2;
   }
 
-  if(_row == 5)
+  if (_row == 5)
   {
     _i = 2;
     _j = 0;
@@ -219,9 +219,9 @@ HomogenizedElasticConstants::computeQpIntegral()
     grad[5][2] = &_grad_disp_z_zx;
 
 
-    for(int p = 0; p < 3; p++)
+    for (int p = 0; p < 3; p++)
     {
-      for(int q = 0; q < 3; q++)
+      for (int q = 0; q < 3; q++)
       {
         value += E(_I,3 * q + p) * (*grad[_column][p])[_qp](q);
       }

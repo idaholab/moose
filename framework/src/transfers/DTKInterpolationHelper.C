@@ -44,12 +44,12 @@ DTKInterpolationHelper::DTKInterpolationHelper()
 
 DTKInterpolationHelper::~DTKInterpolationHelper()
 {
-  for(std::map<EquationSystems *, DTKInterpolationAdapter *>::iterator it = adapters.begin();
+  for (std::map<EquationSystems *, DTKInterpolationAdapter *>::iterator it = adapters.begin();
       it != adapters.end();
       ++it)
     delete it->second;
 
-  for(std::map<std::pair<unsigned int, unsigned int>, shared_domain_map_type * >::iterator it = dtk_maps.begin();
+  for (std::map<std::pair<unsigned int, unsigned int>, shared_domain_map_type * >::iterator it = dtk_maps.begin();
       it != dtk_maps.end();
       ++it)
     delete it->second;

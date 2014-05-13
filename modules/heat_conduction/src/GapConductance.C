@@ -69,22 +69,22 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
    _dof_map(_quadrature ? &_temp_var->sys().dofMap() : NULL),
    _warnings(getParam<bool>("warnings"))
 {
-  if(_quadrature)
+  if (_quadrature)
   {
-    if(!parameters.isParamValid("paired_boundary"))
+    if (!parameters.isParamValid("paired_boundary"))
       mooseError(std::string("No 'paired_boundary' provided for ") + _name);
   }
   else
   {
-    if(!isCoupled("gap_distance"))
+    if (!isCoupled("gap_distance"))
       mooseError(std::string("No 'gap_distance' provided for ") + _name);
 
-    if(!isCoupled("gap_temp"))
+    if (!isCoupled("gap_temp"))
       mooseError(std::string("No 'gap_temp' provided for ") + _name);
   }
 
 
-  if(_quadrature)
+  if (_quadrature)
   {
     _penetration_locator = &_subproblem.geomSearchData().getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
                                                                                          getParam<std::vector<BoundaryName> >("boundary")[0],
@@ -167,7 +167,7 @@ GapConductance::gapLength(Real distance, Real min_gap, Real max_gap)
 {
   Real gap_L = distance;
 
-  if(gap_L > max_gap)
+  if (gap_L > max_gap)
   {
     gap_L = max_gap;
   }
@@ -200,7 +200,7 @@ GapConductance::gapK()
 void
 GapConductance::computeGapValues()
 {
-  if(!_quadrature)
+  if (!_quadrature)
   {
     _has_info = true;
     _gap_temp = _gap_temp_value[_qp];
@@ -227,7 +227,7 @@ GapConductance::computeGapValues()
 
       _dof_map->dof_indices(slave_side, slave_side_dof_indices, _temp_var->number());
 
-      for(unsigned int i=0; i<slave_side_dof_indices.size(); ++i)
+      for (unsigned int i=0; i<slave_side_dof_indices.size(); ++i)
       {
         //The zero index is because we only have one point that the phis are evaluated at
         _gap_temp += slave_side_phi[i][0] * (*(*_serialized_solution))(slave_side_dof_indices[i]);

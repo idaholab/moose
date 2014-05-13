@@ -33,11 +33,11 @@ SourceSink::SourceSink(const std::string & name, InputParameters parameters)
 {
   _p(0) = _point_param[0];
 
-  if(_point_param.size() > 1)
+  if (_point_param.size() > 1)
   {
     _p(1) = _point_param[1];
 
-    if(_point_param.size() > 2)
+    if (_point_param.size() > 2)
     {
       _p(2) = _point_param[2];
     }
@@ -55,7 +55,7 @@ Real SourceSink::computeQpResidual()
   Real zmin = 0.0;
   Real zmax = 0.0;
 
-  if(_point_param.size() > 2)
+  if (_point_param.size() > 2)
   {
     zmin = _p(2) - _range_param[2]/2.0;
     zmax = _p(2) + _range_param[2]/2.0;
@@ -64,7 +64,7 @@ Real SourceSink::computeQpResidual()
 //  Moose::out << "_E=" <<xmax<<" "<<ymax<<" "<<zmax<<"\n";
 //  Moose::out << "_e=" <<xmin<<" "<<ymin<<" "<<zmin<<"\n";
 
-  if(_point_param.size() > 2)
+  if (_point_param.size() > 2)
   {
 
     if (_q_point[_qp](0) >= xmin && _q_point[_qp](0) <= xmax &&

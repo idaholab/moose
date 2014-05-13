@@ -75,14 +75,14 @@ void AnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
 
   //Form Q = R dyadic R and Q transpose
   DenseMatrix<Real> Q, Qt; // Q = R (dyadic) R and Q transpose
-  for(unsigned int i = 0; i < 3; i++)
-    for(unsigned int j = 0; j < 3; j++)
+  for (unsigned int i = 0; i < 3; i++)
+    for (unsigned int j = 0; j < 3; j++)
       for (unsigned int k = 0; k < 3; k++)
-        for(unsigned int l = 0; l < 3; l++)
+        for (unsigned int l = 0; l < 3; l++)
           Q(((i*3)+k),((j*3)+l)) = R(i,j) * R(k,l);
 
-   for(unsigned int p = 0; p < 9; p++)
-    for(unsigned int q = 0; q < 9; q++)
+   for (unsigned int p = 0; p < 9; p++)
+    for (unsigned int q = 0; q < 9; q++)
       Qt(q,p) = Q(p,q);
 
    // Form two kinds of transformation matrix
@@ -98,16 +98,16 @@ void AnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
    trans_d6_to_d9(2,4) = trans_d6_to_d9(6,4) = a;
    trans_d6_to_d9(5,5) = trans_d6_to_d9(7,5) = a;
 
-   for(unsigned int i = 0; i < 9; i++)
-     for(unsigned int j = 0; j < 6; j++)
+   for (unsigned int i = 0; i < 9; i++)
+     for (unsigned int j = 0; j < 6; j++)
        transpose_trans_d6_to_d9(j,i) = trans_d6_to_d9(i,j);
 
    trans_d9_to_d6(0,0) = trans_d9_to_d6(1,4) =  trans_d9_to_d6(2,8) = 1.0;
    trans_d9_to_d6(3,3) = trans_d9_to_d6(4,6) =  trans_d9_to_d6(5,7) = sqrt2;
 
 
-   for(unsigned int i = 0; i < 6; i++)
-     for(unsigned int j = 0; j < 9; j++)
+   for (unsigned int i = 0; i < 6; i++)
+     for (unsigned int j = 0; j < 9; j++)
        transpose_trans_d9_to_d6(j,i) =  trans_d9_to_d6(i,j);
 
    // The function makes use of TransD6toD9 matrix to transfrom Dt[6][6] to Dmat[9][9]
@@ -138,12 +138,10 @@ void AnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
 
   unsigned int count = 0;
 
-  for(unsigned int j = 0; j < 9; j++)
-    for(unsigned int i = 0; i < 9; i++)
+  for (unsigned int j = 0; j < 9; j++)
+    for (unsigned int i = 0; i < 9; i++)
   {
     _values[count] = QDmat(i,j);
     count = count + 1;
   }
 }
-
-

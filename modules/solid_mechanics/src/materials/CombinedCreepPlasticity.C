@@ -35,10 +35,10 @@ CombinedCreepPlasticity::initialSetup()
 {
   std::vector<SubdomainID> block_id = std::vector<SubdomainID>(blockIDs().begin(), blockIDs().end());
   const std::vector<std::string> & submodels = getParam<std::vector<std::string> >("submodels");
-  for(unsigned i(0); i < block_id.size(); ++i)
+  for (unsigned i(0); i < block_id.size(); ++i)
   {
     const std::vector<Material*> * mats_p;
-    if(_bnd)
+    if (_bnd)
     {
       mats_p = &_fe_problem.getFaceMaterials( block_id[i], _tid );
     }
@@ -82,7 +82,7 @@ CombinedCreepPlasticity::computeStress( const Elem & current_elem,
   // stress = stressOld + stressIncrement
   // creep_strain = creep_strainOld + creep_strainIncrement
 
-  if(_t_step == 0) return;
+  if (_t_step == 0) return;
 
   if (_output_iteration_info == true)
   {
@@ -111,7 +111,7 @@ CombinedCreepPlasticity::computeStress( const Elem & current_elem,
   Real first_delS(delS);
   unsigned int counter(0);
 
-  while(counter < _max_its &&
+  while (counter < _max_its &&
         delS > _absolute_tolerance &&
         (delS/first_delS) > _relative_tolerance &&
         (num_submodels != 1 || counter < 1))
@@ -149,7 +149,7 @@ CombinedCreepPlasticity::computeStress( const Elem & current_elem,
     ++counter;
   }
 
-  if(counter == _max_its &&
+  if (counter == _max_its &&
      delS > _absolute_tolerance &&
      (delS/first_delS) > _relative_tolerance)
   {

@@ -86,7 +86,7 @@ SubProblem::getMaterialPropertyBlocks(const std::string & prop_name)
 {
   std::set<SubdomainID> blocks;
 
-  for(std::map<unsigned int, std::set<std::string> >::iterator it = _map_block_material_props.begin();
+  for (std::map<unsigned int, std::set<std::string> >::iterator it = _map_block_material_props.begin();
       it != _map_block_material_props.end();
       ++it)
   {
@@ -120,7 +120,7 @@ SubProblem::getMaterialPropertyBoundaryIDs(const std::string & prop_name)
 {
   std::set<BoundaryID> boundaries;
 
-  for(std::map<unsigned int, std::set<std::string> >::iterator it = _map_boundary_material_props.begin();
+  for (std::map<unsigned int, std::set<std::string> >::iterator it = _map_boundary_material_props.begin();
       it != _map_boundary_material_props.end();
       ++it)
   {

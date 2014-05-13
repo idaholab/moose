@@ -34,7 +34,7 @@ NumVars::NumVars(const std::string & name, InputParameters parameters) :
 Real
 NumVars::getValue()
 {
-  switch(_system)
+  switch (_system)
   {
     case 0:
       return _fe_problem.getNonlinearSystem().sys().n_vars();

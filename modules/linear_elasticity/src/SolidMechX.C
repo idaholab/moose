@@ -23,7 +23,7 @@ SolidMechX::SolidMechX(const std::string & name, InputParameters parameters) :
 Real
 SolidMechX::computeQpResidual()
   {
-    if(!_constant_properties)
+    if (!_constant_properties)
       recomputeConstants();
 
     _strain(0,0) = _grad_u[_qp](0);
@@ -33,7 +33,7 @@ SolidMechX::computeQpResidual()
     _stress(0) = _c1*_strain(0,0)+_c1*_c2*_strain(1,1);
     _stress(1) = _c1*_c3*_strain(0,1);
 
-    if( 3 == _mesh_dimension){
+    if ( 3 == _mesh_dimension){
       _strain(2,2) = _grad_z[_qp](2);
       _strain(0,2) = _grad_u[_qp](2)+_grad_z[_qp](0);
 
@@ -49,7 +49,7 @@ SolidMechX::computeQpResidual()
 Real
 SolidMechX::computeQpJacobian()
   {
-    if(!_constant_properties)
+    if (!_constant_properties)
       recomputeConstants();
 
     Real value = _c1*(_grad_test[_i][_qp]*(_B11*_grad_phi[_j][_qp]));
@@ -60,14 +60,14 @@ SolidMechX::computeQpJacobian()
 Real
 SolidMechX::computeQpOffDiagJacobian(unsigned int jvar)
   {
-    if(!_constant_properties)
+    if (!_constant_properties)
       recomputeConstants();
 
     RealGradient value = 0;
 
-    if(jvar == _y_var)
+    if (jvar == _y_var)
       value += _B12*_grad_phi[_j][_qp];
-    else if(jvar == _z_var)
+    else if (jvar == _z_var)
       value += _B13*_grad_phi[_j][_qp];
 
     return _c1*(_grad_test[_i][_qp]*value);

@@ -84,7 +84,7 @@ AdaptivityAction::act()
     // If weights have been specified then set the default weight to zero
     std::vector<Real> weights(system.nVariables(),0);
 
-    for(int i=0;i<num_weight_names;i++)
+    for (int i=0;i<num_weight_names;i++)
     {
       std::string name = weight_names[i];
       double value = weight_values[i];

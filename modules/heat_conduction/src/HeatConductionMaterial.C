@@ -52,7 +52,7 @@ HeatConductionMaterial::HeatConductionMaterial(const std::string & name, InputPa
 void
 HeatConductionMaterial::computeProperties()
 {
-  for(unsigned int qp(0); qp < _qrule->n_points(); ++qp)
+  for (unsigned int qp(0); qp < _qrule->n_points(); ++qp)
   {
     if (_thermal_conductivity_temperature_function)
     {

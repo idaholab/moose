@@ -50,7 +50,7 @@ Real CoupledBEKinetic::computeQpJacobian()
 /*
 Real CoupledBEKinetic::computeQpOffDiagJacobian(unsigned int jvar)
   {
-    if(jvar == _v_var1)
+    if (jvar == _v_var1)
       return _sto_v1*_test[_i][_qp]*_phi[_j][_qp]/_dt;
   }
 */

@@ -111,7 +111,7 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     break;
   }
 
-  } // end switch(m)
+  } // end switch (m)
 
 
   mooseError("Shouldn't get here...");

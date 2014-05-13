@@ -120,11 +120,11 @@ MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMa
   else
   {
     children.resize(n_children);
-    for(unsigned int child=0; child < n_children; child++)
+    for (unsigned int child=0; child < n_children; child++)
       children[child] = child;
   }
 
-  for(unsigned int i=0; i < children.size(); i++)
+  for (unsigned int i=0; i < children.size(); i++)
   {
     unsigned int child = children[i];
 
@@ -151,7 +151,7 @@ MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMa
         if (propsOlder()[child_elem][child_side][i] == NULL) propsOlder()[child_elem][child_side][i] = child_material_data.propsOlder()[ _stateful_prop_id_to_prop_id[i] ]->init(n_qpoints);
 
       // Copy from the parent stateful properties
-      for(unsigned int qp=0; qp<refinement_map[child].size(); qp++)
+      for (unsigned int qp=0; qp<refinement_map[child].size(); qp++)
       {
         PropertyValue * child_property = props()[child_elem][child_side][i];
         PropertyValue * parent_property = parent_material_props.props()[&elem][parent_side][i];
@@ -208,7 +208,7 @@ MaterialPropertyStorage::restrictStatefulProps(const std::vector<std::pair<unsig
   }
 
   // Copy from the child stateful properties
-  for(unsigned int qp=0; qp<coarsening_map.size(); qp++)
+  for (unsigned int qp=0; qp<coarsening_map.size(); qp++)
   {
     const std::pair<unsigned int, QpMap> & qp_pair = coarsening_map[qp];
     unsigned int child = qp_pair.first;

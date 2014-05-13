@@ -437,11 +437,11 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
       DofMap& dofmap = dmm->nl->sys().get_dof_map();
       std::set<dof_id_type>               indices;
       std::set<dof_id_type> unindices;
-      for(std::map<std::string, dof_id_type>::const_iterator vit = dmm->varids->begin(); vit != dmm->varids->end(); ++vit){
+      for (std::map<std::string, dof_id_type>::const_iterator vit = dmm->varids->begin(); vit != dmm->varids->end(); ++vit){
   dof_id_type v = vit->second;
   /* Iterate only over this DM's blocks. */
   if (!dmm->allblocks || (dmm->nosides && dmm->nocontacts)) {
-    for(std::map<std::string, dof_id_type>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
+    for (std::map<std::string, dof_id_type>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
       dof_id_type b = bit->second;
       MeshBase::const_element_iterator el     = dmm->nl->sys().get_mesh().active_local_subdomain_elements_begin(b);
       MeshBase::const_element_iterator end_el = dmm->nl->sys().get_mesh().active_local_subdomain_elements_end(b);
@@ -450,7 +450,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
         std::vector<dof_id_type> evindices;
         // Get the degree of freedom indices for the given variable off the current element.
         dofmap.dof_indices(elem, evindices, v);
-        for(dof_id_type i = 0; i < evindices.size(); ++i) {
+        for (dof_id_type i = 0; i < evindices.size(); ++i) {
     dof_id_type dof = evindices[i];
     if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) /* might want to use variable_first/last_local_dof instead */
       indices.insert(dof);
@@ -557,7 +557,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
       PetscInt *darray;
       ierr = PetscMalloc(sizeof(PetscInt)*dindices.size(),&darray);CHKERRQ(ierr);
       dof_id_type i = 0;
-      for(std::set<dof_id_type>::const_iterator it = dindices.begin(); it != dindices.end(); ++it) {
+      for (std::set<dof_id_type>::const_iterator it = dindices.begin(); it != dindices.end(); ++it) {
   darray[i] = *it;
   ++i;
       }
@@ -1019,14 +1019,14 @@ static PetscErrorCode  DMView_Moose(DM dm, PetscViewer viewer)
     ierr = PetscViewerASCIIPrintf(viewer, "variables:", name, prefix); CHKERRQ(ierr);
     std::map<std::string,unsigned int>::iterator vit = dmm->varids->begin();
     std::map<std::string,unsigned int>::const_iterator vend = dmm->varids->end();
-    for(; vit != vend; ++vit) {
+    for (; vit != vend; ++vit) {
       ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", vit->first.c_str(), vit->second); CHKERRQ(ierr);
     }
     ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer, "blocks:"); CHKERRQ(ierr);
     std::map<std::string,unsigned int>::iterator bit = dmm->blockids->begin();
     std::map<std::string,unsigned int>::const_iterator bend = dmm->blockids->end();
-    for(; bit != bend; ++bit) {
+    for (; bit != bend; ++bit) {
       ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", bit->first.c_str(), bit->second); CHKERRQ(ierr);
     }
     ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
@@ -1212,7 +1212,7 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
   // FIXME: would be nice to invert this nested loop structure so we could iterate over the potentially smaller dmm->vars,
   // but checking against dofmap.variable would still require a linear search, hence, no win.  Would be nice to endow dofmap.variable
   // with a fast search capability.
-  for(unsigned int v = 0; v < dofmap.n_variables(); ++v) {
+  for (unsigned int v = 0; v < dofmap.n_variables(); ++v) {
     std::string vname = dofmap.variable(v).name();
     if (dmm->vars && dmm->vars->size() && dmm->vars->find(vname) == dmm->vars->end()) continue;
     dmm->varids->insert(std::pair<std::string,unsigned int>(vname,v));
@@ -1231,7 +1231,7 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
   std::set<subdomain_id_type>::iterator bit = blocks.begin();
   std::set<subdomain_id_type>::iterator bend = blocks.end();
   if (bit == bend) SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_PLIB, "No mesh blocks found.");
-  for(; bit != bend; ++bit) {
+  for (; bit != bend; ++bit) {
     subdomain_id_type bid = *bit;
     std::string bname = mesh.subdomain_name(bid);
     if (!bname.length()) {

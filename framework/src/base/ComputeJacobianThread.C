@@ -107,7 +107,7 @@ ComputeJacobianThread::subdomainChanged()
 
   // Boundary Condition Dependencies
   const std::set<unsigned int> & subdomain_boundary_ids = _mesh.getSubdomainBoundaryIds(_subdomain);
-  for(std::set<unsigned int>::const_iterator id_it = subdomain_boundary_ids.begin();
+  for (std::set<unsigned int>::const_iterator id_it = subdomain_boundary_ids.begin();
       id_it != subdomain_boundary_ids.end();
       ++id_it)
   {

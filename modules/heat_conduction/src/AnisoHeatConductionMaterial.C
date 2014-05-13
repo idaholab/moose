@@ -79,7 +79,7 @@ AnisoHeatConductionMaterial::AnisoHeatConductionMaterial(const std::string & nam
 void
 AnisoHeatConductionMaterial::computeProperties()
 {
-  for(unsigned int qp(0); qp < _qrule->n_points(); ++qp)
+  for (unsigned int qp(0); qp < _qrule->n_points(); ++qp)
   {
     (*_thermal_conductivity_x)[qp] = _thermal_conductivity_x_pp ? *_thermal_conductivity_x_pp : _my_thermal_conductivity_x;
     (*_thermal_conductivity_x_dT)[qp] = 0;

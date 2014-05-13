@@ -44,11 +44,11 @@ SparsityBasedContactConstraint::getConnectedDofIndices()
   const PetscInt *cols;
   ierr = MatGetRow(jac,_var.nodalDofIndex(),&ncols,&cols,PETSC_NULL);CHKERRABORT(_communicator.get(), ierr);
   bool debug = false;
-  if(debug) {
+  if (debug) {
     libMesh::out << "_connected_dof_indices: adding " << ncols << " dofs from Jacobian row[" << _var.nodalDofIndex() << "] = [";
   }
   for (PetscInt i = 0; i < ncols; ++i) {
-    if(debug) {
+    if (debug) {
       libMesh::out << cols[i] << " ";
     }
     _connected_dof_indices.push_back(cols[i]);

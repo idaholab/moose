@@ -55,7 +55,7 @@ Real EnthalpyConvectionWater::computeQpJacobian()
 
 Real EnthalpyConvectionWater::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar==_p_var)
+  if (jvar==_p_var)
     //return _grad_test[_i][_qp]*(_tau_water[_qp]*_grad_phi[_j][_qp]*_enthalpy_water[_qp]);
     return _grad_test[_i][_qp]*(_Dtau_waterDP[_qp]*_phi[_j][_qp]*_grad_p[_qp]*_enthalpy_water[_qp]
                                 +_tau_water[_qp]*_grad_phi[_j][_qp]*_enthalpy_water[_qp]

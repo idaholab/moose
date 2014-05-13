@@ -106,7 +106,7 @@ FiniteStrainRatePlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoT
 
   err3=1.1*tol3;
 
-  while(err3 > tol3 && iterisohard < maxiterisohard)//Hardness update iteration
+  while (err3 > tol3 && iterisohard < maxiterisohard)//Hardness update iteration
   {
 
     iterisohard++;
@@ -128,7 +128,7 @@ FiniteStrainRatePlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoT
 //    printf("resid=%f\n",err1);
 
 
-    while(err1 > tol1  && iter < maxiter )//Stress update iteration (hardness fixed)
+    while (err1 > tol1  && iter < maxiter )//Stress update iteration (hardness fixed)
     {
 
       iter++;
@@ -143,7 +143,7 @@ FiniteStrainRatePlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoT
 
       flow_incr_tmp=_ref_pe_rate*_dt*pow(macaulayBracket(getSigEqv(sig_new)/yield_stress-1.0),_exponent);
 
-      if(flow_incr_tmp < 0.0)//negative flow increment not allowed
+      if (flow_incr_tmp < 0.0)//negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
 
       flow_incr=flow_incr_tmp;
@@ -159,7 +159,7 @@ FiniteStrainRatePlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoT
 //      printf("iter=%d resid=%f %f\n",iter,err1,flow_incr_tmp);
     }
 
-    if(iter>=maxiter)//Convergence failure
+    if (iter>=maxiter)//Convergence failure
     {
 //      printf("flow_incr=%f\n",flow_incr);
       mooseError("Constitutive Error-Too many iterations: Reduce time increment.\n");//Convergence failure
@@ -176,7 +176,7 @@ FiniteStrainRatePlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoT
 
   }
 
-  if(iterisohard>=maxiterisohard)
+  if (iterisohard>=maxiterisohard)
   {
 //    printf("flow_incr=%f %f %f %f\n",flow_incr,err3,yield_stress,eqvpstrain);
     mooseError("Constitutive Error-Too many iterations in Hardness Update:Reduce time increment.\n");//Convergence failure
@@ -199,7 +199,7 @@ FiniteStrainRatePlasticMaterial::getFlowTensor(RankTwoTensor sig,Real /*yield_st
   sig_dev=getSigDev(sig);
 
   val=0.0;
-  if(sig_eqv > 1e-8)
+  if (sig_eqv > 1e-8)
     val=3.0/(2.0*sig_eqv);
   *flow_tensor=sig_dev*val;
 }
@@ -227,17 +227,17 @@ FiniteStrainRatePlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl
   dfi_dseqv=_ref_pe_rate*_dt*_exponent*pow(macaulayBracket(sig_eqv/yield_stress-1.0),_exponent-1.0)/yield_stress;
 
 
-  for(int i=0;i<3;i++)
-    for(int j=0;j<3;j++)
-      for(int k=0;k<3;k++)
-        for(int l=0;l<3;l++)
+  for (int i=0;i<3;i++)
+    for (int j=0;j<3;j++)
+      for (int k=0;k<3;k++)
+        for (int l=0;l<3;l++)
           dfi_dsig(i,j,k,l)=flow_dirn(i,j)*flow_dirn(k,l)*dfi_dseqv;//d_flow_increment/d_sig
 
   f1=0.0;
   f2=0.0;
   f3=0.0;
 
-  if(sig_eqv > 1e-8)
+  if (sig_eqv > 1e-8)
   {
     f1=3.0/(2.0*sig_eqv);
     f2=f1/3.0;
@@ -245,10 +245,10 @@ FiniteStrainRatePlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl
   }
 
 
-  for(int i=0;i<3;i++)
-    for(int j=0;j<3;j++)
-      for(int k=0;k<3;k++)
-        for(int l=0;l<3;l++)
+  for (int i=0;i<3;i++)
+    for (int j=0;j<3;j++)
+      for (int k=0;k<3;k++)
+        for (int l=0;l<3;l++)
           dft_dsig(i,j,k,l)=f1*deltaFunc(i,k)*deltaFunc(j,l)-f2*deltaFunc(i,j)*deltaFunc(k,l)-f3*sig_dev(i,j)*sig_dev(k,l);//d_flow_dirn/d_sig - 2nd part
 
   dfd_dsig=dft_dsig;//d_flow_dirn/d_sig
@@ -261,11 +261,9 @@ FiniteStrainRatePlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl
 Real
 FiniteStrainRatePlasticMaterial::macaulayBracket(Real val)
 {
-  if(val > 0.0)
+  if (val > 0.0)
     return val;
   else
     return 0.0;
 
 }
-
-

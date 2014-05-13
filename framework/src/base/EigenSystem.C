@@ -107,7 +107,7 @@ EigenSystem::scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor)
       std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
       std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
 
-      for(; it !=it_end; ++it)
+      for (; it !=it_end; ++it)
         solution().set( *it, solution()(*it)*scaling_factor );
     }
   }
@@ -140,7 +140,7 @@ EigenSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coef
 
       if (coefficients.size()>2)
       {
-        for(; it !=it_end; ++it)
+        for (; it !=it_end; ++it)
         {
           Real t = solution()(*it) * coefficients[0];
           t += solutionOld()(*it) * coefficients[1];
@@ -150,7 +150,7 @@ EigenSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coef
       }
       else if (coefficients.size()>1)
       {
-        for(; it !=it_end; ++it)
+        for (; it !=it_end; ++it)
         {
           Real t = solution()(*it) * coefficients[0];
           t += solutionOld()(*it) * coefficients[1];
@@ -159,7 +159,7 @@ EigenSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coef
       }
       else
       {
-        for(; it !=it_end; ++it)
+        for (; it !=it_end; ++it)
         {
           Real t = solution()(*it) * coefficients[0];
           solution().set( *it, t );
@@ -189,7 +189,7 @@ EigenSystem::initSystemSolution(SYSTEMTAG tag, Real v)
       std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
       std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
 
-      for(; it !=it_end; ++it)
+      for (; it !=it_end; ++it)
         solution().set( *it, v );
     }
   }
@@ -215,7 +215,7 @@ EigenSystem::initSystemSolutionOld(SYSTEMTAG tag, Real v)
       std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
       std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
 
-      for(; it !=it_end; ++it)
+      for (; it !=it_end; ++it)
         solutionOld().set( *it, v );
     }
   }

@@ -43,7 +43,7 @@ LinearGeneralAnisotropicMaterial::LinearGeneralAnisotropicMaterial(const std::st
   //debugging
   /*_Cijkl_matrix.show_r_matrix();
     _Cijkl_matrix.show_dt_matrix();
-    if(libMesh::on_command_line("--debug") || libMesh::on_command_line("--debug-elasticity-Cijkl"))
+    if (libMesh::on_command_line("--debug") || libMesh::on_command_line("--debug-elasticity-Cijkl"))
     {
       libMesh::out << "Material " << this->name() << " on mesh block " << this->blockID() << " has _Cijkl_matrix:\n" << _Cijkl_matrix << "\n";
     }*/

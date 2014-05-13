@@ -31,7 +31,7 @@ AuxNodalScalarKernel::AuxNodalScalarKernel(const std::string & name, InputParame
 {
   // Fill in the MooseVariable dependencies
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for(unsigned int i=0; i<coupled_vars.size(); i++)
+  for (unsigned int i=0; i<coupled_vars.size(); i++)
     addMooseVariableDependency(coupled_vars[i]);
 }
 

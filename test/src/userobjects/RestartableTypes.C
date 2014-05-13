@@ -37,11 +37,11 @@ RestartableTypes::RestartableTypes(const std::string & name, InputParameters par
   _vector_data.resize(4,1);
   _vector_vector_data.resize(4);
 
-  for(unsigned int i=0; i<_vector_vector_data.size(); i++)
+  for (unsigned int i=0; i<_vector_vector_data.size(); i++)
   {
     _vector_vector_data[i].resize(4);
 
-    for(unsigned int j=0; j<_vector_vector_data[i].size(); j++)
+    for (unsigned int j=0; j<_vector_vector_data[i].size(); j++)
       _vector_vector_data[i][j] = 1;
   }
 
@@ -61,11 +61,11 @@ void RestartableTypes::initialSetup()
 {
   _real_data = 2;
 
-  for(unsigned int i=0; i<_vector_data.size(); i++)
+  for (unsigned int i=0; i<_vector_data.size(); i++)
     _vector_data[i] = 2;
 
-  for(unsigned int i=0; i<_vector_vector_data.size(); i++)
-    for(unsigned int j=0; j<_vector_vector_data[i].size(); j++)
+  for (unsigned int i=0; i<_vector_vector_data.size(); i++)
+    for (unsigned int j=0; j<_vector_vector_data[i].size(); j++)
       _vector_vector_data[i][j] = 2;
 
   _pointer_data->_i = 2;
@@ -83,11 +83,11 @@ void RestartableTypes::timestepSetup()
 {
   _real_data += 1;
 
-  for(unsigned int i=0; i<_vector_data.size(); i++)
+  for (unsigned int i=0; i<_vector_data.size(); i++)
     _vector_data[i] += 1;
 
-  for(unsigned int i=0; i<_vector_vector_data.size(); i++)
-    for(unsigned int j=0; j<_vector_vector_data[i].size(); j++)
+  for (unsigned int i=0; i<_vector_vector_data.size(); i++)
+    for (unsigned int j=0; j<_vector_vector_data[i].size(); j++)
       _vector_vector_data[i][j] += 1;
 
   _pointer_data->_i += 1;
@@ -99,4 +99,3 @@ void
 RestartableTypes::execute()
 {
 }
-

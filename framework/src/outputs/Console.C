@@ -483,7 +483,7 @@ Console::outputScalarVariables()
   {
     std::stringstream oss;
     oss << "\nScalar Variable Values:\n";
-    if(processor_id() == 0)
+    if (processor_id() == 0)
       _scalar_table.printTable(oss, _max_rows, _fit_mode);
     oss << std::endl;
 

@@ -221,7 +221,7 @@ AdaptiveTransient::execute()
   preExecute();
 
   // Start time loop...
-  while(keepGoing())
+  while (keepGoing())
   {
     takeStep();
     if (lastSolveConverged())
@@ -747,10 +747,10 @@ AdaptiveTransient::keepGoing()
 {
   bool kg = true;
   // Check for stop condition based upon number of simulation steps and/or solution end time:
-  if(_t_step>_num_steps)
+  if (_t_step>_num_steps)
     kg = false;
 
-  if((_time>_end_time) || (fabs(_time-_end_time)<1.e-14))
+  if ((_time>_end_time) || (fabs(_time-_end_time)<1.e-14))
   {
     if (lastSolveConverged())
     {

@@ -19,7 +19,7 @@ SolidMechTempCouple::SolidMechTempCouple(const std::string & name, InputParamete
 void
 SolidMechTempCouple::subdomainSetup()
 {
-  if(_constant_properties)
+  if (_constant_properties)
   {
     _qp = 0;
     recomputeCouplingConstants();

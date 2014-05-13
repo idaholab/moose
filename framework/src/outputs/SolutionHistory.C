@@ -62,7 +62,7 @@ SolutionHistory::output()
   slh_file.open(filename().c_str(), std::ios::app);
   slh_file << nl_sys._current_nl_its;
 
-  for(unsigned int i = 0; i < nl_sys._current_l_its.size(); i++)
+  for (unsigned int i = 0; i < nl_sys._current_l_its.size(); i++)
     slh_file << " " << nl_sys._current_l_its[i];
 
   slh_file << std::endl;

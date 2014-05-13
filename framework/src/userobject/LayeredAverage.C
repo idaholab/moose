@@ -36,7 +36,7 @@ LayeredAverage::initialize()
 {
   LayeredIntegral::initialize();
 
-  for(unsigned int i=0; i<_layer_volumes.size(); i++)
+  for (unsigned int i=0; i<_layer_volumes.size(); i++)
     _layer_volumes[i] = 0.0;
 }
 
@@ -57,7 +57,7 @@ LayeredAverage::finalize()
   gatherSum(_layer_volumes);
 
   // Compute the average for each layer
-  for(unsigned int i=0; i<_layer_volumes.size(); i++)
+  for (unsigned int i=0; i<_layer_volumes.size(); i++)
     if (layerHasValue(i))
       setLayerValue(i, getLayerValue(i) / _layer_volumes[i]);
 }
@@ -67,6 +67,6 @@ LayeredAverage::threadJoin(const UserObject & y)
 {
   LayeredIntegral::threadJoin(y);
   const LayeredAverage & la = static_cast<const LayeredAverage &>(y);
-  for(unsigned int i=0; i<_layer_volumes.size(); i++)
+  for (unsigned int i=0; i<_layer_volumes.size(); i++)
     _layer_volumes[i] += la._layer_volumes[i];
 }

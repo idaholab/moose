@@ -85,7 +85,7 @@ LayeredBase::integralValue(Point p) const
   int higher_layer = -1;
   int lower_layer = -1;
 
-  for(unsigned int i=layer; i<_layer_values.size(); i++)
+  for (unsigned int i=layer; i<_layer_values.size(); i++)
   {
     if (_layer_has_value[i])
     {
@@ -94,7 +94,7 @@ LayeredBase::integralValue(Point p) const
     }
   }
 
-  for(int i=layer-1; i>=0; i--)
+  for (int i=layer-1; i>=0; i--)
   {
     if (_layer_has_value[i])
     {
@@ -106,7 +106,7 @@ LayeredBase::integralValue(Point p) const
   if (higher_layer == -1 && lower_layer == -1)
     return 0; // TODO: We could error here but there are startup dependency problems
 
-  switch(_sample_type)
+  switch (_sample_type)
   {
     case 0: //direct
     {
@@ -148,7 +148,7 @@ LayeredBase::integralValue(Point p) const
 
       if (higher_layer != -1)
       {
-        for(unsigned int i=0; i<_average_radius; i++)
+        for (unsigned int i=0; i<_average_radius; i++)
         {
           int current_layer = higher_layer + i;
 
@@ -165,7 +165,7 @@ LayeredBase::integralValue(Point p) const
 
       if (lower_layer != -1)
       {
-        for(unsigned int i=0; i<_average_radius; i++)
+        for (unsigned int i=0; i<_average_radius; i++)
         {
           int current_layer = lower_layer - i;
 
@@ -199,7 +199,7 @@ LayeredBase::getLayerValue(unsigned int layer) const
 void
 LayeredBase::initialize()
 {
-  for(unsigned int i=0; i<_layer_values.size(); i++)
+  for (unsigned int i=0; i<_layer_values.size(); i++)
   {
     _layer_values[i] = 0.0;
     _layer_has_value[i] = false;
@@ -217,7 +217,7 @@ void
 LayeredBase::threadJoin(const UserObject & y)
 {
   const LayeredBase & lb = dynamic_cast<const LayeredBase &>(y);
-  for(unsigned int i=0; i<_layer_values.size(); i++)
+  for (unsigned int i=0; i<_layer_values.size(); i++)
     if (lb.layerHasValue(i))
       setLayerValue(i, getLayerValue(i) + lb._layer_values[i]);
 }
@@ -230,7 +230,7 @@ LayeredBase::getLayer(Point p) const
   if (direction_x < _direction_min)
     return 0;
 
-  if(_interval_based)
+  if (_interval_based)
   {
     unsigned int layer = std::floor(((direction_x - _direction_min) / (_direction_max - _direction_min)) * (Real)_num_layers);
 
@@ -248,7 +248,7 @@ LayeredBase::getLayer(Point p) const
     {
       return _layer_bounds.size() - 2; // Just return the last layer.  -2 because layers are "in-between" bounds
     }
-    else if(one_higher == _layer_bounds.begin())
+    else if (one_higher == _layer_bounds.begin())
       return 0; // Return the first layer
     else
       // The -1 is because the interval that we fall in is just _before_ the number that is bigger (which is what we found
