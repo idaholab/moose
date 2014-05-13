@@ -69,8 +69,8 @@ PointSamplerBase::execute()
     {
       _subproblem.reinitElemPhys(elem, _point_vec, 0); // Zero is for tid
 
-      for (unsigned int i=0; i<_coupled_moose_vars.size(); i++)
-        _values[i] = _coupled_moose_vars[i]->sln()[0]; // The zero is for the "qp"
+      for (unsigned int j=0; j<_coupled_moose_vars.size(); j++)
+        _values[j] = _coupled_moose_vars[j]->sln()[0]; // The zero is for the "qp"
 
       SamplerBase::addSample(p, _ids[i], _values);
     }
