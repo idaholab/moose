@@ -78,7 +78,7 @@ ComputeDiracThread::onElement(const Elem * elem)
     if (need_reinit_materials)
       _fe_problem.reinitMaterials(_subdomain, _tid, /*swap_stateful=*/false);
 
-    for(std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _sys._dirac_kernels[_tid].all().begin();
+    for (std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _sys._dirac_kernels[_tid].all().begin();
         dirac_kernel_it != _sys._dirac_kernels[_tid].all().end();
         ++dirac_kernel_it)
     {
@@ -116,4 +116,3 @@ void
 ComputeDiracThread::join(const ComputeDiracThread & /*y*/)
 {
 }
-

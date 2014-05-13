@@ -67,7 +67,7 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
         Moose::out << tokens[k] << "\t";
         std::vector<std::string> stos_vars;
         MooseUtils::tokenize(tokens[k], stos_vars, 1, "()");
-        if(stos_vars.size() == 2)
+        if (stos_vars.size() == 2)
         {
           Real coef;
           std::istringstream iss(stos_vars[0]);
@@ -77,7 +77,7 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
           Moose::out << "stochiometric: " << stos[k] << "\t";
           Moose::out << "reactant: " << rxn_vars[k] << "\n";
           // Check the participation of primary species
-          if(rxn_vars[k] == vars[i]) primary_participation[j] = true;
+          if (rxn_vars[k] == vars[i]) primary_participation[j] = true;
         }
         else
         {
@@ -88,12 +88,12 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
       Moose::out << "whether primary present (0 is not): " << primary_participation[j] << "\n";
 
 
-      if(primary_participation[j])
+      if (primary_participation[j])
       {
         // Assigning the stochiometrics based on parsing
         for (unsigned int m=0; m < rxn_vars.size(); m++)
         {
-          if(rxn_vars[m] == vars[i])
+          if (rxn_vars[m] == vars[i])
           {
             weight.push_back(stos[m]);
             Moose::out << "weight for " << rxn_vars[m] <<" : " << weight[weight.size()-1] << "\n";

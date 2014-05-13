@@ -38,13 +38,13 @@ GenericConstantMaterial::GenericConstantMaterial(const std::string & name, Input
 
   _properties.resize(num_names);
 
-  for(unsigned int i=0; i<_num_props; i++)
+  for (unsigned int i=0; i<_num_props; i++)
     _properties[i] = &declareProperty<Real>(_prop_names[i]);
 }
 
 void
 GenericConstantMaterial::computeQpProperties()
 {
-  for(unsigned int i=0; i<_num_props; i++)
+  for (unsigned int i=0; i<_num_props; i++)
     (*_properties[i])[_qp] = _prop_values[i];
 }

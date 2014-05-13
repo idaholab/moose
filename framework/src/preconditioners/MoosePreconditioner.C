@@ -51,7 +51,7 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
     MeshBase::node_iterator it = mesh.local_nodes_begin();
     MeshBase::node_iterator it_end = mesh.local_nodes_end();
 
-    for(;it!=it_end;++it)
+    for (;it!=it_end;++it)
     {
       Node * node = *it;
 
@@ -60,7 +60,7 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
       mooseAssert(node->n_comp(from_system, from_var) == node->n_comp(to_system, to_var),
                   "Number of components does not match in each system");
 
-      for(unsigned int i=0; i<n_comp; i++)
+      for (unsigned int i=0; i<n_comp; i++)
       {
         dof_id_type from_dof = node->dof_number(from_system,from_var,i);
         dof_id_type to_dof = node->dof_number(to_system,to_var,i);
@@ -73,7 +73,7 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
     MeshBase::element_iterator it = mesh.local_elements_begin();
     MeshBase::element_iterator it_end = mesh.local_elements_end();
 
-    for(;it!=it_end;++it)
+    for (;it!=it_end;++it)
     {
       Elem * elem = *it;
 
@@ -82,7 +82,7 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
       mooseAssert(elem->n_comp(from_system, from_var) == elem->n_comp(to_system, to_var),
                   "Number of components does not match in each system");
 
-      for(unsigned int i=0; i<n_comp; i++)
+      for (unsigned int i=0; i<n_comp; i++)
       {
         dof_id_type from_dof = elem->dof_number(from_system,from_var,i);
         dof_id_type to_dof = elem->dof_number(to_system,to_var,i);

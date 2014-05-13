@@ -32,7 +32,7 @@ class Factory;
  *
  * If the condition 'cond' is satisfied, it gets propagated across all processes, so the parallel code take the same path (if that is requires).
  */
-#define parallel_if(cond)                       \
+#define parallel_if (cond)                       \
     bool __local_bool__ = (cond);               \
     Parallel::max<bool>(__local_bool__);        \
     if (__local_bool__)

@@ -1266,11 +1266,11 @@ MooseVariable::setNodalValue(const DenseVector<Number> & values)
 
   _has_nodal_value = true;
 
-  if(isNodal())
+  if (isNodal())
     mooseError("Variable " + name() + " has to be nodal!");
   else
   {
-    for(unsigned int qp=0; qp<_u.size(); qp++)
+    for (unsigned int qp=0; qp<_u.size(); qp++)
     {
       _u[qp] = 0;
       for (unsigned int i=0; i < _nodal_u.size(); i++)
@@ -1286,11 +1286,11 @@ MooseVariable::setNodalValueNeighbor(const DenseVector<Number> & values)
     _nodal_u_neighbor[i] = values(i);
   _has_nodal_value_neighbor = true;
 
-  if(isNodal())
+  if (isNodal())
     mooseError("Variable " + name() + " has to be nodal!");
   else
   {
-    for(unsigned int qp=0; qp<_u_neighbor.size(); qp++)
+    for (unsigned int qp=0; qp<_u_neighbor.size(); qp++)
     {
       _u_neighbor[qp] = 0;
       for (unsigned int i=0; i < _nodal_u_neighbor.size(); i++)
@@ -1307,7 +1307,7 @@ MooseVariable::setNodalValue(Number value, unsigned int idx/* = 0*/)
 
   if (!isNodal()) // If this is an elemental variable, then update the qp values as well
   {
-    for(unsigned int qp=0; qp<_u.size(); qp++)
+    for (unsigned int qp=0; qp<_u.size(); qp++)
       _u[qp] = value;
   }
 }
@@ -1320,7 +1320,7 @@ MooseVariable::setNodalValueNeighbor(Number value)
 
   if (!isNodal()) // If this is an elemental variable, then update the qp values as well
   {
-    for(unsigned int qp=0; qp<_u_neighbor.size(); qp++)
+    for (unsigned int qp=0; qp<_u_neighbor.size(); qp++)
       _u_neighbor[qp] = value;
   }
 }
@@ -1333,7 +1333,7 @@ MooseVariable::computeDamping(const NumericVector<Number> & increment_vec)
   _increment.resize(nqp);
   // Compute the increment at each quadrature point
   unsigned int num_dofs = _dof_indices.size();
-  for(unsigned int qp=0; qp<nqp; qp++)
+  for (unsigned int qp=0; qp<nqp; qp++)
   {
     _increment[qp]=0;
     for (unsigned int i=0; i<num_dofs; i++)

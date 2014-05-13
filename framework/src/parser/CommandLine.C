@@ -166,7 +166,7 @@ CommandLine::printUsage() const
 void
 CommandLine::buildVarsSet()
 {
-  for(const char* var; (var = _get_pot->next_nominus()) != NULL; )
+  for (const char* var; (var = _get_pot->next_nominus()) != NULL; )
   {
     std::vector<std::string> name_value_pairs;
     MooseUtils::tokenize(var, name_value_pairs, 0, "=");

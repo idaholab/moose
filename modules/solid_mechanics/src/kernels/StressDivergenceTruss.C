@@ -63,10 +63,10 @@ StressDivergenceTruss::computeResidual()
 
   re += _local_re;
 
-  if(_has_save_in)
+  if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for(unsigned int i=0; i<_save_in.size(); i++)
+    for (unsigned int i=0; i<_save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
 }
@@ -130,15 +130,15 @@ StressDivergenceTruss::computeJacobian()
 
   ke += _local_ke;
 
-  if(_has_diag_save_in)
+  if (_has_diag_save_in)
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for(unsigned int i=0; i<rows; i++)
+    for (unsigned int i=0; i<rows; i++)
       diag(i) = _local_ke(i,i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for(unsigned int i=0; i<_diag_save_in.size(); i++)
+    for (unsigned int i=0; i<_diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }

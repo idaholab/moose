@@ -43,7 +43,7 @@ CoupledTiedValueConstraint::computeQpResidual(Moose::ConstraintType type)
   Real scaling_factor = _var.scalingFactor();
   Real slave_resid = 0;
   Real retVal = 0;
-  switch(type)
+  switch (type)
   {
     case Moose::Slave:
       retVal = (_u_slave[_qp] - _u_master[_qp])*_test_slave[_i][_qp]*_scaling;
@@ -64,7 +64,7 @@ CoupledTiedValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType type
   Real scaling_factor = _var.scalingFactor();
   Real slave_jac = 0;
   Real retVal = 0;
-  switch(type)
+  switch (type)
   {
     case Moose::SlaveSlave:
       retVal = _phi_slave[_j][_qp]*_test_slave[_i][_qp]*_scaling;
@@ -92,7 +92,7 @@ CoupledTiedValueConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianTy
 
   if (jvar == _master_var_num)
   {
-    switch(type)
+    switch (type)
     {
       case Moose::SlaveSlave:
         retVal = 0;

@@ -129,7 +129,7 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
 
     solution.close();
 
-    for(std::set<dof_id_type>::iterator it = dof_indices_to_zero.begin();
+    for (std::set<dof_id_type>::iterator it = dof_indices_to_zero.begin();
         it != dof_indices_to_zero.end();
         ++it)
       solution.set(*it, 0);
@@ -178,7 +178,7 @@ SystemBase::prepare(THREAD_ID tid)
     for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
       (*it)->clearDofIndices();
 
-    for(std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
+    for (std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
         it != active_elemental_moose_variables.end();
         ++it)
       if (&(*it)->sys() == this)
@@ -217,7 +217,7 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 
     // Make sure to resize the residual and jacobian datastructures for all the new variables
     if (resize_data)
-      for(unsigned int i=0; i<newly_prepared_vars.size(); i++)
+      for (unsigned int i=0; i<newly_prepared_vars.size(); i++)
         _subproblem.assembly(tid).prepareVariable(newly_prepared_vars[i]);
   }
 }
@@ -241,7 +241,7 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    for(std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
+    for (std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
         it != active_elemental_moose_variables.end();
         ++it)
       if (&(*it)->sys() == this)
@@ -374,7 +374,7 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
 
   unsigned int n_vars = sys.n_vars();
 
-  for(std::set<dof_id_type>::iterator elem_id = ghosted_elems.begin();
+  for (std::set<dof_id_type>::iterator elem_id = ghosted_elems.begin();
       elem_id != ghosted_elems.end();
       ++elem_id)
   {

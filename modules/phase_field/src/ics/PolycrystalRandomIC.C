@@ -26,7 +26,7 @@ Real PolycrystalRandomIC::value(const Point & p)
   Point cur_pos = p;
   Real val =  MooseRandom::rand();
 
-  switch(_typ)
+  switch (_typ)
   {
     case 0: //Continuously random
       return val;

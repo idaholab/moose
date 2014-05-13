@@ -482,12 +482,12 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems
 
   // First add the nodes connected to local elems
   ConstElemRange * active_local_elems = getActiveLocalElementRange();
-  for(ConstElemRange::const_iterator it=active_local_elems->begin();
+  for (ConstElemRange::const_iterator it=active_local_elems->begin();
       it!=active_local_elems->end();
       ++it)
   {
     const Elem * elem = *it;
-    for(unsigned int n=0; n<elem->n_nodes(); n++)
+    for (unsigned int n=0; n<elem->n_nodes(); n++)
     {
       Node * node = elem->get_node(n);
 
@@ -496,12 +496,12 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems
   }
 
   // Now add the nodes connected to ghosted_elems
-  for(std::set<unsigned int>::iterator it=ghosted_elems.begin();
+  for (std::set<unsigned int>::iterator it=ghosted_elems.begin();
       it!=ghosted_elems.end();
       ++it)
   {
     Elem * elem = getMesh().elem(*it);
-    for(unsigned int n=0; n<elem->n_nodes(); n++)
+    for (unsigned int n=0; n<elem->n_nodes(); n++)
     {
       Node * node = elem->get_node(n);
 
@@ -568,7 +568,7 @@ MooseMesh::buildNodeList()
   }
 
   _bnd_nodes.reserve(_bnd_nodes.size() + _extra_bnd_nodes.size());
-  for(unsigned int i=0; i<_extra_bnd_nodes.size(); i++)
+  for (unsigned int i=0; i<_extra_bnd_nodes.size(); i++)
   {
     BndNode * bnode = new BndNode(_extra_bnd_nodes[i]._node, _extra_bnd_nodes[i]._bnd_id);
     _bnd_nodes.push_back(bnode);
@@ -712,15 +712,15 @@ MooseMesh::cacheInfo()
 
     unsigned int subdomain_id = elem->subdomain_id();
 
-    for(unsigned int side=0; side<elem->n_sides(); side++)
+    for (unsigned int side=0; side<elem->n_sides(); side++)
     {
       std::vector<BoundaryID> boundaryids = boundaryIDs(elem, side);
 
-      for(unsigned int i=0; i<boundaryids.size(); i++)
+      for (unsigned int i=0; i<boundaryids.size(); i++)
         _subdomain_boundary_ids[subdomain_id].insert(boundaryids[i]);
     }
 
-    for(unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
+    for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
     {
       Node & node = *elem->get_node(nd);
       _block_node_list[node.id()].insert(elem->subdomain_id());
@@ -876,7 +876,7 @@ MooseMesh::clearQuadratureNodes()
     std::map<unsigned int, Node *>::iterator it = _quadrature_nodes.begin();
     std::map<unsigned int, Node *>::iterator end = _quadrature_nodes.end();
 
-    for(; it != end; ++it)
+    for (; it != end; ++it)
       delete it->second;
   }
 
@@ -909,7 +909,7 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool 
   std::set<BoundaryID> boundary_ids = getMesh().boundary_info->get_boundary_ids();
   BoundaryID max_boundary_id = boundary_ids.empty() ? 0 : *(getMesh().boundary_info->get_boundary_ids().rbegin());
 
-  for(unsigned int i=0; i<boundary_name.size(); i++)
+  for (unsigned int i=0; i<boundary_name.size(); i++)
   {
     if (boundary_name[i] == "ANY_BOUNDARY_ID")
     {
@@ -963,7 +963,7 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
 {
   std::vector<SubdomainID> ids(subdomain_name.size());
 
-  for(unsigned int i=0; i<subdomain_name.size(); i++)
+  for (unsigned int i=0; i<subdomain_name.size(); i++)
   {
     if (subdomain_name[i] == "ANY_BLOCK_ID")
     {
@@ -1355,7 +1355,7 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
   }
   // Now build the maps using these templates
   // Note: This MUST be done NOT threaded!
-  for(std::map<ElemType, Elem *>::iterator can_it = canonical_elems.begin();
+  for (std::map<ElemType, Elem *>::iterator can_it = canonical_elems.begin();
       can_it != canonical_elems.end();
       ++can_it)
   {
@@ -1382,8 +1382,8 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     }
 
     // Child side to parent volume mapping for "internal" child sides
-    for(unsigned int child=0; child<elem->n_children(); child++)
-      for(unsigned int side=0; side<elem->n_sides(); side++) // Assume children have the same number of sides!
+    for (unsigned int child=0; child<elem->n_children(); child++)
+      for (unsigned int side=0; side<elem->n_sides(); side++) // Assume children have the same number of sides!
         if (!elem->is_child_on_side(child, side)) // Otherwise we already computed that map
           buildRefinementMap(*elem, *qrule, *qrule_face, -1, child, side);
   }
@@ -1493,13 +1493,13 @@ MooseMesh::mapPoints(const std::vector<Point> & from, const std::vector<Point> &
 
   qp_map.resize(n_from);
 
-  for(unsigned int i=0; i<n_from; i++)
+  for (unsigned int i=0; i<n_from; i++)
   {
     const Point & from_point = from[i];
 
     QpMap & current_map = qp_map[i];
 
-    for(unsigned int j=0; j<n_to; j++)
+    for (unsigned int j=0; j<n_to; j++)
     {
       const Point & to_point = to[j];
       Real distance = (from_point - to_point).size();
@@ -1530,12 +1530,12 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   unsigned int dim = template_elem->dim();
   mesh.set_mesh_dimension(dim);
 
-  for(unsigned int i=0; i<template_elem->n_nodes(); i++)
+  for (unsigned int i=0; i<template_elem->n_nodes(); i++)
     mesh.add_point(template_elem->point(i));
 
   Elem * elem = mesh.add_elem(Elem::build(template_elem->type()).release());
 
-  for(unsigned int i=0; i<template_elem->n_nodes(); i++)
+  for (unsigned int i=0; i<template_elem->n_nodes(); i++)
     elem->set_node(i) = mesh.node_ptr(i);
 
   AutoPtr<FEBase> fe (FEBase::build(dim, FEType()));
@@ -1582,11 +1582,11 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   else
   {
     children.resize(n_children);
-    for(unsigned int child=0; child < n_children; child++)
+    for (unsigned int child=0; child < n_children; child++)
       children[child] = child;
   }
 
-  for(unsigned int i=0; i < children.size(); i++)
+  for (unsigned int i=0; i < children.size(); i++)
   {
     unsigned int child = children[i];
 
@@ -1620,7 +1620,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   coarsen_map.resize(parent_ref_points.size());
 
   // For each parent qp find the closest child qp
-  for(unsigned int child=0; child < n_children; child++)
+  for (unsigned int child=0; child < n_children; child++)
   {
     if (parent_side != -1 && !elem->is_child_on_side(child, child_side))
       continue;
@@ -1633,7 +1633,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
     mapPoints(parent_ref_points, child_ref_points, qp_map);
 
     // Check those to see if they are closer than what we currently have for each point
-    for(unsigned int parent_qp=0; parent_qp < parent_ref_points.size(); parent_qp++)
+    for (unsigned int parent_qp=0; parent_qp < parent_ref_points.size(); parent_qp++)
     {
       std::pair<unsigned int, QpMap> & child_and_map = coarsen_map[parent_qp];
       unsigned int & closest_child = child_and_map.first;
@@ -1916,7 +1916,7 @@ MooseMesh::ghostGhostedBoundaries()
 
   std::vector<const Elem*> family_tree;
 
-  for(unsigned int i=0; i<elems.size(); i++)
+  for (unsigned int i=0; i<elems.size(); i++)
   {
     if (_ghosted_boundaries.find(ids[i]) != _ghosted_boundaries.end())
     {

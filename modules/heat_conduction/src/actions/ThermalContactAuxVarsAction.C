@@ -54,7 +54,7 @@ ThermalContactAuxVarsAction::act()
 
   std::string penetration_var_name("penetration");
 
-  if(quadrature)
+  if (quadrature)
   {
     order = "CONSTANT";
     family = "MONOMIAL";

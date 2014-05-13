@@ -168,7 +168,7 @@ Nonlinear3D::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat,
  ////
  ////   Chat.eigen(eigen_value,eigen_vector);
  ////
- ////   for(int i = 0; i < ND; i++)
+ ////   for (int i = 0; i < ND; i++)
  ////   {
  ////     N1(i) = eigen_vector(i,0);
  ////     N2(i) = eigen_vector(i,1);

@@ -14,7 +14,7 @@ SymmElasticityTensor::SymmElasticityTensor(const bool constant)
 void
 SymmElasticityTensor::calculate(unsigned int qp)
 {
-  if(!_constant || !_values_computed)
+  if (!_constant || !_values_computed)
   {
     calculateEntries(qp);
     _values_computed = true;
@@ -341,12 +341,12 @@ SymmElasticityTensor::adjustForCracking( const RealVectorValue & /*crack_flags*/
 void
 SymmElasticityTensor::fillFromInputVector(std::vector<Real> input, bool all)
 {
-  if((all == true && input.size() != 21) || (all == false && input.size() != 9 ))
+  if ((all == true && input.size() != 21) || (all == false && input.size() != 9 ))
     mooseError("Please check the number of entries in the stiffness input vector.");
 
-  if(all == true)
+  if (all == true)
   {
-    for(int i=0; i<21; i++)
+    for (int i=0; i<21; i++)
       _val[i] = input[i];
   }
   else

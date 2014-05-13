@@ -111,7 +111,7 @@ ComputeUserObjectsThread::subdomainChanged()
 
   // Boundary UserObject Dependencies (SideUserObjects and NodalUserObjects)
   const std::set<unsigned int> & bnd_ids = _mesh.getSubdomainBoundaryIds(_subdomain);
-  for(std::set<unsigned int>::const_iterator id_it = bnd_ids.begin(); id_it != bnd_ids.end(); ++id_it)
+  for (std::set<unsigned int>::const_iterator id_it = bnd_ids.begin(); id_it != bnd_ids.end(); ++id_it)
   {
     // SideUserObjects
     {

@@ -56,7 +56,7 @@ MaterialPropertyUserObject::threadJoin(const UserObject & y)
 {
   ElementIntegralUserObject::threadJoin(y);
   const MaterialPropertyUserObject & mat_uo = dynamic_cast<const MaterialPropertyUserObject &>(y);
-  for(unsigned int i=0; i<_elem_integrals.size(); i++)
+  for (unsigned int i=0; i<_elem_integrals.size(); i++)
     _elem_integrals[i] += mat_uo._elem_integrals[i];
 }
 

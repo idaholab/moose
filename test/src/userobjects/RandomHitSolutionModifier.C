@@ -44,7 +44,7 @@ RandomHitSolutionModifier::execute()
   _nodes_that_were_hit.resize(hits.size());
 
 
-  for(unsigned int i=0; i<hits.size(); i++)
+  for (unsigned int i=0; i<hits.size(); i++)
   {
     const Point & hit = hits[i];
 
@@ -57,7 +57,7 @@ RandomHitSolutionModifier::execute()
       Node * closest_node = NULL;
 
       // Find the node on that element that is closest.
-      for(unsigned int n=0; n<elem->n_nodes(); n++)
+      for (unsigned int n=0; n<elem->n_nodes(); n++)
       {
         Node * cur_node = elem->get_node(n);
         Real cur_distance = (hit - *cur_node).size();

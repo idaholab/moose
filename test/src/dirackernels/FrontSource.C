@@ -41,7 +41,7 @@ FrontSource::addPoints()
   std::vector<std::pair<Elem *, Point> >::const_iterator end = points.end();
 
   // Add all of the points the front tracker found
-  for(; i != end; ++i)
+  for (; i != end; ++i)
     addPoint(i->first, i->second);
 }
 

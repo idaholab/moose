@@ -272,21 +272,21 @@ NonlinearSystem::restoreSolutions()
 void
 NonlinearSystem::initialSetup()
 {
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
     _constraints[i].initialSetup();
 }
 
 void
 NonlinearSystem::initialSetupBCs()
 {
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
     _bcs[i].initialSetup();
 }
 
 void
 NonlinearSystem::initialSetupKernels()
 {
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _kernels[i].initialSetup();
     _dirac_kernels[i].initialSetup();
@@ -297,7 +297,7 @@ NonlinearSystem::initialSetupKernels()
 void
 NonlinearSystem::timestepSetup()
 {
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _kernels[i].timestepSetup();
     _bcs[i].timestepSetup();
@@ -635,7 +635,7 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
 void
 NonlinearSystem::addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters)
 {
-  for(THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
@@ -684,7 +684,7 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
 
   Moose::enableFPE();
 
-  for(std::vector<NumericVector<Number> *>::iterator it = _vecs_to_zero_for_residual.begin();
+  for (std::vector<NumericVector<Number> *>::iterator it = _vecs_to_zero_for_residual.begin();
       it != _vecs_to_zero_for_residual.end();
       ++it)
   {
@@ -791,7 +791,7 @@ void
 NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
 {
   //Global Kernels
-  for(std::vector<KernelBase *>::const_iterator kernel_it = _kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)
+  for (std::vector<KernelBase *>::const_iterator kernel_it = _kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)
     (*kernel_it)->subdomainSetup();
 }
 
@@ -900,7 +900,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 
   bool constraints_applied = false;
 
-  for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
+  for (std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
       it != penetration_locators->end();
       ++it)
   {
@@ -919,7 +919,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 
     if (constraints.size())
     {
-      for(unsigned int i=0; i<slave_nodes.size(); i++)
+      for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
         Node & slave_node = _mesh.node(slave_node_num);
@@ -944,7 +944,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
             // reinit variables on the master element's face at the contact point
             _fe_problem.reinitNeighborPhys(master_elem, master_side, points, 0);
 
-            for(unsigned int c=0; c < constraints.size(); c++)
+            for (unsigned int c=0; c < constraints.size(); c++)
             {
               NodeFaceConstraint * nfc = constraints[c];
 
@@ -988,7 +988,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
   bool constraints_applied;
   if (!_assemble_constraints_separately) constraints_applied = false;
-  for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
+  for (std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
       it != penetration_locators->end();
       ++it)
   {
@@ -1013,7 +1013,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
     if (constraints.size())
     {
-      for(unsigned int i=0; i<slave_nodes.size(); i++)
+      for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
         Node & slave_node = _mesh.node(slave_node_num);
@@ -1041,7 +1041,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
             // reinit variables on the master element's face at the contact point
             _fe_problem.reinitNeighborPhys(master_elem, master_side, points, 0);
 
-            for(unsigned int c=0; c < constraints.size(); c++)
+            for (unsigned int c=0; c < constraints.size(); c++)
             {
               NodeFaceConstraint * nfc = constraints[c];
 
@@ -1144,7 +1144,7 @@ void
 {
 
    // residualSetup() /////
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _kernels[i].residualSetup();
     _bcs[i].residualSetup();
@@ -1168,7 +1168,7 @@ void
     Moose::perf_log.pop("ComputeResidualThread", "Solve");
 
     unsigned int n_threads = libMesh::n_threads();
-    for(unsigned int i=0; i<n_threads; i++) // Add any cached residuals that might be hanging around
+    for (unsigned int i=0; i<n_threads; i++) // Add any cached residuals that might be hanging around
       _fe_problem.addCachedResidual(i);
   }
   PARALLEL_CATCH;
@@ -1280,13 +1280,13 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
 {
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
 
-  for(std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator it = nearest_node_locators.begin();
+  for (std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator it = nearest_node_locators.begin();
       it != nearest_node_locators.end();
       ++it)
   {
     std::vector<dof_id_type> & slave_nodes = it->second->_slave_nodes;
 
-    for(unsigned int i=0; i<slave_nodes.size(); i++)
+    for (unsigned int i=0; i<slave_nodes.size(); i++)
     {
       std::set<dof_id_type> unique_slave_indices;
       std::set<dof_id_type> unique_master_indices;
@@ -1297,21 +1297,21 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
         std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[slave_node];
 
         // Get the dof indices from each elem connected to the node
-        for(unsigned int el=0; el < elems.size(); ++el)
+        for (unsigned int el=0; el < elems.size(); ++el)
         {
           dof_id_type cur_elem = elems[el];
 
           std::vector<dof_id_type> dof_indices;
           dofMap().dof_indices(_mesh.elem(cur_elem), dof_indices);
 
-          for(unsigned int di=0; di < dof_indices.size(); di++)
+          for (unsigned int di=0; di < dof_indices.size(); di++)
             unique_slave_indices.insert(dof_indices[di]);
         }
       }
 
       std::vector<dof_id_type> master_nodes = it->second->_neighbor_nodes[slave_node];
 
-      for(unsigned int k=0; k<master_nodes.size(); k++)
+      for (unsigned int k=0; k<master_nodes.size(); k++)
       {
         dof_id_type master_node = master_nodes[k];
 
@@ -1319,24 +1319,24 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
           std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[master_node];
 
           // Get the dof indices from each elem connected to the node
-          for(unsigned int el=0; el < elems.size(); ++el)
+          for (unsigned int el=0; el < elems.size(); ++el)
           {
             dof_id_type cur_elem = elems[el];
 
             std::vector<dof_id_type> dof_indices;
             dofMap().dof_indices(_mesh.elem(cur_elem), dof_indices);
 
-            for(unsigned int di=0; di < dof_indices.size(); di++)
+            for (unsigned int di=0; di < dof_indices.size(); di++)
               unique_master_indices.insert(dof_indices[di]);
           }
         }
       }
 
-      for(std::set<dof_id_type>::iterator sit=unique_slave_indices.begin(); sit != unique_slave_indices.end(); ++sit)
+      for (std::set<dof_id_type>::iterator sit=unique_slave_indices.begin(); sit != unique_slave_indices.end(); ++sit)
       {
         dof_id_type slave_id = *sit;
 
-        for(std::set<dof_id_type>::iterator mit=unique_master_indices.begin(); mit != unique_master_indices.end(); ++mit)
+        for (std::set<dof_id_type>::iterator mit=unique_master_indices.begin(); mit != unique_master_indices.end(); ++mit)
         {
           dof_id_type master_id = *mit;
 
@@ -1348,7 +1348,7 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
   }
 
   // Make every entry sorted and unique
-  for(std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
+  for (std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
   {
     std::vector<dof_id_type> & row = git->second;
 
@@ -1367,12 +1367,12 @@ NonlinearSystem::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jaco
 
   findImplicitGeometricCouplingEntries(geom_search_data, graph);
 
-  for(std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
+  for (std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
   {
     dof_id_type dof = git->first;
     std::vector<dof_id_type> & row = git->second;
 
-    for(unsigned int i=0; i<row.size(); i++)
+    for (unsigned int i=0; i<row.size(); i++)
     {
       dof_id_type coupled_dof = row[i];
       jacobian.add(dof, coupled_dof, 0);
@@ -1405,7 +1405,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
   bool constraints_applied;
   if (!_assemble_constraints_separately) constraints_applied = false;
-  for(std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
+  for (std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = penetration_locators->begin();
       it != penetration_locators->end();
       ++it)
   {
@@ -1430,7 +1430,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
     zero_rows.clear();
     if (constraints.size())
     {
-      for(unsigned int i=0; i<slave_nodes.size(); i++)
+      for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
         Node & slave_node = _mesh.node(slave_node_num);
@@ -1454,7 +1454,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
             // reinit variables on the master element's face at the contact point
             _fe_problem.reinitNeighborPhys(master_elem, master_side, points, 0);
-            for(unsigned int c=0; c < constraints.size(); c++)
+            for (unsigned int c=0; c < constraints.size(); c++)
             {
               NodeFaceConstraint * nfc = constraints[c];
 
@@ -1493,11 +1493,11 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
                   MooseVariable & jvar = *(*jt);
 
                   // Only compute jacobians for nonlinear variables
-                  if(jvar.kind() != Moose::VAR_NONLINEAR)
+                  if (jvar.kind() != Moose::VAR_NONLINEAR)
                     continue;
 
                   // Only compute Jacobian entries if this coupling is being used by the preconditioner
-                  if(!_fe_problem.areCoupled(nfc->variable().number(), jvar.number()))
+                  if (!_fe_problem.areCoupled(nfc->variable().number(), jvar.number()))
                     continue;
 
                   // Need to zero out the matrices first
@@ -1669,7 +1669,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 #endif
 
   // jacobianSetup /////
-  for(unsigned int i=0; i<libMesh::n_threads(); i++)
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _kernels[i].jacobianSetup();
     _bcs[i].jacobianSetup();
@@ -1692,7 +1692,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         Threads::parallel_reduce(elem_range, cj);
 
         unsigned int n_threads = libMesh::n_threads();
-        for(unsigned int i=0; i<n_threads; i++) // Add any Jacobian contibutions still hanging around
+        for (unsigned int i=0; i<n_threads; i++) // Add any Jacobian contibutions still hanging around
           _fe_problem.addCachedJacobian(jacobian, i);
       }
       break;
@@ -1704,7 +1704,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         Threads::parallel_reduce(elem_range, cj);
         unsigned int n_threads = libMesh::n_threads();
 
-        for(unsigned int i=0; i<n_threads; i++)
+        for (unsigned int i=0; i<n_threads; i++)
           _fe_problem.addCachedJacobian(jacobian, i);
       }
       break;
@@ -1999,7 +1999,7 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
     const dof_id_type first_dof_on_proc = dofMap().first_dof(processor_id());
     const dof_id_type end_dof_on_proc   = dofMap().end_dof(processor_id());
 
-    for(std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
+    for (std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
     {
       dof_id_type dof = git->first;
       dof_id_type local_dof = dof - first_dof_on_proc;
@@ -2018,7 +2018,7 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
       SparsityPattern::sort_row(sparsity_row.begin(), sparsity_row.begin()+original_row_length, sparsity_row.end());
 
       // Fix up nonzero arrays
-      for(unsigned int i=0; i<row.size(); i++)
+      for (unsigned int i=0; i<row.size(); i++)
       {
         dof_id_type coupled_dof = row[i];
 

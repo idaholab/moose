@@ -48,7 +48,7 @@ MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs)
 
 MaterialWarehouse::~MaterialWarehouse()
 {
-  for(unsigned int i=0; i<_mats.size(); i++)
+  for (unsigned int i=0; i<_mats.size(); i++)
     delete _mats[i];
 }
 
@@ -64,28 +64,28 @@ MaterialWarehouse::initialSetup()
   for (std::map<BoundaryID, std::vector<Material *> >::iterator j = _active_boundary_materials.begin(); j != _active_boundary_materials.end(); ++j)
      sortMaterials(j->second);
 
-  for(unsigned int i=0; i<_mats.size(); i++)
+  for (unsigned int i=0; i<_mats.size(); i++)
     _mats[i]->initialSetup();
 }
 
 void
 MaterialWarehouse::timestepSetup()
 {
-  for(unsigned int i=0; i<_mats.size(); i++)
+  for (unsigned int i=0; i<_mats.size(); i++)
     _mats[i]->timestepSetup();
 }
 
 void
 MaterialWarehouse::residualSetup()
 {
-  for(unsigned int i=0; i<_mats.size(); i++)
+  for (unsigned int i=0; i<_mats.size(); i++)
     _mats[i]->residualSetup();
 }
 
 void
 MaterialWarehouse::jacobianSetup()
 {
-  for(unsigned int i=0; i<_mats.size(); i++)
+  for (unsigned int i=0; i<_mats.size(); i++)
     _mats[i]->jacobianSetup();
 }
 

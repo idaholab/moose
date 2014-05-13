@@ -20,7 +20,7 @@ SolidMech::SolidMech(const std::string & name, InputParameters parameters)
 void
 SolidMech::subdomainSetup()
 {
-  if(_constant_properties)
+  if (_constant_properties)
   {
     _qp = 0;
     recomputeConstants();

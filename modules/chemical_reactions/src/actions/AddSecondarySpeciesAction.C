@@ -68,7 +68,7 @@ AddSecondarySpeciesAction::act()
         {
           std::vector<std::string> stos_vars;
           MooseUtils::tokenize(tokens[k], stos_vars, 1, "()");
-          if(stos_vars.size() == 1)
+          if (stos_vars.size() == 1)
           {
             kin_species = stos_vars[0];
             Moose::out << "I'm here and the kin_species is: " << stos_vars[0] << "\n";

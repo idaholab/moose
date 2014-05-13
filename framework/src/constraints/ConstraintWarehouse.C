@@ -46,15 +46,15 @@ ConstraintWarehouse::initialSetup()
     (*curr)->initialSetup();
 
   for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->initialSetup();
 
   for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->initialSetup();
 
   for (std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->initialSetup();
 }
 
@@ -65,15 +65,15 @@ ConstraintWarehouse::timestepSetup()
     (*curr)->timestepSetup();
 
   for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->timestepSetup();
 
   for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->timestepSetup();
 
   for (std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->timestepSetup();
 }
 
@@ -84,15 +84,15 @@ ConstraintWarehouse::residualSetup()
     (*curr)->residualSetup();
 
   for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->residualSetup();
 
   for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->residualSetup();
 
   for (std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->residualSetup();
 }
 
@@ -103,15 +103,15 @@ ConstraintWarehouse::jacobianSetup()
     (*curr)->jacobianSetup();
 
   for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _node_face_constraints.begin(); curr != _node_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->jacobianSetup();
 
   for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator curr = _displaced_node_face_constraints.begin(); curr != _displaced_node_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->jacobianSetup();
 
   for (std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator curr = _face_face_constraints.begin(); curr != _face_face_constraints.end(); ++curr)
-    for(unsigned int i=0; i<curr->second.size(); i++)
+    for (unsigned int i=0; i<curr->second.size(); i++)
       (curr->second)[i]->jacobianSetup();
 }
 

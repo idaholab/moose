@@ -12,11 +12,11 @@ IsotropicElasticityTensorRZ::calculateLameCoefficients()
   mooseAssert( _lambda_set && _mu_set, "Both lambda and mu must be set" );
 
   // Calculate lambda, the shear modulus, and Young's modulus
-  if(!_nu_set)
+  if (!_nu_set)
   {
     _nu = _lambda / ( 2 * ( _lambda + _mu ) );
   }
-  if(!_E_set)
+  if (!_E_set)
   {
     _E = _mu*(3*_lambda+2*_mu)/(_lambda+_mu);
   }
@@ -62,5 +62,3 @@ IsotropicElasticityTensorRZ::calculateEntries(unsigned int /*qp*/)
   _values[8*row+8] = C0 * C1;
 
 }
-
-

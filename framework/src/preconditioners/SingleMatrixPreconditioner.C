@@ -45,7 +45,7 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const std::string & name,
 
     // off-diagonal entries
     std::vector<std::vector<unsigned int> > off_diag(n_vars);
-    for(unsigned int i = 0; i < getParam<std::vector<std::string> >("off_diag_row").size(); i++)
+    for (unsigned int i = 0; i < getParam<std::vector<std::string> >("off_diag_row").size(); i++)
     {
       unsigned int row = nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_row")[i]).number();
       unsigned int column = nl.getVariable(0, getParam<std::vector<std::string> >("off_diag_column")[i]).number();
@@ -65,4 +65,3 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const std::string & name,
 SingleMatrixPreconditioner::~SingleMatrixPreconditioner()
 {
 }
-

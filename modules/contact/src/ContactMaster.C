@@ -299,7 +299,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
 
   RealVectorValue res_vec;
   // Build up residual vector
-  for(unsigned int i=0; i<_mesh_dimension; ++i)
+  for (unsigned int i=0; i<_mesh_dimension; ++i)
   {
     long int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
@@ -361,7 +361,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
            _model == CM_TIED ||
            (_model == CM_COULOMB && _formulation == CF_DEFAULT))
   {
-    switch(_formulation)
+    switch (_formulation)
     {
     case CF_DEFAULT:
       pinfo->_contact_force =  -res_vec;
@@ -399,7 +399,7 @@ ContactMaster::computeQpJacobian()
 
   PenetrationInfo * pinfo = _point_to_info[_current_point];
 
-  switch(_model)
+  switch (_model)
   {
   case CM_FRICTIONLESS:
   case CM_EXPERIMENTAL:
@@ -441,7 +441,7 @@ ContactMaster::computeQpJacobian()
 
   return 0;
 /*
-  if(_i != _j)
+  if (_i != _j)
     return 0;
 
   Node * node = pinfo->_node;
@@ -449,7 +449,7 @@ ContactMaster::computeQpJacobian()
   RealVectorValue jac_vec;
 
   // Build up jac vector
-  for(unsigned int i=0; i<_dim; i++)
+  for (unsigned int i=0; i<_dim; i++)
   {
     long int dof_number = node->dof_number(0, _vars(i), 0);
     jac_vec(i) = _jacobian_copy(dof_number, dof_number);

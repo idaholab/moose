@@ -46,7 +46,7 @@ Density::initStatefulProperties(unsigned n_points)
 void
 Density::computeProperties()
 {
-  for(unsigned int qp(0); qp < _qrule->n_points(); ++qp)
+  for (unsigned int qp(0); qp < _qrule->n_points(); ++qp)
   {
     Real d(_orig_density);
     if (_is_coupled)

@@ -143,7 +143,7 @@ Piecewise::parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
     gotline=true;
 
     //Replace all commas with spaces
-    while(size_t pos=line.find(','))
+    while (size_t pos=line.find(','))
     {
       if (pos == line.npos)
         break;
@@ -169,7 +169,7 @@ Piecewise::parseRows( std::vector<Real> & x, std::vector<Real> & y )
     mooseError("Error opening file '" + _data_file_name + "' from Piecewise function.");
   std::string line;
 
-  while(parseNextLineReals(file, x))
+  while (parseNextLineReals(file, x))
   {
     if (x.size() >0)
       break;
@@ -178,7 +178,7 @@ Piecewise::parseRows( std::vector<Real> & x, std::vector<Real> & y )
   if (x.size() == 0)
     mooseError("File '" + _data_file_name + "' contains no data for Piecewise function.");
 
-  while(parseNextLineReals(file, y))
+  while (parseNextLineReals(file, y))
   {
     if (y.size() >0)
       break;
@@ -190,7 +190,7 @@ Piecewise::parseRows( std::vector<Real> & x, std::vector<Real> & y )
     mooseError("Lengths of x and y data do not match in file '" + _data_file_name + "' for Piecewise function.");
 
   std::vector<Real> scratch;
-  while(parseNextLineReals(file, scratch)){
+  while (parseNextLineReals(file, scratch)){
     if (scratch.size() > 0)
       mooseError("Read more than two rows of data from file '" + _data_file_name + "' for Piecewise function.  Did you mean to use \"format = columns\"?");
   }
@@ -206,7 +206,7 @@ Piecewise::parseColumns( std::vector<Real> & x, std::vector<Real> & y )
   std::string line;
 
   std::vector<Real> scratch;
-  while(parseNextLineReals(file, scratch))
+  while (parseNextLineReals(file, scratch))
   {
     if (scratch.size() > 0){
       if (scratch.size() != 2)

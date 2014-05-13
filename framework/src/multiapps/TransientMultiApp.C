@@ -77,7 +77,7 @@ TransientMultiApp::~TransientMultiApp()
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
-  for(unsigned int i = 0; i < _my_num_apps; i++)
+  for (unsigned int i = 0; i < _my_num_apps; i++)
   {
     Transient * ex = _transient_executioners[i];
 
@@ -114,7 +114,7 @@ TransientMultiApp::init()
   {
     _transient_executioners.resize(_my_num_apps);
     // Grab Transient Executioners from each app
-    for(unsigned int i=0; i<_my_num_apps; i++)
+    for (unsigned int i=0; i<_my_num_apps; i++)
       setupApp(i);
   }
 
@@ -200,7 +200,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       bool at_steady = false;
 
       // Now do all of the solves we need
-      while(true)
+      while (true)
       {
         if (_first != true)
           ex->incrementStepOrReject();
@@ -237,7 +237,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           std::set<dof_id_type>::iterator it  = _transferred_dofs.begin();
           std::set<dof_id_type>::iterator end = _transferred_dofs.end();
 
-          for(; it != end; ++it)
+          for (; it != end; ++it)
           {
             dof_id_type dof = *it;
             solution.set(dof, (transfer_old(dof) * one_minus_step_percent) + (transfer(dof) * step_percent));
@@ -327,7 +327,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
             Real catch_up_dt = dt/2;
 
-            while(!caught_up && catch_up_step < _max_catch_up_steps)
+            while (!caught_up && catch_up_step < _max_catch_up_steps)
             {
               Moose::err << "Solving " << _name << "catch up step " << catch_up_step << std::endl;
               ex->incrementStepOrReject();
@@ -377,7 +377,7 @@ TransientMultiApp::advanceStep()
 {
   if (!_auto_advance)
   {
-    for(unsigned int i=0; i<_my_num_apps; i++)
+    for (unsigned int i=0; i<_my_num_apps; i++)
     {
       /*FEProblem * problem =*/ appProblem(_first_local_app + i);
       Transient * ex = _transient_executioners[i];
@@ -400,7 +400,7 @@ TransientMultiApp::computeDT()
   {
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
-    for(unsigned int i=0; i<_my_num_apps; i++)
+    for (unsigned int i=0; i<_my_num_apps; i++)
     {
       Transient * ex = _transient_executioners[i];
       ex->computeDT();

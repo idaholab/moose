@@ -49,7 +49,7 @@ NodalFloodCountAux::NodalFloodCountAux(const std::string & name, InputParameters
 Real
 NodalFloodCountAux::computeValue()
 {
-  switch(_field_display)
+  switch (_field_display)
   {
   case 0:  // UNIQUE_REGION
   case 1:  // VARIABLE_COLORING

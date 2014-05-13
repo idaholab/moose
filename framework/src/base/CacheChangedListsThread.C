@@ -44,7 +44,7 @@ CacheChangedListsThread::onElement(const Elem *elem)
 
       std::vector<const Elem *> & children = _coarsened_element_children[elem];
 
-      for(unsigned int child=0; child < elem->n_children(); child++)
+      for (unsigned int child=0; child < elem->n_children(); child++)
         children.push_back(elem->child(child));
     }
   }

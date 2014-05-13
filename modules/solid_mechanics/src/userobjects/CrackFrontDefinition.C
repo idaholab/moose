@@ -175,7 +175,7 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
       Real node0coor0;
       Real node0coor1;
 
-      for(std::set<unsigned int>::iterator sit=nodes.begin(); sit != nodes.end(); ++sit)
+      for (std::set<unsigned int>::iterator sit=nodes.begin(); sit != nodes.end(); ++sit)
       {
         Node & curr_node = _mesh.node(*sit);
         if (sit == nodes.begin())
@@ -305,7 +305,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> nodes)
 
     unsigned int last_node = end_nodes[0];
     unsigned int second_last_node = last_node;
-    while(last_node != end_nodes[1])
+    while (last_node != end_nodes[1])
     {
       std::vector<unsigned int> & curr_node_line_elems = node_to_line_elem_map[last_node];
       bool found_new_node = false;
@@ -817,4 +817,3 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
     theta = -std::asin(p_to_plane_dist/r);
 
 }
-

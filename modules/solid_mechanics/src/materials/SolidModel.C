@@ -288,56 +288,56 @@ SolidModel::checkElasticConstants()
   }
 
   // Calculate lambda, the shear modulus, and Young's modulus
-  if(_lambda_set && _shear_modulus_set) // First and second Lame
+  if (_lambda_set && _shear_modulus_set) // First and second Lame
   {
     _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
     _poissons_ratio = 0.5 * _lambda / (_lambda + _shear_modulus);
   }
-  else if(_lambda_set && _poissons_ratio_set)
+  else if (_lambda_set && _poissons_ratio_set)
   {
     _shear_modulus = (_lambda * (1.0 - 2.0 * _poissons_ratio)) / (2.0 * _poissons_ratio);
     _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
 
   }
-  else if(_lambda_set && _bulk_modulus_set)
+  else if (_lambda_set && _bulk_modulus_set)
   {
     _shear_modulus = 3.0 * (_bulk_modulus - _lambda) / 2.0;
     _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
     _poissons_ratio = _lambda / ( 3 * _bulk_modulus - _lambda );
   }
-  else if(_lambda_set && _youngs_modulus_set)
+  else if (_lambda_set && _youngs_modulus_set)
   {
     _shear_modulus = ( (_youngs_modulus - 3.0*_lambda) / 4.0 ) + ( std::sqrt( (_youngs_modulus-3.0*_lambda)*(_youngs_modulus-3.0*_lambda) + 8.0*_lambda*_youngs_modulus ) / 4.0 );
     _poissons_ratio = _lambda / ( 3 * _bulk_modulus - _lambda );
   }
-  else if(_shear_modulus_set && _poissons_ratio_set)
+  else if (_shear_modulus_set && _poissons_ratio_set)
   {
     _lambda = ( 2.0 * _shear_modulus * _poissons_ratio ) / (1.0 - 2.0*_poissons_ratio);
     _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
   }
-  else if(_shear_modulus_set && _bulk_modulus_set)
+  else if (_shear_modulus_set && _bulk_modulus_set)
   {
     _lambda = _bulk_modulus - 2.0 * _shear_modulus / 3.0;
     _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
     _poissons_ratio = (3*_bulk_modulus-2*_shear_modulus)/(2*(3*_bulk_modulus+_shear_modulus));
   }
-  else if(_shear_modulus_set && _youngs_modulus_set)
+  else if (_shear_modulus_set && _youngs_modulus_set)
   {
     _lambda = ((2.0*_shear_modulus - _youngs_modulus) * _shear_modulus) / (_youngs_modulus - 3.0*_shear_modulus);
     _poissons_ratio = 0.5*_youngs_modulus/_shear_modulus - 1;
   }
-  else if(_poissons_ratio_set && _bulk_modulus_set)
+  else if (_poissons_ratio_set && _bulk_modulus_set)
   {
     _lambda = (3.0 * _bulk_modulus * _poissons_ratio) / (1.0 + _poissons_ratio);
     _shear_modulus = (3.0 * _bulk_modulus * (1.0 - 2.0*_poissons_ratio)) / (2.0 * (1.0 + _poissons_ratio));
     _youngs_modulus = _shear_modulus*(3*_lambda+2*_shear_modulus)/(_lambda+_shear_modulus);
   }
-  else if(_youngs_modulus_set && _poissons_ratio_set) // Young's Modulus and Poisson's Ratio
+  else if (_youngs_modulus_set && _poissons_ratio_set) // Young's Modulus and Poisson's Ratio
   {
     _lambda = (_poissons_ratio * _youngs_modulus) / ( (1.0+_poissons_ratio) * (1-2.0*_poissons_ratio) );
     _shear_modulus = _youngs_modulus / ( 2.0 * (1.0+_poissons_ratio));
   }
-  else if(_youngs_modulus_set && _bulk_modulus_set)
+  else if (_youngs_modulus_set && _bulk_modulus_set)
   {
     _lambda = 3.0 * _bulk_modulus * (3.0 * _bulk_modulus - _youngs_modulus) / (9.0 * _bulk_modulus - _youngs_modulus);
     _shear_modulus = 3.0 * _youngs_modulus * _bulk_modulus / (9.0 * _bulk_modulus - _youngs_modulus);
@@ -673,7 +673,7 @@ SolidModel::computeConstitutiveModelStress()
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
 
-  if(_t_step == 0) return;
+  if (_t_step == 0) return;
 
   const SubdomainID current_block = _current_elem->subdomain_id();
   ConstitutiveModel* cm = _constitutive_model[current_block];
@@ -785,10 +785,10 @@ SolidModel::initialSetup()
 
   // Load in the volumetric models or constitutive model
 
-  for(unsigned i(0); i < _block_id.size(); ++i)
+  for (unsigned i(0); i < _block_id.size(); ++i)
   {
     const std::vector<Material*> * mats_p;
-    if(_bnd)
+    if (_bnd)
     {
       mats_p = &_fe_problem.getFaceMaterials( _block_id[i], _tid );
     }
@@ -1411,7 +1411,7 @@ SolidModel::createConstitutiveModel(const std::string & cm_name, const InputPara
   _models_to_free.insert(cm);  // Keep track of the dynamic memory that is created internally to this object
 
   _constitutive_active = true;
-  for(unsigned i(0); i < _block_id.size(); ++i)
+  for (unsigned i(0); i < _block_id.size(); ++i)
   {
     _constitutive_model[_block_id[i]] = cm;
   }

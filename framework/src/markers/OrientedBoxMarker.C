@@ -131,9 +131,8 @@ OrientedBoxMarker::computeElementMarker()
    */
   RealVectorValue transformed = _rot_matrix*(centroid - _center);
 
-  if(_bounding_box.contains_point(transformed))
+  if (_bounding_box.contains_point(transformed))
     return _inside;
 
   return _outside;
 }
-

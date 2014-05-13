@@ -55,7 +55,7 @@ ThermalContactMaterialsAction::act()
 
   params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, getParam<NonlinearVariableName>("variable"));
 
-  if(!quadrature)
+  if (!quadrature)
   {
     params.set<std::vector<VariableName> >("gap_temp") = std::vector<VariableName>(1, ThermalContactAuxVarsAction::getGapValueName(_pars));
     std::vector<VariableName> vars(1);

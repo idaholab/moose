@@ -179,7 +179,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
       const Node * closest_node = _nearest_node.nearestNode(node.id());
       std::vector<unsigned int> & closest_elems = _node_to_elem_map[closest_node->id()];
 
-      for(unsigned int j=0; j<closest_elems.size(); j++)
+      for (unsigned int j=0; j<closest_elems.size(); j++)
       {
         unsigned int elem_id = closest_elems[j];
         const Elem * elem = _mesh.elem(elem_id);
@@ -384,7 +384,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
               i+=2;
             }
           }
-          while(i<p_info.size() && best<p_info.size());
+          while (i<p_info.size() && best<p_info.size());
           if (best < p_info.size())
           {
             switchInfo( info, p_info[best] );
@@ -1717,7 +1717,7 @@ PenetrationThread::getSidesOnMasterBoundary(std::vector<unsigned int> &sides,
                                             const Elem *const elem)
 {
   sides.clear();
-  for(unsigned int m=0; m<_n_elems; ++m)
+  for (unsigned int m=0; m<_n_elems; ++m)
   {
     if (_elem_list[m] == elem->id())
     {

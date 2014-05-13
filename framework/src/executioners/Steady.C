@@ -88,7 +88,7 @@ Steady::execute()
 
   // Define the refinement loop
   unsigned int steps = _problem.adaptivity().getSteps();
-  for(unsigned int r_step=0; r_step<=steps; r_step++)
+  for (unsigned int r_step=0; r_step<=steps; r_step++)
   {
 #endif //LIBMESH_ENABLE_AMR
     _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);

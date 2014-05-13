@@ -22,7 +22,7 @@ CrystalPlasticityRotationOutAux::computeValue()
   std::ofstream fileout;
 
 
-  if(_t_step % _out_freq == 0)
+  if (_t_step % _out_freq == 0)
     {
       fileout.open(_rotout_file_name.c_str(),std::ofstream::out | std::ofstream::app);
       fileout << _t_step <<" " << _dt <<" "<< _JxW[_qp]<<" "<<_update_rot[_qp](0,0)<<" "<<_update_rot[_qp](0,1)<<" "<<_update_rot[_qp](0,2)<<" "<<_update_rot[_qp](1,0)<<" "<<_update_rot[_qp](1,1)<<" "<<_update_rot[_qp](1,2)<<" "<<_update_rot[_qp](2,0)<<" "<<_update_rot[_qp](2,1)<<" "<<_update_rot[_qp](2,2)<<"\n";

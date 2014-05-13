@@ -46,7 +46,7 @@ InputParameters validParams<MultiApp>()
   std::ostringstream app_types_strings;
 
   registeredMooseAppIterator it = AppFactory::instance().registeredObjectsBegin();
-  while(it != AppFactory::instance().registeredObjectsEnd())
+  while (it != AppFactory::instance().registeredObjectsEnd())
   {
     app_types_strings << it->first;
     ++it;
@@ -117,7 +117,7 @@ MultiApp::~MultiApp()
   if (!_has_an_app)
     return;
 
-  for(unsigned int i=0; i<_my_num_apps; i++)
+  for (unsigned int i=0; i<_my_num_apps; i++)
   {
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
     delete _apps[i];
@@ -178,7 +178,7 @@ MultiApp::init()
 
   _apps.resize(_my_num_apps);
 
-  for(unsigned int i=0; i<_my_num_apps; i++)
+  for (unsigned int i=0; i<_my_num_apps; i++)
     createApp(i, _app.getGlobalTimeOffset());
 
   // Swap back
@@ -192,7 +192,7 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
   if (!_reset_happened && target_time + 1e-14 >= _reset_time)
   {
     _reset_happened = true;
-    for(unsigned int i=0; i<_reset_apps.size(); i++)
+    for (unsigned int i=0; i<_reset_apps.size(); i++)
       resetApp(_reset_apps[i]);
   }
 
@@ -200,7 +200,7 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
   if (!_move_happened && target_time + 1e-14 >= _move_time)
   {
     _move_happened = true;
-    for(unsigned int i=0; i<_move_apps.size(); i++)
+    for (unsigned int i=0; i<_move_apps.size(); i++)
       moveApp(_move_apps[i], _move_positions[i]);
   }
 }

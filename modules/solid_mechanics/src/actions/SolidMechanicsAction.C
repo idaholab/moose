@@ -47,11 +47,11 @@ SolidMechanicsAction::act()
   std::map<Moose::CoordinateSystemType, std::vector<SubdomainName> > coord_map;
   std::set<SubdomainID> subdomains;
 
-  if(isParamValid("block")) // Should it be restricted to certain blocks?
+  if (isParamValid("block")) // Should it be restricted to certain blocks?
   {
     Moose::out<<"Restricting to blocks!"<<std::endl;
     std::vector<SubdomainName> block = getParam<std::vector<SubdomainName> >("block");
-    for(unsigned int i=0; i < block.size(); i++)
+    for (unsigned int i=0; i < block.size(); i++)
       subdomains.insert(_problem->mesh().getSubdomainID(block[i]));
   }
   else // Put it everywhere
@@ -99,17 +99,17 @@ SolidMechanicsAction::act()
       vars.push_back(_disp_r);
       vars.push_back(_disp_z);
       save_in.resize(dim);
-      if(isParamValid("save_in_disp_r"))
+      if (isParamValid("save_in_disp_r"))
         save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_r");
 
-      if(isParamValid("save_in_disp_z"))
+      if (isParamValid("save_in_disp_z"))
         save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
 
       diag_save_in.resize(dim);
-      if(isParamValid("diag_save_in_disp_r"))
+      if (isParamValid("diag_save_in_disp_r"))
         diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_r");
 
-      if(isParamValid("diag_save_in_disp_z"))
+      if (isParamValid("diag_save_in_disp_z"))
         diag_save_in[1] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_z");
     }
     else if (coord_type == Moose::COORD_RSPHERICAL)
@@ -120,11 +120,11 @@ SolidMechanicsAction::act()
       keys.push_back("disp_r");
       vars.push_back(_disp_r);
       save_in.resize(dim);
-      if(isParamValid("save_in_disp_r"))
+      if (isParamValid("save_in_disp_r"))
         save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_r");
 
       diag_save_in.resize(dim);
-      if(isParamValid("diag_save_in_disp_r"))
+      if (isParamValid("diag_save_in_disp_r"))
         diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_r");
     }
 
@@ -151,23 +151,23 @@ SolidMechanicsAction::act()
       }
 
       save_in.resize(dim);
-      if(isParamValid("save_in_disp_x"))
+      if (isParamValid("save_in_disp_x"))
         save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_x");
 
-      if(isParamValid("save_in_disp_y"))
+      if (isParamValid("save_in_disp_y"))
         save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_y");
 
-      if(isParamValid("save_in_disp_z"))
+      if (isParamValid("save_in_disp_z"))
         save_in[2] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
 
       diag_save_in.resize(dim);
-      if(isParamValid("diag_save_in_disp_x"))
+      if (isParamValid("diag_save_in_disp_x"))
         diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_x");
 
-      if(isParamValid("diag_save_in_disp_y"))
+      if (isParamValid("diag_save_in_disp_y"))
         diag_save_in[1] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_y");
 
-      if(isParamValid("diag_save_in_disp_z"))
+      if (isParamValid("diag_save_in_disp_z"))
         diag_save_in[2] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_z");
 
     }

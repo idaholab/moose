@@ -62,7 +62,7 @@ public:
       _zx(init_list[5])
   {
     // test the length to make sure it's 6 long
-    if(init_list.size() != 6)
+    if (init_list.size() != 6)
     {
       mooseError("SymmTensor initialization error: please enter a vector with 6 entries.");
     }

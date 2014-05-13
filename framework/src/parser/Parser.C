@@ -522,7 +522,7 @@ void Parser::setVectorParameter<VariableName>(const std::string & full_name, con
     InputParameters::Parameter<type> * scalar_p = dynamic_cast<InputParameters::Parameter<type>*>(param);                               \
     if (scalar_p)                                                                                                                       \
       setScalarParameter<type>(full_name, short_name, scalar_p, in_global, global_block);                                               \
-  } while(0)
+  } while (0)
 
 #define dynamicCastAndExtractScalarValueType(type, up_type, param, full_name, short_name, in_global, global_block)                      \
   do                                                                                                                                    \
@@ -530,7 +530,7 @@ void Parser::setVectorParameter<VariableName>(const std::string & full_name, con
     InputParameters::Parameter<type> * scalar_p = dynamic_cast<InputParameters::Parameter<type>*>(param);                               \
     if (scalar_p)                                                                                                                       \
       setScalarValueTypeParameter<type, up_type>(full_name, short_name, scalar_p, in_global, global_block);                             \
-  } while(0)
+  } while (0)
 
 #define dynamicCastAndExtractVector(type, param, full_name, short_name, in_global, global_block)                                        \
   do                                                                                                                                    \
@@ -538,7 +538,7 @@ void Parser::setVectorParameter<VariableName>(const std::string & full_name, con
     InputParameters::Parameter<std::vector<type> > * vector_p = dynamic_cast<InputParameters::Parameter<std::vector<type> >*>(param);   \
     if (vector_p)                                                                                                                       \
       setVectorParameter<type>(full_name, short_name, vector_p, in_global, global_block);                                               \
-  } while(0)
+  } while (0)
 
 void
 Parser::extractParams(const std::string & prefix, InputParameters &p)

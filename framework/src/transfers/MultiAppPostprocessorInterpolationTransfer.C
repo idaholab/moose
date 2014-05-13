@@ -55,7 +55,7 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
 void
 MultiAppPostprocessorInterpolationTransfer::execute()
 {
-  switch(_direction)
+  switch (_direction)
   {
     case TO_MULTIAPP:
     {
@@ -66,7 +66,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
     {
       InverseDistanceInterpolation<LIBMESH_DIM> * idi;
 
-      switch(_interp_type)
+      switch (_interp_type)
       {
         case 0:
           idi = new InverseDistanceInterpolation<LIBMESH_DIM>(_communicator, _num_points, _power);
@@ -86,7 +86,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       idi->set_field_variables(field_vars);
 
       {
-        for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+        for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
         {
           if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
           {
@@ -118,7 +118,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
         MeshBase::const_node_iterator node_it = mesh.localNodesBegin();
         MeshBase::const_node_iterator node_end = mesh.localNodesEnd();
 
-        for(; node_it != node_end; ++node_it)
+        for (; node_it != node_end; ++node_it)
         {
           Node * node = *node_it;
 

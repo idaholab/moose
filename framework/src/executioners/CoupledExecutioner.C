@@ -58,11 +58,11 @@ CoupledExecutioner::~CoupledExecutioner()
   std::map<std::string, std::vector<ProjInfo *> >::iterator vm_it = _var_mapping.begin();
   std::map<std::string, std::vector<ProjInfo *> >::iterator vm_end = _var_mapping.end();
 
-  for(; vm_it != vm_end; ++vm_it)
+  for (; vm_it != vm_end; ++vm_it)
   {
     std::vector<ProjInfo *> & info_vec = vm_it->second;
 
-    for(unsigned int i=0; i<info_vec.size(); i++)
+    for (unsigned int i=0; i<info_vec.size(); i++)
       delete info_vec[i];
   }
 }

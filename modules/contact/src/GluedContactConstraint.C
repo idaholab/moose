@@ -171,7 +171,7 @@ GluedContactConstraint::computeQpSlaveValue()
 Real
 GluedContactConstraint::computeQpResidual(Moose::ConstraintType type)
 {
-  switch(type)
+  switch (type)
   {
     case Moose::Slave:
     {
@@ -205,7 +205,7 @@ GluedContactConstraint::computeQpResidual(Moose::ConstraintType type)
 Real
 GluedContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
-  switch(type)
+  switch (type)
   {
     case Moose::SlaveSlave:
     {

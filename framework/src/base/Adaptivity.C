@@ -56,7 +56,7 @@ Adaptivity::~Adaptivity()
   std::map<std::string, ErrorVector *>::iterator it = _indicator_field_to_error_vector.begin();
   std::map<std::string, ErrorVector *>::iterator end = _indicator_field_to_error_vector.end();
 
-  for(; it != end; ++it)
+  for (; it != end; ++it)
     delete it->second;
 
   delete _mesh_refinement;
@@ -255,13 +255,13 @@ void
 Adaptivity::updateErrorVectors()
 {
   // Resize all of the ErrorVectors in case the mesh has changed
-  for(std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
+  for (std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
       it != _indicator_field_to_error_vector.end();
       ++it)
   {
     ErrorVector & vec = *(it->second);
     vec.resize(_mesh.getMesh().max_elem_id());
-    for(unsigned int i=0; i<vec.size(); i++)
+    for (unsigned int i=0; i<vec.size(); i++)
       vec[i] = 0.0;
   }
 
@@ -270,7 +270,7 @@ Adaptivity::updateErrorVectors()
   Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), uevt);
 
   // Now sum across all processors
-  for(std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
+  for (std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
       it != _indicator_field_to_error_vector.end();
       ++it)
     _subproblem.comm().sum((std::vector<float>&)*(it->second));

@@ -112,7 +112,7 @@ TrussMaterial::computeProperties()
   RealVectorValue disp_vec0;
   RealVectorValue disp_vec1;
 
-  for(unsigned int i=0; i<_dim; ++i)
+  for (unsigned int i=0; i<_dim; ++i)
   {
     disp_vec0(i) = ghosted_solution(disp_dofs0(i));
     disp_vec1(i) = ghosted_solution(disp_dofs1(i));
@@ -134,7 +134,7 @@ TrussMaterial::computeProperties()
 
   Real thermal_strain = 0.0;
 
-  for(_qp=0; _qp < _qrule->n_points(); ++_qp)
+  for (_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
     Real youngs_modulus(_youngs_modulus_coupled ? _youngs_modulus_var[_qp] : _youngs_modulus);
     if (_has_temp)

@@ -16,9 +16,9 @@ extern "C" void FORTRAN_CALL(dgetrf) ( ... );
 RankFourTensor::RankFourTensor()
 {
   for (unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           _vals[i][j][k][l] = 0.0;
 }
 
@@ -55,9 +55,9 @@ void
 RankFourTensor::zero()
 {
   for (unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           _vals[i][j][k][l] = 0.0;
 }
 
@@ -65,9 +65,9 @@ RankFourTensor &
 RankFourTensor::operator= (const RankFourTensor &a)
 {
   for (unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           _vals[i][j][k][l] = a._vals[i][j][k][l];
 
   return *this;
@@ -78,10 +78,10 @@ RankFourTensor::operator*(const RankTwoTensor &a)
 {
   RealTensorValue result;
 
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           result(i,j) += _vals[i][j][k][l]*a(k,l);
 
   return result;
@@ -92,10 +92,10 @@ RankFourTensor::operator*(const RealTensorValue &a)
 {
   RealTensorValue result;
 
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           result(i,j) += _vals[i][j][k][l]*a(k,l);
 
   return result;
@@ -106,10 +106,10 @@ RankFourTensor::operator*(const Real &a)
 {
   RankFourTensor result;
 
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           result(i,j,k,l) = _vals[i][j][k][l]*a;
 
   return result;
@@ -118,10 +118,10 @@ RankFourTensor::operator*(const Real &a)
 RankFourTensor &
 RankFourTensor::operator*=(const Real &a)
 {
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           _vals[i][j][k][l] = _vals[i][j][k][l]*a;
 
   return *this;
@@ -132,10 +132,10 @@ RankFourTensor::operator/(const Real &a)
 {
   RankFourTensor result;
 
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           result(i,j,k,l) = _vals[i][j][k][l]/a;
 
   return result;
@@ -144,10 +144,10 @@ RankFourTensor::operator/(const Real &a)
 RankFourTensor &
 RankFourTensor::operator/=(const Real &a)
 {
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           _vals[i][j][k][l] = _vals[i][j][k][l]/a;
 
   return *this;
@@ -156,10 +156,10 @@ RankFourTensor::operator/=(const Real &a)
 RankFourTensor &
 RankFourTensor::operator+=(const RankFourTensor &a)
 {
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           _vals[i][j][k][l] = _vals[i][j][k][l] + a(i,j,k,l);
 
   return *this;
@@ -170,10 +170,10 @@ RankFourTensor::operator+(const RankFourTensor &a) const
 {
   RankFourTensor result;
 
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           result(i,j,k,l) = _vals[i][j][k][l] + a(i,j,k,l);
 
   return result;
@@ -182,10 +182,10 @@ RankFourTensor::operator+(const RankFourTensor &a) const
 RankFourTensor &
 RankFourTensor::operator-=(const RankFourTensor &a)
 {
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           _vals[i][j][k][l] = _vals[i][j][k][l] - a(i,j,k,l);
 
   return *this;
@@ -196,10 +196,10 @@ RankFourTensor::operator-(const RankFourTensor &a) const
 {
   RankFourTensor result;
 
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           result(i,j,k,l) = _vals[i][j][k][l] - a(i,j,k,l);
 
   return result;
@@ -210,10 +210,10 @@ RankFourTensor::operator - () const
 {
   RankFourTensor result;
 
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           result(i,j,k,l) = -_vals[i][j][k][l];
 
   return result;
@@ -226,12 +226,12 @@ RankFourTensor::operator*(const RankFourTensor &a) const
   RankFourTensor result;
 
 
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
-          for(unsigned int p(0); p<N; p++)
-            for(unsigned int q(0); q<N; q++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
+          for (unsigned int p(0); p<N; p++)
+            for (unsigned int q(0); q<N; q++)
               result(i,j,k,l) += _vals[i][j][p][q]*a(p,q,k,l);
 
   return result;
@@ -251,15 +251,15 @@ RankFourTensor::invSymm()
   mat=(double*)calloc(ntens*ntens, sizeof(double));
 
 
-  for(unsigned int i = 0; i < 3; i++)
-    for(unsigned int j = 0; j < 3; j++)
+  for (unsigned int i = 0; i < 3; i++)
+    for (unsigned int j = 0; j < 3; j++)
       for (unsigned int k = 0; k < 3; k++)
-        for(unsigned int l = 0; l < 3; l++)
+        for (unsigned int l = 0; l < 3; l++)
         {
 
-          if(i==j)
+          if (i==j)
           {
-            if(k==l)
+            if (k==l)
             {
               mat[i*ntens+k]=_vals[i][j][k][l];
             }
@@ -271,7 +271,7 @@ RankFourTensor::invSymm()
           }
           else
           {
-            if(k==l)
+            if (k==l)
             {
               mat[(nskip+i+j)*ntens+k]=_vals[i][j][k][l];
             }
@@ -287,24 +287,24 @@ RankFourTensor::invSymm()
 
 
 
-  for(unsigned int i = 3; i < ntens; i++)
-    for(unsigned int j = 3; j < ntens; j++)
+  for (unsigned int i = 3; i < ntens; i++)
+    for (unsigned int j = 3; j < ntens; j++)
       mat[i*ntens+j]=mat[i*ntens+j]/2.0;
 
   error=MatrixInversion(mat,ntens);
 
-  if(error != 0)
+  if (error != 0)
     mooseError("Error in Matrix  Inversion in RankFourTensor\n");
 
-  for(unsigned int i = 0; i < 3; i++)
-    for(unsigned int j = 0; j < 3; j++)
+  for (unsigned int i = 0; i < 3; i++)
+    for (unsigned int j = 0; j < 3; j++)
       for (unsigned int k = 0; k < 3; k++)
-        for(unsigned int l = 0; l < 3; l++)
+        for (unsigned int l = 0; l < 3; l++)
         {
 
-          if(i==j)
+          if (i==j)
           {
-            if(k==l)
+            if (k==l)
             {
               result(i,j,k,l)=mat[i*ntens+k];
 
@@ -319,7 +319,7 @@ RankFourTensor::invSymm()
           }
           else
           {
-            if(k==l)
+            if (k==l)
             {
               result(i,j,k,l)=mat[(2+i+j)*ntens+k];
 
@@ -351,16 +351,16 @@ RankFourTensor::rotate(RealTensorValue &R)
   RankFourTensor old;
   old=*this;
 
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
         {
           temp = 0.0;
-          for(unsigned int m(0); m<N; m++)
-            for(unsigned int n(0); n<N; n++)
-              for(unsigned int o(0); o<N; o++)
-                for(unsigned int p(0); p<N; p++)
+          for (unsigned int m(0); m<N; m++)
+            for (unsigned int n(0); n<N; n++)
+              for (unsigned int o(0); o<N; o++)
+                for (unsigned int p(0); p<N; p++)
                   temp += R(i,m)*R(j,n)*R(k,o)*R(l,p)*old._vals[m][n][o][p];
 
           _vals[i][j][k][l] = temp;
@@ -375,13 +375,13 @@ RankFourTensor::print()
 {
   RankFourTensor & s = (*this);
 
-  for(unsigned int i=0; i<N; i++)
-    for(unsigned int j=0; j<N; j++)
+  for (unsigned int i=0; i<N; i++)
+    for (unsigned int j=0; j<N; j++)
     {
       Moose::out << "i = " << i << " j = " << j << std::endl;
-      for(unsigned int k=0; k<N; k++)
+      for (unsigned int k=0; k<N; k++)
       {
-        for(unsigned int l=0; l<N; l++)
+        for (unsigned int l=0; l<N; l++)
           Moose::out << std::setw(15) <<s(i,j,k,l)<<" ";
 
         Moose::out <<std::endl;
@@ -395,10 +395,10 @@ RankFourTensor::transposeMajor()
 {
   RankFourTensor result;
 
-  for(unsigned int i = 0; i < 3; i++)
-    for(unsigned int j = 0; j < 3; j++)
+  for (unsigned int i = 0; i < 3; i++)
+    for (unsigned int j = 0; j < 3; j++)
       for (unsigned int k = 0; k < 3; k++)
-        for(unsigned int l = 0; l < 3; l++)
+        for (unsigned int l = 0; l < 3; l++)
           result(i,j,k,l)=_vals[k][l][i][j];
 
 
@@ -439,7 +439,7 @@ RankFourTensor::MatrixInversion(double* A, int n)
 void
 RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> input)
 {
-  if(input.size() == 9)
+  if (input.size() == 9)
   {
     this->zero();
 
@@ -484,12 +484,12 @@ RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> input)
 void
 RankFourTensor::fillFromInputVector(const std::vector<Real> input, bool all)
 {
-  if((all == true && input.size() != 21) || (all == false && input.size() != 9 ))
+  if ((all == true && input.size() != 21) || (all == false && input.size() != 9 ))
     mooseError("Please check the number of entries in the stiffness input vector.");
 
   zero();
 
-  if(all == true)
+  if (all == true)
   {
     _vals[0][0][0][0] = input[0]; //C1111
     _vals[0][0][1][1] = input[1]; //C1122
@@ -532,10 +532,10 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> input, bool all)
   }
 
   //fill in from symmetry relations
-  for(unsigned int i(0); i<N; i++)
-    for(unsigned int j(0); j<N; j++)
-      for(unsigned int k(0); k<N; k++)
-        for(unsigned int l(0); l<N; l++)
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      for (unsigned int k(0); k<N; k++)
+        for (unsigned int l(0); l<N; l++)
           _vals[i][j][l][k] =
             _vals[j][i][k][l] =
             _vals[j][i][l][k] =

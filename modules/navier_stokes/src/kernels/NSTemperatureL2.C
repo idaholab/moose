@@ -64,7 +64,7 @@ NSTemperatureL2::computeQpJacobian()
 Real
 NSTemperatureL2::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if(jvar == _p_var)
+  if (jvar == _p_var)
   {
     Real value = 1.0/_c_v[_qp];
 
@@ -74,7 +74,7 @@ NSTemperatureL2::computeQpOffDiagJacobian(unsigned int jvar)
 
     return (-value)*_test[_i][_qp];
   }
-  else if(jvar == _pe_var)
+  else if (jvar == _pe_var)
   {
     Real value = 1.0/_c_v[_qp];
 
@@ -87,4 +87,3 @@ NSTemperatureL2::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0;
 }
-
