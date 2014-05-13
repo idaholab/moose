@@ -57,9 +57,6 @@ SideSetsAroundSubdomain::modify()
   if (!_mesh_ptr)
     mooseError("_mesh_ptr must be initialized before calling SideSetsAroundSubdomain::modify()!");
 
-  // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
-  _mesh_ptr->errorIfParallelDistribution("SideSetsAroundSubdomain");
-
   // Reference the the libMesh::MeshBase
   MeshBase & mesh = _mesh_ptr->getMesh();
 

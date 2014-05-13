@@ -13,6 +13,5 @@
     cli_args = '--mesh-only'
     exodiff = 'around_normals_in.e'
     recover = false
-    mesh_mode = 'SERIAL'
   [../]
 []
