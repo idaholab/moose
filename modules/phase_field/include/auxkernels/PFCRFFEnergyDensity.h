@@ -24,6 +24,7 @@ protected:
   Real _a;
   Real _b;
   Real _c;
+  unsigned int _num_exp_terms;
 };
 
 #endif //PFCRFF_ENERGY_DENSITY_H

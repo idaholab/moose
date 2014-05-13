@@ -9,6 +9,7 @@ InputParameters validParams<PFCRFFEnergyDensity>()
    params.addParam<Real>( "a", 1.0, "Modified Coefficent in Taylor Series Expanstion");
    params.addParam<Real>( "b", 1.0, "Modified Coefficent in Taylor Series Expanstion");
    params.addParam<Real>( "c", 1.0, "Modified Coefficent in Taylor Series Expanstion");
+   params.addParam<unsigned int>( "num_exp_terms", 4, "This is the number of terms to use in the taylor series expansion");
 
    return params;
 }
@@ -19,7 +20,9 @@ PFCRFFEnergyDensity::PFCRFFEnergyDensity(const std::string& name,
     _order(coupledComponents("v")),
     _a(getParam<Real>("a")),
     _b(getParam<Real>("b")),
-    _c(getParam<Real>("c"))
+    _c(getParam<Real>("c")),
+    _num_exp_terms(getParam<unsigned int>("num_exp_terms"))
+
 {
   _vals.resize(_order);
   for (unsigned int i=0; i < _order; ++i)
@@ -29,13 +32,30 @@ PFCRFFEnergyDensity::PFCRFFEnergyDensity(const std::string& name,
 Real
 PFCRFFEnergyDensity::computeValue()
 {
-  Real val =   _c/2.0 * (*_vals[0])[_qp]
-             + (_a/6.0 * std::pow((*_vals[0])[_qp], 2.0))
-             + (_b/12.0 * std::pow((*_vals[0])[_qp], 3.0));
+  Real val = 0;
+  Real coef = 1.0;
+
+  for(unsigned int i = 2; i < (2+_num_exp_terms); i++)
+    {
+      if (i==2)
+	coef = _c;
+      else if (i==3)
+	coef = _a;
+      else if (i==4)
+	coef = _b;
+      else
+	coef = 1.0;
+
+      val += coef*(pow(-1.0,i)/(i*(i - 1)))*pow((*_vals[0])[_qp],i);
+    }
+  
+  Real sumL;
 
   // Loop Through Variables
   for (unsigned int i = 1; i < _order; ++i)
-    val += (*_vals[i])[_qp];
+    sumL += (*_vals[i])[_qp];
+
+  val -= ((*_vals[0])[_qp]*sumL/2.0);
 
   return val;
 }
