@@ -207,9 +207,32 @@ protected:
   /// Scale parameter
   std::vector<Real> _scale;
 
-  /// Factor parameter
-  std::vector<Real> _factor;
+  /// scale_multiplier parameter
+  std::vector<Real> _scale_multiplier;
 
+  /// Translation
+  std::vector<Real> _translation;
+
+  /// vector about which to rotate
+  RealVectorValue  _rotation0_vector;
+
+  /// angle (in degrees) which to rotate through about vector _rotation0_vector
+  Real _rotation0_angle;
+
+  /// Rotation matrix that performs the "_rotation0_angle about rotation0_vector"
+  RealTensorValue _r0;
+
+  /// vector about which to rotate
+  RealVectorValue  _rotation1_vector;
+
+  /// angle (in degrees) which to rotate through about vector _rotation1_vector
+  Real _rotation1_angle;
+
+  /// Rotation matrix that performs the "_rotation1_angle about rotation1_vector"
+  RealTensorValue _r1;
+
+  /// transformations (rotations, translation, scales) are performed in this order
+  std::vector<MooseEnum> _transformation_order;
 };
 
 #endif //SOLUTIONUSEROBJECT_H
