@@ -3,19 +3,16 @@
     type = 'Exodiff'
     input = 'output.i'
     exodiff = 'output_out.e'
-    recover = false # see 3082
   [../]
   [./block]
     type = 'Exodiff'
     input = 'output_block.i'
     exodiff = 'output_block_out.e'
-    recover = false
   [../]
   [./boundary]
     type = 'Exodiff'
     input = 'output_boundary.i'
     exodiff = 'output_boundary_out.e'
-    recover = false # see 3082
   [../]
   [./multiple_files]
     type = Exodiff
