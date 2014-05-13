@@ -54,7 +54,7 @@ MultiAppDTKUserObjectEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>&
       GlobalOrdinal app = bids[i];
 
       Point p;
-      for(unsigned int j=0; j<dim; j++)
+      for (unsigned int j=0; j<dim; j++)
         p(j) = coords[(j*num_values)+i];
 
       evaluated_data[i] = _multi_app.appUserObjectBase(app, _user_object_name).spatialValue(p);
@@ -77,7 +77,7 @@ MultiAppDTKUserObjectEvaluator::createSourceGeometry( const Teuchos::RCP<const T
 
   comm->barrier();
 
-  for(unsigned int app=0; app<_multi_app.numLocalApps(); app++)
+  for (unsigned int app=0; app<_multi_app.numLocalApps(); app++)
   {
     unsigned int global_app = _multi_app.firstLocalApp() + app;
 

@@ -44,7 +44,7 @@ LinearIsotropicMaterial::~LinearIsotropicMaterial()
 void
 LinearIsotropicMaterial::computeProperties()
 {
-  for(_qp=0; _qp < _qrule->n_points(); ++_qp)
+  for (_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
       Real alpha = computeAlpha();
 
@@ -61,7 +61,7 @@ LinearIsotropicMaterial::computeProperties()
                      0.5*(_grad_disp_z[_qp](0)+_grad_disp_x[_qp](2)) );
 
     // Add in Isotropic Thermal Strain
-    if(_has_temp)
+    if (_has_temp)
     {
       Real isotropic_strain = alpha * (_temp[_qp] - _t_ref);
 

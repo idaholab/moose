@@ -56,31 +56,31 @@ IsotropicElasticityTensor::setShearModulus(const Real k)
 void
 IsotropicElasticityTensor::calculateLameCoefficients()
 {
-  if(_lambda_set && _mu_set) // First and second Lame
+  if (_lambda_set && _mu_set) // First and second Lame
     return;
-  else if(_lambda_set && _nu_set)
+  else if (_lambda_set && _nu_set)
     _mu = (_lambda * (1.0 - 2.0 * _nu)) / (2.0 * _nu);
-  else if(_lambda_set && _k_set)
+  else if (_lambda_set && _k_set)
     _mu = ( 3.0 * (_k - _lambda) ) / 2.0;
-  else if(_lambda_set && _E_set)
+  else if (_lambda_set && _E_set)
     _mu = ( (_E - 3.0*_lambda) / 4.0 ) + ( std::sqrt( (_E-3.0*_lambda)*(_E-3.0*_lambda) + 8.0*_lambda*_E ) / 4.0 );
-  else if(_mu_set && _nu_set)
+  else if (_mu_set && _nu_set)
     _lambda = ( 2.0 * _mu * _nu ) / (1.0 - 2.0*_nu);
-  else if(_mu_set && _k_set)
+  else if (_mu_set && _k_set)
     _lambda = ( 3.0 * _k - 2.0 * _mu ) / 3.0;
-  else if(_mu_set && _E_set)
+  else if (_mu_set && _E_set)
     _lambda = ((2.0*_mu - _E) * _mu) / (_E - 3.0*_mu);
-  else if(_nu_set && _k_set)
+  else if (_nu_set && _k_set)
   {
     _lambda = (3.0 * _k * _nu) / (1.0 + _nu);
     _mu = (3.0 * _k * (1.0 - 2.0*_nu)) / (2.0 * (1.0 + _nu));
   }
-  else if(_E_set && _nu_set) // Young's Modulus and Poisson's Ratio
+  else if (_E_set && _nu_set) // Young's Modulus and Poisson's Ratio
   {
     _lambda = (_nu * _E) / ( (1.0+_nu) * (1-2.0*_nu) );
     _mu = _E / ( 2.0 * (1.0+_nu));
   }
-  else if(_E_set && _k_set)
+  else if (_E_set && _k_set)
   {
     _lambda = (3.0 * _k * (3.0 * _k - _E)) / (9.0 * _k - _E);
     _mu = (3.0 * _E * _k) / (9.0 * _k - _E);
@@ -122,5 +122,3 @@ IsotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
     ++i;
   }
 }
-
-

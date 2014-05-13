@@ -140,7 +140,7 @@ NodeFaceConstraint::computeJacobian()
 
   // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
   // This corresponds to evaluating all of the connected shape functions at _this_ node
-  for(unsigned int j=0; j<_connected_dof_indices.size(); j++)
+  for (unsigned int j=0; j<_connected_dof_indices.size(); j++)
   {
     _phi_slave[j].resize(1);
 
@@ -155,7 +155,7 @@ NodeFaceConstraint::computeJacobian()
     for (_j=0; _j<_connected_dof_indices.size(); _j++)
       _Kee(_i,_j) += computeQpJacobian(Moose::SlaveSlave);
 
-  if(Ken.m() && Ken.n())
+  if (Ken.m() && Ken.n())
     for (_i=0; _i<_test_slave.size(); _i++)
       for (_j=0; _j<_phi_master.size(); _j++)
         Ken(_i,_j) += computeQpJacobian(Moose::SlaveMaster);
@@ -165,7 +165,7 @@ NodeFaceConstraint::computeJacobian()
     for (_j=0; _j<_connected_dof_indices.size(); _j++)
       _Kne(_i,_j) += computeQpJacobian(Moose::MasterSlave);
 
-  if(Knn.m() && Knn.n())
+  if (Knn.m() && Knn.n())
     for (_i=0; _i<_test_master.size(); _i++)
       for (_j=0; _j<_phi_master.size(); _j++)
         Knn(_i,_j) += computeQpJacobian(Moose::MasterMaster);
@@ -188,7 +188,7 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
 
   // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
   // This corresponds to evaluating all of the connected shape functions at _this_ node
-  for(unsigned int j=0; j<_connected_dof_indices.size(); j++)
+  for (unsigned int j=0; j<_connected_dof_indices.size(); j++)
   {
     _phi_slave[j].resize(1);
 
@@ -207,7 +207,7 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
     for (_j=0; _j<_phi_master.size(); _j++)
       Ken(_i,_j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
 
-  if(_Kne.m() && _Kne.n())
+  if (_Kne.m() && _Kne.n())
     for (_i=0; _i<_test_master.size(); _i++)
       // Loop over the connected dof indices so we can get all the jacobian contributions
       for (_j=0; _j<_connected_dof_indices.size(); _j++)
@@ -230,7 +230,7 @@ NodeFaceConstraint::getConnectedDofIndices(unsigned int var_num)
   std::vector<dof_id_type> & elems = _node_to_elem_map[_current_node->id()];
 
   // Get the dof indices from each elem connected to the node
-  for(unsigned int el=0; el < elems.size(); ++el)
+  for (unsigned int el=0; el < elems.size(); ++el)
   {
     dof_id_type cur_elem = elems[el];
 
@@ -238,11 +238,11 @@ NodeFaceConstraint::getConnectedDofIndices(unsigned int var_num)
 
     var.getDofIndices(_mesh.elem(cur_elem), dof_indices);
 
-    for(unsigned int di=0; di < dof_indices.size(); di++)
+    for (unsigned int di=0; di < dof_indices.size(); di++)
       unique_dof_indices.insert(dof_indices[di]);
   }
 
-  for(std::set<dof_id_type>::iterator sit=unique_dof_indices.begin(); sit != unique_dof_indices.end(); ++sit)
+  for (std::set<dof_id_type>::iterator sit=unique_dof_indices.begin(); sit != unique_dof_indices.end(); ++sit)
     _connected_dof_indices.push_back(*sit);
 }
 

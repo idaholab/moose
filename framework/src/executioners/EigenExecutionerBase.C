@@ -134,7 +134,7 @@ EigenExecutionerBase::makeBXConsistent(Real k)
   // Scale the solution so that the postprocessor is equal to one.
   // We have a fix point loop here, in case the postprocessor is a nonlinear function of the scaling factor.
   // FIXME: We have assumed this loop always converges.
-  while(std::fabs(k-_source_integral)>consistency_tolerance*std::fabs(k))
+  while (std::fabs(k-_source_integral)>consistency_tolerance*std::fabs(k))
   {
     // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
     _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, k/_source_integral);

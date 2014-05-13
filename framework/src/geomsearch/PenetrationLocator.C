@@ -53,7 +53,7 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
   // Preconstruct an FE object for each thread we're going to use and for each lower-dimensional element
   // This is a time savings so that the thread objects don't do this themselves multiple times
   _fe.resize(libMesh::n_threads());
-  for(unsigned int i=0; i < libMesh::n_threads(); i++)
+  for (unsigned int i=0; i < libMesh::n_threads(); i++)
   {
     unsigned int n_dims = _mesh.dimension();
     _fe[i].resize(n_dims);
@@ -74,7 +74,7 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
 
 PenetrationLocator::~PenetrationLocator()
 {
-  for(unsigned int i=0; i < libMesh::n_threads(); i++)
+  for (unsigned int i=0; i < libMesh::n_threads(); i++)
     for (unsigned int dim = 0; dim < _fe[i].size(); dim++)
       delete _fe[i][dim];
 

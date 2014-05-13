@@ -45,7 +45,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
 
 
   // Perform action based on the transfer direction
-  switch(_direction)
+  switch (_direction)
   {
     // MasterApp -> SubApp
     case TO_MULTIAPP:
@@ -55,7 +55,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
       Real pp_value = from_problem.getPostprocessorValue(_from_pp_name);
 
       // Loop through each of the sub apps
-      for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
         if (_multi_app->hasLocalApp(i))
         {
           // Get reference to the AuxVariable where the postprocessor will be passed
@@ -87,7 +87,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
         mooseError("The number of sub apps (" << num_apps << ") must be equal to the order of the scalar AuxVariable (" << scalar.order() << ")");
 
       // Loop over each sub-app and populate the AuxVariable values from the postprocessors
-      for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
         if (_multi_app->hasLocalApp(i))
           scalar.sys().solution().set(dof[i], _multi_app->appProblem(i)->getPostprocessorValue(_from_pp_name));
 

@@ -32,7 +32,7 @@ RestartableDataIO::writeRestartableData(std::string base_file_name, const Restar
   processor_id_type n_procs = _fe_problem.n_processors();
   processor_id_type proc_id = _fe_problem.processor_id();
 
-  for(unsigned int tid=0; tid<n_threads; tid++)
+  for (unsigned int tid=0; tid<n_threads; tid++)
   {
     const std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
@@ -72,7 +72,7 @@ RestartableDataIO::writeRestartableData(std::string base_file_name, const Restar
         out.write((const char *) &n_data, sizeof(n_data));
 
         // data names
-        for(std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
+        for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
             it != restartable_data.end();
             ++it)
         {
@@ -83,7 +83,7 @@ RestartableDataIO::writeRestartableData(std::string base_file_name, const Restar
       {
         std::ostringstream data_blk;
 
-        for(std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
+        for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
             it != restartable_data.end();
             ++it)
         {
@@ -122,7 +122,7 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
 
   std::vector<std::string> ignored_data;
 
-  for(unsigned int tid=0; tid<n_threads; tid++)
+  for (unsigned int tid=0; tid<n_threads; tid++)
   {
     std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
@@ -181,7 +181,7 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
       // data names
       std::vector<std::string> data_names(n_data);
 
-      for(unsigned int i=0; i < n_data; i++)
+      for (unsigned int i=0; i < n_data; i++)
       {
         std::string data_name;
         char ch = 0;
@@ -197,7 +197,7 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
       unsigned int data_blk_size = 0;
       in.read((char *) &data_blk_size, sizeof(data_blk_size));
 
-      for(unsigned int i=0; i < n_data; i++)
+      for (unsigned int i=0; i < n_data; i++)
       {
         std::string current_name = data_names[i];
 
@@ -229,7 +229,7 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
   {
     std::ostringstream names;
 
-    for(unsigned int i=0; i<ignored_data.size(); i++)
+    for (unsigned int i=0; i<ignored_data.size(); i++)
       names << ignored_data[i] << "\n";
 
     mooseWarning("The following RestorableData was found in restart file but is being ignored:\n" << names.str());

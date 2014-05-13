@@ -74,7 +74,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
     if (_mesh->isParallelMesh())
     {
       const std::set<BoundaryID> & ids = _mesh->meshBoundaryIds();
-      for(std::set<BoundaryID>::const_iterator id_it = ids.begin();
+      for (std::set<BoundaryID>::const_iterator id_it = ids.begin();
           id_it != ids.end();
           ++id_it)
         _problem->addGhostedBoundary(*id_it);

@@ -48,6 +48,6 @@ NodalUserObject::NodalUserObject(const std::string & name, InputParameters param
     _current_node(_assembly.node())
 {
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for(unsigned int i=0; i<coupled_vars.size(); i++)
+  for (unsigned int i=0; i<coupled_vars.size(); i++)
     addMooseVariableDependency(coupled_vars[i]);
 }

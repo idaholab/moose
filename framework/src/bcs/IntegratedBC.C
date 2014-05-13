@@ -65,7 +65,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 
-  for(unsigned int i=0; i<_save_in_strings.size(); i++)
+  for (unsigned int i=0; i<_save_in_strings.size(); i++)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
@@ -79,7 +79,7 @@ IntegratedBC::IntegratedBC(const std::string & name, InputParameters parameters)
 
   _has_save_in = _save_in.size() > 0;
 
-  for(unsigned int i=0; i<_diag_save_in_strings.size(); i++)
+  for (unsigned int i=0; i<_diag_save_in_strings.size(); i++)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
@@ -114,7 +114,7 @@ IntegratedBC::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for(unsigned int i=0; i<_save_in.size(); i++)
+    for (unsigned int i=0; i<_save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
 }
@@ -137,11 +137,11 @@ IntegratedBC::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for(unsigned int i=0; i<rows; i++)
+    for (unsigned int i=0; i<rows; i++)
       diag(i) = _local_ke(i,i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for(unsigned int i=0; i<_diag_save_in.size(); i++)
+    for (unsigned int i=0; i<_diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }

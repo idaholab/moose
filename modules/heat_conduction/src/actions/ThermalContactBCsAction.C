@@ -45,14 +45,14 @@ ThermalContactBCsAction::act()
   // Extract global params
   _app.parser().extractParams(_name, params);
 
-  if(isParamValid("save_in"))
+  if (isParamValid("save_in"))
   {
     params.set<std::vector<std::string> >("save_in") = getParam<std::vector<std::string> >("save_in");
   }
 
   params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("variable");
 
-  if(!quadrature)
+  if (!quadrature)
   {
     std::vector<VariableName> vars(1);
     vars[0] = "penetration";
@@ -97,7 +97,7 @@ ThermalContactBCsAction::act()
       "gap_bc_" + Moose::stringify(n),
       params);
 
-  if(quadrature)
+  if (quadrature)
   {
     // Swap master and slave for this one
     std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));

@@ -75,7 +75,7 @@ FDKernel::computeOffDiagJacobian(unsigned int jvar_index)
   DenseVector<Number> re = perturbedResidual(_var.number(),0,0.0,h);
   for (_j = 0; _j < _phi.size(); _j++) {
     DenseVector<Number> p_re = perturbedResidual(jvar_index,_j,_scale,h);
-    for(_i = 0; _i < _test.size(); _i++) {
+    for (_i = 0; _i < _test.size(); _i++) {
       local_ke(_i,_j) = (p_re(_i) - re(_i))/h;
     }
   }
@@ -86,11 +86,11 @@ FDKernel::computeOffDiagJacobian(unsigned int jvar_index)
     if (_has_diag_save_in) {
       unsigned int rows = ke.m();
       DenseVector<Number> diag(rows);
-      for(unsigned int i=0; i<rows; i++)
+      for (unsigned int i=0; i<rows; i++)
   diag(i) = _local_ke(i,i);
 
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for(unsigned int i=0; i<_diag_save_in.size(); i++)
+      for (unsigned int i=0; i<_diag_save_in.size(); i++)
   _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
     }
   }

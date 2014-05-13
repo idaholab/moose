@@ -34,7 +34,7 @@ RunTime::RunTime(const std::string & name, InputParameters parameters) :
 Real
 RunTime::getValue()
 {
-  switch(_time_type)
+  switch (_time_type)
   {
     case 0:
       return Moose::perf_log.get_elapsed_time();

@@ -40,7 +40,7 @@ UpdateDisplacedMeshThread::operator() (const SemiLocalNodeRange & range) const
   std::vector<unsigned int> aux_var_nums;
   std::vector<unsigned int> aux_var_nums_directions;
 
-  for(unsigned int i=0; i<num_displacements; i++)
+  for (unsigned int i=0; i<num_displacements; i++)
   {
     std::string displacement_name = displacement_variables[i];
 
@@ -72,14 +72,14 @@ UpdateDisplacedMeshThread::operator() (const SemiLocalNodeRange & range) const
 
     Node & reference_node = _ref_mesh.node(displaced_node.id());
 
-    for(unsigned int i=0; i<num_var_nums; i++)
+    for (unsigned int i=0; i<num_var_nums; i++)
     {
       unsigned int direction = var_nums_directions[i];
       if (reference_node.n_dofs(nonlinear_system_number, var_nums[i]) > 0)
         displaced_node(direction) = reference_node(direction) + _nl_soln(reference_node.dof_number(nonlinear_system_number, var_nums[i], 0));
     }
 
-    for(unsigned int i=0; i<num_aux_var_nums; i++)
+    for (unsigned int i=0; i<num_aux_var_nums; i++)
     {
       unsigned int direction = aux_var_nums_directions[i];
       if (reference_node.n_dofs(aux_system_number, aux_var_nums[i]) > 0)

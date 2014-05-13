@@ -61,7 +61,7 @@ public:
     if (!initialized)
     {
       initialized = true;
-      for(unsigned int i=0; i<libMesh::n_threads(); ++i)
+      for (unsigned int i=0; i<libMesh::n_threads(); ++i)
         ids.push(i);
     }
 #endif

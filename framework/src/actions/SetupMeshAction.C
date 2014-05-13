@@ -58,7 +58,7 @@ void
 SetupMeshAction::setupMesh(MooseMesh *mesh)
 {
   std::vector<BoundaryName> ghosted_boundaries = getParam<std::vector<BoundaryName> >("ghosted_boundaries");
-  for(unsigned int i=0; i<ghosted_boundaries.size(); i++)
+  for (unsigned int i=0; i<ghosted_boundaries.size(); i++)
     mesh->addGhostedBoundary(mesh->getBoundaryID(ghosted_boundaries[i]));
 
   mesh->setPatchSize(getParam<unsigned int>("patch_size"));

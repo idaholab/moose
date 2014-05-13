@@ -31,7 +31,7 @@ UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem, std::
     _solution(_aux_sys.solution())
 {
   // Build up this map once so we don't have to do these lookups over and over again
-  for(std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
+  for (std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
       it != _indicator_field_to_error_vector.end();
       ++it)
   {
@@ -56,7 +56,7 @@ UpdateErrorVectorsThread::UpdateErrorVectorsThread(UpdateErrorVectorsThread & x,
 void
 UpdateErrorVectorsThread::onElement(const Elem *elem)
 {
-  for(std::map<unsigned int, ErrorVector *>::iterator it=_indicator_field_number_to_error_vector.begin();
+  for (std::map<unsigned int, ErrorVector *>::iterator it=_indicator_field_number_to_error_vector.begin();
       it != _indicator_field_number_to_error_vector.end();
       ++it)
   {

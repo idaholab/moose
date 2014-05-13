@@ -51,7 +51,7 @@ MultiAppMeshFunctionTransfer::execute()
 {
   Moose::out << "Beginning MeshFunctionTransfer " << _name << std::endl;
 
-  switch(_direction)
+  switch (_direction)
   {
     case TO_MULTIAPP:
     {
@@ -79,7 +79,7 @@ MultiAppMeshFunctionTransfer::execute()
       from_func.init(Trees::ELEMENTS);
       from_func.enable_out_of_mesh_mode(NOTFOUND);
 
-      for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
         if (_multi_app->hasLocalApp(i))
         {
@@ -103,7 +103,7 @@ MultiAppMeshFunctionTransfer::execute()
             MeshBase::const_node_iterator node_it = mesh.local_nodes_begin();
             MeshBase::const_node_iterator node_end = mesh.local_nodes_end();
 
-            for(; node_it != node_end; ++node_it)
+            for (; node_it != node_end; ++node_it)
             {
               Node * node = *node_it;
 
@@ -130,7 +130,7 @@ MultiAppMeshFunctionTransfer::execute()
             MeshBase::const_element_iterator elem_it = mesh.local_elements_begin();
             MeshBase::const_element_iterator elem_end = mesh.local_elements_end();
 
-            for(; elem_it != elem_end; ++elem_it)
+            for (; elem_it != elem_end; ++elem_it)
             {
               Elem * elem = *elem_it;
 
@@ -190,7 +190,7 @@ MultiAppMeshFunctionTransfer::execute()
 
       bool is_nodal = to_sys.variable_type(to_var_num).family == LAGRANGE;
 
-      for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
         if (!_multi_app->hasLocalApp(i))
           continue;
@@ -230,7 +230,7 @@ MultiAppMeshFunctionTransfer::execute()
           MeshBase::const_node_iterator node_it = to_mesh.nodes_begin();
           MeshBase::const_node_iterator node_end = to_mesh.nodes_end();
 
-          for(; node_it != node_end; ++node_it)
+          for (; node_it != node_end; ++node_it)
           {
             Node * node = *node_it;
 
@@ -259,7 +259,7 @@ MultiAppMeshFunctionTransfer::execute()
           MeshBase::const_element_iterator elem_it = to_mesh.elements_begin();
           MeshBase::const_element_iterator elem_end = to_mesh.elements_end();
 
-          for(; elem_it != elem_end; ++elem_it)
+          for (; elem_it != elem_end; ++elem_it)
           {
             Elem * elem = *elem_it;
 

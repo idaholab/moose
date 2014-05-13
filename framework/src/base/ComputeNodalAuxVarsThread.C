@@ -59,7 +59,7 @@ ComputeNodalAuxVarsThread::operator() (const ConstNodeRange & range)
     const std::set<SubdomainID> & block_ids = _sys.mesh().getNodeBlockIds(*node);
     for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
     {
-      for(std::vector<AuxKernel*>::const_iterator aux_it = _auxs[_tid].activeBlockNodalKernels(*block_it).begin();
+      for (std::vector<AuxKernel*>::const_iterator aux_it = _auxs[_tid].activeBlockNodalKernels(*block_it).begin();
           aux_it != _auxs[_tid].activeBlockNodalKernels(*block_it).end();
           ++aux_it)
         (*aux_it)->compute();

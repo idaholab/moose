@@ -43,7 +43,7 @@ OneDContactConstraint::timestepSetup()
 void
 OneDContactConstraint::jacobianSetup()
 {
-  if(_jacobian_update)
+  if (_jacobian_update)
     updateContactSet();
 }
 
@@ -97,7 +97,7 @@ OneDContactConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
-  switch(type)
+  switch (type)
   {
   case Moose::Slave:
     // return (_u_slave[_qp] - _u_master[_qp])*_test_slave[_i][_qp];
@@ -113,7 +113,7 @@ Real
 OneDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   double slave_jac = 0;
-  switch(type)
+  switch (type)
   {
   case Moose::SlaveSlave:
     return _phi_slave[_j][_qp]*_test_slave[_i][_qp];

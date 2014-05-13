@@ -140,7 +140,7 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
     break;
   }
 
-  } // end switch(m)
+  } // end switch (m)
 
   return 0.;
 }

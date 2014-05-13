@@ -83,7 +83,7 @@ PLC_LSH::computeStress()
   // stress = stressOld + stressIncrement
   // creep_strain = creep_strainOld + creep_strainIncrement
 
-  if(_t_step == 0) return;
+  if (_t_step == 0) return;
 
   if (_output_iteration_info == true)
   {
@@ -108,7 +108,7 @@ PLC_LSH::computeStress()
   Real first_delS(delS);
   unsigned int counter(0);
 
-  while(counter < _max_its &&
+  while (counter < _max_its &&
         delS > _absolute_stress_tolerance &&
         (delS/first_delS) > _relative_tolerance)
   {
@@ -152,7 +152,7 @@ PLC_LSH::computeStress()
     ++counter;
   }
 
-  if(counter == _max_its &&
+  if (counter == _max_its &&
      delS > _absolute_stress_tolerance &&
      (delS/first_delS) > _relative_tolerance)
   {
@@ -192,7 +192,7 @@ PLC_LSH::computeCreep( const SymmTensor & strain_increment,
   Real norm_creep_residual = 10;
   Real first_norm_creep_residual = 10;
 
-  while(it < _max_its &&
+  while (it < _max_its &&
         norm_creep_residual > _absolute_tolerance &&
         (norm_creep_residual/first_norm_creep_residual) > _relative_tolerance)
   {
@@ -230,7 +230,7 @@ PLC_LSH::computeCreep( const SymmTensor & strain_increment,
   }
 
 
-  if(it == _max_its &&
+  if (it == _max_its &&
      norm_creep_residual > _absolute_tolerance &&
      (norm_creep_residual/first_norm_creep_residual) > _relative_tolerance)
   {
@@ -288,7 +288,7 @@ PLC_LSH::computeLSH( const SymmTensor & strain_increment,
     Real first_norm_plas_residual = 10;
     Real scalar_plastic_strain_increment = 0;
 
-    while(it < _max_its &&
+    while (it < _max_its &&
           norm_plas_residual > _absolute_tolerance &&
           (norm_plas_residual/first_norm_plas_residual) > _relative_tolerance)
     {
@@ -322,7 +322,7 @@ PLC_LSH::computeLSH( const SymmTensor & strain_increment,
 
     }
 
-    if(it == _max_its &&
+    if (it == _max_its &&
        norm_plas_residual > _absolute_tolerance &&
        (norm_plas_residual/first_norm_plas_residual) > _relative_tolerance)
     {

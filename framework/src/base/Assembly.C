@@ -63,7 +63,7 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
   buildFaceFE(FEType(FIRST, LAGRANGE));
 
   // Build an FE helper object for this type for each dimension up to the dimension of the current mesh
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
   {
     _holder_fe_helper[dim] = &_fe[dim][FEType(FIRST, LAGRANGE)];
     (*_holder_fe_helper[dim])->get_phi();
@@ -82,13 +82,13 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
 
 Assembly::~Assembly()
 {
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
     for (std::map<FEType, FEBase *>::iterator it = _fe[dim].begin(); it != _fe[dim].end(); ++it)
       delete it->second;
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
     for (std::map<FEType, FEBase *>::iterator it = _fe_face[dim].begin(); it != _fe_face[dim].end(); ++it)
       delete it->second;
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
     for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[dim].begin(); it != _fe_neighbor[dim].end(); ++it)
       delete it->second;
 
@@ -125,7 +125,7 @@ Assembly::buildFE(FEType type)
     _fe_shape_data[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
   {
     if (!_fe[dim][type])
       _fe[dim][type] = FEBase::build(dim, type).release();
@@ -139,7 +139,7 @@ Assembly::buildFaceFE(FEType type)
     _fe_shape_data_face[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
   {
     if (!_fe_face[dim][type])
       _fe_face[dim][type] = FEBase::build(dim, type).release();
@@ -153,7 +153,7 @@ Assembly::buildFaceNeighborFE(FEType type)
     _fe_shape_data_face_neighbor[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
   {
     if (!_fe_neighbor[dim][type])
       _fe_neighbor[dim][type] = FEBase::build(dim, type).release();
@@ -185,19 +185,19 @@ void
 Assembly::createQRules(QuadratureType type, Order o)
 {
   _holder_qrule_volume.clear();
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
     _holder_qrule_volume[dim] = QBase::build(type, dim, o).release();
 
   _holder_qrule_face.clear();
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
     _holder_qrule_face[dim] = QBase::build(type, dim - 1, o).release();
 
   _holder_qrule_neighbor.clear();
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
     _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim, o);
 
   _holder_qrule_arbitrary.clear();
-  for(unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
     _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, o);
 
 //  setVolumeQRule(_qrule_volume);
@@ -240,7 +240,7 @@ Assembly::invalidateCache()
   std::map<unsigned int, ElementFEShapeData * >::iterator it = _element_fe_shape_data_cache.begin();
   std::map<unsigned int, ElementFEShapeData * >::iterator end = _element_fe_shape_data_cache.end();
 
-  for(; it!=end; ++it)
+  for (; it!=end; ++it)
     it->second->_invalidated = true;
 }
 
@@ -938,7 +938,7 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values, std::ve
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
 
-      for(unsigned int i=0; i<_tmp_Re.size(); i++)
+      for (unsigned int i=0; i<_tmp_Re.size(); i++)
       {
         cached_residual_values.push_back(_tmp_Re(i));
         cached_residual_rows.push_back(_temp_dof_indices[i]);
@@ -946,7 +946,7 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values, std::ve
     }
     else
     {
-      for(unsigned int i=0; i<res_block.size(); i++)
+      for (unsigned int i=0; i<res_block.size(); i++)
       {
         cached_residual_values.push_back(res_block(i));
         cached_residual_rows.push_back(_temp_dof_indices[i]);
@@ -1054,11 +1054,11 @@ Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
     {
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
-      for(unsigned int i=0; i<di.size(); i++)
+      for (unsigned int i=0; i<di.size(); i++)
         residual.set(di[i], _tmp_Re(i));
     }
     else
-      for(unsigned int i=0; i<di.size(); i++)
+      for (unsigned int i=0; i<di.size(); i++)
         residual.set(di[i], res_block(i));
   }
 }
@@ -1120,8 +1120,8 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id
       _tmp_Ke = jac_block;
       _tmp_Ke *= scaling_factor;
 
-      for(unsigned int i=0; i<di.size(); i++)
-        for(unsigned int j=0; j<dj.size(); j++)
+      for (unsigned int i=0; i<di.size(); i++)
+        for (unsigned int j=0; j<dj.size(); j++)
         {
           _cached_jacobian_values.push_back(_tmp_Ke(i, j));
           _cached_jacobian_rows.push_back(di[i]);
@@ -1130,8 +1130,8 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id
     }
     else
     {
-      for(unsigned int i=0; i<di.size(); i++)
-        for(unsigned int j=0; j<dj.size(); j++)
+      for (unsigned int i=0; i<di.size(); i++)
+        for (unsigned int j=0; j<dj.size(); j++)
         {
           _cached_jacobian_values.push_back(jac_block(i, j));
           _cached_jacobian_rows.push_back(di[i]);
@@ -1150,7 +1150,7 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & jacobian)
   mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
               "Error: Cached data sizes MUST be the same!");
 
-  for(unsigned int i=0; i<_cached_jacobian_rows.size(); i++)
+  for (unsigned int i=0; i<_cached_jacobian_rows.size(); i++)
     jacobian.add(_cached_jacobian_rows[i], _cached_jacobian_cols[i], _cached_jacobian_values[i]);
 
   if (_max_cached_jacobians < _cached_jacobian_values.size())

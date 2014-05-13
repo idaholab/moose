@@ -44,9 +44,9 @@ MultiAppDTKInterpolationTransfer::execute()
   // Every processor has to be involved with every transfer because the "master" domain is on all processors
   // However, each processor might or might not have the particular multiapp on it.  When that happens
   // we need to pass NULL in for the variable and the MPI_Comm for that piece of the transfer
-  for(unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+  for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
   {
-    switch(_direction)
+    switch (_direction)
     {
       case TO_MULTIAPP:
       {

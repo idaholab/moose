@@ -28,7 +28,7 @@ AllLocalDofIndicesThread::AllLocalDofIndicesThread(System & sys,
     _vars(vars)
 {
   _var_numbers.resize(_vars.size());
-  for(unsigned int i=0; i<_vars.size(); i++)
+  for (unsigned int i=0; i<_vars.size(); i++)
     _var_numbers[i] = _sys.variable_number(_vars[i]);
 }
 
@@ -60,7 +60,7 @@ AllLocalDofIndicesThread::operator() (const ConstElemRange & range)
     for (unsigned int i=0; i<_var_numbers.size(); i++)
     {
       _dof_map.dof_indices(elem, dof_indices, _var_numbers[i]);
-      for(unsigned int j=0; j<dof_indices.size(); j++)
+      for (unsigned int j=0; j<dof_indices.size(); j++)
       {
         dof_id_type dof = dof_indices[j];
 

@@ -56,20 +56,20 @@ RigidBodyModes3D::RigidBodyModes3D(const std::string & name, InputParameters par
 {
   const char* all_modes_array[6] = {"trans_x", "trans_y", "trans_z", "rot_x", "rot_y", "rot_z"};
   std::set<std::string> all_modes(all_modes_array,all_modes_array+6);
-  if(_modes.size() == 0) _modes = all_modes;
-  if(_modes.size() > 6) {
+  if (_modes.size() == 0) _modes = all_modes;
+  if (_modes.size() > 6) {
     std::stringstream err;
     err << "Expected between 0 and 6 rigid body modes, got " << _modes.size()  << " instead\n";
     mooseError(err.str());
   }
-  for(std::set<std::string>::const_iterator it = _modes.begin(); it != _modes.end(); ++it)
+  for (std::set<std::string>::const_iterator it = _modes.begin(); it != _modes.end(); ++it)
   {
-    if(all_modes.find(*it)==all_modes.end())
+    if (all_modes.find(*it)==all_modes.end())
     {
       std::stringstream err;
       err << "Invalid 3D rigid body mode " << *it << "; must be one of: ";
       for (std::set<std::string>::iterator it = all_modes.begin(); it != all_modes.end(); ++it) {
-        if(it != all_modes.begin()) err << ", ";
+        if (it != all_modes.begin()) err << ", ";
         err << *it;
       }
       err << "\n";
@@ -77,20 +77,20 @@ RigidBodyModes3D::RigidBodyModes3D(const std::string & name, InputParameters par
     }
   }
 
-  if(!_subspace_indices.size()) {
+  if (!_subspace_indices.size()) {
     _subspace_indices = std::vector<unsigned int>(_fe_problem.subspaceDim(_subspace_name));
-    for(unsigned int i = 0; i < _fe_problem.subspaceDim(_subspace_name); ++i) _subspace_indices[i] = i;
+    for (unsigned int i = 0; i < _fe_problem.subspaceDim(_subspace_name); ++i) _subspace_indices[i] = i;
   }
-  if(_subspace_indices.size() != _modes.size()) {
+  if (_subspace_indices.size() != _modes.size()) {
     std::stringstream err;
     err << "Number of subspace indices " << _subspace_indices.size() << " must match the number or rigid body modes " << _modes.size()  << "\n";
     mooseError(err.str());
   }
 
-  for(unsigned int i = 0; i < _subspace_indices.size(); ++i)
+  for (unsigned int i = 0; i < _subspace_indices.size(); ++i)
   {
     unsigned int subspace_dim = _fe_problem.subspaceDim(_subspace_name);
-    if(_subspace_indices[i] >= subspace_dim)
+    if (_subspace_indices[i] >= subspace_dim)
     {
       std::stringstream err;
       err << "Invalid " << i << "-th " << _subspace_name << " index " << _subspace_indices[i] << "; must be < " << _fe_problem.subspaceDim(_subspace_name) << "\n";
@@ -108,7 +108,7 @@ RigidBodyModes3D::execute()
   const Node& node = *_current_node;
   unsigned int i = 0;
   // x-displacement mode
-  if(_modes.count("trans_x")){
+  if (_modes.count("trans_x")){
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i++];
     NumericVector<Number>& mode = nl.getVector(_subspace_name+postfix.str());
@@ -120,7 +120,7 @@ RigidBodyModes3D::execute()
     mode.set(zdof,0.0);
   }
   // y-displacement mode
-  if(_modes.count("trans_y")){
+  if (_modes.count("trans_y")){
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i++];
     NumericVector<Number>& mode = nl.getVector(_subspace_name+postfix.str());
@@ -132,7 +132,7 @@ RigidBodyModes3D::execute()
     mode.set(zdof,0.0);
   }
   // z-displacement mode
-  if(_modes.count("trans_z")){
+  if (_modes.count("trans_z")){
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i++];
     NumericVector<Number>& mode = nl.getVector(_subspace_name+postfix.str());
@@ -144,7 +144,7 @@ RigidBodyModes3D::execute()
     mode.set(zdof,1.0);
   }
   // x-axis rotation mode
-  if(_modes.count("rot_x")){
+  if (_modes.count("rot_x")){
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i++];
     NumericVector<Number>& mode = nl.getVector(_subspace_name+postfix.str());
@@ -157,7 +157,7 @@ RigidBodyModes3D::execute()
     mode.set(zdof,y);
   }
   // y-axis rotation mode
-  if(_modes.count("rot_y")){
+  if (_modes.count("rot_y")){
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i++];
     NumericVector<Number>& mode = nl.getVector(_subspace_name+postfix.str());
@@ -170,7 +170,7 @@ RigidBodyModes3D::execute()
     mode.set(zdof,-x);
   }
   // z-axis rotation mode
-  if(_modes.count("rot_z")){
+  if (_modes.count("rot_z")){
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i++];
     NumericVector<Number>& mode = nl.getVector(_subspace_name+postfix.str());
@@ -189,7 +189,7 @@ RigidBodyModes3D::finalize()
 {
   // Close the basis vectors
   NonlinearSystem& nl = _fe_problem.getNonlinearSystem();
-  for(unsigned int i = 0; i < _subspace_indices.size(); ++i) {
+  for (unsigned int i = 0; i < _subspace_indices.size(); ++i) {
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i];
     NumericVector<Number>& mode = nl.getVector(_subspace_name+postfix.str());

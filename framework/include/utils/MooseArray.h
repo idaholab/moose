@@ -194,7 +194,7 @@ inline
 void
 MooseArray<T>::setAllValues(const T & value)
 {
-  for(unsigned int i=0; i<_size; i++)
+  for (unsigned int i=0; i<_size; i++)
     _data[i] = value;
 }
 
@@ -238,7 +238,7 @@ MooseArray<T>::resize(const unsigned int size, const T & default_value)
     }
     _data = new_pointer;
 
-    for(unsigned int i=_size; i<size; i++)
+    for (unsigned int i=_size; i<size; i++)
       _data[i] = default_value;
 
     _allocated_size = size;
@@ -313,7 +313,7 @@ MooseArray<T>::operator=(const std::vector<T> & rhs)
 
   resize(rhs_size);
 
-  for(unsigned int i=0; i<rhs_size; i++)
+  for (unsigned int i=0; i<rhs_size; i++)
     _data[i] = rhs[i];
 
   return *this;
@@ -328,7 +328,7 @@ MooseArray<T>::operator=(const MooseArray<T> & rhs)
   resize(rhs._size);
 //  memcpy(_data,rhs._data,sizeof(T)*_size);
 
-  for(unsigned int i=0; i<_size; i++)
+  for (unsigned int i=0; i<_size; i++)
     _data[i] = rhs._data[i];
 
   return *this;
@@ -351,4 +351,3 @@ freeDoubleMooseArray(MooseArray<MooseArray<T> > &a)
 }
 
 #endif //ARRAY_H
-

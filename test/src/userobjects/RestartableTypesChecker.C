@@ -51,16 +51,16 @@ RestartableTypesChecker::execute()
     if (_vector_data.size() != 4)
       mooseError("Error reading restartable std::vector<Real> expected size 4 got " << _vector_data.size());
 
-    for(unsigned int i=0; i<_vector_data.size(); i++)
+    for (unsigned int i=0; i<_vector_data.size(); i++)
       if (_vector_data[i] != 5)
         mooseError("Error reading restartable std::vector<Real> expected 5 got " << _vector_data[i]);
 
     if (_vector_vector_data.size() != 4)
       mooseError("Error reading restartable std::vector<std::vector<Real> > expected size 4 got " << _vector_data.size());
 
-    for(unsigned int i=0; i<_vector_vector_data.size(); i++)
+    for (unsigned int i=0; i<_vector_vector_data.size(); i++)
     {
-      for(unsigned int j=0; j<_vector_vector_data[i].size(); j++)
+      for (unsigned int j=0; j<_vector_vector_data[i].size(); j++)
         if (_vector_vector_data[i][j] != 5)
           mooseError("Error reading restartable std::vector<std::vector<Real> > expected 5 got " << _vector_vector_data[i][j]);
     }
@@ -77,7 +77,7 @@ RestartableTypesChecker::execute()
     if (_set_data.size() != 2)
       mooseError("Error reading restartable std::set expected size 2 got " << _set_data.size());
 
-    for(std::set<Real>::iterator it = _set_data.begin(); it != _set_data.end(); ++it)
+    for (std::set<Real>::iterator it = _set_data.begin(); it != _set_data.end(); ++it)
       if (*it != 1 && *it != 2)
         mooseError("Error reading restartable set data!");
 
@@ -93,4 +93,3 @@ RestartableTypesChecker::execute()
 
   _first = false;
 }
-

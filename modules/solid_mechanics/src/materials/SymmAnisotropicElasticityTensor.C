@@ -45,7 +45,7 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Rea
   if ((all_21==true && init_list.size()!=21) ||(all_21==false && init_list.size()!=9) )
     mooseError("Please correct the number of entries in the stiffness input.");
 
-  if(all_21 == true)
+  if (all_21 == true)
   {
     for (int i = 0; i < 21; i++)
       _val[i] = init_list[i];
@@ -143,7 +143,7 @@ SymmAnisotropicElasticityTensor::rotate(const Real a1, const Real a2, const Real
 
   for (int j(0); j < 6; ++j)
   {
-    for(int i(j); i < 6; ++i)
+    for (int i(j); i < 6; ++i)
     {
       _val[count++] = _dt(i,j);
     }
@@ -207,14 +207,14 @@ void
 SymmAnisotropicElasticityTensor::form_rotational_q_matrix()
 {
 
-  for(int i = 0; i < 3; ++i)
-    for(int j = 0; j < 3; ++j)
+  for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
       for (int k = 0; k < 3; ++k)
-        for(int l = 0; l < 3; ++l)
+        for (int l = 0; l < 3; ++l)
           _q(((i*3)+k),((j*3)+l)) = _r(i,j) * _r(k,l);
 
-/*for(int p = 0; p < 9; ++p)
-  for(int q = 0; q < 9; ++q)
+/*for (int p = 0; p < 9; ++p)
+  for (int q = 0; q < 9; ++q)
   _qt(q,p) = _q(p,q);*/
 }
 
@@ -234,9 +234,9 @@ SymmAnisotropicElasticityTensor::form_transformation_t_matrix()
   _trans_d6_to_d9(5,4) = _trans_d6_to_d9(7,4) = a;
   _trans_d6_to_d9(2,5) = _trans_d6_to_d9(6,5) = a;
 
-  /*for(int i = 0; i < 9; ++i)
+  /*for (int i = 0; i < 9; ++i)
     {
-    for(int j = 0; j < 6; ++j)
+    for (int j = 0; j < 6; ++j)
     {
     _transpose_trans_d6_to_d9(j,i) = _trans_d6_to_d9(i,j);
     }
@@ -246,9 +246,9 @@ SymmAnisotropicElasticityTensor::form_transformation_t_matrix()
 //  _trans_d9_to_d6(3,3) = _trans_d9_to_d6(4,7) =  _trans_d9_to_d6(5,6) = sqrt2;
   _trans_d9_to_d6(3,3) = _trans_d9_to_d6(4,7) =  _trans_d9_to_d6(5,6) = 1.0;
 
-  /*for(int i = 0; i < 6; ++i)
+  /*for (int i = 0; i < 6; ++i)
     {
-    for(int j = 0; j < 9; ++j)
+    for (int j = 0; j < 9; ++j)
     {
     _transpose_trans_d9_to_d6(j,i) =  _trans_d9_to_d6(i,j);
     }
@@ -365,7 +365,7 @@ SymmAnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
 
   for (int j(0); j < 6; ++j)
   {
-    for(int i(j); i < 6; ++i)
+    for (int i(j); i < 6; ++i)
     {
       _val[count++] = _dt(i,j);
     }
@@ -380,7 +380,7 @@ SymmAnisotropicElasticityTensor::show_dt_matrix()
   for (int j = 0; j < 6; ++j)
   {
     printf("  ");
-    for(int i = 0; i < 6; ++i)
+    for (int i = 0; i < 6; ++i)
     {
       printf("%12.4f  ", _dt(i,j));
     }
@@ -397,7 +397,7 @@ SymmAnisotropicElasticityTensor::show_r_matrix()
   for (int j = 0; j < 3; ++j)
   {
     printf("  ");
-    for(int i = 0; i < 3; ++i)
+    for (int i = 0; i < 3; ++i)
     {
       printf("%8.4f  ", _r(i,j));
     }

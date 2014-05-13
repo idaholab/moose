@@ -90,7 +90,7 @@ SamplerBase::finalize()
   // Next... figure out the correct sorted positions of each value
   std::vector<size_t> sorted_indices;
 
-  switch(_sort_by)
+  switch (_sort_by)
   {
     case 0: // x
       Moose::indirectSort(_x_tmp.begin(), _x_tmp.end(), sorted_indices);

@@ -40,7 +40,7 @@ GenericFunctionMaterial::GenericFunctionMaterial(const std::string & name, Input
   _properties.resize(num_names);
   _functions.resize(num_names);
 
-  for(unsigned int i=0; i<_num_props; i++)
+  for (unsigned int i=0; i<_num_props; i++)
   {
     _properties[i] = &declareProperty<Real>(_prop_names[i]);
     _functions[i] = &getFunctionByName(_prop_values[i]);
@@ -50,6 +50,6 @@ GenericFunctionMaterial::GenericFunctionMaterial(const std::string & name, Input
 void
 GenericFunctionMaterial::computeQpProperties()
 {
-  for(unsigned int i=0; i<_num_props; i++)
+  for (unsigned int i=0; i<_num_props; i++)
     (*_properties[i])[_qp] = (*_functions[i]).value(_t, _q_point[_qp]);
 }

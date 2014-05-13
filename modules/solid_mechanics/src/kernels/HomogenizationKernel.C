@@ -27,41 +27,41 @@ HomogenizationKernel::computeQpResidual()
 {
   unsigned k, l;
 
-  if(_column == 0)
+  if (_column == 0)
   {
     k = 0;
     l = 0;
   }
 
 
-  if(_column == 1)
+  if (_column == 1)
   {
     k = 1;
     l = 1;
   }
 
 
-  if(_column == 2)
+  if (_column == 2)
   {
     k = 2;
     l = 2;
   }
 
 
-  if(_column == 3)
+  if (_column == 3)
   {
     k = 0;
     l = 1;
   }
 
 
-  if(_column == 4)
+  if (_column == 4)
   {
     k = 1;
     l = 2;
   }
 
-  if(_column == 5)
+  if (_column == 5)
   {
     k = 2;
     l = 0;
@@ -76,7 +76,7 @@ HomogenizationKernel::computeQpResidual()
   Real value(0);
 
   // Compute positive value since we are computing a residual not a rhs
-  for(unsigned j = 0; j < 3; j++)
+  for (unsigned j = 0; j < 3; j++)
   {
     const unsigned I = 3 * j + _component;
     value += E(I,J) * _grad_test[_i][_qp](j);

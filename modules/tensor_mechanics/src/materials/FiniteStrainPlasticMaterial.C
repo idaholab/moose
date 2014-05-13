@@ -104,7 +104,7 @@ FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTenso
   yield_stress=getYieldStress(eqvpstrain);
   plastic_flag=isPlastic(sig_new,yield_stress);//Check of plasticity for elastic predictor
 
-  if(plastic_flag==1)
+  if (plastic_flag==1)
   {
 
     iter=0;
@@ -129,7 +129,7 @@ FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTenso
     err3=fabs(rep);
 
 
-    while((err1 > _rtol || err2 > _ftol || err3 > _eptol) && iter < maxiter )//Stress update iteration (hardness fixed)
+    while ((err1 > _rtol || err2 > _ftol || err3 > _eptol) && iter < maxiter )//Stress update iteration (hardness fixed)
     {
 
 
@@ -161,7 +161,7 @@ FiniteStrainPlasticMaterial::solveStressResid(RankTwoTensor sig_old,RankTwoTenso
 
     }
 
-    if(iter>=maxiter)
+    if (iter>=maxiter)
     {
       _stress[_qp](2,2)=1e6;
       printf("Constitutive Error: Too many iterations %f %f %f \n",err1,err2, err3);//Convergence failure
@@ -188,7 +188,7 @@ FiniteStrainPlasticMaterial::isPlastic(RankTwoTensor sig,Real yield_stress)
 
   sig_eqv=getSigEqv(sig);
 
-  if(sig_eqv-yield_stress>toly)
+  if (sig_eqv-yield_stress>toly)
   {
     return 1;
   }
@@ -227,8 +227,8 @@ FiniteStrainPlasticMaterial::getSigEqv(RankTwoTensor sig)
   sig_eqv=0.0;
 
 
-  for(int i=0;i<3;i++)
-    for(int j=0;j<3;j++)
+  for (int i=0;i<3;i++)
+    for (int j=0;j<3;j++)
     {
       sij=sig_dev(i,j);
       sig_eqv+=sij*sij;
@@ -249,7 +249,7 @@ FiniteStrainPlasticMaterial::getSigDev(RankTwoTensor sig)
   RankTwoTensor identity;
   RankTwoTensor sig_dev;
 
-  for(int i=0; i<3; i++)
+  for (int i=0; i<3; i++)
     identity(i,i)=1.0;
 
   sig_dev=sig-identity*sig.trace()/3.0;
@@ -281,10 +281,10 @@ FiniteStrainPlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl, Re
   f2=f1/3.0;
   f3=9.0/(4.0*pow(sig_eqv,3.0));
 
-  for(int i=0;i<3;i++)
-    for(int j=0;j<3;j++)
-      for(int k=0;k<3;k++)
-        for(int l=0;l<3;l++)
+  for (int i=0;i<3;i++)
+    for (int j=0;j<3;j++)
+      for (int k=0;k<3;k++)
+        for (int l=0;l<3;l++)
           dft_dsig(i,j,k,l)=f1*deltaFunc(i,k)*deltaFunc(j,l)-f2*deltaFunc(i,j)*deltaFunc(k,l)-f3*sig_dev(i,j)*sig_dev(k,l);
 
   dfd_dsig=dft_dsig;
@@ -299,7 +299,7 @@ FiniteStrainPlasticMaterial::getJac(RankTwoTensor sig, RankFourTensor E_ijkl, Re
 Real
 FiniteStrainPlasticMaterial::deltaFunc(int i, int j)
 {
-  if(i==j)
+  if (i==j)
     return 1.0;
   else
     return 0.0;
@@ -317,7 +317,7 @@ FiniteStrainPlasticMaterial::getYieldStress(Real eqpe)
   nsize=_yield_stress_vector.size();
   data=_yield_stress_vector.data();
 
-  if(data[0] > 0.0 || nsize%2 >0 )//Error check for input inconsitency
+  if (data[0] > 0.0 || nsize%2 >0 )//Error check for input inconsitency
   {
     mooseError("Error in yield stress input: Should be a vector with eqv plastic strain and yield stress pair values.\n");
 
@@ -327,15 +327,15 @@ FiniteStrainPlasticMaterial::getYieldStress(Real eqpe)
   Real tol=1e-8;
 
 
-  while(ind<nsize)
+  while (ind<nsize)
   {
 
-    if(fabs(eqpe-data[ind])<tol)
+    if (fabs(eqpe-data[ind])<tol)
       return data[ind+1];
 
-    if(ind+2<nsize)
+    if (ind+2<nsize)
     {
-      if(eqpe > data[ind] && eqpe < data[ind+2])
+      if (eqpe > data[ind] && eqpe < data[ind+2])
       {
         return data[ind+1]+(eqpe-data[ind])/(data[ind+2]-data[ind])*(data[ind+3]-data[ind+1]);
 
@@ -368,7 +368,7 @@ FiniteStrainPlasticMaterial::getdYieldStressdPlasticStrain(Real eqpe)
   nsize=_yield_stress_vector.size();
   data=_yield_stress_vector.data();
 
-  if(data[0] > 0.0 || nsize%2 >0 )//Error check for input inconsitency
+  if (data[0] > 0.0 || nsize%2 >0 )//Error check for input inconsitency
   {
     mooseError("Error in yield stress input: Should be a vector with eqv plastic strain and yield stress pair values.\n");
 
@@ -378,12 +378,12 @@ FiniteStrainPlasticMaterial::getdYieldStressdPlasticStrain(Real eqpe)
 
 
 
-  while(ind<nsize)
+  while (ind<nsize)
   {
 
-    if(ind+2<nsize)
+    if (ind+2<nsize)
     {
-      if(eqpe >= data[ind] && eqpe < data[ind+2])
+      if (eqpe >= data[ind] && eqpe < data[ind+2])
       {
         return (data[ind+3]-data[ind+1])/(data[ind+2]-data[ind]);
 

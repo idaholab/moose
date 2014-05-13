@@ -163,7 +163,7 @@ OversampleOutput::initOversample()
   _mesh_functions.resize(num_systems);
 
   // Loop over the number of systems
-  for(unsigned int sys_num = 0; sys_num < num_systems; sys_num++)
+  for (unsigned int sys_num = 0; sys_num < num_systems; sys_num++)
   {
     // Reference to the current system
     System & source_sys = source_es.get_system(sys_num);

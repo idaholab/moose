@@ -259,7 +259,7 @@ InputParameters::mooseObjectSyntaxVisibility() const
     InputParameters::Parameter<type> * scalar_p = dynamic_cast<InputParameters::Parameter<type>*>(param);       \
     if (scalar_p)                                                                                               \
       rangeCheck<type, up_type>(long_name, short_name, scalar_p, oss); \
-  } while(0)
+  } while (0)
 
 
 void

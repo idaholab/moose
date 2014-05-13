@@ -64,16 +64,14 @@ DashpotBC::computeQpOffDiagJacobian(unsigned int jvar)
   RealVectorValue velocity;
   unsigned int component = 0;
 
-  if(jvar == _disp_x_var)
+  if (jvar == _disp_x_var)
     component = 0;
-  else if(jvar == _disp_y_var)
+  else if (jvar == _disp_y_var)
     component = 1;
-  else if(jvar == _disp_z_var)
+  else if (jvar == _disp_z_var)
     component = 2;
 
   velocity(component) = _phi[_j][_qp]/_dt;
 
   return -_test[_i][_qp]*_normals[_qp]*velocity;
 }
-
-

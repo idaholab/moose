@@ -120,11 +120,11 @@ NavierStokesMaterial::computeProperties()
     grad_outter_u += grad_outter_u.transpose();
 
     Real div_vel = 0;
-    for(unsigned int i=0;i<3;i++)
+    for (unsigned int i=0;i<3;i++)
       div_vel += (*_vel_grads[i])[qp](i);
 
     //Add diagonal terms
-    for(unsigned int i=0;i<3;i++)
+    for (unsigned int i=0;i<3;i++)
       grad_outter_u(i,i) -= (2.0/3.0) * div_vel;
 
     grad_outter_u *= _dynamic_viscosity[qp];

@@ -69,7 +69,7 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
       Moose::out << tokens[k] << "\t";
       std::vector<std::string> stos_vars;
       MooseUtils::tokenize(tokens[k], stos_vars, 1, "()");
-      if(stos_vars.size() == 2)
+      if (stos_vars.size() == 2)
       {
         Real coef;
         std::istringstream iss(stos_vars[0]);

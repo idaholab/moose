@@ -34,9 +34,9 @@ LinearElasticityMaterial::LinearElasticityMaterial(const std::string & name,
 void
 LinearElasticityMaterial::computeProperties()
 {
-  for(unsigned int qp=0; qp<_qrule->n_points(); qp++)
+  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
   {
-    if(_has_temp)
+    if (_has_temp)
       _thermal_strain[qp] = _my_thermal_expansion*(_temp[qp] - _my_t_ref);
     else
       _thermal_strain[qp] = 0;

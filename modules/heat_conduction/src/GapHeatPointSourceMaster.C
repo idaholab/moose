@@ -50,11 +50,11 @@ GapHeatPointSourceMaster::addPoints()
   std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
   std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 
-  for(; it!=end; ++it)
+  for (; it!=end; ++it)
   {
     PenetrationInfo * pinfo = it->second;
 
-    if(!pinfo)
+    if (!pinfo)
       continue;
 
     addPoint(pinfo->_elem, pinfo->_closest_point);

@@ -40,7 +40,7 @@ ErrorFractionMarker::markerSetup()
   _max = 0;
 
   // First find the max and min error
-  for(unsigned int i=0; i<_error_vector.size(); i++)
+  for (unsigned int i=0; i<_error_vector.size(); i++)
   {
     _min = std::min(_min, static_cast<Real>(_error_vector[i]));
     _max = std::max(_max, static_cast<Real>(_error_vector[i]));

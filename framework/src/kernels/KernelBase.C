@@ -82,7 +82,7 @@ KernelBase::KernelBase(const std::string & name, InputParameters parameters) :
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 
-  for(unsigned int i=0; i<_save_in_strings.size(); i++)
+  for (unsigned int i=0; i<_save_in_strings.size(); i++)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
@@ -97,7 +97,7 @@ KernelBase::KernelBase(const std::string & name, InputParameters parameters) :
   _has_save_in = _save_in.size() > 0;
 
 
-  for(unsigned int i=0; i<_diag_save_in_strings.size(); i++)
+  for (unsigned int i=0; i<_diag_save_in_strings.size(); i++)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 

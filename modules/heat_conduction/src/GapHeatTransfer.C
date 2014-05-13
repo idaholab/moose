@@ -59,17 +59,17 @@ GapHeatTransfer::GapHeatTransfer(const std::string & name, InputParameters param
                                                                                Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
    _warnings(getParam<bool>("warnings"))
 {
-  if(_quadrature)
+  if (_quadrature)
   {
-    if(!parameters.isParamValid("paired_boundary"))
+    if (!parameters.isParamValid("paired_boundary"))
       mooseError(std::string("No 'paired_boundary' provided for ") + _name);
   }
   else
   {
-    if(!isCoupled("gap_distance"))
+    if (!isCoupled("gap_distance"))
       mooseError(std::string("No 'gap_distance' provided for ") + _name);
 
-    if(!isCoupled("gap_temp"))
+    if (!isCoupled("gap_temp"))
       mooseError(std::string("No 'gap_temp' provided for ") + _name);
   }
 }
@@ -80,13 +80,13 @@ GapHeatTransfer::computeQpResidual()
 {
   computeGapValues();
 
-  if(!_has_info)
+  if (!_has_info)
     return 0;
 
   Real grad_t = (_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance[_qp];
 
   // This is keeping track of this residual contribution so it can be used as the flux on the other side of the gap.
-  if(!_quadrature)
+  if (!_quadrature)
   {
     Threads::spin_mutex::scoped_lock lock(slave_flux_mutex);
     const Real slave_flux = computeSlaveFluxContribution(grad_t);
@@ -107,7 +107,7 @@ GapHeatTransfer::computeQpJacobian()
 {
   computeGapValues();
 
-  if(!_has_info)
+  if (!_has_info)
     return 0;
 
   return _test[_i][_qp] * ((_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance_dT[_qp] + _edge_multiplier * _gap_conductance[_qp]) * _phi[_j][_qp];
@@ -118,7 +118,7 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 {
   computeGapValues();
 
-  if(!_has_info)
+  if (!_has_info)
     return 0;
 
   unsigned coupled_component(0);
@@ -184,7 +184,7 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 Real
 GapHeatTransfer::gapLength() const
 {
-  if(!_has_info)
+  if (!_has_info)
     return 1.0;
 
   return GapConductance::gapLength( -_gap_distance, _min_gap, _max_gap );
@@ -208,7 +208,7 @@ GapHeatTransfer::dgapLength( Real normalComponent ) const
 void
 GapHeatTransfer::computeGapValues()
 {
-  if(!_quadrature)
+  if (!_quadrature)
   {
     _has_info = true;
     _gap_temp = _gap_temp_value[_qp];

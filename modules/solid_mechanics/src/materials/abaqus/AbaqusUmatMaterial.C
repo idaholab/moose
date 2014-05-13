@@ -74,12 +74,12 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const std::string  & name,
   _DSTRAN = new Real[_NTENS];
   _PROPS  = new Real[_num_props];
 
-  for(unsigned int i=0;i<_num_state_vars; ++i)
+  for (unsigned int i=0;i<_num_state_vars; ++i)
   {
     _STATEV[i] = 0.0;
   }
 
-  for(int i=0;i<_NTENS; ++i)
+  for (int i=0;i<_NTENS; ++i)
   {
     _DDSDDT[i] = 0.0;
     _DRPLDE[i] = 0.0;
@@ -88,13 +88,13 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const std::string  & name,
     _DSTRAN[i] = 0.0;
   }
 
-  for(unsigned int i=0;i<9; ++i)
+  for (unsigned int i=0;i<9; ++i)
   {
     _DFGRD0[i] = 0.0;
     _DFGRD1[i] = 0.0;
   }
 
-  for(int i=0;i<_NTENS*_NTENS; ++i)
+  for (int i=0;i<_NTENS*_NTENS; ++i)
   {
     _DDSDDE[i] = 0.0;
   }
@@ -160,7 +160,7 @@ void AbaqusUmatMaterial::initQpStatefulProperties()
   //Initialize state variable vector
   _state_var[_qp].resize(_num_state_vars);
   _state_var_old[_qp].resize(_num_state_vars);
-  for(unsigned int i=0; i<_num_state_vars; ++i)
+  for (unsigned int i=0; i<_num_state_vars; ++i)
   {
     _state_var[_qp][i] = 0.0;
     _state_var_old[_qp][i] = 0.0;
@@ -190,11 +190,11 @@ void AbaqusUmatMaterial::computeStress()
   }
 
   //Recover "old" state variables
-  for(unsigned int i=0; i<_num_state_vars; ++i)
+  for (unsigned int i=0; i<_num_state_vars; ++i)
     _STATEV[i]=_state_var_old[_qp][i];
 
   //Pass through updated stress, total strain, and strain increment arrays
-  for(int i=0; i<_NTENS; ++i)
+  for (int i=0; i<_NTENS; ++i)
   {
     _STRESS[i] = _stress_old.component(i);
     _STRAN[i] = _total_strain[_qp].component(i);
