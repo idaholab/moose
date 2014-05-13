@@ -1,4 +1,4 @@
-#ifndef ELASITCENERGYAUX_H
+#ifndef ELASTICENERGYAUX_H
 #define ELASTICENERGYAUX_H
 
 #include "AuxKernel.h"
