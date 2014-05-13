@@ -1,0 +1,18 @@
+[Tests]
+  [./kks_h_eta_poly_material]
+    type = 'Exodiff'
+    input = 'kks_h_eta_poly_material.i'
+    exodiff = 'kks_h_eta_poly_material.e'
+    abs_zero = 6e-08
+    group = 'adaptive'
+  [../]
+
+  [./parsed_material]
+    type = 'Exodiff'
+    input = 'parsed_material.i'
+    exodiff = 'out.e'
+    abs_zero = 6e-08
+    group = 'adaptive'
+    skip = 'under development'
+  [../]
+[]
