@@ -14,6 +14,7 @@
     type = 'Exodiff'
     input = 'output_boundary.i'
     exodiff = 'output_boundary_out.e'
+    recover = false # see 3082
   [../]
   [./multiple_files]
     type = Exodiff
@@ -28,7 +29,7 @@
   [../]
   [./steady]
     type = Exodiff
-    input = output_steady.i
-    exodiff = output_steady_out.e
+    input = 'output_steady.i'
+    exodiff = 'output_steady_out.e'
   [../]
 []
