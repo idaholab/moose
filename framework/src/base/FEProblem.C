@@ -258,6 +258,9 @@ FEProblem::~FEProblem()
   for(unsigned int i=0; i<n_threads; i++)
     delete _pps_data[i];
 
+  for(unsigned int i=0; i<n_threads; i++)
+    delete _vpps_data[i];
+
   delete _resurrector;
 
   // Random data objects
