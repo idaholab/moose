@@ -9,6 +9,7 @@
     type = 'Exodiff'
     input = 'output_block.i'
     exodiff = 'output_block_out.e'
+    recover = false
   [../]
   [./boundary]
     type = 'Exodiff'
