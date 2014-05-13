@@ -3,7 +3,7 @@
   dim = 2
   nx = 10
   ny = 10
-  #uniform_refine = 1
+  uniform_refine = 1
 []
 
 [Variables]
@@ -12,7 +12,7 @@
 []
 
 [AuxVariables]
-  active = 'one two three four'
+  active = 'one two three'
   [./one]
     order = CONSTANT
     family = MONOMIAL
