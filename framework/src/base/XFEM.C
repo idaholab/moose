@@ -518,7 +518,7 @@ XFEM::mark_cut_edges_by_state()
       {
         if (orig_cut_side_id != 999999)
         {
-          libMesh::err << " ERROR: multiple cuts in element "<<elem->id()<<std::endl;
+          libMesh::err << " ERROR: element "<<elem->id()<<" marked for crack growth, but already has multiple cuts"<<std::endl;
           exit(1);
         }
         orig_cut_side_id = i;
@@ -544,10 +544,10 @@ XFEM::mark_cut_edges_by_state()
 
     //find position of existing edge cut to use for cutting plane origin
     Node *node1 = elem->get_node(orig_cut_side_id);
-    Node *node2 = elem->get_node(orig_cut_side_id<nsides-1?orig_cut_side_id+1:0);
+    Node *node2 = elem->get_node(orig_cut_side_id<(nsides-1)?orig_cut_side_id+1:0);
 
-    Real cut_origin_x = orig_cut_distance*(*node1)(0) + (1.0-orig_cut_distance)*(*node2)(0);
-    Real cut_origin_y = orig_cut_distance*(*node1)(1) + (1.0-orig_cut_distance)*(*node2)(1);
+    Real cut_origin_x = (1.0-orig_cut_distance)*(*node1)(0) + orig_cut_distance*(*node2)(0);
+    Real cut_origin_y = (1.0-orig_cut_distance)*(*node1)(1) + orig_cut_distance*(*node2)(1);
 
     //loop through nodes, find distance from cut plane
     std::vector<Real> plane_to_node_dist;
@@ -568,7 +568,7 @@ XFEM::mark_cut_edges_by_state()
       if (i != orig_cut_side_id)
       {
         unsigned int node1idx = i;
-        unsigned int node2idx = i<nsides-1?i+1:0;
+        unsigned int node2idx = i<(nsides-1)?i+1:0;
         if (plane_to_node_dist[node1idx]*plane_to_node_dist[node2idx] < 0.0)
         {
           if (num_cut > 1)
