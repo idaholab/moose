@@ -4,6 +4,7 @@ import os
 
 class CheckFiles(RunApp):
 
+  @staticmethod
   def validParams():
     params = RunApp.validParams()
     params.addParam('check_files', [], "A list of files that MUST exist.")
@@ -11,7 +12,6 @@ class CheckFiles(RunApp):
     params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
     params.addParam('file_expect_out', "A regular expression that must occur in all of the check files in order for the test to be considered passing.")
     return params
-  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)

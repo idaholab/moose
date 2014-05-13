@@ -15,16 +15,8 @@ if os.environ.has_key("MOOSE_DIR"):
 
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
 import path_tool
-
 path_tool.activate_module('TestHarness')
 
-from TestTimer import TestTimer
 from TestHarness import TestHarness
-
-if '--store-timing' in sys.argv:
-  harness = TestTimer(sys.argv, app_name, MOOSE_DIR)
-else:
-  harness = TestHarness(sys.argv, app_name, MOOSE_DIR)
-
 # Run the tests!
-harness.findAndRunTests()
+TestHarness.buildAndRun(sys.argv, app_name, MOOSE_DIR)

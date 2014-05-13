@@ -1,14 +1,12 @@
-import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil
+import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil, time, copy
 import path_tool
 
 path_tool.activate_module('FactorySystem')
 
 import ParseGetPot
-import copy
 from socket import gethostname
 #from options import *
 from util import *
-from time import sleep
 from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
 from XMLDiffer import XMLDiffer
@@ -24,6 +22,16 @@ from optparse import OptionParser, OptionGroup, Values
 from timeit import default_timer as clock
 
 class TestHarness:
+
+  @staticmethod
+  def buildAndRun(argv, app_name, moose_dir):
+    if '--store-timing' in argv:
+      harness = TestTimer(argv, app_name, moose_dir)
+    else:
+      harness = TestHarness(argv, app_name, moose_dir)
+
+    harness.findAndRunTests()
+
   def __init__(self, argv, app_name, moose_dir):
     self.factory = Factory()
 
@@ -689,3 +697,79 @@ class TestHarness:
     if self.options.pbs_cleanup:
       self.cleanPBSBatch()
       sys.exit(0)
+
+
+
+#################################################################################################################################
+# The TestTimer TestHarness
+# This method finds and stores timing for individual tests.  It is activated with --store-timing
+#################################################################################################################################
+
+CREATE_TABLE = """create table timing
+(
+  app_name text,
+  test_name text,
+  revision text,
+  date int,
+  seconds real,
+  scale int,
+  load real
+);"""
+
+class TestTimer(TestHarness):
+  def __init__(self, argv, app_name, moose_dir):
+    TestHarness.__init__(self, argv, app_name, moose_dir)
+    try:
+      from sqlite3 import dbapi2 as sqlite
+    except:
+      print 'Error: --store-timing requires the sqlite3 python module.'
+      sys.exit(1)
+    self.app_name = app_name
+    self.db_file = self.options.dbFile
+    if not self.db_file:
+      home = os.environ['HOME']
+      self.db_file = os.path.join(home, 'timingDB/timing.sqlite')
+      if not os.path.exists(self.db_file):
+        print 'Warning: creating new database at default location: ' + str(self.db_file)
+        self.createDB(self.db_file)
+      else:
+        print 'Warning: Assuming database location ' + self.db_file
+
+  def createDB(self, fname):
+    from sqlite3 import dbapi2 as sqlite
+    print 'Creating empty database at ' + fname
+    con = sqlite.connect(fname)
+    cr = con.cursor()
+    cr.execute(CREATE_TABLE)
+    con.commit()
+
+  def preRun(self):
+    from sqlite3 import dbapi2 as sqlite
+    # Delete previous data if app_name and repo revision are found
+    con = sqlite.connect(self.db_file)
+    cr = con.cursor()
+    cr.execute('delete from timing where app_name = ? and revision = ?', (self.app_name, self.options.revision))
+    con.commit()
+
+  # After the run store the results in the database
+  def postRun(self, test, timing):
+    from sqlite3 import dbapi2 as sqlite
+    con = sqlite.connect(self.db_file)
+    cr = con.cursor()
+
+    timestamp = int(time.time())
+    load = os.getloadavg()[0]
+
+    # accumulate the test results
+    data = []
+    sum_time = 0
+    num = 0
+    parse_failed = False
+    # Were only interested in storing scaled data
+    if timing != None and test['scale_refine'] != 0:
+      sum_time += float(timing)
+      num += 1
+      data.append( (self.app_name, test['test_name'].split('/').pop(), self.options.revision, timestamp, timing, test['scale_refine'], load) )
+    # Insert the data into the database
+    cr.executemany('insert into timing values (?,?,?,?,?,?,?)', data)
+    con.commit()

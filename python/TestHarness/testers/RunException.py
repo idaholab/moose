@@ -2,6 +2,7 @@ from RunApp import RunApp
 
 class RunException(RunApp):
 
+  @staticmethod
   def validParams():
     params = RunApp.validParams()
 
@@ -10,7 +11,6 @@ class RunException(RunApp):
     params.addParam('should_crash', True, "Inidicates that the test is expected to crash or otherwise terminate early")
 
     return params
-  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)

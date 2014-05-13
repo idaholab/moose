@@ -4,6 +4,7 @@ import os
 
 class Exodiff(RunApp):
 
+  @staticmethod
   def validParams():
     params = RunApp.validParams()
     params.addRequiredParam('exodiff',   [], "A list of files to exodiff.")
@@ -16,7 +17,6 @@ class Exodiff(RunApp):
     params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
 
     return params
-  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)
