@@ -34,4 +34,10 @@
     input = 'moving.i'
     exodiff = 'moving_out.e'
   [../]
+
+  [./cylindrical]
+    type = 'Exodiff'
+    input = 'cylindrical.i'
+    exodiff = 'cylindrical_out.e'
+  [../]
 []
