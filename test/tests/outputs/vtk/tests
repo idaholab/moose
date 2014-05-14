@@ -35,6 +35,7 @@
     vtk = true
     cli_args = Outputs/file_base=vtk_diff_serial_mesh_out
     mesh_mode = SERIAL
+    compiler = CLANG
   [../]
   [./diff_parallel_mesh]
     # Check that actual solution, in parallel with parallel mesh
