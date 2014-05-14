@@ -13,7 +13,7 @@
     prereq = 'testRestart1'
   [../]
 
-  [./test]
+  [./test_lsh]
     type = 'Exodiff'
     input = 'LinearStrainHardening_test.i'
     exodiff = 'LinearStrainHardening_test_out.e'
@@ -22,7 +22,7 @@
     scale_refine = 2
   [../]
 
-  [./test]
+  [./test_lsh_pressure]
     type = 'Exodiff'
     input = 'lsh_pressure.i'
     exodiff = 'lsh_pressure_out.e'
