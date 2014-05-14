@@ -2,15 +2,15 @@ from RunApp import RunApp
 
 class RunException(RunApp):
 
-  def getValidParams():
-    params = RunApp.getValidParams()
+  @staticmethod
+  def validParams():
+    params = RunApp.validParams()
 
     params.addParam('expect_err', "A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
     params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
     params.addParam('should_crash', True, "Inidicates that the test is expected to crash or otherwise terminate early")
 
     return params
-  getValidParams = staticmethod(getValidParams)
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)

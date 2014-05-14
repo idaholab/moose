@@ -4,6 +4,7 @@ class InputParameters:
     self.desc = {}
     self.substitute = {}
     self.required = set()
+    self.private = set()
 
   def addRequiredParam(self, name, *args):
     self.required.add(name)
@@ -13,6 +14,11 @@ class InputParameters:
     if len(args) == 2:
       self.valid[name] = args[0]
     self.desc[name] = args[-1]
+
+  def addPrivateParam(self, name, *args):
+    self.private.add(name)
+    if len(args) == 1:
+      self.valid[name] = args[0]
 
   def addStringSubParam(self, name, substitution, *args):
     self.substitute[name] = substitution

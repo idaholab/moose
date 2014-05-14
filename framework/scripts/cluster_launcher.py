@@ -20,8 +20,9 @@ if os.environ.has_key("FRAMEWORK_DIR"):
   FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
 
 # Import the TestHarness and Helper functions from the MOOSE toolkit
-sys.path.append(os.path.join(FRAMEWORK_DIR, 'scripts', 'common'))
-sys.path.append(os.path.join(FRAMEWORK_DIR, 'scripts', 'TestHarness'))
+sys.path.append(os.path.join(MOOSE_DIR, 'python'))
+import path_tool
+path_tool.activate_module('TestHarness')
 sys.path.append(os.path.join(FRAMEWORK_DIR, 'scripts', 'ClusterLauncher'))
 
 import ParseGetPot
