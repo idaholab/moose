@@ -59,6 +59,13 @@ public:
    * @return A string of output file including the extension
    */
   virtual std::string filename();
+
+  /**
+   * Setup the CSV output
+   * If restarting and the append_restart flag is false, then the output data is cleared here
+   */
+  void initialSetup();
+
 };
 
 #endif /* CSV_H */

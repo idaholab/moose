@@ -14,12 +14,16 @@
 
 // Moose includes
 #include "CSV.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<CSV>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
+
+  // Add option for appending file on restart
+  params.addParam<bool>("append_restart", false, "Append existing file on restart");
 
   // Suppress unused parameters
   params.suppressParameter<unsigned int>("padding");
@@ -34,6 +38,13 @@ CSV::CSV(const std::string & name, InputParameters & parameters) :
 
 CSV::~CSV()
 {
+}
+
+void
+CSV::initialSetup()
+{
+  if (_problem_ptr->isRestarting() && !getParam<bool>("append_restart"))
+    _all_data_table.clear();
 }
 
 std::string
