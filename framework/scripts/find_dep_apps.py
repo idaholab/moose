@@ -38,8 +38,7 @@ def findDepApps(dep_names):
 
   # Make sure that we found at least one directory to search
   if len(app_dirs) == 0:
-    print "ERROR:_Unable_to_find_any_directories_to_search"
-    sys.exit(1)
+    sys.exit(0)
 
 #  print '\n'.join(app_dirs)
 
