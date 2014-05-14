@@ -38,7 +38,7 @@ def findDepApps(dep_names):
 
   # Make sure that we found at least one directory to search
   if len(app_dirs) == 0:
-    sys.exit(0)
+    return ''
 
 #  print '\n'.join(app_dirs)
 
