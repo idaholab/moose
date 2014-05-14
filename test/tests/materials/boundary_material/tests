@@ -1,0 +1,9 @@
+[Tests]
+  [./bnd_coupling_vol]
+    type = 'Exodiff'
+    input = 'bnd_coupling_vol.i'
+    exodiff = 'bnd_coupling_vol_out.e'
+    abs_zero = 1e-9
+    max_parallel = 1
+  [../]
+[]

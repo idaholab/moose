@@ -80,6 +80,7 @@
 #include "ScalarVarBC.h"
 #include "BndTestDirichletBC.h"
 #include "MatTestNeumannBC.h"
+#include "MatDivergenceBC.h"
 
 #include "TEIC.h"
 #include "MTICSum.h"
@@ -101,6 +102,7 @@
 #include "VarCouplingMaterialEigen.h"
 #include "BadStatefulMaterial.h"
 #include "OutputTestMaterial.h"
+#include "SumMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -300,6 +302,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerBoundaryCondition(CoupledKernelGradBC);
 
   registerBoundaryCondition(DivergenceBC);
+  registerBoundaryCondition(MatDivergenceBC);
 
   // Initial conditions
   registerInitialCondition(TEIC);
@@ -322,6 +325,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(VarCouplingMaterialEigen);
   registerMaterial(BadStatefulMaterial);
   registerMaterial(OutputTestMaterial);
+  registerMaterial(SumMaterial);
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
