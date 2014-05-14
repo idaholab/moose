@@ -13,4 +13,25 @@
     max_threads = 1  # Sometimes fails with threads or in parallel #2899
     max_parallel = 1
   [../]
+  [./restart_part1]
+    # First part of CSV restart test, CSV files should not append
+    type = CSVDiff
+    input = csv_restart_part1.i
+    csvdiff = 'csv_restart_part1_out.csv'
+  [../]
+  [./restart_part2]
+    # Second part of CSV restart test
+    type = CSVDiff
+    input = csv_restart_part2.i
+    csvdiff = 'csv_restart_part2_out.csv'
+    prereq = restart_part1
+  [../]
+  [./restart_part2_append]
+    # Second part of CSV restart test, with CSV file appending
+    type = CSVDiff
+    input = csv_restart_part2.i
+    csvdiff = 'csv_restart_part2_append_out.csv'
+    prereq = restart_part1
+    cli_args = 'Outputs/csv/file_base=csv_restart_part2_append_out Outputs/csv/append_restart=true'
+  [../]
 []
