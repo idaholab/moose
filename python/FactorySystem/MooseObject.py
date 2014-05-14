@@ -2,12 +2,12 @@ from InputParameters import InputParameters
 
 # This is the base class from which all objects should inherit
 class MooseObject(object):
-  # Static Method
+
+  @staticmethod
   def validParams():
     params = InputParameters()
 
     return params
-  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
     self._name = name

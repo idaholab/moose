@@ -2,8 +2,6 @@
 
 import os, sys, re
 
-sys.path.append('.')
-sys.path.append('../../framework/scripts/TestHarness')
 import ParseGetPot, Factory
 from MooseObject import MooseObject
 from Warehouse import Warehouse
@@ -28,27 +26,6 @@ class Parser:
     if len(self.params_ignored):
       print "Warning detected during test specification parsing\n  File: " #+ os.path.join(test_dir, filename)
       print '       Ignored Parameter(s): ', self.params_ignored
-
-
-  def _parseNode(self, node):
-    if 'type' in node.params:
-      moose_type = node.params['type']
-
-      # Get the valid Params for this type
-      params = self.factory.validParams(moose_type)
-
-      # Extract the parameters from the Getpot node
-      self.extractParams(params, node)
-
-      # Build the object
-      moose_object = self.factory.create(moose_type, node.name, params)
-
-      # Put it in the warehouse
-      self.warehouse.addObject(moose_object)
-
-    # Loop over the section names and parse them
-    for child in node.children_list:
-      self._parseNode(node.children[child])
 
 
   def extractParams(self, params, getpot_node):
@@ -92,18 +69,23 @@ class Parser:
       print "Error detected during test specification parsing\n  File: " #+ os.path.join(test_dir, filename)
       print '       Required Missing Parameter(s): ', required_params_missing
 
+  # private:
+  def _parseNode(self, node):
+    if 'type' in node.params:
+      moose_type = node.params['type']
 
-if __name__ == '__main__':
-  factory = Factory.Factory()
-  warehouse = Warehouse()
+      # Get the valid Params for this type
+      params = self.factory.validParams(moose_type)
 
-  # For now we'll just use the Testers
-  factory.loadPlugins([os.path.abspath('../../framework/scripts')], '/TestHarness/testers', MooseObject)
+      # Extract the parameters from the Getpot node
+      self.extractParams(params, node)
 
-  parser = Parser(factory, warehouse)
-  parser.parse('tests')
+      # Build the object
+      moose_object = self.factory.create(moose_type, node.name, params)
 
-  for moose_object in warehouse.objects:
-    print moose_object.name()
-    moose_object.parameters().printParams()
-    print '\n\n\n\n'
+      # Put it in the warehouse
+      self.warehouse.addObject(moose_object)
+
+    # Loop over the section names and parse them
+    for child in node.children_list:
+      self._parseNode(node.children[child])

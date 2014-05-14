@@ -3,6 +3,7 @@ from InputParameters import InputParameters
 from MooseObject import MooseObject
 
 class Tester(MooseObject):
+
   @staticmethod
   def validParams():
     params = MooseObject.validParams()
