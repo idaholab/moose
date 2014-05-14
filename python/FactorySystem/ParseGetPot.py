@@ -30,6 +30,13 @@ class GPNode:
     for child in self.children_list:
       self.children[child].Print(prefix + self.name + '/')
 
+  def fullName(self):
+    if self.parent == None:
+      return self.name
+    else:
+      return self.parent.fullName() + '/' + self.name
+
+
 class ParseException(Exception):
   def __init__(self, expr, msg):
     self.expr = expr

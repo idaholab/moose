@@ -1,10 +1,12 @@
 from util import *
 from InputParameters import InputParameters
+from MooseObject import MooseObject
 
-class Tester(object):
-  # Static Method
-  def getValidParams():
-    params = InputParameters()
+class Tester(MooseObject):
+
+  @staticmethod
+  def validParams():
+    params = MooseObject.validParams()
 
     # Common Options
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
@@ -32,10 +34,18 @@ class Tester(object):
     params.addParam('tecplot',       ['ALL'], "A test that runs only if Tecplot is detected ('ALL', 'TRUE', 'FALSE')")
 
     return params
-  getValidParams = staticmethod(getValidParams)
 
   def __init__(self, name, params):
+    MooseObject.__init__(self, name, params)
     self.specs = params
+
+
+  def setValgrindMode(self, mode):
+    # Increase the alloted time for tests when running with the valgrind option
+    if mode == 'NORMAL':
+      self.specs['max_time'] = self.specs['max_time'] * 2
+    elif mode == 'NORMAL':
+      self.specs['max_time'] = self.specs['max_time'] * 4
 
 
   # Override this method to tell the harness whether or not this test should run.

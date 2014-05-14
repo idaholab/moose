@@ -9,12 +9,12 @@ class Factory:
     self.objects[name] = type
 
 
-  def getValidParams(self, type):
-    return self.objects[type].getValidParams()
+  def validParams(self, type):
+    return self.objects[type].validParams()
 
 
-  def create(self, type, params):
-    return self.objects[type]('object', params)
+  def create(self, type, name, params):
+    return self.objects[type](name, params)
 
 
   def getClassHierarchy(self, classes):
@@ -24,9 +24,9 @@ class Factory:
     return classes
 
 
-  def loadPlugins(self, base_dirs, plugin_path, module, factory):
+  def loadPlugins(self, base_dirs, plugin_path, module):
     for dir in base_dirs:
-      dir = dir + plugin_path
+      dir = os.path.join(dir, plugin_path)
       if not os.path.exists(dir):
         continue
 
@@ -47,7 +47,7 @@ class Factory:
     for name, object in self.objects.iteritems():
       print "  [./" + name + "]"
 
-      params = self.getValidParams(name)
+      params = self.validParams(name)
 
       for key in params.desc:
         required = 'No'
@@ -80,7 +80,7 @@ class Factory:
       print "    type:"
       print "    parameters:"
 
-      params = self.getValidParams(name)
+      params = self.validParams(name)
       for key in params.valid:
         required = 'No'
         if params.isRequired(key):

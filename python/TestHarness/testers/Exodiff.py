@@ -4,8 +4,9 @@ import os
 
 class Exodiff(RunApp):
 
-  def getValidParams():
-    params = RunApp.getValidParams()
+  @staticmethod
+  def validParams():
+    params = RunApp.validParams()
     params.addRequiredParam('exodiff',   [], "A list of files to exodiff.")
     params.addParam('exodiff_opts',      [], "Additional arguments to be passed to invocations of exodiff.")
     params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
@@ -16,7 +17,6 @@ class Exodiff(RunApp):
     params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
 
     return params
-  getValidParams = staticmethod(getValidParams)
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)
@@ -53,7 +53,7 @@ class Exodiff(RunApp):
         reason = 'MISSING GOLD FILE'
         break
       else:
-        command = moose_dir + 'contrib/exodiff/exodiff -m' + custom_cmp + ' -F' + ' ' + str(specs['abs_zero']) + old_floor + ' -t ' + str(specs['rel_err']) \
+        command = os.path.join(moose_dir, 'framework', 'contrib', 'exodiff', 'exodiff') + ' -m' + custom_cmp + ' -F' + ' ' + str(specs['abs_zero']) + old_floor + ' -t ' + str(specs['rel_err']) \
             + ' ' + ' '.join(specs['exodiff_opts']) + ' ' + os.path.join(specs['test_dir'], specs['gold_dir'], file) + ' ' + os.path.join(specs['test_dir'], file)
         exo_output = runCommand(command)
 
