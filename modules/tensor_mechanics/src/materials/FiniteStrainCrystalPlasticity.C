@@ -274,28 +274,21 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
     mooseError("Hardness Integration error \n");
   }
 
-
   _fp[_qp]=fp_inv.inverse();
   _pk2[_qp]=pk2;
   _stress[_qp]=sig;
 
-
-  rot=getmatrot(_dfgrd[_qp]);
-
+  rot = getmatrot(_dfgrd[_qp]);
   _update_rot[_qp]=rot*_crysrot[_qp];
-
-
 }
-
 
 void
 FiniteStrainCrystalPlasticity::get_euler_rot()
 {
-
   Real phi1, phi, phi2;
   Real cp, cp1, cp2, sp, sp1, sp2;
   RankTwoTensor RT;
-  Real pi = 4.0*atan(1.0);
+  Real pi = libMesh::pi;
 
   //  printf("get euler=%d %d %f %f %f\n",_current_elem->id(),_qp,_euler_angle_1,_euler_angle_2,_euler_angle_3);
 
@@ -303,13 +296,13 @@ FiniteStrainCrystalPlasticity::get_euler_rot()
   phi = _euler_angle_2 * (pi/180.0);
   phi2 = _euler_angle_3 * (pi/180.0);
 
-  cp1 = cos(phi1);
-  cp2 = cos(phi2);
-  cp = cos(phi);
+  cp1 = std::cos(phi1);
+  cp2 = std::cos(phi2);
+  cp = std::cos(phi);
 
-  sp1 = sin(phi1);
-  sp2 = sin(phi2);
-  sp = sin(phi);
+  sp1 = std::sin(phi1);
+  sp2 = std::sin(phi2);
+  sp = std::sin(phi);
 
   RT(0,0) = cp1 * cp2 - sp1 * sp2 * cp;
   RT(0,1) = sp1 * cp2 + cp1 * sp2 * cp;
@@ -323,15 +316,13 @@ FiniteStrainCrystalPlasticity::get_euler_rot()
 
   _crysrot[_qp]= RT.transpose();
   _crysrot_old[_qp]=_crysrot[_qp];
-
 }
-
 
 void
 FiniteStrainCrystalPlasticity::get_slip_sys()
 {
-
-  std::vector<Real> sd(3*_nss), sn(3*_nss);
+  unsigned int i, j;
+  Real sd[3*_nss], sn[3*_nss];
   Real vec[3];
   std::ifstream fileslipsys;
 
@@ -340,62 +331,50 @@ FiniteStrainCrystalPlasticity::get_slip_sys()
   if (!fileslipsys)
     mooseError("Can't open slip system input file ");
 
-  for (int i=0;i<_nss;i++)
+  for (i = 0; i < _nss; ++i)
   {
-    for (int j=0;j<3;j++)
+    for (j = 0; j < 3; ++j)
       fileslipsys >> vec[j];
 
     Real mag;
-    mag=pow(vec[0],2)+pow(vec[1],2)+pow(vec[2],2);
-    mag=pow(mag,0.5);
+    mag = std::pow(vec[0], 2.0) + std::pow(vec[1], 2.0) + std::pow(vec[2], 2.0);
+    mag = std::pow(mag, 0.5);
 
-    for (int j=0;j<3;j++)
-      sn[i*3+j]=vec[j]/mag;
-
-
+    for (j = 0; j < 3; ++j)
+      sn[i*3+j] = vec[j]/mag;
   }
 
-  for (int i=0;i<_nss;i++)
+  for (i = 0; i < _nss; ++i)
   {
-    for (int j=0;j<3;j++)
+    for (j = 0; j < 3; ++j)
       fileslipsys >> vec[j];
 
-
-
     Real mag;
-    mag=pow(vec[0],2)+pow(vec[1],2)+pow(vec[2],2);
-    mag=pow(mag,0.5);
+    mag = std::pow(vec[0], 2.0) + std::pow(vec[1], 2.0) + std::pow(vec[2], 2.0);
+    mag = std::pow(mag, 0.5);
 
-    for (int j=0;j<3;j++)
-      sd[i*3+j]=vec[j]/mag;
-
-
+    for (j = 0; j < 3; ++j)
+      sd[i*3+j] = vec[j] / mag;
   }
 
   fileslipsys.close();
 
-  for (int i=0;i<_nss;i++)
+  for (int i = 0; i < _nss; ++i)
   {
-
-    for (int j=0;j<3;j++)
+    for (int j = 0; j < 3; j++)
     {
-      _mo[i*3+j]=0.0;
-      for (int k=0;k<3;k++)
-        _mo[i*3+j]=_mo[i*3+j]+_crysrot[_qp](j,k)*sd[i*3+k];
-
+      _mo[i*3+j] = 0.0;
+      for (int k = 0; k < 3; ++k)
+        _mo[i*3+j] = _mo[i*3+j] + _crysrot[_qp](j,k) * sd[i*3+k];
     }
 
-    for (int j=0;j<3;j++)
+    for (int j = 0; j < 3; j++)
     {
-      _no[i*3+j]=0.0;
-      for (int k=0;k<3;k++)
-        _no[i*3+j]=_no[i*3+j]+_crysrot[_qp](j,k)*sn[i*3+k];
-
+      _no[i*3+j] = 0.0;
+      for (int k = 0; k < 3; k++)
+        _no[i*3+j] = _no[i*3+j] + _crysrot[_qp](j,k) * sn[i*3+k];
     }
-
   }
-
-
 }
 
 void

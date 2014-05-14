@@ -31,8 +31,7 @@ protected:
   RankFourTensor outerProduct(RankTwoTensor &a,RankTwoTensor &b);
   RankTwoTensor getmatrot(RankTwoTensor &a);
 
-
-  const int _nss;
+  const unsigned int _nss;
 
   std::vector<Real> _gprops;
   std::vector<Real> _hprops;
@@ -57,8 +56,6 @@ protected:
   Real _gtol;
   Real _slip_incr_tol;
 
-
-
   MaterialProperty<RankTwoTensor> & _fp;
   MaterialProperty<RankTwoTensor> & _fp_old;
   MaterialProperty<RankTwoTensor> & _pk2;
@@ -71,11 +68,6 @@ protected:
   MaterialProperty<RankTwoTensor> & _update_rot;
   MaterialProperty<RankTwoTensor> & _crysrot;
   MaterialProperty<RankTwoTensor> & _crysrot_old;
-
-
-
-private:
-
 };
 
 #endif //FINITESTRAINCRYSTALPLASTICITY_H
