@@ -3,10 +3,31 @@
   dim = 2
   nx = 10
   ny = 10
+  uniform_refine = 1
 []
 
 [Variables]
   [./u]
+  [../]
+[]
+
+[AuxVariables]
+  active = 'one two three'
+  [./one]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./two]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./three]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./four]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
