@@ -26,7 +26,7 @@ def buildStatus():
   tmp_apps = []
   tmp_passed = []
   # Open line itemed list of applications passing their tests
-  log_file = open('moose/framework/test_results.log', 'r')
+  log_file = open('moose/test_results.log', 'r')
   tmp_passed = string.split(log_file.read(), '\n')
   log_file.close()
   # Remove trailing \n element which creates an empty item
@@ -153,8 +153,9 @@ if __name__ == '__main__':
     runCMD(comment_syntax_cmd)
     runCMD(rsync_comment_syntax_cmd)
     arg_revision = process_args()
-    coverage_status = getCoverage()
-    if buildStatus() and coverage_status:
+#    coverage_status = getCoverage()
+#    if buildStatus() and coverage_status:
+    if buildStatus():
       # Checking out moose-stable
       checkout_moose_stable = [os.getenv('SVN_BIN'), 'co', '--quiet', moose_stable, 'moose-stable']
       runCMD(checkout_moose_stable)
