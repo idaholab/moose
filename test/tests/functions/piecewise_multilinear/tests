@@ -3,21 +3,25 @@
     type = 'RunException'
     input = 'except1.i'
     expect_err = "Error opening file 'except1.txt' from GriddedData."
+    max_parallel = 1
   [../]
   [./except2]
     type = 'RunException'
     input = 'except2.i'
     expect_err = "PiecewiseMultilinear needs monotonically-increasing axis data.  Axis 0 contains non-monotonicity at value -1"
+    max_parallel = 1
   [../]
   [./except3]
     type = 'RunException'
     input = 'except3.i'
     expect_err = "According to AXIS statements in GriddedData, number of data points is 2 but 3 function values were read from file"
+    max_parallel = 1
   [../]
   [./except4]
     type = 'RunException'
     input = 'except4.i'
     expect_err = "PiecewiseMultilinear needs the AXES to be independent.  Check the AXES lines in your data file."
+    max_parallel = 1
   [../]
 
   [./oneDa]
