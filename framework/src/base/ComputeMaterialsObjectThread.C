@@ -107,7 +107,6 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem *elem, unsigned int side
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
     const unsigned int elem_id = elem->id();
     const unsigned int neighbor_id = neighbor->id();
-    unsigned int neighbor_n_points = _assembly[_tid]->qRule()->n_points();
     if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
     {
       _assembly[_tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);
