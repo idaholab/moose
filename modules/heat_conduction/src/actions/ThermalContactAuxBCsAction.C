@@ -54,45 +54,56 @@ ThermalContactAuxBCsAction::act()
 
   params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
   if (isParamValid("tangential_tolerance"))
+  {
     params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
-
+  }
   if (isParamValid("normal_smoothing_distance"))
+  {
     params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
-
+  }
   if (isParamValid("normal_smoothing_method"))
+  {
     params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
-
+  }
   params.set<bool>("warnings") = getParam<bool>("warnings");
-  _problem->addAuxKernel(getParam<std::string>("gap_type"), "gap_value_" + Moose::stringify(n), params);
+  _problem->addAuxBoundaryCondition(getParam<std::string>("gap_type"),
+      "gap_value_" + Moose::stringify(n),
+      params);
 
   if (quadrature)
   {
     std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
     params.set<std::vector<BoundaryName> >("boundary") = bnds;
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
-    _problem->addAuxKernel(getParam<std::string>("gap_type"), "gap_value_master_" + Moose::stringify(n), params);
-
+    _problem->addAuxBoundaryCondition(getParam<std::string>("gap_type"),
+        "gap_value_master_" + Moose::stringify(n),
+        params);
   }
 
   params = _factory.getValidParams("PenetrationAux");
   std::string penetration_var_name = "penetration";
   if (quadrature)
+  {
     penetration_var_name = "qpoint_penetration";
-
+  }
   params.set<AuxVariableName>("variable") = penetration_var_name;
   params.set<std::vector<BoundaryName> >("boundary") = bnds;
   params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
-
   if (isParamValid("tangential_tolerance"))
+  {
     params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
-
+  }
   if (isParamValid("normal_smoothing_distance"))
+  {
     params.set<Real>("normal_smoothing_distance") = getParam<Real>("normal_smoothing_distance");
-
+  }
   if (isParamValid("normal_smoothing_method"))
+  {
     params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
-
-  _problem->addAuxKernel("PenetrationAux", "penetration_" + Moose::stringify(n), params);
+  }
+  _problem->addAuxBoundaryCondition("PenetrationAux",
+      "penetration_" + Moose::stringify(n),
+      params);
 
   ++n;
 }

@@ -78,25 +78,33 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
     }
   }
 
-  // The 'block' input parameter is undefined, if the object contains a variable, set the subdomain ids to those of the variable
-  else if (parameters.isParamValid("variable") &&
-           (parameters.have_parameter<NonlinearVariableName>("variable") || parameters.have_parameter<AuxVariableName>("variable")))
+  // The 'block' input parameter is undefined
+  else
+  {
+    // If the object contains a variable, set the subdomain ids to those of the variable
+    if (parameters.isParamValid("variable") &&
+        (parameters.have_parameter<NonlinearVariableName>("variable") ||
+         parameters.have_parameter<AuxVariableName>("variable")))
+    {
       _blk_ids = variableSubdomianIDs(parameters);
+    }
+  }
 
   // Produce error if the object is not allowed to be both block and boundary restrictable
-  if (!_blk_dual_restrictable && !_blk_ids.empty() && parameters.isParamValid("_boundary_ids"))
-  {
-    std::vector<BoundaryID> bnd_ids = parameters.get<std::vector<BoundaryID> >("_boundary_ids");
-    if (!bnd_ids.empty()
-        && std::find(bnd_ids.begin(), bnd_ids.end(), Moose::ANY_BOUNDARY_ID) != bnd_ids.end())
-      mooseError("Attempted to restrict the object '" << name << "' to a block, but the object is already restricted by boundary");
-  }
+  if (!_blk_dual_restrictable && !_blk_ids.empty())
+    if (parameters.isParamValid("_boundary_ids"))
+    {
+      std::vector<BoundaryID> bnd_ids = parameters.get<std::vector<BoundaryID> >("_boundary_ids");
+      if (!bnd_ids.empty()
+          && std::find(bnd_ids.begin(), bnd_ids.end(), Moose::ANY_BOUNDARY_ID) != bnd_ids.end())
+        mooseError("Attempted to restrict the object '" << name << "' to a block, but the object is already restricted by boundary");
+    }
 
   // If no blocks were defined above, specify that it is valid on all blocks
   if (_blk_ids.empty())
   {
     _blk_ids.insert(Moose::ANY_BLOCK_ID);
-    _blocks = std::vector<SubdomainName>(1, "ANY_BLOCK_ID");
+    _blocks = std::vector<SubdomainName>(1,"ANY_BLOCK_ID");
   }
 
   // Store the private parameter that contains the set of block ids

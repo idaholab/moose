@@ -63,7 +63,7 @@
   [../]
 []
 
-[AuxKernels]
+[AuxBCs]
 
   [./penetrate]
     type = PenetrationAux

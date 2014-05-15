@@ -34,13 +34,13 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("AddKernelAction", "Kernels/*", "add_kernel");
   syntax.registerActionSyntax("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
-  syntax.registerActionSyntax("AddKernelAction", "AuxBCs/*", "add_aux_bc");
   syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");
 
   syntax.registerActionSyntax("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
   syntax.registerActionSyntax("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
 
   syntax.registerActionSyntax("AddBCAction", "BCs/*", "add_bc");
+  syntax.registerActionSyntax("AddBCAction", "AuxBCs/*", "add_aux_bc");
 
   syntax.registerActionSyntax("CreateProblemAction", "Problem");
   syntax.registerActionSyntax("SetupMeshAction", "Mesh");

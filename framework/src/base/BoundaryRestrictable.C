@@ -42,8 +42,8 @@ BoundaryRestrictable::BoundaryRestrictable(const std::string name, InputParamete
     _boundary_names(parameters.get<std::vector<BoundaryName> >("boundary")),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
-    _boundary_restricted(false),
     _current_boundary_id(_bnd_feproblem == NULL ? _invalid_boundary_id : _bnd_feproblem->getCurrentBoundaryID())
+
 {
 
   // If the mesh pointer is not defined, but FEProblem is, get it from there
@@ -62,21 +62,20 @@ BoundaryRestrictable::BoundaryRestrictable(const std::string name, InputParamete
   }
 
   // Produce error if the object is not allowed to be both block and boundary restrictable
-  if (!_bnd_dual_restrictable && !_bnd_ids.empty() && parameters.isParamValid("_block_ids"))
-  {
-    std::vector<SubdomainID> blk_ids = parameters.get<std::vector<SubdomainID> >("_block_ids");
-    if (!blk_ids.empty() && blk_ids[0] != Moose::ANY_BLOCK_ID)
-      mooseError("Attempted to restrict the object '" << name << "' to a boundary, but the object is already restricted by block(s)");
-  }
+  if (!_bnd_dual_restrictable && !_bnd_ids.empty())
+    if (parameters.isParamValid("_block_ids"))
+    {
+       std::vector<SubdomainID> blk_ids = parameters.get<std::vector<SubdomainID> >("_block_ids");
+       if (!blk_ids.empty() && blk_ids[0] != Moose::ANY_BLOCK_ID)
+         mooseError("Attempted to restrict the object '" << name << "' to a boundary, but the object is already restricted by block(s)");
+    }
 
   // Store ANY_BOUNDARY_ID if empty
   if (_bnd_ids.empty())
   {
     _bnd_ids.insert(Moose::ANY_BOUNDARY_ID);
-    _boundary_names = std::vector<BoundaryName>(1, "ANY_BOUNDARY_ID");
+    _boundary_names = std::vector<BoundaryName>(1,"ANY_BOUNDARY_ID");
   }
-  else
-    _boundary_restricted = true;
 
   // Store the ids in the input parameters
   parameters.set<std::vector<BoundaryID> >("_boundary_ids") = std::vector<BoundaryID>(_bnd_ids.begin(), _bnd_ids.end());

@@ -75,18 +75,24 @@ ThermalContactMaterialsAction::act()
 
   params.set<Real>("gap_conductivity") = getParam<Real>("gap_conductivity");
   if (isParamValid("gap_conductivity_function"))
+  {
     params.set<FunctionName>("gap_conductivity_function") = getParam<FunctionName>("gap_conductivity_function");
-
+  }
   if (isParamValid("gap_conductivity_function_variable"))
+  {
     params.set<std::vector<VariableName> >("gap_conductivity_function_variable") = std::vector<VariableName>(1, getParam<VariableName>("gap_conductivity_function_variable"));
+  }
 
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
   params.set<std::vector<BoundaryName> >("boundary") = bnds;
+
   params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
 
   params.set<std::string>("conductivity_name") = getParam<std::string>("conductivity_name");
 
-  _problem->addMaterial(type, "gap_value_" + Moose::stringify(n), params);
+  _problem->addMaterial(type,
+    "gap_value_" + Moose::stringify(n),
+    params);
 
   if (quadrature)
   {
@@ -97,7 +103,9 @@ ThermalContactMaterialsAction::act()
 
     params.set<std::string>("conductivity_name") = getParam<std::string>("conductivity_master_name");
 
-    _problem->addMaterial(type, "gap_value_master_" + Moose::stringify(n), params);
+    _problem->addMaterial(type,
+      "gap_value_master_" + Moose::stringify(n),
+      params);
   }
 
   ++n;

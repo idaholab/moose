@@ -55,7 +55,7 @@
   [../]
 []
 
-[AuxKernels]
+[AuxBCs]
   [./penetrate]
     type = PenetrationAux
     variable = penetration

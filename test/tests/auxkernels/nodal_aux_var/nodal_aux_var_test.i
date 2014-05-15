@@ -47,6 +47,8 @@
 []
 
 [AuxKernels]
+  active = 'constant coupled'
+
   #Simple Aux Kernel
   [./constant]
     variable = one
@@ -61,14 +63,6 @@
     value = 2
     coupled = u
   [../]
-
-  [./five]
-    type = ConstantAux
-    variable = five
-    boundary = '1 2'
-    value = 5
-  [../]
-
 []
 
 [BCs]
@@ -86,6 +80,17 @@
     variable = u
     boundary = 2
     value = 1
+  [../]
+[]
+
+[AuxBCs]
+  active = 'five'
+
+  [./five]
+    type = ConstantAux
+    variable = five
+    boundary = '1 2'
+    value = 5
   [../]
 []
 

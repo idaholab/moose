@@ -36,7 +36,7 @@
   [../]
 []
 
-[AuxKernels]
+[AuxBCs]
   [./distance]
     type = PenetrationAux
     variable = gap_distance
