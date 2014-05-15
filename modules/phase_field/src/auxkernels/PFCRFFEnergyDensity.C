@@ -36,22 +36,21 @@ PFCRFFEnergyDensity::computeValue()
   Real coef = 1.0;
 
   for(unsigned int i = 2; i < (2+_num_exp_terms); i++)
-    {
-      if (i==2)
-	coef = _c;
-      else if (i==3)
-	coef = _a;
-      else if (i==4)
-	coef = _b;
-      else
-	coef = 1.0;
+  {
+    if (i==2)
+      coef = _c;
+    else if (i==3)
+      coef = _a;
+    else if (i==4)
+      coef = _b;
+    else
+      coef = 1.0;
 
-      val += coef*(pow(-1.0,i)/(i*(i - 1)))*pow((*_vals[0])[_qp],i);
-    }
-  
-  Real sumL;
+    val += coef*(pow(-1.0,i)/(i*(i - 1)))*pow((*_vals[0])[_qp],i);
+  }
 
   // Loop Through Variables
+  Real sumL = 0.0;
   for (unsigned int i = 1; i < _order; ++i)
     sumL += (*_vals[i])[_qp];
 
