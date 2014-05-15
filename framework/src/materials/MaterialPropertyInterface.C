@@ -16,7 +16,6 @@
 #include "FEProblem.h"
 
 MaterialPropertyInterface::MaterialPropertyInterface(InputParameters & parameters) :
-    _material_data(*parameters.get<MaterialData *>("_material_data")),
     _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _mi_block_ids(parameters.isParamValid("_block_ids") ?
                   parameters.get<std::vector<SubdomainID> >("_block_ids") : std::vector<SubdomainID>()),
@@ -25,6 +24,27 @@ MaterialPropertyInterface::MaterialPropertyInterface(InputParameters & parameter
     _stateful_allowed(true),
     _get_material_property_called(false)
 {
+  /* AuxKernels may be boundary or block restricted; however, they are built by the same action and task, add_aux_kernel.
+     The type of material data that should be stored in the interface is not known until the object is constructed. Thus,
+     the private parameter, '_material_data', cannot be set prior to the object creation. To enable the proper
+     construction of AuxKernels a secondary, construction time method for setting the _material_data pointer in this interface
+     exists. */
+
+  // If the _material_data parameter exists, use it
+  if (parameters.isParamValid("_material_data"))
+    _material_data = parameters.get<MaterialData *>("_material_data");
+
+  // If the _material_data parameter does not exist, figure it out based on the _block_ids and _boundary_ids parameters
+  else
+  {
+    THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
+
+    // Utilize boundary material if (1) _mi_boundary_ids is not empty and (2) it does not contain ANY_BOUNDARY_ID
+    if (!_mi_boundary_ids.empty() && std::find(_mi_boundary_ids.begin(), _mi_boundary_ids.end(), Moose::ANY_BOUNDARY_ID) == _mi_boundary_ids.end())
+      _material_data = _mi_feproblem.getBoundaryMaterialData(tid);
+    else
+      _material_data = _mi_feproblem.getMaterialData(tid);
+  }
 }
 
 std::set<SubdomainID>

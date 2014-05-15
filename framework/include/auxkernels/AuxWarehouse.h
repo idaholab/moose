@@ -60,13 +60,6 @@ public:
   const std::vector<AuxScalarKernel *> & scalars() { return _scalar_kernels; }
 
   /**
-   * Adds a boundary condition aux kernel
-   * @param boundary_id Boundary ID this kernel works on
-   * @param aux BC kernel being added
-   */
-  void addActiveBC(AuxKernel *aux);
-
-  /**
    * Adds an auxiliary kernel
    * @param aux Kernel being added
    * @param block_ids Set of subdomain this kernel is active on
