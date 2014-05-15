@@ -131,7 +131,7 @@ public:
    * Indicated whether this system needs material properties on boundaries.
    * @return Boolean if IntegratedBCs are active
    */
-  bool needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid);
+  bool needMaterialOnSide(BoundaryID bnd_id);
 
 protected:
   void computeScalarVars(std::vector<AuxWarehouse> & auxs);

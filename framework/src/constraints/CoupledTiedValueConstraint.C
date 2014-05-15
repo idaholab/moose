@@ -86,8 +86,6 @@ CoupledTiedValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType type
 Real
 CoupledTiedValueConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned int jvar)
 {
-  Real scaling_factor = _var.scalingFactor();
-  Real slave_jac = 0;
   Real retVal = 0;
 
   if (jvar == _master_var_num)

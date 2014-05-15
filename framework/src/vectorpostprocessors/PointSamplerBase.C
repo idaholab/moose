@@ -93,7 +93,7 @@ PointSamplerBase::threadJoin(const UserObject & y)
 
 
 const Elem *
-PointSamplerBase::getLocalElemContainingPoint(const Point & p, unsigned int id)
+PointSamplerBase::getLocalElemContainingPoint(const Point & p, unsigned int /*id*/)
 {
   const Elem * elem = (*_pl)(p);
 

@@ -3906,7 +3906,7 @@ FEProblem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
   {
     _bnd_mat_side_cache[tid][bnd_id] = false;
 
-    if (_nl.needMaterialOnSide(bnd_id, tid) || _aux.needMaterialOnSide(bnd_id, tid))
+    if (_nl.needMaterialOnSide(bnd_id, tid) || _aux.needMaterialOnSide(bnd_id))
       _bnd_mat_side_cache[tid][bnd_id] = true;
     else
     {

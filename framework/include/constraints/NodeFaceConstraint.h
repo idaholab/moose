@@ -91,7 +91,7 @@ public:
   /**
    * This is the virtual that derived classes should override for computing the off-diag Jacobian.
    */
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned int jvar) { return 0; };
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/, unsigned int /*jvar*/) { return 0; }
 
   /**
    * Whether or not this constraint should be applied.
