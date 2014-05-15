@@ -422,7 +422,7 @@ AuxiliarySystem::getMinQuadratureOrder()
 }
 
 bool
-AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
+AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id)
 {
   for (unsigned int i=0; i < Moose::exec_types.size(); ++i)
     if (!_auxs(Moose::exec_types[i])[0].activeBCs(bnd_id).empty() ||

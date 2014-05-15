@@ -2264,7 +2264,7 @@ NonlinearSystem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 }
 
 bool
-NonlinearSystem::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid) const
+NonlinearSystem::needMaterialOnSide(SubdomainID /*subdomain_id*/, THREAD_ID /*tid*/) const
 {
   return _doing_dg;
 }

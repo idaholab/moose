@@ -84,7 +84,7 @@ PointSamplerBase::finalize()
 }
 
 void
-PointSamplerBase::threadJoin(const UserObject & y)
+PointSamplerBase::threadJoin(const SamplerBase & y)
 {
   const PointSamplerBase & vpp = static_cast<const PointSamplerBase &>(y);
 
@@ -93,7 +93,7 @@ PointSamplerBase::threadJoin(const UserObject & y)
 
 
 const Elem *
-PointSamplerBase::getLocalElemContainingPoint(const Point & p, unsigned int id)
+PointSamplerBase::getLocalElemContainingPoint(const Point & p, unsigned int /*id*/)
 {
   const Elem * elem = (*_pl)(p);
 
