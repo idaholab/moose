@@ -39,7 +39,7 @@ public:
   virtual void execute();
   virtual void finalize();
 
-  virtual void threadJoin(const UserObject & y);
+  virtual void threadJoin(const SamplerBase & y);
 
 protected:
 

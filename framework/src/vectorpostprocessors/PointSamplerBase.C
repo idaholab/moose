@@ -84,7 +84,7 @@ PointSamplerBase::finalize()
 }
 
 void
-PointSamplerBase::threadJoin(const UserObject & y)
+PointSamplerBase::threadJoin(const SamplerBase & y)
 {
   const PointSamplerBase & vpp = static_cast<const PointSamplerBase &>(y);
 

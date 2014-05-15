@@ -37,6 +37,11 @@ public:
   virtual void execute();
   virtual void finalize();
 
+  // Let the SamplerBase version of threadJoin() take part in the
+  // overload resolution process, otherwise we get warnings about
+  // overloaded virtual functions and "hiding" in debug mode.
+  using SamplerBase::threadJoin;
+
   virtual void threadJoin(const UserObject & y);
 
 protected:
