@@ -56,8 +56,6 @@ ContactPenetrationAuxAction::act()
     name << short_name;
     name << "_contact_";
     name << counter++;
-    _problem->addAuxBoundaryCondition("PenetrationAux",
-                                      name.str(),
-                                      params);
+    _problem->addAuxKernel("PenetrationAux", name.str(), params);
   }
 }

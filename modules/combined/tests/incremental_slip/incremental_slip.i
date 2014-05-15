@@ -80,7 +80,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./inc_slip_x]
     type = PenetrationAux
     variable = inc_slip_x

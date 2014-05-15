@@ -32,8 +32,5 @@ AddBCAction::AddBCAction(const std::string & name, InputParameters params) :
 void
 AddBCAction::act()
 {
-  if (_current_action == "add_bc")
-    _problem->addBoundaryCondition(_type, getShortName(), _moose_object_pars);
-  else
-    _problem->addAuxBoundaryCondition(_type, getShortName(), _moose_object_pars);
+  _problem->addBoundaryCondition(_type, getShortName(), _moose_object_pars);
 }

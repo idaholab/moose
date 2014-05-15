@@ -17,7 +17,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./real_property]
     type = MaterialRealAux
     variable = real_property
