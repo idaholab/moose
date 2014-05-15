@@ -83,10 +83,10 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(ContactAction, "add_dg_kernel");
 
-  registerAction(ContactPenetrationAuxAction, "add_aux_bc");
+  registerAction(ContactPenetrationAuxAction, "add_aux_kernel");
   registerAction(ContactPenetrationVarAction, "add_aux_variable");
 
-  registerAction(ContactPressureAuxAction, "add_aux_bc");
+  registerAction(ContactPressureAuxAction, "add_aux_kernel");
   registerAction(ContactPressureVarAction, "add_aux_variable");
 
   registerAction(NodalAreaAction, "add_user_object");

@@ -45,7 +45,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./penetrate]
     type = PenetrationAux
     variable = distance

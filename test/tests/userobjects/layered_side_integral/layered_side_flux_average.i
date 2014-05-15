@@ -47,7 +47,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./lsfa]
     type = SpatialUserObjectAux
     variable = layered_side_flux_average

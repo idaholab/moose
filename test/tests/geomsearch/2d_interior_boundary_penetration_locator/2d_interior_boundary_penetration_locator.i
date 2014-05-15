@@ -38,7 +38,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./penetration]
     type = PenetrationAux
     variable = gap_distance
@@ -71,4 +71,3 @@
     linear_residuals = true
   [../]
 []
-
