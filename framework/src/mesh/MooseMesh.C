@@ -590,16 +590,14 @@ MooseMesh::buildBndElemList()
   std::vector<unsigned int> elems;
   std::vector<unsigned short int> sides;
   std::vector<boundary_id_type> ids;
-  getMesh().boundary_info->build_side_list(elems, sides, ids);
+  getMesh().boundary_info->build_active_side_list(elems, sides, ids);
 
   int n = elems.size();
-  _bnd_elems.clear();
+  _bnd_elems.resize(n);
   for (int i = 0; i < n; i++)
   {
-    std::vector<const Elem *> active_family;
-    getMesh().elem(elems[i])->active_family_tree_by_side(active_family, sides[i]);
-    for (std::vector<const Elem *>::iterator it = active_family.begin(); it != active_family.end(); ++it)
-      _bnd_elems.push_back(new BndElement(const_cast<Elem *>(*it), sides[i], ids[i]));
+    _bnd_elems[i] = new BndElement(getMesh().elem(elems[i]), sides[i], ids[i]);
+    _bnd_elem_ids[ids[i]].insert(elems[i]);
   }
 }
 
