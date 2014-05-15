@@ -333,7 +333,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     //  Adjust maximum chi value to ensure it falls within the SST (cubic materials only)
     if (sym == 43)
     {
-      chi_max2 = std::acos (std::sqrt (1 / (2 + (std::tan (std::pow(eta, 2))))));
+      chi_max2 = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(std::pow(eta, 2))))));
     }
     else
     {
@@ -369,7 +369,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     }
 
     //  Convert RGB tuple to scalar and return integer value
-    RGBint = (round(RGB[0] * 255) * std::pow( 256.0, 2)) + (MathUtils::round(RGB[1] * 255) * 256) + MathUtils::round(RGB[2] *255);
+    RGBint = (MathUtils::round(RGB[0] * 255) * std::pow( 256.0, 2)) + (MathUtils::round(RGB[1] * 255) * 256) + MathUtils::round(RGB[2] *255);
   }
   return RGBint;
 }
