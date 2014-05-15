@@ -51,6 +51,15 @@
   [../]
 []
 
+[AuxBCs]
+  [./penetration]
+    type = PenetrationAux
+    variable = penetration
+    boundary = 3
+    paired_boundary = 2
+  [../]
+[]
+
 [AuxKernels]
   [./zeroslip_x]
     type = ConstantAux
@@ -77,12 +86,6 @@
     variable = accum_slip_y
     accumulate_from_variable = inc_slip_y
     execute_on = timestep
-  [../]
-  [./penetration]
-    type = PenetrationAux
-    variable = penetration
-    boundary = 3
-    paired_boundary = 2
   [../]
 []
 

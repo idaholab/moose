@@ -73,7 +73,8 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 
     _var(_aux_sys.getVariable(_tid, parameters.get<AuxVariableName>("variable"))),
     _nodal(_var.isNodal()),
-    _bnd(boundaryRestricted()),
+
+    _bnd(parameters.get<bool>("_on_boundary")),
 
     _mesh(_subproblem.mesh()),
 
@@ -96,6 +97,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
 
     _solution(_aux_sys.solution())
 {
+
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
   std::map<std::string, std::vector<MooseVariable *> > coupled_vars = getCoupledVars();

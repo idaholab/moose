@@ -40,7 +40,7 @@
   [../]
 []
 
-[AuxKernels]
+[AuxBCs]
   [./gap_value_aux]
     type = GapValueAux
     variable = gap_value

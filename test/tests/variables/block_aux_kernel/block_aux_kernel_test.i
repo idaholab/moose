@@ -83,6 +83,11 @@
     function = t
     block = 1
   [../]
+[]
+
+[AuxBCs]
+  active = 'gap_distance gap_distance2'
+
   [./gap_distance]
     type = NearestNodeDistanceAux
     variable = distance

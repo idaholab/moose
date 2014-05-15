@@ -102,7 +102,7 @@
   [../]
 []
 
-[AuxKernels]
+[AuxBCs]
   [./conductance]
     type = MaterialRealAux
     property = gap_conductance

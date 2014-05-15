@@ -73,6 +73,13 @@ public:
    * @param parameters Kernel parameters
    */
   void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  /**
+   * Adds an auxiliary boundary condition
+   * @param bc_name The type of the BC
+   * @param name The name of the BC
+   * @param parameters Parameters of the BC
+   */
+  void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid);
   virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);

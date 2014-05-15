@@ -61,14 +61,20 @@ ContactPressureAuxAction::act()
     name << counter++;
 
     params.set<MooseEnum>("execute_on") = "jacobian";
-    _problem->addAuxKernel("ContactPressureAux", name.str(), params);
+    _problem->addAuxBoundaryCondition("ContactPressureAux",
+                                      name.str(),
+                                      params);
 
     params.set<MooseEnum>("execute_on") = "timestep";
     name << "_timestep";
-    _problem->addAuxKernel("ContactPressureAux", name.str(), params);
+    _problem->addAuxBoundaryCondition("ContactPressureAux",
+                                      name.str(),
+                                      params);
 
     params.set<MooseEnum>("execute_on") = "timestep_begin";
     name << "_timestep_begin";
-    _problem->addAuxKernel("ContactPressureAux", name.str(), params);
+    _problem->addAuxBoundaryCondition("ContactPressureAux",
+                                      name.str(),
+                                      params);
   }
 }

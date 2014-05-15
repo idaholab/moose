@@ -55,11 +55,7 @@
   [../]
 []
 
-[AuxKernels]
-  [./pid]
-    type = ProcessorIDAux
-    variable = pid
-  [../]
+[AuxBCs]
   [./status]
     type = PenetrationAux
     quantity = mechanical_status
@@ -67,6 +63,13 @@
     boundary = 3
     paired_boundary = 2
     execute_on = timestep
+  [../]
+[]
+
+[AuxKernels]
+  [./pid]
+    type = ProcessorIDAux
+    variable = pid
   [../]
 []
 

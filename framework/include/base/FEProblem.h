@@ -332,6 +332,7 @@ public:
   void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
   void addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addAuxScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  void addAuxBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
   AuxiliarySystem & getAuxiliarySystem() { return _aux; }
 

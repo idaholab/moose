@@ -48,7 +48,7 @@ public:
   virtual ~MaterialOutputAction();
 
   /**
-   * Performs the task of adding a AuxVariable and AuxKernel for outputting material properties
+   * Performs the task of adding a AuxVarialbe and AuxKernel for outputting material properites
    */
   virtual void act();
 
@@ -78,7 +78,7 @@ private:
   /**
    * A method for creating an AuxVariable and associated action
    * @param type The action type to create
-   * @param property_name The property name to associated with that action
+   * @param property_name The property name to associated with that actoin
    * @param variable_name The AuxVariable name to create
    * @param material A pointer to the Material object containing the property of interest
    */
@@ -97,12 +97,10 @@ private:
   /// Set of variable names for boundary
   std::set<AuxVariableName> _variable_names;
 
-  /// List of variables for the current Material object
   std::set<AuxVariableName> _material_variable_names;
 
   /// Reference to the OutputWarehouse
   OutputWarehouse & _output_warehouse;
-
 };
 
 template<typename T>
