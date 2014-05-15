@@ -36,6 +36,45 @@ class GPNode:
     else:
       return self.parent.fullName() + '/' + self.name
 
+  ##
+  # Write the node and children in format suitable for writing to .i file
+  # @param level The indentation level
+  # @see writeInputFile
+  # @return A list containing the lines in input file syntax
+  def write(self, level = 0):
+
+    # List to be returned
+    output = []
+
+    # Write the block headings
+    if level == 1:
+       output.append('[' + self.name + ']')
+    elif level > 1:
+      output.append(' '*2*level + '[./' + self.name + ']')
+
+    # Write block level comments
+    for comment in self.comments:
+      output.append(' '*2*(level + 1) + '# ' + comment)
+
+    # Write the parameters and associated comments
+    for param in self.params_list:
+      comment = ''
+      if param in self.param_comments:
+        comment = '# ' + self.param_comments[param]
+      output.append(' '*2*(level + 1) + param + " = " + str(self.params[param]) + ' ' + comment)
+
+    # Write the children
+    for child in self.children_list:
+      output += self.children[child].write(level + 1)
+
+    # Write the block closing
+    if level == 1:
+      output.append('[]\n')
+    elif level > 1:
+      output.append(' '*2*level + '[../]')
+
+    # Return the data
+    return output
 
 class ParseException(Exception):
   def __init__(self, expr, msg):
@@ -155,6 +194,19 @@ def readInputFile(file_name):
 #  pgp.root_node.Print()
   return pgp.root_node
 
+## Write an input file from the root node
+# @param root The root node
+# @param file_name The file name to write
+def writeInputFile(root, file_name):
+
+  # Build the output list
+  output = root.write()
+
+  # Write the list to a file
+  fid = open(file_name, 'w')
+  for item in output:
+    fid.write(item + '\n')
+  fid.close()
 
 if __name__ == '__main__':
   pgp = ParseGetPot('2d_diffusion_test.i')
