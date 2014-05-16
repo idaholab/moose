@@ -27,7 +27,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   active = 'penetrate'
 
   [./penetrate]

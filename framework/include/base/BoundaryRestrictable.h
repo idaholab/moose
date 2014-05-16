@@ -148,6 +148,11 @@ public:
   template<typename T>
   bool hasBoundaryMaterialProperty(const std::string & name) const;
 
+  bool boundaryRestricted()
+    {
+      return _boundary_restricted;
+    }
+
 private:
 
   /// Pointer to FEProblem
@@ -167,6 +172,8 @@ private:
 
   /// Invalid BoundaryID for case when FEProblem
   const BoundaryID _invalid_boundary_id;
+
+  bool _boundary_restricted;
 
 protected:
 

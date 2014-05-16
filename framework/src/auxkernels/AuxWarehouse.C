@@ -72,28 +72,6 @@ AuxWarehouse::jacobianSetup()
 }
 
 void
-AuxWarehouse::addActiveBC(AuxKernel *aux)
-{
-  // Make certain that the AuxKernel is valid
-  mooseAssert(aux, "Auxkernel is NULL");
-
-  // Add the pointer to the complete and the nodal or elemental lists
-  _all_aux_kernels.push_back(aux);
-  if (!aux->isNodal())
-    _all_elem_bcs.push_back(aux);
-
-  // Populate the elemental and nodal boundary restricted maps
-  const std::set<BoundaryID> & boundary_ids = aux->boundaryIDs();
-  for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-  {
-    if (aux->isNodal())
-      _active_nodal_bcs[*it].push_back(aux);
-    else
-      _elem_bcs[*it].push_back(aux);
-  }
-}
-
-void
 AuxWarehouse::addAuxKernel(AuxKernel * aux)
 {
   // Make certain that the AuxKernel is valid
@@ -101,21 +79,45 @@ AuxWarehouse::addAuxKernel(AuxKernel * aux)
 
   // Add the pointer to the complete and the nodal or elemental lists
   _all_aux_kernels.push_back(aux);
-  if (aux->isNodal())
-    _all_nodal_aux_kernels.push_back(aux);
-  else
-    _all_element_aux_kernels.push_back(aux);
 
-  // Get the SubdomainIDs for this object
-  const std::set<SubdomainID> & block_ids(aux->hasBlocks(Moose::ANY_BLOCK_ID) ? aux->meshBlockIDs() : aux->blockIDs()) ;
-
-  // Populate the elemental and nodal block restricted maps
-  for (std::set<SubdomainID>::const_iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+  // Boundary restricted
+  if (aux->boundaryRestricted())
   {
+    // Add to elemental boundary storage
+    if (!aux->isNodal())
+      _all_elem_bcs.push_back(aux);
+
+    // Populate the elemental and nodal boundary restricted maps
+    const std::set<BoundaryID> & boundary_ids = aux->boundaryIDs();
+    for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+    {
+      if (aux->isNodal())
+        _active_nodal_bcs[*it].push_back(aux);
+      else
+        _elem_bcs[*it].push_back(aux);
+    }
+  }
+
+  // Block restricted
+  else
+  {
+    // Add to elemental/nodal storage
     if (aux->isNodal())
-      _active_block_nodal_aux_kernels[*it].push_back(aux);
+      _all_nodal_aux_kernels.push_back(aux);
     else
-      _active_block_element_aux_kernels[*it].push_back(aux);
+      _all_element_aux_kernels.push_back(aux);
+
+    // Get the SubdomainIDs for this object
+    const std::set<SubdomainID> & block_ids(aux->hasBlocks(Moose::ANY_BLOCK_ID) ? aux->meshBlockIDs() : aux->blockIDs()) ;
+
+    // Populate the elemental and nodal block restricted maps
+    for (std::set<SubdomainID>::const_iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+    {
+      if (aux->isNodal())
+        _active_block_nodal_aux_kernels[*it].push_back(aux);
+      else
+        _active_block_element_aux_kernels[*it].push_back(aux);
+    }
   }
 }
 

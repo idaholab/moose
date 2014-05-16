@@ -673,9 +673,9 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_function",                 Function,               false);
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
-  registerMooseObjectTask("add_aux_bc",                   AuxKernel,              false);
   registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
   registerMooseObjectTask("add_coupled_variable",         AuxKernel,              false);
+  registerMooseObjectTask("add_aux_bc",                   AuxKernel,              false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
@@ -809,7 +809,7 @@ addActionTypes(Syntax & syntax)
 "(add_vector_postprocessor)"
 "(setup_pps_complete)"
 "(setup_debug)"
-"(add_aux_bc, add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, add_output)"
+"(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, add_output)"
 "(perf_log_output, check_material_output)"
 "(check_integrity)"
 );
@@ -891,13 +891,13 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(AddKernelAction, "add_kernel");
   registerAction(AddKernelAction, "add_aux_kernel");
+  registerAction(AddKernelAction, "add_aux_bc");
   registerAction(AddScalarKernelAction, "add_scalar_kernel");
   registerAction(AddScalarKernelAction, "add_aux_scalar_kernel");
   registerAction(AddDGKernelAction, "add_dg_kernel");
   registerAction(AddBCAction, "add_bc");
   registerAction(EmptyAction, "no_action");  // placeholder
   registerAction(AddPeriodicBCAction, "add_periodic_bc");
-  registerAction(AddBCAction, "add_aux_bc");
   registerAction(AddMaterialAction, "add_material");
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddVectorPostprocessorAction, "add_vector_postprocessor");

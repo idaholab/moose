@@ -23,7 +23,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./distance]
     type = NearestNodeDistanceAux
     variable = distance

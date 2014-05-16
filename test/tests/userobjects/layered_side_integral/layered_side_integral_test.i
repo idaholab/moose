@@ -47,7 +47,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./liaux]
     type = SpatialUserObjectAux
     variable = layered_integral
