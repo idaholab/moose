@@ -212,7 +212,7 @@ public:
    * and rebuilds caches.  Sets a flag so that clients of the
    * MooseMesh also know when it has changed.
    */
-  void meshChanged();
+  virtual void meshChanged();
 
   /**
    * Cache information about what elements were refined and coarsened in the previous step.
