@@ -33,6 +33,9 @@ InputParameters validParams<GapConductance>()
   // Common
   params.addParam<Real>("min_gap", 1e-6, "A minimum gap size");
   params.addParam<Real>("max_gap", 1e6, "A maximum gap size");
+  params.addParam<bool>("cylindrical_gap", false, "Use cylindrical wall heat flux");
+  params.addParam<Real>("min_denom", 1e-6, "A minimum value for r*(r2/r1) term in cylindrical wall heat flux");
+  params.addParam<Real>("max_denom", 1e6, "A maximum value for r*(r2/r1) term in cylindrical wall heat flux");
 
   params.addParam<Real>("stefan_boltzmann", 5.669e-8, "The Stefan-Boltzmann constant");
   params.addParam<Real>("emissivity_1", 0.0, "The emissivity of the fuel surface");
@@ -50,6 +53,9 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
    _quadrature(getParam<bool>("quadrature")),
    _gap_temp(0),
    _gap_distance(88888),
+   _radius(0),
+   _r1(0),
+   _r2(0),
    _has_info(false),
    _gap_distance_value(_quadrature ? _zero : coupledValue("gap_distance")),
    _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
@@ -63,6 +69,9 @@ GapConductance::GapConductance(const std::string & name, InputParameters paramet
                 1/getParam<Real>("emissivity_1") + 1/getParam<Real>("emissivity_2") - 1 : 0 ),
    _min_gap(getParam<Real>("min_gap")),
    _max_gap(getParam<Real>("max_gap")),
+   _cylindrical_gap(getParam<bool>("cylindrical_gap")),
+   _min_denom(getParam<Real>("min_denom")),
+   _max_denom(getParam<Real>("max_denom")),
    _temp_var(_quadrature ? getVar("variable",0) : NULL),
    _penetration_locator(NULL),
    _serialized_solution(_quadrature ? &_temp_var->sys().currentSolution() : NULL),
@@ -110,7 +119,10 @@ GapConductance::computeQpConductance()
 Real
 GapConductance::h_conduction()
 {
-  return gapK()/gapLength(-(_gap_distance), _min_gap, _max_gap);
+  if (_cylindrical_gap)
+    return gapK()/gapCyl(_radius, _r1, _r2, _min_denom, _max_denom);
+  else
+    return gapK()/gapLength(-(_gap_distance), _min_gap, _max_gap);
 }
 
 
@@ -177,6 +189,25 @@ GapConductance::gapLength(Real distance, Real min_gap, Real max_gap)
   return gap_L;
 }
 
+Real
+GapConductance::gapCyl(Real radius, Real r1, Real r2, Real min_denom, Real max_denom)
+{
+  Real denominator = radius*std::log(r2/r1);
+
+  if (denominator > max_denom)
+  {
+    mooseWarning("Gap size larger than specified limiting value.  Using default limiting max_denom instead of r*ln(r2/r1).");
+    denominator = max_denom;
+  }
+  else if (denominator < min_denom)
+  {
+    mooseWarning("Gap size smaller than specified limiting value.  Using default limiting min_denom instead of r*ln(r2/r1).");
+    denominator =  min_denom;
+  }
+
+  return denominator;
+}
+
 
 Real
 GapConductance::gapK()
@@ -200,12 +231,29 @@ GapConductance::gapK()
 void
 GapConductance::computeGapValues()
 {
+  if (_cylindrical_gap)
+  {
+    if (_normals[_qp](0) > 0)
+    {
+      _r1 = _q_point[_qp](0);
+      _r2 = _q_point[_qp](0) - _gap_distance; // note, _gap_distance is negative
+      _radius = _r1;
+    }
+    if (_normals[_qp](0) < 0)
+    {
+      _r1 = _q_point[_qp](0) + _gap_distance;
+      _r2 = _q_point[_qp](0);
+      _radius = _r2;
+    }
+    if (_normals[_qp](0) == 0)
+      mooseError( "Issue with cylindrical flux calc. normals. \n");
+  }
+
   if (!_quadrature)
   {
     _has_info = true;
     _gap_temp = _gap_temp_value[_qp];
     _gap_distance = _gap_distance_value[_qp];
-    return;
   }
   else
   {
