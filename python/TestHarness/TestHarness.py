@@ -2,6 +2,7 @@ import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil, time,
 import path_tool
 
 path_tool.activate_module('FactorySystem')
+path_tool.activate_module('argparse')
 
 import ParseGetPot
 from socket import gethostname
