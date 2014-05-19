@@ -47,6 +47,13 @@ public:
   }
 
   /**
+   * Allow the base class' getConnectedDofIndices() function to
+   * participate in overload resolution otherwise we get warnings
+   * about overloaded virtual functions and "hiding" in debug mode.
+   */
+  using NodeFaceConstraint::getConnectedDofIndices;
+
+  /**
    * Gets the indices for all dofs conected to the constraint
    * Get indices for all the slave Jacobian columns, not only those based on the mesh connectivity.
    */
