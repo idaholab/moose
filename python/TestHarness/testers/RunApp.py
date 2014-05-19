@@ -37,8 +37,10 @@ class RunApp(Tester):
     Tester.__init__(self, name, params)
     if os.environ.has_key("MOOSE_MPI_COMMAND"):
       self.mpi_command = os.environ['MOOSE_MPI_COMMAND']
+      self.force_mpi = True
     else:
       self.mpi_command = 'mpiexec -host localhost'
+      self.force_mpi = False
 
 
   def checkRunnable(self, options):
@@ -84,7 +86,7 @@ class RunApp(Tester):
       self.specs['caveats'] = ['min_cpus=' + str(ncpus)]
     elif ncpus < default_ncpus:
       self.specs['caveats'] = ['max_cpus=' + str(ncpus)]
-    if options.parallel or ncpus > 1 or nthreads > 1:
+    if self.force_mpi or options.parallel or ncpus > 1 or nthreads > 1:
       command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(specs['cli_args'])
     elif options.valgrind_mode == specs['valgrind'] or options.valgrind_mode == 'HEAVY' and specs[VALGRIND] == 'NORMAL':
       command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
