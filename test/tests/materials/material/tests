@@ -52,4 +52,11 @@
     exodiff = 'out.e'
     scale_refine = 3
   [../]
+  [./with_check_test]
+    type = 'Exodiff'
+    input = 'material_check_test.i'
+    exodiff = 'out.e'
+    scale_refine = 3
+    prereq = 'test'
+  [../]
 []

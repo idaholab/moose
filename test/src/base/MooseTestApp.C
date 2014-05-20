@@ -67,6 +67,7 @@
 #include "UniqueIDAux.h"
 #include "RandomAux.h"
 #include "PostprocessorAux.h"
+#include "MaterialRealAuxCheck.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -275,6 +276,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(UniqueIDAux);
   registerAux(RandomAux);
   registerAux(PostprocessorAux);
+  registerAux(MaterialRealAuxCheck);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
