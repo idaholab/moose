@@ -131,7 +131,7 @@ DiracKernel::addPoint(Point p, unsigned id)
   if (id != libMesh::invalid_uint)
   {
     // OK, the user gave us an ID, let's see if we already have it...
-    std::map<unsigned, std::pair<const Elem*, Point> >::iterator it = _point_cache.find(id);
+    point_cache_t::iterator it = _point_cache.find(id);
 
     if (it != _point_cache.end())
     {
@@ -141,10 +141,70 @@ DiracKernel::addPoint(Point p, unsigned id)
 
       if (cached_point.relative_fuzzy_equals(p))
       {
-        // use cached data and call the other addPoint() method
+        // Find the cached element associated to this point
         const Elem * cached_elem = (it->second).first;
-        addPoint(cached_elem, p, id);
-        return cached_elem;
+
+        bool active = cached_elem->active();
+        bool contains_point = cached_elem->contains_point(p);
+
+        // If the cached Elem is active and the point is still
+        // contained in it, call the other addPoint() method and
+        // return its result.
+        if (active && contains_point)
+        {
+          addPoint(cached_elem, p, id);
+          return cached_elem;
+        }
+
+        // Is the Elem not active (been refined) but still contains the point?
+        // Then search in its active children and update the caches.
+        else if (!active && contains_point)
+        {
+          // Get the list of active children
+          std::vector<const Elem*> active_children;
+          cached_elem->active_family_tree(active_children);
+
+          // Linear search through active children for the one that contains p
+          for (unsigned c=0; c<active_children.size(); ++c)
+            if (active_children[c]->contains_point(p))
+            {
+              updateCaches(cached_elem, active_children[c], p, id);
+              addPoint(active_children[c], p, id);
+              return active_children[c];
+            }
+
+          // If we got here without returning, it means the Point was
+          // found in the parent element, but not in any of the active
+          // children... this is not possible under normal
+          // circumstances, so something must have gone seriously
+          // wrong!
+          mooseError("Error, Point not found in any of the active children!");
+        }
+
+        else if (
+          // Is the Elem active but the point is not contained in it any
+          // longer?  (For example, did the Mesh move out from under
+          // it?)  Then we fall back to the expensive Point Locator
+          // lookup.  TODO: we could try and do something more optimized
+          // like checking if any of the active neighbors contains the
+          // point.  Update the caches.
+          (active && !contains_point) ||
+
+          // The Elem has been refined *and* the Mesh has moved out
+          // from under it, we fall back to doing the expensive Point
+          // Locator lookup.  TODO: We could try and look in the
+          // active children of this Elem's neighbors for the Point.
+          // Update the caches.
+          (!active && !contains_point))
+        {
+          const Elem * elem = expensivePointLookup(p, id);
+          updateCaches(cached_elem, elem, p, id);
+          addPoint(elem, p, id);
+          return elem;
+        }
+
+        else
+          mooseError("We'll never get here!");
       }
       else
         mooseError("Cached Dirac point " << cached_point << " already exists with ID: " << id << " and does not match point " << p);
@@ -154,8 +214,7 @@ DiracKernel::addPoint(Point p, unsigned id)
   // If we made it here, we either didn't have the point already cached or
   // id == libMesh::invalid_uint.  So now do the expensive PointLocator lookup,
   // possibly cache the result, and call the other addPoint() method.
-  AutoPtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, _mesh);
-  const Elem * elem = (*pl)(p);
+  const Elem * elem = expensivePointLookup(p, id);
 
   if (id != libMesh::invalid_uint)
   {
@@ -174,17 +233,16 @@ DiracKernel::addPoint(Point p, unsigned id)
 unsigned
 DiracKernel::currentPointCachedID()
 {
-  std::map<const Elem*, std::vector<std::pair<Point, unsigned> > >::iterator it =
-    _reverse_point_cache.find(_current_elem);
+  reverse_cache_t::iterator it = _reverse_point_cache.find(_current_elem);
 
   // If the current Elem is not in the cache, return invalid_uint
   if (it == _reverse_point_cache.end())
     return libMesh::invalid_uint;
 
   // Do a linear search in the (hopefully small) vector of Points for this Elem
-  std::vector<std::pair<Point, unsigned> > & points = it->second;
+  reverse_cache_t::mapped_type & points = it->second;
 
-  std::vector<std::pair<Point, unsigned> >::iterator
+  reverse_cache_t::mapped_type::iterator
     points_it = points.begin(),
     points_end = points.end();
 
@@ -227,4 +285,65 @@ SubProblem &
 DiracKernel::subProblem()
 {
   return _subproblem;
+}
+
+void
+DiracKernel::updateCaches(const Elem* old_elem,
+                          const Elem* new_elem,
+                          Point p,
+                          unsigned id)
+{
+  // Update the point cache
+  _point_cache.erase(id);
+  _point_cache[id] = std::make_pair(new_elem, p);
+
+  // Update the reverse cache
+  //
+  // First, remove the Point from the old_elem's vector
+  reverse_cache_t::iterator it = _reverse_point_cache.find(old_elem);
+  if (it != _reverse_point_cache.end())
+  {
+    reverse_cache_t::mapped_type & points = it->second;
+    {
+      reverse_cache_t::mapped_type::iterator
+        points_it = points.begin(),
+        points_end = points.end();
+
+      for (; points_it != points_end; ++points_it)
+      {
+        // If the point matches, remove it from the vector of points
+        if (p.relative_fuzzy_equals(points_it->first))
+        {
+          // Vector erasure.  It can be slow but these vectors are
+          // generally very short.  It also invalidates existing
+          // iterators, so we need to break out of the loop and
+          // not use them any more.
+          points.erase(points_it);
+          break;
+        }
+      }
+
+      // If the points vector is now empty, remove old_elem from the reverse cache entirely
+      if (points.empty())
+        _reverse_point_cache.erase(old_elem);
+    }
+  }
+
+  // Next, add the point to the new_elem's vector
+  reverse_cache_t::mapped_type & points = _reverse_point_cache[new_elem];
+  points.push_back(std::make_pair(p, id));
+}
+
+
+
+const Elem *
+DiracKernel::expensivePointLookup(Point p, unsigned /*id*/)
+{
+  AutoPtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, _mesh);
+  const Elem * elem = (*pl)(p);
+
+  if (elem == NULL)
+    mooseError("Error while searching for Point " << p << " in DiracKernel!");
+
+  return elem;
 }

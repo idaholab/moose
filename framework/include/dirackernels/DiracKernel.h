@@ -207,12 +207,30 @@ protected:
 private:
   /// Data structure for caching user-defined IDs which can be mapped to
   /// specific std::pair<const Elem*, Point> and avoid the PointLocator Elem lookup.
-  std::map<unsigned, std::pair<const Elem*, Point> > _point_cache;
+  typedef std::map<unsigned, std::pair<const Elem*, Point> > point_cache_t;
+  point_cache_t _point_cache;
 
   /// Map from Elem* to a list of (Dirac point, id) pairs which can be used
   /// in a user's computeQpResidual() routine to determine the user-defined ID for
   /// the current Dirac point, if one exists.
-  std::map<const Elem*, std::vector<std::pair<Point, unsigned> > > _reverse_point_cache;
+  typedef std::map<const Elem*, std::vector<std::pair<Point, unsigned> > > reverse_cache_t;
+  reverse_cache_t _reverse_point_cache;
+
+  /// This function is used internally when the Elem for a
+  /// locally-cached point needs to be updated.  You must pass in a
+  /// pointer to the old_elem whose data is to be updated, the
+  /// new_elem to which the Point belongs, and the Point and id
+  /// information.
+  void updateCaches(const Elem* old_elem,
+                    const Elem* new_elem,
+                    Point p,
+                    unsigned id);
+
+  /// This function is used internally when we have to do an expensive
+  /// PointLocator-based lookup to find the Elem which contains the Point p.
+  /// The Elem which gets returned is checked against NULL, should contain
+  /// the point p requested by the user.
+  const Elem * expensivePointLookup(Point p, unsigned id);
 };
 
 #endif
