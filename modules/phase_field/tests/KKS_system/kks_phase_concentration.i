@@ -19,29 +19,42 @@
 
 # We set c and eta...
 [BCs]
+  [./lefta]
+    type = DirichletBC
+    variable = ca
+    boundary = 'left'
+    value = 0.111
+  [../]
+  [./righta]
+    type = DirichletBC
+    variable = ca
+    boundary = 'right'
+    value = 0.111
+  [../]
+
   [./left]
     type = DirichletBC
     variable = c
     boundary = 'left'
-    value = 0
+    value = 0.1
   [../]
   [./right]
     type = DirichletBC
     variable = c
     boundary = 'right'
-    value = 1
+    value = 0.9
   [../]
   [./top]
     type = DirichletBC
     variable = eta
     boundary = 'top'
-    value = 0
+    value = 0.1
   [../]
   [./bottom]
     type = DirichletBC
     variable = eta
     boundary = 'bottom'
-    value = 1
+    value = 0.9
   [../]
 []
 
@@ -99,6 +112,21 @@
 []
 
 [Kernels]
+  #active = 'cdiff etadiff phaseconcentration chempot'
+  #active = 'cbdiff cdiff etadiff chempot'
+  active = 'cadiff cdiff etadiff phaseconcentration'
+  #active = 'cadiff cbdiff cdiff etadiff'
+  
+  [./cadiff]
+    type = Diffusion
+    variable = ca
+  [../]
+
+  [./cbdiff]
+    type = Diffusion
+    variable = cb
+  [../]
+
   [./cdiff]
     type = Diffusion
     variable = c
@@ -110,14 +138,15 @@
   [../]
 
   # ...and solve for ca and cb
-  [./ConcentrationVacancies]
+  [./phaseconcentration]
     type = KKSPhaseConcentration
     ca       = ca
     variable = cb
     c        = c
     eta      = eta
   [../]
-  [./ChemPotVacancies]
+
+  [./chempot]
     type = KKSPhaseChemicalPotential
     variable = ca
     cb       = cb
@@ -128,7 +157,15 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
+  #solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
+[]
+
+[Preconditioning]
+  [./mydebug]
+    type = FDP
+    full = true
+  [../]
 []
 
 [Outputs]
