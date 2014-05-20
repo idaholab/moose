@@ -58,7 +58,7 @@ PointValue::execute()
     _subproblem.reinitElemPhys(elem, _point_vec, 0);
 
     mooseAssert(_u.size() == 1, "No values in u!");
-    _value = _u[0];
+    _value = variableValue();
   }
   else
     _value = 0;
@@ -69,4 +69,10 @@ PointValue::getValue()
 {
   gatherSum(_value);
   return _value;
+}
+
+Real
+PointValue::variableValue()
+{
+  return _u[0];
 }
