@@ -122,7 +122,10 @@ BoundaryRestrictable::hasBoundary(std::vector<BoundaryName> names) const
 bool
 BoundaryRestrictable::hasBoundary(BoundaryID id) const
 {
-  return _bnd_ids.find(id) != _bnd_ids.end();
+  if (_bnd_ids.count(Moose::ANY_BOUNDARY_ID) > 0)
+    return true;
+  else
+    return _bnd_ids.find(id) != _bnd_ids.end();
 }
 
 bool
@@ -141,8 +144,12 @@ BoundaryRestrictable::hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type) cons
 
   // All supplied IDs must match those of the object
   else if (type == ALL)
-    return std::includes(_bnd_ids.begin(), _bnd_ids.end(), ids.begin(), ids.end());
-
+  {
+    if (_bnd_ids.count(Moose::ANY_BOUNDARY_ID) > 0)
+      return true;
+    else
+      return std::includes(_bnd_ids.begin(), _bnd_ids.end(), ids.begin(), ids.end());
+  }
   // Any of the supplid IDs must match those of the object
   else
   {
@@ -166,6 +173,9 @@ BoundaryRestrictable::isBoundarySubset(std::set<BoundaryID> ids) const
   // An empty input is assumed to be ANY_BOUNDARY_ID
   if (ids.empty() || ids.count(Moose::ANY_BOUNDARY_ID) > 0)
     return true;
+
+  if (_bnd_ids.count(Moose::ANY_BOUNDARY_ID) > 0)
+    return std::includes(ids.begin(), ids.end(), _bnd_mesh->meshBoundaryIds().begin(), _bnd_mesh->meshBoundaryIds().end());
   else
     return std::includes(ids.begin(), ids.end(), _bnd_ids.begin(), _bnd_ids.end());
 }
