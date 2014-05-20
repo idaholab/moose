@@ -31,6 +31,7 @@ public:
   virtual void initialize();
   virtual void execute();
   virtual Real getValue();
+  virtual Real variableValue();
 
 protected:
   MooseVariable & _var;
