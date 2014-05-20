@@ -13,7 +13,7 @@ InputParameters validParams<TensorMechanicsMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
-  params.addRequiredParam<bool>("all_21","If false, fill C_ijkl as: C1111, C1122, C1133, C2222, C2233, C3333, C2323, C1313, C1212; True if all 21 independent values are given (see ElasticityTensorR4 for details).");
+  params.addParam<bool>("all_21","If false, fill C_ijkl as: C1111, C1122, C1133, C2222, C2233, C3333, C2323, C1313, C1212; True if all 21 independent values are given (see ElasticityTensorR4 for details).");
   params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
   params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
   params.addParam<Real>("euler_angle_3", 0.0, "Euler angle in direction 3");
@@ -22,6 +22,9 @@ InputParameters validParams<TensorMechanicsMaterial>()
   params.addCoupledVar("disp_z", "The z displacement");
 
   params.addCoupledVar("temperature", "temperature variable");
+
+  MooseEnum fm("antisymmetric, symmetric9, symmetric21, general_isotropic, symmetric_isotropic, antisymmetric_isotropic, general", "symmetric9");
+  params.addParam<MooseEnum>("fill_method", fm, "The fill method");
 
   return params;
 }
@@ -44,15 +47,25 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
       _euler_angle_2(getParam<Real>("euler_angle_2")),
       _euler_angle_3(getParam<Real>("euler_angle_3")),
       _Cijkl_vector(getParam<std::vector<Real> >("C_ijkl")),
-      _all_21(getParam<bool>("all_21")),
       _Cijkl(),
       _Euler_angles(_euler_angle_1, _euler_angle_2, _euler_angle_3),
       _has_T(isCoupled("temperature")),
-      _T(_has_T ? &coupledValue("temperature") : NULL)
+      _T(_has_T ? &coupledValue("temperature") : NULL),
+      _fill_method(getParam<MooseEnum>("fill_method"))
+
 {
   // fill in the local tensors from the input vector information
+  if (isParamValid("all_21"))
+  {
+    _all_21 = getParam<bool>("all_21");
+    mooseWarning("The parameter all_21 is deprecated.  Please use fill_method instead");
+    if (_all_21)
+      _fill_method = "symmetric21";
+    else
+      _fill_method = "symmetric9";
+  }
 
-  _Cijkl.fillFromInputVector(_Cijkl_vector, _all_21);
+  _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
 }
 
 void

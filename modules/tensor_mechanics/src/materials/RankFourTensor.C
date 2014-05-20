@@ -212,7 +212,7 @@ RankFourTensor::operator - () const
 
   for (unsigned int i(0); i<N; i++)
     for (unsigned int j(0); j<N; j++)
-      for (unsigned int k(0); k<N; k++)
+      for (unsigned int k(0); k<N;k++)
         for (unsigned int l(0); l<N; l++)
           result(i,j,k,l) = -_vals[i][j][k][l];
 
@@ -482,7 +482,7 @@ RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> input)
 }
 
 void
-RankFourTensor::fillFromInputVector(const std::vector<Real> input, bool all)
+RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> input, bool all)
 {
   if ((all == true && input.size() != 21) || (all == false && input.size() != 9 ))
     mooseError("Please check the number of entries in the stiffness input vector.");
@@ -543,4 +543,134 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> input, bool all)
             _vals[l][k][j][i] =
             _vals[k][l][j][i] =
             _vals[l][k][i][j] = _vals[i][j][k][l];
+}
+
+
+
+void
+RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> input)
+{
+  if (input.size() != 6)
+    mooseError("To use fillAntisymmetricFromInputVector, your input must have size 6.  Yours has size " << input.size());
+
+  zero();
+
+  _vals[0][1][0][1] = input[0];   //B1212
+  _vals[0][1][0][2] = input[1];   //B1213
+  _vals[0][1][1][2] = input[2];   //B1223
+
+  _vals[0][2][0][2] = input[3];   //B1313
+  _vals[0][2][1][2] = input[4];   //B1323
+
+  _vals[1][2][1][2] = input[5];   //B2323
+
+  // antisymmetry
+  _vals[0][2][0][1] = -_vals[0][1][0][2];
+  _vals[1][2][0][1] = -_vals[0][1][1][2];
+  _vals[1][2][0][2] = -_vals[0][2][1][2];
+
+  // fill in from antisymmetry relations
+  for (unsigned int i = 0; i < N - 1 ; i++)
+    for (unsigned int j = i + 1 ; j < N ; j++)
+    {
+      _vals[0][1][j][i] = -_vals[0][1][i][j];
+      _vals[0][2][j][i] = -_vals[0][2][i][j];
+      _vals[1][2][j][i] = -_vals[1][2][i][j];
+    }
+
+  // fill in from symmetry relations
+  for (unsigned int i = 0; i < N - 1 ; i++)
+    for (unsigned int j = i + 1 ; j < N ; j++)
+    {
+      _vals[i][j][0][1] = _vals[0][1][i][j];
+      _vals[i][j][0][2] = _vals[0][2][i][j];
+      _vals[i][j][1][2] = _vals[1][2][i][j];
+    }
+}
+
+
+void
+RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> input)
+{
+  if (input.size() != 3)
+    mooseError("To use fillGeneralIsotropicFromInputVector, your input must have size 3.  Yours has size " << input.size());
+
+  zero();
+
+  for (unsigned int i=0; i<N; i++)
+    for (unsigned int j=0; j<N; j++)
+      for (unsigned int k=0; k<N; k++)
+        for (unsigned int l=0; l<N; l++)
+        {
+          _vals[i][j][k][l] = input[0]*(i==j)*(k==l) + input[1]*(i==k)*(j==l) + input[2]*(i==l)*(j==k);
+            for (unsigned int m = 0 ; m < N ; m++)
+              _vals[i][j][k][l] += input[2]*PermutationTensor::eps(i, j, m)*PermutationTensor::eps(k, l, m);
+        }
+}
+
+void
+RankFourTensor::fillAntisymmetricIsotropicFromInputVector(const std::vector<Real> input)
+{
+  if (input.size() != 1)
+    mooseError("To use fillAntisymmetricIsotropicFromInputVector, your input must have size 1.  Yours has size " << input.size());
+  std::vector<Real> input3;
+  input3.push_back(0);
+  input3.push_back(0);
+  input3.push_back(input[0]);
+  fillGeneralIsotropicFromInputVector(input3);
+}
+
+void
+RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> input)
+{
+  if (input.size() != 2)
+    mooseError("To use fillSymmetricIsotropicFromInputVector, your input must have size 2.  Yours has size " << input.size());
+  std::vector<Real> input3;
+  input3.push_back(input[0]);
+  input3.push_back(input[1]);
+  input3.push_back(0);
+  fillGeneralIsotropicFromInputVector(input3);
+}
+
+
+void
+RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> input)
+{
+  if (input.size() != 81)
+    mooseError("To use fillGeneralFromInputVector, your input must have size 81.  Yours has size " << input.size());
+
+  zero();
+
+  int ind;
+  for (unsigned int i=0; i<N; i++)
+    for (unsigned int j=0; j<N; j++)
+      for (unsigned int k=0; k<N; k++)
+        for (unsigned int l=0; l<N; l++)
+        {
+          ind = i*N*N*N + j*N*N + k*N + l;
+          _vals[i][j][k][l] = input[ind];
+        }
+}
+
+void
+RankFourTensor::fillFromInputVector(const std::vector<Real> input, std::string fill_method)
+{
+  zero();
+
+  if (fill_method == "antisymmetric")
+    fillAntisymmetricFromInputVector(input);
+  else if (fill_method == "symmetric9")
+    fillSymmetricFromInputVector(input, false);
+  else if (fill_method == "symmetric21")
+    fillSymmetricFromInputVector(input, true);
+  else if (fill_method == "general_isotropic")
+    fillGeneralIsotropicFromInputVector(input);
+  else if (fill_method == "symmetric_isotropic")
+    fillSymmetricIsotropicFromInputVector(input);
+  else if (fill_method == "antisymmetric_isotropic")
+    fillAntisymmetricIsotropicFromInputVector(input);
+  else if (fill_method == "general")
+    fillGeneralFromInputVector(input);
+  else
+    mooseError("fillFromInputVector called with unknown fill_method of " << fill_method);
 }
