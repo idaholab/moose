@@ -1,3 +1,8 @@
+#
+# This test validates the helper materials that generate material properties for
+# the h(eta) switching function and the g(eta) double well function in the KKS system
+#
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -72,11 +77,11 @@
     outputs = exodus
   [../]
   
-  [./sometin]
-    type = GenericConstantMaterial
+  [./g_eta1]
+    type = KKSGEtaPolyMaterial
     block = 0
-    prop_names = 'zero'
-    prop_values = '0'
+    g_order = SIMPLE
+    eta = eta1
     outputs = exodus
   [../]
 []
@@ -99,7 +104,7 @@
 []
 
 [Outputs]
-  file_base = kks_h_eta_poly_material
+  file_base = kks_f_eta_poly_materials
   output_initial = false
   interval = 1
   exodus = true

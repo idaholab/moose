@@ -1,3 +1,7 @@
+#
+# This test validates the free energy material with automatic differentiation for the KKS system
+#
+
 [Mesh]
   type = GeneratedMesh
   dim = 2

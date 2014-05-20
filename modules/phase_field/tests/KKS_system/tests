@@ -1,8 +1,8 @@
 [Tests]
-  [./kks_h_eta_poly_material]
+  [./kks_f_eta_poly_materials]
     type = 'Exodiff'
-    input = 'kks_h_eta_poly_material.i'
-    exodiff = 'kks_h_eta_poly_material.e'
+    input = 'kks_f_eta_poly_materials.i'
+    exodiff = 'kks_f_eta_poly_materials.e'
     abs_zero = 6e-08
     group = 'adaptive'
   [../]
