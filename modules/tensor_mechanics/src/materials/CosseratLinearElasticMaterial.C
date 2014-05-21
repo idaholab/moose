@@ -48,6 +48,7 @@ CosseratLinearElasticMaterial::CosseratLinearElasticMaterial(const std::string &
       _antisymmetric_stress(declareProperty<RankTwoTensor>("antisymmetric_stress")),
       _stress_couple(declareProperty<RankTwoTensor>("stress_couple")),
       _elastic_flexural_rigidity_tensor(declareProperty<ElasticityTensorR4>("elastic_flexural_rigidity_tensor")),
+      _Jacobian_mult_couple(declareProperty<ElasticityTensorR4>("Jacobian_mult_couple")),
       _Bijkl_vector(getParam<std::vector<Real> >("B_ijkl")),
       _Bijkl(),
       _has_T(isCoupled("T")),
@@ -90,8 +91,7 @@ void CosseratLinearElasticMaterial::computeQpStrain()
 
   _antisymmetric_strain[_qp] = (grad_tensor - grad_tensor.transpose())/2.0;
 
-  _elastic_strain[_qp] = grad_strain;
-
+  _elastic_strain[_qp] = grad_tensor;
 
   RankTwoTensor wc_grad_tensor(_grad_wc_x[_qp],_grad_wc_y[_qp],_grad_wc_z[_qp]);
 
@@ -131,4 +131,12 @@ RankTwoTensor CosseratLinearElasticMaterial::computeStressFreeStrain()
     stress_free_strain += _applied_strain_tensor;
 
   return stress_free_strain;
+}
+
+void CosseratLinearElasticMaterial::computeQpElasticityTensor()
+{
+  TensorMechanicsMaterial::computeQpElasticityTensor();
+
+  _elastic_flexural_rigidity_tensor[_qp] = _Bijkl;
+  _Jacobian_mult_couple[_qp] = _Bijkl;
 }

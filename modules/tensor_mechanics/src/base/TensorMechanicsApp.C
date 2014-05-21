@@ -17,6 +17,7 @@
 #include "FiniteStrainPlasticAux.h"
 #include "CrystalPlasticitySlipSysAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
+#include "CosseratLinearElasticMaterial.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -58,6 +59,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainPlasticMaterial);
   registerMaterial(FiniteStrainRatePlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
+  registerMaterial(CosseratLinearElasticMaterial);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);

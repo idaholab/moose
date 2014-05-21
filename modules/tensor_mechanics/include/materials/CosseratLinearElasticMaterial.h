@@ -21,6 +21,7 @@ protected:
   virtual void computeQpStrain();
   virtual void computeQpStress();
   virtual RankTwoTensor computeStressFreeStrain();
+  virtual void computeQpElasticityTensor();
 
   MaterialProperty<RankTwoTensor> & _eigenstrain;
   MaterialProperty<ElasticityTensorR4> & _delasticity_tensor_dc;
@@ -39,6 +40,7 @@ protected:
 
 
   MaterialProperty<ElasticityTensorR4> & _elastic_flexural_rigidity_tensor;
+  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult_couple;
 
   std::vector<Real> _Bijkl_vector;
   ElasticityTensorR4 _Bijkl;

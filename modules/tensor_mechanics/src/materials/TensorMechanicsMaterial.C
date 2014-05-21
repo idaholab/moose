@@ -64,9 +64,9 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
     mooseWarning("The parameter all_21 is deprecated.  Please use fill_method instead");
 
     if (_all_21)
-      _fill_method = (int)RankFourTensor::symmetric21;
+      _fill_method = "symmetric21";
     else
-      _fill_method = (int)RankFourTensor::symmetric9;
+      _fill_method = "symmetric9";
   }
 
   _Cijkl.fillFromInputVector(_Cijkl_vector, (RankFourTensor::FillMethod)(int)_fill_method);
