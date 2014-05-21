@@ -17,6 +17,18 @@ ElasticityTensorR4::elasticJacobian( const unsigned int i, const unsigned int k,
   return a;
 }
 
+Real
+ElasticityTensorR4::momentJacobian( const unsigned int comp1, const unsigned int comp2, const Real & test,
+                                     const RealGradient & grad_phi)
+{
+  Real the_sum = 0;
+  for (unsigned int i = 0 ; i < N ; ++i)
+    for (unsigned int j = 0 ; j < N ; ++j)
+      for (unsigned int k = 0 ; k < N ; ++k)
+	the_sum = _vals[i][j][k][comp2]*grad_phi(k)*PermutationTensor::eps(i, j, comp1);
+  return -test*the_sum;
+}
+
 ElasticityTensorR4&
 ElasticityTensorR4::operator=(const ElasticityTensorR4 &a)
 {

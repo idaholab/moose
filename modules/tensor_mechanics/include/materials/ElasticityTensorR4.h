@@ -31,6 +31,10 @@ public:
                                 const RealGradient & grad_test,
                                 const RealGradient & grad_phi);
 
+  virtual Real momentJacobian( const unsigned int comp1, const unsigned int comp2,
+                                const Real & test,
+                                const RealGradient & grad_phi);
+
   ElasticityTensorR4 & operator=(const ElasticityTensorR4 &a);
 
   ElasticityTensorR4 operator/(const Real &a);

@@ -4,6 +4,7 @@
 
 #include "TensorMechanicsAction.h"
 #include "StressDivergenceTensors.h"
+#include "MomentBalancing.h"
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
@@ -50,6 +51,7 @@ void
 TensorMechanicsApp::registerObjects(Factory & factory)
 {
   registerKernel(StressDivergenceTensors);
+  registerKernel(MomentBalancing);
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
