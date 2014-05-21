@@ -41,8 +41,16 @@ CachingPointSource::addPoints()
 Real
 CachingPointSource::computeQpResidual()
 {
+  // Grab the user-defined ID for the Dirac point we are currently on.
+  unsigned id = currentPointCachedID();
+
+  // If looking up the ID failed, we can't continue.
+  if (id == libMesh::invalid_uint)
+    mooseError("User id for point " << _current_point << " is " << id);
+
   // This is negative because it's a forcing function that has been
-  // brought over to the left side.  The value of the forcing is 1.0 each time
-  return -_test[_i][_qp] * 1.0;
+  // brought over to the left side.  The value of the forcing is equal
+  // to the ID of the point in this simple example.
+  return -_test[_i][_qp] * static_cast<Real>(id);
 }
 

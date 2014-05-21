@@ -12,14 +12,7 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./v]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -44,19 +37,17 @@
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = 3
     value = 0
   [../]
 
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = 1
     value = 1
   [../]
 []
@@ -69,7 +60,6 @@
 []
 
 [Outputs]
-  file_base = out
   output_initial = true
   exodus = true
   [./console]

@@ -2,7 +2,7 @@
   [./point_caching]
     type = 'Exodiff'
     input = 'point_caching.i'
-    exodiff = 'out.e'
+    exodiff = 'point_caching_out.e'
   [../]
 
   [./point_caching_error]
