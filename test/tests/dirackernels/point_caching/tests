@@ -10,4 +10,10 @@
     input = 'point_caching_error.i'
     expect_err = "does not match point"
   [../]
+
+  [./point_caching_uniform_refinement]
+    type = 'Exodiff'
+    input = 'point_caching_uniform_refinement.i'
+    exodiff = 'point_caching_uniform_refinement_out.e-s002 point_caching_uniform_refinement_out.e-s003'
+  [../]
 []
