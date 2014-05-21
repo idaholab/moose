@@ -19,13 +19,26 @@
 
 # We set c and eta...
 [BCs]
-  [./lefta]
+  # (and ca for debugging purposes)
+  [./top_ca]
+    type = DirichletBC
+    variable = ca
+    boundary = 'top'
+    value = 0.111
+  [../]
+  [./bottom_ca]
+    type = DirichletBC
+    variable = ca
+    boundary = 'bottom'
+    value = 0.111
+  [../]
+  [./left_ca]
     type = DirichletBC
     variable = ca
     boundary = 'left'
     value = 0.111
   [../]
-  [./righta]
+  [./right_ca]
     type = DirichletBC
     variable = ca
     boundary = 'right'
@@ -59,33 +72,37 @@
 []
 
 [Variables]
-  # concentration 
+  # concentration
   [./c]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 0.5
   [../]
 
   # order parameter
   [./eta]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 0.1
   [../]
-  
+
   # phase concentration a
   [./ca]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 0.2
   [../]
 
   # phase concentration b
   [./cb]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 0.3
   [../]
 []
 
 [Materials]
-  # simple toy free energy 
+  # simple toy free energy
   [./fa]
     type = KKSParsedMaterial
     block = 0
@@ -100,7 +117,7 @@
     args = 'cb'
     function = '(1-cb)^2'
   [../]
-  
+
   # h(eta)
   [./h_eta]
     type = KKSHEtaPolyMaterial
@@ -113,10 +130,10 @@
 
 [Kernels]
   #active = 'cdiff etadiff phaseconcentration chempot'
-  #active = 'cbdiff cdiff etadiff chempot'
+  ##active = 'cbdiff cdiff etadiff chempot'
   active = 'cadiff cdiff etadiff phaseconcentration'
-  #active = 'cadiff cbdiff cdiff etadiff'
-  
+  ##active = 'cadiff cbdiff cdiff etadiff'
+
   [./cadiff]
     type = Diffusion
     variable = ca
@@ -157,16 +174,16 @@
 
 [Executioner]
   type = Steady
-  #solve_type = 'PJFNK'
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
+  #solve_type = 'NEWTON'
 []
 
-[Preconditioning]
-  [./mydebug]
-    type = FDP
-    full = true
-  [../]
-[]
+#[Preconditioning]
+#  [./mydebug]
+#    type = FDP
+#    full = true
+#  [../]
+#[]
 
 [Outputs]
   file_base = kks_phase_concentration
@@ -180,4 +197,3 @@
     linear_residuals = true
   [../]
 []
-
