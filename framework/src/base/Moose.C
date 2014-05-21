@@ -673,9 +673,9 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_function",                 Function,               false);
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
-  registerMooseObjectTask("add_aux_bc",                   AuxKernel,              false);
   registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
   registerMooseObjectTask("add_coupled_variable",         AuxKernel,              false);
+  registerMooseObjectTask("add_aux_bc",                   AuxKernel,              false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
@@ -891,13 +891,13 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(AddKernelAction, "add_kernel");
   registerAction(AddKernelAction, "add_aux_kernel");
+  registerAction(AddKernelAction, "add_aux_bc");
   registerAction(AddScalarKernelAction, "add_scalar_kernel");
   registerAction(AddScalarKernelAction, "add_aux_scalar_kernel");
   registerAction(AddDGKernelAction, "add_dg_kernel");
   registerAction(AddBCAction, "add_bc");
   registerAction(EmptyAction, "no_action");  // placeholder
   registerAction(AddPeriodicBCAction, "add_periodic_bc");
-  registerAction(AddBCAction, "add_aux_bc");
   registerAction(AddMaterialAction, "add_material");
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddVectorPostprocessorAction, "add_vector_postprocessor");

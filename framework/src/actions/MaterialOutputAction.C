@@ -45,7 +45,6 @@ MaterialOutputAction::~MaterialOutputAction()
 {
 }
 
-
 void
 MaterialOutputAction::act()
 {
@@ -131,59 +130,32 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
   // Append the list of output variables for the current material
   _material_variable_names.insert(variable_name);
 
-  // Block restricted materials
-  if (material->hasBoundary(Moose::ANY_BOUNDARY_ID))
-  {
-    // Generate the name
-    std::string long_name("AuxKernels/");
-    long_name += material->name() + "_" + variable_name;
+  // Generate the name
+  std::ostringstream long_name;
+  long_name << "AuxKernels/" << material->name() << "_" << variable_name;
 
-    // Set the action parameters
-    InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
-    action_params.set<std::string>("type") = type;
-    action_params.set<ActionWarehouse *>("awh") = &_awh;
-    action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
-    action_params.set<std::string>("task") = "add_aux_kernel";
+  // Set the action parameters
+  InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
+  action_params.set<std::string>("type") = type;
+  action_params.set<ActionWarehouse *>("awh") = &_awh;
+  action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
+  action_params.set<std::string>("task") = "add_aux_kernel";
 
-    // Create the action
-    action = static_cast<MooseObjectAction *>(_action_factory.create("AddKernelAction", long_name, action_params));
+  // Create the action
+  action = static_cast<MooseObjectAction *>(_action_factory.create("AddKernelAction", long_name.str(), action_params));
 
-    // Set the object parameters
-    InputParameters & object_params = action->getObjectParams();
-    object_params.set<std::string>("property") = property_name;
-    object_params.set<AuxVariableName>("variable") = variable_name;
-    object_params.set<MooseEnum>("execute_on") = "timestep";
-    object_params.set<std::vector<SubdomainName> >("block") = material->blocks();
-  }
+  // Set the object parameters
+  InputParameters & object_params = action->getObjectParams();
+  object_params.set<std::string>("property") = property_name;
+  object_params.set<AuxVariableName>("variable") = variable_name;
+  object_params.set<MooseEnum>("execute_on") = "timestep";
 
-  // Boundary restricted
-  else
-  {
-    // Create the name
-    std::string long_name("AuxBCs/");
-    long_name += material->name() + "_" + variable_name;
-
-    // Set the action parmeters
-    InputParameters action_params = _action_factory.getValidParams("AddBCAction");
-    action_params.set<std::string>("type") = type;
-    action_params.set<ActionWarehouse *>("awh") = &_awh;
-    action_params.set<std::vector<BoundaryName> >("boundary") = material->boundaryNames();
-    action_params.set<NonlinearVariableName>("variable") = variable_name; // needed to avoid error
-    action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
-    action_params.set<std::string>("task") = "add_aux_bc";
-
-    // Create the action
-    action = static_cast<MooseObjectAction *>(_action_factory.create("AddBCAction", long_name, action_params));
-
-    // Set the object parameters
-    InputParameters & object_params = action->getObjectParams();
-    object_params.set<std::string>("property") = property_name;
-    object_params.set<AuxVariableName>("variable") = variable_name;
-    object_params.set<MooseEnum>("execute_on") = "timestep";
+  if (material->boundaryRestricted())
     object_params.set<std::vector<BoundaryName> >("boundary") = material->boundaryNames();
-  }
+  else
+    object_params.set<std::vector<SubdomainName> >("block") = material->blocks();
 
-  // Return the create action
+  // Return the created action
   return action;
 }
 
@@ -206,7 +178,6 @@ MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & 
 
     MooseObjectAction * action = createAction("MaterialRealVectorValueAux", property_name, oss.str(), material);
     action->getObjectParams().set<unsigned int>("component") = i;
-
     _awh.addActionBlock(action);
   }
 }
@@ -225,7 +196,6 @@ MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & 
       MooseObjectAction * action = createAction("MaterialRealTensorValueAux", property_name, oss.str(), material);
       action->getObjectParams().set<unsigned int>("row") = i;
       action->getObjectParams().set<unsigned int>("column") = j;
-
       _awh.addActionBlock(action);
     }
 }

@@ -36,7 +36,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./nearest_node_value]
     type = NearestNodeValueAux
     variable = nearest_node_value

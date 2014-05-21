@@ -22,7 +22,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./boundary_aux]
     type = CoupledAux
     variable = aux

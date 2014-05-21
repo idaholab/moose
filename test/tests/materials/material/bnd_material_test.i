@@ -56,7 +56,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./prop]
     type = MaterialRealAux
     property = matp

@@ -29,7 +29,7 @@
  * Any object that needs material properties should inherit this interface.
  * If your object is also restricted to blocks and/or boundaries via the
  * BlockRestrictable and/or BoundaryRestrictable class, then MaterialPropertyInterface
- * must be inherieted following these two classes for the material property checks
+ * must be inherited following these two classes for the material property checks
  * to operate correctly.
  */
 class MaterialPropertyInterface
@@ -111,8 +111,8 @@ public:
 
 protected:
 
-  /// Reference to the materail data class that stores properties
-  MaterialData & _material_data;
+  /// Pointer to the material data class that stores properties
+  MaterialData * _material_data;
 
   /// Reference to the FEProblem class
   FEProblem & _mi_feproblem;
@@ -150,13 +150,13 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
   checkMaterialProperty(name);
 
-  if (!_stateful_allowed && _material_data.getMaterialPropertyStorage().hasStatefulProperties())
+  if (!_stateful_allowed && _material_data->getMaterialPropertyStorage().hasStatefulProperties())
     mooseError("Error: Stateful material properties not allowed for this object.");
 
   // Update the boolean flag.
   _get_material_property_called = true;
 
-  return _material_data.getProperty<T>(name);
+  return _material_data->getProperty<T>(name);
 }
 
 template<typename T>
@@ -166,7 +166,7 @@ MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
   if (!_stateful_allowed)
     mooseError("Error: Stateful material properties not allowed for this object.");
 
-  return _material_data.getPropertyOld<T>(name);
+  return _material_data->getPropertyOld<T>(name);
 }
 
 template<typename T>
@@ -176,14 +176,14 @@ MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
   if (!_stateful_allowed)
     mooseError("Error: Stateful material properties not allowed for this object.");
 
-  return _material_data.getPropertyOlder<T>(name);
+  return _material_data->getPropertyOlder<T>(name);
 }
 
 template<typename T>
 bool
 MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
 {
-  return _material_data.haveProperty<T>(name);
+  return _material_data->haveProperty<T>(name);
 }
 
 #endif //MATERIALPROPERTYINTERFACE_H
