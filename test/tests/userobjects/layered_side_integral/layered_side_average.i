@@ -47,7 +47,7 @@
   [../]
 []
 
-[AuxBCs]
+[AuxKernels]
   [./lsia]
     type = SpatialUserObjectAux
     variable = layered_side_average

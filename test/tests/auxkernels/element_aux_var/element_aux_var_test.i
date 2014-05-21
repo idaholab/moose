@@ -106,6 +106,12 @@
     grad = '2 0 0'
     coupled = u
   [../]
+  [./five]
+    type = ConstantAux
+    variable = five
+    boundary = '1 2'
+    value = 5
+  [../]
 []
 
 [BCs]
@@ -120,15 +126,6 @@
     variable = u
     boundary = 2
     value = 1
-  [../]
-[]
-
-[AuxBCs]
-  [./five]
-    type = ConstantAux
-    variable = five
-    boundary = '1 2'
-    value = 5
   [../]
 []
 

@@ -121,24 +121,30 @@ AuxiliarySystem::addTimeIntegrator(const std::string & type, const std::string &
 }
 
 void
-AuxiliarySystem::addKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
+AuxiliarySystem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<AuxiliarySystem *>("_aux_sys") = this;
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _mproblem._material_data[tid];
 
     AuxKernel *kernel = static_cast<AuxKernel *>(_factory.create(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not an AuxKernel object");
 
     _auxs(kernel->execFlag())[tid].addAuxKernel(kernel);
     _mproblem._objects_by_name[tid][name].push_back(kernel);
+
+    if (kernel->boundaryRestricted())
+    {
+      const std::set<BoundaryID> & boundary_ids = kernel->boundaryIDs();
+      for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+        _vars[tid].addBoundaryVar(*it, &kernel->variable());
+    }
   }
 }
 
 void
-AuxiliarySystem::addScalarKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
+AuxiliarySystem::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -148,31 +154,8 @@ AuxiliarySystem::addScalarKernel(const  std::string & kernel_name, const std::st
     mooseAssert(kernel != NULL, "Not a AuxScalarKernel object");
 
     _auxs(kernel->execFlag())[tid].addScalarKernel(kernel);
+
     _mproblem._objects_by_name[tid][name].push_back(kernel);
-  }
-}
-
-void
-AuxiliarySystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
-{
-
-  parameters.set<AuxiliarySystem *>("_aux_sys") = this;
-  parameters.set<bool>("_on_boundary") = true;
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    parameters.set<THREAD_ID>("_tid") = tid;
-    parameters.set<MaterialData *>("_material_data") = _mproblem._bnd_material_data[tid];
-
-    AuxKernel * kernel = static_cast<AuxKernel *>(_factory.create(bc_name, name, parameters));
-    mooseAssert(kernel != NULL, "Not a boundary restricted AuxAuxKernel object");
-
-    _auxs(kernel->execFlag())[tid].addActiveBC(kernel);
-    _mproblem._objects_by_name[tid][name].push_back(kernel);
-
-    const std::set<BoundaryID> & boundary_ids = kernel->boundaryIDs();
-    for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-      _vars[tid].addBoundaryVar(*it, &kernel->variable());
   }
 }
 

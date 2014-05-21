@@ -47,25 +47,21 @@ GapValueAux::GapValueAux(const std::string & name, InputParameters parameters) :
     _warnings(getParam<bool>("warnings"))
 {
   if (parameters.isParamValid("tangential_tolerance"))
-  {
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-  }
+
   if (parameters.isParamValid("normal_smoothing_distance"))
-  {
     _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-  }
+
   if (parameters.isParamValid("normal_smoothing_method"))
-  {
     _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
-  }
+
   Order pairedVarOrder(_moose_var.getOrder());
   Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   if (pairedVarOrder != gvaOrder && pairedVarOrder != CONSTANT)
-  {
     mooseError("ERROR: specified order for GapValueAux ("<<Utility::enum_to_string<Order>(gvaOrder)
                <<") does not match order for paired_variable \""<< _moose_var.name() << "\" ("
                <<Utility::enum_to_string<Order>(pairedVarOrder)<<")");
-  }
+
 }
 
 GapValueAux::~GapValueAux()
