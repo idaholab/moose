@@ -82,7 +82,7 @@ CHPFCRFF::computeQpResidual()
         else
           temp_coeff = 1.0;
 
-        ln_expansion += temp_coeff * std::pow(-1.0, i) * std::pow(_u[_qp], i-2.0);
+        ln_expansion += temp_coeff * std::pow(-1.0, Real(i)) * std::pow(_u[_qp], Real(i)-2.0);
       }
       break;
   }
@@ -155,7 +155,7 @@ CHPFCRFF::computeQpJacobian()
         else
           temp_coeff = 1.0;
 
-        ln_expansion += temp_coeff * std::pow(-1.0, i) * std::pow(_u[_qp], i-2.0);
+        ln_expansion += temp_coeff * std::pow(-1.0, Real(i)) * std::pow(_u[_qp], Real(i)-2.0);
       }
       break;
   }
@@ -186,7 +186,7 @@ CHPFCRFF::computeQpJacobian()
         else
           temp_coeff = 1.0;
 
-        Dln_expansion += temp_coeff*std::pow((Real) -1,(int)i)*((Real) i - 2.0)*std::pow(_u[_qp],int(i - 3.0));
+        Dln_expansion += temp_coeff*std::pow((Real) -1, Real(i)) * (Real(i) - 2.0) * std::pow(_u[_qp], Real(i) - 3.0);
       }
 
       dGradDFDConsdC = ln_expansion*_grad_phi[_j][_qp] + _phi[_j][_qp]*Dln_expansion*grad_c;
