@@ -20,30 +20,6 @@
 # We set c and eta...
 [BCs]
   # (and ca for debugging purposes)
-  [./top_ca]
-    type = DirichletBC
-    variable = ca
-    boundary = 'top'
-    value = 0.111
-  [../]
-  [./bottom_ca]
-    type = DirichletBC
-    variable = ca
-    boundary = 'bottom'
-    value = 0.111
-  [../]
-  [./left_ca]
-    type = DirichletBC
-    variable = ca
-    boundary = 'left'
-    value = 0.111
-  [../]
-  [./right_ca]
-    type = DirichletBC
-    variable = ca
-    boundary = 'right'
-    value = 0.111
-  [../]
 
   [./left]
     type = DirichletBC
@@ -129,9 +105,9 @@
 []
 
 [Kernels]
-  #active = 'cdiff etadiff phaseconcentration chempot'
+  active = 'cdiff etadiff phaseconcentration chempot'
   ##active = 'cbdiff cdiff etadiff chempot'
-  active = 'cadiff cdiff etadiff phaseconcentration'
+  #active = 'cadiff cdiff etadiff phaseconcentration'
   ##active = 'cadiff cbdiff cdiff etadiff'
 
   [./cadiff]
@@ -178,12 +154,19 @@
   #solve_type = 'NEWTON'
 []
 
-#[Preconditioning]
-#  [./mydebug]
-#    type = FDP
-#    full = true
-#  [../]
-#[]
+[Preconditioning]
+  active = 'full'
+  #active = 'mydebug'
+  #active = ''
+  [./full]
+    type = SMP
+    full = true
+  [../]
+  [./mydebug]
+    type = FDP
+    full = true
+  [../]
+[]
 
 [Outputs]
   file_base = kks_phase_concentration
