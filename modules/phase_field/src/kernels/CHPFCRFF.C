@@ -69,20 +69,20 @@ CHPFCRFF::computeQpResidual()
       break;
 
     case 2:
-      for (unsigned int i=1; i<_n_exp_terms; ++i)
+      for (unsigned int i=2; i<(_n_exp_terms + 2.0); ++i)
       {
         // Apply Coefficents to Taylor Series defined in input file
         Real temp_coeff;
-        if (i == 1)
+        if (i == 2)
           temp_coeff = _c;
-        else if (i == 2)
-          temp_coeff = _a;
         else if (i == 3)
+          temp_coeff = _a;
+        else if (i == 4)
           temp_coeff = _b;
         else
           temp_coeff = 1.0;
 
-        ln_expansion += temp_coeff * std::pow(-1.0, i+1.0) * std::pow(_u[_qp], i-1.0);
+        ln_expansion += temp_coeff * std::pow(-1.0, i) * std::pow(_u[_qp], i-2.0);
       }
       break;
   }
@@ -142,20 +142,20 @@ CHPFCRFF::computeQpJacobian()
 
     case 2:
 
-      for (unsigned int i=1; i<_n_exp_terms; ++i)
+      for (unsigned int i=2; i<(_n_exp_terms + 2.0); ++i)
       {
         // Apply Coefficents to Taylor Series defined in input file
         Real temp_coeff;
-        if (i == 1)
+        if (i == 2)
           temp_coeff = _c;
-        else if (i == 2)
-          temp_coeff = _a;
         else if (i == 3)
+          temp_coeff = _a;
+        else if (i == 4)
           temp_coeff = _b;
         else
           temp_coeff = 1.0;
 
-        ln_expansion += temp_coeff * std::pow(-1.0, i+1.0) * std::pow(_u[_qp], i-1.0);
+        ln_expansion += temp_coeff * std::pow(-1.0, i) * std::pow(_u[_qp], i-2.0);
       }
       break;
   }
@@ -174,7 +174,7 @@ CHPFCRFF::computeQpJacobian()
       break;
 
     case 2: //appraoch using substitution
-      for (unsigned int i=2; i<(_n_exp_terms+1); ++i)
+      for (unsigned int i=2; i<(_n_exp_terms + 2.0); ++i)
       {
         Real temp_coeff;
         if (i == 2)
@@ -186,7 +186,7 @@ CHPFCRFF::computeQpJacobian()
         else
           temp_coeff = 1.0;
 
-        Dln_expansion += temp_coeff*std::pow(double(-1),int(i+1))*(i - 1.0)*std::pow(_u[_qp],int(i - 2));
+        Dln_expansion += temp_coeff*std::pow((Real) -1,(int)i)*((Real) i - 2.0)*std::pow(_u[_qp],int(i - 3.0));
       }
 
       dGradDFDConsdC = ln_expansion*_grad_phi[_j][_qp] + _phi[_j][_qp]*Dln_expansion*grad_c;
