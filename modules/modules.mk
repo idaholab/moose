@@ -22,6 +22,7 @@ ifeq ($(ALL_MODULES),yes)
         SOLID_MECHANICS           := yes
         TENSOR_MECHANICS          := yes
         WATER_STEAM_EOS           := yes
+        POROUS_MEDIA	          := yes
 endif
 
 ###############################################################################
@@ -108,6 +109,12 @@ endif
 ifeq ($(WATER_STEAM_EOS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/water_steam_eos
   APPLICATION_NAME   := water_steam_eos
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(POROUS_MEDIA),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/porous_media
+  APPLICATION_NAME   := porous_media
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

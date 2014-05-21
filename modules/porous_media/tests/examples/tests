@@ -1,0 +1,32 @@
+[Tests]
+  [./P_CONST_STD_1d_1]
+    type = 'Exodiff'
+    input = 'P_CONST_STD_1D_1.i'
+    exodiff = 'P_CONST_STD_1d_1_out.e'
+  [../]
+   [./P_EOS_STD_3d_1]
+    type = 'Exodiff'
+    input = 'P_EOS_STD_3D_1.i'
+    exodiff = 'P_EOS_STD_3d_1_out.e'
+  [../]
+ [./T_CONST_STD_1D_1]
+    type = 'Exodiff'
+    input = 'T_CONST_STD_1D_1.i'
+    exodiff = 'T_CONST_STD_1D_1_out.e'
+  [../]
+ [./T_EOS_STD_1D_1]
+    type = 'Exodiff'
+    input = 'T_EOS_STD_1D_1.i'
+    exodiff = 'T_EOS_STD_1D_1_out.e'
+  [../]
+  [./PT_CONST_STD_1D_1]
+    type = 'Exodiff'
+    input = 'PT_CONST_STD_1D_1.i'
+    exodiff = 'PT_CONST_STD_1D_1_out.e'
+  [../]
+[./PT_EOS_STD_2D_1]
+    type = 'Exodiff'
+    input = 'PT_EOS_STD_2D_1.i'
+    exodiff = 'PT_EOS_STD_2D_1_out.e'
+  [../]
+[]
