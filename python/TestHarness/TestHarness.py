@@ -2,9 +2,8 @@ import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil, time,
 import path_tool
 
 path_tool.activate_module('FactorySystem')
-path_tool.activate_module('argparse')
 
-import ParseGetPot
+from ParseGetPot import ParseGetPot
 from socket import gethostname
 #from options import *
 from util import *
@@ -327,12 +326,26 @@ class TestHarness:
       # Loop through launched jobs and match the TEST_NAME to determin correct stdout (Output_Path)
       for job in batch_list:
         file = '/'.join(job[2].split('/')[:-2]) + '/' + job[3]
-        tests = self.parseGetPotTestFormat(file)
-        for test in tests:
+
+        # Build a Warehouse to hold the MooseObjects
+        warehouse = Warehouse()
+
+        # Build a Parser to parse the objects
+        parser = Parser(self.factory, warehouse)
+
+        # Parse it
+        parser.parse(file)
+
+        # Retrieve the tests from the warehouse
+        testers = warehouse.getAllObjects()
+        for tester in testers:
+          self.augmentParameters(file, tester)
+
+        for tester in testers:
           # Build the requested Tester object
-          if job[1] == test['test_name']:
+          if job[1] == tester.parameters()['test_name']:
             # Create Test Type
-            tester = self.factory.create(test['type'], test)
+            # test = self.factory.create(tester.parameters()['type'], tester)
 
             # Get job status via qstat
             qstat = ['qstat', '-f', '-x', str(job[0])]
@@ -352,7 +365,7 @@ class TestHarness:
               if os.path.exists(job[2]):
                 output_file = open(job[2], 'r')
                 # Not sure I am doing this right: I have to change the TEST_DIR to match the temporary cluster_launcher TEST_DIR location, thus violating the tester.specs...
-                test['test_dir'] = '/'.join(job[2].split('/')[:-1])
+                tester.parameters()['test_dir'] = '/'.join(job[2].split('/')[:-1])
                 outfile = output_file.read()
                 output_file.close()
               else:

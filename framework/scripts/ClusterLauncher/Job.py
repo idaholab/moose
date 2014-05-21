@@ -18,13 +18,19 @@ if os.environ.has_key("MOOSE_DIR"):
 if os.environ.has_key("FRAMEWORK_DIR"):
   FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
 
+# Import the TestHarness and Helper functions from the MOOSE toolkit
+sys.path.append(os.path.join(MOOSE_DIR, 'python'))
+import path_tool
+path_tool.activate_module('TestHarness')
+path_tool.activate_module('FactorySystem')
+
 class Job(object):
-  def getValidParams():
+  def validParams():
     params = InputParameters()
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
     params.addParam('template_script', FRAMEWORK_DIR + '/scripts/ClusterLauncher/pbs_submit.sh', "The template job script to use.")
     return params
-  getValidParams = staticmethod(getValidParams)
+  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
     self.specs = params
