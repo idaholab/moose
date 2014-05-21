@@ -166,8 +166,7 @@
     disp_y = disp_y
     disp_x = disp_x
     B_ijkl = 0.5
-    fill_method = general_isotropic
-    C_ijkl = '1 2 1'
+    C_ijkl = '5 1 1 5 1 5 2 2 2'
     wc_z = wc_z
     wc_y = wc_y
     wc_x = wc_x
