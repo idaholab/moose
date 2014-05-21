@@ -439,7 +439,17 @@ MooseMesh::meshChanged()
 
   // Lets the output system know that the mesh has changed recently.
   _is_changed = true;
+
+  // Call the callback function onMeshChanged
+  onMeshChanged();
+
 }
+
+void
+MooseMesh::onMeshChanged()
+{
+}
+
 
 void
 MooseMesh::cacheChangedLists()
