@@ -73,6 +73,7 @@ CosseratLinearElasticMaterial::CosseratLinearElasticMaterial(const std::string &
 
 
   _Bijkl.fillFromInputVector(_Bijkl_vector, (RankFourTensor::FillMethod)(int)_fill_method_bending);
+
 }
 
 void CosseratLinearElasticMaterial::computeQpStrain()

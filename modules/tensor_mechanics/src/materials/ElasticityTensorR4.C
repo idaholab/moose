@@ -13,8 +13,23 @@ ElasticityTensorR4::elasticJacobian( const unsigned int i, const unsigned int k,
   for (unsigned int j(0); j<N; j++)
     for (unsigned int l(0); l<N; l++)
       a += _vals[i][j][k][l]*grad_phi(l)*grad_test(j);
+  //a += _vals[i][j][l][k]*grad_phi(l)*grad_test(j);
 
   return a;
+}
+
+Real
+ElasticityTensorR4::cosseratElasticJacobian( const unsigned int i, const unsigned int k,
+                                     const RealGradient & grad_test,
+                                     const Real & phi)
+{
+  Real a(0.0);
+
+  for (unsigned int j(0); j<N; j++)
+    for (unsigned int m(0); m<N; m++)
+      for (unsigned int n(0); n<N; n++)
+        a += _vals[i][j][m][n]*PermutationTensor::eps(m, n, k)*grad_test(j);
+  return a*phi;
 }
 
 Real
@@ -25,8 +40,21 @@ ElasticityTensorR4::momentJacobian( const unsigned int comp1, const unsigned int
   for (unsigned int i = 0 ; i < N ; ++i)
     for (unsigned int j = 0 ; j < N ; ++j)
       for (unsigned int k = 0 ; k < N ; ++k)
-	the_sum = _vals[i][j][k][comp2]*grad_phi(k)*PermutationTensor::eps(i, j, comp1);
+        the_sum += _vals[i][j][k][comp2]*grad_phi(k)*PermutationTensor::eps(i, j, comp1);
   return -test*the_sum;
+}
+
+Real
+ElasticityTensorR4::momentJacobianwc( const unsigned int comp1, const unsigned int comp2, const Real & test,
+                                     const Real & phi)
+{
+  Real the_sum = 0;
+  for (unsigned int j = 0 ; j < N ; ++j)
+    for (unsigned int k = 0 ; k < N ; ++k)
+      for (unsigned int m = 0 ; m < N ; ++m)
+        for (unsigned int n = 0 ; n < N ; ++n)
+          the_sum += _vals[j][k][m][n]*PermutationTensor::eps(comp1, j, k)*PermutationTensor::eps(m, n, comp2);
+  return test*phi*the_sum;
 }
 
 ElasticityTensorR4&

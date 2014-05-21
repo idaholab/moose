@@ -192,10 +192,10 @@ public:
                antisymmetric (use fillAntisymmetricFromInputVector)
                symmetric9 (use fillSymmetricFromInputVector with all=false)
                symmetric21 (use fillSymmetricFromInputVector with all=true)
-	       general_isotropic (use fillGeneralIsotropicFrominputVector)
-	       symmetric_isotropic (use fillSymmetricIsotropicFromInputVector)
-	       antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
-	       general (use fillGeneralFromInputVector)
+               general_isotropic (use fillGeneralIsotropicFrominputVector)
+               symmetric_isotropic (use fillSymmetricIsotropicFromInputVector)
+               antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
+               general (use fillGeneralFromInputVector)
   */
   void fillFromInputVector(const std::vector<Real> input, FillMethod fill_method);
 

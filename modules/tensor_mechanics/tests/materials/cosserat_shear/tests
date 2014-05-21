@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'cosserat_shear.i'
-    exodiff = 'cosserat_shear_out.e'
-  [../]
-[]

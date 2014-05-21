@@ -663,7 +663,7 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> input, FillMethod fi
 {
   zero();
 
-  switch(fill_method)
+  switch (fill_method)
   {
     case antisymmetric:
       fillAntisymmetricFromInputVector(input);
