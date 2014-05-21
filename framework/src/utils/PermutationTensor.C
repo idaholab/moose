@@ -14,9 +14,6 @@
 
 #include "PermutationTensor.h"
 
-PermutationTensor::PermutationTensor()
-{}
-
 int
 PermutationTensor::eps(unsigned int i, unsigned int j)
 {
@@ -52,4 +49,3 @@ PermutationTensor::eps(unsigned int i, unsigned int j, unsigned int k, unsigned 
     return -eps(i-1, j-1, k-1);
   return 0;
 }
-

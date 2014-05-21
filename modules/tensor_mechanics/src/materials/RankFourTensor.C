@@ -13,6 +13,12 @@ extern "C" void FORTRAN_CALL(dgetri) ( ... );
 extern "C" void FORTRAN_CALL(dgetrf) ( ... );
 
 
+MooseEnum
+RankFourTensor::fillMethodEnum()
+{
+  return MooseEnum("antisymmetric, symmetric9, symmetric21, general_isotropic, symmetric_isotropic, antisymmetric_isotropic, general");
+}
+
 RankFourTensor::RankFourTensor()
 {
   for (unsigned int i(0); i<N; i++)
@@ -653,24 +659,34 @@ RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> input)
 }
 
 void
-RankFourTensor::fillFromInputVector(const std::vector<Real> input, std::string fill_method)
+RankFourTensor::fillFromInputVector(const std::vector<Real> input, FillMethod fill_method)
 {
   zero();
 
-  if (fill_method == "antisymmetric")
-    fillAntisymmetricFromInputVector(input);
-  else if (fill_method == "symmetric9")
-    fillSymmetricFromInputVector(input, false);
-  else if (fill_method == "symmetric21")
-    fillSymmetricFromInputVector(input, true);
-  else if (fill_method == "general_isotropic")
-    fillGeneralIsotropicFromInputVector(input);
-  else if (fill_method == "symmetric_isotropic")
-    fillSymmetricIsotropicFromInputVector(input);
-  else if (fill_method == "antisymmetric_isotropic")
-    fillAntisymmetricIsotropicFromInputVector(input);
-  else if (fill_method == "general")
-    fillGeneralFromInputVector(input);
-  else
-    mooseError("fillFromInputVector called with unknown fill_method of " << fill_method);
+  switch(fill_method)
+  {
+    case antisymmetric:
+      fillAntisymmetricFromInputVector(input);
+      break;
+    case symmetric9:
+      fillSymmetricFromInputVector(input, false);
+      break;
+    case symmetric21:
+      fillSymmetricFromInputVector(input, true);
+      break;
+    case general_isotropic:
+      fillGeneralIsotropicFromInputVector(input);
+      break;
+    case symmetric_isotropic:
+      fillSymmetricIsotropicFromInputVector(input);
+      break;
+    case antisymmetric_isotropic:
+      fillAntisymmetricIsotropicFromInputVector(input);
+      break;
+    case general:
+      fillGeneralFromInputVector(input);
+      break;
+    default:
+      mooseError("fillFromInputVector called with unknown fill_method of " << fill_method);
+  }
 }

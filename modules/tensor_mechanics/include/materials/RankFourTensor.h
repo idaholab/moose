@@ -11,17 +11,40 @@
 #ifndef RANKFOURTENSOR_H
 #define RANKFOURTENSOR_H
 
-// Any requisite includes here
+// Modules includes
+#include "RankTwoTensor.h"
+
+// MOOSE includes
+#include "PermutationTensor.h"
+#include "MooseEnum.h"
+
+// libMesh includes
 #include "libmesh/tensor_value.h"
-#include <vector>
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
-#include "RankTwoTensor.h"
-#include "PermutationTensor.h"
+
+// system includes
+#include <vector>
+
 
 class RankFourTensor
 {
 public:
+  /**
+   * Static method for use in validParams for getting the "fill_method"
+   */
+  static MooseEnum fillMethodEnum();
+
+  enum FillMethod
+  {
+    antisymmetric,
+    symmetric9,
+    symmetric21,
+    general_isotropic,
+    symmetric_isotropic,
+    antisymmetric_isotropic,
+    general
+  };
 
   /**
    * Default constructor; fills to zero
@@ -174,7 +197,7 @@ public:
 	       antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
 	       general (use fillGeneralFromInputVector)
   */
-  void fillFromInputVector(const std::vector<Real> input, std::string fill_method);
+  void fillFromInputVector(const std::vector<Real> input, FillMethod fill_method);
 
 protected:
 
