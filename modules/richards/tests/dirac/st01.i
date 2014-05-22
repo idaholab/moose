@@ -95,7 +95,6 @@
     fluxes = '1 2'
     point_file = st01.stream
     SumQuantityUO = stream_total_outflow_mass
-    mesh_adaptivity = false
     variable = pressure
   [../]
 []

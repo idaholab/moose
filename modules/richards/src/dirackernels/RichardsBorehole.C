@@ -20,7 +20,6 @@ InputParameters validParams<RichardsBorehole>()
   params.addRequiredParam<std::string>("point_file", "The file containing the borehole radii and coordinates of the point sinks that approximate the borehole.  Each line in the file must contain a space-separated radius and coordinate.  Ie r x y z.  The last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  Note that you will get segementation faults if your points do not lie within your mesh!");
   params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the borehole for each time step.");
   params.addParam<Real>("re_constant", 0.28, "The dimensionless constant used in evaluating the borehole effective radius.  This depends on the meshing scheme.  Peacemann finite-difference calculations give 0.28, while for rectangular finite elements the result is closer to 0.1594.  (See  Eqn(4.13) of Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388.)");
-  params.addParam<bool>("mesh_adaptivity", true, "If not using mesh adaptivity then set this false to substantially speed up the simulation by caching the element containing each Dirac point.");
   params.addParam<Real>("well_constant", -1.0, "Usually this is calculated internally from the element geometry, the local borehole direction and segment length, and the permeability.  However, if this parameter is given as a positive number then this number is used instead of the internal calculation.  This speeds up computation marginally.  re_constant becomes irrelevant");
   params.addParam<bool>("MyNameIsAndyWilkins", false, "Used for debugging by Andy");
   params.addParam<bool>("fully_upwind", false, "Fully upwind the flux");
@@ -54,8 +53,6 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
     _re_constant(getParam<Real>("re_constant")),
     _well_constant(getParam<Real>("well_constant")),
-
-    _mesh_adaptivity(getParam<bool>("mesh_adaptivity")),
 
     _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
     _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv")),
@@ -204,24 +201,11 @@ RichardsBorehole::addPoints()
   // so this is a handy place to zero this out.
   _total_outflow_mass.zero();
 
-  if (_mesh_adaptivity)
-  {
-    for (unsigned int i = 0; i < _zs.size(); i++)
-    {
-      // Add points the slow way (don't attempt caching) when doing mesh adaptivity.
-      const Elem* dirac_elem = addPoint(Point(_xs[i], _ys[i], _zs[i]));
-      if (!dirac_elem)
-        mooseError("RichardsBorehole: the point " << _xs[i] << " " << _ys[i] << " " << _zs[i] << " was not added since it is not in any element");
-    }
-  }
-  else
-  {
-    // Add point using the unique ID "i", let the DiracKernel take
-    // care of the caching.  This should be fast after the first call,
-    // as long as the points don't move around.
-    for (unsigned int i = 0; i < _zs.size(); i++)
-      addPoint(Point(_xs[i], _ys[i], _zs[i]), i);
-  }
+  // Add point using the unique ID "i", let the DiracKernel take
+  // care of the caching.  This should be fast after the first call,
+  // as long as the points don't move around.
+  for (unsigned int i = 0; i < _zs.size(); i++)
+    addPoint(Point(_xs[i], _ys[i], _zs[i]), i);
 }
 
 Real

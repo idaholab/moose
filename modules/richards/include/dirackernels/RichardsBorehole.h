@@ -41,9 +41,6 @@ public:
 
   /**
    * Add Dirac Points to the borehole
-   * If !_mesh_adaptivity then the containing element for
-   * each point gets cached to speed up computations
-   * at later time steps
    */
   virtual void addPoints();
 
@@ -126,9 +123,6 @@ protected:
 
   /// well constant
   Real _well_constant;
-
-  /// whether mesh adaptivity is used (if not then caching of elemental info is used to speed up addPoints)
-  bool _mesh_adaptivity;
 
   /// fluid porepressure (or porepressures in case of multiphase)
   MaterialProperty<std::vector<Real> > &_pp;

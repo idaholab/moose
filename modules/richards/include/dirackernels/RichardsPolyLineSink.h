@@ -55,14 +55,6 @@ protected:
   /// contains rows of the form x y z (space separated)
   std::string _point_file;
 
-  /**
-   * if true then Dirac Points are added to the mesh at the start,
-   * and then containing elements are cached.
-   * if false then the containing elements are computed each time step
-   * which can be quite expensive
-   */
-  bool _mesh_adaptivity;
-
   /// Defines the richards variables in the simulation
   const RichardsVarNames & _richards_name_UO;
 
@@ -74,7 +66,6 @@ protected:
 
   /// d(porepressure_i)/d(variable_j)
   MaterialProperty<std::vector<std::vector<Real> > > &_dpp_dv;
-
 
   /// vector of Dirac Points' x positions
   std::vector<Real> _xs;

@@ -86,7 +86,6 @@
     fluxes = '200 200'
     point_file = th01.points
     SumQuantityUO = total_outflow_mass
-    mesh_adaptivity = false
     variable = pressure
   [../]
 []
