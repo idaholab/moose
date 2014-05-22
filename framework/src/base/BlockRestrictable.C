@@ -148,7 +148,7 @@ BlockRestrictable::hasBlocks(std::vector<SubdomainName> names) const
 bool
 BlockRestrictable::hasBlocks(SubdomainID id) const
 {
-  if (_blk_ids.empty() || _blk_ids.count(Moose::ANY_BLOCK_ID) > 0)
+  if (_blk_ids.empty() || _blk_ids.find(Moose::ANY_BLOCK_ID) != _blk_ids.end())
     return true;
   else
     return _blk_ids.find(id) != _blk_ids.end();
@@ -164,8 +164,7 @@ BlockRestrictable::hasBlocks(std::vector<SubdomainID> ids) const
 bool
 BlockRestrictable::hasBlocks(std::set<SubdomainID> ids) const
 {
-  // An empty input is assumed to be ANY_BLOCK_ID
-  if (_blk_ids.empty() || _blk_ids.count(Moose::ANY_BLOCK_ID) > 0)
+  if (_blk_ids.empty() || _blk_ids.find(Moose::ANY_BLOCK_ID) != _blk_ids.end())
     return true;
   else
     return std::includes(_blk_ids.begin(), _blk_ids.end(), ids.begin(), ids.end());
@@ -175,10 +174,10 @@ bool
 BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids) const
 {
   // An empty input is assumed to be ANY_BLOCK_ID
-  if (ids.empty() || ids.count(Moose::ANY_BLOCK_ID)  > 0)
+  if (ids.empty() || ids.find(Moose::ANY_BLOCK_ID) != ids.end())
     return true;
 
-  if (_blk_ids.count(Moose::ANY_BLOCK_ID)  > 0)
+  if (_blk_ids.find(Moose::ANY_BLOCK_ID) != _blk_ids.end())
     return std::includes(ids.begin(), ids.end(), _blk_mesh->meshSubdomains().begin(), _blk_mesh->meshSubdomains().end());
   else
     return std::includes(ids.begin(), ids.end(), _blk_ids.begin(), _blk_ids.end());

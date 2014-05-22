@@ -71,6 +71,9 @@ MaterialAuxBase<T>::MaterialAuxBase(const std::string & name, InputParameters pa
     _factor(getParam<Real>("factor")),
     _offset(getParam<Real>("offset"))
 {
+  std::string prop = getParam<std::string>("property");
+  if (!hasBlockMaterialProperty(prop))
+    mooseError("The required material property, "+prop+", is not defined on all blocks for AuxKernel "+name);
 }
 
 #endif //MATERIALAUXBASE_H
