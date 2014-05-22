@@ -22,4 +22,10 @@
     input = 'point_caching_adaptive_refinement.i'
     exodiff = 'point_caching_adaptive_refinement_out.e-s004'
   [../]
+
+  [./point_caching_moving_mesh]
+    type = 'Exodiff'
+    input = 'point_caching_moving_mesh.i'
+    exodiff = 'point_caching_moving_mesh_out.e'
+  [../]
 []
