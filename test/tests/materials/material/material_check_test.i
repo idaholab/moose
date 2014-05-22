@@ -10,8 +10,6 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -19,7 +17,6 @@
 []
 
 [AuxVariables]
-active = 'mat'
   [./mat]
     order = CONSTANT
     family = MONOMIAL
@@ -27,57 +24,48 @@ active = 'mat'
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
-    type = MatDiffusion
+    type = Diffusion
     variable = u
-    prop_name = matp
   [../]
 []
 
 [AuxKernels]
-active = 'mat'
   [./mat]
-    type = MaterialRealAuxCheck
+    type = MaterialRealAux
     variable = mat
-    property = matp
+    property = prop
   [../]
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 1
   [../]
-
   [./right]
-    type = MTBC
+    type = DirichletBC
     variable = u
-    boundary = 1
-    grad = 8
-    prop_name = matp
+    boundary = 2
+    value = 3
   [../]
 []
 
 [Materials]
-  active = mat
-
   [./mat]
-    type = MTMaterial
-    block = 0
+    type = GenericConstantMaterial
+    block = 1
+    prop_names = prop
+    prop_values = 1
   [../]
 []
 
 [Executioner]
-  type = Steady
-
   # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
+  type = Steady
+  solve_type = PJFNK
 []
 
 [Outputs]
