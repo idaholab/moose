@@ -82,14 +82,14 @@
   [./fa]
     type = KKSParsedMaterial
     block = 0
-    f_base = Fa
+    f_name = Fa
     args = 'ca'
     function = 'ca^2'
   [../]
   [./fb]
     type = KKSParsedMaterial
     block = 0
-    f_base = Fb
+    f_name = Fb
     args = 'cb'
     function = '(1-cb)^2'
   [../]
@@ -143,8 +143,8 @@
     type = KKSPhaseChemicalPotential
     variable = ca
     cb       = cb
-    fa_base  = Fa
-    fb_base  = Fb
+    fa_name  = Fa
+    fb_namee  = Fb
   [../]
 []
 

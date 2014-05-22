@@ -69,7 +69,7 @@
     constant_names  = 'T   kB'
     constant_values = '400 8.15e-5'
     function = kB*T*(cbv*log(cbv)+cbg^3)
-    f_base = Fb
+    f_name = Fb
   [../]
 
   # solid phase free energy
@@ -80,7 +80,7 @@
     constant_names  = 'T   kB'
     constant_values = '400 8.15e-5'
     function = kB*T*(csv*log(csv)+csg^3)
-    f_base = Fs
+    f_name = Fs
   [../]
 []
 
@@ -105,16 +105,16 @@
     type = KKSPhaseChemicalPotential
     variable = cbv
     cb       = csv
-    fa_base  = Fb
-    fb_base  = Fs
+    fa_name  = Fb
+    fb_name  = Fs
   [../]
 
   [./ChemPotGas]
     type = KKSPhaseChemicalPotential
     variable = cbg
     cb       = csg
-    fa_base  = Fb
-    fb_base  = Fs
+    fa_name  = Fb
+    fb_name  = Fs
   [../]
 
 []

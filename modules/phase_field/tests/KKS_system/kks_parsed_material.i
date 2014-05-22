@@ -62,7 +62,7 @@
   [./fa]
     type = KKSParsedMaterial
     block = 0
-    f_base = F
+    f_name = F
     args = 'c1 c2'
     constant_names  = 'T    kB'
     constant_values = '400  .000086173324'
