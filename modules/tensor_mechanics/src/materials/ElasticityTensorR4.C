@@ -40,7 +40,8 @@ ElasticityTensorR4::momentJacobian( const unsigned int comp1, const unsigned int
   for (unsigned int i = 0 ; i < N ; ++i)
     for (unsigned int j = 0 ; j < N ; ++j)
       for (unsigned int k = 0 ; k < N ; ++k)
-        the_sum += _vals[i][j][k][comp2]*grad_phi(k)*PermutationTensor::eps(i, j, comp1);
+        //the_sum += _vals[i][j][k][comp2]*grad_phi(k)*PermutationTensor::eps(i, j, comp1);
+        the_sum += _vals[j][i][comp2][k]*grad_phi(k)*PermutationTensor::eps(i, j, comp1);
   return -test*the_sum;
 }
 

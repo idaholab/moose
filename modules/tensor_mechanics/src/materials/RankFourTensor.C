@@ -570,10 +570,11 @@ RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> input)
 
   _vals[1][2][1][2] = input[5];   //B2323
 
-  // antisymmetry
-  _vals[0][2][0][1] = -_vals[0][1][0][2];
-  _vals[1][2][0][1] = -_vals[0][1][1][2];
-  _vals[1][2][0][2] = -_vals[0][2][1][2];
+  // symmetry on the two pairs
+  _vals[0][2][0][1] = _vals[0][1][0][2];
+  _vals[1][2][0][1] = _vals[0][1][1][2];
+  _vals[1][2][0][2] = _vals[0][2][1][2];
+  // have now got the upper parts of vals[0][1], vals[0][2] and vals[1][2]
 
   // fill in from antisymmetry relations
   for (unsigned int i = 0; i < N - 1 ; i++)
@@ -583,14 +584,15 @@ RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> input)
       _vals[0][2][j][i] = -_vals[0][2][i][j];
       _vals[1][2][j][i] = -_vals[1][2][i][j];
     }
+  // have now got all of vals[0][1], vals[0][2] and vals[1][2]
 
-  // fill in from symmetry relations
-  for (unsigned int i = 0; i < N - 1 ; i++)
-    for (unsigned int j = i + 1 ; j < N ; j++)
+  // fill in from antisymmetry relations
+  for (unsigned int i = 0; i < N ; i++)
+    for (unsigned int j = 0 ; j < N ; j++)
     {
-      _vals[i][j][0][1] = _vals[0][1][i][j];
-      _vals[i][j][0][2] = _vals[0][2][i][j];
-      _vals[i][j][1][2] = _vals[1][2][i][j];
+      _vals[1][0][i][j] = -_vals[0][1][i][j];
+      _vals[2][0][i][j] = -_vals[0][2][i][j];
+      _vals[2][1][i][j] = -_vals[1][2][i][j];
     }
 }
 
