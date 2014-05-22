@@ -52,4 +52,9 @@
     exodiff = 'out.e'
     scale_refine = 3
   [../]
+  [./check_test]
+    type = 'RunException'
+    input = 'material_check_test.i'
+    expect_err = 'The required material property, prop, is not defined on all blocks for AuxKernel mat'
+  [../]
 []
