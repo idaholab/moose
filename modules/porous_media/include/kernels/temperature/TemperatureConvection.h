@@ -32,11 +32,11 @@ public:
 
 protected:
   virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();  
+  virtual Real computeQpJacobian();
 
   MaterialProperty<Real> & _specific_heat_water;
   MaterialProperty<RealGradient> & _darcy_mass_flux_water;
 //  MooseArray<RealGradient> &_pore_velocity_water;
-  
+
 };
 #endif //TEMPERATURECONVECTION

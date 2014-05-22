@@ -24,7 +24,7 @@ class VelocityAux;
 template<>
 InputParameters validParams<VelocityAux>();
 
-/** 
+/**
  * Coupled auxiliary value
  */
 class VelocityAux : public AuxKernel
@@ -39,7 +39,7 @@ public:
   VelocityAux(const std::string & name, InputParameters parameters);
 
   virtual ~VelocityAux() {}
-  
+
 protected:
   virtual Real computeValue();
 

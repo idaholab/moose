@@ -12,9 +12,9 @@ class GeothermalMaterialAction : public Action
 {
 public:
   GeothermalMaterialAction(const std::string & name, InputParameters params);
-    
+
   virtual void act();
-    
+
   virtual void addSolidMechanicsMaterial(InputParameters shared_params);
   virtual void addHeatTransportMaterial(InputParameters shared_params);
   virtual void addFluidFlowMaterial(InputParameters shared_params);

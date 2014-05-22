@@ -28,7 +28,7 @@
 
 [Kernels]
   [./p_wmfp]        # Mass diffusion kernel for PT (single-phase) problems
-    type = WaterMassFluxPressure_PT
+    type = WaterMassFluxPressurePT
     variable = pressure
   [../]
 []

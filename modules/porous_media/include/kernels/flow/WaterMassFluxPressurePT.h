@@ -12,36 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "TimeDerivative.h"
+#ifndef WATERMASSFLUXPRESSUREPT_H
+#define WATERMASSFLUXPRESSUREPT_H
 
-#ifndef MASSFLUXTIMEDERIVATIVE_PT_COMP
-#define MASSFLUXTIMEDERIVATIVE_PT_COMP
+#include "Diffusion.h"
+#include "Material.h"
 
 //Forward Declarations
-class MassFluxTimeDerivative_PT_comp;
+class WaterMassFluxPressurePT;
 
 template<>
-InputParameters validParams<MassFluxTimeDerivative_PT_comp>();
+InputParameters validParams<WaterMassFluxPressurePT>();
 
-class MassFluxTimeDerivative_PT_comp : public TimeDerivative
+class WaterMassFluxPressurePT : public Diffusion
 {
 public:
 
-  MassFluxTimeDerivative_PT_comp(const std::string & name, InputParameters parameters);
+  WaterMassFluxPressurePT(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
+
   virtual Real computeQpJacobian();
 
-    MaterialProperty<Real> & _density_water;
-    MaterialProperty<Real> & _density_water_old;
-    MaterialProperty<Real> & _dwdp;
-    
-    bool _has_chem_reactions;
-    MaterialProperty<Real> & _porosity;
-    MaterialProperty<Real> & _compressibility;
-    MaterialProperty<Real> * _porosity_old;
-  VariableValue & _u_old;  
-
+  MaterialProperty<Real> & _tau_water;
 };
-#endif //MASSFLUXTIMEDERIVATIVE_PT_COMP
+#endif //WATERMASSFLUXPRESSUREPT_H

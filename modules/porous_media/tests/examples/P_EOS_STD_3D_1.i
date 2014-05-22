@@ -26,7 +26,7 @@
 [Kernels]
  #----Pressure: diffusion, time derivative----#
   [./p_wmfp]
-    type = WaterMassFluxPressure_PT
+    type = WaterMassFluxPressurePT
     variable = pressure
   [../]
 []

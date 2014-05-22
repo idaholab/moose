@@ -20,7 +20,7 @@
 #include "SolidMechanicsApp.h"
 #include "TensorMechanicsApp.h"
 #include "WaterSteamEOSApp.h"
-#include "PorousMedia.h"
+#include "PorousMediaApp.h"
 
 template<>
 InputParameters validParams<ModulesApp>()

@@ -13,16 +13,16 @@
 /****************************************************************/
 
 #include "Material.h"
-#include "WaterMassFluxElevation_PT.h"
+#include "WaterMassFluxElevationPT.h"
 
 template<>
-InputParameters validParams<WaterMassFluxElevation_PT>()
+InputParameters validParams<WaterMassFluxElevationPT>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-WaterMassFluxElevation_PT::WaterMassFluxElevation_PT(const std::string & name,
+WaterMassFluxElevationPT::WaterMassFluxElevationPT(const std::string & name,
                                              InputParameters parameters)
   :Kernel(name, parameters),
    _density_water(getMaterialProperty<Real>("density_water")),
@@ -33,14 +33,14 @@ WaterMassFluxElevation_PT::WaterMassFluxElevation_PT(const std::string & name,
 {}
 
 Real
-WaterMassFluxElevation_PT::computeQpResidual()
+WaterMassFluxElevationPT::computeQpResidual()
 {
   //return _tau_water[_qp]*_density_water[_qp]*_gravity[_qp]*_gravity_vector[_qp]*_test[_i][_qp];
   return _tau_water[_qp]*_density_water[_qp]*_gravity[_qp]*(_gravity_vector[_qp]*_grad_test[_i][_qp]);
 }
 
 Real
-WaterMassFluxElevation_PT::computeQpJacobian()
+WaterMassFluxElevationPT::computeQpJacobian()
 {
   return 0;
 }

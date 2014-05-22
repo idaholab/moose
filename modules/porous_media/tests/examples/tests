@@ -29,4 +29,9 @@
     input = 'PT_EOS_STD_2D_1.i'
     exodiff = 'PT_EOS_STD_2D_1_out.e'
   [../]
+[./PT_EOS_STD_2D_2]
+    type = 'Exodiff'
+    input = 'PT_EOS_STD_2D_2.i'
+    exodiff = 'PT_EOS_STD_2D_2_out.e'
+  [../]
 []

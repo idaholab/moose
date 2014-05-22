@@ -45,6 +45,6 @@ VelocityAux::computeValue()
   {
     return _darcy_flux_water[_qp](_i)/_porosity[_qp];
   }
-  
+
 }
 

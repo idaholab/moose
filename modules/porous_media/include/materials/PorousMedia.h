@@ -32,7 +32,7 @@ class PorousMedia : public Material
 public:
   PorousMedia(const std::string & name,
               InputParameters parameters);
-  
+
 protected:
   //virtual void initQpStatefulProperties();
   virtual void computeProperties();
@@ -47,7 +47,7 @@ protected:
   Real _gx;
   Real _gy;
   Real _gz;
-    
+
   bool _has_chem_reactions;
 
 ////Declare material properties
@@ -60,13 +60,13 @@ protected:
   //gravity material props
   MaterialProperty<Real> & _gravity;
   MaterialProperty<RealVectorValue> & _gravity_vector;
-    
+
     void setPropsComputed(bool value) { _already_computed = value; }
-    
+
     bool areParentPropsComputed() const { return _already_computed; }
-    
+
 private:
-    
+
     /**
      * This parameter is here to indicate whether or not the PorousMedia Material
      * properties have been computed.  Each of the classes in the diamond hierarchy
@@ -74,7 +74,7 @@ private:
      * not they should recompute the base class properties
      */
     bool _already_computed;
-    
+
 };
 
 

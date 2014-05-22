@@ -12,18 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MassFluxTimeDerivative_PT.h"
+#include "MassFluxTimeDerivativePT.h"
 #include "Material.h"
 
 template<>
-InputParameters validParams<MassFluxTimeDerivative_PT>()
+InputParameters validParams<MassFluxTimeDerivativePT>()
 {
   InputParameters params = validParams<TimeDerivative>();
     params.addParam<bool>("has_chem_reactions", false, "flag if chemical reactions are present");
     return params;
 }
 
-MassFluxTimeDerivative_PT::MassFluxTimeDerivative_PT(const std::string & name, InputParameters parameters)
+MassFluxTimeDerivativePT::MassFluxTimeDerivativePT(const std::string & name, InputParameters parameters)
   :TimeDerivative(name, parameters),
    _density_water(getMaterialProperty<Real>("density_water")),
    _density_water_old(getMaterialProperty<Real>("time_old_density_water")),
@@ -37,14 +37,14 @@ MassFluxTimeDerivative_PT::MassFluxTimeDerivative_PT(const std::string & name, I
 {}
 
 Real
-MassFluxTimeDerivative_PT::computeQpResidual()
+MassFluxTimeDerivativePT::computeQpResidual()
 {
     return (((_porosity[_qp]*_density_water[_qp])-((*_porosity_old)[_qp]*_density_water_old[_qp]))/_dt) * _test[_i][_qp];
 //  return _porosity[_qp]*_density_water[_qp]*_compressibility[_qp]*TimeDerivative::computeQpResidual();
 }
 
 Real
-MassFluxTimeDerivative_PT::computeQpJacobian()
+MassFluxTimeDerivativePT::computeQpJacobian()
 {
     return (_porosity[_qp]*_dwdp[_qp]*_phi[_j][_qp])*_test[_i][_qp]/_dt;
 //  return _porosity[_qp]*_density_water[_qp]*_compressibility[_qp] * TimeDerivative::computeQpJacobian();

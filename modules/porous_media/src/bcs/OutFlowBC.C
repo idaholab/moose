@@ -42,5 +42,5 @@ OutFlowBC::computeQpJacobian()
 {
   Real val = (-_thermal_conductivity[_qp]*_grad_phi[_j][_qp]+_darcy_mass_flux_water[_qp]*_specific_heat_water[_qp]*_phi[_j][_qp])*_test[_i][_qp]*_normals[_qp];
   return val;
-  
+
 }

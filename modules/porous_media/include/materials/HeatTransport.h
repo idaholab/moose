@@ -32,7 +32,7 @@ class HeatTransport : virtual public PorousMedia
 public:
   HeatTransport(const std::string & name,
                 InputParameters parameters);
-  
+
 protected:
   virtual void computeProperties();
 ////Grab user input parameters

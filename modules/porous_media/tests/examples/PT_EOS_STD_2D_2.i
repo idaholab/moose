@@ -49,7 +49,7 @@
     variable = pressure
   [../]
   [./p_td]
-    type = MassFluxTimeDerivativePT
+    type = MassFluxTimeDerivativePTComp
     variable = pressure
   [../]
   [./t_d]
@@ -127,6 +127,7 @@
 
     porosity = 0.5
     permeability = 1.0e-12
+    compressibility = 1e-10
   [../]
 []
 
@@ -151,7 +152,7 @@
 []
 
 [Outputs]
-  file_base = PT_EOS_STD_2D_1_out
+  file_base = PT_EOS_STD_2D_2_out
   output_initial = true
   exodus = true
   console = true

@@ -12,29 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef WATERMASSFLUXPRESSURE_PT
-#define WATERMASSFLUXPRESSURE_PT
-
-#include "Diffusion.h"
 #include "Material.h"
-
-//Forward Declarations
-class WaterMassFluxPressure_PT;
+#include "WaterMassFluxPressurePT.h"
 
 template<>
-InputParameters validParams<WaterMassFluxPressure_PT>();
-
-class WaterMassFluxPressure_PT : public Diffusion
+InputParameters validParams<WaterMassFluxPressurePT>()
 {
-public:
+  InputParameters params = validParams<Diffusion>();
+  return params;
+}
 
-  WaterMassFluxPressure_PT(const std::string & name, InputParameters parameters);
-    
-protected:
-  virtual Real computeQpResidual();
+WaterMassFluxPressurePT::WaterMassFluxPressurePT(const std::string & name,
+                                             InputParameters parameters)
+  :Diffusion(name, parameters),
+   _tau_water(getMaterialProperty<Real>("tau_water"))
+{}
 
-  virtual Real computeQpJacobian();
+Real
+WaterMassFluxPressurePT::computeQpResidual()
+{
+ return _tau_water[_qp]*Diffusion::computeQpResidual();
+}
 
-  MaterialProperty<Real> & _tau_water;
-};
-#endif //WATERMASSFLUXPRESSURE
+Real
+WaterMassFluxPressurePT::computeQpJacobian()
+{
+  return _tau_water[_qp]*Diffusion::computeQpJacobian();
+}
+

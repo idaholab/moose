@@ -40,13 +40,13 @@ public:
    * constructor.
    */
   OutFlowBC(const std::string & name, InputParameters parameters);
-  
+
  virtual ~OutFlowBC(){}
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  
+
 private:
   /**
    * Vector to dot with the normal.
@@ -54,9 +54,9 @@ private:
   MaterialProperty<Real> &_thermal_conductivity;
   MaterialProperty<Real> & _specific_heat_water;
   MaterialProperty<RealGradient> & _darcy_mass_flux_water;
-  
+
 //  std::vector<RealGradient> & _grad_p;
-  
+
 };
 
 #endif //NEUMANNBC_H

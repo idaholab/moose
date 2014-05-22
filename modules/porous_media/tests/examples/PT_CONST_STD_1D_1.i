@@ -20,11 +20,11 @@
 
 [Kernels]
   [./p_td]
-    type = MassFluxTimeDerivative_PT
+    type = MassFluxTimeDerivativePT
     variable = pressure
   [../]
   [./p_wmfp]
-    type = WaterMassFluxPressure_PT
+    type = WaterMassFluxPressurePT
     variable = pressure
   [../]
   [./t_td]
