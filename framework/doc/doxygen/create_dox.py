@@ -1,5 +1,18 @@
 #!/usr/bin/env python
-import os, sys, argparse
+import os, sys
+
+# Get the real path of create_dox.py
+if(os.path.islink(sys.argv[0])):
+  pathname = os.path.dirname(os.path.realpath(sys.argv[0]))
+else:
+  pathname = os.path.dirname(sys.argv[0])
+  pathname = os.path.abspath(pathname)
+
+sys.path.append(os.path.join(MOOSE_DIR, 'python'))
+import path_tool
+path_tool.activate_module('argparse')
+
+import argparse
 
 def writeDOX(args, writefile):
   args.file_object.write("\n/** @example " + writefile + "\n */")
