@@ -5,7 +5,7 @@
 template<>
 InputParameters validParams<BlkResTestDiffusion>()
 {
-  MooseEnum test("none, fe_problem_null, mesh_null, use_mesh, hasBlocks, blocks, blockIDs, isBlockSubset, hasBlockMaterialProperty_true, hasBlockMaterialProperty_false", "none", "Select a test");
+  MooseEnum test("none, fe_problem_null, mesh_null, use_mesh, hasBlocks, hasBlocks_ANY_BLOCK_ID, blocks, blockIDs, isBlockSubset, hasBlockMaterialProperty_true, hasBlockMaterialProperty_false", "none", "Select a test");
   InputParameters params = validParams<Kernel>();
   params.addParam<MooseEnum>("test", test, "Select the desired test");
   return params;
@@ -115,6 +115,16 @@ BlkResTestDiffusion::BlkResTestDiffusion(const std::string & name, InputParamete
 
     // This is the expected error, all the above tests passed
     mooseError("hasBlocks testing passed");
+  }
+
+  // Test of stored ANY_BLOCK_ID on object
+  else if (test == "hasBlocks_ANY_BLOCK_ID")
+  {
+    // Test that ANY_BLOCK_ID is working
+    if (hasBlocks(1))
+      mooseError("hasBlocks_ANY_BLOCK_ID test passed");
+    else
+      mooseError("hasBlocks_ANY_BLOCK_ID test failed");
   }
 
   // Test that the blocks() method is working
