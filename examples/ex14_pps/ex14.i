@@ -1,20 +1,15 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-
   nx = 10
   ny = 10
-
   xmin = 0.0
   xmax = 1.0
-
   ymin = 0.0
   ymax = 1.0
 []
 
 [Variables]
-  active = 'forced'
-
   [./forced]
     order = FIRST
     family = LAGRANGE
@@ -22,15 +17,13 @@
 []
 
 [Functions]
-  active = 'bc_func forcing_func'
-
   # A ParsedFunction allows us to supply analytic expressions
   # directly in the input file
   [./bc_func]
     type = ParsedFunction
     value = sin(alpha*pi*x)
-    vars = 'alpha'
-    vals = '16'
+    vars = alpha
+    vals = 16
   [../]
 
   # This function is an actual compiled function
@@ -42,8 +35,6 @@
 []
 
 [Kernels]
-  active = 'diff forcing'
-
   [./diff]
     type = Diffusion
     variable = forced
@@ -58,8 +49,6 @@
 []
 
 [BCs]
-  active = 'all'
-
   # The BC can take a function name to use
   [./all]
     type = FunctionDirichletBC
@@ -72,20 +61,23 @@
 [Executioner]
   type = Steady
 
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-
+  # Preconditioned JFNK (default)
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Adaptivity]
   marker = uniform
+  steps = 5
 
   # Uniformly refine the mesh
   # for the convergence study
   [./Markers]
-    type = UniformMarker
-    mark = REFINE
+    [./uniform]
+      type = UniformMarker
+      mark = REFINE
+    [../]
   [../]
 []
 
@@ -93,7 +85,6 @@
   [./dofs]
     type = NumDOFs
   [../]
-
   [./integral]
     type = ElementL2Error
     variable = forced
@@ -105,7 +96,7 @@
   file_base = out
   exodus = true
   csv = true
-  x[./console]
+  [./console]
     type = Console
     perf_log = true
     linear_residuals = true

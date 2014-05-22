@@ -42,7 +42,7 @@ void
 ExampleApp::registerObjects(Factory & factory)
 {
   // Register our new executioner
-  registerExecutioner(TransientHalf);
+  registerTimeStepper(TransientHalf);
   registerKernel(ExampleDiffusion);
   registerKernel(Convection);
   registerKernel(ExampleImplicitEuler);
