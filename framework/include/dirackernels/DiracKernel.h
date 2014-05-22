@@ -225,12 +225,6 @@ private:
                     const Elem* new_elem,
                     Point p,
                     unsigned id);
-
-  /// This function is used internally when we have to do an expensive
-  /// PointLocator-based lookup to find the Elem which contains the Point p.
-  /// The Elem which gets returned is checked against NULL, should contain
-  /// the point p requested by the user.
-  const Elem * expensivePointLookup(Point p, unsigned id);
 };
 
 #endif

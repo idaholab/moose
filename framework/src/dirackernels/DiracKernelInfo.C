@@ -13,8 +13,13 @@
 /****************************************************************/
 
 #include "DiracKernelInfo.h"
+#include "MooseMesh.h"
 
-DiracKernelInfo::DiracKernelInfo()
+// LibMesh
+#include "libmesh/point_locator_base.h"
+
+DiracKernelInfo::DiracKernelInfo() :
+    _point_locator(NULL)
 {
 }
 
@@ -62,4 +67,31 @@ DiracKernelInfo::hasPoint(const Elem * elem, Point p)
 
   // If we haven't found it, we don't have it.
   return false;
+}
+
+
+
+void
+DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
+{
+  // Construct the PointLocator object, but only if we have Dirac points
+  if (!_elements.empty())
+    _point_locator = PointLocatorBase::build(TREE, mesh);
+}
+
+
+
+const Elem *
+DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
+{
+  // If the PointLocator has never been created, do so now.
+  if (_point_locator.get() == NULL)
+    _point_locator = PointLocatorBase::build(TREE, mesh);
+
+  const Elem * elem = (*_point_locator)(p);
+
+  if (elem == NULL)
+    mooseError("Error while searching for Point " << p << " in DiracKernel!");
+
+  return elem;
 }

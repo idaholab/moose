@@ -1978,7 +1978,12 @@ MooseMesh::getPatchSize()
   return _patch_size;
 }
 
-MooseMesh::operator libMesh::MeshBase &()
+MooseMesh::operator libMesh::MeshBase & ()
+{
+  return getMesh();
+}
+
+MooseMesh::operator const libMesh::MeshBase & () const
 {
   return getMesh();
 }

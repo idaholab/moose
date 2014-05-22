@@ -197,7 +197,7 @@ DiracKernel::addPoint(Point p, unsigned id)
           // Update the caches.
           (!active && !contains_point))
         {
-          const Elem * elem = expensivePointLookup(p, id);
+          const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
           updateCaches(cached_elem, elem, p, id);
           addPoint(elem, p, id);
           return elem;
@@ -212,9 +212,9 @@ DiracKernel::addPoint(Point p, unsigned id)
   }
 
   // If we made it here, we either didn't have the point already cached or
-  // id == libMesh::invalid_uint.  So now do the expensive PointLocator lookup,
+  // id == libMesh::invalid_uint.  So now do the more expensive PointLocator lookup,
   // possibly cache the result, and call the other addPoint() method.
-  const Elem * elem = expensivePointLookup(p, id);
+  const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
 
   if (id != libMesh::invalid_uint)
   {
@@ -332,18 +332,4 @@ DiracKernel::updateCaches(const Elem* old_elem,
   // Next, add the point to the new_elem's vector
   reverse_cache_t::mapped_type & points = _reverse_point_cache[new_elem];
   points.push_back(std::make_pair(p, id));
-}
-
-
-
-const Elem *
-DiracKernel::expensivePointLookup(Point p, unsigned /*id*/)
-{
-  AutoPtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, _mesh);
-  const Elem * elem = (*pl)(p);
-
-  if (elem == NULL)
-    mooseError("Error while searching for Point " << p << " in DiracKernel!");
-
-  return elem;
 }

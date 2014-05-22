@@ -356,7 +356,8 @@ public:
   /**
    * Implicit conversion operator from MooseMesh -> libMesh::MeshBase.
    */
-  operator libMesh::MeshBase &();
+  operator libMesh::MeshBase & ();
+  operator const libMesh::MeshBase & () const;
 
   /**
    * Accessor for the underlying libMesh Mesh object.
