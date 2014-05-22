@@ -14,6 +14,7 @@
 // MOOSE includes
 #include "MooseError.h"
 #include "SolutionUserObject.h"
+#include "RotationMatrix.h"
 
 // libMesh includes
 //#include "MooseMesh.h"
@@ -32,7 +33,7 @@ InputParameters validParams<SolutionUserObject>()
   InputParameters params = validParams<GeneralUserObject>();
 
   // Add required parameters
-  params.addRequiredParam<std::string>("mesh", "The name of the mesh file (must be xda or exodusII file.");
+  params.addRequiredParam<std::string>("mesh", "The name of the mesh file (must be xda or exodusII file).");
   //params.addRequiredParam<std::vector<std::string> >("variables", "The name of the variable from the file you want to use for values.");
   params.addParam<std::vector<std::string> >("nodal_variables", "The name of the nodal variables from the file you want to use for values.");
   params.addParam<std::vector<std::string> >("elemental_variables", "The name of the element variables from the file you want to use for values.");
@@ -49,9 +50,22 @@ InputParameters validParams<SolutionUserObject>()
   params.set<MooseEnum>("execute_on") = "timestep_begin";
 
   // Add ability to perform coordinate transformation: scale, factor
-  params.addParam<std::vector<Real> >("coord_scale", std::vector<Real>(LIBMESH_DIM,1), "Scaling parameter for x,y,z coordiantes (e.g. x*scale)");
-  params.addParam<std::vector<Real> >("coord_factor", std::vector<Real>(LIBMESH_DIM,0), "Transformation factors for x,y,z coordiantes (e.g., x + factor)");
-
+  params.addParam<std::vector<Real> >("coord_scale", "This name has been deprecated.  Please use scale instead");
+  params.addParam<std::vector<Real> >("coord_factor", "This name has been deprecated.  Please use translation instead");
+  params.addParam<std::vector<Real> >("scale", std::vector<Real>(LIBMESH_DIM,1), "Scale factor for points in the simulation");
+  params.addParam<std::vector<Real> >("scale_multiplier", std::vector<Real>(LIBMESH_DIM,1), "Scale multiplying factor for points in the simulation");
+  params.addParam<std::vector<Real> >("translation", std::vector<Real>(LIBMESH_DIM,0), "Translation factors for x,y,z coordinates of the simulation");
+  params.addParam<RealVectorValue>("rotation0_vector", RealVectorValue(0, 0, 1), "Vector about which to rotate points of the simulation.");
+  params.addParam<Real>("rotation0_angle", 0.0, "Anticlockwise rotation angle (in degrees) to use for rotation about rotation0_vector.");
+  params.addParam<RealVectorValue>("rotation1_vector", RealVectorValue(0, 0, 1), "Vector about which to rotate points of the simulation.");
+  params.addParam<Real>("rotation1_angle", 0.0, "Anticlockwise rotation angle (in degrees) to use for rotation about rotation1_vector.");
+  // following lines build the default_transformation_order
+  MooseEnum t1("rotation0, translation, scale, rotation1, scale_multiplier", "translation");
+  MooseEnum t2("rotation0, translation, scale, rotation1, scale_multiplier", "scale");
+  std::vector<MooseEnum> default_transformation_order;
+  default_transformation_order.push_back(t1);
+  default_transformation_order.push_back(t2);
+  params.addParam<std::vector<MooseEnum> >("transformation_order", default_transformation_order, "The order to perform the operations in.  Define R0 to be the rotation matrix encoded by rotation0_vector and rotation0_angle.  Similarly for R1.  Denote the scale by s, the scale_multiplier by m, and the translation by t.  Then, given a point x in the simulation, if transformation_order = 'rotation0 scale_multiplier translation scale rotation1' then form p = R1*(R0*x*m - t)/s.  Then the values provided by the SolutionUserObject at point x in the simulation are the variable values at point p in the mesh.");
   // Return the parameters
   return params;
 }
@@ -83,10 +97,59 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _exodus_times(NULL),
     _exodus_index1(-1),
     _exodus_index2(-1),
-    _scale(getParam<std::vector<Real> >("coord_scale")),
-    _factor(getParam<std::vector<Real> >("coord_factor"))
+    _scale(getParam<std::vector<Real> >("scale")),
+    _scale_multiplier(getParam<std::vector<Real> >("scale_multiplier")),
+    _translation(getParam<std::vector<Real> >("translation")),
+    _rotation0_vector(getParam<RealVectorValue>("rotation0_vector")),
+    _rotation0_angle(getParam<Real>("rotation0_angle")),
+    _r0(RealTensorValue()),
+    _rotation1_vector(getParam<RealVectorValue>("rotation1_vector")),
+    _rotation1_angle(getParam<Real>("rotation1_angle")),
+    _r1(RealTensorValue()),
+    _transformation_order(getParam<std::vector<MooseEnum> >("transformation_order"))
 {
   _exec_flags = EXEC_INITIAL;
+
+  if (parameters.isParamValid("coord_scale"))
+  {
+    mooseWarning("Parameter name coord_scale is deprecated.  Please use scale instead.");
+    _scale = getParam<std::vector<Real> >("coord_scale");
+  }
+  if (parameters.isParamValid("coord_factor"))
+  {
+    mooseWarning("Parameter name coord_factor is deprecated.  Please use translation instead.");
+    _translation = getParam<std::vector<Real> >("coord_factor");
+  }
+
+  // form rotation matrices with the specified angles
+  Real halfPi = std::acos(0.0);
+  Real a;
+  Real b;
+
+  a = std::cos(halfPi*_rotation0_angle/90);
+  b = std::sin(halfPi*_rotation0_angle/90);
+  Moose::out << "a, b = " << a << " " << b << "\n";
+  // the following is an anticlockwise rotation about z
+  RealTensorValue rot0_z(
+  a, -b, 0,
+  b, a, 0,
+  0, 0, 1);
+  // form the rotation matrix that will take rotation0_vector to the z axis
+  RealTensorValue vec0_to_z = RotationMatrix::rotVecToZ(_rotation0_vector);
+  // _r0 is then: rotate points so vec0 lies along z; then rotate about angle0; then rotate points back
+  _r0 = vec0_to_z.transpose()*(rot0_z*vec0_to_z);
+
+  a = std::cos(halfPi*_rotation1_angle/90);
+  b = std::sin(halfPi*_rotation1_angle/90);
+  // the following is an anticlockwise rotation about z
+  RealTensorValue rot1_z(
+  a, -b, 0,
+  b, a, 0,
+  0, 0, 1);
+  // form the rotation matrix that will take rotation1_vector to the z axis
+  RealTensorValue vec1_to_z = RotationMatrix::rotVecToZ(_rotation1_vector);
+  // _r1 is then: rotate points so vec1 lies along z; then rotate about angle1; then rotate points back
+  _r1 = vec1_to_z.transpose()*(rot1_z*vec1_to_z);
 }
 
 SolutionUserObject::~SolutionUserObject()
@@ -453,9 +516,24 @@ SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_
   // Create copy of point
   Point pt(p);
 
-  // Apply scaling and factor
-  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
-    pt(i) = (pt(i) - _factor[i])/_scale[i];
+  // do the transformations
+  for (unsigned int trans_num = 0 ; trans_num < _transformation_order.size() ; ++trans_num)
+  {
+    Moose::out << "thihs one is " << _transformation_order[trans_num] << "\n";
+    if (_transformation_order[trans_num] == "rotation0")
+      pt = _r0*pt;
+    else if (_transformation_order[trans_num] == "translation")
+      for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+        pt(i) -= _translation[i];
+    else if (_transformation_order[trans_num] == "scale")
+      for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+        pt(i) /= _scale[i];
+    else if (_transformation_order[trans_num] == "scale_multiplier")
+      for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+        pt(i) *= _scale_multiplier[i];
+    else if (_transformation_order[trans_num] == "rotation1")
+      pt = _r1*pt;
+  }
 
   // Extract the value at the current point
   Real val = evalMeshFunction(pt, var_name, 1);

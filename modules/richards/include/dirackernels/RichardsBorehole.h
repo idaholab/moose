@@ -177,9 +177,6 @@ protected:
   /// reads a space-separated line of floats from ifs and puts in myvec
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
 
-  /// provides a rotation matrix that will rotate the vector v2 to the z axis (the "2" direction)
-  RealTensorValue rotVecToZ(RealVectorValue v2);
-
   /**
    * Calculates Peaceman's form of the borehole well constant
    * Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388

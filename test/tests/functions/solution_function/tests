@@ -16,4 +16,37 @@
     input = 'solution_function_exodus_test.i'
     exodiff = 'solution_function_exodus_test_out.e'
   [../]
+
+  [./rot1]
+    type = 'Exodiff'
+    input = 'solution_function_rot1.i'
+    exodiff = 'solution_function_rot1.e'
+  [../]
+  [./rot2]
+    type = 'Exodiff'
+    input = 'solution_function_rot2.i'
+    exodiff = 'solution_function_rot2.e'
+  [../]
+  [./rot3]
+    type = 'Exodiff'
+    input = 'solution_function_rot3.i'
+    exodiff = 'solution_function_rot3.e'
+  [../]
+  [./rot4]
+    type = 'Exodiff'
+    input = 'solution_function_rot4.i'
+    exodiff = 'solution_function_rot4.e'
+  [../]
+  [./scale_transl]
+    type = 'Exodiff'
+    input = 'solution_function_scale_transl.i'
+    exodiff = 'solution_function_scale_transl.e'
+  [../]
+  [./scale_mult]
+    type = 'Exodiff'
+    input = 'solution_function_scale_mult.i'
+    exodiff = 'solution_function_scale_mult.e'
+  [../]
+
+
 []

@@ -4,6 +4,7 @@
 /*****************************************/
 
 #include "RichardsBorehole.h"
+#include "RotationMatrix.h"
 
 template<>
 InputParameters validParams<RichardsBorehole>()
@@ -115,7 +116,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   for (unsigned int i=0 ; i<_xs.size()-1; ++i)
   {
     RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
-    _rot_matrix[i] = rotVecToZ(v2);
+    _rot_matrix[i] = RotationMatrix::rotVecToZ(v2);
   }
 
   // size the array that holds elemental info
@@ -172,53 +173,6 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   else
     mooseError("To reduce errors, if you are using one CoupledVar in a RichardsBorehole (for example, the relperm_var), you must currently use ALL of the CoupledVars (dseff_var, relperm_var, drelperm_var, etc)");
 
-}
-
-RealTensorValue
-RichardsBorehole::rotVecToZ(RealVectorValue v2)
-// provides a rotation matrix that will rotate the vector v2 to the z axis (the "2" direction)
-{
-  // ensure that v2 is normalised
-  v2 /= std::sqrt(v2*v2);
-
-  // construct v0 and v1 to be orthonormal to v2
-  // and form a RH basis, that is, so v1 x v2 = v0
-
-  // Use Gram-Schmidt method to find v1.
-  RealVectorValue v1;
-  // Need a prototype for v1 first, and this is done by looking at the smallest component of v2
-  if ( (v2(2) >= v2(1) && v2(1) >= v2(0)) || (v2(1) >= v2(2) && v2(2) >= v2(0)) )
-    // v2(0) is the smallest component
-    v1(0) = 1;
-  else if ( (v2(2) >= v2(0) && v2(0) >= v2(1)) || (v2(0) >= v2(2) && v2(2) >= v2(1)) )
-    // v2(1) is the smallest component
-    v1(1) = 1;
-  else
-    // v2(2) is the smallest component
-    v1(2) = 1;
-  // now Gram-Schmidt
-  v1 -= (v1*v2)*v2;
-  v1 /= std::sqrt(v1*v1);
-
-  // now use v0 = v1 x v2
-  RealVectorValue v0;
-  v0(0) = v1(1)*v2(2) - v1(2)*v2(1);
-  v0(1) = v1(2)*v2(0) - v1(0)*v2(2);
-  v0(2) = v1(0)*v2(1) - v1(1)*v2(0);
-
-  // the desired rotation matrix is just
-  RealTensorValue rot;
-  rot(0, 0) = v0(0);
-  rot(0, 1) = v0(1);
-  rot(0, 2) = v0(2);
-  rot(1, 0) = v1(0);
-  rot(1, 1) = v1(1);
-  rot(1, 2) = v1(2);
-  rot(2, 0) = v2(0);
-  rot(2, 1) = v2(1);
-  rot(2, 2) = v2(2);
-
-  return rot;
 }
 
 bool RichardsBorehole::parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
