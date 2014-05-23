@@ -128,6 +128,8 @@ public:
 
   Real doubleContraction(const RankTwoTensor &a);
 
+  Real secondInvariant();
+
   Real trace();
 
   //Calculate the determine of the tensor
