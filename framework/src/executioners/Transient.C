@@ -53,7 +53,6 @@ InputParameters validParams<Transient>()
   params.addParam<bool>("trans_ss_check",  false,  "Whether or not to check for steady state conditions");
   params.addParam<Real>("ss_check_tol",    1.0e-08,"Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
   params.addParam<Real>("ss_tmin",         0.0,    "Minimum number of timesteps to take before checking for steady state conditions.");
-  params.addParam<std::vector<Real> >("sync_times", sync_times, "A list of times that will be solved for provided they are within the simulation time");
   params.addParam<Real>("predictor_scale", "The scale factor for the predictor (can range from 0 to 1)");
 
   params.addParam<std::vector<std::string> >("time_periods", "The names of periods");
@@ -144,10 +143,10 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
       params.set<Real>("scale") = predscale;
       _problem.addPredictor("SimplePredictor", "predictor", params);
     }
+
     else
-    {
       mooseError("Input value for predictor_scale = "<< predscale << ", outside of permissible range (0 to 1)");
-    }
+
   }
 
   if (!_restart_file_base.empty())
