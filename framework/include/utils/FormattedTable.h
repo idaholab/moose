@@ -130,6 +130,7 @@ protected:
   static const unsigned short _min_pps_width;
 
   /// The optional output file stream
+  std::string _output_file_name;
   std::ofstream _output_file;
   bool _stream_open;
 
