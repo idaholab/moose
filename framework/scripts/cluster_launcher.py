@@ -23,6 +23,7 @@ if os.environ.has_key("FRAMEWORK_DIR"):
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
 import path_tool
 path_tool.activate_module('TestHarness')
+path_tool.activate_module('FactorySystem')
 sys.path.append(os.path.join(FRAMEWORK_DIR, 'scripts', 'ClusterLauncher'))
 
 import ParseGetPot
@@ -76,7 +77,7 @@ class ClusterLauncher:
           print "Type missing in " + filename
           sys.exit(1)
 
-        params = self.factory.getValidParams(job_node.params['type'])
+        params = self.factory.validParams(job_node.params['type'])
 
         params['job_name'] = jobname
 
@@ -123,7 +124,7 @@ class ClusterLauncher:
     # Turn the remaining work over to the Job instance
     # To keep everything consistent we'll also append our serial number to our job name
     specs['job_name'] = next_dir
-    job_instance = self.factory.create(specs['type'], specs)
+    job_instance = self.factory.create(specs['type'], specs['job_name'], specs)
 
     # Copy files
     job_instance.copyFiles(job_file)

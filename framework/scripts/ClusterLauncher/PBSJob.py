@@ -4,8 +4,8 @@ from Job import Job
 import os, sys, subprocess, shutil
 
 class PBSJob(Job):
-  def getValidParams():
-    params = Job.getValidParams()
+  def validParams():
+    params = Job.validParams()
 
     params.addRequiredParam('chunks', "The number of PBS chunks.")
     # Only one of either of the next two paramteres can be specified
@@ -32,7 +32,7 @@ class PBSJob(Job):
     params.addRequiredParam('input_file', "The input file name.")
 
     return params
-  getValidParams = staticmethod(getValidParams)
+  validParams = staticmethod(validParams)
 
   def __init__(self, name, params):
     Job.__init__(self, name, params)
