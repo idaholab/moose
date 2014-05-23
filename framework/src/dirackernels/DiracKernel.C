@@ -216,7 +216,7 @@ DiracKernel::addPoint(Point p, unsigned id)
   // possibly cache the result, and call the other addPoint() method.
   const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
 
-  if (id != libMesh::invalid_uint)
+  if (elem && (id != libMesh::invalid_uint))
   {
     // Add the point to the cache...
     _point_cache[id] = std::make_pair(elem, p);
@@ -293,9 +293,11 @@ DiracKernel::updateCaches(const Elem* old_elem,
                           Point p,
                           unsigned id)
 {
-  // Update the point cache
+  // Update the point cache.  Remove old cached data, only cache
+  // new_elem if it is non-NULL.
   _point_cache.erase(id);
-  _point_cache[id] = std::make_pair(new_elem, p);
+  if (new_elem)
+    _point_cache[id] = std::make_pair(new_elem, p);
 
   // Update the reverse cache
   //
@@ -329,7 +331,10 @@ DiracKernel::updateCaches(const Elem* old_elem,
     }
   }
 
-  // Next, add the point to the new_elem's vector
-  reverse_cache_t::mapped_type & points = _reverse_point_cache[new_elem];
-  points.push_back(std::make_pair(p, id));
+  // Next, if new_elem is not NULL, add the point to the new_elem's vector
+  if (new_elem)
+  {
+    reverse_cache_t::mapped_type & points = _reverse_point_cache[new_elem];
+    points.push_back(std::make_pair(p, id));
+  }
 }

@@ -90,8 +90,11 @@ DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
 
   const Elem * elem = (*_point_locator)(p);
 
-  if (elem == NULL)
-    mooseError("Error while searching for Point " << p << " in DiracKernel!");
+  // Note: The PointLocator object returns NULL when the Point is not
+  // found within the Mesh.  This is not considered to be an error as
+  // far as the DiracKernels are concerned: sometimes the Mesh moves
+  // out from the Dirac point entirely and in that case the Point just
+  // gets "deactivated".
 
   return elem;
 }
