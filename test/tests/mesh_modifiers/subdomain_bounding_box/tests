@@ -1,0 +1,22 @@
+[Tests]
+  [./inside]
+    type = Exodiff
+    input = subdomain_bounding_box_inside.i
+    exodiff = subdomain_bounding_box_inside_out.e
+  [../]
+  [./outside]
+    type = Exodiff
+    input = subdomain_bounding_box_outside.i
+    exodiff = subdomain_bounding_box_outside_out.e
+  [../]
+  [./oriented_inside]
+    type = Exodiff
+    input = oriented_subdomain_bounding_box_inside.i
+    exodiff = oriented_subdomain_bounding_box_inside_out.e
+  [../]
+  [./oriented_outside]
+    type = Exodiff
+    input = oriented_subdomain_bounding_box_outside.i
+    exodiff = oriented_subdomain_bounding_box_outside_out.e
+  [../]
+[]

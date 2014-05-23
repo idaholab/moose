@@ -12,40 +12,53 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ORIENTEDBOXMARKER_H
-#define ORIENTEDBOXMARKER_H
+#ifndef ORIENTEDSUBDOMAINBOUNDINGBOX_H
+#define ORIENTEDSUBDOMAINBOUNDINGBOX_H
 
 // MOOSE includes
-#include "Marker.h"
+#include "MeshModifier.h"
 #include "OrientedBoxInterface.h"
 
-// Forward declarations
-class OrientedBoxMarker;
+// Forward declerations
+class OrientedSubdomainBoundingBox;
 
 template<>
-InputParameters validParams<OrientedBoxMarker>();
+InputParameters validParams<OrientedSubdomainBoundingBox>();
 
 /**
- * Creates a box of specified width, length and height,
- * with its center at specified position,
- * and with the direction along the width direction specified,
- * and with the direction along the length direction specified.
- * Then elements are marked as inside or outside this box
+ * MeshModifier for defining a Subdomain inside or outside of a bounding box with arbitrary orientation
  */
-class OrientedBoxMarker :
-  public Marker,
+class OrientedSubdomainBoundingBox :
+  public MeshModifier,
   public OrientedBoxInterface
 {
 public:
-  OrientedBoxMarker(const std::string & name, InputParameters parameters);
-  virtual ~OrientedBoxMarker(){};
 
-protected:
-  virtual MarkerValue computeElementMarker();
+  /**
+   * Class constructor
+   * @param name The name of the oject
+   * @param parameters Th input parameters
+   */
+  OrientedSubdomainBoundingBox(const std::string & name, InputParameters parameters);
 
-  MarkerValue _inside;
-  MarkerValue _outside;
+  /**
+   * Class destructor
+   */
+  virtual ~OrientedSubdomainBoundingBox();
+
+  /**
+   * Perform the modification of the Subdomain IDs
+   */
+  virtual void modify();
+
+private:
+
+  /// ID location (inside of outside of box)
+  MooseEnum _location;
+
+  /// Block ID to assign to the region
+  SubdomainID _block_id;
 
 };
 
-#endif /* ORIENTEDBOXMARKER_H */
+#endif //ORIENTEDSUBDOMAINBOUNDINGBOX_H
