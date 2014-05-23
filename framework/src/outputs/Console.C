@@ -211,6 +211,13 @@ Console::~Console()
 void
 Console::initialSetup()
 {
+  // Enable verbose output if Executioner has it enabled
+  if (_app.getExecutioner()->isParamValid("verbose") && _app.getExecutioner()->getParam<bool>("verbose"))
+  {
+    _verbose = true;
+    _pars.set<bool>("verbose") = true;
+  }
+
   // Output the performance log early
   if (getParam<bool>("setup_log_early"))
   {
@@ -274,7 +281,7 @@ Console::timestepSetup()
 
     // Show the old time delta information, if desired
     if (_verbose)
-      oss  << "            old dt = "<< std::left << std::endl;
+      oss  << "            old dt = " << std::left << _dt_old << std::endl;
   }
 
   // Output to the screen
