@@ -61,8 +61,13 @@ EigenExecutionerBase::EigenExecutionerBase(const std::string & name, InputParame
     _problem.addTimeIntegrator(ti_str, "ti", params);
   }
 
+  // we want to tell the App about what our system time is (in case anyone else is interested).
+  Real system_time = getParam<Real>("time");
+  _app.setStartTime(system_time);
+
   // set the system time
-  _problem.time() = getParam<Real>("time");
+  _problem.time() = system_time;
+  _problem.timeOld() = system_time;
 
   // used for controlling screen print-out
   _problem.timeStep() = 0;
