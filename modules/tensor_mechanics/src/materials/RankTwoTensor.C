@@ -355,6 +355,20 @@ RankTwoTensor::transpose()
 }
 
 Real
+RankTwoTensor::secondInvariant()
+{
+  Real result(0.0);
+
+  RankTwoTensor deviatoric(*this);
+
+  deviatoric.addIa(-1./3.*trace());
+
+  result = 0.5*deviatoric.doubleContraction(deviatoric);
+
+  return result;
+}
+
+Real
 RankTwoTensor::trace()
 {
   Real result(0.0);
