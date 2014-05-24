@@ -61,6 +61,7 @@ FormattedTable::FormattedTable() :
 
 FormattedTable::FormattedTable(const FormattedTable &o) :
     _column_names(o._column_names),
+    _output_file_name(""),
     _stream_open(o._stream_open),
     _last_key(o._last_key),
     _output_time(o._output_time)
@@ -146,8 +147,15 @@ FormattedTable::printTable(const std::string & file_name)
 {
   if (!_stream_open)
   {
-    _output_file.open(file_name.c_str(), std::ios::trunc);
+    _output_file_name = file_name;
+    _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
     _stream_open = true;
+  }
+  else if (file_name.compare(_output_file_name) != 0)
+  {
+    _output_file.close();
+    _output_file_name = file_name;
+    _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
   }
   printTable(_output_file);
 }
@@ -263,8 +271,15 @@ FormattedTable::printCSV(const std::string & file_name, int interval)
 
   if (!_stream_open)
   {
+    _output_file_name = file_name;
     _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
     _stream_open = true;
+  }
+  else if (file_name.compare(_output_file_name) != 0)
+  {
+    _output_file.close();
+    _output_file_name = file_name;
+    _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
   }
 
   _output_file.seekp(0, std::ios::beg);
