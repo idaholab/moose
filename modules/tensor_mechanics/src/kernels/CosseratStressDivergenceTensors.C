@@ -36,7 +36,7 @@ CosseratStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
     coupled_component = 2;
 
   if (coupled_component < 3)
-    return _Jacobian_mult[_qp].cosseratElasticJacobian( _component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp] );
+    return _Jacobian_mult[_qp].elasticJacobianwc( _component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp] );
 
   return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
 }

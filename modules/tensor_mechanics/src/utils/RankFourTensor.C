@@ -7,10 +7,10 @@
 #include "libmesh/libmesh.h"
 #include <ostream>
 
-extern "C" void FORTRAN_CALL(dsyev) ( ... );
-extern "C" void FORTRAN_CALL(dgeev) ( ... );
-extern "C" void FORTRAN_CALL(dgetri) ( ... );
-extern "C" void FORTRAN_CALL(dgetrf) ( ... );
+extern "C" void FORTRAN_CALL(dsyev) ( ... ); // eigenvalue and eigenvectors for symmetric matrix from LAPACK
+extern "C" void FORTRAN_CALL(dgeev) ( ... ); // eigenvalue and eigenvectors for general matrix from LAPACK
+extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
+extern "C" void FORTRAN_CALL(dgetrf) ( ... ); // matrix inversion routine from LAPACK
 
 
 MooseEnum
@@ -225,7 +225,6 @@ RankFourTensor::operator - () const
   return result;
 }
 
-//Added
 RankFourTensor
 RankFourTensor::operator*(const RankFourTensor &a) const
 {
@@ -251,104 +250,134 @@ RankFourTensor::invSymm()
 
   RankFourTensor result;
 
-  unsigned int ntens=6;
-  int nskip=2;
+  unsigned int ntens = N*(N+1)/2;
+  int nskip = N-1;
 
+  // We use the LAPACK matrix inversion routine here.  Form the matrix
+  //
+  // mat[0]  mat[1]  mat[2]  mat[3]  mat[4]  mat[5]
+  // mat[6]  mat[7]  mat[8]  mat[9]  mat[10] mat[11]
+  // mat[12] mat[13] mat[14] mat[15] mat[16] mat[17]
+  // mat[18] mat[19] mat[20] mat[21] mat[22] mat[23]
+  // mat[24] mat[25] mat[26] mat[27] mat[28] mat[29]
+  // mat[30] mat[31] mat[32] mat[33] mat[34] mat[35]
+  //
+  // This is filled from the indpendent components of C assuming
+  // the symmetry C_ijkl = C_ijlk = C_jikl.
+  //
+  // If there are two rank-four tensors X and Y then the reason for
+  // this filling becomes apparent if we want to calculate
+  // X_ijkl*Y_klmn = Z_ijmn
+  // For denote the "mat" versions of X, Y and Z by x, y and z.
+  // Then
+  // z_ab = x_ac*y_cb
+  // Eg
+  // z_00 = Z_0000 = X_0000*Y_0000 + X_0011*Y_1111 + X_0022*Y_2200 + 2*X_0001*Y_0100 + 2*X_0002*Y_0200 + 2*X_0012*Y_1200   (the factors of 2 come from the assumed symmetries)
+  // z_03 = 2*Z_0001 = X_0000*2*Y_0001 + X_0011*2*Y_1101 + X_0022*2*Y_2201 + 2*X_0001*2*Y_0101 + 2*X_0002*2*Y_0201 + 2*X_0012*2*Y_1201
+  // z_22 = 2*Z_0102 = X_0100*2*Y_0002 + X_0111*2*X_1102 + X_0122*2*Y_2202 + 2*X_0101*2*Y_0102 + 2*X_0102*2*Y_0202 + 2*X_0112*2*Y_1202
+  // Finally, we use LAPACK to find x^-1, and put it back into rank-4 tensor form
+  //
+  // mat[0] = C(0,0,0,0)
+  // mat[1] = C(0,0,1,1)
+  // mat[2] = C(0,0,2,2)
+  // mat[3] = C(0,0,0,1)*2
+  // mat[4] = C(0,0,0,2)*2
+  // mat[5] = C(0,0,1,2)*2
+
+  // mat[6] = C(1,1,0,0)
+  // mat[7] = C(1,1,1,1)
+  // mat[8] = C(1,1,2,2)
+  // mat[9] = C(1,1,0,1)*2
+  // mat[10] = C(1,1,0,2)*2
+  // mat[11] = C(1,1,1,2)*2
+
+  // mat[12] = C(2,2,0,0)
+  // mat[13] = C(2,2,1,1)
+  // mat[14] = C(2,2,2,2)
+  // mat[15] = C(2,2,0,1)*2
+  // mat[16] = C(2,2,0,2)*2
+  // mat[17] = C(2,2,1,2)*2
+
+  // mat[18] = C(0,1,0,0)
+  // mat[19] = C(0,1,1,1)
+  // mat[20] = C(0,1,2,2)
+  // mat[21] = C(0,1,0,1)*2
+  // mat[22] = C(0,1,0,2)*2
+  // mat[23] = C(0,1,1,2)*2
+
+  // mat[24] = C(0,2,0,0)
+  // mat[25] = C(0,2,1,1)
+  // mat[26] = C(0,2,2,2)
+  // mat[27] = C(0,2,0,1)*2
+  // mat[28] = C(0,2,0,2)*2
+  // mat[29] = C(0,2,1,2)*2
+
+  // mat[30] = C(1,2,0,0)
+  // mat[31] = C(1,2,1,1)
+  // mat[32] = C(1,2,2,2)
+  // mat[33] = C(1,2,0,1)*2
+  // mat[34] = C(1,2,0,2)*2
+  // mat[35] = C(1,2,1,2)*2
   mat=(double*)calloc(ntens*ntens, sizeof(double));
-
-
-  for (unsigned int i = 0; i < 3; i++)
-    for (unsigned int j = 0; j < 3; j++)
-      for (unsigned int k = 0; k < 3; k++)
-        for (unsigned int l = 0; l < 3; l++)
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
         {
-
           if (i==j)
           {
             if (k==l)
-            {
-              mat[i*ntens+k]=_vals[i][j][k][l];
-            }
+              mat[i*ntens+k] = _vals[i][j][k][l];
             else
-            {
-              mat[i*ntens+nskip+k+l]+=_vals[i][j][k][l];
-            }
-
+              mat[i*ntens+nskip+k+l] += _vals[i][j][k][l];
           }
-          else
+          else // i!=j
           {
             if (k==l)
-            {
-              mat[(nskip+i+j)*ntens+k]=_vals[i][j][k][l];
-            }
+              mat[(nskip+i+j)*ntens+k] = _vals[i][j][k][l];
             else
-            {
-              mat[(nskip+i+j)*ntens+nskip+k+l]+=_vals[i][j][k][l];
-            }
-
-
+              mat[(nskip+i+j)*ntens+nskip+k+l] += _vals[i][j][k][l]; // note the +=, which results in double-counting and is rectified below
           }
         }
-
-
-
-
   for (unsigned int i = 3; i < ntens; i++)
     for (unsigned int j = 3; j < ntens; j++)
-      mat[i*ntens+j]=mat[i*ntens+j]/2.0;
+      mat[i*ntens+j] /= 2.0; // because of double-counting above
 
-  error=MatrixInversion(mat,ntens);
 
+  // use LAPACK to find the inverse
+  error=MatrixInversion(mat, ntens);
   if (error != 0)
-    mooseError("Error in Matrix  Inversion in RankFourTensor\n");
+    mooseError("Error in Matrix  Inversion in RankFourTensor");
 
-  for (unsigned int i = 0; i < 3; i++)
-    for (unsigned int j = 0; j < 3; j++)
-      for (unsigned int k = 0; k < 3; k++)
-        for (unsigned int l = 0; l < 3; l++)
+
+  // build the resulting rank-four tensor
+  // using the inverse of the above algorithm
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
         {
-
           if (i==j)
           {
             if (k==l)
-            {
               result(i,j,k,l)=mat[i*ntens+k];
-
-            }
             else
-            {
-
-              result(i,j,k,l)=mat[i*ntens+2+k+l]/2.0;
-
-            }
-
+              result(i,j,k,l)=mat[i*ntens+nskip+k+l]/2.0;
           }
-          else
+          else // i!=j
           {
             if (k==l)
-            {
-              result(i,j,k,l)=mat[(2+i+j)*ntens+k];
-
-            }
+              result(i,j,k,l)=mat[(nskip+i+j)*ntens+k];
             else
-            {
-
-              result(i,j,k,l)=mat[(2+i+j)*ntens+2+k+l]/2.0;
-
-            }
-
-
+              result(i,j,k,l)=mat[(nskip+i+j)*ntens+nskip+k+l]/2.0;
           }
         }
 
   free(mat);
   return result;
-
-
 }
 
 
-//
 
 void
 RankFourTensor::rotate(RealTensorValue &R)
@@ -388,7 +417,7 @@ RankFourTensor::print()
       for (unsigned int k=0; k<N; k++)
       {
         for (unsigned int l=0; l<N; l++)
-          Moose::out << std::setw(15) <<s(i,j,k,l)<<" ";
+          Moose::out << std::setw(15) << s(i,j,k,l) << " ";
 
         Moose::out <<std::endl;
       }
@@ -413,35 +442,6 @@ RankFourTensor::transposeMajor()
 }
 
 
-
-
-
-int
-RankFourTensor::MatrixInversion(double* A, int n)
-{
-  int return_value,buffer_size;
-  int *ipiv,*buffer;
-
-  buffer_size=n*64;
-
-  ipiv=(int*)calloc(n, sizeof(int));
-  buffer=(int*)calloc(buffer_size, sizeof(int));
-  FORTRAN_CALL(dgetrf)(&n, &n, A, &n, ipiv, &return_value);
-
-  if (return_value!=0)
-  {
-
-    free(ipiv);
-    free(buffer);
-    return return_value;
-  }
-  FORTRAN_CALL(dgetri)(&n, A, &n, ipiv, buffer, &buffer_size, &return_value);
-
-  free(ipiv);
-  free(buffer);
-  return return_value;
-}
-
 void
 RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> input)
 {
@@ -460,9 +460,10 @@ RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> input)
     _vals[1][1][0][1]=input[7];
     _vals[1][1][1][1]=input[8];
 
-// any other symmetry to fill in?  just double-checking... e.g., C_1121?
+    // fill in remainders from C_ijkl = C_ijlk = C_jikl
     _vals[0][0][1][0]=_vals[0][0][0][1];
     _vals[0][1][1][0]=_vals[0][1][0][1];
+    _vals[1][0][0][0]=_vals[0][1][0][0];
     _vals[1][0][0][1]=_vals[0][1][0][1];
     _vals[1][0][1][1]=_vals[0][1][1][1];
     _vals[1][0][0][0]=_vals[0][1][0][0];
@@ -486,6 +487,77 @@ RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> input)
     else
       mooseError("Please provide correct number of inputs for surface RankFourTensor initialization.");
 }
+
+
+
+void
+RankFourTensor::fillFromInputVector(const std::vector<Real> input, FillMethod fill_method)
+{
+  zero();
+
+  switch (fill_method)
+  {
+    case antisymmetric:
+      fillAntisymmetricFromInputVector(input);
+      break;
+    case symmetric9:
+      fillSymmetricFromInputVector(input, false);
+      break;
+    case symmetric21:
+      fillSymmetricFromInputVector(input, true);
+      break;
+    case general_isotropic:
+      fillGeneralIsotropicFromInputVector(input);
+      break;
+    case symmetric_isotropic:
+      fillSymmetricIsotropicFromInputVector(input);
+      break;
+    case antisymmetric_isotropic:
+      fillAntisymmetricIsotropicFromInputVector(input);
+      break;
+    case general:
+      fillGeneralFromInputVector(input);
+      break;
+    default:
+      mooseError("fillFromInputVector called with unknown fill_method of " << fill_method);
+  }
+}
+
+
+
+
+
+int
+RankFourTensor::MatrixInversion(double* A, int n)
+{
+  int return_value,buffer_size;
+  int *ipiv,*buffer;
+
+  buffer_size=n*64;
+
+  ipiv=(int*)calloc(n, sizeof(int));
+  buffer=(int*)calloc(buffer_size, sizeof(int));
+  // Following does a LU decomposition of "square matrix A"
+  // upon return "A = P*L*U" if return_value == 0
+  // Here i use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
+  FORTRAN_CALL(dgetrf)(&n, &n, A, &n, ipiv, &return_value);
+
+  if (return_value!=0)
+  {
+    // couldn't LU decompose because: illegal value in A; or, A singular
+    free(ipiv);
+    free(buffer);
+    return return_value;
+  }
+
+  // get the inverse of A
+  FORTRAN_CALL(dgetri)(&n, A, &n, ipiv, buffer, &buffer_size, &return_value);
+
+  free(ipiv);
+  free(buffer);
+  return return_value;
+}
+
 
 void
 RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> input, bool all)
@@ -658,37 +730,4 @@ RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> input)
           ind = i*N*N*N + j*N*N + k*N + l;
           _vals[i][j][k][l] = input[ind];
         }
-}
-
-void
-RankFourTensor::fillFromInputVector(const std::vector<Real> input, FillMethod fill_method)
-{
-  zero();
-
-  switch (fill_method)
-  {
-    case antisymmetric:
-      fillAntisymmetricFromInputVector(input);
-      break;
-    case symmetric9:
-      fillSymmetricFromInputVector(input, false);
-      break;
-    case symmetric21:
-      fillSymmetricFromInputVector(input, true);
-      break;
-    case general_isotropic:
-      fillGeneralIsotropicFromInputVector(input);
-      break;
-    case symmetric_isotropic:
-      fillSymmetricIsotropicFromInputVector(input);
-      break;
-    case antisymmetric_isotropic:
-      fillAntisymmetricIsotropicFromInputVector(input);
-      break;
-    case general:
-      fillGeneralFromInputVector(input);
-      break;
-    default:
-      mooseError("fillFromInputVector called with unknown fill_method of " << fill_method);
-  }
 }
