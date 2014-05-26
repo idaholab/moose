@@ -128,7 +128,6 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
 
   a = std::cos(halfPi*_rotation0_angle/90);
   b = std::sin(halfPi*_rotation0_angle/90);
-  Moose::out << "a, b = " << a << " " << b << "\n";
   // the following is an anticlockwise rotation about z
   RealTensorValue rot0_z(
   a, -b, 0,
@@ -519,7 +518,6 @@ SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_
   // do the transformations
   for (unsigned int trans_num = 0 ; trans_num < _transformation_order.size() ; ++trans_num)
   {
-    Moose::out << "thihs one is " << _transformation_order[trans_num] << "\n";
     if (_transformation_order[trans_num] == "rotation0")
       pt = _r0*pt;
     else if (_transformation_order[trans_num] == "translation")
