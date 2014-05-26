@@ -109,6 +109,9 @@ template <typename T>
 class MaterialProperty : public PropertyValue
 {
 public:
+  /// Explicitly declare a public constructor because we made the copy constructor private
+  MaterialProperty() : PropertyValue() { /* */ }
+
   virtual ~MaterialProperty()
   {
     _value.release();
@@ -195,6 +198,11 @@ public:
   PropertyValue *_init_helper(int size, PropertyValue *prop, const std::vector<P>* the_type);
 
 private:
+  /// private copy constructor to avoid shallow copying of material properties
+  MaterialProperty(const MaterialProperty<T> & src) { mooseError("Material properties must be assigned to references (missing '&')"); }
+
+  /// private assignment operator to avoid shallow copying of material properties
+  MaterialProperty<T> & operator = (const MaterialProperty<T> & rhs) { mooseError("Material properties must be assigned to references (missing '&')"); }
 
   /// Stored parameter value.
   MooseArray<T> _value;
