@@ -28,6 +28,7 @@
 #include "JIntegral.h"
 #include "CrackFrontDefinition.h"
 #include "MaterialSymmElasticityTensorAux.h"
+#include "MaterialStateVectorAux.h"
 #include "MaterialTensorAux.h"
 #include "MaterialTensorOnLine.h"
 #include "MaterialVectorAux.h"
@@ -92,6 +93,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
 {
   registerAux(ElasticEnergyAux);
   registerAux(MaterialSymmElasticityTensorAux);
+  registerAux(MaterialStateVectorAux);
   registerAux(MaterialTensorAux);
   registerAux(MaterialVectorAux);
   registerAux(AccumulateAux);
