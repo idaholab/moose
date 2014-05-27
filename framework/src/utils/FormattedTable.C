@@ -56,7 +56,9 @@ dataLoad(std::istream & stream, FormattedTable & table, void * context)
 FormattedTable::FormattedTable() :
     _stream_open(false),
     _last_key(-1),
-    _output_time(true)
+    _output_time(true),
+    _csv_delimiter(","),
+    _csv_precision(14)
 {}
 
 FormattedTable::FormattedTable(const FormattedTable &o) :
@@ -64,7 +66,9 @@ FormattedTable::FormattedTable(const FormattedTable &o) :
     _output_file_name(""),
     _stream_open(o._stream_open),
     _last_key(o._last_key),
-    _output_time(o._output_time)
+    _output_time(o._output_time),
+    _csv_delimiter(","),
+    _csv_precision(14)
 {
   if (_stream_open)
     mooseError ("Copying a FormattedTable with an open stream is not supported");
@@ -264,7 +268,7 @@ FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries,
 }
 
 void
-FormattedTable::printCSV(const std::string & file_name, int interval)
+FormattedTable::printCSV(const std::string & file_name, int interval, bool align)
 {
   std::map<Real, std::map<std::string, Real> >::iterator i;
   std::set<std::string>::iterator header;
@@ -285,16 +289,62 @@ FormattedTable::printCSV(const std::string & file_name, int interval)
   _output_file.seekp(0, std::ios::beg);
 
 
+  /* When the alignment option is set to true, the widths of the columns needs to be computed based on
+   * longest of the column name of the data supplied. This is done here by creating a map of the
+   * widths for each of the columns, including time */
+  std::map<std::string, unsigned int> width;
+  if (align)
+  {
+    // Set the initial width to the names of the columns
+    width["time"] = 4;
+    for (std::set<std::string>::const_iterator it = _column_names.begin(); it != _column_names.end(); ++it)
+      width[*it] = it->size();
+
+    // Loop through the various times
+    for (std::map<Real, std::map<std::string, Real> >::const_iterator it = _data.begin(); it != _data.end(); ++it)
+    {
+      // Update the time width
+      {
+        std::ostringstream oss;
+        oss << std::setprecision(_csv_precision) << it->first;
+        unsigned int w = oss.str().size();
+        width["time"] = std::max(width["time"], w);
+      }
+
+      // Loop through the data for the current time and update the widths
+      for (std::map<std::string, Real>::const_iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+      {
+        std::ostringstream oss;
+        oss << std::setprecision(_csv_precision) << jt->second;
+        unsigned int w = oss.str().size();
+        width[jt->first] = std::max(width[jt->first], w);
+      }
+    }
+  }
+
   { // Output Header
     bool first = true;
 
     if (_output_time)
     {
-      _output_file << "time";
+      if (align)
+        _output_file << std::setw(width["time"]) << "time";
+      else
+        _output_file << "time";
       first = false;
     }
 
-    std::copy(_column_names.begin(), _column_names.end(), infix_ostream_iterator<std::string>(_output_file, ",", first));
+    for (header = _column_names.begin(); header != _column_names.end(); ++header)
+    {
+      if (!first)
+        _output_file << _csv_delimiter;
+
+      if (align)
+        _output_file << std::right <<  std::setw(width[*header]) << *header;
+      else
+        _output_file << *header;
+      first = false;
+    }
   }
 
   _output_file << "\n";
@@ -308,7 +358,10 @@ FormattedTable::printCSV(const std::string & file_name, int interval)
 
       if (_output_time)
       {
-        _output_file << i->first;
+        if (align)
+          _output_file << std::setprecision(_csv_precision) << std::right <<  std::setw(width["time"]) << i->first;
+        else
+          _output_file << std::setprecision(_csv_precision) << i->first;
         first = false;
       }
 
@@ -317,11 +370,14 @@ FormattedTable::printCSV(const std::string & file_name, int interval)
         std::map<std::string, Real> &tmp = i->second;
 
         if (!first)
-          _output_file << ",";
+          _output_file << _csv_delimiter;
         else
           first = false;
 
-        _output_file<< std::setprecision(14) << tmp[*header];
+        if (align)
+          _output_file << std::setprecision(_csv_precision)  << std::right <<  std::setw(width[*header]) << tmp[*header];
+        else
+          _output_file << std::setprecision(_csv_precision)  << tmp[*header];
       }
       _output_file << "\n";
     }
@@ -353,18 +409,19 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
   {
     extension = ".png"; terminal = "png";
   }
+
   else if (format == "ps")
   {
     extension = ".ps";  terminal = "postscript";
   }
+
   else if (format == "gif")
   {
     extension = ".gif"; terminal = "gif";
   }
+
   else
-  {
     mooseError("gnuplot format \"" + format + "\" is not supported.");
-  }
 
   // Write the data to disk
   std::string dat_name = base_file + ".dat";
