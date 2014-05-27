@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<RichardsBorehole>()
 {
   InputParameters params = validParams<DiracKernel>();
-  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addRequiredParam<FunctionName>("character", "If zero then borehole does nothing.  If positive the borehole acts as a sink (production well) for porepressure > borehole pressure, and does nothing otherwise.  If negative the borehole acts as a source (injection well) for porepressure < borehole pressure, and does nothing otherwise.  The flow rate to/from the borehole is multiplied by |character|, so usually character = +/- 1, but you can specify other quantities to provide an overall scaling to the flow if you like.");
   params.addRequiredParam<Real>("bottom_pressure", "Pressure at the bottom of the borehole");
   params.addRequiredParam<RealVectorValue>("unit_weight", "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  Note that the borehole pressure at a given z position is bottom_pressure + unit_weight*(p - p_bottom), where p=(x,y,z) and p_bottom=(x,y,z) of the bottom point of the borehole.  If you don't want bottomhole pressure to vary in the borehole just set unit_weight=0.  Typical value is gravity = (0,0,-1E4)");
@@ -40,8 +40,8 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     _density_val(&coupledValue("density_var")),
     _ddensity_val(&coupledValue("ddensity_var")),
 
-    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
     _character(getFunction("character")),
     _p_bot(getParam<Real>("bottom_pressure")),
@@ -411,9 +411,9 @@ Real
 RichardsBorehole::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Moose::out << "Starting OffDiag computation for borehole\n";
-  if (_pp_name_UO.not_pressure_var(jvar))
+  if (_richards_name_UO.not_richards_var(jvar))
     return 0.0;
-  unsigned int dvar = _pp_name_UO.pressure_var_num(jvar);
+  unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
 
   Real character = _character.value(_t, _q_point[_qp]);
   if (character == 0.0) return 0.0;

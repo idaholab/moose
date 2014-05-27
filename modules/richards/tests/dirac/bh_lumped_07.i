@@ -4,7 +4,7 @@
 []
 
 [GlobalParams]
-  porepressureNames_UO = PPNames
+  richardsVarNames_UO = PPNames
   density_UO = DensityConstBulk
   relperm_UO = RelPermPower
   sat_UO = Saturation
@@ -14,8 +14,8 @@
 
 [UserObjects]
   [./PPNames]
-    type = RichardsPorepressureNames
-    porepressure_vars = pressure
+    type = RichardsVarNames
+    richards_vars = pressure
   [../]
   [./DensityConstBulk]
     type = RichardsDensityConstBulk

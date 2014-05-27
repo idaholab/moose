@@ -22,13 +22,13 @@
 
 
 [GlobalParams]
-  porepressureNames_UO = PPNames
+  richardsVarNames_UO = PPNames
 []
 
 [UserObjects]
   [./PPNames]
-    type = RichardsPorepressureNames
-    porepressure_vars = pressure
+    type = RichardsVarNames
+    richards_vars = pressure
   [../]
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
@@ -77,7 +77,7 @@
   [../]
   [./richardsf]
     type = RichardsFlux
-    porepressureNames_UO = PPNames
+    richardsVarNames_UO = PPNames
     variable = pressure
   [../]
 []

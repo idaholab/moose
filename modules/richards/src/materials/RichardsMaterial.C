@@ -17,7 +17,7 @@ InputParameters validParams<RichardsMaterial>()
   params.addCoupledVar("por_change", "An auxillary variable describing porosity changes.  Porosity = mat_porosity + por_change.  If this is not provided, zero is used.");
   params.addRequiredParam<RealTensorValue>("mat_permeability", "The permeability tensor (m^2).");
   params.addCoupledVar("perm_change", "A list of auxillary variable describing permeability changes.  There must be 9 of these, corresponding to the xx, xy, xz, yx, yy, yz, zx, zy, zz components respectively.  Permeability = mat_permeability*10^(perm_change).");
-  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addRequiredParam<std::vector<UserObjectName> >("relperm_UO", "List of names of user objects that define relative permeability");
   params.addRequiredParam<std::vector<UserObjectName> >("seff_UO", "List of name of user objects that define effective saturation as a function of pressure list");
   params.addRequiredParam<std::vector<UserObjectName> >("sat_UO", "List of names of user objects that define saturation as a function of effective saturation");
@@ -42,8 +42,8 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     _material_perm(getParam<RealTensorValue>("mat_permeability")),
     _material_viscosity(getParam<std::vector<Real> >("viscosity")),
 
-    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _num_p(_pp_name_UO.num_pp()),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _num_p(_richards_name_UO.num_v()),
 
     // FOLLOWING IS FOR SUPG
     _material_gravity(getParam<RealVectorValue>("gravity")),
@@ -88,7 +88,7 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
 
   // Need to add the variables that the user object is coupled to as dependencies so MOOSE will compute them
   {
-    const std::vector<MooseVariable *> & coupled_vars = _pp_name_UO.getCoupledMooseVars();
+    const std::vector<MooseVariable *> & coupled_vars = _richards_name_UO.getCoupledMooseVars();
     for (unsigned int i=0; i<coupled_vars.size(); i++)
       addMooseVariableDependency(coupled_vars[i]);
   }
@@ -120,9 +120,9 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     //_pressure_old_vals[i] = (_is_transient ? &coupledValueOld("pressure_vars", i) : &_zero);
     //_grad_p[i] = &coupledGradient("pressure_vars", i);
 
-    _pressure_vals[i] = _pp_name_UO.pp_vals(i);
-    _pressure_old_vals[i] = _pp_name_UO.pp_vals_old(i);
-    _grad_p[i] = _pp_name_UO.grad_pp(i);
+    _pressure_vals[i] = _richards_name_UO.richards_vals(i);
+    _pressure_old_vals[i] = _richards_name_UO.richards_vals_old(i);
+    _grad_p[i] = _richards_name_UO.grad_var(i);
 
     // in the following.  first get the userobject names that were inputted, then get the i_th one of these, then get the actual userobject that this corresponds to, then finally & gives pointer to RichardsRelPerm object.
     _material_relperm_UO[i] = &getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[i]);

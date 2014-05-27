@@ -9,7 +9,7 @@ template<>
 InputParameters validParams<RichardsFluxJumpIndicator>()
 {
   InputParameters params = validParams<JumpIndicator>();
-  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addClassDescription("Indicator which calculates jumps in Richards fluxes over elements.");
   return params;
 }
@@ -18,8 +18,8 @@ InputParameters validParams<RichardsFluxJumpIndicator>()
 RichardsFluxJumpIndicator::RichardsFluxJumpIndicator(const std::string & name, InputParameters parameters) :
     JumpIndicator(name, parameters),
 
-    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
     _density(getMaterialProperty<std::vector<Real> >("density")),
     _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),

@@ -9,7 +9,7 @@
 #include "SideIntegralVariablePostprocessor.h"
 #include "MaterialPropertyInterface.h"
 #include "FunctionInterface.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 
 //Forward Declarations
 class RichardsExcavFlow;
@@ -31,10 +31,10 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-  /// holds info regarding the porepressure variables
-  const RichardsPorepressureNames & _pp_name_UO;
+  /// holds info regarding the Richards variables
+  const RichardsVarNames & _richards_name_UO;
 
-  /// the porepressure number for which we want the mass flow
+  /// the richards variable number for which we want the mass flow
   unsigned int _pvar;
 
   /// viscosities of fluids

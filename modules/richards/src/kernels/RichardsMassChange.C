@@ -14,15 +14,15 @@ InputParameters validParams<RichardsMassChange>()
 {
   InputParameters params = validParams<TimeDerivative>();
   params.addParam<bool>("use_supg", false, "True for using SUPG in this kernel, false otherwise.  This has no effect if the material does not use SUPG.");
-  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   return params;
 }
 
 RichardsMassChange::RichardsMassChange(const std::string & name,
                                              InputParameters parameters) :
     TimeDerivative(name,parameters),
-    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
     _use_supg(getParam<bool>("use_supg")),
     // This kernel expects input parameters named "bulk_mod", etc
@@ -85,9 +85,9 @@ RichardsMassChange::computeQpJacobian()
 Real
 RichardsMassChange::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_pp_name_UO.not_pressure_var(jvar))
+  if (_richards_name_UO.not_richards_var(jvar))
     return 0.0;
-  unsigned int dvar = _pp_name_UO.pressure_var_num(jvar);
+  unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
   Real mass_prime = _phi[_j][_qp]*_porosity[_qp]*_density[_qp][_pvar]*_dsat[_qp][_pvar][dvar];
   Real test_fcn = _test[_i][_qp] ;
   if (_use_supg) {

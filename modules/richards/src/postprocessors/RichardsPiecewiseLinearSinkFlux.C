@@ -16,7 +16,7 @@ InputParameters validParams<RichardsPiecewiseLinearSinkFlux>()
   params.addRequiredParam<bool>("use_relperm", "If true, then fluxes are multiplied by relative permeability.  This can be used in conjunction with use_mobility");
   params.addRequiredParam<std::vector<Real> >("pressures", "Tuple of pressure values.  Must be monotonically increasing.");
   params.addRequiredParam<std::vector<Real> >("bare_fluxes", "Tuple of flux values (measured in kg.m^-2.s^-1 for use_mobility=false, and in Pa.s^-1 if use_mobility=true).  A piecewise-linear fit is performed to the (pressure,bare_fluxes) pairs to obtain the flux at any arbitrary pressure.  If a quad-point pressure is less than the first pressure value, the first bare_flux value is used.  If quad-point pressure exceeds the final pressure value, the final bare_flux value is used.  This flux is OUT of the medium: hence positive values of flux means this will be a SINK, while negative values indicate this flux will be a SOURCE.");
-  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addParam<FunctionName>("multiplying_fcn", 1.0, "The flux will be multiplied by this spatially-and-temporally varying function.  This is useful if the boundary is a moving boundary controlled by RichardsExcav.");
   params.addClassDescription("Records the fluid flow into a sink (positive values indicate fluid is flowing from porespace into the sink).");
   return params;
@@ -32,8 +32,8 @@ RichardsPiecewiseLinearSinkFlux::RichardsPiecewiseLinearSinkFlux(const std::stri
 
     _m_func(getFunction("multiplying_fcn")),
 
-    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
     _permeability(getMaterialProperty<RealTensorValue>("permeability")),

@@ -7,7 +7,7 @@
 #define RICHARDSMASSCHANGE
 
 #include "TimeDerivative.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 
 // Forward Declarations
 class RichardsMassChange;
@@ -35,12 +35,12 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// holds info on the porepressure variables
-  const RichardsPorepressureNames & _pp_name_UO;
+  /// holds info on the Richards variables
+  const RichardsVarNames & _richards_name_UO;
 
   /**
-   * the pressure variable number
-   * eg, if porepressure name = 'pwater pgas poil', and this
+   * the Richards variable number
+   * eg, if richards name = 'pwater pgas poil', and this
    * kernel is for pgas, then _pvar = 1
    */
   unsigned int _pvar;

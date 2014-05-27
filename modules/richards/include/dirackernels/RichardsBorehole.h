@@ -10,7 +10,7 @@
 #include "DiracKernel.h"
 #include "Function.h"
 #include "RichardsSumQuantity.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 
 class RichardsBorehole;
 
@@ -81,10 +81,10 @@ protected:
   /// Derivative of density wrt pressure.  If entered then the value from RichardsMaterial is not used.
   VariableValue * _ddensity_val;
 
-  /// Defines the porepressure variables in the simulation
-  const RichardsPorepressureNames & _pp_name_UO;
+  /// Defines the richards variables in the simulation
+  const RichardsVarNames & _richards_name_UO;
 
-  /// The moose internal variable number of the porepresure of this Dirac Kernel
+  /// The moose internal variable number of the richards variable of this Dirac Kernel
   unsigned int _pvar;
 
   /**

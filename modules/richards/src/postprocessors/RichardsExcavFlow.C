@@ -12,7 +12,7 @@ InputParameters validParams<RichardsExcavFlow>()
 {
   InputParameters params = validParams<SideIntegralVariablePostprocessor>();
   params.addRequiredParam<FunctionName>("excav_geom_function", "The function describing the excavation geometry (type RichardsExcavGeom)");
-  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addClassDescription("Records total flow INTO an excavation (if quantity is positive then flow has occured from rock into excavation void)");
   return params;
 }
@@ -21,8 +21,8 @@ RichardsExcavFlow::RichardsExcavFlow(const std::string & name, InputParameters p
     SideIntegralVariablePostprocessor(name, parameters),
     FunctionInterface(parameters),
 
-    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
     _gravity(getMaterialProperty<RealVectorValue>("gravity")),

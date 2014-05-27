@@ -7,7 +7,7 @@
 #define RICHARDSFLUX
 
 #include "Kernel.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 
 // Forward Declarations
 class RichardsFlux;
@@ -35,15 +35,15 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /**
-   * holds info regarding the names of the porepressure variables
+   * holds info regarding the names of the Richards variables
    * and methods for extracting values of these variables
    */
-  const RichardsPorepressureNames & _pp_name_UO;
+  const RichardsVarNames & _richards_name_UO;
 
   /**
-   * the index of this variable in the list of porepressure variables
-   * held by _pp_name_UO.  Eg
-   * if porepressure_vars = 'pwater pgas poil' in the _pp_name_UO
+   * the index of this variable in the list of Richards variables
+   * held by _richards_name_UO.  Eg
+   * if richards_vars = 'pwater pgas poil' in the _richards_name_UO
    * and this kernel has variable = pgas, then _pvar = 1
    * This is used to index correctly into _viscosity, _seff, etc
    */

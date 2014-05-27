@@ -14,15 +14,15 @@ InputParameters validParams<RichardsFlux>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<bool>("linear_shape_fcns", true, "If you are using second-order Lagrange shape functions you need to set this to false.");
-  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   return params;
 }
 
 RichardsFlux::RichardsFlux(const std::string & name,
                                              InputParameters parameters) :
     Kernel(name,parameters),
-    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
     // This kernel gets lots of things from the material
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
@@ -112,9 +112,9 @@ RichardsFlux::computeQpJacobian()
 Real
 RichardsFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_pp_name_UO.not_pressure_var(jvar))
+  if (_richards_name_UO.not_richards_var(jvar))
     return 0.0;
-  unsigned int dvar = _pp_name_UO.pressure_var_num(jvar);
+  unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
   Real flux_prime = _grad_test[_i][_qp]*(_density[_qp][_pvar]*_drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][dvar]*_phi[_j][_qp]/_viscosity[_qp][_pvar]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][_pvar]*_gravity[_qp])));
 
   Real supg_test = _tauvel_SUPG[_qp][_pvar]*_grad_test[_i][_qp];

@@ -8,7 +8,7 @@
 
 #include "IntegratedBC.h"
 #include "LinearInterpolation.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 #include "Function.h"
 
 // Forward Declarations
@@ -54,8 +54,8 @@ protected:
   /// sink flux gets multiplied by this function
   Function & _m_func;
 
-  /// holds info about the names and values of porepressures in the simulation
-  const RichardsPorepressureNames & _pp_name_UO;
+  /// holds info about the names and values of richards variable in the simulation
+  const RichardsVarNames & _richards_name_UO;
 
   /// the moose internal variable number corresponding to the porepressure of this sink flux
   unsigned int _pvar;
