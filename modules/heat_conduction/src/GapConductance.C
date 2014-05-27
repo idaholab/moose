@@ -196,12 +196,10 @@ GapConductance::gapCyl(Real radius, Real r1, Real r2, Real min_denom, Real max_d
 
   if (denominator > max_denom)
   {
-    mooseWarning("Gap size larger than specified limiting value.  Using default limiting max_denom instead of r*ln(r2/r1).");
     denominator = max_denom;
   }
   else if (denominator < min_denom)
   {
-    mooseWarning("Gap size smaller than specified limiting value.  Using default limiting min_denom instead of r*ln(r2/r1).");
     denominator =  min_denom;
   }
 
@@ -231,24 +229,6 @@ GapConductance::gapK()
 void
 GapConductance::computeGapValues()
 {
-  if (_cylindrical_gap)
-  {
-    if (_normals[_qp](0) > 0)
-    {
-      _r1 = _q_point[_qp](0);
-      _r2 = _q_point[_qp](0) - _gap_distance; // note, _gap_distance is negative
-      _radius = _r1;
-    }
-    if (_normals[_qp](0) < 0)
-    {
-      _r1 = _q_point[_qp](0) + _gap_distance;
-      _r2 = _q_point[_qp](0);
-      _radius = _r2;
-    }
-    if (_normals[_qp](0) == 0)
-      mooseError( "Issue with cylindrical flux calc. normals. \n");
-  }
-
   if (!_quadrature)
   {
     _has_info = true;
@@ -284,14 +264,25 @@ GapConductance::computeGapValues()
     else
     {
       if (_warnings)
-      {
-        std::stringstream msg;
-        msg << "No gap value information found for node ";
-        msg << qnode->id();
-        msg << " on processor ";
-        msg << processor_id();
-        mooseWarning( msg.str() );
-      }
+        mooseWarning("No gap value information found for node " << qnode->id() << " on processor " << processor_id() << " at coordinate " << Point(*qnode));
     }
+  }
+
+  if (_cylindrical_gap)
+  {
+    if (_normals[_qp](0) > 0)
+    {
+      _r1 = _q_point[_qp](0);
+      _r2 = _q_point[_qp](0) - _gap_distance; // note, _gap_distance is negative
+      _radius = _r1;
+    }
+    else if (_normals[_qp](0) < 0)
+    {
+      _r1 = _q_point[_qp](0) + _gap_distance;
+      _r2 = _q_point[_qp](0);
+      _radius = _r2;
+    }
+    else
+      mooseError( "Issue with cylindrical flux calc. normals. \n");
   }
 }
