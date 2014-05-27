@@ -35,6 +35,8 @@ RichardsPiecewiseLinearSinkFlux::RichardsPiecewiseLinearSinkFlux(const std::stri
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
+
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
     _permeability(getMaterialProperty<RealTensorValue>("permeability")),
     _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
@@ -44,7 +46,7 @@ RichardsPiecewiseLinearSinkFlux::RichardsPiecewiseLinearSinkFlux(const std::stri
 Real
 RichardsPiecewiseLinearSinkFlux::computeQpIntegral()
 {
-  Real flux = _sink_func.sample(_u[_qp]);
+  Real flux = _sink_func.sample(_pp[_qp][_pvar]);
 
   flux *= _m_func.value(_t, _q_point[_qp]);
 

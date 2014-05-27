@@ -60,6 +60,9 @@ protected:
    */
   unsigned int _pvar;
 
+  /// porepressure values (only the _pvar component is used)
+  MaterialProperty<std::vector<Real> > &_pp;
+
   /// fluid viscosity
   MaterialProperty<std::vector<Real> > &_viscosity;
 

@@ -24,16 +24,13 @@ RichardsExcavFlow::RichardsExcavFlow(const std::string & name, InputParameters p
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
-    _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
-    _gravity(getMaterialProperty<RealVectorValue>("gravity")),
-    _permeability(getMaterialProperty<RealTensorValue>("permeability")),
-    _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
-    _density(getMaterialProperty<std::vector<Real> >("density")),
+    _flux(getMaterialProperty<std::vector<RealVectorValue> >("flux")),
+
     _func(getFunction("excav_geom_function"))
 {}
 
 Real
 RichardsExcavFlow::computeQpIntegral()
 {
-  return -_func.value(_t, _q_point[_qp])*_normals[_qp]*((_density[_qp][_pvar]*_rel_perm[_qp][_pvar]/_viscosity[_qp][_pvar])*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][_pvar]*_gravity[_qp])))*_dt ;
+  return -_func.value(_t, _q_point[_qp])*_normals[_qp]*_flux[_qp][_pvar]*_dt;
 }

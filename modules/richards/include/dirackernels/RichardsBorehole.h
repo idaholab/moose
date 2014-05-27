@@ -66,21 +66,6 @@ protected:
   /// Checks rotation matrices are correct
   bool _debug_things;
 
-  /// Derivative of Seff wrt pressure.  If entered then the value from RichardsMaterial is not used.
-  VariableValue * _dseff_val;
-
-  /// Relative permeability.  If entered then the value from RichardsMaterial is not used.
-  VariableValue * _relperm_val;
-
-  /// Derivative of relative perm wrt Seff.  If entered then the value from RichardsMaterial is not used.
-  VariableValue * _drelperm_val;
-
-  /// Fluid density.  If entered then the value from RichardsMaterial is not used.
-  VariableValue * _density_val;
-
-  /// Derivative of density wrt pressure.  If entered then the value from RichardsMaterial is not used.
-  VariableValue * _ddensity_val;
-
   /// Defines the richards variables in the simulation
   const RichardsVarNames & _richards_name_UO;
 
@@ -109,26 +94,32 @@ protected:
   /// whether mesh adaptivity is used (if not then caching of elemental info is used to speed up addPoints)
   bool _mesh_adaptivity;
 
+  /// fluid porepressure (or porepressures in case of multiphase)
+  MaterialProperty<std::vector<Real> > &_pp;
+
+  /// d(porepressure_i)/d(variable_j)
+  MaterialProperty<std::vector<std::vector<Real> > > &_dpp_dv;
+
   /// fluid viscosity
   MaterialProperty<std::vector<Real> > &_viscosity;
 
   /// material permeability
   MaterialProperty<RealTensorValue> & _permeability;
 
-  /// deriviatves of Seff wrt pressures
-  MaterialProperty<std::vector<std::vector<Real> > > &_dseff;
+  /// deriviatves of Seff wrt variables
+  MaterialProperty<std::vector<std::vector<Real> > > &_dseff_dv;
 
   /// relative permeability
   MaterialProperty<std::vector<Real> > &_rel_perm;
 
-  /// deriv of rel perm wrt Seff
-  MaterialProperty<std::vector<Real> > &_drel_perm;
+  /// d(relperm_i)/d(variable_j)
+  MaterialProperty<std::vector<std::vector<Real> > > &_drel_perm_dv;
 
   /// fluid density
   MaterialProperty<std::vector<Real> > &_density;
 
-  /// derivative of density wrt pressure
-  MaterialProperty<std::vector<Real> > &_ddensity;
+  /// d(density_i)/d(variable_j)
+  MaterialProperty<std::vector<std::vector<Real> > > &_ddensity_dv;
 
   /**
    * This is used to hold the total fluid flowing into the borehole
@@ -171,9 +162,6 @@ protected:
   /// whether _elemental_info has been constructed
   bool _have_constructed_elemental_info;
 
-  /// whether using the _dseff_val, _relperm_val, etc (otherwise values from RichardsMaterial are used)
-  bool _using_coupled_vars;
-
   /// reads a space-separated line of floats from ifs and puts in myvec
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
 
@@ -182,6 +170,13 @@ protected:
    * Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388
    */
   Real wellConstant(const RealTensorValue & perm, const RealTensorValue & rot, const Real & half_len, const Elem * ele, const Real & rad);
+
+  /**
+   * Calculates Jacobian
+   * @param wrt_num differentiate the residual wrt this Richards variable
+   */
+  Real jac(unsigned int wrt_num);
+
 };
 
 #endif //RICHARDSBOREHOLE_H

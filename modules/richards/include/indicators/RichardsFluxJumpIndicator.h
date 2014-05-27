@@ -15,8 +15,8 @@ template<>
 InputParameters validParams<RichardsFluxJumpIndicator>();
 
 /**
- * Jump of the Richards mass-flux*viscosity
- * = density * relative_permeability * permeability * (grad(porepressure) - density * gravity)
+ * Jump of the Richards mass-flux
+ * = density * relative_permeability * permeability * (grad(porepressure) - density * gravity)/viscosity
  */
 class RichardsFluxJumpIndicator :
   public JumpIndicator
@@ -44,29 +44,12 @@ protected:
    */
   unsigned int _pvar;
 
-  /// fluid density (vector of densities if multiphase)
-  MaterialProperty<std::vector<Real> > &_density;
+  /// fluid flux (vector of fluxes if multicomponent)
+  MaterialProperty<std::vector<RealVectorValue> > &_flux;
 
-  /// fluid relative permeability (vector of relperms if multiphase)
-  MaterialProperty<std::vector<Real> > &_rel_perm;
+  /// fluid flux at neighbours
+  MaterialProperty<std::vector<RealVectorValue> > &_flux_n;
 
-  /// gravity vector pointing in downwards direction
-  MaterialProperty<RealVectorValue> &_gravity;
-
-  /// material permeability
-  MaterialProperty<RealTensorValue> & _permeability;
-
-  /// neighboring value of fluid density (vector of densities if multiphase)
-  MaterialProperty<std::vector<Real> > &_density_n;
-
-  /// neighboring value of fluid relative permeability (vector of relperms if multiphase)
-  MaterialProperty<std::vector<Real> > &_rel_perm_n;
-
-  /// neighboring value of gravity vector pointing in downwards direction
-  MaterialProperty<RealVectorValue> &_gravity_n;
-
-  /// neighboring value of material permeability
-  MaterialProperty<RealTensorValue> & _permeability_n;
 };
 
 #endif /* RICHARDSFLUXJUMPINDICATOR_H */

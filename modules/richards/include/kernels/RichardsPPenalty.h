@@ -15,8 +15,8 @@ template<>
 InputParameters validParams<RichardsPPenalty>();
 
 /**
- * Kernel = a*(lower - p) for p<lower, and zero otherwise
- * This is an attempt to enforce p>=lower
+ * Kernel = a*(lower - variable) for variable<lower, and zero otherwise
+ * This is an attempt to enforce variable>=lower
  */
 class RichardsPPenalty : public Kernel
 {
@@ -33,10 +33,10 @@ protected:
 
 private:
 
-  /// Kernel = a*(_lower - p) for p<lower and zero otherwise
+  /// Kernel = a*(_lower - variable) for variable<lower and zero otherwise
   Real _a;
 
-  /// Kernel = a*(_lower - p) for p<lower and zero otherwise
+  /// Kernel = a*(_lower - variable) for variable<lower and zero otherwise
   VariableValue & _lower;
 
   /// moose variable number of the _lower variable (needed for OffDiagJacobian)

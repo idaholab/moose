@@ -9,6 +9,7 @@
 #include "DiracKernel.h"
 #include "LinearInterpolation.h"
 #include "RichardsSumQuantity.h"
+#include "RichardsVarNames.h"
 
 //Forward Declarations
 class RichardsPolyLineSink;
@@ -29,6 +30,14 @@ public:
   virtual void addPoints();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
+  /**
+   * Computes the off-diagonal part of the jacobian
+   * Note: at March2014 this is never called since
+   * moose does not have this functionality.  Hence
+   * as of March2014 this has never been tested.
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 
 protected:
@@ -54,6 +63,19 @@ protected:
    */
   bool _mesh_adaptivity;
 
+  /// Defines the richards variables in the simulation
+  const RichardsVarNames & _richards_name_UO;
+
+  /// The moose internal variable number of the richards variable of this Dirac Kernel
+  unsigned int _pvar;
+
+  /// fluid porepressure (or porepressures in case of multiphase)
+  MaterialProperty<std::vector<Real> > &_pp;
+
+  /// d(porepressure_i)/d(variable_j)
+  MaterialProperty<std::vector<std::vector<Real> > > &_dpp_dv;
+
+
   /// vector of Dirac Points' x positions
   std::vector<Real> _xs;
 
@@ -68,6 +90,7 @@ protected:
 
   /// whether have constructed _elemental_info
   bool _have_constructed_elemental_info;
+
 
   /**
    * reads a space-separated line of floats from ifs and puts in myvec

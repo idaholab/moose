@@ -13,9 +13,9 @@ template<>
 InputParameters validParams<RichardsExcav>()
 {
   InputParameters params = validParams<NodalBC>();
-  params.addRequiredParam<Real>("p_excav", "Porepressure at the surface of the excavation.  Usually this is atmospheric pressure");
+  params.addRequiredParam<Real>("p_excav", "Value of the variable at the surface of the excavation.  Eg atmospheric pressure");
   params.addRequiredParam<FunctionName>("excav_geom_function", "The function describing the excavation geometry (type RichardsExcavGeom)");
-  params.addClassDescription("Allows the user to set porepressure at the face of an excavation.  You must have defined the excavation start time, start position, etc, through the excav_geom_function");
+  params.addClassDescription("Allows the user to set variable values at the face of an excavation.  You must have defined the excavation start time, start position, etc, through the excav_geom_function");
   return params;
 }
 

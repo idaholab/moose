@@ -33,16 +33,19 @@ RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const std::string & nam
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
+    _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv")),
+
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
     _permeability(getMaterialProperty<RealTensorValue>("permeability")),
 
-    _dseff(getMaterialProperty<std::vector<std::vector<Real> > >("ds_eff")),
+    _dseff_dv(getMaterialProperty<std::vector<std::vector<Real> > >("ds_eff_dv")),
 
     _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
-    _drel_perm(getMaterialProperty<std::vector<Real> >("drel_perm")),
+    _drel_perm_dv(getMaterialProperty<std::vector<std::vector<Real> > >("drel_perm_dv")),
 
     _density(getMaterialProperty<std::vector<Real> >("density")),
-    _ddensity(getMaterialProperty<std::vector<Real> >("ddensity"))
+    _ddensity_dv(getMaterialProperty<std::vector<std::vector<Real> > >("ddensity_dv"))
 {}
 
 
@@ -50,7 +53,7 @@ RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const std::string & nam
 Real
 RichardsPiecewiseLinearSink::computeQpResidual()
 {
-  Real flux = _test[_i][_qp]*_sink_func.sample(_u[_qp]);
+  Real flux = _test[_i][_qp]*_sink_func.sample(_pp[_qp][_pvar]);
   if (_use_mobility)
     {
       Real k = (_permeability[_qp]*_normals[_qp])*_normals[_qp];
@@ -67,43 +70,35 @@ RichardsPiecewiseLinearSink::computeQpResidual()
 Real
 RichardsPiecewiseLinearSink::computeQpJacobian()
 {
-  Real flux = _sink_func.sample(_u[_qp]);
-  Real deriv = _sink_func.sampleDerivative(_u[_qp]);
-  if (_use_mobility)
-    {
-      Real k = (_permeability[_qp]*_normals[_qp])*_normals[_qp];
-      Real mob = _density[_qp][_pvar]*k/_viscosity[_qp][_pvar];
-      Real mobp = _ddensity[_qp][_pvar]*k/_viscosity[_qp][_pvar];
-      deriv = mob*deriv + mobp*flux;
-      flux = mob*flux;
-    }
-  if (_use_relperm)
-    {
-      deriv = _rel_perm[_qp][_pvar]*deriv + _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]*flux;
-    }
-
-  deriv *= _m_func.value(_t, _q_point[_qp]);
-
-  return _test[_i][_qp]*deriv*_phi[_j][_qp];
+  return jac(_pvar);
 }
 
 Real
 RichardsPiecewiseLinearSink::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_richards_name_UO.not_richards_var(jvar) || !(_use_relperm))
+  if (_richards_name_UO.not_richards_var(jvar))
     return 0.0;
   unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
+  return jac(dvar);
+}
 
-  // only relperm has off-diag contributions
-
-  Real flux = _sink_func.sample(_u[_qp]);
+Real
+RichardsPiecewiseLinearSink::jac(unsigned int wrt_num)
+{
+  Real flux = _sink_func.sample(_pp[_qp][_pvar]);
+  Real deriv = _sink_func.sampleDerivative(_pp[_qp][_pvar])*_dpp_dv[_qp][_pvar][wrt_num];
   if (_use_mobility)
     {
       Real k = (_permeability[_qp]*_normals[_qp])*_normals[_qp];
       Real mob = _density[_qp][_pvar]*k/_viscosity[_qp][_pvar];
-      flux = mob*flux;
+      Real mobp = _ddensity_dv[_qp][_pvar][wrt_num]*k/_viscosity[_qp][_pvar];
+      deriv = mob*deriv + mobp*flux;
+      flux *= mob;
     }
-  Real deriv = _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][dvar]*flux;
+  if (_use_relperm)
+    {
+      deriv = _rel_perm[_qp][_pvar]*deriv + _drel_perm_dv[_qp][_pvar][wrt_num]*flux;
+    }
 
   deriv *= _m_func.value(_t, _q_point[_qp]);
 

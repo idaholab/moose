@@ -19,11 +19,6 @@ InputParameters validParams<RichardsBorehole>()
   params.addParam<Real>("re_constant", 0.28, "The dimensionless constant used in evaluating the borehole effective radius.  This depends on the meshing scheme.  Peacemann finite-difference calculations give 0.28, while for rectangular finite elements the result is closer to 0.1594.  (See  Eqn(4.13) of Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388.)");
   params.addParam<bool>("mesh_adaptivity", true, "If not using mesh adaptivity then set this false to substantially speed up the simulation by caching the element containing each Dirac point.");
   params.addParam<Real>("well_constant", -1.0, "Usually this is calculated internally from the element geometry, the local borehole direction and segment length, and the permeability.  However, if this parameter is given as a positive number then this number is used instead of the internal calculation.  This speeds up computation marginally.  re_constant becomes irrelevant");
-  params.addCoupledVar("dseff_var", 0.0, "Derivative of Seff wrt the pressure variable.  Usually this is calculated by RichardsMaterial: inputting this parameter allows the user greater freedom");
-  params.addCoupledVar("relperm_var", 0.0, "Relative permeability.  Usually this is calculated by RichardsMaterial: inputting this parameter allows the user greater freedom");
-  params.addCoupledVar("drelperm_var", 0.0, "Derivative of relative permeability wrt effective saturation.  Usually this is calculated by RichardsMaterial: inputting this parameter allows the user greater freedom");
-  params.addCoupledVar("density_var", 0.0, "Fluid density.  Usually this is calculated by RichardsMaterial: inputting this parameter allows the user greater freedom");
-  params.addCoupledVar("ddensity_var", 0.0, "Derivative of fluid density wrt pressure.  Usually this is calculated by RichardsMaterial: inputting this parameter allows the user greater freedom");
   params.addParam<bool>("MyNameIsAndyWilkins", false, "Used for debugging by Andy");
   params.addClassDescription("Approximates a borehole in the mesh with given bottomhole pressure, and radii using a number of point sinks whose positions are read from a file");
   return params;
@@ -33,12 +28,6 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     DiracKernel(name, parameters),
 
     _debug_things(getParam<bool>("MyNameIsAndyWilkins")),
-
-    _dseff_val(&coupledValue("dseff_var")),
-    _relperm_val(&coupledValue("relperm_var")),
-    _drelperm_val(&coupledValue("drelperm_var")),
-    _density_val(&coupledValue("density_var")),
-    _ddensity_val(&coupledValue("ddensity_var")),
 
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
@@ -52,17 +41,20 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
     _mesh_adaptivity(getParam<bool>("mesh_adaptivity")),
 
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
+    _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv")),
+
     _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
 
     _permeability(getMaterialProperty<RealTensorValue>("permeability")),
 
-    _dseff(getMaterialProperty<std::vector<std::vector<Real> > >("ds_eff")),
+    _dseff_dv(getMaterialProperty<std::vector<std::vector<Real> > >("ds_eff_dv")),
 
     _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
-    _drel_perm(getMaterialProperty<std::vector<Real> >("drel_perm")),
+    _drel_perm_dv(getMaterialProperty<std::vector<std::vector<Real> > >("drel_perm_dv")),
 
     _density(getMaterialProperty<std::vector<Real> >("density")),
-    _ddensity(getMaterialProperty<std::vector<Real> >("ddensity")),
+    _ddensity_dv(getMaterialProperty<std::vector<std::vector<Real> > >("ddensity_dv")),
 
     _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
     _point_file(getParam<std::string>("point_file"))
@@ -163,15 +155,6 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
         mooseError("Rotation matrix for v2 = " << v2 << " does not obey R^T.R=I.  It is " << _rot_matrix[i] << "\n");
     }
   }
-
-  // while it should be possible to have, say, relperm_var set, but drelperm_var not set,
-  // i feel this could lead to hard-to-debug errors in Jacobian calculations.  Hence the following:
-  if (isCoupled("dseff_var") && isCoupled("relperm_var") && isCoupled("drelperm_var") && isCoupled("density_var") && isCoupled("ddensity_var"))
-    _using_coupled_vars = true;
-  else if (!(isCoupled("dseff_var") && isCoupled("relperm_var") && isCoupled("drelperm_var") && isCoupled("density_var") && isCoupled("ddensity_var")))
-    _using_coupled_vars = false;
-  else
-    mooseError("To reduce errors, if you are using one CoupledVar in a RichardsBorehole (for example, the relperm_var), you must currently use ALL of the CoupledVars (dseff_var, relperm_var, drelperm_var, etc)");
 
 }
 
@@ -321,7 +304,7 @@ RichardsBorehole::computeQpResidual()
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
 
   Real mob = 1.0/_viscosity[_qp][_pvar];
-  mob *= (_using_coupled_vars ? (*_relperm_val)[_qp]*(*_density_val)[_qp] : _rel_perm[_qp][_pvar]*_density[_qp][_pvar]);
+  mob *= _rel_perm[_qp][_pvar]*_density[_qp][_pvar];
 
 
   // when we can query for the current_dirac_ptid replace this complete bodge:
@@ -336,28 +319,20 @@ RichardsBorehole::computeQpResidual()
   // contribution from half-segment "behind" this point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
-    if ((character < 0.0 && _u[_qp] < bh_pressure) || (character > 0.0 && _u[_qp] > bh_pressure))
+    if ((character < 0.0 && _pp[_qp][_pvar] < bh_pressure) || (character > 0.0 && _pp[_qp][_pvar] > bh_pressure))
       // injection, so outflow<0 || // production, so outflow>0
-      outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(_u[_qp] - bh_pressure);
+      outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(_pp[_qp][_pvar] - bh_pressure);
   }
 
   if (current_dirac_ptid < _zs.size() - 1)
   // contribution from half-segment "ahead of" this point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
-    //Moose::out << " p= " << _u[_qp] << " relperm = " << (*_relperm_val)[_qp] << " density = " << (*_density_val)[_qp] << " mob = " << mob << "\n";
     //Moose::out << " qp= " << _qp << " density = " << _density[_qp][_pvar] << " p = " << std::log(_density[_qp][_pvar]/1000)*2E9 << "\n";
-    if ((character < 0.0 && _u[_qp] < bh_pressure) || (character > 0.0 && _u[_qp] > bh_pressure))
+    if ((character < 0.0 && _pp[_qp][_pvar] < bh_pressure) || (character > 0.0 && _pp[_qp][_pvar] > bh_pressure))
       // injection, so outflow<0 || // production, so outflow>0
-      outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(_u[_qp] - bh_pressure);
-    //outflow += _test[_i][_qp]*std::abs(character)*wc*std::exp(_u[_qp]*10)*(_u[_qp] - bh_pressure)/_viscosity[_qp][_pvar];
+      outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(_pp[_qp][_pvar] - bh_pressure);
   }
-
-  // bodge
-  //Real u_from_dens = std::log( (*_density_val)[_qp]/1000)*2E9 ;
-  //if (u_from_dens < _u[_qp] - 100 || u_from_dens > _u[_qp] + 100 || (*_relperm_val)[_qp] < 0.99 || _u[_qp] < bh_pressure || wc < 1E-16 || wc > 1E-15)
-  //  mooseError("u_from_dens = " << u_from_dens << " u = " << _u[_qp] << " relperm = " << (*_relperm_val)[_qp] << " wc = " << wc << " perm = " << _permeability[_qp] << " rot = " << _rot_matrix[current_dirac_ptid] << " _halflen = " << _half_seg_len[current_dirac_ptid] << " rs = " << _rs[current_dirac_ptid] << "\n");
-  //Moose::out << "wc = " << wc << "\n";
 
 
   _total_outflow_mass.add(outflow*_dt); // this is not thread safe, but DiracKernel's aren't currently threaded
@@ -369,42 +344,7 @@ RichardsBorehole::computeQpJacobian()
 {
   Real character = _character.value(_t, _q_point[_qp]);
   if (character == 0.0) return 0.0;
-
-  Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
-
-  Real mob = 1.0/_viscosity[_qp][_pvar];
-  mob *= (_using_coupled_vars ? (*_relperm_val)[_qp]*(*_density_val)[_qp] : _rel_perm[_qp][_pvar]*_density[_qp][_pvar]);
-
-  Real mobp = 1.0/_viscosity[_qp][_pvar];
-  mobp *= (_using_coupled_vars ? (*_drelperm_val)[_qp]*(*_dseff_val)[_qp]*(*_density_val)[_qp] + (*_relperm_val)[_qp]*(*_ddensity_val)[_qp] : _drel_perm[_qp][_pvar]*_dseff[_qp][_pvar][_pvar]*_density[_qp][_pvar] + _rel_perm[_qp][_pvar]*_ddensity[_qp][_pvar]);
-
-  // when we can query for the current_dirac_ptid replace this complete bodge:
-  unsigned int current_dirac_ptid = 0;
-  if (_zs.size() > 2)
-    current_dirac_ptid = 1;
-
-  Real outflowp(0.0);
-
-  Real wc(0.0);
-  if (current_dirac_ptid > 0)
-  // contribution from half-segment "behind" this point
-  {
-    wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
-    if ((character < 0.0 && _u[_qp] < bh_pressure) || (character > 0.0 && _u[_qp] > bh_pressure))
-      // injection, so outflow<0 || // production, so outflow>0
-      outflowp += _test[_i][_qp]*std::abs(character)*wc*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
-  }
-
-  if (current_dirac_ptid < _zs.size() - 1)
-  // contribution from half-segment "ahead of" this point
-  {
-    wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
-    if ((character < 0.0 && _u[_qp] < bh_pressure) || (character > 0.0 && _u[_qp] > bh_pressure))
-      // injection, so outflow<0 || // production, so outflow>0
-      outflowp += _test[_i][_qp]*std::abs(character)*wc*(mob*_phi[_j][_qp] + mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
-  }
-
-  return outflowp;
+  return jac(_pvar);
 }
 
 Real
@@ -414,14 +354,21 @@ RichardsBorehole::computeQpOffDiagJacobian(unsigned int jvar)
   if (_richards_name_UO.not_richards_var(jvar))
     return 0.0;
   unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
+  return jac(dvar);
+}
 
+
+Real
+RichardsBorehole::jac(unsigned int wrt_num)
+{
   Real character = _character.value(_t, _q_point[_qp]);
   if (character == 0.0) return 0.0;
 
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
 
-  Real mobp = _dseff[_qp][_pvar][dvar]/_viscosity[_qp][_pvar];
-  mobp *= (_using_coupled_vars ? (*_drelperm_val)[_qp]*(*_density_val)[_qp] : _drel_perm[_qp][_pvar]*_density[_qp][_pvar]);
+  Real mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
+
+  Real mobp = (_drel_perm_dv[_qp][_pvar][wrt_num]*_density[_qp][_pvar] + _rel_perm[_qp][_pvar]*_ddensity_dv[_qp][_pvar][wrt_num])/_viscosity[_qp][_pvar];
 
   // when we can query for the current_dirac_ptid replace this complete bodge:
   unsigned int current_dirac_ptid = 0;
@@ -435,18 +382,18 @@ RichardsBorehole::computeQpOffDiagJacobian(unsigned int jvar)
   // contribution from half-segment "behind" this point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
-    if ((character < 0.0 && _u[_qp] < bh_pressure) || (character > 0.0 && _u[_qp] > bh_pressure))
+    if ((character < 0.0 && _pp[_qp][_pvar] < bh_pressure) || (character > 0.0 && _pp[_qp][_pvar] > bh_pressure))
       // injection, so outflow<0 || // production, so outflow>0
-      outflowp += _test[_i][_qp]*std::abs(character)*wc*(mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
+      outflowp += _test[_i][_qp]*std::abs(character)*wc*(mob*_phi[_j][_qp]*_dpp_dv[_qp][_pvar][wrt_num] + mobp*_phi[_j][_qp]*(_pp[_qp][_pvar] - bh_pressure));
   }
 
   if (current_dirac_ptid < _zs.size() - 1)
   // contribution from half-segment "ahead of" this point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
-    if ((character < 0.0 && _u[_qp] < bh_pressure) || (character > 0.0 && _u[_qp] > bh_pressure))
+    if ((character < 0.0 && _pp[_qp][_pvar] < bh_pressure) || (character > 0.0 && _pp[_qp][_pvar] > bh_pressure))
       // injection, so outflow<0 || // production, so outflow>0
-      outflowp += _test[_i][_qp]*std::abs(character)*wc*(mobp*_phi[_j][_qp]*(_u[_qp] - bh_pressure));
+      outflowp += _test[_i][_qp]*std::abs(character)*wc*(mob*_phi[_j][_qp]*_dpp_dv[_qp][_pvar][wrt_num] + mobp*_phi[_j][_qp]*(_pp[_qp][_pvar] - bh_pressure));
   }
 
   return outflowp;

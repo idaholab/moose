@@ -33,14 +33,8 @@ protected:
   /// Richards variable number that we want the mass for
   unsigned int _pvar;
 
-  /// material porosity
-  MaterialProperty<Real> &_porosity;
-
-  /// fluid saturation
-  MaterialProperty<std::vector<Real> > &_sat;
-
-  /// fluid density
-  MaterialProperty<std::vector<Real> > &_density;
+  /// Mass, or vector of masses in multicomponent situation
+  MaterialProperty<std::vector<Real> > &_mass;
 };
 
 #endif

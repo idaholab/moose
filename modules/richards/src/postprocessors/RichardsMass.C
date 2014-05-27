@@ -23,14 +23,12 @@ RichardsMass::RichardsMass(const std::string & name, InputParameters parameters)
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
-    _porosity(getMaterialProperty<Real>("porosity")),
-    _sat(getMaterialProperty<std::vector<Real> >("sat")),
-    _density(getMaterialProperty<std::vector<Real> >("density"))
+    _mass(getMaterialProperty<std::vector<Real> >("mass"))
 {
 }
 
 Real
 RichardsMass::computeQpIntegral()
 {
-  return _porosity[_qp]*_density[_qp][_pvar]*_sat[_qp][_pvar];
+  return _mass[_qp][_pvar];
 }

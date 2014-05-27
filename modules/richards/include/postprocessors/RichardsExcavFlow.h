@@ -37,20 +37,8 @@ protected:
   /// the richards variable number for which we want the mass flow
   unsigned int _pvar;
 
-  /// viscosities of fluids
-  MaterialProperty<std::vector<Real> > &_viscosity;
-
-  /// gravitational acceleration vector
-  MaterialProperty<RealVectorValue> &_gravity;
-
-  /// permeability of medium
-  MaterialProperty<RealTensorValue> & _permeability;
-
-  /// relative permeabilites of fluids
-  MaterialProperty<std::vector<Real> > &_rel_perm;
-
-  /// densities of fluids
-  MaterialProperty<std::vector<Real> > &_density;
+  /// mass-flux of fluid (a vector in the multicomponent case)
+  MaterialProperty<std::vector<RealVectorValue> > &_flux;
 
   /// the RichardsExcavGeom that defines where on the boundary we'll compute the mass flux
   Function & _func;

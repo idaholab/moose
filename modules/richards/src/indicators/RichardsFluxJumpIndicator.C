@@ -21,15 +21,9 @@ RichardsFluxJumpIndicator::RichardsFluxJumpIndicator(const std::string & name, I
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
-    _density(getMaterialProperty<std::vector<Real> >("density")),
-    _rel_perm(getMaterialProperty<std::vector<Real> >("rel_perm")),
-    _gravity(getMaterialProperty<RealVectorValue>("gravity")),
-    _permeability(getMaterialProperty<RealTensorValue>("permeability")),
+    _flux(getMaterialProperty<std::vector<RealVectorValue> >("flux")),
 
-    _density_n(getNeighborMaterialProperty<std::vector<Real> >("density")),
-    _rel_perm_n(getNeighborMaterialProperty<std::vector<Real> >("rel_perm")),
-    _gravity_n(getNeighborMaterialProperty<RealVectorValue>("gravity")),
-    _permeability_n(getNeighborMaterialProperty<RealTensorValue>("permeability"))
+    _flux_n(getNeighborMaterialProperty<std::vector<RealVectorValue> >("flux"))
 {
 }
 
@@ -37,11 +31,7 @@ RichardsFluxJumpIndicator::RichardsFluxJumpIndicator(const std::string & name, I
 Real
 RichardsFluxJumpIndicator::computeQpIntegral()
 {
-  RealVectorValue gra = _density[_qp][_pvar]*_rel_perm[_qp][_pvar]*(_permeability[_qp]*(_grad_u[_qp] - _density[_qp][_pvar]*_gravity[_qp]));
-  RealVectorValue gra_n = _density_n[_qp][_pvar]*_rel_perm_n[_qp][_pvar]*(_permeability_n[_qp]*(_grad_u_neighbor[_qp] - _density_n[_qp][_pvar]*_gravity_n[_qp]));
-
-  Real jump = (gra - gra_n)*_normals[_qp];
-
+  Real jump = (_flux[_qp][_pvar] - _flux_n[_qp][_pvar])*_normals[_qp];
   return jump*jump;
 }
 
