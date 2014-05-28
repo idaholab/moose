@@ -7,8 +7,8 @@
 
 [UserObjects]
   [./PPNames]
-    type = RichardsPorepressureNames
-    porepressure_vars = pressure
+    type = RichardsVarNames
+    richards_vars = pressure
   [../]
   [./DensityConstBulk]
     type = RichardsDensityConstBulk
@@ -280,12 +280,12 @@
   active = 'richardsf richardst'
   [./richardst]
     type = RichardsMassChange
-    porepressureNames_UO = PPNames
+    richardsVarNames_UO = PPNames
     variable = pressure
   [../]
   [./richardsf]
     type = RichardsFlux
-    porepressureNames_UO = PPNames
+    richardsVarNames_UO = PPNames
     variable = pressure
   [../]
 []
@@ -296,7 +296,7 @@
     block = 0
     mat_porosity = 0.1
     mat_permeability = '1E-20 0 0  0 1E-20 0  0 0 1E-20'
-    porepressureNames_UO = PPNames
+    richardsVarNames_UO = PPNames
     density_UO = DensityConstBulk
     relperm_UO = RelPermPower
     sat_UO = Saturation

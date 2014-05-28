@@ -12,9 +12,9 @@ template<>
 InputParameters validParams<RichardsPPenalty>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addParam<Real>("a", 1.0E-10, "Weight of the penalty.  Penalty = a*(lower - p) for p<lower, and zero otherwise.  Care should be taken with this parameter choice.  Determine the typical size of your residual (usually rho*perm*(gradP - rho*g)/visc), then typically you want the penalty to ensure p>lower*(1-1E-6), so typically Penalty = a*1E-6*|p|.  I recommend that Penalty = 1E-3*residual, yielding a = 1E3*residual/|P|. ");
-  params.addRequiredCoupledVar("lower_var", "Your porepressure variable will be constrainted to be greater than this lower_var variable.");
-  params.addClassDescription("This adds a term to the residual that attempts to enforce porepressure > lower_var.  The term is a*(lower - p) for p<lower, and zero otherwise");
+  params.addParam<Real>("a", 1.0E-10, "Weight of the penalty.  Penalty = a*(lower - variable) for variable<lower, and zero otherwise.  Care should be taken with this parameter choice.  Determine the typical size of your residual (usually rho*perm*(gradP - rho*g)/visc), then typically you want the penalty to ensure p>lower*(1-1E-6), so for the PPP formulation you typically Penalty = a*1E-6*|p|.  I recommend that Penalty = 1E-3*residual, yielding a = 1E3*residual/|P|. ");
+  params.addRequiredCoupledVar("lower_var", "Your variable will be constrainted to be greater than this lower_var variable.");
+  params.addClassDescription("This adds a term to the residual that attempts to enforce variable > lower_var.  The term is a*(lower - variable) for variable<lower, and zero otherwise");
   return params;
 }
 

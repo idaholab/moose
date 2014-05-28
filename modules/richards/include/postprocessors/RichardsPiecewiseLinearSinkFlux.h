@@ -8,7 +8,7 @@
 
 #include "SideIntegralVariablePostprocessor.h"
 #include "LinearInterpolation.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 #include "FunctionInterface.h"
 
 class Function;
@@ -50,15 +50,18 @@ protected:
   /// the multiplier function
   Function & _m_func;
 
-  /// holds info regarding the porepressure names, and their values in the simulation
-  const RichardsPorepressureNames & _pp_name_UO;
+  /// holds info regarding the Richards variable names, and their values in the simulation
+  const RichardsVarNames & _richards_name_UO;
 
   /**
-   * the index into _pp_name_UO corresponding to this Postprocessor's variable
-   * eg, if the porepressure names are 'pwater pgas poil pplasma'
+   * the index into _richards_name_UO corresponding to this Postprocessor's variable
+   * eg, if the richards names are 'pwater pgas poil pplasma'
    * and the variable of this Postprocessor is pgas, then _pvar=1
    */
   unsigned int _pvar;
+
+  /// porepressure values (only the _pvar component is used)
+  MaterialProperty<std::vector<Real> > &_pp;
 
   /// fluid viscosity
   MaterialProperty<std::vector<Real> > &_viscosity;

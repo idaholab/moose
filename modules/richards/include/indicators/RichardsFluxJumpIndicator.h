@@ -7,7 +7,7 @@
 #define RICHARDSFLUXJUMPINDICATOR_H
 
 #include "JumpIndicator.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 
 class RichardsFluxJumpIndicator;
 
@@ -15,8 +15,8 @@ template<>
 InputParameters validParams<RichardsFluxJumpIndicator>();
 
 /**
- * Jump of the Richards mass-flux*viscosity
- * = density * relative_permeability * permeability * (grad(porepressure) - density * gravity)
+ * Jump of the Richards mass-flux
+ * = density * relative_permeability * permeability * (grad(porepressure) - density * gravity)/viscosity
  */
 class RichardsFluxJumpIndicator :
   public JumpIndicator
@@ -30,43 +30,26 @@ protected:
   virtual Real computeQpIntegral();
 
   /**
-   * holds info regarding the names of the porepressure variables
+   * holds info regarding the names of the richards variables
    * and methods for extracting values of these variables
    */
-  const RichardsPorepressureNames & _pp_name_UO;
+  const RichardsVarNames & _richards_name_UO;
 
   /**
-   * the index of this variable in the list of porepressure variables
-   * held by _pp_name_UO.  Eg
-   * if porepressure_vars = 'pwater pgas poil' in the _pp_name_UO
+   * the index of this variable in the list of richards variables
+   * held by _richards_name_UO.  Eg
+   * if richards_vars = 'pwater pgas poil' in the _richards_name_UO
    * and this kernel has variable = pgas, then _pvar = 1
    * This is used to index correctly into seff_UO, sat_UO, density_UO, etc.
    */
   unsigned int _pvar;
 
-  /// fluid density (vector of densities if multiphase)
-  MaterialProperty<std::vector<Real> > &_density;
+  /// fluid flux (vector of fluxes if multicomponent)
+  MaterialProperty<std::vector<RealVectorValue> > &_flux;
 
-  /// fluid relative permeability (vector of relperms if multiphase)
-  MaterialProperty<std::vector<Real> > &_rel_perm;
+  /// fluid flux at neighbours
+  MaterialProperty<std::vector<RealVectorValue> > &_flux_n;
 
-  /// gravity vector pointing in downwards direction
-  MaterialProperty<RealVectorValue> &_gravity;
-
-  /// material permeability
-  MaterialProperty<RealTensorValue> & _permeability;
-
-  /// neighboring value of fluid density (vector of densities if multiphase)
-  MaterialProperty<std::vector<Real> > &_density_n;
-
-  /// neighboring value of fluid relative permeability (vector of relperms if multiphase)
-  MaterialProperty<std::vector<Real> > &_rel_perm_n;
-
-  /// neighboring value of gravity vector pointing in downwards direction
-  MaterialProperty<RealVectorValue> &_gravity_n;
-
-  /// neighboring value of material permeability
-  MaterialProperty<RealTensorValue> & _permeability_n;
 };
 
 #endif /* RICHARDSFLUXJUMPINDICATOR_H */

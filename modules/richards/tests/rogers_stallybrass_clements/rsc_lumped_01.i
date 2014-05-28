@@ -11,7 +11,7 @@
 []
 
 [GlobalParams]
-  porepressureNames_UO = PPNames
+  richardsVarNames_UO = PPNames
   density_UO = 'DensityWater DensityOil'
   relperm_UO = 'RelPerm RelPerm'
   SUPG_UO = 'SUPGstandard SUPGstandard'
@@ -21,8 +21,8 @@
 
 [UserObjects]
   [./PPNames]
-    type = RichardsPorepressureNames
-    porepressure_vars = 'pwater poil'
+    type = RichardsVarNames
+    richards_vars = 'pwater poil'
   [../]
   [./DensityWater]
     type = RichardsDensityConstBulk

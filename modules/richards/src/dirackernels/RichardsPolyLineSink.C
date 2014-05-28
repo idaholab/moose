@@ -14,6 +14,7 @@ InputParameters validParams<RichardsPolyLineSink>()
   params.addRequiredParam<std::string>("point_file", "The file containing the coordinates of the point sinks that will approximate the polyline.  Each line in the file must contain a space-separated coordinate.  Note that you will get segementation faults if your points do not lie within your mesh!");
   params.addParam<bool>("mesh_adaptivity", true, "If not using mesh adaptivity then set this false to substantially speed up the simulation by caching the element containing each Dirac point.");
   params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the polylinesink for each time step.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addClassDescription("Approximates a polyline sink in the mesh by using a number of point sinks whose positions are read from a file");
   return params;
 }
@@ -23,7 +24,12 @@ RichardsPolyLineSink::RichardsPolyLineSink(const std::string & name, InputParame
     _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
     _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("fluxes")),
     _point_file(getParam<std::string>("point_file")),
-    _mesh_adaptivity(getParam<bool>("mesh_adaptivity"))
+    _mesh_adaptivity(getParam<bool>("mesh_adaptivity")),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
+    _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv"))
+
 {
   // open file
   std::ifstream file(_point_file.c_str());
@@ -103,7 +109,7 @@ Real
 RichardsPolyLineSink::computeQpResidual()
 {
   Real test_fcn = _test[_i][_qp];
-  Real flow = test_fcn*_sink_func.sample(_u[_qp]);
+  Real flow = test_fcn*_sink_func.sample(_pp[_qp][_pvar]);
   _total_outflow_mass.add(flow*_dt);
   return flow;
 }
@@ -112,5 +118,15 @@ Real
 RichardsPolyLineSink::computeQpJacobian()
 {
   Real test_fcn = _test[_i][_qp];
-  return test_fcn*_sink_func.sampleDerivative(_u[_qp])*_phi[_j][_qp];
+  return test_fcn*_sink_func.sampleDerivative(_pp[_qp][_pvar])*_dpp_dv[_qp][_pvar][_pvar]*_phi[_j][_qp];
+}
+
+Real
+RichardsPolyLineSink::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (_richards_name_UO.not_richards_var(jvar))
+    return 0.0;
+  unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
+  Real test_fcn = _test[_i][_qp];
+  return test_fcn*_sink_func.sampleDerivative(_pp[_qp][_pvar])*_dpp_dv[_qp][_pvar][dvar]*_phi[_j][_qp];
 }

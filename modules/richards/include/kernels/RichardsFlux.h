@@ -7,7 +7,7 @@
 #define RICHARDSFLUX
 
 #include "Kernel.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 
 // Forward Declarations
 class RichardsFlux;
@@ -35,55 +35,39 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /**
-   * holds info regarding the names of the porepressure variables
+   * holds info regarding the names of the Richards variables
    * and methods for extracting values of these variables
    */
-  const RichardsPorepressureNames & _pp_name_UO;
+  const RichardsVarNames & _richards_name_UO;
 
   /**
-   * the index of this variable in the list of porepressure variables
-   * held by _pp_name_UO.  Eg
-   * if porepressure_vars = 'pwater pgas poil' in the _pp_name_UO
+   * the index of this variable in the list of Richards variables
+   * held by _richards_name_UO.  Eg
+   * if richards_vars = 'pwater pgas poil' in the _richards_name_UO
    * and this kernel has variable = pgas, then _pvar = 1
    * This is used to index correctly into _viscosity, _seff, etc
    */
   unsigned int _pvar;
 
-  /// fluid viscosity, or for multiphase a vector of viscosities
-  MaterialProperty<std::vector<Real> > &_viscosity;
+  /// Richards flux
+  MaterialProperty<std::vector<RealVectorValue> > &_flux;
 
-  /// gravity vector pointing in downwards direction
-  MaterialProperty<RealVectorValue> &_gravity;
+  /// d(Richards flux_i)/d(variable_j), here flux_i is the i_th flux, which is itself a RealVectorValue
+  MaterialProperty<std::vector<std::vector<RealVectorValue> > > &_dflux_dv;
 
-  /// material permeability
-  MaterialProperty<RealTensorValue> & _permeability;
+  /// d(Richards flux_i)/d(grad(variable_j)), here flux_i is the i_th flux, which is itself a RealVectorValue
+  MaterialProperty<std::vector<std::vector<RealTensorValue> > > &_dflux_dgradv;
 
-  /// effective saturation(s)
-  MaterialProperty<std::vector<Real> > &_seff;
+  /// d^2(Richards flux_i)/d(variable_j)/d(variable_k), here flux_i is the i_th flux, which is itself a RealVectorValue
+  MaterialProperty<std::vector<std::vector<std::vector<RealVectorValue> > > > &_d2flux_dvdv;
 
-  /// derivative of effective saturation(s) wrt porepressure(s)
-  MaterialProperty<std::vector<std::vector<Real> > > &_dseff;
+  /// d^2(Richards flux_i)/d(grad(variable_j))/d(variable_k), here flux_i is the i_th flux, which is itself a RealVectorValue
+  MaterialProperty<std::vector<std::vector<std::vector<RealTensorValue> > > > &_d2flux_dgradvdv;
 
-  /// second derivative of effective saturation(s) wrt porepressure(s)
-  MaterialProperty<std::vector<std::vector<std::vector<Real> > > > &_d2seff;
+  /// d^2(Richards flux_i)/d(variable_j)/d(grad(variable_k)), here flux_i is the i_th flux, which is itself a RealVectorValue
+  MaterialProperty<std::vector<std::vector<std::vector<RealTensorValue> > > > &_d2flux_dvdgradv;
 
-  /// fluid relative permeability (vector of relperms if multiphase)
-  MaterialProperty<std::vector<Real> > &_rel_perm;
 
-  /// derivative of relative permeability wrt fluid effective saturation
-  MaterialProperty<std::vector<Real> > &_drel_perm;
-
-  /// second derivative of relative permeability wrt fluid effective saturation
-  MaterialProperty<std::vector<Real> > &_d2rel_perm;
-
-  /// fluid density (vector of densities if multiphase)
-  MaterialProperty<std::vector<Real> > &_density;
-
-  /// derivative of fluid density wrt fluid porepressure
-  MaterialProperty<std::vector<Real> > &_ddensity;
-
-  /// second derivative of fluid density wrt fluid porepressure
-  MaterialProperty<std::vector<Real> > &_d2density;
 
   /// grad_i grad_j porepressure.  This is used in SUPG
   VariableSecond & _second_u;
@@ -94,22 +78,11 @@ protected:
   /// SUPGtau*SUPGvel (a vector of these if multiphase)
   MaterialProperty<std::vector<RealVectorValue> >&_tauvel_SUPG;
 
-  /// derivative of SUPGtau*SUPGvel wrt grad(porepressure)
-  MaterialProperty<std::vector<RealTensorValue> >&_dtauvel_SUPG_dgradp;
+  /// derivative of SUPGtau*SUPGvel wrt grad(variable)
+  MaterialProperty<std::vector<RealTensorValue> >&_dtauvel_SUPG_dgradv;
 
-  /// derivative of SUPGtau*SUPGvel wrt porepressure
-  MaterialProperty<std::vector<RealVectorValue> >&_dtauvel_SUPG_dp;
-
- private:
-
-  /// mobility = density*relative-permeability
-  Real mobility(Real density, Real relperm);
-
-  /// derivative of mobility wrt porepressure
-  Real dmobility_dp(Real density, Real ddensity_dp, Real relperm, Real drelperm_dp);
-
-  /// second derivative of mobility wrt porepressure
-  Real d2mobility_dp2(Real density, Real ddensity_dp, Real d2density_dp2, Real relperm, Real drelperm_dp, Real d2relperm_dp2);
+  /// derivative of SUPGtau*SUPGvel wrt variable
+  MaterialProperty<std::vector<RealVectorValue> >&_dtauvel_SUPG_dv;
 };
 
 #endif //RICHARDSFLUX

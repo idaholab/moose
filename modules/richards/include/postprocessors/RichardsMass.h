@@ -7,7 +7,7 @@
 #define RICHARDSMASS_H
 
 #include "ElementIntegralVariablePostprocessor.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 
 //Forward Declarations
 class RichardsMass;
@@ -27,20 +27,14 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-  /// userobject that holds porepressure names
-  const RichardsPorepressureNames & _pp_name_UO;
+  /// userobject that holds Richards variable names
+  const RichardsVarNames & _richards_name_UO;
 
-  /// pressure variable number that we want the mass for
+  /// Richards variable number that we want the mass for
   unsigned int _pvar;
 
-  /// material porosity
-  MaterialProperty<Real> &_porosity;
-
-  /// fluid saturation
-  MaterialProperty<std::vector<Real> > &_sat;
-
-  /// fluid density
-  MaterialProperty<std::vector<Real> > &_density;
+  /// Mass, or vector of masses in multicomponent situation
+  MaterialProperty<std::vector<Real> > &_mass;
 };
 
 #endif

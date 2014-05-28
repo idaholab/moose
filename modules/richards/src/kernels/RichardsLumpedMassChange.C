@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<RichardsLumpedMassChange>()
 {
   InputParameters params = validParams<TimeKernel>();
-  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variables.");
   params.addRequiredParam<std::vector<UserObjectName> >("density_UO", "List of names of user objects that define the fluid density (or densities for multiphase).  In the multiphase case, for ease of use, the density, Seff and Sat UserObjects are the same format as for RichardsMaterial, but only the one relevant for the specific phase is actually used.");
   params.addRequiredParam<std::vector<UserObjectName> >("seff_UO", "List of name of user objects that define effective saturation as a function of porepressure(s)");
   params.addRequiredParam<std::vector<UserObjectName> >("sat_UO", "List of names of user objects that define saturation as a function of effective saturation");
@@ -22,9 +22,9 @@ InputParameters validParams<RichardsLumpedMassChange>()
 RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name,
                                              InputParameters parameters) :
     TimeKernel(name,parameters),
-    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _num_p(_pp_name_UO.num_pp()),
-    _pvar(_pp_name_UO.pressure_var_num(_var.number())),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _num_p(_richards_name_UO.num_v()),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
 
     _porosity(getMaterialProperty<Real>("porosity")),
     _porosity_old(getMaterialProperty<Real>("porosity_old")),
@@ -40,7 +40,7 @@ RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name,
 
   _nodal_pp.resize(_num_p);
   for (unsigned int i=0 ; i<_num_p; ++i)
-    _nodal_pp[i] = _pp_name_UO.raw_pp(i);
+    _nodal_pp[i] = _richards_name_UO.raw_var(i);
 }
 
 
@@ -150,11 +150,11 @@ RichardsLumpedMassChange::computeOffDiagJacobian(unsigned int jvar)
 Real
 RichardsLumpedMassChange::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_pp_name_UO.not_pressure_var(jvar))
+  if (_richards_name_UO.not_richards_var(jvar))
     return 0.0;
   if (_i != _j)
     return 0.0;
-  unsigned int dvar = _pp_name_UO.pressure_var_num(jvar);
+  unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
 
   Real density = (*_density_UO).density(_var.nodalSln()[_i]);
 
