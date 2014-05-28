@@ -212,7 +212,7 @@ RankFourTensor::operator-(const RankFourTensor &a) const
 }
 
 RankFourTensor
-RankFourTensor::operator - () const
+RankFourTensor::operator-() const
 {
   RankFourTensor result;
 
@@ -377,8 +377,6 @@ RankFourTensor::invSymm()
   return result;
 }
 
-
-
 void
 RankFourTensor::rotate(RealTensorValue &R)
 {
@@ -402,8 +400,6 @@ RankFourTensor::rotate(RealTensorValue &R)
         }
 
 }
-
-
 
 void
 RankFourTensor::print()
@@ -440,7 +436,6 @@ RankFourTensor::transposeMajor()
   return result;
 
 }
-
 
 void
 RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> input)
@@ -488,7 +483,6 @@ RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> input)
       mooseError("Please provide correct number of inputs for surface RankFourTensor initialization.");
 }
 
-
 void
 RankFourTensor::fillFromInputVector(const std::vector<Real> input, bool all_21)
 {
@@ -533,10 +527,6 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> input, FillMethod fi
   }
 }
 
-
-
-
-
 int
 RankFourTensor::MatrixInversion(double* A, int n)
 {
@@ -567,7 +557,6 @@ RankFourTensor::MatrixInversion(double* A, int n)
   free(buffer);
   return return_value;
 }
-
 
 void
 RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> input, bool all)
@@ -633,8 +622,6 @@ RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> input, bool
             _vals[l][k][i][j] = _vals[i][j][k][l];
 }
 
-
-
 void
 RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> input)
 {
@@ -678,7 +665,6 @@ RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> input)
     }
 }
 
-
 void
 RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> input)
 {
@@ -693,8 +679,8 @@ RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> inpu
         for (unsigned int l=0; l<N; l++)
         {
           _vals[i][j][k][l] = input[0]*(i==j)*(k==l) + input[1]*(i==k)*(j==l) + input[1]*(i==l)*(j==k);
-            for (unsigned int m = 0 ; m < N ; m++)
-              _vals[i][j][k][l] += input[2]*PermutationTensor::eps(i, j, m)*PermutationTensor::eps(k, l, m);
+          for (unsigned int m = 0 ; m < N ; m++)
+            _vals[i][j][k][l] += input[2]*PermutationTensor::eps(i, j, m)*PermutationTensor::eps(k, l, m);
         }
 }
 
@@ -721,7 +707,6 @@ RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> in
   input3.push_back(0);
   fillGeneralIsotropicFromInputVector(input3);
 }
-
 
 void
 RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> input)
