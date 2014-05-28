@@ -66,6 +66,10 @@ public:
    */
   void initialSetup();
 
+private:
+
+  /// Flag for aligning data in .csv file
+  bool _align;
 };
 
 #endif /* CSV_H */
