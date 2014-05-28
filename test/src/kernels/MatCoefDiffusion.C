@@ -16,7 +16,7 @@ MatCoefDiffusion::MatCoefDiffusion(const std::string & name, InputParameters par
     _prop_name(getParam<std::string>("conductivity"))
 {
 
-  // Get the test paramter
+  // Get the test parameter
   MooseEnum test = parameters.get<MooseEnum>("test");
 
   // Perform the special tests available
