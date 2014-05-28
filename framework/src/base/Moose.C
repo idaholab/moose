@@ -36,6 +36,8 @@
 #include "SideSetsAroundSubdomain.h"
 #include "SideSetsBetweenSubdomains.h"
 #include "AddAllSideSetsByNormals.h"
+#include "SubdomainBoundingBox.h"
+#include "OrientedSubdomainBoundingBox.h"
 
 // problems
 #include "FEProblem.h"
@@ -371,6 +373,8 @@ registerObjects(Factory & factory)
   registerMeshModifier(SideSetsAroundSubdomain);
   registerMeshModifier(SideSetsBetweenSubdomains);
   registerMeshModifier(AddAllSideSetsByNormals);
+  registerMeshModifier(SubdomainBoundingBox);
+  registerMeshModifier(OrientedSubdomainBoundingBox);
 
   // problems
   registerProblem(FEProblem);
