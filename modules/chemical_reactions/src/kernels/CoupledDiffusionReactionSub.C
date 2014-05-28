@@ -128,7 +128,7 @@ Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
 
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
-      if(jvar == _vars[i])
+      if (jvar == _vars[i])
       {
         diff1 *= _sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
       }
@@ -146,7 +146,7 @@ Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
 
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
-      if(jvar == _vars[i])
+      if (jvar == _vars[i])
       {
         diff2_1 = _sto_v[i]*(_sto_v[i]-1.0)*std::pow((*_vals[i])[_qp],_sto_v[i]-2.0)*_phi[_j][_qp]*(*_grad_vals[i])[_qp];
         diff2_2 = _sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_grad_phi[_j][_qp];
@@ -157,7 +157,7 @@ Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
 
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
-      if(jvar != _vars[i])
+      if (jvar != _vars[i])
       {
         diff2 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
       }
@@ -173,7 +173,7 @@ Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
 
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
-      if(jvar == _vars[i])
+      if (jvar == _vars[i])
       {
         var = i;
         val_jvar = val_u*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
@@ -182,7 +182,7 @@ Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
 
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
-      if(i != var)
+      if (i != var)
       {
         diff3 = val_jvar*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*(*_grad_vals[i])[_qp];
 
