@@ -45,6 +45,7 @@ protected:
    *
    * Do NOT copy this line of code!
    */
-  MaterialProperty<Real> _diffusivity;
+
+  VariableValue _coupled_coef;
 };
 #endif //EXAMPLEDIFFUSION_H
