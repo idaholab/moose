@@ -45,6 +45,7 @@ Resurrector::restartFromFile()
   Moose::setup_perf_log.push("restartFromFile()","Resurrector");
   std::string file_name(_restart_file_base + ".xdr");
   MooseUtils::checkFileReadable(file_name);
+  _restartable.readRestartableDataHeader(_restart_file_base + RESTARTABLE_DATA_EXT);
   _fe_problem._eq.read(file_name, DECODE, EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA, _fe_problem.adaptivity().isOn());
   _fe_problem._nl.update();
   Moose::setup_perf_log.pop("restartFromFile()","Resurrector");
@@ -63,6 +64,6 @@ void
 Resurrector::restartRestartableData()
 {
   Moose::setup_perf_log.push("restartRestartableData()","Resurrector");
-  _restartable.readRestartableData(_restart_file_base + RESTARTABLE_DATA_EXT, _fe_problem._restartable_data, _fe_problem._recoverable_data);
+  _restartable.readRestartableData(_fe_problem._restartable_data, _fe_problem._recoverable_data);
   Moose::setup_perf_log.pop("restartRestartableData()","Resurrector");
 }

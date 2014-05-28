@@ -34,19 +34,29 @@ class RestartableDataIO
 public:
   RestartableDataIO(FEProblem & fe_problem);
 
+  virtual ~RestartableDataIO();
+
   /**
    * Write out the restartable data.
    */
   void writeRestartableData(std::string base_file_name, const RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data);
 
   /**
+   * Read restartable data header to verify that we are restarting on the correct number of processors and threads.
+   */
+  void readRestartableDataHeader(std::string base_file_name);
+
+  /**
    * Read the restartable data.
    */
-  void readRestartableData(std::string base_file_name, RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data);
+  void readRestartableData(RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data);
 
 private:
   /// Reference to a FEProblem being restarted
   FEProblem & _fe_problem;
+
+  /// A vector of file handles, one per thread
+  std::vector<std::ifstream *> _in_file_handles;
 };
 
 #endif /* RESTARTABLEDATAIO_H */
