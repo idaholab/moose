@@ -23,6 +23,15 @@
 RestartableDataIO::RestartableDataIO(FEProblem & fe_problem) :
     _fe_problem(fe_problem)
 {
+  _in_file_handles.resize(libMesh::n_threads());
+}
+
+RestartableDataIO::~RestartableDataIO()
+{
+  unsigned int n_threads = libMesh::n_threads();
+
+  for (unsigned int tid=0; tid<n_threads; tid++)
+    delete _in_file_handles[tid];
 }
 
 void
@@ -112,71 +121,82 @@ RestartableDataIO::writeRestartableData(std::string base_file_name, const Restar
 }
 
 void
-RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data)
+RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 {
-  bool recovering = _fe_problem.getMooseApp().isRecovering();
-
   unsigned int n_threads = libMesh::n_threads();
   processor_id_type n_procs = _fe_problem.n_processors();
   processor_id_type proc_id = _fe_problem.processor_id();
 
+  for (unsigned int tid=0; tid<n_threads; tid++)
+  {
+    std::ostringstream file_name_stream;
+    file_name_stream << base_file_name;
+    file_name_stream << "-" << proc_id;
+
+    if (n_threads > 1)
+      file_name_stream << "-" << tid;
+
+    std::string file_name = file_name_stream.str();
+
+    MooseUtils::checkFileReadable(file_name);
+
+    const unsigned int file_version = 1;
+
+    mooseAssert(_in_file_handles[tid] == NULL, "Looks like you might be leaking in RestartableDataIO.C");
+    _in_file_handles[tid] = new std::ifstream(file_name.c_str(), std::ios::in | std::ios::binary);
+
+    // header
+    char id[2];
+    _in_file_handles[tid]->read(id, 2);
+
+    unsigned int this_file_version;
+    _in_file_handles[tid]->read((char *)&this_file_version, sizeof(this_file_version));
+
+    processor_id_type this_n_procs = 0;
+    unsigned int this_n_threads = 0;
+
+    _in_file_handles[tid]->read((char *)&this_n_procs, sizeof(this_n_procs));
+    _in_file_handles[tid]->read((char *)&this_n_threads, sizeof(this_n_threads));
+
+    // check the header
+    if (id[0] != 'R' || id[1] != 'D')
+      mooseError("Corrupted restartable data file!");
+
+    // check the file version
+    if (this_file_version > file_version)
+      mooseError("Trying to restart from a newer file version - you need to update MOOSE");
+
+    if (this_file_version < file_version)
+      mooseError("Trying to restart from an older file version - you need to checkout an older version of MOOSE.");
+
+    if (this_n_procs != n_procs)
+      mooseError("Cannot restart using a different number of processors!");
+
+    if (this_n_threads != n_threads)
+      mooseError("Cannot restart using a different number of threads!");
+  }
+}
+
+void
+RestartableDataIO::readRestartableData(RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data)
+{
+  bool recovering = _fe_problem.getMooseApp().isRecovering();
+
+  unsigned int n_threads = libMesh::n_threads();
   std::vector<std::string> ignored_data;
 
   for (unsigned int tid=0; tid<n_threads; tid++)
   {
     std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
+    if (!_in_file_handles[tid]->is_open())
+      mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling readRestartableData()");
+
     if (restartable_data.size())
     {
-      std::ostringstream file_name_stream;
-      file_name_stream << base_file_name;
-
-      file_name_stream << "-" << proc_id;
-
-      if (n_threads > 1)
-        file_name_stream << "-" << tid;
-
-      std::string file_name = file_name_stream.str();
-
-      MooseUtils::checkFileReadable(file_name);
-
-      const unsigned int file_version = 1;
-
-      std::ifstream in(file_name.c_str(), std::ios::in | std::ios::binary);
-
-      // header
-      char id[2];
-      in.read(id, 2);
-
-      unsigned int this_file_version;
-      in.read((char *)&this_file_version, sizeof(this_file_version));
-
-      processor_id_type this_n_procs = 0;
-      unsigned int this_n_threads = 0;
-
-      in.read((char *)&this_n_procs, sizeof(this_n_procs));
-      in.read((char *)&this_n_threads, sizeof(this_n_threads));
-
-      // check the header
-      if (id[0] != 'R' || id[1] != 'D')
-        mooseError("Corrupted restartable data file!");
-
-      // check the file version
-      if (this_file_version > file_version)
-        mooseError("Trying to restart from a newer file version - you need to update MOOSE");
-
-      if (this_file_version < file_version)
-        mooseError("Trying to restart from an older file version - you need to checkout an older version of MOOSE.");
-
-      if (this_n_procs != n_procs)
-        mooseError("Cannot restart using a different number of processors!");
-
-      if (this_n_threads != n_threads)
-        mooseError("Cannot restart using a different number of threads!");
-
       // number of data
       unsigned int n_data = 0;
-      in.read((char *) &n_data, sizeof(n_data));
+      _in_file_handles[tid]->read((char *) &n_data, sizeof(n_data));
 
       // data names
       std::vector<std::string> data_names(n_data);
@@ -186,7 +206,7 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
         std::string data_name;
         char ch = 0;
         do {
-          in.read(&ch, 1);
+          _in_file_handles[tid]->read(&ch, 1);
           if (ch != '\0')
             data_name += ch;
         } while (ch != '\0');
@@ -195,14 +215,14 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
 
       // Grab this processor's block size
       unsigned int data_blk_size = 0;
-      in.read((char *) &data_blk_size, sizeof(data_blk_size));
+      _in_file_handles[tid]->read((char *) &data_blk_size, sizeof(data_blk_size));
 
       for (unsigned int i=0; i < n_data; i++)
       {
         std::string current_name = data_names[i];
 
         unsigned int data_size = 0;
-        in.read((char *) &data_size, sizeof(data_size));
+        _in_file_handles[tid]->read((char *) &data_size, sizeof(data_size));
 
         if (restartable_data.find(current_name) != restartable_data.end() // Only restore values if they're currently being used
            && (recovering || (_recoverable_data.find(current_name) == _recoverable_data.end())) // Only read this value if we're either recovering or this hasn't been specified to be recovery only data
@@ -211,18 +231,18 @@ RestartableDataIO::readRestartableData(std::string base_file_name, RestartableDa
           // Moose::out<<"Loading "<<current_name<<std::endl;
 
           RestartableDataValue * current_data = restartable_data[current_name];
-          current_data->load(in);
+          current_data->load(*_in_file_handles[tid]);
         }
         else
         {
           // Skip this piece of data
-          in.seekg(data_size, std::ios_base::cur);
+          _in_file_handles[tid]->seekg(data_size, std::ios_base::cur);
           ignored_data.push_back(current_name);
         }
       }
-
-      in.close();
     }
+
+    _in_file_handles[tid]->close();
   }
 
   if (ignored_data.size())
