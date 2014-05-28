@@ -110,6 +110,9 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
 {
   _exec_flags = EXEC_INITIAL;
 
+  if (!parameters.isParamValid("nodal_variables") && !parameters.isParamValid("elemental_variables"))
+    mooseError("In SolutionUserObject " << _name << ", must supply nodal_variables or elemental_variables");
+
   if (parameters.isParamValid("coord_scale"))
   {
     mooseWarning("Parameter name coord_scale is deprecated.  Please use scale instead.");
