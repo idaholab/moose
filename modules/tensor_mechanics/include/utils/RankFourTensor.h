@@ -154,20 +154,22 @@ public:
 
 
   /**
-  * fillFromInputVector takes some number of inputs to fill
-  * the Rank-4 tensor.
-  * @param input the numbers that will be placed in the tensor
-  * @param fill_method this can be:
-               antisymmetric (use fillAntisymmetricFromInputVector)
-               symmetric9 (use fillSymmetricFromInputVector with all=false)
-               symmetric21 (use fillSymmetricFromInputVector with all=true)
-               general_isotropic (use fillGeneralIsotropicFrominputVector)
-               symmetric_isotropic (use fillSymmetricIsotropicFromInputVector)
-               antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
-               general (use fillGeneralFromInputVector)
-  */
+   * fillFromInputVector takes some number of inputs to fill
+   * the Rank-4 tensor.
+   * @param input the numbers that will be placed in the tensor
+   * @param fill_method this can be:
+   *             antisymmetric (use fillAntisymmetricFromInputVector)
+   *             symmetric9 (use fillSymmetricFromInputVector with all=false)
+   *             symmetric21 (use fillSymmetricFromInputVector with all=true)
+   *             general_isotropic (use fillGeneralIsotropicFrominputVector)
+   *             symmetric_isotropic (use fillSymmetricIsotropicFromInputVector)
+   *             antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
+   *             general (use fillGeneralFromInputVector)
+   */
   void fillFromInputVector(const std::vector<Real> input, FillMethod fill_method);
 
+  // Deprecated method, remove after existing Tensor Mechanics applications have been updated
+  void fillFromInputVector(const std::vector<Real> input, bool all_21);
 
 protected:
 
