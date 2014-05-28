@@ -11,13 +11,13 @@
 []
 
 [GlobalParams]
-  porepressureNames_UO = PPNames
+  richardsVarNames_UO = PPNames
 []
 
 [UserObjects]
   [./PPNames]
-    type = RichardsPorepressureNames
-    porepressure_vars = 'pwater poil'
+    type = RichardsVarNames
+    richards_vars = 'pwater poil'
   [../]
   [./DensityWater]
     type = RichardsDensityConstBulk

@@ -8,7 +8,7 @@
 #include "AppFactory.h"
 
 // UserObjects
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 #include "RichardsDensityConstBulk.h"
 #include "RichardsDensityIdeal.h"
 #include "RichardsDensityMethane20degC.h"
@@ -115,7 +115,7 @@ void
 RichardsApp::registerObjects(Factory & factory)
 {
   // UserObjects
-  registerUserObject(RichardsPorepressureNames);
+  registerUserObject(RichardsVarNames);
   registerUserObject(RichardsDensityConstBulk);
   registerUserObject(RichardsDensityIdeal);
   registerUserObject(RichardsDensityMethane20degC);

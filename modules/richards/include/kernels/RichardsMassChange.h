@@ -7,7 +7,7 @@
 #define RICHARDSMASSCHANGE
 
 #include "TimeDerivative.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 
 // Forward Declarations
 class RichardsMassChange;
@@ -35,12 +35,12 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// holds info on the porepressure variables
-  const RichardsPorepressureNames & _pp_name_UO;
+  /// holds info on the Richards variables
+  const RichardsVarNames & _richards_name_UO;
 
   /**
-   * the pressure variable number
-   * eg, if porepressure name = 'pwater pgas poil', and this
+   * the Richards variable number
+   * eg, if richards name = 'pwater pgas poil', and this
    * kernel is for pgas, then _pvar = 1
    */
   unsigned int _pvar;
@@ -48,44 +48,23 @@ protected:
   /// whether to use SUPG for this kernel (not recommended)
   bool _use_supg;
 
-  /// material porosity
-  MaterialProperty<Real> &_porosity;
+  /// fluid mass (or fluid masses in multiphase) at quadpoints
+  MaterialProperty<std::vector<Real> > &_mass;
 
-  /// old material porosity
-  MaterialProperty<Real> &_porosity_old;
+  /// d(fluid mass_i)/d(var_j)
+  MaterialProperty<std::vector<std::vector<Real> > > &_dmass;
 
-  /// old saturation(s)
-  MaterialProperty<std::vector<Real> > &_sat_old;
-
-  /// saturation(s)
-  MaterialProperty<std::vector<Real> > &_sat;
-
-  /// derivatives of saturation(s) wrt effective saturation(s)
-  MaterialProperty<std::vector<std::vector<Real> > > &_dsat;
-
-  /// second derivatives of saturation(s) wrt effective saturation(s)
-  MaterialProperty<std::vector<std::vector<std::vector<Real> > > > &_d2sat;
-
-  /// old values of density
-  MaterialProperty<std::vector<Real> > &_density_old;
-
-  /// fluid density (vector of densities in the case of multiphase flow)
-  MaterialProperty<std::vector<Real> > &_density;
-
-  /// derivative of fluid density wrt pressure (deriv of densities wrt their pressures in the case of multiphase flow)
-  MaterialProperty<std::vector<Real> > &_ddensity;
-
-  /// second derivative of fluid density wrt pressure (second deriv of densities wrt their pressures in the case of multiphase flow)
-  MaterialProperty<std::vector<Real> > &_d2density;
+  /// old value of fluid mass (or fluid masses in multiphase) at quadpoints
+  MaterialProperty<std::vector<Real> > &_mass_old;
 
   /// tau_SUPG
   MaterialProperty<std::vector<RealVectorValue> >&_tauvel_SUPG;
 
-  /// derivative of tau_SUPG wrt gradp
-  MaterialProperty<std::vector<RealTensorValue> >&_dtauvel_SUPG_dgradp;
+  /// derivative of tau_SUPG wrt grad(variable)
+  MaterialProperty<std::vector<RealTensorValue> >&_dtauvel_SUPG_dgradv;
 
-  /// deriv of tau_SUPG wrt p
-  MaterialProperty<std::vector<RealVectorValue> >&_dtauvel_SUPG_dp;
+  /// deriv of tau_SUPG wrt variable
+  MaterialProperty<std::vector<RealVectorValue> >&_dtauvel_SUPG_dv;
 
 };
 

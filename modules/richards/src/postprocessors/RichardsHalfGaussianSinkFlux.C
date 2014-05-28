@@ -14,6 +14,7 @@ InputParameters validParams<RichardsHalfGaussianSinkFlux>()
   params.addRequiredParam<Real>("max", "Maximum of the flux (measured in kg.m^-2.s^-1).  Flux out = max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and Flux out = max for p>centre.  Note, to make this a source rather than a sink, let max<0");
   params.addRequiredParam<Real>("sd", "Standard deviation of the Gaussian (measured in Pa).  Flux out = max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and Flux out = max for p>centre.");
   params.addRequiredParam<Real>("centre", "Centre of the Gaussian (measured in Pa).  Flux out = max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and Flux out = max for p>centre.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   return params;
 }
 
@@ -22,16 +23,19 @@ RichardsHalfGaussianSinkFlux::RichardsHalfGaussianSinkFlux(const std::string & n
     _feproblem(dynamic_cast<FEProblem &>(_subproblem)),
     _maximum(getParam<Real>("max")),
     _sd(getParam<Real>("sd")),
-    _centre(getParam<Real>("centre"))
+    _centre(getParam<Real>("centre")),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _pvar(_richards_name_UO.richards_var_num(_var.number())),
+    _pp(getMaterialProperty<std::vector<Real> >("porepressure"))
 {}
 
 Real
 RichardsHalfGaussianSinkFlux::computeQpIntegral()
 {
-  if (_u[_qp] >= _centre) {
-    return _maximum*_feproblem.dt();
+  if (_pp[_qp][_pvar] >= _centre) {
+    return _maximum*_dt;
   }
   else {
-    return _maximum*exp(-0.5*std::pow((_u[_qp] - _centre)/_sd, 2))*_feproblem.dt();
+    return _maximum*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2))*_dt;
   }
 }

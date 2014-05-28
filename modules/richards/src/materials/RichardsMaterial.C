@@ -17,7 +17,7 @@ InputParameters validParams<RichardsMaterial>()
   params.addCoupledVar("por_change", "An auxillary variable describing porosity changes.  Porosity = mat_porosity + por_change.  If this is not provided, zero is used.");
   params.addRequiredParam<RealTensorValue>("mat_permeability", "The permeability tensor (m^2).");
   params.addCoupledVar("perm_change", "A list of auxillary variable describing permeability changes.  There must be 9 of these, corresponding to the xx, xy, xz, yx, yy, yz, zx, zy, zz components respectively.  Permeability = mat_permeability*10^(perm_change).");
-  params.addRequiredParam<UserObjectName>("porepressureNames_UO", "The UserObject that holds the list of porepressure names.");
+  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   params.addRequiredParam<std::vector<UserObjectName> >("relperm_UO", "List of names of user objects that define relative permeability");
   params.addRequiredParam<std::vector<UserObjectName> >("seff_UO", "List of name of user objects that define effective saturation as a function of pressure list");
   params.addRequiredParam<std::vector<UserObjectName> >("sat_UO", "List of names of user objects that define saturation as a function of effective saturation");
@@ -40,55 +40,64 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     _por_change_old(isCoupled("por_change") ? &coupledValueOld("por_change") : &_zero),
 
     _material_perm(getParam<RealTensorValue>("mat_permeability")),
+
+    _trace_perm(_material_perm.tr()),
+
     _material_viscosity(getParam<std::vector<Real> >("viscosity")),
 
-    _pp_name_UO(getUserObject<RichardsPorepressureNames>("porepressureNames_UO")),
-    _num_p(_pp_name_UO.num_pp()),
-
-    // FOLLOWING IS FOR SUPG
     _material_gravity(getParam<RealVectorValue>("gravity")),
-  _trace_perm(_material_perm.tr()),
 
-// Declare that this material is going to provide a Real
-// valued property named "porosity", etc, that Kernels can use.
-  _porosity(declareProperty<Real>("porosity")),
-  _porosity_old(declareProperty<Real>("porosity_old")),
-  _permeability(declareProperty<RealTensorValue>("permeability")),
+    // Declare that this material is going to provide a Real
+    // valued property named "porosity", etc, that Kernels can use.
+    _porosity_old(declareProperty<Real>("porosity_old")),
+    _porosity(declareProperty<Real>("porosity")),
+    _permeability(declareProperty<RealTensorValue>("permeability")),
+    _gravity(declareProperty<RealVectorValue>("gravity")),
 
-  _viscosity(declareProperty<std::vector<Real> >("viscosity")),
-  _gravity(declareProperty<RealVectorValue>("gravity")),
+    _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _num_p(_richards_name_UO.num_v()),
 
-  _density_old(declareProperty<std::vector<Real> >("density_old")),
+    _pp_old(declareProperty<std::vector<Real> >("porepressure_old")),
+    _pp(declareProperty<std::vector<Real> >("porepressure")),
+    _dpp_dv(declareProperty<std::vector<std::vector<Real> > >("dporepressure_dv")),
 
-  _density(declareProperty<std::vector<Real> >("density")),
-  _ddensity(declareProperty<std::vector<Real> >("ddensity")),
-  _d2density(declareProperty<std::vector<Real> >("d2density")),
+    _viscosity(declareProperty<std::vector<Real> >("viscosity")),
 
-  _seff_old(declareProperty<std::vector<Real> >("s_eff_old")),
+    _density_old(declareProperty<std::vector<Real> >("density_old")),
+    _density(declareProperty<std::vector<Real> >("density")),
+    _ddensity_dv(declareProperty<std::vector<std::vector<Real> > >("ddensity_dv")),
 
-  _seff(declareProperty<std::vector<Real> >("s_eff")),
-  _dseff(declareProperty<std::vector<std::vector<Real> > >("ds_eff")),
-  _d2seff(declareProperty<std::vector<std::vector<std::vector<Real> > > >("d2s_eff")),
+    _seff_old(declareProperty<std::vector<Real> >("s_eff_old")),
+    _seff(declareProperty<std::vector<Real> >("s_eff")),
+    _dseff_dv(declareProperty<std::vector<std::vector<Real> > >("ds_eff_dv")),
 
-  _sat_old(declareProperty<std::vector<Real> >("sat_old")),
+    _sat_old(declareProperty<std::vector<Real> >("sat_old")),
+    _sat(declareProperty<std::vector<Real> >("sat")),
+    _dsat_dv(declareProperty<std::vector<std::vector<Real> > >("dsat_dv")),
 
-  _sat(declareProperty<std::vector<Real> >("sat")),
-  _dsat(declareProperty<std::vector<std::vector<Real> > >("dsat")),
-  _d2sat(declareProperty<std::vector<std::vector<std::vector<Real> > > >("d2sat")),
+    _rel_perm(declareProperty<std::vector<Real> >("rel_perm")),
+    _drel_perm_dv(declareProperty<std::vector<std::vector<Real> > >("drel_perm_dv")),
 
-  _rel_perm(declareProperty<std::vector<Real> >("rel_perm")),
-  _drel_perm(declareProperty<std::vector<Real> >("drel_perm")),
-  _d2rel_perm(declareProperty<std::vector<Real> >("d2rel_perm")),
+    _mass_old(declareProperty<std::vector<Real> >("mass_old")),
+    _mass(declareProperty<std::vector<Real> >("mass")),
+    _dmass(declareProperty<std::vector<std::vector<Real> > >("dmass")),
 
-  _tauvel_SUPG(declareProperty<std::vector<RealVectorValue> >("tauvel_SUPG")),
-  _dtauvel_SUPG_dgradp(declareProperty<std::vector<RealTensorValue> >("dtauvel_SUPG_dgradp")),
-  _dtauvel_SUPG_dp(declareProperty<std::vector<RealVectorValue> >("dtauvel_SUPG_dp"))
+    _flux(declareProperty<std::vector<RealVectorValue> >("flux")),
+    _dflux_dv(declareProperty<std::vector<std::vector<RealVectorValue> > >("dflux_dv")),
+    _dflux_dgradv(declareProperty<std::vector<std::vector<RealTensorValue> > >("dflux_dgradv")),
+    _d2flux_dvdv(declareProperty<std::vector<std::vector<std::vector<RealVectorValue> > > >("d2flux_dvdv")),
+    _d2flux_dgradvdv(declareProperty<std::vector<std::vector<std::vector<RealTensorValue> > > >("d2flux_dgradvdv")),
+    _d2flux_dvdgradv(declareProperty<std::vector<std::vector<std::vector<RealTensorValue> > > >("d2flux_dvdgradv")),
+
+    _tauvel_SUPG(declareProperty<std::vector<RealVectorValue> >("tauvel_SUPG")),
+    _dtauvel_SUPG_dgradp(declareProperty<std::vector<RealTensorValue> >("dtauvel_SUPG_dgradv")),
+    _dtauvel_SUPG_dp(declareProperty<std::vector<RealVectorValue> >("dtauvel_SUPG_dv"))
 
 {
 
   // Need to add the variables that the user object is coupled to as dependencies so MOOSE will compute them
   {
-    const std::vector<MooseVariable *> & coupled_vars = _pp_name_UO.getCoupledMooseVars();
+    const std::vector<MooseVariable *> & coupled_vars = _richards_name_UO.getCoupledMooseVars();
     for (unsigned int i=0; i<coupled_vars.size(); i++)
       addMooseVariableDependency(coupled_vars[i]);
   }
@@ -103,6 +112,9 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
   for (unsigned int i=0 ; i<9 ; ++i)
     _perm_change[i] = (isCoupled("perm_change")? &coupledValue("perm_change", i) : &_zero); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
 
+  _d2density.resize(_num_p);
+  _d2seff.resize(_num_p);
+  _d2rel_perm_dv.resize(_num_p);
   _pressure_vals.resize(_num_p);
   _pressure_old_vals.resize(_num_p);
   _material_relperm_UO.resize(_num_p);
@@ -120,9 +132,9 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     //_pressure_old_vals[i] = (_is_transient ? &coupledValueOld("pressure_vars", i) : &_zero);
     //_grad_p[i] = &coupledGradient("pressure_vars", i);
 
-    _pressure_vals[i] = _pp_name_UO.pp_vals(i);
-    _pressure_old_vals[i] = _pp_name_UO.pp_vals_old(i);
-    _grad_p[i] = _pp_name_UO.grad_pp(i);
+    _pressure_vals[i] = _richards_name_UO.richards_vals(i);
+    _pressure_old_vals[i] = _richards_name_UO.richards_vals_old(i);
+    _grad_p[i] = _richards_name_UO.grad_var(i);
 
     // in the following.  first get the userobject names that were inputted, then get the i_th one of these, then get the actual userobject that this corresponds to, then finally & gives pointer to RichardsRelPerm object.
     _material_relperm_UO[i] = &getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[i]);
@@ -183,71 +195,164 @@ RichardsMaterial::computeProperties()
 
     _gravity[qp] = _material_gravity;
 
+    _pp_old[qp].resize(_num_p);
+    _pp[qp].resize(_num_p);
+    _dpp_dv[qp].resize(_num_p);
+
     _viscosity[qp].resize(_num_p);
 
     _density_old[qp].resize(_num_p);
     _density[qp].resize(_num_p);
-    _ddensity[qp].resize(_num_p);
-    _d2density[qp].resize(_num_p);
+    _ddensity_dv[qp].resize(_num_p);
 
     _rel_perm[qp].resize(_num_p);
-    _drel_perm[qp].resize(_num_p);
-    _d2rel_perm[qp].resize(_num_p);
+    _drel_perm_dv[qp].resize(_num_p);
+
+    _mass_old[qp].resize(_num_p);
+    _mass[qp].resize(_num_p);
+    _dmass[qp].resize(_num_p);
+
+    _flux[qp].resize(_num_p);
+    _dflux_dv[qp].resize(_num_p);
+    _dflux_dgradv[qp].resize(_num_p);
+    _d2flux_dvdv[qp].resize(_num_p);
+    _d2flux_dgradvdv[qp].resize(_num_p);
+    _d2flux_dvdgradv[qp].resize(_num_p);
 
     _seff_old[qp].resize(_num_p);
     _seff[qp].resize(_num_p);
-    _dseff[qp].resize(_num_p);
-    _d2seff[qp].resize(_num_p);
+    _dseff_dv[qp].resize(_num_p);
 
     _sat_old[qp].resize(_num_p);
     _sat[qp].resize(_num_p);
-    _dsat[qp].resize(_num_p);
-    _d2sat[qp].resize(_num_p);
+    _dsat_dv[qp].resize(_num_p);
 
 
     for (unsigned int i=0 ; i<_num_p; ++i)
     {
+      _pp_old[qp][i] = (*_pressure_old_vals[i])[qp];
+      _pp[qp][i] = (*_pressure_vals[i])[qp];
+      _dpp_dv[qp][i].resize(_num_p);
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        _dpp_dv[qp][i][j] = 0;
+      _dpp_dv[qp][i][i] = 1;
+
+
       _viscosity[qp][i] = _material_viscosity[i];
 
       _density_old[qp][i] = (*_material_density_UO[i]).density((*_pressure_old_vals[i])[qp]);
       _density[qp][i] = (*_material_density_UO[i]).density((*_pressure_vals[i])[qp]);
-      _ddensity[qp][i] = (*_material_density_UO[i]).ddensity((*_pressure_vals[i])[qp]);
-      _d2density[qp][i] = (*_material_density_UO[i]).d2density((*_pressure_vals[i])[qp]);
+      _ddensity_dv[qp][i].resize(_num_p);
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        _ddensity_dv[qp][i][j] = 0;
+      _ddensity_dv[qp][i][i] = (*_material_density_UO[i]).ddensity((*_pressure_vals[i])[qp]);
+
+      _d2density[i] = (*_material_density_UO[i]).d2density((*_pressure_vals[i])[qp]);
 
       _seff_old[qp][i] = (*_material_seff_UO[i]).seff(_pressure_old_vals, qp);
       _seff[qp][i] = (*_material_seff_UO[i]).seff(_pressure_vals, qp);
 
-      _dseff[qp][i].resize(_num_p);
-      _dseff[qp][i] = (*_material_seff_UO[i]).dseff(_pressure_vals, qp);
+      _dseff_dv[qp][i].resize(_num_p);
+      _dseff_dv[qp][i] = (*_material_seff_UO[i]).dseff(_pressure_vals, qp);
 
-      _d2seff[qp][i].resize(_num_p);
+      _d2seff[i].resize(_num_p);
       for (unsigned int j=0 ; j<_num_p; ++j)
-      {
-        _d2seff[qp][i][j].resize(_num_p);
-      }
-      _d2seff[qp][i] = (*_material_seff_UO[i]).d2seff(_pressure_vals, qp);
+        _d2seff[i][j].resize(_num_p);
+      _d2seff[i] = (*_material_seff_UO[i]).d2seff(_pressure_vals, qp);
 
       _sat_old[qp][i] = (*_material_sat_UO[i]).sat(_seff_old[qp][i]);
       _sat[qp][i] = (*_material_sat_UO[i]).sat(_seff[qp][i]);
-      //Moose::out << "qp= " << qp << " i= " << i << " pressure= " << (*_pressure_vals[0])[qp] << " " << (*_pressure_vals[1])[qp] << " sat= " << _sat[qp][i] << "\n";
-      _dsat[qp][i].resize(_num_p);
+
+      _dsat_dv[qp][i].resize(_num_p);
       for (unsigned int j=0 ; j<_num_p; ++j)
-      {
-        _dsat[qp][i][j] = (*_material_sat_UO[i]).dsat(_seff[qp][i])*_dseff[qp][i][j]; // could optimise
-      }
-      _d2sat[qp][i].resize(_num_p);
-      for (unsigned int j=0 ; j<_num_p; ++j)
-      {
-        _d2sat[qp][i][j].resize(_num_p);
-        for (unsigned int k=0 ; k<_num_p; ++k)
-        {
-          _d2sat[qp][i][j][k] = (*_material_sat_UO[i]).d2sat(_seff[qp][i])*_dseff[qp][i][j]*_dseff[qp][i][k] + (*_material_sat_UO[i]).dsat(_seff[qp][i])*_d2seff[qp][i][j][k];
-        }
-      }
+        _dsat_dv[qp][i][j] = (*_material_sat_UO[i]).dsat(_seff[qp][i])*_dseff_dv[qp][i][j]; // could optimise
+
 
       _rel_perm[qp][i] = (*_material_relperm_UO[i]).relperm(_seff[qp][i]);
-      _drel_perm[qp][i] = (*_material_relperm_UO[i]).drelperm(_seff[qp][i]);
-      _d2rel_perm[qp][i] =(* _material_relperm_UO[i]).d2relperm(_seff[qp][i]);
+      _drel_perm_dv[qp][i].resize(_num_p);
+      _d2rel_perm_dv[i].resize(_num_p);
+      Real drel;
+      Real d2rel;
+      for (unsigned int j=0 ; j<_num_p; ++j)
+      {
+        drel = (*_material_relperm_UO[i]).drelperm(_seff[qp][i]);
+        d2rel = (* _material_relperm_UO[i]).d2relperm(_seff[qp][i]);
+        _drel_perm_dv[qp][i][j] = drel*_dseff_dv[qp][i][j];
+        _d2rel_perm_dv[i][j].resize(_num_p);
+        for (unsigned int k=0 ; k<_num_p; ++k)
+          _d2rel_perm_dv[i][j][k] = d2rel*_dseff_dv[qp][i][j]*_dseff_dv[qp][i][k] + drel*_d2seff[i][j][k];
+      }
+
+      _mass[qp][i] = _porosity[qp]*_density[qp][i]*_sat[qp][i];
+
+      _dmass[qp][i].resize(_num_p);
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        _dmass[qp][i][j] = _porosity[qp]*_density[qp][i]*_dsat_dv[qp][i][j];
+      _dmass[qp][i][i] += _porosity[qp]*_ddensity_dv[qp][i][i]*_sat[qp][i];
+
+      _mass_old[qp][i] = _porosity_old[qp]*_density_old[qp][i]*_sat_old[qp][i];
+
+
+      _flux[qp][i] = _density[qp][i]*_rel_perm[qp][i]*(_permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]))/_viscosity[qp][i];
+
+
+      _dflux_dv[qp][i].resize(_num_p);
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        _dflux_dv[qp][i][j] = _density[qp][i]*_drel_perm_dv[qp][i][j]*(_permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]))/_viscosity[qp][i];
+      _dflux_dv[qp][i][i] += _ddensity_dv[qp][i][i]*_rel_perm[qp][i]*(_permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]))/_viscosity[qp][i];
+      _dflux_dv[qp][i][i] += _density[qp][i]*_rel_perm[qp][i]*(_permeability[qp]*(- _ddensity_dv[qp][i][i]*_gravity[qp]))/_viscosity[qp][i];
+
+
+      _dflux_dgradv[qp][i].resize(_num_p);
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        _dflux_dgradv[qp][i][j] = 0;
+      _dflux_dgradv[qp][i][i] += _density[qp][i]*_rel_perm[qp][i]*_permeability[qp]/_viscosity[qp][i];
+
+
+      _d2flux_dvdv[qp][i].resize(_num_p);
+      for (unsigned int j=0 ; j<_num_p; ++j)
+      {
+        _d2flux_dvdv[qp][i][j].resize(_num_p);
+        for (unsigned int k=0 ; k<_num_p; ++k)
+          _d2flux_dvdv[qp][i][j][k] = _density[qp][i]*_d2rel_perm_dv[i][j][k]*(_permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]));
+        _d2flux_dvdv[qp][i][j][i] += _ddensity_dv[qp][i][i]*_drel_perm_dv[qp][i][j]*(_permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]));
+        _d2flux_dvdv[qp][i][j][i] += _density[qp][i]*_drel_perm_dv[qp][i][j]*(_permeability[qp]*(- _ddensity_dv[qp][i][i]*_gravity[qp]));
+      }
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        _d2flux_dvdv[qp][i][i][j] += _ddensity_dv[qp][i][i]*_drel_perm_dv[qp][i][j]*(_permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]));
+      _d2flux_dvdv[qp][i][i][i] += _d2density[i]*_rel_perm[qp][i]*(_permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]));
+      _d2flux_dvdv[qp][i][i][i] += _ddensity_dv[qp][i][i]*_rel_perm[qp][i]*(_permeability[qp]*(- _ddensity_dv[qp][i][i]*_gravity[qp]));
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        _d2flux_dvdv[qp][i][i][j] += _density[qp][i]*_drel_perm_dv[qp][i][j]*(_permeability[qp]*(- _ddensity_dv[qp][i][i]*_gravity[qp]));
+      _d2flux_dvdv[qp][i][i][i] += _ddensity_dv[qp][i][i]*_rel_perm[qp][i]*(_permeability[qp]*(- _ddensity_dv[qp][i][i]*_gravity[qp]));
+      _d2flux_dvdv[qp][i][i][i] += _density[qp][i]*_rel_perm[qp][i]*(_permeability[qp]*(- _d2density[i]*_gravity[qp]));
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        for (unsigned int k=0 ; k<_num_p; ++k)
+          _d2flux_dvdv[qp][i][j][k] /= _viscosity[qp][i];
+
+
+      _d2flux_dgradvdv[qp][i].resize(_num_p);
+      for (unsigned int j=0 ; j<_num_p; ++j)
+      {
+        _d2flux_dgradvdv[qp][i][j].resize(_num_p);
+        for (unsigned int k=0 ; k<_num_p; ++k)
+          _d2flux_dgradvdv[qp][i][j][k] = 0;
+      }
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        _d2flux_dgradvdv[qp][i][i][j] += _density[qp][i]*_drel_perm_dv[qp][i][j]*_permeability[qp]/_viscosity[qp][i];
+      _d2flux_dgradvdv[qp][i][i][i] += _ddensity_dv[qp][i][i]*_rel_perm[qp][i]*_permeability[qp]/_viscosity[qp][i];
+
+
+      _d2flux_dvdgradv[qp][i].resize(_num_p);
+      for (unsigned int j=0 ; j<_num_p; ++j)
+      {
+        _d2flux_dvdgradv[qp][i][j].resize(_num_p);
+        for (unsigned int k=0 ; k<_num_p; ++k)
+          _d2flux_dvdgradv[qp][i][j][k] = 0;
+        _d2flux_dvdgradv[qp][i][j][i] += _density[qp][i]*_drel_perm_dv[qp][i][j]*_permeability[qp]/_viscosity[qp][i];
+      }
+      _d2flux_dvdgradv[qp][i][i][i] += _ddensity_dv[qp][i][i]*_rel_perm[qp][i]*_permeability[qp]/_viscosity[qp][i];
+
 
     }
 
@@ -294,7 +399,7 @@ RichardsMaterial::computeProperties()
     {
       RealVectorValue vel = (*_material_SUPG_UO[i]).velSUPG(_permeability[qp], (*_grad_p[i])[qp], _density[qp][i], _gravity[qp]);
       RealTensorValue dvel_dgradp = (*_material_SUPG_UO[i]).dvelSUPG_dgradp(_permeability[qp]);
-      RealVectorValue dvel_dp = (*_material_SUPG_UO[i]).dvelSUPG_dp(_permeability[qp], _ddensity[qp][i], _gravity[qp]);
+      RealVectorValue dvel_dp = (*_material_SUPG_UO[i]).dvelSUPG_dp(_permeability[qp], _ddensity_dv[qp][i][i], _gravity[qp]);
       RealVectorValue bb = (*_material_SUPG_UO[i]).bb(vel, _mesh.dimension(), xi_prime, eta_prime, zeta_prime);
       RealVectorValue dbb2_dgradp = (*_material_SUPG_UO[i]).dbb2_dgradp(vel, dvel_dgradp, xi_prime, eta_prime, zeta_prime);
       Real dbb2_dp = (*_material_SUPG_UO[i]).dbb2_dp(vel, dvel_dp, xi_prime, eta_prime, zeta_prime);

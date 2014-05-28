@@ -8,7 +8,7 @@
 
 #include "IntegratedBC.h"
 #include "LinearInterpolation.h"
-#include "RichardsPorepressureNames.h"
+#include "RichardsVarNames.h"
 #include "Function.h"
 
 // Forward Declarations
@@ -54,11 +54,17 @@ protected:
   /// sink flux gets multiplied by this function
   Function & _m_func;
 
-  /// holds info about the names and values of porepressures in the simulation
-  const RichardsPorepressureNames & _pp_name_UO;
+  /// holds info about the names and values of richards variable in the simulation
+  const RichardsVarNames & _richards_name_UO;
 
   /// the moose internal variable number corresponding to the porepressure of this sink flux
   unsigned int _pvar;
+
+  /// porepressure values (only the _pvar component is used)
+  MaterialProperty<std::vector<Real> > &_pp;
+
+  /// d(porepressure_i)/d(variable_j)
+  MaterialProperty<std::vector<std::vector<Real> > > &_dpp_dv;
 
   /// viscosity (only the _pvar component is used)
   MaterialProperty<std::vector<Real> > &_viscosity;
@@ -67,22 +73,25 @@ protected:
   MaterialProperty<RealTensorValue> & _permeability;
 
   /**
-   * derivative of effective saturation wrt porepressure variables
-   * only _dseff[_pvar][i] is used for i being all porepressure variables
+   * derivative of effective saturation wrt variables
+   * only _dseff_dv[_pvar][i] is used for i being all variables
    */
-  MaterialProperty<std::vector<std::vector<Real> > > &_dseff;
+  MaterialProperty<std::vector<std::vector<Real> > > &_dseff_dv;
 
   /// relative permeability (only the _pvar component is used)
   MaterialProperty<std::vector<Real> > &_rel_perm;
 
-  /// derivative of relative permeability wrt effective saturation (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > &_drel_perm;
+  /// d(relperm_i)/d(variable_j)
+  MaterialProperty<std::vector<std::vector<Real> > > &_drel_perm_dv;
 
   /// fluid density (only the _pvar component is used)
   MaterialProperty<std::vector<Real> > &_density;
 
-  /// derivative of fluid density wrt porepressure (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > &_ddensity;
+  /// d(density_i)/d(variable_j)
+  MaterialProperty<std::vector<std::vector<Real> > > &_ddensity_dv;
+
+  /// derivative of residual wrt the wrt_num Richards variable
+  Real jac(unsigned int wrt_num);
 
 
 };
