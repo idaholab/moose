@@ -83,15 +83,24 @@ PFCFreezingIC::value(const Point & p)
   }
   else
   {
-    for (unsigned int i=0; i<_icdim; i++)
-      val += std::cos((2.0/_lc*p(i))*libMesh::pi);
+    if (_icdim > 2)
+    {
+      for (unsigned int i=0; i<_icdim; i++)
+        val += (std::cos((2.0/_lc*p(i%3))*libMesh::pi)*std::cos((2.0/_lc*p((i+1)%3))*libMesh::pi))/4.0; //Doesn't work in 2D
 
-    val /= _icdim;
-    val = std::pow(val,2);
+      val = val + 0.25;
+    }
+    else
+    {
+      for (unsigned int i=0; i<_icdim; i++)
+        val *= std::cos((2.0/_lc*p(i))*libMesh::pi); // 2D IC for 111 plane
+
+      val = val/2.0 + 0.5;
+    }
   }
 
   Real amp = _inside - _outside;
-  val =  amp * val + _outside;
+  val =  amp *val + _outside;
 
   return val;
 }
