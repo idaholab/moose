@@ -1,5 +1,19 @@
 #include "ElasticityTensorR4.h"
 
+ElasticityTensorR4::ElasticityTensorR4() :
+    RankFourTensor()
+{
+}
+
+ElasticityTensorR4::ElasticityTensorR4(const ElasticityTensorR4 &a) :
+    RankFourTensor(a)
+{
+}
+
+ElasticityTensorR4::ElasticityTensorR4(const RankFourTensor &a) :
+    RankFourTensor(a)
+{
+}
 
 Real
 ElasticityTensorR4::elasticJacobian(const unsigned int i, const unsigned int k, const RealGradient & grad_test, const RealGradient & grad_phi)

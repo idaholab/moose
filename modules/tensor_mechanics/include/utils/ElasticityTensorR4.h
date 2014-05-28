@@ -18,6 +18,15 @@ class ElasticityTensorR4 : public RankFourTensor
 public:
   virtual ~ElasticityTensorR4() {}
 
+  /// Default constructor; fills to zero
+  ElasticityTensorR4();
+
+  /// Copy constructor
+  ElasticityTensorR4(const ElasticityTensorR4 &a);
+
+  /// Copy constructor for RankFourTensor
+  ElasticityTensorR4(const RankFourTensor &a);
+
   /**
    * This is used for the standard kernel stress_ij*d(test)/dx_j, when varied wrt u_k
    * Jacobian entry: d(stress_ij*d(test)/dx_j)/du_k = d(C_ijmn*du_m/dx_n*dtest/dx_j)/du_k
