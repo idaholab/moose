@@ -572,7 +572,8 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
   // set the coord transformation
   MooseArray<Real> coord;
   coord.resize(qrule.n_points());
-  switch (_coord_type) // coord type should be the same for the neighbor
+  Moose::CoordinateSystemType coord_type = _sys.subproblem().getCoordSystem(neighbor->subdomain_id());
+  switch (coord_type) // coord type should be the same for the neighbor
   {
   case Moose::COORD_XYZ:
     for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
