@@ -133,6 +133,9 @@ DiracKernel::addPoint(Point p, unsigned id)
     // OK, the user gave us an ID, let's see if we already have it...
     point_cache_t::iterator it = _point_cache.find(id);
 
+    // Now that we only cache local data, some processors may enter
+    // this if statement and some may not.  Therefore we can't call
+    // any parallel_only() functions inside this if statement.
     if (it != _point_cache.end())
     {
       // We have something cached, now make sure it's actually the same Point.
@@ -144,6 +147,20 @@ DiracKernel::addPoint(Point p, unsigned id)
         // Find the cached element associated to this point
         const Elem * cached_elem = (it->second).first;
 
+        // If the cached element's processor ID doesn't match ours, we
+        // are no longer responsible for caching it.  This can happen
+        // due to adaptivity...
+        if (cached_elem->processor_id() != processor_id())
+        {
+          // Update the caches, telling them to drop the cached Elem.
+          // We are temporarily returning NULL because it seems to
+          // work, but we should probably find the actual Element and
+          // return that for consistency with the rest of the
+          // interface...
+          updateCaches(cached_elem, NULL, p, id);
+          return NULL;
+        }
+
         bool active = cached_elem->active();
         bool contains_point = cached_elem->contains_point(p);
 
@@ -152,6 +169,11 @@ DiracKernel::addPoint(Point p, unsigned id)
         // return its result.
         if (active && contains_point)
         {
+          // FIXME/TODO:
+          // A given Point can be located in multiple elements if it
+          // is on an edge or a node in the grid.  How are we handling
+          // that case?  In other words, the same id would need to
+          // appear multiple times in the _point_cache object...
           addPoint(cached_elem, p, id);
           return cached_elem;
         }
@@ -198,6 +220,7 @@ DiracKernel::addPoint(Point p, unsigned id)
           (!active && !contains_point))
         {
           const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
+
           updateCaches(cached_elem, elem, p, id);
           addPoint(elem, p, id);
           return elem;
@@ -216,7 +239,8 @@ DiracKernel::addPoint(Point p, unsigned id)
   // possibly cache the result, and call the other addPoint() method.
   const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
 
-  if (elem && (id != libMesh::invalid_uint))
+  // Only add the point to the cache on this processor if the Elem is local
+  if (elem && (elem->processor_id() == processor_id()) && (id != libMesh::invalid_uint))
   {
     // Add the point to the cache...
     _point_cache[id] = std::make_pair(elem, p);
@@ -226,6 +250,8 @@ DiracKernel::addPoint(Point p, unsigned id)
     points.push_back(std::make_pair(p, id));
   }
 
+  // Call the other addPoint() method.  This method ignores non-local
+  // and NULL elements automatically.
   addPoint(elem, p, id);
   return elem;
 }
@@ -294,9 +320,9 @@ DiracKernel::updateCaches(const Elem* old_elem,
                           unsigned id)
 {
   // Update the point cache.  Remove old cached data, only cache
-  // new_elem if it is non-NULL.
+  // new_elem if it is non-NULL and local.
   _point_cache.erase(id);
-  if (new_elem)
+  if (new_elem && (new_elem->processor_id() == processor_id()))
     _point_cache[id] = std::make_pair(new_elem, p);
 
   // Update the reverse cache
@@ -331,8 +357,8 @@ DiracKernel::updateCaches(const Elem* old_elem,
     }
   }
 
-  // Next, if new_elem is not NULL, add the point to the new_elem's vector
-  if (new_elem)
+  // Next, if new_elem is not NULL and local, add the point to the new_elem's vector
+  if (new_elem && (new_elem->processor_id() == processor_id()))
   {
     reverse_cache_t::mapped_type & points = _reverse_point_cache[new_elem];
     points.push_back(std::make_pair(p, id));

@@ -74,9 +74,31 @@ DiracKernelInfo::hasPoint(const Elem * elem, Point p)
 void
 DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
 {
-  // Construct the PointLocator object, but only if we have Dirac points
-  if (!_elements.empty())
+  // Construct the PointLocator object if *any* processors have Dirac
+  // points.  Note: building a PointLocator object is a parallel_only()
+  // function, so this is an all-or-nothing thing.  We use an unsigned
+  // int since I'm not sure if max is supported for bool.
+  unsigned pl_needs_rebuild = static_cast<unsigned>(_elements.empty());
+  mesh.comm().max(pl_needs_rebuild);
+
+  if (pl_needs_rebuild)
+  {
+    // PointLocatorBase::build() is a parallel_only function!  So we
+    // can't skip building it just becuase our local _elements is
+    // empty, it might be non-empty on some other processor!
     _point_locator = PointLocatorBase::build(TREE, mesh);
+  }
+  else
+  {
+    // There are no elements with Dirac points, but we have been
+    // requested to update the PointLocator so we have to assume the
+    // old one is invalid.  Therefore we reset it to NULL... however
+    // adding this line causes the code to hang because it triggers
+    // the PointLocator to be rebuilt in a non-parallel-only segment
+    // of the code later... so it's commented out for now even though
+    // it's probably the right behavior.
+    // _point_locator.reset(NULL);
+  }
 }
 
 
@@ -84,9 +106,16 @@ DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
 const Elem *
 DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
 {
-  // If the PointLocator has never been created, do so now.
+  // If the PointLocator has never been created, do so now.  NOTE - WE
+  // CAN'T DO THIS if findPoint() is only called on some processors,
+  // PointLocatorBase::build() is a 'parallel_only' method!
   if (_point_locator.get() == NULL)
     _point_locator = PointLocatorBase::build(TREE, mesh);
+
+  // Check that the PointLocator is ready to start locating points.
+  // So far I do not have any tests that trip this...
+  if (_point_locator->initialized() == false)
+    mooseError("Error, PointLocator is not initialized!");
 
   const Elem * elem = (*_point_locator)(p);
 
