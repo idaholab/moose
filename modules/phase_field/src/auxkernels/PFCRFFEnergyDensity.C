@@ -54,7 +54,7 @@ PFCRFFEnergyDensity::computeValue()
   for (unsigned int i = 1; i < _order; ++i)
     sumL += (*_vals[i])[_qp];
 
-  val -= ((*_vals[0])[_qp]*sumL/2.0);
+  val -= ((*_vals[0])[_qp]*sumL);
 
   return val;
 }
