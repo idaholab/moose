@@ -3841,7 +3841,7 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
   std::vector<std::string> & pn = parameters().set<std::vector<std::string> >("petsc_inames");         // set because we need a writable reference
   std::vector<std::string> & pv = parameters().set<std::vector<std::string> >("petsc_values");         // set because we need a writable reference
 
-  if (pn.size() != pv.size())
+  if (petsc_options_inames.size() != petsc_options_values.size())
     mooseError("PETSc names and options are not the same length");
 
   for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
