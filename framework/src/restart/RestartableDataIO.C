@@ -45,77 +45,74 @@ RestartableDataIO::writeRestartableData(std::string base_file_name, const Restar
   {
     const std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
-    if (restartable_data.size())
-    {
-      const unsigned int file_version = 1;
+    const unsigned int file_version = 1;
 
-      std::ofstream out;
+    std::ofstream out;
 
-      std::ostringstream file_name_stream;
-      file_name_stream << base_file_name;
+    std::ostringstream file_name_stream;
+    file_name_stream << base_file_name;
 
-      file_name_stream << "-" << proc_id;
+    file_name_stream << "-" << proc_id;
 
-      if (n_threads > 1)
-        file_name_stream << "-" << tid;
+    if (n_threads > 1)
+      file_name_stream << "-" << tid;
 
-      std::string file_name = file_name_stream.str();
+    std::string file_name = file_name_stream.str();
 
-      { // Write out header
-        out.open(file_name.c_str(), std::ios::out | std::ios::binary);
+    { // Write out header
+      out.open(file_name.c_str(), std::ios::out | std::ios::binary);
 
-        char id[2];
+      char id[2];
 
-        // header
-        id[0] = 'R';
-        id[1] = 'D';
+      // header
+      id[0] = 'R';
+      id[1] = 'D';
 
-        out.write(id, 2);
-        out.write((const char *)&file_version, sizeof(file_version));
+      out.write(id, 2);
+      out.write((const char *)&file_version, sizeof(file_version));
 
-        out.write((const char *)&n_procs, sizeof(n_procs));
-        out.write((const char *)&n_threads, sizeof(n_threads));
+      out.write((const char *)&n_procs, sizeof(n_procs));
+      out.write((const char *)&n_threads, sizeof(n_threads));
 
-        // number of RestartableData
-        unsigned int n_data = restartable_data.size();
-        out.write((const char *) &n_data, sizeof(n_data));
+      // number of RestartableData
+      unsigned int n_data = restartable_data.size();
+      out.write((const char *) &n_data, sizeof(n_data));
 
-        // data names
-        for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
-            it != restartable_data.end();
-            ++it)
-        {
-          std::string name = it->first;
-          out.write(name.c_str(), name.length() + 1); // trailing 0!
-        }
-      }
+      // data names
+      for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
+           it != restartable_data.end();
+           ++it)
       {
-        std::ostringstream data_blk;
-
-        for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
-            it != restartable_data.end();
-            ++it)
-        {
-          // Moose::out<<"Storing "<<it->first<<std::endl;
-
-          std::ostringstream data;
-          it->second->store(data);
-
-          // Store the size of the data then the data
-          unsigned int data_size = data.tellp();
-          data_blk.write((const char *) &data_size, sizeof(data_size));
-          data_blk << data.str();
-        }
-
-        // Write out this proc's block size
-        unsigned int data_blk_size = data_blk.tellp();
-        out.write((const char *) &data_blk_size, sizeof(data_blk_size));
-
-        // Write out the values
-        out << data_blk.str();
-
-        out.close();
+        std::string name = it->first;
+        out.write(name.c_str(), name.length() + 1); // trailing 0!
       }
+    }
+    {
+      std::ostringstream data_blk;
+
+      for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
+           it != restartable_data.end();
+           ++it)
+      {
+        // Moose::out<<"Storing "<<it->first<<std::endl;
+
+        std::ostringstream data;
+        it->second->store(data);
+
+        // Store the size of the data then the data
+        unsigned int data_size = data.tellp();
+        data_blk.write((const char *) &data_size, sizeof(data_size));
+        data_blk << data.str();
+      }
+
+      // Write out this proc's block size
+      unsigned int data_blk_size = data_blk.tellp();
+      out.write((const char *) &data_blk_size, sizeof(data_blk_size));
+
+      // Write out the values
+      out << data_blk.str();
+
+      out.close();
     }
   }
 }
@@ -192,53 +189,50 @@ RestartableDataIO::readRestartableData(RestartableDatas & restartable_datas, std
     if (!_in_file_handles[tid]->is_open())
       mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling readRestartableData()");
 
-    if (restartable_data.size())
+    // number of data
+    unsigned int n_data = 0;
+    _in_file_handles[tid]->read((char *) &n_data, sizeof(n_data));
+
+    // data names
+    std::vector<std::string> data_names(n_data);
+
+    for (unsigned int i=0; i < n_data; i++)
     {
-      // number of data
-      unsigned int n_data = 0;
-      _in_file_handles[tid]->read((char *) &n_data, sizeof(n_data));
+      std::string data_name;
+      char ch = 0;
+      do {
+        _in_file_handles[tid]->read(&ch, 1);
+        if (ch != '\0')
+          data_name += ch;
+      } while (ch != '\0');
+      data_names[i] = data_name;
+    }
 
-      // data names
-      std::vector<std::string> data_names(n_data);
+    // Grab this processor's block size
+    unsigned int data_blk_size = 0;
+    _in_file_handles[tid]->read((char *) &data_blk_size, sizeof(data_blk_size));
 
-      for (unsigned int i=0; i < n_data; i++)
+    for (unsigned int i=0; i < n_data; i++)
+    {
+      std::string current_name = data_names[i];
+
+      unsigned int data_size = 0;
+      _in_file_handles[tid]->read((char *) &data_size, sizeof(data_size));
+
+      if (restartable_data.find(current_name) != restartable_data.end() // Only restore values if they're currently being used
+          && (recovering || (_recoverable_data.find(current_name) == _recoverable_data.end())) // Only read this value if we're either recovering or this hasn't been specified to be recovery only data
+        )
       {
-        std::string data_name;
-        char ch = 0;
-        do {
-          _in_file_handles[tid]->read(&ch, 1);
-          if (ch != '\0')
-            data_name += ch;
-        } while (ch != '\0');
-        data_names[i] = data_name;
+        // Moose::out<<"Loading "<<current_name<<std::endl;
+
+        RestartableDataValue * current_data = restartable_data[current_name];
+        current_data->load(*_in_file_handles[tid]);
       }
-
-      // Grab this processor's block size
-      unsigned int data_blk_size = 0;
-      _in_file_handles[tid]->read((char *) &data_blk_size, sizeof(data_blk_size));
-
-      for (unsigned int i=0; i < n_data; i++)
+      else
       {
-        std::string current_name = data_names[i];
-
-        unsigned int data_size = 0;
-        _in_file_handles[tid]->read((char *) &data_size, sizeof(data_size));
-
-        if (restartable_data.find(current_name) != restartable_data.end() // Only restore values if they're currently being used
-           && (recovering || (_recoverable_data.find(current_name) == _recoverable_data.end())) // Only read this value if we're either recovering or this hasn't been specified to be recovery only data
-          )
-        {
-          // Moose::out<<"Loading "<<current_name<<std::endl;
-
-          RestartableDataValue * current_data = restartable_data[current_name];
-          current_data->load(*_in_file_handles[tid]);
-        }
-        else
-        {
-          // Skip this piece of data
-          _in_file_handles[tid]->seekg(data_size, std::ios_base::cur);
-          ignored_data.push_back(current_name);
-        }
+        // Skip this piece of data
+        _in_file_handles[tid]->seekg(data_size, std::ios_base::cur);
+        ignored_data.push_back(current_name);
       }
     }
 
