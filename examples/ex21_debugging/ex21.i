@@ -35,9 +35,9 @@
   [../]
 
   [./example_diff]
-    # This Kernel uses "diffusivity" from the active material
     type = ExampleDiffusion
     variable = diffused
+    coupled_coef = convected
   [../]
 
   [./time_deriv_diffused]
