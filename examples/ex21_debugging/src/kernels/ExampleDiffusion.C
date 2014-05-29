@@ -22,6 +22,8 @@ template<>
 InputParameters validParams<ExampleDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
+  params.addRequiredCoupledVar("coupled_coef", "The value of this variable will be used as the diffusion coefficient.");
+
   return params;
 }
 
@@ -29,29 +31,17 @@ InputParameters validParams<ExampleDiffusion>()
 ExampleDiffusion::ExampleDiffusion(const std::string & name,
                                    InputParameters parameters) :
     Diffusion(name,parameters),
-    _diffusivity(getMaterialProperty<Real>("diffusivity"))
+    _coupled_coef(coupledValue("coupled_coef"))
 {}
 
 Real
 ExampleDiffusion::computeQpResidual()
 {
-  // We're dereferencing the _diffusivity pointer to get to the
-  // material properties vector... which gives us one property
-  // value per quadrature point.
-
-  // Also... we're reusing the Diffusion Kernel's residual
-  // so that we don't have to recode that.
-  return _diffusivity[_qp]*Diffusion::computeQpResidual();
+  return _coupled_coef[_qp]*Diffusion::computeQpResidual();
 }
 
 Real
 ExampleDiffusion::computeQpJacobian()
 {
-  // We're dereferencing the _diffusivity pointer to get to the
-  // material properties vector... which gives us one property
-  // value per quadrature point.
-
-  // Also... we're reusing the Diffusion Kernel's residual
-  // so that we don't have to recode that.
-  return _diffusivity[_qp]*Diffusion::computeQpJacobian();
+  return _coupled_coef[_qp]*Diffusion::computeQpJacobian();
 }
