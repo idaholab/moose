@@ -66,6 +66,7 @@ protected:
 
   AuxiliarySystem & _aux;
   MooseMesh & _mesh;
+  static const Real _tol;
 
   std::vector<unsigned int> _ordered_crack_front_nodes;
   std::vector<RealVectorValue> _tangent_directions;
@@ -86,8 +87,13 @@ protected:
   unsigned int _axis_2d;
 
   void getCrackFrontNodes(std::set<unsigned int>& nodes);
-  void orderCrackFrontNodes(std::set<unsigned int> nodes);
+  void orderCrackFrontNodes(std::set<unsigned int>& nodes);
   void orderEndNodes(std::vector<unsigned int> &end_nodes);
+  void pickLoopCrackEndNodes(std::vector<unsigned int> &end_nodes,
+                             std::set<unsigned int> &nodes,
+                             std::map<unsigned int, std::vector<unsigned int> > &node_to_line_elem_map,
+                             std::vector<std::vector<unsigned int> > &line_elems);
+  unsigned int maxNodeCoor(std::vector<Node *>& nodes, unsigned int dir0=0);
   void updateCrackFrontGeometry();
   void updateDataForCrackDirection();
   RealVectorValue calculateCrackFrontDirection(const Node* crack_front_node,
