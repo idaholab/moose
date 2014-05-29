@@ -59,6 +59,7 @@
 
 // Indicators
 #include "RichardsFluxJumpIndicator.h"
+#include "RichardsMobilityJumpIndicator.h"
 
 // Postprocessors
 #include "RichardsMass.h"
@@ -166,6 +167,7 @@ RichardsApp::registerObjects(Factory & factory)
 
   // Indicators
   registerIndicator(RichardsFluxJumpIndicator);
+  registerIndicator(RichardsMobilityJumpIndicator);
 
   // Postprocessors
   registerPostprocessor(RichardsMass);
