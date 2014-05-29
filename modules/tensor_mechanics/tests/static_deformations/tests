@@ -1,0 +1,12 @@
+[Tests]
+  [./shear]
+    type = 'Exodiff'
+    input = 'cosserat_shear.i'
+    exodiff = 'cosserat_shear_out.e'
+  [../]
+  [./tension]
+    type = 'Exodiff'
+    input = 'cosserat_tension.i'
+    exodiff = 'cosserat_tension_out.e'
+  [../]
+[]

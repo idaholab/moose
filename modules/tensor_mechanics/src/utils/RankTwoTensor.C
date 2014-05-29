@@ -51,13 +51,21 @@ RankTwoTensor::operator()(unsigned int i, unsigned int j) const
   return _vals[i][j];
 }
 
+
+void
+RankTwoTensor::zero()
+{
+  for (unsigned int i(0); i<N; i++)
+    for (unsigned int j(0); j<N; j++)
+      _vals[i][j] = 0.0;
+}
+
 void
 RankTwoTensor::fillFromInputVector(const std::vector<Real> input)
 {
   if (input.size() == 6)
   {
-    Moose::out << "Rank 2 tensor input size =" << input.size() << std::endl;
-
+    // Moose::out << "Rank 2 tensor input size =" << input.size() << std::endl;
     _vals[0][0] = input[0]; //S11
     _vals[1][1] = input[1]; //S22
     _vals[2][2] = input[2]; //S33
@@ -67,8 +75,7 @@ RankTwoTensor::fillFromInputVector(const std::vector<Real> input)
   }
   else if (input.size() == 9)
   {
-    Moose::out << "Rank 2 tensor input size =" << input.size() << std::endl;
-
+    // Moose::out << "Rank 2 tensor input size =" << input.size() << std::endl;
     _vals[0][0] = input[0]; //S11
     _vals[1][0] = input[1]; //S21
     _vals[2][0] = input[2]; //S31
@@ -80,7 +87,7 @@ RankTwoTensor::fillFromInputVector(const std::vector<Real> input)
     _vals[2][2] = input[8]; //S33
   }
   else
-    mooseError("Please check the number of entries in the eigenstrain input vector");
+    mooseError("Please check the number of entries in the eigenstrain input vector.  It must be 6 or 9");
 }
 
 void
@@ -95,13 +102,13 @@ RankTwoTensor::getValue(unsigned int i, unsigned int j) const
   return _vals[i-1][j-1];
 }
 
+
 TypeVector<Real>
 RankTwoTensor::row(const unsigned int r) const
 {
   RealVectorValue result;
-  for (unsigned int i = 0; i<N; i++)
+  for (unsigned int i = 0; i < N; i++)
     result(i) = _vals[r][i];
-
   return result;
 }
 
@@ -109,30 +116,27 @@ void
 RankTwoTensor::rotate(RealTensorValue &R)
 {
   Real temp;
-
-  for (unsigned int i(0); i<N; i++)
-    for (unsigned int j(0); j<N; j++)
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
     {
       temp = 0.0;
-      for (unsigned int k(0); k<N; k++)
-        for (unsigned int l(0); l<N; l++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
           temp += R(i,k)*R(j,l)*_vals[k][l];
       _vals[i][j] = temp;
     }
-
 }
 
 void
 RankTwoTensor::rotate(RankTwoTensor &R)
 {
   Real temp;
-
-  for (unsigned int i(0); i<N; i++)
-    for (unsigned int j(0); j<N; j++)
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
     {
       temp = 0.0;
-      for (unsigned int k(0); k<N; k++)
-        for (unsigned int l(0); l<N; l++)
+      for (unsigned int k = 0; k < N; k++)
+        for (unsigned int l = 0; l < N; l++)
           temp += R(i,k)*R(j,l)*_vals[k][l];
       _vals[i][j] = temp;
  }
@@ -141,26 +145,13 @@ RankTwoTensor::rotate(RankTwoTensor &R)
 RankTwoTensor
 RankTwoTensor::rotateXyPlane(const Real a)
 {
+  Real c = std::cos(a);
+  Real s = std::sin(a);
+  Real x = _vals[0][0]*c*c + _vals[1][1]*s*s + 2.0*_vals[0][1]*c*s;
+  Real y = _vals[0][0]*s*s + _vals[1][1]*c*c - 2.0*_vals[0][1]*c*s;
+  Real xy = (_vals[1][1] - _vals[0][0])*c*s + _vals[0][1]*(c*c - s*s);
+
   RankTwoTensor b;
-
-  Real x, y, xy;
-  x = _vals[0][0]*std::cos(a)*std::cos(a)
-    + _vals[1][1]*std::sin(a)*std::sin(a)
-    + 2.0*_vals[0][1]*std::cos(a)*std::sin(a);
-
-  y = _vals[0][0]*std::sin(a)*std::sin(a)
-    + _vals[1][1]*std::cos(a)*std::cos(a)
-    - 2.0*_vals[0][1]*std::cos(a)*std::sin(a);
-
-  xy = 2.0*(_vals[1][1] - _vals[0][0])*std::cos(a)*std::sin(a)
-     + 2.0*_vals[0][1]*(std::cos(a)*std::cos(a) - std::sin(a)*std::sin(a));
-
-  xy /= 2.0;
-
-
-  /* Moose::out<<"x="<<x<<std::endl;
-  Moose::out<<"y="<<y<<std::endl;
-  Moose::out<<"xy="<<xy<<std::endl; */
 
   b.setValue(x, 1, 1);
   b.setValue(y, 2, 2);
@@ -175,12 +166,14 @@ RankTwoTensor::rotateXyPlane(const Real a)
   return b;
 }
 
-void
-RankTwoTensor::zero()
+RankTwoTensor
+RankTwoTensor::transpose()
 {
-    for (unsigned int i(0); i<N; i++)
-      for (unsigned int j(0); j<N; j++)
-        _vals[i][j] = 0.0;
+  RankTwoTensor result;
+  for (unsigned int i=0; i<N; i++)
+    for (unsigned int j=0; j<N; j++)
+      result(i,j) = _vals[j][i];
+  return result;
 }
 
 RankTwoTensor &
@@ -189,7 +182,6 @@ RankTwoTensor::operator= (const RankTwoTensor &a)
   for (unsigned int i(0); i<N; i++)
       for (unsigned int j(0); j<N; j++)
         _vals[i][j] = a._vals[i][j];
-
   return *this;
 }
 
@@ -206,11 +198,9 @@ RankTwoTensor
 RankTwoTensor::operator+ (const RankTwoTensor &a) const
 {
   RankTwoTensor result;
-
    for (unsigned int i(0); i<N; i++)
     for (unsigned int j(0); j<N; j++)
       result(i,j) = _vals[i][j] + a(i,j);
-
    return result;
 }
 
@@ -231,7 +221,6 @@ RankTwoTensor::operator- (const RankTwoTensor &a) const
    for (unsigned int i(0); i<N; i++)
     for (unsigned int j(0); j<N; j++)
       result(i,j) = _vals[i][j] - a(i,j);
-
    return result;
 }
 
@@ -342,29 +331,14 @@ RankTwoTensor::doubleContraction(const RankTwoTensor &a)
   return result;
 }
 
-RankTwoTensor
-RankTwoTensor::transpose()
-{
-  RankTwoTensor result;
-
-  for (unsigned int i=0; i<N; i++)
-    for (unsigned int j=0; j<N; j++)
-      result(i,j) = _vals[j][i];
-
-  return result;
-}
 
 Real
 RankTwoTensor::secondInvariant()
 {
   Real result(0.0);
-
   RankTwoTensor deviatoric(*this);
-
-  deviatoric.addIa(-1./3.*trace());
-
+  deviatoric.addIa(-1./3.*trace()); // actually construct deviatoric part
   result = 0.5*deviatoric.doubleContraction(deviatoric);
-
   return result;
 }
 
@@ -372,10 +346,8 @@ Real
 RankTwoTensor::trace()
 {
   Real result(0.0);
-
   for (unsigned int i(0); i<N; i++)
       result += _vals[i][i];
-
   return result;
 }
 
@@ -441,7 +413,6 @@ RankTwoTensor::L2norm()
   Real norm;
   norm=0.0;
 
-
   for (unsigned int i=0; i<N; i++)
     for (unsigned int j=0; j<N; j++)
       norm+=_vals[i][j]*_vals[i][j];
@@ -453,21 +424,16 @@ RankTwoTensor::L2norm()
 }
 void
 RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> input)
-  {
-    if (input.size() == 4)
 {
+  if (input.size() == 4)
+  {
     // initialize with zeros
     this->zero();
     _vals[0][0] = input[0];
     _vals[0][1] = input[1];
     _vals[1][0] = input[2];
     _vals[1][1] = input[3];
- /*   // pad the rest of the entries with zeros
-    _vals[2][0]=_vals[0][2]=0.;
-    _vals[2][1]=_vals[1][2]=0.;
-    _vals[2][2]=0.;
-*/
   }
   else
-   mooseError("please provide correct number of values for surface RankTwoTensor initialization.");
-  }
+    mooseError("please provide correct number of values for surface RankTwoTensor initialization.");
+}

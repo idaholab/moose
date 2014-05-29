@@ -34,8 +34,9 @@ protected:
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 
-private:
   const unsigned int _component;
+
+private:
 
   const bool _xdisp_coupled;
   const bool _ydisp_coupled;
