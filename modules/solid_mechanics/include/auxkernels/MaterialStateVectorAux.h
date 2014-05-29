@@ -33,11 +33,8 @@ protected:
 
   virtual double computeValue();
 
-  MaterialProperty<std::vector<double> > & _vpStatefulProperty;
+  MaterialProperty<std::vector<double> > & _vp_stateful_property;
   int _index;
-//  Real _factor;
- // const double _offset;
 
 };
-
 #endif //MATERIALSTATEVECTORAUX_H

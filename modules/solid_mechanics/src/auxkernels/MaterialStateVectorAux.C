@@ -23,14 +23,15 @@ InputParameters validParams<MaterialStateVectorAux>()
   return params;
 }
 
-MaterialStateVectorAux::MaterialStateVectorAux(const std::string & name, InputParameters parameters)
-  :AuxKernel(name, parameters),
-   _vpStatefulProperty(getMaterialProperty<std::vector<double> >("vpStatefulProperty")),
+MaterialStateVectorAux::MaterialStateVectorAux(const std::string & name, 
+                                               InputParameters parameters)
+  :AuxKernel( name, parameters ),
+   _vp_stateful_property( getMaterialProperty<std::vector<double> >("vpStatefulProperty") ),
    _index( getParam<int>("index") )
 {}
 
 double
 MaterialStateVectorAux::computeValue()
 {
-  return _vpStatefulProperty[_qp][_index];
+  return _vp_stateful_property[_qp][_index];
 }
