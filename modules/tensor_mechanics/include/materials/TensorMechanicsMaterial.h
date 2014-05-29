@@ -57,8 +57,6 @@ protected:
   // vectors to get the input values
   std::vector<Real> _Cijkl_vector;
 
-  // bool to indicate if using 9 stiffness values or all 21
-  bool _all_21;
 
   //Individual material information
   ElasticityTensorR4 _Cijkl;
@@ -73,6 +71,13 @@ protected:
 
   bool _has_T;
   VariableValue * _T; //pointer rather than reference
+
+  /// determines the translation from C_ijkl to the Rank-4 tensor
+  MooseEnum _fill_method;
+
+  /// bool to indicate if using 9 stiffness values or all 21
+  bool _all_21;
+
 
 private:
 

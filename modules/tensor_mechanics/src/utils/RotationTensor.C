@@ -21,7 +21,7 @@ RotationTensor::update(const RealVectorValue & Euler_angles)
   Real s2 = std::sin(Phi);
   Real s3 = std::sin(phi_2);
 
-//doing a Z1, X2, Z3 rotation
+  //doing a Z1, X2, Z3 rotation
   //RealTensorValue is formed row-wise
 
   _coords[0] = c1*c3 - c2*s1*s3; //R11

@@ -1,0 +1,38 @@
+[Tests]
+  [./cosserat01]
+    type = 'PetscJacobianTester'
+    input = 'cosserat01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cosserat02]
+    type = 'PetscJacobianTester'
+    input = 'cosserat02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cosserat03]
+    type = 'PetscJacobianTester'
+    input = 'cosserat03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cosserat04]
+    type = 'PetscJacobianTester'
+    input = 'cosserat04.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cosserat05]
+    type = 'PetscJacobianTester'
+    input = 'cosserat05.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cosserat06]
+    type = 'PetscJacobianTester'
+    input = 'cosserat06.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+[]
