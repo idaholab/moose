@@ -77,3 +77,10 @@ RichardsSUPGnone::dtauSUPG_dp(RealVectorValue /*vel*/, RealVectorValue /*dvel_dp
 {
   return 0;
 }
+
+bool
+RichardsSUPGnone::SUPG_trivial() const
+{
+  return true;
+}
+

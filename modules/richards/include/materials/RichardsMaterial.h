@@ -66,6 +66,9 @@ private:
   /// d(porepressure_i)/d(variable_j)
   MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
 
+  /// d^2(porepressure_i)/d(variable_j)/d(variable_k)
+  MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _d2pp_dv;
+
 
   /// fluid viscosity (or viscosities in the multiphase case)
   MaterialProperty<std::vector<Real> > & _viscosity;
@@ -89,6 +92,9 @@ private:
 
   /// d(Seff_i)/d(variable_j)
   MaterialProperty<std::vector<std::vector<Real> > > & _dseff_dv; // d(seff)/dp
+
+  /// d^2(Seff_i)/d(variable_j)/d(variable_k)
+  MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _d2seff_dv;
 
   /// old saturation
   MaterialProperty<std::vector<Real> >& _sat_old;
@@ -149,16 +155,13 @@ private:
 
 
   MaterialProperty<std::vector<RealVectorValue> > & _tauvel_SUPG; // tauSUPG * velSUPG
-  MaterialProperty<std::vector<RealTensorValue> > & _dtauvel_SUPG_dgradp; // d (_tauvel_SUPG)/d(_grad_variable)
-  MaterialProperty<std::vector<RealVectorValue> > & _dtauvel_SUPG_dp; // d (_tauvel_SUPG)/d(variable)
+  MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dtauvel_SUPG_dgradp; // d (_tauvel_SUPG_i)/d(_grad_variable_j)
+  MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dtauvel_SUPG_dp; // d (_tauvel_SUPG_i)/d(variable_j)
 
   std::vector<VariableValue *> _perm_change;
 
-  /// d^2(density)/dp^2 - used in various derivative calculations
-  std::vector<Real> _d2density;
-
-  /// d^2(seff_i)/dP_j/dP_k - used in various derivative calculations
-  std::vector<std::vector<std::vector<Real> > > _d2seff;
+  /// d^2(density)/dp_j/dP_k - used in various derivative calculations
+  std::vector<std::vector<std::vector<Real> > > _d2density;
 
   /// d^2(relperm_i)/dP_j/dP_k - used in various derivative calculations
   std::vector<std::vector<std::vector<Real> > > _d2rel_perm_dv;
@@ -174,6 +177,54 @@ private:
   std::vector<const RichardsSat *> _material_sat_UO;
   std::vector<const RichardsDensity *> _material_density_UO;
   std::vector<const RichardsSUPG *> _material_SUPG_UO;
+
+
+  /**
+   * computes the quadpoint values of the porepressure(s)
+   * and effective saturation(s), and their derivatives
+   * wrt the variables in the system.
+   * These are then used in computeProperties to compute
+   * relative permeability, density, and so on
+   */
+  void computePandSeff();
+
+
+  /**
+   * Computes the "derived" quantities --- those that
+   * depend on porepressure(s) and effective saturation(s) ---
+   * such as density, relative permeability, mass, flux, etc
+   * @param qp The quadpoint to evaluate the quantites at
+   */
+  void computeDerivedQuantities(unsigned int qp);
+
+
+  /**
+   * Zeroes 2nd derivatives of the flux.
+   * The values are only calculated in compute2ndDerivedQuantites
+   * if the SUPG UserObject says they are need.  This is for
+   * computational efficiency as these are very expensive to calculate
+   * @param qp The quadpoint to evaluate the quantites at
+   */
+  void zero2ndDerivedQuantities(unsigned int qp);
+
+
+  /**
+   * Computes 2nd derivatives of the flux.
+   * These are needed by kernels if doing SUPG
+   * @param qp The quadpoint to evaluate the quantites at
+   */
+  void compute2ndDerivedQuantities(unsigned int qp);
+
+  /**
+   * Assigns and zeroes the MaterialProperties
+   * associated with SUPG.
+   * @param qp The quadpoint to assign+zero at
+   */
+  void zeroSUPG(unsigned int qp);
+
+
+  /// Computes the tauvel_SUPG and its derivatives
+  void computeSUPG();
 
 
 

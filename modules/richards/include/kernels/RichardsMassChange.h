@@ -61,10 +61,17 @@ protected:
   MaterialProperty<std::vector<RealVectorValue> >&_tauvel_SUPG;
 
   /// derivative of tau_SUPG wrt grad(variable)
-  MaterialProperty<std::vector<RealTensorValue> >&_dtauvel_SUPG_dgradv;
+  MaterialProperty<std::vector<std::vector<RealTensorValue> > >&_dtauvel_SUPG_dgradv;
 
   /// deriv of tau_SUPG wrt variable
-  MaterialProperty<std::vector<RealVectorValue> >&_dtauvel_SUPG_dv;
+  MaterialProperty<std::vector<std::vector<RealVectorValue> > >&_dtauvel_SUPG_dv;
+
+  /**
+   * Derivative of residual with respect to wrt_num Richards variable
+   * This is used by both computeQpJacobian and computeQpOffDiagJacobian
+   * @param wrt_num take the derivative of the residual wrt this Richards variable
+   */
+  Real computeQpJac(unsigned int wrt_num);
 
 };
 

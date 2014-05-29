@@ -286,5 +286,6 @@
   [./console]
     type = Console
     perf_log = true
+    interval = 1
   [../]
 []

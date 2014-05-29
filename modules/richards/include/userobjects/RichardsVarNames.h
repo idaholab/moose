@@ -105,6 +105,10 @@ class RichardsVarNames :
    */
   MooseVariable * raw_var(unsigned int richards_var_num) const;
 
+  /// return the _var_types string
+  std::string var_types() const;
+
+
  protected:
 
   /// number of richards variables
@@ -112,6 +116,9 @@ class RichardsVarNames :
 
   /// space-separated string of names of porepressure variables
   std::string _the_names;
+
+  /// physical meaning of the variables.  Eg 'pppp' means 'all variables are pressure variables'
+  MooseEnum _var_types;
 
   /// _moose_var_num[i] = the moose variable number corresponding to richards variable i
   std::vector<unsigned int> _moose_var_num;

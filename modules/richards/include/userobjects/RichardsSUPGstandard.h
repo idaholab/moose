@@ -108,6 +108,9 @@ class RichardsSUPGstandard : public RichardsSUPG
    */
   Real dtauSUPG_dp(RealVectorValue vel, RealVectorValue dvel_dp, Real traceperm, RealVectorValue b, Real db2_dp) const;
 
+  /// returns false in this case since everything is trivial
+  bool SUPG_trivial() const;
+
  protected:
 
   /**
