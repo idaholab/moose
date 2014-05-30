@@ -72,6 +72,7 @@
 #include "RichardsMassChange.h"
 #include "RichardsLumpedMassChange.h"
 #include "RichardsFlux.h"
+#include "RichardsFullyUpwindFlux.h"
 #include "RichardsPPenalty.h"
 
   // BoundaryConditions
@@ -179,6 +180,7 @@ RichardsApp::registerObjects(Factory & factory)
   registerKernel(RichardsMassChange);
   registerKernel(RichardsLumpedMassChange);
   registerKernel(RichardsFlux);
+  registerKernel(RichardsFullyUpwindFlux);
   registerKernel(RichardsPPenalty);
 
   // BoundaryConditions

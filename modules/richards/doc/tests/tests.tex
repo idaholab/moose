@@ -195,7 +195,7 @@ is correctly coded, and also that its first and second derivatives
 with respect to $P$ are correctly coded.
 
 \item That the density of methane (kg.m$^{-3}$) at 20degC as a
-  function of $P$ (Pa): 
+  function of $P$ (Pa) for pressures less than 12\,MPa: 
 \begin{equation}
 \rho(P) = 6.54576947608\times 10^{-6}P + 1.04357716547\times 10^{-13} P^{2}
 \end{equation}
@@ -255,30 +255,30 @@ consist of the derivatives with respect to another variable (at the
 same quadrature point or a different one).
 
 The `Diagonal' terms are tested using a single-phase single-element
-model with random initial conditions.  Sixteen different tests are
+model with random initial conditions.  Twenty four different tests are
 performed which are all possible combinations of:
 \begin{itemize}
 \item Fully-saturated or unsaturated initial conditions
 \item With or without gravity
-\item With or without SUPG
+\item Without upwinding, or with SUPG, or with full upwinding
 \item With or without unlumped time derivatives
 \end{itemize}
-Of course, the unsaturated case with gravity, SUPG and time
-derivatives is the most complicated, but the other cases are useful
+Of course, the unsaturated cases with gravity, SUPG/full-upwinding and time
+derivatives are the most complicated, but the other cases are useful
 for debugging.  In addition, the Jacobian of the lumped time derivative is checked.
 
 The `OffDiagonal' terms only appear if there is more than one pressure
 variable, that is for multi-phase problems.  A two-phase
 single-element model is used with random initial conditions
-obeying the constraint $P_{1}\geq P_{2}$ (to be meaningful physically).  Eight
+obeying the constraint $P_{1}\geq P_{2}$ (to be meaningful physically).  Twelve
 different tests are performed which model all possible combinations
 of:
 \begin{itemize}
 \item With or without gravity
-\item With or without SUPG
+\item Without upwinding, or with SUPG, or with full upwinding
 \item With or without unlumped time derivatives
 \end{itemize}
-Two other tests are also performed: the first with random initial
+Two other tests also performed: the first with random initial
 conditions subject to $P_{1}=P_{2}$ so that the system is fully
 saturated with the ``1'' phase; and the second with random initial
 conditions subject to $P_{1}\ll P_{2}$ so the system is almost fully
@@ -289,9 +289,13 @@ two-phase tests: with gravity and SUPG; with gravity, SUPG and fully
 saturated with the ``1'' phase; with gravity and SUPG and almost fully
 saturated with the ``2'' phase.
 
+In addition to these tests, two two-phase tests are performed with a
+fully-upwind flux: fully saturated with the ``1'' phase; with gravity
+and SUPG and almost fully saturated with the ``2'' phase.
+
 In addition to these tests, the Jacobians for the following sinks/sources are tested:
 \begin{itemize}
-\item Piecewise linear sink
+\item Piecewise linear sink, with and without full upwinding, with and without mobility terms in the flux
 \item Half Gaussian sink
 \item Polyline stream sink
 \end{itemize}
@@ -376,22 +380,21 @@ magnitude acceleration due to gravity (a vector assumed to be pointing in the
 negative $x$ direction), and $x$ is position.  The tests described below
 are simple tests and are part of the automatic test suite.
 
-This is verified by running sixteen single-phase single-element models
-with random initial conditions.  The sixteen cases are all possible
-combinations of:
+This is verified by running twenty four single-phase single-element models
+with random initial conditions.  The twenty four cases are combinations of:
 \begin{itemize}
 \item Fully-saturated or unsaturated initial conditions
 \item With or without gravity
-\item With or without SUPG
+\item Without upwinding, or with SUPG, or with full upwinding
 \item Transient or Steadystate
 \end{itemize}
-Eight two-phase simulations are also run.  These are also
+Twelve two-phase simulations are also run.  These are also
 single-element models, but with initial conditions that ensure the
-saturations of the phases are between 0.3 and 0.7.  These eight cases
-are all possible combinations of:
+saturations of the phases are between 0.3 and 0.7.  These twelve cases
+are combinations of:
 \begin{itemize}
 \item With or without gravity
-\item With or without SUPG
+\item Without upwinding, or with SUPG, or with full upwinding
 \item Transient or Steadystate
 \end{itemize}
 A test with gravity and SUPG using the lumped time derivative is also run.
@@ -405,39 +408,43 @@ arbitrary, but Eqn~(\ref{grav.head.eqn}) must still hold.)
 \noindent In addition to these cases, a number of more complicated scenarios are
 also part of the automatic test suite:
 \begin{enumerate}
-\item\label{gh20.item} A single-phase situation with nonzero immobile saturation.
-  There are 5 elements in the $x$ direction along which gravity acts.
-  The $x$ direction has length 20\,m, and the initial condition is
-  sufficiently unsaturated so that after some time the saturation at
-  the `top' of the model ($x\sim 20$) would reduce below immobile
-  saturation if the relative permeability weren't preventing it.  Two
-  cases are studied: with SUPG and without SUPG.  The results are
-  shown in the top two pictures of Figure~\ref{gh.fig} and show that
-  SUPG reduces oscillations and prevents $S<S_{\mathrm{imm}}$ in this
-  example at least.
+\item\label{gh20.item} A single-phase situation with nonzero immobile
+  saturation.  There are 5 elements in the $x$ direction along which
+  gravity acts.  The $x$ direction has length 20\,m, and the initial
+  condition is sufficiently unsaturated so that after some time the
+  saturation at the `top' of the model ($x\sim 20$) would reduce below
+  immobile saturation if the relative permeability weren't preventing
+  it.  Three cases are studied: without upwinding, with SUPG, and with
+  full upwinding.  The results are shown in the top two pictures of
+  Figure~\ref{gh.fig} and show that SUPG reduces oscillations and
+  prevents $S<S_{\mathrm{imm}}$ in this example at least, while full
+  upwinding gives exactly the desired result.
 \item The same situation is in item~\ref{gh20.item}, but with 50
   elements in the $x$ direction.  Figure~\ref{gh.fig} shows once again
-  the stabilising nature of SUPG is seen, as well as the hydrostatic
-  pressure head for $S>S_{\mathrm{imm}}$.
+  the upwinding, as well as the hydrostatic
+  pressure head for $S>S_{\mathrm{imm}}$.  The differences between no
+  upwinding, SUPG and full upwinding become small.
 \item A two-phase situation that starts with $P_{1}=P_{2}$, that is
   fully saturated.  A single element is used, along with gravity,
-  SUPG, and transient analysis.  Three simulations are performed:
+  SUPG, and transient analysis.  Four simulations are performed:
 \begin{enumerate}
 \item with an unlumped time derivative
 \item with a lumped time derivative
+\item with full upwinding
 \item using a {\tt RichardsMultiphaseProblem} object to maintain the
   bound $P_{2}\geq P_{1}$.
 \end{enumerate}
-These simulations checks that the MOOSE
+These simulations check that the MOOSE
   implementation yields the correct long-time behaviour for
   fully-saturated two-phase simulations.
 \item A two-phase simulation with nonzero immobile saturations for
   both phases.  Both the unlumped time derivative and lumped time
-  derivative are tested The automatic test suite contains 20-element
-  versions, and the results are shown in Figure~\ref{gh2.fig}, along
-  with the results from a 200-element version.  This figure
-  demonstrates the reduction in spurious oscillations obtained by
-  using a lumped time derivative.
+  derivative are tested, as well as full upwinding.  The automatic
+  test suite contains 20-element versions, and the results are shown
+  in Figure~\ref{gh2.fig}, along with the results from a 200-element
+  version.  These figures demonstrates the reduction in spurious
+  oscillations obtained by using a lumped time derivative, but
+  illustrates the advantage of using full upwinding in such problems.
 \end{enumerate}
 
 \begin{figure}[htb]
@@ -453,8 +460,9 @@ $\mbox{}$ \\
 \caption{Results for $S_{\mathrm{imm}}=0.3$.  Gravity points to the
   left.  Top picture: Effective saturation.  Middle picture: Pore
   pressure.  Bottom pictures: The situation with 50 elements in the
-  $x$ direction instead of just 5.  In each picture the red line is
-  without SUPG, and oscillatory results can be observed in addition to
+  $x$ direction instead of just 5.  In each picture the blue line is
+  with full upwinding, the black line with SUPG, and the red line is
+  without upwinding where oscillatory results can be observed in addition to
   $S_{\mathrm{eff}}< S_{\mathrm{imm}}$.}
 \label{gh.fig}
 \end{figure}
@@ -464,11 +472,19 @@ $\mbox{}$ \\
 \begin{tabular}{cc}
 \includegraphics[width=8cm]{gh2_20.eps} &
 \includegraphics[width=8cm]{gh2.eps}
-\end{tabular}{cc}
+\end{tabular}
+\includegraphics[width=8cm]{gh2_p.eps} 
 \caption{Two-phase long-time results for
   $S^{\mathrm{gas}}_{\mathrm{imm}}=0.3$ and
   $S^{\mathrm{water}}_{\mathrm{imm}}=0.4$.  Left: 20-element
-  simulation with and without time-derivative lumping.  Right: 200-element simulation.}
+  simulation without time-derivative lumping and with SUPG with
+  $P_{\mathrm{SUPG}}=0.1$ for water and $P_{\mathrm{SUPG}}=0.01$ for
+  gas; with lumping and the same SUPG parameters; and without mass
+  lumping but with full upwinding.  Right: 200-element simulation.
+  Bottom: the porepressures, demonstrating that each porepressure
+  follows Eqn~(\ref{grav.head.eqn}) unless it is at immobile
+  saturation in which case it is forced to follow the porepressure of
+  the other phase.}
 \label{gh2.fig}
 \end{figure}
 
@@ -502,7 +518,7 @@ Porosity & 0.1 \\
 \end{tabular} 
 \end{center}
 
-\noindent In the first test a piecewise-linear sink is applied with strength:
+\noindent In the first set of two tests a piecewise-linear sink is applied with strength:
 \begin{equation}
 \mbox{sink flux (kg.m$^{-1}$.s$^{-1}$)} = \left\{
 \begin{array}{ll}
@@ -513,6 +529,7 @@ Porosity & 0.1 \\
 \right.
 \label{eqn.s01}
 \end{equation}
+The first test uses no upwinding, while the second fully-upwinds the flux.
 The sink flux is recorded by into a Postprocessor by MOOSE.  It is
 remotely possible that the MOOSE implementation {\em applies} the sink
 flux incorrectly, but {\em records} it as a Postprocessor correctly as
@@ -574,7 +591,7 @@ Figure~\ref{s02.fig}.
 \end{figure}
 
 
-\noindent In the third test a piecewise-linear sink with relative
+\noindent In the third set of two tests a piecewise-linear sink with relative
 permeability and mobility affects is used.  The flux strength is:
 \begin{equation}
 \mbox{sink flux (kg.m$^{-1}$.s$^{-1}$)} = 
@@ -588,6 +605,7 @@ permeability and mobility affects is used.  The flux strength is:
 \right.
 \label{eqn.s03}
 \end{equation}
+The first test uses no upwinding, while the second fully-upwinds the flux.
 The sink flux is recorded by into a Postprocessor by MOOSE.  It is
 remotely possible that the MOOSE implementation {\em applies} the sink
 flux incorrectly, but {\em records} it as a Postprocessor correctly as
@@ -716,17 +734,18 @@ The solution of the above differential equation is well known to be
 \end{equation}
 where Erf is the error function.
 
-This is verified by using the following six tests on a line of
+This is verified by using the following twelve tests on a line of
 10 elements.
 \begin{enumerate}
 \item Steady state 1-phase analysis to demonstrate that the
   steady-state of $\rho = \rho_{\infty}$ is achieved.
 \item Transient 1-phase analysis with an unlumped time derivative.
 \item Transient 1-phase analysis with a lumped time derivative.
-\item Steady state 2-phase analysis with a fully-water saturated configuration.
+\item Steady state 2-phase analysis with a fully-water saturated configuration. 
 \item Transient 2-phase analysis with unlumped time derivatives.
 \item Transient 2-phase analysis with lumped time derivatives.
 \end{enumerate}
+Each of these is run with SUPG, and with full upwinding.
 An example verification is shown in Figure~\ref{pressure_pulse.fig}.
 These tests run rapidly and are part of the automatic test suite.
 
@@ -743,7 +762,7 @@ These tests run rapidly and are part of the automatic test suite.
   $x=0$.  For greater spatial resolution and smaller timesteps the
   agreement increases.  Both the single-phase simulation and the
   2-phase fully-water-saturated simulation give identical results for
-  the water porepressure.}
+  the water porepressure (regardless of upwinding scheme.}
 \label{pressure_pulse.fig}
 \end{figure}
 
@@ -1035,7 +1054,7 @@ parameter).  The other parameters are: $C$, the character of the
 borehole (eg, ``production'' has $C=1$ for $P>P_{\mathrm{bh}}$ and zero
 otherwise); $\rho$ is the fluid density; $\kappa_{\mathrm{rel}}$ is
 the relative permeability; and $\mu$ is the fluid viscosity.   The
-coefficient of proportionality,, $W$ in this expression is a
+coefficient of proportionality, $W$, in this expression is a
 complicated function of the geometry of the finite element (or the
 neighbouring elements if the Dirac point is on an elemental boundary)
 and the rock permeability, and the borehole radius at that point.
@@ -1053,22 +1072,22 @@ This test is very fast to run (it does not involve any fluid flow) and
 is part of the automatic test suite.
 
 \section{Fluxes}
-The automatic test suite also contains four tests that check that
+The automatic test suite also contains eight tests that check that
 Eqn~(\ref{bh.propto.eqn}) is correctly implemented for given $W$ (the
 Peaceman formulation is used) by placing a vertical borehole through
 the centre of a single element, and measuring the fluid flow to the
-borehole as a function of porepressure $P$.  These four tests are:
+borehole as a function of porepressure $P$.  These eight tests are:
 \begin{itemize}
 \item A production borehole with $P_{\mathrm{bh}} = 0$, with a
-  fully-saturated medium
+  fully-saturated medium, and with no upwinding or full upwinding of the borehole flux
 \item An injection borehole with $P_{\mathrm{bh}} = 10$\,MPa, with a
-  fully-saturated medium
+  fully-saturated medium, and with no upwinding or full upwinding of the borehole flux
 \item A production borehole with $P_{\mathrm{bh}} = -1$\,MPa, with an
-  unsaturated medium
+  unsaturated medium, and with no upwinding or full upwinding of the borehole flux
 \item An injection borehole with $P_{\mathrm{bh}} = 0$, with an
-  unsaturated medium
+  unsaturated medium, and with no upwinding or full upwinding of the borehole flux
 \end{itemize}
-The parameters common to these four tests are:
+The parameters common to these tests are:
 \begin{center}
 \begin{tabular}{|ll|}
 \hline
@@ -1109,7 +1128,9 @@ Eqn~(\ref{bh.propto.eqn}) is indeed correctly implemented in MOOSE.
 \end{tabular}
 \caption{Left figures: Comparison between the MOOSE result (in dots), and the
   expected behaviour of the borehole flux given by
-  Eqn~(\ref{bh.propto.eqn}) (as a line) for the cases listed in the text.  Right
+  Eqn~(\ref{bh.propto.eqn}) (as a line) for the cases listed in the
+  text.  Upwinding the mass flux from the nodes to the borehole makes
+  no difference to these plots.  Right
   figures: The mass balances, which are all small.}
 \label{bh02_05.fig}
 \end{figure}
@@ -1147,12 +1168,13 @@ from Eqn~(\ref{bh.propto.eqn}) (see Theory Manual for more details).
 
 Chen and Zhang (see Theory manual) have derived an expression for $W$
 in the case where this borehole is placed at a node in a square mesh.
-The following two tests are part of the automatic test suite:
+The following three tests are part of the automatic test suite:
 \begin{itemize}
 \item The steadystate solution with a single borehole with $W$ defined by
 Chen and Zhang's formula is compared with Eqn~(\ref{eqn.log.bh}) to
 illustrate that the MOOSE implementation of a borehole is correct.
 \item The same test using a lumped time derivative.
+\item The same test using full upwinding from the nodes to the borehole.
 \end{itemize}
 Figure~\ref{bh07.fig} shows this comparison.  Most parameters in this
 study are identical to those given in the above table with the
@@ -1529,10 +1551,11 @@ unsaturated region.  Using an initial mesh of element size 1\,m, and a
 minimum size of 0.125\,m, with a maximum timestep of 0.3\,s (to give
 the mesh time to adapt around the front),the front at $t=50$\,s sits
 between between $x=9.9$\,m and $x=10.35$\,m, and the simulation takes
-only 3 seconds.  The automatic test suite contains two simulations
-(with and without mass lumping) with
-elements of size 0.1\,m using a timestep of 2\,s, which gives results
-very similar to these, and takes less than 2 seconds to run.
+only 3 seconds.  The automatic test suite contains three simulations
+(without mass lumping, with mass lumping, with mass lumping and full
+upwinding) with elements of size 0.1\,m using a timestep of 2\,s,
+which gives results very similar to these, and takes less than 2
+seconds to run.
 
 \begin{figure}[htb]
 \begin{center}
@@ -1668,10 +1691,11 @@ solution and the MOOSE implementation.  Any minor discrepancies get
 smaller as the temporal and spatial resolution increase, as is
 suggested by the two comparisons in that figure.
 
-The ``low-resolution'' test, which has 200 elements in $0\leq z\leq
-10$ and uses 15 time steps, is part of the automatic test suite that
-is run every time the code is updated.  Two ``high-resolution'' tests
-(one with mass lumping, the other without),
+The ``low-resolution'' tests (with SUPG or with full upwinding) which have 200 elements in $0\leq z\leq
+10$ and use 15 time steps, are part of the automatic test suite that
+is run every time the code is updated.  Three ``high-resolution'' tests
+(without mass lumping and SUPG, with mass lumping and SUPG, with mass
+lumping and full upwinding)
 which have 600 elements, and use 190 time steps, are marked as
 ``heavy'' and so must be run manually.  The mass lumping makes
 negligable difference to the result in this case.
@@ -1820,13 +1844,13 @@ the sharp front.
 
 Figure~\ref{satfront2.figa} shows the results from two MOOSE
 simulations which validate the MOOSE implementation of two-phase fluid
-flow.  Four simulations in total are part of the test suite:
+flow.  Six simulations in total are part of the test suite:
 \begin{enumerate}
 \item ``High res''.  A uniform mesh of size 0.1\,m, with timestep between
   $10^{-4}$\,s and 0.2\,s.  The van Genuchten
   $\alpha=10^{-4}$\,Pa$^{-1}$ and $m=0.8$.  At $t=50$\,s the mesh sits
-  between $x=9.6$\,m and $x=10.2$\,m.  One simulation uses mass
-  lumping while the other does not.  These simulations use 833
+  between $x=9.6$\,m and $x=10.2$\,m.  One simulation uses SUPG and mass
+  lumping, one uses SUPG and no lumping, and one uses lumping and full upwinding.  These simulations use 833
   timesteps and take 1\,minute
   to run, so are marked as ``heavy'' in the test suite and are not run
   every time the code is updated.
@@ -1835,8 +1859,8 @@ flow.  Four simulations in total are part of the test suite:
   $\alpha=10^{-5}$\,Pa$^{-1}$ and $m=0.8$.  Instead of $P=-10^{5}$\,Pa
   at the $x=15$ end, $P=-3\times 10^{5}$\,Pa is used instead, which
   means $s=0.01$ in the unsaturated zone.  At $t=50$\,s the mesh sits
-  between $x=9.3$\,m and $x=12.3$\,m.  One simulation uses mass
-  lumping while the other does not.  These simulations uses 37
+  between $x=9.3$\,m and $x=12.3$\,m.  One simulation uses SUPG and mass
+  lumping, one uses SUPG no lumping, and one uses lumping and full upwinding.  These simulations uses 37
   timesteps and take 0.7\,seconds to run, so are part of the automatic
   test suite.
 \end{enumerate}
@@ -1866,9 +1890,11 @@ $\mbox{}$
 \includegraphics[width=7cm]{bl_lumped_unlumped_zoom.eps}
 \end{tabular}
 \caption{Comparison of the two-phase Buckley-Leverett solution at
-  $t=50$\,s with and without mass lumping for the ``high res'' case
+  $t=50$\,s with SUPG and no mass lumping, with SUPG and mass lumping,
+  and with full upwinding and mass lumping, for
+  the ``high res'' case 
   with $\alpha = 10^{-4}$\,Pa$^{-1}$.  Note the oscillatory
-  behaviour in the unlumped version.}
+  behaviour in the unlumped version even though it uses SUPG.}
 \label{bl_lump.fig}
 \end{figure}
 

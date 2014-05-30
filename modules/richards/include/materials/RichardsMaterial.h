@@ -117,6 +117,16 @@ private:
   MaterialProperty<std::vector<std::vector<Real> > > & _dmass;
 
 
+  /// permeability*(grad(P) - density*gravity)  (a vector of these for multicomponent)
+  MaterialProperty<std::vector<RealVectorValue> > & _flux_no_mob;
+
+  /// d(_flux_no_mob_i)/d(variable_j)
+  MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dflux_no_mob_dv;
+
+  /// d(_flux_no_mob_i)/d(grad(variable_j))
+  MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dflux_no_mob_dgradv;
+
+
   /// fluid flux (a vector of fluxes for multicomponent)
   MaterialProperty<std::vector<RealVectorValue> > & _flux;
 

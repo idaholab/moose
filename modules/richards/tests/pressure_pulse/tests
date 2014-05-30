@@ -42,4 +42,43 @@
     rel_err = 1E-4
     use_old_floor = True
   [../]
+
+  [./pp_fu_01]
+    type = 'Exodiff'
+    input = 'pp_fu_01.i'
+    exodiff = 'pp_fu_01.e'
+    rel_err = 1E-8
+    use_old_floor = True
+  [../]
+  [./pp_fu_02]
+    type = 'Exodiff'
+    input = 'pp_fu_02.i'
+    exodiff = 'pp_fu_02.e'
+    rel_err = 1E-4
+    use_old_floor = True
+  [../]
+
+  [./pp_fu_21]
+    type = 'Exodiff'
+    input = 'pp_fu_21.i'
+    exodiff = 'pp_fu_21.e'
+    rel_err = 1E-8
+    use_old_floor = True
+  [../]
+  [./pp_fu_22]
+    type = 'Exodiff'
+    input = 'pp_fu_22.i'
+    exodiff = 'pp_fu_22.e'
+    rel_err = 1E-4
+    use_old_floor = True
+  [../]
+
+  [./pp_fu_lumped_22]
+    type = 'Exodiff'
+    input = 'pp_fu_lumped_22.i'
+    exodiff = 'pp_fu_lumped_22.e'
+    rel_err = 1E-4
+    use_old_floor = True
+  [../]
+
 []
