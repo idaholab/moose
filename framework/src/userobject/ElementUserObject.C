@@ -32,6 +32,7 @@ ElementUserObject::ElementUserObject(const std::string & name, InputParameters p
     MaterialPropertyInterface(parameters),
     UserObjectInterface(parameters),
     Coupleable(parameters, false),
+    ScalarCoupleable(parameters),
     MooseVariableDependencyInterface(),
     TransientInterface(parameters, name, "element_user_objects"),
     PostprocessorInterface(parameters),
