@@ -74,6 +74,13 @@ DiracKernelInfo::hasPoint(const Elem * elem, Point p)
 void
 DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
 {
+  // Note: we could update the PointLocator *every* time we call this
+  // function, but that may introduce an unacceptable overhead in
+  // problems which don't need a PointLocator at all.  This issue will
+  // most likely become a moot point when we eventually add a shared
+  // "CachingPointLocator" to MOOSE.
+  // _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, mesh);
+
   // Construct the PointLocator object if *any* processors have Dirac
   // points.  Note: building a PointLocator object is a parallel_only()
   // function, so this is an all-or-nothing thing.  We use an unsigned
@@ -86,7 +93,7 @@ DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
     // PointLocatorBase::build() is a parallel_only function!  So we
     // can't skip building it just becuase our local _elements is
     // empty, it might be non-empty on some other processor!
-    _point_locator = PointLocatorBase::build(TREE, mesh);
+    _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, mesh);
   }
   else
   {
@@ -110,7 +117,7 @@ DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
   // CAN'T DO THIS if findPoint() is only called on some processors,
   // PointLocatorBase::build() is a 'parallel_only' method!
   if (_point_locator.get() == NULL)
-    _point_locator = PointLocatorBase::build(TREE, mesh);
+    _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, mesh);
 
   // Check that the PointLocator is ready to start locating points.
   // So far I do not have any tests that trip this...
