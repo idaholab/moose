@@ -511,7 +511,7 @@ class TestHarness:
     # If we encounter bitten_status_moose environment, build a line itemized list of applications which passed their tests
     if os.environ.has_key("BITTEN_STATUS_MOOSE"):
       result_file = open(os.path.join(self.moose_dir, 'test_results.log'), 'a')
-      result_file.write(str(os.path.split(app_name)[1][:-4]) + '\n')
+      result_file.write(os.path.split(app_name)[1].split('-')[0] + '\n')
       result_file.close()
 
   # Print final results, close open files, and exit with the correct error code
