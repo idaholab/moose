@@ -176,6 +176,7 @@
 #include "PointValue.h"
 #include "NodalExtremeValue.h"
 #include "ElementExtremeValue.h"
+#include "DifferencePostprocessor.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -516,6 +517,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(PointValue);
   registerPostprocessor(NodalExtremeValue);
   registerPostprocessor(ElementExtremeValue);
+  registerPostprocessor(DifferencePostprocessor);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
