@@ -23,7 +23,7 @@ protected:
 
   const Real & _power_fraction;
   VariableValue & _total_power;
-  const PostprocessorValue & _fuel_volume;
+  const Real & _volume;
   Function & _power_shape_function;
 };
 
