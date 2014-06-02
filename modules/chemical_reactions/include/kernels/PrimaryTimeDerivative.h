@@ -50,6 +50,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// Material property of porosity
+  std::string _prop_name;
   MaterialProperty<Real> & _porosity;
 };
 
