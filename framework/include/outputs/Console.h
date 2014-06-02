@@ -80,6 +80,16 @@ public:
   void outputSystemInformation();
 
   /**
+   * Add a message to the output streams
+   * @param message The message to add to the output streams
+   *
+   * Any call to this method will write the supplied message to the screen, following
+   * the same restrictions as outputStep and outputInitial
+   *
+   */
+  void write(std::string message, bool err = false);
+
+  /**
    * Output string for setting up PETSC output
    */
   static void petscSetupOutput();
@@ -198,6 +208,9 @@ private:
 
   /// State of the --timing command line argument from MooseApp
   bool _timing;
+
+  friend class OutputWarehouse;
+
 };
 
 #endif /* CONSOLE_H */

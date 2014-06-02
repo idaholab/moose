@@ -12,34 +12,46 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseObject.h"
-#include "MooseApp.h"
-#include "Console.h"
+#ifndef CONSOLEMESSAGEKERNEL_H
+#define CONSOLEMESSAGEKERNEL_H
+
+// MOOSE includes
+#include "CoefDiffusion.h"
+
+// Forward declarations
+class ConsoleMessageKernel;
 
 template<>
-InputParameters validParams<MooseObject>()
-{
-  InputParameters params;
-  return params;
-}
+InputParameters validParams<ConsoleMessageKernel>();
 
-
-MooseObject::MooseObject(const std::string & name, InputParameters parameters) :
-  ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  _name(name),
-  _pars(parameters),
-  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app"))
+/**
+ * A class for testing MooseObject::mooseConsole method
+ */
+class ConsoleMessageKernel : public CoefDiffusion
 {
-}
+public:
 
-void
-MooseObject::mooseConsole(const std::string & message, bool err)
-{
-  _app.getOutputWarehouse().mooseConsole(message, err);
-}
+  /**
+   * Class constructor
+   * @param name Name of the object
+   * @param parameters Input parameters
+   */
+  ConsoleMessageKernel(const std::string & name, InputParameters parameters);
 
-void
-MooseObject::mooseConsole(const std::ostringstream & message, bool err)
-{
-  _app.getOutputWarehouse().mooseConsole(message, err);
-}
+  /**
+   * Class destructor
+   */
+  virtual ~ConsoleMessageKernel();
+
+  /**
+   * Prints a message on initial setup
+   */
+  void initialSetup();
+
+  /*
+   * Prints a message at beginning of timestep
+   */
+  void timestepSetup();
+};
+
+#endif //CONSOLEMESSAGEKERNEL_H

@@ -2701,15 +2701,15 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 
   if (multi_apps.size())
   {
-    Moose::out << "--Executing MultiApps--" << std::endl;
+    _app.getOutputWarehouse().mooseConsole(" Executing MultiApps");
 
     for (unsigned int i=0; i<multi_apps.size(); i++)
       multi_apps[i]->solveStep(_dt, _time, auto_advance);
 
-    Moose::out << "--Waiting For Other Processors To Finish--" << std::endl;
+    _app.getOutputWarehouse().mooseConsole("  Waiting for other processors to finish...");
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    Moose::out << "--Finished Executing MultiApps--" << std::endl;
+    _app.getOutputWarehouse().mooseConsole(" Finished Executing MultiApps");
   }
 
   // Execute Transfers _from_ MultiApps
@@ -2717,14 +2717,14 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     std::vector<Transfer *> transfers = _from_multi_app_transfers(type)[0].all();
     if (transfers.size())
     {
-      Moose::out << "--Starting Transfers From MultiApps--" << std::endl;
+      mooseConsole(" MultiApp Transfers");
       for (unsigned int i=0; i<transfers.size(); i++)
         transfers[i]->execute();
 
-      Moose::out << "--Waiting For Transfers To Finish--" << std::endl;
+      mooseConsole("  Waiting for transfers to finish...");
       MooseUtils::parallelBarrierNotify(_communicator);
 
-      Moose::out << "--Transfers To Finished--" << std::endl;
+      Moose::out << " Transfers Finished" << std::endl;
     }
   }
 }
@@ -2736,15 +2736,15 @@ FEProblem::advanceMultiApps(ExecFlagType type)
 
   if (multi_apps.size())
   {
-    Moose::out << "--Advancing MultiApps--" << std::endl;
+    mooseConsole(" Advancing MultiApps");
 
     for (unsigned int i=0; i<multi_apps.size(); i++)
       multi_apps[i]->advanceStep();
 
-    Moose::out << "--Waiting For Other Processors To Finish--" << std::endl;
+    mooseConsole("  Waiting for other processors to finish...");
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    Moose::out << "--Finished Advancing MultiApps--" << std::endl;
+    mooseConsole(" Finished Advancing MultiApps");
   }
 }
 

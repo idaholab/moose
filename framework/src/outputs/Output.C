@@ -115,7 +115,8 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _force_output(false),
     _output_failed(false),
     _output_setup_called(false),
-    _initialized(false)
+    _initialized(false),
+    _on_initial(true)
 {
 }
 
@@ -219,12 +220,7 @@ Output::timestepSetupInternal()
 void
 Output::outputInitial()
 {
-  // Do Nothing if output is not forced or if output is disallowed
-  if (!_force_output && !_allow_output)
-    return;
-
-  // Output the initial condition, if desired
-  if (_force_output || _output_initial)
+  if (shouldOutputInitial())
   {
     outputSetup();
     _mesh_changed = false;
@@ -251,6 +247,7 @@ Output::outputInitial()
   // Set the force output flag to false
   _force_output = false;
   _output_initial = false;
+  _on_initial = false;
 }
 
 void
@@ -263,16 +260,9 @@ Output::outputFailedStep()
 void
 Output::outputStep()
 {
-  // Do nothing if intermediate steps are disable
-  if (!_output_intermediate)
-    return;
 
-  // Do nothing if output is not forced and is not allowed
-  if (!_force_output && !_allow_output)
-    return;
-
-  // Only continue if output is not forced and the output is on an interval
-  if (!_force_output && !checkInterval())
+  // Only perform output if you should
+  if (!shouldOutputStep())
     return;
 
   // If the mesh has changed or the sequence state is true or if it has not been called, call the outputSetup() function
@@ -298,10 +288,34 @@ Output::outputStep()
   _force_output = false;
 }
 
+bool
+Output::shouldOutputStep()
+{
+  // Do not perform output if:
+  // (1) Intermediate output is disabled
+  // (2) Output is not forced and output is not allowed or not on interval
+  if (!_output_intermediate || (!_force_output && (!_allow_output || !checkInterval())))
+    return false;
+  else
+    return true;
+}
+
+bool
+Output::shouldOutputInitial()
+{
+  // Do Nothing if output is not forced or if output is disallowed
+  if (!_force_output && !_allow_output)
+    return false;
+  else if (_force_output || _output_initial)
+    return true;
+  else
+    return false;
+}
+
 void
 Output::outputFinal()
 {
-  // If the intermediate steps are being output and the final time step is on an interval it will already have benn output by outputStep, so do nothing
+  // If the intermediate steps are being output and the final time step is on an interval it will already have been output by outputStep, so do nothing
   if (checkInterval() && _output_intermediate)
     return;
 
@@ -400,7 +414,6 @@ Output::getElementalVariableOutput()
   return _nonlinear_elemental.output;
 }
 
-
 bool
 Output::hasScalarOutput()
 {
@@ -454,6 +467,12 @@ void
 Output::sequence(bool state)
 {
   _sequence = state;
+}
+
+bool
+Output::onInitial()
+{
+  return _on_initial;
 }
 
 bool

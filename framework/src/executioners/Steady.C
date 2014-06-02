@@ -60,7 +60,7 @@ Steady::init()
 {
   if (_app.isRecovering())
   {
-    Moose::out<<"\nCannot recover steady solves!\nExiting...\n"<<std::endl;
+    mooseConsole("\nCannot recover steady solves!\nExiting...\n");
     return;
   }
 

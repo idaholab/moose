@@ -202,6 +202,22 @@ public:
    */
   bool isReservedName(const std::string & name);
 
+  /**
+   * A method for disabling all Console output to the screen
+   * This used used by the Multiapp system
+   */
+  void disableScreenOutput();
+
+  ///@{
+  /**
+   * Sends the supplied message to Console output objects
+   * @param message A string or stringstream containing the message to write
+   * @param err A flag for outputing to Moose::err instead of Moose::out
+   */
+  void mooseConsole(const std::string & message, bool err = false);
+  void mooseConsole(const std::ostringstream & message, bool err = false);
+  ///@}
+
 private:
 
   /**

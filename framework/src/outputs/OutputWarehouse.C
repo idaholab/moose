@@ -178,6 +178,31 @@ OutputWarehouse::forceOutput()
 }
 
 void
+OutputWarehouse::disableScreenOutput()
+{
+  std::vector<Console *> console_ptrs = getOutputs<Console>();
+  for (std::vector<Console *>::const_iterator it = console_ptrs.begin(); it != console_ptrs.end(); ++it)
+    (*it)->_write_screen = false;
+}
+
+void
+OutputWarehouse::mooseConsole(const std::string & message, bool err)
+{
+  std::vector<Console *> objects = getOutputs<Console>();
+
+  if (objects.empty())
+    mooseWarning("Attempted to write a message via mooseConsole, but no Console output objects exist.\nIt is likely that the output objects are not constructed, consider moving this message to initialSetup()");
+
+  for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)
+    (*it)->write(message, err);
+}
+void
+OutputWarehouse::mooseConsole(const std::ostringstream & message, bool err)
+{
+  mooseConsole(message.str(), err);
+}
+
+void
 OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset)
 {
   for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)

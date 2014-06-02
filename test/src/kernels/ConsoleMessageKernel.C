@@ -12,34 +12,37 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseObject.h"
-#include "MooseApp.h"
-#include "Console.h"
+#include "ConsoleMessageKernel.h"
 
 template<>
-InputParameters validParams<MooseObject>()
+InputParameters validParams<ConsoleMessageKernel>()
 {
-  InputParameters params;
+  InputParameters params = validParams<CoefDiffusion>();
   return params;
 }
 
+ConsoleMessageKernel::ConsoleMessageKernel(const std::string & name, InputParameters parameters) :
+  CoefDiffusion(name, parameters)
+{
+  mooseConsole("ConsoleMessageKernel - Constructing object.");
+}
 
-MooseObject::MooseObject(const std::string & name, InputParameters parameters) :
-  ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  _name(name),
-  _pars(parameters),
-  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app"))
+ConsoleMessageKernel::~ConsoleMessageKernel()
 {
 }
 
 void
-MooseObject::mooseConsole(const std::string & message, bool err)
+ConsoleMessageKernel::initialSetup()
 {
-  _app.getOutputWarehouse().mooseConsole(message, err);
+  std::ostringstream oss;
+  oss << "ConsoleMessageKernel::initalSetup - time = " << _t << "; t_step = " << _t_step;
+  mooseConsole(oss);
 }
 
 void
-MooseObject::mooseConsole(const std::ostringstream & message, bool err)
+ConsoleMessageKernel::timestepSetup()
 {
-  _app.getOutputWarehouse().mooseConsole(message, err);
+  std::ostringstream oss;
+  oss << "ConsoleMessageKernel::timestepSetup - time = " << _t << "; t_step = " << _t_step;
+  mooseConsole(oss);
 }

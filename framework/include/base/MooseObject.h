@@ -64,19 +64,35 @@ public:
   template <typename T>
   const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
 
+  /**
+   * Test if the supplied parameter is valid
+   * @param name The name of the parameter to test
+   */
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
-  ///@}a
 
   /**
-   * Get the MooseApp this object is associated wth.
+   * Get the MooseApp this object is associated with.
    */
   MooseApp & getMooseApp() { return _app; }
 
+  ///@{
+  /**
+   * Passes message to the Console output objects
+   * @param message The string or stringstram to output to the Console object
+   * @param err A flag for outputting to Moose::err instead of Moose::out
+   */
+  void mooseConsole(const std::string & message, bool err = false);
+  void mooseConsole(const std::ostringstream & message, bool err = false);
+  ///@}
+
 protected:
+
   /// The name of this object
   std::string _name;
+
   /// Parameters of this object
   InputParameters _pars;
+
   /// The MooseApp this object is associated with
   MooseApp & _app;
 };

@@ -435,6 +435,24 @@ private:
    */
   void initOutputList(OutputData & data);
 
+  /**
+   * Handles logic for determining if a step should be output
+   * @return True if a call to outputStep should be preformed
+   */
+  bool shouldOutputStep();
+
+  /**
+   * Handles logic for determining if an initial step should be output
+   * @return True if a call to outputInitial should be preformed
+   */
+  bool shouldOutputInitial();
+
+  /**
+   * Returns status of output initial flag
+   * @return True prior to call of outputInitial(), once this is called then it returns false
+   */
+  bool onInitial();
+
   /// Storage structure for the variable lists for elemental nonlinear variable output
   OutputData _nonlinear_elemental;
 
@@ -485,11 +503,14 @@ private:
   /// True if init() has been called
   bool _initialized;
 
+  bool _on_initial;
+
   // Allow complete access
   friend class OutputWarehouse;
   friend class FileOutput;
   friend class OversampleOutput;
   friend class PetscOutput;
+  friend class Console;
   friend class TransientMultiApp;
 };
 
