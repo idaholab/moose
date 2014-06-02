@@ -1,4 +1,4 @@
-import re, os
+import re, os, sys
 from Tester import Tester
 from RunParallel import RunParallel # For TIMEOUT value
 
@@ -43,6 +43,7 @@ class RunApp(Tester):
       self.force_mpi = False
 
 
+
   def checkRunnable(self, options):
     if options.enable_recover:
       if self.specs.isValid('expect_out') or self.specs['should_crash'] == True:
@@ -53,10 +54,14 @@ class RunApp(Tester):
 
 
   def getCommand(self, options):
+    specs = self.specs
     # Create the command line string to run
     command = ''
 
-    specs = self.specs
+    # Check for built application
+    if not os.path.exists(specs['executable']):
+      print 'Application not found: ' + str(specs['executable'])
+      sys.exit(1)
 
     if options.parallel == None:
       default_ncpus = 1
