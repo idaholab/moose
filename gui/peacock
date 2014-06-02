@@ -101,13 +101,19 @@ class UiBox(QtGui.QMainWindow):
           tab._openFile(options.visualize_result)
 
 def recursiveFindFile(current_path, p, executable):
+  if not os.path.exists(current_path):
+    return None
+
   files = os.listdir(current_path)
 
   split = current_path.split('/')
 
-  # if we're in the "problems" directory... hop over to this application's directory instead
-  if len(split) > 2 and split[len(split)-2] == 'problems':
-    return recursiveFindFile('/'.join(split[:len(split)-2]) + '/' + split[len(split)-1], p, executable)
+  if len(split) > 2 and split[-2] == 'problems':
+    # if we're in the "problems" directory... hop over to this application's directory instead
+    the_file = recursiveFindFile('/'.join(split[:-2]) + '/' + split[-1], p, executable)
+    # Still didn't find it, we must keep looking up this path so fall through here
+    if the_file != None:
+      return the_file
 
   for afile in files:
     if p.match(afile) and ((not executable) or os.access(current_path+'/'+afile, os.X_OK)):
