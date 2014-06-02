@@ -179,7 +179,7 @@ public:
    * @return A pointer to the output object
    */
   template<typename T>
-  std::vector<T *> getOutputs();
+  std::vector<T *> getOutputs() const;
 
   /**
    * Return a list of output objects with a given type
@@ -214,8 +214,8 @@ public:
    * @param message A string or stringstream containing the message to write
    * @param err A flag for outputing to Moose::err instead of Moose::out
    */
-  void mooseConsole(const std::string & message, bool err = false);
-  void mooseConsole(const std::ostringstream & message, bool err = false);
+  void mooseConsole(const std::string & message, bool err = false) const;
+  void mooseConsole(const std::ostringstream & message, bool err = false) const;
   ///@}
 
 private:
@@ -330,7 +330,7 @@ OutputWarehouse::getOutputs(const std::vector<OutputName> & names)
 
 template<typename T>
 std::vector<T *>
-OutputWarehouse::getOutputs()
+OutputWarehouse::getOutputs() const
 {
   // The vector to output
   std::vector<T *> outputs;

@@ -24,7 +24,7 @@ InputParameters validParams<ConsoleMessageKernel>()
 ConsoleMessageKernel::ConsoleMessageKernel(const std::string & name, InputParameters parameters) :
   CoefDiffusion(name, parameters)
 {
-  mooseConsole("ConsoleMessageKernel - Constructing object.");
+  _console << "ConsoleMessageKernel - Constructing object.";
 }
 
 ConsoleMessageKernel::~ConsoleMessageKernel()
@@ -34,15 +34,11 @@ ConsoleMessageKernel::~ConsoleMessageKernel()
 void
 ConsoleMessageKernel::initialSetup()
 {
-  std::ostringstream oss;
-  oss << "ConsoleMessageKernel::initalSetup - time = " << _t << "; t_step = " << _t_step;
-  mooseConsole(oss);
+  _console << "ConsoleMessageKernel::initalSetup - time = " << _t << "; t_step = " << _t_step;
 }
 
 void
 ConsoleMessageKernel::timestepSetup()
 {
-  std::ostringstream oss;
-  oss << "ConsoleMessageKernel::timestepSetup - time = " << _t << "; t_step = " << _t_step;
-  mooseConsole(oss);
+  _console << "ConsoleMessageKernel::timestepSetup - time = " << _t << "; t_step = " << _t_step;
 }

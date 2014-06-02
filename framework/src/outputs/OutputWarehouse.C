@@ -186,7 +186,7 @@ OutputWarehouse::disableScreenOutput()
 }
 
 void
-OutputWarehouse::mooseConsole(const std::string & message, bool err)
+OutputWarehouse::mooseConsole(const std::string & message, bool err) const
 {
   std::vector<Console *> objects = getOutputs<Console>();
 
@@ -197,7 +197,7 @@ OutputWarehouse::mooseConsole(const std::string & message, bool err)
     (*it)->write(message, err);
 }
 void
-OutputWarehouse::mooseConsole(const std::ostringstream & message, bool err)
+OutputWarehouse::mooseConsole(const std::ostringstream & message, bool err) const
 {
   mooseConsole(message.str(), err);
 }

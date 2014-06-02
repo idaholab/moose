@@ -2701,15 +2701,15 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 
   if (multi_apps.size())
   {
-    _app.getOutputWarehouse().mooseConsole(" Executing MultiApps");
+    _console << " Executing MultiApps";
 
     for (unsigned int i=0; i<multi_apps.size(); i++)
       multi_apps[i]->solveStep(_dt, _time, auto_advance);
 
-    _app.getOutputWarehouse().mooseConsole("  Waiting for other processors to finish...");
+    _console << "  Waiting for other processors to finish...";
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _app.getOutputWarehouse().mooseConsole(" Finished Executing MultiApps");
+    _console << " Finished Executing MultiApps";
   }
 
   // Execute Transfers _from_ MultiApps
@@ -2717,14 +2717,14 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     std::vector<Transfer *> transfers = _from_multi_app_transfers(type)[0].all();
     if (transfers.size())
     {
-      mooseConsole(" MultiApp Transfers");
+      _console << " MultiApp Transfers";
       for (unsigned int i=0; i<transfers.size(); i++)
         transfers[i]->execute();
 
-      mooseConsole("  Waiting for transfers to finish...");
+      _console << "  Waiting for transfers to finish...";
       MooseUtils::parallelBarrierNotify(_communicator);
 
-      Moose::out << " Transfers Finished" << std::endl;
+      _console << " Transfers Finished";
     }
   }
 }
@@ -2736,15 +2736,16 @@ FEProblem::advanceMultiApps(ExecFlagType type)
 
   if (multi_apps.size())
   {
-    mooseConsole(" Advancing MultiApps");
+    _console << " Advancing MultiApps";
 
     for (unsigned int i=0; i<multi_apps.size(); i++)
       multi_apps[i]->advanceStep();
 
-    mooseConsole("  Waiting for other processors to finish...");
+    _console << "  Waiting for other processors to finish...";
+
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    mooseConsole(" Finished Advancing MultiApps");
+    _console << " Finished Advancing MultiApps";
   }
 }
 

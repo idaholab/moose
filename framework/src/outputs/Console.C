@@ -512,13 +512,13 @@ Console::write(std::string message, bool err)
     return;
 
   if (_write_screen && err)
-    Moose::err << std::endl << message;
+    Moose::err << message;
 
   else if (_write_screen)
-    Moose::out << std::endl << message;
+    Moose::out << message;
 
   if (_write_file)
-    _file_output_stream << std::endl << message;
+    _file_output_stream << message;
 }
 
 void

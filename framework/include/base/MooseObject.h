@@ -16,6 +16,7 @@
 #define MOOSEOBJECT_H
 
 #include "InputParameters.h"
+#include "ConsoleStream.h"
 
 // libMesh includes
 #include "libmesh/parallel_object.h"
@@ -75,16 +76,6 @@ public:
    */
   MooseApp & getMooseApp() { return _app; }
 
-  ///@{
-  /**
-   * Passes message to the Console output objects
-   * @param message The string or stringstram to output to the Console object
-   * @param err A flag for outputting to Moose::err instead of Moose::out
-   */
-  void mooseConsole(const std::string & message, bool err = false);
-  void mooseConsole(const std::ostringstream & message, bool err = false);
-  ///@}
-
 protected:
 
   /// The name of this object
@@ -95,6 +86,9 @@ protected:
 
   /// The MooseApp this object is associated with
   MooseApp & _app;
+
+  /// An instance of helper class to write streams to the Console objects
+  ConsoleStream _console;
 };
 
 #endif /* MOOSEOBJECT_H*/
