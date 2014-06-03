@@ -60,6 +60,8 @@ private:
    * constructor!
    */
   /// Material property of dispersion-diffusion coefficient.
+  bool _has_diff;
+  std::string _prop_name;
   MaterialProperty<Real> & _diffusivity;
 
   /// Weight of the equilibrium species concentration in the total primary species concentration.
