@@ -30,8 +30,11 @@ class GeneralPostprocessor;
 template<>
 InputParameters validParams<GeneralPostprocessor>();
 
-/* This class is here to combine the Postprocessor interface and the
- * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
+/**
+ * This class is here to combine the Postprocessor interface and the
+ * base class Postprocessor object along with adding MooseObject to the inheritance tree.
+ * GeneralPostprocessors have dependency resolution enabled with other GeneralPostprocessors.
+ */
 class GeneralPostprocessor :
   public GeneralUserObject,
   public Postprocessor

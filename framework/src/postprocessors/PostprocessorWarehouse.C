@@ -30,8 +30,6 @@ PostprocessorWarehouse::PostprocessorWarehouse()
 PostprocessorWarehouse::~PostprocessorWarehouse()
 {
   // We don't need to free because that's taken care of by the UserObjectWarehouse
-//  for (std::vector<Postprocessor *>::iterator i=_all_postprocessors.begin(); i!=_all_postprocessors.end(); ++i)
-//    delete *i;
 }
 
 void
@@ -56,7 +54,6 @@ PostprocessorWarehouse::initialSetup()
       i!=_all_internal_side_postprocessors.end();
       ++i)
     (*i)->initialSetup();
-
 
   for (std::vector<GeneralPostprocessor *>::const_iterator i=_all_generic_postprocessors.begin();
       i!=_all_generic_postprocessors.end();
