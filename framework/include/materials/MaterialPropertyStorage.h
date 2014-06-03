@@ -120,6 +120,16 @@ public:
   void shift();
 
   /**
+   * Copy material properties from elem_from to elem_to
+   * Thread safe
+   * @param material_data MaterialData object to work with
+   * @param elem_to Element to copy data to
+   * @param elem_from Element to copy data from
+   * @param side Side number (elemental material properties have this equal to zero)
+   */
+  void copy(MaterialData & material_data, const Elem & elem_to, const Elem & elem_from, unsigned int side, unsigned int n_qpoints);
+
+  /**
    * Swap (shallow copy) material properties in MaterialData and MaterialPropertyStorage
    * Thread safe
    * @param material_data MaterialData object to work with
