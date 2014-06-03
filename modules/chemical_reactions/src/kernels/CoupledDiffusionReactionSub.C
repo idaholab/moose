@@ -10,7 +10,7 @@ InputParameters validParams<CoupledDiffusionReactionSub>()
   params.addParam<Real>("weight",1.0,"Weight of equilibrium species concentration in the primary species concentration");
   params.addParam<Real>("log_k",0.0,"Equilibrium constant of the equilbrium reaction in dissociation form");
   params.addParam<Real>("sto_u",1.0,"Stochiometric coef of the primary species this kernel operates on in the equilibrium reaction");
-  params.addRequiredParam<std::vector<Real>>("sto_v","The stochiometric coefficients of coupled primary species");
+  params.addRequiredParam<std::vector<Real> >("sto_v","The stochiometric coefficients of coupled primary species");
   params.addParam<std::string>("diffusivity","The real material property (here is it a diffusivity) to use in this boundary condition");
   params.addCoupledVar("v","List of coupled primary species in this equilibrium species");
   return params;
@@ -24,7 +24,7 @@ CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const std::string & nam
    _weight(getParam<Real>("weight")),
    _log_k(getParam<Real>("log_k")),
    _sto_u(getParam<Real>("sto_u")),
-   _sto_v(getParam<std::vector<Real>>("sto_v"))
+   _sto_v(getParam<std::vector<Real> >("sto_v"))
 {
   int n = coupledComponents("v");
   _vars.resize(n);
