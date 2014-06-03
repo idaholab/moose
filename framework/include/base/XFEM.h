@@ -28,6 +28,7 @@
 // C++ Includes   -----------------------------------
 #include <vector>
 
+#include "MaterialData.h"
 #include "CutElemMesh.h"
 
 enum XFEM_CUTPLANE_QUANTITY
@@ -113,7 +114,7 @@ public:
    * Constructor
    */
   explicit
-  XFEM(MeshBase* mesh, MeshBase* mesh2=NULL);
+  XFEM(std::vector<MaterialData *> & material_data, MeshBase* mesh, MeshBase* mesh2=NULL);
 
   /**
    * Destructor
@@ -154,6 +155,8 @@ public:
   bool is_elem_cut(const Elem* elem) const;
 
 private:
+  std::vector<MaterialData *> & _material_data;
+
   /**
    * Reference to the mesh.
    */

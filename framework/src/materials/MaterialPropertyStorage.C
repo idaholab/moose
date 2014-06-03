@@ -330,10 +330,10 @@ MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, u
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-//  shallowCopyData(_stateful_prop_id_to_prop_id, material_data.props(), props()[&elem][side]);
-//  shallowCopyData(_stateful_prop_id_to_prop_id, material_data.propsOld(), propsOld()[&elem][side]);
-//  if (hasOlderProperties())
-//    shallowCopyData(_stateful_prop_id_to_prop_id, material_data.propsOlder(), propsOlder()[&elem][side]);
+  shallowCopyData(_stateful_prop_id_to_prop_id, material_data.props(), props()[&elem][side]);
+  shallowCopyData(_stateful_prop_id_to_prop_id, material_data.propsOld(), propsOld()[&elem][side]);
+  if (hasOlderProperties())
+    shallowCopyData(_stateful_prop_id_to_prop_id, material_data.propsOlder(), propsOlder()[&elem][side]);
 }
 
 void
@@ -341,10 +341,10 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data, const Elem & ele
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-//  shallowCopyDataBack(_stateful_prop_id_to_prop_id, props()[&elem][side], material_data.props());
-//  shallowCopyDataBack(_stateful_prop_id_to_prop_id, propsOld()[&elem][side], material_data.propsOld());
-//  if (hasOlderProperties())
-//    shallowCopyDataBack(_stateful_prop_id_to_prop_id, propsOlder()[&elem][side], material_data.propsOlder());
+  shallowCopyDataBack(_stateful_prop_id_to_prop_id, props()[&elem][side], material_data.props());
+  shallowCopyDataBack(_stateful_prop_id_to_prop_id, propsOld()[&elem][side], material_data.propsOld());
+  if (hasOlderProperties())
+    shallowCopyDataBack(_stateful_prop_id_to_prop_id, propsOlder()[&elem][side], material_data.propsOlder());
 }
 
 bool

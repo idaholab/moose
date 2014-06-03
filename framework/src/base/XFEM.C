@@ -238,7 +238,8 @@ XFEMCutElem::get_normal(Real *normal, MeshBase* displaced_mesh)const
 
 //-----------------------------------------------------------------
 // XFEM mesh modification methods
-XFEM::XFEM (MeshBase* m, MeshBase* m2) :
+XFEM::XFEM (std::vector<MaterialData *> & material_data, MeshBase* m, MeshBase* m2) :
+  _material_data(material_data),
   _mesh(m),
   _mesh2(m2)
 {
@@ -702,6 +703,11 @@ XFEM::cut_mesh_with_efa()
     libmesh_elem->set_n_systems(parent_elem->n_systems());
     libmesh_elem->subdomain_id() = parent_elem->subdomain_id();
     libmesh_elem->processor_id() = parent_elem->processor_id();
+
+    //TODO: The 0 here is the thread ID.  Need to sort out how to do this correctly
+    //TODO: Also need to copy surface and neighbor material data
+    _material_data[0]->copy(*libmesh_elem, *parent_elem, 0);
+
     std::cout<<"XFEM added elem "<<libmesh_elem->id()+1<<std::endl;
 
     XFEMCutElem * xfce = new XFEMCutElem(libmesh_elem, NewElements[i]);
@@ -715,7 +721,6 @@ XFEM::cut_mesh_with_efa()
       libmesh_elem2->set_n_systems(parent_elem2->n_systems());
       libmesh_elem2->subdomain_id() = parent_elem2->subdomain_id();
       libmesh_elem2->processor_id() = parent_elem2->processor_id();
-      std::cout<<"XFEM2 added elem "<<libmesh_elem2->id()+1<<std::endl;
     }
 
     unsigned int n_sides = parent_elem->n_sides();
