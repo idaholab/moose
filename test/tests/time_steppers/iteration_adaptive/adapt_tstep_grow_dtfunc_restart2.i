@@ -54,8 +54,8 @@
   l_tol = 1e-5
 
   start_time = 0.0
-  end_time = 20.0
-  num_steps = 5
+  end_time = 40.0
+  num_steps = 10
 
   [./TimeStepper]
     type = IterationAdaptiveDT
@@ -75,7 +75,6 @@
 []
 
 [Outputs]
-  file_base = adapt_tstep_grow_dtfunc_out_2
   output_initial = true
   exodus = true
   [./console]

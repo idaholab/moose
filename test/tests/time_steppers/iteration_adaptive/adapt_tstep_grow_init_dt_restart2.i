@@ -74,7 +74,6 @@
 []
 
 [Outputs]
-  file_base = adapt_tstep_grow_init_dt_out
   output_initial = true
   exodus = true
   sync_times = '0.5 9.5'
