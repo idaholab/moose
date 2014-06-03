@@ -60,7 +60,7 @@ Steady::init()
 {
   if (_app.isRecovering())
   {
-    _console << "\nCannot recover steady solves!\nExiting...\n";
+    _console << "\nCannot recover steady solves!\nExiting...\n" << std::endl;
     return;
   }
 
