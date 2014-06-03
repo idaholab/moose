@@ -103,6 +103,7 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _initial_from_file(false),
     _parallel_mesh_on_command_line(false),
     _recover(false),
+    _restart(false),
     _half_transient(false),
     _output_warehouse(new OutputWarehouse),
     _alternate_output_warehouse(NULL)

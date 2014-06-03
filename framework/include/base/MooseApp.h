@@ -243,6 +243,11 @@ public:
   bool isRecovering() { return _recover; }
 
   /**
+   * Whether or not this is a "recover" calculation.
+   */
+  bool isRestarting() { return _restart; }
+
+  /**
    * Return true if the recovery file base is set
    */
   bool hasRecoverFileBase() { return !_recover_base.empty(); }
@@ -391,7 +396,7 @@ protected:
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;
 
-  /// Map of outputer name and file number (used by MultiApps to propogate file numbers down through the multiapps)
+  /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;
 
   /// OutputWarehouse object for this App
@@ -399,6 +404,20 @@ protected:
 
   /// An alternate OutputWarehouse object (required for CoupledExecutioner)
   OutputWarehouse * _alternate_output_warehouse;
+
+private:
+
+  ///@{
+  /**
+   * Sets the restart/recover flags
+   * @param state The state to set the flag to
+   */
+  void setRestart(const bool & value){ _restart = value; }
+  void setRecover(const bool & value){ _recover = value; }
+  ///@}
+
+  // Allow FEProblem to set the recover/restart state, so make it a friend
+  friend class FEProblem;
 };
 
 #endif /* MOOSEAPP_H */

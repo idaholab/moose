@@ -638,18 +638,6 @@ public:
   void setRestartFile(const std::string & file_name);
 
   /**
-   * Was this subproblem initialized from a restart file
-   * @return true if we restarted form a file, otherwise false
-   */
-  virtual bool isRestarting();
-
-  /**
-   * Are we recovering a previous simulation??
-   * @return true if recovering form a file, otherwise false
-   */
-  virtual bool isRecovering();
-
-  /**
    * Register a piece of restartable data.  This is data that will get
    * written / read to / from a restart file.
    *
@@ -923,9 +911,6 @@ protected:
   bool _has_jacobian;
 
   SolverParams _solver_params;
-
-  /// True if we're doing a _restart_ (note: this is _not_ true when recovering!)
-  bool _restarting;
 
   /// Determines whether a check to verify an active kernel on every subdomain
   bool _kernel_coverage_check;

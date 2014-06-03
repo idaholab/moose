@@ -187,7 +187,7 @@ Transient::init()
   _problem.initialSetup();
   _time_stepper->init();
 
-  if (_problem.isRestarting())
+  if (_app.isRestarting())
     _time_old = _time;
 
 
