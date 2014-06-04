@@ -520,7 +520,7 @@ class TestHarness:
     # tests as they were running
     if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
       print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
-      for (test, output, result, timing, start, end) in self.test_table:
+      for (test, output, result, timing, start, end) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
         if self.options.show_directory:
           print printResult(test['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options)
         else:
