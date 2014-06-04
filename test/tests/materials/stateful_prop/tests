@@ -31,6 +31,13 @@
     exodiff = 'out_spatial.e'
   [../]
 
+  [./stateful_copy]
+    type = 'Exodiff'
+    input = 'stateful_prop_copy_test.i'
+    exodiff = 'out_stateful_copy.e'
+    max_parallel = 1
+  [../]
+
   [./test_older_csv]
     type = 'CSVDiff'
     input = 'stateful_prop_test_older.i'

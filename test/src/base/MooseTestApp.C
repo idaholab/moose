@@ -124,6 +124,7 @@
 #include "RandomHitUserObject.h"
 #include "RandomHitSolutionModifier.h"
 #include "MaterialPropertyUserObject.h"
+#include "MaterialCopyUserObject.h"
 #include "InsideUserObject.h"
 #include "RestartableTypes.h"
 #include "RestartableTypesChecker.h"
@@ -357,6 +358,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(RandomHitUserObject);
   registerUserObject(RandomHitSolutionModifier);
   registerUserObject(MaterialPropertyUserObject);
+  registerUserObject(MaterialCopyUserObject);
   registerUserObject(InsideUserObject);
   registerUserObject(RestartableTypes);
   registerUserObject(RestartableTypesChecker);
