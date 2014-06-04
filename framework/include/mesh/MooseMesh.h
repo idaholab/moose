@@ -286,12 +286,6 @@ public:
   const std::set<BoundaryID> & meshBoundaryIds() const;
 
   /**
-   * Returns a not-read-only reference to the set of subdomains currently
-   * present in the Mesh.
-   */
-  std::set<BoundaryID> & meshBoundaryIds();
-
-  /**
    * Sets the mapping between BoundaryID and normal vector
    * Is called by AddAllSideSetsByNormals
    */

@@ -1828,12 +1828,6 @@ MooseMesh::meshBoundaryIds() const
   return _mesh_boundary_ids;
 }
 
-std::set<BoundaryID> &
-MooseMesh::meshBoundaryIds()
-{
-  return _mesh_boundary_ids;
-}
-
 void
 MooseMesh::setMeshBoundaryIDs(std::set<BoundaryID> boundary_IDs)
 {
