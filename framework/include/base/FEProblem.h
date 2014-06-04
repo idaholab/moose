@@ -638,18 +638,6 @@ public:
   void setRestartFile(const std::string & file_name);
 
   /**
-   * Was this subproblem initialized from a restart file
-   * @return true if we restarted form a file, otherwise false
-   */
-  virtual bool isRestarting();
-
-  /**
-   * Are we recovering a previous simulation??
-   * @return true if recovering form a file, otherwise false
-   */
-  virtual bool isRecovering();
-
-  /**
    * Register a piece of restartable data.  This is data that will get
    * written / read to / from a restart file.
    *
@@ -780,6 +768,9 @@ public:
 
 
 protected:
+  /// Data names that will only be read from the restart file during RECOVERY
+  std::set<std::string> _recoverable_data;
+
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
@@ -921,9 +912,6 @@ protected:
 
   SolverParams _solver_params;
 
-  /// True if we're doing a _restart_ (note: this is _not_ true when recovering!)
-  bool _restarting;
-
   /// Determines whether a check to verify an active kernel on every subdomain
   bool _kernel_coverage_check;
 
@@ -946,9 +934,6 @@ private:
    * @param name The full (unique) name.
    */
   virtual void registerRecoverableData(std::string name);
-
-  /// Data names that will only be read from the restart file during RECOVERY
-  std::set<std::string> _recoverable_data;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;

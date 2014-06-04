@@ -511,7 +511,7 @@ class TestHarness:
     # If we encounter bitten_status_moose environment, build a line itemized list of applications which passed their tests
     if os.environ.has_key("BITTEN_STATUS_MOOSE"):
       result_file = open(os.path.join(self.moose_dir, 'test_results.log'), 'a')
-      result_file.write(str(os.path.split(app_name)[1][:-4]) + '\n')
+      result_file.write(os.path.split(app_name)[1].split('-')[0] + '\n')
       result_file.close()
 
   # Print final results, close open files, and exit with the correct error code
@@ -520,7 +520,7 @@ class TestHarness:
     # tests as they were running
     if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
       print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
-      for (test, output, result, timing, start, end) in self.test_table:
+      for (test, output, result, timing, start, end) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
         if self.options.show_directory:
           print printResult(test['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options)
         else:
@@ -562,11 +562,6 @@ class TestHarness:
 
     ## Save executable-under-test name to self.executable
     self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
-
-    # Check for built application
-    if not os.path.exists(self.executable):
-      print 'Application not found: ' + str(self.executable)
-      sys.exit(1)
 
     # Emulate the standard Nose RegEx for consistency
     self.test_match = re.compile(r"(?:^|\b|[_-])[Tt]est")

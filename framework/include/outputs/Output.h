@@ -197,6 +197,37 @@ public:
    */
   void forceOutput();
 
+  /**
+   * Get the output time.
+   * @return The output time, which may be different than the simulation time
+   *
+   * When the Executioner is steady this utilizes the time_step and when Transient the actual time is used.
+   */
+  virtual Real time();
+
+   /**
+   * Get the old output time.
+   * @return The old output time, which may be different than the simulation time
+   *
+   * @see time()
+   */
+  virtual Real timeOld();
+
+  /**
+   * Get the current time step size
+   */
+  virtual Real dt();
+
+  /**
+   * Get old time step size
+   */
+  virtual Real dtOld();
+
+  /**
+   * Get the current time step
+   */
+  virtual int timeStep();
+
 protected:
 
   /**
@@ -308,21 +339,6 @@ protected:
   /// Reference the the libMesh::EquationSystems object that contains the data
   EquationSystems * _es_ptr;
 
-  /// The current time for output purposes
-  Real & _time;
-
-  /// The old time
-  Real & _time_old;
-
-  /// The current time step
-  int & _t_step;
-
-  /// Time step delta
-  Real & _dt;
-
-  /// Old time step delta
-  Real & _dt_old;
-
   /// Flag for outputing the initial solution
   bool _output_initial;
 
@@ -356,10 +372,11 @@ protected:
   /// Flag for forcing call to outputSetup() with every call to output() (restartable)
   bool & _sequence;
 
-  /// Flag for disabling/enabling outut
+  /// Flag for disabling/enabling output
   bool _allow_output;
 
 private:
+//protected:
 
   /**
    * Initialization method.
@@ -452,6 +469,21 @@ private:
    * @return True prior to call of outputInitial(), once this is called then it returns false
    */
   bool onInitial();
+
+  /// The current time for output purposes
+  Real & _time;
+
+  /// The old time
+  Real & _time_old;
+
+  /// The current time step
+  int & _t_step;
+
+  /// Time step delta
+  Real & _dt;
+
+  /// Old time step delta
+  Real & _dt_old;
 
   /// Storage structure for the variable lists for elemental nonlinear variable output
   OutputData _nonlinear_elemental;

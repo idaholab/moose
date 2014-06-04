@@ -115,7 +115,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _transient(false),
     _time(declareRestartableData<Real>("time")),
     _time_old(declareRestartableData<Real>("time_old")),
-    _t_step(declareRestartableData<int>("t_step")),
+    _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
 
@@ -140,7 +140,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _resurrector(NULL),
     _const_jacobian(false),
     _has_jacobian(false),
-    _restarting(false),
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max())
 {
@@ -327,10 +326,10 @@ FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const std::
 
 void FEProblem::initialSetup()
 {
-  if (isRecovering())
+  if (_app.isRecovering())
     _resurrector->setRestartFile(_app.getRecoverFileBase());
 
-  if (isRestarting() || isRecovering())
+  if (_app.isRestarting() || _app.isRecovering())
     _resurrector->restartFromFile();
   else
   {
@@ -351,7 +350,7 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("mesh.buildRefinementAndCoarseningMaps()","Setup");
   }
 
-  if (!isRecovering())
+  if (!_app.isRecovering())
   {
     // uniform refine
     if (_mesh.uniformRefineLevel() > 0)
@@ -393,7 +392,7 @@ void FEProblem::initialSetup()
     for (std::map<std::string, Function *>::iterator vit = _functions[i].begin(); vit != _functions[i].end(); ++vit)
       vit->second->initialSetup();
 
-  if (!isRecovering())
+  if (!_app.isRecovering())
   {
     for (unsigned int i = 0; i < n_threads; i++)
       _ics[i].initialSetup();
@@ -408,7 +407,7 @@ void FEProblem::initialSetup()
 
 #ifdef LIBMESH_ENABLE_AMR
 
-  if (!isRecovering())
+  if (!_app.isRecovering())
   {
     Moose::setup_perf_log.push("initial adaptivity","Setup");
     for (unsigned int i = 0; i < adaptivity().getInitialSteps(); i++)
@@ -426,7 +425,7 @@ void FEProblem::initialSetup()
 
 #endif //LIBMESH_ENABLE_AMR
 
-  if (!isRecovering() && !isRestarting())
+  if (!_app.isRecovering() && !_app.isRestarting())
   {
     // During initial setup the solution is copied to solution_old and solution_older
     Moose::setup_perf_log.push("copySolutionsBackwards()","Setup");
@@ -448,10 +447,10 @@ void FEProblem::initialSetup()
 
   // Auxilary variable initialSetup calls
   _aux.initialSetup();
-  if (!isRecovering())
+  if (!_app.isRecovering())
     _aux.compute(EXEC_INITIAL);
 
-  if (isRestarting() || isRecovering())
+  if (_app.isRestarting() || _app.isRecovering())
   {
     // now if restarting and we have stateful material properties, go overwrite the values with the ones
     // from the restart file.  We need to do it this way, since we have no idea about sizes of user-defined material
@@ -505,7 +504,7 @@ void FEProblem::initialSetup()
 
 
 
-  if (!isRecovering())
+  if (!_app.isRecovering())
   {
     _aux.compute(EXEC_TIMESTEP_BEGIN);
 
@@ -534,7 +533,7 @@ void FEProblem::initialSetup()
   // during initialSetup by calls to computeProperties.
   if (_material_props.hasStatefulProperties())
   {
-    if (isRestarting() || isRecovering())
+    if (_app.isRestarting() || _app.isRecovering())
       _resurrector->restartStatefulMaterialProps();
     else
     {
@@ -545,7 +544,7 @@ void FEProblem::initialSetup()
     }
   }
 
-  if (isRestarting() || isRecovering())
+  if (_app.isRestarting() || _app.isRecovering())
     _resurrector->restartRestartableData();
 
   // Scalar variables need to reinited for the initial conditions to be available for output
@@ -3647,22 +3646,10 @@ FEProblem::serializeSolution()
   _aux.serializeSolution();
 }
 
-bool
-FEProblem::isRestarting()
-{
-  return _restarting;
-}
-
-bool
-FEProblem::isRecovering()
-{
-  return _app.isRecovering();
-}
-
 void
 FEProblem::setRestartFile(const std::string & file_name)
 {
-  _restarting = true;
+  _app.setRestart(true);
   _resurrector->setRestartFile(file_name);
 }
 
