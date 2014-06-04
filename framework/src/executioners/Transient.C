@@ -190,7 +190,6 @@ Transient::init()
   if (_app.isRestarting())
     _time_old = _time;
 
-
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
   _output_warehouse.outputInitial();
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
@@ -404,8 +403,6 @@ Transient::endStep(Real input_time)
   _picard_converged=false;
 
   _last_solve_converged = lastSolveConverged();
-
-  // _time_old = _time;
 
   if (_last_solve_converged)
   {
