@@ -22,7 +22,7 @@
 // MOOSE includes
 #include "OutputWarehouse.h"
 
-// this is the type of std::cout
+// this is the type of s t d :: c o u t
 typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
 
 // this is the function signature of std::endl

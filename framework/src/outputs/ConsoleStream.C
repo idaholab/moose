@@ -23,7 +23,7 @@ ConsoleStream::ConsoleStream(const OutputWarehouse & output_warehouse) :
 ConsoleStream &
 ConsoleStream::operator<<(StandardEndLine manip)
 {
-  manip(std::cout);
+  manip(Moose::out);
   return *this;
 }
 
