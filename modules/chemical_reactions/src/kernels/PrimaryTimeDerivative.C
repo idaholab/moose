@@ -5,12 +5,13 @@ template<>
 InputParameters validParams<PrimaryTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
+  params.addParam<std::string>("porosity","porosity","The real material property (here is it a porosity) to use");
   return params;
 }
 
 PrimaryTimeDerivative::PrimaryTimeDerivative(const std::string & name, InputParameters parameters) :
     TimeDerivative(name, parameters),
-    _porosity(getMaterialProperty<Real>("porosity"))
+    _porosity(getMaterialProperty<Real>(getParam<std::string>("porosity")))
 {}
 
 Real
