@@ -87,7 +87,7 @@ public:
    * the same restrictions as outputStep and outputInitial
    *
    */
-  void write(std::string message, bool err = false);
+  void write(const std::string & message, bool err = false);
 
   /**
    * Output string for setting up PETSC output

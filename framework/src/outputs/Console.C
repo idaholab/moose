@@ -259,7 +259,7 @@ Console::timestepSetup()
       n = 2;
 
     // Write time step and time information
-    oss << std::endl << std::endl <<  "Time Step " << std::setw(n) << _t_step;
+    oss << "\n\nTime Step " << std::setw(n) << _t_step;
 
     // Set precision
     if (_precision > 0)
@@ -270,23 +270,26 @@ Console::timestepSetup()
       oss << std::scientific;
 
     // Print the time
-    oss << ", time = " << _time;
+    oss << ", time = " << _time << '\n';
 
     // Show old time information, if desired
     if (_verbose)
-      oss << std::endl << std::right << std::setw(21) << "old time = " << std::left << _time_old;
+      oss << std::right << std::setw(21) << "old time = " << std::left << _time_old << '\n';
 
     // Show the time delta information
-    oss << std::endl << std::right << std::setw(21) << "dt = " << std::left << _dt;
+    oss << std::right << std::setw(21) << "dt = " << std::left << _dt << '\n';
 
     // Show the old time delta information, if desired
     if (_verbose)
-      oss << std::endl << std::right << std::setw(21) << "old dt = " << _dt_old << std::left;
+      oss << std::right << std::setw(21) << "old dt = " << _dt_old << std::left << '\n';
   }
 
   // Output to the screen
   if (_write_screen)
+  {
     Moose::out << oss.str();
+    Moose::out << std::flush;
+  }
 
   // Output to the file
   if (_write_file)
@@ -326,20 +329,20 @@ Console::output()
   if (onNonlinearResidual())
   {
     if (_write_screen)
-      Moose::out << std::endl << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm);
+      Moose::out << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
 
     if (_write_file)
-      _file_output_stream << std::endl << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << std::scientific << _norm;
+      _file_output_stream << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << std::scientific << _norm << std::endl;
   }
 
   // Print Linear Residual
   else if (onLinearResidual())
   {
     if (_write_screen)
-      Moose::out  << std::endl << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm);
+      Moose::out << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
 
     if (_write_file)
-      _file_output_stream  << std::endl << std::setw(7) << _linear_iter << std::scientific << " Linear |R| = " << std::scientific << _norm;
+      _file_output_stream << std::setw(7) << _linear_iter << std::scientific << " Linear |R| = " << std::scientific << _norm << std::endl;
   }
 
   // Call the base class output function
@@ -506,7 +509,7 @@ Console::outputScalarVariables()
 }
 
 void
-Console::write(std::string message, bool err)
+Console::write(const std::string & message, bool err)
 {
   if ( (onInitial() && !shouldOutputInitial()) || !shouldOutputStep())
     return;
@@ -532,9 +535,9 @@ Console::outputSystemInformation()
 
   // Framework information
   if (_app.getSystemInfo() != NULL)
-    oss << std::endl << _app.getSystemInfo()->getInfo();
+    oss << _app.getSystemInfo()->getInfo();
 
-  oss << std::left
+  oss << std::left << '\n'
       << "Parallelism:\n"
       << std::setw(_field_width) << "  Num Processors: "       << static_cast<std::size_t>(n_processors()) << '\n'
       << std::setw(_field_width) << "  Num Threads: "         << static_cast<std::size_t>(n_threads()) << '\n'
@@ -669,7 +672,7 @@ Console::outputSystemInformation()
   if (time_stepper != "")
     oss << std::setw(_field_width) << "  TimeStepper: " << time_stepper << '\n';
 
-  oss << std::setw(_field_width) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(_problem_ptr->solverParams()._type);
+  oss << std::setw(_field_width) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(_problem_ptr->solverParams()._type) << "\n\n";
   oss.flush();
 
   // Output the information

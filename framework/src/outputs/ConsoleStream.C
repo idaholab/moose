@@ -15,13 +15,14 @@
 // Moose includes
 #include "ConsoleStream.h"
 
-ConsoleStreamHelper::ConsoleStreamHelper(const OutputWarehouse & output_warehouse) :
+ConsoleStream::ConsoleStream(const OutputWarehouse & output_warehouse) :
     _output_warehouse(output_warehouse)
 {
 }
 
-ConsoleStream::ConsoleStream(const OutputWarehouse & output_warehouse) :
-    _output_warehouse(output_warehouse),
-    _helper(_output_warehouse)
+ConsoleStream &
+ConsoleStream::operator<<(StandardEndLine manip)
 {
+  manip(std::cout);
+  return *this;
 }
