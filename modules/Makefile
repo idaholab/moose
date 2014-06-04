@@ -35,8 +35,7 @@ include            $(FRAMEWORK_DIR)/app.mk
 
 # This target will build the individual executables in each module
 # and run their respective tests.
-MODULE_DIRS_ALL    := $(shell find $(MOOSE_DIR)/modules -maxdepth 1 -mindepth 1 -type d)
-MODULE_DIRS        := $(filter-out %combined, $(MODULE_DIRS_ALL))
+MODULE_DIRS    := $(shell find $(MOOSE_DIR)/modules -maxdepth 1 -mindepth 1 -type d)
 MOOSE_COLOR        ?= true
 ifneq ($(MOOSE_COLOR),true)
   COLOR_STRING = '--no-color'
