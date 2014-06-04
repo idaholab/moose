@@ -49,6 +49,9 @@ protected:
   /// This callback is used for Kernels that need to perturb residual calculations
   virtual void precalculateResidual();
 
+  /// This callback is used for Kernels that need to perturb residual calculations after _local_re has been computed via computeQpResidual
+  virtual void postcalculateResidual();
+
   /// Holds the solution at current quadrature points
   VariableValue & _u;
 
