@@ -20,6 +20,7 @@
 #include "SolidMechanicsApp.h"
 #include "TensorMechanicsApp.h"
 #include "WaterSteamEOSApp.h"
+#include "PorousMediaApp.h"
 
 template<>
 InputParameters validParams<ModulesApp>()
@@ -68,6 +69,7 @@ ModulesApp::registerObjects(Factory & factory)
   SolidMechanicsApp::registerObjects(factory);
   TensorMechanicsApp::registerObjects(factory);
   WaterSteamEOSApp::registerObjects(factory);
+  PorousMediaApp::registerObjects(factory);
 }
 
 void
@@ -90,4 +92,5 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   SolidMechanicsApp::associateSyntax(syntax, action_factory);
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
   WaterSteamEOSApp::associateSyntax(syntax, action_factory);
+  PorousMediaApp::associateSyntax(syntax, action_factory);
 }

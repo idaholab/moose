@@ -10,25 +10,10 @@
   [../]
 []
 
-[AuxVariables]
-  [./aux]
-  [../]
-[]
-
 [Kernels]
   [./diff]
     type = Diffusion
     variable = u
-  [../]
-[]
-
-[AuxKernels]
-  [./boundary_aux]
-    type = CoupledAux
-    variable = aux
-    value = 2
-    coupled = u
-    boundary = top
   [../]
 []
 
@@ -48,9 +33,8 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Steady
-  solve_type = PJFNK
+  solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
