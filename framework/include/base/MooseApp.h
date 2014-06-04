@@ -232,7 +232,7 @@ public:
   virtual void executeExecutioner();
 
   /**
-   * Returns true if the user specifed --parallel-mesh on the command line and false
+   * Returns true if the user specified --parallel-mesh on the command line and false
    * otherwise.
    */
   bool getParallelMeshOnCommandLine() const { return _parallel_mesh_on_command_line; }
@@ -241,6 +241,11 @@ public:
    * Whether or not this is a "recover" calculation.
    */
   bool isRecovering() { return _recover; }
+
+  /**
+   * Whether or not this is a "recover" calculation.
+   */
+  bool isRestarting() { return _restart; }
 
   /**
    * Return true if the recovery file base is set
@@ -264,8 +269,7 @@ public:
 
   /**
    * Store a map of outputter names and file numbers
-   * The MultiApp system requires this to get the file numbering to propogate down through the
-   * multiapps.
+   * The MultiApp system requires this to get the file numbering to propagate down through the Multiapps.
    * @param numbers Map of outputter names and file numbers
    *
    * @see MultiApp TransientMultiApp OutputWarehouse
@@ -383,13 +387,16 @@ protected:
   /// Whether or not this is a recovery run
   bool _recover;
 
+  /// Whether or not this is a restart run
+  bool _restart;
+
   /// The base name to recover from.  If blank then we will find the newest recovery file.
   std::string _recover_base;
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
   bool _half_transient;
 
-  /// Map of outputer name and file number (used by MultiApps to propogate file numbers down through the multiapps)
+  /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;
 
   /// OutputWarehouse object for this App
@@ -397,6 +404,20 @@ protected:
 
   /// An alternate OutputWarehouse object (required for CoupledExecutioner)
   OutputWarehouse * _alternate_output_warehouse;
+
+private:
+
+  ///@{
+  /**
+   * Sets the restart/recover flags
+   * @param state The state to set the flag to
+   */
+  void setRestart(const bool & value){ _restart = value; }
+  void setRecover(const bool & value){ _recover = value; }
+  ///@}
+
+  // Allow FEProblem to set the recover/restart state, so make it a friend
+  friend class FEProblem;
 };
 
 #endif /* MOOSEAPP_H */

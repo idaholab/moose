@@ -117,7 +117,7 @@
   dt = 0.1
   reset_dt = true #NECESSARY to force a change in DT when using restart!
 
-  num_steps = 8
+  num_steps = 3
 []
 
 [Outputs]

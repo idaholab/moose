@@ -76,7 +76,7 @@ Checkpoint::filename()
          << std::setprecision(0)
          << std::setfill('0')
          << std::right
-         << _t_step;
+         << timeStep();
   return output.str();
 }
 
