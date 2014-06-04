@@ -334,9 +334,8 @@
 #include "SetupPredictorAction.h"
 #include "AddMortarInterfaceAction.h"
 #include "SetupPostprocessorDataAction.h"
-#include "PerfLogOutputAction.h"
 #include "MaterialOutputAction.h"
-#include "CheckMaterialOutputAction.h"
+#include "CheckOutputAction.h"
 
 // Outputs
 #include "Exodus.h"
@@ -751,9 +750,9 @@ addActionTypes(Syntax & syntax)
   registerTask("ready_to_init", true);
   registerTask("setup_pps_complete", false);
 
-  registerTask("perf_log_output", true);
+  // Output related actions
   registerTask("setup_material_output", true);
-  registerTask("check_material_output", true);
+  registerTask("check_output", true);
 
   /**************************/
   /****** Dependencies ******/
@@ -813,7 +812,7 @@ addActionTypes(Syntax & syntax)
 "(setup_pps_complete)"
 "(setup_debug)"
 "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, add_output)"
-"(perf_log_output, check_material_output)"
+"(check_output)"
 "(check_integrity)"
 );
 
@@ -868,14 +867,8 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(CommonOutputAction, "meta_action");
   registerAction(GlobalParamsAction, "set_global_params");
   registerAction(SetupPredictorAction, "setup_predictor");
-
-  /* The display of performance long is controlled by the Console outputter, if there is not one present
-     logging must be disable externally from the object, this action does this */
-  registerAction(PerfLogOutputAction, "perf_log_output");
-
-  // Enable automatic output of material properties
   registerAction(MaterialOutputAction, "setup_material_output");
-  registerAction(CheckMaterialOutputAction, "check_material_output");
+  registerAction(CheckOutputAction, "check_output");
 
   /// Variable/AuxVariable Actions
   registerAction(AddVariableAction, "add_variable");

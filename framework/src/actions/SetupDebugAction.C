@@ -19,6 +19,7 @@
 #include "Output.h"
 #include "MooseApp.h"
 #include "MooseObjectAction.h"
+#include "ActionFactory.h"
 
 template<>
 InputParameters validParams<SetupDebugAction>()
@@ -51,19 +52,21 @@ SetupDebugAction::~SetupDebugAction()
 void
 SetupDebugAction::act()
 {
-  // If the user desires residual debugging, create an action for creating the debug outputter
+  // Create DebugOutput object
   if (_pars.get<bool>("show_var_residual_norms"))
   {
     // Set the 'type =' parameters for the desired object
     _action_params.set<std::string>("type") = "DebugOutput";
 
     // Create the action
-    MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", "Outputs/moose_debug_output", _action_params));
+    MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", "Outputs/_moose_debug_output", _action_params));
+    action->getObjectParams().set<bool>("_built_by_moose") = true;
 
     // Add the action to the warehouse
     _awh.addActionBlock(action);
   }
 
+  // Enable MaterialProperty and top residual debugging
   if (_problem != NULL)
   {
     _problem->setDebugTopResiduals(_top_residuals);

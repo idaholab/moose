@@ -114,6 +114,7 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
     _timing(_app.getParam<bool>("timing"))
 {
+
   // If --timing was used from the command-line, do nothing, all logs are enabled
   if (!_timing)
   {

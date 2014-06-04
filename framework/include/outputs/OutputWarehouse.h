@@ -223,9 +223,10 @@ private:
    * Adds the file name to the list of filenames being output
    * The main function of this object is to test that the same output file
    * does not already exist to protect against output files overwriting each other
+   * @param ptr Pointer to the Output object
    * @param filename Name of an output file (extracted from filename() method of the objects)
    */
-  void addOutputFilename(OutFileBase filename);
+  void addOutputFilename(const OutFileBase & filename);
 
   /**
    * Calls the initialSetup function for each of the output objects
@@ -265,13 +266,10 @@ private:
   std::map<OutputName, Output *> _object_map;
 
   /// List of object names
-  std::set<OutFileBase> _filenames;
+  std::set<OutFileBase> _file_base_set;
 
   /// Pointer to the common InputParameters (@see CommonOutputAction)
   InputParameters * _common_params_ptr;
-
-  /// True if a Console output object is added to the warehouse, used to check for multiple screen outputs
-  bool _has_screen_console;
 
   /// Sync times for all objects
   std::set<Real> _sync_times;

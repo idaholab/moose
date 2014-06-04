@@ -42,7 +42,7 @@ InputParameters validParams<CommonOutputAction>()
 #ifdef LIBMESH_HAVE_NEMESIS_API
    params.addParam<bool>("nemesis", false, "Output the results using the default settings for Nemesis output");
 #endif
-   params.addParam<bool>("console", false, "Output the results using the default settings for Console output");
+   params.addParam<bool>("console", true, "Output the results using the default settings for Console output");
    params.addParam<bool>("csv", false, "Output the scalar variable and postprocessors to a *.csv file using the default CSV output.");
 #ifdef LIBMESH_HAVE_VTK
    params.addParam<bool>("vtk", false, "Output the results using the default settings for VTKOutput output");
@@ -100,8 +100,11 @@ CommonOutputAction::act()
     create("Nemesis");
 #endif
 
-  if (getParam<bool>("console"))
+  // Only create a Console if screen output was not created
+  if (getParam<bool>("console") && !hasConsole())
     create("Console");
+  else
+    _pars.set<bool>("console") = false;
 
   if (getParam<bool>("csv"))
     create("CSV");
@@ -146,7 +149,7 @@ CommonOutputAction::create(std::string object_type)
   // Set the 'type =' parameters for the desired object
   _action_params.set<std::string>("type") = object_type;
 
-  // Create the complete object name (use lower case for the object_name)
+  // Create the complete object name (use lower case of type()
   std::transform(object_type.begin(), object_type.end(), object_type.begin(), ::tolower);
   std::string long_name("Outputs/");
   long_name += object_type;
@@ -155,7 +158,7 @@ CommonOutputAction::create(std::string object_type)
   MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", long_name, _action_params));
 
   // Set flag indicating that the object to be created was created with short-cut syntax
-  action->getObjectParams().set<bool>("_short_cut") = true;
+  action->getObjectParams().set<bool>("_built_by_moose") = true;
 
   // Add the action to the warehouse
   _awh.addActionBlock(action);
@@ -339,4 +342,21 @@ CommonOutputAction::getRecoveryDirectory()
 
   // Return the directory
   return full_name;
+}
+
+bool
+CommonOutputAction::hasConsole()
+{
+
+  // Loop through all of the actions for adding output objects
+  for (ActionIterator it = _awh.actionBlocksWithActionBegin("add_output"); it != _awh.actionBlocksWithActionEnd("add_output"); it++)
+  {
+    MooseObjectAction * moa = static_cast<MooseObjectAction *>(*it);
+    const std::string & type = moa->getMooseObjectType();
+    InputParameters & params = moa->getObjectParams();
+    if (type.compare("Console") == 0 && params.get<bool>("output_screen"))
+      return true;
+  }
+
+  return false;
 }

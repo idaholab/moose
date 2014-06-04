@@ -12,45 +12,59 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PERFLOGOUTPUTACTION_H
-#define PERFLOGOUTPUTACTION_H
+#ifndef CHECKOUTPUTACTION_H
+#define CHECKOUTPUTACTION_H
 
 // MOOSE includes
 #include "Action.h"
 
 // Forward declerations
-class PerfLogOutputAction;
+class CheckOutputAction;
 
 template<>
-InputParameters validParams<PerfLogOutputAction>();
+InputParameters validParams<CheckOutputAction>();
 
 /**
- * In general the Console output object controls all aspects of toggling performance logging.
- * However, there are two scenarios where additional control is needed:
- *   (1) If there is no Console object the logging must be disabled
- *   (2) If --timing is used from the command-line all logs are enabled, overriding whatever
- *       the Console object(s) are doing
+ * Action for checking that "outputs" is properly populated for Materials
  */
-class PerfLogOutputAction : public Action
+class CheckOutputAction : public Action
 {
 public:
 
   /**
    * Class constructor
-   * @param name The action name
-   * @param params The action parameters
+   * @param name Name of this action
+   * @param params Input parameters for this object
    */
-  PerfLogOutputAction(const std::string & name, InputParameters params);
+  CheckOutputAction(const std::string & name, InputParameters params);
 
   /**
    * Class destructor
    */
-  virtual ~PerfLogOutputAction();
+  virtual ~CheckOutputAction();
 
   /**
-   * Set the appropriate state for the performance logs given the outputs and use of --timing
+   * Preforms a set of checks on various Output objects
    */
   virtual void act();
+
+private:
+
+  /**
+   * Preforms a set of checks on each of the Material objects that the "outputs" parameters has valid values
+   */
+  void checkMaterialOutput();
+
+  /**
+   * Performs Console Output object related checks
+   */
+  void checkConsoleOutput();
+
+  /**
+   * Performs PerfLog output settings
+   */
+  void checkPerfLogOutput();
+
 };
 
-#endif //PERFLOGOUTPUTACTION_H
+#endif //CHECKOUTPUTACTION_H

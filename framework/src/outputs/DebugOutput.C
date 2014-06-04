@@ -48,11 +48,12 @@ DebugOutput::DebugOutput(const std::string & name, InputParameters & parameters)
     _show_var_residual_norms(getParam<bool>("show_var_residual_norms")),
     _sys(_problem_ptr->getNonlinearSystem().sys())
 {
+
   // Force this outputter to output on nonlinear residuals
   _output_nonlinear = true;
 
   // Check the name of the object to see if was created by SetupDebugAction
-  if (name.compare("moose_debug_output") == 0)
+  if (name.compare("_moose_debug_output") == 0)
   {
     // Extract the SetupDebugAction object
     std::vector<Action *> actions = _app.actionWarehouse().getActionsByName("setup_debug");

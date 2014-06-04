@@ -48,8 +48,8 @@ AddOutputAction::act()
   // Get the output object name
   std::string object_name = getShortName();
 
-  // Reject the reserved names
-  if (output_warehouse.isReservedName(object_name))
+  // Reject the reserved names for objects not built by MOOSE
+  if (!_moose_object_pars.get<bool>("_built_by_moose") && output_warehouse.isReservedName(object_name))
     mooseError("The name '" << object_name << "' is a reserved name for output objects");
 
   // Check that an object by the same name does not already exist; this must be done before the object
