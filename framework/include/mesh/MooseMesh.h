@@ -286,6 +286,24 @@ public:
   const std::set<BoundaryID> & meshBoundaryIds() const;
 
   /**
+   * Returns a not-read-only reference to the set of subdomains currently
+   * present in the Mesh.
+   */
+  std::set<BoundaryID> & meshBoundaryIds();
+
+  /**
+   * Sets the mapping between BoundaryID and normal vector
+   * Is called by AddAllSideSetsByNormals
+   */
+  void setBoundaryToNormalMap(AutoPtr<std::map<BoundaryID, RealVectorValue> > boundary_map);
+
+  /**
+   * Sets the set of BoundaryIDs
+   * Is called by AddAllSideSetsByNormals
+   */
+  void setMeshBoundaryIDs(std::set<BoundaryID> boundary_IDs);
+
+  /**
    * Returns the normal vector associated with a given BoundaryID.
    * It's only valid to call this when AddAllSideSetsByNormals is active.
    */
@@ -735,9 +753,6 @@ protected:
    * In serial, this is equivalent to the values returned
    * by _mesh.boundary_info->get_boundary_ids().  In parallel,
    * it will contain off-processor boundary IDs as well.
-   *
-   * Note: This datastructure is directly accessed
-   * and modified by the friend "AddAllSideSetsByNormals".
    */
   std::set<BoundaryID> _mesh_boundary_ids;
 
@@ -898,8 +913,6 @@ private:
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
-
-  friend class AddAllSideSetsByNormals;
 };
 
 #endif /* MOOSEMESH_H */

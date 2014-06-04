@@ -1828,6 +1828,24 @@ MooseMesh::meshBoundaryIds() const
   return _mesh_boundary_ids;
 }
 
+std::set<BoundaryID> &
+MooseMesh::meshBoundaryIds()
+{
+  return _mesh_boundary_ids;
+}
+
+void
+MooseMesh::setMeshBoundaryIDs(std::set<BoundaryID> boundary_IDs)
+{
+  _mesh_boundary_ids = boundary_IDs;
+}
+
+void
+MooseMesh::setBoundaryToNormalMap(AutoPtr<std::map<BoundaryID, RealVectorValue> > boundary_map)
+{
+  _boundary_to_normal_map = boundary_map;
+}
+
 #ifdef LIBMESH_ENABLE_AMR
 unsigned int & MooseMesh::uniformRefineLevel()
 {
