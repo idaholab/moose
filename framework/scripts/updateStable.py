@@ -35,6 +35,12 @@ def buildStatus():
   for app_dir in os.listdir('.'):
     if os.path.exists(os.path.join(os.getcwd(), app_dir, 'run_tests')):
       tmp_apps.append(app_dir)
+
+  # Now get any applications inside the moose directory (modules, test, unit)
+  for app_dir in os.listdir('moose'):
+    if os.path.exists(os.path.join(os.getcwd(), 'moose', app_dir, 'run_tests')):
+      tmp_apps.append(app_dir)
+
   # Return boolean if all application tests passed
   if len(((set(tmp_apps) - excluded_applications) - set(tmp_passed))) != 0:
     print 'Failing tests:', string.join(((set(tmp_apps) - excluded_applications) - set(tmp_passed)))
