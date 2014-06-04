@@ -153,10 +153,8 @@ DiracKernel::addPoint(Point p, unsigned id)
         if (cached_elem->processor_id() != processor_id())
         {
           // Update the caches, telling them to drop the cached Elem.
-          // We are temporarily returning NULL because it seems to
-          // work, but we should probably find the actual Element and
-          // return that for consistency with the rest of the
-          // interface...
+          // Analogously to the rest of the DiracKernel system, we
+          // also return NULL because the Elem is non-local.
           updateCaches(cached_elem, NULL, p, id);
           return NULL;
         }
