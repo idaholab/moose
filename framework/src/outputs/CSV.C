@@ -15,6 +15,7 @@
 // Moose includes
 #include "CSV.h"
 #include "FEProblem.h"
+#include "MooseApp.h"
 
 template<>
 InputParameters validParams<CSV>()
@@ -49,7 +50,7 @@ CSV::~CSV()
 void
 CSV::initialSetup()
 {
-  if (_problem_ptr->isRestarting() && !getParam<bool>("append_restart"))
+  if (_app.isRestarting() && !getParam<bool>("append_restart"))
     _all_data_table.clear();
 
   // Set the delimiter
@@ -88,7 +89,7 @@ CSV::output()
            << std::setprecision(0)
            << std::setfill('0')
            << std::right
-           << _t_step;
+           << timeStep();
 
     output << ".csv";
 

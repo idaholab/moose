@@ -44,7 +44,7 @@ FileOutput::FileOutput(const std::string & name, InputParameters & parameters) :
     _output_file(true)
 {
   // If restarting reset the file number
-  if (_problem_ptr->isRestarting())
+  if (_app.isRestarting())
     _file_num = 0;
 
   // Set the file base, if it has not been set already

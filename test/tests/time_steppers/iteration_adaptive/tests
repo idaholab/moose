@@ -19,8 +19,10 @@
   [./test_grow_init_dt_restart2]
     type = 'Exodiff'
     input = 'adapt_tstep_grow_init_dt_restart2.i'
-    exodiff = 'adapt_tstep_grow_init_dt_out.e'
-    exodiff_opts = -TM
+    exodiff = 'adapt_tstep_grow_init_dt_restart2_out.e'
+    #exodiff_opts = -TM
+    exodiff_opts = -steps last
+
     prereq = 'test_grow_init_dt test_grow_init_dt_restart1'
   [../]
 
@@ -38,7 +40,7 @@
   [./test_grow_dtfunc_restart2]
     type = 'Exodiff'
     input = 'adapt_tstep_grow_dtfunc_restart2.i'
-    exodiff = 'adapt_tstep_grow_dtfunc_out.e'
+    exodiff = 'adapt_tstep_grow_dtfunc_restart2_out.e'
     exodiff_opts = -TM
     prereq = 'test_grow_dtfunc test_grow_dtfunc_restart1'
   [../]

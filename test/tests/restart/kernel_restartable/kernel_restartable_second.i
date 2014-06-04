@@ -41,7 +41,7 @@
   # Preconditioned JFNK (default)
   type = Transient
   restart_file_base = kernel_restartable_out_cp/0005
-  num_steps = 10
+  num_steps = 5
   dt = 1e-2
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'

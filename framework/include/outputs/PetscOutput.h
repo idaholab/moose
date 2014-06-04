@@ -61,7 +61,7 @@ public:
    * by PETSc. To separate theses outputs within the output a pseudo time is defined, this function provides
    * this time and it should be used in place of _time from Outputter.
    */
-  Real time();
+  virtual Real time();
 
 protected:
 

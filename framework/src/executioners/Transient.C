@@ -91,7 +91,7 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     _dt_old(_problem.dtOld()),
     _unconstrained_dt(declareRestartableData<Real>("unconstrained_dt", -1)),
     _at_sync_point(declareRestartableData<bool>("at_sync_point", false)),
-    _first(declareRestartableData<bool>("first", true)),
+    _first(declareRecoverableData<bool>("first", true)),
     _last_solve_converged(declareRestartableData<bool>("last_solve_converged", true)),
     _end_time(getParam<Real>("end_time")),
     _dtmin(getParam<Real>("dtmin")),
@@ -187,6 +187,9 @@ Transient::init()
   _problem.initialSetup();
   _time_stepper->init();
 
+  if (_app.isRestarting())
+    _time_old = _time;
+
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
   _output_warehouse.outputInitial();
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
@@ -195,16 +198,18 @@ Transient::init()
   if (_t_step == 0)
     _t_step = 1;
 
-  if (_t_step > 1) //Restart case
-  {
+
+  if (_t_step > 1) //Recover case
     _dt_old = _dt;
-  }
+
   else
   {
     computeDT();
 //  _dt = computeConstrainedDT();
     _dt = getDT();
   }
+
+
 }
 
 void
@@ -274,6 +279,7 @@ Transient::incrementStepOrReject()
   }
 
   _first = false;
+
 }
 
 void
@@ -362,9 +368,7 @@ Transient::solveStep(Real input_dt)
 #if 0
     // User definable callback
     if (_estimate_error)
-    {
       estimateTimeError();
-    }
 #endif
 
     _problem.onTimestepEnd();
@@ -384,8 +388,6 @@ Transient::solveStep(Real input_dt)
 
   postSolve();
   _time_stepper->postSolve();
-
-  // Reset time in case we solve again
   _dt = current_dt; // _dt might be smaller than this at this point for multistep methods
   _time = _time_old;
 }
@@ -443,9 +445,8 @@ Transient::computeConstrainedDT()
 
   //After startup steps, compute new dt
   if (_t_step > _n_startup_steps)
-  {
     dt_cur = getDT();
-  }
+
   else
   {
     diag << "Timestep < n_startup_steps, using old dt: "

@@ -242,7 +242,7 @@ Console::timestepSetup()
   // Do nothing if output is turned off
   // Do nothing if the problem is steady or if it is not an output interval
   // Do nothing if output_initial = false and the timestep is zero
-  if (!_allow_output || !checkInterval() || (!_output_initial && _t_step == 0))
+  if (!_allow_output || !checkInterval() || (!_output_initial && timeStep() == 0))
     return;
 
   // Stream to build the time step information
@@ -253,13 +253,13 @@ Console::timestepSetup()
   {
     // Get the length of the time step string
     std::ostringstream time_step_string;
-    time_step_string << _t_step;
+    time_step_string << timeStep();
     unsigned int n = time_step_string.str().size();
     if (n < 2)
       n = 2;
 
     // Write time step and time information
-    oss << std::endl <<  "Time Step " << std::setw(n) << _t_step;
+    oss << std::endl <<  "Time Step " << std::setw(n) << timeStep();
 
     // Set precision
     if (_precision > 0)
@@ -270,14 +270,14 @@ Console::timestepSetup()
       oss << std::scientific;
 
     // Print the time
-    oss << ", time = " << _time << std::endl;
+    oss << ", time = " << time() << std::endl;
 
     // Show old time information, if desired
     if (_verbose)
-      oss << "          old time = " << std::left << _time_old << std::endl;
+      oss << "          old time = " << std::left << timeOld() << std::endl;
 
     // Show the time delta information
-    oss  << "                dt = "<< std::left <<  _dt << std::endl;
+    oss  << "                dt = "<< std::left << dt() << std::endl;
 
     // Show the old time delta information, if desired
     if (_verbose)

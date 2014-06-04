@@ -189,5 +189,5 @@ PetscOutput::time()
   else if (_on_linear_residual)
     return _linear_time;
   else
-    return _time;
+    return Output::time();
 }
