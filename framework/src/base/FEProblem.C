@@ -2701,15 +2701,15 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 
   if (multi_apps.size())
   {
-    _console << " Executing MultiApps" << std::endl;
+    _console << "--Executing MultiApps--" << std::endl;
 
     for (unsigned int i=0; i<multi_apps.size(); i++)
       multi_apps[i]->solveStep(_dt, _time, auto_advance);
 
-    _console << "  Waiting for other processors to finish..." << std::endl;
+    _console << "--Waiting For Other Processors To Finish--" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _console << " Finished Executing MultiApps" << std::endl;
+    _console << "--Finished Executing MultiApps--" << std::endl;
   }
 
   // Execute Transfers _from_ MultiApps
@@ -2717,14 +2717,14 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     std::vector<Transfer *> transfers = _from_multi_app_transfers(type)[0].all();
     if (transfers.size())
     {
-      _console << " MultiApp Transfers" << std::endl;
+      _console << "--Starting Transfers From MultiApps--" << std::endl;
       for (unsigned int i=0; i<transfers.size(); i++)
         transfers[i]->execute();
 
-      _console << "  Waiting for transfers to finish..." << std::endl;
+      _console << "--Waiting For Transfers To Finish--" << std::endl;
       MooseUtils::parallelBarrierNotify(_communicator);
 
-      _console << " Transfers Finished" << std::endl;
+      _console << "--Transfers To Finished--" << std::endl;
     }
   }
 }
@@ -2736,16 +2736,15 @@ FEProblem::advanceMultiApps(ExecFlagType type)
 
   if (multi_apps.size())
   {
-    _console << " Advancing MultiApps" << std::endl;
+    _console << "--Advancing MultiApps--" << std::endl;
 
     for (unsigned int i=0; i<multi_apps.size(); i++)
       multi_apps[i]->advanceStep();
 
-    _console << "  Waiting for other processors to finish..." << std::endl;
-
+    _console << "--Waiting For Other Processors To Finish--" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _console << " Finished Advancing MultiApps" << std::endl;
+    _console << "--Finished Advancing MultiApps--" << std::endl;
   }
 }
 
@@ -2946,7 +2945,7 @@ void
 FEProblem::useFECache(bool fe_cache)
 {
   if (fe_cache)
-    Moose::out << "\nUtilizing FE Shape Function Caching\n" << std::endl;
+    _console << "\nUtilizing FE Shape Function Caching\n" << std::endl;
 
   unsigned int n_threads = libMesh::n_threads();
 
@@ -3515,18 +3514,18 @@ FEProblem::checkProblemIntegrity()
 #ifdef LIBMESH_ENABLE_AMR
     if (_material_props.hasStatefulProperties() && _adaptivity.isOn())
     {
-      Moose::out << "Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!\n";
+      _console << "Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!\n";
 
       if (n_processors() > 1)
       {
-        Moose::out << "\nWarning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imbalances and degraded performance!!\n\n";
+        _console << "\nWarning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imbalances and degraded performance!!\n\n";
         _mesh.getMesh().skip_partitioning(true);
         if (_displaced_problem)
           _displaced_problem->mesh().getMesh().skip_partitioning(true);
       }
 
       // flush buffer
-      Moose::out.flush();
+      _console.flush();
     }
 #endif
 

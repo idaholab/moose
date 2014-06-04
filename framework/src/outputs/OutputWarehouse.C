@@ -196,11 +196,6 @@ OutputWarehouse::mooseConsole(const std::string & message, bool err) const
   for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)
     (*it)->write(message, err);
 }
-void
-OutputWarehouse::mooseConsole(const std::ostringstream & message, bool err) const
-{
-  mooseConsole(message.str(), err);
-}
 
 void
 OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset)

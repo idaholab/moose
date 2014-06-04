@@ -26,3 +26,9 @@ ConsoleStream::operator<<(StandardEndLine manip)
   manip(std::cout);
   return *this;
 }
+
+void
+ConsoleStream::flush()
+{
+  _oss.flush();
+}

@@ -52,7 +52,7 @@ public:
    * @param s The data to be output to the Console objects
    *
    * This allows any MooseObject to uses _console to write to the Console:
-   *   _console << "The combination to the air lock is " << 12345;
+   *   _console << "The combination to the air lock is " << 12345 << std::endl;
    */
   template<typename T>
   ConsoleStream & operator<<(T s);
@@ -62,25 +62,30 @@ public:
    */
   ConsoleStream & operator<<(StandardEndLine manip);
 
+  /**
+   * Flush the stream
+   */
+  void flush();
 
 private:
 
   /// Reference to the OutputWarhouse that contains the Console output objects
   const OutputWarehouse & _output_warehouse;
 
-  std::ostringstream oss;
+  /// Stream for storing console output messages
+  std::ostringstream _oss;
 };
 
 template<typename T>
 ConsoleStream &
 ConsoleStream::operator<<(T s)
 {
-  oss << s;
-  _output_warehouse.mooseConsole(oss.str());
+  _oss << s;
+  _output_warehouse.mooseConsole(_oss.str());
 
   // Reset
-  oss.clear();
-  oss.str("");
+  _oss.clear();
+  _oss.str("");
 
   return *this;
 }

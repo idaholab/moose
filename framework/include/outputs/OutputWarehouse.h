@@ -215,7 +215,6 @@ public:
    * @param err A flag for outputing to Moose::err instead of Moose::out
    */
   void mooseConsole(const std::string & message, bool err = false) const;
-  void mooseConsole(const std::ostringstream & message, bool err = false) const;
   ///@}
 
 private:
