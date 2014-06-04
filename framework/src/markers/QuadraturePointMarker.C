@@ -12,12 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ValueThresholdMarker.h"
+#include "QuadraturePointMarker.h"
 #include "FEProblem.h"
 #include "MooseEnum.h"
 
 template<>
-InputParameters validParams<ValueThresholdMarker>()
+InputParameters validParams<QuadraturePointMarker>()
 {
   InputParameters params = validParams<Marker>();
 
@@ -26,50 +26,34 @@ InputParameters validParams<ValueThresholdMarker>()
   params.addParam<Real>("coarsen", "The threshold value for coarsening.  Elements with variable values beyond this will be marked for coarsening.");
   params.addParam<Real>("refine", "The threshold value for refinement.  Elements with variable values beyond this will be marked for refinement.");
   params.addParam<bool>("invert", false, "If this is true then values _below_ 'refine' will be refined and _above_ 'coarsen' will be coarsened.");
-  params.addRequiredCoupledVar("variable", "The values of this variable will be compared to 'refine' and 'coarsen' to see what should be done with the element");
+  params.addRequiredParam<VariableName>("variable", "The values of this variable will be compared to 'refine' and 'coarsen' to see what should be done with the element");
   return params;
 }
 
 
-ValueThresholdMarker::ValueThresholdMarker(const std::string & name, InputParameters parameters) :
-    QuadraturePointMarker(name, parameters),
-    _coarsen_set(parameters.isParamValid("coarsen")),
-    _coarsen(parameters.get<Real>("coarsen")),
-    _refine_set(parameters.isParamValid("refine")),
-    _refine(parameters.get<Real>("refine")),
-
-    _invert(parameters.get<bool>("invert")),
-    _third_state((MarkerValue)(int)getParam<MooseEnum>("third_state")),
-
-    _u(coupledValue("variable"))
+QuadraturePointMarker::QuadraturePointMarker(const std::string & name, InputParameters parameters) :
+    Marker(name, parameters),
+    Coupleable(parameters, false),
+    MaterialPropertyInterface(parameters),
+    _qrule(_assembly.qRule()),
+    _qp(0)
 {
-  if (_refine_set && _coarsen_set)
-  {
-    Real diff = _refine - _coarsen;
-    if ((diff > 0 && _invert) || (diff < 0 && !_invert))
-      mooseError("Invalid combination of refine, coarsen, and invert values specified");
-  }
+  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  for (unsigned int i=0; i<coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
 }
 
 Marker::MarkerValue
-ValueThresholdMarker::computeQpMarker()
+QuadraturePointMarker::computeElementMarker()
 {
-  if (!_invert)
-  {
-    if (_refine_set && _u[_qp] > _refine)
-      return REFINE;
+  MarkerValue current_mark = DONT_MARK;
 
-    if (_coarsen_set && _u[_qp] < _coarsen)
-      return COARSEN;
-  }
-  else
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    if (_refine_set && _u[_qp] < _refine)
-      return REFINE;
+    MarkerValue new_mark = computeQpMarker();
 
-    if (_coarsen_set && _u[_qp] > _coarsen)
-      return COARSEN;
+    current_mark = std::max(current_mark, new_mark);
   }
 
-  return _third_state;
+  return current_mark;
 }
