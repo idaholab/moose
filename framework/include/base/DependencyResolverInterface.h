@@ -56,7 +56,7 @@ public:
     }
 
     // Sort based on dependencies
-    std::sort(start, end, resolver);
+    std::stable_sort(start, end, resolver);
   }
 };
 
