@@ -120,42 +120,8 @@ BasicDistribution::hasParameter(std::string s)
   return _dis_parameters.find(s) != _dis_parameters.end();
 }
 
-double getDistributionVariable(BasicDistribution & dist,const std::string & variableName){
-  return dist.getVariable(variableName);
-}
-
-void DistributionUpdateVariable(BasicDistribution & dist,const std::string & variableName, double newValue){
-  dist.updateVariable(variableName, newValue);
-}
-
-double DistributionPdf(BasicDistribution & dist, double x){
-  return dist.Pdf(x);
-}
-
-double DistributionCdf(BasicDistribution & dist, double x){
-  return dist.Cdf(x);
-}
-
 double BasicDistribution::windowProcessing(double RNG){
         double value;
-
-//	if (dist.getVariableVector(std::string("PBwindow")).size()==1) // value Pb window
-//		value=dist.InverseCdf(RNG);
-//	else if(dist.getVariableVector(std::string("PBwindow")).size()==2){	// interval Pb window
-//		double pbLOW = dist.getVariableVector(std::string("PBwindow"))[0];
-//		double pbUP  = dist.getVariableVector(std::string("PBwindow"))[1];
-//		double pb=pbLOW+(pbUP-pbLOW)*RNG;
-//		value=dist.InverseCdf(pb);
-//	}
-//	else if(dist.getVariableVector(std::string("Vwindow")).size()==1)	// value V window
-//		value=RNG;
-//	else if(dist.getVariableVector(std::string("Vwindow")).size()==2){	// interval V window
-//		double valLOW = dist.getVariableVector(std::string("Vwindow"))[0];
-//		double valUP  = dist.getVariableVector(std::string("Vwindow"))[1];
-//		value=valLOW+(valUP-valLOW)*RNG;
-//	}
-//	else	// DEFAULT
-//		value = dist.InverseCdf(RNG);
 
    if(getVariable(std::string("PB_window_Low")) != 0.0 || getVariable(std::string("PB_window_Up")) != 1.0){	// interval Pb window
                 double pbLOW = getVariable(std::string("PB_window_Low"));
@@ -174,33 +140,4 @@ double BasicDistribution::windowProcessing(double RNG){
                 value = InverseCdf(RNG);
 
         return value;
-}
-
-double DistributionInverseCdf(BasicDistribution & dist, double x){
-  return dist.InverseCdf(x);
-  //double windowedRNG = windowProcessing(dist, x);
-
-  //return windowedRNG;
-}
-
-double untrDistributionPdf(BasicDistribution & dist, double & x){
-  return dist.untrPdf(x);
-}
-
-double untrDistributionCdf(BasicDistribution & dist, double & x){
-  return dist.untrCdf(x);
-}
-
-double untrDistributionInverseCdf(BasicDistribution & dist, double & x){
-  return dist.untrInverseCdf(x);
-}
-
-std::string getDistributionType(BasicDistribution & dist) {
-  return dist.getType();
-}
-
-std::vector<std::string>
-getDistributionVariableNames(BasicDistribution & dist)
-{
-  return dist.getVariableNames();
 }
