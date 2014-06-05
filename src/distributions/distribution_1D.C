@@ -59,14 +59,14 @@ public:
 double
 BasicTruncatedDistribution::Pdf(double x){
   double value;
-  double xMin = _dis_parameters.find("xMin") ->second;
-  double xMax = _dis_parameters.find("xMax") ->second;
+  double x_min = _dist_parameters.find("xMin") ->second;
+  double x_max = _dist_parameters.find("xMax") ->second;
 
-  if (_dis_parameters.find("truncation") ->second == 1) {
-    if ((x<xMin)||(x>xMax)) {
+  if (_dist_parameters.find("truncation") ->second == 1) {
+    if ((x<x_min)||(x>x_max)) {
       value=0;
     } else {
-      value = 1/(untrCdf(xMax) - untrCdf(xMin)) * untrPdf(x);
+      value = 1/(untrCdf(x_max) - untrCdf(x_min)) * untrPdf(x);
     }
   } else {
     value=-1;
@@ -78,16 +78,16 @@ BasicTruncatedDistribution::Pdf(double x){
 double
 BasicTruncatedDistribution::Cdf(double x){
   double value;
-  double xMin = _dis_parameters.find("xMin") ->second;
-  double xMax = _dis_parameters.find("xMax") ->second;
+  double x_min = _dist_parameters.find("xMin") ->second;
+  double x_max = _dist_parameters.find("xMax") ->second;
 
-  if (_dis_parameters.find("truncation") ->second == 1) {
-    if (x<xMin) {
+  if (_dist_parameters.find("truncation") ->second == 1) {
+    if (x<x_min) {
       value=0;
-    } else if (x>xMax) {
+    } else if (x>x_max) {
       value=1;
     } else{
-      value = 1/(untrCdf(xMax) - untrCdf(xMin)) * (untrCdf(x)- untrCdf(xMin));
+      value = 1/(untrCdf(x_max) - untrCdf(x_min)) * (untrCdf(x)- untrCdf(x_min));
     }
   } else {
     value=-1;
@@ -99,22 +99,22 @@ BasicTruncatedDistribution::Cdf(double x){
 double
 BasicTruncatedDistribution::InverseCdf(double x){
   double value;
-  double xMin = _dis_parameters.find("xMin") ->second;
-  double xMax = _dis_parameters.find("xMax") ->second;
+  double x_min = _dist_parameters.find("xMin") ->second;
+  double x_max = _dist_parameters.find("xMax") ->second;
   if(x == 0.0) {
     //Using == in floats is generally a bad idea, but
     // 0.0 can be represented exactly.
     //In this case, return the minimum value
-    return xMin;
+    return x_min;
   }
   if(x == 1.0) {
     //Using == in floats is generally a bad idea, but
     // 1.0 can be represented exactly.
     //In this case, return the maximum value
-    return xMax;
+    return x_max;
   }
-  if (_dis_parameters.find("truncation") ->second == 1){
-    double temp=untrCdf(xMin)+x*(untrCdf(xMax)-untrCdf(xMin));
+  if (_dist_parameters.find("truncation") ->second == 1){
+    double temp=untrCdf(x_min)+x*(untrCdf(x_max)-untrCdf(x_min));
     value=untrInverseCdf(temp);
   } else {
     value=-1;
@@ -234,8 +234,8 @@ protected:
 
 class UniformDistributionBackend : public DistributionBackendTemplate<boost::math::uniform> {
 public:
-  UniformDistributionBackend(double xMin, double xMax) {
-    _backend = new boost::math::uniform(xMin,xMax);
+  UniformDistributionBackend(double x_min, double x_max) {
+    _backend = new boost::math::uniform(x_min,x_max);
   }
   ~UniformDistributionBackend() {
     delete _backend;
@@ -243,13 +243,13 @@ public:
 };
 
 
-BasicUniformDistribution::BasicUniformDistribution(double xMin, double xMax)
+BasicUniformDistribution::BasicUniformDistribution(double x_min, double x_max)
 {
-  _dis_parameters["xMin"] = xMin;
-  _dis_parameters["xMax"] = xMax;
-  _backend = new UniformDistributionBackend(xMin, xMax);
+  _dist_parameters["xMin"] = x_min;
+  _dist_parameters["xMax"] = x_max;
+  _backend = new UniformDistributionBackend(x_min, x_max);
 
-  if (xMin>xMax)
+  if (x_min>x_max)
     throwError("ERROR: bounds for uniform distribution are incorrect");
 }
 
@@ -288,36 +288,36 @@ public:
  */
 
 BasicNormalDistribution::BasicNormalDistribution(double mu, double sigma) {
-  _dis_parameters["mu"] = mu; //mean
-  _dis_parameters["sigma"] = sigma; //sd
+  _dist_parameters["mu"] = mu; //mean
+  _dist_parameters["sigma"] = sigma; //sd
   if(not hasParameter("truncation")) {
-    _dis_parameters["truncation"] = 1.0;
+    _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dis_parameters["xMin"] = -std::numeric_limits<double>::max( );
+    _dist_parameters["xMin"] = -std::numeric_limits<double>::max( );
   }
   if(not hasParameter("xMax")) {
-    _dis_parameters["xMax"] = std::numeric_limits<double>::max( );
+    _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
   }
   //std::cout << "mu " << mu << " sigma " << sigma
-  //          << " truncation " << _dis_parameters["truncation"]
-  //          << " xMin " << _dis_parameters["xMin"]
-  //          << " xMax " << _dis_parameters["xMax"] << std::endl;
+  //          << " truncation " << _dist_parameters["truncation"]
+  //          << " xMin " << _dist_parameters["xMin"]
+  //          << " xMax " << _dist_parameters["xMax"] << std::endl;
   _backend = new NormalDistributionBackend(mu, sigma);
 }
 
-BasicNormalDistribution::BasicNormalDistribution(double mu, double sigma, double xMin, double xMax) {
-  _dis_parameters["mu"] = mu; //mean
-  _dis_parameters["sigma"] = sigma; //sd
+BasicNormalDistribution::BasicNormalDistribution(double mu, double sigma, double x_min, double x_max) {
+  _dist_parameters["mu"] = mu; //mean
+  _dist_parameters["sigma"] = sigma; //sd
   if(not hasParameter("truncation")) {
-    _dis_parameters["truncation"] = 1.0;
+    _dist_parameters["truncation"] = 1.0;
   }
-  _dis_parameters["xMin"] = xMin;
-  _dis_parameters["xMax"] = xMax;
+  _dist_parameters["xMin"] = x_min;
+  _dist_parameters["xMax"] = x_max;
   //std::cout << "mu " << mu << " sigma " << sigma
-  //          << " truncation " << _dis_parameters["truncation"]
-  //          << " xMin " << _dis_parameters["xMin"]
-  //          << " xMax " << _dis_parameters["xMax"] << std::endl;
+  //          << " truncation " << _dist_parameters["truncation"]
+  //          << " xMin " << _dist_parameters["xMin"]
+  //          << " xMax " << _dist_parameters["xMax"] << std::endl;
   _backend = new NormalDistributionBackend(mu, sigma);
 
 }
@@ -350,17 +350,17 @@ public:
 
 BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma)
 {
-  _dis_parameters["mu"] = mu;
-  _dis_parameters["sigma"] = sigma;
+  _dist_parameters["mu"] = mu;
+  _dist_parameters["sigma"] = sigma;
 
   if(not hasParameter("truncation")) {
-    _dis_parameters["truncation"] = 1.0;
+    _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dis_parameters["xMin"] = 0.0;
+    _dist_parameters["xMin"] = 0.0;
   }
   if(not hasParameter("xMax")) {
-    _dis_parameters["xMax"] = std::numeric_limits<double>::max( );
+    _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
   }
 
   if (mu<0)
@@ -409,17 +409,17 @@ public:
 
 BasicLogisticDistribution::BasicLogisticDistribution(double location, double scale)
 {
-  _dis_parameters["location"] = location;
-  _dis_parameters["scale"] = scale;
+  _dist_parameters["location"] = location;
+  _dist_parameters["scale"] = scale;
 
   if(not hasParameter("truncation")) {
-    _dis_parameters["truncation"] = 1.0;
+    _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dis_parameters["xMin"] = -std::numeric_limits<double>::max( );
+    _dist_parameters["xMin"] = -std::numeric_limits<double>::max( );
   }
   if(not hasParameter("xMax")) {
-    _dis_parameters["xMax"] = std::numeric_limits<double>::max( );
+    _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
   }
 
   _backend = new LogisticDistributionBackend(location, scale);
@@ -447,30 +447,30 @@ public:
 };
 
 
-BasicTriangularDistribution::BasicTriangularDistribution(double xPeak, double lowerBound, double upperBound)
+BasicTriangularDistribution::BasicTriangularDistribution(double x_peak, double lower_bound, double upper_bound)
 {
-  _dis_parameters["xPeak"] = xPeak;
-  _dis_parameters["lowerBound"] = lowerBound;
-  _dis_parameters["upperBound"] = upperBound;
+  _dist_parameters["xPeak"] = x_peak;
+  _dist_parameters["lowerBound"] = lower_bound;
+  _dist_parameters["upperBound"] = upper_bound;
 
   if(not hasParameter("truncation")) {
-    _dis_parameters["truncation"] = 1.0;
+    _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dis_parameters["xMin"] = lowerBound;
+    _dist_parameters["xMin"] = lower_bound;
   }
   if(not hasParameter("xMax")) {
-    _dis_parameters["xMax"] = upperBound;
+    _dist_parameters["xMax"] = upper_bound;
   }
 
 
-  if (upperBound < lowerBound)
+  if (upper_bound < lower_bound)
     throwError("ERROR: bounds for triangular distribution are incorrect");
-  if (upperBound < _dis_parameters.find("xMin") ->second)
+  if (upper_bound < _dist_parameters.find("xMin") ->second)
     throwError("ERROR: bounds and LB/UB are inconsistent for triangular distribution");
-  if (lowerBound > _dis_parameters.find("xMax") ->second)
+  if (lower_bound > _dist_parameters.find("xMax") ->second)
     throwError("ERROR: bounds and LB/UB are inconsistent for triangular distribution");
-  _backend = new TriangularDistributionBackend(lowerBound, xPeak, upperBound);
+  _backend = new TriangularDistributionBackend(lower_bound, x_peak, upper_bound);
 
 }
 BasicTriangularDistribution::~BasicTriangularDistribution()
@@ -497,16 +497,16 @@ public:
 
 BasicExponentialDistribution::BasicExponentialDistribution(double lambda)
 {
-  _dis_parameters["lambda"] = lambda;
+  _dist_parameters["lambda"] = lambda;
 
   if(not hasParameter("truncation")) {
-    _dis_parameters["truncation"] = 1.0;
+    _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dis_parameters["xMin"] = 0.0;
+    _dist_parameters["xMin"] = 0.0;
   }
   if(not hasParameter("xMax")) {
-    _dis_parameters["xMax"] = std::numeric_limits<double>::max( );
+    _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
   }
 
 
@@ -549,17 +549,17 @@ public:
 
 BasicWeibullDistribution::BasicWeibullDistribution(double k, double lambda)
 {
-  _dis_parameters["k"] = k; //shape
-  _dis_parameters["lambda"] = lambda; //scale
+  _dist_parameters["k"] = k; //shape
+  _dist_parameters["lambda"] = lambda; //scale
 
   if(not hasParameter("truncation")) {
-    _dis_parameters["truncation"] = 1.0;
+    _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dis_parameters["xMin"] = 0.0;
+    _dist_parameters["xMin"] = 0.0;
   }
   if(not hasParameter("xMax")) {
-    _dis_parameters["xMax"] = std::numeric_limits<double>::max( );
+    _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
   }
 
   if ((lambda<0) || (k<0))
@@ -601,19 +601,19 @@ public:
 
 BasicGammaDistribution::BasicGammaDistribution(double k, double theta, double low)
 {
-  _dis_parameters["k"] = k; //shape
-  _dis_parameters["theta"] = theta; //scale
-  _dis_parameters["low"] = low; //low value shift. 0.0 would be a regular gamma
+  _dist_parameters["k"] = k; //shape
+  _dist_parameters["theta"] = theta; //scale
+  _dist_parameters["low"] = low; //low value shift. 0.0 would be a regular gamma
   // distribution
 
   if(not hasParameter("truncation")) {
-    _dis_parameters["truncation"] = 1.0;
+    _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dis_parameters["xMin"] = low;
+    _dist_parameters["xMin"] = low;
   }
   if(not hasParameter("xMax")) {
-    _dis_parameters["xMax"] = std::numeric_limits<double>::max( );
+    _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
   }
 
 
@@ -631,7 +631,7 @@ BasicGammaDistribution::~BasicGammaDistribution()
 
 double
 BasicGammaDistribution::untrCdf(double x){
-  double low = _dis_parameters.find("low") ->second;
+  double low = _dist_parameters.find("low") ->second;
   if(x > 1.0e100) {
     return 1.0;
   } else if(x >= low) {
@@ -644,13 +644,13 @@ BasicGammaDistribution::untrCdf(double x){
 
 double
 BasicGammaDistribution::untrPdf(double x){
-  double low = _dis_parameters.find("low") ->second;
+  double low = _dist_parameters.find("low") ->second;
   return BasicTruncatedDistribution::untrPdf(x - low);
 }
 
 double
 BasicGammaDistribution::untrInverseCdf(double x){
-  double low = _dis_parameters.find("low") ->second;
+  double low = _dist_parameters.find("low") ->second;
   return BasicTruncatedDistribution::untrInverseCdf(x) + low;
 }
 
@@ -672,18 +672,18 @@ public:
 
 BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double scale)
 {
-  _dis_parameters["alpha"] = alpha;
-  _dis_parameters["beta"] = beta;
-  _dis_parameters["scale"] = scale;
+  _dist_parameters["alpha"] = alpha;
+  _dist_parameters["beta"] = beta;
+  _dist_parameters["scale"] = scale;
 
   if(not hasParameter("truncation")) {
-    _dis_parameters["truncation"] = 1.0;
+    _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dis_parameters["xMin"] = 0.0;
+    _dist_parameters["xMin"] = 0.0;
   }
   if(not hasParameter("xMax")) {
-    _dis_parameters["xMax"] = std::numeric_limits<double>::max( );
+    _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
   }
 
   if ((alpha<0) || (beta<0))
@@ -710,19 +710,19 @@ BasicBetaDistribution::untrCdf(double x){
 
 double
 BasicBetaDistribution::Pdf(double x){
-  double scale = _dis_parameters.find("scale") ->second;
+  double scale = _dist_parameters.find("scale") ->second;
   return BasicTruncatedDistribution::Pdf(x/scale)/scale;
 }
 
 double
 BasicBetaDistribution::Cdf(double x){
-  double scale = _dis_parameters.find("scale") ->second;
+  double scale = _dist_parameters.find("scale") ->second;
   return BasicTruncatedDistribution::Cdf(x/scale);
 }
 
 double
 BasicBetaDistribution::InverseCdf(double x){
-  double scale = _dis_parameters.find("scale") ->second;
+  double scale = _dist_parameters.find("scale") ->second;
   return BasicTruncatedDistribution::InverseCdf(x)*scale;
 }
 
@@ -744,16 +744,16 @@ public:
 
 BasicPoissonDistribution::BasicPoissonDistribution(double mu)
 {
-  _dis_parameters["mu"] = mu;
+  _dist_parameters["mu"] = mu;
 
   if(not hasParameter("truncation")) {
-    _dis_parameters["truncation"] = 1.0;
+    _dist_parameters["truncation"] = 1.0;
   }
   if(not hasParameter("xMin")) {
-    _dis_parameters["xMin"] = -std::numeric_limits<double>::max( );
+    _dist_parameters["xMin"] = -std::numeric_limits<double>::max( );
   }
   if(not hasParameter("xMax")) {
-    _dis_parameters["xMax"] = std::numeric_limits<double>::max( );
+    _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
   }
 
   if (mu<0)
@@ -778,18 +778,18 @@ BasicPoissonDistribution::untrCdf(double x){
 
 double
 BasicPoissonDistribution::Pdf(double x){
-   double xMin = _dis_parameters.find("xMin") ->second;
-   double xMax = _dis_parameters.find("xMax") ->second;
+   double x_min = _dist_parameters.find("xMin") ->second;
+   double x_max = _dist_parameters.find("xMax") ->second;
 
    double value;
 
-   if (_dis_parameters.find("truncation") ->second == 1)
-          if (x<xMin)
+   if (_dist_parameters.find("truncation") ->second == 1)
+          if (x<x_min)
                   value=0;
-          else if (x>xMax)
+          else if (x>x_max)
                   value=0;
           else
-                  value = 1/(untrCdf(xMax) - untrCdf(xMin)) * untrPdf(x);
+                  value = 1/(untrCdf(x_max) - untrCdf(x_min)) * untrPdf(x);
    else
       value=-1;
 
@@ -798,18 +798,18 @@ BasicPoissonDistribution::Pdf(double x){
 
 double
 BasicPoissonDistribution::Cdf(double x){
-   double xMin = _dis_parameters.find("xMin") ->second;
-   double xMax = _dis_parameters.find("xMax") ->second;
+   double x_min = _dist_parameters.find("xMin") ->second;
+   double x_max = _dist_parameters.find("xMax") ->second;
 
    double value;
 
-   if (_dis_parameters.find("truncation") ->second == 1)
-          if (x<xMin)
+   if (_dist_parameters.find("truncation") ->second == 1)
+          if (x<x_min)
                   value=0;
-          else if (x>xMax)
+          else if (x>x_max)
                   value=1;
           else
-                  value = 1/(untrCdf(xMax) - untrCdf(xMin)) * (untrCdf(x) - untrCdf(xMin));
+                  value = 1/(untrCdf(x_max) - untrCdf(x_min)) * (untrCdf(x) - untrCdf(x_min));
    else
       value=-1;
 
@@ -819,14 +819,14 @@ BasicPoissonDistribution::Cdf(double x){
 double
 BasicPoissonDistribution::InverseCdf(double x){
    double value;
-   double xMin = _dis_parameters.find("xMin") ->second;
-   double xMax = _dis_parameters.find("xMax") ->second;
+   double x_min = _dist_parameters.find("xMin") ->second;
+   double x_max = _dist_parameters.find("xMax") ->second;
 
    if(x == 1.0) {
-     return xMax;
+     return x_max;
    }
-   if (_dis_parameters.find("truncation") ->second == 1){
-     double temp = untrCdf(xMin) + x * (untrCdf(xMax)-untrCdf(xMin));
+   if (_dist_parameters.find("truncation") ->second == 1){
+     double temp = untrCdf(x_min) + x * (untrCdf(x_max)-untrCdf(x_min));
      value=untrInverseCdf(temp);
    } else {
       value=-1;
@@ -852,8 +852,8 @@ public:
 
 BasicBinomialDistribution::BasicBinomialDistribution(double n, double p)
 {
-  _dis_parameters["n"] = n;
-  _dis_parameters["p"] = p;
+  _dist_parameters["n"] = n;
+  _dist_parameters["p"] = p;
 
   if (n<0 or p<0)
     throwError("ERROR: incorrect value of n or p for binomial distribution");
@@ -893,7 +893,7 @@ public:
 
 BasicBernoulliDistribution::BasicBernoulliDistribution(double p)
 {
-  _dis_parameters["p"] = p;
+  _dist_parameters["p"] = p;
 
   if (p<0)
     throwError("ERROR: incorrect value of p for bernoulli distribution");
@@ -972,10 +972,10 @@ double BasicConstantDistribution::untrHazard(double /*x*/){
 
 // BasicCustomDistribution::BasicCustomDistribution(double x_coordinates, double y_coordinates, int fitting_type, double n_points)
 // {
-//    _dis_parameters["x_coordinates"] = x_coordinates;
-//    _dis_parameters["y_coordinates"] = y_coordinates;
-//    _dis_parameters["fitting_type"] = fitting_type;
-//    _dis_parameters["n_points"] = n_points;
+//    _dist_parameters["x_coordinates"] = x_coordinates;
+//    _dist_parameters["y_coordinates"] = y_coordinates;
+//    _dist_parameters["fitting_type"] = fitting_type;
+//    _dist_parameters["n_points"] = n_points;
 
 // }
 
@@ -1085,11 +1085,11 @@ double BasicConstantDistribution::untrHazard(double /*x*/){
 //      double distribution_1D::triangularRandNumberGenerator(){
 //         double value;
 //         double RNG = rand()/double(RAND_MAX);
-//         double referenceValue=(_parameter1-_xMin)/(_xMax-_xMin);
+//         double referenceValue=(_parameter1-_x_min)/(_x_max-_x_min);
 //
 //         if (RNG<referenceValue)
-//            value= _xMin+sqrt(RNG*(_parameter1-_xMin)*(_xMax-_xMin));
+//            value= _x_min+sqrt(RNG*(_parameter1-_x_min)*(_x_max-_x_min));
 //         else
-//            value=_xMax-sqrt((1-RNG)*(_xMax-_parameter1)*(_xMax-_xMin));
+//            value=_x_max-sqrt((1-RNG)*(_x_max-_parameter1)*(_x_max-_x_min));
 //         return value;
 //      }

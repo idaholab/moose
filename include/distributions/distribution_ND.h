@@ -1,13 +1,5 @@
-/*
- * distribution_ND.h
- *
- *  Created on: Feb 6, 2013
- *      Author: alfoa
- *
- */
-
-#ifndef DISTRIBUTION_ND_H_
-#define DISTRIBUTION_ND_H_
+#ifndef DISTRIBUTION_ND_H
+#define DISTRIBUTION_ND_H
 
 #include <string>
 #include <vector>
@@ -22,8 +14,8 @@ InputParameters validParams<distributionND>();
 
 class distributionND : public MooseObject , public virtual BasicDistributionND
 {
- public:
-   //> constructor for built-in distributions
+public:
+  //> constructor for built-in distributions
   distributionND(const std::string & name, InputParameters parameters);
   virtual ~distributionND();
 
@@ -37,11 +29,11 @@ class MultiDimensionalInverseWeight;
 template<>
 InputParameters validParams<MultiDimensionalInverseWeight>();
 
-class MultiDimensionalInverseWeight : public distributionND, public BasicMultiDimensionalInverseWeight {
+class MultiDimensionalInverseWeight : public distributionND, public BasicMultiDimensionalInverseWeight
+{
 public:
   MultiDimensionalInverseWeight(const std::string & name, InputParameters parameters);
   virtual ~MultiDimensionalInverseWeight();
-protected:
 };
 
 /*
@@ -52,11 +44,11 @@ class MultivariateNormal;
 template<>
 InputParameters validParams<MultivariateNormal>();
 
-class MultivariateNormal : public distributionND, public BasicMultivariateNormal {
+class MultivariateNormal : public distributionND, public BasicMultivariateNormal
+{
 public:
   MultivariateNormal(const std::string & name, InputParameters parameters);
   virtual ~MultivariateNormal();
-protected:
 };
 
 /*
@@ -68,11 +60,11 @@ class MultiDimensionalScatteredMS;
 template<>
 InputParameters validParams<MultiDimensionalScatteredMS>();
 
-class MultiDimensionalScatteredMS : public distributionND, public BasicMultiDimensionalScatteredMS {
+class MultiDimensionalScatteredMS : public distributionND, public BasicMultiDimensionalScatteredMS
+{
 public:
   MultiDimensionalScatteredMS(const std::string & name, InputParameters parameters);
   virtual ~MultiDimensionalScatteredMS();
-protected:
 };
 
 /*
@@ -84,13 +76,12 @@ template<>
 InputParameters validParams<MultiDimensionalCartesianSpline>();
 
 
-class MultiDimensionalCartesianSpline : public distributionND, public BasicMultiDimensionalCartesianSpline {
+class MultiDimensionalCartesianSpline : public distributionND, public BasicMultiDimensionalCartesianSpline
+{
 public:
   MultiDimensionalCartesianSpline(const std::string & name, InputParameters parameters);
   virtual ~MultiDimensionalCartesianSpline();
-protected:
 };
-
 
 
 

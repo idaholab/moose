@@ -43,11 +43,11 @@ distribution::distribution(const std::string & name, InputParameters parameters)
    _type=getParam<std::string>("type");
    if(_type != "CustomDistribution"){
      if(parameters.isParamValid("xMin")) {
-       _dis_parameters["xMin"] = getParam<double>("xMin");
+       _dist_parameters["xMin"] = getParam<double>("xMin");
      }
 
      if(parameters.isParamValid("xMax")) {
-       _dis_parameters["xMax"] = getParam<double>("xMax");
+       _dist_parameters["xMax"] = getParam<double>("xMax");
      }
 
      if(parameters.isParamValid("force_probability")){
@@ -64,8 +64,8 @@ distribution::distribution(const std::string & name, InputParameters parameters)
    else
    {
      std::vector<double> x_coordinates = getParam<std::vector<double> >("x_coordinates");
-     _dis_parameters["xMin"] = x_coordinates[0];
-     _dis_parameters["xMax"] = x_coordinates[x_coordinates.size()-1];
+     _dist_parameters["xMin"] = x_coordinates[0];
+     _dist_parameters["xMax"] = x_coordinates[x_coordinates.size()-1];
      std::vector<double> y_cordinates = getParam<std::vector<double> >("y_coordinates");
      //custom_dist_fit_type fitting_type = static_cast<custom_dist_fit_type>((int)getParam<MooseEnum>("fitting_type"));
 
@@ -74,15 +74,15 @@ distribution::distribution(const std::string & name, InputParameters parameters)
      //                                       fitting_type);
    }
       _seed = getParam<unsigned int>("seed");
-      _dis_parameters["truncation"] = double(getParam<unsigned int>("truncation"));
+      _dist_parameters["truncation"] = double(getParam<unsigned int>("truncation"));
 
-      _dis_parameters["PB_window_Low"] = getParam<double>("PB_window_Low");
-      _dis_parameters["PB_window_Up"]  = getParam<double>("PB_window_Up");
+      _dist_parameters["PB_window_Low"] = getParam<double>("PB_window_Low");
+      _dist_parameters["PB_window_Up"]  = getParam<double>("PB_window_Up");
 
-      _dis_parameters["V_window_Low"] = getParam<double>("V_window_Low");
-      _dis_parameters["V_window_Up"]  = getParam<double>("V_window_Up");
+      _dist_parameters["V_window_Low"] = getParam<double>("V_window_Low");
+      _dist_parameters["V_window_Up"]  = getParam<double>("V_window_Up");
 
-      _dis_parameters["ProbabilityThreshold"] = getParam<double>("ProbabilityThreshold");
+      _dist_parameters["ProbabilityThreshold"] = getParam<double>("ProbabilityThreshold");
 
       // Data checks
       if (getParam<double>("PB_window_Low") >= getParam<double>("PB_window_Up"))

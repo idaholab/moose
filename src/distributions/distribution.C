@@ -1,9 +1,3 @@
-/*
- * distribution.C
- *
- *  Created on: Nov 1, 2012
- *      Author: alfoa
- */
 #include "distribution.h"
 #include <limits>
 #include <iostream>
@@ -13,47 +7,47 @@ using namespace std;
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 BasicDistribution::BasicDistribution() {
-  _forcingMethod = NO_FORCING;
-  _forcedConstant = 0.0;
-  //_dis_parameters["truncation"] = 1.0;
-  //_dis_parameters.insert(std::pair<std::string,double>("truncation",1));
+  _forcing_method = NO_FORCING;
+  _forced_constant = 0.0;
+  //_dist_parameters["truncation"] = 1.0;
+  //_dist_parameters.insert(std::pair<std::string,double>("truncation",1));
 }
 
 BasicDistribution::~BasicDistribution() {}
 
 double
-BasicDistribution::getVariable(std::string variableName){
+BasicDistribution::getVariable(std::string variable_name){
    double res;
-   if(_dis_parameters.find(variableName) != _dis_parameters.end()){
-          res = _dis_parameters.find(variableName) ->second;
+   if(_dist_parameters.find(variable_name) != _dist_parameters.end()){
+          res = _dist_parameters.find(variable_name) ->second;
    }
    else{
-     throwError("Parameter " << variableName << " was not found in distribution type " << _type <<".");
+     throwError("Parameter " << variable_name << " was not found in distribution type " << _type <<".");
    }
    return res;
 }
 
 std::vector<double>
-BasicDistribution::getVariableVector(std::string  variableName){
+BasicDistribution::getVariableVector(std::string  variable_name){
         std::vector<double> res;
-   if(_dis_vectorParameters.find(variableName) != _dis_vectorParameters.end()){
-         res = _dis_vectorParameters.find(variableName) ->second;
+   if(_dist_vector_parameters.find(variable_name) != _dist_vector_parameters.end()){
+         res = _dist_vector_parameters.find(variable_name) ->second;
    }
    else{
-     throwError("Parameter " << variableName << " was not found in distribution type " << _type <<".");
+     throwError("Parameter " << variable_name << " was not found in distribution type " << _type <<".");
    }
    return res;
 }
 
 void
-BasicDistribution::updateVariable(const std::string & variableName, double & newValue){
-   if(_dis_parameters.find(variableName) != _dis_parameters.end()){
-     // we are sure the variableName is already present in the mapping =>
+BasicDistribution::updateVariable(const std::string & variable_name, double & new_value){
+   if(_dist_parameters.find(variable_name) != _dist_parameters.end()){
+     // we are sure the variable_name is already present in the mapping =>
      // we can update it in the following way
-     _dis_parameters[variableName] = newValue;
+     _dist_parameters[variable_name] = new_value;
    }
    else{
-     throwError("Parameter " << variableName << " was not found in distribution type " << _type << ".");
+     throwError("Parameter " << variable_name << " was not found in distribution type " << _type << ".");
    }
 }
 
@@ -69,7 +63,7 @@ unsigned int BasicDistribution::getSeed() {
 std::vector<std::string>
 BasicDistribution::getVariableNames(){
   std::vector<std::string> paramtersNames;
-  for (std::map<std::string,double>::iterator it = _dis_parameters.begin(); it!= _dis_parameters.end();it++){
+  for (std::map<std::string,double>::iterator it = _dist_parameters.begin(); it!= _dist_parameters.end();it++){
     paramtersNames.push_back(it->first);
   }
   return paramtersNames;
@@ -90,54 +84,54 @@ BasicDistribution::getRandom(double x)
   }
 }
 
-BasicDistribution::force_random
+BasicDistribution::EForceRandom
 BasicDistribution::forcingMethod()
 {
-  return _forcingMethod;
+  return _forcing_method;
 }
 
 double
 BasicDistribution::forcedConstant()
 {
-  return _forcedConstant;
+  return _forced_constant;
 }
 
 void
-BasicDistribution::setForcingMethod(force_random forcingMethod)
+BasicDistribution::setForcingMethod(EForceRandom forcing_method)
 {
-  _forcingMethod = forcingMethod;
+  _forcing_method = forcing_method;
 }
 
 void
-BasicDistribution::setForcedConstant(double forcedConstant)
+BasicDistribution::setForcedConstant(double forced_constant)
 {
-  _forcedConstant = forcedConstant;
+  _forced_constant = forced_constant;
 }
 
 bool
 BasicDistribution::hasParameter(std::string s)
 {
-  return _dis_parameters.find(s) != _dis_parameters.end();
+  return _dist_parameters.find(s) != _dist_parameters.end();
 }
 
-double BasicDistribution::windowProcessing(double RNG){
+double BasicDistribution::windowProcessing(double rng){
         double value;
 
    if(getVariable(std::string("PB_window_Low")) != 0.0 || getVariable(std::string("PB_window_Up")) != 1.0){	// interval Pb window
                 double pbLOW = getVariable(std::string("PB_window_Low"));
                 double pbUP  = getVariable(std::string("PB_window_Up"));
-                double pb = pbLOW + (pbUP-pbLOW) * RNG;
+                double pb = pbLOW + (pbUP-pbLOW) * rng;
                 value = InverseCdf(pb);
                 //std::cerr << " pbLOW " << pbLOW << " pbUP " << pbUP << " pb " << pb << " value " << value << std::endl;
         }else if(getVariable(std::string("V_window_Low")) != -std::numeric_limits<double>::max() && getVariable(std::string("V_window_Up")) != std::numeric_limits<double>::max( )){	// interval V window
                 double pbLOW = Cdf(getVariable(std::string("V_window_Low")));
                 double pbUP  = Cdf(getVariable(std::string("V_window_Up")));
-                double pb = pbLOW + (pbUP-pbLOW) * RNG;
+                double pb = pbLOW + (pbUP-pbLOW) * rng;
                 value = InverseCdf(pb);
                 //std::cerr << " valLOW " << valLOW << " valUP " << valUP << " value " << value << std::endl;
         }
         else	// DEFAULT
-                value = InverseCdf(RNG);
+                value = InverseCdf(rng);
 
         return value;
 }

@@ -21,7 +21,7 @@ InputParameters validParams<distributionND>()
   params.addRequiredParam<std::string>("data_filename","Name of the file containing the data points to be interpolated");
   params.addParam<double>("PB_window_Low", 0.0, "Probability window lower bound");
   params.addParam<double>("PB_window_Up", 1.0, "Probability window upper bound");
-  params.addRequiredParam<PbFunctionType>("function_type","PDF or CDF");
+  params.addRequiredParam<EPbFunctionType>("function_type","PDF or CDF");
   params.registerBase("distributionND");
   return params;
 }
@@ -33,7 +33,7 @@ distributionND::distributionND(const std::string & name, InputParameters paramet
 {
    _type          = getParam<std::string>("type");
    _data_filename = getParam<std::string>("data_filename");
-   _function_type = getParam<PbFunctionType>("function_type");
+   _function_type = getParam<EPbFunctionType>("function_type");
    _dis_parameters["ProbabilityThreshold"]  = getParam<double>("ProbabilityThreshold");
    _dis_parameters["PB_window_Low"] = getParam<double>("PB_window_Low");
    _dis_parameters["PB_window_Up"]  = getParam<double>("PB_window_Up");

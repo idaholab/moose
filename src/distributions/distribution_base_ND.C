@@ -38,29 +38,29 @@ BasicDistributionND::~BasicDistributionND()
 }
 
 double
-BasicDistributionND::getVariable(const std::string & variableName){
+BasicDistributionND::getVariable(const std::string & variable_name){
    double res;
 
-   if(_dis_parameters.find(variableName) != _dis_parameters.end())
+   if(_dis_parameters.find(variable_name) != _dis_parameters.end())
    {
-          res = _dis_parameters.find(variableName) ->second;
+          res = _dis_parameters.find(variable_name) ->second;
    }
    else
    {
-     throwError("Parameter " << variableName << " was not found in distribution type " << _type <<".");
+     throwError("Parameter " << variable_name << " was not found in distribution type " << _type <<".");
    }
    return res;
 }
 
 void
-BasicDistributionND::updateVariable(const std::string & variableName, double & newValue){
-   if(_dis_parameters.find(variableName) != _dis_parameters.end())
+BasicDistributionND::updateVariable(const std::string & variable_name, double & new_value){
+   if(_dis_parameters.find(variable_name) != _dis_parameters.end())
    {
-     _dis_parameters[variableName] = newValue;
+     _dis_parameters[variable_name] = new_value;
    }
    else
    {
-     throwError("Parameter " << variableName << " was not found in distribution type " << _type << ".");
+     throwError("Parameter " << variable_name << " was not found in distribution type " << _type << ".");
    }
 }
 
@@ -70,13 +70,13 @@ BasicDistributionND::getType(){
 }
 
 double
-getDistributionVariable(BasicDistributionND & dist,const std::string & variableName){
-  return dist.getVariable(variableName);
+getDistributionVariable(BasicDistributionND & dist,const std::string & variable_name){
+  return dist.getVariable(variable_name);
 }
 
 void
-DistributionUpdateVariable(BasicDistributionND & dist,const std::string & variableName, double & newValue){
-  dist.updateVariable(variableName, newValue);
+DistributionUpdateVariable(BasicDistributionND & dist,const std::string & variable_name, double & new_value){
+  dist.updateVariable(variable_name, new_value);
 }
 
 std::string
@@ -103,20 +103,20 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std:
   _sigma = sigma;
 
   int rows,columns;
-  readMatrix(data_filename, rows, columns, _covMatrix);
+  readMatrix(data_filename, rows, columns, _cov_matrix);
 
   if(rows != columns)
           throwError("MultivariateNormal error: covariance matrix in " << data_filename << " is not a square matrix.");
 }
 
-BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu, std::vector<double> sigma){
+BasicMultivariateNormal::BasicMultivariateNormal(std::vector<std::vector<double> > cov_matrix, std::vector<double> mu, std::vector<double> sigma){
   _mu = mu;
   _sigma = sigma;
-  _covMatrix = covMatrix;
+  _cov_matrix = cov_matrix;
 
-  computeInverse(_covMatrix, _inverseCovMatrix);
+  computeInverse(_cov_matrix, _inverse_cov_matrix);
 
-  _determinantCovMatrix = getDeterminant(covMatrix);
+  _determinant_cov_matrix = getDeterminant(cov_matrix);
 }
 
 double BasicMultivariateNormal::Pdf(std::vector<double> x){
@@ -129,10 +129,10 @@ double BasicMultivariateNormal::Pdf(std::vector<double> x){
                 for(int i=0; i<dimensions; i++){
                         tempVector[i]=0;
                         for(int j=0; j<dimensions; j++)
-                                tempVector[i] += _inverseCovMatrix[i][j]*x[j];
+                                tempVector[i] += _inverse_cov_matrix[i][j]*x[j];
                         expTerm += tempVector[i]*x[i];
                 }
-                value = 1/pow(2*M_PI,dimensions/2)*1/sqrt(_determinantCovMatrix)*exp(expTerm);
+                value = 1/pow(2*M_PI,dimensions/2)*1/sqrt(_determinant_cov_matrix)*exp(expTerm);
         }else
                         throwError("MultivariateNormal PDF error: evaluation point dimensionality is not correct");
 
@@ -151,7 +151,7 @@ double BasicMultivariateNormal::Cdf(std::vector<double> x){
                 for(int i=0; i<dimensions; i++){
                         tempVector[i]=0;
                         for(int j=0; j<dimensions; j++)
-                                tempVector[i] += _inverseCovMatrix[i][j]*x[j];
+                                tempVector[i] += _inverse_cov_matrix[i][j]*x[j];
                         mahalanobis += tempVector[i]*x[i];
                 }
                 //value = chiDistribution.cdf(mahalanobis);
