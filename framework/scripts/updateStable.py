@@ -34,12 +34,22 @@ def buildStatus():
   # Get a list of applications tested, by searching each directory presently containing a run_test application
   for app_dir in os.listdir('.'):
     if os.path.exists(os.path.join(os.getcwd(), app_dir, 'run_tests')):
-      tmp_apps.append(app_dir)
+      run_tests = open(os.path.join(os.getcwd(), app_dir, 'run_tests'))
+      try:
+        tmp_apps.append(re.findall(r"app_name\s+=\s+'.*?([^/]*?)'", run_tests.read(), re.M)[0])
+      except IndexError:
+        tmp_apps.append(app_dir)
+      run_tests.close()
 
   # Now get any applications inside the moose directory (modules, test, unit)
   for app_dir in os.listdir('moose'):
     if os.path.exists(os.path.join(os.getcwd(), 'moose', app_dir, 'run_tests')):
-      tmp_apps.append(app_dir)
+      run_tests = open(os.path.join(os.getcwd(), 'moose', app_dir, 'run_tests'))
+      try:
+        tmp_apps.append(re.findall(r"app_name\s+=\s+'.*?([^/]*?)'", run_tests.read(), re.M)[0])
+      except IndexError:
+        tmp_apps.append(app_dir)
+      run_tests.close()
 
   # Return boolean if all application tests passed
   if len(((set(tmp_apps) - excluded_applications) - set(tmp_passed))) != 0:
