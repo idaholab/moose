@@ -1,4 +1,5 @@
 #!/bin/bash
+app_name='unit'
 
 # If $METHOD is not set, use opt
 if [ -z $METHOD ]; then
