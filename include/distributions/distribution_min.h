@@ -1,7 +1,6 @@
 #ifndef DISTRIBUTION_MIN_H_
 #define DISTRIBUTION_MIN_H_
 
-#include "distribution_type.h"
 
 class BasicDistribution;
 class BasicDistributionND;

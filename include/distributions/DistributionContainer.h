@@ -8,16 +8,10 @@
 #ifndef DISTRIBUTIONCONTAINER_H_
 #define DISTRIBUTIONCONTAINER_H_
 
-//#include "distribution_1D.h"
-#include "distribution_type.h"
 #include <iostream>
 #include <vector>
 #include <map>
 #include "distribution.h"
-//#include "distribution_base_ND.h"
-//#include "Interpolation_Functions.h"
-//#include <MooseRandom.h>
-//#include <boost/random/mersenne_twister.hpp>
 
 
 using namespace std;
