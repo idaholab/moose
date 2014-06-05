@@ -23,9 +23,6 @@ InputParameters validParams<CSV>()
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
 
-  // Add option for appending file on restart
-  params.addParam<bool>("append_restart", false, "Append existing file on restart");
-
   // Options for aligning csv output with whitespace padding
   params.addParam<bool>("align", false, "Align the outputted csv data by padding the numbers with trailing whitespace");
   params.addParam<std::string>("delimiter", "Assign the delimiter (default is ','"); // default not included because peacock didn't parse ','
@@ -50,10 +47,7 @@ CSV::~CSV()
 void
 CSV::initialSetup()
 {
-  if (_app.isRestarting() && !getParam<bool>("append_restart"))
-    _all_data_table.clear();
-
-  // Set the delimiter
+// Set the delimiter
   if (isParamValid("delimiter"))
     _all_data_table.setDelimiter(getParam<std::string>("delimiter"));
 

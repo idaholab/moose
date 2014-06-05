@@ -204,6 +204,7 @@ private:
   friend class FileOutput;
   friend class FEProblem;
   friend class Transient;
+  friend class TableOutput;
 };
 
 template<typename T>

@@ -80,16 +80,19 @@ protected:
    */
   virtual void outputVectorPostprocessors();
 
-  /// Table containing postprocessor data (restartable)
+  /// Flag for allowing all table data to become restartable
+  bool _tables_restartable;
+
+  /// Table containing postprocessor data
   FormattedTable & _postprocessor_table;
 
   /// Formatted tables for outputting vector postprocessor data.  One per VectorPostprocessor
   std::map<std::string, FormattedTable> _vector_postprocessor_tables;
 
-  /// Table containing scalar aux variables (restartable)
+  /// Table containing scalar aux variables
   FormattedTable & _scalar_table;
 
-  /// Table containing postprocessor values and scalar aux variables (restartable)
+  /// Table containing postprocessor values and scalar aux variables
   FormattedTable & _all_data_table;
 
 };

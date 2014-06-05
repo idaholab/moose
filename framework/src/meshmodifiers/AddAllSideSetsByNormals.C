@@ -51,7 +51,7 @@ AddAllSideSetsByNormals::modify()
   _mesh_ptr->errorIfParallelDistribution("AddAllSideSetsByNormals");
 
   // Get the current list of boundaries so we can generate new ones that won't conflict
-  _mesh_boundary_ids = &_mesh_ptr->_mesh_boundary_ids;
+  _mesh_boundary_ids = _mesh_ptr->meshBoundaryIds();
 
   // Create the map object that will be owned by MooseMesh
   AutoPtr<std::map<BoundaryID, RealVectorValue> > boundary_map(new std::map<BoundaryID, RealVectorValue>());
@@ -98,8 +98,9 @@ AddAllSideSetsByNormals::modify()
 
   finalize();
 
-  // Transfer owndership of the boundary map.
-  _mesh_ptr->_boundary_to_normal_map = boundary_map;
+  // Transfer ownership of the boundary map and boundary ID set.
+  _mesh_ptr->setBoundaryToNormalMap(boundary_map);
+  _mesh_ptr->setMeshBoundaryIDs(_mesh_boundary_ids);
 }
 
 BoundaryID
@@ -108,10 +109,10 @@ AddAllSideSetsByNormals::getNextBoundaryID()
   std::set<BoundaryID>::iterator it;
   BoundaryID next_id = 1;
 
-  while ((it = _mesh_boundary_ids->find(next_id)) != _mesh_boundary_ids->end())
+  while ((it = _mesh_boundary_ids.find(next_id)) != _mesh_boundary_ids.end())
     ++next_id;
 
-  _mesh_boundary_ids->insert(next_id);
+  _mesh_boundary_ids.insert(next_id);
 
   return next_id;
 }
