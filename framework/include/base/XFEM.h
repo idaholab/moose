@@ -31,6 +31,8 @@
 #include "MaterialData.h"
 #include "CutElemMesh.h"
 
+using namespace libMesh;
+
 enum XFEM_CUTPLANE_QUANTITY
 {
   XCC_ORIGIN_X=1,

@@ -19,6 +19,8 @@
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
 #include "libmesh/elem.h"
 
+using namespace libMesh;
+
 struct cutEdge
 {
   unsigned int id1;
