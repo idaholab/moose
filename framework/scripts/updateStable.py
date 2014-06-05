@@ -9,7 +9,7 @@ moose_stable = 'https://hpcsc.inl.gov/svn/herd/trunk/moose'
 moose_devel = 'https://hpcsc.inl.gov/svn/herd/trunk/devel/moose'
 
 # We exclude these applications:
-excluded_applications = set(['r7_moose', 'rattlesnake', 'elk'])
+excluded_applications = set(['r7_moose', 'rattlesnake'])
 
 # Comment Syntax Coverage command:
 comment_syntax_cmd = [ 'moose/framework/contrib/nsiqcppstyle/nsiqcppstyle', '--quiet', '--basedir=/moose/framework', '-f', 'moose/framework/contrib/nsiqcppstyle/syntax_style', '--output=html', '--url=https://hpcsc.inl.gov/moose/browser/trunk', '-o', 'output.html', 'moose']
@@ -22,6 +22,16 @@ Where repo_revision is the target merge revision.
 
 """
 
+def buildList(dir_path):
+  if os.path.exists(os.path.join(dir_path, 'run_tests')):
+    run_tests = open(os.path.join(dir_path, 'run_tests'))
+    run_tests_contents = run_tests.read()
+    run_tests.close()
+    try:
+      return re.findall(r"app_name\s+=\s+'.*?([^/]*?)'", run_tests_contents, re.M)[0]
+    except IndexError:
+      return os.path.basename(dir_path)
+
 def buildStatus():
   tmp_apps = []
   tmp_passed = []
@@ -33,27 +43,13 @@ def buildStatus():
   tmp_passed.pop()
   # Get a list of applications tested, by searching each directory presently containing a run_test application
   for app_dir in os.listdir('.'):
-    if os.path.exists(os.path.join(os.getcwd(), app_dir, 'run_tests')):
-      run_tests = open(os.path.join(os.getcwd(), app_dir, 'run_tests'))
-      try:
-        tmp_apps.append(re.findall(r"app_name\s+=\s+'.*?([^/]*?)'", run_tests.read(), re.M)[0])
-      except IndexError:
-        tmp_apps.append(app_dir)
-      run_tests.close()
-
+    tmp_apps.append(buildList(os.path.join(os.getcwd(), app_dir)))
   # Now get any applications inside the moose directory (modules, test, unit)
   for app_dir in os.listdir('moose'):
-    if os.path.exists(os.path.join(os.getcwd(), 'moose', app_dir, 'run_tests')):
-      run_tests = open(os.path.join(os.getcwd(), 'moose', app_dir, 'run_tests'))
-      try:
-        tmp_apps.append(re.findall(r"app_name\s+=\s+'.*?([^/]*?)'", run_tests.read(), re.M)[0])
-      except IndexError:
-        tmp_apps.append(app_dir)
-      run_tests.close()
-
+    tmp_apps.append(buildList(os.path.join(os.getcwd(), 'moose', app_dir)))
   # Return boolean if all application tests passed
-  if len(((set(tmp_apps) - excluded_applications) - set(tmp_passed))) != 0:
-    print 'Failing tests:', string.join(((set(tmp_apps) - excluded_applications) - set(tmp_passed)))
+  if len(((set(tmp_apps) - excluded_applications) - set(tmp_passed) - set([None]))) != 0:
+    print 'Failing tests:', string.join(((set(tmp_apps) - excluded_applications) - set(tmp_passed) - set([None])))
     return False
   else:
     return True
