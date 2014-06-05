@@ -43,7 +43,7 @@
 
 #include "smart_assert.h"
 #include "exo_entity.h"
-#include "libmesh/exodusII.h"
+#include "exodusII.h"
 #include "util.h"
 
 using namespace std;
@@ -54,54 +54,53 @@ namespace {
     os << t;
     return os.str();
   }
-  int get_index(int file_id,          EXOTYPE exo_type, int id, const char *label);
-  int get_num_entities(int file_id,   EXOTYPE exo_type);
-  int get_num_variables(int file_id,  EXOTYPE exo_type,         const char *label);
-  int get_num_attributes(int file_id, EXOTYPE exo_type, int id, const char *label);
-  int get_num_timesteps(int file_id);
+  size_t get_index(int file_id,          EXOTYPE exo_type, size_t id, const char *label);
+  size_t get_num_entities(int file_id,   EXOTYPE exo_type);
+  size_t get_num_variables(int file_id,  EXOTYPE exo_type,         const char *label);
+  size_t get_num_attributes(int file_id, EXOTYPE exo_type, size_t id, const char *label);
+  size_t get_num_timesteps(int file_id);
 }
 
 Exo_Entity::Exo_Entity()
   : fileId(-1),
     id_(EX_INVALID_ID),
-    index_(-1),
-    numEntity(-1),
+    index_(0),
+    numEntity(0),
     truth_(NULL),
-    currentStep(-1),
-    numVars(-1),
+    currentStep(0),
+    numVars(0),
     results_(NULL),
-    numAttr(-1)
+    numAttr(0)
 { }
 
-Exo_Entity::Exo_Entity(int file_id, int id)
+Exo_Entity::Exo_Entity(int file_id, size_t id)
   : fileId(file_id),
     id_(id),
-    index_(-1),
-    numEntity(-1),
+    index_(0),
+    numEntity(0),
     truth_(NULL),
-    currentStep(-1),
-    numVars(-1),
+    currentStep(0),
+    numVars(0),
     results_(NULL),
-    numAttr(-1)
+    numAttr(0)
 {
   SMART_ASSERT(file_id > 0);
-  SMART_ASSERT(id > EX_INVALID_ID);}
+  SMART_ASSERT((int)id > EX_INVALID_ID);}
 
 
-Exo_Entity::Exo_Entity(int file_id, int id, int nnodes)
+Exo_Entity::Exo_Entity(int file_id, size_t id, size_t nnodes)
   : fileId(file_id),
     id_(id),
-    index_(-1),
+    index_(0),
     numEntity(nnodes),
     truth_(NULL),
-    currentStep(-1),
-    numVars(-1),
+    currentStep(0),
+    numVars(0),
     results_(NULL),
-    numAttr(-1)
+    numAttr(0)
 {
   SMART_ASSERT(file_id > 0);
-  SMART_ASSERT(id > EX_INVALID_ID);
-  SMART_ASSERT(nnodes >= 0);
+  SMART_ASSERT((int)id > EX_INVALID_ID);
 }
 
 Exo_Entity::~Exo_Entity()
@@ -121,13 +120,12 @@ Exo_Entity::~Exo_Entity()
 int Exo_Entity::Check_State() const
 {
   SMART_ASSERT(id_ >= EX_INVALID_ID);
-  SMART_ASSERT(numEntity >= 0);
 
   SMART_ASSERT( !( id_ == EX_INVALID_ID && numEntity > 0 ) );
   return 1;
 }
 
-void Exo_Entity::initialize(int file_id, int id)
+void Exo_Entity::initialize(int file_id, size_t id)
 {
   fileId = file_id;
   id_ = id;
@@ -139,9 +137,9 @@ void Exo_Entity::initialize(int file_id, int id)
   internal_load_params();
 }
 
-bool Exo_Entity::is_valid_var(int var_index) const
+bool Exo_Entity::is_valid_var(size_t var_index) const
 {
-  SMART_ASSERT(var_index >= 0 && var_index < numVars);
+  SMART_ASSERT((int)var_index < numVars);
   if (truth_ == NULL) {
     get_truth_table();
   }
@@ -156,9 +154,7 @@ string Exo_Entity::Load_Results(int time_step, int var_index)
   if (fileId < 0) return "ERROR:  Invalid file id!";
   if (id_ == EX_INVALID_ID) return "ERROR:  Must initialize block parameters first!";
   SMART_ASSERT(var_index >= 0 && var_index < numVars);
-
-  int num_times = get_num_timesteps(fileId);
-  SMART_ASSERT(time_step >= 1 && time_step <= num_times);
+  SMART_ASSERT(time_step >= 1 && time_step <= (int)get_num_timesteps(fileId));
 
   if (time_step != currentStep) {
     Free_Results();
@@ -191,6 +187,75 @@ string Exo_Entity::Load_Results(int time_step, int var_index)
               << " returned from call to exodus get variable routine.";
 	  return oss.str();
         }
+      }
+      else
+	return string("WARNING:  No items in this ") + label();
+    }
+  else {
+    return string("WARNING: Variable not stored in this ") + label();
+  }
+  return "";
+}
+
+string Exo_Entity::Load_Results(int t1, int t2, double proportion, int var_index)
+{
+  static std::vector<double> results2;
+
+  SMART_ASSERT(Check_State());
+
+  if (fileId < 0) return "ERROR:  Invalid file id!";
+  if (id_ == EX_INVALID_ID) return "ERROR:  Must initialize block parameters first!";
+  SMART_ASSERT(var_index >= 0 && var_index < numVars);
+  SMART_ASSERT(t1 >= 1 && t1 <= (int)get_num_timesteps(fileId));
+  SMART_ASSERT(t2 >= 1 && t2 <= (int)get_num_timesteps(fileId));
+
+  if (t1 != currentStep) {
+    Free_Results();
+    currentStep = t1;
+  }
+
+  if (truth_ == NULL) {
+    get_truth_table();
+  }
+
+  if (truth_[var_index]) {
+    if (!results_[var_index] && numEntity) {
+      results_[var_index] = new double[numEntity];
+      SMART_ASSERT(results_[var_index] != 0);
+    }
+      if (numEntity) {
+	int err = ex_get_var(fileId, t1, exodus_type(), var_index+1,
+			     id_, numEntity, results_[var_index]);
+
+	if (err < 0) {
+	  std::cout << "Exo_Entity::Load_Results()  ERROR: Call to exodus routine"
+		    << " returned error value! " << label() << " id = " << id_ << std::endl;
+	  std::cout << "Aborting..." << std::endl;
+	  exit(1);
+	}
+	else if (err > 0) {
+          ostringstream oss;
+          oss << "WARNING:  Number " << err
+              << " returned from call to exodus get variable routine.";
+	  return oss.str();
+        }
+
+	if (t1 != t2) {
+	  results2.resize(numEntity);
+	  err = ex_get_var(fileId, t2, exodus_type(), var_index+1, id_, numEntity, &results2[0]);
+
+	  if (err < 0) {
+	    std::cout << "Exo_Entity::Load_Results()  ERROR: Call to exodus routine"
+		      << " returned error value! " << label() << " id = " << id_ << std::endl;
+	    std::cout << "Aborting..." << std::endl;
+	    exit(1);
+	  }
+
+	  double *results1 = results_[var_index];
+	  for (size_t i=0; i < numEntity; i++) {
+	    results1[i] = proportion * results1[i] + (1.0 - proportion) * results2[i];
+	  }
+	}
       }
       else
 	return string("WARNING:  No items in this ") + label();
@@ -337,7 +402,7 @@ void Exo_Entity::internal_load_params()
       SMART_ASSERT(names[vg] != 0);
       if (std::strlen(names[vg]) == 0) {
 	std::string name = "attribute_" + to_string(vg+1);
-	strncpy(names[vg], name.c_str(), name_size);
+	attributeNames.push_back(name);
       } else if ((int)std::strlen(names[vg]) > name_size) {
 	std::cout << "exodiff: ERROR: " << label()
 		  << " attribute names appear corrupt\n"
@@ -349,35 +414,44 @@ void Exo_Entity::internal_load_params()
 	  std::cout << "\t\t" << k << ") \"" << names[k-1] << "\"\n";
 	std::cout << "                 Aborting..." << std::endl;
 	exit(1);
+      } else {
+	string n(names[vg]);
+	to_lower(n);
+	attributeNames.push_back(n);
       }
-
-      string n(names[vg]);
-      to_lower(n);
-      attributeNames.push_back(n);
     }
     free_name_array(names, numAttr);
   }
 }
 
 namespace {
-  int get_index(int file_id, EXOTYPE exo_type, int id, const char *label)
+  size_t get_index(int file_id, EXOTYPE exo_type, size_t id, const char *label)
   {
     // Get ids...
-    int count = get_num_entities(file_id, exo_type);
-    std::vector<int> ids(count);
+    size_t count = get_num_entities(file_id, exo_type);
+    if (ex_int64_status(file_id) & EX_IDS_INT64_API) {
+      std::vector<int64_t> ids(count);
+      ex_get_ids(file_id, exo_type, TOPTR(ids));
 
-    ex_get_ids(file_id, exo_type, &ids[0]);
+      for (size_t i=0; i<count; i++) {
+	if ((size_t)ids[i] == id)
+	  return i;
+      }
+    } else {
+      std::vector<int> ids(count);
+      ex_get_ids(file_id, exo_type, TOPTR(ids));
 
-    for (int i=0; i<count; i++) {
-      if (ids[i] == id)
-	return i;
+      for (size_t i=0; i<count; i++) {
+	if ((size_t)ids[i] == id)
+	  return i;
+      }
     }
 
     std::cerr << "ERROR:  " << label << " id " <<id << " does not exist!\n";
-    return -1;
+    return 0;
   }
 
-  int get_num_entities(int file_id, EXOTYPE exo_type)
+  size_t get_num_entities(int file_id, EXOTYPE exo_type)
   {
     int inquiry = 0;
     switch (exo_type) {
@@ -398,7 +472,7 @@ namespace {
     return ex_inquire_int(file_id, inquiry);
   }
 
-  int get_num_variables(int file_id, EXOTYPE type, const char *label)
+  size_t get_num_variables(int file_id, EXOTYPE type, const char *label)
   {
     int num_vars = 0;
     int err = ex_get_variable_param(file_id, type, &num_vars);
@@ -410,7 +484,7 @@ namespace {
     return num_vars;
   }
 
-  int get_num_attributes(int file_id, EXOTYPE type, int id, const char *label)
+  size_t get_num_attributes(int file_id, EXOTYPE type, size_t id, const char *label)
   {
     int num_attr = 0;
     int err = ex_get_attr_param(file_id, type, id, &num_attr);
@@ -422,7 +496,7 @@ namespace {
     return num_attr;
   }
 
-  int get_num_timesteps(int file_id)
+  size_t get_num_timesteps(int file_id)
   {
     return ex_inquire_int(file_id, EX_INQ_TIME);
   }

@@ -37,7 +37,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "libmesh/exodusII.h"
+#include <exodusII.h>
 
 #if defined(EX_API_VERS_NODOT)
 #if EX_API_VERS_NODOT > 467
@@ -50,33 +50,35 @@ typedef int EXOTYPE;
 #endif
 
 
-class ExoII_Read;
+template <typename INT> class ExoII_Read;
 
 class Exo_Entity {
  public:
   Exo_Entity();
-  Exo_Entity(int file_id, int exo_id);
-  Exo_Entity(int file_id, int exo_id, int num_entity);
+  Exo_Entity(int file_id, size_t exo_id);
+  Exo_Entity(int file_id, size_t exo_id, size_t num_entity);
   virtual ~Exo_Entity();
 
-  int  Size() const  {return numEntity;}
+  size_t  Size() const  {return numEntity;}
 
-  int  Id() const    {return id_;}
-  int  Index() const {return index_;}
+  size_t  Id() const    {return id_;}
+  size_t  Index() const {return index_;}
 
   void Display_Stats(std::ostream& = std::cout);
   void Display      (std::ostream& = std::cout);
   int  Check_State() const;
 
-  void initialize(int file_id, int id);
+  void initialize(int file_id, size_t id);
 
-  bool          is_valid_var(int var_index) const;
-  int           var_count() const {return numVars;}
+  bool          is_valid_var(size_t var_index) const;
+  size_t        var_count() const {return numVars;}
   std::string   Load_Results(int time_step_num, int var_index);
+  std::string   Load_Results(int t1, int t2, double proportion, int var_index); // Interpolation
+
   const double* Get_Results(int var_index) const;
   void          Free_Results();
 
-  int           attr_count() const {return numAttr;}
+  int        attr_count() const {return numAttr;}
   std::string   Load_Attributes(int attr_index);
   const double* Get_Attributes(int attr_index) const;
   void          Free_Attributes();
@@ -87,9 +89,9 @@ class Exo_Entity {
 
  protected:
   int fileId;
-  int id_;
-  int index_;          // 0-offset index into Exodus nodeset list.
-  int numEntity;      // Number of items (nodes, sides, elements)
+  ex_entity_id id_;
+  size_t index_;          // 0-offset index into Exodus nodeset list.
+  size_t numEntity;      // Number of items (nodes, sides, elements)
 
 
  private:
@@ -107,16 +109,17 @@ class Exo_Entity {
 
   void get_truth_table() const;
 
-  mutable int* truth_;        // Array; holds local truth table for this entity
-  int      currentStep;      // Time step number of the current results.
-  int      numVars;         // Total number of variables in the file.
+  mutable int* truth_;     // Array; holds local truth table for this entity
+  int   currentStep;      // Time step number of the current results.
+  int   numVars;         // Total number of variables in the file.
   double** results_;       // Array of pointers (length numVars)
                           // to arrays of results (length num_entity).
-  int      numAttr;      // Total number of variables in the file.
+  int   numAttr;      // Total number of attributes in the file.
   std::vector<double*> attributes_; // Array of pointers (length numAttr)
                                    // to arrays of attributes (length num_entity).
   std::vector<std::string> attributeNames;
 
+  template <typename INT>
   friend class ExoII_Read;
 
 };

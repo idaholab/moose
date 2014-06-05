@@ -37,12 +37,13 @@
 #include "smart_assert.h"
 #include "side_set.h"
 #include "iqsort.h"
-#include "libmesh/exodusII.h"
-#include "Specifications.h"
+#include "exodusII.h"
+#include "ED_SystemInterface.h"
 
 using namespace std;
 
-Side_Set::Side_Set()
+template <typename INT>
+Side_Set<INT>::Side_Set()
   : Exo_Entity(),
     num_dist_factors(0),
     elmts(0),
@@ -51,7 +52,8 @@ Side_Set::Side_Set()
     dist_factors(0)
 { }
 
-Side_Set::Side_Set(int file_id, int id)
+template <typename INT>
+Side_Set<INT>::Side_Set(int file_id, size_t id)
   : Exo_Entity(file_id, id),
     num_dist_factors(0),
     elmts(0),
@@ -59,10 +61,11 @@ Side_Set::Side_Set(int file_id, int id)
     sideIndex(0),
     dist_factors(0)
 {
-  SMART_ASSERT(id != EX_INVALID_ID);
+  SMART_ASSERT((int)id != EX_INVALID_ID);
 }
 
-Side_Set::Side_Set(int file_id, int id, int ns, int ndf)
+template <typename INT>
+Side_Set<INT>::Side_Set(int file_id, size_t id, size_t ns, size_t ndf)
   : Exo_Entity(file_id, id, ns),
     num_dist_factors(ndf),
     elmts(0),
@@ -71,11 +74,10 @@ Side_Set::Side_Set(int file_id, int id, int ns, int ndf)
     dist_factors(0)
 {
   SMART_ASSERT(id > 0);
-  SMART_ASSERT(ns >= 0);
-  SMART_ASSERT(ndf >= 0);
 }
 
-Side_Set::~Side_Set()
+template <typename INT>
+Side_Set<INT>::~Side_Set()
 {
   SMART_ASSERT(Check_State());
 
@@ -85,9 +87,11 @@ Side_Set::~Side_Set()
   delete [] dist_factors;
 }
 
-EXOTYPE Side_Set::exodus_type() const {return EX_SIDE_SET;}
+template <typename INT>
+EXOTYPE Side_Set<INT>::exodus_type() const {return EX_SIDE_SET;}
 
-void Side_Set::entity_load_params()
+template <typename INT>
+void Side_Set<INT>::entity_load_params()
 {
   int err = ex_get_set_param(fileId, EX_SIDE_SET, id_, &numEntity,&num_dist_factors);
 
@@ -98,7 +102,8 @@ void Side_Set::entity_load_params()
   }
 }
 
-void Side_Set::apply_map(const int *elmt_map)
+template <typename INT>
+void Side_Set<INT>::apply_map(const INT *elmt_map)
 {
   SMART_ASSERT(elmt_map != NULL);
   if (elmts != NULL) {
@@ -109,31 +114,32 @@ void Side_Set::apply_map(const int *elmt_map)
   load_sides(elmt_map);
 }
 
-void Side_Set::load_sides(const int *elmt_map) const
+template <typename INT>
+void Side_Set<INT>::load_sides(const INT *elmt_map) const
 {
   int err = 0;
   if ((elmts == NULL || sides == NULL) && numEntity > 0)
     {
-      elmts = new int[numEntity];  SMART_ASSERT(elmts != 0);
-      sides = new int[numEntity];  SMART_ASSERT(sides != 0);
-      sideIndex = new int[numEntity]; SMART_ASSERT(sideIndex != 0);
+      elmts = new INT[numEntity];  SMART_ASSERT(elmts != 0);
+      sides = new INT[numEntity];  SMART_ASSERT(sides != 0);
+      sideIndex = new INT[numEntity]; SMART_ASSERT(sideIndex != 0);
 
       err = ex_get_set(fileId, EX_SIDE_SET, id_, elmts, sides);
 
       if (err < 0) {
-	std::cout << "Side_Set::Load_Set(): ERROR: Failed to read side set "
+	std::cout << "Side_Set<INT>::Load_Set(): ERROR: Failed to read side set "
 		  << id_ << "!  Aborting..." << std::endl;
 	exit(1);
       }
 
       if (elmt_map != NULL) {
-	for (int i=0; i < numEntity; i++) {
+	for (size_t i=0; i < numEntity; i++) {
 	  elmts[i] = 1+elmt_map[elmts[i]-1];
 	}
       }
 
-      if (specs.ssmap_flag) {
-	for (int i=0; i < numEntity; i++) {
+      if (interface.ssmap_flag) {
+	for (size_t i=0; i < numEntity; i++) {
 	  sideIndex[i] = i;
 	  elmts[i] = elmts[i] * 8 + sides[i];
 	}
@@ -141,11 +147,11 @@ void Side_Set::load_sides(const int *elmt_map) const
 	index_qsort(elmts, sideIndex, numEntity);
 
 	// Recover elmts...
-	for (int i=0; i < numEntity; i++) {
+	for (size_t i=0; i < numEntity; i++) {
 	  elmts[i] = elmts[i] / 8;
 	}
       } else {
-	for (int i=0; i < numEntity; i++) {
+	for (size_t i=0; i < numEntity; i++) {
 	  sideIndex[i] = i;
 	}
       }
@@ -153,33 +159,38 @@ void Side_Set::load_sides(const int *elmt_map) const
     }
 }
 
-const int* Side_Set::Elements() const
+template <typename INT>
+const INT* Side_Set<INT>::Elements() const
 {
   load_sides();
   return elmts;
 }
 
-const int* Side_Set::Sides() const
+template <typename INT>
+const INT* Side_Set<INT>::Sides() const
 {
   load_sides();
   return sides;
 }
 
-std::pair<int,int> Side_Set::Side_Id(int position) const
+template <typename INT>
+std::pair<INT,INT> Side_Set<INT>::Side_Id(size_t position) const
 {
   load_sides();
   SMART_ASSERT(position < numEntity);
   return std::make_pair(elmts[sideIndex[position]], sides[sideIndex[position]]);
 }
 
-int Side_Set::Side_Index(int position) const
+template <typename INT>
+size_t Side_Set<INT>::Side_Index(size_t position) const
 {
   load_sides();
   SMART_ASSERT(position < numEntity);
   return sideIndex[position];
 }
 
-const double* Side_Set::Distribution_Factors() const
+template <typename INT>
+const double* Side_Set<INT>::Distribution_Factors() const
 {
   if (!dist_factors && num_dist_factors > 0) {
     dist_factors = new double[num_dist_factors];  SMART_ASSERT(dist_factors != 0);
@@ -188,22 +199,21 @@ const double* Side_Set::Distribution_Factors() const
   return dist_factors;
 }
 
-void Side_Set::Display(std::ostream& s) const
+template <typename INT>
+void Side_Set<INT>::Display(std::ostream& s) const
 {
   SMART_ASSERT(Check_State());
 
-  s << "Side_Set::Display()  Exodus side set ID = " << id_              << std::endl
+  s << "Side_Set<INT>::Display()  Exodus side set ID = " << id_              << std::endl
     << "                        number of sides = " << numEntity        << std::endl
     << "         number of distribution factors = " << num_dist_factors << std::endl
     << "                    number of variables = " << var_count()      << std::endl;
 }
 
-int Side_Set::Check_State() const
+template <typename INT>
+int Side_Set<INT>::Check_State() const
 {
   SMART_ASSERT(id_ >= EX_INVALID_ID);
-  SMART_ASSERT(numEntity >= 0);
-  SMART_ASSERT(num_dist_factors >= 0);
-
   SMART_ASSERT( !( id_ == EX_INVALID_ID && numEntity > 0 ) );
   SMART_ASSERT( !( id_ == EX_INVALID_ID && num_dist_factors > 0 ) );
   SMART_ASSERT( !( id_ == EX_INVALID_ID && elmts ) );
@@ -216,3 +226,5 @@ int Side_Set::Check_State() const
   return 1;
 }
 
+template class Side_Set<int>;
+template class Side_Set<int64_t>;

@@ -99,9 +99,12 @@ exodiff_DIR := $(FRAMEWORK_DIR)/contrib/exodiff
 exodiff_APP := $(exodiff_DIR)/exodiff
 exodiff_srcfiles := $(shell find $(exodiff_DIR) -name "*.C")
 exodiff_objfiles := $(patsubst %.C, %.$(obj-suffix), $(exodiff_srcfiles))
+exodiff_includes := $(app_INCLUDES) -I$(exodiff_DIR)
 
 all:: exodiff
 
+# Target-specific Variable Values (See GNU-make manual)
+exodiff: app_INCLUDES := $(exodiff_includes)
 exodiff: $(exodiff_APP)
 
 $(exodiff_APP): $(exodiff_objfiles)

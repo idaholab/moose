@@ -1,6 +1,7 @@
-// Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
-// DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-// certain rights in this software
+// Copyright(C) 2009-2010 Sandia Corporation.
+//
+// Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
+// the U.S. Government retains certain rights in this software.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -13,7 +14,6 @@
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
@@ -29,11 +29,6 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// smart_assert.h
-//
-//////////////////////////////////////////////////////////////////////
-
 #if !defined(SMART_ASSERT_H)
 #define SMART_ASSERT_H
 
@@ -63,7 +58,7 @@
 
 enum {
 
-    // default behavior - just loggs this assert
+    // default behavior - just loges this assert
     // (a message is shown to the user to the console)
     lvl_warn = 100,
 
@@ -126,7 +121,7 @@ public:
     const string & get_level_msg() const { return msg_; }
 
 private:
-    // where the assertion occured
+    // where the assertion occurred
     string file_;
     int line_;
 
@@ -159,9 +154,9 @@ namespace smart_assert {
 } // namespace smart_assert
 
 namespace Private {
-    void init_assert();
-    void set_default_log_stream( std::ostream & out);
-    void set_default_log_name( const char * str);
+//    void init_assert();
+//    void set_default_log_stream( std::ostream & out);
+//    void set_default_log_name( const char * str);
 
     // allows finding if a value is of type 'const char *'
     // and is null; if so, we cannot print it to an ostream
@@ -205,8 +200,10 @@ struct Assert {
         context_.set_expr( expr);
 
         if ( ( logger() == 0) || handlers().size() < 4) {
-            // used before main!
-            Private::init_assert();
+          ;
+
+//            // used before main!
+//            Private::init_assert();
         }
     }
 
@@ -224,7 +221,7 @@ struct Assert {
     }
 
     template< class type>
-    Assert & print_current_val( const type & val, const char * msgStr) {
+    Assert & print_current_val( const type & val, const char * my_msg) {
         std::ostringstream out;
 
         Private::is_null_finder< type> f;
@@ -234,7 +231,7 @@ struct Assert {
         else
             // null string
             out << "null";
-        context_.add_val( out.str(), msgStr);
+        context_.add_val( out.str(), my_msg);
         return *this;
     }
 
@@ -273,15 +270,15 @@ struct Assert {
     // in this case, we set the default logger, and make it
     // write everything to this file
     static void set_log( const char * strFileName) {
-        Private::set_default_log_name( strFileName);
-        logger() = &smart_assert::default_logger;
+//        Private::set_default_log_name( strFileName);
+//        logger() = &smart_assert::default_logger;
     }
 
     // in this case, we set the default logger, and make it
     // write everything to this log
     static void set_log( std::ostream & out) {
-        Private::set_default_log_stream( out);
-        logger() = &smart_assert::default_logger;
+//        Private::set_default_log_stream( out);
+//        logger() = &smart_assert::default_logger;
     }
 
     static void set_log( assert_func log) {
@@ -376,14 +373,14 @@ namespace smart_assert {
 // "debug" mode
 #define SMART_ASSERT( expr) \
     if ( (expr) ) ; \
-    else ::smart_assert::make_assert( #expr).print_context( __FILE__, __LINE__)   //.SMART_ASSERT_A
+    else (void)::smart_assert::make_assert( #expr).print_context( __FILE__, __LINE__).SMART_ASSERT_A \
     /**/
 
 #else
 // "release" mode
 #define SMART_ASSERT( expr) \
     if ( true ) ; \
-    else ::smart_assert::make_assert( "")   //.SMART_ASSERT_A
+    else (void)::smart_assert::make_assert( "").SMART_ASSERT_A \
     /**/
 
 #endif // ifdef SMART_ASSERT_DEBUG
@@ -391,7 +388,7 @@ namespace smart_assert {
 
 #define SMART_VERIFY( expr) \
     if ( (expr) ) ; \
-    else ::smart_assert::make_assert( #expr).error().print_context( __FILE__, __LINE__)  //.SMART_ASSERT_A
+    else (void)::smart_assert::make_assert( #expr).error().print_context( __FILE__, __LINE__).SMART_ASSERT_A \
     /**/
 
 

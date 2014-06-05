@@ -36,14 +36,15 @@
 
 #include "smart_assert.h"
 #include "node_set.h"
-#include "libmesh/exodusII.h"
+#include "exodusII.h"
 #include "iqsort.h"
-#include "Specifications.h"
+#include "ED_SystemInterface.h"
 
 
 using namespace std;
 
-Node_Set::Node_Set()
+template <typename INT>
+Node_Set<INT>::Node_Set()
   : Exo_Entity(),
     num_dist_factors(0),
     nodes(NULL),
@@ -51,7 +52,8 @@ Node_Set::Node_Set()
     dist_factors(NULL)
 { }
 
-Node_Set::Node_Set(int file_id, int id)
+template <typename INT>
+Node_Set<INT>::Node_Set(int file_id, size_t id)
   : Exo_Entity(file_id, id),
     num_dist_factors(0),
     nodes(NULL),
@@ -59,26 +61,28 @@ Node_Set::Node_Set(int file_id, int id)
     dist_factors(NULL)
 { }
 
-Node_Set::Node_Set(int file_id, int id, int nnodes, int ndfs)
+template <typename INT>
+Node_Set<INT>::Node_Set(int file_id, size_t id, size_t nnodes, size_t ndfs)
   : Exo_Entity(file_id, id, nnodes),
     num_dist_factors(ndfs),
     nodes(NULL),
     nodeIndex(NULL),
     dist_factors(NULL)
-{
-  SMART_ASSERT(ndfs >= 0);
-}
+{}
 
-Node_Set::~Node_Set()
+template <typename INT>
+Node_Set<INT>::~Node_Set()
 {
   delete [] nodes;
   delete [] nodeIndex;
   delete [] dist_factors;
 }
 
-EXOTYPE Node_Set::exodus_type() const {return EX_NODE_SET;}
+template <typename INT>
+EXOTYPE Node_Set<INT>::exodus_type() const {return EX_NODE_SET;}
 
-const int* Node_Set::Nodes() const
+template <typename INT>
+const INT* Node_Set<INT>::Nodes() const
 {
   // See if already loaded...
   if (!nodes) {
@@ -87,7 +91,8 @@ const int* Node_Set::Nodes() const
   return nodes;
 }
 
-int Node_Set::Node_Id(int position) const
+template <typename INT>
+size_t Node_Set<INT>::Node_Id(size_t position) const
 {
   if (numEntity <= 0) {
     return 0;
@@ -101,7 +106,8 @@ int Node_Set::Node_Id(int position) const
   }
 }
 
-int Node_Set::Node_Index(int position) const
+template <typename INT>
+size_t Node_Set<INT>::Node_Index(size_t position) const
 {
   if (numEntity <= 0) {
     return 0;
@@ -116,7 +122,8 @@ int Node_Set::Node_Index(int position) const
   }
 }
 
-void Node_Set::apply_map(const int *node_map)
+template <typename INT>
+void Node_Set<INT>::apply_map(const INT *node_map)
 {
   SMART_ASSERT(node_map != NULL);
   if (nodes != NULL) {
@@ -126,28 +133,30 @@ void Node_Set::apply_map(const int *node_map)
   load_nodes(node_map);
 }
 
-void Node_Set::load_nodes(const int *node_map) const
+template <typename INT>
+void Node_Set<INT>::load_nodes(const INT *node_map) const
 {
   if (numEntity > 0) {
-    nodes = new int[numEntity];  SMART_ASSERT(nodes != 0);
-    nodeIndex = new int[numEntity];  SMART_ASSERT(nodeIndex != 0);
+    nodes = new INT[numEntity];  SMART_ASSERT(nodes != 0);
+    nodeIndex = new INT[numEntity];  SMART_ASSERT(nodeIndex != 0);
     ex_get_set(fileId, EX_NODE_SET, id_, nodes, 0);
 
     if (node_map != NULL) {
-      for (int i=0; i < numEntity; i++) {
+      for (size_t i=0; i < numEntity; i++) {
 	nodes[i] = 1+node_map[nodes[i]-1];
       }
     }
 
-    for (int i=0; i < numEntity; i++) {
+    for (size_t i=0; i < numEntity; i++) {
       nodeIndex[i] = i;
     }
-    if (specs.nsmap_flag)
+    if (interface.nsmap_flag)
       index_qsort(nodes, nodeIndex, numEntity);
   }
 }
 
-const double* Node_Set::Distribution_Factors() const
+template <typename INT>
+const double* Node_Set<INT>::Distribution_Factors() const
 {
   if (!dist_factors && num_dist_factors > 0) {
     dist_factors = new double[num_dist_factors];  SMART_ASSERT(dist_factors != 0);
@@ -156,21 +165,20 @@ const double* Node_Set::Distribution_Factors() const
   return dist_factors;
 }
 
-void Node_Set::Display(std::ostream& s)
+template <typename INT>
+void Node_Set<INT>::Display(std::ostream& s)
 {
   Check_State();
-  s << "Node_Set::Display_Stats()  Exodus node set ID = " << id_              << std::endl
+  s << "Node_Set<INT>::Display_Stats()  Exodus node set ID = " << id_              << std::endl
     << "                              number of nodes = " << numEntity        << std::endl
     << "               number of distribution factors = " << num_dist_factors << std::endl
     << "                          number of variables = " << var_count()      << std::endl;
 }
 
-int Node_Set::Check_State() const
+template <typename INT>
+int Node_Set<INT>::Check_State() const
 {
   SMART_ASSERT(id_ >= EX_INVALID_ID);
-  SMART_ASSERT(numEntity >= 0);
-  SMART_ASSERT(num_dist_factors >= 0);
-
   SMART_ASSERT( !( id_ == EX_INVALID_ID && numEntity > 0 ) );
   SMART_ASSERT( !( id_ == EX_INVALID_ID && num_dist_factors > 0 ) );
   SMART_ASSERT( !( id_ == EX_INVALID_ID && nodes ) );
@@ -179,14 +187,27 @@ int Node_Set::Check_State() const
   return 1;
 }
 
-void Node_Set::entity_load_params()
+template <typename INT>
+void Node_Set<INT>::entity_load_params()
 {
-  int err = ex_get_set_param(fileId, EX_NODE_SET, id_, &numEntity, &num_dist_factors);
+  std::vector<ex_set> sets(1);
+  sets[0].id = id_;
+  sets[0].type = EX_NODE_SET;
+  sets[0].entry_list = NULL;
+  sets[0].extra_list = NULL;
+  sets[0].distribution_factor_list = NULL;
+
+  int err = ex_get_sets(fileId, 1, &sets[0]);
 
   if (err < 0) {
     std::cout << "ERROR: Failed to get nodeset parameters for nodeset " << id_
 	      << ". !  Aborting..." << std::endl;
     exit(1);
   }
+
+  numEntity = sets[0].num_entry;
+  num_dist_factors = sets[0].num_distribution_factor;
 }
 
+template class Node_Set<int>;
+template class Node_Set<int64_t>;

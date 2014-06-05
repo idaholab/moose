@@ -39,17 +39,19 @@
 
 #include <string>
 
+template <typename INT>
 class ExoII_Read;
 
+template <typename INT>
 class Exo_Block: public Exo_Entity {
 public:
 
   Exo_Block();
-  Exo_Block(int exo_file_id, int exo_block_id);
-  Exo_Block(int exo_file_id, int block_id,
+  Exo_Block(int exo_file_id, size_t block_id);
+  Exo_Block(int exo_file_id, size_t block_id,
             const char* type,
-            int num_elmts,
-            int num_nodes_per_elmt);
+            size_t num_elmts,
+            size_t num_nodes_per_elmt);
  ~Exo_Block();
 
   std::string Load_Connectivity();
@@ -58,17 +60,17 @@ public:
   // Access functions:
 
   const std::string& Elmt_Type()            const { return elmt_type;          }
-  int                Num_Nodes_per_Elmt()   const { return num_nodes_per_elmt; }
+  size_t             Num_Nodes_per_Elmt()   const { return num_nodes_per_elmt; }
 
 
   // Block description access functions:
 
-  const int* Connectivity()  const { return conn; }  // 1-offset connectivity
-  const int* Connectivity(int elmt_index) const;     // 1-offset connectivity
+  const INT* Connectivity()  const { return conn; }  // 1-offset connectivity
+  const INT* Connectivity(size_t elmt_index) const;     // 1-offset connectivity
 
-  std::string Give_Connectivity(int& num_e,       // Moves connectivity matrix
-                                int& npe,         // to conn pointer and sets
-                                int*& recv_conn); // its own to null.
+  std::string Give_Connectivity(size_t& num_e,       // Moves connectivity matrix
+                                size_t& npe,         // to conn pointer and sets
+                                INT*& recv_conn); // its own to null.
 
 
   // Misc:
@@ -84,16 +86,15 @@ private:
 
   void entity_load_params();
 
-  const char* exodus_flag() const {return "E";}
   EXOTYPE exodus_type() const;
   const char* label() const {return "Element Block";}
 
   std::string elmt_type;
   int         num_nodes_per_elmt;
 
-  int*    conn;          // Array; holds a matrix, num_elmts by num_nodes_per_elmt.
+  INT*    conn;          // Array; holds a matrix, num_elmts by num_nodes_per_elmt.
 
-  friend class ExoII_Read;
+  friend class ExoII_Read<INT>;
 };
 
 #endif

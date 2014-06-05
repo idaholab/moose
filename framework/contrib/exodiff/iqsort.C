@@ -32,40 +32,30 @@
 //
 #include "iqsort.h"
 #include "smart_assert.h"
+#include <unistd.h>
 
 namespace {
-  void swap_(int v[], int i, int j);
+  template <typename INT>
+  void swap_(INT v[], size_t i, size_t j);
 
-  template <typename T>
-  int median3(const T v[], int iv[], int left, int right);
+  template <typename T, typename INT>
+  int median3(const T v[], INT iv[], size_t left, size_t right);
 
-  template <typename T>
-  void iqsort(const T v[], int iv[], int left, int right);
+  template <typename T, typename INT>
+  void iqsort(const T v[], INT iv[], size_t left, size_t right);
 
-  template <typename T>
-  void iisort(const T v[], int iv[], int N);
+  template <typename T, typename INT>
+  void iisort(const T v[], INT iv[], size_t N);
 
-  template <typename T>
-  void check(const T v[], int iv[], int N);
+  template <typename T, typename INT>
+  void check(const T v[], INT iv[], size_t N);
 }
 
 
-// Too avoid issues of instantiation, the visible interface
-// defines two qsort instances -- double and int.  (Could define more)
-// These then cause the correct template functions in this file to be
-// instantiated so there should be no linker problems.  Only issue is
-// that a new sort type needs to be added below and to iqsort.h instead
-// of it appearing magically if index_qsort were a template...
-
-void index_qsort(const double v[], int iv[], int N)
+template <typename T, typename INT>
+void index_qsort(const T v[], INT iv[], size_t N)
 {
-  iqsort(v, iv, 0, N-1);
-  iisort(v, iv, N);
-  check(v, iv, N);
-}
-
-void index_qsort(const int v[], int iv[], int N)
-{
+  if (N <=1 ) return;
   iqsort(v, iv, 0, N-1);
   iisort(v, iv, N);
   check(v, iv, N);
@@ -90,19 +80,20 @@ namespace {
 #define QSORT_CUTOFF 12
 
 /* swap - interchange v[i] and v[j] */
-void swap_(int v[], int i, int j)
+template <typename INT>
+void swap_(INT v[], size_t i, size_t j)
 {
-  int temp;
+  INT temp;
 
   temp = v[i];
   v[i] = v[j];
   v[j] = temp;
 }
 
-  template <typename T>
-  int median3(const T v[], int iv[], int left, int right)
+  template <typename T, typename INT>
+  int median3(const T v[], INT iv[], size_t left, size_t right)
 {
-  int center;
+  size_t center;
   center = (left + right) / 2;
 
   if (v[iv[left]] > v[iv[center]])
@@ -116,11 +107,11 @@ void swap_(int v[], int i, int j)
   return iv[right-1];
 }
 
-  template <typename T>
-  void iqsort(const T v[], int iv[], int left, int right)
+  template <typename T, typename INT>
+  void iqsort(const T v[], INT iv[], size_t left, size_t right)
 {
-  int pivot;
-  int i, j;
+  size_t pivot;
+  size_t i, j;
 
   if (left + QSORT_CUTOFF <= right) {
     pivot = median3(v, iv, left, right);
@@ -128,10 +119,8 @@ void swap_(int v[], int i, int j)
     j = right - 1;
 
     for ( ; ; ) {
-      while (v[iv[++i]] < v[pivot])
-        ;
-      while (v[iv[--j]] > v[pivot])
-        ;
+      while (v[iv[++i]] < v[pivot]);
+      while (v[iv[--j]] > v[pivot]);
       if (i < j) {
         swap_(iv, i, j);
       } else {
@@ -145,15 +134,13 @@ void swap_(int v[], int i, int j)
   }
 }
 
-  template <typename T>
-  void iisort(const T v[], int iv[], int N)
+  template <typename T, typename INT>
+  void iisort(const T v[], INT iv[], size_t N)
 {
-  int i,j;
-  int ndx = 0;
-  T small;
-  int tmp;
+  size_t i,j;
+  size_t ndx = 0;
 
-  small = v[iv[0]];
+  T small = v[iv[0]];
   for (i = 1; i < N; i++) {
     if (v[iv[i]] < small) {
       small = v[iv[i]];
@@ -164,7 +151,7 @@ void swap_(int v[], int i, int j)
   swap_(iv, 0, ndx);
 
   for (i=1; i <N; i++) {
-    tmp = iv[i];
+    INT tmp = iv[i];
     for (j=i; v[tmp] < v[iv[j-1]]; j--) {
       iv[j] = iv[j-1];
     }
@@ -172,18 +159,21 @@ void swap_(int v[], int i, int j)
   }
 }
 
-  template <typename T>
-#if defined(DEBUG_QSORT)
-  void check(const T v[], int iv[], int N)
+  template <typename T, typename INT>
+  void check(const T v[], INT iv[], size_t N)
   {
+#if defined(DEBUG_QSORT)
   fprintf(stderr, "Checking sort of %d values\n", N+1);
-  int i;
+  size_t i;
   for (i=1; i < N; i++) {
     SMART_ASSERT(v[iv[i-1]] <= v[iv[i]]);
   }
-#else
-  void check(const T /*v*/[], int /*iv*/[], int /*N*/)
-  {
 #endif
   }
 }
+
+template void index_qsort(const int v[], int iv[], size_t N);
+template void index_qsort(const double v[], int iv[], size_t N);
+
+template void index_qsort(const int64_t v[], int64_t iv[], size_t N);
+template void index_qsort(const double v[], int64_t iv[], size_t N);
