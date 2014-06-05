@@ -18,6 +18,7 @@
 #include "UserObject.h"
 #include "TransientInterface.h"
 #include "FunctionInterface.h"
+#include "DependencyResolverInterface.h"
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -37,6 +38,7 @@ class GeneralUserObject :
   public MaterialPropertyInterface,
   public TransientInterface,
   public FunctionInterface,
+  public DependencyResolverInterface,
   public UserObjectInterface,
   protected PostprocessorInterface
 {
@@ -50,7 +52,18 @@ public:
    */
   virtual void execute() = 0;
 
+  const std::set<std::string> & getRequestedItems();
+
+  const std::set<std::string> & getSuppliedItems();
+
   virtual ~GeneralUserObject() {}
+
+  virtual PostprocessorValue & getPostprocessorValue(const std::string & name);
+  virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
+
+protected:
+  std::set<std::string> _depend_vars;
+  std::set<std::string> _supplied_vars;
 };
 
 #endif
