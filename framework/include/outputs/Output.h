@@ -372,11 +372,11 @@ protected:
   /// Flag for forcing call to outputSetup() with every call to output() (restartable)
   bool & _sequence;
 
-  /// Flag for disabling/enabling outut
+  /// Flag for disabling/enabling output
   bool _allow_output;
 
-//private:
-protected:
+private:
+//protected:
 
   /**
    * Initialization method.
@@ -452,6 +452,24 @@ protected:
    */
   void initOutputList(OutputData & data);
 
+  /**
+   * Handles logic for determining if a step should be output
+   * @return True if a call to outputStep should be preformed
+   */
+  bool shouldOutputStep();
+
+  /**
+   * Handles logic for determining if an initial step should be output
+   * @return True if a call to outputInitial should be preformed
+   */
+  bool shouldOutputInitial();
+
+  /**
+   * Returns status of output initial flag
+   * @return True prior to call of outputInitial(), once this is called then it returns false
+   */
+  bool onInitial();
+
   /// The current time for output purposes
   Real & _time;
 
@@ -517,11 +535,14 @@ protected:
   /// True if init() has been called
   bool _initialized;
 
+  bool _on_initial;
+
   // Allow complete access
   friend class OutputWarehouse;
   friend class FileOutput;
   friend class OversampleOutput;
   friend class PetscOutput;
+  friend class Console;
   friend class TransientMultiApp;
 };
 

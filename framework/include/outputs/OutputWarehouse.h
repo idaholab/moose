@@ -179,7 +179,7 @@ public:
    * @return A pointer to the output object
    */
   template<typename T>
-  std::vector<T *> getOutputs();
+  std::vector<T *> getOutputs() const;
 
   /**
    * Return a list of output objects with a given type
@@ -201,6 +201,21 @@ public:
    * @return True if the name is reserved
    */
   bool isReservedName(const std::string & name);
+
+  /**
+   * A method for disabling all Console output to the screen
+   * This used used by the Multiapp system
+   */
+  void disableScreenOutput();
+
+  ///@{
+  /**
+   * Sends the supplied message to Console output objects
+   * @param message A string or stringstream containing the message to write
+   * @param err A flag for outputing to Moose::err instead of Moose::out
+   */
+  void mooseConsole(const std::string & message, bool err = false) const;
+  ///@}
 
 private:
 
@@ -314,7 +329,7 @@ OutputWarehouse::getOutputs(const std::vector<OutputName> & names)
 
 template<typename T>
 std::vector<T *>
-OutputWarehouse::getOutputs()
+OutputWarehouse::getOutputs() const
 {
   // The vector to output
   std::vector<T *> outputs;
