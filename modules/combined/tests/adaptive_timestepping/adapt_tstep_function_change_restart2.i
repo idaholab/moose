@@ -177,9 +177,8 @@
 []
 
 [Outputs]
-  file_base = adapt_tstep_function_change_out
   output_initial = true
-  [./exodus]
+  [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]

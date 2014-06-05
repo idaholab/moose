@@ -22,11 +22,10 @@
   [./test_function_change_restart2]
     type = 'Exodiff'
     input = 'adapt_tstep_function_change_restart2.i'
-    exodiff = 'adapt_tstep_function_change_out.e'
+    exodiff = 'adapt_tstep_function_change_restart2_out.e'
     exodiff_opts = -TM
     rel_err = 9e-06
     prereq = 'test_function_change test_function_change_restart1'
-    skip = 'see #2995'
   [../]
 
 
