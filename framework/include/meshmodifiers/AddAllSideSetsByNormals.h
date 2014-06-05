@@ -45,7 +45,7 @@ protected:
    * A pointer to the Mesh's boundary set, this datastructure will be modified
    * through this modifier.
    */
-  std::set<BoundaryID> *_mesh_boundary_ids;
+  std::set<BoundaryID> _mesh_boundary_ids;
 };
 
 #endif /* ADDALLSIDESETS_H */
