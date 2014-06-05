@@ -1,12 +1,5 @@
-/*
- * powerGrid.h
- *
- *  Created on: Aug 9, 2012
- *      Author: mandd
- */
-
-#ifndef POWERGRID_H_
-#define POWERGRID_H_
+#ifndef POWERGRID_H
+#define POWERGRID_H
 
 #include "CrowTools.h"
 
@@ -15,15 +8,13 @@ class powerGrid;
 template<>
 InputParameters validParams<powerGrid>();
 
-class powerGrid : public CrowTools{
-
+class powerGrid : public CrowTools
+{
 public:
   powerGrid(const std::string & name, InputParameters parameters);
   ~powerGrid();
 
-protected:
-
 };
 
 
-#endif /* POWERGRID_H_ */
+#endif /* POWERGRID_H */

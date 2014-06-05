@@ -28,14 +28,14 @@ CrowTools::~CrowTools()
 {
 }
 double
-CrowTools::getVariable(std::string variableName)
+CrowTools::getVariable(std::string variable_name)
 {
   double res;
-  if(_tool_parameters.find(variableName) != _tool_parameters.end()){
-     res = _tool_parameters.find(variableName) ->second;
+  if(_tool_parameters.find(variable_name) != _tool_parameters.end()){
+     res = _tool_parameters.find(variable_name) ->second;
   }
   else{
-    mooseError("Parameter " << variableName << " was not found in CrowTool type " << _type <<".");
+    mooseError("Parameter " << variable_name << " was not found in CrowTool type " << _type <<".");
   }
   return res;
 }
@@ -51,15 +51,15 @@ CrowTools::getVariableNames(){
 
 
 void
-CrowTools::updateVariable(std::string variableName, double & newValue)
+CrowTools::updateVariable(std::string variable_name, double & new_value)
 {
-  if(_tool_parameters.find(variableName) != _tool_parameters.end()){
-    // we are sure the variableName is already present in the mapping =>
+  if(_tool_parameters.find(variable_name) != _tool_parameters.end()){
+    // we are sure the variable_name is already present in the mapping =>
     // we can update it in the following way
-    _tool_parameters[variableName] = newValue;
+    _tool_parameters[variable_name] = new_value;
   }
   else{
-    mooseError("Parameter " << variableName << " was not found in CrowTool type " << _type << ".");
+    mooseError("Parameter " << variable_name << " was not found in CrowTool type " << _type << ".");
   }
 }
 
@@ -80,15 +80,15 @@ getCrowToolType(CrowTools & tool)
   return tool.getType();
 }
 double
-getCrowToolVariable(CrowTools & tool,const std::string & variableName)
+getCrowToolVariable(CrowTools & tool,const std::string & variable_name)
 {
-  return tool.getVariable(variableName);
+  return tool.getVariable(variable_name);
 }
 
 void
-updateCrowToolVariable(CrowTools & tool,const std::string & variableName, double newValue)
+updateCrowToolVariable(CrowTools & tool,const std::string & variable_name, double new_value)
 {
-  tool.updateVariable(variableName,newValue);
+  tool.updateVariable(variable_name,new_value);
 }
 
 double

@@ -22,13 +22,15 @@ InputParameters validParams<TableFunction>(){
    return params;
 }
 
+#define ECustomDistFitType custom_dist_fit_type
+
 TableFunction::TableFunction(const std::string & name, InputParameters parameters):
   CrowTools(name,parameters)
 {
   _tool_parameters["scaling_factor"] = getParam<double>("scaling_factor");
   _interpolation=Interpolation_Functions(getParam<std::vector<double> >("x_coordinates"),
                  getParam<std::vector<double> >("y_coordinates"),
-       static_cast<custom_dist_fit_type>((int)getParam<MooseEnum>("fitting_type")));
+       static_cast<ECustomDistFitType>((int)getParam<MooseEnum>("fitting_type")));
 }
 TableFunction::~TableFunction()
 {

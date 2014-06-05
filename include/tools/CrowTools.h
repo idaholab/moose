@@ -1,17 +1,10 @@
-/*
- * CrowTools.h
- *
- *  Created on: May 28, 2013
- *      Author: alfoa
- */
-
-#ifndef CROWTOOLS_H_
-#define CROWTOOLS_H_
+#ifndef CROWTOOLS_H
+#define CROWTOOLS_H
 
 #include "Interpolation_Functions.h"
 #include "MooseObject.h"
-#include "CrowTools_min.h"
 
+class CrowTools;
 
 template<>
 InputParameters validParams<CrowTools>();
@@ -19,23 +12,22 @@ InputParameters validParams<CrowTools>();
 class CrowTools : public MooseObject
 {
 public:
-   //> constructor for built-in crow tools
-   CrowTools(const std::string & name, InputParameters parameters);
+  //> constructor for built-in crow tools
+  CrowTools(const std::string & name, InputParameters parameters);
 
-   virtual ~CrowTools();
-   /*
-    * All variables except status ones
-    */
-   double  getVariable(std::string variableName);                     ///< getVariable from mapping
-   void updateVariable(std::string variableName, double & newValue);  ///< update variable into the mapping//   void updateVariable(const char variableName, double & newValue);
-   virtual double compute(double value);
-   std::string & getType();                                             ///< Get CrowTool type
-   std::vector<std::string> getVariableNames();                         ///< Get variable Names
+  virtual ~CrowTools();
+  /*
+   * All variables except status ones
+   */
+  double  getVariable(std::string variable_name);                     ///< getVariable from mapping
+  void updateVariable(std::string variable_name, double & new_value);  ///< update variable into the mapping//   void updateVariable(const char variable_name, double & new_value);
+  virtual double compute(double value);
+  std::string & getType();        ///< Get CrowTool type
+   std::vector<std::string> getVariableNames(); ///< Get variable Names
 
 protected:
-   std::string                       _type;               ///< CrowTools' type
-   std::map <std::string,double>     _tool_parameters  ;  ///< CrowTools' parameters
-   //void addVariable(std::string & variableName, double & newValue);
+  std::string _type;               ///< CrowTools' type
+  std::map <std::string,double> _tool_parameters  ;  ///< CrowTools' parameters
 };
 
-#endif /* CROWTOOLS_H_ */
+#endif /* CROWTOOLS_H */

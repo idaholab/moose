@@ -29,8 +29,8 @@ decayHeat::decayHeat(const std::string & name, InputParameters parameters):
   _tool_parameters["initial_pow"      ] = getParam<double>("initial_pow");
   _tool_parameters["operating_time"   ] = getParam<double>("operating_time");
   _tool_parameters["power_coefficient"] = getParam<double>("power_coefficient");
-  _equationType = getParam<int>("eq_type");
-  if(_equationType != 1 and _equationType != 2)  throw("DecayHeat supports only equation type 1 or 2 so far.");
+  _equation_type = getParam<int>("eq_type");
+  if(_equation_type != 1 and _equation_type != 2)  throw("DecayHeat supports only equation type 1 or 2 so far.");
 }
 
 decayHeat::~decayHeat()
@@ -41,7 +41,7 @@ double
 decayHeat::compute(double time)
 {
   double powerValue;
-  if(_equationType == 1)
+  if(_equation_type == 1)
   {
     powerValue=getVariable(std::string("initial_pow"))*getVariable(std::string("power_coefficient"))*(pow(time,-0.2) - pow(time+getVariable("operating_time"),-0.2));
   }

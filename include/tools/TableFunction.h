@@ -1,12 +1,5 @@
-/*
- * TableFunction.h
- *
- *  Created on: July 20, 2012
- *      Author: alfoa
- */
-
-#ifndef TABLEFUNCTION_H_
-#define TABLEFUNCTION_H_
+#ifndef TABLEFUNCTION_H
+#define TABLEFUNCTION_H
 
 #include "CrowTools.h"
 #include "Interpolation_Functions.h"
@@ -17,7 +10,8 @@ template<>
 InputParameters validParams<TableFunction>();
 
 
-class TableFunction : public CrowTools{
+class TableFunction : public CrowTools
+{
 public:
   TableFunction(const std::string & name, InputParameters parameters);
   virtual ~TableFunction();
@@ -25,7 +19,6 @@ public:
 
 protected:
   Interpolation_Functions _interpolation;         ///< Interpolation class
-
 };
 
 

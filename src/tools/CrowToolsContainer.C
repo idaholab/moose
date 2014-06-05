@@ -5,7 +5,6 @@
  *      Author: alfoa
  */
 #include "CrowToolsContainer.h"
-#include "CrowTools_min.h"
 #include <iostream>
 #include <math.h>
 #include <cmath>
@@ -42,39 +41,39 @@ CrowToolsContainer::addToolInContainer(const std::string & type, const std::stri
 }
 
 std::string
-CrowToolsContainer::getType(const char *  ToolAlias){
-  return getType(std::string(ToolAlias));
+CrowToolsContainer::getType(const char *  tool_alias){
+  return getType(std::string(tool_alias));
 }
 
 std::string
-CrowToolsContainer::getType(const std::string ToolAlias){
+CrowToolsContainer::getType(const std::string tool_alias){
 
-    if(_tool_by_name.find(ToolAlias) != _tool_by_name.end()){
-       CrowTools * tool = _tool_by_name.find(ToolAlias)->second;
-       std::string type = getCrowToolType(*tool);
+    if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
+       CrowTools * tool = _tool_by_name.find(tool_alias)->second;
+       std::string type = tool->getType();
        if(type == "CrowToolError"){
-         mooseError("Type for CrowTool " << ToolAlias << " not found");
+         mooseError("Type for CrowTool " << tool_alias << " not found");
        }
        return type;
     }
     else{
-       mooseError("CrowTool " << ToolAlias << " not found in distribution container (get type");
+       mooseError("CrowTool " << tool_alias << " not found in distribution container (get type");
        return "CrowToolError";
     }
 }
 
 double
-CrowToolsContainer::getVariable(const char * paramName,const char *ToolAlias){
-  return getVariable(std::string(paramName),std::string(ToolAlias));
+CrowToolsContainer::getVariable(const char * param_name,const char *tool_alias){
+  return getVariable(std::string(param_name),std::string(tool_alias));
 }
 
 double
-CrowToolsContainer::getVariable(const std::string paramName,const std::string ToolAlias){
-    if(_tool_by_name.find(ToolAlias) != _tool_by_name.end()){
-       CrowTools * tool = _tool_by_name.find(ToolAlias)->second;
-       return getCrowToolVariable(*tool,paramName);
+CrowToolsContainer::getVariable(const std::string param_name,const std::string tool_alias){
+    if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
+       CrowTools * tool = _tool_by_name.find(tool_alias)->second;
+       return tool->getVariable(param_name);
     }
-    mooseError("CrowTool " << ToolAlias << " not found in CrowTools container (get variable)");
+    mooseError("CrowTool " << tool_alias << " not found in CrowTools container (get variable)");
     return -1;
 }
 
@@ -88,42 +87,42 @@ CrowToolsContainer::getToolNames(){
 }
 
 std::vector<std::string>
-CrowToolsContainer::getToolVariableNames(const std::string ToolAlias){
-  if(_tool_by_name.find(ToolAlias) != _tool_by_name.end()){
-     CrowTools * tool = _tool_by_name.find(ToolAlias)->second;
-     return ::getToolVariableNames(*tool);
+CrowToolsContainer::getToolVariableNames(const std::string tool_alias){
+  if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
+     CrowTools * tool = _tool_by_name.find(tool_alias)->second;
+     return tool->getVariableNames();
   }
-  mooseError("CrowTool " << ToolAlias << " not found in CrowTools container (getCrowToolVariableNames)");
+  mooseError("CrowTool " << tool_alias << " not found in CrowTools container (getCrowToolVariableNames)");
 }
 void
-CrowToolsContainer::updateVariable(const char * paramName,double newValue,const char *ToolAlias){
-  updateVariable(std::string(paramName),newValue,std::string(ToolAlias));
+CrowToolsContainer::updateVariable(const char * param_name,double new_value,const char *tool_alias){
+  updateVariable(std::string(param_name),new_value,std::string(tool_alias));
 }
 
 void
-CrowToolsContainer::updateVariable(const std::string paramName,double newValue,const std::string ToolAlias){
-    if(_tool_by_name.find(ToolAlias) != _tool_by_name.end()){
-       CrowTools * tool = _tool_by_name.find(ToolAlias)->second;
-       updateCrowToolVariable(*tool,paramName,newValue);
+CrowToolsContainer::updateVariable(const std::string param_name,double new_value,const std::string tool_alias){
+    if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
+       CrowTools * tool = _tool_by_name.find(tool_alias)->second;
+       tool->updateVariable(param_name, new_value);
     }
     else{
-       mooseError("CrowTool " + ToolAlias + " was not found in CrowTools container (update variable)");
+       mooseError("CrowTool " + tool_alias + " was not found in CrowTools container (update variable)");
 
     }
 }
 
 double
-CrowToolsContainer::compute(const char *ToolAlias, double value){
-  return compute(std::string(ToolAlias),value);
+CrowToolsContainer::compute(const char *tool_alias, double value){
+  return compute(std::string(tool_alias),value);
 }
 
 double
-CrowToolsContainer::compute(const std::string ToolAlias, double value){
-    if(_tool_by_name.find(ToolAlias) != _tool_by_name.end()){
-       CrowTools * tool = _tool_by_name.find(ToolAlias)->second;
-       return computeCrowTool(*tool,value);
+CrowToolsContainer::compute(const std::string tool_alias, double value){
+    if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
+       CrowTools * tool = _tool_by_name.find(tool_alias)->second;
+       return tool->compute(value);
     }
-    mooseError("CrowTool " << ToolAlias << " not found in CrowTools container (compute)");
+    mooseError("CrowTool " << tool_alias << " not found in CrowTools container (compute)");
     return -1;
 }
 

@@ -1,12 +1,5 @@
-/*
- * decayHeat.h
- *
- *  Created on: Aug 8, 2012
- *      Author: mandd
- */
-
-#ifndef DECAYHEAT_H_
-#define DECAYHEAT_H_
+#ifndef DECAYHEAT_H
+#define DECAYHEAT_H
 
 #include "CrowTools.h"
 
@@ -15,15 +8,15 @@ class decayHeat;
 template<>
 InputParameters validParams<decayHeat>();
 
-
-class decayHeat : public CrowTools{
+class decayHeat : public CrowTools
+{
 public:
   decayHeat(const std::string & name, InputParameters parameters);
   virtual ~decayHeat();
   double compute(double time);
 
 protected:
-  int _equationType;
+  int _equation_type;
 
 };
 
