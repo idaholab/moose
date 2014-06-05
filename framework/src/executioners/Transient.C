@@ -198,7 +198,6 @@ Transient::init()
   if (_t_step == 0)
     _t_step = 1;
 
-
   if (_t_step > 1) //Recover case
     _dt_old = _dt;
 
@@ -215,6 +214,7 @@ Transient::init()
 void
 Transient::execute()
 {
+
   preExecute();
 
   // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a wrong answer and might need to be regolded.
@@ -288,7 +288,7 @@ Transient::takeStep(Real input_dt)
   for (_picard_it=0; _picard_it<_picard_max_its && _picard_converged==false; _picard_it++)
   {
     if (_picard_max_its > 1)
-      Moose::out<<"Beginning Picard Iteration "<<_picard_it<<"\n"<<std::endl;
+      _console << "Beginning Picard Iteration " << _picard_it << "\n" << std::endl;
 
     solveStep(input_dt);
   }
@@ -337,16 +337,16 @@ Transient::solveStep(Real input_dt)
     if (_picard_it == 0) // First Picard iteration - need to save off the initial nonlinear residual
     {
       _picard_initial_norm = current_norm;
-      Moose::out<<"Initial Picard Norm: "<<_picard_initial_norm<<std::endl;
+      _console << "Initial Picard Norm: " << _picard_initial_norm << '\n';
     }
     else
-      Moose::out<<"Current Picard Norm: "<<current_norm<<std::endl;
+      _console << "Current Picard Norm: " << current_norm << '\n';
 
     Real relative_drop = current_norm / _picard_initial_norm;
 
     if (current_norm < _picard_abs_tol || relative_drop < _picard_rel_tol)
     {
-      Moose::out<<"Picard converged!"<<std::endl;
+      _console << "Picard converged!" << std::endl;
 
       _picard_converged = true;
       return;
@@ -358,7 +358,7 @@ Transient::solveStep(Real input_dt)
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   if (lastSolveConverged())
   {
-    Moose::out << "Solve Converged!" << std::endl;
+    _console << " Solve Converged!" << std::endl;
 
     _time_stepper->acceptStep();
 
@@ -380,7 +380,7 @@ Transient::solveStep(Real input_dt)
   }
   else
   {
-    Moose::out << "Solve Did NOT Converge!" << std::endl;
+    _console << " Solve Did NOT Converge!" << std::endl;
 
     // Perform the output of the current, failed time step (this only occurs if desired)
     _output_warehouse.outputFailedStep();
@@ -465,7 +465,7 @@ Transient::computeConstrainedDT()
   _unconstrained_dt = dt_cur;
 
   if (_verbose)
-    Moose::out << diag.str();
+    _console << diag.str();
 
   diag.str("");
   diag.clear();
@@ -551,7 +551,7 @@ Transient::computeConstrainedDT()
   }
 
   if (_verbose)
-    Moose::out << diag.str();
+    _console << diag.str();
 
   return dt_cur;
 }
@@ -578,7 +578,7 @@ Transient::keepGoing()
     // Check current solution relative error norm against steady-state tolerance
     if (ss_relerr_norm < _ss_check_tol)
     {
-      Moose::out << "Steady-State Solution Achieved at time: " << _time << std::endl;
+      _console << "Steady-State Solution Achieved at time: " << _time << std::endl;
       //Output last solve if not output previously by forcing it
       keep_going = false;
     }
@@ -587,7 +587,7 @@ Transient::keepGoing()
       // Update solution norm for next time step
       _old_time_solution_norm = new_time_solution_norm;
       // Print steady-state relative error norm
-      Moose::out << "Steady-State Relative Differential Norm: " << ss_relerr_norm << std::endl;
+      _console << "Steady-State Relative Differential Norm: " << ss_relerr_norm << std::endl;
     }
   }
 
@@ -600,7 +600,7 @@ Transient::keepGoing()
 
   if (!lastSolveConverged() && _abort)
   {
-    Moose::out << "Aborting as solve did not converge and input selected to abort" << std::endl;
+    _console << "Aborting as solve did not converge and input selected to abort" << std::endl;
     keep_going = false;
   }
 

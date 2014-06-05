@@ -54,6 +54,7 @@
 #include "PHarmonic.h"
 #include "PMassEigenKernel.h"
 #include "CoupledEigenKernel.h"
+#include "ConsoleMessageKernel.h"
 
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
@@ -264,6 +265,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(PHarmonic);
   registerKernel(PMassEigenKernel);
   registerKernel(CoupledEigenKernel);
+  registerKernel(ConsoleMessageKernel);
 
   // Aux kernels
   registerAux(CoupledAux);

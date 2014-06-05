@@ -12,23 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseObject.h"
-#include "MooseApp.h"
-#include "Console.h"
+#include "ConsoleMessageKernel.h"
 
 template<>
-InputParameters validParams<MooseObject>()
+InputParameters validParams<ConsoleMessageKernel>()
 {
-  InputParameters params;
+  InputParameters params = validParams<CoefDiffusion>();
   return params;
 }
 
-
-MooseObject::MooseObject(const std::string & name, InputParameters parameters) :
-  ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  _name(name),
-  _pars(parameters),
-  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
-  _console(_app.getOutputWarehouse())
+ConsoleMessageKernel::ConsoleMessageKernel(const std::string & name, InputParameters parameters) :
+  CoefDiffusion(name, parameters)
 {
+  _console << "ConsoleMessageKernel - Constructing object.\n";
+}
+
+ConsoleMessageKernel::~ConsoleMessageKernel()
+{
+}
+
+void
+ConsoleMessageKernel::initialSetup()
+{
+  _console << "ConsoleMessageKernel::initalSetup - time = " << _t << "; t_step = " << _t_step << '\n';
+}
+
+void
+ConsoleMessageKernel::timestepSetup()
+{
+  _console << "ConsoleMessageKernel::timestepSetup - time = " << _t << "; t_step = " << _t_step << '\n';
 }

@@ -136,7 +136,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
   _auto_advance = auto_advance;
 
-  Moose::out << "Solving MultiApp " << _name << std::endl;
+  _console << "Solving MultiApp " << _name << std::endl;
 
 // "target_time" must always be in global time
   target_time += _app.getGlobalTimeOffset();
@@ -265,11 +265,11 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         Real solution_change_norm = ex->getSolutionChangeNorm();
 
         if (_detect_steady_state)
-          Moose::out << "Solution change norm: " << solution_change_norm << std::endl;
+          _console << "Solution change norm: " << solution_change_norm << std::endl;
 
         if (converged && _detect_steady_state && solution_change_norm < _steady_state_tol)
         {
-          Moose::out << "Detected Steady State!  Fast-forwarding to " << target_time << std::endl;
+          _console << "Detected Steady State!  Fast-forwarding to " << target_time << std::endl;
 
           at_steady = true;
 
@@ -299,7 +299,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
     }
     else
     {
-      Moose::out << "Solving Normal Step!" << std::endl;
+      _console << "Solving Normal Step!" << std::endl;
       if (auto_advance)
         if (_first != true)
           ex->incrementStepOrReject();
@@ -319,7 +319,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           if (_catch_up)
           {
-            Moose::out << "Starting Catch Up!" << std::endl;
+            _console << "Starting Catch Up!" << std::endl;
 
             bool caught_up = false;
 
@@ -369,7 +369,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
   _transferred_vars.clear();
 
-  Moose::out << "Finished Solving MultiApp " << _name << std::endl;
+  _console << "Finished Solving MultiApp " << _name << std::endl;
 }
 
 void

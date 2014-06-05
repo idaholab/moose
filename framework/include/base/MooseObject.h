@@ -16,6 +16,7 @@
 #define MOOSEOBJECT_H
 
 #include "InputParameters.h"
+#include "ConsoleStream.h"
 
 // libMesh includes
 #include "libmesh/parallel_object.h"
@@ -64,21 +65,30 @@ public:
   template <typename T>
   const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
 
+  /**
+   * Test if the supplied parameter is valid
+   * @param name The name of the parameter to test
+   */
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
-  ///@}a
 
   /**
-   * Get the MooseApp this object is associated wth.
+   * Get the MooseApp this object is associated with.
    */
   MooseApp & getMooseApp() { return _app; }
 
 protected:
+
   /// The name of this object
   std::string _name;
+
   /// Parameters of this object
   InputParameters _pars;
+
   /// The MooseApp this object is associated with
   MooseApp & _app;
+
+  /// An instance of helper class to write streams to the Console objects
+  ConsoleStream _console;
 };
 
 #endif /* MOOSEOBJECT_H*/

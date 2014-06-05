@@ -78,4 +78,16 @@
     input = 'console_transient.i'
     expect_out = 'Time Step  4, time = -0.600000'
   [../]
+  [./mooseConsole_warning]
+    # Test the used of MooseObject::mooseConsole method
+    type = RunApp
+    input = 'moose_console.i'
+    expect_out = 'Attempted to write a message via mooseConsole, but no Console output objects exist.'
+  [../]
+  [./mooseConsole_output]
+    # Test the used of MooseObject::mooseConsole method
+    type = RunApp
+    input = 'moose_console.i'
+    expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0.4; t_step = 4'
+  [../]
 []
