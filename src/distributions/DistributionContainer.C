@@ -5,9 +5,6 @@
  *      Author: alfoa
  */
 #include "DistributionContainer.h"
-//#include "Factory.h"
-//#include "distribution_1D.h"
-#include "distribution_min.h"
 #include "distribution_base_ND.h"
 #include <iostream>
 #include <math.h>
@@ -93,7 +90,7 @@ DistributionContainer::getType(const std::string DistAlias){
     if(_dist_by_name.find(DistAlias) != _dist_by_name.end())
     {
        BasicDistribution * dist = _dist_by_name.find(DistAlias)->second;
-       std::string type = getDistributionType(*dist);
+       std::string type = dist->getType();
        if(type == "DistributionError")
        {
          throwError("getType: Type for distribution " << DistAlias << " not found");
@@ -103,7 +100,7 @@ DistributionContainer::getType(const std::string DistAlias){
     else if (_dist_nd_by_name.find(DistAlias) != _dist_nd_by_name.end())
     {
       BasicDistributionND * dist = _dist_nd_by_name.find(DistAlias)->second;
-      std::string type = getDistributionType(*dist);
+      std::string type = dist->getType();
       if(type == "DistributionError")
       {
         throwError("getType :Type for distribution " << DistAlias << " not found");
@@ -198,12 +195,12 @@ DistributionContainer::getVariable(const std::string DistAlias, const std::strin
     if(_dist_by_name.find(DistAlias) != _dist_by_name.end())
     {
        BasicDistribution * dist = _dist_by_name.find(DistAlias)->second;
-       return getDistributionVariable(*dist,paramName);
+       return dist->getVariable(paramName);
     }
     else if (_dist_nd_by_name.find(DistAlias) != _dist_nd_by_name.end())
     {
       BasicDistributionND * dist = _dist_nd_by_name.find(DistAlias)->second;
-      return getDistributionVariable(*dist,paramName);
+      return dist->getVariable(paramName);
     }
     throwError("getVariable: Distribution " << DistAlias << " not found in distribution container");
     return -1;
@@ -219,12 +216,12 @@ DistributionContainer::updateVariable(const std::string DistAlias,const std::str
     if(_dist_by_name.find(DistAlias) != _dist_by_name.end())
     {
        BasicDistribution * dist = _dist_by_name.find(DistAlias)->second;
-       DistributionUpdateVariable(*dist,paramName,newValue);
+       dist->updateVariable(paramName, newValue);
     }
     else if (_dist_nd_by_name.find(DistAlias) != _dist_nd_by_name.end())
     {
        BasicDistributionND * dist = _dist_nd_by_name.find(DistAlias)->second;
-       DistributionUpdateVariable(*dist,paramName,newValue);
+       dist->updateVariable(paramName, newValue);
     }
     else
     {
@@ -252,7 +249,7 @@ DistributionContainer::getDistributionVariableNames(const std::string DistAlias)
   if(_dist_by_name.find(DistAlias) != _dist_by_name.end())
   {
      BasicDistribution * dist = _dist_by_name.find(DistAlias)->second;
-     return ::getDistributionVariableNames(*dist);
+     return dist->getVariableNames();
   }
   else if(_dist_nd_by_name.find(DistAlias) != _dist_nd_by_name.end())
   {
@@ -277,7 +274,7 @@ DistributionContainer::Pdf(const std::string DistAlias, double x){
 
     if(_dist_by_name.find(DistAlias) != _dist_by_name.end()){
        BasicDistribution * dist = _dist_by_name.find(DistAlias)->second;
-       return DistributionPdf(*dist,x);
+       return dist->Pdf(x);
     }
     throwError("Pdf: Distribution " + DistAlias + " was not found in distribution container.");
     return -1.0;
@@ -294,7 +291,7 @@ DistributionContainer::Pdf(const std::string DistAlias, std::vector<double> x){
 
     if(_dist_nd_by_name.find(DistAlias) != _dist_nd_by_name.end()){
       BasicDistributionND * dist = _dist_nd_by_name.find(DistAlias)->second;
-       return DistributionPdf(*dist,x);
+      return dist->Pdf(x);
     }
     throwError("Pdf: Distribution ND" + DistAlias + " was not found in distribution container.");
     return -1.0;
@@ -310,7 +307,7 @@ DistributionContainer::Cdf(const std::string DistAlias, double x){
 
    if(_dist_by_name.find(DistAlias) != _dist_by_name.end()){
        BasicDistribution * dist = _dist_by_name.find(DistAlias)->second;
-       return DistributionCdf(*dist,x);
+       return dist->Cdf(x);
     }
     throwError("Cdf: Distribution " + DistAlias + " was not found in distribution container.");
     return -1.0;
@@ -326,8 +323,7 @@ DistributionContainer::Cdf(const std::string DistAlias, std::vector<double> x){
 
    if(_dist_nd_by_name.find(DistAlias) != _dist_nd_by_name.end()){
        BasicDistributionND * dist = _dist_nd_by_name.find(DistAlias)->second;
-       return DistributionCdf(*dist,x);
-       //return DistributionCdf(dist,x);
+       return dist->Cdf(x);
     }
     throwError("Cdf: Distribution ND" + DistAlias + " was not found in distribution container.");
     return -1.0;
@@ -344,8 +340,7 @@ double
 DistributionContainer::inverseCdf(const std::string DistAlias, double RNG) {
     if(_dist_by_name.find(DistAlias) != _dist_by_name.end()){
         BasicDistribution * dist = _dist_by_name.find(DistAlias)->second;
-        //return dist->InverseCdf(RNG);
-        return DistributionInverseCdf(*dist,RNG);
+        return dist->InverseCdf(RNG);
      }
      throwError("inverseCdf: Distribution " + DistAlias + " was not found in distribution container.");
      return -1.0;

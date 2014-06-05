@@ -17,6 +17,9 @@
 using namespace std;
 
 class RandomClass;
+class BasicDistribution;
+class BasicDistributionND;
+
 
 class DistributionContainer{
      public:
