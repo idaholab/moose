@@ -48,7 +48,6 @@
 []
 
 [Outputs]
-  console = true
   [./out]
     type = Exodus
     output_final = true

@@ -42,6 +42,10 @@ AddOutputAction::AddOutputAction(const std::string & name, InputParameters param
 void
 AddOutputAction::act()
 {
+  // Do nothing if FEProblem is NULL, this should only be the case for CoupledProblem
+  if (_problem == NULL)
+    return;
+
   // Get a reference to the OutputWarehouse
   OutputWarehouse & output_warehouse = _app.getOutputWarehouse();
 
@@ -61,7 +65,9 @@ AddOutputAction::act()
   _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem",  _problem);
 
   // Apply the common parameters
-  _moose_object_pars.applyParameters(output_warehouse.getCommonParameters());
+  InputParameters * common = output_warehouse.getCommonParameters();
+  if (common != NULL)
+    _moose_object_pars.applyParameters(*common);
 
   // Set the correct value for the binary flag for XDA/XDR output
   if (_type.compare("XDR") == 0)

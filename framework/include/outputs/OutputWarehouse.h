@@ -133,9 +133,9 @@ public:
 
   /**
    * Get a reference to the common output parameters
-   * @return Reference to the common InputParameters object
+   * @return Pointer to the common InputParameters object
    */
-  InputParameters & getCommonParameters();
+  InputParameters * getCommonParameters();
 
   /**
    * Return the sync times for all objects

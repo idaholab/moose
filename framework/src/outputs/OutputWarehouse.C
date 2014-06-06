@@ -223,13 +223,10 @@ OutputWarehouse::setCommonParameters(InputParameters * params_ptr)
   _common_params_ptr = params_ptr;
 }
 
-InputParameters &
+InputParameters *
 OutputWarehouse::getCommonParameters()
 {
-  if (_common_params_ptr == NULL)
-    mooseError("No common input parameters are stored");
-
-  return *_common_params_ptr;
+  return _common_params_ptr;
 }
 
 std::set<Real> &

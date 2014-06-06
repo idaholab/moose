@@ -73,7 +73,6 @@
 []
 
 [Outputs]
-  console = true
   exodus = true
   [./oversample]
     type = Exodus

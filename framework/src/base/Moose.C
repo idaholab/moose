@@ -706,7 +706,9 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_multi_app",                MultiApp,               false);
   registerMooseObjectTask("add_transfer",                 Transfer,               false);
 
-  registerMooseObjectTask("add_output",                   Output,             false);
+  registerMooseObjectTask("add_output",                   Output,                 false);
+
+  registerTask("common_output", true);
 
   registerTask("add_feproblem", false);
   registerTask("add_bounds_vectors", false);
@@ -767,6 +769,7 @@ addActionTypes(Syntax & syntax)
    */
   syntax.addDependencySets(
 "(meta_action)"
+"(common_output)"
 "(set_global_params)"
 "(recover_base)"
 "(check_copy_nodal_vars)"
@@ -864,7 +867,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(DetermineSystemType, "determine_system_type");
   registerAction(CreateProblemAction, "create_problem");
   registerAction(AddOutputAction, "add_output");
-  registerAction(CommonOutputAction, "meta_action");
+  registerAction(CommonOutputAction, "common_output");
   registerAction(GlobalParamsAction, "set_global_params");
   registerAction(SetupPredictorAction, "setup_predictor");
   registerAction(MaterialOutputAction, "setup_material_output");

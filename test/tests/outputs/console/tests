@@ -1,4 +1,10 @@
 [Tests]
+  [./no_outputs_block]
+    # Test the a file w/o output outputs
+    type = RunApp
+    input = console_no_outputs_block.i
+    expect_out = 'Framework Information'
+  [../]
   [./postprocessors]
     # Tests if the header line for the postprocessor values table is correct
     type = RunApp
@@ -79,7 +85,7 @@
     expect_out = 'Time Step  4, time = -0.600000'
   [../]
   [./_console_output]
-    # Test the used of MooseObject::mooseConsole method
+    # Test the used of MooseObject::_console method
     type = RunApp
     input = 'moose_console.i'
     expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0.4; t_step = 4'

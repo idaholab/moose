@@ -50,7 +50,6 @@
 
 [Outputs]
   exodus = true
-  console = true
   [./out]
     type = Checkpoint
     interval = 3
