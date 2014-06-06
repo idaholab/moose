@@ -20,6 +20,7 @@ protected:
   MaterialProperty<SymmTensor> & _tensor;
   Real _threshold;
   bool _average;
+  Real _random_range;
 
   virtual bool doesElementCrack(RealVectorValue &direction);
 };

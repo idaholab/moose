@@ -22,6 +22,7 @@ InputParameters validParams<XFEMMaterialTensorMarkerUserObject>()
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
   params.addRequiredParam<Real>("threshold", "The threshold for crack growth.");
   params.addRequiredParam<bool>("average", "Should the tensor quantity be averaged over the quadruature points?");
+  params.addParam<Real>("random_range",0.0,"Range of a uniform random distribution for the threshold");
   return params;
 }
 
@@ -30,8 +31,10 @@ XFEMMaterialTensorMarkerUserObject::XFEMMaterialTensorMarkerUserObject(const std
   _material_tensor_calculator(name, parameters),
   _tensor(getMaterialProperty<SymmTensor>(getParam<std::string>("tensor"))),
   _threshold(getParam<Real>("threshold")),
-  _average(getParam<bool>("average"))
+  _average(getParam<bool>("average")),
+  _random_range(getParam<Real>("random_range"))
 {
+  setRandomResetFrequency(EXEC_INITIAL);
 }
 
 bool
@@ -39,49 +42,45 @@ XFEMMaterialTensorMarkerUserObject::doesElementCrack(RealVectorValue &direction)
 {
   bool does_it_crack = false;
   unsigned int numqp = _qrule->n_points();
-  std::vector<Real> tensor_quantities;
-  tensor_quantities.reserve(numqp);
-  std::vector<RealVectorValue> directions;
-  directions.resize(numqp);
-  Real ave_quantity = 0;
-  Real max_quantity = 0;
-  unsigned int max_index = 999999;
 
-  for ( unsigned int qp = 0; qp < numqp; ++qp )
-  {
-    tensor_quantities[qp] = _material_tensor_calculator.getTensorQuantity(_tensor[qp],&_q_point[qp],directions[qp]);
-    if (directions[qp](0) == 0 &&
-        directions[qp](1) == 0 &&
-        directions[qp](2) == 0)
-    {
-      mooseError("Direction has zero length in XFEMMaterialTensorMarkerUserObject");
-    }
-    ave_quantity += tensor_quantities[qp];
-    if (tensor_quantities[qp] > max_quantity)
-    {
-      max_quantity = tensor_quantities[qp];
-      max_index = qp;
-    }
-  }
-
+  Real rnd_mult = (1.0 - _random_range/2.0) + _random_range*getRandomReal();
+  
   if (_average)
   {
-    ave_quantity /= (Real)numqp;
-    if (ave_quantity > _threshold)
+    SymmTensor average_tensor;
+    for ( unsigned int qp = 0; qp < numqp; ++qp )
     {
-      does_it_crack = true;
-      direction.zero();
-      for ( unsigned int qp = 0; qp < numqp; ++qp )
-      {
-        //direction += tensor_quantities[qp] * directions[qp];
-        direction += directions[qp];
-      }
-      direction /= direction.size();
+      average_tensor += _tensor[qp];
     }
+    average_tensor *= 1.0/(Real)numqp;
+    Real tensor_quantity = _material_tensor_calculator.getTensorQuantity(average_tensor,&_q_point[0],direction);
+    if (tensor_quantity > _threshold*rnd_mult)
+      does_it_crack = true;
   }
   else
   {
-    if (max_quantity > _threshold)
+    unsigned int max_index = 999999;
+    std::vector<Real> tensor_quantities;
+    tensor_quantities.reserve(numqp);
+    Real max_quantity = 0;
+    std::vector<RealVectorValue> directions;
+    directions.resize(numqp);
+    for ( unsigned int qp = 0; qp < numqp; ++qp )
+    {
+      tensor_quantities[qp] = _material_tensor_calculator.getTensorQuantity(_tensor[qp],&_q_point[qp],directions[qp]);
+      if (directions[qp](0) == 0 &&
+          directions[qp](1) == 0 &&
+          directions[qp](2) == 0)
+      {
+        mooseError("Direction has zero length in XFEMMaterialTensorMarkerUserObject");
+      }
+      if (tensor_quantities[qp] > max_quantity)
+      {
+        max_quantity = tensor_quantities[qp];
+        max_index = qp;
+      }
+    }
+    if (max_quantity > _threshold*rnd_mult)
     {
       does_it_crack = true;
       direction = directions[max_index];
