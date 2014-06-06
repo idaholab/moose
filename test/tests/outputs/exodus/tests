@@ -10,8 +10,9 @@
     # Test the ability to write the input file to the output; this currently just checks if
     # Moose runs with the output_input = true
     # \TODO Find a method for comparing files with and without information records
-    type = 'RunApp'
+    type = 'CheckFiles'
     input = 'exodus_input.i'
+    check_files = 'exodus_input_out.e'
   [../]
 
   [./disable_initial]

@@ -40,6 +40,7 @@ CheckOutputAction::act()
   checkMaterialOutput();
   checkConsoleOutput();
   checkPerfLogOutput();
+  checkInputOutput();
 }
 
 void
@@ -111,5 +112,17 @@ CheckOutputAction::checkPerfLogOutput()
 #ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
     libMesh::perflog.enable_logging();
 #endif
+  }
+}
+
+void
+CheckOutputAction::checkInputOutput()
+{
+  if (_app.isParamValid("show_input"))
+  {
+    const std::vector<Console *> ptrs = _app.getOutputWarehouse().getOutputs<Console>();
+    for (std::vector<Console *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)
+      if ((*it)->getParam<bool>("output_screen"))
+        (*it)->parameters().set<bool>("output_input") = true;
   }
 }

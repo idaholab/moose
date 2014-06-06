@@ -90,4 +90,11 @@
     input = 'moose_console.i'
     expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0.4; t_step = 4'
   [../]
+  [./input_output]
+    # Test the used of MooseObject::mooseConsole method
+    type = RunApp
+    input = 'console.i'
+    cli_args = '--show-input'
+    expect_out = '[./screen]'
+  [../]
 []

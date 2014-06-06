@@ -65,6 +65,11 @@ private:
    */
   void checkPerfLogOutput();
 
+  /**
+   * Checks for --output-input command line parameter
+   */
+  void checkInputOutput();
+
 };
 
 #endif //CHECKOUTPUTACTION_H

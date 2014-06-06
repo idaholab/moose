@@ -97,6 +97,11 @@ public:
 protected:
 
   /**
+   * Print the input file at the beginning of the simulation
+   */
+  virtual void outputInput();
+
+  /**
    * Prints the aux scalar variables table to the screen
    */
   virtual void outputScalarVariables();

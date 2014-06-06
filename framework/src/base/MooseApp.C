@@ -268,12 +268,6 @@ MooseApp::runInputFile()
   if (_ready_to_exit)
     return;
 
-  // Print the input file syntax if requested
-  if (isParamValid("show_input"))
-  {
-    _action_warehouse.printInputFile(Moose::out);
-  }
-
   _action_warehouse.executeAllActions();
   _executioner = _action_warehouse.executioner();
 

@@ -32,7 +32,11 @@ InputParameters validParams<Exodus>()
   // Add description for the Exodus class
   params.addClassDescription("Object for output data in the Exodus II format");
 
+  // Disable the outputting of vector postprocessor data
   params.suppressParameter<bool>("output_vector_postprocessors");
+
+  // Set outputting of the input to be on by default
+  params.set<bool>("output_input") = true;
 
   // Return the InputParameters
   return params;
@@ -203,6 +207,12 @@ Exodus::output()
     if (!_exodus_initialized)
       outputEmptyTimestep();
     _exodus_io_ptr->write_global_data(_global_values, _global_names);
+  }
+
+  if (_output_input)
+  {
+    outputInput();
+    _output_input = false;
   }
 
   // Increment output call counter, which is reset by outputSetup
