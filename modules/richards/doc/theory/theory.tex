@@ -46,7 +46,8 @@ foundations of the MOOSE implementation.
   and associated nonlinear functions.
 \item Chapter~\ref{sources.sinks.chap} describes the sources and sinks
   that I have implemented.
-\item Chapter~\ref{chap.upwinding} describes upwinding using the SUPG method.
+\item Chapter~\ref{chap.upwinding} describes upwinding
+\item Chapter~\ref{discret.chap} describes the discretisation of the time derivative.
 \item Chapter~\ref{chap.multi} describes the multi-phase Richards'
   equations that I have implemented.  For notational simplicity, the
   rest of this document focusses on the single-phase case, but this
@@ -54,8 +55,6 @@ foundations of the MOOSE implementation.
   generalisation.
 \item Chapter~\ref{tol.chap} briefly discusses tolerancs and
   convergence criteria.
-\item Chapter~\ref{discret.chap} discusses technical issues with the
-  finite-element discretisation.
 \end{itemize}
 There are two other accompanying documents: (1) A description of the
 unit tests and benchmark verifications; (2) Examples of input syntax
@@ -896,8 +895,12 @@ It is well-known that numerical implementations of
 Eqn~(\ref{richards.eqn}) must use upwinding so that the propagation of
 fronts be accurately simulated
 (eg~\cite{huyakorn1978,dalen1979,helmig1998}).  This chapter details
-the Streamline-Upwind-Petrov-Galerkin (SUPG) upwinding I have
-implemented, which is based on~\cite{brooks1982, hughes1986}.
+the two forms of upwinding I have implemented for the Richards
+equation: Streamline-Upwind-Petrov-Galerkin (SUPG) upwinding
+implemented, based on~\cite{brooks1982, hughes1986}, and the
+fully-upwinding approach that I think is originally due to~\cite{dalen1979}.
+
+\section{Petrov-Galerkin finite elements and upwinding}
 
 First consider the
 fairly general case of one scalar variable whose evolution within a
@@ -1362,6 +1365,87 @@ Eqn~(\ref{eqn.i.eg.supg.a.b}).  This means that the saturation at Node
 1 will reduce below immobile saturation.  With SUPG this effect is
 reduced due to the fluid transfer depending only on $\lambda_{1}=0$ to second
 order (Eqn~(\ref{eqn.supg.eg.2nd.order})).
+
+
+\section{Full upwinding}
+
+The SUPG approach has nice numerical properties, in particular the
+upwinding strength is a smooth function of the velocity.  However for
+multi-phase situations it can lead to disaster as the algorithm can
+attempt to withdraw fluid from a node where there is no fluid.  For
+instance, this would happen in the situation described in the previous
+paragraph if the immobile saturation was zero.  For situations where
+one phase disappears, or almost disappears, full upwinding is
+advisable.  It has the numerical disadvantage that it is not smooth,
+so that close to steady-state where the fluxes are zero, the upwind
+direction can oscillate, leading to nonconvergence.
+
+The weak form of the flux term in Eqn~(\ref{richards.eqn}) for a
+single element is
+\begin{equation}
+R_{a} = \int_{\mathrm{element}} \nabla_{i}\psi_{a}
+\frac{\rho\kappa_{ij}\kappa_{\mathrm{rel}}}{\mu}(\nabla_{j}P - \rho
+g_{j})  \ .
+\end{equation}
+Here $\psi_{a}$ is the test function that we are integrating against,
+and $R_{a}$ is the contribution to the residual for this test
+function.  Define
+\begin{equation}
+m = \frac{\rho\kappa_{\mathrm{rel}}}{\mu} \ ,
+\end{equation}
+which is called the mobility.
+
+Upwinding is all a matter of choosing where in the element to evaluate
+$m$ in the above integral.  The sophisticated SUPG approach was
+designed to weight $m$ on the upstream side of the element.  Consider
+for a moment taking $m$ outside the integral:
+\begin{equation}
+\tilde{R}_{a} = m\int_{\mathrm{element}} \nabla_{i}\psi_{a}
+\kappa_{ij}(\nabla_{j}P - \rho
+g_{j}) = m I_{a} \ .
+\end{equation}
+$\tilde{R}$ is not exactly $R$, but note:
+\begin{itemize}
+\item $R_{a}$ is the mass flux flowing out of node $a$.
+\item $I_{a}$ is thereby intepreted as a measure of fluid flow out of
+  node $a$.
+\end{itemize}
+This leads to the following definition of upwinding:
+\begin{equation}
+R_{a} = m_{a}I_{a} \ \ \ \mbox{if}\ \ \ I_{a}\geq 0 \ .
+\end{equation}
+The nodes for which $I_{a}\geq 0$ are called ``upwind nodes'', since
+fluid is flowing from them to the ``downwind nodes''.  I
+think this approach was first introduced by Dalen~\cite{dalen1979} in
+1979.
+
+The residual at the downwind nodes is determined by conserving mass.
+Specifically, let
+\begin{equation}
+I_{\mathrm{up}} = \sum_{I_{a}\geq 0}I_{a} \ \ \ \mbox{and}\ \ \ 
+I_{\mathrm{down}} = -\sum_{I_{a}<0} I_{a} \ .
+\end{equation}
+Then
+\begin{equation}
+R_{a} = I_{a}\frac{I_{\mathrm{up}}}{I_{\mathrm{down}}}
+\ \ \ \mbox{for}\ \ \ I_{a}<0 \ .
+\end{equation}
+Then $\sum_{a} R_{a} = 0$ as required by mass conservation (which
+originates from $\sum_{a} \psi_{a} = 1$).
+
+The fully-upwind method is extremely
+advantageous to use if fluid saturations ever approach immobile
+saturation (where $\kappa_{\mathrm{rel}}=0$) or zero density, for then
+the mobility is zero and it becomes impossible to withdraw fluid from
+such a node (in practice this may still happen due to precision loss
+or other related nasty artifacts that I will not describe here).
+
+Prescribed sinks, either from the boundary or from internal objects such as
+wellbores, should also be fully-upwinded if they are likely to cause
+fluid phases to disappear or be reduced to their immobile
+saturations.  I have implemented full upwinding for the sinks
+described in Chapter~\ref{sources.sinks.chap}.
+
 
 
 
