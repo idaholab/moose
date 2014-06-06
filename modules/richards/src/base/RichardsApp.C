@@ -57,9 +57,6 @@
 #include "GradParsedFunction.h"
 #include "Grad2ParsedFunction.h"
 
-// Indicators
-#include "RichardsFluxJumpIndicator.h"
-
 // Postprocessors
 #include "RichardsMass.h"
 #include "RichardsPiecewiseLinearSinkFlux.h"
@@ -163,9 +160,6 @@ RichardsApp::registerObjects(Factory & factory)
   registerFunction(RichardsExcavGeom);
   registerFunction(GradParsedFunction);
   registerFunction(Grad2ParsedFunction);
-
-  // Indicators
-  registerIndicator(RichardsFluxJumpIndicator);
 
   // Postprocessors
   registerPostprocessor(RichardsMass);
