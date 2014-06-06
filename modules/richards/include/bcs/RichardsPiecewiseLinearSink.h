@@ -8,8 +8,12 @@
 
 #include "IntegratedBC.h"
 #include "LinearInterpolation.h"
-#include "RichardsVarNames.h"
 #include "Function.h"
+#include "RichardsVarNames.h"
+#include "RichardsDensity.h"
+#include "RichardsRelPerm.h"
+#include "RichardsSeff.h"
+
 
 // Forward Declarations
 class RichardsPiecewiseLinearSink;
@@ -36,9 +40,15 @@ public:
                         InputParameters parameters);
 
 protected:
+  virtual void computeResidual();
+
   virtual Real computeQpResidual();
 
+  virtual void computeJacobian();
+
   virtual Real computeQpJacobian();
+
+  virtual void computeJacobianBlock(unsigned int jvar);
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
@@ -47,6 +57,9 @@ protected:
 
   /// whether to multiply the sink flux by relative permeability
   bool _use_relperm;
+
+  /// whether to use full upwinding
+  bool _fully_upwind;
 
   /// piecewise-linear function of porepressure (this defines the strength of the sink)
   LinearInterpolation _sink_func;
@@ -57,8 +70,47 @@ protected:
   /// holds info about the names and values of richards variable in the simulation
   const RichardsVarNames & _richards_name_UO;
 
+  /// number of richards variables
+  unsigned int _num_p;
+
   /// the moose internal variable number corresponding to the porepressure of this sink flux
   unsigned int _pvar;
+
+  /// user object defining the density.  Only used if _fully_upwind = true
+  const RichardsDensity * _density_UO;
+
+  /// user object defining the effective saturation.  Only used if _fully_upwind = true
+  const RichardsSeff * _seff_UO;
+
+  /// user object defining the relative permeability.  Only used if _fully_upwind = true
+  const RichardsRelPerm * _relperm_UO;
+
+  /// number of nodes in this element.  Only used if _fully_upwind = true
+  unsigned int _num_nodes;
+
+  /**
+   * nodal values of fluid density
+   * These are used if _fully_upwind = true
+   */
+  std::vector<Real> _nodal_density;
+
+  /**
+   * d(_nodal_density)/d(variable_ph)  (variable_ph is the variable for phase=ph)
+   * These are used in the jacobian calculations if _fully_upwind = true
+   */
+  std::vector<std::vector<Real> > _dnodal_density_dv;
+
+  /**
+   * nodal values of relative permeability
+   * These are used if _fully_upwind = true
+   */
+  std::vector<Real> _nodal_relperm;
+
+  /**
+   * d(_nodal_relperm)/d(variable_ph)  (variable_ph is the variable for phase=ph)
+   * These are used in the jacobian calculations if _fully_upwind = true
+   */
+  std::vector<std::vector<Real> > _dnodal_relperm_dv;
 
   /// porepressure values (only the _pvar component is used)
   MaterialProperty<std::vector<Real> > &_pp;
@@ -89,6 +141,29 @@ protected:
 
   /// d(density_i)/d(variable_j)
   MaterialProperty<std::vector<std::vector<Real> > > &_ddensity_dv;
+
+  /**
+   * Holds the values of pressures at all the nodes of the element
+   * This holds the same info as _ps_at_nodes, but in a different way.
+   * Eg: _nodal_pp[_pvar]->nodalSln()[i] = (*_ps_at_nodes[_pvar])[i]
+   * We call its computeNodalValues method in order to retrieve the nodal
+   * porepressures from Moose if _fully_upwind = true.
+   * NOTE: only valid if all Richards variables are pressures
+   */
+  std::vector<MooseVariable *> _nodal_pp;
+
+  /**
+   * Holds the values of pressures at all the nodes of the element
+   * Only used if _fully_upwind = true
+   * Eg:
+   * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
+   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i]
+   */
+  std::vector<VariableValue *> _ps_at_nodes;
+
+
+  /// calculates the nodal values of pressure, mobility, and derivatives thereof
+  void prepareNodalValues();
 
   /// derivative of residual wrt the wrt_num Richards variable
   Real jac(unsigned int wrt_num);
