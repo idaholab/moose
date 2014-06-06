@@ -17,7 +17,6 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
-#include "MaterialData.h"
 #include "ParallelUniqueId.h"
 
 // libMesh includes
@@ -46,8 +45,6 @@ InternalSideIndicator::InternalSideIndicator(const std::string & name, InputPara
     NeighborCoupleable(parameters, false, false),
     ScalarCoupleable(parameters),
     NeighborMooseVariableInterface(parameters, false),
-    TwoMaterialPropertyInterface(parameters),
-
     _field_var(_sys.getVariable(_tid, name)),
 
     _current_elem(_assembly.elem()),
