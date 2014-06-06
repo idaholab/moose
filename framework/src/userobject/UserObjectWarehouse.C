@@ -104,6 +104,8 @@ UserObjectWarehouse::updateDependObjects(const std::set<std::string> & depend_uo
     }
   }
 
+  // Sort the General UserObjects
+  sortUserObjects(_all_generic_user_objects);
   _pre_generic_user_objects.clear();
   _post_generic_user_objects.clear();
   for (std::vector<GeneralUserObject *>::iterator it2 = _all_generic_user_objects.begin(); it2 != _all_generic_user_objects.end(); ++it2)
@@ -425,5 +427,26 @@ UserObjectWarehouse::genericUserObjects(GROUP group)
     return _post_generic_user_objects;
   default:
     mooseError("Bad value for Enum GROUP, must be ALL, PRE_AUX, or POST_AUX");
+  }
+}
+
+template<typename T>
+void
+UserObjectWarehouse::sortUserObjects(std::vector<T *> & uo_vector)
+{
+  try
+  {
+    // Sort based on dependencies
+    DependencyResolverInterface::sort(uo_vector.begin(), uo_vector.end());
+  }
+  catch(CyclicDependencyException<DependencyResolverInterface *> & e)
+  {
+    std::ostringstream oss;
+
+    oss << "Cyclic dependency detected in UserObject ordering:\n";
+    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
+    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
+      oss << (static_cast<T *>(it->first))->name() << " -> " << (static_cast<T *>(it->second))->name() << "\n";
+    mooseError(oss.str());
   }
 }

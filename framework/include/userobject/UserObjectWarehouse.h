@@ -150,6 +150,9 @@ public:
   const std::set<SubdomainID> & blockNodalIds() { return _block_ids_with_nodal_user_objects; }
 
 protected:
+  /// Internal method for sorting postprocessors based on dependencies
+  template <typename T>
+  void sortUserObjects(std::vector<T *> & pps_vector);
 
   /// Userobject Names
   std::map<std::string, UserObject *> _name_to_user_objects;
