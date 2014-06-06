@@ -11,6 +11,9 @@ InputParameters validParams<RichardsBorehole>()
 {
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
+  params.addParam<std::vector<UserObjectName> >("relperm_UO", "List of names of user objects that define relative permeability.  Only needed if fully_upwind is used");
+  params.addParam<std::vector<UserObjectName> >("seff_UO", "List of name of user objects that define effective saturation as a function of pressure list.  Only needed if fully_upwind is used");
+  params.addParam<std::vector<UserObjectName> >("density_UO", "List of names of user objects that define the fluid density.  Only needed if fully_upwind is used");
   params.addRequiredParam<FunctionName>("character", "If zero then borehole does nothing.  If positive the borehole acts as a sink (production well) for porepressure > borehole pressure, and does nothing otherwise.  If negative the borehole acts as a source (injection well) for porepressure < borehole pressure, and does nothing otherwise.  The flow rate to/from the borehole is multiplied by |character|, so usually character = +/- 1, but you can specify other quantities to provide an overall scaling to the flow if you like.");
   params.addRequiredParam<Real>("bottom_pressure", "Pressure at the bottom of the borehole");
   params.addRequiredParam<RealVectorValue>("unit_weight", "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  Note that the borehole pressure at a given z position is bottom_pressure + unit_weight*(p - p_bottom), where p=(x,y,z) and p_bottom=(x,y,z) of the bottom point of the borehole.  If you don't want bottomhole pressure to vary in the borehole just set unit_weight=0.  Typical value is gravity = (0,0,-1E4)");
@@ -20,6 +23,7 @@ InputParameters validParams<RichardsBorehole>()
   params.addParam<bool>("mesh_adaptivity", true, "If not using mesh adaptivity then set this false to substantially speed up the simulation by caching the element containing each Dirac point.");
   params.addParam<Real>("well_constant", -1.0, "Usually this is calculated internally from the element geometry, the local borehole direction and segment length, and the permeability.  However, if this parameter is given as a positive number then this number is used instead of the internal calculation.  This speeds up computation marginally.  re_constant becomes irrelevant");
   params.addParam<bool>("MyNameIsAndyWilkins", false, "Used for debugging by Andy");
+  params.addParam<bool>("fully_upwind", false, "Fully upwind the flux");
   params.addClassDescription("Approximates a borehole in the mesh with given bottomhole pressure, and radii using a number of point sinks whose positions are read from a file");
   return params;
 }
@@ -29,8 +33,20 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
     _debug_things(getParam<bool>("MyNameIsAndyWilkins")),
 
+    _fully_upwind(getParam<bool>("fully_upwind")),
+
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
+    _num_p(_richards_name_UO.num_v()),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
+
+    // in the following, getUserObjectByName returns a reference (an alias) to a RichardsBLAH user object, and the & turns it into a pointer
+    _density_UO(_fully_upwind ? &getUserObjectByName<RichardsDensity>(getParam<std::vector<UserObjectName> >("density_UO")[_pvar]) : NULL),
+    _seff_UO(_fully_upwind ? &getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName> >("seff_UO")[_pvar]) : NULL),
+    _relperm_UO(_fully_upwind ? &getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[_pvar]) : NULL),
+
+    _num_nodes(0),
+    _mobility(0),
+    _dmobility_dv(0),
 
     _character(getFunction("character")),
     _p_bot(getParam<Real>("bottom_pressure")),
@@ -155,6 +171,12 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
         mooseError("Rotation matrix for v2 = " << v2 << " does not obey R^T.R=I.  It is " << _rot_matrix[i] << "\n");
     }
   }
+
+  _nodal_pp.resize(_num_p);
+  for (unsigned int i=0 ; i<_num_p; ++i)
+    _nodal_pp[i] = _richards_name_UO.raw_var(i);
+  _ps_at_nodes.resize(_num_p);
+
 
 }
 
@@ -295,6 +317,56 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
   return 4*halfPi*effective_perm*half_len/std::log(r0/rad);
 }
 
+void
+RichardsBorehole::prepareNodalValues()
+{
+  // NOTE: i'm assuming that all the richards variables are pressure values
+
+  // can't do the following in the constructor unfortunately
+  for (unsigned int i=0 ; i<_num_p; ++i)
+    _nodal_pp[i]->computeNodalValues();
+
+  _num_nodes = _var.nodalSln().size();
+
+  // we want to use seff_UO.seff, and this has arguments:
+  // seff(std::vector<VariableValue *> p, unsigned int qp)
+  // so i need a std::vector<VariableValue *> (ie a vector of pointers to VariableValues)
+  for (unsigned int pnum=0 ; pnum<_num_p; ++pnum)
+    // _nodal_pp[pnum] is just like _var, and the ->nodalSln() returns a VariableValue &.  We want a pointer to this.
+    _ps_at_nodes[pnum] = &(_nodal_pp[pnum]->nodalSln());
+
+
+  Real p;
+  Real density;
+  Real ddensity_dp;
+  Real seff;
+  std::vector<Real> dseff_dp;
+  Real relperm;
+  Real drelperm_ds;
+  _mobility.resize(_num_nodes);
+  _dmobility_dv.resize(_num_nodes);
+  dseff_dp.resize(_num_p);
+  for (unsigned int nodenum=0; nodenum < _num_nodes ; ++nodenum)
+  {
+    // retrieve and calculate basic things at the node
+    p = _nodal_pp[_pvar]->nodalSln()[nodenum];  // pressure of fluid _pvar at node nodenum
+    density = _density_UO->density(p); // density of fluid _pvar at node nodenum
+    ddensity_dp = _density_UO->ddensity(p); // d(density)/dP
+    seff = _seff_UO->seff(_ps_at_nodes, nodenum); // effective saturation of fluid _pvar at node nodenum
+    dseff_dp = _seff_UO->dseff(_ps_at_nodes, nodenum); // d(seff)/d(P_ph), for ph = 0, ..., _num_p - 1
+    relperm = _relperm_UO->relperm(seff); // relative permeability of fluid _pvar at node nodenum
+    drelperm_ds = _relperm_UO->drelperm(seff); // d(relperm)/dseff
+
+    // calculate the mobility and its derivatives wrt (variable_ph = porepressure_ph)
+    _mobility[nodenum] = density*relperm/_viscosity[0][_pvar]; // assume viscosity is constant throughout element
+    _dmobility_dv[nodenum].resize(_num_p);
+    for (unsigned int ph = 0; ph < _num_p ; ++ph)
+      _dmobility_dv[nodenum][ph] = density*drelperm_ds*dseff_dp[ph]/_viscosity[0][_pvar];
+    _dmobility_dv[nodenum][_pvar] += ddensity_dp*relperm/_viscosity[0][_pvar];
+  }
+}
+
+
 Real
 RichardsBorehole::computeQpResidual()
 {
@@ -303,8 +375,21 @@ RichardsBorehole::computeQpResidual()
 
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
 
-  Real mob = 1.0/_viscosity[_qp][_pvar];
-  mob *= _rel_perm[_qp][_pvar]*_density[_qp][_pvar];
+  Real pp;
+  Real mob;
+  if (!_fully_upwind)
+  {
+    pp = _pp[_qp][_pvar];
+    mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
+  }
+  else
+  {
+    prepareNodalValues();
+    pp = _nodal_pp[_pvar]->nodalSln()[_i];
+    mob = _mobility[_i];
+  }
+
+
 
 
   // when we can query for the current_dirac_ptid replace this complete bodge:
@@ -319,9 +404,9 @@ RichardsBorehole::computeQpResidual()
   // contribution from half-segment "behind" this point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
-    if ((character < 0.0 && _pp[_qp][_pvar] < bh_pressure) || (character > 0.0 && _pp[_qp][_pvar] > bh_pressure))
+    if ((character < 0.0 && pp < bh_pressure) || (character > 0.0 && pp > bh_pressure))
       // injection, so outflow<0 || // production, so outflow>0
-      outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(_pp[_qp][_pvar] - bh_pressure);
+      outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(pp - bh_pressure);
   }
 
   if (current_dirac_ptid < _zs.size() - 1)
@@ -329,9 +414,9 @@ RichardsBorehole::computeQpResidual()
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
     //Moose::out << " qp= " << _qp << " density = " << _density[_qp][_pvar] << " p = " << std::log(_density[_qp][_pvar]/1000)*2E9 << "\n";
-    if ((character < 0.0 && _pp[_qp][_pvar] < bh_pressure) || (character > 0.0 && _pp[_qp][_pvar] > bh_pressure))
+    if ((character < 0.0 && pp < bh_pressure) || (character > 0.0 && pp > bh_pressure))
       // injection, so outflow<0 || // production, so outflow>0
-      outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(_pp[_qp][_pvar] - bh_pressure);
+      outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(pp - bh_pressure);
   }
 
 
@@ -366,9 +451,30 @@ RichardsBorehole::jac(unsigned int wrt_num)
 
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
 
-  Real mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
-
-  Real mobp = (_drel_perm_dv[_qp][_pvar][wrt_num]*_density[_qp][_pvar] + _rel_perm[_qp][_pvar]*_ddensity_dv[_qp][_pvar][wrt_num])/_viscosity[_qp][_pvar];
+  Real pp;
+  Real dpp_dv;
+  Real mob;
+  Real dmob_dv;
+  Real phi;
+  if (!_fully_upwind)
+  {
+    pp = _pp[_qp][_pvar];
+    dpp_dv = _dpp_dv[_qp][_pvar][wrt_num];
+    mob = _rel_perm[_qp][_pvar]*_density[_qp][_pvar]/_viscosity[_qp][_pvar];
+    dmob_dv = (_drel_perm_dv[_qp][_pvar][wrt_num]*_density[_qp][_pvar] + _rel_perm[_qp][_pvar]*_ddensity_dv[_qp][_pvar][wrt_num])/_viscosity[_qp][_pvar];
+    phi = _phi[_j][_qp];
+  }
+  else
+  {
+    if (_i != _j)
+      return 0.0;  // residual at node _i only depends on variables at that node
+    prepareNodalValues();
+    pp = _nodal_pp[_pvar]->nodalSln()[_i];
+    dpp_dv = (_pvar == wrt_num ? 1 : 0);  // NOTE: i'm assuming that the variables are pressure variables
+    mob = _mobility[_i];
+    dmob_dv = _dmobility_dv[_i][wrt_num];
+    phi = 1;
+  }
 
   // when we can query for the current_dirac_ptid replace this complete bodge:
   unsigned int current_dirac_ptid = 0;
@@ -382,18 +488,18 @@ RichardsBorehole::jac(unsigned int wrt_num)
   // contribution from half-segment "behind" this point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
-    if ((character < 0.0 && _pp[_qp][_pvar] < bh_pressure) || (character > 0.0 && _pp[_qp][_pvar] > bh_pressure))
+    if ((character < 0.0 && pp < bh_pressure) || (character > 0.0 && pp > bh_pressure))
       // injection, so outflow<0 || // production, so outflow>0
-      outflowp += _test[_i][_qp]*std::abs(character)*wc*(mob*_phi[_j][_qp]*_dpp_dv[_qp][_pvar][wrt_num] + mobp*_phi[_j][_qp]*(_pp[_qp][_pvar] - bh_pressure));
+      outflowp += _test[_i][_qp]*std::abs(character)*wc*(mob*phi*dpp_dv + dmob_dv*phi*(pp - bh_pressure));
   }
 
   if (current_dirac_ptid < _zs.size() - 1)
   // contribution from half-segment "ahead of" this point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
-    if ((character < 0.0 && _pp[_qp][_pvar] < bh_pressure) || (character > 0.0 && _pp[_qp][_pvar] > bh_pressure))
+    if ((character < 0.0 && pp < bh_pressure) || (character > 0.0 && pp > bh_pressure))
       // injection, so outflow<0 || // production, so outflow>0
-      outflowp += _test[_i][_qp]*std::abs(character)*wc*(mob*_phi[_j][_qp]*_dpp_dv[_qp][_pvar][wrt_num] + mobp*_phi[_j][_qp]*(_pp[_qp][_pvar] - bh_pressure));
+      outflowp += _test[_i][_qp]*std::abs(character)*wc*(mob*phi*dpp_dv + dmob_dv*phi*(pp - bh_pressure));
   }
 
   return outflowp;
