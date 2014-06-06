@@ -38,7 +38,7 @@ AdaptAndModify::incrementStepOrReject()
     _time_old = _time;
     _t_step++;
 
-    _problem.copyOldSolutions();
+    _problem.advanceState();
   }
   else
   {

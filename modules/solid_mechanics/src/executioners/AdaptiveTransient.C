@@ -234,7 +234,7 @@ void
 AdaptiveTransient::takeStep(Real input_dt)
 {
   if (_converged)
-    _problem.copyOldSolutions();
+    _problem.advanceState();
   else
     _problem.restoreSolutions();
 
@@ -245,11 +245,6 @@ AdaptiveTransient::takeStep(Real input_dt)
     _dt = input_dt;
 
   _problem.onTimestepBegin();
-  if (_converged)
-  {
-    // Update backward material data structures
-    _problem.updateMaterials();
-  }
 
   // Increment time
   _time = _time_old + _dt;

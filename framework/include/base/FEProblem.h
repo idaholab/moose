@@ -306,8 +306,12 @@ public:
   virtual void addPredictor(const std::string & type, const std::string & name, InputParameters parameters);
 
   virtual void copySolutionsBackwards();
-  // Update backward time solution vectors
-  virtual void copyOldSolutions();
+
+  /**
+   * Advance all of the state holding vectors / datastructures so that we can move to the next timestep.
+   */
+  virtual void advanceState();
+
   virtual void restoreSolutions();
 
   virtual const std::vector<MooseObject *> & getObjectsByName(const std::string & name, THREAD_ID tid);
@@ -360,7 +364,6 @@ public:
   virtual const std::vector<Material*> & getFaceMaterials(SubdomainID block_id, THREAD_ID tid);
   virtual const std::vector<Material*> & getBndMaterials(BoundaryID block_id, THREAD_ID tid);
   virtual const std::vector<Material*> & getNeighborMaterials(SubdomainID block_id, THREAD_ID tid);
-  virtual void updateMaterials();
 
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.

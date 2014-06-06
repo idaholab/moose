@@ -1629,19 +1629,6 @@ FEProblem::getNeighborMaterials(SubdomainID block_id, THREAD_ID tid)
 }
 
 void
-FEProblem::updateMaterials()
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _materials[tid].updateMaterialDataState();
-
-  if (_material_props.hasStatefulProperties())
-  {
-    _material_props.shift();
-    _bnd_material_props.shift();
-  }
-}
-
-void
 FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 {
   if (_materials[tid].hasMaterials(blk_id))
@@ -3070,10 +3057,22 @@ FEProblem::copySolutionsBackwards()
 }
 
 void
-FEProblem::copyOldSolutions()
+FEProblem::advanceState()
 {
   _nl.copyOldSolutions();
   _aux.copyOldSolutions();
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    _pps_data[tid]->copyValuesBack();
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    _materials[tid].updateMaterialDataState();
+
+  if (_material_props.hasStatefulProperties())
+  {
+    _material_props.shift();
+    _bnd_material_props.shift();
+  }
 }
 
 void FEProblem::restoreSolutions()
@@ -3112,9 +3111,6 @@ void
 FEProblem::onTimestepBegin()
 {
   _nl.onTimestepBegin();
-
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _pps_data[tid]->copyValuesBack();
 }
 
 void

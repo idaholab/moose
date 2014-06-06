@@ -54,7 +54,7 @@ NonlinearEigen::init()
   if (_free_iter>0)
   {
     // save the initial guess
-    _problem.copyOldSolutions();
+    _problem.advanceState();
 
     // free power iterations
     Moose::out << std::endl << " Free power iteration starts"  << std::endl;
@@ -98,9 +98,8 @@ NonlinearEigen::takeStep()
   // nonlinear solve
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);
   preSolve();
-  _problem.updateMaterials();
   _problem.timestepSetup();
-  _problem.copyOldSolutions();
+  _problem.advanceState();
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
   nonlinearSolve(_rel_tol, _abs_tol, _pfactor, _eigenvalue);

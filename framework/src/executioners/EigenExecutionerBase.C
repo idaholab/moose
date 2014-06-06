@@ -241,8 +241,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     if (echo)  Moose::out << " Power iteration= "<< iter << std::endl;
 
     // important: solutions of aux system is also copied
-    _problem.copyOldSolutions();
-    _problem.updateMaterials();
+    _problem.advanceState();
     k_old = k;
 
     // FIXME: timestep needs to be changed to step

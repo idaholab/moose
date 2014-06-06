@@ -222,7 +222,7 @@ Transient::execute()
   // is to maintain backward compatibility and so that MOOSE is giving the same answer.  However, we might remove this call and regold the test
   // in the future eventually.
   if (!_app.isRecovering())
-    _problem.copyOldSolutions();
+    _problem.advanceState();
 
   // Start time loop...
   while (true)
@@ -270,7 +270,7 @@ Transient::incrementStepOrReject()
     _time_old = _time; // = _time_old + _dt;
     _t_step++;
 
-    _problem.copyOldSolutions();
+    _problem.advanceState();
   }
   else
   {
@@ -307,8 +307,6 @@ Transient::solveStep(Real input_dt)
   Real current_dt = _dt;
 
   _problem.onTimestepBegin();
-  if (lastSolveConverged())
-    _problem.updateMaterials();             // Update backward material data structures
 
   // Increment time
   _time = _time_old + _dt;
