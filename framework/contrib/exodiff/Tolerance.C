@@ -31,8 +31,82 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "Tolerance.h"
-#include <math.h>
+#include <cmath>
+#include <cstdlib>
+#include <stdint.h>
+
 #include "smart_assert.h"
+
+namespace {
+  /* See
+     http://randomascii.wordpress.com/2012/01/11/tricks-with-the-floating-point-format
+     for the potential portability problems with the union and bit-fields below.
+  */
+  union Float_t
+  {
+    Float_t(float num = 0.0f) : f(num) {}
+    // Portable extraction of components.
+    bool Negative() const { return (i >> 31) != 0; }
+
+    int32_t i;
+    float f;
+  };
+
+  union Double_t
+  {
+    Double_t(double num = 0.0) : f(num) {}
+    // Portable extraction of components.
+    bool Negative() const { return (i >> 63) != 0; }
+
+    int64_t i;
+    double f;
+  };
+
+  bool AlmostEqualUlpsFloat(float A, float B, int maxUlpsDiff)
+  {
+    Float_t uA(A);
+    Float_t uB(B);
+
+    // Different signs means they do not match.
+    if (uA.Negative() != uB.Negative())
+      {
+        // Check for equality to make sure +0==-0
+        if (A == B)
+	  return true;
+        return false;
+      }
+
+    // Find the difference in ULPs.
+    int ulpsDiff = std::abs(uA.i - uB.i);
+    if (ulpsDiff <= maxUlpsDiff)
+      return true;
+
+    return false;
+  }
+
+  bool AlmostEqualUlpsDouble(double A, double B, int maxUlpsDiff)
+  {
+    Double_t uA(A);
+    Double_t uB(B);
+
+    // Different signs means they do not match.
+    if (uA.Negative() != uB.Negative())
+      {
+        // Check for equality to make sure +0==-0
+        if (A == B)
+	  return true;
+        return false;
+      }
+
+    // Find the difference in ULPs.
+    int ulpsDiff = std::abs(uA.i - uB.i);
+    if (ulpsDiff <= maxUlpsDiff)
+      return true;
+
+    return false;
+  }
+
+}
 
 bool Tolerance::use_old_floor = false;
 
@@ -73,6 +147,12 @@ bool Tolerance::Diff(double v1, double v2) const
     // the other and they should compare equal.  Eventually would like
     // to do a better check to ensure that ratio of one shape to other
     // is 1 or -1...
+  } else if (type == ULPS_FLOAT) {
+    return !AlmostEqualUlpsFloat(v1, v2, (int)value);
+
+  } else if (type == ULPS_DOUBLE) {
+    return !AlmostEqualUlpsDouble(v1, v2, (int)value);
+
   } else if (type == EIGEN_REL) {
     if (v1 == 0.0 && v2 == 0.0) return 0;
     double max = fabs(v1) < fabs(v2) ? fabs(v2): fabs(v1);
@@ -105,6 +185,10 @@ const char* Tolerance::typestr() const
     return "absolute";
   else if (type == COMBINED)
     return "combined";
+  else if (type == ULPS_FLOAT)
+    return "ulps_float";
+  else if (type == ULPS_DOUBLE)
+    return "ulps_double";
   else if (type == EIGEN_REL)
     return "eigenrel";
   else if (type == EIGEN_ABS)
@@ -123,6 +207,10 @@ const char* Tolerance::abrstr() const
     return "abs";
   else if (type == COMBINED)
     return "com";
+  else if (type == ULPS_FLOAT)
+    return "upf";
+  else if (type == ULPS_DOUBLE)
+    return "upd";
   else if (type == EIGEN_REL)
     return "ere";
   else if (type == EIGEN_ABS)
@@ -132,4 +220,39 @@ const char* Tolerance::abrstr() const
   else
     return "ign";
 }
+
+double Tolerance::UlpsDiffFloat(double A, double B) const
+{
+  Float_t uA(A);
+  Float_t uB(B);
+
+  // Different signs means they do not match.
+  if (uA.Negative() != uB.Negative()) {
+    // Check for equality to make sure +0==-0
+    if (A == B)
+      return 0.0;
+    return 2<<28;
+  }
+
+  // Find the difference in ULPs.
+  return abs(uA.i - uB.i);
+}
+
+double Tolerance::UlpsDiffDouble(double A, double B) const
+{
+  Double_t uA(A);
+  Double_t uB(B);
+
+  // Different signs means they do not match.
+  if (uA.Negative() != uB.Negative()) {
+    // Check for equality to make sure +0==-0
+    if (A == B)
+      return 0.0;
+    return 2<<28;
+  }
+
+  // Find the difference in ULPs.
+  return abs(uA.i - uB.i);
+}
+
 

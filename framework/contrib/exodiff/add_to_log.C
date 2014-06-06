@@ -45,7 +45,7 @@
 
 using namespace std;
 
-void add_to_log(const char *my_name)
+void add_to_log(const char *my_name, double)
 {
 #define LEN 512
   char time_string[LEN];

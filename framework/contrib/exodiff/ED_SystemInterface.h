@@ -1,6 +1,7 @@
-// Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
-// DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-// certain rights in this software
+// Copyright(C) 2010 Sandia Corporation.
+//
+// Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
+// the U.S. Government retains certain rights in this software.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -13,7 +14,6 @@
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-//
 //     * Neither the name of Sandia Corporation nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
@@ -29,28 +29,34 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+#ifndef Sierra_SystemInterface_h
+#define Sierra_SystemInterface_h
 
-#ifndef Options_h
-#define Options_h
+#include "GetLongOpt.h"
 
 #include "Tolerance.h"
 #include "map.h"
+
 #include <string>
 #include <vector>
 
+#include <iosfwd>
+
 #define DEFAULT_MAX_NUMBER_OF_NAMES 1000
 
+class SystemInterface
+{
+ public:
+  SystemInterface();
+  ~SystemInterface();
 
-class Specifications {
-public:
+  bool parse_options(int argc, char **argv);
 
-  Specifications();
-  ~Specifications();
+  static void show_version();
 
+  void Parse_Command_File();
   void Set_Max_Names(int size);
   void allocateNames();
-  void allocateExcludeSteps( int num );
 
   // Program parameters.
   bool quiet_flag;        // By default, warnings and other info is produced
@@ -76,6 +82,8 @@ public:
 
   bool ignore_attributes; // Don't compare attributes...
 
+  bool ints_64_bits;
+
   bool coord_sep;
   bool exit_status_switch;
   bool dump_mapping;         // By default, mappings are not printed.
@@ -83,11 +91,15 @@ public:
   bool noSymmetricNameCheck; // By default, the second file's variable
   bool allowNameMismatch;    // By default, name in 1st db must be in second also.
   bool doNorms;
+  bool pedantic;             // Be most picky on what is different (not fully picky yet)
+
+  bool interpolating;        // Interpolate times on file2 to match times on file1;
 
   // These should correspond to the values specified during parsing of
   // coordinate tolerance.
   Tolerance coord_tol;
   Tolerance time_tol;
+  Tolerance final_time_tol;
 
   // Offset of timesteps between first and second databases.
   int time_step_offset;
@@ -95,51 +107,54 @@ public:
   int time_step_stop;  // Last step to compare
   int time_step_increment;  // Step increment
 
+  std::pair<int,int> explicit_steps;  // Only compare these two steps (db1:db2) if nonzero.
+
   int max_number_of_names;
 
   Tolerance default_tol;
 
-  std::vector<std::string>* glob_var_names;
+  std::vector<std::string>  glob_var_names;
   bool                      glob_var_do_all_flag;
   Tolerance                 glob_var_default;
-  Tolerance*                glob_var;
+  std::vector<Tolerance>    glob_var;
 
-  std::vector<std::string>* node_var_names;
+  std::vector<std::string>  node_var_names;
   bool                      node_var_do_all_flag;
   Tolerance                 node_var_default;
-  Tolerance*                node_var;
+  std::vector<Tolerance>    node_var;
 
-  std::vector<std::string>* elmt_var_names;
+  std::vector<std::string>  elmt_var_names;
   bool                      elmt_var_do_all_flag;
   Tolerance                 elmt_var_default;
-  Tolerance*                elmt_var;
+  std::vector<Tolerance>    elmt_var;
 
-  std::vector<std::string>* elmt_att_names;
+  std::vector<std::string>  elmt_att_names;
   bool                      elmt_att_do_all_flag;
   Tolerance                 elmt_att_default;
-  Tolerance*                elmt_att;
+  std::vector<Tolerance>    elmt_att;
 
-  std::vector<std::string>* ns_var_names;
+  std::vector<std::string>  ns_var_names;
   bool                      ns_var_do_all_flag;
   Tolerance                 ns_var_default;
-  Tolerance*                ns_var;
+  std::vector<Tolerance>    ns_var;
 
-  std::vector<std::string>* ss_var_names;
+  std::vector<std::string>  ss_var_names;
   bool                      ss_var_do_all_flag;
   Tolerance                 ss_var_default;
-  Tolerance*                ss_var;
+  std::vector<Tolerance>    ss_var;
 
   // time step exclusion data
-  int  num_excluded_steps;
-  int* exclude_steps;
+  std::vector<int> exclude_steps;
 
-  std::string command_file_name;
+  std::string file1;
+  std::string file2;
+  std::string diff_file;
+  std::string command_file;
 
  private:
-  Specifications(const Specifications&); // don't implement
-  Specifications& operator=(const Specifications&); // don't implement
+  void enroll_options();
+  GetLongOption options_; //!< Options parsing
 };
 
-extern Specifications specs;
-
+extern SystemInterface interface;
 #endif

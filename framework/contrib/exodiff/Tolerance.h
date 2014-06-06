@@ -45,7 +45,7 @@
 //
 // if (Abs(x - y) <= EPSILON * Max(1.0f, Abs(x), Abs(y)) ...
 
-enum TOLERANCE_TYPE_enum { RELATIVE = 0, ABSOLUTE = 1, COMBINED = 2, IGNORE = 3, EIGEN_REL = 4, EIGEN_ABS = 5, EIGEN_COM = 6 };
+enum TOLERANCE_TYPE_enum { RELATIVE = 0, ABSOLUTE = 1, COMBINED = 2, IGNORE = 3, EIGEN_REL = 4, EIGEN_ABS = 5, EIGEN_COM = 6, ULPS_FLOAT = 7, ULPS_DOUBLE = 8 };
 
 class Tolerance
 {
@@ -72,6 +72,9 @@ public:
   // If true, use the older defintion of the floor tolerance which was
   // |a-b| < floor.  The new definition is |a| < floor && |b| < floor
   static bool use_old_floor;
+ private:
+  double UlpsDiffFloat(double v1, double v2) const;
+  double UlpsDiffDouble(double v1, double v2) const;
 };
 
 inline double Tolerance::Delta(double v1, double v2) const
@@ -107,6 +110,12 @@ inline double Tolerance::Delta(double v1, double v2) const
 	return fabs(v1 - v2)/max;
       else
 	return fabs(v1 - v2);
+    }
+    else if (type == ULPS_FLOAT) {
+      return UlpsDiffFloat(v1, v2);
+    }
+    else if (type == ULPS_DOUBLE) {
+      return UlpsDiffDouble(v1, v2);
     }
     else if (type == EIGEN_REL) {
       if (v1 == 0.0 && v2 == 0.0) return 0.0;

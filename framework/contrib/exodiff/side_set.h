@@ -37,21 +37,23 @@
 #include "exo_entity.h"
 #include <iostream>
 
+template <typename INT>
 class ExoII_Read;
 
+template <typename INT>
 class Side_Set: public Exo_Entity {
  public:
 
   Side_Set();
-  Side_Set(int file_id, int exo_set_id);
-  Side_Set(int file_id, int exo_set_id, int num_sides, int num_dist_factors = 0);
+  Side_Set(int file_id, size_t exo_set_id);
+  Side_Set(int file_id, size_t exo_set_id, size_t num_sides, size_t num_dist_factors = 0);
   ~Side_Set();
 
-  void apply_map(const int *node_map);
-  const int* Elements() const;
-  const int* Sides() const;
-  std::pair<int,int> Side_Id(int position) const;
-  int Side_Index(int position) const;
+  void apply_map(const INT *node_map);
+  const INT* Elements() const;
+  const INT* Sides() const;
+  std::pair<INT,INT> Side_Id(size_t position) const;
+  size_t Side_Index(size_t position) const;
 
   const double* Distribution_Factors() const;
 
@@ -63,21 +65,20 @@ class Side_Set: public Exo_Entity {
   Side_Set(const Side_Set&);  // Not written.
   const Side_Set& operator=(const Side_Set&);  // Not written.
 
-  void load_sides(const int *elmt_map = NULL) const;
+  void load_sides(const INT *elmt_map = NULL) const;
   void entity_load_params();
 
-  const char* exodus_flag() const {return "S";}
   EXOTYPE exodus_type() const;
   const char* label() const {return "Sideset";}
 
-  int num_dist_factors;
+  size_t num_dist_factors;
 
-  mutable int*    elmts;
-  mutable int*    sides;
-  mutable int*    sideIndex;
+  mutable INT*    elmts;
+  mutable INT*    sides;
+  mutable INT*    sideIndex;
   mutable double* dist_factors;
 
-  friend class ExoII_Read;
+  friend class ExoII_Read<INT>;
 };
 
 #endif

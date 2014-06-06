@@ -36,35 +36,38 @@
 
 #include "smart_assert.h"
 #include "exo_block.h"
-#include "libmesh/exodusII.h"
+#include "exodusII.h"
 
 #include <string>
 #include <sstream>
 
 using namespace std;
 
-Exo_Block::Exo_Block()
+template <typename INT>
+Exo_Block<INT>::Exo_Block()
   : Exo_Entity(),
     num_nodes_per_elmt(-1),
     conn(NULL)
 { }
 
-Exo_Block::Exo_Block(int file_id, int exo_block_id)
+template <typename INT>
+Exo_Block<INT>::Exo_Block(int file_id, size_t exo_block_id)
   : Exo_Entity(file_id, exo_block_id),
     num_nodes_per_elmt(-1),
     conn(NULL)
 {
   SMART_ASSERT(file_id >= 0);
-  SMART_ASSERT(exo_block_id > EX_INVALID_ID);
+  SMART_ASSERT((int)exo_block_id > EX_INVALID_ID);
 
   initialize(file_id, exo_block_id);
 }
 
-Exo_Block::Exo_Block(int file_id,
-		     int id,
+template <typename INT>
+Exo_Block<INT>::Exo_Block(int file_id,
+		     size_t id,
                      const char* type,
-                     int num_e,
-                     int num_npe)
+                     size_t num_e,
+                     size_t num_npe)
   : Exo_Entity(file_id, id, num_e),
     elmt_type(type),
     num_nodes_per_elmt(num_npe),
@@ -72,35 +75,41 @@ Exo_Block::Exo_Block(int file_id,
 {
   SMART_ASSERT(id > 0);
   SMART_ASSERT(elmt_type != "");
-  SMART_ASSERT(num_e >= 0);
   SMART_ASSERT(num_npe > 0);
 }
 
-Exo_Block::~Exo_Block()
+template <typename INT>
+Exo_Block<INT>::~Exo_Block()
 {
   if (conn)  delete [] conn;
 }
 
-EXOTYPE Exo_Block::exodus_type() const {return EX_ELEM_BLOCK;}
+template <typename INT>
+EXOTYPE Exo_Block<INT>::exodus_type() const {return EX_ELEM_BLOCK;}
 
-void Exo_Block::entity_load_params()
+template <typename INT>
+void Exo_Block<INT>::entity_load_params()
 {
-  char eltype[MAX_STR_LENGTH+1];
   int num_attr;
-  int err = ex_get_block(fileId, EX_ELEM_BLOCK, id_, eltype, &numEntity,
-			 &num_nodes_per_elmt, 0, 0, &num_attr);
+  ex_block block;
+  block.id = id_;
+  block.type = EX_ELEM_BLOCK;
+  int err = ex_get_block_param(fileId, &block);
 
   if (err < 0) {
-    std::cout << "Exo_Block::Load_Block_Params(): ERROR: Failed to get element"
+    std::cout << "Exo_Block<INT>::Load_Block_Params(): ERROR: Failed to get element"
          << " block parameters!  Aborting..." << std::endl;
     exit(1);
   }
 
-  if (numEntity < 0 ||
-      num_nodes_per_elmt < 0 ||
-      num_attr < 0)
+  numEntity = block.num_entry;
+  num_nodes_per_elmt = block.num_nodes_per_entry;
+  num_attr = block.num_attribute;
+  elmt_type = block.topology;
+
+  if (num_nodes_per_elmt < 0 || num_attr < 0)
   {
-    std::cout << "Exo_Block::Load_Block_Params(): ERROR: Data appears corrupt for"
+    std::cout << "Exo_Block<INT>::Load_Block_Params(): ERROR: Data appears corrupt for"
          << " block " << id_ << "(id=" << id_
          << ")!" << std::endl
          << "\tnum elmts = "          << numEntity  << std::endl
@@ -109,10 +118,10 @@ void Exo_Block::entity_load_params()
          << " ... Aborting..." << std::endl;
     exit(1);
   }
-  elmt_type = eltype;
 }
 
-string Exo_Block::Load_Connectivity()
+template <typename INT>
+string Exo_Block<INT>::Load_Connectivity()
 {
   SMART_ASSERT(Check_State());
 
@@ -123,11 +132,11 @@ string Exo_Block::Load_Connectivity()
 
   if (numEntity && num_nodes_per_elmt)
   {
-    conn = new int[ (size_t)numEntity * num_nodes_per_elmt ];  SMART_ASSERT(conn != 0);
+    conn = new INT[ (size_t)numEntity * num_nodes_per_elmt ];  SMART_ASSERT(conn != 0);
 
     int err = ex_get_conn(fileId, EX_ELEM_BLOCK, id_, conn, 0, 0);
     if (err < 0) {
-      std::cout << "Exo_Block::Load_Connectivity()  ERROR: Call to ex_get_conn"
+      std::cout << "Exo_Block<INT>::Load_Connectivity()  ERROR: Call to ex_get_conn"
            << " returned error value!  Block id = " << id_ << std::endl;
       std::cout << "Aborting..." << std::endl;
       exit(1);
@@ -143,25 +152,28 @@ string Exo_Block::Load_Connectivity()
   return "";
 }
 
-string Exo_Block::Free_Connectivity()
+template <typename INT>
+string Exo_Block<INT>::Free_Connectivity()
 {
   SMART_ASSERT(Check_State());
   if (conn) delete [] conn;  conn = 0;
   return "";
 }
 
-const int* Exo_Block::Connectivity(int elmt_index) const
+template <typename INT>
+const INT* Exo_Block<INT>::Connectivity(size_t elmt_index) const
 {
   SMART_ASSERT(Check_State());
 
-  if (!conn || elmt_index < 0 || elmt_index >= numEntity) return 0;
+  if (!conn || elmt_index >= numEntity) return 0;
 
-  return &conn[elmt_index * num_nodes_per_elmt];
+  return &conn[(size_t)elmt_index * num_nodes_per_elmt];
 }
 
-string Exo_Block::Give_Connectivity(int& num_e, int& npe, int*& recv_conn)
+template <typename INT>
+string Exo_Block<INT>::Give_Connectivity(size_t& num_e, size_t& npe, INT*& recv_conn)
 {
-  if (numEntity < 0 || num_nodes_per_elmt < 0)
+  if (num_nodes_per_elmt < 0)
     return "ERROR:  Connectivity parameters have not been determined!";
 
   num_e = numEntity;
@@ -173,26 +185,23 @@ string Exo_Block::Give_Connectivity(int& num_e, int& npe, int*& recv_conn)
   return "";
 }
 
-int Exo_Block::Check_State() const
+template <typename INT>
+int Exo_Block<INT>::Check_State() const
 {
   SMART_ASSERT(id_ >= EX_INVALID_ID);
-  SMART_ASSERT(index_ >= -1);
-  SMART_ASSERT(numEntity >= -1);
-  SMART_ASSERT(num_nodes_per_elmt >= -1);
-
   SMART_ASSERT( !( id_ == EX_INVALID_ID && elmt_type != "" ) );
-  SMART_ASSERT( !( id_ == EX_INVALID_ID && numEntity > -1 ) );
-  SMART_ASSERT( !( id_ == EX_INVALID_ID && num_nodes_per_elmt > -1 ) );
+  SMART_ASSERT( !( id_ == EX_INVALID_ID && num_nodes_per_elmt >= 0 ) );
   SMART_ASSERT( !( id_ == EX_INVALID_ID && conn ) );
 
-  SMART_ASSERT( !( conn && (numEntity <= 0 || num_nodes_per_elmt <= 0) ) );
+  SMART_ASSERT( !( conn && (numEntity == 0 || num_nodes_per_elmt <= 0) ) );
 
   return 1;
 }
 
-void Exo_Block::Display_Stats(std::ostream& s) const
+template <typename INT>
+void Exo_Block<INT>::Display_Stats(std::ostream& s) const
 {
-  s << "Exo_Block::Display()  block id = " << id_           << std::endl
+  s << "Exo_Block<INT>::Display()  block id = " << id_           << std::endl
     << "                  element type = " << elmt_type          << std::endl
     << "               number of elmts = " << numEntity          << std::endl
     << "      number of nodes per elmt = " << num_nodes_per_elmt << std::endl
@@ -200,11 +209,12 @@ void Exo_Block::Display_Stats(std::ostream& s) const
     << "           number of variables = " << var_count()        << std::endl;
 }
 
-void Exo_Block::Display(std::ostream& s) const
+template <typename INT>
+void Exo_Block<INT>::Display(std::ostream& s) const
 {
   SMART_ASSERT(Check_State());
 
-  s << "Exo_Block::Display()  block id = " << id_           << std::endl
+  s << "Exo_Block<INT>::Display()  block id = " << id_           << std::endl
     << "                  element type = " << elmt_type          << std::endl
     << "               number of elmts = " << numEntity          << std::endl
     << "      number of nodes per elmt = " << num_nodes_per_elmt << std::endl
@@ -212,9 +222,9 @@ void Exo_Block::Display(std::ostream& s) const
     << "           number of variables = " << var_count()        << std::endl;
 
   if (conn) {
-    int index = 0;
+    size_t index = 0;
     s << "       connectivity = ";
-    for (int e = 0; e < numEntity; ++e) {
+    for (size_t e = 0; e < numEntity; ++e) {
       if (e != 0) s << "                      ";
       s << "(" << (e + 1) << ") ";
       for (int n = 0; n < num_nodes_per_elmt; ++n)
@@ -223,3 +233,6 @@ void Exo_Block::Display(std::ostream& s) const
     }
   }
 }
+
+template class Exo_Block<int>;
+template class Exo_Block<int64_t>;

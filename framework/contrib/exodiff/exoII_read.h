@@ -34,7 +34,8 @@
 #ifndef EXOII_READ_H
 #define EXOII_READ_H
 
-#include "libmesh/exodusII.h"
+#include "exodusII.h"
+#include "netcdf.h"
 #include "exo_entity.h"
 
 #include <iostream>
@@ -51,11 +52,13 @@
 
 
 class Exo_Entity;
-class Exo_Block;
-class Node_Set;
-class Side_Set;
+template <typename INT> class Exo_Block;
+
+template <typename INT>class Node_Set;
+template <typename INT>class Side_Set;
 
 
+template <typename INT>
 class ExoII_Read {
 public:
 
@@ -77,8 +80,8 @@ public:
 
   const std::string& Title() const { return title;        }
   int     Dimension()       const { return dimension;     }
-  int     Num_Nodes()       const { return num_nodes;     }
-  int     Num_Elmts()       const { return num_elmts;     }
+  size_t  Num_Nodes()       const { return num_nodes;     }
+  size_t  Num_Elmts()       const { return num_elmts;     }
   int     Num_Node_Sets()   const { return num_node_sets; }
   int     Num_Side_Sets()   const { return num_side_sets; }
   float Data_Base_Version() const { return db_version;    }
@@ -118,30 +121,26 @@ public:
 
   std::string Load_Elmt_Block_Description(int block_index) const;
   std::string Load_Elmt_Block_Descriptions() const;  // Loads all blocks.
-  std::string Load_Elmt_Block_Results(int block_index,
-                                      int elmt_var_index,
-                                      int time_step_num) const;
   std::string Free_Elmt_Block(int block_index) const; // Frees all dynamic memory.
   std::string Free_Elmt_Blocks() const;               // Frees all blocks.
-  std::string Free_Elmt_Block_Results(int block_index) const;
 
   // Moves array of connectivities from the block to the conn array.
-  std::string Give_Connectivity(int block_index, int& num_e, int& npe, int*& conn);
+  std::string Give_Connectivity(int block_index, size_t& num_e, size_t& npe, INT*& conn);
 
   // Number maps:
   std::string Load_Node_Map();
   std::string Free_Node_Map();
-  const int*  Get_Node_Map() { return node_map; }
+  const INT*  Get_Node_Map() { return node_map; }
   std::string Load_Elmt_Map();
   std::string Free_Elmt_Map();
-  const int*  Get_Elmt_Map() { return elmt_map; }
+  const INT*  Get_Elmt_Map() { return elmt_map; }
   std::string Load_Elmt_Order();
   std::string Free_Elmt_Order();
-  const int*  Get_Elmt_Order() { return elmt_order; }
+  const INT*  Get_Elmt_Order() { return elmt_order; }
   void Free_All_Maps();
-  inline int Node_Map  (int node_num) const;  // numbers are global, 1-offset
-  inline int Elmt_Map  (int elmt_num) const;  // numbers are global, 1-offset
-  inline int Elmt_Order(int elmt_num) const;  // numbers are global, 1-offset
+  inline INT Node_Map  (size_t node_num) const;  // numbers are global, 1-offset
+  inline INT Elmt_Map  (size_t elmt_num) const;  // numbers are global, 1-offset
+  inline INT Elmt_Order(size_t elmt_num) const;  // numbers are global, 1-offset
 
 
   // Nodal data:
@@ -157,6 +156,7 @@ public:
   // (First time step = 1.)
   std::string Load_Nodal_Results(int time_step_num, int var_index);
   const double* Get_Nodal_Results(int var_index) const;
+  const double* Get_Nodal_Results(int t1, int t2, double proportion, int var_index) const; // Interpolated results
   void Free_Nodal_Results();
 
   // Global data:  (NOTE:  Global and Nodal data are always stored at the same
@@ -164,34 +164,30 @@ public:
   //                       is changed, the results will all be deleted.)
 
   std::string Load_Global_Results(int time_step_num);
+  std::string Load_Global_Results(int t1, int t2, double proportion); // Interpolated results
   const double* Get_Global_Results() const { return global_vals; }
 
   // Node/Side sets:
 
 
   Exo_Entity* Get_Entity_by_Index(EXOTYPE type, int index) const;
-  Exo_Entity* Get_Entity_by_Id   (EXOTYPE type, int id)    const;
+  Exo_Entity* Get_Entity_by_Id   (EXOTYPE type, size_t id)    const;
 
-  int        Block_Index            (int block_id) const;  // Returns associated block index.
-  int        Block_Id               (int block_index) const;  // Returns associated block id.
-  Exo_Block* Get_Elmt_Block_by_Id   (int block_id)    const;
-  Exo_Block* Get_Elmt_Block_by_Index(int block_index) const;
+  int        Block_Index            (size_t block_id) const;  // Returns associated block index.
+  size_t        Block_Id               (int block_index) const;  // Returns associated block id.
+  Exo_Block<INT>* Get_Elmt_Block_by_Id   (size_t block_id)    const;
+  Exo_Block<INT>* Get_Elmt_Block_by_Index(int block_index) const;
 
 
-  int       Side_Set_Index       (int set_id)         const;  // Returns associated sideset index.
-  int       Side_Set_Id          (int set_index)      const;
-  Side_Set* Get_Side_Set_by_Id   (int set_id)         const;
-  Side_Set* Get_Side_Set_by_Index(int side_set_index) const;
+  int       Side_Set_Index       (size_t set_id)         const;  // Returns associated sideset index.
+  size_t       Side_Set_Id          (int set_index)      const;
+  Side_Set<INT>* Get_Side_Set_by_Id   (size_t set_id)         const;
+  Side_Set<INT>* Get_Side_Set_by_Index(int side_set_index) const;
 
-  int       Node_Set_Index       (int set_id)         const;  // Returns associated sideset index.
-  int       Node_Set_Id          (int set_index)      const;
-  Node_Set* Get_Node_Set_by_Id   (int set_id)         const;
-  Node_Set* Get_Node_Set_by_Index(int side_set_index) const;
-
-  std::string Load_NS_Results(int set_index, int var_index, int time_step_num) const;
-  std::string Free_NS_Results(int set_index) const;
-  std::string Load_SS_Results(int set_index, int var_index, int time_step_num) const;
-  std::string Free_SS_Results(int set_index) const;
+  int       Node_Set_Index       (size_t set_id)         const;  // Returns associated sideset index.
+  size_t       Node_Set_Id          (int set_index)      const;
+  Node_Set<INT>* Get_Node_Set_by_Id   (size_t set_id)         const;
+  Node_Set<INT>* Get_Node_Set_by_Index(int side_set_index) const;
 
   // Misc functions:
 
@@ -200,9 +196,9 @@ public:
   virtual void Display_Maps (std::ostream& = std::cout) const;
   virtual int  Check_State() const;  // Checks state of obj (not the file).
   int  File_ID() const { return file_id; }  // This is temporary.
-  std::string Global_to_Block_Local(int global_elmt_num,            // 1-offset
+  std::string Global_to_Block_Local(size_t global_elmt_num,            // 1-offset
                                     int& block_index,               // 0-offset
-                                    int& local_elmt_index) const;   // 0-offset
+                                    size_t& local_elmt_index) const;   // 0-offset
 
 protected:
 
@@ -212,10 +208,10 @@ protected:
   // GENESIS info:
 
   std::string  title;
-  int          num_nodes;
+  size_t       num_nodes;
   std::vector<std::string> coord_names;
   int          dimension;
-  int          num_elmts;
+  size_t       num_elmts;
   int          num_elmt_blocks;
   int          num_node_sets;
   int          num_side_sets;
@@ -223,16 +219,16 @@ protected:
   float        api_version;
   int          io_word_size;    // Note: The "compute word size" is always 8.
 
-  Exo_Block* eblocks;   // Array.
-  Node_Set*  nsets;     // Array.
-  Side_Set*  ssets;     // Array.
+  Exo_Block<INT>* eblocks;   // Array.
+  Node_Set<INT>*  nsets;     // Array.
+  Side_Set<INT>*  ssets;     // Array.
 
   double* nodes;        // Matrix;  dimension by num_nodes (row major form).
                         //          I.e., all x's then all y's, etc.
 
-  int* node_map;        // Array; num_nodes long when filled.
-  int* elmt_map;        // Array; num_elmts long when filled.
-  int* elmt_order;      // Array; num_elmts long when filled.
+  INT* node_map;        // Array; num_nodes long when filled.
+  INT* elmt_map;        // Array; num_elmts long when filled.
+  INT* elmt_order;      // Array; num_elmts long when filled.
 
   // RESULTS info:
 
@@ -250,14 +246,15 @@ protected:
   double** results;  // Array of pointers (to arrays of results data);
                      // length is number of nodal variables.
   double* global_vals;  // Array of global variables for the current timestep.
+  double* global_vals2;  // Array of global variables used if interpolating.
 
   // Internal methods:
 
   void Get_Init_Data();         // Gets bunch of initial data.
 
-  int Elmt_Block_Index(int eblock_id) const;  // Returns index of element block.
-  int NSet_Index(int node_set_id) const;      // Returns index of node set.
-  int SSet_Index(int side_set_id) const;      // Returns index of side set.
+  int Elmt_Block_Index(size_t eblock_id) const;  // Returns index of element block.
+  int NSet_Index(size_t node_set_id) const;      // Returns index of node set.
+  int SSet_Index(size_t side_set_id) const;      // Returns index of side set.
 
   int File_Exists(const char* fname);
 
@@ -266,28 +263,31 @@ protected:
 
 };
 
-inline int ExoII_Read::Node_Map(int node_num) const
+template <typename INT>
+inline INT ExoII_Read<INT>::Node_Map(size_t node_num) const
 {
   SMART_ASSERT(Check_State());
-  SMART_ASSERT(node_num > 0 && node_num <= num_nodes);
+  SMART_ASSERT(node_num <= num_nodes);
 
   if (node_map) return node_map[ node_num - 1 ];
   return 0;
 }
 
-inline int ExoII_Read::Elmt_Map(int elmt_num) const
+template <typename INT>
+inline INT ExoII_Read<INT>::Elmt_Map(size_t elmt_num) const
 {
   SMART_ASSERT(Check_State());
-  SMART_ASSERT(elmt_num > 0 && elmt_num <= num_elmts);
+  SMART_ASSERT(elmt_num <= num_elmts);
 
   if (elmt_map) return elmt_map[ elmt_num - 1 ];
   return 0;
 }
 
-inline int ExoII_Read::Elmt_Order(int elmt_num) const
+template <typename INT>
+inline INT ExoII_Read<INT>::Elmt_Order(size_t elmt_num) const
 {
   SMART_ASSERT(Check_State());
-  SMART_ASSERT(elmt_num > 0 && elmt_num <= num_elmts);
+  SMART_ASSERT(elmt_num <= num_elmts);
 
   if (elmt_order) return elmt_order[ elmt_num - 1 ];
   return 0;

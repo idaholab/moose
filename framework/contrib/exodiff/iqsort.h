@@ -32,6 +32,8 @@
 //
 #ifndef IQSORT_H
 #define IQSORT_H
-void index_qsort(const int    v[], int iv[], int N);
-void index_qsort(const double v[], int iv[], int N);
+#include <stdlib.h>
+
+template <typename T, typename INT>
+void index_qsort(const T v[], INT iv[], size_t N);
 #endif
