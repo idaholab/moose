@@ -202,6 +202,12 @@ public:
   QBase * & qRuleNeighbor() { return _current_qrule_neighbor; }
 
   /**
+   * Returns the reference to the transformed jacobian weights on a current face
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  const MooseArray<Real> & JxWNeighbor() { return _current_JxW_neighbor; }
+
+  /**
    * Returns the reference to the node
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -528,6 +534,8 @@ protected:
   QBase * _current_qrule_neighbor;
   /// Holds arbitrary qrules for each dimension
   std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_neighbor;
+  /// The current transformed jacobian weights on a neighbor face
+  MooseArray<Real> _current_JxW_neighbor;
 
   /// The current "element" we are currently on.
   const Elem * _current_elem;
