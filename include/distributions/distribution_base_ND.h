@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include "ND_Interpolation_Functions.h"
+#include "distributionFunctions.h"
+//#include "distribution_min.h"
 #include <iostream>
 
 enum EPbFunctionType{PDF,CDF};
@@ -13,13 +15,14 @@ class distributionND;
 class BasicDistributionND
 {
 public:
-  BasicDistributionND();
-  virtual ~BasicDistributionND();
-  double  getVariable(const std::string & variable_name); ///< getVariable from mapping
-  void updateVariable(const std::string & variable_name, double & new_value);
-  virtual double  Pdf(std::vector<double> x) = 0; ///< Pdf function at coordinate x
-  virtual double  Cdf(std::vector<double> x) = 0; ///< Cdf function at coordinate x
-  virtual std::vector<double> InverseCdf(double min, double max) = 0;
+
+   BasicDistributionND();
+   virtual ~BasicDistributionND();
+   double  getVariable(const std::string & variableName);                       ///< getVariable from mapping
+   void updateVariable(const std::string & variableName, double & newValue);
+   virtual double  Pdf(std::vector<double> x) = 0;                              ///< Pdf function at coordinate x
+   virtual double  Cdf(std::vector<double> x) = 0;                              ///< Cdf function at coordinate x
+   virtual std::vector<double> InverseCdf(double min, double max) = 0;
 
   std::string & getType();
 
@@ -66,8 +69,8 @@ protected:
 class BasicMultivariateNormal: public virtual BasicDistributionND
 {
 public:
-  BasicMultivariateNormal(std::string data_filename, std::vector<double> mu,std::vector<double> sigma);
-  BasicMultivariateNormal(std::vector<std::vector<double> > cov_matrix, std::vector<double> mu, std::vector<double> sigma);
+  BasicMultivariateNormal(std::string data_filename, std::vector<double> mu);
+  BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
   virtual ~BasicMultivariateNormal();
   double  Pdf(std::vector<double> x);
   double  Cdf(std::vector<double> x);
@@ -76,9 +79,16 @@ public:
   {
     return std::vector<double>(2,-1.0);
   };
+
+  //double MVNDST(std::vector<double> a, std::vector<double> b, double alpha, double epsilon, int Nmax);
+  double phi(double x);
+  double phi_inv(double x);
+  //double rn();
+  double * cholesky(double *A, int n);
+  std::vector<std::vector<double> > choleskyDecomposition(std::vector<std::vector<double> > matrix);
+  void show_matrix(double *A, int n);
 private:
   std::vector<double> _mu;
-  std::vector<double> _sigma;
   std::vector<std::vector<double> > _cov_matrix;
   std::vector<std::vector<double> > _inverse_cov_matrix;
   double _determinant_cov_matrix;

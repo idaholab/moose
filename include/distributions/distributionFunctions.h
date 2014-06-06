@@ -20,6 +20,7 @@
  *      source: Numerical Recipes in C++ 3rd edition
  */
 
+//typedef boost::numeric::ublas::matrix<double> matrixDouble;
 
 void matrixConversion(std::vector<std::vector<double> > original, double converted[]);
 void matrixBackConversion(double original[], std::vector<std::vector<double> > converted);

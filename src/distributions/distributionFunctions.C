@@ -129,32 +129,15 @@ void invertMatrixBoost(matrixDouble & a, matrixDouble & aInverted)
   aInverted.assign(boost::numeric::ublas::identity_matrix<double>(a.size1()));
 
   boost::numeric::ublas::lu_substitute(a, pm, aInverted);
-
-
 }
 
 
-/*
-void computeInverseOld(std::vector<std::vector<double> > matrix, std::vector<std::vector<double> > inverse){
-        int dimensions = matrix.size();
-        double A [dimensions*dimensions];
-
-        matrixConversion(matrix, A);
-
-        inverseMatrix(A,dimensions);
-
-        matrixBackConversion(A, inverse);
-}
-*/
 
 void computeInverse(const std::vector<std::vector<double> > & matrix, std::vector<std::vector<double> > & inverse){
         int dimensions = matrix.size();
         matrixDouble A(dimensions,dimensions),inverted(dimensions,dimensions);
-
         matrixConversionBoost(matrix, A);
-
         invertMatrixBoost(A,inverted);
-
         matrixBackConversionBoost(inverted, inverse);
 }
 

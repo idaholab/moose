@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <vector>
+#include <boost/random/mersenne_twister.hpp>
 
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
@@ -75,9 +76,11 @@ std::vector<double> inverseDistanceWeigthing::NDinverseFunction(double F_min, do
 
     double referenceCDF = (F_max-F_min)/2;
 
-    srand(time(NULL));
+	boost::random::mt19937 rng;
+	rng.seed(time(NULL));
+	double range = rng.max() - rng.min();
 
-    // check input values incosistencies
+    // check input values inconsistencies
 
     if (F_min > F_max)
         throwError("ND RNG function: invalid param (F_min > F_max)");
@@ -103,7 +106,8 @@ std::vector<double> inverseDistanceWeigthing::NDinverseFunction(double F_min, do
 
     // Randomly pick the fistPoint
     for (int nDim=0; nDim<_dimensions; nDim++){
-        firstPoint[nDim] = min_values[nDim] + (max_values[nDim]-min_values[nDim]) * rand();
+    	double temp = (rng()-rng.min())/range;;
+        firstPoint[nDim] = min_values[nDim] + (max_values[nDim]-min_values[nDim]) * temp;
     }
 
     int min_index, max_index = 0;
@@ -164,4 +168,10 @@ std::vector<double> inverseDistanceWeigthing::NDinverseFunction(double F_min, do
     }
 
     return nextPoint;
+}
+
+
+double ND_Interpolation::NDderivative(std::vector<double> x){
+	double value;
+	return value;
 }

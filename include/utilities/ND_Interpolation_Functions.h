@@ -25,6 +25,7 @@ public:
 	virtual double getGradientAt(std::vector<double> point_coordinate);
 	virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
 	std::vector<double> NDinverseFunction(double F_min, double F_max);
+	double NDderivative(std::vector<double> x);
 	ND_Interpolation();
 	~ND_Interpolation();
 protected:
