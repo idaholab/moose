@@ -44,10 +44,13 @@ protected:
 
   /**
    * The value of the variable at a point.
-   *
-   * This must be overridden by derived classes.
    */
   virtual Real value(const Point &p);
+
+  /**
+   * The value of the gradient at a point.
+   */
+  virtual RealGradient gradient(const Point &p);
 
   Function & _func;
 };

@@ -34,3 +34,9 @@ FunctionIC::value(const Point & p)
 {
   return _func.value(_t, p);
 }
+
+RealGradient
+FunctionIC::gradient(const Point & p)
+{
+  return _func.gradient(_t, p);
+}
