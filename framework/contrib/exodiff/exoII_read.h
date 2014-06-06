@@ -34,7 +34,7 @@
 #ifndef EXOII_READ_H
 #define EXOII_READ_H
 
-#include "exodusII.h"
+#include "libmesh/exodusII.h"
 #include "netcdf.h"
 #include "exo_entity.h"
 

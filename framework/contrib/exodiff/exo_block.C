@@ -36,7 +36,7 @@
 
 #include "smart_assert.h"
 #include "exo_block.h"
-#include "exodusII.h"
+#include "libmesh/exodusII.h"
 
 #include <string>
 #include <sstream>

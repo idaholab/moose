@@ -99,7 +99,7 @@ exodiff_DIR := $(FRAMEWORK_DIR)/contrib/exodiff
 exodiff_APP := $(exodiff_DIR)/exodiff
 exodiff_srcfiles := $(shell find $(exodiff_DIR) -name "*.C")
 exodiff_objfiles := $(patsubst %.C, %.$(obj-suffix), $(exodiff_srcfiles))
-exodiff_includes := $(app_INCLUDES) -I$(exodiff_DIR)
+exodiff_includes := $(app_INCLUDES) -I$(exodiff_DIR) $(libmesh_INCLUDE)
 
 all:: exodiff
 
