@@ -53,6 +53,38 @@
     skip = 'Needs DiracKernel::computeOffDiagQpJacobian - ticket #668'
   [../]
 
+  [./bh_fu_02]
+    type = 'CSVDiff'
+    input = 'bh_fu_02.i'
+    csvdiff = 'bh_fu_02.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh_fu_03]
+    type = 'CSVDiff'
+    input = 'bh_fu_03.i'
+    csvdiff = 'bh_fu_03.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh_fu_04]
+    type = 'CSVDiff'
+    input = 'bh_fu_04.i'
+    csvdiff = 'bh_fu_04.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh_fu_05]
+    type = 'CSVDiff'
+    input = 'bh_fu_05.i'
+    csvdiff = 'bh_fu_05.csv'
+    rel_err = 1E-5
+  [../]
+
+  [./bh_fu_07]
+    type = 'Exodiff'
+    input = 'bh_fu_07.i'
+    exodiff = 'bh_fu_07.e'
+    rel_err = 1E-5
+  [../]
+
   [./st01]
     type = 'CSVDiff'
     input = 'st01.i'
