@@ -53,6 +53,9 @@ protected:
   /// The quadrature rule for the system
   QBase * & _qrule;
 
+  /// Position of the current quadrature point
+  const MooseArray< Point > & _q_point;
+
   /// The current quadrature point
   unsigned int _qp;
 };

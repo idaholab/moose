@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'q_point_marker.i'
+    exodiff = 'q_point_marker_out.e'
+    scale_refine = 2
+  [../]
+[]

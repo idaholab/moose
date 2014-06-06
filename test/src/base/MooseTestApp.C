@@ -161,6 +161,7 @@
 
 // markers
 #include "RandomHitMarker.h"
+#include "QPointMarker.h"
 
 // meshes
 #include "StripeMesh.h"
@@ -380,6 +381,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(ElementL2Diff);
 
   registerMarker(RandomHitMarker);
+  registerMarker(QPointMarker);
 
   registerExecutioner(ExceptionSteady);
   registerExecutioner(SteadyTransientExecutioner);
