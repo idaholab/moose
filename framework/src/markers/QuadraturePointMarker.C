@@ -36,6 +36,7 @@ QuadraturePointMarker::QuadraturePointMarker(const std::string & name, InputPara
     Coupleable(parameters, false),
     MaterialPropertyInterface(parameters),
     _qrule(_assembly.qRule()),
+    _q_point(_assembly.qPoints()),
     _qp(0)
 {
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
