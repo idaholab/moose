@@ -1,7 +1,7 @@
 #include "util.h"
 
 #include <cstring>
-#include "libmesh/exodusII.h"
+#include "exodusII.h"
 
 char **get_name_array(int size, int length) {
   char **names = NULL;

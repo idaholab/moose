@@ -36,14 +36,25 @@
 
 enum MAP_TYPE_enum {FILE_ORDER=0, PARTIAL, USE_FILE_IDS, DISTANCE};
 
-void Compute_Maps(int*& node_map, int*& elmt_map,
-                  ExoII_Read& file1, ExoII_Read& file2);
-void Compute_Partial_Maps(int*& node_map, int*& elmt_map,
-			  ExoII_Read& file1, ExoII_Read& file2);
-void Compute_FileId_Maps(int*& node_map, int*& elmt_map,
-			 ExoII_Read& file1, ExoII_Read& file2);
-void Dump_Maps(const int *node_map, const int *elmt_map, ExoII_Read& file1);
-bool Check_Maps(const int *node_map, const int *elmt_map, const ExoII_Read& file1, const ExoII_Read& file2);
-bool Compare_Maps(ExoII_Read& file1, ExoII_Read& file2, const int *node_map, const int *elmt_map, bool partial_flag);
+template <typename INT>
+void Compute_Maps(INT*& node_map, INT*& elmt_map,
+                  ExoII_Read<INT>& file1, ExoII_Read<INT>& file2);
+
+template <typename INT>
+void Compute_Partial_Maps(INT*& node_map, INT*& elmt_map,
+			  ExoII_Read<INT>& file1, ExoII_Read<INT>& file2);
+
+template <typename INT>
+void Compute_FileId_Maps(INT*& node_map, INT*& elmt_map,
+			 ExoII_Read<INT>& file1, ExoII_Read<INT>& file2);
+
+template <typename INT>
+void Dump_Maps(const INT *node_map, const INT *elmt_map, ExoII_Read<INT>& file1);
+
+template <typename INT>
+bool Check_Maps(const INT *node_map, const INT *elmt_map, const ExoII_Read<INT>& file1, const ExoII_Read<INT>& file2);
+
+template <typename INT>
+bool Compare_Maps(ExoII_Read<INT>& file1, ExoII_Read<INT>& file2, const INT *node_map, const INT *elmt_map, bool partial_flag);
 
 #endif

@@ -46,25 +46,25 @@ class DiffData
     };
 
   DiffData()
-    : diff(0.0), val1(0.0), val2(0.0), id(-1), blk(-1), type(mm_unknown)
+    : diff(0.0), val1(0.0), val2(0.0), id(0), blk(0), type(mm_unknown)
     {}
 
-    void set_max(double d, double val_1, double val_2, int id_=-1, int blk_=-1)
+    void set_max(double d, double val_1, double val_2, int id_=-1, int blk_=0)
     {
       if (diff < d) {
 	diff = d;
 	val1 = val_1;
 	val2 = val_2;
 	if (id_  != -1) id  = id_;
-	if (blk_ != -1) blk = blk_;
+	if (blk_ != 0) blk = blk_;
       }
     }
 
     double diff;
     double val1;
     double val2;
-    int    id;
-    int    blk;
+    size_t   id;
+    size_t  blk;
 
     Type   type;
 };
@@ -83,37 +83,37 @@ class MinMaxData
       mm_elematt = 7  // step not valid
     };
   MinMaxData()
-    : min_val(DBL_MAX), min_step(-1), min_id(-1), min_blk(-1),
-    max_val(-1.0),    max_step(-1), max_id(-1), max_blk(-1),
+    : min_val(DBL_MAX), min_step(0), min_id(0), min_blk(0),
+    max_val(-1.0),    max_step(0), max_id(0), max_blk(0),
     type(mm_unknown)
       {}
 
-    void spec_min_max(double val, int step, int id=-1, int blk=-1)
+    void spec_min_max(double val, int step, int id=-1, int blk=0)
     {
       if (fabs(val) < min_val) {
 	min_val = fabs(val);
 	min_step = step;
 	if (id  != -1) min_id  = id;
-	if (blk != -1) min_blk = blk;
+	if (blk != 0) min_blk = blk;
       }
 
       if (fabs(val) > max_val) {
 	max_val = fabs(val);
 	max_step = step;
 	if (id  != -1) max_id  = id;
-	if (blk != -1) max_blk = blk;
+	if (blk != 0) max_blk = blk;
       }
     }
 
     double min_val;
     int    min_step;
-    int    min_id;
-    int    min_blk;
+    size_t min_id;
+    size_t min_blk;
 
     double max_val;
     int    max_step;
-    int    max_id;
-    int    max_blk;
+    size_t max_id;
+    size_t max_blk;
 
     Type   type;
 };
