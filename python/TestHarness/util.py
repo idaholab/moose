@@ -232,7 +232,7 @@ def getPetscVersion(libmesh_dir):
   major_version = getLibMeshConfigOption(libmesh_dir, 'petsc_major')
   minor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_minor')
   if len(major_version) != 1 or len(minor_version) != 1:
-    printf("Error determining PETSC version")
+    print "Error determining PETSC version"
     exit(1)
 
   return major_version.pop() + '.' + minor_version.pop()
