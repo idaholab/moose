@@ -560,7 +560,6 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
   FEType fe_type (neighbor->default_order() , LAGRANGE);
   AutoPtr<FEBase> fe (FEBase::build(neighbor->dim(), fe_type));
 
-  const std::vector<Real> & JxW = fe->get_JxW();
   const std::vector<Point> & q_points = fe->get_xyz();
 
   // The default quadrature rule should integrate the mass matrix,
@@ -568,6 +567,8 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
   QGauss qrule (neighbor->dim(), fe_type.default_quadrature_order());
   fe->attach_quadrature_rule(&qrule);
   fe->reinit(neighbor);
+
+  _current_JxW_neighbor = fe->get_JxW();
 
   // set the coord transformation
   MooseArray<Real> coord;
@@ -597,7 +598,7 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
 
   _current_neighbor_volume = 0.;
   for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-    _current_neighbor_volume += JxW[qp] * coord[qp];
+    _current_neighbor_volume += _current_JxW_neighbor[qp] * coord[qp];
 
   coord.release();
 }
