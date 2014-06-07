@@ -37,7 +37,7 @@
 #include "smart_assert.h"
 #include "side_set.h"
 #include "iqsort.h"
-#include "exodusII.h"
+#include "libmesh/exodusII.h"
 #include "ED_SystemInterface.h"
 
 using namespace std;
