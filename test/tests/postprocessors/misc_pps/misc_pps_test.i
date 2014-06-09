@@ -108,7 +108,7 @@
 []
 
 [Materials]
-  [./constant]
+  [./constant_block]
     type = GenericConstantMaterial
     prop_names = diffusivity
     prop_values = 1
