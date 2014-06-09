@@ -65,6 +65,18 @@ public:
   template<typename T>
   T evaluate(Real t, const Point & p);
 
+  /**
+   * Evaluate the gradient of the function which libMesh provides through
+   * automatic differentiation
+   */
+  RealGradient evaluateGradient(Real t, const Point & p);
+
+  /**
+   * Evaluate the time derivative of the function which libMesh provides through
+   * automatic differentiation
+   */
+  Real evaluateDot(Real t, const Point & p);
+
 private:
 
   /// Reference to the FEProblem object
