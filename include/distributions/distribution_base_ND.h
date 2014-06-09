@@ -66,7 +66,12 @@ public:
   double
   Cdf(std::vector<double> x)
   {
-    return _interpolator.interpolateAt(x);
+     double value = _interpolator.interpolateAt(x);
+
+     if (value > 1.0)
+    	 value=1.0;
+
+     return value;
   };
   std::vector<double>
   InverseCdf(double min, double max)
@@ -149,11 +154,11 @@ public:
   {
 	  bool LBcheck = _interpolator.checkLB(0.0);
 	  if (LBcheck == false)
-		  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+		  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
 
 	  bool UBcheck = _interpolator.checkUB(1.0);
 	  if (UBcheck == false)
-		  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
+		  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
   };
   BasicMultiDimensionalCartesianSpline(): _interpolator()
   {
@@ -169,7 +174,12 @@ public:
   double
   Cdf(std::vector<double> x)
   {
-    return _interpolator.interpolateAt(x);
+     double value = _interpolator.interpolateAt(x);
+
+     if (value > 1.0)
+    	 value=1.0;
+
+     return value;
   };
   double
   InverseCdf(std::vector<double> /*x*/)
