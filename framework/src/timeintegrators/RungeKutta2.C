@@ -68,7 +68,7 @@ RungeKutta2::solve()
   _fe_problem.time() = time_half;
   _fe_problem.getNonlinearSystem().sys().solve();
 
-  _fe_problem.copyOldSolutions();
+  _fe_problem.advanceState();
 
   // ---------------------------------
   Moose::out << " 2. stage" << std::endl;

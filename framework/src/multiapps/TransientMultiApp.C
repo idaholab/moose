@@ -481,7 +481,7 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
   }
 
   ex->preExecute();
-  problem->copyOldSolutions();
+  problem->advanceState();
   _transient_executioners[i] = ex;
 
   if (_detect_steady_state || _tolerate_failure)
