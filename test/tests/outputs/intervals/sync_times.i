@@ -49,7 +49,6 @@
 []
 
 [Outputs]
-  console = true
   [./out]
     type = Exodus
     sync_times = '0.15 0.375 0.892'

@@ -34,6 +34,7 @@ InputParameters validParams<Tecplot>()
   params.suppressParameter<bool>("output_vector_postprocessors");
   params.suppressParameter<bool>("scalar_as_nodal");
   params.suppressParameter<bool>("sequence");
+  params.suppressParameter<bool>("output_input");
 
   // Add binary toggle
   params.addParam<bool>("binary", false, "Set Tecplot files to output in binary format");

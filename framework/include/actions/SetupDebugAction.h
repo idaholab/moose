@@ -37,7 +37,6 @@ public:
 protected:
   unsigned int _top_residuals;
 
-
   /// Parameters from the action being created (AddOutputAction)
   InputParameters _action_params;
 };

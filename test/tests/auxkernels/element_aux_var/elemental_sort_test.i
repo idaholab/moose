@@ -80,7 +80,6 @@
 []
 
 [Outputs]
-  console = true
   [./out]
     type = Exodus
     elemental_as_nodal = true

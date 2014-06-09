@@ -40,7 +40,6 @@
 []
 
 [Outputs]
-  console = true
   [./exodus]
     type = Exodus
     output_initial = false

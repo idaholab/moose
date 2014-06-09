@@ -114,8 +114,3 @@
   type = Transient
   solve_type = Newton
 []
-
-[Outputs]
-  console = true
-[]
-

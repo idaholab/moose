@@ -30,6 +30,7 @@ InputParameters validParams<CSV>()
 
   // Suppress unused parameters
   params.suppressParameter<unsigned int>("padding");
+  params.suppressParameter<bool>("output_input");
 
   return params;
 }

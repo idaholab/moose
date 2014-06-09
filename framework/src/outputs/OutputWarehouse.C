@@ -29,13 +29,12 @@
 #include "pcrecpp.h"
 
 
-OutputWarehouse::OutputWarehouse() :
-    _has_screen_console(false)
+OutputWarehouse::OutputWarehouse()
 {
   // Set the reserved names
   _reserved.insert("none");                  // allows 'none' to be used as a keyword in 'outputs' parameter
   _reserved.insert("all");                   // allows 'all' to be used as a keyword in 'outputs' parameter
-  _reserved.insert("moose_debug_outputter"); // the [Debug] block creates this object
+  _reserved.insert("_moose_debug_output");   // the [Debug] block creates this object
 }
 
 OutputWarehouse::~OutputWarehouse()
@@ -93,18 +92,6 @@ OutputWarehouse::addOutput(Output * output)
     std::vector<Real> sync_times = output->parameters().get<std::vector<Real> >("sync_times");
     _sync_times.insert(sync_times.begin(), sync_times.end());
   }
-
-  // Warning if multiple Console objects are added with 'output_screen=true' in the input file
-  Console * c_ptr = dynamic_cast<Console *>(output);
-  if (c_ptr != NULL)
-  {
-    bool screen = c_ptr->getParam<bool>("output_screen");
-
-    if (screen && _has_screen_console)
-      mooseWarning("Multiple Console output objects are writing to the screen, this will likely cause duplicate messages printed.");
-    else
-      _has_screen_console = true;
-  }
 }
 
 bool
@@ -120,12 +107,11 @@ OutputWarehouse::getOutputs() const
 }
 
 void
-OutputWarehouse::addOutputFilename(OutFileBase filename)
+OutputWarehouse::addOutputFilename(const OutFileBase & filename)
 {
-  if (_filenames.find(filename) != _filenames.end())
+  if (_file_base_set.find(filename) != _file_base_set.end())
     mooseError("An output file with the name, " << filename << ", already exists.");
-
-  _filenames.insert(filename);
+  _file_base_set.insert(filename);
 }
 
 void
@@ -237,13 +223,10 @@ OutputWarehouse::setCommonParameters(InputParameters * params_ptr)
   _common_params_ptr = params_ptr;
 }
 
-InputParameters &
+InputParameters *
 OutputWarehouse::getCommonParameters()
 {
-  if (_common_params_ptr == NULL)
-    mooseError("No common input parameters are stored");
-
-  return *_common_params_ptr;
+  return _common_params_ptr;
 }
 
 std::set<Real> &

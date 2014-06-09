@@ -307,7 +307,7 @@ protected:
 
   /**
    * Performs the output of the input file
-   * By default this method does nothing and it is called only once, on the first call to output()
+   * By default this method does nothing and is not called, the individual Output objects are responsible for calling it
    */
   virtual void outputInput();
 
@@ -376,7 +376,6 @@ protected:
   bool _allow_output;
 
 private:
-//protected:
 
   /**
    * Initialization method.

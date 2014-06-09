@@ -25,6 +25,7 @@ InputParameters validParams<VTKOutput>()
   params.suppressParameter<bool>("output_vector_postprocessors");
   params.suppressParameter<bool>("scalar_as_nodal");
   params.suppressParameter<bool>("sequence");
+  params.suppressParameter<bool>("output_input");
 
   // Set default padding to 3
   params.set<unsigned int>("padding") = 3;

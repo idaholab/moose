@@ -27,10 +27,10 @@ InputParameters validParams<SolutionHistory>()
   params.suppressParameter<unsigned int>("padding");
   params.suppressParameter<bool>("output_nodal_variables");
   params.suppressParameter<bool>("output_elemental_variables");
-  params.suppressParameter <bool>("output_scalar_variables");
+  params.suppressParameter<bool>("output_scalar_variables");
   params.suppressParameter<bool>("output_postprocessors");
   params.suppressParameter<bool>("output_vector_postprocessors");
-
+  params.suppressParameter<bool>("output_input");
 
   // Return the parameters
   return params;

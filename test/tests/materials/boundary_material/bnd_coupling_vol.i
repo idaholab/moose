@@ -136,6 +136,5 @@
 []
 
 [Outputs]
-  console = true
   exodus = true
 []

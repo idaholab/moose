@@ -50,7 +50,7 @@ FileOutput::FileOutput(const std::string & name, InputParameters & parameters) :
   // Set the file base, if it has not been set already
   if (!isParamValid("file_base"))
   {
-    if (getParam<bool>("_short_cut"))
+    if (getParam<bool>("_built_by_moose"))
       _file_base = getOutputFileBase(_app);
     else
       _file_base = getOutputFileBase(_app, "_" + name);

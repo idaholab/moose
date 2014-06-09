@@ -48,7 +48,6 @@
 []
 
 [Outputs]
-  console = true
   [./exodus_3]
     type = Exodus
     interval = 3

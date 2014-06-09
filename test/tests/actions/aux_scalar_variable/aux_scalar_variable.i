@@ -47,10 +47,6 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Outputs]
-  console = true
-[]
-
 [Debug]
   show_var_residual_norms = true
 []

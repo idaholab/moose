@@ -114,6 +114,7 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
     _timing(_app.getParam<bool>("timing"))
 {
+
   // If --timing was used from the command-line, do nothing, all logs are enabled
   if (!_timing)
   {
@@ -227,6 +228,10 @@ Console::initialSetup()
     if (_write_file)
       _file_output_stream << Moose::setup_perf_log.get_perf_info() << std::endl;
   }
+
+  // Output the input file
+  if (_output_input)
+    outputInput();
 
   // Output the system information
   if (_system_information && _allow_output && !_force_output)
@@ -465,6 +470,24 @@ Console::insertNewline(std::stringstream &oss, std::streampos &begin, std::strea
      begin = oss.tellp();
      oss << std::setw(_field_width + 2) << "";  // "{ "
    }
+}
+
+void
+Console::outputInput()
+{
+  if (!_write_screen && !_write_file)
+    return;
+
+  std::ostringstream oss;
+  oss << "--- " << _app.getInputFileName() << " ------------------------------------------------------";
+  _app.actionWarehouse().printInputFile(oss);
+  oss << "\n";
+
+  if (_write_screen)
+    Moose::out << oss.str() << std::endl;
+
+  if (_write_file)
+    _file_output_stream << oss.str() << std::endl;
 }
 
 void

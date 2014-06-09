@@ -93,6 +93,5 @@
 
 [Outputs]
   exodus = true
-  console = true
   output_initial = true
 []

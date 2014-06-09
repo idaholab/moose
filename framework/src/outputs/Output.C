@@ -76,7 +76,7 @@ InputParameters validParams<Output>()
   params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_vector_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
-  params.addPrivateParam<bool>("_short_cut", false);
+  params.addPrivateParam<bool>("_built_by_moose", false);
 
   // Register this class as base class
   params.registerBase("Output");
@@ -189,6 +189,9 @@ Output::init()
   if (isParamValid("output_vector_postprocessors") ? !getParam<bool>("output_vector_postprocessors") : true)
     _vector_postprocessor.output.clear();
 
+  // Set the _output_input bool, this is done here rather than the constructor so that CheckOutputAction can force in case --show-input is used
+  _output_input = getParam<bool>("output_input");
+
   // Set the initialization flag
   _initialized = true;
 }
@@ -229,21 +232,6 @@ Output::outputInitial()
     _num++;
   }
 
-  // Output the input, if desired and it has not been output previously
-  if (_output_input)
-  {
-    // Produce warning if an input file does not exist
-    // (parser/action system are not mandatory subsystems)
-    if (_app.actionWarehouse().empty())
-      mooseWarning("There is no input file to be output");
-
-    // Call the input file output function
-    outputInput();
-
-    // Do not allow the input file to be written again
-    _output_input = false;
-  }
-
   // Set the force output flag to false
   _force_output = false;
   _output_initial = false;
@@ -260,7 +248,6 @@ Output::outputFailedStep()
 void
 Output::outputStep()
 {
-
   // Only perform output if you should
   if (!shouldOutputStep())
     return;
@@ -381,7 +368,7 @@ Output::hasOutput()
 void
 Output::outputInput()
 {
-  // Empty function
+  // The method left intentially empty
 }
 
 void
