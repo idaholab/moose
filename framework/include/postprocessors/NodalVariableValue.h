@@ -35,6 +35,7 @@ public:
   virtual void initialize() {}
   virtual void execute() {}
 
+
   /**
    * This will return the degrees of freedom in the system.
    */
@@ -44,6 +45,7 @@ protected:
   MooseMesh & _mesh;
   std::string _var_name;
   Node * _node_ptr;
+  const Real _scale_factor;
 };
 
 #endif //NODALVARIABLEVALUE_H
