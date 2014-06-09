@@ -59,10 +59,22 @@ private:
    */
   void createAutoRecoveryCheckpointObject();
 
-
+  /**
+   * Set the file base for recovery
+   */
   void setRecoverFileBase();
 
+  /**
+   * Extract the recovery directory
+   * @return A string containing the default recovery directory
+   */
   std::string getRecoveryDirectory();
+
+  /**
+   * Check if a Console object that outputs to the screen has been defined
+   * @return True if the a screen outputting Console objects
+   */
+  bool hasConsole();
 
   /// Parameters from the action being created (AddOutputAction)
   InputParameters _action_params;

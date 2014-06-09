@@ -59,7 +59,7 @@
 []
 
 [Outputs]
+  console = false
   output_initial = false
   exodus = true
-  console = true
 []

@@ -1,4 +1,10 @@
 [Tests]
+  [./no_outputs_block]
+    # Test the a file w/o output outputs
+    type = RunApp
+    input = console_no_outputs_block.i
+    expect_out = 'Framework Information'
+  [../]
   [./postprocessors]
     # Tests if the header line for the postprocessor values table is correct
     type = RunApp
@@ -14,9 +20,9 @@
   [./warning]
     # Test that duel screen output warning is printed
     type = RunApp
-    input = 'console.i'
+    input = 'console_warning.i'
     cli_args = 'Outputs/console=true Outputs/screen/file_base=console_warning_out'
-    expect_out = 'Multiple Console output objects are writing to the screen, this will likely cause duplicate messages printed.'
+    expect_out = 'Multiple \(3\) Console output objects are writing to the screen, this will likely cause duplicate messages printed.'
   [../]
   [./file_system_information]
     # Test that file contains regex
@@ -78,16 +84,17 @@
     input = 'console_transient.i'
     expect_out = 'Time Step  4, time = -0.600000'
   [../]
-  [./mooseConsole_warning]
-    # Test the used of MooseObject::mooseConsole method
-    type = RunApp
-    input = 'moose_console.i'
-    expect_out = 'Attempted to write a message via mooseConsole, but no Console output objects exist.'
-  [../]
-  [./mooseConsole_output]
-    # Test the used of MooseObject::mooseConsole method
+  [./_console_output]
+    # Test the used of MooseObject::_console method
     type = RunApp
     input = 'moose_console.i'
     expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0.4; t_step = 4'
+  [../]
+  [./input_output]
+    # Test the use of --show-input
+    type = RunApp
+    input = 'console.i'
+    cli_args = '--show-input'
+    expect_out = '[./screen]'
   [../]
 []

@@ -40,7 +40,15 @@
 []
 
 [Outputs]
+  [./console]
+    type = Console
+  [../]
   [./out]
     type = Exodus
   [../]
+[]
+
+[Debug]
+  show_var_residual_norms = true
+  #show_actions = true
 []

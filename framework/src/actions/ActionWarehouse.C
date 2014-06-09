@@ -169,7 +169,10 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & task)
 const std::vector<Action *> &
 ActionWarehouse::getActionsByName(const std::string & task) const
 {
-  return _action_blocks.at(task);
+  std::map<std::string, std::vector<Action *> >::const_iterator it = _action_blocks.find(task);
+  if (it == _action_blocks.end())
+    mooseError("The task " << task << " does not exist.");
+  return it->second;
 }
 
 void

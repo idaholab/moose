@@ -212,6 +212,4 @@
 
 [Outputs]
   exodus = true
-  console = true
 []
-

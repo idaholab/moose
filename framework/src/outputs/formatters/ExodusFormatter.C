@@ -39,8 +39,11 @@ ExodusFormatter::printInputFile(ActionWarehouse & wh)
   if (wh.mooseApp().commandLine())
     wh.mooseApp().commandLine()->print("", _ss, 1);
 
-  _ss << "### Version Info ###\n"
-      << wh.mooseApp().getSystemInfo()->getInfo() << "\n";
+  if (wh.mooseApp().getSystemInfo() != NULL)
+  {
+    _ss << "### Version Info ###\n"
+        << wh.mooseApp().getSystemInfo()->getInfo() << "\n";
+  }
 
   _ss << "### Input File ###" << std::endl;
   wh.printInputFile(_ss);

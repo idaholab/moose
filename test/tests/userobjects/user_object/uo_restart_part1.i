@@ -72,7 +72,6 @@
 [Outputs]
   exodus = true
   output_initial = true
-  console = true
   [./checkpoint]
     type = Checkpoint
     num_files = 1
