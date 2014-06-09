@@ -101,6 +101,21 @@ MOOSE is struggling with.
   $S_{\mathrm{eff}}=1$.  See {\tt recharge\_discharge/rd01.i} in the
   tests directory for an example of this.   I also suggest using the
   ``power'' covers over the ``VG'' curves.
+\item In multiphase problems if one phase completely disappears, MOOSE
+  may not converge.  To avoid this:
+\begin{enumerate}
+\item The fully-upwind kernel and boundary fluxes and dirac sources
+  can be used.  If the immobile saturation of the phase is nonzero,
+  then it probably won't disappear, as the fully-upwind approach will
+  not, in theory, allow fluid to exit from a node if the relative
+  permeability is zero.  However, numerical imprecision can lead to
+  phase disappearance.
+\item A nonzero residual saturation can be used.  This means that for
+  $dt\rightarrow 0$ the Jacobian matrix will be nonsingular.  (If the
+  residual saturations are zero then the Jacobian is singular for
+  $dt\rightarrow 0$.)  Then in most cases the problematic node will
+  fill with a little amount of the phase in the next time step
+\end{enumerate}
 \end{itemize}
 
 Choosing reasonable convergence criteria is very important.  The
@@ -191,6 +206,15 @@ The penalty term should {\em not} be used unless absolutely necessary
 as it will lead to poorer convergence characteristics.  In many cases
 it is not necessary.
 
+As mentioned above, in these situations it is often advantageous to
+use the fully-upwind kernels, boundary fluxes and dirac sources.  If
+the immobile saturation of the phase is nonzero then it probably won't
+disappear entirely.  If a phase disappears entirely then the Jacobian
+will be singular for $dt\rightarrow 0$, and this sometimes leads to
+nonconvergence.  This can be avoided by using a nonzero residual
+saturation.
+
+
 
 
 \section{An excavation}
@@ -234,6 +258,17 @@ this in an input file.  Note that:
 
 
 
+
+\chapter{Coupled porosity}
+
+When porosity is a function of time and the residual saturations are
+nonzero, the system can be singular when $dt\rightarrow 0$ (or for
+small $dt$).  This is annoying, and i suggest using zero residual
+saturations.
+
+In the case of one phase disappearing {\em and} time-dependent
+porosity, then you're stuck, sorry.  I need to implement a
+pressure-saturation-saturation formulation that will get around this.
 
 
 

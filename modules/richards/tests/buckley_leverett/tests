@@ -52,4 +52,33 @@
     heavy = true
     max_time = 1000
   [../]
+
+  [./bl01_lumped_fu]
+    type = 'Exodiff'
+    input = 'bl01_lumped_fu.i'
+    exodiff = 'bl01_lumped_fu.e'
+    rel_err = 1E-5
+    use_old_floor = True
+  [../]
+
+  [./bl20_lumped_fu]
+    type = 'Exodiff'
+    input = 'bl20_lumped_fu.i'
+    exodiff = 'bl20_lumped_fu.e'
+    rel_err = 1E-2
+    use_old_floor = True
+
+    # Need to investigate these restrictions
+    #compiler = GCC
+    #platform = LINUX
+  [../]
+  [./bl22_lumped_fu]
+    type = 'Exodiff'
+    input = 'bl22_lumped_fu.i'
+    exodiff = 'bl22_lumped_fu.e'
+    rel_err = 1E-2
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+  [../]
 []

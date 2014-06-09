@@ -106,4 +106,50 @@
     rel_err = 1e-5
     abs_zero = 1e-4
   [../]
+
+  [./gh_fu_01]
+    type = 'CSVDiff'
+    input = 'gh_fu_01.i'
+    csvdiff = 'gh_fu_01.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+  [./gh_fu_02]
+    type = 'CSVDiff'
+    input = 'gh_fu_02.i'
+    csvdiff = 'gh_fu_02.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+  [./gh_fu_05]
+    type = 'CSVDiff'
+    input = 'gh_fu_05.i'
+    csvdiff = 'gh_fu_05.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+  [./gh_fu_06]
+    type = 'CSVDiff'
+    input = 'gh_fu_06.i'
+    csvdiff = 'gh_fu_06.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+
+  [./gh_fu_17]
+    type = 'CSVDiff'
+    input = 'gh_fu_17.i'
+    csvdiff = 'gh_fu_17.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+
+  [./gh_fu_18]
+    type = 'Exodiff'
+    input = 'gh_fu_18.i'
+    exodiff = 'gh_fu_18.e'
+    exodiff_opts = '-steps last'
+    rel_err = 1e-5
+    use_old_floor = True
+  [../]
 []
