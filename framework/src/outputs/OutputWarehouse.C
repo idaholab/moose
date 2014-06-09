@@ -25,11 +25,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "tinydir.h"
-#include "pcrecpp.h"
-
-
-OutputWarehouse::OutputWarehouse()
+OutputWarehouse::OutputWarehouse() :
+    _multiapp_level(0)
 {
   // Set the reserved names
   _reserved.insert("none");                  // allows 'none' to be used as a keyword in 'outputs' parameter
@@ -172,15 +169,16 @@ OutputWarehouse::disableScreenOutput()
 }
 
 void
-OutputWarehouse::mooseConsole(const std::string & message, bool err) const
+OutputWarehouse::mooseConsole(const std::string & message)
 {
   std::vector<Console *> objects = getOutputs<Console>();
 
+  // If no Console objects exist, hold onto the message until they are created
   if (objects.empty())
-    mooseWarning("Attempted to write a message via mooseConsole, but no Console output objects exist.\nIt is likely that the output objects are not constructed, consider moving this message to initialSetup()");
+    _console_buffer << message;
 
   for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)
-    (*it)->write(message, err);
+    (*it)->mooseConsole(message);
 }
 
 void

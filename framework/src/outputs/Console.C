@@ -19,6 +19,7 @@
 #include "PetscSupport.h"
 #include "Executioner.h"
 #include "MooseApp.h"
+#include "pcrecpp.h"
 
 template<>
 InputParameters validParams<Console>()
@@ -112,7 +113,8 @@ Console::Console(const std::string & name, InputParameters parameters) :
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
     _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier")),
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
-    _timing(_app.getParam<bool>("timing"))
+    _timing(_app.getParam<bool>("timing")),
+    _console_buffer(_app.getOutputWarehouse().consoleBuffer())
 {
 
   // If --timing was used from the command-line, do nothing, all logs are enabled
@@ -144,55 +146,32 @@ Console::Console(const std::string & name, InputParameters parameters) :
     }
   }
 
-  // If file output is desired, wipe out the existing file if not recovering
-  if (_write_file && !_app.isRecovering())
-    writeStream(false);
+  // Write cached messages
+  write(_console_buffer.str());
 }
 
 Console::~Console()
 {
   // Write the libMesh performance log header
   if (_perf_header)
-  {
-    if (_write_screen && !_timing)
-      Moose::out << Moose::perf_log.get_info_header();
-
-    if (_write_file)
-      _file_output_stream << Moose::perf_log.get_info_header();
-  }
+    write(Moose::perf_log.get_info_header(), false);
 
   // Write the solve log (Moose Test Performance)
   if (_solve_log)
-  {
-    if (_write_screen && !_timing)
-      Moose::out << Moose::perf_log.get_perf_info();
-    if (_write_file)
-      _file_output_stream << Moose::perf_log.get_perf_info();
-  }
+    write(Moose::perf_log.get_perf_info(), false);
 
   // Write the setup log (Setup Performance)
   if (_setup_log)
-  {
-    if (_write_screen && !_timing)
-      Moose::out << Moose::setup_perf_log.get_perf_info();
-    if (_write_file)
-      _file_output_stream << Moose::setup_perf_log.get_perf_info();
-  }
+    write(Moose::setup_perf_log.get_perf_info(), false);
 
   // Write the libMesh log
 #ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
   if (_libmesh_log)
-  {
-    if (_write_screen && !_timing)
-      Moose::out << libMesh::perflog.get_perf_info();
-    if (_write_file)
-      _file_output_stream << libMesh::perflog.get_perf_info();
-  }
+    write(libMesh::perflog.get_perf_info(), false);
 #endif
 
   // Write the file output stream
-  if (_write_file)
-    writeStream();
+  writeStream();
 
   /* If --timing was not used disable the logging b/c the destructor of these
    * object does the output, if --timing was used do nothing because all other
@@ -212,6 +191,14 @@ Console::~Console()
 void
 Console::initialSetup()
 {
+
+  // Set the string for multiapp output indending
+  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),' ');
+
+  // If file output is desired, wipe out the existing file if not recovering
+  if (!_app.isRecovering())
+    writeStream(false);
+
   // Enable verbose output if Executioner has it enabled
   if (_app.getExecutioner()->isParamValid("verbose") && _app.getExecutioner()->getParam<bool>("verbose"))
   {
@@ -219,15 +206,12 @@ Console::initialSetup()
     _pars.set<bool>("verbose") = true;
   }
 
+  // Display a message to indicate the application is running (useful for MultiApps)
+  write(std::string("\nRunning App: ") + _app.name());
+
   // Output the performance log early
   if (getParam<bool>("setup_log_early"))
-  {
-    if (_write_screen)
-      Moose::out << Moose::setup_perf_log.get_perf_info() << std::endl;
-
-    if (_write_file)
-      _file_output_stream << Moose::setup_perf_log.get_perf_info() << std::endl;
-  }
+    write(Moose::setup_perf_log.get_perf_info());
 
   // Output the input file
   if (_output_input)
@@ -264,7 +248,7 @@ Console::timestepSetup()
       n = 2;
 
     // Write time step and time information
-    oss << std::endl <<  "Time Step " << std::setw(n) << timeStep();
+    oss << std::endl << "Time Step " << std::setw(n) << timeStep();
 
     // Set precision
     if (_precision > 0)
@@ -279,26 +263,18 @@ Console::timestepSetup()
 
     // Show old time information, if desired
     if (_verbose)
-      oss << "          old time = " << std::left << timeOld() << std::endl;
+      oss << std::right << std::setw(21) << std::setfill(' ') << "old time = " << std::left << timeOld() << '\n';
 
     // Show the time delta information
-    oss  << "                dt = "<< std::left << dt() << std::endl;
+    oss << std::right << std::setw(21) << std::setfill(' ') << "dt = "<< std::left << dt() << '\n';
 
     // Show the old time delta information, if desired
     if (_verbose)
-      oss << std::right << std::setw(21) << "old dt = " << _dt_old << std::left << '\n';
+      oss << std::right << std::setw(21) << std::setfill(' ') << "old dt = " << _dt_old << '\n';
   }
 
   // Output to the screen
-  if (_write_screen)
-  {
-    Moose::out << oss.str();
-    Moose::out << std::flush;
-  }
-
-  // Output to the file
-  if (_write_file)
-    _file_output_stream << oss.str();
+  write(oss.str());
 }
 
 std::string
@@ -310,6 +286,9 @@ Console::filename()
 void
 Console::writeStream(bool append)
 {
+  if (!_write_screen)
+    return;
+
   // Create the stream
   std::ofstream output;
 
@@ -334,7 +313,7 @@ Console::output()
   if (onNonlinearResidual())
   {
     if (_write_screen)
-      Moose::out << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
+      Moose::out << _multiapp_indent << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
 
     if (_write_file)
       _file_output_stream << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << std::scientific << _norm << std::endl;
@@ -344,7 +323,7 @@ Console::output()
   else if (onLinearResidual())
   {
     if (_write_screen)
-      Moose::out << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
+      Moose::out << _multiapp_indent << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
 
     if (_write_file)
       _file_output_stream << std::setw(7) << _linear_iter << std::scientific << " Linear |R| = " << std::scientific << _norm << std::endl;
@@ -361,8 +340,7 @@ Console::output()
   }
 
   // Write the file
-  if (_write_file)
-    writeStream();
+  writeStream();
 }
 
 void
@@ -431,11 +409,7 @@ Console::writeVariableNorms()
   }
 
   // Update the output streams
-  if (_write_screen)
-    Moose::out << oss.str() << std::endl;
-
-  if (_write_file)
-    _file_output_stream << oss.str() << std::endl;
+  write(oss.str());
 }
 
 // Quick helper to output the norm in color
@@ -501,12 +475,7 @@ Console::outputPostprocessors()
     oss << "\nPostprocessor Values:\n";
     _postprocessor_table.printTable(oss, _max_rows, _fit_mode);
     oss << std::endl;
-
-    if (_write_screen)
-      Moose::out << oss.str();
-
-    if (_write_file)
-      _file_output_stream << oss.str();
+    write(oss.str());
   }
 }
 
@@ -522,29 +491,59 @@ Console::outputScalarVariables()
     if (processor_id() == 0)
       _scalar_table.printTable(oss, _max_rows, _fit_mode);
     oss << std::endl;
-
-    if (_write_screen)
-      Moose::out << oss.str();
-
-    if (_write_file)
-      _file_output_stream << oss.str();
+    write(oss.str());
   }
 }
 
 void
-Console::write(const std::string & message, bool err)
+Console::write(std::string message, bool indent)
 {
-  if ( (onInitial() && !shouldOutputInitial()) || !shouldOutputStep())
-    return;
 
-  if (_write_screen && err)
-    Moose::err << message;
+  // Apply MultiApp indenting
+  if (indent)
+  {
+    // Remove final \n
+    bool n_last = false;
+    char last = *message.rbegin();
+    if (last == '\n')
+    {
+      message.erase(message.end()-1);
+      n_last = true;
+    }
 
-  else if (_write_screen)
+    // Replace all \n with \n and correct multiapp level spacing
+    pcrecpp::RE("\n").GlobalReplace(std::string("\n") + _multiapp_indent, &message);
+
+    // If the line doesn't start with \n then it must be indented
+    if (*message.begin() != '\n')
+      message.insert(0, _multiapp_indent);
+
+    // Restore the ending \n, if it exists
+    if (n_last)
+      message.push_back('\n');
+  }
+
+  // Write message
+  if (_write_screen)
     Moose::out << message;
 
   if (_write_file)
-    _file_output_stream << message;
+    _file_output_stream << message << std::endl;
+}
+
+void
+Console::mooseConsole(const std::string & message)
+{
+  // Do nothing if output is disabled
+  if ( (onInitial() && !shouldOutputInitial()) || !shouldOutputStep())
+    return;
+
+  // Write the messages
+  write(message);
+
+  // Update the file and flush the stream to the screen
+  //writeStream();
+  Moose::out << std::flush;
 }
 
 void
@@ -558,12 +557,12 @@ Console::outputSystemInformation()
 
   // Framework information
   if (_app.getSystemInfo() != NULL)
-    oss << _app.getSystemInfo()->getInfo();
+    oss << '\n' << _app.getSystemInfo()->getInfo();
 
   oss << std::left << '\n'
       << "Parallelism:\n"
-      << std::setw(_field_width) << "  Num Processors: "       << static_cast<std::size_t>(n_processors()) << '\n'
-      << std::setw(_field_width) << "  Num Threads: "         << static_cast<std::size_t>(n_threads()) << '\n'
+      << std::setw(_field_width) << "  Num Processors: " << static_cast<std::size_t>(n_processors()) << '\n'
+      << std::setw(_field_width) << "  Num Threads: " << static_cast<std::size_t>(n_threads()) << '\n'
       << '\n';
 
   MooseMesh & moose_mesh = _problem_ptr->mesh();
@@ -571,18 +570,18 @@ Console::outputSystemInformation()
   oss << "Mesh: " << '\n'
       << std::setw(_field_width) << "  Distribution: " << (moose_mesh.isParallelMesh() ? "parallel" : "serial")
       << (moose_mesh.isDistributionForced() ? " (forced) " : "") << '\n'
-      << std::setw(_field_width) << "  Mesh Dimension: " << mesh.mesh_dimension() << '\n'
-      << std::setw(_field_width) << "  Spatial Dimension: " << mesh.spatial_dimension() << '\n'
-      << std::setw(_field_width) << "  Nodes:" << '\n'
-      << std::setw(_field_width) << "    Total:" << mesh.n_nodes() << '\n'
-      << std::setw(_field_width) << "    Local:" << mesh.n_local_nodes() << '\n'
-      << std::setw(_field_width) << "  Elems:" << '\n'
-      << std::setw(_field_width) << "    Total:" << mesh.n_elem() << '\n'
-      << std::setw(_field_width) << "    Local:" << mesh.n_local_elem() << '\n'
-      << std::setw(_field_width) << "  Num Subdomains: "       << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
-      << std::setw(_field_width) << "  Num Partitions: "       << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
+      <<  std::setw(_field_width) << "  Mesh Dimension: " << mesh.mesh_dimension() << '\n'
+      <<  std::setw(_field_width) << "  Spatial Dimension: " << mesh.spatial_dimension() << '\n'
+      <<  std::setw(_field_width) << "  Nodes:" << '\n'
+      <<  std::setw(_field_width) << "    Total:" << mesh.n_nodes() << '\n'
+      <<  std::setw(_field_width) << "    Local:" << mesh.n_local_nodes() << '\n'
+      <<  std::setw(_field_width) << "  Elems:" << '\n'
+      <<  std::setw(_field_width) << "    Total:" << mesh.n_elem() << '\n'
+      <<  std::setw(_field_width) << "    Local:" << mesh.n_local_elem() << '\n'
+      <<  std::setw(_field_width) << "  Num Subdomains: "       << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
+      <<  std::setw(_field_width) << "  Num Partitions: "       << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
   if (n_processors() > 1 && moose_mesh.partitionerName() != "")
-    oss << std::setw(_field_width) << "  Partitioner: "       << moose_mesh.partitionerName()
+    oss << _multiapp_indent << std::setw(_field_width) << "  Partitioner: "       << moose_mesh.partitionerName()
         << (moose_mesh.isPartitionerForced() ? " (forced) " : "")
         << '\n';
   oss << '\n';
@@ -593,7 +592,7 @@ Console::outputSystemInformation()
   {
     const System & system = eq.get_system(i);
     if (system.system_type() == "TransientNonlinearImplicit")
-      oss <<  "Nonlinear System:" << '\n';
+      oss << "Nonlinear System:" << '\n';
     else if (system.system_type() == "TransientExplicit")
       oss << "Auxiliary System:" << '\n';
     else
@@ -699,11 +698,7 @@ Console::outputSystemInformation()
   oss.flush();
 
   // Output the information
-  if (_write_screen)
-    Moose::out << oss.str();
-
-  if (_write_file)
-    _file_output_stream << oss.str();
+  write(oss.str());
 }
 
 void

@@ -15,7 +15,7 @@
 // Moose includes
 #include "ConsoleStream.h"
 
-ConsoleStream::ConsoleStream(const OutputWarehouse & output_warehouse) :
+ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse) :
     _output_warehouse(output_warehouse)
 {
 }
