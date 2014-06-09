@@ -45,6 +45,13 @@
     type = GenericConstantMaterial
     block = 0
     prop_names = diffusivity
+    prop_values = 2
+  [../]
+
+  [./mat_props_bnd]
+    type = GenericConstantMaterial
+    boundary = right
+    prop_names = diffusivity
     prop_values = 1
   [../]
 []
