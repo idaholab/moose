@@ -125,6 +125,21 @@
     difference_tol = 1E10
   [../]
 
+  [./jn_fu_20]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_20.i'
+    # can't make too tight as finite-difference constant state bums out due to precision loss
+    ratio_tol = 1E-5 
+    difference_tol = 1E10
+  [../]
+  [./jn_fu_22]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_22.i'
+    # can't make too tight as finite-difference constant state bums out due to precision loss
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+
   [./jn30]
     type = 'PetscJacobianTester'
     input = 'jn30.i'
@@ -138,4 +153,68 @@
     ratio_tol = 1E-7 
     difference_tol = 1E10
   [../]
+
+  [./jn_fu_01]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn_fu_02]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn_fu_03]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn_fu_04]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_04.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn_fu_05]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_05.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn_fu_06]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_06.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn_fu_07]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_07.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn_fu_08]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_08.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./jn_fu_16]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_16.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./jn_fu_30]
+    type = 'PetscJacobianTester'
+    input = 'jn_fu_30.i'
+    ratio_tol = 1E-7 
+    difference_tol = 1E10
+  [../]
+
+
 []

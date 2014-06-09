@@ -11,6 +11,10 @@
 #include "Function.h"
 #include "RichardsSumQuantity.h"
 #include "RichardsVarNames.h"
+#include "RichardsDensity.h"
+#include "RichardsRelPerm.h"
+#include "RichardsSeff.h"
+
 
 class RichardsBorehole;
 
@@ -66,11 +70,43 @@ protected:
   /// Checks rotation matrices are correct
   bool _debug_things;
 
+  /// Whether to use full upwinding
+  bool _fully_upwind;
+
   /// Defines the richards variables in the simulation
   const RichardsVarNames & _richards_name_UO;
 
+  /// number of richards variables
+  unsigned int _num_p;
+
   /// The moose internal variable number of the richards variable of this Dirac Kernel
   unsigned int _pvar;
+
+  /// user object defining the density.  Only used if _fully_upwind = true
+  const RichardsDensity * _density_UO;
+
+  /// user object defining the effective saturation.  Only used if _fully_upwind = true
+  const RichardsSeff * _seff_UO;
+
+  /// user object defining the relative permeability.  Only used if _fully_upwind = true
+  const RichardsRelPerm * _relperm_UO;
+
+  /// number of nodes in this element.  Only used if _fully_upwind = true
+  unsigned int _num_nodes;
+
+  /**
+   * nodal values of mobility = density*relperm/viscosity
+   * These are used if _fully_upwind = true
+   */
+  std::vector<Real> _mobility;
+
+  /**
+   * d(_mobility)/d(variable_ph)  (variable_ph is the variable for phase=ph)
+   * These are used in the jacobian calculations if _fully_upwind = true
+   */
+  std::vector<std::vector<Real> > _dmobility_dv;
+
+
 
   /**
    * If positive then the borehole acts as a sink (producion well) for porepressure > borehole pressure, and does nothing otherwise
@@ -162,6 +198,26 @@ protected:
   /// whether _elemental_info has been constructed
   bool _have_constructed_elemental_info;
 
+  /**
+   * Holds the values of pressures at all the nodes of the element
+   * This holds the same info as _ps_at_nodes, but in a different way.
+   * Eg: _nodal_pp[_pvar]->nodalSln()[i] = (*_ps_at_nodes[_pvar])[i]
+   * We call its computeNodalValues method in order to retrieve the nodal
+   * porepressures from Moose if _fully_upwind = true.
+   * NOTE: only valid if all Richards variables are pressures
+   */
+  std::vector<MooseVariable *> _nodal_pp;
+
+  /**
+   * Holds the values of pressures at all the nodes of the element
+   * Only used if _fully_upwind = true
+   * Eg:
+   * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
+   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i]
+   */
+  std::vector<VariableValue *> _ps_at_nodes;
+
+
   /// reads a space-separated line of floats from ifs and puts in myvec
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
 
@@ -170,6 +226,10 @@ protected:
    * Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388
    */
   Real wellConstant(const RealTensorValue & perm, const RealTensorValue & rot, const Real & half_len, const Elem * ele, const Real & rad);
+
+  /// calculates the nodal values of pressure, mobility, and derivatives thereof
+  void prepareNodalValues();
+
 
   /**
    * Calculates Jacobian

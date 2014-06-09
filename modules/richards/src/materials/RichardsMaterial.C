@@ -82,6 +82,10 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     _mass(declareProperty<std::vector<Real> >("mass")),
     _dmass(declareProperty<std::vector<std::vector<Real> > >("dmass")),
 
+    _flux_no_mob(declareProperty<std::vector<RealVectorValue> >("flux_no_mob")),
+    _dflux_no_mob_dv(declareProperty<std::vector<std::vector<RealVectorValue> > >("dflux_no_mob_dv")),
+    _dflux_no_mob_dgradv(declareProperty<std::vector<std::vector<RealTensorValue> > >("dflux_no_mob_dgradv")),
+
     _flux(declareProperty<std::vector<RealVectorValue> >("flux")),
     _dflux_dv(declareProperty<std::vector<std::vector<RealVectorValue> > >("dflux_dv")),
     _dflux_dgradv(declareProperty<std::vector<std::vector<RealTensorValue> > >("dflux_dgradv")),
@@ -212,6 +216,10 @@ RichardsMaterial::computeProperties()
     _mass[qp].resize(_num_p);
     _dmass[qp].resize(_num_p);
 
+    _flux_no_mob[qp].resize(_num_p);
+    _dflux_no_mob_dv[qp].resize(_num_p);
+    _dflux_no_mob_dgradv[qp].resize(_num_p);
+
     _flux[qp].resize(_num_p);
     _dflux_dv[qp].resize(_num_p);
     _dflux_dgradv[qp].resize(_num_p);
@@ -293,8 +301,20 @@ RichardsMaterial::computeProperties()
       _mass_old[qp][i] = _porosity_old[qp]*_density_old[qp][i]*_sat_old[qp][i];
 
 
-      _flux[qp][i] = _density[qp][i]*_rel_perm[qp][i]*(_permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]))/_viscosity[qp][i];
+      _flux_no_mob[qp][i] = _permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]);
 
+      _dflux_no_mob_dv[qp][i].resize(_num_p);
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        _dflux_no_mob_dv[qp][i][j] = 0.0;
+      _dflux_no_mob_dv[qp][i][i] = _permeability[qp]*(- _ddensity_dv[qp][i][i]*_gravity[qp]);
+
+      _dflux_no_mob_dgradv[qp][i].resize(_num_p);
+      for (unsigned int j=0 ; j<_num_p; ++j)
+        _dflux_no_mob_dgradv[qp][i][j] = 0;
+      _dflux_no_mob_dgradv[qp][i][i] += _permeability[qp];
+
+
+      _flux[qp][i] = _density[qp][i]*_rel_perm[qp][i]*_flux_no_mob[qp][i]/_viscosity[qp][i];
 
       _dflux_dv[qp][i].resize(_num_p);
       for (unsigned int j=0 ; j<_num_p; ++j)
