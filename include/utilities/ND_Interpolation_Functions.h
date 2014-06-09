@@ -18,6 +18,9 @@
 #include <vector>
 #include <string>
 
+bool checkUpperBound(double upperBound, std::vector<double> values);
+bool checkLowerBound(double lowerBound, std::vector<double> values);
+
 class ND_Interpolation
 {
 public:
@@ -28,6 +31,7 @@ public:
 	double NDderivative(std::vector<double> x);
 	ND_Interpolation();
 	~ND_Interpolation();
+
 protected:
 	std::string _dataFileName;
 	bool        _completedInit;
@@ -44,6 +48,9 @@ public:
 	NDspline(std::string filename, std::vector<double> alpha, std::vector<double> beta);
 	NDspline();
 	~NDspline();
+	bool checkUB(double upperBound);
+	bool checkLB(double lowerBound);
+
 private:
     std::vector< std::vector<double> > _discretizations;
 	std::vector<double> _values;
@@ -90,6 +97,9 @@ public:
 	std::vector<double> NDinverseFunction(double F_min, double F_max);
 	inverseDistanceWeigthing(std::string filename, double p);
 	inverseDistanceWeigthing(double p);
+	bool checkUB(double upperBound);
+	bool checkLB(double lowerBound);
+
 private:
 	int _dimensions;
 	int _numberOfPoints;

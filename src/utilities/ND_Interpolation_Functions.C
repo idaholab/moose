@@ -41,6 +41,50 @@ ND_Interpolation::~ND_Interpolation()
 {
 }
 
+bool checkUpperBound(double upperBound, std::vector<double> values){
+	bool check = true;
+
+	for (int i=0; i<values.size(); i++){
+		if (values.at(i) > upperBound){
+			check = check && false;
+			std::cout<< "values.at(i) : " << values.at(i) << std::endl;
+		}
+		else
+			check = check && true;
+	}
+
+	return check;
+}
+
+
+bool checkLowerBound(double lowerBound, std::vector<double> values){
+	bool check = true;
+
+	for (int i=0; i<values.size(); i++){
+		if (values.at(i) < lowerBound)
+			check = check && false;
+		else
+			check = check && true;
+	}
+
+	return check;
+}
+
+bool inverseDistanceWeigthing::checkUB(double upperBound){
+	return checkUpperBound(upperBound, _values);
+}
+
+bool inverseDistanceWeigthing::checkLB(double lowerBound){
+	return checkLowerBound(lowerBound, _values);
+}
+
+bool NDspline::checkUB(double upperBound){
+	return checkUpperBound(upperBound, _values);
+}
+
+bool NDspline::checkLB(double lowerBound){
+	return checkLowerBound(lowerBound, _values);
+}
 
 double ND_Interpolation::minkowskiDistance (std::vector<double> point1, std::vector<double> point2, double p){
 	double distance;

@@ -5,8 +5,12 @@
 #include <vector>
 #include "ND_Interpolation_Functions.h"
 #include "distributionFunctions.h"
+#include <stdexcept>
 //#include "distribution_min.h"
 #include <iostream>
+
+using namespace std;
+#define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 enum EPbFunctionType{PDF,CDF};
 
@@ -40,6 +44,13 @@ class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
 public:
   BasicMultiDimensionalInverseWeight(std::string data_filename,double p):  _interpolator(data_filename,p)
   {
+	  bool LBcheck = _interpolator.checkLB(0.0);
+	  if (LBcheck == false)
+		  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+
+	  bool UBcheck = _interpolator.checkUB(1.0);
+	  if (UBcheck == false)
+		  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
   };
   BasicMultiDimensionalInverseWeight(double p):  _interpolator(inverseDistanceWeigthing(p))
   {
@@ -136,6 +147,13 @@ class BasicMultiDimensionalCartesianSpline: public  virtual BasicDistributionND
 public:
   BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta): _interpolator(data_filename, alpha, beta)
   {
+	  bool LBcheck = _interpolator.checkLB(0.0);
+	  if (LBcheck == false)
+		  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+
+	  bool UBcheck = _interpolator.checkUB(1.0);
+	  if (UBcheck == false)
+		  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
   };
   BasicMultiDimensionalCartesianSpline(): _interpolator()
   {
