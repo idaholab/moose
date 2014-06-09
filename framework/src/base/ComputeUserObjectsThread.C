@@ -188,6 +188,7 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
     _fe_problem.reinitMaterialsFace(_subdomain, _tid);
+    _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
     for (std::vector<SideUserObject *>::const_iterator side_UserObject_it = _user_objects[_tid].sideUserObjects(bnd_id, _group).begin();
          side_UserObject_it != _user_objects[_tid].sideUserObjects(bnd_id, _group).end();
