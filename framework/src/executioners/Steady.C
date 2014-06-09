@@ -93,7 +93,6 @@ Steady::execute()
 #endif //LIBMESH_ENABLE_AMR
     _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);
     preSolve();
-    _problem.updateMaterials();
     _problem.timestepSetup();
     _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
     _problem.solve();

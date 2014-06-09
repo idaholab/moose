@@ -64,7 +64,7 @@ void
 InversePowerMethod::takeStep()
 {
   // save the initial guess and mark a new time step
-  _problem.copyOldSolutions();
+  _problem.advanceState();
 
   preSolve();
   // we currently do not check the solution difference

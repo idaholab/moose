@@ -132,7 +132,7 @@ DT2::step()
       nl_sys.update();
 
       _fe_problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
-      _fe_problem.copyOldSolutions();
+      _fe_problem.advanceState();
 
       _time += _dt;
       // 2. step
