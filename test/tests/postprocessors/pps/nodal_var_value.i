@@ -96,7 +96,7 @@
 []
 
 [Postprocessors]
-  active = 'l2 node1 node4'
+  active = 'l2 scalednode1 node1 node4'
 
   [./l2]
     type = ElementL2Error
@@ -108,6 +108,13 @@
     type = NodalVariableValue
     variable = u
     nodeid = 15
+  [../]
+
+  [./scalednode1]
+    type = NodalVariableValue
+    variable = u
+    nodeid = 15
+    scale_factor = 2
   [../]
 
   [./node4]
