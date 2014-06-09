@@ -205,10 +205,22 @@ public:
 
   /**
    * Sends the supplied message to Console output objects
-   * @param message A string or stringstream containing the message to write
-   * @param err A flag for outputing to Moose::err instead of Moose::out
+   * @param message A string containing the message to write
    */
-  void mooseConsole(const std::string & message, bool err = false) const;
+  void mooseConsole(const std::string & message) const;
+
+  /**
+   * The multiapp level
+   * @return A writable reference to the current number of levels from the master app
+   */
+  unsigned int & multiappLevel() { return _multiapp_level; }
+
+  /**
+   * The buffered messages stream for Console objectsc
+   * @return Reference to the stream storing cached messages from calls to _console
+   */
+  std::ostringstream & consoleBuffer() { return _console_buffer; }
+>>>>>>> Re-factored output to the screen, including MultiApp indenting
 
 private:
 
@@ -278,6 +290,12 @@ private:
 
   /// List of reserved names
   std::set<std::string> _reserved;
+
+  /// Level of multiapp, the master is level 0. This used by the Console to indent output
+  unsigned int _multiapp_level;
+
+  /// Stream for holding messages passed to _console prior to Output object construction
+  std::ostringstream _console_buffer;
 
   // Allow complete access to FEProblem for calling initial/timestepSetup functions
   friend class FEProblem;

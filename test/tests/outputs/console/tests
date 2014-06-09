@@ -84,7 +84,7 @@
     input = 'console_transient.i'
     expect_out = 'Time Step  4, time = -0.600000'
   [../]
-  [./_console_output]
+  [./_console]
     # Test the used of MooseObject::_console method
     type = RunApp
     input = 'moose_console.i'

@@ -83,11 +83,11 @@ public:
    * Add a message to the output streams
    * @param message The message to add to the output streams
    *
-   * Any call to this method will write the supplied message to the screen, following
-   * the same restrictions as outputStep and outputInitial
+   * Any call to this method will write the supplied message to the screen and/or file,
+   * following the same restrictions as outputStep and outputInitial
    *
    */
-  void write(const std::string & message, bool err = false);
+  void mooseConsole(const std::string & message);
 
   /**
    * Output string for setting up PETSC output
@@ -129,12 +129,27 @@ protected:
   void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr);
 
   /**
-   * Write the file stream to the file
-   * This helper function writes the _file_output_stream to the file and clears the
-   * stream, by default the file is appended.
-   * @param append Toggle for appending the file
+   * Write message to screen and/or file
+   * @param message The desired message
+   * @param indent True if multiapp indenting is desired
    */
-  void writeStream(bool append = true);
+  void write(std::string message, bool indent = true);
+
+  /**
+   * Apply indentation to newlines in the supplied stream
+   * @param message Reference to the message being changed
+   */
+  void indentMessage(std::string & message);
+
+/**
+   * Write the file stream to the file
+   * @param append Toggle for appending the file
+   *
+   * This helper function writes the _file_output_stream to the file and clears the
+   * stream, by default the file is appended. This does nothing if 'output_file' is
+   * false.
+   */
+  void writeStreamToFile(bool append = true);
 
   /**
    * Print the L2-norms for each variable
@@ -214,8 +229,13 @@ private:
   /// State of the --timing command line argument from MooseApp
   bool _timing;
 
-  friend class OutputWarehouse;
+  /// Level of indent to add to output
+  std::string _multiapp_indent;
 
+  /// Reference to cached messages from calls to _console
+  const std::ostringstream & _console_buffer;
+
+  friend class OutputWarehouse;
 };
 
 #endif /* CONSOLE_H */

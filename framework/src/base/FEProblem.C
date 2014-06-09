@@ -135,6 +135,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
+    _has_multiapps(false),
     _has_initialized_stateful(false),
     _dbg_top_residuals(0),
     _resurrector(NULL),
@@ -2628,6 +2629,8 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
 void
 FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & name, InputParameters parameters)
 {
+  _has_multiapps = true;
+
   parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2654,7 +2657,6 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
   _multi_apps(type)[0].addMultiApp(multi_app);
-
   multi_app->init();
 }
 
@@ -2687,15 +2689,15 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 
   if (multi_apps.size())
   {
-    _console << "--Executing MultiApps--" << std::endl;
+    _console << "Executing MultiApps" << std::endl;
 
     for (unsigned int i=0; i<multi_apps.size(); i++)
       multi_apps[i]->solveStep(_dt, _time, auto_advance);
 
-    _console << "--Waiting For Other Processors To Finish--" << std::endl;
+    _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _console << "--Finished Executing MultiApps--" << std::endl;
+    _console << "Finished Executing MultiApps" << std::endl;
   }
 
   // Execute Transfers _from_ MultiApps
@@ -2703,14 +2705,14 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     std::vector<Transfer *> transfers = _from_multi_app_transfers(type)[0].all();
     if (transfers.size())
     {
-      _console << "--Starting Transfers From MultiApps--" << std::endl;
+      _console << "Starting Transfers From MultiApps" << std::endl;
       for (unsigned int i=0; i<transfers.size(); i++)
         transfers[i]->execute();
 
-      _console << "--Waiting For Transfers To Finish--" << std::endl;
+      _console << "Waiting For Transfers To Finish" << std::endl;
       MooseUtils::parallelBarrierNotify(_communicator);
 
-      _console << "--Transfers To Finished--" << std::endl;
+      _console << "Transfers To Finished" << std::endl;
     }
   }
 }
@@ -2722,15 +2724,15 @@ FEProblem::advanceMultiApps(ExecFlagType type)
 
   if (multi_apps.size())
   {
-    _console << "--Advancing MultiApps--" << std::endl;
+    _console << "Advancing MultiApps" << std::endl;
 
     for (unsigned int i=0; i<multi_apps.size(); i++)
       multi_apps[i]->advanceStep();
 
-    _console << "--Waiting For Other Processors To Finish--" << std::endl;
+    _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _console << "--Finished Advancing MultiApps--" << std::endl;
+    _console << "Finished Advancing MultiApps" << std::endl;
   }
 }
 
@@ -2757,8 +2759,6 @@ FEProblem::execTransfers(ExecFlagType type)
     for (unsigned int i=0; i<transfers.size(); i++)
       transfers[i]->execute();
 }
-
-
 
 void
 FEProblem::addTransfer(const std::string & transfer_name, const std::string & name, InputParameters parameters)

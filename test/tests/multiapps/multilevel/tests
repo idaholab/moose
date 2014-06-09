@@ -18,4 +18,11 @@
     exodiff = 'dt_from_sub_master_out.e dt_from_sub_master_out_sub0.e dt_from_sub_master_out_sub0_sub0.e dt_from_sub_master_out_sub0_sub1.e dt_from_sub_master_out_sub1.e dt_from_sub_master_out_sub1_sub0.e dt_from_sub_master_out_sub1_sub1.e'
     recover = false
   [../]
+  [./console_to_file]
+    type = 'CheckFiles'
+    input = 'time_dt_from_master_master.i'
+    check_files = 'time_dt_from_master_master_out.txt time_dt_from_master_master_out_sub0.txt time_dt_from_master_master_out_sub0_sub0.txt time_dt_from_master_master_out_sub0_sub1.txt time_dt_from_master_master_out_sub1.txt time_dt_from_master_master_out_sub1_sub0.txt time_dt_from_master_master_out_sub1_sub1.txt'
+    prereq = time_dt_from_master
+    recover = false
+  [../]
 []

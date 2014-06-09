@@ -45,7 +45,7 @@ public:
    * newline at the beginning of each call, but returns a reference to ConsoleStreamHelper
    * that write the stream to the Console objects with out entering a new
    */
-  ConsoleStream(const OutputWarehouse & output_warehouse);
+  ConsoleStream(OutputWarehouse & output_warehouse);
 
   /**
    * The output stream operator
@@ -55,28 +55,27 @@ public:
    *   _console << "The combination to the air lock is " << 12345 << std::endl;
    */
   template<typename T>
-  const ConsoleStream & operator<<(T s) const;
+  ConsoleStream & operator<<(T s);
 
   /**
    * This overload is here to handle the the std::endl manipulator
    */
-  const ConsoleStream & operator<<(StandardEndLine manip) const;
+  ConsoleStream & operator<<(StandardEndLine manip);
 
 private:
 
+  /// The stream for storing the message
+  std::ostringstream _oss;
+
   /// Reference to the OutputWarhouse that contains the Console output objects
-  const OutputWarehouse & _output_warehouse;
+  OutputWarehouse & _output_warehouse;
 };
 
 template<typename T>
-const ConsoleStream &
-ConsoleStream::operator<<(T s) const
+ConsoleStream &
+ConsoleStream::operator<<(T s)
 {
-  std::ostringstream _oss;
-
   _oss << s;
-  _output_warehouse.mooseConsole(_oss.str());
-
   return *this;
 }
 
