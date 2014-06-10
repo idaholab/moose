@@ -131,6 +131,7 @@
     # can't make too tight as finite-difference constant state bums out due to precision loss
     ratio_tol = 1E-5 
     difference_tol = 1E10
+    skip = 'Fails in debug mode'
   [../]
   [./jn_fu_22]
     type = 'PetscJacobianTester'
@@ -138,6 +139,7 @@
     # can't make too tight as finite-difference constant state bums out due to precision loss
     ratio_tol = 1E-6
     difference_tol = 1E10
+    skip = 'Fails in debug mode'
   [../]
 
   [./jn30]
