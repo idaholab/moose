@@ -24,9 +24,14 @@ RichardsSeff1VGcut::RichardsSeff1VGcut(const std::string & name, InputParameters
 {
   _s_cut = RichardsSeffVG::seff(_p_cut, _al, _m);
   _ds_cut = RichardsSeffVG::dseff(_p_cut, _al, _m);
-  Moose::out << "cut VG Seff has p_cut=" << _p_cut << " so seff_cut=" << _s_cut << " and seff=0 at p=" << -_s_cut/_ds_cut + _p_cut << "\n";
 }
 
+
+void
+RichardsSeff1VGcut::initialSetup()
+{
+  _console << "cut VG Seff has p_cut=" << _p_cut << " so seff_cut=" << _s_cut << " and seff=0 at p=" << -_s_cut/_ds_cut + _p_cut << std::endl;
+}
 
 
 Real

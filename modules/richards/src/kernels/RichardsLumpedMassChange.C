@@ -94,7 +94,6 @@ RichardsLumpedMassChange::computeQpResidual()
   Real seff_old;
   if (_var.nodalSlnOld().size()<=_i || (*_ps_old_at_nodes[0]).size() <= _i)
   {
-    //Moose::out << "size of var.nodalSlnOld = " << _var.nodalSlnOld().size() << "\n";
     density_old = (*_density_UO).density(_var.nodalSln()[_i]);
     seff_old = (*_seff_UO).seff(_ps_at_nodes, _i);
   }

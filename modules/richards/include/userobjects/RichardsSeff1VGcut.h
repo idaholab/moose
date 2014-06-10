@@ -30,6 +30,9 @@ class RichardsSeff1VGcut : public RichardsSeff1VG
  public:
   RichardsSeff1VGcut(const std::string & name, InputParameters parameters);
 
+  /// just prints some (maybe) useful info to the console
+  void initialSetup();
+
   /**
    * effective saturation as a function of porepressure
    * @param p porepressure in the element.  Note that (*p[0])[qp] is the porepressure at quadpoint qp

@@ -32,9 +32,13 @@ RichardsRelPermVG1::RichardsRelPermVG1(const std::string & name, InputParameters
   _vg1_linear = RichardsRelPermVG::drelperm(_scut);
   _vg1_quad = RichardsRelPermVG::d2relperm(_scut);
   _vg1_cub = (1 - _vg1_const - _vg1_linear*(1 - _scut) - _vg1_quad*std::pow(1 - _scut, 2))/std::pow(1 - _scut, 3);
-  Moose::out << "Relative permeability of VG1 type has cubic coefficients " << _vg1_const << " " << _vg1_linear << " " << _vg1_quad << " " << _vg1_cub << "\n";
 }
 
+void
+RichardsRelPermVG1::initialSetup()
+{
+  _console << "Relative permeability of VG1 type has cubic coefficients " << _vg1_const << " " << _vg1_linear << " " << _vg1_quad << " " << _vg1_cub << std::endl;
+}
 
 Real
 RichardsRelPermVG1::relperm(Real seff) const
