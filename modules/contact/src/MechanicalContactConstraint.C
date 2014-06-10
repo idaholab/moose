@@ -79,7 +79,15 @@ MechanicalContactConstraint::MechanicalContactConstraint(const std::string & nam
   if (parameters.isParamValid("normal_smoothing_method"))
     _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
 
-  _penetration_locator.setUpdate(false);
+  if (_model == CM_GLUED ||
+      (_model == CM_COULOMB && _formulation == CF_DEFAULT))
+    _penetration_locator.setUpdate(false);
+
+  if (_tension_release < 0)
+    mooseError("The parameter 'tension_release' must be non-negative");
+
+  if (_friction_coefficient < 0)
+    mooseError("The friction coefficient must be nonnegative");
 }
 
 void
