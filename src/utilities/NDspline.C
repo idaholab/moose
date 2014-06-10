@@ -3,6 +3,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <iostream>
+#include <limits>
 #include "MDreader.h"
 
 
@@ -20,7 +21,14 @@ NDspline::NDspline(std::string filename, std::vector<double> alfa, std::vector<d
 		int length = _discretizations.at(nDim).size();
 		_hj.push_back((_discretizations.at(nDim).at(length-1) - _discretizations.at(nDim).at(0))/(length-1));
 		std::cerr << "dim " << nDim+1 << ": _hj: " << _hj.at(nDim) << std::endl;
+
+		_minDisc.push_back(_discretizations.at(nDim).at(0));
+		_maxDisc.push_back(_discretizations.at(nDim).at(length-1));
+
+		//std::cout << "nDim: " << nDim << " ; _minDisc.at(nDim).at(0): " <<  _minDisc.at(nDim) << " ; _maxDisc.at(nDim): " << _maxDisc.at(nDim) << std::endl;
 	}
+
+
 	_completedInit = true;
 
 	int numberOfCoefficients=1;
@@ -45,11 +53,43 @@ NDspline::~NDspline() {
 
 double NDspline::interpolateAt(std::vector<double> point_coordinate){
 	double interpolated_value;
-    if (not _completedInit)
-    {
-      throw ("Error in interpolateAt: the class has not been completely initialized... you can not interpolate!!!!");
-    }
-	interpolated_value = spline_cartesian_interpolation(point_coordinate);
+
+	bool outcome = checkBoundaries(point_coordinate);
+
+	if (outcome==true){
+		if (not _completedInit)
+		{
+		  throw ("Error in interpolateAt: the class has not been completely initialized... you can not interpolate!!!!");
+		}
+		interpolated_value = spline_cartesian_interpolation(point_coordinate);
+	}else{
+		std::vector<double> distances (_values.size());
+		std::vector<int> indexes (point_coordinate.size());
+		std::vector<int> coordinates (point_coordinate.size());
+
+		int minIndex = -1;
+		double minDistance = numeric_limits<double>::max();
+
+		for (int nDim=0; nDim<_dimensions; nDim++)
+			indexes.at(nDim) = _discretizations.at(nDim).size();
+
+		for (int i=0; i<_values.size(); i++){
+			coordinates = from1DtoNDconverter(i, indexes);
+			double distance = 0;
+
+			for (int nDim=0; nDim<_dimensions; nDim++)
+				distance = distance + pow((coordinates.at(nDim)-point_coordinate.at(nDim)),2);
+
+			distances.at(i) = sqrt(distance);
+
+			if (distances.at(i) < minDistance){
+				minIndex = i;
+				minDistance = distances.at(i);
+			}
+		}
+		std::cout<<"minIndex: "<< minIndex << std::endl;
+		interpolated_value = _values.at(minIndex);
+	}
 
 	return interpolated_value;
 }
@@ -355,6 +395,21 @@ double NDspline::retrieveCoefficient(std::vector<int> coefficientCoordinate){
 	int oneDlocation = fromNDto1Dconverter(coefficientCoordinate);
 
 	return _splineCoefficients.at(oneDlocation);
+}
+
+bool NDspline::checkBoundaries(std::vector<double> point){
+	bool outcome = true; // True: within boundaries ; False: outside boundaries
+
+	for (int nDim=0; nDim<_dimensions; nDim++){
+		if (point.at(nDim) > _maxDisc.at(nDim))
+			outcome = outcome && false;
+		if (point.at(nDim) < _minDisc.at(nDim))
+			outcome = outcome && false;
+	}
+
+	//std::cout<<"Outcome Boundaries: " << outcome << std::endl;
+
+	return outcome;
 }
 
 //void NDspline::iterationStep(int nDim, std::vector<double> & coefficients, std::vector<double> & data){

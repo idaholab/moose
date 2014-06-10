@@ -51,6 +51,8 @@ public:
 	bool checkUB(double upperBound);
 	bool checkLB(double lowerBound);
 
+	bool checkBoundaries(std::vector<double> point);
+
 private:
     std::vector< std::vector<double> > _discretizations;
 	std::vector<double> _values;
@@ -59,6 +61,9 @@ private:
 	std::vector<double> _hj;
 	std::vector<double> _alpha;
 	std::vector<double> _beta;
+
+	std::vector<double> _minDisc;
+	std::vector<double> _maxDisc;
 
 	//void initializeCoefficientsVector();
 	void saveCoefficient(double value, std::vector<int> coefficientCoordinate);
