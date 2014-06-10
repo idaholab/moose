@@ -134,7 +134,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   // do debugging if AndyWilkins
   if (_debug_things)
   {
-    Moose::out << "Checking rotation matrices\n";
+    Moose::out << "Checking rotation matrices" << std::endl;
     RealVectorValue zzz(0,0,1);
     RealTensorValue iii;
     iii(0,0) = 1;
@@ -146,7 +146,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     for (unsigned int i=0 ; i<_xs.size()-1; ++i)
     {
       // check rotation matrix does the correct rotation
-      Moose::out << i << "\n";
+      Moose::out << i << std::endl;
       RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
       v2 /= std::sqrt(v2*v2);
       vec0 = _rot_matrix[i]*v2 - zzz;
@@ -299,21 +299,15 @@ RichardsBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
   Real ll1 = max1 - min1;
   Real ll2 = max2 - min2;
 
-  //Moose::out << " max1, min1, max2, min2 " << max1 << " " << min1 << " " << max2 << " " << min2 << "\n";
-
   Real r0 = _re_constant*std::sqrt( std::sqrt(eig_val1/eig_val2)*std::pow(ll2, 2) + std::sqrt(eig_val2/eig_val1)*std::pow(ll1, 2)) / ( std::pow(eig_val1/eig_val2, 0.25) + std::pow(eig_val2/eig_val1, 0.25) );
 
   Real effective_perm = std::sqrt(det2D);
-  //Moose::out << "eff = " << effective_perm << " rot_perm=" << rot_perm << "\n";
 
   const Real halfPi = acos(0.0);
 
   if (r0 <= rad)
     mooseError("The effective element size (about 0.2-times-true-ele-size) for an element containing a RichardsBorehole must be (much) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size " << r0 << " and the borehole radius is " << rad << "\n");
 
-  //Moose::out << "half_len = " << half_len << " r0 = " << r0 << " rad = " << rad << "\n";
-
-  //Moose::out << "computed wc= " << 4*halfPi*effective_perm*half_len/std::log(r0/rad) << "\n";
   return 4*halfPi*effective_perm*half_len/std::log(r0/rad);
 }
 
@@ -413,7 +407,6 @@ RichardsBorehole::computeQpResidual()
   // contribution from half-segment "ahead of" this point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
-    //Moose::out << " qp= " << _qp << " density = " << _density[_qp][_pvar] << " p = " << std::log(_density[_qp][_pvar]/1000)*2E9 << "\n";
     if ((character < 0.0 && pp < bh_pressure) || (character > 0.0 && pp > bh_pressure))
       // injection, so outflow<0 || // production, so outflow>0
       outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(pp - bh_pressure);
@@ -435,7 +428,7 @@ RichardsBorehole::computeQpJacobian()
 Real
 RichardsBorehole::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  Moose::out << "Starting OffDiag computation for borehole\n";
+  Moose::out << "Starting OffDiag computation for borehole" << std::endl;
   if (_richards_name_UO.not_richards_var(jvar))
     return 0.0;
   unsigned int dvar = _richards_name_UO.richards_var_num(jvar);

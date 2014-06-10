@@ -32,6 +32,5 @@ RichardsSeffAux::RichardsSeffAux(const std::string & name, InputParameters param
 Real
 RichardsSeffAux::computeValue()
 {
-  //Moose::out << "aux value " << _seff_UO.seff(_pressure_vals, _qp) << "\n";
   return _seff_UO.seff(_pressure_vals, _qp);
 }

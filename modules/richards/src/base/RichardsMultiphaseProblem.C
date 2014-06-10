@@ -49,10 +49,7 @@ RichardsMultiphaseProblem::initialSetup()
   // extract the required info
   _bounded_var_num = bounded.number();
   _lower_var_num = lower.number();
-  /*
-  Moose::out << "bounded_var_num = " << _bounded_var_num << "\n";
-  Moose::out << "lower_var_num = " << _lower_var_num << "\n";
-  */
+
   FEProblem::initialSetup();
 }
 
@@ -93,11 +90,6 @@ RichardsMultiphaseProblem::updateSolution(NumericVector<Number>& vec_solution, N
     // do the bounding
     if (soln[0] < soln[1])
     {
-      /*
-      dof_id_type nd = node.id();
-      Moose::out << "nd = " << nd << " dof_bounded = " << dofs[0] << " dof_lower = " << dofs[1] << "\n";
-      Moose::out << " bounded_value = " << soln[0] << " lower_value = " << soln[1] << "\n";
-      */
       vec_solution.set(dofs[0], soln[1]); // set the bounded variable equal to the lower value
       updatedSolution = true;
     }

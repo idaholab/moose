@@ -96,7 +96,15 @@ class TestHarness:
 
     self.initialize(argv, app_name)
 
+  """
+  Recursively walks the current tree looking for tests to run
+  Error codes:
+  0x0  - Success
+  0x0x - Parser error
+  0x1x - TestHarness error
+  """
   def findAndRunTests(self):
+    error_code = 0x0
     self.preRun()
     self.start_time = clock()
 
@@ -127,7 +135,7 @@ class TestHarness:
               parser = Parser(self.factory, warehouse)
 
               # Parse it
-              parser.parse(file)
+              error_code = error_code | parser.parse(file)
 
               # Retrieve the tests from the warehouse
               testers = warehouse.getAllObjects()
@@ -181,9 +189,13 @@ class TestHarness:
       print '\n< checking batch status >\n'
       self.options.processingPBS = True
       self.processPBSResults()
-      self.cleanupAndExit()
-    else:
-      self.cleanupAndExit()
+
+    self.cleanup()
+
+    if self.num_failed:
+      error_code = error_code | 0x10
+
+    sys.exit(error_code)
 
   def prunePath(self, filename):
     test_dir = os.path.abspath(os.path.dirname(filename))
@@ -516,7 +528,7 @@ class TestHarness:
       result_file.close()
 
   # Print final results, close open files, and exit with the correct error code
-  def cleanupAndExit(self):
+  def cleanup(self):
     # Print the results table again if a bunch of output was spewed to the screen between
     # tests as they were running
     if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
@@ -553,9 +565,6 @@ class TestHarness:
 
     if self.num_failed == 0:
       self.writeState(self.executable)
-      sys.exit(0)
-    else:
-      sys.exit(1)
 
   def initialize(self, argv, app_name):
     # Initialize the parallel runner with how many tests to run in parallel

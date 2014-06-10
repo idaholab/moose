@@ -25,6 +25,9 @@ class RichardsRelPermVG1 : public RichardsRelPermVG
  public:
   RichardsRelPermVG1(const std::string & name, InputParameters parameters);
 
+  /// just prints some (maybe) useful info to the console
+  void initialSetup();
+
   /**
    * relative permeability as a function of effective saturation
    * @param seff effective saturation
