@@ -112,7 +112,7 @@ public:
 protected:
   /// The name of the object that this interface belongs to
   std::string _mi_name;
-  
+
   /// Pointer to the material data class that stores properties
   MaterialData * _material_data;
 
