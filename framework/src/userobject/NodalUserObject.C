@@ -34,7 +34,7 @@ NodalUserObject::NodalUserObject(const std::string & name, InputParameters param
     UserObject(name, parameters),
     BlockRestrictable(name, parameters),
     BoundaryRestrictable(name, parameters),
-    MaterialPropertyInterface(parameters),
+    MaterialPropertyInterface(name, parameters),
     UserObjectInterface(parameters),
     Coupleable(parameters, true),
     ScalarCoupleable(parameters),

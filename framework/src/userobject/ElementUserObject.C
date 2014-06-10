@@ -29,7 +29,7 @@ InputParameters validParams<ElementUserObject>()
 ElementUserObject::ElementUserObject(const std::string & name, InputParameters parameters) :
     UserObject(name, parameters),
     BlockRestrictable(name, parameters),
-    MaterialPropertyInterface(parameters),
+    MaterialPropertyInterface(name, parameters),
     UserObjectInterface(parameters),
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),

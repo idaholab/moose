@@ -15,7 +15,8 @@
 #include "MaterialPropertyInterface.h"
 #include "FEProblem.h"
 
-MaterialPropertyInterface::MaterialPropertyInterface(InputParameters & parameters) :
+MaterialPropertyInterface::MaterialPropertyInterface(const std::string & name, InputParameters & parameters) :
+    _mi_name(name),
     _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _mi_block_ids(parameters.isParamValid("_block_ids") ?
                   parameters.get<std::vector<SubdomainID> >("_block_ids") : std::vector<SubdomainID>()),

@@ -35,7 +35,7 @@
 class MaterialPropertyInterface
 {
 public:
-  MaterialPropertyInterface(InputParameters & parameters);
+  MaterialPropertyInterface(const std::string & name, InputParameters & parameters);
 
   /**
    * Retrieve reference to material property (current time)
@@ -110,7 +110,9 @@ public:
   bool getMaterialPropertyCalled() const { return _get_material_property_called; }
 
 protected:
-
+  /// The name of the object that this interface belongs to
+  std::string _mi_name;
+  
   /// Pointer to the material data class that stores properties
   MaterialData * _material_data;
 
