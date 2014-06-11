@@ -13,7 +13,7 @@ template<>
 InputParameters validParams<RichardsDensityMethane20degC>()
 {
   InputParameters params = validParams<RichardsDensity>();
-  params.addClassDescription("Methane density (kg/m^3) at 20degC.  Pressure is assumed to be measured in Pascals.");
+  params.addClassDescription("Methane density (kg/m^3) at 20degC.  Pressure is assumed to be measured in Pascals.  NOTE: this expression is only valid to about P=20MPa.  Use van der Waals (RichardsDensityVDW) for higher pressures.");
   return params;
 }
 

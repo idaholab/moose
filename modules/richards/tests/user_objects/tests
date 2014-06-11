@@ -9,7 +9,7 @@
     type = 'CSVDiff'
     input = 'uo2.i'
     csvdiff = 'uo2.csv'
-    abs_zero = 1E-8
+    abs_zero = 1E-6
   [../]
   [./test_uo3]
     type = 'CSVDiff'
