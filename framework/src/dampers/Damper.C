@@ -29,7 +29,7 @@ InputParameters validParams<Damper>()
 Damper::Damper(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
-    MaterialPropertyInterface(parameters),
+    MaterialPropertyInterface(name, parameters),
     Restartable(name, parameters, "Dampers"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),

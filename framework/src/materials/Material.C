@@ -51,7 +51,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "materials"),
-    MaterialPropertyInterface(parameters),
+    MaterialPropertyInterface(name, parameters),
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
     Restartable(name, parameters, "Materials"),

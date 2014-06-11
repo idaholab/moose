@@ -57,7 +57,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     TransientInterface(parameters, name, "aux_kernels"),
-    MaterialPropertyInterface(parameters),
+    MaterialPropertyInterface(name, parameters),
     PostprocessorInterface(parameters),
     DependencyResolverInterface(),
     RandomInterface(name, parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
