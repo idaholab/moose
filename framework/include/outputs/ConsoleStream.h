@@ -45,7 +45,7 @@ public:
    * newline at the beginning of each call, but returns a reference to ConsoleStreamHelper
    * that write the stream to the Console objects with out entering a new
    */
-  ConsoleStream(const OutputWarehouse & output_warehouse);
+  ConsoleStream(OutputWarehouse & output_warehouse);
 
   /**
    * The output stream operator
@@ -70,7 +70,7 @@ public:
 private:
 
   /// Reference to the OutputWarhouse that contains the Console output objects
-  const OutputWarehouse & _output_warehouse;
+  OutputWarehouse & _output_warehouse;
 
   /// Stream for storing console output messages
   std::ostringstream _oss;
@@ -81,12 +81,6 @@ ConsoleStream &
 ConsoleStream::operator<<(T s)
 {
   _oss << s;
-  _output_warehouse.mooseConsole(_oss.str());
-
-  // Reset
-  _oss.clear();
-  _oss.str("");
-
   return *this;
 }
 
