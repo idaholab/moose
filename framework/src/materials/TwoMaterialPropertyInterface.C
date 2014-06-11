@@ -15,8 +15,8 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "MaterialData.h"
 
-TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(InputParameters & parameters) :
-    MaterialPropertyInterface(parameters),
+TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const std::string & name, InputParameters & parameters) :
+    MaterialPropertyInterface(name, parameters),
     _neighbor_material_data(*parameters.get<MaterialData *>("_neighbor_material_data"))
 {
 }

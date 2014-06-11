@@ -15,7 +15,8 @@
 #include "MaterialPropertyInterface.h"
 #include "FEProblem.h"
 
-MaterialPropertyInterface::MaterialPropertyInterface(InputParameters & parameters) :
+MaterialPropertyInterface::MaterialPropertyInterface(const std::string & name, InputParameters & parameters) :
+    _mi_name(name),
     _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
     _mi_block_ids(parameters.isParamValid("_block_ids") ?
                   parameters.get<std::vector<SubdomainID> >("_block_ids") : std::vector<SubdomainID>()),
@@ -76,12 +77,12 @@ MaterialPropertyInterface::checkMaterialProperty(const std::string & name)
   // If the material property is block restrictable, add to the list of materials to check
   if (!_mi_block_ids.empty())
     for (std::vector<SubdomainID>::iterator it = _mi_block_ids.begin(); it != _mi_block_ids.end(); ++it)
-      _mi_feproblem.storeDelayedCheckMatProp(*it, name);
+      _mi_feproblem.storeDelayedCheckMatProp(_mi_name, *it, name);
 
   // If the material property is boundary restrictable, add to the list of materials to check
   if (!_mi_boundary_ids.empty())
     for (std::vector<BoundaryID>::iterator it = _mi_boundary_ids.begin(); it != _mi_boundary_ids.end(); ++it)
-      _mi_feproblem.storeDelayedCheckMatProp(*it, name);
+      _mi_feproblem.storeDelayedCheckMatProp(_mi_name, *it, name);
 }
 
 void

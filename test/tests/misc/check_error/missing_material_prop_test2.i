@@ -12,9 +12,7 @@
 []
 
 [Kernels]
-  active = 'diff body_force'
-
-  [./diff]
+  [./diff_km_kernel]
     type = DiffMKernel
     variable = u
     mat_prop = diff1

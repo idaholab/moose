@@ -26,7 +26,7 @@
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {
 public:
-  TwoMaterialPropertyInterface(InputParameters & parameters);
+  TwoMaterialPropertyInterface(const std::string & name, InputParameters & parameters);
 
   /**
    * Retrieve the property named "name"
