@@ -213,14 +213,12 @@
   [../]
 []
 
+#
+# This still needs finite difference preconditioning as the
+# handcoded jacobians are not complete. Check out the split
+# solve, which works with SMP preconditioning.
+#
 [Preconditioning]
-  #active = 'full'
-  active = 'mydebug'
-  #active = ''
-  [./full]
-    type = SMP
-    full = true
-  [../]
   [./mydebug]
     type = FDP
     full = true

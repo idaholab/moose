@@ -14,4 +14,12 @@
     abs_zero = 6e-08
     group = 'adaptive'
   [../]
+
+  [./kks_example_split]
+    type = 'Exodiff'
+    input = 'kks_example_split.i'
+    exodiff = 'kks_example_split.e'
+    abs_zero = 6e-08
+    group = 'adaptive'
+  [../]
 []

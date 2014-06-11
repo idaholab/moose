@@ -228,23 +228,19 @@
   [../]
 []
 
+#
+# Precondition using handcoded off-diagonal terms
+#
 [Preconditioning]
-  #active = 'full'
-  active = 'mydebug'
-  #active = ''
   [./full]
     type = SMP
-    full = true
-  [../]
-  [./mydebug]
-    type = FDP
     full = true
   [../]
 []
 
 
 [Outputs]
-  file_base = test_transient_split
+  file_base = kks_example_split
   output_initial = true
   interval = 1
   exodus = true
