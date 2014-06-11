@@ -12,6 +12,7 @@
 #include "RichardsDensityConstBulk.h"
 #include "RichardsDensityIdeal.h"
 #include "RichardsDensityMethane20degC.h"
+#include "RichardsDensityVDW.h"
 #include "RichardsRelPermMonomial.h"
 #include "RichardsRelPermPower.h"
 #include "RichardsRelPermVG.h"
@@ -117,6 +118,7 @@ RichardsApp::registerObjects(Factory & factory)
   registerUserObject(RichardsDensityConstBulk);
   registerUserObject(RichardsDensityIdeal);
   registerUserObject(RichardsDensityMethane20degC);
+  registerUserObject(RichardsDensityVDW);
   registerUserObject(RichardsRelPermMonomial);
   registerUserObject(RichardsRelPermPower);
   registerUserObject(RichardsRelPermVG);
