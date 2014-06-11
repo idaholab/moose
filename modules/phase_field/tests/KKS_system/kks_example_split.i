@@ -1,17 +1,17 @@
 #
-# KKS toy problem in the non-split form
+# KKS toy problem in the split form
 #
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 30
-  ny = 30
+  nx = 15
+  ny = 15
   nz = 0
   xmin = 0
-  xmax = 10
+  xmax = 5
   ymin = 0
-  ymax = 10
+  ymax = 5
   zmin = 0
   zmax = 0
   elem_type = QUAD4
@@ -20,26 +20,32 @@
 [Variables]
   # order parameter
   [./eta]
-    order = THIRD
-    family = HERMITE
+    order = FIRST
+    family = LAGRANGE
+  [../]
+
+  # chemical potential
+  [./w]
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   # hydrogen concentration
   [./c]
-    order = THIRD
-    family = HERMITE
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   # hydrogen phase concentration (matrix)
   [./cm]
-    order = THIRD
-    family = HERMITE
+    order = FIRST
+    family = LAGRANGE
     initial_condition = 0.0
   [../]
   # hydrogen phase concentration (delta phase)
   [./cd]
-    order = THIRD
-    family = HERMITE
+    order = FIRST
+    family = LAGRANGE
     initial_condition = 0.0
   [../]
 []
@@ -63,8 +69,14 @@
 
 [BCs]
   [./Periodic]
+    #active = 'cm cd'
+
     [./eta]
       variable = eta
+      auto_direction = 'x y'
+    [../]
+    [./w]
+      variable = w
       auto_direction = 'x y'
     [../]
     [./c]
@@ -90,7 +102,6 @@
     f_name = fm
     args = 'cm'
     function = '(0.1-cm)^2'
-    outputs = exodus
   [../]
 
   # Free energy of the delta phase
@@ -100,7 +111,6 @@
     f_name = fd
     args = 'cd'
     function = '(0.9-cd)^2'
-    outputs = exodus
   [../]
 
   # h(eta)
@@ -109,7 +119,6 @@
     block = 0
     h_order = HIGH
     eta = eta
-    outputs = exodus
   [../]
 
   # g(eta)
@@ -118,7 +127,6 @@
     block = 0
     g_order = SIMPLE
     eta = eta
-    outputs = exodus
   [../]
 
   # constant properties
@@ -132,7 +140,7 @@
 
 [Kernels]
   # full transient
-  active = 'PhaseConc ChemPotVacancies CHBulk ACBulkF ACBulkC ACInterface dcdt detadt'
+  active = 'PhaseConc ChemPotVacancies CHBulk ACBulkF ACBulkC ACInterface dcdt detadt ckernel'
 
   # enforce c = (1-h(eta))*cm + h(eta)*cd
   [./PhaseConc]
@@ -156,17 +164,25 @@
   # Cahn-Hilliard Equation
   #
   [./CHBulk]
-    type = KKSCHBulk
+    type = KKSSplitCHCRes
     variable = c
     ca       = cm
     cb       = cd
     fa_name  = fm
     fb_name  = fd
     eta      = eta
+    w        = w
   [../]
+
   [./dcdt]
-    type = TimeDerivative
-    variable = c
+    type = CoupledImplicitEuler
+    variable = w
+    v = c
+  [../]
+  [./ckernel]
+    type = SplitCHWRes
+    mob_name = M
+    variable = w
   [../]
 
   #
@@ -204,9 +220,8 @@
 
   l_max_its = 100
   nl_max_its = 100
-
   num_steps = 3
-
+  
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.1  
@@ -227,8 +242,9 @@
   [../]
 []
 
+
 [Outputs]
-  file_base = kks_example
+  file_base = test_transient_split
   output_initial = true
   interval = 1
   exodus = true
