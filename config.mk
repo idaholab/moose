@@ -31,8 +31,8 @@ endif #Have SWIG
 else #no Python3
 ifeq ($(PYTHON2_HELLO),HELLO)
 ifeq ($(PYTHON_CONFIG_WHICH),)
-	PYTHON_INCLUDE = -DNO_PYTHON3_FOR_YOU
-	PYTHON_LIB = -DNO_PYTHON3_FOR_YOU
+	PYTHON_INCLUDE = -DNO_PYTHON_FOR_YOU
+	PYTHON_LIB = -DNO_PYTHON_FOR_YOU
 	CONTROL_MODULES =
 	PYTHON_MODULES =
 else #Python 2 and Python config found but not Python 3
@@ -45,8 +45,8 @@ else #Python 2 and Python config found but not Python 3
 endif
 else
 #Python3 and Python2 not found.
-	PYTHON_INCLUDE = -DNO_PYTHON3_FOR_YOU
-	PYTHON_LIB = -DNO_PYTHON3_FOR_YOU
+	PYTHON_INCLUDE = -DNO_PYTHON_FOR_YOU
+	PYTHON_LIB = -DNO_PYTHON_FOR_YOU
 	CONTROL_MODULES =
 	PYTHON_MODULES =
 endif
