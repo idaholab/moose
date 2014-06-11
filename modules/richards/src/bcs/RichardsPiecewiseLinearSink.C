@@ -92,8 +92,6 @@ RichardsPiecewiseLinearSink::prepareNodalValues()
 
 
   Real p;
-  Real density;
-  Real ddensity_dp;
   Real seff;
   std::vector<Real> dseff_dp;
   Real drelperm_ds;
