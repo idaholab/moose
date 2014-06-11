@@ -193,7 +193,10 @@ Console::initialSetup()
 {
 
   // Set the string for multiapp output indending
-  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),'-');
+//  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),'-');
+//  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),' ') + '|';
+  if (_app.getOutputWarehouse().multiappLevel() > 0)
+    _multiapp_indent += std::string("|") + _app.name() + "|";
 
   // If file output is desired, wipe out the existing file if not recovering
   if (!_app.isRecovering())
@@ -207,7 +210,7 @@ Console::initialSetup()
   }
 
   // Display a message to indicate the application is running (useful for MultiApps)
-  write(std::string("\nRunning App: ") + _app.name());
+  write(std::string("\nRunning App: ") + _app.name() + "\n");
 
   // Output the performance log early
   if (getParam<bool>("setup_log_early"))
@@ -495,55 +498,43 @@ Console::outputScalarVariables()
   }
 }
 
+
+void
+Console::indentMessage(std::string & message)
+{
+  pcrecpp::RE re("\n(?!\\Z)");
+  re.GlobalReplace(std::string("\n") + _multiapp_indent, &message);
+}
+
 void
 Console::write(std::string message, bool indent)
 {
+  if (_write_file)
+    _file_output_stream << message << std::endl;
 
   // Apply MultiApp indenting
   if (indent)
   {
-//    // Remove final \n
-//    bool n_last = false;
-//    char last = *message.rbegin();
-//    if (last == '\n')
-//    {
-//      message.erase(message.end()-1);
-//      n_last = true;
-//    }
-
-    pcrecpp::RE re("\n(?!\\Z)");
-
-    re.GlobalReplace(std::string("\n") + _multiapp_indent, &message);
-
-//    // If the line doesn't start with \n then it must be indented
-//    if (*message.begin() != '\n')
-//      message.insert(0, _multiapp_indent);
-
-//    // Restore the ending \n, if it exists
-//    if (n_last)
-//      message.push_back('\n');
+    indentMessage(message);
+    Moose::out << _multiapp_indent;
   }
 
   // Write message
   if (_write_screen)
     Moose::out << message;
-
-  if (_write_file)
-    _file_output_stream << message << std::endl;
 }
 
 void
-Console::mooseConsole(const std::string & message)
+Console::mooseConsole(const std::string & message, bool indent)
 {
-  // Do nothing if output is disabled
+  // Do nothing if output is disabledyes
   if ( (onInitial() && !shouldOutputInitial()) || !shouldOutputStep())
     return;
 
   // Write the messages
-  write(message);
+  write(message, indent);
 
-  // Update the file and flush the stream to the screen
-  //writeStream();
+  // Flush the stream to the screen
   Moose::out << std::flush;
 }
 
@@ -571,18 +562,18 @@ Console::outputSystemInformation()
   oss << "Mesh: " << '\n'
       << std::setw(_field_width) << "  Distribution: " << (moose_mesh.isParallelMesh() ? "parallel" : "serial")
       << (moose_mesh.isDistributionForced() ? " (forced) " : "") << '\n'
-      <<  std::setw(_field_width) << "  Mesh Dimension: " << mesh.mesh_dimension() << '\n'
-      <<  std::setw(_field_width) << "  Spatial Dimension: " << mesh.spatial_dimension() << '\n'
-      <<  std::setw(_field_width) << "  Nodes:" << '\n'
-      <<  std::setw(_field_width) << "    Total:" << mesh.n_nodes() << '\n'
-      <<  std::setw(_field_width) << "    Local:" << mesh.n_local_nodes() << '\n'
-      <<  std::setw(_field_width) << "  Elems:" << '\n'
-      <<  std::setw(_field_width) << "    Total:" << mesh.n_elem() << '\n'
-      <<  std::setw(_field_width) << "    Local:" << mesh.n_local_elem() << '\n'
-      <<  std::setw(_field_width) << "  Num Subdomains: "       << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
-      <<  std::setw(_field_width) << "  Num Partitions: "       << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
+      << std::setw(_field_width) << "  Mesh Dimension: " << mesh.mesh_dimension() << '\n'
+      << std::setw(_field_width) << "  Spatial Dimension: " << mesh.spatial_dimension() << '\n'
+      << std::setw(_field_width) << "  Nodes:" << '\n'
+      << std::setw(_field_width) << "    Total:" << mesh.n_nodes() << '\n'
+      << std::setw(_field_width) << "    Local:" << mesh.n_local_nodes() << '\n'
+      << std::setw(_field_width) << "  Elems:" << '\n'
+      << std::setw(_field_width) << "    Total:" << mesh.n_elem() << '\n'
+      << std::setw(_field_width) << "    Local:" << mesh.n_local_elem() << '\n'
+      << std::setw(_field_width) << "  Num Subdomains: "       << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
+      << std::setw(_field_width) << "  Num Partitions: "       << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
   if (n_processors() > 1 && moose_mesh.partitionerName() != "")
-    oss << _multiapp_indent << std::setw(_field_width) << "  Partitioner: "       << moose_mesh.partitionerName()
+    oss << std::setw(_field_width) << "  Partitioner: "       << moose_mesh.partitionerName()
         << (moose_mesh.isPartitionerForced() ? " (forced) " : "")
         << '\n';
   oss << '\n';

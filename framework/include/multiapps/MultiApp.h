@@ -312,9 +312,6 @@ protected:
 
   /// Whether or not this processor as an App _at all_
   bool _has_an_app;
-
-  /// Whether to write console output of apps to file
-  bool _app_screen_to_file;
 };
 
 #endif // MULTIAPP_H

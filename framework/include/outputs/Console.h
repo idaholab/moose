@@ -87,7 +87,7 @@ public:
    * following the same restrictions as outputStep and outputInitial
    *
    */
-  void mooseConsole(const std::string & message);
+  void mooseConsole(const std::string & message, bool indent);
 
   /**
    * Output string for setting up PETSC output
@@ -128,11 +128,20 @@ protected:
    */
   void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr);
 
-
+  /**
+   * Write message to screen and/or file
+   * @param message The desired message
+   * @param indent True if multiapp indenting is desired
+   */
   void write(std::string message, bool indent = true);
 
-
   /**
+   * Apply indentation to newlines in the supplied stream
+   * @param message Reference to the message being changed
+   */
+  void indentMessage(std::string & message);
+
+/**
    * Write the file stream to the file
    * @param append Toggle for appending the file
    *

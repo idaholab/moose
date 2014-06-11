@@ -74,6 +74,8 @@ private:
 
   /// Stream for storing console output messages
   std::ostringstream _oss;
+
+  bool _indent;
 };
 
 template<typename T>
@@ -81,11 +83,12 @@ ConsoleStream &
 ConsoleStream::operator<<(T s)
 {
   _oss << s;
-  _output_warehouse.mooseConsole(_oss.str());
+  _output_warehouse.mooseConsole(_oss.str(), _indent);
 
   // Reset
   _oss.clear();
   _oss.str("");
+  _indent = false;
 
   return *this;
 }

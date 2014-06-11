@@ -16,15 +16,18 @@
 #include "ConsoleStream.h"
 
 ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse) :
-    _output_warehouse(output_warehouse)
+    _output_warehouse(output_warehouse),
+    _indent(true)
 {
 }
 
 ConsoleStream &
 ConsoleStream::operator<<(StandardEndLine manip)
 {
+  _indent = true;
   manip(Moose::out);
   return *this;
+
 }
 
 void

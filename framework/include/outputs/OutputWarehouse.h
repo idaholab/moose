@@ -212,7 +212,7 @@ public:
    * Sends the supplied message to Console output objects
    * @param message A string containing the message to write
    */
-  void mooseConsole(const std::string & message);
+  void mooseConsole(const std::string & message, bool indent);
 
   /**
    * The multiapp level
