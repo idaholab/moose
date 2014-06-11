@@ -3,7 +3,6 @@
 
 #include "SplitCHCRes.h"
 
-
 //Forward Declarations
 class SplitCHMath;
 

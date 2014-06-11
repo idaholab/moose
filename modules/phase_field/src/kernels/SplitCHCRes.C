@@ -16,8 +16,7 @@ SplitCHCRes::SplitCHCRes(const std::string & name, InputParameters parameters) :
     _kappa_name(getParam<std::string>("kappa_name")),
     _kappa(getMaterialProperty<Real>(_kappa_name)),
     _w_var(coupled("w")),
-    _w(coupledValue("w")),
-    _grad_w(coupledGradient("w"))
+    _w(coupledValue("w"))
 {
 }
 
@@ -35,7 +34,7 @@ SplitCHCRes::computeDFDC(PFFunctionType type)
   }
 
   mooseError("Invalid type passed in");
-  }*/
+}*/
 
 Real
 SplitCHCRes::computeQpResidual()

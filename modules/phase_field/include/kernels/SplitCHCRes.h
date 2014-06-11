@@ -25,7 +25,6 @@ private:
   MaterialProperty<Real> & _kappa;
   unsigned int _w_var;
   VariableValue & _w;
-  VariableGradient & _grad_w;
 };
 
 #endif //SPLITCHCRES_H
