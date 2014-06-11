@@ -1,4 +1,5 @@
 #include "SplitCHMath.h"
+
 // The couple, SplitCHMath and SplitCHWRes, splits the CH equation by replacing chemical potential with 'w'.
 template<>
 InputParameters validParams<SplitCHMath>()
