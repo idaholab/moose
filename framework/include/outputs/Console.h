@@ -87,7 +87,7 @@ public:
    * following the same restrictions as outputStep and outputInitial
    *
    */
-  void mooseConsole(const std::string & message, bool indent);
+  void mooseConsole(const std::string & message);
 
   /**
    * Output string for setting up PETSC output

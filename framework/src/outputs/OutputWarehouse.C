@@ -169,7 +169,7 @@ OutputWarehouse::disableScreenOutput()
 }
 
 void
-OutputWarehouse::mooseConsole(const std::string & message, bool indent)
+OutputWarehouse::mooseConsole(const std::string & message)
 {
   std::vector<Console *> objects = getOutputs<Console>();
 
@@ -178,7 +178,7 @@ OutputWarehouse::mooseConsole(const std::string & message, bool indent)
     _console_buffer << message;
 
   for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)
-    (*it)->mooseConsole(message, indent);
+    (*it)->mooseConsole(message);
 }
 
 void

@@ -16,22 +16,25 @@
 #include "ConsoleStream.h"
 
 ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse) :
-    _output_warehouse(output_warehouse),
-    _indent(true)
+    _output_warehouse(output_warehouse)
 {
 }
 
 ConsoleStream &
 ConsoleStream::operator<<(StandardEndLine manip)
 {
-  _indent = true;
+  _output_warehouse.mooseConsole(_oss.str());
   manip(Moose::out);
-  return *this;
 
+  // Reset
+  _oss.clear();
+  _oss.str("");
+  return *this;
 }
 
 void
 ConsoleStream::flush()
 {
+  _output_warehouse.mooseConsole(_oss.str());
   _oss.flush();
 }

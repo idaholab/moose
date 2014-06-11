@@ -196,7 +196,7 @@ Console::initialSetup()
 //  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),'-');
 //  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),' ') + '|';
   if (_app.getOutputWarehouse().multiappLevel() > 0)
-    _multiapp_indent += std::string("|") + _app.name() + "|";
+    _multiapp_indent += _app.name() + " |";
 
   // If file output is desired, wipe out the existing file if not recovering
   if (!_app.isRecovering())
@@ -504,6 +504,9 @@ Console::indentMessage(std::string & message)
 {
   pcrecpp::RE re("\n(?!\\Z)");
   re.GlobalReplace(std::string("\n") + _multiapp_indent, &message);
+
+  if (message.empty())
+    message + "\n" + _multiapp_indent;
 }
 
 void
@@ -525,14 +528,14 @@ Console::write(std::string message, bool indent)
 }
 
 void
-Console::mooseConsole(const std::string & message, bool indent)
+Console::mooseConsole(const std::string & message)
 {
   // Do nothing if output is disabledyes
   if ( (onInitial() && !shouldOutputInitial()) || !shouldOutputStep())
     return;
 
   // Write the messages
-  write(message, indent);
+  write(message);
 
   // Flush the stream to the screen
   Moose::out << std::flush;
