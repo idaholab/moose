@@ -63,7 +63,6 @@ active = 'SMP'
     type = SplitCHWRes
     variable = w
     mob_name = M
-    c = c
   [../]
 
   [./time]
@@ -133,6 +132,3 @@ active = 'SMP'
     linear_residuals = true
   [../]
 []
-
-
-
