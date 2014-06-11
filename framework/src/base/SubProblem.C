@@ -162,15 +162,15 @@ SubProblem::storeMatPropName(BoundaryID boundary_id, const std::string & name)
 }
 
 void
-SubProblem::storeDelayedCheckMatProp(SubdomainID block_id, const std::string & name)
+SubProblem::storeDelayedCheckMatProp(const std::string & requestor, SubdomainID block_id, const std::string & name)
 {
-  _map_block_material_props_check[block_id].insert(name);
+  _map_block_material_props_check[block_id].insert(std::make_pair(requestor, name));
 }
 
 void
-SubProblem::storeDelayedCheckMatProp(BoundaryID boundary_id, const std::string & name)
+SubProblem::storeDelayedCheckMatProp(const std::string & requestor, BoundaryID boundary_id, const std::string & name)
 {
-  _map_boundary_material_props_check[boundary_id].insert(name);
+  _map_boundary_material_props_check[boundary_id].insert(std::make_pair(requestor, name));
 }
 
 void
@@ -218,8 +218,8 @@ SubProblem::meshChanged()
 
 void
 SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props,
-                          std::map<unsigned int, std::set<std::string> > & check_props,
-                          std::string type)
+                          std::map<unsigned int, std::multimap<std::string, std::string> > & check_props,
+                          const std::string & type)
 {
 
   // Set flag for type: block/boundary
@@ -250,7 +250,7 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
   }
 
   // Loop through the properties to check
-  for (std::map<unsigned int, std::set<std::string> >::const_iterator check_it = check_props.begin();
+  for (std::map<unsigned int, std::multimap<std::string, std::string> >::const_iterator check_it = check_props.begin();
        check_it != check_props.end(); ++check_it)
   {
     // The current id for the property being checked (BoundaryID || BlockID)
@@ -285,13 +285,11 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
       for (std::set<int>::const_iterator all_it = all_ids.begin(); all_it != all_ids.end(); ++all_it)
       {
         // Loop through all the stored properties
-        for (std::set<std::string>::const_iterator prop_it = check_it->second.begin();
-             prop_it != check_it->second.end(); ++prop_it)
+        for (std::multimap<std::string, std::string>::const_iterator prop_it = check_it->second.begin(); prop_it != check_it->second.end(); ++prop_it)
         {
-            // Produce an error if the material is not defined on the current block/boundary and any block/boundary
-            if (props[*all_it].find(*prop_it) == props[*all_it].end() &&
-                props[any_id].find(*prop_it) == props[any_id].end())
-              mooseError("Material property '" + (*prop_it) + "' is not defined on " + type + " " + Moose::stringify(*all_it));
+          // Produce an error if the material is not defined on the current block/boundary and any block/boundary
+          if (props[*all_it].find(prop_it->second) == props[*all_it].end() && props[any_id].find(prop_it->second) == props[any_id].end())
+            mooseError("Material property '" + prop_it->second + "', requested by '" + prop_it->first + "' is not defined on " + type + " " + Moose::stringify(*all_it));
         }
       }
     }
@@ -299,17 +297,13 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
     // If the property is contained in the map of properties, loop over the stored names for the current id and
     // check that the property is defined
     else if (props.find(check_id) != props.end())
-      for (std::set<std::string>::const_iterator check_jt = check_it->second.begin(); check_jt != check_it->second.end(); ++check_jt)
+      for (std::multimap<std::string, std::string>::const_iterator prop_it = check_it->second.begin(); prop_it != check_it->second.end(); ++prop_it)
       {
-        std::string name = *check_jt;
-
         // Check if the name is contained in the map and skip over the id if it is Moose::ANY_BLOCK_ID/ANY_BOUNDARY_ID
-        if (props[check_id].find(name) == props[check_id].end() && check_id != any_id)
-
-          //if (props[id].find(name) == props[id].end())
-          mooseError("Material property '" + name + "' is not defined on " + type + " " + check_name);//Moose::stringify(id));
+        if (props[check_id].find(prop_it->second) == props[check_id].end() && check_id != any_id)
+          mooseError("Material property '" + prop_it->second + "', requested by '" + prop_it->first + "' is not defined on " + type + " " + check_name);
       }
     else
-      mooseError("No material defined on " + type + " " + check_name); //Moose::stringify(id));
+      mooseError("No material defined on " + type + " " + check_name);
   }
 }
