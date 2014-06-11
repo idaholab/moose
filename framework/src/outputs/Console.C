@@ -193,7 +193,7 @@ Console::initialSetup()
 {
 
   // Set the string for multiapp output indending
-  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),' ');
+  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),'-');
 
   // If file output is desired, wipe out the existing file if not recovering
   if (!_app.isRecovering())
@@ -502,25 +502,26 @@ Console::write(std::string message, bool indent)
   // Apply MultiApp indenting
   if (indent)
   {
-    // Remove final \n
-    bool n_last = false;
-    char last = *message.rbegin();
-    if (last == '\n')
-    {
-      message.erase(message.end()-1);
-      n_last = true;
-    }
+//    // Remove final \n
+//    bool n_last = false;
+//    char last = *message.rbegin();
+//    if (last == '\n')
+//    {
+//      message.erase(message.end()-1);
+//      n_last = true;
+//    }
 
-    // Replace all \n with \n and correct multiapp level spacing
-    pcrecpp::RE("\n").GlobalReplace(std::string("\n") + _multiapp_indent, &message);
+    pcrecpp::RE re("\n(?!\\Z)");
 
-    // If the line doesn't start with \n then it must be indented
-    if (*message.begin() != '\n')
-      message.insert(0, _multiapp_indent);
+    re.GlobalReplace(std::string("\n") + _multiapp_indent, &message);
 
-    // Restore the ending \n, if it exists
-    if (n_last)
-      message.push_back('\n');
+//    // If the line doesn't start with \n then it must be indented
+//    if (*message.begin() != '\n')
+//      message.insert(0, _multiapp_indent);
+
+//    // Restore the ending \n, if it exists
+//    if (n_last)
+//      message.push_back('\n');
   }
 
   // Write message
