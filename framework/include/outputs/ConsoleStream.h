@@ -55,37 +55,27 @@ public:
    *   _console << "The combination to the air lock is " << 12345 << std::endl;
    */
   template<typename T>
-  ConsoleStream & operator<<(T s);
+  const ConsoleStream & operator<<(T s) const;
 
   /**
    * This overload is here to handle the the std::endl manipulator
    */
-  ConsoleStream & operator<<(StandardEndLine manip);
-
-  /**
-   * Flush the stream
-   */
-  void flush();
+  const ConsoleStream & operator<<(StandardEndLine manip) const;
 
 private:
 
   /// Reference to the OutputWarhouse that contains the Console output objects
   const OutputWarehouse & _output_warehouse;
-
-  /// Stream for storing console output messages
-  std::ostringstream _oss;
 };
 
 template<typename T>
-ConsoleStream &
-ConsoleStream::operator<<(T s)
+const ConsoleStream &
+ConsoleStream::operator<<(T s) const
 {
+  std::ostringstream _oss;
+
   _oss << s;
   _output_warehouse.mooseConsole(_oss.str());
-
-  // Reset
-  _oss.clear();
-  _oss.str("");
 
   return *this;
 }
