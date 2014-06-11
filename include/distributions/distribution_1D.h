@@ -11,6 +11,8 @@ class DistributionBackend;
 class BasicTruncatedDistribution : public virtual BasicDistribution
 {
 public:
+  BasicTruncatedDistribution(double x_min, double x_max);
+  BasicTruncatedDistribution(){};
   virtual double Pdf(double x);        ///< Pdf function at coordinate x
   virtual double Cdf(double x);        ///< Cdf function at coordinate x
   virtual double InverseCdf(double x); ///< x
@@ -95,6 +97,7 @@ class BasicLogNormalDistribution : public BasicTruncatedDistribution
 {
 public:
   BasicLogNormalDistribution(double mu, double sigma);
+  BasicLogNormalDistribution(double mu, double sigma, double x_min, double x_max);
   virtual ~BasicLogNormalDistribution();
 
   double  InverseCdf(double x);        ///< x
@@ -113,6 +116,7 @@ class LogisticDistributionBackend;
 class BasicLogisticDistribution : public BasicTruncatedDistribution {
 public:
    BasicLogisticDistribution(double location, double scale);
+   BasicLogisticDistribution(double location, double scale, double x_min, double x_max);
    virtual ~BasicLogisticDistribution();
 
 };
@@ -147,6 +151,7 @@ class BasicExponentialDistribution : public BasicTruncatedDistribution
 {
 public:
   BasicExponentialDistribution(double lambda);
+  BasicExponentialDistribution(double lambda, double x_min, double x_max);
   virtual ~BasicExponentialDistribution();
 
   double  untrCdf(double x);
@@ -164,6 +169,7 @@ class BasicWeibullDistribution : public BasicTruncatedDistribution
 {
 public:
   BasicWeibullDistribution(double k, double lambda);
+  BasicWeibullDistribution(double k, double lambda, double x_min, double x_max);
   virtual ~BasicWeibullDistribution();
 
   double  untrCdf(double x);
@@ -179,6 +185,7 @@ class BasicGammaDistribution : public BasicTruncatedDistribution
 {
 public:
   BasicGammaDistribution(double k, double theta, double low);
+  BasicGammaDistribution(double k, double theta, double low, double x_min, double x_max);
   virtual ~BasicGammaDistribution();
 
   double  untrPdf(double x);                ///< Pdf function at coordinate x
@@ -197,6 +204,7 @@ class BasicBetaDistribution : public BasicTruncatedDistribution
 {
 public:
   BasicBetaDistribution(double alpha, double beta, double scale);
+  BasicBetaDistribution(double alpha, double beta, double scale, double x_min, double x_max);
   virtual ~BasicBetaDistribution();
 
   double  Pdf(double x);                ///< Pdf function at coordinate x

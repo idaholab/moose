@@ -56,6 +56,16 @@ public:
  * be inherited from.
  */
 
+BasicTruncatedDistribution::BasicTruncatedDistribution(double x_min, double x_max)
+{
+  if(not hasParameter("truncation"))
+  {
+    _dist_parameters["truncation"] = 1.0;
+  }
+    _dist_parameters["xMin"] = x_min;
+    _dist_parameters["xMax"] = x_max;
+}
+
 double
 BasicTruncatedDistribution::Pdf(double x){
   double value;
@@ -306,14 +316,16 @@ BasicNormalDistribution::BasicNormalDistribution(double mu, double sigma) {
   _backend = new NormalDistributionBackend(mu, sigma);
 }
 
-BasicNormalDistribution::BasicNormalDistribution(double mu, double sigma, double x_min, double x_max) {
+BasicNormalDistribution::BasicNormalDistribution(double mu, double sigma, double x_min, double x_max):
+  BasicTruncatedDistribution(x_min,x_max)
+{
   _dist_parameters["mu"] = mu; //mean
   _dist_parameters["sigma"] = sigma; //sd
-  if(not hasParameter("truncation")) {
-    _dist_parameters["truncation"] = 1.0;
-  }
-  _dist_parameters["xMin"] = x_min;
-  _dist_parameters["xMax"] = x_max;
+  //if(not hasParameter("truncation")) {
+  //  _dist_parameters["truncation"] = 1.0;
+  //}
+  //_dist_parameters["xMin"] = x_min;
+  //_dist_parameters["xMax"] = x_max;
   //std::cout << "mu " << mu << " sigma " << sigma
   //          << " truncation " << _dist_parameters["truncation"]
   //          << " xMin " << _dist_parameters["xMin"]
@@ -370,6 +382,20 @@ BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma)
 
 }
 
+BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma, double x_min, double x_max):
+  BasicTruncatedDistribution(x_min,x_max)
+{
+    _dist_parameters["mu"] = mu;
+    _dist_parameters["sigma"] = sigma;
+    
+    if (mu<0)
+    throwError("ERROR: incorrect value of mu for lognormaldistribution");
+    
+    _backend = new LogNormalDistributionBackend(mu, sigma);
+    
+}
+
+
 BasicLogNormalDistribution::~BasicLogNormalDistribution()
 {
   delete _backend;
@@ -423,6 +449,15 @@ BasicLogisticDistribution::BasicLogisticDistribution(double location, double sca
   }
 
   _backend = new LogisticDistributionBackend(location, scale);
+}
+
+BasicLogisticDistribution::BasicLogisticDistribution(double location, double scale, double x_min, double x_max):
+  BasicTruncatedDistribution(x_min,x_max)
+{
+    _dist_parameters["location"] = location;
+    _dist_parameters["scale"] = scale;
+    
+    _backend = new LogisticDistributionBackend(location, scale);
 }
 
 BasicLogisticDistribution::~BasicLogisticDistribution()
@@ -515,6 +550,18 @@ BasicExponentialDistribution::BasicExponentialDistribution(double lambda)
 
   _backend = new ExponentialDistributionBackend(lambda);
 }
+
+
+BasicExponentialDistribution::BasicExponentialDistribution(double lambda, double x_min, double x_max):
+  BasicTruncatedDistribution(x_min,x_max)
+{
+    _dist_parameters["lambda"] = lambda;
+    if (lambda<0)
+    throwError("ERROR: incorrect value of lambda for exponential distribution");
+    _backend = new ExponentialDistributionBackend(lambda);
+}
+
+
 BasicExponentialDistribution::~BasicExponentialDistribution()
 {
   delete _backend;
@@ -566,6 +613,16 @@ BasicWeibullDistribution::BasicWeibullDistribution(double k, double lambda)
     throwError("ERROR: incorrect value of k or lambda for weibull distribution");
 
   _backend = new WeibullDistributionBackend(k, lambda);
+}
+
+BasicWeibullDistribution::BasicWeibullDistribution(double k, double lambda, double x_min, double x_max):
+  BasicTruncatedDistribution(x_min,x_max)
+{
+    _dist_parameters["k"] = k; //shape
+    _dist_parameters["lambda"] = lambda; //scale
+    if ((lambda<0) || (k<0))
+    throwError("ERROR: incorrect value of k or lambda for weibull distribution");
+    _backend = new WeibullDistributionBackend(k, lambda);
 }
 
 BasicWeibullDistribution::~BasicWeibullDistribution()
@@ -621,6 +678,20 @@ BasicGammaDistribution::BasicGammaDistribution(double k, double theta, double lo
     throwError("ERROR: incorrect value of k or theta for gamma distribution");
 
   _backend = new GammaDistributionBackend(k, theta);
+}
+
+BasicGammaDistribution::BasicGammaDistribution(double k, double theta, double low, double x_min, double x_max):
+  BasicTruncatedDistribution(x_min,x_max)
+{
+    _dist_parameters["k"] = k; //shape
+    _dist_parameters["theta"] = theta; //scale
+    _dist_parameters["low"] = low; //low value shift. 0.0 would be a regular gamma
+    // distribution
+    
+    if ((theta<0) || (k<0))
+    throwError("ERROR: incorrect value of k or theta for gamma distribution");
+    
+    _backend = new GammaDistributionBackend(k, theta);
 }
 
 BasicGammaDistribution::~BasicGammaDistribution()
@@ -692,6 +763,19 @@ BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double s
   _backend = new BetaDistributionBackend(alpha, beta);
 }
 
+BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double scale, double x_min, double x_max):
+  BasicTruncatedDistribution(x_min,x_max)
+{
+    _dist_parameters["alpha"] = alpha;
+    _dist_parameters["beta"] = beta;
+    _dist_parameters["scale"] = scale;
+    
+    if ((alpha<0) || (beta<0))
+    throwError("ERROR: incorrect value of alpha or beta for beta distribution");
+    
+    _backend = new BetaDistributionBackend(alpha, beta);
+}
+
 BasicBetaDistribution::~BasicBetaDistribution()
 {
   delete _backend;
@@ -761,6 +845,7 @@ BasicPoissonDistribution::BasicPoissonDistribution(double mu)
 
   _backend = new PoissonDistributionBackend(mu);
 }
+
 
 BasicPoissonDistribution::~BasicPoissonDistribution()
 {
