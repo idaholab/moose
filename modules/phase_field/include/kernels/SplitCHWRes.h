@@ -18,13 +18,10 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
   std::string _mob_name;
   MaterialProperty<Real> & _mob;
-  unsigned int _c_var;
-  VariableValue & _c;
 };
 
 #endif //SPLITCHWRES_H

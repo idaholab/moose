@@ -27,7 +27,7 @@ SplitCHBase::computeDFDC(PFFunctionType type)
   }
 
   mooseError("Invalid type passed in");
-  }*/
+}*/
 
 Real
 SplitCHBase::computeQpResidual()
