@@ -3,7 +3,6 @@ template<>
 InputParameters validParams<SplitCHWRes>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredCoupledVar("c", "intermediate parameter--concentration");
   params.addParam<std::string>("mob_name", "mobtemp", "The mobility used with the kernel");
   return params;
 }
