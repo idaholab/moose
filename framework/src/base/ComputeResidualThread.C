@@ -47,12 +47,12 @@ void
 ComputeResidualThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
-  _sys._kernels[_tid].updateActiveKernels(_subdomain);
-  if (_sys._doing_dg)
-    _sys._dg_kernels[_tid].updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
+  _sys.getKernelWarehouse(_tid)->updateActiveKernels(_subdomain);
+  if (_sys.doingDG())
+    _sys.getDGKernelWarehouse(_tid)->updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt());
 
   std::set<MooseVariable *> needed_moose_vars;
-  const std::vector<KernelBase *> & kernels = _sys._kernels[_tid].active();
+  const std::vector<KernelBase *> & kernels = _sys.getKernelWarehouse(_tid)->active();
   for (std::vector<KernelBase *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
   {
     const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
@@ -65,7 +65,7 @@ ComputeResidualThread::subdomainChanged()
       id_it != subdomain_boundary_ids.end();
       ++id_it)
   {
-    std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(*id_it);
+    std::vector<IntegratedBC *> bcs = _sys.getBCWarehouse(_tid)->activeIntegrated(*id_it);
     if (bcs.size() > 0)
     {
       for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
@@ -82,7 +82,7 @@ ComputeResidualThread::subdomainChanged()
 
   // DG Kernel dependencies
   {
-    std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
+    std::vector<DGKernel *> dgks = _sys.getDGKernelWarehouse(_tid)->active();
     for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
     {
       const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
@@ -104,9 +104,9 @@ ComputeResidualThread::onElement(const Elem *elem)
   const std::vector<KernelBase *> * kernels = NULL;
   switch (_kernel_type)
   {
-  case Moose::KT_ALL: kernels = & _sys._kernels[_tid].active(); break;
-  case Moose::KT_TIME: kernels = & _sys._kernels[_tid].activeTime(); break;
-  case Moose::KT_NONTIME: kernels = & _sys._kernels[_tid].activeNonTime(); break;
+  case Moose::KT_ALL: kernels = & _sys.getKernelWarehouse(_tid)->active(); break;
+  case Moose::KT_TIME: kernels = & _sys.getKernelWarehouse(_tid)->activeTime(); break;
+  case Moose::KT_NONTIME: kernels = & _sys.getKernelWarehouse(_tid)->activeNonTime(); break;
   }
   for (std::vector<KernelBase *>::const_iterator it = kernels->begin(); it != kernels->end(); ++it)
   {
@@ -120,7 +120,7 @@ void
 ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
 
-  std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
+  std::vector<IntegratedBC *> bcs = _sys.getBCWarehouse(_tid)->activeIntegrated(bnd_id);
   if (bcs.size() > 0)
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
@@ -151,7 +151,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 void
 ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 {
-  if (_sys._dg_kernels[_tid].active().empty())
+  if (_sys.getDGKernelWarehouse(_tid)->active().empty())
     return;
 
   // Pointer to the neighbor we are currently working on.
@@ -163,7 +163,7 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 
   if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
   {
-    std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
+    std::vector<DGKernel *> dgks = _sys.getDGKernelWarehouse(_tid)->active();
     if (dgks.size() > 0)
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
