@@ -2268,3 +2268,44 @@ NonlinearSystem::needMaterialOnSide(SubdomainID /*subdomain_id*/, THREAD_ID /*ti
 {
   return _doing_dg;
 }
+
+bool
+NonlinearSystem::doingDG() const
+{
+  return _doing_dg;
+}
+
+KernelWarehouse *
+NonlinearSystem::getKernelWarehouse(THREAD_ID tid)
+{
+  mooseAssert(tid < _kernels.size(), "Thread ID does not exist.");
+  return &(_kernels[tid]) ;
+}
+
+DGKernelWarehouse *
+NonlinearSystem::getDGKernelWarehouse(THREAD_ID tid)
+{
+  mooseAssert(tid < _dg_kernels.size(), "Thread ID does not exist.");
+  return &(_dg_kernels[tid]) ;
+}
+
+BCWarehouse *
+NonlinearSystem::getBCWarehouse(THREAD_ID tid)
+{
+  mooseAssert(tid < _bcs.size(), "Thread ID does not exist.");
+  return &(_bcs[tid]) ;
+}
+
+DiracKernelWarehouse *
+NonlinearSystem::getDiracKernelWarehouse(THREAD_ID tid)
+{
+  mooseAssert(tid < _dirac_kernels.size(), "Thread ID does not exist.");
+  return &(_dirac_kernels[tid]) ;
+}
+
+DamperWarehouse *
+NonlinearSystem::getDamperWarehouse(THREAD_ID tid)
+{
+  mooseAssert(tid < _dampers.size(), "Thread ID does not exist.");
+  return &(_dampers[tid]) ;
+}

@@ -403,6 +403,20 @@ public:
    */
   bool needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid) const;
 
+  /**
+   * Getter for _doing_dg
+   */
+  bool doingDG() const;
+
+  /**
+   * Access functions to Warehouses from outside NonlinearSystem
+   */
+  KernelWarehouse * getKernelWarehouse(THREAD_ID tid);
+  DGKernelWarehouse * getDGKernelWarehouse(THREAD_ID tid);
+  BCWarehouse * getBCWarehouse(THREAD_ID tid);
+  DiracKernelWarehouse * getDiracKernelWarehouse(THREAD_ID tid);
+  DamperWarehouse * getDamperWarehouse(THREAD_ID tid);
+
 public:
   FEProblem & _fe_problem;
   // FIXME: make these protected and create getters/setters
@@ -543,15 +557,6 @@ protected:
 
   bool _print_all_var_norms;
 
-public:
-  friend class ComputeResidualThread;
-  friend class ComputeJacobianThread;
-  friend class ComputeFullJacobianThread;
-  friend class ComputeJacobianBlockThread;
-//  friend class ComputeMaterialsObjectThread;
-//  friend class ProjectMaterialProperties;
-  friend class ComputeDiracThread;
-  friend class ComputeDampingThread;
 };
 
 #endif /* NONLINEARSYSTEM_H */
