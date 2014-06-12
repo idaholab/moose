@@ -7,49 +7,49 @@ using namespace std;
 #include <iostream>
 
 
-inverseDistanceWeigthing::inverseDistanceWeigthing(std::string filename, double p){
-	_dataFileName = filename;
+InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double p){
+	_data_filename = filename;
 	int dimensions;
 	int numberOfPoints;
 	std::vector<double> values;
 	std::vector< std::vector<double> > pointCoordinates;
 
-	readScatteredNDarray(_dataFileName, dimensions, numberOfPoints, pointCoordinates, values);
+	readScatteredNDarray(_data_filename, dimensions, numberOfPoints, pointCoordinates, values);
 
 	_dimensions = dimensions;
-	_numberOfPoints = numberOfPoints;
+	_number_of_points = numberOfPoints;
 	_values = values;
-	_pointCoordinates = pointCoordinates;
+	_point_coordinates = pointCoordinates;
 	_p = p;
-	_completedInit = true;
+	_completed_init = true;
 
 	std::cerr << "_dimensions " << _dimensions << std::endl;
-	std::cerr << "_numberOfPoints " << _numberOfPoints << std::endl;
+	std::cerr << "_number_of_points " << _number_of_points << std::endl;
 }
 
-inverseDistanceWeigthing::inverseDistanceWeigthing(double p){
+InverseDistanceWeighting::InverseDistanceWeighting(double p){
     _p = p;
-    _completedInit = false;
-    _numberOfPoints = 0;
+    _completed_init = false;
+    _number_of_points = 0;
     _dimensions = 0;
 }
 
-double inverseDistanceWeigthing::interpolateAt(std::vector<double> point){
+double InverseDistanceWeighting::interpolateAt(std::vector<double> point){
 	double value = 0;
 	double weightsCumulativeSum = 0;
-	std::vector<double> weights (_numberOfPoints);
+	std::vector<double> weights (_number_of_points);
 
-	if (not _completedInit)
+	if (not _completed_init)
 	{
 	  throw ("Error in interpolateAt: the class has not been completely initialized... you can not interpolate!!!!");
 	}
-	for (int i=0; i<_numberOfPoints; i++){
-		if (minkowskiDistance(point, _pointCoordinates[i],_p) == 0){
+	for (int i=0; i<_number_of_points; i++){
+		if (minkowskiDistance(point, _point_coordinates[i],_p) == 0){
 			value = _values[i];
 			weightsCumulativeSum = 1;
 			break;
 		} else {
-			weights[i]= pow(1.0/minkowskiDistance(point, _pointCoordinates[i],_p),_dimensions+1);
+			weights[i]= pow(1.0/minkowskiDistance(point, _point_coordinates[i],_p),_dimensions+1);
 			weightsCumulativeSum += weights[i];
 			value += weights[i] * _values[i];
 		}
@@ -60,9 +60,9 @@ double inverseDistanceWeigthing::interpolateAt(std::vector<double> point){
 	return value;
 }
 
-double inverseDistanceWeigthing::getGradientAt(std::vector<double> point){
+double InverseDistanceWeighting::getGradientAt(std::vector<double> point){
 	// TO BE COMPLETED
-  if (not _completedInit)
+  if (not _completed_init)
   {
     throw ("Error in getGradientAt: the class has not been completely initialized... you can not interpolate!!!!");
   }
@@ -71,10 +71,10 @@ double inverseDistanceWeigthing::getGradientAt(std::vector<double> point){
 }
 
 void
-inverseDistanceWeigthing::fit(std::vector< std::vector<double> > coordinates, std::vector<double> values){
+InverseDistanceWeighting::fit(std::vector< std::vector<double> > coordinates, std::vector<double> values){
   _dimensions=coordinates[0].size();
-  _numberOfPoints = coordinates.size();
-  _pointCoordinates = coordinates;
+  _number_of_points = coordinates.size();
+  _point_coordinates = coordinates;
   _values = values;
-  _completedInit = true;
+  _completed_init = true;
 }

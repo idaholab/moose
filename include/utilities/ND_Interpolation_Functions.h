@@ -12,176 +12,126 @@
  */
 
 
-#ifndef ND_INTERPOLATION_FUNCTIONS_H_
-#define ND_INTERPOLATION_FUNCTIONS_H_
+#ifndef ND_INTERPOLATION_FUNCTIONS_H
+#define ND_INTERPOLATION_FUNCTIONS_H
 
 #include <vector>
 #include <string>
 
-bool checkUpperBound(double upperBound, std::vector<double> values);
-bool checkLowerBound(double lowerBound, std::vector<double> values);
+bool checkUpperBound(double upper_bound, std::vector<double> values);
+bool checkLowerBound(double lower_bound, std::vector<double> values);
 
-class ND_Interpolation
+class NDInterpolation
 {
 public:
-	virtual double interpolateAt(std::vector<double> point_coordinate);
-	virtual double getGradientAt(std::vector<double> point_coordinate);
-	virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
-	std::vector<double> NDinverseFunction(double F_min, double F_max);
-	double NDderivative(std::vector<double> x);
-	ND_Interpolation();
-	~ND_Interpolation();
+  virtual double interpolateAt(std::vector<double> point_coordinate);
+  virtual double getGradientAt(std::vector<double> point_coordinate);
+  virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
+  std::vector<double> NDinverseFunction(double F_min, double F_max);
+  double NDderivative(std::vector<double> x);
+  NDInterpolation();
+  ~NDInterpolation();
 
 protected:
-	std::string _dataFileName;
-	bool        _completedInit;
-	double minkowskiDistance(std::vector<double> point1, std::vector<double> point2, double p);
-	double vectorNorm(std::vector<double> point, double p);
+  std::string _data_filename;
+  bool        _completed_init;
+  double minkowskiDistance(std::vector<double> point1, std::vector<double> point2, double p);
+  double vectorNorm(std::vector<double> point, double p);
 };
 
-class NDspline: public ND_Interpolation
+class NDSpline: public NDInterpolation
 {
 public:
-	double interpolateAt(std::vector<double> point_coordinate);
-	double getGradientAt(std::vector<double> point_coordinate);
-	void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
-	NDspline(std::string filename, std::vector<double> alpha, std::vector<double> beta);
-	NDspline();
-	~NDspline();
-	bool checkUB(double upperBound);
-	bool checkLB(double lowerBound);
+  double interpolateAt(std::vector<double> point_coordinate);
+  double getGradientAt(std::vector<double> point_coordinate);
+  void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
+  NDSpline(std::string filename, std::vector<double> alpha, std::vector<double> beta);
+  NDSpline();
+  ~NDSpline();
+  bool checkUB(double upper_bound);
+  bool checkLB(double lower_bound);
 
-	bool checkBoundaries(std::vector<double> point);
+  bool checkBoundaries(std::vector<double> point);
 
 private:
-    std::vector< std::vector<double> > _discretizations;
-	std::vector<double> _values;
-	int _dimensions;
-	std::vector<double> _splineCoefficients;
-	std::vector<double> _hj;
-	std::vector<double> _alpha;
-	std::vector<double> _beta;
+  std::vector< std::vector<double> > _discretizations;
+  std::vector<double> _values;
+  int _dimensions;
+  std::vector<double> _spline_coefficients;
+  std::vector<double> _hj;
+  std::vector<double> _alpha;
+  std::vector<double> _beta;
 
-	std::vector<double> _minDisc;
-	std::vector<double> _maxDisc;
+  std::vector<double> _min_disc;
+  std::vector<double> _max_disc;
 
-	//void initializeCoefficientsVector();
-	void saveCoefficient(double value, std::vector<int> coefficientCoordinate);
-	double retrieveCoefficient(std::vector<int> coefficientCoordinate);
+  //void initializeCoefficientsVector();
+  void saveCoefficient(double value, std::vector<int> coefficient_coordinate);
+  double retrieveCoefficient(std::vector<int> coefficient_coordinate);
 
-	double spline_cartesian_interpolation(std::vector<double> point_coordinate);
-	double getPointAtCoordinate(std::vector<int> coordinates);
+  double spline_cartesian_interpolation(std::vector<double> point_coordinate);
+  double getPointAtCoordinate(std::vector<int> coordinates);
 
-	int fromNDto1Dconverter(std::vector<int> coordinate);
-	std::vector<int> from1DtoNDconverter(int oneDcoordinate, std::vector<int> indexes);
+  int fromNDto1Dconverter(std::vector<int> coordinate);
+  std::vector<int> from1DtoNDconverter(int oneDcoordinate, std::vector<int> indexes);
 
-	void calculateCoefficients();
-	std::vector<double> fillArrayCoefficient(int nDimensions, std::vector<double> & data, std::vector<int> & loopLocator);
+  void calculateCoefficients();
+  std::vector<double> fillArrayCoefficient(int n_dimensions, std::vector<double> & data, std::vector<int> & loop_locator);
 
-	void from2Dto1Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata);
-	void from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing);
+  void from2Dto1Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata);
+  void from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing);
 
-	double phi(double t);
-	double u_k(double x, double a, double h, double i);
-	void tridag(std::vector<double> & a, std::vector<double> & b, std::vector<double> & c, std::vector<double> & r, std::vector<double> & u);
-	std::vector<double> getCoefficients(std::vector<double> & y, double h, double alpha, double beta);
-	//void iterationStep(int nDim, std::vector<double> & coefficients, std::vector<double> & data);
+  double phi(double t);
+  double u_k(double x, double a, double h, double i);
+  void tridag(std::vector<double> & a, std::vector<double> & b, std::vector<double> & c, std::vector<double> & r, std::vector<double> & u);
+  std::vector<double> getCoefficients(std::vector<double> & y, double h, double alpha, double beta);
+  //void iterationStep(int nDim, std::vector<double> & coefficients, std::vector<double> & data);
 
-	std::vector<double> coefficientRestructuring(std::vector<std::vector<double> > matrix);
-	std::vector<std::vector<double> > tensorProductInterpolation(std::vector<std::vector<double> > step1, double h, double alpha, double beta);
-	std::vector<std::vector<double> > matrixRestructuring(std::vector<std::vector<double> > step1);
-	std::vector<double> getValues(std::vector<int> & loopLocator);
+  std::vector<double> coefficientRestructuring(std::vector<std::vector<double> > matrix);
+  std::vector<std::vector<double> > tensorProductInterpolation(std::vector<std::vector<double> > step1, double h, double alpha, double beta);
+  std::vector<std::vector<double> > matrixRestructuring(std::vector<std::vector<double> > step1);
+  std::vector<double> getValues(std::vector<int> & loop_locator);
 };
 
-class inverseDistanceWeigthing: public ND_Interpolation
+class InverseDistanceWeighting: public NDInterpolation
 {
 public:
-	double interpolateAt(std::vector<double> point_coordinate);
-	double getGradientAt(std::vector<double> point_coordinate);
-	void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
-	std::vector<double> NDinverseFunction(double F_min, double F_max);
-	inverseDistanceWeigthing(std::string filename, double p);
-	inverseDistanceWeigthing(double p);
-	bool checkUB(double upperBound);
-	bool checkLB(double lowerBound);
+  double interpolateAt(std::vector<double> point_coordinate);
+  double getGradientAt(std::vector<double> point_coordinate);
+  void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
+  std::vector<double> NDinverseFunction(double F_min, double F_max);
+  InverseDistanceWeighting(std::string filename, double p);
+  InverseDistanceWeighting(double p);
+  bool checkUB(double upper_bound);
+  bool checkLB(double lower_bound);
 
 private:
-	int _dimensions;
-	int _numberOfPoints;
-	double _p;
-	std::vector<double> _values;
-	std::vector< std::vector<double> > _pointCoordinates;
+  int _dimensions;
+  int _number_of_points;
+  double _p;
+  std::vector<double> _values;
+  std::vector< std::vector<double> > _point_coordinates;
 };
 
-class microSphere: public ND_Interpolation
+class MicroSphere: public NDInterpolation
 {
 public:
-	double interpolateAt(std::vector<double> point_coordinate);
-	double getGradientAt(std::vector<double> point_coordinate);
-	void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
-	microSphere(std::string filename, double p, int precision);
-	microSphere(double p, int precision);
+  double interpolateAt(std::vector<double> point_coordinate);
+  double getGradientAt(std::vector<double> point_coordinate);
+  void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
+  MicroSphere(std::string filename, double p, int precision);
+  MicroSphere(double p, int precision);
 private:
-	int _dimensions;
-	int _numberOfPoints;
-	double _p;
-	std::vector<double> _values;
-	std::vector< std::vector<double> > _pointCoordinates;
-	int _precision;
-	std::vector< std::vector<double> > _unitVector;
-	void MSinitialization();
-	double cosValueBetweenVectors(std::vector<double> point1, std::vector<double> point2);
+  int _dimensions;
+  int _number_of_points;
+  double _p;
+  std::vector<double> _values;
+  std::vector< std::vector<double> > _point_coordinates;
+  int _precision;
+  std::vector< std::vector<double> > _unit_vector;
+  void MSinitialization();
+  double cosValueBetweenVectors(std::vector<double> point1, std::vector<double> point2);
 };
 
-//class ND_Interpolation_Functions_old{
-//public:
-//	ND_Interpolation_Functions(int dimensions, std::vector< std::vector<double> > discretizations, std::vector<double> values, ND_interpolation_type type, std::vector<double> alpha, std::vector<double> beta);
-//	ND_Interpolation_Functions(std::string filename, ND_interpolation_type type);
-//
-//    virtual ~ND_Interpolation_Functions();
-//
-//    double interpolate (std::vector<double> point_coordinate);
-//
-//    double InverseDistanceWeigthing(std::vector<double> point, std::vector< std::vector<double> > pointCoordinates, std::vector<double> pointValues, double p);
-//
-//protected:
-//    ND_interpolation_type _type;
-//    std::vector< std::vector<double> > _discretizations;
-//    std::vector<double> _values;
-//    int _dimensions;
-//    std::vector<double> _splineCoefficients;
-//    std::vector<double> _hj;
-//    std::vector<double> _alpha;
-//    std::vector<double> _beta;
-//    int _precision;
-//    std::vector< std::vector<double> > _unitVector (_precision, std::vector<double> (_dimensions));
-//
-//    void initializeCoefficientsVector();
-//    void saveCoefficient(double value, std::vector<int> coefficientCoordinate);
-//    double retrieveCoefficient(std::vector<int> coefficientCoordinate);
-//
-//    double spline_cartesian_interpolation(std::vector<double> point_coordinate);
-//    double getPointAtCoordinate(std::vector<int> coordinates);
-//
-//    int fromNDto1Dconverter(std::vector<int> coordinate);
-//    std::vector<int> from1DtoNDconverter(int oneDcoordinate);
-//
-//    void calculateCoefficients();
-//    void fillArrayCoefficient(int nDim, std::vector<double> coefficients, std::vector<double> data);
-//
-//    void from2Dto1Drestructuring(std::vector<std::vector<double> > twoDdata, std::vector<double> oneDdata);
-//    void from1Dto2Drestructuring(std::vector<std::vector<double> > twoDdata, std::vector<double> oneDdata, int spacing);
-//
-//    double phi(double t);
-//    double u_k(double x, double a, double h, double i);
-//    void tridag(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> r, std::vector<double> u);
-//    void getCoefficients(std::vector<double> coefficients, std::vector<double> y, double h, double alpha, double beta);
-//    void iterationStep(int nDim, std::vector<double> coefficients, std::vector<double> data);
-//
-//    double minkowskiDistance (std::vector<double> point1, std::vector<double> point2, double p);
-//
-//    void MSinitialization();
-//    double MS();
-//};
 
 #endif

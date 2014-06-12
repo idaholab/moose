@@ -7,7 +7,7 @@
 #include "MDreader.h"
 
 
-NDspline::NDspline(std::string filename, std::vector<double> alfa, std::vector<double> beta){
+NDSpline::NDSpline(std::string filename, std::vector<double> alfa, std::vector<double> beta){
 	// constructor for scattered data interpolation functions
 
 	_alpha = alfa;
@@ -22,42 +22,42 @@ NDspline::NDspline(std::string filename, std::vector<double> alfa, std::vector<d
 		_hj.push_back((_discretizations.at(nDim).at(length-1) - _discretizations.at(nDim).at(0))/(length-1));
 		std::cerr << "dim " << nDim+1 << ": _hj: " << _hj.at(nDim) << std::endl;
 
-		_minDisc.push_back(_discretizations.at(nDim).at(0));
-		_maxDisc.push_back(_discretizations.at(nDim).at(length-1));
+		_min_disc.push_back(_discretizations.at(nDim).at(0));
+		_max_disc.push_back(_discretizations.at(nDim).at(length-1));
 
-		//std::cout << "nDim: " << nDim << " ; _minDisc.at(nDim).at(0): " <<  _minDisc.at(nDim) << " ; _maxDisc.at(nDim): " << _maxDisc.at(nDim) << std::endl;
+		//std::cout << "nDim: " << nDim << " ; _min_disc.at(nDim).at(0): " <<  _min_disc.at(nDim) << " ; _max_disc.at(nDim): " << _max_disc.at(nDim) << std::endl;
 	}
 
 
-	_completedInit = true;
+	_completed_init = true;
 
 	int numberOfCoefficients=1;
 
 	if (_dimensions > 1)
 		calculateCoefficients();
 	else
-		_splineCoefficients = getCoefficients(_values, _hj.at(0), _alpha.at(0), _beta.at(0));
+		_spline_coefficients = getCoefficients(_values, _hj.at(0), _alpha.at(0), _beta.at(0));
 
 	std::cerr << "ND spline completed initialization" << std::endl;
 }
 
 
-NDspline::NDspline(){
-    _completedInit = false;
+NDSpline::NDSpline(){
+    _completed_init = false;
     _dimensions = 0;
 }
 
-NDspline::~NDspline() {
+NDSpline::~NDSpline() {
   
 }
 
-double NDspline::interpolateAt(std::vector<double> point_coordinate){
+double NDSpline::interpolateAt(std::vector<double> point_coordinate){
 	double interpolated_value;
 
 	bool outcome = checkBoundaries(point_coordinate);
 
 	if (outcome==true){
-		if (not _completedInit)
+		if (not _completed_init)
 		{
 		  throw ("Error in interpolateAt: the class has not been completely initialized... you can not interpolate!!!!");
 		}
@@ -95,27 +95,27 @@ double NDspline::interpolateAt(std::vector<double> point_coordinate){
 }
 
 
-double NDspline::getGradientAt(std::vector<double> point_coordinate){
+double NDSpline::getGradientAt(std::vector<double> point_coordinate){
 	// TO BE COMPLETED
 	double gradient= -1;
-	if (not _completedInit)
+	if (not _completed_init)
 	{
 	  throw ("Error in getGradientAt: the class has not been completely initialized... you can not interpolate!!!!");
 	}
 	return gradient;
 }
 
-void NDspline::fit(std::vector< std::vector<double> > coordinates, std::vector<double> values){
-  throw ("Error in NDspline: fit not yet implemented!!!");
-  _completedInit = true;
+void NDSpline::fit(std::vector< std::vector<double> > coordinates, std::vector<double> values){
+  throw ("Error in NDSpline: fit not yet implemented!!!");
+  _completed_init = true;
 }
 
-double NDspline::spline_cartesian_interpolation(std::vector<double> point_coordinate){
+double NDSpline::spline_cartesian_interpolation(std::vector<double> point_coordinate){
 	double interpolated_value = 0;
 	std::vector<int> coordinates (point_coordinate.size());
 	std::vector<int> indexes (point_coordinate.size());
 
-	int numberOfIterations = _splineCoefficients.size();
+	int numberOfIterations = _spline_coefficients.size();
 
 	for (int nDim=0; nDim<_dimensions; nDim++)
 		indexes.at(nDim) = _discretizations.at(nDim).size() + 2;
@@ -127,41 +127,41 @@ double NDspline::spline_cartesian_interpolation(std::vector<double> point_coordi
 		for (int nDim=0; nDim<_dimensions; nDim++)
 			product *= u_k(point_coordinate.at(nDim), _discretizations.at(nDim).at(0), _hj.at(nDim), coordinates.at(nDim)+1);       //u_k(double x, double a, double h, double k)
 
-		interpolated_value += _splineCoefficients.at(i)*product;
+		interpolated_value += _spline_coefficients.at(i)*product;
 	}
 	return interpolated_value;
 }
 
 
-void NDspline::calculateCoefficients(){
-	std::vector<int> loopLocator (_dimensions);
+void NDSpline::calculateCoefficients(){
+	std::vector<int> loop_locator (_dimensions);
 
 	std::cerr << "calculateCoefficients" << std::endl;
-	std::vector<double> coeff = fillArrayCoefficient(_dimensions, _values, loopLocator);
+	std::vector<double> coeff = fillArrayCoefficient(_dimensions, _values, loop_locator);
 	std::cerr << " done calculateCoefficients" << std::endl;
-	_splineCoefficients = coeff;
+	_spline_coefficients = coeff;
 }
 
 
-std::vector<double> NDspline::fillArrayCoefficient(int nDimensions, std::vector<double> & data, std::vector<int> & loopLocator){
+std::vector<double> NDSpline::fillArrayCoefficient(int n_dimensions, std::vector<double> & data, std::vector<int> & loop_locator){
 	std::vector<std::vector<double> > tempCoefficients;
 	std::vector<double> temp;
 	std::vector<double> y;
 
-	for(int n=0; n<_discretizations.at(nDimensions-1).size(); n++){
-		loopLocator.at(nDimensions-1)=n;
+	for(int n=0; n<_discretizations.at(n_dimensions-1).size(); n++){
+		loop_locator.at(n_dimensions-1)=n;
 
-		if (nDimensions>2){
-			int tempIndex=nDimensions-1;
-			temp = fillArrayCoefficient(tempIndex, data, loopLocator);
+		if (n_dimensions>2){
+			int tempIndex=n_dimensions-1;
+			temp = fillArrayCoefficient(tempIndex, data, loop_locator);
 
 			tempCoefficients.push_back(temp);
 			temp.clear();
 		}
 		else{		// n=1
-			y = getValues(loopLocator); // get data
+			y = getValues(loop_locator); // get data
 
-			tempCoefficients.push_back(getCoefficients(y, _hj.at(nDimensions-1), _alpha.at(nDimensions-1), _beta.at(nDimensions-1)));
+			tempCoefficients.push_back(getCoefficients(y, _hj.at(n_dimensions-1), _alpha.at(n_dimensions-1), _beta.at(n_dimensions-1)));
 			y.clear();
 		}
 	}
@@ -169,7 +169,7 @@ std::vector<double> NDspline::fillArrayCoefficient(int nDimensions, std::vector<
 	// Create tensor-product
 	//std::cerr << "Create tensor-product" << std::endl;
 
-	std::vector<std::vector<double> > finalCoefficients = tensorProductInterpolation(tempCoefficients, _hj.at(nDimensions-1), _alpha.at(nDimensions-1), _beta.at(nDimensions-1));
+	std::vector<std::vector<double> > finalCoefficients = tensorProductInterpolation(tempCoefficients, _hj.at(n_dimensions-1), _alpha.at(n_dimensions-1), _beta.at(n_dimensions-1));
 
 	// Adjust  Data
 	//std::cerr << "Adjust data" << std::endl;
@@ -181,7 +181,7 @@ std::vector<double> NDspline::fillArrayCoefficient(int nDimensions, std::vector<
 	return coefficients;
 }
 
-std::vector<double> NDspline::coefficientRestructuring(std::vector<std::vector<double> > matrix){
+std::vector<double> NDSpline::coefficientRestructuring(std::vector<std::vector<double> > matrix){
 	std::vector<double> array;
 
 	for (int i=0; i<matrix.size(); i++)
@@ -192,7 +192,7 @@ std::vector<double> NDspline::coefficientRestructuring(std::vector<std::vector<d
 
 
 
-std::vector<std::vector<double> > NDspline::tensorProductInterpolation(std::vector<std::vector<double> > step1, double h, double alpha, double beta){
+std::vector<std::vector<double> > NDSpline::tensorProductInterpolation(std::vector<std::vector<double> > step1, double h, double alpha, double beta){
 
 	std::vector<std::vector<double> > step1restructured = matrixRestructuring(step1);
 
@@ -212,7 +212,7 @@ std::vector<std::vector<double> > NDspline::tensorProductInterpolation(std::vect
 }
 
 
-std::vector<std::vector<double> > NDspline::matrixRestructuring(std::vector<std::vector<double> > step1){
+std::vector<std::vector<double> > NDSpline::matrixRestructuring(std::vector<std::vector<double> > step1){
 	int rows = step1.size();
 	int cols = step1.at(0).size();
 
@@ -226,12 +226,12 @@ std::vector<std::vector<double> > NDspline::matrixRestructuring(std::vector<std:
 }
 
 
-std::vector<double> NDspline::getValues(std::vector<int> & loopLocator){
+std::vector<double> NDSpline::getValues(std::vector<int> & loop_locator){
 	std::vector<double> values (_discretizations.at(0).size());
 
 	for (int n=0; n<_discretizations.at(0).size(); n++){
-		loopLocator.at(0) = n;
-		int oneDcoordinate = fromNDto1Dconverter(loopLocator);
+		loop_locator.at(0) = n;
+		int oneDcoordinate = fromNDto1Dconverter(loop_locator);
 	    values.at(n) = _values.at(oneDcoordinate);
 	}
 
@@ -239,7 +239,7 @@ std::vector<double> NDspline::getValues(std::vector<int> & loopLocator){
 }
 
 
-void NDspline::from2Dto1Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata){
+void NDSpline::from2Dto1Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata){
 	// this function restructures a 2D vector into a 1D vector
 	// example: 2D [[1,2],[3,4]] --> 1D restructuring [1,2,3,4]
 
@@ -248,7 +248,7 @@ void NDspline::from2Dto1Drestructuring(std::vector<std::vector<double> > & twoDd
 }
 
 
-void NDspline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing){
+void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing){
 	// this function restructures a 1D vector into a 2D vector
 	// example: 1D [1,2,3,4,5,6] spacing=2 --> 2D restructuring [[1,2],[3,4],[5,6]]
 
@@ -262,13 +262,13 @@ void NDspline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDd
 }
 
 
-double NDspline::u_k(double x, double a, double h, double k){
+double NDSpline::u_k(double x, double a, double h, double k){
 	// defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
 	return phi((x-a)/h - (k-2));
 }
 
 
-double NDspline::phi(double t){
+double NDSpline::phi(double t){
 	// defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
 	double phi_value=0;
 
@@ -282,7 +282,7 @@ double NDspline::phi(double t){
 }
 
 
-void NDspline::tridag(std::vector<double> & a, std::vector<double> & b, std::vector<double> & c, std::vector<double> & r, std::vector<double> & u){
+void NDSpline::tridag(std::vector<double> & a, std::vector<double> & b, std::vector<double> & c, std::vector<double> & r, std::vector<double> & u){
 	//Source: "Numerical Recipies" pp 56
 	int j, n=a.size();
 	double bet;
@@ -304,7 +304,7 @@ void NDspline::tridag(std::vector<double> & a, std::vector<double> & b, std::vec
 }
 
 
-std::vector<double> NDspline::getCoefficients(std::vector<double> & y, double h, double alpha, double beta){
+std::vector<double> NDSpline::getCoefficients(std::vector<double> & y, double h, double alpha, double beta){
     // alfa,beta = second derivative of the spline function in a and b of [a,b];
     // natural splines have alfa and beta = 0
 
@@ -352,7 +352,7 @@ std::vector<double> NDspline::getCoefficients(std::vector<double> & y, double h,
     }
 
 
-int NDspline::fromNDto1Dconverter(std::vector<int> coordinate){
+int NDSpline::fromNDto1Dconverter(std::vector<int> coordinate){
 	int coordinate1D = 0;
 	int spacing;
 
@@ -366,17 +366,17 @@ int NDspline::fromNDto1Dconverter(std::vector<int> coordinate){
 	return (coordinate1D);
 }
 
-std::vector<int> NDspline::from1DtoNDconverter(int oneDcoordinate, std::vector<int> indexes){
-	int nDimensions = indexes.size();
+std::vector<int> NDSpline::from1DtoNDconverter(int oneDcoordinate, std::vector<int> indexes){
+	int n_dimensions = indexes.size();
 	double temp=0;
-	std::vector<int> NDcoordinates (nDimensions);
-	std::vector<int> weights (nDimensions);
+	std::vector<int> NDcoordinates (n_dimensions);
+	std::vector<int> weights (n_dimensions);
 
 	weights.at(0)=1;
-	for (int nDim=1; nDim<nDimensions; nDim++)
+	for (int nDim=1; nDim<n_dimensions; nDim++)
 		weights.at(nDim)=weights.at(nDim-1)*indexes.at(nDim-1);
 
-	for (int nDim=(nDimensions-1); nDim>=0; nDim--){
+	for (int nDim=(n_dimensions-1); nDim>=0; nDim--){
 		if (nDim>0){
 			NDcoordinates.at(nDim) = oneDcoordinate/weights.at(nDim);
 			oneDcoordinate -= NDcoordinates.at(nDim)*weights.at(nDim);
@@ -389,21 +389,21 @@ std::vector<int> NDspline::from1DtoNDconverter(int oneDcoordinate, std::vector<i
 }
 
 
-double NDspline::retrieveCoefficient(std::vector<int> coefficientCoordinate){
+double NDSpline::retrieveCoefficient(std::vector<int> coefficient_coordinate){
 	double value = 0;
 
-	int oneDlocation = fromNDto1Dconverter(coefficientCoordinate);
+	int oneDlocation = fromNDto1Dconverter(coefficient_coordinate);
 
-	return _splineCoefficients.at(oneDlocation);
+	return _spline_coefficients.at(oneDlocation);
 }
 
-bool NDspline::checkBoundaries(std::vector<double> point){
+bool NDSpline::checkBoundaries(std::vector<double> point){
 	bool outcome = true; // True: within boundaries ; False: outside boundaries
 
 	for (int nDim=0; nDim<_dimensions; nDim++){
-		if (point.at(nDim) > _maxDisc.at(nDim))
+		if (point.at(nDim) > _max_disc.at(nDim))
 			outcome = outcome && false;
-		if (point.at(nDim) < _minDisc.at(nDim))
+		if (point.at(nDim) < _min_disc.at(nDim))
 			outcome = outcome && false;
 	}
 
@@ -412,7 +412,7 @@ bool NDspline::checkBoundaries(std::vector<double> point){
 	return outcome;
 }
 
-//void NDspline::iterationStep(int nDim, std::vector<double> & coefficients, std::vector<double> & data){
+//void NDSpline::iterationStep(int nDim, std::vector<double> & coefficients, std::vector<double> & data){
 //	int numberOfCoefficients=1;
 //	for (int i=nDim; i<_dimensions; i++)
 //		numberOfCoefficients *= _discretizations[i].size();
@@ -433,13 +433,13 @@ bool NDspline::checkBoundaries(std::vector<double> point){
 
 
 
-//void NDspline::initializeCoefficientsVector(){
+//void NDSpline::initializeCoefficientsVector(){
 //	int numberOfCoefficientsToStore = 1;
 //
 //	for(int i=0; i<_dimensions; i++)
 //		numberOfCoefficientsToStore *= _discretizations[i].size() + 3;
 //
-//	_splineCoefficients = std::vector<double>(numberOfCoefficientsToStore);
+//	_spline_coefficients = std::vector<double>(numberOfCoefficientsToStore);
 //}
 
 

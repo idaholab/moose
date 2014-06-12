@@ -18,27 +18,27 @@ class Interpolation_Functions;
 
 class Interpolation_Functions{
 public:
-    Interpolation_Functions();
-    Interpolation_Functions(std::vector<double> x_coordinates, std::vector<double> y_cordinates, custom_dist_fit_type type);
+  Interpolation_Functions();
+  Interpolation_Functions(std::vector<double> x_coordinates, std::vector<double> y_cordinates, custom_dist_fit_type type);
 
-    virtual ~Interpolation_Functions();
+  virtual ~Interpolation_Functions();
 
-    double interpolation (double x_point);
-    double cumulativeInterpolation (double x_point);
+  double interpolation (double x_point);
+  double cumulativeInterpolation (double x_point);
 
 protected:
-    LinearInterpolation  _linear;
-    SplineInterpolation  _spline;
-    std::vector<double>  _x_coordinates;
-    std::vector<double>  _y_coordinates;
-    custom_dist_fit_type _type;
+  LinearInterpolation  _linear;
+  SplineInterpolation  _spline;
+  std::vector<double>  _x_coordinates;
+  std::vector<double>  _y_coordinates;
+  custom_dist_fit_type _type;
 
-    double interpolation_Step_Left (double x_point);
-    double interpolation_Step_Right (double x_point);
+  double interpolation_Step_Left (double x_point);
+  double interpolation_Step_Right (double x_point);
 
-    double cumulativeInterpolation_Step_Left (double x_point);
-    double cumulativeInterpolation_Step_Right (double x_point);
-    double cumulativeInterpolation_Linear (double x_point);
+  double cumulativeInterpolation_Step_Left (double x_point);
+  double cumulativeInterpolation_Step_Right (double x_point);
+  double cumulativeInterpolation_Linear (double x_point);
 };
 
 

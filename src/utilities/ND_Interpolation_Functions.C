@@ -12,12 +12,12 @@
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 
-double ND_Interpolation::interpolateAt(std::vector<double> point_coordinate){
+double NDInterpolation::interpolateAt(std::vector<double> point_coordinate){
   throw ("Error in interpolateAt: NOT IMPLEMENTED!!!!");
   return -1;
 }
 
-std::vector<double> ND_Interpolation::NDinverseFunction(double F_min, double F_max){
+std::vector<double> NDInterpolation::NDinverseFunction(double F_min, double F_max){
   throw ("Error in NDinverseFunction: NOT IMPLEMENTED!!!!");
   std::vector<double> a;
   a.push_back(-1);
@@ -25,27 +25,27 @@ std::vector<double> ND_Interpolation::NDinverseFunction(double F_min, double F_m
 }
 
 
-double ND_Interpolation::getGradientAt(std::vector<double> point_coordinate){
+double NDInterpolation::getGradientAt(std::vector<double> point_coordinate){
   throw ("Error in getGradientAt: NOT IMPLEMENTED!!!!");
   return -1;
 }
 
-void ND_Interpolation::fit(std::vector< std::vector<double> > coordinates, std::vector<double> values){
+void NDInterpolation::fit(std::vector< std::vector<double> > coordinates, std::vector<double> values){
   throw ("Error in fit: NOT IMPLEMENTED!!!!");
 }
 
-ND_Interpolation::ND_Interpolation()
+NDInterpolation::NDInterpolation()
 {
 }
-ND_Interpolation::~ND_Interpolation()
+NDInterpolation::~NDInterpolation()
 {
 }
 
-bool checkUpperBound(double upperBound, std::vector<double> values){
+bool checkUpperBound(double upper_bound, std::vector<double> values){
 	bool check = true;
 
 	for (int i=0; i<values.size(); i++){
-		if (values.at(i) > upperBound){
+		if (values.at(i) > upper_bound){
 			check = check && false;
 			std::cout<< "values.at(i) : " << values.at(i) << std::endl;
 		}
@@ -57,11 +57,11 @@ bool checkUpperBound(double upperBound, std::vector<double> values){
 }
 
 
-bool checkLowerBound(double lowerBound, std::vector<double> values){
+bool checkLowerBound(double lower_bound, std::vector<double> values){
 	bool check = true;
 
 	for (int i=0; i<values.size(); i++){
-		if (values.at(i) < lowerBound)
+		if (values.at(i) < lower_bound)
 			check = check && false;
 		else
 			check = check && true;
@@ -70,23 +70,23 @@ bool checkLowerBound(double lowerBound, std::vector<double> values){
 	return check;
 }
 
-bool inverseDistanceWeigthing::checkUB(double upperBound){
-	return checkUpperBound(upperBound, _values);
+bool InverseDistanceWeighting::checkUB(double upper_bound){
+	return checkUpperBound(upper_bound, _values);
 }
 
-bool inverseDistanceWeigthing::checkLB(double lowerBound){
-	return checkLowerBound(lowerBound, _values);
+bool InverseDistanceWeighting::checkLB(double lower_bound){
+	return checkLowerBound(lower_bound, _values);
 }
 
-bool NDspline::checkUB(double upperBound){
-	return checkUpperBound(upperBound, _values);
+bool NDSpline::checkUB(double upper_bound){
+	return checkUpperBound(upper_bound, _values);
 }
 
-bool NDspline::checkLB(double lowerBound){
-	return checkLowerBound(lowerBound, _values);
+bool NDSpline::checkLB(double lower_bound){
+	return checkLowerBound(lower_bound, _values);
 }
 
-double ND_Interpolation::minkowskiDistance (std::vector<double> point1, std::vector<double> point2, double p){
+double NDInterpolation::minkowskiDistance (std::vector<double> point1, std::vector<double> point2, double p){
 	double distance;
 
 	if (point1.size() == point1.size()){
@@ -103,7 +103,7 @@ double ND_Interpolation::minkowskiDistance (std::vector<double> point1, std::vec
 }
 
 
-double ND_Interpolation::vectorNorm(std::vector<double> point, double p){
+double NDInterpolation::vectorNorm(std::vector<double> point, double p){
 	double norm = 0;
 
 	for (int i=1; i<point.size(); i++){
@@ -115,7 +115,7 @@ double ND_Interpolation::vectorNorm(std::vector<double> point, double p){
 	return norm;
 }
 
-std::vector<double> inverseDistanceWeigthing::NDinverseFunction(double F_min, double F_max){
+std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, double F_max){
 	// iterative procedure of linear interpolation to determine a nextPoint between firstPoint and secondPoint until CDF(nextPoint) lies between F_min and F_max
 
     double referenceCDF = (F_max-F_min)/2;
@@ -135,11 +135,11 @@ std::vector<double> inverseDistanceWeigthing::NDinverseFunction(double F_min, do
     // Find extreme points
 
     for (int nDim=0; nDim<_dimensions; nDim++){
-        for (int nPoints=0; nPoints<_numberOfPoints; nPoints++){
-            if (_pointCoordinates[nPoints][nDim] < min_values[nDim])
-                min_values[nDim] = _pointCoordinates[nPoints][nDim];
-            if (_pointCoordinates[nPoints][nDim] > max_values[nDim])
-                max_values[nDim] = _pointCoordinates[nPoints][nDim];
+        for (int nPoints=0; nPoints<_number_of_points; nPoints++){
+            if (_point_coordinates[nPoints][nDim] < min_values[nDim])
+                min_values[nDim] = _point_coordinates[nPoints][nDim];
+            if (_point_coordinates[nPoints][nDim] > max_values[nDim])
+                max_values[nDim] = _point_coordinates[nPoints][nDim];
         }
     }
 
@@ -157,7 +157,7 @@ std::vector<double> inverseDistanceWeigthing::NDinverseFunction(double F_min, do
     int min_index, max_index = 0;
 
     double min_value , max_value = 0.0;
-    for (int n=0; n<_numberOfPoints; n++){
+    for (int n=0; n<_number_of_points; n++){
         if (_values[n] < min_value){
         	min_index = n;
             min_value = _values[min_index];
@@ -215,7 +215,7 @@ std::vector<double> inverseDistanceWeigthing::NDinverseFunction(double F_min, do
 }
 
 
-double ND_Interpolation::NDderivative(std::vector<double> x){
+double NDInterpolation::NDderivative(std::vector<double> x){
 	double value;
 	return value;
 }

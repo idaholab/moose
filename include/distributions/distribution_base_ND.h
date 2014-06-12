@@ -52,7 +52,7 @@ public:
 	  if (UBcheck == false)
 		  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
   };
-  BasicMultiDimensionalInverseWeight(double p):  _interpolator(inverseDistanceWeigthing(p))
+  BasicMultiDimensionalInverseWeight(double p):  _interpolator(InverseDistanceWeighting(p))
   {
   };
   virtual ~BasicMultiDimensionalInverseWeight()
@@ -79,7 +79,7 @@ public:
     return _interpolator.NDinverseFunction(min, max);
   };
 protected:
-  inverseDistanceWeigthing  _interpolator;
+  InverseDistanceWeighting  _interpolator;
 };
 
 class BasicMultivariateNormal: public virtual BasicDistributionND
@@ -144,7 +144,7 @@ public:
     return std::vector<double>(2,-1.0);
   };
 protected:
-  microSphere _interpolator;
+  MicroSphere _interpolator;
 };
 
 class BasicMultiDimensionalCartesianSpline: public  virtual BasicDistributionND
@@ -192,7 +192,7 @@ public:
     return std::vector<double>(2,-1.0);
   };
 protected:
-  NDspline _interpolator;
+  NDSpline _interpolator;
 };
 
 
