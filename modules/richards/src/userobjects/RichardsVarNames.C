@@ -13,6 +13,9 @@ InputParameters validParams<RichardsVarNames>()
   InputParameters params = validParams<GeneralUserObject>();
   params.addClassDescription("Holds information on the porepressure variable names");
   params.addRequiredCoupledVar("richards_vars", "List of variables that represent the porepressures or (porepressure, saturations).  In single-phase models you will just have one (eg \'pressure\'), in two-phase models you will have two (eg \'p_water p_gas\', or \'p_water s_water\', etc.  These names must also be used in your kernels and material.");
+  MooseEnum var_types("pppp", "pppp");
+  params.addParam<MooseEnum>("var_types", var_types, "Variable types for the problem.  Eg, 'pppp' means all the variables are pressure variables");
+
   return params;
 }
 
@@ -21,7 +24,8 @@ RichardsVarNames::RichardsVarNames(const std::string & name, InputParameters par
   Coupleable(parameters, false),
   ZeroInterface(parameters),
   _num_v(coupledComponents("richards_vars")),
-  _the_names(std::string())
+  _the_names(std::string()),
+  _var_types(getParam<MooseEnum>("var_types"))
 
 {
   unsigned int max_moose_var_num_seen(0);
@@ -121,6 +125,12 @@ MooseVariable *
 RichardsVarNames::raw_var(unsigned int richards_var_num) const
 {
   return _moose_raw_var[richards_var_num];
+}
+
+std::string
+RichardsVarNames::var_types() const
+{
+  return _var_types;
 }
 
 

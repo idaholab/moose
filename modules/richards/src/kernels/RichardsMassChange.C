@@ -31,8 +31,8 @@ RichardsMassChange::RichardsMassChange(const std::string & name,
     _mass_old(getMaterialProperty<std::vector<Real> >("mass_old")),
 
     _tauvel_SUPG(getMaterialProperty<std::vector<RealVectorValue> >("tauvel_SUPG")),
-    _dtauvel_SUPG_dgradv(getMaterialProperty<std::vector<RealTensorValue> >("dtauvel_SUPG_dgradv")),
-    _dtauvel_SUPG_dv(getMaterialProperty<std::vector<RealVectorValue> >("dtauvel_SUPG_dv"))
+    _dtauvel_SUPG_dgradv(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("dtauvel_SUPG_dgradv")),
+    _dtauvel_SUPG_dv(getMaterialProperty<std::vector<std::vector<RealVectorValue> > >("dtauvel_SUPG_dv"))
 {
 }
 
@@ -47,11 +47,11 @@ RichardsMassChange::computeQpResidual()
 }
 
 Real
-RichardsMassChange::computeQpJacobian()
+RichardsMassChange::computeQpJac(unsigned int wrt_num)
 {
   Real mass = _mass[_qp][_pvar];
   Real mass_old = _mass_old[_qp][_pvar];
-  Real mass_prime = _phi[_j][_qp]*_dmass[_qp][_pvar][_pvar];
+  Real mass_prime = _phi[_j][_qp]*_dmass[_qp][_pvar][wrt_num];
 
   Real test_fcn = _test[_i][_qp] ;
   Real test_fcn_prime = 0;
@@ -59,9 +59,16 @@ RichardsMassChange::computeQpJacobian()
   if (_use_supg)
   {
     test_fcn += _tauvel_SUPG[_qp][_pvar]*_grad_test[_i][_qp];
-    test_fcn_prime += _grad_phi[_j][_qp]*(_dtauvel_SUPG_dgradv[_qp][_pvar]*_grad_test[_i][_qp]) + _phi[_j][_qp]*_dtauvel_SUPG_dv[_qp][_pvar]*_grad_test[_i][_qp];
+    test_fcn_prime += _grad_phi[_j][_qp]*(_dtauvel_SUPG_dgradv[_qp][_pvar][wrt_num]*_grad_test[_i][_qp]) + _phi[_j][_qp]*_dtauvel_SUPG_dv[_qp][_pvar][wrt_num]*_grad_test[_i][_qp];
   }
   return (test_fcn*mass_prime + test_fcn_prime*(mass- mass_old))/_dt;
+}
+
+
+Real
+RichardsMassChange::computeQpJacobian()
+{
+  return computeQpJac(_pvar);
 }
 
 Real
@@ -70,10 +77,5 @@ RichardsMassChange::computeQpOffDiagJacobian(unsigned int jvar)
   if (_richards_name_UO.not_richards_var(jvar))
     return 0.0;
   unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
-  Real mass_prime = _phi[_j][_qp]*_dmass[_qp][_pvar][dvar];
-  Real test_fcn = _test[_i][_qp] ;
-  if (_use_supg)
-    test_fcn += _tauvel_SUPG[_qp][_pvar]*_grad_test[_i][_qp];
-
-  return test_fcn*mass_prime/_dt;
+  return computeQpJac(dvar);
 }
