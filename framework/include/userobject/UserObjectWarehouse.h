@@ -204,4 +204,4 @@ protected:
 
 };
 
-#endif // USER_OBJECTWAREHOUSE_Hb
+#endif // USER_OBJECTWAREHOUSE_H
