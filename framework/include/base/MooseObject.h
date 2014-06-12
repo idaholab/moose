@@ -88,7 +88,7 @@ protected:
   MooseApp & _app;
 
   /// An instance of helper class to write streams to the Console objects
-  ConsoleStream _console;
+  const ConsoleStream _console;
 };
 
 #endif /* MOOSEOBJECT_H*/
