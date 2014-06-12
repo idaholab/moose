@@ -3518,9 +3518,6 @@ FEProblem::checkProblemIntegrity()
         if (_displaced_problem)
           _displaced_problem->mesh().getMesh().skip_partitioning(true);
       }
-
-      // flush buffer
-      _console.flush();
     }
 #endif
 

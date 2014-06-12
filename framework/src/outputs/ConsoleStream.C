@@ -20,15 +20,10 @@ ConsoleStream::ConsoleStream(const OutputWarehouse & output_warehouse) :
 {
 }
 
-ConsoleStream &
-ConsoleStream::operator<<(StandardEndLine manip)
+const ConsoleStream &
+ConsoleStream::operator<<(StandardEndLine manip) const
 {
   manip(Moose::out);
   return *this;
 }
 
-void
-ConsoleStream::flush()
-{
-  _oss.flush();
-}
