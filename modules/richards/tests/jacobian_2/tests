@@ -91,7 +91,6 @@
     input = 'jn_fu_22.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    skip = 'Fails in debug mode'
   [../]
 
   [./jn38]
