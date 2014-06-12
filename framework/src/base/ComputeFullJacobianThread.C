@@ -51,7 +51,7 @@ ComputeFullJacobianThread::computeJacobian()
     if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
-      const std::vector<KernelBase *> & kernels = _sys._kernels[_tid].activeVar(ivar);
+      const std::vector<KernelBase *> & kernels = _sys.getKernelWarehouse(_tid)->activeVar(ivar);
       for (std::vector<KernelBase *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
       {
         KernelBase * kernel = *kt;
@@ -75,7 +75,7 @@ ComputeFullJacobianThread::computeJacobian()
       if (ivar.activeOnSubdomain(_subdomain) > 0)
       {
         // for each variable get the list of active kernels
-        const std::vector<KernelBase *> & kernels = _sys._kernels[_tid].activeVar(ivar.number());
+        const std::vector<KernelBase *> & kernels = _sys.getKernelWarehouse(_tid)->activeVar(ivar.number());
         for (std::vector<KernelBase *>::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
         {
           KernelBase * kernel = *kt;
@@ -108,7 +108,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     if (ivar.activeOnSubdomain(_subdomain) && jvar.activeOnSubdomain(_subdomain))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
-      std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].getBCs(bnd_id);
+      std::vector<IntegratedBC *> bcs = _sys.getBCWarehouse(_tid)->getBCs(bnd_id);
       for (std::vector<IntegratedBC *>::iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
       {
         IntegratedBC * bc = *jt;
@@ -132,7 +132,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       if (ivar.activeOnSubdomain(_subdomain) > 0)
       {
         // for each variable get the list of active kernels
-        std::vector<IntegratedBC *> bcs = _sys._bcs[_tid].activeIntegrated(bnd_id);
+        std::vector<IntegratedBC *> bcs = _sys.getBCWarehouse(_tid)->activeIntegrated(bnd_id);
         for (std::vector<IntegratedBC *>::iterator kt = bcs.begin(); kt != bcs.end(); ++kt)
         {
           IntegratedBC * bc = *kt;
@@ -157,13 +157,13 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 void
 ComputeFullJacobianThread::computeInternalFaceJacobian()
 {
-  if (_sys._dg_kernels[_tid].active().empty())
+  if (_sys.getDGKernelWarehouse(_tid)->active().empty())
     return;
 
   std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
   for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
   {
-    std::vector<DGKernel *> dgks = _sys._dg_kernels[_tid].active();
+    std::vector<DGKernel *> dgks = _sys.getDGKernelWarehouse(_tid)->active();
     for (std::vector<DGKernel *>::iterator dg_it = dgks.begin(); dg_it != dgks.end(); ++dg_it)
     {
       unsigned int ivar = (*it).first->number();

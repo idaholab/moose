@@ -77,13 +77,13 @@ ComputeJacobianBlockThread::operator() (const ConstElemRange & range, bool bypas
       {
         subdomain = cur_subdomain;
         _fe_problem.subdomainSetup(subdomain, _tid);
-        _nl._kernels[_tid].updateActiveKernels(cur_subdomain);
+        _nl.getKernelWarehouse(_tid)->updateActiveKernels(cur_subdomain);
       }
 
       _fe_problem.reinitMaterials(cur_subdomain, _tid);
 
       //Kernels
-      std::vector<KernelBase *> kernels = _nl._kernels[_tid].active();
+      std::vector<KernelBase *> kernels = _nl.getKernelWarehouse(_tid)->active();
       for (std::vector<KernelBase *>::const_iterator it = kernels.begin(); it != kernels.end(); it++)
       {
         KernelBase * kernel = *it;
@@ -106,7 +106,7 @@ ComputeJacobianBlockThread::operator() (const ConstElemRange & range, bool bypas
           {
             BoundaryID bnd_id = *it;
 
-            std::vector<IntegratedBC *> bcs = _nl._bcs[_tid].activeIntegrated(bnd_id);
+            std::vector<IntegratedBC *> bcs = _nl.getBCWarehouse(_tid)->activeIntegrated(bnd_id);
             if (bcs.size() > 0)
             {
               _fe_problem.prepareFace(elem, _tid);
@@ -144,7 +144,7 @@ ComputeJacobianBlockThread::operator() (const ConstElemRange & range, bool bypas
 
           if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
           {
-            std::vector<DGKernel *> dgks = _nl._dg_kernels[_tid].active();
+            std::vector<DGKernel *> dgks = _nl.getDGKernelWarehouse(_tid)->active();
             if (dgks.size() > 0)
             {
               _fe_problem.prepareFace(elem, _tid);
