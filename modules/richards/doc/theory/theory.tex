@@ -317,6 +317,24 @@ The Rogers-Stallybrass-Clements capillary curve valid for zero
 residual saturations and oil viscosity double that of water viscosity
 has also been coded into MOOSE~\cite{rsc1983}. 
 
+A ``shifted'' version of Eqn~(\ref{vg.cap.eqn}) has been coded for
+into MOOSE for 2-phase simulations.  The effective saturation for the
+``water'' phase is
+\begin{equation}
+S^{\mathrm{water}}_{\mathrm{eff}} = S_{s}^{-1}\left( 1 + (\alpha
+  (P^{\mathrm{gas}} - P^{\mathrm{water}} + s))^{\frac{1}{1 - m}}
+\right)^{-m} \ \ \ \mbox{for}\ \ 0<m<1 \ ,
+\end{equation}
+where $s$ is the so-called ``shift'', and $S_{s}$ is the value of
+Eqn~(\ref{vg.cap.eqn}) at $P_{c}=s$ (so $S_{s}^{-1}$ scales the result so
+that $0\leq S_{\mathrm{eff}}\leq 1$).  The ``gas'' saturation is just
+$S^{\mathrm{gas}}_{\mathrm{eff}}=1-S^{\mathrm{water}}_{\mathrm{eff}}$.
+Here it assumed that $P_{c} = P^{\mathrm{gas}}-P^{\mathrm{water}}>0$.
+Note that $dS^{\mathrm{water}}/dP^{\mathrm{water}} >0$ for all
+$P^{\mathrm{water}}$ which can be advantageous numerically around low
+gas saturation values.
+
+
 \section{Relative permeability}
 \label{rel.perm.sec}
 

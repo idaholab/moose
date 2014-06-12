@@ -25,6 +25,8 @@
 #include "RichardsSeff1RSC.h"
 #include "RichardsSeff2waterVG.h"
 #include "RichardsSeff2gasVG.h"
+#include "RichardsSeff2waterVGshifted.h"
+#include "RichardsSeff2gasVGshifted.h"
 #include "RichardsSeff2waterRSC.h"
 #include "RichardsSeff2gasRSC.h"
 #include "RichardsSat.h"
@@ -131,6 +133,8 @@ RichardsApp::registerObjects(Factory & factory)
   registerUserObject(RichardsSeff1RSC);
   registerUserObject(RichardsSeff2waterVG);
   registerUserObject(RichardsSeff2gasVG);
+  registerUserObject(RichardsSeff2waterVGshifted);
+  registerUserObject(RichardsSeff2gasVGshifted);
   registerUserObject(RichardsSeff2waterRSC);
   registerUserObject(RichardsSeff2gasRSC);
   registerUserObject(RichardsSat);

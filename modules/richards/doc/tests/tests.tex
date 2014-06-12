@@ -213,6 +213,7 @@ with respect to $P$ are correctly coded.
 \begin{equation}
 S_{\mathrm{eff}} = \left(1 + (\alpha
 P_{\mathrm{c}})^{\frac{1}{1-m}}\right)^{-m} \ ,
+\label{eqn.vg.cap}
 \end{equation}
 is correctly coded, and also that its first and second derivatives
 with respect to $P_{\mathrm{c}}$ are correctly coded.
@@ -240,6 +241,21 @@ S_{\mathrm{eff}} = \frac{1}{\sqrt{1 +
 \end{equation}
 and its derivatives with respect to $P_{\mathrm{c}}$ are correctly coded.
 
+\item That the ``shifted van Genuchten'' water effective saturation,
+  designed for 2-phase simulations, defined by
+\begin{equation}
+S^{\mathrm{water}}_{\mathrm{eff}} = S_{s}^{-1}\left( 1 + (\alpha
+  (P^{\mathrm{gas}} - P^{\mathrm{water}} + s))^{\frac{1}{1 - m}}
+\right)^{-m} \ \ \ \mbox{for}\ \ 0<m<1 \ ,
+\end{equation}
+and its derivatives with respect to the two pressures are correctly
+coded.  Also that the ``gas'' saturation is just
+$S^{\mathrm{gas}}_{\mathrm{eff}}=1-S^{\mathrm{water}}_{\mathrm{eff}}$,
+and its derivatives are also correctly coded.
+Here it assumed that $P_{c} = P^{\mathrm{gas}}-P^{\mathrm{water}}>0$.
+The parameter $s$ is the so-called ``shift'', and $S_{s}$ is the value of
+Eqn~(\ref{eqn.vg.cap}) at $P_{c}=s$ (so $S_{s}^{-1}$ scales the result so
+that $0\leq S_{\mathrm{eff}}\leq 1$).
 
 \end{itemize}
 
