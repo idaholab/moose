@@ -78,11 +78,19 @@ protected:
   /// SUPGtau*SUPGvel (a vector of these if multiphase)
   MaterialProperty<std::vector<RealVectorValue> >&_tauvel_SUPG;
 
-  /// derivative of SUPGtau*SUPGvel wrt grad(variable)
-  MaterialProperty<std::vector<RealTensorValue> >&_dtauvel_SUPG_dgradv;
+  /// derivative of SUPGtau*SUPGvel_i wrt grad(variable_j)
+  MaterialProperty<std::vector<std::vector<RealTensorValue> > >&_dtauvel_SUPG_dgradv;
 
-  /// derivative of SUPGtau*SUPGvel wrt variable
-  MaterialProperty<std::vector<RealVectorValue> >&_dtauvel_SUPG_dv;
+  /// derivative of SUPGtau*SUPGvel_i wrt variable_j
+  MaterialProperty<std::vector<std::vector<RealVectorValue> > >&_dtauvel_SUPG_dv;
+
+  /**
+   * Computes diagonal and off-diagonal jacobian entries.
+   * Since the code is almost identical for both cases it's
+   * better to use just one function
+   * @param wrt_num take the derivative of the residual wrt this richards variable
+   */
+  Real computeQpJac(unsigned int wrt_num);
 };
 
 #endif //RICHARDSFLUX

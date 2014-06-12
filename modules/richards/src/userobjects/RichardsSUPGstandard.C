@@ -170,3 +170,11 @@ RichardsSUPGstandard::dtauSUPG_dp(RealVectorValue vel, RealVectorValue dvel_dp, 
 
   return tau_dp;
 }
+
+
+bool
+RichardsSUPGstandard::SUPG_trivial() const
+{
+  return false;
+}
+

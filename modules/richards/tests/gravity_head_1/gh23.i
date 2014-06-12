@@ -130,6 +130,7 @@
   interval = 10000
   exodus = true
   [./console]
+    interval = 1
     type = Console
     perf_log = true
   [../]
