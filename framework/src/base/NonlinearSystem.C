@@ -1757,11 +1757,11 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
       BoundaryID boundary_id = bnode->_bnd_id;
       Node * node = bnode->_node;
 
-      if (node->processor_id() == processor_id())
+      if (_bcs[0].hasNodalBCs(boundary_id) && node->processor_id() == processor_id())
       {
         _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-        for (std::vector<NodalBC *>::iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
+        for (std::vector<NodalBC *>::const_iterator it = _bcs[0].getNodalBCs(boundary_id).begin(); it != _bcs[0].getNodalBCs(boundary_id).end(); ++it)
         {
           NodalBC * bc = *it;
           if (bc->shouldApply() && bc->variable().isNodalDefined())
@@ -2275,37 +2275,51 @@ NonlinearSystem::doingDG() const
   return _doing_dg;
 }
 
-KernelWarehouse *
+void
+NonlinearSystem::updateActiveKernels(SubdomainID subdomain_id, THREAD_ID tid)
+{
+  mooseAssert(tid < _kernels.size(), "Thread ID does not exist.");
+  _kernels[tid].updateActiveKernels(subdomain_id);
+}
+
+void
+NonlinearSystem::updateActiveDGKernels(Real t, Real dt, THREAD_ID tid)
+{
+  mooseAssert(tid < _dg_kernels.size(), "Thread ID does not exist.");
+  _dg_kernels[tid].updateActiveDGKernels(t, dt);
+}
+
+const KernelWarehouse &
 NonlinearSystem::getKernelWarehouse(THREAD_ID tid)
 {
   mooseAssert(tid < _kernels.size(), "Thread ID does not exist.");
-  return &(_kernels[tid]) ;
+  return _kernels[tid];
 }
 
-DGKernelWarehouse *
+const DGKernelWarehouse &
 NonlinearSystem::getDGKernelWarehouse(THREAD_ID tid)
 {
   mooseAssert(tid < _dg_kernels.size(), "Thread ID does not exist.");
-  return &(_dg_kernels[tid]) ;
+  return _dg_kernels[tid];
 }
 
-BCWarehouse *
+const BCWarehouse &
 NonlinearSystem::getBCWarehouse(THREAD_ID tid)
 {
   mooseAssert(tid < _bcs.size(), "Thread ID does not exist.");
-  return &(_bcs[tid]) ;
+  return _bcs[tid];
 }
 
-DiracKernelWarehouse *
+const DiracKernelWarehouse &
 NonlinearSystem::getDiracKernelWarehouse(THREAD_ID tid)
 {
   mooseAssert(tid < _dirac_kernels.size(), "Thread ID does not exist.");
-  return &(_dirac_kernels[tid]) ;
+  return _dirac_kernels[tid];
 }
 
-DamperWarehouse *
+const DamperWarehouse &
 NonlinearSystem::getDamperWarehouse(THREAD_ID tid)
 {
   mooseAssert(tid < _dampers.size(), "Thread ID does not exist.");
-  return &(_dampers[tid]) ;
+  return _dampers[tid];
 }

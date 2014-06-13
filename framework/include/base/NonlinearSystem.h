@@ -408,14 +408,25 @@ public:
    */
   bool doingDG() const;
 
+  //@{
+  /**
+   * Updates the active kernels/dgkernels in the warehouse for the
+   * passed in subdomain_id and thread
+   */
+  void updateActiveKernels(SubdomainID subdomain_id, THREAD_ID tid);
+  void updateActiveDGKernels(Real t, Real dt, THREAD_ID tid);
+  //@}
+
+  //@{
   /**
    * Access functions to Warehouses from outside NonlinearSystem
    */
-  KernelWarehouse * getKernelWarehouse(THREAD_ID tid);
-  DGKernelWarehouse * getDGKernelWarehouse(THREAD_ID tid);
-  BCWarehouse * getBCWarehouse(THREAD_ID tid);
-  DiracKernelWarehouse * getDiracKernelWarehouse(THREAD_ID tid);
-  DamperWarehouse * getDamperWarehouse(THREAD_ID tid);
+  const KernelWarehouse & getKernelWarehouse(THREAD_ID tid);
+  const DGKernelWarehouse & getDGKernelWarehouse(THREAD_ID tid);
+  const BCWarehouse & getBCWarehouse(THREAD_ID tid);
+  const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
+  const DamperWarehouse & getDamperWarehouse(THREAD_ID tid);
+  //@}
 
 public:
   FEProblem & _fe_problem;
