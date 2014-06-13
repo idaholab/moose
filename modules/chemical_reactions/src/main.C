@@ -19,6 +19,9 @@ int main(int argc, char *argv[])
   // This creates dynamic memory that we're responsible for deleting
   MooseApp * app = AppFactory::createApp("ChemicalReactionsApp", argc, argv);
 
+  app->setCheckUnusedFlag(true);
+  app->setErrorOverridden();
+
   // Execute the application
   app->run();
 
