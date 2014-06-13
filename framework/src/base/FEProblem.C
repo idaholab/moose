@@ -3449,6 +3449,9 @@ FEProblem::meshChanged()
   _eq.reinit();
   _mesh.meshChanged();
 
+  // Since the Mesh changed, update the PointLocator object used by DiracKernels.
+  _dirac_kernel_info.updatePointLocator(_mesh);
+
   unsigned int n_threads = libMesh::n_threads();
 
   for (unsigned int i = 0; i < n_threads; ++i)

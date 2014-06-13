@@ -1,0 +1,31 @@
+[Tests]
+  [./point_caching]
+    type = 'Exodiff'
+    input = 'point_caching.i'
+    exodiff = 'point_caching_out.e'
+  [../]
+
+  [./point_caching_error]
+    type = 'RunException'
+    input = 'point_caching_error.i'
+    expect_err = "does not match point"
+  [../]
+
+  [./point_caching_uniform_refinement]
+    type = 'Exodiff'
+    input = 'point_caching_uniform_refinement.i'
+    exodiff = 'point_caching_uniform_refinement_out.e-s002 point_caching_uniform_refinement_out.e-s003'
+  [../]
+
+  [./point_caching_adaptive_refinement]
+    type = 'Exodiff'
+    input = 'point_caching_adaptive_refinement.i'
+    exodiff = 'point_caching_adaptive_refinement_out.e-s004'
+  [../]
+
+  [./point_caching_moving_mesh]
+    type = 'Exodiff'
+    input = 'point_caching_moving_mesh.i'
+    exodiff = 'point_caching_moving_mesh_out.e'
+  [../]
+[]

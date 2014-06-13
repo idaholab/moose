@@ -117,8 +117,11 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
   Threads::parallel_for (*_mesh.getActiveSemiLocalNodeRange(), UpdateDisplacedMeshThread(*this));
 
   // Update the geometric searches that depend on the displaced mesh
-//  if (_displaced_nl.currentlyComputingJacobian())
-    _geometric_search_data.update();
+  // if (_displaced_nl.currentlyComputingJacobian())
+  _geometric_search_data.update();
+
+  // Since the Mesh changed, update the PointLocator object used by DiracKernels.
+  _dirac_kernel_info.updatePointLocator(_mesh);
 
   Moose::perf_log.pop("updateDisplacedMesh()","Solve");
 }
@@ -494,6 +497,10 @@ DisplacedProblem::meshChanged()
   // mesh changed
   _eq.reinit();
   _mesh.meshChanged();
+
+  // Since the Mesh changed, update the PointLocator object used by DiracKernels.
+  _dirac_kernel_info.updatePointLocator(_mesh);
+
   unsigned int n_threads = libMesh::n_threads();
 
   for (unsigned int i = 0; i < n_threads; ++i)

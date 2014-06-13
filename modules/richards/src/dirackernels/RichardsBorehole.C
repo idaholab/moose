@@ -20,7 +20,6 @@ InputParameters validParams<RichardsBorehole>()
   params.addRequiredParam<std::string>("point_file", "The file containing the borehole radii and coordinates of the point sinks that approximate the borehole.  Each line in the file must contain a space-separated radius and coordinate.  Ie r x y z.  The last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  Note that you will get segementation faults if your points do not lie within your mesh!");
   params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the borehole for each time step.");
   params.addParam<Real>("re_constant", 0.28, "The dimensionless constant used in evaluating the borehole effective radius.  This depends on the meshing scheme.  Peacemann finite-difference calculations give 0.28, while for rectangular finite elements the result is closer to 0.1594.  (See  Eqn(4.13) of Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388.)");
-  params.addParam<bool>("mesh_adaptivity", true, "If not using mesh adaptivity then set this false to substantially speed up the simulation by caching the element containing each Dirac point.");
   params.addParam<Real>("well_constant", -1.0, "Usually this is calculated internally from the element geometry, the local borehole direction and segment length, and the permeability.  However, if this parameter is given as a positive number then this number is used instead of the internal calculation.  This speeds up computation marginally.  re_constant becomes irrelevant");
   params.addParam<bool>("MyNameIsAndyWilkins", false, "Used for debugging by Andy");
   params.addParam<bool>("fully_upwind", false, "Fully upwind the flux");
@@ -54,8 +53,6 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
     _re_constant(getParam<Real>("re_constant")),
     _well_constant(getParam<Real>("well_constant")),
-
-    _mesh_adaptivity(getParam<bool>("mesh_adaptivity")),
 
     _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
     _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv")),
@@ -126,10 +123,6 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
     _rot_matrix[i] = RotationMatrix::rotVecToZ(v2);
   }
-
-  // size the array that holds elemental info
-  _elemental_info.resize(num_pts);
-  _have_constructed_elemental_info = false;
 
   // do debugging if AndyWilkins
   if (_debug_things)
@@ -208,22 +201,11 @@ RichardsBorehole::addPoints()
   // so this is a handy place to zero this out.
   _total_outflow_mass.zero();
 
-  if (!_have_constructed_elemental_info || _mesh_adaptivity)
-  {
-    for (unsigned int i = 0; i < _zs.size(); i++)
-    {
-      _elemental_info[i] = addPoint(Point(_xs[i], _ys[i], _zs[i]));
-      if (!_elemental_info[i])
-        mooseError("RichardsBorehole: the point " << _xs[i] << " " << _ys[i] << " " << _zs[i] << " was not added since it is not in any element");
-    }
-    _have_constructed_elemental_info = true;
-  }
-  else
-  {
-    for (unsigned int i = 0; i < _zs.size(); i++)
-      addPoint(_elemental_info[i], Point(_xs[i], _ys[i], _zs[i]));
-  }
-
+  // Add point using the unique ID "i", let the DiracKernel take
+  // care of the caching.  This should be fast after the first call,
+  // as long as the points don't move around.
+  for (unsigned int i = 0; i < _zs.size(); i++)
+    addPoint(Point(_xs[i], _ys[i], _zs[i]), i);
 }
 
 Real
@@ -385,11 +367,12 @@ RichardsBorehole::computeQpResidual()
 
 
 
+  // Get the ID we initially assigned to this point
+  unsigned current_dirac_ptid = currentPointCachedID();
 
-  // when we can query for the current_dirac_ptid replace this complete bodge:
-  unsigned int current_dirac_ptid = 0;
-  if (_zs.size() > 2)
-    current_dirac_ptid = 1;
+  // If getting the ID failed, fall back to the old bodge!
+  if (current_dirac_ptid == libMesh::invalid_uint)
+    current_dirac_ptid = (_zs.size() > 2) ? 1 : 0;
 
   Real outflow(0.0); // this is the flow rate from porespace out of the system
 
@@ -469,10 +452,12 @@ RichardsBorehole::jac(unsigned int wrt_num)
     phi = 1;
   }
 
-  // when we can query for the current_dirac_ptid replace this complete bodge:
-  unsigned int current_dirac_ptid = 0;
-  if (_zs.size() > 2)
-    current_dirac_ptid = 1;
+  // Get the ID we initially assigned to this point
+  unsigned current_dirac_ptid = currentPointCachedID();
+
+  // If getting the ID failed, fall back to the old bodge!
+  if (current_dirac_ptid == libMesh::invalid_uint)
+    current_dirac_ptid = (_zs.size() > 2) ? 1 : 0;
 
   Real outflowp(0.0);
 
