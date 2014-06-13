@@ -45,6 +45,7 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _current_side_elem(NULL),
     _current_neighbor_elem(NULL),
     _current_neighbor_side(0),
+    _current_neighbor_side_elem(NULL),
     _current_node(NULL),
     _current_neighbor_node(NULL),
 
@@ -61,6 +62,7 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
   // Build fe's for the helpers
   buildFE(FEType(FIRST, LAGRANGE));
   buildFaceFE(FEType(FIRST, LAGRANGE));
+  buildFaceNeighborFE(FEType(FIRST, LAGRANGE));
 
   // Build an FE helper object for this type for each dimension up to the dimension of the current mesh
   for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
@@ -77,6 +79,11 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     (*_holder_fe_face_helper[dim])->get_xyz();
     (*_holder_fe_face_helper[dim])->get_JxW();
     (*_holder_fe_face_helper[dim])->get_normals();
+
+    _holder_fe_neighbor_helper[dim] = &_fe_neighbor[dim][FEType(FIRST, LAGRANGE)];
+    (*_holder_fe_neighbor_helper[dim])->get_xyz();
+    (*_holder_fe_neighbor_helper[dim])->get_JxW();
+    (*_holder_fe_neighbor_helper[dim])->get_normals();
   }
 }
 
@@ -112,6 +119,7 @@ Assembly::~Assembly()
     delete it->second;
 
   delete _current_side_elem;
+  delete _current_neighbor_side_elem;
 
   _current_physical_points.release();
 
@@ -560,6 +568,7 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
   FEType fe_type (neighbor->default_order() , LAGRANGE);
   AutoPtr<FEBase> fe (FEBase::build(neighbor->dim(), fe_type));
 
+  const std::vector<Real> & JxW = fe->get_JxW();
   const std::vector<Point> & q_points = fe->get_xyz();
 
   // The default quadrature rule should integrate the mass matrix,
@@ -567,8 +576,6 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
   QGauss qrule (neighbor->dim(), fe_type.default_quadrature_order());
   fe->attach_quadrature_rule(&qrule);
   fe->reinit(neighbor);
-
-  _current_JxW_neighbor = fe->get_JxW();
 
   // set the coord transformation
   MooseArray<Real> coord;
@@ -598,18 +605,27 @@ Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Poi
 
   _current_neighbor_volume = 0.;
   for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-    _current_neighbor_volume += _current_JxW_neighbor[qp] * coord[qp];
+    _current_neighbor_volume += JxW[qp] * coord[qp];
 
   coord.release();
 }
 
 void
-Assembly::reinitNeighborAtPhysical(const Elem * neighbor, const std::vector<Point> & physical_points)
+Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points)
 {
+  delete _current_neighbor_side_elem;
+  _current_neighbor_side_elem = neighbor->build_side(neighbor_side).release();
+
   std::vector<Point> reference_points;
 
   unsigned int neighbor_dim = neighbor->dim();
   FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, physical_points, reference_points);
+
+  // first do the side element
+  reinitNeighborAtReference(_current_neighbor_side_elem, reference_points);
+  // compute JxW on the neighbor's face
+  unsigned int neighbor_side_dim = _current_neighbor_side_elem->dim();
+  _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_neighbor_helper[neighbor_side_dim])->get_JxW()));
 
   reinitNeighborAtReference(neighbor, reference_points);
 

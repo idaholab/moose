@@ -294,7 +294,7 @@ public:
   /**
    * Reinitializes the neighbor at the physical coordinates given.
    */
-  void reinitNeighborAtPhysical(const Elem * neighbor, const std::vector<Point> & physical_points);
+  void reinitNeighborAtPhysical(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points);
 
   /**
    * Reinitialize assembly data for a node
@@ -529,12 +529,14 @@ protected:
 
   /// types of finite elements
   std::map<unsigned int, std::map<FEType, FEBase *> > _fe_neighbor;
+  /// Each dimension's helper objects
+  std::map<unsigned int, FEBase **> _holder_fe_neighbor_helper;
 
   /// quadrature rule used on neighbors
   QBase * _current_qrule_neighbor;
   /// Holds arbitrary qrules for each dimension
   std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_neighbor;
-  /// The current transformed jacobian weights on a neighbor face
+  /// The current transformed jacobian weights on a neighbor's face
   MooseArray<Real> _current_JxW_neighbor;
 
   /// The current "element" we are currently on.
@@ -551,6 +553,8 @@ protected:
   const Elem * _current_neighbor_elem;
   /// The current side of the selected neighboring element (valid only when working with sides)
   unsigned int _current_neighbor_side;
+  /// The current side element of the ncurrent neighbor element
+  const Elem * _current_neighbor_side_elem;
   /// Volume of the current neighbor
   Real _current_neighbor_volume;
   /// The current node we are working with
