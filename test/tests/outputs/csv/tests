@@ -11,7 +11,7 @@
     input = 'csv_transient.i'
     csvdiff = 'csv_transient_out.csv'
     max_threads = 1  # Sometimes fails with threads or in parallel #2899
-    max_parallel = 1
+#    max_parallel = 1
   [../]
   [./restart_part1]
     # First part of CSV restart test, CSV files should not append
