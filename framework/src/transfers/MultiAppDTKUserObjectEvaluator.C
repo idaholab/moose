@@ -57,7 +57,7 @@ MultiAppDTKUserObjectEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>&
       for (unsigned int j=0; j<dim; j++)
         p(j) = coords[(j*num_values)+i];
 
-      evaluated_data[i] = _multi_app.appUserObjectBase(app, _user_object_name).spatialValue(p);
+      evaluated_data[i] = _multi_app.appUserObjectBase(app, _user_object_name).spatialValue(p - _multi_app.position(app) );
     }
     else
       evaluated_data[i] = 0.0;
