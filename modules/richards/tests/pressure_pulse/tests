@@ -79,6 +79,7 @@
     exodiff = 'pp_fu_lumped_22.e'
     rel_err = 1E-4
     use_old_floor = True
+    compiler = 'GCC CLANG'
   [../]
 
 []
