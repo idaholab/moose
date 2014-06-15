@@ -174,7 +174,7 @@
     full = true
     #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 100'
+    petsc_options_value = 'bcgs bjacobi 1E-13 1E-13 100'
   [../]
 []
 
@@ -194,5 +194,8 @@
   [./console]
     type = Console
     perf_log = true
+    interval = 1
+    linear_residuals = true
+    nonlinear_residuals = true
   [../]
 []
