@@ -28,6 +28,8 @@ InputParameters validParams<SetupQuadratureAction>()
 
   params.addParam<MooseEnum>("type", types, "Type of the quadrature rule");
   params.addParam<MooseEnum>("order", order, "Order of the quadrature");
+  params.addParam<MooseEnum>("element_order", order, "Order of the quadrature for elements");
+  params.addParam<MooseEnum>("side_order", order, "Order of the quadrature for sides");
 
   return params;
 }
@@ -35,7 +37,9 @@ InputParameters validParams<SetupQuadratureAction>()
 SetupQuadratureAction::SetupQuadratureAction(const std::string & name, InputParameters parameters) :
     Action(name, parameters),
     _type(Moose::stringToEnum<QuadratureType>(getParam<MooseEnum>("type"))),
-    _order(Moose::stringToEnum<Order>(getParam<MooseEnum>("order")))
+    _order(Moose::stringToEnum<Order>(getParam<MooseEnum>("order"))),
+    _element_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("element_order"))),
+    _side_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("side_order")))
 {
 }
 
@@ -47,5 +51,5 @@ void
 SetupQuadratureAction::act()
 {
   if (_problem != NULL)
-    _problem->createQRules(_type, _order);
+    _problem->createQRules(_type, _order, _element_order, _side_order);
 }

@@ -220,9 +220,9 @@ public:
   const Node * & nodeNeighbor() { return _current_neighbor_node; }
 
   /**
-   * Creates the volume, face and arbitrary qrules based on the Order passed in.
+   * Creates the volume, face and arbitrary qrules based on the orders passed in.
    */
-  void createQRules(QuadratureType type, Order o);
+  void createQRules(QuadratureType type, Order order, Order volume_order, Order face_order);
 
   /**
    * Set the qrule to be used for volume integration.
