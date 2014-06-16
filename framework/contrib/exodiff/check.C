@@ -213,7 +213,7 @@ namespace {
   }
 
   template <typename INT>
-  bool Check_Elmt_Block(ExoII_Read<INT>& file1, ExoII_Read<INT>& file2, bool check_only)
+  bool Check_Elmt_Block(ExoII_Read<INT>& file1, ExoII_Read<INT>& file2, bool /*check_only*/)
   {
     bool is_same = true;
     // Verify that element blocks match in the two files...
