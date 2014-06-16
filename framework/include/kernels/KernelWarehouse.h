@@ -20,6 +20,7 @@
 #include <set>
 
 #include "MooseTypes.h"
+#include "MooseError.h"
 
 class KernelBase;
 class ScalarKernel;
@@ -43,39 +44,52 @@ public:
    * Get list of all kernels
    * @return The list of all active kernels
    */
-  const std::vector<KernelBase *> & all() { return _all_kernels; }
+  const std::vector<KernelBase *> & all() const { return _all_kernels; }
 
   /**
    * Get the list of all active kernels
    * @return The list of all active kernels
    */
-  const std::vector<KernelBase *> & active() { return _active_kernels; }
+  const std::vector<KernelBase *> & active() const { return _active_kernels; }
 
   /**
    * Get the list of all active time kernels
    * @return The list of all active time kernels
    */
-  const std::vector<KernelBase *> & activeTime(){ return _time_kernels;}
-
+  const std::vector<KernelBase *> & activeTime() const { return _time_kernels;}
 
   /**
    * Get the list of all active non-time kernels
    * @return The list of all active non-time kernels
    */
-  const std::vector<KernelBase *> & activeNonTime(){ return _non_time_kernels;}
+  const std::vector<KernelBase *> & activeNonTime() const { return _non_time_kernels;}
+
+  /**
+   * See if there are active kernels for a variable
+   * @param var The variable number
+   * @return Boolean indicating whether there are active kernels
+   */
+  bool hasActiveKernels(unsigned int var) const
+    {
+      return _active_var_kernels.find(var) != _active_var_kernels.end();
+    }
 
   /**
    * Get the list of all active kernels for a variable
    * @param var The variable number
    * @return The list of all active kernels
    */
-  const std::vector<KernelBase *> & activeVar(unsigned int var) { return _active_var_kernels[var]; }
+  const std::vector<KernelBase *> & activeVar(unsigned int var) const
+    {
+      mooseAssert(_active_var_kernels.find(var) != _active_var_kernels.end(), "No active kernels");
+      return _active_var_kernels.find(var)->second;
+    }
 
   /**
    * Get list of scalar kernels
    * @return The list of scalar active kernels
    */
-  const std::vector<ScalarKernel *> & scalars() { return _scalar_kernels; }
+  const std::vector<ScalarKernel *> & scalars() const { return _scalar_kernels; }
 
   /**
    * Add a kernels
