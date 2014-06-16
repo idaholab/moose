@@ -766,8 +766,9 @@ NonlinearSystem::setInitialSolution()
       // reinit variables in nodes
       _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-      std::vector<PresetNodalBC*> p(_bcs[0].activePresetNodal(boundary_id));
-      for (std::vector<PresetNodalBC *>::iterator it = p.begin(); it != p.end(); ++it)
+      std::vector<PresetNodalBC*> preset;
+      _bcs[0].activePresetNodal(boundary_id, preset);
+      for (std::vector<PresetNodalBC *>::iterator it = preset.begin(); it != preset.end(); ++it)
         (*it)->computeValue(initial_solution);
     }
   }
@@ -1255,7 +1256,8 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
         // reinit variables in nodes
         _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-        std::vector<NodalBC *> bcs = _bcs[0].activeNodal(boundary_id);
+        std::vector<NodalBC *> bcs;
+        _bcs[0].activeNodal(boundary_id, bcs);
         for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
         {
           NodalBC * bc = *it;
@@ -1861,8 +1863,9 @@ NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::
       BoundaryID boundary_id = bnode->_bnd_id;
       Node * node = bnode->_node;
 
-      std::vector<NodalBC *> bcs = _bcs[0].activeNodal(boundary_id);
-      if (bcs.size() > 0)
+      std::vector<NodalBC *> bcs;
+      _bcs[0].activeNodal(boundary_id, bcs);
+      if (!bcs.empty())
       {
         if (node->processor_id() == processor_id())
         {
@@ -2260,7 +2263,9 @@ NonlinearSystem::setPCSide(MooseEnum pcs)
 bool
 NonlinearSystem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
-  return !_bcs[tid].activeIntegrated(bnd_id).empty();
+  std::vector<IntegratedBC *> bcs;
+  _bcs[tid].activeIntegrated(bnd_id, bcs);
+  return !bcs.empty();
 }
 
 bool

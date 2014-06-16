@@ -41,7 +41,7 @@ MultiAppWarehouse::addMultiApp(MultiApp * multi_app)
 }
 
 bool
-MultiAppWarehouse::hasMultiApp(const std::string & multi_app_name)
+MultiAppWarehouse::hasMultiApp(const std::string & multi_app_name) const
 {
   for (std::vector<MultiApp *>::const_iterator i = _all_multi_apps.begin(); i != _all_multi_apps.end(); ++i)
     if ((*i)->name() == multi_app_name)
@@ -51,7 +51,7 @@ MultiAppWarehouse::hasMultiApp(const std::string & multi_app_name)
 }
 
 MultiApp *
-MultiAppWarehouse::getMultiApp(const std::string & multi_app_name)
+MultiAppWarehouse::getMultiApp(const std::string & multi_app_name) const
 {
   for (std::vector<MultiApp *>::const_iterator i = _all_multi_apps.begin(); i != _all_multi_apps.end(); ++i)
     if ((*i)->name() == multi_app_name)

@@ -62,7 +62,7 @@ public:
    * Returns true if the output object exists
    * @param name The name of the output object for which to test for existence within the warehouse
    */
-  bool hasOutput(const std::string & name);
+  bool hasOutput(const std::string & name) const;
 
   /**
    * Calls the outputInitial method for each of the output objects
@@ -193,7 +193,7 @@ public:
    * Return a set of reserved output names
    * @return A std::set of reserved names
    */
-  const std::set<std::string> & getReservedNames();
+  const std::set<std::string> & getReservedNames() const;
 
   /**
    * Test if the given name is reserved

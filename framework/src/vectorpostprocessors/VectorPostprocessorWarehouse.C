@@ -153,6 +153,49 @@ VectorPostprocessorWarehouse::jacobianSetup()
     (*i)->jacobianSetup();
 }
 
+const std::vector<ElementVectorPostprocessor *> &
+VectorPostprocessorWarehouse::elementVectorPostprocessors(SubdomainID block_id) const
+{
+  std::map<SubdomainID, std::vector<ElementVectorPostprocessor *> >::const_iterator it = _element_VectorPostprocessors.find(block_id);
+
+  if (it == _element_VectorPostprocessors.end())
+    mooseError("No element vector postprocessors on block: " << block_id);
+
+  return it->second;
+}
+
+const std::vector<SideVectorPostprocessor *> &
+VectorPostprocessorWarehouse::sideVectorPostprocessors(BoundaryID boundary_id) const
+{
+  std::map<BoundaryID, std::vector<SideVectorPostprocessor *> >::const_iterator it = _side_VectorPostprocessors.find(boundary_id);
+
+  if (it == _side_VectorPostprocessors.end())
+    mooseError("No side vector postprocessors on boundary: " << boundary_id);
+
+  return it->second;
+}
+
+const std::vector<NodalVectorPostprocessor *> &
+VectorPostprocessorWarehouse::nodalVectorPostprocessors(BoundaryID boundary_id) const
+{
+  std::map<BoundaryID, std::vector<NodalVectorPostprocessor *> >::const_iterator it = _nodal_VectorPostprocessors.find(boundary_id);
+
+  if (it == _nodal_VectorPostprocessors.end())
+    mooseError("No nodal vector postprocessors on boundary: " << boundary_id);
+
+  return it->second;
+}
+
+const std::vector<NodalVectorPostprocessor *> &
+VectorPostprocessorWarehouse::blockNodalVectorPostprocessors(SubdomainID block_id) const
+{
+  std::map<SubdomainID, std::vector<NodalVectorPostprocessor *> >::const_iterator it = _block_nodal_VectorPostprocessors.find(block_id);
+
+  if (it == _block_nodal_VectorPostprocessors.end())
+    mooseError("No block nodal vector postprocessors on block: " << block_id);
+
+  return it->second;
+}
 
 void
 VectorPostprocessorWarehouse::addVectorPostprocessor(VectorPostprocessor *VectorPostprocessor)

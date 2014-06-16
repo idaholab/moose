@@ -33,12 +33,6 @@ public:
   virtual ~SplitWarehouse();
 
   /**
-   * Get list of all splits
-   * @return The list of all splits
-   */
-  const std::vector<Split *> & all();
-
-  /**
    * Add a split
    * @param name - name the split being added should have
    * @param split Split being added

@@ -41,19 +41,19 @@ public:
    * Get list of all Indicators
    * @return The list of all active Indicators
    */
-  const std::vector<Indicator *> & all() { return _all_indicators; }
+  const std::vector<Indicator *> & all() const { return _all_indicators; }
 
   /**
    * Get the list of all active Indicators
    * @return The list of all active Indicators
    */
-  const std::vector<Indicator *> & active() { return _active_indicators; }
+  const std::vector<Indicator *> & active() const { return _active_indicators; }
 
   /**
    * Get the list of all active Indicators
    * @return The list of all active InternalSideIndicators
    */
-  const std::vector<Indicator *> & activeInternalSideIndicators() { return _active_internal_side_indicators; }
+  const std::vector<Indicator *> & activeInternalSideIndicators() const { return _active_internal_side_indicators; }
 
   /**
    * Add a Indicators

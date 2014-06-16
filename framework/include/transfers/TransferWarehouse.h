@@ -37,13 +37,13 @@ public:
    * Get list of all Transfers
    * @return The list of all active Transfers
    */
-  const std::vector<Transfer *> & all() { return _all_transfers; }
+  const std::vector<Transfer *> & all() const { return _all_transfers; }
 
   /**
    * Get list of all MultiAppTransfers
    * @return The list of all active MultiAppTransfers
    */
-  const std::vector<MultiAppTransfer *> & multiAppTransfers() { return _multi_app_transfers; }
+  const std::vector<MultiAppTransfer *> & multiAppTransfers() const { return _multi_app_transfers; }
 
   /**
    * Add a Transfers
@@ -56,14 +56,14 @@ public:
    * @param transfer_name The name of the Transfer we're looking for
    * @return True if that Transfer exists False otherwise
    */
-  bool hasTransfer(const std::string & transfer_name);
+  bool hasTransfer(const std::string & transfer_name) const;
 
   /**
    * Get a Transfer by name.  Will error if the Transfer doesn't exist in this Warehouse.
    * @param transfer_name The name of the Transfer to get.
    * @return A pointer to the Transfer
    */
-  Transfer * getTransfer(const std::string & transfer_name);
+  Transfer * getTransfer(const std::string & transfer_name) const;
 
 protected:
   std::vector<Transfer *> _all_transfers;

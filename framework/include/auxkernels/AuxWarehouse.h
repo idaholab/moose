@@ -42,9 +42,9 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  const std::vector<AuxKernel *> & all() { return _all_aux_kernels; }
-  const std::vector<AuxKernel *> & allElementKernels() { return _all_element_aux_kernels; }
-  const std::vector<AuxKernel *> & allNodalKernels() { return _all_nodal_aux_kernels; }
+  const std::vector<AuxKernel *> & all() const { return _all_aux_kernels; }
+  const std::vector<AuxKernel *> & allElementKernels() const { return _all_element_aux_kernels; }
+  const std::vector<AuxKernel *> & allNodalKernels() const { return _all_nodal_aux_kernels; }
 
   const std::vector<AuxKernel *> & activeBlockNodalKernels(SubdomainID block) { return _active_block_nodal_aux_kernels[block]; }
   const std::vector<AuxKernel *> & activeBlockElementKernels(SubdomainID block) { return _active_block_element_aux_kernels[block]; }

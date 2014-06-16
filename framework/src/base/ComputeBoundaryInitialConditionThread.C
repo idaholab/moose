@@ -44,22 +44,25 @@ ComputeBoundaryInitialConditionThread::operator() (const ConstBndNodeRange & ran
 
     _fe_problem.assembly(_tid).reinit(node);
 
-    const std::vector<InitialCondition *> & ics = _fe_problem._ics[_tid].activeBoundary(boundary_id);
-    for (std::vector<InitialCondition *>::const_iterator it = ics.begin(); it != ics.end(); ++it)
+    if (_fe_problem._ics[_tid].hasActiveBoundaryICs(boundary_id))
     {
-      InitialCondition * ic = (*it);
-      if (node->processor_id() == _fe_problem.processor_id())
+      const std::vector<InitialCondition *> & ics = _fe_problem._ics[_tid].activeBoundary(boundary_id);
+      for (std::vector<InitialCondition *>::const_iterator it = ics.begin(); it != ics.end(); ++it)
       {
-        MooseVariable & var = ic->variable();
-        var.reinitNode();
-        var.computeNodalValues();                   // has to call this to resize the internal array
-        Real value = ic->value(*node);
-
-        var.setNodalValue(value);                  // update variable data, which is referenced by others, so the value is up-to-date
-        // We are done, so update the solution vector
+        InitialCondition * ic = (*it);
+        if (node->processor_id() == _fe_problem.processor_id())
         {
-          Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          var.insert(var.sys().solution());
+          MooseVariable & var = ic->variable();
+          var.reinitNode();
+          var.computeNodalValues();                   // has to call this to resize the internal array
+          Real value = ic->value(*node);
+
+          var.setNodalValue(value);                  // update variable data, which is referenced by others, so the value is up-to-date
+          // We are done, so update the solution vector
+          {
+            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+            var.insert(var.sys().solution());
+          }
         }
       }
     }
