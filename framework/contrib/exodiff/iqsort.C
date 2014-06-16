@@ -160,7 +160,13 @@ void swap_(INT v[], size_t i, size_t j)
 }
 
   template <typename T, typename INT>
-  void check(const T v[], INT iv[], size_t N)
+  void check(
+#if defined(DEBUG_QSORT)
+const T v[], INT iv[], size_t N
+#else
+const T [], INT [], size_t
+#endif
+)
   {
 #if defined(DEBUG_QSORT)
   fprintf(stderr, "Checking sort of %d values\n", N+1);
