@@ -45,13 +45,13 @@ public:
    * Get list of all kernels
    * @return The list of all active kernels
    */
-  const std::vector<DGKernel *> & all() { return _all_dg_kernels; }
+  const std::vector<DGKernel *> & all() const { return _all_dg_kernels; }
 
   /**
    * Get the list of all active kernels
    * @return The list of all active kernels
    */
-  const std::vector<DGKernel *> & active() { return _active_dg_kernels; }
+  const std::vector<DGKernel *> & active() const { return _active_dg_kernels; }
 
   void addDGKernel(DGKernel *dg_kernel);
 

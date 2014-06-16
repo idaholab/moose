@@ -98,22 +98,25 @@ BCWarehouse::addPresetNodalBC(BoundaryID boundary_id, PresetNodalBC *bc)
   _preset_nodal_bcs[boundary_id].push_back(bc);
 }
 
-std::vector<IntegratedBC *> &
-BCWarehouse::getBCs(BoundaryID boundary_id)
+const std::vector<IntegratedBC *> &
+BCWarehouse::getBCs(BoundaryID boundary_id) const
 {
-  return _bcs[boundary_id];
+  mooseAssert(_bcs.find(boundary_id) != _bcs.end(), "Unknown boundary id: " << boundary_id);
+  return _bcs.find(boundary_id)->second;
 }
 
-std::vector<NodalBC *> &
-BCWarehouse::getNodalBCs(BoundaryID boundary_id)
+const std::vector<NodalBC *> &
+BCWarehouse::getNodalBCs(BoundaryID boundary_id) const
 {
-  return _nodal_bcs[boundary_id];
+  mooseAssert(_nodal_bcs.find(boundary_id) != _nodal_bcs.end(), "Unknown boundary id: " << boundary_id);
+  return _nodal_bcs.find(boundary_id)->second;
 }
 
-std::vector<PresetNodalBC *> &
-BCWarehouse::getPresetNodalBCs(BoundaryID boundary_id)
+const std::vector<PresetNodalBC *> &
+BCWarehouse::getPresetNodalBCs(BoundaryID boundary_id) const
 {
-  return _preset_nodal_bcs[boundary_id];
+  mooseAssert(_preset_nodal_bcs.find(boundary_id) != _preset_nodal_bcs.end(), "Unknown boundary id: " << boundary_id);
+  return _preset_nodal_bcs.find(boundary_id)->second;
 }
 
 void

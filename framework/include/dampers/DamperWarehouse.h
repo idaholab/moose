@@ -30,7 +30,7 @@ public:
   DamperWarehouse();
   virtual ~DamperWarehouse();
 
-  const std::vector<Damper *> & all() { return _dampers; }
+  const std::vector<Damper *> & all() const { return _dampers; }
 
   /**
    * Adds a damper

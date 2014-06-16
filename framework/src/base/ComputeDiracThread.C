@@ -62,8 +62,8 @@ ComputeDiracThread::onElement(const Elem * elem)
     // actually called getMaterialProperty().  Loop over all the
     // DiracKernels and check whether this is the case.
     bool need_reinit_materials = false;
-    for (std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _sys.getDiracKernelWarehouse(_tid)->all().begin();
-         dirac_kernel_it != _sys.getDiracKernelWarehouse(_tid)->all().end();
+    for (std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _sys.getDiracKernelWarehouse(_tid).all().begin();
+         dirac_kernel_it != _sys.getDiracKernelWarehouse(_tid).all().end();
          ++dirac_kernel_it)
     {
       // If any of the DiracKernels have had getMaterialProperty()
@@ -78,8 +78,8 @@ ComputeDiracThread::onElement(const Elem * elem)
     if (need_reinit_materials)
       _fe_problem.reinitMaterials(_subdomain, _tid, /*swap_stateful=*/false);
 
-    for (std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _sys.getDiracKernelWarehouse(_tid)->all().begin();
-        dirac_kernel_it != _sys.getDiracKernelWarehouse(_tid)->all().end();
+    for (std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _sys.getDiracKernelWarehouse(_tid).all().begin();
+        dirac_kernel_it != _sys.getDiracKernelWarehouse(_tid).all().end();
         ++dirac_kernel_it)
     {
       DiracKernel * dirac = *dirac_kernel_it;

@@ -46,15 +46,22 @@ public:
   /**
    * Get boundary conditions on a specified boundary id
    */
-  std::vector<IntegratedBC *> & getBCs(BoundaryID boundary_id);
+  const std::vector<IntegratedBC *> & getBCs(BoundaryID boundary_id) const;
+
+  /**
+   * Check for the existence of nodal bcs for the specified boundary
+   */
+  bool hasNodalBCs(BoundaryID boundary_id) const { return _nodal_bcs.find(boundary_id) != _nodal_bcs.end(); }
+
   /**
    * Get nodal boundary conditions on a specified boundary id
    */
-  std::vector<NodalBC *> & getNodalBCs(BoundaryID boundary_id);
+  const std::vector<NodalBC *> & getNodalBCs(BoundaryID boundary_id) const;
+
   /**
    * Get presetting (;-)) nodal boundary conditions on a specified boundary id
    */
-  std::vector<PresetNodalBC *> & getPresetNodalBCs(BoundaryID boundary_id);
+  const std::vector<PresetNodalBC *> & getPresetNodalBCs(BoundaryID boundary_id) const;
 
   /**
    * Get list of active boundaries
