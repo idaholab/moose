@@ -40,6 +40,7 @@ protected:
   Point _point;
   std::vector<Point> _point_vec;
   Real _value;
+  processor_id_type _root_id;
 };
 
 

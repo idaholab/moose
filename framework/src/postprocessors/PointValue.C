@@ -32,7 +32,8 @@ PointValue::PointValue(const std::string & name, InputParameters parameters) :
     _mesh(_subproblem.mesh()),
     _point(getParam<Point>("point")),
     _point_vec(1, _point),
-    _value(0)
+    _value(0),
+    _root_id(0)
 {
 }
 
@@ -52,22 +53,22 @@ PointValue::execute()
 
   // First find the element the hit lands in
   const Elem * elem = (*pl)(_point);
+  mooseAssert(elem, "No element located at the specified point");
+  _root_id = elem->processor_id();
 
+  // Compute the value at the point
   if (elem && elem->processor_id() == processor_id())
   {
     _subproblem.reinitElemPhys(elem, _point_vec, 0);
-
     mooseAssert(_u.size() == 1, "No values in u!");
     _value = variableValue();
   }
-  else
-    _value = 0;
 }
 
 Real
 PointValue::getValue()
 {
-  gatherSum(_value);
+  _communicator.broadcast(_value, _root_id);
   return _value;
 }
 
