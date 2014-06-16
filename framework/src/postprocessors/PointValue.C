@@ -49,6 +49,9 @@ PointValue::initialize()
 void
 PointValue::execute()
 {
+  std::set<MooseVariable *> var_list;
+  var_list.insert(&_var);
+
   AutoPtr<PointLocatorBase> pl = _mesh.getMesh().sub_point_locator();
 
   // First find the element the hit lands in
@@ -59,6 +62,7 @@ PointValue::execute()
   // Compute the value at the point
   if (elem && elem->processor_id() == processor_id())
   {
+    _fe_problem.setActiveElementalMooseVariables(var_list, _tid);
     _subproblem.reinitElemPhys(elem, _point_vec, 0);
     mooseAssert(_u.size() == 1, "No values in u!");
     _value = variableValue();
