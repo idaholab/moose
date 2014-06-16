@@ -269,14 +269,14 @@ struct Assert {
 
     // in this case, we set the default logger, and make it
     // write everything to this file
-    static void set_log( const char * strFileName) {
+    static void set_log( const char * /*strFileName*/) {
 //        Private::set_default_log_name( strFileName);
 //        logger() = &smart_assert::default_logger;
     }
 
     // in this case, we set the default logger, and make it
     // write everything to this log
-    static void set_log( std::ostream & out) {
+    static void set_log( std::ostream & /*out*/) {
 //        Private::set_default_log_stream( out);
 //        logger() = &smart_assert::default_logger;
     }

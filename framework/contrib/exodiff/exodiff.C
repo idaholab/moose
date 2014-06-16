@@ -1848,8 +1848,8 @@ void do_diffs(ExoII_Read<INT>& file1, ExoII_Read<INT>& file2, int time_step1, Ti
 
 template <typename INT>
 bool diff_element_attributes(ExoII_Read<INT>& file1, ExoII_Read<INT>& file2,
-			     INT* elmt_map, const INT *id_map,
-			     Exo_Block<INT> **blocks2)
+                             INT* /*elmt_map*/, const INT *id_map,
+                             Exo_Block<INT> ** /*blocks2*/)
 {
   bool diff_was_output = false;
   bool diff_flag = false;
