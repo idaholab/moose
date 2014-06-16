@@ -17,6 +17,7 @@
     type = CSVDiff
     input = csv_restart_part1.i
     csvdiff = 'csv_restart_part1_out.csv'
+    max_threads = 1  # Sometimes fails with threads or in parallel #2899
   [../]
   [./restart_part2]
     # Second part of CSV restart test
@@ -32,6 +33,7 @@
     csvdiff = 'csv_restart_part2_append_out.csv'
     prereq = restart_part2
     cli_args = 'Outputs/csv/file_base=csv_restart_part2_append_out Outputs/csv/append_restart=true'
+    max_threads = 1  # Sometimes fails with threads or in parallel #2899
   [../]
   [./align]
     # Test the alignment, delimiter, and precision settings
