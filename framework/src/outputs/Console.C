@@ -191,12 +191,14 @@ Console::~Console()
 void
 Console::initialSetup()
 {
-
   // Set the string for multiapp output indending
-//  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),'-');
-//  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),' ') + '|';
-  if (_app.getOutputWarehouse().multiappLevel() > 0)
-    _multiapp_indent += _app.name() + " |";
+  _multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),'-');
+
+  /**
+   * LEAVE HERE FOR DEBUGGING
+   * if (_app.getOutputWarehouse().multiappLevel() > 0)
+   *   _multiapp_indent += _app.name() + " |";
+   */
 
   // If file output is desired, wipe out the existing file if not recovering
   if (!_app.isRecovering())
@@ -210,7 +212,10 @@ Console::initialSetup()
   }
 
   // Display a message to indicate the application is running (useful for MultiApps)
-  write(std::string("\nRunning App: ") + _app.name() + "\n");
+
+  // TODO: This doesn't work because each Multiapp has it's own FE problem...
+  if (_problem_ptr->hasMultiApps())
+    write(std::string("\nRunning App: ") + _app.name() + "\n");
 
   // Output the performance log early
   if (getParam<bool>("setup_log_early"))
@@ -502,25 +507,26 @@ Console::outputScalarVariables()
 void
 Console::indentMessage(std::string & message)
 {
+  // Indent all lines after the first
   pcrecpp::RE re("\n(?!\\Z)");
   re.GlobalReplace(std::string("\n") + _multiapp_indent, &message);
 
-  if (message.empty())
-    message + "\n" + _multiapp_indent;
+  // Prepend indent string at the front of the message
+  message = _multiapp_indent + message;
 }
 
 void
 Console::write(std::string message, bool indent)
 {
+  if (message.empty())
+    return;
+
   if (_write_file)
     _file_output_stream << message << std::endl;
 
   // Apply MultiApp indenting
   if (indent)
-  {
     indentMessage(message);
-    Moose::out << _multiapp_indent;
-  }
 
   // Write message
   if (_write_screen)
@@ -552,7 +558,7 @@ Console::outputSystemInformation()
 
   // Framework information
   if (_app.getSystemInfo() != NULL)
-    oss << '\n' << _app.getSystemInfo()->getInfo();
+    oss << _app.getSystemInfo()->getInfo();
 
   oss << std::left << '\n'
       << "Parallelism:\n"

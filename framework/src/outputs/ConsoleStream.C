@@ -21,10 +21,10 @@ ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse) :
 }
 
 ConsoleStream &
-ConsoleStream::operator<<(StandardEndLine manip)
+ConsoleStream::operator<<(StandardEndLine /*manip*/)
 {
+  _oss << '\n';
   _output_warehouse.mooseConsole(_oss.str());
-  manip(Moose::out);
 
   // Reset
   _oss.clear();

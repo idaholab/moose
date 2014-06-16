@@ -50,6 +50,12 @@ MultiAppWarehouse::hasMultiApp(const std::string & multi_app_name)
   return false;
 }
 
+bool
+MultiAppWarehouse::hasMultiApp() const
+{
+  return !_all_multi_apps.empty();
+}
+
 MultiApp *
 MultiAppWarehouse::getMultiApp(const std::string & multi_app_name)
 {

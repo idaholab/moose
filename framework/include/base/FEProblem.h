@@ -456,6 +456,11 @@ public:
   ExecStore<PostprocessorWarehouse> & getPostprocessorWarehouse();
 
   /**
+   * Returns whether or not the current simulation has any multiapps
+   */
+  bool hasMultiApps() const { return _has_multiapps; }
+
+  /**
    * Check existence of the VectorPostprocessor.
    * @param name The name of the post-processor
    * @return true if it exists, otherwise false
@@ -898,6 +903,9 @@ protected:
 
   /// Whether or not this system has any Constraints.
   bool _has_constraints;
+
+  /// Whether or not this systen has any multiapps
+  bool _has_multiapps;
 
   /// Whether nor not stateful materials have been initialized
   bool _has_initialized_stateful;
