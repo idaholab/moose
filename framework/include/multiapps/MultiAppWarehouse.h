@@ -59,6 +59,11 @@ public:
   bool hasMultiApp(const std::string & multi_app_name);
 
   /**
+   * Returns whether there are any multiapps
+   */
+  bool hasMultiApp() const;
+
+  /**
    * Get a MultiApp by name.  Will error if the MultiApp doesn't exist in this Warehouse.
    * @param multi_app_name The name of the MultiApp to get.
    * @return A pointer to the MultiApp

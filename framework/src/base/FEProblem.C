@@ -135,6 +135,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
+    _has_multiapps(false),
     _has_initialized_stateful(false),
     _dbg_top_residuals(0),
     _resurrector(NULL),
@@ -2628,6 +2629,8 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
 void
 FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & name, InputParameters parameters)
 {
+  _has_multiapps = true;
+
   parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
