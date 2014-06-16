@@ -34,7 +34,7 @@ InputParameters validParams<MultiAppNearestNodeTransfer>()
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   params.addParam<bool>("displaced_source_mesh", false, "Whether or not to use the displaced mesh for the source mesh.");
   params.addParam<bool>("displaced_target_mesh", false, "Whether or not to use the displaced mesh for the target mesh.");
-  params.addParam<bool>("fixed_meshes", false, "Set to true when the meshes are not changing (ie, no moviement or adaptivity).  This will cache nearest node neighbors to greatly speed up the transfer.");
+  params.addParam<bool>("fixed_meshes", false, "Set to true when the meshes are not changing (ie, no movement or adaptivity).  This will cache nearest node neighbors to greatly speed up the transfer.");
 
   return params;
 }

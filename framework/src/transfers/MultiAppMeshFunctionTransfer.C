@@ -19,6 +19,7 @@
 // Moose
 #include "MooseTypes.h"
 #include "FEProblem.h"
+#include "DisplacedProblem.h"
 
 // libMesh
 #include "libmesh/meshfree_interpolation.h"
@@ -32,6 +33,8 @@ InputParameters validParams<MultiAppMeshFunctionTransfer>()
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
+  params.addParam<bool>("displaced_source_mesh", false, "Whether or not to use the displaced mesh for the source mesh.");
+  params.addParam<bool>("displaced_target_mesh", false, "Whether or not to use the displaced mesh for the target mesh.");
   params.addParam<bool>("error_on_miss", false, "Whether or not to error in the case that a target point is not found in the source domain.");
   return params;
 }
@@ -40,6 +43,8 @@ MultiAppMeshFunctionTransfer::MultiAppMeshFunctionTransfer(const std::string & n
     MultiAppTransfer(name, parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
+    _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
+    _displaced_target_mesh(getParam<bool>("displaced_target_mesh")),
     _error_on_miss(getParam<bool>("error_on_miss"))
 {
   // This transfer does not work with ParallelMesh
@@ -57,6 +62,18 @@ MultiAppMeshFunctionTransfer::execute()
     {
       FEProblem & from_problem = *_multi_app->problem();
       MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
+
+      MeshBase * tmp_from_mesh = NULL;
+
+      if (_displaced_source_mesh && from_problem.getDisplacedProblem())
+      {
+        tmp_from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
+      }
+      else
+        tmp_from_mesh = &from_problem.mesh().getMesh();
+
+      MeshBase & from_mesh = *tmp_from_mesh;
+
       SystemBase & from_system_base = from_var.sys();
 
       System & from_sys = from_system_base.system();
@@ -95,7 +112,15 @@ MultiAppMeshFunctionTransfer::execute()
           unsigned int var_num = to_sys->variable_number(_to_var_name);
           NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
 
-          MeshBase & mesh = _multi_app->appProblem(i)->mesh().getMesh();
+          MeshBase * tmp_mesh = NULL;
+
+          if (_displaced_target_mesh && _multi_app->appProblem(i)->getDisplacedProblem())
+            tmp_mesh = &_multi_app->appProblem(i)->getDisplacedProblem()->mesh().getMesh();
+          else
+            tmp_mesh = &_multi_app->appProblem(i)->mesh().getMesh();
+
+          MeshBase & mesh = *tmp_mesh;
+
           bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
           if (is_nodal)
@@ -186,7 +211,14 @@ MultiAppMeshFunctionTransfer::execute()
 
       NumericVector<Number> * to_solution = to_sys.solution.get();
 
-      MeshBase & to_mesh = to_es.get_mesh();
+      MeshBase * tmp_to_mesh = NULL;
+
+      if (_displaced_target_mesh && to_problem.getDisplacedProblem())
+        tmp_to_mesh = &to_problem.getDisplacedProblem()->mesh().getMesh();
+      else
+        tmp_to_mesh = &to_problem.mesh().getMesh();
+
+      MeshBase & to_mesh = *tmp_to_mesh;
 
       bool is_nodal = to_sys.variable_type(to_var_num).family == LAGRANGE;
 
@@ -216,7 +248,15 @@ MultiAppMeshFunctionTransfer::execute()
         // Need to pull down a full copy of this vector on every processor so we can get values in parallel
         from_sys.solution->localize(*serialized_from_solution);
 
-        MeshBase & from_mesh = from_es.get_mesh();
+        MeshBase * tmp_from_mesh = NULL;
+
+        if (_displaced_source_mesh && from_problem.getDisplacedProblem())
+          tmp_from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
+        else
+          tmp_from_mesh = &from_problem.mesh().getMesh();
+
+        MeshBase & from_mesh = *tmp_from_mesh;
+
         MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(from_mesh, from_mesh.processor_id());
         Point app_position = _multi_app->position(i);
 
