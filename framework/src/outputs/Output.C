@@ -661,7 +661,8 @@ Output::initOutputList(OutputData & data)
   std::vector<std::string> & output = data.output;
 
   // Append the hide list from automatic material property output
-  std::vector<std::string> material_hide = _app.getOutputWarehouse().getMaterialOutputHideList(_name);
+  std::vector<std::string> material_hide;
+  _app.getOutputWarehouse().buildMaterialOutputHideList(_name, material_hide);
   hide.insert(hide.end(), material_hide.begin(), material_hide.end());
 
   // Sort the vectors
