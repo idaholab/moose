@@ -8,6 +8,7 @@
   [./pointer_load_error]
     type = 'RunApp'
     input = 'pointer_load_error.i'
+    max_parallel = 16
   [../]
 
   [./pointer_load_error2]
@@ -15,5 +16,6 @@
     input = 'pointer_load_error2.i'
     expect_err = 'Cannot load raw pointers'
     prereq = pointer_load_error
+    max_parallel = 16
   [../]
 []
