@@ -994,4 +994,6 @@ PerfLog setup_perf_log("Setup");
 
 bool __trap_fpe = false;
 
+bool __color_console = true;
+
 } // namespace Moose

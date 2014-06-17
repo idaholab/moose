@@ -72,6 +72,9 @@ class RunApp(Tester):
     if options.timing:
       specs['cli_args'].append('--timing')
 
+    if options.colored == False:
+      specs['cli_args'].append('--no-color')
+
     # Raise the floor
     ncpus = max(default_ncpus, int(specs['min_parallel']))
     # Lower the ceiling
