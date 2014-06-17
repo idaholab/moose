@@ -3,32 +3,33 @@
 /* Please contact me if you make changes */
 /*****************************************/
 
-#ifndef RICHARDSSEFF2GASRSC_H
-#define RICHARDSSEFF2GASRSC_H
+#ifndef RICHARDSSEFF2GASVGSHIFTED_H
+#define RICHARDSSEFF2GASVGSHIFTED_H
 
 #include "RichardsSeff.h"
-#include "RichardsSeffRSC.h"
+#include "RichardsSeffVG.h"
 
-/**
- * Rogers-Stallybrass-Clements version of effective saturation of oil (gas) phase
- * as a function of (Pwater, Pgas), and its derivs wrt to those pressures.
- * Note that the water pressure appears first in the tuple (Pwater, Pgas).
- * valid for residual saturations = 0, and viscosityOil = 2*viscosityWater.  (the "2" is important here!).
- * C Rogers, MP Stallybrass and DL Clements "On two phase filtration under gravity and with boundary infiltration: application of a Backlund transformation" Nonlinear Analysis Theory Methods and Applications 7 (1983) 785--799.
- */
-class RichardsSeff2gasRSC;
+class RichardsSeff2gasVGshifted;
 
 
 template<>
-InputParameters validParams<RichardsSeff2gasRSC>();
+InputParameters validParams<RichardsSeff2gasVGshifted>();
 
-class RichardsSeff2gasRSC : public RichardsSeff
+/**
+ * Shifted van-Genuchten water effective saturation as a function of (Pwater, Pgas),
+ * and its derivs wrt to those pressures.  Note that the water pressure appears
+ * first in the tuple (Pwater, Pgas)
+ * This takes the original van-Genuchten Seff = Seff(Pwater-Pgas), and shifts it
+ * to the right by "shift", and scales the result so 0<=Seff<=1.
+ * The purpose of this is so dSeff/dP>0 at P=0.
+ */
+class RichardsSeff2gasVGshifted : public RichardsSeff
 {
  public:
-  RichardsSeff2gasRSC(const std::string & name, InputParameters parameters);
+  RichardsSeff2gasVGshifted(const std::string & name, InputParameters parameters);
 
   /**
-   * oil effective saturation
+   * gas effective saturation
    * @param p porepressures.  Here (*p[0])[qp] is the water pressure at quadpoint qp, and (*p[1])[qp] is the gas porepressure
    * @param qp the quadpoint to evaluate effective saturation at
    */
@@ -52,18 +53,18 @@ class RichardsSeff2gasRSC : public RichardsSeff
 
  protected:
 
-  /// oil viscosity
-  Real _oil_viscosity;
+  /// van Genuchten alpha parameter
+  Real _al;
 
-  /// RSC scale ratio
-  Real _scale_ratio;
+  /// van Genuchten m parameter
+  Real _m;
 
-  /// RSC shift
+  /// shift
   Real _shift;
 
-  /// RSC scale
+  /// scale
   Real _scale;
 
 };
 
-#endif // RICHARDSSEFF2GASRSC_H
+#endif // RICHARDSSEFF2GASVGSHIFTED_H

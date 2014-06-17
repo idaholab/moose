@@ -191,12 +191,12 @@ RichardsMaterial::computePandSeff()
         _seff[qp][i] = (*_material_seff_UO[i]).seff(_pressure_vals, qp);
 
         _dseff_dv[qp][i].resize(_num_p);
-        _dseff_dv[qp][i] = (*_material_seff_UO[i]).dseff(_pressure_vals, qp);
+        (*_material_seff_UO[i]).dseff(_pressure_vals, qp, _dseff_dv[qp][i]);
 
         _d2seff_dv[qp][i].resize(_num_p);
         for (unsigned int j=0 ; j<_num_p; ++j)
           _d2seff_dv[qp][i][j].resize(_num_p);
-        _d2seff_dv[qp][i] = (*_material_seff_UO[i]).d2seff(_pressure_vals, qp);
+        (*_material_seff_UO[i]).d2seff(_pressure_vals, qp, _d2seff_dv[qp][i]);
 
       }
     }

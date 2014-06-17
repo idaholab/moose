@@ -37,22 +37,16 @@ RichardsSeff1RSC::seff(std::vector<VariableValue *> p, unsigned int qp) const
   return RichardsSeffRSC::seff(pc, _shift, _scale);
 }
 
-std::vector<Real>
-RichardsSeff1RSC::dseff(std::vector<VariableValue *> p, unsigned int qp) const
+void
+RichardsSeff1RSC::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
 {
-  std::vector<Real> dseff_dp(1);
   Real pc = -(*p[0])[qp];
-  dseff_dp[0] = -RichardsSeffRSC::dseff(pc, _shift, _scale);
-  return dseff_dp;
+  result[0] = -RichardsSeffRSC::dseff(pc, _shift, _scale);
 }
 
-std::vector<std::vector<Real> >
-RichardsSeff1RSC::d2seff(std::vector<VariableValue *> p, unsigned int qp) const
+void
+RichardsSeff1RSC::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
 {
-  // create a dummy b that is 1x1 and zeroed
-  std::vector<Real> a(1, 0);
-  std::vector<std::vector <Real> > b(1, a);
   Real pc = -(*p[0])[qp];
-  b[0][0] = RichardsSeffRSC::d2seff(pc, _shift, _scale);
-  return b;
+  result[0][0] =  RichardsSeffRSC::d2seff(pc, _shift, _scale);
 }

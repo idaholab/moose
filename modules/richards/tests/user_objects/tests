@@ -15,6 +15,12 @@
     type = 'CSVDiff'
     input = 'uo3.i'
     csvdiff = 'uo3.csv'
-    abs_zero = 1E-7
+    abs_zero = 1E-6
+  [../]
+  [./test_uo4]
+    type = 'CSVDiff'
+    input = 'uo4.i'
+    csvdiff = 'uo4.csv'
+    abs_zero = 1E-6
   [../]
 []
