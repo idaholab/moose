@@ -79,37 +79,65 @@ ComputeDiracThread::onElement(const Elem * elem)
     // actually called getMaterialProperty().  Loop over all the
     // DiracKernels and check whether this is the case.
     bool need_reinit_materials = false;
-    for (std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _sys.getDiracKernelWarehouse(_tid).all().begin();
-         dirac_kernel_it != _sys.getDiracKernelWarehouse(_tid).all().end();
-         ++dirac_kernel_it)
     {
+      std::vector<DiracKernel *>::const_iterator
+        dirac_kernel_it = _sys.getDiracKernelWarehouse(_tid).all().begin(),
+        dirac_kernel_end = _sys.getDiracKernelWarehouse(_tid).all().end();
 
-      // If any of the DiracKernels have had getMaterialProperty()
-      // called, we need to reinit Materials.
-      if ((*dirac_kernel_it)->getMaterialPropertyCalled())
+      for (; dirac_kernel_it != dirac_kernel_end; ++dirac_kernel_it)
       {
-        need_reinit_materials = true;
-        break;
+        // If any of the DiracKernels have had getMaterialProperty()
+        // called, we need to reinit Materials.
+        if ((*dirac_kernel_it)->getMaterialPropertyCalled())
+        {
+          need_reinit_materials = true;
+          break;
+        }
       }
     }
 
     if (need_reinit_materials)
       _fe_problem.reinitMaterials(_subdomain, _tid, /*swap_stateful=*/false);
 
-    for (std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _sys.getDiracKernelWarehouse(_tid).all().begin();
-        dirac_kernel_it != _sys.getDiracKernelWarehouse(_tid).all().end();
-        ++dirac_kernel_it)
-    {
-      DiracKernel * dirac = *dirac_kernel_it;
+    std::vector<DiracKernel *>::const_iterator
+      dirac_kernel_it = _sys.getDiracKernelWarehouse(_tid).all().begin(),
+      dirac_kernel_end = _sys.getDiracKernelWarehouse(_tid).all().end();
 
-      if (dirac->hasPointsOnElem(elem))
+    for (; dirac_kernel_it != dirac_kernel_end; ++dirac_kernel_it)
+    {
+      DiracKernel * dirac_kernel = *dirac_kernel_it;
+
+      if (dirac_kernel->hasPointsOnElem(elem))
       {
         if (_jacobian == NULL)
-          dirac->computeResidual();
+          dirac_kernel->computeResidual();
         else
         {
-          dirac->subProblem().prepareShapes(dirac->variable().number(), _tid);
-          dirac->computeJacobian();
+          // Get a list of coupled variables from the FEProblem
+          std::vector<std::pair<MooseVariable *, MooseVariable *> > & coupling_entries = _fe_problem.couplingEntries(_tid);
+
+          // Loop over the list of coupled variable pairs
+          {
+            std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator
+              var_pair_iter = coupling_entries.begin(),
+              var_pair_end = coupling_entries.end();
+
+            for (; var_pair_iter != var_pair_end; ++var_pair_iter)
+            {
+              MooseVariable * ivariable = var_pair_iter->first;
+              MooseVariable * jvariable = var_pair_iter->second;
+
+              // The same check that is in ComputeFullJacobianThread::computeJacobian().
+              // We only want to call computeOffDiagJacobian() if both
+              // variables are active on this subdomain...
+              if (ivariable->activeOnSubdomain(_subdomain) && jvariable->activeOnSubdomain(_subdomain))
+              {
+                // FIXME: do we need to prepareShapes for ivariable->number?
+                dirac_kernel->subProblem().prepareShapes(jvariable->number(), _tid);
+                dirac_kernel->computeOffDiagJacobian(jvariable->number());
+              }
+            }
+          }
         }
       }
     }
