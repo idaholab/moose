@@ -26,7 +26,7 @@ class NodeFaceConstraint;
 class FaceFaceConstraint;
 
 /**
- * Warehouse for storing boundary conditions (for non-linear variables)
+ * Warehouse for storing constraints
  */
 class ConstraintWarehouse
 {

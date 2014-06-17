@@ -52,20 +52,27 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  bool hasMaterials(SubdomainID block_id);
-  bool hasFaceMaterials(SubdomainID block_id);
-  bool hasNeighborMaterials(SubdomainID block_id);
-  bool hasBoundaryMaterials(BoundaryID boundary_id);
+  bool hasMaterials(SubdomainID block_id) const;
+  bool hasFaceMaterials(SubdomainID block_id) const;
+  bool hasNeighborMaterials(SubdomainID block_id) const;
+  bool hasBoundaryMaterials(BoundaryID boundary_id) const;
 
-  std::vector<Material *> & getMaterialsByName(const std::string & name);
+  const std::vector<Material *> & getMaterialsByName(const std::string & name) const;
 
-  std::vector<Material *> & getMaterials(){ return _mats;}
+  ///@{
+  /**
+   * These methods return vectors of Materials for various mesh entities used
+   * to compute properties during the system "solve".  The materials in these
+   * vectors are asked to recompute their values.
+   */
+  std::vector<Material *> & getMaterials();
   std::vector<Material *> & getMaterials(SubdomainID block_id);
   std::vector<Material *> & getFaceMaterials(SubdomainID block_id);
   std::vector<Material *> & getNeighborMaterials(SubdomainID block_id);
   std::vector<Material *> & getBoundaryMaterials(BoundaryID boundary_id);
+  ///@}
 
-  const std::vector<Material *> & active(SubdomainID block_id) { return _active_materials[block_id]; }
+  std::vector<Material *> & active(SubdomainID block_id);
 
   void updateMaterialDataState();
 

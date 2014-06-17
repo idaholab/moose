@@ -37,13 +37,13 @@ public:
    * Get list of all MultiApps
    * @return The list of all active MultiApps
    */
-  const std::vector<MultiApp *> & all() { return _all_multi_apps; }
+  const std::vector<MultiApp *> & all() const { return _all_multi_apps; }
 
   /**
    * Get list of all TransientMultiApps
    * @return The list of all active TransientMultiApps
    */
-  const std::vector<TransientMultiApp *> & transient() { return _transient_multi_apps; }
+  const std::vector<TransientMultiApp *> & transient() const { return _transient_multi_apps; }
 
   /**
    * Add a MultiApps
@@ -56,14 +56,14 @@ public:
    * @param multi_app_name The name of the MultiApp we're looking for
    * @return True if that MultiApp exists False otherwise
    */
-  bool hasMultiApp(const std::string & multi_app_name);
+  bool hasMultiApp(const std::string & multi_app_name) const;
 
   /**
    * Get a MultiApp by name.  Will error if the MultiApp doesn't exist in this Warehouse.
    * @param multi_app_name The name of the MultiApp to get.
    * @return A pointer to the MultiApp
    */
-  MultiApp * getMultiApp(const std::string & multi_app_name);
+  MultiApp * getMultiApp(const std::string & multi_app_name) const;
 
   /**
    * Gets called when the output position has changed for the parent app.
