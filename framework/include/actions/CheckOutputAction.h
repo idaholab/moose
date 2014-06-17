@@ -70,6 +70,11 @@ private:
    */
   void checkInputOutput();
 
+  /**
+   * Checks for --no-color command line parameter
+   */
+  void checkNoColorOutput();
+
 };
 
 #endif //CHECKOUTPUTACTION_H
