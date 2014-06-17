@@ -164,14 +164,6 @@ OutputWarehouse::forceOutput()
 }
 
 void
-OutputWarehouse::disableScreenOutput()
-{
-  std::vector<Console *> console_ptrs = getOutputs<Console>();
-  for (std::vector<Console *>::const_iterator it = console_ptrs.begin(); it != console_ptrs.end(); ++it)
-    (*it)->_write_screen = false;
-}
-
-void
 OutputWarehouse::mooseConsole(const std::string & message, bool err) const
 {
   std::vector<Console *> objects = getOutputs<Console>();
@@ -248,20 +240,14 @@ OutputWarehouse::setMaterialOutputVariables(const std::set<AuxVariableName> & va
   _all_material_output_variables = variables;
 }
 
-std::vector<std::string>
-OutputWarehouse::getMaterialOutputHideList(const std::string & name)
+void
+OutputWarehouse::buildMaterialOutputHideList(const std::string & name, std::vector<std::string> & hide)
 {
-  // The hide list to return
-  std::vector<std::string> hide;
-
   // Get the difference of all the material output variables and those for the given output name
   if (_material_output_map.find(name) != _material_output_map.end())
     std::set_difference(_all_material_output_variables.begin(), _all_material_output_variables.end(),
                         _material_output_map[name].begin(), _material_output_map[name].end(),
                         std::back_inserter(hide));
-
-  // Return the list of material property AuxVariables to hide from output
-  return hide;
 }
 
 void
