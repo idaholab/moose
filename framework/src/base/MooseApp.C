@@ -38,6 +38,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<std::string>("mesh_only", "--mesh-only", "Setup and Output the input mesh only.");
 
   params.addCommandLineParam<bool>("show_input", "--show-input", "Shows the parsed input file before running the simulation.");
+  params.addCommandLineParam<bool>("no_color", "--no-color", "Disable coloring of all Console outputs.");
 
   params.addCommandLineParam<bool>("help", "-h --help", "Displays CLI usage statement.");
 

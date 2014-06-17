@@ -41,6 +41,7 @@ CheckOutputAction::act()
   checkConsoleOutput();
   checkPerfLogOutput();
   checkInputOutput();
+  checkNoColorOutput();
 }
 
 void
@@ -124,5 +125,17 @@ CheckOutputAction::checkInputOutput()
     for (std::vector<Console *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)
       if ((*it)->getParam<bool>("output_screen"))
         (*it)->parameters().set<bool>("output_input") = true;
+  }
+}
+
+
+void
+CheckOutputAction::checkNoColorOutput()
+{
+  if (_app.isParamValid("no_color"))
+  {
+    const std::vector<Console *> ptrs = _app.getOutputWarehouse().getOutputs<Console>();
+    for (std::vector<Console *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)
+      (*it)->parameters().set<bool>("use_color") = false;
   }
 }

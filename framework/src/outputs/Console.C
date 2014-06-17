@@ -132,18 +132,6 @@ Console::Console(const std::string & name, InputParameters parameters) :
 #endif
   }
 
-  // Set output coloring
-  if (getParam<bool>("use_color"))
-  {
-    char * term_env = getenv("TERM");
-    if (term_env)
-    {
-      std::string term(term_env);
-      if (term == "xterm-256color" || term == "xterm")
-        _use_color = true;
-    }
-  }
-
   // If file output is desired, wipe out the existing file if not recovering
   if (_write_file && !_app.isRecovering())
     writeStream(false);
@@ -212,6 +200,18 @@ Console::~Console()
 void
 Console::initialSetup()
 {
+  // Set output coloring
+  if (getParam<bool>("use_color"))
+  {
+    char * term_env = getenv("TERM");
+    if (term_env)
+    {
+      std::string term(term_env);
+      if (term == "xterm-256color" || term == "xterm")
+        _use_color = true;
+    }
+  }
+
   // Enable verbose output if Executioner has it enabled
   if (_app.getExecutioner()->isParamValid("verbose") && _app.getExecutioner()->getParam<bool>("verbose"))
   {
