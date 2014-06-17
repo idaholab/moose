@@ -33,26 +33,20 @@ RichardsSeff2waterVG::seff(std::vector<VariableValue *> p, unsigned int qp) cons
   return RichardsSeffVG::seff(negpc, _al, _m);
 }
 
-std::vector<Real>
-RichardsSeff2waterVG::dseff(std::vector<VariableValue *> p, unsigned int qp) const
+void
+RichardsSeff2waterVG::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
 {
   Real negpc = (*p[0])[qp] - (*p[1])[qp];
-  std::vector<Real> answer(2);
-  answer[0] = RichardsSeffVG::dseff(negpc, _al, _m);
-  answer[1] = -answer[0];
-  return answer;
+  result[0] = RichardsSeffVG::dseff(negpc, _al, _m);
+  result[1] = -result[0];
 }
 
-std::vector<std::vector<Real> >
-RichardsSeff2waterVG::d2seff(std::vector<VariableValue *> p, unsigned int qp) const
+void
+RichardsSeff2waterVG::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
 {
   Real negpc = (*p[0])[qp] - (*p[1])[qp];
-  std::vector<std::vector<Real> > answer(2);
-  answer[0].resize(2);
-  answer[1].resize(2);
-  answer[0][0] = RichardsSeffVG::d2seff(negpc, _al, _m);
-  answer[0][1] = -answer[0][0];
-  answer[1][0] = -answer[0][0];
-  answer[1][1] = answer[0][0];
-  return answer;
+  result[0][0] = RichardsSeffVG::d2seff(negpc, _al, _m);
+  result[0][1] = -result[0][0];
+  result[1][0] = -result[0][0];
+  result[1][1] = result[0][0];
 }

@@ -115,6 +115,9 @@ protected:
    */
   std::vector<MooseVariable *> _nodal_pp;
 
+  /// holds nodal values of d(Seff)/dP_i
+  std::vector<Real> _dseff;
+
 };
 
 #endif //RICHARDSLUMPEDMASSCHANGE

@@ -30,11 +30,14 @@ RichardsSeffPrimeAux::RichardsSeffPrimeAux(const std::string & name, InputParame
 
   for (int i=0 ; i<n; ++i)
     _pressure_vals[i] = &coupledValue("pressure_vars", i);
+
+  _mat.resize(n);
 }
 
 
 Real
 RichardsSeffPrimeAux::computeValue()
 {
-  return _seff_UO.dseff(_pressure_vals, _qp)[_wrt1];
+  _seff_UO.dseff(_pressure_vals, _qp, _mat);
+  return _mat[_wrt1];
 }
