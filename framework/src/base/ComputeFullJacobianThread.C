@@ -135,7 +135,8 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       if (ivar.activeOnSubdomain(_subdomain) > 0)
       {
         // for each variable get the list of active kernels
-        std::vector<IntegratedBC *> bcs = _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id);
+        std::vector<IntegratedBC *> bcs;
+        _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id, bcs);
         for (std::vector<IntegratedBC *>::iterator kt = bcs.begin(); kt != bcs.end(); ++kt)
         {
           IntegratedBC * bc = *kt;

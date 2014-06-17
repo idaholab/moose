@@ -61,7 +61,8 @@ ComputeJacobianThread::computeJacobian()
 void
 ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
-  std::vector<IntegratedBC *> bcs = _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id);
+  std::vector<IntegratedBC *> bcs;
+  _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id, bcs);
   for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
   {
     IntegratedBC * bc = *it;
@@ -111,7 +112,8 @@ ComputeJacobianThread::subdomainChanged()
       id_it != subdomain_boundary_ids.end();
       ++id_it)
   {
-    std::vector<IntegratedBC *> bcs = _sys.getBCWarehouse(_tid).activeIntegrated(*id_it);
+    std::vector<IntegratedBC *> bcs;
+    _sys.getBCWarehouse(_tid).activeIntegrated(*id_it, bcs);
     if (bcs.size() > 0)
     {
       for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
@@ -160,7 +162,8 @@ void
 ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
 
-  std::vector<IntegratedBC *> bcs = _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id);
+  std::vector<IntegratedBC *> bcs;
+  _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id, bcs);
   if (bcs.size() > 0)
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);

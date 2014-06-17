@@ -106,7 +106,8 @@ ComputeJacobianBlockThread::operator() (const ConstElemRange & range, bool bypas
           {
             BoundaryID bnd_id = *it;
 
-            std::vector<IntegratedBC *> bcs = _nl.getBCWarehouse(_tid).activeIntegrated(bnd_id);
+            std::vector<IntegratedBC *> bcs;
+            _nl.getBCWarehouse(_tid).activeIntegrated(bnd_id, bcs);
             if (bcs.size() > 0)
             {
               _fe_problem.prepareFace(elem, _tid);

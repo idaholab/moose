@@ -19,9 +19,6 @@
 
 #include <fstream>
 
-// FIXME: !
-#define unlikely(a) a
-
 MaterialWarehouse::MaterialWarehouse()
 {
   _master_list.reserve(3);
@@ -90,34 +87,40 @@ MaterialWarehouse::jacobianSetup()
 }
 
 bool
-MaterialWarehouse::hasMaterials(SubdomainID block_id)
+MaterialWarehouse::hasMaterials(SubdomainID block_id) const
 {
   return (_active_materials.find(block_id) != _active_materials.end());
 }
 
 bool
-MaterialWarehouse::hasFaceMaterials(SubdomainID block_id)
+MaterialWarehouse::hasFaceMaterials(SubdomainID block_id) const
 {
   return (_active_face_materials.find(block_id) != _active_face_materials.end());
 }
 
 bool
-MaterialWarehouse::hasNeighborMaterials(SubdomainID block_id)
+MaterialWarehouse::hasNeighborMaterials(SubdomainID block_id) const
 {
   return (_active_neighbor_materials.find(block_id) != _active_neighbor_materials.end());
 }
 
 bool
-MaterialWarehouse::hasBoundaryMaterials(BoundaryID boundary_id)
+MaterialWarehouse::hasBoundaryMaterials(BoundaryID boundary_id) const
 {
   return (_active_boundary_materials.find(boundary_id) != _active_boundary_materials.end());
+}
+
+std::vector<Material *> &
+MaterialWarehouse::getMaterials()
+{
+  return _mats;
 }
 
 std::vector<Material *> &
 MaterialWarehouse::getMaterials(SubdomainID block_id)
 {
   std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_materials.find(block_id);
-  if (unlikely(mat_iter == _active_materials.end()))
+  if (mat_iter == _active_materials.end())
   {
     std::stringstream oss;
     oss << "Active Material Missing for block: " << block_id << "\n";
@@ -130,7 +133,7 @@ std::vector<Material *> &
 MaterialWarehouse::getFaceMaterials(SubdomainID block_id)
 {
   std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_face_materials.find(block_id);
-  if (unlikely(mat_iter == _active_face_materials.end()))
+  if (mat_iter == _active_face_materials.end())
   {
     std::stringstream oss;
     oss << "Active Face Material Missing for block: " << block_id << "\n";
@@ -143,7 +146,7 @@ std::vector<Material *> &
 MaterialWarehouse::getNeighborMaterials(SubdomainID block_id)
 {
   std::map<SubdomainID, std::vector<Material *> >::iterator mat_iter = _active_neighbor_materials.find(block_id);
-  if (unlikely(mat_iter == _active_neighbor_materials.end()))
+  if (mat_iter == _active_neighbor_materials.end())
   {
     std::stringstream oss;
     oss << "Active Neighbor Material Missing for block: " << block_id << "\n";
@@ -156,13 +159,23 @@ std::vector<Material *> &
 MaterialWarehouse::getBoundaryMaterials(BoundaryID boundary_id)
 {
   std::map<BoundaryID, std::vector<Material *> >::iterator mat_iter = _active_boundary_materials.find(boundary_id);
-  if (unlikely(mat_iter == _active_boundary_materials.end()))
+  if (mat_iter == _active_boundary_materials.end())
   {
     std::stringstream oss;
     oss << "Active Boundary Material Missing for boundary: " << boundary_id << "\n";
     mooseError(oss.str());
   }
   return mat_iter->second;
+}
+
+std::vector<Material *> &
+MaterialWarehouse::active(SubdomainID block_id)
+{
+  std::map<SubdomainID, std::vector<Material *> >::iterator it = _active_materials.find(block_id);
+  if (it  == _active_materials.end())
+    mooseError("Active Material missing for block_id: " << block_id);
+
+  return it->second;
 }
 
 void MaterialWarehouse::updateMaterialDataState()
@@ -364,10 +377,12 @@ MaterialWarehouse::sortMaterials(std::vector<Material *> & materials_vector)
   }
 }
 
-std::vector<Material *> &
-MaterialWarehouse::getMaterialsByName(const std::string & name)
+const std::vector<Material *> &
+MaterialWarehouse::getMaterialsByName(const std::string & name) const
 {
-  if (_mat_by_name.find(name) == _mat_by_name.end())
+  std::map<std::string, std::vector<Material *> >::const_iterator it = _mat_by_name.find(name);
+
+  if (it == _mat_by_name.end())
     mooseError("Could not find material with name '" << name << "'");
-  return _mat_by_name[name];
+  return it->second;
 }

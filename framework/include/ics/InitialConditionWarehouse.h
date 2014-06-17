@@ -46,13 +46,20 @@ public:
    * Get the list of active ICs
    * @return the list of active ICs
    */
-  const std::vector<InitialCondition *> & active();
+  const std::vector<InitialCondition *> & active() const;
+
+  /**
+   * Checks if there are ics active on the passed boundary id
+   * @param boundary_id the boundary id to check
+   * @return Boolean indicating whether ics exist on the given boundary
+   */
+  bool hasActiveBoundaryICs(BoundaryID boundary_id) const;
 
   /**
    * Get the list of active boundary ICs
    * @return the list of active boundary ICs
    */
-  const std::vector<InitialCondition *> & activeBoundary(BoundaryID boundary_id);
+  const std::vector<InitialCondition *> & activeBoundary(BoundaryID boundary_id) const;
 
   /**
    * Add an initial condition for field variable
@@ -76,7 +83,7 @@ public:
    * Get the list of active scalar ICs
    * @return the list of active scalar ICs
    */
-  const std::vector<ScalarInitialCondition *> & activeScalar();
+  const std::vector<ScalarInitialCondition *> & activeScalar() const;
 
   /**
    * Add an initial condition for scalar variable

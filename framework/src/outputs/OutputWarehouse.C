@@ -95,7 +95,7 @@ OutputWarehouse::addOutput(Output * output)
 }
 
 bool
-OutputWarehouse::hasOutput(const std::string & name)
+OutputWarehouse::hasOutput(const std::string & name) const
 {
   return _object_map.find(name) != _object_map.end();
 }
@@ -273,7 +273,7 @@ OutputWarehouse::checkOutputs(const std::set<OutputName> & names)
 }
 
 const std::set<std::string> &
-OutputWarehouse::getReservedNames()
+OutputWarehouse::getReservedNames() const
 {
   return _reserved;
 }

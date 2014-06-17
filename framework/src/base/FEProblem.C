@@ -1635,9 +1635,9 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   {
     std::set<MooseVariable *> needed_moose_vars;
 
-    std::vector<Material *> & materials = _materials[tid].getMaterials(blk_id);
+    const std::vector<Material *> & materials = _materials[tid].getMaterials(blk_id);
 
-    for (std::vector<Material *>::iterator it = materials.begin();
+    for (std::vector<Material *>::const_iterator it = materials.begin();
         it != materials.end();
         ++it)
     {
@@ -1652,9 +1652,9 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
     {
       if (_materials[tid].hasBoundaryMaterials(*id_it))
       {
-        std::vector<Material *> & materials = _materials[tid].getBoundaryMaterials(*id_it);
+        const std::vector<Material *> & materials = _materials[tid].getBoundaryMaterials(*id_it);
 
-        for (std::vector<Material *>::iterator it = materials.begin();
+        for (std::vector<Material *>::const_iterator it = materials.begin();
             it != materials.end();
             ++it)
         {

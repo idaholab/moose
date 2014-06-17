@@ -41,7 +41,7 @@ TransferWarehouse::addTransfer(Transfer * transfer)
 }
 
 bool
-TransferWarehouse::hasTransfer(const std::string & transfer_name)
+TransferWarehouse::hasTransfer(const std::string & transfer_name) const
 {
   for (std::vector<Transfer *>::const_iterator i = _all_transfers.begin(); i != _all_transfers.end(); ++i)
     if ((*i)->name() == transfer_name)
@@ -51,7 +51,7 @@ TransferWarehouse::hasTransfer(const std::string & transfer_name)
 }
 
 Transfer *
-TransferWarehouse::getTransfer(const std::string & transfer_name)
+TransferWarehouse::getTransfer(const std::string & transfer_name) const
 {
   for (std::vector<Transfer *>::const_iterator i = _all_transfers.begin(); i != _all_transfers.end(); ++i)
     if ((*i)->name() == transfer_name)
@@ -59,4 +59,3 @@ TransferWarehouse::getTransfer(const std::string & transfer_name)
 
   mooseError("Unknown Transfer: " << transfer_name);
 }
-

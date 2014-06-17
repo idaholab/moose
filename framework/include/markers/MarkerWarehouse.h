@@ -41,13 +41,13 @@ public:
    * Get list of all Markers
    * @return The list of all active Markers
    */
-  const std::vector<Marker *> & all() { return _all_markers; }
+  const std::vector<Marker *> & all() const { return _all_markers; }
 
   /**
    * Get the list of all active Markers
    * @return The list of all active Markers
    */
-  const std::vector<Marker *> & active() { return _active_markers; }
+  const std::vector<Marker *> & active() const { return _active_markers; }
 
   /**
    * Get the list of all active Markers for a variable
