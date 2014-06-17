@@ -168,7 +168,6 @@ OutputWarehouse::mooseConsole()
 {
   std::vector<Console *> objects = getOutputs<Console>();
 
-  // If no Console objects exist, hold onto the message until they are created
   if (!objects.empty())
   {
     for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)

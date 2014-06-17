@@ -80,16 +80,6 @@ public:
   void outputSystemInformation();
 
   /**
-   * Add a message to the output streams
-   * @param message The message to add to the output streams
-   *
-   * Any call to this method will write the supplied message to the screen and/or file,
-   * following the same restrictions as outputStep and outputInitial
-   *
-   */
-  void mooseConsole(const std::string & message);
-
-  /**
    * Output string for setting up PETSC output
    */
   static void petscSetupOutput();
@@ -225,6 +215,18 @@ protected:
   static const unsigned int _line_length = 100;
 
 private:
+
+  /**
+   * Add a message to the output streams
+   * @param message The message to add to the output streams
+   *
+   * Any call to this method will write the supplied message to the screen and/or file,
+   * following the same restrictions as outputStep and outputInitial.
+   *
+   * Calls to this method should be made via OutputWarehouse::mooseConsole so that the
+   * output stream buffer is cleaned up correctly. Thus, it is a private method.
+   */
+  void mooseConsole(const std::string & message);
 
   /// State of the --timing command line argument from MooseApp
   bool _timing;

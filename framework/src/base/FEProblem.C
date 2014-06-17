@@ -327,6 +327,9 @@ FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const std::
 
 void FEProblem::initialSetup()
 {
+  // Write all cached calls to _console, this will output calls to _console from the object constructors
+  _app.getOutputWarehouse().mooseConsole();
+
   if (_app.isRecovering())
     _resurrector->setRestartFile(_app.getRecoverFileBase());
 
@@ -552,9 +555,10 @@ void FEProblem::initialSetup()
   for (unsigned int tid = 0; tid < n_threads; tid++)
     reinitScalars(tid);
 
-  // Init function and initial setup of output objects;
+  // Perform output related setups
   _app.getOutputWarehouse().init();
   _app.getOutputWarehouse().initialSetup();
+  _app.getOutputWarehouse().mooseConsole(); // writes all calls to _console from initialSetup()
 }
 
 void FEProblem::timestepSetup()

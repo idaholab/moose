@@ -146,9 +146,6 @@ Console::Console(const std::string & name, InputParameters parameters) :
         _use_color = true;
     }
   }
-
-  // Write cached messages
-  write(_console_buffer.str());
 }
 
 Console::~Console()
@@ -529,13 +526,11 @@ Console::write(std::string message, bool indent)
     Moose::out << message;
 }
 
-
-
 void
 Console::mooseConsole(const std::string & message)
 {
   // Do nothing if output is disabled
-  if ((onInitial() && !shouldOutputInitial()) || !shouldOutputStep())
+  if (!shouldOutput())
     return;
 
   // Write the messages
