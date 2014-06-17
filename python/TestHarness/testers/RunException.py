@@ -10,6 +10,9 @@ class RunException(RunApp):
     params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
     params.addParam('should_crash', True, "Inidicates that the test is expected to crash or otherwise terminate early")
 
+    # Printing errors in parallel often intertwine when multiple processors receive the same error.  We will set max_parallel = 1 by default, but it can be overridden
+    params['max_parallel'] = 1
+
     return params
 
   def __init__(self, name, params):
