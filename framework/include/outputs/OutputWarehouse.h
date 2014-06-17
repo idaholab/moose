@@ -102,6 +102,7 @@ public:
   /**
    * Creates a list of automatically generated material property AuxVariable to hide
    * @param name The name of the output object to compose the list of hidden variables
+   * @param hide The vector to populate with the variables to hide
    *
    * The Material system has the ability to automatically generate AuxVariables for
    * material property outputting. This includes the ability to control which output
@@ -110,7 +111,7 @@ public:
    *
    * @see Output::initOutputList
    */
-  std::vector<std::string> getMaterialOutputHideList(const std::string & name);
+  void  buildMaterialOutputHideList(const std::string & name, std::vector<std::string> & hide);
 
   /**
    * Calls the setFileNumber method for every FileOutput output object
@@ -203,19 +204,11 @@ public:
   bool isReservedName(const std::string & name);
 
   /**
-   * A method for disabling all Console output to the screen
-   * This used used by the Multiapp system
-   */
-  void disableScreenOutput();
-
-  ///@{
-  /**
    * Sends the supplied message to Console output objects
    * @param message A string or stringstream containing the message to write
    * @param err A flag for outputing to Moose::err instead of Moose::out
    */
   void mooseConsole(const std::string & message, bool err = false) const;
-  ///@}
 
 private:
 
