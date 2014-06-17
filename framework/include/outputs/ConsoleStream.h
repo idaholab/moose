@@ -55,25 +55,24 @@ public:
    *   _console << "The combination to the air lock is " << 12345 << std::endl;
    */
   template<typename T>
-  ConsoleStream & operator<<(T s);
+  const ConsoleStream & operator<<(T s) const;
 
   /**
    * This overload is here to handle the the std::endl manipulator
    */
-  ConsoleStream & operator<<(StandardEndLine manip);
+  const ConsoleStream & operator<<(StandardEndLine manip) const;
 
 private:
-
-  /// The stream for storing the message
-  std::ostringstream _oss;
-
   /// Reference to the OutputWarhouse that contains the Console output objects
   OutputWarehouse & _output_warehouse;
+
+  /// The stream for buffering the message
+  std::ostringstream & _oss;
 };
 
 template<typename T>
-ConsoleStream &
-ConsoleStream::operator<<(T s)
+const ConsoleStream &
+ConsoleStream::operator<<(T s) const
 {
   _oss << s;
   return *this;

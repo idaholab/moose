@@ -207,7 +207,7 @@ public:
    * Sends the supplied message to Console output objects
    * @param message A string containing the message to write
    */
-  void mooseConsole(const std::string & message) const;
+  void mooseConsole();
 
   /**
    * The multiapp level
@@ -220,7 +220,6 @@ public:
    * @return Reference to the stream storing cached messages from calls to _console
    */
   std::ostringstream & consoleBuffer() { return _console_buffer; }
->>>>>>> Re-factored output to the screen, including MultiApp indenting
 
 private:
 

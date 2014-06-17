@@ -193,9 +193,8 @@ void
 Console::initialSetup()
 {
   // Set the string for multiapp output indending
-  //_multiapp_indent += std::string(4*_app.getOutputWarehouse().multiappLevel(),'-');
   if (_app.getOutputWarehouse().multiappLevel() > 0)
-    _multiapp_indent = _app.name() + "|";
+    _multiapp_indent = MooseUtils::colorText(CYAN, _app.name() + ": ", _use_color);
 
   // If file output is desired, wipe out the existing file if not recovering
   if (!_app.isRecovering())
@@ -535,8 +534,8 @@ Console::write(std::string message, bool indent)
 void
 Console::mooseConsole(const std::string & message)
 {
-  // Do nothing if output is disabledyes
-  if ( (onInitial() && !shouldOutputInitial()) || !shouldOutputStep())
+  // Do nothing if output is disabled
+  if ((onInitial() && !shouldOutputInitial()) || !shouldOutputStep())
     return;
 
   // Write the messages

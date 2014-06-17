@@ -15,19 +15,20 @@
 // Moose includes
 #include "ConsoleStream.h"
 
+// One stream fits all
+//std::ostringstream ConsoleStream::_oss;
+
 ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse) :
-    _output_warehouse(output_warehouse)
+    _output_warehouse(output_warehouse),
+    _oss(output_warehouse.consoleBuffer())
 {
 }
 
-ConsoleStream &
-ConsoleStream::operator<<(StandardEndLine /*manip*/)
+const ConsoleStream &
+ConsoleStream::operator<<(StandardEndLine /*manip*/) const
 {
   _oss << '\n';
-  _output_warehouse.mooseConsole(_oss.str());
+  _output_warehouse.mooseConsole();
 
-  // Reset
-  _oss.clear();
-  _oss.str("");
   return *this;
 }

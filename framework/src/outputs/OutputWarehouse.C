@@ -36,6 +36,9 @@ OutputWarehouse::OutputWarehouse() :
 
 OutputWarehouse::~OutputWarehouse()
 {
+  if (_console_buffer.str().length())
+    mooseConsole();
+
   for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
     delete *it;
 }
@@ -161,16 +164,20 @@ OutputWarehouse::forceOutput()
 }
 
 void
-OutputWarehouse::mooseConsole(const std::string & message) const
+OutputWarehouse::mooseConsole()
 {
   std::vector<Console *> objects = getOutputs<Console>();
 
   // If no Console objects exist, hold onto the message until they are created
-  if (objects.empty())
-    _console_buffer << message;
+  if (!objects.empty())
+  {
+    for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)
+      (*it)->mooseConsole(_console_buffer.str());
 
-  for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)
-    (*it)->mooseConsole(message);
+    // Reset
+    _console_buffer.clear();
+    _console_buffer.str("");
+  }
 }
 
 void
