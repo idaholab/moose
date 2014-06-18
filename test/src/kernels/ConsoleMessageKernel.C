@@ -35,10 +35,17 @@ void
 ConsoleMessageKernel::initialSetup()
 {
   _console << "ConsoleMessageKernel::initalSetup - time = " << _t << "; t_step = " << _t_step << '\n';
+  constMethod();
 }
 
 void
 ConsoleMessageKernel::timestepSetup()
 {
   _console << "ConsoleMessageKernel::timestepSetup - time = " << _t << "; t_step = " << _t_step << '\n';
+}
+
+void
+ConsoleMessageKernel::constMethod() const
+{
+  _console << "I am writing from a const method\n";
 }
