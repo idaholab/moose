@@ -14,9 +14,7 @@
 
 // Moose includes
 #include "ConsoleStream.h"
-
-// One stream fits all
-//std::ostringstream ConsoleStream::_oss;
+#include "MooseUtils.h"
 
 ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse) :
     _output_warehouse(output_warehouse),

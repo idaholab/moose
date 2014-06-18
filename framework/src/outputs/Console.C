@@ -20,6 +20,7 @@
 #include "Executioner.h"
 #include "MooseApp.h"
 #include "pcrecpp.h"
+#include "Moose.h"
 
 template<>
 InputParameters validParams<Console>()
@@ -45,7 +46,6 @@ InputParameters validParams<Console>()
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
 
   // Basic table output controls
-  params.addParam<bool>("use_color", true, "If true, color will be added to the output");
   params.addParam<bool>("scientific_time", false, "Control the printing of time and dt in scientific notation");
   params.addParam<unsigned int>("time_precision", "The number of significant digits that are printed on time related outputs");
 
@@ -95,7 +95,6 @@ Console::Console(const std::string & name, InputParameters parameters) :
     TableOutput(name, parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
-    _use_color(false),
     _scientific_time(getParam<bool>("scientific_time")),
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
@@ -136,14 +135,14 @@ Console::Console(const std::string & name, InputParameters parameters) :
   }
 
   // Set output coloring
-  if (getParam<bool>("use_color"))
+  if (Moose::__color_console)
   {
     char * term_env = getenv("TERM");
     if (term_env)
     {
       std::string term(term_env);
-      if (term == "xterm-256color" || term == "xterm")
-        _use_color = true;
+      if (term != "xterm-256color" && term != "xterm")
+        Moose::__color_console = false;
     }
   }
 }
@@ -191,7 +190,7 @@ Console::initialSetup()
 {
   // Set the string for multiapp output indending
   if (_app.getOutputWarehouse().multiappLevel() > 0)
-    _multiapp_indent = MooseUtils::colorText(CYAN, _app.name() + ": ", _use_color);
+    _multiapp_indent = COLOR_CYAN + _app.name() + ": " + COLOR_DEFAULT;
 
   // If file output is desired, wipe out the existing file if not recovering
   if (!_app.isRecovering())
@@ -386,12 +385,12 @@ Console::writeVariableNorms()
       }
 
       // Set the color, RED if the variable norm is 0.8 (default) of the total norm
-      std::string color = YELLOW;
+      std::string color = COLOR_YELLOW;
       if (_outlier_variable_norms && (var_norm > _outlier_multiplier[0] * avg_norm * n_vars) )
-        color = RED;
+        color = COLOR_RED;
 
       // Display the residual
-      oss << "  " << var_name << ": " << MooseUtils::colorText(color, std::sqrt(var_norm), _use_color) << '\n';
+      oss << "  " << var_name << ": " << std::scientific << color << std::sqrt(var_norm) << COLOR_DEFAULT << '\n';
     }
 
     // GREEN
@@ -403,7 +402,7 @@ Console::writeVariableNorms()
         oss << "\nVariable Residual Norms:\n";
         header = true;
       }
-      oss << "  " << var_name << ": " <<  MooseUtils::colorText(GREEN, std::sqrt(var_norm), _use_color) << '\n';
+      oss << "  " << var_name << ": " << std::scientific << COLOR_GREEN << std::sqrt(var_norm) << COLOR_DEFAULT << '\n';
     }
   }
 
@@ -415,21 +414,19 @@ Console::writeVariableNorms()
 std::string
 Console::outputNorm(Real old_norm, Real norm)
 {
-  std::string color(GREEN);
+  std::string color = COLOR_GREEN;
 
-  // Use color
-  if (_use_color)
-  {
-    // Red if the residual went up...
-    if (norm > old_norm)
-      color = RED;
-    // Yellow if change is less than 5%
-    else if ((old_norm - norm) / old_norm <= 0.05)
-      color = YELLOW;
-  }
+  // Red if the residual went up...
+  if (norm > old_norm)
+    color = COLOR_RED;
+  // Yellow if change is less than 5%
+  else if ((old_norm - norm) / old_norm <= 0.05)
+    color = COLOR_YELLOW;
 
-  // Return the colored text
-  return MooseUtils::colorText<Real>(color, norm, _use_color);
+  std::stringstream oss;
+  oss << std::scientific << color << norm << COLOR_DEFAULT;
+
+  return oss.str();
 }
 
 

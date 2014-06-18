@@ -20,8 +20,6 @@
 #include <sstream>
 #include <algorithm>
 
-#include "XTermConstants.h"
-
 // libMesh includes
 #include "libmesh/parallel.h"
 
@@ -87,31 +85,6 @@ namespace MooseUtils
       if (iter->second == value)
         return true;
     return false;
-  }
-
-  /**
-   * Returns a character string to produce a specific color in terminals supporting
-   * color. The list of color constants is available in XTermConstants.h
-   * @param color (from XTermConstants.h)
-   * @param text The output to be converted to text and colored
-   * @param use_color A convenience flag using or not using color (see src/outputs/Console.C)
-   */
-  template <typename T>
-  std::string
-  colorText(std::string color, T text, bool use_color = true)
-  {
-    // Define a stream to output
-    std::ostringstream oss;
-    oss << std::scientific;
-
-    // Output the value to the stream
-    if (use_color)
-      oss << color << text << COLOR_DEFAULT;
-    else
-      oss << text;
-
-    // Return string
-    return oss.str();
   }
 }
 
