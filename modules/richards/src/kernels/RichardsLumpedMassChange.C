@@ -41,6 +41,8 @@ RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name,
   _nodal_pp.resize(_num_p);
   for (unsigned int i=0 ; i<_num_p; ++i)
     _nodal_pp[i] = _richards_name_UO.raw_var(i);
+
+  _dseff.resize(_num_p);
 }
 
 
@@ -127,12 +129,12 @@ RichardsLumpedMassChange::computeQpJacobian()
   Real ddensity = (*_density_UO).ddensity(_var.nodalSln()[_i]);
 
   Real seff = (*_seff_UO).seff(_ps_at_nodes, _i);
-  std::vector<Real> dseff = (*_seff_UO).dseff(_ps_at_nodes, _i);
+  (*_seff_UO).dseff(_ps_at_nodes, _i, _dseff);
 
   Real sat = (*_sat_UO).sat(seff);
   Real dsat = (*_sat_UO).dsat(seff);
 
-  Real mass_prime = _porosity[_qp]*(ddensity*sat + density*dseff[_pvar]*dsat);
+  Real mass_prime = _porosity[_qp]*(ddensity*sat + density*_dseff[_pvar]*dsat);
 
   return _test[_i][_qp]*mass_prime/_dt;
 }
@@ -158,11 +160,11 @@ RichardsLumpedMassChange::computeQpOffDiagJacobian(unsigned int jvar)
   Real density = (*_density_UO).density(_var.nodalSln()[_i]);
 
   Real seff = (*_seff_UO).seff(_ps_at_nodes, _i);
-  std::vector<Real> dseff = (*_seff_UO).dseff(_ps_at_nodes, _i);
+  (*_seff_UO).dseff(_ps_at_nodes, _i, _dseff);
 
   Real dsat = (*_sat_UO).dsat(seff);
 
-  Real mass_prime = _porosity[_qp]*density*dseff[dvar]*dsat;
+  Real mass_prime = _porosity[_qp]*density*_dseff[dvar]*dsat;
 
   return _test[_i][_qp]*mass_prime/_dt;
 }

@@ -49,33 +49,20 @@ RichardsSeff1VGcut::seff(std::vector<VariableValue *> p, unsigned int qp) const
     }
 }
 
-std::vector<Real>
-RichardsSeff1VGcut::dseff(std::vector<VariableValue *> p, unsigned int qp) const
+void
+RichardsSeff1VGcut::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
 {
   if ((*p[0])[qp] > _p_cut)
-    {
-      return RichardsSeff1VG::dseff(p, qp);
-    }
+    return RichardsSeff1VG::dseff(p, qp, result);
   else
-    {
-      //Real seff_linear = _s_cut + _ds_cut*((*p[0])[qp] - _p_cut);
-      //return (seff_linear > 0 ? _ds_cut : 0);
-      return std::vector<Real>(1, _ds_cut);
-    }
+    result[0] = _ds_cut;
 }
 
-std::vector<std::vector<Real> >
-RichardsSeff1VGcut::d2seff(std::vector<VariableValue *> p, unsigned int qp) const
+void
+RichardsSeff1VGcut::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
 {
   if ((*p[0])[qp] > _p_cut)
-    {
-      return RichardsSeff1VG::d2seff(p, qp);
-    }
+    return RichardsSeff1VG::d2seff(p, qp, result);
   else
-    {
-      // create a dummy b that is 1x1 and zeroed
-      std::vector<Real> a(1, 0);
-      std::vector<std::vector <Real> > b(1, a);
-      return b;
-    }
+    result[0][0] = 0;
 }

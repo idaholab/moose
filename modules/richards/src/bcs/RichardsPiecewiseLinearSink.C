@@ -113,7 +113,7 @@ RichardsPiecewiseLinearSink::prepareNodalValues()
     _dnodal_density_dv[nodenum][_pvar] = _density_UO->ddensity(p); // d(density)/dP
 
     seff = _seff_UO->seff(_ps_at_nodes, nodenum); // effective saturation of fluid _pvar at node nodenum
-    dseff_dp = _seff_UO->dseff(_ps_at_nodes, nodenum); // d(seff)/d(P_ph), for ph = 0, ..., _num_p - 1
+    _seff_UO->dseff(_ps_at_nodes, nodenum, dseff_dp); // d(seff)/d(P_ph), for ph = 0, ..., _num_p - 1
 
     _nodal_relperm[nodenum] = _relperm_UO->relperm(seff); // relative permeability of fluid _pvar at node nodenum
     drelperm_ds = _relperm_UO->drelperm(seff); // d(relperm)/dseff

@@ -31,20 +31,14 @@ RichardsSeff1VG::seff(std::vector<VariableValue *> p, unsigned int qp) const
   return RichardsSeffVG::seff((*p[0])[qp], _al, _m);
 }
 
-std::vector<Real>
-RichardsSeff1VG::dseff(std::vector<VariableValue *> p, unsigned int qp) const
+void
+RichardsSeff1VG::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
 {
-  std::vector<Real> dseff_dp(1);
-  dseff_dp[0] = RichardsSeffVG::dseff((*p[0])[qp], _al, _m);
-  return dseff_dp;
+  result[0] = RichardsSeffVG::dseff((*p[0])[qp], _al, _m);
 }
 
-std::vector<std::vector<Real> >
-RichardsSeff1VG::d2seff(std::vector<VariableValue *> p, unsigned int qp) const
+void
+RichardsSeff1VG::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
 {
-  // create a dummy b that is 1x1 and zeroed
-  std::vector<Real> a(1, 0);
-  std::vector<std::vector <Real> > b(1, a);
-  b[0][0] = RichardsSeffVG::d2seff((*p[0])[qp], _al, _m);
-  return b;
+  result[0][0] = RichardsSeffVG::d2seff((*p[0])[qp], _al, _m);
 }

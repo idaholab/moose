@@ -52,6 +52,9 @@ protected:
    * Eg, for twophase simulations N=2
    */
   std::vector<VariableValue *> _pressure_vals;
+
+  /// matrix of 2nd derivtives: This auxkernel returns _mat[_wrt1][_wrt2];
+  std::vector<std::vector<Real> > _mat;
 };
 
 #endif // RICHARDSSEFFPRIMEPRIMEAUX_H
