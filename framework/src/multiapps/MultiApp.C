@@ -22,6 +22,7 @@
 #include "OutputWarehouse.h"
 #include "AppFactory.h"
 #include "MooseUtils.h"
+#include "Console.h"
 
 // libMesh
 #include "libmesh/mesh_tools.h"
@@ -360,9 +361,22 @@ MultiApp::parentOutputPositionChanged()
 void
 MultiApp::createApp(unsigned int i, Real start_time)
 {
+
+  // Define the app name
+  std::ostringstream multiapp_name;
+  std::string full_name;
+  multiapp_name << _name <<  std::setw(std::ceil(std::log10(_total_num_apps)))
+           << std::setprecision(0) << std::setfill('0') << std::right << _first_local_app + i;
+
+  // Only add parent name if it the parent is not the main app
+  if (_app.getOutputWarehouse().multiappLevel() > 0)
+    full_name = _app.name() + "_" + multiapp_name.str();
+  else
+    full_name = multiapp_name.str();
+
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblem *>("_parent_fep") = _fe_problem;
-  MooseApp * app = AppFactory::instance().create(_app_type, "multi_app", app_params, _my_comm);
+  MooseApp * app = AppFactory::instance().create(_app_type, full_name, app_params, _my_comm);
   _apps[i] = app;
 
   std::string input_file = "";
@@ -386,13 +400,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   }
 
   // Append the sub app name to the output file base
-  output_base << _name
-              << std::setw(std::ceil(std::log10(_total_num_apps)))
-              << std::setprecision(0)
-              << std::setfill('0')
-              << std::right
-              << _first_local_app + i;
-
+  output_base << multiapp_name.str();
   app->setGlobalTimeOffset(start_time);
   app->setInputFileName(input_file);
   app->setOutputFileBase(output_base.str());
@@ -400,6 +408,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   if (getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
+
+  // Update the MultiApp level for the app that was just created
+  app->getOutputWarehouse().multiappLevel() = _app.getOutputWarehouse().multiappLevel() + 1;
 
   app->setupOptions();
   app->runInputFile();

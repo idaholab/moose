@@ -84,11 +84,17 @@
     input = 'console_transient.i'
     expect_out = 'Time Step  4, time = -0.600000'
   [../]
-  [./_console_output]
+  [./_console]
     # Test the used of MooseObject::_console method
     type = RunApp
     input = 'moose_console.i'
     expect_out = 'ConsoleMessageKernel::timestepSetup - time = 0.4; t_step = 4'
+  [../]
+  [./_console_const]
+    # Test the used of MooseObject::_console method from a constant method
+    type = RunApp
+    input = 'moose_console.i'
+    expect_out = 'I am writing from a const method'
   [../]
   [./input_output]
     # Test the use of --show-input

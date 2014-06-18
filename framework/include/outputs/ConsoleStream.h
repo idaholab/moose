@@ -45,7 +45,7 @@ public:
    * newline at the beginning of each call, but returns a reference to ConsoleStreamHelper
    * that write the stream to the Console objects with out entering a new
    */
-  ConsoleStream(const OutputWarehouse & output_warehouse);
+  ConsoleStream(OutputWarehouse & output_warehouse);
 
   /**
    * The output stream operator
@@ -63,20 +63,18 @@ public:
   const ConsoleStream & operator<<(StandardEndLine manip) const;
 
 private:
-
   /// Reference to the OutputWarhouse that contains the Console output objects
-  const OutputWarehouse & _output_warehouse;
+  OutputWarehouse & _output_warehouse;
+
+  /// The stream for buffering the message
+  std::ostringstream & _oss;
 };
 
 template<typename T>
 const ConsoleStream &
 ConsoleStream::operator<<(T s) const
 {
-  std::ostringstream _oss;
-
   _oss << s;
-  _output_warehouse.mooseConsole(_oss.str());
-
   return *this;
 }
 

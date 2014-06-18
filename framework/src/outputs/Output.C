@@ -116,7 +116,7 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _output_failed(false),
     _output_setup_called(false),
     _initialized(false),
-    _on_initial(true)
+    _on_initial(false)
 {
 }
 
@@ -194,6 +194,11 @@ Output::init()
 
   // Set the initialization flag
   _initialized = true;
+
+  // Assume after init()
+  /* Between init() and the first call of outputStep() all output is considered to be a part of initial output. This is
+     mainly only import for calls to _console that occur during this time */
+  _on_initial = true;
 }
 
 Output::~Output()
@@ -223,7 +228,7 @@ Output::timestepSetupInternal()
 void
 Output::outputInitial()
 {
-  if (shouldOutputInitial())
+  if (shouldOutput())
   {
     outputSetup();
     _mesh_changed = false;
@@ -234,8 +239,7 @@ Output::outputInitial()
 
   // Set the force output flag to false
   _force_output = false;
-  _output_initial = false;
-  _on_initial = false;
+
 }
 
 void
@@ -248,8 +252,12 @@ Output::outputFailedStep()
 void
 Output::outputStep()
 {
+  // Set output initial related flags, outputting of initial is over at the first call to outputStep
+  _on_initial = false;
+  _output_initial = false;
+
   // Only perform output if you should
-  if (!shouldOutputStep())
+  if (!shouldOutput())
     return;
 
   // If the mesh has changed or the sequence state is true or if it has not been called, call the outputSetup() function
@@ -276,27 +284,32 @@ Output::outputStep()
 }
 
 bool
-Output::shouldOutputStep()
+Output::shouldOutput()
 {
-  // Do not perform output if:
-  // (1) Intermediate output is disabled
-  // (2) Output is not forced and output is not allowed or not on interval
-  if (!_output_intermediate || (!_force_output && (!_allow_output || !checkInterval())))
-    return false;
-  else
-    return true;
-}
-
-bool
-Output::shouldOutputInitial()
-{
-  // Do Nothing if output is not forced or if output is disallowed
+  // Do Nothing if output is not forced and allowing output has been disabled
   if (!_force_output && !_allow_output)
     return false;
-  else if (_force_output || _output_initial)
-    return true;
+
+  // On initial step: between init() and first call to outputStep()
+  if (onInitial())
+  {
+    if (_force_output || _output_initial)
+      return true;
+    else
+      return false;
+  }
+
+  // On intermediate steps
   else
-    return false;
+  {
+    // Do not perform output if:
+    // (1) Intermediate output is disabled
+    // (2) Output is not forced and (output is not allowed or not on interval)
+    if (!_output_intermediate || (!_force_output && (!_allow_output || !checkInterval())))
+      return false;
+    else
+      return true;
+  }
 }
 
 void
