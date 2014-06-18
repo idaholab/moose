@@ -38,25 +38,21 @@ CSIRO}
 
 The Richards' equation describes slow fluid flow through a porous
 medium.  This document outlines input-file examples for the Richards
-MOOSE code, drawing mainly upon the test suite.  There are two other
-accompanying documents: (1) The theoretical and numerical foundations
-of the code, which also describes the notation used throughout this
-document; (2) The test suite, which describes the benchmark tests used
-to validate the code. 
-
-
-\chapter{The examples}
+MOOSE code, drawing upon the test suite, and provides guidelines for
+creating models that run smoothly.  There are two other accompanying
+documents: (1) The theoretical and numerical foundations of the code,
+which also describes the notation used throughout this document; (2)
+The test suite, which describes the benchmark tests used to validate
+the code.
 
 Each example is located in the {\em test} directory, which has path
 \begin{verbatim}
 <install_dir>/moose/modules/richards/tests
 \end{verbatim}
-or the {\em user} directory, which has path
-\begin{verbatim}
-<install_dir>/moose/modules/richards/doc/user
-\end{verbatim}
 
-\section{Convergence and convergence criteria}
+
+
+\chapter{Convergence and convergence criteria}
 
 As a general rule, the formulation of multiphase flow implemented in
 MOOSE is quite suitable to solve many different problems.  However,
@@ -89,7 +85,8 @@ MOOSE is struggling with.
     buckley\_leverett/bl21.i} and {\tt buckley\_leverett/bl22.i}.
 \item Any discontinuities in the effective saturation, or its
   derivative, are bad.  I suggest using van Genuchten parameter
-  $\alpha\geq 0.5$ for problems with both saturated and unsaturated zones.
+  $\alpha\geq 0.5$ for problems with both saturated and unsaturated
+  zones if the van Genuchten relative permeability relation is used.
 \item Highly nonlinear relative permeability curves make convergence
   difficult in some cases.  For instance, a ``power'' relative
   permeability curve with $n=20$ is much worse numerically than with
@@ -102,7 +99,8 @@ MOOSE is struggling with.
   tests directory for an example of this.   I also suggest using the
   ``power'' covers over the ``VG'' curves.
 \item In multiphase problems if one phase completely disappears, MOOSE
-  may not converge.  To avoid this:
+  may not converge, as discussed more fully in
+  Chapter~\ref{chap.sing.jac}.  To avoid this: 
 \begin{enumerate}
 \item The fully-upwind kernel and boundary fluxes and dirac sources
   can be used.  If the immobile saturation of the phase is nonzero,
@@ -114,8 +112,16 @@ MOOSE is struggling with.
   $dt\rightarrow 0$ the Jacobian matrix will be nonsingular.  (If the
   residual saturations are zero then the Jacobian is singular for
   $dt\rightarrow 0$.)  Then in most cases the problematic node will
-  fill with a little amount of the phase in the next time step
+  fill with a little amount of the phase in the next time step.
+\item A ``shifted'' van Genuchten capillary suction curve may be used
+  in difficult multiphase problems.
 \end{enumerate}
+\item When porosity is a function of time, small time steps may be
+  necessary, especially in multiphase situations.  MOOSE will
+  converge, but may need quite a few nonlinear iterations (maybe about
+  20), and the PETSc tolerances should be set quite tight, otherwise
+  MOOSE might ``converge'' to a crazy solution that causes
+  difficulties in subsequent time steps.
 \end{itemize}
 
 Choosing reasonable convergence criteria is very important.  The
@@ -176,7 +182,7 @@ $\rho_{0}$ and $\mu$.
 \end{enumerate}
 
 
-\section{Two-phase, almost saturated}
+\chapter{Two-phase, almost saturated}
 
 If a two-phase model has regions that are fully saturated with the
 ``1'' phase (typically this is water), then the residual for the ``2''
@@ -186,11 +192,13 @@ phase subsequently infiltrates to these regions, an initially crazy
 $P_{2}$ might affect the results.  This sometimes also holds for
 almost-saturated situations, depending on the exact simulation.
 
-In these cases, one way of avoiding problems is to implement the
-constraint $P_{1}\leq P_{2}$ using a {\tt RichardsMultiphaseProblem}
-Problem object.  This gets around the problem of chosing the $a$ in
-the penalty term described in the next paragraph.
-See Section~\ref{sec.bound.pp} for more comments.
+In these cases, probably the best way of avoiding problems is to
+implement the constraint $P_{1}\leq P_{2}$ using a {\tt
+  RichardsMultiphaseProblem} Problem object.  In fact, I almost always
+use this as standard in my 2-phase simulations, just in case one phase
+disappears.  This gets around the
+problem of chosing the $a$ in the penalty term described in the next
+paragraph.  See Section~\ref{sec.bound.pp} for more comments.
 
 Another way is to add a penalty term to the residual to
 ensure that $P_{1}\leq P_{2}$.  An example can be found in the tests
@@ -210,20 +218,17 @@ As mentioned above, in these situations it is often advantageous to
 use the fully-upwind kernels, boundary fluxes and dirac sources.  If
 the immobile saturation of the phase is nonzero then it probably won't
 disappear entirely.  If a phase disappears entirely then the Jacobian
-will be singular for $dt\rightarrow 0$, and this sometimes leads to
+may be singular for $dt\rightarrow 0$, and this sometimes leads to
 nonconvergence.  This can be avoided by using a nonzero residual
-saturation.
+saturation, or a shifted van Genuchten relationship.  Please see
+Chapter~\ref{chap.sing.jac} for more discussions and tips.
 
 
 
 
-\section{An excavation}
 
-In the test directory {\tt excav/ex01.i} and {\tt excav/ex02.i}
-contains a single excavation, and the associated mass flux and mass
-balance.
 
-\section{Bounding porepressure}
+\chapter{Bounding porepressure}
 \label{sec.bound.pp}
 
 Occasionally it might be useful to bound porepressure.  The test {\tt
@@ -231,7 +236,7 @@ Occasionally it might be useful to bound porepressure.  The test {\tt
 \begin{itemize}
 \item The convergence is likely to be much slower when using bounds
 \item The {\tt -snes\_type} must be set to {\tt vinewtonssls} (see the
-  {\tt [Preconditioning]} block of the aforementioned test.
+  {\tt [Preconditioning]} block of the aforementioned test).
 \item The command line must contain the argument {\tt --use-petsc-dm}.
 \end{itemize}
 
@@ -259,16 +264,120 @@ this in an input file.  Note that:
 
 
 
-\chapter{Coupled porosity}
+\chapter{Singular Jacobians}
+\label{chap.sing.jac}
 
-When porosity is a function of time and the residual saturations are
-nonzero, the system can be singular when $dt\rightarrow 0$ (or for
-small $dt$).  This is annoying, and i suggest using zero residual
-saturations.
+In multiphase simulations, there are subtleties associated with one of
+the phases reducing to its residual saturation, and the resulting
+problems encountered can completely dominate the convergence
+characteristics of simulations.  They can be understood by considering
+a simulation containing a single node, with no Darcy flux.  The
+residual is just
+\begin{equation}
+R = \frac{d}{dt}\left(
+\begin{array}{l}
+\phi \rho_{g}S_{g} \\
+\phi \rho_{w}S_{w}
+\end{array}
+\right) \ .
+\end{equation}
+Here I've labelled the phases ``g'' and ``w'', for gas and water.
+With the variables being $P_{g}$ and $P_{w}$, the
+Jacobian is
+\begin{equation}
+J = \frac{\phi}{dt} \left(
+\begin{array}{cc}
+\rho_{g}'S_{g} + \rho_{g}\frac{\partial S_{g}}{\partial P_{g}} &
+\rho_{g}\frac{\partial S_{g}}{\partial P_{w}} \\
+\rho_{w}\frac{\partial S_{w}}{\partial P_{g}} &
+\rho_{w}'S_{w} + \rho_{w}\frac{\partial S_{w}}{\partial P_{w}}
+\end{array}
+\right)
+= \frac{\phi}{dt} \left(
+\begin{array}{cc}
+\rho_{g}'S_{g} + \rho_{g}S' &
+-\rho_{g}S' \\
+-\rho_{w}S' & 
+\rho_{w}'S_{w} + \rho_{w}S'
+\end{array}
+\right)
+\end{equation}
+Now imagine that $S_{g} = S_{g}^{\mathrm{res}}$ (that gas has reduced
+to the residual value).  Using the standard van-Genuchten expression
+for $S'$ gives
+\begin{equation}
+S' = 0
+\end{equation}
+and so
+\begin{equation}
+J = \frac{\phi}{dt} \left(
+\begin{array}{cc}
+\rho_{g}'S_{g}^{\mathrm{res}}  &
+0 \\
+0 & 
+\rho_{w}'(1 - S_{g}^{\mathrm{res}})
+\end{array}
+\right)
+\end{equation}
+Note that if $S_{g}^{\mathrm{res}}=0$, then this Jacobian is singular!
 
-In the case of one phase disappearing {\em and} time-dependent
-porosity, then you're stuck, sorry.  I need to implement a
-pressure-saturation-saturation formulation that will get around this.
+This singularity will manifest itself in various ways:
+\begin{itemize}
+\item When one phase disappears PETSc will find it difficult or
+  impossible to invert the Jacobian, leading to a large number of
+  linear iterations
+\item The nonlinear solver will find it difficult or impossible to
+  converge.
+\end{itemize}
+
+\noindent The arguments above strongly point to ensuring that simulations are
+always run with
+\begin{equation}
+S^{\mathrm{res}}>0.
+\end{equation}
+for all phases.  Then the Jacobian is non-singular if the timestep
+sizes are not too big, so that the time-derivative terms dominate the
+Richards flux terms.  {\em However, this can also lead to
+  difficulties.}  Imagine that the `g' phase is at its residual
+value.  Then the difficulties encountered are:
+\begin{enumerate}
+\item If the `w' phase wants to increase its pressure (because of
+  Richards' flux, say), then the `g' phase pressure {\em must
+    increase} at least as fast as the `w' phase to maintain $P_{g}\geq
+  P_{w}$.  However, if there is no `g' phase entering the node
+  (because of immobile saturation, say), mass conservation is thereby
+  violated.  This was mentioned in Chapter~\ref{sec.bound.pp} in
+  relation to the test {\tt gh\_bounded\_17.i}.  The nonlinear
+  iterations in MOOSE will typically not converge in this case.
+\item If the porosity decreases, and the `g' phase is more
+  compressible than the `w' phase ($\rho_{g}'/\rho_{g} >
+  \rho_{w}'/\rho_{w}$) the `g' phase saturation will attempt to reduce
+  below its residual value.  In some ways this is unfair to Richards'
+  flow, as the whole concept of residual saturation was never designed
+  to handle dynamic porosity, but nevertheless this problem will
+  manifest itself in nonconvergence of the nonlinear solver.
+\end{enumerate}
+The existence of these two cases (which are not too unusual in real
+simulations) have made it necessary to create the ``shifted''
+van-Genuchten capillary curve for two-phase situations.
+
+The ``shifted'' van-Genuchten capillary curve is documented in the
+Theory and Test manuals.  It has the important property that
+\begin{equation}
+S' > 0 \ ,
+\end{equation}
+for all finite porepressures.  Therefore, the determinant of the
+Jacobian is always positive
+\begin{equation}
+\det J = \rho_{g}'\rho_{w}'S(1-S) + \rho_{g}'\rho_{w}SS' +
+\rho_{g}\rho_{w}'(1-S)S' > 0 \ .
+\end{equation}
+since $0\leq S\leq 1$, and $\rho'>0$ physically, so the Jacobian is
+non-singular in the full Richards case for $\mathrm{d}t \rightarrow 0$.  (Here
+$S = S_{g} = 1-S_{w}$.)   Finally, using $S^{\mathrm{res}}=0$ gets
+around both of the problems mentioned in the previous paragraph.
+
+
 
 
 
