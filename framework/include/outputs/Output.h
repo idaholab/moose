@@ -311,9 +311,6 @@ protected:
    */
   virtual void outputInput();
 
-  //virtual void outputLinearResidual();
-  //virtual void outputNonlinearResidual();
-
   /**
    * \todo{Make this call automatic in similar fashion to outputInput}
    * Performs the output of system information
@@ -453,15 +450,9 @@ private:
 
   /**
    * Handles logic for determining if a step should be output
-   * @return True if a call to outputStep should be preformed
+   * @return True if a call if output should be preformed
    */
-  bool shouldOutputStep();
-
-  /**
-   * Handles logic for determining if an initial step should be output
-   * @return True if a call to outputInitial should be preformed
-   */
-  bool shouldOutputInitial();
+  bool shouldOutput();
 
   /**
    * Returns status of output initial flag
@@ -534,6 +525,7 @@ private:
   /// True if init() has been called
   bool _initialized;
 
+  /// Flag determining if the output system is on the initial output step (i.e., output control with output_initial parameter)
   bool _on_initial;
 
   // Allow complete access

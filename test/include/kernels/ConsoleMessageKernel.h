@@ -52,6 +52,12 @@ public:
    * Prints a message at beginning of timestep
    */
   void timestepSetup();
+
+  /**
+   * Prints from a const method
+   */
+  void constMethod() const;
+
 };
 
 #endif //CONSOLEMESSAGEKERNEL_H
