@@ -217,8 +217,7 @@ public:
    */
   virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
 
-  virtual void createQRules(QuadratureType type, Order order);
-  virtual Order getQuadratureOrder() { return _quadrature_order; }
+  virtual void createQRules(QuadratureType type, Order order, Order volume_order=INVALID_ORDER, Order face_order=INVALID_ORDER);
 
   /**
    * @return The maximum number of quadrature points in use on any element in this problem.
@@ -812,8 +811,6 @@ protected:
   // Dimension of the subspace spanned by the vectors with a given prefix
   std::map<std::string,unsigned int> _subspace_dim;
 
-  // quadrature
-  Order _quadrature_order;                              ///< Quadrature order required by all variables to integrated over them.
   std::vector<Assembly *> _assembly;
 
   /// functions

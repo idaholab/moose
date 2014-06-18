@@ -49,7 +49,7 @@ public:
   DisplacedSystem & nlSys() { return _displaced_nl; }
   DisplacedSystem & auxSys() { return _displaced_aux; }
 
-  virtual void createQRules(QuadratureType type, Order order);
+  virtual void createQRules(QuadratureType type, Order order, Order volume_order, Order face_order);
 
   /**
    * Whether or not this problem should utilize FE shape function caching.
@@ -147,8 +147,6 @@ public:
    * @return The list
    */
   virtual std::set<dof_id_type> & ghostedElems() { return _mproblem.ghostedElems(); }
-
-  virtual Order getQuadratureOrder();
 
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor

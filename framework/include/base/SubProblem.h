@@ -64,8 +64,6 @@ public:
 
   virtual bool isTransient() const = 0;
 
-  virtual Order getQuadratureOrder() = 0;
-
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) = 0;
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
