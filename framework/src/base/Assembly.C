@@ -190,23 +190,23 @@ Assembly::getFEFaceNeighbor(FEType type, unsigned int dim)
 }
 
 void
-Assembly::createQRules(QuadratureType type, Order o)
+Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
 {
   _holder_qrule_volume.clear();
   for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
-    _holder_qrule_volume[dim] = QBase::build(type, dim, o).release();
+    _holder_qrule_volume[dim] = QBase::build(type, dim, volume_order).release();
 
   _holder_qrule_face.clear();
   for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
-    _holder_qrule_face[dim] = QBase::build(type, dim - 1, o).release();
+    _holder_qrule_face[dim] = QBase::build(type, dim - 1, face_order).release();
 
   _holder_qrule_neighbor.clear();
   for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
-    _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim, o);
+    _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim, face_order);
 
   _holder_qrule_arbitrary.clear();
   for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
-    _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, o);
+    _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, order);
 
 //  setVolumeQRule(_qrule_volume);
 //  setFaceQRule(_qrule_face);

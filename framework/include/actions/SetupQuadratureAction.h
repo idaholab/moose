@@ -39,6 +39,8 @@ protected:
 
   QuadratureType _type;
   Order _order;
+  Order _element_order;
+  Order _side_order;
 };
 
 

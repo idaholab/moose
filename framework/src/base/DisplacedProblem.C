@@ -50,10 +50,10 @@ DisplacedProblem::~DisplacedProblem()
 }
 
 void
-DisplacedProblem::createQRules(QuadratureType type, Order order)
+DisplacedProblem::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
 {
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->createQRules(type, order);
+    _assembly[tid]->createQRules(type, order, volume_order, face_order);
 }
 
 void
@@ -557,12 +557,6 @@ DisplacedProblem::onTimestepBegin()
 void
 DisplacedProblem::onTimestepEnd()
 {
-}
-
-Order
-DisplacedProblem::getQuadratureOrder()
-{
-  return _mproblem.getQuadratureOrder();
 }
 
 void

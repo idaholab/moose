@@ -123,7 +123,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _aux(*this, name_sys("aux", _n)),
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
-    _quadrature_order(CONSTANT),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif
@@ -2880,24 +2879,28 @@ FEProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
 }
 
 void
-FEProblem::createQRules(QuadratureType type, Order order)
+FEProblem::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
 {
   if (order == INVALID_ORDER)
   {
     // automatically determine the integration order
     Moose::setup_perf_log.push("getMinQuadratureOrder()","Setup");
-    _quadrature_order = _nl.getMinQuadratureOrder();
-    if (_quadrature_order<_aux.getMinQuadratureOrder()) _quadrature_order = _aux.getMinQuadratureOrder();
+    order = _nl.getMinQuadratureOrder();
+    if (order<_aux.getMinQuadratureOrder()) order = _aux.getMinQuadratureOrder();
     Moose::setup_perf_log.pop("getMinQuadratureOrder()","Setup");
   }
-  else
-    _quadrature_order = order;
+
+  if (volume_order == INVALID_ORDER)
+    volume_order = order;
+
+  if (face_order == INVALID_ORDER)
+    face_order = order;
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->createQRules(type, _quadrature_order);
+    _assembly[tid]->createQRules(type, order, volume_order, face_order);
 
   if (_displaced_problem)
-    _displaced_problem->createQRules(type, _quadrature_order);
+    _displaced_problem->createQRules(type, order, volume_order, face_order);
 
   // Find the maximum number of quadrature points
   {
