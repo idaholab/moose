@@ -79,10 +79,10 @@ ActionWarehouse::addActionBlock(Action * action)
   std::set<std::string> tasks;
 
   if (_show_parser)
-    Moose::err << COLOR_DEFAULT << "Parsing Syntax:        " << GREEN   << action->name() << '\n'
+    Moose::err << COLOR_DEFAULT << "Parsing Syntax:        " << COLOR_GREEN   << action->name() << '\n'
                << COLOR_DEFAULT << "Building Action:       " << COLOR_DEFAULT << action->type() << '\n'
-               << COLOR_DEFAULT << "Registered Identifier: " << GREEN   << registered_identifier << '\n'
-               << COLOR_DEFAULT << "Specific Task:         " << CYAN    << action->specificTaskName() << '\n';
+               << COLOR_DEFAULT << "Registered Identifier: " << COLOR_GREEN   << registered_identifier << '\n'
+               << COLOR_DEFAULT << "Specific Task:         " << COLOR_CYAN    << action->specificTaskName() << '\n';
 
   /**
    * We need to see if the current Action satisfies multiple tasks. There are a few cases to consider:
@@ -144,7 +144,7 @@ ActionWarehouse::addActionBlock(Action * action)
     action->appendTask(*it);
 
     if (_show_parser)
-      Moose::err << YELLOW << "Adding Action:         " << COLOR_DEFAULT << action->type() << " (" << YELLOW << *it << COLOR_DEFAULT << ")\n";
+      Moose::err << COLOR_YELLOW << "Adding Action:         " << COLOR_DEFAULT << action->type() << " (" << COLOR_YELLOW << *it << COLOR_DEFAULT << ")\n";
 
     // Add it to the warehouse
     _action_blocks[*it].push_back(action);
@@ -239,7 +239,7 @@ ActionWarehouse::printActionDependencySets() const
   const std::vector<std::set<std::string> > & ordered_names = _syntax.getSortedTaskSet();
   for (std::vector<std::set<std::string> >::const_iterator i = ordered_names.begin(); i != ordered_names.end(); ++i)
   {
-    oss << "[DBG][ACT] (" << YELLOW;
+    oss << "[DBG][ACT] (" << COLOR_YELLOW;
     std::copy(i->begin(), i->end(), infix_ostream_iterator<std::string>(oss, ", "));
     oss << COLOR_DEFAULT << ")\n";
 
@@ -252,7 +252,7 @@ ActionWarehouse::printActionDependencySets() const
 
         // The Syntax of the Action if it exists
         if ((*k)->name() != "")
-          oss << "[DBG][ACT]\t" << GREEN << (*k)->name() << COLOR_DEFAULT << '\n';
+          oss << "[DBG][ACT]\t" << COLOR_GREEN << (*k)->name() << COLOR_DEFAULT << '\n';
 
         // The task sets
         oss << "[DBG][ACT]\t" << act->type();
@@ -267,9 +267,9 @@ ActionWarehouse::printActionDependencySets() const
           std::set_difference(tasks.begin(), tasks.end(), intersection.begin(), intersection.end(),
                               std::inserter(difference, difference.end()));
 
-          oss << CYAN;
+          oss << COLOR_CYAN;
           std::copy(intersection.begin(), intersection.end(), infix_ostream_iterator<std::string>(oss, ", "));
-          oss << MAGENTA << (difference.empty() ? "" : ", ");
+          oss << COLOR_MAGENTA << (difference.empty() ? "" : ", ");
           std::copy(difference.begin(), difference.end(), infix_ostream_iterator<std::string>(oss, ", "));
           oss << COLOR_DEFAULT << ")";
         }
@@ -312,7 +312,7 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
        ++act_iter)
   {
     if (_show_actions)
-      Moose::out << "[DBG][ACT] " << (*act_iter)->type() << " (" << YELLOW << task << COLOR_DEFAULT << ")"  << std::endl;
+      Moose::out << "[DBG][ACT] " << (*act_iter)->type() << " (" << COLOR_YELLOW << task << COLOR_DEFAULT << ")"  << std::endl;
     (*act_iter)->act();
   }
 }

@@ -152,9 +152,6 @@ protected:
   /// The FormattedTable fit mode
   MooseEnum _fit_mode;
 
-  /// Toggle for controlling the use of color output
-  bool _use_color;
-
   /// Toggle for outputting time in time and dt in scientific notation
   bool _scientific_time;
 
