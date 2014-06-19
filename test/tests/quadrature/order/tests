@@ -1,0 +1,12 @@
+[Tests]
+  [./order3]
+    type = CSVDiff
+    input = 'order5.i'
+    csvdiff = 'order5_out.csv'
+  [../]
+  [./elem5_side7]
+    type = CSVDiff
+    input = 'elem5_side7.i'
+    csvdiff = 'elem5_side7_out.csv'
+  [../]
+[]
