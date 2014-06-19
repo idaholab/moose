@@ -1,10 +1,9 @@
+#ifndef _MDreader_h
+#define _MDreader_h
+
 #include <vector>
 #include <string>
 
-using namespace std;
-
-#ifndef _MDreader_h
-#define _MDreader_h
 
 void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::vector< std::vector<double> > & discretizationValues, std::vector<double> & values);
 void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int & numberOfPoints, std::vector< std::vector<double> > & pointcoordinates, std::vector<double> & values);

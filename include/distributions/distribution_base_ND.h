@@ -9,7 +9,6 @@
 //#include "distribution_min.h"
 #include <iostream>
 
-using namespace std;
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 enum EPbFunctionType{PDF,CDF};

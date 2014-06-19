@@ -272,11 +272,11 @@ double NDSpline::phi(double t){
 	// defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
 	double phi_value=0;
 
-	if (abs(t)<=2 & abs(t)>=1)
-		phi_value = pow(2-abs(t),3);
+	if (std::abs(t)<=2 & std::abs(t)>=1)
+		phi_value = std::pow(2-std::abs(t),3);
 
 	if (abs(t)<1)
-		phi_value = 4 - 6*pow(abs(t),2) + 3*pow(abs(t),3);
+		phi_value = 4 - 6*std::pow(std::abs(t),2) + 3*std::pow(std::abs(t),3);
 
 	return phi_value;
 }
