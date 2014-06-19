@@ -56,6 +56,14 @@ Tecplot::Tecplot(const std::string & name, InputParameters parameters) :
     _ascii_append(getParam<bool>("ascii_append")),
     _first_time(declareRestartableData<bool>("first_time", true))
 {
+#ifndef LIBMESH_HAVE_TECPLOT_API
+  if (_binary)
+  {
+    mooseWarning("Teclplot binary output requested but not available, outputting ASCII format instead.");
+    _binary = false;
+  }
+#endif
+
   // Force sequence output Note: This does not change the behavior for
   // this object b/c outputSetup() is empty, but it is placed here for
   // consistency.
