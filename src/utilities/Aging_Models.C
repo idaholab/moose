@@ -1,0 +1,15 @@
+/*
+ *  Aging_Models.C
+ *
+ *  Created on: June 19, 2014
+ */
+
+#include <math.h>
+#include <iostream>
+#include <vector>
+
+
+
+void Aging_Models(std::vector<double> input_1, std::vector<double> input_2, std::vector<std::vector<double> > output){
+    // To be added
+}
