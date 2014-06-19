@@ -143,6 +143,8 @@
 #include "InsideValuePPS.h"
 #include "BoundaryValuePPS.h"
 #include "NumInternalSides.h"
+#include "NumElemQPs.h"
+#include "NumSideQPs.h"
 #include "ElementL2Diff.h"
 
 // Functions
@@ -382,6 +384,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(TestCopyInitialSolution);
   registerPostprocessor(BoundaryValuePPS);
   registerPostprocessor(NumInternalSides);
+  registerPostprocessor(NumElemQPs);
+  registerPostprocessor(NumSideQPs);
   registerPostprocessor(ElementL2Diff);
 
   registerMarker(RandomHitMarker);
