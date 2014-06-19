@@ -6,10 +6,8 @@
  */
 #include "CrowToolsContainer.h"
 #include <iostream>
-#include <math.h>
 #include <cmath>
 #include <cstdlib>
-#include <stdlib.h>
 #include <vector>
 #include <map>
 

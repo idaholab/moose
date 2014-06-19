@@ -11,11 +11,9 @@
 #include <stdexcept>
 #include <iostream>
 #include <stdio.h>
-#include <stdlib.h>
 #include "MDreader.h"
 #include "distributionFunctions.h"
 #include <cmath>
-#include <math.h>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/math/distributions/chi_squared.hpp>

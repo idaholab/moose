@@ -7,10 +7,8 @@
 #include "DistributionContainer.h"
 #include "distribution_base_ND.h"
 #include <iostream>
-#include <math.h>
 #include <cmath>
 #include <cstdlib>
-#include <stdlib.h>
 #include <vector>
 #include <map>
 //#include <MooseRandom.h>

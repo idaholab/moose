@@ -1,7 +1,6 @@
 #include "ND_Interpolation_Functions.h"
 #include <cmath>
 #include <vector>
-#include <stdlib.h>
 #include <iostream>
 #include <limits>
 #include "MDreader.h"
@@ -275,7 +274,7 @@ double NDSpline::phi(double t){
 	if (std::abs(t)<=2 & std::abs(t)>=1)
 		phi_value = std::pow(2-std::abs(t),3);
 
-	if (abs(t)<1)
+	if (std::abs(t)<1)
 		phi_value = 4 - 6*std::pow(std::abs(t),2) + 3*std::pow(std::abs(t),3);
 
 	return phi_value;

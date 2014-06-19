@@ -1,7 +1,7 @@
 #include "ND_Interpolation_Functions.h"
-#include <math.h>
 #include <vector>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cmath>
 #include "MDreader.h"
 
 MicroSphere::MicroSphere(std::string filename, double p, int precision){
@@ -25,17 +25,17 @@ MicroSphere::MicroSphere(double p, int precision)
 }
 
 void MicroSphere::MSinitialization(){
-	srand (time(NULL));
+  std::srand (time(NULL));
 
 	for (int j=0; j<_precision; j++){
 		double sum = 0;
 		do{
 			for (int i=0; i<_dimensions; i++){
 				// x,y,z are uniformly-distributed random numbers in the range (-1,1)
-				_unit_vector[j][i] = -1+2*rand();
+                          _unit_vector[j][i] = -1+2*std::rand();
 				sum += _unit_vector[j][i];
 			}
-			sum = sqrt(sum);
+			sum = std::sqrt(sum);
 		}while (sum > 1);
 
 		for (int i=0; i<_dimensions; i++)
