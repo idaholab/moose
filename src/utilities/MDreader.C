@@ -14,11 +14,9 @@
 
 #include "MDreader.h"
 
-using namespace std;
-
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
-void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::vector< std::vector<double> > & discretizationValues, vector<double> & values){
+void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::vector< std::vector<double> > & discretizationValues, std::vector<double> & values){
     //FILE* pFile = fopen("filename", "rb");
     // file structure
     // - int number of dimensions                                   1
@@ -116,7 +114,7 @@ void readMatrix(std::string filename, int & rows, int & columns, std::vector< st
 	//              row2
 	//              row3
 
-    vector <double> v;
+    std::vector <double> v;
 
     import_matrix_from_txt_file(filename,v,rows,columns);
 
@@ -129,8 +127,8 @@ void readMatrix(std::string filename, int & rows, int & columns, std::vector< st
 }
 
 
-int ReadNumbers(const string & s, vector <double> & v ) {
-    istringstream is( s );
+int ReadNumbers(const std::string & s, std::vector <double> & v ) {
+    std::istringstream is( s );
     double n;
     while( is >> n )
         v.push_back( n );
@@ -140,9 +138,9 @@ int ReadNumbers(const string & s, vector <double> & v ) {
 
 
 
-void import_matrix_from_txt_file(std::string filename_X, vector <double>& v, int& rows, int& cols){
-    ifstream file_X;
-    string line;
+void import_matrix_from_txt_file(std::string filename_X, std::vector <double>& v, int& rows, int& cols){
+    std::ifstream file_X;
+    std::string line;
 
     file_X.open(filename_X.c_str());
     if (file_X.is_open())
@@ -151,7 +149,7 @@ void import_matrix_from_txt_file(std::string filename_X, vector <double>& v, int
         getline(file_X, line);
 
         cols =ReadNumbers( line, v );
-        cout << "cols:" << cols << endl;
+        std::cout << "cols:" << cols << std::endl;
 
         for ( i=1;i<32767;i++){
             if ( getline(file_X, line) == 0 ) break;
@@ -159,20 +157,20 @@ void import_matrix_from_txt_file(std::string filename_X, vector <double>& v, int
         }
 
         rows=i;
-        cout << "rows :" << rows << endl;
-        if(rows >32766) cout<< "N must be smaller than MAX_INT";
+        std::cout << "rows :" << rows << std::endl;
+        if(rows >32766) std::cout<< "N must be smaller than MAX_INT";
 
         file_X.close();
     }
     else{
-        cout << "file open failed";
+      std::cout << "file open failed";
     }
 
-    cout << "v:" << endl;
+    std::cout << "v:" << std::endl;
     for (int i=0;i<rows;i++){
         for (int j=0;j<cols;j++)
-            cout << v[i*cols+j] << "\t" ;
-        cout << endl;
+          std::cout << v[i*cols+j] << "\t" ;
+        std::cout << std::endl;
     }
 }
 
@@ -181,8 +179,8 @@ void import_matrix_from_txt_file(std::string filename_X, vector <double>& v, int
 std::vector<double> read1Darray(std::string filename){
 	//numbers are separated by newlines
 
-	vector<double> data;
-	ifstream in(filename.c_str());
+        std::vector<double> data;
+        std::ifstream in(filename.c_str());
 	if(not in)
 		throwError("The filename " << filename << " does not exist!!!!");
 	if(in)

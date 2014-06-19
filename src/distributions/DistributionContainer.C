@@ -16,8 +16,6 @@
 //#include <MooseRandom.h>
 #include <boost/random/mersenne_twister.hpp>
 
-using namespace std;
-
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 class DistributionContainer;

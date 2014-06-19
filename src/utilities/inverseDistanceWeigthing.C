@@ -3,7 +3,6 @@
 #include <vector>
 #include <stdlib.h>
 #include "MDreader.h"
-using namespace std;
 #include <iostream>
 
 

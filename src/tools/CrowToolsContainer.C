@@ -13,8 +13,6 @@
 #include <vector>
 #include <map>
 
-using namespace std;
-
 #ifndef mooseError
 #define mooseError(msg) { std::cerr << "\n\n" << msg << "\n\n"; }
 #endif

@@ -39,8 +39,6 @@
 
 #define _USE_MATH_DEFINES
 
-using namespace std;
-
 /*
 extern "C" {
     // LU decomoposition of a general matrix

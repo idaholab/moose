@@ -35,7 +35,6 @@ using boost::math::normal;
 //#include <boost/numeric/ublas/io.hpp>
 
 //using namespace boost::numeric::ublas;
-using namespace std;
 
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 

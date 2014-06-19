@@ -68,7 +68,7 @@ double NDSpline::interpolateAt(std::vector<double> point_coordinate){
 		std::vector<int> coordinates (point_coordinate.size());
 
 		int minIndex = -1;
-		double minDistance = numeric_limits<double>::max();
+		double minDistance = std::numeric_limits<double>::max();
 
 		for (int nDim=0; nDim<_dimensions; nDim++)
 			indexes.at(nDim) = _discretizations.at(nDim).size();
@@ -216,7 +216,7 @@ std::vector<std::vector<double> > NDSpline::matrixRestructuring(std::vector<std:
 	int rows = step1.size();
 	int cols = step1.at(0).size();
 
-	std::vector<std::vector<double> > step2 (cols, vector<double>(rows,0));
+	std::vector<std::vector<double> > step2 (cols, std::vector<double>(rows,0));
 
 	for (int r=0; r<rows; r++)
 		for (int c=0; c<cols; c++)

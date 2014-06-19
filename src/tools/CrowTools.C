@@ -7,8 +7,6 @@
 
 #include "CrowTools.h"
 
-using namespace std;
-
 template<>
 InputParameters validParams<CrowTools>(){
 
