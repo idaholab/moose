@@ -34,7 +34,6 @@ InputParameters validParams<SolutionUserObject>()
 
   // Add required parameters
   params.addRequiredParam<std::string>("mesh", "The name of the mesh file (must be xda or exodusII file).");
-  //params.addRequiredParam<std::vector<std::string> >("variables", "The name of the variable from the file you want to use for values.");
   params.addParam<std::vector<std::string> >("nodal_variables", "The name of the nodal variables from the file you want to use for values.");
   params.addParam<std::vector<std::string> >("elemental_variables", "The name of the element variables from the file you want to use for values.");
 
@@ -72,7 +71,7 @@ InputParameters validParams<SolutionUserObject>()
 
 SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters parameters) :
     GeneralUserObject(name, parameters),
-    _file_type(MooseEnum("xda=0, exodusII=1")),
+    _file_type(MooseEnum("xda=0, exodusII=1, xdr=2")),
     _mesh_file(getParam<std::string>("mesh")),
     _es_file(getParam<std::string>("es")),
     _system_name(getParam<std::string>("system")),
@@ -118,6 +117,7 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     mooseWarning("Parameter name coord_scale is deprecated.  Please use scale instead.");
     _scale = getParam<std::vector<Real> >("coord_scale");
   }
+
   if (parameters.isParamValid("coord_factor"))
   {
     mooseWarning("Parameter name coord_factor is deprecated.  Please use translation instead.");
@@ -177,20 +177,20 @@ SolutionUserObject::~SolutionUserObject()
 void
 SolutionUserObject::readXda()
 {
-  // Check that the EquationSystems XDA file
-  if (_es_file == "")
-      mooseError("In SolutionUserObject, es must be supplied when file_type=xda");
 
-  // Check that a system name is defined, for extraction from the file
-  if (_system_name == "")
-      mooseError("In SolutionUserObject, system must be supplied when file_type=xda");
+  // Check that the required files exist
+  MooseUtils::checkFileReadable(_es_file);
+  MooseUtils::checkFileReadable(_mesh_file);
 
   // Read the libmesh::mesh from the xda file
   _mesh->read(_mesh_file);
 
   // Create, read, and update the libmesh::EquationSystems
   _es = new EquationSystems(*_mesh);
-  _es->read(_es_file);
+  if (_file_type ==  "xdr")
+    _es->read(_es_file, DECODE, EquationSystems::READ_HEADER | EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA);
+  else
+    _es->read(_es_file, READ, EquationSystems::READ_HEADER | EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA);
   _es->update();
 
   // Store the EquationSystems name locally
@@ -399,9 +399,15 @@ SolutionUserObject::initialSetup()
     readXda();
   }
 
+  else if (MooseUtils::hasExtension(_mesh_file, "xdr"))
+  {
+    _file_type = "xdr";
+    readXda();
+  }
+
   // Produce an error for an unknown file type
   else
-    mooseError("In SolutionUserObject, invalid file type (only .xda and .e supported)");
+    mooseError("In SolutionUserObject, invalid file type (only .xda, .xdr, and .e supported)");
 
   // Intilize the serial solution vector
   _serialized_solution = NumericVector<Number>::build(_communicator).release();
