@@ -237,10 +237,10 @@ SystemBase::prepareNeighbor(THREAD_ID tid)
 void
 SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
-  const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
 
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
+    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
     for (std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
         it != active_elemental_moose_variables.end();
         ++it)
