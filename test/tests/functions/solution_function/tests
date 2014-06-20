@@ -21,32 +21,36 @@
     type = 'Exodiff'
     input = 'solution_function_rot1.i'
     exodiff = 'solution_function_rot1.e'
+    mesh_mode = SERIAL
   [../]
   [./rot2]
     type = 'Exodiff'
     input = 'solution_function_rot2.i'
     exodiff = 'solution_function_rot2.e'
+    mesh_mode = SERIAL
   [../]
   [./rot3]
     type = 'Exodiff'
     input = 'solution_function_rot3.i'
     exodiff = 'solution_function_rot3.e'
+    mesh_mode = SERIAL
   [../]
   [./rot4]
     type = 'Exodiff'
     input = 'solution_function_rot4.i'
     exodiff = 'solution_function_rot4.e'
+    mesh_mode = SERIAL
   [../]
   [./scale_transl]
     type = 'Exodiff'
     input = 'solution_function_scale_transl.i'
     exodiff = 'solution_function_scale_transl.e'
+    mesh_mode = SERIAL
   [../]
   [./scale_mult]
     type = 'Exodiff'
     input = 'solution_function_scale_mult.i'
     exodiff = 'solution_function_scale_mult.e'
+    mesh_mode = SERIAL
   [../]
-
-
 []
