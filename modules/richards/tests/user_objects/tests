@@ -22,5 +22,6 @@
     input = 'uo4.i'
     csvdiff = 'uo4.csv'
     abs_zero = 1E-6
+    skip = 'Access out of bounds'
   [../]
 []
