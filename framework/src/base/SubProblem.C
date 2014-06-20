@@ -58,7 +58,7 @@ SubProblem::~SubProblem()
 void
 SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid)
 {
-  _has_active_elemental_moose_variables[tid] = true;
+  _has_active_elemental_moose_variables[tid] = 1;
   _active_elemental_moose_variables[tid] = moose_vars;
 }
 
@@ -77,7 +77,7 @@ SubProblem::hasActiveElementalMooseVariables(THREAD_ID tid)
 void
 SubProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
 {
-  _has_active_elemental_moose_variables[tid] = false;
+  _has_active_elemental_moose_variables[tid] = 0;
   _active_elemental_moose_variables[tid].clear();
 }
 

@@ -3,6 +3,5 @@
     type = 'Exodiff'
     input = 'front_tracking.i'
     exodiff = 'front_tracking_out.e'
-    max_threads = 1  # Issue 2370
   [../]
 []
