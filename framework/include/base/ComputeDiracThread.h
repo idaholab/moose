@@ -39,9 +39,11 @@ public:
 
   virtual ~ComputeDiracThread();
 
+  virtual void subdomainChanged();
   virtual void pre();
   virtual void onElement(const Elem *elem);
   virtual void postElement(const Elem * /*elem*/);
+  virtual void post();
 
   void join(const ComputeDiracThread & /*y*/);
 
