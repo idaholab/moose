@@ -45,21 +45,19 @@
 []
 
 [BCs]
-  active = 'bottom top'
+  active = 'left right'
 
-  [./bottom]
+  [./left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0.0
   [../]
 
-  [./top]
-#    type = DirichletBC
+  [./right]
     type = MTBC
     variable = u
     boundary = 1
-#    value = 1.0
     grad = 1.0
     prop_name = thermal_conductivity
   [../]
