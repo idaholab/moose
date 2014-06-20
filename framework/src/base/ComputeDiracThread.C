@@ -37,7 +37,8 @@ ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split sp
     ThreadedElementLoop<DistElemRange>(x, split),
     _jacobian(x._jacobian),
     _sys(x._sys)
-{}
+{
+}
 
 ComputeDiracThread::~ComputeDiracThread()
 {
@@ -52,9 +53,25 @@ ComputeDiracThread::pre()
 }
 
 void
+ComputeDiracThread::subdomainChanged()
+{
+  std::set<MooseVariable *> needed_moose_vars;
+  const std::vector<DiracKernel *> & dkernels = _sys.getDiracKernelWarehouse(_tid).all();
+  for (std::vector<DiracKernel *>::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
+  {
+    // Update the dependent variables for the dirac kernel
+    const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+  }
+  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+}
+
+
+void
 ComputeDiracThread::onElement(const Elem * elem)
 {
   bool has_dirac_kernels_on_elem = _fe_problem.reinitDirac(elem, _tid);
+  std::set<MooseVariable *> needed_moose_vars;
 
   if (has_dirac_kernels_on_elem)
   {
@@ -66,6 +83,7 @@ ComputeDiracThread::onElement(const Elem * elem)
          dirac_kernel_it != _sys.getDiracKernelWarehouse(_tid).all().end();
          ++dirac_kernel_it)
     {
+
       // If any of the DiracKernels have had getMaterialProperty()
       // called, we need to reinit Materials.
       if ((*dirac_kernel_it)->getMaterialPropertyCalled())
@@ -110,6 +128,12 @@ ComputeDiracThread::postElement(const Elem * /*elem*/)
     _fe_problem.addResidual(_tid);
   else
     _fe_problem.addJacobian(*_jacobian, _tid);
+}
+
+void
+ComputeDiracThread::post()
+{
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
 }
 
 void

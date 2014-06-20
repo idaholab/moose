@@ -313,7 +313,8 @@ protected:
   std::vector<std::set<MooseVariable *> > _active_elemental_moose_variables;
 
   /// Whether or not there is currently a list of active elemental moose variables
-  std::vector<bool> _has_active_elemental_moose_variables;
+  /* This needs to remain <unsigned int> for threading purposes */
+  std::vector<unsigned int> _has_active_elemental_moose_variables;
 
   /// Elements that should have Dofs ghosted to the local processor
   std::set<dof_id_type> _ghosted_elems;
