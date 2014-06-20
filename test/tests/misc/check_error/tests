@@ -364,6 +364,8 @@
     expect_out = "WARNING: The following parameters were unused in your input file"
     input = 'unused_param_test.i'
     cli_args = '--warn-unused'
+    # Don't allow --error-unused on this test
+    skip_test_harness_cli_args = true
   [../]
 
   [./uo_pps_name_collision_test]
