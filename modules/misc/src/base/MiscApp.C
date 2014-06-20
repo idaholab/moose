@@ -16,6 +16,7 @@
 #include "RigidBodyModes3D.h"
 #include "CoupledDirectionalMeshHeightInterpolation.h"
 #include "CInterfacePosition.h"
+#include "ThermoDiffusion.h"
 
 template<>
 InputParameters validParams<MiscApp>()
@@ -59,6 +60,7 @@ MiscApp::registerObjects(Factory & factory)
   registerKernel(JouleHeating);
   registerKernel(CoefTimeDerivative);
   registerKernel(GaussContForcing);
+  registerKernel(ThermoDiffusion);
 
   registerMaterial(Density);
 
