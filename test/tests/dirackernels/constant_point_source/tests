@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'constant_point_source_test.i'
     exodiff = 'out.e'
+   # exodiff_opts = '-show_all_diffs'
   [../]
 
   [./1d]
