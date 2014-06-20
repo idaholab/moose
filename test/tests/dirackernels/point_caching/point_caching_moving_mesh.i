@@ -105,7 +105,6 @@
 []
 
 [Outputs]
-  use_color = false
   output_initial = true
   exodus = true
   [./console]

@@ -36,6 +36,20 @@
     check_files = 'out_0000.dat'
   [../]
 
+  [./tecplot_bin_test]
+    type = 'CheckFiles'
+    input = 'output_test_tecplot_binary.i'
+    check_files = 'bin_out_0000.plt'
+    tecplot = true
+  [../]
+
+  [./tecplot_bin_test_override]
+    type = 'CheckFiles'
+    input = 'output_test_tecplot_binary.i'
+    check_files = 'bin_out_0000.dat'
+    tecplot = false
+  [../]
+
   [./dump_test]
     type = 'RunApp'
     input = 'IGNORED'
