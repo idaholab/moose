@@ -10,22 +10,13 @@
 []
 
 [Variables]
-  active = 'u prop1'
-
   [./u]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./prop1]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  active = 'heat ie prop1_output'
-
   [./heat]
     type = MatDiffusion
     variable = u
@@ -36,39 +27,36 @@
     type = TimeDerivative
     variable = u
   [../]
-
-  [./prop1_output]
-    type = RealPropertyOutput
-    variable = prop1
-    prop_name = thermal_conductivity
-  [../]
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 3
+    boundary = left
     value = 0.0
   [../]
 
   [./right]
     type = MTBC
     variable = u
-    boundary = 1
+    boundary = right
     grad = 1.0
     prop_name = thermal_conductivity
   [../]
 []
 
 [Materials]
-  active = 'stateful'
-
-  [./stateful]
-    type = StatefulSpatialTest
+  [./volatile]
+    type = GenericConstantMaterial
+    prop_names = 'thermal_conductivity'
+    prop_values = 10
     block = 0
+  [../]
+
+  [./stateful_on_boundary]
+    type = StatefulSpatialTest
+    boundary = right
   [../]
 []
 
@@ -84,7 +72,7 @@
 []
 
 [Outputs]
-  file_base = out_spatial
+  file_base = out_bnd_only
   output_initial = true
   exodus = true
   [./console]

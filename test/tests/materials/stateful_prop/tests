@@ -31,6 +31,12 @@
     exodiff = 'out_spatial.e'
   [../]
 
+  [./spatial_bnd_only]
+    type = 'Exodiff'
+    input = 'stateful_prop_on_bnd_only.i'
+    exodiff = 'out_bnd_only.e'
+  [../]
+
   [./stateful_copy]
     type = 'Exodiff'
     input = 'stateful_prop_copy_test.i'
@@ -41,7 +47,7 @@
   [./test_older_csv]
     type = 'CSVDiff'
     input = 'stateful_prop_test_older.i'
-    csvdiff = 'out_older.csv' 
+    csvdiff = 'out_older.csv'
     cli_args = 'Outputs/csv=true'
     max_parallel = 1
     prereq = 'test_older'

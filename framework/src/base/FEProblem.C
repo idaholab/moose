@@ -346,7 +346,7 @@ void FEProblem::initialSetup()
   }
 
   // Build Refinement and Coarsening maps for stateful material projections if necessary
-  if (_adaptivity.isOn() && _material_props.hasStatefulProperties())
+  if (_adaptivity.isOn() && (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
     Moose::setup_perf_log.push("mesh.buildRefinementAndCoarseningMaps()","Setup");
     _mesh.buildRefinementAndCoarseningMaps(_assembly[0]);
@@ -439,7 +439,7 @@ void FEProblem::initialSetup()
   for (unsigned int i=0; i<n_threads; i++)
     _materials[i].initialSetup();
 
-  if (_material_props.hasStatefulProperties())
+  if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
@@ -458,7 +458,7 @@ void FEProblem::initialSetup()
     // now if restarting and we have stateful material properties, go overwrite the values with the ones
     // from the restart file.  We need to do it this way, since we have no idea about sizes of user-defined material
     // properties (i.e. things like std:vector<std::vector<SymmTensor> >)
-    if (_material_props.hasStatefulProperties())
+    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
     {
       // load the stateful material props from a file
       _resurrector->restartStatefulMaterialProps();
@@ -534,7 +534,7 @@ void FEProblem::initialSetup()
 
   // Here we will initialize the stateful properties once more since they may have been updated
   // during initialSetup by calls to computeProperties.
-  if (_material_props.hasStatefulProperties())
+  if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
   {
     if (_app.isRestarting() || _app.isRecovering())
       _resurrector->restartStatefulMaterialProps();
@@ -3076,10 +3076,10 @@ FEProblem::advanceState()
     _materials[tid].updateMaterialDataState();
 
   if (_material_props.hasStatefulProperties())
-  {
     _material_props.shift();
+
+  if (_bnd_material_props.hasStatefulProperties())
     _bnd_material_props.shift();
-  }
 }
 
 void FEProblem::restoreSolutions()
@@ -3444,7 +3444,7 @@ FEProblem::adaptMesh()
 void
 FEProblem::meshChanged()
 {
-  if (_material_props.hasStatefulProperties())
+  if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material properties
 
   // Clear these out because they corresponded to the old mesh
@@ -3478,7 +3478,7 @@ FEProblem::meshChanged()
   reinitBecauseOfGhosting();
 
   // We need to create new storage for the new elements and copy stateful properties from the old elements.
-  if (_has_initialized_stateful && _material_props.hasStatefulProperties())
+  if (_has_initialized_stateful && (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
     {
       ProjectMaterialProperties pmp(true, *this, _nl, _material_data, _bnd_material_data, _material_props, _bnd_material_props, _materials, _assembly);
@@ -3517,7 +3517,7 @@ FEProblem::checkProblemIntegrity()
   // Check materials
   {
 #ifdef LIBMESH_ENABLE_AMR
-    if (_material_props.hasStatefulProperties() && _adaptivity.isOn())
+    if (_adaptivity.isOn() && (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
     {
       _console << "Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!\n";
 
