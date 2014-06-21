@@ -67,18 +67,19 @@ void
 ComputeMaterialsObjectThread::subdomainChanged()
 {
   _need_internal_side_material = _fe_problem.needMaterialOnSide(_subdomain, _tid);
-
-  mooseAssert(_materials[_tid].hasMaterials(_subdomain), "No materials on subdomain block");
   _fe_problem.subdomainSetup(_subdomain, _tid);
 }
 
 void
 ComputeMaterialsObjectThread::onElement(const Elem *elem)
 {
-  _assembly[_tid]->reinit(elem);
+  if (_materials[_tid].hasMaterials(_subdomain))
+  {
+    _assembly[_tid]->reinit(elem);
 
-  unsigned int n_points = _assembly[_tid]->qRule()->n_points();
-  _material_props.initStatefulProps(*_material_data[_tid], _materials[_tid].getMaterials(_subdomain), n_points, *elem);
+    unsigned int n_points = _assembly[_tid]->qRule()->n_points();
+    _material_props.initStatefulProps(*_material_data[_tid], _materials[_tid].getMaterials(_subdomain), n_points, *elem);
+  }
 }
 
 void
@@ -89,7 +90,13 @@ ComputeMaterialsObjectThread::onBoundary(const Elem *elem, unsigned int side, Bo
     _fe_problem.setCurrentBoundaryID(bnd_id);
     _assembly[_tid]->reinit(elem, side);
     unsigned int n_points = _assembly[_tid]->qRuleFace()->n_points();
-    _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), n_points, *elem, side);
+    // Face Materials
+    if (_materials[_tid].hasFaceMaterials(_subdomain))
+      _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), n_points, *elem, side);
+    // Boundary Materials
+    if (_materials[_tid].hasBoundaryMaterials(bnd_id))
+      _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getBoundaryMaterials(bnd_id), n_points, *elem, side);
+
     _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
   }
 }
@@ -110,6 +117,9 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem *elem, unsigned int side
     if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
     {
       _assembly[_tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);
+      // Face Materials
+      _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid], _materials[_tid].getFaceMaterials(_subdomain), face_n_points, *elem, side);
+      // Neighbor Materials
       _bnd_material_props.initStatefulProps(*_neighbor_material_data[_tid], _materials[_tid].getNeighborMaterials(_subdomain), face_n_points, *neighbor, neighbor_side);
     }
   }
