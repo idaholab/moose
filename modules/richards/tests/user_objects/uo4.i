@@ -405,7 +405,7 @@
     sat_UO = 'Saturation Saturation'
     seff_UO = 'Seff2waterVG Seff2gasVG'
     SUPG_UO = 'SUPGstandard SUPGstandard'
-    viscosity = 1E-3
+    viscosity = '1E-3 1E-5'
     gravity = '0 0 -10'
     linear_shape_fcns = true
   [../]
