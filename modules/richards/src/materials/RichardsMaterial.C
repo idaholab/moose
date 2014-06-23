@@ -108,12 +108,15 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
   if (_material_por <= 0 || _material_por >= 1)
     mooseError("Porosity set to " << _material_por << " but it must be between 0 and 1");
 
-  if (isCoupled("perm_change") && (coupledComponents("perm_change") != 9))
-    mooseError("9 components of perm_change must be given to a RichardsMaterial.  You supplied " << coupledComponents("perm_change") << "\n");
+  if (isCoupled("perm_change") && (coupledComponents("perm_change") != LIBMESH_DIM*LIBMESH_DIM))
+    mooseError(LIBMESH_DIM*LIBMESH_DIM << " components of perm_change must be given to a RichardsMaterial.  You supplied " << coupledComponents("perm_change") << "\n");
 
-  _perm_change.resize(9);
-  for (unsigned int i=0 ; i<9 ; ++i)
+  _perm_change.resize(LIBMESH_DIM*LIBMESH_DIM);
+  for (unsigned int i=0 ; i<LIBMESH_DIM*LIBMESH_DIM ; ++i)
     _perm_change[i] = (isCoupled("perm_change")? &coupledValue("perm_change", i) : &_zero); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
+
+  if (!(_material_viscosity.size() == _num_p && getParam<std::vector<UserObjectName> >("relperm_UO").size() && getParam<std::vector<UserObjectName> >("seff_UO").size() && getParam<std::vector<UserObjectName> >("sat_UO").size() && getParam<std::vector<UserObjectName> >("density_UO").size() && getParam<std::vector<UserObjectName> >("SUPG_UO").size()))
+    mooseError("There are " << _num_p << " Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO");
 
   _d2density.resize(_num_p);
   _d2rel_perm_dv.resize(_num_p);
@@ -479,8 +482,8 @@ RichardsMaterial::computeSUPG()
       _tauvel_SUPG[qp][i] = tau*vel;
 
       RealTensorValue dtauvel_dgradp = tau*dvel_dgradp;
-      for (unsigned int j=0 ; j<3; ++j)
-        for (unsigned int k=0 ; k<3; ++k)
+      for (unsigned int j=0 ; j<LIBMESH_DIM; ++j)
+        for (unsigned int k=0 ; k<LIBMESH_DIM; ++k)
           dtauvel_dgradp(j, k) += dtau_dgradp(j)*vel(k); // this is outerproduct - maybe libmesh can do it better?
       for (unsigned int j=0 ; j<_num_p; ++j)
         _dtauvel_SUPG_dgradp[qp][i][j] = dtauvel_dgradp*_dpp_dv[qp][i][j];
@@ -507,9 +510,9 @@ RichardsMaterial::computeProperties()
     _porosity_old[qp] = _material_por + (*_por_change_old)[qp];
 
     _permeability[qp] = _material_perm;
-    for (unsigned int i=0; i<3; i++)
-      for (unsigned int j=0; j<3; j++)
-        _permeability[qp](i,j) *= std::pow(10,(*_perm_change[3*i+j])[qp]);
+    for (unsigned int i=0; i<LIBMESH_DIM; i++)
+      for (unsigned int j=0; j<LIBMESH_DIM; j++)
+        _permeability[qp](i,j) *= std::pow(10,(*_perm_change[LIBMESH_DIM*i+j])[qp]);
 
     _gravity[qp] = _material_gravity;
   }

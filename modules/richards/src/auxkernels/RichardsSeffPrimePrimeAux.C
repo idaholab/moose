@@ -36,7 +36,7 @@ RichardsSeffPrimePrimeAux::RichardsSeffPrimePrimeAux(const std::string & name, I
     _pressure_vals[i] = &coupledValue("pressure_vars", i);
 
   _mat.resize(n);
-  for (unsigned i=0; i<n; ++i)
+  for (int i=0; i<n; ++i)
     _mat[i].resize(n);
 }
 
