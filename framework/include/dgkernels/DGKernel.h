@@ -77,14 +77,29 @@ public:
   SubProblem & subProblem();
 
   /**
+   * Computes the residual for this element or the neighbor
+   */
+  virtual void computeElemNeighResidual(Moose::DGResidualType type);
+
+  /**
    * Computes the residual for the current side.
    */
   virtual void computeResidual();
 
   /**
+   * Computes the element/neighbor-element/neighbor Jacobian
+   */
+  virtual void computeElemNeighJacobian(Moose::DGJacobianType type);
+
+  /**
    * Computes the jacobian for the current side.
    */
   virtual void computeJacobian();
+
+  /**
+   * Computes the element-element off-diagonal Jacobian
+   */
+  virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,unsigned int jvar);
 
   /**
    * Computes d-residual / d-jvar...
