@@ -15,6 +15,8 @@ InputParameters validParams<SolidMaterialProperties>()
   params.addPrivateParam<Real>("specific_heat");
   params.addPrivateParam<Real>("density");
 
+  params.registerBase("MaterialProperties");
+
   return params;
 }
 
