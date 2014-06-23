@@ -1,0 +1,22 @@
+[Tests]
+  [./relperm]
+    type = 'RunApp'
+    input = 'relperm.i'
+    expect_out = 'Framework Information'
+  [../]
+  [./density]
+    type = 'RunApp'
+    input = 'density.i'
+    expect_out = 'Framework Information'
+  [../]
+  [./seff1]
+    type = 'RunApp'
+    input = 'seff1.i'
+    expect_out = 'Framework Information'
+  [../]
+  [./seff2]
+    type = 'RunApp'
+    input = 'seff2.i'
+    expect_out = 'Framework Information'
+  [../]
+[]

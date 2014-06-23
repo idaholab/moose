@@ -18,6 +18,8 @@ InputParameters validParams<RichardsSeff1VGcut>()
 
 RichardsSeff1VGcut::RichardsSeff1VGcut(const std::string & name, InputParameters parameters) :
   RichardsSeff1VG(name, parameters),
+  _al(getParam<Real>("al")),
+  _m(getParam<Real>("m")),
   _p_cut(getParam<Real>("p_cut")),
   _s_cut(0),
   _ds_cut(0)
