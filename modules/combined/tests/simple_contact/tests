@@ -5,6 +5,11 @@
     input = 'simple_contact_test.i'
     exodiff = 'out.e'
   [../]
+  [./3D_2]
+    type = Exodiff
+    input = 'simple_contact_mechanical_constraint_test.i'
+    exodiff = 'mechanical_constraint_out.e'
+  [../]
   [./RZ]
     type = Exodiff
     input = 'simple_contact_rz_test.i'
