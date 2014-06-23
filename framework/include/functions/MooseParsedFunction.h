@@ -67,6 +67,12 @@ public:
   virtual Real value(Real t, const Point & pt);
 
   /**
+   * Evaluate the gradient of the function. This is computed in libMesh
+   * through automatic symbolic differentiation.
+   */
+  virtual RealGradient gradient(Real t, const Point & p);
+
+  /**
    * Method invalid for ParsedGradFunction
    * @see ParsedVectorFunction
    */
