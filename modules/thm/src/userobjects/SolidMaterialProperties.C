@@ -15,6 +15,8 @@ InputParameters validParams<SolidMaterialProperties>()
   params.addPrivateParam<Real>("specific_heat");
   params.addPrivateParam<Real>("density");
 
+  params.addPrivateParam<MooseEnum>("execute_on");
+  params.addPrivateParam<bool>("use_displaced_mesh");
   params.registerBase("MaterialProperties");
 
   return params;
