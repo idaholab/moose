@@ -51,6 +51,34 @@ Each example is located in the {\em test} directory, which has path
 \end{verbatim}
 
 
+\chapter{User Object examples}
+
+In the test suite there are a number of tests that allow easy
+exploration of the functional form of the User Objects.  These are:
+\begin{enumerate}
+\item {\tt relperm.i} outputs the relative permeability as a function
+  of effective saturation.  The user may specify which particular form
+  of relative permeability to output, and the appropriate parameters
+  of interest.
+\item {\tt density.i} outputs the fluid density as a function of fluid
+  pressure.  The user may specify which particular form of density to
+  output, and the appropriate parameters of interest.
+\item {\tt seff1.i} outputs the effective saturation for a
+  single-phase situation as a function of porepressure (if
+  porepressure is positive then the effective saturation is unity).
+  The user may specify which particular form of effective saturation
+  to output, and the appropriate parameters of interest.
+\item {\tt seff2.i} outputs the effective saturation for a 2-phase
+  situation as a function of differences in porepressure (the
+  difference is, say, $P_{\mathrm{gas}} - P_{\mathrm{water}}$, which
+  is positive).  The user may specify which particular form of
+  effective saturation to output, and the appropriate parameters of
+  interest.
+\end{enumerate}
+In all cases, an exodus file is output that can be used to generate
+plots of the user objects.  Also a CSV file is output that contains
+the user object evaluated at a specific point of interest.
+
 
 \chapter{Convergence and convergence criteria}
 
