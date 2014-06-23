@@ -6,11 +6,25 @@
     recover = false
   [../]
 
+  [./tosub_target_displaced]
+    type = 'Exodiff'
+    input = 'tosub_master_target_displaced.i'
+    exodiff = 'tosub_master_target_displaced_out_sub0.e tosub_master_target_displaced_out_sub1.e tosub_master_target_displaced_out_sub2.e'
+    recover = false
+  [../]
+
 
   [./fromsub]
     type = 'Exodiff'
     input = 'master.i'
     exodiff = 'master_out.e'
+    recover = false
+  [../]
+
+  [./fromsub_source_displaced]
+    type = 'Exodiff'
+    input = 'master_source_displaced.i'
+    exodiff = 'master_source_displaced_out.e'
     recover = false
   [../]
 

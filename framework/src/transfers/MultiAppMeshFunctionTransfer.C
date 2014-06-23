@@ -60,6 +60,10 @@ MultiAppMeshFunctionTransfer::execute()
   {
     case TO_MULTIAPP:
     {
+      // TODO: This doesn't work with the master app being displaced see #3424
+      if (_displaced_source_mesh)
+        mooseError("displaced_source_mesh is not yet implemented for transferring 'to_multiapp'");
+
       FEProblem & from_problem = *_multi_app->problem();
       MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
 
@@ -83,7 +87,14 @@ MultiAppMeshFunctionTransfer::execute()
 
       unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-      EquationSystems & from_es = from_sys.get_equation_systems();
+      EquationSystems * tmp_es = NULL;
+
+      if (_displaced_source_mesh && from_problem.getDisplacedProblem())
+        tmp_es = &from_problem.getDisplacedProblem()->es();
+      else
+        tmp_es = &from_problem.es();
+
+      EquationSystems & from_es = *tmp_es;
 
       //Create a serialized version of the solution vector
       NumericVector<Number> * serialized_solution = NumericVector<Number>::build(from_sys.comm()).release();
@@ -194,6 +205,10 @@ MultiAppMeshFunctionTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
+      // TODO: This doesn't work with the master app being displaced see #3424
+      if (_displaced_target_mesh)
+        mooseError("displaced_target_mesh is not yet implemented for transferring 'from_multiapp'");
+
       FEProblem & to_problem = *_multi_app->problem();
       MooseVariable & to_var = to_problem.getVariable(0, _to_var_name);
       SystemBase & to_system_base = to_var.sys();
@@ -239,7 +254,14 @@ MultiAppMeshFunctionTransfer::execute()
 
         unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-        EquationSystems & from_es = from_sys.get_equation_systems();
+        EquationSystems * tmp_es = NULL;
+
+        if (_displaced_source_mesh && from_problem.getDisplacedProblem())
+          tmp_es = &from_problem.getDisplacedProblem()->es();
+        else
+          tmp_es = &from_problem.es();
+
+        EquationSystems & from_es = *tmp_es;
 
         //Create a serialized version of the solution vector
         NumericVector<Number> * serialized_from_solution = NumericVector<Number>::build(from_sys.comm()).release();
