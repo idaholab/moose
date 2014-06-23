@@ -54,6 +54,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("output_initial", false,  "Request that the initial condition is output to the solution file");
    params.addParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output");
    params.addParam<bool>("output_final", false, "Force the final timestep to be output, regardless of output interval");
+   params.addParam<bool>("color", true, "Set to false to turn off all coloring in all outputs");
    params.addParam<std::string>("file_base", "Common file base name to be utilized with all output objects");
    params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputting only a subset of outputs when using MultiApps.");
    params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
@@ -137,6 +138,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("solution_history"))
     create("SolutionHistory");
+
+  if (!getParam<bool>("color"))
+    Moose::__color_console = false;
 
   // This creates a checkpoint block used by the test harness for testing recovery (i.e., ./run_tests --recover)
   if (getParam<bool>("auto_recovery_part1"))

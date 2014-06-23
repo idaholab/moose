@@ -84,6 +84,8 @@
 []
 
 [Outputs]
+  color = false
+
   [./screen]
     type = Console
     output_initial = false
