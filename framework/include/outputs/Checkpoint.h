@@ -118,6 +118,9 @@ private:
   /// Reference to the material property storage
   const MaterialPropertyStorage & _material_property_storage;
 
+  /// Reference to the boundary material property storage
+  const MaterialPropertyStorage & _bnd_material_property_storage;
+
   /// MaterialProperty input/output interface
   MaterialPropertyIO _material_property_io;
 
