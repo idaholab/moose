@@ -6,4 +6,11 @@
     abs_zero = 5e-05
     max_parallel = 1
   [../]
+  [./test2]
+    type = 'Exodiff'
+    input = 'glued_contact_mechanical_constraint_test.i'
+    exodiff = 'mechanical_constraint_out.e'
+    abs_zero = 5e-05
+    max_parallel = 1
+  [../]
 []

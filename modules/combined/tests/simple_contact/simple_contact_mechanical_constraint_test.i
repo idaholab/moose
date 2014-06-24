@@ -1,12 +1,8 @@
-
-[GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
-[]
+# Note: Run merged.i to generate a solution to compare to that doesn't use contact.
+# This is a mechanical constraint (contact formulation) version of simple_contact_test.i
 
 [Mesh]
-  file = pressure.e
+  file = contact.e
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -29,7 +25,7 @@
 
 [AuxVariables]
 
-  [./stress_yy]
+  [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -38,27 +34,31 @@
 
 [SolidMechanics]
   [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
 [Contact]
-  [./m20_s10]
-    master = 20
-    slave = 10
-    penalty = 1e8
-    formulation = penalty
-#    model = glued
-    tangential_tolerance = 1e-3
+  [./dummy_name]
+    master = 3
+    slave = 2
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    penalty = 1e5
+    formulation = kinematic
+    system = constraint
   [../]
 []
 
 [AuxKernels]
-  [./stress_yy]
+  [./stress_xx]
     type = MaterialTensorAux
     tensor = stress
-    variable = stress_yy
-    index = 1
-    execute_on = timestep
+    variable = stress_xx
+    index = 0
   [../]
 [] # AuxKernels
 
@@ -66,38 +66,44 @@
   [./left_x]
     type = DirichletBC
     variable = disp_x
-    boundary = 3
+    boundary = 1
     value = 0.0
   [../]
 
-  [./bottom_y]
+  [./left_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
 
-  [./z]
+  [./left_z]
     type = DirichletBC
     variable = disp_z
-    boundary = 5
+    boundary = 1
     value = 0.0
   [../]
 
-  [./Pressure]
-    [./press]
-      boundary = 7
-      factor = 1e3
-    [../]
+  [./right_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 4
+    value = -0.0001
   [../]
 
-  [./down]
-    type = PresetBC
+  [./right_y]
+    type = DirichletBC
     variable = disp_y
-    boundary = 8
-    value = -2e-3
+    boundary = 4
+    value = 0.0
   [../]
 
+  [./right_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 4
+    value = 0.0
+  [../]
 [] # BCs
 
 [Materials]
@@ -106,15 +112,23 @@
     type = Elastic
     block = 1
 
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+
     youngs_modulus = 1e6
-    poissons_ratio = 0.0
+    poissons_ratio = 0.3
   [../]
   [./stiffStuff2]
     type = Elastic
     block = 2
 
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+
     youngs_modulus = 1e6
-    poissons_ratio = 0.0
+    poissons_ratio = 0.3
   [../]
 [] # Materials
 
@@ -126,15 +140,14 @@
 
 
 
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
+  petsc_options_value = 'hypre    boomeramg      101'
 
 
   line_search = 'none'
 
 
-  nl_rel_tol = 1e-9
-  nl_abs_tol = 1e-9
+  nl_abs_tol = 1e-8
 
   l_max_its = 100
   nl_max_its = 10
@@ -143,11 +156,15 @@
 [] # Executioner
 
 [Outputs]
+  file_base = mechanical_constraint_out
   output_initial = true
-  exodus = true
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
   [./console]
     type = Console
     perf_log = true
     linear_residuals = true
   [../]
-[] # Output
+[] # Outputs
