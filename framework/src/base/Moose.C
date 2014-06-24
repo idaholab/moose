@@ -750,7 +750,6 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_function_complete", false);
   registerTask("setup_variable_complete", false);
   registerTask("ready_to_init", true);
-  registerTask("setup_pps_complete", false);
 
   // Output related actions
   registerTask("setup_material_output", true);
@@ -810,11 +809,11 @@ addActionTypes(Syntax & syntax)
 "(add_material)"
 "(setup_material_output)"
 "(init_problem)"
+"(add_output)"
 "(add_postprocessor)"
 "(add_vector_postprocessor)"
-"(setup_pps_complete)"
 "(setup_debug)"
-"(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker, add_output)"
+"(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
 "(check_output)"
 "(check_integrity)"
 );
