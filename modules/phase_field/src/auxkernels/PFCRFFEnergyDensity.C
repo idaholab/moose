@@ -74,9 +74,9 @@ PFCRFFEnergyDensity::computeValue()
   // Loop Through Variables
   Real sumL = 0.0;
   for (unsigned int i = 1; i < _order; ++i)
-    sumL += (*_vals[i])[_qp];
+    sumL += (*_vals[i])[_qp]*0.5;
 
-  val -= ((*_vals[0])[_qp]*sumL/4.0);
+  val -= ((*_vals[0])[_qp]*sumL);
 
   return val;
 }
