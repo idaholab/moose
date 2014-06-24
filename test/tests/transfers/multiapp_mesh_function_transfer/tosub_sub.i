@@ -5,6 +5,7 @@
   ny = 10
   xmax = 0.2
   ymax = 0.2
+  displacements = 'x_disp y_disp'
 []
 
 [Variables]
@@ -18,6 +19,11 @@
   [./elemental_transferred_u]
     order = CONSTANT
     family = MONOMIAL
+  [../]
+  [./x_disp]
+    initial_condition = .2
+  [../]
+  [./y_disp]
   [../]
 []
 
@@ -44,13 +50,11 @@
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
   num_steps = 1
   dt = 1
-
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
@@ -64,3 +68,4 @@
     linear_residuals = true
   [../]
 []
+
