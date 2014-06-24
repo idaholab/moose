@@ -74,6 +74,11 @@ public:
   virtual void computeJacobian();
 
   /**
+   * Computes the off-diagonal Jacobian for variable jvar.
+   */
+  virtual void computeOffDiagJacobian(unsigned int jvar);
+
+  /**
    * The variable number that this kernel operates on.
    */
   MooseVariable & variable();
@@ -98,6 +103,11 @@ public:
    * This is the virtual that derived classes should override for computing the Jacobian.
    */
   virtual Real computeQpJacobian();
+
+  /**
+   * This gets called by computeOffDiagJacobian() at each quadrature point.
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /**
    * Whether or not this DiracKernel has something to distribute on this element.
