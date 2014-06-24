@@ -54,10 +54,7 @@ CHPFCRFF::computeQpResidual()
   RealGradient sum_grad_L;
 
   for (unsigned int i = 0; i < _num_L; ++i)
-  {
-    sum_grad_L += (*_grad_vals[i])[_qp]*0.5;
-  }
-  
+    sum_grad_L += (*_grad_vals[i])[_qp];
 
   Real frac;
   Real ln_expansion = 0.0;
@@ -123,10 +120,8 @@ CHPFCRFF::computeQpJacobian()
   RealGradient sum_grad_L;
 
   for (unsigned int i = 0; i < _num_L; ++i)
-  {
-    sum_grad_L += (*_grad_vals[i])[_qp]*0.5;
-  }
-    
+    sum_grad_L += (*_grad_vals[i])[_qp];
+
   Real frac, dfrac;
   Real ln_expansion = 0.0;
 
@@ -213,8 +208,7 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
   for (unsigned int i=0; i<_num_L; ++i)
     if (jvar == _vals_var[i])
     {
-      
-      RealGradient dsum_grad_L = _grad_phi[_j][_qp]*0.5;
+      RealGradient dsum_grad_L = _grad_phi[_j][_qp];
       RealGradient dGradDFDConsdL;
       switch(_log_approach)
       {
