@@ -52,6 +52,12 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const std::string & nam
 }
 
 void
+MultiAppNearestNodeTransfer::initialSetup()
+{
+  variableIntegrityCheck(_to_var_name);
+}
+
+void
 MultiAppNearestNodeTransfer::execute()
 {
   Moose::out << "Beginning NearestNodeTransfer " << _name << std::endl;
@@ -100,9 +106,6 @@ MultiAppNearestNodeTransfer::execute()
 
           // Loop over the master nodes and set the value of the variable
           System * to_sys = find_sys(_multi_app->appProblem(i)->es(), _to_var_name);
-
-          if (!to_sys)
-            mooseError("Cannot find variable "<<_to_var_name<<" for "<<_name<<" Transfer");
 
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);

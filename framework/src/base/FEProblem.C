@@ -505,7 +505,13 @@ void FEProblem::initialSetup()
        ++it)
     it->second->updateSeeds(EXEC_INITIAL);
 
-
+  // Call initial setup on the transfers
+  _transfers(EXEC_RESIDUAL)[0].initialSetup();
+  _transfers(EXEC_JACOBIAN)[0].initialSetup();
+  _transfers(EXEC_TIMESTEP)[0].initialSetup();
+  _transfers(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
+  _transfers(EXEC_INITIAL)[0].initialSetup();
+  _transfers(EXEC_CUSTOM)[0].initialSetup();
 
   if (!_app.isRecovering())
   {

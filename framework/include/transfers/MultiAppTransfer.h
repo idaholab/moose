@@ -18,6 +18,7 @@
 #include "Transfer.h"
 #include "MultiApp.h"
 #include "MooseEnum.h"
+#include "MooseTypes.h"
 
 class MultiAppTransfer;
 
@@ -57,6 +58,11 @@ public:
    * @return When this Transfer will be executed.
    */
   virtual int executeOn() { return _multi_app->executeOn(); }
+
+  /**
+   * Utility to verify that the vEariable in the destination system exists.
+   */
+  void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
 protected:
   /// The MultiApp this Transfer is transferring data to or from

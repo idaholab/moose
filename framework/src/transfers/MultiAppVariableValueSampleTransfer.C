@@ -39,6 +39,12 @@ MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const s
 }
 
 void
+MultiAppVariableValueSampleTransfer::initialSetup()
+{
+  variableIntegrityCheck(_to_var_name);
+}
+
+void
 MultiAppVariableValueSampleTransfer::execute()
 {
   switch (_direction)
