@@ -1,4 +1,4 @@
-
+# This is a mechanical constraint (contact formulation) version of pressurePenalty.i
 [GlobalParams]
   disp_x = disp_x
   disp_y = disp_y
@@ -49,6 +49,7 @@
     formulation = penalty
 #    model = glued
     tangential_tolerance = 1e-3
+    system = constraint
   [../]
 []
 
