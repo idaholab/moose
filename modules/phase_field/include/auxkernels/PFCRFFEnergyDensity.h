@@ -25,6 +25,9 @@ protected:
   Real _b;
   Real _c;
   unsigned int _num_exp_terms;
+  MooseEnum _log_approach;
+  Real _tol;
+  
 };
 
 #endif //PFCRFF_ENERGY_DENSITY_H
