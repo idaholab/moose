@@ -1,0 +1,45 @@
+## trelis
+## Trelis Version 15.0
+## Trelis Build 2f22810
+## Revised Tue Mar 11 12:27:44 2014 -0600
+## Running 06/24/2014 09:19:37 AM
+## Command Options:
+undo on
+create surface rectangle width 1 height 1 zplane
+curve 4 2 interval 50
+curve 4 2 scheme equal
+curve 4 2 interval 50
+curve 4 2 scheme equal
+mesh curve 4 2
+undo group begin
+curve 3 tangent opposite
+undo group end
+curve 3 interval 25
+curve 3 scheme bias fraction 0.1
+curve 3 interval 25
+curve 3 scheme bias fraction 0.1
+mesh curve 3
+delete mesh curve 3
+curve 3 interval 25
+curve 3 scheme bias factor 0.9
+curve 3 interval 25
+curve 3 scheme bias factor 0.9
+mesh curve 3
+curve 1 interval 25
+curve 1 scheme bias factor 0.9
+curve 1 interval 25
+curve 1 scheme bias factor 0.9
+mesh curve 1
+surface 1 scheme map
+mesh surface 1
+set duplicate block elements off
+block 1 surface 1
+block 1 element type QUAD4
+set duplicate block elements off
+block 2 curve 2
+nodeset 1 node 53
+move surface 1 location 0.6 0.5 0 include_merged
+undo group begin
+set large exodus file on
+export mesh "/apps/geomodel/moose/projects_andy/moose/modules/misc/tests/fracture_flow/single.e" overwrite
+undo group end
