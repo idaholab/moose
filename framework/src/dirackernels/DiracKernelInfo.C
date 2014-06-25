@@ -83,9 +83,8 @@ DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
 
   // Construct the PointLocator object if *any* processors have Dirac
   // points.  Note: building a PointLocator object is a parallel_only()
-  // function, so this is an all-or-nothing thing.  We use an unsigned
-  // int since I'm not sure if max is supported for bool.
-  unsigned pl_needs_rebuild = static_cast<unsigned>(_elements.empty());
+  // function, so this is an all-or-nothing thing.
+  unsigned pl_needs_rebuild = _elements.size();
   mesh.comm().max(pl_needs_rebuild);
 
   if (pl_needs_rebuild)
