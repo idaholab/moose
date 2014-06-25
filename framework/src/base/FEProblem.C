@@ -440,14 +440,13 @@ void FEProblem::initialSetup()
   for (unsigned int i=0; i<n_threads; i++)
     _materials[i].initialSetup();
 
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
+                                   _material_props, _bnd_material_props, _materials, _assembly);
+  Threads::parallel_reduce(elem_range, cmt);
+
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
-  {
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                     _material_props, _bnd_material_props, _materials, _assembly);
-    Threads::parallel_reduce(elem_range, cmt);
     _has_initialized_stateful = true;
-  }
 
   // Auxilary variable initialSetup calls
   _aux.initialSetup();
