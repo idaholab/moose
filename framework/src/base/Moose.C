@@ -347,7 +347,7 @@
 #include "XDA.h"
 #include "GMVOutput.h"
 #include "Tecplot.h"
-#include "GNUPlot.h"
+#include "Gnuplot.h"
 #include "SolutionHistory.h"
 #include "DebugOutput.h"
 
@@ -635,7 +635,7 @@ registerObjects(Factory & factory)
   registerOutput(XDA);
   registerNamedOutput(GMVOutput, "GMV");
   registerOutput(Tecplot);
-  registerOutput(GNUPlot);
+  registerOutput(Gnuplot);
   registerOutput(SolutionHistory);
   registerOutput(DebugOutput);
 
