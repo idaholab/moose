@@ -142,7 +142,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _const_jacobian(false),
     _has_jacobian(false),
     _kernel_coverage_check(false),
-    _max_qps(std::numeric_limits<unsigned int>::max())
+    _max_qps(std::numeric_limits<unsigned int>::max()),
+    _use_legacy_uo_aux_computation(false)
 {
 
 #ifdef LIBMESH_HAVE_PETSC
@@ -2188,7 +2189,12 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
       if (_displaced_problem != NULL)
         _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
-      _aux.compute(type);
+      if (_use_legacy_uo_aux_computation)
+        // Compute all AuxKernels regardless of the requested type (legacy behavior)
+        for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
+          _aux.compute(Moose::exec_types[i]);
+      else
+        _aux.compute(type);
     }
 
     // init

@@ -713,6 +713,8 @@ public:
 
   void setKernelCoverageCheck(bool flag) { _kernel_coverage_check = flag; }
 
+  void setLegacyUoAuxComputation(bool flag) { _use_legacy_uo_aux_computation = flag; }
+
   /**
    * Updates the active boundary id
    * @param id The BoundaryID to set as active
@@ -945,6 +947,8 @@ public:
   static unsigned int _n;
 
 private:
+  bool _use_legacy_uo_aux_computation;
+
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
    *
