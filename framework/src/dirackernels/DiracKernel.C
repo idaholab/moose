@@ -124,16 +124,9 @@ DiracKernel::computeOffDiagJacobian(unsigned int jvar)
     {
       _current_point = _physical_point[_qp];
       if (isActiveAtPoint(_current_elem, _current_point))
-      {
-        // Detect when ke is not properly sized, and don't try to
-        // compute Jacobians in that case.
-        if (ke.m()*ke.n() == 0)
-          return;
-
         for (_i=0; _i<_test.size(); _i++)
           for (_j=0; _j<_phi.size(); _j++)
             ke(_i, _j) += computeQpOffDiagJacobian(jvar);
-      }
     }
   }
 }
