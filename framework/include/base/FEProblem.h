@@ -666,10 +666,14 @@ public:
    */
   std::set<std::string> & getRecoverableData() { return _recoverable_data; }
 
-  /** Return a reference to the material property storage
+  ///@{
+  /**
+   * Return a reference to the material property storage
    * @return A const reference to the material property storage
    */
   const MaterialPropertyStorage & getMaterialPropertyStorage() { return _material_props; }
+  const MaterialPropertyStorage & getBndMaterialPropertyStorage() { return _bnd_material_props; }
+  ///@}
 
   /**
    * Get the solver parameters
