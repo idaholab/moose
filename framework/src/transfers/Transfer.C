@@ -51,7 +51,7 @@ Transfer::Transfer(const std::string & name, InputParameters parameters) :
  * Note that this implies that variable names are unique across all systems!
  */
 System *
-Transfer::find_sys(EquationSystems & es, std::string & var_name)
+Transfer::find_sys(EquationSystems & es, const std::string & var_name) const
 {
   System * sys = NULL;
 

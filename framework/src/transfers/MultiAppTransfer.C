@@ -35,3 +35,11 @@ MultiAppTransfer::MultiAppTransfer(const std::string & name, InputParameters par
     _direction(getParam<MooseEnum>("direction"))
 {
 }
+
+void
+MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
+{
+  for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+    if (_multi_app->hasLocalApp(i) && !find_sys(_multi_app->appProblem(i)->es(), var_name))
+      mooseError("Cannot find variable " << var_name << " for " << _name << " Transfer");
+}

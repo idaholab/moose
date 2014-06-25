@@ -34,6 +34,8 @@ public:
   MultiAppVariableValueSampleTransfer(const std::string & name, InputParameters parameters);
   virtual ~MultiAppVariableValueSampleTransfer() {}
 
+  virtual void initialSetup();
+
   virtual void execute();
 
 protected:

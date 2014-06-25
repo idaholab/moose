@@ -34,6 +34,8 @@ public:
   MultiAppUserObjectTransfer(const std::string & name, InputParameters parameters);
   virtual ~MultiAppUserObjectTransfer() {}
 
+  virtual void initialSetup();
+
   virtual void execute();
 
 protected:

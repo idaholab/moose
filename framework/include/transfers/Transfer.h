@@ -55,6 +55,12 @@ public:
   virtual void execute() = 0;
 
   /**
+   * Method called at the beginning of the simulation for checking integrity or doing
+   * one-time setup.
+   */
+  virtual void initialSetup() {}
+
+  /**
    * @return When this Transfer will be executed.
    */
   virtual int executeOn() { return _execute_on; }
@@ -68,7 +74,7 @@ protected:
    * @param es The EquationSystems object to be searched.
    * @param var_name The name of the variable you are looking for.
    */
-  System * find_sys(EquationSystems & es, std::string & var_name);
+  System * find_sys(EquationSystems & es, const std::string & var_name) const;
 
   SubProblem & _subproblem;
   FEProblem & _fe_problem;
