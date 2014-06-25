@@ -55,7 +55,7 @@
     type = Console
     perf_log = true
   [../]
-  [./checkpoint]
+  [./recover]
     type = Checkpoint
     file_base = test_recover_dir
   [../]

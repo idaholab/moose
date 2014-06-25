@@ -77,12 +77,9 @@
 [Outputs]
   output_initial = true
   exodus = true
+  checkpoint = true
   [./console]
     type = Console
     linear_residuals = true
-  [../]
-  [./out]
-    type = Checkpoint
-    num_files = 1
   [../]
 []

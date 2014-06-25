@@ -12,63 +12,55 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CHECKOUTPUTACTION_H
-#define CHECKOUTPUTACTION_H
+#ifndef SETUPRECOVERFILEBASEACTION_H
+#define SETUPRECOVERFILEBASEACTION_H
 
 // MOOSE includes
 #include "Action.h"
 
 // Forward declerations
-class CheckOutputAction;
+class SetupRecoverFileBaseAction;
 
 template<>
-InputParameters validParams<CheckOutputAction>();
+InputParameters validParams<SetupRecoverFileBaseAction>();
 
 /**
- * Action for checking that "outputs" is properly populated for Materials
+ *
  */
-class CheckOutputAction : public Action
+class SetupRecoverFileBaseAction : public Action
 {
 public:
 
   /**
    * Class constructor
-   * @param name Name of this action
-   * @param params Input parameters for this object
+   * @param name Name of the action
+   * @param params Input parameters for this action
    */
-  CheckOutputAction(const std::string & name, InputParameters params);
+  SetupRecoverFileBaseAction(const std::string & name, InputParameters params);
 
   /**
    * Class destructor
    */
-  virtual ~CheckOutputAction();
+  virtual ~SetupRecoverFileBaseAction();
 
   /**
-   * Preforms a set of checks on various Output objects
+   * Sets the recovery file base.
    */
   virtual void act();
 
 private:
 
   /**
-   * Preforms a set of checks on each of the Material objects that the "outputs" parameters has valid values
+   * Extract all possible checkpoint file names
+   * @param files A Set of checkpoint filenames to populate
    */
-  void checkMaterialOutput();
+  void getCheckpointFiles(std::set<std::string> & files);
 
   /**
-   * Performs Console Output object related checks
+   * Extract the file base to utilize for recovery, uses the newest of the files in the supplied set
+   * @param The most current checkpoing file base
    */
-  void checkConsoleOutput();
-
-  /**
-   * Performs PerfLog output settings
-   */
-  void checkPerfLogOutput();
-
-  /**
-   * Checks for --output-input command line parameter
-   */
-  void checkInputOutput();
+  std::string getRecoveryFileBase(const std::set<std::string> checkpoint_files);
 };
 
-#endif //CHECKOUTPUTACTION_H
+#endif //SETUPRECOVERFILEBASEACTION_H

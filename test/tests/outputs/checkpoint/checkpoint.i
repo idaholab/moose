@@ -3,6 +3,7 @@
   dim = 2
   nx = 10
   ny = 10
+  distribution = serial
 []
 
 [Variables]
@@ -12,7 +13,12 @@
 
 [Kernels]
   [./diff]
-    type = Diffusion
+    type = CoefDiffusion
+    variable = u
+    coef = 0.1
+  [../]
+  [./time]
+    type = TimeDerivative
     variable = u
   [../]
 []
@@ -32,32 +38,16 @@
   [../]
 []
 
-[UserObjects]
-  [./restartable_types]
-    type = PointerLoadError
-  [../]
-[]
-
-[Problem]
-  type = FEProblem
-  solve = false
-[]
-
 [Executioner]
   # Preconditioned JFNK (default)
-  type = Steady
+  type = Transient
+  num_steps = 11
+  dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
-  output_initial = true
   exodus = true
-  checkpoint = true
-  [./console]
-    type = Console
-    perf_log = true
-    linear_residuals = true
-  [../]
 []

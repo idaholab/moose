@@ -38,7 +38,7 @@
     min_threads = 4
     max_threads = 4
     prereq = parallel_error1
-    cli_args = 'Outputs/out/file_base=kernel_restartable_out_threads'
+    cli_args = 'Outputs/restart/file_base=kernel_restartable_out_threads'
   [../]
 
   [./threads_error]

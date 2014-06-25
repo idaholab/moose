@@ -75,13 +75,10 @@
 [Outputs]
   output_initial = true
   exodus = true
+  checkpoint = true
   sync_times = '0.5 9.5'
   [./console]
     type = Console
     linear_residuals = true
-  [../]
-  [./out]
-    type = Checkpoint
-    num_files = 1
   [../]
 []
