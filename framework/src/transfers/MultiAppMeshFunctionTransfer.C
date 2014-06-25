@@ -82,7 +82,7 @@ MultiAppMeshFunctionTransfer::execute()
       else
         tmp_from_mesh = &from_problem.mesh().getMesh();
 
-      MeshBase & from_mesh = *tmp_from_mesh;
+      // MeshBase & from_mesh = *tmp_from_mesh;
 
       SystemBase & from_system_base = from_var.sys();
 
@@ -225,7 +225,7 @@ MultiAppMeshFunctionTransfer::execute()
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
-      EquationSystems & to_es = to_sys.get_equation_systems();
+      // EquationSystems & to_es = to_sys.get_equation_systems();
 
       NumericVector<Number> * to_solution = to_sys.solution.get();
 

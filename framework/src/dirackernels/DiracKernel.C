@@ -145,7 +145,7 @@ DiracKernel::computeQpJacobian()
 }
 
 Real
-DiracKernel::computeQpOffDiagJacobian(unsigned int jvar)
+DiracKernel::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0;
 }
