@@ -34,6 +34,8 @@ public:
   MultiAppMeshFunctionTransfer(const std::string & name, InputParameters parameters);
   virtual ~MultiAppMeshFunctionTransfer() {}
 
+  virtual void initialSetup();
+
   virtual void execute();
 
 protected:

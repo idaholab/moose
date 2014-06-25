@@ -59,3 +59,10 @@ TransferWarehouse::getTransfer(const std::string & transfer_name) const
 
   mooseError("Unknown Transfer: " << transfer_name);
 }
+
+void
+TransferWarehouse::initialSetup()
+{
+  for (std::vector<Transfer *>::iterator i = _all_transfers.begin(); i != _all_transfers.end(); ++i)
+    (*i)->initialSetup();
+}

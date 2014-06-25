@@ -33,6 +33,8 @@ public:
   MultiAppNearestNodeTransfer(const std::string & name, InputParameters parameters);
   virtual ~MultiAppNearestNodeTransfer() {}
 
+  virtual void initialSetup();
+
   virtual void execute();
 
 protected:

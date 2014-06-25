@@ -33,6 +33,8 @@ public:
   MultiAppInterpolationTransfer(const std::string & name, InputParameters parameters);
   virtual ~MultiAppInterpolationTransfer() {}
 
+  virtual void initialSetup();
+
   virtual void execute();
 
 protected:

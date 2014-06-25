@@ -65,6 +65,11 @@ public:
    */
   Transfer * getTransfer(const std::string & transfer_name) const;
 
+  /**
+   * Calls the initialSetup() function for all Transfers in the Warehouse
+   */
+  void initialSetup();
+
 protected:
   std::vector<Transfer *> _all_transfers;
   std::vector<MultiAppTransfer *> _multi_app_transfers;
