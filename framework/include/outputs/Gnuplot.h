@@ -19,17 +19,17 @@
 #include "TableOutput.h"
 
 // Forward declarations
-class GNUPlot;
+class Gnuplot;
 
 template<>
-InputParameters validParams<GNUPlot>();
+InputParameters validParams<Gnuplot>();
 
 /**
  * Based class for adding basic filename support to output base class
  *
  * @see Exodus
  */
-class GNUPlot :
+class Gnuplot :
   public TableOutput
 {
 public:
@@ -42,12 +42,12 @@ public:
    *
    * @see initAvailable init seperate
    */
-  GNUPlot(const std::string & name, InputParameters & parameters);
+  Gnuplot(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
    */
-  virtual ~GNUPlot();
+  virtual ~Gnuplot();
 
   /**
    * Output the table to a *.csv file

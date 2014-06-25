@@ -134,7 +134,7 @@ CommonOutputAction::act()
     create("Tecplot");
 
   if (getParam<bool>("gnuplot"))
-    create("GNUPlot");
+    create("Gnuplot");
 
   if (getParam<bool>("solution_history"))
     create("SolutionHistory");

@@ -13,10 +13,10 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "GNUPlot.h"
+#include "Gnuplot.h"
 
 template<>
-InputParameters validParams<GNUPlot>()
+InputParameters validParams<Gnuplot>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
@@ -33,24 +33,24 @@ InputParameters validParams<GNUPlot>()
   return params;
 }
 
-GNUPlot::GNUPlot(const std::string & name, InputParameters & parameters) :
+Gnuplot::Gnuplot(const std::string & name, InputParameters & parameters) :
     TableOutput(name, parameters),
     _extension(getParam<MooseEnum>("extension"))
 {
 }
 
-GNUPlot::~GNUPlot()
+Gnuplot::~Gnuplot()
 {
 }
 
 std::string
-GNUPlot::filename()
+Gnuplot::filename()
 {
   return _file_base;
 }
 
 void
-GNUPlot::output()
+Gnuplot::output()
 {
   // Call the base class output (populates tables)
   TableOutput::output();
