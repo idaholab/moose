@@ -329,7 +329,7 @@ CommonOutputAction::getRecoveryDirectory()
 
       if (file_base.empty())
       {
-        if (obj_pars.get<bool>("_short_cut"))
+        if (obj_pars.get<bool>("_build_by_moose"))
           file_base = FileOutput::getOutputFileBase(_app);
         else
           file_base = FileOutput::getOutputFileBase(_app, "_" + name);
