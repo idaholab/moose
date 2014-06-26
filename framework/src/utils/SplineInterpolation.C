@@ -145,8 +145,7 @@ SplineInterpolation::sampleDerivative(double x) const
   double h, a, b;
   computeCoeffs(klo, khi, x, h, a, b);
 
-  return (_y[khi] - _y[klo]) / h - (((3. * a*a - 1) * _y2[klo] + (3. * b*b - 1.) * _y2[khi]) * h / 6);
-
+  return (_y[khi] - _y[klo]) / h - (((3.0 * a*a - 1.0) * _y2[klo] + (3.0 * b*b - 1.0) * -_y2[khi]) * h / 6.0);
 }
 
 double
