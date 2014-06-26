@@ -113,8 +113,9 @@ ComputeDiracThread::onElement(const Elem * elem)
           dirac_kernel->computeResidual();
         else
         {
-          // Get a list of coupled variables from the FEProblem
-          std::vector<std::pair<MooseVariable *, MooseVariable *> > & coupling_entries = _fe_problem.couplingEntries(_tid);
+          // Get a list of coupled variables from the SubProblem
+          std::vector<std::pair<MooseVariable *, MooseVariable *> > & coupling_entries =
+            dirac_kernel->subProblem().assembly(_tid).couplingEntries();
 
           // Loop over the list of coupled variable pairs
           {
@@ -127,12 +128,15 @@ ComputeDiracThread::onElement(const Elem * elem)
               MooseVariable * ivariable = var_pair_iter->first;
               MooseVariable * jvariable = var_pair_iter->second;
 
-              // The same check that is in ComputeFullJacobianThread::computeJacobian().
-              // We only want to call computeOffDiagJacobian() if both
-              // variables are active on this subdomain...
-              if (ivariable->activeOnSubdomain(_subdomain) && jvariable->activeOnSubdomain(_subdomain))
+              // A variant of the check that is in
+              // ComputeFullJacobianThread::computeJacobian().  We
+              // only want to call computeOffDiagJacobian() if both
+              // variables are active on this subdomain, and the
+              // off-diagonal variable actually has dofs.
+              if (ivariable->activeOnSubdomain(_subdomain)
+                  && jvariable->activeOnSubdomain(_subdomain)
+                  && (jvariable->numberOfDofs() > 0))
               {
-                // FIXME: do we need to prepareShapes for ivariable->number?
                 dirac_kernel->subProblem().prepareShapes(jvariable->number(), _tid);
                 dirac_kernel->computeOffDiagJacobian(jvariable->number());
               }
