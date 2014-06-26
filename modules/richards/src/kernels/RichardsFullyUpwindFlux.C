@@ -117,7 +117,7 @@ RichardsFullyUpwindFlux::computeQpJacobian()
 
 
 Real
-RichardsFullyUpwindFlux::computeQpOffDiagJacobian(unsigned int jvar)
+RichardsFullyUpwindFlux::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   // not used.  I use computeQpJac instead
   return 0.0;
