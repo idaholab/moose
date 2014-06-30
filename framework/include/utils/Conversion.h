@@ -17,6 +17,8 @@
 
 #include "ExecStore.h"
 #include "MooseTypes.h"
+#include "MooseEnum.h"
+
 // libMesh
 #include "libmesh/enum_order.h"
 #include "libmesh/enum_quadrature_type.h"
@@ -24,6 +26,7 @@
 
 namespace Moose {
 
+  // Scalar conversions
   template<typename T>
   T stringToEnum(const std::string & s);
 
@@ -48,6 +51,13 @@ namespace Moose {
   template<>
   LineSearchType stringToEnum<LineSearchType>(const std::string & s);
 
+  // Vector conversions
+  template<typename T>
+  std::vector<T> vectorStringsToEnum(const std::vector<MooseEnum> & v);
+
+  template<>
+  std::vector<ExecFlagType> vectorStringsToEnum<ExecFlagType>(const std::vector<MooseEnum> & v);
+
   // conversion to string
   template<typename T>
   std::string
@@ -63,6 +73,7 @@ namespace Moose {
    */
   template<>
   std::string stringify(const SolveType & t);
+
 }
 
 /**

@@ -1830,12 +1830,6 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
   else
     parameters.set<SubProblem *>("_subproblem") = this;
 
-  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
-
-  // Check for name collision
-  if (_user_objects(type)[0].getUserObjectByName(name))
-    mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a Postprocessor by the same name.");
-
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -1856,18 +1850,26 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
       mooseError("Unable to determine type for Postprocessor: " + mo->name());
 
     Postprocessor * pp = getPostprocessorPointer(mo);
-    _pps(type)[tid].addPostprocessor(pp);
-    _objects_by_name[tid][name].push_back(mo);
-    _pps_data[tid]->init(name);
 
-    // Add it to the user object warehouse as well...
+    // Postprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
+    const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<std::vector<MooseEnum> >("execute_on"));
+    for (unsigned int i=0; i<exec_flags.size(); ++i)
     {
+      // Check for name collision
+      if (_user_objects(exec_flags[i])[tid].getUserObjectByName(name))
+        mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a Postprocessor by the same name.");
+      _pps(exec_flags[i])[tid].addPostprocessor(pp);
+
+      // Add it to the user object warehouse as well...
       UserObject * user_object = dynamic_cast<UserObject *>(mo);
       if (!user_object)
         mooseError("Unknown user object type: " + pp_name);
 
-      _user_objects(type)[tid].addUserObject(user_object);
+      _user_objects(exec_flags[i])[tid].addUserObject(user_object);
     }
+
+    _objects_by_name[tid][name].push_back(mo);
+    _pps_data[tid]->init(name);
   }
 }
 
@@ -1934,12 +1936,6 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
   else
     parameters.set<SubProblem *>("_subproblem") = this;
 
-  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
-
-  // Check for name collision
-  if (_user_objects(type)[0].getUserObjectByName(name))
-    mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
-
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
@@ -1961,17 +1957,25 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
       mooseError("Unable to determine type for VectorPostprocessor: " + mo->name());
 
     VectorPostprocessor * pp = getVectorPostprocessorPointer(mo);
-    _vpps(type)[tid].addVectorPostprocessor(pp);
-    _objects_by_name[tid][name].push_back(mo);
 
-    // Add it to the user object warehouse as well...
+    // VectorPostprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
+    const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<std::vector<MooseEnum> >("execute_on"));
+    for (unsigned int i=0; i<exec_flags.size(); ++i)
     {
+      // Check for name collision
+      if (_user_objects(exec_flags[i])[tid].getUserObjectByName(name))
+        mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
+      _vpps(exec_flags[i])[tid].addVectorPostprocessor(pp);
+
+      // Add it to the user object warehouse as well...
       UserObject * user_object = dynamic_cast<UserObject *>(mo);
       if (!user_object)
         mooseError("Unknown user object type: " + pp_name);
 
-      _user_objects(type)[tid].addUserObject(user_object);
+      _user_objects(exec_flags[i])[tid].addUserObject(user_object);
     }
+
+    _objects_by_name[tid][name].push_back(mo);
   }
 }
 
@@ -1986,15 +1990,9 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-  {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
-  }
   else
-  {
     parameters.set<SubProblem *>("_subproblem") = this;
-  }
-
-  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
 
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
@@ -2018,7 +2016,10 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
     if (!user_object)
       mooseError("Unknown user object type: " + user_object_name);
 
-    _user_objects(type)[tid].addUserObject(user_object);
+    const std::vector<ExecFlagType> & exec_flags = user_object->execFlags();
+    for (unsigned int i=0; i<exec_flags.size(); ++i)
+      _user_objects(exec_flags[i])[tid].addUserObject(user_object);
+
     _objects_by_name[tid][name].push_back(mo);
   }
 }
@@ -2654,8 +2655,6 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
 
-  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
-
   parameters.set<THREAD_ID>("_tid") = 0;
 
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
@@ -2666,7 +2665,11 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
   if (!multi_app)
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
-  _multi_apps(type)[0].addMultiApp(multi_app);
+  const std::vector<ExecFlagType> & exec_flags = multi_app->execFlags();
+  for (unsigned int i=0; i<exec_flags.size(); ++i)
+    _multi_apps(exec_flags[i])[0].addMultiApp(multi_app);
+
+  // TODO: Is this really the right spot to init a multiapp?
   multi_app->init();
 }
 
@@ -2786,8 +2789,6 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
 
-  ExecFlagType type = Moose::stringToEnum<ExecFlagType>(parameters.get<MooseEnum>("execute_on"));
-
   parameters.set<THREAD_ID>("_tid") = 0;
 
   MooseObject * mo = _factory.create(transfer_name, name, parameters);
@@ -2798,17 +2799,19 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
 
   MultiAppTransfer * multi_app_transfer = dynamic_cast<MultiAppTransfer *>(transfer);
 
-  if (multi_app_transfer)
-  {
-    int direction = multi_app_transfer->direction();
+  const std::vector<ExecFlagType> & exec_flags = transfer->execFlags();
+  for (unsigned int i=0; i<exec_flags.size(); ++i)
+    if (multi_app_transfer)
+    {
+      int direction = multi_app_transfer->direction();
 
-    if (direction == MultiAppTransfer::TO_MULTIAPP)
-      _to_multi_app_transfers(type)[0].addTransfer(multi_app_transfer);
+      if (direction == MultiAppTransfer::TO_MULTIAPP)
+        _to_multi_app_transfers(exec_flags[i])[0].addTransfer(multi_app_transfer);
+      else
+        _from_multi_app_transfers(exec_flags[i])[0].addTransfer(multi_app_transfer);
+    }
     else
-      _from_multi_app_transfers(type)[0].addTransfer(multi_app_transfer);
-  }
-  else
-    _transfers(type)[0].addTransfer(transfer);
+      _transfers(exec_flags[i])[0].addTransfer(transfer);
 }
 
 bool

@@ -115,8 +115,6 @@ AuxiliarySystem::addTimeIntegrator(const std::string & type, const std::string &
 {
   parameters.set<SystemBase *>("_sys") = this;
   TimeIntegrator * ti = static_cast<TimeIntegrator *>(_factory.create(type, name, parameters));
-  if (ti == NULL)
-    mooseError("Not an time integrator object.");
   _time_integrator = ti;
 }
 
@@ -129,7 +127,11 @@ AuxiliarySystem::addKernel(const std::string & kernel_name, const std::string & 
     parameters.set<THREAD_ID>("_tid") = tid;
 
     MooseSharedPointer<AuxKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxKernel>(_factory.create_shared_ptr(kernel_name, name, parameters));
-    _auxs(kernel->execFlag())[tid].addAuxKernel(kernel);
+
+    // Add this AuxKernel to multiple ExecStores
+    const std::vector<ExecFlagType> & exec_flags = kernel->execFlags();
+    for (unsigned int i=0; i<exec_flags.size(); ++i)
+      _auxs(exec_flags[i])[tid].addAuxKernel(kernel);
 
     _mproblem._objects_by_name[tid][name].push_back(kernel.get());
 
@@ -151,7 +153,10 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name, const std::str
 
     MooseSharedPointer<AuxScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxScalarKernel>(_factory.create_shared_ptr(kernel_name, name, parameters));
 
-    _auxs(kernel->execFlag())[tid].addScalarKernel(kernel);
+    // Add this AuxKernel to multiple ExecStores
+    const std::vector<ExecFlagType> & exec_flags = kernel->execFlags();
+    for (unsigned int i=0; i<exec_flags.size(); ++i)
+      _auxs(exec_flags[i])[tid].addScalarKernel(kernel);
 
     _mproblem._objects_by_name[tid][name].push_back(kernel.get());
   }

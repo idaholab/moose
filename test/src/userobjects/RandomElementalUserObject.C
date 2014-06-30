@@ -19,9 +19,9 @@ InputParameters validParams<RandomElementalUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
 
-  MooseEnum setup_options(SetupInterface::getExecuteOptions());
-  setup_options = "timestep_begin";
-  params.set<MooseEnum>("execute_on") = setup_options;
+  std::vector<MooseEnum> setup_options(SetupInterface::getExecuteOptions());
+  setup_options[0] = "timestep_begin";
+  params.set<std::vector<MooseEnum> >("execute_on") = setup_options;
   return params;
 }
 

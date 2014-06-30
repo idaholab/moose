@@ -43,9 +43,8 @@ InputParameters validParams<SolutionUserObject>()
   // When using ExodusII a specific time is extracted
   params.addParam<int>("timestep", -1, "Index of the single timestep used (exodusII only).  If not supplied, time interpolation will occur.");
 
-  // Re-set the default exeuction time, due to the how this class interacts with SolutionAux and SolutionFunction, this
-  // must be set to timestep_begin to interp values in Exodus files correctly.
-  params.set<MooseEnum>("execute_on") = "timestep_begin";
+  // This object does not use the execute() method
+  params.suppressParameter<std::vector<MooseEnum> >("execute_on");
 
   // Add ability to perform coordinate transformation: scale, factor
   params.addParam<std::vector<Real> >("coord_scale", "This name has been deprecated.  Please use scale instead");
@@ -110,11 +109,8 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _initialized(false),
     _legacy_read(getParam<bool>("legacy_read"))
 {
-
   if (_legacy_read)
     mooseWarning("The input parameter 'legacy_read' is deprecated.\nThis option is for legacy support and will be removed on 10/1/2014.\nThe xda/xdr files being read should be regenerated and the flag removed.");
-
-  _exec_flags = EXEC_INITIAL;
 
   if (!parameters.isParamValid("nodal_variables") && !parameters.isParamValid("elemental_variables"))
     mooseError("In SolutionUserObject " << _name << ", must supply nodal_variables or elemental_variables");

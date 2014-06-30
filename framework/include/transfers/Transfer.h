@@ -60,11 +60,6 @@ public:
    */
   virtual void initialSetup() {}
 
-  /**
-   * @return When this Transfer will be executed.
-   */
-  virtual int executeOn() { return _execute_on; }
-
 protected:
   /**
    * Small helper function for finding the system containing the variable.
@@ -81,8 +76,6 @@ protected:
   SystemBase & _sys;
 
   THREAD_ID _tid;
-
-  MooseEnum _execute_on;
 };
 
 #endif /* TRANSFER_H */
