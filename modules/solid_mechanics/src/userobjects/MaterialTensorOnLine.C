@@ -17,7 +17,7 @@ InputParameters validParams<MaterialTensorOnLine>()
   params.addCoupledVar("element_line_id","Element line ID: if not zero, output stress at integration points");
   params.addRequiredParam<std::string>("filename","Output file name");
   params.addParam<int>("line_id",1,"ID of the line of elements to output stresses on");
-  params.set<MooseEnum>("execute_on") = "timestep";
+  params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
 
   return params;
 }
