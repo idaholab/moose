@@ -594,10 +594,16 @@ void FEProblem::timestepSetup()
          it != _random_data_objects.end();
          ++it)
       it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
+
+    // Timestep setup of all UserObjects
+    for (unsigned int j = 0; j < Moose::exec_types.size(); j++)
+      _user_objects(Moose::exec_types[j])[i].timestepSetup();
   }
 
    // Timestep setup of output objects
   _app.getOutputWarehouse().timestepSetup();
+
+
 }
 
 unsigned int
@@ -2523,8 +2529,6 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectW
 
   case EXEC_TIMESTEP:
   case EXEC_TIMESTEP_BEGIN:
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _user_objects(type)[tid].timestepSetup();
     break;
 
   case EXEC_INITIAL:
