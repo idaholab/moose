@@ -43,7 +43,8 @@ InputParameters validParams<SolutionUserObject>()
   // When using ExodusII a specific time is extracted
   params.addParam<int>("timestep", -1, "Index of the single timestep used (exodusII only).  If not supplied, time interpolation will occur.");
 
-  // This object does not use the execute() method
+  // This object does not use the execute() method but it must be set to timestep_begin in order for timestepSetup to be executed.
+  params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep_begin";
   params.suppressParameter<std::vector<MooseEnum> >("execute_on");
 
   // Add ability to perform coordinate transformation: scale, factor
