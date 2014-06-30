@@ -128,11 +128,10 @@ AuxiliarySystem::addKernel(const std::string & kernel_name, const std::string & 
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    AuxKernel *kernel = static_cast<AuxKernel *>(_factory.create(kernel_name, name, parameters));
-    mooseAssert(kernel != NULL, "Not an AuxKernel object");
-
+    MooseSharedPointer<AuxKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxKernel>(_factory.create_shared_ptr(kernel_name, name, parameters));
     _auxs(kernel->execFlag())[tid].addAuxKernel(kernel);
-    _mproblem._objects_by_name[tid][name].push_back(kernel);
+
+    _mproblem._objects_by_name[tid][name].push_back(kernel.get());
 
     if (kernel->boundaryRestricted())
     {
@@ -150,12 +149,11 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name, const std::str
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    AuxScalarKernel *kernel = static_cast<AuxScalarKernel *>(_factory.create(kernel_name, name, parameters));
-    mooseAssert(kernel != NULL, "Not a AuxScalarKernel object");
+    MooseSharedPointer<AuxScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxScalarKernel>(_factory.create_shared_ptr(kernel_name, name, parameters));
 
     _auxs(kernel->execFlag())[tid].addScalarKernel(kernel);
 
-    _mproblem._objects_by_name[tid][name].push_back(kernel);
+    _mproblem._objects_by_name[tid][name].push_back(kernel.get());
   }
 }
 
