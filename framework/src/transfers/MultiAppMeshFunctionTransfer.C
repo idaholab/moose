@@ -82,8 +82,6 @@ MultiAppMeshFunctionTransfer::execute()
       else
         tmp_from_mesh = &from_problem.mesh().getMesh();
 
-      // MeshBase & from_mesh = *tmp_from_mesh;
-
       SystemBase & from_system_base = from_var.sys();
 
       System & from_sys = from_system_base.system();
@@ -224,8 +222,6 @@ MultiAppMeshFunctionTransfer::execute()
       mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppMeshFunctionTransfer only works with SerialMesh!");
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
-
-      // EquationSystems & to_es = to_sys.get_equation_systems();
 
       NumericVector<Number> * to_solution = to_sys.solution.get();
 
