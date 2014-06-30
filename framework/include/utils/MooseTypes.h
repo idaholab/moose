@@ -28,6 +28,16 @@
 #include <string>
 #include <vector>
 
+#ifdef LIBMESH_HAVE_CXX11_SHARED_PTR
+#  include <memory>
+#  define MooseSharedPointer std::shared_ptr
+#  define MooseSharedNamespace std
+#else
+#  include "boost/shared_ptr.hpp"
+#  define MooseSharedPointer boost::shared_ptr
+#  define MooseSharedNamespace boost
+#endif
+
 /**
  * MOOSE typedefs
  */
