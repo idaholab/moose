@@ -9,6 +9,5 @@
     type = 'Exodiff'
     input = 'spline_function.i'
     exodiff = 'spline.e'
-    skip = 'spline gradients look iffy'
   [../]
 []
