@@ -1,6 +1,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
+  # Note: The following parameters must match the values in “Ti_2Phase_28x28_Sqr_Marmot.txt” after uniform refine has run.
   nx = 7
   ny = 7
   nz = 0
@@ -16,17 +17,28 @@
 
 [GlobalParams]
   crys_num = 4
-  var_name_base = gr
+  grain_num = 4
+  var_name_base = eta
   sd = 3
 []
 
+[UserObjects]
+  [./ebsd]
+    type = EBSDReader
+    filename = 'Ti_2Phase_28x28_Sqr_Marmot.txt'
+  [../]
+[]
+
+[ICs]
+  [./PolycrystalICs]
+    [./ReconstructionIC]
+    ebsd_reader = ebsd
+    [../]
+  [../]
+[]
+
 [Variables]
-  [./ReconstructedVariables]    
-    EBSD_file_name = Ti_2Phase_28x28_Sqr_Marmot.txt
-    x1 = 0
-    y1 = 0
-    x2 = 1.4
-    y2 = 1.212430
+  [./PolycrystalVariables]    
   [../]
 []
 
@@ -34,6 +46,21 @@
   [./bnds]
     order = FIRST
     family = LAGRANGE
+  [../]
+
+  [./phi1]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./PHI]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
+  [./phi2]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 
   [./grn]
@@ -64,6 +91,37 @@
     execute_on = timestep
   [../]
 
+  [./phi1_aux]
+    type = TestEBSDAux
+    variable = phi1
+    ebsd_reader = ebsd
+    data_name = 'PHI1'
+    execute_on = initial
+  [../]
+
+  [./phi_aux]
+    type = TestEBSDAux
+    variable = PHI
+    ebsd_reader = ebsd
+    data_name = 'PHI'
+    execute_on = initial
+  [../]
+  [./phi2_aux]
+    type = TestEBSDAux
+    variable = phi2
+    ebsd_reader = ebsd
+    data_name = 'PHI2'
+    execute_on = initial
+  [../]
+
+  [./grain_aux]
+    type = TestEBSDAux
+    variable = grn
+    ebsd_reader = ebsd
+    data_name = 'GRAIN'
+    execute_on = initial
+  [../]
+
   [./grn]
     type = GrainIndexAux
     variable = grn
@@ -88,7 +146,7 @@
     type = CuGrGr
     block = 0
     T = 500 #K
-    wGB = 0.75 #micron
+    wGB = 0.15 #micron
     length_scale = 1.0e-6
     time_scale = 1.0e-4
   [../]
@@ -96,7 +154,7 @@
   [./ReconstructionMaterial]
     type = ReconstructionMaterial
     block = 0
-    EBSD_file_name = Ti_2Phase_28x28_Sqr_Marmot.txt
+    ebsd_reader = ebsd 
   [../]   
 []
 
@@ -148,6 +206,11 @@
     linear_residuals = true
     nonlinear_residuals = true
   [../]  
+[]
+
+[Debug]
+  show_parser = true
+  show_actions = true
 []
     
 

@@ -3,13 +3,15 @@
     type = 'Exodiff'
     input = '1phase_reconstruction_test.i'
     exodiff = '1phase_reconstruction_test.e-s002'
-    max_time = 1000  
+    max_time = 1000
+    skip = ‘Needs Updating’  
   [../]
 
   [./2phase_reconstruction_test]
     type = 'Exodiff'
     input = '2phase_reconstruction_test.i'
     exodiff = '2phase_reconstruction_test.e-s002'
-    max_time = 1000    
+    max_time = 1000 
+    skip = ‘Needs Updating’    
   [../]
 []
