@@ -49,15 +49,12 @@
   [../]
 []
 
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = u
-  [../]
-[]
-
 [Executioner]
   type = Steady
+[]
+
+[Problem]
+  solve = false
 []
 
 [Outputs]

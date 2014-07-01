@@ -10,7 +10,7 @@
   ymin = 0
   ymax = 1
   nx = 10
-  ny = 1
+  ny = 2
 []
 
 [Variables]
@@ -36,15 +36,12 @@
   [../]
 []
 
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = u
-  [../]
-[]
-
 [Executioner]
   type = Steady
+[]
+
+[Problem]
+  solve = false
 []
 
 [Outputs]
