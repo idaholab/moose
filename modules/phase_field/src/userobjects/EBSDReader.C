@@ -1,16 +1,23 @@
 #include "EBSDReader.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<EBSDReader>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addRequiredParam<FileName>("filename", "The name of the file containing the EBSD data");
+  params.addRequiredParam<unsigned int>("crys_num", "Specifies the number of order paraameters to create");
+  params.addRequiredParam<unsigned int>("grain_num", "Specifies the number of grains in the reconstructed dataset");
   return params;
 }
 
 EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     GeneralUserObject(name, params),
+    _mesh(_fe_problem.mesh()),
+    _nl(_fe_problem.getNonlinearSystem()),
     _filename(getParam<FileName>("filename")),
+    _op_num(getParam<unsigned int>("crys_num")),
+    _grain_num(getParam<unsigned int>("grain_num")),
     _nx(0),
     _ny(0),
     _nz(0),
@@ -103,10 +110,10 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
           // Resize the _data array
           _data.resize(total_size);
 
-          // Resize each entry of the _data array to 9, which is the number of values
+          // Resize each entry of the _data array to 10, which is the number of values
           // we expect for each centroid.
           for (unsigned i=0; i<_data.size(); ++i)
-            _data[i].resize(9);
+            _data[i].resize(10);
         }
 
         // Make sure we have processed the header and allocated space to start saving values.
@@ -121,8 +128,6 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
 
         unsigned global_index = this->index_from_point( Point(x,y,z) );
 
-        // Moose::out << "Computed global index " << global_index << std::endl;
-
         std::vector<Real> & centroid_data = _data[global_index];
 
         centroid_data[0] = phi1;
@@ -134,6 +139,17 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
         centroid_data[6] = grain;
         centroid_data[7] = phase;
         centroid_data[8] = sym;
+        centroid_data[9] = 0;
+
+        _phi1_ic.push_back(phi1);
+        _PHI_ic.push_back(phi);
+        _phi2_ic.push_back(phi2);
+        _x_ic.push_back(x);
+        _y_ic.push_back(y);
+        _z_ic.push_back(z);
+        _grn_ic.push_back(grain);
+        _phase_ic.push_back(phase);
+        _sym_ic.push_back(sym);
       }
 
       // Go to next line of file, skip the rest of the error checking code below
@@ -146,6 +162,136 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     // If we made it here, then !file AND !file.eof, therefore the
     // stream is "bad".
     mooseError("Stream is bad!");
+  }
+  stream_in.close();
+
+  // Calculate average initial values of phi1, PHI, phi2, phase, and sym for each grain imported into the simulation.
+  // Also Calculate centerpoint of each EBSD grain.
+  {
+    // Resize the variables
+    _avg_data.resize(_grain_num);
+    for (unsigned i=0; i<_avg_data.size(); ++i)
+    {
+      _avg_data[i].resize(8);
+    }
+
+    _avg_phi1.resize(_grain_num);
+    _avg_PHI.resize(_grain_num);
+    _avg_phi2.resize(_grain_num);
+    _avg_x.resize(_grain_num);
+    _avg_y.resize(_grain_num);
+    _avg_z.resize(_grain_num);
+    _avg_phase.resize(_grain_num);
+    _avg_sym.resize(_grain_num);
+    _centerpoints.resize(_grain_num);
+
+    // Iterate through data points to get average variable values for each grain
+    unsigned int num_pts;
+    for (unsigned int i = 0; i < _grain_num; ++i)
+    {
+      num_pts = 0;
+      for (unsigned int j = 0; j < _grn_ic.size(); ++j)
+      {
+        if (_grn_ic[j] == i)
+        {
+          _avg_phi1[i] += _phi1_ic[j];
+          _avg_PHI[i] += _PHI_ic[j];
+          _avg_phi2[i] += _phi2_ic[j];
+          _avg_x[i] += _x_ic[j];
+          _avg_y[i] += _y_ic[j];
+          _avg_z[i] += _z_ic[j];
+          _avg_phase[i] = _phase_ic[j];
+          _avg_sym[i] = _sym_ic[j];
+          num_pts += 1;
+        }
+      }
+      _avg_phi1[i] = _avg_phi1[i] / num_pts;
+      _avg_PHI[i] = _avg_PHI[i] / num_pts;
+      _avg_phi2[i] = _avg_phi2[i] / num_pts;
+      _avg_x[i] = _avg_x[i] / num_pts;
+      _avg_y[i] = _avg_y[i] / num_pts;
+      _avg_z[i] = _avg_z[i] / num_pts;
+      _avg_phase[i] = _avg_phase[i];
+      _avg_sym[i] = _avg_sym[i];
+
+      // Save centerpoints of each grain
+      _centerpoints[i](0) = _avg_x[i];
+      _centerpoints[i](1) = _avg_y[i];
+      _centerpoints[i](2) = _avg_z[i];
+
+      // Save averaged values to array
+      unsigned int index = i;
+      std::vector<Real> & averaged_data = _avg_data[index];
+      averaged_data[0] = _avg_phi1[i];
+      averaged_data[1] = _avg_PHI[i];
+      averaged_data[2] = _avg_phi2[i];
+      averaged_data[3] = _avg_x[i];
+      averaged_data[4] = _avg_y[i];
+      averaged_data[5] = _avg_z[i];
+      averaged_data[6] = _avg_phase[i];
+      averaged_data[7] = _avg_sym[i];
+    }
+    
+    //Set up domain bounds with mesh tools
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    {
+      _bottom_left(i) = _mesh.getMinInDimension(i);
+      _top_right(i) = _mesh.getMaxInDimension(i);
+    }
+    _range = _top_right - _bottom_left;
+    
+    //Output error message if number of order parameters is larger than number of grains from EBSD dataset
+    if (_op_num > _grain_num)
+      mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
+    
+    //Assign grains to each order parameter in a way that maximizes distance
+    _assigned_op.resize(_grain_num);
+    for (unsigned int grain=0; grain < _grain_num; ++grain)
+    {
+      std::vector<int> min_op_ind;
+      std::vector<Real> min_op_dist;
+      min_op_ind.resize(_op_num);
+      min_op_dist.resize(_op_num);
+      
+      //Determine the distance to the closest center assigned to each order parameter
+      if (grain >= _op_num)
+      {
+        std::fill(min_op_dist.begin() , min_op_dist.end(), _range.size());
+        for (unsigned int i=0; i<grain; ++i)
+        {
+          Real dist =  _mesh.minPeriodicDistance(grain, _centerpoints[grain], _centerpoints[i]);
+          if (min_op_dist[_assigned_op[i]] > dist)
+          {
+            min_op_dist[_assigned_op[i]] = dist;
+            min_op_ind[_assigned_op[i]] = i;
+          }
+        }
+      }
+      
+      //Assign the current center point to the order parameter that is furthest away.
+      Real mx;
+      if (grain < _op_num)
+        _assigned_op[grain] = grain;
+      else
+      {
+        mx = 0.0;
+        unsigned int mx_ind = 1e6;
+        for (unsigned int i = 0; i < _op_num; ++i) //Find index of max
+          if (mx < min_op_dist[i])
+          {
+            mx = min_op_dist[i];
+            mx_ind = i;
+          }
+        _assigned_op[grain] = mx_ind;
+      }
+    }
+  }
+  // Update centroid_data[9] with assigned order parameter value
+  for (unsigned int k = 0; k < _data.size(); ++k)
+  {
+    std::vector<Real> & centroid_data = _data[k];
+    unsigned int index1 = centroid_data[6];
+    centroid_data[9] = _assigned_op[index1];
   }
 }
 
@@ -192,16 +338,63 @@ EBSDReader::get_data(const Point & p, MooseEnum data_type) const
     case PHASE:
       // grain is entry [7] at each centroid
       return _data[index_from_point(p)][7];
-
-    case SYMMETRY_CLASS:
+      
+    case SYMMETRY:
       // symmetry is entry [8] at each centroid
       return _data[index_from_point(p)][8];
+      
+    case OP:
+      // OP is entry [9] at each centroid
+      return _data[index_from_point(p)][9];
+  }
+  mooseError("Invalid DataType " << data_type << " requested.");
+}
+
+Real
+EBSDReader::get_avg_data(const unsigned int & var, MooseEnum data_type) const
+{
+  // TODO: If we always keep these in order, we can just return
+  // _avg_data[index_from_index(var)][data_type]...
+
+  switch (data_type)
+  {
+  case AVG_PHI1:
+      // avg_phi1 is entry [0] in _avg_data array
+      return _avg_data[index_from_index(var)][0];
+
+    case AVG_PHI:
+      // avg_phi is entry [1] in _avg_data array
+      return _avg_data[index_from_index(var)][1];
+
+    case AVG_PHI2:
+      // avg_phi2 is entry [2] in _avg_data array
+      return _avg_data[index_from_index(var)][2];
+
+    case AVG_X:
+      // avg_x is entry [3] in _avg_data array
+      return _avg_data[index_from_index(var)][3];
+
+    case AVG_Y:
+      // avg_y is entry [4] in _avg_data array
+      return _avg_data[index_from_index(var)][4];
+
+    case AVG_Z:
+      // avg_x is entry [5] in _avg_data array
+      return _avg_data[index_from_index(var)][5];
+
+    case AVG_PHASE:
+      // avg_phase is entry [6] in _avg_data array
+      return _avg_data[index_from_index(var)][6];
+
+    case AVG_SYMMETRY:
+      // avg_symmetry is entry [7] in _avg_data array
+      return _avg_data[index_from_index(var)][7];
   }
 
   mooseError("Invalid DataType " << data_type << " requested.");
 }
 
-unsigned EBSDReader::index_from_point(const Point& p) const
+unsigned EBSDReader::index_from_point(const Point & p) const
 {
   // Don't assume an ordering on the input data, use the (x, y,
   // z) values of this centroid to determine the index.
@@ -219,3 +412,17 @@ unsigned EBSDReader::index_from_point(const Point& p) const
 
   return global_index;
 }
+
+unsigned EBSDReader::index_from_index(const unsigned int & var) const
+{
+ 
+  // Transfer the index into the _avg_data array. 
+  unsigned avg_index = var;
+
+  // Don't access out of range!
+  if (avg_index >= _avg_data.size())
+    mooseError("Error! Index out of range in EBSDReader::index_from_index()");
+
+  return avg_index;
+}
+
