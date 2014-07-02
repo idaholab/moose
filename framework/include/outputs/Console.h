@@ -84,6 +84,21 @@ public:
    */
   static void petscSetupOutput();
 
+  /**
+   * Allow outputting postprocessors at each Newton iteration
+   */
+  virtual void outputPostprocessorOnNewton();
+
+  /**
+   * Disallow outputting postprocessors at each Newton iteration
+   */
+  virtual void noOutputPostprocessorOnNewton();
+
+  /**
+   * Check if postprocessors are outputted at each Newton iteration
+   */
+  virtual bool postprocessorOnNewtonAllowed() const;
+
 protected:
 
   /**
@@ -160,6 +175,9 @@ protected:
 
   /// Flag for controlling outputting console information to screen
   bool _write_screen;
+
+  /// Flag for controlling outputting postprocessors at each Newton iteration
+  bool _newton_pps;
 
   /// Flag for writing detailed time step information
   bool _verbose;
