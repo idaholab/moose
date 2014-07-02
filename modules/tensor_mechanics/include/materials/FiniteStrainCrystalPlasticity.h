@@ -21,15 +21,15 @@ protected:
   virtual void initQpStatefulProperties();
   virtual void calc_resid_jacob(const RankTwoTensor &, RankTwoTensor &, const RankTwoTensor &, RankTwoTensor &,
                                 std::vector<Real> &, std::vector<Real> &, RankTwoTensor &, RankFourTensor &);
-  virtual void get_slip_incr(const std::vector<Real> &, std::vector<Real> &, std::vector<Real> &);
-  virtual void update_gss(Real*);
+  virtual void getSlipIncrements(const std::vector<Real> &, std::vector<Real> &, std::vector<Real> &);
+  virtual void updateGss(std::vector<Real> &);
 
-  virtual void get_slip_sys();
-  virtual void get_euler_ang();
+  virtual void getSlipSystems();
+  virtual void getEulerAngles();
 
-  void get_euler_rot();
+  void getEulerRotations();
   RankFourTensor outerProduct(const RankTwoTensor & a, const RankTwoTensor & b);
-  RankTwoTensor getmatrot(const RankTwoTensor & a);
+  RankTwoTensor getMatRot(const RankTwoTensor & a);
 
   const unsigned int _nss;
 
@@ -59,10 +59,10 @@ protected:
   MaterialProperty<RankTwoTensor> & _pk2;
   MaterialProperty<RankTwoTensor> & _pk2_old;
   MaterialProperty<RankTwoTensor> & _lag_e;
-  MaterialProperty<std::vector<Real> >  & _gss;
-  MaterialProperty<std::vector<Real> >  & _gss_old;
-  MaterialProperty<Real>  & _acc_slip;
-  MaterialProperty<Real>  & _acc_slip_old;
+  MaterialProperty<std::vector<Real> > & _gss;
+  MaterialProperty<std::vector<Real> > & _gss_old;
+  MaterialProperty<Real> & _acc_slip;
+  MaterialProperty<Real> & _acc_slip_old;
   MaterialProperty<RankTwoTensor> & _update_rot;
   MaterialProperty<RankTwoTensor> & _crysrot;
   MaterialProperty<RankTwoTensor> & _crysrot_old;

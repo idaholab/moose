@@ -119,13 +119,13 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
     ind += 2;
   }
 
-  get_euler_ang();
-  get_euler_rot();
+  getEulerAngles();
+  getEulerRotations();
 
   _mo.resize(_nss*3);
   _no.resize(_nss*3);
 
-  get_slip_sys();
+  getSlipSystems();
 
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
@@ -213,7 +213,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
     for (i = 0; i < _nss; ++i)
       gss_prev[i] = _gss[_qp][i];
 
-    update_gss(&slip_incr[0]);
+    updateGss(slip_incr);
 
     gmax = 0.0;
     for (i = 0; i < _nss; ++i)
@@ -237,12 +237,12 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
   _pk2[_qp] = pk2;
   _stress[_qp] = sig;
 
-  rot = getmatrot(_dfgrd[_qp]);
+  rot = getMatRot(_dfgrd[_qp]);
   _update_rot[_qp] = rot * _crysrot[_qp];
 }
 
 void
-FiniteStrainCrystalPlasticity::get_euler_rot()
+FiniteStrainCrystalPlasticity::getEulerRotations()
 {
   Real phi1, phi, phi2;
   Real cp, cp1, cp2, sp, sp1, sp2;
@@ -276,7 +276,7 @@ FiniteStrainCrystalPlasticity::get_euler_rot()
 }
 
 void
-FiniteStrainCrystalPlasticity::get_slip_sys()
+FiniteStrainCrystalPlasticity::getSlipSystems()
 {
   unsigned int i, j, k;
   Real sd[3*_nss], sn[3*_nss];
@@ -335,7 +335,7 @@ FiniteStrainCrystalPlasticity::get_slip_sys()
 }
 
 void
-FiniteStrainCrystalPlasticity::update_gss(Real *slip_incr)
+FiniteStrainCrystalPlasticity::updateGss(std::vector<Real> & slip_incr)
 {
   unsigned int i, j;
   std::vector<Real> hb(_nss);
@@ -352,12 +352,9 @@ FiniteStrainCrystalPlasticity::update_gss(Real *slip_incr)
   val = std::cosh(_h0 * _acc_slip[_qp] / (_tau_sat - _tau_init)); //Karthik
   val = _h0 * std::pow(1.0/val,2.0); //Kalidindi
 
-
   for (i = 0; i < _nss; i++)
     // hb[i]=val;
     hb[i] = _h0 * std::pow(1.0 - _gss[_qp][i] / _tau_sat, a);
-
-
 
   for (i=0; i < _nss; i++)
   {
@@ -377,7 +374,6 @@ FiniteStrainCrystalPlasticity::update_gss(Real *slip_incr)
       _gss[_qp][i] = _gss[_qp][i] + qab * hb[j] * std::abs(slip_incr[j]);
     }
   }
-
 }
 
 void
@@ -416,7 +412,7 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(const RankTwoTensor & pk2, RankT
     tau[i] = ce_pk2.doubleContraction(s0[i]);
   }
 
-  get_slip_incr(tau, slip_incr, dslipdtau); //Calculate dslip,dslipdtau
+  getSlipIncrements(tau, slip_incr, dslipdtau); //Calculate dslip,dslipdtau
 
   eqv_slip_incr.zero();
   for (i = 0; i < _nss; ++i)
@@ -483,7 +479,7 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(const RankTwoTensor & pk2, RankT
 }
 
 void
-FiniteStrainCrystalPlasticity::get_slip_incr(const std::vector<Real> & tau, std::vector<Real> & slip_incr, std::vector<Real> & dslipdtau)
+FiniteStrainCrystalPlasticity::getSlipIncrements(const std::vector<Real> & tau, std::vector<Real> & slip_incr, std::vector<Real> & dslipdtau)
 {
   for (unsigned int i = 0; i < _nss; ++i)
     slip_incr[i] = _a0[i] * std::pow(std::abs(tau[i] / _gss[_qp][i]), 1.0 / _xm[i]) * copysign(1.0, tau[i]) * _dt;
@@ -507,7 +503,7 @@ RankFourTensor FiniteStrainCrystalPlasticity::outerProduct(const RankTwoTensor &
 }
 
 RankTwoTensor
-FiniteStrainCrystalPlasticity::getmatrot(const RankTwoTensor & a)
+FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
 {
   unsigned int i, j;
   RankTwoTensor rot;
@@ -540,7 +536,7 @@ FiniteStrainCrystalPlasticity::getmatrot(const RankTwoTensor & a)
 }
 
 void
-FiniteStrainCrystalPlasticity::get_euler_ang()
+FiniteStrainCrystalPlasticity::getEulerAngles()
 {
   std::ifstream fileeuler;
   Real vec[3];
