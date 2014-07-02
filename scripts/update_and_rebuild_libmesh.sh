@@ -29,6 +29,7 @@ cd build
              --enable-silent-rules \
              --enable-unique-id \
              --disable-warnings \
+             --disable-cxx11 \
              --enable-openmp $*
 
 # let LIBMESH_JOBS be either MOOSE_JOBS, or 1 if MOOSE_JOBS
