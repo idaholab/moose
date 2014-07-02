@@ -15,7 +15,7 @@ InputParameters validParams<Component>()
   params.addPrivateParam<std::string>("built_by_action", "add_component");
 
   params.registerBase("Component");
-  
+
   return params;
 }
 
