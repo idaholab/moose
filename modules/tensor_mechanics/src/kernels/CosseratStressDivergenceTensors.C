@@ -14,18 +14,18 @@ InputParameters validParams<CosseratStressDivergenceTensors>()
   return params;
 }
 
-
-CosseratStressDivergenceTensors::CosseratStressDivergenceTensors(const std::string & name, InputParameters parameters)
-  :StressDivergenceTensors(name, parameters),
-   _wc_x_var(coupled("wc_x")),
-   _wc_y_var(coupled("wc_y")),
-   _wc_z_var(coupled("wc_z"))
-{}
+CosseratStressDivergenceTensors::CosseratStressDivergenceTensors(const std::string & name, InputParameters parameters) :
+    StressDivergenceTensors(name, parameters),
+    _wc_x_var(coupled("wc_x")),
+    _wc_y_var(coupled("wc_y")),
+    _wc_z_var(coupled("wc_z"))
+{
+}
 
 Real
 CosseratStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned int coupled_component = 3; // this indicates none of the if statements below are true
+  unsigned int coupled_component = 3;
 
   // What does 2D look like here?
   if (jvar == _wc_x_var)
@@ -36,7 +36,7 @@ CosseratStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
     coupled_component = 2;
 
   if (coupled_component < 3)
-    return _Jacobian_mult[_qp].elasticJacobianwc( _component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp] );
+    return _Jacobian_mult[_qp].elasticJacobianwc(_component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]);
 
   return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
 }

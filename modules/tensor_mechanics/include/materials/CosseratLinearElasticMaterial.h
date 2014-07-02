@@ -11,7 +11,6 @@
  * boolean input value given.  This can be extended or simplified to specify HCP, monoclinic,
  * cubic, etc as needed.
  */
-
 class CosseratLinearElasticMaterial : public TensorMechanicsMaterial
 {
 public:
@@ -38,7 +37,6 @@ protected:
   MaterialProperty<RankTwoTensor> & _antisymmetric_stress;
   MaterialProperty<RankTwoTensor> & _stress_couple;
 
-
   MaterialProperty<ElasticityTensorR4> & _elastic_flexural_rigidity_tensor;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult_couple;
 
@@ -46,11 +44,10 @@ protected:
   ElasticityTensorR4 _Bijkl;
 
 private:
-  bool _has_T;
-  VariableValue * _T; //pointer rather than reference
+  VariableValue & _T;
 
   Real _thermal_expansion_coeff;
-  const Real _Temp, _T0;
+  const Real _T0;
   std::vector<Real> _applied_strain_vector;
   RankTwoTensor _applied_strain_tensor;
 

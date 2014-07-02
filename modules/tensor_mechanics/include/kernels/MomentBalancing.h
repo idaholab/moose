@@ -3,7 +3,6 @@
 
 #include "Kernel.h"
 
-
 //Forward Declarations
 class MomentBalancing;
 class ElasticityTensorR4;
@@ -15,14 +14,11 @@ InputParameters validParams<MomentBalancing>();
 class MomentBalancing : public Kernel
 {
 public:
-
   MomentBalancing(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
-
   virtual Real computeQpJacobian();
-
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   MaterialProperty<RankTwoTensor> & _stress;
@@ -38,4 +34,5 @@ private:
   const unsigned int _ydisp_var;
   const unsigned int _zdisp_var;
 };
+
 #endif //MOMENTBALANCING_H
