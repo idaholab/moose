@@ -17,6 +17,8 @@
 #include "Material.h"
 #include "MooseApp.h"
 #include "Console.h"
+#include "Checkpoint.h"
+#include "CommonOutputAction.h"
 
 template<>
 InputParameters validParams<CheckOutputAction>()

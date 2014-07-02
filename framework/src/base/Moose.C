@@ -330,12 +330,12 @@
 #include "AddTransferAction.h"
 #include "AddNodalNormalsAction.h"
 #include "SetupTimeStepperAction.h"
-#include "RecoverBaseAction.h"
 #include "SetupPredictorAction.h"
 #include "AddMortarInterfaceAction.h"
 #include "SetupPostprocessorDataAction.h"
 #include "MaterialOutputAction.h"
 #include "CheckOutputAction.h"
+#include "SetupRecoverFileBaseAction.h"
 
 // Outputs
 #include "Exodus.h"
@@ -709,13 +709,13 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_output",                   Output,                 false);
 
   registerTask("common_output", true);
+  registerTask("setup_recover_file_base", true);
 
   registerTask("add_feproblem", false);
   registerTask("add_bounds_vectors", false);
   registerTask("add_periodic_bc", false);
   registerTask("add_aux_variable", false);
   registerTask("add_variable", false);
-  registerTask("recover_base", false);
 
   registerTask("prepare_mesh", false);
   registerTask("setup_mesh_complete", false);  // calls prepare
@@ -770,7 +770,7 @@ addActionTypes(Syntax & syntax)
 "(meta_action)"
 "(common_output)"
 "(set_global_params)"
-"(recover_base)"
+"(setup_recover_file_base)"
 "(check_copy_nodal_vars)"
 "(setup_mesh)"
 "(prepare_mesh)"
@@ -851,7 +851,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
   registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
-  registerAction(RecoverBaseAction, "recover_base");
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(SetupMeshCompleteAction, "prepare_mesh");
   registerAction(AddMeshModifierAction, "add_mesh_modifier");
@@ -867,6 +866,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(CreateProblemAction, "create_problem");
   registerAction(AddOutputAction, "add_output");
   registerAction(CommonOutputAction, "common_output");
+  registerAction(SetupRecoverFileBaseAction, "setup_recover_file_base");
   registerAction(GlobalParamsAction, "set_global_params");
   registerAction(SetupPredictorAction, "setup_predictor");
   registerAction(MaterialOutputAction, "setup_material_output");

@@ -32,4 +32,19 @@
     max_parallel = 1
     max_threads = 1
   [../]
+
+  [./recover_half_transient]
+    type = RunApp
+    input = checkpoint.i
+    cli_args = "Outputs/checkpoint=true --half-transient"
+    recover = false
+  [../]
+  [./recover]
+    # Gold for this test was created using checkpoint.i without any recover options
+    type = RunApp
+    input = checkpoint.i
+    cli_args = --recover
+    recover = false
+    prereq = recover_half_transient
+  [../]
 []
