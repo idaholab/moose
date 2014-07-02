@@ -15,11 +15,10 @@
  * Any material that inherits from this one must override ComputeQpStress with the desired
  * constitutive relationship.
  */
-
 class FiniteStrainMaterial : public TensorMechanicsMaterial
 {
 public:
-  FiniteStrainMaterial(const std:: string & name, InputParameters parameters);
+  FiniteStrainMaterial(const std::string & name, InputParameters parameters);
 
 protected:
   virtual void initQpStatefulProperties();
@@ -34,9 +33,6 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress_old;
   MaterialProperty<RankTwoTensor> & _rotation_increment;
   MaterialProperty<RankTwoTensor> & _dfgrd;
-
-private:
-
 };
 
 #endif //FINITESTRAINMATERIAL_H

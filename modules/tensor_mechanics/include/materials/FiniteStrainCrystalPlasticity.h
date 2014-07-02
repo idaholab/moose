@@ -13,7 +13,7 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>();
 class FiniteStrainCrystalPlasticity : public FiniteStrainMaterial
 {
 public:
-  FiniteStrainCrystalPlasticity(const std:: string & name, InputParameters parameters);
+  FiniteStrainCrystalPlasticity(const std::string & name, InputParameters parameters);
 
 protected:
   virtual void computeQpStress();

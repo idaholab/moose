@@ -14,7 +14,7 @@
 class CosseratLinearElasticMaterial : public TensorMechanicsMaterial
 {
 public:
-  CosseratLinearElasticMaterial(const std:: string & name, InputParameters parameters);
+  CosseratLinearElasticMaterial(const std::string & name, InputParameters parameters);
 
 protected:
   virtual void computeQpStrain();
