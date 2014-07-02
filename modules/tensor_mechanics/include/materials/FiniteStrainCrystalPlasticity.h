@@ -28,8 +28,8 @@ protected:
   virtual void get_euler_ang();
 
   void get_euler_rot();
-  RankFourTensor outerProduct(RankTwoTensor &a, RankTwoTensor &b);
-  RankTwoTensor getmatrot(RankTwoTensor &a);
+  RankFourTensor outerProduct(const RankTwoTensor & a, const RankTwoTensor & b);
+  RankTwoTensor getmatrot(const RankTwoTensor & a);
 
   const unsigned int _nss;
 

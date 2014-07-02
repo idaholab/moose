@@ -492,7 +492,7 @@ FiniteStrainCrystalPlasticity::get_slip_incr(Real* tau,Real *slip_incr,Real *dsl
     dslipdtau[i] = _a0[i] / _xm[i] * std::pow(std::abs(tau[i] / _gss[_qp][i]), 1.0 / _xm[i] - 1.0) / _gss[_qp][i] * _dt;
 }
 
-RankFourTensor FiniteStrainCrystalPlasticity::outerProduct(RankTwoTensor &a, RankTwoTensor &b)
+RankFourTensor FiniteStrainCrystalPlasticity::outerProduct(const RankTwoTensor & a, const RankTwoTensor & b)
 {
   unsigned int i, j, k, l;
   RankFourTensor result;
@@ -507,7 +507,7 @@ RankFourTensor FiniteStrainCrystalPlasticity::outerProduct(RankTwoTensor &a, Ran
 }
 
 RankTwoTensor
-FiniteStrainCrystalPlasticity::getmatrot(RankTwoTensor &a)
+FiniteStrainCrystalPlasticity::getmatrot(const RankTwoTensor & a)
 {
   unsigned int i, j;
   RankTwoTensor rot;

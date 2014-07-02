@@ -25,7 +25,7 @@ protected:
   virtual void initQpStatefulProperties();
   virtual void computeStrain();
   virtual void computeQpStrain();
-  virtual void computeQpStrain(RankTwoTensor Fhat);
+  virtual void computeQpStrain(const RankTwoTensor & Fhat);
   virtual void computeQpStress() = 0;
 
   MaterialProperty<RankTwoTensor> & _strain_rate;
