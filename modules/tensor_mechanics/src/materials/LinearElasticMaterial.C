@@ -12,29 +12,25 @@ template<>
 InputParameters validParams<LinearElasticMaterial>()
 {
   InputParameters params = validParams<TensorMechanicsMaterial>();
-  params.addParam<Real>("thermal_expansion_coeff",0,"Thermal expansion coefficient in 1/K");
-  params.addParam<Real>("T0",300,"Reference temperature for thermal expansion in K");
-  params.addParam<Real>("Temp",300,"Current temperature for thermal expansion in K");
-  params.addCoupledVar("T", "Temperature in Kelvin");
-  params.addParam<std::vector<Real> >("applied_strain_vector","Applied strain: e11, e22, e33, e23, e13, e12");
-
+  params.addParam<Real>("thermal_expansion_coeff", 0, "Thermal expansion coefficient in 1/K");
+  params.addParam<Real>("T0", 300, "Reference temperature for thermal expansion in K");
+  params.addCoupledVar("T", 300, "Temperature in Kelvin");
+  params.addParam<std::vector<Real> >("applied_strain_vector", "Applied strain: e11, e22, e33, e23, e13, e12");
   return params;
 }
 
 LinearElasticMaterial::LinearElasticMaterial(const std::string & name,
-                                             InputParameters parameters)
-    : TensorMechanicsMaterial(name, parameters),
-      _eigenstrain(declareProperty<RankTwoTensor>("eigenstrain")),
-      _delasticity_tensor_dc(declareProperty<ElasticityTensorR4>("delasticity_tensor_dc")),
-      _d2elasticity_tensor_dc2(declareProperty<ElasticityTensorR4>("d2elasticity_tensor_dc2")),
-      _deigenstrain_dc(declareProperty<RankTwoTensor>("deigenstrain_dc")),
-      _d2eigenstrain_dc2(declareProperty<RankTwoTensor>("d2eigenstrain_dc2")),
-      _has_T(isCoupled("T")),
-      _T(_has_T ? &coupledValue("T") : NULL),
-      _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
-      _Temp(getParam<Real>("Temp")),
-      _T0(getParam<Real>("T0")),
-      _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector"))
+                                             InputParameters parameters) :
+    TensorMechanicsMaterial(name, parameters),
+    _eigenstrain(declareProperty<RankTwoTensor>("eigenstrain")),
+    _delasticity_tensor_dc(declareProperty<ElasticityTensorR4>("delasticity_tensor_dc")),
+    _d2elasticity_tensor_dc2(declareProperty<ElasticityTensorR4>("d2elasticity_tensor_dc2")),
+    _deigenstrain_dc(declareProperty<RankTwoTensor>("deigenstrain_dc")),
+    _d2eigenstrain_dc2(declareProperty<RankTwoTensor>("d2eigenstrain_dc2")),
+    _T(coupledValue("T")),
+    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
+    _T0(getParam<Real>("T0")),
+    _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector"))
 {
   //Initialize applied strain tensor from input vector
   if (_applied_strain_vector.size() == 6)
@@ -43,7 +39,8 @@ LinearElasticMaterial::LinearElasticMaterial(const std::string & name,
     _applied_strain_tensor.zero();
 }
 
-void LinearElasticMaterial::computeQpStrain()
+void
+LinearElasticMaterial::computeQpStrain()
 {
   //strain = (grad_disp + grad_disp^T)/2
   RankTwoTensor grad_tensor(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]);
@@ -58,10 +55,10 @@ void LinearElasticMaterial::computeQpStrain()
   }
 
   _elastic_strain[_qp] = (grad_tensor + grad_tensor.transpose())/2.0;
-
 }
 
-void LinearElasticMaterial::computeQpStress()
+void
+LinearElasticMaterial::computeQpStress()
 {
   //Calculation and Apply stress free strain
   RankTwoTensor stress_free_strain = computeStressFreeStrain();
@@ -72,17 +69,12 @@ void LinearElasticMaterial::computeQpStress()
   _stress[_qp] = _elasticity_tensor[_qp]*_elastic_strain[_qp];
 }
 
-RankTwoTensor LinearElasticMaterial::computeStressFreeStrain()
+RankTwoTensor
+LinearElasticMaterial::computeStressFreeStrain()
 {
   //Apply thermal expansion
-  Real T;
-  if (_has_T)
-    T = (*_T)[_qp];
-  else
-    T = _Temp;
-
   RankTwoTensor stress_free_strain;
-  stress_free_strain.addIa(-_thermal_expansion_coeff*(T - _T0));
+  stress_free_strain.addIa(-_thermal_expansion_coeff*(_T[_qp] - _T0));
 
   //Apply uniform applied strain
   if (_applied_strain_vector.size() == 6)
