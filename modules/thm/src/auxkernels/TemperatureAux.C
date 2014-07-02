@@ -5,7 +5,7 @@ template<>
 InputParameters validParams<TemperatureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  
+
   // Coupled variables.  We assume that temperature is always a function of rho, rhou, and rhoE...
   params.addRequiredCoupledVar("rho", "density");
   params.addRequiredCoupledVar("rhou", "momentum");
@@ -13,7 +13,7 @@ InputParameters validParams<TemperatureAux>()
 
   // The EOS function is a required parameter.
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
-  
+
   return params;
 }
 

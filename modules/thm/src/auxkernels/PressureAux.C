@@ -5,14 +5,14 @@ template<>
 InputParameters validParams<PressureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  
+
   // Required coupled variables.  We assume that pressure always at least depends on density...
   params.addRequiredCoupledVar("rho", "density");
 
   // Optional coupled variables.  Pressure may or may not also depend on momentum and total energy.
   params.addCoupledVar("rhou", "momentum");
   params.addCoupledVar("rhoE", "total energy");
-  
+
   // The EOS function is a required parameter.
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
 

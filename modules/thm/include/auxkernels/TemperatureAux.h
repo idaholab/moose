@@ -11,7 +11,7 @@ class EquationOfState;
 template<>
 InputParameters validParams<TemperatureAux>();
 
-/** 
+/**
  * Nodal auxiliary variable for temperature.
  */
 class TemperatureAux : public AuxKernel
@@ -25,7 +25,7 @@ public:
   TemperatureAux(const std::string & name, InputParameters parameters);
 
   virtual ~TemperatureAux();
-  
+
 protected:
   virtual Real computeValue();
 
@@ -33,8 +33,8 @@ protected:
   VariableValue & _rho;
   VariableValue & _rhou;
   VariableValue & _rhoE;
-  
+
   const EquationOfState & _eos;
 };
 
-#endif 
+#endif

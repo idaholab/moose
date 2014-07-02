@@ -11,7 +11,7 @@ class EquationOfState;
 template<>
 InputParameters validParams<PressureAux>();
 
-/** 
+/**
  * Nodal auxiliary variable for pressure.
  */
 class PressureAux : public AuxKernel
@@ -25,7 +25,7 @@ public:
   PressureAux(const std::string & name, InputParameters parameters);
 
   virtual ~PressureAux() {}
-  
+
 protected:
   virtual Real computeValue();
 
@@ -37,4 +37,4 @@ protected:
   const EquationOfState & _eos;
 };
 
-#endif 
+#endif
