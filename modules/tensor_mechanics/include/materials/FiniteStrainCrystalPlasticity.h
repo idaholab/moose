@@ -19,16 +19,16 @@ protected:
   virtual void computeQpStress();
   virtual void computeQpElasticityTensor();
   virtual void initQpStatefulProperties();
-  virtual void calc_resid_jacob(RankTwoTensor*,RankTwoTensor*,RankTwoTensor*,RankTwoTensor*,Real*,Real*,
-                                RankTwoTensor*,RankFourTensor*);
-  virtual void get_slip_incr(Real*,Real*,Real*);
+  virtual void calc_resid_jacob(RankTwoTensor*, RankTwoTensor*, RankTwoTensor*, RankTwoTensor*, Real*, Real*,
+                                RankTwoTensor*, RankFourTensor*);
+  virtual void get_slip_incr(Real*, Real*, Real*);
   virtual void update_gss(Real*);
 
   virtual void get_slip_sys();
   virtual void get_euler_ang();
 
   void get_euler_rot();
-  RankFourTensor outerProduct(RankTwoTensor &a,RankTwoTensor &b);
+  RankFourTensor outerProduct(RankTwoTensor &a, RankTwoTensor &b);
   RankTwoTensor getmatrot(RankTwoTensor &a);
 
   const unsigned int _nss;
@@ -37,10 +37,8 @@ protected:
   std::vector<Real> _hprops;
   std::vector<Real> _flowprops;
 
-
   std::string _slip_sys_file_name;
   std::string _euler_angle_file_name;
-
 
   std::vector<Real> _mo;
   std::vector<Real> _no;
