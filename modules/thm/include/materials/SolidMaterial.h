@@ -17,11 +17,11 @@ class SolidMaterial : public Material
 {
 public:
   SolidMaterial(const std::string & name, InputParameters parameters);
-  
+
 protected:
   virtual void computeQpProperties();
 
-  /// The solid material properties 
+  /// The solid material properties
   MaterialProperty<Real> & _thermal_conductivity;
   MaterialProperty<Real> & _specific_heat;
   MaterialProperty<Real> & _density;
