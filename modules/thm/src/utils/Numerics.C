@@ -21,7 +21,7 @@ namespace Numerics {
     {
       if(std::fabs(res)<tola && std::fabs((xnew-xold)/xold)<tolr)
       {
-        //std::cout<<"  Newton iteration: total iteration "<<n<<" res= "<<res<<std::endl;
+        //_console<<"  Newton iteration: total iteration "<<n<<" res= "<<res<<std::endl;
         return xnew;
       }
 
@@ -29,12 +29,12 @@ namespace Numerics {
       xold=xnew;
       res=(*fct)(xold, f0);
       xnew=xold-res/(*dfct)(xold);
-      //std::cout<<"  Newton iteration: n= "<<n<<" xold= "<<xold<<" xnew= "<<xnew<<" res= "<<res<<std::endl;
+      //_console<<"  Newton iteration: n= "<<n<<" xold= "<<xold<<" xnew= "<<xnew<<" res= "<<res<<std::endl;
     }
 
     std::stringstream error_message;
     error_message << "Newton iteration cannot converge after " << (n-1)<<"; final value is "<<xnew;
-    //std::cerr << error_message.str() << std::endl;
+    //Moose::err << error_message.str() << std::endl;
     mooseError(error_message.str() );
     return 0.;
   }
