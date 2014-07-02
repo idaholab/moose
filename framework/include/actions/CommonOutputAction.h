@@ -55,22 +55,6 @@ private:
   void create(std::string object_type);
 
   /**
-   * Helper method for creating Checkpoint object for auto recovery testing
-   */
-  void createAutoRecoveryCheckpointObject();
-
-  /**
-   * Set the file base for recovery
-   */
-  void setRecoverFileBase();
-
-  /**
-   * Extract the recovery directory
-   * @return A string containing the default recovery directory
-   */
-  std::string getRecoveryDirectory();
-
-  /**
    * Check if a Console object that outputs to the screen has been defined
    * @return True if the a screen outputting Console objects
    */

@@ -497,7 +497,7 @@ Output::checkInterval()
   return output;
 }
 
-/// Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
+// Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
 template <typename warehouse_type, typename postprocessor_type>
 void
 initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_type & warehouse, bool & has_limited_pps, MooseApp & app, std::string & name, InputParameters & params)
@@ -522,9 +522,9 @@ initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_
 
       /* Hide the postprocessor if:
        *  (1) The "outputs" parameter is NOT empty and
-       *  (1) 'all' is NOT found in the 'outputs' parameter and
-       *  (2) 'none' is used within the 'outputs' parameter or
-       *  (3) this output object name is not found in the list of output names
+       *  (2) 'all' is NOT found in the 'outputs' parameter and
+       *  (3) 'none' is used within the 'outputs' parameter or
+       *  (4) this output object name is not found in the list of output names
        */
       if ( !pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end() &&
            (pps_outputs.find("none") != pps_outputs.end() || pps_outputs.find(name) == pps_outputs.end()) )
