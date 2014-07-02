@@ -19,9 +19,9 @@ protected:
   virtual void computeQpStress();
   virtual void computeQpElasticityTensor();
   virtual void initQpStatefulProperties();
-  virtual void calc_resid_jacob(RankTwoTensor*, RankTwoTensor*, RankTwoTensor*, RankTwoTensor*, Real*, Real*,
-                                RankTwoTensor*, RankFourTensor*);
-  virtual void get_slip_incr(Real*, Real*, Real*);
+  virtual void calc_resid_jacob(const RankTwoTensor &, RankTwoTensor &, const RankTwoTensor &, RankTwoTensor &,
+                                std::vector<Real> &, std::vector<Real> &, RankTwoTensor &, RankFourTensor &);
+  virtual void get_slip_incr(const std::vector<Real> &, std::vector<Real> &, std::vector<Real> &);
   virtual void update_gss(Real*);
 
   virtual void get_slip_sys();

@@ -163,7 +163,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
   {
     iter = 0;
     pk2 = _pk2_old[_qp];
-    calc_resid_jacob(&pk2,&sig,&fp_old_inv,&fp_inv,&slip_incr[0],&tau[0],&resid,&jac);
+    calc_resid_jacob(pk2, sig, fp_old_inv, fp_inv, slip_incr, tau, resid, jac);
 
     slip_incr_max = 0.0;
 
@@ -186,7 +186,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
     {
       dpk2 = jac.invSymm() * resid;
       pk2 = pk2 - dpk2 * fac;
-      calc_resid_jacob(&pk2,&sig,&fp_old_inv,&fp_inv,&slip_incr[0],&tau[0],&resid,&jac);
+      calc_resid_jacob(pk2, sig, fp_old_inv, fp_inv, slip_incr, tau, resid, jac);
       slip_incr_max=0.0;
 
       for (i = 0; i < _nss; ++i)
@@ -381,8 +381,8 @@ FiniteStrainCrystalPlasticity::update_gss(Real *slip_incr)
 }
 
 void
-FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2, RankTwoTensor *sig, RankTwoTensor* fp_old_inv, RankTwoTensor* fp_inv,
-                                                Real* slip_incr, Real *tau, RankTwoTensor* resid, RankFourTensor *jac)
+FiniteStrainCrystalPlasticity::calc_resid_jacob(const RankTwoTensor & pk2, RankTwoTensor & sig, const RankTwoTensor & fp_old_inv, RankTwoTensor & fp_inv,
+                                                std::vector<Real> & slip_incr, std::vector<Real> & tau, RankTwoTensor & resid, RankFourTensor & jac)
 {
   unsigned int i, j, k;
   RankTwoTensor fe, ce, ee, iden, ce_pk2;
@@ -397,13 +397,13 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2, RankTwoTenso
   iden.zero();
   iden.addIa(1.0);
 
-  fe = _dfgrd[_qp] * (*fp_old_inv);
+  fe = _dfgrd[_qp] * fp_old_inv;
 
-  ce = fe.transpose()*fe;
+  ce = fe.transpose() * fe;
   ee = ce - iden;
   ee *= 0.5;
 
-  ce_pk2 = ce * (*pk2);
+  ce_pk2 = ce * pk2;
   ce_pk2 = ce_pk2 / fe.det();
   // ce_pk2=(*pk2);//Approximation
 
@@ -416,15 +416,15 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2, RankTwoTenso
     tau[i] = ce_pk2.doubleContraction(s0[i]);
   }
 
-  get_slip_incr(tau, slip_incr, &dslipdtau[0]); //Calculate dslip,dslipdtau
+  get_slip_incr(tau, slip_incr, dslipdtau); //Calculate dslip,dslipdtau
 
   eqv_slip_incr.zero();
   for (i = 0; i < _nss; ++i)
     eqv_slip_incr += s0[i] * slip_incr[i];
 
   eqv_slip_incr = iden - eqv_slip_incr;
-  (*fp_inv) = (*fp_old_inv) * eqv_slip_incr;
-  fe = _dfgrd[_qp] * (*fp_inv);
+  fp_inv = fp_old_inv * eqv_slip_incr;
+  fe = _dfgrd[_qp] * fp_inv;
 
   ce = fe.transpose() * fe;
   ee = ce - iden;
@@ -433,16 +433,16 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2, RankTwoTenso
   pk2_new = _elasticity_tensor[_qp] * ee;
 
   _lag_e[_qp] = _dfgrd[_qp].transpose() * _dfgrd[_qp] - iden;
-  _lag_e[_qp] = _lag_e[_qp]*0.5;
+  _lag_e[_qp] = _lag_e[_qp] * 0.5;
 
-  (*resid) = (*pk2) - pk2_new;
+  resid = pk2 - pk2_new;
   /*End Calculate Residual*/
   /*Calculate Jacobian*/
 
   for (i = 0; i < _nss; ++i)
   {
     dtaudpk2[i] = s0[i];
-    dfpinvdslip[i] = -(*fp_old_inv) * s0[i];
+    dfpinvdslip[i] = -fp_old_inv * s0[i];
   }
 
   for (i = 0; i < 3; ++i)
@@ -468,22 +468,22 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(RankTwoTensor* pk2, RankTwoTenso
     dfpinvdpk2 += temp4;
   }
 
-  (*jac)=_elasticity_tensor[_qp]*deedfe*dfedfpinv*dfpinvdpk2;
+  jac = _elasticity_tensor[_qp] * deedfe * dfedfpinv * dfpinvdpk2;
 
   for (i = 0; i < 3 ; ++i)
     for (j = 0; j < 3; ++j)
       idenFour(i,j,i,j) = 1.0;
 
-  (*jac) = idenFour - (*jac);
+  jac = idenFour - jac;
 
   /*End Calculate Jacobian*/
 
-  (*sig) = fe * (*pk2) * fe.transpose();
-  (*sig) = (*sig) / fe.det();
+  sig = fe * pk2 * fe.transpose();
+  sig = sig / fe.det();
 }
 
 void
-FiniteStrainCrystalPlasticity::get_slip_incr(Real* tau,Real *slip_incr,Real *dslipdtau)
+FiniteStrainCrystalPlasticity::get_slip_incr(const std::vector<Real> & tau, std::vector<Real> & slip_incr, std::vector<Real> & dslipdtau)
 {
   for (unsigned int i = 0; i < _nss; ++i)
     slip_incr[i] = _a0[i] * std::pow(std::abs(tau[i] / _gss[_qp][i]), 1.0 / _xm[i]) * copysign(1.0, tau[i]) * _dt;
