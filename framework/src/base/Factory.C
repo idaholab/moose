@@ -55,21 +55,6 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   return (*_name_to_build_pointer[obj_name])(name, parameters);
 }
 
-MooseObjectPtr
-Factory::create_shared_ptr(const std::string & obj_name, const std::string & name, InputParameters parameters)
-{
-  // Check if the object is registered
-  if (_name_to_build_pointer_shared.find(obj_name) == _name_to_build_pointer_shared.end())
-    mooseError("Object '" + obj_name + "' was not registered.");
-
-  // Print out deprecated message, if it exists
-  deprecatedMessage(obj_name);
-
-  // Check to make sure that all required parameters are supplied
-  parameters.checkParams(name);
-  return (*_name_to_build_pointer_shared[obj_name])(name, parameters);
-}
-
 time_t Factory::parseTime(const std::string t_str)
 {
   // The string must be a certain length to be valid
