@@ -108,7 +108,7 @@ void readScatteredNDarray(std::string & filename, int & numberOfDimensions, int 
 		throwError("Data contained in " << filename << " is not complete: expected number of points and point coordinates do not match.");
 }
 
-void readMatrix(std::string filename, int & rows, int & columns, std::vector< std::vector<double> > & matrix){
+void readMatrix(const std::string filename, int & rows, int & columns, std::vector< std::vector<double> > & matrix){
 	// Data format: row1
 	//              row2
 	//              row3
@@ -137,7 +137,8 @@ int ReadNumbers(const std::string & s, std::vector <double> & v ) {
 
 
 
-void import_matrix_from_txt_file(std::string filename_X, std::vector <double>& v, int& rows, int& cols){
+
+void import_matrix_from_txt_file(const std::string filename_X, std::vector <double>& v, int& rows, int& cols){
     std::ifstream file_X;
     std::string line;
 
@@ -162,10 +163,8 @@ void import_matrix_from_txt_file(std::string filename_X, std::vector <double>& v
         file_X.close();
     }
     else{
-      std::cout << "file open failed";
+    	throwError("Failure to open file:" << filename_X);
     }
-
-    std::cout << "v:" << std::endl;
     for (int i=0;i<rows;i++){
         for (int j=0;j<cols;j++)
           std::cout << v[i*cols+j] << "\t" ;

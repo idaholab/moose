@@ -41,6 +41,10 @@ protected:
 class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
 {
 public:
+  BasicMultiDimensionalInverseWeight(const char * data_filename,double p):  _interpolator(data_filename,p)
+  {
+  };
+
   BasicMultiDimensionalInverseWeight(std::string data_filename,double p):  _interpolator(data_filename,p)
   {
 	  bool LBcheck = _interpolator.checkLB(0.0);
@@ -84,6 +88,7 @@ protected:
 class BasicMultivariateNormal: public virtual BasicDistributionND
 {
 public:
+  BasicMultivariateNormal(const char * data_filename, std::vector<double> mu);
   BasicMultivariateNormal(std::string data_filename, std::vector<double> mu);
   BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
   virtual ~BasicMultivariateNormal();
@@ -149,6 +154,10 @@ protected:
 class BasicMultiDimensionalCartesianSpline: public  virtual BasicDistributionND
 {
 public:
+  BasicMultiDimensionalCartesianSpline(const char * data_filename,std::vector<double> alpha, std::vector<double> beta):  _interpolator(data_filename,alpha, beta)
+  {
+  };
+
   BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta): _interpolator(data_filename, alpha, beta)
   {
 	  bool LBcheck = _interpolator.checkLB(0.0);
@@ -193,6 +202,54 @@ public:
 protected:
   NDSpline _interpolator;
 };
+
+//class BasicMultiDimensionalLinear: public  virtual BasicDistributionND
+//{
+//public:
+//  BasicMultiDimensionalLinear(std::string data_filename): _interpolator(data_filename)
+//  {
+//	  bool LBcheck = _interpolator.checkLB(0.0);
+//	  if (LBcheck == false)
+//		  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+//
+//	  bool UBcheck = _interpolator.checkUB(1.0);
+//	  if (UBcheck == false)
+//		  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
+//  };
+//  BasicMultiDimensionalLinear(): _interpolator()
+//  {
+//  };
+//  virtual ~BasicMultiDimensionalLinear()
+//  {
+//  };
+//  double
+//  Pdf(std::vector<double> x)
+//  {
+//    return _interpolator.interpolateAt(x);
+//  };
+//  double
+//  Cdf(std::vector<double> x)
+//  {
+//     double value = _interpolator.interpolateAt(x);
+//
+//     if (value > 1.0)
+//    	 value=1.0;
+//
+//     return value;
+//  };
+//  double
+//  InverseCdf(std::vector<double> /*x*/)
+//  {
+//    return -1.0;
+//  };
+//  std::vector<double>
+//  InverseCdf(double /*min*/, double /*max*/)
+//  {
+//    return std::vector<double>(2,-1.0);
+//  };
+//protected:
+//  NDlinear _interpolator;
+//};
 
 
 #endif /* DISTRIBUTION_BASE_ND_H */

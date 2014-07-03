@@ -113,7 +113,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std:
   readMatrix(data_filename, rows, columns, _cov_matrix);
   std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
 
-  std::cerr<< "Computing inverse and determinant"<< std::endl;;
+  std::cerr<< "Computing inverse and determinant"<< std::endl;
 
   computeInverse(_cov_matrix, inverseCovMatrix);
 
@@ -136,6 +136,48 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std:
 
   if(rows != columns)
           throwError("MultivariateNormal error: covariance matrix in " << data_filename << " is not a square matrix.");
+}
+
+BasicMultivariateNormal::BasicMultivariateNormal(const char * data_filename, std::vector<double> mu){
+	  //std::string str(data_filename);
+	  //std::cerr<< data_filename << std::endl;
+
+	  //std::stringstream ss;
+	  //ss.str(data_filename);
+	  //std::string filename = ss.str();
+	  //std::cerr<< filename << std::endl;
+	  //std::cerr<< typeof(filename) << std::endl;
+
+	  _mu = mu;
+
+	  int rows,columns;
+	  readMatrix(std::string(data_filename), rows, columns, _cov_matrix);
+	  //readMatrix(data_filename, rows, columns, _cov_matrix);
+	  std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
+
+	  std::cerr<< "Computing inverse and determinant"<< std::endl;
+
+	  computeInverse(_cov_matrix, inverseCovMatrix);
+
+	  for (int i=0;i<rows;i++){
+	  	std::vector<double> temp;
+	     for (int j=0;j<columns;j++)
+	    	 temp.push_back(inverseCovMatrix.at(i).at(j));
+	     _inverse_cov_matrix.push_back(temp);
+	  }
+
+	  int dimensions = _mu.size();
+	  for(int i=0; i<dimensions; i++)
+		  for(int j=0; j<dimensions; j++)
+			  std::cerr<<_inverse_cov_matrix[i][j]<<std::endl;
+
+	  std::cerr<< "_inverseCovMatrix completed"<< std::endl;
+
+	  _determinant_cov_matrix = getDeterminant(_cov_matrix);
+	  std::cerr<< "_determinantCovMatrix completed";
+
+	  if(rows != columns)
+	          throwError("MultivariateNormal error: covariance matrix in " << data_filename << " is not a square matrix.");
 }
 
 

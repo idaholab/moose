@@ -63,6 +63,12 @@ MultiDimensionalInverseWeight::MultiDimensionalInverseWeight(const std::string &
 {
 }
 
+//MultiDimensionalInverseWeight::MultiDimensionalInverseWeight(const char * name, InputParameters parameters):
+//    distributionND(name,parameters),
+//    BasicMultiDimensionalInverseWeight(getParam<std::string>("data_filename"),getParam<double>("p"))
+//{
+//}
+
 MultiDimensionalInverseWeight::~MultiDimensionalInverseWeight()
 {
 }
@@ -138,3 +144,26 @@ MultiDimensionalCartesianSpline::MultiDimensionalCartesianSpline(const std::stri
 MultiDimensionalCartesianSpline::~MultiDimensionalCartesianSpline()
 {
 }
+
+
+///*
+// * CLASS ND DISTRIBUTION MultiDimensionalLinear
+// */
+//
+//template<>
+//InputParameters validParams<MultiDimensionalLinear>(){
+//
+//   InputParameters params = validParams<distributionND>();
+//   return params;
+//
+//}
+//
+//MultiDimensionalLinear::MultiDimensionalLinear(const std::string & name, InputParameters parameters):
+//    distributionND(name,parameters),
+//    BasicMultiDimensionalLinear(getParam<std::string>("data_filename"))
+//{
+//}
+//
+//MultiDimensionalLinear::~MultiDimensionalLinear()
+//{
+//}

@@ -33,6 +33,7 @@ class MultiDimensionalInverseWeight : public distributionND, public BasicMultiDi
 {
 public:
   MultiDimensionalInverseWeight(const std::string & name, InputParameters parameters);
+  //MultiDimensionalInverseWeight(const char * name, InputParameters parameters);
   virtual ~MultiDimensionalInverseWeight();
 };
 
@@ -82,6 +83,22 @@ public:
   MultiDimensionalCartesianSpline(const std::string & name, InputParameters parameters);
   virtual ~MultiDimensionalCartesianSpline();
 };
+
+///*
+// * CLASS MultiDimensionalLinear DISTRIBUTION
+// */
+//class MultiDimensionalLinear;
+//
+//template<>
+//InputParameters validParams<MultiDimensionalLinear>();
+//
+//
+//class MultiDimensionalLinear : public distributionND, public BasicMultiDimensionalLinear
+//{
+//public:
+//  MultiDimensionalLinear(const std::string & name, InputParameters parameters);
+//  virtual ~MultiDimensionalLinear();
+//};
 
 
 

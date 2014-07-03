@@ -113,6 +113,33 @@ private:
   std::vector< std::vector<double> > _point_coordinates;
 };
 
+//class NDlinear: public NDInterpolation
+//{
+//public:
+//  double interpolateAt(std::vector<double> point_coordinate);
+//  NDlinear(std::string filename);
+//  NDlinear();
+//  ~NDlinear();
+//  double linear_interpolation(std::vector<double> point_coordinate);
+//  std::vector<double> getValues(std::vector<int> & loopLocator);
+//  int fromNDto1Dconverter(std::vector<int> coordinate);
+//  bool checkBoundaries(std::vector<double> point);
+//  std::vector<int> from1DtoNDconverter(int oneDcoordinate, std::vector<int> indexes);
+//
+//  bool checkUB(double upper_bound);
+//  bool checkLB(double lower_bound);
+//
+//private:
+//  int _dimensions;
+//  int _number_of_points;
+//  bool _completedInit;
+//  double _p;
+//  std::vector<double> _values;
+//  std::vector<double> _minDisc;
+//  std::vector<double> _maxDisc;
+//  std::vector< std::vector<double> > _discretizations;
+//};
+
 class MicroSphere: public NDInterpolation
 {
 public:
