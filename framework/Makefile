@@ -3,7 +3,7 @@
 ###############################################################################
 #
 # Optional Environment variables
-# MOOSE_DIR     - Root directory of the MOOSE project 
+# MOOSE_DIR     - Root directory of the MOOSE project
 # FRAMEWORK_DIR - Location of the MOOSE framework
 #
 ###############################################################################
@@ -17,6 +17,6 @@ include $(FRAMEWORK_DIR)/moose.mk
 
 DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py moose)
 
+
 ###############################################################################
 # Additional special case targets should be added here
-
