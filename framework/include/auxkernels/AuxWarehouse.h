@@ -15,13 +15,12 @@
 #ifndef AUXWAREHOUSE_H
 #define AUXWAREHOUSE_H
 
-#include "MooseTypes.h"
-
 #include <vector>
 #include <map>
 #include <string>
 #include <list>
 #include <set>
+#include "MooseTypes.h"
 
 class AuxKernel;
 class AuxScalarKernel;
@@ -65,13 +64,13 @@ public:
    * @param aux Kernel being added
    * @param block_ids Set of subdomain this kernel is active on
    */
-  void addAuxKernel(MooseSharedPointer<AuxKernel> aux);
+  void addAuxKernel(AuxKernel *aux);
 
   /**
    * Add a scalar kernels
    * @param kernel Scalar kernel being added
    */
-  void addScalarKernel(MooseSharedPointer<AuxScalarKernel> kernel);
+  void addScalarKernel(AuxScalarKernel *kernel);
 
 protected:
   /// all aux kernels
@@ -97,15 +96,6 @@ protected:
   std::vector<AuxScalarKernel *> _scalar_kernels;
 
 private:
-  ///@{
-  /**
-   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
-   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
-   */
-  std::vector<MooseSharedPointer<AuxKernel> > _all_ptrs;
-  std::vector<MooseSharedPointer<AuxScalarKernel> > _all_scalar_ptrs;
-  ///@}
-
   /**
    * This routine uses the Dependency Resolver to sort AuxKernels based on dependencies they
    * might have on coupled values
