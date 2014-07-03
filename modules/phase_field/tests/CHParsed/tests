@@ -9,6 +9,5 @@
     type = 'Exodiff'
     input = 'SplitCHParsed_test.i'
     exodiff = 'out_split.e'
-    skip = 'waiting for LibMesh update'
   [../]
 []

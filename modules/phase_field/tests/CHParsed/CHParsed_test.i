@@ -47,14 +47,14 @@
   [./CHSolid]
     type = CHParsed
     variable = cv
-    mob_name = M_v
+    mob_name = M
 
     # Either define constants here...
-    #constant_names  = 'barr_height  cv_eq'
-    #constant_values = '0.1         1.0e-2'
+    constant_names  = 'barr_height  cv_eq'
+    constant_values = '0.1         1.0e-2'
 
     # ...or use material properties declared here.
-    material_property_names = 'barr_height cv_eq'
+    #material_property_names = 'barr_height cv_eq'
 
     # Equivalent to CHPoly with order=4
     function = 16*barr_height*(cv-cv_eq)^2*(1-cv_eq-cv)^2
@@ -63,37 +63,18 @@
   [./CHInterface]
     type = CHInterface
     variable = cv
-    mob_name = M_v
-    grad_mob_name = grad_M_v
-    kappa_name = kappa_v
+    mob_name = M
+    grad_mob_name = grad_M
+    kappa_name = kappa_c
   [../]
 []
 
 [Materials]
-  [./GenIrrad]
-    type = CTempIrrad
+  [./consts]
+    type = PFMobility
     block = 0
-    cv = cv
-    temp = 1150 #K
-    kappa_cv_input = 0.5
-    int_width = 20.0 #nm
-    free_energy_form = 4
-  [../]
-[]
-
-[BCs]
-  [./Periodic]
-    [./left_right]
-      primary = 0
-      secondary = 2
-      translation = '0 50 0'
-    [../]
-
-    [./top_bottom]
-      primary = 1
-      secondary = 3
-      translation = '-50 0 0'
-    [../]
+    kappa = 0.1
+    mob = 1e-3
   [../]
 []
 

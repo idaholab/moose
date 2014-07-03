@@ -31,7 +31,7 @@
       radius = 60.0
       invalue = 1.0
       outvalue = 0.1
-      int_width = 60.0
+      int_width = 30.0
     [../]
   [../]
   [./w]
@@ -44,15 +44,15 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    kappa_name = kappa_v
+    kappa_name = kappa_c
     w = w
 
     # Either define constants here...
-    #constant_names  = 'barr_height  cv_eq'
-    #constant_values = '0.1         1.0e-2'
+    constant_names  = 'barr_height  cv_eq'
+    constant_values = '0.1         1.0e-2'
 
     # ...or use material properties declared here.
-    material_property_names = 'barr_height cv_eq'
+    #material_property_names = 'barr_height cv_eq'
 
     # Equivalent to SplitCHPoly with order=4
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
@@ -60,8 +60,7 @@
   [./w_res]
     type = SplitCHWRes
     variable = w
-    c = c
-    mob_name = M_v
+    mob_name = M
   [../]
   [./time]
     type = CoupledImplicitEuler
@@ -70,19 +69,12 @@
   [../]
 []
 
-[BCs]
-[]
-
 [Materials]
-  [./GenIrrad]
-    type = CuVacProps
+  [./constants]
+    type = PFMobility
     block = 0
-    cv = c
-    temp = 1000 # K
-    int_width = 40.0
-    length_scale = 1.0e-9
-    free_energy_form = 4
-    time_scale = 1.0e-9
+    kappa = 0.1
+    mob = 1e-3
   [../]
 []
 
@@ -102,7 +94,8 @@
   scheme = bdf2
 
   solve_type = 'NEWTON'
-  petsc_options = # -ksp_monitor'
+  # petsc_options = ' -ksp_monitor'
+
   l_max_its = 30
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
