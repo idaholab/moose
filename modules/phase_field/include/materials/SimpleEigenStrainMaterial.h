@@ -23,6 +23,7 @@ protected:
 private:
   Real _epsilon0;
   Real _c0;
+  VariableValue & _c;
 };
 
 #endif //SIMPLEEIGENSTRAINMATERIAL_H

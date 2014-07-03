@@ -8,6 +8,7 @@ InputParameters validParams<SimpleEigenStrainMaterial>()
   InputParameters params = validParams<EigenStrainBaseMaterial>();
   params.addRequiredParam<Real>("epsilon0", "Initial eigen strain value");
   params.addParam<Real>("c0", 0.0, "Initial concentration value");
+  params.addRequiredCoupledVar("c", "Concentration");
   return params;
 }
 
@@ -15,7 +16,8 @@ SimpleEigenStrainMaterial::SimpleEigenStrainMaterial(const std::string & name,
                                                      InputParameters parameters) :
     EigenStrainBaseMaterial(name, parameters),
     _epsilon0(getParam<Real>("epsilon0")),
-    _c0(getParam<Real>("c0"))
+    _c0(getParam<Real>("c0")),
+    _c(coupledValue("c"))
 {
 }
 
