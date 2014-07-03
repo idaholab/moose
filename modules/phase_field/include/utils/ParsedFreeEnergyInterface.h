@@ -206,8 +206,8 @@ ParsedFreeEnergyInterface<T>::functionsOptimize()
   _function->Optimize();
 
   // optimize first derivatives
-//  for (unsigned int i = 0; i < _nvars; ++i)
-//    _first_derivatives[i]->Optimize();
+  for (unsigned int i = 0; i < _nvars; ++i)
+    _first_derivatives[i]->Optimize();
 
   // optimize second derivatives
   for (unsigned int i = 0; i < _nvars; ++i)
