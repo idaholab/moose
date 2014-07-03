@@ -185,6 +185,32 @@ SubProblem::checkBoundaryMatProps()
   checkMatProps(_map_boundary_material_props, _map_boundary_material_props_check, "boundary");
 }
 
+bool
+SubProblem::checkMatPropRequested(std::map<unsigned int, std::multimap<std::string, std::string> > & check_props, const std::string & prop_name)
+{
+  // Loop through the properties to check
+  for (std::map<unsigned int, std::multimap<std::string, std::string> >::const_iterator check_it = check_props.begin();
+       check_it != check_props.end(); ++check_it)
+  {
+    // Loop through all the stored properties
+    for (std::multimap<std::string, std::string>::const_iterator prop_it = check_it->second.begin(); prop_it != check_it->second.end(); ++prop_it)
+    {
+      // return success as soon as the queried property name has been found
+      if (prop_it->second == prop_name)
+        return true;
+    }
+  }
+
+  return false;
+}
+
+bool
+SubProblem::isMatPropRequested(const std::string & prop_name)
+{
+  return checkMatPropRequested(_map_block_material_props_check, prop_name) ||
+         checkMatPropRequested(_map_boundary_material_props_check, prop_name);
+}
+
 
 DiracKernelInfo &
 SubProblem::diracKernelInfo()
