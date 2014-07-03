@@ -42,6 +42,7 @@
     es = out_0001.xda
     system = AuxiliarySystem
     nodal_variables = u_aux
+    legacy_read = true
   [../]
 []
 
@@ -75,5 +76,8 @@
   [./console]
     type = Console
     perf_log = true
+  [../]
+  [./xda]
+    type = XDA
   [../]
 []

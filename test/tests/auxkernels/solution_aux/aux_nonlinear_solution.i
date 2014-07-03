@@ -3,12 +3,6 @@
   dim = 2
   nx = 2
   ny = 2
-  xmin = 1
-  xmax = 4
-  ymin = 1
-  ymax = 3
-  # This test uses SolutionUserObject which doesn't work with ParallelMesh.
-  distribution = serial
 []
 
 [Variables]
@@ -20,8 +14,6 @@
 
 [AuxVariables]
   [./u_aux]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -33,24 +25,10 @@
 []
 
 [AuxKernels]
-  [./initial_cond_aux]
-    type = SolutionAux
-    solution = xda_soln
-    execute_on = initial
+  [./aux_kernel]
+    type = FunctionAux
+    function = x*y
     variable = u_aux
-  [../]
-[]
-
-[UserObjects]
-  [./xda_soln]
-    type = SolutionUserObject
-    mesh = out_0001_mesh.xda
-    es = out_0001.xda
-    system = AuxiliarySystem
-    nodal_variables = u_aux
-    scale = '3 2 1'
-    translation = '1 1 0'
-    legacy_read = true
   [../]
 []
 
@@ -58,28 +36,32 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = left
+    boundary = 1
     value = 0
   [../]
   [./right]
     type = DirichletBC
     variable = u
-    boundary = right
+    boundary = 2
     value = 1
   [../]
 []
 
 [Executioner]
   type = Steady
+  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
   nl_rel_tol = 1e-10
 []
 
 [Outputs]
   output_initial = true
-  exodus = true
+  xda = true
   [./console]
     type = Console
     perf_log = true
+  [../]
+  [./xdr]
+    type = XDR
   [../]
 []
