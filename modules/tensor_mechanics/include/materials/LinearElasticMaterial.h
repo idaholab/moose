@@ -20,12 +20,9 @@ protected:
   virtual void computeQpStrain();
   virtual void computeQpStress();
   virtual RankTwoTensor computeStressFreeStrain();
-
-  MaterialProperty<RankTwoTensor> & _eigenstrain;
+  
   MaterialProperty<ElasticityTensorR4> & _delasticity_tensor_dc;
   MaterialProperty<ElasticityTensorR4> & _d2elasticity_tensor_dc2;
-  MaterialProperty<RankTwoTensor> & _deigenstrain_dc;
-  MaterialProperty<RankTwoTensor> & _d2eigenstrain_dc2;
 
 private:
   VariableValue & _T;
