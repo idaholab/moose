@@ -167,7 +167,7 @@ RankTwoTensor::rotateXyPlane(const Real a)
 }
 
 RankTwoTensor
-RankTwoTensor::transpose()
+RankTwoTensor::transpose() const
 {
   RankTwoTensor result;
   for (unsigned int i=0; i<N; i++)
@@ -331,19 +331,18 @@ RankTwoTensor::doubleContraction(const RankTwoTensor &a)
   return result;
 }
 
-
 Real
-RankTwoTensor::secondInvariant()
+RankTwoTensor::secondInvariant() const
 {
   Real result(0.0);
   RankTwoTensor deviatoric(*this);
-  deviatoric.addIa(-1./3.*trace()); // actually construct deviatoric part
-  result = 0.5*deviatoric.doubleContraction(deviatoric);
+  deviatoric.addIa(-1.0/3.0 * trace()); // actually construct deviatoric part
+  result = 0.5 * deviatoric.doubleContraction(deviatoric);
   return result;
 }
 
 Real
-RankTwoTensor::trace()
+RankTwoTensor::trace() const
 {
   Real result(0.0);
   for (unsigned int i(0); i<N; i++)
@@ -352,7 +351,7 @@ RankTwoTensor::trace()
 }
 
 Real
-RankTwoTensor::det()
+RankTwoTensor::det() const
 {
   Real result(0.0);
 
@@ -364,7 +363,7 @@ RankTwoTensor::det()
 }
 
 RankTwoTensor
-RankTwoTensor::inverse()
+RankTwoTensor::inverse() const
 {
   RankTwoTensor result;
 
@@ -389,7 +388,7 @@ RankTwoTensor::inverse()
 }
 
 void
-RankTwoTensor::print()
+RankTwoTensor::print() const
 {
   for (unsigned int i=0; i<N; i++)
   {
@@ -407,21 +406,18 @@ RankTwoTensor::addIa(const Real &a)
 }
 
 Real
-RankTwoTensor::L2norm()
+RankTwoTensor::L2norm() const
 {
-
-  Real norm;
-  norm=0.0;
+  Real norm = 0.0;
 
   for (unsigned int i=0; i<N; i++)
     for (unsigned int j=0; j<N; j++)
-      norm+=_vals[i][j]*_vals[i][j];
+      norm += _vals[i][j] * _vals[i][j];
 
-  norm=pow(norm,0.5);
-
+  norm = std::sqrt(norm);
   return norm;
-
 }
+
 void
 RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> input)
 {

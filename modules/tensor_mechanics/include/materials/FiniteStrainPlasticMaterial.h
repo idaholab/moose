@@ -13,7 +13,7 @@ InputParameters validParams<FiniteStrainPlasticMaterial>();
 class FiniteStrainPlasticMaterial : public FiniteStrainMaterial
 {
 public:
-  FiniteStrainPlasticMaterial(const std:: string & name, InputParameters parameters);
+  FiniteStrainPlasticMaterial(const std::string & name, InputParameters parameters);
 
 protected:
   virtual void computeQpStress();
@@ -28,23 +28,18 @@ protected:
   Real _ftol;
   Real _eptol;
 
-  virtual void solveStressResid(RankTwoTensor,RankTwoTensor,RankFourTensor,RankTwoTensor*,RankTwoTensor*);
-  void getJac(RankTwoTensor,RankFourTensor,Real,RankFourTensor*);
-  void getFlowTensor(RankTwoTensor,RankTwoTensor*);
+  virtual void solveStressResid(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
+  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, RankFourTensor &);
+  void getFlowTensor(const RankTwoTensor &, RankTwoTensor &);
 
+  unsigned int isPlastic(const RankTwoTensor &, Real);
 
-  unsigned int isPlastic(RankTwoTensor,Real);
+  Real getSigEqv(const RankTwoTensor &);
+  RankTwoTensor getSigDev(const RankTwoTensor &);
 
-  Real getSigEqv(RankTwoTensor);
-  RankTwoTensor getSigDev(RankTwoTensor);
-
-  Real deltaFunc(int,int);
+  Real deltaFunc(unsigned int, unsigned int);
   Real getYieldStress(Real);
   Real getdYieldStressdPlasticStrain(Real);
-
-
-private:
-
 };
 
 #endif //FINITESTRAINPLASTICMATERIAL_H
