@@ -217,6 +217,16 @@ public:
   virtual void checkBoundaryMatProps();
 
   /**
+   * Helper method for isMatPropRequested to factor out block and boundary checking
+   */
+  virtual bool checkMatPropRequested(std::map<unsigned int, std::multimap<std::string, std::string> > &, const std::string &);
+
+  /**
+   * Find out if a material property has been requested by any object
+   */
+  virtual bool isMatPropRequested(const std::string & prop_name);
+
+  /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
    */
   virtual void addGhostedElem(unsigned int elem_id) = 0;
