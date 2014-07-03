@@ -1,36 +1,28 @@
 [Mesh]
-  type = FileMesh
-  file = square.e
   # This test uses SolutionUserObject which doesn't work with ParallelMesh.
+  type = GeneratedMesh
   distribution = serial
+  dim = 2
+  nx = 2
+  ny = 2
 []
 
 [Variables]
   [./u]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
-      type = FunctionIC
-      function = initial_cond_func
-    [../]
   [../]
 []
 
 [AuxVariables]
   [./u_aux]
-    order = FIRST
-    family = LAGRANGE
-    [./InitialCondition]
-      type = FunctionIC
-      function = initial_cond_func
-    [../]
   [../]
 []
 
 [Functions]
-  [./initial_cond_func]
+  [./u_xdr_func]
     type = SolutionFunction
-    solution = ex_soln
+    solution = xdr_u
   [../]
 []
 
@@ -41,47 +33,69 @@
   [../]
 []
 
+[AuxKernels]
+  [./aux_xdr_kernel]
+    type = SolutionAux
+    variable = u_aux
+    solution = xdr_u_aux
+    execute_on = initial
+  [../]
+[]
+
 [BCs]
   [./left]
     type = DirichletBC
     variable = u
     boundary = 1
-    value = 0
+    value = 1
   [../]
   [./right]
     type = DirichletBC
     variable = u
     boundary = 2
-    value = 1
+    value = 2
   [../]
 []
 
 [UserObjects]
-  [./ex_soln]
+  [./xdr_u_aux]
     type = SolutionUserObject
+    system = aux0
+    mesh = aux_nonlinear_solution_xdr_0001_mesh.xdr
+    es = aux_nonlinear_solution_xdr_0001.xdr
     nodal_variables = u_aux
-    system = AuxiliarySystem
-    mesh = out_0001_mesh.xda
-    es = out_0001.xda
-    legacy_read = true
+    execute_on = initial
+  [../]
+  [./xdr_u]
+    type = SolutionUserObject
+    system = nl0
+    mesh = aux_nonlinear_solution_xdr_0001_mesh.xdr
+    es = aux_nonlinear_solution_xdr_0001.xdr
+    nodal_variables = u
+    execute_on = initial
   [../]
 []
 
 [Executioner]
-  type = Steady
-
   # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  type = Steady
+  solve_type = PJFNK
   nl_rel_tol = 1e-10
 []
 
 [Outputs]
-  file_base = out
   output_initial = true
   exodus = true
   [./console]
     type = Console
     perf_log = true
+  [../]
+[]
+
+[ICs]
+  [./u_func_ic]
+    function = u_xdr_func
+    variable = u
+    type = FunctionIC
   [../]
 []
