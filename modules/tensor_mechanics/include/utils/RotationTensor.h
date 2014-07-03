@@ -19,13 +19,11 @@
 class RotationTensor : public RealTensorValue
 {
 public:
-
   /// Default constructor; fills according to Euler angles (measured in degrees)
   RotationTensor(const RealVectorValue & Euler_angles);
 
   /// reforms the rotation matrix according to the Euler angles.
   void update(const RealVectorValue & Euler_angles);
-
 };
 
 

@@ -44,7 +44,7 @@ class Tester(MooseObject):
     # Increase the alloted time for tests when running with the valgrind option
     if mode == 'NORMAL':
       self.specs['max_time'] = self.specs['max_time'] * 2
-    elif mode == 'NORMAL':
+    elif mode == 'HEAVY':
       self.specs['max_time'] = self.specs['max_time'] * 4
 
 

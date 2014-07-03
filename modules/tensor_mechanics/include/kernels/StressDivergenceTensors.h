@@ -3,12 +3,6 @@
 
 #include "Kernel.h"
 
-
-/** StressDivergenceTensors mostly copies from StressDivergence.  There are small changes to use
- * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and SymmTensors.  This is done
- * to allow for more mathematical transparancy.
- **/
-
 //Forward Declarations
 class StressDivergenceTensors;
 class ElasticityTensorR4;
@@ -17,17 +11,19 @@ class RankTwoTensor;
 template<>
 InputParameters validParams<StressDivergenceTensors>();
 
+/**
+ * StressDivergenceTensors mostly copies from StressDivergence.  There are small changes to use
+ * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and SymmTensors.  This is done
+ * to allow for more mathematical transparancy.
+ */
 class StressDivergenceTensors : public Kernel
 {
 public:
-
   StressDivergenceTensors(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
-
   virtual Real computeQpJacobian();
-
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   MaterialProperty<RankTwoTensor> & _stress;
@@ -37,7 +33,6 @@ protected:
   const unsigned int _component;
 
 private:
-
   const bool _xdisp_coupled;
   const bool _ydisp_coupled;
   const bool _zdisp_coupled;

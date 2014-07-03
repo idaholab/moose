@@ -99,7 +99,7 @@ public:
    * Returns a matrix that is the transpose of the matrix this
    * was called on.
    */
-  RankTwoTensor transpose();
+  RankTwoTensor transpose() const;
 
   /// sets _vals to a, and returns _vals
   RankTwoTensor & operator= (const RankTwoTensor &a);
@@ -148,25 +148,25 @@ public:
    * S_ij = A_ij - de_ij*tr(A)/3
    * Then this returns S_ij*S_ij/2
    */
-  Real secondInvariant();
+  Real secondInvariant() const;
 
   /// returns the trace of the tensor, ie _vals[i][i] (sum i = 1, 2, 3)
-  Real trace();
+  Real trace() const;
 
   //Calculate the determinant of the tensor
-  Real det();
+  Real det() const;
 
   //Calculate the inverse of the tensor
-  RankTwoTensor inverse();
+  RankTwoTensor inverse() const;
 
   //Print the rank two tensor
-  void print();
+  void print() const;
 
   //Add identity times a to _vals
   void addIa(const Real &a);
 
   /// Sqrt(_vals[i][j]*_vals[i][j])
-  Real L2norm();
+  Real L2norm() const;
 
   /**
    * sets _vals[0][0], _vals[0][1], _vals[1][0], _vals[1][1] to input,

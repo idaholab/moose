@@ -85,7 +85,7 @@
     all_21 = false
     C_ijkl = '1e6 0 0 1e6 0 1e6 .5e6 .5e6 .5e6'
     thermal_expansion_coeff = 1.0e-6
-    Temp = 400
+    T = 400
   [../]
 []
 

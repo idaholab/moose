@@ -60,49 +60,49 @@ public:
   void zero();
 
   /// copies values from a into this tensor
-  RankFourTensor & operator=(const RankFourTensor &a);
+  RankFourTensor & operator= (const RankFourTensor &a);
 
   /// C_ijkl*a_kl
-  RankTwoTensor operator*(const RankTwoTensor &a);
+  RankTwoTensor operator* (const RankTwoTensor &a) const;
 
   /// C_ijkl*a_kl
-  RealTensorValue operator*(const RealTensorValue &a);
+  RealTensorValue operator* (const RealTensorValue &a) const;
 
   /// C_ijkl*a
-  RankFourTensor operator*(const Real &a);
+  RankFourTensor operator* (const Real &a) const;
 
   /// C_ijkl *= a
-  RankFourTensor & operator*=(const Real &a);
+  RankFourTensor & operator*= (const Real &a);
 
   /// C_ijkl/a
-  RankFourTensor operator/(const Real &a);
+  RankFourTensor operator/ (const Real &a) const;
 
   /// C_ijkl /= a  for all i, j, k, l
-  RankFourTensor & operator/=(const Real &a);
+  RankFourTensor & operator/= (const Real &a);
 
   /// C_ijkl += a_ijkl  for all i, j, k, l
-  RankFourTensor & operator+=(const RankFourTensor &a);
+  RankFourTensor & operator+= (const RankFourTensor &a);
 
   /// C_ijkl + a_ijkl
-  RankFourTensor operator+(const RankFourTensor &a) const;
+  RankFourTensor operator+ (const RankFourTensor &a) const;
 
   /// C_ijkl -= a_ijkl
-  RankFourTensor & operator-=(const RankFourTensor &a);
+  RankFourTensor & operator-= (const RankFourTensor &a);
 
   /// C_ijkl - a_ijkl
-  RankFourTensor operator-(const RankFourTensor &a) const;
+  RankFourTensor operator- (const RankFourTensor &a) const;
 
   /// -C_ijkl
-  RankFourTensor operator - () const;
+  RankFourTensor operator- () const;
 
   /// C_ijpq*a_pqkl
-  RankFourTensor operator*(const RankFourTensor &a) const;
+  RankFourTensor operator* (const RankFourTensor &a) const;
 
   /**
    * This returns A_ijkl such that C_ijkl*A_klmn = 0.5*(de_im de_jn + de_in de_jm)
    * This routine assumes that C_ijkl = C_jikl = C_ijlk
    */
-  RankFourTensor invSymm();
+  RankFourTensor invSymm() const;
 
   /**
    * Rotate the tensor using
@@ -111,13 +111,13 @@ public:
   virtual void rotate(RealTensorValue &R);
 
   /// Print tensor using nice formatting and Moose::out
-  void print();
+  void print() const;
 
   /**
    * Transpose the tensor by swapping the first pair with the second pair of indices
    * @return C_klji
    */
-  RankFourTensor transposeMajor();
+  RankFourTensor transposeMajor() const;
 
 
   /**
@@ -185,7 +185,7 @@ protected:
    * @param n size of A
    * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
    */
-  int MatrixInversion(double *A, int n);//Added
+  int MatrixInversion(double *A, int n) const;
 
    /**
   * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in

@@ -23,5 +23,4 @@ private:
   const std::string _temp;
 };
 
-
 #endif //TENSORMECHANICSACTION_H

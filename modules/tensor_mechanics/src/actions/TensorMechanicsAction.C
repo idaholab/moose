@@ -21,12 +21,12 @@ InputParameters validParams<TensorMechanicsAction>()
 }
 
 TensorMechanicsAction::TensorMechanicsAction(const std::string & name, InputParameters params) :
-  Action(name, params),
-  _disp_x(getParam<NonlinearVariableName>("disp_x")),
-  _disp_y(getParam<NonlinearVariableName>("disp_y")),
-  _disp_z(getParam<NonlinearVariableName>("disp_z")),
-  _disp_r(getParam<NonlinearVariableName>("disp_r")),
-  _temp(getParam<NonlinearVariableName>("temp"))
+    Action(name, params),
+    _disp_x(getParam<NonlinearVariableName>("disp_x")),
+    _disp_y(getParam<NonlinearVariableName>("disp_y")),
+    _disp_z(getParam<NonlinearVariableName>("disp_z")),
+    _disp_r(getParam<NonlinearVariableName>("disp_r")),
+    _temp(getParam<NonlinearVariableName>("temp"))
 {
 }
 
@@ -34,8 +34,8 @@ void
 TensorMechanicsAction::act()
 {
   // Determine whether RZ
-  bool rz(false);
-  unsigned int dim(1);
+  bool rz = false;
+  unsigned int dim = 1;
   std::vector<std::string> keys;
   std::vector<VariableName> vars;
   std::string type("StressDivergenceTensors");
@@ -53,9 +53,7 @@ TensorMechanicsAction::act()
     }*/
 
   if (!rz && _disp_x == "")
-  {
     mooseError("disp_x must be specified");
-  }
 
   if (!rz)
   {
@@ -89,7 +87,7 @@ TensorMechanicsAction::act()
   short_name.erase(0, 15);
 
   InputParameters params = _factory.getValidParams(type);
-  for (unsigned j(0); j < num_coupled; ++j)
+  for (unsigned int j = 0; j < num_coupled; ++j)
   {
     params.addCoupledVar(keys[j], "");
     params.set<std::vector<VariableName> >(keys[j]) = std::vector<VariableName>(1, vars[j]);
@@ -98,7 +96,7 @@ TensorMechanicsAction::act()
   params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
   params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
 
-  for (unsigned int i(0); i < dim; ++i)
+  for (unsigned int i = 0; i < dim; ++i)
   {
     std::stringstream name;
     name << "Kernels/";

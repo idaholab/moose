@@ -80,7 +80,7 @@ RankFourTensor::operator= (const RankFourTensor &a)
 }
 
 RankTwoTensor
-RankFourTensor::operator*(const RankTwoTensor &a)
+RankFourTensor::operator* (const RankTwoTensor &a) const
 {
   RealTensorValue result;
 
@@ -94,7 +94,7 @@ RankFourTensor::operator*(const RankTwoTensor &a)
 }
 
 RealTensorValue
-RankFourTensor::operator*(const RealTensorValue &a)
+RankFourTensor::operator* (const RealTensorValue &a) const
 {
   RealTensorValue result;
 
@@ -108,7 +108,7 @@ RankFourTensor::operator*(const RealTensorValue &a)
 }
 
 RankFourTensor
-RankFourTensor::operator*(const Real &a)
+RankFourTensor::operator* (const Real &a) const
 {
   RankFourTensor result;
 
@@ -122,7 +122,7 @@ RankFourTensor::operator*(const Real &a)
 }
 
 RankFourTensor &
-RankFourTensor::operator*=(const Real &a)
+RankFourTensor::operator*= (const Real &a)
 {
   for (unsigned int i(0); i<N; i++)
     for (unsigned int j(0); j<N; j++)
@@ -134,7 +134,7 @@ RankFourTensor::operator*=(const Real &a)
 }
 
 RankFourTensor
-RankFourTensor::operator/(const Real &a)
+RankFourTensor::operator/ (const Real &a) const
 {
   RankFourTensor result;
 
@@ -243,7 +243,7 @@ RankFourTensor::operator*(const RankFourTensor &a) const
 }
 
 RankFourTensor
-RankFourTensor::invSymm()
+RankFourTensor::invSymm() const
 {
   int error;
   double *mat;
@@ -345,7 +345,7 @@ RankFourTensor::invSymm()
 
 
   // use LAPACK to find the inverse
-  error=MatrixInversion(mat, ntens);
+  error = MatrixInversion(mat, ntens);
   if (error != 0)
     mooseError("Error in Matrix  Inversion in RankFourTensor");
 
@@ -398,13 +398,12 @@ RankFourTensor::rotate(RealTensorValue &R)
 
           _vals[i][j][k][l] = temp;
         }
-
 }
 
 void
-RankFourTensor::print()
+RankFourTensor::print() const
 {
-  RankFourTensor & s = (*this);
+  const RankFourTensor & s = (*this);
 
   for (unsigned int i=0; i<N; i++)
     for (unsigned int j=0; j<N; j++)
@@ -422,7 +421,7 @@ RankFourTensor::print()
 }
 
 RankFourTensor
-RankFourTensor::transposeMajor()
+RankFourTensor::transposeMajor() const
 {
   RankFourTensor result;
 
@@ -432,9 +431,7 @@ RankFourTensor::transposeMajor()
         for (unsigned int l = 0; l < 3; l++)
           result(i,j,k,l)=_vals[k][l][i][j];
 
-
   return result;
-
 }
 
 void
@@ -528,21 +525,22 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> input, FillMethod fi
 }
 
 int
-RankFourTensor::MatrixInversion(double* A, int n)
+RankFourTensor::MatrixInversion(double* A, int n) const
 {
-  int return_value,buffer_size;
+  int return_value, buffer_size;
   int *ipiv,*buffer;
 
   buffer_size=n*64;
 
-  ipiv=(int*)calloc(n, sizeof(int));
-  buffer=(int*)calloc(buffer_size, sizeof(int));
+  ipiv = (int*)calloc(n, sizeof(int));
+  buffer = (int*)calloc(buffer_size, sizeof(int));
+
   // Following does a LU decomposition of "square matrix A"
   // upon return "A = P*L*U" if return_value == 0
   // Here i use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
   FORTRAN_CALL(dgetrf)(&n, &n, A, &n, ipiv, &return_value);
 
-  if (return_value!=0)
+  if (return_value != 0)
   {
     // couldn't LU decompose because: illegal value in A; or, A singular
     free(ipiv);

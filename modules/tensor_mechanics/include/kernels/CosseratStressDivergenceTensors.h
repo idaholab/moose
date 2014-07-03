@@ -3,12 +3,8 @@
 
 #include "StressDivergenceTensors.h"
 
-
-
 //Forward Declarations
 class CosseratStressDivergenceTensors;
-//class ElasticityTensorR4;
-//class RankTwoTensor;
 
 template<>
 InputParameters validParams<CosseratStressDivergenceTensors>();
@@ -16,7 +12,6 @@ InputParameters validParams<CosseratStressDivergenceTensors>();
 class CosseratStressDivergenceTensors : public StressDivergenceTensors
 {
 public:
-
   CosseratStressDivergenceTensors(const std::string & name, InputParameters parameters);
 
 protected:
@@ -27,4 +22,5 @@ private:
   const unsigned int _wc_y_var;
   const unsigned int _wc_z_var;
 };
+
 #endif //COSSERATSTRESSDIVERGENCETENSORS_H
