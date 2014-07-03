@@ -33,6 +33,8 @@ public:
   virtual ~SplineFunction();
 
   virtual Real value(Real t, const Point & p);
+  virtual RealGradient gradient(Real t, const Point & p);
+
   virtual Real derivative(const Point & p);
   virtual Real secondDerivative(const Point & p);
 
