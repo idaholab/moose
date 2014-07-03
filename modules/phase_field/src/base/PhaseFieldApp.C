@@ -5,9 +5,11 @@
 #include "MatDiffusion.h"
 #include "ACInterface.h"
 #include "CHMath.h"
+#include "CHParsed.h"
 #include "CHInterface.h"
 #include "SplitCHWRes.h"
 #include "SplitCHMath.h"
+#include "SplitCHParsed.h"
 #include "CoupledImplicitEuler.h"
 #include "CrossIC.h"
 #include "SmoothCircleIC.h"
@@ -75,9 +77,11 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(MatDiffusion);
   registerKernel(ACInterface);
   registerKernel(CHMath);
+  registerKernel(CHParsed);
   registerKernel(CHInterface);
   registerKernel(SplitCHWRes);
   registerKernel(SplitCHMath);
+  registerKernel(SplitCHParsed);
   registerKernel(CoupledImplicitEuler);
   registerKernel(ACGrGrPoly);
   registerKernel(ACGBPoly);

@@ -1,0 +1,13 @@
+[Tests]
+  [./nonsplit]
+    type = 'Exodiff'
+    input = 'CHParsed_test.i'
+    exodiff = 'out_oversample.e'
+  [../]
+
+  [./split]
+    type = 'Exodiff'
+    input = 'SplitCHParsed_test.i'
+    exodiff = 'out_split.e'
+  [../]
+[]
