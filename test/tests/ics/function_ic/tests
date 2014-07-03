@@ -1,0 +1,13 @@
+[Tests]
+  [./parsed_function]
+    type = 'Exodiff'
+    input = 'parsed_function.i'
+    exodiff = 'parsed.e'
+  [../]
+
+  [./spline_function]
+    type = 'Exodiff'
+    input = 'spline_function.i'
+    exodiff = 'spline.e'
+  [../]
+[]

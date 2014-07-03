@@ -27,7 +27,7 @@ MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblem & feproblem,
   initialize();
 
   // Create the libMesh::ParsedFunction
-  _function_ptr = new ParsedFunction<Real>(_function_str, &_vars, &_vals);
+  _function_ptr = new ParsedFunction<Real,RealGradient>(_function_str, &_vars, &_vals);
 
   // Loop through the Postprocessor variables and point the libMesh::ParsedFunction to the PostprocessorValue
   for (unsigned int i = 0; i < _pp_index.size(); ++i)
@@ -74,6 +74,26 @@ MooseParsedFunctionWrapper::evaluate(Real t, const Point & p)
                       , output(2)
 #endif
     );
+}
+
+RealGradient
+MooseParsedFunctionWrapper::evaluateGradient(Real t, const Point & p)
+{
+  // Update the postprocessor / libMesh::ParsedFunction references for the desired function
+  update();
+
+  // Evalute the gradient of the function
+  return _function_ptr->gradient(p, t);
+}
+
+Real
+MooseParsedFunctionWrapper::evaluateDot(Real t, const Point & p)
+{
+  // Update the postprocessor / libMesh::ParsedFunction references for the desired function
+  update();
+
+  // Evalute the time derivative
+  return _function_ptr->dot(p, t);
 }
 
 void

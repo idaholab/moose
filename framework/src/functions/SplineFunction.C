@@ -45,6 +45,14 @@ SplineFunction::value(Real /*t*/, const Point & p)
   return _ipol.sample(p(0));
 }
 
+RealGradient
+SplineFunction::gradient(Real /*t*/, const Point & p)
+{
+  RealGradient grad(0.0);
+  grad(0) = derivative(p);
+  return grad;
+}
+
 Real
 SplineFunction::derivative(const Point & p)
 {
