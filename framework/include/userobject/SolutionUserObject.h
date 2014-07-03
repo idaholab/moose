@@ -233,6 +233,10 @@ protected:
 
   /// transformations (rotations, translation, scales) are performed in this order
   std::vector<MooseEnum> _transformation_order;
+
+  /// Flag for using old EquationSystems::read
+  /* This was required for tests relying on old xda files without additional data, in debug mode, on linux */
+  bool _legacy_read;
 };
 
 #endif //SOLUTIONUSEROBJECT_H

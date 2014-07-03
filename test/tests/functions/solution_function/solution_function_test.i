@@ -63,6 +63,7 @@
     system = AuxiliarySystem
     mesh = out_0001_mesh.xda
     es = out_0001.xda
+    legacy_read = true
   [../]
 []
 

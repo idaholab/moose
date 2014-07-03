@@ -58,6 +58,7 @@ InputParameters validParams<SolutionUserObject>()
   params.addParam<Real>("rotation0_angle", 0.0, "Anticlockwise rotation angle (in degrees) to use for rotation about rotation0_vector.");
   params.addParam<RealVectorValue>("rotation1_vector", RealVectorValue(0, 0, 1), "Vector about which to rotate points of the simulation.");
   params.addParam<Real>("rotation1_angle", 0.0, "Anticlockwise rotation angle (in degrees) to use for rotation about rotation1_vector.");
+  params.addParam<bool>("legacy_read", false, "Utilize the legacy call to EquationsSystems::read, this may be required for older XDA/XDR files");
   // following lines build the default_transformation_order
   MooseEnum t1("rotation0, translation, scale, rotation1, scale_multiplier", "translation");
   MooseEnum t2("rotation0, translation, scale, rotation1, scale_multiplier", "scale");
@@ -105,7 +106,8 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _rotation1_vector(getParam<RealVectorValue>("rotation1_vector")),
     _rotation1_angle(getParam<Real>("rotation1_angle")),
     _r1(RealTensorValue()),
-    _transformation_order(getParam<std::vector<MooseEnum> >("transformation_order"))
+    _transformation_order(getParam<std::vector<MooseEnum> >("transformation_order")),
+    _legacy_read(getParam<bool>("legacy_read"))
 {
   _exec_flags = EXEC_INITIAL;
 
@@ -185,15 +187,27 @@ SolutionUserObject::readXda()
   // Read the libmesh::mesh from the xda file
   _mesh->read(_mesh_file);
 
-  // Create, read, and update the libmesh::EquationSystems
+  // Create the libmesh::EquationSystems
   _es = new EquationSystems(*_mesh);
-  if (_file_type ==  "xdr")
-    _es->read(_es_file, DECODE, EquationSystems::READ_HEADER | EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA);
-  else
-    _es->read(_es_file, READ, EquationSystems::READ_HEADER | EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA);
-  _es->update();
 
-  // Store the EquationSystems name locally
+  // Use the legacy read
+  if (_legacy_read)
+    _es->read(_es_file);
+
+  // Use new read syntax (binary)
+  else if (_file_type ==  "xdr")
+    _es->read(_es_file, DECODE, EquationSystems::READ_HEADER | EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA);
+
+  // Use new read syntax
+  else if (_file_type ==  "xda")
+    _es->read(_es_file, READ, EquationSystems::READ_HEADER | EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA);
+
+  // This should never occur, just incase produce an error
+  else
+    mooseError("Faild to determine proper read method for XDA/XDR equation system file: " << _es_file);
+
+  // Update and store the EquationSystems name locally
+  _es->update();
   _system = &_es->get_system(_system_name);
 }
 
