@@ -93,30 +93,22 @@ KernelValue::computeJacobian()
 void
 KernelValue::computeOffDiagJacobian(unsigned int jvar)
 {
-//  Moose::perf_log.push("computeOffDiagJacobian()",_name);
+  if (jvar == _var.number())
+    computeJacobian();
+  else
+  {
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
-  DenseMatrix<Number> & Ke = _assembly.jacobianBlock(_var.number(), jvar);
-
-  for (_j=0; _j<_phi.size(); _j++)
-    for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    {
-      if (jvar == _var.number())
-      {
-        _value = _coord[_qp]*precomputeQpJacobian();
-        for (_i=0; _i<_test.size(); _i++)
-          Ke(_i,_j) += _JxW[_qp]*_coord[_qp]*_value*_test[_i][_qp];
-      }
-      else
+    for (_j=0; _j<_phi.size(); _j++)
+      for (_qp=0; _qp<_qrule->n_points(); _qp++)
       {
         for (_i=0; _i<_test.size(); _i++)
         {
           _value = _coord[_qp]*computeQpOffDiagJacobian(jvar);
-          Ke(_i,_j) += _JxW[_qp]*_coord[_qp]*_value;
+          ke(_i,_j) += _JxW[_qp]*_coord[_qp]*_value;
         }
       }
-    }
-
-//  Moose::perf_log.pop("computeOffDiagJacobian()",_name);
+  }
 }
 
 Real
