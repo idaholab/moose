@@ -11,11 +11,13 @@ template<>
 InputParameters validParams<FiniteStrainPlasticAux>();
 
 
+/**
+ * Obtains equivalent plastic strain for output
+ */
 class FiniteStrainPlasticAux : public AuxKernel
 {
 public:
-  FiniteStrainPlasticAux ( const std::string & name, InputParameters parameters );
-
+  FiniteStrainPlasticAux(const std::string & name, InputParameters parameters);
   virtual ~FiniteStrainPlasticAux() {}
 
 protected:

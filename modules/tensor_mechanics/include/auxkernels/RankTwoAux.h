@@ -28,8 +28,8 @@ protected:
 private:
 
   MaterialProperty<RankTwoTensor> & _tensor;
-  const int _i;
-  const int _j;
+  const unsigned int _i;
+  const unsigned int _j;
 };
 
 #endif //RANKTWOAUX_H
