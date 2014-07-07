@@ -126,11 +126,14 @@ class Machine(object):
     self.use_threads = self.threads
 
     # Set the network
-    if self.address.find('204.') != -1:
-      self.network = 'fn'
+    if 'DMAKE_NETWORK' in os.environ:
+      self.network = os.environ['DMAKE_NETWORK']
     else:
-      self.network = 'inl'
-      os.environ['no_proxy'] = '.inl.gov'
+      if self.address.find('204.') != -1:
+        self.network = 'fn'
+      else:
+        self.network = 'inl'
+        os.environ['no_proxy'] = '.inl.gov'
 
     # Set the description, if the remote or local file is read this will be updated with the user supplied
     # description. This is not done here for speed purposed if a local only build is performed
