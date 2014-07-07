@@ -36,24 +36,15 @@ KernelGrad::~KernelGrad()
 void
 KernelGrad::computeResidual()
 {
-//  Moose::perf_log.push("computeResidual()","KernelGrad");
-
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   _local_re.resize(re.size());
   _local_re.zero();
 
-  unsigned int n_qp = _qrule->n_points();
-  unsigned int n_test = _test.size();
-
-  for (_qp=0; _qp<n_qp; _qp++)
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
   {
-    _value = precomputeQpResidual();
-
-    Real jxw = _JxW[_qp];
-    Real coord = _coord[_qp];
-
-    for (_i=0; _i<n_test; _i++)
-      _local_re(_i) += jxw*coord*_value*_grad_test[_i][_qp];
+    RealGradient value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
+    for (_i=0; _i<_test.size(); _i++)
+      _local_re(_i) += value * _grad_test[_i][_qp];
   }
 
   re += _local_re;
@@ -64,7 +55,6 @@ KernelGrad::computeResidual()
     for (unsigned int i=0; i<_save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
-//  Moose::perf_log.pop("computeResidual()","KernelGrad");
 }
 
 void
@@ -74,23 +64,13 @@ KernelGrad::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
-  unsigned int n_qp = _qrule->n_points();
-  unsigned int n_phi = _phi.size();
-  unsigned int n_test = _test.size();
-
-  for (_qp=0; _qp<n_qp; _qp++)
-  {
-    Real jxw = _JxW[_qp];
-    Real coord = _coord[_qp];
-
-    for (_j=0; _j<n_phi; _j++)
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    for (_j=0; _j<_phi.size(); _j++)
     {
-      _value = precomputeQpJacobian();
-
-      for (_i=0; _i<n_test; _i++)
-        _local_ke(_i, _j) += jxw*coord*_value*_grad_test[_i][_qp];
+      RealGradient value = precomputeQpJacobian() * _JxW[_qp] * _coord[_qp];
+      for (_i=0; _i<_test.size(); _i++)
+        _local_ke(_i, _j) += value * _grad_test[_i][_qp];
     }
-  }
 
   ke += _local_ke;
 
@@ -110,41 +90,19 @@ KernelGrad::computeJacobian()
 void
 KernelGrad::computeOffDiagJacobian(unsigned int jvar)
 {
-//  Moose::perf_log.push("computeOffDiagJacobian()",_name);
+  if (jvar == _var.number())
+    computeJacobian();
+  else
+  {
+    DenseMatrix<Number> & Ke = _assembly.jacobianBlock(_var.number(), jvar);
 
-  DenseMatrix<Number> & Ke = _assembly.jacobianBlock(_var.number(), jvar);
-
-  unsigned int n_qp = _qrule->n_points();
-  unsigned int n_phi = _phi.size();
-  unsigned int n_test = _test.size();
-  unsigned int var_num = _var.number();
-
-  for (_j=0; _j<n_phi; _j++)
-    for (_qp=0; _qp<n_qp; _qp++)
-    {
-      Real off_diag_value;
-
-      Real jxw = _JxW[_qp];
-      Real coord = _coord[_qp];
-
-      if (jvar == var_num)
-      {
-        _value = precomputeQpJacobian();
-        for (_i=0; _i<n_test; _i++)
-          Ke(_i,_j) += jxw*coord*_value*_grad_test[_i][_qp];
-      }
-      else
-      {
-        for (_i=0; _i<n_test; _i++)
+    for (_j=0; _j<_phi.size(); _j++)
+      for (_qp=0; _qp<_qrule->n_points(); _qp++)
+        for (_i=0; _i<_test.size(); _i++)
         {
-          off_diag_value = computeQpOffDiagJacobian(jvar);
-          Ke(_i,_j) += jxw*coord*off_diag_value;
+          Ke(_i,_j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
         }
-      }
-
-    }
-
-//  Moose::perf_log.pop("computeOffDiagJacobian()",_name);
+  }
 }
 
 Real

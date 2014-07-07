@@ -42,9 +42,9 @@ KernelValue::computeResidual()
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    _value = precomputeQpResidual();
+    Real value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
     for (_i = 0; _i < _test.size(); _i++)
-      _local_re(_i) += _JxW[_qp] * _coord[_qp] * _value * _test[_i][_qp];
+      _local_re(_i) += value * _test[_i][_qp];
   }
 
   re += _local_re;
@@ -65,15 +65,12 @@ KernelValue::computeJacobian()
   _local_ke.zero();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
     for (_j = 0; _j < _phi.size(); _j++)
     {
-      // NOTE: is it possible to move this out of the for-loop and multiply the _value by _phi[_j][_qp]
-      _value = precomputeQpJacobian();
+      Real value = precomputeQpJacobian() * _JxW[_qp] * _coord[_qp];
       for (_i = 0; _i < _test.size(); _i++)
-        _local_ke(_i, _j) += _JxW[_qp]*_coord[_qp]*_value*_test[_i][_qp];
+        _local_ke(_i, _j) += value * _test[_i][_qp];
     }
-  }
 
   ke += _local_ke;
 
@@ -101,13 +98,10 @@ KernelValue::computeOffDiagJacobian(unsigned int jvar)
 
     for (_j=0; _j<_phi.size(); _j++)
       for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      {
         for (_i=0; _i<_test.size(); _i++)
         {
-          _value = _coord[_qp]*computeQpOffDiagJacobian(jvar);
-          ke(_i,_j) += _JxW[_qp]*_coord[_qp]*_value;
+          ke(_i,_j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
         }
-      }
   }
 }
 

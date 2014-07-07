@@ -105,7 +105,7 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
       for (_j=0; _j<_phi.size(); _j++)
         for (_qp=0; _qp<_qrule->n_points(); _qp++)
         {
-          ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(jvar);
+          ke(_i,_j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
         }
   }
 }
