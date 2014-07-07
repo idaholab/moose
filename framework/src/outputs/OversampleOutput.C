@@ -185,8 +185,15 @@ OversampleOutput::initOversample()
       // Add the variables to the system... simultaneously creating MeshFunctions for them.
       for (unsigned int var_num = 0; var_num < num_vars; var_num++)
       {
-        // Create a variable in the dest_sys to match... but of LINEAR LAGRANGE type
-        dest_sys.add_variable(source_sys.variable_name(var_num), FEType());
+        // Add the variable, allow for first and second lagrange
+        const FEType & fe_type = source_sys.variable_type(var_num);
+        FEType second(SECOND, LAGRANGE);
+        if (fe_type == second)
+          dest_sys.add_variable(source_sys.variable_name(var_num), second);
+        else
+          dest_sys.add_variable(source_sys.variable_name(var_num), FEType());
+
+        // Create the MeshFunction object
         _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *serialized_solution, source_sys.get_dof_map(), var_num);
         _mesh_functions[sys_num][var_num]->init();
       }
