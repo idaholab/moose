@@ -86,11 +86,7 @@ OversampleOutput::outputInitial()
 
   // Perform oversample solution projection
   if (_oversample || _change_position)
-  {
-    _mesh_changed = false; // oversampling uses the original and it doesn't change
     update();
-  }
-
   // Call the initial output method
   Output::outputInitial();
 }
@@ -104,10 +100,7 @@ OversampleOutput::outputStep()
 
   // Perform oversample solution projection
   if (_oversample || _change_position)
-  {
-    _mesh_changed = false; // oversampling uses the original and it doesn't change
     update();
-  }
 
   // Call the step output method
   Output::outputStep();
@@ -122,10 +115,7 @@ OversampleOutput::outputFinal()
 
   // Perform oversample solution projection
   if (_oversample || _change_position)
-  {
-    _mesh_changed = false; // oversampling uses the original and it doesn't change
     update();
-  }
 
   // Call the final output methods
   Output::outputFinal();
@@ -176,11 +166,11 @@ OversampleOutput::initOversample()
     if (num_vars > 0)
     {
       _mesh_functions[sys_num].resize(num_vars);
-      AutoPtr<NumericVector<Number> > serialized_solution = NumericVector<Number>::build(_communicator);
-      serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+      _serialized_solution = NumericVector<Number>::build(_communicator);
+      _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
 
       // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-      source_sys.solution->localize(*serialized_solution);
+      source_sys.solution->localize(*_serialized_solution);
 
       // Add the variables to the system... simultaneously creating MeshFunctions for them.
       for (unsigned int var_num = 0; var_num < num_vars; var_num++)
@@ -192,10 +182,6 @@ OversampleOutput::initOversample()
           dest_sys.add_variable(source_sys.variable_name(var_num), second);
         else
           dest_sys.add_variable(source_sys.variable_name(var_num), FEType());
-
-        // Create the MeshFunction object
-        _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *serialized_solution, source_sys.get_dof_map(), var_num);
-        _mesh_functions[sys_num][var_num]->init();
       }
     }
   }
@@ -213,23 +199,31 @@ OversampleOutput::update()
   // Loop throuch each system
   for (unsigned int sys_num = 0; sys_num < source_es.n_systems(); ++sys_num)
   {
-    if (_mesh_functions[sys_num].size())
+    if (!_mesh_functions[sys_num].empty())
     {
       // Get references to the source and destination systems
       System & source_sys = source_es.get_system(sys_num);
       System & dest_sys = _es_ptr->get_system(sys_num);
 
       // Update the solution for the oversampled mesh
-      AutoPtr<NumericVector<Number> > serialized_solution = NumericVector<Number>::build(_communicator);
-      serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
-      source_sys.solution->localize(*serialized_solution);
+      _serialized_solution->clear();
+      _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+      source_sys.solution->localize(*_serialized_solution);
 
       // Update the mesh functions
-      // TODO: Why do we need to recreate these MeshFunctions each time?
       for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
       {
-        delete _mesh_functions[sys_num][var_num];
-        _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *serialized_solution, source_sys.get_dof_map(), var_num);
+
+        // If the mesh has change the MeshFunctions need to be re-built, otherwise simply clear it for re-initialization
+        if (_mesh_functions[sys_num][var_num] == NULL || _mesh_changed)
+        {
+          delete _mesh_functions[sys_num][var_num];
+          _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
+        }
+        else
+          _mesh_functions[sys_num][var_num]->clear();
+
+        // Initialize the MeshFunctions for application to the oversampled solution
         _mesh_functions[sys_num][var_num]->init();
       }
 
@@ -240,6 +234,9 @@ OversampleOutput::update()
             dest_sys.solution->set((*nd)->dof_number(sys_num, var_num, 0), (*_mesh_functions[sys_num][var_num])(**nd - _position)); // 0 value is for component
     }
   }
+
+  // Set this to false so that new output files are not created, since the oversampled mesh doesn't actually change
+  _mesh_changed = false;
 }
 
 void
