@@ -21,5 +21,5 @@ RankTwoAux::RankTwoAux(const std::string & name, InputParameters parameters) :
 Real
 RankTwoAux::computeValue()
 {
-  return _tensor[_qp].getValue(_i, _j);
+  return _tensor[_qp](_i-1, _j-1);
 }

@@ -19,8 +19,7 @@ class RankTwoAux : public AuxKernel
 {
 public:
   RankTwoAux(const std::string & name, InputParameters parameters);
-
-  virtual ~ RankTwoAux() {}
+  virtual ~RankTwoAux() {}
 
 protected:
   virtual Real computeValue();
