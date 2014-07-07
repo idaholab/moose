@@ -17,7 +17,6 @@
 #include "RotationMatrix.h"
 
 // libMesh includes
-//#include "MooseMesh.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/mesh_function.h"
 #include "libmesh/numeric_vector.h"
@@ -33,12 +32,12 @@ InputParameters validParams<SolutionUserObject>()
   InputParameters params = validParams<GeneralUserObject>();
 
   // Add required parameters
-  params.addRequiredParam<std::string>("mesh", "The name of the mesh file (must be xda or exodusII file).");
+  params.addRequiredParam<MeshFileName>("mesh", "The name of the mesh file (must be xda or exodusII file).");
   params.addParam<std::vector<std::string> >("nodal_variables", "The name of the nodal variables from the file you want to use for values.");
   params.addParam<std::vector<std::string> >("elemental_variables", "The name of the element variables from the file you want to use for values.");
 
   // When using XDA files the following must be defined
-  params.addParam<std::string>("es", "The name of the file holding the equation system info in xda format (xda only).");
+  params.addParam<FileName>("es", "The name of the file holding the equation system info in xda format (xda only).");
   params.addParam<std::string>("system", "NonlinearSystem", "The name of the system to pull values out of (xda only).");
 
   // When using ExodusII a specific time is extracted
@@ -58,7 +57,8 @@ InputParameters validParams<SolutionUserObject>()
   params.addParam<Real>("rotation0_angle", 0.0, "Anticlockwise rotation angle (in degrees) to use for rotation about rotation0_vector.");
   params.addParam<RealVectorValue>("rotation1_vector", RealVectorValue(0, 0, 1), "Vector about which to rotate points of the simulation.");
   params.addParam<Real>("rotation1_angle", 0.0, "Anticlockwise rotation angle (in degrees) to use for rotation about rotation1_vector.");
-  params.addParam<bool>("legacy_read", false, "Utilize the legacy call to EquationsSystems::read, this may be required for older XDA/XDR files");
+  params.addDeprecatedParam<bool>("legacy_read", false, "Utilize the legacy call to EquationsSystems::read, this may be required for older XDA/XDR files",
+                                  "This option is for legacy support and will be removed on 10/1/2014.\nThe xda/xdr files being read should be regenerated and the flag removed.");
   // following lines build the default_transformation_order
   MooseEnum t1("rotation0, translation, scale, rotation1, scale_multiplier", "translation");
   MooseEnum t2("rotation0, translation, scale, rotation1, scale_multiplier", "scale");
@@ -73,8 +73,8 @@ InputParameters validParams<SolutionUserObject>()
 SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters parameters) :
     GeneralUserObject(name, parameters),
     _file_type(MooseEnum("xda=0, exodusII=1, xdr=2")),
-    _mesh_file(getParam<std::string>("mesh")),
-    _es_file(getParam<std::string>("es")),
+    _mesh_file(getParam<MeshFileName>("mesh")),
+    _es_file(getParam<FileName>("es")),
     _system_name(getParam<std::string>("system")),
     _nodal_vars(isParamValid("nodal_variables") ?
                 getParam<std::vector<std::string> >("nodal_variables") : std::vector<std::string>()),
