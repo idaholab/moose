@@ -1,0 +1,41 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "FunctionScalarAux.h"
+#include "Function.h"
+
+template<>
+InputParameters validParams<FunctionScalarAux>()
+{
+  InputParameters params = validParams<AuxScalarKernel>();
+  params.addRequiredParam<FunctionName>("function", "The function to set the scalar variable value.");
+
+  return params;
+}
+
+FunctionScalarAux::FunctionScalarAux(const std::string & name, InputParameters parameters) :
+    AuxScalarKernel(name, parameters),
+    _function(getFunction("function"))
+{
+}
+
+FunctionScalarAux::~FunctionScalarAux()
+{
+}
+
+Real
+FunctionScalarAux::computeValue()
+{
+  return _function.value(_t, Point(0, 0, 0));
+}
