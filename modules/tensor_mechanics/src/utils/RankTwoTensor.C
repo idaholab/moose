@@ -354,6 +354,14 @@ RankTwoTensor::doubleContraction(const RankTwoTensor &a)
   return result;
 }
 
+RankTwoTensor
+RankTwoTensor::deviatoric() const
+{
+  RankTwoTensor deviatoric(*this);
+  deviatoric.addIa(-1.0/3.0 * trace()); // actually construct deviatoric part
+  return deviatoric;
+}
+
 Real
 RankTwoTensor::secondInvariant() const
 {
@@ -363,6 +371,13 @@ RankTwoTensor::secondInvariant() const
   result = 0.5 * deviatoric.doubleContraction(deviatoric);
   return result;
 }
+
+RankTwoTensor
+RankTwoTensor::dsecondInvariant() const
+{
+  return deviatoric();
+}
+
 
 Real
 RankTwoTensor::trace() const

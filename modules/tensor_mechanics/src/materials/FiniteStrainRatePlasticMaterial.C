@@ -52,7 +52,7 @@ FiniteStrainRatePlasticMaterial::computeQpStress()
   //Solve J2 plastic constitutive equations based on current strain increment
   //Returns current  stress and plastic rate of deformation tensor
 
-  solveStressResid(_stress_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], dp, sig);
+  returnMap(_stress_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], dp, sig);
   _stress[_qp] = sig;
 
   //Updates current plastic rate of deformation tensor
@@ -75,7 +75,7 @@ FiniteStrainRatePlasticMaterial::computeQpStress()
  *plastic rate of deformation tensor.
  */
 void
-FiniteStrainRatePlasticMaterial::solveStressResid(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig)
+FiniteStrainRatePlasticMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig)
 {
   RankTwoTensor sig_new, delta_dp, dpn;
   RankTwoTensor flow_tensor, flow_dirn;
@@ -165,7 +165,7 @@ FiniteStrainRatePlasticMaterial::getFlowTensor(const RankTwoTensor & sig, Real /
   Real sig_eqv, val;
 
   sig_eqv = getSigEqv(sig);
-  sig_dev = getSigDev(sig);
+  sig_dev = sig.deviatoric();
 
   val = 0.0;
   if (sig_eqv > 1e-8)
@@ -186,7 +186,7 @@ FiniteStrainRatePlasticMaterial::getJac(const RankTwoTensor & sig, const RankFou
   Real f1, f2, f3;
   Real dfi_dseqv;
 
-  sig_dev = getSigDev(sig);
+  sig_dev = sig.deviatoric();
   sig_eqv = getSigEqv(sig);
 
   getFlowTensor(sig, yield_stress, flow_tensor);
