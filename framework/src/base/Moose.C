@@ -223,6 +223,7 @@
 
 // ScalarKernels
 #include "ODETimeDerivative.h"
+#include "FunctionScalarAux.h"
 
 // indicators
 #include "AnalyticalIndicator.h"
@@ -430,6 +431,7 @@ registerObjects(Factory & factory)
   registerAux(ConstantScalarAux);
   registerAux(QuotientAux);
   registerAux(NormalizationAux);
+  registerAux(FunctionScalarAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
