@@ -36,7 +36,7 @@ BilinearInterpolation::BilinearInterpolation(const std::vector<Real> & x, const 
 {
 }
 
-void BilinearInterpolation::getNeighborIndices(std::vector<Real> inArr, Real x ,int& lowerX ,int& upperX )
+void BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr, Real x ,int& lowerX ,int& upperX )
 {
   int N = inArr.size();
   if (x <= inArr[0])
