@@ -121,7 +121,7 @@ private:
    */
   std::vector<std::vector<MeshFunction *> > _mesh_functions;
 
-  /// Flag for enableing oversampling
+  /// Flag for enabling oversampling
   bool _oversample;
 
   /// The number of oversampling refinements
@@ -133,6 +133,11 @@ private:
   /// When oversampling, the output is shift by this amount
   Point _position;
 
+  /// Oversample solution vector
+  /* Each of the MeshFunctions keeps a reference to this vector, the vector is updated for the current system
+   * and variable before the MeshFunction is applied. This allows for the same MeshFunction object to be
+   * re-used, unless the mesh has changed due to adaptivity */
+  AutoPtr<NumericVector<Number> > _serialized_solution;
 };
 
 #endif // OVERSAMPLEOUTPUT_H
