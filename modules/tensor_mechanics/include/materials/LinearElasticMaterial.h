@@ -20,7 +20,7 @@ protected:
   virtual void computeQpStrain();
   virtual void computeQpStress();
   virtual RankTwoTensor computeStressFreeStrain();
-  
+
   MaterialProperty<ElasticityTensorR4> & _delasticity_tensor_dc;
   MaterialProperty<ElasticityTensorR4> & _d2elasticity_tensor_dc2;
 
