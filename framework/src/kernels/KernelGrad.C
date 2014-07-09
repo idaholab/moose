@@ -40,10 +40,11 @@ KernelGrad::computeResidual()
   _local_re.resize(re.size());
   _local_re.zero();
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+  const unsigned int n_test = _test.size();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     RealGradient value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
-    for (_i=0; _i<_test.size(); _i++)
+    for (_i = 0; _i < n_test; _i++)  // target for auto vectorization
       _local_re(_i) += value * _grad_test[_i][_qp];
   }
 
@@ -52,7 +53,7 @@ KernelGrad::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_save_in.size(); i++)
+    for (unsigned int i = 0; i < _save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
 }
@@ -64,11 +65,12 @@ KernelGrad::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    for (_j=0; _j<_phi.size(); _j++)
+  const unsigned int n_test = _test.size();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_j = 0; _j < _phi.size(); _j++)
     {
       RealGradient value = precomputeQpJacobian() * _JxW[_qp] * _coord[_qp];
-      for (_i=0; _i<_test.size(); _i++)
+      for (_i = 0; _i < n_test; _i++) // target for auto vectorization
         _local_ke(_i, _j) += value * _grad_test[_i][_qp];
     }
 
@@ -76,13 +78,13 @@ KernelGrad::computeJacobian()
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = ke.m();
+    const unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i=0; i<rows; i++)
+    for (unsigned int i = 0; i < rows; i++) // target for auto vectorization
       diag(i) = _local_ke(i,i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_diag_save_in.size(); i++)
+    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }
@@ -96,23 +98,21 @@ KernelGrad::computeOffDiagJacobian(unsigned int jvar)
   {
     DenseMatrix<Number> & Ke = _assembly.jacobianBlock(_var.number(), jvar);
 
-    for (_j=0; _j<_phi.size(); _j++)
-      for (_qp=0; _qp<_qrule->n_points(); _qp++)
-        for (_i=0; _i<_test.size(); _i++)
-        {
-          Ke(_i,_j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
-        }
+    for (_j = 0; _j < _phi.size(); _j++)
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        for (_i = 0; _i < _test.size(); _i++)
+          Ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
   }
 }
 
 Real
 KernelGrad::computeQpResidual()
 {
-  return 0;
+  return 0.0;
 }
 
 RealGradient
 KernelGrad::precomputeQpJacobian()
 {
-  return RealGradient();
+  return RealGradient(0.0);
 }

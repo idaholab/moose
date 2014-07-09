@@ -40,10 +40,11 @@ KernelValue::computeResidual()
   _local_re.resize(re.size());
   _local_re.zero();
 
+  const unsigned int n_test = _test.size();
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     Real value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
-    for (_i = 0; _i < _test.size(); _i++)
+    for (_i = 0; _i < n_test; _i++) // target for auto vectorization
       _local_re(_i) += value * _test[_i][_qp];
   }
 
@@ -64,11 +65,12 @@ KernelValue::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
+  const unsigned int n_test = _test.size();
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_j = 0; _j < _phi.size(); _j++)
     {
       Real value = precomputeQpJacobian() * _JxW[_qp] * _coord[_qp];
-      for (_i = 0; _i < _test.size(); _i++)
+      for (_i = 0; _i < n_test; _i++) // target for auto vectorization
         _local_ke(_i, _j) += value * _test[_i][_qp];
     }
 
@@ -78,11 +80,11 @@ KernelValue::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i=0; i<rows; i++)
+    for (unsigned int i = 0; i < rows; i++) // target for auto vectorization
       diag(i) = _local_ke(i,i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_diag_save_in.size(); i++)
+    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }
@@ -96,23 +98,21 @@ KernelValue::computeOffDiagJacobian(unsigned int jvar)
   {
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
-    for (_j=0; _j<_phi.size(); _j++)
-      for (_qp=0; _qp<_qrule->n_points(); _qp++)
-        for (_i=0; _i<_test.size(); _i++)
-        {
-          ke(_i,_j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
-        }
+    for (_j = 0; _j < _phi.size(); _j++)
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        for (_i = 0; _i < _test.size(); _i++)
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
   }
 }
 
 Real
 KernelValue::computeQpResidual()
 {
-  return 0;
+  return 0.0;
 }
 
 Real
 KernelValue::precomputeQpJacobian()
 {
-  return 0;
+  return 0.0;
 }
