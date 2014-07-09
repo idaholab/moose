@@ -68,10 +68,7 @@ protected:
    * Called before forming the jacobian for an element
    */
   virtual Real precomputeQpJacobian();
-
   virtual Real computeQpResidual();
-
-  Real _value;
 };
 
 #endif //KERNELVALUE_H
