@@ -1,8 +1,6 @@
 #include "StressDivergenceTensors.h"
 
 #include "Material.h"
-#include "ElasticityTensorR4.h"
-#include "RankTwoTensor.h"
 
 template<>
 InputParameters validParams<StressDivergenceTensors>()
