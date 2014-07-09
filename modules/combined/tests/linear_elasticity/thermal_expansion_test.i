@@ -82,7 +82,7 @@
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-    all_21 = false
+    fill_method = symmetric9
     C_ijkl = '1e6 0 0 1e6 0 1e6 .5e6 .5e6 .5e6'
     thermal_expansion_coeff = 1.0e-6
     T = 400

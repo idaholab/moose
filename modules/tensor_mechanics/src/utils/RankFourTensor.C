@@ -481,17 +481,6 @@ RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> input)
 }
 
 void
-RankFourTensor::fillFromInputVector(const std::vector<Real> input, bool all_21)
-{
-  mooseDeprecated();
-
-  if (all_21)
-    fillFromInputVector(input, symmetric21);
-  else
-    fillFromInputVector(input, symmetric9);
-}
-
-void
 RankFourTensor::fillFromInputVector(const std::vector<Real> input, FillMethod fill_method)
 {
   zero();
