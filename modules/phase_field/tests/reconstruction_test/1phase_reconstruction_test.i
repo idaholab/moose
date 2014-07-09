@@ -38,6 +38,7 @@
     connecting_threshold = 0.05
     compute_op_maps = true
     execute_on = TIMESTEP_BEGIN
+    ebsd_reader = ebsd
   [../]
 []
 
