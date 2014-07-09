@@ -168,9 +168,6 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> input, FillMethod fill_method);
 
-  // Deprecated method, remove after existing Tensor Mechanics applications have been updated
-  void fillFromInputVector(const std::vector<Real> input, bool all_21);
-
 protected:
 
   /// Dimensionality of rank-four tensor

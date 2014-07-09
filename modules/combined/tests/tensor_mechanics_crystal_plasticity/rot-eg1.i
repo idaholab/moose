@@ -138,7 +138,7 @@
     nss = 12
     hprops = '1 541.5 60.8 109.8'
     gprops = '1 12 60.8'
-    all_21 = false
+    fill_method = symmetric9
   [../]
 []
 

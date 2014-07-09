@@ -209,7 +209,7 @@ active = ''
     # reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
     type = FiniteStrainElasticMaterial
     block = 1
-    all_21 = false
+    fill_method = symmetric9
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z

@@ -33,7 +33,7 @@
   [./felastic]
     type = FiniteStrainElasticMaterial
     block = 0
-    all_21 = false
+    fill_method = symmetric9
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
@@ -50,7 +50,7 @@
     nss = 12
     hprops = '1.0 541.5 60.8 109.8'
     gprops = '1 12 60.8'
-    all_21 = false
+    fill_method = symmetric9
     slip_sys_file_name = input_slip_sys.txt
   [../]
 []
