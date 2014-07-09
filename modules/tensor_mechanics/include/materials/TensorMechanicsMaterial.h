@@ -68,10 +68,7 @@ protected:
   VariableValue * _T; //pointer rather than reference
 
   /// determines the translation from C_ijkl to the Rank-4 tensor
-  MooseEnum _fill_method;
-
-  /// bool to indicate if using 9 stiffness values or all 21
-  bool _all_21;
+  RankFourTensor::FillMethod _fill_method;
 };
 
 #endif //TENSORMECHANICSMATERIAL_H

@@ -140,7 +140,7 @@
     nss = 12
     hprops = '1 541.5 60.8 109.8'
     gprops = '1 12 60.8'
-    all_21 = false
+    fill_method = symmetric9
     euler_angle_file_name = euler_ang_test.inp
   [../]
   [./elastic]
@@ -150,7 +150,7 @@
     disp_x = ux
     disp_z = uz
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
-    all_21 = false
+    fill_method = symmetric9
   [../]
 []
 

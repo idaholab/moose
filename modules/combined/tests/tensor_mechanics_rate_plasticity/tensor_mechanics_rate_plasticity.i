@@ -59,7 +59,7 @@
   [./felastic]
     type = FiniteStrainRatePlasticMaterial
     block=0
-    all_21 = false
+    fill_method = symmetric9
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
