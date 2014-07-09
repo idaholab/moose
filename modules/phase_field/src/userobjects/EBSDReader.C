@@ -231,7 +231,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
       averaged_data[6] = _avg_phase[i];
       averaged_data[7] = _avg_sym[i];
     }
-    
+
     //Set up domain bounds with mesh tools
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
@@ -239,11 +239,11 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
       _top_right(i) = _mesh.getMaxInDimension(i);
     }
     _range = _top_right - _bottom_left;
-    
+
     //Output error message if number of order parameters is larger than number of grains from EBSD dataset
     if (_op_num > _grain_num)
       mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
-    
+
     //Assign grains to each order parameter in a way that maximizes distance
     _assigned_op.resize(_grain_num);
     for (unsigned int grain=0; grain < _grain_num; ++grain)
@@ -252,7 +252,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
       std::vector<Real> min_op_dist;
       min_op_ind.resize(_op_num);
       min_op_dist.resize(_op_num);
-      
+
       //Determine the distance to the closest center assigned to each order parameter
       if (grain >= _op_num)
       {
@@ -267,7 +267,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
           }
         }
       }
-      
+
       //Assign the current center point to the order parameter that is furthest away.
       Real mx;
       if (grain < _op_num)
@@ -338,11 +338,11 @@ EBSDReader::get_data(const Point & p, MooseEnum data_type) const
     case PHASE:
       // grain is entry [7] at each centroid
       return _data[index_from_point(p)][7];
-      
+
     case SYMMETRY:
       // symmetry is entry [8] at each centroid
       return _data[index_from_point(p)][8];
-      
+
     case OP:
       // OP is entry [9] at each centroid
       return _data[index_from_point(p)][9];
@@ -415,8 +415,8 @@ unsigned EBSDReader::index_from_point(const Point & p) const
 
 unsigned EBSDReader::index_from_index(const unsigned int & var) const
 {
- 
-  // Transfer the index into the _avg_data array. 
+
+  // Transfer the index into the _avg_data array.
   unsigned avg_index = var;
 
   // Don't access out of range!
@@ -425,4 +425,3 @@ unsigned EBSDReader::index_from_index(const unsigned int & var) const
 
   return avg_index;
 }
-

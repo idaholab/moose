@@ -2,6 +2,7 @@
 #include "MooseMesh.h"
 #include "AddV.h"
 #include "GeneratedMesh.h"
+#include "EBSDReader.h"
 
 // LibMesh includes
 #include "libmesh/periodic_boundary_base.h"
@@ -70,6 +71,7 @@ InputParameters validParams<GrainTracker>()
   params.addParam<bool>("compute_op_maps", false, "Indicates whether the data structures that"
                                                   "hold the active order parameter information"
                                                   "should be populated or not");
+  params.addParam<UserObjectName>("ebsd_reader", "Optional: EBSD Reader for initial condition");
 
   // We are using "addV" to add the variable parameter on the fly
   params.suppressParameter<std::vector<VariableName> >("variable");
@@ -84,6 +86,7 @@ GrainTracker::GrainTracker(const std::string & name, InputParameters parameters)
     _remap(getParam<bool>("remap_grains")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _unique_grains(declareRestartableData<std::map<unsigned int, UniqueGrain *> >("unique_grains")),
+    _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : NULL),
     _compute_op_maps(getParam<bool>("compute_op_maps"))
 {
   // Size the data structures to hold the correct number of maps
@@ -408,10 +411,53 @@ GrainTracker::trackGrains()
    */
   if (_t_step == _tracking_step)   // Start tracking when the time_step == the tracking_step
   {
-    for (unsigned int i=1; i <= new_grains.size(); ++i)
+    if (_ebsd_reader)
     {
-      new_grains[i-1]->status = MARKED;
-      _unique_grains[i] = new_grains[i-1];                   // Transfer ownership of the memory
+      const std::vector<Point> & center_points = _ebsd_reader->getCenterPoints();
+
+      // To find the minimum distance we will use the boundingRegionDistance routine.
+      // To do that, we need to build BoundingSphereObjects with a few dummy values, radius and node_id will be ignored
+      BoundingSphereInfo ebsd_sphere(0, Point(0, 0, 0), 0);
+      std::vector<BoundingSphereInfo *> ebsd_vector(1);
+      ebsd_vector[0] = &ebsd_sphere;
+      std::set<unsigned int> used_indices;
+
+      for (unsigned int i=0; i < new_grains.size(); ++i)
+      {
+        Real min_centroid_diff = std::numeric_limits<Real>::max();
+        unsigned int closest_match_idx = 0;
+
+        for (unsigned int j=0; j<center_points.size(); ++j)
+        {
+          // Update the ebsd sphere to be used in the boundingRegionDistance calculation
+          ebsd_sphere.b_sphere.center() = center_points[j];
+
+          Real curr_centroid_diff = boundingRegionDistance(ebsd_vector, new_grains[i]->sphere_ptrs, true);
+          if (curr_centroid_diff <= min_centroid_diff)
+          {
+            closest_match_idx = j;
+            min_centroid_diff = curr_centroid_diff;
+          }
+        }
+
+        if (used_indices.find(closest_match_idx) != used_indices.end())
+          mooseError("Error finding unique closest match in ESBD initial condition");
+        used_indices.insert(closest_match_idx);
+
+        // Finally assign the grain index
+        /**
+         * TODO: Verify this mapping, the zeroth index is reserved for places where there are no grains
+         */
+        _unique_grains[closest_match_idx+1] = new_grains[closest_match_idx];
+      }
+    }
+    else
+    {
+      for (unsigned int i=1; i <= new_grains.size(); ++i)
+      {
+        new_grains[i-1]->status = MARKED;
+        _unique_grains[i] = new_grains[i-1];                   // Transfer ownership of the memory
+      }
     }
     return;  // Return early - no matching or tracking to do
   }

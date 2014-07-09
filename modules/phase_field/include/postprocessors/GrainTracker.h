@@ -9,6 +9,7 @@
 #include "libmesh/sphere.h"
 
 class GrainTracker;
+class EBSDReader;
 
 template<>
 InputParameters validParams<GrainTracker>();
@@ -55,7 +56,7 @@ public:
 public:
   /// This struct holds the nodesets and bounding spheres for each flooded region.
   struct BoundingSphereInfo;
-  
+
   /// This struct hold the information necessary to identify and track a unique grain;
   struct UniqueGrain;
 
@@ -117,6 +118,9 @@ protected:
   /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
   std::map<unsigned int, UniqueGrain *> & _unique_grains;
 
+  /// Optional ESBD Reader
+  const EBSDReader * _ebsd_reader;
+
 public:
   /// This enumeration is used to indicate status of the grains in the _unique_grains data structure
   enum STATUS
@@ -151,7 +155,7 @@ public:
      */
     const std::set<unsigned int> *nodes_ptr;
   };
-  
+
   bool _compute_op_maps;
   // Data structure for active order parameter information on nodes
   std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > > _nodal_data;
