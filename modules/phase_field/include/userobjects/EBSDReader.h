@@ -53,6 +53,11 @@ public:
       return MooseEnum("PHI1, PHI, PHI2, X, Y, Z, GRAIN, PHASE, SYMMETRY, OP, AVG_PHI1, AVG_PHI, AVG_PHI2, AVG_X, AVG_Y, AVG_Z, AVG_PHASE, AVG_SYMMETRY", type);
     }
 
+  const std::vector<Point> & getCenterPoints() const
+    {
+      return _centerpoints;
+    }
+
 protected:
 
   /**
