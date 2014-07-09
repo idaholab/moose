@@ -4,14 +4,14 @@ template<>
 InputParameters validParams<CrystalPlasticityRotationOutAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addParam<std::string>("rotout_file_name", "rot.out", "Name of rotation output file: Default rot.out");
+  params.addParam<FileName>("rotout_file_name", "rot.out", "Name of rotation output file: Default rot.out");
   params.addParam<unsigned int>("output_frequency", 1, "Frequency of Output");
   return params;
 }
 
 CrystalPlasticityRotationOutAux::CrystalPlasticityRotationOutAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _rotout_file_name(getParam<std::string>("rotout_file_name")),
+    _rotout_file_name(getParam<FileName>("rotout_file_name")),
     _out_freq(getParam<unsigned int>("output_frequency")),
     _update_rot( getMaterialProperty<RankTwoTensor>("update_rot"))
 {
