@@ -50,7 +50,8 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
 
 void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
 {
-  int ind, is, ie, flag;
+  unsigned int ind;
+  int is, ie;
   Real *data;
   RealTensorValue rot;
 
@@ -64,29 +65,26 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
   _gss[_qp].resize(_nss);
   _gss_old[_qp].resize(_nss);
 
-
-  _acc_slip[_qp]=0.0;
+  _acc_slip[_qp] = 0.0;
 
   _a0.resize(_nss);
   _xm.resize(_nss);
 
-  data=_gprops.data();
+  data = _gprops.data();
 
-  flag = 0;
-  ind = -1;
-  while (flag == 0)
+  ind = 0;
+  while (true)
   {
-    ind++;
-    is = data[ind];
-    ind++;
-    ie = data[ind];
+    is = data[ind++];
+    ie = data[ind++];
 
-    if (ie == _nss)
-      flag = 1;
-
-    ind++;
     for (unsigned int i = is; i <= ie; ++i)
       _gss[_qp][i-1] = _gprops[ind];
+
+    if (ie == _nss)
+      break;
+
+    ind++;
   }
 
   data = _hprops.data();
@@ -98,25 +96,22 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
 
   data = _flowprops.data();
 
-  flag = 0;
-  ind = -1;
-  while (flag == 0)
+  ind = 0;
+  while (true)
   {
-    ind++;
-    is = data[ind];
-    ind++;
-    ie = data[ind];
-
-    if (ie == _nss)
-      flag = 1;
+    is = data[ind++];
+    ie = data[ind++];
 
     for (unsigned int i = is; i <= ie; ++i)
     {
-      _a0[i-1] = _flowprops[ind+1];
-      _xm[i-1] = _flowprops[ind+2];
+      _a0[i-1] = _flowprops[ind];
+      _xm[i-1] = _flowprops[ind+1];
     }
 
-    ind += 2;
+    if (ie == _nss)
+      break;
+
+    ind += 3;
   }
 
   getEulerAngles();

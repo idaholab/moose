@@ -2,6 +2,8 @@
 #define STRESSDIVERGENCETENSORS_H
 
 #include "Kernel.h"
+#include "ElasticityTensorR4.h"
+#include "RankTwoTensor.h"
 
 //Forward Declarations
 class StressDivergenceTensors;
@@ -43,4 +45,5 @@ private:
   const unsigned int _zdisp_var;
   const unsigned int _temp_var;
 };
+
 #endif //STRESSDIVERGENCETENSORS_H

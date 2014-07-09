@@ -12,8 +12,7 @@ InputParameters validParams<CrystalPlasticityRotationOutAux>();
 class CrystalPlasticityRotationOutAux : public AuxKernel
 {
 public:
-  CrystalPlasticityRotationOutAux ( const std::string & name, InputParameters parameters );
-
+  CrystalPlasticityRotationOutAux(const std::string & name, InputParameters parameters);
   virtual ~CrystalPlasticityRotationOutAux() {}
 
 protected:
@@ -21,7 +20,7 @@ protected:
 
 private:
   std::string _rotout_file_name;
-  int _out_freq;
+  unsigned int _out_freq;
   MaterialProperty<RankTwoTensor> & _update_rot;
 };
 
