@@ -411,7 +411,6 @@ RichardsBorehole::computeQpJacobian()
 Real
 RichardsBorehole::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  Moose::out << "Starting OffDiag computation for borehole" << std::endl;
   if (_richards_name_UO.not_richards_var(jvar))
     return 0.0;
   unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
