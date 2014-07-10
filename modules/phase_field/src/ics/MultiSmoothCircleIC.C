@@ -55,7 +55,7 @@ MultiSmoothCircleIC::computeCircleCenters()
   //Set up domain bounds with mesh tools
   Point top_right; //Actually a point containing the max dimensions in x, y, and z.
   Point bottom_left; //Actually a point containing the min dimensions in x, y, and z.
-  
+
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     top_right(i) = _mesh.getMaxInDimension(i);
