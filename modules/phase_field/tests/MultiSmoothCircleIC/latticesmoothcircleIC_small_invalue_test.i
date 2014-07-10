@@ -22,31 +22,28 @@
 
 [ICs]
   [./c]
-    type = SmoothCircleIC
+    type = SpecifiedSmoothCircleIC
     variable = c
-    x1 = 25.0
-    y1 = 25.0
-    radius = 6.0
-    invalue = 1.0
-    outvalue = -0.8
-    int_width = 4.0
+    invalue = -0.8
+    outvalue = 1
+    int_width = 5
+    x_positions = '25 32'
+    z_positions = '0 0'
+    y_positions = '25 32'
+    radii = '6 5'
   [../]
 []
 
 [Kernels]
-  active = 'ie_c CHSolid CHInterface'
-
   [./ie_c]
     type = TimeDerivative
     variable = c
   [../]
-
   [./CHSolid]
     type = CHMath
     variable = c
     mob_name = M
   [../]
-
   [./CHInterface]
     type = CHInterface
     variable = c
@@ -63,7 +60,6 @@
       secondary = 2
       translation = '0 50 0'
     [../]
-
     [./top_bottom]
       primary = 1
       secondary = 3
@@ -73,53 +69,37 @@
 []
 
 [Materials]
-
   [./constant]
     type = PFMobility
     block = 0
     mob = 1.0
-    kappa = 1.0
+    kappa = 1.5
   [../]
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
-  scheme = 'bdf2'
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-
-
+  scheme = bdf2
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 101'
-
   l_max_its = 20
   l_tol = 1.0e-5
-
   nl_max_its = 40
   nl_rel_tol = 5.0e-14
-
   start_time = 0.0
   num_steps = 1
-  dt = 2.0
+  dt = 5
 []
 
 [Outputs]
-  file_base = circle
   output_initial = true
   exodus = true
-  [./oversampled]
-    type = Exodus
-    oversample = true
-    refinements = 3
-    append_oversample = true
-  [../]
   [./console]
     type = Console
     perf_log = true
     linear_residuals = true
   [../]
 []
-
 

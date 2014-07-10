@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 8
-  ny = 8
+  nx = 25
+  ny = 25
   nz = 0
   xmin = 0
   xmax = 50
@@ -11,8 +11,6 @@
   zmin = 0
   zmax = 50
   elem_type = QUAD4
-
-  uniform_refine = 1
 []
 
 [Variables]
@@ -21,16 +19,21 @@
   [./c]
     order = THIRD
     family = HERMITE
-    [./InitialCondition]
-      type = RndSmoothCircleIC
-      x1 = 25.0
-      y1 = 25.0
-      radius = 6.0
-      mx_invalue = 1.0
-      mn_invalue = 1.0
-      mx_outvalue = -0.6
-      mn_outvalue = -0.99
-    [../]
+  [../]
+[]
+
+[ICs]
+  [./c]
+    variable = c
+    type = RndSmoothCircleIC
+    x1 = 25.0
+    y1 = 25.0
+    radius = 6.0
+    invalue = 1.0
+    variation_invalue = 0.0
+    outvalue = -0.8;
+    variation_outvalue = 0.2
+    int_width = 5
   [../]
 []
 
@@ -91,7 +94,7 @@ active = 'Periodic'
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options = '-snes_ksp_ew'
+  #petsc_options = '-snes_ksp_ew'
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 101'
@@ -102,16 +105,8 @@ active = 'Periodic'
   nl_max_its = 10
 
   start_time = 0.0
-  num_steps = 2
+  num_steps = 1
   dt = 1.0
-
-  [./Adaptivity]
-    initial_adaptivity = 1
-    error_estimator = LaplacianErrorEstimator
-    refine_fraction = 0.8
-   coarsen_fraction = 0.05
-    max_h_level = 2
-  [../]
 []
 
 [Outputs]
