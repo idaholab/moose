@@ -39,6 +39,29 @@ RankTwoTensor::RankTwoTensor(const TypeTensor<Real> &a)
       _vals[i][j] = a(i,j);
 }
 
+RankTwoTensor::RankTwoTensor(Real S11, Real S22, Real S33, Real S23, Real S13, Real S12)
+{
+  _vals[0][0] = S11;
+  _vals[1][1] = S22;
+  _vals[2][2] = S33;
+  _vals[1][2] = _vals[2][1] = S23;
+  _vals[0][2] = _vals[2][0] = S13;
+  _vals[0][1] = _vals[1][0] = S12;
+}
+
+RankTwoTensor::RankTwoTensor(Real S11, Real S21, Real S31, Real S12, Real S22, Real S32, Real S13, Real S23, Real S33)
+{
+  _vals[0][0] = S11;
+  _vals[1][0] = S21;
+  _vals[2][0] = S31;
+  _vals[0][1] = S12;
+  _vals[1][1] = S22;
+  _vals[2][1] = S32;
+  _vals[0][2] = S13;
+  _vals[1][2] = S23;
+  _vals[2][2] = S33;
+}
+
 Real &
 RankTwoTensor::operator()(unsigned int i, unsigned int j)
 {
@@ -61,7 +84,7 @@ RankTwoTensor::zero()
 }
 
 void
-RankTwoTensor::fillFromInputVector(const std::vector<Real> input)
+RankTwoTensor::fillFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() == 6)
   {
@@ -143,7 +166,7 @@ RankTwoTensor::rotate(RankTwoTensor &R)
 }
 
 RankTwoTensor
-RankTwoTensor::rotateXyPlane(const Real a)
+RankTwoTensor::rotateXyPlane(Real a)
 {
   Real c = std::cos(a);
   Real s = std::sin(a);
@@ -419,7 +442,7 @@ RankTwoTensor::L2norm() const
 }
 
 void
-RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> input)
+RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> &input)
 {
   if (input.size() == 4)
   {
