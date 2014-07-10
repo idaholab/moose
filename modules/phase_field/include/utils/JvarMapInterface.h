@@ -4,7 +4,7 @@
 #include "MooseVariable.h"
 
 /**
- * Interface class ("Veneer") to provide a mapping from 'jvar' in 
+ * Interface class ("Veneer") to provide a mapping from 'jvar' in
  * computeQpOffDiagJacobian into the _coupled_moose_vars array
  */
 template <class T>

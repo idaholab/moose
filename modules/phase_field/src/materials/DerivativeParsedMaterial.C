@@ -52,7 +52,9 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
 
     constant_values[i] = expression->Eval(NULL);
 
-    std::cout << "Constant value " << i << ' ' << constant_expressions[i] << " = " << constant_values[i] << std::endl;
+#ifdef DEBUG
+    _console << "Constant value " << i << ' ' << constant_expressions[i] << " = " << constant_values[i] << std::endl;
+#endif
 
     if (!_func_F.AddConstant(constant_names[i], constant_values[i]))
       mooseError("Invalid constant name in DerivativeParsedMaterial");
@@ -148,18 +150,11 @@ void DerivativeParsedMaterial::functionsOptimize()
 
   // base function
   _func_F.Optimize();
-#ifdef FUNCTIONPARSER_SUPPORT_DEBUGGING
-  //_func_F.PrintByteCode(std::cout);
-#endif
 
   // optimize first derivatives
   for (i = 0; i < _nargs; ++i)
   {
     _func_dF[i]->Optimize();
-#ifdef FUNCTIONPARSER_SUPPORT_DEBUGGING
-    std::cout << propertyNameFirst(_F_name, _arg_name[i]) << "\n";
-    //_func_dF[i]->PrintByteCode(std::cout);
-#endif
 
     // if the derivative vanishes set the function back to NULL
     if (_func_dF[i]->isZero())
@@ -172,10 +167,6 @@ void DerivativeParsedMaterial::functionsOptimize()
     for (j = i; j < _nargs; ++j)
     {
       _func_d2F[i][j]->Optimize();
-#ifdef FUNCTIONPARSER_SUPPORT_DEBUGGING
-      std::cout << propertyNameSecond(_F_name, _arg_name[i], _arg_name[j]) << "\n";
-      //_func_d2F[i][j]->PrintByteCode(std::cout);
-#endif
 
       // if the derivative vanishes set the function back to NULL
       if (_func_d2F[i][j]->isZero())
@@ -190,10 +181,6 @@ void DerivativeParsedMaterial::functionsOptimize()
         for (k = j; k < _nargs; ++k)
         {
           _func_d3F[i][j][k]->Optimize();
-#ifdef FUNCTIONPARSER_SUPPORT_DEBUGGING
-          std::cout << propertyNameThird(_F_name, _arg_name[i], _arg_name[j], _arg_name[k]) << "\n";
-          //_func_d3F[i][j][k]->PrintByteCode(std::cout);
-#endif
 
           // if the derivative vanishes set the function back to NULL
           if (_func_d3F[i][j][k]->isZero())
