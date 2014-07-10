@@ -53,9 +53,16 @@ MultiSmoothCircleIC::computeCircleCenters()
   _centers.resize(_numbub);
 
   //Set up domain bounds with mesh tools
-  Point top_right;
+  Point top_right; //Actually a point containing the max dimensions in x, y, and z.
+  Point bottom_left; //Actually a point containing the min dimensions in x, y, and z.
+  
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  {
     top_right(i) = _mesh.getMaxInDimension(i);
+    bottom_left(i) = _mesh.getMinInDimension(i);
+  }
+
+  Point range = top_right - bottom_left;
 
   for (unsigned int i = 0; i < _numbub; i++)
   {
@@ -89,7 +96,7 @@ MultiSmoothCircleIC::computeCircleCenters()
           rr = tmp_rr;
       }
 
-      if (i == 0) rr = top_right.size();
+      if (i == 0) rr = range.size();
     }
 
     if (num_tries == _numtries)
