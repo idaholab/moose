@@ -7,6 +7,10 @@
 #include "MaterialProperty.h"
 #include <ostream>
 
+// This is used to calculate eigenvalues and eigenvectors
+#include <petscblaslapack.h>
+
+
 RankTwoTensor::RankTwoTensor()
 {
   for (unsigned int i(0); i<N; i++)
@@ -362,9 +366,33 @@ RankTwoTensor::secondInvariant() const
 }
 
 RankTwoTensor
+RankTwoTensor::dtrace() const
+{
+  return RankTwoTensor(1, 0, 0, 0, 1, 0, 0, 0, 1);
+}
+
+RankTwoTensor
 RankTwoTensor::dsecondInvariant() const
 {
   return deviatoric();
+}
+
+RankTwoTensor
+RankTwoTensor::ddet() const
+{
+  RankTwoTensor d;
+
+  d(0, 0) = _vals[1][1] * _vals[2][2] - _vals[2][1] * _vals[1][2];
+  d(0, 1) = _vals[2][0] * _vals[1][2] - _vals[1][0] * _vals[2][2];
+  d(0, 2) = _vals[1][0] * _vals[2][1] - _vals[2][0] * _vals[1][1];
+  d(1, 0) = _vals[2][1] * _vals[0][2] - _vals[0][1] * _vals[2][2];
+  d(1, 1) = _vals[0][0] * _vals[2][2] - _vals[2][0] * _vals[0][2];
+  d(1, 2) = _vals[2][0] * _vals[0][1] - _vals[0][0] * _vals[2][1];
+  d(2, 0) = _vals[0][1] * _vals[1][2] - _vals[1][1] * _vals[0][2];
+  d(2, 1) = _vals[1][0] * _vals[0][2] - _vals[0][0] * _vals[1][2];
+  d(2, 2) = _vals[0][0] * _vals[1][1] - _vals[1][0] * _vals[0][1];
+
+  return d;
 }
 
 
@@ -461,4 +489,29 @@ RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
   }
   else
     mooseError("please provide correct number of values for surface RankTwoTensor initialization.");
+}
+
+void
+RankTwoTensor::symmetricEigenvalues(std::vector<Real> & eigvals)
+{
+  eigvals.resize(N);
+
+  // prepare data for the dsyev routine
+  int nd = N;
+  int lwork = 66*nd;
+  int info;
+  double a[nd*nd];
+  double w[nd];
+  double work[lwork];
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      a[i*N + j] = _vals[i][j]; // a is destroyed by dsyev
+
+  // compute the eigenvalues only (first "N")
+  // assume upper trianlge of a is stored (second "U")
+  LAPACKsyev_("N", "U", &nd, a, &nd, &eigvals[0], work, &lwork, &info);
+
+  if (info != 0)
+    mooseError("In computing the eigenvalues of a rank-2 tensor, the PETSC LAPACK syev routine returned error code " << info);
 }
