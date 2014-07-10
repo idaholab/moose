@@ -32,7 +32,14 @@ public:
    */
   RankTwoTensor(const TypeVector<Real> & row1, const TypeVector<Real> & row2, const TypeVector<Real> & row3);
 
-  ~RankTwoTensor() {}
+  /// Constructor that proxies the fillFromInputVector method
+  RankTwoTensor(const std::vector<Real> &input) { this->fillFromInputVector(input); };
+
+  /// Initialization list replacement constructors, 6 arguments
+  RankTwoTensor(Real S11, Real S22, Real S33, Real S23, Real S13, Real S12);
+
+  /// Initialization list replacement constructors, 9 arguments
+  RankTwoTensor(Real S11, Real S21, Real S31, Real S12, Real S22, Real S32, Real S13, Real S23, Real S33);
 
   /// Copy constructor from RankTwoTensor
   RankTwoTensor(const RankTwoTensor &a);
@@ -60,7 +67,7 @@ public:
   *   _vals[0][1] = input[5]
   * If 9 inputs then input order is [0][0], [1][0], [2][0], [0][1], [1][1], ..., [2][2]
   */
-  void fillFromInputVector(const std::vector<Real> input);
+  void fillFromInputVector(const std::vector<Real> &input);
 
   /// Sets the value for the index specified.  Takes index = 1, 2, 3 (not 0, 1, 2)
   void setValue(Real val, unsigned int i, unsigned int j);
@@ -150,19 +157,19 @@ public:
    */
   Real secondInvariant() const;
 
-  /// returns the trace of the tensor, ie _vals[i][i] (sum i = 1, 2, 3)
+  /// Calculate the trace of the tensor, ie _vals[i][i] (sum i = 1, 2, 3)
   Real trace() const;
 
-  //Calculate the determinant of the tensor
+  /// Calculate the determinant of the tensor
   Real det() const;
 
-  //Calculate the inverse of the tensor
+  /// Calculate the inverse of the tensor
   RankTwoTensor inverse() const;
 
-  //Print the rank two tensor
+  /// Print the rank two tensor
   void print() const;
 
-  //Add identity times a to _vals
+  /// Add identity times a to _vals
   void addIa(const Real &a);
 
   /// Sqrt(_vals[i][j]*_vals[i][j])
@@ -172,7 +179,7 @@ public:
    * sets _vals[0][0], _vals[0][1], _vals[1][0], _vals[1][1] to input,
    * and the remainder to zero
    */
-  void surfaceFillFromInputVector(const std::vector<Real> input);
+  void surfaceFillFromInputVector(const std::vector<Real> &input);
 
 protected:
 
