@@ -2,7 +2,7 @@
 #define SPLITCHPARSED_H
 
 #include "SplitCHCRes.h"
-#include "ParsedFreeEnergyInterface.h"
+#include "DerivativeKernelInterface.h"
 
 //Forward Declarations
 class SplitCHParsed;
@@ -11,18 +11,22 @@ template<>
 InputParameters validParams<SplitCHParsed>();
 
 /**
- * SplitCHParsed allows a free energy functionals to be provided as a parsed
- * expression in the input file. It uses automatic differentiation
- * to generate the necessary derivative. This is the split operator variant.
- * \see SplitCHParsed
+ * CHParsed uses the Free Energy function and derivatives
+ * provided by a DerivativeParsedMaterial.
+ * This is the split operator variant.
+ * \see CHParsed
  */
-class SplitCHParsed : public ParsedFreeEnergyInterface<SplitCHCRes>
+class SplitCHParsed : public DerivativeKernelInterface<SplitCHCRes>
 {
 public:
   SplitCHParsed(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeDFDC(PFFunctionType type);
+
+private:
+  MaterialProperty<Real> & _dFdc;
+  MaterialProperty<Real> & _d2Fdc2;
 };
 
 #endif // SPLITCHPARSED_H
