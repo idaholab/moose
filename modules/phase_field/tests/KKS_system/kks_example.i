@@ -85,7 +85,7 @@
 [Materials]
   # Free energy of the matrix
   [./fm]
-    type = KKSParsedMaterial
+    type = DerivativeParsedMaterial
     block = 0
     f_name = fm
     args = 'cm'
@@ -95,7 +95,7 @@
 
   # Free energy of the delta phase
   [./fd]
-    type = KKSParsedMaterial
+    type = DerivativeParsedMaterial
     block = 0
     f_name = fd
     args = 'cd'
@@ -209,7 +209,7 @@
 
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
-    dt = 0.1  
+    dt = 0.1
   [../]
 []
 
@@ -236,4 +236,3 @@
     perf_log = true
   [../]
 []
-

@@ -7,10 +7,10 @@
     group = 'adaptive'
   [../]
 
-  [./kks_parsed_material]
+  [./derivative_parsed_material]
     type = 'Exodiff'
-    input = 'kks_parsed_material.i'
-    exodiff = 'kks_parsed_material.e'
+    input = 'derivative_parsed_material.i'
+    exodiff = 'derivative_parsed_material.e'
     abs_zero = 6e-08
     group = 'adaptive'
   [../]

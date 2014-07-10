@@ -80,14 +80,14 @@
 [Materials]
   # simple toy free energy
   [./fa]
-    type = KKSParsedMaterial
+    type = DerivativeParsedMaterial
     block = 0
     f_name = Fa
     args = 'ca'
     function = 'ca^2'
   [../]
   [./fb]
-    type = KKSParsedMaterial
+    type = DerivativeParsedMaterial
     block = 0
     f_name = Fb
     args = 'cb'

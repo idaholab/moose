@@ -60,7 +60,7 @@
 
 [Materials]
   [./fa]
-    type = KKSParsedMaterial
+    type = DerivativeParsedMaterial
     block = 0
     f_name = F
     args = 'c1 c2'
@@ -89,7 +89,7 @@
 []
 
 [Outputs]
-  file_base = kks_parsed_material
+  file_base = derivative_parsed_material
   output_initial = false
   interval = 1
   exodus = true
@@ -100,4 +100,3 @@
     linear_residuals = true
   [../]
 []
-
