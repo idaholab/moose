@@ -15,6 +15,14 @@
     valgrind = 'HEAVY'
   [../]
 
+  [./lattice_small_invalue_test]
+    type = 'Exodiff'
+    input = 'latticesmoothcircleIC_small_invalue_test.i'
+    exodiff = 'latticesmoothcircleIC_small_invalue_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
   [./specified_test]
     type = 'Exodiff'
     input = 'specifiedsmoothcircleIC_test.i'

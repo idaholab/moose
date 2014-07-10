@@ -4,38 +4,31 @@
 template<>
 InputParameters validParams<LatticeSmoothCircleIC>()
 {
-  InputParameters params = validParams<MultiSmoothCircleIC>();
+  InputParameters params = validParams<SmoothCircleBaseIC>();
   params.addParam<Real>("Rnd_variation", 0.0, "Variation from central lattice position");
   params.addRequiredParam<std::vector<unsigned int> >("circles_per_side", "Vector containing the number of bubbles along each side");
-  params.set<unsigned int>("numbub") = 0;
-  params.set<Real>("bubspac") = 0.0;
-  params.set<Real>("x1") = 0.0;
-  params.set<Real>("y1") = 0.0;
+  params.addRequiredParam<Real>("Lx", "length of simulation domain in x-direction");
+  params.addRequiredParam<Real>("Ly", "length of simulation domain in y-direction");
+  params.addParam<Real>("Lz", 0.0, "length of simulation domain in z-direction");
+  params.addParam<unsigned int>("rand_seed", 2000, "random seed");
+  params.addRequiredParam<Real>("radius", "Mean radius value for the circels");
+  params.addParam<Real>("radius_variation", 0.0, "Plus or minus fraction of random variation in the bubble radius");
 
   return params;
 }
 
 LatticeSmoothCircleIC::LatticeSmoothCircleIC(const std::string & name,
                                              InputParameters parameters) :
-    MultiSmoothCircleIC(name, parameters),
-    _Rnd_variation(getParam<Real>("Rnd_variation")),
-    _circles_per_side(getParam<std::vector<unsigned int> >("circles_per_side"))
+    SmoothCircleBaseIC(name, parameters),
+    _lattice_variation(getParam<Real>("Rnd_variation")),
+    _circles_per_side(getParam<std::vector<unsigned int> >("circles_per_side")),
+    _Lx(getParam<Real>("Lx")),
+    _Ly(getParam<Real>("Ly")),
+    _Lz(getParam<Real>("Lz")),
+    _radius(getParam<Real>("radius")),
+    _radius_variation(getParam<Real>("radius_variation"))
 {
-}
-
-void
-LatticeSmoothCircleIC::initialSetup()
-{
-  MultiSmoothCircleIC::initialSetup();
-
-  /*std::vector<unsigned int> circles_per_side;
-  circles_per_side.resize(3);
-
-  for (unsigned int i = 0; i < 3; ++i)
-  circles_per_side[i] = _circles_per_side;*/
-
-  //Moose::out << "1: "<< _circles_per_side[0] << " 2: "<< _circles_per_side[1] << " 3: " << _circles_per_side[2] << std::endl;
-
+  //Error checks
   if (_Ly != 0.0 && _circles_per_side[1] == 0)
     mooseError("If domain is > 1D, circles_per_side must have more than one value");
 
@@ -48,24 +41,36 @@ LatticeSmoothCircleIC::initialSetup()
     _circles_per_side[2] = 0;
   }
 
-
+  //Set _numbub
   if (_Lz == 0.0)
   {
     _circles_per_side[2] = 0;
     _numbub = _circles_per_side[0] * _circles_per_side[1];
   }
   else
-  {
     _numbub = _circles_per_side[0] * _circles_per_side[1] * _circles_per_side[2];
-    /*if (_Lz < _Lx) //For non-uniform domain.  This needs to be changed
-      circles_per_side[2] = _circles_per_side[0]*_Lz/_Lx;*/
+
+  //Set random seed
+  MooseRandom::seed(getParam<unsigned int>("rand_seed"));
+}
+
+void
+LatticeSmoothCircleIC::computeCircleRadii()
+{
+  _radii.resize(_numbub);
+
+  for (unsigned int i = 0; i < _numbub; i++)
+  {
+    //Vary bubble radius
+    _radii[i] = _radius * (1.0 + (1.0 - 2.0*MooseRandom::rand()) * _radius_variation);
+    if (_radii[i] < 0.0) _radii[i] = 0.0;
   }
+}
 
-
-  _bubcent.resize(_numbub);
-  _bubradi.resize(_numbub);
-
-  MooseRandom::seed(_rnd_seed);
+void
+LatticeSmoothCircleIC::computeCircleCenters()
+{
+  _centers.resize(_numbub);
 
   Real x_sep = _Lx / _circles_per_side[0];
   Real y_sep = _Ly / _circles_per_side[1];
@@ -84,42 +89,37 @@ LatticeSmoothCircleIC::initialSetup()
     for (unsigned int j = 0; j < _circles_per_side[1]; j++)
       for (unsigned int k = 0; k < z_num; k++)
       {
-         //Vary circle radius
-        _bubradi[cnt] = _radius*(1.0 + (1.0 - 2.0*MooseRandom::rand())*_radius_variation);
-
-        if (_bubradi[cnt] < 0.0) _bubradi[cnt] = 0.0;
-
         Real xx = x_sep/2.0 + i*x_sep;
         Real yy = y_sep/2.0 + j*y_sep;
         Real zz = z_sep/2.0 + k*z_sep;
 
         //Vary circle position
-        xx = xx + (1.0 - 2.0*MooseRandom::rand()) * _Rnd_variation;
-        yy = yy + (1.0 - 2.0*MooseRandom::rand()) * _Rnd_variation;
+        xx = xx + (1.0 - 2.0*MooseRandom::rand()) * _lattice_variation;
+        yy = yy + (1.0 - 2.0*MooseRandom::rand()) * _lattice_variation;
 
         if (_Lz != 0.0)
-          zz = zz + (1.0 - 2.0*MooseRandom::rand()) * _Rnd_variation;
+          zz = zz + (1.0 - 2.0*MooseRandom::rand()) * _lattice_variation;
 
         //Verify not out of bounds
-        if (xx < _bubradi[cnt] + _int_width)
-          xx = _bubradi[cnt] + _int_width;
-        if (xx > _Lx - (_bubradi[cnt] + _int_width))
-          xx = _Lx - (_bubradi[cnt] + _int_width);
-        if (yy < _bubradi[cnt] + _int_width)
-          yy = _bubradi[cnt] + _int_width;
-        if (yy > _Ly - (_bubradi[cnt] + _int_width))
-          yy = _Ly - (_bubradi[cnt] + _int_width);
+        if (xx < _radii[cnt] + _int_width)
+          xx = _radii[cnt] + _int_width;
+        if (xx > _Lx - (_radii[cnt] + _int_width))
+          xx = _Lx - (_radii[cnt] + _int_width);
+        if (yy < _radii[cnt] + _int_width)
+          yy = _radii[cnt] + _int_width;
+        if (yy > _Ly - (_radii[cnt] + _int_width))
+          yy = _Ly - (_radii[cnt] + _int_width);
         if (_Lz != 0.0)
         {
-          if (zz < _bubradi[cnt] + _int_width)
-            zz = _bubradi[cnt] + _int_width;
-          if (zz > _Lz - (_bubradi[cnt] + _int_width))
-            zz = _Lz - (_bubradi[cnt] + _int_width);
+          if (zz < _radii[cnt] + _int_width)
+            zz = _radii[cnt] + _int_width;
+          if (zz > _Lz - (_radii[cnt] + _int_width))
+            zz = _Lz - (_radii[cnt] + _int_width);
         }
 
-        _bubcent[cnt](0) = xx;
-        _bubcent[cnt](1) = yy;
-        _bubcent[cnt](2) = zz;
+        _centers[cnt](0) = xx;
+        _centers[cnt](1) = yy;
+        _centers[cnt](2) = zz;
 
         cnt++;
       }

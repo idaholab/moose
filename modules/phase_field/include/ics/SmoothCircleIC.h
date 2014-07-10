@@ -2,7 +2,7 @@
 #define SMOOTHCIRCLEIC_H
 
 #include "Kernel.h"
-#include "InitialCondition.h"
+#include "SmoothCircleBaseIC.h"
 
 // System includes
 #include <string>
@@ -18,7 +18,7 @@ InputParameters validParams<SmoothCircleIC>();
  * If int_width > zero, the border of the circle with smoothly transition from
  * the invalue to the outvalue.
  */
-class SmoothCircleIC : public InitialCondition
+class SmoothCircleIC : public SmoothCircleBaseIC
 {
 public:
   /**
@@ -36,24 +36,16 @@ public:
    *
    * This must be overriden by derived classes.
    */
-  virtual Real value(const Point & p);
+  virtual void computeCircleRadii();
 
-  virtual RealGradient gradient(const Point & p);
+  virtual void computeCircleCenters();
 
 protected:
-  MooseMesh & _mesh;
-
   Real _x1;
   Real _y1;
   Real _z1;
-  Real _invalue;
-  Real _outvalue;
   Real _radius;
-  Real _int_width;
-  bool _3D_spheres;
   Point _center;
-
-  unsigned int _num_dim;
 };
 
 #endif //SMOOTHCIRCLEIC_H

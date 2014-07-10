@@ -46,7 +46,7 @@
   [./rndcircleIC_test]
     type = 'Exodiff'
     input = 'CH_RndCircleIC_test.i'
-    exodiff = 'rnd_circle.e-s002'
+    exodiff = 'rnd_circle.e'
     group = 'adaptive'
     scale_refine = 1
     valgrind = 'HEAVY'

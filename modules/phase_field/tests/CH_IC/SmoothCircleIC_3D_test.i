@@ -12,17 +12,21 @@
 
 [Variables]
   [./c]
-    [./InitialCondition]
-      type = SmoothCircleIC
-      x1 = 25.0
-      y1 = 25.0
-      radius = 12
-      invalue = 1.0
-      outvalue = 0
-      int_width = 12
-      3D_spheres = false
-      z1 = 25
-    [../]
+  [../]
+[]
+
+[ICs]
+  [./c]
+    type = SmoothCircleIC
+    variable = c
+    x1 = 25.0
+    y1 = 25.0
+    radius = 12
+    invalue = 1.0
+    outvalue = 0
+    int_width = 12
+    3D_spheres = false
+    z1 = 25
   [../]
 []
 

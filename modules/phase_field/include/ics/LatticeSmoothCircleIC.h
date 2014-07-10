@@ -2,7 +2,7 @@
 #define LATTICESMOOTHCIRCLEIC_H
 
 #include "Kernel.h"
-#include "MultiSmoothCircleIC.h"
+#include "SmoothCircleBaseIC.h"
 
 // System includes
 #include <string>
@@ -17,7 +17,7 @@ InputParameters validParams<LatticeSmoothCircleIC>();
  * LatticeSmoothcircleIC creates a lattice of smoothcircles as an initial condition.
  * They are either directly on the lattice or randomly perturbed from the lattice.
  **/
-class LatticeSmoothCircleIC : public MultiSmoothCircleIC
+class LatticeSmoothCircleIC : public SmoothCircleBaseIC
 {
 public:
   /**
@@ -30,11 +30,20 @@ public:
   LatticeSmoothCircleIC(const std::string & name,
                          InputParameters parameters);
 
-  virtual void initialSetup();
+  virtual void computeCircleRadii();
+
+  virtual void computeCircleCenters();
 
 protected:
-  Real _Rnd_variation;
+  Real _lattice_variation;
   std::vector<unsigned int> _circles_per_side;
+  unsigned int _numbub;
+  Real _Lx;
+  Real _Ly;
+  Real _Lz;
+
+  Real _radius;
+  Real _radius_variation;
 };
 
 #endif //LATTICESMOOTHCIRCLEIC_H

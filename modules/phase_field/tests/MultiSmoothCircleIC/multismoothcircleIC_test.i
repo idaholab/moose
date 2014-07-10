@@ -21,19 +21,24 @@
   [./c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
-       type = MultiSmoothCircleIC
-       Lx = 100.0
-       Ly = 100.0
-       Lz = 100.0
-       invalue = 1.0
-       outvalue = 0.0001
-       bubspac = 30.0 #This spacing is from bubble center to bubble center
-       numbub = 10
-       radius = 10.0
-       int_width = 12.0
-       radius_variation = 0.2
-    [../]
+  [../]
+[]
+
+[ICs]
+
+  [./c]
+     type = MultiSmoothCircleIC
+     variable = c
+     Lx = 100.0
+     Ly = 100.0
+     Lz = 100.0
+     invalue = 1.0
+     outvalue = 0.0001
+     bubspac = 30.0 #This spacing is from bubble center to bubble center
+     numbub = 10
+     radius = 10.0
+     int_width = 12.0
+     radius_variation = 0.2
   [../]
 []
 
