@@ -43,18 +43,11 @@ public:
   /// Gets the value for the index specified.  Takes index = 0,1,2
   Real & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
 
-
   /**
    * Gets the value for the index specified.  Takes index = 0,1,2
    * used for const
    */
   Real operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
-
-  ///Sets the value for the index specified.  Indices = 0, 1, 2
-  void setValue(Real val, unsigned int i, unsigned int j, unsigned int k, unsigned int l);
-
-  /// Gets the value for the index specified.  Takes index = 1,2,3
-  Real getValue(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
 
   /// Zeros out the tensor.
   void zero();

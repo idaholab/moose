@@ -69,17 +69,6 @@ public:
   */
   void fillFromInputVector(const std::vector<Real> &input);
 
-private:
-  /// Sets the value for the index specified.  Takes index = 1, 2, 3 (not 0, 1, 2)
-  void setValue(Real val, unsigned int i, unsigned int j);
-
-  /**
-   * @param i 1, 2, or 3
-   * @param j 1, 2, or 3
-   * @return Value for the index specified. Takes index = 1,2,3
-   */
-  Real getValue(unsigned int i, unsigned int j) const;
-
 public:
   /// returns _vals[r][i], ie, row r, with r = 0, 1, 2
   TypeVector<Real> row(const unsigned int r) const;
