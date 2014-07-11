@@ -151,29 +151,29 @@
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
-    index_i = 3
-    index_j = 3
+    index_i = 2
+    index_j = 2
   [../]
   [./pe11]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = pe11
-    index_i = 1
-    index_j = 1
+    index_i = 0
+    index_j = 0
   [../]
     [./pe22]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = pe22
-    index_i = 2
-    index_j = 2
+    index_i = 1
+    index_j = 1
   [../]
   [./pe33]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = pe33
-    index_i = 3
-    index_j = 3
+    index_i = 2
+    index_j = 2
   [../]
   [./eqv_plastic_strain]
     type = FiniteStrainPlasticAux
