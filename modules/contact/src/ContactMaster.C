@@ -152,7 +152,7 @@ ContactMaster::updateContactSet(bool beginning_of_step)
       pinfo->_starting_closest_point_ref = it->second->_closest_point_ref;
     }
 
-    if (_model == CM_EXPERIMENTAL ||
+    if (_model == CM_FRICTIONLESS ||
         (_model == CM_COULOMB && _formulation == CF_DEFAULT))
     {
       const Node * node = pinfo->_node;
@@ -307,8 +307,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
   RealVectorValue pen_force(_penalty * distance_vec);
   RealVectorValue tan_residual(0,0,0);
 
-  if (_model == CM_FRICTIONLESS ||
-      _model == CM_EXPERIMENTAL)
+  if (_model == CM_FRICTIONLESS)
   {
     switch (_formulation)
     {
@@ -401,7 +400,6 @@ ContactMaster::computeQpJacobian()
   switch (_model)
   {
   case CM_FRICTIONLESS:
-  case CM_EXPERIMENTAL:
     switch (_formulation)
     {
     case CF_DEFAULT:
@@ -484,7 +482,8 @@ contactModel(const std::string & the_name)
   }
   else if ("experimental" == name)
   {
-    model = CM_EXPERIMENTAL;
+    model = CM_FRICTIONLESS;
+    mooseWarning("Use of contact model \"experimental\" is deprecated.  Use \"frictionless\" instead.");
   }
   else
   {

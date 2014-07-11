@@ -12,8 +12,7 @@ enum ContactModel
   CM_FRICTIONLESS,
   CM_GLUED,
   CM_COULOMB,
-  CM_TIED,
-  CM_EXPERIMENTAL
+  CM_TIED
 };
 
 enum ContactFormulation

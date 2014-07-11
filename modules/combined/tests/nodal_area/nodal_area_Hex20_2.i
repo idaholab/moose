@@ -108,7 +108,7 @@
     disp_x = displ_x
     disp_y = displ_y
     disp_z = displ_z
-    model = experimental
+    model = frictionless
     penalty = 1e7
     order = SECOND
     tangential_tolerance = 1e-5
