@@ -57,8 +57,8 @@ InputParameters validParams<SolutionUserObject>()
   params.addParam<Real>("rotation0_angle", 0.0, "Anticlockwise rotation angle (in degrees) to use for rotation about rotation0_vector.");
   params.addParam<RealVectorValue>("rotation1_vector", RealVectorValue(0, 0, 1), "Vector about which to rotate points of the simulation.");
   params.addParam<Real>("rotation1_angle", 0.0, "Anticlockwise rotation angle (in degrees) to use for rotation about rotation1_vector.");
-  params.addDeprecatedParam<bool>("legacy_read", false, "Utilize the legacy call to EquationsSystems::read, this may be required for older XDA/XDR files",
-                                  "This option is for legacy support and will be removed on 10/1/2014.\nThe xda/xdr files being read should be regenerated and the flag removed.");
+  params.addParam<bool>("legacy_read", false, "Utilize the legacy call to EquationsSystems::read, this may be required for older XDA/XDR files");
+
   // following lines build the default_transformation_order
   MooseEnum t1("rotation0, translation, scale, rotation1, scale_multiplier", "translation");
   MooseEnum t2("rotation0, translation, scale, rotation1, scale_multiplier", "scale");
@@ -109,6 +109,10 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _transformation_order(getParam<std::vector<MooseEnum> >("transformation_order")),
     _legacy_read(getParam<bool>("legacy_read"))
 {
+
+  if (_legacy_read)
+    mooseWarning("The input parameter 'legacy_read' is deprecated.\nThis option is for legacy support and will be removed on 10/1/2014.\nThe xda/xdr files being read should be regenerated and the flag removed.");
+
   _exec_flags = EXEC_INITIAL;
 
   if (!parameters.isParamValid("nodal_variables") && !parameters.isParamValid("elemental_variables"))
