@@ -123,7 +123,7 @@ public:
                            C_2211 = input[7], C_2212 = input[8], C_2222 = input[9]
                            and C_ijkl = C_jikl = C_ijlk
   */
-  virtual void surfaceFillFromInputVector(const std::vector<Real> input);
+  virtual void surfaceFillFromInputVector(const std::vector<Real> &input);
 
 
   /// Static method for use in validParams for getting the "fill_method"
@@ -159,7 +159,7 @@ public:
    *             antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
    *             general (use fillGeneralFromInputVector)
    */
-  void fillFromInputVector(const std::vector<Real> input, FillMethod fill_method);
+  void fillFromInputVector(const std::vector<Real> &input, FillMethod fill_method);
 
 protected:
 
@@ -188,7 +188,7 @@ protected:
                  If all==false then this is
                    C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323 C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
   */
-  void fillSymmetricFromInputVector(const std::vector<Real> input, bool all);
+  void fillSymmetricFromInputVector(const std::vector<Real> &input, bool all);
 
   /**
    * fillAntisymmetricFromInputVector takes 6 inputs to fill the
@@ -196,7 +196,7 @@ protected:
    * I.e., B_ijkl = -B_jikl = -B_ijlk = B_klij
    * @param input this is B1212, B1213, B1223, B1313, B1323, B2323.
    */
-  void fillAntisymmetricFromInputVector(const std::vector<Real> input);
+  void fillAntisymmetricFromInputVector(const std::vector<Real> &input);
 
   /**
    * fillGeneralIsotropicFromInputVector takes 3 inputs to fill the
@@ -206,7 +206,7 @@ protected:
    * and a is the antisymmetric shear modulus, and ep is the permutation tensor
    * @param input this is la, mu, a in the above formula
    */
-  void fillGeneralIsotropicFromInputVector(const std::vector<Real> input);
+  void fillGeneralIsotropicFromInputVector(const std::vector<Real> &input);
 
   /**
    * fillAntisymmetricIsotropicFromInputVector takes 1 inputs to fill the
@@ -214,7 +214,7 @@ protected:
    * I.e., C_ijkl = a * ep_ijm * ep_klm, where epsilon is the permutation tensor (and sum on m)
    * @param input this is a in the above formula
    */
-  void fillAntisymmetricIsotropicFromInputVector(const std::vector<Real> input);
+  void fillAntisymmetricIsotropicFromInputVector(const std::vector<Real> &input);
 
   /**
    * fillSymmetricIsotropicFromInputVector takes 2 inputs to fill the
@@ -223,14 +223,14 @@ protected:
    * where la is the first Lame modulus, mu is the second (shear) Lame modulus,
    * @param input this is la and mu in the above formula
    */
-  void fillSymmetricIsotropicFromInputVector(const std::vector<Real> input);
+  void fillSymmetricIsotropicFromInputVector(const std::vector<Real> &input);
 
   /**
    * fillGeneralFromInputVector takes 81 inputs to fill the Rank-4 tensor
    * No symmetries are explicitly maintained
    * @param input  C[i][j][k][l] = input[i*N*N*N + j*N*N + k*N + l]
    */
-  void fillGeneralFromInputVector(const std::vector<Real> input);
+  void fillGeneralFromInputVector(const std::vector<Real> &input);
 
 
 private:
