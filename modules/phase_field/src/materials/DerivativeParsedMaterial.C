@@ -15,7 +15,9 @@ InputParameters validParams<DerivativeParsedMaterial>()
   params.addParam<std::vector<Real> >( "tol_values", std::vector<Real>(), "Vector of tolerance values for the variables in tol_names");
 
   // Material properties
-  /* params.addParam<std::vector<std::string> >("material_property_names", std::vector<std::string>(), "Vector of material properties used in the parsed function (this currently is only for constant material properties, i.e. no derivatives of those properties are calculated!)"); */
+  params.addParam<std::vector<std::string> >(
+    "material_property_names", std::vector<std::string>(),
+    "Vector of material properties used in the parsed function (these should have a zero gradient!)");
 
   // Function expression
   params.addRequiredParam<std::string>("function", "FParser function expression for the phase free energy");
@@ -26,11 +28,14 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
                                                    InputParameters parameters) :
     DerivativeBaseMaterial(name, parameters)
 {
+  // check number of coupled variables
+  if (_arg_names.size() == 0)
+    mooseError("Need at least one couple variable for DerivativeParsedMaterial.");
+
   // get and check constant vectors
   std::vector<std::string> constant_names = getParam<std::vector<std::string> >("constant_names");
   std::vector<std::string> constant_expressions = getParam<std::vector<std::string> >("constant_expressions");
   unsigned int nconst = constant_expressions.size();
-
   if (nconst != constant_expressions.size())
     mooseError("The parameter vectors constant_names and constant_values must have equal length.");
 
@@ -77,7 +82,7 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
 
     // for every argument look throug the entire tolerance vector to find a match
     for (unsigned int j = 0; j < tol_names.size(); ++j)
-      if (_arg_name[i] == tol_names[j])
+      if (_arg_names[i] == tol_names[j])
       {
         _tol[i] = tol_values[j];
         break;
@@ -85,13 +90,24 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
   }
 
   // build 'variables' argument for fparser
-  std::stringstream  s;
-  std::copy(_arg_name.begin(), _arg_name.end(), std::ostream_iterator<std::string>(s, ","));
-  std::string vars = s.str();
-  vars.erase(vars.size() - 1); // trim trailing ','
+  std::string variables = _arg_names[0];
+  for (unsigned i = 1; i < _arg_names.size(); ++i)
+    variables += "," + _arg_names[i];
+
+  // get material property names
+  std::vector<std::string> mat_prop_names = getParam<std::vector<std::string> >("material_property_names");
+  _nmat_props = mat_prop_names.size();
+
+  // get all material properties
+  _mat_props.resize(_nmat_props);
+  for (unsigned int i = 0; i < _nmat_props; ++i)
+  {
+    _mat_props[i] = &getMaterialProperty<Real>(mat_prop_names[i]);
+    variables += "," + mat_prop_names[i];
+  }
 
   // build the base function
-  if (_func_F.Parse(getParam<std::string>("function"), vars) >= 0)
+  if (_func_F.Parse(getParam<std::string>("function"), variables) >= 0)
      mooseError(std::string("Invalid function\n" + getParam<std::string>("function") + "\nin DerivativeParsedMaterial.\n") + _func_F.ErrorMsg());
 
   // Auto-Derivatives
@@ -101,7 +117,7 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
   functionsOptimize();
 
   // create parameter passing buffer
-  _func_params = new Real[_nargs];
+  _func_params = new Real[_nargs + _nmat_props];
 }
 
 DerivativeParsedMaterial::~DerivativeParsedMaterial()
@@ -120,7 +136,7 @@ void DerivativeParsedMaterial::functionsDerivative()
   for (i = 0; i < _nargs; ++i)
   {
     _func_dF[i] = new ADFunction(_func_F);
-    _func_dF[i]->AutoDiff(_arg_name[i]);
+    _func_dF[i]->AutoDiff(_arg_names[i]);
 
     // second derivatives
     _func_d2F[i].resize(_nargs);
@@ -128,7 +144,7 @@ void DerivativeParsedMaterial::functionsDerivative()
     for (j = i; j < _nargs; ++j)
     {
       _func_d2F[i][j] = new ADFunction(*_func_dF[i]);
-      _func_d2F[i][j]->AutoDiff(_arg_name[j]);
+      _func_d2F[i][j]->AutoDiff(_arg_names[j]);
 
       // third derivatives
       if (_third_derivatives)
@@ -137,7 +153,7 @@ void DerivativeParsedMaterial::functionsDerivative()
         for (k = j; k < _nargs; ++k)
         {
           _func_d3F[i][j][k] = new ADFunction(*_func_d2F[i][j]);
-          _func_d3F[i][j][k]->AutoDiff(_arg_name[k]);
+          _func_d3F[i][j][k]->AutoDiff(_arg_names[k]);
         }
       }
     }
@@ -227,6 +243,10 @@ DerivativeParsedMaterial::computeProperties()
         _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
       }
     }
+
+    // insert material property values
+    for (i = 0; i < _nmat_props; ++i)
+      _func_params[i + _nargs] = (*_mat_props[i])[_qp];
 
     // set function value
     if (_prop_F)

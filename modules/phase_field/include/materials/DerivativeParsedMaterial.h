@@ -48,7 +48,8 @@ private:
   std::vector<std::vector<std::vector<ADFunction *> > > _func_d3F;
 
   /// Material properties needed by this free energy
-  // std::vector<MaterialProperty<Real> *> _mat_prop;
+  std::vector<MaterialProperty<Real> *> _mat_props;
+  unsigned int _nmat_props;
 
   /// Array to stage the parameters passed to the functions when calling Eval.
   Real * _func_params;

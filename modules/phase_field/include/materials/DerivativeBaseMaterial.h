@@ -102,7 +102,7 @@ protected:
   unsigned int _nargs;
 
   /// String vector of all argument names.
-  std::vector<std::string> _arg_name;
+  std::vector<std::string> _arg_names;
 
   /// Calculate (and allocate memory for) the third derivatives of the free energy.
   bool _third_derivatives;

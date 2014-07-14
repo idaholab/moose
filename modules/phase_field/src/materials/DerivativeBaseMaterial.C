@@ -43,9 +43,9 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
   }
 
   // fetch names of variables in args
-  _arg_name.resize(_nargs);
+  _arg_names.resize(_nargs);
   for (i = 0; i < _nargs; ++i)
-    _arg_name[i] = getVar("args", i)->name();
+    _arg_names[i] = getVar("args", i)->name();
 
   // initialize derivatives
   for (i = 0; i < _nargs; ++i)
@@ -54,7 +54,7 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
     _args[i] = &coupledValue("args", i);
 
     // first derivatives
-    _prop_dF[i] = &declareProperty<Real>(propertyNameFirst(_F_name, _arg_name[i]));
+    _prop_dF[i] = &declareProperty<Real>(propertyNameFirst(_F_name, _arg_names[i]));
 
     // second derivatives
     for (j = i; j < _nargs; ++j)
@@ -62,7 +62,7 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
       _prop_d2F[i][j] =
       _prop_d2F[j][i] =
         &declareProperty<Real>(
-          propertyNameSecond(_F_name, _arg_name[i], _arg_name[j])
+          propertyNameSecond(_F_name, _arg_names[i], _arg_names[j])
         );
 
       // third derivatives
@@ -79,7 +79,7 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
           _prop_d3F[j][i][k] =
           _prop_d3F[i][k][j] =
             &declareProperty<Real>(
-              propertyNameThird(_F_name, _arg_name[i], _arg_name[j], _arg_name[k])
+              propertyNameThird(_F_name, _arg_names[i], _arg_names[j], _arg_names[k])
             );
         }
       }
@@ -103,13 +103,13 @@ DerivativeBaseMaterial::initialSetup()
 
   for (i = 0; i < _nargs; ++i)
   {
-    if (!_fe_problem.isMatPropRequested(propertyNameFirst(_F_name, _arg_name[i])))
+    if (!_fe_problem.isMatPropRequested(propertyNameFirst(_F_name, _arg_names[i])))
       _prop_dF[i] = NULL;
 
     // second derivatives
     for (j = i; j < _nargs; ++j)
     {
-      if (!_fe_problem.isMatPropRequested(propertyNameSecond(_F_name, _arg_name[i], _arg_name[j])))
+      if (!_fe_problem.isMatPropRequested(propertyNameSecond(_F_name, _arg_names[i], _arg_names[j])))
         _prop_d2F[i][j] =
         _prop_d2F[j][i] = NULL;
 
@@ -118,7 +118,7 @@ DerivativeBaseMaterial::initialSetup()
       {
         for (k = j; k < _nargs; ++k)
         {
-          if (!_fe_problem.isMatPropRequested(propertyNameThird(_F_name, _arg_name[i], _arg_name[j], _arg_name[k])))
+          if (!_fe_problem.isMatPropRequested(propertyNameThird(_F_name, _arg_names[i], _arg_names[j], _arg_names[k])))
             _prop_d3F[i][j][k] =
             _prop_d3F[k][i][j] =
             _prop_d3F[j][k][i] =
