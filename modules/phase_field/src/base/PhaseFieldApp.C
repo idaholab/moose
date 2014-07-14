@@ -19,6 +19,7 @@
 #include "SpecifiedSmoothCircleIC.h"
 #include "RndBoundingBoxIC.h"
 #include "PFMobility.h"
+#include "DerivativeParsedMaterial.h"
 #include "NodalFloodCount.h"
 #include "NodalFloodCountAux.h"
 #include "NodalVolumeFraction.h"
@@ -99,6 +100,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(Tricrystal2CircleGrainsIC);
   registerMaterial(PFMobility);
   registerMaterial(GBEvolution);
+  registerMaterial(DerivativeParsedMaterial);
   registerUserObject(NodalFloodCount);
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);

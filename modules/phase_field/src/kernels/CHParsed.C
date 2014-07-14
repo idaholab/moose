@@ -3,32 +3,49 @@
 template<>
 InputParameters validParams<CHParsed>()
 {
-  InputParameters params = ParsedFreeEnergyInterface<CHBulk>::validParams();
+  InputParameters params = DerivativeKernelInterface<CHBulk>::validParams();
+  params.addCoupledVar("args", "Vector of additional arguments to F");
   return params;
 }
 
 CHParsed::CHParsed(const std::string & name, InputParameters parameters) :
-    ParsedFreeEnergyInterface<CHBulk>(name, parameters)
+    DerivativeKernelInterface<CHBulk>(name, parameters)
 {
+  // reserve space for derivatives and gradients
+  _second_derivatives.resize(_nvar+1);
+  _third_derivatives.resize(_nvar+1);
+  _grad_vars.resize(_nvar+1);
+
+  // derivatives w.r.t. and gradients of the kernel variable
+  _second_derivatives[0] = &getDerivative<Real>(_F_name, _var.name(), _var.name());
+  _third_derivatives[0]  = &getDerivative<Real>(_F_name, _var.name(), _var.name(), _var.name());
+  _grad_vars[0] = &(_grad_u);
+
+  // Iterate over all coupled variables
+  for (unsigned int i = 0; i < _nvar; ++i)
+  {
+    _second_derivatives[i+1] = &getDerivative<Real>(_F_name, _var.name(), _coupled_moose_vars[i]->name());
+    _third_derivatives[i+1]  = &getDerivative<Real>(_F_name, _var.name(), _var.name(), _coupled_moose_vars[i]->name());
+    _grad_vars[i+1] = &(_coupled_moose_vars[i]->gradSln());
+  }
 }
 
 RealGradient
 CHParsed::computeGradDFDCons(PFFunctionType type)
 {
-  updateFuncParams();
   RealGradient res = 0.0;
 
   switch (type)
   {
     case Residual:
-      for (unsigned int i = 0; i < _nvars; ++i)
-        res += (*_grad_vars[i])[_qp] * secondDerivative(i);
+      for (unsigned int i = 0; i <= _nvar; ++i)
+        res += (*_grad_vars[i])[_qp] * (*_second_derivatives[i])[_qp];
       return res;
 
     case Jacobian:
-      res = _grad_phi[_j][_qp] * secondDerivative(0);
-      for (unsigned int i = 0; i < _nvars; ++i)
-        res += _phi[_j][_qp] * (*_grad_vars[i])[_qp] * thirdDerivative(i);
+      res = _grad_phi[_j][_qp] * (*_second_derivatives[0])[_qp];
+      for (unsigned int i = 0; i <= _nvar; ++i)
+        res += _phi[_j][_qp] * (*_grad_vars[i])[_qp] * (*_third_derivatives[i])[_qp];
       return res;
   }
 

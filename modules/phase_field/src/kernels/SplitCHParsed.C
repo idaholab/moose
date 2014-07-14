@@ -3,27 +3,27 @@
 template<>
 InputParameters validParams<SplitCHParsed>()
 {
-  InputParameters params = ParsedFreeEnergyInterface<SplitCHCRes>::validParams();
+  InputParameters params = DerivativeKernelInterface<SplitCHCRes>::validParams();
   return params;
 }
 
 SplitCHParsed::SplitCHParsed(const std::string & name, InputParameters parameters) :
-    ParsedFreeEnergyInterface<SplitCHCRes>(name, parameters)
+    DerivativeKernelInterface<SplitCHCRes>(name, parameters),
+    _dFdc(getDerivative<Real>(_F_name, _var.name())),
+    _d2Fdc2(getDerivative<Real>(_F_name, _var.name(), _var.name()))
 {
 }
 
 Real
 SplitCHParsed::computeDFDC(PFFunctionType type)
 {
-  updateFuncParams();
-
   switch (type)
   {
     case Residual:
-      return firstDerivative(0);
+      return _dFdc[_qp];
 
     case Jacobian:
-      return secondDerivative(0) * _phi[_j][_qp];
+      return _d2Fdc2[_qp] * _phi[_j][_qp];
   }
 
   mooseError("Internal error");
