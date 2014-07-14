@@ -44,18 +44,9 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
+    f_name = F
     kappa_name = kappa_c
     w = w
-
-    # Either define constants here...
-    constant_names  = 'barr_height  cv_eq'
-    constant_values = '0.1         1.0e-2'
-
-    # ...or use material properties declared here.
-    #material_property_names = 'barr_height cv_eq'
-
-    # Equivalent to SplitCHPoly with order=4
-    function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
   [../]
   [./w_res]
     type = SplitCHWRes
@@ -75,6 +66,16 @@
     block = 0
     kappa = 0.1
     mob = 1e-3
+  [../]
+
+  [./free_energy]
+    type = DerivativeParsedMaterial
+    block = 0
+    f_name = F
+    args = 'c'
+    constant_names       = 'barr_height  cv_eq'
+    constant_expressions = '0.1          1.0e-2'
+    function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
   [../]
 []
 
