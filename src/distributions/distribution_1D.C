@@ -375,9 +375,6 @@ BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma)
     _dist_parameters["xMax"] = std::numeric_limits<double>::max( );
   }
 
-  if (mu<0)
-    throwError("ERROR: incorrect value of mu for lognormaldistribution");
-
   _backend = new LogNormalDistributionBackend(mu, sigma);
 
 }
@@ -385,14 +382,11 @@ BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma)
 BasicLogNormalDistribution::BasicLogNormalDistribution(double mu, double sigma, double x_min, double x_max):
   BasicTruncatedDistribution(x_min,x_max)
 {
-    _dist_parameters["mu"] = mu;
-    _dist_parameters["sigma"] = sigma;
-    
-    if (mu<0)
-    throwError("ERROR: incorrect value of mu for lognormaldistribution");
-    
-    _backend = new LogNormalDistributionBackend(mu, sigma);
-    
+  _dist_parameters["mu"] = mu;
+  _dist_parameters["sigma"] = sigma;
+
+  _backend = new LogNormalDistributionBackend(mu, sigma);
+
 }
 
 
