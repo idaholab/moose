@@ -5,8 +5,8 @@ InputParameters validParams<RankTwoAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<std::string>("rank_two_tensor", "The rank two material tensor name");
-  params.addRequiredRangeCheckedParam<unsigned int>("index_i", "index_i >= 1 & index_i <= 3", "The index i of ij for the tensor to output (1, 2, 3)");
-  params.addRequiredRangeCheckedParam<unsigned int>("index_j", "index_j >= 1 & index_j <= 3", "The index j of ij for the tensor to output (1, 2, 3)");
+  params.addRequiredRangeCheckedParam<unsigned int>("index_i", "index_i >= 0 & index_i <= 2", "The index i of ij for the tensor to output (0, 1, 2)");
+  params.addRequiredRangeCheckedParam<unsigned int>("index_j", "index_j >= 0 & index_j <= 2", "The index j of ij for the tensor to output (0, 1, 2)");
   return params;
 }
 
@@ -21,5 +21,5 @@ RankTwoAux::RankTwoAux(const std::string & name, InputParameters parameters) :
 Real
 RankTwoAux::computeValue()
 {
-  return _tensor[_qp].getValue(_i, _j);
+  return _tensor[_qp](_i, _j);
 }

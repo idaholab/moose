@@ -114,7 +114,9 @@ void FiniteStrainPlasticMaterial::computeQpStress()
  *     internalPotential = -1 in the "rep" equation.
  */
 void
-FiniteStrainPlasticMaterial::returnMap(const RankTwoTensor & sig_old, const Real eqvpstrain_old, const RankTwoTensor &plastic_strain_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & sig, Real & eqvpstrain, RankTwoTensor &plastic_strain)
+FiniteStrainPlasticMaterial::returnMap(const RankTwoTensor & sig_old, const Real eqvpstrain_old, const RankTwoTensor & plastic_strain_old,
+                                       const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & sig,
+                                       Real & eqvpstrain, RankTwoTensor & plastic_strain)
 {
   // the yield function, must be non-positive
   // Newton-Raphson sets this to zero if trial stress enters inadmissible region
@@ -268,7 +270,7 @@ FiniteStrainPlasticMaterial::returnMap(const RankTwoTensor & sig_old, const Real
 
 
 Real
-FiniteStrainPlasticMaterial::yieldFunction(const RankTwoTensor &stress, const Real yield_stress)
+FiniteStrainPlasticMaterial::yieldFunction(const RankTwoTensor & stress, const Real yield_stress)
 {
   return getSigEqv(stress) - yield_stress;
 }
@@ -304,7 +306,7 @@ FiniteStrainPlasticMaterial::internalPotential()
 
 
 Real
-FiniteStrainPlasticMaterial::getSigEqv(const RankTwoTensor &stress)
+FiniteStrainPlasticMaterial::getSigEqv(const RankTwoTensor & stress)
 {
   return std::pow(3*stress.secondInvariant(), 0.5);
 }
