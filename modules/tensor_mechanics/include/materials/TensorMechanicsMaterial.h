@@ -42,6 +42,7 @@ protected:
   VariableGradient & _grad_disp_z_old;
 
   MaterialProperty<RankTwoTensor> & _stress;
+  MaterialProperty<RankTwoTensor> & _total_strain;
   MaterialProperty<RankTwoTensor> & _elastic_strain;
   MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;

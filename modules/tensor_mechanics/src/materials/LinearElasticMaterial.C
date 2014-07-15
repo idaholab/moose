@@ -52,6 +52,7 @@ LinearElasticMaterial::computeQpStrain()
   }
 
   _elastic_strain[_qp] = (grad_tensor + grad_tensor.transpose())/2.0;
+  _total_strain[_qp] = _elastic_strain[_qp];
 }
 
 void
@@ -61,6 +62,7 @@ LinearElasticMaterial::computeQpStress()
   RankTwoTensor stress_free_strain = computeStressFreeStrain();
 
   _elastic_strain[_qp] += stress_free_strain;
+  _total_strain[_qp] = _elastic_strain[_qp];
 
   // stress = C * e
   _stress[_qp] = _elasticity_tensor[_qp]*_elastic_strain[_qp];
