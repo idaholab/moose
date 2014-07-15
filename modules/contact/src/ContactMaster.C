@@ -356,7 +356,6 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
     }
   }
   else if (_model == CM_GLUED ||
-           _model == CM_TIED ||
            (_model == CM_COULOMB && _formulation == CF_DEFAULT))
   {
     switch (_formulation)
@@ -416,7 +415,6 @@ ContactMaster::computeQpJacobian()
     break;
   case CM_GLUED:
   case CM_COULOMB:
-  case CM_TIED:
     switch (_formulation)
     {
     case CF_DEFAULT:
@@ -475,10 +473,6 @@ contactModel(const std::string & the_name)
   else if ("coulomb" == name)
   {
     model = CM_COULOMB;
-  }
-  else if ("tied" == name)
-  {
-    model = CM_TIED;
   }
   else if ("experimental" == name)
   {

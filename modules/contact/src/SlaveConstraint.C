@@ -126,7 +126,7 @@ SlaveConstraint::computeQpResidual()
     {
       resid += pinfo->_normal(_component) * pinfo->_normal * pen_force;
     }
-    else if (_model == CM_GLUED || _model == CM_TIED || _model == CM_COULOMB)
+    else if (_model == CM_GLUED || _model == CM_COULOMB)
     {
       resid += pen_force(_component);
     }
@@ -245,7 +245,6 @@ SlaveConstraint::computeQpJacobian()
     }
   }
   else if ( CM_GLUED == _model ||
-            CM_TIED == _model ||
             CM_COULOMB == _model )
   {
     normal.zero();
