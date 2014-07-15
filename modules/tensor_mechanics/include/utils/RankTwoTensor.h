@@ -157,7 +157,19 @@ public:
    */
   Real secondInvariant() const;
 
-  /// Calculate the trace of the tensor, ie _vals[i][i] (sum i = 1, 2, 3)
+
+  /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
+  RankTwoTensor deviatoric() const;
+
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then this returns
+   * d(secondInvariant)/dA_ij
+   */
+  RankTwoTensor dsecondInvariant() const;
+
+
+  /// returns the trace of the tensor, ie _vals[i][i] (sum i = 0, 1, 2)
   Real trace() const;
 
   /// Calculate the determinant of the tensor
