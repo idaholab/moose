@@ -103,6 +103,12 @@ with an ALE front-tracking algorithm.
 Below I list some general pointers that may help with problems that
 MOOSE is struggling with.
 \begin{itemize}
+\item External fluxes that turn off or on too quickly are bad.
+  Simialrly, those that have large discontinuities in their
+  derivatives can cause convergence problems.  Try to define
+  ``smooth'' versions of these as inputs.  Discontinuities like these
+  often manifest themselves in non-convergence of the nonlinear
+  iterations.
 \item Effective saturation curves that are too ``flat'' are not good.
   For example, the van Genuchten parameter $m=0.6$ almost always gives
   better convergence than $m=0.9$.
@@ -150,6 +156,17 @@ MOOSE is struggling with.
   20), and the PETSc tolerances should be set quite tight, otherwise
   MOOSE might ``converge'' to a crazy solution that causes
   difficulties in subsequent time steps.
+\item Check whether the linear or nonlinear solvers are causing the
+  problem.  If it is the latter, and you have addressed the potential
+  problems above (most particularly discontinuities, and phase
+  disappearence), then probably your problem is just highly
+  nonlinear.  However, you can often address problems with the
+  {\em linear} solver not converging quickly by choosing different
+  preconditioners and ksp methods.  I typically use one of:
+\begin{enumerate}
+\item {\tt -ksp\_type=gmres -pc\_type=bjacobi}
+\item {\tt -ksp\_type=gmres -pc\_type=asm -sub\_pc\_type=lu}
+\end{enumerate}
 \end{itemize}
 
 Choosing reasonable convergence criteria is very important.  The
