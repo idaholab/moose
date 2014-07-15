@@ -43,6 +43,11 @@ public:
    */
   virtual ~SolutionAux();
 
+  /**
+   * Sets up the variable name for extraction from the SolutionUserObject
+   */
+  void initialSetup();
+
 protected:
 
   /** Compute the value for the kernel

@@ -1,8 +1,8 @@
 [Mesh]
-  type = FileMesh
-  file = square.e
-  # This test uses SolutionUserObject which doesn't work with ParallelMesh.
-  distribution = serial
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
 []
 
 [Variables]
@@ -14,8 +14,6 @@
 
 [AuxVariables]
   [./u_aux]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -27,22 +25,10 @@
 []
 
 [AuxKernels]
-  [./initial_cond_aux]
-    type = SolutionAux
-    solution = xda_soln
-    execute_on = initial
+  [./aux_kernel]
+    type = FunctionAux
+    function = x*y
     variable = u_aux
-  [../]
-[]
-
-[UserObjects]
-  [./xda_soln]
-    type = SolutionUserObject
-    mesh = out_0001_mesh.xda
-    es = out_0001.xda
-    system = AuxiliarySystem
-    system_variables = u_aux
-    legacy_read = true
   [../]
 []
 
@@ -62,22 +48,35 @@
 []
 
 [Executioner]
-  type = Steady
-
   # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  type = Steady
+  solve_type = PJFNK
   nl_rel_tol = 1e-10
+[]
+
+[Adaptivity]
+  marker = error_frac
+  steps = 3
+  [./Indicators]
+    [./jump_indicator]
+      type = GradientJumpIndicator
+      variable = u
+    [../]
+  [../]
+  [./Markers]
+    [./error_frac]
+      type = ErrorFractionMarker
+      indicator = jump_indicator
+      refine = 0.7
+    [../]
+  [../]
 []
 
 [Outputs]
   output_initial = true
-  exodus = true
+  xda = true
   [./console]
     type = Console
     perf_log = true
-  [../]
-  [./xda]
-    type = XDA
   [../]
 []

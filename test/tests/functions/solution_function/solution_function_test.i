@@ -59,7 +59,7 @@
 [UserObjects]
   [./ex_soln]
     type = SolutionUserObject
-    nodal_variables = u_aux
+    system_variables = u_aux
     system = AuxiliarySystem
     mesh = out_0001_mesh.xda
     es = out_0001.xda
