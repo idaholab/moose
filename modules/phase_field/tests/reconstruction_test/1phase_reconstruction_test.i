@@ -28,18 +28,20 @@
     filename = 'IN100_001_28x28_Marmot.txt'
   [../]
 
-  [./grain_tracker]
+   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.3
-    convex_hull_buffer = 5.0
+    threshold = 0.2
+    convex_hull_buffer = 1.0
     use_single_map = false
     enable_var_coloring = true
     condense_map_info = true
-    connecting_threshold = 0.05
+    connecting_threshold = 0.2
     compute_op_maps = true
-    execute_on = TIMESTEP_BEGIN
-    ebsd_reader = ebsd
-  [../]
+    execute_on = timestep_begin
+    tracking_step = 0
+    remap_grains = false
+    #ebsd_reader = ebsd
+   [../]
 []
 
 [ICs]
@@ -104,21 +106,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../] 
-
-  [./unique_grains]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./var_indices]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./centroids]
-    order = CONSTANT
-    family = MONOMIAL
-  [../] 
 []	     
 
 [Kernels]
@@ -129,56 +116,73 @@
 [AuxKernels]
   [./BndsCalc]
     type = BndsCalcAux
-    variable = bnds	    
+    variable = bnds
     execute_on = timestep
   [../]
-
-  [./grn]
-    type = GrainIndexAux
-    variable = grn
-    execute_on = timestep
-  [../]
-
-   [./op]
-    type = GrainIndexAux
-    variable = op
-    execute_on = timestep
-  [../]
-
-  [./unique_grains]
-    type = NodalFloodCountAux
-    variable = unique_grains
-    execute_on = timestep
-    bubble_object = grain_tracker
-    field_display = UNIQUE_REGION
-  [../]
-  [./var_indices]
-    type = NodalFloodCountAux
-    variable = var_indices
-    execute_on = timestep
-    bubble_object = grain_tracker
-    field_display = VARIABLE_COLORING
-  [../]
-  [./centroids]
-    type = NodalFloodCountAux
-    variable = centroids
-    execute_on = timestep
-    bubble_object = grain_tracker
-    field_display = CENTROID
-  [../]
-
-  [./phase]
-    type = PhaseIndexAux
-    variable = phase
-    execute_on = timestep
+  
+  [./phi1_aux]
+    Aux_param = phi1
+    variable = phi1
+    type = ReconAuxVarUpdate
     ebsd_reader = ebsd 
+    execute_on = timestep
   [../]
-    
-#  [./rgb]
-#    type = Euler2RGBAux
-#    variable = rgb   
-#    execute_on = timestep
-#  [../]
+
+  [./PHI_aux]
+    Aux_param = PHI
+    variable = PHI
+    type = ReconAuxVarUpdate
+    ebsd_reader = ebsd 
+    execute_on = timestep
+  [../]
+
+  [./phi2_aux]
+    Aux_param = phi2
+    variable = phi2
+    type = ReconAuxVarUpdate
+    ebsd_reader = ebsd 
+    execute_on = timestep
+  [../]
+
+  [./grn_aux]
+    Aux_param = grn
+    variable = grn
+    type = ReconAuxVarUpdate
+    ebsd_reader = ebsd 
+    execute_on = timestep
+  [../]
+
+  [./phase_aux]
+    Aux_param = phase
+    variable = phase
+    type = ReconAuxVarUpdate
+    ebsd_reader = ebsd 
+    execute_on = timestep
+  [../]
+
+  [./sym_aux]
+    Aux_param = sym
+    variable = sym
+    type = ReconAuxVarUpdate
+    ebsd_reader = ebsd 
+    execute_on = timestep
+  [../]
+
+  [./rgb_aux]
+    Aux_param = rgb
+    variable = rgb
+    type = ReconAuxVarUpdate
+    ebsd_reader = ebsd 
+    execute_on = timestep
+  [../]
+
+  [./op_aux]
+    Aux_param = op
+    variable = op
+    type = ReconAuxVarUpdate
+    ebsd_reader = ebsd 
+    execute_on = timestep
+  [../].
 []
 
 [Materials]  
@@ -209,11 +213,11 @@
     type = NumDOFs
   [../]
 
-  [./num_grns]
-    type = NodalFloodCount
-    variable = bnds
-    threshold = 0.7
-  [../]
+ # [./num_grns]
+ #   type = NodalFloodCount
+ #   variable = bnds
+ #   threshold = 0.7
+ # [../]
 []
 
 [Executioner]
@@ -233,10 +237,12 @@
   dt = 0.05
 
   [./Adaptivity]
-    initial_adaptivity = 1
+    initial_adaptivity = 2
     refine_fraction = 0.7
     coarsen_fraction = 0.1
-     max_h_level = 3
+    max_h_level = 3
+    # weight_names = 'gr0 gr1 gr2 gr3 gr4 gr5 bnds'
+    # weight_values = '0 0 0 0 0 0 1'
   [../]
 []
 
@@ -254,10 +260,10 @@
   [../]  
 []
 
-[Debug]
-  show_parser = true
-  show_actions = true
-[]
+#[Debug]
+#  show_parser = true
+#  show_actions = true
+#[]
 
     
 
