@@ -39,9 +39,13 @@ public:
   virtual void updateContactSet(bool beginning_of_step = false);
 
 protected:
+
+  Real nodalArea(PenetrationInfo & pinfo);
+
   const unsigned int _component;
   const ContactModel _model;
   const ContactFormulation _formulation;
+  const bool _normalize_penalty;
   PenetrationLocator & _penetration_locator;
 
   const Real _penalty;

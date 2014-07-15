@@ -51,9 +51,14 @@ public:
   void computeContactForce(PenetrationInfo * pinfo);
 
 protected:
+
+  Real nodalArea(PenetrationInfo & pinfo);
+  Real getPenalty(PenetrationInfo & pinfo);
+
   const unsigned int _component;
   const ContactModel _model;
   const ContactFormulation _formulation;
+  const bool _normalize_penalty;
 
   const Real _penalty;
   const Real _friction_coefficient;

@@ -35,6 +35,7 @@ InputParameters validParams<ContactMaster>()
   params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  No tension release if negative.");
 
   params.addParam<std::string>("formulation", "default", "The contact formulation");
+  params.addParam<bool>("normalize_penalty", false, "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
   return params;
 }
 
@@ -45,6 +46,7 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
   _formulation(contactFormulation(getParam<std::string>("formulation"))),
+  _normalize_penalty(getParam<bool>("normalize_penalty")),
   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
   _penalty(getParam<Real>("penalty")),
   _friction_coefficient(getParam<Real>("friction_coefficient")),
@@ -137,6 +139,8 @@ ContactMaster::updateContactSet(bool beginning_of_step)
       continue;
     }
 
+    Real area = nodalArea(*pinfo);
+
     const unsigned int slave_node_num = it->first;
     std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
 
@@ -156,21 +160,6 @@ ContactMaster::updateContactSet(bool beginning_of_step)
         (_model == CM_COULOMB && _formulation == CF_DEFAULT))
     {
       const Node * node = pinfo->_node;
-
-      unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
-
-      Real area = (*_aux_solution)( dof );
-      if (area == 0)
-      {
-        if (_t_step > 1)
-        {
-          mooseError("Zero nodal area found");
-        }
-        else
-        {
-          area = 1; // Avoid divide by zero during initialization
-        }
-      }
 
       Real resid( -(pinfo->_normal * pinfo->_contact_force) / area );
 
@@ -202,28 +191,11 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     {
       if (_formulation == CF_PENALTY)
       {
-        const Node * node = pinfo->_node;
-
-        unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
-
-        Real area = (*_aux_solution)( dof );
-        if (area == 0)
-        {
-          if (_t_step > 1)
-          {
-            mooseError("Zero nodal area found");
-          }
-          else
-          {
-            area = 1; // Avoid divide by zero during initialization
-          }
-        }
         if (pinfo->_distance >= 0)
         {
           if (hpit == has_penetrated.end())
-          {
             has_penetrated.insert(slave_node_num);
-          }
+
         }
         else if (_tension_release < 0 ||
                  (pinfo->_contact_force * pinfo->_normal) / area < _tension_release)
@@ -254,7 +226,11 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     if (_formulation == CF_AUGMENTED_LAGRANGE && hpit != has_penetrated.end())
     {
       const RealVectorValue distance_vec(_mesh.node(slave_node_num) - pinfo->_closest_point);
-      lagrange_multiplier[slave_node_num] += _penalty * pinfo->_normal * distance_vec;
+      Real penalty = _penalty;
+      if (_normalize_penalty)
+        penalty *= area;
+
+      lagrange_multiplier[slave_node_num] += penalty * pinfo->_normal * distance_vec;
     }
   }
 }
@@ -274,9 +250,8 @@ ContactMaster::addPoints()
     PenetrationInfo * pinfo = it->second;
 
     if (!pinfo)
-    {
       continue;
-    }
+
 
     unsigned int slave_node_num = it->first;
 
@@ -304,8 +279,14 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
     long int dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
   }
+
+  const Real area = nodalArea(*pinfo);
+
   RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
   RealVectorValue pen_force(_penalty * distance_vec);
+  if (_normalize_penalty)
+    pen_force *= area;
+
   RealVectorValue tan_residual(0,0,0);
 
   if (_model == CM_FRICTIONLESS)
@@ -333,6 +314,9 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
   {
     distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.node(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
     pen_force = _penalty * distance_vec;
+    if (_normalize_penalty)
+      pen_force *= area;
+
 
     // Frictional capacity
     // const Real capacity( _friction_coefficient * (pen_force * pinfo->_normal < 0 ? -pen_force * pinfo->_normal : 0) );
@@ -396,6 +380,10 @@ ContactMaster::computeQpJacobian()
 {
 
   PenetrationInfo * pinfo = _point_to_info[_current_point];
+  Real penalty = _penalty;
+  if (_normalize_penalty)
+    penalty *= nodalArea(*pinfo);
+
 
   switch (_model)
   {
@@ -407,7 +395,7 @@ ContactMaster::computeQpJacobian()
       break;
     case CF_PENALTY:
     case CF_AUGMENTED_LAGRANGE:
-      return _test[_i][_qp] * _penalty * _phi[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
+      return _test[_i][_qp] * penalty * _phi[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
       break;
     default:
       mooseError("Invalid contact formulation");
@@ -423,7 +411,7 @@ ContactMaster::computeQpJacobian()
       break;
     case CF_PENALTY:
     case CF_AUGMENTED_LAGRANGE:
-      return _test[_i][_qp] * _penalty * _phi[_j][_qp];
+      return _test[_i][_qp] * penalty * _phi[_j][_qp];
       break;
     default:
       mooseError("Invalid contact formulation");
@@ -497,17 +485,14 @@ contactFormulation(const std::string & the_name)
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
   if ("default" == name ||
       "kinematic" == name)
-  {
     formulation = CF_DEFAULT;
-  }
+
   else if ("penalty" == name)
-  {
     formulation = CF_PENALTY;
-  }
+
   else if ("augmented_lagrange" == name)
-  {
     formulation = CF_AUGMENTED_LAGRANGE;
-  }
+
   if (formulation == CF_INVALID)
   {
     std::string err("Invalid formulation found: ");
@@ -515,4 +500,23 @@ contactFormulation(const std::string & the_name)
     mooseError( err );
   }
   return formulation;
+}
+
+Real
+ContactMaster::nodalArea(PenetrationInfo & pinfo)
+{
+  const Node * node = pinfo._node;
+
+  unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
+
+  Real area = (*_aux_solution)( dof );
+  if (area == 0)
+  {
+    if (_t_step > 1)
+      mooseError("Zero nodal area found");
+
+    else
+      area = 1; // Avoid divide by zero during initialization
+  }
+  return area;
 }
