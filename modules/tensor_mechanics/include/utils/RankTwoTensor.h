@@ -33,7 +33,7 @@ public:
   RankTwoTensor(const TypeVector<Real> & row1, const TypeVector<Real> & row2, const TypeVector<Real> & row3);
 
   /// Constructor that proxies the fillFromInputVector method
-  RankTwoTensor(const std::vector<Real> &input) { this->fillFromInputVector(input); };
+  RankTwoTensor(const std::vector<Real> & input) { this->fillFromInputVector(input); };
 
   /// Initialization list replacement constructors, 6 arguments
   RankTwoTensor(Real S11, Real S22, Real S33, Real S23, Real S13, Real S12);
@@ -42,10 +42,10 @@ public:
   RankTwoTensor(Real S11, Real S21, Real S31, Real S12, Real S22, Real S32, Real S13, Real S23, Real S33);
 
   /// Copy constructor from RankTwoTensor
-  RankTwoTensor(const RankTwoTensor &a);
+  RankTwoTensor(const RankTwoTensor & a);
 
   /// Copy constructor from RealTensorValue
-  RankTwoTensor(const TypeTensor<Real> &a);
+  RankTwoTensor(const TypeTensor<Real> & a);
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
   Real & operator()(unsigned int i, unsigned int j);
@@ -67,7 +67,7 @@ public:
   *   _vals[0][1] = input[5]
   * If 9 inputs then input order is [0][0], [1][0], [2][0], [0][1], [1][1], ..., [2][2]
   */
-  void fillFromInputVector(const std::vector<Real> &input);
+  void fillFromInputVector(const std::vector<Real> & input);
 
 public:
   /// returns _vals[r][i], ie, row r, with r = 0, 1, 2
@@ -78,14 +78,14 @@ public:
    * _vals[i][j] = R_ij * R_jl * _vals[k][l]
    * @param R rotation matrix as a RealTensorValue
    */
-  virtual void rotate(RealTensorValue &R);
+  virtual void rotate(RealTensorValue & R);
 
   /**
    * rotates the tensor data given a rank two tensor rotation tensor
    * _vals[i][j] = R_ij * R_jl * _vals[k][l]
    * @param R rotation matrix as a RankTwoTensor
    */
-  virtual void rotate(RankTwoTensor &R);
+  virtual void rotate(RankTwoTensor & R);
 
   /**
    * rotates the tensor data anticlockwise around the z-axis
@@ -100,46 +100,46 @@ public:
   RankTwoTensor transpose() const;
 
   /// sets _vals to a, and returns _vals
-  RankTwoTensor & operator= (const RankTwoTensor &a);
+  RankTwoTensor & operator= (const RankTwoTensor & a);
 
   /// adds a to _vals
-  RankTwoTensor & operator+= (const RankTwoTensor &a);
+  RankTwoTensor & operator+= (const RankTwoTensor & a);
 
   /// returns _vals + a
-  RankTwoTensor operator+ (const RankTwoTensor &a) const;
+  RankTwoTensor operator+ (const RankTwoTensor & a) const;
 
   /// sets _vals -= a and returns vals
-  RankTwoTensor & operator-= (const RankTwoTensor &a);
+  RankTwoTensor & operator-= (const RankTwoTensor & a);
 
   /// returns _vals - a
-  RankTwoTensor operator- (const RankTwoTensor &a) const;
+  RankTwoTensor operator- (const RankTwoTensor & a) const;
 
   /// returns -_vals
   RankTwoTensor operator - () const;
 
   /// performs _vals *= a
-  RankTwoTensor & operator*= (const Real &a);
+  RankTwoTensor & operator*= (const Real & a);
 
   /// returns _vals*a
-  RankTwoTensor operator* (const Real &a) const;
+  RankTwoTensor operator* (const Real & a) const;
 
   /// performs _vals /= a
-  RankTwoTensor & operator/= (const Real &a);
+  RankTwoTensor & operator/= (const Real & a);
 
   /// returns _vals/a
-  RankTwoTensor operator/ (const Real &a) const;
+  RankTwoTensor operator/ (const Real & a) const;
 
   /// performs _vals *= a (component by component) and returns the result
-  RankTwoTensor & operator*= (const RankTwoTensor &a);
+  RankTwoTensor & operator*= (const RankTwoTensor & a);
 
   /// Defines multiplication with another RankTwoTensor
-  RankTwoTensor operator* (const RankTwoTensor &a) const;
+  RankTwoTensor operator* (const RankTwoTensor & a) const;
 
   /// Defines multiplication with a TypeTensor<Real>
-  RankTwoTensor operator* (const TypeTensor<Real> &a) const;
+  RankTwoTensor operator* (const TypeTensor<Real> & a) const;
 
   /// returns _vals_ij * a_ij (sum on i, j)
-  Real doubleContraction(const RankTwoTensor &a);
+  Real doubleContraction(const RankTwoTensor & a);
 
   /**
    * Denote the _vals[i][j] by A_ij, then
@@ -173,7 +173,7 @@ public:
   void print() const;
 
   /// Add identity times a to _vals
-  void addIa(const Real &a);
+  void addIa(const Real & a);
 
   /// Sqrt(_vals[i][j]*_vals[i][j])
   Real L2norm() const;
@@ -182,7 +182,7 @@ public:
    * sets _vals[0][0], _vals[0][1], _vals[1][0], _vals[1][1] to input,
    * and the remainder to zero
    */
-  void surfaceFillFromInputVector(const std::vector<Real> &input);
+  void surfaceFillFromInputVector(const std::vector<Real> & input);
 
 protected:
 

@@ -28,7 +28,7 @@ RankFourTensor::RankFourTensor()
           _vals[i][j][k][l] = 0.0;
 }
 
-RankFourTensor::RankFourTensor(const RankFourTensor &a)
+RankFourTensor::RankFourTensor(const RankFourTensor & a)
 {
   *this = a;
 }
@@ -56,7 +56,7 @@ RankFourTensor::zero()
 }
 
 RankFourTensor &
-RankFourTensor::operator=(const RankFourTensor &a)
+RankFourTensor::operator=(const RankFourTensor & a)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -68,7 +68,7 @@ RankFourTensor::operator=(const RankFourTensor &a)
 }
 
 RankTwoTensor
-RankFourTensor::operator*(const RankTwoTensor &a) const
+RankFourTensor::operator*(const RankTwoTensor & a) const
 {
   RealTensorValue result;
 
@@ -82,7 +82,7 @@ RankFourTensor::operator*(const RankTwoTensor &a) const
 }
 
 RealTensorValue
-RankFourTensor::operator*(const RealTensorValue &a) const
+RankFourTensor::operator*(const RealTensorValue & a) const
 {
   RealTensorValue result;
 
@@ -96,7 +96,7 @@ RankFourTensor::operator*(const RealTensorValue &a) const
 }
 
 RankFourTensor
-RankFourTensor::operator*(const Real &a) const
+RankFourTensor::operator*(const Real & a) const
 {
   RankFourTensor result;
 
@@ -110,7 +110,7 @@ RankFourTensor::operator*(const Real &a) const
 }
 
 RankFourTensor &
-RankFourTensor::operator*=(const Real &a)
+RankFourTensor::operator*=(const Real & a)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -122,7 +122,7 @@ RankFourTensor::operator*=(const Real &a)
 }
 
 RankFourTensor
-RankFourTensor::operator/(const Real &a) const
+RankFourTensor::operator/(const Real & a) const
 {
   RankFourTensor result;
 
@@ -136,7 +136,7 @@ RankFourTensor::operator/(const Real &a) const
 }
 
 RankFourTensor &
-RankFourTensor::operator/=(const Real &a)
+RankFourTensor::operator/=(const Real & a)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -148,7 +148,7 @@ RankFourTensor::operator/=(const Real &a)
 }
 
 RankFourTensor &
-RankFourTensor::operator+=(const RankFourTensor &a)
+RankFourTensor::operator+=(const RankFourTensor & a)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -160,7 +160,7 @@ RankFourTensor::operator+=(const RankFourTensor &a)
 }
 
 RankFourTensor
-RankFourTensor::operator+(const RankFourTensor &a) const
+RankFourTensor::operator+(const RankFourTensor & a) const
 {
   RankFourTensor result;
 
@@ -174,7 +174,7 @@ RankFourTensor::operator+(const RankFourTensor &a) const
 }
 
 RankFourTensor &
-RankFourTensor::operator-=(const RankFourTensor &a)
+RankFourTensor::operator-=(const RankFourTensor & a)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -186,7 +186,7 @@ RankFourTensor::operator-=(const RankFourTensor &a)
 }
 
 RankFourTensor
-RankFourTensor::operator-(const RankFourTensor &a) const
+RankFourTensor::operator-(const RankFourTensor & a) const
 {
   RankFourTensor result;
 
@@ -214,7 +214,7 @@ RankFourTensor::operator-() const
 }
 
 RankFourTensor
-RankFourTensor::operator*(const RankFourTensor &a) const
+RankFourTensor::operator*(const RankFourTensor & a) const
 {
   RankFourTensor result;
 
@@ -365,7 +365,7 @@ RankFourTensor::invSymm() const
 }
 
 void
-RankFourTensor::rotate(RealTensorValue &R)
+RankFourTensor::rotate(RealTensorValue & R)
 {
   Real temp;
   RankFourTensor old = *this;
@@ -420,7 +420,7 @@ RankFourTensor::transposeMajor() const
 }
 
 void
-RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> &input)
+RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
 {
   zero();
 
@@ -464,7 +464,7 @@ RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> &input)
 }
 
 void
-RankFourTensor::fillFromInputVector(const std::vector<Real> &input, FillMethod fill_method)
+RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method)
 {
   zero();
 
@@ -529,7 +529,7 @@ RankFourTensor::MatrixInversion(double* A, int n) const
 }
 
 void
-RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> &input, bool all)
+RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> & input, bool all)
 {
   if ((all == true && input.size() != 21) || (all == false && input.size() != 9 ))
     mooseError("Please check the number of entries in the stiffness input vector.");
@@ -593,7 +593,7 @@ RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> &input, boo
 }
 
 void
-RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> &input)
+RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 6)
     mooseError("To use fillAntisymmetricFromInputVector, your input must have size 6.  Yours has size " << input.size());
@@ -636,7 +636,7 @@ RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> &input)
 }
 
 void
-RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> &input)
+RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 3)
     mooseError("To use fillGeneralIsotropicFromInputVector, your input must have size 3.  Yours has size " << input.size());
@@ -655,7 +655,7 @@ RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> &inp
 }
 
 void
-RankFourTensor::fillAntisymmetricIsotropicFromInputVector(const std::vector<Real> &input)
+RankFourTensor::fillAntisymmetricIsotropicFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 1)
     mooseError("To use fillAntisymmetricIsotropicFromInputVector, your input must have size 1. Yours has size " << input.size());
@@ -667,7 +667,7 @@ RankFourTensor::fillAntisymmetricIsotropicFromInputVector(const std::vector<Real
 }
 
 void
-RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> &input)
+RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 2)
     mooseError("To use fillSymmetricIsotropicFromInputVector, your input must have size 2. Yours has size " << input.size());
@@ -679,7 +679,7 @@ RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> &i
 }
 
 void
-RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> &input)
+RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 81)
     mooseError("To use fillGeneralFromInputVector, your input must have size 81. Yours has size " << input.size());
