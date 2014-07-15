@@ -53,22 +53,22 @@
   [./matl_e11]
     type = RankTwoAux
     rank_two_tensor = stress
-    index_i = 1
-    index_j = 1
+    index_i = 0
+    index_j = 0
     variable = e11_aux
   [../]
   [./matl_e12]
     type = RankTwoAux
     rank_two_tensor = elastic_strain
-    index_i = 1
-    index_j = 2
+    index_i = 0
+    index_j = 1
     variable = e12_aux
   [../]
   [./matl_e22]
     type = RankTwoAux
     rank_two_tensor = elastic_strain
-    index_i = 2
-    index_j = 2
+    index_i = 1
+    index_j = 1
     variable = e22_aux
   [../]
 []

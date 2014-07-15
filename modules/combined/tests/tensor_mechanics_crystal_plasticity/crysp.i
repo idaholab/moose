@@ -56,8 +56,8 @@
     type = RankTwoAux
     variable = stress_zz
     rank_two_tensor = stress
-    index_j = 3
-    index_i = 3
+    index_j = 2
+    index_i = 2
     execute_on = timestep
     block = 0
   [../]
@@ -65,8 +65,8 @@
     type = RankTwoAux
     variable = fp_zz
     rank_two_tensor = fp
-    index_j = 3
-    index_i = 3
+    index_j = 2
+    index_i = 2
     execute_on = timestep
     block = 0
   [../]
@@ -74,8 +74,8 @@
     type = RankTwoAux
     variable = e_zz
     rank_two_tensor = lage
-    index_j = 3
-    index_i = 3
+    index_j = 2
+    index_i = 2
     execute_on = timestep
     block = 0
   [../]

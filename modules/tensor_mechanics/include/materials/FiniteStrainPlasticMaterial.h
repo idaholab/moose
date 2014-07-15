@@ -49,7 +49,9 @@ protected:
    * Note that this algorithm doesn't do any rotations.  In order to find the
    * final stress and plastic_strain, sig and plastic_strain must be rotated using _rotation_increment.
    */
-  virtual void returnMap(const RankTwoTensor &sig_old, const Real eqvpstrain_old, const RankTwoTensor &plastic_strain_old, const RankTwoTensor &delta_d, const RankFourTensor &E_ijkl, RankTwoTensor &sig, Real &eqvpstrain, RankTwoTensor &plastic_strain);
+  virtual void returnMap(const RankTwoTensor & sig_old, const Real eqvpstrain_old, const RankTwoTensor & plastic_strain_old,
+                         const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & sig,
+                         Real & eqvpstrain, RankTwoTensor & plastic_strain);
 
   /**
    * Calculates the yield function
@@ -57,13 +59,13 @@ protected:
    * @param yield_stress the current value of the yield stress
    * @return equivalentstress - yield_stress
    */
-  virtual Real yieldFunction(const RankTwoTensor &stress, const Real yield_stress);
+  virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
 
 
   /**
    * Derivative of yieldFunction with respect to the stress
    */
-  virtual RankTwoTensor dyieldFunction_dstress(const RankTwoTensor &stress);
+  virtual RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress);
 
   /**
    * Derivative of yieldFunction with respect to the equivalent plastic strain
@@ -75,7 +77,7 @@ protected:
    * because we are doing associative flow, and hence does not depend
    * on the internal hardening parameter equivalent_plastic_strain
    */
-  virtual RankTwoTensor flowPotential(const RankTwoTensor &stress);
+  virtual RankTwoTensor flowPotential(const RankTwoTensor & stress);
 
   /**
    * The internal potential.  For associative J2 plasticity this is just -1
@@ -85,7 +87,7 @@ protected:
   /**
    * Equivalent stress
    */
-  Real getSigEqv(const RankTwoTensor &stress);
+  Real getSigEqv(const RankTwoTensor & stress);
 
   /**
    * Evaluates the derivative d(resid_ij)/d(sig_kl), where
@@ -95,7 +97,7 @@ protected:
    * @param flow_incr consistency parameter
    * @param dresid_dsig the required derivative (this is an output variable)
    */
-  virtual void getJac(const RankTwoTensor &sig, const RankFourTensor &E_ijkl, Real flow_incr, RankFourTensor &dresid_dsig);
+  virtual void getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, RankFourTensor & dresid_dsig);
 
 
   /// returns unity if i==j, otherwise zero
