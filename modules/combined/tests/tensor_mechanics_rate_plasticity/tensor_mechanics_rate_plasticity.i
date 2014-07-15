@@ -11,6 +11,7 @@
   ymax=1.0
   zmin=0.0
   zmax=1.0
+  displacements = 'x_disp y_disp z_disp'
 []
 
 [MeshModifiers]
@@ -49,6 +50,7 @@
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
+    use_displaced_mesh = true
   [../]
 []
 
@@ -194,7 +196,7 @@
 
 [Executioner]
   start_time = 0.0
-  end_time=10.0
+  end_time=1.0
   dt=0.1
   dtmax=1
   dtmin=0.0001

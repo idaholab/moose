@@ -2,6 +2,7 @@
   type = GeneratedMesh
   dim = 3
   elem_type = HEX8
+  displacements = 'ux uy uz'
 []
 
 [Variables]
@@ -215,5 +216,6 @@
     disp_z = uz
     disp_y = uy
     disp_x = ux
+    use_displaced_mesh = true
   [../]
 []
