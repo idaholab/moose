@@ -32,7 +32,7 @@ InputParameters validParams<ContactMaster>()
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
-  params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
+  params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  No tension release if negative.");
 
   params.addParam<std::string>("formulation", "default", "The contact formulation");
   return params;
@@ -78,10 +78,6 @@ ContactMaster::ContactMaster(const std::string & name, InputParameters parameter
       (_model == CM_COULOMB && _formulation == CF_DEFAULT))
   {
     _penetration_locator.setUpdate(false);
-  }
-  if (_tension_release < 0)
-  {
-    mooseError("The parameter 'tension_release' must be non-negative");
   }
   if (_friction_coefficient < 0)
   {
@@ -156,7 +152,7 @@ ContactMaster::updateContactSet(bool beginning_of_step)
       pinfo->_starting_closest_point_ref = it->second->_closest_point_ref;
     }
 
-    if (_model == CM_EXPERIMENTAL ||
+    if (_model == CM_FRICTIONLESS ||
         (_model == CM_COULOMB && _formulation == CF_DEFAULT))
     {
       const Node * node = pinfo->_node;
@@ -181,7 +177,10 @@ ContactMaster::updateContactSet(bool beginning_of_step)
       // Moose::out << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
       const Real distance( pinfo->_normal * (pinfo->_closest_point - _mesh.node(node->id())));
 
-      if (hpit != has_penetrated.end() && resid < -_tension_release && locked_this_step[slave_node_num] < 2)
+      if (hpit != has_penetrated.end() &&
+          _tension_release >= 0 &&
+          resid < -_tension_release &&
+          locked_this_step[slave_node_num] < 2)
       {
         Moose::out << "Releasing node " << node->id() << " " << resid << " < " << -_tension_release << std::endl;
         has_penetrated.erase(hpit);
@@ -308,8 +307,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
   RealVectorValue pen_force(_penalty * distance_vec);
   RealVectorValue tan_residual(0,0,0);
 
-  if (_model == CM_FRICTIONLESS ||
-      _model == CM_EXPERIMENTAL)
+  if (_model == CM_FRICTIONLESS)
   {
     switch (_formulation)
     {
@@ -358,7 +356,6 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
     }
   }
   else if (_model == CM_GLUED ||
-           _model == CM_TIED ||
            (_model == CM_COULOMB && _formulation == CF_DEFAULT))
   {
     switch (_formulation)
@@ -402,7 +399,6 @@ ContactMaster::computeQpJacobian()
   switch (_model)
   {
   case CM_FRICTIONLESS:
-  case CM_EXPERIMENTAL:
     switch (_formulation)
     {
     case CF_DEFAULT:
@@ -419,7 +415,6 @@ ContactMaster::computeQpJacobian()
     break;
   case CM_GLUED:
   case CM_COULOMB:
-  case CM_TIED:
     switch (_formulation)
     {
     case CF_DEFAULT:
@@ -479,13 +474,10 @@ contactModel(const std::string & the_name)
   {
     model = CM_COULOMB;
   }
-  else if ("tied" == name)
-  {
-    model = CM_TIED;
-  }
   else if ("experimental" == name)
   {
-    model = CM_EXPERIMENTAL;
+    model = CM_FRICTIONLESS;
+    mooseWarning("Use of contact model \"experimental\" is deprecated.  Use \"frictionless\" instead.");
   }
   else
   {

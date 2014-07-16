@@ -42,7 +42,7 @@ InputParameters validParams<MechanicalContactConstraint>()
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
-  params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  Must be positive.");
+  params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  No tension release if negative.");
 
   params.addParam<std::string>("formulation", "default", "The contact formulation");
   return params;
@@ -82,9 +82,6 @@ MechanicalContactConstraint::MechanicalContactConstraint(const std::string & nam
   if (_model == CM_GLUED ||
       (_model == CM_COULOMB && _formulation == CF_DEFAULT))
     _penetration_locator.setUpdate(false);
-
-  if (_tension_release < 0)
-    mooseError("The parameter 'tension_release' must be non-negative");
 
   if (_friction_coefficient < 0)
     mooseError("The friction coefficient must be nonnegative");
@@ -163,7 +160,7 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
         area = 1; // Avoid divide by zero during initialization
     }
 
-    if (_model == CM_EXPERIMENTAL ||
+    if (_model == CM_FRICTIONLESS ||
         (_model == CM_COULOMB && _formulation == CF_DEFAULT))
     {
 
@@ -172,7 +169,10 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
       // Moose::out << locked_this_step[slave_node_num] << " " << pinfo->_distance << std::endl;
       const Real distance( pinfo->_normal * (pinfo->_closest_point - _mesh.node(node->id())));
 
-      if (hpit != has_penetrated.end() && resid < -_tension_release && locked_this_step[slave_node_num] < 2)
+      if (hpit != has_penetrated.end() &&
+          _tension_release >= 0 &&
+          resid < -_tension_release &&
+          locked_this_step[slave_node_num] < 2)
       {
         //Moose::out << "Releasing node " << node->id() << " " << resid << " < " << -_tension_release << std::endl;
         has_penetrated.erase(hpit);
@@ -284,7 +284,6 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
   switch (_model)
   {
     case CM_FRICTIONLESS:
-    case CM_EXPERIMENTAL:
       switch (_formulation)
       {
         case CF_DEFAULT:
@@ -346,7 +345,6 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
       }
       break;
     case CM_GLUED:
-    case CM_TIED:
       switch (_formulation)
       {
         case CF_DEFAULT:
@@ -394,10 +392,10 @@ MechanicalContactConstraint::computeQpResidual(Moose::ConstraintType type)
         RealVectorValue distance_vec(*_current_node - pinfo->_closest_point);
         RealVectorValue pen_force(_penalty * distance_vec);
 
-        if (_model == CM_FRICTIONLESS || _model == CM_EXPERIMENTAL)
+        if (_model == CM_FRICTIONLESS)
           resid += pinfo->_normal(_component) * pinfo->_normal * pen_force;
 
-        else if (_model == CM_GLUED || _model == CM_TIED || _model == CM_COULOMB)
+        else if (_model == CM_GLUED || _model == CM_COULOMB)
           resid += pen_force(_component);
 
       }
@@ -420,7 +418,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       switch (_model)
       {
         case CM_FRICTIONLESS:
-        case CM_EXPERIMENTAL:
           switch (_formulation)
           {
             case CF_DEFAULT:
@@ -438,7 +435,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           }
         case CM_COULOMB:
         case CM_GLUED:
-        case CM_TIED:
           switch (_formulation)
           {
             case CF_DEFAULT:
@@ -460,7 +456,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       switch (_model)
       {
         case CM_FRICTIONLESS:
-        case CM_EXPERIMENTAL:
           switch (_formulation)
           {
             case CF_DEFAULT:
@@ -479,7 +474,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           }
         case CM_COULOMB:
         case CM_GLUED:
-        case CM_TIED:
           switch (_formulation)
           {
             case CF_DEFAULT:
@@ -502,7 +496,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       switch (_model)
       {
         case CM_FRICTIONLESS:
-        case CM_EXPERIMENTAL:
           switch (_formulation)
           {
             case CF_DEFAULT:
@@ -522,7 +515,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           }
         case CM_COULOMB:
         case CM_GLUED:
-        case CM_TIED:
           switch (_formulation)
           {
             case CF_DEFAULT:
@@ -544,7 +536,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       switch (_model)
       {
         case CM_FRICTIONLESS:
-        case CM_EXPERIMENTAL:
           switch (_formulation)
           {
             case CF_DEFAULT:
@@ -558,7 +549,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           }
         case CM_COULOMB:
         case CM_GLUED:
-        case CM_TIED:
           switch (_formulation)
           {
             case CF_DEFAULT:

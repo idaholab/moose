@@ -114,7 +114,6 @@ MultiDContactConstraint::updateContactSet()
       break;
 
     case CM_GLUED:
-    case CM_TIED:
 
 //      resid = pinfo->_normal * res_vec;
       break;
@@ -197,7 +196,6 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
       break;
 
     case CM_GLUED:
-    case CM_TIED:
 
       resid = pen_force(_component)
         - res_vec(_component)
@@ -219,7 +217,6 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
       break;
 
     case CM_GLUED:
-    case CM_TIED:
       resid = res_vec(_component);
       break;
 
@@ -249,7 +246,6 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
       break;
 
     case CM_GLUED:
-    case CM_TIED:
 /*
       resid = pen_force(_component)
         - res_vec(_component)
@@ -271,7 +267,6 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
       break;
 
     case CM_GLUED:
-    case CM_TIED:
 /*
       resid = pen_force(_component)
         - res_vec(_component)

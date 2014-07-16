@@ -65,7 +65,7 @@
     disp_y = disp_y
     disp_z = disp_z
     penalty = 1e6
-    model = experimental
+    model = frictionless
   [../]
 []
 
