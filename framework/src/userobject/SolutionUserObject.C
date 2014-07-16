@@ -107,6 +107,7 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _rotation1_angle(getParam<Real>("rotation1_angle")),
     _r1(RealTensorValue()),
     _transformation_order(getParam<std::vector<MooseEnum> >("transformation_order")),
+    _initialized(false),
     _legacy_read(getParam<bool>("legacy_read"))
 {
 
@@ -391,6 +392,10 @@ SolutionUserObject::execute()
 void
 SolutionUserObject::initialSetup()
 {
+  // Make sure this only happens once
+  if (_initialized)
+    return;
+
   // Several aspects of SolutionUserObject won't work if the FEProblem's MooseMesh is
   // a ParallelMesh:
   // .) ExodusII_IO::copy_nodal_solution() doesn't work in parallel.
@@ -446,6 +451,9 @@ SolutionUserObject::initialSetup()
   // Create the MeshFunction for working with the solution data
   _mesh_function = new MeshFunction(*_es, *_serialized_solution, _system->get_dof_map(), var_num);
   _mesh_function->init();
+
+  // Set initialization flag
+  _initialized = true;
 }
 
 MooseEnum
