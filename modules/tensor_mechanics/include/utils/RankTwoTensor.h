@@ -192,4 +192,6 @@ private:
   Real _vals[N][N];
 };
 
+inline RankTwoTensor operator*(Real a, const RankTwoTensor & b) { return b * a; }
+
 #endif //RANKTWOTENSOR_H

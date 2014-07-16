@@ -237,4 +237,6 @@ private:
 
 };
 
+inline RankFourTensor operator*(Real a, const RankFourTensor & b) { return b * a; }
+
 #endif //RANKFOURTENSOR_H
