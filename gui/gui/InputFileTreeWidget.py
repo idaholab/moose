@@ -210,7 +210,7 @@ class InputFileTreeWidget(QtGui.QTreeWidget):
       return True
 
   def _addDataRecursively(self, parent_item, node):
-    is_active = 'active' not in node.parent.params or node.parent.params['active'].find(node.name) != -1
+    is_active = 'active' not in node.parent.params or node.name in node.parent.params['active'].split(' ')
 
     table_data = node.params
     table_data['Name'] = node.name
