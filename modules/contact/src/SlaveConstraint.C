@@ -122,11 +122,11 @@ SlaveConstraint::computeQpResidual()
     RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
     RealVectorValue pen_force(_penalty * distance_vec);
 
-    if (_model == CM_FRICTIONLESS || _model == CM_EXPERIMENTAL)
+    if (_model == CM_FRICTIONLESS)
     {
       resid += pinfo->_normal(_component) * pinfo->_normal * pen_force;
     }
-    else if (_model == CM_GLUED || _model == CM_TIED || _model == CM_COULOMB)
+    else if (_model == CM_GLUED || _model == CM_COULOMB)
     {
       resid += pen_force(_component);
     }
@@ -171,8 +171,7 @@ SlaveConstraint::computeQpJacobian()
 
   Real term(0);
 
-  if ( CM_FRICTIONLESS == _model ||
-       CM_EXPERIMENTAL == _model )
+  if ( CM_FRICTIONLESS == _model )
   {
 
     const Real nnTDiag = normal(_component) * normal(_component);
@@ -246,7 +245,6 @@ SlaveConstraint::computeQpJacobian()
     }
   }
   else if ( CM_GLUED == _model ||
-            CM_TIED == _model ||
             CM_COULOMB == _model )
   {
     normal.zero();

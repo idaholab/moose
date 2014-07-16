@@ -131,7 +131,7 @@
   line_search = 'none'
 
 
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-7
   nl_rel_tol = 1e-11
 
 
@@ -148,7 +148,7 @@
   exodus = true
   [./console]
     type = Console
-    perf_log = true
+#    perf_log = true
     linear_residuals = true
   [../]
 [] # Outputs

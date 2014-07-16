@@ -37,7 +37,7 @@
     disp_x = disp_x
     disp_y = disp_y
     penalty = 1e6
-    model = experimental
+    model = frictionless
     tangential_tolerance = 0.01
   [../]
 []
@@ -127,7 +127,7 @@
   exodus = true
   [./console]
     type = Console
-    perf_log = true
+#    perf_log = true
     linear_residuals = true
   [../]
 [] # Outputs

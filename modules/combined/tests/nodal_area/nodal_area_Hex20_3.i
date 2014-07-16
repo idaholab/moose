@@ -108,7 +108,6 @@
     disp_x = displ_x
     disp_y = displ_y
     disp_z = displ_z
-#    model = experimental
     formulation = penalty
     penalty = 1e9
     order = SECOND
