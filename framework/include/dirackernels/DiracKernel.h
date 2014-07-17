@@ -31,6 +31,7 @@
 #include "MooseMesh.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
+#include "MeshChangedInterface.h"
 
 //Forward Declarations
 class Assembly;
@@ -57,7 +58,8 @@ class DiracKernel :
   public PostprocessorInterface,
   protected GeometricSearchInterface,
   public Restartable,
-  public ZeroInterface
+  public ZeroInterface,
+  public MeshChangedInterface
 {
 public:
   DiracKernel(const std::string & name, InputParameters parameters);

@@ -25,7 +25,7 @@
 #include "BlockRestrictable.h"
 #include "Restartable.h"
 #include "PostprocessorInterface.h"
-
+#include "MeshChangedInterface.h"
 
 // libmesh Includes
 #include "libmesh/threads.h"
@@ -51,7 +51,8 @@ class Marker :
   public MooseVariableDependencyInterface,
   public UserObjectInterface,
   public Restartable,
-  public PostprocessorInterface
+  public PostprocessorInterface,
+  public MeshChangedInterface
 {
 public:
   Marker(const std::string & name, InputParameters parameters);

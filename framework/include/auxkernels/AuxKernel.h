@@ -31,6 +31,7 @@
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
+#include "MeshChangedInterface.h"
 
 //forward declarations
 class Problem;
@@ -61,7 +62,8 @@ class AuxKernel :
   public RandomInterface,
   protected GeometricSearchInterface,
   public Restartable,
-  public ZeroInterface
+  public ZeroInterface,
+  public MeshChangedInterface
 {
 public:
   AuxKernel(const std::string & name, InputParameters parameters);

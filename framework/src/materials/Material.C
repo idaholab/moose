@@ -56,6 +56,7 @@ Material::Material(const std::string & name, InputParameters parameters) :
     DependencyResolverInterface(),
     Restartable(name, parameters, "Materials"),
     ZeroInterface(parameters),
+    MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),

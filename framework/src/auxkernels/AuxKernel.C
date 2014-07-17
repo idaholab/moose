@@ -31,6 +31,7 @@ InputParameters validParams<AuxKernel>()
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
   params += validParams<RandomInterface>();
+  params += validParams<MeshChangedInterface>();
 
   // Add the SetupInterface parameter, 'execute_on', the default is 'residual'
   params += validParams<SetupInterface>();
@@ -64,6 +65,7 @@ AuxKernel::AuxKernel(const std::string & name, InputParameters parameters) :
     GeometricSearchInterface(parameters),
     Restartable(name, parameters, "AuxKernels"),
     ZeroInterface(parameters),
+    MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _nl_sys(*parameters.get<SystemBase *>("_nl_sys")),

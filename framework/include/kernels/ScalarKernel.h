@@ -28,6 +28,8 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "ZeroInterface.h"
+#include "MeshChangedInterface.h"
+
 // libMesh
 #include "libmesh/fe.h"
 #include "libmesh/quadrature.h"
@@ -50,7 +52,8 @@ class ScalarKernel :
   public UserObjectInterface,
   public PostprocessorInterface,
   public TransientInterface,
-  public ZeroInterface
+  public ZeroInterface,
+  public MeshChangedInterface
 {
 public:
   ScalarKernel(const std::string & name, InputParameters parameters);
