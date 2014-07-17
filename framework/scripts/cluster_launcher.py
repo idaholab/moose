@@ -25,11 +25,13 @@ import path_tool
 path_tool.activate_module('TestHarness')
 path_tool.activate_module('FactorySystem')
 sys.path.append(os.path.join(FRAMEWORK_DIR, 'scripts', 'ClusterLauncher'))
+from PBSJob import PBSJob
+
+sys.path.append(os.path.join(MOOSE_DIR, 'python', 'FactorySystem'))
 
 import ParseGetPot
 from InputParameters import InputParameters
 from Factory import Factory
-from PBSJob import PBSJob
 
 # Default file to read if only a directory is supplied
 job_list = 'job_list'
