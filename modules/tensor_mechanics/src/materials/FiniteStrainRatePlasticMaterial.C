@@ -39,7 +39,6 @@ FiniteStrainRatePlasticMaterial::initQpStatefulProperties()
   _eqv_plastic_strain[_qp] = 0.0;
 }
 
-<<<<<<< HEAD
 void
 FiniteStrainRatePlasticMaterial::computeQpStress()
 {
