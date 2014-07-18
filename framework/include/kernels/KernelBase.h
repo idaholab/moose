@@ -32,6 +32,8 @@
 #include "MooseTypes.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
+#include "MeshChangedInterface.h"
+
 // libMesh
 #include "libmesh/fe.h"
 #include "libmesh/quadrature.h"
@@ -57,7 +59,8 @@ class KernelBase :
   public RandomInterface,
   protected GeometricSearchInterface,
   public Restartable,
-  public ZeroInterface
+  public ZeroInterface,
+  public MeshChangedInterface
 {
 public:
   KernelBase(const std::string & name, InputParameters parameters);

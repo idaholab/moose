@@ -48,6 +48,7 @@ class MooseMesh;
 class NonlinearSystem;
 class RandomInterface;
 class RandomData;
+class MeshChangedInterface;
 
 template<>
 InputParameters validParams<FEProblem>();
@@ -687,6 +688,12 @@ public:
 #endif //LIBMESH_ENABLE_AMR
   virtual void meshChanged();
 
+  /**
+   * Register an object that derives from MeshChangedInterface
+   * to be notified when the mesh changes.
+   */
+  void notifyWhenMeshChanges(MeshChangedInterface * mci);
+
   void printMaterialMap();
   void checkProblemIntegrity();
 
@@ -865,11 +872,14 @@ protected:
   /// A map of objects that consume random numbers
   std::map<std::string, RandomData *> _random_data_objects;
 
-  // Cache for calculating materials on side
+  /// Cache for calculating materials on side
   std::vector<LIBMESH_BEST_UNORDERED_MAP<SubdomainID, bool> > _block_mat_side_cache;
 
-  // Cache for calculating materials on side
+  /// Cache for calculating materials on side
   std::vector<LIBMESH_BEST_UNORDERED_MAP<BoundaryID, bool> > _bnd_mat_side_cache;
+
+  /// Objects to be notified when the mesh changes
+  std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
   void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
 
