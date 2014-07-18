@@ -2,11 +2,8 @@
   type = GeneratedMesh
   dim = 3
   nx = 5
-  ny = 5
-  nz = 5
-  xmax = 10
-  ymax = 10
-  zmax = 10
+  ny = 3
+  nz = 2
 []
 
 [Variables]
@@ -14,11 +11,23 @@
   [../]
 []
 
+[AuxVariables]
+  [./from_sub]
+  [../]
+[]
+
+[Functions]
+  [./bc_func]
+    type = ParsedFunction
+    value = y+1
+  [../]
+[]
+
 [Kernels]
   [./diff]
     type = CoefDiffusion
     variable = u
-    coef = 30
+    coef = 0.3
   [../]
   [./time]
     type = TimeDerivative
@@ -34,17 +43,17 @@
     value = 0
   [../]
   [./right]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = u
     boundary = right
-    value = 1
+    function = bc_func
   [../]
 []
 
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 20
+  num_steps = 5
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -80,6 +89,14 @@
     multi_app = auto_pos
     source_variable = u
     postprocessor = master_value
+  [../]
+  [./from_sub]
+    type = MultiAppNearestNodeTransfer
+    direction = from_multiapp
+    execute_on = timestep
+    multi_app = auto_pos
+    source_variable = u
+    variable = from_sub
   [../]
 []
 
