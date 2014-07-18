@@ -24,6 +24,7 @@
 #include "GeometricSearchInterface.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
+#include "MeshChangedInterface.h"
 
 #include "MooseVariable.h"
 #include "SubProblem.h"
@@ -52,7 +53,8 @@ class Constraint :
   public TransientInterface,
   protected GeometricSearchInterface,
   public Restartable,
-  public ZeroInterface
+  public ZeroInterface,
+  public MeshChangedInterface
 {
 public:
   Constraint(const std::string & name, InputParameters parameters);

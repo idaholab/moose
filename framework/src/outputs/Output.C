@@ -86,6 +86,7 @@ InputParameters validParams<Output>()
 Output::Output(const std::string & name, InputParameters & parameters) :
     MooseObject(name, parameters),
     Restartable(name, parameters, "Output"),
+    MeshChangedInterface(parameters),
     _problem_ptr(getParam<FEProblem *>("_fe_problem")),
     _transient(_problem_ptr->isTransient()),
     _use_displaced(getParam<bool>("use_displaced")),

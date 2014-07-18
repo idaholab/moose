@@ -39,6 +39,7 @@
 #include "RandomData.h"
 #include "EigenSystem.h"
 #include "MooseParsedFunction.h"
+#include "MeshChangedInterface.h"
 
 #include "ScalarInitialCondition.h"
 #include "ElementPostprocessor.h"
@@ -3498,10 +3499,18 @@ FEProblem::meshChanged()
 
   }
 
-  // Indicate that the Mesh has changed to the Output objects
-  _app.getOutputWarehouse().meshChanged();
-
   _has_jacobian = false;                    // we have to recompute jacobian when mesh changed
+
+  for (std::vector<MeshChangedInterface *>::iterator it = _notify_when_mesh_changes.begin();
+       it != _notify_when_mesh_changes.end();
+       ++it)
+    (*it)->meshChanged();
+}
+
+void
+FEProblem::notifyWhenMeshChanges(MeshChangedInterface * mci)
+{
+  _notify_when_mesh_changes.push_back(mci);
 }
 
 void

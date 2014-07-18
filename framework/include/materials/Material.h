@@ -36,6 +36,8 @@
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
+#include "MeshChangedInterface.h"
+
 // libMesh includes
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/elem.h"
@@ -76,7 +78,8 @@ class Material :
   public PostprocessorInterface,
   public DependencyResolverInterface,
   public Restartable,
-  public ZeroInterface
+  public ZeroInterface,
+  public MeshChangedInterface
 {
 public:
   Material(const std::string & name, InputParameters parameters);

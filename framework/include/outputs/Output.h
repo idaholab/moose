@@ -20,6 +20,7 @@
 #include "Restartable.h"
 #include "MooseTypes.h"
 #include "MooseMesh.h"
+#include "MeshChangedInterface.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -64,7 +65,8 @@ struct OutputData
  */
 class Output :
   public MooseObject,
-  public Restartable
+  public Restartable,
+  public MeshChangedInterface
 {
 public:
 
