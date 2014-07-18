@@ -51,6 +51,11 @@ public:
   virtual void init();
 
   /**
+   * _must_ fill in _positions with the positions of the sub-aps
+   */
+  virtual void fillPositions();
+
+  /**
    * Gets called just before transfers are done _to_ the MultiApp
    * (Which is just before the MultiApp is solved)
    */
