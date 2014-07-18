@@ -152,7 +152,7 @@ ContactMaster::updateContactSet(bool beginning_of_step)
       pinfo->_starting_closest_point_ref = it->second->_closest_point_ref;
     }
 
-    if (_model == CM_FRICTIONLESS ||
+    if ((_model == CM_FRICTIONLESS && _formulation == CF_DEFAULT) ||
         (_model == CM_COULOMB && _formulation == CF_DEFAULT))
     {
       const Node * node = pinfo->_node;
@@ -225,9 +225,10 @@ ContactMaster::updateContactSet(bool beginning_of_step)
             has_penetrated.insert(slave_node_num);
           }
         }
-        else if ((pinfo->_contact_force * pinfo->_normal) / area < 0)
+        else if (_tension_release < 0 ||
+                 (pinfo->_contact_force * pinfo->_normal) / area < _tension_release)
         {
-          // Do nothing.  This node is in contact and in compression.
+          // Do nothing.
         }
         else
         {
