@@ -30,6 +30,7 @@ FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const std::string & nam
 
 void FiniteStrainPlasticMaterial::initQpStatefulProperties()
 {
+  _total_strain[_qp].zero();
   _elastic_strain[_qp].zero();
   _stress[_qp].zero();
   _plastic_strain[_qp].zero();
@@ -39,17 +40,31 @@ void FiniteStrainPlasticMaterial::initQpStatefulProperties()
 
 void FiniteStrainPlasticMaterial::computeQpStress()
 {
-  //In elastic problem, all the strain is elastic
-  _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
 
   // perform the return-mapping algorithm
   returnMap(_stress_old[_qp], _eqv_plastic_strain_old[_qp], _plastic_strain_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], _stress[_qp], _eqv_plastic_strain[_qp], _plastic_strain[_qp]);
 
-  //Rotate the stress to the current configuration
+  //Rotate the stress tensor to the current configuration
   _stress[_qp] = _rotation_increment[_qp]*_stress[_qp]*_rotation_increment[_qp].transpose();
 
-  //Rotate to plastic rate of deformation tensor the current configuration
+  //Calculate elastic strain increment
+  RankTwoTensor delta_ee = _strain_increment[_qp]-(_plastic_strain[_qp]-_plastic_strain_old[_qp]);
+
+  //Update elastic strain tensor in intermediate configuration
+  _elastic_strain[_qp] = _elastic_strain_old[_qp] + delta_ee;
+
+  //Rotate elastic strain tensor to the current configuration
+  _elastic_strain[_qp] = _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();
+
+  //Rotate plastic strain tensor to the current configuration
   _plastic_strain[_qp] = _rotation_increment[_qp] * _plastic_strain[_qp] * _rotation_increment[_qp].transpose();
+
+  //Update strain in intermediate configuration
+  _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+
+  //Rotate strain to current configuration
+  _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+
 }
 
 /**
