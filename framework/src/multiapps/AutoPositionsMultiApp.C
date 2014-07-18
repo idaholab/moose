@@ -18,6 +18,8 @@ InputParameters validParams<AutoPositionsMultiApp>()
 {
   InputParameters params = validParams<TransientMultiApp>();
 
+  params += validParams<BoundaryRestrictable>();
+
   params.suppressParameter<std::vector<Point> >("positions");
   params.suppressParameter<FileName>("positions_file");
 
@@ -26,7 +28,8 @@ InputParameters validParams<AutoPositionsMultiApp>()
 
 
 AutoPositionsMultiApp::AutoPositionsMultiApp(const std::string & name, InputParameters parameters):
-    TransientMultiApp(name, parameters)
+    TransientMultiApp(name, parameters),
+    BoundaryRestrictable(name, parameters)
 {
 }
 
@@ -37,5 +40,24 @@ AutoPositionsMultiApp::~AutoPositionsMultiApp()
 void
 AutoPositionsMultiApp::fillPositions()
 {
-  _positions.push_back(Point(1,1,1));
+  MooseMesh & master_mesh = _fe_problem->mesh();
+
+  const std::set<BoundaryID> & bids = boundaryIDs();
+
+  for (std::set<BoundaryID>::iterator bid_it = bids.begin();
+       bid_it != bids.end();
+       ++bid_it)
+  {
+    BoundaryID boundary_id = *bid_it;
+
+    // Grab the nodes on the boundary ID and add a Sub-App at each one.
+    std::vector<unsigned int> & boundary_node_ids = master_mesh.getNodeList(boundary_id);
+
+    for (unsigned int i=0; i<boundary_node_ids.size(); i++)
+    {
+      Node & node = master_mesh.node(boundary_node_ids[i]);
+
+      _positions.push_back(node);
+    }
+  }
 }

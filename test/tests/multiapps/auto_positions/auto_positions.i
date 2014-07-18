@@ -66,7 +66,9 @@
   [./auto_pos]
     type = AutoPositionsMultiApp
     app_type = MooseTestApp
+    execute_on = timestep
     input_files = sub.i
+    boundary = right
   [../]
 []
 
@@ -74,6 +76,7 @@
   [./to_sub]
     type = MultiAppVariableValueSamplePostprocessorTransfer
     direction = to_multiapp
+    execute_on = timestep
     multi_app = auto_pos
     source_variable = u
     postprocessor = master_value

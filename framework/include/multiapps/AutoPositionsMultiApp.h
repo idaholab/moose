@@ -15,6 +15,7 @@
 #define AUTOPOSITIONSMULTIAPP_H
 
 #include "TransientMultiApp.h"
+#include "BoundaryRestrictable.h"
 
 class AutoPositionsMultiApp;
 
@@ -25,7 +26,8 @@ InputParameters validParams<AutoPositionsMultiApp>();
  * Automatically generates Sub-App positions from positions in the master app's mesh.
  */
 class AutoPositionsMultiApp :
-  public TransientMultiApp
+  public TransientMultiApp,
+  public BoundaryRestrictable
 {
 public:
   AutoPositionsMultiApp(const std::string & name, InputParameters parameters);

@@ -2,6 +2,8 @@
   type = GeneratedMesh
   dim = 1
   nx = 10
+  xmin = -1
+  xmax = 0
 []
 
 [Variables]
