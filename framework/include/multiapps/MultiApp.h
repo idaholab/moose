@@ -51,11 +51,6 @@ public:
   virtual void init();
 
   /**
-   * _must_ fill in _positions with the positions of the sub-aps
-   */
-  virtual void fillPositions();
-
-  /**
    * Gets called just before transfers are done _to_ the MultiApp
    * (Which is just before the MultiApp is solved)
    */
@@ -207,6 +202,11 @@ public:
   bool isRootProcessor() { return _my_rank == 0; }
 
 protected:
+  /**
+   * _must_ fill in _positions with the positions of the sub-aps
+   */
+  virtual void fillPositions();
+
   /**
    * Helper function for creating an App instance.
    *

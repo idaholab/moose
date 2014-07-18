@@ -69,6 +69,8 @@
 #include "VectorNeumannBC.h"
 #include "WeakGradientBC.h"
 #include "DiffusionFluxBC.h"
+#include "PostprocessorDirichletBC.h"
+
 // auxkernels
 #include "ConstantAux.h"
 #include "FunctionAux.h"
@@ -262,6 +264,7 @@
 // MultiApps
 #include "TransientMultiApp.h"
 #include "FullSolveMultiApp.h"
+#include "AutoPositionsMultiApp.h"
 
 // Transfers
 #ifdef LIBMESH_HAVE_DTK
@@ -407,6 +410,7 @@ registerObjects(Factory & factory)
   registerBoundaryCondition(VectorNeumannBC);
   registerBoundaryCondition(WeakGradientBC);
   registerBoundaryCondition(DiffusionFluxBC);
+  registerBoundaryCondition(PostprocessorDirichletBC);
 
   // dirac kernels
   registerDiracKernel(ConstantPointSource);
@@ -583,6 +587,7 @@ registerObjects(Factory & factory)
   // MultiApps
   registerMultiApp(TransientMultiApp);
   registerMultiApp(FullSolveMultiApp);
+  registerMultiApp(AutoPositionsMultiApp);
 
   // time steppers
   registerTimeStepper(ConstantDT);
