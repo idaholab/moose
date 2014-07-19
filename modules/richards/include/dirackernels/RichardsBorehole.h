@@ -45,9 +45,24 @@ public:
   virtual void addPoints();
 
   /**
-   * Computes the residual
+   * Computes the residual.  This just
+   * calls prepareNodalValues, if _fully_upwind
+   * then calls DiracKernel::computeResidual
+   */
+  virtual void computeResidual();
+
+  /**
+   * Computes the Qp residual
    */
   virtual Real computeQpResidual();
+
+
+  /**
+   * Computes the Jacobian.  This just
+   * calls prepareNodalValues, if _fully_upwind
+   * then calls DiracKernel::computeJacobian
+   */
+  virtual void computeJacobian();
 
   /**
    * Computes the diagonal part of the jacobian
@@ -123,6 +138,12 @@ protected:
 
   /// well constant
   Real _well_constant;
+
+  /// borehole length.  Note this is only used if there is only one borehole point
+  Real _borehole_length;
+
+  /// borehole direction.  Note this is only used if there is only one borehole point
+  RealVectorValue _borehole_direction;
 
   /// fluid porepressure (or porepressures in case of multiphase)
   MaterialProperty<std::vector<Real> > &_pp;

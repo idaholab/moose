@@ -17,12 +17,14 @@ InputParameters validParams<RichardsBorehole>()
   params.addRequiredParam<FunctionName>("character", "If zero then borehole does nothing.  If positive the borehole acts as a sink (production well) for porepressure > borehole pressure, and does nothing otherwise.  If negative the borehole acts as a source (injection well) for porepressure < borehole pressure, and does nothing otherwise.  The flow rate to/from the borehole is multiplied by |character|, so usually character = +/- 1, but you can specify other quantities to provide an overall scaling to the flow if you like.");
   params.addRequiredParam<Real>("bottom_pressure", "Pressure at the bottom of the borehole");
   params.addRequiredParam<RealVectorValue>("unit_weight", "(fluid_density*gravitational_acceleration) as a vector pointing downwards.  Note that the borehole pressure at a given z position is bottom_pressure + unit_weight*(p - p_bottom), where p=(x,y,z) and p_bottom=(x,y,z) of the bottom point of the borehole.  If you don't want bottomhole pressure to vary in the borehole just set unit_weight=0.  Typical value is gravity = (0,0,-1E4)");
-  params.addRequiredParam<std::string>("point_file", "The file containing the borehole radii and coordinates of the point sinks that approximate the borehole.  Each line in the file must contain a space-separated radius and coordinate.  Ie r x y z.  The last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  Note that you will get segementation faults if your points do not lie within your mesh!");
+  params.addRequiredParam<std::string>("point_file", "The file containing the borehole radii and coordinates of the point sinks that approximate the borehole.  Each line in the file must contain a space-separated radius and coordinate.  Ie r x y z.  The last point in the file is defined as the borehole bottom, where the borehole pressure is bottom_pressure.  If your file contains just one point, you must also specify the borehole_length and borehole_direction.  Note that you will get segementation faults if your points do not lie within your mesh!");
   params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the borehole for each time step.");
   params.addParam<Real>("re_constant", 0.28, "The dimensionless constant used in evaluating the borehole effective radius.  This depends on the meshing scheme.  Peacemann finite-difference calculations give 0.28, while for rectangular finite elements the result is closer to 0.1594.  (See  Eqn(4.13) of Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388.)");
   params.addParam<Real>("well_constant", -1.0, "Usually this is calculated internally from the element geometry, the local borehole direction and segment length, and the permeability.  However, if this parameter is given as a positive number then this number is used instead of the internal calculation.  This speeds up computation marginally.  re_constant becomes irrelevant");
   params.addParam<bool>("MyNameIsAndyWilkins", false, "Used for debugging by Andy");
   params.addParam<bool>("fully_upwind", false, "Fully upwind the flux");
+  params.addRangeCheckedParam<Real>("borehole_length", 0.0, "borehole_length>=0", "Borehole length.  Note this is only used if there is only one point in the point_file.");
+  params.addParam<RealVectorValue>("borehole_direction", RealVectorValue(0, 0, 1), "Borehole direction.  Note this is only used if there is only one point in the point_file.");
   params.addClassDescription("Approximates a borehole in the mesh with given bottomhole pressure, and radii using a number of point sinks whose positions are read from a file");
   return params;
 }
@@ -53,6 +55,9 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
     _re_constant(getParam<Real>("re_constant")),
     _well_constant(getParam<Real>("well_constant")),
+
+    _borehole_length(getParam<Real>("borehole_length")),
+    _borehole_direction(getParam<RealVectorValue>("borehole_direction")),
 
     _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
     _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv")),
@@ -108,21 +113,25 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   _bottom_point(2) = _zs[num_pts - 1];
 
   // construct the line-segment lengths between each point
-  _half_seg_len.resize(num_pts-1);
+  _half_seg_len.resize(std::max(num_pts-1, 1));
   for (unsigned int i=0 ; i<_xs.size()-1; ++i)
   {
     _half_seg_len[i] = 0.5*std::sqrt(std::pow(_xs[i+1] - _xs[i], 2) + std::pow(_ys[i+1] - _ys[i], 2) + std::pow(_zs[i+1] - _zs[i], 2));
     if (_half_seg_len[i] == 0)
       mooseError("Borehole has a zero-segment length at (x,y,z) = " << _xs[i] << " " << _ys[i] << " " << _zs[i] << "\n");
   }
+  if (num_pts == 1)
+    _half_seg_len[0] = _borehole_length;
 
   // construct the rotation matrix needed to rotate the permeability
-  _rot_matrix.resize(num_pts-1);
+  _rot_matrix.resize(std::max(num_pts-1, 1));
   for (unsigned int i=0 ; i<_xs.size()-1; ++i)
   {
     RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
     _rot_matrix[i] = RotationMatrix::rotVecToZ(v2);
   }
+  if (num_pts == 1)
+    _rot_matrix[0] = RotationMatrix::rotVecToZ(_borehole_direction);
 
   // do debugging if AndyWilkins
   if (_debug_things)
@@ -342,6 +351,13 @@ RichardsBorehole::prepareNodalValues()
   }
 }
 
+void
+RichardsBorehole::computeResidual()
+{
+  if (_fully_upwind)
+    prepareNodalValues();
+  DiracKernel::computeResidual();
+}
 
 Real
 RichardsBorehole::computeQpResidual()
@@ -360,7 +376,6 @@ RichardsBorehole::computeQpResidual()
   }
   else
   {
-    prepareNodalValues();
     pp = _nodal_pp[_pvar]->nodalSln()[_i];
     mob = _mobility[_i];
   }
@@ -378,7 +393,7 @@ RichardsBorehole::computeQpResidual()
 
   Real wc(0.0);
   if (current_dirac_ptid > 0)
-  // contribution from half-segment "behind" this point
+  // contribution from half-segment "behind" this point (must have >1 point for current_dirac_ptid>0)
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid - 1], _half_seg_len[current_dirac_ptid - 1], _current_elem, _rs[current_dirac_ptid]);
     if ((character < 0.0 && pp < bh_pressure) || (character > 0.0 && pp > bh_pressure))
@@ -386,8 +401,8 @@ RichardsBorehole::computeQpResidual()
       outflow += _test[_i][_qp]*std::abs(character)*wc*mob*(pp - bh_pressure);
   }
 
-  if (current_dirac_ptid < _zs.size() - 1)
-  // contribution from half-segment "ahead of" this point
+  if (current_dirac_ptid < _zs.size() - 1 || _zs.size() == 1)
+  // contribution from half-segment "ahead of" this point, or we only have one point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
     if ((character < 0.0 && pp < bh_pressure) || (character > 0.0 && pp > bh_pressure))
@@ -398,6 +413,14 @@ RichardsBorehole::computeQpResidual()
 
   _total_outflow_mass.add(outflow*_dt); // this is not thread safe, but DiracKernel's aren't currently threaded
   return outflow;
+}
+
+void
+RichardsBorehole::computeJacobian()
+{
+  if (_fully_upwind)
+    prepareNodalValues();
+  DiracKernel::computeJacobian();
 }
 
 Real
@@ -443,7 +466,6 @@ RichardsBorehole::jac(unsigned int wrt_num)
   {
     if (_i != _j)
       return 0.0;  // residual at node _i only depends on variables at that node
-    prepareNodalValues();
     pp = _nodal_pp[_pvar]->nodalSln()[_i];
     dpp_dv = (_pvar == wrt_num ? 1 : 0);  // NOTE: i'm assuming that the variables are pressure variables
     mob = _mobility[_i];
@@ -470,7 +492,7 @@ RichardsBorehole::jac(unsigned int wrt_num)
       outflowp += _test[_i][_qp]*std::abs(character)*wc*(mob*phi*dpp_dv + dmob_dv*phi*(pp - bh_pressure));
   }
 
-  if (current_dirac_ptid < _zs.size() - 1)
+  if (current_dirac_ptid < _zs.size() - 1 || _zs.size() == 1)
   // contribution from half-segment "ahead of" this point
   {
     wc = wellConstant(_permeability[_qp], _rot_matrix[current_dirac_ptid], _half_seg_len[current_dirac_ptid], _current_elem, _rs[current_dirac_ptid]);
