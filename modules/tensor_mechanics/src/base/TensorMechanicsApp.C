@@ -9,8 +9,8 @@
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
-#include "FiniteStrainWeakPlaneShear.h"
 #include "FiniteStrainRatePlasticMaterial.h"
+#include "FiniteStrainWeakPlaneTensile.h"
 #include "FiniteStrainCrystalPlasticity.h"
 #include "RankTwoAux.h"
 #include "RealTensorValueAux.h"
@@ -60,7 +60,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
   registerMaterial(FiniteStrainPlasticMaterial);
-  registerMaterial(FiniteStrainWeakPlaneShear);
+  registerMaterial(FiniteStrainWeakPlaneTensile);
   registerMaterial(FiniteStrainRatePlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
   registerMaterial(CosseratLinearElasticMaterial);
