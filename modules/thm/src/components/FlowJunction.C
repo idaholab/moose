@@ -12,6 +12,7 @@ InputParameters validParams<FlowJunction>()
 {
   InputParameters params = validParams<Junction>();
   params.addParam<std::vector<Real> >("K", "Form loss coefficients");
+  params.addParam<Real>("scaling_factor", 1., "Scaling factor for the Lagrange multiplier variable");
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
   return params;
 }
@@ -40,7 +41,7 @@ FlowJunction::addVariables()
     break;
 
   case FlowModel::EQ_MODEL_3:
-    _sim.addVariable(true, _lm_name,  FEType(THIRD, SCALAR), 0, 1.e-5);
+    _sim.addVariable(true, _lm_name,  FEType(THIRD, SCALAR), 0, getParam<Real>("scaling_factor"));
     break;
 
   default:
