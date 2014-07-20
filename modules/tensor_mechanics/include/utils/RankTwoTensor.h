@@ -155,9 +155,21 @@ public:
 
   /**
    * Denote the _vals[i][j] by A_ij, then this returns
+   * d(trace)/dA_ij
+   */
+  RankTwoTensor dtrace() const;
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then this returns
    * d(secondInvariant)/dA_ij
    */
   RankTwoTensor dsecondInvariant() const;
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then this returns
+   * d(det)/dA_ij
+   */
+  RankTwoTensor ddet() const;
 
 
   /// returns the trace of the tensor, ie _vals[i][i] (sum i = 0, 1, 2)
@@ -183,6 +195,12 @@ public:
    * and the remainder to zero
    */
   void surfaceFillFromInputVector(const std::vector<Real> & input);
+
+  /**
+   * computes eigenvalues, assuming _vals is symmetric, and places them
+   * in ascending order in eigvals
+   */
+  void symmetricEigenvalues(std::vector<Real> & eigvals);
 
 protected:
 
