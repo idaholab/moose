@@ -359,7 +359,7 @@ FiniteStrainPlasticMaterial::deltaFunc(const unsigned int i, const unsigned int 
 Real
 FiniteStrainPlasticMaterial::getYieldStress(const Real eqpe)
 {
-  int nsize;
+  unsigned nsize;
   Real *data;
 
   nsize = _yield_stress_vector.size();
@@ -393,7 +393,7 @@ FiniteStrainPlasticMaterial::getYieldStress(const Real eqpe)
 Real
 FiniteStrainPlasticMaterial::getdYieldStressdPlasticStrain(const Real eqpe)
 {
-  int nsize;
+  unsigned nsize;
   Real *data;
 
   nsize = _yield_stress_vector.size();

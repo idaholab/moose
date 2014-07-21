@@ -78,7 +78,7 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
     for (int i = is; i <= ie; ++i)
       _gss[_qp][i-1] = _gprops[ind];
 
-    if (ie == _nss)
+    if (ie == static_cast<int>(_nss))
       break;
 
     ind++;
@@ -95,13 +95,13 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
     is = _flowprops[ind++];
     ie = _flowprops[ind++];
 
-    for (unsigned int i = is; i <= ie; ++i)
+    for (int i = is; i <= ie; ++i)
     {
       _a0[i-1] = _flowprops[ind];
       _xm[i-1] = _flowprops[ind+1];
     }
 
-    if (ie == _nss)
+    if (ie == static_cast<int>(_nss))
       break;
 
     ind += 3;
@@ -328,10 +328,8 @@ FiniteStrainCrystalPlasticity::updateGss(std::vector<Real> & slip_incr)
   unsigned int i, j;
   std::vector<Real> hb(_nss);
   Real qab,val;
-  Real *data; //Kalidindi
 
-  data=_hprops.data(); //Kalidindi
-  Real a=data[4]; //Kalidindi
+  Real a = _hprops[4]; //Kalidindi
 
   _acc_slip[_qp]=_acc_slip_old[_qp];
   for (i=0; i < _nss; i++)
