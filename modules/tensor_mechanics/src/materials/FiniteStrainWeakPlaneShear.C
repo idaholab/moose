@@ -253,16 +253,16 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
         // update the variables using this line-search parameter
         ls_flow_incr = flow_incr + dflow_incr*lam;
         ls_delta_dp = delta_dp - (E_inv*ddsig)*lam;
-	ls_internal = internal + dinternal*lam;
+        ls_internal = internal + dinternal*lam;
         ls_sig = sig + ddsig*lam;
 
         // calculate the new yield function and residual
         flow_dirn = flowPotential(ls_sig, ls_internal);
         resid = flow_dirn*ls_flow_incr - ls_delta_dp;
         f = yieldFunction(ls_sig, ls_internal);
-	ic = ls_internal - internal_old - ls_flow_incr;
+        ic = ls_internal - internal_old - ls_flow_incr;
 
-	nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2) + std::pow(ic/_r_tol, 2));
+        nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2) + std::pow(ic/_r_tol, 2));
 
         if (nr_res2 < f0 + 1E-4*lam*slope)
         {
@@ -277,13 +277,13 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
           lam = 0.1;
           ls_flow_incr = flow_incr + dflow_incr*lam;
           ls_delta_dp = delta_dp - (E_inv*ddsig)*lam;
-	  ls_internal = internal + dinternal*lam;
+          ls_internal = internal + dinternal*lam;
           ls_sig = sig + ddsig*lam;
           flow_dirn = flowPotential(ls_sig, ls_internal);
           resid = flow_dirn*ls_flow_incr - ls_delta_dp;
           f = yieldFunction(ls_sig, ls_internal);
-	  ic = ls_internal - internal_old - ls_flow_incr;
-	  nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2) + std::pow(ic/_r_tol, 2));
+          ic = ls_internal - internal_old - ls_flow_incr;
+          nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2) + std::pow(ic/_r_tol, 2));
           line_searching = false;
           break;
         }
