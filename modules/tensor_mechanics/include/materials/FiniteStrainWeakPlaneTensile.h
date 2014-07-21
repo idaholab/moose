@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<FiniteStrainWeakPlaneTensile>();
 
 /**
- * FiniteStrainWeakPlaneTensile implements rate-independent non-associative weak-plane Mohr-Coulomb
+ * FiniteStrainWeakPlaneTensile implements rate-independent associative weak-plane tensile failure
  * with no hardening in the finite-strain framework.
  */
 class FiniteStrainWeakPlaneTensile : public FiniteStrainMaterial
@@ -24,7 +24,7 @@ protected:
 
   /// tension cutoff
   Real _tension_cutoff;
- 
+
   /// Unit normal inputted by user
   RealVectorValue _input_n;
 
@@ -54,7 +54,7 @@ protected:
 
   /// Value of the yield function
   MaterialProperty<Real> & _yf;
-  
+
   /**
    * Implements the return map
    * @param sig_old  The stress at the previous "time" step
@@ -77,7 +77,7 @@ protected:
    * @return equivalent stress - yield_stress
    */
   virtual Real yieldFunction(const RankTwoTensor &stress);
-  
+
   /**
    * Derivative of yieldFunction with respect to the stress
    */

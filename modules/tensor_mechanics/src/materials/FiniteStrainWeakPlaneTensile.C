@@ -6,12 +6,12 @@ template<>
 InputParameters validParams<FiniteStrainWeakPlaneTensile>()
 {
   InputParameters params = validParams<FiniteStrainMaterial>();
-  params.addRangeCheckedParam<Real>("tension_cutoff","tension_cutoff>0","Tension cutoff has to be positive");
+  params.addRequiredParam<Real>("tension_cutoff","Weak plane Tension cutoff");
   params.addRequiredParam<RealVectorValue>("wpt_normal_vector", "The normal vector to the weak plane");
   params.addParam<bool>("wpt_normal_rotates", true, "The normal vector to the weak plane rotates with the large deformations");
   params.addRequiredRangeCheckedParam<Real>("wpt_f_tol", "wpt_f_tol>0", "Tolerance on the yield function: if yield function is less than this value then the stresses are admissible");
   params.addRequiredRangeCheckedParam<Real>("wpt_r_tol", "wpt_r_tol>0", "Tolerance on the residual function: if the L2 norm of the residual is less than this value then the Newton-Raphson procedure is deemed to have converged");
-  params.addRangeCheckedParam<int>("wpt_max_iterations", 20, "wpt_max_iterations>0", "Maximum number of Newton-Raphson iterations allowed");
+  params.addRangeCheckedParam<int>("wpt_max_iterations", 1, "wpt_max_iterations>0", "Maximum number of Newton-Raphson iterations allowed");
   params.addClassDescription("Non-associative weak-plane tensile plasticity with no hardening");
 
   return params;
@@ -33,12 +33,15 @@ FiniteStrainWeakPlaneTensile::FiniteStrainWeakPlaneTensile(const std::string & n
     _n(declareProperty<RealVectorValue>("weak_plane_normal")),
     _n_old(declarePropertyOld<RealVectorValue>("weak_plane_normal")),
     _yf(declareProperty<Real>("weak_plane_tensile_yield_function"))
-    
+
 {
    if (_input_n.size() == 0)
-    mooseError("Weak-plane normal vector must not have zero length");
-  else
-    _input_n /= _input_n.size();
+     mooseError("Weak-plane normal vector must not have zero length");
+   else
+     _input_n /= _input_n.size();
+
+   if (_tension_cutoff < 0)
+     mooseError("Tension cutoff has to be positive");
 }
 
 void FiniteStrainWeakPlaneTensile::initQpStatefulProperties()
@@ -64,7 +67,7 @@ void FiniteStrainWeakPlaneTensile::computeQpStress()
   RankTwoTensor tilde_epp_old = rot*_plastic_strain_old[_qp]*rot.transpose();
   RankTwoTensor tilde_incr = rot*_strain_increment[_qp]*rot.transpose();
 
-  
+
   // perform the return-mapping algorithm
   RankTwoTensor tilde_sigma;
   RankTwoTensor tilde_epp;
@@ -87,7 +90,7 @@ void FiniteStrainWeakPlaneTensile::computeQpStress()
     {
       _n[_qp](i) = 0;
       for (unsigned int j = 0 ; j < 3 ; ++j)
-	_n[_qp](i) += _rotation_increment[_qp](i, j)*_n_old[_qp](j);
+        _n[_qp](i) += _rotation_increment[_qp](i, j)*_n_old[_qp](j);
     }
   }
 }
@@ -187,7 +190,7 @@ FiniteStrainWeakPlaneTensile::returnMap(const RankTwoTensor & sig_old, const Ran
       flow_incr += dflow_incr;
       delta_dp += -E_inv*ddsig;
       sig += ddsig;
-      
+
       flow_dirn = flowPotential(sig);
 
        // need the following to be zero
@@ -201,10 +204,10 @@ FiniteStrainWeakPlaneTensile::returnMap(const RankTwoTensor & sig_old, const Ran
       //sig.print();
     }
 
-    if (iter >= _max_iter)
+    if (iter > _max_iter)
     {
       sig = sig_old;
-      _console << "Too many iterations in Weak Plane Shear.  f = " << f << ", |resid| = " << resid.L2norm() << ", condition = " << std::abs(f)/_f_tol + resid.L2norm()/_r_tol << "\n";
+      _console << "Too many iterations in Weak Plane Tension.  f = " << f << ", |resid| = " << resid.L2norm() << ", condition = " << std::abs(f)/_f_tol + resid.L2norm()/_r_tol << "\n";
       return;
     }
 
@@ -223,7 +226,7 @@ RankTwoTensor
 FiniteStrainWeakPlaneTensile::dyieldFunction_dstress(const RankTwoTensor & stress)
 {
   RankTwoTensor deriv; // the constructor zeroes this
-  
+
   deriv(2,2) = 1.0;
   return deriv;
 }
