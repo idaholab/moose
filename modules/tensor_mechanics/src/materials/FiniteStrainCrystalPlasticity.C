@@ -52,7 +52,6 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
 {
   unsigned int ind;
   int is, ie;
-  Real *data;
   RealTensorValue rot;
 
   _stress[_qp].zero();
@@ -70,13 +69,11 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
   _a0.resize(_nss);
   _xm.resize(_nss);
 
-  data = _gprops.data();
-
   ind = 0;
   while (true)
   {
-    is = data[ind++];
-    ie = data[ind++];
+    is = _gprops[ind++];
+    ie = _gprops[ind++];
 
     for (int i = is; i <= ie; ++i)
       _gss[_qp][i-1] = _gprops[ind];
@@ -87,20 +84,16 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
     ind++;
   }
 
-  data = _hprops.data();
-
-  _r = data[0];
-  _h0 = data[1];
-  _tau_init = data[2];
-  _tau_sat = data[3];
-
-  data = _flowprops.data();
+  _r = _hprops[0];
+  _h0 = _hprops[1];
+  _tau_init = _hprops[2];
+  _tau_sat = _hprops[3];
 
   ind = 0;
   while (true)
   {
-    is = data[ind++];
-    ie = data[ind++];
+    is = _flowprops[ind++];
+    ie = _flowprops[ind++];
 
     for (unsigned int i = is; i <= ie; ++i)
     {
