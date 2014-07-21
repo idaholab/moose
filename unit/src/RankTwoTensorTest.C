@@ -194,3 +194,47 @@ RankTwoTensorTest::ddetTest()
     }
 }
 
+void
+RankTwoTensorTest::dsymmetricEigenvaluesTest()
+{
+  // this derivative is less trivial than dtrace and dsecondInvariant,
+  // so let's check with a finite-difference approximation
+  Real ep = 1E-5; // small finite-difference parameter
+
+  std::vector<Real> eigvals; // eigenvalues in ascending order provided by RankTwoTensor
+  std::vector<RankTwoTensor> deriv; // derivatives of these eigenvalues provided by RankTwoTensor
+
+  RankTwoTensor mep; // the RankTwoTensor with successive entries shifted by ep
+  std::vector<Real> eigvalsep; // eigenvalues of mep in ascending order
+
+  _m2.dsymmetricEigenvalues(eigvals, deriv);
+  mep = _m2;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      // note the explicit symmeterisation here
+      mep(i, j) += ep/2;
+      mep(j, i) += ep/2;
+      mep.symmetricEigenvalues(eigvalsep);
+      for (unsigned k = 0 ; k < 3 ; ++k)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvals[k])/ep, deriv[k](i, j), ep);
+      mep(i, j) -= ep/2;
+      mep(j, i) -= ep/2;
+    }
+
+  _m3.dsymmetricEigenvalues(eigvals, deriv);
+  mep = _m3;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      // note the explicit symmeterisation here
+      mep(i, j) += ep/2;
+      mep(j, i) += ep/2;
+      mep.symmetricEigenvalues(eigvalsep);
+      for (unsigned k = 0 ; k < 3 ; ++k)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvals[k])/ep, deriv[k](i, j), ep);
+      mep(i, j) -= ep/2;
+      mep(j, i) -= ep/2;
+    }
+}
+

@@ -202,12 +202,37 @@ public:
    */
   void symmetricEigenvalues(std::vector<Real> & eigvals);
 
+  /**
+   * computes eigenvalues, and their symmetric derivatives wrt _vals,
+   * assuming _vals is symmetric
+   * @param eigvals are the eigenvalues of the matrix, in ascending order
+   * @param deigvals Here digvals[i](j,k) = (1/2)*(d(eigvals[i])/dA_jk + d(eigvals[i]/dA_kj))
+   * Note the explicit symmeterisation here.
+   * For equal eigenvalues, these derivatives are not gauranteed to
+   * be the ones you expect, since the derivatives in this case are
+   * often defined by continuation from the un-equal case, and that is
+   * too sophisticated for this routine.
+   */
+  void dsymmetricEigenvalues(std::vector<Real> & eigvals, std::vector<RankTwoTensor> & deigvals);
+
 protected:
 
 private:
   static const unsigned int N = 3;
 
   Real _vals[N][N];
+
+  /**
+   * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _vals:
+   *  (1) the eigenvalues (if calculation_type == "N")
+   *  (2) the eigenvalues and eigenvectors (if calculation_type == "V")
+   * @param calculation_type If "N" then calculation eigenvalues only
+   * @param eigvals Eigenvalues are placed in this array, in ascending order
+   * @param a Eigenvectors are placed in this array if calculation_type == "V".
+   * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
+   */
+  void syev(const char * calculation_type, std::vector<Real> & eigvals, std::vector<double> & a);
+
 };
 
 inline RankTwoTensor operator*(Real a, const RankTwoTensor & b) { return b * a; }
