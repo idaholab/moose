@@ -10,6 +10,12 @@ InputParameters validParams<FiniteStrainWeakPlaneShear>()
   params.addRequiredRangeCheckedParam<Real>("wps_cohesion", "wps_cohesion>=0", "Weak plane cohesion");
   params.addRequiredRangeCheckedParam<Real>("wps_friction_angle", "wps_friction_angle>=0 & wps_friction_angle<=45", "Weak-plane friction angle in degrees");
   params.addRequiredRangeCheckedParam<Real>("wps_dilation_angle", "wps_dilation_angle>=0", "Weak-plane dilation angle in degrees.  For associative flow use dilation_angle = friction_angle.  Should not be less than friction angle.");
+  params.addParam<Real>("wps_cohesion_residual", "Weak plane cohesion at infinite hardening.  If not given, this defaults to wps_cohesion, ie, perfect plasticity");
+  params.addParam<Real>("wps_friction_angle_residual", "Weak-plane friction angle in degrees at infinite hardening.  If not given, this defaults to wps_friction_angle, ie, perfect plasticity");
+  params.addParam<Real>("wps_dilation_angle_residual", "Weak-plane dilation angle in degrees at infinite hardening.  If not given, this defaults to wps_dilation_angle, ie, perfect plasticity");
+  params.addRangeCheckedParam<Real>("wps_cohesion_rate", 0, "wps_cohesion_rate>=0", "Cohesion = wps_cohesion_residual + (wps_cohesion - wps_cohesion_residual)*exp(-wps_cohesion_rate*plasticstrain).  Set to zero for perfect plasticity");
+  params.addRangeCheckedParam<Real>("wps_friction_angle_rate", 0, "wps_friction_angle_rate>=0", "tan(friction_angle) = tan(wps_friction_angle_residual) + (tan(wps_friction_angle) - tan(wps_friction_angle_residual))*exp(-wps_friction_angle_rate*plasticstrain).  Set to zero for perfect plasticity");
+  params.addRangeCheckedParam<Real>("wps_dilation_angle_rate", 0, "wps_dilation_angle_rate>=0", "tan(dilation_angle) = tan(wps_dilation_angle_residual) + (tan(wps_dilation_angle) - tan(wps_dilation_angle_residual))*exp(-wps_dilation_angle_rate*plasticstrain).  Set to zero for perfect plasticity");
   params.addRequiredParam<RealVectorValue>("wps_normal_vector", "The normal vector to the weak plane");
   params.addParam<bool>("wps_normal_rotates", true, "The normal vector to the weak plane rotates with the large deformations");
   params.addRequiredRangeCheckedParam<Real>("wps_f_tol", "wps_f_tol>0", "Tolerance on the yield function: if yield function is less than this value then the stresses are admissible");
@@ -27,6 +33,12 @@ FiniteStrainWeakPlaneShear::FiniteStrainWeakPlaneShear(const std::string & name,
     _cohesion(getParam<Real>("wps_cohesion")),
     _tan_phi(std::tan(getParam<Real>("wps_friction_angle")*M_PI/180.0)),
     _tan_psi(std::tan(getParam<Real>("wps_dilation_angle")*M_PI/180.0)),
+    _cohesion_residual(parameters.isParamValid("wps_cohesion_residual") ? getParam<Real>("wps_cohesion_residual") : _cohesion),
+    _tan_phi_residual(parameters.isParamValid("wps_friction_angle_residual") ? std::tan(getParam<Real>("wps_friction_angle_residual")*M_PI/180.0) : _tan_phi),
+    _tan_psi_residual(parameters.isParamValid("wps_dilation_angle_residual") ? std::tan(getParam<Real>("wps_dilation_angle_residual")*M_PI/180.0) : _tan_psi),
+    _cohesion_rate(getParam<Real>("wps_cohesion_rate")),
+    _tan_phi_rate(getParam<Real>("wps_friction_angle_rate")),
+    _tan_psi_rate(getParam<Real>("wps_dilation_angle_rate")),
     _input_n(getParam<RealVectorValue>("wps_normal_vector")),
     _normal_rotates(getParam<bool>("wps_normal_rotates")),
     _f_tol(getParam<Real>("wps_f_tol")),
@@ -38,10 +50,16 @@ FiniteStrainWeakPlaneShear::FiniteStrainWeakPlaneShear(const std::string & name,
     _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
     _n(declareProperty<RealVectorValue>("weak_plane_normal")),
     _n_old(declarePropertyOld<RealVectorValue>("weak_plane_normal")),
+    _wps_internal(declareProperty<Real>("weak_plane_shear_internal")),
+    _wps_internal_old(declarePropertyOld<Real>("weak_plane_shear_internal")),
     _yf(declareProperty<Real>("weak_plane_shear_yield_function"))
 {
   if (_tan_phi < _tan_psi)
     mooseError("Weak-plane friction angle must not be less than weak-plane dilation angle");
+  if (_cohesion_residual < 0)
+    mooseError("Weak-plane residual cohesion must not be negative");
+  if (_tan_phi_residual < 0 || _tan_phi_residual > 1 || _tan_psi_residual < 0 || _tan_phi_residual < _tan_psi_residual)
+    mooseError("Weak-plane residual friction and dilation angles must lie in [0, 45], and dilation_residual <= friction_residual");
   if (_input_n.size() == 0)
     mooseError("Weak-plane normal vector must not have zero length");
   else
@@ -56,6 +74,8 @@ void FiniteStrainWeakPlaneShear::initQpStatefulProperties()
   _stress[_qp].zero();
   _plastic_strain[_qp].zero();
   _plastic_strain_old[_qp].zero();
+  _wps_internal[_qp] = 0;
+  _wps_internal_old[_qp] = 0;
 }
 
 void FiniteStrainWeakPlaneShear::computeQpStress()
@@ -75,7 +95,7 @@ void FiniteStrainWeakPlaneShear::computeQpStress()
   // perform the return-mapping algorithm
   RankTwoTensor tilde_sigma;
   RankTwoTensor tilde_epp;
-  returnMap(tilde_sigma_old, tilde_epp_old, tilde_incr, _elasticity_tensor[_qp], tilde_sigma, tilde_epp, _yf[_qp]);
+  returnMap(tilde_sigma_old, tilde_epp_old, _wps_internal_old[_qp], tilde_incr, _elasticity_tensor[_qp], tilde_sigma, tilde_epp, _wps_internal[_qp], _yf[_qp]);
 
 
   // rotate the stress and plastic strain back to original frame where _n is correctly oriented
@@ -101,7 +121,7 @@ void FiniteStrainWeakPlaneShear::computeQpStress()
 }
 
 void
-FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor &plastic_strain_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & sig, RankTwoTensor & plastic_strain, Real & f)
+FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor &plastic_strain_old, const Real &internal_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & sig, RankTwoTensor & plastic_strain, Real &internal, Real & f)
 {
   // the consistency parameter, must be non-negative
   // change in plastic strain in this timestep = flow_incr*flow_potential
@@ -114,11 +134,18 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
   // resid_ij = flow_incr*flow_dirn_ij - (plastic_strain - plastic_strain_old)
   RankTwoTensor resid;
 
+  // Newton-Raphson sets this "internal constraint" to zero
+  // ic = internal - internal_old - flow_incr;
+  Real ic;
+
   // change in the stress (sig) in a Newton-Raphson iteration
   RankTwoTensor ddsig;
 
   // change in the consistency parameter in a Newton-Raphson iteration
   Real dflow_incr = 0.0;
+
+  // change in the internal parameter in a Newton-Raphson iteration
+  Real dinternal = 0.0;
 
   // convenience variable that holds the change in plastic strain incurred during the return
   // delta_dp = plastic_strain - plastic_strain_old
@@ -128,11 +155,17 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
   // d(yieldFunction)/d(stress)
   RankTwoTensor df_dsig;
 
+  // d(yieldFunction)/d(internal)
+  Real df_di;
+
   // d(resid_ij)/d(sigma_kl)
   RankFourTensor dr_dsig;
 
   // dr_dsig_inv_ijkl*dr_dsig_klmn = 0.5*(de_ij de_jn + de_ij + de_jm), where de_ij = 1 if i=j, but zero otherwise
   RankFourTensor dr_dsig_inv;
+
+  // d(resid_ij)/d(internal)
+  RankTwoTensor dr_di;
 
   // Newton-Raphson residual-squared
   Real nr_res2;
@@ -145,8 +178,9 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
   // This is the elastic-predictor
   sig = sig_old + E_ijkl * delta_d;  // the trial stress
   plastic_strain = plastic_strain_old;
+  internal = internal_old;
 
-  f = yieldFunction(sig);
+  f = yieldFunction(sig, internal);
   if (f > _f_tol)
   {
     // the sig just calculated is inadmissable.  We must return to the yield surface.
@@ -154,15 +188,16 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
 
     delta_dp.zero();
 
-    sig = sig_old + E_ijkl * delta_d;  // this is the elastic predictor
+    sig = sig_old + E_ijkl * delta_d;  // this is the elastic predictor, which is initial-guess to NR
 
-    flow_dirn = flowPotential(sig);
+    flow_dirn = flowPotential(sig, internal);
 
     // need the following to be zero
     resid = flow_dirn * flow_incr - delta_dp;
-    f = yieldFunction(sig);
+    f = yieldFunction(sig, internal);
+    ic = internal - internal_old - flow_incr;
 
-    nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2));
+    nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2) + std::pow(ic/_r_tol, 2));
 
 
     while (nr_res2 > 0.5 && iter < static_cast<unsigned>(_max_iter))
@@ -171,13 +206,16 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
 
       RankFourTensor E_inv = E_ijkl.invSymm();
 
-      df_dsig = dyieldFunction_dstress(sig, _tan_phi);
-      dr_dsig = dflowPotential_dstress(sig)*flow_incr + E_inv;
+      df_dsig = dyieldFunction_dstress(sig, tan_phi(internal));
+      df_di = dyieldFunction_dinternal(sig, internal);
+      dr_dsig = dflowPotential_dstress(sig, internal)*flow_incr + E_inv;
+      dr_di = dflowPotential_dinternal(sig, internal)*flow_incr;
 
       /**
        * The linear system is
-       *   ( dr_dsig  flow_dirn )( ddsig       )   ( - resid )
-       *   ( df_dsig     0      )( dflow_incr  ) = ( - f     )
+       *   ( dr_dsig  flow_dirn dr_di)( ddsig       )   ( - resid )
+       *   ( df_dsig     0      df_di)( dflow_incr  ) = ( - f     )
+       *   ( 0           -1       1  )( dinternal   ) = ( - ic    )
        */
 
       //Moose::out << "iter = " << iter << " should be pos = " << df_dsig.doubleContraction(E_ijkl * flow_dirn) << "\n";
@@ -189,7 +227,9 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
        * solve by hand.
        */
       dflow_incr = (f - df_dsig.doubleContraction(dr_dsig_inv * resid)) / df_dsig.doubleContraction(dr_dsig_inv * flow_dirn);
-      ddsig = dr_dsig_inv * (-resid - flow_dirn * dflow_incr);  // from solving the top row of linear system, given dflow_incr
+      dflow_incr = (f - df_dsig.doubleContraction(dr_dsig_inv * (resid - dr_di*ic))) / (df_dsig.doubleContraction(dr_dsig_inv * (flow_dirn + dr_di)) - df_di);
+      dinternal = -ic + dflow_incr;
+      ddsig = dr_dsig_inv * (-resid - flow_dirn*dflow_incr - dr_di*dinternal);  // from solving the top row of linear system, given dflow_incr and dinternal
 
       // perform a line search
       // Want to decrease nr_res2
@@ -198,28 +238,31 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
       Real lam_min = 1E-7; // minimum value of lam allowed - perhaps this should be dynamically calculated?
       bool line_searching = true;
       Real f0 = nr_res2;
-      Real slope = resid.doubleContraction(dr_dsig*ddsig + flow_dirn*dflow_incr)/std::pow(_r_tol, 2) + f*df_dsig.doubleContraction(ddsig)/std::pow(_f_tol, 2);
+      Real slope = resid.doubleContraction(dr_dsig*ddsig + flow_dirn*dflow_incr + dr_di*dinternal)/std::pow(_r_tol, 2) + f*(df_dsig.doubleContraction(ddsig) + df_di*dinternal)/std::pow(_f_tol, 2) + ic*(-dflow_incr + dinternal)/std::pow(_r_tol, 2);
       if (slope > 0)
         mooseError("Roundoff problem in weak-plane line search");
-      Real ls_flow_incr;
-      RankTwoTensor ls_delta_dp;
-      RankTwoTensor ls_sig;
-      Real tmp_lam;
-      Real f2;
-      Real lam2;
+      Real ls_flow_incr; // flow_incr during the line-search
+      RankTwoTensor ls_delta_dp; // delta_dp during the line-search
+      Real ls_internal; // internal parameter during the line-search
+      RankTwoTensor ls_sig; // stress during the line-search
+      Real tmp_lam; // cached value of lam used in quadratic & cubic line search
+      Real f2; // cached value of f = nr_res2 used in the cubic in the line search
+      Real lam2; // cached value of lam used in the cubic in the line search
       while (line_searching)
       {
         // update the variables using this line-search parameter
         ls_flow_incr = flow_incr + dflow_incr*lam;
         ls_delta_dp = delta_dp - (E_inv*ddsig)*lam;
+	ls_internal = internal + dinternal*lam;
         ls_sig = sig + ddsig*lam;
 
         // calculate the new yield function and residual
-        flow_dirn = flowPotential(ls_sig);
+        flow_dirn = flowPotential(ls_sig, ls_internal);
         resid = flow_dirn*ls_flow_incr - ls_delta_dp;
-        f = yieldFunction(ls_sig);
+        f = yieldFunction(ls_sig, ls_internal);
+	ic = ls_internal - internal_old - ls_flow_incr;
 
-        nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2));
+	nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2) + std::pow(ic/_r_tol, 2));
 
         if (nr_res2 < f0 + 1E-4*lam*slope)
         {
@@ -234,11 +277,13 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
           lam = 0.1;
           ls_flow_incr = flow_incr + dflow_incr*lam;
           ls_delta_dp = delta_dp - (E_inv*ddsig)*lam;
+	  ls_internal = internal + dinternal*lam;
           ls_sig = sig + ddsig*lam;
-          flow_dirn = flowPotential(ls_sig);
+          flow_dirn = flowPotential(ls_sig, ls_internal);
           resid = flow_dirn*ls_flow_incr - ls_delta_dp;
-          f = yieldFunction(ls_sig);
-          nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2));
+          f = yieldFunction(ls_sig, ls_internal);
+	  ic = ls_internal - internal_old - ls_flow_incr;
+	  nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2) + std::pow(ic/_r_tol, 2));
           line_searching = false;
           break;
         }
@@ -277,6 +322,7 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
 
       flow_incr = ls_flow_incr;
       delta_dp = ls_delta_dp;
+      internal = ls_internal;
       sig = ls_sig;
 
 
@@ -287,6 +333,7 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
     if (iter >= static_cast<unsigned>(_max_iter))
     {
       sig = sig_old;
+      internal = internal_old;
       _console << "Too many iterations in Weak Plane Shear.  f = " << f << ", |resid| = " << resid.L2norm() << ", condition = " << std::abs(f)/_f_tol + resid.L2norm()/_r_tol << "\n";
       return;
     }
@@ -297,10 +344,10 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
 
 
 Real
-FiniteStrainWeakPlaneShear::yieldFunction(const RankTwoTensor &stress)
+FiniteStrainWeakPlaneShear::yieldFunction(const RankTwoTensor &stress, const Real internal_param)
 {
   // note that i explicitly symmeterise in preparation for Cosserat
-  return std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2) + std::pow(_small_smoother, 2)) + stress(2,2)*_tan_phi - _cohesion;
+  return std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2) + std::pow(_small_smoother, 2)) + stress(2,2)*tan_phi(internal_param) - cohesion(internal_param);
 }
 
 
@@ -327,15 +374,24 @@ FiniteStrainWeakPlaneShear::dyieldFunction_dstress(const RankTwoTensor & stress,
   return deriv;
 }
 
-RankTwoTensor
-FiniteStrainWeakPlaneShear::flowPotential(const RankTwoTensor & stress)
+
+Real
+FiniteStrainWeakPlaneShear::dyieldFunction_dinternal(const RankTwoTensor &stress, const Real internal_param)
 {
-  return dyieldFunction_dstress(stress, _tan_psi);
+  return stress(2,2)*dtan_phi(internal_param) - dcohesion(internal_param);
+}
+
+
+
+RankTwoTensor
+FiniteStrainWeakPlaneShear::flowPotential(const RankTwoTensor & stress, const Real internal_param)
+{
+  return dyieldFunction_dstress(stress, tan_psi(internal_param));
 }
 
 
 RankFourTensor
-FiniteStrainWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor & stress)
+FiniteStrainWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor & stress, const Real /*internal_param*/)
 {
   RankFourTensor d2tau; // the constructor zeroes this
 
@@ -365,4 +421,49 @@ FiniteStrainWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor & stress)
   d2tau(2, 1, 2, 1) += 0.25/tau;
 
   return d2tau;
+}
+
+RankTwoTensor
+FiniteStrainWeakPlaneShear::dflowPotential_dinternal(const RankTwoTensor & /*stress*/, const Real internal_param)
+{
+  RankTwoTensor deriv; // constructor zeroes this
+  deriv(2, 2) = dtan_psi(internal_param);
+  return deriv;
+}
+
+
+Real
+FiniteStrainWeakPlaneShear::cohesion(const Real internal_param)
+{
+  return _cohesion_residual + (_cohesion - _cohesion_residual)*std::exp(-_cohesion_rate*internal_param);
+}
+
+Real
+FiniteStrainWeakPlaneShear::dcohesion(const Real internal_param)
+{
+  return -_cohesion_rate*(_cohesion - _cohesion_residual)*std::exp(-_cohesion_rate*internal_param);
+}
+
+Real
+FiniteStrainWeakPlaneShear::tan_phi(const Real internal_param)
+{
+  return _tan_phi_residual + (_tan_phi - _tan_phi_residual)*std::exp(-_tan_phi_rate*internal_param);
+}
+
+Real
+FiniteStrainWeakPlaneShear::dtan_phi(const Real internal_param)
+{
+  return -_tan_phi_rate*(_tan_phi - _tan_phi_residual)*std::exp(-_tan_phi_rate*internal_param);
+}
+
+Real
+FiniteStrainWeakPlaneShear::tan_psi(const Real internal_param)
+{
+  return _tan_psi_residual + (_tan_psi - _tan_psi_residual)*std::exp(-_tan_psi_rate*internal_param);
+}
+
+Real
+FiniteStrainWeakPlaneShear::dtan_psi(const Real internal_param)
+{
+  return -_tan_psi_rate*(_tan_psi - _tan_psi_residual)*std::exp(-_tan_psi_rate*internal_param);
 }
