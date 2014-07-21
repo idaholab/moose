@@ -78,7 +78,7 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
     is = data[ind++];
     ie = data[ind++];
 
-    for (unsigned int i = is; i <= ie; ++i)
+    for (int i = is; i <= ie; ++i)
       _gss[_qp][i-1] = _gprops[ind];
 
     if (ie == _nss)
