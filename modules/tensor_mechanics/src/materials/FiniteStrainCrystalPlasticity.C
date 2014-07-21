@@ -274,7 +274,7 @@ void
 FiniteStrainCrystalPlasticity::getSlipSystems()
 {
   unsigned int i, j, k;
-  Real sd[3*_nss], sn[3*_nss];
+  std::vector<Real> sd(3*_nss), sn(3*_nss);
   Real vec[3];
   std::ifstream fileslipsys;
 
