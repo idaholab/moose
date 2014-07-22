@@ -45,6 +45,7 @@ InputParameters validParams<MechanicalContactConstraint>()
   params.addParam<Real>("tension_release", 0.0, "Tension release threshold.  A node in contact will not be released if its tensile load is below this value.  No tension release if negative.");
 
   params.addParam<std::string>("formulation", "default", "The contact formulation");
+  params.addParam<bool>("normalize_penalty", false, "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
   return params;
 }
 
@@ -53,6 +54,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const std::string & nam
   _component(getParam<unsigned int>("component")),
   _model(contactModel(getParam<std::string>("model"))),
   _formulation(contactFormulation(getParam<std::string>("formulation"))),
+  _normalize_penalty(getParam<bool>("normalize_penalty")),
   _penalty(getParam<Real>("penalty")),
   _friction_coefficient(getParam<Real>("friction_coefficient")),
   _tension_release(getParam<Real>("tension_release")),
@@ -150,17 +152,9 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
     }
 
     const Node * node = pinfo->_node;
-    unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
-    Real area = (*_aux_solution)( dof );
-    if (area == 0)
-    {
-      if (_t_step > 1)
-        mooseError("Zero nodal area found");
-      else
-        area = 1; // Avoid divide by zero during initialization
-    }
+    const Real area = nodalArea(*pinfo);
 
-    if (_model == CM_FRICTIONLESS ||
+    if ((_model == CM_FRICTIONLESS && _formulation == CF_DEFAULT) ||
         (_model == CM_COULOMB && _formulation == CF_DEFAULT))
     {
 
@@ -197,7 +191,8 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
         if (hpit == has_penetrated.end())
           has_penetrated.insert(slave_node_num);
       }
-      else if ((pinfo->_contact_force * pinfo->_normal) / area < 0) //In contact and in compression
+      else if (_tension_release < 0 ||
+               (pinfo->_contact_force * pinfo->_normal) / area < _tension_release) //In contact and below tension release threshold
       {
         // Do nothing.
       }
@@ -221,7 +216,8 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
     if (_formulation == CF_AUGMENTED_LAGRANGE && hpit != has_penetrated.end())
     {
       const RealVectorValue distance_vec(_mesh.node(slave_node_num) - pinfo->_closest_point);
-      lagrange_multiplier[slave_node_num] += _penalty * pinfo->_normal * distance_vec;
+      Real penalty = getPenalty(*pinfo);
+      lagrange_multiplier[slave_node_num] += penalty * pinfo->_normal * distance_vec;
     }
   }
 }
@@ -278,7 +274,8 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
     res_vec(i) = _residual_copy(dof_number);
   }
   RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
-  RealVectorValue pen_force(_penalty * distance_vec);
+  const Real penalty = getPenalty(*pinfo);
+  RealVectorValue pen_force(penalty * distance_vec);
   RealVectorValue tan_residual(0,0,0);
 
   switch (_model)
@@ -312,7 +309,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
         case CF_PENALTY:
         {
           distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.node(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
-          pen_force = _penalty * distance_vec;
+          pen_force = penalty * distance_vec;
 
           // Frictional capacity
           // const Real capacity( _friction_coefficient * (pen_force * pinfo->_normal < 0 ? -pen_force * pinfo->_normal : 0) );
@@ -387,10 +384,9 @@ MechanicalContactConstraint::computeQpResidual(Moose::ConstraintType type)
     case Moose::Slave:
       if (_formulation == CF_DEFAULT)
       {
-        //Real distance = (*_current_node)(_component) - pinfo->_closest_point(_component);
-        //Real pen_force = _penalty * distance;
         RealVectorValue distance_vec(*_current_node - pinfo->_closest_point);
-        RealVectorValue pen_force(_penalty * distance_vec);
+        const Real penalty = getPenalty(*pinfo);
+        RealVectorValue pen_force(penalty * distance_vec);
 
         if (_model == CM_FRICTIONLESS)
           resid += pinfo->_normal(_component) * pinfo->_normal * pen_force;
@@ -412,6 +408,8 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
 {
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
+  const Real penalty = getPenalty(*pinfo);
+
   switch (type)
   {
     case Moose::SlaveSlave:
@@ -424,12 +422,12 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             {
               double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
               //TODO:  Need off-diagonal term/s
-              return (-curr_jac + _phi_slave[_j][_qp] * _penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
+              return (-curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
               //TODO:  Need off-diagonal terms
-              return _phi_slave[_j][_qp] * _penalty * _test_slave[_i][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
+              return _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
             default:
               mooseError("Invalid contact formulation");
           }
@@ -440,11 +438,11 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             case CF_DEFAULT:
             {
               double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
-              return -curr_jac + _phi_slave[_j][_qp] * _penalty * _test_slave[_i][_qp];
+              return -curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp];
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
-              return _phi_slave[_j][_qp] * _penalty * _test_slave[_i][_qp];
+              return _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp];
             default:
               mooseError("Invalid contact formulation");
           }
@@ -463,12 +461,12 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               Node * curr_master_node = _current_master->get_node(_j);
               double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), curr_master_node->dof_number(0, _vars(_component), 0));
               //TODO:  Need off-diagonal terms
-              return (-curr_jac - _phi_master[_j][_qp] * _penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
+              return (-curr_jac - _phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
               //TODO:  Need off-diagonal terms
-              return -_phi_master[_j][_qp] * _penalty * _test_slave[_i][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
+              return -_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
             default:
               mooseError("Invalid contact formulation");
           }
@@ -480,11 +478,11 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             {
               Node * curr_master_node = _current_master->get_node(_j);
               double curr_jac = (*_jacobian)( _current_node->dof_number(0, _vars(_component), 0), curr_master_node->dof_number(0, _vars(_component), 0));
-              return -curr_jac - _phi_master[_j][_qp] * _penalty * _test_slave[_i][_qp];
+              return -curr_jac - _phi_master[_j][_qp] * penalty * _test_slave[_i][_qp];
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
-              return -_phi_master[_j][_qp] * _penalty * _test_slave[_i][_qp];
+              return -_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp];
             default:
               mooseError("Invalid contact formulation");
           }
@@ -509,7 +507,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
               //TODO:  Need off-diagonal terms
-              return -_test_master[_i][_qp] * _penalty * _phi_slave[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
+              return -_test_master[_i][_qp] * penalty * _phi_slave[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
             default:
               mooseError("Invalid contact formulation");
           }
@@ -524,7 +522,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
-              return -_test_master[_i][_qp] * _penalty * _phi_slave[_j][_qp];
+              return -_test_master[_i][_qp] * penalty * _phi_slave[_j][_qp];
             default:
               mooseError("Invalid contact formulation");
           }
@@ -543,7 +541,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
               //TODO: Need off-diagonal terms
-              return _test_master[_i][_qp] * _penalty * _phi_master[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
+              return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
             default:
               mooseError("Invalid contact formulation");
           }
@@ -555,7 +553,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               return 0;
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
-              return _test_master[_i][_qp] * _penalty * _phi_master[_j][_qp];
+              return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp];
             default:
               mooseError("Invalid contact formulation");
           }
@@ -565,4 +563,37 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
   }
 
   return 0;
+}
+
+Real
+MechanicalContactConstraint::nodalArea(PenetrationInfo & pinfo)
+{
+  const Node * node = pinfo._node;
+
+  unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
+
+  Real area = (*_aux_solution)( dof );
+  if (area == 0)
+  {
+    if (_t_step > 1)
+    {
+      mooseError("Zero nodal area found");
+    }
+    else
+    {
+      area = 1; // Avoid divide by zero during initialization
+    }
+  }
+  return area;
+}
+
+Real
+MechanicalContactConstraint::getPenalty(PenetrationInfo & pinfo)
+{
+  Real penalty = _penalty;
+  if (_normalize_penalty)
+  {
+    penalty *= nodalArea(pinfo);
+  }
+  return penalty;
 }
