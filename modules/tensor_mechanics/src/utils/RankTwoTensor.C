@@ -500,9 +500,8 @@ RankTwoTensor::symmetricEigenvalues(std::vector<Real> & eigvals)
   int nd = N;
   int lwork = 66*nd;
   int info;
-  double a[nd*nd];
-  double w[nd];
-  double work[lwork];
+  std::vector<double> a(nd*nd);
+  std::vector<double> work(lwork);
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -510,7 +509,7 @@ RankTwoTensor::symmetricEigenvalues(std::vector<Real> & eigvals)
 
   // compute the eigenvalues only (first "N")
   // assume upper trianlge of a is stored (second "U")
-  LAPACKsyev_("N", "U", &nd, a, &nd, &eigvals[0], work, &lwork, &info);
+  LAPACKsyev_("N", "U", &nd, &a[0], &nd, &eigvals[0], &work[0], &lwork, &info);
 
   if (info != 0)
     mooseError("In computing the eigenvalues of a rank-2 tensor, the PETSC LAPACK syev routine returned error code " << info);

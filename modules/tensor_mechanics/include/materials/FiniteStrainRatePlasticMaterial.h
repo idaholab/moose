@@ -19,6 +19,10 @@ protected:
   virtual void computeQpStress();
   virtual void initQpStatefulProperties();
 
+  // Avoid warnings about hidden overloaded virtual function
+  using FiniteStrainPlasticMaterial::returnMap;
+  using FiniteStrainPlasticMaterial::getJac;
+
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, RankTwoTensor &);

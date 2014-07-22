@@ -165,7 +165,7 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
     nr_res2 = 0.5*(std::pow(f/_f_tol, 2) + std::pow(resid.L2norm()/_r_tol, 2));
 
 
-    while (nr_res2 > 0.5 && iter < _max_iter)
+    while (nr_res2 > 0.5 && iter < static_cast<unsigned>(_max_iter))
     {
       iter++;
 
@@ -284,7 +284,7 @@ FiniteStrainWeakPlaneShear::returnMap(const RankTwoTensor & sig_old, const RankT
       //sig.print();
     }
 
-    if (iter >= _max_iter)
+    if (iter >= static_cast<unsigned>(_max_iter))
     {
       sig = sig_old;
       _console << "Too many iterations in Weak Plane Shear.  f = " << f << ", |resid| = " << resid.L2norm() << ", condition = " << std::abs(f)/_f_tol + resid.L2norm()/_r_tol << "\n";
