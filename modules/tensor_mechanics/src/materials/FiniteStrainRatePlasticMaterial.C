@@ -31,6 +31,7 @@ FiniteStrainRatePlasticMaterial::FiniteStrainRatePlasticMaterial(const std::stri
 void
 FiniteStrainRatePlasticMaterial::initQpStatefulProperties()
 {
+  _total_strain[_qp].zero();
   _elastic_strain[_qp].zero();
   _stress[_qp].zero();
   _plastic_strain[_qp].zero();
@@ -43,9 +44,6 @@ FiniteStrainRatePlasticMaterial::computeQpStress()
 {
   RankTwoTensor dp,sig;
 
-  //In elastic problem, all the strain is elastic
-  _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
-
   //Obtain previous plastic rate of deformation tensor
   dp=_plastic_strain_old[_qp];
 
@@ -55,19 +53,35 @@ FiniteStrainRatePlasticMaterial::computeQpStress()
   returnMap(_stress_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], dp, sig);
   _stress[_qp] = sig;
 
+  //Rotate the stress to the current configuration
+  _stress[_qp] = _rotation_increment[_qp] * _stress[_qp] * _rotation_increment[_qp].transpose();
+
   //Updates current plastic rate of deformation tensor
   _plastic_strain[_qp] = dp;
 
   //Evaluate and update current equivalent plastic strain
   _eqv_plastic_strain[_qp] = std::pow(2.0/3.0,0.5) * dp.L2norm();
 
+  //Calculate elastic strain increment
+  RankTwoTensor delta_ee = _strain_increment[_qp]-(_plastic_strain[_qp]-_plastic_strain_old[_qp]);
 
-  //Rotate the stress to the current configuration
-  _stress[_qp] = _rotation_increment[_qp] * _stress[_qp] * _rotation_increment[_qp].transpose();
+  //Update elastic strain tensor in intermediate configuration
+  _elastic_strain[_qp] = _elastic_strain_old[_qp] + delta_ee;
+
+  //Rotate elastic strain tensor to the current configuration
+  _elastic_strain[_qp] = _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();
 
   //Rotate to plastic rate of deformation tensor the current configuration
   _plastic_strain[_qp] = _rotation_increment[_qp] * _plastic_strain[_qp] * _rotation_increment[_qp].transpose();
+
+  //Update strain in intermediate configuration
+  _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+
+  //Rotate strain to current configuration
+  _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+
 }
+
 
 /*
  *Solves for incremental plastic rate of deformation tensor and stress in unrotated frame.

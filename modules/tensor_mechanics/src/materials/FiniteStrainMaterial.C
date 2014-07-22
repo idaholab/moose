@@ -14,6 +14,7 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
     TensorMechanicsMaterial(name, parameters),
     _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
     _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
+    _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
     _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
     _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
     _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
@@ -24,6 +25,7 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
 void
 FiniteStrainMaterial::initQpStatefulProperties()
 {
+  _total_strain[_qp].zero();
   _elastic_strain[_qp].zero();
   _stress[_qp].zero();
 }
