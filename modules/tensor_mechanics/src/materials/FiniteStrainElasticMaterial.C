@@ -23,8 +23,14 @@ FiniteStrainElasticMaterial::FiniteStrainElasticMaterial(const std::string & nam
 
 void FiniteStrainElasticMaterial::computeQpStress()
 {
-  //In elastic problem, all the strain is elastic
-  _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
+  //Update strain in intermediate configuration
+  _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+
+  //Rotate strain to current configuration
+  _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+
+  //For elastic problems elastic strain = total strain
+  _elastic_strain[_qp]=_total_strain[_qp];
 
   // stress = C * e
   _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp]; //Calculate stress in intermediate configruation
