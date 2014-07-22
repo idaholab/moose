@@ -15,7 +15,7 @@
 #ifndef MOOSERANDOM_H
 #define MOOSERANDOM_H
 
-#include "mtwist.h"
+#include "randistrs.h"
 
 #include "MooseError.h"
 
@@ -60,6 +60,18 @@ public:
   }
 
   /**
+   * This method returns the next random number (double format) from the generator,
+   * drawn from a normal distribution centered around mean, with a width of sigma
+   * @param mean     center of the random number distribution
+   * @param sigma    width  of the random number distribution
+   * @return      the next random number following a normal distribution of width sigma around mean with 64-bit precision
+   */
+  static inline double randNormal(double mean, double sigma)
+  {
+    return rd_normal(mean, sigma);
+  }
+
+  /**
    * This method returns the next random number (long format) from the generator
    * @return      the next random number in the range [0,max(uinit32_t)) with 32-bit number
    */
@@ -87,6 +99,20 @@ public:
   {
     mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
     return mts_ldrand(&(_states[i]));
+  }
+
+  /**
+   * This method returns the next random number (double format) from the specified generator,
+   * drawn from a normal distribution centered around mean, with a width of sigma
+   * @param i     the index of the generator
+   * @param mean     center of the random number distribution
+   * @param sigma    width  of the random number distribution
+   * @return      the next random number following a normal distribution of width sigma around mean with 64-bit precision
+   */
+  inline double randNormal(unsigned int i, double mean, double sigma)
+  {
+    mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
+    return rds_normal(&(_states[i]), mean, sigma);
   }
 
   /**
