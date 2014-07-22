@@ -27,10 +27,12 @@ protected:
 
   /// phase a concentration
   std::string _ca_name;
+  unsigned int _ca_var;
   VariableValue & _ca;
 
   /// phase b concentration
   std::string _cb_name;
+  unsigned int _cb_var;
   VariableValue & _cb;
 
   /// Value of the switching function \f$ h(\eta) \f$

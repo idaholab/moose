@@ -13,8 +13,10 @@ InputParameters validParams<KKSACBulkC>()
 KKSACBulkC::KKSACBulkC(const std::string & name, InputParameters parameters) :
     KKSACBulkBase(name, parameters),
     _ca_name(getVar("ca", 0)->name()),
+    _ca_var(coupled("ca")),
     _ca(coupledValue("ca")),
     _cb_name(getVar("cb", 0)->name()),
+    _cb_var(coupled("cb")),
     _cb(coupledValue("cb")),
     _prop_h(getMaterialProperty<Real>(_h_name)),
     _prop_dFadca(getDerivative<Real>(_Fa_name, _ca_name)),
@@ -55,7 +57,27 @@ KKSACBulkC::computeDFDOP(PFFunctionType type)
 Real
 KKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  // get the coupled variable jvar is referring to
+  // The root of these issues may be that the equations need dF/dc, which happens to be dFa/dca
+  // We should really calculate d^2F/dc*dca which is NOT d^2Fa/dca*dca!!!!
+
+  // for now ignore these terms
+  return 0.0;
+
+  // treat ca and cb specially, as they appear in the residual
+  if (jvar == _ca_var)
+  {
+    return _test[_i][_qp] * _phi[_j][_qp] * _prop_dh[_qp] * (
+        _ca[_qp] * _prop_d2Fadca2[_qp] + _prop_dFadca[_qp]
+      - _prop_dFadca[_qp]
+    ); // Not correct yet
+  }
+
+  if (jvar == _cb_var)
+  {
+    return 0.0;
+  }
+
+  //  for all other vars get the coupled variable jvar is referring to
   unsigned int cvar;
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
@@ -64,5 +86,6 @@ KKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
   Real res = _prop_dh[_qp] * (  (*_derivatives_Fa[cvar])[_qp]
                               - (*_derivatives_Fb[cvar])[_qp])
                            * _phi[_j][_qp];
-  return res * _test[_j][_qp];
+
+  return res * _test[_i][_qp];
 }
