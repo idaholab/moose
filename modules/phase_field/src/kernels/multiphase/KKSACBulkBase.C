@@ -7,8 +7,8 @@ InputParameters validParams<KKSACBulkBase>()
   params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order parameter 'eta' as the non-linear variable");
   params.addRequiredParam<std::string>("fa_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
   params.addRequiredParam<std::string>("fb_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
-
   params.addParam<std::string>("h_name", "h", "Base name for the switching function h(eta)");
+  params.addCoupledVar("args", "coupled variables i.e. concentrations");
   return params;
 }
 

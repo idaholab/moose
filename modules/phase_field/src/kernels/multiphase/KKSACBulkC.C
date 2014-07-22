@@ -60,6 +60,7 @@ KKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
+  // The following stuff returns 0.0,  which is wrong!
   Real res = _prop_dh[_qp] * (  (*_derivatives_Fa[cvar])[_qp]
                               - (*_derivatives_Fb[cvar])[_qp])
                            * _phi[_j][_qp];
