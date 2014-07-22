@@ -33,9 +33,11 @@ public:
 
   double getVariable(const char * param_name, const char * tool_alias);
   double getVariable(const std::string param_name, const std::string tool_alias);
-
-  void updateVariable(const char * param_name, double new_value, const char * tool_alias);
-  void updateVariable(const std::string param_name, double new_value, const std::string tool_alias);
+    
+  //void updateVariable(const char * param_name, double new_value, const char * tool_alias);
+  //void updateVariable(const std::string param_name, double new_value, const std::string tool_alias);
+  void updateVariable(const std::string tool_alias, double new_value, const std::string param_name);
+  void updateVariable(const char * tool_alias ,double new_value, const char * param_name);
 
   double compute(const char *tool_alias, double value);
   double compute(const std::string tool_alias, double value);

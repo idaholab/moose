@@ -111,6 +111,7 @@ private:
   std::vector<double> _mu;
   std::vector<std::vector<double> > _cov_matrix;
   std::vector<std::vector<double> > _inverse_cov_matrix;
+  std::vector<std::vector<double> > _cholesky_C;
   double _determinant_cov_matrix;
 };
 

@@ -174,7 +174,12 @@ BasicMultivariateNormal::BasicMultivariateNormal(const char * data_filename, std
 	  std::cerr<< "_inverseCovMatrix completed"<< std::endl;
 
 	  _determinant_cov_matrix = getDeterminant(_cov_matrix);
+
 	  std::cerr<< "_determinantCovMatrix completed";
+
+	  std::cout<< "choleskyDecomposition initiated";
+	  _cholesky_C = choleskyDecomposition(_cov_matrix);
+	  std::cout<< "choleskyDecomposition completed";
 
 	  if(rows != columns)
 	          throwError("MultivariateNormal error: covariance matrix in " << data_filename << " is not a square matrix.");
@@ -250,10 +255,8 @@ double BasicMultivariateNormal::Cdf(std::vector<double> x){
 	std::vector<double> e (dimensions);
 	std::vector<double> f (dimensions);
 
-	std::vector<std::vector<double> > cholesky_C = choleskyDecomposition(_cov_matrix);
-
 	d[0] = 0.0;
-	e[0] = phi(x[0]/cholesky_C[0][0]);
+	e[0] = phi(x[0]/_cholesky_C[0][0]);
 	f[0] = e[0] - d[0];
 
 	boost::random::mt19937 rng;
@@ -278,7 +281,7 @@ double BasicMultivariateNormal::Cdf(std::vector<double> x){
 			double tempE = x.at(i);
 
 			for (int j=0; j<(i-1); j++)
-				tempE = tempE - cholesky_C[i][j] * y.at(j) / cholesky_C[i][i];
+				tempE = tempE - _cholesky_C[i][j] * y.at(j) / _cholesky_C[i][i];
 
 			e.at(i)=phi(tempE);
 			d.at(i)=0.0;
@@ -302,7 +305,7 @@ BasicMultivariateNormal::~BasicMultivariateNormal(){
 }
 
 double BasicMultivariateNormal::phi(double x){
-	double value = 0.5 * (1 + boost::math::erf<double>(x/sqrt(2)));
+	double value = 0.5 * (1.0 + boost::math::erf<double>(x/sqrt(2.0)));
 	//double value = 0.5 * (boost::math::erf<double>(x/sqrt(2)));
 	return value;
 }
@@ -411,6 +414,7 @@ std::vector<std::vector<double> > BasicMultivariateNormal::choleskyDecomposition
 			m1[r*dimensions+c] = matrix[r][c];
 
 	double *c1 = cholesky(m1, dimensions);
+	std::cout << "choleskyDecomposition" << std::endl;
 	show_matrix(c1,dimensions);
 
 	for (int r=0; r<dimensions; r++){
@@ -424,6 +428,8 @@ std::vector<std::vector<double> > BasicMultivariateNormal::choleskyDecomposition
 }
 
 void BasicMultivariateNormal::show_matrix(double *A, int n) {
+	printf("Cholesky Decompostion");
+	printf("\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++)
             printf("%2.5f ", A[i * n + j]);

@@ -6,6 +6,8 @@
  */
 
 #include "CrowTools.h"
+#include <iostream>
+#include <stdio.h>
 
 template<>
 InputParameters validParams<CrowTools>(){
@@ -49,7 +51,7 @@ CrowTools::getVariableNames(){
 
 
 void
-CrowTools::updateVariable(std::string variable_name, double & new_value)
+CrowTools::updateVariable(const std::string variable_name, double new_value)
 {
   if(_tool_parameters.find(variable_name) != _tool_parameters.end()){
     // we are sure the variable_name is already present in the mapping =>
@@ -59,6 +61,11 @@ CrowTools::updateVariable(std::string variable_name, double & new_value)
   else{
     mooseError("Parameter " << variable_name << " was not found in CrowTool type " << _type << ".");
   }
+}
+
+void
+CrowTools::updateVariable(const char * variable_name, double new_value){
+    updateVariable(std::string(variable_name), new_value);
 }
 
 double

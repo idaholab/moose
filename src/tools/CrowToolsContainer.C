@@ -10,6 +10,8 @@
 #include <cstdlib>
 #include <vector>
 #include <map>
+#include <iostream>
+#include <stdio.h>
 
 #ifndef mooseError
 #define mooseError(msg) { std::cerr << "\n\n" << msg << "\n\n"; }
@@ -90,22 +92,31 @@ CrowToolsContainer::getToolVariableNames(const std::string tool_alias){
   }
   mooseError("CrowTool " << tool_alias << " not found in CrowTools container (getCrowToolVariableNames)");
 }
+
 void
-CrowToolsContainer::updateVariable(const char * param_name,double new_value,const char *tool_alias){
-  updateVariable(std::string(param_name),new_value,std::string(tool_alias));
+CrowToolsContainer::updateVariable(const char * tool_alias ,double new_value, const char * param_name){
+  std::cout<< "step 1" << std::endl;
+  updateVariable(std::string(tool_alias),new_value,std::string(param_name));
 }
 
 void
-CrowToolsContainer::updateVariable(const std::string param_name,double new_value,const std::string tool_alias){
+CrowToolsContainer::updateVariable(const std::string tool_alias, double new_value, const std::string param_name){
     if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
+       std::cout<< "step 2" << std::endl;
+       std::cout << "param_name: " << param_name << std::endl;
+       std::cout << "new_value: "  << new_value  << std::endl;
+       std::cout << "tool_alias: " << tool_alias << std::endl;
        CrowTools * tool = _tool_by_name.find(tool_alias)->second;
        tool->updateVariable(param_name, new_value);
     }
     else{
+       std::cout << "param_name: " << param_name << std::endl;
+       std::cout << "new_value: "  << new_value  << std::endl;
+       std::cout << "tool_alias: " << tool_alias << std::endl;
        mooseError("CrowTool " + tool_alias + " was not found in CrowTools container (update variable)");
-
     }
 }
+
 
 double
 CrowToolsContainer::compute(const char *tool_alias, double value){
