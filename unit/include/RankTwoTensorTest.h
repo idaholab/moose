@@ -39,6 +39,7 @@ class RankTwoTensorTest : public CppUnit::TestFixture
   CPPUNIT_TEST( dtraceTest );
   CPPUNIT_TEST( dsecondInvariantTest );
   CPPUNIT_TEST( ddetTest );
+  CPPUNIT_TEST( dsymmetricEigenvaluesTest );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -59,6 +60,7 @@ public:
   void dtraceTest();
   void dsecondInvariantTest();
   void ddetTest();
+  void dsymmetricEigenvaluesTest();
 
  private:
   RankTwoTensor _m0;
