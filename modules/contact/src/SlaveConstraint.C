@@ -21,6 +21,7 @@ InputParameters validParams<SlaveConstraint>()
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addParam<std::string>("model", "frictionless", "The contact model to use");
 
   params.set<bool>("use_displaced_mesh") = true;
@@ -31,23 +32,28 @@ InputParameters validParams<SlaveConstraint>()
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<std::string>("formulation", "default", "The contact formulation");
+  params.addParam<bool>("normalize_penalty", false, "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
   return params;
 }
 
-SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters parameters)
-  :DiracKernel(name, parameters),
-   _component(getParam<unsigned int>("component")),
-   _model(contactModel(getParam<std::string>("model"))),
-   _formulation(contactFormulation(getParam<std::string>("formulation"))),
-   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("boundary"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
-   _penalty(getParam<Real>("penalty")),
-   _friction_coefficient(getParam<Real>("friction_coefficient")),
-   _residual_copy(_sys.residualGhosted()),
-   _x_var(coupled("disp_x")),
-   _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
-   _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
-   _mesh_dimension(_mesh.dimension()),
-   _vars(_x_var, _y_var, _z_var)
+SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters parameters) :
+  DiracKernel(name, parameters),
+  _component(getParam<unsigned int>("component")),
+  _model(contactModel(getParam<std::string>("model"))),
+  _formulation(contactFormulation(getParam<std::string>("formulation"))),
+  _normalize_penalty(getParam<bool>("normalize_penalty")),
+  _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("boundary"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
+  _penalty(getParam<Real>("penalty")),
+  _friction_coefficient(getParam<Real>("friction_coefficient")),
+  _residual_copy(_sys.residualGhosted()),
+  _x_var(coupled("disp_x")),
+  _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
+  _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
+  _vars(_x_var, _y_var, _z_var),
+  _mesh_dimension(_mesh.dimension()),
+  _nodal_area_var(getVar("nodal_area", 0)),
+  _aux_system( _nodal_area_var->sys() ),
+  _aux_solution( _aux_system.currentSolution() )
 {
   if (parameters.isParamValid("tangential_tolerance"))
   {
@@ -117,19 +123,21 @@ SlaveConstraint::computeQpResidual()
 
   Real resid = pinfo->_contact_force(_component);
 
+  const Real area = nodalArea(*pinfo);
+
   if (_formulation == CF_DEFAULT)
   {
     RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
     RealVectorValue pen_force(_penalty * distance_vec);
+    if (_normalize_penalty)
+      pen_force *= area;
 
     if (_model == CM_FRICTIONLESS)
-    {
       resid += pinfo->_normal(_component) * pinfo->_normal * pen_force;
-    }
+
     else if (_model == CM_GLUED || _model == CM_COULOMB)
-    {
       resid += pen_force(_component);
-    }
+
   }
 
   return _test[_i][_qp] * resid;
@@ -169,13 +177,17 @@ SlaveConstraint::computeQpJacobian()
 
   RealVectorValue normal(pinfo->_normal);
 
+  Real penalty = _penalty;
+  if (_normalize_penalty)
+    penalty *= nodalArea(*pinfo);
+
   Real term(0);
 
   if ( CM_FRICTIONLESS == _model )
   {
 
     const Real nnTDiag = normal(_component) * normal(_component);
-    term =  _penalty * nnTDiag;
+    term =  penalty * nnTDiag;
 
     const RealGradient & A1( pinfo->_dxyzdxi [0] );
     RealGradient A2;
@@ -232,24 +244,21 @@ SlaveConstraint::computeQpJacobian()
     const Real AinvDAT33( AinvD31*A1(2) + AinvD32*A2(2) );
 
     if ( _component == 0 )
-    {
-      term += _penalty * ( 1 - nnTDiag + AinvDAT11 );
-    }
+      term += penalty * ( 1 - nnTDiag + AinvDAT11 );
+
     else if ( _component == 1 )
-    {
-      term += _penalty * ( 1 - nnTDiag + AinvDAT22 );
-    }
+      term += penalty * ( 1 - nnTDiag + AinvDAT22 );
+
     else
-    {
-      term += _penalty * ( 1 - nnTDiag + AinvDAT33 );
-    }
+      term += penalty * ( 1 - nnTDiag + AinvDAT33 );
+
   }
   else if ( CM_GLUED == _model ||
             CM_COULOMB == _model )
   {
     normal.zero();
     normal(_component) = 1;
-    term = _penalty;
+    term = penalty;
   }
   else
   {
@@ -257,4 +266,24 @@ SlaveConstraint::computeQpJacobian()
   }
 
   return _test[_i][_qp] * term * _phi[_j][_qp];
+}
+
+Real
+SlaveConstraint::nodalArea(PenetrationInfo & pinfo)
+{
+  const Node * node = pinfo._node;
+
+  unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
+
+  Real area = (*_aux_solution)( dof );
+  if (area == 0)
+  {
+    if (_t_step > 1)
+      mooseError("Zero nodal area found");
+
+    else
+      area = 1; // Avoid divide by zero during initialization
+
+  }
+  return area;
 }

@@ -23,9 +23,13 @@ public:
   virtual Real computeQpJacobian();
 
 protected:
+
+  Real nodalArea(PenetrationInfo & pinfo);
+
   const unsigned int _component;
   const ContactModel _model;
   const ContactFormulation _formulation;
+  const bool _normalize_penalty;
   PenetrationLocator & _penetration_locator;
 
   const Real _penalty;
@@ -39,9 +43,13 @@ protected:
   const unsigned int _y_var;
   const unsigned int _z_var;
 
+  const RealVectorValue _vars;
+
   const unsigned int _mesh_dimension;
 
-  const RealVectorValue _vars;
+  MooseVariable * _nodal_area_var;
+  SystemBase & _aux_system;
+  const NumericVector<Number> * _aux_solution;
 };
 
 #endif //SLAVECONSTRAINT_H
