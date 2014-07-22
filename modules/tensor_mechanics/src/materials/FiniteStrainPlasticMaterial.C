@@ -374,13 +374,11 @@ FiniteStrainPlasticMaterial::deltaFunc(const unsigned int i, const unsigned int 
 Real
 FiniteStrainPlasticMaterial::getYieldStress(const Real eqpe)
 {
-  int nsize;
-  Real *data;
+  unsigned nsize;
 
   nsize = _yield_stress_vector.size();
-  data = _yield_stress_vector.data();
 
-  if (data[0] > 0.0 || nsize % 2 > 0)//Error check for input inconsitency
+  if (_yield_stress_vector[0] > 0.0 || nsize % 2 > 0)//Error check for input inconsitency
     mooseError("Error in yield stress input: Should be a vector with eqv plastic strain and yield stress pair values.\n");
 
   unsigned int ind = 0;
@@ -388,16 +386,19 @@ FiniteStrainPlasticMaterial::getYieldStress(const Real eqpe)
 
   while (ind<nsize)
   {
-    if (std::abs(eqpe - data[ind]) < tol)
-      return data[ind+1];
+    if (std::abs(eqpe - _yield_stress_vector[ind]) < tol)
+      return _yield_stress_vector[ind+1];
 
     if (ind + 2 < nsize)
     {
-      if (eqpe > data[ind] && eqpe < data[ind+2])
-        return data[ind+1]+(eqpe-data[ind])/(data[ind+2]-data[ind])*(data[ind+3]-data[ind+1]);
+      if (eqpe > _yield_stress_vector[ind] && eqpe < _yield_stress_vector[ind+2])
+        return _yield_stress_vector[ind+1] +
+          (eqpe - _yield_stress_vector[ind]) /
+          (_yield_stress_vector[ind+2] - _yield_stress_vector[ind]) *
+          (_yield_stress_vector[ind+3] - _yield_stress_vector[ind+1]);
     }
     else
-      return data[nsize-1];
+      return _yield_stress_vector[nsize-1];
 
     ind += 2;
   }
@@ -408,13 +409,11 @@ FiniteStrainPlasticMaterial::getYieldStress(const Real eqpe)
 Real
 FiniteStrainPlasticMaterial::getdYieldStressdPlasticStrain(const Real eqpe)
 {
-  int nsize;
-  Real *data;
+  unsigned nsize;
 
   nsize = _yield_stress_vector.size();
-  data = _yield_stress_vector.data();
 
-  if (data[0] > 0.0 || nsize % 2 > 0)//Error check for input inconsitency
+  if (_yield_stress_vector[0] > 0.0 || nsize % 2 > 0)//Error check for input inconsitency
     mooseError("Error in yield stress input: Should be a vector with eqv plastic strain and yield stress pair values.\n");
 
   unsigned int ind = 0;
@@ -423,13 +422,15 @@ FiniteStrainPlasticMaterial::getdYieldStressdPlasticStrain(const Real eqpe)
   {
     if (ind + 2 < nsize)
     {
-      if (eqpe >= data[ind] && eqpe < data[ind+2])
-        return (data[ind+3]-data[ind+1])/(data[ind+2]-data[ind]);
+      if (eqpe >= _yield_stress_vector[ind] && eqpe < _yield_stress_vector[ind+2])
+        return
+          (_yield_stress_vector[ind+3] - _yield_stress_vector[ind+1]) /
+          (_yield_stress_vector[ind+2] - _yield_stress_vector[ind]);
     }
     else
       return 0.0;
 
-    ind+=2;;
+    ind += 2;
   }
 
   return 0.0;

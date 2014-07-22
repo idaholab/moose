@@ -52,7 +52,6 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
 {
   unsigned int ind;
   int is, ie;
-  Real *data;
   RealTensorValue rot;
 
   _stress[_qp].zero();
@@ -70,45 +69,39 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
   _a0.resize(_nss);
   _xm.resize(_nss);
 
-  data = _gprops.data();
-
   ind = 0;
   while (true)
   {
-    is = data[ind++];
-    ie = data[ind++];
+    is = _gprops[ind++];
+    ie = _gprops[ind++];
 
-    for (unsigned int i = is; i <= ie; ++i)
+    for (int i = is; i <= ie; ++i)
       _gss[_qp][i-1] = _gprops[ind];
 
-    if (ie == _nss)
+    if (ie == static_cast<int>(_nss))
       break;
 
     ind++;
   }
 
-  data = _hprops.data();
-
-  _r = data[0];
-  _h0 = data[1];
-  _tau_init = data[2];
-  _tau_sat = data[3];
-
-  data = _flowprops.data();
+  _r = _hprops[0];
+  _h0 = _hprops[1];
+  _tau_init = _hprops[2];
+  _tau_sat = _hprops[3];
 
   ind = 0;
   while (true)
   {
-    is = data[ind++];
-    ie = data[ind++];
+    is = _flowprops[ind++];
+    ie = _flowprops[ind++];
 
-    for (unsigned int i = is; i <= ie; ++i)
+    for (int i = is; i <= ie; ++i)
     {
       _a0[i-1] = _flowprops[ind];
       _xm[i-1] = _flowprops[ind+1];
     }
 
-    if (ie == _nss)
+    if (ie == static_cast<int>(_nss))
       break;
 
     ind += 3;
@@ -274,7 +267,7 @@ void
 FiniteStrainCrystalPlasticity::getSlipSystems()
 {
   unsigned int i, j, k;
-  Real sd[3*_nss], sn[3*_nss];
+  std::vector<Real> sd(3*_nss), sn(3*_nss);
   Real vec[3];
   std::ifstream fileslipsys;
 
@@ -335,10 +328,8 @@ FiniteStrainCrystalPlasticity::updateGss(std::vector<Real> & slip_incr)
   unsigned int i, j;
   std::vector<Real> hb(_nss);
   Real qab,val;
-  Real *data; //Kalidindi
 
-  data=_hprops.data(); //Kalidindi
-  Real a=data[4]; //Kalidindi
+  Real a = _hprops[4]; //Kalidindi
 
   _acc_slip[_qp]=_acc_slip_old[_qp];
   for (i=0; i < _nss; i++)
