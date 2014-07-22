@@ -72,6 +72,13 @@ public:
   }
 
   /**
+   * Return next random number drawn from a standard distribution.
+   */
+  inline double randNormal() {
+    return randNormal(0.0, 1.0);
+  }
+
+  /**
    * This method returns the next random number (long format) from the generator
    * @return      the next random number in the range [0,max(uinit32_t)) with 32-bit number
    */
@@ -113,6 +120,13 @@ public:
   {
     mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
     return rds_normal(&(_states[i]), mean, sigma);
+  }
+
+  /**
+   * Return next random number drawn from a standard distribution.
+   */
+  inline double randNormal(unsigned int i) {
+    return randNormal(i, 0.0, 1.0);
   }
 
   /**
