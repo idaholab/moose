@@ -23,11 +23,6 @@ AuxWarehouse::AuxWarehouse()
 
 AuxWarehouse::~AuxWarehouse()
 {
-  for (std::vector<AuxKernel *>::const_iterator j = all().begin(); j != all().end(); ++j)
-    delete *j;
-
-  for (std::vector<AuxScalarKernel *>::const_iterator i = _scalar_kernels.begin(); i != _scalar_kernels.end(); ++i)
-    delete *i;
 }
 
 void
@@ -72,29 +67,30 @@ AuxWarehouse::jacobianSetup()
 }
 
 void
-AuxWarehouse::addAuxKernel(AuxKernel * aux)
+AuxWarehouse::addAuxKernel(MooseSharedPointer<AuxKernel> aux)
 {
   // Make certain that the AuxKernel is valid
   mooseAssert(aux, "Auxkernel is NULL");
 
   // Add the pointer to the complete and the nodal or elemental lists
-  _all_aux_kernels.push_back(aux);
+  _all_ptrs.push_back(aux);
+  _all_aux_kernels.push_back(aux.get());
 
   // Boundary restricted
   if (aux->boundaryRestricted())
   {
     // Add to elemental boundary storage
     if (!aux->isNodal())
-      _all_elem_bcs.push_back(aux);
+      _all_elem_bcs.push_back(aux.get());
 
     // Populate the elemental and nodal boundary restricted maps
     const std::set<BoundaryID> & boundary_ids = aux->boundaryIDs();
     for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
     {
       if (aux->isNodal())
-        _active_nodal_bcs[*it].push_back(aux);
+        _active_nodal_bcs[*it].push_back(aux.get());
       else
-        _elem_bcs[*it].push_back(aux);
+        _elem_bcs[*it].push_back(aux.get());
     }
   }
 
@@ -103,9 +99,9 @@ AuxWarehouse::addAuxKernel(AuxKernel * aux)
   {
     // Add to elemental/nodal storage
     if (aux->isNodal())
-      _all_nodal_aux_kernels.push_back(aux);
+      _all_nodal_aux_kernels.push_back(aux.get());
     else
-      _all_element_aux_kernels.push_back(aux);
+      _all_element_aux_kernels.push_back(aux.get());
 
     // Get the SubdomainIDs for this object
     const std::set<SubdomainID> & block_ids(aux->hasBlocks(Moose::ANY_BLOCK_ID) ? aux->meshBlockIDs() : aux->blockIDs()) ;
@@ -114,19 +110,20 @@ AuxWarehouse::addAuxKernel(AuxKernel * aux)
     for (std::set<SubdomainID>::const_iterator it = block_ids.begin(); it != block_ids.end(); ++it)
     {
       if (aux->isNodal())
-        _active_block_nodal_aux_kernels[*it].push_back(aux);
+        _active_block_nodal_aux_kernels[*it].push_back(aux.get());
       else
-        _active_block_element_aux_kernels[*it].push_back(aux);
+        _active_block_element_aux_kernels[*it].push_back(aux.get());
     }
   }
 }
 
 void
-AuxWarehouse::addScalarKernel(AuxScalarKernel *kernel)
+AuxWarehouse::addScalarKernel(MooseSharedPointer<AuxScalarKernel> kernel)
 {
   mooseAssert(kernel, "ScalarAuxkernel is NULL");
 
-  _scalar_kernels.push_back(kernel);
+  _all_scalar_ptrs.push_back(kernel);
+  _scalar_kernels.push_back(kernel.get());
 }
 
 void
