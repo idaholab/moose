@@ -4,7 +4,7 @@
     input = '1phase_reconstruction_test.i'
     exodiff = '1phase_reconstruction_test.e-s002'
     max_time = 1000
-    skip = ‘Needs Updating’  
+    skip = 'Needs Updating'
   [../]
 
   [./2phase_reconstruction_test]
@@ -12,6 +12,6 @@
     input = '2phase_reconstruction_test.i'
     exodiff = '2phase_reconstruction_test.e-s002'
     max_time = 1000 
-    skip = ‘Needs Updating’    
+    skip = 'Needs Updating'
   [../]
 []
