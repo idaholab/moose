@@ -41,7 +41,6 @@ protected:
   bool _has_alpha_A;
   unsigned int _alpha_A_liquid_var_number;
   MaterialProperty<Real> * _dp_dalphaA_liquid;
-  Real _vf_norm_factor;
 
   VariableValue & _alpha;
 

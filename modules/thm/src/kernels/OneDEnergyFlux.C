@@ -18,7 +18,6 @@ InputParameters validParams<OneDEnergyFlux>()
   params.addRequiredCoupledVar("pressure", "pressure");
 
   params.addRequiredParam<bool>("is_liquid", "True for liquid, false for vapor");
-  params.addRequiredParam<Real>("vf_norm_factor", "Normalization factor for volume fraction equation.");
   params.addCoupledVar("alpha", 1., "Volume fraction");
   params.addCoupledVar("alpha_A_liquid", "Volume fraction of liquid");
 
@@ -46,8 +45,6 @@ OneDEnergyFlux::OneDEnergyFlux(const std::string & name, InputParameters paramet
     _dp_dalphaA_liquid(_has_alpha_A ?
         (_is_liquid ? &getMaterialProperty<Real>("dp_L_d_alphaA_L") : &getMaterialProperty<Real>("dp_V_d_alphaA_L")) :
         NULL),
-    // volume fraction norm factor
-    _vf_norm_factor(getParam<Real>("vf_norm_factor")),
     _alpha(coupledValue("alpha")),
     _eos(getUserObject<EquationOfState>("eos"))
 {
@@ -85,7 +82,7 @@ OneDEnergyFlux::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if (jvar == _alpha_A_liquid_var_number)
   {
-    return -(_u_vel[_qp] * (_sign * _pressure[_qp] + _alpha[_qp] * _area[_qp] * (*_dp_dalphaA_liquid)[_qp])) / _vf_norm_factor * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+    return -(_u_vel[_qp] * (_sign * _pressure[_qp] + _alpha[_qp] * _area[_qp] * (*_dp_dalphaA_liquid)[_qp])) * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else
     return 0.;
