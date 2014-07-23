@@ -179,8 +179,8 @@ protected:
    * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
    */
   int MatrixInversion(double *A, int n) const;
-
-   /**
+  
+  /**
   * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in
   * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
   * C_ijkl = C_ijlk, C_ijkl = C_jikl
@@ -235,7 +235,19 @@ protected:
    */
   void fillGeneralFromInputVector(const std::vector<Real> & input);
 
-
+  /**
+  * computes eigenvalues, assuming _vals is symmetric, and places them
+  * in ascending order in eigvals
+  */
+  void symmetricEigenvalues(std::vector<Real> & eigvals);
+  /**
+   * computes second derivative of input tensor,
+   * assuming rank two tensor is symmetric
+   * @param a rank two tensor
+   * @param alpha index of eigenvalue (for rank two tensor index will be 1,2 and 3)
+   */
+   void secondDerivative(const RankTwoTensor & a, const unsigned int alpha);
+    
 private:
 
 };
