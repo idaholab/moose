@@ -15,19 +15,21 @@
     input = 'small_deform1.i'
     csvdiff = 'small_deform1.csv'
     rel_err = 1.0E-5
+    abs_zero = 1.0E-6
   [../]
   [./small2]
     type = 'CSVDiff'
     input = 'small_deform2.i'
     csvdiff = 'small_deform2.csv'
     rel_err = 1.0E-5
+    abs_zero = 1.0E-6
   [../]
   [./small3]
     type = 'CSVDiff'
     input = 'small_deform3.i'
     csvdiff = 'small_deform3.csv'
     rel_err = 1.0E-5
-    abs_zero = 1.0E-3
+    abs_zero = 1.0E-6
     heavy = true
   [../]
 
@@ -46,7 +48,7 @@
     input = 'large_deform3.i'
     csvdiff = 'large_deform3.csv'
     rel_err = 1.0E-5
-    abs_zero = 1.0E-3
+    abs_zero = 1.0E-6
     heavy = true
   [../]
 
