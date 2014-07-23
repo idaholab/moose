@@ -1,0 +1,30 @@
+[Tests]
+  [./except1]
+    type = 'RunException'
+    input = 'except1.i'
+    expect_err = 'Tension cutoff has to be positive'
+  [../]
+  [./small1]
+    type = 'CSVDiff'
+    input = 'small_deform1.i'
+    csvdiff = 'small_deform1.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./small2]
+    type = 'CSVDiff'
+    input = 'small_deform2.i'
+    csvdiff = 'small_deform2.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./large1]
+    type = 'Exodiff'
+    input = 'large_deform1.i'
+    exodiff = 'large_deform1.e'
+  [../]
+  [./large2]
+    type = 'Exodiff'
+    input = 'large_deform2.i'
+    exodiff = 'large_deform2.e'
+  [../]
+
+[]
