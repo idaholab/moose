@@ -45,15 +45,15 @@ RestartableTypesChecker::execute()
 {
   if (_first != true) // These guards are here because of Ticket #2221
   {
-    if (_real_data != 5)
-      mooseError("Error reading restartable Real expected 5 got " << _real_data);
+    if (_real_data != 3)
+      mooseError("Error reading restartable Real expected 3 got " << _real_data);
 
     if (_vector_data.size() != 4)
       mooseError("Error reading restartable std::vector<Real> expected size 4 got " << _vector_data.size());
 
     for (unsigned int i=0; i<_vector_data.size(); i++)
-      if (_vector_data[i] != 5)
-        mooseError("Error reading restartable std::vector<Real> expected 5 got " << _vector_data[i]);
+      if (_vector_data[i] != 3)
+        mooseError("Error reading restartable std::vector<Real> expected 3 got " << _vector_data[i]);
 
     if (_vector_vector_data.size() != 4)
       mooseError("Error reading restartable std::vector<std::vector<Real> > expected size 4 got " << _vector_data.size());
@@ -61,17 +61,17 @@ RestartableTypesChecker::execute()
     for (unsigned int i=0; i<_vector_vector_data.size(); i++)
     {
       for (unsigned int j=0; j<_vector_vector_data[i].size(); j++)
-        if (_vector_vector_data[i][j] != 5)
-          mooseError("Error reading restartable std::vector<std::vector<Real> > expected 5 got " << _vector_vector_data[i][j]);
+        if (_vector_vector_data[i][j] != 3)
+          mooseError("Error reading restartable std::vector<std::vector<Real> > expected 3 got " << _vector_vector_data[i][j]);
     }
 
-    if (_pointer_data->_i != 5)
+    if (_pointer_data->_i != 3)
       mooseError("Error reading restartable pointer data!");
 
-    if (_custom_data._i != 5)
+    if (_custom_data._i != 3)
       mooseError("Error reading restartable custom data!");
 
-    if (_custom_with_context._i != 5)
+    if (_custom_with_context._i != 3)
       mooseError("Error reading restartable custom data with context!");
 
     if (_set_data.size() != 2)

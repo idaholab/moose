@@ -19,7 +19,7 @@ InputParameters validParams<CavityPressureUOAction>()
   params.addParam<std::string>("output", "The name to use for the cavity pressure value.");
 
   params += validParams<SetupInterface>();
-  params.set<MooseEnum>("execute_on") = "residual";
+  params.set<std::vector<MooseEnum> >("execute_on")[0] = "residual";
 
   return params;
 }
@@ -47,7 +47,7 @@ CavityPressureUOAction::act()
 
   InputParameters params = _factory.getValidParams(uo_type_name);
 
-  params.set<MooseEnum>("execute_on") = getParam<MooseEnum>("execute_on");
+  params.set<std::vector<MooseEnum> >("execute_on") = getParam<std::vector<MooseEnum> >("execute_on");
 
   params.set<Real>("initial_pressure") = _initial_pressure;
   params.set<std::vector<PostprocessorName> >("material_input") = _material_input;

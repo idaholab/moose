@@ -103,13 +103,14 @@ EigenExecutionerBase::init()
   _eigen_sys.initSystemSolutionOld(EigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated
-  _bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execFlag();
+  // TODO: Multiple execFlags support
+  _bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execFlags()[0];
   if (_solution_diff)
-    _xdiff_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("xdiff")).execFlag();
+    _xdiff_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("xdiff")).execFlags()[0];
   else
     _xdiff_execflag = EXEC_TIMESTEP;
   if (isParamValid("normalization"))
-    _norm_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization")).execFlag();
+    _norm_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization")).execFlags()[0];
   else
     _norm_execflag = _bx_execflag;
 
@@ -170,9 +171,9 @@ void
 EigenExecutionerBase::addRealParameterReporter(const std::string & param_name)
 {
   InputParameters params = _app.getFactory().getValidParams("ProblemRealParameter");
-  MooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep";
-  params.set<MooseEnum>("execute_on") = execute_options;
+  std::vector<MooseEnum> execute_options(SetupInterface::getExecuteOptions());
+  execute_options[0] = "timestep";
+  params.set<std::vector<MooseEnum> >("execute_on") = execute_options;
   params.set<std::string>("param_name") = param_name;
   _problem.addPostprocessor("ProblemRealParameter", param_name, params);
 }
@@ -584,7 +585,7 @@ void
 EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k)
 {
   PostprocessorName bxp = getParam<PostprocessorName>("bx_norm");
-  if ( _problem.getUserObject<UserObject>(bxp).execFlag() != EXEC_RESIDUAL)
+  if ( _problem.getUserObject<UserObject>(bxp).execFlags()[0] != EXEC_RESIDUAL)
     mooseError("rhs postprocessor for the nonlinear eigenvalue solve must be executed on residual");
   makeBXConsistent(k);
 

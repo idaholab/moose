@@ -22,9 +22,9 @@ InputParameters validParams<MaterialCopyUserObject>()
   params.addRequiredParam<unsigned int>("copy_from_element", "The id of the element from which data is copied");
   params.addRequiredParam<unsigned int>("copy_to_element", "The id of the element to which data is copied");
 
-  MooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep";
-  params.set<MooseEnum>("execute_on") = execute_options;
+  std::vector<MooseEnum> execute_options(SetupInterface::getExecuteOptions());
+  execute_options[0] = "timestep";
+  params.set<std::vector<MooseEnum> >("execute_on") = execute_options;
 
   return params;
 }

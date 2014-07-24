@@ -78,7 +78,7 @@ JIntegralAction::act()
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
-    params.set<MooseEnum>("execute_on") = "initial";
+    params.set<std::vector<MooseEnum> >("execute_on")[0] = "initial";
     params.set<MooseEnum>("crack_direction_method") = _direction_method_moose_enum;
     params.set<MooseEnum>("crack_end_direction_method") = _end_direction_method_moose_enum;
     if (_have_crack_direction_vector)
@@ -133,7 +133,7 @@ JIntegralAction::act()
   {
     const std::string ak_type_name("qFunctionJIntegral");
     InputParameters params = _factory.getValidParams(ak_type_name);
-    params.set<MooseEnum>("execute_on") = "initial";
+    params.set<std::vector<MooseEnum> >("execute_on")[0] = "initial";
     params.set<UserObjectName>("crack_front_definition") = uo_name;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
@@ -169,7 +169,7 @@ JIntegralAction::act()
   {
     const std::string pp_type_name("JIntegral");
     InputParameters params = _factory.getValidParams(pp_type_name);
-    params.set<MooseEnum>("execute_on") = "timestep";
+    params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
     params.set<UserObjectName>("crack_front_definition") = uo_name;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
     for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
