@@ -353,15 +353,15 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
   // PETSc 3.5.x
   MatColoring matcoloring;
   ierr = MatColoringCreate(petsc_mat->mat(),&matcoloring);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(_communicator.get(),ierr);
   ierr = MatColoringSetType(matcoloring,MATCOLORINGLF);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(_communicator.get(),ierr);
   ierr = MatColoringSetFromOptions(matcoloring);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(_communicator.get(),ierr);
   ierr = MatColoringApply(matcoloring,&iscoloring);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(_communicator.get(),ierr);
   ierr = MatColoringDestroy(&matcoloring);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(_communicator.get(),ierr);
 #endif
 
 
