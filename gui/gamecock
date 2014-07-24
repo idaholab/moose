@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+import os, sys, traceback
+
+from PySide import QtCore, QtGui
+
+from base import *
+from execute import *
+from input import *
+
+
+# A DEMO TABBED WIDGET
+class PeacockTabWidget(PeacockWidget):
+  def __init__(self, **kwargs):
+    PeacockWidget.__init__(self, **kwargs)
+
+    # Create Tab layout
+    self.addObject(QtGui.QTabWidget(), handle='PeacockTabs')
+
+    # Add the tabs to the layout
+    self.addObject(InputWidget(**kwargs), handle='Input', parent='PeacockTabs')
+    self.addObject(ExecuteWidget(**kwargs), handle='Execute', parent='PeacockTabs')
+
+    # Connect the signal 'button' from the InputWidget to the 'Run' callback of ExecuteWidget
+    self.connectSignal('button', 'Run')
+
+    self.setup()
+
+if __name__ == '__main__':
+
+  app  = QtGui.QApplication(sys.argv)
+  main = QtGui.QMainWindow()
+  menubar = QtGui.QMenuBar() # need parentless menu bar for OSX (see PySide QMainWindow.menuBar())
+  main.setMenuBar(menubar)
+
+  tabs = PeacockTabWidget(main=main, alignment='vertical', debug=True)
+
+  tabs.show()
+
+  sys.exit(app.exec_())
