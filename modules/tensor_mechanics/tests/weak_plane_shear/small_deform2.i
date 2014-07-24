@@ -158,7 +158,10 @@
 
 [Materials]
   [./mc]
-    type = FiniteStrainWeakPlaneShear
+    type = FiniteStrainWeakPlaneShear1
+    yield_function_tolerance = 1E-3
+    direction_tolerance = 1E-4
+    fspb_debug = 0
     block = 0
     wps_cohesion = 1E3
     wps_dilation_angle = 1
