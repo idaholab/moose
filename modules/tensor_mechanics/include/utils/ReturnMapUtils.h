@@ -20,7 +20,7 @@ namespace ReturnMapUtils
    *
    * for dstress, dpm and dintnl, assuming that dstress and related
    * tensor quantities are symmetric
-   * 
+   *
    * @param dirn the "direction constraint" from plasticity
    * @param f vector of yield functions
    * @param ic vector of internal constraints from plasticity

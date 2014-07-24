@@ -31,6 +31,12 @@ FiniteStrainPlasticBase::FiniteStrainPlasticBase(const std::string & name,
     _intnl_old(declarePropertyOld<std::vector<Real> >("plastic_internal_parameter")),
     _f(declareProperty<std::vector<Real> >("plastic_yield_function"))
 {
+}
+
+
+void
+FiniteStrainPlasticBase::initQpStatefulProperties()
+{
   if (_f_tol.size() != numberOfYieldFunctions())
     mooseError("The number of yield_function_tolerance parameters must match the number of yield functions");
   for (unsigned alpha = 0 ; alpha < _f_tol.size() ; ++alpha)
@@ -38,16 +44,11 @@ FiniteStrainPlasticBase::FiniteStrainPlasticBase(const std::string & name,
       mooseError("The yield_function_tolerance must be positive");
 
   if (_ic_tol.size() != numberOfInternalParameters())
-    mooseError("The number of internal_constraint_tolerance parameters must match the number of internal parameters");
+    mooseError("The number of internal_constraint_tolerance parameters (" << _ic_tol.size() << ") must match the number of internal parameters (" << numberOfInternalParameters() << ")");
   for (unsigned a = 0 ; a < _ic_tol.size() ; ++a)
     if (_ic_tol[a] <= 0)
       mooseError("The internal_constraint_tolerance must be positive");
-}
 
-
-void
-FiniteStrainPlasticBase::initQpStatefulProperties()
-{
   _stress[_qp].zero();
   _plastic_strain[_qp].zero();
   _plastic_strain_old[_qp].zero();
@@ -231,14 +232,14 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
     // The line-search will exit with updated values
     lineSearch(nr_res2, stress, intnl_old, intnl, ga, E_inv, delta_dp, dstress, dpm, dintnl, f, dirn, ic);
   }
-  
+
 
   if (iter >= _max_iter)
   {
     stress = stress_old;
     for (unsigned i = 0; i < intnl_old.size() ; ++i)
       intnl[i] = intnl_old[i];
-    _console << "Too many iterations in plasticity.\nYield function(s):\n";
+    _console << "Too many iterations (" << iter << " but maximum = " << _max_iter << ") in plasticity.\nYield function(s):\n";
     for (unsigned i = 0; i < f.size() ; ++i)
       _console << f[i] << "\n";
     _console << "Stress:\n";
@@ -282,7 +283,7 @@ FiniteStrainPlasticBase::residual2(const std::vector<Real> & f, const RankTwoTen
 {
   Real nr_res2 = 0;
   for (unsigned alpha = 0 ; alpha < f.size() ; ++alpha)
-    nr_res2 += 0.5*std::pow( std::max(f[alpha], 0.0)/_f_tol[alpha], 2);
+    nr_res2 += 0.5*std::pow( f[alpha]/_f_tol[alpha], 2); // NOTE: have to change for multi-surface, since f could be negative!
   nr_res2 += 0.5*std::pow(dirn.L2norm()/_dirn_tol, 2);
   for (unsigned a = 0 ; a < ic.size() ; ++a)
     nr_res2 += 0.5*std::pow(ic[a]/_ic_tol[a], 2);
@@ -299,7 +300,7 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
 
   std::vector<std::vector<Real> > df_dintnl;
   dyieldFunction_dintnl(stress, intnl, df_dintnl);
-  
+
   std::vector<RankTwoTensor> r;
   flowPotential(stress, intnl, r);
 
@@ -365,7 +366,7 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
     for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
       dic_dpm[a][alpha] = h[a][alpha];
   }
-  
+
   std::vector<std::vector<Real> > dic_dintnl;
   dic_dintnl.resize(numberOfInternalParameters());
   for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
@@ -373,7 +374,7 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
     dic_dintnl[a].assign(numberOfInternalParameters(), 0);
     for (unsigned b = 0 ; b < numberOfInternalParameters() ; ++b)
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-	dic_dintnl[a][b] += ga[alpha]*dh_dintnl[a][alpha][b];
+        dic_dintnl[a][b] += ga[alpha]*dh_dintnl[a][alpha][b];
     dic_dintnl[a][a] += 1;
   }
 
@@ -403,7 +404,7 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
   Real lam2; // cached value of lam used in the cubic in the line search
 
   // ga during the line-search
-  std::vector<Real> ls_ga; 
+  std::vector<Real> ls_ga;
   ls_ga.resize(numberOfYieldFunctions());
 
   // delta_dp during the line-search
@@ -412,7 +413,7 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
   // internal parameter during the line-search
   std::vector<Real> ls_intnl;
   ls_intnl.resize(numberOfInternalParameters());
-  
+
   // stress during the line-search
   RankTwoTensor ls_stress;
 
@@ -432,6 +433,7 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
     // calculate the new residual-squared
     nr_res2 = residual2(f, dirn, ic);
 
+
     if (nr_res2 < f0 + 1E-4*lam*slope)
     {
       line_searching = false;
@@ -441,10 +443,10 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
     {
       lam = 0.1;
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-	ls_ga[alpha] = ga[alpha] + dpm[alpha];
+        ls_ga[alpha] = ga[alpha] + dpm[alpha];
       ls_delta_dp = delta_dp - E_inv*dstress;
       for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++ a)
-	ls_intnl[a] = intnl[a] + dintnl[a];
+        ls_intnl[a] = intnl[a] + dintnl[a];
       ls_stress = stress + dstress;
       calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_ga, ls_delta_dp, f, dirn, ic);
       nr_res2 = residual2(f, dirn, ic);
@@ -464,19 +466,19 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
       Real a = (rhs1/std::pow(lam, 2) - rhs2/std::pow(lam2, 2))/(lam - lam2);
       Real b = (-lam2*rhs1/std::pow(lam, 2) + lam*rhs2/std::pow(lam2, 2))/(lam - lam2);
       if (a == 0)
-	tmp_lam = -slope/2.0/b;
+        tmp_lam = -slope/2.0/b;
       else
       {
-	Real disc = std::pow(b, 2) - 3*a*slope;
-	if (disc < 0)
-	  tmp_lam = 0.5*lam;
-	else if (b <= 0)
-	  tmp_lam = (-b + std::sqrt(disc))/3.0/a;
-	else
-	  tmp_lam = -slope/(b + std::sqrt(disc));
+        Real disc = std::pow(b, 2) - 3*a*slope;
+        if (disc < 0)
+          tmp_lam = 0.5*lam;
+        else if (b <= 0)
+          tmp_lam = (-b + std::sqrt(disc))/3.0/a;
+        else
+          tmp_lam = -slope/(b + std::sqrt(disc));
       }
       if (tmp_lam > 0.5*lam)
-	tmp_lam = 0.5*lam;
+        tmp_lam = 0.5*lam;
     }
     lam2 = lam;
     f2 = nr_res2;

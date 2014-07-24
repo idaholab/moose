@@ -179,14 +179,15 @@
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
-    wps_f_tol = 1E-3
     fill_method = symmetric_isotropic
     C_ijkl = '1E9 0.5E9'
     wps_friction_angle = 45
     wps_normal_vector = '0 0 1'
     wps_normal_rotates = false
-    wps_r_tol = 1E-3
     wps_smoother = 500
+    yield_function_tolerance = 1E-3
+    direction_tolerance = 1E-3
+    internal_constraint_tolerance = 1E-3
   [../]
 []
 

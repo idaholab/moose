@@ -35,7 +35,7 @@ ReturnMapUtilsTest::ReturnMapUtilsTest()
   ddirn_dpm.resize(num_f);
   for (int alpha = 0 ; alpha < num_f ; ++alpha)
     ddirn_dpm[alpha] = RankTwoTensor(std::sin(alpha), -2.5*(alpha+1), std::cos(3*alpha), -2.5*(alpha+1), -4*alpha, 5.3*(alpha-5.5), std::cos(3*alpha), 5.3*(alpha-5.5), 6*(alpha+3.3));
-    
+
   ddirn_dintnl.resize(num_ic);
   for (int a = 0 ; a < num_ic ; ++a)
     ddirn_dintnl[a] = RankTwoTensor(a+1, 2*a+2, 3*a+5.5, 2*a+2, -4*a, 8*std::sin(a)+9, 3*a+5.5, 8*std::sin(a)+9, -6*(a-2.2));

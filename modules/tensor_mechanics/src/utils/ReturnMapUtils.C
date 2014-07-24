@@ -21,7 +21,7 @@ ReturnMapUtils::linearSolve(const RankTwoTensor & dirn, const std::vector<Real> 
    * Extra hairiness is added because the full "A" is
    * often not invertible because of the explicit
    * symmeterisation of stresses and strains, so I
-   * explicitly enforce the constraint 
+   * explicitly enforce the constraint
    * dstress(i, j) = dstress(j, i)
    * by solving for dstress(i, j) with i>=j
    */
@@ -79,41 +79,41 @@ ReturnMapUtils::linearSolve(const RankTwoTensor & dirn, const std::vector<Real> 
     for (unsigned l = 0 ; l <= k ; ++l)
     {
       for (unsigned i = 0 ; i < dim ; ++i)
-	for (unsigned j = 0 ; j <= i ; ++j)
-	  a[ind++] = ddirn_dstress(i, j, k, l) + (k != l ? ddirn_dstress(i, j, l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i) - see note above
+        for (unsigned j = 0 ; j <= i ; ++j)
+          a[ind++] = ddirn_dstress(i, j, k, l) + (k != l ? ddirn_dstress(i, j, l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i) - see note above
 
       for (unsigned fi = 0 ; fi < num_f ; ++fi)
-	a[ind++] = df_dstress[fi](k, l) + (k != l ? df_dstress[fi](l, k) : 0);
+        a[ind++] = df_dstress[fi](k, l) + (k != l ? df_dstress[fi](l, k) : 0);
 
       for (unsigned ci = 0 ; ci < num_ic ; ++ci)
-	a[ind++] = dic_dstress[ci](k, l) + (k != l ? dic_dstress[ci](l, k) : 0);
+        a[ind++] = dic_dstress[ci](k, l) + (k != l ? dic_dstress[ci](l, k) : 0);
     }
 
   for (unsigned fj = 0 ; fj < num_f ; ++fj)
     {
       for (unsigned i = 0 ; i < dim ; ++i)
-	for (unsigned j = 0 ; j <= i ; ++j)
-	  a[ind++] = ddirn_dpm[fj](i, j);
+        for (unsigned j = 0 ; j <= i ; ++j)
+          a[ind++] = ddirn_dpm[fj](i, j);
 
       for (unsigned fi = 0 ; fi < num_f ; ++fi)
-	a[ind++] = 0; // This is df[fi]/dpm[fj], but f never depends on plasticity multipliers
+        a[ind++] = 0; // This is df[fi]/dpm[fj], but f never depends on plasticity multipliers
 
       for (unsigned ci = 0 ; ci < num_ic ; ++ci)
-	a[ind++] = dic_dpm[ci][fj];
+        a[ind++] = dic_dpm[ci][fj];
     }
 
 
   for (unsigned cj = 0 ; cj < num_ic ; ++cj)
     {
       for (unsigned i = 0 ; i < dim ; ++i)
-	for (unsigned j = 0 ; j <= i ; ++j)
-	  a[ind++] = ddirn_dintnl[cj](i, j);
+        for (unsigned j = 0 ; j <= i ; ++j)
+          a[ind++] = ddirn_dintnl[cj](i, j);
 
       for (unsigned fi = 0 ; fi < num_f ; ++fi)
-	a[ind++] = df_dintnl[fi][cj];
+        a[ind++] = df_dintnl[fi][cj];
 
       for (unsigned ci = 0 ; ci < num_ic ; ++ci)
-	a[ind++] = dic_dintnl[ci][cj];
+        a[ind++] = dic_dintnl[ci][cj];
     }
 
 
@@ -177,7 +177,7 @@ ReturnMapUtils::printA(const std::vector<double> & a)
   */
 
 }
-      
+
 
 
 Real
