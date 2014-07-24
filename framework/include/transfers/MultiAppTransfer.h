@@ -52,14 +52,6 @@ public:
   int direction() { return _direction; }
 
   /**
-   * MultiApp Transfers need to execute when the MultiApp is executed.
-   * Depending on the direction they will either get executed just before or just after the MultiApp is executed.
-   *
-   * @return When this Transfer will be executed.
-   */
-  virtual int executeOn() { return _multi_app->executeOn(); }
-
-  /**
    * Utility to verify that the vEariable in the destination system exists.
    */
   void variableIntegrityCheck(const AuxVariableName & var_name) const;

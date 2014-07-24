@@ -67,10 +67,10 @@ InputParameters validParams<MultiApp>()
   params.addPrivateParam<MPI_Comm>("_mpi_comm");
 
 
-  MooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "timestep_begin";  // set the default
+  std::vector<MooseEnum> execute_options(SetupInterface::getExecuteOptions());
+  execute_options[0] = "timestep_begin";  // set the default
 
-  params.addParam<MooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
+  params.addParam<std::vector<MooseEnum> >("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
 
   params.addParam<unsigned int>("max_procs_per_app", std::numeric_limits<unsigned int>::max(), "Maximum number of processors to give to each App in this MultiApp.  Useful for restricting small solves to just a few procs so they don't get spread out");
 
@@ -93,12 +93,12 @@ InputParameters validParams<MultiApp>()
 
 MultiApp::MultiApp(const std::string & name, InputParameters parameters):
     MooseObject(name, parameters),
+    SetupInterface(parameters),
     Restartable(name, parameters, "MultiApps"),
     _fe_problem(getParam<FEProblem *>("_fe_problem")),
     _app_type(getParam<MooseEnum>("app_type")),
     _input_files(getParam<std::vector<std::string> >("input_files")),
     _orig_comm(getParam<MPI_Comm>("_mpi_comm")),
-    _execute_on(getParam<MooseEnum>("execute_on")),
     _inflation(getParam<Real>("bounding_box_inflation")),
     _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),

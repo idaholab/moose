@@ -42,7 +42,7 @@ public:
   virtual void timestepSetup();
 
   /**
-   * Gets called just before the jacobian is computed and before this object is asked to do its job
+   * Gets called just before the Jacobian is computed and before this object is asked to do its job
    */
   virtual void jacobianSetup();
 
@@ -52,24 +52,24 @@ public:
   virtual void residualSetup();
 
   /**
-   * Gets called when the subdomain changes (ie in a jacobian or residual loop) and before this object is asked to do its job
+   * Gets called when the subdomain changes (i.e. in a Jacobian or residual loop) and before this object is asked to do its job
    */
   virtual void subdomainSetup();
 
   /**
-   * Get the execution falg for the object
+   * Get the execution flag for the object
    */
-  virtual ExecFlagType execFlag() const;
+  virtual const std::vector<ExecFlagType> & execFlags() const;
 
   /**
    * Returns the available options for the 'execute_on' input parameters
-   * @return A MooseEnum with the avaiable 'execute_on' options, the default is 'residual'
+   * @return A MooseEnum with the available 'execute_on' options, the default is 'residual'
    */
-  static MooseEnum getExecuteOptions();
+  static std::vector<MooseEnum> getExecuteOptions();
 
 protected:
   /// execution flag (when is the object executed/evaluated)
-  ExecFlagType _exec_flags;
+  std::vector<ExecFlagType> _exec_flags;
 };
 
 #endif /* SETUPINTERFACE_H */

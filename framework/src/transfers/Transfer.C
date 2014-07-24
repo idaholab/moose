@@ -23,9 +23,9 @@ InputParameters validParams<Transfer>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
-  // Add the SetupInterface parameter, 'execute_on', and set it to a default of 'timestep'
+  // Add the SetupInterface parameter, 'execute_on', and set it to a default of 'timestep_begin'
   params += validParams<SetupInterface>();
-  params.set<MooseEnum>("execute_on") = "timestep_begin";
+  params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep_begin";
 
   params.registerBase("Transfer");
 
@@ -40,8 +40,7 @@ Transfer::Transfer(const std::string & name, InputParameters parameters) :
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _execute_on(getParam<MooseEnum>("execute_on"))
+    _tid(parameters.get<THREAD_ID>("_tid"))
 {
 }
 

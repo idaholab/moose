@@ -25,6 +25,8 @@ InputParameters validParams<SolutionAux>()
   params.addParam<bool>("direct", false, "If true the meshes must be the same and then the values are simply copied over.");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor (a)  to be applied to the solution (x): ax+b, where b is the 'add_factor'");
   params.addParam<Real>("add_factor", 0.0, "Add this value (b) to the solution (x): ax+b, where a is the 'scale_factor'");
+
+  params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep_begin";
   return params;
 }
 
