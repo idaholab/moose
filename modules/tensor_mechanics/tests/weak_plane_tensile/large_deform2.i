@@ -172,12 +172,12 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    wpt_f_tol = 1E-7
+    yield_function_tolerance = 1E-7
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
     wpt_normal_vector = '0 0 1'
     wpt_normal_rotates = true
-    wpt_r_tol = 1E-9
+    direction_tolerance = 1E-9
   [../]
 []
 

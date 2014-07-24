@@ -37,11 +37,13 @@
     type = 'Exodiff'
     input = 'large_deform1.i'
     exodiff = 'large_deform1.e'
+    abs_zero = 1.0E-6
   [../]
   [./large2]
     type = 'Exodiff'
     input = 'large_deform2.i'
     exodiff = 'large_deform2.e'
+    abs_zero = 1.0E-6
   [../]
   [./large3]
     type = 'CSVDiff'
