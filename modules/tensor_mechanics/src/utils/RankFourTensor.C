@@ -238,7 +238,7 @@ RankFourTensor::L2norm() const
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-	  l2 += std::pow(_vals[i][j][k][l], 2);
+          l2 += std::pow(_vals[i][j][k][l], 2);
   return std::pow(l2, 0.5);
 }
 

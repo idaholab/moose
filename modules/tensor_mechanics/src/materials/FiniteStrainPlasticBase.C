@@ -327,7 +327,7 @@ FiniteStrainPlasticBase::calculateRHS(const RankTwoTensor & stress, const std::v
   std::vector<Real> ic; // the "internal constraints"
 
   calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, dirn, ic);
-  
+
   unsigned int dim = 3;
   unsigned int system_size = 6 + numberOfYieldFunctions() + numberOfInternalParameters(); // "6" comes from symmeterizing dirn
 
@@ -466,12 +466,12 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
     for (unsigned j = 0 ; j <= i ; ++j)
     {
       for (unsigned k = 0 ; k < dim ; ++k)
-	for (unsigned l = 0 ; l <= k ; ++l)
-	  jac[col_num][row_num++] = ddirn_dstress(i, j, k, l) + (k != l ? ddirn_dstress(i, j, l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
+        for (unsigned l = 0 ; l <= k ; ++l)
+          jac[col_num][row_num++] = ddirn_dstress(i, j, k, l) + (k != l ? ddirn_dstress(i, j, l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-	jac[col_num][row_num++] = ddirn_dpm[alpha](i, j);
+        jac[col_num][row_num++] = ddirn_dpm[alpha](i, j);
       for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
-	jac[col_num][row_num++] = ddirn_dintnl[a](i, j);
+        jac[col_num][row_num++] = ddirn_dintnl[a](i, j);
       row_num = 0;
       col_num++;
     }
@@ -480,7 +480,7 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
   {
     for (unsigned k = 0 ; k < dim ; ++k)
       for (unsigned l = 0 ; l <= k ; ++l)
-	jac[col_num][row_num++] = df_dstress[alpha](k, l) + (k != l ? df_dstress[alpha](l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
+        jac[col_num][row_num++] = df_dstress[alpha](k, l) + (k != l ? df_dstress[alpha](l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
     for (unsigned beta = 0 ; beta < numberOfYieldFunctions() ; ++beta)
       jac[col_num][row_num++] = 0;
     for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
@@ -493,7 +493,7 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
   {
     for (unsigned k = 0 ; k < dim ; ++k)
       for (unsigned l = 0 ; l <= k ; ++l)
-	jac[col_num][row_num++] = dic_dstress[a](k, l) + (k != l ? dic_dstress[a](l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
+        jac[col_num][row_num++] = dic_dstress[a](k, l) + (k != l ? dic_dstress[a](l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
     for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
       jac[col_num][row_num++] = dic_dpm[a][alpha];
     for (unsigned b = 0 ; b < numberOfInternalParameters() ; ++b)
@@ -612,7 +612,7 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
       lam = 1E-4;
       _console << "line search failed in plasticity\n";
       if (_fspb_debug == 1)
-	mooseError("Causing crash due to debug parameter choice");
+        mooseError("Causing crash due to debug parameter choice");
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
         ls_pm[alpha] = pm[alpha] + dpm[alpha]*lam;
       ls_delta_dp = delta_dp - E_inv*dstress*lam;
@@ -726,10 +726,10 @@ FiniteStrainPlasticBase::checkDerivatives()
       Moose::out << "alpha = " << alpha << " a = " << a << " Relative L2norm = " << 2*(dr_dintnl[alpha][a] - fddr_dintnl[alpha][a]).L2norm()/(dr_dintnl[alpha][a] + fddr_dintnl[alpha][a]).L2norm() << "\n";
       if (_fspb_debug == 3)
       {
-	Moose::out << "Coded:\n";
-	dr_dintnl[alpha][a].print();
-	Moose::out << "Finite difference:\n";
-	fddr_dintnl[alpha][a].print();
+        Moose::out << "Coded:\n";
+        dr_dintnl[alpha][a].print();
+        Moose::out << "Finite difference:\n";
+        fddr_dintnl[alpha][a].print();
       }
     }
   }
@@ -741,7 +741,7 @@ void
 FiniteStrainPlasticBase::fddyieldFunction_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankTwoTensor> & df_dstress)
 {
   df_dstress.assign(numberOfYieldFunctions(), RankTwoTensor());
-  
+
   std::vector<Real> origf;
   yieldFunction(stress, intnl, origf);
 
@@ -755,7 +755,7 @@ FiniteStrainPlasticBase::fddyieldFunction_dstress(const RankTwoTensor & stress, 
       stressep(i, j) += ep;
       yieldFunction(stressep, intnl, fep);
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-	df_dstress[alpha](i, j) = (fep[alpha] - origf[alpha])/ep;
+        df_dstress[alpha](i, j) = (fep[alpha] - origf[alpha])/ep;
     }
 }
 
@@ -777,9 +777,9 @@ FiniteStrainPlasticBase::fddflowPotential_dstress(const RankTwoTensor & stress, 
       stressep(i, j) += ep;
       flowPotential(stressep, intnl, rep);
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-	for (unsigned k = 0 ; k < 3 ; ++k)
-	  for (unsigned l = 0 ; l < 3 ; ++l)
-	    dr_dstress[alpha](k, l, i, j) = (rep[alpha](k, l) - origr[alpha](k, l))/ep;
+        for (unsigned k = 0 ; k < 3 ; ++k)
+          for (unsigned l = 0 ; l < 3 ; ++l)
+            dr_dstress[alpha](k, l, i, j) = (rep[alpha](k, l) - origr[alpha](k, l))/ep;
     }
 }
 
@@ -833,7 +833,7 @@ FiniteStrainPlasticBase::checkJacobian()
       Moose::out << jac[row][col] << " ";
     Moose::out << "\n";
   }
-      
+
   Moose::out << "Finite difference Jacobian:\n";
   for (unsigned row = 0 ; row < fdjac.size() ; ++row)
   {
@@ -869,18 +869,18 @@ FiniteStrainPlasticBase::fdJacobian(const RankTwoTensor & stress, const std::vec
       stressep = stress;
       stressep(i, j) += ep;
       if (i != j)
-	stressep(j, i) += ep;
+        stressep(j, i) += ep;
       delta_dpep = delta_dp;
       for (unsigned k = 0; k < 3 ; ++k)
-	for (unsigned l = 0 ; l < 3 ; ++l)
+        for (unsigned l = 0 ; l < 3 ; ++l)
         {
-	  delta_dpep(k, l) -= E_inv(k, l, i, j)*ep;
-	  if (i != j)
-	    delta_dpep(k, l) -= E_inv(k, l, j, i)*ep;
-	}
+          delta_dpep(k, l) -= E_inv(k, l, i, j)*ep;
+          if (i != j)
+            delta_dpep(k, l) -= E_inv(k, l, j, i)*ep;
+        }
       calculateRHS(stressep, intnl_old, intnl, pm, delta_dpep, rhs_ep);
       for (unsigned row = 0 ; row < system_size ; ++row)
-	jac[row][col] = -(rhs_ep[row] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
+        jac[row][col] = -(rhs_ep[row] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
       col++;
     }
 
