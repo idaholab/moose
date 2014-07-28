@@ -1791,38 +1791,49 @@ FEProblem::swapBackMaterialsNeighbor(THREAD_ID tid)
 /**
  * Small helper function used by addPostprocessor to try to get a Postprocessor pointer from a MooseObject
  */
-Postprocessor *
-getPostprocessorPointer(MooseObject * mo)
+MooseSharedPointer<Postprocessor>
+getPostprocessorPointer(MooseSharedPointer<MooseObject> mo)
 {
   {
-    ElementPostprocessor * intermediate = dynamic_cast<ElementPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<Postprocessor *>(intermediate);
+    MooseSharedPointer<ElementPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<ElementPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    NodalPostprocessor * intermediate = dynamic_cast<NodalPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<Postprocessor *>(intermediate);
+    MooseSharedPointer<NodalPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<NodalPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    InternalSidePostprocessor * intermediate = dynamic_cast<InternalSidePostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<Postprocessor *>(intermediate);
+    MooseSharedPointer<InternalSidePostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<InternalSidePostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    SidePostprocessor * intermediate = dynamic_cast<SidePostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<Postprocessor *>(intermediate);
+    MooseSharedPointer<SidePostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<SidePostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    GeneralPostprocessor * intermediate = dynamic_cast<GeneralPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<Postprocessor *>(intermediate);
+    MooseSharedPointer<GeneralPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<GeneralPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
   }
+
+  return MooseSharedPointer<Postprocessor>();
+}
+
+template <typename UO_TYPE, typename PP_TYPE>
+Postprocessor *
+getPostprocessorPointer(UO_TYPE * uo)
+{
+  PP_TYPE * intermediate = dynamic_cast<PP_TYPE *>(uo);
+  if (intermediate)
+    return static_cast<Postprocessor *>(intermediate);
 
   return NULL;
 }
@@ -1851,11 +1862,11 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
-    MooseObject * mo = _factory.create(pp_name, name, parameters);
+    MooseSharedPointer<MooseObject> mo = _factory.create_shared_ptr(pp_name, name, parameters);
     if (!mo)
       mooseError("Unable to determine type for Postprocessor: " + mo->name());
 
-    Postprocessor * pp = getPostprocessorPointer(mo);
+    MooseSharedPointer<Postprocessor> pp = getPostprocessorPointer(mo);
 
     // Postprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
     const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<std::vector<MooseEnum> >("execute_on"));
@@ -1867,14 +1878,14 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
       _pps(exec_flags[i])[tid].addPostprocessor(pp);
 
       // Add it to the user object warehouse as well...
-      UserObject * user_object = dynamic_cast<UserObject *>(mo);
-      if (!user_object)
+      MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::dynamic_pointer_cast<UserObject>(mo);
+      if (!user_object.get())
         mooseError("Unknown user object type: " + pp_name);
 
       _user_objects(exec_flags[i])[tid].addUserObject(user_object);
     }
 
-    _objects_by_name[tid][name].push_back(mo);
+    _objects_by_name[tid][name].push_back(mo.get());
     _pps_data[tid]->init(name);
   }
 }
@@ -1897,40 +1908,40 @@ FEProblem::getPostprocessorWarehouse()
 /**
  * Small helper function used by addVectorPostprocessor to try to get a VectorPostprocessor pointer from a MooseObject
  */
-VectorPostprocessor *
-getVectorPostprocessorPointer(MooseObject * mo)
+MooseSharedPointer<VectorPostprocessor>
+getVectorPostprocessorPointer(MooseSharedPointer<MooseObject> mo)
 {
   {
-    ElementVectorPostprocessor * intermediate = dynamic_cast<ElementVectorPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<VectorPostprocessor *>(intermediate);
+    MooseSharedPointer<ElementVectorPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<ElementVectorPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<VectorPostprocessor>(intermediate);
   }
 
   {
-    NodalVectorPostprocessor * intermediate = dynamic_cast<NodalVectorPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<VectorPostprocessor *>(intermediate);
+    MooseSharedPointer<NodalVectorPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<NodalVectorPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<VectorPostprocessor>(intermediate);
   }
 
   {
-    InternalSideVectorPostprocessor * intermediate = dynamic_cast<InternalSideVectorPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<VectorPostprocessor *>(intermediate);
+    MooseSharedPointer<InternalSideVectorPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<InternalSideVectorPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<VectorPostprocessor>(intermediate);
   }
 
   {
-    SideVectorPostprocessor * intermediate = dynamic_cast<SideVectorPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<VectorPostprocessor *>(intermediate);
+    MooseSharedPointer<SideVectorPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<SideVectorPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<VectorPostprocessor>(intermediate);
   }
 
   {
-    GeneralVectorPostprocessor * intermediate = dynamic_cast<GeneralVectorPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<VectorPostprocessor *>(intermediate);
+    MooseSharedPointer<GeneralVectorPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<GeneralVectorPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<VectorPostprocessor>(intermediate);
   }
 
-  return NULL;
+  return MooseSharedPointer<VectorPostprocessor>();
 }
 
 void
@@ -1958,11 +1969,11 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
-    MooseObject * mo = _factory.create(pp_name, name, parameters);
+    MooseSharedPointer<MooseObject> mo = _factory.create_shared_ptr(pp_name, name, parameters);
     if (!mo)
       mooseError("Unable to determine type for VectorPostprocessor: " + mo->name());
 
-    VectorPostprocessor * pp = getVectorPostprocessorPointer(mo);
+    MooseSharedPointer<VectorPostprocessor> pp = getVectorPostprocessorPointer(mo);
 
     // VectorPostprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
     const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<std::vector<MooseEnum> >("execute_on"));
@@ -1974,14 +1985,14 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
       _vpps(exec_flags[i])[tid].addVectorPostprocessor(pp);
 
       // Add it to the user object warehouse as well...
-      UserObject * user_object = dynamic_cast<UserObject *>(mo);
-      if (!user_object)
+      MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::dynamic_pointer_cast<UserObject>(mo);
+      if (!user_object.get())
         mooseError("Unknown user object type: " + pp_name);
 
       _user_objects(exec_flags[i])[tid].addUserObject(user_object);
     }
 
-    _objects_by_name[tid][name].push_back(mo);
+    _objects_by_name[tid][name].push_back(mo.get());
   }
 }
 
@@ -2016,17 +2027,13 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
-    MooseObject * mo = _factory.create(user_object_name, name, parameters);
-
-    UserObject * user_object = dynamic_cast<UserObject *>(mo);
-    if (!user_object)
-      mooseError("Unknown user object type: " + user_object_name);
+    MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::static_pointer_cast<UserObject>(_factory.create_shared_ptr(user_object_name, name, parameters));
 
     const std::vector<ExecFlagType> & exec_flags = user_object->execFlags();
     for (unsigned int i=0; i<exec_flags.size(); ++i)
       _user_objects(exec_flags[i])[tid].addUserObject(user_object);
 
-    _objects_by_name[tid][name].push_back(mo);
+    _objects_by_name[tid][name].push_back(user_object.get());
   }
 }
 
@@ -2294,7 +2301,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
             ps->finalize();
 
-            Postprocessor * pp = getPostprocessorPointer(ps);
+            Postprocessor * pp = getPostprocessorPointer<ElementUserObject, ElementPostprocessor>(ps);
 
             if (pp)
             {
@@ -2332,7 +2339,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
             ps->finalize();
 
-            Postprocessor * pp = getPostprocessorPointer(ps);
+            Postprocessor * pp = getPostprocessorPointer<SideUserObject, SidePostprocessor>(ps);
 
             if (pp)
             {
@@ -2370,7 +2377,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
             it->finalize();
 
-            Postprocessor * pp = getPostprocessorPointer(it);
+            Postprocessor * pp = getPostprocessorPointer<InternalSideUserObject, InternalSidePostprocessor>(it);
 
             if (pp)
             {
@@ -2431,7 +2438,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
             ps->finalize();
 
-            Postprocessor * pp = getPostprocessorPointer(ps);
+            Postprocessor * pp = getPostprocessorPointer<NodalUserObject, NodalPostprocessor>(ps);
 
             if (pp)
             {
@@ -2468,7 +2475,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
             ps->finalize();
 
-            Postprocessor * pp = getPostprocessorPointer(ps);
+            Postprocessor * pp = getPostprocessorPointer<NodalUserObject, NodalPostprocessor>(ps);
 
             if (pp)
             {
@@ -2497,7 +2504,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
     (*generic_user_object_it)->finalize();
 
-    Postprocessor * pp = getPostprocessorPointer(*generic_user_object_it);
+    Postprocessor * pp = getPostprocessorPointer<GeneralUserObject, GeneralPostprocessor>(*generic_user_object_it);
 
     if (pp)
     {
