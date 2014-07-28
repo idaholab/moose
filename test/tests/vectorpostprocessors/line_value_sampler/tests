@@ -4,4 +4,11 @@
     input = 'line_value_sampler.i'
     csvdiff = 'line_value_sampler_out_line_sample_0001.csv'
   [../]
+  [./delimiter]
+    type = 'CheckFiles'
+    input = 'csv_delimiter.i'
+    check_files = 'csv_delimiter_csv_line_sample_0001.csv'
+    file_expect_out = 'id u v x y z\n0 0 1\.2346 0 0\.5 0\n0\.1 0\.1 1\.2346 0\.1 0\.5 0\n0\.2 0.2 1\.2346 0\.2 0.5 0'
+  [../]
 []
+
