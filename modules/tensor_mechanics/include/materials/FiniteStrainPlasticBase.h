@@ -37,6 +37,24 @@ protected:
   /// Debug parameter - useful for coders, not for users (hopefully!)
   int _fspb_debug;
 
+  /// Debug the Jacobian entries at this stress
+  RankTwoTensor _fspb_debug_stress;
+
+  /// Debug the Jacobian entires at these plastic multipliers
+  std::vector<Real> _fspb_debug_pm;
+
+  /// Debug the Jacobian entires at these internal parameters
+  std::vector<Real> _fspb_debug_intnl;
+
+  /// Debug finite-differencing parameter for the stress
+  Real _fspb_debug_stress_change;
+
+  /// Debug finite-differencing parameters for the plastic multipliers
+  std::vector<Real> _fspb_debug_pm_change;
+
+  /// Debug finite-differencing parameters for the internal parameters
+  std::vector<Real> _fspb_debug_intnl_change;
+
   /// plastic strain
   MaterialProperty<RankTwoTensor> & _plastic_strain;
 
@@ -53,6 +71,11 @@ protected:
   MaterialProperty<std::vector<Real> > & _f;
 
 
+  // *****************************************************************
+  // *                                                               *
+  // *  FOLLOWING ARE DESIGNED TO BE OVERRIDDEN BY DERIVED CLASSES   *
+  // *                                                               *
+  // *****************************************************************
 
   /**
    * The number of yield functions (should return 1 for single-surface plasticity)
@@ -142,19 +165,36 @@ protected:
   /// Function called just after doing returnMap
   virtual void postReturnMap();
 
+
+  // **********************************************************************
+  // *                                                                    *
+  // *  USUALLY IT IS NOT NECESSARY TO OVERRIDE ANYTHING ELSE BELOW HERE  *
+  // *                                                                    *
+  // **********************************************************************
+
   /**
    * The constraints.  These are set to zero (or <=0 in the case of the yield functions)
    * by the Newton-Raphson process
    * @param stress The stress
    * @param intnl_old old values of the internal parameters
    * @param intnl internal parameters
-   * @param ga Current value(s) of the plasticity multiplier(s) (consistency parameters)
+   * @param pm Current value(s) of the plasticity multiplier(s) (consistency parameters)
    * @param delta_dp Change in plastic strain incurred so far during the return
    * @param f (output) Yield function(s)
    * @param dirn (output) Direction constraint
    * @param ic (output) Internal-parameter constraint
    */
-  virtual void calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & ga, const RankTwoTensor & delta_dp, std::vector<Real> & f, RankTwoTensor & dirn, std::vector<Real> & ic);
+  virtual void calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, RankTwoTensor & dirn, std::vector<Real> & ic);
+
+  /**
+   * Given the constraints, calculate the RHS which is
+   * rhs = -(dirn(0,0), dirn(1,0), dirn(1,1), dirn(2,0), dirn(2,1), dirn(2,2), f[0], f[1], ..., f[num_f], ic[0], ic[1], ..., ic[num_ic])
+   *
+   * @param dirn Direction constraint
+   * @param f yield function(s)
+   * @param ic internal constraint(s)
+   */
+  virtual void calculateRHS(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & rhs);
 
   /**
    * The residual-squared
@@ -164,6 +204,7 @@ protected:
    */
   virtual Real residual2(const std::vector<Real> & f, const RankTwoTensor & dirn, const std::vector<Real> & ic);
 
+  virtual void calculateJacobian(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_inv, std::vector<std::vector<Real> > & jac);
 
   /**
    * Implements the return map
@@ -188,15 +229,15 @@ protected:
    * @param stress Current value of stress
    * @param intnl_old The internal variables at the previous "time" step
    * @param intnl    Current value of the internal variables
-   * @param ga  Current value of the plasticity multipliers (consistency parameters)
+   * @param pm  Current value of the plasticity multipliers (consistency parameters)
+   * @param E_ijkl Elasticity tensor
    * @param E_inv inverse of the elasticity tensor
    * @param delta_dp  Current value of the plastic-strain increment (ie plastic_strain - plastic_strain_old)
-   * @param f The yield function
    * @param dstress (output) The change in stress for a full Newton step
    * @param dpm (output) The change in plasticity multiplier for a full Newton step
    * @param dintnl (output) The change in internal variable(s) for a full Newton step
    */
-  virtual void nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & ga, const RankFourTensor & E_inv, const RankTwoTensor & delta_dp, const std::vector<Real> & f, RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl);
+  virtual void nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_ijkl, const RankFourTensor & E_inv, const RankTwoTensor & delta_dp, RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl);
 
   /**
    * Performs a line search.  Algorithm is taken straight from
@@ -211,7 +252,7 @@ protected:
    * @param nr_res2 (input/output) The residual-squared
    * @param intnl_old  The internal variables at the previous "time" step
    * @param intnl (input/output) The internal variables
-   * @param ga (input/output) The plasticity multiplier(s) (consistency parameter(s))
+   * @param pm (input/output) The plasticity multiplier(s) (consistency parameter(s))
    * @param E_inv inverse of the elasticity tensor
    * @param delta_dp (input/output) Change in plastic strain from start of "time" step to current configuration (plastic_strain - plastic_strain_old)
    * @param dstress Change in stress for a full Newton step
@@ -221,9 +262,63 @@ protected:
    * @param dirn (input/output) Direction constraint
    * @param ic (input/output) Internal constraint
    */
-  virtual void lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & ga, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & dirn, std::vector<Real> & ic);
+  virtual void lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & dirn, std::vector<Real> & ic);
 
 
+ private:
+
+  // Following are used for checking derivatives
+
+  /**
+   * Checks the derivatives, eg dyieldFunction_dstress by using
+   * finite difference approximations.
+   */
+  void checkDerivatives();
+
+  /**
+   * The finite-difference derivative of yield function(s) with respect to stress
+   * @param stress the stress at which to calculate the yield function
+   * @param intnl vector of internal parameters
+   * @param df_dstress (output) the derivative (or derivatives in the case of multisurface plasticity).  df_dstress[alpha](i, j) = dyieldFunction[alpha]/dstress(i, j)
+   */
+  void fddyieldFunction_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankTwoTensor> & df_dstress);
+
+  /**
+   * The finite-difference derivative of the flow potential(s) with respect to stress
+   * @param stress the stress at which to calculate the flow potential
+   * @param intnl vector of internal parameters
+   * @param dr_dstress (output) the derivative.  dr_dstress[alpha](i, j, k, l) = dr[alpha](i, j)/dstress(k, l)
+   */
+  virtual void fddflowPotential_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankFourTensor> & dr_dstress);
+
+  /**
+   * The finite-difference derivative of the flow potentials with respect to internal parameters
+   * @param stress the stress at which to calculate the flow potential
+   * @param intnl vector of internal parameters
+   * @param dr_dintnl (output) the derivatives.  dr_dintnl[alpha][a](i, j) = dr[alpha](i, j)/dintnl[a]
+   */
+  virtual void fddflowPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<std::vector<RankTwoTensor> > & dr_dintnl);
+
+  /**
+   * Checks the full Jacobian, which is just certain
+   * linear combinations of the dyieldFunction_dstress, etc,
+   * by using finite difference approximations
+   */
+  void checkJacobian();
+
+  /**
+   * The Jacobian calculated using finite differences.  The output
+   * should be equal to calculateJacobian(...) if everything is
+   * coded correctly.
+   * @param stress the stress at which to calculate the Jacobian
+   * @param intnl_old the old values of internal variables (jacobian is inependent of these, but they are needed to do the finite-differencing cleanly)
+   * @param intnl the vector of internal parameters at which to calculate the Jacobian
+   * @param pm the plasticity multipliers at which to calculate the Jacobian
+   * @param delta_dp plastic_strain - plastic_strain_old (Jacobian is independent of this, but it is needed to do the finite-differencing cleanly)
+   * @param E_inv inverse of the elasticity tensor
+   * @param jac (output) the finite-difference Jacobian
+   */
+  virtual void fdJacobian(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<std::vector<Real> > & jac);
 
 };
 

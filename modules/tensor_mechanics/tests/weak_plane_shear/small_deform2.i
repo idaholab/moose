@@ -161,7 +161,6 @@
     type = FiniteStrainWeakPlaneShear
     yield_function_tolerance = 1E-3
     direction_tolerance = 1E-4
-    fspb_debug = 0
     block = 0
     wps_cohesion = 1E3
     wps_dilation_angle = 1
@@ -175,6 +174,7 @@
     wps_normal_rotates = false
     internal_constraint_tolerance = 1E-6
     wps_smoother = 500
+    debug_fspb = 1
   [../]
 []
 

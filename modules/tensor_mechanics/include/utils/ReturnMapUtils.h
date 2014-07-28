@@ -34,7 +34,15 @@ namespace ReturnMapUtils
   void printA(const std::vector<double> & a);
 
 
-  Real solutionError(const RankTwoTensor & dirn, const std::vector<Real> & f, const std::vector<Real> & ic, const RankFourTensor & ddirn_dstress, const std::vector<RankTwoTensor> & ddirn_dpm, const std::vector<RankTwoTensor> & ddirn_dintnl, const std::vector<RankTwoTensor> & df_dstress, const std::vector<std::vector<Real> > & df_dintnl, const std::vector<RankTwoTensor> & dic_dstress, const std::vector<std::vector<Real> > & dic_dpm, const std::vector<std::vector<Real> > & dic_dintnl, RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl);
+  /**
+   * Uses a solution provided by linearSolve and checks
+   * whether the LHS equals the RHS
+   * Same parameters are linear solve, but the outputs are:
+   * @param dirn_error relative error in the "direction" constraint
+   * @param f_error relative error in the yield function constraint
+   * @param ic_error relative errors in the internal constraints
+   */
+  void solutionError(const RankTwoTensor & dirn, const std::vector<Real> & f, const std::vector<Real> & ic, const RankFourTensor & ddirn_dstress, const std::vector<RankTwoTensor> & ddirn_dpm, const std::vector<RankTwoTensor> & ddirn_dintnl, const std::vector<RankTwoTensor> & df_dstress, const std::vector<std::vector<Real> > & df_dintnl, const std::vector<RankTwoTensor> & dic_dstress, const std::vector<std::vector<Real> > & dic_dpm, const std::vector<std::vector<Real> > & dic_dintnl, RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, Real & dirn_error, std::vector<Real> & f_error, std::vector<Real> & ic_error);
 }
 
 #endif //RETURNMAPUTILS_H

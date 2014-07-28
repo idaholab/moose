@@ -146,8 +146,8 @@ FiniteStrainWeakPlaneShear::df_dsig(const RankTwoTensor & stress, const Real & _
   }
   else
   {
-    deriv(0, 2) = deriv(2, 0) = 0.5*stress(0, 2)/tau;
-    deriv(1, 2) = deriv(2, 1) = 0.5*stress(1, 2)/tau;
+    deriv(0, 2) = deriv(2, 0) = 0.25*(stress(0, 2)+stress(2,0))/tau;
+    deriv(1, 2) = deriv(2, 1) = 0.25*(stress(1, 2)+stress(2,1))/tau;
   }
   deriv(2, 2) = _tan_phi_or_psi;
   return deriv;
@@ -187,8 +187,8 @@ FiniteStrainWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor & stress,
 
   // note that i explicitly symmeterise
   RankTwoTensor dtau;
-  dtau(0, 2) = dtau(2, 0) = 0.5*stress(0, 2)/tau;
-  dtau(1, 2) = dtau(2, 1) = 0.5*stress(1, 2)/tau;
+  dtau(0, 2) = dtau(2, 0) = 0.25*(stress(0, 2) + stress(2, 0))/tau;
+  dtau(1, 2) = dtau(2, 1) = 0.25*(stress(1, 2) + stress(2, 1))/tau;
 
   for (unsigned i = 0 ; i < 3 ; ++i)
     for (unsigned j = 0 ; j < 3 ; ++j)

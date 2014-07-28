@@ -138,6 +138,7 @@
     yield_function_tolerance = 1E-3
     direction_tolerance = 1E-3
     internal_constraint_tolerance = 1E-3
+    debug_fspb = 1
   [../]
 []
 

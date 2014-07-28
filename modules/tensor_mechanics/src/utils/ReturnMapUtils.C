@@ -180,46 +180,61 @@ ReturnMapUtils::printA(const std::vector<double> & a)
 
 
 
-Real
-ReturnMapUtils::solutionError(const RankTwoTensor & dirn, const std::vector<Real> & f, const std::vector<Real> & ic, const RankFourTensor & ddirn_dstress, const std::vector<RankTwoTensor> & ddirn_dpm, const std::vector<RankTwoTensor> & ddirn_dintnl, const std::vector<RankTwoTensor> & df_dstress, const std::vector<std::vector<Real> > & df_dintnl, const std::vector<RankTwoTensor> & dic_dstress, const std::vector<std::vector<Real> > & dic_dpm, const std::vector<std::vector<Real> > & dic_dintnl, RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl)
+void
+ReturnMapUtils::solutionError(const RankTwoTensor & dirn, const std::vector<Real> & f, const std::vector<Real> & ic, const RankFourTensor & ddirn_dstress, const std::vector<RankTwoTensor> & ddirn_dpm, const std::vector<RankTwoTensor> & ddirn_dintnl, const std::vector<RankTwoTensor> & df_dstress, const std::vector<std::vector<Real> > & df_dintnl, const std::vector<RankTwoTensor> & dic_dstress, const std::vector<std::vector<Real> > & dic_dpm, const std::vector<std::vector<Real> > & dic_dintnl, RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, Real & dirn_error, std::vector<Real> & f_error, std::vector<Real> & ic_error)
 {
   unsigned int num_f = f.size(); // number of yield functions, and the number of pm
   unsigned int num_ic = ic.size();
 
+  Real abs_error;
 
+  // "r" should equal -dirn
   RankTwoTensor r = ddirn_dstress*dstress;
-  for (unsigned i = 0 ; i < num_f ; ++i)
-    r += ddirn_dpm[i]*dpm[i];
-  for (unsigned i = 0 ; i < num_ic ; ++i)
-    r += ddirn_dintnl[i]*dintnl[i];
-  r += dirn;
+  for (unsigned alpha = 0 ; alpha < num_f ; ++alpha)
+    r += ddirn_dpm[alpha]*dpm[alpha];
+  for (unsigned a = 0 ; a < num_ic ; ++a)
+    r += ddirn_dintnl[a]*dintnl[a];
+  abs_error = (r + dirn).L2norm();
+  if (abs_error == 0.0)
+    dirn_error = 0.0;
+  else 
+    dirn_error = 2.0*abs_error/(r - dirn).L2norm();
 
-  Real error = r.L2norm();
-  error *= error; // i'll add the square of the other values too
-
+  // "fe" should equal -f
   std::vector<Real> fe(num_f);
-  for (unsigned i = 0 ; i < num_f ; ++i)
-    fe[i] = dstress.doubleContraction(df_dstress[i]);
-  for (unsigned i = 0 ; i < num_f ; ++i)
-    for (unsigned j = 0 ; j < num_ic ; ++j)
-      fe[i] += df_dintnl[i][j]*dintnl[j];
-  for (unsigned i = 0 ; i < num_f ; ++i)
-    error += std::pow(fe[i] + f[i], 2);
+  for (unsigned alpha = 0 ; alpha < num_f ; ++alpha)
+    fe[alpha] = dstress.doubleContraction(df_dstress[alpha]);
+  for (unsigned alpha = 0 ; alpha < num_f ; ++alpha)
+    for (unsigned a = 0 ; a < num_ic ; ++a)
+      fe[alpha] += df_dintnl[alpha][a]*dintnl[a];
+  f_error.resize(num_f);
+  for (unsigned alpha = 0 ; alpha < num_f ; ++alpha)
+  {
+    abs_error = fe[alpha] + fe[alpha];
+    if (abs_error == 0.0)
+      f_error[alpha] = 0.0;
+    else
+      f_error[alpha] = 2.0*(fe[alpha] + f[alpha])/(fe[alpha] - f[alpha]);
+  }
 
+  // "ice" should equal -ic
   std::vector<Real> ice(num_ic);
-  for (unsigned i = 0 ; i < num_ic ; ++i)
-    ice[i] = dstress.doubleContraction(dic_dstress[i]);
-  for (unsigned i = 0 ; i < num_ic ; ++i)
-    for (unsigned j = 0 ; j < num_f ; ++j)
-      ice[i] += dic_dpm[i][j]*dpm[j];
-  for (unsigned i = 0 ; i < num_ic ; ++i)
-    for (unsigned j = 0 ; j < num_ic ; ++j)
-      ice[i] += dic_dintnl[i][j]*dintnl[j];
-  for (unsigned i = 0 ; i < num_ic ; ++i)
-    error += std::pow(ice[i] + ic[i], 2);
-
-
-  return error;
-
+  for (unsigned a = 0 ; a < num_ic ; ++a)
+    ice[a] = dstress.doubleContraction(dic_dstress[a]);
+  for (unsigned a = 0 ; a < num_ic ; ++a)
+    for (unsigned alpha = 0 ; alpha < num_f ; ++alpha)
+      ice[a] += dic_dpm[a][alpha]*dpm[alpha];
+  for (unsigned a = 0 ; a < num_ic ; ++a)
+    for (unsigned b = 0 ; b < num_ic ; ++b)
+      ice[a] += dic_dintnl[a][b]*dintnl[b];
+  ic_error.resize(num_f);
+  for (unsigned a = 0 ; a < num_ic ; ++a)
+  {
+    abs_error = ice[a] + ic[a];
+    if (abs_error == 0.0)
+      ic_error[a] = 0.0;
+    else
+      ic_error[a] = 2.0*(ice[a] + ic[a])/(ice[a] - ic[a]);
+  }
 }
 

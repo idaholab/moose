@@ -113,13 +113,20 @@ ReturnMapUtilsTest::linearSolveTest()
 void
 ReturnMapUtilsTest::solutionErrorTest()
 {
-
   RankTwoTensor dstress;
   std::vector<Real> dpm;
   std::vector<Real> dintnl;
 
   ReturnMapUtils::linearSolve(dirn, f, ic, ddirn_dstress, ddirn_dpm, ddirn_dintnl, df_dstress, df_dintnl, dic_dstress, dic_dpm, dic_dintnl, dstress, dpm, dintnl);
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,   ReturnMapUtils::solutionError(dirn, f, ic, ddirn_dstress, ddirn_dpm, ddirn_dintnl, df_dstress, df_dintnl, dic_dstress, dic_dpm, dic_dintnl, dstress, dpm, dintnl), 0.0001);
-
+  Real dirn_error;
+  std::vector<Real> f_error;
+  std::vector<Real> ic_error;
+  ReturnMapUtils::solutionError(dirn, f, ic, ddirn_dstress, ddirn_dpm, ddirn_dintnl, df_dstress, df_dintnl, dic_dstress, dic_dpm, dic_dintnl, dstress, dpm, dintnl, dirn_error, f_error, ic_error);
+  
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, dirn_error, 0.0001);
+  for (unsigned alpha = 0 ; alpha < f_error.size() ; ++alpha)
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, f_error[alpha], 0.0001);
+  for (unsigned a = 0 ; a < ic_error.size() ; ++a)
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ic_error[a], 0.0001);
 }

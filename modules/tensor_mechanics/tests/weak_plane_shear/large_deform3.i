@@ -61,7 +61,7 @@
   [../]
 
   # the following are "random" deformations
-  # each is O(1E-5) to keep deformations small
+  # each is O(1E-1) to provide large deformations
   [./topx]
     type = FunctionPresetBC
     variable = disp_x
@@ -136,9 +136,10 @@
     wps_normal_rotates = true
     wps_smoother = 100
     max_NR_iterations = 100
-    yield_function_tolerance = 1
-    direction_tolerance = 1E-8
+    yield_function_tolerance = 1E-3
+    direction_tolerance = 1E-3
     internal_constraint_tolerance = 1E-3
+    debug_fspb = 1
   [../]
 []
 

@@ -78,8 +78,8 @@
 
   [./large_hard3]
     type = 'CSVDiff'
-    input = 'large_deform_hard3.i'
-    csvdiff = 'large_deform_hard3.csv'
+    input = 'large_deform_harden3.i'
+    csvdiff = 'large_deform_harden3.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-3
     heavy = true

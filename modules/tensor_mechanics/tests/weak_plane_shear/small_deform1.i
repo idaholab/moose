@@ -190,6 +190,7 @@
     direction_tolerance = 1E-5
     internal_constraint_tolerance = 1E-6
     wps_smoother = 0
+    debug_fspb = 1
   [../]
 []
 
