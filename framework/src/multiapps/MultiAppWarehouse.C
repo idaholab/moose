@@ -24,20 +24,18 @@ MultiAppWarehouse::MultiAppWarehouse()
 
 MultiAppWarehouse::~MultiAppWarehouse()
 {
-  for (std::vector<MultiApp *>::const_iterator i = _all_multi_apps.begin(); i != _all_multi_apps.end(); ++i)
-    delete *i;
-
 }
 
 void
-MultiAppWarehouse::addMultiApp(MultiApp * multi_app)
+MultiAppWarehouse::addMultiApp(MooseSharedPointer<MultiApp> multi_app)
 {
-  _all_multi_apps.push_back(multi_app);
+  _all_ptrs.push_back(multi_app);
+  _all_multi_apps.push_back(multi_app.get());
 
-  TransientMultiApp * trans_multi_app = dynamic_cast<TransientMultiApp *>(multi_app);
+  MooseSharedPointer<TransientMultiApp> trans_multi_app = MooseSharedNamespace::dynamic_pointer_cast<TransientMultiApp>(multi_app);
 
-  if (trans_multi_app)
-    _transient_multi_apps.push_back(trans_multi_app);
+  if (trans_multi_app.get())
+    _transient_multi_apps.push_back(trans_multi_app.get());
 }
 
 bool

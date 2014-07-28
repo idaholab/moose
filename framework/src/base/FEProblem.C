@@ -2663,10 +2663,10 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
 
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
 
-  MooseObject * mo = _factory.create(multi_app_name, name, parameters);
+  MooseSharedPointer<MooseObject> mo = _factory.create_shared_ptr(multi_app_name, name, parameters);
 
-  MultiApp * multi_app = dynamic_cast<MultiApp *>(mo);
-  if (!multi_app)
+  MooseSharedPointer<MultiApp> multi_app = MooseSharedNamespace::dynamic_pointer_cast<MultiApp>(mo);
+  if (multi_app.get() == NULL)
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
   const std::vector<ExecFlagType> & exec_flags = multi_app->execFlags();
