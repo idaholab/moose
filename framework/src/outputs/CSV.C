@@ -37,7 +37,10 @@ InputParameters validParams<CSV>()
 
 CSV::CSV(const std::string & name, InputParameters & parameters) :
     TableOutput(name, parameters),
-    _align(getParam<bool>("align"))
+    _align(getParam<bool>("align")),
+    _precision(getParam<unsigned int>("precision")),
+    _set_delimiter(isParamValid("delimiter")),
+    _delimiter(getParam<std::string>("delimiter"))
 {
 }
 
@@ -48,13 +51,12 @@ CSV::~CSV()
 void
 CSV::initialSetup()
 {
-// Set the delimiter
-  if (isParamValid("delimiter"))
-    _all_data_table.setDelimiter(getParam<std::string>("delimiter"));
+  // Set the delimiter
+  if (_set_delimiter)
+    _all_data_table.setDelimiter(_delimiter);
 
   // Set the precision
-  if (isParamValid("precision"))
-    _all_data_table.setPrecision(getParam<unsigned int>("precision"));
+  _all_data_table.setPrecision(_precision);
 }
 
 std::string
@@ -88,6 +90,9 @@ CSV::output()
 
     output << ".csv";
 
+    if (_set_delimiter)
+      it->second.setDelimiter(_delimiter);
+    it->second.setPrecision(_precision);
     it->second.printCSV(output.str(), 1, _align);
   }
 }
