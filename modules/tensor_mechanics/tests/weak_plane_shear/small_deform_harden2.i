@@ -192,7 +192,7 @@
     wps_normal_rotates = false
     wps_smoother = 500
     yield_function_tolerance = 1E-3
-    direction_tolerance = 1E-3
+    ep_plastic_tolerance = 1E-3
     internal_constraint_tolerance = 1E-3
     debug_fspb = 1
   [../]

@@ -177,7 +177,7 @@
     C_ijkl = '0 1E7'
     wpt_normal_vector = '0 0 1'
     wpt_normal_rotates = true
-    direction_tolerance = 1E-9
+    ep_plastic_tolerance = 1E-9
   [../]
 []
 

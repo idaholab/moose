@@ -11,7 +11,7 @@ InputParameters validParams<FiniteStrainPlasticBase>()
   params.addRangeCheckedParam<unsigned int>("max_NR_iterations", 20, "max_NR_iterations>0", "Maximum number of Newton-Raphson iterations allowed");
   params.addRequiredParam<std::vector<Real> >("yield_function_tolerance", "If the yield function is less than this amount, the (stress, internal parameters) are deemed admissible.  A vector of tolerances must be entered for the multi-surface case");
   params.addParam<std::vector<Real> >("internal_constraint_tolerance", "The Newton-Raphson process is only deemed converged if the internal constraint is less than this.  A vector of tolerances must be entered for the case with more than one internal parameter");
-  params.addRequiredRangeCheckedParam<Real>("direction_tolerance", "direction_tolerance>0", "The Newton-Raphson process is only deemed converged if the direction constraints have L2 norm less than this.");
+  params.addRequiredRangeCheckedParam<Real>("ep_plastic_tolerance", "ep_plastic_tolerance>0", "The Newton-Raphson process is only deemed converged if the plastic strain increment constraints have L2 norm less than this.");
   params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  1 = cause a crash if max_iter is exceeded or the line search fails,  2 = debug Jacobian entries, 3 = print full Jacobian results while debugging.  4 = check the entire Jacobian");
   params.addParam<RealTensorValue>("debug_jac_at_stress", RealTensorValue(), "Debug Jacobian entries at this stress.  For use by developers");
   params.addParam<std::vector<Real> >("debug_jac_at_pm", "Debug Jacobian entries at these plastic multipliers");
@@ -30,7 +30,7 @@ FiniteStrainPlasticBase::FiniteStrainPlasticBase(const std::string & name,
     _max_iter(getParam<unsigned int>("max_NR_iterations")),
     _f_tol(getParam<std::vector<Real> >("yield_function_tolerance")),
     _ic_tol(parameters.isParamValid("internal_constraint_tolerance") ? getParam<std::vector<Real> >("internal_constraint_tolerance") : std::vector<Real>(0)),
-    _dirn_tol(getParam<Real>("direction_tolerance")),
+    _epp_tol(getParam<Real>("ep_plastic_tolerance")),
 
     _fspb_debug(getParam<int>("debug_fspb")),
     _fspb_debug_stress(getParam<RealTensorValue>("debug_jac_at_stress")),
@@ -219,8 +219,8 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
   // types of constraints we have to satisfy, listed
   // below, and calculated in calculateConstraints(...)
 
-  // Direction constraint, L2 norm must be zero (up to a tolerance)
-  RankTwoTensor dirn;
+  // Plastic strain constraint, L2 norm must be zero (up to a tolerance)
+  RankTwoTensor epp;
 
   // Yield function constraint passed to this function as
   // std::vector<Real> & f
@@ -263,11 +263,11 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
     iter++;
 
     // calculate dstress, dpm and dintnl for one full Newton-Raphson step
-    nrStep(stress, intnl_old, intnl, pm, E_ijkl, E_inv, delta_dp, dstress, dpm, dintnl);
+    nrStep(stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl);
 
     // perform a line search
     // The line-search will exit with updated values
-    lineSearch(nr_res2, stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, f, dirn, ic);
+    lineSearch(nr_res2, stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, f, epp, ic);
   }
 
 
@@ -290,20 +290,20 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
 }
 
 void
-FiniteStrainPlasticBase::calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, RankTwoTensor & dirn, std::vector<Real> & ic)
+FiniteStrainPlasticBase::calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic)
 {
   // yield functions
   yieldFunction(stress, intnl, f);
 
 
-  // direction constraints
+  // flow direction
   std::vector<RankTwoTensor> r;
   flowPotential(stress, intnl, r);
 
-  dirn = RankTwoTensor();
+  epp = RankTwoTensor();
   for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-    dirn += pm[alpha]*r[alpha];
-  dirn -= delta_dp;
+    epp += pm[alpha]*r[alpha];
+  epp -= delta_dp;
 
 
   // internal constraints
@@ -323,23 +323,23 @@ void
 FiniteStrainPlasticBase::calculateRHS(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & rhs)
 {
   std::vector<Real> f; // the yield functions
-  RankTwoTensor dirn; // the "direction constraint"
+  RankTwoTensor epp; // the plastic-strain constraint ("direction constraint")
   std::vector<Real> ic; // the "internal constraints"
 
-  calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, dirn, ic);
+  calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, epp, ic);
 
   unsigned int dim = 3;
-  unsigned int system_size = 6 + numberOfYieldFunctions() + numberOfInternalParameters(); // "6" comes from symmeterizing dirn
+  unsigned int system_size = 6 + numberOfYieldFunctions() + numberOfInternalParameters(); // "6" comes from symmeterizing epp
 
   rhs.resize(system_size);
 
-  // rhs = -(dirn(0,0), dirn(1,0), dirn(1,1), dirn(2,0), dirn(2,1), dirn(2,2), f[0], f[1], ..., f[numberOfYieldFunctions()], ic[0], ic[1], ..., ic[numberOfInternalParameters()])
+  // rhs = -(epp(0,0), epp(1,0), epp(1,1), epp(2,0), epp(2,1), epp(2,2), f[0], f[1], ..., f[numberOfYieldFunctions()], ic[0], ic[1], ..., ic[numberOfInternalParameters()])
   // notice the appearance of only the i>=j components
 
   unsigned ind = 0;
   for (unsigned i = 0 ; i < dim ; ++i)
     for (unsigned j = 0 ; j <= i ; ++j)
-      rhs[ind++] = -dirn(i, j);
+      rhs[ind++] = -epp(i, j);
   for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
     rhs[ind++] = -f[alpha];
   for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
@@ -348,12 +348,12 @@ FiniteStrainPlasticBase::calculateRHS(const RankTwoTensor & stress, const std::v
 
 
 Real
-FiniteStrainPlasticBase::residual2(const std::vector<Real> & f, const RankTwoTensor & dirn, const std::vector<Real> & ic)
+FiniteStrainPlasticBase::residual2(const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic)
 {
   Real nr_res2 = 0;
   for (unsigned alpha = 0 ; alpha < f.size() ; ++alpha)
     nr_res2 += 0.5*std::pow( f[alpha]/_f_tol[alpha], 2); // NOTE: have to change for multi-surface, since f could be negative!
-  nr_res2 += 0.5*std::pow(dirn.L2norm()/_dirn_tol, 2);
+  nr_res2 += 0.5*std::pow(epp.L2norm()/_epp_tol, 2);
   for (unsigned a = 0 ; a < ic.size() ; ++a)
     nr_res2 += 0.5*std::pow(ic[a]/_ic_tol[a], 2);
   return nr_res2;
@@ -394,25 +394,25 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
 
   // construct matrix entries
   // In the following
-  // dirn = pm*r - E_inv*(trial_stress - stress) = pm*r - delta_dp
+  // epp = pm*r - E_inv*(trial_stress - stress) = pm*r - delta_dp
   // f = yield function
   // ic = intnl - intnl_old + pm*h
 
-  RankFourTensor ddirn_dstress;
+  RankFourTensor depp_dstress;
   for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-    ddirn_dstress += pm[alpha]*dr_dstress[alpha];
-  ddirn_dstress += E_inv;
+    depp_dstress += pm[alpha]*dr_dstress[alpha];
+  depp_dstress += E_inv;
 
-  std::vector<RankTwoTensor> ddirn_dpm;
-  ddirn_dpm.resize(numberOfYieldFunctions());
+  std::vector<RankTwoTensor> depp_dpm;
+  depp_dpm.resize(numberOfYieldFunctions());
   for (unsigned alpha = 0; alpha < numberOfYieldFunctions() ; ++alpha)
-    ddirn_dpm[alpha] = r[alpha];
+    depp_dpm[alpha] = r[alpha];
 
-  std::vector<RankTwoTensor> ddirn_dintnl;
-  ddirn_dintnl.assign(numberOfInternalParameters(), RankTwoTensor());
+  std::vector<RankTwoTensor> depp_dintnl;
+  depp_dintnl.assign(numberOfInternalParameters(), RankTwoTensor());
   for (unsigned a = 0; a < numberOfInternalParameters() ; ++a)
     for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-      ddirn_dintnl[a] += pm[alpha]*dr_dintnl[alpha][a];
+      depp_dintnl[a] += pm[alpha]*dr_dintnl[alpha][a];
 
   // df_dstress has been calculated above
   // df_dpm is always zero
@@ -448,14 +448,14 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
   /**
    * now construct the Jacobian
    * It is:
-   * ( ddirn_dstress ddirn_dpm ddirn_dintnl )
+   * ( depp_dstress depp_dpm depp_dintnl )
    * (  df_dstress       0      df_dintnl   )
    * ( dic_dstress    dic_dpm   dic_dintnl  )
-   * For the "dirn" terms, only the i>=j components are kept in the RHS, so only these terms are kept here too
+   * For the "epp" terms, only the i>=j components are kept in the RHS, so only these terms are kept here too
    */
 
   unsigned int dim = 3;
-  unsigned int system_size = 6 + numberOfYieldFunctions() + numberOfInternalParameters(); // "6" comes from symmeterizing dirn
+  unsigned int system_size = 6 + numberOfYieldFunctions() + numberOfInternalParameters(); // "6" comes from symmeterizing epp
   jac.resize(system_size);
   for (unsigned i = 0 ; i < system_size ; ++i)
     jac[i].resize(system_size);
@@ -467,11 +467,11 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
     {
       for (unsigned k = 0 ; k < dim ; ++k)
         for (unsigned l = 0 ; l <= k ; ++l)
-          jac[col_num][row_num++] = ddirn_dstress(i, j, k, l) + (k != l ? ddirn_dstress(i, j, l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
+          jac[col_num][row_num++] = depp_dstress(i, j, k, l) + (k != l ? depp_dstress(i, j, l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-        jac[col_num][row_num++] = ddirn_dpm[alpha](i, j);
+        jac[col_num][row_num++] = depp_dpm[alpha](i, j);
       for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
-        jac[col_num][row_num++] = ddirn_dintnl[a](i, j);
+        jac[col_num][row_num++] = depp_dintnl[a](i, j);
       row_num = 0;
       col_num++;
     }
@@ -505,7 +505,7 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
 }
 
 void
-FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_ijkl, const RankFourTensor & E_inv, const RankTwoTensor & delta_dp, RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl)
+FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_inv, const RankTwoTensor & delta_dp, RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl)
 {
   // Calculate RHS and Jacobian
   std::vector<Real> rhs;
@@ -519,11 +519,11 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
   // prepare for LAPACKgesv_ routine provided by PETSc
   int system_size = rhs.size();
 
-  double a[system_size*system_size];
+  std::vector<double> a(system_size*system_size);
   // Fill in the a "matrix" by going down columns
   unsigned ind = 0;
-  for (unsigned col = 0 ; col < system_size ; ++col)
-    for (unsigned row = 0 ; row < system_size ; ++row)
+  for (int col = 0 ; col < system_size ; ++col)
+    for (int row = 0 ; row < system_size ; ++row)
       a[ind++] = jac[row][col];
 
   int nrhs = 1;
@@ -537,7 +537,7 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
 
 
   // Extract the results back to dstress, dpm and dintnl
-  int dim = 3;
+  unsigned int dim = 3;
   ind = 0;
   for (unsigned i = 0 ; i < dim ; ++i)
     for (unsigned j = 0 ; j <= i ; ++j)
@@ -552,7 +552,7 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
 
 
 void
-FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & dirn, std::vector<Real> & ic)
+FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic)
 {
   // Line search algorithm straight out of "Numerical Recipes"
 
@@ -595,11 +595,11 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
       ls_intnl[a] = intnl[a] + dintnl[a]*lam;
     ls_stress = stress + dstress*lam;
 
-    // calculate the new yield function, dirn and internal constraints
-    calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, dirn, ic);
+    // calculate the new yield function, epp and internal constraints
+    calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic);
 
     // calculate the new residual-squared
-    nr_res2 = residual2(f, dirn, ic);
+    nr_res2 = residual2(f, epp, ic);
 
 
     if (nr_res2 < f0 + 1E-4*lam*slope)
@@ -619,8 +619,8 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
       for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++ a)
         ls_intnl[a] = intnl[a] + dintnl[a]*lam;
       ls_stress = stress + dstress*lam;
-      calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, dirn, ic);
-      nr_res2 = residual2(f, dirn, ic);
+      calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic);
+      nr_res2 = residual2(f, epp, ic);
       line_searching = false;
       break;
     }
@@ -851,7 +851,7 @@ FiniteStrainPlasticBase::fdJacobian(const RankTwoTensor & stress, const std::vec
   std::vector<Real> orig_rhs;
   calculateRHS(stress, intnl_old, intnl, pm, delta_dp, orig_rhs);
 
-  int system_size = orig_rhs.size();
+  unsigned int system_size = orig_rhs.size();
   jac.resize(system_size);
   for (unsigned row = 0 ; row < system_size ; ++row)
     jac[row].resize(system_size);

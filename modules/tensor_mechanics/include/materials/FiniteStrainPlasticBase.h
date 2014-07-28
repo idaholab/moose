@@ -31,8 +31,8 @@ protected:
   /// Tolerance(s) on the internal constraint(s)
   std::vector<Real> _ic_tol;
 
-  /// Tolerance on the direction constraint
-  Real _dirn_tol;
+  /// Tolerance on the plastic strain increment ("direction") constraint
+  Real _epp_tol;
 
   /// Debug parameter - useful for coders, not for users (hopefully!)
   int _fspb_debug;
@@ -181,16 +181,16 @@ protected:
    * @param pm Current value(s) of the plasticity multiplier(s) (consistency parameters)
    * @param delta_dp Change in plastic strain incurred so far during the return
    * @param f (output) Yield function(s)
-   * @param dirn (output) Direction constraint
+   * @param epp (output) Plastic-strain increment constraint
    * @param ic (output) Internal-parameter constraint
    */
-  virtual void calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, RankTwoTensor & dirn, std::vector<Real> & ic);
+  virtual void calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic);
 
   /**
    * Given the constraints, calculate the RHS which is
-   * rhs = -(dirn(0,0), dirn(1,0), dirn(1,1), dirn(2,0), dirn(2,1), dirn(2,2), f[0], f[1], ..., f[num_f], ic[0], ic[1], ..., ic[num_ic])
+   * rhs = -(epp(0,0), epp(1,0), epp(1,1), epp(2,0), epp(2,1), epp(2,2), f[0], f[1], ..., f[num_f], ic[0], ic[1], ..., ic[num_ic])
    *
-   * @param dirn Direction constraint
+   * @param epp Plastic strain increment constraint
    * @param f yield function(s)
    * @param ic internal constraint(s)
    */
@@ -199,10 +199,10 @@ protected:
   /**
    * The residual-squared
    * @param f the yield function(s)
-   * @param dirn the direction constraint
+   * @param epp the plastic strain increment constraint
    * @param ic the internal constraint(s)
    */
-  virtual Real residual2(const std::vector<Real> & f, const RankTwoTensor & dirn, const std::vector<Real> & ic);
+  virtual Real residual2(const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic);
 
   virtual void calculateJacobian(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_inv, std::vector<std::vector<Real> > & jac);
 
@@ -230,14 +230,13 @@ protected:
    * @param intnl_old The internal variables at the previous "time" step
    * @param intnl    Current value of the internal variables
    * @param pm  Current value of the plasticity multipliers (consistency parameters)
-   * @param E_ijkl Elasticity tensor
    * @param E_inv inverse of the elasticity tensor
    * @param delta_dp  Current value of the plastic-strain increment (ie plastic_strain - plastic_strain_old)
    * @param dstress (output) The change in stress for a full Newton step
    * @param dpm (output) The change in plasticity multiplier for a full Newton step
    * @param dintnl (output) The change in internal variable(s) for a full Newton step
    */
-  virtual void nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_ijkl, const RankFourTensor & E_inv, const RankTwoTensor & delta_dp, RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl);
+  virtual void nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_inv, const RankTwoTensor & delta_dp, RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl);
 
   /**
    * Performs a line search.  Algorithm is taken straight from
@@ -259,10 +258,10 @@ protected:
    * @param dpm Change in plasticity multiplier for a full Newton step
    * @param dintnl change in internal parameter(s) for a full Newton step
    * @param f (input/output) Yield function(s)
-   * @param dirn (input/output) Direction constraint
+   * @param epp (input/output) Plastic strain increment constraint
    * @param ic (input/output) Internal constraint
    */
-  virtual void lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & dirn, std::vector<Real> & ic);
+  virtual void lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic);
 
 
  private:

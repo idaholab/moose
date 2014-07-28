@@ -187,7 +187,7 @@
     wps_friction_angle = 26.565051178
     wps_normal_vector = '0 0 1'
     wps_normal_rotates = false
-    direction_tolerance = 1E-5
+    ep_plastic_tolerance = 1E-5
     internal_constraint_tolerance = 1E-6
     wps_smoother = 0
     debug_fspb = 1
