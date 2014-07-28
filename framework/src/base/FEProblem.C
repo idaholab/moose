@@ -527,10 +527,17 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
 
     Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
-    computeUserObjects();
+    if (_use_legacy_uo_aux_computation)
+      computeUserObjects();
+
+    // The only user objects that should be computed here are the initial UOs
     computeUserObjects(EXEC_INITIAL);
-    computeUserObjects(EXEC_TIMESTEP_BEGIN);
-    computeUserObjects(EXEC_RESIDUAL);
+
+    if (_use_legacy_uo_aux_computation)
+    {
+      computeUserObjects(EXEC_TIMESTEP_BEGIN);
+      computeUserObjects(EXEC_RESIDUAL);
+    }
     Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
   }
 
