@@ -29,7 +29,6 @@ PostprocessorWarehouse::PostprocessorWarehouse()
 
 PostprocessorWarehouse::~PostprocessorWarehouse()
 {
-  // We don't need to free because that's taken care of by the UserObjectWarehouse
 }
 
 void
@@ -196,13 +195,17 @@ PostprocessorWarehouse::blockNodalPostprocessors(SubdomainID block_id) const
 }
 
 void
-PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
+PostprocessorWarehouse::addPostprocessor(MooseSharedPointer<Postprocessor> postprocessor)
 {
-  _all_postprocessors.push_back(postprocessor);
+  _all_ptrs.push_back(postprocessor);
 
-  if (dynamic_cast<ElementPostprocessor*>(postprocessor))
+  Postprocessor * raw_ptr = postprocessor.get();
+
+  _all_postprocessors.push_back(raw_ptr);
+
+  if (dynamic_cast<ElementPostprocessor*>(raw_ptr))
   {
-    ElementPostprocessor * elem_pp = dynamic_cast<ElementPostprocessor*>(postprocessor);
+    ElementPostprocessor * elem_pp = dynamic_cast<ElementPostprocessor*>(raw_ptr);
     const std::set<SubdomainID> & block_ids = dynamic_cast<ElementPostprocessor*>(elem_pp)->blockIDs();
     _all_element_postprocessors.push_back(elem_pp);
     for (std::set<SubdomainID>::const_iterator it = block_ids.begin(); it != block_ids.end(); ++it)
@@ -211,9 +214,9 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
       _block_ids_with_postprocessors.insert(*it);
     }
   }
-  else if (dynamic_cast<SidePostprocessor*>(postprocessor))
+  else if (dynamic_cast<SidePostprocessor*>(raw_ptr))
   {
-    SidePostprocessor * side_pp = dynamic_cast<SidePostprocessor*>(postprocessor);
+    SidePostprocessor * side_pp = dynamic_cast<SidePostprocessor*>(raw_ptr);
     _all_side_postprocessors.push_back(side_pp);
 
     const std::set<BoundaryID> & bnds = dynamic_cast<SidePostprocessor*>(side_pp)->boundaryIDs();
@@ -223,9 +226,9 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
       _boundary_ids_with_postprocessors.insert(*it);
     }
   }
-  else if (dynamic_cast<InternalSidePostprocessor*>(postprocessor))
+  else if (dynamic_cast<InternalSidePostprocessor*>(raw_ptr))
   {
-    InternalSidePostprocessor * internal_side_pp = dynamic_cast<InternalSidePostprocessor*>(postprocessor);
+    InternalSidePostprocessor * internal_side_pp = dynamic_cast<InternalSidePostprocessor*>(raw_ptr);
     _all_internal_side_postprocessors.push_back(internal_side_pp);
 
     const std::set<SubdomainID> & blks = dynamic_cast<InternalSidePostprocessor*>(internal_side_pp)->blockIDs();
@@ -235,9 +238,9 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
       _block_ids_with_postprocessors.insert(*it);
     }
   }
-  else if (dynamic_cast<NodalPostprocessor*>(postprocessor))
+  else if (dynamic_cast<NodalPostprocessor*>(raw_ptr))
   {
-    NodalPostprocessor * nodal_pp = dynamic_cast<NodalPostprocessor*>(postprocessor);
+    NodalPostprocessor * nodal_pp = dynamic_cast<NodalPostprocessor*>(raw_ptr);
 
     // NodalPostprocessors can be "block" restricted and/or "boundary" restricted
     const std::set<BoundaryID> & bnds = nodal_pp->boundaryIDs();
@@ -263,9 +266,9 @@ PostprocessorWarehouse::addPostprocessor(Postprocessor *postprocessor)
       }
 
   }
-  else if (dynamic_cast<GeneralPostprocessor*>(postprocessor))
+  else if (dynamic_cast<GeneralPostprocessor*>(raw_ptr))
   {
-    GeneralPostprocessor * general_pp = dynamic_cast<GeneralPostprocessor*>(postprocessor);
+    GeneralPostprocessor * general_pp = dynamic_cast<GeneralPostprocessor*>(raw_ptr);
 
     // FIXME: generic pps multithreaded
     _generic_postprocessors.push_back(general_pp);

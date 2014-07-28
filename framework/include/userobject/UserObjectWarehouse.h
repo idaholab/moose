@@ -123,7 +123,7 @@ public:
    * Add a user_object
    * @param user_object UserObject being added
    */
-  void addUserObject(UserObject *user_object);
+  void addUserObject(MooseSharedPointer<UserObject> user_object);
 
   /**
    * Get the list of blocks with user_objects
@@ -202,6 +202,9 @@ protected:
   /// All of the block ids that have nodal user_objects specified to act on them
   std::set<SubdomainID> _block_ids_with_nodal_user_objects;
 
+private:
+  /// Hold shared pointers for automatic cleanup
+  std::vector<MooseSharedPointer<UserObject> > _all_ptrs;
 };
 
 #endif // USER_OBJECTWAREHOUSE_H
