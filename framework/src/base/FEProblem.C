@@ -2795,17 +2795,17 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
 
   parameters.set<THREAD_ID>("_tid") = 0;
 
-  MooseObject * mo = _factory.create(transfer_name, name, parameters);
+  MooseSharedPointer<MooseObject> mo = _factory.create_shared_ptr(transfer_name, name, parameters);
 
-  Transfer * transfer = dynamic_cast<Transfer *>(mo);
-  if (!transfer)
+  MooseSharedPointer<Transfer> transfer = MooseSharedNamespace::dynamic_pointer_cast<Transfer>(mo);
+  if (transfer.get() == NULL)
     mooseError("Unknown Transfer type: " << transfer_name);
 
-  MultiAppTransfer * multi_app_transfer = dynamic_cast<MultiAppTransfer *>(transfer);
+  MooseSharedPointer<MultiAppTransfer> multi_app_transfer = MooseSharedNamespace::dynamic_pointer_cast<MultiAppTransfer>(transfer);
 
   const std::vector<ExecFlagType> & exec_flags = transfer->execFlags();
   for (unsigned int i=0; i<exec_flags.size(); ++i)
-    if (multi_app_transfer)
+    if (multi_app_transfer.get())
     {
       int direction = multi_app_transfer->direction();
 
