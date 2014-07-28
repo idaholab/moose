@@ -93,7 +93,7 @@ public:
    * Add a postprocessor
    * @param postprocessor Postprocessor being added
    */
-  void addPostprocessor(Postprocessor *postprocessor);
+  void addPostprocessor(MooseSharedPointer<Postprocessor> postprocessor);
 
   /**
    * Get the list of blocks with postprocessors
@@ -144,6 +144,10 @@ protected:
   std::set<BoundaryID> _nodeset_ids_with_postprocessors;
   /// All of the block ids that have nodal postprocessors specified to act on them
   std::set<SubdomainID> _block_ids_with_nodal_postprocessors;
+
+private:
+  /// Hold shared pointers for automatic cleanup
+  std::vector<MooseSharedPointer<Postprocessor> > _all_ptrs;
 };
 
 #endif // POSTPROCESSORWAREHOUSE_H
