@@ -194,6 +194,11 @@ public:
   bool & legacyUoAuxComputationDefault();
 
   /**
+   * Tell MOOSE to compute all aux kernels when any user objects are computed - deprecated behavior
+   */
+  bool & legacyUoInitializationDefault();
+
+  /**
    * Retrieve the Executioner for this App.
    */
   Executioner * getExecutioner() { return _executioner; }
@@ -412,6 +417,9 @@ protected:
 
   /// Legacy Uo Aux computation flag
   bool _legacy_uo_aux_computation_default;
+
+  /// Legacy Uo Initialization flag
+  bool _legacy_uo_initialization_default;
 
 private:
 

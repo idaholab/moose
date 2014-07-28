@@ -21,6 +21,8 @@ int main(int argc, char *argv[])
 
   app->setCheckUnusedFlag(true);
   app->setErrorOverridden();
+  app->legacyUoInitializationDefault() = true;
+  app->legacyUoAuxComputationDefault() = true;
 
   // Execute the application
   app->run();

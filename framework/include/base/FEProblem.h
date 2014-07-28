@@ -713,7 +713,9 @@ public:
 
   void setKernelCoverageCheck(bool flag) { _kernel_coverage_check = flag; }
 
-  void setLegacyUoAuxComputation(bool flag) { _use_legacy_uo_aux_computation = flag; }
+  bool & legacyUoAuxComputation() { return _use_legacy_uo_aux_computation; }
+
+  bool & legacyUoInitialization() { return _use_legacy_uo_initialization; }
 
   /**
    * Updates the active boundary id
@@ -948,6 +950,7 @@ public:
 
 private:
   bool _use_legacy_uo_aux_computation;
+  bool _use_legacy_uo_initialization;
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!

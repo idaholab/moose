@@ -550,6 +550,15 @@ Console::outputSystemInformation()
   if (_app.getSystemInfo() != NULL)
     oss << _app.getSystemInfo()->getInfo();
 
+  if (_problem_ptr->legacyUoAuxComputation() || _problem_ptr->legacyUoInitialization())
+  {
+    oss << "LEGACY MODES ENABLED:\n";
+    if (_problem_ptr->legacyUoAuxComputation())
+      oss << "  Computing all AuxKernel types when any UserObject type is executed.\n";
+    if (_problem_ptr->legacyUoInitialization())
+      oss << "  Computing all UserObjects during initial setup.\n";
+  }
+
   oss << std::left << '\n'
       << "Parallelism:\n"
       << std::setw(_field_width) << "  Num Processors: " << static_cast<std::size_t>(n_processors()) << '\n'

@@ -143,7 +143,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _has_jacobian(false),
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
-    _use_legacy_uo_aux_computation(false)
+    _use_legacy_uo_aux_computation(false),
+    _use_legacy_uo_initialization(false)
 {
 
 #ifdef LIBMESH_HAVE_PETSC
@@ -527,13 +528,13 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
 
     Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
-    if (_use_legacy_uo_aux_computation)
+    if (_use_legacy_uo_initialization)
       computeUserObjects();
 
     // The only user objects that should be computed here are the initial UOs
     computeUserObjects(EXEC_INITIAL);
 
-    if (_use_legacy_uo_aux_computation)
+    if (_use_legacy_uo_initialization)
     {
       computeUserObjects(EXEC_TIMESTEP_BEGIN);
       computeUserObjects(EXEC_RESIDUAL);

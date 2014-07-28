@@ -108,7 +108,9 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _half_transient(false),
     _output_warehouse(new OutputWarehouse),
     _alternate_output_warehouse(NULL),
-    _legacy_uo_aux_computation_default(false)
+    _legacy_uo_aux_computation_default(false),
+    _legacy_uo_initialization_default(false)
+
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -392,6 +394,12 @@ bool &
 MooseApp::legacyUoAuxComputationDefault()
 {
   return _legacy_uo_aux_computation_default;
+}
+
+bool &
+MooseApp::legacyUoInitializationDefault()
+{
+  return _legacy_uo_initialization_default;
 }
 
 void
