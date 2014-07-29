@@ -111,6 +111,25 @@ class MooseWidget(QtGui.QWidget):
     return None
 
   ##
+  # Extract value from pull method  by name
+  # @param name The pull method name contained within a Peacock object (_pull<Name>)
+  # @param *args Additional arguments
+  def pull(self, name, *args):
+    pull_name = '_pull' + name
+
+    for key, obj in self._objects.iteritems():
+      if hasattr(obj, pull_name):
+        attr = getattr(obj, pull_name)
+        return attr(args)
+
+      elif search_children and isinstance(obj, MooseWidget):
+        attr = obj.pull(name, *args)
+        if attr != None:
+          return attr
+
+    return None
+
+  ##
   # Return true if a handle exists (public)
   # @param handle The handle (<str>) of the object
   # @param search_children If True (default) search all children MooseWidget objects for the handle
@@ -318,6 +337,12 @@ class MooseWidget(QtGui.QWidget):
     self._getSignalInfo(signals)
     print '\n', self.__class__.__name__, 'Signals:'
     self.__printTable(['Signal', 'Parent'], signals)
+
+    # Extract the pull information
+    pulls = []
+    self._getPullInfo(pulls)
+    print '\n', self.__class__.__name__, 'Pulls:'
+    self.__printTable(['Pull', 'Parent'], pulls)
     print '\n'
 
 # protected:
@@ -355,6 +380,21 @@ class MooseWidget(QtGui.QWidget):
     for key, obj in self._objects.iteritems():
       if isinstance(obj, MooseWidget):
         obj._getSignalInfo(data)
+
+  ##
+  # Recursively, gather pull information for this MooseObject
+  # @param data The data list to populate
+  def _getPullInfo(self, data):
+
+    # Search for signals in this object
+    for item in dir(self):
+      if item.startswith('_pull'):
+        data.append([item, self.__class__.__name__])
+
+    # Search for signals in child objects
+    for key, obj in self._objects.iteritems():
+      if isinstance(obj, MooseWidget):
+        obj._getPullInfo(data)
 
   ##
   # Define a message the prints when the debug flag is set to true (protected)
