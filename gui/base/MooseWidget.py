@@ -8,7 +8,7 @@ def peacockError(*args):
 
 ##
 # Basic QWidget to serve as a container for controls
-class PeacockWidget(QtGui.QWidget):
+class MooseWidget(QtGui.QWidget):
 
   ##
   # Constructor.
@@ -21,11 +21,11 @@ class PeacockWidget(QtGui.QWidget):
   #  debug True | {False}
   #    Toggles the printing of debug messages, to create a debug message
   #    call the self._debug('Your message here') method. The printing of
-  #    debug messages will be set on child PeacockWidget object to that of the parent
+  #    debug messages will be set on child MooseWidget object to that of the parent
   #
   #  main <QMainWindow>
   #    Sets the main window for this object, which is used for adding
-  #    QMenu items. The main window object of  will be set on child PeacockWidget object
+  #    QMenu items. The main window object of  will be set on child MooseWidget object
   #    to that of the parent
   def __init__(self, **kwargs):
 
@@ -53,7 +53,7 @@ class PeacockWidget(QtGui.QWidget):
   ##
   # Return an object that was added via addObject (public)
   # @param handle The handle (<str>) of the object
-  # @param search_children If True (default) search all children PeacockWidget objects for the handle
+  # @param search_children If True (default) search all children MooseWidget objects for the handle
   def object(self, handle, search_children = True):
 
     print "Searching for", handle, "in", self.__class__.__name__
@@ -66,7 +66,7 @@ class PeacockWidget(QtGui.QWidget):
     child_obj = None
     if search_children:
       for key, obj in self._objects.iteritems():
-        if isinstance(obj, PeacockWidget):
+        if isinstance(obj, MooseWidget):
           child_obj = obj.object(handle)
           if child_obj == None:
             continue
@@ -78,7 +78,7 @@ class PeacockWidget(QtGui.QWidget):
   ##
   # Return true if a handle exists (public)
   # @param handle The handle (<str>) of the object
-  # @param search_children If True (default) search all children PeacockWidget objects for the handle
+  # @param search_children If True (default) search all children MooseWidget objects for the handle
   def hasObject(self, handle, search_children = True):
 
     # Search this object for the handle
@@ -88,7 +88,7 @@ class PeacockWidget(QtGui.QWidget):
     # Search the children for the handle, if desired
     if search_children:
       for key, obj in self._objects.iteritems():
-        if isinstance(obj, PeacockWidget):
+        if isinstance(obj, MooseWidget):
           return True
 
     # If an object has not been returned yet, it doesn't exist
@@ -96,7 +96,7 @@ class PeacockWidget(QtGui.QWidget):
 
 
   ##
-  # Add a QObject to this PeacockWidget (public)
+  # Add a QObject to this MooseWidget (public)
   # @param q_object The instance of the QObject to add
   # @param kwargs A list of property value pairs (see below)
   #
@@ -121,8 +121,8 @@ class PeacockWidget(QtGui.QWidget):
       peacockError("The supplied object must be a QtGui.QObject, but a ",
                    q_object.__class__.__name__, " was supplied")
 
-    # Pass the debug and main window properties to PeacockWidget objects being added
-    if isinstance(q_object, PeacockWidget):
+    # Pass the debug and main window properties to MooseWidget objects being added
+    if isinstance(q_object, MooseWidget):
       q_object.setProperty('debug', self.property('debug'))
       q_object.setProperty('main', self.property('main'))
 
@@ -176,7 +176,7 @@ class PeacockWidget(QtGui.QWidget):
       self._debug('Adding QMenu (' + handle + ') to (' + parent + ')')
       parent_object.addMenu(q_object)
 
-    # QMenu -> QMainWindow.menuBar (if 'main' property was set in PeacockWidget)
+    # QMenu -> QMainWindow.menuBar (if 'main' property was set in MooseWidget)
     elif isinstance(q_object, QtGui.QMenu) and self.property('main') != None:
       self._debug('Adding QMenu (' + handle + ') to (QMainWindow.menuBar())')
       print self.property('main')
@@ -207,7 +207,7 @@ class PeacockWidget(QtGui.QWidget):
   # Extract a callback method by name
   # @param callback_name The handle associated with the QObject added via addObject that
   #                      has a _callback<name> method defined in the class
-  # @param search_children Toggle the searching of child PeacockWidget objects (optional, default is True)
+  # @param search_children Toggle the searching of child MooseWidget objects (optional, default is True)
   #
   def callback(self, name, search_children = True):
     callback_name = '_callback' + name
@@ -216,7 +216,7 @@ class PeacockWidget(QtGui.QWidget):
       if hasattr(obj, callback_name):
         return getattr(obj, callback_name)
 
-      elif search_children and isinstance(obj, PeacockWidget):
+      elif search_children and isinstance(obj, MooseWidget):
         attr = obj.callback(name)
         if attr != None:
           return attr
@@ -226,7 +226,7 @@ class PeacockWidget(QtGui.QWidget):
   ##
   # Extract a Signal object by name
   # @param name The signal name contained within a Peacock object (_signal_<name>)
-  # @param search_children Toggle the searching of child PeacockWidget objects (optional, default is True)
+  # @param search_children Toggle the searching of child MooseWidget objects (optional, default is True)
   def signal(self, name, search_children = True):
     signal_name = 'signal_' + name
 
@@ -234,7 +234,7 @@ class PeacockWidget(QtGui.QWidget):
       if hasattr(obj, signal_name):
         return getattr(obj, signal_name)
 
-      elif search_children and isinstance(obj, PeacockWidget):
+      elif search_children and isinstance(obj, MooseWidget):
         attr = obj.signal(name)
         if attr != None:
           return attr
@@ -247,7 +247,7 @@ class PeacockWidget(QtGui.QWidget):
   # @param signal_name The signal name contained within a Peacock object (_signal_<name>) or a Qt.Signal object
   # @param callback_name The handle associated with the QObject added via addObject that
   #                      has a _callback<name> method defined in the class or callable method.
-  # @param search_children Toggle the searching of child PeacockWidget objects (optional, default is True)
+  # @param search_children Toggle the searching of child MooseWidget objects (optional, default is True)
   def connectSignal(self, signal_name, callback_name, search_children = True ):
 
     # Set signal object
@@ -272,7 +272,7 @@ class PeacockWidget(QtGui.QWidget):
   # Run object setup methods
   #
   # When this method is executed, it should be done in the constructor of an object inheriting
-  # from PeacockWidget, the following is done:
+  # from MooseWidget, the following is done:
   #   (1) If a method named "_setup<handle>" exists it is called, where handle is the name given to
   #       the object when adding it via addObject.
   #   (2) If a _setup<handle> method does not exist and a method named _callback<handle> does then
