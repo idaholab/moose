@@ -27,7 +27,7 @@ class AuxiliarySystem;
 class ComputeElemAuxBcsThread
 {
 public:
-  ComputeElemAuxBcsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
+  ComputeElemAuxBcsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs, bool need_materials);
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
 
@@ -41,6 +41,7 @@ protected:
   THREAD_ID _tid;
 
   std::vector<AuxWarehouse> & _auxs;
+  bool _need_materials;
 };
 
 #endif //COMPUTEELEMAUXBCSTHREAD_H
