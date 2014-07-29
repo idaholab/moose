@@ -62,9 +62,11 @@ AuxiliarySystem::initialSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
-    _auxs(EXEC_RESIDUAL)[i].initialSetup();
-    _auxs(EXEC_TIMESTEP)[i].initialSetup();
+    _auxs(EXEC_INITIAL)[i].initialSetup();
     _auxs(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
+    _auxs(EXEC_TIMESTEP)[i].initialSetup();
+    _auxs(EXEC_JACOBIAN)[i].initialSetup();
+    _auxs(EXEC_RESIDUAL)[i].initialSetup();
   }
 }
 
@@ -73,9 +75,20 @@ AuxiliarySystem::timestepSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
-    _auxs(EXEC_RESIDUAL)[i].timestepSetup();
-    _auxs(EXEC_TIMESTEP)[i].timestepSetup();
     _auxs(EXEC_TIMESTEP_BEGIN)[i].timestepSetup();
+    _auxs(EXEC_TIMESTEP)[i].timestepSetup();
+    _auxs(EXEC_JACOBIAN)[i].timestepSetup();
+    _auxs(EXEC_RESIDUAL)[i].timestepSetup();
+  }
+}
+
+void
+AuxiliarySystem::jacobianSetup()
+{
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
+  {
+    _auxs(EXEC_JACOBIAN)[i].jacobianSetup();
+    _auxs(EXEC_RESIDUAL)[i].jacobianSetup();
   }
 }
 
@@ -84,13 +97,6 @@ AuxiliarySystem::residualSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
     _auxs(EXEC_RESIDUAL)[i].residualSetup();
-}
-
-void
-AuxiliarySystem::jacobianSetup()
-{
-  for (unsigned int i=0; i<libMesh::n_threads(); i++)
-    _auxs(EXEC_RESIDUAL)[i].jacobianSetup();
 }
 
 void
