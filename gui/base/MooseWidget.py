@@ -56,8 +56,6 @@ class MooseWidget(QtGui.QWidget):
   # @param search_children If True (default) search all children MooseWidget objects for the handle
   def object(self, handle, search_children = True):
 
-    print "Searching for", handle, "in", self.__class__.__name__
-
     # Search this object for the handle
     if handle in self._objects:
       return self._objects[handle]
@@ -74,6 +72,43 @@ class MooseWidget(QtGui.QWidget):
     # If an object has not been returned yet, produce an error
     return child_obj
 
+  ##
+  # Extract a callback method by name
+  # @param callback_name The handle associated with the QObject added via addObject that
+  #                      has a _callback<name> method defined in the class
+  # @param search_children Toggle the searching of child MooseWidget objects (optional, default is True)
+  #
+  def callback(self, name, search_children = True):
+    callback_name = '_callback' + name
+
+    for key, obj in self._objects.iteritems():
+      if hasattr(obj, callback_name):
+        return getattr(obj, callback_name)
+
+      elif search_children and isinstance(obj, MooseWidget):
+        attr = obj.callback(name)
+        if attr != None:
+          return attr
+
+    return None
+
+  ##
+  # Extract a Signal object by name
+  # @param name The signal name contained within a Peacock object (_signal_<name>)
+  # @param search_children Toggle the searching of child MooseWidget objects (optional, default is True)
+  def signal(self, name, search_children = True):
+    signal_name = '_signal_' + name
+
+    for key, obj in self._objects.iteritems():
+      if hasattr(obj, signal_name):
+        return getattr(obj, signal_name)
+
+      elif search_children and isinstance(obj, MooseWidget):
+        attr = obj.signal(name)
+        if attr != None:
+          return attr
+
+    return None
 
   ##
   # Return true if a handle exists (public)
@@ -204,45 +239,6 @@ class MooseWidget(QtGui.QWidget):
     return self._objects[handle]
 
   ##
-  # Extract a callback method by name
-  # @param callback_name The handle associated with the QObject added via addObject that
-  #                      has a _callback<name> method defined in the class
-  # @param search_children Toggle the searching of child MooseWidget objects (optional, default is True)
-  #
-  def callback(self, name, search_children = True):
-    callback_name = '_callback' + name
-
-    for key, obj in self._objects.iteritems():
-      if hasattr(obj, callback_name):
-        return getattr(obj, callback_name)
-
-      elif search_children and isinstance(obj, MooseWidget):
-        attr = obj.callback(name)
-        if attr != None:
-          return attr
-
-    return None
-
-  ##
-  # Extract a Signal object by name
-  # @param name The signal name contained within a Peacock object (_signal_<name>)
-  # @param search_children Toggle the searching of child MooseWidget objects (optional, default is True)
-  def signal(self, name, search_children = True):
-    signal_name = 'signal_' + name
-
-    for key, obj in self._objects.iteritems():
-      if hasattr(obj, signal_name):
-        return getattr(obj, signal_name)
-
-      elif search_children and isinstance(obj, MooseWidget):
-        attr = obj.signal(name)
-        if attr != None:
-          return attr
-
-    return None
-
-
-  ##
   # Connect a signal to a callback
   # @param signal_name The signal name contained within a Peacock object (_signal_<name>) or a Qt.Signal object
   # @param callback_name The handle associated with the QObject added via addObject that
@@ -337,7 +333,7 @@ class MooseWidget(QtGui.QWidget):
     # Print signals
     print '\n', self.__class__.__name__, 'User Signals:'
     for item in dir(self):
-      if item.startswith('signal_') and isinstance(getattr(self, item), QtCore.Signal):
+      if item.startswith('_signal_') and isinstance(getattr(self, item), QtCore.Signal):
         print ' ', item
     print '\n'
 

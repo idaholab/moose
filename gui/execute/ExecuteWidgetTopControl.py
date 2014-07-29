@@ -7,7 +7,7 @@ from base import *
 # Defines the top control buttons for the Execute Tab
 class ExecuteWidgetTopControl(MooseWidget):
   ## Emitted when 'Run' button is pressed
-  signal_run = QtCore.Signal(str, str, str, str)
+  _signal_run = QtCore.Signal(str, str, str, str)
 
 # public:
   def __init__(self, **kwargs):
@@ -46,7 +46,7 @@ class ExecuteWidgetTopControl(MooseWidget):
     mpi = self.object('MPI').text()
     threads = self.object('Threads').text()
     args = self.object('Arguments').text()
-    self.signal_run.emit(executable, mpi, threads, args)
+    self._signal_run.emit(executable, mpi, threads, args)
 
   ##
   # Executes when 'Select' button is pressed (auto connected via addObject)
