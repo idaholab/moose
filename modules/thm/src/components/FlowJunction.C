@@ -19,6 +19,7 @@ InputParameters validParams<FlowJunction>()
 
 FlowJunction::FlowJunction(const std::string & name, InputParameters params) :
     Junction(name, params),
+    _model_type(_sim.getParam<FlowModel::EModelType>("model_type")),
     _lm_name(genName(name, "lm")),
     _K(getParam<std::vector<Real> >("K"))
 {

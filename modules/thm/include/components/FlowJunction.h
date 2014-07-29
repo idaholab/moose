@@ -22,6 +22,7 @@ public:
   virtual void addMooseObjects();
 
 protected:
+  FlowModel::EModelType _model_type;
   std::string _lm_name;
   std::vector<Real> _K;
 };
