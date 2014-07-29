@@ -49,7 +49,7 @@ public:
    * Add a MultiApps
    * @param multi_app MultiApp being added
    */
-  void addMultiApp(MultiApp * multi_app);
+  void addMultiApp(MooseSharedPointer<MultiApp> multi_app);
 
   /**
    * Whether or not this warehouse has a MultiApp named multi_app_name
@@ -80,6 +80,10 @@ public:
 protected:
   std::vector<MultiApp *> _all_multi_apps;
   std::vector<TransientMultiApp *> _transient_multi_apps;
+
+private:
+  /// Hold shared pointers for automatic cleanup
+  std::vector<MooseSharedPointer<MultiApp> > _all_ptrs;
 };
 
 #endif // MULTIAPPWAREHOUSE_H
