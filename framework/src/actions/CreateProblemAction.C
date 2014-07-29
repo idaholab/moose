@@ -32,6 +32,11 @@ InputParameters validParams<CreateProblemAction>()
   params.addParam<bool>("fe_cache", false, "Whether or not to turn on the finite element shape function caching system.  This can increase speed with an associated memory cost.");
 
   params.addParam<bool>("kernel_coverage_check", true, "Set to false to disable kernel->subdomain kernel coverage check");
+
+  params.addParam<bool>("use_legacy_uo_aux_computation", "Set to true to have MOOSE recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavoir is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
+  params.addParam<bool>("use_legacy_uo_initialization", "Set to true to have MOOSE compute all UserObjects and Postprocessors during the initial setup phase of the problem recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavoir is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
+
+
   return params;
 }
 
@@ -62,5 +67,7 @@ CreateProblemAction::act()
     _problem->setCoordSystem(_blocks, _coord_sys);
     _problem->useFECache(_fe_cache);
     _problem->setKernelCoverageCheck(getParam<bool>("kernel_coverage_check"));
+    _problem->legacyUoAuxComputation() = _pars.isParamValid("use_legacy_uo_aux_computation") ? getParam<bool>("use_legacy_uo_aux_computation") : _app.legacyUoAuxComputationDefault();
+    _problem->legacyUoInitialization() = _pars.isParamValid("use_legacy_uo_initialization") ? getParam<bool>("use_legacy_uo_aux_computation") : _app.legacyUoInitializationDefault();
   }
 }

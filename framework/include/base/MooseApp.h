@@ -189,6 +189,16 @@ public:
   void disableCheckUnusedFlag();
 
   /**
+   * Tell MOOSE to compute all aux kernels when any user objects are computed - deprecated behavior
+   */
+  bool & legacyUoAuxComputationDefault();
+
+  /**
+   * Tell MOOSE to compute all aux kernels when any user objects are computed - deprecated behavior
+   */
+  bool & legacyUoInitializationDefault();
+
+  /**
    * Retrieve the Executioner for this App.
    */
   Executioner * getExecutioner() { return _executioner; }
@@ -404,6 +414,12 @@ protected:
 
   /// An alternate OutputWarehouse object (required for CoupledExecutioner)
   OutputWarehouse * _alternate_output_warehouse;
+
+  /// Legacy Uo Aux computation flag
+  bool _legacy_uo_aux_computation_default;
+
+  /// Legacy Uo Initialization flag
+  bool _legacy_uo_initialization_default;
 
 private:
 
