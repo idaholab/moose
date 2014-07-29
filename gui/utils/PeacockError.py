@@ -1,4 +1,3 @@
-
 def peacockError(*args):
-  print args
+  print " ".join(args)
   # print trace here
