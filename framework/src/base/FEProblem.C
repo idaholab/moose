@@ -2670,10 +2670,10 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
 
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
 
-  MooseObject * mo = _factory.create(multi_app_name, name, parameters);
+  MooseSharedPointer<MooseObject> mo = _factory.create_shared_ptr(multi_app_name, name, parameters);
 
-  MultiApp * multi_app = dynamic_cast<MultiApp *>(mo);
-  if (!multi_app)
+  MooseSharedPointer<MultiApp> multi_app = MooseSharedNamespace::dynamic_pointer_cast<MultiApp>(mo);
+  if (multi_app.get() == NULL)
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
   const std::vector<ExecFlagType> & exec_flags = multi_app->execFlags();
@@ -2802,17 +2802,17 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
 
   parameters.set<THREAD_ID>("_tid") = 0;
 
-  MooseObject * mo = _factory.create(transfer_name, name, parameters);
+  MooseSharedPointer<MooseObject> mo = _factory.create_shared_ptr(transfer_name, name, parameters);
 
-  Transfer * transfer = dynamic_cast<Transfer *>(mo);
-  if (!transfer)
+  MooseSharedPointer<Transfer> transfer = MooseSharedNamespace::dynamic_pointer_cast<Transfer>(mo);
+  if (transfer.get() == NULL)
     mooseError("Unknown Transfer type: " << transfer_name);
 
-  MultiAppTransfer * multi_app_transfer = dynamic_cast<MultiAppTransfer *>(transfer);
+  MooseSharedPointer<MultiAppTransfer> multi_app_transfer = MooseSharedNamespace::dynamic_pointer_cast<MultiAppTransfer>(transfer);
 
   const std::vector<ExecFlagType> & exec_flags = transfer->execFlags();
   for (unsigned int i=0; i<exec_flags.size(); ++i)
-    if (multi_app_transfer)
+    if (multi_app_transfer.get())
     {
       int direction = multi_app_transfer->direction();
 
