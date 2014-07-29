@@ -169,6 +169,9 @@ class MooseWidget(QtGui.QWidget):
       parent = self.__class__.__name__ + '._main_layout'
       parent_object = self._main_layout
 
+    # Set the name of the object as a property of the object, used by info()
+    q_object.setProperty('parent', parent)
+
     # Determine the handle for the object being added, and test that it doesn't exist
     handle = kwargs.pop('handle', 'object_' + str(len(self._objects)))
     if handle in self._objects:
@@ -300,42 +303,95 @@ class MooseWidget(QtGui.QWidget):
           self._debug('Connecting ' + callback_name + ' to clicked signal of ' +  key + ' object')
 
   ##
-  # Displays the object and signals for this object
-  # @\todo{Make this recursive and show parent handle name in the table}
+  # Displays the object and signals for this object (public)
   def info(self):
 
     print '\n', self.__class__.__name__, 'Objects:'
 
     # Build the object data to print
     data = []
+    self._getObjectInfo(data)
+
+    # Compute the table widths
     key_width = 0
+    parent_width = 0
     flavor_width = 0
+    for d in data:
+      key_width = max(key_width, len(d[0]))
+      parent_width = max(parent_width, len(d[1]))
+      flavor_width = max(flavor_width, len(d[2]))
+
+    # Create format strings for building table
+    frmt = ' {0:' + str(key_width) + 's}  {1:' + str(parent_width) + 's} {2:' + str(flavor_width)+ 's}  {3:5s}  {4:8s} '
+    line = frmt.format('-'*key_width, '-'*parent_width, '-'*flavor_width, '-----', '--------')
+
+    # Print the object table
+    print line
+    print frmt.format('Handle', 'Parent', 'Type', 'Setup', 'Callback')
+    print line
+    for d in data:
+      print frmt.format(d[0], d[1], d[2], str(d[3]), str(d[4]))
+    print line
+
+    # Extract the signal information
+    signals = []
+    self._getSignalInfo(signals)
+
+    # Compute the signal table widths
+    signal_name_width = 0
+    signal_parent_width = 0
+    for s in signals:
+      signal_name_width = max(signal_name_width, len(s[0]))
+      signal_parent_width = max(signal_parent_width, len(s[1]))
+
+    # Create format strings for building signal table
+    frmt = ' {0:' + str(signal_name_width) + 's}  {1:' + str(signal_parent_width) + 's}'
+    line = frmt.format('-'*signal_name_width, '-'*signal_parent_width)
+
+    # Print signals
+    print '\n', self.__class__.__name__, 'User Signals:'
+    print line
+    print frmt.format('Signal', 'Parent')
+    print line
+    for s in signals:
+      print frmt.format(s[0], s[1])
+    print line
+
+    print '\n'
+
+  ##
+  # Recursively, gather object information for this MooseObject
+  # @param data The data list to populate
+  # @param indent_level The level of indentation to applie to the table entry
+  #
+  def _getObjectInfo(self, data, indent_level=0):
     for key, obj in self._objects.iteritems():
       has_setup = hasattr(self, '_setup' + key)
       has_callback = hasattr(self, '_callback' + key)
       flavor = obj.__class__.__name__
-      key_width = max(key_width, len(key))
-      flavor_width = max(flavor_width, len(flavor))
-      data.append([key, flavor, has_setup, has_callback])
+      has_setup = hasattr(self, '_setup' + key)
+      has_callback = hasattr(self, '_callback' + key)
+      flavor = obj.__class__.__name__
+      parent = obj.property('parent')
+      data.append(['  '*indent_level + key, parent, flavor, has_setup, has_callback])
+      if isinstance(obj, MooseWidget):
+        obj._getObjectInfo(data, indent_level + 1)
+    return data
 
-    # Create format strings for building table
-    frmt = ' {0:' + str(key_width) + 's}  {1:' + str(flavor_width)+ 's}  {2:5s}  {3:8s} '
-    line = frmt.format('-'*key_width, '-'*flavor_width, '-----', '--------')
+  ##
+  # Recursively, gather signal information for this MooseObject
+  # @param data The data list to populate
+  def _getSignalInfo(self, data):
 
-    # Print the object table
-    print line
-    print frmt.format('Handle', 'Type', 'Setup', 'Callback')
-    print line
-    for d in data:
-      print frmt.format(d[0], d[1], str(d[2]), str(d[3]))
-    print line
-
-    # Print signals
-    print '\n', self.__class__.__name__, 'User Signals:'
+    # Search for signals in this object
     for item in dir(self):
       if item.startswith('_signal_') and isinstance(getattr(self, item), QtCore.Signal):
-        print ' ', item
-    print '\n'
+        data.append([item, self.__class__.__name__])
+
+    # Search for signals in child objects
+    for key, obj in self._objects.iteritems():
+      if isinstance(obj, MooseWidget):
+        obj._getSignalInfo(data)
 
   ##
   # Define a message the prints when the debug flag is set to true
