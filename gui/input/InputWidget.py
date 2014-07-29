@@ -10,7 +10,7 @@ from base import *
 class InputWidget(MooseWidget):
 
   # Define signals that will be emitted from this object
-  signal_button = QtCore.Signal()
+  _signal_button = QtCore.Signal()
 
   def __init__(self, **kwargs):
     MooseWidget.__init__(self, **kwargs)
@@ -21,4 +21,4 @@ class InputWidget(MooseWidget):
 
   def _callbackButton(self):
     print '_callbackButton'
-    self.signal_button.emit()
+    self._signal_button.emit()
