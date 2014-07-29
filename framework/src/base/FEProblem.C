@@ -2534,15 +2534,7 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectW
       _user_objects(type)[tid].jacobianSetup();
     break;
 
-  case EXEC_TIMESTEP:
-  case EXEC_TIMESTEP_BEGIN:
-    break;
-
-  case EXEC_INITIAL:
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _user_objects(type)[tid].initialSetup();
-    break;
-  case EXEC_CUSTOM:
+  default:
     break;
   }
   computeUserObjectsInternal(_user_objects(type), group);
