@@ -142,7 +142,9 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _const_jacobian(false),
     _has_jacobian(false),
     _kernel_coverage_check(false),
-    _max_qps(std::numeric_limits<unsigned int>::max())
+    _max_qps(std::numeric_limits<unsigned int>::max()),
+    _use_legacy_uo_aux_computation(false),
+    _use_legacy_uo_initialization(false)
 {
 
 #ifdef LIBMESH_HAVE_PETSC
@@ -440,14 +442,13 @@ void FEProblem::initialSetup()
   for (unsigned int i=0; i<n_threads; i++)
     _materials[i].initialSetup();
 
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
+                                   _material_props, _bnd_material_props, _materials, _assembly);
+  Threads::parallel_reduce(elem_range, cmt);
+
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
-  {
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                     _material_props, _bnd_material_props, _materials, _assembly);
-    Threads::parallel_reduce(elem_range, cmt);
     _has_initialized_stateful = true;
-  }
 
   // Auxilary variable initialSetup calls
   _aux.initialSetup();
@@ -527,10 +528,17 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
 
     Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
-    computeUserObjects();
+    if (_use_legacy_uo_initialization)
+      computeUserObjects();
+
+    // The only user objects that should be computed here are the initial UOs
     computeUserObjects(EXEC_INITIAL);
-    computeUserObjects(EXEC_TIMESTEP_BEGIN);
-    computeUserObjects(EXEC_RESIDUAL);
+
+    if (_use_legacy_uo_initialization)
+    {
+      computeUserObjects(EXEC_TIMESTEP_BEGIN);
+      computeUserObjects(EXEC_RESIDUAL);
+    }
     Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
   }
 
@@ -2171,11 +2179,11 @@ FEProblem::computeIndicatorsAndMarkers()
 }
 
 void
-FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
+FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group)
 {
-  if (pps[0].blockIds().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0)
+  std::vector<UserObjectWarehouse> & pps = _user_objects(type);
+  if (pps[0].blockIds().size() || pps[0].boundaryIds().size() || pps[0].nodesetIds().size() || pps[0].blockNodalIds().size() || pps[0].internalSideUserObjects(group).size())
   {
-
     /* Note: The fact that we compute the aux system when we compute the user_objects
      * is a very bad behavior that some of our applications have come to rely on.  This
      * needs to be fixed.  For now we cannot easily change this behavior without
@@ -2189,7 +2197,12 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
       if (_displaced_problem != NULL)
         _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
-      _aux.compute();
+      if (_use_legacy_uo_aux_computation)
+        // Compute all AuxKernels regardless of the requested type (legacy behavior)
+        for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
+          _aux.compute(Moose::exec_types[i]);
+      else
+        _aux.compute(type);
     }
 
     // init
@@ -2537,7 +2550,7 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectW
   default:
     break;
   }
-  computeUserObjectsInternal(_user_objects(type), group);
+  computeUserObjectsInternal(type, group);
 
   Moose::perf_log.pop("compute_user_objects()","Solve");
 }

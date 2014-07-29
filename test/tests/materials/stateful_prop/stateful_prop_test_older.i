@@ -36,6 +36,7 @@
     type = MaterialRealAux
     variable = prop1
     property = thermal_conductivity
+    execute_on = 'initial timestep'
   [../]
 []
 

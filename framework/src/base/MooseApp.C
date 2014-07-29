@@ -81,7 +81,7 @@ void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos
   }
 }
 
-MooseApp::MooseApp(const std::string & name, InputParameters parameters):
+MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     ParallelObject(*parameters.get<Parallel::Communicator *>("_comm")), // Can't call getParam() before pars is set
     _name(name),
     _pars(parameters),
@@ -107,7 +107,10 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters):
     _restart(false),
     _half_transient(false),
     _output_warehouse(new OutputWarehouse),
-    _alternate_output_warehouse(NULL)
+    _alternate_output_warehouse(NULL),
+    _legacy_uo_aux_computation_default(false),
+    _legacy_uo_initialization_default(false)
+
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -385,6 +388,18 @@ void
 MooseApp::setErrorOverridden()
 {
   _error_overridden = true;
+}
+
+bool &
+MooseApp::legacyUoAuxComputationDefault()
+{
+  return _legacy_uo_aux_computation_default;
+}
+
+bool &
+MooseApp::legacyUoInitializationDefault()
+{
+  return _legacy_uo_initialization_default;
 }
 
 void
