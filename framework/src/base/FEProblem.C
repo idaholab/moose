@@ -440,14 +440,18 @@ void FEProblem::initialSetup()
   for (unsigned int i=0; i<n_threads; i++)
     _materials[i].initialSetup();
 
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
+                                   _material_props, _bnd_material_props, _materials, _assembly);
+  /**
+   * The ComputeMaterialObjectThread object now allocates memory as needed for the material storage system.
+   * This cannot be done with threads. The first call to this object bypasses threading by calling the object
+   * directly. The subsequent call can be called with threads.
+   */
+  cmt(elem_range, true);
+
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
-  {
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                     _material_props, _bnd_material_props, _materials, _assembly);
-    Threads::parallel_reduce(elem_range, cmt);
     _has_initialized_stateful = true;
-  }
 
   // Auxilary variable initialSetup calls
   _aux.initialSetup();
