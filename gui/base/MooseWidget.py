@@ -1,10 +1,8 @@
 from PySide import QtCore, QtGui
 
 import inspect
+from utils import *
 from base import *
-
-def peacockError(*args):
-  print args
 
 ##
 # Basic QWidget to serve as a container for controls
@@ -49,6 +47,8 @@ class MooseWidget(QtGui.QWidget):
       peacockError('Unknown alignment parameter ' + align + ', must be \'vertical\' or \'horizontal\'')
     self.setLayout(self._main_layout)
 
+    # Create an error message dialog
+    self._error_message = QtGui.QErrorMessage(self)
 
   ##
   # Return an object that was added via addObject (public)
