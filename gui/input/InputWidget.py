@@ -18,8 +18,16 @@ class InputWidget(MooseWidget):
 
     self.addObject(QtGui.QPushButton('Run'), handle='Button')
 
+    self._execute_widget = None
+
     self.setup()
 
+  def setExecuteWidget(self, obj):
+    self._execute_widget = obj
+
+
   def _callbackButton(self):
-    print '_callbackButton'
-    self._signal_button.emit()
+#    print '_callbackButton'
+#    self._signal_button.emit()
+    data = self._execute_widget.pull('ExecInfo', '--testing')
+    print data

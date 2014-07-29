@@ -38,7 +38,7 @@ class ExecuteWidgetTopControl(MooseWidget):
     ## DEMO INFO ##
     self.info()
 
-# private:
+# protected:
 
   ##
   # Executes when 'Run' is clicked (auto connected via addObject)
@@ -68,3 +68,8 @@ class ExecuteWidgetTopControl(MooseWidget):
     q_object.setMaximumWidth(40)
     q_object.setToolTip('Number of threads to be used.')
     q_object.property('label').setAlignment(QtCore.Qt.AlignRight)
+
+  ## A simple test of the pull functionality
+  #
+  def _pullExecInfo(self, cli_args=''):
+    return self.object('Executable').text()# + ' ' + cli_args
