@@ -2,6 +2,7 @@ import os, sys
 from PySide import QtCore, QtGui
 
 from base import *
+from utils import *
 from ExecuteWidgetTopControl import *
 from ExecuteWidgetConsole import *
 
