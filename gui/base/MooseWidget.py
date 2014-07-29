@@ -90,6 +90,7 @@ class MooseWidget(QtGui.QWidget):
         if attr != None:
           return attr
 
+    #peacockWarning(...)
     return None
 
   ##
@@ -108,25 +109,39 @@ class MooseWidget(QtGui.QWidget):
         if attr != None:
           return attr
 
+    #peacockWarning(...)
     return None
 
   ##
   # Extract value from pull method  by name
   # @param name The pull method name contained within a Peacock object (_pull<Name>)
   # @param *args Additional arguments
-  def pull(self, name, *args):
+  # @return The actual function to call
+  #
+  # This does not execute the method queried, but returns you the actual function, e.g.:
+  #   func = obj.pull('MyFinger')
+  #   data = func(some_additional_argument)
+  #
+  # By default, pull will automatically search "sibling" objects if the, for example.
+  #
+  def pull(self, name, search_owner = True):
     pull_name = '_pull' + name
 
-    for key, obj in self._objects.iteritems():
-      if hasattr(obj, pull_name):
-        attr = getattr(obj, pull_name)
-        return attr(args)
+    if search_owner and isinstance(self.property('owner'), MooseWidget):
+      return self.property('owner').pull(name, False)
 
-      elif search_children and isinstance(obj, MooseWidget):
-        attr = obj.pull(name, *args)
-        if attr != None:
+    else:
+      for key, obj in self._objects.iteritems():
+        if hasattr(obj, pull_name):
+          attr = getattr(obj, pull_name)
           return attr
 
+        elif isinstance(obj, MooseWidget):
+          attr = obj.pull(name, False)
+          if attr != None:
+            return attr
+
+    #peacockWarning(...)
     return None
 
   ##
@@ -188,8 +203,11 @@ class MooseWidget(QtGui.QWidget):
       parent = self.__class__.__name__ + '._main_layout'
       parent_object = self._main_layout
 
-    # Set the name of the object as a property of the object, used by info()
-    q_object.setProperty('parent', parent)
+    # Store the parent object name as a property of the object, used by info()
+    q_object.setProperty('parent_name', parent)
+
+    # Store the this object in the object being added
+    q_object.setProperty('owner', self)
 
     # Determine the handle for the object being added, and test that it doesn't exist
     handle = kwargs.pop('handle', 'object_' + str(len(self._objects)))
@@ -291,9 +309,10 @@ class MooseWidget(QtGui.QWidget):
   #
   # When this method is executed, it should be done in the constructor of an object inheriting
   # from MooseWidget, the following is done:
-  #   (1) If a method named "_setup<handle>" exists it is called, where handle is the name given to
+  #   (1) If a method named "initialSetup" exists, it is called.
+  #   (2) If a method named "_setup<handle>" exists it is called, where handle is the name given to
   #       the object when adding it via addObject.
-  #   (2) If a _setup<handle> method does not exist and a method named _callback<handle> does then
+  #   (3) If a _setup<handle> method does not exist and a method named _callback<handle> does then
   #       an attempt to connect the QObject with the given handle to the callback method. Currently,
   #       QObjects with the following attributes are supported for automatic connection:
   #           - QAbstractButton via 'clicked' attribute
@@ -301,6 +320,11 @@ class MooseWidget(QtGui.QWidget):
 
     # Iterate through each of the objects stored
     for key, obj in self._objects.iteritems():
+
+      # Call _initialSetup method
+      if hasattr(obj, '_initialSetup'):
+        self._debug('Executing _initialSetup for ' +  key + ' object')
+        obj._initialSetup()
 
       # Define the setup and callback method names
       setup_name = '_setup' + key
@@ -350,7 +374,7 @@ class MooseWidget(QtGui.QWidget):
   ##
   # Recursively, gather object information for this MooseObject
   # @param data The data list to populate
-  # @param indent_level The level of indentation to applie to the table entry
+  # @param indent_level The level of indentation to applied to the table entry
   #
   def _getObjectInfo(self, data, indent_level=0):
     for key, obj in self._objects.iteritems():
@@ -360,7 +384,7 @@ class MooseWidget(QtGui.QWidget):
       has_setup = hasattr(self, '_setup' + key)
       has_callback = hasattr(self, '_callback' + key)
       flavor = obj.__class__.__name__
-      parent = obj.property('parent')
+      parent = obj.property('parent_name')
       data.append(['  '*indent_level + key, parent, flavor, has_setup, has_callback])
       if isinstance(obj, MooseWidget):
         obj._getObjectInfo(data, indent_level + 1)

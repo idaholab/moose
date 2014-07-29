@@ -71,5 +71,8 @@ class ExecuteWidgetTopControl(MooseWidget):
 
   ## A simple test of the pull functionality
   #
-  def _pullExecInfo(self, cli_args=''):
-    return self.object('Executable').text()# + ' ' + cli_args
+  def _pullExecInfo(self, *args):
+    txt = self.object('Executable').text()
+    if len(args) > 0:
+      txt += ' ' + args[0]
+    return txt
