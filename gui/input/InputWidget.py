@@ -17,17 +17,18 @@ class InputWidget(MooseWidget):
     MooseWidget.__init__(self, **kwargs)
 
     self.addObject(QtGui.QPushButton('Run'), handle='Button')
-
-    self._execute_widget = None
-
     self.setup()
 
-  def setExecuteWidget(self, obj):
-    self._execute_widget = obj
+    self._func = None
 
+  ##
+  # Initial Setup for the InputWidget
+  # This populates the pull function, this cannot be done in the constructor because
+  # this is pulling a function from the ExecuteWidget, which does not exist when the InputWidget
+  # is being constructed.
+  def _initialSetup(self):
+    self._func = self.pull('ExecInfo')
 
   def _callbackButton(self):
-#    print '_callbackButton'
-#    self._signal_button.emit()
-    data = self._execute_widget.pull('ExecInfo', '--testing')
-    print data
+    func = self.pull('ExecInfo')
+    print self._func('--testing')
