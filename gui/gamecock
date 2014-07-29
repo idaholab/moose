@@ -19,12 +19,11 @@ class PeacockTabWidget(MooseWidget):
     # Add the tabs to the layout
     self.addObject(InputWidget(**kwargs), handle='Input', parent='PeacockTabs')
     self.addObject(ExecuteWidget(**kwargs), handle='Execute', parent='PeacockTabs')
-    self.object('Input').setExecuteWidget(self.object('Execute'))
 
     # Connect the signal 'button' from the InputWidget to the 'Run' callback of ExecuteWidget
     self.connectSignal('button', 'Run')
 
-    self.object('Execute').info()
+#    self.object('Execute').info()
 
     self.setup()
 
