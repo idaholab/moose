@@ -339,7 +339,7 @@ class MooseWidget(QtGui.QWidget):
 
   ##
   # Define a message the prints when the debug flag is set to true
-  # @param messsage The desired debugging message
+  # @param message The desired debugging message
   def _debug(self, message):
     if property('debug'):
       caller = inspect.stack()[1]
