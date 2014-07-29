@@ -12,61 +12,44 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef RANKTWOTENSORTEST_H
-#define RANKTWOTENSORTEST_H
+#ifndef RANKTWOEIGENROUTINESTEST_H
+#define RANKTWOEIGENROUTINESTEST_H
 
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
 // Moose includes
-#include "RankTwoTensor.h"
+#include "RankTwoEigenRoutines.h"
 
-class RankTwoTensorTest : public CppUnit::TestFixture
+class RankTwoEigenRoutinesTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( RankTwoTensorTest );
+  CPPUNIT_TEST_SUITE( RankTwoEigenRoutinesTest );
 
-  CPPUNIT_TEST( L2normTest );
-  CPPUNIT_TEST( addIaTest );
-  CPPUNIT_TEST( transposeTest );
-  CPPUNIT_TEST( doubleContractionTest );
-  CPPUNIT_TEST( traceTest );
-  CPPUNIT_TEST( rotateTest );
-  CPPUNIT_TEST( secondInvariantTest );
-  CPPUNIT_TEST( detTest );
-  CPPUNIT_TEST( deviatoricTest );
-  CPPUNIT_TEST( inverseTest );
-  CPPUNIT_TEST( dtraceTest );
-  CPPUNIT_TEST( dsecondInvariantTest );
-  CPPUNIT_TEST( ddetTest );
+  CPPUNIT_TEST( symmetricEigenvaluesTest );
+  CPPUNIT_TEST( dsymmetricEigenvaluesTest );
+  CPPUNIT_TEST( d2symmetricEigenvaluesTest1 );
+  CPPUNIT_TEST( d2symmetricEigenvaluesTest2 );
 
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  RankTwoTensorTest();
-  ~RankTwoTensorTest();
+  RankTwoEigenRoutinesTest();
+  ~RankTwoEigenRoutinesTest();
 
-  void L2normTest();
-  void addIaTest();
-  void transposeTest();
-  void doubleContractionTest();
-  void rotateTest();
-  void traceTest();
-  void secondInvariantTest();
-  void detTest();
-  void deviatoricTest();
-  void inverseTest();
-  void dtraceTest();
-  void dsecondInvariantTest();
-  void ddetTest();
+  void symmetricEigenvaluesTest();
+  void dsymmetricEigenvaluesTest();
+  void d2symmetricEigenvaluesTest1();
+  void d2symmetricEigenvaluesTest2();
 
  private:
   RankTwoTensor _m0;
   RankTwoTensor _m1;
   RankTwoTensor _m2;
   RankTwoTensor _m3;
+  RankTwoTensor _m4;
   RankTwoTensor _unsymmetric0;
   RankTwoTensor _unsymmetric1;
 };
 
-#endif  // RANKTWOTENSORTEST_H
+#endif  // RANKTWOEIGENROUTINESTEST_H

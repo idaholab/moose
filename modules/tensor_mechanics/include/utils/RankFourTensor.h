@@ -52,6 +52,9 @@ public:
   /// Zeros out the tensor.
   void zero();
 
+  /// Print the rank four tensor
+  void print() const;
+
   /// copies values from a into this tensor
   RankFourTensor & operator= (const RankFourTensor & a);
 
@@ -105,9 +108,6 @@ public:
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
   virtual void rotate(RealTensorValue & R);
-
-  /// Print tensor using nice formatting and Moose::out
-  void print() const;
 
   /**
    * Transpose the tensor by swapping the first pair with the second pair of indices
@@ -164,6 +164,7 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
+
 protected:
 
   /// Dimensionality of rank-four tensor
@@ -179,7 +180,7 @@ protected:
    * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
    */
   int MatrixInversion(double *A, int n) const;
-  
+
   /**
   * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in
   * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
@@ -235,19 +236,6 @@ protected:
    */
   void fillGeneralFromInputVector(const std::vector<Real> & input);
 
-  /**
-  * computes eigenvalues, assuming _vals is symmetric, and places them
-  * in ascending order in eigvals
-  */
-  void symmetricEigenvalues(std::vector<Real> & eigvals);
-  /**
-   * computes second derivative of input tensor,
-   * assuming rank two tensor is symmetric
-   * @param a rank two tensor
-   * @param alpha index of eigenvalue (for rank two tensor index will be 1,2 and 3)
-   */
-   void secondDerivative(const RankTwoTensor & a, const unsigned int alpha);
-    
 private:
 
 };

@@ -708,20 +708,3 @@ RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
           _vals[i][j][k][l] = input[ind];
         }
 }
-
-void
-RankFourTensor::secondDerivative(const RankTwoTensor & a, const unsigned int alpha)
-{
-  std::vector<double> eigvectors;
-  std::vector<double> eigvals;
-  
-  a.syev('V',eigvals,eigvectors)
-  for (unsigned int beta=0; beta <3; beta++)
-  {
-    if (beta == alpha) 
-      continue
-    
-  }
-    
-}
-

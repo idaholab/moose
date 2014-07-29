@@ -7,9 +7,6 @@
 #include "MaterialProperty.h"
 #include <ostream>
 
-// This is used to calculate eigenvalues and eigenvectors
-#include <petscblaslapack.h>
-
 
 RankTwoTensor::RankTwoTensor()
 {
@@ -493,60 +490,3 @@ RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
     mooseError("please provide correct number of values for surface RankTwoTensor initialization.");
 }
 
-
-void
-RankTwoTensor::syev(const char * calculation_type, std::vector<Real> & eigvals, std::vector<double> & a)
-{
-  eigvals.resize(N);
-  a.resize(N*N);
-
-  // prepare data for the LAPACKsyev_ routine (which comes from petscblaslapack.h)
-  int nd = N;
-  int lwork = 66*nd;
-  int info;
-  std::vector<double> work(lwork);
-
-  for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N; ++j)
-      a[i*N + j] = _vals[i][j]; // a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed there
-
-  // compute the eigenvalues only (if calculation_type == "N"),
-  // or both the eigenvalues and eigenvectors (if calculation_type == "V")
-  // assume upper triangle of a is stored (second "U")
-  LAPACKsyev_(calculation_type, "U", &nd, &a[0], &nd, &eigvals[0], &work[0], &lwork, &info);
-
-  if (info != 0)
-    mooseError("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the PETSC LAPACK syev routine returned error code " << info);
-}
-
-
-void
-RankTwoTensor::symmetricEigenvalues(std::vector<Real> & eigvals)
-{
-  std::vector<double> a;
-  syev("N", eigvals, a);
-}
-
-void
-RankTwoTensor::dsymmetricEigenvalues(std::vector<Real> & eigvals, std::vector<RankTwoTensor> & deigvals)
-{
-  deigvals.resize(N);
-
-  std::vector<double> a;
-  syev("V", eigvals, a);
-
-  // now a contains the eigenvetors
-  // extract these and place appropriately in deigvals
-  std::vector<Real> eig_vec;
-  eig_vec.resize(N);
-
-  for (unsigned int i = 0; i < N; ++i)
-  {
-    for (unsigned int j = 0; j < N; ++j)
-      eig_vec[j] = a[i*N + j];
-    for (unsigned int j = 0; j < N; ++j)
-      for (unsigned int k = 0; k < N; ++k)
-        deigvals[i](j, k) = eig_vec[j]*eig_vec[k];
-  }
-
-}
