@@ -5,13 +5,13 @@ from base import *
 
 ##
 # Defines the top control buttons for the Execute Tab
-class ExecuteWidgetTopControl(PeacockWidget):
+class ExecuteWidgetTopControl(MooseWidget):
   ## Emitted when 'Run' button is pressed
   signal_run = QtCore.Signal(str, str, str, str)
 
 # public:
   def __init__(self, **kwargs):
-    PeacockWidget.__init__(self, **kwargs)
+    MooseWidget.__init__(self, **kwargs)
 
     # Define the mpi/threads/run controls
     self.addObject(QtGui.QHBoxLayout(), handle='ControlButtonLayout')
