@@ -7,13 +7,13 @@ from base import *
 
 ##
 # An input file widget
-class InputWidget(PeacockWidget):
+class InputWidget(MooseWidget):
 
   # Define signals that will be emitted from this object
   signal_button = QtCore.Signal()
 
   def __init__(self, **kwargs):
-    PeacockWidget.__init__(self, **kwargs)
+    MooseWidget.__init__(self, **kwargs)
 
     self.addObject(QtGui.QPushButton('Run'), handle='Button')
 
