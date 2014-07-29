@@ -7,11 +7,11 @@ from ExecuteWidgetConsole import *
 
 ##
 # The Peacock Execute Tab
-class ExecuteWidget(PeacockWidget):
+class ExecuteWidget(MooseWidget):
 
 # public:
   def __init__(self, **kwargs):
-    PeacockWidget.__init__(self, **kwargs)
+    MooseWidget.__init__(self, **kwargs)
 
     # Add the controls and console display
     self.addObject(ExecuteWidgetTopControl(**kwargs), handle='ExecuteTopControls')
