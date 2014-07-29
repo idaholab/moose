@@ -2,6 +2,7 @@ import os, sys
 from PySide import QtCore, QtGui
 
 from base import *
+from utils import *
 
 ##
 # Widget for executing and displaying MOOSE executable results
