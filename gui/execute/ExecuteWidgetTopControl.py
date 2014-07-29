@@ -2,6 +2,7 @@ import os, sys, traceback
 from PySide import QtCore, QtGui
 
 from base import *
+from utils import *
 
 ##
 # Defines the top control buttons for the Execute Tab
