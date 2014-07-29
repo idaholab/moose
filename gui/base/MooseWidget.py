@@ -242,7 +242,7 @@ class MooseWidget(QtGui.QWidget):
     return self._objects[handle]
 
   ##
-  # Connect a signal to a callback
+  # Connect a signal to a callback (public)
   # @param signal_name The signal name contained within a Peacock object (_signal_<name>) or a Qt.Signal object
   # @param callback_name The handle associated with the QObject added via addObject that
   #                      has a _callback<name> method defined in the class or callable method.
@@ -268,7 +268,7 @@ class MooseWidget(QtGui.QWidget):
     signal.connect(callback)
 
   ##
-  # Run object setup methods
+  # Run object setup methods (public)
   #
   # When this method is executed, it should be done in the constructor of an object inheriting
   # from MooseWidget, the following is done:
@@ -306,58 +306,21 @@ class MooseWidget(QtGui.QWidget):
   # Displays the object and signals for this object (public)
   def info(self):
 
-    print '\n', self.__class__.__name__, 'Objects:'
 
     # Build the object data to print
     data = []
     self._getObjectInfo(data)
-
-    # Compute the table widths
-    key_width = 0
-    parent_width = 0
-    flavor_width = 0
-    for d in data:
-      key_width = max(key_width, len(d[0]))
-      parent_width = max(parent_width, len(d[1]))
-      flavor_width = max(flavor_width, len(d[2]))
-
-    # Create format strings for building table
-    frmt = ' {0:' + str(key_width) + 's}  {1:' + str(parent_width) + 's} {2:' + str(flavor_width)+ 's}  {3:5s}  {4:8s} '
-    line = frmt.format('-'*key_width, '-'*parent_width, '-'*flavor_width, '-----', '--------')
-
-    # Print the object table
-    print line
-    print frmt.format('Handle', 'Parent', 'Type', 'Setup', 'Callback')
-    print line
-    for d in data:
-      print frmt.format(d[0], d[1], d[2], str(d[3]), str(d[4]))
-    print line
+    print '\n', self.__class__.__name__, 'Objects:'
+    self.__printTable(['Handle', 'Parent', 'Type', 'Setup', 'Callback'], data)
 
     # Extract the signal information
     signals = []
     self._getSignalInfo(signals)
-
-    # Compute the signal table widths
-    signal_name_width = 0
-    signal_parent_width = 0
-    for s in signals:
-      signal_name_width = max(signal_name_width, len(s[0]))
-      signal_parent_width = max(signal_parent_width, len(s[1]))
-
-    # Create format strings for building signal table
-    frmt = ' {0:' + str(signal_name_width) + 's}  {1:' + str(signal_parent_width) + 's}'
-    line = frmt.format('-'*signal_name_width, '-'*signal_parent_width)
-
-    # Print signals
-    print '\n', self.__class__.__name__, 'User Signals:'
-    print line
-    print frmt.format('Signal', 'Parent')
-    print line
-    for s in signals:
-      print frmt.format(s[0], s[1])
-    print line
-
+    print '\n', self.__class__.__name__, 'Signals:'
+    self.__printTable(['Signal', 'Parent'], signals)
     print '\n'
+
+# protected:
 
   ##
   # Recursively, gather object information for this MooseObject
@@ -394,7 +357,7 @@ class MooseWidget(QtGui.QWidget):
         obj._getSignalInfo(data)
 
   ##
-  # Define a message the prints when the debug flag is set to true
+  # Define a message the prints when the debug flag is set to true (protected)
   # @param message The desired debugging message
   def _debug(self, message):
     if property('debug'):
@@ -402,3 +365,52 @@ class MooseWidget(QtGui.QWidget):
       frame = caller[0]
       info = inspect.getframeinfo(frame)
       print '[' + self.__class__.__name__ + '][' + info.function + ':' + str(info.lineno) +']', message
+
+# private:
+
+  ##
+  # Given header and data, create a formatted table
+  def __printTable(self, header, data):
+
+    # Print empty message if no data exists
+    if len(data) == 0:
+      print ' No data'
+      return
+
+    # Insert the header to the beginning of the data
+    data.insert(0, header)
+
+    # Compute the table widths
+    widths = [0]*len(data[0])
+    for d in data:
+      for i in xrange(len(d)):
+
+        # Convert bool
+        if isinstance(d[i], bool):
+          if d[i]:
+            d[i] = 'True'
+          else:
+            d[i] = 'False'
+
+        # Compute max width
+        widths[i] = max(widths[i], len(str(d[i])))
+
+    # Strip header from the beginning
+    data.pop(0)
+
+    # Create format strings for building signal table
+    cnt = 0
+    frmt = ''
+    line = ''
+    for w in widths:
+      frmt += ' {' + str(cnt) + ':' + str(w) + 's}'
+      line += ' ' + '-'*(w)
+      cnt += 1
+
+    # Print signals
+    print line
+    print frmt.format(*header)
+    print line
+    for d in data:
+      print frmt.format(*d)
+    print line
