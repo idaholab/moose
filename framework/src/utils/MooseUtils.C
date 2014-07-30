@@ -165,4 +165,34 @@ hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ex
     return false;
 }
 
+std::pair<std::string, std::string>
+splitFileName(std::string full_file)
+{
+  // Error if path ends with /
+  if (full_file[full_file.size()-1] == '/')
+    mooseError("Invalid full file name: " << full_file);
+
+  // Define the variables to output
+  std::string path;
+  std::string file;
+
+  // Locate the / sepearting the file from path
+  std::size_t found = full_file.find_last_of("/");
+
+  // If no / is found used "." for the path, otherwise seperate the two
+  if (found == std::string::npos)
+  {
+    path = ".";
+    file = full_file;
+  }
+  else
+  {
+    path = full_file.substr(0, found);
+    file = full_file.substr(found+1);
+  }
+
+  // Return the path and file as a pair
+  return std::pair<std::string, std::string>(path, file);
+}
+
 } // MooseUtils namespace
