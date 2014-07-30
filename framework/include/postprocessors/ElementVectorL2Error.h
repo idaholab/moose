@@ -16,7 +16,6 @@
 #define ELEMENTVECTORL2ERROR_H
 
 #include "ElementIntegralPostprocessor.h"
-#include "FunctionInterface.h"
 
 class Function;
 
@@ -27,8 +26,7 @@ template<>
 InputParameters validParams<ElementVectorL2Error>();
 
 class ElementVectorL2Error :
-  public ElementIntegralPostprocessor,
-  public FunctionInterface
+  public ElementIntegralPostprocessor
 {
 public:
   ElementVectorL2Error(const std::string & name, InputParameters parameters);
