@@ -18,7 +18,6 @@ protected:
   virtual void residualSetup();
   virtual Real computeQpResidual();
 
-private:
   const Real _amplitude;
   const MaterialProperty<Real> * _multiplier_prop;
 };
