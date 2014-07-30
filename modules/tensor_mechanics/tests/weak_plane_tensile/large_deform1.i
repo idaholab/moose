@@ -165,12 +165,12 @@
     disp_y = disp_y
     disp_z = disp_z
     tension_cutoff = 1.0
-    wpt_f_tol = 1E-6
+    yield_function_tolerance = 1E-6
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
     wpt_normal_vector = '0 0 1'
     wpt_normal_rotates = true
-    wpt_r_tol = 1E-5
+    ep_plastic_tolerance = 1E-5
   [../]
 []
 

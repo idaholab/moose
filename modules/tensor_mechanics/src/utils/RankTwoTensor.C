@@ -131,31 +131,33 @@ RankTwoTensor::row(const unsigned int r) const
 void
 RankTwoTensor::rotate(RealTensorValue & R)
 {
-  Real temp;
+  RankTwoTensor temp;
   for (unsigned int i = 0; i < N; i++)
     for (unsigned int j = 0; j < N; j++)
     {
-      temp = 0.0;
       for (unsigned int k = 0; k < N; k++)
         for (unsigned int l = 0; l < N; l++)
-          temp += R(i,k)*R(j,l)*_vals[k][l];
-      _vals[i][j] = temp;
+          temp(i, j) += R(i,k)*R(j,l)*_vals[k][l];
     }
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      _vals[i][j] = temp(i, j);
 }
 
 void
 RankTwoTensor::rotate(RankTwoTensor & R)
 {
-  Real temp;
+  RankTwoTensor temp;
   for (unsigned int i = 0; i < N; i++)
     for (unsigned int j = 0; j < N; j++)
     {
-      temp = 0.0;
       for (unsigned int k = 0; k < N; k++)
         for (unsigned int l = 0; l < N; l++)
-          temp += R(i,k) * R(j,l) * _vals[k][l];
-      _vals[i][j] = temp;
+          temp(i, j) += R(i,k) * R(j,l) * _vals[k][l];
     }
+  for (unsigned int i = 0; i < N; i++)
+    for (unsigned int j = 0; j < N; j++)
+      _vals[i][j] = temp(i, j);
 }
 
 RankTwoTensor

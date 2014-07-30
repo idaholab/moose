@@ -91,6 +91,9 @@ public:
   /// C_ijpq*a_pqkl
   RankFourTensor operator* (const RankFourTensor & a) const;
 
+  /// sqrt(C_ijkl*C_ijkl)
+  Real L2norm() const;
+
   /**
    * This returns A_ijkl such that C_ijkl*A_klmn = 0.5*(de_im de_jn + de_in de_jm)
    * This routine assumes that C_ijkl = C_jikl = C_ijlk

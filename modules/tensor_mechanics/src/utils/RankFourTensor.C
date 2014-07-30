@@ -230,6 +230,18 @@ RankFourTensor::operator*(const RankFourTensor & a) const
   return result;
 }
 
+Real
+RankFourTensor::L2norm() const
+{
+  Real l2 = 0;
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          l2 += std::pow(_vals[i][j][k][l], 2);
+  return std::pow(l2, 0.5);
+}
+
 RankFourTensor
 RankFourTensor::invSymm() const
 {
