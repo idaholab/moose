@@ -1,4 +1,3 @@
-from PeacockWidget import *
-from PeacockError import *
+from MooseWidget import *
 
-__all__ = ['PeacockError', 'PeacockWidget']
+__all__ = ['MooseWidget']

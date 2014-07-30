@@ -2,16 +2,17 @@ import os, sys
 from PySide import QtCore, QtGui
 
 from base import *
+from utils import *
 from ExecuteWidgetTopControl import *
 from ExecuteWidgetConsole import *
 
 ##
 # The Peacock Execute Tab
-class ExecuteWidget(PeacockWidget):
+class ExecuteWidget(MooseWidget):
 
 # public:
   def __init__(self, **kwargs):
-    PeacockWidget.__init__(self, **kwargs)
+    MooseWidget.__init__(self, **kwargs)
 
     # Add the controls and console display
     self.addObject(ExecuteWidgetTopControl(**kwargs), handle='ExecuteTopControls')
@@ -41,7 +42,7 @@ class ExecuteWidget(PeacockWidget):
 
     # Check that program exists
     if not os.path.exists(executable):
-      peacockError('The program', executable, 'does not exist.')
+      peacockError(self, 'The program', executable, 'does not exist.')
 
     # Build the command
     cmd = []

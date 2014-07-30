@@ -2,16 +2,17 @@ import os, sys, traceback
 from PySide import QtCore, QtGui
 
 from base import *
+from utils import *
 
 ##
 # Defines the top control buttons for the Execute Tab
-class ExecuteWidgetTopControl(PeacockWidget):
+class ExecuteWidgetTopControl(MooseWidget):
   ## Emitted when 'Run' button is pressed
-  signal_run = QtCore.Signal(str, str, str, str)
+  _signal_run = QtCore.Signal(str, str, str, str)
 
 # public:
   def __init__(self, **kwargs):
-    PeacockWidget.__init__(self, **kwargs)
+    MooseWidget.__init__(self, **kwargs)
 
     # Define the mpi/threads/run controls
     self.addObject(QtGui.QHBoxLayout(), handle='ControlButtonLayout')
@@ -37,7 +38,7 @@ class ExecuteWidgetTopControl(PeacockWidget):
     ## DEMO INFO ##
     self.info()
 
-# private:
+# protected:
 
   ##
   # Executes when 'Run' is clicked (auto connected via addObject)
@@ -46,7 +47,7 @@ class ExecuteWidgetTopControl(PeacockWidget):
     mpi = self.object('MPI').text()
     threads = self.object('Threads').text()
     args = self.object('Arguments').text()
-    self.signal_run.emit(executable, mpi, threads, args)
+    self._signal_run.emit(executable, mpi, threads, args)
 
   ##
   # Executes when 'Select' button is pressed (auto connected via addObject)
@@ -67,3 +68,11 @@ class ExecuteWidgetTopControl(PeacockWidget):
     q_object.setMaximumWidth(40)
     q_object.setToolTip('Number of threads to be used.')
     q_object.property('label').setAlignment(QtCore.Qt.AlignRight)
+
+  ## A simple test of the pull functionality
+  #
+  def _pullExecInfo(self, *args):
+    txt = self.object('Executable').text()
+    if len(args) > 0:
+      txt += ' ' + args[0]
+    return txt

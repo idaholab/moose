@@ -9,9 +9,9 @@ from input import *
 
 
 # A DEMO TABBED WIDGET
-class PeacockTabWidget(PeacockWidget):
+class PeacockTabWidget(MooseWidget):
   def __init__(self, **kwargs):
-    PeacockWidget.__init__(self, **kwargs)
+    MooseWidget.__init__(self, **kwargs)
 
     # Create Tab layout
     self.addObject(QtGui.QTabWidget(), handle='PeacockTabs')
@@ -22,6 +22,8 @@ class PeacockTabWidget(PeacockWidget):
 
     # Connect the signal 'button' from the InputWidget to the 'Run' callback of ExecuteWidget
     self.connectSignal('button', 'Run')
+
+#    self.object('Execute').info()
 
     self.setup()
 
