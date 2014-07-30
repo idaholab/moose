@@ -2,7 +2,7 @@
 #ifndef FINITESTRAINWEAKPLANETENSILE
 #define FINITESTRAINWEAKPLANETENSILE
 
-#include "FiniteStrainMaterial.h"
+#include "FiniteStrainPlasticBase.h"
 
 class FiniteStrainWeakPlaneTensile;
 
@@ -13,13 +13,12 @@ InputParameters validParams<FiniteStrainWeakPlaneTensile>();
  * FiniteStrainWeakPlaneTensile implements rate-independent associative weak-plane tensile failure
  * with no hardening in the finite-strain framework.
  */
-class FiniteStrainWeakPlaneTensile : public FiniteStrainMaterial
+class FiniteStrainWeakPlaneTensile : public FiniteStrainPlasticBase
 {
 public:
   FiniteStrainWeakPlaneTensile(const std::string & name, InputParameters parameters);
 
 protected:
-  virtual void computeQpStress();
   virtual void initQpStatefulProperties();
 
   /// tension cutoff
@@ -31,21 +30,6 @@ protected:
   /// Whether the normal vector rotates with large deformations
   bool _normal_rotates;
 
-  /// Tolerance for yield function
-  Real _f_tol;
-
-  /// Tolerance for residual
-  Real _r_tol;
-
-  /// Maximum number of Newton-Raphson iterations allowed
-  int _max_iter;
-
-  /// plastic strain
-  MaterialProperty<RankTwoTensor> & _plastic_strain;
-
-  /// Old value of plastic strain
-  MaterialProperty<RankTwoTensor> & _plastic_strain_old;
-
   /// Unit normal vector to the weak plane
   MaterialProperty<RealVectorValue> & _n;
 
@@ -56,44 +40,42 @@ protected:
   MaterialProperty<Real> & _yf;
 
   /**
-   * Implements the return map
-   * @param sig_old  The stress at the previous "time" step
-   * @param plastic_strain_old  The value of plastic strain at the previous "time" step
-   * @param delta_d  The total strain increment for this "time" step
-   * @param E_ijkl   The elasticity tensor.  If no plasiticity then sig_new = sig_old + E_ijkl*delta_d
-   * @param sig      The stress after returning to the yield surface   (this is an output variable)
-   * @param plastic_strain   The value of plastic strain after returning to the yield surface (this is an output variable)
-   * @param yield_fcn   The value of the yield function after returning to the yield surface (this is an output variable)
-   * Note that this algorithm doesn't do any rotations.  In order to find the
-   * final stress and plastic_strain, sig and plastic_strain must be rotated using _rotation_increment.
-   */
-  virtual void returnMap(const RankTwoTensor &sig_old, const RankTwoTensor &plastic_strain_old, const RankTwoTensor &delta_d, const RankFourTensor &E_ijkl, RankTwoTensor &sig, RankTwoTensor &plastic_strain, Real &yield_function);
-
-
-  /**
-   * Calculates the yield function
+   * The yield function(s)
    * @param stress the stress at which to calculate the yield function
-   * @param yield_stress the current value of the yield stress
-   * @return equivalent stress - yield_stress
+   * @param intnl vector of internal parameters
+   * @param f (output) the yield function (or functions in the case of multisurface plasticity)
    */
-  virtual Real yieldFunction(const RankTwoTensor &stress);
+  virtual void yieldFunction(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<Real> & f);
 
   /**
-   * Derivative of yieldFunction with respect to the stress
+   * The derivative of yield function(s) with respect to stress
+   * @param stress the stress at which to calculate the yield function
+   * @param intnl vector of internal parameters
+   * @param df_dstress (output) the derivative (or derivatives in the case of multisurface plasticity).  df_dstress[alpha](i, j) = dyieldFunction[alpha]/dstress(i, j)
    */
-  virtual RankTwoTensor dyieldFunction_dstress(const RankTwoTensor &stress);
+  virtual void dyieldFunction_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankTwoTensor> & df_dstress);
 
   /**
-   * Flow potential, which in this case is just dyieldFunction_dstress
+   * The flow potential(s) - one for each yield function
+   * @param stress the stress at which to calculate the flow potential
+   * @param intnl vector of internal parameters
+   * @param r (output) the flow potential (flow potentials in the multi-surface case)
    */
-  virtual RankTwoTensor flowPotential(const RankTwoTensor &stress);
+  virtual void flowPotential(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankTwoTensor> & r);
 
   /**
-   * Evaluates the derivative d(flowPotential_ij)/d(stress_kl), where
-   * @param sig stress
-   * @return the answer
+   * The derivative of the flow potential(s) with respect to stress
+   * @param stress the stress at which to calculate the flow potential
+   * @param intnl vector of internal parameters
+   * @param dr_dstress (output) the derivative.  dr_dstress[alpha](i, j, k, l) = dr[alpha](i, j)/dstress(k, l)
    */
-  virtual RankFourTensor dflowPotential_dstress(const RankTwoTensor &sig);
+  virtual void dflowPotential_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankFourTensor> & dr_dstress);
+
+  /// Function called just before doing returnMap
+  virtual void preReturnMap();
+
+  /// Function called just after doing returnMap
+  virtual void postReturnMap();
 };
 
 #endif //FINITESTRAINWEAKPLANETENSILE

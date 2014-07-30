@@ -9,6 +9,7 @@
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
+#include "FiniteStrainWeakPlaneShear.h"
 #include "FiniteStrainRatePlasticMaterial.h"
 #include "FiniteStrainWeakPlaneTensile.h"
 #include "FiniteStrainWeakPlaneShear.h"

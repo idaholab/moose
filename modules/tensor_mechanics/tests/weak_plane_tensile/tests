@@ -2,7 +2,7 @@
   [./except1]
     type = 'RunException'
     input = 'except1.i'
-    expect_err = 'Tension cutoff has to be positive'
+    expect_err = 'Range check failed for parameter Materials/mc/tension_cutoff'
   [../]
   [./small1]
     type = 'CSVDiff'
@@ -20,11 +20,13 @@
     type = 'Exodiff'
     input = 'large_deform1.i'
     exodiff = 'large_deform1.e'
+    abs_zero = 1.0E-6
   [../]
   [./large2]
     type = 'Exodiff'
     input = 'large_deform2.i'
     exodiff = 'large_deform2.e'
+    abs_zero = 1.0E-6
   [../]
 
 []

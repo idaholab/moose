@@ -66,6 +66,58 @@ RankTwoTensorTest::doubleContractionTest()
 }
 
 void
+RankTwoTensorTest::rotateTest()
+{
+  Real sqrt2 = 0.707106781187;
+  RealTensorValue rtv0(sqrt2, -sqrt2, 0, sqrt2, sqrt2, 0, 0, 0, 1); // rotation about "0" axis
+  RealTensorValue rtv1(sqrt2, 0, -sqrt2, 0, 1, 0, sqrt2, 0, sqrt2); // rotation about "1" axis
+  RealTensorValue rtv2(1, 0, 0, 0, sqrt2, -sqrt2, 0, sqrt2, sqrt2); // rotation about "2" axis
+
+  RankTwoTensor rot0(rtv0);
+  RankTwoTensor rot0T = rot0.transpose();
+  RankTwoTensor rot1(rtv1);
+  RankTwoTensor rot1T = rot1.transpose();
+  RankTwoTensor rot2(rtv2);
+  RankTwoTensor rot2T = rot2.transpose();
+  RankTwoTensor rot = rot0*rot1*rot2;
+
+  RankTwoTensor answer;
+  RankTwoTensor m3;
+
+  // the following "answer"s come from mathematica of course!
+
+  // rotate about "0" axis with RealTensorValue, then back again with RankTwoTensor
+  m3 = _m3;
+  answer = RankTwoTensor(-4, 3, 6.363961, 3, 0, -2.1213403, 6.363961, -2.1213403, 9);
+  m3.rotate(rtv0);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+  m3.rotate(rot0T);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - _m3).L2norm(), 0.0001);
+
+  // rotate about "1" axis with RealTensorValue, then back again with RankTwoTensor
+  m3 = _m3;
+  answer = RankTwoTensor(2, 5.656854, -4, 5.656854, -5, -2.828427, -4, -2.828427, 8);
+  m3.rotate(rtv1);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+  m3.rotate(rot1T);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - _m3).L2norm(), 0.0001);
+
+  // rotate about "2" axis with RealTensorValue, then back again with RankTwoTensor
+  m3 = _m3;
+  answer = RankTwoTensor(1, -sqrt2, 3.5355339, -sqrt2, 8, -7, 3.5355339, -7, -4);
+  m3.rotate(rtv2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+  m3.rotate(rot2T);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - _m3).L2norm(), 0.0001);
+
+  // rotate with "rot"
+  m3 = _m3;
+  answer = RankTwoTensor(-2.9675144, -6.51776695, 5.6213203, -6.51776695, 5.9319805, -2.0857864, 5.6213203, -2.0857864, 2.0355339);
+  m3.rotate(rot);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+}
+
+void
 RankTwoTensorTest::traceTest()
 {
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _m0.trace(), 0.0001);
