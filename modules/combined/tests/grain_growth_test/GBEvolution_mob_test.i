@@ -73,6 +73,7 @@
   [./gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
+    execute_on = 'initial timestep'
   [../]
 []
 
@@ -109,4 +110,8 @@
     perf_log = true
     linear_residuals = true
   [../]
+[]
+
+[Problem]
+  use_legacy_uo_initialization = false
 []

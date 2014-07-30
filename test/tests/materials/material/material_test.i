@@ -10,8 +10,6 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -19,7 +17,6 @@
 []
 
 [AuxVariables]
-active = 'mat'
   [./mat]
     order = CONSTANT
     family = MONOMIAL
@@ -27,8 +24,6 @@ active = 'mat'
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = MatDiffusion
     variable = u
@@ -37,17 +32,15 @@ active = 'mat'
 []
 
 [AuxKernels]
-active = 'mat'
   [./mat]
     type = MaterialRealAux
     variable = mat
     property = matp
+    execute_on = timestep
   [../]
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
@@ -65,8 +58,6 @@ active = 'mat'
 []
 
 [Materials]
-  active = mat
-
   [./mat]
     type = MTMaterial
     block = 0
