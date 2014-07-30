@@ -967,7 +967,7 @@ swapLibMeshComm(MPI_Comm new_comm)
 void
 enableFPE(bool on)
 {
-  if (__trap_fpe)
+  if (_trap_fpe)
     libMesh::enableFPE(on);
 }
 
@@ -990,11 +990,11 @@ const std::vector<ExecFlagType> exec_types = populateExecTypes();
 PerfLog setup_perf_log("Setup");
 
 #ifdef DEBUG
-bool __trap_fpe = true;
+bool _trap_fpe = true;
 #else
-bool __trap_fpe = false;
+bool _trap_fpe = false;
 #endif
 
-bool __color_console = true;
+bool _color_console = true;
 
 } // namespace Moose
