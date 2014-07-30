@@ -59,6 +59,7 @@
   [./pid]
     type = ProcessorIDAux
     variable = pid
+    execute_on = 'initial timestep'
   [../]
   [./status]
     type = PenetrationAux
