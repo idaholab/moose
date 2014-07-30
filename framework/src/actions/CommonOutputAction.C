@@ -136,7 +136,7 @@ CommonOutputAction::act()
     create("SolutionHistory");
 
   if (!getParam<bool>("color"))
-    Moose::__color_console = false;
+    Moose::_color_console = false;
 }
 
 void

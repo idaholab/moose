@@ -156,7 +156,7 @@ MooseApp::setupOptions()
     _half_transient = true;
 
   if (isParamValid("no_color"))
-    Moose::__color_console = false;
+    Moose::_color_console = false;
 
   // Set the timing parameter (see src/outputs/Console.C)
   if (isParamValid("timing"))
@@ -169,11 +169,11 @@ MooseApp::setupOptions()
 
   if (isParamValid("trap_fpe"))
     // Setting Global Variable
-    Moose::__trap_fpe = true;
+    Moose::_trap_fpe = true;
 
   if (isParamValid("no_trap_fpe"))
     // Setting Global Variable
-    Moose::__trap_fpe = false;
+    Moose::_trap_fpe = false;
 
   if (isParamValid("help"))
   {
