@@ -68,6 +68,6 @@ CreateProblemAction::act()
     _problem->useFECache(_fe_cache);
     _problem->setKernelCoverageCheck(getParam<bool>("kernel_coverage_check"));
     _problem->legacyUoAuxComputation() = _pars.isParamValid("use_legacy_uo_aux_computation") ? getParam<bool>("use_legacy_uo_aux_computation") : _app.legacyUoAuxComputationDefault();
-    _problem->legacyUoInitialization() = _pars.isParamValid("use_legacy_uo_initialization") ? getParam<bool>("use_legacy_uo_aux_computation") : _app.legacyUoInitializationDefault();
+    _problem->legacyUoInitialization() = _pars.isParamValid("use_legacy_uo_initialization") ? getParam<bool>("use_legacy_uo_initialization") : _app.legacyUoInitializationDefault();
   }
 }
