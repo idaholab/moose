@@ -67,8 +67,15 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       {
         _problem.prepare(elem, _tid);
         _problem.reinitElemFace(elem, side, boundary_id, _tid);
+
         if (_need_materials)
+        {
+          _problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
           _problem.reinitMaterialsBoundary(boundary_id, _tid);
+        }
+
+        // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
+        _problem.setCurrentBoundaryID(boundary_id);
 
         const std::vector<AuxKernel*> & bcs = _auxs[_tid].elementalBCs(boundary_id);
         for (std::vector<AuxKernel*>::const_iterator element_bc_it = bcs.begin(); element_bc_it != bcs.end(); ++element_bc_it)
@@ -76,6 +83,9 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
 
         if (_need_materials)
           _problem.swapBackMaterialsFace(_tid);
+
+        // Set active boundary id to invalid
+        _problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
       }
 
       // update the solution vector
