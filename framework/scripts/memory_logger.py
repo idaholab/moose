@@ -31,7 +31,11 @@ class LLDB:
         if command == lldb_commands[-1]:
           lldb_commands = []
           if self._waitForResponse(False):
-            lldb_process.stdin.write(command)
+            # I have seen LLDB exit out from under us
+            try:
+              lldb_process.stdin.write(command)
+            except:
+              pass
         elif self._waitForResponse():
           lldb_process.stdin.write(command)
     self.lldb_stdout.seek(0)
@@ -68,7 +72,11 @@ class GDB:
         if command == gdb_commands[-1]:
           gdb_commands = []
         elif self._waitForResponse():
-          gdb_process.stdin.write(command)
+          # I have seen GDB exit out from under us
+          try:
+            gdb_process.stdin.write(command)
+          except:
+            pass
     self.gdb_stdout.seek(0)
     stack_trace = self._parseStackTrace(self.gdb_stdout.read())
     self.gdb_stdout.close()
@@ -571,8 +579,8 @@ machine_id is supplied by the client class. This allows for multiple agents if d
       stack_trace = GDB()
     tmp_pids = self._getPIDs()
     if tmp_pids != {}:
-      lowest_pid = sorted([x for x in tmp_pids.keys()])[0]
-      return stack_trace.getStackTrace(str(lowest_pid))
+      last_pid = sorted([x for x in tmp_pids.keys()])[-1]
+      return stack_trace.getStackTrace(str(last_pid))
     else:
       return ''
 
