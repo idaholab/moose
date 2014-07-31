@@ -1,8 +1,20 @@
-# checking for small deformation
-# A single element is stretched by 1E-6m in x,y and z directions.
-# stress_zz = Youngs Modulus*Strain = 2E6*1E-6 = 2 Pa
-# wpt_tensile_strength is set to 5Pa
-# Since maximum stress which is 2Pa is less than tension cutoff, plastic yeilding shoud not be observed.
+# Checking solution of hardening
+# A single element is stretched by 1E-6 in z direction.
+#
+# Young's modulus = 20 MPa.  Tensile strength = 10 Exp(-1E6*q) Pa
+#
+# The trial stress is
+# trial_stress_zz = Youngs Modulus*Strain = 2E7*1E-6 = 20 Pa
+#
+# Therefore the equations we have to solve are
+# 0 = f = stress_zz - 10 Exp(-1E6*q)
+# 0 = epp = ga - (20 - stress_zz)/2E7
+# 0 = intnl = q - ga
+#
+# The result is
+# q = 0.76803905E-6
+# stress_zz = 4.6392191 Pa
+
 
 [Mesh]
   type = GeneratedMesh
@@ -61,32 +73,24 @@
     type = PresetBC
     variable = x_disp
     boundary = front
-    value = 1E-6
+    value = 0
   [../]
   [./topy]
     type = PresetBC
     variable = y_disp
     boundary = front
-    value = 1E-6
+    value = 0
   [../]
   [./topz]
-    type = PresetBC
+    type = FunctionPresetBC
     variable = z_disp
     boundary = front
-    value = 1E-6
+    function = 1E-6*t
   [../]
 []
 
 [AuxVariables]
-  [./stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
+  [./wpt_internal]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -101,26 +105,10 @@
 []
 
 [AuxKernels]
-  [./stress_xz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xz
-    index_i = 0
-    index_j = 2
-  [../]
-  [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zx
-    index_i = 2
-    index_j = 0
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
+  [./wpt_internal]
+    type = MaterialRealAux
+    property = weak_plane_tensile_internal
+    variable = wpt_internal
   [../]
   [./stress_zz]
     type = RankTwoAux
@@ -137,15 +125,10 @@
 []
 
 [Postprocessors]
-  [./s_xz]
+  [./wpt_internal]
     type = PointValue
     point = '0 0 0'
-    variable = stress_xz
-  [../]
-  [./s_yz]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_yz
+    variable = wpt_internal
   [../]
   [./s_zz]
     type = PointValue
@@ -166,14 +149,16 @@
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
-    wpt_tensile_strength = 5.0
+    wpt_tensile_strength = 10
+    wpt_tensile_strength_residual = 0
+    wpt_tensile_strength_rate = 1E6
     yield_function_tolerance = 1E-6
     fill_method = symmetric_isotropic
-    C_ijkl = '0 1E6'
+    C_ijkl = '0 1E7'
     wpt_normal_vector = '0 0 1'
     wpt_normal_rotates = false
-    ep_plastic_tolerance = 1E-5
-    internal_constraint_tolerance = 1E-5
+    ep_plastic_tolerance = 1E-11
+    internal_constraint_tolerance = 1E-11
   [../]
 []
 
@@ -186,9 +171,9 @@
 
 
 [Outputs]
-  file_base = small_deform2
+  file_base = small_deform_hard2
   output_initial = true
-  exodus = true
+  exodus = false
   [./console]
     type = Console
     perf_log = true

@@ -1,5 +1,4 @@
-# rotate the mesh by 90degrees
-# then pull in the z direction - should be no plasticity
+# checking error is thrown for negative rate
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -16,62 +15,60 @@
 
 
 [Variables]
-  [./disp_x]
+  [./x_disp]
   [../]
-  [./disp_y]
+  [./y_disp]
   [../]
-  [./disp_z]
+  [./z_disp]
   [../]
 []
 
 [TensorMechanics]
   [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    disp_x = x_disp
+    disp_y = y_disp
+    disp_z = z_disp
   [../]
 []
 
 
 [BCs]
-  # rotate:
-  # ynew = c*y + s*z.  znew = -s*y + c*z
   [./bottomx]
-    type = FunctionPresetBC
-    variable = disp_x
+    type = PresetBC
+    variable = x_disp
     boundary = back
-    function = '0'
+    value = 0.0
   [../]
   [./bottomy]
-    type = FunctionPresetBC
-    variable = disp_y
+    type = PresetBC
+    variable = y_disp
     boundary = back
-    function = '0*y+1*z-y'
+    value = 0.0
   [../]
   [./bottomz]
-    type = FunctionPresetBC
-    variable = disp_z
+    type = PresetBC
+    variable = z_disp
     boundary = back
-    function = '-1*y+0*z-z+if(t>0,0.5-y,0)' # note that this uses original nodal values of (x,y,z)
+    value = 0.0
   [../]
 
   [./topx]
-    type = FunctionPresetBC
-    variable = disp_x
+    type = PresetBC
+    variable = x_disp
     boundary = front
-    function = '0'
+    value = 1E-6
   [../]
   [./topy]
-    type = FunctionPresetBC
-    variable = disp_y
+    type = PresetBC
+    variable = y_disp
     boundary = front
-    function = '0*y+1*z-y'
+    value = 1E-6
   [../]
   [./topz]
-    type = FunctionPresetBC
-    variable = disp_z
+    type = PresetBC
+    variable = z_disp
     boundary = front
-    function = '-1*y+0*z-z+if(t>0,0.5-y,0)' # note that this uses original nodal values of (x,y,z)
+    value = 1E-6
   [../]
 []
 
@@ -161,15 +158,16 @@
   [./mc]
     type = FiniteStrainWeakPlaneTensile
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    disp_x = x_disp
+    disp_y = y_disp
+    disp_z = z_disp
     wpt_tensile_strength = 1.0
+    wpt_tensile_strength_rate = -1
     yield_function_tolerance = 1E-6
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
     wpt_normal_vector = '0 0 1'
-    wpt_normal_rotates = true
+    wpt_normal_rotates = false
     ep_plastic_tolerance = 1E-5
     internal_constraint_tolerance = 1E-5
   [../]
@@ -177,7 +175,6 @@
 
 
 [Executioner]
-  start_time = -1
   end_time = 1
   dt = 1
   type = Transient
@@ -185,8 +182,9 @@
 
 
 [Outputs]
-  file_base = large_deform1
+  file_base = except2
   output_initial = true
+  exodus = true
   [./console]
     type = Console
     perf_log = true
@@ -194,10 +192,6 @@
   [../]
   [./csv]
     type = CSV
-    interval = 1
-  [../]
-  [./exodus]
-    type = Exodus
     interval = 1
   [../]
 []
