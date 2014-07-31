@@ -171,8 +171,8 @@
 
 
 #  petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = '201                hypre    boomeramg      4'
+  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter -pc_hypre_boomeramg_strong_threshold'
+  petsc_options_value = '201                hypre    boomeramg      4                            0.25'
 
 
   line_search = 'none'
