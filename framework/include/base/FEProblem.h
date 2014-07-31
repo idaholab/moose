@@ -788,6 +788,10 @@ public:
    */
   MaterialData * getBoundaryMaterialData(THREAD_ID tid) { return _bnd_material_data[tid]; }
 
+  /**
+   * Returns a short description of the active preconditioner
+   */
+  const std::string & getPreconditionerDescription() const { return _pc_description; }
 
 protected:
   /// Data names that will only be read from the restart file during RECOVERY
@@ -943,6 +947,9 @@ protected:
 
   /// Maximum number of quadrature points used in the problem
   unsigned int _max_qps;
+
+  /// Preconditioner description
+  std::string _pc_description;
 
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)
