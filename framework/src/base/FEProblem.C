@@ -3855,7 +3855,7 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
       if (petsc_options[i] == "-snes" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator")
         help_string = "Please set the solver type through \"solve_type\".";
       else if (petsc_options[i] == "-ksp_monitor")
-        help_string = "Please use \"Output/linear_residuals = true\"";
+        help_string = "Please use \"Outputs/console/type=Console Outputs/console/linear_residuals=true\"";
 
       if (help_string != "")
         mooseWarning("The PETSc option " << petsc_options[i] << " should not be used directly in a MOOSE input file. " << help_string);
