@@ -604,7 +604,7 @@ protected:
     _exception = e;                                                                     \
   }                                                                                     \
   {                                                                                     \
-    _communicator.max<MooseException>(_exception);                                          \
+    _communicator.max<MooseException>(_exception);                                      \
     if (_exception > 0)                                                                 \
       throw _exception;                                                                 \
   }
@@ -615,7 +615,7 @@ protected:
     _exception = e;                                                                     \
   }                                                                                     \
   {                                                                                     \
-    _communicator.max<MooseException>(_exception);                                          \
+    _communicator.max<MooseException>(_exception);                                      \
     if (_exception > 0)                                                                 \
       throw _exception;                                                                 \
   }

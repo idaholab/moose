@@ -721,7 +721,7 @@ protected:
   std::set<Node *> _semilocal_node_list;
 
   /**
-   * A range for use with TBB.  We do this so that it doesn't have
+   * A range for use with threading.  We do this so that it doesn't have
    * to get rebuilt all the time (which takes time).
    */
   ConstElemRange * _active_local_elem_range;

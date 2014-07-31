@@ -46,7 +46,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<std::string>("yaml", "--yaml", "Dumps input file syntax in YAML format.");
   params.addCommandLineParam<bool>("syntax", "--syntax", "Dumps the associated Action syntax paths ONLY");
 
-  params.addCommandLineParam<unsigned int>("n_threads", "--n-threads=<n>", 1, "Runs the specified number of threads (Intel TBB) per process");
+  params.addCommandLineParam<unsigned int>("n_threads", "--n-threads=<n>", 1, "Runs the specified number of threads per process");
 
   params.addCommandLineParam<bool>("warn_unused", "-w --warn-unused", "Warn about unused input file options");
   params.addCommandLineParam<bool>("error_unused", "-e --error-unused", "Error when encountering unused input file options");
