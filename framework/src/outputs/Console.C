@@ -694,8 +694,12 @@ Console::outputSystemInformation()
   if (time_stepper != "")
     oss << std::setw(_field_width) << "  TimeStepper: " << time_stepper << '\n';
 
-  oss << std::setw(_field_width) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(_problem_ptr->solverParams()._type) << "\n\n";
-  oss.flush();
+  oss << std::setw(_field_width) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(_problem_ptr->solverParams()._type) << '\n';
+
+  const std::string & pc_desc = _problem_ptr->getPreconditionerDescription();
+  if (!pc_desc.empty())
+    oss << std::setw(_field_width) << "  Preconditioner: " << pc_desc << '\n';
+  oss << '\n';
 
   // Output the information
   write(oss.str());
