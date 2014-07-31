@@ -10,7 +10,6 @@
     type = CSVDiff
     input = 'csv_transient.i'
     csvdiff = 'csv_transient_out.csv'
-    recover = false
   [../]
   [./transient_exodus]
     # Tests output of postprocessors and scalars to CSV files for transient propblems
@@ -18,6 +17,7 @@
     input = 'csv_transient.i'
     exodiff = 'csv_transient_out.e'
     cli_args = 'Outputs/csv=false Outputs/exodus=true'
+    prereq = transient
   [../]
 
   [./restart_part1]
