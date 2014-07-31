@@ -44,7 +44,8 @@ FiniteStrainPlasticBase::FiniteStrainPlasticBase(const std::string & name,
     _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
     _intnl(declareProperty<std::vector<Real> >("plastic_internal_parameter")),
     _intnl_old(declarePropertyOld<std::vector<Real> >("plastic_internal_parameter")),
-    _f(declareProperty<std::vector<Real> >("plastic_yield_function"))
+    _f(declareProperty<std::vector<Real> >("plastic_yield_function")),
+    _iter(declareProperty<unsigned int>("plastic_NR_iterations"))
 {
 }
 
@@ -86,6 +87,8 @@ FiniteStrainPlasticBase::initQpStatefulProperties()
 
   _f[_qp].assign(numberOfYieldFunctions(), 0);
 
+  _iter[_qp] = 0;
+
   if (_fspb_debug == 2 || _fspb_debug == 3)
     checkDerivatives();
 }
@@ -98,7 +101,7 @@ FiniteStrainPlasticBase::computeQpStress()
 
   preReturnMap();
 
-  returnMap(_stress_old[_qp], _plastic_strain_old[_qp], _intnl_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], _stress[_qp], _plastic_strain[_qp], _intnl[_qp], _f[_qp]);
+  returnMap(_stress_old[_qp], _plastic_strain_old[_qp], _intnl_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], _stress[_qp], _plastic_strain[_qp], _intnl[_qp], _f[_qp], _iter[_qp]);
 
   postReturnMap();
 
@@ -191,7 +194,7 @@ FiniteStrainPlasticBase::dhardPotential_dintnl(const RankTwoTensor & /*stress*/,
 }
 
 void
-FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankTwoTensor & plastic_strain_old, const std::vector<Real> & intnl_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & stress, RankTwoTensor & plastic_strain, std::vector<Real> & intnl, std::vector<Real> & f)
+FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankTwoTensor & plastic_strain_old, const std::vector<Real> & intnl_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & stress, RankTwoTensor & plastic_strain, std::vector<Real> & intnl, std::vector<Real> & f, unsigned int & iter)
 {
 
   // Assume this strain increment does not induce any plasticity
@@ -200,6 +203,7 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
   plastic_strain = plastic_strain_old;
   for (unsigned i = 0; i < intnl_old.size() ; ++i)
     intnl[i] = intnl_old[i];
+  iter = 0;
 
   yieldFunction(stress, intnl, f);
 
@@ -257,7 +261,6 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
 
 
   // The Newton-Raphson loops
-  unsigned int iter = 0;
   while (nr_res2 > 0.5 && iter < _max_iter)
   {
     iter++;

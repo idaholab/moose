@@ -168,7 +168,7 @@
   [./mc]
     type = FiniteStrainWeakPlaneTensile
     block = 0
-    tension_cutoff = 1E6
+    wpt_tensile_strength = 1E6
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
@@ -178,6 +178,7 @@
     wpt_normal_vector = '0 0 1'
     wpt_normal_rotates = true
     ep_plastic_tolerance = 1E-9
+    internal_constraint_tolerance = 1E-5
   [../]
 []
 
