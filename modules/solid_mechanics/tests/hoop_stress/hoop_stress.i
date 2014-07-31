@@ -326,8 +326,8 @@
 
 
   petsc_options = '-ksp_gmres_modifiedgramschmidt'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type  -pc_hypre_type'
-  petsc_options_value = '201                 hypre     boomeramg     '
+  petsc_options_iname = '-ksp_gmres_restart -pc_type  -pc_hypre_type -pc_hypre_boomeramg_strong_threshold'
+  petsc_options_value = '201                 hypre     boomeramg     0.25'
 
 
   line_search = 'none'

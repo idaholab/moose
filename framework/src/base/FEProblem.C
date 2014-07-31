@@ -3871,12 +3871,25 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
   if (petsc_options_inames.size() != petsc_options_values.size())
     mooseError("PETSc names and options are not the same length");
 
+  bool boomeramg_found = false;
+  bool strong_threshold_found = false;
+  _pc_description = "";
   for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
   {
     if (find(pn.begin(), pn.end(), petsc_options_inames[i]) == pn.end())
     {
       pn.push_back(petsc_options_inames[i]);
       pv.push_back(petsc_options_values[i]);
+
+      // Look for a pc description
+      if (petsc_options_inames[i] == "-pc_type" || petsc_options_inames[i] == "-pc_sub_type" || petsc_options_inames[i] == "-pc_hypre_type")
+        _pc_description += petsc_options_values[i] + ' ';
+
+      // This special case is common enough that we'd like to handle it for the user.
+      if (petsc_options_inames[i] == "-pc_hypre_type" && petsc_options_values[i] == "boomeramg")
+        boomeramg_found = true;
+      if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
+        strong_threshold_found = true;
     }
     else
     {
@@ -3884,6 +3897,15 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
         if (pn[j] == petsc_options_inames[i])
           pv[j] = petsc_options_values[i];
     }
+  }
+
+  // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold value
+  // We will provide that for the user here if they haven't supplied it themselves.
+  if (boomeramg_found && !strong_threshold_found && _mesh.dimension() == 3)
+  {
+    pn.push_back("-pc_hypre_boomeramg_strong_threshold");
+    pv.push_back("0.7");
+    _pc_description += "strong_threshold: 0.7 (auto)";
   }
 }
 #endif
