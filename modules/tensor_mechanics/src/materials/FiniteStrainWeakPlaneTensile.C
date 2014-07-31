@@ -6,7 +6,9 @@ template<>
 InputParameters validParams<FiniteStrainWeakPlaneTensile>()
 {
   InputParameters params = validParams<FiniteStrainPlasticBase>();
-  params.addRequiredRangeCheckedParam<Real>("tension_cutoff", "tension_cutoff>=0", "Weak plane Tension cutoff");
+  params.addRequiredRangeCheckedParam<Real>("wpt_tensile_strength", "wpt_tensile_strength>=0", "Weak plane tensile strength");
+  params.addParam<Real>("wpt_tensile_strength_residual", "Tenile strength at infinite hardening.  If not given, this defaults to wpt_tensile_strength, ie, perfect plasticity");
+  params.addRangeCheckedParam<Real>("wpt_tensile_strength_rate", 0, "wpt_tensile_strength_rate>=0", "Tensile strength = wpt_tensile_strenght_residual + (wpt_tensile_strength - wpt_tensile_strength_residual)*exp(-wpt_tensile_rate*plasticstrain).  Set to zero for perfect plasticity");
   params.addRequiredParam<RealVectorValue>("wpt_normal_vector", "The normal vector to the weak plane");
   params.addParam<bool>("wpt_normal_rotates", true, "The normal vector to the weak plane rotates with the large deformations");
   params.addClassDescription("Non-associative weak-plane tensile plasticity with no hardening");
@@ -17,14 +19,17 @@ InputParameters validParams<FiniteStrainWeakPlaneTensile>()
 FiniteStrainWeakPlaneTensile::FiniteStrainWeakPlaneTensile(const std::string & name,
                                                          InputParameters parameters) :
     FiniteStrainPlasticBase(name, parameters),
-    _tension_cutoff(getParam<Real>("tension_cutoff")),
+    _tension_cutoff(getParam<Real>("wpt_tensile_strength")),
+    _tension_cutoff_residual(parameters.isParamValid("wpt_tensile_strength_residual") ? getParam<Real>("wpt_tensile_strength_residual") : _tension_cutoff),
+    _tension_cutoff_rate(getParam<Real>("wpt_tensile_strength_rate")),
     _input_n(getParam<RealVectorValue>("wpt_normal_vector")),
     _normal_rotates(getParam<bool>("wpt_normal_rotates")),
 
     _n(declareProperty<RealVectorValue>("weak_plane_normal")),
     _n_old(declarePropertyOld<RealVectorValue>("weak_plane_normal")),
+    _wpt_internal(declareProperty<Real>("weak_plane_tensile_internal")),
+    _wpt_internal_old(declarePropertyOld<Real>("weak_plane_tensile_internal")),
     _yf(declareProperty<Real>("weak_plane_tensile_yield_function"))
-
 {
    if (_input_n.size() == 0)
      mooseError("Weak-plane normal vector must not have zero length");
@@ -36,6 +41,8 @@ void FiniteStrainWeakPlaneTensile::initQpStatefulProperties()
 {
   _n[_qp] = _input_n;
   _n_old[_qp] = _input_n;
+  _wpt_internal[_qp] = 0;
+  _wpt_internal_old[_qp] = 0;
   _yf[_qp] = 0.0;
   FiniteStrainPlasticBase::initQpStatefulProperties();
 }
@@ -80,13 +87,23 @@ FiniteStrainWeakPlaneTensile::postReturnMap()
 
   // Record the value of the yield function
   _yf[_qp] = _f[_qp][0];
+
+  // Record the value of the internal parameter
+  _wpt_internal[_qp] = _intnl[_qp][0];
 }
 
 
-void
-FiniteStrainWeakPlaneTensile::yieldFunction(const RankTwoTensor &stress, const std::vector<Real> & /*intnl*/, std::vector<Real> & f)
+
+unsigned int
+FiniteStrainWeakPlaneTensile::numberOfInternalParameters()
 {
-  f.assign(1, stress(2,2) - _tension_cutoff);
+  return 1;
+}
+
+void
+FiniteStrainWeakPlaneTensile::yieldFunction(const RankTwoTensor &stress, const std::vector<Real> & intnl, std::vector<Real> & f)
+{
+  f.assign(1, stress(2,2) - tensile_strength(intnl[0]));
 }
 
 void
@@ -94,6 +111,13 @@ FiniteStrainWeakPlaneTensile::dyieldFunction_dstress(const RankTwoTensor & /*str
 {
   df_dstress.assign(1, RankTwoTensor());
   df_dstress[0](2, 2) = 1.0;
+}
+
+void
+FiniteStrainWeakPlaneTensile::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, const std::vector<Real> & intnl, std::vector<std::vector<Real> > & df_dintnl)
+{
+  df_dintnl.resize(1);
+  df_dintnl[0].assign(1, - dtensile_strength(intnl[0]));
 }
 
 void
@@ -107,4 +131,46 @@ void
 FiniteStrainWeakPlaneTensile::dflowPotential_dstress(const RankTwoTensor & /*stress*/, const std::vector<Real> & /*intnl*/, std::vector<RankFourTensor> & dr_dstress)
 {
   dr_dstress.assign(1, RankFourTensor());
+}
+
+void
+FiniteStrainWeakPlaneTensile::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, const std::vector<Real> & /*intnl*/, std::vector<std::vector<RankTwoTensor> > & dr_dintnl)
+{
+  dr_dintnl.resize(1);
+  dr_dintnl[0].assign(1, RankTwoTensor());
+}
+
+void
+FiniteStrainWeakPlaneTensile::hardPotential(const RankTwoTensor & /*stress*/, const std::vector<Real> & /*intnl*/, std::vector<std::vector<Real> > & h)
+{
+  h.resize(1);
+  h[0].assign(1, -1.0);
+}
+
+void
+FiniteStrainWeakPlaneTensile::dhardPotential_dstress(const RankTwoTensor & /*stress*/, const std::vector<Real> & /*intnl*/, std::vector<std::vector<RankTwoTensor> > & dh_dstress)
+{
+  dh_dstress.resize(1);
+  dh_dstress[0].assign(1, RankTwoTensor());
+}
+
+void
+FiniteStrainWeakPlaneTensile::dhardPotential_dintnl(const RankTwoTensor & /*stress*/, const std::vector<Real> & /*intnl*/, std::vector<std::vector<std::vector<Real> > > & dh_dintnl)
+{
+  dh_dintnl.resize(1);
+  dh_dintnl[0].resize(1);
+  dh_dintnl[0][0].assign(1, 0.0);
+}
+
+
+Real
+FiniteStrainWeakPlaneTensile::tensile_strength(const Real internal_param)
+{
+  return _tension_cutoff_residual + (_tension_cutoff - _tension_cutoff_residual)*std::exp(-_tension_cutoff_rate*internal_param);
+}
+
+Real
+FiniteStrainWeakPlaneTensile::dtensile_strength(const Real internal_param)
+{
+  return -_tension_cutoff_rate*(_tension_cutoff - _tension_cutoff_residual)*std::exp(-_tension_cutoff_rate*internal_param);
 }

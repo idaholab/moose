@@ -2,7 +2,12 @@
   [./except1]
     type = 'RunException'
     input = 'except1.i'
-    expect_err = 'Range check failed for parameter Materials/mc/tension_cutoff'
+    expect_err = 'wpt_tensile_strength>=0'
+  [../]
+  [./except2]
+    type = 'RunException'
+    input = 'except2.i'
+    expect_err = 'wpt_tensile_strength_rate>=0'
   [../]
   [./small1]
     type = 'CSVDiff'
@@ -27,6 +32,25 @@
     input = 'large_deform2.i'
     exodiff = 'large_deform2.e'
     abs_zero = 1.0E-6
+  [../]
+
+  [./small_hard1]
+    type = 'CSVDiff'
+    input = 'small_deform_hard1.i'
+    csvdiff = 'small_deform_hard1.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./small_hard2]
+    type = 'CSVDiff'
+    input = 'small_deform_hard2.i'
+    csvdiff = 'small_deform_hard2.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./small_hard3]
+    type = 'CSVDiff'
+    input = 'small_deform_hard3.i'
+    csvdiff = 'small_deform_hard3.csv'
+    rel_err = 1.0E-5
   [../]
 
 []

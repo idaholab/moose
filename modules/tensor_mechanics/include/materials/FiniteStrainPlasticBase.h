@@ -70,6 +70,10 @@ protected:
   /// yield functions
   MaterialProperty<std::vector<Real> > & _f;
 
+  /// Number of Newton-Raphson iterations used in the return-map
+  MaterialProperty<unsigned int> & _iter;
+
+
 
   // *****************************************************************
   // *                                                               *
@@ -217,11 +221,12 @@ protected:
    * @param plastic_strain   (output) The value of plastic strain after returning to the yield surface
    * @param intnl    (output) The internal variables after returning to the yield surface
    * @param f  (output) The yield functions after returning to the yield surface
+   * @param iter (output) The number of Newton-Raphson iterations used
    * Note that this algorithm doesn't do any rotations.  In order to find the
    * final stress and plastic_strain must be rotated using _rotation_increment.
    * This is usually done in computeQpStress
    */
-  virtual void returnMap(const RankTwoTensor & stress_old, const RankTwoTensor & plastic_strain_old, const std::vector<Real> & intnl_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & stress, RankTwoTensor & plastic_strain, std::vector<Real> & intnl, std::vector<Real> & f);
+  virtual void returnMap(const RankTwoTensor & stress_old, const RankTwoTensor & plastic_strain_old, const std::vector<Real> & intnl_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & stress, RankTwoTensor & plastic_strain, std::vector<Real> & intnl, std::vector<Real> & f, unsigned int & iter);
 
   /**
    * Performs one Newton-Raphson step.  The purpose here is to find the
