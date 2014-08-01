@@ -1,4 +1,5 @@
 #include "RankFourTensor.h"
+#include "RankTwoTensor.h"
 
 // Any other includes here
 #include <vector>
