@@ -58,6 +58,7 @@ class TestHarness:
     self.moose_dir = moose_dir
     self.run_tests_dir = os.path.abspath('.')
     self.code = '2d2d6769726c2d6d6f6465'
+    self.error_code = 0x0
     # Assume libmesh is a peer directory to MOOSE if not defined
     if os.environ.has_key("LIBMESH_DIR"):
       self.libmesh_dir = os.environ['LIBMESH_DIR']
@@ -100,11 +101,11 @@ class TestHarness:
   Recursively walks the current tree looking for tests to run
   Error codes:
   0x0  - Success
-  0x0x - Parser error
-  0x1x - TestHarness error
+  0x0* - Parser error
+  0x1* - TestHarness error
   """
   def findAndRunTests(self):
-    error_code = 0x0
+    self.error_code = 0x0
     self.preRun()
     self.start_time = clock()
 
@@ -135,7 +136,7 @@ class TestHarness:
               parser = Parser(self.factory, warehouse)
 
               # Parse it
-              error_code = error_code | parser.parse(file)
+              self.error_code = self.error_code | parser.parse(file)
 
               # Retrieve the tests from the warehouse
               testers = warehouse.getAllObjects()
@@ -193,9 +194,9 @@ class TestHarness:
     self.cleanup()
 
     if self.num_failed:
-      error_code = error_code | 0x10
+      self.error_code = self.error_code | 0x10
 
-    sys.exit(error_code)
+    sys.exit(self.error_code)
 
   def prunePath(self, filename):
     test_dir = os.path.abspath(os.path.dirname(filename))
@@ -547,13 +548,17 @@ class TestHarness:
       summary = '<b>%d passed</b>'
     summary += ', <b>%d skipped</b>'
     if self.num_pending:
-      summary += ', <c>%d pending</c>, '
+      summary += ', <c>%d pending</c>'
     else:
-      summary += ', <b>%d pending</b>, '
+      summary += ', <b>%d pending</b>'
     if self.num_failed:
-      summary += '<r>%d FAILED</r>'
+      summary += ', <r>%d FAILED</r>'
     else:
-      summary += '<b>%d failed</b>'
+      summary += ', <b>%d failed</b>'
+
+    # Mask off TestHarness error codes to report parser errors
+    if self.error_code & 0x0F:
+      summary += ', <r>FATAL PARSER ERROR</r>'
 
     print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed), self.options, "", html=True )
     if self.options.pbs:
