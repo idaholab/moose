@@ -615,9 +615,14 @@ SolutionUserObject::directValue(dof_id_type dof_index) const
   return val;
 }
 
+Threads::spin_mutex solution_user_object_eval_mesh_function_spin_mutex;
+
 Real
 SolutionUserObject::evalMeshFunction(const Point & p, std::string var_name, unsigned int func_num) const
 {
+  // The populating of the DenseVector causes threading problems
+  Threads::spin_mutex::scoped_lock lock(solution_user_object_eval_mesh_function_spin_mutex);
+
   // Storage for mesh function output
   DenseVector<Number> output;
 
