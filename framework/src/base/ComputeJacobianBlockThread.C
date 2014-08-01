@@ -78,6 +78,8 @@ ComputeJacobianBlockThread::operator() (const ConstElemRange & range, bool bypas
         subdomain = cur_subdomain;
         _fe_problem.subdomainSetup(subdomain, _tid);
         _nl.updateActiveKernels(cur_subdomain, _tid);
+        if (_nl.doingDG())
+          _nl.updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt(), _tid);
       }
 
       _fe_problem.reinitMaterials(cur_subdomain, _tid);
