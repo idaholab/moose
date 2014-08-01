@@ -22,6 +22,9 @@
 #include <istream>
 #include <iterator>
 
+// External includes
+#include "pcrecpp.h"
+
 namespace MooseUtils
 {
 
@@ -140,9 +143,23 @@ parallelBarrierNotify(const Parallel::Communicator & comm)
 }
 
 bool
-hasExtension(const std::string & filename, std::string ext)
+hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ext)
 {
-  if (filename.substr(filename.find_last_of(".") + 1) == ext)
+  // Extract the extension, w/o the '.'
+  std::string file_ext;
+  if (strip_exodus_ext)
+  {
+    pcrecpp::RE re(".*\\.([^\\.]*?)(?:-s\\d+)?$"); // capture the complete extension, ignoring -s*
+    re.FullMatch(filename, &file_ext);
+  }
+  else
+  {
+    pcrecpp::RE re(".*\\.([^\\.]*)$"); // capture the complete extension
+    re.FullMatch(filename, &file_ext);
+  }
+
+  // Perform the comparision
+  if (file_ext == ext)
     return true;
   else
     return false;
