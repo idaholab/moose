@@ -406,7 +406,7 @@ SolutionUserObject::initialSetup()
   _mesh = new SerialMesh(_communicator);
 
   // ExodusII mesh file supplied
-  if (MooseUtils::hasExtension(_mesh_file, "e"))
+  if (MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/ true))
   {
     _file_type = "exodusII";
     readExodusII();

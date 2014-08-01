@@ -17,6 +17,12 @@
     exodiff = 'solution_aux_exodus_out.e'
   [../]
 
+  [./exodus_file_extension]
+    type = 'Exodiff'
+    input = 'solution_aux_exodus_file_extension.i'
+    exodiff = 'solution_aux_exodus_file_extension_out.e'
+  [../]
+
   [./exodus_elem_map]
     type = 'Exodiff'
     input = 'solution_aux_exodus_elem_map.i'
