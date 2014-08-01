@@ -19,7 +19,7 @@
 #include "cppunit/extensions/HelperMacros.h"
 
 // Moose includes
-#include "RankTwoEigenRoutines.h"
+#include "RankTwoTensor.h"
 
 class RankTwoEigenRoutinesTest : public CppUnit::TestFixture
 {
