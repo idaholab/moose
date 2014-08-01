@@ -19,7 +19,6 @@ InputParameters validParams<RichardsExcavFlow>()
 
 RichardsExcavFlow::RichardsExcavFlow(const std::string & name, InputParameters parameters) :
     SideIntegralVariablePostprocessor(name, parameters),
-    FunctionInterface(parameters),
 
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),

@@ -36,6 +36,7 @@ InputParameters validParams<UserObject>()
 UserObject::UserObject(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     SetupInterface(parameters),
+    FunctionInterface(parameters),
     Restartable(name, parameters, "UserObjects"),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
