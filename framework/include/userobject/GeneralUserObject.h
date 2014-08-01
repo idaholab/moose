@@ -17,7 +17,6 @@
 
 #include "UserObject.h"
 #include "TransientInterface.h"
-#include "FunctionInterface.h"
 #include "DependencyResolverInterface.h"
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
@@ -37,7 +36,6 @@ class GeneralUserObject :
   public UserObject,
   public MaterialPropertyInterface,
   public TransientInterface,
-  public FunctionInterface,
   public DependencyResolverInterface,
   public UserObjectInterface,
   protected PostprocessorInterface

@@ -8,7 +8,6 @@
 
 #include "SideIntegralVariablePostprocessor.h"
 #include "MaterialPropertyInterface.h"
-#include "FunctionInterface.h"
 #include "RichardsVarNames.h"
 
 //Forward Declarations
@@ -22,8 +21,7 @@ InputParameters validParams<RichardsExcavFlow>();
  * Records total mass flow into an excavation defined by a RichardsExcavGeom function
  */
 class RichardsExcavFlow :
-public SideIntegralVariablePostprocessor,
-public FunctionInterface
+  public SideIntegralVariablePostprocessor
 {
 public:
   RichardsExcavFlow(const std::string & name, InputParameters parameters);

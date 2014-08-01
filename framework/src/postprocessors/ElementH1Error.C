@@ -25,7 +25,6 @@ InputParameters validParams<ElementH1Error>()
 
 ElementH1Error::ElementH1Error(const std::string & name, InputParameters parameters) :
     ElementIntegralVariablePostprocessor(name, parameters),
-    FunctionInterface(parameters),
     _func(getFunction("function"))
 {
 }

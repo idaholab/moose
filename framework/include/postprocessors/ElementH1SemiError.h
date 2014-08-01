@@ -16,7 +16,6 @@
 #define ELEMENTH1SEMIERROR_H
 
 #include "ElementIntegralVariablePostprocessor.h"
-#include "FunctionInterface.h"
 
 class Function;
 
@@ -32,8 +31,7 @@ InputParameters validParams<ElementH1SemiError>();
  * ||u,f||h1 is computed as sqrt( (grad u - grad f) * (grad u - grad f) )
  */
 class ElementH1SemiError :
-  public ElementIntegralVariablePostprocessor,
-  public FunctionInterface
+  public ElementIntegralVariablePostprocessor
 {
 public:
   ElementH1SemiError(const std::string & name, InputParameters parameters);

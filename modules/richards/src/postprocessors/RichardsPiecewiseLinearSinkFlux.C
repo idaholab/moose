@@ -24,7 +24,6 @@ InputParameters validParams<RichardsPiecewiseLinearSinkFlux>()
 
 RichardsPiecewiseLinearSinkFlux::RichardsPiecewiseLinearSinkFlux(const std::string & name, InputParameters parameters) :
     SideIntegralVariablePostprocessor(name, parameters),
-    FunctionInterface(parameters),
     _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("bare_fluxes")),
 
     _use_mobility(getParam<bool>("use_mobility")),
