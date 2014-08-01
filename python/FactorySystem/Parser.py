@@ -19,19 +19,19 @@ class Parser:
   """
   Parse the passed filename filling the warehouse with populated InputParameter objects
   Error codes:
-    0x0 - Success
-    0x1 - pyGetpot parsing error
-    0x2 - Unrecogonized Boolean key/value pair
-    0x4 - Missing required parameter
+    0x00 - Success
+    0x01 - pyGetpot parsing error
+    0x02 - Unrecogonized Boolean key/value pair
+    0x04 - Missing required parameter
   """
   def parse(self, filename):
-    error_code = 0x0
+    error_code = 0x00
 
     try:
       root = ParseGetPot.readInputFile(filename)
     except:
       print "Parse Error: " + filename
-      return 0x1 # Parse Error
+      return 0x01 # Parse Error
 
     error_code = self._parseNode(filename, root)
 
@@ -42,7 +42,7 @@ class Parser:
     return error_code
 
   def extractParams(self, filename, params, getpot_node):
-    error_code = 0x0
+    error_code = 0x00
     full_name = getpot_node.fullName()
 
     # Populate all of the parameters of this test node
@@ -69,7 +69,7 @@ class Parser:
                 params[key] = False
               else:
                 print "Unrecognized (key,value) pair: (", key, ',', value, ")"
-                return 0x2
+                return 0x02
 
               # Otherwise, just do normal assignment
             else:
@@ -82,13 +82,13 @@ class Parser:
     if len(required_params_missing):
       print 'Error detected when parsing file "' + os.path.join(os.getcwd(), filename) + '"'
       print '       Required Missing Parameter(s): ', required_params_missing
-      error_code = 0x4 # Missing required params
+      error_code = 0x04 # Missing required params
 
     return error_code
 
   # private:
   def _parseNode(self, filename, node):
-    error_code = 0x0
+    error_code = 0x00
 
     if 'type' in node.params:
       moose_type = node.params['type']
