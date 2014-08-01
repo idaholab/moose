@@ -1,10 +1,11 @@
 #ifndef RANKFOURTENSOR_H
 #define RANKFOURTENSOR_H
 
-// Modules includes
-#include "RankTwoTensor.h"
+// Forward declaration of RankTwoTensor
+class RankTwoTensor;
 
 // MOOSE includes
+#include "Moose.h"
 #include "PermutationTensor.h"
 #include "MooseEnum.h"
 
