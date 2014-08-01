@@ -25,6 +25,18 @@
     min_threads = 2
   [../]
 
+  # Parallel Mesh Tests
+  # AuxKernel Tests
+  [./test_par_mesh]
+    type = 'Exodiff'
+    input = 'random.i'
+    exodiff = 'parallel_mesh_out.e'
+    min_parallel = 2
+    max_parallel = 2
+    cli_args = 'Mesh/distribution=PARALLEL Outputs/file_base=parallel_mesh_out'
+    prereq = 'threads_verification'
+  [../]
+
   # User Object Tests
   [./test_uo]
     type = 'Exodiff'
@@ -50,18 +62,6 @@
     min_threads = 2
   [../]
 
-  # Parallel Mesh Tests
-  # AuxKernel Tests
-  [./test_par_mesh]
-    type = 'Exodiff'
-    input = 'random.i'
-    exodiff = 'parallel_mesh_out.e'
-    min_parallel = 2
-    max_parallel = 2
-    cli_args = 'Mesh/distribution=PARALLEL Outputs/file_base=parallel_mesh_out'
-    prereq = 'test'
-  [../]
-
   # User Object Tests
   [./test_uo_par_mesh]
     type = 'Exodiff'
@@ -70,6 +70,6 @@
     min_parallel = 2
     max_parallel = 2
     cli_args = 'Mesh/distribution=PARALLEL Outputs/file_base=parallel_mesh_uo_out'
-    prereq = 'test'
+    prereq = 'threads_verification_uo'
   [../]
 []
