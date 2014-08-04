@@ -18,6 +18,9 @@
 // MOOSE includes
 #include "Function.h"
 
+// libmesh includes
+#include "libmesh/mesh_tools.h"
+
 // VTK includes
 #ifdef LIBMESH_HAVE_VTK
 #include "vtkSmartPointer.h"
@@ -30,6 +33,7 @@
 #include "vtkImageCast.h"
 #include "vtkImageShiftScale.h"
 #include "vtkImageMagnitude.h"
+#include "vtkImageFlip.h"
 #endif
 
 // Forward declarations
@@ -88,6 +92,13 @@ protected:
    */
   void vtkMagnitude();
 
+  /**
+   * Perform image flipping
+   *
+   * Flip the image along the x, y, and/or z axis. If multiple flips occur, they happen in order.
+   */
+  void vtkFlip();
+
 #ifdef LIBMESH_HAVE_VTK
 
   /// List of file names to extract data
@@ -107,6 +118,13 @@ protected:
 
   /// Pointer to the magnitude filter
   vtkSmartPointer<vtkImageMagnitude> _magnitude_filter;
+
+  ///@{
+  /// Pointers to image flipping filters
+  vtkSmartPointer<vtkImageFlip> _flip_filter_x;
+  vtkSmartPointer<vtkImageFlip> _flip_filter_y;
+  vtkSmartPointer<vtkImageFlip> _flip_filter_z;
+  ///@}
 #endif
 
 private:
@@ -127,6 +145,15 @@ private:
    */
   void getFiles();
 
+  /**
+   * Helper method for flipping image
+   * @param axis Flag for determing the flip axis: "x=0", "y=1", "z=2"
+   * @return A smart pointer the flipping filter
+   */
+#ifdef LIBMESH_HAVE_VTK
+  vtkSmartPointer<vtkImageFlip> imageFlip(const int & axis);
+#endif
+
   /// File base name
   FileName _file_base;
 
@@ -137,19 +164,22 @@ private:
   std::vector<unsigned int> _file_range;
 
   /// Origin of image
-  std::vector<Real> _origin;
+  Point _origin;
 
   /// Pixel dimension of image
   std::vector<int> _dims;
 
   /// Physical dimensions of image
-  std::vector<Real> _physical_dims;
+  Point _physical_dims;
 
   /// Physical pixel size
   std::vector<double> _voxel;
 
   /// Component to extract
   unsigned int _component;
+
+  /// Bounding box for testing points
+  MeshTools::BoundingBox  _bounding_box;
 
 };
 
@@ -167,16 +197,19 @@ ImageFunction::readImages()
   _image->Update();
   _data = _image->GetOutput();
 
-  // Set the image dimensions member variable
+  // Set the image dimensions and voxel size member variable
   int * dims = _data->GetDimensions();
-  _dims.push_back(dims[0]);
-  _dims.push_back(dims[1]);
-  _dims.push_back(dims[2]);
+  for (unsigned int i = 0; i < 3; ++i)
+  {
+    _dims.push_back(dims[i]);
+    _voxel.push_back(_physical_dims(i)/_dims[i]);
+  }
 
-  // Set the voxel size
-  _voxel.push_back((_physical_dims[0] - _origin[0])/_dims[0]);
-  _voxel.push_back((_physical_dims[1] - _origin[1])/_dims[1]);
-  _voxel.push_back((_physical_dims[2] - _origin[2])/_dims[2]);
+  // Set the dimensions of the image and bounding box
+  _data->SetSpacing(_voxel[0], _voxel[1], _voxel[2]);
+  _data->SetOrigin(_origin(0), _origin(0), _origin(0));
+  _bounding_box.min() = _origin;
+  _bounding_box.max() = _origin + _physical_dims;
 
   // Indicate data read is completed
   _console << "          ...image read finished" << std::endl;

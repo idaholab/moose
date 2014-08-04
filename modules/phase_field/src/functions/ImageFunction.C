@@ -31,8 +31,8 @@ InputParameters validParams<ImageFunction>()
   params.addParam<FileName>("file_base", "Image file base to open, use this option when a stack of images must be read (ignord if 'file' is given)");
   params.addParam<MooseEnum>("file_type", type, "Image file type, use this to specify the type of file for an image stack (use with 'file_base'; ignored if 'file' is given)");
   params.addParam<std::vector<unsigned int> >("file_range", "Range of images to analyze, used with 'file_base' (ignored if 'file' is given)");
-  params.addParam<std::vector<Real> >("origin", "Origin of the image (defualts to mesh origin)");
-  params.addParam<std::vector<Real> >("dimensions", "x,y,z dimensions of the image (defaults to mesh dimensions)");
+  params.addParam<Point>("origin", "Origin of the image (defualts to mesh origin)");
+  params.addParam<Point>("dimensions", "x,y,z dimensions of the image (defaults to mesh dimensions)");
   params.addParam<unsigned int>("component", "The image component to return, leaving this blank will result in a greyscale value for the image to be created. The component number is zero based, i.e. 0 returns the first component of the image");
 
   // Shift and Scale (application of these occurs prior to threshold)
@@ -46,6 +46,12 @@ InputParameters validParams<ImageFunction>()
   params.addParam<double>("lower_value", "The value to set for data less than the threshold value");
   params.addParamNamesToGroup("threshold upper_value lower_value", "Threshold");
 
+  // Flip image
+  params.addParam<bool>("flip_x", false, "Flip the image along the x-axis");
+  params.addParam<bool>("flip_y", false, "Flip the image along the y-axis");
+  params.addParam<bool>("flip_z", false, "Flip the image along the z-axis");
+  params.addParamNamesToGroup("flip_x flip_y flip_z", "Flip");
+
   return params;
 }
 
@@ -55,8 +61,7 @@ ImageFunction::ImageFunction(const std::string & name, InputParameters parameter
     _data(NULL),
 #endif
     _file_base(getParam<FileName>("file_base")),
-    _file_type(getParam<MooseEnum>("file_type")),
-    _origin(getParam<std::vector<Real> >("origin"))
+    _file_type(getParam<MooseEnum>("file_type"))
 {
 #ifndef LIBMESH_HAVE_VTK
   // This should be impossible to reach, the registration of ImageFunction is also guarded with LIBMESH_HAVE_VTK
@@ -94,10 +99,11 @@ ImageFunction::initialSetup()
   else
     _component = 0;
 
-  // Apply filters (only applied if appropriate, this is handled internally by each method)
+  // Apply filters, the toggling on and off of each filter is handled internally
   vtkMagnitude();
   vtkShiftAndScale();
   vtkThreshold();
+  vtkFlip();
 #endif
 }
 
@@ -109,21 +115,32 @@ Real
 ImageFunction::value(Real /*t*/, const Point & p)
 {
 #ifdef LIBMESH_HAVE_VTK
-  // Compute the pixel coordinates
-  int x = std::floor(p(0)/_voxel[0]);
-  int y = std::floor(p(1)/_voxel[1]);
-  int z = std::floor(p(2)/_voxel[2]);
 
-  // If the point falls on the mesh extents the index needs to be decreased by one
-  if (x == _dims[0])
-    x--;
-  if (y == _dims[1])
-    y--;
-  if (z == _dims[2])
-    z--;
+  // Do nothing if the point is outside of the image domain
+  if (!_bounding_box.contains_point(p))
+    return 0.0;
+
+  // Deterimine pixel coordinates
+  std::vector<int> x(3,0);
+  for (int i = 0; i < LIBMESH_DIM; ++i)
+  {
+    // Compute position, only if voxel size is greater than zero
+    if (_voxel[i] == 0)
+      x[i] = 0;
+
+    else
+    {
+      x[i] = std::floor((p(i) - _origin(i))/_voxel[i]);
+
+      // If the point falls on the mesh extents the index needs to be decreased by one
+      if (x[i] == _dims[i])
+        x[i]--;
+    }
+  }
 
   // Return the image data at the given point
-  return _data->GetScalarComponentAsDouble(x, y, z, _component);
+  return _data->GetScalarComponentAsDouble(x[0], x[1], x[2], _component);
+
 #else
   libmesh_ignore(p); // avoid un-used parameter warnings
   return 0.0;
@@ -140,24 +157,32 @@ ImageFunction::initImageData()
 
   // Set the dimensions from the Mesh if not set by the User
   if (isParamValid("dimensions"))
-    _physical_dims = getParam<std::vector<Real> >("dimensions");
+    _physical_dims = getParam<Point>("dimensions");
 
   else
   {
-    _physical_dims.push_back(mesh.getParam<Real>("xmax") - mesh.getParam<Real>("xmin"));
-    _physical_dims.push_back(mesh.getParam<Real>("ymax") - mesh.getParam<Real>("ymin"));
-    _physical_dims.push_back(mesh.getParam<Real>("zmax") - mesh.getParam<Real>("zmin"));
+    _physical_dims(0) = mesh.getParam<Real>("xmax") - mesh.getParam<Real>("xmin");
+#if LIBMESH_DIM > 1
+    _physical_dims(1) = mesh.getParam<Real>("ymax") - mesh.getParam<Real>("ymin");
+#endif
+#if LIBMESH_DIM > 2
+    _physical_dims(2) = mesh.getParam<Real>("zmax") - mesh.getParam<Real>("zmin");
+#endif
   }
 
   // Set the origin from the Mesh if not set in the input file
   if (isParamValid("origin"))
-    _origin = getParam<std::vector<Real> >("origin");
+    _origin = getParam<Point>("origin");
 
   else
   {
-    _origin.push_back(mesh.getParam<Real>("xmin"));
-    _origin.push_back(mesh.getParam<Real>("ymin"));
-    _origin.push_back(mesh.getParam<Real>("zmin"));
+    _origin(0) = mesh.getParam<Real>("xmin");
+#if LIBMESH_DIM > 1
+    _origin(1) = mesh.getParam<Real>("ymin");
+#endif
+#if LIBMESH_DIM > 2
+    _origin(2) = mesh.getParam<Real>("zmin");
+#endif
   }
 
   // Check the file range and do some error checking
@@ -242,7 +267,7 @@ void
 ImageFunction::vtkMagnitude()
 {
 #ifdef LIBMESH_HAVE_VTK
-  // Do nothing if component is set
+  // Do nothing if 'component' is set
   if (isParamValid("component"))
     return;
 
@@ -263,13 +288,14 @@ void
 ImageFunction::vtkShiftAndScale()
 {
 #ifdef LIBMESH_HAVE_VTK
-  // Extract the parameters
+  // Capture the parameters
   double shift = getParam<double>("shift");
   double scale = getParam<double>("scale");
 
-  // Do nothing if shift and scale are not set beyond defaults
-  if (shift == 0 && scale == 1)
+  // Do nothing if shift and scale are not set
+  if (shift == 0 || scale == 1)
     return;
+
 
   // Perform the scaling and offset actions
   _shift_scale_filter = vtkSmartPointer<vtkImageShiftScale>::New();
@@ -291,7 +317,7 @@ void
 ImageFunction::vtkThreshold()
 {
 #ifdef LIBMESH_HAVE_VTK
-  // Do nothing if the threshold parameter is not set
+  // Do nothing if threshold not set
   if (!isParamValid("threshold"))
     return;
 
@@ -322,3 +348,52 @@ ImageFunction::vtkThreshold()
   _data = _image_threshold->GetOutput();
 #endif
 }
+
+void
+ImageFunction::vtkFlip()
+{
+#ifdef LIBMESH_HAVE_VTK
+  // x-axis
+  if (getParam<bool>("flip_x"))
+  {
+    _flip_filter_x = imageFlip(0);
+    _data = _flip_filter_x->GetOutput();
+  }
+
+  // y-axis
+  if (getParam<bool>("flip_y"))
+  {
+    _flip_filter_y = imageFlip(1);
+    _data = _flip_filter_y->GetOutput();
+  }
+
+  // z-axis
+  if (getParam<bool>("flip_z"))
+  {
+    _flip_filter_z = imageFlip(2);
+    _data = _flip_filter_z->GetOutput();
+  }
+#endif
+}
+
+#ifdef LIBMESH_HAVE_VTK
+vtkSmartPointer<vtkImageFlip>
+ImageFunction::imageFlip(const int & axis)
+{
+  vtkSmartPointer<vtkImageFlip> flip_image = vtkSmartPointer<vtkImageFlip>::New();
+
+  // Set the data source
+#if VTK_MAJOR_VERSION < 6
+  flip_image->SetInput(_data);
+#else
+  flip_image->SetInputData(_data);
+#endif
+
+  // Perform the flip
+  flip_image->SetFilteredAxis(axis);
+  flip_image->Update();
+
+  // Return the flip filter pointer
+  return flip_image;
+}
+#endif
