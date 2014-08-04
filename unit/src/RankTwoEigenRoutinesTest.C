@@ -204,3 +204,26 @@ RankTwoEigenRoutinesTest::d2symmetricEigenvaluesTest2()
           }
       }
 }
+
+
+void
+RankTwoEigenRoutinesTest::someIdentitiesTest()
+{
+  // checks identities that should hold if eigenvalues
+  // and invariants are correctly calculated
+  std::vector<Real> eigvals;
+  _m3.symmetricEigenvalues(eigvals);
+
+  Real mean = _m3.trace()/3.0;
+  Real secondInvariant = _m3.secondInvariant();
+  Real shear = std::sqrt(secondInvariant);
+  Real thirdInvariant = _m3.thirdInvariant();
+
+  Real lode = std::asin(-1.5*std::sqrt(3.0)*thirdInvariant/std::pow(shear, 3.0))/3.0;
+
+  Real two_pi_over_3 = 2.09439510239;
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(eigvals[0], 2*shear*std::sin(lode - two_pi_over_3)/std::sqrt(3.0) + mean, 0.0001);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(eigvals[1], 2*shear*std::sin(lode)/std::sqrt(3.0) + mean, 0.0001);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(eigvals[2], 2*shear*std::sin(lode + two_pi_over_3)/std::sqrt(3.0) + mean, 0.0001);
+
+}

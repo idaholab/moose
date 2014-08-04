@@ -31,6 +31,8 @@ class RankTwoEigenRoutinesTest : public CppUnit::TestFixture
   CPPUNIT_TEST( d2symmetricEigenvaluesTest1 );
   CPPUNIT_TEST( d2symmetricEigenvaluesTest2 );
 
+  CPPUNIT_TEST( someIdentitiesTest );
+
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -41,6 +43,8 @@ public:
   void dsymmetricEigenvaluesTest();
   void d2symmetricEigenvaluesTest1();
   void d2symmetricEigenvaluesTest2();
+
+  void someIdentitiesTest();
 
  private:
   RankTwoTensor _m0;

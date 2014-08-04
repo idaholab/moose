@@ -2,6 +2,7 @@
 #define RANKTWOTENSOR_H
 
 #include "Moose.h"
+#include "PermutationTensor.h"
 
 #include "RankFourTensor.h"
 
@@ -144,23 +145,30 @@ public:
   /// returns _vals_ij * a_ij (sum on i, j)
   Real doubleContraction(const RankTwoTensor & a);
 
-  /**
-   * Denote the _vals[i][j] by A_ij, then
-   * S_ij = A_ij - de_ij*tr(A)/3
-   * Then this returns S_ij*S_ij/2
-   */
-  Real secondInvariant() const;
 
 
   /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
   RankTwoTensor deviatoric() const;
 
 
+  /// returns the trace of the tensor, ie _vals[i][i] (sum i = 0, 1, 2)
+  Real trace() const;
+
   /**
    * Denote the _vals[i][j] by A_ij, then this returns
    * d(trace)/dA_ij
    */
   RankTwoTensor dtrace() const;
+
+
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then
+   * S_ij = A_ij - de_ij*tr(A)/3
+   * Then this returns (S_ij + S_ji)*(S_ij + S_ji)/8
+   * Note the explicit symmeterisation
+   */
+  Real secondInvariant() const;
 
   /**
    * Denote the _vals[i][j] by A_ij, then this returns
@@ -170,16 +178,41 @@ public:
 
   /**
    * Denote the _vals[i][j] by A_ij, then this returns
+   * d^2(secondInvariant)/dA_ij/dA_kl
+   */
+  RankFourTensor d2secondInvariant() const;
+
+
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then
+   * S_ij = A_ij - de_ij*tr(A)/3
+   * Then this returns det(S + S.transpose())/2
+   * Note the explicit symmeterisation
+   */
+  Real thirdInvariant() const;
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then
+   * this returns d(thirdInvariant()/dA_ij
+   */
+  RankTwoTensor dthirdInvariant() const;
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then this returns
+   * d^2(thirdInvariant)/dA_ij/dA_kl
+   */
+  RankFourTensor d2thirdInvariant() const;
+
+  /// Calculate the determinant of the tensor
+  Real det() const;
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then this returns
    * d(det)/dA_ij
    */
   RankTwoTensor ddet() const;
 
-
-  /// returns the trace of the tensor, ie _vals[i][i] (sum i = 0, 1, 2)
-  Real trace() const;
-
-  /// Calculate the determinant of the tensor
-  Real det() const;
 
   /// Calculate the inverse of the tensor
   RankTwoTensor inverse() const;

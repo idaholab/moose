@@ -30,15 +30,19 @@ class RankTwoTensorTest : public CppUnit::TestFixture
   CPPUNIT_TEST( addIaTest );
   CPPUNIT_TEST( transposeTest );
   CPPUNIT_TEST( doubleContractionTest );
-  CPPUNIT_TEST( traceTest );
   CPPUNIT_TEST( rotateTest );
-  CPPUNIT_TEST( secondInvariantTest );
-  CPPUNIT_TEST( detTest );
   CPPUNIT_TEST( deviatoricTest );
-  CPPUNIT_TEST( inverseTest );
+  CPPUNIT_TEST( traceTest );
   CPPUNIT_TEST( dtraceTest );
+  CPPUNIT_TEST( secondInvariantTest );
   CPPUNIT_TEST( dsecondInvariantTest );
+  CPPUNIT_TEST( d2secondInvariantTest );
+  CPPUNIT_TEST( thirdInvariantTest );
+  CPPUNIT_TEST( dthirdInvariantTest );
+  CPPUNIT_TEST( d2thirdInvariantTest );
+  CPPUNIT_TEST( detTest );
   CPPUNIT_TEST( ddetTest );
+  CPPUNIT_TEST( inverseTest );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -51,14 +55,18 @@ public:
   void transposeTest();
   void doubleContractionTest();
   void rotateTest();
-  void traceTest();
-  void secondInvariantTest();
-  void detTest();
   void deviatoricTest();
-  void inverseTest();
+  void traceTest();
   void dtraceTest();
+  void secondInvariantTest();
   void dsecondInvariantTest();
+  void d2secondInvariantTest();
+  void thirdInvariantTest();
+  void dthirdInvariantTest();
+  void d2thirdInvariantTest();
+  void detTest();
   void ddetTest();
+  void inverseTest();
 
  private:
   RankTwoTensor _m0;
