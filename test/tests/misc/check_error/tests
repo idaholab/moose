@@ -300,6 +300,12 @@
     # error on newer versions of PETSc.
   [../]
 
+  [./nan_no_trap_fpe_test]
+    type = 'RunApp'
+    input = 'nan_test.i'
+    cli_args = '--no-trap-fpe'
+  [../]
+
   [./nan_test_transient]
     type = 'RunException'
     input = 'nan_test_transient.i'

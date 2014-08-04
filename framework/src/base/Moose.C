@@ -967,12 +967,8 @@ swapLibMeshComm(MPI_Comm new_comm)
 void
 enableFPE(bool on)
 {
-#ifdef DEBUG
-  libMesh::enableFPE(on);
-#else
-  if (__trap_fpe)
+  if (_trap_fpe)
     libMesh::enableFPE(on);
-#endif
 }
 
 // Currently there are 6 exec types (See Moose.h)
@@ -993,8 +989,12 @@ const std::vector<ExecFlagType> exec_types = populateExecTypes();
 
 PerfLog setup_perf_log("Setup");
 
-bool __trap_fpe = false;
+#ifdef DEBUG
+bool _trap_fpe = true;
+#else
+bool _trap_fpe = false;
+#endif
 
-bool __color_console = true;
+bool _color_console = true;
 
 } // namespace Moose
