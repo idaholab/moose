@@ -61,6 +61,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("half_transient", "--half-transient", "When true the simulation will only run half of its specified transient (ie half the timesteps).  This is useful for testing recovery and restart");
 
   params.addCommandLineParam<bool>("trap_fpe", "--trap-fpe", "Enable Floating Point Exception handling in critical sections of code.  This is enabled automatically in DEBUG mode");
+  params.addCommandLineParam<bool>("no_trap_fpe", "--no-trap-fpe", "Disable Floating Point Exception handling in critical sections of code when using DEBUG mode.");
 
   params.addCommandLineParam<bool>("timing", "-t --timing", "Enable all performance logging for timing purposes. This will disable all screen output of performance logs for all Console objects.");
 
@@ -155,7 +156,7 @@ MooseApp::setupOptions()
     _half_transient = true;
 
   if (isParamValid("no_color"))
-    Moose::__color_console = false;
+    Moose::_color_console = false;
 
   // Set the timing parameter (see src/outputs/Console.C)
   if (isParamValid("timing"))
@@ -163,9 +164,16 @@ MooseApp::setupOptions()
   else
     _pars.set<bool>("timing") = false;
 
+  if (isParamValid("trap_fpe") && isParamValid("no_trap_fpe"))
+    mooseError("Cannot use both \"--trap-fpe\" and \"--no-trap-fpe\" flags.");
+
   if (isParamValid("trap_fpe"))
     // Setting Global Variable
-    Moose::__trap_fpe = true;
+    Moose::_trap_fpe = true;
+
+  if (isParamValid("no_trap_fpe"))
+    // Setting Global Variable
+    Moose::_trap_fpe = false;
 
   if (isParamValid("help"))
   {

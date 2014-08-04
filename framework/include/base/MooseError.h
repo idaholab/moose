@@ -27,10 +27,10 @@
   do                                                                                \
   {                                                                                 \
     Moose::err << "\n\n"                                                            \
-               << (Moose::__color_console ? RED : "")                               \
+               << (Moose::_color_console ? RED : "")                                \
                << "\n\n*** ERROR ***\n"                                             \
                << msg                                                               \
-               << (Moose::__color_console ? DEFAULT : "")                           \
+               << (Moose::_color_console ? DEFAULT : "")                            \
                << "\n\n";                                                           \
     if (libMesh::global_n_processors() == 1)                                        \
       print_trace();                                                                \
@@ -48,12 +48,12 @@
     if (!(asserted))                                                                \
     {                                                                               \
       Moose::err                                                                    \
-        << (Moose::__color_console ? RED : "")                                      \
+        << (Moose::_color_console ? RED : "")                                       \
         << "\n\nAssertion `" #asserted "' failed\n"                                 \
         << msg                                                                      \
         << "\nat "                                                                  \
         << __FILE__ << ", line " << __LINE__                                        \
-        << (Moose::__color_console ? DEFAULT : "")                                  \
+        << (Moose::_color_console ? DEFAULT : "")                                   \
         << std::endl;                                                               \
      if (libMesh::global_n_processors() == 1)                                       \
        print_trace();                                                               \
@@ -68,11 +68,11 @@
   do                                                                                \
   {                                                                                 \
     Moose::out                                                                      \
-      << (Moose::__color_console ? YELLOW : "")                                     \
+      << (Moose::_color_console ? YELLOW : "")                                      \
       << "\n\n*** Warning ***\n"                                                    \
       << msg                                                                        \
       << "\nat " << __FILE__ << ", line " << __LINE__                               \
-      << (Moose::__color_console ? DEFAULT : "")                                    \
+      << (Moose::_color_console ? DEFAULT : "")                                     \
       << "\n"                                                                       \
       << std::endl;                                                                 \
   } while (0)
@@ -82,11 +82,11 @@
 #define mooseDeprecated()                                                                              \
     mooseDoOnce(                                                                                       \
       Moose::out                                                                                       \
-      << (Moose::__color_console ? YELLOW : "")                                                        \
+      << (Moose::_color_console ? YELLOW : "")                                                         \
       << "*** Warning, This code is deprecated, and likely to be removed in future library versions! " \
       << __FILE__ << ", line " << __LINE__ << ", compiled "                                            \
       << __DATE__ << " at " << __TIME__ << " ***"                                                      \
-      << (Moose::__color_console ? DEFAULT : "")                                                       \
+      << (Moose::_color_console ? DEFAULT : "")                                                        \
       << std::endl;                                                                                    \
       )
 

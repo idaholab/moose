@@ -86,12 +86,12 @@ extern PerfLog setup_perf_log;
 /**
  * Variable indicating whether we will enable FPE trapping for this run.
  */
-extern bool __trap_fpe;
+extern bool _trap_fpe;
 
 /**
  * Variable indicating whether Console coloring will be turned on (default: true).
  */
-extern bool __color_console;
+extern bool _color_console;
 
 /**
  * A static list of all the exec types.
@@ -101,15 +101,15 @@ extern const std::vector<ExecFlagType> exec_types;
 /**
  * Macros for coloring any output stream (_console, std::ostringstream, etc.)
  */
-#define COLOR_BLACK   (Moose::__color_console ? BLACK : "")
-#define COLOR_RED     (Moose::__color_console ? RED : "")
-#define COLOR_GREEN   (Moose::__color_console ? GREEN : "")
-#define COLOR_YELLOW  (Moose::__color_console ? YELLOW : "")
-#define COLOR_BLUE    (Moose::__color_console ? BLUE : "")
-#define COLOR_MAGENTA (Moose::__color_console ? MAGENTA : "")
-#define COLOR_CYAN    (Moose::__color_console ? CYAN : "")
-#define COLOR_WHITE   (Moose::__color_console ? WHITE : "")
-#define COLOR_DEFAULT (Moose::__color_console ? DEFAULT : "")
+#define COLOR_BLACK   (Moose::_color_console ? BLACK : "")
+#define COLOR_RED     (Moose::_color_console ? RED : "")
+#define COLOR_GREEN   (Moose::_color_console ? GREEN : "")
+#define COLOR_YELLOW  (Moose::_color_console ? YELLOW : "")
+#define COLOR_BLUE    (Moose::_color_console ? BLUE : "")
+#define COLOR_MAGENTA (Moose::_color_console ? MAGENTA : "")
+#define COLOR_CYAN    (Moose::_color_console ? CYAN : "")
+#define COLOR_WHITE   (Moose::_color_console ? WHITE : "")
+#define COLOR_DEFAULT (Moose::_color_console ? DEFAULT : "")
 
 /**
  * Import libMesh::out, and libMesh::err for use in MOOSE.
