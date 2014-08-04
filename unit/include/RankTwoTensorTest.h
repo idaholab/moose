@@ -40,6 +40,9 @@ class RankTwoTensorTest : public CppUnit::TestFixture
   CPPUNIT_TEST( thirdInvariantTest );
   CPPUNIT_TEST( dthirdInvariantTest );
   CPPUNIT_TEST( d2thirdInvariantTest );
+  CPPUNIT_TEST( sin3LodeTest );
+  CPPUNIT_TEST( dsin3LodeTest );
+  CPPUNIT_TEST( d2sin3LodeTest );
   CPPUNIT_TEST( detTest );
   CPPUNIT_TEST( ddetTest );
   CPPUNIT_TEST( inverseTest );
@@ -64,6 +67,9 @@ public:
   void thirdInvariantTest();
   void dthirdInvariantTest();
   void d2thirdInvariantTest();
+  void sin3LodeTest();
+  void dsin3LodeTest();
+  void d2sin3LodeTest();
   void detTest();
   void ddetTest();
   void inverseTest();

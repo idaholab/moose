@@ -336,7 +336,7 @@ RankTwoTensor::operator*(const TypeTensor<Real> & a) const
 }
 
 Real
-RankTwoTensor::doubleContraction(const RankTwoTensor & a)
+RankTwoTensor::doubleContraction(const RankTwoTensor & a) const
 {
   Real result = 0.0;
 
@@ -537,6 +537,45 @@ RankTwoTensor::d2thirdInvariant() const
 }
 
 Real
+RankTwoTensor::sin3Lode() const
+{
+  Real bar = secondInvariant();
+  if (bar == 0.0)
+    return 0.0; // in this case the Lode angle is not defined, so zero is as good as anything else
+  else
+    return -1.5*std::sqrt(3.0)*thirdInvariant()/std::pow(bar, 1.5);
+}
+
+RankTwoTensor
+RankTwoTensor::dsin3Lode() const
+{
+  Real bar = secondInvariant();
+  if (bar == 0.0)
+    return RankTwoTensor();
+  else
+    return -1.5*std::sqrt(3.0)*(dthirdInvariant()/std::pow(bar, 1.5) - 1.5*dsecondInvariant()*thirdInvariant()/std::pow(bar, 2.5));
+}
+
+RankFourTensor
+RankTwoTensor::d2sin3Lode() const
+{
+  Real bar = secondInvariant();
+  if (bar == 0.0)
+    return RankFourTensor();
+  Real J3 = thirdInvariant();
+  RankTwoTensor dII = dsecondInvariant();
+  RankTwoTensor dIII = dthirdInvariant();
+  RankFourTensor deriv = d2thirdInvariant()/std::pow(bar, 1.5) - 1.5*d2secondInvariant()*J3/std::pow(bar, 2.5);
+  for (unsigned i = 0 ; i < N ; ++i)
+    for (unsigned j = 0 ; j < N ; ++j)
+      for (unsigned k = 0 ; k < N ; ++k)
+	for (unsigned l = 0 ; l < N ; ++l)
+	  deriv(i, j, k, l) += (-1.5*dII(i, j)*dIII(k, l) -1.5*dIII(i, j)*dII(k, l))/std::pow(bar, 2.5) + 1.5*2.5*dII(i, j)*dII(k, l)*J3/std::pow(bar, 3.5);
+  deriv *= -1.5*std::sqrt(3.0);
+  return deriv;
+}
+
+Real
 RankTwoTensor::det() const
 {
   Real result = 0.0;
@@ -640,14 +679,51 @@ RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
 }
 
 void
-RankTwoTensor::symmetricEigenvalues(/*RankTwoTensor & tens,*/ std::vector<Real> & eigvals)
+RankTwoTensor::symmetricEigenvalues(std::vector<Real> & eigvals) const
+{
+  std::vector<double> a;
+  syev("N", eigvals, a);
+}
+void
+RankTwoTensor::dsymmetricEigenvalues(std::vector<Real> & eigvals, std::vector<RankTwoTensor> & deigvals) const
   {
+    deigvals.resize(N);
+
     std::vector<double> a;
-    syev("N", eigvals, a);
+    syev("V", eigvals, a);
+
+    // now a contains the eigenvetors
+    // extract these and place appropriately in deigvals
+    std::vector<Real> eig_vec;
+    eig_vec.resize(N);
+
+    for (unsigned int i = 0; i < N; ++i)
+    {
+      for (unsigned int j = 0; j < N; ++j)
+        eig_vec[j] = a[i*N + j];
+      for (unsigned int j = 0; j < N; ++j)
+        for (unsigned int k = 0; k < N; ++k)
+          deigvals[i](j, k) = eig_vec[j]*eig_vec[k];
+    }
+
+    // There are discontinuities in the derivative
+    // for equal eigenvalues.  The following is
+    // an attempt to make a sensible choice for
+    // the derivative.  This agrees with a central-difference
+    // approximation to the derivative.
+    if (eigvals[0] == eigvals[1] && eigvals[0] == eigvals[2])
+      deigvals[0] = deigvals[1] = deigvals[2] = (deigvals[0] + deigvals[1] + deigvals[2])/3.0;
+    else if (eigvals[0] == eigvals[1])
+      deigvals[0] = deigvals[1] = (deigvals[0] + deigvals[1])/2.0;
+    else if (eigvals[0] == eigvals[2])
+      deigvals[0] = deigvals[2] = (deigvals[0] + deigvals[2])/2.0;
+    else if (eigvals[1] == eigvals[2])
+      deigvals[1] = deigvals[2] = (deigvals[1] + deigvals[2])/2.0;
   }
 
+
 void
-RankTwoTensor::d2symmetricEigenvalues(/*RankTwoTensor & tens,*/ std::vector<RankFourTensor> & deriv)
+RankTwoTensor::d2symmetricEigenvalues(std::vector<RankFourTensor> & deriv) const
   {
     std::vector<double> eigvec;
     std::vector<double> eigvals;
@@ -677,33 +753,12 @@ RankTwoTensor::d2symmetricEigenvalues(/*RankTwoTensor & tens,*/ std::vector<Rank
                   *(ev[beta][k]*ev[alpha][l]+ev[beta][l]*ev[alpha][k])/(eigvals[alpha]-eigvals[beta]);
               }
       }
+
   }
 
-void
-RankTwoTensor::dsymmetricEigenvalues(/*RankTwoTensor & tens,*/ std::vector<Real> & eigvals, std::vector<RankTwoTensor> & deigvals)
-  {
-    deigvals.resize(N);
-
-    std::vector<double> a;
-    syev("V", eigvals, a);
-
-    // now a contains the eigenvetors
-    // extract these and place appropriately in deigvals
-    std::vector<Real> eig_vec;
-    eig_vec.resize(N);
-
-    for (unsigned int i = 0; i < N; ++i)
-    {
-      for (unsigned int j = 0; j < N; ++j)
-        eig_vec[j] = a[i*N + j];
-      for (unsigned int j = 0; j < N; ++j)
-        for (unsigned int k = 0; k < N; ++k)
-          deigvals[i](j, k) = eig_vec[j]*eig_vec[k];
-    }
-  }
 
 void
-RankTwoTensor::syev(/*RankTwoTensor & tens,*/ const char * calculation_type, std::vector<Real> & eigvals, std::vector<double> & a)
+RankTwoTensor::syev(const char * calculation_type, std::vector<Real> & eigvals, std::vector<double> & a) const
   {
     eigvals.resize(N);
     a.resize(N*N);
@@ -716,7 +771,9 @@ RankTwoTensor::syev(/*RankTwoTensor & tens,*/ const char * calculation_type, std
 
     for (unsigned int i = 0; i < N; ++i)
       for (unsigned int j = 0; j < N; ++j)
-        a[i*N + j] = this->operator()(i,j); // a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed there
+	// a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed there
+	// Note the explicit symmeterisation
+        a[i*N + j] = 0.5*(this->operator()(i,j) + this->operator()(j,i));
 
     // compute the eigenvalues only (if calculation_type == "N"),
     // or both the eigenvalues and eigenvectors (if calculation_type == "V")

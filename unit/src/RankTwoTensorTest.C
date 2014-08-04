@@ -340,6 +340,110 @@ RankTwoTensorTest::d2thirdInvariantTest()
 }
 
 void
+RankTwoTensorTest::sin3LodeTest()
+{
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.72218212, _unsymmetric1.sin3Lode(), 0.0001);
+}
+
+
+void
+RankTwoTensorTest::dsin3LodeTest()
+{
+  // this derivative is less trivial
+  // so let's check with a finite-difference approximation
+  Real ep = 1E-5; // small finite-difference parameter
+  Real sin3Lode; // sin3Lode provided by RankTwoTensor
+  RankTwoTensor deriv; // derivative of sin3Lode provided by RankTwoTensor
+  RankTwoTensor mep; // the RankTwoTensor with successive entries shifted by ep
+
+  sin3Lode = _m3.sin3Lode();
+  deriv = _m3.dsin3Lode();
+  mep = _m3;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      mep(i, j) += ep;
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode() - sin3Lode)/ep, deriv(i, j), 10*ep);
+      mep(i, j) -= ep;
+    }
+
+  sin3Lode = _unsymmetric1.sin3Lode();
+  deriv = _unsymmetric1.dsin3Lode();
+  mep = _unsymmetric1;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      mep(i, j) += ep;
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode() - sin3Lode)/ep, deriv(i, j), 10*ep);
+      mep(i, j) -= ep;
+
+      // since sin3Lode is explicitly symmeterised, we can also do
+      mep(i, j) += 0.5*ep;
+      mep(j, i) += 0.5*ep;
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode() - sin3Lode)/ep, deriv(i, j), 10*ep);
+      mep(i, j) -= 0.5*ep;
+      mep(j, i) -= 0.5*ep;
+    }
+}
+
+
+void
+RankTwoTensorTest::d2sin3LodeTest()
+{
+  // Here i do a finite-difference calculation of the third
+  // derivative and compare with the closed-solution form
+  Real ep = 1E-5; // small finite-difference parameter
+
+  RankTwoTensor d1; // first derivative of sin3Lode - from RankTwoTensor - do a finite-difference of this
+  RankFourTensor d2; // third derivative of third Invariant - from RankTwoTensor
+  RankTwoTensor mep; // matrix with shifted entries
+  RankTwoTensor d1ep; // first derivative of sin3Lode of mep
+
+
+  mep = _m3;
+  d1 = _m3.dsin3Lode();
+  d2 = _m3.d2sin3Lode();
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      for (unsigned int k = 0; k < 3; k++)
+        for (unsigned int l = 0; l < 3; l++)
+        {
+          mep(k, l) += ep;
+          d1ep = mep.dsin3Lode();
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= ep;
+        }
+    }
+
+
+  mep = _unsymmetric1;
+  d1 = _unsymmetric1.dsin3Lode();
+  d2 = _unsymmetric1.d2sin3Lode();
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      for (unsigned int k = 0; k < 3; k++)
+        for (unsigned int l = 0; l < 3; l++)
+        {
+          mep(k, l) += ep;
+          d1ep = mep.dsin3Lode();
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= ep;
+
+          // note that because d1 and d2 explicitly symmeterise the matrix
+          // the derivative may or may not explicitly symmeterise
+          mep(k, l) += 0.5*ep;
+          mep(l, k) += 0.5*ep;
+          d1ep = mep.dsin3Lode();
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= 0.5*ep;
+          mep(l, k) -= 0.5*ep;
+        }
+    }
+}
+
+void
 RankTwoTensorTest::ddetTest()
 {
   // this derivative is less trivial than dtrace and dsecondInvariant,
