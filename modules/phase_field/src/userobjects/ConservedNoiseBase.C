@@ -77,7 +77,7 @@ ConservedNoiseBase::getQpValue(dof_id_type element_id, unsigned int qp) const
     mooseError("Element not found.");
   else
   {
-    libmesh_assert_less(qp, me->second->size());
+    libmesh_assert_less(qp, me->second.size());
     return me->second[qp] - _offset;
   }
 }
