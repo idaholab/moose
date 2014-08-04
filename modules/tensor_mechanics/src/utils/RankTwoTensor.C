@@ -359,9 +359,46 @@ Real
 RankTwoTensor::secondInvariant() const
 {
   Real result = 0.0;
-  RankTwoTensor deviatoric(*this);
-  deviatoric.addIa(-1.0/3.0 * trace()); // actually construct deviatoric part
-  result = 0.5 * deviatoric.doubleContraction(deviatoric);
+  //RankTwoTensor deviatoric(*this);
+  //deviatoric.addIa(-1.0/3.0 * trace()); // actually construct deviatoric part
+  //result = 0.5*(deviatoric + deviatoric.transpose()).doubleContraction(deviatoric + deviatoric.transpose());
+  result = std::pow(_vals[0][0] - _vals[1][1], 2)/6.0;
+  result += std::pow(_vals[0][0] - _vals[2][2], 2)/6.0;
+  result += std::pow(_vals[1][1] - _vals[2][2], 2)/6.0;
+  result += std::pow(_vals[0][1] + _vals[1][0], 2)/4.0;
+  result += std::pow(_vals[0][2] + _vals[2][0], 2)/4.0;
+  result += std::pow(_vals[1][2] + _vals[2][1], 2)/4.0;
+  return result;
+}
+
+RankTwoTensor
+RankTwoTensor::dsecondInvariant() const
+{
+  return 0.5*(deviatoric() + deviatoric().transpose());
+}
+
+RankFourTensor
+RankTwoTensor::d2secondInvariant() const
+{
+  RankFourTensor result;
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          result(i, j, k, l) = 0.5*(i==k)*(j==l) + 0.5*(i==l)*(j==k) - (1.0/3.0)*(i==j)*(k==l);
+  return result;
+}
+
+
+
+Real
+RankTwoTensor::trace() const
+{
+  Real result = 0.0;
+
+  for (unsigned int i = 0; i < N; ++i)
+      result += _vals[i][i];
+
   return result;
 }
 
@@ -371,11 +408,146 @@ RankTwoTensor::dtrace() const
   return RankTwoTensor(1, 0, 0, 0, 1, 0, 0, 0, 1);
 }
 
-RankTwoTensor
-RankTwoTensor::dsecondInvariant() const
+
+Real
+RankTwoTensor::thirdInvariant() const
 {
-  return deviatoric();
+  RankTwoTensor s = 0.5*deviatoric();
+  s += s.transpose();
+
+  Real result = 0.0;
+
+  result =  s(0, 0) * (s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2));
+  result -= s(1, 0) * (s(0, 1) * s(2, 2) - s(2, 1) * s(0, 2));
+  result += s(2, 0) * (s(0, 1) * s(1, 2) - s(1, 1) * s(0, 2));
+
+  return result;
 }
+
+RankTwoTensor
+RankTwoTensor::dthirdInvariant() const
+{
+  RankTwoTensor s = 0.5*deviatoric();
+  s += s.transpose();
+
+  RankTwoTensor d;
+  Real sec_over_three = secondInvariant()/3.0;
+
+  d(0, 0) = s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2) + sec_over_three;
+  d(0, 1) = s(2, 0) * s(1, 2) - s(1, 0) * s(2, 2);
+  d(0, 2) = s(1, 0) * s(2, 1) - s(2, 0) * s(1, 1);
+  d(1, 0) = s(2, 1) * s(0, 2) - s(0, 1) * s(2, 2);
+  d(1, 1) = s(0, 0) * s(2, 2) - s(2, 0) * s(0, 2) + sec_over_three;
+  d(1, 2) = s(2, 0) * s(0, 1) - s(0, 0) * s(2, 1);
+  d(2, 0) = s(0, 1) * s(1, 2) - s(1, 1) * s(0, 2);
+  d(2, 1) = s(1, 0) * s(0, 2) - s(0, 0) * s(1, 2);
+  d(2, 2) = s(0, 0) * s(1, 1) - s(1, 0) * s(0, 1) + sec_over_three;
+
+  return d;
+}
+
+RankFourTensor
+RankTwoTensor::d2thirdInvariant() const
+{
+  RankTwoTensor s = 0.5*deviatoric();
+  s += s.transpose();
+
+  RankFourTensor d2;
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+        {
+          d2(i, j, k, l) = (i==j)*s(k, l)/3.0 + (k==l)*s(i, j)/3.0;
+          //for (unsigned int a = 0; a < N; ++a)
+          //  for (unsigned int b = 0; b < N; ++b)
+          //    d2(i, j, k, l) += 0.5*(PermutationTensor::eps(i, k, a)*PermutationTensor::eps(j, l, b) + PermutationTensor::eps(i, l, a)*PermutationTensor::eps(j, k, b))*s(a, b);
+        }
+
+  // I'm not sure which is more readable: the above
+  // PermutationTensor stuff, or the stuff below.
+  // Anyway, they yield the same result, and so i leave
+  // both of them here to enlighten you!
+
+  d2(0, 0, 1, 1) += s(2, 2);
+  d2(0, 0, 1, 2) -= s(2, 1);
+  d2(0, 0, 2, 1) -= s(1, 2);
+  d2(0, 0, 2, 2) += s(1, 1);
+
+  d2(0, 1, 0, 1) -= s(2, 2)/2.0;
+  d2(0, 1, 1, 0) -= s(2, 2)/2.0;
+  d2(0, 1, 0, 2) += s(1, 2)/2.0;
+  d2(0, 1, 2, 0) += s(1, 2)/2.0;
+  d2(0, 1, 1, 2) += s(2, 0)/2.0;
+  d2(0, 1, 2, 1) += s(2, 0)/2.0;
+  d2(0, 1, 2, 2) -= s(1, 0);
+
+  d2(0, 2, 0, 1) += s(2, 1)/2.0;
+  d2(0, 2, 1, 0) += s(2, 1)/2.0;
+  d2(0, 2, 0, 2) -= s(1, 1)/2.0;
+  d2(0, 2, 2, 0) -= s(1, 1)/2.0;
+  d2(0, 2, 1, 1) -= s(2, 0);
+  d2(0, 2, 1, 2) += s(1, 0)/2.0;
+  d2(0, 2, 2, 1) += s(1, 0)/2.0;
+
+  d2(1, 0, 0, 1) -= s(2, 2)/2.0;
+  d2(1, 0, 1, 0) -= s(2, 2)/2.0;
+  d2(1, 0, 0, 2) += s(1, 2)/2.0;
+  d2(1, 0, 2, 0) += s(1, 2)/2.0;
+  d2(1, 0, 1, 2) += s(2, 0)/2.0;
+  d2(1, 0, 2, 1) += s(2, 0)/2.0;
+  d2(1, 0, 2, 2) -= s(1, 0);
+
+  d2(1, 1, 0, 0) += s(2, 2);
+  d2(1, 1, 0, 2) -= s(2, 0);
+  d2(1, 1, 2, 0) -= s(2, 0);
+  d2(1, 1, 2, 2) += s(0, 0);
+
+  d2(1, 2, 0, 0) -= s(2, 1);
+  d2(1, 2, 0, 1) += s(2, 0)/2.0;
+  d2(1, 2, 1, 0) += s(2, 0)/2.0;
+  d2(1, 2, 0, 2) += s(0, 1)/2.0;
+  d2(1, 2, 2, 0) += s(0, 1)/2.0;
+  d2(1, 2, 1, 2) -= s(0, 0)/2.0;
+  d2(1, 2, 2, 1) -= s(0, 0)/2.0;
+
+  d2(2, 0, 0, 1) += s(2, 1)/2.0;
+  d2(2, 0, 1, 0) += s(2, 1)/2.0;
+  d2(2, 0, 0, 2) -= s(1, 1)/2.0;
+  d2(2, 0, 2, 0) -= s(1, 1)/2.0;
+  d2(2, 0, 1, 1) -= s(2, 0);
+  d2(2, 0, 1, 2) += s(1, 0)/2.0;
+  d2(2, 0, 2, 1) += s(1, 0)/2.0;
+
+  d2(2, 1, 0, 0) -= s(2, 1);
+  d2(2, 1, 0, 1) += s(2, 0)/2.0;
+  d2(2, 1, 1, 0) += s(2, 0)/2.0;
+  d2(2, 1, 0, 2) += s(0, 1)/2.0;
+  d2(2, 1, 2, 0) += s(0, 1)/2.0;
+  d2(2, 1, 1, 2) -= s(0, 0)/2.0;
+  d2(2, 1, 2, 1) -= s(0, 0)/2.0;
+
+  d2(2, 2, 0, 0) += s(1, 1);
+  d2(2, 2, 0, 1) -= s(1, 0);
+  d2(2, 2, 1, 0) -= s(1, 0);
+  d2(2, 2, 1, 1) += s(0, 0);
+
+  return d2;
+
+}
+
+Real
+RankTwoTensor::det() const
+{
+  Real result = 0.0;
+
+  result =  _vals[0][0] * (_vals[1][1] * _vals[2][2] - _vals[2][1] * _vals[1][2]);
+  result -= _vals[1][0] * (_vals[0][1] * _vals[2][2] - _vals[2][1] * _vals[0][2]);
+  result += _vals[2][0] * (_vals[0][1] * _vals[1][2] - _vals[1][1] * _vals[0][2]);
+
+  return result;
+}
+
 
 RankTwoTensor
 RankTwoTensor::ddet() const
@@ -393,30 +565,6 @@ RankTwoTensor::ddet() const
   d(2, 2) = _vals[0][0] * _vals[1][1] - _vals[1][0] * _vals[0][1];
 
   return d;
-}
-
-
-Real
-RankTwoTensor::trace() const
-{
-  Real result = 0.0;
-
-  for (unsigned int i = 0; i < N; ++i)
-      result += _vals[i][i];
-
-  return result;
-}
-
-Real
-RankTwoTensor::det() const
-{
-  Real result = 0.0;
-
-  result =  _vals[0][0] * (_vals[1][1] * _vals[2][2] - _vals[2][1] * _vals[1][2]);
-  result -= _vals[1][0] * (_vals[0][1] * _vals[2][2] - _vals[2][1] * _vals[0][2]);
-  result += _vals[2][0] * (_vals[0][1] * _vals[1][2] - _vals[1][1] * _vals[0][2]);
-
-  return result;
 }
 
 RankTwoTensor
