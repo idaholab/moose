@@ -989,6 +989,9 @@ const std::vector<ExecFlagType> exec_types = populateExecTypes();
 
 PerfLog setup_perf_log("Setup");
 
+/**
+ * Initialize global variables
+ */
 #ifdef DEBUG
 bool _trap_fpe = true;
 #else
@@ -996,5 +999,7 @@ bool _trap_fpe = false;
 #endif
 
 bool _color_console = true;
+
+bool _warnings_are_errors = false;
 
 } // namespace Moose
