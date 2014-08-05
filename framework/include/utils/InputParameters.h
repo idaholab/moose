@@ -700,7 +700,6 @@ InputParameters::addCommandLineParam(const std::string &name, const std::string 
   MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
 }
 
-
 template <typename T>
 void
 InputParameters::checkConsistentType(const std::string &name) const
