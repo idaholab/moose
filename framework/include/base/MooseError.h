@@ -67,14 +67,19 @@
 #define mooseWarning(msg)                                                           \
   do                                                                                \
   {                                                                                 \
-    Moose::out                                                                      \
-      << (Moose::_color_console ? YELLOW : "")                                      \
+    if (Moose::_warnings_are_errors)                                                \
+      mooseError(msg);                                                              \
+    else                                                                            \
+    {                                                                               \
+      Moose::out                                                                    \
+        << (Moose::_color_console ? YELLOW : "")                                    \
       << "\n\n*** Warning ***\n"                                                    \
       << msg                                                                        \
       << "\nat " << __FILE__ << ", line " << __LINE__                               \
       << (Moose::_color_console ? DEFAULT : "")                                     \
       << "\n"                                                                       \
       << std::endl;                                                                 \
+    }                                                                               \
   } while (0)
 
 #define mooseDoOnce(do_this) do { static bool did_this_already = false; if (!did_this_already) { did_this_already = true; do_this; } } while (0)
