@@ -1035,6 +1035,9 @@ FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 
   _nl.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
   _aux.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+
+  if (_displaced_problem != NULL && _reinit_displaced_face)
+    _displaced_problem->reinitNeighbor(elem, side, tid);
 }
 
 void
