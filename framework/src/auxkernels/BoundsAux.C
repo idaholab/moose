@@ -42,10 +42,13 @@ BoundsAux::BoundsAux(const std::string & name, InputParameters parameters) :
 Real
 BoundsAux::computeValue()
 {
-  // The zero is for the component, this will only work for Lagrange variables!
-  dof_id_type dof = _current_node->dof_number(_nl_sys.number(), _bounded_variable_id, 0);
-  if (_upper_valid) _upper_vector.set(dof, _upper);
-  if (_lower_valid) _lower_vector.set(dof, _lower);
+  if (_current_node->n_dofs(_nl_sys.number(), _bounded_variable_id) > 0)
+  {
+    // The zero is for the component, this will only work for Lagrange variables!
+    dof_id_type dof = _current_node->dof_number(_nl_sys.number(), _bounded_variable_id, 0);
+    if (_upper_valid) _upper_vector.set(dof, _upper);
+    if (_lower_valid) _lower_vector.set(dof, _lower);
+  }
 
   return 0.0;
 }
