@@ -1,0 +1,106 @@
+[Tests]
+  [./2d]
+    # Test ability to read in a single 20x20 image
+    type = Exodiff
+    input = image_2d.i
+    exodiff = image_2d_out.e
+    vtk = true
+  [../]
+  [./3d]
+    # Test ability to read in stack of 20x20 images
+    type = Exodiff
+    input = image_3d.i
+    exodiff = image_3d_out.e
+    vtk = true
+  [../]
+  [./3d_subset]
+    # Test ability to read a subset of of 20x20 image stack
+    type = Exodiff
+    input = image_3d_subset.i
+    exodiff = image_3d_subset_out.e
+    vtk = true
+ [../]
+  [./threshold]
+    # Test the ability to threshold the image
+    type = Exodiff
+    input = threshold.i
+    exodiff = threshold_out.e
+    vtk = true
+  [../]
+  [./threshold_adapt]
+    # Test the ability to threshold the image and adapt
+    type = Exodiff
+    input = threshold_adapt.i
+    exodiff = threshold_adapt_out.e
+    vtk = true
+  [../]
+  [./threshold_adapt_parallel]
+    # Test the ability to threshold the image and adapt
+    type = Exodiff
+    input = threshold_adapt_parallel.i
+    exodiff = threshold_adapt_parallel_out.e
+    cli_args = Outputs/exodus=true
+    min_parallel = 3
+    max_parallel = 3
+    vtk = true
+  [../]
+  [./threshold_adapt_parallel_check_files]
+    # Test the ability to threshold the image and adapt
+    type = CheckFiles
+    input = threshold_adapt_parallel.i
+    check_files = 'threshold_adapt_parallel_out.e.3.0 threshold_adapt_parallel_out.e.3.1 threshold_adapt_parallel_out.e.3.2'
+    min_parallel = 3
+    max_parallel = 3
+    cli_args = Outputs/nemesis=true
+    vtk = true
+  [../]
+  [./component]
+    # Test ability to read in a single component from a 20x20 image
+    type = Exodiff
+    input = component.i
+    exodiff = component_out.e
+    vtk = true
+  [../]
+  [./shift_and_scale]
+    # Test the shift and scale feature
+    type = Exodiff
+    input = shift_and_scale.i
+    exodiff = shift_and_scale_out.e
+    vtk = true
+  [../]
+  [./subset]
+    # Test the image may be a subset of the domain
+    type = Exodiff
+    input = subset.i
+    exodiff = subset_out.e
+    vtk = true
+  [../]
+  [./flip]
+    # Test the flipping feature
+    type = Exodiff
+    input = flip.i
+    exodiff = flip_out.e
+    vtk = true
+  [../]
+  [./flip_dual]
+    # Tests the flipping and images on subdomains
+    type = Exodiff
+    input = flip_dual.i
+    exodiff = flip_dual_out.e
+    vtk = true
+  [../]
+  [./flip_quad]
+    # Tests the flipping and images on subdomains
+    type = Exodiff
+    input = flip_quad.i
+    exodiff = flip_quad_out.e
+    vtk = true
+  [../]
+  [./crop]
+    # Tests ability for mesh to be a subset of image
+    type = Exodiff
+    input = crop.i
+    exodiff = crop_out.e
+    vtk = true
+  [../]
+[]

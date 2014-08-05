@@ -1,0 +1,79 @@
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 20
+  ny = 40
+  ymax = 2
+  uniform_refine = 1
+[]
+
+[MeshModifiers]
+  [./top]
+    type = SubdomainBoundingBox
+    top_right = '1 2 0'
+    bottom_left = '0 1 0'
+    block_id = 1
+  [../]
+[]
+
+[Variables]
+  [./u]
+  [../]
+[]
+
+[Functions]
+  [./top]
+    type = ImageFunction
+    origin = '0 1 0'
+    file_base = stack/test
+    flip_y = true
+    file_range = 00
+    dimensions = '1 1 0'
+  [../]
+  [./bottom]
+    type = ImageFunction
+    origin = '0 0 0'
+    file_base = stack/test
+    file_range = 00
+    dimensions = '1 1 0'
+  [../]
+[]
+
+[ICs]
+  [./top_ic]
+    function = top
+    variable = u
+    type = FunctionIC
+    block = 1
+  [../]
+  [./bottom_ic]
+    function = bottom
+    variable = u
+    type = FunctionIC
+    block = 0
+  [../]
+[]
+
+[Problem]
+  type = FEProblem
+  solve = false
+[]
+
+[Executioner]
+  # Preconditioned JFNK (default)
+  type = Transient
+  num_steps = 1
+  dt = 0.1
+[]
+
+[Outputs]
+  output_initial = true
+  exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+    nonlinear_residuals = false
+    linear_residuals = false
+  [../]
+[]
+
