@@ -319,6 +319,8 @@ DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID
   _displaced_nl.prepareNeighbor(tid);
   _displaced_aux.prepareNeighbor(tid);
 
+  _assembly[tid]->prepareNeighbor();
+
   BoundaryID bnd_id = 0;              // some dummy number (it is not really used for anything, right now)
   _displaced_nl.reinitElemFace(elem, side, bnd_id, tid);
   _displaced_aux.reinitElemFace(elem, side, bnd_id, tid);
