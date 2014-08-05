@@ -84,6 +84,20 @@
     expect_err = "Input file block '\S+' has been deprecated."
   [../]
 
+  [./deprecated_param_default]
+    type = 'RunException'
+    input = 'deprecated_param_test.i'
+    expect_err = "The parameter \w+ is deprecated."
+    cli_args = '--error Kernels/nan/deprecated_default=1'
+  [../]
+
+  [./deprecated_param_no_default]
+    type = 'RunException'
+    input = 'deprecated_param_test.i'
+    expect_err = "The parameter \w+ is deprecated."
+    cli_args = '--error Kernels/nan/deprecated_no_default=1'
+  [../]
+
   [./double_restrict_uo_test]
     type = 'RunException'
     input = 'double_restrict_uo.i'
