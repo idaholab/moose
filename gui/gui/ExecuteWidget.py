@@ -307,7 +307,7 @@ class ExecuteWidget(QtGui.QWidget):
     if self.thread_proc != '':
       _command = _command + self.thread_command + self.thread_proc
     if self.postprocessor_csv.checkState() == QtCore.Qt.Checked:
-      _command += ' Outputs/csv=true '
+      _command += ' --no-color Outputs/csv=true '
 
     _command += ' ' + self.other_options
 
