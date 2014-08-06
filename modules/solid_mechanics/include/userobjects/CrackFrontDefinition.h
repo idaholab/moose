@@ -31,6 +31,7 @@ public:
   virtual void threadJoin(const UserObject & uo);
 
   const Node & getCrackFrontNode(const unsigned int node_index) const;
+  const Node * getCrackFrontNodePtr(const unsigned int node_index) const;
   const RealVectorValue & getCrackFrontTangent(const unsigned int node_index) const;
   const RealVectorValue & getCrackFrontNormal() const;
   Real getCrackFrontForwardSegmentLength(const unsigned int node_index) const;

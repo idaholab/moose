@@ -250,6 +250,13 @@
   [./lin_its]
     type = NumLinearIterations
   [../]
+
+  [./disp_x_centercrack]
+    type = CrackFrontData
+    crack_front_definition = crackFrontDefinition
+    variable = disp_x
+    crack_front_node_index = 1
+  [../]
 []
 
 

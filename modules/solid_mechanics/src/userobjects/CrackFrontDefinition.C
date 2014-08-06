@@ -802,6 +802,12 @@ CrackFrontDefinition::getCrackFrontNode(const unsigned int node_index) const
   return _mesh.node(_ordered_crack_front_nodes[node_index]);
 }
 
+const Node *
+CrackFrontDefinition::getCrackFrontNodePtr(const unsigned int node_index) const
+{
+  return _mesh.nodePtr(_ordered_crack_front_nodes[node_index]);
+}
+
 const RealVectorValue &
 CrackFrontDefinition::getCrackFrontTangent(const unsigned int node_index) const
 {
