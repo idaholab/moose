@@ -1,10 +1,25 @@
 [Mesh]
   # This test uses SolutionUserObject which doesn't work with ParallelMesh.
-  type = GeneratedMesh
-  distribution = serial
-  dim = 2
-  nx = 2
-  ny = 2
+  type = FileMesh
+  file = aux_nonlinear_solution_adapt_out_0004_mesh.xda
+[]
+
+[Adaptivity]
+  marker = error_frac
+  steps = 2
+  [./Indicators]
+    [./jump_indicator]
+      type = GradientJumpIndicator
+      variable = u
+    [../]
+  [../]
+  [./Markers]
+    [./error_frac]
+      type = ErrorFractionMarker
+      indicator = jump_indicator
+      refine = 0.7
+    [../]
+  [../]
 []
 
 [Variables]
@@ -20,9 +35,9 @@
 []
 
 [Functions]
-  [./u_xdr_func]
+  [./u_xda_func]
     type = SolutionFunction
-    solution = xdr_u
+    solution = xda_u
   [../]
 []
 
@@ -34,10 +49,10 @@
 []
 
 [AuxKernels]
-  [./aux_xdr_kernel]
+  [./aux_xda_kernel]
     type = SolutionAux
     variable = u_aux
-    solution = xdr_u_aux
+    solution = xda_u_aux
     execute_on = initial
   [../]
 []
@@ -58,21 +73,21 @@
 []
 
 [UserObjects]
-  [./xdr_u_aux]
+  [./xda_u_aux]
     type = SolutionUserObject
     system = aux0
-    mesh = aux_nonlinear_solution_xdr_0001_mesh.xdr
-    es = aux_nonlinear_solution_xdr_0001.xdr
+    mesh = aux_nonlinear_solution_adapt_out_0004_mesh.xda
+    es = aux_nonlinear_solution_adapt_out_0004.xda
+    elemental_variables = u_aux
     execute_on = initial
-    nodal_variables = u_aux
   [../]
-  [./xdr_u]
+  [./xda_u]
     type = SolutionUserObject
     system = nl0
-    mesh = aux_nonlinear_solution_xdr_0001_mesh.xdr
-    es = aux_nonlinear_solution_xdr_0001.xdr
-    execute_on = initial
+    mesh = aux_nonlinear_solution_adapt_out_0004_mesh.xda
+    es = aux_nonlinear_solution_adapt_out_0004.xda
     nodal_variables = u
+    execute_on = initial
   [../]
 []
 
@@ -94,7 +109,7 @@
 
 [ICs]
   [./u_func_ic]
-    function = u_xdr_func
+    function = u_xda_func
     variable = u
     type = FunctionIC
   [../]
