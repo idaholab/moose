@@ -43,6 +43,11 @@
   [../]
 []
 
+[Problem]
+  type = FEProblem
+  use_legacy_uo_initialization = false
+[]
+
 [BCs]
   [./stuff]
     type = DirichletBC
