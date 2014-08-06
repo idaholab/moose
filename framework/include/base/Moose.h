@@ -84,6 +84,11 @@ extern PerfLog perf_log;
 extern PerfLog setup_perf_log;
 
 /**
+ * A static list of all the exec types.
+ */
+extern const std::vector<ExecFlagType> exec_types;
+
+/**
  * Variable indicating whether we will enable FPE trapping for this run.
  */
 extern bool _trap_fpe;
@@ -94,9 +99,9 @@ extern bool _trap_fpe;
 extern bool _color_console;
 
 /**
- * A static list of all the exec types.
+ * Variable to toggle any warning into an error
  */
-extern const std::vector<ExecFlagType> exec_types;
+extern bool _warnings_are_errors;
 
 /**
  * Macros for coloring any output stream (_console, std::ostringstream, etc.)

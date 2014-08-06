@@ -63,6 +63,8 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("trap_fpe", "--trap-fpe", "Enable Floating Point Exception handling in critical sections of code.  This is enabled automatically in DEBUG mode");
   params.addCommandLineParam<bool>("no_trap_fpe", "--no-trap-fpe", "Disable Floating Point Exception handling in critical sections of code when using DEBUG mode.");
 
+  params.addCommandLineParam<bool>("error", "--error", "Turn all warnings into errors");
+
   params.addCommandLineParam<bool>("timing", "-t --timing", "Enable all performance logging for timing purposes. This will disable all screen output of performance logs for all Console objects.");
 
   params.addPrivateParam<int>("_argc");
@@ -145,6 +147,9 @@ MooseApp::setupOptions()
     setCheckUnusedFlag(true);
   else if (isParamValid("warn_unused"))
     setCheckUnusedFlag(false);
+
+  if (isParamValid("error"))
+    Moose::_warnings_are_errors = true;
 
   if (isParamValid("error_override"))
     setErrorOverridden();
