@@ -282,7 +282,7 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
     _console << "Stress at maximum iterations:\n";
     stress.print();
     if (_fspb_debug == 1)
-      mooseError("Causing crash due to debug parameter choice");
+      mooseError("Causing crash due max iterations and debug parameter choice");
     stress = stress_old;
     for (unsigned i = 0; i < intnl_old.size() ; ++i)
       intnl[i] = intnl_old[i];
@@ -615,7 +615,7 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
       lam = 1E-4;
       _console << "line search failed in plasticity\n";
       if (_fspb_debug == 1)
-        mooseError("Causing crash due to debug parameter choice");
+        mooseError("Causing crash due linesearch failure and debug parameter choice");
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
         ls_pm[alpha] = pm[alpha] + dpm[alpha]*lam;
       ls_delta_dp = delta_dp - E_inv*dstress*lam;
@@ -745,20 +745,21 @@ FiniteStrainPlasticBase::fddyieldFunction_dstress(const RankTwoTensor & stress, 
 {
   df_dstress.assign(numberOfYieldFunctions(), RankTwoTensor());
 
-  std::vector<Real> origf;
-  yieldFunction(stress, intnl, origf);
-
   Real ep = _fspb_debug_stress_change;
   RankTwoTensor stressep;
-  std::vector<Real> fep;
+  std::vector<Real> fep, fep_minus;
   for (unsigned i = 0 ; i < 3 ; ++i)
     for (unsigned j = 0 ; j < 3 ; ++j)
     {
       stressep = stress;
-      stressep(i, j) += ep;
+      // do a central difference to attempt to capture discontinuities
+      // such as those encountered in tensile and Mohr-Coulomb
+      stressep(i, j) += ep/2.0;
       yieldFunction(stressep, intnl, fep);
+      stressep(i, j) -= ep;
+      yieldFunction(stressep, intnl, fep_minus);
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-        df_dstress[alpha](i, j) = (fep[alpha] - origf[alpha])/ep;
+        df_dstress[alpha](i, j) = (fep[alpha] - fep_minus[alpha])/ep;
     }
 }
 
@@ -767,22 +768,21 @@ FiniteStrainPlasticBase::fddflowPotential_dstress(const RankTwoTensor & stress, 
 {
   dr_dstress.assign(numberOfYieldFunctions(), RankFourTensor());
 
-  std::vector<RankTwoTensor> origr;
-  flowPotential(stress, intnl, origr);
-
   Real ep = _fspb_debug_stress_change;
   RankTwoTensor stressep;
-  std::vector<RankTwoTensor> rep;
+  std::vector<RankTwoTensor> rep, rep_minus;
   for (unsigned i = 0 ; i < 3 ; ++i)
     for (unsigned j = 0 ; j < 3 ; ++j)
     {
       stressep = stress;
-      stressep(i, j) += ep;
+      stressep(i, j) += ep/2.0;
       flowPotential(stressep, intnl, rep);
+      stressep(i, j) -= ep;
+      flowPotential(stressep, intnl, rep_minus);
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
         for (unsigned k = 0 ; k < 3 ; ++k)
           for (unsigned l = 0 ; l < 3 ; ++l)
-            dr_dstress[alpha](k, l, i, j) = (rep[alpha](k, l) - origr[alpha](k, l))/ep;
+            dr_dstress[alpha](k, l, i, j) = (rep[alpha](k, l) - rep_minus[alpha](k, l))/ep;
     }
 }
 

@@ -1,0 +1,53 @@
+[Tests]
+  [./small1]
+    type = 'CSVDiff'
+    input = 'small_deform1.i'
+    csvdiff = 'small_deform1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small2]
+    type = 'CSVDiff'
+    input = 'small_deform2.i'
+    csvdiff = 'small_deform2.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small3]
+    type = 'CSVDiff'
+    input = 'small_deform3.i'
+    csvdiff = 'small_deform3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small4]
+    type = 'CSVDiff'
+    input = 'small_deform4.i'
+    csvdiff = 'small_deform4.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small5]
+    type = 'CSVDiff'
+    input = 'small_deform5.i'
+    csvdiff = 'small_deform5.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small6]
+    type = 'CSVDiff'
+    input = 'small_deform6.i'
+    csvdiff = 'small_deform6.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+
+  [./many_deforms]
+    type = 'CSVDiff'
+    input = 'many_deforms.i'
+    csvdiff = 'many_deforms.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    heavy = true
+  [../]
+[]
