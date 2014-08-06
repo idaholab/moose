@@ -123,8 +123,8 @@
     C_ijkl = '0 2.0E6'
     max_NR_iterations = 1000
     yield_function_tolerance = 1E-3
-    ep_plastic_tolerance = 1E-6
-    internal_constraint_tolerance = 1E-6
+    ep_plastic_tolerance = 1E-9
+    internal_constraint_tolerance = 1E-9
     debug_fspb = 1
   [../]
 []
