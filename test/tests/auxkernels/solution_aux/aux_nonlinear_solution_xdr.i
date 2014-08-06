@@ -64,6 +64,7 @@
     mesh = aux_nonlinear_solution_xdr_0001_mesh.xdr
     es = aux_nonlinear_solution_xdr_0001.xdr
     execute_on = initial
+    nodal_variables = u_aux
   [../]
   [./xdr_u]
     type = SolutionUserObject
@@ -71,6 +72,7 @@
     mesh = aux_nonlinear_solution_xdr_0001_mesh.xdr
     es = aux_nonlinear_solution_xdr_0001.xdr
     execute_on = initial
+    nodal_variables = u
   [../]
 []
 

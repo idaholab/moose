@@ -18,7 +18,7 @@
     type = SolutionUserObject
     mesh = cube_with_u_equals_x.e
     timestep = 1
-    system_variables = u
+    nodal_variables = u
     scale = '0.5 1 1'
     translation = '2 0 0'
     transformation_order = 'scale translation'

@@ -19,7 +19,7 @@
     type = SolutionUserObject
     mesh = cube_with_u_equals_x.e
     timestep = 1
-    system_variables = u
+    nodal_variables = u
     # the following takes:
     # (0.7, 0.7, +/-0.7) -> (-0.7, 0.7, +/-0.7)
     # (-0.7, 0.7, +/-0.7) -> (-0.7, -0.7, +/-0.7)

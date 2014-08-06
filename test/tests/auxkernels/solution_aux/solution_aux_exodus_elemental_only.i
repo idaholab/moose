@@ -44,7 +44,7 @@
   [./soln]
     type = SolutionUserObject
     mesh = cubesource.e
-    system_variables = 'source_element'
+    elemental_variables = 'source_element'
     timestep = 2
   [../]
 []

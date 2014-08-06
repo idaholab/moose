@@ -15,7 +15,7 @@
     type = SolutionUserObject
     mesh = square_with_u_equals_x.e
     timestep = 1
-    system_variables = u
+    nodal_variables = u
     scale_multiplier = '2 2 0'
     transformation_order = scale_multiplier
   [../]
