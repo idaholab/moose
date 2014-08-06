@@ -117,7 +117,11 @@ bool CommandLine::search(const std::string &option_name, T & argument)
     {
       if (_get_pot->search(pos->second.cli_switch[i]))
       {
-        if (pos->second.argument_type != NONE)
+        // "Flag" CLI options are added as Boolean types, when we see them
+        // we set the Boolean argument to true
+        if (pos->second.argument_type == NONE)
+          argument = true;
+        else
           argument = _get_pot->next(argument);
         return true;
       }
