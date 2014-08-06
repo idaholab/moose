@@ -569,8 +569,8 @@ RankTwoTensor::d2sin3Lode() const
   for (unsigned i = 0 ; i < N ; ++i)
     for (unsigned j = 0 ; j < N ; ++j)
       for (unsigned k = 0 ; k < N ; ++k)
-	for (unsigned l = 0 ; l < N ; ++l)
-	  deriv(i, j, k, l) += (-1.5*dII(i, j)*dIII(k, l) -1.5*dIII(i, j)*dII(k, l))/std::pow(bar, 2.5) + 1.5*2.5*dII(i, j)*dII(k, l)*J3/std::pow(bar, 3.5);
+        for (unsigned l = 0 ; l < N ; ++l)
+          deriv(i, j, k, l) += (-1.5*dII(i, j)*dIII(k, l) -1.5*dIII(i, j)*dII(k, l))/std::pow(bar, 2.5) + 1.5*2.5*dII(i, j)*dII(k, l)*J3/std::pow(bar, 3.5);
   deriv *= -1.5*std::sqrt(3.0);
   return deriv;
 }
@@ -771,8 +771,8 @@ RankTwoTensor::syev(const char * calculation_type, std::vector<Real> & eigvals, 
 
     for (unsigned int i = 0; i < N; ++i)
       for (unsigned int j = 0; j < N; ++j)
-	// a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed there
-	// Note the explicit symmeterisation
+        // a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed there
+        // Note the explicit symmeterisation
         a[i*N + j] = 0.5*(this->operator()(i,j) + this->operator()(j,i));
 
     // compute the eigenvalues only (if calculation_type == "N"),
