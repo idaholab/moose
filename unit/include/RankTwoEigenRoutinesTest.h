@@ -52,8 +52,10 @@ public:
   RankTwoTensor _m2;
   RankTwoTensor _m3;
   RankTwoTensor _m4;
-  RankTwoTensor _unsymmetric0;
-  RankTwoTensor _unsymmetric1;
+  RankTwoTensor _m5;
+  RankTwoTensor _m6;
+  RankTwoTensor _m7;
+  RankTwoTensor _m8;
 };
 
 #endif  // RANKTWOEIGENROUTINESTEST_H

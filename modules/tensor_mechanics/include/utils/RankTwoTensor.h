@@ -143,7 +143,7 @@ public:
   RankTwoTensor operator* (const TypeTensor<Real> & a) const;
 
   /// returns _vals_ij * a_ij (sum on i, j)
-  Real doubleContraction(const RankTwoTensor & a);
+  Real doubleContraction(const RankTwoTensor & a) const;
 
 
 
@@ -183,6 +183,14 @@ public:
   RankFourTensor d2secondInvariant() const;
 
 
+  /// Sin(3*Lode_angle)
+  Real sin3Lode() const;
+
+  /// d(sin3Lode)/dA_ij
+  RankTwoTensor dsin3Lode() const;
+
+  /// d^2(sin3Lode)/dA_ij/dA_kl
+  RankFourTensor d2sin3Lode() const;
 
   /**
    * Denote the _vals[i][j] by A_ij, then
@@ -233,17 +241,10 @@ public:
   void surfaceFillFromInputVector(const std::vector<Real> & input);
 
   /**
-   * Computes second derivatives of Eigenvalues of a rank two tensor
-   * @param tens is a rank two tensor
-   * @param deriv is a second derivative of the input tensor
-   */
-  void d2symmetricEigenvalues(std::vector<RankFourTensor> & deriv);
-
-  /**
    * computes eigenvalues, assuming tens is symmetric, and places them
    * in ascending order in eigvals
    */
-  void symmetricEigenvalues(std::vector<Real> & eigvals);
+  void symmetricEigenvalues(std::vector<Real> & eigvals) const;
 
   /**
    * computes eigenvalues, and their symmetric derivatives wrt vals,
@@ -256,7 +257,15 @@ public:
    * often defined by continuation from the un-equal case, and that is
    * too sophisticated for this routine.
    */
-  void dsymmetricEigenvalues(std::vector<Real> & eigvals, std::vector<RankTwoTensor> & deigvals);
+  void dsymmetricEigenvalues(std::vector<Real> & eigvals, std::vector<RankTwoTensor> & deigvals) const;
+
+  /**
+   * Computes second derivatives of Eigenvalues of a rank two tensor
+   * @param tens is a rank two tensor
+   * @param deriv is a second derivative of the input tensor
+   */
+  void d2symmetricEigenvalues(std::vector<RankFourTensor> & deriv) const;
+
    /**
    * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _vals:
    *  (1) the eigenvalues (if calculation_type == "N")
@@ -266,7 +275,7 @@ public:
    * @param a Eigenvectors are placed in this array if calculation_type == "V".
    * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
    */
-  void syev(const char * calculation_type, std::vector<Real> & eigvals, std::vector<double> & a);
+  void syev(const char * calculation_type, std::vector<Real> & eigvals, std::vector<double> & a) const;
 
 protected:
 

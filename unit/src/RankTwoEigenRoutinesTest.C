@@ -22,8 +22,10 @@ RankTwoEigenRoutinesTest::RankTwoEigenRoutinesTest()
   _m2 = RankTwoTensor(1, 0, 0, 0, 2, 0, 0, 0, 3);
   _m3 = RankTwoTensor(1, 2, 3, 2, -5, -6, 3, -6, 9);
   _m4 = RankTwoTensor(1, 0, 0, 0, 3, 0, 0, 0, 2);
-  _unsymmetric0 = RankTwoTensor(1, 2, 3, -4, -5, -6, 7, 8, 9);
-  _unsymmetric1 = RankTwoTensor(1, 2, 3, -4, -5, -6, 7, 8, 10);
+  _m5 = RankTwoTensor(1, 0, 0, 0, 1, 0, 0, 0, 2);
+  _m6 = RankTwoTensor(1, 0, 0, 0, 2, 0, 0, 0, 1);
+  _m7 = RankTwoTensor(1, 0, 0, 0, 2, 0, 0, 0, 2);
+  _m8 = RankTwoTensor(1, 1, 0, 1, 1, 0, 0, 0, 2); // has eigenvalues 0, 2 and 2
 }
 
 RankTwoEigenRoutinesTest::~RankTwoEigenRoutinesTest()
@@ -48,16 +50,6 @@ RankTwoEigenRoutinesTest::symmetricEigenvaluesTest()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-8.17113, eigvals[0], 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.51145, eigvals[1], 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(11.6597, eigvals[2], 0.0001);
-
-  // note that only the upper-diagonal part of m is used
-  // in the symmetric_eigenvalues routine - so the routine
-  // only works for symmetric matrices!!
-  // That is why the following m appears to have the same
-  // eigenvalues as the previous m !
-  _unsymmetric0.symmetricEigenvalues(eigvals);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-8.17113, eigvals[0], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.51145, eigvals[1], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(11.6597, eigvals[2], 0.0001);
 }
 
 void
@@ -72,20 +64,18 @@ RankTwoEigenRoutinesTest::dsymmetricEigenvaluesTest()
 
   RankTwoTensor mep; // the RankTwoTensor with successive entries shifted by ep
   std::vector<Real> eigvalsep; // eigenvalues of mep in ascending order
+  std::vector<Real> eigvalsep_minus; // for equal-eigenvalue cases, i take a central difference
 
   _m2.dsymmetricEigenvalues(eigvals, deriv);
   mep = _m2;
   for (unsigned i = 0 ; i < 3 ; ++i)
     for (unsigned j = 0 ; j < 3 ; ++j)
     {
-      // note the explicit symmeterisation here
-      mep(i, j) += ep/2;
-      mep(j, i) += ep/2;
+      mep(i, j) += ep;
       mep.symmetricEigenvalues(eigvalsep);
       for (unsigned k = 0 ; k < 3 ; ++k)
         CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvals[k])/ep, deriv[k](i, j), ep);
-      mep(i, j) -= ep/2;
-      mep(j, i) -= ep/2;
+      mep(i, j) -= ep;
     }
 
   _m3.dsymmetricEigenvalues(eigvals, deriv);
@@ -93,15 +83,80 @@ RankTwoEigenRoutinesTest::dsymmetricEigenvaluesTest()
   for (unsigned i = 0 ; i < 3 ; ++i)
     for (unsigned j = 0 ; j < 3 ; ++j)
     {
-      // note the explicit symmeterisation here
-      mep(i, j) += ep/2;
-      mep(j, i) += ep/2;
+      mep(i, j) += ep;
       mep.symmetricEigenvalues(eigvalsep);
       for (unsigned k = 0 ; k < 3 ; ++k)
         CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvals[k])/ep, deriv[k](i, j), ep);
-      mep(i, j) -= ep/2;
-      mep(j, i) -= ep/2;
+      mep(i, j) -= ep;
     }
+
+  // the equal-eigenvalue cases follow:
+
+  _m5.dsymmetricEigenvalues(eigvals, deriv);
+  mep = _m5;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      // here i use a central difference to define the
+      // discontinuous derivative
+      mep(i, j) += ep/2.0;
+      mep.symmetricEigenvalues(eigvalsep);
+      mep(i, j) -= ep;
+      mep.symmetricEigenvalues(eigvalsep_minus);
+      for (unsigned k = 0 ; k < 3 ; ++k)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvalsep_minus[k])/ep, deriv[k](i, j), ep);
+      mep(i, j) += ep/2.0;
+    }
+
+  _m6.dsymmetricEigenvalues(eigvals, deriv);
+  mep = _m6;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      // here i use a central difference to define the
+      // discontinuous derivative
+      mep(i, j) += ep/2.0;
+      mep.symmetricEigenvalues(eigvalsep);
+      mep(i, j) -= ep;
+      mep.symmetricEigenvalues(eigvalsep_minus);
+      for (unsigned k = 0 ; k < 3 ; ++k)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvalsep_minus[k])/ep, deriv[k](i, j), ep);
+      mep(i, j) += ep/2.0;
+    }
+
+  _m7.dsymmetricEigenvalues(eigvals, deriv);
+  mep = _m7;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      // here i use a central difference to define the
+      // discontinuous derivative
+      mep(i, j) += ep/2.0;
+      mep.symmetricEigenvalues(eigvalsep);
+      mep(i, j) -= ep;
+      mep.symmetricEigenvalues(eigvalsep_minus);
+      for (unsigned k = 0 ; k < 3 ; ++k)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvalsep_minus[k])/ep, deriv[k](i, j), ep);
+      mep(i, j) += ep/2.0;
+    }
+
+  _m8.dsymmetricEigenvalues(eigvals, deriv);
+  mep = _m8;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      // here i use a central difference to define the
+      // discontinuous derivative
+      mep(i, j) += ep/2.0;
+      mep.symmetricEigenvalues(eigvalsep);
+      mep(i, j) -= ep;
+      mep.symmetricEigenvalues(eigvalsep_minus);
+      for (unsigned k = 0 ; k < 3 ; ++k)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvalsep_minus[k])/ep, deriv[k](i, j), ep);
+      mep(i, j) += ep/2.0;
+    }
+
+
 }
 
 /**
@@ -154,17 +209,15 @@ void
 RankTwoEigenRoutinesTest::d2symmetricEigenvaluesTest2()
 {
   Real ep = 1E-5; // small finite-difference parameter
-  std::vector<Real> eigvals,eigvalsep; // eigenvalues in ascending order provided by RankTwoTensor
-  std::vector<RankTwoTensor> deriv,derivep; // derivatives of these eigenvalues provided by RankTwoTensor
+  std::vector<Real> eigvals, eigvalsep, eigvalsep_minus; // eigenvalues in ascending order provided by RankTwoTensor
+  std::vector<RankTwoTensor> deriv,derivep, derivep_minus; // derivatives of these eigenvalues provided by RankTwoTensor
   std::vector<RankFourTensor> second_deriv;
 
   RankTwoTensor mep; // the RankTwoTensor with successive entries shifted by ep
 
   _m2.d2symmetricEigenvalues(second_deriv);
   _m2.dsymmetricEigenvalues(eigvals, deriv);
-
   mep = _m2;
-
   for (unsigned int m = 0; m < 3; m++)
     for (unsigned i = 0; i < 3; i++)
       for (unsigned j = 0; j < 3; j++)
@@ -172,21 +225,17 @@ RankTwoEigenRoutinesTest::d2symmetricEigenvaluesTest2()
         for (unsigned int k=0; k<3; k++)
           for (unsigned int l=0; l<3; l++)
           {
-            mep(k, l) += ep/2;
-            mep(l, k) += ep/2;
-
+            mep(k, l) += ep;
             mep.dsymmetricEigenvalues(eigvalsep, derivep);
             CPPUNIT_ASSERT_DOUBLES_EQUAL((derivep[m](i, j) - deriv[m](i, j))/ep, second_deriv[m](i, j, k, l), ep);
-            mep(k, l) -= ep/2;
-            mep(l, k) -= ep/2;
+            mep(k, l) -= ep;
           }
       }
+
 
   _m3.d2symmetricEigenvalues(second_deriv);
   _m3.dsymmetricEigenvalues(eigvals, deriv);
-
   mep = _m3;
-
   for (unsigned int m = 0; m < 3; m++)
     for (unsigned i = 0; i < 3; i++)
       for (unsigned j = 0; j < 3; j++)
@@ -194,15 +243,13 @@ RankTwoEigenRoutinesTest::d2symmetricEigenvaluesTest2()
         for (unsigned int k=0; k<3; k++)
           for (unsigned int l=0; l<3; l++)
           {
-            mep(k, l) += ep/2;
-            mep(l, k) += ep/2;
-
+            mep(k, l) += ep;
             mep.dsymmetricEigenvalues(eigvalsep, derivep);
             CPPUNIT_ASSERT_DOUBLES_EQUAL((derivep[m](i, j) - deriv[m](i, j))/ep, second_deriv[m](i, j, k, l), ep);
-            mep(k, l) -= ep/2;
-            mep(l, k) -= ep/2;
+            mep(k, l) -= ep;
           }
       }
+
 }
 
 
@@ -219,7 +266,7 @@ RankTwoEigenRoutinesTest::someIdentitiesTest()
   Real shear = std::sqrt(secondInvariant);
   Real thirdInvariant = _m3.thirdInvariant();
 
-  Real lode = std::asin(-1.5*std::sqrt(3.0)*thirdInvariant/std::pow(shear, 3.0))/3.0;
+  Real lode = std::asin(_m3.sin3Lode()/3.0);
 
   Real two_pi_over_3 = 2.09439510239;
   CPPUNIT_ASSERT_DOUBLES_EQUAL(eigvals[0], 2*shear*std::sin(lode - two_pi_over_3)/std::sqrt(3.0) + mean, 0.0001);
