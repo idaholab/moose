@@ -152,7 +152,13 @@ protected:
   /// The system name to extract from the XDA file (xda only)
   std::string _system_name;
 
-  /// A list of variables to extract from the read system
+  /// A list of nodal variables extract from the read system
+  std::vector<std::string> _nodal_variables;
+
+  /// A list of elemental variables to extract from the read system
+  std::vector<std::string> _elemental_variables;
+
+  /// A list of all variables to extract from the read system
   std::vector<std::string> _system_variables;
 
   /// Stores the local index need by MeshFunction
