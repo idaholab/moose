@@ -2,6 +2,6 @@
   [./test]
     type = 'Exodiff'
     input = 'auto_positions.i'
-    exodiff = 'auto_positions_out.e auto_positions_out_auto_pos00.e auto_positions_out_auto_pos01.e auto_positions_out_auto_pos02.e auto_positions_out_auto_pos03.e auto_positions_out_auto_pos04.e auto_positions_out_auto_pos05.e auto_positions_out_auto_pos06.e auto_positions_out_auto_pos07.e auto_positions_out_auto_pos08.e auto_positions_out_auto_pos09.e auto_positions_out_auto_pos10.e auto_positions_out_auto_pos11.e'
+    exodiff = 'auto_positions_out.e'
   [../]
 []
