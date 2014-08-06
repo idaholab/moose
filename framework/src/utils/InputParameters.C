@@ -72,13 +72,24 @@ InputParameters::addClassDescription(const std::string &doc_string)
 void
 InputParameters::set_attributes(const std::string & name, bool inserted_only)
 {
-  // valid_params don't make sense for MooseEnums
-  if (!inserted_only && !have_parameter<MooseEnum>(name))
-    _valid_params.insert(name);
+  if (!inserted_only)
+  {
+    /**
+     * "_set_by_add_param" and "_deprecated_params" are not populated until after
+     * the default value has already been set in libMesh (first callback to this
+     * method). Therefore if a variable is in/not in one of these sets, you can
+     * be assured it was put there outside of the "addParam*()" calls.
+     */
+    _set_by_add_param.erase(name);
 
-  /* If set_attributes is called then the user has changed it from the default value
-     set by addParam, thus remove if from the list */
-  _set_by_add_param.erase(name);
+    // valid_params don't make sense for MooseEnums
+    if (!have_parameter<MooseEnum>(name))
+      _valid_params.insert(name);
+
+    std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
+    if (pos != _deprecated_params.end())
+      mooseWarning("The parameter " << name << " is deprecated.\n" << pos->second);
+  }
 }
 
 std::string

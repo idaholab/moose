@@ -483,6 +483,9 @@ private:
   /// The coupled variables set
   std::set<std::string> _coupled_vars;
 
+  /// The list of deprecated params
+  std::map<std::string, std::string> _deprecated_params;
+
   /// The default value for optionally coupled variables
   std::map<std::string, Real> _default_coupled_value;
 
@@ -721,27 +724,27 @@ template <typename T>
 void
 InputParameters::addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
 {
-  mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
-
   addRequiredParam<T>(name, doc_string);
+
+  _deprecated_params.insert(std::make_pair(name, deprecation_message));
 }
 
 template <typename T>
 void
 InputParameters::addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message)
 {
-  mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
-
   addParam<T>(name, value, doc_string);
+
+  _deprecated_params.insert(std::make_pair(name, deprecation_message));
 }
 
 template <typename T>
 void
 InputParameters::addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
 {
-  mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
-
   addParam<T>(name, doc_string);
+
+  _deprecated_params.insert(std::make_pair(name, deprecation_message));
 }
 
 template <typename T>

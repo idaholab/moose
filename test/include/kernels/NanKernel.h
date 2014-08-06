@@ -24,6 +24,9 @@ protected:
 
 private:
   unsigned int _timestep_to_nan;
+
+  unsigned int _deprecated_default;
+  unsigned int _deprecated_no_default;
 };
 
 #endif //NANKERNEL_H
