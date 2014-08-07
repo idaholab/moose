@@ -1,5 +1,5 @@
-#ifndef QFUNCTIONJINTEGRAL_H
-#define QFUNCTIONJINTEGRAL_H
+#ifndef DOMAININTEGRALQFUNCTION_H
+#define DOMAININTEGRALQFUNCTION_H
 
 #include "AuxKernel.h"
 #include "CrackFrontDefinition.h"
@@ -7,7 +7,7 @@
 /**
  * Coupled auxiliary value
  */
-class qFunctionJIntegral : public AuxKernel
+class DomainIntegralQFunction : public AuxKernel
 {
 public:
 
@@ -15,9 +15,9 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  qFunctionJIntegral(const std::string & name, InputParameters parameters);
+  DomainIntegralQFunction(const std::string & name, InputParameters parameters);
 
-  virtual ~qFunctionJIntegral() {}
+  virtual ~DomainIntegralQFunction() {}
 
 protected:
   virtual void initialSetup();
@@ -33,6 +33,6 @@ private:
 };
 
 template<>
-InputParameters validParams<qFunctionJIntegral>();
+InputParameters validParams<DomainIntegralQFunction>();
 
-#endif //QFUNCTIONJINTEGRAL3D_H
+#endif //DOMAININTEGRALQFUNCTION_H

@@ -1,7 +1,7 @@
-#include "qFunctionJIntegral.h"
+#include "DomainIntegralQFunction.h"
 
 template<>
-InputParameters validParams<qFunctionJIntegral>()
+InputParameters validParams<DomainIntegralQFunction>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -13,7 +13,7 @@ InputParameters validParams<qFunctionJIntegral>()
   return params;
 }
 
-qFunctionJIntegral::qFunctionJIntegral(const std::string & name, InputParameters parameters):
+DomainIntegralQFunction::DomainIntegralQFunction(const std::string & name, InputParameters parameters):
     AuxKernel(name, parameters),
     _j_integral_radius_inner(getParam<Real>("j_integral_radius_inner")),
     _j_integral_radius_outer(getParam<Real>("j_integral_radius_outer")),
@@ -24,7 +24,7 @@ qFunctionJIntegral::qFunctionJIntegral(const std::string & name, InputParameters
 {}
 
 void
-qFunctionJIntegral::initialSetup()
+DomainIntegralQFunction::initialSetup()
 {
   _treat_as_2d = _crack_front_definition->treatAs2D();
 
@@ -39,13 +39,13 @@ qFunctionJIntegral::initialSetup()
   {
     if (!_has_crack_front_node_index)
     {
-      mooseError("crack_front_node_index must be specified in qFunctionJIntegral");
+      mooseError("crack_front_node_index must be specified in DomainIntegralQFunction");
     }
   }
 }
 
 Real
-qFunctionJIntegral::computeValue()
+DomainIntegralQFunction::computeValue()
 {
   Point  p = *_current_node;
 

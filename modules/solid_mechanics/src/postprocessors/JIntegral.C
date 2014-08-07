@@ -1,4 +1,4 @@
-//  This post processor returns the J-Integral
+//  This post processor calculates the J-Integral
 //
 #include "JIntegral.h"
 
@@ -40,7 +40,7 @@ JIntegral::initialSetup()
   {
     if (!_has_crack_front_node_index)
     {
-      mooseError("crack_front_node_index must be specified in qFunctionJIntegral3D");
+      mooseError("crack_front_node_index must be specified in JIntegral");
     }
   }
 }

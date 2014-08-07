@@ -1,4 +1,4 @@
-#include "JIntegralAction.h"
+#include "DomainIntegralAction.h"
 
 #include "Factory.h"
 #include "FEProblem.h"
@@ -7,10 +7,13 @@
 #include "CrackFrontDefinition.h"
 
 template<>
-InputParameters validParams<JIntegralAction>()
+InputParameters validParams<DomainIntegralAction>()
 {
   InputParameters params = validParams<Action>();
   addCrackFrontDefinitionParams(params);
+  MooseEnum integral("JIntegral, InteractionIntegralKI, InteractionIntegralKII, InteractionIntegralKIII");
+  std::vector<MooseEnum> integral_vec(1, integral);
+  params.addRequiredParam<std::vector<MooseEnum> >("integrals", integral_vec, "Domain integrals to calculate.  Choices are: " + integral.getRawNames());
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
   params.addParam<std::string>("order", "FIRST",  "Specifies the order of the FE shape function to use for q AuxVariables");
   params.addParam<std::string>("family", "LAGRANGE", "Specifies the family of FE shape functions to use for q AuxVariables");
@@ -19,7 +22,7 @@ InputParameters validParams<JIntegralAction>()
   return params;
 }
 
-JIntegralAction::JIntegralAction(const std::string & name, InputParameters params):
+DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParameters params):
   Action(name, params),
   _boundary_names(getParam<std::vector<BoundaryName> >("boundary")),
   _order(getParam<std::string>("order")),
@@ -58,14 +61,27 @@ JIntegralAction::JIntegralAction(const std::string & name, InputParameters param
   {
     mooseError("Number of entries in 'radius_inner' and 'radius_outer' must match.");
   }
+
+  std::vector<MooseEnum> integral_moose_enums = getParam<std::vector<MooseEnum> >("integrals");
+  if (integral_moose_enums.size() == 0)
+    mooseError("Must specify at least one domain integral to perform.");
+  for (unsigned int i=0; i<integral_moose_enums.size(); ++i)
+  {
+    if (integral_moose_enums[i].isValid())
+    {
+      if (integral_moose_enums[i] != "JIntegral")
+        mooseError("Domain integral type not yet implemented: "<<integral_moose_enums[i]);
+      _integrals.insert(INTEGRAL(int(integral_moose_enums[i])));
+    }
+  }
 }
 
-JIntegralAction::~JIntegralAction()
+DomainIntegralAction::~DomainIntegralAction()
 {
 }
 
 void
-JIntegralAction::act()
+DomainIntegralAction::act()
 {
   const std::string uo_name("crackFrontDefinition");
   const std::string ak_base_name("q");
@@ -131,7 +147,7 @@ JIntegralAction::act()
   }
   else if (_current_task == "add_aux_kernel")
   {
-    const std::string ak_type_name("qFunctionJIntegral");
+    const std::string ak_type_name("DomainIntegralQFunction");
     InputParameters params = _factory.getValidParams(ak_type_name);
     params.set<std::vector<MooseEnum> >("execute_on")[0] = "initial";
     params.set<UserObjectName>("crack_front_definition") = uo_name;
@@ -167,37 +183,40 @@ JIntegralAction::act()
   }
   else if (_current_task == "add_postprocessor")
   {
-    const std::string pp_type_name("JIntegral");
-    InputParameters params = _factory.getValidParams(pp_type_name);
-    params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
-    params.set<UserObjectName>("crack_front_definition") = uo_name;
-    params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
-    for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
+    if (_integrals.count(J_INTEGRAL) != 0)
     {
-      if (_treat_as_2d)
+      const std::string pp_type_name("JIntegral");
+      InputParameters params = _factory.getValidParams(pp_type_name);
+      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<UserObjectName>("crack_front_definition") = uo_name;
+      params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+      for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
-        std::ostringstream av_name_stream;
-        av_name_stream<<av_base_name<<"_"<<ring_index+1;
-        std::ostringstream pp_name_stream;
-        pp_name_stream<<pp_base_name<<"_"<<ring_index+1;
-        std::vector<VariableName> qvars;
-        qvars.push_back(av_name_stream.str());
-        params.set<std::vector<VariableName> >("q") = qvars;
-        _problem->addPostprocessor(pp_type_name,pp_name_stream.str(),params);
-      }
-      else
-      {
-        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        if (_treat_as_2d)
         {
           std::ostringstream av_name_stream;
-          av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+          av_name_stream<<av_base_name<<"_"<<ring_index+1;
           std::ostringstream pp_name_stream;
-          pp_name_stream<<pp_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+          pp_name_stream<<pp_base_name<<"_"<<ring_index+1;
           std::vector<VariableName> qvars;
           qvars.push_back(av_name_stream.str());
           params.set<std::vector<VariableName> >("q") = qvars;
-          params.set<unsigned int>("crack_front_node_index") = cfn_index;
           _problem->addPostprocessor(pp_type_name,pp_name_stream.str(),params);
+        }
+        else
+        {
+          for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+          {
+            std::ostringstream av_name_stream;
+            av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            std::ostringstream pp_name_stream;
+            pp_name_stream<<pp_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            std::vector<VariableName> qvars;
+            qvars.push_back(av_name_stream.str());
+            params.set<std::vector<VariableName> >("q") = qvars;
+            params.set<unsigned int>("crack_front_node_index") = cfn_index;
+            _problem->addPostprocessor(pp_type_name,pp_name_stream.str(),params);
+          }
         }
       }
     }
@@ -205,7 +224,7 @@ JIntegralAction::act()
 }
 
 unsigned int
-JIntegralAction::calcNumCrackFrontNodes()
+DomainIntegralAction::calcNumCrackFrontNodes()
 {
   std::vector<BoundaryID> bids = _mesh->getBoundaryIDs(_boundary_names,true);
   std::set<unsigned int> nodes;
