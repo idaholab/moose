@@ -22,8 +22,8 @@ InputParameters validParams<Gnuplot>()
   InputParameters params = validParams<TableOutput>();
 
   // Set an enum for the possible file extensions
-  MooseEnum ext("png ps gif", "png", "GNU plot file extension");
-  params.addParam<MooseEnum>("extension", ext, "GUN plot file extension");
+  MooseEnum ext("png ps gif", "png", true);
+  params.addParam<MooseEnum>("extension", ext, "GNU plot file extension");
 
   // Suppress unused parameters
   params.suppressParameter<unsigned int>("padding");
