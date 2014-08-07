@@ -79,7 +79,7 @@ AddVariableAction::getNonlinearVariableOrders()
 void
 AddVariableAction::act()
 {
-  if (_current_action == "add_variable")
+  if (_current_task == "add_variable")
   {
     // Get necessary data for creating a variable
     std::string var_name = getShortName();
@@ -106,7 +106,7 @@ AddVariableAction::act()
   }
 
   // Set the initial condition
-  if (_current_action == "add_ic")
+  if (_current_task == "add_ic")
     setInitialCondition();
 }
 

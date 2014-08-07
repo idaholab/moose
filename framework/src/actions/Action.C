@@ -44,7 +44,7 @@ Action::Action(const std::string & name, InputParameters params) :
     _action_factory(_app.getActionFactory()),
     _specific_task_name(getParam<std::string>("task")),
     _awh(*params.getCheckedPointerParam<ActionWarehouse *>("awh")),
-    _current_action(_awh.getCurrentTaskName()),
+    _current_task(_awh.getCurrentTaskName()),
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
     _problem(_awh.problem()),
