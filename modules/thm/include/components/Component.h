@@ -9,7 +9,7 @@
 
 class Component;
 class FEProblem;
-class RavenMapContainer;
+class ControlLogicMapContainer;
 
 template<>
 InputParameters validParams<Component>();
@@ -20,12 +20,12 @@ InputParameters validParams<Component>();
  * Since this class is only privately used by the class Component,
  * it's been added in this file
  */
-class RavenMapContainer
+class ControlLogicMapContainer
 {
 public:
-   RavenMapContainer();
-   RavenMapContainer(const std::string & controllableParName, unsigned int & position);
-   virtual ~ RavenMapContainer();
+   ControlLogicMapContainer();
+   ControlLogicMapContainer(const std::string & controllableParName, unsigned int & position);
+   virtual ~ ControlLogicMapContainer();
    const std::string & getControllableParName();
    unsigned int & getControllableParPosition();
 protected:
@@ -42,9 +42,9 @@ protected:
 class Component : public R7Object
 {
 public:
-  struct RavenNameEntry
+  struct ControlLogicNameEntry
   {
-    RavenNameEntry(const std::string & object_name, const std::string par_name) :
+    ControlLogicNameEntry(const std::string & object_name, const std::string par_name) :
       _object_name(object_name),
       _par_name(par_name)
     {
@@ -111,7 +111,13 @@ public:
 
   void aliasParam(const std::string & rname, const std::string & name, Component * comp = NULL);
   void aliasVectorParam(const std::string & rname, const std::string & name, unsigned int pos, Component * comp = NULL);
+  /**
+   * Connect with control logic
+   */
   void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name);
+  /**
+   * Connect with control logic
+   */
   void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name);
 
   /**
@@ -122,7 +128,7 @@ public:
    */
   void createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos);
 
-  const std::map<std::string, std::map<std::string, std::vector<RavenNameEntry> > > & getControllableParams() { return _rname_map; }
+  const std::map<std::string, std::map<std::string, std::vector<ControlLogicNameEntry> > > & getControllableParams() { return _rname_map; }
 
 public:
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
@@ -151,9 +157,9 @@ protected:
   std::vector<unsigned int> _subdomains;
 
   /// Mapping from a friendly name to MOOSE object name
-  std::map<std::string, std::map<std::string, std::vector<RavenNameEntry> > > _rname_map;
+  std::map<std::string, std::map<std::string, std::vector<ControlLogicNameEntry> > > _rname_map;
   /// Mapping of friendly names
-  std::map<std::string, RavenMapContainer> _rvect_map;
+  std::map<std::string, ControlLogicMapContainer> _rvect_map;
   /// Map for aliasing component param names
   std::map<std::string, std::pair<Component *, std::string> > _param_alias_map;
 
@@ -183,10 +189,10 @@ Component::hasRParam(const std::string & param_name)
 {
   std::vector<std::string> s = split(param_name);
 
-  std::map<std::string, std::vector<RavenNameEntry> > & rmap = _rname_map[s[0]];
+  std::map<std::string, std::vector<ControlLogicNameEntry> > & rmap = _rname_map[s[0]];
 
-  const std::vector<RavenNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
-  for (std::vector<RavenNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+  const std::vector<ControlLogicNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
+  for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
   {
     const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(it->_object_name, 0);
     if (objs.size() > 0)
@@ -223,7 +229,7 @@ Component::hasRParam(const std::string & param_name)
     return false;
   else
   {
-    RavenMapContainer name_cont = _rvect_map.find(param_name)->second;
+    ControlLogicMapContainer name_cont = _rvect_map.find(param_name)->second;
     if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
       return true;
   }
@@ -237,10 +243,10 @@ Component::getRParam(const std::string & param_name)
 {
   std::vector<std::string> s = split(param_name);
 
-  std::map<std::string, std::vector<RavenNameEntry> > & rmap = _rname_map[s[0]];
+  std::map<std::string, std::vector<ControlLogicNameEntry> > & rmap = _rname_map[s[0]];
 
-  const std::vector<RavenNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
-  for (std::vector<RavenNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+  const std::vector<ControlLogicNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
+  for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
   {
     const std::vector<MooseObject *> & objs = _sim.feproblem().getObjectsByName(it->_object_name, 0);
     if (objs.size() > 0)
@@ -277,7 +283,7 @@ Component::getRParam(const std::string & param_name)
     mooseError("Parameter '" + param_name + "' was not found in component '" + name() + "'.");
   else
   {
-    RavenMapContainer name_cont = _rvect_map.find(param_name)->second;
+    ControlLogicMapContainer name_cont = _rvect_map.find(param_name)->second;
     if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
       return parameters().get<std::vector<T> >(name_cont.getControllableParName())[name_cont.getControllableParPosition()];
   }
@@ -290,9 +296,9 @@ Component::setRParam(const std::string & param_name, const T & value)
 {
   std::vector<std::string> s = split(param_name);
 
-  std::map<std::string, std::vector<RavenNameEntry> > & rmap = _rname_map[s[0]];
-  const std::vector<RavenNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
-  for (std::vector<RavenNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
+  std::map<std::string, std::vector<ControlLogicNameEntry> > & rmap = _rname_map[s[0]];
+  const std::vector<ControlLogicNameEntry> & entries = (rmap.find(s[1]) != rmap.end()) ? rmap[s[1]] : rmap[""];
+  for (std::vector<ControlLogicNameEntry>::const_iterator it = entries.begin(); it != entries.end(); ++it)
   {
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
@@ -331,7 +337,7 @@ Component::setRParam(const std::string & param_name, const T & value)
   // Try to search into the vector parameter mapping
   if (_rvect_map.find(param_name) != _rvect_map.end())
   {
-    RavenMapContainer name_cont = _rvect_map.find(param_name)->second;
+    ControlLogicMapContainer name_cont = _rvect_map.find(param_name)->second;
     if (parameters().have_parameter<std::vector<T> >(name_cont.getControllableParName()))
     {
       std::vector<T> tempp = parameters().get< std::vector<T> >(name_cont.getControllableParName());

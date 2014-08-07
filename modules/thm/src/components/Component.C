@@ -23,25 +23,25 @@ InputParameters validParams<Component>()
  * Class used by Component class to map vector variables through friendly names
  * i.e. friendly name = inlet:K_loss; variableName = K_loss, position = 1
  */
-RavenMapContainer::RavenMapContainer()
+ControlLogicMapContainer::ControlLogicMapContainer()
 {
 }
 /*
  * CHANGE VARIABLENAME to ControllableName
  */
-RavenMapContainer::RavenMapContainer(const std::string & controllableParName, unsigned int & position):
+ControlLogicMapContainer::ControlLogicMapContainer(const std::string & controllableParName, unsigned int & position):
    _controllableParName(controllableParName),
    _position(position)
 {
 }
-RavenMapContainer::~RavenMapContainer(){
+ControlLogicMapContainer::~ControlLogicMapContainer(){
 }
 const std::string &
-RavenMapContainer::getControllableParName(){
+ControlLogicMapContainer::getControllableParName(){
    return _controllableParName;
 }
 unsigned int &
-RavenMapContainer::getControllableParPosition(){
+ControlLogicMapContainer::getControllableParPosition(){
    return _position;
 }
 
@@ -155,7 +155,7 @@ Component::aliasVectorParam(const std::string & rname, const std::string & name,
 void
 Component::connectObject(const std::string & rname, const std::string & mooseName, const std::string & name)
 {
-  RavenNameEntry rne(mooseName, name);
+  ControlLogicNameEntry rne(mooseName, name);
   if (_parent != NULL)
     _parent->_rname_map[rname][name].push_back(rne);
   else
@@ -165,7 +165,7 @@ Component::connectObject(const std::string & rname, const std::string & mooseNam
 void
 Component::connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name)
 {
-  RavenNameEntry rne(mooseName, par_name);
+  ControlLogicNameEntry rne(mooseName, par_name);
   if (_parent != NULL)
     _parent->_rname_map[rname][name].push_back(rne);
   else
@@ -176,5 +176,5 @@ Component::connectObject(const std::string & rname, const std::string & mooseNam
 void
 Component::createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos)
 {
-  _rvect_map[rname] = RavenMapContainer(mooseName, pos);
+  _rvect_map[rname] = ControlLogicMapContainer(mooseName, pos);
 }
