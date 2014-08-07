@@ -16,13 +16,13 @@ class PeacockErrorInterface:
 
 
 
-
   def peacockError(self, *args, **kwargs):
 
     message = ' '.join(args)
+    self._last_error_message = message
 
+    # Eat the message if running in testing mode
     if self._testing:
-      self._last_error_message = message
       return
 
     if self._has_dialog and kwargs.pop('dialog', True):
@@ -35,7 +35,7 @@ class PeacockErrorInterface:
   def getLastErrorMessage(self):
     return self._last_error_message
 
-class TestInterface:
+class PeacockTestInterface:
   def __init__(self):
     pass
 
@@ -45,22 +45,32 @@ class TestInterface:
     static_prefix = '_' + class_name + '__test'
     prefix = '__test'
 
+    print dir(self)
+
     for item in dir(self):
       name = None
 
+      print item
+
       # static
       if item.startswith(static_prefix):
+        print "Static"
         name = item.replace(static_prefix, '')
         attr = getattr(self, item)
         self.__showResult(name, attr)
 
 
       if item.startswith(prefix):
+        print "Non-static"
         name = item.replace(prefix, '')
-        attr = getattr(self, item)
-        self.__showResult(name, attr())
+        attr = getattr(self, '__test'+name)
+        result = attr()
+        self.__showResult(name, result)
 
   def __showResult(self, name, result):
+
+    print 'result = ', result
+
     if result:
       result = 'OK'
     else:
@@ -78,10 +88,10 @@ class TestInterface:
 
 
 
-class CSVIO(object, PeacockErrorInterface, TestInterface):
+class CSVIO(object, PeacockErrorInterface, PeacockTestInterface):
   def __init__(self, filename, **kwargs):
     PeacockErrorInterface.__init__(self, **kwargs)
-    TestInterface.__init__(self)
+    PeacockTestInterface.__init__(self)
 
 
     # Initialize member variables
@@ -124,11 +134,11 @@ class CSVIO(object, PeacockErrorInterface, TestInterface):
       return None
 
 
-  def __testDataAccess():
+  def _testDataAccess():
     data = CSVIO('test.csv', testing=True)
     return data['data1'] == [1.1, 4.2, 431.353]
 
-  def __testDataError(self):
+  def _testDataError(self):
     data['ThisDoeNotExist']
     print self.getLastErrorMessage()
     return self.getLastErrorMessage() == 'No data for key \'ThisDoeNotExist\' loated'
