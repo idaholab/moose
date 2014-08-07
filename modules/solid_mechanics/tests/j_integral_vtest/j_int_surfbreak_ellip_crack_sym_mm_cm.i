@@ -59,7 +59,8 @@
   [../]
 []
 
-[JIntegral]
+[DomainIntegral]
+  integrals = JIntegral
   boundary = 1001
   crack_direction_method = CrackMouth
   crack_mouth_boundary = 11
