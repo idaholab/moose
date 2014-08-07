@@ -1,43 +1,143 @@
+from PySide import QtCore, QtGui
 import csv
 
-class CSVIO(object):
-  def __init__(self, filename):
+
+class PeacockErrorInterface:
+  def __init__(self, **kwargs):
+
+    self._testing = kwargs.pop('testing', False)
+    self._last_error_message = None
+    self._error_dialog = None
+    self._has_dialog = False
+
+    if isinstance(self, QtGui.QWidget):
+      self._error_dialog = QtGui.QErrorMessage(self)
+      self._has_dialog = True
+
+
+
+
+  def peacockError(self, *args, **kwargs):
+
+    message = ' '.join(args)
+
+    if self._testing:
+      self._last_error_message = message
+      return
+
+    if self._has_dialog and kwargs.pop('dialog', True):
+      self._error_message.showMessage(message)
+
+    if kwargs.pop('screen', True):
+      print message
+
+
+  def getLastErrorMessage(self):
+    return self._last_error_message
+
+class TestInterface:
+  def __init__(self):
+    pass
+
+  def test(self):
+
+    class_name = self.__class__.__name__
+    static_prefix = '_' + class_name + '__test'
+    prefix = '__test'
+
+    for item in dir(self):
+      name = None
+
+      # static
+      if item.startswith(static_prefix):
+        name = item.replace(static_prefix, '')
+        attr = getattr(self, item)
+        self.__showResult(name, attr)
+
+
+      if item.startswith(prefix):
+        name = item.replace(prefix, '')
+        attr = getattr(self, item)
+        self.__showResult(name, attr())
+
+  def __showResult(self, name, result):
+    if result:
+      result = 'OK'
+    else:
+      result = 'FAIL'
+
+
+    name = self.__class__.__name__ + '/' + name
+    n = 110 - len(name) - len(result)
+    print name + '.'*n + result
+
+
+
+
+
+
+
+
+class CSVIO(object, PeacockErrorInterface, TestInterface):
+  def __init__(self, filename, **kwargs):
+    PeacockErrorInterface.__init__(self, **kwargs)
+    TestInterface.__init__(self)
+
+
+    # Initialize member variables
+    self._headers = []
+    self._data = dict()
 
     # Read the file
-    reader = csv.reader(filename)
+    with open(filename) as csvfile:
+      reader = csv.reader(csvfile)
 
-    # Extract the data into a dictionary
-    self._data = dict()
-    on_header = True
+      # Extract the data into a dictionary
+      self._data = dict()
+      on_header = True
 
-    # Loop through the rows
-    for row in reader:
+      # Loop through the rows
+      for row in reader:
 
-      # Store the header and initialize the data dictionary
-      if on_header:
-        headers = row
-        for h in headers:
-          self._data[h] = []
-        on_header = False
-
-
-      # Extract the data
-      else:
-        for idx in xrange(len(row)):
-          self._data[headers[idx]].append(row[idx])
+        # Store the header and initialize the data dictionary
+        if on_header:
+          headers = row
+          for h in headers:
+            key = h.strip()
+            self._headers.append(key)
+            self._data[key] = []
+          on_header = False
 
 
+        # Extract the data
+        else:
+          for idx in xrange(len(row)):
+            self._data[self._headers[idx]].append(float(row[idx]))
 
-
-  def.__getitem__(self, key):
+  def __getitem__(self, key):
 
     try:
       return self._data[key]
 
     except KeyError:
-
-      print "No data..."
-      # We need to come up with a way of creating error dialogs that would work with free, non MooseWidget functions/classes
-      #peacockError()
-
+      self.peacockError('No data for key \'' + key + '\' located', dialog=False)
       return None
+
+
+  def __testDataAccess():
+    data = CSVIO('test.csv', testing=True)
+    return data['data1'] == [1.1, 4.2, 431.353]
+
+  def __testDataError(self):
+    data['ThisDoeNotExist']
+    print self.getLastErrorMessage()
+    return self.getLastErrorMessage() == 'No data for key \'ThisDoeNotExist\' loated'
+
+
+# Perform testing
+if __name__ == "__main__":
+
+  data = CSVIO('test.csv', testing=True)
+  data.test()
+
+  print data.getLastErrorMessage()
