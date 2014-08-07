@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "NodalVariableValue.h"
+#include "CrackFrontData.h"
 #include "MooseMesh.h"
 #include "SubProblem.h"
 
@@ -20,37 +20,37 @@
 #include "libmesh/boundary_info.h"
 
 template<>
-InputParameters validParams<NodalVariableValue>()
+InputParameters validParams<CrackFrontData>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<VariableName>("variable", "The variable to be monitored");
-  params.addRequiredParam<unsigned int>("nodeid", "The ID of the node where we monitor");
-  params.addParam<Real>("scale_factor",1, "A scale factor to be applied to the variable");
+  params.addRequiredParam<VariableName>("variable", "The name of a variable whose value at the crack front is to be reported");
+  params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
+  params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front where data is to be reported");
+  params.addParam<Real>("scale_factor",1, "A scale factor to be applied to the reported quantity");
   return params;
 }
 
-NodalVariableValue::NodalVariableValue(const std::string & name, InputParameters parameters) :
+CrackFrontData::CrackFrontData(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
+    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
+    _crack_front_node_index(isParamValid("crack_front_node_index") ? getParam<unsigned int>("crack_front_node_index") : 0),
+    _crack_front_node(NULL),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
-    _node_ptr(_mesh.getMesh().query_node_ptr(getParam<unsigned int>("nodeid"))),
     _scale_factor(getParam<Real>("scale_factor"))
 {
-  // This class only works with SerialMesh, since it relies on a
-  // specific node numbering that we can't guarantee with ParallelMesh
-  _mesh.errorIfParallelDistribution("NodalVariableValue");
-
-  if (_node_ptr == NULL)
-    mooseError("Node #" << getParam<unsigned int>("nodeid") << " specified in '" << name << "' not found in the mesh!");
 }
 
 Real
-NodalVariableValue::getValue()
+CrackFrontData::getValue()
 {
+  if (! _crack_front_node)
+    _crack_front_node = _crack_front_definition->getCrackFrontNodePtr(_crack_front_node_index);
+
   Real value = 0;
 
-  if (_node_ptr->processor_id() == processor_id())
-    value = _subproblem.getVariable(_tid, _var_name).getNodalValue(*_node_ptr);
+  if (_crack_front_node->processor_id() == processor_id())
+    value = _subproblem.getVariable(_tid, _var_name).getNodalValue(*_crack_front_node);
 
   gatherSum(value);
 

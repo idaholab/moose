@@ -26,6 +26,7 @@
 #include "MacroElastic.h"
 #include "Mass.h"
 #include "JIntegral.h"
+#include "CrackFrontData.h"
 #include "CrackFrontDefinition.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
@@ -139,6 +140,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(Mass);
   registerPostprocessor(JIntegral);
+  registerPostprocessor(CrackFrontData);
   registerPostprocessor(CavityPressurePostprocessor);
 
   registerUserObject(MaterialTensorOnLine);
