@@ -35,7 +35,7 @@
 #include "AccumulateAux.h"
 #include "NewmarkAccelAux.h"
 #include "NewmarkVelAux.h"
-#include "qFunctionJIntegral.h"
+#include "DomainIntegralQFunction.h"
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
@@ -48,7 +48,7 @@
 #include "Pressure.h"
 #include "PressureAction.h"
 #include "SolidMechanicsAction.h"
-#include "JIntegralAction.h"
+#include "DomainIntegralAction.h"
 #include "SolidMechInertialForce.h"
 #include "SolidMechImplicitEuler.h"
 #include "SolidModel.h"
@@ -98,7 +98,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerAux(AccumulateAux);
   registerAux(NewmarkAccelAux);
   registerAux(NewmarkVelAux);
-  registerAux(qFunctionJIntegral);
+  registerAux(DomainIntegralQFunction);
   registerAux(ElementsOnLineAux);
 
   registerBoundaryCondition(DashpotBC);
@@ -161,18 +161,18 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
 
   syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
-  syntax.registerActionSyntax("JIntegralAction", "JIntegral","add_user_object");
-  syntax.registerActionSyntax("JIntegralAction", "JIntegral","add_aux_variable");
-  syntax.registerActionSyntax("JIntegralAction", "JIntegral","add_aux_kernel");
-  syntax.registerActionSyntax("JIntegralAction", "JIntegral","add_postprocessor");
+  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_user_object");
+  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_aux_variable");
+  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_aux_kernel");
+  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_postprocessor");
 
   registerAction(PressureAction, "add_bc");
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");
   registerAction(CavityPressureUOAction, "add_user_object");
   registerAction(SolidMechanicsAction, "add_kernel");
-  registerAction(JIntegralAction, "add_user_object");
-  registerAction(JIntegralAction, "add_aux_variable");
-  registerAction(JIntegralAction, "add_aux_kernel");
-  registerAction(JIntegralAction, "add_postprocessor");
+  registerAction(DomainIntegralAction, "add_user_object");
+  registerAction(DomainIntegralAction, "add_aux_variable");
+  registerAction(DomainIntegralAction, "add_aux_kernel");
+  registerAction(DomainIntegralAction, "add_postprocessor");
 }

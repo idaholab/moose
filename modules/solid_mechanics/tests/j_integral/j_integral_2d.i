@@ -63,7 +63,8 @@
   [../]
 []
 
-[JIntegral]
+[DomainIntegral]
+  integrals = JIntegral
   boundary = 800
   crack_direction_method = CrackDirectionVector
   crack_direction_vector = '1 0 0'

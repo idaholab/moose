@@ -59,7 +59,8 @@
   [../]
 []
 
-[JIntegral]
+[DomainIntegral]
+  integrals = JIntegral
   boundary = 1001
   crack_direction_method = CurvedCrackFront
   crack_end_direction_method = CrackDirectionVector

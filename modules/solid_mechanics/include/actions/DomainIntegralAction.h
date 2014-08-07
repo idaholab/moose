@@ -1,25 +1,34 @@
-#ifndef JINTEGRALACTION_H
-#define JINTEGRALACTION_H
+#ifndef DOMAININTEGRALACTION_H
+#define DOMAININTEGRALACTION_H
 
 #include "Action.h"
 #include "MooseTypes.h"
 #include "libmesh/vector_value.h"
 
-class JIntegralAction;
+class DomainIntegralAction;
 
 template<>
-InputParameters validParams<JIntegralAction>();
+InputParameters validParams<DomainIntegralAction>();
 
-class JIntegralAction : public Action
+class DomainIntegralAction : public Action
 {
 public:
-  JIntegralAction(const std::string & name, InputParameters params);
-  ~JIntegralAction();
+  DomainIntegralAction(const std::string & name, InputParameters params);
+  ~DomainIntegralAction();
 
   virtual void act();
-private:
+protected:
+  enum INTEGRAL
+  {
+    J_INTEGRAL,
+    INTERACTION_INTEGRAL_KI,
+    INTERACTION_INTEGRAL_KII,
+    INTERACTION_INTEGRAL_KIII
+  };
+
   unsigned int calcNumCrackFrontNodes();
 
+  std::set<INTEGRAL> _integrals;
   const std::vector<BoundaryName> & _boundary_names;
   const std::string _order;
   const std::string _family;
@@ -39,4 +48,4 @@ private:
   bool _use_displaced_mesh;
 };
 
-#endif //JINTEGRALACTION_H
+#endif //DOMAININTEGRALACTION_H
