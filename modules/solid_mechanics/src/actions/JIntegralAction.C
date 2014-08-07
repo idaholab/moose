@@ -73,7 +73,7 @@ JIntegralAction::act()
   const std::string pp_base_name("J");
   const unsigned int num_crack_front_nodes = calcNumCrackFrontNodes();
 
-  if (_current_action == "add_user_object")
+  if (_current_task == "add_user_object")
   {
     const std::string uo_type_name("CrackFrontDefinition");
 
@@ -104,7 +104,7 @@ JIntegralAction::act()
 
     _problem->addUserObject(uo_type_name, uo_name, params);
   }
-  else if (_current_action == "add_aux_variable")
+  else if (_current_task == "add_aux_variable")
   {
     for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
     {
@@ -129,7 +129,7 @@ JIntegralAction::act()
       }
     }
   }
-  else if (_current_action == "add_aux_kernel")
+  else if (_current_task == "add_aux_kernel")
   {
     const std::string ak_type_name("qFunctionJIntegral");
     InputParameters params = _factory.getValidParams(ak_type_name);
@@ -165,7 +165,7 @@ JIntegralAction::act()
       }
     }
   }
-  else if (_current_action == "add_postprocessor")
+  else if (_current_task == "add_postprocessor")
   {
     const std::string pp_type_name("JIntegral");
     InputParameters params = _factory.getValidParams(pp_type_name);
