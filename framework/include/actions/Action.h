@@ -112,7 +112,7 @@ protected:
   ActionWarehouse & _awh;
 
   /// The current action (even though we have seperate instances for each action)
-  const std::string & _current_action;
+  const std::string & _current_task;
 
   MooseMesh * & _mesh;
   MooseMesh * & _displaced_mesh;
