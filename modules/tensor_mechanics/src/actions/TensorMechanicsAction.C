@@ -22,13 +22,13 @@ InputParameters validParams<TensorMechanicsAction>()
 }
 
 TensorMechanicsAction::TensorMechanicsAction(const std::string & name, InputParameters params) :
-    Action(name, params),
-    _disp_x(getParam<NonlinearVariableName>("disp_x")),
-    _disp_y(getParam<NonlinearVariableName>("disp_y")),
-    _disp_z(getParam<NonlinearVariableName>("disp_z")),
-    _disp_r(getParam<NonlinearVariableName>("disp_r")),
-    _temp(getParam<NonlinearVariableName>("temp")),
-    _pore_pres(getParam<NonlinearVariableName>("pore_pres"))
+  Action(name, params),
+  _disp_x(getParam<NonlinearVariableName>("disp_x")),
+  _disp_y(getParam<NonlinearVariableName>("disp_y")),
+  _disp_z(getParam<NonlinearVariableName>("disp_z")),
+  _disp_r(getParam<NonlinearVariableName>("disp_r")),
+  _temp(getParam<NonlinearVariableName>("temp")),
+  _pore_pres(getParam<NonlinearVariableName>("pore_pres"))
 {
 }
 
@@ -83,11 +83,11 @@ TensorMechanicsAction::act()
     vars.push_back(_temp);
   }
   if (_pore_pres != "")
-    {
-      ++num_coupled;
-      keys.push_back("pore_pres");
-      vars.push_back(_pore_pres);
-    }
+  {
+    ++num_coupled;
+    keys.push_back("pore_pres");
+    vars.push_back(_pore_pres);
+  }
 
   // Create divergence objects
   std::string short_name(_name);

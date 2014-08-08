@@ -30,8 +30,6 @@ protected:
 
   VariableValue & _pore_pres;
   RealVectorValue _poromech_stress_row;
-
-
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
