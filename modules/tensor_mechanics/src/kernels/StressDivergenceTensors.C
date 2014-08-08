@@ -48,7 +48,7 @@ StressDivergenceTensors::computeQpResidual()
    * Handling the case where pore pressure is active. In this case pore pressure
    * is not depending on displacements (incompressible case) and the stresses of
    * TensorMechanics are now effective stresses.
-   * The quantitity _poromech_stress is the total stress obeying to Terzaghi's
+   * The quantity _poromech_stress is the total stress obeying to Terzaghi's
    * principle: poromech_stress(ij) = stress(ij) + pore_pressure * delta(ij).
    * Jacobians are the same, since pore pressure is not depending on displacements
    */
