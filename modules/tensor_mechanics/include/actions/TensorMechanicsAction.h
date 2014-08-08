@@ -21,6 +21,7 @@ private:
   const std::string _disp_z;
   const std::string _disp_r;
   const std::string _temp;
+  const std::string _pore_pres;
 };
 
 #endif //TENSORMECHANICSACTION_H

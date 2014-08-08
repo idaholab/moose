@@ -13,6 +13,7 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
   params.addParam<NonlinearVariableName>("disp_r", "", "The r displacement");
   params.addParam<NonlinearVariableName>("temp", "", "The temperature");
+  params.addParam<NonlinearVariableName>("pore_pres", "", "The pore fluid pressure");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
   // changed this from true to false
@@ -26,7 +27,8 @@ TensorMechanicsAction::TensorMechanicsAction(const std::string & name, InputPara
     _disp_y(getParam<NonlinearVariableName>("disp_y")),
     _disp_z(getParam<NonlinearVariableName>("disp_z")),
     _disp_r(getParam<NonlinearVariableName>("disp_r")),
-    _temp(getParam<NonlinearVariableName>("temp"))
+    _temp(getParam<NonlinearVariableName>("temp")),
+    _pore_pres(getParam<NonlinearVariableName>("pore_pres"))
 {
 }
 
@@ -80,6 +82,12 @@ TensorMechanicsAction::act()
     keys.push_back("temp");
     vars.push_back(_temp);
   }
+  if (_pore_pres != "")
+    {
+      ++num_coupled;
+      keys.push_back("pore_pres");
+      vars.push_back(_pore_pres);
+    }
 
   // Create divergence objects
   std::string short_name(_name);
