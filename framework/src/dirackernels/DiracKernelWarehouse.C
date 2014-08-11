@@ -22,9 +22,6 @@ DiracKernelWarehouse::DiracKernelWarehouse()
 
 DiracKernelWarehouse::~DiracKernelWarehouse()
 {
-  // delete  DiracKernels
-  for (std::vector<DiracKernel *>::iterator i=_dirac_kernels.begin(); i!=_dirac_kernels.end(); ++i)
-    delete *i;
 }
 
 void
@@ -55,9 +52,9 @@ DiracKernelWarehouse::jacobianSetup()
     _dirac_kernels[i]->jacobianSetup();
 }
 
-
 void
-DiracKernelWarehouse::addDiracKernel(DiracKernel * kernel)
+DiracKernelWarehouse::addDiracKernel(MooseSharedPointer<DiracKernel> & kernel)
 {
-  _dirac_kernels.push_back(kernel);
+  _all_ptrs.push_back(kernel);
+  _dirac_kernels.push_back(kernel.get());
 }
