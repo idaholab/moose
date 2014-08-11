@@ -55,7 +55,7 @@
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
-    scale_factor = -0.6895 #MPa
+    scale_factor = -689.5 #MPa
   [../]
 []
 
@@ -173,8 +173,8 @@
 
 
 #  petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter -pc_hypre_boomeramg_strong_threshold'
-  petsc_options_value = '201                hypre    boomeramg      4                            0.25'
+  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  petsc_options_value = '201                hypre    boomeramg      4'
 
 
   line_search = 'none'
@@ -182,7 +182,7 @@
    l_max_its = 50
    nl_max_its = 20
    nl_abs_tol = 1e-5
-   nl_rel_tol = 1e-8
+   nl_rel_tol = 1e-11
    l_tol = 1e-2
 
    start_time = 0.0
