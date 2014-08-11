@@ -649,8 +649,7 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
 void
 NonlinearSystem::addSplit(const  std::string & split_name, const std::string & name, InputParameters parameters)
 {
-  Split *split = static_cast<Split *>(_factory.create(split_name, name, parameters));
-  mooseAssert(split != NULL, "Not a Split object");
+  MooseSharedPointer<Split> split = MooseSharedNamespace::static_pointer_cast<Split>(_factory.create_shared_ptr(split_name, name, parameters));
   _splits.addSplit(name, split);
 }
 
