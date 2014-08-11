@@ -238,7 +238,7 @@ ImageFunction::getFiles()
     pcrecpp::RE re_base_and_file_num(oss.str()); // Will pull out the full base and the file number simultaneously
 
     // Loop through the files in the directory
-    for (unsigned int i = 0; i < dir.n_files; i++)
+    for (int i = 0; i < dir.n_files; i++)
     {
       // Upate the current file
       tinydir_file file;
@@ -248,7 +248,7 @@ ImageFunction::getFiles()
       if (!file.is_dir && MooseUtils::hasExtension(file.name, _file_type))
       {
         std::string the_base;
-        int file_num = 0;
+        unsigned file_num = 0;
         re_base_and_file_num.FullMatch(file.name, &the_base, &file_num);
         if (!the_base.empty() && file_num >= _file_range[0] && file_num <= _file_range[1])
           _files->InsertNextValue(split_file.first + "/" + file.name);
