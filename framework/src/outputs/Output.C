@@ -75,6 +75,12 @@ InputParameters validParams<Output>()
   // 'Variables' Group
   params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_vector_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
 
+  // 'Materials' group
+  params.addParam<bool>("output_material_properties", false, "Flag indicating if material properties should be output");
+  params.addParam<std::vector<std::string> >("show_material_properties", "Flag indicating if material properties should be output");
+  params.addParamNamesToGroup("output_material_properties show_material_properties", "Materials");
+  params.addParamNamesToGroup("show_material_properties", "Materials");
+
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_built_by_moose", false);
 

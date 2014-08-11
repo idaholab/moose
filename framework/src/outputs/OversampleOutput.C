@@ -49,7 +49,7 @@ OversampleOutput::OversampleOutput(const std::string & name, InputParameters & p
     _change_position(isParamValid("position")),
     _position(_change_position ? getParam<Point>("position") : Point())
 {
-  // Call the initialization method
+
   initOversample();
 
   // Append the '_oversample' to the file base, if desired and oversampling is being used
