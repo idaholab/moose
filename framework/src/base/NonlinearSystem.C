@@ -642,9 +642,9 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
-    Damper * damper = static_cast<Damper *>(_factory.create(damper_name, name, parameters));
+    MooseSharedPointer<Damper> damper = MooseSharedNamespace::static_pointer_cast<Damper>(_factory.create_shared_ptr(damper_name, name, parameters));
     _dampers[tid].addDamper(damper);
-    _fe_problem._objects_by_name[tid][name].push_back(damper);
+    _fe_problem._objects_by_name[tid][name].push_back(damper.get());
   }
 }
 
