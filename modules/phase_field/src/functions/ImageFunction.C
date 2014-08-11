@@ -248,7 +248,7 @@ ImageFunction::getFiles()
       if (!file.is_dir && MooseUtils::hasExtension(file.name, _file_type))
       {
         std::string the_base;
-        unsigned file_num = 0;
+        unsigned int file_num = 0;
         re_base_and_file_num.FullMatch(file.name, &the_base, &file_num);
         if (!the_base.empty() && file_num >= _file_range[0] && file_num <= _file_range[1])
           _files->InsertNextValue(split_file.first + "/" + file.name);
