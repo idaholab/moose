@@ -139,7 +139,8 @@ SetupMeshAction::act()
   _mesh = dynamic_cast<MooseMesh *>(_factory.create(_type, "mesh", _moose_object_pars));
   _mesh->init();
 
-  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
+  // Check that libMesh mesh was created
+  mooseAssert(&_mesh->getMesh() != NULL, "Mesh hasn't been created");
 
   if (isParamValid("displacements"))
   {

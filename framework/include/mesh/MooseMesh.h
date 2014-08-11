@@ -319,6 +319,7 @@ public:
    * Returns the level of uniform refinement requested (zero if AMR is disabled).
    */
   unsigned int & uniformRefineLevel();
+  const unsigned int & uniformRefineLevel() const;
 #endif //LIBMESH_ENABLE_AMR
 
   /**
