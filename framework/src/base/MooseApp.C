@@ -165,7 +165,7 @@ MooseApp::setupOptions()
     Moose::_trap_fpe = false;
 
   Moose::_warnings_are_errors = getParam<bool>("error");
-  Moose::_color_console = getParam<bool>("no_color");
+  Moose::_color_console = !getParam<bool>("no_color");
 
   if (getParam<bool>("help"))
   {
