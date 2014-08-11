@@ -486,15 +486,14 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
     // Create the kernel object via the factory
-    KernelBase *kernel = static_cast<KernelBase *>(_factory.create(kernel_name, name, parameters));
-    mooseAssert(kernel != NULL, "Not a Kernel object");
+    MooseSharedPointer<KernelBase> kernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create_shared_ptr(kernel_name, name, parameters));
 
     // Extract the SubdomainIDs from the object (via BlockRestrictable class)
     std::set<SubdomainID> blk_ids = kernel->blockIDs();
 
     // Add the kernel to the warehouse
     _kernels[tid].addKernel(kernel, blk_ids);
-    _fe_problem._objects_by_name[tid][name].push_back(kernel);
+    _fe_problem._objects_by_name[tid][name].push_back(kernel.get());
   }
 }
 
@@ -505,11 +504,11 @@ NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::st
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    ScalarKernel *kernel = static_cast<ScalarKernel *>(_factory.create(kernel_name, name, parameters));
+    MooseSharedPointer<ScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<ScalarKernel>(_factory.create_shared_ptr(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
     _kernels[tid].addScalarKernel(kernel);
-    _fe_problem._objects_by_name[tid][name].push_back(kernel);
+    _fe_problem._objects_by_name[tid][name].push_back(kernel.get());
   }
 }
 
