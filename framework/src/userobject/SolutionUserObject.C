@@ -33,8 +33,8 @@ InputParameters validParams<SolutionUserObject>()
 
   // Add required parameters
   params.addRequiredParam<MeshFileName>("mesh", "The name of the mesh file (must be xda or exodusII file).");
-  params.addParam<std::vector<std::string> >("nodal_variables", "The name of the nodal variables from the file you want to use for values");
-  params.addParam<std::vector<std::string> >("elemental_variables", "The name of the nodal variables from the file you want to use for values");
+  params.addParam<std::vector<std::string> >("system_variables", std::vector<std::string>(),
+                                             "The name of the nodal and elemental variables from the file you want to use for values");
 
   // When using XDA files the following must be defined
   params.addParam<FileName>("es", "The name of the file holding the equation system info in xda format (xda only).");
@@ -72,8 +72,7 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _mesh_file(getParam<MeshFileName>("mesh")),
     _es_file(getParam<FileName>("es")),
     _system_name(getParam<std::string>("system")),
-    _nodal_variables(getParam<std::vector<std::string> >("nodal_variables")),
-    _elemental_variables(getParam<std::vector<std::string> >("elemental_variables")),
+    _system_variables(getParam<std::vector<std::string> >("system_variables")),
     _exodus_time_index(getParam<int>("timestep")),
     _interpolate_times(false),
     _mesh(NULL),
@@ -107,6 +106,8 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
   if (_legacy_read)
     mooseWarning("The input parameter 'legacy_read' is deprecated.\nThis option is for legacy support and will be removed on 10/1/2014.\nThe xda/xdr files being read should be regenerated and the flag removed.");
 
+  //_exec_flags = EXEC_INITIAL;
+
   if (parameters.isParamValid("coord_scale"))
   {
     mooseWarning("Parameter name coord_scale is deprecated.  Please use scale instead.");
@@ -118,9 +119,6 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     mooseWarning("Parameter name coord_factor is deprecated.  Please use translation instead.");
     _translation = getParam<std::vector<Real> >("coord_factor");
   }
-
-  if (!parameters.isParamValid("nodal_variables") && !parameters.isParamValid("elemental_variables"))
-    mooseError("In SolutionUserObject " << _name << ", must supply nodal_variables or elemental_variables");
 
   // form rotation matrices with the specified angles
   Real halfPi = std::acos(0.0);
@@ -244,11 +242,35 @@ SolutionUserObject::readExodusII()
   _es->add_system<ExplicitSystem> (_system_name);
   _system = &_es->get_system(_system_name);
 
+  // Get the variable name lists as set; these need to be sets to perform set_intersection
+  const std::vector<std::string> & all_nodal(_exodusII_io->get_nodal_var_names());
+  const std::vector<std::string> & all_elemental(_exodusII_io->get_elem_var_names());
+
+  // Storage for the nodal and elemental variables to consider
+  std::vector<std::string> nodal, elemental;
+
+  // Build nodal/elemental variable lists, limit to variables listed in 'system_variables', if provided
+  if (!_system_variables.empty())
+  {
+    for (std::vector<std::string>::const_iterator it = _system_variables.begin(); it != _system_variables.end(); ++it)
+    {
+      if (std::find(all_nodal.begin(), all_nodal.end(), *it) != all_nodal.end())
+        nodal.push_back(*it);
+      if (std::find(all_elemental.begin(), all_elemental.end(), *it) != all_elemental.end())
+        elemental.push_back(*it);
+    }
+  }
+  else
+  {
+    nodal = all_nodal;
+    elemental = all_elemental;
+  }
+
   // Add the variables to the system
-  for (std::vector<std::string>::const_iterator it = _nodal_variables.begin(); it != _nodal_variables.end(); ++it)
+  for (std::vector<std::string>::const_iterator it = nodal.begin(); it != nodal.end(); ++it)
     _system->add_variable(*it, FIRST);
 
-  for (std::vector<std::string>::const_iterator it = _elemental_variables.begin(); it != _elemental_variables.end(); ++it)
+  for (std::vector<std::string>::const_iterator it = elemental.begin(); it != elemental.end(); ++it)
     _system->add_variable(*it, CONSTANT, MONOMIAL);
 
   // Initilize the equations systems
@@ -263,10 +285,10 @@ SolutionUserObject::readExodusII()
     _system2 = &_es2->get_system(_system_name);
 
     // Add the variables to the system
-    for (std::vector<std::string>::const_iterator it = _nodal_variables.begin(); it != _nodal_variables.end(); ++it)
+    for (std::vector<std::string>::const_iterator it = nodal.begin(); it != nodal.end(); ++it)
       _system2->add_variable(*it, FIRST);
 
-    for (std::vector<std::string>::const_iterator it = _elemental_variables.begin(); it != _elemental_variables.end(); ++it)
+    for (std::vector<std::string>::const_iterator it = elemental.begin(); it != elemental.end(); ++it)
       _system2->add_variable(*it, CONSTANT, MONOMIAL);
 
     // Initialize
@@ -276,13 +298,13 @@ SolutionUserObject::readExodusII()
     updateExodusBracketingTimeIndices(0.0);
 
     // Copy the solutions from the first system
-    for (std::vector<std::string>::const_iterator it = _nodal_variables.begin(); it != _nodal_variables.end(); ++it)
+    for (std::vector<std::string>::const_iterator it = nodal.begin(); it != nodal.end(); ++it)
     {
       _exodusII_io->copy_nodal_solution(*_system, *it, *it, _exodus_index1+1);
       _exodusII_io->copy_nodal_solution(*_system2, *it, *it, _exodus_index2+1);
     }
 
-    for (std::vector<std::string>::const_iterator it = _elemental_variables.begin(); it != _elemental_variables.end(); ++it)
+    for (std::vector<std::string>::const_iterator it = elemental.begin(); it != elemental.end(); ++it)
     {
       _exodusII_io->copy_elemental_solution(*_system, *it, *it, _exodus_index1+1);
       _exodusII_io->copy_elemental_solution(*_system2, *it, *it, _exodus_index2+1);
@@ -302,10 +324,10 @@ SolutionUserObject::readExodusII()
       mooseError("In SolutionUserObject, timestep = "<<_exodus_time_index<<", but there are only "<<num_exo_times<<" time steps.");
 
     // Copy the values from the ExodusII file
-    for (std::vector<std::string>::const_iterator it = _nodal_variables.begin(); it != _nodal_variables.end(); ++it)
+    for (std::vector<std::string>::const_iterator it = nodal.begin(); it != nodal.end(); ++it)
       _exodusII_io->copy_nodal_solution(*_system, *it, *it,  _exodus_time_index);
 
-    for (std::vector<std::string>::const_iterator it = _elemental_variables.begin(); it != _elemental_variables.end(); ++it)
+    for (std::vector<std::string>::const_iterator it = elemental.begin(); it != elemental.end(); ++it)
       _exodusII_io->copy_elemental_solution(*_system, *it, *it, _exodus_time_index);
 
     // Update the equations systems
@@ -418,10 +440,6 @@ SolutionUserObject::initialSetup()
 
   // Pull down a full copy of this vector on every processor so we can get values in parallel
   _system->solution->localize(*_serialized_solution);
-
-  // Populate the all variables vector
-  _system_variables.insert(_system_variables.begin(), _nodal_variables.begin(), _nodal_variables.end());
-  _system_variables.insert(_system_variables.end(), _elemental_variables.begin(), _elemental_variables.end());
 
   // Vector of variable numbers to apply the MeshFunction to
   std::vector<unsigned int> var_nums;
