@@ -45,10 +45,7 @@ MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs)
 
 MaterialWarehouse::~MaterialWarehouse()
 {
-  for (unsigned int i=0; i<_mats.size(); i++)
-    delete _mats[i];
 }
-
 
 void
 MaterialWarehouse::initialSetup()
@@ -198,52 +195,57 @@ void MaterialWarehouse::updateMaterialDataState()
 }
 
 void
-MaterialWarehouse::addMaterial(std::vector<SubdomainID> blocks, Material *material)
+MaterialWarehouse::addMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material)
 {
-  _mats.push_back(material);
+  _all_ptrs.push_back(material);
+  _mats.push_back(material.get());
 
   for (unsigned int i=0; i<blocks.size(); ++i)
   {
     SubdomainID blk_id = blocks[i];
-    _active_materials[blk_id].push_back(material);
-    _mat_by_name[material->name()].push_back(material);
+    _active_materials[blk_id].push_back(material.get());
+    _mat_by_name[material->name()].push_back(material.get());
   }
 }
 
-void MaterialWarehouse::addFaceMaterial(std::vector<SubdomainID> blocks, Material *material)
+void MaterialWarehouse::addFaceMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material)
 {
-  _mats.push_back(material);
-
-  for (unsigned int i=0; i<blocks.size(); ++i)
-  {
-    SubdomainID blk_id = blocks[i];
-    _blocks.insert(blk_id);
-    _active_face_materials[blk_id].push_back(material);
-    _mat_by_name[material->name()].push_back(material);
-  }
-}
-
-void MaterialWarehouse::addNeighborMaterial(std::vector<SubdomainID> blocks, Material *material)
-{
-  _mats.push_back(material);
+  _all_ptrs.push_back(material);
+  _mats.push_back(material.get());
 
   for (unsigned int i=0; i<blocks.size(); ++i)
   {
     SubdomainID blk_id = blocks[i];
     _blocks.insert(blk_id);
-    _active_neighbor_materials[blk_id].push_back(material);
-    _mat_by_name[material->name()].push_back(material);
+    _active_face_materials[blk_id].push_back(material.get());
+    _mat_by_name[material->name()].push_back(material.get());
   }
 }
 
-void MaterialWarehouse::addBoundaryMaterial(std::vector<BoundaryID> boundaries, Material *material)
+void MaterialWarehouse::addNeighborMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material)
 {
-  _mats.push_back(material);
+  _all_ptrs.push_back(material);
+  _mats.push_back(material.get());
+
+  for (unsigned int i=0; i<blocks.size(); ++i)
+  {
+    SubdomainID blk_id = blocks[i];
+    _blocks.insert(blk_id);
+    _active_neighbor_materials[blk_id].push_back(material.get());
+    _mat_by_name[material->name()].push_back(material.get());
+  }
+}
+
+void MaterialWarehouse::addBoundaryMaterial(std::vector<BoundaryID> boundaries, MooseSharedPointer<Material> & material)
+{
+  _all_ptrs.push_back(material);
+  _mats.push_back(material.get());
+
   for (std::vector<BoundaryID>::const_iterator it = boundaries.begin(); it != boundaries.end(); ++it)
   {
     _boundaries.insert(*it);
-    _active_boundary_materials[*it].push_back(material);
-    _mat_by_name[material->name()].push_back(material);
+    _active_boundary_materials[*it].push_back(material.get());
+    _mat_by_name[material->name()].push_back(material.get());
   }
 }
 
