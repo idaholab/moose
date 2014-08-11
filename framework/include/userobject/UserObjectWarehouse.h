@@ -123,7 +123,7 @@ public:
    * Add a user_object
    * @param user_object UserObject being added
    */
-  void addUserObject(MooseSharedPointer<UserObject> user_object);
+  void addUserObject(MooseSharedPointer<UserObject> & user_object);
 
   /**
    * Get the list of blocks with user_objects

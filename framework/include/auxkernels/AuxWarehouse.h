@@ -65,13 +65,13 @@ public:
    * @param aux Kernel being added
    * @param block_ids Set of subdomain this kernel is active on
    */
-  void addAuxKernel(MooseSharedPointer<AuxKernel> aux);
+  void addAuxKernel(MooseSharedPointer<AuxKernel> & aux);
 
   /**
    * Add a scalar kernels
    * @param kernel Scalar kernel being added
    */
-  void addScalarKernel(MooseSharedPointer<AuxScalarKernel> kernel);
+  void addScalarKernel(MooseSharedPointer<AuxScalarKernel> & kernel);
 
 protected:
   /// all aux kernels
