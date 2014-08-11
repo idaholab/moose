@@ -1,18 +1,27 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
+  nx=1
+  ny=1
+  nz=1
+  xmin=0.0
+  xmax=1.0
+  ymin=0.0
+  ymax=1.0
+  zmin=0.0
+  zmax=1.0
   elem_type = HEX8
-  displacements = 'ux uy uz'
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
-  [./ux]
+  [./disp_x]
     block = 0
   [../]
-  [./uy]
+  [./disp_y]
     block = 0
   [../]
-  [./uz]
+  [./disp_z]
     block = 0
   [../]
 []
@@ -99,25 +108,25 @@
 [BCs]
   [./symmy]
     type = PresetBC
-    variable = uy
+    variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./symmx]
     type = PresetBC
-    variable = ux
+    variable = disp_x
     boundary = left
     value = 0
   [../]
   [./symmz]
     type = PresetBC
-    variable = uz
+    variable = disp_z
     boundary = back
     value = 0
   [../]
   [./tdisp]
     type = FunctionPresetBC
-    variable = uz
+    variable = disp_z
     boundary = front
     function = tdisp
   [../]
@@ -128,26 +137,16 @@
   [./crysp]
     type = FiniteStrainCrystalPlasticity
     block = 0
-    disp_y = uy
-    disp_x = ux
+    disp_y = disp_y
+    disp_x = disp_x
+    disp_z = disp_z
     gtol = 1e-2
     slip_sys_file_name = input_slip_sys.txt
-    disp_z = uz
+    slip_sys_res_prop_file_name = input_slip_sys_res.txt
+    slip_sys_flow_prop_file_name = input_slip_sys_flow_prop.txt
+    hprops = '1.0 541.5 60.8 109.8 2.5'
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     nss = 12
-    num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
-    flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
-    hprops = '1.0 541.5 60.8 109.8 2.5'
-    gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
-    fill_method = symmetric9
-  [../]
-  [./elastic]
-    type = FiniteStrainElasticMaterial
-    block = 0
-    disp_y = uy
-    disp_x = ux
-    disp_z = uz
-    C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
   [../]
 []
@@ -196,14 +195,14 @@
   dtmax = 10.0
   nl_rel_tol = 1e-10
   ss_check_tol = 1e-10
-  end_time = 1
+  end_time = 10.0
   dtmin = 0.05
   num_steps = 10
   nl_abs_step_tol = 1e-10
 []
 
 [Outputs]
-  file_base = out
+  file_base = crysp_fileread_out
   output_initial = true
   exodus = true
   [./console]
@@ -215,13 +214,9 @@
 
 [TensorMechanics]
   [./solid]
-    disp_z = uz
-    disp_y = uy
-    disp_x = ux
+    disp_z = disp_z
+    disp_y = disp_y
+    disp_x = disp_x
     use_displaced_mesh = true
   [../]
-[]
-
-[Problem]
-  use_legacy_uo_initialization = false
 []
