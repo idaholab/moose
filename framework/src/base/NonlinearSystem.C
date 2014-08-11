@@ -572,6 +572,8 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
 
   MooseObject * obj = _factory.create(c_name, name, parameters);
   _fe_problem._objects_by_name[0][name].push_back(obj);
+  for (THREAD_ID tid = 1; tid < libMesh::n_threads(); tid++)
+    _fe_problem._objects_by_name[tid][name] = std::vector<MooseObject *>();
 
   NodalConstraint    * nc = dynamic_cast<NodalConstraint *>(obj);
   NodeFaceConstraint * nfc = dynamic_cast<NodeFaceConstraint *>(obj);
