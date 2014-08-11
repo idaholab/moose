@@ -41,7 +41,7 @@
     mesh = out_0001_mesh.xda
     es = out_0001.xda
     system = AuxiliarySystem
-    nodal_variables = u_aux
+    system_variables = u_aux
     legacy_read = true
   [../]
 []

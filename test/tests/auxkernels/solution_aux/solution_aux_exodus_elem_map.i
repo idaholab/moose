@@ -43,7 +43,7 @@
   [./soln]
     type = SolutionUserObject
     mesh = elem_map.e
-    elemental_variables = MatID
+    system_variables = MatID
     timestep = 1
   [../]
 []

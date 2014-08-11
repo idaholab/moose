@@ -47,7 +47,7 @@
     mesh = out_0001_mesh.xda
     es = out_0001.xda
     system = AuxiliarySystem
-    nodal_variables = u_aux
+    system_variables = u_aux
     scale = '3 2 1'
     translation = '1 1 0'
     legacy_read = true
