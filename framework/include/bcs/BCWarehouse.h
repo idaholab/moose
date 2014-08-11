@@ -20,6 +20,7 @@
 #include <set>
 #include "MooseTypes.h"
 
+class BoundaryCondition;
 class IntegratedBC;
 class NodalBC;
 class PresetNodalBC;
@@ -39,9 +40,9 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  void addBC(BoundaryID boundary_id, IntegratedBC *bc);
-  void addNodalBC(BoundaryID boundary_id, NodalBC *bc);
-  void addPresetNodalBC(BoundaryID boundary_id, PresetNodalBC *bc);
+  void addBC(BoundaryID boundary_id, MooseSharedPointer<IntegratedBC> & bc);
+  void addNodalBC(BoundaryID boundary_id, MooseSharedPointer<NodalBC> & bc);
+  void addPresetNodalBC(BoundaryID boundary_id, MooseSharedPointer<PresetNodalBC> & bc);
 
   /**
    * Get boundary conditions on a specified boundary id
@@ -91,6 +92,12 @@ public:
   void activePresetNodal(BoundaryID boundary_id, std::vector<PresetNodalBC *> & active_preset) const;
 
 protected:
+  /**
+   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   */
+  std::vector<MooseSharedPointer<BoundaryCondition> > _all_ptrs;
+
   /// integrated boundary conditions on a boundary
   std::map<BoundaryID, std::vector<IntegratedBC *> > _bcs;
   /// nodal boundary conditions on a boundary

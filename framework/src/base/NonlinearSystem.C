@@ -531,25 +531,22 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
       parameters.set<THREAD_ID>("_tid") = tid;
       parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
 
-      BoundaryCondition * bc = static_cast<BoundaryCondition *>(_factory.create(bc_name, name, parameters));
-      mooseAssert(bc != NULL, "Not a BoundaryCondition object");
-      _fe_problem._objects_by_name[tid][name].push_back(bc);
+      MooseSharedPointer<BoundaryCondition> bc = MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(_factory.create_shared_ptr(bc_name, name, parameters));
+      _fe_problem._objects_by_name[tid][name].push_back(bc.get());
 
-      if (dynamic_cast<PresetNodalBC*>(bc) != NULL)
-      {
-        PresetNodalBC * pnbc = dynamic_cast<PresetNodalBC*>(bc);
+      MooseSharedPointer<PresetNodalBC> pnbc = MooseSharedNamespace::dynamic_pointer_cast<PresetNodalBC>(bc);
+      if (pnbc.get())
         _bcs[tid].addPresetNodalBC(boundary_id, pnbc);
-      }
 
-      if (dynamic_cast<NodalBC *>(bc) != NULL)
+      MooseSharedPointer<NodalBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<NodalBC>(bc);
+      MooseSharedPointer<IntegratedBC> ibc = MooseSharedNamespace::dynamic_pointer_cast<IntegratedBC>(bc);
+      if (nbc.get())
       {
-        NodalBC * nbc = dynamic_cast<NodalBC *>(bc);
         _bcs[tid].addNodalBC(boundary_id, nbc);
         _vars[tid].addBoundaryVars(boundary_id, nbc->getCoupledVars());
       }
-      else if (dynamic_cast<IntegratedBC *>(bc) != NULL)
+      else if (ibc.get())
       {
-        IntegratedBC * ibc = dynamic_cast<IntegratedBC *>(bc);
         _bcs[tid].addBC(boundary_id, ibc);
         _vars[tid].addBoundaryVars(boundary_id, ibc->getCoupledVars());
       }
