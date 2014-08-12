@@ -151,7 +151,7 @@ Parser::parse(const std::string &input_filename)
     std::vector<std::string> ufos = _getpot_file.unidentified_nominuses(knowns);
     if (!ufos.empty())
     {
-      Moose::err << "Error: the following \"unidentified nominuses\" were found in your input file:" << std::endl;
+      Moose::err << "Error: the following unidentified entries were found in your input file:" << std::endl;
       for (unsigned int i=0; i<ufos.size(); ++i)
         Moose::err << ufos[i] << std::endl;
       mooseError("Your input file may have a syntax error, or you may have forgotten to put quotes around a vector, ie. v='1 2'.");
