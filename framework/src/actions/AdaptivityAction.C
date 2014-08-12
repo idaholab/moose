@@ -44,6 +44,7 @@ InputParameters validParams<AdaptivityAction>()
   params.addParam<std::vector<Real> > ("weight_values", "List of values between 0 and 1 to weight the associated weight_names error by");
   params.addParam<unsigned int>("cycles_per_step", 1, "The number of adaptivity cycles per step");
 
+  params.addParam<bool>("show_initial_progress", true, "Show the progress of the initial adaptivity");
   return params;
 }
 
