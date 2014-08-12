@@ -1,4 +1,4 @@
-`#
+#
 # 1-D Gap Heat Transfer Test without mechanics
 #
 # This test exercises 1-D gap heat transfer for a constant conductivity gap.
