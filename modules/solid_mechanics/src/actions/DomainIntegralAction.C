@@ -19,6 +19,7 @@ InputParameters validParams<DomainIntegralAction>()
   params.addParam<std::string>("family", "LAGRANGE", "Specifies the family of FE shape functions to use for q AuxVariables");
   params.addRequiredParam<std::vector<Real> >("radius_inner", "Inner radius for volume integral domain");
   params.addRequiredParam<std::vector<Real> >("radius_outer", "Outer radius for volume integral domain");
+  params.addParam<std::vector<VariableName> >("output_variable", "Variable values to be reported along the crack front");
   return params;
 }
 
@@ -74,6 +75,9 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
       _integrals.insert(INTEGRAL(int(integral_moose_enums[i])));
     }
   }
+
+  if (isParamValid("output_variable"))
+    _output_variables = getParam<std::vector<VariableName> >("output_variable");
 }
 
 DomainIntegralAction::~DomainIntegralAction()
@@ -217,6 +221,32 @@ DomainIntegralAction::act()
             params.set<unsigned int>("crack_front_node_index") = cfn_index;
             _problem->addPostprocessor(pp_type_name,pp_name_stream.str(),params);
           }
+        }
+      }
+    }
+    for (unsigned int i=0; i<_output_variables.size(); ++i)
+    {
+      const std::string ov_base_name(_output_variables[i]);
+      const std::string pp_type_name("CrackFrontData");
+      InputParameters params = _factory.getValidParams(pp_type_name);
+      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<UserObjectName>("crack_front_definition") = uo_name;
+      if (_treat_as_2d)
+      {
+        std::ostringstream pp_name_stream;
+        pp_name_stream<<ov_base_name<<"_crack";
+        params.set<VariableName>("variable") = _output_variables[i];
+        _problem->addPostprocessor(pp_type_name,pp_name_stream.str(),params);
+      }
+      else
+      {
+        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        {
+          std::ostringstream pp_name_stream;
+          pp_name_stream<<ov_base_name<<"_crack_"<<cfn_index+1;
+          params.set<VariableName>("variable") = _output_variables[i];
+          params.set<unsigned int>("crack_front_node_index") = cfn_index;
+          _problem->addPostprocessor(pp_type_name,pp_name_stream.str(),params);
         }
       }
     }

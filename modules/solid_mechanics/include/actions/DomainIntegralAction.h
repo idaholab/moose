@@ -45,6 +45,7 @@ protected:
   unsigned int _axis_2d;
   std::vector<Real> _radius_inner;
   std::vector<Real> _radius_outer;
+  std::vector<VariableName> _output_variables;
   bool _use_displaced_mesh;
 };
 
