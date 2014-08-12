@@ -93,7 +93,7 @@ public:
    * Add a postprocessor
    * @param postprocessor Postprocessor being added
    */
-  void addPostprocessor(MooseSharedPointer<Postprocessor> postprocessor);
+  void addPostprocessor(MooseSharedPointer<Postprocessor> & postprocessor);
 
   /**
    * Get the list of blocks with postprocessors

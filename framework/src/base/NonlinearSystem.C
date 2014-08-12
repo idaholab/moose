@@ -118,7 +118,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _residual_ghosted(addVector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
     _residual_copy(*NumericVector<Number>::build(_communicator).release()),
-    _time_integrator(NULL),
     _u_dot(addVector("u_dot", true, GHOSTED)),
     _du_dot_du(addVector("du_dot_du", true, GHOSTED)),
     _Re_time(addVector("Re_time", false, GHOSTED)),
@@ -171,7 +170,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
 
 NonlinearSystem::~NonlinearSystem()
 {
-  delete _time_integrator;
   delete _preconditioner;
   delete _predictor;
   delete &_serialized_solution;
@@ -473,9 +471,8 @@ void
 NonlinearSystem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
 {
   parameters.set<SystemBase *>("_sys") = this;
-  TimeIntegrator * ti = static_cast<TimeIntegrator *>(_factory.create(type, name, parameters));
-  if (ti == NULL)
-    mooseError("Not an time integrator object.");
+
+  MooseSharedPointer<TimeIntegrator> ti = MooseSharedNamespace::static_pointer_cast<TimeIntegrator>(_factory.create_shared_ptr(type, name, parameters));
   _time_integrator = ti;
 }
 
@@ -489,15 +486,14 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
     // Create the kernel object via the factory
-    KernelBase *kernel = static_cast<KernelBase *>(_factory.create(kernel_name, name, parameters));
-    mooseAssert(kernel != NULL, "Not a Kernel object");
+    MooseSharedPointer<KernelBase> kernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create_shared_ptr(kernel_name, name, parameters));
 
     // Extract the SubdomainIDs from the object (via BlockRestrictable class)
     std::set<SubdomainID> blk_ids = kernel->blockIDs();
 
     // Add the kernel to the warehouse
     _kernels[tid].addKernel(kernel, blk_ids);
-    _fe_problem._objects_by_name[tid][name].push_back(kernel);
+    _fe_problem._objects_by_name[tid][name].push_back(kernel.get());
   }
 }
 
@@ -508,11 +504,11 @@ NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::st
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    ScalarKernel *kernel = static_cast<ScalarKernel *>(_factory.create(kernel_name, name, parameters));
+    MooseSharedPointer<ScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<ScalarKernel>(_factory.create_shared_ptr(kernel_name, name, parameters));
     mooseAssert(kernel != NULL, "Not a Kernel object");
 
     _kernels[tid].addScalarKernel(kernel);
-    _fe_problem._objects_by_name[tid][name].push_back(kernel);
+    _fe_problem._objects_by_name[tid][name].push_back(kernel.get());
   }
 }
 
@@ -535,25 +531,22 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
       parameters.set<THREAD_ID>("_tid") = tid;
       parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
 
-      BoundaryCondition * bc = static_cast<BoundaryCondition *>(_factory.create(bc_name, name, parameters));
-      mooseAssert(bc != NULL, "Not a BoundaryCondition object");
-      _fe_problem._objects_by_name[tid][name].push_back(bc);
+      MooseSharedPointer<BoundaryCondition> bc = MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(_factory.create_shared_ptr(bc_name, name, parameters));
+      _fe_problem._objects_by_name[tid][name].push_back(bc.get());
 
-      if (dynamic_cast<PresetNodalBC*>(bc) != NULL)
-      {
-        PresetNodalBC * pnbc = dynamic_cast<PresetNodalBC*>(bc);
+      MooseSharedPointer<PresetNodalBC> pnbc = MooseSharedNamespace::dynamic_pointer_cast<PresetNodalBC>(bc);
+      if (pnbc.get())
         _bcs[tid].addPresetNodalBC(boundary_id, pnbc);
-      }
 
-      if (dynamic_cast<NodalBC *>(bc) != NULL)
+      MooseSharedPointer<NodalBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<NodalBC>(bc);
+      MooseSharedPointer<IntegratedBC> ibc = MooseSharedNamespace::dynamic_pointer_cast<IntegratedBC>(bc);
+      if (nbc.get())
       {
-        NodalBC * nbc = dynamic_cast<NodalBC *>(bc);
         _bcs[tid].addNodalBC(boundary_id, nbc);
         _vars[tid].addBoundaryVars(boundary_id, nbc->getCoupledVars());
       }
-      else if (dynamic_cast<IntegratedBC *>(bc) != NULL)
+      else if (ibc.get())
       {
-        IntegratedBC * ibc = dynamic_cast<IntegratedBC *>(bc);
         _bcs[tid].addBC(boundary_id, ibc);
         _vars[tid].addBoundaryVars(boundary_id, ibc->getCoupledVars());
       }
@@ -607,11 +600,10 @@ NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::str
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
-    DiracKernel *kernel = static_cast<DiracKernel *>(_factory.create(kernel_name, name, parameters));
-    mooseAssert(kernel != NULL, "Not a Dirac Kernel object");
+    MooseSharedPointer<DiracKernel> kernel = MooseSharedNamespace::static_pointer_cast<DiracKernel>(_factory.create_shared_ptr(kernel_name, name, parameters));
 
     _dirac_kernels[tid].addDiracKernel(kernel);
-    _fe_problem._objects_by_name[tid][name].push_back(kernel);
+    _fe_problem._objects_by_name[tid][name].push_back(kernel.get());
   }
 }
 
@@ -624,11 +616,10 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
     parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
     parameters.set<MaterialData *>("_neighbor_material_data") = _fe_problem._neighbor_material_data[tid];
 
-    DGKernel *dg_kernel = static_cast<DGKernel *>(_factory.create(dg_kernel_name, name, parameters));
-    mooseAssert(dg_kernel != NULL, "Not a DG Kernel object");
+    MooseSharedPointer<DGKernel> dg_kernel = MooseSharedNamespace::static_pointer_cast<DGKernel>(_factory.create_shared_ptr(dg_kernel_name, name, parameters));
 
     _dg_kernels[tid].addDGKernel(dg_kernel);
-    _fe_problem._objects_by_name[tid][name].push_back(dg_kernel);
+    _fe_problem._objects_by_name[tid][name].push_back(dg_kernel.get());
   }
 
   _doing_dg = true;
@@ -642,17 +633,16 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
     parameters.set<THREAD_ID>("_tid") = tid;
     parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
-    Damper * damper = static_cast<Damper *>(_factory.create(damper_name, name, parameters));
+    MooseSharedPointer<Damper> damper = MooseSharedNamespace::static_pointer_cast<Damper>(_factory.create_shared_ptr(damper_name, name, parameters));
     _dampers[tid].addDamper(damper);
-    _fe_problem._objects_by_name[tid][name].push_back(damper);
+    _fe_problem._objects_by_name[tid][name].push_back(damper.get());
   }
 }
 
 void
 NonlinearSystem::addSplit(const  std::string & split_name, const std::string & name, InputParameters parameters)
 {
-  Split *split = static_cast<Split *>(_factory.create(split_name, name, parameters));
-  mooseAssert(split != NULL, "Not a Split object");
+  MooseSharedPointer<Split> split = MooseSharedNamespace::static_pointer_cast<Split>(_factory.create_shared_ptr(split_name, name, parameters));
   _splits.addSplit(name, split);
 }
 

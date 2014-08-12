@@ -21,8 +21,6 @@ DGKernelWarehouse::DGKernelWarehouse()
 
 DGKernelWarehouse::~DGKernelWarehouse()
 {
-  for (std::vector<DGKernel *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    delete *i;
 }
 
 void
@@ -54,9 +52,10 @@ DGKernelWarehouse::jacobianSetup()
 }
 
 void
-DGKernelWarehouse::addDGKernel(DGKernel *dg_kernel)
+DGKernelWarehouse::addDGKernel(MooseSharedPointer<DGKernel> & dg_kernel)
 {
-  _all_dg_kernels.push_back(dg_kernel);
+  _all_ptrs.push_back(dg_kernel);
+  _all_dg_kernels.push_back(dg_kernel.get());
 }
 
 void

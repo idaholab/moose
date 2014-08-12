@@ -385,7 +385,7 @@ public:
   void setPredictor(Predictor * predictor);
   Predictor * getPredictor() { return _predictor; }
 
-  TimeIntegrator * & getTimeIntegrator() { return _time_integrator; }
+  TimeIntegrator * getTimeIntegrator() { return _time_integrator.get(); }
 
   void setPCSide(MooseEnum pcs);
 
@@ -481,7 +481,7 @@ protected:
   NumericVector<Number> & _residual_copy;
 
   /// Time integrator
-  TimeIntegrator * _time_integrator;
+  MooseSharedPointer<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
   /// solution vector for \f$ {du^dot}\over{du} \f$

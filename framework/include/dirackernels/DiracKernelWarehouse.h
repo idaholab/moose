@@ -15,6 +15,8 @@
 #ifndef DIRACKERNELWAREHOUSE_H
 #define DIRACKERNELWAREHOUSE_H
 
+#include "MooseTypes.h"
+
 #include <vector>
 
 class DiracKernel;
@@ -44,9 +46,15 @@ public:
    * Adds a Dirac kernel
    * @param kernel The DiracKernel being added
    */
-  void addDiracKernel(DiracKernel * kernel);
+  void addDiracKernel(MooseSharedPointer<DiracKernel> & kernel);
 
 protected:
+  /**
+   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   */
+  std::vector<MooseSharedPointer<DiracKernel> > _all_ptrs;
+
   /// All dirac kernels
   std::vector<DiracKernel *> _dirac_kernels;
 };

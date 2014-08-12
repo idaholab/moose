@@ -96,13 +96,13 @@ public:
    * @param kernel Kernel being added
    * @param block_ids Set of active domain where the kernel is defined
    */
-  void addKernel(KernelBase *kernel, const std::set<SubdomainID> & block_ids);
+  void addKernel(MooseSharedPointer<KernelBase> & kernel, const std::set<SubdomainID> & block_ids);
 
   /**
    * Add a scalar kernels
    * @param kernel Scalar kernel being added
    */
-  void addScalarKernel(ScalarKernel *kernel);
+  void addScalarKernel(MooseSharedPointer<ScalarKernel> & kernel);
 
   /**
    * Update the list of active kernels
@@ -123,6 +123,15 @@ public:
   bool subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variable_count) const;
 
 protected:
+  ///@{
+  /**
+   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   */
+  std::vector<MooseSharedPointer<KernelBase> > _all_ptrs;
+  std::vector<MooseSharedPointer<ScalarKernel> > _all_scalar_ptrs;
+  ///@}
+
   /// Kernels active on a block and in specified time
   std::vector<KernelBase *> _active_kernels;
   ///  active TimeDerivitive Kernels

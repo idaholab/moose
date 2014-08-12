@@ -67,7 +67,7 @@ AuxWarehouse::jacobianSetup()
 }
 
 void
-AuxWarehouse::addAuxKernel(MooseSharedPointer<AuxKernel> aux)
+AuxWarehouse::addAuxKernel(MooseSharedPointer<AuxKernel> & aux)
 {
   // Make certain that the AuxKernel is valid
   mooseAssert(aux, "Auxkernel is NULL");
@@ -118,7 +118,7 @@ AuxWarehouse::addAuxKernel(MooseSharedPointer<AuxKernel> aux)
 }
 
 void
-AuxWarehouse::addScalarKernel(MooseSharedPointer<AuxScalarKernel> kernel)
+AuxWarehouse::addScalarKernel(MooseSharedPointer<AuxScalarKernel> & kernel)
 {
   mooseAssert(kernel, "ScalarAuxkernel is NULL");
 

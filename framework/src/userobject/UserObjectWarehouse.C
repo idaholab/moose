@@ -233,7 +233,7 @@ UserObjectWarehouse::jacobianSetup()
 
 
 void
-UserObjectWarehouse::addUserObject(MooseSharedPointer<UserObject> user_object)
+UserObjectWarehouse::addUserObject(MooseSharedPointer<UserObject> & user_object)
 {
   // Add the object and its name to the lists of all objects
   _all_ptrs.push_back(user_object);
