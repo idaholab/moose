@@ -342,7 +342,7 @@ RankTwoTensorTest::d2thirdInvariantTest()
 void
 RankTwoTensorTest::sin3LodeTest()
 {
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.72218212, _unsymmetric1.sin3Lode(), 0.0001);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.72218212, _unsymmetric1.sin3Lode(0, 0), 0.0001);
 }
 
 
@@ -356,31 +356,31 @@ RankTwoTensorTest::dsin3LodeTest()
   RankTwoTensor deriv; // derivative of sin3Lode provided by RankTwoTensor
   RankTwoTensor mep; // the RankTwoTensor with successive entries shifted by ep
 
-  sin3Lode = _m3.sin3Lode();
-  deriv = _m3.dsin3Lode();
+  sin3Lode = _m3.sin3Lode(0, 0);
+  deriv = _m3.dsin3Lode(0);
   mep = _m3;
   for (unsigned i = 0 ; i < 3 ; ++i)
     for (unsigned j = 0 ; j < 3 ; ++j)
     {
       mep(i, j) += ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode() - sin3Lode)/ep, deriv(i, j), 10*ep);
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode(0, 0) - sin3Lode)/ep, deriv(i, j), 10*ep);
       mep(i, j) -= ep;
     }
 
-  sin3Lode = _unsymmetric1.sin3Lode();
-  deriv = _unsymmetric1.dsin3Lode();
+  sin3Lode = _unsymmetric1.sin3Lode(0, 0);
+  deriv = _unsymmetric1.dsin3Lode(0);
   mep = _unsymmetric1;
   for (unsigned i = 0 ; i < 3 ; ++i)
     for (unsigned j = 0 ; j < 3 ; ++j)
     {
       mep(i, j) += ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode() - sin3Lode)/ep, deriv(i, j), 10*ep);
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode(0, 0) - sin3Lode)/ep, deriv(i, j), 10*ep);
       mep(i, j) -= ep;
 
       // since sin3Lode is explicitly symmeterised, we can also do
       mep(i, j) += 0.5*ep;
       mep(j, i) += 0.5*ep;
-      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode() - sin3Lode)/ep, deriv(i, j), 10*ep);
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode(0, 0) - sin3Lode)/ep, deriv(i, j), 10*ep);
       mep(i, j) -= 0.5*ep;
       mep(j, i) -= 0.5*ep;
     }
@@ -401,8 +401,8 @@ RankTwoTensorTest::d2sin3LodeTest()
 
 
   mep = _m3;
-  d1 = _m3.dsin3Lode();
-  d2 = _m3.d2sin3Lode();
+  d1 = _m3.dsin3Lode(0);
+  d2 = _m3.d2sin3Lode(0);
   for (unsigned i = 0; i < 3; i++)
     for (unsigned j = 0; j < 3; j++)
     {
@@ -410,7 +410,7 @@ RankTwoTensorTest::d2sin3LodeTest()
         for (unsigned int l = 0; l < 3; l++)
         {
           mep(k, l) += ep;
-          d1ep = mep.dsin3Lode();
+          d1ep = mep.dsin3Lode(0);
           CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
           mep(k, l) -= ep;
         }
@@ -418,8 +418,8 @@ RankTwoTensorTest::d2sin3LodeTest()
 
 
   mep = _unsymmetric1;
-  d1 = _unsymmetric1.dsin3Lode();
-  d2 = _unsymmetric1.d2sin3Lode();
+  d1 = _unsymmetric1.dsin3Lode(0);
+  d2 = _unsymmetric1.d2sin3Lode(0);
   for (unsigned i = 0; i < 3; i++)
     for (unsigned j = 0; j < 3; j++)
     {
@@ -427,7 +427,7 @@ RankTwoTensorTest::d2sin3LodeTest()
         for (unsigned int l = 0; l < 3; l++)
         {
           mep(k, l) += ep;
-          d1ep = mep.dsin3Lode();
+          d1ep = mep.dsin3Lode(0);
           CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
           mep(k, l) -= ep;
 
@@ -435,7 +435,7 @@ RankTwoTensorTest::d2sin3LodeTest()
           // the derivative may or may not explicitly symmeterise
           mep(k, l) += 0.5*ep;
           mep(l, k) += 0.5*ep;
-          d1ep = mep.dsin3Lode();
+          d1ep = mep.dsin3Lode(0);
           CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
           mep(k, l) -= 0.5*ep;
           mep(l, k) -= 0.5*ep;

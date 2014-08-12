@@ -183,14 +183,29 @@ public:
   RankFourTensor d2secondInvariant() const;
 
 
-  /// Sin(3*Lode_angle)
-  Real sin3Lode() const;
+  /**
+   * Sin(3*Lode_angle)
+   * If secondInvariant() <= r0 then return r0_value
+   * This is to gaurd against precision-loss errors.
+   * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
+   */
+  Real sin3Lode(const Real r0, const Real r0_value) const;
 
-  /// d(sin3Lode)/dA_ij
-  RankTwoTensor dsin3Lode() const;
+  /**
+   * d(sin3Lode)/dA_ij
+   * If secondInvariant() <= r0 then return zero
+   * This is to gaurd against precision-loss errors.
+   * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
+   */
+  RankTwoTensor dsin3Lode(const Real r0) const;
 
-  /// d^2(sin3Lode)/dA_ij/dA_kl
-  RankFourTensor d2sin3Lode() const;
+  /**
+   * d^2(sin3Lode)/dA_ij/dA_kl
+   * If secondInvariant() <= r0 then return zero
+   * This is to gaurd against precision-loss errors.
+   * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
+   */
+  RankFourTensor d2sin3Lode(const Real r0) const;
 
   /**
    * Denote the _vals[i][j] by A_ij, then

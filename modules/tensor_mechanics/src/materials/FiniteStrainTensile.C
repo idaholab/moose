@@ -10,6 +10,7 @@ InputParameters validParams<FiniteStrainTensile>()
   params.addRangeCheckedParam<Real>("tensile_strength_rate", 0, "tensile_strength_rate>=0", "Tensile strength = tensile_strength_residual + (tensile_strength - tensile_strength_residual)*exp(-tensile_strength_rate*plasticstrain).  Set to zero for perfect plasticity");
   params.addRangeCheckedParam<Real>("tensile_edge_smoother", 25.0, "tensile_edge_smoother>=0 & tensile_edge_smoother<=30", "Smoothing parameter: the edges of the cone are smoothed by the given amount.");
   params.addRequiredRangeCheckedParam<Real>("tensile_tip_smoother", "tensile_tip_smoother>=0", "Smoothing parameter: the cone vertex at mean = Tensile strength, will be smoothed by the given amount.  Typical value is 0.1*tensile_strength");
+  params.addParam<Real>("tensile_lode_cutoff", "If the second invariant of stress is less than this amount, the Lode angle is assumed to be zero.  This is to gaurd against precision-loss problems, and this parameter should be set small.  Default = 0.00001*((yield_Function_tolerance)^2)");
   params.addClassDescription("Non-associative tensile plasticity with hardening/softening");
 
   return params;
@@ -24,12 +25,15 @@ FiniteStrainTensile::FiniteStrainTensile(const std::string & name,
     _small_smoother2(std::pow(getParam<Real>("tensile_tip_smoother"), 2)),
     _tt(getParam<Real>("tensile_edge_smoother")*M_PI/180.0),
     _sin3tt(std::sin(3*_tt)),
+    _lode_cutoff(parameters.isParamValid("tensile_lode_cutoff") ? getParam<Real>("tensile_lode_cutoff") : 1.0E-5*std::pow(_f_tol[0], 2)),
 
     _tensile_internal(declareProperty<Real>("tensile_internal")),
     _tensile_internal_old(declarePropertyOld<Real>("tensile_internal")),
     _tensile_max_principal(declareProperty<Real>("tensile_max_principal_stress")),
     _yf(declareProperty<Real>("tensile_yield_function"))
 {
+  if (_lode_cutoff < 0)
+    mooseError("tensile_lode_cutoff must not be negative");
   _ccc = (-std::cos(3*_tt)*(std::cos(_tt) - std::sin(_tt)/std::sqrt(3.0)) - 3*std::sin(3*_tt)*(std::sin(_tt) + std::cos(_tt)/std::sqrt(3.0)))/(18*std::pow(std::cos(3*_tt), 3));
   _bbb = (std::sin(6*_tt)*(std::cos(_tt) - std::sin(_tt)/std::sqrt(3.0)) - 6*std::cos(6*_tt)*(std::sin(_tt) + std::cos(_tt)/std::sqrt(3.0)))/(18*std::pow(std::cos(3*_tt), 3));
   _aaa = -std::sin(_tt)/std::sqrt(3.0) - _bbb*std::sin(3*_tt) - _ccc*std::pow(std::sin(3*_tt), 2) + std::cos(_tt);
@@ -72,7 +76,7 @@ void
 FiniteStrainTensile::yieldFunction(const RankTwoTensor &stress, const std::vector<Real> & intnl, std::vector<Real> & f)
 {
   Real mean_stress = stress.trace()/3.0;
-  Real sin3Lode = stress.sin3Lode();
+  Real sin3Lode = stress.sin3Lode(_lode_cutoff, 0);
   if (sin3Lode <= _sin3tt)
   {
     // the non-edge-smoothed version
@@ -94,7 +98,7 @@ FiniteStrainTensile::dyieldFunction_dstress(const RankTwoTensor & stress, const 
 {
   Real mean_stress = stress.trace()/3.0;
   RankTwoTensor dmean_stress = stress.dtrace()/3.0;
-  Real sin3Lode = stress.sin3Lode();
+  Real sin3Lode = stress.sin3Lode(_lode_cutoff, 0);
   if (sin3Lode <= _sin3tt)
   {
     // the non-edge-smoothed version
@@ -108,7 +112,7 @@ FiniteStrainTensile::dyieldFunction_dstress(const RankTwoTensor & stress, const 
   {
     // the edge-smoothed version
     Real kk = _aaa + _bbb*sin3Lode + _ccc*std::pow(sin3Lode, 2);
-    RankTwoTensor dkk = (_bbb + 2*_ccc*sin3Lode)*stress.dsin3Lode();
+    RankTwoTensor dkk = (_bbb + 2*_ccc*sin3Lode)*stress.dsin3Lode(_lode_cutoff);
     Real sibar2 = stress.secondInvariant();
     RankTwoTensor dsibar2 = stress.dsecondInvariant();
     Real denom = std::sqrt(_small_smoother2 + sibar2*std::pow(kk, 2));
@@ -135,7 +139,7 @@ FiniteStrainTensile::dflowPotential_dstress(const RankTwoTensor & stress, const 
 {
   Real mean_stress = stress.trace()/3.0;
   RankTwoTensor dmean_stress = stress.dtrace()/3.0;
-  Real sin3Lode = stress.sin3Lode();
+  Real sin3Lode = stress.sin3Lode(_lode_cutoff, 0);
   if (sin3Lode <= _sin3tt)
   {
     // the non-edge-smoothed version
@@ -157,10 +161,10 @@ FiniteStrainTensile::dflowPotential_dstress(const RankTwoTensor & stress, const 
   else
   {
     // the edge-smoothed version
-    RankTwoTensor dsin3Lode = stress.dsin3Lode();
+    RankTwoTensor dsin3Lode = stress.dsin3Lode(_lode_cutoff);
     Real kk = _aaa + _bbb*sin3Lode + _ccc*std::pow(sin3Lode, 2);
     RankTwoTensor dkk = (_bbb + 2*_ccc*sin3Lode)*dsin3Lode;
-    RankFourTensor d2kk = (_bbb + 2*_ccc*sin3Lode)*stress.d2sin3Lode();
+    RankFourTensor d2kk = (_bbb + 2*_ccc*sin3Lode)*stress.d2sin3Lode(_lode_cutoff);
     for (unsigned i = 0 ; i < 3 ; ++i)
       for (unsigned j = 0 ; j < 3 ; ++j)
         for (unsigned k = 0 ; k < 3 ; ++k)

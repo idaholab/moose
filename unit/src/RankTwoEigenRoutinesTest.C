@@ -266,7 +266,7 @@ RankTwoEigenRoutinesTest::someIdentitiesTest()
   Real shear = std::sqrt(secondInvariant);
   Real thirdInvariant = _m3.thirdInvariant();
 
-  Real lode = std::asin(_m3.sin3Lode()/3.0);
+  Real lode = std::asin(_m3.sin3Lode(0, 0)/3.0);
 
   Real two_pi_over_3 = 2.09439510239;
   CPPUNIT_ASSERT_DOUBLES_EQUAL(eigvals[0], 2*shear*std::sin(lode - two_pi_over_3)/std::sqrt(3.0) + mean, 0.0001);
