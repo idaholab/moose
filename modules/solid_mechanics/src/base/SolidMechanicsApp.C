@@ -28,6 +28,8 @@
 #include "JIntegral.h"
 #include "CrackFrontData.h"
 #include "CrackFrontDefinition.h"
+#include "InteractionIntegral.h"
+#include "InteractionIntegralAuxFields.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
 #include "MaterialTensorOnLine.h"
@@ -114,6 +116,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(CombinedCreepPlasticity);
   registerMaterial(Elastic);
   registerMaterial(ElasticModel);
+  registerMaterial(InteractionIntegralAuxFields);
   registerMaterial(IsotropicPlasticity);
   registerMaterial(LinearAnisotropicMaterial);
   registerMaterial(LinearGeneralAnisotropicMaterial);
@@ -141,6 +144,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(Mass);
   registerPostprocessor(JIntegral);
   registerPostprocessor(CrackFrontData);
+  registerPostprocessor(InteractionIntegral);
   registerPostprocessor(CavityPressurePostprocessor);
 
   registerUserObject(MaterialTensorOnLine);
@@ -165,6 +169,7 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_aux_variable");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_aux_kernel");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_postprocessor");
+  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_material");
 
   registerAction(PressureAction, "add_bc");
   registerAction(CavityPressureAction, "add_bc");
@@ -175,4 +180,5 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   registerAction(DomainIntegralAction, "add_aux_variable");
   registerAction(DomainIntegralAction, "add_aux_kernel");
   registerAction(DomainIntegralAction, "add_postprocessor");
+  registerAction(DomainIntegralAction, "add_material");
 }

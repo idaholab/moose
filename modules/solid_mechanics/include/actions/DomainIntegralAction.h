@@ -46,6 +46,12 @@ protected:
   std::vector<Real> _radius_inner;
   std::vector<Real> _radius_outer;
   std::vector<VariableName> _output_variables;
+  Real _poissons_ratio;
+  Real _youngs_modulus;
+  std::vector<SubdomainName> _blocks;
+  VariableName _disp_x;
+  VariableName _disp_y;
+  VariableName _disp_z;
   bool _use_displaced_mesh;
 };
 

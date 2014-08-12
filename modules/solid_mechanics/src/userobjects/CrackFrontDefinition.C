@@ -118,6 +118,7 @@ CrackFrontDefinition::initialSetup()
   orderCrackFrontNodes(nodes);
 
   updateCrackFrontGeometry();
+
 }
 
 void
@@ -557,15 +558,15 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     _crack_plane_normal = crack_direction.cross(tangent_direction);
     ColumnMajorMatrix rot_mat;
     rot_mat(0,0) = crack_direction(0);
-    rot_mat(0,1) = crack_direction(1);
-    rot_mat(0,2) = crack_direction(2);
-    rot_mat(1,0) = _crack_plane_normal(0);
+    rot_mat(1,0) = crack_direction(1);
+    rot_mat(2,0) = crack_direction(2);
+    rot_mat(0,1) = _crack_plane_normal(0);
     rot_mat(1,1) = _crack_plane_normal(1);
-    rot_mat(1,2) = _crack_plane_normal(2);
-    rot_mat(2,0) = 0.0;
-    rot_mat(2,1) = 0.0;
+    rot_mat(2,1) = _crack_plane_normal(2);
+    rot_mat(0,2) = 0.0;
+    rot_mat(1,2) = 0.0;
     rot_mat(2,2) = 0.0;
-    rot_mat(2,_axis_2d) = 1.0;
+    rot_mat(_axis_2d,2) = -1.0;
     _rot_matrix.push_back(rot_mat);
 
     _segment_lengths.push_back(std::make_pair(0.0,0.0));
@@ -886,65 +887,72 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
 {
   unsigned int num_nodes(_ordered_crack_front_nodes.size());
   Point p = qp;
+  Point closest_node(0.0);
+  RealVectorValue closest_node_to_p;
 
-  // Loop over nodes to find the two crack front nodes closest to the point qp
-  Real mindist1(1.0e30);
-  Real mindist2(1.0e30);
-  Point closest_node1(0.0);
-  Point closest_node2(0.0);
-  for (unsigned int nit = 0; nit != num_nodes; ++nit)
+  Node & crack_tip_node = _mesh.node(_ordered_crack_front_nodes[node_index]);
+  RealVectorValue crack_tip_node_rot = rotateToCrackFrontCoords(crack_tip_node,node_index);
+
+  RealVectorValue crack_front_edge = rotateToCrackFrontCoords(_tangent_directions[node_index],node_index);
+
+  Point p_rot = rotateToCrackFrontCoords(p,node_index);
+  p_rot = p_rot - crack_tip_node_rot;
+
+  if (_treat_as_2d)
   {
-    Node & crack_front_node = _mesh.node(_ordered_crack_front_nodes[nit]);
-    RealVectorValue crack_node_to_current_node = p - crack_front_node;
-    Real dist = crack_node_to_current_node.size();
+    closest_node = crack_tip_node_rot;
+    closest_node_to_p = p_rot;
 
-    if (dist < mindist1)
-    {
-      mindist2 = mindist1;
-      closest_node2 = closest_node1;
-      mindist1 = dist;
-      closest_node1 = crack_front_node;
-    }
-    else if (dist < mindist2 && dist != mindist1)
-    {
-      mindist2 = dist;
-      closest_node2 = crack_front_node;
-    }
+    //Find r, the distance between the qp and the crack front
+    RealVectorValue r_vec = p_rot;
+    r = r_vec.size();
 
   }
-
-  //Rotate coordinates to crack front coordinate system
-  closest_node1 = rotateToCrackFrontCoords(closest_node1,node_index);
-  closest_node2 = rotateToCrackFrontCoords(closest_node2,node_index);
-  if (closest_node1(2) > closest_node2(2))
+  else
   {
-    RealVectorValue tmp = closest_node2;
-    closest_node2 = closest_node1;
-    closest_node1 = tmp;
-  }
-  p = rotateToCrackFrontCoords(p,node_index);
+    // Loop over crack front nodes to find the one closest to the point qp
+    Real min_dist = std::numeric_limits<Real>::max();
+    for (unsigned int nit = 0; nit != num_nodes; ++nit)
+    {
+      Node & crack_front_node = _mesh.node(_ordered_crack_front_nodes[nit]);
+      RealVectorValue crack_node_to_current_node = p - crack_front_node;
+      Real dist = crack_node_to_current_node.size();
 
-  //Find r, the distance between the qp and the crack front
-  RealVectorValue crack_front_edge = closest_node2 - closest_node1;
-  Real edge_length_sq = crack_front_edge.size_sq();
-  RealVectorValue closest_node1_to_p = p - closest_node1;
-  Real perp = crack_front_edge * closest_node1_to_p;
-  Real dist_along_edge = perp / edge_length_sq;
-  RealVectorValue point_on_edge = closest_node1 + crack_front_edge * dist_along_edge;
-  RealVectorValue r_vec = p - point_on_edge;
-  r = r_vec.size();
+      if (dist < min_dist)
+      {
+        min_dist = dist;
+        closest_node = crack_front_node;
+      }
+    }
+
+    //Rotate coordinates to crack front coordinate system
+    closest_node = rotateToCrackFrontCoords(closest_node,node_index);
+    closest_node = closest_node - crack_tip_node_rot;
+
+    //Find r, the distance between the qp and the crack front
+    Real edge_length_sq = crack_front_edge.size_sq();
+    closest_node_to_p = p_rot - closest_node;
+    Real perp = crack_front_edge * closest_node_to_p;
+    Real dist_along_edge = perp / edge_length_sq;
+    RealVectorValue point_on_edge = closest_node + crack_front_edge * dist_along_edge;
+    RealVectorValue r_vec = p_rot - point_on_edge;
+    r = r_vec.size();
+
+  }
 
   //Find theta, the angle between r and the crack front plane
   RealVectorValue crack_plane_normal = rotateToCrackFrontCoords(_crack_plane_normal,node_index);
-  Real p_to_plane_dist = std::abs(closest_node1_to_p*crack_plane_normal);
+  Real p_to_plane_dist = std::abs(closest_node_to_p*crack_plane_normal);
 
   //Determine if p is above or below the crack plane
-  Real y_local = p(1) - closest_node1(1);
+  Real y_local = p_rot(1) - closest_node(1);
+
   //Determine if p is in front of or behind the crack front
-  RealVectorValue p2(p);
+  RealVectorValue p2(p_rot);
   p2(1) = 0;
-  RealVectorValue p2_vec = p2 - closest_node1;
+  RealVectorValue p2_vec = p2 - closest_node;
   Real ahead = crack_front_edge(2) * p2_vec(0) - crack_front_edge(0) * p2_vec(2);
+
   Real x_local(0);
   if (ahead >= 0)
     x_local = 1;
