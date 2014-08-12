@@ -8,7 +8,7 @@
   [./checked_pointer_param_test]
     type = 'RunException'
     input = 'checked_pointer_param_test.i'
-    expect_err = "_fe_problem is NULL."
+    expect_err = "quotes around a vector"
   [../]
 
   [./add_aux_variable_multiple_test]

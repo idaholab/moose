@@ -144,6 +144,21 @@ Parser::parse(const std::string &input_filename)
   _getpot_initialized = true;
   _inactive_strings.clear();
 
+  // Check for "unidentified nominuses".  These can indicate a vector
+  // input which the user failed to wrap in quotes e.g.: v = 1 2
+  {
+    std::set<std::string> knowns;
+    std::vector<std::string> ufos = _getpot_file.unidentified_nominuses(knowns);
+    if (!ufos.empty())
+    {
+      Moose::err << "Error: the following \"unidentified nominuses\" were found in your input file:" << std::endl;
+      for (unsigned int i=0; i<ufos.size(); ++i)
+        Moose::err << ufos[i] << std::endl;
+      mooseError("Your input file may have a syntax error, or you may have forgotten to put quotes around a vector, ie. v='1 2'.");
+    }
+  }
+
+
   section_names = _getpot_file.get_section_names();
   appendAndReorderSectionNames(section_names);
 
