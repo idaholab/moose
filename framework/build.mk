@@ -206,7 +206,7 @@ mpif77_command := $(libmesh_F77)
 # If $(libmesh_f77) is an mpiXXX compiler script, use -show
 # to determine the base compiler
 ifneq (,$(findstring mpi,$(mpif77_command)))
-	mpif77_command := $(shell $(libmesh_F77) -show)
+	mpif77_command := $(shell $(libmesh_F77) -show | cut -f1 -d' ')
 endif
 
 # Set certain flags based on compiler
