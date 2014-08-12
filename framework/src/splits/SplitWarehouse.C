@@ -32,7 +32,6 @@ SplitWarehouse::addSplit(const std::string& name, MooseSharedPointer<Split> & sp
 Split*
 SplitWarehouse::getSplit(const std::string& name)
 {
-  Split *split = NULL;
   std::map<std::string, MooseSharedPointer<Split> >::iterator it = _all_splits.find(name);
 
   if (it == _all_splits.end())

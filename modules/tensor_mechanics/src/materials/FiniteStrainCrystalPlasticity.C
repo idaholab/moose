@@ -713,7 +713,7 @@ FiniteStrainCrystalPlasticity::getInitSlipSysRes()
     for (unsigned int i = is; i <= ie; ++i)
       _gss[_qp][i-1] = _gprops[ind];
 
-    if (ie == static_cast<int>(_nss))
+    if (ie == _nss)
       break;
 
     ind++;
@@ -788,7 +788,7 @@ FiniteStrainCrystalPlasticity::getFlowRateParams()
       _xm[i-1] = _flowprops[ind+1];
     }
 
-    if (ie == static_cast<int>(_nss))
+    if (ie == _nss)
       break;
 
     ind += _num_slip_sys_flowrate_props;
