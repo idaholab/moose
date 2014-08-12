@@ -38,9 +38,6 @@ OutputWarehouse::~OutputWarehouse()
 {
   if (_console_buffer.str().length())
     mooseConsole();
-
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
-    delete *it;
 }
 
 void
@@ -69,20 +66,22 @@ OutputWarehouse::timestepSetup()
 }
 
 void
-OutputWarehouse::addOutput(Output * output)
+OutputWarehouse::addOutput(MooseSharedPointer<Output> & output)
 {
+  _all_ptrs.push_back(output);
+
   // Add the object to the warehouse storage, Checkpoint placed at end so they are called last
-  Checkpoint * cp = dynamic_cast<Checkpoint *>(output);
+  Checkpoint * cp = dynamic_cast<Checkpoint *>(output.get());
   if (cp != NULL)
-    _object_ptrs.push_back(output);
+    _object_ptrs.push_back(output.get());
   else
-    _object_ptrs.insert(_object_ptrs.begin(), output);
+    _object_ptrs.insert(_object_ptrs.begin(), output.get());
 
   // Store the name and pointer in map
-  _object_map[output->name()] = output;
+  _object_map[output->name()] = output.get();
 
   // If the output object is a FileOutput then store the output filename
-  FileOutput * ptr = dynamic_cast<FileOutput *>(output);
+  FileOutput * ptr = dynamic_cast<FileOutput *>(output.get());
   if (ptr != NULL)
     addOutputFilename(ptr->filename());
 
