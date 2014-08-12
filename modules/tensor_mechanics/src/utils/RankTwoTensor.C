@@ -537,27 +537,27 @@ RankTwoTensor::d2thirdInvariant() const
 }
 
 Real
-RankTwoTensor::sin3Lode() const
+RankTwoTensor::sin3Lode(const Real r0, const Real r0_value) const
 {
   Real bar = secondInvariant();
-  if (bar == 0.0)
-    return 0.0; // in this case the Lode angle is not defined, so zero is as good as anything else
+  if (bar <= r0)
+    return r0_value; // in this case the Lode angle is not defined
   else
-    return -1.5*std::sqrt(3.0)*thirdInvariant()/std::pow(bar, 1.5);
+    return std::max(std::min(-1.5*std::sqrt(3.0)*thirdInvariant()/std::pow(bar, 1.5), 1.0), -1.0); // the min and max here gaurd against precision-loss when bar is tiny but nonzero.
 }
 
 RankTwoTensor
-RankTwoTensor::dsin3Lode() const
+RankTwoTensor::dsin3Lode(const Real r0) const
 {
   Real bar = secondInvariant();
-  if (bar == 0.0)
+  if (bar <= r0)
     return RankTwoTensor();
   else
     return -1.5*std::sqrt(3.0)*(dthirdInvariant()/std::pow(bar, 1.5) - 1.5*dsecondInvariant()*thirdInvariant()/std::pow(bar, 2.5));
 }
 
 RankFourTensor
-RankTwoTensor::d2sin3Lode() const
+RankTwoTensor::d2sin3Lode(const Real r0) const
 {
   Real bar = secondInvariant();
   if (bar == 0.0)
