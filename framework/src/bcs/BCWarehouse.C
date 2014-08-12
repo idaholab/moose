@@ -23,13 +23,6 @@ BCWarehouse::BCWarehouse()
 
 BCWarehouse::~BCWarehouse()
 {
-  for (std::map<BoundaryID, std::vector<IntegratedBC *> >::iterator i = _bcs.begin(); i != _bcs.end(); ++i)
-    for (std::vector<IntegratedBC *>::iterator k=(i->second).begin(); k!=(i->second).end(); ++k)
-      delete *k;
-
-  for (std::map<BoundaryID, std::vector<NodalBC *> >::iterator i = _nodal_bcs.begin(); i != _nodal_bcs.end(); ++i)
-    for (std::vector<NodalBC *>::iterator k=(i->second).begin(); k!=(i->second).end(); ++k)
-      delete *k;
 }
 
 void
@@ -81,21 +74,24 @@ BCWarehouse::jacobianSetup()
 }
 
 void
-BCWarehouse::addBC(BoundaryID boundary_id, IntegratedBC *bc)
+BCWarehouse::addBC(BoundaryID boundary_id, MooseSharedPointer<IntegratedBC> & bc)
 {
-  _bcs[boundary_id].push_back(bc);
+  _all_ptrs.push_back(MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(bc));
+  _bcs[boundary_id].push_back(bc.get());
 }
 
 void
-BCWarehouse::addNodalBC(BoundaryID boundary_id, NodalBC *bc)
+BCWarehouse::addNodalBC(BoundaryID boundary_id, MooseSharedPointer<NodalBC> & bc)
 {
-  _nodal_bcs[boundary_id].push_back(bc);
+  _all_ptrs.push_back(MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(bc));
+  _nodal_bcs[boundary_id].push_back(bc.get());
 }
 
 void
-BCWarehouse::addPresetNodalBC(BoundaryID boundary_id, PresetNodalBC *bc)
+BCWarehouse::addPresetNodalBC(BoundaryID boundary_id, MooseSharedPointer<PresetNodalBC> & bc)
 {
-  _preset_nodal_bcs[boundary_id].push_back(bc);
+  _all_ptrs.push_back(MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(bc));
+  _preset_nodal_bcs[boundary_id].push_back(bc.get());
 }
 
 const std::vector<IntegratedBC *> &

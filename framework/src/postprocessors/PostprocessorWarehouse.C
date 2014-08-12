@@ -195,7 +195,7 @@ PostprocessorWarehouse::blockNodalPostprocessors(SubdomainID block_id) const
 }
 
 void
-PostprocessorWarehouse::addPostprocessor(MooseSharedPointer<Postprocessor> postprocessor)
+PostprocessorWarehouse::addPostprocessor(MooseSharedPointer<Postprocessor> & postprocessor)
 {
   _all_ptrs.push_back(postprocessor);
 

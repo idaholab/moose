@@ -1592,38 +1592,34 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       parameters.set<bool>("_bnd") = false;
       parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-      Material *volume_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
-      mooseAssert(volume_material != NULL, "Not a Material object");
+      MooseSharedPointer<Material> volume_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create_shared_ptr(mat_name, name, parameters));
       _materials[tid].addMaterial(block_ids, volume_material);
-      _objects_by_name[tid][name].push_back(volume_material);
+      _objects_by_name[tid][name].push_back(volume_material.get());
 
       // face material
       parameters.set<bool>("_bnd") = true;
       parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-      Material *face_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
-      mooseAssert(face_material != NULL, "Not a Material object");
+      MooseSharedPointer<Material> face_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create_shared_ptr(mat_name, name, parameters));
       _materials[tid].addFaceMaterial(block_ids, face_material);
-      _objects_by_name[tid][name].push_back(face_material);
+      _objects_by_name[tid][name].push_back(face_material.get());
 
       // neighbor material
       parameters.set<bool>("_bnd") = true;
       parameters.set<bool>("_neighbor") = true;
       parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
-      Material *neighbor_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
-      mooseAssert(neighbor_material != NULL, "Not a Material object");
+      MooseSharedPointer<Material> neighbor_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create_shared_ptr(mat_name, name, parameters));
       _materials[tid].addNeighborMaterial(block_ids, neighbor_material);
-      _objects_by_name[tid][name].push_back(neighbor_material);
+      _objects_by_name[tid][name].push_back(neighbor_material.get());
     }
     else if (boundary_ids.size() > 0)
     {
       parameters.set<bool>("_bnd") = true;
       parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-      Material *bnd_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
-      mooseAssert(bnd_material != NULL, "Not a Material object");
+      MooseSharedPointer<Material> bnd_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create_shared_ptr(mat_name, name, parameters));
       _materials[tid].addBoundaryMaterial(boundary_ids, bnd_material);
-      _objects_by_name[tid][name].push_back(bnd_material);
+      _objects_by_name[tid][name].push_back(bnd_material.get());
     }
     else
       mooseError("Material '" + name + "' did not specify either block or boundary parameter");

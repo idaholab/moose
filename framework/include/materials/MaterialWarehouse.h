@@ -76,10 +76,10 @@ public:
 
   void updateMaterialDataState();
 
-  void addMaterial(std::vector<SubdomainID> blocks, Material *material);
-  void addFaceMaterial(std::vector<SubdomainID> blocks, Material *material);
-  void addNeighborMaterial(std::vector<SubdomainID> blocks, Material *material);
-  void addBoundaryMaterial(std::vector<BoundaryID> boundaries, Material *material);
+  void addMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
+  void addFaceMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
+  void addNeighborMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
+  void addBoundaryMaterial(std::vector<BoundaryID> boundaries, MooseSharedPointer<Material> & material);
 
   /**
    * Get the list of blocks that materials are defined on
@@ -131,6 +131,12 @@ protected:
   std::vector<Material *> _mats;
 
 private:
+  /**
+   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   */
+  std::vector<MooseSharedPointer<Material> > _all_ptrs;
+
   /**
    * This routine uses the Dependency Resolver to sort Materials based on dependencies they
    * might have on coupled values

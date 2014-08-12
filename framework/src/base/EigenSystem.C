@@ -48,13 +48,13 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
       {
         // EigenKernel
         parameters.set<bool>("implicit") = true;
-        EigenKernel *ekernel = static_cast<EigenKernel *>(_factory.create(kernel_name, name, parameters));
-        mooseAssert(ekernel != NULL, "Not an EigenKernel object");
-        if (parameters.get<bool>("eigen")) markEigenVariable(parameters.get<NonlinearVariableName>("variable"));
+        MooseSharedPointer<KernelBase> ekernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create_shared_ptr(kernel_name, name, parameters));
+        if (parameters.get<bool>("eigen"))
+          markEigenVariable(parameters.get<NonlinearVariableName>("variable"));
         // Extract the SubdomainIDs from the object (via BlockRestrictable class)
         std::set<SubdomainID> blk_ids = ekernel->blockIDs();
         _kernels[tid].addKernel(ekernel, blk_ids);
-        _fe_problem._objects_by_name[tid][name].push_back(ekernel);
+        _fe_problem._objects_by_name[tid][name].push_back(ekernel.get());
       }
       if (parameters.get<bool>("eigen"))
       {
@@ -62,23 +62,22 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
         parameters.set<bool>("implicit") = false;
         std::string old_name(name + "_old");
 
-        EigenKernel *ekernel = static_cast<EigenKernel *>(_factory.create(kernel_name, old_name, parameters));
+        MooseSharedPointer<KernelBase> ekernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create_shared_ptr(kernel_name, old_name, parameters));
         _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
         // Extract the SubdomainIDs from the object (via BlockRestrictable class)
         std::set<SubdomainID> blk_ids = ekernel->blockIDs();
         _kernels[tid].addKernel(ekernel, blk_ids);
-        _fe_problem._objects_by_name[tid][old_name].push_back(ekernel);
+        _fe_problem._objects_by_name[tid][old_name].push_back(ekernel.get());
       }
     }
     else // Standard nonlinear system kernel
     {
       // Create the kernel object via the factory
-      KernelBase *kernel = static_cast<KernelBase *>(_factory.create(kernel_name, name, parameters));
-      mooseAssert(kernel != NULL, "Not a Kernel object");
+      MooseSharedPointer<KernelBase> kernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create_shared_ptr(kernel_name, name, parameters));
       // Extract the SubdomainIDs from the object (via BlockRestrictable class)
       std::set<SubdomainID> blk_ids = kernel->blockIDs();
       _kernels[tid].addKernel(kernel, blk_ids);
-      _fe_problem._objects_by_name[tid][name].push_back(kernel);
+      _fe_problem._objects_by_name[tid][name].push_back(kernel.get());
     }
   }
 }
