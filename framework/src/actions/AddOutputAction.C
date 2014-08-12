@@ -80,6 +80,6 @@ AddOutputAction::act()
     _moose_object_pars.set<std::string>("suffix") = "auto_recovery";
 
   // Create the object and add it to the warehouse
-  Output * output = static_cast<Output *>(_factory.create(_type, object_name, _moose_object_pars));
+  MooseSharedPointer<Output> output = MooseSharedNamespace::static_pointer_cast<Output>(_factory.create_shared_ptr(_type, object_name, _moose_object_pars));
   output_warehouse.addOutput(output);
 }
