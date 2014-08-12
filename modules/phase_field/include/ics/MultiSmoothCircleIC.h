@@ -28,22 +28,27 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   MultiSmoothCircleIC(const std::string & name,
-                         InputParameters parameters);
+                      InputParameters parameters);
+
+  virtual void initialSetup();
 
   virtual void computeCircleRadii();
 
   virtual void computeCircleCenters();
 
 protected:
+
   unsigned int _numbub;
   Real _bubspac;
-  Real _Lx;
-  Real _Ly;
-  Real _Lz;
 
   unsigned int _numtries;
   Real _radius;
   Real _radius_variation;
+  MooseEnum _radius_variation_type;
+
+  Point _bottom_left;
+  Point _top_right;
+  Point _range;
 };
 
 #endif //MULTISMOOTHCIRCLEIC_H
