@@ -77,7 +77,7 @@ InputParameters validParams<Output>()
 
   // 'Materials' group
   params.addParam<bool>("output_material_properties", false, "Flag indicating if material properties should be output");
-  params.addParam<std::vector<std::string> >("show_material_properties", "Flag indicating if material properties should be output");
+  params.addParam<std::vector<std::string> >("show_material_properties", "List of materialproperties that should be written to the output");
   params.addParamNamesToGroup("output_material_properties show_material_properties", "Materials");
   params.addParamNamesToGroup("show_material_properties", "Materials");
 

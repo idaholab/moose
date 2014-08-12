@@ -64,17 +64,20 @@ MaterialOutputAction::act()
   std::vector<Material *> materials = _problem->getMaterialWarehouse(0).getMaterials();
 
   // Handle setting of material property output in [Outputs] sub-blocks
-  /* Output objects can enable material property output, the following code examines the parameters
-   * for each Output object and sets a flag if any Output object has output set and also builds a list if the
-   * properties are limited via the 'show_material_properties' parameters
-   */
+  // Output objects can enable material property output, the following code examines the parameters
+  // for each Output object and sets a flag if any Output object has output set and also builds a list if the
+  // properties are limited via the 'show_material_properties' parameters
   bool outputs_has_properties = false;
   std::set<std::string> output_object_properties;
 
   std::vector<Action *> output_actions =  _app.actionWarehouse().getActionsByName("add_output");
   for (std::vector<Action *>::const_iterator it = output_actions.begin(); it != output_actions.end(); ++it)
   {
+    // Extract the Output action
     AddOutputAction * action = dynamic_cast<AddOutputAction *>(*it);
+    mooseAssert(action != NULL, "No AddOutputAction with the name " << *it << " exists");
+
+    // Add the material property names from the output object parameters to the list of properties to output
     InputParameters & params = action->getObjectParams();
     if (params.get<bool>("output_material_properties"))
     {
@@ -97,15 +100,14 @@ MaterialOutputAction::act()
     if (outputs_has_properties)
       output_properties.insert(output_properties.end(), output_object_properties.begin(), output_object_properties.end());
 
-    /* Clear the list of variable names for the current material object, this list will be populated with all the
-    variables names for the current material object and is needed for purposes of controlling the which output objects
-    show the material property data */
+    // Clear the list of variable names for the current material object, this list will be populated with all the
+    // variables names for the current material object and is needed for purposes of controlling the which output objects
+    // show the material property data
     _material_variable_names.clear();
 
-    /* Create necessary outputs for the properties if:
-       (1) The Outputs block has material output enabled
-       (2) If the Material object itself has set the 'outputs' parameter
-    */
+    // Create necessary outputs for the properties if:
+    //   (1) The Outputs block has material output enabled
+    //   (2) If the Material object itself has set the 'outputs' parameter
     if (outputs_has_properties || outputs.find("none") == outputs.end())
     {
       // Add the material property for output if the name is contained in the 'output_properties' list or if the list is empty (all properties)
@@ -129,8 +131,8 @@ MaterialOutputAction::act()
         }
 
         // Update the OutputWarehouse
-        /* If 'outputs' is supplied with a list of output objects to limit the output to this information must be communicated
-         * to output objects, which is done via the OutputWarehouse */
+        // If 'outputs' is supplied with a list of output objects to limit the output to this information must be communicated
+        // to output objects, which is done via the OutputWarehouse
         if (!outputs.empty())
           _output_warehouse.updateMaterialOutput(outputs, _material_variable_names);
       }

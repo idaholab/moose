@@ -1994,12 +1994,14 @@ MooseMesh::operator const libMesh::MeshBase & () const
 MeshBase &
 MooseMesh::getMesh()
 {
+  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
   return *_mesh;
 }
 
 const MeshBase &
 MooseMesh::getMesh() const
 {
+  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
   return *_mesh;
 }
 
