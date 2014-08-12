@@ -1,0 +1,38 @@
+[Tests]
+ [./ii_2d]
+   type = 'Exodiff'
+   input = 'interaction_integral_2d.i'
+   exodiff = 'interaction_integral_2d_out.e'
+   abs_zero = 1e-7
+ [../]
+ [./ii_2d_mouth_dir]
+   type = 'Exodiff'
+   input = 'interaction_integral_2d_mouth_dir.i'
+   exodiff = 'interaction_integral_2d_mouth_dir_out.e'
+   abs_zero = 1e-7
+ [../]
+ [./ii_3d_as_2d]
+   type = 'Exodiff'
+   input = 'interaction_integral_3d_as_2d.i'
+   exodiff = 'interaction_integral_3d_as_2d_out.e'
+   abs_zero = 1e-7
+ [../]
+ [./ii_3d]
+   type = 'Exodiff'
+   input = 'interaction_integral_3d.i'
+   exodiff = 'interaction_integral_3d_out.e'
+   abs_zero = 1e-7
+ [../]
+ [./ii_3d_mouth_dir]
+   type = 'Exodiff'
+   input = 'interaction_integral_3d_mouth_dir.i'
+   exodiff = 'interaction_integral_3d_mouth_dir_out.e'
+   abs_zero = 1e-7
+ [../]
+ [./ii_3d_mouth_dir_end_dir_vec]
+   type = 'Exodiff'
+   input = 'interaction_integral_3d_mouth_dir_end_dir_vec.i'
+   exodiff = 'interaction_integral_3d_mouth_dir_end_dir_vec_out.e'
+   abs_zero = 1e-7
+ [../]
+[]
