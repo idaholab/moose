@@ -416,8 +416,11 @@ void FEProblem::initialSetup()
   if (!_app.isRecovering())
   {
     Moose::setup_perf_log.push("initial adaptivity","Setup");
-    for (unsigned int i = 0; i < adaptivity().getInitialSteps(); i++)
+    _console << "Performing initial adaptivity\n";
+    unsigned int n = adaptivity().getInitialSteps();
+    for (unsigned int i = 0; i < n; i++)
     {
+      _console << "  step " << i+1 << " of " << n << "\n" << std::endl;
       computeIndicatorsAndMarkers();
 
       _adaptivity.initialAdaptMesh();
