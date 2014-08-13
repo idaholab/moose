@@ -17,7 +17,7 @@ extern "C" void FORTRAN_CALL(dgetrf) ( ... ); // matrix inversion routine from L
 MooseEnum
 RankFourTensor::fillMethodEnum()
 {
-  return MooseEnum("antisymmetric, symmetric9, symmetric21, general_isotropic, symmetric_isotropic, antisymmetric_isotropic, general");
+  return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic antisymmetric_isotropic general");
 }
 
 RankFourTensor::RankFourTensor()

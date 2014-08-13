@@ -23,7 +23,7 @@ template<>
 InputParameters validParams<ImageFunction>()
 {
   // Define the possible image formats
-  MooseEnum type("png, tif, tiff", "png");
+  MooseEnum type("png tif tiff", "png");
 
   // Define the general parameters
   InputParameters params = validParams<Function>();

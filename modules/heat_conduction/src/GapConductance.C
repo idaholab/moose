@@ -9,7 +9,7 @@
 template<>
 InputParameters validParams<GapConductance>()
 {
-  MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");

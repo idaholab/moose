@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<MaterialTensorCalculator>()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum quantities("VonMises=1, PlasticStrainMag, Hydrostatic, Direction, Hoop, Radial, Axial, MaxPrincipal, MedPrincipal, MinPrincipal, FirstInvariant, SecondInvariant, ThirdInvariant, TriAxiality, VolumetricStrain");
+  MooseEnum quantities("VonMises=1 PlasticStrainMag Hydrostatic Direction Hoop Radial Axial MaxPrincipal MedPrincipal MinPrincipal FirstInvariant SecondInvariant ThirdInvariant TriAxiality VolumetricStrain");
 
   params.addParam<int>("index", -1, "The index into the tensor, from 0 to 5 (xx, yy, zz, xy, yz, zx).");
   params.addParam<MooseEnum>("quantity", quantities, "A scalar quantity to compute: " + quantities.getRawNames());

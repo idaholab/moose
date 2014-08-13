@@ -9,7 +9,7 @@ static unsigned int n = 0;
 template<>
 InputParameters validParams<ThermalContactAuxBCsAction>()
 {
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::string>("type", "A string representing the Moose object that will be used for heat conduction over the gap");
