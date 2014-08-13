@@ -146,8 +146,10 @@ MooseEnum::fillNames(std::string names)
     // split on equals sign
     MooseUtils::tokenize(MooseUtils::trim(elements[i]), name_value, 1, "=");
 
+    if (name_value.size() < 1 || name_value.size() > 2)
+      mooseError("Invalid option supplied in MooseEnum: " << elements[i]);
+
     // See if there is a value supplied for this option
-    mooseAssert(name_value.size() <= 2, "Invalid option supplied in MooseEnum");
     if (name_value.size() == 2)
     {
       std::istringstream iss(name_value[1]);
