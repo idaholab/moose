@@ -128,13 +128,6 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
 void
 SetupMeshAction::act()
 {
-  if (_type == "MooseMesh")
-  {
-    mooseDeprecated();
-    Moose::err << "Warning: MooseMesh is gone - please use FileMesh instead!";
-    _type = "FileMesh";
-  }
-
   // Create the mesh object and tell it to build itself
   _mesh = dynamic_cast<MooseMesh *>(_factory.create(_type, "mesh", _moose_object_pars));
   _mesh->init();

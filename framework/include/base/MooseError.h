@@ -84,16 +84,23 @@
 
 #define mooseDoOnce(do_this) do { static bool did_this_already = false; if (!did_this_already) { did_this_already = true; do_this; } } while (0)
 
-#define mooseDeprecated()                                                                              \
-    mooseDoOnce(                                                                                       \
-      Moose::out                                                                                       \
-      << (Moose::_color_console ? YELLOW : "")                                                         \
-      << "*** Warning, This code is deprecated, and likely to be removed in future library versions! " \
-      << __FILE__ << ", line " << __LINE__ << ", compiled "                                            \
-      << __DATE__ << " at " << __TIME__ << " ***"                                                      \
-      << (Moose::_color_console ? DEFAULT : "")                                                        \
-      << std::endl;                                                                                    \
-      )
+#define mooseDeprecated(msg)                                                                                \
+  do                                                                                                        \
+  {                                                                                                         \
+    if (Moose::_warnings_are_errors)                                                                        \
+      mooseError("\n\nDeprecated code:\n" << msg << '\n');                                                  \
+    else                                                                                                    \
+      mooseDoOnce(                                                                                          \
+        Moose::out                                                                                          \
+          << (Moose::_color_console ? YELLOW : "")                                                          \
+          << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
+          << msg << '\n'                                                                                    \
+          << __FILE__ << ", line " << __LINE__ << ", compiled "                                             \
+          << __DATE__ << " at " << __TIME__ << " ***"                                                       \
+          << (Moose::_color_console ? DEFAULT : "")                                                         \
+          << std::endl;                                                                                     \
+        );                                                                                                  \
+   } while (0)
 
 #define mooseCheckMPIErr(err) do { if (err != MPI_SUCCESS) { if (libMesh::global_n_processors() == 1) print_trace(); libmesh_here(); MPI_Abort(libMesh::GLOBAL_COMM_WORLD,1); exit(1); } } while (0)
 
