@@ -6,7 +6,7 @@ InputParameters validParams<MatDiffusion>()
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<std::string>("prop_name", "the name of the material property we are going to use");
 
-  MooseEnum prop_state("current, old, older", "current");
+  MooseEnum prop_state("current old older", "current");
   params.addParam<MooseEnum>("prop_state", prop_state, "Declares which property state we should retrieve");
   return params;
 }

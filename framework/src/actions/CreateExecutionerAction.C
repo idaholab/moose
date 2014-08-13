@@ -48,7 +48,7 @@ InputParameters validParams<CreateExecutionerAction>()
 void
 CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & params)
 {
-  MooseEnum solve_type("PJFNK, JFNK, NEWTON, FD, LINEAR");
+  MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
   params.addParam<MooseEnum>   ("solve_type",      solve_type,
                                 "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
                                 "JFNK: Jacobian-Free Newton Krylov "
@@ -59,9 +59,9 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
   // Line Search Options
 #ifdef LIBMESH_HAVE_PETSC
 #if PETSC_VERSION_LESS_THAN(3,3,0)
-  MooseEnum line_search("default, cubic, quadratic, none, basic, basicnonorms", "default");
+  MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
 #else
-  MooseEnum line_search("default, shell, none, basic, l2, bt, cp", "default");
+  MooseEnum line_search("default shell none basic l2 bt cp", "default");
 #endif
   std::string addtl_doc_str(" (Note: none = basic)");
 #else

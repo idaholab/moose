@@ -32,7 +32,7 @@ InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>()
   params.addParam<unsigned int>("num_points", 3, "The number of nearest points to use for interpolation.");
   params.addParam<Real>("power", 2, "The polynomial power to use for calculation of the decay in the interpolation.");
 
-  MooseEnum interp_type("inverse_distance, radial_basis", "inverse_distance");
+  MooseEnum interp_type("inverse_distance radial_basis", "inverse_distance");
 
   params.addParam<MooseEnum>("interp_type", interp_type, "The algorithm to use for interpolation.");
 

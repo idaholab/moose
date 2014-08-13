@@ -20,7 +20,7 @@
 template<>
 InputParameters validParams<CreateProblemAction>()
 {
-  MooseEnum coord_types("XYZ, RZ, RSPHERICAL", "XYZ");
+  MooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   std::vector<MooseEnum> coord_types_vec(1, coord_types);
 
   InputParameters params = validParams<MooseObjectAction>();

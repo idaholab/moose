@@ -5,7 +5,7 @@
 template<>
 InputParameters validParams<BlkResTestDiffusion>()
 {
-  MooseEnum test("none, fe_problem_null, mesh_null, use_mesh, hasBlocks, hasBlocks_ANY_BLOCK_ID, blocks, blockIDs, isBlockSubset, hasBlockMaterialProperty_true, hasBlockMaterialProperty_false", "none", "Select a test");
+  MooseEnum test("none fe_problem_null mesh_null use_mesh hasBlocks hasBlocks_ANY_BLOCK_ID blocks blockIDs isBlockSubset hasBlockMaterialProperty_true hasBlockMaterialProperty_false", "none", "Select a test");
   InputParameters params = validParams<Kernel>();
   params.addParam<MooseEnum>("test", test, "Select the desired test");
   return params;

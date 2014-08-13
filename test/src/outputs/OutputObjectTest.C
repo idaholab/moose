@@ -19,7 +19,7 @@
 template<>
 InputParameters validParams<OutputObjectTest>()
 {
-  MooseEnum type("getOutput, getOutputs-names, getOutputs, getOutputNames");
+  MooseEnum type("getOutput getOutputs-names getOutputs getOutputNames");
   InputParameters params = validParams<Console>();
   params.addRequiredParam<MooseEnum>("test_type", type, "The type of test to execute");
   return params;

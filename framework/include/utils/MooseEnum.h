@@ -25,10 +25,10 @@
 
 /**
  * This is a "smart" enum class intended to replace many of the shortcomings in the C++ enum type
- * It should be initialized with a comma-separated list of strings which become the enum values.
+ * It should be initialized with a space-delimited list of strings which become the enum values.
  * You may also optionally supply numeric ints for one or more values similar to a C++ enum.  This
- * is done with the "=" sign. It can be used any place where an integer (switch statements), const char*
- * or std::string is expected.  In addition the InputParameters system has full support for this Enum type
+ * is done with the "=" sign (no spaces). It can be used any place where an integer (switch statements), const char*
+ * or std::string is expected. In addition the InputParameters system has full support for this Enum type
  */
 class MooseEnum
 {
@@ -57,15 +57,9 @@ public:
 
   /**
    * Method for returning the raw name strings for this instance
-   * @return a comma separated list of names
-   */
-  const std::string & getRawNames() const { return _raw_names; }
-
-  /**
-   * Method for returning the raw name strings for this instance
    * @return a space separated list of names
    */
-  const std::string & getRawNamesNoCommas() const { return _raw_names_no_commas; }
+  const std::string & getRawNames() const { return _raw_names; }
 
   /**
    * Cast operators to make this object behave as value_types and std::string
@@ -129,11 +123,8 @@ private:
   /// The vector of enumeration names
   std::vector<std::string> _names;
 
-  /// The raw string of names separated by commas
+  /// The raw string of names separated by spaces
   std::string _raw_names;
-
-  /// The raw string of names separated by space
-  std::string _raw_names_no_commas;
 
   /// The map of names to enumeration constants
   std::map<std::string, int> _name_to_id;

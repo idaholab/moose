@@ -5,7 +5,7 @@ template<>
 InputParameters validParams<ExceptionKernel>()
 {
   InputParameters params = validParams<Kernel>();
-  MooseEnum when("residual = 0, jacobian, initial_condition", "residual");
+  MooseEnum when("residual=0 jacobian initial_condition", "residual");
   params.addParam<MooseEnum>("when", when, "When to throw the exception");
   return params;
 }

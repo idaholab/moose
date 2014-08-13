@@ -21,7 +21,7 @@ InputParameters validParams<QuadraturePointMarker>()
 {
   InputParameters params = validParams<Marker>();
 
-  MooseEnum third_state("DONT_MARK = -1, COARSEN, DO_NOTHING, REFINE", "DONT_MARK");
+  MooseEnum third_state("DONT_MARK=-1 COARSEN DO_NOTHING REFINE", "DONT_MARK");
   params.addParam<MooseEnum>("third_state", third_state, "The Marker state to apply to values falling in-between the coarsen and refine thresholds.");
   params.addParam<Real>("coarsen", "The threshold value for coarsening.  Elements with variable values beyond this will be marked for coarsening.");
   params.addParam<Real>("refine", "The threshold value for refinement.  Elements with variable values beyond this will be marked for refinement.");

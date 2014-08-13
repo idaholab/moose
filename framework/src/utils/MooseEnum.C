@@ -39,7 +39,6 @@ MooseEnum::MooseEnum(std::string names, std::string default_name, bool allow_out
 MooseEnum::MooseEnum(const MooseEnum & other_enum) :
     _names(other_enum._names),
     _raw_names(other_enum._raw_names),
-    _raw_names_no_commas(other_enum._raw_names_no_commas),
     _name_to_id(other_enum._name_to_id),
     _current_id(other_enum._current_id),
     _current_name(other_enum._current_name),
@@ -135,8 +134,8 @@ void
 MooseEnum::fillNames(std::string names)
 {
   std::vector<std::string> elements;
-  // split on commas
-  MooseUtils::tokenize(names, elements, 1, ",");
+  // split on spaces
+  MooseUtils::tokenize(names, elements, 1, " ");
 
   _names.resize(elements.size());
   int value=0;
@@ -160,12 +159,8 @@ MooseEnum::fillNames(std::string names)
 
     // preserve case for raw options, append to list
     if (i)
-    {
-      _raw_names += ", ";
-      _raw_names_no_commas += " ";
-    }
+      _raw_names += " ";
     _raw_names += name_value[0];
-    _raw_names_no_commas += name_value[0];
 
     // convert name to uppercase
     std::string upper(name_value[0]);

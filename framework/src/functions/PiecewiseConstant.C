@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<PiecewiseConstant>()
 {
   InputParameters params = validParams<Piecewise>();
-  MooseEnum direction("left, right", "left");
+  MooseEnum direction("left right", "left");
   params.addParam<MooseEnum>("direction", direction, "Direction to look to find value: " + direction.getRawNames());
   return params;
 }
