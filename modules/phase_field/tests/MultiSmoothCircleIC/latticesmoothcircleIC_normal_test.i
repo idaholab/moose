@@ -30,11 +30,11 @@
      invalue = 1.0
      outvalue = 0.0001
      circles_per_side = '3 3 3'
-     Rnd_variation = 0.0
+     Rnd_variation = 10.0
      radius = 10.0
      int_width = 12.0
-     radius_variation = 0.2
-     radius_variation_type = uniform
+     radius_variation = 2
+     radius_variation_type = normal
   [../]
 []
 
