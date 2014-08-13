@@ -131,7 +131,7 @@ class GenSyntax():
 
     if not self.use_cached_syntax:
       try:
-        data = subprocess.check_output([self.app_path, '--yaml'])
+        data = subprocess.Popen([self.app_path, '--yaml'], stdout=subprocess.PIPE).communicate()[0]
       except:
         print '\n\nPeacock: Error executing ' + self.app_path + '\nPlease make sure your application is built and able to execute with the "--yaml" flag'
         sys.exit(1)
