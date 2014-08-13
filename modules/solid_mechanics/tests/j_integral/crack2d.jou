@@ -1,7 +1,7 @@
 reset
 brick x 20 y 20 z 1
 volume 1 move 0 0 -.5
-webcut volume 1  with plane xplane noimprint merge 
+webcut volume 1  with plane xplane noimprint merge
 volume 1 2 size 3
 surface 15 8 size .1
 mesh surface 15 8

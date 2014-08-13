@@ -1,5 +1,5 @@
 #
-# 
+#
 #
 reset
 
@@ -20,7 +20,7 @@ refine surface 2  numsplit 1 bias 1.0 depth 1 smooth
 # mortar space
 create vertex 0 1.5 0
 create vertex 3 1.5 0
-create curve vertex 9 10 
+create curve vertex 9 10
 
 create node location 0      1.5 0 owner curve 9
 create node location 0.5   1.5 0 owner curve 9
