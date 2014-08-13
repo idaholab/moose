@@ -2,7 +2,6 @@
 #This is a 3d extrusion of a 2d plane strain model with 2 elements
 #through the thickness, and calculates the J-Integrals using options
 #to treat it as 3d.
-#Crack direction is defined using the crack mouth coordinates.
 #The analytic solution for J1 is 2.434.  This model
 #converges to that solution with a refined mesh.
 #Reference: National Agency for Finite Element Methods and Standards (U.K.):
@@ -21,7 +20,7 @@
 []
 
 [Mesh]
-  file = crack3d.e
+  file = crack3d_rot.e
   displacements = 'disp_x disp_y disp_z'
 #  partitioner = centroid
 #  centroid_partitioner_direction = z
@@ -74,8 +73,8 @@
 [DomainIntegral]
   integrals = 'InteractionIntegralKI InteractionIntegralKII InteractionIntegralKIII'
   boundary = 800
-  crack_direction_method = CrackMouth
-  crack_mouth_boundary = 900
+  crack_direction_method = CrackDirectionVector
+  crack_direction_vector = '0 0 -1'
   radius_inner = '4.0 5.5'
   radius_outer = '5.5 7.0'
   block = 1
@@ -169,20 +168,20 @@
 # [../]
   [./no_z]
     type = DirichletBC
-    variable = disp_z
+    variable = disp_x
     boundary = 500
     value = 0.0
   [../]
   [./no_z2]
     type = DirichletBC
-    variable = disp_z
+    variable = disp_x
     boundary = 510
     value = 0.0
   [../]
 
   [./no_x]
     type = DirichletBC
-    variable = disp_x
+    variable = disp_z
     boundary = 700
     value = 0.0
   [../]
@@ -258,7 +257,7 @@
 
 
 [Outputs]
-  file_base = interaction_integral_3d_mouth_dir_out
+  file_base = interaction_integral_3d_rot_out
   output_initial = true
   exodus = true
   [./console]
