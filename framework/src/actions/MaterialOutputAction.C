@@ -16,6 +16,7 @@
 #include "MaterialOutputAction.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "AddOutputAction.h"
 
 // Declare the output helper specializations
 template<>
@@ -62,6 +63,30 @@ MaterialOutputAction::act()
   // A complete list of all Material objects
   std::vector<Material *> materials = _problem->getMaterialWarehouse(0).getMaterials();
 
+  // Handle setting of material property output in [Outputs] sub-blocks
+  // Output objects can enable material property output, the following code examines the parameters
+  // for each Output object and sets a flag if any Output object has output set and also builds a list if the
+  // properties are limited via the 'show_material_properties' parameters
+  bool outputs_has_properties = false;
+  std::set<std::string> output_object_properties;
+
+  std::vector<Action *> output_actions =  _app.actionWarehouse().getActionsByName("add_output");
+  for (std::vector<Action *>::const_iterator it = output_actions.begin(); it != output_actions.end(); ++it)
+  {
+    // Extract the Output action
+    AddOutputAction * action = dynamic_cast<AddOutputAction *>(*it);
+    mooseAssert(action != NULL, "No AddOutputAction with the name " << *it << " exists");
+
+    // Add the material property names from the output object parameters to the list of properties to output
+    InputParameters & params = action->getObjectParams();
+    if (params.get<bool>("output_material_properties"))
+    {
+      outputs_has_properties = true;
+      std::vector<std::string> prop_names = params.get<std::vector<std::string> >("show_material_properties");
+      output_object_properties.insert(prop_names.begin(), prop_names.end());
+    }
+  }
+
   // Loop through each material object
   for (std::vector<Material *>::iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
   {
@@ -71,19 +96,25 @@ MaterialOutputAction::act()
     // Extract the property names that will actually be output
     std::vector<std::string> output_properties = (*material_iter)->getParam<std::vector<std::string> >("output_properties");
 
-    /* Clear the list of variable names for the current material object, this list will be populated with all the
-    variables names for the current material object and is needed for purposes of controlling the which output objects
-    show the material property data */
+    // Append the properties listed in the Outputs block
+    if (outputs_has_properties)
+      output_properties.insert(output_properties.end(), output_object_properties.begin(), output_object_properties.end());
+
+    // Clear the list of variable names for the current material object, this list will be populated with all the
+    // variables names for the current material object and is needed for purposes of controlling the which output objects
+    // show the material property data
     _material_variable_names.clear();
 
-    // Only continue if the the 'outputs' input parameter is not equal to 'none'
-    if (outputs.find("none") == outputs.end())
+    // Create necessary outputs for the properties if:
+    //   (1) The Outputs block has material output enabled
+    //   (2) If the Material object itself has set the 'outputs' parameter
+    if (outputs_has_properties || outputs.find("none") == outputs.end())
     {
-      // Loop over the material property names
+      // Add the material property for output if the name is contained in the 'output_properties' list or if the list is empty (all properties)
       const std::set<std::string> names = (*material_iter)->getSuppliedItems();
       for (std::set<std::string>::const_iterator name_iter = names.begin(); name_iter != names.end(); ++name_iter)
       {
-        // Add the material property for output if the name is contained in the 'output_properties' list or if the list is empty
+        // Add the material property for output
         if (output_properties.empty() || std::find(output_properties.begin(), output_properties.end(), *name_iter) != output_properties.end())
         {
           if (hasProperty<Real>(*name_iter))
@@ -100,8 +131,8 @@ MaterialOutputAction::act()
         }
 
         // Update the OutputWarehouse
-        /* If 'outputs' is supplied with a list of output objects to limit the output to this information must be communicated
-         * to output objects, which is done via the OutputWarehouse */
+        // If 'outputs' is supplied with a list of output objects to limit the output to this information must be communicated
+        // to output objects, which is done via the OutputWarehouse
         if (!outputs.empty())
           _output_warehouse.updateMaterialOutput(outputs, _material_variable_names);
       }

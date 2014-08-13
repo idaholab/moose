@@ -150,9 +150,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     }
   }
   else
-  {
     _mesh = new SerialMesh(_communicator, dim);
-  }
 
   // Set the partitioner
   switch (_partitioner_name)
@@ -209,7 +207,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _mesh(other_mesh.getMesh().clone().release()),
     _partitioner_name(other_mesh._partitioner_name),
     _partitioner_overridden(other_mesh._partitioner_overridden),
-    _uniform_refine_level(0),
+    _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _is_changed(false),
     _is_nemesis(false),
     _is_prepared(false),
@@ -1845,6 +1843,11 @@ unsigned int & MooseMesh::uniformRefineLevel()
 {
   return _uniform_refine_level;
 }
+
+const unsigned int & MooseMesh::uniformRefineLevel() const
+{
+  return _uniform_refine_level;
+}
 #endif // LIBMESH_ENABLE_AMR
 
 void
@@ -1991,12 +1994,14 @@ MooseMesh::operator const libMesh::MeshBase & () const
 MeshBase &
 MooseMesh::getMesh()
 {
+  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
   return *_mesh;
 }
 
 const MeshBase &
 MooseMesh::getMesh() const
 {
+  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
   return *_mesh;
 }
 

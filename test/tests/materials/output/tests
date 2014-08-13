@@ -4,6 +4,24 @@
     input = 'output.i'
     exodiff = 'output_out.e'
   [../]
+  [./all_via_outputs]
+    # Test the ability for Output objects to enable all material property output
+    type = 'Exodiff'
+    input = 'output_via_outputs.i'
+    exodiff = 'output_via_outputs_out.e'
+  [../]
+  [./limit_via_outputs]
+    # Test the ability for Output objects to enable specific material property outputs
+    type = 'Exodiff'
+    input = 'limited_via_outputs.i'
+    exodiff = 'limited_via_outputs_out.e'
+  [../]
+  [./block_via_outputs]
+    # Test the ability for Output objects to enable specific material property outputs across blocks
+    type = 'Exodiff'
+    input = 'block_via_outputs.i'
+    exodiff = 'block_via_outputs_out.e'
+  [../]
   [./block]
     type = 'Exodiff'
     input = 'output_block.i'
