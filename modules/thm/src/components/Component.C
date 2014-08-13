@@ -39,6 +39,7 @@ Component::genName(const std::string & prefix, const std::string & suffix)
   ss << prefix << ":" << suffix;
   return ss.str();
 }
+
 std::string
 Component::genName(const std::string & prefix, const std::string & middle, const std::string & suffix)
 {
