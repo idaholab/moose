@@ -118,7 +118,7 @@ private:
    * Populates the _names vector
    * @param names - a space separated list of names used to populate the internal names vector
    */
-  void fillNames(std::string names);
+  void fillNames(std::string names, std::string option_delim=" ");
 
   /// The vector of enumeration names
   std::vector<std::string> _names;
