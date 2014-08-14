@@ -21,7 +21,7 @@ InputParameters validParams<ValueRangeMarker>()
 {
   InputParameters params = validParams<Marker>();
 
-  MooseEnum third_state("DONT_MARK = -1, COARSEN, DO_NOTHING, REFINE", "DONT_MARK");
+  MooseEnum third_state("DONT_MARK=-1 COARSEN DO_NOTHING REFINE", "DONT_MARK");
   params.addParam<MooseEnum>("third_state", third_state, "The Marker state to apply to values in the buffer zone (both ends of the range).");
   params.addRequiredParam<Real>("lower_bound", "The lower bound value for the range.");
   params.addRequiredParam<Real>("upper_bound", "The upper bound value for the range.");

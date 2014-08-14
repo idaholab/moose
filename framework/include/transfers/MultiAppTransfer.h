@@ -46,7 +46,7 @@ public:
   };
 
   /// Used to construct InputParameters
-  static MooseEnum directions() { return MooseEnum("to_multiapp,from_multiapp"); }
+  static MooseEnum directions() { return MooseEnum("to_multiapp from_multiapp"); }
 
   /// The direction this Transfer is going in
   int direction() { return _direction; }

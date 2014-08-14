@@ -2,7 +2,6 @@
 #include "MooseUtils.h"
 #include "FEProblem.h"
 #include "Factory.h"
-#include "MooseEnum.h"
 
 #include <sstream>
 #include <stdexcept>

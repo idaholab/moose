@@ -70,5 +70,5 @@ SetupInterface::execFlags() const
 std::vector<MooseEnum>
 SetupInterface::getExecuteOptions()
 {
-  return std::vector<MooseEnum>(1, MooseEnum("initial, residual, jacobian, timestep, timestep_begin, custom", "residual"));
+  return std::vector<MooseEnum>(1, MooseEnum("initial residual jacobian timestep timestep_begin custom", "residual"));
 }

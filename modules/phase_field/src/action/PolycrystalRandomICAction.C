@@ -22,7 +22,7 @@ InputParameters validParams<PolycrystalRandomICAction>()
   InputParameters params = validParams<Action>();
   params.addRequiredParam<unsigned int>("crys_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
-  MooseEnum typ_options("continuous, discrete");
+  MooseEnum typ_options("continuous discrete");
   params.addParam<MooseEnum>("random_type", typ_options, "The type of random polycrystal initial condition. Whether one order parameter is chosen to be 1 at each node or if each order parameter continuously varies from 0 to 1");
 
   return params;

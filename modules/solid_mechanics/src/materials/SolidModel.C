@@ -16,7 +16,7 @@
 template<>
 InputParameters validParams<SolidModel>()
 {
-  MooseEnum formulation("Nonlinear3D, AxisymmetricRZ, SphericalR, Linear, PlaneStrain");
+  MooseEnum formulation("Nonlinear3D AxisymmetricRZ SphericalR Linear PlaneStrain");
 
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");

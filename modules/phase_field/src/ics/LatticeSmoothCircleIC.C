@@ -10,7 +10,7 @@ InputParameters validParams<LatticeSmoothCircleIC>()
   params.addParam<unsigned int>("rand_seed", 2000, "random seed");
   params.addRequiredParam<Real>("radius", "Mean radius value for the circels");
   params.addParam<Real>("radius_variation", 0.0, "Plus or minus fraction of random variation in the bubble radius");
-  MooseEnum rand_options("uniform,normal,none","none");
+  MooseEnum rand_options("uniform normal none","none");
   params.addParam<MooseEnum>("radius_variation_type", rand_options, "Type of distribution that random circle radii will follow");
 
   return params;

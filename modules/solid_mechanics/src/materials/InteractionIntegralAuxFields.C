@@ -5,7 +5,6 @@ InputParameters validParams<InteractionIntegralAuxFields>()
 {
   InputParameters params = validParams<Material>();
   addInteractionIntegralAuxFieldsParams(params);
-  //MooseEnum stress_mode("plane_stress, plane_strain");
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
   //TODO: anisotropic material properties
   // material properties defined at crack front
@@ -31,7 +30,7 @@ InteractionIntegralAuxFields::getSIFModesVec(unsigned int n)
 MooseEnum
 InteractionIntegralAuxFields::getSIFModesEnum()
 {
-  return MooseEnum("KI, KII, KIII","KI");
+  return MooseEnum("KI KII KIII", "KI");
 }
 
 

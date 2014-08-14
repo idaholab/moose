@@ -12,7 +12,7 @@
 template<>
 InputParameters validParams<ContactMaster>()
 {
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");

@@ -11,7 +11,7 @@ static unsigned int counter = 0;
 template<>
 InputParameters validParams<ContactPressureAuxAction>()
 {
-  MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<Action>();
   params.addRequiredParam<BoundaryName>("master", "The master surface");

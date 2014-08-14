@@ -22,7 +22,7 @@ InputParameters validParams<PerformanceData>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
-  MooseEnum column_options("n_calls, total_time, average_time, total_time_with_sub, average_time_with_sub, percent_of_active_time, percent_of_active_time_with_sub");
+  MooseEnum column_options("n_calls total_time average_time total_time_with_sub average_time_with_sub percent_of_active_time percent_of_active_time_with_sub");
 
   params.addRequiredParam<MooseEnum>("column", column_options, "The column you want the value of.");
   params.addRequiredParam<std::string>("event", "The name of the event.");

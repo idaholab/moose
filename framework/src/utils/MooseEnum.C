@@ -28,7 +28,13 @@ const int MooseEnum::INVALID_ID = std::numeric_limits<int>::min();
 MooseEnum::MooseEnum(std::string names, std::string default_name, bool allow_out_of_range) :
     _out_of_range_index(allow_out_of_range ? INVALID_ID + 1 : 0)
 {
-  fillNames(names);
+  if (names.find(',') != std::string::npos)
+  {
+    mooseDeprecated("Please use a space to separate options in a MooseEnum, commas are deprecated\nMooseEnum initialized with names: \"" << names << '\"');
+    fillNames(names, ",");
+  }
+  else
+    fillNames(names);
 
   if (default_name == "")
     _current_id = INVALID_ID;
@@ -39,7 +45,6 @@ MooseEnum::MooseEnum(std::string names, std::string default_name, bool allow_out
 MooseEnum::MooseEnum(const MooseEnum & other_enum) :
     _names(other_enum._names),
     _raw_names(other_enum._raw_names),
-    _raw_names_no_commas(other_enum._raw_names_no_commas),
     _name_to_id(other_enum._name_to_id),
     _current_id(other_enum._current_id),
     _current_name(other_enum._current_name),
@@ -68,7 +73,7 @@ MooseEnum::operator=(const std::string & name)
   if (std::find(_names.begin(), _names.end(), upper) == _names.end())
   {
     if (_out_of_range_index == 0)     // Are out of range values allowed?
-      mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options are \"" + _raw_names + "\".");
+      mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names + "\".");
     else
     {
       // Allow values assigned outside of the enumeration range
@@ -132,11 +137,11 @@ bool MooseEnum::operator!=(const MooseEnum & value) const
 }
 
 void
-MooseEnum::fillNames(std::string names)
+MooseEnum::fillNames(std::string names, std::string option_delim)
 {
   std::vector<std::string> elements;
-  // split on commas
-  MooseUtils::tokenize(names, elements, 1, ",");
+  // split on spaces
+  MooseUtils::tokenize(names, elements, 1, option_delim);
 
   _names.resize(elements.size());
   int value=0;
@@ -146,8 +151,10 @@ MooseEnum::fillNames(std::string names)
     // split on equals sign
     MooseUtils::tokenize(MooseUtils::trim(elements[i]), name_value, 1, "=");
 
+    if (name_value.size() < 1 || name_value.size() > 2)
+      mooseError("Invalid option supplied in MooseEnum: " << elements[i]);
+
     // See if there is a value supplied for this option
-    mooseAssert(name_value.size() <= 2, "Invalid option supplied in MooseEnum");
     if (name_value.size() == 2)
     {
       std::istringstream iss(name_value[1]);
@@ -158,12 +165,8 @@ MooseEnum::fillNames(std::string names)
 
     // preserve case for raw options, append to list
     if (i)
-    {
-      _raw_names += ", ";
-      _raw_names_no_commas += " ";
-    }
+      _raw_names += " ";
     _raw_names += name_value[0];
-    _raw_names_no_commas += name_value[0];
 
     // convert name to uppercase
     std::string upper(name_value[0]);

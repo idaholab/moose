@@ -23,7 +23,7 @@
 template<>
 InputParameters validParams<NodeFaceConstraint>()
 {
-  MooseEnum orders("FIRST, SECOND, THIRD, FORTH", "FIRST");
+  MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
   InputParameters params = validParams<Constraint>();
   params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
   params.addRequiredParam<BoundaryName>("master", "The boundary ID associated with the master side");

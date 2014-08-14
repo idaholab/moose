@@ -67,13 +67,13 @@ AddVariableAction::AddVariableAction(const std::string & name, InputParameters p
 MooseEnum
 AddVariableAction::getNonlinearVariableFamilies()
 {
-  return MooseEnum("LAGRANGE, MONOMIAL, HERMITE, SCALAR, HIERARCHIC, CLOUGH, XYZ, SZABAB, BERNSTEIN, L2_LAGRANGE, L2_HIERARCHIC", "LAGRANGE");
+  return MooseEnum("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN L2_LAGRANGE L2_HIERARCHIC", "LAGRANGE");
 }
 
 MooseEnum
 AddVariableAction::getNonlinearVariableOrders()
 {
-  return MooseEnum("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST", true);
+  return MooseEnum("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST", true);
 }
 
 void

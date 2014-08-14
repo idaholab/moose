@@ -54,7 +54,7 @@ InputParameters validParams<MooseMesh>()
 {
   InputParameters params = validParams<MooseObject>();
 
-  MooseEnum mesh_distribution_type("PARALLEL=0, SERIAL, DEFAULT", "DEFAULT");
+  MooseEnum mesh_distribution_type("PARALLEL=0 SERIAL DEFAULT", "DEFAULT");
   params.addParam<MooseEnum>("distribution", mesh_distribution_type,
                              "PARALLEL: Always use libMesh::ParallelMesh "
                              "SERIAL: Always use libMesh::SerialMesh "
@@ -65,16 +65,16 @@ InputParameters validParams<MooseMesh>()
                         "foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, "
                         "where N = # CPUs, with NemesisIO.");
 
-  MooseEnum dims("1 = 1, 2, 3", "3");
+  MooseEnum dims("1=1 2 3", "3");
   params.addParam<MooseEnum>("dim", dims,
                              "This is only required for certain mesh formats where "
                              "the dimension of the mesh cannot be autodetected.  "
                              "In particular you must supply this for GMSH meshes.  "
                              "Note: This is completely ignored for ExodusII meshes!");
 
-  MooseEnum partitioning("default=-3, metis=-2, parmetis=-1, linear=0, centroid, hilbert_sfc, morton_sfc", "default");
+  MooseEnum partitioning("default=-3 metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc", "default");
   params.addParam<MooseEnum>("partitioner", partitioning, "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation.");
-  MooseEnum direction("x, y, z, radial");
+  MooseEnum direction("x y z radial");
   params.addParam<MooseEnum>("centroid_partitioner_direction", direction, "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
 
   params.registerBase("MooseMesh");

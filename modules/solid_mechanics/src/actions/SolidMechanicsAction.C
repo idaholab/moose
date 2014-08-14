@@ -8,7 +8,7 @@ template<>
 InputParameters validParams<SolidMechanicsAction>()
 {
   InputParameters params = validParams<Action>();
-  MooseEnum elemType("truss, undefined", "undefined");
+  MooseEnum elemType("truss undefined", "undefined");
   params.addParam<MooseEnum>("type", elemType, "The element type: " + elemType.getRawNames());
   params.addParam<NonlinearVariableName>("disp_x", "", "The x displacement");
   params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");

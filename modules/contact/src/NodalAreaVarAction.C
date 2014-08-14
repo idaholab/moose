@@ -9,7 +9,7 @@
 template<>
 InputParameters validParams<NodalAreaVarAction>()
 {
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<Action>();
   params.addParam<MooseEnum>("order", orders, "The finite element order: " + orders.getRawNames());

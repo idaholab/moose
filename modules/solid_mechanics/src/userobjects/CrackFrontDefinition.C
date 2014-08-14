@@ -14,8 +14,8 @@ InputParameters validParams<CrackFrontDefinition>()
 
 void addCrackFrontDefinitionParams(InputParameters& params)
 {
-  MooseEnum direction_method("CrackDirectionVector, CrackMouth, CurvedCrackFront");
-  MooseEnum end_direction_method("NoSpecialTreatment, CrackDirectionVector", "NoSpecialTreatment");
+  MooseEnum direction_method("CrackDirectionVector CrackMouth CurvedCrackFront");
+  MooseEnum end_direction_method("NoSpecialTreatment CrackDirectionVector", "NoSpecialTreatment");
   params.addRequiredParam<MooseEnum>("crack_direction_method", direction_method, "Method to determine direction of crack propagation.  Choices are: " + direction_method.getRawNames());
   params.addParam<MooseEnum>("crack_end_direction_method", end_direction_method, "Method to determine direction of crack propagation at ends of crack.  Choices are: " + end_direction_method.getRawNames());
   params.addParam<RealVectorValue>("crack_direction_vector","Direction of crack propagation");

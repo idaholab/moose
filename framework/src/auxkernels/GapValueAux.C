@@ -23,7 +23,7 @@
 template<>
 InputParameters validParams<GapValueAux>()
 {
-  MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<AuxKernel>();
   params.set<bool>("_dual_restrictable") = true;

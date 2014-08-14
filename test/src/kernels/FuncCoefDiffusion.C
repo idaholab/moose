@@ -1,5 +1,4 @@
 #include "FuncCoefDiffusion.h"
-#include "MooseEnum.h"
 
 template<>
 InputParameters validParams<FuncCoefDiffusion>()

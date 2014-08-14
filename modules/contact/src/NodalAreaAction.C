@@ -11,7 +11,7 @@ static unsigned int counter = 0;
 template<>
 InputParameters validParams<NodalAreaAction>()
 {
-  MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<Action>();
   params.addParam<BoundaryName>("slave", "The slave surface");

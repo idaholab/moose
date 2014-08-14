@@ -11,9 +11,9 @@ static unsigned int counter = 0;
 template<>
 InputParameters validParams<ContactAction>()
 {
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
-  MooseEnum formulation("DEFAULT, KINEMATIC, PENALTY, AUGMENTED_LAGRANGE", "DEFAULT");
-  MooseEnum system("DiracKernel, Constraint", "DiracKernel");
+  MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
+  MooseEnum formulation("DEFAULT KINEMATIC PENALTY AUGMENTED_LAGRANGE", "DEFAULT");
+  MooseEnum system("DiracKernel Constraint", "DiracKernel");
 
   InputParameters params = validParams<Action>();
   params.addRequiredParam<BoundaryName>("master", "The master surface");
