@@ -509,7 +509,7 @@ InputParameters::set (const std::string& name)
 
   set_attributes(name, false);
 
-  return libmesh_cast_ptr<Parameter<T>*>(_values[name])->set();
+  return cast_ptr<Parameter<T>*>(_values[name])->set();
 }
 
 template <typename T, typename UP_T>

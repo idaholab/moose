@@ -716,8 +716,8 @@ static PetscErrorCode DMMooseFunction(DM dm, Vec x, Vec r)
 
   NonlinearSystem* nl;
   ierr = DMMooseGetNonlinearSystem(dm, nl); CHKERRQ(ierr);
-  PetscVector<Number>& X_sys = *libmesh_cast_ptr<PetscVector<Number>* >(nl->sys().solution.get());
-  PetscVector<Number>& R_sys = *libmesh_cast_ptr<PetscVector<Number>* >(nl->sys().rhs);
+  PetscVector<Number>& X_sys = *cast_ptr<PetscVector<Number>* >(nl->sys().solution.get());
+  PetscVector<Number>& R_sys = *cast_ptr<PetscVector<Number>* >(nl->sys().rhs);
   PetscVector<Number> X_global(x, nl->comm()), R(r, nl->comm());
 
   // Use the systems update() to get a good local version of the parallel solution
@@ -798,8 +798,8 @@ static PetscErrorCode DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
 
   PetscMatrix<Number>  the_pc(pc, nl->comm());
   PetscMatrix<Number>  Jac(jac, nl->comm());
-  PetscVector<Number>& X_sys = *libmesh_cast_ptr<PetscVector<Number>*>(nl->sys().solution.get());
-  PetscMatrix<Number>& Jac_sys = *libmesh_cast_ptr<PetscMatrix<Number>*>(nl->sys().matrix);
+  PetscVector<Number>& X_sys = *cast_ptr<PetscVector<Number>*>(nl->sys().solution.get());
+  PetscMatrix<Number>& Jac_sys = *cast_ptr<PetscMatrix<Number>*>(nl->sys().matrix);
   PetscVector<Number>  X_global(x, nl->comm());
 
   // Set the dof maps
