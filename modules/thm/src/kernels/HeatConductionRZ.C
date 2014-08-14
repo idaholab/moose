@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<HeatConductionRZ>()
 {
-  InputParameters params = validParams<Diffusion>();
+  InputParameters params = validParams<HeatConductionKernel>();
   params.addRequiredParam<Real>("axial_offset", "");
 
   return params;
