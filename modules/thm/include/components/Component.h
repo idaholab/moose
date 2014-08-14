@@ -121,8 +121,8 @@ public:
   void connectObject(const std::string & rname, const std::string & mooseName, const std::string & name, const std::string & par_name);
 
   /**
-   * This function creates a mapping between a RAVEN friendly name and a vector variable within a MOOSE object
-   * @param rname  - RAVEN friendly name
+   * This function creates a mapping between a control logic friendly name and a vector variable within a MOOSE object
+   * @param rname  - control logic friendly name
    * @param mooseName - vector parameter name within an object
    * @param pos - position in the vector
    */
@@ -169,7 +169,7 @@ protected:
   virtual unsigned int getNextBCId();
 
   /**
-   * Split the "RAVEN" name into "section name" and "property name"
+   * Split the control logic name into "section name" and "property name"
    * @param rname
    * @return
    */
@@ -223,8 +223,7 @@ Component::hasRParam(const std::string & param_name)
     }
   }
 
-  // Specialization for RAVEN. At this point the variable has not been found.
-  // Try to search into the vector parameter mapping.
+  // At this point the variable has not been found. Try to search in the vector parameter mapping.
   if (_rvect_map.find(param_name) == _rvect_map.end())
     return false;
   else
@@ -277,8 +276,7 @@ Component::getRParam(const std::string & param_name)
     }
   }
 
-  // Specialization for RAVEN. At this point the variable has not been found.
-  // Try to search into the vector parameter mapping.
+  // At this point the variable has not been found. Try to search in the vector parameter mapping.
   if (_rvect_map.find(param_name) == _rvect_map.end())
     mooseError("Parameter '" + param_name + "' was not found in component '" + name() + "'.");
   else
@@ -333,8 +331,7 @@ Component::setRParam(const std::string & param_name, const T & value)
     }
   }
 
-  // Specialization for RAVEN. At this point the variable has not been found.
-  // Try to search into the vector parameter mapping
+  // At this point the variable has not been found. Try to search in the vector parameter mapping
   if (_rvect_map.find(param_name) != _rvect_map.end())
   {
     ControlLogicMapContainer name_cont = _rvect_map.find(param_name)->second;
