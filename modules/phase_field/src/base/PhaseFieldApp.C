@@ -43,6 +43,10 @@
 #ifdef LIBMESH_HAVE_VTK
 #include "ImageFunction.h"
 #endif
+#ifdef LIBMESH_HAVE_FPARSER
+#include "Terminator.h"
+#endif
+
 //#include "SPPARKSUserObject.h"
 //#include "SPPARKSAux.h"
 
@@ -110,6 +114,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
   // registerAux(SPPARKSAux);
   registerUserObject(NodalVolumeFraction);
   // registerUserObject(SPPARKSUserObject);
+#ifdef LIBMESH_HAVE_FPARSER
+  registerUserObject(Terminator);
+#endif
 #ifdef LIBMESH_HAVE_VTK
   registerFunction(ImageFunction);
 #endif
