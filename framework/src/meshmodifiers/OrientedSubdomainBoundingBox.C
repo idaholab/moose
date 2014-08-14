@@ -20,7 +20,7 @@ InputParameters validParams<OrientedSubdomainBoundingBox>()
   InputParameters params = validParams<MeshModifier>();
   params += validParams<OrientedBoxInterface>();
 
-  MooseEnum location("INSIDE, OUTSIDE", "INSIDE");
+  MooseEnum location("INSIDE OUTSIDE", "INSIDE");
   params.addRequiredParam<SubdomainID>("block_id", "Subdomain id to set for inside/outside the bounding box");
   params.addParam<MooseEnum>("location", location, "Control of where the subdomain id is to be set");
 

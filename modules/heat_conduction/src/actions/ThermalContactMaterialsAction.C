@@ -10,7 +10,7 @@ static unsigned int n = 0;
 template<>
 InputParameters validParams<ThermalContactMaterialsAction>()
 {
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<Action>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");

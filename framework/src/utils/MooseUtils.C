@@ -36,7 +36,7 @@ tokenize(const std::string &str, std::vector<std::string> &elements, unsigned in
   std::string::size_type last_pos = str.find_first_not_of(delims, 0);
   std::string::size_type pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
 
-  while (pos != std::string::npos || last_pos != std::string::npos)
+  while (last_pos != std::string::npos)
   {
     elements.push_back(str.substr(last_pos, pos - last_pos));
     // skip delims between tokens

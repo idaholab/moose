@@ -3,7 +3,6 @@
 
 #include "Action.h"
 #include "MooseTypes.h"
-#include "MooseEnum.h"
 
 class ContactPenetrationVarAction: public Action
 {

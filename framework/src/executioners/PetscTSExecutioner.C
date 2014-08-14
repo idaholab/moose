@@ -39,7 +39,7 @@
 template<>
 InputParameters validParams<PetscTSExecutioner>()
 {
-  MooseEnum schemes("implicit-euler, explicit-euler, crank-nicolson, bdf2, petsc", "implicit-euler");
+  MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2 petsc", "implicit-euler");
   InputParameters params = validParams<Executioner>();
   std::vector<Real> sync_times(1);
   sync_times[0] = -1;

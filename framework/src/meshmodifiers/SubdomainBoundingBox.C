@@ -19,7 +19,7 @@
 template<>
 InputParameters validParams<SubdomainBoundingBox>()
 {
-  MooseEnum location("INSIDE, OUTSIDE", "INSIDE");
+  MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
   InputParameters params = validParams<MeshModifier>();
   params.addRequiredParam<RealVectorValue>("bottom_left", "The bottom left point (in x,y,z with spaces in-between).");

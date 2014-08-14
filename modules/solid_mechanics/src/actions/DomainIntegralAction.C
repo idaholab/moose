@@ -12,7 +12,7 @@ InputParameters validParams<DomainIntegralAction>()
 {
   InputParameters params = validParams<Action>();
   addCrackFrontDefinitionParams(params);
-  MooseEnum integral("JIntegral, InteractionIntegralKI, InteractionIntegralKII, InteractionIntegralKIII");
+  MooseEnum integral("JIntegral InteractionIntegralKI InteractionIntegralKII InteractionIntegralKIII");
   std::vector<MooseEnum> integral_vec(1, integral);
   params.addRequiredParam<std::vector<MooseEnum> >("integrals", integral_vec, "Domain integrals to calculate.  Choices are: " + integral.getRawNames());
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");

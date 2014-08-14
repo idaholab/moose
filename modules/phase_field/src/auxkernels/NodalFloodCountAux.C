@@ -19,7 +19,7 @@
 template<>
 InputParameters validParams<NodalFloodCountAux>()
 {
-  MooseEnum field_display("UNIQUE_REGION, VARIABLE_COLORING, ACTIVE_BOUNDS, CENTROID", "UNIQUE_REGION");
+  MooseEnum field_display("UNIQUE_REGION VARIABLE_COLORING ACTIVE_BOUNDS CENTROID", "UNIQUE_REGION");
 
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>("bubble_object", "The NodalFloodCount UserObject to get values from.");

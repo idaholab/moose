@@ -20,7 +20,7 @@ InputParameters validParams<SamplerBase>()
 {
   InputParameters params = emptyInputParameters();
 
-  MooseEnum sort_options("x,y,z,id");
+  MooseEnum sort_options("x y z id");
   params.addRequiredParam<MooseEnum>("sort_by", sort_options, "What to sort the samples by");
 
   return params;

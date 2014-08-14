@@ -19,7 +19,7 @@ InputParameters validParams<CoupledAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
-  MooseEnum operators("+, -, *, /", "+");
+  MooseEnum operators("+ - * /", "+");
 
   params.addRequiredCoupledVar("coupled", "Coupled Value for Calculation");
 

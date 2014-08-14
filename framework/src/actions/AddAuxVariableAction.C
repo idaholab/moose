@@ -38,13 +38,13 @@ AddAuxVariableAction::AddAuxVariableAction(const std::string & name, InputParame
 MooseEnum
 AddAuxVariableAction::getAuxVariableFamilies()
 {
-  return MooseEnum("LAGRANGE, MONOMIAL, SCALAR", "LAGRANGE", true);
+  return MooseEnum("LAGRANGE MONOMIAL SCALAR", "LAGRANGE", true);
 }
 
 MooseEnum
 AddAuxVariableAction::getAuxVariableOrders()
 {
-  return MooseEnum("CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH, NINTH", "FIRST", true);
+  return MooseEnum("CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "FIRST", true);
 }
 
 void
