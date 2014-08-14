@@ -5,6 +5,8 @@ InputParameters validParams<HeatConductionKernel>()
 {
   InputParameters params = validParams<Diffusion>();
   params.addClassDescription("Compute thermal conductivity "); // Add a description of what this kernel does
+  params.addParam<std::string>("diffusion_coefficient_name", "thermal_conductivity", "Property name of the diffusivity (Default: thermal_conductivity");
+  params.addParam<std::string>("diffusion_coefficient_dT_name", "thermal_conductivity_dT", "Property name of the derivative of the diffusivity with respect to the variable (Default: thermal_conductivity_dT");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -12,8 +14,8 @@ InputParameters validParams<HeatConductionKernel>()
 HeatConductionKernel::HeatConductionKernel(const std::string & name, InputParameters parameters) :
   Diffusion(name, parameters),
   _dim(_subproblem.mesh().dimension()),
-  _k(getMaterialProperty<Real>("thermal_conductivity")),
-  _k_dT(hasMaterialProperty<Real>("thermal_conductivity_dT") ? &getMaterialProperty<Real>("thermal_conductivity_dT") : NULL)
+  _diffusion_coefficient(getMaterialProperty<Real>(getParam<std::string>("diffusion_coefficient_name"))),
+  _diffusion_coefficient_dT(hasMaterialProperty<Real>(getParam<std::string>("diffusion_coefficient_dT_name")) ? &getMaterialProperty<Real>(getParam<std::string>("diffusion_coefficient_dT_name")) : NULL)
 {
 }
 
@@ -21,7 +23,7 @@ Real
 HeatConductionKernel::computeQpResidual()
 {
   Real r(0);
-//   r = _k[_qp]*Diffusion::computeQpResidual();
+//   r = diffusion_coefficient[_qp]*Diffusion::computeQpResidual();
 //   if (!libmesh_isnan(r))
 //   {
 //   }
@@ -29,7 +31,7 @@ HeatConductionKernel::computeQpResidual()
 //   {
 //     Moose::err << "NaN found at " << __LINE__ << " in " << __FILE__ << "!\n"
 //               << "Processor: " << libMesh::processor_id() << "\n"
-//               << "_k[_qp]: " << _k[_qp] << "\n"
+//               << "_diffusion_coefficient[_qp]: " << _diffusion_coefficient[_qp] << "\n"
 //               << "Diffusion resid: " << Diffusion::computeQpResidual() << "\n"
 //               << "Elem: " << _current_elem->id() << "\n"
 //               << "Qp: " << _qp << "\n"
@@ -37,20 +39,18 @@ HeatConductionKernel::computeQpResidual()
 //               << std::endl;
 //   }
 //   return r;
-  r = _k[_qp]*Diffusion::computeQpResidual();
+  r = _diffusion_coefficient[_qp]*Diffusion::computeQpResidual();
   return r;
 }
-
-
 
 Real
 HeatConductionKernel::computeQpJacobian()
 {
   Real jac(0);
-  jac = _k[_qp] * Diffusion::computeQpJacobian();
-  if ( _k_dT )
+  jac = _diffusion_coefficient[_qp] * Diffusion::computeQpJacobian();
+  if ( _diffusion_coefficient_dT )
   {
-    jac += (*_k_dT)[_qp] * _phi[_j][_qp] * Diffusion::computeQpResidual();
+    jac += (*_diffusion_coefficient_dT)[_qp] * _phi[_j][_qp] * Diffusion::computeQpResidual();
   }
   return jac;
 }

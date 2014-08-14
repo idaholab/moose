@@ -19,7 +19,7 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  MaterialProperty<Real> & _thermal_conductivity;
+  MaterialProperty<Real> & _diffusion_coefficient;
 
 private:
   const unsigned int _component;
