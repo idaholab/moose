@@ -10,7 +10,7 @@ InputParameters validParams<SolidMaterialProperties>()
   params.addParam<std::string>("Cp", "Specific heat");
   params.addParam<std::string>("rho", "Density");
 
-  // These are here for RAVEN to be able to control these values
+  // These are here so we are able to control these values
   params.addPrivateParam<Real>("thermal_conductivity");
   params.addPrivateParam<Real>("specific_heat");
   params.addPrivateParam<Real>("density");
