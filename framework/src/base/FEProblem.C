@@ -230,8 +230,13 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
 FEProblem::~FEProblem()
 {
-  delete _cm;
+  // Flush the Console stream, the underlying call to Console::mooseConsole
+  // relies on a call to Output::checkInterval that has references to
+  // _time, etc. If it is not flush here memory problems arise if you have
+  // an unflushed stream and start destructing things.
+  _console << std::flush;
 
+  delete _cm;
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; i++)
   {
@@ -243,13 +248,6 @@ FEProblem::~FEProblem()
 
     for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
       delete it->second;
-
-/*
-    for (std::map<std::string, RestartableDataValue *>::iterator it = _restartable_data[i].begin();
-        it != _restartable_data[i].end();
-        ++it)
-      delete it->second;
-*/
   }
 
   delete &_mesh;
@@ -415,12 +413,11 @@ void FEProblem::initialSetup()
 
   if (!_app.isRecovering())
   {
-    Moose::setup_perf_log.push("initial adaptivity","Setup");
-    _console << "Performing initial adaptivity\n";
+    Moose::setup_perf_log.push("initial adaptivity", "Setup");
     unsigned int n = adaptivity().getInitialSteps();
     for (unsigned int i = 0; i < n; i++)
     {
-      _console << "  step " << i+1 << " of " << n << "\n" << std::endl;
+      _console << "Initial adaptivity step " << i+1 << " of " << n << "\n" << std::endl;
       computeIndicatorsAndMarkers();
 
       _adaptivity.initialAdaptMesh();
