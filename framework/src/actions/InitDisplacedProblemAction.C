@@ -42,6 +42,6 @@ InitDisplacedProblemAction::act()
   {
     InputParameters params = validParams<DisplacedProblem>();
     params.set<std::vector<std::string> >("displacements") = getParam<std::vector<std::string> >("displacements");
-    _problem->initDisplacedProblem(_displaced_mesh, params);
+    _problem->initDisplacedProblem(_displaced_mesh.get(), params);
   }
 }

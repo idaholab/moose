@@ -330,7 +330,7 @@ MooseApp::meshOnly(std::string mesh_file_name)
   _action_warehouse.executeActionsWithAction("setup_mesh_complete");
 
   // uniform refinement
-  MooseMesh * mesh = _action_warehouse.mesh();
+  MooseSharedPointer<MooseMesh> & mesh = _action_warehouse.mesh();
   MeshRefinement mesh_refinement(mesh->getMesh());
   mesh_refinement.uniformly_refine(mesh->uniformRefineLevel());
 
@@ -365,11 +365,6 @@ MooseApp::meshOnly(std::string mesh_file_name)
     // Just write the file using the name requested by the user.
     mesh->getMesh().write(mesh_file_name);
   }
-
-  // Since we are not going to create a problem the mesh
-  // will not get cleaned up, so we'll do it here
-  delete mesh;
-  delete _action_warehouse.displacedMesh();
 }
 
 void

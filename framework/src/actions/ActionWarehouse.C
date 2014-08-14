@@ -31,8 +31,6 @@ ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory 
     _generator_valid(false),
     _show_actions(false),
     _show_parser(false),
-    _mesh(NULL),
-    _displaced_mesh(NULL),
     _problem(NULL),
     _executioner(NULL)
 {
@@ -63,6 +61,13 @@ ActionWarehouse::clear()
 
   _action_blocks.clear();
   _generator_valid = false;
+
+  // Due to the way ActionWarehouse is cleaned up (see MooseApp's
+  // destructor) we must guarantee that ActionWarehouse::clear()
+  // releases all the resources which have to be released _before_ the
+  // _comm object owned by the MooseApp is destroyed.
+  _mesh.reset();
+  _displaced_mesh.reset();
 }
 
 void

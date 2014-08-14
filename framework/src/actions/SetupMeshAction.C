@@ -129,13 +129,13 @@ void
 SetupMeshAction::act()
 {
   // Create the mesh object and tell it to build itself
-  _mesh = dynamic_cast<MooseMesh *>(_factory.create(_type, "mesh", _moose_object_pars));
+  _mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create_shared_ptr(_type, "mesh", _moose_object_pars));
   _mesh->init();
 
   if (isParamValid("displacements"))
   {
     // Create the displaced mesh
-    _displaced_mesh = dynamic_cast<MooseMesh *>(_factory.create(_type, "displaced_mesh", _moose_object_pars));
+    _displaced_mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create_shared_ptr(_type, "displaced_mesh", _moose_object_pars));
     _displaced_mesh->init();
 
     std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
@@ -143,8 +143,8 @@ SetupMeshAction::act()
       mooseError("Number of displacements and dimension of mesh MUST be the same!");
   }
 
-  setupMesh(_mesh);
+  setupMesh(_mesh.get());
 
   if (_displaced_mesh)
-    setupMesh(_displaced_mesh);
+    setupMesh(_displaced_mesh.get());
 }
