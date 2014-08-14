@@ -105,8 +105,18 @@ public:
    */
   virtual void parentOutputPositionChanged() {}
 
-protected:
+  /**
+   * Transient loops will continue as long as this keeps returning true.
+   */
+  virtual bool keepGoing() { return !_termination_requested; }
 
+  /**
+   * Allow objects with access to teh executioner to request clean
+   * termination of the solve
+   */
+  virtual void terminate() { _termination_requested = true; }
+
+protected:
   /// Initial Residual Variables
   Real _initial_residual_norm;
   Real _old_initial_residual_norm;
@@ -119,6 +129,10 @@ protected:
 
   /// Reference to the OutputWarehouse object
   OutputWarehouse & _output_warehouse;
+
+private:
+  /// Flag to store if terminate() was called
+  bool _termination_requested;
 };
 
 #endif //EXECUTIONER_H
