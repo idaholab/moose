@@ -9,32 +9,9 @@
 
 class Component;
 class FEProblem;
-class ControlLogicMapContainer;
 
 template<>
 InputParameters validParams<Component>();
-
-/*
- * Class used by Component class to map vector parameters through friendly names
- * i.e. friendly name = inlet:K_loss; variableName = K_loss, position = 1.
- * Since this class is only privately used by the class Component,
- * it's been added in this file
- */
-class ControlLogicMapContainer
-{
-public:
-   ControlLogicMapContainer();
-   ControlLogicMapContainer(const std::string & controllableParName, unsigned int & position);
-   virtual ~ ControlLogicMapContainer();
-   const std::string & getControllableParName();
-   unsigned int & getControllableParPosition();
-protected:
-   /// Variable name (i.e. K_loss)
-   std::string _controllableParName;
-   /// Position in the vector (i.e. 1)
-   unsigned int _position;
-};
-
 
 /**
  * Base class for R7 components
@@ -54,6 +31,27 @@ public:
     std::string _object_name;
     /// Parameter name
     std::string _par_name;
+  };
+
+  /**
+   * Used to map friendly names to vector parameters, i.e. inlet:K_loss => K_loss[1], where K_loss is a vector parameter.
+   */
+  struct ControlLogicMapContainer
+  {
+    ControlLogicMapContainer(const std::string & controllable_par_name, unsigned int & position) :
+      _controllable_par_name(controllable_par_name),
+      _position(position)
+    {
+    }
+
+    const std::string & getControllableParName() { return _controllable_par_name; }
+    unsigned int & getControllableParPosition() { return _position; }
+
+  protected:
+    /// Variable name (i.e. K_loss)
+    std::string _controllable_par_name;
+    /// Position in the vector (i.e. 1)
+    unsigned int _position;
   };
 
   Component(const std::string & name, InputParameters parameters);

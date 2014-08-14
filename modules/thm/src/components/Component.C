@@ -20,32 +20,6 @@ InputParameters validParams<Component>()
 }
 
 /*
- * Class used by Component class to map vector variables through friendly names
- * i.e. friendly name = inlet:K_loss; variableName = K_loss, position = 1
- */
-ControlLogicMapContainer::ControlLogicMapContainer()
-{
-}
-/*
- * CHANGE VARIABLENAME to ControllableName
- */
-ControlLogicMapContainer::ControlLogicMapContainer(const std::string & controllableParName, unsigned int & position):
-   _controllableParName(controllableParName),
-   _position(position)
-{
-}
-ControlLogicMapContainer::~ControlLogicMapContainer(){
-}
-const std::string &
-ControlLogicMapContainer::getControllableParName(){
-   return _controllableParName;
-}
-unsigned int &
-ControlLogicMapContainer::getControllableParPosition(){
-   return _position;
-}
-
-/*
  * Component implementation
  */
 static unsigned int comp_id = 0;
@@ -176,5 +150,6 @@ Component::connectObject(const std::string & rname, const std::string & mooseNam
 void
 Component::createVectorControllableParMapping(const std::string & rname, const std::string & mooseName, unsigned int pos)
 {
-  _rvect_map[rname] = ControlLogicMapContainer(mooseName, pos);
+  ControlLogicMapContainer mc(mooseName, pos);
+  _rvect_map.insert(std::pair<std::string, ControlLogicMapContainer>(rname, mc));
 }
