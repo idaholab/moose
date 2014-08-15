@@ -130,6 +130,7 @@ public:
 
 public:
   static std::string genName(const std::string & prefix, unsigned int id, const std::string & suffix);
+  static std::string genName(const std::string & prefix, unsigned int i, unsigned int j, const std::string & suffix);
   static std::string genName(const std::string & prefix, const std::string & suffix);
   static std::string genName(const std::string & prefix, const std::string & middle, const std::string & suffix);
 

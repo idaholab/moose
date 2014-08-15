@@ -33,6 +33,14 @@ Component::genName(const std::string & prefix, unsigned int id, const std::strin
 }
 
 std::string
+Component::genName(const std::string & prefix, unsigned int i, unsigned int j, const std::string & suffix)
+{
+  std::stringstream ss;
+  ss << prefix << ":" << i << ":" << j << ":" << suffix;
+  return ss.str();
+}
+
+std::string
 Component::genName(const std::string & prefix, const std::string & suffix)
 {
   std::stringstream ss;

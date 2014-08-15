@@ -69,7 +69,7 @@ FlowJunction::addMooseObjects()
   std::vector<MooseEnum> execute_options = SetupInterface::getExecuteOptions();
   execute_options[0] = "residual";
 
-  std::string c_pps = genName("flow", _id, "_pps");
+  std::string c_pps = genName(name(), "flow_pps");
   {
     InputParameters params = _factory.getValidParams("PressureCB");
     params.set<std::vector<unsigned int> >("r7:boundary") = _bnd_id;
@@ -110,7 +110,7 @@ FlowJunction::addMooseObjects()
         params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
       }
 
-      _sim.addBoundaryCondition("OneDFreeMassBC", genName("mass", _id, "_bc"), params);
+      _sim.addBoundaryCondition("OneDFreeMassBC", genName(name(), _bnd_id[i], "mass_bc"), params);
     }
     // momentum
     {
@@ -136,7 +136,7 @@ FlowJunction::addMooseObjects()
         params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
       }
 
-      _sim.addBoundaryCondition("OneDFreeMomentumBC", genName("mom", _id, "_bc"), params);
+      _sim.addBoundaryCondition("OneDFreeMomentumBC", genName(name(), _bnd_id[i], "mom_bc"), params);
     }
     // energy
     if (_model_type == FlowModel::EQ_MODEL_3)
@@ -158,7 +158,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<Real> >("scaling_factors") = sf;
       params.set<std::vector<VariableName> >("lambda") = cv_lambda;
 
-      _sim.addBoundaryCondition("OneDFreeEnergyBC", genName("erg", _id, "_bc"), params);
+      _sim.addBoundaryCondition("OneDFreeEnergyBC", genName(name(), _bnd_id[i], "erg_bc"), params);
     }
   }
 
@@ -187,6 +187,6 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
     }
 
-    _sim.addScalarKernel("FlowConstraint", genName("flow", _id, "_c0"), params);
+    _sim.addScalarKernel("FlowConstraint", genName(name(), "flow_c0"), params);
   }
 }
