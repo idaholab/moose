@@ -563,7 +563,7 @@ Transient::getDT()
 bool
 Transient::keepGoing()
 {
-  bool keep_going = Executioner::keepGoing();
+  bool keep_going = !_problem.isSolveTerminationRequested();
 
   // Check for stop condition based upon steady-state check flag:
   if (lastSolveConverged() && _trans_ss_check == true && _time > _ss_tmin)

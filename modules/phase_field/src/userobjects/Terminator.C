@@ -45,6 +45,5 @@ Terminator::execute()
 
   // request termination of the run in case the expression evaluates to true
   if (_fp.Eval(_params) != 0)
-    _fe_problem.getMooseApp().getExecutioner()->terminate();
+    _fe_problem.terminateSolve();
 }
-
