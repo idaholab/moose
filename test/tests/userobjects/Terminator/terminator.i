@@ -16,58 +16,35 @@
     family = LAGRANGE
     [./InitialCondition]
       type = RandomIC
-      min = -0.1
-      max =  0.1
+      min = -1
+      max =  1
     [../]
-  [../]
-
-  [./w]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[Preconditioning]
-  [./SMP]
-   type = SMP
-   off_diag_row = 'w c'
-   off_diag_column = 'c w'
   [../]
 []
 
 [Postprocessors]
-  [./nfc]
-    type = NodalFloodCount
+  [./max_c]
+    type = NodalMaxValue
     variable = c
-    threshold = 0.8
   [../]
 []
 
 [UserObjects]
   [./arnold]
     type = Terminator
-    expression = 'nfc > 0'
+    expression = 'max_c < 0.5'
   [../]
 []
 
 [Kernels]
   [./cres]
-    type = SplitCHMath
+    type = Diffusion
     variable = c
-    kappa_name = kappa_c
-    w = w
-  [../]
-
-  [./wres]
-    type = SplitCHWRes
-    variable = w
-    mob_name = M
   [../]
 
   [./time]
-    type = CoupledImplicitEuler
-    variable = w
-    v = c
+    type = TimeDerivative
+    variable = c
   [../]
 []
 
@@ -77,32 +54,14 @@
       variable = c
       auto_direction = 'x y'
     [../]
-    [./w]
-      variable = w
-      auto_direction = 'x y'
-    [../]
-  [../]
-[]
-
-[Materials]
-  [./constant]
-    type = PFMobility
-    block = 0
-    mob = 1.0
-    kappa = 2.0
   [../]
 []
 
 [Executioner]
   type = Transient
-  scheme = 'BDF2'
-  #petsc_options = '-snes_mf'
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
 
   l_max_its = 30
   l_tol = 1.0e-3
@@ -110,7 +69,7 @@
   nl_max_its = 50
   nl_rel_tol = 1.0e-10
 
-  dt = 10.0
+  dt = 0.1
   num_steps = 20
 []
 

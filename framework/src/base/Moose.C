@@ -199,6 +199,9 @@
 #include "NodalNormalsCorner.h"
 #include "NodalNormalsPreprocessor.h"
 #include "SolutionUserObject.h"
+#ifdef LIBMESH_HAVE_FPARSER
+#include "Terminator.h"
+#endif
 
 // preconditioners
 #include "PhysicsBasedPreconditioner.h"
@@ -542,6 +545,9 @@ registerObjects(Factory & factory)
   registerUserObject(NodalNormalsCorner);
   registerUserObject(NodalNormalsEvaluator);
   registerUserObject(SolutionUserObject);
+#ifdef LIBMESH_HAVE_FPARSER
+  registerUserObject(Terminator);
+#endif
 
   // preconditioners
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
