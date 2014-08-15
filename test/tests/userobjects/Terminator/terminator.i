@@ -14,11 +14,7 @@
   [./c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
-      type = RandomIC
-      min = -1
-      max =  1
-    [../]
+    initial_condition = 1
   [../]
 []
 
@@ -63,7 +59,7 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  dt = 0.1
+  dt = 100
   num_steps = 20
 []
 
