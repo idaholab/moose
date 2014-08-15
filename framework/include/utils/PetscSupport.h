@@ -36,13 +36,15 @@ namespace PetscSupport
 {
 void petscSetOptions(FEProblem & problem);
 
+void petscCheckCLIOptions(const CommandLine & cmd_line, Problem & problem);
+
 void petscSetDefaults(FEProblem & problem);
 
 void petscSetupDampers(NonlinearImplicitSystem& sys);
 
 void petscSetupDM(NonlinearSystem & nl);
 
-PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
+void petscSetupOutput(const CommandLine & cmd_line);
 
 /**
  * Helper function for outputing the norm values with/without color

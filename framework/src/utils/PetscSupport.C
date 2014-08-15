@@ -159,7 +159,6 @@ void petscSetupDM (NonlinearSystem & nl) {
 #endif
 }
 
-
 void
 petscSetOptions(FEProblem & problem)
 {
@@ -210,15 +209,63 @@ petscSetOptions(FEProblem & problem)
 
 }
 
-PetscErrorCode petscSetupOutput(CommandLine * cmd_line)
+void
+petscCheckCLIOptions(const CommandLine & cmd_line, Problem & problem)
 {
-  char code[10] = {45,45,109,111,111,115,101};
-  if (cmd_line->getPot()->search(code))
-    Console::petscSetupOutput();
-  return 0;
+  std::set<std::string> flag_options;
+
+  // Get all of the flag options for this MooseApp (begins with a hyphen)
+  for (CommandLine::OptionIterator it = cmd_line.optionsBegin(); it != cmd_line.optionsEnd(); ++it)
+    for (std::vector<std::string>::const_iterator jt = it->second.cli_switch.begin(); jt != it->second.cli_switch.end(); ++jt)
+      if (jt->size() > 0 and (*jt)[0] == '-')
+        flag_options.insert(*jt);
+
+  // Get all of the flag options from the command line and verify that they either belong to
+  // MOOSE or PETSc
+  GetPot * get_pot = cmd_line.getPot();
+  mooseAssert(get_pot, "GetPot object is NULL");
+  get_pot->reset_cursor();
+
+  std::list<std::string> unused_options;
+  for (unsigned int i=0; i<get_pot->size(); ++i)
+  {
+    const char * option = get_pot->next("");
+
+    // Make sure that the string isn't empty, the first character is a hyphen, and it's not used by MOOSE
+    if (std::strlen(option) > 0 && option[0] == '-' && flag_options.find(option) == flag_options.end())
+    {
+      PetscBool option_used;
+      PetscErrorCode ierr = 0;
+      // Is PETSc using this option?
+      ierr = PetscOptionsUsed(option, &option_used);
+      CHKERRABORT(problem.comm().get(), ierr);
+
+      // If not add it to the unused list
+      if (!option_used)
+        unused_options.push_back(option);
+    }
+  }
+
+  if (!unused_options.empty())
+  {
+    std::ostringstream oss;
+    oss << "The following command line option(s) were unused by either MOOSE or PETSc:";
+    for (std::list<std::string>::const_iterator it = unused_options.begin(); it != unused_options.end(); ++it)
+      oss << "\n\t" << *it;
+    mooseWarning(oss.str() << '\n');
+  }
 }
 
-PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
+void
+petscSetupOutput(const CommandLine & cmd_line)
+{
+  char code[10] = {45,45,109,111,111,115,101};
+  if (cmd_line.getPot()->search(code))
+    Console::petscSetupOutput();
+}
+
+PetscErrorCode
+petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
 {
   // Cast the context pointer coming from PETSc to an FEProblem& and
   // get a reference to the System from it.
@@ -294,7 +341,8 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
   return 0;
 }
 
-PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
+PetscErrorCode
+petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
 {
   FEProblem & problem = *static_cast<FEProblem *>(ctx);
   NonlinearSystem & system = problem.getNonlinearSystem();
@@ -394,10 +442,12 @@ PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, 
 
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 // PETSc 3.2.x-
-PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, PetscBool * /*changed_y*/, PetscBool * changed_w)
+PetscErrorCode
+dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, PetscBool * /*changed_y*/, PetscBool * changed_w)
 #else
 // PETSc 3.3.0+
-  PetscErrorCode dampedCheck(SNESLineSearch /* linesearch */, Vec x, Vec y, Vec w, PetscBool * /*changed_y*/, PetscBool * changed_w, void *lsctx)
+PetscErrorCode
+dampedCheck(SNESLineSearch /* linesearch */, Vec x, Vec y, Vec w, PetscBool * /*changed_y*/, PetscBool * changed_w, void *lsctx)
 #endif
 {
   // From SNESLineSearchSetPostCheck docs:
@@ -468,7 +518,8 @@ PetscErrorCode dampedCheck(SNES /*snes*/, Vec x, Vec y, Vec w, void *lsctx, Pets
   return ierr;
 }
 
-void petscSetupDampers(NonlinearImplicitSystem& sys)
+void
+petscSetupDampers(NonlinearImplicitSystem& sys)
 {
   FEProblem * problem = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
   NonlinearSystem & nl = problem->getNonlinearSystem();
@@ -505,7 +556,8 @@ getPetscPCSide(Moose::PCSideType pcs)
   }
 }
 
-void petscSetDefaults(FEProblem & problem)
+void
+petscSetDefaults(FEProblem & problem)
 {
   // dig out Petsc solver
   NonlinearSystem & nl = problem.getNonlinearSystem();

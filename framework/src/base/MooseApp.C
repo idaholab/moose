@@ -307,7 +307,7 @@ MooseApp::executeExecutioner()
   if (_executioner)
   {
 #ifdef LIBMESH_HAVE_PETSC
-    Moose::PetscSupport::petscSetupOutput(_command_line);
+    Moose::PetscSupport::petscSetupOutput(*_command_line);
 #endif
     _executioner->init();
     _executioner->execute();
