@@ -46,7 +46,6 @@
 [UserObjects]
   [./arnold]
     type = Terminator
-    postprocessors = 'nfc'
     expression = 'nfc > 0'
   [../]
 []
