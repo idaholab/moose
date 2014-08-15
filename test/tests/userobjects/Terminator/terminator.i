@@ -49,11 +49,11 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./c]
-      variable = c
-      auto_direction = 'x y'
-    [../]
+  [./c]
+    type = DirichletBC
+    variable = c
+    boundary = left
+    value = 0
   [../]
 []
 
@@ -63,18 +63,11 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  l_max_its = 30
-  l_tol = 1.0e-3
-
-  nl_max_its = 50
-  nl_rel_tol = 1.0e-10
-
   dt = 0.1
   num_steps = 20
 []
 
 [Outputs]
-  file_base = out
   output_initial = true
   exodus = true
   [./console]

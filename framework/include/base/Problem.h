@@ -95,7 +95,7 @@ public:
 
   /**
    * Check of termination has been requested. This should be called by
-   * transient Executioners in teh keepGoing() member.
+   * transient Executioners in the keepGoing() member.
    */
   virtual bool isSolveTerminationRequested() { return _termination_requested; };
 

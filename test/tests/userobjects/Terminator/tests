@@ -2,9 +2,6 @@
   [./test]
     type = 'Exodiff'
     input = 'terminator.i'
-    exodiff = 'out.e'
-    abs_zero = 1e-09
-    scale_refine = 1
-    max_parallel = 1
+    exodiff = 'terminator_out.e'
   [../]
 []
