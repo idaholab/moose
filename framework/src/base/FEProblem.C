@@ -250,8 +250,6 @@ FEProblem::~FEProblem()
       delete it->second;
   }
 
-  delete &_mesh;
-  delete _displaced_mesh;
   delete _displaced_problem;
   delete &_nl;
 

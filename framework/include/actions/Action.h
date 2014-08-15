@@ -114,8 +114,8 @@ protected:
   /// The current action (even though we have seperate instances for each action)
   const std::string & _current_task;
 
-  MooseMesh * & _mesh;
-  MooseMesh * & _displaced_mesh;
+  MooseSharedPointer<MooseMesh> & _mesh;
+  MooseSharedPointer<MooseMesh> & _displaced_mesh;
   /// Convenience reference to a problem this action works on
 
 public:

@@ -48,3 +48,33 @@
    fun:scalable_free
    fun:*
 }
+{
+   openmpi_mpi_init_leak
+   Memcheck:Leak
+   ...
+   fun:ompi_mpi_init
+   ...
+}
+{
+   openmpi_mpi_init_param
+   Memcheck:Param
+   writev(vector[...])
+   ...
+   fun:ompi_mpi_init
+   ...
+}
+{
+   openmpi_opal_event_base_loop
+   Memcheck:Leak
+   ...
+   fun:opal_event_base_loop
+   ...
+}
+{
+   openmpi_attr_create_keyval
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:ompi_attr_create_keyval
+   ...
+}
