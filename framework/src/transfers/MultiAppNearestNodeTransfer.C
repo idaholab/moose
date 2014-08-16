@@ -552,13 +552,12 @@ Node * MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & dista
 
   for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it)
   {
-    Node & node = *(*node_it);
-    Real current_distance = (p-node).size();
+    Real current_distance = (p-*(*node_it)).size();
 
     if (current_distance < distance)
     {
       distance = current_distance;
-      nearest = &node;
+      nearest = *node_it;
     }
   }
 

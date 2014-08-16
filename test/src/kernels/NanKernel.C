@@ -24,10 +24,9 @@ NanKernel::NanKernel(const std::string & name, InputParameters parameters) :
 Real
 NanKernel::computeQpResidual()
 {
-  Real zero = 0;
-
   if (static_cast<unsigned int>(_t_step) >= _timestep_to_nan)
-    return _grad_u[_qp] * _grad_test[_i][_qp] / zero;
+    //TODO: Once C++11 is fully supported, add "static_assert(std::numeric_limits::has_infinity, some_msg)".
+    return _grad_u[_qp] * _grad_test[_i][_qp] * std::numeric_limits<Real>::infinity();
   else
     return _grad_u[_qp] * _grad_test[_i][_qp];
 }
