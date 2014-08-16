@@ -63,5 +63,5 @@ void MemDataTest::test()
   // CPPUNIT_ASSERT( rel_diff < 1.e-2 );
 
   // Clean up the dummy array we created
-  delete dummy_memory;
+  delete[] dummy_memory;
 }
