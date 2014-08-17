@@ -289,7 +289,7 @@ public:
    * Sets the mapping between BoundaryID and normal vector
    * Is called by AddAllSideSetsByNormals
    */
-  void setBoundaryToNormalMap(AutoPtr<std::map<BoundaryID, RealVectorValue> > boundary_map);
+  void setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * boundary_map);
 
   /**
    * Sets the set of BoundaryIDs
