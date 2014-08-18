@@ -38,8 +38,8 @@ PFCElementEnergyIntegral::PFCElementEnergyIntegral(const std::string & name, Inp
 Real
 PFCElementEnergyIntegral::computeQpIntegral()
 {
-  const Real kb = 1.3806488e-23;  // A^2 kg s^-2 K^-1
-  const Real p0 = 0.0801; // A^-3
+  // const Real kb = 1.3806488e-23;  // A^2 kg s^-2 K^-1
+  // const Real p0 = 0.0801; // A^-3
 
   return _u[_qp]; // * (kb * _temp);
 }
