@@ -6,8 +6,8 @@ InputParameters validParams<PFCTradMaterial>()
   InputParameters params = validParams<Material>();
 
   params.addRequiredParam<unsigned int>("order","This is the order of the polynomial used for correlation function");
-  
-  
+
+
   return params;
 }
 
@@ -53,9 +53,9 @@ PFCTradMaterial::computeQpProperties()
   }
   else
   {
-    
+
   }
-  
-  
+
+
 }
 

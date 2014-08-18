@@ -46,11 +46,11 @@ PFCRFFEnergyDensity::computeValue()
       else
         val += ((1 + (*_vals[0])[_qp])*std::log(1 + (*_vals[0])[_qp])) - (*_vals[0])[_qp];
       break;
-      
+
     case 1: //approach using cancellation
       val += ((1 + (*_vals[0])[_qp])*std::log(1 + (*_vals[0])[_qp])) - (*_vals[0])[_qp];
       break;
-      
+
     case 2: //approach using Taylor Series Expansion
       Real coef = 1.0;
 
@@ -69,7 +69,7 @@ PFCRFFEnergyDensity::computeValue()
       }
       break;
   }
-  
+
 
   // Loop Through Variables
   Real sumL = 0.0;
