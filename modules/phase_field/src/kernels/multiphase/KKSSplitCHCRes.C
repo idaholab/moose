@@ -65,8 +65,6 @@ KKSSplitCHCRes::computeQpResidual()
 Real
 KKSSplitCHCRes::computeDFDC(PFFunctionType type)
 {
-  Real res = 0.0;
-
   switch (type)
   {
     case Residual:

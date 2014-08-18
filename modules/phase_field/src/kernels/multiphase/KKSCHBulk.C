@@ -79,9 +79,9 @@ KKSCHBulk::computeGradDFDCons(PFFunctionType type)
       // the non linear variable is c, but the free energy only contains the
       // phase concentrations. Equation (23) in the KKS paper gives the chain-
       // rule derivative dca/dc
-      Real dcadc = _second_derivative_Fb[_qp]
+      /* Real dcadc = _second_derivative_Fb[_qp]
                   / (  (1.0 - _prop_h[_qp]) * _second_derivative_Fb[_qp]
-                     + _prop_h[_qp]         * _second_derivative_Fa[_qp]);
+                     + _prop_h[_qp]         * _second_derivative_Fa[_qp]); */
       // The (1-h)*X_b, h*X_a pairing is opposite to what the KKSPhaseConcentration kernel does!
 
       res = _second_derivative_Fa[_qp] * _grad_phi[_j][_qp];
