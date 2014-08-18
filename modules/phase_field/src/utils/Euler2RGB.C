@@ -287,8 +287,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
 
     // Loop to sort Euler angles into standard stereographic triangle (SST)
     index = 0;
-    bool exit_flag = false;
-    while ((exit_flag == false) && (index < nsym))
+    while (index < nsym)
     {
       // Form orientation matrix
       for (unsigned int i = 0; i < 3; ++i)
@@ -318,27 +317,19 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
       chi = std::acos(std::abs(hkl[2]));
 
       // Continue if eta and chi values are within the SST
-      if (eta >= eta_min && eta < eta_max && chi >= eta_min && chi < chi_max)
-      {
-        exit_flag = true;
-      }
+      if (eta >= eta_min && eta < eta_max && chi >= chi_min && chi < chi_max)
+        break;
 
       // Increment to next symmetry operator if not in SST
       else
-      {
         index++;
-      }
     }
 
     //  Adjust maximum chi value to ensure it falls within the SST (cubic materials only)
     if (sym == 43)
-    {
       chi_max2 = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(std::pow(eta, 2))))));
-    }
     else
-    {
       chi_max2 = pi / 2;
-    }
 
     //  Calculate the RGB color values and make adjustments to maximize colorspace
     red = std::abs(1.0 - (chi / chi_max2));
@@ -371,5 +362,6 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     //  Convert RGB tuple to scalar and return integer value
     RGBint = (MathUtils::round(RGB[0] * 255) * std::pow( 256.0, 2)) + (MathUtils::round(RGB[1] * 255) * 256) + MathUtils::round(RGB[2] *255);
   }
+
   return RGBint;
 }
