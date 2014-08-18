@@ -27,7 +27,7 @@ void
 ReconVarIC::initialSetup()
 {
   // Read in EBSD data from user object
-  unsigned int n_elem =  _mesh.getMesh().n_active_elem();
+  // unsigned int n_elem =  _mesh.getMesh().n_active_elem();
   const MeshBase::element_iterator begin = _mesh.getMesh().active_elements_begin();
   const MeshBase::element_iterator end = _mesh.getMesh().active_elements_end();
   for (MeshBase::element_iterator el = begin; el != end; ++el)
@@ -39,7 +39,7 @@ ReconVarIC::initialSetup()
     _x[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("X"));
     _y[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("Y"));
     _z[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("Z"));
-    //Moose::out << "Element #, Grain #, X, Y, Z:  " << current_elem->id()  << "  " << _grn[index] << "  " << _x[index] << "  " << _y[index] << "  " << _z[index] <<< "\n" << std::endl;
+    // Moose::out << "Element #, Grain #, X, Y, Z:  " << current_elem->id()  << "  " << _grn[index] << "  " << _x[index] << "  " << _y[index] << "  " << _z[index] <<< "\n" << std::endl;
   }
 
   // Calculate centerpoint of each EBSD grain
@@ -65,7 +65,7 @@ ReconVarIC::initialSetup()
     _centerpoints[i](0) = _sum_x[i] / num_pts;
     _centerpoints[i](1) = _sum_y[i] / num_pts;
     _centerpoints[i](2) = _sum_z[i] / num_pts;
-    //Moose::out << _centerpoints[i] << "\n" << std::endl;
+    // Moose::out << _centerpoints[i] << "\n" << std::endl;
   }
 
   //Set up domain bounds with mesh tools
@@ -125,13 +125,11 @@ ReconVarIC::initialSetup()
   }
 }
 
-Real
-ReconVarIC::value(const Point & p)
-
-// Note that we are not actually using "Point p" coordinates here to assign the order parameter.
+// Note that we are not actually using Point coordinates that get passed in to assign the order parameter.
 // By knowing the curent elements index, we can use it's centroid to grab the EBSD grain index
 // associated with the point from the EBSDReader user object.
-
+Real
+ReconVarIC::value(const Point &)
 {
   Real op = 0.0;
   Point p1 = _current_elem->centroid();
@@ -143,4 +141,3 @@ ReconVarIC::value(const Point & p)
   // Moose::out << _current_elem->id() << "  " << p << " " << op <<  "\n" << std::endl;
   return op;
 }
-

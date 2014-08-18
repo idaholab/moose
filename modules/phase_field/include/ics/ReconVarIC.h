@@ -21,7 +21,7 @@ public:
   ReconVarIC(const std::string & name, InputParameters parameters);
 
   virtual void initialSetup();
-  virtual Real value(const Point & p);
+  virtual Real value(const Point &);
 
 private:
   MooseMesh & _mesh;
