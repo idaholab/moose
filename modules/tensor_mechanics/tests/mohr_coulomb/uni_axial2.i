@@ -1,0 +1,270 @@
+[Mesh]
+  type = FileMesh
+  file = quarter_hole.e
+[]
+
+[Variables]
+  [./disp_x]
+  [../]
+  [./disp_y]
+  [../]
+  [./disp_z]
+  [../]
+[]
+
+[TensorMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+  [../]
+[]
+
+
+[BCs]
+  [./zmin_zzero]
+    type = PresetBC
+    variable = disp_z
+    boundary = 'zmin'
+    value = '0'
+  [../]
+  [./xmin_xzero]
+    type = PresetBC
+    variable = disp_x
+    boundary = 'xmin'
+    value = '0'
+  [../]
+  [./ymin_yzero]
+    type = PresetBC
+    variable = disp_y
+    boundary = 'ymin'
+    value = '0'
+  [../]
+  [./ymax_disp]
+    type = FunctionPresetBC
+    variable = disp_y
+    boundary = 'ymax'
+    function = '-1E-4*t'
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_xy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_xz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./max_ps]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./min_ps]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mc_int]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./yield_fcn]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_xx]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xx
+    index_i = 0
+    index_j = 0
+  [../]
+  [./stress_xy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xy
+    index_i = 0
+    index_j = 1
+  [../]
+  [./stress_xz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xz
+    index_i = 0
+    index_j = 2
+  [../]
+  [./stress_yy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_yy
+    index_i = 1
+    index_j = 1
+  [../]
+  [./stress_yz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_yz
+    index_i = 1
+    index_j = 2
+  [../]
+  [./stress_zz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_zz
+    index_i = 2
+    index_j = 2
+  [../]
+  [./max_ps]
+    type = MaterialRealAux
+    property = mc_max_principal_stress
+    variable = max_ps
+  [../]
+  [./min_ps]
+    type = MaterialRealAux
+    property = mc_min_principal_stress
+    variable = min_ps
+  [../]
+  [./mc_int_auxk]
+    type = MaterialRealAux
+    property = mc_internal
+    variable = mc_int
+  [../]
+  [./yield_fcn_auxk]
+    type = MaterialRealAux
+    property = mc_yield_function
+    variable = yield_fcn
+  [../]
+[]
+
+[Postprocessors]
+  [./s_xx]
+    type = PointValue
+    point = '0.005 0.02 0.002'
+    variable = stress_xx
+  [../]
+  [./s_xy]
+    type = PointValue
+    point = '0.005 0.02 0.002'
+    variable = stress_xy
+  [../]
+  [./s_xz]
+    type = PointValue
+    point = '0.005 0.02 0.002'
+    variable = stress_xz
+  [../]
+  [./s_yy]
+    type = PointValue
+    point = '0.005 0.02 0.002'
+    variable = stress_yy
+  [../]
+  [./s_yz]
+    type = PointValue
+    point = '0.005 0.02 0.002'
+    variable = stress_yz
+  [../]
+  [./s_zz]
+    type = PointValue
+    point = '0.005 0.02 0.002'
+    variable = stress_zz
+  [../]
+  [./max_ps]
+    type = PointValue
+    point = '0.005 0.02 0.002'
+    variable = max_ps
+  [../]
+  [./min_ps]
+    type = PointValue
+    point = '0.005 0.02 0.002'
+    variable = min_ps
+  [../]
+  [./f]
+    type = PointValue
+    point = '0.005 0.02 0.002'
+    variable = yield_fcn
+  [../]
+[]
+
+[Materials]
+  [./mc]
+    type = FiniteStrainMohrCoulomb
+    block = 1
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    fill_method = symmetric_isotropic
+    C_ijkl = '0 5E9' # young = 10Gpa, poisson = 0.0
+    mc_cohesion = 10E6
+    mc_cohesion_residual = 8E6
+    mc_cohesion_rate = 0
+    mc_friction_angle = 2
+    mc_dilation_angle = 2
+    mc_tip_smoother = 0.01E6
+    mc_edge_smoother = 29
+    yield_function_tolerance = 1E-4
+    ep_plastic_tolerance = 1E-11
+    internal_constraint_tolerance = 1E-11
+    max_NR_iterations = 1000
+    debug_fspb = 1
+  [../]
+[]
+
+# Preconditioning and Executioner options kindly provided by Andrea
+[Preconditioning]
+  [./andy]
+    type = SMP
+    full = true
+  [../]
+[]
+
+
+[Executioner]
+  end_time = 0.5
+  dt = 0.1
+  solve_type = PJFNK
+  type = Transient
+
+  l_tol = 1E-2
+  nl_abs_tol = 1E-5
+  nl_rel_tol = 1E-7
+  l_max_its = 200
+  nl_max_its = 400
+
+  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
+  petsc_options_value = ' asm      2              lu            gmres     200'
+[]
+
+
+[Outputs]
+  file_base = uni_axial2
+  output_initial = true
+  exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+  [./csv]
+    type = CSV
+    interval = 1
+  [../]
+[]
