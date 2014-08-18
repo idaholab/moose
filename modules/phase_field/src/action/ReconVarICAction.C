@@ -36,7 +36,7 @@ ReconVarICAction::act()
 #ifdef DEBUG
   Moose::err << "Inside the ReconVarICAction Object\n";
 #endif
-  
+
   // Set initial condition for each order parameter
   for (unsigned int crys = 0; crys < _crys_num; ++crys)
   {
@@ -45,7 +45,7 @@ ReconVarICAction::act()
     std::stringstream out;
     out << crys;
     var_name.append(out.str());
-    
+
     {
       // Define parameters for ReconVarIC
       InputParameters poly_params = _factory.getValidParams("ReconVarIC");

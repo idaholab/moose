@@ -1,6 +1,6 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2 
+  dim = 2
   # Note: The following parameters must match the values in “IN100_001_28x28_Marmot.txt” after uniform refine has run
   nx = 7
   ny = 7
@@ -19,7 +19,7 @@
   crys_num = 9
   grain_num = 9
   var_name_base = gr
-  sd = 3  
+  sd = 3
 []
 
 [UserObjects]
@@ -48,16 +48,16 @@
   [./PolycrystalICs]
     [./ReconAuxVarIC]
       ebsd_reader = ebsd
-    [../] 
-    
-    [./ReconVarIC]    
+    [../]
+
+    [./ReconVarIC]
      ebsd_reader = ebsd
-    [../] 
+    [../]
   [../]
 []
 
 [Variables]
-  [./PolycrystalVariables]  
+  [./PolycrystalVariables]
   [../]
 []
 
@@ -96,7 +96,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
- 
+
   [./rgb]
     order = CONSTANT
     family = MONOMIAL
@@ -105,8 +105,8 @@
   [./op]
     order = CONSTANT
     family = MONOMIAL
-  [../] 
-[]	     
+  [../]
+[]
 
 [Kernels]
   [./PolycrystalKernel]
@@ -119,12 +119,12 @@
     variable = bnds
     execute_on = timestep
   [../]
-  
+
   [./phi1_aux]
     Aux_param = phi1
     variable = phi1
     type = ReconAuxVarUpdate
-    ebsd_reader = ebsd 
+    ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
@@ -132,7 +132,7 @@
     Aux_param = PHI
     variable = PHI
     type = ReconAuxVarUpdate
-    ebsd_reader = ebsd 
+    ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
@@ -140,7 +140,7 @@
     Aux_param = phi2
     variable = phi2
     type = ReconAuxVarUpdate
-    ebsd_reader = ebsd 
+    ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
@@ -148,7 +148,7 @@
     Aux_param = grn
     variable = grn
     type = ReconAuxVarUpdate
-    ebsd_reader = ebsd 
+    ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
@@ -156,7 +156,7 @@
     Aux_param = phase
     variable = phase
     type = ReconAuxVarUpdate
-    ebsd_reader = ebsd 
+    ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
@@ -164,7 +164,7 @@
     Aux_param = sym
     variable = sym
     type = ReconAuxVarUpdate
-    ebsd_reader = ebsd 
+    ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
@@ -172,7 +172,7 @@
     Aux_param = rgb
     variable = rgb
     type = ReconAuxVarUpdate
-    ebsd_reader = ebsd 
+    ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
@@ -180,12 +180,12 @@
     Aux_param = op
     variable = op
     type = ReconAuxVarUpdate
-    ebsd_reader = ebsd 
+    ebsd_reader = ebsd
     execute_on = timestep
   [../].
 []
 
-[Materials]  
+[Materials]
   [./CuGrGr]
     type = CuGrGr
     block = 0
@@ -198,9 +198,9 @@
   [./ReconMaterial]
     type = ReconMaterial
     block = 0
-    ebsd_reader = ebsd 
-    GrainTracker_object = grain_tracker     
-  [../]   
+    ebsd_reader = ebsd
+    GrainTracker_object = grain_tracker
+  [../]
 []
 
 [Postprocessors]
@@ -226,7 +226,7 @@
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold' 
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold'
   petsc_options_value = 'hypre boomeramg 31 0.7'
   l_tol = 1.0e-4
   l_max_its = 20
@@ -257,7 +257,7 @@
     perf_log = true
     linear_residuals = true
     nonlinear_residuals = true
-  [../]  
+  [../]
 []
 
 #[Debug]
@@ -265,5 +265,5 @@
 #  show_actions = true
 #[]
 
-    
+
 

@@ -4,7 +4,7 @@
 template<>
 InputParameters validParams<ReconVarIC>()
 {
- 
+
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader GeneralUserObject");
   params.addRequiredParam<unsigned int>("crys_num", "Specifies the number of order paraameters to create");
@@ -41,15 +41,15 @@ ReconVarIC::initialSetup()
     _z[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("Z"));
     //Moose::out << "Element #, Grain #, X, Y, Z:  " << current_elem->id()  << "  " << _grn[index] << "  " << _x[index] << "  " << _y[index] << "  " << _z[index] <<< "\n" << std::endl;
   }
-  
+
   // Calculate centerpoint of each EBSD grain
   _sum_x.resize(_grain_num);
   _sum_y.resize(_grain_num);
   _sum_z.resize(_grain_num);
   _centerpoints.resize(_grain_num);
-  
+
   unsigned int num_pts;
-  for (unsigned int i = 0; i < _grain_num; i++) 
+  for (unsigned int i = 0; i < _grain_num; i++)
   {
     num_pts = 0;
     for (std::map<unsigned int, unsigned int>::iterator it = _grn.begin(); it != _grn.end(); ++it)
@@ -88,7 +88,7 @@ ReconVarIC::initialSetup()
     std::vector<Real> min_op_dist;
     min_op_ind.resize(_op_num);
     min_op_dist.resize(_op_num);
-    
+
       //Determine the distance to the closest center assigned to each order parameter
     if (grain >= _op_num)
     {
@@ -103,7 +103,7 @@ ReconVarIC::initialSetup()
         }
       }
     }
-    
+
     //Assign the current center point to the order parameter that is furthest away.
     Real mx;
     if (grain < _op_num)

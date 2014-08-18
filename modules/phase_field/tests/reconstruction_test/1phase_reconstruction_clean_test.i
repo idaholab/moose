@@ -1,7 +1,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 28 
+  nx = 28
   ny = 28
   nz = 0
   xmin = 0
@@ -15,24 +15,24 @@
 []
 
 [GlobalParams]
-  crys_num = 9 
+  crys_num = 9
   var_name_base = gr
   sd= 3
 []
 
 [Variables]
-  [./ReconstructedVariables]    
+  [./ReconstructedVariables]
     EBSD_file_name = IN100_001_28x28_Clean_Marmot.txt
     x1 = 0
     y1 = 0
     z1 = 0
     x2 = 7
     y2 = 7
-    z2 = 0    
+    z2 = 0
   [../]
 []
 
-[AuxVariables]   
+[AuxVariables]
   [./bnds]
     order = FIRST
     family = LAGRANGE
@@ -47,7 +47,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
- 
+
   [./rgb]
     order = CONSTANT
     family = MONOMIAL
@@ -66,8 +66,8 @@
 #  [./centroids]
 #    order = CONSTANT
 #    family = MONOMIAL
-#  [../]  
-[]	     
+#  [../]
+[]
 
 [Kernels]
   [./PolycrystalKernel]
@@ -75,7 +75,7 @@
 []
 
 [AuxKernels]
-  
+
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
@@ -117,10 +117,10 @@
     variable = phase
     execute_on = timestep
   [../]
-    
+
   [./rgb]
     type = Euler2RGBAux
-    variable = rgb   
+    variable = rgb
     execute_on = timestep
   [../]
 []
@@ -134,7 +134,7 @@
 #   [../]
 #[]
 
-[Materials]  
+[Materials]
   [./CuGrGr]
     type = CuGrGrClean
     block = 0
@@ -148,7 +148,7 @@
     type = ReconstructionMaterial
     block = 0
     EBSD_file_name = IN100_001_28x28_Clean_Marmot.txt
-  [../]   
+  [../]
 []
 
 #[Preconditioning]
@@ -191,7 +191,7 @@
 
 
 
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold' 
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold'
   petsc_options_value = 'hypre boomeramg 31 0.7'
   l_tol = 1.0e-4
   l_max_its = 20
@@ -201,7 +201,7 @@
   num_steps = 2
   dt = 0.1
 []
-  
+
  #[./Adaptivity]
  #  initial_adaptivity = 1
  #  refine_fraction = 0.8
@@ -219,8 +219,8 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true 
-    nonlinear_residuals = true  
+    linear_residuals = true
+    nonlinear_residuals = true
 #    max_rows = 20
   [../]
 []

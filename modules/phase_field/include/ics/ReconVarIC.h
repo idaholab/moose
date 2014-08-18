@@ -35,10 +35,10 @@ private:
   Point _bottom_left;
   Point _top_right;
   Point _range;
-  
+
   std::map<unsigned int, unsigned int> _grn;
   std::map<unsigned int, Real> _x, _y, _z;
-  
+
   std::vector<Real> _sum_x, _sum_y, _sum_z;
   std::vector<Point> _centerpoints;
   std::vector<Real> _assigned_op;

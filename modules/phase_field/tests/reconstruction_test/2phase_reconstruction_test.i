@@ -38,7 +38,7 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]    
+  [./PolycrystalVariables]
   [../]
 []
 
@@ -66,7 +66,7 @@
   [./grn]
     order = CONSTANT
     family = MONOMIAL
-  [../]  
+  [../]
 
   [./phase]
     order = CONSTANT
@@ -77,7 +77,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-[]	     
+[]
 
 [Kernels]
   [./PolycrystalKernel]
@@ -133,15 +133,15 @@
     variable = phase
     execute_on = timestep
   [../]
-    
+
   [./rgb]
     type = Euler2RGBAux
-    variable = rgb   
+    variable = rgb
     execute_on = timestep
   [../]
 []
 
-[Materials]  
+[Materials]
   [./CuGrGr]
     type = CuGrGr
     block = 0
@@ -154,8 +154,8 @@
   [./ReconstructionMaterial]
     type = ReconstructionMaterial
     block = 0
-    ebsd_reader = ebsd 
-  [../]   
+    ebsd_reader = ebsd
+  [../]
 []
 
 [Postprocessors]
@@ -176,7 +176,7 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold' 
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold'
   petsc_options_value = 'hypre boomeramg 31 0.7'
   l_tol = 1.0e-4
   l_max_its = 20
@@ -205,12 +205,12 @@
     perf_log = true
     linear_residuals = true
     nonlinear_residuals = true
-  [../]  
+  [../]
 []
 
 [Debug]
   show_parser = true
   show_actions = true
 []
-    
+
 
