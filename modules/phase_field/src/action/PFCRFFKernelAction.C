@@ -36,8 +36,8 @@ void
 PFCRFFKernelAction::act()
 {
 #ifdef DEBUG
-  std::cerr << "Inside the PFCRFFKernelAction Object\n";
-  std::cerr << "L name base:" << _L_name_base;
+  Moose::err << "Inside the PFCRFFKernelAction Object\n";
+  Moose::err << "L name base:" << _L_name_base;
 #endif
 
   //Create the two kernels required for the n_variable, starting with the time derivative
@@ -57,7 +57,7 @@ PFCRFFKernelAction::act()
     L_name.append(out.str());
     L_name.append("_real");
     real_v[l] = L_name;
-    //std::cout << "real_v[" << l << "] = " << L_name << std::endl;
+    //_console << "real_v[" << l << "] = " << L_name << std::endl;
   }
 
   poly_params = _factory.getValidParams("CHPFCRFF");

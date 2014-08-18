@@ -48,7 +48,7 @@ PFCFreezingIC::PFCFreezingIC(const std::string & name,
     _inside(getParam<Real>("inside")),
     _outside(getParam<Real>("outside"))
 {
-  std::cout << "MooseEnum? " << _crystal_structure << std::endl;
+  _console << "MooseEnum? " << _crystal_structure << std::endl;
 
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
     mooseAssert(_range(i) >= 0.0, "x1, y1 or z1 is not less than x2, y2 or z2");

@@ -36,8 +36,8 @@ void
 HHPFCRFFSplitVariablesAction::act()
 {
 #ifdef DEBUG
-  std::cerr << "Inside the HHPFCRFFSplitVariablesAction Object\n";
-  std::cerr << "VariableBase: " << _L_name_base
+  Moose::err << "Inside the HHPFCRFFSplitVariablesAction Object\n";
+  Moose::err << "VariableBase: " << _L_name_base
             << "\torder: " << getParam<std::string>("order")
             << "\tfamily: " << getParam<std::string>("family") << std::endl;
 #endif
@@ -57,7 +57,7 @@ HHPFCRFFSplitVariablesAction::act()
 
 
 #ifdef DEBUG
-    std::cerr << "Real name = " << real_name << std::endl;
+    Moose::err << "Real name = " << real_name << std::endl;
 #endif
 
     _problem->addVariable(real_name,
@@ -72,7 +72,7 @@ HHPFCRFFSplitVariablesAction::act()
       imag_name.append("_imag");
 
 #ifdef DEBUG
-      std::cerr << "Imaginary name = " << imag_name << std::endl;
+      Moose::err << "Imaginary name = " << imag_name << std::endl;
 #endif
 
       _problem->addVariable(imag_name,

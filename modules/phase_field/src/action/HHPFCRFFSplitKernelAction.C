@@ -33,8 +33,8 @@ void
 HHPFCRFFSplitKernelAction::act()
 {
 #ifdef DEBUG
-  std::cerr << "Inside the HHPFCRFFSplitKernelAction Object\n";
-  std::cerr << "L name base:" << _L_name_base;
+  Moose::err << "Inside the HHPFCRFFSplitKernelAction Object\n";
+  Moose::err << "L name base:" << _L_name_base;
 #endif
 
   //Loop over the L_variables

@@ -27,7 +27,7 @@ PFCEnergyDensity::PFCEnergyDensity(const std::string& name,
     std::stringstream out;
     out << i*2;
     coeff_name.append(out.str());
-    std::cout << coeff_name << std::endl;
+    _console << coeff_name << std::endl;
     _coeff[i] = &getMaterialProperty<Real>(coeff_name);
   }
 }
