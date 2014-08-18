@@ -74,6 +74,14 @@ namespace RELAP7
     HFPM_SIMPLE = 1
   };
 
+  /**
+   * Wall boiling model
+   */
+  enum EWallBoilingModelType
+  {
+    WBM_SIMPLE = 0,
+    WBM_ORIGINAL = 1
+  };
 }
 
 #endif // ENUMS_H
