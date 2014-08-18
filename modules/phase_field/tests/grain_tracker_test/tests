@@ -9,7 +9,7 @@
     type = 'Exodiff'
     input = 'grain_tracker_recover.i'
     exodiff = 'grain_tracker_recover_out.e
-	       grain_tracker_recover_out.e-s002
+         grain_tracker_recover_out.e-s002
                grain_tracker_recover_out.e-s003'
 
     #Note: this test should be run with min parallel=2 
