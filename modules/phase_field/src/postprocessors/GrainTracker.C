@@ -475,7 +475,7 @@ GrainTracker::trackGrains()
       continue;
 
     unsigned int closest_match_idx;
-    bool found_one = false;
+    // bool found_one = false;
     Real min_centroid_diff = std::numeric_limits<Real>::max();
 
     for (unsigned int new_grain_idx=0; new_grain_idx<new_grains.size(); ++new_grain_idx)
@@ -485,7 +485,7 @@ GrainTracker::trackGrains()
         Real curr_centroid_diff = boundingRegionDistance(curr_it->second->sphere_ptrs, new_grains[new_grain_idx]->sphere_ptrs, true);
         if (curr_centroid_diff <= min_centroid_diff)
         {
-          found_one = true;
+          // found_one = true;
           closest_match_idx = new_grain_idx;
           min_centroid_diff = curr_centroid_diff;
         }
