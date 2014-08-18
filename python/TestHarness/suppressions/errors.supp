@@ -73,7 +73,6 @@
 {
    openmpi_attr_create_keyval
    Memcheck:Leak
-   match-leak-kinds: definite
    ...
    fun:ompi_attr_create_keyval
    ...
