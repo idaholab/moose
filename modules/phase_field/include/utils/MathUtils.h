@@ -61,7 +61,7 @@ namespace MathUtils
 
     if (deriv == 0)
     {
-      if(x<tol)
+      if (x<tol)
         value =  c1*x*x + c2*x + c3;
       else
         value =  std::log(x);
@@ -109,7 +109,7 @@ namespace MathUtils
     }
     else if (order == 1)
     {
-      if(x<tol)
+      if (x<tol)
         value = 3.0 * c1 * x*x + 2.0 * c2 * x + c3;
       else
         value = 1.0/x;
