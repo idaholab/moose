@@ -76,7 +76,7 @@
     eta = eta2
     outputs = exodus
   [../]
-  
+
   [./g_eta1]
     type = KKSGEtaPolyMaterial
     block = 0
