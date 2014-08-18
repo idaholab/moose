@@ -72,8 +72,7 @@ def runMake(distcc_hosts, jobs, **kwargs):
   sub = subprocess.Popen(make, cwd=make_dir)
 
   # Wait for process to terminate
-  while sub.poll() == None:
-    pass
+  sub.wait()
 
   # Print the make durration
   t = time.clock() - strt
