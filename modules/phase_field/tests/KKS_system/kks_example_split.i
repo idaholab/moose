@@ -17,6 +17,13 @@
   elem_type = QUAD4
 []
 
+[AuxVariables]
+  [./Fglobal]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [Variables]
   # order parameter
   [./eta]
@@ -211,6 +218,16 @@
   [./detadt]
     type = TimeDerivative
     variable = eta
+  [../]
+[]
+
+[AuxKernels]
+  [./GlobalFreeEnergy]
+    variable = Fglobal
+    type = KKSGlobalFreeEnergy
+    fa_name = fm
+    fb_name = fd
+    w = 0.4
   [../]
 []
 
