@@ -153,11 +153,11 @@ private:
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
   }
   virtual void setupInternal(NumericVector<Number> &X) {
-    PetscVector<Number> *pX = libmesh_cast_ptr<PetscVector<Number> *>(&X);
+    PetscVector<Number> *pX = cast_ptr<PetscVector<Number> *>(&X);
     PetscErrorCode ierr;
     ierr = TSSetIFunction(this->_ts,PETSC_NULL,this->_computeIFunction,this);
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
-    PetscMatrix<Number> *mat = libmesh_cast_ptr<PetscMatrix<Number> *>(this->_fe_problem.getNonlinearSystem().sys().matrix);
+    PetscMatrix<Number> *mat = cast_ptr<PetscMatrix<Number> *>(this->_fe_problem.getNonlinearSystem().sys().matrix);
     Mat pmat = mat->mat();
     ierr = TSSetIJacobian(this->_ts,pmat,pmat,this->_computeIJacobian,this);
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
@@ -178,7 +178,7 @@ private:
     return (TimeStepperStatus)reason;
   }
   virtual void interpolate(Real time,NumericVector<Number> &X) {
-    PetscVector<Number> *pX = libmesh_cast_ptr<PetscVector<Number> *>(&X);
+    PetscVector<Number> *pX = cast_ptr<PetscVector<Number> *>(&X);
     PetscErrorCode ierr;
     ierr = TSInterpolate(this->_ts,time,pX->vec());
     CHKERRABORT(libMesh::COMM_WORLD,ierr);
