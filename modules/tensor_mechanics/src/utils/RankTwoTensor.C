@@ -560,7 +560,7 @@ RankFourTensor
 RankTwoTensor::d2sin3Lode(const Real r0) const
 {
   Real bar = secondInvariant();
-  if (bar == 0.0)
+  if (bar <= r0)
     return RankFourTensor();
   Real J3 = thirdInvariant();
   RankTwoTensor dII = dsecondInvariant();
