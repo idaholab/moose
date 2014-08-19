@@ -1,4 +1,3 @@
-// Include files
 #include "Euler2RGBAux.h"
 #include "Euler2RGB.h"
 
@@ -19,7 +18,8 @@ Euler2RGBAux::Euler2RGBAux(const std::string & name, InputParameters parameters)
     _phi2(getMaterialProperty<Real>("phi2")),
     _phase(getMaterialProperty<unsigned int>("phase")),
     _sym(getMaterialProperty<unsigned int>("sym"))
-{}
+{
+}
 
 Real
 Euler2RGBAux::computeValue()
