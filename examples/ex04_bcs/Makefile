@@ -12,6 +12,8 @@ MOOSE_DIR          ?= $(shell dirname $(EXAMPLE_DIR))
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 ###############################################################################
 
+TEST := test_ignore
+
 # framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
@@ -34,7 +36,7 @@ ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
 ###############################################################################
 # Additional special case targets should be added here
 
-test: $(APPLICATION_NAME)-$(METHOD)
+test: all
 	$(call TEST_exodiff,dirichlet_bc.i,out_coupled_dirichlet.e)
 	$(call TEST_exodiff,neumann_bc.i,out_coupled_neumann.e)
 	$(call TEST_exodiff,periodic_bc.i,out_pbc.e)
