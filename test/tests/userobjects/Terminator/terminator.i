@@ -60,7 +60,7 @@
   solve_type = 'PJFNK'
 
   dt = 100
-  num_steps = 20
+  num_steps = 6
 []
 
 [Outputs]
