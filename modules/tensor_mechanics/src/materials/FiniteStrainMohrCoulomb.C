@@ -199,7 +199,6 @@ FiniteStrainMohrCoulomb::dyieldFunction_dintnl(const RankTwoTensor & stress, con
     Real kk = aaa + bbb*sin3Lode + ccc*std::pow(sin3Lode, 2);
     Real dkk = (daaa + dbbb*sin3Lode + dccc*std::pow(sin3Lode, 2))*dsin_angle;
     Real sibar2 = stress.secondInvariant();
-    RankTwoTensor dsibar2 = stress.dsecondInvariant();
     Real denom = std::sqrt(_small_smoother2 + sibar2*std::pow(kk, 2));
     df_dintnl[0].assign(1, mean_stress*dsin_angle + sibar2*kk*dkk/denom - dcohesion(intnl[0])*cos_angle - cohesion(intnl[0])*dcos_angle);
   }
