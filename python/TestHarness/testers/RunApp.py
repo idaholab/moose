@@ -26,6 +26,7 @@ class RunApp(Tester):
     params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
     params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
     params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
+    params.addParam('allow_warning',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
 
     # Valgrind
     params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
@@ -69,7 +70,7 @@ class RunApp(Tester):
     else:
       default_ncpus = options.parallel
 
-    if options.error:
+    if options.error and not specs["allow_warning"]:
       specs['cli_args'].append('--error')
 
     timing_string = ' '
