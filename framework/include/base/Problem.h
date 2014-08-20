@@ -88,6 +88,17 @@ public:
 
   const std::vector<TimePeriod *> & getTimePeriods() const;
 
+  /**
+   * Allow objects to request clean termination of the solve
+   */
+  virtual void terminateSolve() { _termination_requested = true; };
+
+  /**
+   * Check of termination has been requested. This should be called by
+   * transient Executioners in the keepGoing() member.
+   */
+  virtual bool isSolveTerminationRequested() { return _termination_requested; };
+
 protected:
   /// Time periods
   std::vector<TimePeriod *> _time_periods;
@@ -97,6 +108,9 @@ protected:
 
   /// True if we're going to attempt to write color output
   bool _color_output;
+
+  /// True if termination of the solve has been requested
+  bool _termination_requested;
 };
 
 #endif /* PROBLEM_H */
