@@ -11,6 +11,11 @@ namespace MathUtils
     return std::floor(x > 0.0 ? (x + 0.5) : (x - 0.5));
   }
 
+  inline Real sign(Real x)
+  {
+    return x >= 0.0 ? 1.0 : -1.0;
+  }
+
   inline Real poly1Log(Real x, Real tol, int deriv)
   {
     Real c1 = 1.0/tol;
