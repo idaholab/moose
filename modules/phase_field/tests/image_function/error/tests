@@ -4,7 +4,7 @@
     type = RunException
     input = check_error.i
     cli_args = Functions/tif/file_type=bmp
-    expect_err = "Invalid option \"BMP\" in MooseEnum.  Valid options are \"png, tif, tiff\""
+    expect_err = "Invalid option \"BMP\" in MooseEnum.  Valid options \(not case-sensitive\) are \"png tif tiff\"."
     vtk = true
   [../]
   [./file_range]

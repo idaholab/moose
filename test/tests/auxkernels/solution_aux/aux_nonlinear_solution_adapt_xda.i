@@ -78,7 +78,7 @@
     system = aux0
     mesh = aux_nonlinear_solution_adapt_out_0004_mesh.xda
     es = aux_nonlinear_solution_adapt_out_0004.xda
-    elemental_variables = u_aux
+    system_variables = u_aux
     execute_on = initial
   [../]
   [./xda_u]
@@ -86,7 +86,7 @@
     system = nl0
     mesh = aux_nonlinear_solution_adapt_out_0004_mesh.xda
     es = aux_nonlinear_solution_adapt_out_0004.xda
-    nodal_variables = u
+    system_variables = u
     execute_on = initial
   [../]
 []
