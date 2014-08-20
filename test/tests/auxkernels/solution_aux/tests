@@ -3,12 +3,14 @@
     type = 'Exodiff'
     input = 'solution_aux.i'
     exodiff = 'solution_aux_out.e'
+    allow_warning = true
   [../]
 
   [./direct]
     type = 'Exodiff'
     input = 'solution_aux_direct.i'
     exodiff = 'solution_aux_direct_out.e'
+    allow_warning = true
   [../]
 
   [./exodus]
@@ -91,6 +93,7 @@
     type = 'Exodiff'
     input = 'solution_aux_scale.i'
     exodiff = 'solution_aux_scale_out.e'
+    allow_warning = true
   [../]
 
   [./aux_nonlinear_solution]
