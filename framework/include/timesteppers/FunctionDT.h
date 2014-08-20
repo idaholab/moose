@@ -38,17 +38,16 @@ public:
 protected:
   virtual Real computeInitialDT();
   virtual Real computeDT();
+  virtual bool constrainStep( Real & dt );
 
+private:
   void removeOldKnots();
 
-  const std::vector<Real> & _time_t;
+  std::set<Real> _time_t;
   /// Piecewise linear definition of time stepping
   LinearInterpolation _time_ipol;
   Real _growth_factor;
-  /// True if cut back of the time step occurred
-  bool _cutback_occurred;
   Real _min_dt;
-  std::vector<Real> _time_knots;
 };
 
 #endif /* FUNCTIONDT_H_ */
