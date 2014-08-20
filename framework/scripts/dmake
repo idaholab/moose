@@ -68,14 +68,14 @@ def runMake(distcc_hosts, jobs, **kwargs):
     make_dir = getMakeDirectory()
 
   # Run make
-  strt = time.clock()
+  strt = time.time()
   sub = subprocess.Popen(make, cwd=make_dir)
 
   # Wait for process to terminate
   sub.wait()
 
   # Print the make durration
-  t = time.clock() - strt
+  t = time.time() - strt
   print 'Make Execution Time: ' + str(t) + ' sec.'
 
 
