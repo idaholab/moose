@@ -69,6 +69,9 @@ class RunApp(Tester):
     else:
       default_ncpus = options.parallel
 
+    if options.error:
+      specs['cli_args'].append('--error')
+
     timing_string = ' '
     if options.timing:
       specs['cli_args'].append('--timing')
