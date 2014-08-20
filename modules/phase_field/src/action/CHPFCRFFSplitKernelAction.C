@@ -15,8 +15,7 @@ InputParameters validParams<CHPFCRFFSplitKernelAction>()
   MooseEnum log_options("tolerance cancelation expansion");
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");
-  params.addParam<Real>("n_exp_terms", 4, "Number of terms used in the Taylor expansion of the natural log term");
-
+  params.addParam<Real>("n_exp_terms", 4.0, "Number of terms used in the Taylor expansion of the natural log term");
   return params;
 }
 
@@ -54,7 +53,6 @@ CHPFCRFFSplitKernelAction::act()
     L_name.append(out.str());
     L_name.append("_real");
     real_v[l] = L_name;
-    // _console << "real_v[" << l << "] = " << L_name << std::endl;
   }
 
   poly_params = _factory.getValidParams("CHPFCRFF");
@@ -67,10 +65,9 @@ CHPFCRFFSplitKernelAction::act()
 
   _problem->addKernel("CHPFCRFF", "CH_bulk_n", poly_params);
 
-
   // Loop over the L_variables
-  // \todo This looks like it is not done yetß
-  for (unsigned int l = 0; l<_num_L; l++)
+  // \todo This looks like it is not done yet
+  for (unsigned int l = 0; l < _num_L; ++l)
   {
     // Create L base name
     std::string L_name = _L_name_base;

@@ -3,7 +3,7 @@
 
 #include "Action.h"
 
-//Forward Declarations
+// Forward Declarations
 class CHPFCRFFSplitKernelAction;
 
 template<>
