@@ -40,7 +40,7 @@
 [Functions]
   [./vertical_movement]
     type = ParsedFunction
-    value = -t + 0.1
+    value = -t
   [../]
   [./horizontal_movement]
     type = ParsedFunction
