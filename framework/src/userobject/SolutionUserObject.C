@@ -35,6 +35,8 @@ InputParameters validParams<SolutionUserObject>()
   params.addRequiredParam<MeshFileName>("mesh", "The name of the mesh file (must be xda or exodusII file).");
   params.addParam<std::vector<std::string> >("system_variables", std::vector<std::string>(),
                                              "The name of the nodal and elemental variables from the file you want to use for values");
+  params.addDeprecatedParam<std::vector<std::string> >("nodal_variables", "Nodal variables", "Use 'system_variables' for all variable names, both nodal and elemental");
+  params.addDeprecatedParam<std::vector<std::string> >("elemental_variables", "Elemental variables", "Use 'system_variables' for all variable names, both nodal and elemental");
 
   // When using XDA files the following must be defined
   params.addParam<FileName>("es", "The name of the file holding the equation system info in xda format (xda only).");
@@ -103,11 +105,24 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _initialized(false),
     _legacy_read(getParam<bool>("legacy_read"))
 {
+
+  // Handle deprecated parameters
+  if (isParamValid("nodal_variables"))
+  {
+    std::vector<std::string> vars = getParam<std::vector<std::string> >("nodal_variables");
+    _system_variables.insert(_system_variables.end(), vars.begin(), vars.end());
+  }
+
+  if (isParamValid("elemental_variables"))
+  {
+    std::vector<std::string> vars = getParam<std::vector<std::string> >("elemental_variables");
+    _system_variables.insert(_system_variables.end(), vars.begin(), vars.end());
+  }
+
   if (_legacy_read)
     mooseWarning("The input parameter 'legacy_read' is deprecated.\nThis option is for legacy support and will be removed on 10/1/2014.\nThe xda/xdr files being read should be regenerated and the flag removed.");
 
-  //_exec_flags = EXEC_INITIAL;
-
+  // Extract coordinate transformation
   if (parameters.isParamValid("coord_scale"))
   {
     mooseWarning("Parameter name coord_scale is deprecated.  Please use scale instead.");
