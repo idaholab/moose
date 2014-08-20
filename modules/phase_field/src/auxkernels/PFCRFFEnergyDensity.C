@@ -30,25 +30,25 @@ PFCRFFEnergyDensity::PFCRFFEnergyDensity(const std::string& name,
 
 {
   _vals.resize(_order);
-  for (unsigned int i=0; i < _order; ++i)
+  for (unsigned int i = 0; i < _order; ++i)
     _vals[i] = &coupledValue("v", i);
 }
 
 Real
 PFCRFFEnergyDensity::computeValue()
 {
-  Real val = 0;
+  Real val = 0.0;
   switch (_log_approach)
   {
     case 0: //approach using tolerence
       if (1.0 + (*_vals[0])[_qp] < _tol)
-        val += ((1 + _tol)*std::log(1 + _tol)) - _tol;
+        val += ((1.0 + _tol) * std::log(1 + _tol)) - _tol;
       else
-        val += ((1 + (*_vals[0])[_qp])*std::log(1 + (*_vals[0])[_qp])) - (*_vals[0])[_qp];
+        val += ((1.0 + (*_vals[0])[_qp]) * std::log(1 + (*_vals[0])[_qp])) - (*_vals[0])[_qp];
       break;
 
     case 1: //approach using cancellation
-      val += ((1 + (*_vals[0])[_qp])*std::log(1 + (*_vals[0])[_qp])) - (*_vals[0])[_qp];
+      val += ((1.0 + (*_vals[0])[_qp]) * std::log(1.0 + (*_vals[0])[_qp])) - (*_vals[0])[_qp];
       break;
 
     case 2: //approach using Taylor Series Expansion
@@ -65,7 +65,7 @@ PFCRFFEnergyDensity::computeValue()
         else
           coef = 1.0;
 
-        val += coef*(pow(-1.0,i)/(i*(i - 1)))*pow((*_vals[0])[_qp],i);
+        val += coef * (std::pow(-1.0, Real(i)) / (i * (i-1))) * std::pow((*_vals[0])[_qp], Real(i));
       }
       break;
   }
@@ -74,9 +74,9 @@ PFCRFFEnergyDensity::computeValue()
   // Loop Through Variables
   Real sumL = 0.0;
   for (unsigned int i = 1; i < _order; ++i)
-    sumL += (*_vals[i])[_qp]*0.5;
+    sumL += (*_vals[i])[_qp] * 0.5;
 
-  val -= ((*_vals[0])[_qp]*sumL);
+  val -= ((*_vals[0])[_qp] * sumL);
 
   return val;
 }
