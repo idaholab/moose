@@ -101,7 +101,7 @@ KKSSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
     return _phi[_j][_qp] * _test[_i][_qp] * _second_derivative_Fa[_qp]; // OK
 
   if (jvar == _cb_var)
-    //return _phi[_j][_qp] * _test[_i][_qp] * _second_derivative_Fb[_qp]; // PetSc fd wants this to be 0.0. Why?
+    // return _phi[_j][_qp] * _test[_i][_qp] * _second_derivative_Fb[_qp]; // PetSc fd wants this to be 0.0. Why?
     return 0.0;
 
   return 0.0; // OK

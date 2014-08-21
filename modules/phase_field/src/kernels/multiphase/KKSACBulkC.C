@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<KKSACBulkC>()
 {
   InputParameters params = validParams<KKSACBulkBase>();
-  //params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order parameter 'eta' as the non-linear variable");
+  // params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order parameter 'eta' as the non-linear variable");
   params.addRequiredCoupledVar("ca", "a-phase concentration");
   params.addRequiredCoupledVar("cb", "b-phase concentration");
   return params;

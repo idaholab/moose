@@ -16,7 +16,7 @@ InputParameters validParams<KKSAction>()
 
 KKSAction::KKSAction(const std::string & name, InputParameters params) :
     Action(name, params)
-    //_z2(getParam<Real>("z2"))
+    // _z2(getParam<Real>("z2"))
 {
 }
 
@@ -33,7 +33,7 @@ KKSAction::act()
     poly_params.set<Real>("y2") = _y2;
     poly_params.set<Real>("z2") = _z2;
 
-    //Add initial condition
+    // Add initial condition
     _problem->addInitialCondition("BoundingBoxIC", "InitialCondition", poly_params);
   */
 }

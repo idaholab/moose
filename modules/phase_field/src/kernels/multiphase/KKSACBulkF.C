@@ -4,7 +4,7 @@ template<>
 InputParameters validParams<KKSACBulkF>()
 {
   InputParameters params = validParams<KKSACBulkBase>();
-  //params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order parameter 'eta' as the non-linear variable");
+  // params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order parameter 'eta' as the non-linear variable");
   params.addRequiredParam<Real>("w", "Double well height parameter");
   params.addParam<std::string>("g_name", "g", "Base name for the double well function g(eta)");
   return params;
