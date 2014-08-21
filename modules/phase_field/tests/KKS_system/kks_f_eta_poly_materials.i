@@ -84,6 +84,14 @@
     eta = eta1
     outputs = exodus
   [../]
+
+  [./g_eta2]
+    type = KKSGEtaPolyMaterial
+    block = 0
+    g_order = LOW
+    eta = eta2
+    outputs = exodus
+  [../]
 []
 
 [Kernels]
