@@ -230,8 +230,6 @@ Transient::execute()
     if (_first != true)
       incrementStepOrReject();
 
-    _first = false;
-
     if (!keepGoing())
     {
       _output_warehouse.outputFinal();
@@ -245,6 +243,8 @@ Transient::execute()
     endStep();
 
     _steps_taken++;
+
+    _first = false;
   }
 
 
@@ -290,7 +290,27 @@ Transient::takeStep(Real input_dt)
     if (_picard_max_its > 1)
       _console << "Beginning Picard Iteration " << _picard_it << "\n" << std::endl;
 
-    solveStep(input_dt);
+#ifdef LIBMESH_ENABLE_AMR
+    if (_first)
+    {
+      if (_problem.adaptivity().isOn())
+      {
+        unsigned int steps = _problem.adaptivity().getSteps();
+        for (unsigned int r_step=0; r_step<=steps; r_step++)
+        {
+          solveStep(input_dt);
+          if (r_step != steps)
+          {
+            _problem.adaptMesh();
+          }
+        }
+      }
+      else
+        solveStep(input_dt);
+    }
+    else
+#endif
+      solveStep(input_dt);
   }
 }
 
