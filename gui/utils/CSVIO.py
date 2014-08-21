@@ -36,7 +36,7 @@ class PeacockErrorInterface:
     return self._last_error_message
 
 class PeacockTestInterface:
-  def __init__(self):
+  def __init__(self, **kwargs):
     pass
 
   def test(self):
@@ -63,11 +63,11 @@ class PeacockTestInterface:
       if item.startswith(prefix):
         print "Non-static"
         name = item.replace(prefix, '')
-        attr = getattr(self, '__test'+name)
+        attr = getattr(self, '_test'+name)
         result = attr()
-        self.__showResult(name, result)
+        self._showResult(name, result)
 
-  def __showResult(self, name, result):
+  def _showResult(self, name, result):
 
     print 'result = ', result
 
@@ -91,7 +91,7 @@ class PeacockTestInterface:
 class CSVIO(object, PeacockErrorInterface, PeacockTestInterface):
   def __init__(self, filename, **kwargs):
     PeacockErrorInterface.__init__(self, **kwargs)
-    PeacockTestInterface.__init__(self)
+    PeacockTestInterface.__init__(self, **kwargs)
 
 
     # Initialize member variables
@@ -133,8 +133,6 @@ class CSVIO(object, PeacockErrorInterface, PeacockTestInterface):
       self.peacockError('No data for key \'' + key + '\' located', dialog=False)
       return None
 
-
-  def _testDataAccess():
     data = CSVIO('test.csv', testing=True)
     return data['data1'] == [1.1, 4.2, 431.353]
 
