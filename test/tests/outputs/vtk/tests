@@ -1,4 +1,4 @@
-[Tests]
+cd[Tests]
   [./files_serial]
     # Check that the files are being created (serial)
     type = 'CheckFiles'
@@ -28,12 +28,11 @@
   [./diff_serial_mesh_parallel]
     # Check that actual solution, in parallel with serial mesh
     type = VTKDiff
-    vtkdiff = 'vtk_diff_serial_mesh_out_005.vtk vtk_diff_serial_mesh_out_005_0.vtu vtk_diff_serial_mesh_out_005_1.vtu'
-    input = vtk_diff.i
+    vtkdiff = 'vtk_diff_serial_mesh_parallel_out_005.vtk vtk_diff_serial_mesh_parallel_out_005_0.vtu vtk_diff_serial_mesh_parallel_out_005_1.vtu'
+    input = vtk_diff_serial_mesh_parallel.i
     max_parallel = 2
     min_parallel = 2
     vtk = true
-    cli_args = Outputs/file_base=vtk_diff_serial_mesh_out
     mesh_mode = SERIAL
     compiler = CLANG
   [../]
