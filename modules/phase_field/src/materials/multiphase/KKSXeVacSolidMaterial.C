@@ -26,9 +26,9 @@ KKSXeVacSolidMaterial::cLogC(Real c) {
   return c==0.0 ? 0.0 : c * std::log(c);
 }
 
-// / Fm(cmg,cmv,T) takes three arguments
+// / Fm(cmg,cmv) takes three arguments
 unsigned int
-KKSXeVacSolidMaterial::expectedNumArgs() { return 3; }
+KKSXeVacSolidMaterial::expectedNumArgs() { return 2; }
 
 // Free energy value
 Real

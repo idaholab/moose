@@ -22,4 +22,10 @@
     input = 'kks_example_split.i'
     exodiff = 'kks_example_split.e'
   [../]
+
+  [./kks_xevac]
+    type = 'Exodiff'
+    input = 'kks_xevac.i'
+    exodiff = 'kks_xevac.e'
+  [../]
 []
