@@ -80,3 +80,10 @@ class PeacockErrorInterface:
   # @return A list of strings containing the error messages
   def getAllErrorMessages(self):
     return self._all_error_messages
+
+  ##
+  # Test that the last error message is the same as the message passed in
+  # @param msg The message to test
+  # @return True if the last error and the message supplied are the same
+  def testLastErrorMessage(self, msg):
+    return self._last_error_message == msg
