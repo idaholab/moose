@@ -8,10 +8,10 @@
   nx = 15
   ny = 15
   nz = 0
-  xmin = 0
-  xmax = 5
-  ymin = 0
-  ymax = 5
+  xmin = -2.5
+  xmax = 2.5
+  ymin = -2.5
+  ymax = 2.5
   zmin = 0
   zmax = 0
   elem_type = QUAD4
@@ -59,43 +59,34 @@
 
 [ICs]
   [./eta]
-    type = RandomIC
     variable = eta
-    min = 0.1
-    max = 0.2
+    type = SmoothCircleIC
+    x1 = 0.0
+    y1 = 0.0
+    radius = 1.5
+    invalue = 0.2
+    outvalue = 0.1
+    int_width = 0.75
     block = 0
   [../]
   [./c]
-    type = RandomIC
     variable = c
-    min = 0.4
-    max = 0.6
+    type = SmoothCircleIC
+    x1 = 0.0
+    y1 = 0.0
+    radius = 1.5
+    invalue = 0.6
+    outvalue = 0.4
+    int_width = 0.75
     block = 0
   [../]
 []
 
+
 [BCs]
   [./Periodic]
-    #active = 'cm cd'
-
-    [./eta]
-      variable = eta
-      auto_direction = 'x y'
-    [../]
-    [./w]
-      variable = w
-      auto_direction = 'x y'
-    [../]
-    [./c]
-      variable = c
-      auto_direction = 'x y'
-    [../]
-    [./cm]
-      variable = cm
-      auto_direction = 'x y'
-    [../]
-    [./cd]
-      variable = cd
+    [./all]
+      variable = 'eta w c cm cd'
       auto_direction = 'x y'
     [../]
   [../]
@@ -239,10 +230,7 @@
   nl_max_its = 100
   num_steps = 3
 
-  [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
-    dt = 0.1
-  [../]
+  dt = 0.1
 []
 
 #
@@ -259,7 +247,6 @@
 [Outputs]
   file_base = kks_example_split
   output_initial = true
-  interval = 1
   exodus = true
 
   [./console]

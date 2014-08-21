@@ -5,13 +5,13 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 30
-  ny = 30
+  nx = 5
+  ny = 5
   nz = 0
-  xmin = 0
-  xmax = 10
-  ymin = 0
-  ymax = 10
+  xmin = -0.5
+  xmax = 0.5
+  ymin = -0.5
+  ymax = 0.5
   zmin = 0
   zmax = 0
   elem_type = QUAD4
@@ -46,37 +46,33 @@
 
 [ICs]
   [./eta]
-    type = RandomIC
     variable = eta
-    min = 0.1
-    max = 0.2
+    type = SmoothCircleIC
+    x1 = 0.0
+    y1 = 0.0
+    radius = 0.2
+    invalue = 0.2
+    outvalue = 0.1
+    int_width = 0.05
     block = 0
   [../]
   [./c]
-    type = RandomIC
     variable = c
-    min = 0.4
-    max = 0.6
+    type = SmoothCircleIC
+    x1 = 0.0
+    y1 = 0.0
+    radius = 0.2
+    invalue = 0.6
+    outvalue = 0.4
+    int_width = 0.05
     block = 0
   [../]
 []
 
 [BCs]
   [./Periodic]
-    [./eta]
-      variable = eta
-      auto_direction = 'x y'
-    [../]
-    [./c]
-      variable = c
-      auto_direction = 'x y'
-    [../]
-    [./cm]
-      variable = cm
-      auto_direction = 'x y'
-    [../]
-    [./cd]
-      variable = cd
+    [./all]
+      variable = 'eta c cm cd'
       auto_direction = 'x y'
     [../]
   [../]
@@ -90,7 +86,7 @@
     f_name = fm
     args = 'cm'
     function = '(0.1-cm)^2'
-    outputs = exodus
+    outputs = oversampling
   [../]
 
   # Free energy of the delta phase
@@ -100,7 +96,7 @@
     f_name = fd
     args = 'cd'
     function = '(0.9-cd)^2'
-    outputs = exodus
+    outputs = oversampling
   [../]
 
   # h(eta)
@@ -109,7 +105,7 @@
     block = 0
     h_order = HIGH
     eta = eta
-    outputs = exodus
+    outputs = oversampling
   [../]
 
   # g(eta)
@@ -118,7 +114,7 @@
     block = 0
     g_order = SIMPLE
     eta = eta
-    outputs = exodus
+    outputs = oversampling
   [../]
 
   # constant properties
@@ -131,9 +127,6 @@
 []
 
 [Kernels]
-  # full transient
-  active = 'PhaseConc ChemPotVacancies CHBulk ACBulkF ACBulkC ACInterface dcdt detadt'
-
   # enforce c = (1-h(eta))*cm + h(eta)*cd
   [./PhaseConc]
     type = KKSPhaseConcentration
@@ -162,7 +155,6 @@
     cb       = cd
     fa_name  = fm
     fb_name  = fd
-    eta      = eta
   [../]
   [./dcdt]
     type = TimeDerivative
@@ -204,13 +196,11 @@
 
   l_max_its = 100
   nl_max_its = 100
+  nl_rel_tol = 1e-4
 
-  num_steps = 3
+  num_steps = 1
 
-  [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
-    dt = 0.1
-  [../]
+  dt = 0.01
 []
 
 #
@@ -228,8 +218,13 @@
 [Outputs]
   file_base = kks_example
   output_initial = true
-  interval = 1
-  exodus = true
+
+  [./oversampling]
+    type = Exodus
+    refinements = 3
+    output_initial = true
+    oversample = true
+  [../]
 
   [./console]
     type = Console

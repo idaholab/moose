@@ -3,23 +3,23 @@
     type = 'Exodiff'
     input = 'kks_f_eta_poly_materials.i'
     exodiff = 'kks_f_eta_poly_materials.e'
-    abs_zero = 6e-08
-    group = 'adaptive'
   [../]
 
   [./derivative_parsed_material]
     type = 'Exodiff'
     input = 'derivative_parsed_material.i'
     exodiff = 'derivative_parsed_material.e'
-    abs_zero = 6e-08
-    group = 'adaptive'
+  [../]
+
+  [./kks_example]
+    type = 'Exodiff'
+    input = 'kks_example.i'
+    exodiff = 'kks_example.e'
   [../]
 
   [./kks_example_split]
     type = 'Exodiff'
     input = 'kks_example_split.i'
     exodiff = 'kks_example_split.e'
-    abs_zero = 6e-08
-    group = 'adaptive'
   [../]
 []
