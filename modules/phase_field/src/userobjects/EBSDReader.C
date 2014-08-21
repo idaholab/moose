@@ -232,7 +232,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
       averaged_data[7] = _avg_sym[i];
     }
 
-    //Set up domain bounds with mesh tools
+    // Set up domain bounds with mesh tools
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       _bottom_left(i) = _mesh.getMinInDimension(i);
@@ -240,11 +240,11 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     }
     _range = _top_right - _bottom_left;
 
-    //Output error message if number of order parameters is larger than number of grains from EBSD dataset
+    // Output error message if number of order parameters is larger than number of grains from EBSD dataset
     if (_op_num > _grain_num)
       mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
 
-    //Assign grains to each order parameter in a way that maximizes distance
+    // Assign grains to each order parameter in a way that maximizes distance
     _assigned_op.resize(_grain_num);
     for (unsigned int grain=0; grain < _grain_num; ++grain)
     {
@@ -253,7 +253,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
       min_op_ind.resize(_op_num);
       min_op_dist.resize(_op_num);
 
-      //Determine the distance to the closest center assigned to each order parameter
+      // Determine the distance to the closest center assigned to each order parameter
       if (grain >= _op_num)
       {
         std::fill(min_op_dist.begin() , min_op_dist.end(), _range.size());
@@ -268,7 +268,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
         }
       }
 
-      //Assign the current center point to the order parameter that is furthest away.
+      // Assign the current center point to the order parameter that is furthest away.
       Real mx;
       if (grain < _op_num)
         _assigned_op[grain] = grain;
@@ -276,7 +276,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
       {
         mx = 0.0;
         unsigned int mx_ind = 1e6;
-        for (unsigned int i = 0; i < _op_num; ++i) //Find index of max
+        for (unsigned int i = 0; i < _op_num; ++i) // Find index of max
           if (mx < min_op_dist[i])
           {
             mx = min_op_dist[i];
