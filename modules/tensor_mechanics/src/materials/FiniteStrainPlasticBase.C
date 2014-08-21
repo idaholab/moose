@@ -69,15 +69,7 @@ FiniteStrainPlasticBase::initQpStatefulProperties()
     if (_ic_tol[a] <= 0)
       mooseError("The internal_constraint_tolerance must be positive");
 
-  // Andy is not sure of "old" initialisation for stress, total_strain and elastic_strain
-  _stress[_qp].zero();
-  _stress_old[_qp].zero();
-
-  _total_strain[_qp].zero();
-  _total_strain_old[_qp].zero();
-
-  _elastic_strain[_qp].zero();
-  _elastic_strain_old[_qp].zero();
+  FiniteStrainMaterial::initQpStatefulProperties();
 
   _plastic_strain[_qp].zero();
   _plastic_strain_old[_qp].zero();
