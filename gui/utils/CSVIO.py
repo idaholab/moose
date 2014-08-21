@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from PySide import QtCore, QtGui
 import csv
 
@@ -42,39 +44,30 @@ class PeacockTestInterface:
   def test(self):
 
     class_name = self.__class__.__name__
-    static_prefix = '_' + class_name + '__test'
-    prefix = '__test'
-
-    print dir(self)
-
+    prefix = '_test'
     for item in dir(self):
       name = None
-
-      print item
-
-      # static
-      if item.startswith(static_prefix):
-        print "Static"
-        name = item.replace(static_prefix, '')
-        attr = getattr(self, item)
-        self.__showResult(name, attr)
-
-
       if item.startswith(prefix):
-        print "Non-static"
         name = item.replace(prefix, '')
-        attr = getattr(self, '_test'+name)
-        result = attr()
-        self._showResult(name, result)
+        attr = getattr(self, prefix+name)
+        args = attr.func_code.co_argcount
+        if args == 1:
+          self._showResult(name, attr())
+        elif args == 0:
+          self._showResult(name, attr)
+        else:
+          self._showResult(name, False, prefix+name + ' cannot accept arguments')
+          return
 
-  def _showResult(self, name, result):
 
-    print 'result = ', result
-
+  def _showResult(self, name, result, *args):
     if result:
       result = 'OK'
     else:
       result = 'FAIL'
+      if len(args) == 1 and isinstance(args[0], str) and len(args[0]) > 0 :
+        result += ' (' + args[0] + ')'
+
 
 
     name = self.__class__.__name__ + '/' + name
@@ -133,13 +126,16 @@ class CSVIO(object, PeacockErrorInterface, PeacockTestInterface):
       self.peacockError('No data for key \'' + key + '\' located', dialog=False)
       return None
 
+  def _testDataRead():
     data = CSVIO('test.csv', testing=True)
     return data['data1'] == [1.1, 4.2, 431.353]
 
   def _testDataError(self):
-    data['ThisDoeNotExist']
-    print self.getLastErrorMessage()
-    return self.getLastErrorMessage() == 'No data for key \'ThisDoeNotExist\' loated'
+    data['ThisDoesNotExist']
+    return self.getLastErrorMessage() == 'No data for key \'ThisDoesNotExist\' located'
+
+  def _testNope(self, input):
+    print input
 
 
 # Perform testing
@@ -147,5 +143,3 @@ if __name__ == "__main__":
 
   data = CSVIO('test.csv', testing=True)
   data.test()
-
-  print data.getLastErrorMessage()
