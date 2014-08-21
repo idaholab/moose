@@ -60,7 +60,6 @@
 []
 
 [Adaptivity]
-  steps = 1
   marker = box
   max_h_level = 2
   initial_steps = 4
