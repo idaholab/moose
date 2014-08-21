@@ -84,7 +84,7 @@
   [./quad]
     type = TransientMultiApp
     app_type = MooseTestApp
-    positions = '0.1 0.1 0 0.9 0.1 0 0.1 0.9 0 0.9 0.9 0'
+    positions = '0.05 0.05 0 0.95 0.05 0 0.05 0.95 0 0.95 0.95 0'
     input_files = quad_sub.i
   [../]
 []
