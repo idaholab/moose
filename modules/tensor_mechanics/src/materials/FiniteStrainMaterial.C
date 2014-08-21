@@ -25,9 +25,12 @@ FiniteStrainMaterial::FiniteStrainMaterial(const std::string & name,
 void
 FiniteStrainMaterial::initQpStatefulProperties()
 {
-  _total_strain[_qp].zero();
-  _elastic_strain[_qp].zero();
-  _stress[_qp].zero();
+  TensorMechanicsMaterial::initQpStatefulProperties(); // initialises stress, total_strain and elastic_strain
+
+  _stress_old[_qp] = _stress[_qp];
+  _total_strain_old[_qp] = _total_strain[_qp];
+  _elastic_strain_old[_qp] = _elastic_strain[_qp];
+
 }
 
 void
