@@ -68,7 +68,7 @@ ReconVarIC::initialSetup()
     // Moose::out << _centerpoints[i] << "\n" << std::endl;
   }
 
-  //Set up domain bounds with mesh tools
+  // Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
   {
     _bottom_left(i) = _mesh.getMinInDimension(i);
@@ -76,11 +76,11 @@ ReconVarIC::initialSetup()
   }
   _range = _top_right - _bottom_left;
 
-  //Output error message if number of order parameters is larger than number of grains from EBSD dataset
+  // Output error message if number of order parameters is larger than number of grains from EBSD dataset
   if (_op_num > _grain_num)
      mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
 
-  //Assign grains to each order parameter in a way that maximizes distance
+  // Assign grains to each order parameter in a way that maximizes distance
   _assigned_op.resize(_grain_num);
   for (unsigned int grain=0; grain < _grain_num; grain++)
   {
@@ -89,7 +89,7 @@ ReconVarIC::initialSetup()
     min_op_ind.resize(_op_num);
     min_op_dist.resize(_op_num);
 
-      //Determine the distance to the closest center assigned to each order parameter
+      // Determine the distance to the closest center assigned to each order parameter
     if (grain >= _op_num)
     {
       std::fill(min_op_dist.begin() , min_op_dist.end(), _range.size());
@@ -104,7 +104,7 @@ ReconVarIC::initialSetup()
       }
     }
 
-    //Assign the current center point to the order parameter that is furthest away.
+    // Assign the current center point to the order parameter that is furthest away.
     Real mx;
     if (grain < _op_num)
         _assigned_op[grain] = grain;
@@ -112,7 +112,7 @@ ReconVarIC::initialSetup()
     {
       mx = 0.0;
       unsigned int mx_ind = 1e6;
-      for (unsigned int i = 0; i < _op_num; i++) //Find index of max
+      for (unsigned int i = 0; i < _op_num; i++) // Find index of max
         if (mx < min_op_dist[i])
         {
           mx = min_op_dist[i];
@@ -120,8 +120,8 @@ ReconVarIC::initialSetup()
         }
       _assigned_op[grain] = mx_ind;
     }
-    //Moose::out << "For grain " << grain << ", center point = " << _centerpoints[grain](0) << " " << _centerpoints[grain](1) << "\n";
-    //Moose::out << "Max index is " << _assigned_op[grain] << ", with a max distance of " << mx << "\n";
+    // Moose::out << "For grain " << grain << ", center point = " << _centerpoints[grain](0) << " " << _centerpoints[grain](1) << "\n";
+    // Moose::out << "Max index is " << _assigned_op[grain] << ", with a max distance of " << mx << "\n";
   }
 }
 

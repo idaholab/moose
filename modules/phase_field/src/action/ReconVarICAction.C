@@ -52,7 +52,7 @@ ReconVarICAction::act()
       poly_params.applyParameters(_pars);
       poly_params.set<VariableName>("variable") = var_name;
       poly_params.set<unsigned int>("crys_index") = crys;
-      //poly_params.set<std::vector<VariableName> >("eta") = getParam<std::vector<VariableName> >("eta");
+      // poly_params.set<std::vector<VariableName> >("eta") = getParam<std::vector<VariableName> >("eta");
 
       // Add initial condition
       _problem->addInitialCondition("ReconVarIC", "Initialize_op", poly_params);
