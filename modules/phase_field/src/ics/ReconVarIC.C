@@ -39,7 +39,7 @@ ReconVarIC::initialSetup()
     _x[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("X"));
     _y[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("Y"));
     _z[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("Z"));
-    // Moose::out << "Element #, Grain #, X, Y, Z:  " << current_elem->id()  << "  " << _grn[index] << "  " << _x[index] << "  " << _y[index] << "  " << _z[index] <<< "\n" << std::endl;
+    // Moose::out << "Element #, Grain #, X, Y, Z:  " << current_elem->id()  << "  " << _grn[index] << "  " << _x[index] << "  " << _y[index] << "  " << _z[index] << "\n" << std::endl;
   }
 
   // Calculate centerpoint of each EBSD grain
