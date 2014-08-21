@@ -335,7 +335,7 @@ GrainTracker::buildBoundingSpheres()
     }
   }
 
-  Moose::out<< "\nTotal Node Count: " << total_node_count << "\n";
+  Moose::out << "\nTotal Node Count: " << total_node_count << "\n";
 }
 
 void
@@ -362,11 +362,11 @@ GrainTracker::trackGrains()
   {
     for (unsigned int map_num=0; map_num < _maps_size; ++map_num)
     {
-      Moose::out<< "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> " << _bubble_sets[map_num].size();
+      Moose::out << "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> " << _bubble_sets[map_num].size();
       if (map_sizes[map_num] != _bubble_sets[map_num].size())
-        Moose::out<< "**";
+        Moose::out << "**";
     }
-    Moose::out<< std::endl;
+    Moose::out << std::endl;
   }
 
   std::vector<UniqueGrain *> new_grains; new_grains.reserve(_unique_grains.size());
@@ -539,7 +539,7 @@ GrainTracker::trackGrains()
         }
         else
         {
-          Moose::out<< "Marking Grain " << curr_idx << " as INACTIVE (varible index: "
+          Moose::out << "Marking Grain " << curr_idx << " as INACTIVE (varible index: "
                     << _unique_grains[curr_idx]->variable_idx <<  ")\n";
           _unique_grains[curr_idx]->status = INACTIVE;
         }
@@ -572,7 +572,7 @@ GrainTracker::trackGrains()
   for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
     if (it->second->status == NOT_MARKED)
     {
-      Moose::out<< "Marking Grain " << it->first << " as INACTIVE (varible index: "
+      Moose::out << "Marking Grain " << it->first << " as INACTIVE (varible index: "
                     << it->second->variable_idx <<  ")\n";
       it->second->status = INACTIVE;
     }
@@ -599,7 +599,7 @@ GrainTracker::remapGrains()
   bool variables_remapped;
   do
   {
-    Moose::out<< "Remap Loop: " << ++times_through_loop << std::endl;
+    Moose::out << "Remap Loop: " << ++times_through_loop << std::endl;
 
     variables_remapped = false;
     for (std::map<unsigned int, UniqueGrain *>::iterator grain_it1 = _unique_grains.begin();
