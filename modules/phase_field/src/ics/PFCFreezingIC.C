@@ -20,7 +20,7 @@ InputParameters validParams<PFCFreezingIC>()
 
   params.addRequiredParam<Real>("lc", "The lattice constant off the crystal structure");
 
-  MooseEnum crystal_structures("FCC, BCC");
+  MooseEnum crystal_structures("FCC BCC");
   params.addParam<MooseEnum>("crystal_structure", crystal_structures,"The type of crystal structure");
 
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");

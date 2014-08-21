@@ -7,7 +7,7 @@ InputParameters validParams<CHPFCRFF>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("v", "Array of names of the real parts of the L variables");
-  MooseEnum log_options("tolerance, cancelation, expansion, nothing");
+  MooseEnum log_options("tolerance cancelation expansion nothing");
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");
   params.addParam<Real>("n_exp_terms", 4, "Number of terms used in the Taylor expansion of the natural log term");
@@ -54,9 +54,7 @@ CHPFCRFF::computeQpResidual()
   RealGradient sum_grad_L;
 
   for (unsigned int i = 0; i < _num_L; ++i)
-    sum_grad_L += (*_grad_vals[i])[_qp]*0.5;
-
-
+    sum_grad_L += (*_grad_vals[i])[_qp] * 0.5;
 
   Real frac;
   Real ln_expansion = 0.0;
@@ -110,7 +108,7 @@ CHPFCRFF::computeQpResidual()
       break;
   }
 
-  Real residual = _M[_qp]*GradDFDCons*_grad_test[_i][_qp];
+  Real residual = _M[_qp] * GradDFDCons * _grad_test[_i][_qp];
   return residual;
 }
 
@@ -122,8 +120,7 @@ CHPFCRFF::computeQpJacobian()
   RealGradient sum_grad_L;
 
   for (unsigned int i = 0; i < _num_L; ++i)
-    sum_grad_L += (*_grad_vals[i])[_qp]*0.5;
-
+    sum_grad_L += (*_grad_vals[i])[_qp] * 0.5;
 
   Real frac, dfrac;
   Real ln_expansion = 0.0;
@@ -133,19 +130,18 @@ CHPFCRFF::computeQpJacobian()
     case 0: // approach using tolerance
       if (1.0 + c < _tol)
       {
-        frac = 1.0/_tol;
-        dfrac = -1.0/(_tol*_tol);
+        frac = 1.0 / _tol;
+        dfrac = -1.0 / (_tol*_tol);
       }
       else
       {
-        frac = 1.0/(1.0 + c);
-        dfrac = -1.0/((1.0 + c)*(1.0 + c));
+        frac = 1.0 / (1.0 + c);
+        dfrac = -1.0 / ((1.0 + c) * (1.0 + c));
       }
       break;
 
     case 2:
-
-      for (unsigned int i=2; i<(_n_exp_terms + 2.0); ++i)
+      for (unsigned int i = 2; i < (_n_exp_terms + 2.0); ++i)
       {
         // Apply Coefficents to Taylor Series defined in input file
         Real temp_coeff;
@@ -158,7 +154,7 @@ CHPFCRFF::computeQpJacobian()
         else
           temp_coeff = 1.0;
 
-        ln_expansion += temp_coeff * std::pow(-1.0, Real(i)) * std::pow(_u[_qp], Real(i)-2.0);
+        ln_expansion += temp_coeff * std::pow(-1.0, Real(i)) * std::pow(_u[_qp], Real(i) - 2.0);
       }
       break;
   }
@@ -189,14 +185,14 @@ CHPFCRFF::computeQpJacobian()
         else
           temp_coeff = 1.0;
 
-        Dln_expansion += temp_coeff*std::pow((Real) -1, Real(i)) * (Real(i) - 2.0) * std::pow(_u[_qp], Real(i) - 3.0);
+        Dln_expansion += temp_coeff * std::pow((Real) - 1.0, Real(i)) * (Real(i) - 2.0) * std::pow(_u[_qp], Real(i) - 3.0);
       }
 
-      dGradDFDConsdC = ln_expansion*_grad_phi[_j][_qp] + _phi[_j][_qp]*Dln_expansion*grad_c;
+      dGradDFDConsdC = ln_expansion * _grad_phi[_j][_qp] + _phi[_j][_qp] * Dln_expansion * grad_c;
       break;
 
     case 3: // Nothing special
-      dGradDFDConsdC = _grad_phi[_j][_qp]/(1.0 + c) - grad_c/((1.0 + c)*(1.0 + c))*_phi[_j][_qp];
+      dGradDFDConsdC = _grad_phi[_j][_qp] / (1.0 + c) - grad_c / ((1.0 + c) * (1.0 + c)) * _phi[_j][_qp];
       break;
   }
 
@@ -208,11 +204,11 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real c = _u[_qp];
 
-  for (unsigned int i=0; i<_num_L; ++i)
+  for (unsigned int i = 0; i < _num_L; ++i)
     if (jvar == _vals_var[i])
     {
 
-      RealGradient dsum_grad_L = _grad_phi[_j][_qp]*0.5;
+      RealGradient dsum_grad_L = _grad_phi[_j][_qp] * 0.5;
       RealGradient dGradDFDConsdL;
       switch (_log_approach)
       {
@@ -221,7 +217,7 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
           break;
 
         case 1:  // approach using cancelation from the mobility
-          dGradDFDConsdL = -(1.0 + c)*dsum_grad_L;
+          dGradDFDConsdL = -(1.0 + c) * dsum_grad_L;
           break;
 
         case 2: // appraoch using substitution
@@ -233,7 +229,7 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
           break;
       }
 
-      return _M[_qp]*dGradDFDConsdL*_grad_test[_i][_qp];
+      return _M[_qp] * dGradDFDConsdL * _grad_test[_i][_qp];
     }
 
   return 0.0;

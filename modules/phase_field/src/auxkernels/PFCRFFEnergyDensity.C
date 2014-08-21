@@ -10,7 +10,7 @@ InputParameters validParams<PFCRFFEnergyDensity>()
    params.addParam<Real>( "b", 1.0, "Modified Coefficent in Taylor Series Expanstion");
    params.addParam<Real>( "c", 1.0, "Modified Coefficent in Taylor Series Expanstion");
    params.addParam<unsigned int>( "num_exp_terms", 4, "This is the number of terms to use in the taylor series expansion");
-   MooseEnum log_options("tolerance, cancelation, expansion, nothing");
+   MooseEnum log_options("tolerance cancelation expansion nothing");
    params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
    params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");
 
