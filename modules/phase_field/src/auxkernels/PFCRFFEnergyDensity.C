@@ -40,18 +40,18 @@ PFCRFFEnergyDensity::computeValue()
   Real val = 0.0;
   switch (_log_approach)
   {
-    case 0: //approach using tolerence
+    case 0: // approach using tolerence
       if (1.0 + (*_vals[0])[_qp] < _tol)
         val += ((1.0 + _tol) * std::log(1 + _tol)) - _tol;
       else
         val += ((1.0 + (*_vals[0])[_qp]) * std::log(1 + (*_vals[0])[_qp])) - (*_vals[0])[_qp];
       break;
 
-    case 1: //approach using cancellation
+    case 1: // approach using cancellation
       val += ((1.0 + (*_vals[0])[_qp]) * std::log(1.0 + (*_vals[0])[_qp])) - (*_vals[0])[_qp];
       break;
 
-    case 2: //approach using Taylor Series Expansion
+    case 2: // approach using Taylor Series Expansion
       Real coef = 1.0;
 
       for (unsigned int i = 2; i < (2+_num_exp_terms); i++)

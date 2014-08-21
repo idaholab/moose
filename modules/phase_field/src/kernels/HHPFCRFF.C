@@ -19,7 +19,7 @@ HHPFCRFF::HHPFCRFF(const std::string & name, InputParameters parameters) :
     _coupled_var(_has_coupled_var ? &coupledValue("coupled_var") : NULL),
     _coupled_var_var(_has_coupled_var ? coupled("coupled_var") : 0)
 {
-  //Set the sign of the kernel
+  // Set the sign of the kernel
   if (_positive)
     _kernel_sign = 1.0;
   else
@@ -29,7 +29,7 @@ HHPFCRFF::HHPFCRFF(const std::string & name, InputParameters parameters) :
 Real
 HHPFCRFF::precomputeQpResidual()
 {
-  //Assign value of the variable, whether coupled or not
+  // Assign value of the variable, whether coupled or not
   Real var;
   if (_has_coupled_var)
     var = (*_coupled_var)[_qp];

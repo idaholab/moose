@@ -63,7 +63,7 @@ CHPFCRFF::computeQpResidual()
 
   switch (_log_approach)
   {
-    case 0: //approach using tolerance
+    case 0: // approach using tolerance
       if (1.0 + c < _tol)
         frac = 1.0/_tol;
       else
@@ -93,19 +93,19 @@ CHPFCRFF::computeQpResidual()
 
   switch (_log_approach)
   {
-    case 0: //approach using tolerance
+    case 0: // approach using tolerance
       GradDFDCons = grad_c*frac - sum_grad_L;
       break;
 
-    case 1: //approach using cancelation from the mobility
+    case 1: // approach using cancelation from the mobility
       GradDFDCons = grad_c - (1.0 + c)*sum_grad_L;
       break;
 
-    case 2: //appraoch using substitution
+    case 2: // appraoch using substitution
       GradDFDCons = ln_expansion*grad_c - sum_grad_L;
       break;
 
-    case 3: //Just using the log
+    case 3: // Just using the log
       GradDFDCons = grad_c/(1.0 + c) - sum_grad_L;
       break;
   }
@@ -130,7 +130,7 @@ CHPFCRFF::computeQpJacobian()
 
   switch (_log_approach)
   {
-    case 0: //approach using tolerance
+    case 0: // approach using tolerance
       if (1.0 + c < _tol)
       {
         frac = 1.0/_tol;
@@ -168,15 +168,15 @@ CHPFCRFF::computeQpJacobian()
 
   switch (_log_approach)
   {
-    case 0: //approach using tolerance
+    case 0: // approach using tolerance
       dGradDFDConsdC = _grad_phi[_j][_qp]*frac + _phi[_j][_qp]*grad_c*dfrac;
       break;
 
-    case 1: //approach using cancelation from the mobility
+    case 1: // approach using cancelation from the mobility
       dGradDFDConsdC = _grad_phi[_j][_qp] - _phi[_j][_qp]*sum_grad_L;
       break;
 
-    case 2: //appraoch using substitution
+    case 2: // appraoch using substitution
       for (unsigned int i=2; i<(_n_exp_terms + 2.0); ++i)
       {
         Real temp_coeff;
@@ -195,7 +195,7 @@ CHPFCRFF::computeQpJacobian()
       dGradDFDConsdC = ln_expansion*_grad_phi[_j][_qp] + _phi[_j][_qp]*Dln_expansion*grad_c;
       break;
 
-    case 3: //Nothing special
+    case 3: // Nothing special
       dGradDFDConsdC = _grad_phi[_j][_qp]/(1.0 + c) - grad_c/((1.0 + c)*(1.0 + c))*_phi[_j][_qp];
       break;
   }
@@ -216,19 +216,19 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
       RealGradient dGradDFDConsdL;
       switch (_log_approach)
       {
-        case 0: //approach using tolerance
+        case 0: // approach using tolerance
           dGradDFDConsdL = -dsum_grad_L;
           break;
 
-        case 1:  //approach using cancelation from the mobility
+        case 1:  // approach using cancelation from the mobility
           dGradDFDConsdL = -(1.0 + c)*dsum_grad_L;
           break;
 
-        case 2: //appraoch using substitution
+        case 2: // appraoch using substitution
           dGradDFDConsdL = -dsum_grad_L;
           break;
 
-        case 3: //nothing special
+        case 3: // nothing special
           dGradDFDConsdL = -dsum_grad_L;
           break;
       }

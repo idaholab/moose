@@ -66,12 +66,12 @@ PFCFreezingIC::PFCFreezingIC(const std::string & name,
 Real
 PFCFreezingIC::value(const Point & p)
 {
-  //If out of bounds, set random value
+  // If out of bounds, set random value
   for (unsigned int i=0; i<LIBMESH_DIM; i++)
     if (p(i) < _bottom_left(i) || p(i) > _top_right(i))
       return _min + _val_range * MooseRandom::rand();
 
-  //If in bounds, set sinusoid IC to make atoms
+  // If in bounds, set sinusoid IC to make atoms
   Real val = 0.0;
   if (_crystal_structure == "FCC")
   {
@@ -86,7 +86,7 @@ PFCFreezingIC::value(const Point & p)
     if (_icdim > 2)
     {
       for (unsigned int i=0; i<_icdim; i++)
-        val += (std::cos((2.0/_lc*p(i%3))*libMesh::pi)*std::cos((2.0/_lc*p((i+1)%3))*libMesh::pi))/4.0; //Doesn't work in 2D
+        val += (std::cos((2.0/_lc*p(i%3))*libMesh::pi)*std::cos((2.0/_lc*p((i+1)%3))*libMesh::pi))/4.0; // Doesn't work in 2D
 
       val = val + 0.25;
     }

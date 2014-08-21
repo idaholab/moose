@@ -37,14 +37,14 @@ CHPFCRFFSplitKernelAction::act()
   Moose::err << "L name base:" << _L_name_base;
 #endif
 
-  //Create the two kernels required for the n_variable, starting with the time derivative
+  // Create the two kernels required for the n_variable, starting with the time derivative
   InputParameters poly_params = _factory.getValidParams("TimeDerivative");
   poly_params.set<NonlinearVariableName>("variable") = _n_name;
 
   _problem->addKernel("TimeDerivative", "IE_n", poly_params);
 
-  //Now the CHPFCRFF kernel
-  std::vector<VariableName> real_v; //First, we have to create the vector containing the names of the real L variables
+  // Now the CHPFCRFF kernel
+  std::vector<VariableName> real_v; // First, we have to create the vector containing the names of the real L variables
   real_v.resize(_num_L);
   for (unsigned int l = 0; l < _num_L; ++l)
   {
@@ -54,7 +54,7 @@ CHPFCRFFSplitKernelAction::act()
     L_name.append(out.str());
     L_name.append("_real");
     real_v[l] = L_name;
-    //_console << "real_v[" << l << "] = " << L_name << std::endl;
+    // _console << "real_v[" << l << "] = " << L_name << std::endl;
   }
 
   poly_params = _factory.getValidParams("CHPFCRFF");
@@ -68,11 +68,11 @@ CHPFCRFFSplitKernelAction::act()
   _problem->addKernel("CHPFCRFF", "CH_bulk_n", poly_params);
 
 
-  //Loop over the L_variables
+  // Loop over the L_variables
   // \todo This looks like it is not done yetß
   for (unsigned int l = 0; l<_num_L; l++)
   {
-    //Create L base name
+    // Create L base name
     std::string L_name = _L_name_base;
     std::stringstream out;
     out << l;

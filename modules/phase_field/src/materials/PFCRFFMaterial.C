@@ -39,13 +39,13 @@ PFCRFFMaterial::PFCRFFMaterial(const std::string & name,
 void
 PFCRFFMaterial::computeQpProperties()
 {
-  //Mobility
+  // Mobility
   _M[_qp] = 1.0;
 
-  //Alpha and A constants
+  // Alpha and A constants
   if (_num_L == 3)
   {
-    //alpha constants
+    // alpha constants
     _alpha_R_0[_qp] = 2.429134088464706;
     _alpha_I_0[_qp] =  0.0;
     _alpha_R_1[_qp] = 18.943264072194637;
@@ -53,7 +53,7 @@ PFCRFFMaterial::computeQpProperties()
     _alpha_R_2[_qp] =  3.972333899872749;
     _alpha_I_2[_qp] =  6.499130135847140;
 
-    //A constants
+    // A constants
     _A_R_0[_qp] = -63.1;
     _A_I_0[_qp] =  9.910190130869531e-15;
     _A_R_1[_qp] = 10.501019149026910;
@@ -63,7 +63,7 @@ PFCRFFMaterial::computeQpProperties()
   }
   else if (_num_L == 5)
   {
-    //alpha constants
+    // alpha constants
     _alpha_R_0[_qp] =  2.429134088464706;
     _alpha_I_0[_qp] =  0.0;
     _alpha_R_1[_qp] = -3.972333899872749;
@@ -75,7 +75,7 @@ PFCRFFMaterial::computeQpProperties()
     _alpha_R_4[_qp] = -18.943264072194637;
     _alpha_I_4[_qp] = -9.349446845430961;
 
-    //A constants
+    // A constants
     _A_R_0[_qp] = -1.282478656880326e02;
     _A_I_0[_qp] =  9.910190130869531e-15;
     _A_R_1[_qp] =  34.212475550662354;
@@ -102,7 +102,7 @@ PFCRFFMaterial::computeQpProperties()
     _alpha_R_4[_qp] =  -3.88;
     _alpha_I_4[_qp] =   6.545;
 
-    //A constants
+    // A constants
     _A_R_0[_qp] = -63.1;
     _A_I_0[_qp] =  0.0;
     _A_R_1[_qp] = 12.52;
@@ -116,7 +116,7 @@ PFCRFFMaterial::computeQpProperties()
 
   else if (_num_L == 5)
   {
-    //alpha constants
+    // alpha constants
     _alpha_R_0[_qp] = 2.4887266073084095552303551812656223773956298828125;
     _alpha_I_0[_qp] =  0.0;
     _alpha_R_1[_qp] = -19.2733746470461682065433706156909465789794921875;
@@ -128,7 +128,7 @@ PFCRFFMaterial::computeQpProperties()
     _alpha_R_4[_qp] =  -3.8695517424123173633176975272363051772117614746094;
     _alpha_I_4[_qp] =  -6.7955256217773678528715208813082426786422729492188;
 
-    //A constants
+    // A constants
     _A_R_0[_qp] = -133.2927098034036816898151300847530364990234375;
     _A_I_0[_qp] =  0.0;
     _A_R_1[_qp] = 10.728194854990965367846911249216645956039428710938;

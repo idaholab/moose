@@ -45,13 +45,13 @@ HHPFCRFFSplitVariablesAction::act()
   // Loop through the number of L variables
   for (unsigned int l = 0; l < _num_L; ++l)
   {
-    //Create L base name
+    // Create L base name
     std::string L_name = _L_name_base;
     std::stringstream out;
     out << l;
     L_name.append(out.str());
 
-    //Create real L variable
+    // Create real L variable
     std::string real_name = L_name;
     real_name.append("_real");
 
@@ -67,7 +67,7 @@ HHPFCRFFSplitVariablesAction::act()
 
     if (l > 0)
     {
-      //Create imaginary L variable IF l > 0
+      // Create imaginary L variable IF l > 0
       std::string imag_name = L_name;
       imag_name.append("_imag");
 

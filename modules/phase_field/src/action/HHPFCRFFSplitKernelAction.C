@@ -37,23 +37,23 @@ HHPFCRFFSplitKernelAction::act()
   Moose::err << "L name base:" << _L_name_base;
 #endif
 
-  //Loop over the L_variables
+  // Loop over the L_variables
   for (unsigned int l = 0; l < _num_L; ++l)
   {
-    //Create L base name
+    // Create L base name
     std::string L_name = _L_name_base;
     std::stringstream out;
     out << l;
     L_name.append(out.str());
 
-    //Create real  and imaginary L variable names
+    // Create real  and imaginary L variable names
     std::string real_name = L_name;
     real_name.append("_real");
     std::string imag_name = L_name;
     imag_name.append("_imag");
 
-    //Create the kernels for the real L variable ***********************************
-    //**Create the diffusion kernel for L_real_l
+    // Create the kernels for the real L variable ***********************************
+    // **Create the diffusion kernel for L_real_l
     InputParameters poly_params = _factory.getValidParams("Diffusion");
     poly_params.set<NonlinearVariableName>("variable") = real_name;
 
@@ -62,7 +62,7 @@ HHPFCRFFSplitKernelAction::act()
 
     _problem->addKernel("Diffusion", kernel_name, poly_params);
 
-    //**Create the (alpha^R_m L^R_m) term
+    // **Create the (alpha^R_m L^R_m) term
     poly_params = _factory.getValidParams("HHPFCRFF");
     poly_params.set<NonlinearVariableName>("variable") = real_name;
     poly_params.set<bool>("positive") = true;
@@ -76,7 +76,7 @@ HHPFCRFFSplitKernelAction::act()
 
     _problem->addKernel("HHPFCRFF", kernel_name, poly_params);
 
-    //**Create the -(alpha^I_m L^I_m) term
+    // **Create the -(alpha^I_m L^I_m) term
     if (l > 0)
     {
       poly_params = _factory.getValidParams("HHPFCRFF");
@@ -94,7 +94,7 @@ HHPFCRFFSplitKernelAction::act()
       _problem->addKernel("HHPFCRFF", kernel_name, poly_params);
     }
 
-    //**Create the -(A^R_m n) term
+    // **Create the -(A^R_m n) term
     poly_params = _factory.getValidParams("HHPFCRFF");
     poly_params.set<NonlinearVariableName>("variable") = real_name;
     poly_params.set<bool>("positive") = false;
@@ -108,10 +108,10 @@ HHPFCRFFSplitKernelAction::act()
     kernel_name.append(real_name);
 
     _problem->addKernel("HHPFCRFF", kernel_name, poly_params);
-    //Create the kernels for the imaginary L variable, l > 0 ***********************************
+    // Create the kernels for the imaginary L variable, l > 0 ***********************************
     if (l > 0)
     {
-      //**Create the diffusion kernel for L_imag_l
+      // **Create the diffusion kernel for L_imag_l
       InputParameters poly_params = _factory.getValidParams("Diffusion");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
 
@@ -120,7 +120,7 @@ HHPFCRFFSplitKernelAction::act()
 
       _problem->addKernel("Diffusion", kernel_name, poly_params);
 
-      //**Create the (alpha^R_m L^I_m) term
+      // **Create the (alpha^R_m L^I_m) term
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = true;
@@ -134,7 +134,7 @@ HHPFCRFFSplitKernelAction::act()
 
       _problem->addKernel("HHPFCRFF", kernel_name, poly_params);
 
-      //**Create the (alpha^I_m L^R_m) term
+      // **Create the (alpha^I_m L^R_m) term
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = true;
@@ -149,7 +149,7 @@ HHPFCRFFSplitKernelAction::act()
 
       _problem->addKernel("HHPFCRFF", kernel_name, poly_params);
 
-      //**Create the -(A^I_m n) term
+      // **Create the -(A^I_m n) term
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = false;
@@ -163,7 +163,7 @@ HHPFCRFFSplitKernelAction::act()
       kernel_name.append(imag_name);
 
       _problem->addKernel("HHPFCRFF", kernel_name, poly_params);
-      //*******************
+      // *******************
     }
   }
 }
