@@ -23,7 +23,7 @@
     input = 'console_warning.i'
     cli_args = 'Outputs/console=true Outputs/screen/file_base=console_warning_out'
     expect_out = 'Multiple \(3\) Console output objects are writing to the screen, this will likely cause duplicate messages printed.'
-    allow_warning = true
+    allow_warnings = true
   [../]
   [./file_system_information]
     # Test that file contains regex
