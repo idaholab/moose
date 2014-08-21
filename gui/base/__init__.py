@@ -1,3 +1,4 @@
 from MooseWidget import *
-
-__all__ = ['MooseWidget']
+from PeacockErrorInterface import *
+from PeacockTestInterface import *
+__all__ = ['MooseWidget', 'PeacockErrorInterface', 'PeacockTestInterface']
