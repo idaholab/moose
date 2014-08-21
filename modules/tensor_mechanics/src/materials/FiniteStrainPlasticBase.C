@@ -12,7 +12,8 @@ InputParameters validParams<FiniteStrainPlasticBase>()
   params.addRequiredParam<std::vector<Real> >("yield_function_tolerance", "If the yield function is less than this amount, the (stress, internal parameters) are deemed admissible.  A vector of tolerances must be entered for the multi-surface case");
   params.addParam<std::vector<Real> >("internal_constraint_tolerance", "The Newton-Raphson process is only deemed converged if the internal constraint is less than this.  A vector of tolerances must be entered for the case with more than one internal parameter");
   params.addRequiredRangeCheckedParam<Real>("ep_plastic_tolerance", "ep_plastic_tolerance>0", "The Newton-Raphson process is only deemed converged if the plastic strain increment constraints have L2 norm less than this.");
-  params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  1 = cause a crash if max_iter is exceeded or the line search fails,  2 = debug Jacobian entries, 3 = print full Jacobian results while debugging.  4 = check the entire Jacobian");
+  params.addRangeCheckedParam<unsigned int>("max_subdivisions", 4096, "max_subdivisions>0", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the maximum number of subdivisions allowed.  The number of subdivisions tried increases exponentially, first 1, then 2, then 4, then 8, etc");
+  params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  1 = cause a crash if max_subdivisions is exceeded,  2 = debug Jacobian entries, 3 = print full Jacobian results while debugging.  4 = check the entire Jacobian");
   params.addParam<RealTensorValue>("debug_jac_at_stress", RealTensorValue(), "Debug Jacobian entries at this stress.  For use by developers");
   params.addParam<std::vector<Real> >("debug_jac_at_pm", "Debug Jacobian entries at these plastic multipliers");
   params.addParam<std::vector<Real> >("debug_jac_at_intnl", "Debug Jacobian entries at these internal parameters");
@@ -28,6 +29,7 @@ FiniteStrainPlasticBase::FiniteStrainPlasticBase(const std::string & name,
                                                          InputParameters parameters) :
     FiniteStrainMaterial(name, parameters),
     _max_iter(getParam<unsigned int>("max_NR_iterations")),
+    _max_subdivisions(getParam<unsigned int>("max_subdivisions")),
     _f_tol(getParam<std::vector<Real> >("yield_function_tolerance")),
     _ic_tol(parameters.isParamValid("internal_constraint_tolerance") ? getParam<std::vector<Real> >("internal_constraint_tolerance") : std::vector<Real>(0)),
     _epp_tol(getParam<Real>("ep_plastic_tolerance")),
@@ -93,7 +95,56 @@ FiniteStrainPlasticBase::computeQpStress()
 
   preReturnMap();
 
-  returnMap(_stress_old[_qp], _plastic_strain_old[_qp], _intnl_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], _stress[_qp], _plastic_strain[_qp], _intnl[_qp], _f[_qp], _iter[_qp]);
+  /**
+   * the idea in the following is to potentially subdivide the
+   * strain increment into smaller portions
+   * First one subdivision is tried, and if that fails then
+   * 2 are tried, then 4, etc.  This is in the hope that the
+   * time-step for the entire mesh need not be cut if there
+   * are only a few "bad" quadpoints where the return-map
+   * is difficult
+   */
+
+  bool return_successful = false;
+
+  // number of subdivisions of the strain increment currently being tried
+  unsigned int num_subdivisions = 1;
+
+  while (num_subdivisions <= _max_subdivisions && !return_successful)
+  {
+    // prepare the variables for this set of strain increments
+    RankTwoTensor dep = _strain_increment[_qp]/num_subdivisions;
+    RankTwoTensor stress_previous = _stress_old[_qp];
+    RankTwoTensor plastic_strain_previous = _plastic_strain_old[_qp];
+    std::vector<Real> intnl_previous;
+    intnl_previous.resize(_intnl_old[_qp].size());
+    for (int a = 0 ; a < _intnl_old[_qp].size() ; ++a)
+      intnl_previous[a] = _intnl_old[_qp][a];
+
+
+    // now do the work: apply the "dep" over num_subdivisions "substeps"
+    for (unsigned substep = 0 ; substep < num_subdivisions ; ++substep)
+    {
+      return_successful = returnMap(stress_previous, plastic_strain_previous, _intnl_old[_qp], dep, _elasticity_tensor[_qp], _stress[_qp], _plastic_strain[_qp], _intnl[_qp], _f[_qp], _iter[_qp]);
+      if (return_successful)
+      {
+        // record the updated variables in readiness for the next substep
+        stress_previous = _stress[_qp];
+        plastic_strain_previous = _plastic_strain[_qp];
+        for (int a = 0 ; a < _intnl_old[_qp].size() ; ++a)
+          intnl_previous[a] = _intnl[_qp][a];
+      }
+      else
+        break; // oh dear, we need to increase the number of subdivisions
+    }
+
+    if (!return_successful)
+      num_subdivisions *= 2;
+  }
+
+  if (!return_successful)
+    mooseError("After making " << num_subdivisions << " subdivisions of the strain increment with L2norm " << _strain_increment[_qp].L2norm() << " the returnMap algorithm failed");
+
 
   postReturnMap();
 
@@ -185,7 +236,7 @@ FiniteStrainPlasticBase::dhardPotential_dintnl(const RankTwoTensor & /*stress*/,
   dh_dintnl.resize(0); // zero internal parameters mean zero hardening potentials
 }
 
-void
+bool
 FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankTwoTensor & plastic_strain_old, const std::vector<Real> & intnl_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & stress, RankTwoTensor & plastic_strain, std::vector<Real> & intnl, std::vector<Real> & f, unsigned int & iter)
 {
 
@@ -206,7 +257,7 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
   if (nr_res2 < 0.5)
     // a purely elastic increment.
     // All output variables have been calculated
-    return;
+    return true;
 
 
   // So, from here on we know that the trial stress
@@ -251,9 +302,11 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
   std::vector<Real> pm;
   pm.assign(numberOfYieldFunctions(), 0.0);
 
+  // whether line-searching was successful
+  bool ls_success = true;
 
   // The Newton-Raphson loops
-  while (nr_res2 > 0.5 && iter < _max_iter)
+  while (nr_res2 > 0.5 && iter < _max_iter && ls_success)
   {
     iter++;
 
@@ -262,25 +315,33 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
 
     // perform a line search
     // The line-search will exit with updated values
-    lineSearch(nr_res2, stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, f, epp, ic);
+    ls_success = lineSearch(nr_res2, stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, f, epp, ic);
   }
 
 
   if (iter >= _max_iter)
   {
-    _console << "Too many iterations (" << iter << " but maximum = " << _max_iter << ") in plasticity.\nYield function(s):\n";
-    for (unsigned i = 0; i < f.size() ; ++i)
-      _console << f[i] << "\n";
-    _console << "Stress at maximum iterations:\n";
-    stress.print();
     if (_fspb_debug == 1)
       mooseError("Causing crash due max iterations and debug parameter choice");
     stress = stress_old;
     for (unsigned i = 0; i < intnl_old.size() ; ++i)
       intnl[i] = intnl_old[i];
+    return false;
+  }
+  else if (!ls_success)
+  {
+    if (_fspb_debug == 1)
+      mooseError("Causing crash due linesearch failure and debug parameter choice");
+    stress = stress_old;
+    for (unsigned i = 0; i < intnl_old.size() ; ++i)
+      intnl[i] = intnl_old[i];
+    return false;
   }
   else
+  {
     plastic_strain += delta_dp;
+    return true;
+  }
 
 }
 
@@ -546,10 +607,12 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
 }
 
 
-void
+bool
 FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic)
 {
   // Line search algorithm straight out of "Numerical Recipes"
+
+  bool success = true; // return value: will be false if linesearch couldn't reduce the residual-squared
 
   // Aim is to decrease residual2
 
@@ -558,8 +621,6 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
   bool line_searching = true;
   Real f0 = nr_res2; // initial value of residual2
   Real slope = -2*nr_res2; // "Numerical Recipes" uses -b*A*x, in order to check for roundoff, but i hope the nrStep would warn if there were problems.
-  if (slope > 0)
-    mooseError("Roundoff problem in weak-plane line search");
   Real tmp_lam; // cached value of lam used in quadratic & cubic line search
   Real f2; // cached value of f = residual2 used in the cubic in the line search
   Real lam2; // cached value of lam used in the cubic in the line search
@@ -604,16 +665,14 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
     }
     else if (lam < lam_min)
     {
-      lam = 1E-4;
-      _console << "line search failed in plasticity\n";
-      if (_fspb_debug == 1)
-        mooseError("Causing crash due linesearch failure and debug parameter choice");
+      success = false;
+      // restore plastic multipliers, yield functions, etc to original values
       for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-        ls_pm[alpha] = pm[alpha] + dpm[alpha]*lam;
-      ls_delta_dp = delta_dp - E_inv*dstress*lam;
+        ls_pm[alpha] = pm[alpha];
+      ls_delta_dp = delta_dp;
       for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++ a)
-        ls_intnl[a] = intnl[a] + dintnl[a]*lam;
-      ls_stress = stress + dstress*lam;
+        ls_intnl[a] = intnl[a];
+      ls_stress = stress;
       calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic);
       nr_res2 = residual2(f, epp, ic);
       line_searching = false;
@@ -659,6 +718,8 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
   for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++ a)
     intnl[a] = ls_intnl[a];
   stress = ls_stress;
+
+  return success;
 }
 
 
