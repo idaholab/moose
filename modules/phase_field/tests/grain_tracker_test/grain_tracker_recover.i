@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 25
-  ny = 25
+  nx = 20
+  ny = 20
   nz = 0
   xmax = 1000
   ymax = 1000
@@ -124,10 +124,10 @@
   l_tol = 1.0e-4
   l_max_its = 30
   nl_max_its = 20
-  nl_rel_tol = 1.0e-9
+  nl_rel_tol = 1.0e-7
   start_time = 0.0
   num_steps = 3
-  dt = 100.0
+  dt = 50.0
   [./Adaptivity]
     refine_fraction = 0.2
     max_h_level = 3
