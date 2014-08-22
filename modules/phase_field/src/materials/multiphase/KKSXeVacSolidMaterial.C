@@ -23,7 +23,7 @@ KKSXeVacSolidMaterial::KKSXeVacSolidMaterial(const std::string & name,
 // Catch fixable singularity at 0
 Real
 KKSXeVacSolidMaterial::cLogC(Real c) {
-  return c==0.0 ? 0.0 : c * std::log(c);
+  return c <= 0.0 ? 0.0 : c * std::log(c);
 }
 
 // / Fm(cmg,cmv) takes three arguments
@@ -46,9 +46,12 @@ KKSXeVacSolidMaterial::computeF() {
 // Derivative of the Free energy
 Real
 KKSXeVacSolidMaterial::computeDF(unsigned int arg) {
-  // create named aliases for the arguments
-  const Real & cmg = (*_args[0])[_qp];
-  const Real & cmv = (*_args[1])[_qp];
+  Real cmg = (*_args[0])[_qp];
+  Real cmv = (*_args[1])[_qp];
+
+  const Real tol = 1e-10;
+  cmg = cmg < tol ? tol : (cmg > (1.0-tol) ? (1.0-tol) : cmg);
+  cmv = cmv < tol ? tol : (cmv > (1.0-tol) ? (1.0-tol) : cmv);
 
   switch (arg)
   {
@@ -65,11 +68,14 @@ KKSXeVacSolidMaterial::computeDF(unsigned int arg) {
 // Derivative of the Free energy
 Real
 KKSXeVacSolidMaterial::computeD2F(unsigned int arg1, unsigned int arg2) {
-  // create named aliases for the arguments
-  const Real & cmg = (*_args[0])[_qp];
-  const Real & cmv = (*_args[1])[_qp];
+  Real cmg = (*_args[0])[_qp];
+  Real cmv = (*_args[1])[_qp];
 
   if (arg1 != arg2) return 0.0;
+
+  const Real tol = 1e-10;
+  cmg = cmg < tol ? tol : (cmg > (1.0-tol) ? (1.0-tol) : cmg);
+  cmv = cmv < tol ? tol : (cmv > (1.0-tol) ? (1.0-tol) : cmv);
 
   switch (arg1)
   {
