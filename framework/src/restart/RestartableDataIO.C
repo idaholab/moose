@@ -181,6 +181,7 @@ RestartableDataIO::readRestartableData(RestartableDatas & restartable_datas, std
 
   unsigned int n_threads = libMesh::n_threads();
   std::vector<std::string> ignored_data;
+//  std::vector<unsigned int> ignored_data_is_recoverable;
 
   for (unsigned int tid=0; tid<n_threads; tid++)
   {
@@ -219,9 +220,12 @@ RestartableDataIO::readRestartableData(RestartableDatas & restartable_datas, std
       unsigned int data_size = 0;
       _in_file_handles[tid]->read((char *) &data_size, sizeof(data_size));
 
-      if (restartable_data.find(current_name) != restartable_data.end() // Only restore values if they're currently being used
-          && (recovering || (_recoverable_data.find(current_name) == _recoverable_data.end())) // Only read this value if we're either recovering or this hasn't been specified to be recovery only data
-        )
+      // Determine if the current data is recoverable
+      bool is_data_restartable = restartable_data.find(current_name) != restartable_data.end();
+      bool is_data_recoverable = _recoverable_data.find(current_name) != _recoverable_data.end();
+      if (is_data_restartable // Only restore values if they're currently being used
+          && (recovering || !is_data_recoverable)) // Only read this value if we're either recovering or this hasn't been specified to be recovery only data
+
       {
         // Moose::out<<"Loading "<<current_name<<std::endl;
 
@@ -230,23 +234,25 @@ RestartableDataIO::readRestartableData(RestartableDatas & restartable_datas, std
       }
       else
       {
-        // Skip this piece of data
+        // Skip this piece of data and do not report if restarting and recoverable data is not used
         _in_file_handles[tid]->seekg(data_size, std::ios_base::cur);
-        ignored_data.push_back(current_name);
+        if (recovering && !is_data_recoverable)
+          ignored_data.push_back(current_name);
+
       }
     }
 
     _in_file_handles[tid]->close();
   }
 
-  if (ignored_data.size())
+  // Procdue a warning if restarting and restart data is being skipped
+  // Do not produce the warning with recovery b/c in cases the parent defines a something as recoverable,
+  // but only certain child classes use the value in recovery (i.e., FileOutput::_num_files is needed by Exodus but not Checkpoint)
+  if (ignored_data.size() && !recovering)
   {
     std::ostringstream names;
-
     for (unsigned int i=0; i<ignored_data.size(); i++)
       names << ignored_data[i] << "\n";
-
-    mooseWarning("The following RestorableData was found in restart file but is being ignored:\n" << names.str());
-
+    mooseWarning("The following RestartableData was found in restart file but is being ignored:\n" << names.str());
   }
 }
