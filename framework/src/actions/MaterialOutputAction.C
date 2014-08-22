@@ -17,6 +17,7 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "AddOutputAction.h"
+#include "CoupledExecutioner.h"
 
 // Declare the output helper specializations
 template<>
@@ -49,19 +50,34 @@ MaterialOutputAction::~MaterialOutputAction()
 void
 MaterialOutputAction::act()
 {
-  // Do nothing if _problem is NULL (this is the case for coupled problems)
-  if (_problem == NULL)
+  // If running a coupled problem, loop through all the FEProblem objects
+  CoupledExecutioner * exec_ptr = dynamic_cast<CoupledExecutioner *>(_executioner);
+  if (exec_ptr != NULL)
   {
-    mooseWarning("FEProblem pointer is NULL, if you are executing a coupled problem this is expected. Auto material output is not supported for this case.");
-    return;
+    std::vector<FEProblem *> & problems = exec_ptr->getProblems();
+    for (std::vector<FEProblem *>::iterator it = problems.begin(); it != problems.end(); ++it)
+      buildMaterialOutputObjects(*it);
   }
 
+  // Error if _problem is NULL, I don't know how this would happen
+  else if (_problem == NULL)
+    mooseError("FEProblem pointer is NULL, it is needed for auto material property output");
+
+  // Build on the problem for this action, this is what should happend for everything except coupled problems
+  else
+    buildMaterialOutputObjects(_problem);
+}
+
+void
+MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
+{
+
   // Set the pointers to the MaterialData objects (Note, these pointers are not available at construction)
-  _block_material_data = _problem->getMaterialData(0);
-  _boundary_material_data = _problem->getBoundaryMaterialData(0);
+  _block_material_data = problem_ptr->getMaterialData(0);
+  _boundary_material_data = problem_ptr->getBoundaryMaterialData(0);
 
   // A complete list of all Material objects
-  std::vector<Material *> materials = _problem->getMaterialWarehouse(0).getMaterials();
+  std::vector<Material *> materials = problem_ptr->getMaterialWarehouse(0).getMaterials();
 
   // Handle setting of material property output in [Outputs] sub-blocks
   // Output objects can enable material property output, the following code examines the parameters
@@ -142,7 +158,7 @@ MaterialOutputAction::act()
   // Create the AuxVariables
   FEType fe_type(CONSTANT, MONOMIAL); // currently only elemental variables are support for material property output
   for (std::set<AuxVariableName>::iterator it = _variable_names.begin(); it != _variable_names.end(); ++it)
-    _problem->addAuxVariable(*it, fe_type);
+    problem_ptr->addAuxVariable(*it, fe_type);
 
   // Update the complete list of material related AuxVariables to the OutputWarehouse
   _output_warehouse.setMaterialOutputVariables(_variable_names);

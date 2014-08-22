@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 2
+  ny = 2
 []
 
 [Variables]
@@ -10,9 +10,21 @@
   [../]
 []
 
+[AuxVariables]
+  [./aux]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
 [Kernels]
   [./diff]
-    type = Diffusion
+    type = CoefDiffusion
+    variable = u
+    coef = 0.1
+  [../]
+  [./time]
+    type = TimeDerivative
     variable = u
   [../]
 []
@@ -33,25 +45,21 @@
 []
 
 [Executioner]
-  type = Steady
-
   # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-
+  type = Transient
+  num_steps = 5
+  dt = 0.1
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
-  exodus = true
+  output_initial = true
   vtk = true
-  console = false
-  [./exodus2]
-    type = Exodus
-    file_base = exodus2
-  [../]
-  [./test]
-    type = OutputObjectTest
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
   [../]
 []

@@ -366,10 +366,10 @@ protected:
   bool _system_information;
 
   /// True if the meshChanged() function has been called (restartable)
-  bool & _mesh_changed;
+  bool _mesh_changed;
 
   /// Flag for forcing call to outputSetup() with every call to output() (restartable)
-  bool & _sequence;
+  bool _sequence;
 
   /// Flag for disabling/enabling output
   bool _allow_output;
@@ -492,8 +492,8 @@ private:
   /// Storage structure for the variable lists for scalar output
   OutputData _scalar;
 
-  /// The number of outputs written (restartable)
-  unsigned int & _num;
+  /// The number of outputs written
+  unsigned int _num;
 
   /// The output time step interval
   const unsigned int _interval;
@@ -520,8 +520,8 @@ private:
   bool _output_failed;
 
   /// True if outputSetup was called
-  /* Note, this is needed by recovery system to guarantee that outputStep was called. Normal runs rely on _num == 0, but when
-     recovering _num will likely be non-zero */
+  // Note, this is needed by recovery system to guarantee that outputStep was called.
+  // Normal runs rely on _num == 0, but when recovering _num will likely be non-zero
   bool _output_setup_called;
 
   /// True if init() has been called

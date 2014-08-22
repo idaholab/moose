@@ -52,6 +52,11 @@ public:
    */
   virtual void act();
 
+  /**
+   * Builds the objects necessary for material property output
+   */
+  void buildMaterialOutputObjects(FEProblem * problem_ptr);
+
 private:
 
   /**
