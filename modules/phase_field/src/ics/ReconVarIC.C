@@ -35,10 +35,10 @@ ReconVarIC::initialSetup()
     Elem *current_elem = *el;
     unsigned int index = current_elem->id();
     Point p0 = current_elem->centroid();
-    _grn[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("GRAIN"));
-    _x[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("X"));
-    _y[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("Y"));
-    _z[index] = _ebsd_reader.get_data(p0, _ebsd_reader.getDataType("Z"));
+    _grn[index] = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("GRAIN"));
+    _x[index] = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("X"));
+    _y[index] = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("Y"));
+    _z[index] = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("Z"));
     // Moose::out << "Element #, Grain #, X, Y, Z:  " << current_elem->id()  << "  " << _grn[index] << "  " << _x[index] << "  " << _y[index] << "  " << _z[index] << "\n" << std::endl;
   }
 
@@ -133,7 +133,7 @@ ReconVarIC::value(const Point &)
 {
   Real op = 0.0;
   Point p1 = _current_elem->centroid();
-  unsigned int grn_index = _ebsd_reader.get_data(p1, _ebsd_reader.getDataType("GRAIN"));
+  unsigned int grn_index = _ebsd_reader.getData(p1, _ebsd_reader.getDataType("GRAIN"));
   if (_assigned_op[grn_index] == _op_index)
     op = 1.0;
   else
