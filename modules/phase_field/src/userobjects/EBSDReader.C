@@ -65,6 +65,8 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
       // required to do the indexing we're going to do...
       if (line.find("#") == 0)
       {
+        // Process lines that start with a comment character (comments and meta data)
+
         for (unsigned i=0; i<labels.size(); ++i)
           if (line.find(labels[i]) != std::string::npos)
           {
@@ -77,10 +79,10 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
             break;
           }
       }
-
-      // Process lines that don't start with a comment character (data lines)
-      if (line.find("#") != 0)
+      else
       {
+        // Process lines that don't start with a comment character (data lines)
+
         // Make sure we have successfully parsed the header
         if (!header_parsed)
         {
@@ -126,7 +128,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
         std::istringstream iss(line);
         iss >> phi1 >> phi >> phi2 >> x >> y >> z >> grain >> phase >> sym;
 
-        unsigned global_index = this->index_from_point( Point(x,y,z) );
+        unsigned global_index = indexFromPoint(Point(x, y, z));
 
         std::vector<Real> & centroid_data = _data[global_index];
 
@@ -300,101 +302,101 @@ EBSDReader::~EBSDReader()
 }
 
 Real
-EBSDReader::get_data(const Point & p, MooseEnum data_type) const
+EBSDReader::getData(const Point & p, MooseEnum data_type) const
 {
   // TODO: If we always keep these in order, we can just return
-  // _data[index_from_point(p)][data_type]...
+  // _data[indexFromPoint(p)][data_type]...
 
   switch (data_type)
   {
     case PHI1:
       // phi1 is entry [0] at each centroid
-      return _data[index_from_point(p)][0];
+      return _data[indexFromPoint(p)][0];
 
     case PHI:
       // phi is entry [1] at each centroid
-      return _data[index_from_point(p)][1];
+      return _data[indexFromPoint(p)][1];
 
     case PHI2:
       // phi2 is entry [2] at each centroid
-      return _data[index_from_point(p)][2];
+      return _data[indexFromPoint(p)][2];
 
     case X:
       // x is entry [3] at each centroid
-      return _data[index_from_point(p)][3];
+      return _data[indexFromPoint(p)][3];
 
     case Y:
       // y is entry [4] at each centroid
-      return _data[index_from_point(p)][4];
+      return _data[indexFromPoint(p)][4];
 
     case Z:
       // z is entry [5] at each centroid
-      return _data[index_from_point(p)][5];
+      return _data[indexFromPoint(p)][5];
 
     case GRAIN:
       // grain is entry [6] at each centroid
-      return _data[index_from_point(p)][6];
+      return _data[indexFromPoint(p)][6];
 
     case PHASE:
       // grain is entry [7] at each centroid
-      return _data[index_from_point(p)][7];
+      return _data[indexFromPoint(p)][7];
 
     case SYMMETRY:
       // symmetry is entry [8] at each centroid
-      return _data[index_from_point(p)][8];
+      return _data[indexFromPoint(p)][8];
 
     case OP:
       // OP is entry [9] at each centroid
-      return _data[index_from_point(p)][9];
+      return _data[indexFromPoint(p)][9];
   }
   mooseError("Invalid DataType " << data_type << " requested.");
 }
 
 Real
-EBSDReader::get_avg_data(const unsigned int & var, MooseEnum data_type) const
+EBSDReader::getAvgData(const unsigned int & var, MooseEnum data_type) const
 {
   // TODO: If we always keep these in order, we can just return
-  // _avg_data[index_from_index(var)][data_type]...
+  // _avg_data[indexFromIndex(var)][data_type]...
 
   switch (data_type)
   {
   case AVG_PHI1:
       // avg_phi1 is entry [0] in _avg_data array
-      return _avg_data[index_from_index(var)][0];
+      return _avg_data[indexFromIndex(var)][0];
 
     case AVG_PHI:
       // avg_phi is entry [1] in _avg_data array
-      return _avg_data[index_from_index(var)][1];
+      return _avg_data[indexFromIndex(var)][1];
 
     case AVG_PHI2:
       // avg_phi2 is entry [2] in _avg_data array
-      return _avg_data[index_from_index(var)][2];
+      return _avg_data[indexFromIndex(var)][2];
 
     case AVG_X:
       // avg_x is entry [3] in _avg_data array
-      return _avg_data[index_from_index(var)][3];
+      return _avg_data[indexFromIndex(var)][3];
 
     case AVG_Y:
       // avg_y is entry [4] in _avg_data array
-      return _avg_data[index_from_index(var)][4];
+      return _avg_data[indexFromIndex(var)][4];
 
     case AVG_Z:
       // avg_x is entry [5] in _avg_data array
-      return _avg_data[index_from_index(var)][5];
+      return _avg_data[indexFromIndex(var)][5];
 
     case AVG_PHASE:
       // avg_phase is entry [6] in _avg_data array
-      return _avg_data[index_from_index(var)][6];
+      return _avg_data[indexFromIndex(var)][6];
 
     case AVG_SYMMETRY:
       // avg_symmetry is entry [7] in _avg_data array
-      return _avg_data[index_from_index(var)][7];
+      return _avg_data[indexFromIndex(var)][7];
   }
 
   mooseError("Invalid DataType " << data_type << " requested.");
 }
 
-unsigned EBSDReader::index_from_point(const Point & p) const
+unsigned EBSDReader::indexFromPoint(const Point & p) const
 {
   // Don't assume an ordering on the input data, use the (x, y,
   // z) values of this centroid to determine the index.
@@ -408,12 +410,12 @@ unsigned EBSDReader::index_from_point(const Point & p) const
 
   // Don't access out of range!
   if (global_index >= _data.size())
-    mooseError("Error! Index out of range in EBSDReader::index_from_point().");
+    mooseError("Error! Index out of range in EBSDReader::indexFromPoint().");
 
   return global_index;
 }
 
-unsigned EBSDReader::index_from_index(const unsigned int & var) const
+unsigned EBSDReader::indexFromIndex(const unsigned int & var) const
 {
 
   // Transfer the index into the _avg_data array.
@@ -421,7 +423,7 @@ unsigned EBSDReader::index_from_index(const unsigned int & var) const
 
   // Don't access out of range!
   if (avg_index >= _avg_data.size())
-    mooseError("Error! Index out of range in EBSDReader::index_from_index()");
+    mooseError("Error! Index out of range in EBSDReader::indexFromIndex()");
 
   return avg_index;
 }
