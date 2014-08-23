@@ -26,9 +26,5 @@ TestEBSDAux::computeValue()
   // sense as an Element AuxKernel
   Point p = _current_elem->centroid();
 
-  Real ret_val = _ebsd_reader.get_data(p, _data_type);
-
-  // Debugging
-  // Moose::out << "Returning value " << ret_val << std::endl;
-  return ret_val;
+  return _ebsd_reader.getData(p, _data_type);
 }

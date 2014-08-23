@@ -36,12 +36,12 @@ public:
   /**
    * Get the requested type of data at the point p.
    */
-  Real get_data(const Point & p, MooseEnum data_type) const;
+  Real getData(const Point & p, MooseEnum data_type) const;
 
   /**
    * Get the requested type of average data at the index i.
    */
-  Real get_avg_data(const unsigned int & i, MooseEnum data_type) const;
+  Real getAvgData(const unsigned int & i, MooseEnum data_type) const;
 
   /**
    * Returns a MooseEnum object associated with the C++ DataType enum
@@ -49,14 +49,14 @@ public:
    * as the C++ DataType enum.
    */
   MooseEnum getDataType (const std::string & type) const
-    {
-      return MooseEnum("PHI1, PHI, PHI2, X, Y, Z, GRAIN, PHASE, SYMMETRY, OP, AVG_PHI1, AVG_PHI, AVG_PHI2, AVG_X, AVG_Y, AVG_Z, AVG_PHASE, AVG_SYMMETRY", type);
-    }
+  {
+    return MooseEnum("PHI1 PHI PHI2 X Y Z GRAIN PHASE SYMMETRY OP AVG_PHI1 AVG_PHI AVG_PHI2 AVG_X AVG_Y AVG_Z AVG_PHASE AVG_SYMMETRY", type);
+  }
 
   const std::vector<Point> & getCenterPoints() const
-    {
-      return _centerpoints;
-    }
+  {
+    return _centerpoints;
+  }
 
 protected:
 
@@ -66,7 +66,7 @@ protected:
    */
   enum DataType
   {
-    PHI1=0,
+    PHI1 = 0,
     PHI,
     PHI2,
     X,
@@ -125,10 +125,10 @@ protected:
   std::vector<Real> _assigned_op;
 
   // Computes a global index in the _data array given an input *centroid* point
-  unsigned index_from_point(const Point & p) const;
+  unsigned indexFromPoint(const Point & p) const;
 
   // Transfer the index into the _avg_data array from given index
-  unsigned index_from_index(const unsigned int & var) const;
+  unsigned indexFromIndex(const unsigned int & var) const;
 };
 
 #endif /* EBSDREADER_H */
