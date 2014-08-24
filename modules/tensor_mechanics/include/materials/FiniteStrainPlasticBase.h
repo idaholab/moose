@@ -329,6 +329,12 @@ protected:
    */
   virtual void fdJacobian(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<std::vector<Real> > & jac);
 
+  /**
+   * Outputs the debug parameters: _fspb_debug_stress, _fspd_debug_pm, etc
+   * and checks that they are sized correctly
+   */
+  void outputAndCheckDebugParameters();
+
 };
 
 #endif //FINITESTRAINPLASTICBASE

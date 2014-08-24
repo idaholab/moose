@@ -13,7 +13,7 @@ InputParameters validParams<FiniteStrainPlasticBase>()
   params.addParam<std::vector<Real> >("internal_constraint_tolerance", "The Newton-Raphson process is only deemed converged if the internal constraint is less than this.  A vector of tolerances must be entered for the case with more than one internal parameter");
   params.addRequiredRangeCheckedParam<Real>("ep_plastic_tolerance", "ep_plastic_tolerance>0", "The Newton-Raphson process is only deemed converged if the plastic strain increment constraints have L2 norm less than this.");
   params.addRangeCheckedParam<unsigned int>("max_subdivisions", 4096, "max_subdivisions>0", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the maximum number of subdivisions allowed.  The number of subdivisions tried increases exponentially, first 1, then 2, then 4, then 8, etc");
-  params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  1 = cause a crash if max_subdivisions is exceeded,  2 = debug Jacobian entries, 3 = print full Jacobian results while debugging.  4 = check the entire Jacobian");
+  params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  2 = debug Jacobian entries, 3 = check the entire Jacobian");
   params.addParam<RealTensorValue>("debug_jac_at_stress", RealTensorValue(), "Debug Jacobian entries at this stress.  For use by developers");
   params.addParam<std::vector<Real> >("debug_jac_at_pm", "Debug Jacobian entries at these plastic multipliers");
   params.addParam<std::vector<Real> >("debug_jac_at_intnl", "Debug Jacobian entries at these internal parameters");
@@ -83,15 +83,21 @@ FiniteStrainPlasticBase::initQpStatefulProperties()
 
   _iter[_qp] = 0;
 
-  if (_fspb_debug == 2 || _fspb_debug == 3)
+  if (_fspb_debug == 2)
+  {
     checkDerivatives();
+    mooseError("Derivatives have been checked.  Exiting with no error");
+  }
 }
 
 void
 FiniteStrainPlasticBase::computeQpStress()
 {
-  if (_fspb_debug == 4)
+  if (_fspb_debug == 3)
+  {
     checkJacobian();
+    mooseError("Jacobian has been checked.  Exiting with no error");
+  }
 
   preReturnMap();
 
@@ -143,7 +149,17 @@ FiniteStrainPlasticBase::computeQpStress()
   }
 
   if (!return_successful)
-    mooseError("After making " << num_subdivisions << " subdivisions of the strain increment with L2norm " << _strain_increment[_qp].L2norm() << " the returnMap algorithm failed");
+  {
+    Moose::out << "After making " << num_subdivisions << " subdivisions of the strain increment with L2norm " << _strain_increment[_qp].L2norm() << " the returnMap algorithm failed\n";
+    _fspb_debug_stress = _stress_old[_qp];
+    _fspb_debug_pm.assign(numberOfYieldFunctions(), 1); // this is chosen arbitrarily - please change if a more suitable value occurs to you!
+    _fspb_debug_intnl.resize(numberOfInternalParameters());
+    for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+      _fspb_debug_intnl[a] = _intnl_old[_qp][a];
+    checkDerivatives();
+    checkJacobian();
+    mooseError("Exiting\n");
+  }
 
 
   postReturnMap();
@@ -319,19 +335,8 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
   }
 
 
-  if (iter >= _max_iter)
+  if (iter >= _max_iter || !ls_success)
   {
-    if (_fspb_debug == 1)
-      mooseError("Causing crash due max iterations and debug parameter choice");
-    stress = stress_old;
-    for (unsigned i = 0; i < intnl_old.size() ; ++i)
-      intnl[i] = intnl_old[i];
-    return false;
-  }
-  else if (!ls_success)
-  {
-    if (_fspb_debug == 1)
-      mooseError("Causing crash due linesearch failure and debug parameter choice");
     stress = stress_old;
     for (unsigned i = 0; i < intnl_old.size() ; ++i)
       intnl[i] = intnl_old[i];
@@ -733,8 +738,8 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
 void
 FiniteStrainPlasticBase::checkDerivatives()
 {
-  if (_fspb_debug_pm.size() != numberOfYieldFunctions() || _fspb_debug_intnl.size() != numberOfInternalParameters() || _fspb_debug_pm_change.size() != numberOfYieldFunctions() || _fspb_debug_intnl_change.size() != numberOfInternalParameters())
-    mooseError("The debug parameters have the wrong size\n");
+  Moose::out << "\n ++++++++++++++ \nChecking the derivatives\n";
+  outputAndCheckDebugParameters();
 
   Moose::out << "dyieldFunction_dstress.  Relative L2 norms.\n";
   std::vector<RankTwoTensor> df_dstress;
@@ -744,13 +749,10 @@ FiniteStrainPlasticBase::checkDerivatives()
   for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
   {
     Moose::out << "alpha = " << alpha << " Relative L2norm = " << 2*(df_dstress[alpha] - fddf_dstress[alpha]).L2norm()/(df_dstress[alpha] + fddf_dstress[alpha]).L2norm() << "\n";
-    if (_fspb_debug == 3)
-    {
-      Moose::out << "Coded:\n";
-      df_dstress[alpha].print();
-      Moose::out << "Finite difference:\n";
-      fddf_dstress[alpha].print();
-    }
+    Moose::out << "Coded:\n";
+    df_dstress[alpha].print();
+    Moose::out << "Finite difference:\n";
+    fddf_dstress[alpha].print();
   }
 
   Moose::out << "dflowPotential_dstress.  Relative L2 norms.\n";
@@ -761,13 +763,10 @@ FiniteStrainPlasticBase::checkDerivatives()
   for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
   {
     Moose::out << "alpha = " << alpha << " Relative L2norm = " << 2*(dr_dstress[alpha] - fddr_dstress[alpha]).L2norm()/(dr_dstress[alpha] + fddr_dstress[alpha]).L2norm() << "\n";
-    if (_fspb_debug == 3)
-    {
-      Moose::out << "Coded:\n";
-      dr_dstress[alpha].print();
-      Moose::out << "Finite difference:\n";
-      fddr_dstress[alpha].print();
-    }
+    Moose::out << "Coded:\n";
+    dr_dstress[alpha].print();
+    Moose::out << "Finite difference:\n";
+    fddr_dstress[alpha].print();
   }
 
   Moose::out << "dflowPotential_dintnl.  Relative L2 norms.\n";
@@ -780,17 +779,13 @@ FiniteStrainPlasticBase::checkDerivatives()
     for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
     {
       Moose::out << "alpha = " << alpha << " a = " << a << " Relative L2norm = " << 2*(dr_dintnl[alpha][a] - fddr_dintnl[alpha][a]).L2norm()/(dr_dintnl[alpha][a] + fddr_dintnl[alpha][a]).L2norm() << "\n";
-      if (_fspb_debug == 3)
-      {
-        Moose::out << "Coded:\n";
-        dr_dintnl[alpha][a].print();
-        Moose::out << "Finite difference:\n";
-        fddr_dintnl[alpha][a].print();
-      }
+      Moose::out << "Coded:\n";
+      dr_dintnl[alpha][a].print();
+      Moose::out << "Finite difference:\n";
+      fddr_dintnl[alpha][a].print();
     }
   }
 
-  mooseError("no error\n");
 }
 
 void
@@ -870,8 +865,8 @@ FiniteStrainPlasticBase::fddflowPotential_dintnl(const RankTwoTensor & stress, c
 void
 FiniteStrainPlasticBase::checkJacobian()
 {
-  if (_fspb_debug_pm.size() != numberOfYieldFunctions() || _fspb_debug_intnl.size() != numberOfInternalParameters() || _fspb_debug_pm_change.size() != numberOfYieldFunctions() || _fspb_debug_intnl_change.size() != numberOfInternalParameters())
-    mooseError("The debug parameters have the wrong size\n");
+  Moose::out << "\n ++++++++++++++ \nChecking the Jacobian\n";
+  outputAndCheckDebugParameters();
 
   RankFourTensor E_inv = _elasticity_tensor[_qp].invSymm();
   RankTwoTensor delta_dp = -E_inv*_fspb_debug_stress;
@@ -897,8 +892,6 @@ FiniteStrainPlasticBase::checkJacobian()
       Moose::out << fdjac[row][col] << " ";
     Moose::out << "\n";
   }
-
-  mooseError("no error\n");
 }
 
 void
@@ -971,3 +964,29 @@ FiniteStrainPlasticBase::fdJacobian(const RankTwoTensor & stress, const std::vec
   }
 }
 
+
+void
+FiniteStrainPlasticBase::outputAndCheckDebugParameters()
+{
+  Moose::out << "stress = \n";
+  _fspb_debug_stress.print();
+
+  if (_fspb_debug_pm.size() != numberOfYieldFunctions() || _fspb_debug_intnl.size() != numberOfInternalParameters() || _fspb_debug_pm_change.size() != numberOfYieldFunctions() || _fspb_debug_intnl_change.size() != numberOfInternalParameters())
+    mooseError("The debug parameters have the wrong size\n");
+
+  Moose::out << "plastic multipliers =\n";
+  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+    Moose::out << _fspb_debug_pm[alpha] << "\n";
+
+  Moose::out << "internal parameters =\n";
+  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+    Moose::out << _fspb_debug_intnl[a] << "\n";
+
+  Moose::out << "finite-differencing parameter for stress-changes:\n" << _fspb_debug_stress_change  << "\n";
+  Moose::out << "finite-differencing parameter(s) for plastic-multiplier(s):\n";
+  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+    Moose::out << _fspb_debug_pm_change[alpha] << "\n";
+  Moose::out << "finite-differencing parameter(s) for internal-parameter(s):\n";
+  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+    Moose::out << _fspb_debug_intnl_change[a] << "\n";
+}
