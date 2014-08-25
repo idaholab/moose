@@ -42,7 +42,7 @@ class ExecuteWidget(MooseWidget):
 
     # Check that program exists
     if not os.path.exists(executable):
-      peacockError(self, 'The program', executable, 'does not exist.')
+      self.peacockError('The program', executable, 'does not exist.')
 
     # Build the command
     cmd = []
