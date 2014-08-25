@@ -64,8 +64,8 @@ std::string
 SetupRecoverFileBaseAction::getRecoveryFileBase(const std::set<std::string> checkpoint_files)
 {
   // Create storage for newest restart files
-  /* Note that these might have the same modification time if the simulation was fast.
-     In that case we're going to save all of the "newest" files and sort it out momentarily */
+  // Note that these might have the same modification time if the simulation was fast.
+  // In that case we're going to save all of the "newest" files and sort it out momentarily
   time_t newest_time = 0;
   std::vector<std::string> newest_restart_files;
 
