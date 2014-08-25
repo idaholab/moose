@@ -6,7 +6,7 @@ from base import *
 
 ##
 # Basic QWidget to serve as a container for controls
-class MooseWidget(QtGui.QWidget):
+class MooseWidget(QtGui.QWidget, PeacockTestInterface, PeacockErrorInterface):
 
   ##
   # Constructor.
@@ -29,6 +29,8 @@ class MooseWidget(QtGui.QWidget):
 
     # Call the base class constructor
     QtGui.QWidget.__init__(self)
+    PeacockTestInterface.__init__(self)
+    PeacockErrorInterface.__init__(self)
 
     # All object added via addObject are stored in a dictionary
     self._objects = dict()
@@ -44,7 +46,7 @@ class MooseWidget(QtGui.QWidget):
     elif align == 'horizontal':
       self._main_layout = QtGui.QHBoxLayout()
     else:
-      peacockError('Unknown alignment parameter ' + align + ', must be \'vertical\' or \'horizontal\'')
+      self.peacockError('Unknown alignment parameter ' + align + ', must be \'vertical\' or \'horizontal\'')
     self.setLayout(self._main_layout)
 
     # Create an error message dialog
@@ -84,7 +86,7 @@ class MooseWidget(QtGui.QWidget):
   # Extract a Signal object by name
   # @param name The signal name contained within a Peacock object (_signal_<name>)
   def signal(self, name):
-    return self._getAttr('_signal' + name)
+    return self._getAttr('_signal_' + name)
 
   ##
   # Extract value from pull method  by name
@@ -112,12 +114,13 @@ class MooseWidget(QtGui.QWidget):
 
     else:
       for key, obj in self._objects.iteritems():
+        print 'Seraching for', full_name, 'in', obj.__class__.__name__
         if hasattr(obj, full_name):
           attr = getattr(obj, full_name)
           return attr
 
         elif isinstance(obj, MooseWidget):
-          attr = obj._getAttr(name, False)
+          attr = obj._getAttr(full_name, False)
           if attr != None:
             return attr
 
@@ -166,7 +169,7 @@ class MooseWidget(QtGui.QWidget):
 
     # Make sure the the object added is QtGui.QObject instance
     if not isinstance(q_object, QtCore.QObject):
-      peacockError("The supplied object must be a QtGui.QObject, but a ",
+      self.peacockError("The supplied object must be a QtGui.QObject, but a ",
                    q_object.__class__.__name__, " was supplied")
 
     # Pass the debug and main window properties to MooseWidget objects being added
@@ -191,7 +194,7 @@ class MooseWidget(QtGui.QWidget):
     # Determine the handle for the object being added, and test that it doesn't exist
     handle = kwargs.pop('handle', 'object_' + str(len(self._objects)))
     if handle in self._objects:
-      peacockError("The handle, ", handle, " already exists")
+      self.peacockError("The handle, ", handle, " already exists")
 
     # Add the object to the list of objects and set the handle property
     self._objects[handle] = q_object
@@ -203,7 +206,7 @@ class MooseWidget(QtGui.QWidget):
       label_handle = handle + 'Label'
 
       if label_handle in self._objects:
-        peacockError('The handle, ', label_handle, ' already exists')
+        self.peacockError('The handle, ', label_handle, ' already exists')
 
       if parent.endswith('._main_layout'):
         label_object = self.addObject(QtGui.QLabel(label), handle=handle+'Label')
@@ -263,23 +266,23 @@ class MooseWidget(QtGui.QWidget):
   # @param callback_name The handle associated with the QObject added via addObject that
   #                      has a _callback<name> method defined in the class or callable method.
   # @param search_children Toggle the searching of child MooseWidget objects (optional, default is True)
-  def connectSignal(self, signal_name, callback_name, search_children = True ):
+  def connectSignal(self, signal_name, callback_name):
 
     # Set signal object
     signal = signal_name
     if isinstance(signal, str):
-      signal = self.signal(signal, search_children)
+      signal = self.signal(signal)
 
     if not isinstance(signal, QtCore.Signal):
-      peacockError('The supplied signal must be valid signal name or a QtCore.Signal object')
+      self.peacockError('The supplied signal must be valid signal name or a QtCore.Signal object')
 
     # Get method
     callback = callback_name
     if isinstance(callback, str):
-      callback = self.callback(callback, search_children)
+      callback = self.callback(callback)
 
     if not hasattr(callback, '__call__'):
-      peacockError('The supplied callback must be a valid callback name or a callable function')
+      self.peacockError('The supplied callback must be a valid callback name or a callable function')
 
     signal.connect(callback)
 
