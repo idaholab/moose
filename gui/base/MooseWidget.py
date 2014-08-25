@@ -23,7 +23,7 @@ class MooseWidget(QtGui.QWidget):
   #
   #  main <QMainWindow>
   #    Sets the main window for this object, which is used for adding
-  #    QMenu items. The main window object of  will be set on child MooseWidget object
+  #    QMenu items. The main window object will be set on child MooseWidget object
   #    to that of the parent
   def __init__(self, **kwargs):
 
@@ -76,41 +76,15 @@ class MooseWidget(QtGui.QWidget):
   # Extract a callback method by name
   # @param callback_name The handle associated with the QObject added via addObject that
   #                      has a _callback<name> method defined in the class
-  # @param search_children Toggle the searching of child MooseWidget objects (optional, default is True)
   #
-  def callback(self, name, search_children = True):
-    callback_name = '_callback' + name
-
-    for key, obj in self._objects.iteritems():
-      if hasattr(obj, callback_name):
-        return getattr(obj, callback_name)
-
-      elif search_children and isinstance(obj, MooseWidget):
-        attr = obj.callback(name)
-        if attr != None:
-          return attr
-
-    #peacockWarning(...)
-    return None
+  def callback(self, name):
+    return self._getAttr('_callback' + name)
 
   ##
   # Extract a Signal object by name
   # @param name The signal name contained within a Peacock object (_signal_<name>)
-  # @param search_children Toggle the searching of child MooseWidget objects (optional, default is True)
-  def signal(self, name, search_children = True):
-    signal_name = '_signal_' + name
-
-    for key, obj in self._objects.iteritems():
-      if hasattr(obj, signal_name):
-        return getattr(obj, signal_name)
-
-      elif search_children and isinstance(obj, MooseWidget):
-        attr = obj.signal(name)
-        if attr != None:
-          return attr
-
-    #peacockWarning(...)
-    return None
+  def signal(self, name):
+    return self._getAttr('_signal' + name)
 
   ##
   # Extract value from pull method  by name
@@ -122,26 +96,31 @@ class MooseWidget(QtGui.QWidget):
   #   func = obj.pull('MyFinger')
   #   data = func(some_additional_argument)
   #
-  # By default, pull will automatically search "sibling" objects if the, for example.
+  # The pull will automatically search "sibling" objects if the, for example.
   #
-  def pull(self, name, search_owner = True):
-    pull_name = '_pull' + name
+  def pull(self, name):
+    return self._getAttr('_pull' + name)
 
+
+  ##
+  # Extract attribute from MooseObject (protected)
+  def _getAttr(self, full_name, search_owner = True):
+
+    # Search the owner
     if search_owner and isinstance(self.property('owner'), MooseWidget):
-      return self.property('owner').pull(name, False)
+      return self.property('owner')._getAttr(full_name, False)
 
     else:
       for key, obj in self._objects.iteritems():
-        if hasattr(obj, pull_name):
-          attr = getattr(obj, pull_name)
+        if hasattr(obj, full_name):
+          attr = getattr(obj, full_name)
           return attr
 
         elif isinstance(obj, MooseWidget):
-          attr = obj.pull(name, False)
+          attr = obj._getAttr(name, False)
           if attr != None:
             return attr
 
-    #peacockWarning(...)
     return None
 
   ##
