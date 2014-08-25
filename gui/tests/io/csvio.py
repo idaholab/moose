@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys
+import os, sys
 
 # Import Peacock IO module
 import io

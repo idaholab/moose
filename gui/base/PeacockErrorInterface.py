@@ -11,7 +11,7 @@ from PySide import QtCore, QtGui
 #   True | <False>
 #   If set to true, no error dialog or screen printing occurs. The message is
 #   simply stored. It is accessible through getLastErrorMessage()
-class PeacockErrorInterface:
+class PeacockErrorInterface(object):
 
   ## Constructor (public)
   def __init__(self, **kwargs):
