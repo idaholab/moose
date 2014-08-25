@@ -13,7 +13,7 @@ import utils
 #     (b) It must not accept any additional arguments
 #     (c) It must return a tuple containing the test result and the failure message,
 #         (i.e., result, msg = _testThis())
-class PeacockTestInterface:
+class PeacockTestInterface(object):
 
   ## Constructor (empty; public)
   def __init__(self, **kwargs):
