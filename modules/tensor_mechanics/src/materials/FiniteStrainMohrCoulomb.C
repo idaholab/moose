@@ -185,7 +185,7 @@ FiniteStrainMohrCoulomb::dyieldFunction_dintnl(const RankTwoTensor & stress, con
     std::vector<Real> eigvals;
     stress.symmetricEigenvalues(eigvals);
     Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2*mean_stress)*sin_angle;
-    Real dtmp = -2*mean_stress*dsin_angle;
+    Real dtmp = (eigvals[2] + eigvals[0] - 2*mean_stress)*dsin_angle;
     Real denom = std::sqrt(_small_smoother2 + 0.25*std::pow(tmp, 2));
     df_dintnl[0].assign(1, mean_stress*dsin_angle + 0.25*tmp*dtmp/denom - dcohesion(intnl[0])*cos_angle - cohesion(intnl[0])*dcos_angle);
   }
@@ -229,7 +229,7 @@ FiniteStrainMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & stress, co
 
     Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2*mean_stress)*sin_angle;
     RankTwoTensor dtmp = deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2*dmean_stress)*sin_angle;
-    Real denom = std::sqrt(_small_smoother2 + std::pow(eigvals[2] - mean_stress, 2));
+    Real denom = std::sqrt(_small_smoother2 + 0.25*std::pow(tmp, 2));
 
     dr_dstress.assign(1, 0.25*tmp*(d2eigvals[2] - d2eigvals[0] + (d2eigvals[2] + d2eigvals[0])*sin_angle)/denom);
     Real pre = (0.25 - std::pow(0.25*tmp/denom, 2))/denom;
@@ -291,9 +291,9 @@ FiniteStrainMohrCoulomb::dflowPotential_dintnl(const RankTwoTensor & stress, con
     std::vector<RankTwoTensor> deigvals;
     stress.dsymmetricEigenvalues(eigvals, deigvals);
     Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2*mean_stress)*sin_angle;
-    Real dtmp_dintnl = -2*mean_stress*dsin_angle;
+    Real dtmp_dintnl = (eigvals[2] + eigvals[0] - 2*mean_stress)*dsin_angle;
     RankTwoTensor dtmp_dstress = deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2*dmean_stress)*sin_angle;
-    RankTwoTensor d2tmp_dstress_dintnl = -2*dmean_stress*dsin_angle;
+    RankTwoTensor d2tmp_dstress_dintnl = (deigvals[2] + deigvals[0] - 2*dmean_stress)*dsin_angle;
     Real denom = std::sqrt(_small_smoother2 + 0.25*std::pow(tmp, 2));
     dr_dintnl[0].assign(1, dmean_stress*dsin_angle + 0.25*dtmp_dintnl*dtmp_dstress/denom + 0.25*tmp*d2tmp_dstress_dintnl/denom - 0.25*tmp*dtmp_dstress*0.25*tmp*dtmp_dintnl/std::pow(denom, 3));
   }
