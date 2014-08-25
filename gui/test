@@ -1,0 +1,6 @@
+#!/usr/bin/python
+
+from io import *
+
+io = CSVIO('test.csv', testing=True)
+io.test()
