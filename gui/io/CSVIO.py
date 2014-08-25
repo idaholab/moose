@@ -2,8 +2,8 @@
 import os, sys, csv
 
 # Peacock modules
-sys.path.append(os.path.abspath('..'))
 from base import *
+from tests.io import *
 
 ##
 # A class for performing read/write operations on *.csv files
@@ -19,6 +19,11 @@ class CSVIO(object, PeacockErrorInterface, PeacockTestInterface):
   def __init__(self, filename, **kwargs):
     PeacockErrorInterface.__init__(self, **kwargs)
     PeacockTestInterface.__init__(self, **kwargs)
+
+    # Register the tests associated with this object
+    self.registerTest(csvio.testDataRead)
+    self.registerTest(csvio.testDataError)
+    self.registerTest(csvio.testInvalidInput)
 
     # Initialize member variables
     self._headers = []
@@ -70,30 +75,3 @@ class CSVIO(object, PeacockErrorInterface, PeacockTestInterface):
     except KeyError:
       self.peacockError('No data for key \'' + key + '\' located', dialog=False)
       return None
-
-# tests (see PeacockTestInterface)
-  ## Test reading data
-  def _testDataRead(self):
-    result = data['temp'] == [1.2, 3.3, 5.5]
-    fail_msg = 'Data read failed'
-    return (result, fail_msg)
-
-  ## Test data access failure
-  def _testDataError(self):
-    data['ThisDoesNotExist']
-    result = self.testLastErrorMessage('No data for key \'ThisDoesNotExist\' located')
-    fail_msg = 'Error failed to produce'
-    return (result, fail_msg)
-
-  ## Test invalid file input
-  def _testInvalidInput(self):
-    io = CSVIO('bad_filename.csv', testing=True)
-    result = io.testLastErrorMessage('The file \'bad_filename.csv\' does not exist.')
-    fail_msg = 'The fake filename exists'
-    return (result, fail_msg)
-
-
-# Perform testing
-if __name__ == "__main__":
-  data = CSVIO('test.csv', testing=True)
-  data.test()
