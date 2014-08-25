@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# Import Peacock modules
+import utils
+
 ##
 # A a class for creating self testing classes
 #
@@ -14,36 +17,26 @@ class PeacockTestInterface:
 
   ## Constructor (empty; public)
   def __init__(self, **kwargs):
-    pass
+    self._tests = []
+
+  ##
+  # Register a function to execute as a test
+  #
+  #
+  def registerTest(self, test):
+    self._tests.append(test)
 
   ##
   # Performs the testing by calling all _test<YourNameHere> methods
   def test(self):
-    # Loop over all properties and methods for this class
-    prefix = '_test'
-    for item in dir(self):
 
-      # If the method/property starts with _test, investigate for running
-      if item.startswith(prefix):
+    for test in self._tests:
+      # If it is not callable, i.e., a method, go to the next one
+      if not hasattr(test, '__call__'):
+        print "Some error message here"
 
-        # Extract the test name and retrieve the attribute
-        name = item.replace(prefix, '')
-        attr = getattr(self, prefix+name)
-
-        # If it is not callable, i.e., a method, go to the next one
-        if not hasattr(attr, '__call__'):
-          continue
-
-        # Call the methods if it takes a single argument (self) otherwise produce
-        # a failure with appropriate message
-        args = attr.func_code.co_argcount
-        if args == 1:
-          result, msg = attr()
-          self._showResult(name, result, msg)
-        elif args == 0:
-          self._showResult(name, False, prefix+name + ' cannot be static')
-        else:
-          self._showResult(name, False, prefix+name + ' cannot accept arguments')
+      result, msg = test()
+      self._showResult(test.__name__, result, msg)
     return
 
   ##
@@ -54,16 +47,22 @@ class PeacockTestInterface:
   def _showResult(self, name, result, *args):
 
     # Build the status message: OK or FAIL
-    if result:
-      result = 'OK'
-    else:
-      result = 'FAIL'
 
+    if result:
+       msg = utils.colorText('OK', 'GREEN')
+       msg_length = 2
+    else:
       # Add the failure message, if it exists
+      msg_length = 4
+      msg = ''
       if len(args) == 1 and isinstance(args[0], str) and len(args[0]) > 0 :
-        result += ' (' + args[0] + ')'
+        msg = utils.colorText('(' + args[0] + ') ', 'RED')
+        msg_length += len(args[0])+ 3
+
+      # Print the failure
+      msg += utils.colorText('FAIL', 'RED')
 
     # Produce the complete test message string
-    name = self.__class__.__name__ + '/' + name
-    n = 110 - len(name) - len(result)
-    print name + '.'*n + result
+    name = utils.colorText(self.__class__.__name__, 'YELLOW') + '/' + name
+    n = 110 - len(name) - msg_length
+    print name + '.'*n + msg
