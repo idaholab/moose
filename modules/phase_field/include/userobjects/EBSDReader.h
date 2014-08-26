@@ -18,6 +18,17 @@ public:
   EBSDReader(const std::string & name, InputParameters params);
   virtual ~EBSDReader();
 
+  struct EBSDPointData {
+    Real phi1, phi, phi2, phase, symmetry;
+    unsigned int grain, op;
+    Point p;
+  };
+  struct EBSDAvgData {
+    Real phi1, phi, phi2, phase, symmetry;
+    unsigned int n;
+    Point p;
+  };
+
   /**
    * Called before execute() is ever called so that data can be cleared.
    */
@@ -36,22 +47,12 @@ public:
   /**
    * Get the requested type of data at the point p.
    */
-  Real getData(const Point & p, MooseEnum data_type) const;
+  const EBSDPointData & getData(const Point & p) const;
 
   /**
    * Get the requested type of average data at the index i.
    */
-  Real getAvgData(const unsigned int & i, MooseEnum data_type) const;
-
-  /**
-   * Returns a MooseEnum object associated with the C++ DataType enum
-   * defined in this class.  This should be maintained in the same order
-   * as the C++ DataType enum.
-   */
-  MooseEnum getDataType (const std::string & type) const
-  {
-    return MooseEnum("PHI1 PHI PHI2 X Y Z GRAIN PHASE SYMMETRY OP AVG_PHI1 AVG_PHI AVG_PHI2 AVG_X AVG_Y AVG_Z AVG_PHASE AVG_SYMMETRY", type);
-  }
+  const EBSDAvgData &  getAvgData(unsigned int i) const;
 
   const std::vector<Point> & getCenterPoints() const
   {
@@ -59,33 +60,6 @@ public:
   }
 
 protected:
-
-  /**
-   * An enum, which is used in conjunction with a MooseEnum, for
-   * determining which type of data to return.
-   */
-  enum DataType
-  {
-    PHI1 = 0,
-    PHI,
-    PHI2,
-    X,
-    Y,
-    Z,
-    GRAIN,
-    PHASE,
-    SYMMETRY,
-    OP,
-    AVG_PHI1,
-    AVG_PHI,
-    AVG_PHI2,
-    AVG_X,
-    AVG_Y,
-    AVG_Z,
-    AVG_PHASE,
-    AVG_SYMMETRY
-  };
-
   // MooseMesh Variables
   MooseMesh & _mesh;
   NonlinearSystem & _nl;
@@ -101,10 +75,10 @@ protected:
   Point _range;
 
   // Logically three-dimensional data indexed by geometric points in a 1D vector
-  std::vector<std::vector<Real> > _data;
+  std::vector<EBSDPointData> _data;
 
   // Logically three-dimensional data indexed by index in a 1D vector
-  std::vector<std::vector<Real> > _avg_data;
+  std::vector<EBSDAvgData> _avg_data;
 
   // The number of values in the x, y and z directions.
   unsigned _nx, _ny, _nz;
@@ -128,7 +102,7 @@ protected:
   unsigned indexFromPoint(const Point & p) const;
 
   // Transfer the index into the _avg_data array from given index
-  unsigned indexFromIndex(const unsigned int & var) const;
+  unsigned indexFromIndex(unsigned int var) const;
 };
 
 #endif /* EBSDREADER_H */
