@@ -32,17 +32,16 @@ ReconVarIC::initialSetup()
   const MeshBase::element_iterator end = _mesh.getMesh().active_elements_end();
   for (MeshBase::element_iterator el = begin; el != end; ++el)
   {
-    Elem *current_elem = *el;
+    Elem * current_elem = *el;
     unsigned int index = current_elem->id();
     Point p0 = current_elem->centroid();
-    _grn[index] = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("GRAIN"));
-    _x[index] = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("X"));
-    _y[index] = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("Y"));
-    _z[index] = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("Z"));
-    // Moose::out << "Element #, Grain #, X, Y, Z:  " << current_elem->id()  << "  " << _grn[index] << "  " << _x[index] << "  " << _y[index] << "  " << _z[index] << "\n" << std::endl;
+    _gp[index]._grn = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("GRAIN"));
+    _gp[index]._x = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("X"));
+    _gp[index]._y = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("Y"));
+    _gp[index]._z = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("Z"));
   }
 
-  // Calculate centerpoint of each EBSD grain
+  // Calculate centerpoint of each EBSD grain TODO: use Point
   _sum_x.resize(_grain_num);
   _sum_y.resize(_grain_num);
   _sum_z.resize(_grain_num);
@@ -52,13 +51,13 @@ ReconVarIC::initialSetup()
   for (unsigned int i = 0; i < _grain_num; i++)
   {
     num_pts = 0;
-    for (std::map<unsigned int, unsigned int>::iterator it = _grn.begin(); it != _grn.end(); ++it)
+    for (std::map<unsigned int, GrainPoint>::iterator it = _gp.begin(); it != _gp.end(); ++it)
     {
-      if (it->second == i)
+      if (it->second._grn == i)
       {
-        _sum_x[i] += _x[it->first];
-        _sum_y[i] += _y[it->first];
-        _sum_z[i] += _z[it->first];
+        _sum_x[i] += it->second._x;
+        _sum_y[i] += it->second._y;
+        _sum_z[i] += it->second._z;
         num_pts += 1;
       }
     }
@@ -68,34 +67,33 @@ ReconVarIC::initialSetup()
     // Moose::out << _centerpoints[i] << "\n" << std::endl;
   }
 
-  // Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-  {
-    _bottom_left(i) = _mesh.getMinInDimension(i);
-    _top_right(i) = _mesh.getMaxInDimension(i);
-  }
-  _range = _top_right - _bottom_left;
-
   // Output error message if number of order parameters is larger than number of grains from EBSD dataset
   if (_op_num > _grain_num)
      mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
 
+Moose::err << "Assigning OPs\n";
   // Assign grains to each order parameter in a way that maximizes distance
   _assigned_op.resize(_grain_num);
+  std::vector<int> min_op_ind;
+  std::vector<Real> min_op_dist;
+  min_op_ind.resize(_op_num);
+  min_op_dist.resize(_op_num);
   for (unsigned int grain=0; grain < _grain_num; grain++)
   {
-    std::vector<int> min_op_ind;
-    std::vector<Real> min_op_dist;
-    min_op_ind.resize(_op_num);
-    min_op_dist.resize(_op_num);
-
-      // Determine the distance to the closest center assigned to each order parameter
+    // Determine the distance to the closest center assigned to each order parameter
     if (grain >= _op_num)
     {
-      std::fill(min_op_dist.begin() , min_op_dist.end(), _range.size());
-      for (unsigned int i=0; i<grain; i++)
+      // We can set the array to the distances to the grains 0.._op_num-1 (see assignment in the else case)
+      for (unsigned int i=0; i<_op_num; ++i)
       {
-        Real dist =  _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
+        min_op_dist[i] = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
+        min_op_ind[_assigned_op[i]] = i;
+      }
+
+      // Now check if any of the extra grains are even closer
+      for (unsigned int i=_op_num; i<grain; ++i)
+      {
+        Real dist = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
         if (min_op_dist[_assigned_op[i]] > dist)
         {
           min_op_dist[_assigned_op[i]] = dist;
@@ -103,26 +101,21 @@ ReconVarIC::initialSetup()
         }
       }
     }
-
-    // Assign the current center point to the order parameter that is furthest away.
-    Real mx;
-    if (grain < _op_num)
-        _assigned_op[grain] = grain;
     else
     {
-      mx = 0.0;
-      unsigned int mx_ind = 1e6;
-      for (unsigned int i = 0; i < _op_num; i++) // Find index of max
-        if (mx < min_op_dist[i])
-        {
-          mx = min_op_dist[i];
-          mx_ind = i;
-        }
-      _assigned_op[grain] = mx_ind;
+      _assigned_op[grain] = grain;
+      continue;
     }
-    // Moose::out << "For grain " << grain << ", center point = " << _centerpoints[grain](0) << " " << _centerpoints[grain](1) << "\n";
-    // Moose::out << "Max index is " << _assigned_op[grain] << ", with a max distance of " << mx << "\n";
+
+    // Assign the current center point to the order parameter that is furthest away.
+    unsigned int mx_ind = 0;
+    for (unsigned int i = 1; i < _op_num; i++) // Find index of max
+      if (min_op_dist[mx_ind] < min_op_dist[i])
+        mx_ind = i;
+
+    _assigned_op[grain] = mx_ind;
   }
+Moose::err << "Done assigning OPs\n";
 }
 
 // Note that we are not actually using Point coordinates that get passed in to assign the order parameter.
