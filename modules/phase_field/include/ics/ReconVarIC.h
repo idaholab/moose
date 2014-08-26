@@ -37,12 +37,11 @@ private:
   Point _range;
 
   struct GrainPoint {
-    unsigned int _grn;
-    Real _x, _y, _z; // TODO: Use Point
+    unsigned int grain;
+    Point p;
   };
   std::map<unsigned int, GrainPoint> _gp;
 
-  std::vector<Real> _sum_x, _sum_y, _sum_z;
   std::vector<Point> _centerpoints;
   std::vector<Real> _assigned_op;
 };

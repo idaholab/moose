@@ -21,7 +21,8 @@ ReconVarIC::ReconVarIC(const std::string & name,InputParameters parameters) :
     _op_num(getParam<unsigned int>("crys_num")),
     _grain_num(getParam<unsigned int>("grain_num")),
     _op_index(getParam<unsigned int>("crys_index"))
-{}
+{
+}
 
 void
 ReconVarIC::initialSetup()
@@ -35,36 +36,30 @@ ReconVarIC::initialSetup()
     Elem * current_elem = *el;
     unsigned int index = current_elem->id();
     Point p0 = current_elem->centroid();
-    _gp[index]._grn = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("GRAIN"));
-    _gp[index]._x = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("X"));
-    _gp[index]._y = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("Y"));
-    _gp[index]._z = _ebsd_reader.getData(p0, _ebsd_reader.getDataType("Z"));
+    const EBSDReader::EBSDPointData & d = _ebsd_reader.getData(p0);
+    _gp[index].grain = d.grain;
+    _gp[index].p = d.p;
   }
 
   // Calculate centerpoint of each EBSD grain TODO: use Point
-  _sum_x.resize(_grain_num);
-  _sum_y.resize(_grain_num);
-  _sum_z.resize(_grain_num);
   _centerpoints.resize(_grain_num);
-
-  unsigned int num_pts;
+  std::vector<unsigned int> num_pts(_grain_num);
   for (unsigned int i = 0; i < _grain_num; i++)
   {
-    num_pts = 0;
-    for (std::map<unsigned int, GrainPoint>::iterator it = _gp.begin(); it != _gp.end(); ++it)
-    {
-      if (it->second._grn == i)
-      {
-        _sum_x[i] += it->second._x;
-        _sum_y[i] += it->second._y;
-        _sum_z[i] += it->second._z;
-        num_pts += 1;
-      }
-    }
-    _centerpoints[i](0) = _sum_x[i] / num_pts;
-    _centerpoints[i](1) = _sum_y[i] / num_pts;
-    _centerpoints[i](2) = _sum_z[i] / num_pts;
-    // Moose::out << _centerpoints[i] << "\n" << std::endl;
+    _centerpoints[i] = 0.0;
+    num_pts[i] = 0;
+  }
+
+  for (std::map<unsigned int, GrainPoint>::iterator it = _gp.begin(); it != _gp.end(); ++it)
+  {
+    _centerpoints[it->second.grain] += it->second.p;
+    num_pts[it->second.grain]++;
+  }
+
+  for (unsigned int i = 0; i < _grain_num; i++)
+  {
+    if (num_pts[i] == 0) continue;
+    _centerpoints[i] *= 1.0 / Real(num_pts[i]);
   }
 
   // Output error message if number of order parameters is larger than number of grains from EBSD dataset
@@ -124,13 +119,11 @@ Moose::err << "Done assigning OPs\n";
 Real
 ReconVarIC::value(const Point &)
 {
-  Real op = 0.0;
-  Point p1 = _current_elem->centroid();
-  unsigned int grn_index = _ebsd_reader.getData(p1, _ebsd_reader.getDataType("GRAIN"));
+  const Point p1 = _current_elem->centroid();
+  const unsigned int grn_index = _ebsd_reader.getData(p1).grain;;
+
   if (_assigned_op[grn_index] == _op_index)
-    op = 1.0;
+    return 1.0;
   else
-    op = 0.0;
-  // Moose::out << _current_elem->id() << "  " << p << " " << op <<  "\n" << std::endl;
-  return op;
+    return 0.0;
 }
