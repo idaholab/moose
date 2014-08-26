@@ -44,6 +44,10 @@ MultiMooseEnum::MultiMooseEnum()
 {
 }
 
+MultiMooseEnum::~MultiMooseEnum()
+{
+}
+
 MultiMooseEnum &
 MultiMooseEnum::operator=(const std::string & names)
 {

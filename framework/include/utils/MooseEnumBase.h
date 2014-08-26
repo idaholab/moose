@@ -40,6 +40,9 @@ public:
    */
   MooseEnumBase(const MooseEnumBase & other_enum);
 
+  /// Destructor
+  virtual ~MooseEnumBase();
+
   /**
    * Method for returning a vector of all valid enumeration names for this instance
    * @return a vector of names

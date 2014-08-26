@@ -48,6 +48,8 @@ public:
    */
   MultiMooseEnum(const MultiMooseEnum & other_enum);
 
+  virtual ~MultiMooseEnum();
+
   /**
    * Comparison operators for comparing with character constants, MultiMooseEnums
    * or integer values

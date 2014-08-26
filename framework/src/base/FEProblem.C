@@ -68,6 +68,7 @@
 
 #include "Transfer.h"
 #include "MultiAppTransfer.h"
+#include "MultiMooseEnum.h"
 
 //libmesh Includes
 #include "libmesh/exodusII_io.h"
@@ -149,7 +150,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
-  this->parameters().set<std::vector<MooseEnum> >("petsc_options") = std::vector<MooseEnum>();
+  this->parameters().set<MultiMooseEnum>("petsc_options") = MultiMooseEnum("", "", true);
   this->parameters().set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
   this->parameters().set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
 #endif
@@ -3831,35 +3832,36 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
 
 #ifdef LIBMESH_HAVE_PETSC
 void
-FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
+FEProblem::storePetscOptions(const MultiMooseEnum & petsc_options,
                              const std::vector<std::string> & petsc_options_inames,
                              const std::vector<std::string> & petsc_options_values)
 {
-  std::vector<MooseEnum> & po = parameters().set<std::vector<MooseEnum> >("petsc_options");         // set because we need a writable reference
-  for (unsigned int i = 0; i < petsc_options.size(); i++)
+  MultiMooseEnum & po = parameters().set<MultiMooseEnum>("petsc_options");         // set because we need a writable reference
+
+  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
   {
     /**
      * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is initialized
      * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
      */
-    if (petsc_options[i] == "-log_summary")
+    if (*it == "-log_summary")
       mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
 
     // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
     else
     {
       std::string help_string;
-      if (petsc_options[i] == "-snes" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator")
+      if (*it == "-snes" || *it == "-snes_mf" || *it == "-snes_mf_operator")
         help_string = "Please set the solver type through \"solve_type\".";
-      else if (petsc_options[i] == "-ksp_monitor")
+      else if (*it == "-ksp_monitor")
         help_string = "Please use \"Outputs/console/type=Console Outputs/console/linear_residuals=true\"";
 
       if (help_string != "")
-        mooseWarning("The PETSc option " << petsc_options[i] << " should not be used directly in a MOOSE input file. " << help_string);
+        mooseWarning("The PETSc option " << *it << " should not be used directly in a MOOSE input file. " << help_string);
     }
 
-    if (find(po.begin(), po.end(), petsc_options[i]) == po.end())
-      po.push_back(petsc_options[i]);
+    if (find(po.begin(), po.end(), *it) == po.end())
+      po.insert(*it);
   }
 
   std::vector<std::string> & pn = parameters().set<std::vector<std::string> >("petsc_inames");         // set because we need a writable reference
