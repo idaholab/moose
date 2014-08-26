@@ -40,7 +40,6 @@
 
 [Executioner]
   type = TestSteady
-  test_type = "Exception"
   solve_type = 'PJFNK'
 []
 

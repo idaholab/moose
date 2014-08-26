@@ -35,22 +35,27 @@ Real
 ExceptionKernel::computeQpResidual()
 {
   if (_when == INITIAL_CONDITION)
-    throw MooseException(1);
+    throw MooseException("Initial error");
   else if (_when == RESIDUAL)
   {
-    if (_call_no == 1000)                 // 1000 calls to computeQpResidual is enough to get us into linear solve
-      throw MooseException(2);
+    if (_call_no == 3240)                 // 1000 calls to computeQpResidual is enough to get us into linear solve
+    {
+      std::cout<<"Stopping solve!"<<std::endl;
+      _fe_problem.getNonlinearSystem().stopSolve();
+    }
+
+      //throw MooseException("Residual error");
   }
   _call_no++;
 
-  return 0.;
+  return 0;
 }
 
 Real
 ExceptionKernel::computeQpJacobian()
 {
   if (_when == JACOBIAN)
-    throw MooseException(3);
+    throw MooseException("Jacobian");
 
   return 0.;
 }

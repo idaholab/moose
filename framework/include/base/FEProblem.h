@@ -79,12 +79,12 @@ enum MooseLinearConvergenceReason
   // MOOSE_CONVERGED_ATOL_NORMAL        =  9,
   MOOSE_CONVERGED_RTOL                  =  2,
   MOOSE_CONVERGED_ATOL                  =  3,
-  MOOSE_CONVERGED_ITS                   =  4
+  MOOSE_CONVERGED_ITS                   =  4,
   // MOOSE_CONVERGED_CG_NEG_CURVE       =  5,
   // MOOSE_CONVERGED_CG_CONSTRAINED     =  6,
   // MOOSE_CONVERGED_STEP_LENGTH        =  7,
   // MOOSE_CONVERGED_HAPPY_BREAKDOWN    =  8,
-  // MOOSE_DIVERGED_NULL                = -2,
+  MOOSE_DIVERGED_NULL                   = -2,
   // MOOSE_DIVERGED_ITS                 = -3,
   // MOOSE_DIVERGED_DTOL                = -4,
   // MOOSE_DIVERGED_BREAKDOWN           = -5,
@@ -284,6 +284,30 @@ public:
 
   virtual void init();
   virtual void solve();
+
+  /**
+   * Set an exception.  Usually this should not be directly called - but should be called through the mooseException() macro.
+   *
+   * @param message The error message about the exception.
+   */
+  virtual void setException(std::string & message);
+
+  /**
+   * Whether or not an exception has occurred.
+   */
+  virtual bool hasException() { return _has_exception; }
+
+  /**
+   * Check to see if an exception has occurred on any processor and stop the solve.
+   *
+   * Note: Collective on MPI!  Must be called simultaneously by all processors!
+   *
+   * Also: This will throw a MooseException!
+   *
+   * Note: DO NOT CALL THIS IN A THREADED REGION!  This is meant to be called just after a threaded section.
+   */
+  virtual void checkExceptionAndStopSolve();
+
   virtual bool converged();
   virtual unsigned int nNonlinearIterations() { return _nl.nNonlinearIterations(); }
   virtual unsigned int nLinearIterations() { return _nl.nLinearIterations(); }
@@ -1021,6 +1045,12 @@ protected:
 
   /// Preconditioner description
   std::string _pc_description;
+
+  /// Whether or not an exception has occurred
+  bool _has_exception;
+
+  /// The error message to go with an exception
+  std::string _exception_message;
 
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)

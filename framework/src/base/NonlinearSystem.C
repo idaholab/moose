@@ -199,26 +199,20 @@ NonlinearSystem::init()
 void
 NonlinearSystem::solve()
 {
-  try
+  if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
-    if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
-    {
-      //Calculate the initial residual for use in the convergence criterion.  The initial
-      //residual
-      _computing_initial_residual = true;
-      _fe_problem.computeResidual(_sys, *_current_solution, *_sys.rhs);
-      _computing_initial_residual = false;
-      _sys.rhs->close();
-      _initial_residual_before_preset_bcs = _sys.rhs->l2_norm();
-      if (_compute_initial_residual_before_preset_bcs)
-        _console << "Initial residual before setting preset BCs: " << _initial_residual_before_preset_bcs << '\n';
-    }
+    //Calculate the initial residual for use in the convergence criterion.  The initial
+    //residual
+    _computing_initial_residual = true;
+    _fe_problem.computeResidual(_sys, *_current_solution, *_sys.rhs);
+    _computing_initial_residual = false;
+    _sys.rhs->close();
+    _initial_residual_before_preset_bcs = _sys.rhs->l2_norm();
+    if (_compute_initial_residual_before_preset_bcs)
+      _console << "Initial residual before setting preset BCs: " << _initial_residual_before_preset_bcs << '\n';
   }
-  catch (MooseException & e)
-  {
-    // re-throw the exception, we can do this since we did not enter the solve() call yet
-    throw;
-  }
+
+  _fe_problem.checkExceptionAndStopSolve(); // This might not be right ;-)
 
   // Clear the iteration counters
   _current_l_its.clear();
@@ -252,10 +246,6 @@ NonlinearSystem::solve()
     MatFDColoringDestroy(&_fdcoloring);
 #endif
 #endif
-
-  // we are back from the libMesh solve, so re-throw the exception if we got one;
-  if (_exception > 0)
-    throw _exception;
 }
 
 void
@@ -266,6 +256,21 @@ NonlinearSystem::restoreSolutions()
   // and update _current_solution
   _current_solution = _sys.current_local_solution.get();
 }
+
+
+void
+NonlinearSystem::stopSolve()
+{
+#ifdef LIBMESH_HAVE_PETSC
+#if PETSC_VERSION_LESS_THAN(3,0,0)
+#else
+  PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
+  std::cout<<"NonlinearSystem::stopSolve() Stopping solve! "<<&solver<<std::endl;
+  SNESSetFunctionDomainError(solver.snes());
+#endif
+#endif
+}
+
 
 void
 NonlinearSystem::initialSetup()
@@ -464,6 +469,9 @@ NonlinearSystem::setupSplitBasedPreconditioner()
 bool
 NonlinearSystem::converged()
 {
+  if (_fe_problem.hasException())
+    return false;
+
   return _sys.nonlinear_solver->converged;
 }
 
@@ -698,18 +706,6 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
   }
   catch (MooseException & e)
   {
-    residual.close();
-    if (!_computing_initial_residual)
-    {
-      // tell solver to stop
-#ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3,0,0)
-#else
-      PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*_sys.nonlinear_solver);
-      SNESSetFunctionDomainError(solver.snes());
-#endif
-#endif
-    }
     throw;
   }
 

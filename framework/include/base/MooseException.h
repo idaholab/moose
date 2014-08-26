@@ -15,19 +15,33 @@
 #ifndef MOOSEEXCEPTION_H
 #define MOOSEEXCEPTION_H
 
+#include <exception>
+
 /**
- * MooseException is typedef'd as int so we can do simple sync'ing over the MPI.
- *
- * To use it in MOOSE (framework, not applications!), you have two macros available:
- * - PARALLEL_TRY
- * - PARALLEL_CATCH
- *
- * To use these right, one has to include a critical part of the code inside it. There cannot
- * be any MPI communications inside this block, since it would mess up the MPI comm pattern and
- * the code would end up out of sync (i.e. hang inside MPI).
- *
- * NOTE: These macros can be used only inside Nonlinear system (right now).
+ * Provides a way for users to bail out of the current solve.
  */
-typedef int MooseException;
+class MooseException : public std::exception
+{
+public:
+  /**
+   * @param message The message to display
+   */
+  MooseException(std::string message):
+    _message(message)
+  {}
+
+  /**
+   * Get out the error message.
+   *
+   * Satisfies the interface of std::exception
+   */
+  virtual const char* what() const throw()
+  {
+    return _message.c_str();
+  }
+
+protected:
+  std::string _message;
+};
 
 #endif /* MOOSEEXCEPTION_H */

@@ -147,6 +147,7 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
+    _has_exception(false),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
@@ -3102,6 +3103,43 @@ FEProblem::solve()
     _displaced_problem->syncSolutions(*_nl.currentSolution(), *_aux.currentSolution());
 }
 
+
+void
+FEProblem::setException(std::string & message)
+{
+  _has_exception = true;
+  _exception_message = message;
+}
+
+
+void
+FEProblem::checkExceptionAndStopSolve()
+{
+  // See if any processor had an exception.  If it did, get back the processor that the exception occurred on.
+
+  unsigned int processor_id;
+
+  _communicator.maxloc(_has_exception, processor_id);
+
+  if (_has_exception)
+  {
+    _communicator.broadcast(_exception_message, processor_id);
+
+    print_trace();
+
+    // Print the message
+    if (_communicator.rank() == 0)
+      std::cerr<<_exception_message<<std::endl;
+
+    // Stop the solve
+    // _nl.stopSolve();
+
+    // Throw the error
+    throw MooseException(_exception_message);
+  }
+}
+
+
 bool
 FEProblem::converged()
 {
@@ -3247,7 +3285,14 @@ FEProblem::computeResidualL2Norm()
 void
 FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
-  computeResidualType(soln, residual, _kernel_type);
+  try
+  {
+    computeResidualType(soln, residual, _kernel_type);
+  }
+  catch(MooseException & e)
+  {
+    // Blank on purpose because this error should have already been dealt with
+  }
 }
 
 void
@@ -3407,33 +3452,22 @@ void
 FEProblem::computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number>& lower, NumericVector<Number>& upper)
 {
   if (!_nl.hasVector("lower_bound") || !_nl.hasVector("upper_bound")) return;
-  try
+
+  NumericVector<Number> & _lower = _nl.getVector("lower_bound");
+  NumericVector<Number> & _upper = _nl.getVector("upper_bound");
+  _lower.swap(lower);
+  _upper.swap(upper);
+  unsigned int n_threads = libMesh::n_threads();
+  for (unsigned int i=0; i<n_threads; i++)
   {
-    NumericVector<Number> & _lower = _nl.getVector("lower_bound");
-    NumericVector<Number> & _upper = _nl.getVector("upper_bound");
-    _lower.swap(lower);
-    _upper.swap(upper);
-    unsigned int n_threads = libMesh::n_threads();
-    for (unsigned int i=0; i<n_threads; i++)
-    {
-      _materials[i].residualSetup();
-    }
-    _aux.residualSetup();
-    _aux.compute(EXEC_LINEAR);
-    _lower.swap(lower);
-    _upper.swap(upper);
+    _materials[i].residualSetup();
   }
-  catch (MooseException & e)
-  {
-    // tell solver to stop
-#ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3,0,0)
-#else
-    PetscNonlinearSolver<Real> & solver = static_cast<PetscNonlinearSolver<Real> &>(*_nl.sys().nonlinear_solver);
-    SNESSetFunctionDomainError(solver.snes());
-#endif
-#endif
-  }
+  _aux.residualSetup();
+  _aux.compute(EXEC_LINEAR);
+  _lower.swap(lower);
+  _upper.swap(upper);
+
+  checkExceptionAndStopSolve();
 }
 
 void
@@ -3837,6 +3871,9 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
                                      const Real initial_residual_before_preset_bcs,
                                      const Real div_threshold)
 {
+  if (_has_exception)
+    return MOOSE_DIVERGED_FNORM_NAN;
+
   NonlinearSystem & system = getNonlinearSystem();
   MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
 
@@ -3907,6 +3944,9 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
                                   const Real /*dtol*/,
                                   const PetscInt maxits)
 {
+  if (_has_exception)
+    return MOOSE_DIVERGED_NULL;
+
   // We initialize the reason to something that basically means MOOSE
   // has not made a decision on convergence yet.
   MooseLinearConvergenceReason reason = MOOSE_LINEAR_ITERATING;
