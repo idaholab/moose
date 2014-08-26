@@ -263,7 +263,7 @@ OutputWarehouse::buildMaterialOutputHideList(const std::string & name, std::vect
 }
 
 void
-OutputWarehouse::addInterfaceHiddenVariables(const std::string & output_name, const std::vector<std::string> & variable_names)
+OutputWarehouse::addInterfaceHideVariables(const std::string & output_name, const std::vector<std::string> & variable_names)
 {
   _interface_map[output_name].insert(variable_names.begin(), variable_names.end());
 }

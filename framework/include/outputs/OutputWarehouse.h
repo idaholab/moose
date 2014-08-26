@@ -298,7 +298,7 @@ private:
    * This is a private method used by the OutputInterface system, it is not intended for any
    * other purpose.
    */
-  void addInterfaceHiddenVariables(const std::string & output_name, const std::vector<std::string> & variable_names);
+  void addInterfaceHideVariables(const std::string & output_name, const std::vector<std::string> & variable_names);
 
   /// The list of all output objects
   std::vector<Output *> _object_ptrs;

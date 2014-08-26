@@ -24,6 +24,7 @@ InputParameters validParams<Marker>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
+  params += validParams<OutputInterface>();
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
@@ -41,6 +42,7 @@ Marker::Marker(const std::string & name, InputParameters parameters) :
     Restartable(name, parameters, "Markers"),
     PostprocessorInterface(parameters),
     MeshChangedInterface(parameters),
+    OutputInterface(name, parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _adaptivity(_fe_problem.adaptivity()),
