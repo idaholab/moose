@@ -25,11 +25,13 @@ class MooseEnumTest : public CppUnit::TestFixture
   CPPUNIT_TEST_SUITE( MooseEnumTest );
 
   CPPUNIT_TEST( multiTestOne );
+  CPPUNIT_TEST( testErrors );
 
   CPPUNIT_TEST_SUITE_END();
 
 public:
   void multiTestOne();
+  void testErrors();
 };
 
 #endif  // MOOSEENUMTEST_H
