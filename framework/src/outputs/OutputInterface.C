@@ -27,21 +27,26 @@ InputParameters validParams<OutputInterface>()
 }
 
 
-OutputInterface::OutputInterface(const std::string & name, InputParameters parameters) :
-    OutputInterface(name, parameters, std::vector<std::string>(1, name))
-{
-}
-
-OutputInterface::OutputInterface(const std::string & name, InputParameters parameters, std::string variable_name) :
-    OutputInterface(name, parameters, std::vector<std::string>(1, variable_name))
-{
-}
-
-OutputInterface::OutputInterface(const std::string & name, InputParameters parameters, std::vector<std::string> variable_names) :
+OutputInterface::OutputInterface(const std::string & name, InputParameters parameters, bool build_list) :
     _oi_moose_app(*parameters.get<MooseApp *>("_moose_app")),
     _oi_output_warehouse(_oi_moose_app.getOutputWarehouse()),
     _oi_outputs(parameters.get<std::vector<OutputName> >("outputs").begin(),
                 parameters.get<std::vector<OutputName> >("outputs").end())
+{
+  // By default it is assumed that the variable name associated with 'outputs' is the name
+  // of the block, this is the case for Markers, Indicators, VectorPostprocessors, and Postprocessors.
+  // However, for Materials this is not the case, so the ability to call buildOutputHideVariableList
+  // explicitly is needed by Materials, the build_list allows for this behavior.
+  if (build_list)
+  {
+    std::set<std::string> names_set;
+    names_set.insert(name);
+    buildOutputHideVariableList(names_set);
+  }
+}
+
+void
+OutputInterface::buildOutputHideVariableList(std::set<std::string> variable_names)
 {
   // Extract all the possible
   const std::set<OutputName> & avail = _oi_output_warehouse.getOutputNames();
@@ -58,9 +63,6 @@ OutputInterface::OutputInterface(const std::string & name, InputParameters param
   // Limit the variable output to Output objects listed
   else
   {
-    // Check that the supplied outputs are valid
-    _oi_output_warehouse.checkOutputs(_oi_outputs);
-
     // Create a list of outputs where the variable should be hidden
     std::set<OutputName> hide;
     std::set_difference(avail.begin(), avail.end(), _oi_outputs.begin(), _oi_outputs.end(), std::inserter(hide, hide.begin()));

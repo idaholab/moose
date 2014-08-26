@@ -37,6 +37,7 @@
 #include "Restartable.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
+#include "OutputInterface.h"
 
 // libMesh includes
 #include "libmesh/quadrature_gauss.h"
@@ -79,7 +80,8 @@ class Material :
   public DependencyResolverInterface,
   public Restartable,
   public ZeroInterface,
-  public MeshChangedInterface
+  public MeshChangedInterface,
+  public OutputInterface
 {
 public:
   Material(const std::string & name, InputParameters parameters);

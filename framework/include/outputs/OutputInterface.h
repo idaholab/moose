@@ -34,9 +34,26 @@ InputParameters validParams<OutputInterface>();
 class OutputInterface
 {
 public:
-  OutputInterface(const std::string & name, InputParameters parameters);
-  OutputInterface(const std::string & name, InputParameters parameters, std::string variable_name);
-  OutputInterface(const std::string & name, InputParameters parameters, std::vector<std::string> variable_names);
+
+  /**
+   * Handles 'outputs' parameter for objects that desire control of variable outputs
+   * @param name Name of the object; also the assumed default name for the output variable to limit
+   * @param parameters The input parameters for the object
+   * @param build_list If false the buildOutputHideVariableList must be called explicitly, this behavior
+   *                   is required for automatic output of material properties
+   */
+  OutputInterface(const std::string & name, InputParameters parameters, bool build_list = true);
+
+  /**
+   * Builds hide lists for output objects NOT listed in the 'outputs' parameter
+   * @param variable_names A set of variables for which the 'outputs' parameter controls
+   *
+   * By default this is called by the constructor and passes the block name as the list of
+   * variables. This needs to be called explicitly if the build_list flag is set to False
+   * in the constructor. The latter cases is needed by the Material object to work correctly
+   * with the automatic material output capability.
+   */
+  void buildOutputHideVariableList(std::set<std::string> variable_names);
 
   /**
    * Get the list of output objects that this class is restricted
@@ -46,10 +63,13 @@ public:
 
 private:
 
+  /// Reference the the MooseApp; neede for access to the OutputWarehouse
   MooseApp & _oi_moose_app;
 
+  /// Reference to the OutputWarehouse for populating the Output object hide lists
   OutputWarehouse & _oi_output_warehouse;
 
+  /// The set of Output object names listed in the 'outputs' parameter
   std::set<OutputName> _oi_outputs;
 };
 

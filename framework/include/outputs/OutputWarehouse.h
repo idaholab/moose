@@ -106,20 +106,6 @@ public:
   void forceOutput();
 
   /**
-   * Creates a list of automatically generated material property AuxVariable to hide
-   * @param name The name of the output object to compose the list of hidden variables
-   * @param hide The vector to populate with the variables to hide
-   *
-   * The Material system has the ability to automatically generate AuxVariables for
-   * material property outputting. This includes the ability to control which output
-   * object the variables are written. This method extracts the list of AuxVariables
-   * that should be hidden for the supplied output object name.
-   *
-   * @see Output::initOutputList
-   */
-  void buildMaterialOutputHideList(const std::string & name, std::vector<std::string> & hide);
-
-  /**
    * Return the list of hidden variables for the given output name
    * @param output_name The name of the output object for which the variables should be returned
    * @param hide The set of variables to hide which is built by this method
@@ -272,25 +258,6 @@ private:
   void timestepSetup();
 
   /**
-   * Method for populating and updating variables associated with automatic material output
-   * @param outputs A vector output object names
-   * @param variables A set of variables names to be output for the given output names
-   *
-   * This is a private function that is called by the friend class MaterialOutputAction, it is not
-   * intended for any other purpose than automatic material property output control.
-   */
-  void updateMaterialOutput(const std::set<OutputName> & outputs, const std::set<AuxVariableName> & variables);
-
-  /**
-   * Method for setting the complete list of auto generated material property output AuxVariables
-   * @param variables The set of variables to store as the complete list
-   *
-   * This complete list is compared with the output specific lists by getMaterialOutputHideList to
-   * generate this variables that should be hidden for a given output object
-   */
-  void setMaterialOutputVariables(const std::set<AuxVariableName> & variables);
-
-  /**
    * Insert a variable name for hiding via the OutoutInterface
    * @param output_name The name of the output object on which the variable is to be hidden
    * @param variable_name The name of the variable to be hidden
@@ -298,7 +265,7 @@ private:
    * This is a private method used by the OutputInterface system, it is not intended for any
    * other purpose.
    */
-  void addInterfaceHideVariables(const std::string & output_name, const std::vector<std::string> & variable_names);
+  void addInterfaceHideVariables(const std::string & output_name, const std::set<std::string> & variable_names);
 
   /// The list of all output objects
   std::vector<Output *> _object_ptrs;
