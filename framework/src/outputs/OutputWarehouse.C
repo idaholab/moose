@@ -78,8 +78,9 @@ OutputWarehouse::addOutput(MooseSharedPointer<Output> & output)
   else
     _object_ptrs.insert(_object_ptrs.begin(), output.get());
 
-  // Store the name and pointer in map
+  // Store the name and pointer
   _object_map[output->name()] = output.get();
+  _object_names.insert(output->name());
 
   // If the output object is a FileOutput then store the output filename
   FileOutput * ptr = dynamic_cast<FileOutput *>(output.get());
@@ -104,6 +105,13 @@ const std::vector<Output *> &
 OutputWarehouse::getOutputs() const
 {
   return _object_ptrs;
+}
+
+
+const std::set<OutputName> &
+OutputWarehouse::getOutputNames() const
+{
+  return _object_names;
 }
 
 void
@@ -252,6 +260,20 @@ OutputWarehouse::buildMaterialOutputHideList(const std::string & name, std::vect
     std::set_difference(_all_material_output_variables.begin(), _all_material_output_variables.end(),
                         _material_output_map[name].begin(), _material_output_map[name].end(),
                         std::back_inserter(hide));
+}
+
+void
+OutputWarehouse::addInterfaceHiddenVariables(const std::string & output_name, const std::vector<std::string> & variable_names)
+{
+  _interface_map[output_name].insert(variable_names.begin(), variable_names.end());
+}
+
+void
+OutputWarehouse::buildInterfaceHideVariables(const std::string & output_name, std::set<std::string> & hide)
+{
+  std::map<std::string, std::set<std::string> >::const_iterator it = _interface_map.find(output_name);
+  if (it != _interface_map.end())
+    hide = it->second;
 }
 
 void

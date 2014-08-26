@@ -59,6 +59,12 @@ public:
   const std::vector<Output *> & getOutputs() const;
 
   /**
+   * Get a complete set of all output object names
+   * @return A set of output names for each output object
+   */
+  const std::set<OutputName> & getOutputNames() const;
+
+  /**
    * Returns true if the output object exists
    * @param name The name of the output object for which to test for existence within the warehouse
    */
@@ -112,6 +118,21 @@ public:
    * @see Output::initOutputList
    */
   void buildMaterialOutputHideList(const std::string & name, std::vector<std::string> & hide);
+
+  /**
+   * Return the list of hidden variables for the given output name
+   * @param output_name The name of the output object for which the variables should be returned
+   * @param hide The set of variables to hide which is built by this method
+   *
+   * Objects inheriting from the OutputInterface have the ability to control the output of variables
+   * associated with the objects (i.e., Marker elemental variable). This method returns a list
+   * of variables that should be hidden for the supplied object name due to the 'outputs' parameter
+   * being set by the object(s).
+   *
+   * This method is used by Output::initOutputList to populate the correct hide lists for the
+   * output object, it is not intended for general use.
+   */
+  void buildInterfaceHideVariables(const std::string & output_name, std::set<std::string> & hide);
 
   /**
    * Calls the setFileNumber method for every FileOutput output object
@@ -221,6 +242,7 @@ public:
    */
   std::ostringstream & consoleBuffer() { return _console_buffer; }
 
+
 private:
   /**
    * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
@@ -268,11 +290,24 @@ private:
    */
   void setMaterialOutputVariables(const std::set<AuxVariableName> & variables);
 
+  /**
+   * Insert a variable name for hiding via the OutoutInterface
+   * @param output_name The name of the output object on which the variable is to be hidden
+   * @param variable_name The name of the variable to be hidden
+   *
+   * This is a private method used by the OutputInterface system, it is not intended for any
+   * other purpose.
+   */
+  void addInterfaceHiddenVariables(const std::string & output_name, const std::vector<std::string> & variable_names);
+
   /// The list of all output objects
   std::vector<Output *> _object_ptrs;
 
   /// A map of the output pointers
   std::map<OutputName, Output *> _object_map;
+
+  /// A set of output names
+  std::set<OutputName> _object_names;
 
   /// List of object names
   std::set<OutFileBase> _file_base_set;
@@ -301,9 +336,13 @@ private:
   /// Stream for holding messages passed to _console prior to Output object construction
   std::ostringstream _console_buffer;
 
+  /// Storage for variables to hide as prescribed by the object via the OutputInterface
+  std::map<std::string, std::set<std::string> > _interface_map;
+
   // Allow complete access to FEProblem for calling initial/timestepSetup functions
   friend class FEProblem;
   friend class MaterialOutputAction;
+  friend class OutputInterface;
 };
 
 template<typename T>

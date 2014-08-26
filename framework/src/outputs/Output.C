@@ -685,6 +685,11 @@ Output::initOutputList(OutputData & data)
   _app.getOutputWarehouse().buildMaterialOutputHideList(_name, material_hide);
   hide.insert(hide.end(), material_hide.begin(), material_hide.end());
 
+  // Append the list from OutputInterface objects
+  std::set<std::string> interface_hide;
+  _app.getOutputWarehouse().buildInterfaceHideVariables(_name, interface_hide);
+  hide.insert(hide.end(), interface_hide.begin(), interface_hide.end());
+
   // Sort the vectors
   std::sort(avail.begin(), avail.end());
   std::sort(show.begin(), show.end());
