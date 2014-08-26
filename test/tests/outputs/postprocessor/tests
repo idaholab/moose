@@ -8,7 +8,7 @@
   [./invalid_outputs]
     # Test that an invalid outputer name in the "output" parameter is caught
     type = 'RunException'
-    input = 'postprocessor.i'
+    input = 'postprocessor_invalid.i'
     expect_err = "The output object 'garbage' is not a defined output object"
     cli_args = 'Postprocessors/num_dofs/outputs=garbage'
   [../]

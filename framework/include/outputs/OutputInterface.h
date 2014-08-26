@@ -38,6 +38,12 @@ public:
   OutputInterface(const std::string & name, InputParameters parameters, std::string variable_name);
   OutputInterface(const std::string & name, InputParameters parameters, std::vector<std::string> variable_names);
 
+  /**
+   * Get the list of output objects that this class is restricted
+   * @return A set of OutputNames
+   */
+  const std::set<OutputName> & getOutputs();
+
 private:
 
   MooseApp & _oi_moose_app;

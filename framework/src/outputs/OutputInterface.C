@@ -70,3 +70,9 @@ OutputInterface::OutputInterface(const std::string & name, InputParameters param
       _oi_output_warehouse.addInterfaceHideVariables(*it, variable_names);
   }
 }
+
+const std::set<OutputName> &
+OutputInterface::getOutputs()
+{
+  return _oi_outputs;
+}
