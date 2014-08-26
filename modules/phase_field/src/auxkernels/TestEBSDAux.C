@@ -1,3 +1,7 @@
+// This seems redundant
+
+#if 0
+
 #include "TestEBSDAux.h"
 
 template<>
@@ -13,8 +17,8 @@ InputParameters validParams<TestEBSDAux>()
 TestEBSDAux::TestEBSDAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
-    _data_name(getParam<std::string>("data_name")),
-    _data_type(_ebsd_reader.getDataType(_data_name))
+    _data_name(getParam<std::string>("data_name"))
+    //_data_type(_ebsd_reader.getDataType(_data_name))
 {
 }
 
@@ -26,5 +30,7 @@ TestEBSDAux::computeValue()
   // sense as an Element AuxKernel
   Point p = _current_elem->centroid();
 
-  return _ebsd_reader.getData(p, _data_type);
+  //return _ebsd_reader.getData(p, _data_type);
 }
+
+#endif

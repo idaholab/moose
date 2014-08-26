@@ -1,3 +1,7 @@
+// This seems redundant
+
+#if 0
+
 #ifndef TESTEBSDAUX_H
 #define TESTEBSDAUX_H
 
@@ -30,3 +34,5 @@ protected:
 };
 
 #endif //TESTEBSDAUX_H
+
+#endif
