@@ -48,61 +48,116 @@ MultiMooseEnum::~MultiMooseEnum()
 {
 }
 
+bool
+MultiMooseEnum::operator==(const MultiMooseEnum & value) const
+{
+  return std::equal(value._current_ids.begin(), value._current_ids.end(),
+                    _current_ids.begin());
+}
+
+bool
+MultiMooseEnum::contains(const std::string & value) const
+{
+  std::string upper(value);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+  return std::find(_current_names.begin(), _current_names.end(), upper) != _current_names.end();
+}
+
+bool
+MultiMooseEnum::contains(int value) const
+{
+  return std::find(_current_ids.begin(), _current_ids.end(), value) != _current_ids.end();
+}
+
+bool
+MultiMooseEnum::contains(unsigned short value) const
+{
+  return std::find(_current_ids.begin(), _current_ids.end(), value) != _current_ids.end();
+}
+
+bool
+MultiMooseEnum::contains(const MultiMooseEnum & value) const
+{
+  std::set<int> lookup_set(_current_ids.begin(), _current_ids.end());
+
+  for (std::vector<int>::const_iterator it = value._current_ids.begin(); it != value._current_ids.end(); ++it)
+    if (lookup_set.find(*it) == lookup_set.end())
+      return false;
+
+  return true;
+}
+
 MultiMooseEnum &
 MultiMooseEnum::operator=(const std::string & names)
 {
   std::vector<std::string> names_vector;
   MooseUtils::tokenize(names, names_vector, 1, " ");
-  return *this = names_vector;
+  return assign(names_vector.begin(), names_vector.end(), false);
 }
 
 MultiMooseEnum &
 MultiMooseEnum::operator=(const std::vector<std::string> & names)
 {
-  std::set<std::string> names_set(names.begin(), names.end());
-  return *this = names_set;
+  return assign(names.begin(), names.end(), false);
 }
 
 MultiMooseEnum &
 MultiMooseEnum::operator=(const std::set<std::string> & names)
 {
-  return assign(names, false);
+  return assign(names.begin(), names.end(), false);
 }
 
 void
-MultiMooseEnum::insert(const std::string & names)
+MultiMooseEnum::push_back(const std::string & names)
 {
   std::vector<std::string> names_vector;
   MooseUtils::tokenize(names, names_vector, 1, " ");
-  insert(names_vector);
+  assign(names_vector.begin(), names_vector.end(), true);
 }
 
 void
-MultiMooseEnum::insert(const std::vector<std::string> & names)
+MultiMooseEnum::push_back(const std::vector<std::string> & names)
 {
-  std::set<std::string> names_set(names.begin(), names.end());
-  insert(names_set);
+  assign(names.begin(), names.end(), true);
 }
 
 void
-MultiMooseEnum::insert(const std::set<std::string> & names)
+MultiMooseEnum::push_back(const std::set<std::string> & names)
 {
-  assign(names, true);
+  assign(names.begin(), names.end(), true);
 }
 
+std::string &
+MultiMooseEnum::operator[](unsigned int i)
+{
+  mooseAssert(i < _current_names.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_names.size() << ")");
+
+  return _current_names[i];
+}
+
+const std::string &
+MultiMooseEnum::operator[](unsigned int i) const
+{
+  mooseAssert(i < _current_names.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_names.size() << ")");
+
+  return _current_names[i];
+}
+
+template<typename InputIterator>
 MultiMooseEnum &
-MultiMooseEnum::assign(const std::set<std::string> & names, bool append)
+MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
 {
   if (!append)
     clear();
 
-  _current_names_preserved.insert(names.begin(), names.end());
-  for (std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+  std::copy(first, last, std::back_inserter(_current_names_preserved));
+  for (InputIterator it = first; it != last; ++it)
   {
     std::string upper(*it);
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
-    _current_names.insert(upper);
+    _current_names.push_back(upper);
 
     if (std::find(_names.begin(), _names.end(), upper) == _names.end())
     {
@@ -116,42 +171,13 @@ MultiMooseEnum::assign(const std::set<std::string> & names, bool append)
         int current_id = _out_of_range_index++;
         _name_to_id[upper] = current_id;
 
-        _current_ids.insert(current_id);
+        _current_ids.push_back(current_id);
       }
     }
     else
-      _current_ids.insert(_name_to_id[upper]);
+      _current_ids.push_back(_name_to_id[upper]);
   }
-
   return *this;
-}
-
-bool
-MultiMooseEnum::contains(const std::string & value) const
-{
-  std::string upper(value);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
-  return _current_names.find(upper) != _current_names.end();
-}
-
-bool
-MultiMooseEnum::contains(int value) const
-{
-  return _current_ids.find(value) != _current_ids.end();
-}
-
-bool
-MultiMooseEnum::contains(unsigned short value) const
-{
-  return _current_ids.find(value) != _current_ids.end();
-}
-
-bool
-MultiMooseEnum::operator==(const MultiMooseEnum & value) const
-{
-  return std::equal(value._current_ids.begin(), value._current_ids.end(),
-                    _current_ids.begin());
 }
 
 void
@@ -160,6 +186,19 @@ MultiMooseEnum::clear()
   _current_names.clear();
   _current_names_preserved.clear();
   _current_ids.clear();
+}
+
+unsigned int
+MultiMooseEnum::size() const
+{
+  return _current_ids.size();
+}
+
+unsigned int
+MultiMooseEnum::unique_items_size() const
+{
+  std::set<int> unique_ids(_current_ids.begin(), _current_ids.end());
+  return unique_ids.size();
 }
 
 std::ostream &

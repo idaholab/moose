@@ -3861,7 +3861,7 @@ FEProblem::storePetscOptions(const MultiMooseEnum & petsc_options,
     }
 
     if (find(po.begin(), po.end(), *it) == po.end())
-      po.insert(*it);
+      po.push_back(*it);
   }
 
   std::vector<std::string> & pn = parameters().set<std::vector<std::string> >("petsc_inames");         // set because we need a writable reference
