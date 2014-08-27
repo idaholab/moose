@@ -106,3 +106,30 @@ MooseEnumTest::multiTestOne()
                                 std::inserter(difference, difference.end()));
   CPPUNIT_ASSERT( difference.size() == 0 );
 }
+
+void
+MooseEnumTest::testErrors()
+{
+  // Assign invalid item
+  try
+  {
+    MultiMooseEnum error_check("one two three");
+    error_check = "four";
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    CPPUNIT_ASSERT( msg.find("Invalid option") != std::string::npos );
+  }
+
+  // Whitespace around equals sign
+  try
+  {
+    MultiMooseEnum error_check("one= 1 two three");
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    CPPUNIT_ASSERT( msg.find("You cannot place whitespace around the '=' character") != std::string::npos );
+  }
+}

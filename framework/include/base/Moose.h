@@ -104,6 +104,12 @@ extern bool _color_console;
 extern bool _warnings_are_errors;
 
 /**
+ * Variable to turn on exceptions during mooseError() and mooseWarning(), should
+ * only be used with MOOSE unit.
+ */
+extern bool _throw_on_error;
+
+/**
  * Macros for coloring any output stream (_console, std::ostringstream, etc.)
  */
 #define COLOR_BLACK   (Moose::_color_console ? BLACK : "")
