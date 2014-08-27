@@ -2,6 +2,7 @@
 #define EBSDREADER_H
 
 #include "GeneralUserObject.h"
+#include "EBSDAccessFunctors.h"
 
 class EBSDReader;
 
@@ -12,22 +13,11 @@ InputParameters validParams<EBSDReader>();
  * A GeneralUserObject that reads an EBSD file and stores the centroid
  * data in a data structure which indexes on element centroids.
  */
-class EBSDReader : public GeneralUserObject
+class EBSDReader : public GeneralUserObject, public EBSDAccessFunctors
 {
 public:
   EBSDReader(const std::string & name, InputParameters params);
   virtual ~EBSDReader();
-
-  struct EBSDPointData {
-    Real phi1, phi, phi2, phase, symmetry;
-    unsigned int grain, op;
-    Point p;
-  };
-  struct EBSDAvgData {
-    Real phi1, phi, phi2, phase, symmetry;
-    unsigned int n;
-    Point p;
-  };
 
   /**
    * Called before execute() is ever called so that data can be cleared.
@@ -105,4 +95,4 @@ protected:
   unsigned indexFromIndex(unsigned int var) const;
 };
 
-#endif /* EBSDREADER_H */
+#endif // EBSDREADER_H
