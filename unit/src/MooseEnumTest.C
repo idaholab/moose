@@ -105,6 +105,15 @@ MooseEnumTest::multiTestOne()
                                 compare_set.begin(), compare_set.end(),
                                 std::inserter(difference, difference.end()));
   CPPUNIT_ASSERT( difference.size() == 0 );
+
+  // Order and indexing
+  mme.clear();
+  mme = "one two four";
+  CPPUNIT_ASSERT( mme.contains("three") == false );
+
+  CPPUNIT_ASSERT( mme[0] == "ONE" );
+  CPPUNIT_ASSERT( mme[1] == "TWO" );
+  CPPUNIT_ASSERT( mme[2] == "FOUR" );
 }
 
 void
@@ -132,4 +141,18 @@ MooseEnumTest::testErrors()
     std::string msg(e.what());
     CPPUNIT_ASSERT( msg.find("You cannot place whitespace around the '=' character") != std::string::npos );
   }
+
+#ifndef NDEBUG
+  // Out of bounds access
+  try
+  {
+    MultiMooseEnum error_check("one two three");
+    std::string invalid = error_check[3];
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    CPPUNIT_ASSERT( msg.find("Access out of bounds") != std::string::npos );
+  }
+#endif
 }

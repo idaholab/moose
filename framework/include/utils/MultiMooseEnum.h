@@ -92,17 +92,14 @@ public:
   void push_back(const std::set<std::string> & names);
   ///@}
 
-  ///@{
   /**
-   * Indexing operators
-   * Operator to retrieve an item from the MultiMooseEnum. The reference may be used to change
+   * Indexing operator
+   * Operator to retrieve an item from the MultiMooseEnum. The reference may not be used to change
    * the item.
    * @param i index
    * @returns a read/read-write reference to the item.
    */
-  std::string & operator[](unsigned int i);
   const std::string & operator[](unsigned int i) const;
-  ///@}
 
   ///@{
   /**
