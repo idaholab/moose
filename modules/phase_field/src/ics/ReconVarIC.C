@@ -66,7 +66,6 @@ ReconVarIC::initialSetup()
   if (_op_num > _grain_num)
      mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
 
-Moose::err << "Assigning OPs\n";
   // Assign grains to each order parameter in a way that maximizes distance
   _assigned_op.resize(_grain_num);
   std::vector<int> min_op_ind;
@@ -110,7 +109,6 @@ Moose::err << "Assigning OPs\n";
 
     _assigned_op[grain] = mx_ind;
   }
-Moose::err << "Done assigning OPs\n";
 }
 
 // Note that we are not actually using Point coordinates that get passed in to assign the order parameter.
