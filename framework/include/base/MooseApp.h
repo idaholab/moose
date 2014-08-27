@@ -363,8 +363,13 @@ protected:
 
   /// Syntax of the input file
   Syntax _syntax;
+
+  /// OutputWarehouse object for this App
+  OutputWarehouse * _output_warehouse;
+
   /// The Factory responsible for building Actions
   ActionFactory _action_factory;
+
   /// Where built actions are stored
   ActionWarehouse _action_warehouse;
 
@@ -408,9 +413,6 @@ protected:
 
   /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;
-
-  /// OutputWarehouse object for this App
-  OutputWarehouse * _output_warehouse;
 
   /// An alternate OutputWarehouse object (required for CoupledExecutioner)
   OutputWarehouse * _alternate_output_warehouse;

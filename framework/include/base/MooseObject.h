@@ -16,7 +16,7 @@
 #define MOOSEOBJECT_H
 
 #include "InputParameters.h"
-#include "ConsoleStream.h"
+#include "ConsoleStreamInterface.h"
 
 // libMesh includes
 #include "libmesh/parallel_object.h"
@@ -30,7 +30,9 @@ InputParameters validParams<MooseObject>();
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class MooseObject : public libMesh::ParallelObject
+class MooseObject :
+  public ConsoleStreamInterface,
+  public libMesh::ParallelObject
 {
 public:
   MooseObject(const std::string & name, InputParameters parameters);
@@ -86,9 +88,6 @@ protected:
 
   /// The MooseApp this object is associated with
   MooseApp & _app;
-
-  /// An instance of helper class to write streams to the Console objects
-  const ConsoleStream _console;
 };
 
 #endif /* MOOSEOBJECT_H*/
