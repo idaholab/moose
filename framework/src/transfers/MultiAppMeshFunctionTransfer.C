@@ -356,5 +356,5 @@ MultiAppMeshFunctionTransfer::execute()
     }
   }
 
-  Moose::out << "Finished MeshFunctionTransfer " << _name << std::endl;
+  _console << "Finished MeshFunctionTransfer " << _name << std::endl;
 }

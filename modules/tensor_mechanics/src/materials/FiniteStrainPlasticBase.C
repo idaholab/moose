@@ -150,7 +150,7 @@ FiniteStrainPlasticBase::computeQpStress()
 
   if (!return_successful)
   {
-    Moose::out << "After making " << num_subdivisions << " subdivisions of the strain increment with L2norm " << _strain_increment[_qp].L2norm() << " the returnMap algorithm failed\n";
+    _console << "After making " << num_subdivisions << " subdivisions of the strain increment with L2norm " << _strain_increment[_qp].L2norm() << " the returnMap algorithm failed\n";
     _fspb_debug_stress = _stress_old[_qp];
     _fspb_debug_pm.assign(numberOfYieldFunctions(), 1); // this is chosen arbitrarily - please change if a more suitable value occurs to you!
     _fspb_debug_intnl.resize(numberOfInternalParameters());
@@ -738,38 +738,38 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
 void
 FiniteStrainPlasticBase::checkDerivatives()
 {
-  Moose::out << "\n ++++++++++++++ \nChecking the derivatives\n";
+  _console << "\n ++++++++++++++ \nChecking the derivatives\n";
   outputAndCheckDebugParameters();
 
-  Moose::out << "dyieldFunction_dstress.  Relative L2 norms.\n";
+  _console << "dyieldFunction_dstress.  Relative L2 norms.\n";
   std::vector<RankTwoTensor> df_dstress;
   std::vector<RankTwoTensor> fddf_dstress;
   dyieldFunction_dstress(_fspb_debug_stress, _fspb_debug_intnl, df_dstress);
   fddyieldFunction_dstress(_fspb_debug_stress, _fspb_debug_intnl, fddf_dstress);
   for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
   {
-    Moose::out << "alpha = " << alpha << " Relative L2norm = " << 2*(df_dstress[alpha] - fddf_dstress[alpha]).L2norm()/(df_dstress[alpha] + fddf_dstress[alpha]).L2norm() << "\n";
-    Moose::out << "Coded:\n";
+    _console << "alpha = " << alpha << " Relative L2norm = " << 2*(df_dstress[alpha] - fddf_dstress[alpha]).L2norm()/(df_dstress[alpha] + fddf_dstress[alpha]).L2norm() << "\n";
+    _console << "Coded:\n";
     df_dstress[alpha].print();
-    Moose::out << "Finite difference:\n";
+    _console << "Finite difference:\n";
     fddf_dstress[alpha].print();
   }
 
-  Moose::out << "dflowPotential_dstress.  Relative L2 norms.\n";
+  _console << "dflowPotential_dstress.  Relative L2 norms.\n";
   std::vector<RankFourTensor> dr_dstress;
   std::vector<RankFourTensor> fddr_dstress;
   dflowPotential_dstress(_fspb_debug_stress, _fspb_debug_intnl, dr_dstress);
   fddflowPotential_dstress(_fspb_debug_stress, _fspb_debug_intnl, fddr_dstress);
   for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
   {
-    Moose::out << "alpha = " << alpha << " Relative L2norm = " << 2*(dr_dstress[alpha] - fddr_dstress[alpha]).L2norm()/(dr_dstress[alpha] + fddr_dstress[alpha]).L2norm() << "\n";
-    Moose::out << "Coded:\n";
+    _console << "alpha = " << alpha << " Relative L2norm = " << 2*(dr_dstress[alpha] - fddr_dstress[alpha]).L2norm()/(dr_dstress[alpha] + fddr_dstress[alpha]).L2norm() << "\n";
+    _console << "Coded:\n";
     dr_dstress[alpha].print();
-    Moose::out << "Finite difference:\n";
+    _console << "Finite difference:\n";
     fddr_dstress[alpha].print();
   }
 
-  Moose::out << "dflowPotential_dintnl.  Relative L2 norms.\n";
+  _console << "dflowPotential_dintnl.  Relative L2 norms.\n";
   std::vector<std::vector<RankTwoTensor> > dr_dintnl;
   std::vector<std::vector<RankTwoTensor> > fddr_dintnl;
   dflowPotential_dintnl(_fspb_debug_stress, _fspb_debug_intnl, dr_dintnl);
@@ -778,10 +778,10 @@ FiniteStrainPlasticBase::checkDerivatives()
   {
     for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
     {
-      Moose::out << "alpha = " << alpha << " a = " << a << " Relative L2norm = " << 2*(dr_dintnl[alpha][a] - fddr_dintnl[alpha][a]).L2norm()/(dr_dintnl[alpha][a] + fddr_dintnl[alpha][a]).L2norm() << "\n";
-      Moose::out << "Coded:\n";
+      _console << "alpha = " << alpha << " a = " << a << " Relative L2norm = " << 2*(dr_dintnl[alpha][a] - fddr_dintnl[alpha][a]).L2norm()/(dr_dintnl[alpha][a] + fddr_dintnl[alpha][a]).L2norm() << "\n";
+      _console << "Coded:\n";
       dr_dintnl[alpha][a].print();
-      Moose::out << "Finite difference:\n";
+      _console << "Finite difference:\n";
       fddr_dintnl[alpha][a].print();
     }
   }
@@ -865,7 +865,7 @@ FiniteStrainPlasticBase::fddflowPotential_dintnl(const RankTwoTensor & stress, c
 void
 FiniteStrainPlasticBase::checkJacobian()
 {
-  Moose::out << "\n ++++++++++++++ \nChecking the Jacobian\n";
+  _console << "\n ++++++++++++++ \nChecking the Jacobian\n";
   outputAndCheckDebugParameters();
 
   RankFourTensor E_inv = _elasticity_tensor[_qp].invSymm();
@@ -877,20 +877,20 @@ FiniteStrainPlasticBase::checkJacobian()
   std::vector<std::vector<Real> > fdjac;
   fdJacobian(_fspb_debug_stress, _intnl_old[_qp], _fspb_debug_intnl, _fspb_debug_pm, delta_dp, E_inv, fdjac);
 
-  Moose::out << "Hand-coded Jacobian:\n";
+  _console << "Hand-coded Jacobian:\n";
   for (unsigned row = 0 ; row < jac.size() ; ++row)
   {
     for (unsigned col = 0 ; col < jac.size() ; ++col)
-      Moose::out << jac[row][col] << " ";
-    Moose::out << "\n";
+      _console << jac[row][col] << " ";
+    _console << "\n";
   }
 
-  Moose::out << "Finite difference Jacobian:\n";
+  _console << "Finite difference Jacobian:\n";
   for (unsigned row = 0 ; row < fdjac.size() ; ++row)
   {
     for (unsigned col = 0 ; col < fdjac.size() ; ++col)
-      Moose::out << fdjac[row][col] << " ";
-    Moose::out << "\n";
+      _console << fdjac[row][col] << " ";
+    _console << "\n";
   }
 }
 
@@ -968,25 +968,25 @@ FiniteStrainPlasticBase::fdJacobian(const RankTwoTensor & stress, const std::vec
 void
 FiniteStrainPlasticBase::outputAndCheckDebugParameters()
 {
-  Moose::out << "stress = \n";
+  _console << "stress = \n";
   _fspb_debug_stress.print();
 
   if (_fspb_debug_pm.size() != numberOfYieldFunctions() || _fspb_debug_intnl.size() != numberOfInternalParameters() || _fspb_debug_pm_change.size() != numberOfYieldFunctions() || _fspb_debug_intnl_change.size() != numberOfInternalParameters())
     mooseError("The debug parameters have the wrong size\n");
 
-  Moose::out << "plastic multipliers =\n";
+  _console << "plastic multipliers =\n";
   for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-    Moose::out << _fspb_debug_pm[alpha] << "\n";
+    _console << _fspb_debug_pm[alpha] << "\n";
 
-  Moose::out << "internal parameters =\n";
+  _console << "internal parameters =\n";
   for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
-    Moose::out << _fspb_debug_intnl[a] << "\n";
+    _console << _fspb_debug_intnl[a] << "\n";
 
-  Moose::out << "finite-differencing parameter for stress-changes:\n" << _fspb_debug_stress_change  << "\n";
-  Moose::out << "finite-differencing parameter(s) for plastic-multiplier(s):\n";
+  _console << "finite-differencing parameter for stress-changes:\n" << _fspb_debug_stress_change  << "\n";
+  _console << "finite-differencing parameter(s) for plastic-multiplier(s):\n";
   for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-    Moose::out << _fspb_debug_pm_change[alpha] << "\n";
-  Moose::out << "finite-differencing parameter(s) for internal-parameter(s):\n";
+    _console << _fspb_debug_pm_change[alpha] << "\n";
+  _console << "finite-differencing parameter(s) for internal-parameter(s):\n";
   for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
-    Moose::out << _fspb_debug_intnl_change[a] << "\n";
+    _console << _fspb_debug_intnl_change[a] << "\n";
 }

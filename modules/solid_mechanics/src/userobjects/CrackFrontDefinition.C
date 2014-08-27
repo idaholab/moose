@@ -653,11 +653,11 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       _rot_matrix.push_back(rot_mat);
     }
 
-    Moose::out<<"Summary of J-Integral crack front geometry:"<<std::endl;
-    Moose::out<<"index   node id   x coord       y coord       z coord       x dir         y dir          z dir        seg length"<<std::endl;
+    _console<<"Summary of J-Integral crack front geometry:"<<std::endl;
+    _console<<"index   node id   x coord       y coord       z coord       x dir         y dir          z dir        seg length"<<std::endl;
     for (unsigned int i=0; i<crack_front_nodes.size(); ++i)
     {
-      Moose::out<<std::left
+      _console<<std::left
                 <<std::setw(8) <<i+1
                 <<std::setw(10)<<crack_front_nodes[i]->id()
                 <<std::setw(14)<<(*crack_front_nodes[i])(0)
@@ -669,7 +669,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
                 <<std::setw(14)<<(_segment_lengths[i].first+_segment_lengths[i].second)/2.0
                 <<std::endl;
     }
-    Moose::out<<"overall length: "<<_overall_length<<std::endl;
+    _console<<"overall length: "<<_overall_length<<std::endl;
   }
 }
 
