@@ -20,6 +20,7 @@
 #include "CommandLine.h"
 #include "MooseEnum.h"
 #include "Syntax.h"
+#include "ConsoleStreamInterface.h"
 
 // libMesh
 #include "libmesh/getpot.h"
@@ -37,7 +38,7 @@ class ActionFactory;
  * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and parsing files. It is not
  * currently designed for extensibility. If you wish to build your own parser, please contact the MOOSE team for guidance.
  */
-class Parser
+class Parser : public ConsoleStreamInterface
 {
 public:
   enum SyntaxFormatterType
