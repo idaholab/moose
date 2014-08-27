@@ -55,15 +55,18 @@
   [../]
   [./Markers]
     [./marker_0]
-      type = ErrorFractionMarker
+      type = ValueThresholdMarker
       outputs = markers
-      indicator = indicator_0
-      refine = 0.1
+      refine = 0.5
+      variable = u
     [../]
     [./marker_1]
-      type = UniformMarker
+      type = BoxMarker
+      bottom_left = '0.25 0.25 0'
+      top_right = '0.75 0.75 0'
+      inside = REFINE
+      outside = DONT_MARK
       outputs = markers
-      mark = COARSEN
     [../]
   [../]
 []
