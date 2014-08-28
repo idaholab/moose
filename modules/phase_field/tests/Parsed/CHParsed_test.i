@@ -8,8 +8,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 8
-  ny = 8
+  nx = 16
+  ny = 16
   nz = 0
   xmin = 0
   xmax = 50
@@ -18,8 +18,6 @@
   zmin = 0
   zmax = 50
   elem_type = QUAD4
-
-  uniform_refine = 1
 []
 
 [Variables]
@@ -27,13 +25,11 @@
     order = THIRD
     family = HERMITE
     [./InitialCondition]
-      type = SmoothCircleIC
-      x1 = 25.0
-      y1 = 25.0
-      radius = 6.0
-      invalue = 1.0
-      outvalue = 0.1
-      int_width = 3.0
+      type = CrossIC
+      x1 = 5.0
+      y1 = 5.0
+      x2 = 45.0
+      y2 = 45.0
     [../]
   [../]
 []
@@ -65,7 +61,7 @@
     type = PFMobility
     block = 0
     kappa = 0.1
-    mob = 1e-3
+    mob = 1
   [../]
 
   [./free_energy]
@@ -73,9 +69,7 @@
     block = 0
     f_name = F
     args = 'cv'
-    constant_names       = 'barr_height  cv_eq'
-    constant_expressions = '0.1          1.0e-2'
-    function = 16*barr_height*(cv-cv_eq)^2*(1-cv_eq-cv)^2
+    function = '(1-cv)^2 * (1+cv)^2'
   [../]
 []
 
@@ -97,19 +91,10 @@
 
   start_time = 0.0
   num_steps = 2
-  dt = 1.0
-
-  [./Adaptivity]
-    initial_adaptivity = 1
-    error_estimator = LaplacianErrorEstimator
-    refine_fraction = 0.8
-    coarsen_fraction = 0.05
-    max_h_level = 2
-  [../]
+  dt = 0.7
 []
 
 [Outputs]
-  file_base = out
   output_initial = true
   interval = 1
 
@@ -120,9 +105,8 @@
 
   [./OverSampling]
     type = Exodus
-    refinements = 3
+    refinements = 1
     output_initial = true
     oversample = true
-    append_oversample = true
   [../]
 []
