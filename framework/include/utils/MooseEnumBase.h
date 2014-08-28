@@ -41,6 +41,11 @@ public:
   MooseEnumBase(const MooseEnumBase & other_enum);
 
   /**
+   * This class must have a virtual destructor since it has derived classes.
+   */
+  virtual ~MooseEnumBase() {}
+
+  /**
    * Method for returning a vector of all valid enumeration names for this instance
    * @return a vector of names
    */
