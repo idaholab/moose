@@ -76,7 +76,6 @@
 []
 
 [Outputs]
-  file_base = adapt_tstep_shrink_init_dt_out
   output_initial = true
   exodus = true
   [./console]
