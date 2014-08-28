@@ -26,6 +26,7 @@
 #include "BndsCalcAux.h"
 #include "ACGrGrPoly.h"
 #include "ACGBPoly.h"
+#include "ACParsed.h"
 #include "GBEvolution.h"
 #include "HexPolycrystalIC.h"
 #include "PolycrystalRandomIC.h"
@@ -90,6 +91,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CoupledImplicitEuler);
   registerKernel(ACGrGrPoly);
   registerKernel(ACGBPoly);
+  registerKernel(ACParsed);
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(RndSmoothCircleIC);
