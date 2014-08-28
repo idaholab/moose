@@ -25,6 +25,9 @@ protected:
   /// Maximum number of Newton-Raphson iterations allowed
   unsigned int _max_iter;
 
+  /// Maximum number of subdivisions allowed
+  unsigned int _max_subdivisions;
+
   /// Tolerance(s) on yield function(s)
   std::vector<Real> _f_tol;
 
@@ -222,11 +225,12 @@ protected:
    * @param intnl    (output) The internal variables after returning to the yield surface
    * @param f  (output) The yield functions after returning to the yield surface
    * @param iter (output) The number of Newton-Raphson iterations used
+   * @return true if the stress was successfully returned to the yield surface
    * Note that this algorithm doesn't do any rotations.  In order to find the
    * final stress and plastic_strain must be rotated using _rotation_increment.
    * This is usually done in computeQpStress
    */
-  virtual void returnMap(const RankTwoTensor & stress_old, const RankTwoTensor & plastic_strain_old, const std::vector<Real> & intnl_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & stress, RankTwoTensor & plastic_strain, std::vector<Real> & intnl, std::vector<Real> & f, unsigned int & iter);
+  virtual bool returnMap(const RankTwoTensor & stress_old, const RankTwoTensor & plastic_strain_old, const std::vector<Real> & intnl_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & stress, RankTwoTensor & plastic_strain, std::vector<Real> & intnl, std::vector<Real> & f, unsigned int & iter);
 
   /**
    * Performs one Newton-Raphson step.  The purpose here is to find the
@@ -265,8 +269,9 @@ protected:
    * @param f (input/output) Yield function(s)
    * @param epp (input/output) Plastic strain increment constraint
    * @param ic (input/output) Internal constraint
+   * @return true if successfully found a step that reduces the residual-squared
    */
-  virtual void lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic);
+  virtual bool lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic);
 
 
  private:
@@ -323,6 +328,12 @@ protected:
    * @param jac (output) the finite-difference Jacobian
    */
   virtual void fdJacobian(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<std::vector<Real> > & jac);
+
+  /**
+   * Outputs the debug parameters: _fspb_debug_stress, _fspd_debug_pm, etc
+   * and checks that they are sized correctly
+   */
+  void outputAndCheckDebugParameters();
 
 };
 
