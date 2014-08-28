@@ -245,7 +245,7 @@ RestartableDataIO::readRestartableData(RestartableDatas & restartable_datas, std
     _in_file_handles[tid]->close();
   }
 
-  // Procdue a warning if restarting and restart data is being skipped
+  // Produce a warning if restarting and restart data is being skipped
   // Do not produce the warning with recovery b/c in cases the parent defines a something as recoverable,
   // but only certain child classes use the value in recovery (i.e., FileOutput::_num_files is needed by Exodus but not Checkpoint)
   if (ignored_data.size() && !recovering)
