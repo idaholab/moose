@@ -291,4 +291,21 @@ InteractionIntegralAuxFields::computeAuxFields(const SIF_MODE sif_mode, ColumnMa
   strain(0,2) = (1 / _shear_modulus)  * s13;
   strain(2,0) = (1 / _shear_modulus)  * s13;
 
+  // Compiling in debug mode says all these variables are unused. I'm
+  // ignoring them to silence compiler warnings, but I wonder why are
+  // you calculating them at all?
+  libmesh_ignore(ds121);
+  libmesh_ignore(ds131);
+  libmesh_ignore(ds231);
+  libmesh_ignore(ds331);
+
+  libmesh_ignore(du111);
+  libmesh_ignore(du112);
+  libmesh_ignore(du113);
+  libmesh_ignore(du211);
+  libmesh_ignore(du212);
+  libmesh_ignore(du213);
+  libmesh_ignore(du311);
+  libmesh_ignore(du312);
+  libmesh_ignore(du313);
 }
