@@ -8,8 +8,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 8
-  ny = 8
+  nx = 20
+  ny = 20
   nz = 0
   xmin = 0
   xmax = 50
@@ -23,15 +23,15 @@
 []
 
 [Variables]
-  [./cv]
-    order = THIRD
-    family = HERMITE
+  [./eta]
+    order = FIRST
+    family = LAGRANGE
     [./InitialCondition]
       type = SmoothCircleIC
       x1 = 25.0
       y1 = 25.0
       radius = 6.0
-      invalue = 1.0
+      invalue = 0.9
       outvalue = 0.1
       int_width = 3.0
     [../]
@@ -39,43 +39,39 @@
 []
 
 [Kernels]
-  [./ie_c]
+  [./detadt]
     type = TimeDerivative
-    variable = cv
+    variable = eta
   [../]
 
-  [./CHSolid]
-    type = CHParsed
-    variable = cv
+  [./ACBulk]
+    type = ACParsed
+    variable = eta
     f_name = F
-    mob_name = M
   [../]
 
-  [./CHInterface]
-    type = CHInterface
-    variable = cv
-    mob_name = M
-    grad_mob_name = grad_M
-    kappa_name = kappa_c
+  [./ACInterface]
+    type = ACInterface
+    variable = eta
+    kappa_name = kappa
   [../]
 []
 
 [Materials]
   [./consts]
-    type = PFMobility
+    type = GenericConstantMaterial
     block = 0
-    kappa = 0.1
-    mob = 1e-3
+    prop_names  = 'L kappa'
+    prop_values = '1 1'
   [../]
 
   [./free_energy]
     type = DerivativeParsedMaterial
     block = 0
     f_name = F
-    args = 'cv'
-    constant_names       = 'barr_height  cv_eq'
-    constant_expressions = '0.1          1.0e-2'
-    function = 16*barr_height*(cv-cv_eq)^2*(1-cv_eq-cv)^2
+    args = 'eta'
+    function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
+    third_derivatives = false
   [../]
 []
 
@@ -86,9 +82,6 @@
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 101'
-
   l_max_its = 15
   l_tol = 1.0e-4
 
@@ -97,32 +90,16 @@
 
   start_time = 0.0
   num_steps = 2
-  dt = 1.0
-
-  [./Adaptivity]
-    initial_adaptivity = 1
-    error_estimator = LaplacianErrorEstimator
-    refine_fraction = 0.8
-    coarsen_fraction = 0.05
-    max_h_level = 2
-  [../]
+  dt = 0.5
 []
 
 [Outputs]
-  file_base = out
   output_initial = true
   interval = 1
+  exodus = true
 
   [./console]
     type = Console
     perf_log = true
-  [../]
-
-  [./OverSampling]
-    type = Exodus
-    refinements = 3
-    output_initial = true
-    oversample = true
-    append_oversample = true
   [../]
 []
