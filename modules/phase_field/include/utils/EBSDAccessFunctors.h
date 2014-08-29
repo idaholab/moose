@@ -76,6 +76,12 @@ public:
   struct EBSDAvgDataPhi2 : EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData & a) { return a.phi2; };
   };
+  struct EBSDAvgDataPhase : EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData & a) { return a.phase; };
+  };
+  struct EBSDAvgDataSymmetry : EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData & a) { return a.symmetry; };
+  };
 };
 
 #endif //EBSDACCESSFUNCTORS_H
