@@ -51,6 +51,14 @@ protected:
    */
   virtual void output();
 
+  /**
+   * Prints material property information
+   */
+  void printMaterialMap() const;
+
+  void printMaterialProperties(std::ostringstream & output, const std::vector<Material * > & materials) const;
+
+
   //@{
   /**
    * Individual component output is not supported for DebugOutput

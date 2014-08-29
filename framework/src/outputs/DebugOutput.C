@@ -16,9 +16,10 @@
 #include "DebugOutput.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
-//#include "Actions.h"
-#include "libmesh/transient_system.h"
+#include "Material.h"
 
+// libMesh includesx
+#include "libmesh/transient_system.h"
 
 template<>
 InputParameters validParams<DebugOutput>()
@@ -39,6 +40,7 @@ InputParameters validParams<DebugOutput>()
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
   params.addParam<bool>("show_var_residual_norms", false, "Print the residual norms of the individual solution variables at each nonlinear iteration");
+  params.addParam<bool>("show_material_props", false, "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
 
   return params;
 }
@@ -48,21 +50,12 @@ DebugOutput::DebugOutput(const std::string & name, InputParameters & parameters)
     _show_var_residual_norms(getParam<bool>("show_var_residual_norms")),
     _sys(_problem_ptr->getNonlinearSystem().sys())
 {
-
   // Force this outputter to output on nonlinear residuals
   _output_nonlinear = true;
 
-  // Check the name of the object to see if was created by SetupDebugAction
-  if (name.compare("_moose_debug_output") == 0)
-  {
-    // Extract the SetupDebugAction object
-    std::vector<Action *> actions = _app.actionWarehouse().getActionsByName("setup_debug");
-
-    /* If the 'show_var_residual_norms' is false and a SetupDebugAction object exists, use the
-       parameters from the Action */
-    if (!_show_var_residual_norms && actions.size() > 0)
-      _show_var_residual_norms = actions[0]->getParam<bool>("show_var_residual_norms");
-  }
+  // Show material information
+  if (getParam<bool>("show_material_props"))
+    printMaterialMap();
 }
 
 DebugOutput::~DebugOutput()
@@ -90,19 +83,74 @@ DebugOutput::output()
     oss << "    |residual|_2 of individual variables:\n";
     for (unsigned int var_num = 0; var_num < _sys.n_vars(); var_num++)
     {
-      Real varResid = _sys.calculate_norm(*_sys.rhs,var_num,DISCRETE_L2);
+      Real var_res_id = _sys.calculate_norm(*_sys.rhs,var_num,DISCRETE_L2);
       oss << std::setw(27-max_name_size) << " " << std::setw(max_name_size+2) //match position of overall NL residual
-          << std::left << _sys.variable_name(var_num) + ":" << varResid << "\n";
+          << std::left << _sys.variable_name(var_num) + ":" << var_res_id << "\n";
     }
 
     _console << oss.str() << std::flush;
   }
 }
 
+void
+DebugOutput::printMaterialMap() const
+{
+
+  // Get a reference to the material warehouse
+  MaterialWarehouse & material_warehouse = _problem_ptr->getMaterialWarehouse(0);
+
+  // Build output streams for block materials and block face materials
+  std::ostringstream active_block, active_face, active_neighbor;
+  std::set<SubdomainID> blocks = material_warehouse.blocks();
+  for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+  {
+    // Active materials on blocks
+    active_block << "  block ID = " << *it << ":\n";
+    printMaterialProperties(active_block, material_warehouse.getMaterials(*it));
+
+    // Active face materials on blocks
+    active_face << "  block ID = " << *it << ":\n";
+    printMaterialProperties(active_face, material_warehouse.getFaceMaterials(*it));
+
+    // Active face materials on blocks
+    active_neighbor << "  block ID = " << *it << ":\n";
+    printMaterialProperties(active_neighbor, material_warehouse.getNeighborMaterials(*it));
+  }
+
+  // Build output stream for side set materials
+  std::ostringstream active_boundary;
+  std::set<BoundaryID> boundaries = material_warehouse.boundaries();
+  for (std::set<BoundaryID>::const_iterator it = boundaries.begin(); it != boundaries.end(); ++it)
+  {
+    // Active materials on blocks
+    active_boundary << "  boundary ID = " << *it << ":\n";
+    printMaterialProperties(active_boundary, material_warehouse.getBoundaryMaterials(*it));
+  }
+
+  // Write the stored strings to the Console output objects
+  _console << "Active materials on blocks:\n" << active_block.str() << '\n';
+  _console << "Active face materials on blocks:\n" << active_face.str() << '\n';
+  _console << "Active neighboring materials on blocks:\n" << active_neighbor.str() << '\n';
+  _console << "Active materials on boundaries:\n" << active_boundary.str() << std::endl;
+}
+
+
+void
+DebugOutput::printMaterialProperties( std::ostringstream & output, const std::vector<Material * > & materials) const
+{
+  for (std::vector<Material *>::const_iterator jt = materials.begin(); jt != materials.end(); ++jt)
+  {
+    const std::set<std::string> & props = (*jt)->getSuppliedItems();
+    output << "    material = " << (*jt)->name() << ":\n";
+    for (std::set<std::string>::const_iterator prop_it = props.begin(); prop_it != props.end(); ++prop_it)
+      output << "      " << *prop_it << '\n';
+  }
+}
+
 std::string
 DebugOutput::filename()
 {
-  return std::string();
+  return _file_base;
 }
 
 void

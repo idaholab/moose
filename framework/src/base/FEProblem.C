@@ -3534,12 +3534,6 @@ FEProblem::notifyWhenMeshChanges(MeshChangedInterface * mci)
 }
 
 void
-FEProblem::printMaterialMap()
-{
-  _materials[0].printMaterialMap();
-}
-
-void
 FEProblem::checkProblemIntegrity()
 {
   // Check for unsatisfied actions

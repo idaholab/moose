@@ -93,9 +93,6 @@ public:
    */
   const std::set<BoundaryID> & boundaries() const { return _boundaries; }
 
-  /// This method displays a list of active materials and the properties they supply
-  void printMaterialMap() const;
-
   /// This method checks for coupled material properties to make sure that all retrieved properties are supplied
   void checkMaterialDependSanity() const;
 

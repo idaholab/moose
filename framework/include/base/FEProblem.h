@@ -695,7 +695,6 @@ public:
    */
   void notifyWhenMeshChanges(MeshChangedInterface * mci);
 
-  void printMaterialMap();
   void checkProblemIntegrity();
 
   void serializeSolution();

@@ -374,6 +374,9 @@ protected:
   /// Flag for disabling/enabling output
   bool _allow_output;
 
+  /// Flag determining if the output system is on the initial output step (i.e., output control with output_initial parameter)
+  bool _on_initial;
+
 private:
 
   /**
@@ -526,9 +529,6 @@ private:
 
   /// True if init() has been called
   bool _initialized;
-
-  /// Flag determining if the output system is on the initial output step (i.e., output control with output_initial parameter)
-  bool _on_initial;
 
   // Allow complete access
   friend class OutputWarehouse;

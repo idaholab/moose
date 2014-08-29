@@ -107,6 +107,7 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _mesh_changed(false),
     _sequence(isParamValid("sequence") ? getParam<bool>("sequence") : false),
     _allow_output(true),
+    _on_initial(false),
     _time(_problem_ptr->time()),
     _time_old(_problem_ptr->timeOld()),
     _t_step(_problem_ptr->timeStep()),
@@ -122,8 +123,7 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _force_output(false),
     _output_failed(false),
     _output_setup_called(false),
-    _initialized(false),
-    _on_initial(false)
+    _initialized(false)
 {
 }
 
