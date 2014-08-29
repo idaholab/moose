@@ -274,5 +274,5 @@ AddCoupledEqSpeciesKernelsAction::act()
     }
   }
   oss << "\n";
-  Moose::out << oss.str();
+  _console << oss.str();
 }

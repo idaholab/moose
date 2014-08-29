@@ -57,7 +57,7 @@ SetupRecoverFileBaseAction::act()
   }
 
   // Set the recover file base in the App
-  Moose::out << "\nUsing " << _app.getRecoverFileBase() << " for recovery.\n" << std::endl;
+  _console << "\nUsing " << _app.getRecoverFileBase() << " for recovery.\n" << std::endl;
 }
 
 std::string
