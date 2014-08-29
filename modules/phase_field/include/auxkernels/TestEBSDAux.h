@@ -1,7 +1,3 @@
-// This seems redundant
-
-#if 0
-
 #ifndef TESTEBSDAUX_H
 #define TESTEBSDAUX_H
 
@@ -18,7 +14,7 @@ InputParameters validParams<TestEBSDAux>();
  * This kernel tests the EBSDReader GeneralUserObject by using it to
  * set up an Aux variable.
  */
-class TestEBSDAux : public AuxKernel
+class TestEBSDAux : public AuxKernel, EBSDAccessFunctors
 {
 public:
   TestEBSDAux(const std::string & name, InputParameters parameters);
@@ -29,10 +25,10 @@ protected:
 
   /// String and associated MooseEnum that stores the type of data
   /// this AuxKernel extracts.
-  std::string _data_name;
-  MooseEnum _data_type;
+  MooseEnum _data_name;
+
+  /// Accessor functor to fetch the selected data field form the EBSD data point
+  EBSDPointDataFunctor * _val;
 };
 
 #endif //TESTEBSDAUX_H
-
-#endif

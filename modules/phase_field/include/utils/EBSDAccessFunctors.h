@@ -1,6 +1,14 @@
 #ifndef EBSDACCESSFUNCTORS_H
-#define  EBSDACCESSFUNCTORS_H
+#define EBSDACCESSFUNCTORS_H
 
+#include "MooseObject.h"
+#include "MooseEnum.h"
+
+/**
+ * Mix-in class that adds so called access functors to select a field from
+ * an EBSDPointData or EBSDPointData (todo) structure. The field name is specified
+ * by name as a std::string.
+ */
 class EBSDAccessFunctors
 {
 public:
@@ -18,11 +26,24 @@ public:
     Point p;
   };
 
+  static MooseEnum getPointDataFieldType();
+  static MooseEnum getAvgDataFieldType();
+
   /// Access functor base class for EBSDPointData
   struct EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData &) = 0;
   };
+  /// Access functor base class for EBSDAvgData
+  struct EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData &) = 0;
+  };
 
+  /// Factory function to return a point functor specified by name
+  EBSDPointDataFunctor * getPointDataAccessFunctor(const MooseEnum & field_name) const;
+  /// Factory function to return a average functor specified by name
+  EBSDAvgDataFunctor * getAvgDataAccessFunctor(const MooseEnum & field_name) const;
+
+  // List of specialized access functors (one for each field in EBSDPointData)
   struct EBSDPointDataPhi1 : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d.phi1; };
   };
@@ -43,6 +64,17 @@ public:
   };
   struct EBSDPointDataOp : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d.op; };
+  };
+
+  // List of specialized access functors (one for each field in EBSDAvgData)
+  struct EBSDAvgDataPhi1 : EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData & a) { return a.phi1; };
+  };
+  struct EBSDAvgDataPhi : EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData & a) { return a.phi; };
+  };
+  struct EBSDAvgDataPhi2 : EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData & a) { return a.phi2; };
   };
 };
 
