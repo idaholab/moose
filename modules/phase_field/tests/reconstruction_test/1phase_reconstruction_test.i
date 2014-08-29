@@ -2,8 +2,8 @@
   type = GeneratedMesh
   dim = 2
   # Note: The following parameters must match the values in “IN100_001_28x28_Marmot.txt” after uniform refine has run
-  nx = 7
-  ny = 7
+  nx = 28
+  ny = 28
   nz = 0
   xmin = 0
   xmax = 7
@@ -12,7 +12,6 @@
   zmin = 0
   zmax = 0
   elem_type = QUAD4
-  uniform_refine = 2
 []
 
 [GlobalParams]
@@ -29,18 +28,18 @@
   [../]
 
    [./grain_tracker]
-    type = GrainTracker
-    threshold = 0.2
-    convex_hull_buffer = 1.0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
-    connecting_threshold = 0.2
-    compute_op_maps = true
-    execute_on = timestep_begin
-    tracking_step = 0
-    remap_grains = false
-    #ebsd_reader = ebsd
+     type = GrainTracker
+     threshold = 0.2
+     convex_hull_buffer = 1.0
+     use_single_map = false
+     enable_var_coloring = true
+     condense_map_info = true
+     connecting_threshold = 0.2
+     compute_op_maps = true
+     execute_on = timestep_begin
+     tracking_step = 0
+     remap_grains = false
+     #ebsd_reader = ebsd
    [../]
 []
 
@@ -51,7 +50,7 @@
     [../]
 
     [./ReconVarIC]
-     ebsd_reader = ebsd
+      ebsd_reader = ebsd
     [../]
   [../]
 []
@@ -97,11 +96,6 @@
     family = MONOMIAL
   [../]
 
-  [./rgb]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
   [./op]
     order = CONSTANT
     family = MONOMIAL
@@ -121,68 +115,60 @@
   [../]
 
   [./phi1_aux]
-    Aux_param = phi1
     variable = phi1
     type = ReconAuxVarUpdate
+    data_name = phi1
     ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
   [./PHI_aux]
-    Aux_param = PHI
-    variable = PHI
+    variable = phi
     type = ReconAuxVarUpdate
+    data_name = phi
     ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
   [./phi2_aux]
-    Aux_param = phi2
     variable = phi2
     type = ReconAuxVarUpdate
+    data_name = phi2
     ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
-  [./grn_aux]
-    Aux_param = grn
-    variable = grn
-    type = ReconAuxVarUpdate
-    ebsd_reader = ebsd
-    execute_on = timestep
-  [../]
+#  [./grn_aux]
+#    variable = grain
+#    type = ReconAuxVarUpdate
+#    data_name = grain
+#    ebsd_reader = ebsd
+#    execute_on = timestep
+#  [../]
 
   [./phase_aux]
-    Aux_param = phase
     variable = phase
     type = ReconAuxVarUpdate
+    data_name = phase
     ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
   [./sym_aux]
-    Aux_param = sym
-    variable = sym
+    variable = symmetry
     type = ReconAuxVarUpdate
+    data_name = symmetry
     ebsd_reader = ebsd
     execute_on = timestep
   [../]
 
-  [./rgb_aux]
-    Aux_param = rgb
-    variable = rgb
-    type = ReconAuxVarUpdate
-    ebsd_reader = ebsd
-    execute_on = timestep
-  [../]
-
-  [./op_aux]
-    Aux_param = op
-    variable = op
-    type = ReconAuxVarUpdate
-    ebsd_reader = ebsd
-    execute_on = timestep
-  [../].
+#  [./op_aux]
+#    variable = op
+#    type = ReconAuxVarUpdate
+#    data_name = op
+#    ebsd_reader = ebsd
+#    execute_on = timestep
+#  [../]
 []
 
 [Materials]
@@ -212,12 +198,6 @@
   [./DOFs]
     type = NumDOFs
   [../]
-
- # [./num_grns]
- #   type = NodalFloodCount
- #   variable = bnds
- #   threshold = 0.7
- # [../]
 []
 
 [Executioner]
