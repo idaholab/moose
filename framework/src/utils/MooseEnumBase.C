@@ -52,6 +52,10 @@ MooseEnumBase::MooseEnumBase()
 {
 }
 
+MooseEnumBase::~MooseEnumBase()
+{
+}
+
 void
 MooseEnumBase::fillNames(std::string names, std::string option_delim)
 {

@@ -100,6 +100,11 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
         oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
     }
     {
+      InputParameters::Parameter<MultiMooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MultiMooseEnum>*>(iter->second);
+      if (enum_type)
+        oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
+    }
+    {
       InputParameters::Parameter<std::vector<MooseEnum> > * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum> >*>(iter->second);
       if (enum_type)
         oss << "\n" << indent << "    options: " << (enum_type->get())[0].getRawNames();

@@ -44,6 +44,8 @@ public:
    */
   MooseEnum(const MooseEnum & other_enum);
 
+  virtual ~MooseEnum();
+
   /**
    * Cast operators to make this object behave as value_types and std::string
    * these methods can be used so that this class behaves more like a normal value_type enumeration

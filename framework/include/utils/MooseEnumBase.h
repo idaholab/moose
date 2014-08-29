@@ -43,7 +43,7 @@ public:
   /**
    * This class must have a virtual destructor since it has derived classes.
    */
-  virtual ~MooseEnumBase() {}
+  virtual ~MooseEnumBase();
 
   /**
    * Method for returning a vector of all valid enumeration names for this instance

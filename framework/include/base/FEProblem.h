@@ -49,6 +49,7 @@ class NonlinearSystem;
 class RandomInterface;
 class RandomData;
 class MeshChangedInterface;
+class MultiMooseEnum;
 
 template<>
 InputParameters validParams<FEProblem>();
@@ -178,7 +179,7 @@ public:
                                                               const int maxits);
 
 #ifdef LIBMESH_HAVE_PETSC
-  void storePetscOptions(const std::vector<MooseEnum> & petsc_options,
+  void storePetscOptions(const MultiMooseEnum & petsc_options,
                          const std::vector<std::string> & petsc_options_inames,
                          const std::vector<std::string> & petsc_options_values);
 #endif

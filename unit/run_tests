@@ -8,14 +8,14 @@ fi
 
 if [ -e ./unit/moose_unit-$METHOD ]
 then
-  ./unit/moose_unit-$METHOD
+  ./unit/moose_unit-$METHOD --throw-on-error
   if [ $? -eq 0 ]
   then
     echo $app_name >> test_results.log
   fi
 elif [ -e ./moose_unit-$METHOD ]
 then
-  ./moose_unit-$METHOD
+  ./moose_unit-$METHOD --throw-on-error
   if [ $? -eq 0 ]
   then
     echo $app_name >> ../test_results.log

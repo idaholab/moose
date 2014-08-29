@@ -83,7 +83,7 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
     _set_by_add_param.erase(name);
 
     // valid_params don't make sense for MooseEnums
-    if (!have_parameter<MooseEnum>(name))
+    if (!have_parameter<MooseEnum>(name) && !have_parameter<MultiMooseEnum>(name))
       _valid_params.insert(name);
 
     std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
@@ -201,6 +201,8 @@ InputParameters::isParamValid(const std::string &name) const
 {
   if (have_parameter<MooseEnum>(name))
     return get<MooseEnum>(name).isValid();
+  else if (have_parameter<MultiMooseEnum>(name))
+    return get<MultiMooseEnum>(name).isValid();
   else
     return _valid_params.find(name) != _valid_params.end();
 }

@@ -67,6 +67,11 @@ class Tester(MooseObject):
     return
 
 
+  # This method is called to return the commands (list) used for processing results
+  def processResultsCommand(self, moose_dir, options):
+    return []
+
+
   # This method will be called to process the results of running the test.  Any post-test
   # processing should happen in this method
   def processResults(self, moose_dir, retcode, options, output):
