@@ -19,7 +19,7 @@
 #include "libmesh/point_locator_base.h"
 
 DiracKernelInfo::DiracKernelInfo() :
-    _point_locator(NULL)
+    _point_locator()
 {
 }
 
