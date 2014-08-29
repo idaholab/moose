@@ -24,6 +24,8 @@
     abs_zero = 1e-4
     scale_refine = 0
     max_parallel = 1
+    # Review needed on Intel compilers
+    compiler = 'CLANG GCC'
   [../]
 
   [./rz_exponential]
@@ -46,4 +48,3 @@
   [../]
 
 []
-
