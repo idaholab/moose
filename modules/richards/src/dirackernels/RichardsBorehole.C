@@ -136,7 +136,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   // do debugging if AndyWilkins
   if (_debug_things)
   {
-    Moose::out << "Checking rotation matrices" << std::endl;
+    _console << "Checking rotation matrices" << std::endl;
     RealVectorValue zzz(0,0,1);
     RealTensorValue iii;
     iii(0,0) = 1;
@@ -148,7 +148,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     for (unsigned int i=0 ; i<_xs.size()-1; ++i)
     {
       // check rotation matrix does the correct rotation
-      Moose::out << i << std::endl;
+      _console << i << std::endl;
       RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
       v2 /= std::sqrt(v2*v2);
       vec0 = _rot_matrix[i]*v2 - zzz;

@@ -95,8 +95,7 @@ DebugOutput::output()
           << std::left << _sys.variable_name(var_num) + ":" << varResid << "\n";
     }
 
-    Moose::out << oss.str();
-    Moose::out.flush();
+    _console << oss.str() << std::flush;
   }
 }
 

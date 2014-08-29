@@ -20,7 +20,8 @@
 #include <sstream>
 
 // MOOSE includes
-#include "OutputWarehouse.h"
+class OutputWarehouse;
+
 
 // this is the type of s t d :: c o u t
 typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
@@ -39,7 +40,7 @@ public:
    * Constructor
    * @param output_warehouse A reference to the OutputWarehouse containing the Console outputs
    *
-   * MooseObject contains an instance of this object, which allows message streams to be
+   * ConsoleStreamInterface contains an instance of this object, which allows message streams to be
    * transferred to Console output objects. This class simply provides an operator<< method
    * that passes the stream to the Console objects. Note, that this class inserts a
    * newline at the beginning of each call, but returns a reference to ConsoleStreamHelper
@@ -51,7 +52,7 @@ public:
    * The output stream operator
    * @param s The data to be output to the Console objects
    *
-   * This allows any MooseObject to uses _console to write to the Console:
+   * This allows any object to uses _console to write to the Console:
    *   _console << "The combination to the air lock is " << 12345 << std::endl;
    */
   template<typename T>
@@ -63,6 +64,7 @@ public:
   const ConsoleStream & operator<<(StandardEndLine manip) const;
 
 private:
+
   /// Reference to the OutputWarhouse that contains the Console output objects
   OutputWarehouse & _output_warehouse;
 

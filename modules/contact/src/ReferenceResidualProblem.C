@@ -164,7 +164,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
 
   if (_solnVars.size() > 0)
   {
-    Moose::out<<"Solution, reference convergence variable norms:"<<std::endl;
+    _console<<"Solution, reference convergence variable norms:"<<std::endl;
     unsigned int maxwsv=0;
     unsigned int maxwrv=0;
     for (unsigned int i=0; i<_solnVars.size(); ++i)
@@ -177,7 +177,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
 
     for (unsigned int i=0; i<_solnVars.size(); ++i)
     {
-      Moose::out<<std::setw(maxwsv+2)<<std::left<<_solnVarNames[i]+":"<<_resid[i]<<"  "<<std::setw(maxwrv+2)<<_refResidVarNames[i]+":"<<_refResid[i]<<std::endl;
+      _console<<std::setw(maxwsv+2)<<std::left<<_solnVarNames[i]+":"<<_resid[i]<<"  "<<std::setw(maxwrv+2)<<_refResidVarNames[i]+":"<<_refResid[i]<<std::endl;
     }
   }
 
@@ -217,7 +217,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
         oss << "Converged due to function norm " << " < " << " (acceptable relative tolerance) or (acceptable absolute tolerance) for all solution variables" << std::endl;
       else
         oss << "Converged due to function norm " << fnorm << " < " << " (acceptable relative tolerance)" << std::endl;
-      Moose::out<<"ACCEPTABLE"<<std::endl;
+      _console<<"ACCEPTABLE"<<std::endl;
       reason = MOOSE_CONVERGED_FNORM_RELATIVE;
     }
 
@@ -233,7 +233,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
 
   msg = oss.str();
 
-//  Moose::out<<msg<<std::endl; //Print convergence diagnostic message
+//  _console<<msg<<std::endl; //Print convergence diagnostic message
   return(reason);
 }
 

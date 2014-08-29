@@ -20,7 +20,9 @@
 #include <map>
 #include <ostream>
 
+// MOOSE includes
 #include "Action.h"
+#include "ConsoleStreamInterface.h"
 
 /// Typedef to hide implementation details
 typedef std::vector<Action *>::iterator ActionIterator;
@@ -33,7 +35,7 @@ class ActionFactory;
 /**
  * Storage for action instances.
  */
-class ActionWarehouse
+class ActionWarehouse : public ConsoleStreamInterface
 {
 public:
   ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory);

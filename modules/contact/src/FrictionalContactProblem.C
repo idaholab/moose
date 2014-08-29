@@ -193,7 +193,7 @@ FrictionalContactProblem::initialSetup()
 //    Moose::out<<"Contact reference convergence variables:"<<std::endl;
 //    for (unsigned int i=0; i<_contactRefResidVarIndices.size(); ++i)
 //    {
-//      Moose::out<<_contactRefResidVarNames[i]<<std::endl;;
+//      _console<<_contactRefResidVarNames[i]<<std::endl;;
 //    }
 //  }
 }
@@ -229,7 +229,7 @@ FrictionalContactProblem::updateContactReferenceResidual()
     }
     _refResidContact = std::sqrt(_refResidContact);
   }
-  Moose::out<<"Contact reference convergence residual: "<<_refResidContact<<std::endl;;
+  _console<<"Contact reference convergence residual: "<<_refResidContact<<std::endl;;
 }
 
 bool
@@ -254,16 +254,16 @@ FrictionalContactProblem::updateSolution(NumericVector<Number>& vec_solution, Nu
   {
     updateReferenceResidual();
     updateContactReferenceResidual();
-    Moose::out<<"Slip Update: "<<_num_slip_iterations<<std::endl;
-    Moose::out<<"Iter  #Cont     #Slip     #TooFar   Slip resid  Inc Slip    It Slip"<<std::endl;
+    _console<<"Slip Update: "<<_num_slip_iterations<<std::endl;
+    _console<<"Iter  #Cont     #Slip     #TooFar   Slip resid  Inc Slip    It Slip"<<std::endl;
 
     for (int i=0; i<_slip_updates_per_iter; i++)
     {
-      Moose::out<<std::left<<std::setw(6)<<i+1;
+      _console<<std::left<<std::setw(6)<<i+1;
 
       bool updated_this_iter = calculateSlip(ghosted_solution, &iterative_slip);
 
-      Moose::out<<std::setw(10)<<_num_contact_nodes
+      _console<<std::setw(10)<<_num_contact_nodes
                <<std::setw(10)<<_num_slipping
                <<std::setw(10)<<_num_slipped_too_far
                <<std::setprecision(4)<<std::setw(12)<<_slip_residual
@@ -275,18 +275,18 @@ FrictionalContactProblem::updateSolution(NumericVector<Number>& vec_solution, Nu
         if (_slip_residual < _target_contact_residual ||
             _slip_residual < _target_relative_contact_residual*_refResidContact)
         {
-          Moose::out<<"     Converged: Slip resid < tolerance, not applying this slip update"<<std::endl;
+          _console<<"     Converged: Slip resid < tolerance, not applying this slip update"<<std::endl;
           break;
         }
         else
         {
-          Moose::out<<std::endl;
+          _console<<std::endl;
           applySlip(vec_solution, ghosted_solution, iterative_slip);
         }
       }
       else
       {
-        Moose::out<<"     Converged: No slipping nodes"<<std::endl;
+        _console<<"     Converged: No slipping nodes"<<std::endl;
         break;
       }
 
@@ -359,7 +359,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
 
             if (hpit != has_penetrated.end())
             {
-//              Moose::out<<"Slave node: "<<slave_node_num<<std::endl;
+//              _console<<"Slave node: "<<slave_node_num<<std::endl;
               const Node * node = info._node;
 
               VectorValue<unsigned int> solution_dofs(node->dof_number(nonlinear_sys.number(), disp_x_var->number(), 0),
@@ -529,11 +529,11 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
 
                 RealVectorValue slip_iterative(0.0,0.0,0.0);
                 Real interaction_slip_residual = 0.0;
-//                Moose::out<<"inc  slip: "<<slip_inc_vec<<std::endl;
-//                Moose::out<<"info slip: "<<info._incremental_slip<<std::endl;
+//                _console<<"inc  slip: "<<slip_inc_vec<<std::endl;
+//                _console<<"info slip: "<<info._incremental_slip<<std::endl;
 //                ContactState state = calculateInteractionSlip(slip_iterative, interaction_slip_residual, info._normal, res_vec, info._incremental_slip, stiff_vec, friction_coefficient, slip_factor, slip_too_far_factor, dim);
                 ContactState state = calculateInteractionSlip(slip_iterative, interaction_slip_residual, info._normal, res_vec, slip_inc_vec, stiff_vec, friction_coefficient, slip_factor, slip_too_far_factor, dim);
-//                Moose::out<<"iter slip: "<<slip_iterative<<std::endl;
+//                _console<<"iter slip: "<<slip_iterative<<std::endl;
                 _slip_residual += interaction_slip_residual*interaction_slip_residual;
 
                 if (state == SLIPPING || state == SLIPPED_TOO_FAR)
@@ -591,10 +591,10 @@ FrictionalContactProblem::calculateInteractionSlip(RealVectorValue &slip,
   RealVectorValue normal_residual = normal * (normal * residual);
   Real normal_force = normal_residual.size();
 
-//  Moose::out<<"normal="<<info._normal<<std::endl;
-//  Moose::out<<"normal_force="<<normal_force<<std::endl;
-//  Moose::out<<"residual="<<residual<<std::endl;
-//  Moose::out<<"stiffness="<<stiff_vec<<std::endl;
+//  _console<<"normal="<<info._normal<<std::endl;
+//  _console<<"normal_force="<<normal_force<<std::endl;
+//  _console<<"residual="<<residual<<std::endl;
+//  _console<<"stiffness="<<stiff_vec<<std::endl;
 
   RealVectorValue tangential_force = normal_residual - residual ; // swap sign to make the code more manageable
   Real tangential_force_magnitude = tangential_force.size();
@@ -616,7 +616,7 @@ FrictionalContactProblem::calculateInteractionSlip(RealVectorValue &slip,
     if (slip_dot_tang_force < capacity)
     {
       state = SLIPPED_TOO_FAR;
-//      Moose::out<<"STF slip_dot_force: "<<slip_dot_tang_force<<" capacity: "<<capacity<<std::endl;
+//      _console<<"STF slip_dot_force: "<<slip_dot_tang_force<<" capacity: "<<capacity<<std::endl;
     }
   }
 
@@ -638,16 +638,16 @@ FrictionalContactProblem::calculateInteractionSlip(RealVectorValue &slip,
     Real stiffness_slipdir = force_from_unit_slip * slip_inc_direction; //k=f resolved to slip dir because f=kd and d is a unit vector
 
     Real slip_distance = slip_too_far_factor*(capacity - tangential_force_in_slip_dir) / stiffness_slipdir;
-//    Moose::out<<"STF dist: "<<slip_distance<<" inc: "<<slip_inc<<std::endl;
-//    Moose::out<<"STF  cap: "<<capacity<<" tfs: "<<tangential_force_in_slip_dir<<std::endl;
+//    _console<<"STF dist: "<<slip_distance<<" inc: "<<slip_inc<<std::endl;
+//    _console<<"STF  cap: "<<capacity<<" tfs: "<<tangential_force_in_slip_dir<<std::endl;
     if (slip_distance < slip_inc)
     {
-//      Moose::out<<"STF"<<std::endl;
+//      _console<<"STF"<<std::endl;
       slip = slip_inc_direction * -slip_distance;
     }
     else
     {
-//      Moose::out<<"STF max"<<std::endl;
+//      _console<<"STF max"<<std::endl;
       slip = -incremental_slip;
     }
   }
@@ -830,12 +830,12 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
        (fnorm < abstol*_contact_slip_tol_factor ||
         checkConvergenceIndividVars(fnorm, abstol*_contact_slip_tol_factor, rtol*_contact_slip_tol_factor, ref_resid))))
   {
-    Moose::out<<"Slip iteration "<<_num_slip_iterations<<" ";
+    _console<<"Slip iteration "<<_num_slip_iterations<<" ";
     if (_num_slip_iterations < _min_slip_iters)
     { //force another iteration, and do a slip update
       reason = MOOSE_NONLINEAR_ITERATING;
       _do_slip_update = true;
-      Moose::out<<"Force slip update < min slip iterations"<<std::endl;
+      _console<<"Force slip update < min slip iterations"<<std::endl;
     }
     else if (_num_slip_iterations < _max_slip_iters)
     { //do a slip update if there is another iteration
@@ -853,12 +853,12 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
             _slip_residual > _target_relative_contact_residual*_refResidContact)
         { //force it to keep iterating
           reason = MOOSE_NONLINEAR_ITERATING;
-          Moose::out<<"Force slip update slip_resid > target: "<<_slip_residual<<std::endl;
+          _console<<"Force slip update slip_resid > target: "<<_slip_residual<<std::endl;
         }
         else
         {
           //_do_slip_update = false; //maybe we want to do this
-          Moose::out<<"Not forcing slip update slip_resid <= target: "<<_slip_residual<<std::endl;
+          _console<<"Not forcing slip update slip_resid <= target: "<<_slip_residual<<std::endl;
         }
       }
       else
@@ -867,13 +867,13 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
             _slip_residual > _target_relative_contact_residual*_refResidContact)
         { //force it to keep iterating
           reason = MOOSE_NONLINEAR_ITERATING;
-          Moose::out<<"Forcing another nonlinear iteration before slip iteration: " <<_num_nl_its_since_contact_update <<std::endl;
+          _console<<"Forcing another nonlinear iteration before slip iteration: " <<_num_nl_its_since_contact_update <<std::endl;
         }
       }
     }
     else
     { //maxed out
-      Moose::out<<"Max slip iterations"<<std::endl;
+      _console<<"Max slip iterations"<<std::endl;
       reason = MOOSE_DIVERGED_FUNCTION_COUNT;
     }
   }

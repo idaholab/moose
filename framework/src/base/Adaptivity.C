@@ -31,6 +31,7 @@
 #ifdef LIBMESH_ENABLE_AMR
 
 Adaptivity::Adaptivity(FEProblem & subproblem) :
+    ConsoleStreamInterface(subproblem.getMooseApp()),
     _subproblem(subproblem),
     _mesh(_subproblem.mesh()),
     _mesh_refinement_on(false),
@@ -166,7 +167,7 @@ Adaptivity::adaptMesh()
 
     if (meshChanged && _print_mesh_changed)
     {
-      Moose::out << "\nMesh Changed:\n";
+      _console << "\nMesh Changed:\n";
       _mesh.printInfo();
     }
   }

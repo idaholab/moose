@@ -25,6 +25,7 @@
 #include "InfixIterator.h"
 
 ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory) :
+    ConsoleStreamInterface(app),
     _app(app),
     _syntax(syntax),
     _action_factory(factory),
@@ -284,7 +285,7 @@ ActionWarehouse::printActionDependencySets() const
   }
 
   if (_show_actions)
-    Moose::out << oss.str() << std::endl;
+    _console << oss.str() << std::endl;
 }
 
 void
@@ -292,10 +293,10 @@ ActionWarehouse::executeAllActions()
 {
   if (_show_actions)
   {
-    Moose::out << "[DBG][ACT] Action Dependency Sets:\n";
+    _console << "[DBG][ACT] Action Dependency Sets:\n";
     printActionDependencySets();
 
-    Moose::out << "\n[DBG][ACT] Executing actions:" << std::endl;
+    _console << "\n[DBG][ACT] Executing actions:" << std::endl;
   }
 
 
@@ -317,7 +318,7 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
        ++act_iter)
   {
     if (_show_actions)
-      Moose::out << "[DBG][ACT] " << (*act_iter)->type() << " (" << COLOR_YELLOW << task << COLOR_DEFAULT << ")"  << std::endl;
+      _console << "[DBG][ACT] " << (*act_iter)->type() << " (" << COLOR_YELLOW << task << COLOR_DEFAULT << ")"  << std::endl;
     (*act_iter)->act();
   }
 }
