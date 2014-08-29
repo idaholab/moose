@@ -9,7 +9,7 @@ EBSDAccessFunctors::getPointDataFieldType()
 MooseEnum
 EBSDAccessFunctors::getAvgDataFieldType()
 {
-  return MooseEnum("phi1 phi phi2");
+  return MooseEnum("phi1 phi phi2 phase symmetry");
 }
 
 EBSDAccessFunctors::EBSDPointDataFunctor *
@@ -47,6 +47,10 @@ EBSDAccessFunctors::getAvgDataAccessFunctor(const MooseEnum & field_name) const
       return new EBSDAvgDataPhi();
     case 2: // phi2
       return new EBSDAvgDataPhi2();
+    case 3: // phase
+      return new EBSDAvgDataPhase();
+    case 4: // symmetry
+      return new EBSDAvgDataSymmetry();
   }
 
   mooseError("Error:  Please input supported EBSD_param");
