@@ -124,7 +124,7 @@ FiniteStrainPlasticBase::computeQpStress()
     RankTwoTensor plastic_strain_previous = _plastic_strain_old[_qp];
     std::vector<Real> intnl_previous;
     intnl_previous.resize(_intnl_old[_qp].size());
-    for (int a = 0 ; a < _intnl_old[_qp].size() ; ++a)
+    for (unsigned int a = 0; a < _intnl_old[_qp].size(); ++a)
       intnl_previous[a] = _intnl_old[_qp][a];
 
 
@@ -137,7 +137,7 @@ FiniteStrainPlasticBase::computeQpStress()
         // record the updated variables in readiness for the next substep
         stress_previous = _stress[_qp];
         plastic_strain_previous = _plastic_strain[_qp];
-        for (int a = 0 ; a < _intnl_old[_qp].size() ; ++a)
+        for (unsigned int a = 0; a < _intnl_old[_qp].size(); ++a)
           intnl_previous[a] = _intnl[_qp][a];
       }
       else
