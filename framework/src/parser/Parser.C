@@ -477,7 +477,8 @@ Parser::buildFullTree(const std::string &search_string)
     }
   }
 
-  _console << _syntax_formatter->print(search_string);
+  // Do not change to _console, we need this printed to the stdout in all cases
+  Moose::out << _syntax_formatter->print(search_string) << std::flush;
 }
 
 

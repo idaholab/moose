@@ -112,7 +112,6 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _recover(false),
     _restart(false),
     _half_transient(false),
-
     _alternate_output_warehouse(NULL),
     _legacy_uo_aux_computation_default(true),
     _legacy_uo_initialization_default(true)

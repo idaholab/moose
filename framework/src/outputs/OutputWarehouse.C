@@ -36,6 +36,7 @@ OutputWarehouse::OutputWarehouse() :
 
 OutputWarehouse::~OutputWarehouse()
 {
+  // If the output buffer is not empty, it needs to be written
   if (_console_buffer.str().length())
     mooseConsole();
 }
@@ -165,8 +166,8 @@ OutputWarehouse::forceOutput()
 void
 OutputWarehouse::mooseConsole()
 {
+  // Loop through all Console Output objects and pass the current output buffer
   std::vector<Console *> objects = getOutputs<Console>();
-
   if (!objects.empty())
   {
     for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)
