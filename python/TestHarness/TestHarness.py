@@ -282,6 +282,9 @@ class TestHarness:
 
     if self.options.pbs and self.options.processingPBS == False:
       (reason, output) = self.buildPBSBatch(output, tester)
+    elif self.options.dry_run:
+      reason = 'DRY_RUN'
+      output += '\n'.join(tester.processResultsCommand(self.moose_dir, self.options))
     else:
       (reason, output) = tester.processResults(self.moose_dir, retcode, self.options, output)
 
@@ -302,6 +305,8 @@ class TestHarness:
         result = 'LAUNCHED'
       else:
         result = 'OK'
+    elif reason == 'DRY_RUN':
+      result = 'DRY_RUN'
     else:
       result = 'FAILED (%s)' % reason
       did_pass = False
@@ -465,7 +470,7 @@ class TestHarness:
     # in the 'Final Test Results' area.
     if add_to_table:
       self.test_table.append( (specs, output, result, timing, start, end) )
-      if result.find('OK') != -1:
+      if result.find('OK') != -1 or result.find('DRY_RUN') != -1:
         self.num_passed += 1
       elif result.find('skipped') != -1:
         self.num_skipped += 1
@@ -635,6 +640,7 @@ class TestHarness:
     parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help="Pass --parallel-mesh to executable")
     parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors')
     parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
+    parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
 
     outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='show the output of every test that fails')
@@ -724,7 +730,8 @@ class TestHarness:
       self.cleanPBSBatch()
       sys.exit(0)
 
-
+  def getOptions(self):
+    return self.options
 
 #################################################################################################################################
 # The TestTimer TestHarness
