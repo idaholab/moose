@@ -12,21 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// Moose includes
+#ifndef CONSOLESTREAMINTERFACE_H
+#define CONSOLESTREAMINTERFACE_H
+
+// MOOSE includes
 #include "ConsoleStream.h"
-#include "MooseUtils.h"
 
-ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse) :
-    _output_warehouse(output_warehouse),
-    _oss(output_warehouse.consoleBuffer())
+// Forward declerations
+class MooseApp;
+
+/**
+ * An inteface for the _console for outputting to the Console object
+ */
+class ConsoleStreamInterface
 {
-}
+public:
 
-const ConsoleStream &
-ConsoleStream::operator<<(StandardEndLine /*manip*/) const
-{
-  _oss << '\n';
-  _output_warehouse.mooseConsole();
+  /**
+   * A class for providing a helper stream object for writting message to
+   * all the Output objects.
+   */
+  ConsoleStreamInterface(MooseApp & app);
 
-  return *this;
-}
+  /// An instance of helper class to write streams to the Console objects
+  const ConsoleStream _console;
+
+};
+
+#endif // CONSOLESTREAMINTERFACE_H

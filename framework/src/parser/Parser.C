@@ -48,6 +48,7 @@
 #include "libmesh/getpot.h"
 
 Parser::Parser(MooseApp & app, ActionWarehouse & action_wh) :
+    ConsoleStreamInterface(app),
     _app(app),
     _factory(app.getFactory()),
     _action_wh(action_wh),
@@ -290,7 +291,7 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
     if (error_on_warn)
       mooseError(oss.str());
     else
-      Moose::out << oss.str();
+      _console << oss.str();
   }
 }
 
@@ -318,7 +319,7 @@ Parser::checkOverriddenParams(bool error_on_warn)
     if (error_on_warn)
       mooseError(oss.str());
     else
-      Moose::out << oss.str() << std::flush;
+      _console << oss.str() << std::flush;
   }
 }
 
@@ -478,7 +479,8 @@ Parser::buildFullTree(const std::string &search_string)
     }
   }
 
-  Moose::out << _syntax_formatter->print(search_string);
+  // Do not change to _console, we need this printed to the stdout in all cases
+  Moose::out << _syntax_formatter->print(search_string) << std::flush;
 }
 
 

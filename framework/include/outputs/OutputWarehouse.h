@@ -111,7 +111,7 @@ public:
    *
    * @see Output::initOutputList
    */
-  void  buildMaterialOutputHideList(const std::string & name, std::vector<std::string> & hide);
+  void buildMaterialOutputHideList(const std::string & name, std::vector<std::string> & hide);
 
   /**
    * Calls the setFileNumber method for every FileOutput output object

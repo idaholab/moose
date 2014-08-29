@@ -60,7 +60,7 @@ MultiAppNearestNodeTransfer::initialSetup()
 void
 MultiAppNearestNodeTransfer::execute()
 {
-  Moose::out << "Beginning NearestNodeTransfer " << _name << std::endl;
+  _console << "Beginning NearestNodeTransfer " << _name << std::endl;
 
   switch (_direction)
   {
@@ -542,7 +542,7 @@ MultiAppNearestNodeTransfer::execute()
     }
   }
 
-  Moose::out << "Finished NearestNodeTransfer " << _name << std::endl;
+  _console << "Finished NearestNodeTransfer " << _name << std::endl;
 }
 
 Node * MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end)

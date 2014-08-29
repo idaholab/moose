@@ -255,7 +255,7 @@ AdaptiveTransient::takeStep(Real input_dt)
   // Compute TimestepBegin Postprocessors
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN);
 
-  Moose::out << "Solving time step ";
+  _console << "Solving time step ";
   {
     std::ostringstream out;
 
@@ -282,7 +282,7 @@ AdaptiveTransient::takeStep(Real input_dt)
         << std::showpoint
         << std::left
         << _dt;
-    Moose::out << out.str() << std::endl;
+    _console << out.str() << std::endl;
   }
 
   preSolve();
@@ -328,7 +328,7 @@ AdaptiveTransient::takeStep(Real input_dt)
       _problem.computeUserObjects();
     }
 
-    Moose::out << std::endl;
+    _console << std::endl;
   }
 }
 
@@ -465,9 +465,7 @@ AdaptiveTransient::computeConstrainedDT()
   }
 
   if (_diag.str().size() > 0)
-  {
-    Moose::out << _diag.str() << std::endl;
-  }
+    _console << _diag.str() << std::endl;
 
   return dt_cur;
 

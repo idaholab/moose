@@ -12,22 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseObject.h"
-#include "MooseApp.h"
+// Moose includes
+#include "ConsoleStream.h"
+#include "MooseUtils.h"
+#include "OutputWarehouse.h"
 
-template<>
-InputParameters validParams<MooseObject>()
+ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse) :
+    _output_warehouse(output_warehouse),
+    _oss(output_warehouse.consoleBuffer())
 {
-  InputParameters params;
-  return params;
 }
 
-
-MooseObject::MooseObject(const std::string & name, InputParameters parameters) :
-  ConsoleStreamInterface(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  ParallelObject(*parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
-  _name(name),
-  _pars(parameters),
-  _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app"))
+const ConsoleStream &
+ConsoleStream::operator<<(StandardEndLine /*manip*/) const
 {
+  _oss << '\n';
+  _output_warehouse.mooseConsole();
+
+  return *this;
 }

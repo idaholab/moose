@@ -162,7 +162,7 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
         params_eq.set<std::vector<VariableName> >("v") = primary_species_involved[j];
         _problem->addAuxKernel("AqueousEquilibriumRxnAux", "aux_"+eq_species[j], params_eq);
 
-        Moose::out << "aux_"+eq_species[j] << "\n";
+        _console << "aux_"+eq_species[j] << "\n";
         params_eq.print();
       }
 //       else
