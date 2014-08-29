@@ -96,6 +96,7 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _start_time(0.0),
     _global_time_offset(0.0),
     _command_line(NULL),
+    _alternate_output_warehouse(NULL),
     _output_warehouse(new OutputWarehouse),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
@@ -112,7 +113,6 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _recover(false),
     _restart(false),
     _half_transient(false),
-    _alternate_output_warehouse(NULL),
     _legacy_uo_aux_computation_default(true),
     _legacy_uo_initialization_default(true)
 

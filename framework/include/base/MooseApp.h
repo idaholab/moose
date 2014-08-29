@@ -364,6 +364,9 @@ protected:
   /// Syntax of the input file
   Syntax _syntax;
 
+  /// An alternate OutputWarehouse object (required for CoupledExecutioner)
+  OutputWarehouse * _alternate_output_warehouse;
+
   /// OutputWarehouse object for this App
   OutputWarehouse * _output_warehouse;
 
@@ -375,6 +378,7 @@ protected:
 
   /// Parser for parsing the input file
   Parser _parser;
+
   /// Pointer to the executioner of this run (typically build by actions)
   Executioner * _executioner;
 
@@ -413,9 +417,6 @@ protected:
 
   /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;
-
-  /// An alternate OutputWarehouse object (required for CoupledExecutioner)
-  OutputWarehouse * _alternate_output_warehouse;
 
   /// Legacy Uo Aux computation flag
   bool _legacy_uo_aux_computation_default;
