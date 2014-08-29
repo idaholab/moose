@@ -27,6 +27,7 @@
 #include "MooseError.h"
 #include "MooseTypes.h"
 #include "MooseEnum.h"
+#include "MultiMooseEnum.h"
 #include "MooseUtils.h"
 
 #ifdef LIBMESH_HAVE_FPARSER
@@ -106,7 +107,7 @@ public:
   void addRequiredParam(const std::string &name, const std::string &doc_string);
 
   /**
-   * This version of addRequiredParam is here for a consistent use with MooseEnum.  Use of
+   * This version of addRequiredParam is here for a consistent use with MooseEnums.  Use of
    * this function for any other type will throw an error.
    */
   template <typename T>
@@ -472,7 +473,7 @@ private:
 
   /**
    * The set of parameters either explicitly set or provided a default value when added
-   * Note: We do not store MooseEnum names in valid params, instead we asked MooseEnums whether
+   * Note: We do not store MooseEnum names in valid params, instead we ask MooseEnums whether
    *       they are valid or not.
    */
   std::set<std::string> _valid_params;
@@ -767,6 +768,16 @@ InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const Moos
 template <>
 inline
 void
+InputParameters::addRequiredParam<MultiMooseEnum>(const std::string &name, const MultiMooseEnum &moose_enum, const std::string &doc_string)
+{
+  InputParameters::set<MultiMooseEnum>(name) = moose_enum;               // valid parameter is set by set_attributes
+  _required_params.insert(name);
+  _doc_string[name] = doc_string;
+}
+
+template <>
+inline
+void
 InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &name, const std::vector<MooseEnum> &moose_enums, const std::string &doc_string)
 {
   InputParameters::set<std::vector<MooseEnum> >(name) = moose_enums;    // valid parameter is set by set_attributes
@@ -780,6 +791,14 @@ void
 InputParameters::addParam<MooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/)
 {
   mooseError("You must supply a MooseEnum object when using addParam, even if the parameter is not required!");
+}
+
+template <>
+inline
+void
+InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/)
+{
+  mooseError("You must supply a MultiMooseEnum object when using addParam, even if the parameter is not required!");
 }
 
 template <>

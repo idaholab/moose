@@ -28,6 +28,7 @@
 #include "MooseUtils.h"
 #include "CommandLine.h"
 #include "Console.h"
+#include "MultiMooseEnum.h"
 
 //libMesh Includes
 #include "libmesh/libmesh_common.h"
@@ -163,7 +164,7 @@ void petscSetupDM (NonlinearSystem & nl) {
 void
 petscSetOptions(FEProblem & problem)
 {
-        std::vector<MooseEnum>     petsc_options = problem.parameters().get<std::vector<MooseEnum> >("petsc_options");
+        MultiMooseEnum             petsc_options = problem.parameters().get<MultiMooseEnum>("petsc_options");
   const std::vector<std::string> & petsc_options_inames = problem.parameters().get<std::vector<std::string> >("petsc_inames");
   const std::vector<std::string> & petsc_options_values = problem.parameters().get<std::vector<std::string> >("petsc_values");
 
@@ -182,9 +183,9 @@ petscSetOptions(FEProblem & problem)
 
   setSolverOptions(problem.solverParams());
 
-  // Add any additional options specified in the input fible
-  for (unsigned int i=0; i<petsc_options.size(); ++i)
-    PetscOptionsSetValue(std::string(petsc_options[i]).c_str(), PETSC_NULL);
+  // Add any additional options specified in the input file
+  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
+    PetscOptionsSetValue(it->c_str(), PETSC_NULL);
   for (unsigned int i=0; i<petsc_options_inames.size(); ++i)
     PetscOptionsSetValue(petsc_options_inames[i].c_str(), petsc_options_values[i].c_str());
 

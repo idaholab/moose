@@ -21,7 +21,7 @@
 
 #include <set>
 
-typedef std::set<std::string>::const_iterator MooseEnumIterator;
+typedef std::vector<std::string>::const_iterator MooseEnumIterator;
 
 /**
  * This is a "smart" enum class intended to replace many of the shortcomings in the C++ enum type
@@ -47,6 +47,8 @@ public:
    * @param other_enum - The other enumeration to copy state from
    */
   MultiMooseEnum(const MultiMooseEnum & other_enum);
+
+  virtual ~MultiMooseEnum();
 
   /**
    * Comparison operators for comparing with character constants, MultiMooseEnums
@@ -81,14 +83,23 @@ public:
   ///@{
   /**
    * Insert operators
-   * Operator to insert values into the enum. Existing values are preserved and
-   * duplicates are discarded.
+   * Operator to insert (push_back) values into the enum. Existing values are preserved and
+   * duplicates are stored.
    * @param names - a string, set, or vector representing one of the enumeration values.
    */
-  void insert(const std::string & names);
-  void insert(const std::vector<std::string> & names);
-  void insert(const std::set<std::string> & names);
+  void push_back(const std::string & names);
+  void push_back(const std::vector<std::string> & names);
+  void push_back(const std::set<std::string> & names);
   ///@}
+
+  /**
+   * Indexing operator
+   * Operator to retrieve an item from the MultiMooseEnum. The reference may not be used to change
+   * the item.
+   * @param i index
+   * @returns a read/read-write reference to the item.
+   */
+  const std::string & operator[](unsigned int i) const;
 
   ///@{
   /**
@@ -106,9 +117,14 @@ public:
   void clear();
 
   /**
-   * Return the number of items in the MooseEnum
+   * Return the number of items in the MultiMooseEnum
    */
-  unsigned int size() const { return _current_ids.size(); }
+  unsigned int size() const;
+
+  /**
+   * Returns the number of unique items in the MultiMooseEnum
+   */
+  unsigned int unique_items_size() const;
 
   /**
    * IsValid
@@ -130,14 +146,18 @@ private:
    */
   MultiMooseEnum();
 
-  MultiMooseEnum & assign(const std::set<std::string> &names, bool append);
+  /**
+   * Helper method for all inserts and assignment operators
+   */
+  template<typename InputIterator>
+  MultiMooseEnum & assign(InputIterator first, InputIterator last, bool append);
 
   /// The current id
-  std::set<int> _current_ids;
+  std::vector<int> _current_ids;
 
   /// The corresponding name
-  std::set<std::string> _current_names;
-  std::set<std::string> _current_names_preserved;
+  std::vector<std::string> _current_names;
+  std::vector<std::string> _current_names_preserved;
 };
 
 #endif //VECTORMOOSEENUM_H

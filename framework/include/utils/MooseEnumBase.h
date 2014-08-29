@@ -40,6 +40,9 @@ public:
    */
   MooseEnumBase(const MooseEnumBase & other_enum);
 
+  /// Destructor
+  virtual ~MooseEnumBase();
+
   /**
    * This class must have a virtual destructor since it has derived classes.
    */

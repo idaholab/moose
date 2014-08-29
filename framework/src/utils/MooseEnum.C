@@ -46,6 +46,10 @@ MooseEnum::MooseEnum() :
 {
 }
 
+MooseEnum::~MooseEnum()
+{
+}
+
 MooseEnum &
 MooseEnum::operator=(const std::string & name)
 {

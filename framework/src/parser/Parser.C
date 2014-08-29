@@ -33,6 +33,8 @@
 #include "MooseMesh.h"
 #include "Executioner.h"
 #include "MooseApp.h"
+#include "MooseEnum.h"
+#include "MultiMooseEnum.h"
 
 #include "GlobalParamsAction.h"
 
@@ -511,6 +513,10 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
                                            InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
 
 template<>
+void Parser::setScalarParameter<MultiMooseEnum>(const std::string & full_name, const std::string & short_name,
+                                                InputParameters::Parameter<MultiMooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
+
+template<>
 void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, const std::string & short_name,
                                                  InputParameters::Parameter<RealTensorValue> * param, bool in_global, GlobalParamsAction * global_block);
 
@@ -638,6 +644,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractScalar(RealVectorValue       , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(Point                 , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(MooseEnum             , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(MultiMooseEnum        , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(RealTensorValue       , it->second, full_name, it->first, in_global, global_params_block);
 
       // Moose String-derived scalars
@@ -865,6 +872,38 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
   {
     global_block->remove(short_name);
     global_block->setScalarParam<MooseEnum>(short_name) = current_param;
+  }
+}
+
+template<>
+void Parser::setScalarParameter<MultiMooseEnum>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<MultiMooseEnum> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
+  else
+    gp = &_getpot_file;
+
+  MultiMooseEnum current_param = param->get();
+
+  int vec_size = gp->vector_variable_size(full_name.c_str());
+
+  std::string raw_values;
+  for (int i = 0; i < vec_size; ++i)
+  {
+    std::string single_value = gp->get_value_no_default(full_name.c_str(), "", i);
+    raw_values += ' ' + single_value;
+  }
+
+  param->set() = raw_values;
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setScalarParam<MultiMooseEnum>(short_name) = current_param;
   }
 }
 

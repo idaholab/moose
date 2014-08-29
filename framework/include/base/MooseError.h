@@ -26,17 +26,24 @@
 #define mooseError(msg)                                                             \
   do                                                                                \
   {                                                                                 \
-    Moose::err << "\n\n"                                                            \
-               << (Moose::_color_console ? RED : "")                                \
-               << "\n\n*** ERROR ***\n"                                             \
-               << msg                                                               \
-               << (Moose::_color_console ? DEFAULT : "")                            \
-               << "\n\n";                                                           \
-    if (libMesh::global_n_processors() == 1)                                        \
-      print_trace();                                                                \
-    libmesh_here();                                                                 \
-    MPI_Abort(libMesh::GLOBAL_COMM_WORLD,1);                                        \
-    exit(1);                                                                        \
+    std::ostringstream _error_oss_;                                                 \
+    _error_oss_ << "\n\n"                                                           \
+                << (Moose::_color_console ? RED : "")                               \
+                << "\n\n*** ERROR ***\n"                                            \
+                << msg                                                              \
+                << (Moose::_color_console ? DEFAULT : "")                           \
+                << "\n\n";                                                          \
+    if (Moose::_throw_on_error)                                                     \
+      throw std::runtime_error(_error_oss_.str());                                  \
+    else                                                                            \
+    {                                                                               \
+      Moose::err << _error_oss_.str() << std::flush;                                \
+      if (libMesh::global_n_processors() == 1)                                      \
+        print_trace();                                                              \
+      libmesh_here();                                                               \
+      MPI_Abort(libMesh::GLOBAL_COMM_WORLD,1);                                      \
+      exit(1);                                                                      \
+    }                                                                               \
   } while (0)
 
 #ifdef NDEBUG
@@ -71,14 +78,19 @@
       mooseError(msg);                                                              \
     else                                                                            \
     {                                                                               \
-      Moose::out                                                                    \
+      std::ostringstream _warn_oss_;                                                \
+                                                                                    \
+      _warn_oss_                                                                    \
         << (Moose::_color_console ? YELLOW : "")                                    \
       << "\n\n*** Warning ***\n"                                                    \
       << msg                                                                        \
       << "\nat " << __FILE__ << ", line " << __LINE__                               \
       << (Moose::_color_console ? DEFAULT : "")                                     \
-      << "\n"                                                                       \
-      << std::endl;                                                                 \
+        << "\n\n";                                                                  \
+      if (Moose::_throw_on_error)                                                   \
+        throw std::runtime_error(_warn_oss_.str());                                 \
+      else                                                                          \
+        Moose::err << _warn_oss_.str() << std::flush;                               \
     }                                                                               \
   } while (0)
 
