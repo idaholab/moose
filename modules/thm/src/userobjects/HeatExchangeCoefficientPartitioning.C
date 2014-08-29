@@ -31,16 +31,16 @@ HeatExchangeCoefficientPartitioning::getPartition(Real alpha_liquid, Real dalpha
   if ((alpha_liquid < _lower))
   {
     if (dalpha_liquid_dt < 0)
-      c = 1 - (1 - std::exp(-_k * (0.001 - alpha_liquid) / 0.001));
+      c = 1 - (1 - std::exp(-_k * (_lower - alpha_liquid) / _lower));
     else
-      c = 1 - std::exp(-_k * alpha_liquid / 0.001);
+      c = 1 - std::exp(-_k * alpha_liquid / _lower);
   }
   else if ((alpha_liquid > _upper))
   {
     if (dalpha_liquid_dt > 0)
-      c = 1 - (1 - std::exp(-_k * (alpha_liquid - 0.999) / 0.001));
+      c = 1 - (1 - std::exp(-_k * (alpha_liquid - _upper) / _lower));
     else
-      c = 1 - std::exp(-_k * (1 - alpha_liquid) / 0.001);
+      c = 1 - std::exp(-_k * (1 - alpha_liquid) / _lower);
   }
   else
     c = 1.;
