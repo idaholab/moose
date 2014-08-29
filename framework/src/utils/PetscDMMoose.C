@@ -25,7 +25,7 @@
 
 // libMesh Includes
 #include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/petsc_dm_nonlinear_solver.h"
+#include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/dof_map.h"
