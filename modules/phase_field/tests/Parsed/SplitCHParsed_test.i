@@ -88,30 +88,27 @@
 []
 
 [Executioner]
-  # petsc_options = '-snes_mf_operator'
-  # petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  # petsc_options_value = 'hypre boomeramg 101'
   type = Transient
   scheme = bdf2
 
   solve_type = 'NEWTON'
-  # petsc_options = ' -ksp_monitor'
+  petsc_options_iname = -pc_type
+  petsc_options_value = lu
 
   l_max_its = 30
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
   start_time = 0.0
   num_steps = 6
+
   dt = 10
-  petsc_options_iname = -pc_type
-  petsc_options_value = lu
 []
 
 [Outputs]
-  file_base = out_split
   output_initial = true
   interval = 1
   exodus = true
+
   [./console]
     type = Console
     perf_log = true
