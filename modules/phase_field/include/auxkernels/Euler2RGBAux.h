@@ -19,7 +19,7 @@ protected:
 private:
   unsigned int _sd;
   MaterialProperty<Real> & _phi1;
-  MaterialProperty<Real> & _PHI;
+  MaterialProperty<Real> & _phi;
   MaterialProperty<Real> & _phi2;
   MaterialProperty<unsigned int> & _phase;
   MaterialProperty<unsigned int> & _sym;
