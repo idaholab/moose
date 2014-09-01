@@ -15,6 +15,7 @@
 #include "FiniteStrainTensile.h"
 #include "FiniteStrainMohrCoulomb.h"
 #include "FiniteStrainCrystalPlasticity.h"
+#include "FiniteStrainMultiPlasticity.h"
 #include "RankTwoAux.h"
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
@@ -23,6 +24,8 @@
 #include "CrystalPlasticitySlipSysAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
 #include "CosseratLinearElasticMaterial.h"
+
+#include "TensorMechanicsPlasticMohrCoulomb.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -69,7 +72,10 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainMohrCoulomb);
   registerMaterial(FiniteStrainRatePlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
+  registerMaterial(FiniteStrainMultiPlasticity);
   registerMaterial(CosseratLinearElasticMaterial);
+
+  registerUserObject(TensorMechanicsPlasticMohrCoulomb);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);
