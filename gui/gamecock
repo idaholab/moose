@@ -7,25 +7,73 @@ from base import *
 from execute import *
 from input import *
 
+import code
+
+class Console(object, code.InteractiveConsole):
+
+  def __init__(self, names=None):
+    names = names or {}
+    names['console'] = self
+    code.InteractiveConsole.__init__(self, names)
+
+  def write(self, data):
+    print 'Peacock:', data
+
+#  def raw_input(self, banner):
+#    super(Console, self).raw_input(banner)
+
+
+class PeacockInteractiveConsole(QtGui.QTextEdit, MooseWidget):
+  def __init__(self, **kwargs):
+    QtGui.QTextEdit.__init__(self)
+    MooseWidget.__init__(self, **kwargs)
+
+    self._console = Console()
+
+    r = self._console.push('for i in range(2):')
+    print r
+    r = self._console.push('  print i\n')
+    print r
+
+#    code.interact('Peacock', self._console.raw_input('PEACOCK>>>'))
+#self._console.interact(banner='Peacock', local=self)
+
+#  def _readFunc(self, stuff):
+###    print stuff
+#    print 'yes'
+#    pass
+    #proc = QtCore.QProcess(self)
+    #proc.setProcessChannelMode(QtCore.QProcess.MergedChannels)
+
+    #proc.start('python')
+
+    # Connect the Console (display) to the process
+   # self.object('Console').connect(proc, QtCore.SIGNAL("readyReadStandardOutput()"),
+    #                               lambda: self.object('ExecuteConsole').updateConsole(proc))
+
+
 
 # A DEMO TABBED WIDGET
-class PeacockTabWidget(MooseWidget):
+class PeacockTabWidget(QtGui.QWidget, MooseWidget):
   def __init__(self, **kwargs):
+    QtGui.QWidget.__init__(self)
     MooseWidget.__init__(self, **kwargs)
 
     # Create Tab layout
     self.addObject(QtGui.QTabWidget(), handle='PeacockTabs')
 
     # Add the tabs to the layout
-    self.addObject(InputWidget(**kwargs), handle='Input', parent='PeacockTabs')
-    self.addObject(ExecuteWidget(**kwargs), handle='Execute', parent='PeacockTabs')
+  #  self.addObject(InputWidget(**kwargs), handle='Input', parent='PeacockTabs')
+  #  self.addObject(ExecuteWidget(**kwargs), handle='Execute', parent='PeacockTabs')
+
+    self.addObject(PeacockInteractiveConsole(**kwargs), handle='InteractiveConsole', parent='PeacockTabs')
 
     # Connect the signal 'button' from the InputWidget to the 'Run' callback of ExecuteWidget
-    self.connectSignal('button', 'Run')
+#    self.connectSignal('button', 'Run')
 
 #    self.object('Execute').info()
 
-    self.setup()
+#    self.setup()
 
 if __name__ == '__main__':
 
@@ -35,6 +83,9 @@ if __name__ == '__main__':
   main.setMenuBar(menubar)
 
   tabs = PeacockTabWidget(main=main, alignment='vertical', debug=True)
+
+
+
 
   tabs.show()
 

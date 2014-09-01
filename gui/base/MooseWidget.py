@@ -6,7 +6,7 @@ from base import *
 
 ##
 # Basic QWidget to serve as a container for controls
-class MooseWidget(QtGui.QWidget, PeacockTestInterface, PeacockErrorInterface):
+class MooseWidget(PeacockErrorInterface, PeacockTestInterface):
 
   ##
   # Constructor.
@@ -28,9 +28,12 @@ class MooseWidget(QtGui.QWidget, PeacockTestInterface, PeacockErrorInterface):
   def __init__(self, **kwargs):
 
     # Call the base class constructor
-    QtGui.QWidget.__init__(self)
-    PeacockTestInterface.__init__(self)
+ #   QtGui.QWidget.__init__(self)
+    if not isinstance(self, QtGui.QWidget):
+      print "MUST BE A WIDGET"
+
     PeacockErrorInterface.__init__(self)
+    PeacockTestInterface.__init__(self)
 
     # All object added via addObject are stored in a dictionary
     self._objects = dict()
