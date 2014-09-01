@@ -1,0 +1,12 @@
+#!/usr/bin/python
+from PySide import QtCore, QtGui
+
+import code
+
+
+
+#from io import *
+#io = CSVIO('test.csv', testing=True)
+#io.test()
+
+
