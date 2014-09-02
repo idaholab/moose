@@ -16,6 +16,7 @@
 #include "OutputInterface.h"
 #include "OutputWarehouse.h"
 #include "MooseApp.h"
+#include "ActionWarehouse.h"
 
 // Define input parameters
 template<>
@@ -48,8 +49,19 @@ OutputInterface::OutputInterface(const std::string & name, InputParameters param
 void
 OutputInterface::buildOutputHideVariableList(std::set<std::string> variable_names)
 {
-  // Extract all the possible
-  const std::set<OutputName> & avail = _oi_output_warehouse.getOutputNames();
+  // Set of available names (a copy is used intentionally to handle the empty case discussed below)
+  std::set<OutputName> avail =_oi_output_warehouse.getOutputNames();
+
+  // If avail is empty then there is a chance that the creation of this object is happening
+  // prior to the creation of the Output objects, thus extract the names from ActionWarehouse,
+  // this is the case for RELAP-7 Component creation
+  if (avail.empty())
+  {
+    ActionWarehouse & awh = _oi_moose_app.actionWarehouse();
+    const std::vector<Action *> & actions = awh.getActionsByName("add_output");
+    for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+      avail.insert((*it)->getShortName());
+  }
 
   // Check for 'none'; hide variables on all outputs
   if (_oi_outputs.find("none") != _oi_outputs.end())
