@@ -742,11 +742,6 @@ public:
    */
   void parentOutputPositionChanged();
 
-  /**
-   * Enable printing of top residuals
-   */
-  void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
-
   ///@{
   /**
    * These methods are used to determine whether stateful material properties need to be stored on
@@ -928,9 +923,6 @@ protected:
 
   /// Whether nor not stateful materials have been initialized
   bool _has_initialized_stateful;
-
-  /// Flag for print top residuals
-  bool _dbg_top_residuals;
 
   /// Object responsible for restart (read/write)
   Resurrector * _resurrector;

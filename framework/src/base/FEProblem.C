@@ -138,7 +138,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _has_constraints(false),
     _has_multiapps(false),
     _has_initialized_stateful(false),
-    _dbg_top_residuals(0),
     _resurrector(NULL),
     _const_jacobian(false),
     _has_jacobian(false),
@@ -3243,9 +3242,6 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   // Need to close and update the aux system in case residuals were saved to it.
   _aux.solution().close();
   _aux.update();
-
-  if (_dbg_top_residuals)
-    _nl.printTopResiduals(residual, _dbg_top_residuals);
 }
 
 void

@@ -42,12 +42,17 @@ InputParameters validParams<DebugOutput>()
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
   params.addParam<bool>("show_var_residual_norms", false, "Print the residual norms of the individual solution variables at each nonlinear iteration");
   params.addParam<bool>("show_material_props", false, "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
+  params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
+
+  // By default operate on linear residuals, this is to maintain the behavior of show_top_residuals
+  params.set<bool>("linear_residuals") = true;
 
   return params;
 }
 
 DebugOutput::DebugOutput(const std::string & name, InputParameters & parameters) :
     PetscOutput(name, parameters),
+    _show_top_residuals(getParam<unsigned int>("show_top_residuals")),
     _show_var_residual_norms(getParam<bool>("show_var_residual_norms")),
     _sys(_problem_ptr->getNonlinearSystem().sys())
 {
@@ -57,6 +62,7 @@ DebugOutput::DebugOutput(const std::string & name, InputParameters & parameters)
   // Show material information
   if (getParam<bool>("show_material_props"))
     printMaterialMap();
+
 }
 
 DebugOutput::~DebugOutput()
@@ -66,6 +72,7 @@ DebugOutput::~DebugOutput()
 void
 DebugOutput::output()
 {
+  // Show variable residual norms on Nonlinear iterations
   if (_show_var_residual_norms && onNonlinearResidual())
   {
     // Stream for outputting
@@ -91,6 +98,10 @@ DebugOutput::output()
 
     _console << oss.str() << std::flush;
   }
+
+  // Display the top residuals
+  if (_show_top_residuals > 0)
+    printTopResiduals(*(_sys.rhs), _show_top_residuals);
 }
 
 void
@@ -143,6 +154,47 @@ DebugOutput::printMaterialMap() const
   _console << std::setw(Console::_field_width) << active_boundary.str() << '\n';
 }
 
+void
+DebugOutput::printTopResiduals(const NumericVector<Number> & residual, unsigned int n)
+{
+  // Need a reference to the libMesh mesh object
+  MeshBase & mesh = _problem_ptr->mesh().getMesh();
+
+  std::vector<DebugOutputTopResidualData> vec;
+  vec.resize(residual.local_size());
+
+  unsigned int j = 0;
+  MeshBase::node_iterator it = mesh.local_nodes_begin();
+  const MeshBase::node_iterator end = mesh.local_nodes_end();
+  for (; it != end; ++it)
+  {
+    Node & node = *(*it);
+    dof_id_type nd = node.id();
+
+    for (unsigned int var = 0; var < node.n_vars(_sys.number()); ++var)
+      if (node.n_dofs(_sys.number(), var) > 0)
+      {
+        dof_id_type dof_idx = node.dof_number(_sys.number(), var, 0);
+        vec[j] = DebugOutputTopResidualData(var, nd, residual(dof_idx));
+        j++;
+      }
+  }
+
+  // Sort vec by residuals
+  std::sort(vec.begin(), vec.end(), sortTopResidualData);
+
+  // Display the residuals
+  Moose::err << "[DBG][" << processor_id() << "] Max " << n << " residuals";
+  if (j < n)
+  {
+    n = j;
+    Moose::err << " (Only " << n << " available)";
+  }
+  Moose::err << std::endl;
+
+  for (unsigned int i = 0; i < n; ++i)
+    fprintf(stderr, "[DBG][%d]  % .15e '%s' at node %d\n", processor_id(), vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
+}
 
 void
 DebugOutput::printMaterialProperties(std::stringstream & output, const std::vector<Material * > & materials) const

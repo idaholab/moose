@@ -55,9 +55,10 @@ SetupDebugAction::act()
   // Flags debug outputting via the DebugOutput object
   bool show_var_residual_norms = _pars.get<bool>("show_var_residual_norms");
   bool show_material_props = _pars.get<bool>("show_material_props");
+  unsigned int show_top_residuals  = _pars.get<unsigned int>("show_top_residuals");
 
   // Create DebugOutput object
-  if (show_var_residual_norms || show_material_props)
+  if (show_var_residual_norms || show_material_props || show_top_residuals > 0)
   {
     // Set the 'type =' parameters for the desired object
     _action_params.set<std::string>("type") = "DebugOutput";
@@ -70,12 +71,9 @@ SetupDebugAction::act()
     object_params.set<bool>("_built_by_moose") = true;
     object_params.set<bool>("show_var_residual_norms") = show_var_residual_norms;
     object_params.set<bool>("show_material_props") = show_material_props;
+    object_params.set<unsigned int>("show_top_residuals") = show_top_residuals;
 
     // Add the action to the warehouse
     _awh.addActionBlock(action);
   }
-
-  // Enable MaterialProperty and top residual debugging
-  if (_problem != NULL)
-    _problem->setDebugTopResiduals(_top_residuals);
 }
