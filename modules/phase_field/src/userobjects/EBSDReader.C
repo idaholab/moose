@@ -124,6 +124,9 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
         iss >> d.phi1 >> d.phi >> d.phi2 >> x >> y >> z >> d.grain >> d.phase >> d.symmetry;
         d.p = Point(x,y,z);
 
+        // The Order parameter is not yet assigned. We initialize it to zero in order not to have undefined values that break the testing.
+        d.op = 0;
+
         unsigned global_index = indexFromPoint(Point(x, y, z));
         _data[global_index] = d;
       }
