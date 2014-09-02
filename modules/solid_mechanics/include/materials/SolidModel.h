@@ -90,6 +90,7 @@ protected:
   const bool _has_temp;
   VariableValue & _temperature;
   VariableValue & _temperature_old;
+  VariableGradient & _temp_grad;
   const Real _alpha;
   Function * const _alpha_function;
   bool _has_stress_free_temp;
@@ -140,6 +141,7 @@ protected:
   MaterialProperty<Real> & _SED_old;
   const bool _compute_JIntegral;
   MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
+  MaterialProperty<RealVectorValue> & _thermal_J_vec;
 
   virtual void initQpStatefulProperties();
 
@@ -173,6 +175,7 @@ protected:
 
   virtual void computeEshelby();
   virtual void computeStrainEnergyDensity();
+  virtual void computeThermalJvec();
 
   /*
    * Determine whether new cracks have formed.

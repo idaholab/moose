@@ -12,6 +12,7 @@
 
 #include "MooseApp.h"
 #include "Problem.h"
+#include "PiecewiseLinear.h"
 
 template<>
 InputParameters validParams<SolidModel>()
@@ -107,6 +108,7 @@ SolidModel::SolidModel( const std::string & name,
   _has_temp(isCoupled("temp")),
   _temperature(_has_temp ? coupledValue("temp") : _zero),
   _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
+  _temp_grad(coupledGradient("temp")),
   _alpha(parameters.isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0.),
   _alpha_function( parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
   _has_stress_free_temp(false),
@@ -143,6 +145,7 @@ SolidModel::SolidModel( const std::string & name,
   _SED_old(declarePropertyOld<Real>("strain_energy_density")),
   _compute_JIntegral(getParam<bool>("compute_JIntegral")),
   _Eshelby_tensor(declareProperty<ColumnMajorMatrix>("Eshelby_tensor")),
+  _thermal_J_vec(declareProperty<RealVectorValue>("thermal_J_vec")),//Variable to calculate thermal component of J
   _block_id(std::vector<SubdomainID>(blockIDs().begin(), blockIDs().end())),
   _constitutive_active(false),
   _element(NULL),
@@ -607,6 +610,11 @@ SolidModel::computeProperties()
     if (_compute_JIntegral)
     {
       computeEshelby();
+    }
+
+    if (_compute_JIntegral && _has_temp)
+    {
+      computeThermalJvec();
     }
 
     computePreconditioning();
@@ -1431,4 +1439,42 @@ SolidModel::initStatefulProperties(unsigned n_points)
     ConstitutiveModel* cm = _constitutive_model[current_block];
     cm->initStatefulProperties( n_points );
   }
+}
+
+/*
+  Variable storing contribution to thermal component of J calculated
+ */
+void
+SolidModel::computeThermalJvec()
+{
+
+  Real alpha(_alpha);
+  Real dalpha_dT = 0.0;
+
+  if (_alpha_function)
+  {
+    Point p;
+    alpha = _alpha_function->value(_temperature[_qp],p);
+
+    PiecewiseLinear * pl_func = dynamic_cast<PiecewiseLinear * >(_alpha_function);
+
+    if ( pl_func )
+      dalpha_dT = pl_func->timeDerivative(_temperature[_qp],p);
+    else
+      mooseError("Provide PiecewiseLinear function for temperature dependent CTE");
+
+  }
+
+  Real stress_trace;
+  stress_trace = _stress[_qp].xx() + _stress[_qp].yy() + _stress[_qp].zz();
+
+  _thermal_J_vec[_qp] = 0.0;
+  for (unsigned int i = 0; i < 3; i++)
+  {
+    Real val = alpha*_temp_grad[_qp](i)+dalpha_dT*_temp_grad[_qp](i)*(_temperature[_qp]-_stress_free_temp);
+
+    _thermal_J_vec[_qp](i) = stress_trace*val;
+
+  }
+
 }

@@ -10,17 +10,20 @@ InputParameters validParams<JIntegral>()
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
   params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front corresponding to this q function");
   params.set<bool>("use_displaced_mesh") = false;
+  params.addParam<bool>("thermal_component", true, "Include thermal component in J calculation");
   return params;
 }
 
 JIntegral::JIntegral(const std::string & name, InputParameters parameters):
     ElementIntegralPostprocessor(name, parameters),
+    _scalar_q(coupledValue("q")),
     _grad_of_scalar_q(coupledGradient("q")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _has_crack_front_node_index(isParamValid("crack_front_node_index")),
     _crack_front_node_index(_has_crack_front_node_index ? getParam<unsigned int>("crack_front_node_index") : 0),
     _treat_as_2d(false),
-    _Eshelby_tensor(getMaterialProperty<ColumnMajorMatrix>("Eshelby_tensor"))
+    _Eshelby_tensor(getMaterialProperty<ColumnMajorMatrix>("Eshelby_tensor")),
+    _thermal_J_vec(getMaterialProperty<RealVectorValue>("thermal_J_vec"))
 {
 }
 
@@ -62,6 +65,15 @@ JIntegral::computeQpIntegral()
 
   Real eq = _Eshelby_tensor[_qp].doubleContraction(grad_of_vector_q);
 
+  //Thermal component of J -- Start
+  Real eq_thermal = 0.0;
+
+  for (unsigned int i = 0; i < 3; i++)
+    eq_thermal += crack_direction(i)*_scalar_q[_qp]*_thermal_J_vec[_qp](i);
+
+  //End
+
+
   Real q_avg_seg = 1.0;
   if (!_crack_front_definition->treatAs2D())
   {
@@ -69,5 +81,7 @@ JIntegral::computeQpIntegral()
                  _crack_front_definition->getCrackFrontBackwardSegmentLength(_crack_front_node_index)) / 2.0;
   }
 
-  return -eq/q_avg_seg;
+  Real etot = -eq + eq_thermal;
+
+  return etot/q_avg_seg;
 }
