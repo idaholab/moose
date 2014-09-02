@@ -146,22 +146,37 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
             mooseWarning("The type for material property '" << *name_iter << "' is not supported for automatic output.");
         }
 
-        // Update the OutputWarehouse
-        // If 'outputs' is supplied with a list of output objects to limit the output to this information must be communicated
-        // to output objects, which is done via the OutputWarehouse
+        // Create the hide list in the Material object via the OutputInterface; this creates the
+        // the hide these supplied variables from outputs not listed in the materials 'outputs'
+        // parameter (see OutputInterface for details)
+        (*material_iter)->buildOutputHideVariableList(_material_variable_names);
+
+        // If the material object as limited outputs, store the variables associated with the output objects
         if (!outputs.empty())
-          _output_warehouse.updateMaterialOutput(outputs, _material_variable_names);
+          for (std::set<OutputName>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
+            _material_variable_names_map[*it].insert(_material_variable_names.begin(), _material_variable_names.end());
+
       }
     }
   }
 
   // Create the AuxVariables
   FEType fe_type(CONSTANT, MONOMIAL); // currently only elemental variables are support for material property output
-  for (std::set<AuxVariableName>::iterator it = _variable_names.begin(); it != _variable_names.end(); ++it)
+  for (std::set<std::string>::iterator it = _variable_names.begin(); it != _variable_names.end(); ++it)
     problem_ptr->addAuxVariable(*it, fe_type);
 
-  // Update the complete list of material related AuxVariables to the OutputWarehouse
-  _output_warehouse.setMaterialOutputVariables(_variable_names);
+  // When a Material object has 'output_properties' defined all other properties not listed must be added to
+  // the hide list for the output objects so that properties that are not desired do not appear.
+  for (std::map<OutputName, std::set<std::string> >::const_iterator it = _material_variable_names_map.begin();
+       it != _material_variable_names_map.end(); ++it)
+  {
+    std::set<std::string> hide;
+    std::set_difference(_variable_names.begin(), _variable_names.end(),
+                        it->second.begin(), it->second.end(),
+                        std::inserter(hide, hide.begin()));
+
+    _output_warehouse.addInterfaceHideVariables(it->first, hide);
+  }
 }
 
 MooseObjectAction *

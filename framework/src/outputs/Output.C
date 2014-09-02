@@ -504,87 +504,26 @@ Output::checkInterval()
   return output;
 }
 
-// Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
-template <typename warehouse_type, typename postprocessor_type>
-void
-initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_type & warehouse, bool & has_limited_pps, MooseApp & app, std::string & name, InputParameters & params)
-{
-  // Loop through each of the execution flags
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-  {
-    // Loop through each of the postprocessors
-    for (typename std::vector<postprocessor_type *>::const_iterator postprocessor_it = warehouse(Moose::exec_types[i])[0].all().begin();
-         postprocessor_it != warehouse(Moose::exec_types[i])[0].all().end();
-         ++postprocessor_it)
-    {
-      // Store the name in the available postprocessors
-      postprocessor_type *pps = *postprocessor_it;
-      output_data.available.push_back(pps->PPName());
-
-      // Extract the list of outputs
-      std::set<OutputName> pps_outputs = pps->getOutputs();
-
-      // Check that the outputs are valid
-      app.getOutputWarehouse().checkOutputs(pps_outputs);
-
-      /* Hide the postprocessor if:
-       *  (1) The "outputs" parameter is NOT empty and
-       *  (2) 'all' is NOT found in the 'outputs' parameter and
-       *  (3) 'none' is used within the 'outputs' parameter or
-       *  (4) this output object name is not found in the list of output names
-       */
-      if ( !pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end() &&
-           (pps_outputs.find("none") != pps_outputs.end() || pps_outputs.find(name) == pps_outputs.end()) )
-        output_data.hide.push_back(pps->PPName());
-
-      // Check that the output object allows postprocessor output, account for "all" keyword (if it is present assume "all" was desired)
-      if ( pps_outputs.find(name) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end() )
-      {
-        if (!params.isParamValid("output_postprocessors"))
-          mooseWarning("Postprocessor '" << pps->PPName()
-                       << "' has requested to be output by the '" << name
-                       << "' output, but postprocessor output is not support by this type of output object.");
-      }
-
-      // Set the flag state for postprocessors that utilize 'outputs' parameter
-      if (!pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end())
-        has_limited_pps = true;
-    }
-  }
-}
-
-
 void
 Output::initAvailableLists()
 {
-  /* This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
-     to produce an warning if postprocessor output is disabled*/
-  bool has_limited_pps = false;
-
-  /* This flag is set to true if any vector postprocessor has the 'outputs' parameter set, it is then used
-     to produce an warning if postprocessor output is disabled*/
-  bool has_limited_vector_pps = false;
-
-  {
-    // Get a reference to the storage of the postprocessors
-    ExecStore<PostprocessorWarehouse> & warehouse = _problem_ptr->getPostprocessorWarehouse();
-
-    initPostprocessorOrVectorPostprocessorLists<ExecStore<PostprocessorWarehouse>, Postprocessor>(_postprocessor, warehouse, has_limited_pps, _app, _name, _pars);
-  }
-
-  {
-    // Get a reference to the storage of the vector postprocessors
-    ExecStore<VectorPostprocessorWarehouse> & warehouse = _problem_ptr->getVectorPostprocessorWarehouse();
-
-    initPostprocessorOrVectorPostprocessorLists<ExecStore<VectorPostprocessorWarehouse>, VectorPostprocessor>(_vector_postprocessor, warehouse, has_limited_vector_pps, _app, _name, _pars);
-  }
-
+  // Initialize Postprocessor list
+  // This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
+  // to produce an warning if postprocessor output is disabled
+  ExecStore<PostprocessorWarehouse> & warehouse = _problem_ptr->getPostprocessorWarehouse();
+  bool has_limited_pps = initPostprocessorOrVectorPostprocessorLists<ExecStore<PostprocessorWarehouse>, Postprocessor>(_postprocessor, warehouse);
 
   // Produce the warning when 'outputs' is used, but postprocessor output is disable
   if (has_limited_pps && isParamValid("output_postprocessors") && getParam<bool>("output_postprocessors") == false)
     mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '" << _name << "' output object.");
 
-  // Produce the warning when 'outputs' is used, but postprocessor output is disable
+  // Initialize vector postprocessor list
+  // This flag is set to true if any vector postprocessor has the 'outputs' parameter set, it is then used
+  // to produce an warning if vector postprocessor output is disabled
+  ExecStore<VectorPostprocessorWarehouse> & vector_warehouse = _problem_ptr->getVectorPostprocessorWarehouse();
+  bool has_limited_vector_pps = initPostprocessorOrVectorPostprocessorLists<ExecStore<VectorPostprocessorWarehouse>, VectorPostprocessor>(_vector_postprocessor, vector_warehouse);
+
+  // Produce the warning when 'outputs' is used, but vector postprocessor output is disable
   if (has_limited_vector_pps && isParamValid("output_vector_postprocessors") && getParam<bool>("output_vector_postprocessors") == false)
     mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '" << _name << "' output object.");
 
@@ -680,10 +619,10 @@ Output::initOutputList(OutputData & data)
   std::vector<std::string> & avail = data.available;
   std::vector<std::string> & output = data.output;
 
-  // Append the hide list from automatic material property output
-  std::vector<std::string> material_hide;
-  _app.getOutputWarehouse().buildMaterialOutputHideList(_name, material_hide);
-  hide.insert(hide.end(), material_hide.begin(), material_hide.end());
+  // Append the list from OutputInterface objects
+  std::set<std::string> interface_hide;
+  _app.getOutputWarehouse().buildInterfaceHideVariables(_name, interface_hide);
+  hide.insert(hide.end(), interface_hide.begin(), interface_hide.end());
 
   // Sort the vectors
   std::sort(avail.begin(), avail.end());
