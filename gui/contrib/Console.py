@@ -48,6 +48,7 @@ class _QPythonConsoleInterpreter(_InteractiveConsole):
         finally:
             if sys.stdout is collector:
                 sys.stdout = old_stdout
+
             if sys.stderr is collector:
                 sys.stderr = old_stderr
         self.write(collector.getvalue())
