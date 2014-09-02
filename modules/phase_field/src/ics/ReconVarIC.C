@@ -41,7 +41,7 @@ ReconVarIC::initialSetup()
     _gp[index].p = d.p;
   }
 
-  // Calculate centerpoint of each EBSD grain TODO: use Point
+  // Calculate centerpoint of each EBSD grain
   _centerpoints.resize(_grain_num);
   std::vector<unsigned int> num_pts(_grain_num);
   for (unsigned int i = 0; i < _grain_num; i++)
