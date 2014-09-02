@@ -258,6 +258,11 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface):
       self._debug('Adding QLayout (' + handle + ') to (' + parent + ')')
       parent_object.addLayout(q_object)
 
+    # QWidget -> QSplitter
+    elif isinstance(q_object, QtGui.QWidget) and isinstance(parent_object, QtGui.QSplitter):
+      self._debug('Adding QWidget (' + handle + ') to QSplitter (' + parent + ')')
+      parent_object.addWidget(q_object)
+
     else:
       print 'peacockWarning ...'
 
