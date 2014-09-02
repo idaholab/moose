@@ -140,33 +140,3 @@ MaterialPropertyDebugOutput::printMaterialProperties(std::stringstream & output,
     output << '\n';
   }
 }
-
-void
-MaterialPropertyDebugOutput::outputNodalVariables()
-{
-  mooseError("Individual output of nodal variables is not support for Debug output");
-}
-
-void
-MaterialPropertyDebugOutput::outputElementalVariables()
-{
-  mooseError("Individual output of elemental variables is not support for Debug output");
-}
-
-void
-MaterialPropertyDebugOutput::outputPostprocessors()
-{
-  mooseError("Individual output of postprocessors is not support for Debug output");
-}
-
-void
-MaterialPropertyDebugOutput::outputVectorPostprocessors()
-{
-  mooseError("Individual output of VectorPostprocessors is not support for Debug output");
-}
-
-void
-MaterialPropertyDebugOutput::outputScalarVariables()
-{
-  mooseError("Individual output of scalars is not support for Debug output");
-}

@@ -109,39 +109,3 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
   for (unsigned int i = 0; i < n; ++i)
     fprintf(stderr, "[DBG][%d]  % .15e '%s' at node %d\n", processor_id(), vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
 }
-
-std::string
-TopResidualDebugOutput::filename()
-{
-  return _file_base;
-}
-
-void
-TopResidualDebugOutput::outputNodalVariables()
-{
-  mooseError("Individual output of nodal variables is not support for Debug output");
-}
-
-void
-TopResidualDebugOutput::outputElementalVariables()
-{
-  mooseError("Individual output of elemental variables is not support for Debug output");
-}
-
-void
-TopResidualDebugOutput::outputPostprocessors()
-{
-  mooseError("Individual output of postprocessors is not support for Debug output");
-}
-
-void
-TopResidualDebugOutput::outputVectorPostprocessors()
-{
-  mooseError("Individual output of VectorPostprocessors is not support for Debug output");
-}
-
-void
-TopResidualDebugOutput::outputScalarVariables()
-{
-  mooseError("Individual output of scalars is not support for Debug output");
-}

@@ -83,39 +83,3 @@ VariableResidualNormsDebugOutput::output()
 
   _console << oss.str() << std::flush;
 }
-
-std::string
-VariableResidualNormsDebugOutput::filename()
-{
-  return _file_base;
-}
-
-void
-VariableResidualNormsDebugOutput::outputNodalVariables()
-{
-  mooseError("Individual output of nodal variables is not support for Debug output");
-}
-
-void
-VariableResidualNormsDebugOutput::outputElementalVariables()
-{
-  mooseError("Individual output of elemental variables is not support for Debug output");
-}
-
-void
-VariableResidualNormsDebugOutput::outputPostprocessors()
-{
-  mooseError("Individual output of postprocessors is not support for Debug output");
-}
-
-void
-VariableResidualNormsDebugOutput::outputVectorPostprocessors()
-{
-  mooseError("Individual output of VectorPostprocessors is not support for Debug output");
-}
-
-void
-VariableResidualNormsDebugOutput::outputScalarVariables()
-{
-  mooseError("Individual output of scalars is not support for Debug output");
-}

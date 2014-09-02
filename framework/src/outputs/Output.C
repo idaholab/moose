@@ -348,6 +348,38 @@ Output::outputFinal()
   _force_output = false;
 }
 
+
+void
+Output::outputNodalVariables()
+{
+  mooseError("Individual output of nodal variables is not support for this output object");
+}
+
+void
+Output::outputElementalVariables()
+{
+  mooseError("Individual output of elemental variables is not support for this output object");
+}
+
+void
+Output::outputPostprocessors()
+{
+  mooseError("Individual output of postprocessors is not support for this output object");
+}
+
+void
+Output::outputVectorPostprocessors()
+{
+  mooseError("Individual output of VectorPostprocessors is not support for this output object");
+}
+
+void
+Output::outputScalarVariables()
+{
+  mooseError("Individual output of scalars is not support for this output object");
+}
+
+
 void
 Output::output()
 {

@@ -87,18 +87,6 @@ protected:
    */
   static bool sortTopResidualData(TopResidualDebugOutputTopResidualData i, TopResidualDebugOutputTopResidualData j) { return (fabs(i._residual) > fabs(j._residual)); }
 
-  //@{
-  /**
-   * Individual component output is not supported for TopResidualDebugOutput
-   */
-  std::string filename();
-  virtual void outputNodalVariables();
-  virtual void outputElementalVariables();
-  virtual void outputPostprocessors();
-  virtual void outputVectorPostprocessors();
-  virtual void outputScalarVariables();
-  //@}
-
   /// Number of residuals to display
   unsigned int _num_residuals;
 

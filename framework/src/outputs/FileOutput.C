@@ -165,6 +165,11 @@ FileOutput::checkFilename()
   return output;
 }
 
+std::string
+FileOutput::filename()
+{
+  return _file_base;
+}
 
 void
 FileOutput::setFileNumber(unsigned int num)

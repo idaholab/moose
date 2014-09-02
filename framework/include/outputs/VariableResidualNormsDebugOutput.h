@@ -53,18 +53,6 @@ protected:
    */
   virtual void output();
 
-  //@{
-  /**
-   * Individual component output is not supported for VariableResidualNormsDebugOutput
-   */
-  std::string filename();
-  virtual void outputNodalVariables();
-  virtual void outputElementalVariables();
-  virtual void outputPostprocessors();
-  virtual void outputVectorPostprocessors();
-  virtual void outputScalarVariables();
-  //@}
-
   /// Reference to libMesh system
   TransientNonlinearImplicitSystem & _sys;
 

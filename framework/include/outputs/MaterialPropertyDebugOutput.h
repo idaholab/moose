@@ -66,16 +66,6 @@ protected:
    */
   void printMaterialProperties(std::stringstream & output, const std::vector<Material * > & materials) const;
 
-  //@{
-  /**
-   * Individual component output is not supported for MaterialPropertyDebugOutput
-   */
-  virtual void outputNodalVariables();
-  virtual void outputElementalVariables();
-  virtual void outputPostprocessors();
-  virtual void outputVectorPostprocessors();
-  virtual void outputScalarVariables();
-  //@}
 };
 
-#endif //D MATERIALPROPERTYEBUGOUTPUT_H
+#endif // MATERIALPROPERTYEBUGOUTPUT_H

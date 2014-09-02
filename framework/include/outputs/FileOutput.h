@@ -45,9 +45,9 @@ public:
 
   /**
    * The filename for the output file
-   * @return A string of output file including the extension
+   * @return A string of output file including the extension, by default this returns _file_base
    */
-  virtual std::string filename() = 0;
+  virtual std::string filename();
 
   /**
    * Performs the initial output, including the creation of the file base contains check

@@ -247,34 +247,34 @@ protected:
    * The child class must define this method to output the nonlinear variables as desired
    * @see Exodus::outputNodalVariables
    */
-  virtual void outputNodalVariables() = 0;
+  virtual void outputNodalVariables();
 
   /**
    * Performs output of elemental nonlinear variables
    * The child class must define this method to output the nonlinear variables as desired
    * @see Exodus::outputElementalVariables
    */
-  virtual void outputElementalVariables() = 0;
+  virtual void outputElementalVariables();
 
   /**
    * Performs output of scalar variables
    * The child class must define this method to output the scalar variables as desired
    * @see Exodus::outputScalarVariables
    */
-  virtual void outputScalarVariables() = 0;
+  virtual void outputScalarVariables();
 
   /**
    * Performs output of postprocessors
    * The child class must define this method to output the postprocessors as desired
    * @see Exodus::outputPostprocessors
    */
-  virtual void outputPostprocessors() = 0;
+  virtual void outputPostprocessors();
 
   /**
    * Performs output of VectorPostprocessors
    * The child class must define this method to output the VectorPostprocessors as desired
    */
-  virtual void outputVectorPostprocessors() = 0;
+  virtual void outputVectorPostprocessors();
 
   /**
    * Initial setup function that is called prior to any output
