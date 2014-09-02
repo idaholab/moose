@@ -5,28 +5,53 @@
     input = 'show_var_residual_norms.i'
     expect_out = "\|residual\|_2 of individual variables:"
   [../]
+
   [./debug_show_var_residual_norms]
     # Use the debug block to print variable residual norms
     type = 'RunApp'
     input = 'debug_show_var_residual_norms.i'
     expect_out = "\|residual\|_2 of individual variables:"
   [../]
+
   [./show_var_residual_norms_block]
     # Use the outputs block to print variable residual norms
     type = 'RunApp'
     input = 'show_var_residual_norms_block.i'
     expect_out = "\|residual\|_2 of individual variables:"
   [../]
+
   [./show_material_props]
     # Test the output block ability to output material property information
     type = RunApp
     input = show_material_props.i
     expect_out = "Property Names:.*\"bnd_prop\""
    [../]
+
    [./show_material_props_block]
     # Test the debug block ability to output material property information
     type = RunApp
     input = show_material_props_debug.i
     expect_out = "Property Names:.*\"bnd_prop\""
+   [../]
+
+   [./show_top_residuals]
+     # Test that top residauls are displayed using DebugOutput object via Outputs block
+     type = RunApp
+     input = show_top_residuals.i
+     expect_out = "\[DBG\]\[0\].*'u'.*at node"
+   [../]
+
+   [./show_top_residuals_debug]
+     # Test that top residauls are displayed using DebugOutput object via Debug block
+     type = RunApp
+     input = show_top_residuals_debug.i
+     expect_out = "\[DBG\]\[0\].*'u'.*at node"
+   [../]
+
+   [./show_top_residuals_nonlinear_only]
+     # Test that top residauls may be limited to nonlinear iterations only
+     type = RunApp
+     input = show_top_residuals.i Outputs/debug/linear_residuals=false
+     expect_out = "0 Linear[^\n]*\n[^\n]*1 Linear"
    [../]
 []
