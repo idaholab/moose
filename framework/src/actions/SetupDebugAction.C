@@ -54,8 +54,7 @@ SetupDebugAction::act()
 {
   // Flags debug outputting via the DebugOutput object
   bool show_var_residual_norms = _pars.get<bool>("show_var_residual_norms");
-  bool show_material_props = _pars.get<bool>("show_var_residual_norms");
-
+  bool show_material_props = _pars.get<bool>("show_material_props");
 
   // Create DebugOutput object
   if (show_var_residual_norms || show_material_props)

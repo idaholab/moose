@@ -17,4 +17,16 @@
     input = 'show_var_residual_norms_block.i'
     expect_out = "\|residual\|_2 of individual variables:"
   [../]
+  [./show_material_props]
+    # Test the output block ability to output material property information
+    type = RunApp
+    input = show_material_props.i
+    expect_out = "Property Names:.*\"bnd_prop\""
+   [../]
+   [./show_material_props_block]
+    # Test the debug block ability to output material property information
+    type = RunApp
+    input = show_material_props_debug.i
+    expect_out = "Property Names:.*\"bnd_prop\""
+   [../]
 []
