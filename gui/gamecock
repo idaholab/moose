@@ -16,38 +16,55 @@ from StringIO import StringIO
 # Adapted from
 class PeacockInteractiveConsole(InteractiveConsole):
 
-    def __init__(self, ui, locals=None):
-        _InteractiveConsole.__init__(self,locals)
-        self.ui = ui
+#  _signal_write = QtCore.Signal(str)
 
-    def write(self, data):
-        if data:
-            if data[-1] == '\n':
-                data = data[:-1]
-            self.ui.output.appendPlainText(data)
+  def __init__(self, locals=None, **kwargs):
+    InteractiveConsole.__init__(self, locals)
 
-    def runsource(self, source, filename="<input>", symbol="single"):
-        old_stdout = sys.stdout
-        old_stderr = sys.stderr
-        sys.stdout = sys.stderr = collector = StringIO()
-        try:
-            more = InteractiveConsole.runsource(self,source,filename,symbol)
-        finally:
-            if sys.stdout is collector:
-                sys.stdout = old_stdout
-            if sys.stderr is collector:
-                sys.stderr = old_stderr
-        self.write(collector.getvalue())
-        return more
+    self._current_output = None
 
+#  def write(self, data):
+#    print data
+#    if data:
+#      if data[-1] == '\n':
+#        data = data[:-1]
+#              self._signal_write.emit(data)
+#          self.ui.output.appendPlainText(data)
 
+  def runsource(self, source, filename="<input>", symbol="single"):
+
+      more = False
+      old_stdout = sys.stdout
+      old_stderr = sys.stderr
+      sys.stdout = sys.stderr = collector = StringIO()
+      try:
+          more = InteractiveConsole.runsource(self, source, filename, symbol)
+      finally:
+          if sys.stdout is collector:
+              sys.stdout = old_stdout
+          if sys.stderr is collector:
+              sys.stderr = old_stderr
+#      self._signal_write.emit(collector.getvalue())
+#      self.write(collector.getvalue())
+      self._current_output = collector.getvalue()
+      return more
+
+  def getCurrentOutput(self):
+    return self._current_output
 
 
 
 class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
+
+ # _signal_write = QtCore.Signal(str)
+
   def __init__(self, **kwargs):
     QtGui.QWidget.__init__(self)
     MooseWidget.__init__(self, **kwargs)
+
+
+    self._console = PeacockInteractiveConsole()
+#    self._signal_write.connect(self._console.write)
 
     top_layout = self.addObject(QtGui.QVBoxLayout(), handle='ConsoleLayout')
     top_layout.setSpacing(0)
@@ -60,6 +77,7 @@ class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
     self.addObject(QtGui.QLineEdit(), handle='ConsoleInput', parent='ConsolePromptInputLayout')
 
     self.setup()
+
 
   def _setupConsoleOutput(self, q_object):
     q_object.setReadOnly(True)
@@ -75,20 +93,8 @@ class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
 
   def _setupConsolePrompt(self, q_object):
     q_object.setFrame(False)
-
-
-
-
-#    text_format = QtGui.QTextCharFormat()
-#    text_format.setFontFixedPitch(True)
-#    q_object.setPlainText()
-
-#    q_object.setTextColor('red') # = QtGui.QColor('red')
-#    q_object.setTextBackgroundColor(QtGui.QColor('black'))
     q_object.setStyleSheet('color:white;background-color:black;')
-
     q_object.setFixedWidth(30)
-#    q_object.setTextColor(QtGui.QColor('white'))
     q_object.setReadOnly(True)
     q_object.setText('>>> ')
 
@@ -96,7 +102,34 @@ class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
   def _setupConsoleInput(self, q_object):
     q_object.setFrame(False)
     q_object.setStyleSheet('color:white;background-color:black;')
+    q_object.returnPressed.connect(lambda: self._callbackConsoleInput(q_object))
 
+  def _callbackConsoleInput(self, q_object):
+    current_text = q_object.text()
+
+    if current_text and current_text[-1] == '\n':
+      current_text = current_text[:-1]
+
+    q_object.setText('')
+
+    output_object = self.object('ConsoleOutput')
+    prompt_object = self.object('ConsolePrompt')
+
+    output_object.appendPlainText(prompt_object.text() + current_text)
+
+    more = self._console.push(current_text)
+    result = self._console.getCurrentOutput()
+
+    output_object.appendPlainText(result)
+
+    if more:
+      prompt_object.setText('... ')
+    else:
+      prompt_object.setText('>>> ')
+
+
+
+#    self._signal_write.emit(self.object('ConsolePrompt').text() + current_text)
 
 # A DEMO TABBED WIDGET
 class PeacockTabWidget(QtGui.QWidget, MooseWidget):
