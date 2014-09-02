@@ -8,12 +8,13 @@ from utils import *
 
 ##
 # An input file widget
-class InputWidget(MooseWidget):
+class InputWidget(QtGui.QWidget, MooseWidget):
 
   # Define signals that will be emitted from this object
   _signal_button = QtCore.Signal()
 
   def __init__(self, **kwargs):
+    QtGui.QWidget.__init__(self)
     MooseWidget.__init__(self, **kwargs)
 
     self.addObject(QtGui.QPushButton('Run'), handle='Button')
