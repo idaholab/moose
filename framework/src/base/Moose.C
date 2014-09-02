@@ -357,6 +357,7 @@
 #include "Gnuplot.h"
 #include "SolutionHistory.h"
 #include "MaterialPropertyDebugOutput.h"
+#include "VariableResidualNormsDebugOutput.h"
 #include "DebugOutput.h"
 
 namespace Moose {
@@ -652,7 +653,10 @@ registerObjects(Factory & factory)
   registerOutput(Gnuplot);
   registerOutput(SolutionHistory);
   registerOutput(MaterialPropertyDebugOutput);
+  registerOutput(VariableResidualNormsDebugOutput);
+
   registerOutput(DebugOutput);
+
 
   registered = true;
 }

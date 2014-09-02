@@ -51,16 +51,19 @@ SetupDebugAction::~SetupDebugAction()
 void
 SetupDebugAction::act()
 {
-  // MaterialPropertyDebugOutput
+  // Material properties
   if (_pars.get<bool>("show_material_props"))
     createOutputAction("MaterialPropertyDebugOutput", "_moose_material_property_debug_output");
 
+  // Variable residusl norms
+  if (_pars.get<bool>("show_var_residual_norms"))
+    createOutputAction("VariableResidualNormsDebugOutput", "_moose_variable_residual_norms_debug_output");
+
   // Flags debug outputting via the DebugOutput object
-  bool show_var_residual_norms = _pars.get<bool>("show_var_residual_norms");
   unsigned int show_top_residuals  = _pars.get<unsigned int>("show_top_residuals");
 
   // Create DebugOutput object
-  if (show_var_residual_norms || show_top_residuals > 0)
+  if (show_top_residuals > 0)
   {
     // Set the 'type =' parameters for the desired object
     _action_params.set<std::string>("type") = "DebugOutput";
@@ -71,7 +74,6 @@ SetupDebugAction::act()
     // Set the object parameters
     InputParameters & object_params = action->getObjectParams();
     object_params.set<bool>("_built_by_moose") = true;
-    object_params.set<bool>("show_var_residual_norms") = show_var_residual_norms;
     object_params.set<unsigned int>("show_top_residuals") = show_top_residuals;
 
     // Add the action to the warehouse
@@ -84,7 +86,7 @@ void
 SetupDebugAction::createOutputAction(const std::string & type, const std::string & name)
 {
   // Set the 'type =' parameters for the desired object
-  _action_params.set<std::string>("type") = "MaterialPropertyDebugOutput";
+  _action_params.set<std::string>("type") = type;
 
   // Create the action
   std::ostringstream oss;

@@ -6,17 +6,10 @@
     expect_out = "\|residual\|_2 of individual variables:"
   [../]
 
-  [./debug_show_var_residual_norms]
+  [./show_var_residual_norms_debug]
     # Use the debug block to print variable residual norms
     type = 'RunApp'
-    input = 'debug_show_var_residual_norms.i'
-    expect_out = "\|residual\|_2 of individual variables:"
-  [../]
-
-  [./show_var_residual_norms_block]
-    # Use the outputs block to print variable residual norms
-    type = 'RunApp'
-    input = 'show_var_residual_norms_block.i'
+    input = 'show_var_residual_norms_debug.i'
     expect_out = "\|residual\|_2 of individual variables:"
   [../]
 
