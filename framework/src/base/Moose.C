@@ -358,7 +358,7 @@
 #include "SolutionHistory.h"
 #include "MaterialPropertyDebugOutput.h"
 #include "VariableResidualNormsDebugOutput.h"
-#include "DebugOutput.h"
+#include "TopResidualDebugOutput.h"
 
 namespace Moose {
 
@@ -654,9 +654,7 @@ registerObjects(Factory & factory)
   registerOutput(SolutionHistory);
   registerOutput(MaterialPropertyDebugOutput);
   registerOutput(VariableResidualNormsDebugOutput);
-
-  registerOutput(DebugOutput);
-
+  registerOutput(TopResidualDebugOutput);
 
   registered = true;
 }

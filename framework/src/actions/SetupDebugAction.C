@@ -59,30 +59,16 @@ SetupDebugAction::act()
   if (_pars.get<bool>("show_var_residual_norms"))
     createOutputAction("VariableResidualNormsDebugOutput", "_moose_variable_residual_norms_debug_output");
 
-  // Flags debug outputting via the DebugOutput object
-  unsigned int show_top_residuals  = _pars.get<unsigned int>("show_top_residuals");
-
-  // Create DebugOutput object
-  if (show_top_residuals > 0)
+  // Top residuals
+  if (_pars.get<unsigned int>("show_top_residuals") > 0)
   {
-    // Set the 'type =' parameters for the desired object
-    _action_params.set<std::string>("type") = "DebugOutput";
-
-    // Create the action
-    MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", "Outputs/_moose_debug_output", _action_params));
-
-    // Set the object parameters
-    InputParameters & object_params = action->getObjectParams();
-    object_params.set<bool>("_built_by_moose") = true;
-    object_params.set<unsigned int>("show_top_residuals") = show_top_residuals;
-
-    // Add the action to the warehouse
-    _awh.addActionBlock(action);
+    MooseObjectAction * action = createOutputAction("TopResidualDebugOutput", "_moose_top_residual_debug_output");
+    action->getObjectParams().set<unsigned int>("num_residuals") = _pars.get<unsigned int>("show_top_residuals");
   }
 }
 
 
-void
+MooseObjectAction *
 SetupDebugAction::createOutputAction(const std::string & type, const std::string & name)
 {
   // Set the 'type =' parameters for the desired object
@@ -99,4 +85,7 @@ SetupDebugAction::createOutputAction(const std::string & type, const std::string
 
   // Add the action to the warehouse
   _awh.addActionBlock(action);
+
+  // Return the pointer to the action
+  return dynamic_cast<MooseObjectAction *>(action);
 }

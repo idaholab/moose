@@ -13,7 +13,7 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "DebugOutput.h"
+#include "TopResidualDebugOutput.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "Material.h"
@@ -23,7 +23,7 @@
 #include "libmesh/transient_system.h"
 
 template<>
-InputParameters validParams<DebugOutput>()
+InputParameters validParams<TopResidualDebugOutput>()
 {
   InputParameters params = validParams<PetscOutput>();
 
@@ -40,42 +40,41 @@ InputParameters validParams<DebugOutput>()
   params.suppressParameter<bool>("file_base");
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
-  params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
+  params.addParam<unsigned int>("num_residuals", 0, "The number of top residuals to print out (0 = no output)");
 
-  // By default operate on linear residuals, this is to maintain the behavior of show_top_residuals
+  // By default operate on both nonlinear and linear residuals
+  params.set<bool>("nonlinear_residuals") = true;
   params.set<bool>("linear_residuals") = true;
 
   return params;
 }
 
-DebugOutput::DebugOutput(const std::string & name, InputParameters & parameters) :
+TopResidualDebugOutput::TopResidualDebugOutput(const std::string & name, InputParameters & parameters) :
     PetscOutput(name, parameters),
-    _show_top_residuals(getParam<unsigned int>("show_top_residuals")),
+    _num_residuals(getParam<unsigned int>("num_residuals")),
     _sys(_problem_ptr->getNonlinearSystem().sys())
 {
-  // Force this outputter to output on nonlinear residuals
-  _output_nonlinear = true;
 }
 
-DebugOutput::~DebugOutput()
+TopResidualDebugOutput::~TopResidualDebugOutput()
 {
 }
 
 void
-DebugOutput::output()
+TopResidualDebugOutput::output()
 {
   // Display the top residuals
-  if (_show_top_residuals > 0)
-    printTopResiduals(*(_sys.rhs), _show_top_residuals);
+  if (_num_residuals > 0)
+    printTopResiduals(*(_sys.rhs), _num_residuals);
 }
 
 void
-DebugOutput::printTopResiduals(const NumericVector<Number> & residual, unsigned int n)
+TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual, unsigned int n)
 {
   // Need a reference to the libMesh mesh object
   MeshBase & mesh = _problem_ptr->mesh().getMesh();
 
-  std::vector<DebugOutputTopResidualData> vec;
+  std::vector<TopResidualDebugOutputTopResidualData> vec;
   vec.resize(residual.local_size());
 
   unsigned int j = 0;
@@ -90,7 +89,7 @@ DebugOutput::printTopResiduals(const NumericVector<Number> & residual, unsigned 
       if (node.n_dofs(_sys.number(), var) > 0)
       {
         dof_id_type dof_idx = node.dof_number(_sys.number(), var, 0);
-        vec[j] = DebugOutputTopResidualData(var, nd, residual(dof_idx));
+        vec[j] = TopResidualDebugOutputTopResidualData(var, nd, residual(dof_idx));
         j++;
       }
   }
@@ -112,37 +111,37 @@ DebugOutput::printTopResiduals(const NumericVector<Number> & residual, unsigned 
 }
 
 std::string
-DebugOutput::filename()
+TopResidualDebugOutput::filename()
 {
   return _file_base;
 }
 
 void
-DebugOutput::outputNodalVariables()
+TopResidualDebugOutput::outputNodalVariables()
 {
   mooseError("Individual output of nodal variables is not support for Debug output");
 }
 
 void
-DebugOutput::outputElementalVariables()
+TopResidualDebugOutput::outputElementalVariables()
 {
   mooseError("Individual output of elemental variables is not support for Debug output");
 }
 
 void
-DebugOutput::outputPostprocessors()
+TopResidualDebugOutput::outputPostprocessors()
 {
   mooseError("Individual output of postprocessors is not support for Debug output");
 }
 
 void
-DebugOutput::outputVectorPostprocessors()
+TopResidualDebugOutput::outputVectorPostprocessors()
 {
   mooseError("Individual output of VectorPostprocessors is not support for Debug output");
 }
 
 void
-DebugOutput::outputScalarVariables()
+TopResidualDebugOutput::outputScalarVariables()
 {
   mooseError("Individual output of scalars is not support for Debug output");
 }

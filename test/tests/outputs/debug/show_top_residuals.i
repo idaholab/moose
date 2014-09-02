@@ -52,7 +52,7 @@
     linear_residuals = true
   [../]
   [./debug]
-    type = DebugOutput
-    show_top_residuals = 1
+    type = TopResidualDebugOutput
+    num_residuals = 1
   [../]
 []
