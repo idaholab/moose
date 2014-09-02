@@ -1,156 +1,52 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  xmin = -1
-  xmax = 1
-  ymin = -1
-  ymax = 1
   nx = 10
   ny = 10
-  elem_type = QUAD9
 []
 
-[Functions]
-  # NeumannBC functions
-  [./forcing_fnu]
-    type = ParsedFunction
-    value = -5.8*(x+y)+x*x*x-x+y*y*y-y
-  [../]
-  [./forcing_fnv]
-    type = ParsedFunction
-    value = -4
-  [../]
-  [./slnu]
-    type = ParsedGradFunction
-    value = x*x*x-x+y*y*y-y
-    grad_x = 3*x*x-1
-    grad_y = 3*y*y-1
-  [../]
-  [./slnv]
-    type = ParsedGradFunction
-    value = x*x+y*y
-    grad_x = 2*x
-    grad_y = 2*y
-  [../]
-  [./bc_fnut]
-    type = ParsedFunction
-    value = 3*y*y-1
-  [../]
-  [./bc_fnub]
-    type = ParsedFunction
-    value = -3*y*y+1
-  [../]
-  [./bc_fnul]
-    type = ParsedFunction
-    value = -3*x*x+1
-  [../]
-  [./bc_fnur]
-    type = ParsedFunction
-    value = 3*x*x-1
+[MeshModifiers]
+  [./subdomains]
+    type = SubdomainBoundingBox
+    bottom_left = '0.1 0.1 0'
+    block_id = 1
+    top_right = '0.9 0.9 0'
   [../]
 []
 
 [Variables]
   [./u]
-    order = THIRD
-    family = HIERARCHIC
-  [../]
-  [./v]
-    order = SECOND
-    family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  [./diff1]
+  [./diff]
     type = Diffusion
     variable = u
-  [../]
-  [./test1]
-    type = CoupledKernelGradTest
-    variable = u
-    var2 = v
-    vel = '0.1 0.1'
-  [../]
-  [./diff2]
-    type = Diffusion
-    variable = v
-  [../]
-  [./react]
-    type = Reaction
-    variable = u
-  [../]
-  [./forceu]
-    type = UserForcingFunction
-    variable = u
-    function = forcing_fnu
-  [../]
-  [./forcev]
-    type = UserForcingFunction
-    variable = v
-    function = forcing_fnv
   [../]
 []
 
 [BCs]
-  active = 'bc_v bc_ul bc_ub bc_u_tb bc_ur bc_ut'
-  [./bc_u]
-    type = FunctionPenaltyDirichletBC
+  [./left]
+    type = DirichletBC
     variable = u
-    function = slnu
-    boundary = 'left right top bottom'
-  [../]
-  [./bc_v]
-    type = FunctionDirichletBC
-    variable = v
-    function = slnv
-    boundary = 'left right top bottom'
-  [../]
-  [./bc_u_lr]
-    type = FunctionPenaltyDirichletBC
-    variable = u
-    function = slnu
-    boundary = 'left right top bottom'
-  [../]
-  [./bc_u_tb]
-    type = CoupledKernelGradBC
-    variable = u
-    var2 = v
-    vel = '0.1 0.1'
-    boundary = 'top bottom left right'
-  [../]
-  [./bc_ul]
-    type = FunctionNeumannBC
-    variable = u
-    function = bc_fnul
     boundary = left
+    value = 0
   [../]
-  [./bc_ur]
-    type = FunctionNeumannBC
+  [./right]
+    type = DirichletBC
     variable = u
-    function = bc_fnur
     boundary = right
-  [../]
-  [./bc_ut]
-    type = FunctionNeumannBC
-    variable = u
-    function = bc_fnut
-    boundary = top
-  [../]
-  [./bc_ub]
-    type = FunctionNeumannBC
-    variable = u
-    function = bc_fnub
-    boundary = bottom
+    value = 1
   [../]
 []
 
 [Materials]
   [./block]
     type = GenericConstantMaterial
-    block = 0
-    prop_names = prop
-    prop_values = 1
+    block = '0 1'
+    prop_names = 'property0 property1 property2 property3 property4 property5 property6 property7 property8 property9 property10'
+    prop_values = '0 1 2 3 4 5 6 7 8 9 10'
   [../]
   [./boundary]
     type = GenericConstantMaterial
@@ -158,68 +54,35 @@
     boundary = top
     prop_values = 12345
   [../]
-[]
-
-[Preconditioning]
-  active = ''
-  [./prec]
-    type = SMP
-    full = true
-  [../]
-[]
-
-[Postprocessors]
-  active = 'L2u L2v'
-  [./dofs]
-    type = NumDOFs
-  [../]
-  [./h]
-    type = AverageElementSize
-    variable = u
-  [../]
-  [./L2u]
-    type = ElementL2Error
-    variable = u
-    function = slnu
-  [../]
-  [./L2v]
-    type = ElementL2Error
-    variable = v
-    function = slnv
-  [../]
-  [./H1error]
-    type = ElementH1Error
-    variable = u
-    function = solution
-  [../]
-  [./H1Semierror]
-    type = ElementH1SemiError
-    variable = u
-    function = solution
+  [./restricted]
+    type = GenericConstantMaterial
+    block = 1
+    prop_names = 'restricted0 restricted1'
+    prop_values = '10 11'
   [../]
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
-  # petsc_options = '-snes'
   type = Steady
-  solve_type = PJFNK
-  nl_rel_tol = 1e-15
-  nl_abs_tol = 1e-13
+
+  # Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
   output_initial = false
+  exodus = true
   [./console]
     type = Console
     perf_log = true
+    linear_residuals = true
   [../]
   [./debug]
     type = DebugOutput
     show_material_props = true
   [../]
-[]
-
-[Debug]
-  show_material_props = true
 []

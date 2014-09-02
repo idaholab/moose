@@ -52,12 +52,16 @@ protected:
   virtual void output();
 
   /**
-   * Prints material property information
+   * Prints material property information in a format similar to Moose system information
    */
   void printMaterialMap() const;
 
-  void printMaterialProperties(std::ostringstream & output, const std::vector<Material * > & materials) const;
-
+  /**
+   * Builds a output streams for the properties in each material object
+   * @param output The output stream to populate
+   * @param materials Vector of pointers to the Material objects of interest
+   */
+  void printMaterialProperties(std::stringstream & output, const std::vector<Material * > & materials) const;
 
   //@{
   /**
