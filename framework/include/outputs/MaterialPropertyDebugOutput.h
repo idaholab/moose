@@ -12,46 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DEBUGOUTPUT_H
-#define DEBUGOUTPUT_H
+#ifndef MATERIALPROPERTYDEBUGOUTPUT_H
+#define MATERIALPROPERTYDEBUGOUTPUT_H
 
 // MOOSE includes
 #include "PetscOutput.h"
 #include "FEProblem.h"
 
 // Forward declerations
-class DebugOutput;
+class MaterialPropertyDebugOutput;
 
 template<>
-InputParameters validParams<DebugOutput>();
-
-
-/**
- * A structure for storing data related to top residuals
- *  @see DebugOutput::printTopResiduals()
- */
-struct DebugOutputTopResidualData
-{
-  unsigned int _var;
-  unsigned int _nd;
-  Real _residual;
-
-  DebugOutputTopResidualData() { _var = 0; _nd = 0; _residual = 0.; }
-
-  DebugOutputTopResidualData(unsigned int var, unsigned int nd, Real residual)
-  {
-    _var = var;
-    _nd = nd;
-    _residual = residual;
-  }
-};
+InputParameters validParams<MaterialPropertyDebugOutput>();
 
 /**
  * A class for producing various debug related outputs
  *
  * This class may be used from inside the [Outputs] block or via the [Debug] block (preferred)
  */
-class DebugOutput : public PetscOutput
+class MaterialPropertyDebugOutput : public Output
 {
 public:
 
@@ -60,54 +39,43 @@ public:
    * @param name Output object name
    * @param parameters Object input parameters
    */
-  DebugOutput(const std::string & name, InputParameters & parameters);
+  MaterialPropertyDebugOutput(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
    */
-  virtual ~DebugOutput();
+  virtual ~MaterialPropertyDebugOutput();
 
 protected:
 
   /**
    * Perform the debugging output
+   * For this object this is empty; the output is preformed in the constructor
    */
   virtual void output();
 
   /**
-   * Prints the n top residuals for the variables in the system
-   * @param residual A reference to the residual vector
-   * @param n The number of residuals to print
+   * Prints material property information in a format similar to Moose system information
    */
-  void printTopResiduals(const NumericVector<Number> & residual, unsigned int n);
+  void printMaterialMap() const;
 
   /**
-   * Method for sorting the residuals data from DebugOutputTopResidualData structs
-   * @see printTopResiduals
+   * Builds a output streams for the properties in each material object
+   * @param output The output stream to populate
+   * @param materials Vector of pointers to the Material objects of interest
    */
-  static bool sortTopResidualData(DebugOutputTopResidualData i, DebugOutputTopResidualData j) { return (fabs(i._residual) > fabs(j._residual)); }
+  void printMaterialProperties(std::stringstream & output, const std::vector<Material * > & materials) const;
 
   //@{
   /**
-   * Individual component output is not supported for DebugOutput
+   * Individual component output is not supported for MaterialPropertyDebugOutput
    */
-  std::string filename();
   virtual void outputNodalVariables();
   virtual void outputElementalVariables();
   virtual void outputPostprocessors();
   virtual void outputVectorPostprocessors();
   virtual void outputScalarVariables();
   //@}
-
-  /// Number of residuals to display
-  unsigned int _show_top_residuals;
-
-  /// Flag for outputting variable norms
-  bool _show_var_residual_norms;
-
-  /// Reference to libMesh system
-  TransientNonlinearImplicitSystem & _sys;
-
 };
 
-#endif //DEBUGOUTPUT_H
+#endif //D MATERIALPROPERTYEBUGOUTPUT_H

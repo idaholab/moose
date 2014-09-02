@@ -41,7 +41,6 @@ InputParameters validParams<DebugOutput>()
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
   params.addParam<bool>("show_var_residual_norms", false, "Print the residual norms of the individual solution variables at each nonlinear iteration");
-  params.addParam<bool>("show_material_props", false, "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
   params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
 
   // By default operate on linear residuals, this is to maintain the behavior of show_top_residuals
@@ -58,11 +57,6 @@ DebugOutput::DebugOutput(const std::string & name, InputParameters & parameters)
 {
   // Force this outputter to output on nonlinear residuals
   _output_nonlinear = true;
-
-  // Show material information
-  if (getParam<bool>("show_material_props"))
-    printMaterialMap();
-
 }
 
 DebugOutput::~DebugOutput()
@@ -105,56 +99,6 @@ DebugOutput::output()
 }
 
 void
-DebugOutput::printMaterialMap() const
-{
-
-  // Get a reference to the material warehouse
-  MaterialWarehouse & material_warehouse = _problem_ptr->getMaterialWarehouse(0);
-
-  // Build output streams for block materials and block face materials
-  std::stringstream active_block, active_face, active_neighbor;
-  std::set<SubdomainID> blocks = material_warehouse.blocks();
-  for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
-  {
-    // Active materials on blocks
-    active_block << "    Block ID " << *it << ":\n";
-    printMaterialProperties(active_block, material_warehouse.getMaterials(*it));
-
-    // Active face materials on blocks
-    active_face << "    Block ID " << *it << ":\n";
-    printMaterialProperties(active_face, material_warehouse.getFaceMaterials(*it));
-
-    // Active face materials on blocks
-    active_neighbor << "    Block ID " << *it << ":\n";
-    printMaterialProperties(active_neighbor, material_warehouse.getNeighborMaterials(*it));
-  }
-
-  // Build output stream for side set materials
-  std::stringstream active_boundary;
-  std::set<BoundaryID> boundaries = material_warehouse.boundaries();
-  for (std::set<BoundaryID>::const_iterator it = boundaries.begin(); it != boundaries.end(); ++it)
-  {
-    // Active materials on blocks
-    active_boundary << "    Boundary ID " << *it << ":\n";
-    printMaterialProperties(active_boundary, material_warehouse.getBoundaryMaterials(*it));
-  }
-
-  // Write the stored strings to the Console output objects
-  _console << "Materials:\n";
-  _console << std::setw(Console::_field_width) << "  Active Materials on Subdomain:\n";
-  _console << std::setw(Console::_field_width) << active_block.str() << '\n';
-
-  _console << std::setw(Console::_field_width) << "  Active Face Materials on Subdomain:\n";
-  _console << std::setw(Console::_field_width) << active_face.str() << '\n';
-
-  _console << std::setw(Console::_field_width) << "  Active Neighboring Materials on Subdomain:\n";
-  _console << std::setw(Console::_field_width) << active_neighbor.str() << '\n';
-
-  _console << std::setw(Console::_field_width) << "  Active Materials on Boundaries:\n";
-  _console << std::setw(Console::_field_width) << active_boundary.str() << '\n';
-}
-
-void
 DebugOutput::printTopResiduals(const NumericVector<Number> & residual, unsigned int n)
 {
   // Need a reference to the libMesh mesh object
@@ -194,32 +138,6 @@ DebugOutput::printTopResiduals(const NumericVector<Number> & residual, unsigned 
 
   for (unsigned int i = 0; i < n; ++i)
     fprintf(stderr, "[DBG][%d]  % .15e '%s' at node %d\n", processor_id(), vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
-}
-
-void
-DebugOutput::printMaterialProperties(std::stringstream & output, const std::vector<Material * > & materials) const
-{
-  // Loop through all material objects
-  for (std::vector<Material *>::const_iterator jt = materials.begin(); jt != materials.end(); ++jt)
-  {
-    // Get a list of properties for the current material
-    const std::set<std::string> & props = (*jt)->getSuppliedItems();
-
-    // Adds the material name to the output stream
-    output << std::left << std::setw(Console::_field_width) << "      Material Name: " << (*jt)->name() << '\n';
-
-    // Build stream for properties using the Console helper functions to wrap the names if there are too many for one line
-    std::streampos begin_string_pos = output.tellp();
-    std::streampos curr_string_pos = begin_string_pos;
-    output << std::left << std::setw(Console::_field_width) << "      Property Names: ";
-    for (std::set<std::string>::const_iterator prop_it = props.begin(); prop_it != props.end(); ++prop_it)
-    {
-      output << "\"" << (*prop_it) << "\" ";
-      curr_string_pos = output.tellp();
-      Console::insertNewline(output, begin_string_pos, curr_string_pos);
-    }
-    output << '\n';
-  }
 }
 
 std::string

@@ -35,7 +35,6 @@ InputParameters validParams<SetupDebugAction>()
 
 SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
     Action(name, parameters),
-    _top_residuals(getParam<unsigned int>("show_top_residuals")),
     _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
   _awh.showActions(getParam<bool>("show_actions"));
@@ -52,13 +51,16 @@ SetupDebugAction::~SetupDebugAction()
 void
 SetupDebugAction::act()
 {
+  // MaterialPropertyDebugOutput
+  if (_pars.get<bool>("show_material_props"))
+    createOutputAction("MaterialPropertyDebugOutput", "_moose_material_property_debug_output");
+
   // Flags debug outputting via the DebugOutput object
   bool show_var_residual_norms = _pars.get<bool>("show_var_residual_norms");
-  bool show_material_props = _pars.get<bool>("show_material_props");
   unsigned int show_top_residuals  = _pars.get<unsigned int>("show_top_residuals");
 
   // Create DebugOutput object
-  if (show_var_residual_norms || show_material_props || show_top_residuals > 0)
+  if (show_var_residual_norms || show_top_residuals > 0)
   {
     // Set the 'type =' parameters for the desired object
     _action_params.set<std::string>("type") = "DebugOutput";
@@ -70,10 +72,29 @@ SetupDebugAction::act()
     InputParameters & object_params = action->getObjectParams();
     object_params.set<bool>("_built_by_moose") = true;
     object_params.set<bool>("show_var_residual_norms") = show_var_residual_norms;
-    object_params.set<bool>("show_material_props") = show_material_props;
     object_params.set<unsigned int>("show_top_residuals") = show_top_residuals;
 
     // Add the action to the warehouse
     _awh.addActionBlock(action);
   }
+}
+
+
+void
+SetupDebugAction::createOutputAction(const std::string & type, const std::string & name)
+{
+  // Set the 'type =' parameters for the desired object
+  _action_params.set<std::string>("type") = "MaterialPropertyDebugOutput";
+
+  // Create the action
+  std::ostringstream oss;
+  oss << "Outputs/" << name;
+  MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", oss.str(), _action_params));
+
+  // Set the object parameters
+  InputParameters & object_params = action->getObjectParams();
+  object_params.set<bool>("_built_by_moose") = true;
+
+  // Add the action to the warehouse
+  _awh.addActionBlock(action);
 }

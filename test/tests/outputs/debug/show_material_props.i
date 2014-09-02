@@ -82,7 +82,6 @@
     linear_residuals = true
   [../]
   [./debug]
-    type = DebugOutput
-    show_material_props = true
+    type = MaterialPropertyDebugOutput
   [../]
 []

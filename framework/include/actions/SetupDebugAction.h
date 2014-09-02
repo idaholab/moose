@@ -35,7 +35,11 @@ public:
   virtual void act();
 
 protected:
-  unsigned int _top_residuals;
+
+  /**
+   * Helper method for creating Output actions
+   */
+  void createOutputAction(const std::string & type, const std::string & name);
 
   /// Parameters from the action being created (AddOutputAction)
   InputParameters _action_params;
