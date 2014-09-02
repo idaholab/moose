@@ -1,0 +1,83 @@
+#ifndef TENSORMECHANICSPLASTICSIMPLETESTER_H
+#define TENSORMECHANICSPLASTICSIMPLETESTER_H
+
+#include "TensorMechanicsPlasticModel.h"
+
+
+class TensorMechanicsPlasticSimpleTester;
+
+
+template<>
+InputParameters validParams<TensorMechanicsPlasticSimpleTester>();
+
+/**
+ * Class that can be used for testing multi-surface plasticity models.
+ * Yield function = a*stress_yy + b*stress_zz - strength
+ * No hardening/softening.  Associative.
+ */
+class TensorMechanicsPlasticSimpleTester : public TensorMechanicsPlasticModel
+{
+ public:
+  TensorMechanicsPlasticSimpleTester(const std::string & name, InputParameters parameters);
+
+  /**
+   * The yield function
+   * @param stress the stress at which to calculate the yield function
+   * @param intnl internal parameter
+   * @return the yield function
+   */
+  Real yieldFunction(const RankTwoTensor & stress, const Real & intnl) const;
+
+  /**
+   * The derivative of yield function with respect to stress
+   * @param stress the stress at which to calculate the yield function
+   * @param intnl internal parameter
+   * @return df_dstress(i, j) = dyieldFunction/dstress(i, j)
+   */
+  RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, const Real & intnl) const;
+
+  /**
+   * The derivative of yield function with respect to the internal parameter
+   * @param stress the stress at which to calculate the yield function
+   * @param intnl internal parameter
+   * @return the derivative
+   */
+  Real dyieldFunction_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
+
+  /**
+   * The flow potential
+   * @param stress the stress at which to calculate the flow potential
+   * @param intnl internal parameter
+   * @return the flow potential
+   */
+  RankTwoTensor flowPotential(const RankTwoTensor & stress, const Real & intnl) const;
+
+  /**
+   * The derivative of the flow potential with respect to stress
+   * @param stress the stress at which to calculate the flow potential
+   * @param intnl internal parameter
+   * @return dr_dstress(i, j, k, l) = dr(i, j)/dstress(k, l)
+   */
+  RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, const Real & intnl) const;
+
+  /**
+   * The derivative of the flow potential with respect to the internal parameter
+   * @param stress the stress at which to calculate the flow potential
+   * @param intnl internal parameter
+   * @return dr_dintnl(i, j) = dr(i, j)/dintnl
+   */
+  RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
+
+ protected:
+
+  /// a
+  Real _a;
+
+  /// b
+  Real _b;
+
+  /// strength
+  Real _strength;
+};
+
+#endif // TENSORMECHANICSPLASTICSIMPLETESTER_H
