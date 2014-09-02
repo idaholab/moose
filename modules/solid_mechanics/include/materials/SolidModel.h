@@ -9,6 +9,7 @@ class ConstitutiveModel;
 class SolidModel;
 class SymmElasticityTensor;
 class VolumetricModel;
+class PiecewiseLinear;
 namespace SolidMechanics
 {
 class Element;
@@ -93,6 +94,7 @@ protected:
   VariableGradient & _temp_grad;
   const Real _alpha;
   Function * const _alpha_function;
+  PiecewiseLinear * _piecewise_linear_alpha_function;
   bool _has_stress_free_temp;
   Real _stress_free_temp;
 
@@ -137,11 +139,13 @@ protected:
   SymmTensor _total_strain_increment;
   SymmTensor _strain_increment;
 
-  MaterialProperty<Real> & _SED;
-  MaterialProperty<Real> & _SED_old;
   const bool _compute_JIntegral;
-  MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
-  MaterialProperty<RealVectorValue> & _thermal_J_vec;
+
+  //These are used in calculation of the J integral
+  MaterialProperty<Real> * _SED;
+  MaterialProperty<Real> * _SED_old;
+  MaterialProperty<ColumnMajorMatrix> * _Eshelby_tensor;
+  MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
 
   virtual void initQpStatefulProperties();
 
@@ -173,8 +177,13 @@ protected:
     mooseError("SolidModel::computeStress must be defined by the derived class");
   }
 
+  // Compute Eshelby tensor, used in J Integral calculation
   virtual void computeEshelby();
+
+  // Compute strain energy density, used in Eshelby tensor calculation
   virtual void computeStrainEnergyDensity();
+
+  // Compute quantity used in thermal term of J Integral
   virtual void computeThermalJvec();
 
   /*
