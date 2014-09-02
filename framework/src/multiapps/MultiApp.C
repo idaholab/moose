@@ -394,7 +394,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   std::ostringstream output_base;
 
-  /* The following file_base needs to be improved (see #2554) */
   // Create an output base by taking the output base of the master problem and appending
   // the name of the multiapp + a number to it
   if (!_app.getOutputFileBase().empty())

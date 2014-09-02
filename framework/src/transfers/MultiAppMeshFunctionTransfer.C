@@ -73,15 +73,6 @@ MultiAppMeshFunctionTransfer::execute()
       FEProblem & from_problem = *_multi_app->problem();
       MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
 
-      MeshBase * tmp_from_mesh = NULL;
-
-      if (_displaced_source_mesh && from_problem.getDisplacedProblem())
-      {
-        tmp_from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
-      }
-      else
-        tmp_from_mesh = &from_problem.mesh().getMesh();
-
       SystemBase & from_system_base = from_var.sys();
 
       System & from_sys = from_system_base.system();
@@ -269,16 +260,14 @@ MultiAppMeshFunctionTransfer::execute()
         // Need to pull down a full copy of this vector on every processor so we can get values in parallel
         from_sys.solution->localize(*serialized_from_solution);
 
-        MeshBase * tmp_from_mesh = NULL;
+        MeshBase * from_mesh = NULL;
 
         if (_displaced_source_mesh && from_problem.getDisplacedProblem())
-          tmp_from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
+          from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
         else
-          tmp_from_mesh = &from_problem.mesh().getMesh();
+          from_mesh = &from_problem.mesh().getMesh();
 
-        MeshBase & from_mesh = *tmp_from_mesh;
-
-        MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(from_mesh, from_mesh.processor_id());
+        MeshTools::BoundingBox app_box = MeshTools::processor_bounding_box(*from_mesh, from_mesh->processor_id());
         Point app_position = _multi_app->position(i);
 
         MeshFunction from_func(from_es, *serialized_from_solution, from_sys.get_dof_map(), from_var_num);
