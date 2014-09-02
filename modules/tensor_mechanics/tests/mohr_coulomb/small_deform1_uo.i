@@ -82,6 +82,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./f]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [AuxKernels]
@@ -127,6 +131,12 @@
     index_i = 2
     index_j = 2
   [../]
+  [./f]
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_yield_function
+    variable = f
+  [../]
 []
 
 [Postprocessors]
@@ -159,6 +169,11 @@
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
+  [../]
+  [./f]
+    type = PointValue
+    point = '0 0 0'
+    variable = f
   [../]
 []
 
