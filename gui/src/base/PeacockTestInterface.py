@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Import Peacock modules
-import utils
+import src.utils
 
 ##
 # A a class for creating self testing classes
