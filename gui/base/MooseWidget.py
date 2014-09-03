@@ -52,6 +52,10 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface):
       self.peacockError('Unknown alignment parameter ' + align + ', must be \'vertical\' or \'horizontal\'')
     self.setLayout(self._main_layout)
 
+    # Set screen width/height properties
+    self.setProperty('screen_width', kwargs.pop('screen_width', 0))
+    self.setProperty('screen_height', kwargs.pop('screen_height', 0))
+
     # Create an error message dialog
     self._error_message = QtGui.QErrorMessage(self)
 
