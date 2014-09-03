@@ -59,7 +59,6 @@
 []
 
 [Outputs]
-  file_base = out
   output_initial = true
   gnuplot = true
   [./console]

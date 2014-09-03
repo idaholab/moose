@@ -59,9 +59,8 @@
 []
 
 [Outputs]
-  file_base = out_gif
   output_initial = true
-  [./gnuplot]
+  [./out]
     type = Gnuplot
     extension = gif
   [../]
