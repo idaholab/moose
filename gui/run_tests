@@ -1,20 +1,106 @@
 #!/usr/bin/env python
-import sys, os, inspect, importlib
+import sys, os, inspect, importlib, time
+from StringIO import StringIO
 
-import src
+from src import *
+
+
+
+##
+# Show the pass/fail result in typical MOOSE run_tests style
+# @param name The name of the test
+# @param result True/False result of the test
+# @param msg (optional) A message to show upon failure
+def showTestResult(name, result, msg, out):
+
+  # Build the status message: OK or FAIL
+  if result:
+     msg = utils.colorText('OK', 'GREEN')
+     msg_length = 2
+  else:
+    # Add the failure message, if it exists
+    msg_length = len(msg) + 7
+    msg = utils.colorText('(' + msg + ') FAIL', 'RED')
+
+  # Produce the complete test message string
+  n = 110 - len(name) - msg_length
+  print name + '.'*n + msg
+
+  if not result:
+    print out
+    #print utils.colorText(out, 'YELLOW')
+
+
 
 class PeacockTester(object):
   def __init__(self):
-    pass
+    self._num_tests = 0
+    self._num_tests_pass = 0
+    self._tests = []
+    self._results = []
+
+  def run(self):
+    self._buildTests()
+
+    start_time = time.time()
+    self._executeTests()
+
+    failed = self._num_tests - self._num_tests_pass
+
+    print '-'*110
+    print 'Executed', self._num_tests, 'in', str(time.time() - start_time), 'seconds'
+    print  utils.colorText(str(self._num_tests) + ' passed', 'GREEN') + ', ' \
+           + utils.colorText(str(failed) + ' failed', 'RED')
 
 
-for root, dirs, files in os.walk('tests'):
-  for f in files:
-    if f.endswith('.py') and f != '__init__.py':
-      mod, ext = os.path.splitext(os.path.join(root))
-      mod = mod.replace('/','.')
-      print 'Loading:', mod
-      i = importlib.import_module(mod)
+
+  def _buildTests(self):
+
+    for root, dirs, files in os.walk('tests'):
+      for f in files:
+        if f.endswith('.py') and f != '__init__.py':
+          prefix, ext = os.path.splitext(os.path.join(root, f))
+          mod, ext = os.path.splitext(root)
+          mod = mod.replace('/','.')
+          i = importlib.import_module(mod)
+
+          for item in dir(i):
+            attr = getattr(i, item)
+            if hasattr(attr, '__call__'):
+              name = prefix + '.' + item
+
+              self._tests.append(dict(name=name, attr=attr))
+              #(result, msg) = attr()
+              #showTestResult(name, result, msg)
+
+              #self._num_tests += 1
+              #if (result):
+              #  self._num_tests_pass += 1
 
 
-      print i.testDataRead()
+  def _executeTests(self):
+
+
+     # This needs to be threaded
+     for test in self._tests:
+       name = test.get('name')
+       attr = test.get('attr')
+
+       backup = sys.stdout
+       sys.stdout = StringIO()     # capture output
+
+       (result, msg) = attr()
+       self._results.append(dict(name=name, result=result, message=msg))
+
+       out = sys.stdout.getvalue() # release output
+
+       sys.stdout.close()  # close the stream
+       sys.stdout = backup # restore original stdout
+
+
+       showTestResult(name, result, msg, out)
+
+if __name__ == '__main__':
+
+  tester = PeacockTester()
+  tester.run()
