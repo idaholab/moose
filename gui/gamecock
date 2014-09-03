@@ -9,196 +9,6 @@ from base import *
 from execute import *
 from input import *
 
-from code import InteractiveConsole
-from StringIO import StringIO
-
-
-##
-# An interactive python interpreter class
-#
-# This class inherits from InteractiveConsole and provides the necessary
-# functionality for capturing the output stream from the interactive
-# console object.
-#
-# Note, ideally this would include multiple inheritance and be included
-# in PeacockConsoleWidget, but due to InteractiveConsole not using the
-# new object syntax multiple inhertence support is limited.
-class PeacockInteractiveConsole(InteractiveConsole):
-
-  ##
-  # Class constructor
-  def __init__(self, write_function, locals=None, **kwargs):
-    InteractiveConsole.__init__(self, locals)
-
-    self._writeFunction = write_function
-
-  def write(self, data):
-    if data:
-      if data[-1] == '\n':
-        data = data[:-1]
-        self._writeFunction(data)
-
-  def runsource(self, source, filename="<input>", symbol="single"):
-
-      more = False
-      old_stdout = sys.stdout
-      old_stderr = sys.stderr
-      sys.stdout = sys.stderr = collector = StringIO()
-      try:
-        more = InteractiveConsole.runsource(self, source, filename, symbol)
-      finally:
-        if sys.stdout is collector:
-          sys.stdout = old_stdout
-        if sys.stderr is collector:
-          sys.stderr = old_stderr
-      self.write(collector.getvalue())
-      return more
-
-
-'''
-class ConsoleInputWidget(QtGui.QLineEdit(), MooseWidget):
-
- # _key_press_signal = QtCore.Signal(str)
-
-  def __init__(self, history_function):
-    QtGui.QPlainTextEdit().__init__(self)
-
-    self._historyFunction = history_function
-
-  def keyPressEvent(self, event):
-    if event.key() == QtCore.Qt.Key_Up:
-      h = self._historyFunction(-1)
-    elif event.key() == QtCore.Qt.Key_Down:
-      h = self._historyFunction(1)
-
-    #self.setText(h)
-    return False
-
-  def _history(self, offset):
-    self._history_position + offset
-
-    if self._history_position < 0:
-      self._history_position = 0
-      return ''
-
-    elif self._history_position > len(self._history):
-      self._history_position = len(self._history)
-      return ''
-
-    else:
-      return self._history[self._history_position]
-'''
-
-
-class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
-
-
-  def __init__(self, **kwargs):
-    QtGui.QWidget.__init__(self)
-    MooseWidget.__init__(self, **kwargs)
-
-    self._history = []
-    self._history_position = 0
-
-    self.addObject(QtGui.QVBoxLayout(), handle='ConsoleLayout')
-
-    output_object = self.addObject(QtGui.QPlainTextEdit(), handle='ConsoleOutput', parent='ConsoleLayout')
-
-    self.addObject(QtGui.QHBoxLayout(), handle='ConsolePromptInputLayout', parent='ConsoleLayout')
-
-    self.addObject(QtGui.QLineEdit(), handle='ConsolePrompt', parent='ConsolePromptInputLayout')
-
-
-    self.addObject(QtGui.QLineEdit(), handle='ConsoleInput', parent='ConsolePromptInputLayout')
-
-
-    self._console = PeacockInteractiveConsole(output_object.appendPlainText)
-
-
-    self._input = self.object('ConsoleInput')
-    self.setup()
-
-
-  def eventFilter(self, q_object, event):
-    if event.type() == QtCore.QEvent.KeyPress:
-      if event.key() == QtCore.Qt.Key_Up:
-        h = self._getHistory(-1)
-        self._input.setText(h)
-      elif event.key() == QtCore.Qt.Key_Down:
-        h = self._getHistory(1)
-        self._input.setText(h)
-    return False
-
-  def _getHistory(self, offset):
-    self._history_position += offset
-
-
-    if self._history_position < 0:
-      self._history_position = 0
-      return ''
-
-    elif self._history_position >= len(self._history):
-      self._history_position = len(self._history) - 1
-      return ''
-
-    else:
-      return self._history[self._history_position]
-
-
-  def _setupConsoleLayout(self, q_object):
-    q_object.setSpacing(0)
-
-  def _setupConsoleOutput(self, q_object):
-    q_object.setReadOnly(True)
-    q_object.setUndoRedoEnabled(False)
-    q_object.setMaximumBlockCount(5000)
-    q_object.setFrameStyle(QtGui.QFrame.NoFrame)
-
-    q_object.setStyleSheet('color:white;background-color:black;')
-
-    text_format = QtGui.QTextCharFormat()
-    text_format.setFontFixedPitch(True)
-    q_object.setCurrentCharFormat(text_format)
-
-  def _setupConsolePrompt(self, q_object):
-    q_object.setFrame(False)
-    q_object.setStyleSheet('color:white;background-color:black;')
-    q_object.setFixedWidth(30)
-    q_object.setReadOnly(True)
-    q_object.setText('>>> ')
-
-
-  def _setupConsoleInput(self, q_object):
-    q_object.setFrame(False)
-    q_object.setStyleSheet('color:white;background-color:black;')
-    q_object.returnPressed.connect(lambda: self._callbackConsoleInput(q_object))
-    q_object.installEventFilter(self)
-
-
-  def _callbackConsoleInput(self, q_object):
-    current_text = q_object.text()
-
-    if current_text:
-      self._history.append(current_text)
-      self._history_position += 1
-
-      # limit size of history here???
-
-
-    q_object.setText('')
-
-    output_object = self.object('ConsoleOutput')
-    prompt_object = self.object('ConsolePrompt')
-
-    output_object.appendPlainText(prompt_object.text() + current_text)
-
-    more = self._console.push(current_text)
-
-    if more:
-      prompt_object.setText('... ')
-    else:
-      prompt_object.setText('>>> ')
-
 
 
 
@@ -218,7 +28,8 @@ class PeacockTabWidget(QtGui.QWidget, MooseWidget):
     self.addObject(InputWidget(**kwargs), handle='Input', parent='PeacockTabs')
   #  self.addObject(ExecuteWidget(**kwargs), handle='Execute', parent='PeacockTabs')
 ##
-    self.addObject(PeacockConsoleWidget(**kwargs), handle='InteractiveConsole', parent='MainVerticalSplit')
+
+    self.addObject(PeacockConsoleWidget(globals(), **kwargs), handle='InteractiveConsole', parent='MainVerticalSplit')
 
     # Connect the signal 'button' from the InputWidget to the 'Run' callback of ExecuteWidget
 #    self.connectSignal('button', 'Run')
@@ -230,6 +41,12 @@ class PeacockTabWidget(QtGui.QWidget, MooseWidget):
   def _setupMainVerticalSplit(self, q_object):
     q_object.setOrientation(QtCore.Qt.Vertical)
 
+    h = self.property('screen_height')
+    if self.property('debug'):
+      q_object.setSizes([0.25*h, 0.25*h])
+    else:
+      q_object.setSizes([0.25*h, 0])
+
 
 if __name__ == '__main__':
 
@@ -238,7 +55,12 @@ if __name__ == '__main__':
   menubar = QtGui.QMenuBar() # need parentless menu bar for OSX (see PySide QMainWindow.menuBar())
   main.setMenuBar(menubar)
 
-  tabs = PeacockTabWidget(main=main, alignment='vertical', debug=True)
+  screen_rect = app.desktop().screenGeometry()
+  width, height = screen_rect.width(), screen_rect.height()
+
+
+
+  tabs = PeacockTabWidget(main=main, alignment='vertical', debug=False, screen_width=width, screen_height=height)
 
 
 
