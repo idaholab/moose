@@ -10,9 +10,6 @@ from execute import *
 from input import *
 
 
-
-
-
 # A DEMO TABBED WIDGET
 class PeacockTabWidget(QtGui.QWidget, MooseWidget):
   def __init__(self, **kwargs):
