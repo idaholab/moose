@@ -2,7 +2,7 @@
 import os, sys, csv
 
 # Peacock modules
-from base import *
+from src.base import *
 from tests.io import *
 
 ##
@@ -21,9 +21,9 @@ class CSVIO(PeacockErrorInterface, PeacockTestInterface):
     PeacockTestInterface.__init__(self, **kwargs)
 
     # Register the tests associated with this object
-    self.registerTest(csvio.testDataRead)
-    self.registerTest(csvio.testDataError)
-    self.registerTest(csvio.testInvalidInput)
+    #self.registerTest(io.testDataRead)
+    #self.registerTest(io.testDataError)
+    #self.registerTest(io.testInvalidInput)
 
     # Initialize member variables
     self._headers = []
