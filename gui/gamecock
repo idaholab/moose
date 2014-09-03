@@ -18,18 +18,16 @@ class PeacockInteractiveConsole(InteractiveConsole):
 
 #  _signal_write = QtCore.Signal(str)
 
-  def __init__(self, locals=None, **kwargs):
+  def __init__(self, func, locals=None, **kwargs):
     InteractiveConsole.__init__(self, locals)
 
-    self._current_output = None
+    self._writeFunction = func
 
-#  def write(self, data):
-#    print data
-#    if data:
-#      if data[-1] == '\n':
-#        data = data[:-1]
-#              self._signal_write.emit(data)
-#          self.ui.output.appendPlainText(data)
+  def write(self, data):
+    if data:
+      if data[-1] == '\n':
+        data = data[:-1]
+        self._writeFunction(data)
 
   def runsource(self, source, filename="<input>", symbol="single"):
 
@@ -44,13 +42,8 @@ class PeacockInteractiveConsole(InteractiveConsole):
               sys.stdout = old_stdout
           if sys.stderr is collector:
               sys.stderr = old_stderr
-#      self._signal_write.emit(collector.getvalue())
-#      self.write(collector.getvalue())
-      self._current_output = collector.getvalue()
+      self.write(collector.getvalue())
       return more
-
-  def getCurrentOutput(self):
-    return self._current_output
 
 
 
@@ -62,19 +55,21 @@ class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
     QtGui.QWidget.__init__(self)
     MooseWidget.__init__(self, **kwargs)
 
-
-    self._console = PeacockInteractiveConsole()
-#    self._signal_write.connect(self._console.write)
-
     top_layout = self.addObject(QtGui.QVBoxLayout(), handle='ConsoleLayout')
     top_layout.setSpacing(0)
 
-    self.addObject(QtGui.QPlainTextEdit(), handle='ConsoleOutput', parent='ConsoleLayout')
+    output_object = self.addObject(QtGui.QPlainTextEdit(), handle='ConsoleOutput', parent='ConsoleLayout')
 
     self.addObject(QtGui.QHBoxLayout(), handle='ConsolePromptInputLayout', parent='ConsoleLayout')
 
     self.addObject(QtGui.QLineEdit(), handle='ConsolePrompt', parent='ConsolePromptInputLayout')
     self.addObject(QtGui.QLineEdit(), handle='ConsoleInput', parent='ConsolePromptInputLayout')
+
+
+
+    self._console = PeacockInteractiveConsole(output_object.appendPlainText)
+#    self._signal_write.connect(self._console.write)
+
 
     self.setup()
 
@@ -110,6 +105,8 @@ class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
     if current_text and current_text[-1] == '\n':
       current_text = current_text[:-1]
 
+    print current_text
+
     q_object.setText('')
 
     output_object = self.object('ConsoleOutput')
@@ -118,9 +115,12 @@ class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
     output_object.appendPlainText(prompt_object.text() + current_text)
 
     more = self._console.push(current_text)
-    result = self._console.getCurrentOutput()
+    #result = self._console.getCurrentOutput()
+    #if result and result[-1] == '\n':
+    #  result = result[:-1]
 
-    output_object.appendPlainText(result)
+
+    #output_object.appendPlainText(result.strip())
 
     if more:
       prompt_object.setText('... ')
