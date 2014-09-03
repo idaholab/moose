@@ -16,6 +16,7 @@
 #include "OutputInterface.h"
 #include "OutputWarehouse.h"
 #include "MooseApp.h"
+#include "ActionWarehouse.h"
 
 // Define input parameters
 template<>
@@ -35,8 +36,9 @@ OutputInterface::OutputInterface(const std::string & name, InputParameters param
 {
   // By default it is assumed that the variable name associated with 'outputs' is the name
   // of the block, this is the case for Markers, Indicators, VectorPostprocessors, and Postprocessors.
-  // However, for Materials this is not the case, so the ability to call buildOutputHideVariableList
-  // explicitly is needed by Materials, the build_list allows for this behavior.
+  // However, for Materials this is not the case, so the call to buildOutputHideVariableList must be
+  // disabled, the build_list allows for this behavior. The hide lists are handled by MaterialOutputAction
+  // in this case
   if (build_list)
   {
     std::set<std::string> names_set;
@@ -48,8 +50,8 @@ OutputInterface::OutputInterface(const std::string & name, InputParameters param
 void
 OutputInterface::buildOutputHideVariableList(std::set<std::string> variable_names)
 {
-  // Extract all the possible
-  const std::set<OutputName> & avail = _oi_output_warehouse.getOutputNames();
+  // Set of available names
+  const std::set<OutputName> & avail =_oi_output_warehouse.getOutputNames();
 
   // Check for 'none'; hide variables on all outputs
   if (_oi_outputs.find("none") != _oi_outputs.end())

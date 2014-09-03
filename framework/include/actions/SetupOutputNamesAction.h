@@ -12,22 +12,42 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AddMaterialAction.h"
-#include "FEProblem.h"
+#ifndef SETUPOUTPUTNAMESACTION_H
+#define SETUPOUTPUTNAMESACTION_H
+
+// MOOSE includes
+#include "Action.h"
+
+// Forward declerations
+class SetupOutputNamesAction;
 
 template<>
-InputParameters validParams<AddMaterialAction>()
-{
-  return validParams<MooseObjectAction>();
-}
+InputParameters validParams<SetupOutputNamesAction>();
 
-AddMaterialAction::AddMaterialAction(const std::string & name, InputParameters params) :
-    MooseObjectAction(name, params)
+/**
+ * Populates the list of available output names in the OutputWarehouse.
+ *
+ * This allows for objects to reference output names prior to the output
+ * object construction.
+ */
+class SetupOutputNamesAction : public Action
 {
-}
+public:
 
-void
-AddMaterialAction::act()
-{
-  _problem->addMaterial(_type, getShortName(), _moose_object_pars);
-}
+  /**
+   * Class constructor
+   */
+  SetupOutputNamesAction(const std::string & name, InputParameters params);
+
+  /**
+   * Class destructor
+   */
+  virtual ~SetupOutputNamesAction();
+
+  /**
+   * Populates the available output names in the OutputWarehouse
+   */
+  virtual void act();
+};
+
+#endif //SETUPOUTPUTNAMESACTION_H
