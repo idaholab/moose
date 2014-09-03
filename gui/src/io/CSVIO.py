@@ -3,7 +3,7 @@ import os, sys, csv
 
 # Peacock modules
 from src.base import *
-from tests.io import *
+#from tests.io import *
 
 ##
 # A class for performing read/write operations on *.csv files
