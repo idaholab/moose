@@ -272,3 +272,9 @@ OutputWarehouse::isReservedName(const std::string & name)
 {
   return _reserved.find(name) != _reserved.end();
 }
+
+void
+OutputWarehouse::setOutputNames(const std::set<std::string> & output_names)
+{
+  _object_names.insert(output_names.begin(), output_names.end());
+}

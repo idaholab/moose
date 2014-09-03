@@ -60,8 +60,8 @@ Material::Material(const std::string & name, InputParameters parameters) :
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
 
-    // The false flag requires that buildOutputVariableHideList be called explicitly;
-    // for Material objects this call is made in the MaterialOutputAction
+    // The false flag disables the automatic call  buildOutputVariableHideList;
+    // for Material objects the hide lists are handled by MaterialOutputAction
     OutputInterface(name, parameters, false),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),

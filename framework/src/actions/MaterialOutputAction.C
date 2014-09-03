@@ -126,7 +126,8 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
     //   (2) If the Material object itself has set the 'outputs' parameter
     if (outputs_has_properties || outputs.find("none") == outputs.end())
     {
-      // Add the material property for output if the name is contained in the 'output_properties' list or if the list is empty (all properties)
+      // Add the material property for output if the name is contained in the 'output_properties' list
+      // or if the list is empty (all properties)
       const std::set<std::string> names = (*material_iter)->getSuppliedItems();
       for (std::set<std::string>::const_iterator name_iter = names.begin(); name_iter != names.end(); ++name_iter)
       {
@@ -145,11 +146,6 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
           else
             mooseWarning("The type for material property '" << *name_iter << "' is not supported for automatic output.");
         }
-
-        // Create the hide list in the Material object via the OutputInterface; this creates the
-        // the hide these supplied variables from outputs not listed in the materials 'outputs'
-        // parameter (see OutputInterface for details)
-        (*material_iter)->buildOutputHideVariableList(_material_variable_names);
 
         // If the material object as limited outputs, store the variables associated with the output objects
         if (!outputs.empty())
