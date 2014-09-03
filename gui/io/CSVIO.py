@@ -7,7 +7,7 @@ from tests.io import *
 
 ##
 # A class for performing read/write operations on *.csv files
-class CSVIO(object, PeacockErrorInterface, PeacockTestInterface):
+class CSVIO(PeacockErrorInterface, PeacockTestInterface):
 
   ##
   # Class constructor
