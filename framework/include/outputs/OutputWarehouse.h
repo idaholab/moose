@@ -267,14 +267,6 @@ private:
    */
   void addInterfaceHideVariables(const std::string & output_name, const std::set<std::string> & variable_names);
 
-  /**
-   * Sets the list of output object names
-   *
-   * This is a private method used bn the SetupOutputNamesAction to make the names of the outputs available
-   * prior to construction.
-   */
-  void setOutputNames(const std::set<std::string> & output_names);
-
   /// The list of all output objects
   std::vector<Output *> _object_ptrs;
 
@@ -318,11 +310,9 @@ private:
   //  (1) FEProblem for calling initial/timestepSetup functions
   //  (2) MaterialOutputAction for calling addInterfaceHideVariables
   //  (3) OutputInterface for calling addInterfaceHideVariables
-  //  (4) For populating the list of output objects names
   friend class FEProblem;
   friend class MaterialOutputAction;
   friend class OutputInterface;
-  friend class SetupOutputNamesAction;
 };
 
 template<typename T>
