@@ -1,8 +1,8 @@
 from PySide import QtCore, QtGui
 
 import inspect
-from utils import *
-from base import *
+from src.utils import *
+from src.base import *
 
 ##
 # Basic QWidget to serve as a container for controls

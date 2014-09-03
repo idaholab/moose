@@ -7,7 +7,7 @@ from StringIO import StringIO
 from PySide import QtCore, QtGui
 
 # Peacock modules
-from base import *
+from src.base import *
 
 ##
 # An interactive python interpreter class

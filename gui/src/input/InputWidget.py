@@ -3,8 +3,8 @@ import os, sys, traceback
 
 from PySide import QtCore, QtGui
 
-from base import *
-from utils import *
+from src.base import *
+from src.utils import *
 
 ##
 # An input file widget
