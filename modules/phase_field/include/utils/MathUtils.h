@@ -8,7 +8,7 @@ namespace MathUtils
 {
   inline Real round(Real x)
   {
-    return std::floor(x > 0.0 ? (x + 0.5) : (x - 0.5));
+    return x > 0.0 ? std::floor(x + 0.5) : std::ceil(x - 0.5);
   }
 
   inline Real sign(Real x)
