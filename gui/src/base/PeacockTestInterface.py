@@ -41,13 +41,12 @@ class PeacockTestInterface(object):
 
   ##
   # Show the pass/fail result in typical MOOSE run_tests style
-  # @param name The name of the test, MyTest, for the method '_testMyTest'
+  # @param name The name of the test
   # @param result True/False result of the test
   # @param msg (optional) A message to show upon failure
   def _showResult(self, name, result, *args):
 
     # Build the status message: OK or FAIL
-
     if result:
        msg = utils.colorText('OK', 'GREEN')
        msg_length = 2

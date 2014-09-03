@@ -13,7 +13,7 @@ def testDataRead():
 
 # Test data access failure
 def testDataError():
-  csvio = io.CSVIO('input.csv', testing=True)
+  csvio = io.CSVIO('input.csv', testing=False)
   csvio['ThisDoesNotExist']
   result = csvio.testLastErrorMessage('No data for key \'ThisDoesNotExist\' located')
   fail_msg = 'Error failed to produce'
