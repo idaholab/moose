@@ -70,10 +70,13 @@ protected:
   // Logically three-dimensional data indexed by index in a 1D vector
   std::vector<EBSDAvgData> _avg_data;
 
-  // The number of values in the x, y and z directions.
+  /// Dimension of teh problem domain
+  unsigned int _mesh_dimension;
+
+  /// The number of values in the x, y and z directions.
   unsigned _nx, _ny, _nz;
 
-  // The spacing of the values in x, y and z directions.
+  /// The spacing of the values in x, y and z directions.
   Real _dx, _dy, _dz;
 
   // Initial condition values of EBSD variables
@@ -88,10 +91,10 @@ protected:
   std::vector<Point> _centerpoints;
   std::vector<Real> _assigned_op;
 
-  // Computes a global index in the _data array given an input *centroid* point
+  /// Computes a global index in the _data array given an input *centroid* point
   unsigned indexFromPoint(const Point & p) const;
 
-  // Transfer the index into the _avg_data array from given index
+  /// Transfer the index into the _avg_data array from given index
   unsigned indexFromIndex(unsigned int var) const;
 };
 

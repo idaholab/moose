@@ -18,6 +18,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     _filename(getParam<FileName>("filename")),
     _op_num(getParam<unsigned int>("crys_num")),
     _grain_num(getParam<unsigned int>("grain_num")),
+    _mesh_dimension(_mesh.dimension()),
     _nx(0),
     _ny(0),
     _nz(0),
@@ -99,15 +100,15 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
           _nz = label_vals[5];
 
           // Must have at least 2D data
-          if ((_nx == 0) || (_ny == 0))
-            mooseError("Error reading header, one of X_Dim or Y_Dim was zero.");
+          if (_nx == 0 || _ny == 0 || (_nz == 0 && _mesh_dimension > 2))
+            mooseError("Error reading header, spatial dimension of the EBSD data is lower than the dimension of the mesh.");
 
           // Must also have nonzero stepsizes
-          if ((_dx == 0.) || (_dy == 0.))
-            mooseError("Error reading header, one of X_Step or Y_Step was zero.");
+          if (_dx == 0.0 || _dy == 0.0 || (_dz == 0.0 && _mesh_dimension > 2))
+            mooseError("Error reading header, EBSD data step size is zero.");
 
           // Compute the total size.  If this is 2D data, don't multiply by zero.
-          unsigned total_size = _nz==0 ? _nx*_ny : _nx*_ny*_nz;
+          unsigned total_size = _mesh_dimension < 3 ? _nx*_ny : _nx*_ny*_nz;
 
           // Resize the _data array
           _data.resize(total_size);
@@ -277,17 +278,25 @@ EBSDReader::indexFromPoint(const Point & p) const
 {
   // Don't assume an ordering on the input data, use the (x, y,
   // z) values of this centroid to determine the index.
-  unsigned x_index = static_cast<unsigned>(p(0)/_dx);
-  unsigned y_index = static_cast<unsigned>(p(1)/_dy);
-  unsigned z_index = static_cast<unsigned>(p(2)/_dz);
+  unsigned int x_index, y_index, z_index, global_index;
+
+  x_index = (unsigned int)(p(0) / _dx);
+  y_index = (unsigned int)(p(1) / _dy);
+
+  if (_mesh_dimension == 3)
+  {
+    z_index = (unsigned int)(p(2) / _dz);
+    global_index = z_index * _ny;
+  }
+  else
+    global_index = 0;
 
   // Compute the global index into the _data array.  This stores points
   // in a [z][y][x] ordering.
-  unsigned global_index = (z_index*_ny + y_index)*_nx + x_index;
+  global_index = (global_index + y_index) * _nx + x_index;
 
   // Don't access out of range!
-  if (global_index >= _data.size())
-    mooseError("Error! Index out of range in EBSDReader::indexFromPoint().");
+  mooseAssert(global_index < _data.size(), "global_index points out of _data range");
 
   return global_index;
 }
