@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
 
 
-  tabs = PeacockTabWidget(main=main, alignment='vertical', debug=False, screen_width=width, screen_height=height)
+  tabs = PeacockTabWidget(main=main, alignment='vertical', debug=True, screen_width=width, screen_height=height)
 
 
 
