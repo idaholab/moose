@@ -340,7 +340,6 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface):
   # Displays the object and signals for this object (public)
   def info(self):
 
-
     # Build the object data to print
     data = []
     self._getObjectInfo(data)
