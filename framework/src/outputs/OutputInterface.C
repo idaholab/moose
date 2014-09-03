@@ -36,8 +36,9 @@ OutputInterface::OutputInterface(const std::string & name, InputParameters param
 {
   // By default it is assumed that the variable name associated with 'outputs' is the name
   // of the block, this is the case for Markers, Indicators, VectorPostprocessors, and Postprocessors.
-  // However, for Materials this is not the case, so the ability to call buildOutputHideVariableList
-  // explicitly is needed by Materials, the build_list allows for this behavior.
+  // However, for Materials this is not the case, so the call to buildOutputHideVariableList must be
+  // disabled, the build_list allows for this behavior. The hide lists are handled by MaterialOutputAction
+  // in this case
   if (build_list)
   {
     std::set<std::string> names_set;
@@ -49,19 +50,8 @@ OutputInterface::OutputInterface(const std::string & name, InputParameters param
 void
 OutputInterface::buildOutputHideVariableList(std::set<std::string> variable_names)
 {
-  // Set of available names (a copy is used intentionally to handle the empty case discussed below)
-  std::set<OutputName> avail =_oi_output_warehouse.getOutputNames();
-
-  // If avail is empty then there is a chance that the creation of this object is happening
-  // prior to the creation of the Output objects, thus extract the names from ActionWarehouse,
-  // this is the case for RELAP-7 Component creation
-  if (avail.empty())
-  {
-    ActionWarehouse & awh = _oi_moose_app.actionWarehouse();
-    const std::vector<Action *> & actions = awh.getActionsByName("add_output");
-    for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
-      avail.insert((*it)->getShortName());
-  }
+  // Set of available names
+  const std::set<OutputName> & avail =_oi_output_warehouse.getOutputNames();
 
   // Check for 'none'; hide variables on all outputs
   if (_oi_outputs.find("none") != _oi_outputs.end())
