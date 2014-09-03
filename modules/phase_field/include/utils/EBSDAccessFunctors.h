@@ -32,10 +32,12 @@ public:
   /// Access functor base class for EBSDPointData
   struct EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData &) = 0;
+    virtual ~EBSDPointDataFunctor() {};
   };
   /// Access functor base class for EBSDAvgData
   struct EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData &) = 0;
+    virtual ~EBSDAvgDataFunctor() {};
   };
 
   /// Factory function to return a point functor specified by name
