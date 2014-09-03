@@ -2,7 +2,7 @@
 import os, sys
 
 # Import Peacock IO module
-import io
+from src import *
 
 # Test reading data
 def testDataRead():

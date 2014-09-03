@@ -1,6 +1,0 @@
-[Tests]
-  [./csv_read_data]
-    type = PeacockTester
-    function = tests.io.csvio.testDataRead
-  [../]
-[]
