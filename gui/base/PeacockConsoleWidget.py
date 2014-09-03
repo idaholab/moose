@@ -84,7 +84,7 @@ class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
     self._console = PeacockInteractiveConsoleHelper(output_object.appendPlainText, namespace_vars)
 
     # Define short-cut to the 'ConsoleInput'; this is used in an eventFilter which is continuously being
-    # called. To avoid searhing for the object over and over, just store a local variable
+    # called. To avoid searching for the object over and over, just store a local variable
     self._input = self.object('ConsoleInput')
 
     # Define the storage for the command history and current history location
