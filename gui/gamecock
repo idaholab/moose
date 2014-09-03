@@ -16,7 +16,7 @@ from StringIO import StringIO
 # Adapted from
 class PeacockInteractiveConsole(InteractiveConsole):
 
-#  _signal_write = QtCore.Signal(str)
+  _signal_write = QtCore.Signal(str)
 
   def __init__(self, func, locals=None, **kwargs):
     InteractiveConsole.__init__(self, locals)
@@ -27,7 +27,8 @@ class PeacockInteractiveConsole(InteractiveConsole):
     if data:
       if data[-1] == '\n':
         data = data[:-1]
-        self._writeFunction(data)
+        self._signal_write.emit(data)
+#        self._writeFunction(data)
 
   def runsource(self, source, filename="<input>", symbol="single"):
 
@@ -49,7 +50,7 @@ class PeacockInteractiveConsole(InteractiveConsole):
 
 class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
 
- # _signal_write = QtCore.Signal(str)
+  #_signal_write = QtCore.Signal(str)
 
   def __init__(self, **kwargs):
     QtGui.QWidget.__init__(self)
@@ -67,8 +68,8 @@ class PeacockConsoleWidget(QtGui.QWidget, MooseWidget):
 
 
 
-    self._console = PeacockInteractiveConsole(output_object.appendPlainText)
-#    self._signal_write.connect(self._console.write)
+#    self._console = PeacockInteractiveConsole(output_object.appendPlainText)
+    self._console._signal_write.connect(output_object.appendPlainText)
 
 
     self.setup()
