@@ -313,7 +313,6 @@
 #include "SetupMeshCompleteAction.h"
 #include "AddOutputAction.h"
 #include "CommonOutputAction.h"
-#include "SetupOutputNamesAction.h"
 #include "AddMaterialAction.h"
 #include "GlobalParamsAction.h"
 #include "AdaptivityAction.h"
@@ -723,7 +722,6 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_output",                   Output,                 false);
 
   registerTask("common_output", true);
-  registerTask("setup_output_names", true);
   registerTask("setup_recover_file_base", true);
 
   registerTask("add_feproblem", false);
@@ -784,7 +782,6 @@ addActionTypes(Syntax & syntax)
   syntax.addDependencySets(
 "(meta_action)"
 "(common_output)"
-"(setup_output_names)"
 "(set_global_params)"
 "(setup_recover_file_base)"
 "(check_copy_nodal_vars)"
@@ -882,7 +879,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(CreateProblemAction, "create_problem");
   registerAction(AddOutputAction, "add_output");
   registerAction(CommonOutputAction, "common_output");
-  registerAction(SetupOutputNamesAction, "setup_output_names");
   registerAction(SetupRecoverFileBaseAction, "setup_recover_file_base");
   registerAction(GlobalParamsAction, "set_global_params");
   registerAction(SetupPredictorAction, "setup_predictor");
