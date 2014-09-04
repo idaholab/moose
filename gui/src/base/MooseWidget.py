@@ -1,3 +1,5 @@
+import sys
+
 from PySide import QtCore, QtGui
 
 import inspect
@@ -5,8 +7,23 @@ from src.utils import *
 from src.base import *
 
 ##
+# A MooseWidget base class for information handling.
+#
+# This class provides two main features:
+#  (1) info() - Prints information about the class objects, callbacks, pulls, and signals
+#  (2) _debug(msg) - Prints a debug message if the
+class MooseWidgetInfoBase(object):
+  def __init__(self):
+    if not isinstance(self, MooseWidget) or not isinstance(self, QtGui.QWidget):
+      print 'MooseWidgetInfoBase only works if the parent class is both a MooseWidget and a QtGui.QWidget'
+      sys.exit()
+
+
+
+
+##
 # Basic QWidget to serve as a container for controls
-class MooseWidget(PeacockErrorInterface, PeacockTestInterface):
+class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBase):
 
   ##
   # Constructor.
@@ -34,6 +51,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface):
 
     PeacockErrorInterface.__init__(self)
     PeacockTestInterface.__init__(self)
+    MooseWidgetInfoBase.__init__(self)
 
     # All object added via addObject are stored in a dictionary
     self._objects = dict()
@@ -342,6 +360,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface):
 
   ##
   # Displays the object and signals for this object (public)
+  #
   def info(self):
 
     # Build the object data to print
@@ -364,6 +383,17 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface):
     print '\n'
 
 # protected:
+
+  ##
+  # Define a message the prints when the debug flag is set to true (protected)
+  # @param message The desired debugging message
+  def _debug(self, message):
+    if property('debug'):
+      caller = inspect.stack()[1]
+      frame = caller[0]
+      info = inspect.getframeinfo(frame)
+      print '[' + self.__class__.__name__ + '][' + info.function + ':' + str(info.lineno) +']', message
+
 
   ##
   # Recursively, gather object information for this MooseObject
@@ -414,15 +444,6 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface):
       if isinstance(obj, MooseWidget):
         obj._getPullInfo(data)
 
-  ##
-  # Define a message the prints when the debug flag is set to true (protected)
-  # @param message The desired debugging message
-  def _debug(self, message):
-    if property('debug'):
-      caller = inspect.stack()[1]
-      frame = caller[0]
-      info = inspect.getframeinfo(frame)
-      print '[' + self.__class__.__name__ + '][' + info.function + ':' + str(info.lineno) +']', message
 
 # private:
 
