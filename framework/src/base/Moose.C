@@ -83,6 +83,7 @@
 #include "MaterialRealAux.h"
 #include "MaterialRealVectorValueAux.h"
 #include "MaterialRealTensorValueAux.h"
+#include "MaterialStdVectorAux.h"
 #include "DebugResidualAux.h"
 #include "BoundsAux.h"
 #include "SpatialUserObjectAux.h"
@@ -430,6 +431,7 @@ registerObjects(Factory & factory)
   registerAux(MaterialRealAux);
   registerAux(MaterialRealVectorValueAux);
   registerAux(MaterialRealTensorValueAux);
+  registerAux(MaterialStdVectorAux);
   registerAux(DebugResidualAux);
   registerAux(BoundsAux);
   registerAux(SpatialUserObjectAux);
