@@ -41,9 +41,9 @@ InputParameters validParams<Output>()
   params.addParam<std::vector<VariableName> >("show", "A list of the variables and postprocessors that should be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
 
   // Enable/disable output types
-  params.addParam<bool>("output_nodal_variables", true, "Enable/disable the output of nodal nonlinear variables");
-  params.addParam<bool>("output_elemental_variables", true, "Enable/disable the output of elemental nonlinear variables");
-  params.addParam<bool>("output_scalar_variables", true, "Enable/disable the output of aux scalar variables");
+  params.addParam<bool>("output_nodal_variables", true, "Enable/disable the output of nodal variables");
+  params.addParam<bool>("output_elemental_variables", true, "Enable/disable the output of elemental variables");
+  params.addParam<bool>("output_scalar_variables", true, "Enable/disable the output of scalar variables");
   params.addParam<bool>("output_postprocessors", true, "Enable/disable the output of postprocessors");
   params.addParam<bool>("output_vector_postprocessors", true, "Enable/disable the output of VectorPostprocessors");
 
@@ -54,7 +54,7 @@ InputParameters validParams<Output>()
   params.addParam<bool>("sequence", "Enable/disable sequential file output (enable by default when 'use_displace = true', otherwise defaults to false");
 
   // Control for outputting elemental variables as nodal variables
-  params.addParam<bool>("elemental_as_nodal", false, "Output elemental nonlinear variables as nodal");
+  params.addParam<bool>("elemental_as_nodal", false, "Output elemental variables as nodal");
   params.addParam<bool>("scalar_as_nodal", false, "Output scalar variables as nodal");
 
   // Output intervals and timing
@@ -154,22 +154,22 @@ Output::init()
   // it will create the correct nodal variable from the elemental
   if (_elemental_as_nodal)
   {
-    _nonlinear_nodal.show.insert(_nonlinear_nodal.show.end(), _nonlinear_elemental.show.begin(), _nonlinear_elemental.show.end());
-    _nonlinear_nodal.hide.insert(_nonlinear_nodal.hide.end(), _nonlinear_elemental.hide.begin(), _nonlinear_elemental.hide.end());
-    _nonlinear_nodal.available.insert(_nonlinear_nodal.available.end(), _nonlinear_elemental.available.begin(), _nonlinear_elemental.available.end());
+    _nodal_variables.show.insert(_nodal_variables.show.end(), _elemental_variables.show.begin(), _elemental_variables.show.end());
+    _nodal_variables.hide.insert(_nodal_variables.hide.end(), _elemental_variables.hide.begin(), _elemental_variables.hide.end());
+    _nodal_variables.available.insert(_nodal_variables.available.end(), _elemental_variables.available.begin(), _elemental_variables.available.end());
   }
 
   // Similarly as above, if 'scalar_as_nodal = true' append the elemental variable lists
   if (_scalar_as_nodal)
   {
-    _nonlinear_nodal.show.insert(_nonlinear_nodal.show.end(), _scalar.show.begin(), _scalar.show.end());
-    _nonlinear_nodal.hide.insert(_nonlinear_nodal.hide.end(), _scalar.hide.begin(), _scalar.hide.end());
-    _nonlinear_nodal.available.insert(_nonlinear_nodal.available.end(), _scalar.available.begin(), _scalar.available.end());
+    _nodal_variables.show.insert(_nodal_variables.show.end(), _scalar.show.begin(), _scalar.show.end());
+    _nodal_variables.hide.insert(_nodal_variables.hide.end(), _scalar.hide.begin(), _scalar.hide.end());
+    _nodal_variables.available.insert(_nodal_variables.available.end(), _scalar.available.begin(), _scalar.available.end());
   }
 
   // Initialize the show/hide/output lists for each of the types of output
-  initOutputList(_nonlinear_nodal);
-  initOutputList(_nonlinear_elemental);
+  initOutputList(_nodal_variables);
+  initOutputList(_elemental_variables);
   initOutputList(_scalar);
   initOutputList(_postprocessor);
   initOutputList(_vector_postprocessor);
@@ -182,10 +182,10 @@ Output::init()
   // in only the nodal version of the scalar variable to be in the output file (Exodus supports this). The
   // same is true for elemental variables.
   if (isParamValid("output_elemental_variables") ? !getParam<bool>("output_elemental_variables") : true)
-    _nonlinear_elemental.output.clear();
+    _elemental_variables.output.clear();
 
   if (isParamValid("output_nodal_variables") ? !getParam<bool>("output_nodal_variables") : true)
-    _nonlinear_nodal.output.clear();
+    _nodal_variables.output.clear();
 
   if (isParamValid("output_scalar_variables") ? !getParam<bool>("output_scalar_variables") : true)
     _scalar.output.clear();
@@ -400,25 +400,25 @@ Output::outputSystemInformation()
 bool
 Output::hasNodalVariableOutput()
 {
-  return !_nonlinear_nodal.output.empty();
+  return !_nodal_variables.output.empty();
 }
 
 const std::vector<std::string> &
 Output::getNodalVariableOutput()
 {
-  return _nonlinear_nodal.output;
+  return _nodal_variables.output;
 }
 
 bool
 Output::hasElementalVariableOutput()
 {
-  return !_nonlinear_elemental.output.empty();
+  return !_elemental_variables.output.empty();
 }
 
 const std::vector<std::string> &
 Output::getElementalVariableOutput()
 {
-  return _nonlinear_elemental.output;
+  return _elemental_variables.output;
 }
 
 bool
@@ -538,9 +538,9 @@ Output::initAvailableLists()
       MooseVariable & var = _problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _nonlinear_elemental.available.push_back(*it);
+        _elemental_variables.available.push_back(*it);
       else
-        _nonlinear_nodal.available.push_back(*it);
+        _nodal_variables.available.push_back(*it);
     }
 
     else if (_problem_ptr->hasScalarVariable(*it))
@@ -563,9 +563,9 @@ Output::initShowHideLists(const std::vector<VariableName> & show, const std::vec
       MooseVariable & var = _problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _nonlinear_elemental.show.push_back(*it);
+        _elemental_variables.show.push_back(*it);
       else
-        _nonlinear_nodal.show.push_back(*it);
+        _nodal_variables.show.push_back(*it);
     }
     else if (_problem_ptr->hasScalarVariable(*it))
       _scalar.show.push_back(*it);
@@ -585,9 +585,9 @@ Output::initShowHideLists(const std::vector<VariableName> & show, const std::vec
       MooseVariable & var = _problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _nonlinear_elemental.hide.push_back(*it);
+        _elemental_variables.hide.push_back(*it);
       else
-        _nonlinear_nodal.hide.push_back(*it);
+        _nodal_variables.hide.push_back(*it);
     }
     else if (_problem_ptr->hasScalarVariable(*it))
       _scalar.hide.push_back(*it);
