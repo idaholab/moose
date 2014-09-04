@@ -1,50 +1,82 @@
 #!/usr/bin/python
+import sys, os, inspect, time
+from StringIO import StringIO
 
 # Import Peacock modules
-import src.utils
+from src import utils
 
 ##
-# A a class for creating self testing classes
+# A a class for performing testing
 #
-# Any class that inherits from this interface has a test() method, this
-# method automatically calls any methods with the '_test' prefix (e.g.,
-# _testDataRead). The test method must meet the following criteria:
-#     (a) It must be a non-static member variable (i.e., it takes self)
-#     (b) It must not accept any additional arguments
-#     (c) It must return a tuple containing the test result and the failure message,
-#         (i.e., result, msg = _testThis())
+# Any class that inherits from this interface has a test() method that
+# calls any function that is registered using 'registerTest' method.
+# The function must output the test result (True | False) and a message
+# that will show when the test fails
 class PeacockTestInterface(object):
 
   ## Constructor (empty; public)
   def __init__(self, **kwargs):
+
+    self._options = dict()
+    self._options['verbose'] = kwargs.pop('verbose', False)
+    self._options['quiet'] = kwargs.pop('quiet', False)
+
+
     self._tests = []
 
   ##
   # Register a function to execute as a test
-  #
-  #
-  def registerTest(self, test):
-    self._tests.append(test)
+  # @param test A function that is serving as a test
+  # @param name (optional) The name of the test, the function name is used by default
+  def registerTest(self, test, name = None):
+    if name == None:
+      name = test.__name__
+    self._tests.append(dict(name=name, attr=test))
 
   ##
-  # Performs the testing by calling all _test<YourNameHere> methods
+  # Performs the testing by calling all functions register via registerTest()
   def test(self):
 
-    for test in self._tests:
-      # If it is not callable, i.e., a method, go to the next one
-      if not hasattr(test, '__call__'):
-        print "Some error message here"
 
-      result, msg = test()
-      self._showResult(test.__name__, result, msg)
-    return
+    start_time = time.time()
+    num_tests = len(self._tests)
+    failed_tests = 0
+
+    # This needs to be threaded
+    for test in self._tests:
+      name = test['name']
+      attr = test['attr']
+
+      backup = sys.stdout
+      sys.stdout = StringIO()     # capture output
+
+      (result, msg) = attr()
+
+      if not result:
+        failed_tests += 1
+
+      out = sys.stdout.getvalue() # release output
+
+      sys.stdout.close()  # close the stream
+      sys.stdout = backup # restore original stdout
+
+      self._showTestResult(name, result, msg, out)
+
+    # Print the summary
+    print '-'*110
+    print 'Executed', num_tests, 'in', str(time.time() - start_time), 'seconds'
+    print  utils.colorText(str(num_tests - failed_tests) + ' passed', 'GREEN') + ', ' \
+           + utils.colorText(str(failed_tests) + ' failed', 'RED')
+
 
   ##
   # Show the pass/fail result in typical MOOSE run_tests style
   # @param name The name of the test
   # @param result True/False result of the test
-  # @param msg (optional) A message to show upon failure
-  def _showResult(self, name, result, *args):
+  # @param msg A message to show upon failure
+  # @param stdout The stdout string from the test execution, prints if failed
+  def _showTestResult(self, name, result, msg, *args):
+
 
     # Build the status message: OK or FAIL
     if result:
@@ -52,16 +84,18 @@ class PeacockTestInterface(object):
        msg_length = 2
     else:
       # Add the failure message, if it exists
-      msg_length = 4
-      msg = ''
-      if len(args) == 1 and isinstance(args[0], str) and len(args[0]) > 0 :
-        msg = utils.colorText('(' + args[0] + ') ', 'RED')
-        msg_length += len(args[0])+ 3
-
-      # Print the failure
-      msg += utils.colorText('FAIL', 'RED')
+      msg_length = len(msg) + 7
+      msg = utils.colorText('(' + msg + ') FAIL', 'RED')
 
     # Produce the complete test message string
-    name = utils.colorText(self.__class__.__name__, 'YELLOW') + '/' + name
     n = 110 - len(name) - msg_length
     print name + '.'*n + msg
+
+    # Do not show any test output if --quiet is used
+    if self._options['quiet']:
+      return
+
+    # Print the error message, if the test fails
+    if self._options['verbose'] or (result and len(args) > 0):
+      for line in args[0].splitlines():
+        print '  ' + utils.colorText(line, 'RED')

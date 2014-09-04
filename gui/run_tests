@@ -1,106 +1,52 @@
 #!/usr/bin/env python
-import sys, os, inspect, importlib, time
-from StringIO import StringIO
-
-from src import *
-
+import os, importlib, argparse
+from src.base import *
 
 
 ##
-# Show the pass/fail result in typical MOOSE run_tests style
-# @param name The name of the test
-# @param result True/False result of the test
-# @param msg (optional) A message to show upon failure
-def showTestResult(name, result, msg, out):
-
-  # Build the status message: OK or FAIL
-  if result:
-     msg = utils.colorText('OK', 'GREEN')
-     msg_length = 2
-  else:
-    # Add the failure message, if it exists
-    msg_length = len(msg) + 7
-    msg = utils.colorText('(' + msg + ') FAIL', 'RED')
-
-  # Produce the complete test message string
-  n = 110 - len(name) - msg_length
-  print name + '.'*n + msg
-
-  if not result:
-    print out
-    #print utils.colorText(out, 'YELLOW')
-
-
-
-class PeacockTester(object):
-  def __init__(self):
-    self._num_tests = 0
-    self._num_tests_pass = 0
-    self._tests = []
-    self._results = []
-
-  def run(self):
+# A class for running all available tests, this utilizes
+# the base class, PeacockTestInterface, for running the tests
+class PeacockTester(PeacockTestInterface):
+  def __init__(self, **kwargs):
+    PeacockTestInterface.__init__(self, **kwargs)
     self._buildTests()
 
-    start_time = time.time()
-    self._executeTests()
-
-    failed = self._num_tests - self._num_tests_pass
-
-    print '-'*110
-    print 'Executed', self._num_tests, 'in', str(time.time() - start_time), 'seconds'
-    print  utils.colorText(str(self._num_tests) + ' passed', 'GREEN') + ', ' \
-           + utils.colorText(str(failed) + ' failed', 'RED')
-
-
-
+  ##
+  # Walks through the tests directory and registers a test
+  # for each executable function that exists
   def _buildTests(self):
 
+    # Walk through all files and directories in the 'tests' path
     for root, dirs, files in os.walk('tests'):
+
+      # For each file, if the file is a .py file and not a module file it might contain tests
       for f in files:
         if f.endswith('.py') and f != '__init__.py':
+
+          # Build and load the module
           prefix, ext = os.path.splitext(os.path.join(root, f))
           mod, ext = os.path.splitext(root)
           mod = mod.replace('/','.')
           i = importlib.import_module(mod)
 
+          # Look through all items in the module, if the items
+          # is executable register it as a test
           for item in dir(i):
             attr = getattr(i, item)
             if hasattr(attr, '__call__'):
               name = prefix + '.' + item
-
-              self._tests.append(dict(name=name, attr=attr))
-              #(result, msg) = attr()
-              #showTestResult(name, result, msg)
-
-              #self._num_tests += 1
-              #if (result):
-              #  self._num_tests_pass += 1
+              self.registerTest(attr, name)
 
 
-  def _executeTests(self):
-
-
-     # This needs to be threaded
-     for test in self._tests:
-       name = test.get('name')
-       attr = test.get('attr')
-
-       backup = sys.stdout
-       sys.stdout = StringIO()     # capture output
-
-       (result, msg) = attr()
-       self._results.append(dict(name=name, result=result, message=msg))
-
-       out = sys.stdout.getvalue() # release output
-
-       sys.stdout.close()  # close the stream
-       sys.stdout = backup # restore original stdout
-
-
-       showTestResult(name, result, msg, out)
-
+# Main
 if __name__ == '__main__':
 
-  tester = PeacockTester()
-  tester.run()
+  # Command-line arguments
+  parser = argparse.ArgumentParser(description='run_tests: A function for executing gui tests.')
+  parser.add_argument('--verbose', '-v', action='store_true', help='Display all test output')
+  parser.add_argument('--quiet', '-q', action='store_true', help='Disable display of all test output')
+  options = parser.parse_args()
+
+  # Run the tests
+  tester = PeacockTester(**vars(options))
+  tester.test()
