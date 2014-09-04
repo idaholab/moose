@@ -35,5 +35,5 @@ FunctionAux::computeValue()
   if (isNodal())
     return _func.value(_t, *_current_node);
   else
-    return _func.value(_t, _current_elem->centroid());
+    return _func.value(_t, _q_point[_qp]);
 }
