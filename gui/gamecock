@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 import os, sys, traceback
 
-from contrib import *
-
 from PySide import QtCore, QtGui
 
-from base import *
-from execute import *
-from input import *
+from src.base import *
+from src.execute import *
+from src.input import *
 
 
 # A DEMO TABBED WIDGET
@@ -24,13 +22,12 @@ class PeacockTabWidget(QtGui.QWidget, MooseWidget):
     # Add the tabs to the layout
     self.addObject(InputWidget(**kwargs), handle='Input', parent='PeacockTabs')
   #  self.addObject(ExecuteWidget(**kwargs), handle='Execute', parent='PeacockTabs')
-##
 
+    # Add the Interactive console
     self.addObject(PeacockConsoleWidget(globals(), **kwargs), handle='InteractiveConsole', parent='MainVerticalSplit')
 
     # Connect the signal 'button' from the InputWidget to the 'Run' callback of ExecuteWidget
 #    self.connectSignal('button', 'Run')
-
 #    self.object('Execute').info()
 
     self.setup()
@@ -56,11 +53,7 @@ if __name__ == '__main__':
   width, height = screen_rect.width(), screen_rect.height()
 
 
-
   tabs = PeacockTabWidget(main=main, alignment='vertical', debug=True, screen_width=width, screen_height=height)
-
-
-
 
   tabs.show()
 
