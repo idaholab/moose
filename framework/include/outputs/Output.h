@@ -487,11 +487,11 @@ private:
   /// Old time step delta
   Real & _dt_old;
 
-  /// Storage structure for the variable lists for elemental nonlinear variable output
-  OutputData _nonlinear_elemental;
+  /// Storage structure for the variable lists for elemental variable output (Variable and AuxVariable)
+  OutputData _elemental_variables;
 
-  /// Storage structure for the variable lists for nodal nonlinear variable output
-  OutputData _nonlinear_nodal;
+  /// Storage structure for the variable lists for nodal variable output (Variable and AuxVariable)
+  OutputData _nodal_variables;
 
   /// Storage structure for the variable lists for postprocessor output
   OutputData _postprocessor;
