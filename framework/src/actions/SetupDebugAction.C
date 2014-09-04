@@ -75,9 +75,9 @@ SetupDebugAction::createOutputAction(const std::string & type, const std::string
   _action_params.set<std::string>("type") = type;
 
   // Create the action
-  std::ostringstream oss;
-  oss << "Outputs/" << name;
-  MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", oss.str(), _action_params));
+  std::string long_name = "Outputs/";
+  long_name += name;
+  MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", long_name, _action_params));
 
   // Set the object parameters
   InputParameters & object_params = action->getObjectParams();

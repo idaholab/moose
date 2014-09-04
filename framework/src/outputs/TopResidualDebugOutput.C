@@ -107,5 +107,6 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
   Moose::err << std::endl;
 
   for (unsigned int i = 0; i < n; ++i)
-    fprintf(stderr, "[DBG][%d]  % .15e '%s' at node %d\n", processor_id(), vec[i]._residual, _sys.variable_name(vec[i]._var).c_str(), vec[i]._nd);
+    Moose::err << "[DBG][" << processor_id() << "] " << std::setprecision(15) << vec[i]._residual << " '"
+               << _sys.variable_name(vec[i]._var).c_str() << "' at node " << vec[i]._nd << '\n';
 }
