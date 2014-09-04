@@ -19,6 +19,53 @@ class MooseWidgetInfoBase(object):
       sys.exit()
 
 
+# private:
+  ##
+  # Given header and data, create a formatted table
+  def __printTable(self, header, data):
+
+    # Print empty message if no data exists
+    if len(data) == 0:
+      print ' No data'
+      return
+
+    # Insert the header to the beginning of the data
+    data.insert(0, header)
+
+    # Compute the table widths
+    widths = [0]*len(data[0])
+    for d in data:
+      for i in xrange(len(d)):
+
+        # Convert bool
+        if isinstance(d[i], bool):
+          if d[i]:
+            d[i] = 'True'
+          else:
+            d[i] = 'False'
+
+        # Compute max width
+        widths[i] = max(widths[i], len(str(d[i])))
+
+    # Strip header from the beginning
+    data.pop(0)
+
+    # Create format strings for building signal table
+    cnt = 0
+    frmt = ''
+    line = ''
+    for w in widths:
+      frmt += ' {' + str(cnt) + ':' + str(w) + 's}'
+      line += ' ' + '-'*(w)
+      cnt += 1
+
+    # Print signals
+    print line
+    print frmt.format(*header)
+    print line
+    for d in data:
+      print frmt.format(*d)
+    print line
 
 
 ##
@@ -443,53 +490,3 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
     for key, obj in self._objects.iteritems():
       if isinstance(obj, MooseWidget):
         obj._getPullInfo(data)
-
-
-# private:
-
-  ##
-  # Given header and data, create a formatted table
-  def __printTable(self, header, data):
-
-    # Print empty message if no data exists
-    if len(data) == 0:
-      print ' No data'
-      return
-
-    # Insert the header to the beginning of the data
-    data.insert(0, header)
-
-    # Compute the table widths
-    widths = [0]*len(data[0])
-    for d in data:
-      for i in xrange(len(d)):
-
-        # Convert bool
-        if isinstance(d[i], bool):
-          if d[i]:
-            d[i] = 'True'
-          else:
-            d[i] = 'False'
-
-        # Compute max width
-        widths[i] = max(widths[i], len(str(d[i])))
-
-    # Strip header from the beginning
-    data.pop(0)
-
-    # Create format strings for building signal table
-    cnt = 0
-    frmt = ''
-    line = ''
-    for w in widths:
-      frmt += ' {' + str(cnt) + ':' + str(w) + 's}'
-      line += ' ' + '-'*(w)
-      cnt += 1
-
-    # Print signals
-    print line
-    print frmt.format(*header)
-    print line
-    for d in data:
-      print frmt.format(*d)
-    print line
