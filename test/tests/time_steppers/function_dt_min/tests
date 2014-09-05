@@ -1,7 +1,12 @@
 [Tests]
-  [./test]
+  [./test_min]
     type = 'Exodiff'
     input = 'function_dt_min.i'
     exodiff = 'function_dt_min_out.e'
+  [../]
+  [./test_startup]
+    type = 'Exodiff'
+    input = 'with_startup.i'
+    exodiff = 'with_startup_out.e'
   [../]
 []
