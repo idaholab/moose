@@ -139,11 +139,13 @@ SetupRecoverFileBaseAction::getCheckpointFiles(std::set<std::string> & files)
   for (std::set<std::string>::const_iterator it = checkpoint_dirs.begin(); it != checkpoint_dirs.end(); ++it)
   {
     tinydir_dir dir;
+    dir.has_next = 0; // Avoid a garbage value in has_next (clang StaticAnalysis)
     tinydir_open(&dir, it->c_str());
 
     while (dir.has_next)
     {
       tinydir_file file;
+      file.is_dir = 0; // Avoid a garbage value in is_dir (clang StaticAnalysis)
       tinydir_readfile(&dir, &file);
 
       if (!file.is_dir)

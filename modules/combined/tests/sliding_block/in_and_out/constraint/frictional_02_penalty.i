@@ -6,7 +6,8 @@
 #  The sinusoid is of the form 0.4sin(4t)+0.2 and a friction coefficient
 #  of 0.2 is used.  The gold file is run on one processor and the benchmark
 #  case is run on a minimum of 4 processors to ensure no parallel variability
-#  in the contact pressure and penetration results.
+#  in the contact pressure and penetration results.  Further documentation can
+#  found in moose/modules/contact/doc/sliding_block/
 #
 
 [Mesh]

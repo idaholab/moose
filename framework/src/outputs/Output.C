@@ -188,22 +188,22 @@ Output::init()
   // it will create the correct nodal variable from the elemental
   if (isParamValid("elemental_as_nodal") && getParam<bool>("elemental_as_nodal"))
   {
-    _nonlinear_nodal.show.insert(_nonlinear_nodal.show.end(), _nonlinear_elemental.show.begin(), _nonlinear_elemental.show.end());
-    _nonlinear_nodal.hide.insert(_nonlinear_nodal.hide.end(), _nonlinear_elemental.hide.begin(), _nonlinear_elemental.hide.end());
-    _nonlinear_nodal.available.insert(_nonlinear_nodal.available.end(), _nonlinear_elemental.available.begin(), _nonlinear_elemental.available.end());
+    _nodal_variables.show.insert(_nodal_variables.show.end(), _elemental_variables.show.begin(), _elemental_variables.show.end());
+    _nodal_variables.hide.insert(_nodal_variables.hide.end(), _elemental_variables.hide.begin(), _elemental_variables.hide.end());
+    _nodal_variables.available.insert(_nodal_variables.available.end(), _elemental_variables.available.begin(), _elemental_variables.available.end());
   }
 
   // Similarly as above, if 'scalar_as_nodal = true' append the elemental variable lists
   if (isParamValid("scalar_as_nodal") && getParam<bool>("scalar_as_nodal"))
   {
-    _nonlinear_nodal.show.insert(_nonlinear_nodal.show.end(), _scalar.show.begin(), _scalar.show.end());
-    _nonlinear_nodal.hide.insert(_nonlinear_nodal.hide.end(), _scalar.hide.begin(), _scalar.hide.end());
-    _nonlinear_nodal.available.insert(_nonlinear_nodal.available.end(), _scalar.available.begin(), _scalar.available.end());
+    _nodal_variables.show.insert(_nodal_variables.show.end(), _scalar.show.begin(), _scalar.show.end());
+    _nodal_variables.hide.insert(_nodal_variables.hide.end(), _scalar.hide.begin(), _scalar.hide.end());
+    _nodal_variables.available.insert(_nodal_variables.available.end(), _scalar.available.begin(), _scalar.available.end());
   }
 
   // Initialize the show/hide/output lists for each of the types of output
-  initOutputList(_nonlinear_nodal);
-  initOutputList(_nonlinear_elemental);
+  initOutputList(_nodal_variables);
+  initOutputList(_elemental_variables);
   initOutputList(_scalar);
   initOutputList(_postprocessor);
   initOutputList(_vector_postprocessor);
@@ -216,10 +216,10 @@ Output::init()
   // in only the nodal version of the scalar variable to be in the output file (Exodus supports this). The
   // same is true for elemental variables.
   if (isParamValid("output_elemental_variables") ? !getParam<bool>("output_elemental_variables") : true)
-    _nonlinear_elemental.output.clear();
+    _elemental_variables.output.clear();
 
   if (isParamValid("output_nodal_variables") ? !getParam<bool>("output_nodal_variables") : true)
-    _nonlinear_nodal.output.clear();
+    _nodal_variables.output.clear();
 
   if (isParamValid("output_scalar_variables") ? !getParam<bool>("output_scalar_variables") : true)
     _scalar.output.clear();
@@ -466,25 +466,25 @@ Output::outputSystemInformation()
 bool
 Output::hasNodalVariableOutput()
 {
-  return !_nonlinear_nodal.output.empty();
+  return !_nodal_variables.output.empty();
 }
 
 const std::vector<std::string> &
 Output::getNodalVariableOutput()
 {
-  return _nonlinear_nodal.output;
+  return _nodal_variables.output;
 }
 
 bool
 Output::hasElementalVariableOutput()
 {
-  return !_nonlinear_elemental.output.empty();
+  return !_elemental_variables.output.empty();
 }
 
 const std::vector<std::string> &
 Output::getElementalVariableOutput()
 {
-  return _nonlinear_elemental.output;
+  return _elemental_variables.output;
 }
 
 bool
@@ -570,87 +570,26 @@ Output::checkInterval()
   return output;
 }
 
-// Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
-template <typename warehouse_type, typename postprocessor_type>
-void
-initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_type & warehouse, bool & has_limited_pps, MooseApp & app, std::string & name, InputParameters & params)
-{
-  // Loop through each of the execution flags
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-  {
-    // Loop through each of the postprocessors
-    for (typename std::vector<postprocessor_type *>::const_iterator postprocessor_it = warehouse(Moose::exec_types[i])[0].all().begin();
-         postprocessor_it != warehouse(Moose::exec_types[i])[0].all().end();
-         ++postprocessor_it)
-    {
-      // Store the name in the available postprocessors
-      postprocessor_type *pps = *postprocessor_it;
-      output_data.available.push_back(pps->PPName());
-
-      // Extract the list of outputs
-      std::set<OutputName> pps_outputs = pps->getOutputs();
-
-      // Check that the outputs are valid
-      app.getOutputWarehouse().checkOutputs(pps_outputs);
-
-      /* Hide the postprocessor if:
-       *  (1) The "outputs" parameter is NOT empty and
-       *  (2) 'all' is NOT found in the 'outputs' parameter and
-       *  (3) 'none' is used within the 'outputs' parameter or
-       *  (4) this output object name is not found in the list of output names
-       */
-      if ( !pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end() &&
-           (pps_outputs.find("none") != pps_outputs.end() || pps_outputs.find(name) == pps_outputs.end()) )
-        output_data.hide.push_back(pps->PPName());
-
-      // Check that the output object allows postprocessor output, account for "all" keyword (if it is present assume "all" was desired)
-      if ( pps_outputs.find(name) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end() )
-      {
-        if (!params.isParamValid("output_postprocessors"))
-          mooseWarning("Postprocessor '" << pps->PPName()
-                       << "' has requested to be output by the '" << name
-                       << "' output, but postprocessor output is not support by this type of output object.");
-      }
-
-      // Set the flag state for postprocessors that utilize 'outputs' parameter
-      if (!pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end())
-        has_limited_pps = true;
-    }
-  }
-}
-
-
 void
 Output::initAvailableLists()
 {
-  /* This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
-     to produce an warning if postprocessor output is disabled*/
-  bool has_limited_pps = false;
-
-  /* This flag is set to true if any vector postprocessor has the 'outputs' parameter set, it is then used
-     to produce an warning if postprocessor output is disabled*/
-  bool has_limited_vector_pps = false;
-
-  {
-    // Get a reference to the storage of the postprocessors
-    ExecStore<PostprocessorWarehouse> & warehouse = _problem_ptr->getPostprocessorWarehouse();
-
-    initPostprocessorOrVectorPostprocessorLists<ExecStore<PostprocessorWarehouse>, Postprocessor>(_postprocessor, warehouse, has_limited_pps, _app, _name, _pars);
-  }
-
-  {
-    // Get a reference to the storage of the vector postprocessors
-    ExecStore<VectorPostprocessorWarehouse> & warehouse = _problem_ptr->getVectorPostprocessorWarehouse();
-
-    initPostprocessorOrVectorPostprocessorLists<ExecStore<VectorPostprocessorWarehouse>, VectorPostprocessor>(_vector_postprocessor, warehouse, has_limited_vector_pps, _app, _name, _pars);
-  }
-
+  // Initialize Postprocessor list
+  // This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
+  // to produce an warning if postprocessor output is disabled
+  ExecStore<PostprocessorWarehouse> & warehouse = _problem_ptr->getPostprocessorWarehouse();
+  bool has_limited_pps = initPostprocessorOrVectorPostprocessorLists<ExecStore<PostprocessorWarehouse>, Postprocessor>(_postprocessor, warehouse);
 
   // Produce the warning when 'outputs' is used, but postprocessor output is disable
   if (has_limited_pps && isParamValid("output_postprocessors") && getParam<bool>("output_postprocessors") == false)
     mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '" << _name << "' output object.");
 
-  // Produce the warning when 'outputs' is used, but postprocessor output is disable
+  // Initialize vector postprocessor list
+  // This flag is set to true if any vector postprocessor has the 'outputs' parameter set, it is then used
+  // to produce an warning if vector postprocessor output is disabled
+  ExecStore<VectorPostprocessorWarehouse> & vector_warehouse = _problem_ptr->getVectorPostprocessorWarehouse();
+  bool has_limited_vector_pps = initPostprocessorOrVectorPostprocessorLists<ExecStore<VectorPostprocessorWarehouse>, VectorPostprocessor>(_vector_postprocessor, vector_warehouse);
+
+  // Produce the warning when 'outputs' is used, but vector postprocessor output is disable
   if (has_limited_vector_pps && isParamValid("output_vector_postprocessors") && getParam<bool>("output_vector_postprocessors") == false)
     mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '" << _name << "' output object.");
 
@@ -665,9 +604,9 @@ Output::initAvailableLists()
       MooseVariable & var = _problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _nonlinear_elemental.available.push_back(*it);
+        _elemental_variables.available.push_back(*it);
       else
-        _nonlinear_nodal.available.push_back(*it);
+        _nodal_variables.available.push_back(*it);
     }
 
     else if (_problem_ptr->hasScalarVariable(*it))
@@ -690,9 +629,9 @@ Output::initShowHideLists(const std::vector<VariableName> & show, const std::vec
       MooseVariable & var = _problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _nonlinear_elemental.show.push_back(*it);
+        _elemental_variables.show.push_back(*it);
       else
-        _nonlinear_nodal.show.push_back(*it);
+        _nodal_variables.show.push_back(*it);
     }
     else if (_problem_ptr->hasScalarVariable(*it))
       _scalar.show.push_back(*it);
@@ -712,9 +651,9 @@ Output::initShowHideLists(const std::vector<VariableName> & show, const std::vec
       MooseVariable & var = _problem_ptr->getVariable(0, *it);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _nonlinear_elemental.hide.push_back(*it);
+        _elemental_variables.hide.push_back(*it);
       else
-        _nonlinear_nodal.hide.push_back(*it);
+        _nodal_variables.hide.push_back(*it);
     }
     else if (_problem_ptr->hasScalarVariable(*it))
       _scalar.hide.push_back(*it);
@@ -746,10 +685,10 @@ Output::initOutputList(OutputData & data)
   std::vector<std::string> & avail = data.available;
   std::vector<std::string> & output = data.output;
 
-  // Append the hide list from automatic material property output
-  std::vector<std::string> material_hide;
-  _app.getOutputWarehouse().buildMaterialOutputHideList(_name, material_hide);
-  hide.insert(hide.end(), material_hide.begin(), material_hide.end());
+  // Append the list from OutputInterface objects
+  std::set<std::string> interface_hide;
+  _app.getOutputWarehouse().buildInterfaceHideVariables(_name, interface_hide);
+  hide.insert(hide.end(), interface_hide.begin(), interface_hide.end());
 
   // Sort the vectors
   std::sort(avail.begin(), avail.end());

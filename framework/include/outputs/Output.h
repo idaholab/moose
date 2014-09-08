@@ -21,6 +21,7 @@
 #include "MooseTypes.h"
 #include "MooseMesh.h"
 #include "MeshChangedInterface.h"
+#include "MooseApp.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -479,6 +480,15 @@ private:
   void initShowHideLists(const std::vector<VariableName> & show, const std::vector<VariableName> & hide);
 
   /**
+   * Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
+   * @param output_data Reference to OutputData struct to initialize
+   * @param warehouse Reference to the postprocessor or vector postprocessor warehouse
+   */
+  template <typename warehouse_type, typename postprocessor_type>
+  bool
+  initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_type & warehouse);
+
+  /**
    * Initializes the list of items to be output using the available, show, and hide lists
    * @param data The OutputData to operate on
    */
@@ -528,11 +538,11 @@ private:
   /// Old time step delta
   Real & _dt_old;
 
-  /// Storage structure for the variable lists for elemental nonlinear variable output
-  OutputData _nonlinear_elemental;
+  /// Storage structure for the variable lists for elemental variable output (Variable and AuxVariable)
+  OutputData _elemental_variables;
 
-  /// Storage structure for the variable lists for nodal nonlinear variable output
-  OutputData _nonlinear_nodal;
+  /// Storage structure for the variable lists for nodal variable output (Variable and AuxVariable)
+  OutputData _nodal_variables;
 
   /// Storage structure for the variable lists for postprocessor output
   OutputData _postprocessor;
@@ -586,5 +596,50 @@ private:
   friend class Console;
   friend class TransientMultiApp;
 };
+
+// Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
+template <typename warehouse_type, typename postprocessor_type>
+bool
+Output::initPostprocessorOrVectorPostprocessorLists(OutputData & output_data, warehouse_type & warehouse)
+{
+  // Return value
+  bool has_limited_pps = false;
+
+  // Loop through each of the execution flags
+  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
+  {
+    // Loop through each of the postprocessors
+    for (typename std::vector<postprocessor_type *>::const_iterator postprocessor_it = warehouse(Moose::exec_types[i])[0].all().begin();
+         postprocessor_it != warehouse(Moose::exec_types[i])[0].all().end();
+         ++postprocessor_it)
+    {
+      // Store the name in the available postprocessors
+      postprocessor_type *pps = *postprocessor_it;
+      output_data.available.push_back(pps->PPName());
+
+      // Extract the list of outputs
+      std::set<OutputName> pps_outputs = pps->getOutputs();
+
+      // Check that the outputs lists are valid
+      _app.getOutputWarehouse().checkOutputs(pps_outputs);
+
+      // Check that the output object allows postprocessor output,
+      // account for "all" keyword (if it is present assume "all" was desired)
+      if ( pps_outputs.find(_name) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end() )
+      {
+        if (!isParamValid("output_postprocessors"))
+          mooseWarning("Postprocessor '" << pps->PPName()
+                       << "' has requested to be output by the '" << _name
+                       << "' output, but postprocessor output is not support by this type of output object.");
+      }
+
+      // Set the flag state for postprocessors that utilize 'outputs' parameter
+      if (!pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end())
+        has_limited_pps = true;
+    }
+  }
+
+  return has_limited_pps;
+}
 
 #endif /* OUTPUTBASE_H */

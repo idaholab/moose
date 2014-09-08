@@ -53,7 +53,6 @@
 []
 
 [Outputs]
-  file_base = out
   output_initial = true
   solution_history = true
   [./console]

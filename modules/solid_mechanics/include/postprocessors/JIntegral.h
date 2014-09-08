@@ -22,6 +22,7 @@ public:
 protected:
   virtual void initialSetup();
   virtual Real computeQpIntegral();
+  VariableValue & _scalar_q;
   /// The gradient of the scalar q field
   VariableGradient & _grad_of_scalar_q;
   const CrackFrontDefinition * const _crack_front_definition;
@@ -29,6 +30,8 @@ protected:
   const unsigned int _crack_front_node_index;
   bool _treat_as_2d;
   MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
+  MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
+
 };
 
 #endif //JINTEGRAL3D_H

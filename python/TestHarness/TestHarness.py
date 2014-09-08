@@ -116,6 +116,11 @@ class TestHarness:
     else:
       self.options.processingPBS = False
       for dirpath, dirnames, filenames in os.walk(os.getcwd(), followlinks=True):
+        # Prune submdule paths when searching for tests
+        if '.git' in filenames:
+          dirnames[:] = []
+
+        # Look for test directories that aren't in contrib folders
         if (self.test_match.search(dirpath) and "contrib" not in os.path.relpath(dirpath, os.getcwd())):
           for file in filenames:
             # set cluster_handle to be None initially (happens for each test)

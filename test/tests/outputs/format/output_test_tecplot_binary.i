@@ -53,15 +53,13 @@
 []
 
 [Outputs]
-  file_base = bin_out
   output_initial = true
   [./console]
     type = Console
     perf_log = true
     linear_residuals = true
   [../]
-
-  [./tecplot]
+  [./out]
     type = Tecplot
     binary = true
   [../]
