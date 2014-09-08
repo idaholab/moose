@@ -24,7 +24,7 @@ InputParameters validParams<OversampleOutput>()
 {
 
   // Get the parameters from the parent object
-  InputParameters params = validParams<PetscOutput>();
+  InputParameters params = validParams<FileOutput>();
 
   params.suppressParameter<bool>("output_vector_postprocessors");
 
@@ -41,7 +41,7 @@ InputParameters validParams<OversampleOutput>()
 }
 
 OversampleOutput::OversampleOutput(const std::string & name, InputParameters & parameters) :
-    PetscOutput(name, parameters),
+    FileOutput(name, parameters),
     _mesh_ptr(getParam<bool>("use_displaced") ?
               &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
     _oversample(getParam<bool>("oversample")),

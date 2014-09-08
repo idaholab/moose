@@ -16,7 +16,7 @@
 #define PETSCOUTPUT_H
 
 // MOOSE includes
-#include "FileOutput.h"
+#include "Output.h"
 
 // Forward declerations
 class PetscOutput;
@@ -27,7 +27,7 @@ InputParameters validParams<PetscOutput>();
 /**
  * Adds the ability to output on every nonlinear and/or linear residual
  */
-class PetscOutput : public FileOutput
+class PetscOutput : public Output
 {
 public:
 

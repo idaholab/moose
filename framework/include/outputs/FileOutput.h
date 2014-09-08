@@ -16,7 +16,7 @@
 #define FILEOUTPUT_H
 
 // MOOSE includes
-#include "Output.h"
+#include "PetscOutput.h"
 
 // Forward declerations
 class FileOutput;
@@ -29,7 +29,7 @@ InputParameters validParams<FileOutput>();
  *
  * @see Exodus
  */
-class FileOutput : public Output
+class FileOutput : public PetscOutput
 {
 public:
 

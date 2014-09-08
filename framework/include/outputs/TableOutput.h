@@ -16,7 +16,7 @@
 #define TABLESOUTPUTBASE_H
 
 // MOOSE includes
-#include "PetscOutput.h"
+#include "FileOutput.h"
 #include "FormattedTable.h"
 
 class TableOutput;
@@ -36,7 +36,7 @@ InputParameters validParams<TableOutput>();
  * @see CSV Console
  */
 class TableOutput :
-  public PetscOutput
+  public FileOutput
 {
 public:
 
