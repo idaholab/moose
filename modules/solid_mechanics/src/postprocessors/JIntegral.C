@@ -22,7 +22,9 @@ JIntegral::JIntegral(const std::string & name, InputParameters parameters):
     _crack_front_node_index(_has_crack_front_node_index ? getParam<unsigned int>("crack_front_node_index") : 0),
     _treat_as_2d(false),
     _Eshelby_tensor(getMaterialProperty<ColumnMajorMatrix>("Eshelby_tensor")),
-    _J_thermal_term_vec(getMaterialProperty<RealVectorValue>("J_thermal_term_vec"))
+    _J_thermal_term_vec(hasMaterialProperty<RealVectorValue>("J_thermal_term_vec")?
+                        &getMaterialProperty<RealVectorValue>("J_thermal_term_vec"):
+                        NULL)
 {
 }
 
@@ -64,14 +66,13 @@ JIntegral::computeQpIntegral()
 
   Real eq = _Eshelby_tensor[_qp].doubleContraction(grad_of_vector_q);
 
-  //Thermal component of J -- Start
+  //Thermal component
   Real eq_thermal = 0.0;
-
-  for (unsigned int i = 0; i < 3; i++)
-    eq_thermal += crack_direction(i)*_scalar_q[_qp]*_J_thermal_term_vec[_qp](i);
-
-  //End
-
+  if (_J_thermal_term_vec)
+  {
+    for (unsigned int i = 0; i < 3; i++)
+      eq_thermal += crack_direction(i)*_scalar_q[_qp]*(*_J_thermal_term_vec)[_qp](i);
+  }
 
   Real q_avg_seg = 1.0;
   if (!_crack_front_definition->treatAs2D())
