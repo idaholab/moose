@@ -33,7 +33,9 @@ void
 EBSDAccessFunctorsTest::pointData()
 {
   EBSDAccessFunctors::EBSDPointData d;
-  EBSDAccessFunctors::EBSDPointDataFunctor * v;
+  EBSDAccessFunctors::EBSDPointDataFunctor * v1, * v2;
+
+  MooseEnum field = EBSDAccessFunctors::getPointDataFieldType();
 
   // we initialize this data sctructure with varying data and check if it is read correctly each time
   const double offset = 17.3232;
@@ -48,28 +50,62 @@ EBSDAccessFunctorsTest::pointData()
     d.grain = (unsigned int)(i * offset) + 7;
     d.op    = (unsigned int)(i * offset) + 9;
 
-    // check functors
-    v = new EBSDAccessFunctors::EBSDPointDataPhi1;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), d.phi1, 1e-9 );
-    delete v;
-    v = new EBSDAccessFunctors::EBSDPointDataPhi;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), d.phi, 1e-9 );
-    delete v;
-    v = new EBSDAccessFunctors::EBSDPointDataPhi2;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), d.phi2, 1e-9 );
-    delete v;
-    v = new EBSDAccessFunctors::EBSDPointDataPhase;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), d.phase, 1e-9 );
-    delete v;
-    v = new EBSDAccessFunctors::EBSDPointDataSymmetry;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), d.symmetry, 1e-9 );
-    delete v;
-    v = new EBSDAccessFunctors::EBSDPointDataGrain;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), Real(d.grain), 1e-9 );
-    delete v;
-    v = new EBSDAccessFunctors::EBSDPointDataOp;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), Real(d.op), 1e-9 );
-    delete v;
+    // check functors (both a functor constructed by hand and one built by the factory method)
+    v1 = new EBSDAccessFunctors::EBSDPointDataPhi1;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phi1, 1e-9 );
+    field = "phi1";
+    v2 = EBSDAccessFunctors::getPointDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
+
+    v1 = new EBSDAccessFunctors::EBSDPointDataPhi;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phi, 1e-9 );
+    field = "phi";
+    v2 = EBSDAccessFunctors::getPointDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
+
+    v1 = new EBSDAccessFunctors::EBSDPointDataPhi2;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phi2, 1e-9 );
+    field = "phi2";
+    v2 = EBSDAccessFunctors::getPointDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
+
+    v1 = new EBSDAccessFunctors::EBSDPointDataPhase;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phase, 1e-9 );
+    field = "phase";
+    v2 = EBSDAccessFunctors::getPointDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
+
+    v1 = new EBSDAccessFunctors::EBSDPointDataSymmetry;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.symmetry, 1e-9 );
+    field = "symmetry";
+    v2 = EBSDAccessFunctors::getPointDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
+
+    v1 = new EBSDAccessFunctors::EBSDPointDataGrain;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), Real(d.grain), 1e-9 );
+    field = "grain";
+    v2 = EBSDAccessFunctors::getPointDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
+
+    v1 = new EBSDAccessFunctors::EBSDPointDataOp;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), Real(d.op), 1e-9 );
+    field = "op";
+    v2 = EBSDAccessFunctors::getPointDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
   }
 }
 
@@ -77,7 +113,9 @@ void
 EBSDAccessFunctorsTest::avgData()
 {
   EBSDAccessFunctors::EBSDAvgData d;
-  EBSDAccessFunctors::EBSDAvgDataFunctor * v;
+  EBSDAccessFunctors::EBSDAvgDataFunctor * v1, * v2;
+
+  MooseEnum field = EBSDAccessFunctors::getAvgDataFieldType();
 
   // we initialize this data sctructure with varying data and check if it is read correctly each time
   const double offset = 17.3232;
@@ -91,20 +129,44 @@ EBSDAccessFunctorsTest::avgData()
     d.symmetry = i * offset + 4.9;
 
     // check functors
-    v = new EBSDAccessFunctors::EBSDAvgDataPhi1;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), d.phi1, 1e-9 );
-    delete v;
-    v = new EBSDAccessFunctors::EBSDAvgDataPhi;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), d.phi, 1e-9 );
-    delete v;
-    v = new EBSDAccessFunctors::EBSDAvgDataPhi2;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), d.phi2, 1e-9 );
-    delete v;
-    v = new EBSDAccessFunctors::EBSDAvgDataPhase;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), d.phase, 1e-9 );
-    delete v;
-    v = new EBSDAccessFunctors::EBSDAvgDataSymmetry;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v)(d), d.symmetry, 1e-9 );
-    delete v;
+    v1 = new EBSDAccessFunctors::EBSDAvgDataPhi1;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phi1, 1e-9 );
+    field = "phi1";
+    v2 = EBSDAccessFunctors::getAvgDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
+
+    v1 = new EBSDAccessFunctors::EBSDAvgDataPhi;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phi, 1e-9 );
+    field = "phi";
+    v2 = EBSDAccessFunctors::getAvgDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
+
+    v1 = new EBSDAccessFunctors::EBSDAvgDataPhi2;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phi2, 1e-9 );
+    field = "phi2";
+    v2 = EBSDAccessFunctors::getAvgDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
+
+    v1 = new EBSDAccessFunctors::EBSDAvgDataPhase;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.phase, 1e-9 );
+    field = "phase";
+    v2 = EBSDAccessFunctors::getAvgDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
+
+    v1 = new EBSDAccessFunctors::EBSDAvgDataSymmetry;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v1)(d), d.symmetry, 1e-9 );
+    field = "symmetry";
+    v2 = EBSDAccessFunctors::getAvgDataAccessFunctor(field);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL( (*v2)(d), (*v1)(d), 1e-9 );
+    delete v2;
+    delete v1;
   }
 }
