@@ -41,9 +41,9 @@ public:
   };
 
   /// Factory function to return a point functor specified by name
-  EBSDPointDataFunctor * getPointDataAccessFunctor(const MooseEnum & field_name) const;
+  static EBSDPointDataFunctor * getPointDataAccessFunctor(const MooseEnum & field_name);
   /// Factory function to return a average functor specified by name
-  EBSDAvgDataFunctor * getAvgDataAccessFunctor(const MooseEnum & field_name) const;
+  static EBSDAvgDataFunctor * getAvgDataAccessFunctor(const MooseEnum & field_name);
 
   // List of specialized access functors (one for each field in EBSDPointData)
   struct EBSDPointDataPhi1 : EBSDPointDataFunctor {

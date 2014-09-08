@@ -13,7 +13,7 @@ EBSDAccessFunctors::getAvgDataFieldType()
 }
 
 EBSDAccessFunctors::EBSDPointDataFunctor *
-EBSDAccessFunctors::getPointDataAccessFunctor(const MooseEnum & field_name) const
+EBSDAccessFunctors::getPointDataAccessFunctor(const MooseEnum & field_name)
 {
   switch (field_name)
   {
@@ -37,7 +37,7 @@ EBSDAccessFunctors::getPointDataAccessFunctor(const MooseEnum & field_name) cons
 }
 
 EBSDAccessFunctors::EBSDAvgDataFunctor *
-EBSDAccessFunctors::getAvgDataAccessFunctor(const MooseEnum & field_name) const
+EBSDAccessFunctors::getAvgDataAccessFunctor(const MooseEnum & field_name)
 {
   switch (field_name)
   {
