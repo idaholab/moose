@@ -6,8 +6,7 @@ InputParameters validParams<EBSDReader>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addRequiredParam<FileName>("filename", "The name of the file containing the EBSD data");
-  params.addRequiredParam<unsigned int>("crys_num", "Specifies the number of order paraameters to create");
-  params.addRequiredParam<unsigned int>("grain_num", "Specifies the number of grains in the reconstructed dataset");
+  params.addRequiredParam<unsigned int>("crys_num", "Specifies the number of order parameters to create");
   return params;
 }
 
@@ -17,7 +16,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     _nl(_fe_problem.getNonlinearSystem()),
     _filename(getParam<FileName>("filename")),
     _op_num(getParam<unsigned int>("crys_num")),
-    _grain_num(getParam<unsigned int>("grain_num")),
+    _grain_num(0),
     _mesh_dimension(_mesh.dimension()),
     _nx(0),
     _ny(0),
@@ -125,6 +124,9 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
         iss >> d.phi1 >> d.phi >> d.phi2 >> x >> y >> z >> d.grain >> d.phase >> d.symmetry;
         d.p = Point(x,y,z);
 
+        // determine number of grains in the dataset
+        if (d.grain > _grain_num) _grain_num = d.grain;
+
         // The Order parameter is not yet assigned. We initialize it to zero in order not to have undefined values that break the testing.
         d.op = 0;
 
@@ -145,6 +147,8 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
   }
   stream_in.close();
 
+  // total number of grains is one higher than the maximum grain id
+  _grain_num += 1;
 
   // Resize the variables
   _avg_data.resize(_grain_num);
