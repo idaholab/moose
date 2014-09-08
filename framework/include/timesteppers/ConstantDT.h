@@ -30,7 +30,10 @@ public:
 protected:
   virtual Real computeInitialDT();
   virtual Real computeDT();
-};
 
+private:
+  const Real _constant_dt;
+  const Real _growth_factor;
+};
 
 #endif /* CONSTANTDT_H */
