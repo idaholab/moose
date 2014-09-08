@@ -22,15 +22,7 @@ InputParameters validParams<SolutionHistory>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<FileOutput>();
-
-  // Suppress unused parameters
-  params.suppressParameter<unsigned int>("padding");
-  params.suppressParameter<bool>("output_nodal_variables");
-  params.suppressParameter<bool>("output_elemental_variables");
-  params.suppressParameter<bool>("output_scalar_variables");
-  params.suppressParameter<bool>("output_postprocessors");
-  params.suppressParameter<bool>("output_vector_postprocessors");
-  params.suppressParameter<bool>("output_input");
+  params += Output::disableOutputTypes();
 
   // Return the parameters
   return params;
@@ -66,34 +58,4 @@ SolutionHistory::output()
     slh_file << " " << nl_sys._current_l_its[i];
 
   slh_file << std::endl;
-}
-
-void
-SolutionHistory::outputNodalVariables()
-{
-  mooseError("Individual output of nodal variables is not supported for solution hisotry output");
-}
-
-void
-SolutionHistory::outputElementalVariables()
-{
-  mooseError("Individual output of elemental variables is not supported for solution history output");
-}
-
-void
-SolutionHistory::outputPostprocessors()
-{
-  mooseError("Individual output of postprocessors is not supported for solution history output");
-}
-
-void
-SolutionHistory::outputVectorPostprocessors()
-{
-  mooseError("Individual output of VectorPostprocessors is not supported for solution history output");
-}
-
-void
-SolutionHistory::outputScalarVariables()
-{
-  mooseError("Individual output of scalars is not supported for solution history output");
 }

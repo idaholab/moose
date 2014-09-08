@@ -26,18 +26,7 @@ template<>
 InputParameters validParams<MaterialPropertyDebugOutput>()
 {
   InputParameters params = validParams<PetscOutput>();
-
-  // Suppress unnecessary parameters
-  params.suppressParameter<bool>("output_scalar_variables");
-  params.suppressParameter<bool>("output_postprocessors");
-  params.suppressParameter<bool>("output_vector_postprocessors");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("sequence");
-  params.suppressParameter<bool>("elemental_as_nodal");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("output_input");
-  params.suppressParameter<bool>("output_system_information");
-  params.suppressParameter<bool>("file_base");
+  params += Output::disableOutputTypes();
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
   params.addParam<bool>("show_var_residual_norms", false, "Print the residual norms of the individual solution variables at each nonlinear iteration");

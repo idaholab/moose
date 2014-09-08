@@ -26,18 +26,7 @@ template<>
 InputParameters validParams<VariableResidualNormsDebugOutput>()
 {
   InputParameters params = validParams<PetscOutput>();
-
-  // Suppress unnecessary parameters
-  params.suppressParameter<bool>("output_scalar_variables");
-  params.suppressParameter<bool>("output_postprocessors");
-  params.suppressParameter<bool>("output_vector_postprocessors");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("sequence");
-  params.suppressParameter<bool>("elemental_as_nodal");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("output_input");
-  params.suppressParameter<bool>("output_system_information");
-  params.suppressParameter<bool>("file_base");
+  params += Output::disableOutputTypes();
   return params;
 }
 

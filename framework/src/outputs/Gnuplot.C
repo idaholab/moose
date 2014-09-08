@@ -25,11 +25,6 @@ InputParameters validParams<Gnuplot>()
   MooseEnum ext("png ps gif", "png", true);
   params.addParam<MooseEnum>("extension", ext, "GNU plot file extension");
 
-  // Suppress unused parameters
-  params.suppressParameter<unsigned int>("padding");
-  params.suppressParameter<bool>("output_input");
-  params.suppressParameter<bool>("output_vector_postprocessors");
-
   return params;
 }
 

@@ -32,13 +32,7 @@ InputParameters validParams<TableOutput>()
 
   // Base class parameters
   InputParameters params = validParams<FileOutput>();
-
-  // Suppressing the output of nodal and elemental variables disables this type of output
-  params.suppressParameter<bool>("output_elemental_variables");
-  params.suppressParameter<bool>("output_nodal_variables");
-  params.suppressParameter<bool>("elemental_as_nodal");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("output_input");
+  params += Output::enableOutputTypes("postprocessor scalar");
 
   // Add option for appending file on restart
   params.addParam<bool>("append_restart", false, "Append existing file on restart");

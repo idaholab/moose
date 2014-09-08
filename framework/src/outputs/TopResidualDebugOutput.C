@@ -26,18 +26,7 @@ template<>
 InputParameters validParams<TopResidualDebugOutput>()
 {
   InputParameters params = validParams<PetscOutput>();
-
-  // Suppress unnecessary parameters
-  params.suppressParameter<bool>("output_scalar_variables");
-  params.suppressParameter<bool>("output_postprocessors");
-  params.suppressParameter<bool>("output_vector_postprocessors");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("sequence");
-  params.suppressParameter<bool>("elemental_as_nodal");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("output_input");
-  params.suppressParameter<bool>("output_system_information");
-  params.suppressParameter<bool>("file_base");
+  params += Output::disableOutputTypes();
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
   params.addParam<unsigned int>("num_residuals", 0, "The number of top residuals to print out (0 = no output)");

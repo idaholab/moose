@@ -95,7 +95,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
 
     // Add the material property names from the output object parameters to the list of properties to output
     InputParameters & params = action->getObjectParams();
-    if (params.get<bool>("output_material_properties"))
+    if (params.isParamValid("output_material_properties") && params.get<bool>("output_material_properties"))
     {
       outputs_has_properties = true;
       std::vector<std::string> prop_names = params.get<std::vector<std::string> >("show_material_properties");

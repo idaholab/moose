@@ -22,6 +22,7 @@ InputParameters validParams<CSV>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
+  params += Output::enableOutputTypes("scalar postprocessor vector_postprocessor");
 
   // Options for aligning csv output with whitespace padding
   params.addParam<bool>("align", false, "Align the outputted csv data by padding the numbers with trailing whitespace");
@@ -30,8 +31,8 @@ InputParameters validParams<CSV>()
 
   // Suppress unused parameters
   params.suppressParameter<unsigned int>("padding");
-  params.suppressParameter<bool>("output_input");
 
+  // Done
   return params;
 }
 
