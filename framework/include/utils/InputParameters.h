@@ -365,14 +365,21 @@ public:
    * Methods returning iterators to the coupled variables names stored in this
    * InputParameters object
    */
-  inline std::set<std::string>::const_iterator coupledVarsBegin()
+  inline std::set<std::string>::const_iterator coupledVarsBegin() const
   {
     return _coupled_vars.begin();
   }
-  inline std::set<std::string>::const_iterator coupledVarsEnd()
+  inline std::set<std::string>::const_iterator coupledVarsEnd() const
   {
     return _coupled_vars.end();
   }
+
+  /**
+   * Return whether or not the coupled variable exists
+   * @param coupling_name The name of the coupled variable to test for
+   * @return True if the variable exists in the coupled variables for this InputParameters object
+   */
+  bool hasCoupledValue(const std::string & coupling_name) const;
 
   /**
    * Return whether or not the requested parameter has a default coupled value.

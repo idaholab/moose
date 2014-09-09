@@ -310,6 +310,12 @@ InputParameters::checkParams(const std::string &prefix)
 }
 
 bool
+InputParameters::hasCoupledValue(const std::string & coupling_name) const
+{
+  return _coupled_vars.find(coupling_name) != _coupled_vars.end();
+}
+
+bool
 InputParameters::hasDefaultCoupledValue(const std::string & coupling_name) const
 {
   return _default_coupled_value.find(coupling_name) != _default_coupled_value.end();
@@ -464,6 +470,20 @@ InputParameters::applyParameters(const InputParameters & common)
       delete _values[common_name];
       _values[common_name] = it->second->clone();
       set_attributes(common_name, false);
+    }
+  }
+
+  // Loop through the coupled variables
+  for (std::set<std::string>::const_iterator it = common.coupledVarsBegin(); it != common.coupledVarsEnd(); ++it)
+  {
+    // If the local parameters has a coupled variable, populate it with the value from the common parameters
+    const std::string var_name = *it;
+    if (hasCoupledValue(var_name))
+    {
+      if (common.hasDefaultCoupledValue(var_name))
+        addCoupledVar(var_name, common.defaultCoupledValue(var_name), common.getDocString(var_name));
+      else
+        addCoupledVar(var_name, common.getDocString(var_name));
     }
   }
 }
