@@ -9,6 +9,7 @@ InputParameters validParams<EBSDMesh>()
 
   // suppress parameters
   params.suppressParameter<MooseEnum>("dim");
+  params.set<MooseEnum>("dim") = MooseEnum("1=1 2 3", "1");
   params.suppressParameter<int>("nx");
   params.suppressParameter<int>("ny");
   params.suppressParameter<int>("nz");
@@ -126,6 +127,7 @@ EBSDMesh::buildMesh()
   readEBSDHeader();
 
   unsigned int uniform_refine = getParam<unsigned int>("uniform_refine");
+  _dim = (_geometry.dim == 1 ? "1" : (_geometry.dim == 2 ? "2" : "3"));
 
   unsigned int nr[3];
   nr[0] = _geometry.n[0];
@@ -153,9 +155,6 @@ EBSDMesh::buildMesh()
   _nx = nr[0];
   _ny = nr[1];
   _nz = nr[2];
-
-  _dim = (_geometry.dim == 1 ? "1" : (_geometry.dim == 2 ? "2" : "3"));
-
 
   GeneratedMesh::buildMesh();
 }
