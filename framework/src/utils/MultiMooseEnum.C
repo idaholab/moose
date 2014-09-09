@@ -196,13 +196,11 @@ template<typename InputIterator>
 void
 MultiMooseEnum::remove(InputIterator first, InputIterator last)
 {
-  // Create a set of the current values for the enumeration
-  std::set<std::string> current(_current_names.begin(), _current_names.end());
-
   // Create a new list of enumerations by striping out the supplied values
+  std::vector<std::string> current = _current_names;
   for (InputIterator it = first; it != last; ++it)
   {
-    std::set<std::string>::const_iterator found = current.find(*it);
+    std::vector<std::string>::iterator found = std::find(current.begin(), current.end(), *it);
     if (found != current.end())
       current.erase(found);
   }
