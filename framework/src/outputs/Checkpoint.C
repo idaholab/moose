@@ -29,6 +29,7 @@ InputParameters validParams<Checkpoint>()
 {
   // Get the parameters from the base classes
   InputParameters params = validParams<FileOutput>();
+  params += Output::disableOutputTypes(); // Checkpoint acts like a honey badger, it does what it wants; disable individual controls
 
   // Typical checkpoint options
   params.addParam<unsigned int>("num_files", 2, "Number of the restart files to save");
@@ -37,14 +38,6 @@ InputParameters validParams<Checkpoint>()
   // Advanced settings
   params.addParam<bool>("binary", true, "Toggle the output of binary files");
   params.addParamNamesToGroup("binary", "Advanced");
-
-  // Checkpoint files always output everything, so suppress the toggles
-  params.suppressParameter<bool>("output_nodal_variables");
-  params.suppressParameter<bool>("output_elemental_variables");
-  params.suppressParameter<bool>("output_scalar_variables");
-  params.suppressParameter<bool>("output_postprocessors");
-  params.suppressParameter<bool>("output_vector_postprocessors");
-
   return params;
 }
 

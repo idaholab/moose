@@ -209,8 +209,8 @@
     type = Console
     perf_log = true
   [../]
-  [./debug]
-    type = DebugOutput
-    show_var_residual_norms = true
-  [../]
+[]
+
+[Debug]
+  show_var_residual_norms = true
 []

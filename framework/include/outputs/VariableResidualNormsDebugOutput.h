@@ -12,37 +12,39 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DEBUGOUTPUT_H
-#define DEBUGOUTPUT_H
+#ifndef VARIABLERESIDUALNORMSDEBUGOUTPUT_H
+#define VARIABLERESIDUALNORMSDEBUGOUTPUT_H
 
 // MOOSE includes
 #include "PetscOutput.h"
 #include "FEProblem.h"
 
 // Forward declerations
-class DebugOutput;
+class VariableResidualNormsDebugOutput;
 
 template<>
-InputParameters validParams<DebugOutput>();
+InputParameters validParams<VariableResidualNormsDebugOutput>();
 
 /**
+ * A class for producing various debug related outputs
  *
+ * This class may be used from inside the [Outputs] block or via the [Debug] block (preferred)
  */
-class DebugOutput : public PetscOutput
+class VariableResidualNormsDebugOutput : public PetscOutput
 {
 public:
 
   /**
    * Class constructor
-   * @param name
-   * @param parameters
+   * @param name Output object name
+   * @param parameters Object input parameters
    */
-  DebugOutput(const std::string & name, InputParameters & parameters);
+  VariableResidualNormsDebugOutput(const std::string & name, InputParameters & parameters);
 
   /**
    * Class destructor
    */
-  virtual ~DebugOutput();
+  virtual ~VariableResidualNormsDebugOutput();
 
 protected:
 
@@ -51,23 +53,9 @@ protected:
    */
   virtual void output();
 
-  //@{
-  /**
-   * Individual component output is not supported for DebugOutput
-   */
-  std::string filename();
-  virtual void outputNodalVariables();
-  virtual void outputElementalVariables();
-  virtual void outputPostprocessors();
-  virtual void outputVectorPostprocessors();
-  virtual void outputScalarVariables();
-  //@}
-
-  /// Flag for outputting variable norms
-  bool _show_var_residual_norms;
-
-  // Reference to libMesh system
+  /// Reference to libMesh system
   TransientNonlinearImplicitSystem & _sys;
+
 };
 
-#endif //DEBUGOUTPUT_H
+#endif // VARIABLERESIDUALNORMSDEBUGOUTPUT_H

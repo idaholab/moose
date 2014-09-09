@@ -109,6 +109,26 @@ MultiMooseEnum::operator=(const std::set<std::string> & names)
 }
 
 void
+MultiMooseEnum::erase(const std::string & names)
+{
+  std::vector<std::string> names_vector;
+  MooseUtils::tokenize(names, names_vector, 1, " ");
+  remove(names_vector.begin(), names_vector.end());
+}
+
+void
+MultiMooseEnum::erase(const std::vector<std::string> & names)
+{
+  remove(names.begin(), names.end());
+}
+
+void
+MultiMooseEnum::erase(const std::set<std::string> & names)
+{
+  remove(names.begin(), names.end());
+}
+
+void
 MultiMooseEnum::push_back(const std::string & names)
 {
   std::vector<std::string> names_vector;
@@ -170,6 +190,23 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
       _current_ids.push_back(_name_to_id[upper]);
   }
   return *this;
+}
+
+template<typename InputIterator>
+void
+MultiMooseEnum::remove(InputIterator first, InputIterator last)
+{
+  // Create a new list of enumerations by striping out the supplied values
+  std::vector<std::string> current = _current_names;
+  for (InputIterator it = first; it != last; ++it)
+  {
+    std::vector<std::string>::iterator found = std::find(current.begin(), current.end(), *it);
+    if (found != current.end())
+      current.erase(found);
+  }
+
+  // Build the new enumeration
+  assign(current.begin(), current.end(), false);
 }
 
 void

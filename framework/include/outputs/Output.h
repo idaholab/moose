@@ -231,6 +231,49 @@ public:
    */
   virtual int timeStep();
 
+  /**
+   * A method controlling which types of outputs are supported by the Output object
+   * @param names (optional) Space seperated of output type names that are supported by this Output object,
+   *              if this is ommited all outputs types will be supported. The list of aviable output
+   *              types is given below.
+   *
+   * Output objects vary widely in what type of outputs they support (e.g., elemental variables,
+   * or postprocessor data). This method provides the user a means for controlling the types of
+   * outputs that are supported for the object being created. This is a static method that MUST
+   * be used to append parameters inside the objects validParams function.
+   *
+   * List of Output Types and Method Names
+   * The output system is designed around overloading virtual method calls to output the
+   * various output types, the following list gives the name of the output type and the associated
+   * virtual method that should be overloaded to perform the output in the object being created.
+   *
+   * Type                 virtual Method Name
+   * -------------------- ----------------------------
+   * nodal                outputNodalVariables()
+   * elemental            outputElementalVariables()
+   * scalar               outputScalarVariables()
+   * postprocessor        outputPostprocessors()
+   * vector_postprocessor outputVectorPostprocessors()
+   * input                outputInput()
+   * system_information   outputSystemInformation()
+   *
+   * @see CSV Exodus
+   *
+   */
+  static InputParameters enableOutputTypes(const std::string & names = std::string());
+
+  /**
+   * A method for disabling all individual output type control
+   * @param names (optional) Space seperated of output type names that are un-supported by this Output object,
+   *              if this is ommited all outputs types will be un-supported.
+   *
+   * This method acts in the opposite manner for Output::enableOutputTypes().
+   *
+   * @see Output::enableOutputTypes() Checkpoint
+   */
+  static InputParameters disableOutputTypes(const std::string & names = std::string());
+
+
 protected:
 
   /**
@@ -248,34 +291,34 @@ protected:
    * The child class must define this method to output the nonlinear variables as desired
    * @see Exodus::outputNodalVariables
    */
-  virtual void outputNodalVariables() = 0;
+  virtual void outputNodalVariables();
 
   /**
    * Performs output of elemental nonlinear variables
    * The child class must define this method to output the nonlinear variables as desired
    * @see Exodus::outputElementalVariables
    */
-  virtual void outputElementalVariables() = 0;
+  virtual void outputElementalVariables();
 
   /**
    * Performs output of scalar variables
    * The child class must define this method to output the scalar variables as desired
    * @see Exodus::outputScalarVariables
    */
-  virtual void outputScalarVariables() = 0;
+  virtual void outputScalarVariables();
 
   /**
    * Performs output of postprocessors
    * The child class must define this method to output the postprocessors as desired
    * @see Exodus::outputPostprocessors
    */
-  virtual void outputPostprocessors() = 0;
+  virtual void outputPostprocessors();
 
   /**
    * Performs output of VectorPostprocessors
    * The child class must define this method to output the VectorPostprocessors as desired
    */
-  virtual void outputVectorPostprocessors() = 0;
+  virtual void outputVectorPostprocessors();
 
   /**
    * Initial setup function that is called prior to any output
@@ -351,18 +394,6 @@ protected:
   /// Flag for output the input file
   bool _output_input;
 
-  /// Toggle for controlling the printing of nonlinear residuals
-  bool _output_nonlinear;
-
-  /// Toggle for controlling the printing of linear residuals
-  bool _output_linear;
-
-  /// Flag for outputting elemental variables as nodal
-  bool _elemental_as_nodal;
-
-  /// Flag for outputting scalar AuxVaraiables as nodal
-  bool _scalar_as_nodal;
-
   /// System information output flag
   bool _system_information;
 
@@ -374,6 +405,9 @@ protected:
 
   /// Flag for disabling/enabling output
   bool _allow_output;
+
+  /// Flag determining if the output system is on the initial output step (i.e., output control with output_initial parameter)
+  bool _on_initial;
 
 private:
 
@@ -472,6 +506,23 @@ private:
    */
   bool onInitial();
 
+  /**
+   * Method for defining the available parameters based on the types of outputs
+   * @param params The InputParamters object to add parameters to
+   * @param types The types of output this object should support (see Output::enableOutputTypes)
+   *
+   * Each output object may have a varying set of supported output types (e.g., elemental
+   * variables may not be supported). This private, static method populates the InputParameters
+   * object with the correct parameters based on the items contained in the MultiMooseEnum.
+   *
+   * This method is private, users should utlize the Output::enableOutputTypes method
+   *
+   * @see Output::enableOutputTypes
+   */
+  static void addValidParams(InputParameters & params, const MultiMooseEnum & types);
+
+  static MultiMooseEnum getOutputTypes();
+
   /// The current time for output purposes
   Real & _time;
 
@@ -536,9 +587,6 @@ private:
 
   /// True if init() has been called
   bool _initialized;
-
-  /// Flag determining if the output system is on the initial output step (i.e., output control with output_initial parameter)
-  bool _on_initial;
 
   // Allow complete access
   friend class OutputWarehouse;

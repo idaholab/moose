@@ -357,7 +357,9 @@
 #include "Tecplot.h"
 #include "Gnuplot.h"
 #include "SolutionHistory.h"
-#include "DebugOutput.h"
+#include "MaterialPropertyDebugOutput.h"
+#include "VariableResidualNormsDebugOutput.h"
+#include "TopResidualDebugOutput.h"
 
 namespace Moose {
 
@@ -652,7 +654,9 @@ registerObjects(Factory & factory)
   registerOutput(Tecplot);
   registerOutput(Gnuplot);
   registerOutput(SolutionHistory);
-  registerOutput(DebugOutput);
+  registerOutput(MaterialPropertyDebugOutput);
+  registerOutput(VariableResidualNormsDebugOutput);
+  registerOutput(TopResidualDebugOutput);
 
   registered = true;
 }

@@ -25,6 +25,7 @@
 #include "FileMesh.h"
 #include "CoupledExecutioner.h"
 #include "VectorPostprocessor.h"
+#include "MooseUtils.h"
 
 template<>
 InputParameters validParams<Output>()
@@ -32,30 +33,16 @@ InputParameters validParams<Output>()
   // Get the parameters from the parent object
   InputParameters params = validParams<MooseObject>();
 
-  // General options
-  params.addParam<bool>("output_input", false, "Output the input file");
-  params.addParam<bool>("output_system_information", true, "Toggles the display of the system information prior to the solve");
 
   // Hide/show variable output options
   params.addParam<std::vector<VariableName> >("hide", "A list of the variables and postprocessors that should NOT be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
   params.addParam<std::vector<VariableName> >("show", "A list of the variables and postprocessors that should be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
-
-  // Enable/disable output types
-  params.addParam<bool>("output_nodal_variables", true, "Enable/disable the output of nodal variables");
-  params.addParam<bool>("output_elemental_variables", true, "Enable/disable the output of elemental variables");
-  params.addParam<bool>("output_scalar_variables", true, "Enable/disable the output of scalar variables");
-  params.addParam<bool>("output_postprocessors", true, "Enable/disable the output of postprocessors");
-  params.addParam<bool>("output_vector_postprocessors", true, "Enable/disable the output of VectorPostprocessors");
 
   // Displaced Mesh options
   params.addParam<bool>("use_displaced", false, "Enable/disable the use of the displaced mesh for outputting");
 
   // Enable sequential file output (do not set default, the use_displace criteria relies on isParamValid, see Constructor)
   params.addParam<bool>("sequence", "Enable/disable sequential file output (enable by default when 'use_displace = true', otherwise defaults to false");
-
-  // Control for outputting elemental variables as nodal variables
-  params.addParam<bool>("elemental_as_nodal", false, "Output elemental variables as nodal");
-  params.addParam<bool>("scalar_as_nodal", false, "Output scalar variables as nodal");
 
   // Output intervals and timing
   params.addParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file");
@@ -73,13 +60,7 @@ InputParameters validParams<Output>()
   params.addParamNamesToGroup("time_tolerance interval output_initial output_final sync_times sync_only start_time end_time ", "Timing");
 
   // 'Variables' Group
-  params.addParamNamesToGroup("hide show output_nonlinear_variables output_postprocessors output_vector_postprocessors output_scalar_variables output_elemental_variables output_nodal_variables scalar_as_nodal elemental_as_nodal", "Variables");
-
-  // 'Materials' group
-  params.addParam<bool>("output_material_properties", false, "Flag indicating if material properties should be output");
-  params.addParam<std::vector<std::string> >("show_material_properties", "List of materialproperties that should be written to the output");
-  params.addParamNamesToGroup("output_material_properties show_material_properties", "Materials");
-  params.addParamNamesToGroup("show_material_properties", "Materials");
+  params.addParamNamesToGroup("hide show", "Variables");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_built_by_moose", false);
@@ -88,6 +69,58 @@ InputParameters validParams<Output>()
   params.registerBase("Output");
   return params;
 }
+
+MultiMooseEnum
+Output::getOutputTypes()
+{
+  return MultiMooseEnum("nodal=0 elemental=1 scalar=2 postprocessor=3 vector_postprocessor=4 input=5 system_information=6");
+}
+
+InputParameters
+Output::enableOutputTypes(const std::string & names)
+{
+  // The parameters object that will be returned
+  InputParameters params = emptyInputParameters();
+
+  // Set private parameter indicating that this method was called
+  params.addPrivateParam("_output_valid_params_was_called", true);
+
+  // Get the MultiEnum of output types
+  MultiMooseEnum output_types = Output::getOutputTypes();
+
+  // Update the enum of output types to append
+  if (names.empty())
+    output_types = output_types.getRawNames();
+  else
+    output_types = names;
+
+  // Add the parameters and return them
+  Output::addValidParams(params, output_types);
+  return params;
+}
+
+InputParameters
+Output::disableOutputTypes(const std::string & names)
+{
+  // The parameters object that will be returned
+  InputParameters params = emptyInputParameters();
+
+  // Set private parameter indicating that this method was called
+  params.addPrivateParam("_output_valid_params_was_called", true);
+
+  // If names is empty() don't add anything
+  if (!names.empty())
+  {
+    // Define the MultMooseEnum with the desired output types, by removing the type provided
+    MultiMooseEnum output_types = Output::getOutputTypes();
+    output_types = output_types.getRawNames();
+    output_types.erase(names);
+    Output::addValidParams(params, output_types);
+  }
+
+  return params;
+}
+
 
 Output::Output(const std::string & name, InputParameters & parameters) :
     MooseObject(name, parameters),
@@ -100,13 +133,11 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _output_initial(getParam<bool>("output_initial")),
     _output_intermediate(getParam<bool>("output_intermediate")),
     _output_final(getParam<bool>("output_final")),
-    _output_input(getParam<bool>("output_input")),
-    _elemental_as_nodal(getParam<bool>("elemental_as_nodal")),
-    _scalar_as_nodal(getParam<bool>("scalar_as_nodal")),
-    _system_information(getParam<bool>("output_system_information")),
+    _system_information(isParamValid("output_system_information") ? getParam<bool>("output_system_information") : false),
     _mesh_changed(false),
     _sequence(isParamValid("sequence") ? getParam<bool>("sequence") : false),
     _allow_output(true),
+    _on_initial(false),
     _time(_problem_ptr->time()),
     _time_old(_problem_ptr->timeOld()),
     _t_step(_problem_ptr->timeStep()),
@@ -122,14 +153,17 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _force_output(false),
     _output_failed(false),
     _output_setup_called(false),
-    _initialized(false),
-    _on_initial(false)
+    _initialized(false)
 {
 }
 
 void
 Output::init()
 {
+  // Check that enable[disable]OutputTypes was called
+  if (!isParamValid("_output_valid_params_was_called"))
+    mooseError("The static method Output::enableOutputTypes or Output::disableOutputTypes must be called inside the validParams function for this object to properly define the input parameters for the output object named '" << _name << "'");
+
   // Do not initialize more than once
   /* This check is needed for YAK which calls Executioners from within Executioners */
   if (_initialized)
@@ -152,7 +186,7 @@ Output::init()
   // If 'elemental_as_nodal = true' the elemental variable names must be appended to the
   // nodal variable names. Thus, when libMesh::EquationSystem::build_solution_vector is called
   // it will create the correct nodal variable from the elemental
-  if (_elemental_as_nodal)
+  if (isParamValid("elemental_as_nodal") && getParam<bool>("elemental_as_nodal"))
   {
     _nodal_variables.show.insert(_nodal_variables.show.end(), _elemental_variables.show.begin(), _elemental_variables.show.end());
     _nodal_variables.hide.insert(_nodal_variables.hide.end(), _elemental_variables.hide.begin(), _elemental_variables.hide.end());
@@ -160,7 +194,7 @@ Output::init()
   }
 
   // Similarly as above, if 'scalar_as_nodal = true' append the elemental variable lists
-  if (_scalar_as_nodal)
+  if (isParamValid("scalar_as_nodal") && getParam<bool>("scalar_as_nodal"))
   {
     _nodal_variables.show.insert(_nodal_variables.show.end(), _scalar.show.begin(), _scalar.show.end());
     _nodal_variables.hide.insert(_nodal_variables.hide.end(), _scalar.hide.begin(), _scalar.hide.end());
@@ -197,7 +231,7 @@ Output::init()
     _vector_postprocessor.output.clear();
 
   // Set the _output_input bool, this is done here rather than the constructor so that CheckOutputAction can force in case --show-input is used
-  _output_input = getParam<bool>("output_input");
+  _output_input = isParamValid("output_input") ? getParam<bool>("output_input") : false;
 
   // Set the initialization flag
   _initialized = true;
@@ -347,6 +381,38 @@ Output::outputFinal()
   // Set the force output flag to false
   _force_output = false;
 }
+
+
+void
+Output::outputNodalVariables()
+{
+  mooseError("Individual output of nodal variables is not support for this output object");
+}
+
+void
+Output::outputElementalVariables()
+{
+  mooseError("Individual output of elemental variables is not support for this output object");
+}
+
+void
+Output::outputPostprocessors()
+{
+  mooseError("Individual output of postprocessors is not support for this output object");
+}
+
+void
+Output::outputVectorPostprocessors()
+{
+  mooseError("Individual output of VectorPostprocessors is not support for this output object");
+}
+
+void
+Output::outputScalarVariables()
+{
+  mooseError("Individual output of scalars is not support for this output object");
+}
+
 
 void
 Output::output()
@@ -658,6 +724,82 @@ Output::initOutputList(OutputData & data)
 
     // Define the output variable list
     output.assign(show.begin(), show.end());
+  }
+}
+
+
+void
+Output::addValidParams(InputParameters & params, const MultiMooseEnum & types)
+{
+
+  // Nodal output
+  if (types.contains("nodal"))
+  {
+    params.addParam<bool>("output_nodal_variables", true, "Enable/disable the output of nodal nonlinear variables");
+    params.addParamNamesToGroup("output_nodal_variables", "Variables");
+  }
+
+  // Elemental output
+  if (types.contains("elemental"))
+  {
+    // Add elemental output control
+    params.addParam<bool>("output_elemental_variables", true, "Enable/disable the output of elemental nonlinear variables");
+    params.addParamNamesToGroup("output_elemental_variables", "Variables");
+
+    // Add material output control, which are output via elemental variables
+    params.addParam<bool>("output_material_properties", false, "Flag indicating if material properties should be output");
+    params.addParam<std::vector<std::string> >("show_material_properties", "List of materialproperties that should be written to the output");
+    params.addParamNamesToGroup("output_material_properties show_material_properties", "Materials");
+    params.addParamNamesToGroup("show_material_properties", "Materials");
+  }
+
+  // Scalar variable output
+  if (types.contains("scalar"))
+  {
+    params.addParam<bool>("output_scalar_variables", true, "Enable/disable the output of aux scalar variables");
+    params.addParamNamesToGroup("output_scalar_variables", "Variables");
+  }
+
+  // Nodal and scalar output
+  if (types.contains("nodal") && types.contains("scalar"))
+  {
+    params.addParam<bool>("scalar_as_nodal", false, "Output scalar variables as nodal");
+    params.addParamNamesToGroup("scalar_as_nodal", "Variables");
+  }
+
+  // Elemental and nodal
+  if (types.contains("elemental") && types.contains("nodal"))
+  {
+    params.addParam<bool>("elemental_as_nodal", false, "Output elemental nonlinear variables as nodal");
+    params.addParamNamesToGroup("elemental_as_nodal", "Variables");
+  }
+
+  // Postprocessors
+  if (types.contains("postprocessor"))
+  {
+    params.addParam<bool>("output_postprocessors", true, "Enable/disable the output of postprocessors");
+    params.addParamNamesToGroup("output_postprocessors", "Variables");
+  }
+
+  // Vector Postprocessors
+  if (types.contains("vector_postprocessor"))
+  {
+    params.addParam<bool>("output_vector_postprocessors", true, "Enable/disable the output of VectorPostprocessors");
+    params.addParamNamesToGroup("output_vector_postprocessors", "Variables");
+  }
+
+  // Input file
+  if (types.contains("input"))
+  {
+    params.addParam<bool>("output_input", false, "Enable/disable the output of the input file");
+    params.addParamNamesToGroup("output_input", "Variables");
+  }
+
+  // System Information
+  if (types.contains("system_information"))
+  {
+    params.addParam<bool>("output_system_information", true, "Enable/disable the output of the simulation information");
+    params.addParamNamesToGroup("output_system_information", "Variables");
   }
 }
 

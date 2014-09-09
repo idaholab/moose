@@ -35,7 +35,6 @@ InputParameters validParams<SetupDebugAction>()
 
 SetupDebugAction::SetupDebugAction(const std::string & name, InputParameters parameters) :
     Action(name, parameters),
-    _top_residuals(getParam<unsigned int>("show_top_residuals")),
     _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
   _awh.showActions(getParam<bool>("show_actions"));
@@ -52,25 +51,41 @@ SetupDebugAction::~SetupDebugAction()
 void
 SetupDebugAction::act()
 {
-  // Create DebugOutput object
+  // Material properties
+  if (_pars.get<bool>("show_material_props"))
+    createOutputAction("MaterialPropertyDebugOutput", "_moose_material_property_debug_output");
+
+  // Variable residusl norms
   if (_pars.get<bool>("show_var_residual_norms"))
+    createOutputAction("VariableResidualNormsDebugOutput", "_moose_variable_residual_norms_debug_output");
+
+  // Top residuals
+  if (_pars.get<unsigned int>("show_top_residuals") > 0)
   {
-    // Set the 'type =' parameters for the desired object
-    _action_params.set<std::string>("type") = "DebugOutput";
-
-    // Create the action
-    MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", "Outputs/_moose_debug_output", _action_params));
-    action->getObjectParams().set<bool>("_built_by_moose") = true;
-
-    // Add the action to the warehouse
-    _awh.addActionBlock(action);
+    MooseObjectAction * action = createOutputAction("TopResidualDebugOutput", "_moose_top_residual_debug_output");
+    action->getObjectParams().set<unsigned int>("num_residuals") = _pars.get<unsigned int>("show_top_residuals");
   }
+}
 
-  // Enable MaterialProperty and top residual debugging
-  if (_problem != NULL)
-  {
-    _problem->setDebugTopResiduals(_top_residuals);
-    if (getParam<bool>("show_material_props"))
-      _problem->printMaterialMap();
-  }
+
+MooseObjectAction *
+SetupDebugAction::createOutputAction(const std::string & type, const std::string & name)
+{
+  // Set the 'type =' parameters for the desired object
+  _action_params.set<std::string>("type") = type;
+
+  // Create the action
+  std::string long_name = "Outputs/";
+  long_name += name;
+  MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", long_name, _action_params));
+
+  // Set the object parameters
+  InputParameters & object_params = action->getObjectParams();
+  object_params.set<bool>("_built_by_moose") = true;
+
+  // Add the action to the warehouse
+  _awh.addActionBlock(action);
+
+  // Return the pointer to the action
+  return dynamic_cast<MooseObjectAction *>(action);
 }

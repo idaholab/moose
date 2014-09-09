@@ -23,7 +23,7 @@
 template<>
 InputParameters validParams<PetscOutput>()
 {
-  InputParameters params = validParams<FileOutput>();
+  InputParameters params = validParams<Output>();
 
   // Toggled for outputting nonlinear and linear residuals, only if we have PETSc
 #ifdef LIBMESH_HAVE_PETSC
@@ -50,7 +50,7 @@ InputParameters validParams<PetscOutput>()
 }
 
 PetscOutput::PetscOutput(const std::string & name, InputParameters & parameters) :
-    FileOutput(name, parameters),
+    Output(name, parameters),
     _nonlinear_iter(0),
     _linear_iter(0),
     _output_nonlinear(getParam<bool>("nonlinear_residuals")),

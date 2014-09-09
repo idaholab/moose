@@ -695,7 +695,6 @@ public:
    */
   void notifyWhenMeshChanges(MeshChangedInterface * mci);
 
-  void printMaterialMap();
   void checkProblemIntegrity();
 
   void serializeSolution();
@@ -742,11 +741,6 @@ public:
    * Calls parentOutputPositionChanged() on all sub apps.
    */
   void parentOutputPositionChanged();
-
-  /**
-   * Enable printing of top residuals
-   */
-  void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
 
   ///@{
   /**
@@ -929,9 +923,6 @@ protected:
 
   /// Whether nor not stateful materials have been initialized
   bool _has_initialized_stateful;
-
-  /// Flag for print top residuals
-  bool _dbg_top_residuals;
 
   /// Object responsible for restart (read/write)
   Resurrector * _resurrector;
