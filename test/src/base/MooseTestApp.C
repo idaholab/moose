@@ -180,8 +180,10 @@
 #include "MooseTestProblem.h"
 #include "FailingProblem.h"
 
+// actions
 #include "ConvDiffMetaAction.h"
 #include "AddLotsOfAuxVariablesAction.h"
+#include "ApplyCoupledVariablesTestAction.h"
 
 // From MOOSE
 #include "AddVariableAction.h"
@@ -415,4 +417,8 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
   syntax.registerActionSyntax("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
   syntax.registerActionSyntax("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
+
+  registerAction(ApplyCoupledVariablesTestAction, "meta_action");
+  syntax.registerActionSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
+
 }
