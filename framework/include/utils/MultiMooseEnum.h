@@ -82,6 +82,16 @@ public:
 
   ///@{
   /**
+   * Un-assign a value
+   * @param names - a string, set, or vector giving the name to erase from the enumeration values
+   */
+  void erase(const std::string & names);
+  void erase(const std::vector<std::string> & names);
+  void erase(const std::set<std::string> & names);
+  ///@}
+
+  ///@{
+  /**
    * Insert operators
    * Operator to insert (push_back) values into the enum. Existing values are preserved and
    * duplicates are stored.
@@ -151,6 +161,12 @@ private:
    */
   template<typename InputIterator>
   MultiMooseEnum & assign(InputIterator first, InputIterator last, bool append);
+
+  /**
+   * Helper method for un-assigning enumeration values
+   */
+  template<typename InputIterator>
+  void remove(InputIterator first, InputIterator last);
 
   /// The current id
   std::vector<int> _current_ids;

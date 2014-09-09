@@ -250,60 +250,6 @@ void MaterialWarehouse::addBoundaryMaterial(std::vector<BoundaryID> boundaries, 
 }
 
 void
-MaterialWarehouse::printMaterialMap() const
-{
-  unsigned int map_num=0;
-  for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::const_iterator i = _master_list.begin(); i != _master_list.end(); ++i)
-  {
-    switch (map_num)
-    {
-    case 0:
-      Moose::out << " Active materials on blocks:\n";
-      break;
-    case 1:
-      Moose::out << " Active face materials on blocks:\n";
-      break;
-    case 2:
-      Moose::out << " Active neighboring materials on blocks:\n";
-      break;
-    }
-
-    for (std::map<SubdomainID, std::vector<Material *> >::const_iterator k = (*i)->begin(); k != (*i)->end(); ++k)
-    {
-      Moose::out << "  block ID = " << k->first << ":\n";
-      for (unsigned int l=0; l<k->second.size(); l++)
-      {
-        Moose::out << "   material = " << k->second[l]->name() << ":\n";
-
-        for (std::set<std::string>::const_iterator it=k->second[l]->getSuppliedItems().begin();
-             it!=k->second[l]->getSuppliedItems().end(); it++)
-          Moose::out << "    " << *it << std::endl;
-      }
-      Moose::out << '\n';
-    }
-
-    ++map_num;
-  }
-
-  Moose::out << " Active materials on side sets:\n";
-  for (std::map<BoundaryID, std::vector<Material *> >::const_iterator k = _active_boundary_materials.begin();
-       k != _active_boundary_materials.end(); ++k)
-  {
-    Moose::out << "  side set ID = " << k->first << ":\n";
-    for (unsigned int l=0; l<k->second.size(); l++)
-    {
-      Moose::out << "   material = " << k->second[l]->name() << ":\n";
-
-      for (std::set<std::string>::const_iterator it=k->second[l]->getSuppliedItems().begin();
-           it!=k->second[l]->getSuppliedItems().end(); it++)
-        Moose::out << "    " << *it << '\n';
-    }
-    Moose::out << '\n';
-  }
-  Moose::out.flush();
-}
-
-void
 MaterialWarehouse::checkMaterialDependSanity() const
 {
   for (std::vector<std::map<SubdomainID, std::vector<Material *> > *>::const_iterator i = _master_list.begin(); i != _master_list.end(); ++i)

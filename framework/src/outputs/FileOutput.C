@@ -23,7 +23,7 @@ template<>
 InputParameters validParams<FileOutput>()
 {
   // Create InputParameters object for this stand-alone object
-  InputParameters params = validParams<Output>();
+  InputParameters params = validParams<PetscOutput>();
   params.addParam<std::string>("file_base", "The desired solution output name without an extension");
   params.addParam<bool>("append_displaced", false, "Append '_displaced' to the output file base");
   params.addParamNamesToGroup("append_displaced", "Displaced");
@@ -37,7 +37,7 @@ InputParameters validParams<FileOutput>()
 }
 
 FileOutput::FileOutput(const std::string & name, InputParameters & parameters) :
-    Output(name, parameters),
+    PetscOutput(name, parameters),
     _file_base(getParam<std::string>("file_base")),
     _file_num(declareRecoverableData<unsigned int>("file_num", 0)),
     _padding(getParam<unsigned int>("padding")),
@@ -165,6 +165,11 @@ FileOutput::checkFilename()
   return output;
 }
 
+std::string
+FileOutput::filename()
+{
+  return _file_base;
+}
 
 void
 FileOutput::setFileNumber(unsigned int num)

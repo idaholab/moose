@@ -25,15 +25,13 @@ InputParameters validParams<Exodus>()
 {
   // Get the base class parameters
   InputParameters params = validParams<OversampleOutput>();
+  params += Output::disableOutputTypes("vector_postprocessor system_information");
 
   // Set the default padding to 3
   params.set<unsigned int>("padding") = 3;
 
   // Add description for the Exodus class
   params.addClassDescription("Object for output data in the Exodus II format");
-
-  // Disable the outputting of vector postprocessor data
-  params.suppressParameter<bool>("output_vector_postprocessors");
 
   // Set outputting of the input to be on by default
   params.set<bool>("output_input") = true;

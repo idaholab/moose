@@ -21,17 +21,8 @@ template<>
 InputParameters validParams<XDA>()
 {
   // Get the base class parameters
-
   InputParameters params = validParams<OversampleOutput>();
-
-  // Supress un-available parameters
-  params.suppressParameter<bool>("output_nodal_variables");
-  params.suppressParameter<bool>("output_elemental_variables");
-  params.suppressParameter<bool>("output_scalar_variables");
-  params.suppressParameter<bool>("output_postprocessors");
-  params.suppressParameter<bool>("output_vector_postprocessors");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("sequence");
+  params += Output::disableOutputTypes(); // Output is handled explicitly, disable everything
 
   // Add description for the XDA class
   params.addClassDescription("Object for outputting data in the XDA/XDR format");
@@ -68,36 +59,6 @@ XDA::output()
     _es_ptr->write (filename()+".xda", WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
   }
   _file_num++;
-}
-
-void
-XDA::outputNodalVariables()
-{
-  mooseError("Individual output of nodal variables is not supported for XDA/XDR output");
-}
-
-void
-XDA::outputElementalVariables()
-{
-  mooseError("Individual output of elemental variables is not supported for XDA/XDR output");
-}
-
-void
-XDA::outputPostprocessors()
-{
-  mooseError("Individual output of postprocessors is not supported for XDA/XDR output");
-}
-
-void
-XDA::outputVectorPostprocessors()
-{
-  mooseError("Individual output of VectorPostprocessors is not supported for XDA/XDR output");
-}
-
-void
-XDA::outputScalarVariables()
-{
-  mooseError("Individual output of scalars is not supported for XDA/XDR output");
 }
 
 std::string

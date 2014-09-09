@@ -210,7 +210,6 @@
     perf_log = true
   [../]
   [./debug]
-    type = DebugOutput
-    show_var_residual_norms = true
+    type = VariableResidualNormsDebugOutput
   [../]
 []
