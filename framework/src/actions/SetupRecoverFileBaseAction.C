@@ -122,13 +122,16 @@ SetupRecoverFileBaseAction::getCheckpointFiles(std::set<std::string> & files)
   // Extract the CommonOutputAction
   const Action* common = _awh.getActionsByName("common_output")[0];
 
-  // Create a set of directory names and insert the default (i.e., checkpoint = true directory)
+  // Storage for the directory names
   std::set<std::string> checkpoint_dirs;
-  checkpoint_dirs.insert(FileOutput::getOutputFileBase(_app, "_out_cp"));
 
   // If file_base is set in CommonOutputAction, add this file to the list of potential checkpoint files
   if (common->isParamValid("file_base"))
     checkpoint_dirs.insert(common->getParam<std::string>("file_base") + "_cp");
+
+  // If file_base is not set use the default <filename>_out_cp location
+  else
+    checkpoint_dirs.insert(FileOutput::getOutputFileBase(_app, "_out_cp"));
 
   // Add the directories from any existing checkpoint objects
   const std::vector<Checkpoint *> ptrs = _app.getOutputWarehouse().getOutputs<Checkpoint>();
