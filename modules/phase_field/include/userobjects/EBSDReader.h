@@ -54,9 +54,6 @@ protected:
   MooseMesh & _mesh;
   NonlinearSystem & _nl;
 
-  // Name of the file containing the EBSD data
-  std::string _filename;
-
   // Variables needed to determine reduced order parameter values
   unsigned int _op_num;
   unsigned int _grain_num;

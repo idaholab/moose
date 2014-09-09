@@ -107,7 +107,7 @@ EBSDMesh::readEBSDHeader()
   unsigned int dim;
 
   // determine mesh dimension
-  for (dim = 3; dim > 0 && _geometry.n[dim-1] == 0; --dim)
+  for (dim = 3; dim > 0 && _geometry.n[dim-1] == 0; --dim);
 
   // check if the data has nonzero stepsizes
   for (unsigned i = 0; i < dim; ++i)
@@ -132,6 +132,15 @@ EBSDMesh::buildMesh()
   nr[1] = _geometry.n[1];
   nr[2] = _geometry.n[2];
 
+  // set min/max box length
+  InputParameters & params = parameters();
+  params.set<Real>("xmin") = 0.0;
+  params.set<Real>("xmax") = nr[0] * _geometry.d[0];
+  params.set<Real>("ymin") = 0.0;
+  params.set<Real>("ymax") = nr[1] * _geometry.d[1];
+  params.set<Real>("zmin") = 0.0;
+  params.set<Real>("zmax") = nr[2] * _geometry.d[2];
+
   // check if the requested uniform refine level is possible and determine initial grid size
   for (unsigned int i = 0; i < uniform_refine; ++i)
     for (unsigned int j = 0; j < _geometry.dim; ++j)
@@ -146,6 +155,7 @@ EBSDMesh::buildMesh()
   _nz = nr[2];
 
   _dim = (_geometry.dim == 1 ? "1" : (_geometry.dim == 2 ? "2" : "3"));
+
 
   GeneratedMesh::buildMesh();
 }

@@ -1,11 +1,10 @@
 #include "EBSDReader.h"
-#include "MooseMesh.h"
+#include "EBSDMesh.h"
 
 template<>
 InputParameters validParams<EBSDReader>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addRequiredParam<FileName>("filename", "The name of the file containing the EBSD data");
   params.addRequiredParam<unsigned int>("crys_num", "Specifies the number of order parameters to create");
   return params;
 }
@@ -14,7 +13,6 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     GeneralUserObject(name, params),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
-    _filename(getParam<FileName>("filename")),
     _op_num(getParam<unsigned int>("crys_num")),
     _grain_num(0),
     _mesh_dimension(_mesh.dimension()),
@@ -25,125 +23,54 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     _dy(0.),
     _dz(0.)
 {
-  std::ifstream stream_in(_filename.c_str());
+  // Fetch and check mesh
+  EBSDMesh * mesh = dynamic_cast<EBSDMesh *>(&_mesh);
+  if (mesh == NULL)
+    mooseError("Please use an EBSDMesh in your simulation.");
 
+  std::ifstream stream_in(mesh->getEBSDFilename().c_str());
   if (!stream_in)
-    mooseError("Can't open EBSD file: " << _filename);
+    mooseError("Can't open EBSD file: " << mesh->getEBSDFilename());
 
-  // Labels to look for in the header
-  std::vector<std::string> labels;
-  labels.push_back("X_step");
-  labels.push_back("X_Dim");
-  labels.push_back("Y_step");
-  labels.push_back("Y_Dim");
-  labels.push_back("Z_step");
-  labels.push_back("Z_Dim");
+  const EBSDMesh::EBSDMeshGeometry & g = mesh->getEBSDGeometry();
 
-  // Dimension variables to store once they are found in the header
-  // X_step, X_Dim, Y_step, Y_Dim, Z_step, Z_Dim
-  // We use Reals even though the Dim values should all be integers...
-  std::vector<Real> label_vals(labels.size());
+  // Copy file header data from the EBSDMesh
+  _dx = g.d[0];
+  _nx = g.n[0];
 
-  // Set to true once we reach the first data (non-comment) line.  We must
-  // have parsed the entire header successfully before this happens
-  bool header_parsed = false;
+  _dy = g.d[1];
+  _ny = g.n[1];
+
+  _dz = g.d[2];
+  _nz = g.n[2];
+
+  // Resize the _data array
+  unsigned total_size = g.dim < 3 ? _nx*_ny : _nx*_ny*_nz;
+  _data.resize(total_size);
 
   std::string line;
-  while (true)
+  while (std::getline(stream_in, line))
   {
-    // Try to read something
-    std::getline(stream_in, line);
-
-    if (stream_in)
+    if (line.find("#") != 0)
     {
-      // We need to process the comment lines that have:
-      // X_step, X_Dim
-      // Y_step, Y_Dim
-      // Z_step, Z_Dim
-      // in them.
-      // Note that for 2D data, Z_Dim will be zero, but that's OK because Z_Dim isn't
-      // required to do the indexing we're going to do...
-      if (line.find("#") == 0)
-      {
-        // Process lines that start with a comment character (comments and meta data)
+      // Temporary variables to read in on each line
+      EBSDPointData d;
+      Real x, y, z;
 
-        for (unsigned i=0; i<labels.size(); ++i)
-          if (line.find(labels[i]) != std::string::npos)
-          {
-            // Moose::out << "Found label " << labels[i] << ": " << line << std::endl;
-            std::string dummy;
-            std::istringstream iss(line);
-            iss >> dummy >> dummy >> label_vals[i];
+      std::istringstream iss(line);
+      iss >> d.phi1 >> d.phi >> d.phi2 >> x >> y >> z >> d.grain >> d.phase >> d.symmetry;
+      d.p = Point(x,y,z);
 
-            // One label per line, break out of for loop over labels
-            break;
-          }
-      }
-      else
-      {
-        // Process lines that don't start with a comment character (data lines)
+      // determine number of grains in the dataset
+      if (d.grain > _grain_num) _grain_num = d.grain;
 
-        // Make sure we have successfully parsed the header
-        if (!header_parsed)
-        {
-          header_parsed = true;
+      // The Order parameter is not yet assigned.
+      // We initialize it to zero in order not to have undefined values that break the testing.
+      d.op = 0;
 
-          // Copy stuff out of the label_vars array into class variables
-          _dx = label_vals[0];
-          _nx = label_vals[1];
-
-          _dy = label_vals[2];
-          _ny = label_vals[3];
-
-          _dz = label_vals[4];
-          _nz = label_vals[5];
-
-          // Must have at least 2D data
-          if (_nx == 0 || _ny == 0 || (_nz == 0 && _mesh_dimension > 2))
-            mooseError("Error reading header, spatial dimension of the EBSD data is lower than the dimension of the mesh.");
-
-          // Must also have nonzero stepsizes
-          if (_dx == 0.0 || _dy == 0.0 || (_dz == 0.0 && _mesh_dimension > 2))
-            mooseError("Error reading header, EBSD data step size is zero.");
-
-          // Compute the total size.  If this is 2D data, don't multiply by zero.
-          unsigned total_size = _mesh_dimension < 3 ? _nx*_ny : _nx*_ny*_nz;
-
-          // Resize the _data array
-          _data.resize(total_size);
-        }
-
-        // Make sure we have processed the header and allocated space to start saving values.
-        mooseAssert(_data.size() > 0, "Error, _data vector not properly resized!");
-
-        // Temporary variables to read in on each line
-        EBSDPointData d;
-        Real x, y, z;
-
-        std::istringstream iss(line);
-        iss >> d.phi1 >> d.phi >> d.phi2 >> x >> y >> z >> d.grain >> d.phase >> d.symmetry;
-        d.p = Point(x,y,z);
-
-        // determine number of grains in the dataset
-        if (d.grain > _grain_num) _grain_num = d.grain;
-
-        // The Order parameter is not yet assigned. We initialize it to zero in order not to have undefined values that break the testing.
-        d.op = 0;
-
-        unsigned global_index = indexFromPoint(Point(x, y, z));
-        _data[global_index] = d;
-      }
-
-      // Go to next line of file, skip the rest of the error checking code below
-      continue;
+      unsigned global_index = indexFromPoint(Point(x, y, z));
+      _data[global_index] = d;
     }
-
-    if (stream_in.eof())
-      break;
-
-    // If we made it here, then !file AND !file.eof, therefore the
-    // stream is "bad".
-    mooseError("Stream is bad!");
   }
   stream_in.close();
 
