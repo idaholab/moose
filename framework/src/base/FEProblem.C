@@ -3060,7 +3060,12 @@ FEProblem::solve()
 //  _solve_only_perf_log.push("solve");
 
   if (_solve)
+  {
     _nl.solve();
+#ifdef LIBMESH_HAVE_PETSC
+    Moose::PetscSupport::petscCheckCLIOptions(*getMooseApp().commandLine(), *this);
+#endif
+  }
 
 //  _solve_only_perf_log.pop("solve");
   Moose::perf_log.pop("solve()","Solve");

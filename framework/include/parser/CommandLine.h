@@ -48,7 +48,6 @@ public:
     std::vector<std::string> cli_switch;
   };
 
-
   CommandLine(int argc, char * argv[]);
   virtual ~CommandLine();
 
@@ -87,7 +86,7 @@ public:
    * Get the GetPot object
    * @return Pointer to the GetPot object
    */
-  GetPot * getPot() { return _get_pot; }
+  GetPot * getPot() const { return _get_pot; }
 
   /**
    * Check if we have a variable on the command line
@@ -95,6 +94,13 @@ public:
    * @return True if the variable was defined on the command line
    */
   bool haveVariable(const std::string & name);
+
+  /**
+   * Return an iterator to the CLI options.
+   */
+  typedef std::map<std::string, CommandLine::Option>::const_iterator OptionIterator;
+  OptionIterator optionsBegin() const;
+  OptionIterator optionsEnd() const;
 
   void print(const char * prefix, std::ostream & out_stream, unsigned int skip_count);
 
@@ -106,6 +112,9 @@ protected:
   /// This is a set of all "extra" options on the command line
   std::set<std::string> _command_line_vars;
 };
+
+//typedef std::map<std::string, CommandLine::Option>::const_iterator OptionIterator;
+
 
 template <typename T>
 bool CommandLine::search(const std::string &option_name, T & argument)

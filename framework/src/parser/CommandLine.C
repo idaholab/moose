@@ -186,6 +186,18 @@ CommandLine::haveVariable(const std::string & name)
   return _get_pot->have_variable(name);
 }
 
+CommandLine::OptionIterator
+CommandLine::optionsBegin() const
+{
+  return _cli_options.begin();
+}
+
+CommandLine::OptionIterator
+CommandLine::optionsEnd() const
+{
+  return _cli_options.end();
+}
+
 void
 CommandLine::print(const char * prefix, std::ostream & out_stream, unsigned int skip_count)
 {
