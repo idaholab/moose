@@ -733,14 +733,14 @@ Output::addValidParams(InputParameters & params, const MultiMooseEnum & types)
 {
 
   // Nodal output
-  if (types.contains(0))
+  if (types.contains("nodal"))
   {
     params.addParam<bool>("output_nodal_variables", true, "Enable/disable the output of nodal nonlinear variables");
     params.addParamNamesToGroup("output_nodal_variables", "Variables");
   }
 
   // Elemental output
-  if (types.contains(1))
+  if (types.contains("elemental"))
   {
     // Add elemental output control
     params.addParam<bool>("output_elemental_variables", true, "Enable/disable the output of elemental nonlinear variables");
@@ -754,49 +754,49 @@ Output::addValidParams(InputParameters & params, const MultiMooseEnum & types)
   }
 
   // Scalar variable output
-  if (types.contains(2))
+  if (types.contains("scalar"))
   {
     params.addParam<bool>("output_scalar_variables", true, "Enable/disable the output of aux scalar variables");
     params.addParamNamesToGroup("output_scalar_variables", "Variables");
   }
 
   // Nodal and scalar output
-  if (types.contains(0) && types.contains(2))
+  if (types.contains("nodal") && types.contains("scalar"))
   {
     params.addParam<bool>("scalar_as_nodal", false, "Output scalar variables as nodal");
     params.addParamNamesToGroup("scalar_as_nodal", "Variables");
   }
 
   // Elemental and nodal
-  if (types.contains(0) && types.contains(1))
+  if (types.contains("elemental") && types.contains("nodal"))
   {
     params.addParam<bool>("elemental_as_nodal", false, "Output elemental nonlinear variables as nodal");
     params.addParamNamesToGroup("elemental_as_nodal", "Variables");
   }
 
   // Postprocessors
-  if (types.contains(3))
+  if (types.contains("postprocessor"))
   {
     params.addParam<bool>("output_postprocessors", true, "Enable/disable the output of postprocessors");
     params.addParamNamesToGroup("output_postprocessors", "Variables");
   }
 
   // Vector Postprocessors
-  if (types.contains(4))
+  if (types.contains("vector_postprocessor"))
   {
     params.addParam<bool>("output_vector_postprocessors", true, "Enable/disable the output of VectorPostprocessors");
     params.addParamNamesToGroup("output_vector_postprocessors", "Variables");
   }
 
   // Input file
-  if (types.contains(5))
+  if (types.contains("input"))
   {
     params.addParam<bool>("output_input", false, "Enable/disable the output of the input file");
     params.addParamNamesToGroup("output_input", "Variables");
   }
 
   // System Information
-  if (types.contains(6))
+  if (types.contains("system_information"))
   {
     params.addParam<bool>("output_system_information", true, "Enable/disable the output of the simulation information");
     params.addParamNamesToGroup("output_system_information", "Variables");
