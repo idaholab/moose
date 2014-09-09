@@ -121,14 +121,14 @@ $(exodiff_APP): $(exodiff_objfiles)
 app_LIB      := $(moose_LIBS) $(exodiff_APP)
 
 clean::
-	@rm -fr $(app_LIB)
+	@rm -fr $(app_LIB) $(app_EXEC)
 	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
                            -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \) -exec rm '{}' \;)
 	@$(shell find . \( -name *.gch \) | xargs rm -rf)
 	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
 
 clobber::
-	@rm -fr $(app_LIB)
+	@rm -fr $(app_LIB) $(app_EXEC)
 	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
                            -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \
                            -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \) -exec rm '{}' \;)
