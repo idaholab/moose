@@ -757,7 +757,6 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_time_periods", true);
   registerTask("setup_adaptivity", false);
   registerTask("meta_action", false);
-  registerTask("initial_mesh_refinement", false);
   registerTask("setup_debug", false);
   registerTask("setup_residual_debug", false);
   registerTask("setup_oversampling", false);
@@ -824,7 +823,6 @@ addActionTypes(Syntax & syntax)
 "(add_multi_app)"
 "(add_transfer)"
 "(copy_nodal_vars, copy_nodal_aux_vars)"
-"(initial_mesh_refinement)"
 "(add_material)"
 "(setup_material_output)"
 "(init_problem)"
