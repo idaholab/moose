@@ -38,6 +38,7 @@
 
 class FEProblem;
 class MoosePreconditioner;
+class JacobianBlock;
 
 /**
  * Nonlinear system to be solved
@@ -219,14 +220,15 @@ public:
    * @param jacobian Jacobian is formed in here
    */
   void computeJacobian(SparseMatrix<Number> &  jacobian);
+
   /**
-   * Computes a Jacobian block. Used by Physics-based preconditioning
-   * @param jacobian Where the block is stored
-   * @param precond_system libMesh system that is used for the block Jacobian
-   * @param ivar number of i-th variable
-   * @param jvar number of j-th variable
+   * Computes several Jacobian blocks simultaneously, summing their contributions into smaller preconditioning matrices.
+   *
+   * Used by Physics-based preconditioning
+   *
+   * @param blocks The blocks to fill in (JacobianBlock is defined in ComputeJacobianBlocksThread)
    */
-  void computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
+  void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks);
 
   /**
    * Compute damping

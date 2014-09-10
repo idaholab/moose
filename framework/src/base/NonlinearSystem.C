@@ -24,7 +24,7 @@
 #include "ComputeResidualThread.h"
 #include "ComputeJacobianThread.h"
 #include "ComputeFullJacobianThread.h"
-#include "ComputeJacobianBlockThread.h"
+#include "ComputeJacobianBlocksThread.h"
 #include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
 #include "TimeKernel.h"
@@ -1527,7 +1527,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 #ifdef LIBMESH_HAVE_PETSC
         //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3,1,0)
         // In Petsc 3.0.0, MatSetOption has three args...the third arg
         // determines whether the option is set (true) or unset (false)
@@ -1559,7 +1559,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 #ifdef LIBMESH_HAVE_PETSC
       //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3,1,0)
       // In Petsc 3.0.0, MatSetOption has three args...the third arg
       // determines whether the option is set (true) or unset (false)
@@ -1642,7 +1642,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3,1,0)
   // In Petsc 3.0.0, MatSetOption has three args...the third arg
   // determines whether the option is set (true) or unset (false)
@@ -1803,91 +1803,107 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 }
 
 void
-NonlinearSystem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 {
   Moose::perf_log.push("compute_jacobian_block()","Solve");
 
   Moose::enableFPE();
 
+  for (unsigned int i=0; i<blocks.size(); i++)
+  {
+    SparseMatrix<Number> & jacobian = blocks[i]->_jacobian;
+
 #ifdef LIBMESH_HAVE_PETSC
-  //Necessary for speed
+    //Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3,0,0)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),MAT_KEEP_ZEROED_ROWS);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3,1,0)
-  // In Petsc 3.0.0, MatSetOption has three args...the third arg
-  // determines whether the option is set (true) or unset (false)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-    MAT_KEEP_ZEROED_ROWS,
-    PETSC_TRUE);
+    // In Petsc 3.0.0, MatSetOption has three args...the third arg
+    // determines whether the option is set (true) or unset (false)
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                 MAT_KEEP_ZEROED_ROWS,
+                 PETSC_TRUE);
 #else
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-    MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
-    PETSC_TRUE);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                 MAT_KEEP_NONZERO_PATTERN,  // This is changed in 3.1
+                 PETSC_TRUE);
 #endif
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 #else
-  // PETSc 3.3.0
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    // PETSc 3.3.0
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 #endif
 
 #endif
 
-  jacobian.zero();
+    jacobian.zero();
+  }
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
     _fe_problem.reinitScalars(tid);
 
   PARALLEL_TRY {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeJacobianBlockThread cjb(_fe_problem, precond_system, jacobian, ivar, jvar);
+    ComputeJacobianBlocksThread cjb(_fe_problem, blocks);
     Threads::parallel_reduce(elem_range, cjb);
   }
   PARALLEL_CATCH;
-  jacobian.close();
 
-  //Dirichlet BCs
-  std::vector<numeric_index_type> zero_rows;
-  PARALLEL_TRY {
-    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
-    {
-      const BndNode * bnode = *nd;
-      BoundaryID boundary_id = bnode->_bnd_id;
-      Node * node = bnode->_node;
+  for (unsigned int i=0; i<blocks.size(); i++)
+    blocks[i]->_jacobian.close();
 
-      std::vector<NodalBC *> bcs;
-      _bcs[0].activeNodal(boundary_id, bcs);
-      if (!bcs.empty())
+  for (unsigned int i=0; i<blocks.size(); i++)
+  {
+    libMesh::System & precond_system = blocks[i]->_precond_system;
+    SparseMatrix<Number> & jacobian = blocks[i]->_jacobian;
+
+    unsigned int ivar = blocks[i]->_ivar;
+    unsigned int jvar = blocks[i]->_jvar;
+
+    //Dirichlet BCs
+    std::vector<numeric_index_type> zero_rows;
+    PARALLEL_TRY {
+      ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+      for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
       {
-        if (node->processor_id() == processor_id())
-        {
-          _fe_problem.reinitNodeFace(node, boundary_id, 0);
+        const BndNode * bnode = *nd;
+        BoundaryID boundary_id = bnode->_bnd_id;
+        Node * node = bnode->_node;
 
-          for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+        std::vector<NodalBC *> bcs;
+        _bcs[0].activeNodal(boundary_id, bcs);
+        if (!bcs.empty())
+        {
+          if (node->processor_id() == processor_id())
           {
-            NodalBC * bc = *it;
-            if (bc->variable().number() == ivar && bc->shouldApply())
+            _fe_problem.reinitNodeFace(node, boundary_id, 0);
+
+            for (std::vector<NodalBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
             {
-              //The first zero is for the variable number... there is only one variable in each mini-system
-              //The second zero only works with Lagrange elements!
-              zero_rows.push_back(node->dof_number(precond_system.number(), 0, 0));
+              NodalBC * bc = *it;
+              if (bc->variable().number() == ivar && bc->shouldApply())
+              {
+                //The first zero is for the variable number... there is only one variable in each mini-system
+                //The second zero only works with Lagrange elements!
+                zero_rows.push_back(node->dof_number(precond_system.number(), 0, 0));
+              }
             }
           }
         }
       }
     }
+    PARALLEL_CATCH;
+
+    jacobian.close();
+
+    //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
+    if (ivar == jvar)
+      jacobian.zero_rows(zero_rows, 1.0);
+    else
+      jacobian.zero_rows(zero_rows, 0.0);
+
+    jacobian.close();
   }
-  PARALLEL_CATCH;
-
-  jacobian.close();
-
-  //This zeroes the rows corresponding to Dirichlet BCs and puts a 1.0 on the diagonal
-  if (ivar == jvar)
-    jacobian.zero_rows(zero_rows, 1.0);
-  else
-    jacobian.zero_rows(zero_rows, 0.0);
-
-  jacobian.close();
 
   Moose::enableFPE(false);
 
