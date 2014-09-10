@@ -19,8 +19,6 @@
 #include "cppunit/extensions/HelperMacros.h"
 
 // Forward declarations
-class MooseMesh;
-class FEProblem;
 class Factory;
 class MooseApp;
 
@@ -30,7 +28,7 @@ class EBSDMeshErrorTest : public CppUnit::TestFixture
 
   CPPUNIT_TEST( geometrySpecifiedError );
   CPPUNIT_TEST( fileDoesNotExist );
-
+  CPPUNIT_TEST( headerError );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -39,6 +37,7 @@ public:
   void tearDown();
 
   void fileDoesNotExist();
+  void headerError();
   void geometrySpecifiedError();
 
 private:
@@ -47,6 +46,8 @@ private:
 
   template <typename T>
   void testParam(unsigned int nparam, const char ** param_list);
+
+  void headerErrorHelper(const char * filename, const char * error);
 };
 
 #endif //EBSDMESHERRORTEST_H

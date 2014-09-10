@@ -18,10 +18,8 @@
 #include "EBSDMesh.h"
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"
-#include "FEProblem.h"
 #include "MarmotUnitApp.h"
 #include "AppFactory.h"
-#include "GeneratedMesh.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( EBSDMeshErrorTest );
 
@@ -64,6 +62,51 @@ EBSDMeshErrorTest::fileDoesNotExist()
   {
     std::string msg(e.what());
     CPPUNIT_ASSERT( msg.find("Can't open EBSD file: FILEDOESNOTEXIST") != std::string::npos );
+  }
+
+  // delete mesh object
+  delete mesh;
+}
+
+void
+EBSDMeshErrorTest::headerError()
+{
+  const unsigned int ntestcase = 4;
+
+  const char * testcase[ntestcase][2] = {
+    {"data/ebsd/ebsd3D_zerostep.txt", "Error reading header, EBSD data step size is zero."},
+    {"data/ebsd/ebsd3D_zerosize.txt", "Error reading header, EBSD grid size is zero."},
+    {"data/ebsd/ebsd3D_zerodim.txt", "Error reading header, EBSD data is zero dimensional."},
+    {"data/ebsd/ebsd3D_norefine.txt", "EBSDMesh error. Requested uniform_refine levels not possible."},
+  };
+
+  for (unsigned int i = 0; i < ntestcase; ++i)
+    headerErrorHelper(testcase[i][0], testcase[i][1]);
+}
+
+void
+EBSDMeshErrorTest::headerErrorHelper(const char * filename, const char * error)
+{
+  // generate input parameter set
+  InputParameters params = _factory->getValidParams("EBSDMesh");
+  params.addPrivateParam("_moose_app", _app);
+
+  // set filename
+  params.set<FileName>("filename") = filename;
+  params.set<unsigned int>("uniform_refine") = 2;
+
+  // construct mesh object
+  EBSDMesh * mesh = new EBSDMesh("unit_test_mesh", params);
+
+  try
+  {
+    // trigger mesh building with invalid EBSD filename
+    mesh->buildMesh();
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    CPPUNIT_ASSERT_MESSAGE( filename, msg.find(error) != std::string::npos );
   }
 
   // delete mesh object
