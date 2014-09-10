@@ -58,12 +58,8 @@ InputParameters validParams<SolutionUserObject>()
   params.addParam<bool>("legacy_read", false, "Utilize the legacy call to EquationsSystems::read, this may be required for older XDA/XDR files");
 
   // following lines build the default_transformation_order
-  MooseEnum t1("rotation0 translation scale rotation1 scale_multiplier", "translation");
-  MooseEnum t2("rotation0 translation scale rotation1 scale_multiplier", "scale");
-  std::vector<MooseEnum> default_transformation_order;
-  default_transformation_order.push_back(t1);
-  default_transformation_order.push_back(t2);
-  params.addParam<std::vector<MooseEnum> >("transformation_order", default_transformation_order, "The order to perform the operations in.  Define R0 to be the rotation matrix encoded by rotation0_vector and rotation0_angle.  Similarly for R1.  Denote the scale by s, the scale_multiplier by m, and the translation by t.  Then, given a point x in the simulation, if transformation_order = 'rotation0 scale_multiplier translation scale rotation1' then form p = R1*(R0*x*m - t)/s.  Then the values provided by the SolutionUserObject at point x in the simulation are the variable values at point p in the mesh.");
+  MultiMooseEnum default_transformation_order("rotation0 translation scale rotation1 scale_multiplier", "translation scale");
+  params.addParam<MultiMooseEnum>("transformation_order", default_transformation_order, "The order to perform the operations in.  Define R0 to be the rotation matrix encoded by rotation0_vector and rotation0_angle.  Similarly for R1.  Denote the scale by s, the scale_multiplier by m, and the translation by t.  Then, given a point x in the simulation, if transformation_order = 'rotation0 scale_multiplier translation scale rotation1' then form p = R1*(R0*x*m - t)/s.  Then the values provided by the SolutionUserObject at point x in the simulation are the variable values at point p in the mesh.");
   // Return the parameters
   return params;
 }
@@ -101,7 +97,7 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _rotation1_vector(getParam<RealVectorValue>("rotation1_vector")),
     _rotation1_angle(getParam<Real>("rotation1_angle")),
     _r1(RealTensorValue()),
-    _transformation_order(getParam<std::vector<MooseEnum> >("transformation_order")),
+    _transformation_order(getParam<MultiMooseEnum>("transformation_order")),
     _initialized(false),
     _legacy_read(getParam<bool>("legacy_read"))
 {
