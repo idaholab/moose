@@ -11,7 +11,7 @@
 []
 
 [GlobalParams]
-  crys_num = 12
+  op_num = 12
   var_name_base = gr
 []
 

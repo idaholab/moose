@@ -5,7 +5,7 @@ template<>
 InputParameters validParams<EBSDReader>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addRequiredParam<unsigned int>("crys_num", "Specifies the number of order parameters to create");
+  params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order parameters to create");
   return params;
 }
 
@@ -13,7 +13,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     GeneralUserObject(name, params),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
-    _op_num(getParam<unsigned int>("crys_num")),
+    _op_num(getParam<unsigned int>("op_num")),
     _grain_num(0),
     _mesh_dimension(_mesh.dimension()),
     _nx(0),
@@ -134,7 +134,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
 
   // Output error message if number of order parameters is larger than number of grains from EBSD dataset
   if (_op_num > _grain_num)
-    mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
+    mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
   // Assign grains to each order parameter in a way that maximizes distance
   _assigned_op.resize(_grain_num);
