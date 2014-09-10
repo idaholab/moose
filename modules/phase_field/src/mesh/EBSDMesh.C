@@ -60,39 +60,32 @@ EBSDMesh::readEBSDHeader()
   std::vector<Real> label_vals(labels.size());
 
   std::string line;
-  while (true)
+  while (std::getline(stream_in, line))
   {
-    // Try to a line form teh EBSD file
-    std::getline(stream_in, line);
-
-    if (stream_in)
+    // We need to process the comment lines that have:
+    // X_step, X_Dim
+    // Y_step, Y_Dim
+    // Z_step, Z_Dim
+    // in them.
+    if (line.find("#") == 0)
     {
-      // We need to process the comment lines that have:
-      // X_step, X_Dim
-      // Y_step, Y_Dim
-      // Z_step, Z_Dim
-      // in them.
-      if (line.find("#") == 0)
-      {
-        // Process lines that start with a comment character (comments and meta data)
+      // Process lines that start with a comment character (comments and meta data)
 
-        for (unsigned i=0; i<labels.size(); ++i)
-          if (line.find(labels[i]) != std::string::npos)
-          {
-            // Moose::out << "Found label " << labels[i] << ": " << line << std::endl;
-            std::string dummy;
-            std::istringstream iss(line);
-            iss >> dummy >> dummy >> label_vals[i];
+      for (unsigned i=0; i<labels.size(); ++i)
+        if (line.find(labels[i]) != std::string::npos)
+        {
+          // Moose::out << "Found label " << labels[i] << ": " << line << std::endl;
+          std::string dummy;
+          std::istringstream iss(line);
+          iss >> dummy >> dummy >> label_vals[i];
 
-            // One label per line, break out of for loop over labels
-            break;
-          }
-      }
-      else
-        break;
+          // One label per line, break out of for loop over labels
+          break;
+        }
     }
     else
-      mooseError("Error reading EBSD file header in EBSDMesh.");
+      // first non comment line marks the end of the header
+      break;
   }
 
   // Copy stuff out of the label_vars array into class variables
