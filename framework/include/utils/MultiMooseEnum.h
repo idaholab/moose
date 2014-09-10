@@ -107,9 +107,18 @@ public:
    * Operator to retrieve an item from the MultiMooseEnum. The reference may not be used to change
    * the item.
    * @param i index
-   * @returns a read/read-write reference to the item.
+   * @returns a read/read-write reference to the item as a string.
    */
   const std::string & operator[](unsigned int i) const;
+
+  /**
+   * Indexing operator
+   * Operator to retrieve an item from the MultiMooseEnum. The reference may not be used to change
+   * the item.
+   * @param i index
+   * @returns a read/read-write reference to the item as an unsigned int.
+   */
+  unsigned int get(unsigned int i) const;
 
   ///@{
   /**

@@ -151,9 +151,17 @@ MultiMooseEnum::push_back(const std::set<std::string> & names)
 const std::string &
 MultiMooseEnum::operator[](unsigned int i) const
 {
-  mooseAssert(i >= _current_names.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_names.size() << ")");
+  mooseAssert(i < _current_names.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_names.size() << ")");
 
-  return _current_names[i];
+  return _current_names_preserved[i];
+}
+
+unsigned int
+MultiMooseEnum::get(unsigned int i) const
+{
+  mooseAssert( i < _current_ids.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_ids.size() << ")");
+
+  return _current_ids[i];
 }
 
 template<typename InputIterator>

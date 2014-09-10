@@ -142,7 +142,7 @@ MooseEnumTest::testErrors()
     CPPUNIT_ASSERT( msg.find("You cannot place whitespace around the '=' character") != std::string::npos );
   }
 
-#ifndef NDEBUG
+#ifdef DEBUG
   // Out of bounds access
   try
   {
