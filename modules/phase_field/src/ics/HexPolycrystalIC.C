@@ -54,7 +54,7 @@ HexPolycrystalIC::initialSetup()
   _range = _top_right - _bottom_left;
 
   if (_op_num > _grain_num)
-     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
+     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
   _centerpoints.resize(_grain_num);
   _assigned_op.resize(_grain_num);

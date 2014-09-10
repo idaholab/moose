@@ -20,8 +20,8 @@ template<>
 InputParameters validParams<PolycrystalVoronoiICAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<unsigned int>("crys_num", "number of order parameters to create");
-  params.addRequiredParam<unsigned int>("grain_num", "number of grains to create, if it is going to greater than crys_num");
+  params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
+  params.addRequiredParam<unsigned int>("grain_num", "number of grains to create, if it is going to greater than op_num");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
 
@@ -34,10 +34,11 @@ InputParameters validParams<PolycrystalVoronoiICAction>()
 
 PolycrystalVoronoiICAction::PolycrystalVoronoiICAction(const std::string & name, InputParameters params) :
     Action(name, params),
-    _crys_num(getParam<unsigned int>("crys_num")),
+    _op_num(getParam<unsigned int>("op_num")),
     _grain_num(getParam<unsigned int>("grain_num")),
     _var_name_base(getParam<std::string>("var_name_base"))
-{}
+{
+}
 
 void
 PolycrystalVoronoiICAction::act()
@@ -47,20 +48,20 @@ PolycrystalVoronoiICAction::act()
 #endif
 
   // Loop through the number of order parameters
-  for (unsigned int crys = 0; crys < _crys_num; crys++)
+  for (unsigned int op = 0; op < _op_num; op++)
   {
     //Create variable names
     std::string var_name = _var_name_base;
     std::stringstream out;
-    out << crys;
+    out << op;
     var_name.append(out.str());
 
     //Set parameters for BoundingBoxIC
     InputParameters poly_params = _factory.getValidParams("PolycrystalReducedIC");
     poly_params.set<VariableName>("variable") = var_name;
-    poly_params.set<unsigned int>("crys_num") = _crys_num;
+    poly_params.set<unsigned int>("op_num") = _op_num;
     poly_params.set<unsigned int>("grain_num") = _grain_num;
-    poly_params.set<unsigned int>("crys_index") = crys;
+    poly_params.set<unsigned int>("op_index") = op;
     poly_params.set<unsigned int>("rand_seed") = getParam<unsigned int>("rand_seed");
     poly_params.set<bool>("cody_test") = getParam<bool>("cody_test");
     poly_params.set<bool>("columnar_3D") = getParam<bool>("columnar_3D");

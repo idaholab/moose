@@ -41,8 +41,8 @@ protected:
   /// A reference to the nonlinear system
   NonlinearSystem & _nl;
 
-  unsigned int _crys_num;
-  unsigned int _crys_index;
+  unsigned int _op_num;
+  unsigned int _op_index;
 
   Point _bottom_left;
   Point _top_right;

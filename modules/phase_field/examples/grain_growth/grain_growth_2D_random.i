@@ -23,7 +23,7 @@
 
 [GlobalParams]
   # Parameters used by several kernels that are defined globally to simplify input file
-  crys_num = 10 # Number of grains
+  op_num = 10 # Number of grains
   var_name_base = gr # Base name of grains
 []
 

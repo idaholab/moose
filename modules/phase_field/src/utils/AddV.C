@@ -3,22 +3,22 @@
 InputParameters &
 AddV(InputParameters & parameters, const std::string & var_name)
 {
-  unsigned int crys_num = parameters.get<unsigned int>("crys_num");
+  unsigned int op_num = parameters.get<unsigned int>("op_num");
   std::string var_name_base = parameters.get<std::string>("var_name_base");
 
   //Create variable names
   std::vector<VariableName> v;
-  v.resize(crys_num);
+  v.resize(op_num);
 
-  if (crys_num > 0)
+  if (op_num > 0)
   {
-    for (unsigned int crys = 0; crys < crys_num; crys++)
+    for (unsigned int op = 0; op < op_num; op++)
     {
       std::string coupled_var_name = var_name_base;
       std::stringstream out;
-      out << crys;
+      out << op;
       coupled_var_name.append(out.str());
-      v[crys] = coupled_var_name;
+      v[op] = coupled_var_name;
     }
 
     parameters.remove(var_name);

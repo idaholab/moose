@@ -6,9 +6,9 @@ template<>
 InputParameters validParams<PolycrystalReducedIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.addRequiredParam<unsigned int>("crys_num", "Number of order parameters");
+  params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<unsigned int>("grain_num", "Number of grains being represented by the order parameters");
-  params.addRequiredParam<unsigned int>("crys_index", "The index for the current order parameter");
+  params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
 
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
 
@@ -24,9 +24,9 @@ PolycrystalReducedIC::PolycrystalReducedIC(const std::string & name,
     InitialCondition(name, parameters),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
-    _op_num(getParam<unsigned int>("crys_num")),
+    _op_num(getParam<unsigned int>("op_num")),
     _grain_num(getParam<unsigned int>("grain_num")),
-    _op_index(getParam<unsigned int>("crys_index")),
+    _op_index(getParam<unsigned int>("op_index")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _cody_test(getParam<bool>("cody_test")),
     _columnar_3D(getParam<bool>("columnar_3D"))
@@ -45,7 +45,7 @@ PolycrystalReducedIC::initialSetup()
   _range = _top_right - _bottom_left;
 
   if (_op_num > _grain_num)
-     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
+     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
   if (_cody_test)
     if (_op_num != 5 || _grain_num != 10)
