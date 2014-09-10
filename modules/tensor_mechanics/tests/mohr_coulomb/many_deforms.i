@@ -84,8 +84,9 @@
 
 [AuxKernels]
   [./yield_fcn_auxk]
-    type = MaterialRealAux
-    property = mc_yield_function
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_yield_function
     variable = yield_fcn
   [../]
 []
@@ -112,9 +113,22 @@
   [../]
 []
 
+[UserObjects]
+  [./mc]
+    type = TensorMechanicsPlasticMohrCoulomb
+    mc_cohesion = 1E3
+    mc_friction_angle = 30
+    mc_dilation_angle = 5
+    mc_tip_smoother = 0.1E3
+    mc_edge_smoother = 10
+    yield_function_tolerance = 1E-3
+    internal_constraint_tolerance = 1E-6
+  [../]
+[]
+
 [Materials]
   [./mc]
-    type = FiniteStrainMohrCoulomb
+    type = FiniteStrainMultiPlasticity
     block = 0
     disp_x = disp_x
     disp_y = disp_y
@@ -122,15 +136,11 @@
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
     max_NR_iterations = 1000
-    mc_cohesion = 1E3
-    mc_friction_angle = 30
-    mc_dilation_angle = 5
-    mc_tip_smoother = 0.1E3
-    mc_edge_smoother = 10
-    yield_function_tolerance = 1E-3
     ep_plastic_tolerance = 1E-6
-    internal_constraint_tolerance = 1E-6
+    plastic_models = mc
     debug_fspb = 1
+    # THIS IS WORTH EXPLORING: deactivation_scheme = optimized DOES NOT WORK HERE !!
+    deactivation_scheme = safe
   [../]
 []
 

@@ -165,8 +165,6 @@ FiniteStrainMultiPlasticity::computeQpStress()
     mooseError("Exiting\n");
   }
 
-  Moose::out << "\nRETURNED!\n\n";
-
 
   postReturnMap();
 
@@ -371,30 +369,30 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
 
   while (!kuhn_tucker)
   {
-  
+
     delta_dp = RankTwoTensor();
-    
+
     // The "consistency parameters" (plastic multipliers)
     // Change in plastic strain in this timestep = pm*flowPotential
     // Each pm must be non-negative
     std::vector<Real> pm;
     pm.assign(_num_f, 0.0);
-    
+
     // The constraints that have been deactivated for this NR step
     // due to the flow directions being linearly dependent
     std::vector<bool> deact_ld;
     deact_ld.assign(_num_f, false);
-    
+
     // whether line-searching was successful
     ls_success = true;
 
     iter = 0;
-    
+
     // The Newton-Raphson loops
     while (nr_res2 > 0.5 && iter < _max_iter && ls_success)
     {
       iter++;
-      
+
       Real nr_res2_before_step = nr_res2;
       RankTwoTensor stress_before_step = stress;
       std::vector<Real> intnl_before_step(intnl.size());
@@ -404,91 +402,91 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
       for (unsigned alpha = 0 ; alpha < pm.size() ; ++alpha)
         pm_before_step[alpha] = pm[alpha];
       RankTwoTensor delta_dp_before_step = delta_dp;
-      
+
       /* at the end of the NR step, if _deactivation_scheme == "optimized", the
        * active plasticity multipliers are checked for non-negativity.  If some
        * are negative then they are deactivated forever, and the NR step is
        * re-done starting from the *_before_step quantities recorded above
        */
       bool constraints_changing = true;
-      
+
       while (constraints_changing)
       {
         constraints_changing = false;
-        
+
         deact_ld.assign(_num_f, false);
-        
+
         // calculate dstress, dpm and dintnl for one full Newton-Raphson step
         nrStep(stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, act, deact_ld);
-        
-        Moose::out << "Full nrStep has dpm = \n";
-        for (unsigned alpha = 0 ; alpha < dpm.size() ; ++alpha)
-          Moose::out << " " << dpm[alpha] << "\n";
-        
-        
+
+
         // perform a line search
         // The line-search will exit with updated values
         ls_success = lineSearch(nr_res2, stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, f, epp, ic, act, deact_ld);
-        
-        Moose::out << "Line search exited with nr_res2 = " << nr_res2  << "\n";
-        
-        
+
+
         // reinstate any active values that have been turned off due to linear-dependence
         bool reinstated_actives = false;
         for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
           if (deact_ld[alpha])
             reinstated_actives = true;
         deact_ld.assign(_num_f, false);
-        
-        
+
+
         // See if any active constraints need to be removed
         if (_deactivation_scheme == "optimized")
+        {
           for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
             if (act[alpha] && pm[alpha] < 0.0)
-            {
               constraints_changing = true;
-              Moose::out << "alpha = " << alpha << " had negative pm of " << pm[alpha] << " turning off forever\n";
-              act[alpha] = false;
-              // the following is because below we set intnl = intnl_before_step, and pm = pm_before_step
-              pm_before_step[alpha] = 0.0; 
-              intnl_before_step[alpha] = intnl_old[alpha]; // don't want to muck-up hardening!
+          if (constraints_changing)
+          {
+            stress = stress_before_step;
+            delta_dp = delta_dp_before_step;
+            nr_res2 = nr_res2_before_step;
+            for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+            {
+              if (act[alpha] && pm[alpha] < 0.0)
+              {
+                // turn off the constraint forever
+                act[alpha] = false;
+                pm_before_step[alpha] = 0.0;
+                intnl_before_step[alpha] = intnl_old[alpha]; // don't want to muck-up hardening!
+              }
+              intnl[alpha] = intnl_before_step[alpha];
+              pm[alpha] = pm_before_step[alpha];
             }
-        
-        
+            unsigned num_active = 0;
+            for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+              if (act[alpha])
+                num_active++;
+            if (num_active == 0)
+            {
+              // completely bomb out
+              constraints_changing = false;
+              ls_success = false;
+              break;
+            }
+          }
+        }
+
+
         // if active constraints were reinstated then nr_res2 needs to be re-calculated
         if (reinstated_actives && !constraints_changing) // latter condition is for efficiency, since in that case we'll have to re-do this NR step anyway
         {
           calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, epp, ic, act, false, deact_ld);
-          nr_res2 = residual2(f, epp, ic, act, deact_ld);
-          Moose::out << "After re-instating actives, nr_res2 = " << nr_res2 << "\n";
+          nr_res2 = residual2(pm, f, epp, ic, act, deact_ld);
         }
-        
-        
-        // if active constraints were changed then have to re-do the NR step
-        if (constraints_changing)
-        {
-          stress = stress_before_step;
-          for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-          {
-            intnl[alpha] = intnl_before_step[alpha];
-            pm[alpha] = pm_before_step[alpha];
-          }
-          delta_dp = delta_dp_before_step;
-          nr_res2 = nr_res2_before_step;
-        }
-        
-	
+
+
       } // ends the "constraints_changing" while loop
 
       // NR step completed
-      Moose::out << "NR step completed.  Plasticity multipliers are:\n";
-      for (unsigned alpha = 0 ; alpha < pm.size() ; ++alpha)
-        Moose::out << " " << pm[alpha] << "\n";
 
     } // ends the nr_res2>0.5 loop
 
     // Newton-Raphson has exited, with success or failure
-    
+
     // Check Kuhn-Tucker conditions
     kuhn_tucker = true;
     for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
@@ -508,7 +506,6 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
 
     if (!kuhn_tucker)
     {
-      Moose::out << "kuhn-tucker failed";
       unsigned num_active = 0;
       for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
         if (act[alpha])
@@ -533,7 +530,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
     }
 
   }
-      
+
   // returned, with either success or failure
 
   if (iter >= _max_iter || !ls_success || !kuhn_tucker)
@@ -562,10 +559,10 @@ FiniteStrainMultiPlasticity::calculateConstraints(const RankTwoTensor & stress, 
 
   // construct constraints
   //
-  // epp = pm*r - E_inv*(trial_stress - stress) = pm*r - delta_dp   
+  // epp = pm*r - E_inv*(trial_stress - stress) = pm*r - delta_dp
   // f = yield function    [only the "active_now" constraints]
   // ic = intnl - intnl_old + pm*h
-  // 
+  //
   // Here pm*r = sum_{active_alpha} pm[alpha]*r[alpha].  Note that this contains all the "active" constraints,
   //             even the ones that have been deactivated_due_to_ld.  r is a std::vector containing all the
   //             active flow directions.
@@ -579,8 +576,6 @@ FiniteStrainMultiPlasticity::calculateConstraints(const RankTwoTensor & stress, 
     if (active[alpha])
       num_active++;
 
-  // yield functions
-  yieldFunction(stress, intnl, active, num_active, f);
 
   // flow direction
   std::vector<RankTwoTensor> r;
@@ -588,7 +583,12 @@ FiniteStrainMultiPlasticity::calculateConstraints(const RankTwoTensor & stress, 
 
 
   if (deactivate_if_linear_dependence)
+  {
+    // yield functions
+    yieldFunction(stress, intnl, active, num_active, f);
+    // eliminate
     eliminateLinearDependence(stress, intnl, f, r, active, num_active, deactivated_due_to_ld);
+  }
 
   unsigned num_deactivated_due_to_ld = 0;
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
@@ -603,25 +603,31 @@ FiniteStrainMultiPlasticity::calculateConstraints(const RankTwoTensor & stress, 
   epp -= delta_dp;
 
 
-  // internal constraints
-  std::vector<bool> active_ics;
-  unsigned num_active_ics = 0;
-  active_ics.resize(_num_f, false);
+  // the active constraints without the deactivated_due_to_ld
+  std::vector<bool> active_now;
+  unsigned num_active_now = 0;
+  active_now.resize(_num_f, false);
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
     if (active[alpha] && !deactivated_due_to_ld[alpha])
     {
       // do not need the deactivated_due_to_ld since those plastic muldipliers, and hence the intnl values aren't changing this NR step.
-      active_ics[alpha] = true;
-      num_active_ics++;
+      active_now[alpha] = true;
+      num_active_now++;
     }
-    
-  std::vector<Real> h;
-  hardPotential(stress, intnl, active_ics, num_active_ics, h);
 
-  ic.resize(num_active_ics);
+  // yield functions
+  if (!deactivate_if_linear_dependence)
+    // if deactivate_if_linear_dependence then f has been calculated above
+    yieldFunction(stress, intnl, active_now, num_active_now, f);
+
+  // internal constraints
+  std::vector<Real> h;
+  hardPotential(stress, intnl, active_now, num_active_now, h);
+
+  ic.resize(num_active_now);
   ind = 0;
   for (unsigned a = 0 ; a < _num_f ; ++a)
-    if (active_ics[a])
+    if (active_now[a])
     {
       ic[ind] = intnl[a] - intnl_old[a] + pm[a]*h[ind];
       ind++;
@@ -641,11 +647,6 @@ FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & str
   if (info != 0)
     mooseError("In finding the SVD in the return-map algorithm, the PETSC LAPACK gesvd routine returned with error code " << info);
 
-  Moose::out << "Singular values are ";
-  for (unsigned i = 0 ; i < s.size() ; ++i)
-    Moose::out << " " << s[i];
-  Moose::out << "\n";
-
   // num_lin_dep are the number of linearly dependent
   // "r vectors", if num_active <= 6
   unsigned int num_lin_dep = 0;
@@ -658,8 +659,6 @@ FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & str
   if (num_lin_dep == 0 && num_active <= 6)
     return;
 
-
-  Moose::out << "num lin dep = " << num_lin_dep << "\n";
 
   // From here on, some flow directions are linearly dependent
 
@@ -691,12 +690,6 @@ FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & str
     std::sort(dist.begin(), dist.end()); // sorted in ascending order
 
 
-  Moose::out << "Distances = ";
-  for (unsigned i = 0 ; i < num_active  ; ++i)
-    Moose::out << " " << dist[i].first << " " << dist[i].second << " ";
-  Moose::out << "\n";
-
-
   std::vector<bool> scheduled_for_deactivation;
   scheduled_for_deactivation.assign(num_active, false);
 
@@ -704,7 +697,6 @@ FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & str
   unsigned current_yf;
   std::vector<RankTwoTensor> r_tmp(1);
   current_yf = dist[num_active - 1].second;
-  Moose::out << "Added in " << dist[num_active - 1].second << " which has distance = " << dist[num_active - 1].first << "\n";
   r_tmp[0] = r[current_yf];
   unsigned num_kept_active = 1;
   // Refactor the following to make smarter for num_active > 6
@@ -718,15 +710,9 @@ FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & str
     else
     {
       r_tmp.push_back(r[current_yf]);
-      Moose::out << "Added in " << dist[num_active - yf_to_try].second << " which has distance = " << dist[num_active - yf_to_try].first << "\n";
       info = singularValuesOfR(r_tmp, s);
-      Moose::out << "Singular values are now";
-      for (unsigned i = 0 ; i < s.size() ; ++i)
-        Moose::out << " " << s[i];
-      Moose::out << "\n";
       if (s[s.size() - 1] < _svd_tol*s[0])
       {
-        Moose::out << "Scheduling " << current_yf << "for deactivation\n";
         scheduled_for_deactivation[current_yf] = true;
         r_tmp.pop_back();
         num_lin_dep--;
@@ -766,9 +752,6 @@ FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & str
       }
     }
 
-  Moose::out << "Active is now ";
-  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-    Moose::out << "alpha = " << alpha << " active[alpha] = " << active[alpha] << " deact_ld[alpha] = " << deactivated_due_to_ld[alpha] << "\n";
 }
 
 
@@ -778,7 +761,6 @@ FiniteStrainMultiPlasticity::singularValuesOfR(const std::vector<RankTwoTensor> 
   int bm = r.size();
   int bn = 6;
 
-  Moose::out << "Performing singular values of r, with size of r = " << r.size() << "\n";
   s.resize(std::min(bm, bn));
 
   // prepare for gesvd or gesdd routine provided by PETSc
@@ -802,10 +784,6 @@ FiniteStrainMultiPlasticity::singularValuesOfR(const std::vector<RankTwoTensor> 
   for (int row = 0 ; row < bm ; ++row)
     a[ind++] = r[row](2, 2);
 
-  Moose::out << "a = \n";
-  for (ind = 0 ; ind < bm*6 ; ++ind)
-    Moose::out << " " << a[ind];
-  Moose::out << "\n";
 
   // u and vt are dummy variables because they won't
   // get referenced due to the "N" and "N" choices
@@ -858,33 +836,25 @@ FiniteStrainMultiPlasticity::calculateRHS(const RankTwoTensor & stress, const st
 
 
 Real
-FiniteStrainMultiPlasticity::residual2(const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld)
+FiniteStrainMultiPlasticity::residual2(const std::vector<Real> & pm, const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld)
 {
   Real nr_res2 = 0;
   unsigned ind = 0;
 
-  Moose::out << " Calculating residual2\n";
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
     if (active[alpha] && !deactivated_due_to_ld[alpha])
     {
-      Moose::out << " alpha = " << alpha << " f[ind] = " << f[ind] << "\n";
-      if (f[ind] > 0)
-	nr_res2 += 0.5*std::pow( f[ind]/_f[alpha]->_f_tol, 2);
+      if (!(pm[alpha] == 0 && f[ind] <= 0) )
+        nr_res2 += 0.5*std::pow( f[ind]/_f[alpha]->_f_tol, 2);
       ind++;
     }
 
-  Moose::out << "nr_res2 with f only = " << nr_res2 << "\n";
-
   nr_res2 += 0.5*std::pow(epp.L2norm()/_epp_tol, 2);
-
-  Moose::out << "nr_res2 with f and epp = " << nr_res2 << "\n";
 
   ind = 0;
   for (unsigned a = 0 ; a < _num_f; ++a)
     if (active[a] && !deactivated_due_to_ld[a])
       nr_res2 += 0.5*std::pow(ic[ind++]/_f[a]->_ic_tol, 2);
-
-  Moose::out << "nr_res2 with f and epp and ic = " << nr_res2 << "\n";
 
   return nr_res2;
 }
@@ -936,10 +906,10 @@ FiniteStrainMultiPlasticity::calculateJacobian(const RankTwoTensor & stress, con
 
   // construct matrix entries
   // In the following
-  // epp = pm*r - E_inv*(trial_stress - stress) = pm*r - delta_dp   
+  // epp = pm*r - E_inv*(trial_stress - stress) = pm*r - delta_dp
   // f = yield function    [only the "active_now" constraints]
   // ic = intnl - intnl_old + pm*h
-  // 
+  //
   // Here pm*r = sum_{active_alpha} pm[alpha]*r[alpha].  Note that this contains all the "active" constraints,
   //             even the ones that have been deactivated_due_to_ld.  r is a std::vector containing all the
   //             active flow directions.
@@ -1073,9 +1043,9 @@ FiniteStrainMultiPlasticity::calculateJacobian(const RankTwoTensor & stress, con
       jac[col_num][row_num++] = 0;
     for (unsigned a = 0 ; a < num_active_now ; ++a)
       if (a == alpha)
-	jac[col_num][row_num++] = df_dintnl[alpha];
+        jac[col_num][row_num++] = df_dintnl[alpha];
       else
-	jac[col_num][row_num++] = 0;
+        jac[col_num][row_num++] = 0;
     row_num = 0;
     col_num++;
   }
@@ -1193,7 +1163,7 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
     calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic, active, false, deactivated_due_to_ld);
 
     // calculate the new residual-squared
-    nr_res2 = residual2(f, epp, ic, active, deactivated_due_to_ld);
+    nr_res2 = residual2(ls_pm, f, epp, ic, active, deactivated_due_to_ld);
 
 
     if (nr_res2 < f0 + 1E-4*lam*slope)
@@ -1212,7 +1182,7 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
         ls_intnl[a] = intnl[a];
       ls_stress = stress;
       calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic, active, false, deactivated_due_to_ld);
-      nr_res2 = residual2(f, epp, ic, active, deactivated_due_to_ld);
+      nr_res2 = residual2(ls_pm, f, epp, ic, active, deactivated_due_to_ld);
       line_searching = false;
       break;
     }

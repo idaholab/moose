@@ -23,7 +23,7 @@
 # stress_zz=2, stress_yy=1, where f0>0.  Once again, a random choice
 # of turning off SimpleTester1 or SimpleTester2 can be made.  Hence,
 # oscillations can occur.  If too many oscillations occur then the algorithm
-# will fail  
+# will fail
 
 [Mesh]
   type = GeneratedMesh

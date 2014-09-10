@@ -73,14 +73,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./max_ps]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./min_ps]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./mc_int]
     order = CONSTANT
     family = MONOMIAL
@@ -134,24 +126,16 @@
     index_i = 2
     index_j = 2
   [../]
-  [./max_ps]
-    type = MaterialRealAux
-    property = mc_max_principal_stress
-    variable = max_ps
-  [../]
-  [./min_ps]
-    type = MaterialRealAux
-    property = mc_min_principal_stress
-    variable = min_ps
-  [../]
   [./mc_int_auxk]
-    type = MaterialRealAux
-    property = mc_internal
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_internal_parameter
     variable = mc_int
   [../]
   [./yield_fcn_auxk]
-    type = MaterialRealAux
-    property = mc_yield_function
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_yield_function
     variable = yield_fcn
   [../]
 []
@@ -187,16 +171,6 @@
     point = '0.005 0.02 0.002'
     variable = stress_zz
   [../]
-  [./max_ps]
-    type = PointValue
-    point = '0.005 0.02 0.002'
-    variable = max_ps
-  [../]
-  [./min_ps]
-    type = PointValue
-    point = '0.005 0.02 0.002'
-    variable = min_ps
-  [../]
   [./f]
     type = PointValue
     point = '0.005 0.02 0.002'
@@ -204,16 +178,9 @@
   [../]
 []
 
-[Materials]
+[UserObjects]
   [./mc]
-    type = FiniteStrainMohrCoulomb
-    block = 1
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    fill_method = symmetric_isotropic
-    #C_ijkl = '5.77E9 3.85E9' # young = 10Gpa, poisson = 0.3
-    C_ijkl = '0 5E9' # young = 10Gpa, poisson = 0.0
+    type = TensorMechanicsPlasticMohrCoulomb
     mc_cohesion = 10E6
     mc_cohesion_residual = 8E6
     mc_cohesion_rate = 0
@@ -221,9 +188,23 @@
     mc_dilation_angle = 40
     mc_tip_smoother = 0.01E6
     mc_edge_smoother = 29
-    yield_function_tolerance = 1E-4
-    ep_plastic_tolerance = 1E-11
+    yield_function_tolerance = 1E-5
     internal_constraint_tolerance = 1E-11
+  [../]
+[]
+
+[Materials]
+  [./mc]
+    type = FiniteStrainMultiPlasticity
+    block = 1
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    fill_method = symmetric_isotropic
+    #C_ijkl = '5.77E9 3.85E9' # young = 10Gpa, poisson = 0.3
+    C_ijkl = '0 5E9' # young = 10Gpa, poisson = 0.0
+    ep_plastic_tolerance = 1E-11
+    plastic_models = mc
     max_NR_iterations = 1000
     debug_fspb = 1
   [../]

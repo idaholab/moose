@@ -83,14 +83,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./max_ps]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./min_ps]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./mc_int]
     order = CONSTANT
     family = MONOMIAL
@@ -144,24 +136,16 @@
     index_i = 2
     index_j = 2
   [../]
-  [./max_ps]
-    type = MaterialRealAux
-    property = mc_max_principal_stress
-    variable = max_ps
-  [../]
-  [./min_ps]
-    type = MaterialRealAux
-    property = mc_min_principal_stress
-    variable = min_ps
-  [../]
   [./mc_int_auxk]
-    type = MaterialRealAux
-    property = mc_internal
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_internal_parameter
     variable = mc_int
   [../]
   [./yield_fcn_auxk]
-    type = MaterialRealAux
-    property = mc_yield_function
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_yield_function
     variable = yield_fcn
   [../]
 []
@@ -197,16 +181,6 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
-  [./max_ps]
-    type = PointValue
-    point = '0 0 0'
-    variable = max_ps
-  [../]
-  [./min_ps]
-    type = PointValue
-    point = '0 0 0'
-    variable = min_ps
-  [../]
   [./internal]
     type = PointValue
     point = '0 0 0'
@@ -219,15 +193,9 @@
   [../]
 []
 
-[Materials]
+[UserObjects]
   [./mc]
-    type = FiniteStrainMohrCoulomb
-    block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    fill_method = symmetric_isotropic
-    C_ijkl = '0 1E7'
+    type = TensorMechanicsPlasticMohrCoulomb
     mc_cohesion = 10
     mc_friction_angle = 50
     mc_dilation_angle = 0
@@ -236,8 +204,21 @@
     mc_tip_smoother = 4
     mc_edge_smoother = 20
     yield_function_tolerance = 1E-8
-    ep_plastic_tolerance = 1E-9
     internal_constraint_tolerance = 1E-9
+  [../]
+[]
+
+[Materials]
+  [./mc]
+    type = FiniteStrainMultiPlasticity
+    block = 0
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    fill_method = symmetric_isotropic
+    C_ijkl = '0 1E7'
+    ep_plastic_tolerance = 1E-9
+    plastic_models = mc
     debug_fspb = 1
   [../]
 []

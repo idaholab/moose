@@ -255,13 +255,14 @@ protected:
 
   /**
    * The residual-squared
-   * @param f the active yield function(s)
+   * @param pm the plastic multipliers for all constraints
+   * @param f the active yield function(s) (not including the ones that are deactivated_due_to_ld)
    * @param epp the plastic strain increment constraint
-   * @param ic the active internal constraint(s)
+   * @param ic the active internal constraint(s) (not including the ones that are deactivated_due_to_ld)
    * @param active true if constraint is active
    * @param deactivated_due_to_ld true if constraint has been temporarily deactivated due to linear dependence of flow directions
    */
-  virtual Real residual2(const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld);
+  virtual Real residual2(const std::vector<Real> & pm, const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld);
 
   /**
    * d(rhs)/d(dof)
