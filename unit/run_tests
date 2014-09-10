@@ -12,6 +12,12 @@ cd `dirname $0` > /dev/null
 if [ -e ./$APPLICATION_NAME-unit-$METHOD ]
 then
   ./$APPLICATION_NAME-unit-$METHOD
+
+  # This log file is produced for the update_stable script.
+  if [ $? -eq 0 ]
+  then
+    echo $app_name >> ../test_results.log
+  fi
 else
   echo "Executable missing!"
   exit 1
