@@ -19,7 +19,7 @@ public:
   virtual void act();
 
 private:
-  unsigned int _crys_num;
+  unsigned int _op_num;
   std::string _var_name_base;
   //std::vector<VariableName> _eta;
 };

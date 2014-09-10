@@ -16,7 +16,7 @@
 []
 
 [GlobalParams]
-  crys_num = 4
+  op_num = 4
   grain_num = 4
   var_name_base = eta
   sd = 3

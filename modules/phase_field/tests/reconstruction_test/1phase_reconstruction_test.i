@@ -15,7 +15,7 @@
 []
 
 [GlobalParams]
-  crys_num = 9
+  op_num = 9
   grain_num = 9
   var_name_base = gr
   sd = 3

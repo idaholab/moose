@@ -7,9 +7,9 @@ InputParameters validParams<ReconVarIC>()
 
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader GeneralUserObject");
-  params.addRequiredParam<unsigned int>("crys_num", "Specifies the number of order paraameters to create");
+  params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order paraameters to create");
   params.addRequiredParam<unsigned int>("grain_num", "Specifies the number of grains in the reconstructed dataset");
-  params.addRequiredParam<unsigned int>("crys_index", "The index for the current crystal");
+  params.addRequiredParam<unsigned int>("op_index", "The index for the current crystal");
   return params;
 }
 
@@ -18,9 +18,9 @@ ReconVarIC::ReconVarIC(const std::string & name,InputParameters parameters) :
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
-    _op_num(getParam<unsigned int>("crys_num")),
+    _op_num(getParam<unsigned int>("op_num")),
     _grain_num(getParam<unsigned int>("grain_num")),
-    _op_index(getParam<unsigned int>("crys_index"))
+    _op_index(getParam<unsigned int>("op_index"))
 {
 }
 
@@ -64,7 +64,7 @@ ReconVarIC::initialSetup()
 
   // Output error message if number of order parameters is larger than number of grains from EBSD dataset
   if (_op_num > _grain_num)
-     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
+     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
   // Assign grains to each order parameter in a way that maximizes distance
   _assigned_op.resize(_grain_num);
