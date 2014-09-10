@@ -32,6 +32,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_system_information_out'
     check_files = 'console_file_system_information_out.txt'
     file_expect_out = 'Num\s*DOFs:\s*242'
+    recover = false # This is a steady state problem
   [../]
   [./file_postprocessor]
     # Test that file contains regex
@@ -40,6 +41,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_postprocessor_out'
     check_files = 'console_file_postprocessor_out.txt'
     file_expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
+    recover = false # This is a steady state problem
   [../]
   [./file_scalar_aux]
     # Test that file contains regex
@@ -48,6 +50,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_scalar_aux_out'
     check_files = 'console_file_scalar_aux_out.txt'
     file_expect_out = '\| time\s*?\| aux0_0\s*?\|\n'
+    recover = false # This is a steady state problem
   [../]
   [./file_solve_log]
     # Test that file contains regex
@@ -56,6 +59,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/solve_log=true Outputs/screen/file_base=console_file_solve_log_out'
     check_files = 'console_file_solve_log_out.txt'
     file_expect_out = 'Moose\sTest\sPerformance:'
+    recover = false # This is a steady state problem
   [../]
   [./file_setup_log]
     # Test that file contains regex
@@ -64,6 +68,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/setup_log=true Outputs/screen/file_base=console_file_setup_log_out'
     check_files = 'console_file_setup_log_out.txt'
     file_expect_out = 'Setup\sPerformance:'
+    recover = false # This is a steady state problem
   [../]
   [./norms]
     # Test that the variable norms are being output
@@ -71,6 +76,7 @@
     input = 'console.i'
     cli_args = 'Outputs/screen/all_variable_norms=true'
     expect_out = 'Variable Residual Norms:'
+    recover = false # This is a steady state problem
   [../]
   [./timing]
     # Tests that the --timing enables all logs
@@ -78,6 +84,7 @@
     input = 'console.i'
     cli_args = 'Outputs/screen/perf_log=false --timing'
     expect_out = 'Moose\sTest\sPerformance:'
+    recover = false # This is a steady state problem
   [../]
   [./transient]
     # Test the transient console output, with negative start-time
