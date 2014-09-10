@@ -105,8 +105,12 @@ EBSDMesh::readEBSDHeader()
 
   // check if the data has nonzero stepsizes
   for (unsigned i = 0; i < dim; ++i)
+  {
+    if (_geometry.n[i] == 0)
+      mooseError("Error reading header, EBSD grid size is zero.");
     if (_geometry.d[i] == 0.0)
       mooseError("Error reading header, EBSD data step size is zero.");
+  }
 
   if (dim == 0)
     mooseError("Error reading header, EBSD data is zero dimensional.");
