@@ -31,7 +31,7 @@ include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
 APPLICATION_DIR  := $(MOOSE_DIR)/unit
-APPLICATION_NAME := moose_unit
+APPLICATION_NAME := moose-unit
 BUILD_EXEC       := yes
 DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include $(FRAMEWORK_DIR)/app.mk
