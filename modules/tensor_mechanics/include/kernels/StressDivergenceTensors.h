@@ -31,19 +31,25 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
+  MaterialProperty<RankTwoTensor> * _d_stress_dc;
+  std::string _pff_jac_prop_name;
 
   const unsigned int _component;
 
-private:
   const bool _xdisp_coupled;
   const bool _ydisp_coupled;
   const bool _zdisp_coupled;
   const bool _temp_coupled;
+  const bool _c_coupled;
 
   const unsigned int _xdisp_var;
   const unsigned int _ydisp_var;
   const unsigned int _zdisp_var;
   const unsigned int _temp_var;
+  const unsigned int _c_var;
+
+private:
+
 };
 
 #endif //STRESSDIVERGENCETENSORS_H

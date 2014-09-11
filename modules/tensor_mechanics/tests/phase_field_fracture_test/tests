@@ -1,0 +1,7 @@
+[Tests]
+  [./sent_crack]
+    type = 'Exodiff'
+    input = 'crack-prob-2d.i'
+    exodiff = 'crack-prob-2d_out.e'
+  [../]
+[]
