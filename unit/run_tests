@@ -16,7 +16,7 @@ then
   # This log file is produced for the update_stable script.
   if [ $? -eq 0 ]
   then
-    echo $app_name >> ../test_results.log
+    echo "unit" >> ../test_results.log
   fi
 else
   echo "Executable missing!"
