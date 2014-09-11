@@ -209,9 +209,6 @@ if __name__ == "__main__":
   options, unknown = parseArguments()
   make_args += unknown
 
-  # Get the make directory
-  make_dir = getMakeDirectory()
-
   # Get the make related options from dmake
   dmake_make_options = subOptions(options,'timeout','quiet','dbg','opt','oprof')
 
@@ -290,8 +287,11 @@ if __name__ == "__main__":
   outputer.display(distcc_hosts, jobs, verbose=options.verbose, make_args=make_args)
 
   # --summary does not run any commands, so exit
-  if options.summary:
+  if options.summary or options.dedicated:
     sys.exit()
+
+  # Get the make directory
+  make_dir = getMakeDirectory()
 
   # Run 'make cleanall' if the benchmark options is given
   if options.benchmark:
