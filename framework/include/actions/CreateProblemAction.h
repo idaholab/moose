@@ -32,7 +32,7 @@ public:
 protected:
   std::string _problem_name;
   std::vector<SubdomainName> _blocks;
-  std::vector<MooseEnum> _coord_sys;
+  MultiMooseEnum _coord_sys;
   bool _fe_cache;
 };
 

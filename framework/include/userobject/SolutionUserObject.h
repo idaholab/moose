@@ -240,7 +240,7 @@ protected:
   RealTensorValue _r1;
 
   /// transformations (rotations, translation, scales) are performed in this order
-  std::vector<MooseEnum> _transformation_order;
+  MultiMooseEnum _transformation_order;
 
   /// True if initial_setup has executed
   bool _initialized;

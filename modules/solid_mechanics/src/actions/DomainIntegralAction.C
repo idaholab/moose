@@ -12,9 +12,8 @@ InputParameters validParams<DomainIntegralAction>()
 {
   InputParameters params = validParams<Action>();
   addCrackFrontDefinitionParams(params);
-  MooseEnum integral("JIntegral InteractionIntegralKI InteractionIntegralKII InteractionIntegralKIII");
-  std::vector<MooseEnum> integral_vec(1, integral);
-  params.addRequiredParam<std::vector<MooseEnum> >("integrals", integral_vec, "Domain integrals to calculate.  Choices are: " + integral.getRawNames());
+  MultiMooseEnum integral_vec("JIntegral InteractionIntegralKI InteractionIntegralKII InteractionIntegralKIII");
+  params.addRequiredParam<MultiMooseEnum>("integrals", integral_vec, "Domain integrals to calculate.  Choices are: " + integral_vec.getRawNames());
   params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
   params.addParam<std::string>("order", "FIRST",  "Specifies the order of the FE shape function to use for q AuxVariables");
   params.addParam<std::string>("family", "LAGRANGE", "Specifies the family of FE shape functions to use for q AuxVariables");
@@ -70,37 +69,34 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
     mooseError("Number of entries in 'radius_inner' and 'radius_outer' must match.");
   }
 
-  std::vector<MooseEnum> integral_moose_enums = getParam<std::vector<MooseEnum> >("integrals");
+  MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
   if (integral_moose_enums.size() == 0)
     mooseError("Must specify at least one domain integral to perform.");
   for (unsigned int i=0; i<integral_moose_enums.size(); ++i)
   {
-    if (integral_moose_enums[i].isValid())
+    if (integral_moose_enums[i] != "JIntegral")
     {
-      if (integral_moose_enums[i] != "JIntegral")
-      {
-        //Check that parameters required for interaction integrals are defined
-        if (!(isParamValid("disp_x")) || !(isParamValid("disp_y")))
-          mooseError("DomainIntegral error: must set displacements for integral: "<<integral_moose_enums[i]);
+      //Check that parameters required for interaction integrals are defined
+      if (!(isParamValid("disp_x")) || !(isParamValid("disp_y")))
+        mooseError("DomainIntegral error: must set displacements for integral: "<<integral_moose_enums[i]);
 
-        if (!(isParamValid("poissons_ratio")) || !(isParamValid("youngs_modulus")))
-          mooseError("DomainIntegral error: must set Poisson's ratio and Young's modulus for integral: "<<integral_moose_enums[i]);
+      if (!(isParamValid("poissons_ratio")) || !(isParamValid("youngs_modulus")))
+        mooseError("DomainIntegral error: must set Poisson's ratio and Young's modulus for integral: "<<integral_moose_enums[i]);
 
-        if (!(isParamValid("block")))
-          mooseError("DomainIntegral error: must set block ID or name for integral: "<<integral_moose_enums[i]);
+      if (!(isParamValid("block")))
+        mooseError("DomainIntegral error: must set block ID or name for integral: "<<integral_moose_enums[i]);
 
-        _poissons_ratio = getParam<Real>("poissons_ratio");
-        _youngs_modulus = getParam<Real>("youngs_modulus");
-        _blocks = getParam<std::vector<SubdomainName> >("block");
-        _disp_x = getParam<VariableName>("disp_x");
-        _disp_y = getParam<VariableName>("disp_y");
-        _disp_z = getParam<VariableName>("disp_z");
+      _poissons_ratio = getParam<Real>("poissons_ratio");
+      _youngs_modulus = getParam<Real>("youngs_modulus");
+      _blocks = getParam<std::vector<SubdomainName> >("block");
+      _disp_x = getParam<VariableName>("disp_x");
+      _disp_y = getParam<VariableName>("disp_y");
+      _disp_z = getParam<VariableName>("disp_z");
 
-        //mooseError("Domain integral type not yet implemented: "<<integral_moose_enums[i]);
-      }
-
-      _integrals.insert(INTEGRAL(int(integral_moose_enums[i])));
+      //mooseError("Domain integral type not yet implemented: "<<integral_moose_enums[i]);
     }
+
+    _integrals.insert(INTEGRAL(int(integral_moose_enums.get(i))));
   }
 
   if (isParamValid("output_variable"))
