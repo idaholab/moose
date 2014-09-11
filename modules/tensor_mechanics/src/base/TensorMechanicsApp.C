@@ -25,7 +25,10 @@
 #include "CrystalPlasticityRotationOutAux.h"
 #include "CosseratLinearElasticMaterial.h"
 
+#include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticMohrCoulomb.h"
+#include "TensorMechanicsPlasticWeakPlaneTensile.h"
+#include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -75,7 +78,10 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainMultiPlasticity);
   registerMaterial(CosseratLinearElasticMaterial);
 
+  registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticMohrCoulomb);
+  registerUserObject(TensorMechanicsPlasticWeakPlaneTensile);
+  registerUserObject(TensorMechanicsPlasticWeakPlaneTensileN);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);
