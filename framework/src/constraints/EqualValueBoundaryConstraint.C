@@ -33,15 +33,15 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const std::string & n
   std::vector<unsigned int> nodelist;
   std::vector<boundary_id_type> boundary_id_list;
   _mesh.getMesh().boundary_info->build_node_list(nodelist,boundary_id_list);
-  
+
   std::vector<unsigned int>::iterator in;
   std::vector<boundary_id_type>::iterator ib;
-  
+
   for (in = nodelist.begin(), ib = boundary_id_list.begin();
        in != nodelist.end() && ib != boundary_id_list.end();
        ++in, ++ib)
   {
-    if (*ib == _slave_boundary_id && *in != _master_node_id) 
+    if (*ib == _slave_boundary_id && *in != _master_node_id)
     {
       _connected_nodes.push_back(*in);
     }
