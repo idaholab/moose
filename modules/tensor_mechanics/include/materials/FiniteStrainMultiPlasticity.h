@@ -35,6 +35,15 @@ protected:
   /// Tolerance on the plastic strain increment ("direction") constraint
   Real _epp_tol;
 
+  /// Tolerance on the minimum ratio of singular values before flow-directions are deemed linearly dependent
+  Real _svd_tol;
+
+  /// Minimum value of the _f_tol parameters for the Yield Function User Objects
+  Real _min_f_tol;
+
+  /// When in the Newton-Raphson to deactivate constraints
+  MooseEnum _deactivation_scheme;
+
   /// Debug parameter - useful for coders, not for users (hopefully!)
   int _fspb_debug;
 
@@ -80,76 +89,97 @@ protected:
 
 
   /**
-   * The yield function(s)
+   * The active yield function(s)
    * @param stress the stress at which to calculate the yield function
    * @param intnl vector of internal parameters
+   * @param active set of active constraints - only the active yield functions are put into "f"
+   * @param num_active number of active constraints
    * @param f (output) the yield function (or functions in the case of multisurface plasticity)
    */
-  virtual void yieldFunction(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<Real> & f);
+  virtual void yieldFunction(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<Real> & f);
 
   /**
-   * The derivative of yield function(s) with respect to stress
+   * The derivative of the active yield function(s) with respect to stress
    * @param stress the stress at which to calculate the yield function
    * @param intnl vector of internal parameters
+   * @param active set of active constraints - only the active derivatives are put into "df_dstress"
+   * @param num_active number of active constraints
    * @param df_dstress (output) the derivative (or derivatives in the case of multisurface plasticity).  df_dstress[alpha](i, j) = dyieldFunction[alpha]/dstress(i, j)
    */
-  virtual void dyieldFunction_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankTwoTensor> & df_dstress);
+  virtual void dyieldFunction_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<RankTwoTensor> & df_dstress);
 
   /**
-   * The derivative of yield function(s) with respect to internal parameters
+   * The derivative of active yield function(s) with respect to their internal parameters (the user objects assume there is exactly one internal param per yield function)
    * @param stress the stress at which to calculate the yield function
    * @param intnl vector of internal parameters
-   * @param df_dintnl (output) the derivatives.  df_dstress[alpha][a] = dyieldFunction[alpha]/dintnl[a]
+   * @param active set of active constraints - only the active derivatives are put into "df_dintnl"
+   * @param num_active number of active constraints
+   * @param df_dintnl (output) the derivatives.  df_dstress[alpha] = dyieldFunction[alpha]/dintnl[alpha]
    */
-  virtual void dyieldFunction_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<std::vector<Real> > & df_dintnl);
+  virtual void dyieldFunction_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<Real> & df_dintnl);
 
   /**
-   * The flow potential(s) - one for each yield function
+   * The active flow potential(s) - one for each yield function
    * @param stress the stress at which to calculate the flow potential
    * @param intnl vector of internal parameters
+   * @param active set of active constraints - only the active flow potentials are put into "r"
+   * @param num_active number of active constraints
    * @param r (output) the flow potential (flow potentials in the multi-surface case)
    */
-  virtual void flowPotential(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankTwoTensor> & r);
+  virtual void flowPotential(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<RankTwoTensor> & r);
 
   /**
-   * The derivative of the flow potential(s) with respect to stress
+   * The derivative of the active flow potential(s) with respect to stress
    * @param stress the stress at which to calculate the flow potential
    * @param intnl vector of internal parameters
+   * @param active set of active constraints - only the active derivatives are put into "dr_dstress"
+   * @param num_active number of active constraints
    * @param dr_dstress (output) the derivative.  dr_dstress[alpha](i, j, k, l) = dr[alpha](i, j)/dstress(k, l)
    */
-  virtual void dflowPotential_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankFourTensor> & dr_dstress);
+  virtual void dflowPotential_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<RankFourTensor> & dr_dstress);
 
   /**
-   * The derivative of the flow potentials with respect to internal parameters
+   * The derivative of the active flow potentials with respect to the active internal parameters
+   * The UserObjects explicitly assume that r[alpha] is only dependent on intnl[alpha]
    * @param stress the stress at which to calculate the flow potential
    * @param intnl vector of internal parameters
-   * @param dr_dintnl (output) the derivatives.  dr_dintnl[alpha][a](i, j) = dr[alpha](i, j)/dintnl[a]
+   * @param active set of active constraints - only the active derivatives are put into "dr_dintnl"
+   * @param num_active number of active constraints
+   * @param dr_dintnl (output) the derivatives.  dr_dintnl[alpha](i, j) = dr[alpha](i, j)/dintnl[alpha]
    */
-  virtual void dflowPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<std::vector<RankTwoTensor> > & dr_dintnl);
+  virtual void dflowPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<RankTwoTensor> & dr_dintnl);
 
   /**
-   * The hardening potentials (one for each internal parameter and for each yield function)
+   * The active hardening potentials (one for each internal parameter and for each yield function)
+   * by assumption in the Userobjects, the h[a][alpha] is nonzero only for a = alpha, so we only calculate those here
    * @param stress the stress at which to calculate the hardening potential
    * @param intnl vector of internal parameters
-   * @param h (output) the hardening potentials.  h[a][alpha] = hardening potential for yield fcn alpha and internal param a
+   * @param active set of active constraints - only the active hardening potentials are put into "h"
+   * @param num_active number of active constraints
+   * @param h (output) the hardening potentials.  h[alpha] = hardening potential for yield fcn alpha and internal param a=alpha, by assumption in the userobjects this is only nonzero for a=alpha
    */
-  virtual void hardPotential(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<std::vector<Real> > & h);
+  virtual void hardPotential(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<Real> & h);
 
   /**
-   * The derivative of the hardening potentials with respect to stress
+   * The derivative of the active hardening potentials with respect to stress
+   * By assumption in the Userobjects, the h[a][alpha] is nonzero only for a = alpha, so we only calculate those here
    * @param stress the stress at which to calculate the hardening potentials
    * @param intnl vector of internal parameters
-   * @param dh_dstress (output) the derivative.  dh_dstress[a][alpha](i, j) = dh[a][alpha]/dstress(k, l)
+   * @param active set of active constraints - only the active derivatives are put into "dh_dstress"
+   * @param num_active number of active constraints
+   * @param dh_dstress (output) the derivative.  dh_dstress[a](i, j) = dh[a]/dstress(k, l)
    */
-  virtual void dhardPotential_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<std::vector<RankTwoTensor> > & dh_dstress);
+  virtual void dhardPotential_dstress(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<RankTwoTensor> & dh_dstress);
 
   /**
-   * The derivative of the hardening potential with respect to internal parameters
+   * The derivative of the active hardening potentials with respect to the active internal parameters
    * @param stress the stress at which to calculate the hardening potentials
    * @param intnl vector of internal parameters
-   * @param dh_dintnl (output) the derivatives.  dh_dintnl[a][alpha][b] = dh[a][alpha]/dintnl[b]
+   * @param active set of active constraints - only the active derivatives are put into "dh_dintnl"
+   * @param num_active number of active constraints
+   * @param dh_dintnl (output) the derivatives.  dh_dintnl[a][alpha][b] = dh[a][alpha]/dintnl[b].  Note that the userobjects assume that there is exactly one internal parameter per yield function, so the derivative is only nonzero for a=alpha=b, so that is all we calculate
    */
-  virtual void dhardPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<std::vector<std::vector<Real> > > & dh_dintnl);
+  virtual void dhardPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<Real> & dh_dintnl);
 
   /// Function called just before doing returnMap
   virtual void preReturnMap();
@@ -165,19 +195,51 @@ protected:
   // **********************************************************************
 
   /**
-   * The constraints.  These are set to zero (or <=0 in the case of the yield functions)
+   * The active constraints.  These are set to zero (or <=0 in the case of the yield functions)
    * by the Newton-Raphson process
    * @param stress The stress
    * @param intnl_old old values of the internal parameters
    * @param intnl internal parameters
    * @param pm Current value(s) of the plasticity multiplier(s) (consistency parameters)
    * @param delta_dp Change in plastic strain incurred so far during the return
-   * @param f (output) Yield function(s)
+   * @param f (output) Active yield function(s)
    * @param epp (output) Plastic-strain increment constraint
-   * @param ic (output) Internal-parameter constraint
+   * @param ic (output) Active internal-parameter constraint
+   * @param active The active constraints.  This is not modified if deactivate_if_linear_dependence = false, otherwise it may be modified
+   * @param deactivate_if_linear_dependence The "deactivated_due_to_ld" vector may be modified if linear dependence in the return directions is detected
+   * @param deactivated_due_to_ld This is not modified if deactivate_if_linear_dependence = false, otherwise it may be modified
    */
-  virtual void calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic);
+  virtual void calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active, const bool & deactivate_if_linear_dependence, std::vector<bool> & deactivated_due_to_ld);
 
+  /**
+   * Performs a number of singular-value decompositions
+   * to check for linear-dependence of the active directions "r"
+   * If linear dependence is found, then f, r, active and num_active is modified appropriately
+   * @param stress the current stress
+   * @param intnl the current values of internal parameters
+   * @param f (input/output) Upon output, these are the yield function values that are both active and not deactivated_due_to_ld
+   * @param r (input) the flow directions that for those yield functions that are active upon entry to this function
+   * @param active true if active
+   * @param num_active number of active yield functions
+   * @param (output) deactivated_due_to_ld Yield functions deactivated due to linearly-dependent flow directions
+   */
+  virtual void eliminateLinearDependence(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<Real> & f, const std::vector<RankTwoTensor> & r, const std::vector<bool> & active, unsigned num_active, std::vector<bool> & deactivated_due_to_ld);
+
+  /**
+   * Performs a singular-value decomposition of r and returns the singular values
+   *
+   * Example: If r has size 5 then the singular values of the following matrix are returned:
+   *     (  r[0](0,0) r[0](0,1) r[0](0,2) r[0](1,1) r[0](1,2) r[0](2,2)  )
+   *     (  r[1](0,0) r[1](0,1) r[1](0,2) r[1](1,1) r[1](1,2) r[1](2,2)  )
+   * a = (  r[2](0,0) r[2](0,1) r[2](0,2) r[2](1,1) r[2](1,2) r[2](2,2)  )
+   *     (  r[3](0,0) r[3](0,1) r[3](0,2) r[3](1,1) r[3](1,2) r[3](2,2)  )
+   *     (  r[4](0,0) r[4](0,1) r[4](0,2) r[4](1,1) r[4](1,2) r[4](2,2)  )
+   *
+   * @param r The flow directions
+   * @param s (output) The singular values
+   * @return The return value from the PETSc LAPACK gesvd reoutine
+   */
+  virtual int singularValuesOfR(const std::vector<RankTwoTensor> & r, std::vector<Real> & s);
   /**
    * Given the constraints, calculate the RHS which is
    * rhs = -(epp(0,0), epp(1,0), epp(1,1), epp(2,0), epp(2,1), epp(2,2), f[0], f[1], ..., f[num_f], ic[0], ic[1], ..., ic[num_ic])
@@ -185,18 +247,27 @@ protected:
    * @param epp Plastic strain increment constraint
    * @param f yield function(s)
    * @param ic internal constraint(s)
+   * @param rhs (output) the rhs
+   * @param active the active constraints
+   * @param deactivated_due_to_ld (output) constraints deactivated due to linear-dependence of flow directions
    */
-  virtual void calculateRHS(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & rhs);
+  virtual void calculateRHS(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & rhs, const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
 
   /**
    * The residual-squared
-   * @param f the yield function(s)
+   * @param pm the plastic multipliers for all constraints
+   * @param f the active yield function(s) (not including the ones that are deactivated_due_to_ld)
    * @param epp the plastic strain increment constraint
-   * @param ic the internal constraint(s)
+   * @param ic the active internal constraint(s) (not including the ones that are deactivated_due_to_ld)
+   * @param active true if constraint is active
+   * @param deactivated_due_to_ld true if constraint has been temporarily deactivated due to linear dependence of flow directions
    */
-  virtual Real residual2(const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic);
+  virtual Real residual2(const std::vector<Real> & pm, const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld);
 
-  virtual void calculateJacobian(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_inv, std::vector<std::vector<Real> > & jac);
+  /**
+   * d(rhs)/d(dof)
+   */
+  virtual void calculateJacobian(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_inv, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld, std::vector<std::vector<Real> > & jac);
 
   /**
    * Implements the return map
@@ -229,8 +300,10 @@ protected:
    * @param dstress (output) The change in stress for a full Newton step
    * @param dpm (output) The change in plasticity multiplier for a full Newton step
    * @param dintnl (output) The change in internal variable(s) for a full Newton step
+   * @param active The active constraints
+   * @param deactivated_due_to_ld (output) The constraints deactivated due to linear-dependence of the flow directions
    */
-  virtual void nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_inv, const RankTwoTensor & delta_dp, RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl);
+  virtual void nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_inv, const RankTwoTensor & delta_dp, RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl, const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
 
   /**
    * Performs a line search.  Algorithm is taken straight from
@@ -254,12 +327,15 @@ protected:
    * @param f (input/output) Yield function(s)
    * @param epp (input/output) Plastic strain increment constraint
    * @param ic (input/output) Internal constraint
+   * @param active The active constraints.  This is not modified, but can't be made "const" because of how calculateConstraints is coded
+   * @param deactivated_due_to_ld True if a constraint has temporarily been made deactive due to linear dependence.  This is not modified, but can't be made "const" because of how calculateConstraints is coded
    * @return true if successfully found a step that reduces the residual-squared
    */
-  virtual bool lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic);
+  virtual bool lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
 
 
  private:
+
 
   // Following are used for checking derivatives
 
@@ -289,9 +365,9 @@ protected:
    * The finite-difference derivative of the flow potentials with respect to internal parameters
    * @param stress the stress at which to calculate the flow potential
    * @param intnl vector of internal parameters
-   * @param dr_dintnl (output) the derivatives.  dr_dintnl[alpha][a](i, j) = dr[alpha](i, j)/dintnl[a]
+   * @param dr_dintnl (output) the derivatives.  dr_dintnl[alpha](i, j) = dr[alpha](i, j)/dintnl[alpha]
    */
-  virtual void fddflowPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<std::vector<RankTwoTensor> > & dr_dintnl);
+  virtual void fddflowPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankTwoTensor> & dr_dintnl);
 
   /**
    * Checks the full Jacobian, which is just certain
