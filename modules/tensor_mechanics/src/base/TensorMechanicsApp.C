@@ -26,6 +26,7 @@
 #include "CosseratLinearElasticMaterial.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
+#include "TensorMechanicsPlasticTensile.h"
 #include "TensorMechanicsPlasticMohrCoulomb.h"
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
@@ -79,6 +80,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(CosseratLinearElasticMaterial);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
+  registerUserObject(TensorMechanicsPlasticTensile);
   registerUserObject(TensorMechanicsPlasticMohrCoulomb);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensile);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileN);
