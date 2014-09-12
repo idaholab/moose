@@ -82,8 +82,9 @@
 
 [AuxKernels]
   [./yield_fcn_auxk]
-    type = MaterialRealAux
-    property = tensile_yield_function
+    type = MaterialStdVectorAux
+    property = plastic_yield_function
+    index = 0
     variable = yield_fcn
   [../]
 []
@@ -110,21 +111,28 @@
   [../]
 []
 
+[UserObjects]
+  [./mc]
+    type = TensorMechanicsPlasticTensile
+    tensile_strength = 1.0
+    yield_function_tolerance = 1E-3
+    tensile_tip_smoother = 0.5
+    internal_constraint_tolerance = 1E-9
+  [../]
+[]
+
 [Materials]
   [./mc]
-    type = FiniteStrainTensile
+    type = FiniteStrainMultiPlasticity
     block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    tensile_strength = 1.0
-    tensile_tip_smoother = 0.5
     fill_method = symmetric_isotropic
     C_ijkl = '0 2.0E6'
     max_NR_iterations = 1000
-    yield_function_tolerance = 1E-3
     ep_plastic_tolerance = 1E-9
-    internal_constraint_tolerance = 1E-9
+    plastic_models = mc
     debug_fspb = 1
   [../]
 []
