@@ -3,6 +3,7 @@
 
 #include "InitialCondition.h"
 #include "EBSDReader.h"
+#include "PolycrystalICTools.h"
 
 // Forward Declarations
 class ReconVarIC;

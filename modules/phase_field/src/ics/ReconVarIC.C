@@ -68,6 +68,8 @@ ReconVarIC::initialSetup()
 
   // Assign grains to each order parameter in a way that maximizes distance
   _assigned_op.resize(_grain_num);
+  //_assigned_op = PolycrystalICTools::AssignPointsToVariables(_centerpoints,_op_num, _mesh, _var, _range.size());
+
   std::vector<int> min_op_ind;
   std::vector<Real> min_op_dist;
   min_op_ind.resize(_op_num);
@@ -108,7 +110,7 @@ ReconVarIC::initialSetup()
         mx_ind = i;
 
     _assigned_op[grain] = mx_ind;
-  }
+    }
 }
 
 // Note that we are not actually using Point coordinates that get passed in to assign the order parameter.
