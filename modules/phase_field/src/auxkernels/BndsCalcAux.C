@@ -6,7 +6,7 @@ InputParameters validParams<BndsCalcAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addCoupledVar("v", "Array of coupled variables");
-  params.addRequiredParam<unsigned int>("crys_num", "number of grains");
+  params.addRequiredParam<unsigned int>("op_num", "number of grains");
   params.addRequiredParam<std::string>("var_name_base", "base for variable names");
 
   return params;
