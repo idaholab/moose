@@ -1,10 +1,10 @@
-#include "FiniteStrainTensile.h"
+#include "TensorMechanicsPlasticTensile.h"
 #include <math.h> // for M_PI
 
 template<>
-InputParameters validParams<FiniteStrainTensile>()
+InputParameters validParams<TensorMechanicsPlasticTensile>()
 {
-  InputParameters params = validParams<FiniteStrainPlasticBase>();
+  InputParameters params = validParams<TensorMechanicsPlasticModel>();
   params.addRequiredRangeCheckedParam<Real>("tensile_strength", "tensile_strength>=0", "Tensile strength");
   params.addParam<Real>("tensile_strength_residual", "Tensile strength at infinite hardening.  If not given, this defaults to tensile_strength, ie, perfect plasticity");
   params.addRangeCheckedParam<Real>("tensile_strength_rate", 0, "tensile_strength_rate>=0", "Tensile strength = tensile_strength_residual + (tensile_strength - tensile_strength_residual)*exp(-tensile_strength_rate*plasticstrain).  Set to zero for perfect plasticity");
@@ -16,21 +16,17 @@ InputParameters validParams<FiniteStrainTensile>()
   return params;
 }
 
-FiniteStrainTensile::FiniteStrainTensile(const std::string & name,
+TensorMechanicsPlasticTensile::TensorMechanicsPlasticTensile(const std::string & name,
                                                          InputParameters parameters) :
-    FiniteStrainPlasticBase(name, parameters),
+    TensorMechanicsPlasticModel(name, parameters),
     _tensile_strength0(getParam<Real>("tensile_strength")),
     _tensile_strength_residual(parameters.isParamValid("tensile_strength_residual") ? getParam<Real>("tensile_strength_residual") : _tensile_strength0),
     _tensile_strength_rate(getParam<Real>("tensile_strength_rate")),
     _small_smoother2(std::pow(getParam<Real>("tensile_tip_smoother"), 2)),
     _tt(getParam<Real>("tensile_edge_smoother")*M_PI/180.0),
     _sin3tt(std::sin(3*_tt)),
-    _lode_cutoff(parameters.isParamValid("tensile_lode_cutoff") ? getParam<Real>("tensile_lode_cutoff") : 1.0E-5*std::pow(_f_tol[0], 2)),
+    _lode_cutoff(parameters.isParamValid("tensile_lode_cutoff") ? getParam<Real>("tensile_lode_cutoff") : 1.0E-5*std::pow(_f_tol, 2))
 
-    _tensile_internal(declareProperty<Real>("tensile_internal")),
-    _tensile_internal_old(declarePropertyOld<Real>("tensile_internal")),
-    _tensile_max_principal(declareProperty<Real>("tensile_max_principal_stress")),
-    _yf(declareProperty<Real>("tensile_yield_function"))
 {
   if (_lode_cutoff < 0)
     mooseError("tensile_lode_cutoff must not be negative");
@@ -39,41 +35,9 @@ FiniteStrainTensile::FiniteStrainTensile(const std::string & name,
   _aaa = -std::sin(_tt)/std::sqrt(3.0) - _bbb*std::sin(3*_tt) - _ccc*std::pow(std::sin(3*_tt), 2) + std::cos(_tt);
 }
 
-void FiniteStrainTensile::initQpStatefulProperties()
-{
-  _tensile_internal[_qp] = 0;
-  _tensile_internal_old[_qp] = 0;
-  _tensile_max_principal[_qp] = 0;
-  _yf[_qp] = 0.0;
-  FiniteStrainPlasticBase::initQpStatefulProperties();
-}
 
-
-void
-FiniteStrainTensile::postReturnMap()
-{
-  // Record the value of the yield function
-  _yf[_qp] = _f[_qp][0];
-
-  // Record the value of the internal parameter
-  _tensile_internal[_qp] = _intnl[_qp][0];
-
-  // Record the maximum principal stress
-  std::vector<Real> eigvals;
-  _stress[_qp].symmetricEigenvalues(eigvals);
-  _tensile_max_principal[_qp] = eigvals[2];
-}
-
-
-
-unsigned int
-FiniteStrainTensile::numberOfInternalParameters()
-{
-  return 1;
-}
-
-void
-FiniteStrainTensile::yieldFunction(const RankTwoTensor &stress, const std::vector<Real> & intnl, std::vector<Real> & f)
+Real
+TensorMechanicsPlasticTensile::yieldFunction(const RankTwoTensor & stress, const Real & intnl) const
 {
   Real mean_stress = stress.trace()/3.0;
   Real sin3Lode = stress.sin3Lode(_lode_cutoff, 0);
@@ -82,19 +46,20 @@ FiniteStrainTensile::yieldFunction(const RankTwoTensor &stress, const std::vecto
     // the non-edge-smoothed version
     std::vector<Real> eigvals;
     stress.symmetricEigenvalues(eigvals);
-    f.assign(1, mean_stress + std::sqrt(_small_smoother2 + std::pow(eigvals[2] - mean_stress, 2)) - tensile_strength(intnl[0]));
+    return mean_stress + std::sqrt(_small_smoother2 + std::pow(eigvals[2] - mean_stress, 2)) - tensile_strength(intnl);
   }
   else
   {
     // the edge-smoothed version
     Real kk = _aaa + _bbb*sin3Lode + _ccc*std::pow(sin3Lode, 2);
     Real sibar2 = stress.secondInvariant();
-    f.assign(1, mean_stress + std::sqrt(_small_smoother2 + sibar2*std::pow(kk, 2)) - tensile_strength(intnl[0]));
+    return mean_stress + std::sqrt(_small_smoother2 + sibar2*std::pow(kk, 2)) - tensile_strength(intnl);
   }
 }
 
-void
-FiniteStrainTensile::dyieldFunction_dstress(const RankTwoTensor & stress, const std::vector<Real> & /*intnl*/, std::vector<RankTwoTensor> & df_dstress)
+
+RankTwoTensor
+TensorMechanicsPlasticTensile::dyieldFunction_dstress(const RankTwoTensor & stress, const Real & intnl) const
 {
   Real mean_stress = stress.trace()/3.0;
   RankTwoTensor dmean_stress = stress.dtrace()/3.0;
@@ -106,7 +71,7 @@ FiniteStrainTensile::dyieldFunction_dstress(const RankTwoTensor & stress, const 
     std::vector<RankTwoTensor> deigvals;
     stress.dsymmetricEigenvalues(eigvals, deigvals);
     Real denom = std::sqrt(_small_smoother2 + std::pow(eigvals[2] - mean_stress, 2));
-    df_dstress.assign(1, dmean_stress + (eigvals[2] - mean_stress)*(deigvals[2] - dmean_stress)/denom);
+    return dmean_stress + (eigvals[2] - mean_stress)*(deigvals[2] - dmean_stress)/denom;
   }
   else
   {
@@ -116,26 +81,26 @@ FiniteStrainTensile::dyieldFunction_dstress(const RankTwoTensor & stress, const 
     Real sibar2 = stress.secondInvariant();
     RankTwoTensor dsibar2 = stress.dsecondInvariant();
     Real denom = std::sqrt(_small_smoother2 + sibar2*std::pow(kk, 2));
-    df_dstress.assign(1, dmean_stress + (0.5*dsibar2*std::pow(kk, 2) + sibar2*kk*dkk)/denom);
+    return dmean_stress + (0.5*dsibar2*std::pow(kk, 2) + sibar2*kk*dkk)/denom;
   }
 }
 
-void
-FiniteStrainTensile::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, const std::vector<Real> & intnl, std::vector<std::vector<Real> > & df_dintnl)
+
+Real
+TensorMechanicsPlasticTensile::dyieldFunction_dintnl(const RankTwoTensor & stress, const Real & intnl) const
 {
-  df_dintnl.resize(1);
-  df_dintnl[0].assign(1, - dtensile_strength(intnl[0]));
+  return -dtensile_strength(intnl);
 }
 
-void
-FiniteStrainTensile::flowPotential(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<RankTwoTensor> & r)
+RankTwoTensor
+TensorMechanicsPlasticTensile::flowPotential(const RankTwoTensor & stress, const Real & intnl) const
 {
   // This plasticity is associative so
-  dyieldFunction_dstress(stress, intnl, r);
+  return dyieldFunction_dstress(stress, intnl);
 }
 
-void
-FiniteStrainTensile::dflowPotential_dstress(const RankTwoTensor & stress, const std::vector<Real> & /*intnl*/, std::vector<RankFourTensor> & dr_dstress)
+RankFourTensor
+TensorMechanicsPlasticTensile::dflowPotential_dstress(const RankTwoTensor & stress, const Real & intnl) const
 {
   Real mean_stress = stress.trace()/3.0;
   RankTwoTensor dmean_stress = stress.dtrace()/3.0;
@@ -151,12 +116,13 @@ FiniteStrainTensile::dflowPotential_dstress(const RankTwoTensor & stress, const 
 
     Real denom = std::sqrt(_small_smoother2 + std::pow(eigvals[2] - mean_stress, 2));
 
-    dr_dstress.assign(1, (eigvals[2] - mean_stress)*d2eigvals[2]/denom);
+    RankFourTensor dr_dstress = (eigvals[2] - mean_stress)*d2eigvals[2]/denom;
     for (unsigned i = 0 ; i < 3 ; ++i)
       for (unsigned j = 0 ; j < 3 ; ++j)
         for (unsigned k = 0 ; k < 3 ; ++k)
           for (unsigned l = 0 ; l < 3 ; ++l)
-            dr_dstress[0](i, j, k, l) += (1 - std::pow((eigvals[2] - mean_stress)/denom, 2))*(deigvals[2](i, j) - dmean_stress(i, j))*(deigvals[2](k, l) - dmean_stress(k, l))/denom;
+            dr_dstress(i, j, k, l) += (1 - std::pow((eigvals[2] - mean_stress)/denom, 2))*(deigvals[2](i, j) - dmean_stress(i, j))*(deigvals[2](k, l) - dmean_stress(k, l))/denom;
+    return dr_dstress;
   }
   else
   {
@@ -176,57 +142,34 @@ FiniteStrainTensile::dflowPotential_dstress(const RankTwoTensor & stress, const 
     RankFourTensor d2sibar2 = stress.d2secondInvariant();
 
     Real denom = std::sqrt(_small_smoother2 + sibar2*std::pow(kk, 2));
-    dr_dstress.assign(1, (0.5*d2sibar2*std::pow(kk, 2) + sibar2*kk*d2kk)/denom);
+    RankFourTensor dr_dstress = (0.5*d2sibar2*std::pow(kk, 2) + sibar2*kk*d2kk)/denom;
     for (unsigned i = 0 ; i < 3 ; ++i)
       for (unsigned j = 0 ; j < 3 ; ++j)
         for (unsigned k = 0 ; k < 3 ; ++k)
           for (unsigned l = 0 ; l < 3 ; ++l)
           {
-            dr_dstress[0](i, j, k, l) += (dsibar2(i, j)*dkk(k, l)*kk + dkk(i, j)*dsibar2(k, l)*kk + sibar2*dkk(i, j)*dkk(k, l))/denom;
-            dr_dstress[0](i, j, k, l) -= (0.5*dsibar2(i, j)*std::pow(kk, 2) + sibar2*kk*dkk(i, j))*(0.5*dsibar2(k, l)*std::pow(kk, 2) + sibar2*kk*dkk(k, l))/std::pow(denom, 3);
+            dr_dstress(i, j, k, l) += (dsibar2(i, j)*dkk(k, l)*kk + dkk(i, j)*dsibar2(k, l)*kk + sibar2*dkk(i, j)*dkk(k, l))/denom;
+            dr_dstress(i, j, k, l) -= (0.5*dsibar2(i, j)*std::pow(kk, 2) + sibar2*kk*dkk(i, j))*(0.5*dsibar2(k, l)*std::pow(kk, 2) + sibar2*kk*dkk(k, l))/std::pow(denom, 3);
           }
+    return dr_dstress;
   }
-
 }
 
-void
-FiniteStrainTensile::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, const std::vector<Real> & /*intnl*/, std::vector<std::vector<RankTwoTensor> > & dr_dintnl)
+RankTwoTensor
+TensorMechanicsPlasticTensile::dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const
 {
-  dr_dintnl.resize(1);
-  dr_dintnl[0].assign(1, RankTwoTensor());
-}
-
-void
-FiniteStrainTensile::hardPotential(const RankTwoTensor & /*stress*/, const std::vector<Real> & /*intnl*/, std::vector<std::vector<Real> > & h)
-{
-  h.resize(1);
-  h[0].assign(1, -1.0);
-}
-
-void
-FiniteStrainTensile::dhardPotential_dstress(const RankTwoTensor & /*stress*/, const std::vector<Real> & /*intnl*/, std::vector<std::vector<RankTwoTensor> > & dh_dstress)
-{
-  dh_dstress.resize(1);
-  dh_dstress[0].assign(1, RankTwoTensor());
-}
-
-void
-FiniteStrainTensile::dhardPotential_dintnl(const RankTwoTensor & /*stress*/, const std::vector<Real> & /*intnl*/, std::vector<std::vector<std::vector<Real> > > & dh_dintnl)
-{
-  dh_dintnl.resize(1);
-  dh_dintnl[0].resize(1);
-  dh_dintnl[0][0].assign(1, 0.0);
+  return RankTwoTensor();
 }
 
 
 Real
-FiniteStrainTensile::tensile_strength(const Real internal_param)
+TensorMechanicsPlasticTensile::tensile_strength(const Real internal_param) const
 {
   return _tensile_strength_residual + (_tensile_strength0 - _tensile_strength_residual)*std::exp(-_tensile_strength_rate*internal_param);
 }
 
 Real
-FiniteStrainTensile::dtensile_strength(const Real internal_param)
+TensorMechanicsPlasticTensile::dtensile_strength(const Real internal_param) const
 {
   return -_tensile_strength_rate*(_tensile_strength0 - _tensile_strength_residual)*std::exp(-_tensile_strength_rate*internal_param);
 }
