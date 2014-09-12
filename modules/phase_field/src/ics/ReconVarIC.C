@@ -68,49 +68,9 @@ ReconVarIC::initialSetup()
 
   // Assign grains to each order parameter in a way that maximizes distance
   _assigned_op.resize(_grain_num);
-  //_assigned_op = PolycrystalICTools::AssignPointsToVariables(_centerpoints,_op_num, _mesh, _var, _range.size());
 
-  std::vector<int> min_op_ind;
-  std::vector<Real> min_op_dist;
-  min_op_ind.resize(_op_num);
-  min_op_dist.resize(_op_num);
-  for (unsigned int grain=0; grain < _grain_num; grain++)
-  {
-    // Determine the distance to the closest center assigned to each order parameter
-    if (grain >= _op_num)
-    {
-      // We can set the array to the distances to the grains 0.._op_num-1 (see assignment in the else case)
-      for (unsigned int i=0; i<_op_num; ++i)
-      {
-        min_op_dist[i] = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
-        min_op_ind[_assigned_op[i]] = i;
-      }
+  _assigned_op = PolycrystalICTools::AssignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
 
-      // Now check if any of the extra grains are even closer
-      for (unsigned int i=_op_num; i<grain; ++i)
-      {
-        Real dist = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
-        if (min_op_dist[_assigned_op[i]] > dist)
-        {
-          min_op_dist[_assigned_op[i]] = dist;
-          min_op_ind[_assigned_op[i]] = i;
-        }
-      }
-    }
-    else
-    {
-      _assigned_op[grain] = grain;
-      continue;
-    }
-
-    // Assign the current center point to the order parameter that is furthest away.
-    unsigned int mx_ind = 0;
-    for (unsigned int i = 1; i < _op_num; i++) // Find index of max
-      if (min_op_dist[mx_ind] < min_op_dist[i])
-        mx_ind = i;
-
-    _assigned_op[grain] = mx_ind;
-    }
 }
 
 // Note that we are not actually using Point coordinates that get passed in to assign the order parameter.
