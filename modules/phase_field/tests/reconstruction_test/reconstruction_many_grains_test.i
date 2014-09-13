@@ -19,7 +19,7 @@
 [ICs]
   [./PolycrystalICs]
     [./ReconVarIC]
-	ebsd_reader = ebsd
+      ebsd_reader = ebsd
     [../]
   [../]
 []
