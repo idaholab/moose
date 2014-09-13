@@ -489,20 +489,24 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
 
     // Check Kuhn-Tucker conditions
     kuhn_tucker = true;
+    unsigned ind = 0;
     for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
     {
+      if (act[alpha])
+        if (f[ind++] < -_f[alpha]->_f_tol)
+          if (pm[alpha] != 0)
+          {
+            kuhn_tucker = false;
+            act[alpha] = false;
+          }
+    }
+    for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
       if (pm[alpha] < 0)
       {
         kuhn_tucker = false;
         act[alpha] = false;
       }
-      if (f[alpha] < -_f[alpha]->_f_tol)
-        if (pm[alpha] != 0)
-        {
-          kuhn_tucker = false;
-          act[alpha] = false;
-        }
-    }
+
 
     if (!kuhn_tucker)
     {
