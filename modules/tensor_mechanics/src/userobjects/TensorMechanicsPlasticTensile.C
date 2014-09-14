@@ -59,7 +59,7 @@ TensorMechanicsPlasticTensile::yieldFunction(const RankTwoTensor & stress, const
 
 
 RankTwoTensor
-TensorMechanicsPlasticTensile::dyieldFunction_dstress(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticTensile::dyieldFunction_dstress(const RankTwoTensor & stress, const Real & /*intnl*/) const
 {
   Real mean_stress = stress.trace()/3.0;
   RankTwoTensor dmean_stress = stress.dtrace()/3.0;
@@ -87,7 +87,7 @@ TensorMechanicsPlasticTensile::dyieldFunction_dstress(const RankTwoTensor & stre
 
 
 Real
-TensorMechanicsPlasticTensile::dyieldFunction_dintnl(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticTensile::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, const Real & intnl) const
 {
   return -dtensile_strength(intnl);
 }
@@ -100,7 +100,7 @@ TensorMechanicsPlasticTensile::flowPotential(const RankTwoTensor & stress, const
 }
 
 RankFourTensor
-TensorMechanicsPlasticTensile::dflowPotential_dstress(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticTensile::dflowPotential_dstress(const RankTwoTensor & stress, const Real & /*intnl*/) const
 {
   Real mean_stress = stress.trace()/3.0;
   RankTwoTensor dmean_stress = stress.dtrace()/3.0;
@@ -156,7 +156,7 @@ TensorMechanicsPlasticTensile::dflowPotential_dstress(const RankTwoTensor & stre
 }
 
 RankTwoTensor
-TensorMechanicsPlasticTensile::dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticTensile::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const
 {
   return RankTwoTensor();
 }
