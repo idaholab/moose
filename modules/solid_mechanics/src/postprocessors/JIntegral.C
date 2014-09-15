@@ -9,6 +9,8 @@ InputParameters validParams<JIntegral>()
   params.addCoupledVar("q", "The q function, aux variable");
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
   params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front corresponding to this q function");
+  params.addParam<bool>("convert_J_to_K",false,"Convert J-integral to stress intensity factor K.");
+  params.addParam<Real>("youngs_modulus","Young's modulus of the material.");
   params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
@@ -24,7 +26,9 @@ JIntegral::JIntegral(const std::string & name, InputParameters parameters):
     _Eshelby_tensor(getMaterialProperty<ColumnMajorMatrix>("Eshelby_tensor")),
     _J_thermal_term_vec(hasMaterialProperty<RealVectorValue>("J_thermal_term_vec")?
                         &getMaterialProperty<RealVectorValue>("J_thermal_term_vec"):
-                        NULL)
+                        NULL),
+    _convert_J_to_K(getParam<bool>("convert_J_to_K")),
+    _youngs_modulus(getParam<Real>("youngs_modulus"))
 {
 }
 
@@ -47,6 +51,9 @@ JIntegral::initialSetup()
       mooseError("crack_front_node_index must be specified in JIntegral");
     }
   }
+
+  if (_convert_J_to_K && !isParamValid("youngs_modulus"))
+    mooseError("youngs_modulus must be specified if convert_J_to_K = true");
 }
 
 Real
@@ -84,4 +91,16 @@ JIntegral::computeQpIntegral()
   Real etot = -eq + eq_thermal;
 
   return etot/q_avg_seg;
+}
+
+Real
+JIntegral::getValue()
+{
+  gatherSum(_integral_value);
+
+  Real sign = (_integral_value > 0.0) ? 1.0 : ((_integral_value < 0.0) ? -1.0: 0.0);
+  if (_convert_J_to_K)
+    _integral_value = sign * std::sqrt(std::abs(_integral_value) * _youngs_modulus);
+
+  return _integral_value;
 }
