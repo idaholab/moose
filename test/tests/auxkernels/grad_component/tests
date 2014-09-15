@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'grad_component.i'
+    exodiff = 'grad_component_out.e'
+  [../]
+[]
