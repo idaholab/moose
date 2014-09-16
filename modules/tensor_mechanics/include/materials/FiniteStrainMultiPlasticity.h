@@ -271,6 +271,8 @@ protected:
    */
   virtual Real residual2(const std::vector<Real> & pm, const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld);
 
+  Real extra_trial(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld);
+
   /**
    * d(rhs)/d(dof)
    */
