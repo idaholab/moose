@@ -576,6 +576,21 @@ public:
    * @param blocks The blocks to fill in (JacobianBlock is defined in ComputeJacobianBlocksThread)
    */
   virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks);
+
+  /**
+   * Really not a good idea to use this.
+   *
+   * It computes just one block of the Jacobian into a smaller matrix.  Calling this in a loop is EXTREMELY ineffecient!
+   * Try to use computeJacobianBlocks() instead!
+   *
+   * @param jacobian The matrix you want to fill
+   * @param precond_system The libMesh::system of the preconditioning system
+   * @param ivar the block-row of the Jacobian
+   * @param jvar the block-column of the Jacobian
+   *
+   */
+  virtual void computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
+
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
   /**

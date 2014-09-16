@@ -3329,6 +3329,16 @@ FEProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 }
 
 void
+FEProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+{
+  std::vector<JacobianBlock *> blocks;
+  JacobianBlock * block = new JacobianBlock(precond_system, jacobian, ivar, jvar);
+  blocks.push_back(block);
+  computeJacobianBlocks(blocks);
+  delete block;
+}
+
+void
 FEProblem::computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number>& lower, NumericVector<Number>& upper)
 {
   if (!_nl.hasVector("lower_bound") || !_nl.hasVector("upper_bound")) return;
