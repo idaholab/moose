@@ -91,7 +91,7 @@
     type = 'Exodiff'
     input = 'uni_axial2.i'
     exodiff = 'uni_axial2.e'
-    rel_err = 1.0E-5
+    rel_err = 4.0E-4
     abs_zero = 1.0E-4
     heavy = true
   [../]
@@ -99,7 +99,7 @@
     type = 'Exodiff'
     input = 'uni_axial3.i'
     exodiff = 'uni_axial3.e'
-    rel_err = 1.0E-5
+    rel_err = 4.0E-4
     abs_zero = 1.0E-4
     heavy = true
   [../]
