@@ -52,6 +52,7 @@ protected:
   VariableName _disp_x;
   VariableName _disp_y;
   VariableName _disp_z;
+  bool _convert_J_to_K;
   bool _use_displaced_mesh;
 };
 
