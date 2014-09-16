@@ -81,7 +81,7 @@ protected:
   MaterialProperty<std::vector<Real> > & _yf;
 
   /// Number of Newton-Raphson iterations used in the return-map
-  MaterialProperty<unsigned int> & _iter;
+  MaterialProperty<Real> & _iter;
 
   /// User objects that define the yield functions, flow potentials, etc
   std::vector<const TensorMechanicsPlasticModel *> _f;
@@ -181,12 +181,6 @@ protected:
    */
   virtual void dhardPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<Real> & dh_dintnl);
 
-  /// Function called just before doing returnMap
-  virtual void preReturnMap();
-
-  /// Function called just after doing returnMap
-  virtual void postReturnMap();
-
 
   // **********************************************************************
   // *                                                                    *
@@ -240,6 +234,19 @@ protected:
    * @return The return value from the PETSc LAPACK gesvd reoutine
    */
   virtual int singularValuesOfR(const std::vector<RankTwoTensor> & r, std::vector<Real> & s);
+
+  /**
+   * makes all deactivated_due_to_ld false, and if >0 of them were initially true, returns true
+   */
+  virtual bool reinstateLinearDependentConstraints(std::vector<bool> & deactivated_due_to_ld);
+
+
+  /**
+   * counts the number of active constraints
+   */
+  virtual unsigned int numberActive(const std::vector<bool> & active);
+
+
   /**
    * Given the constraints, calculate the RHS which is
    * rhs = -(epp(0,0), epp(1,0), epp(1,1), epp(2,0), epp(2,1), epp(2,2), f[0], f[1], ..., f[num_f], ic[0], ic[1], ..., ic[num_ic])
@@ -276,10 +283,10 @@ protected:
    * @param intnl_old The internal variables at the previous "time" step
    * @param delta_d  The total strain increment for this "time" step
    * @param E_ijkl   The elasticity tensor.  If no plasiticity then sig_new = sig_old + E_ijkl*delta_d
-   * @param sress    (output) The stress after returning to the yield surface
+   * @param stress    (output) The stress after returning to the yield surface
    * @param plastic_strain   (output) The value of plastic strain after returning to the yield surface
-   * @param intnl    (output) The internal variables after returning to the yield surface
-   * @param f  (output) The yield functions after returning to the yield surface
+   * @param intnl    (output) All the internal variables after returning to the yield surface
+   * @param f  (output) All the yield functions after returning to the yield surface
    * @param iter (output) The number of Newton-Raphson iterations used
    * @return true if the stress was successfully returned to the yield surface
    * Note that this algorithm doesn't do any rotations.  In order to find the
@@ -298,8 +305,8 @@ protected:
    * @param E_inv inverse of the elasticity tensor
    * @param delta_dp  Current value of the plastic-strain increment (ie plastic_strain - plastic_strain_old)
    * @param dstress (output) The change in stress for a full Newton step
-   * @param dpm (output) The change in plasticity multiplier for a full Newton step
-   * @param dintnl (output) The change in internal variable(s) for a full Newton step
+   * @param dpm (output) The change in all plasticity multipliers for a full Newton step
+   * @param dintnl (output) The change in all internal variables for a full Newton step
    * @param active The active constraints
    * @param deactivated_due_to_ld (output) The constraints deactivated due to linear-dependence of the flow directions
    */
@@ -324,14 +331,49 @@ protected:
    * @param dstress Change in stress for a full Newton step
    * @param dpm Change in plasticity multiplier for a full Newton step
    * @param dintnl change in internal parameter(s) for a full Newton step
-   * @param f (input/output) Yield function(s)
+   * @param f (input/output) Yield function(s).  In this routine, only the active constraints that are not deactivated_due_to_ld are contained in f.
    * @param epp (input/output) Plastic strain increment constraint
-   * @param ic (input/output) Internal constraint
+   * @param ic (input/output) Internal constraint.  In this routine, only the active constraints that are not deactivated_due_to_ld are contained in ic.
    * @param active The active constraints.  This is not modified, but can't be made "const" because of how calculateConstraints is coded
    * @param deactivated_due_to_ld True if a constraint has temporarily been made deactive due to linear dependence.  This is not modified, but can't be made "const" because of how calculateConstraints is coded
    * @return true if successfully found a step that reduces the residual-squared
    */
   virtual bool lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
+
+
+  /**
+   * Performs a single Newton-Raphson + linesearch step
+   * Constraints are deactivated and the step is re-done if
+   * deactivation_scheme is set appropriately
+   * @param nr_res2 (input/output) Residual-squared that the line-search will reduce
+   * @param stress (input/output) stress
+   * @param intnl_old (input) old values of the internal parameters
+   * @param intnl (input/output) internal parameters
+   * @param pm (input/output) plastic multipliers
+   * @param delta_dp (input/output) Change in plastic strain from start of "time" step to current configuration (plastic_strain - plastic_strain_old)
+   * @param E_inv (input) Inverse of the elasticity tensor
+   * @param f (input/output) Yield function(s).  Upon successful exit only the active constraints are contained in f
+   * @param epp (input/output) Plastic strain increment constraint
+   * @param ic (input/output) Internal constraint.  Upon successful exit only the active constraints are contained in ic
+   * @param active The active constraints.  This is may be modified, depending upon deactivation_scheme
+   * @param deactivation_scheme The scheme used for deactivating constraints
+   * @return true if the step was successful, ie, if the linesearch was successful and the number of constraints wasn't reduced to zero via deactivation
+   */
+  virtual bool singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<Real> & f,RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, const MooseEnum & deactivation_scheme);
+
+  /**
+   * Checks Kuhn-Tucker conditions, and alters "active" if appropriate.
+   * Do not let the simplicity of this routine fool you!
+   * Explicitly:
+   * (1) checks that pm = 0 for all the f < 0.  If not, then active is set to false for that constraint.  This may be triggered if upon exit of the NR loops a constraint got deactivated due to linear dependence, and then f<0 and its pm>0.
+   * (2) checks that pm = 0 for all inactive constraints.  This should always be true unless someone has screwed with the code.
+   * (3) if any pm < 0, then active is set to false for that constraint.  This may be triggered if _deactivation_scheme!="optimized".
+   * @param f values of the active yield functions
+   * @param pm values of all the plastic multipliers
+   * @param active the active constraints (true if active)
+   * @param return false if any of the Kuhn-Tucker conditions were violated (and hence the set of active constraints was changed)
+   */
+  virtual bool checkAndApplyKuhnTucker(const std::vector<Real> & f, const std::vector<Real> & pm, std::vector<bool> & active);
 
 
  private:

@@ -1,4 +1,4 @@
-# The no_trap_fpe is because the SVD in LAPACK calls a ieeeck routine which explicitly tries to cause exceptions by calculating 1/0 etc
+# The no-trap-fpe is because the SVD in LAPACK calls a ieeeck routine which explicitly tries to cause exceptions by calculating 1/0 etc
 [Tests]
   [./two_surface01]
     type = 'CSVDiff'
@@ -6,7 +6,7 @@
     csvdiff = 'two_surface01.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./two_surface02]
     type = 'CSVDiff'
@@ -14,7 +14,7 @@
     csvdiff = 'two_surface02.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./two_surface03]
     type = 'CSVDiff'
@@ -22,7 +22,7 @@
     csvdiff = 'two_surface03.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./two_surface04]
     type = 'CSVDiff'
@@ -30,7 +30,7 @@
     csvdiff = 'two_surface04.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./two_surface05]
     type = 'CSVDiff'
@@ -38,7 +38,7 @@
     csvdiff = 'two_surface05.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
 
   [./three_surface00]
@@ -47,7 +47,7 @@
     csvdiff = 'three_surface00.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface01]
     type = 'CSVDiff'
@@ -55,7 +55,7 @@
     csvdiff = 'three_surface01.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface02]
     type = 'CSVDiff'
@@ -63,7 +63,7 @@
     csvdiff = 'three_surface02.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface03]
     type = 'CSVDiff'
@@ -71,7 +71,7 @@
     csvdiff = 'three_surface03.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface04]
     type = 'CSVDiff'
@@ -79,7 +79,7 @@
     csvdiff = 'three_surface04.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface05]
     type = 'CSVDiff'
@@ -87,7 +87,7 @@
     csvdiff = 'three_surface05.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface06]
     type = 'CSVDiff'
@@ -95,7 +95,7 @@
     csvdiff = 'three_surface06.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface07]
     type = 'CSVDiff'
@@ -103,7 +103,7 @@
     csvdiff = 'three_surface07.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface08]
     type = 'CSVDiff'
@@ -111,7 +111,7 @@
     csvdiff = 'three_surface08.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface09]
     type = 'CSVDiff'
@@ -119,7 +119,7 @@
     csvdiff = 'three_surface09.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface10]
     type = 'CSVDiff'
@@ -127,7 +127,7 @@
     csvdiff = 'three_surface10.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface11]
     type = 'CSVDiff'
@@ -135,7 +135,7 @@
     csvdiff = 'three_surface11.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface12]
     type = 'CSVDiff'
@@ -143,7 +143,7 @@
     csvdiff = 'three_surface12.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface13]
     type = 'CSVDiff'
@@ -151,7 +151,7 @@
     csvdiff = 'three_surface13.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
 
   [./three_surface14]
@@ -160,7 +160,7 @@
     csvdiff = 'three_surface14.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface15]
     type = 'CSVDiff'
@@ -168,7 +168,7 @@
     csvdiff = 'three_surface15.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface16]
     type = 'CSVDiff'
@@ -176,7 +176,7 @@
     csvdiff = 'three_surface16.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface20]
     type = 'CSVDiff'
@@ -184,7 +184,7 @@
     csvdiff = 'three_surface20.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface21]
     type = 'CSVDiff'
@@ -192,7 +192,7 @@
     csvdiff = 'three_surface21.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
   [./three_surface22]
     type = 'CSVDiff'
@@ -200,6 +200,6 @@
     csvdiff = 'three_surface22.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no_trap_fpe'
+    cli_args = '--no-trap-fpe'
   [../]
 []
