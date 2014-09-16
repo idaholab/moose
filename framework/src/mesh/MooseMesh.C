@@ -416,24 +416,33 @@ MooseMesh::meshChanged()
   // Rebuild the active local element range
   delete _active_local_elem_range;
   _active_local_elem_range = NULL;
+
   // Rebuild the node range
   delete _active_node_range;
   _active_node_range = NULL;
+
   // Rebuild the semilocal range
   delete _active_semilocal_node_range;
   _active_semilocal_node_range = NULL;
+
   // Rebuild the local node range
   delete _local_node_range;
   _local_node_range = NULL;
+
   // Rebuild the boundary node range
   delete _bnd_node_range;
   _bnd_node_range = NULL;
+
+  // Rebuild the boundary element rage
+  delete _bnd_elem_range;
+  _bnd_elem_range = NULL;
 
   // Rebuild the ranges
   getActiveLocalElementRange();
   getActiveNodeRange();
   getLocalNodeRange();
   getBoundaryNodeRange();
+  getBoundaryElementRange();
 
   // Lets the output system know that the mesh has changed recently.
   _is_changed = true;
