@@ -113,6 +113,8 @@ FiniteStrainMultiPlasticity::computeQpStress()
    * is difficult
    */
 
+  // NOTE: perhaps i should optimise for purely elastic
+
   bool return_successful = false;
 
   // number of subdivisions of the strain increment currently being tried
@@ -307,11 +309,11 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
   // value to the yield surface.  There are three
   // types of constraints we have to satisfy, listed
   // below, and calculated in calculateConstraints(...)
+  // f<=0, epp=0, ic=0 (up to tolerances), and these are
+  //     guaranteed to hold if nr_res2<=0.5
   //
   // Kuhn-Tucker conditions must also be satisfied
   // These are:
-  // f<=0, epp=0, ic=0 (up to tolerances), and these are
-  //     guaranteed to hold if nr_res2<=0.5
   // pm>=0, which may not hold upon exit of the NR loops
   //     due to _deactivation_scheme!="optimized";
   // pm*f=0 (up to tolerances), which may not hold upon exit
@@ -325,13 +327,12 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
   // Yield function constraint passed to this function as
   // std::vector<Real> & f
   // Each yield function must be <= 0 (up to tolerance)
-  // Note that only the constraints that are both active and not
-  // deactivated due to linear dependence will be contained in f
-  // until the final few lines of returnMap
+  // Note that only the constraints that are active will be
+  // contained in f until the final few lines of returnMap
 
   // Internal constraint(s), must be zero (up to a tolerance)
-  // Note that only the constraints that are active and linearly
-  // independent will be contained in ic.
+  // Note that only the constraints that are active will be
+  // contained in ic.
   std::vector<Real> ic;
 
 
@@ -366,13 +367,11 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
   initial_act.resize(_num_f);
   if (_deactivation_scheme == "optimized_to_safe")
   {
-    // if "optimized" failes can change the deactivation scheme to "safe"
+    // if "optimized" fails we can change the deactivation scheme to "safe"
     deact_scheme = "optimized";
     for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
       initial_act[alpha] = act[alpha];
   }
-
-
 
   successful_return = false;
 
@@ -388,14 +387,13 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
 
 
 
-    // if (single_step_success) // CHECK !!!
     if (nr_res2 <= 0.5 && iter <= _max_iter && single_step_success)
     {
       // Returned, but must still check Kuhn-Tucker conditions
       if (checkAndApplyKuhnTucker(f, pm, act))
         successful_return = true; // Returned perfectly successfully.  The "while" loop will now exit
       else
-        successful_return = false;
+        successful_return = false; // KT conditions changed the "act" set.  Need to try another return
     }
     else if (deact_scheme == "optimized" && _deactivation_scheme == "optimized_to_safe")
     {
@@ -422,7 +420,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
       if (num_active == 0)
         break; // failure
 
-      // calculate new nr_res2
+      // Since "act" set has changed, need to re-calculate nr_res2
       yieldFunction(stress, intnl, act, num_active, f);
 
       nr_res2 = 0;
@@ -440,16 +438,19 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
     stress = stress_old;
     for (unsigned i = 0; i < intnl_old.size() ; ++i)
       intnl[i] = intnl_old[i];
-    return false;
   }
   else
   {
     plastic_strain += delta_dp;
-    // at this stage f.size() = num_active, but we need to return with all the yield functions evaluated, so:
-    act.assign(_num_f, true);
-    yieldFunction(stress, intnl, act, _num_f, f);
-    return true;
+    if (f.size() != _num_f)
+    {
+      // at this stage f.size() = num_active, but we need to return with all the yield functions evaluated, so:
+      act.assign(_num_f, true);
+      yieldFunction(stress, intnl, act, _num_f, f);
+    }
   }
+
+  return successful_return;
 
 }
 
@@ -464,9 +465,10 @@ FiniteStrainMultiPlasticity::singleStep(Real & nr_res2, RankTwoTensor & stress, 
   std::vector<Real> pm_before_step;
   RankTwoTensor delta_dp_before_step;
 
+
   if (deactivation_scheme == "optimized")
   {
-    // we potentially used the "before_step" quantities, so record them here
+    // we potentially use the "before_step" quantities, so record them here
     stress_before_step = stress;
     intnl_before_step.resize(intnl.size());
     for (unsigned alpha = 0 ; alpha < intnl.size() ; ++alpha)
@@ -494,14 +496,14 @@ FiniteStrainMultiPlasticity::singleStep(Real & nr_res2, RankTwoTensor & stress, 
   /* After NR and linesearch, if _deactivation_scheme == "optimized", the
    * active plasticity multipliers are checked for non-negativity.  If some
    * are negative then they are deactivated forever, and the NR step is
-   * re-done starting from the *_before_step quantities recorded above
+   * re-done starting from the _before_step quantities recorded above
    */
   bool constraints_changing = true;
 
+  bool reinstated_actives;
+
   while (constraints_changing)
   {
-    constraints_changing = false;
-
 
     // calculate dstress, dpm and dintnl for one full Newton-Raphson step
     nrStep(stress, intnl_old, intnl, pm, E_inv, delta_dp, dstress, dpm, dintnl, active, deact_ld);
@@ -514,81 +516,87 @@ FiniteStrainMultiPlasticity::singleStep(Real & nr_res2, RankTwoTensor & stress, 
 
     if (!successful_step)
       // completely bomb out
-      break;
+      return successful_step;
 
 
 
     // See if any active constraints need to be removed, and the step re-done
+    constraints_changing = false;
     if (deactivation_scheme == "optimized")
     {
       for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
         if (active[alpha] && pm[alpha] < 0.0)
           constraints_changing = true;
-      if (constraints_changing)
-      {
-        stress = stress_before_step;
-        delta_dp = delta_dp_before_step;
-        nr_res2 = nr_res2_before_step;
-        for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-        {
-          if (active[alpha] && pm[alpha] < 0.0)
-          {
-            // turn off the constraint forever
-            active[alpha] = false;
-            pm_before_step[alpha] = 0.0;
-            intnl_before_step[alpha] = intnl_old[alpha]; // don't want to muck-up hardening!
-          }
-          intnl[alpha] = intnl_before_step[alpha];
-          pm[alpha] = pm_before_step[alpha];
-        }
-        if (numberActive(active) == 0)
-        {
-          // completely bomb out
-          constraints_changing = false;
-          successful_step = false;
-          break;
-        }
-      }
     }
 
-
-
+    if (constraints_changing)
+    {
+      stress = stress_before_step;
+      delta_dp = delta_dp_before_step;
+      nr_res2 = nr_res2_before_step;
+      for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+      {
+        if (active[alpha] && pm[alpha] < 0.0)
+        {
+          // turn off the constraint forever
+          active[alpha] = false;
+          pm_before_step[alpha] = 0.0;
+          intnl_before_step[alpha] = intnl_old[alpha]; // don't want to muck-up hardening!
+        }
+        intnl[alpha] = intnl_before_step[alpha];
+        pm[alpha] = pm_before_step[alpha];
+      }
+      if (numberActive(active) == 0)
+      {
+        // completely bomb out
+        successful_step = false;
+        return successful_step;
+      }
+    }
 
     // reinstate any active values that have been turned off due to linear-dependence
-    bool reinstated_actives = reinstateLinearDependentConstraints(deact_ld);
+    reinstated_actives = reinstateLinearDependentConstraints(deact_ld);
 
-    // if active constraints were reinstated then nr_res2, f, and ic need to be re-calculated
-    if (reinstated_actives && !constraints_changing) // latter condition is for efficiency, since in that case we'll have to re-do this NR step anyway
+  } // ends "constraints_changing" loop
+
+
+  // if active constraints were reinstated then nr_res2 needs to be re-calculated so it is correct upson returning
+  if (reinstated_actives)
+  {
+    // calculateConstraints returns this
+    std::vector<RankTwoTensor> r;
+
+    bool completely_converged = true;
+    if (successful_step && nr_res2 < 0.5)
     {
-      calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, epp, ic, active, false, deact_ld);
-
-      bool completely_converged = true;
-      if (successful_step && nr_res2 < 0.5)
-      {
-        // Here we have converged to the correct solution if
-        // all the yield functions are < 0.
-        // This is quite tricky - perhaps i can refactor to make it more obvious.
-        // However, because actives are now reinstated, the residual2
-        // calculation below will give nr_res2 > 0.5
-        // Therefore, check for this case
-        unsigned ind = 0;
-        for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-          if (active[alpha])
-            if (f[ind++] > _f[alpha]->_f_tol)
-              completely_converged = false;
-      }
-      else
-        completely_converged = false;
-
-      if (!completely_converged)
-        nr_res2 = residual2(pm, f, epp, ic, active, deact_ld);
+      // Here we have converged to the correct solution if
+      // all the yield functions are < 0.  Excellent!
+      //
+      // This is quite tricky - perhaps i can refactor to make it more obvious.
+      //
+      // Because actives are now reinstated, the residual2
+      // calculation below will give nr_res2 > 0.5, because it won't
+      // realise that we only had to set the active-but-not-deactivated f = 0,
+      // and not the entire active set.  If we pass that nr_res2 back from
+      // this function then the calling function will not realise we've converged!
+      // Therefore, check for this case
+      std::vector<bool> all_active;
+      all_active.assign(_num_f, true);
+      calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, r, epp, ic, all_active);
+      for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+        if (f[alpha] > _f[alpha]->_f_tol)
+          completely_converged = false;
     }
+    else
+      completely_converged = false;
 
-
-  } // ends the "constraints_changing" while loop
+    if (!completely_converged)
+      nr_res2 = residual2(pm, f, epp, ic, active, deact_ld);
+  }
 
   return successful_step;
 }
+
 
 bool
 FiniteStrainMultiPlasticity::reinstateLinearDependentConstraints(std::vector<bool> & deactivated_due_to_ld)
@@ -641,43 +649,30 @@ FiniteStrainMultiPlasticity::checkAndApplyKuhnTucker(const std::vector<Real> & f
 
 
 void
-FiniteStrainMultiPlasticity::calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active, const bool & deactivate_if_linear_dependence, std::vector<bool> & deactivated_due_to_ld)
-// NOTE: this must not change "deactivated_due_to_ld" if deactivate_if_linear_dependence == false
+FiniteStrainMultiPlasticity::calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, std::vector<RankTwoTensor> & r, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active)
 {
 
   // construct constraints
   //
   // epp = pm*r - E_inv*(trial_stress - stress) = pm*r - delta_dp
-  // f = yield function    [only the "active_now" constraints]
+  // f = yield function    [all the active constraints, including the deactivated_due_to_ld.  The latter ones won't be put into the linear system
   // ic = intnl - intnl_old + pm*h
   //
   // Here pm*r = sum_{active_alpha} pm[alpha]*r[alpha].  Note that this contains all the "active" constraints,
   //             even the ones that have been deactivated_due_to_ld.  r is a std::vector containing all the
   //             active flow directions.
-  // Also yield_function contains only the "active_now" constraints.  f is a std::vector containing only
+  // Also yield_function contains only the "active" constraints.  f is a std::vector containing only
   //             these yield functions
-  // Also pm*h = sum_{active_now_alpha} pm[alpha]*h[alpha].  Note that this only contains the "active_now"
-  //             hardening potentials.  h is a std::vector containing only these "active_now" ones.
+  // Also pm*h = sum_{active_now_alpha} pm[alpha]*h[alpha].  Note that this only contains the "active"
+  //             hardening potentials.  h is a std::vector containing only these "active" ones.
 
   unsigned num_active = numberActive(active);
 
-  // flow direction
-  std::vector<RankTwoTensor> r;
+  // yield functions
+  yieldFunction(stress, intnl, active, num_active, f);
+
+  // flow directions and "epp"
   flowPotential(stress, intnl, active, num_active, r);
-
-
-  if (deactivate_if_linear_dependence)
-  {
-    // yield functions
-    yieldFunction(stress, intnl, active, num_active, f);
-    // eliminate
-    eliminateLinearDependence(stress, intnl, f, r, active, num_active, deactivated_due_to_ld);
-  }
-
-  unsigned num_deactivated_due_to_ld = 0;
-  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-    if (deactivated_due_to_ld[alpha])
-      num_deactivated_due_to_ld++;
 
   epp = RankTwoTensor();
   unsigned ind = 0;
@@ -687,31 +682,14 @@ FiniteStrainMultiPlasticity::calculateConstraints(const RankTwoTensor & stress, 
   epp -= delta_dp;
 
 
-  // the active constraints without the deactivated_due_to_ld
-  std::vector<bool> active_now;
-  unsigned num_active_now = 0;
-  active_now.resize(_num_f, false);
-  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-    if (active[alpha] && !deactivated_due_to_ld[alpha])
-    {
-      // do not need the deactivated_due_to_ld since those plastic muldipliers, and hence the intnl values aren't changing this NR step.
-      active_now[alpha] = true;
-      num_active_now++;
-    }
-
-  // yield functions
-  if (!deactivate_if_linear_dependence)
-    // if deactivate_if_linear_dependence then f has been calculated above
-    yieldFunction(stress, intnl, active_now, num_active_now, f);
-
   // internal constraints
   std::vector<Real> h;
-  hardPotential(stress, intnl, active_now, num_active_now, h);
+  hardPotential(stress, intnl, active, num_active, h);
 
-  ic.resize(num_active_now);
+  ic.resize(num_active);
   ind = 0;
   for (unsigned a = 0 ; a < _num_f ; ++a)
-    if (active_now[a])
+    if (active[a])
     {
       ic[ind] = intnl[a] - intnl_old[a] + pm[a]*h[ind];
       ind++;
@@ -719,9 +697,11 @@ FiniteStrainMultiPlasticity::calculateConstraints(const RankTwoTensor & stress, 
 }
 
 void
-FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<Real> & f, const std::vector<RankTwoTensor> & r, const std::vector<bool> & active, unsigned num_active, std::vector<bool> & deactivated_due_to_ld)
+FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & f, const std::vector<RankTwoTensor> & r, const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld)
 {
   deactivated_due_to_ld.resize(_num_f, false);
+
+  unsigned num_active = numberActive(active);
 
   if (num_active <= 1)
     return;
@@ -746,7 +726,7 @@ FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & str
 
   // From here on, some flow directions are linearly dependent
 
-  // Find the "distance" of the current (stress, internal) configuration
+  // Find the signed "distance" of the current (stress, internal) configuration
   // from the yield surfaces.  This distance will not be precise, but
   // i want to preferentially deactivate yield surfaces that are close
   // to the current stress point.
@@ -810,31 +790,15 @@ FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & str
     }
   }
 
-  // record the original values of f in order to extract only the linear-dependent ones
-  std::vector<Real> f_old(num_active);
-  for (unsigned i = 0 ; i < num_active ; ++i)
-  {
-    f_old[i] = f[i];
-  }
-
-  // prepare f for only the active ones
-  f.resize(num_active);
-
-  // deactivate, and calculate the new f vector
-  int old_active_number = -1;
-  int new_active_number = -1;
+  unsigned int old_active_number = 0;
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
     if (active[alpha])
     {
-      old_active_number++;
       if (scheduled_for_deactivation[old_active_number])
         deactivated_due_to_ld[alpha] = true;
-      else
-      {
-        new_active_number++;
-        f[new_active_number] = f_old[old_active_number];
-      }
+      old_active_number++;
     }
+
 }
 
 
@@ -892,7 +856,11 @@ FiniteStrainMultiPlasticity::calculateRHS(const RankTwoTensor & stress, const st
   RankTwoTensor epp; // the plastic-strain constraint ("direction constraint")
   std::vector<Real> ic; // the "internal constraints"
 
-  calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, epp, ic, active, true, deactivated_due_to_ld);
+  std::vector<RankTwoTensor> r;
+  calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, r, epp, ic, active);
+
+  eliminateLinearDependence(stress, intnl, f, r, active, deactivated_due_to_ld);
+
 
   unsigned num_active_f = 0;
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
@@ -911,10 +879,23 @@ FiniteStrainMultiPlasticity::calculateRHS(const RankTwoTensor & stress, const st
   for (unsigned i = 0 ; i < dim ; ++i)
     for (unsigned j = 0 ; j <= i ; ++j)
       rhs[ind++] = -epp(i, j);
-  for (unsigned i = 0 ; i < num_active_f ; ++i)
-    rhs[ind++] = -f[i];
-  for (unsigned i = 0 ; i < num_active_f ; ++i)
-    rhs[ind++] = -ic[i];
+  unsigned i = 0;
+  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+    if (active[alpha])
+    {
+      if (!deactivated_due_to_ld[alpha])
+        rhs[ind++] = -f[i];
+      i++;
+    }
+  i = 0;
+  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+    if (active[alpha])
+    {
+      if (!deactivated_due_to_ld[alpha])
+        rhs[ind++] = -ic[i];
+      i++;
+    }
+
 }
 
 
@@ -925,10 +906,15 @@ FiniteStrainMultiPlasticity::residual2(const std::vector<Real> & pm, const std::
   unsigned ind = 0;
 
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-    if (active[alpha] && !deactivated_due_to_ld[alpha])
+    if (active[alpha])
     {
-      if (!(pm[alpha] == 0 && f[ind] <= 0) )
-        nr_res2 += 0.5*std::pow( f[ind]/_f[alpha]->_f_tol, 2);
+      if (!deactivated_due_to_ld[alpha])
+      {
+        if (!(pm[alpha] == 0 && f[ind] <= 0) )
+          nr_res2 += 0.5*std::pow( f[ind]/_f[alpha]->_f_tol, 2);
+      }
+      else if (deactivated_due_to_ld[alpha] && f[ind] > 0)
+        nr_res2 += 0.5*std::pow(f[ind]/_f[alpha]->_f_tol, 2);
       ind++;
     }
 
@@ -936,8 +922,9 @@ FiniteStrainMultiPlasticity::residual2(const std::vector<Real> & pm, const std::
 
   ind = 0;
   for (unsigned a = 0 ; a < _num_f; ++a)
-    if (active[a] && !deactivated_due_to_ld[a])
+    if (active[a])
       nr_res2 += 0.5*std::pow(ic[ind++]/_f[a]->_ic_tol, 2);
+
 
   return nr_res2;
 }
@@ -1156,7 +1143,6 @@ FiniteStrainMultiPlasticity::nrStep(const RankTwoTensor & stress, const std::vec
   calculateJacobian(stress, intnl, pm, E_inv, active, deactivated_due_to_ld, jac);
 
 
-
   // prepare for LAPACKgesv_ routine provided by PETSc
   int system_size = rhs.size();
 
@@ -1195,7 +1181,7 @@ FiniteStrainMultiPlasticity::nrStep(const RankTwoTensor & stress, const std::vec
 
 
 bool
-FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld)
+FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld)
 {
   // Line search algorithm straight out of "Numerical Recipes"
 
@@ -1227,7 +1213,8 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
   // stress during the line-search
   RankTwoTensor ls_stress;
 
-
+  // flow directions (not used in line search, but calculateConstraints returns this parameter)
+  std::vector<RankTwoTensor> r;
 
   while (line_searching)
   {
@@ -1240,7 +1227,7 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
     ls_stress = stress + dstress*lam;
 
     // calculate the new active yield functions, epp and active internal constraints
-    calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic, active, false, deactivated_due_to_ld);
+    calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, r, epp, ic, active);
 
     // calculate the new residual-squared
     nr_res2 = residual2(ls_pm, f, epp, ic, active, deactivated_due_to_ld);
@@ -1261,7 +1248,7 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
       for (unsigned a = 0 ; a < _num_f ; ++ a)
         ls_intnl[a] = intnl[a];
       ls_stress = stress;
-      calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic, active, false, deactivated_due_to_ld);
+      calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, r, epp, ic, active);
       nr_res2 = residual2(ls_pm, f, epp, ic, active, deactivated_due_to_ld);
       line_searching = false;
       break;
