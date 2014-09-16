@@ -22,6 +22,9 @@ public:
 protected:
   virtual void initialSetup();
   virtual Real computeValue();
+  bool projectToFrontAtNode(Real & dist_to_front,
+                            Real & dist_along_tangent,
+                            const int index_offset = 0);
 
 private:
   const Real _j_integral_radius_inner;
