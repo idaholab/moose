@@ -372,6 +372,10 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
       initial_act[alpha] = act[alpha];
   }
 
+      Moose::out << "Initial act = ";
+      for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+        Moose::out << act[alpha] << " ";
+      Moose::out << "\n";
 
 
   successful_return = false;
@@ -384,11 +388,17 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
 
     // The Newton-Raphson loops
     while (nr_res2 > 0.5 && iter++ < _max_iter && single_step_success)
+    {
       single_step_success = singleStep(nr_res2, stress, intnl_old, intnl, pm, delta_dp, E_inv, f, epp, ic, act, deact_scheme);
+      Moose::out << "After singlestep stress_zz = " << stress(2, 2) << " stress_yy = " << stress(1, 1) << "\n";
+      Moose::out << "and act = ";
+      for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+        Moose::out << act[alpha] << " ";
+      Moose::out << "\n";
+    }
 
 
 
-    // if (single_step_success) // CHECK !!!
     if (nr_res2 <= 0.5 && iter <= _max_iter && single_step_success)
     {
       // Returned, but must still check Kuhn-Tucker conditions
@@ -534,6 +544,7 @@ FiniteStrainMultiPlasticity::singleStep(Real & nr_res2, RankTwoTensor & stress, 
           if (active[alpha] && pm[alpha] < 0.0)
           {
             // turn off the constraint forever
+            Moose::out << "Turning off constraint " << alpha << " forever\n";
             active[alpha] = false;
             pm_before_step[alpha] = 0.0;
             intnl_before_step[alpha] = intnl_old[alpha]; // don't want to muck-up hardening!
@@ -560,7 +571,6 @@ FiniteStrainMultiPlasticity::singleStep(Real & nr_res2, RankTwoTensor & stress, 
     // if active constraints were reinstated then nr_res2, f, and ic need to be re-calculated
     if (reinstated_actives && !constraints_changing) // latter condition is for efficiency, since in that case we'll have to re-do this NR step anyway
     {
-      calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, epp, ic, active, false, deact_ld);
 
       bool completely_converged = true;
       if (successful_step && nr_res2 < 0.5)
@@ -571,17 +581,23 @@ FiniteStrainMultiPlasticity::singleStep(Real & nr_res2, RankTwoTensor & stress, 
         // However, because actives are now reinstated, the residual2
         // calculation below will give nr_res2 > 0.5
         // Therefore, check for this case
-        unsigned ind = 0;
+        std::vector<bool> all_active;
+        all_active.assign(_num_f, true);
+        calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, epp, ic, all_active, false, deact_ld);
         for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-          if (active[alpha])
-            if (f[ind++] > _f[alpha]->_f_tol)
-              completely_converged = false;
+          if (f[alpha] > _f[alpha]->_f_tol)
+            completely_converged = false;
       }
       else
         completely_converged = false;
 
       if (!completely_converged)
-        nr_res2 = residual2(pm, f, epp, ic, active, deact_ld);
+      {
+        calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, epp, ic, active, false, deact_ld);
+        nr_res2 = residual2(pm, f, epp, ic, active, deact_ld) + extra_trial(stress, intnl, active, deact_ld);
+      }
+
+      // if completely_converged then we'll exit since then also !constraints_changing
     }
 
 
@@ -919,6 +935,27 @@ FiniteStrainMultiPlasticity::calculateRHS(const RankTwoTensor & stress, const st
 
 
 Real
+FiniteStrainMultiPlasticity::extra_trial(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld)
+{
+  Real nr_res2 = 0;
+
+  std::vector<Real> f;
+  unsigned num_act = numberActive(active);
+  yieldFunction(stress, intnl, active, num_act, f);
+
+  unsigned ind = 0;
+  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+    if (active[alpha])
+    {
+      if (deactivated_due_to_ld[alpha] && f[ind] > 0)
+        nr_res2 += 0.5*std::pow(f[ind]/_f[alpha]->_f_tol, 2);
+      ind++;
+    }
+  Moose::out << "extra bit is " << nr_res2 << "\n";
+  return nr_res2;
+}
+
+Real
 FiniteStrainMultiPlasticity::residual2(const std::vector<Real> & pm, const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld)
 {
   Real nr_res2 = 0;
@@ -938,6 +975,7 @@ FiniteStrainMultiPlasticity::residual2(const std::vector<Real> & pm, const std::
   for (unsigned a = 0 ; a < _num_f; ++a)
     if (active[a] && !deactivated_due_to_ld[a])
       nr_res2 += 0.5*std::pow(ic[ind++]/_f[a]->_ic_tol, 2);
+
 
   return nr_res2;
 }
@@ -1243,7 +1281,7 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
     calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic, active, false, deactivated_due_to_ld);
 
     // calculate the new residual-squared
-    nr_res2 = residual2(ls_pm, f, epp, ic, active, deactivated_due_to_ld);
+    nr_res2 = residual2(ls_pm, f, epp, ic, active, deactivated_due_to_ld) + extra_trial(ls_stress, ls_intnl, active, deactivated_due_to_ld);
 
 
     if (nr_res2 < f0 + 1E-4*lam*slope)
@@ -1262,7 +1300,7 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
         ls_intnl[a] = intnl[a];
       ls_stress = stress;
       calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic, active, false, deactivated_due_to_ld);
-      nr_res2 = residual2(ls_pm, f, epp, ic, active, deactivated_due_to_ld);
+      nr_res2 = residual2(ls_pm, f, epp, ic, active, deactivated_due_to_ld) + extra_trial(ls_stress, ls_intnl, active, deactivated_due_to_ld);
       line_searching = false;
       break;
     }
