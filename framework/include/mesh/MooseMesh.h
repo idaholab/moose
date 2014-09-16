@@ -355,6 +355,16 @@ public:
   unsigned int getPatchSize();
 
   /**
+   * Set the patch size update strategy
+   */
+  void setPatchUpdateStrategy(MooseEnum patch_update_strategy);
+
+  /**
+   * Get the current patch update strategy.
+   */
+  const MooseEnum & getPatchUpdateStrategy();
+
+  /**
    * Implicit conversion operator from MooseMesh -> libMesh::MeshBase.
    */
   operator libMesh::MeshBase & ();
@@ -784,6 +794,9 @@ protected:
 
   /// The number of nodes to consider in the NearestNode neighborhood.
   unsigned int _patch_size;
+
+  /// The patch update strategy
+  MooseEnum _patch_update_strategy;
 
   /// file_name iff this mesh was read from a file
   std::string _file_name;

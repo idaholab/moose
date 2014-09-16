@@ -77,10 +77,13 @@ InputParameters validParams<MooseMesh>()
   MooseEnum direction("x y z radial");
   params.addParam<MooseEnum>("centroid_partitioner_direction", direction, "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
 
+  MooseEnum patch_update_strategy("never always auto", "never");
+  params.addParam<MooseEnum>("patch_update_strategy", patch_update_strategy,  "How often to update the geometric search 'patch'.  The default is to never update it (which is the most efficient but could be a problem with lots of relative motion).  'always' will update the patch every timestep which might be time consuming.  'auto' will attempt to determine when the patch size needs to be updated automatically.");
+
   params.registerBase("MooseMesh");
 
   // groups
-  params.addParamNamesToGroup("dim nemesis", "Advanced");
+  params.addParamNamesToGroup("dim nemesis patch_update_strategy", "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
   return params;
@@ -110,6 +113,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
     _patch_size(40),
+    _patch_update_strategy(getParam<MooseEnum>("patch_update_strategy")),
     _regular_orthogonal_mesh(false),
     _allow_recovery(true)
 {
@@ -221,6 +225,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
     _patch_size(40),
+    _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false)
 {
   *(getMesh().boundary_info) = *(other_mesh.getMesh().boundary_info);
@@ -1988,6 +1993,18 @@ unsigned int
 MooseMesh::getPatchSize()
 {
   return _patch_size;
+}
+
+void
+MooseMesh::setPatchUpdateStrategy(MooseEnum patch_update_strategy)
+{
+  _patch_update_strategy = patch_update_strategy;
+}
+
+const MooseEnum &
+MooseMesh::getPatchUpdateStrategy()
+{
+  return _patch_update_strategy;
 }
 
 MooseMesh::operator libMesh::MeshBase & ()

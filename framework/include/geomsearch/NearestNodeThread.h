@@ -33,6 +33,9 @@ public:
   // This is the info map we're actually filling here
   std::map<unsigned int, NearestNodeLocator::NearestNodeInfo> _nearest_node_info;
 
+  // The furthest percentage through the patch that had to be searched (indicative of needing to rebuild the patch)
+  Real _max_patch_percentage;
+
 protected:
   // The Mesh
   const MooseMesh & _mesh;
