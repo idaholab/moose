@@ -18,6 +18,7 @@ class JIntegral: public ElementIntegralPostprocessor
 {
 public:
   JIntegral(const std::string & name, InputParameters parameters);
+  virtual Real getValue();
 
 protected:
   virtual void initialSetup();
@@ -31,6 +32,8 @@ protected:
   bool _treat_as_2d;
   MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
   MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
+  bool _convert_J_to_K;
+  Real _youngs_modulus;
 
 };
 

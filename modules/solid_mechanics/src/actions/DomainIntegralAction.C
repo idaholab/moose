@@ -20,6 +20,7 @@ InputParameters validParams<DomainIntegralAction>()
   params.addRequiredParam<std::vector<Real> >("radius_inner", "Inner radius for volume integral domain");
   params.addRequiredParam<std::vector<Real> >("radius_outer", "Outer radius for volume integral domain");
   params.addParam<std::vector<VariableName> >("output_variable", "Variable values to be reported along the crack front");
+  params.addParam<bool>("convert_J_to_K",false,"Convert J-integral to stress intensity factor K.");
   params.addParam<Real>("poissons_ratio","Poisson's ratio");
   params.addParam<Real>("youngs_modulus","Young's modulus");
   params.addParam<std::vector<SubdomainName> >("block","The block ids where InteractionIntegralAuxFields is defined");
@@ -43,6 +44,7 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
   _axis_2d(getParam<unsigned int>("axis_2d")),
   _radius_inner(getParam<std::vector<Real> >("radius_inner")),
   _radius_outer(getParam<std::vector<Real> >("radius_outer")),
+  _convert_J_to_K(false),
   _use_displaced_mesh(false)
 {
   if (isParamValid("crack_direction_vector"))
@@ -69,6 +71,7 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
     mooseError("Number of entries in 'radius_inner' and 'radius_outer' must match.");
   }
 
+  bool youngs_modulus_set(false);
   MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
   if (integral_moose_enums.size() == 0)
     mooseError("Must specify at least one domain integral to perform.");
@@ -88,12 +91,12 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
 
       _poissons_ratio = getParam<Real>("poissons_ratio");
       _youngs_modulus = getParam<Real>("youngs_modulus");
+      youngs_modulus_set = true;
       _blocks = getParam<std::vector<SubdomainName> >("block");
       _disp_x = getParam<VariableName>("disp_x");
       _disp_y = getParam<VariableName>("disp_y");
       _disp_z = getParam<VariableName>("disp_z");
 
-      //mooseError("Domain integral type not yet implemented: "<<integral_moose_enums[i]);
     }
 
     _integrals.insert(INTEGRAL(int(integral_moose_enums.get(i))));
@@ -101,6 +104,17 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
 
   if (isParamValid("output_variable"))
     _output_variables = getParam<std::vector<VariableName> >("output_variable");
+
+  if (isParamValid("convert_J_to_K"))
+    _convert_J_to_K = getParam<bool>("convert_J_to_K");
+  if (_convert_J_to_K)
+  {
+    if (!isParamValid("youngs_modulus"))
+      mooseError("DomainIntegral error: must set Young's modulus for J-integral if convert_J_to_K = true.");
+    else if (!youngs_modulus_set)
+      _youngs_modulus = getParam<Real>("youngs_modulus");
+  }
+
 }
 
 DomainIntegralAction::~DomainIntegralAction()
@@ -113,7 +127,6 @@ DomainIntegralAction::act()
   const std::string uo_name("crackFrontDefinition");
   const std::string ak_base_name("q");
   const std::string av_base_name("q");
-  const std::string pp_base_name("J");
   const unsigned int num_crack_front_nodes = calcNumCrackFrontNodes();
 
   if (_current_task == "add_user_object")
@@ -212,10 +225,18 @@ DomainIntegralAction::act()
   {
     if (_integrals.count(J_INTEGRAL) != 0)
     {
+      std::string pp_base_name;
+      if (_convert_J_to_K)
+        pp_base_name = "K";
+      else
+        pp_base_name = "J";
       const std::string pp_type_name("JIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
       params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
+      params.set<bool>("convert_J_to_K") = _convert_J_to_K;
+      if (_convert_J_to_K)
+        params.set<Real>("youngs_modulus") = _youngs_modulus;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
