@@ -53,6 +53,7 @@ namespace Moose {
       quadrature_type_to_enum["MONOMIAL"] = QMONOMIAL;
       quadrature_type_to_enum["SIMPSON"]  = QSIMPSON;
       quadrature_type_to_enum["TRAP"]     = QTRAP;
+      quadrature_type_to_enum["GAUSS_LOBATTO"] = QGAUSS_LOBATTO;
     }
   }
 
