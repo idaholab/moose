@@ -22,9 +22,6 @@ class PeacockErrorInterface(object):
     self._error_dialog = None
     self._has_dialog = False
 
-    # Extract the optional arguments
-    self._testing = kwargs.pop('testing', False)
-
     # Create the error dialog if the object is a QWidget
     if isinstance(self, QtGui.QWidget):
       self._error_dialog = QtGui.QErrorMessage(self)
@@ -56,10 +53,6 @@ class PeacockErrorInterface(object):
     message = ' '.join(args)
     self._last_error_message = message
     self._all_error_messages.append(message)
-
-    # Eat the message if running in testing mode
-    if self._testing:
-      return
 
     # Create the dialog
     if self._has_dialog and kwargs.pop('dialog', True):
