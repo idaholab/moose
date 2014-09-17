@@ -7,7 +7,11 @@ from src.base import *
 # the base class, PeacockTestInterface, for running the tests
 class PeacockTester(PeacockTestInterface):
   def __init__(self, **kwargs):
+
+    self._search = kwargs.pop('search', None)
+
     PeacockTestInterface.__init__(self, **kwargs)
+
     self._buildTests()
 
   ##
@@ -34,7 +38,8 @@ class PeacockTester(PeacockTestInterface):
             attr = getattr(i, item)
             if hasattr(attr, '__call__') and not inspect.isclass(attr):
               name = prefix + '.' + item
-              self.registerTest(attr, name)
+              if self._search == None or self._search in name:
+                self.registerTest(attr, name)
 
 
 # Main
@@ -44,6 +49,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='run_tests: A function for executing GUI tests.')
   parser.add_argument('--verbose', '-v', action='store_true', help='Display all test output')
   parser.add_argument('--quiet', '-q', action='store_true', help='Disable display of all test output')
+  parser.add_argument('--search', help='Limit testing to tests that contain the supplied search text')
   options = parser.parse_args()
 
   # Run the tests

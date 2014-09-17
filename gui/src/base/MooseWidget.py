@@ -70,10 +70,10 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   # @return The desired object
   #
   # Optional key=value Pairs:
-  #  parent str
-  #    The name of the MooseObject that is the parent of the object being searched, the
+  #  owener <str>
+  #    The name of the MooseObject that is the owner of the object being searched, the
   #    parent name given must be a child of the current object. This takes precedence over
-  #    the 'search_owner' option below
+  #    the 'search_owner' option below.  The 'owner' is the object that calls addObject.
   #
   #  search_children True | {False}
   #    If set to true and the optional parent name is excluded, the search will
@@ -83,12 +83,17 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   #    If set to true, the search will look for the object in object that owns this object
   def object(self, handle, **kwargs):
 
-    # Search in a known object
-    parent = kwargs.pop('parent', None)
-    if parent in self._objects:
-      return self._objects[parent].object(handle, search_owner=False)
-    elif parent != None:
-      self._debug('Unknown parent object name', str(parent), 'when searching for', handle)
+    # Keyword 'owner' supplied
+    owner = kwargs.pop('owner', None)
+    if owner in self._objects and isinstance(self._objects[owner], MooseWidget):
+      return self._objects[owner].object(handle, search_owner=False)
+
+    elif (owner in self._objects) and not isinstance(self._objects[owner], MooseWidget):
+      self._debug('The owner object', str(owner), 'must be a MooseWidget to search for children')
+      return None
+
+    elif owner != None:
+      self._debug('Invalid owner object name', str(owner), 'when searching for', handle)
       return None
 
     # Search the owner
@@ -233,7 +238,8 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
     # Determine the handle for the object being added, and test that it doesn't exist
     handle = kwargs.pop('handle', 'object_' + str(len(self._objects)))
     if handle in self._objects:
-      self.peacockError("The handle, ", handle, " already exists")
+      self.peacockError('The handle', handle, 'already exists')
+      return
 
     # Add the object to the list of objects and set the handle property
     self._objects[handle] = q_object
@@ -245,7 +251,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
       label_handle = handle + 'Label'
 
       if label_handle in self._objects:
-        self.peacockError('The handle, ', label_handle, ' already exists')
+        self.peacockError('The handle', label_handle, 'already exists')
 
       if parent.endswith('._main_layout'):
         label_object = self.addObject(QtGui.QLabel(label), handle=handle+'Label')
