@@ -87,6 +87,10 @@ def runMake(distcc_hosts, jobs, **kwargs):
 def localMake(master, **kwargs):
   jobs = master.threads
   distcc_hosts = 'localhost/' + str(jobs)
+
+  # Get the make directory
+  make_dir = getMakeDirectory()
+
   runMake(distcc_hosts, jobs, make_args=make_args, cwd=make_dir, **kwargs)
 
 
