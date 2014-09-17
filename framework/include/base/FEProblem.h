@@ -638,6 +638,8 @@ public:
 
   virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL);
 
+  virtual void possiblyRebuildGeomSearchPatches();
+
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
   /**

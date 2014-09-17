@@ -3057,6 +3057,9 @@ FEProblem::solve()
   Moose::setSolverDefaults(*this);
 
   Moose::perf_log.push("solve()","Solve");
+
+  possiblyRebuildGeomSearchPatches();
+
 //  _solve_only_perf_log.push("solve");
 
   if (_solve)
@@ -3449,6 +3452,41 @@ FEProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 
   if (_displaced_problem)
     _displaced_problem->updateGeomSearch(type);
+}
+
+void
+FEProblem::possiblyRebuildGeomSearchPatches()
+{
+  if (_displaced_problem) // Only need to do this if things are moving...
+  {
+    switch (_mesh.getPatchUpdateStrategy())
+    {
+      case 0: // Never
+        break;
+      case 2: // Auto
+      {
+        Real max = _displaced_problem->geomSearchData().maxPatchPercentage();
+        _communicator.max(max);
+
+        // If we haven't moved very far through the patch
+        if (max < 0.4)
+          break;
+      }
+
+      // Let this fall through if things do need to be updated...
+
+      case 1: // Always
+        _console << "\n\nUpdating geometric search patches\n\n";
+
+        _geometric_search_data.clearNearestNodeLocators();
+        _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
+
+        _displaced_problem->geomSearchData().clearNearestNodeLocators();
+        _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
+
+        reinitBecauseOfGhosting();
+    }
+  }
 }
 
 #ifdef LIBMESH_ENABLE_AMR
