@@ -1,4 +1,7 @@
 #!/usr/bin/python
+########################################
+# Tests for MooseObject::object method #
+########################################
 import os, sys
 from PySide import QtGui
 
