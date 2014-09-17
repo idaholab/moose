@@ -66,24 +66,33 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   ##
   # Return an object that was added via addObject (public)
   # @param handle The handle (<str>) of the object
-  # @param search_children If True (default) search all children MooseWidget objects for the handle
-  def object(self, handle, search_children = True):
+  # @param parent (optional) The name of the parent object to search
+  # @return The desired object
+  def object(self, handle, *args, **kwargs):
 
-    # Search this object for the handle
+    # The list of output objects
+#    output_objs = []
+
+    # Search locally for the object handle
     if handle in self._objects:
       return self._objects[handle]
 
-    # Search the children for the handle, if desired
-    child_obj = None
-    if search_children:
-      for key, obj in self._objects.iteritems():
-        if isinstance(obj, MooseWidget):
-          child_obj = obj.object(handle)
-          if child_obj == None:
-            continue
+    # Search in specified parent object
+    if len(args) == 1 and args[0] in self._objects:
+      return self._objects[args[0]].object(handle)
 
-    # If an object has not been returned yet, produce an error
-    return child_obj
+    # Return nothing if you get here
+    return None
+    # Search the children for the handle, if desired
+ #   if kwargs.pop('search_children', True):
+ #     for key, obj in self._objects.iteritems():
+ #       if isinstance(obj, MooseWidget):
+ #         output_obj = obj.object(handle)
+ #         if output_obj == None:
+ #           continue
+ #
+ #   # If an object has not been returned yet, produce an error
+ #   return child_obj
 
   ##
   # Extract a callback method by name
