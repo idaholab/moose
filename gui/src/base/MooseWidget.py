@@ -66,33 +66,48 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   ##
   # Return an object that was added via addObject (public)
   # @param handle The handle (<str>) of the object
-  # @param parent (optional) The name of the parent object to search
+  # @param kwargs Optional key, value pairs
   # @return The desired object
-  def object(self, handle, *args, **kwargs):
+  #
+  # Optional key=value Pairs:
+  #  parent str
+  #    The name of the MooseObject that is the parent of the object being searched, the
+  #    parent name given must be a child of the current object. This takes precedence over
+  #    the 'search_owner' option below
+  #
+  #  search_children True | {False}
+  #    If set to true and the optional parent name is excluded, the search will
+  #    look for the object in child MooseWidget objects
+  #
+  #  search_owner {True} | False
+  #    If set to true, the search will look for the object in object that owns this object
+  def object(self, handle, **kwargs):
 
-    # The list of output objects
-#    output_objs = []
+    # Search in a known object
+    parent = kwargs.pop('parent', None)
+    if parent in self._objects:
+      return self._objects[parent].object(handle, search_owner=False)
+    elif parent != None:
+      self._debug('Unknown parent object name', str(parent), 'when searching for', handle)
+      return None
 
-    # Search locally for the object handle
-    if handle in self._objects:
-      return self._objects[handle]
+    # Search the owner
+    if kwargs.pop('search_owner', True) and isinstance(self.property('owner'), MooseWidget):
+      return self.property('owner').object(full_name, search_owner=False)
 
-    # Search in specified parent object
-    if len(args) == 1 and args[0] in self._objects:
-      return self._objects[args[0]].object(handle)
+    # If not searching the owner search locally and then in the children
+    else:
+      if handle in self._objects:
+        return self._objects[handle]
 
-    # Return nothing if you get here
+      for key, obj in self._objects.iteritems():
+        if isinstance(obj, MooseWidget):
+          obj = obj.object(handle, search_owner=False)
+          if obj != None:
+            return obj
+
+    # Nothing was found, so return nothing
     return None
-    # Search the children for the handle, if desired
- #   if kwargs.pop('search_children', True):
- #     for key, obj in self._objects.iteritems():
- #       if isinstance(obj, MooseWidget):
- #         output_obj = obj.object(handle)
- #         if output_obj == None:
- #           continue
- #
- #   # If an object has not been returned yet, produce an error
- #   return child_obj
 
   ##
   # Extract a callback method by name
@@ -151,6 +166,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   # @param handle The handle (<str>) of the object
   # @param search_children If True (default) search all children MooseWidget objects for the handle
   def hasObject(self, handle, search_children = True):
+    print handle
 
     # Search this object for the handle
     if handle in self._objects:
@@ -158,12 +174,15 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
 
     # Search the children for the handle, if desired
     if search_children:
+      found_obj = True
       for key, obj in self._objects.iteritems():
         if isinstance(obj, MooseWidget):
-          return True
+          found_obj = obj.hasObject(handle)
+          if found_obj:
+            break
 
     # If an object has not been returned yet, it doesn't exist
-    return False
+    return found_obj
 
 
   ##
@@ -359,9 +378,9 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   ##
   # Define a message the prints when the debug flag is set to true (protected)
   # @param message The desired debugging message
-  def _debug(self, message):
+  def _debug(self, *args):
     if self.property('debug'):
       caller = inspect.stack()[1]
       frame = caller[0]
       info = inspect.getframeinfo(frame)
-      print '[' + self.__class__.__name__ + '][' + info.function + ':' + str(info.lineno) +']', message
+      print '[' + self.__class__.__name__ + '][' + info.function + ':' + str(info.lineno) +']', ' '.join(args)
