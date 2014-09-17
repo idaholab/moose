@@ -77,15 +77,15 @@ class PeacockTestInterface(object):
   # @param stdout The stdout string from the test execution, prints if failed
   def _showTestResult(self, name, result, msg, *args):
 
-
     # Build the status message: OK or FAIL
     if result:
-       msg = utils.colorText('OK', 'GREEN')
-       msg_length = 2
+      color = 'GREEN'
+      msg = utils.colorText('OK', color)
+      msg_length = 2
     else:
-      # Add the failure message, if it exists
+      color = 'RED'
       msg_length = len(msg) + 7
-      msg = utils.colorText('(' + msg + ') FAIL', 'RED')
+      msg = utils.colorText('(' + msg + ') FAIL', color)
 
     # Produce the complete test message string
     n = 110 - len(name) - msg_length
@@ -96,6 +96,6 @@ class PeacockTestInterface(object):
       return
 
     # Print the error message, if the test fails
-    if self._options['verbose'] or (result and len(args) > 0):
+    if not self._options['quiet'] and len(args) > 0 and (not result or (self._options['verbose'])):
       for line in args[0].splitlines():
-        print '  ' + utils.colorText(line, 'RED')
+        print utils.colorText(name + ': ', color) + line
