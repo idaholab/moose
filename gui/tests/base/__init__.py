@@ -1,3 +1,3 @@
-from MooseWidget import *
+from MooseWidget_object import *
 
 __all__ = ['MooseWidget_object']
