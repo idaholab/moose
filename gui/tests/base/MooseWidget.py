@@ -17,16 +17,16 @@ class TestMooseWidget(QtGui.QWidget, base.MooseWidget):
   def __init__(self, **kwargs):
     QtGui.QWidget.__init__(self)
     base.MooseWidget.__init__(self, **kwargs)
+
+# Create
 app  = QtGui.QApplication(sys.argv)
 main = QtGui.QMainWindow()
 test = TestMooseWidget(main=main)
 test.addObject(SubTestMooseWidget(), handle='sub_widget')
 
-# Test reading
-def localObject():
-
-
-
-  result = False
-  fail_msg = 'In progress'
+# Test locating of a direct child
+def hasLocalObject():
+  obj = test.object('sub_widget')
+  result = test.hasObject('sub_widget')
+  fail_msg = 'Failed local find'
   return (result, fail_msg)
