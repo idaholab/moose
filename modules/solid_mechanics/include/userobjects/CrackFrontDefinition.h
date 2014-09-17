@@ -30,10 +30,8 @@ public:
   virtual void execute();
   virtual void threadJoin(const UserObject & uo);
 
-  const Node & getCrackFrontNode(const unsigned int node_index) const;
   const Node * getCrackFrontNodePtr(const unsigned int node_index) const;
   const RealVectorValue & getCrackFrontTangent(const unsigned int node_index) const;
-  const RealVectorValue & getCrackFrontNormal() const;
   Real getCrackFrontForwardSegmentLength(const unsigned int node_index) const;
   Real getCrackFrontBackwardSegmentLength(const unsigned int node_index) const;
   const RealVectorValue & getCrackDirection(const unsigned int node_index) const;
@@ -42,6 +40,7 @@ public:
   ColumnMajorMatrix rotateToCrackFrontCoords(const SymmTensor tensor, const unsigned int node_index) const;
   ColumnMajorMatrix rotateToCrackFrontCoords(const ColumnMajorMatrix tensor, const unsigned int node_index) const;
   void calculateRThetaToCrackFront(const Point qp, const unsigned int node_index, Real & r, Real & theta) const;
+  bool isNodeOnIntersectingBoundary(const Node * const node) const;
 
 protected:
 
@@ -82,6 +81,8 @@ protected:
   RealVectorValue _crack_direction_vector_end_2;
   std::vector<BoundaryName> _crack_mouth_boundary_names;
   std::vector<BoundaryID> _crack_mouth_boundary_ids;
+  std::vector<BoundaryName> _intersecting_boundary_names;
+  std::vector<BoundaryID> _intersecting_boundary_ids;
   RealVectorValue _crack_mouth_coordinates;
   RealVectorValue _crack_plane_normal;
   bool _treat_as_2d;

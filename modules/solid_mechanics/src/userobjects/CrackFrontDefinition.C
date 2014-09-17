@@ -22,6 +22,7 @@ void addCrackFrontDefinitionParams(InputParameters& params)
   params.addParam<RealVectorValue>("crack_direction_vector_end_1","Direction of crack propagation for the node at end 1 of the crack");
   params.addParam<RealVectorValue>("crack_direction_vector_end_2","Direction of crack propagation for the node at end 2 of the crack");
   params.addParam<std::vector<BoundaryName> >("crack_mouth_boundary","Boundaries whose average coordinate defines the crack mouth");
+  params.addParam<std::vector<BoundaryName> >("intersecting_boundary","Boundaries intersected by ends of crack");
   params.addParam<bool>("2d", false, "Treat body as two-dimensional");
   params.addRangeCheckedParam<unsigned int>("axis_2d", 2, "axis_2d>=0 & axis_2d<=2", "Out of plane axis for models treated as two-dimensional (0=x, 1=y, 2=z)");
 }
@@ -77,6 +78,11 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
     }
   }
 
+  if (isParamValid("intersecting_boundary"))
+  {
+    _intersecting_boundary_names = getParam<std::vector<BoundaryName> >("intersecting_boundary");
+  }
+
   MooseEnum end_direction_method_moose_enum = getParam<MooseEnum>("crack_end_direction_method");
   if (end_direction_method_moose_enum.isValid())
   {
@@ -112,6 +118,7 @@ void
 CrackFrontDefinition::initialSetup()
 {
   _crack_mouth_boundary_ids = _mesh.getBoundaryIDs(_crack_mouth_boundary_names,true);
+  _intersecting_boundary_ids = _mesh.getBoundaryIDs(_intersecting_boundary_names,true);
 
   std::set<unsigned int> nodes;
   getCrackFrontNodes(nodes);
@@ -797,28 +804,20 @@ CrackFrontDefinition::calculateCrackFrontDirection(const Node* crack_front_node,
   return crack_dir;
 }
 
-const Node &
-CrackFrontDefinition::getCrackFrontNode(const unsigned int node_index) const
-{
-  return _mesh.node(_ordered_crack_front_nodes[node_index]);
-}
-
 const Node *
 CrackFrontDefinition::getCrackFrontNodePtr(const unsigned int node_index) const
 {
-  return _mesh.nodePtr(_ordered_crack_front_nodes[node_index]);
+  Node * node_ptr = NULL;
+  if (node_index < _ordered_crack_front_nodes.size())
+    node_ptr = _mesh.nodePtr(_ordered_crack_front_nodes[node_index]);
+  return node_ptr;
 }
 
 const RealVectorValue &
 CrackFrontDefinition::getCrackFrontTangent(const unsigned int node_index) const
 {
+  mooseAssert(node_index < _ordered_crack_front_nodes.size(),"node_index out of range");
   return _tangent_directions[node_index];
-}
-
-const RealVectorValue &
-CrackFrontDefinition::getCrackFrontNormal() const
-{
-  return _crack_plane_normal;
 }
 
 Real
@@ -972,5 +971,21 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
 
   else if (x_local >= 0 && y_local < 0)
     theta = -std::asin(p_to_plane_dist/r);
+}
 
+bool
+CrackFrontDefinition::isNodeOnIntersectingBoundary(const Node * const node) const
+{
+  bool is_on_boundary = false;
+  mooseAssert(node,"Invalid node");
+  unsigned int node_id = node->id();
+  for (unsigned int i=0; i<_intersecting_boundary_ids.size(); ++i)
+  {
+    if (_mesh.isBoundaryNode(node_id),_intersecting_boundary_ids[i])
+    {
+      is_on_boundary = true;
+      break;
+    }
+  }
+  return is_on_boundary;
 }

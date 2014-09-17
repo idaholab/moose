@@ -41,6 +41,7 @@ protected:
   bool _have_crack_direction_vector_end_2;
   RealVectorValue _crack_direction_vector_end_2;
   std::vector<BoundaryName> _crack_mouth_boundary_names;
+  std::vector<BoundaryName> _intersecting_boundary_names;
   bool _treat_as_2d;
   unsigned int _axis_2d;
   std::vector<Real> _radius_inner;
