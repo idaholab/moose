@@ -47,63 +47,78 @@ DomainIntegralQFunction::initialSetup()
 Real
 DomainIntegralQFunction::computeValue()
 {
-  Point  p = *_current_node;
 
-  const Node &crack_front_node = _crack_front_definition->getCrackFrontNode(_crack_front_node_index);
-  const RealVectorValue &crack_front_tangent = _crack_front_definition->getCrackFrontTangent(_crack_front_node_index);
-
-  RealVectorValue crack_node_to_current_node = p - crack_front_node;
-  Real dist_along_tangent = crack_node_to_current_node * crack_front_tangent;
-  RealVectorValue projection_point = crack_front_node + dist_along_tangent * crack_front_tangent;
-  RealVectorValue axis_to_current_node = p - projection_point;
-  Real dist_to_crack_front = axis_to_current_node.size();
+  Real dist_to_crack_front;
+  Real dist_along_tangent;
+  projectToFrontAtNode(dist_to_crack_front,dist_along_tangent);
 
   Real q = 1.0;
   if ( dist_to_crack_front > _j_integral_radius_inner &&
        dist_to_crack_front < _j_integral_radius_outer)
-  {
     q = (_j_integral_radius_outer - dist_to_crack_front) /
         (_j_integral_radius_outer - _j_integral_radius_inner);
-  }
   else if ( dist_to_crack_front >= _j_integral_radius_outer)
-  {
     q = 0.0;
-  }
 
-  if ((q > 0.0) && (!_treat_as_2d))
+  if (q > 0.0)
   {
-    const Real forward_segment_length = _crack_front_definition->getCrackFrontForwardSegmentLength(_crack_front_node_index);
-    const Real backward_segment_length = _crack_front_definition->getCrackFrontBackwardSegmentLength(_crack_front_node_index);
-
-    if (dist_along_tangent >= 0.0)
+    Real tangent_multiplier = 1.0;
+    if (!_treat_as_2d)
     {
-      if (dist_along_tangent >= forward_segment_length)
+      const Real forward_segment_length = _crack_front_definition->getCrackFrontForwardSegmentLength(_crack_front_node_index);
+      const Real backward_segment_length = _crack_front_definition->getCrackFrontBackwardSegmentLength(_crack_front_node_index);
+
+      if (dist_along_tangent >= 0.0)
       {
         if (forward_segment_length > 0.0)
-        {
-          q = 0.0;
-        }
+          tangent_multiplier = 1.0 - dist_along_tangent/forward_segment_length;
       }
       else
-      {
-        q *= (1.0 - dist_along_tangent/forward_segment_length);
-      }
-    }
-    else
-    {
-      if (-dist_along_tangent >= backward_segment_length)
       {
         if (backward_segment_length > 0.0)
-        {
-          q = 0.0;
-        }
-      }
-      else
-      {
-        q *= (1.0 + dist_along_tangent/backward_segment_length);
+          tangent_multiplier = 1.0 + dist_along_tangent/backward_segment_length;
       }
     }
+
+    tangent_multiplier=std::max(tangent_multiplier,0.0);
+    tangent_multiplier=std::min(tangent_multiplier,1.0);
+
+    //Set to zero if a node is on a designated free surface and its crack front node is not.
+    if (_crack_front_definition->isNodeOnIntersectingBoundary(_current_node))
+    {
+      const Node * crack_front_node = _crack_front_definition->getCrackFrontNodePtr(_crack_front_node_index);
+      if (!_crack_front_definition->isNodeOnIntersectingBoundary(crack_front_node))
+        tangent_multiplier=0.0;
+    }
+
+    q *= tangent_multiplier;
   }
 
   return q;
+}
+
+bool
+DomainIntegralQFunction::projectToFrontAtNode(Real & dist_to_front,
+                                              Real & dist_along_tangent,
+                                              const int index_offset)
+{
+  int this_front_node_index = _crack_front_node_index + index_offset;
+
+  const Node *crack_front_node = NULL;
+  if (this_front_node_index >= 0)
+    crack_front_node = _crack_front_definition->getCrackFrontNodePtr(static_cast<unsigned>(this_front_node_index));
+
+  if (crack_front_node)
+  {
+    Point  p = *_current_node;
+    const RealVectorValue &crack_front_tangent =
+      _crack_front_definition->getCrackFrontTangent(static_cast<unsigned>(this_front_node_index));
+
+    RealVectorValue crack_node_to_current_node = p - *crack_front_node;
+    dist_along_tangent = crack_node_to_current_node * crack_front_tangent;
+    RealVectorValue projection_point = *crack_front_node + dist_along_tangent * crack_front_tangent;
+    RealVectorValue axis_to_current_node = p - projection_point;
+    dist_to_front = axis_to_current_node.size();
+  }
+  return (crack_front_node != NULL);
 }
