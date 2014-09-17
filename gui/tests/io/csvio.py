@@ -2,7 +2,7 @@
 import os, sys
 
 # Import Peacock IO module
-from src import *
+from src import io
 
 # Set global test filename
 test_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'input.csv')

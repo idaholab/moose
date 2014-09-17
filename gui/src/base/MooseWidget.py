@@ -351,7 +351,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   # Define a message the prints when the debug flag is set to true (protected)
   # @param message The desired debugging message
   def _debug(self, message):
-    if property('debug'):
+    if self.property('debug'):
       caller = inspect.stack()[1]
       frame = caller[0]
       info = inspect.getframeinfo(frame)
