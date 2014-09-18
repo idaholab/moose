@@ -21,6 +21,11 @@ InputParameters validParams<DerivativeParsedMaterial>()
 
   // Function expression
   params.addRequiredParam<std::string>("function", "FParser function expression for the phase free energy");
+
+  // Just in time compilation for the FParser objects
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+  params.addParam<bool>( "enable_jit", false, "Enable Just In Time compilation of the parsed functions (experimental)");
+#endif
   return params;
 }
 
@@ -164,13 +169,23 @@ void DerivativeParsedMaterial::functionsOptimize()
 {
   unsigned int i, j, k;
 
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+  bool enable_jit = getParam<bool>("enable_jit");
+#endif
+
   // base function
   _func_F.Optimize();
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+  if (enable_jit) _func_F.JITCompile();
+#endif
 
   // optimize first derivatives
   for (i = 0; i < _nargs; ++i)
   {
     _func_dF[i]->Optimize();
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+    if (enable_jit) _func_dF[i]->JITCompile();
+#endif
 
     // if the derivative vanishes set the function back to NULL
     if (_func_dF[i]->isZero())
@@ -183,6 +198,9 @@ void DerivativeParsedMaterial::functionsOptimize()
     for (j = i; j < _nargs; ++j)
     {
       _func_d2F[i][j]->Optimize();
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+      if (enable_jit) _func_d2F[i][j]->JITCompile();
+#endif
 
       // if the derivative vanishes set the function back to NULL
       if (_func_d2F[i][j]->isZero())
@@ -197,6 +215,9 @@ void DerivativeParsedMaterial::functionsOptimize()
         for (k = j; k < _nargs; ++k)
         {
           _func_d3F[i][j][k]->Optimize();
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+          if (enable_jit) _func_d3F[i][j][k]->JITCompile();
+#endif
 
           // if the derivative vanishes set the function back to NULL
           if (_func_d3F[i][j][k]->isZero())
