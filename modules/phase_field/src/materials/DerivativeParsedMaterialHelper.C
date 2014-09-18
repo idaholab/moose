@@ -1,0 +1,289 @@
+#include "DerivativeParsedMaterialHelper.h"
+
+template<>
+InputParameters validParams<DerivativeParsedMaterialHelper>()
+{
+  InputParameters params = validParams<DerivativeBaseMaterial>();
+  params.addClassDescription("Parsed Function Material with automatic derivatives.");
+
+  // Just in time compilation for the FParser objects
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+  params.addParam<bool>( "enable_jit", false, "Enable Just In Time compilation of the parsed functions (experimental)");
+#endif
+  return params;
+}
+
+DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string & name,
+                                                   InputParameters parameters) :
+    DerivativeBaseMaterial(name, parameters),
+    _nmat_props(0)
+{
+}
+
+DerivativeParsedMaterialHelper::~DerivativeParsedMaterialHelper()
+{
+  delete[] _func_params;
+}
+
+void DerivativeParsedMaterialHelper::functionParse(const std::string & function_expression)
+{
+  std::vector<std::string> empty_string_vector;
+  functionParse(function_expression,
+                empty_string_vector, empty_string_vector);
+}
+
+void DerivativeParsedMaterialHelper::functionParse(const std::string & function_expression,
+                                                   const std::vector<std::string> & constant_names,
+                                                   const std::vector<std::string> & constant_expressions)
+{
+  std::vector<std::string> empty_string_vector;
+  std::vector<Real> empty_real_vector;
+  functionParse(function_expression, constant_names, constant_expressions,
+                empty_string_vector, empty_string_vector, empty_real_vector);
+}
+
+void DerivativeParsedMaterialHelper::functionParse(const std::string & function_expression,
+                                                   const std::vector<std::string> & constant_names,
+                                                   const std::vector<std::string> & constant_expressions,
+                                                   const std::vector<std::string> & mat_prop_names,
+                                                   const std::vector<std::string> & tol_names,
+                                                   const std::vector<Real> & tol_values)
+{
+  // check number of coupled variables
+  if (_arg_names.size() == 0)
+    mooseError("Need at least one coupled variable for DerivativeParsedMaterialHelper.");
+
+  // check constant vectors
+  unsigned int nconst = constant_expressions.size();
+  if (nconst != constant_expressions.size())
+    mooseError("The parameter vectors constant_names and constant_values must have equal length.");
+
+  // initialize constants
+  ADFunction *expression;
+  std::vector<Real> constant_values(nconst);
+  for (unsigned int i = 0; i < nconst; ++i)
+  {
+    expression = new ADFunction();
+
+    // add previously evaluated constants
+    for (unsigned int j = 0; j < i; ++j)
+      if (!expression->AddConstant(constant_names[j], constant_values[j]))
+        mooseError("Invalid constant name in DerivativeParsedMaterialHelper");
+
+    // build the temporary comnstant expression function
+    if (expression->Parse(constant_expressions[i], "") >= 0)
+       mooseError(std::string("Invalid constant expression\n" + constant_expressions[i] + "\n in DerivativeParsedMaterialHelper. ") + expression->ErrorMsg());
+
+    constant_values[i] = expression->Eval(NULL);
+
+#ifdef DEBUG
+    _console << "Constant value " << i << ' ' << constant_expressions[i] << " = " << constant_values[i] << std::endl;
+#endif
+
+    if (!_func_F.AddConstant(constant_names[i], constant_values[i]))
+      mooseError("Invalid constant name in DerivativeParsedMaterialHelper");
+
+    delete expression;
+  }
+
+  // tolerance vectors
+  if (tol_names.size() != tol_values.size())
+    mooseError("The parameter vectors tol_names and tol_values must have equal length.");
+
+  // set tolerances
+  _tol.resize(_nargs);
+  for (unsigned int i = 0; i < _nargs; ++i)
+  {
+    _tol[i] = -1.0;
+
+    // for every argument look throug the entire tolerance vector to find a match
+    for (unsigned int j = 0; j < tol_names.size(); ++j)
+      if (_arg_names[i] == tol_names[j])
+      {
+        _tol[i] = tol_values[j];
+        break;
+      }
+  }
+
+  // build 'variables' argument for fparser
+  std::string variables = _arg_names[0];
+  for (unsigned i = 1; i < _arg_names.size(); ++i)
+    variables += "," + _arg_names[i];
+
+  // get all material properties
+  _nmat_props = mat_prop_names.size();
+  _mat_props.resize(_nmat_props);
+  for (unsigned int i = 0; i < _nmat_props; ++i)
+  {
+    _mat_props[i] = &getMaterialProperty<Real>(mat_prop_names[i]);
+    variables += "," + mat_prop_names[i];
+  }
+
+  // build the base function
+  if (_func_F.Parse(function_expression, variables) >= 0)
+     mooseError(std::string("Invalid function\n" + function_expression + "\nin DerivativeParsedMaterialHelper.\n") + _func_F.ErrorMsg());
+
+  // Auto-Derivatives
+  functionsDerivative();
+
+  // Optimization
+  functionsOptimize();
+
+  // create parameter passing buffer
+  _func_params = new Real[_nargs + _nmat_props];
+}
+
+void DerivativeParsedMaterialHelper::functionsDerivative()
+{
+  unsigned int i, j, k;
+
+  // first derivatives
+  _func_dF.resize(_nargs);
+  _func_d2F.resize(_nargs);
+  _func_d3F.resize(_nargs);
+  for (i = 0; i < _nargs; ++i)
+  {
+    _func_dF[i] = new ADFunction(_func_F);
+    _func_dF[i]->AutoDiff(_arg_names[i]);
+
+    // second derivatives
+    _func_d2F[i].resize(_nargs);
+    _func_d3F[i].resize(_nargs);
+    for (j = i; j < _nargs; ++j)
+    {
+      _func_d2F[i][j] = new ADFunction(*_func_dF[i]);
+      _func_d2F[i][j]->AutoDiff(_arg_names[j]);
+
+      // third derivatives
+      if (_third_derivatives)
+      {
+        _func_d3F[i][j].resize(_nargs);
+        for (k = j; k < _nargs; ++k)
+        {
+          _func_d3F[i][j][k] = new ADFunction(*_func_d2F[i][j]);
+          _func_d3F[i][j][k]->AutoDiff(_arg_names[k]);
+        }
+      }
+    }
+  }
+}
+
+void DerivativeParsedMaterialHelper::functionsOptimize()
+{
+  unsigned int i, j, k;
+
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+  bool enable_jit = getParam<bool>("enable_jit");
+#endif
+
+  // base function
+  _func_F.Optimize();
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+  if (enable_jit) _func_F.JITCompile();
+#endif
+
+  // optimize first derivatives
+  for (i = 0; i < _nargs; ++i)
+  {
+    _func_dF[i]->Optimize();
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+    if (enable_jit) _func_dF[i]->JITCompile();
+#endif
+
+    // if the derivative vanishes set the function back to NULL
+    if (_func_dF[i]->isZero())
+    {
+      delete _func_dF[i];
+      _func_dF[i] = NULL;
+    }
+
+    // optimize second derivatives
+    for (j = i; j < _nargs; ++j)
+    {
+      _func_d2F[i][j]->Optimize();
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+      if (enable_jit) _func_d2F[i][j]->JITCompile();
+#endif
+
+      // if the derivative vanishes set the function back to NULL
+      if (_func_d2F[i][j]->isZero())
+      {
+        delete _func_d2F[i][j];
+        _func_d2F[i][j] = NULL;
+      }
+
+      // optimize third derivatives
+      if (_third_derivatives)
+      {
+        for (k = j; k < _nargs; ++k)
+        {
+          _func_d3F[i][j][k]->Optimize();
+#ifdef LIBMESH_HAVE_FPARSER_JIT
+          if (enable_jit) _func_d3F[i][j][k]->JITCompile();
+#endif
+
+          // if the derivative vanishes set the function back to NULL
+          if (_func_d3F[i][j][k]->isZero())
+          {
+            delete _func_d3F[i][j][k];
+            _func_d3F[i][j][k] = NULL;
+          }
+        }
+      }
+    }
+  }
+}
+
+/// need to implment these virtuals, although they never get called
+Real DerivativeParsedMaterialHelper::computeF() { return 0.0; }
+Real DerivativeParsedMaterialHelper::computeDF(unsigned int) { return 0.0; }
+Real DerivativeParsedMaterialHelper::computeD2F(unsigned int, unsigned int) { return 0.0; }
+
+void
+DerivativeParsedMaterialHelper::computeProperties()
+{
+  unsigned int i, j, k;
+  Real a;
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    // fill the parameter vector, apply tolerances
+    for (i = 0; i < _nargs; ++i)
+    {
+      if (_tol[i] < 0.0)
+        _func_params[i] = (*_args[i])[_qp];
+      else
+      {
+        a = (*_args[i])[_qp];
+        _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
+      }
+    }
+
+    // insert material property values
+    for (i = 0; i < _nmat_props; ++i)
+      _func_params[i + _nargs] = (*_mat_props[i])[_qp];
+
+    // set function value
+    if (_prop_F)
+      (*_prop_F)[_qp] = _func_F.Eval(_func_params);
+
+    for (i = 0; i < _nargs; ++i)
+    {
+      if (_prop_dF[i])
+        (*_prop_dF[i])[_qp] = _func_dF[i]==NULL ? 0.0 : _func_dF[i]->Eval(_func_params);
+
+      // second derivatives
+      for (j = i; j < _nargs; ++j)
+      {
+        if (_prop_d2F[i][j])
+          (*_prop_d2F[i][j])[_qp] = _func_d2F[i][j]==NULL ? 0.0 : _func_d2F[i][j]->Eval(_func_params);
+
+        // third derivatives
+        if (_third_derivatives)
+          for (k = j; k < _nargs; ++k)
+            if (_prop_d3F[i][j][k])
+              (*_prop_d3F[i][j][k])[_qp] = _func_d3F[i][j][k]==NULL ? 0.0 : _func_d3F[i][j][k]->Eval(_func_params);
+      }
+    }
+  }
+}
