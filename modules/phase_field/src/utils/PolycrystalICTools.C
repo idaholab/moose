@@ -1,6 +1,7 @@
 #include "PolycrystalICTools.h"
 
-std::vector<Real> PolycrystalICTools::AssignPointsToVariables(const std::vector<Point> centerpoints, const Real op_num, const MooseMesh & mesh, const MooseVariable & var)
+std::vector<Real>
+PolycrystalICTools::assignPointsToVariables(const std::vector<Point> centerpoints, const Real op_num, const MooseMesh & mesh, const MooseVariable & var)
 {
   Real grain_num = centerpoints.size();
 
@@ -50,7 +51,8 @@ std::vector<Real> PolycrystalICTools::AssignPointsToVariables(const std::vector<
   return assigned_op;
 }
 
-unsigned int PolycrystalICTools::AssignPointToGrain(const Point & p, const std::vector<Point> centerpoints, const MooseMesh & mesh, const MooseVariable & var, const Real maxsize)
+unsigned int
+PolycrystalICTools::assignPointToGrain(const Point & p, const std::vector<Point> centerpoints, const MooseMesh & mesh, const MooseVariable & var, const Real maxsize)
 {
   unsigned int grain_num = centerpoints.size();
 

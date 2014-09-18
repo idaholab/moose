@@ -109,7 +109,7 @@ PolycrystalReducedIC::initialSetup()
   }
   else
     //Assign grains to specific order parameters in a way that maximizes the distance
-    _assigned_op = PolycrystalICTools::AssignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
+    _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
 }
 
 Real
@@ -117,7 +117,7 @@ PolycrystalReducedIC::value(const Point & p)
 {
   Real val = 0.0;
 
-  unsigned int min_index = PolycrystalICTools::AssignPointToGrain(p, _centerpoints, _mesh, _var, _range.size());
+  unsigned int min_index = PolycrystalICTools::assignPointToGrain(p, _centerpoints, _mesh, _var, _range.size());
 
   //If the current order parameter index (_op_index) is equal to the min_index, set the value to 1.0
   if (_assigned_op[min_index] == _op_index) //Make sure that the _op_index goes from 0 to _op_num-1

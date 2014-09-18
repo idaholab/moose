@@ -98,5 +98,5 @@ HexPolycrystalIC::initialSetup()
     }
 
   //Assign grains to specific order parameters in a way that maximizes the distance
-  _assigned_op = PolycrystalICTools::AssignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
+  _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
 }
