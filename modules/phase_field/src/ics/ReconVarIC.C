@@ -69,7 +69,7 @@ ReconVarIC::initialSetup()
   // Assign grains to each order parameter in a way that maximizes distance
   _assigned_op.resize(_grain_num);
 
-  _assigned_op = PolycrystalICTools::AssignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
+  _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
 
 }
 
