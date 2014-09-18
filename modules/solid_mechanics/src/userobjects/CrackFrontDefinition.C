@@ -981,7 +981,7 @@ CrackFrontDefinition::isNodeOnIntersectingBoundary(const Node * const node) cons
   unsigned int node_id = node->id();
   for (unsigned int i=0; i<_intersecting_boundary_ids.size(); ++i)
   {
-    if (_mesh.isBoundaryNode(node_id),_intersecting_boundary_ids[i])
+    if (_mesh.isBoundaryNode(node_id,_intersecting_boundary_ids[i]))
     {
       is_on_boundary = true;
       break;

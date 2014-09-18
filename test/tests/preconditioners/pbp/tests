@@ -20,4 +20,16 @@
     expect_out = 'Linear'
     max_parallel = 1
   [../]
+
+  [./lots_of_variables]
+    type = 'Exodiff'
+    input = 'lots_of_variables.i'
+    exodiff = 'lots_of_variables_out.e'
+    max_parallel = 1
+    max_time = 20
+    compiler = 'GCC CLANG'
+    method = 'OPT OPROF'
+    valgrind = 'HEAVY'
+    min_reported_time = 20
+  [../]
 []
