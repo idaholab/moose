@@ -69,6 +69,7 @@
   crack_direction_vector_end_2 = '1.0 0.0 0.0'
   radius_inner = '12.5 25.0 37.5'
   radius_outer = '25.0 37.5 50.0'
+  intersecting_boundary = '1 2'
 []
 
 [SolidMechanics]
