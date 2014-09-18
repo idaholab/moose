@@ -567,7 +567,30 @@ public:
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual );
   virtual void computeResidualType(const NumericVector<Number> & soln, NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
-  virtual void computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
+
+  /**
+   * Computes several Jacobian blocks simultaneously, summing their contributions into smaller preconditioning matrices.
+   *
+   * Used by Physics-based preconditioning
+   *
+   * @param blocks The blocks to fill in (JacobianBlock is defined in ComputeJacobianBlocksThread)
+   */
+  virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks);
+
+  /**
+   * Really not a good idea to use this.
+   *
+   * It computes just one block of the Jacobian into a smaller matrix.  Calling this in a loop is EXTREMELY ineffecient!
+   * Try to use computeJacobianBlocks() instead!
+   *
+   * @param jacobian The matrix you want to fill
+   * @param precond_system The libMesh::system of the preconditioning system
+   * @param ivar the block-row of the Jacobian
+   * @param jvar the block-column of the Jacobian
+   *
+   */
+  virtual void computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
+
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
   /**

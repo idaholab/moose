@@ -40,6 +40,7 @@
 #include "EigenSystem.h"
 #include "MooseParsedFunction.h"
 #include "MeshChangedInterface.h"
+#include "ComputeJacobianBlocksThread.h"
 
 #include "ScalarInitialCondition.h"
 #include "ElementPostprocessor.h"
@@ -3320,13 +3321,24 @@ FEProblem::computeTransientImplicitJacobian(Real time, const NumericVector<Numbe
 
 
 void
-FEProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+FEProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 {
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
   _aux.compute();
-  _nl.computeJacobianBlock(jacobian, precond_system, ivar, jvar);
+
+  _nl.computeJacobianBlocks(blocks);
+}
+
+void
+FEProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+{
+  std::vector<JacobianBlock *> blocks;
+  JacobianBlock * block = new JacobianBlock(precond_system, jacobian, ivar, jvar);
+  blocks.push_back(block);
+  computeJacobianBlocks(blocks);
+  delete block;
 }
 
 void

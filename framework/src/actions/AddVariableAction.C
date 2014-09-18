@@ -83,26 +83,7 @@ AddVariableAction::act()
   {
     // Get necessary data for creating a variable
     std::string var_name = getShortName();
-    std::set<SubdomainID> blocks = getSubdomainIDs();
-    Real scale_factor = isParamValid("scaling") ? getParam<Real>("scaling") : 1;
-
-    // Scalar variable
-    if (_scalar_var)
-      _problem->addScalarVariable(var_name, _fe_type.order, scale_factor);
-
-    // Block restricted variable
-    else if (blocks.empty())
-      _problem->addVariable(var_name, _fe_type, scale_factor);
-
-    // Non-block restricted variable
-    else
-      _problem->addVariable(var_name, _fe_type, scale_factor, &blocks);
-
-    if (getParam<bool>("eigen"))
-    {
-      EigenSystem & esys(static_cast<EigenSystem &>(_problem->getNonlinearSystem()));
-      esys.markEigenVariable(var_name);
-    }
+    addVariable(var_name);
   }
 
   // Set the initial condition
@@ -136,6 +117,31 @@ AddVariableAction::setInitialCondition()
       params.set<Real>("value") = initial;
       _problem->addInitialCondition("ConstantIC", "ic", params);
     }
+  }
+}
+
+void
+AddVariableAction::addVariable(std::string & var_name)
+{
+  std::set<SubdomainID> blocks = getSubdomainIDs();
+  Real scale_factor = isParamValid("scaling") ? getParam<Real>("scaling") : 1;
+
+  // Scalar variable
+  if (_scalar_var)
+    _problem->addScalarVariable(var_name, _fe_type.order, scale_factor);
+
+  // Block restricted variable
+  else if (blocks.empty())
+    _problem->addVariable(var_name, _fe_type, scale_factor);
+
+  // Non-block restricted variable
+  else
+    _problem->addVariable(var_name, _fe_type, scale_factor, &blocks);
+
+  if (getParam<bool>("eigen"))
+  {
+    EigenSystem & esys(static_cast<EigenSystem &>(_problem->getNonlinearSystem()));
+    esys.markEigenVariable(var_name);
   }
 }
 
