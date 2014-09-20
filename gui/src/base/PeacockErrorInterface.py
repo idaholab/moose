@@ -40,8 +40,8 @@ class PeacockErrorInterface(object):
   #
   # Optional Keyword Arguments:
   #   dialog
-  #   <True> | False
-  #   If true (the default) and the Object is a QWidget, an error dialog is created
+  #   True | <False>
+  #   If true and the Object is a QWidget, an error dialog is created
   #
   #   screen
   #   <True> | False
@@ -54,7 +54,7 @@ class PeacockErrorInterface(object):
     self._all_error_messages.append(message)
 
     # Create the dialog
-    if self._has_dialog and kwargs.pop('dialog', True):
+    if self._has_dialog and kwargs.pop('dialog', False):
       self._error_message.showMessage(message)
 
     # Print to the screen
@@ -82,3 +82,13 @@ class PeacockErrorInterface(object):
       return False
     else:
       return msg in self._last_error_message
+
+  ##
+  # Test that the an error message occured
+  # @param msg The message to test
+  # @return True if the supplied message was an error
+  def hasErrorMessage(self, msg):
+    for err in self._all_error_messages:
+      if msg in err:
+        return True
+    return False

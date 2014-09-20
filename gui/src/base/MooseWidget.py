@@ -101,7 +101,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
       msg = ['The owner object', str(owner), 'must be a MooseWidget']
       self._debug(*msg)
       if error:
-        self.peacockError(msg)
+        self.peacockError(*msg)
       return_value = None
 
     elif (owner != None):
@@ -141,13 +141,6 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
     if return_value == None:
       name = self.__class__.__name__
       msg = ['The handle,', handle + ',', 'was not located in the', name, 'object']
-      self._debug(*msg)
-      if error:
-        self.peacockError(*msg)
-
-    # Print a debug message if the return value is fails
-    elif return_value == False:
-      msg = ['The handle,', handle + ',', 'was not found.']
       self._debug(*msg)
       if error:
         self.peacockError(*msg)
