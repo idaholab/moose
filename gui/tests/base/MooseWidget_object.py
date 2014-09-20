@@ -77,6 +77,12 @@ def multipleObjects():
   del _test._objects['another_sub_widget'] # remove this so it doesn't mess up other tests
   return (result, fail_msg)
 
+# Test error for owner != MooseWidget
+def errorOwnerNotMooseWidget():
+  obj = _test.object('name_does_not_matter', owner='sub_sub_widget')
+  result = _test.testLastErrorMessage('The owner object sub_sub_widget must be a MooseWidget')
+  return (result, 'Wrong error')
+
 # Test error object
 def objectErrorFlag():
   obj = _test.object('invalid_widget_name', error=True)
