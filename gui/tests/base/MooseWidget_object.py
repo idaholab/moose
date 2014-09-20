@@ -81,13 +81,13 @@ def multipleObjects():
 # Test error for owner != MooseWidget
 def errorOwnerNotMooseWidget():
   obj = _test.object('name_does_not_matter', owner='non_moose_widget', error=True)
-  result = _test.hasErrorMessage('The owner object non_moose_widget must be a MooseWidget')
+  result = _test.testLastErrorMessage('The owner object non_moose_widget must be a MooseWidget')
   return (result, 'Wrong error')
 
 # Test error for owner != MooseWidget
 def errorInvalidOwnerName():
   obj = _test.object('name_does_not_matter', owner='invalid_owner', error=True)
-  result = _test.hasErrorMessage('Invalid owner object name invalid_owner when')
+  result = _test.testLastErrorMessage('Invalid owner object name invalid_owner when')
   return (result, 'Wrong error')
 
 # Test error object
@@ -107,6 +107,6 @@ def errorInvalidWidgetName():
 def errorMultipleWidgets():
   _test.addObject(SubTestMooseWidget(), handle='another_sub_widget')
   objs = _test.object('sub_sub_widget', error=True)
-  result = _test.hasErrorMessage('Multiple handles located with the name sub_sub')
+  result = _test.testLastErrorMessage('Multiple handles located with the name sub_sub')
   del _test._objects['another_sub_widget'] # remove this so it doesn't mess up other tests
   return (result, 'No expected error')
