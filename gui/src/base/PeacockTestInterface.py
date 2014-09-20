@@ -37,7 +37,6 @@ class PeacockTestInterface(object):
   # Performs the testing by calling all functions register via registerTest()
   def test(self):
 
-
     start_time = time.time()
     num_tests = len(self._tests)
     failed_tests = 0
@@ -51,12 +50,16 @@ class PeacockTestInterface(object):
       sys.stdout = StringIO()     # capture output
 
       (result, msg) = attr()
+#      try:
+#        (result, msg) = attr()
+#      except:
+#        result = False
+#        msg = 'RUN ERROR'
 
       if not result:
         failed_tests += 1
 
       out = sys.stdout.getvalue() # release output
-
       sys.stdout.close()  # close the stream
       sys.stdout = backup # restore original stdout
 
@@ -74,7 +77,7 @@ class PeacockTestInterface(object):
   # @param name The name of the test
   # @param result True/False result of the test
   # @param msg A message to show upon failure
-  # @param stdout The stdout string from the test execution, prints if failed
+  # @param stdout The stbdout string from the test execution, prints if failed
   def _showTestResult(self, name, result, msg, *args):
 
     # Build the status message: OK or FAIL

@@ -30,11 +30,11 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   #    to that of the parent
   def __init__(self, **kwargs):
 
-    # Call the base class constructor
- #   QtGui.QWidget.__init__(self)
+    # MooseWidget must be a QWidget
     if not isinstance(self, QtGui.QWidget):
-      print "MUST BE A WIDGET"
+      self.peacockError('All MooseWidget objects must also be a QtGui.QWidget object')
 
+    # Call the base class constructor
     PeacockErrorInterface.__init__(self)
     PeacockTestInterface.__init__(self)
     MooseWidgetInfoBase.__init__(self)
@@ -72,7 +72,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   # Optional key=value Pairs:
   #  owener <str>
   #    The name of the MooseObject that is the owner of the object being searched, the
-  #    parent name given must be a child of the current object. This takes precedence over
+  #    owner name given must be a child of the current object. This takes precedence over
   #    the 'search_owner' option below.  The 'owner' is the object that calls addObject.
   #
   #  search_children True | {False}
@@ -81,38 +81,87 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   #
   #  search_owner {True} | False
   #    If set to true, the search will look for the object in object that owns this object
+  #
+  #  error True | {False}
+  #    If the true return an error rather than only returning None if a unique object is not found
   def object(self, handle, **kwargs):
+
+    # The value to return
+    return_value = None
+
+    # Produce an error if
+    error = kwargs.pop('error', False)
 
     # Keyword 'owner' supplied
     owner = kwargs.pop('owner', None)
     if owner in self._objects and isinstance(self._objects[owner], MooseWidget):
-      return self._objects[owner].object(handle, search_owner=False)
+      return_value = self._objects[owner].object(handle, search_owner=False)
 
     elif (owner in self._objects) and not isinstance(self._objects[owner], MooseWidget):
-      self._debug('The owner object', str(owner), 'must be a MooseWidget to search for children')
+      msg = ['The owner object', str(owner), 'must be a MooseWidget']
+      self._debug(*msg)
+      if error:
+        self.peacockError(msg)
+      return_value = None
+
+    elif (owner != None):
+      msg = ['Invalid owner object name', str(owner), 'when searching for', handle]
+      self._debug(*msg)
+      if error:
+        self.peacockError(*msg)
       return None
 
-    elif owner != None:
-      self._debug('Invalid owner object name', str(owner), 'when searching for', handle)
-      return None
-
-    # Search the owner
+    # Search the owner, this uses the 'owner' object method, so just return its results
     if kwargs.pop('search_owner', True) and isinstance(self.property('owner'), MooseWidget):
       return self.property('owner').object(full_name, search_owner=False)
 
-    # If not searching the owner search locally and then in the children
+    # If not searching the owner search locally and then in the children, in this case
+    # it is possible to get more than one object
     else:
-      if handle in self._objects:
-        return self._objects[handle]
+      return_value = []
 
+      # Search locally
+      if handle in self._objects:
+        return_value.append(self._objects[handle])
+
+      # Search children
       for key, obj in self._objects.iteritems():
         if isinstance(obj, MooseWidget):
           obj = obj.object(handle, search_owner=False)
           if obj != None:
-            return obj
+            return_value.append(obj)
 
-    # Nothing was found, so return nothing
-    return None
+      # Handle empty and single case
+      if len(return_value) == 0:
+        return_value = None
+      elif len(return_value) == 1:
+        return_value = return_value[0]
+
+    # Produce and error if the error flag is used
+    if return_value == None:
+      name = self.__class__.__name__
+      msg = ['The handle,', handle + ',', 'was not located in the', name, 'object']
+      self._debug(*msg)
+      if error:
+        self.peacockError(*msg)
+
+    # Print a debug message if the return value is fails
+    elif return_value == False:
+      msg = ['The handle,', handle + ',', 'was not found.']
+      self._debug(*msg)
+      if error:
+        self.peacockError(*msg)
+
+    # Print a debug message if more than one value exists
+    elif isinstance(return_value, list):
+      msg = ['Multiple handles located with the name', handle]
+      self._debug(*msg)
+      if error:
+        self.peacockError(*msg)
+
+    # Return it already
+    return return_value
+
 
   ##
   # Extract a callback method by name
@@ -171,7 +220,6 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   # @param handle The handle (<str>) of the object
   # @param search_children If True (default) search all children MooseWidget objects for the handle
   def hasObject(self, handle, search_children = True):
-    print handle
 
     # Search this object for the handle
     if handle in self._objects:
@@ -332,7 +380,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
     if isinstance(callback, str):
       callback = self.callback(callback)
 
-    if not hasattr(callback, '__call__'):
+    if not callable(callback):
       self.peacockError('The supplied callback must be a valid callback name or a callable function')
 
     signal.connect(callback)
