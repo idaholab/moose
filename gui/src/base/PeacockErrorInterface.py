@@ -46,7 +46,6 @@ class PeacockErrorInterface(object):
   #   screen
   #   <True> | False
   #   If true (the default) the error message is printed to the screen
-
   def peacockError(self, *args, **kwargs):
 
     # Build and store the message
@@ -77,6 +76,9 @@ class PeacockErrorInterface(object):
   ##
   # Test that the last error message is the same as the message passed in
   # @param msg The message to test
-  # @return True if the last error and the message supplied are the same
+  # @return True if the last error contains the message supplied
   def testLastErrorMessage(self, msg):
-    return self._last_error_message == msg
+    if self._last_error_message == None:
+      return False
+    else:
+      return msg in self._last_error_message
