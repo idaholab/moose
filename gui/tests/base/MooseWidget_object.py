@@ -23,6 +23,7 @@ app  = QtGui.QApplication(sys.argv)
 main = QtGui.QMainWindow()
 _test = TestMooseWidget(main=main)
 _test.addObject(SubTestMooseWidget(), handle='sub_widget')
+_test.addObject(QtGui.QWidget(), handle='non_moose_widget')
 _test.setProperty('debug', True)
 
 # Test call to 'object' fails when an invalid parent name is given
@@ -79,20 +80,33 @@ def multipleObjects():
 
 # Test error for owner != MooseWidget
 def errorOwnerNotMooseWidget():
-  obj = _test.object('name_does_not_matter', owner='sub_sub_widget')
-  result = _test.testLastErrorMessage('The owner object sub_sub_widget must be a MooseWidget')
+  obj = _test.object('name_does_not_matter', owner='non_moose_widget', error=True)
+  result = _test.hasErrorMessage('The owner object non_moose_widget must be a MooseWidget')
+  return (result, 'Wrong error')
+
+# Test error for owner != MooseWidget
+def errorInvalidOwnerName():
+  obj = _test.object('name_does_not_matter', owner='invalid_owner', error=True)
+  result = _test.hasErrorMessage('Invalid owner object name invalid_owner when')
   return (result, 'Wrong error')
 
 # Test error object
-def objectErrorFlag():
+def errorInvalidWidgetName():
   obj = _test.object('invalid_widget_name', error=True)
   result = _test.testLastErrorMessage('The handle, invalid_widget_name, was not located in the')
   fail_msg = 'No expected error'
   return (result, fail_msg)
 
-# Test objects multiple objects with same name
+# Test error object
+def errorInvalidWidgetName():
+  obj = _test.object('invalid_widget_name', error=True)
+  result = _test.testLastErrorMessage('The handle, invalid_widget_name, was not located in the')
+  fail_msg = 'No expected error'
+  return (result, fail_msg)
 
-# TODO
-# -finish 'error' option for object method, add a test
-
-# -implement and test multiple return values for duplicate names
+def errorMultipleWidgets():
+  _test.addObject(SubTestMooseWidget(), handle='another_sub_widget')
+  objs = _test.object('sub_sub_widget', error=True)
+  result = _test.hasErrorMessage('Multiple handles located with the name sub_sub')
+  del _test._objects['another_sub_widget'] # remove this so it doesn't mess up other tests
+  return (result, 'No expected error')
