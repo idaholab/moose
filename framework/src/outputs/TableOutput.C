@@ -31,14 +31,8 @@ InputParameters validParams<TableOutput>()
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Base class parameters
-  InputParameters params = validParams<PetscOutput>();
-
-  // Suppressing the output of nodal and elemental variables disables this type of output
-  params.suppressParameter<bool>("output_elemental_variables");
-  params.suppressParameter<bool>("output_nodal_variables");
-  params.suppressParameter<bool>("elemental_as_nodal");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("output_input");
+  InputParameters params = validParams<FileOutput>();
+  params += Output::enableOutputTypes("postprocessor scalar");
 
   // Add option for appending file on restart
   params.addParam<bool>("append_restart", false, "Append existing file on restart");
@@ -47,7 +41,7 @@ InputParameters validParams<TableOutput>()
 }
 
 TableOutput::TableOutput(const std::string & name, InputParameters parameters) :
-    PetscOutput(name, parameters),
+    FileOutput(name, parameters),
     _tables_restartable(getParam<bool>("append_restart")),
     _postprocessor_table(_tables_restartable ? declareRestartableData<FormattedTable>("postprocessor_table") : declareRecoverableData<FormattedTable>("postprocessor_table")),
     _scalar_table(_tables_restartable ? declareRestartableData<FormattedTable>("scalar_table") : declareRecoverableData<FormattedTable>("scalar_table")),

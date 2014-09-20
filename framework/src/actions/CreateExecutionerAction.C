@@ -21,6 +21,7 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "MooseEnum.h"
+#include "MultiMooseEnum.h"
 
 template<>
 InputParameters validParams<CreateExecutionerAction>()
@@ -48,7 +49,7 @@ InputParameters validParams<CreateExecutionerAction>()
 void
 CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & params)
 {
-  MooseEnum solve_type("PJFNK, JFNK, NEWTON, FD, LINEAR");
+  MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
   params.addParam<MooseEnum>   ("solve_type",      solve_type,
                                 "PJFNK: Preconditioned Jacobian-Free Newton Krylov "
                                 "JFNK: Jacobian-Free Newton Krylov "
@@ -59,9 +60,9 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
   // Line Search Options
 #ifdef LIBMESH_HAVE_PETSC
 #if PETSC_VERSION_LESS_THAN(3,3,0)
-  MooseEnum line_search("default, cubic, quadratic, none, basic, basicnonorms", "default");
+  MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
 #else
-  MooseEnum line_search("default, shell, none, basic, l2, bt, cp", "default");
+  MooseEnum line_search("default shell none basic l2 bt cp", "default");
 #endif
   std::string addtl_doc_str(" (Note: none = basic)");
 #else
@@ -71,10 +72,9 @@ CreateExecutionerAction::populateCommonExecutionerParams(InputParameters & param
   params.addParam<MooseEnum>   ("line_search",     line_search, "Specifies the line search type" + addtl_doc_str);
 
 #ifdef LIBMESH_HAVE_PETSC
-  MooseEnum common_petsc_options("", "", true);
-  std::vector<MooseEnum> common_petsc_options_vec(1, common_petsc_options);
+  MultiMooseEnum common_petsc_options("", "", true);
 
-  params.addParam<std::vector<MooseEnum> >("petsc_options", common_petsc_options_vec, "Singleton PETSc options");
+  params.addParam<MultiMooseEnum>("petsc_options", common_petsc_options, "Singleton PETSc options");
   params.addParam<std::vector<std::string> >("petsc_options_iname", "Names of PETSc name/value pairs");
   params.addParam<std::vector<std::string> >("petsc_options_value", "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
 #endif //LIBMESH_HAVE_PETSC
@@ -155,7 +155,7 @@ CreateExecutionerAction::storeCommonExecutionerParams(FEProblem & fe_problem, In
     fe_problem.solverParams()._line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
 
 #ifdef LIBMESH_HAVE_PETSC
-  std::vector<MooseEnum>   petsc_options       = params.get<std::vector<MooseEnum> >  ("petsc_options");
+  MultiMooseEnum           petsc_options       = params.get<MultiMooseEnum>("petsc_options");
   std::vector<std::string> petsc_options_iname = params.get<std::vector<std::string> >("petsc_options_iname");
   std::vector<std::string> petsc_options_value = params.get<std::vector<std::string> >("petsc_options_value");
 

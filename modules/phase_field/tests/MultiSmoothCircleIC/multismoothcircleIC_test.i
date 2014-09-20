@@ -1,5 +1,4 @@
 [Mesh]
-
   type = GeneratedMesh
   dim = 3
   nx = 22
@@ -12,12 +11,9 @@
   zmin = 0
   zmax = 100
   elem_type = HEX8
-
-
 []
 
 [Variables]
-
   [./c]
     order = FIRST
     family = LAGRANGE
@@ -25,31 +21,25 @@
 []
 
 [ICs]
-
   [./c]
-     type = MultiSmoothCircleIC
-     variable = c
-     Lx = 100.0
-     Ly = 100.0
-     Lz = 100.0
-     invalue = 1.0
-     outvalue = 0.0001
-     bubspac = 30.0 #This spacing is from bubble center to bubble center
-     numbub = 10
-     radius = 10.0
-     int_width = 12.0
-     radius_variation = 0.2
+    type = MultiSmoothCircleIC
+    variable = c
+    invalue = 1.0
+    outvalue = 0.0001
+    bubspac = 30.0 # This spacing is from bubble center to bubble center
+    numbub = 10
+    radius = 10.0
+    int_width = 12.0
+    radius_variation = 0.2
+    radius_variation_type = uniform
   [../]
 []
 
 [Kernels]
-active = 'ie_c diff'
-
   [./ie_c]
     type = TimeDerivative
     variable = c
   [../]
-
   [./diff]
     type = MatDiffusion
     variable = c
@@ -58,11 +48,14 @@ active = 'ie_c diff'
 []
 
 [BCs]
-
+  [./Periodic]
+    [./all]
+      auto_direction = 'x y z'
+    [../]
+  [../]
 []
 
 [Materials]
-
   [./Dv]
     type = GenericConstantMaterial
     prop_names = D_v
@@ -72,8 +65,6 @@ active = 'ie_c diff'
 []
 
 [Postprocessors]
-  active = 'bubbles'
-
   [./bubbles]
     type = NodalFloodCount
     variable = c
@@ -82,33 +73,23 @@ active = 'ie_c diff'
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
-  scheme = 'bdf2'
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-
-
-
+  scheme = bdf2
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -mat_mffd_type'
   petsc_options_value = 'hypre boomeramg 101 ds'
-
   l_max_its = 20
   l_tol = 1e-4
-
   nl_max_its = 20
   nl_rel_tol = 1e-9
   nl_abs_tol = 1e-11
-
   start_time = 0.0
-  num_steps =1
+  num_steps = 1
   dt = 100.0
-
   [./Adaptivity]
     refine_fraction = .5
   [../]
-
 []
 
 [Outputs]
@@ -120,3 +101,4 @@ active = 'ie_c diff'
     linear_residuals = true
   [../]
 []
+

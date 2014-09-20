@@ -12,4 +12,11 @@
     exodiff = 'pp_master_out_pp_sub0.e pp_master_out_pp_sub1.e'
     recover = false
   [../]
+
+  [./monomail_to_sub_pp]
+    type = 'Exodiff'
+    input = 'master_quad.i'
+    exodiff = 'master_quad_out.e master_quad_out_quad0.e master_quad_out_quad1.e master_quad_out_quad2.e master_quad_out_quad3.e'
+    recover = false
+  [../]
 []

@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<MatCoefDiffusion>()
 {
-  MooseEnum test("none=0, hasMaterialProperty=1", "none", "Select optional test");
+  MooseEnum test("none=0 hasMaterialProperty=1", "none", "Select optional test");
 
   InputParameters params = validParams<Kernel>();
   params.addParam<std::string>("conductivity", "the name of the material property for conductivity");

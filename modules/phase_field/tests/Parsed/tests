@@ -1,0 +1,19 @@
+[Tests]
+  [./CHParsed]
+    type = 'Exodiff'
+    input = 'CHParsed_test.i'
+    exodiff = 'CHParsed_test_OverSampling.e'
+  [../]
+
+  [./SplitCHParsed]
+    type = 'Exodiff'
+    input = 'SplitCHParsed_test.i'
+    exodiff = 'SplitCHParsed_test_out.e'
+  [../]
+
+  [./ACParsed]
+    type = 'Exodiff'
+    input = 'ACParsed_test.i'
+    exodiff = 'ACParsed_test_out.e'
+  [../]
+[]

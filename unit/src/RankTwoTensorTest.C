@@ -11,7 +11,6 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
 #include "RankTwoTensorTest.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( RankTwoTensorTest );
@@ -66,6 +65,58 @@ RankTwoTensorTest::doubleContractionTest()
 }
 
 void
+RankTwoTensorTest::rotateTest()
+{
+  Real sqrt2 = 0.707106781187;
+  RealTensorValue rtv0(sqrt2, -sqrt2, 0, sqrt2, sqrt2, 0, 0, 0, 1); // rotation about "0" axis
+  RealTensorValue rtv1(sqrt2, 0, -sqrt2, 0, 1, 0, sqrt2, 0, sqrt2); // rotation about "1" axis
+  RealTensorValue rtv2(1, 0, 0, 0, sqrt2, -sqrt2, 0, sqrt2, sqrt2); // rotation about "2" axis
+
+  RankTwoTensor rot0(rtv0);
+  RankTwoTensor rot0T = rot0.transpose();
+  RankTwoTensor rot1(rtv1);
+  RankTwoTensor rot1T = rot1.transpose();
+  RankTwoTensor rot2(rtv2);
+  RankTwoTensor rot2T = rot2.transpose();
+  RankTwoTensor rot = rot0*rot1*rot2;
+
+  RankTwoTensor answer;
+  RankTwoTensor m3;
+
+  // the following "answer"s come from mathematica of course!
+
+  // rotate about "0" axis with RealTensorValue, then back again with RankTwoTensor
+  m3 = _m3;
+  answer = RankTwoTensor(-4, 3, 6.363961, 3, 0, -2.1213403, 6.363961, -2.1213403, 9);
+  m3.rotate(rtv0);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+  m3.rotate(rot0T);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - _m3).L2norm(), 0.0001);
+
+  // rotate about "1" axis with RealTensorValue, then back again with RankTwoTensor
+  m3 = _m3;
+  answer = RankTwoTensor(2, 5.656854, -4, 5.656854, -5, -2.828427, -4, -2.828427, 8);
+  m3.rotate(rtv1);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+  m3.rotate(rot1T);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - _m3).L2norm(), 0.0001);
+
+  // rotate about "2" axis with RealTensorValue, then back again with RankTwoTensor
+  m3 = _m3;
+  answer = RankTwoTensor(1, -sqrt2, 3.5355339, -sqrt2, 8, -7, 3.5355339, -7, -4);
+  m3.rotate(rtv2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+  m3.rotate(rot2T);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - _m3).L2norm(), 0.0001);
+
+  // rotate with "rot"
+  m3 = _m3;
+  answer = RankTwoTensor(-2.9675144, -6.51776695, 5.6213203, -6.51776695, 5.9319805, -2.0857864, 5.6213203, -2.0857864, 2.0355339);
+  m3.rotate(rot);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (m3 - answer).L2norm(), 0.0001);
+}
+
+void
 RankTwoTensorTest::traceTest()
 {
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _m0.trace(), 0.0001);
@@ -82,7 +133,7 @@ RankTwoTensorTest::secondInvariantTest()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _m0.secondInvariant(), 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _m1.secondInvariant(), 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1, _m2.secondInvariant(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(146, _unsymmetric1.secondInvariant(), 0.0001);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(84, _unsymmetric1.secondInvariant(), 0.0001);
 }
 
 void
@@ -112,38 +163,6 @@ RankTwoTensorTest::inverseTest()
 }
 
 void
-RankTwoTensorTest::symmetricEigenvaluesTest()
-{
-  std::vector<Real> eigvals;
-
-
-  _m0.symmetricEigenvalues(eigvals);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, eigvals[0], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, eigvals[1], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, eigvals[2], 0.0001);
-
-  _m2.symmetricEigenvalues(eigvals);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1, eigvals[0], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(2, eigvals[1], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3, eigvals[2], 0.0001);
-
-  _m3.symmetricEigenvalues(eigvals);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-8.17113, eigvals[0], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.51145, eigvals[1], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(11.6597, eigvals[2], 0.0001);
-
-  // note that only the upper-diagonal part of m is used
-  // in the symmetric_eigenvalues routine - so the routine
-  // only works for symmetric matrices!!
-  // That is why the following m appears to have the same
-  // eigenvalues as the previous m !
-  _unsymmetric0.symmetricEigenvalues(eigvals);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-8.17113, eigvals[0], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.51145, eigvals[1], 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(11.6597, eigvals[2], 0.0001);
-}
-
-void
 RankTwoTensorTest::dtraceTest()
 {
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m0.dtrace() - _m1).L2norm(), 0.0001);
@@ -157,8 +176,271 @@ RankTwoTensorTest::dsecondInvariantTest()
 {
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m0.dsecondInvariant() - _m0.deviatoric()).L2norm(), 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_m3.dsecondInvariant() - _m3.deviatoric()).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_unsymmetric0.dsecondInvariant() - _unsymmetric0.deviatoric()).L2norm(), 0.0001);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_unsymmetric1.dsecondInvariant() - _unsymmetric1.deviatoric()).L2norm(), 0.0001);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_unsymmetric0.dsecondInvariant() - 0.5*(_unsymmetric0.deviatoric() + _unsymmetric0.deviatoric().transpose())).L2norm(), 0.0001);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, (_unsymmetric1.dsecondInvariant() - 0.5*(_unsymmetric1.deviatoric() + _unsymmetric1.deviatoric().transpose())).L2norm(), 0.0001);
+}
+
+void
+RankTwoTensorTest::d2secondInvariantTest()
+{
+  // Here i do a finite-difference calculation of the second
+  // derivative and compare with the closed-solution form
+  Real ep = 1E-5; // small finite-difference parameter
+
+  RankTwoTensor d1; // first derivative of secondInvariant - from RankTwoTensor - do a finite-difference of this
+  RankFourTensor d2; // second derivative of second Invariant - from RankTwoTensor
+  RankTwoTensor mep; // matrix with shifted entries
+  RankTwoTensor d1ep; // first derivative of secondInvariant of mep
+
+
+  mep = _m3;
+  d1 = _m3.dsecondInvariant();
+  d2 = _m3.d2secondInvariant();
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      for (unsigned int k = 0; k < 3; k++)
+        for (unsigned int l = 0; l < 3; l++)
+        {
+          mep(k, l) += ep;
+          d1ep = mep.dsecondInvariant();
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= ep;
+        }
+    }
+
+  mep = _unsymmetric1;
+  d1 = _unsymmetric1.dsecondInvariant();
+  d2 = _unsymmetric1.d2secondInvariant();
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      for (unsigned int k = 0; k < 3; k++)
+        for (unsigned int l = 0; l < 3; l++)
+        {
+          mep(k, l) += ep;
+          d1ep = mep.dsecondInvariant();
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= ep;
+
+          // note that because d1 and d2 explicitly symmeterise the matrix
+          // the derivative may or may not explicitly symmeterise
+          mep(k, l) += 0.5*ep;
+          mep(l, k) += 0.5*ep;
+          d1ep = mep.dsecondInvariant();
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= 0.5*ep;
+          mep(l, k) -= 0.5*ep;
+        }
+    }
+}
+
+void
+RankTwoTensorTest::thirdInvariantTest()
+{
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(214, _unsymmetric1.thirdInvariant(), 0.0001);
+}
+
+
+void
+RankTwoTensorTest::dthirdInvariantTest()
+{
+  // this derivative is less trivial
+  // so let's check with a finite-difference approximation
+  Real ep = 1E-5; // small finite-difference parameter
+  Real thirdInvariant; // thirdInvariant provided by RankTwoTensor
+  RankTwoTensor deriv; // derivative of thirdInvariant provided by RankTwoTensor
+  RankTwoTensor mep; // the RankTwoTensor with successive entries shifted by ep
+
+  thirdInvariant = _m3.thirdInvariant();
+  deriv = _m3.dthirdInvariant();
+  mep = _m3;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      mep(i, j) += ep;
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.thirdInvariant() - thirdInvariant)/ep, deriv(i, j), 10*ep);
+      mep(i, j) -= ep;
+    }
+
+  thirdInvariant = _unsymmetric1.thirdInvariant();
+  deriv = _unsymmetric1.dthirdInvariant();
+  mep = _unsymmetric1;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      mep(i, j) += ep;
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.thirdInvariant() - thirdInvariant)/ep, deriv(i, j), 10*ep);
+      mep(i, j) -= ep;
+
+      // since thirdInvariant is explicitly symmeterised, we can also do
+      mep(i, j) += 0.5*ep;
+      mep(j, i) += 0.5*ep;
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.thirdInvariant() - thirdInvariant)/ep, deriv(i, j), 10*ep);
+      mep(i, j) -= 0.5*ep;
+      mep(j, i) -= 0.5*ep;
+    }
+}
+
+
+void
+RankTwoTensorTest::d2thirdInvariantTest()
+{
+  // Here i do a finite-difference calculation of the third
+  // derivative and compare with the closed-solution form
+  Real ep = 1E-5; // small finite-difference parameter
+
+  RankTwoTensor d1; // first derivative of thirdInvariant - from RankTwoTensor - do a finite-difference of this
+  RankFourTensor d2; // third derivative of third Invariant - from RankTwoTensor
+  RankTwoTensor mep; // matrix with shifted entries
+  RankTwoTensor d1ep; // first derivative of thirdInvariant of mep
+
+
+  mep = _m3;
+  d1 = _m3.dthirdInvariant();
+  d2 = _m3.d2thirdInvariant();
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      for (unsigned int k = 0; k < 3; k++)
+        for (unsigned int l = 0; l < 3; l++)
+        {
+          mep(k, l) += ep;
+          d1ep = mep.dthirdInvariant();
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= ep;
+        }
+    }
+
+
+  mep = _unsymmetric1;
+  d1 = _unsymmetric1.dthirdInvariant();
+  d2 = _unsymmetric1.d2thirdInvariant();
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      for (unsigned int k = 0; k < 3; k++)
+        for (unsigned int l = 0; l < 3; l++)
+        {
+          mep(k, l) += ep;
+          d1ep = mep.dthirdInvariant();
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= ep;
+
+          // note that because d1 and d2 explicitly symmeterise the matrix
+          // the derivative may or may not explicitly symmeterise
+          mep(k, l) += 0.5*ep;
+          mep(l, k) += 0.5*ep;
+          d1ep = mep.dthirdInvariant();
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= 0.5*ep;
+          mep(l, k) -= 0.5*ep;
+        }
+    }
+}
+
+void
+RankTwoTensorTest::sin3LodeTest()
+{
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.72218212, _unsymmetric1.sin3Lode(0, 0), 0.0001);
+}
+
+
+void
+RankTwoTensorTest::dsin3LodeTest()
+{
+  // this derivative is less trivial
+  // so let's check with a finite-difference approximation
+  Real ep = 1E-5; // small finite-difference parameter
+  Real sin3Lode; // sin3Lode provided by RankTwoTensor
+  RankTwoTensor deriv; // derivative of sin3Lode provided by RankTwoTensor
+  RankTwoTensor mep; // the RankTwoTensor with successive entries shifted by ep
+
+  sin3Lode = _m3.sin3Lode(0, 0);
+  deriv = _m3.dsin3Lode(0);
+  mep = _m3;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      mep(i, j) += ep;
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode(0, 0) - sin3Lode)/ep, deriv(i, j), 10*ep);
+      mep(i, j) -= ep;
+    }
+
+  sin3Lode = _unsymmetric1.sin3Lode(0, 0);
+  deriv = _unsymmetric1.dsin3Lode(0);
+  mep = _unsymmetric1;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j < 3 ; ++j)
+    {
+      mep(i, j) += ep;
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode(0, 0) - sin3Lode)/ep, deriv(i, j), 10*ep);
+      mep(i, j) -= ep;
+
+      // since sin3Lode is explicitly symmeterised, we can also do
+      mep(i, j) += 0.5*ep;
+      mep(j, i) += 0.5*ep;
+      CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.sin3Lode(0, 0) - sin3Lode)/ep, deriv(i, j), 10*ep);
+      mep(i, j) -= 0.5*ep;
+      mep(j, i) -= 0.5*ep;
+    }
+}
+
+
+void
+RankTwoTensorTest::d2sin3LodeTest()
+{
+  // Here i do a finite-difference calculation of the third
+  // derivative and compare with the closed-solution form
+  Real ep = 1E-5; // small finite-difference parameter
+
+  RankTwoTensor d1; // first derivative of sin3Lode - from RankTwoTensor - do a finite-difference of this
+  RankFourTensor d2; // third derivative of third Invariant - from RankTwoTensor
+  RankTwoTensor mep; // matrix with shifted entries
+  RankTwoTensor d1ep; // first derivative of sin3Lode of mep
+
+
+  mep = _m3;
+  d1 = _m3.dsin3Lode(0);
+  d2 = _m3.d2sin3Lode(0);
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      for (unsigned int k = 0; k < 3; k++)
+        for (unsigned int l = 0; l < 3; l++)
+        {
+          mep(k, l) += ep;
+          d1ep = mep.dsin3Lode(0);
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= ep;
+        }
+    }
+
+
+  mep = _unsymmetric1;
+  d1 = _unsymmetric1.dsin3Lode(0);
+  d2 = _unsymmetric1.d2sin3Lode(0);
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      for (unsigned int k = 0; k < 3; k++)
+        for (unsigned int l = 0; l < 3; l++)
+        {
+          mep(k, l) += ep;
+          d1ep = mep.dsin3Lode(0);
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= ep;
+
+          // note that because d1 and d2 explicitly symmeterise the matrix
+          // the derivative may or may not explicitly symmeterise
+          mep(k, l) += 0.5*ep;
+          mep(l, k) += 0.5*ep;
+          d1ep = mep.dsin3Lode(0);
+          CPPUNIT_ASSERT_DOUBLES_EQUAL((d1ep(i, j) - d1(i, j))/ep, d2(i, j, k, l), ep);
+          mep(k, l) -= 0.5*ep;
+          mep(l, k) -= 0.5*ep;
+        }
+    }
 }
 
 void
@@ -191,50 +473,6 @@ RankTwoTensorTest::ddetTest()
       mep(i, j) += ep;
       CPPUNIT_ASSERT_DOUBLES_EQUAL((mep.det() - det)/ep, deriv(i, j), ep);
       mep(i, j) -= ep;
-    }
-}
-
-void
-RankTwoTensorTest::dsymmetricEigenvaluesTest()
-{
-  // this derivative is less trivial than dtrace and dsecondInvariant,
-  // so let's check with a finite-difference approximation
-  Real ep = 1E-5; // small finite-difference parameter
-
-  std::vector<Real> eigvals; // eigenvalues in ascending order provided by RankTwoTensor
-  std::vector<RankTwoTensor> deriv; // derivatives of these eigenvalues provided by RankTwoTensor
-
-  RankTwoTensor mep; // the RankTwoTensor with successive entries shifted by ep
-  std::vector<Real> eigvalsep; // eigenvalues of mep in ascending order
-
-  _m2.dsymmetricEigenvalues(eigvals, deriv);
-  mep = _m2;
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
-    {
-      // note the explicit symmeterisation here
-      mep(i, j) += ep/2;
-      mep(j, i) += ep/2;
-      mep.symmetricEigenvalues(eigvalsep);
-      for (unsigned k = 0 ; k < 3 ; ++k)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvals[k])/ep, deriv[k](i, j), ep);
-      mep(i, j) -= ep/2;
-      mep(j, i) -= ep/2;
-    }
-
-  _m3.dsymmetricEigenvalues(eigvals, deriv);
-  mep = _m3;
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
-    {
-      // note the explicit symmeterisation here
-      mep(i, j) += ep/2;
-      mep(j, i) += ep/2;
-      mep.symmetricEigenvalues(eigvalsep);
-      for (unsigned k = 0 ; k < 3 ; ++k)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((eigvalsep[k] - eigvals[k])/ep, deriv[k](i, j), ep);
-      mep(i, j) -= ep/2;
-      mep(j, i) -= ep/2;
     }
 }
 

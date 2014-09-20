@@ -9,7 +9,6 @@
 #include "SideIntegralVariablePostprocessor.h"
 #include "LinearInterpolation.h"
 #include "RichardsVarNames.h"
-#include "FunctionInterface.h"
 
 class Function;
 
@@ -29,8 +28,7 @@ InputParameters validParams<RichardsPiecewiseLinearSinkFlux>();
  *      where knn is n.permeability.n where n is the normal to the boundary
  */
 class RichardsPiecewiseLinearSinkFlux:
-  public SideIntegralVariablePostprocessor,
-  public FunctionInterface
+  public SideIntegralVariablePostprocessor
 {
 public:
   RichardsPiecewiseLinearSinkFlux(const std::string & name, InputParameters parameters);

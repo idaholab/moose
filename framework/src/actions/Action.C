@@ -35,6 +35,7 @@ InputParameters validParams<Action>()
 }
 
 Action::Action(const std::string & name, InputParameters params) :
+    ConsoleStreamInterface(*params.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _name(name),
     _pars(params),
     _registered_identifier(isParamValid("registered_identifier") ? getParam<std::string>("registered_identifier") : ""),
@@ -44,7 +45,7 @@ Action::Action(const std::string & name, InputParameters params) :
     _action_factory(_app.getActionFactory()),
     _specific_task_name(getParam<std::string>("task")),
     _awh(*params.getCheckedPointerParam<ActionWarehouse *>("awh")),
-    _current_action(_awh.getCurrentTaskName()),
+    _current_task(_awh.getCurrentTaskName()),
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
     _problem(_awh.problem()),

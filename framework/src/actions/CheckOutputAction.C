@@ -120,7 +120,7 @@ CheckOutputAction::checkPerfLogOutput()
 void
 CheckOutputAction::checkInputOutput()
 {
-  if (_app.isParamValid("show_input"))
+  if (_app.getParam<bool>("show_input"))
   {
     const std::vector<Console *> ptrs = _app.getOutputWarehouse().getOutputs<Console>();
     for (std::vector<Console *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)

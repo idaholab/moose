@@ -325,15 +325,15 @@
   solve_type = 'PJFNK'
 
 
-  petsc_options = '-ksp_gmres_modifiedgramschmidt'
+  petsc_options = '-snes_ksp_ew -ksp_gmres_modifiedgramschmidt'
   petsc_options_iname = '-ksp_gmres_restart -pc_type  -pc_hypre_type'
-  petsc_options_value = '201                 hypre     boomeramg     '
+  petsc_options_value = '201                 hypre     boomeramg'
 
 
   line_search = 'none'
 
 
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-12
   nl_abs_tol = 1e-7
 
   l_max_its = 20

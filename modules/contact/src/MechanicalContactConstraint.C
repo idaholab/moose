@@ -22,7 +22,7 @@
 template<>
 InputParameters validParams<MechanicalContactConstraint>()
 {
-  MooseEnum orders("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<NodeFaceConstraint>();
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");

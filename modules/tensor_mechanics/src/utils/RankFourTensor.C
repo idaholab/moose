@@ -1,4 +1,5 @@
 #include "RankFourTensor.h"
+#include "RankTwoTensor.h"
 
 // Any other includes here
 #include <vector>
@@ -16,7 +17,7 @@ extern "C" void FORTRAN_CALL(dgetrf) ( ... ); // matrix inversion routine from L
 MooseEnum
 RankFourTensor::fillMethodEnum()
 {
-  return MooseEnum("antisymmetric, symmetric9, symmetric21, general_isotropic, symmetric_isotropic, antisymmetric_isotropic, general");
+  return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic antisymmetric_isotropic general");
 }
 
 RankFourTensor::RankFourTensor()
@@ -228,6 +229,18 @@ RankFourTensor::operator*(const RankFourTensor & a) const
               result(i,j,k,l) += _vals[i][j][p][q] * a(p,q,k,l);
 
   return result;
+}
+
+Real
+RankFourTensor::L2norm() const
+{
+  Real l2 = 0;
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          l2 += std::pow(_vals[i][j][k][l], 2);
+  return std::pow(l2, 0.5);
 }
 
 RankFourTensor

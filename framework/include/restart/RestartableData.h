@@ -149,7 +149,7 @@ inline void
 RestartableData<T>::swap (RestartableDataValue *rhs)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
-//  _value.swap(libmesh_cast_ptr<RestartableData<T>*>(rhs)->_value);
+//  _value.swap(cast_ptr<RestartableData<T>*>(rhs)->_value);
 }
 
 template<typename T>

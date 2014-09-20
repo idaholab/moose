@@ -2,6 +2,9 @@
 #define RANKTWOTENSOR_H
 
 #include "Moose.h"
+#include "PermutationTensor.h"
+
+#include "RankFourTensor.h"
 
 // Any requisite includes here
 #include "libmesh/libmesh.h"
@@ -9,6 +12,7 @@
 #include "libmesh/tensor_value.h"
 
 #include <vector>
+
 
 /**
  * RankTwoTensor is designed to handle the Stress or Strain Tensor for a fully anisotropic material.
@@ -139,25 +143,32 @@ public:
   RankTwoTensor operator* (const TypeTensor<Real> & a) const;
 
   /// returns _vals_ij * a_ij (sum on i, j)
-  Real doubleContraction(const RankTwoTensor & a);
+  Real doubleContraction(const RankTwoTensor & a) const;
 
-  /**
-   * Denote the _vals[i][j] by A_ij, then
-   * S_ij = A_ij - de_ij*tr(A)/3
-   * Then this returns S_ij*S_ij/2
-   */
-  Real secondInvariant() const;
 
 
   /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
   RankTwoTensor deviatoric() const;
 
 
+  /// returns the trace of the tensor, ie _vals[i][i] (sum i = 0, 1, 2)
+  Real trace() const;
+
   /**
    * Denote the _vals[i][j] by A_ij, then this returns
    * d(trace)/dA_ij
    */
   RankTwoTensor dtrace() const;
+
+
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then
+   * S_ij = A_ij - de_ij*tr(A)/3
+   * Then this returns (S_ij + S_ji)*(S_ij + S_ji)/8
+   * Note the explicit symmeterisation
+   */
+  Real secondInvariant() const;
 
   /**
    * Denote the _vals[i][j] by A_ij, then this returns
@@ -167,16 +178,64 @@ public:
 
   /**
    * Denote the _vals[i][j] by A_ij, then this returns
+   * d^2(secondInvariant)/dA_ij/dA_kl
+   */
+  RankFourTensor d2secondInvariant() const;
+
+
+  /**
+   * Sin(3*Lode_angle)
+   * If secondInvariant() <= r0 then return r0_value
+   * This is to gaurd against precision-loss errors.
+   * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
+   */
+  Real sin3Lode(const Real r0, const Real r0_value) const;
+
+  /**
+   * d(sin3Lode)/dA_ij
+   * If secondInvariant() <= r0 then return zero
+   * This is to gaurd against precision-loss errors.
+   * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
+   */
+  RankTwoTensor dsin3Lode(const Real r0) const;
+
+  /**
+   * d^2(sin3Lode)/dA_ij/dA_kl
+   * If secondInvariant() <= r0 then return zero
+   * This is to gaurd against precision-loss errors.
+   * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
+   */
+  RankFourTensor d2sin3Lode(const Real r0) const;
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then
+   * S_ij = A_ij - de_ij*tr(A)/3
+   * Then this returns det(S + S.transpose())/2
+   * Note the explicit symmeterisation
+   */
+  Real thirdInvariant() const;
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then
+   * this returns d(thirdInvariant()/dA_ij
+   */
+  RankTwoTensor dthirdInvariant() const;
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then this returns
+   * d^2(thirdInvariant)/dA_ij/dA_kl
+   */
+  RankFourTensor d2thirdInvariant() const;
+
+  /// Calculate the determinant of the tensor
+  Real det() const;
+
+  /**
+   * Denote the _vals[i][j] by A_ij, then this returns
    * d(det)/dA_ij
    */
   RankTwoTensor ddet() const;
 
-
-  /// returns the trace of the tensor, ie _vals[i][i] (sum i = 0, 1, 2)
-  Real trace() const;
-
-  /// Calculate the determinant of the tensor
-  Real det() const;
 
   /// Calculate the inverse of the tensor
   RankTwoTensor inverse() const;
@@ -197,14 +256,14 @@ public:
   void surfaceFillFromInputVector(const std::vector<Real> & input);
 
   /**
-   * computes eigenvalues, assuming _vals is symmetric, and places them
+   * computes eigenvalues, assuming tens is symmetric, and places them
    * in ascending order in eigvals
    */
-  void symmetricEigenvalues(std::vector<Real> & eigvals);
+  void symmetricEigenvalues(std::vector<Real> & eigvals) const;
 
   /**
-   * computes eigenvalues, and their symmetric derivatives wrt _vals,
-   * assuming _vals is symmetric
+   * computes eigenvalues, and their symmetric derivatives wrt vals,
+   * assuming tens is symmetric
    * @param eigvals are the eigenvalues of the matrix, in ascending order
    * @param deigvals Here digvals[i](j,k) = (1/2)*(d(eigvals[i])/dA_jk + d(eigvals[i]/dA_kj))
    * Note the explicit symmeterisation here.
@@ -213,16 +272,16 @@ public:
    * often defined by continuation from the un-equal case, and that is
    * too sophisticated for this routine.
    */
-  void dsymmetricEigenvalues(std::vector<Real> & eigvals, std::vector<RankTwoTensor> & deigvals);
-
-protected:
-
-private:
-  static const unsigned int N = 3;
-
-  Real _vals[N][N];
+  void dsymmetricEigenvalues(std::vector<Real> & eigvals, std::vector<RankTwoTensor> & deigvals) const;
 
   /**
+   * Computes second derivatives of Eigenvalues of a rank two tensor
+   * @param tens is a rank two tensor
+   * @param deriv is a second derivative of the input tensor
+   */
+  void d2symmetricEigenvalues(std::vector<RankFourTensor> & deriv) const;
+
+   /**
    * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _vals:
    *  (1) the eigenvalues (if calculation_type == "N")
    *  (2) the eigenvalues and eigenvectors (if calculation_type == "V")
@@ -231,8 +290,14 @@ private:
    * @param a Eigenvectors are placed in this array if calculation_type == "V".
    * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
    */
-  void syev(const char * calculation_type, std::vector<Real> & eigvals, std::vector<double> & a);
+  void syev(const char * calculation_type, std::vector<Real> & eigvals, std::vector<double> & a) const;
 
+protected:
+
+
+private:
+  static const unsigned int N = 3;
+  Real _vals[N][N];
 };
 
 inline RankTwoTensor operator*(Real a, const RankTwoTensor & b) { return b * a; }

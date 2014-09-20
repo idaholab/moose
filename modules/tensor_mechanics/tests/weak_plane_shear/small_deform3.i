@@ -127,16 +127,18 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    wps_f_tol = 1E-3
     # the following is transversely isotropic, i think.
     fill_method = symmetric9
     C_ijkl = '3E9 1E9 3E9 3E9 3E9 6E9 1E9 1E9 9E9'
     wps_friction_angle = 30
     wps_normal_vector = '0 0 1'
     wps_normal_rotates = false
-    wps_r_tol = 1E-3
     wps_smoother = 100
-    wps_max_iterations = 100
+    max_NR_iterations = 100
+    yield_function_tolerance = 1E-3
+    ep_plastic_tolerance = 1E-3
+    internal_constraint_tolerance = 1E-3
+    debug_fspb = 1
   [../]
 []
 

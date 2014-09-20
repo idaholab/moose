@@ -24,7 +24,7 @@ block 2 element type QUAD4
 block 3 surface 3
 block 3 element type QUAD4
 
-sideset 1 curve 3 7 11 
+sideset 1 curve 3 7 11
 sideset 1 name 'bottom'
 sideset 2 curve 8
 sideset 2 name 'right'

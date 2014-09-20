@@ -57,15 +57,15 @@ SetupRecoverFileBaseAction::act()
   }
 
   // Set the recover file base in the App
-  Moose::out << "\nUsing " << _app.getRecoverFileBase() << " for recovery.\n" << std::endl;
+  _console << "\nUsing " << _app.getRecoverFileBase() << " for recovery.\n" << std::endl;
 }
 
 std::string
 SetupRecoverFileBaseAction::getRecoveryFileBase(const std::set<std::string> checkpoint_files)
 {
   // Create storage for newest restart files
-  /* Note that these might have the same modification time if the simulation was fast.
-     In that case we're going to save all of the "newest" files and sort it out momentarily */
+  // Note that these might have the same modification time if the simulation was fast.
+  // In that case we're going to save all of the "newest" files and sort it out momentarily
   time_t newest_time = 0;
   std::vector<std::string> newest_restart_files;
 
@@ -122,13 +122,16 @@ SetupRecoverFileBaseAction::getCheckpointFiles(std::set<std::string> & files)
   // Extract the CommonOutputAction
   const Action* common = _awh.getActionsByName("common_output")[0];
 
-  // Create a set of directory names and insert the default (i.e., checkpoint = true directory)
+  // Storage for the directory names
   std::set<std::string> checkpoint_dirs;
-  checkpoint_dirs.insert(FileOutput::getOutputFileBase(_app, "_out_cp"));
 
   // If file_base is set in CommonOutputAction, add this file to the list of potential checkpoint files
   if (common->isParamValid("file_base"))
     checkpoint_dirs.insert(common->getParam<std::string>("file_base") + "_cp");
+
+  // If file_base is not set use the default <filename>_out_cp location
+  else
+    checkpoint_dirs.insert(FileOutput::getOutputFileBase(_app, "_out_cp"));
 
   // Add the directories from any existing checkpoint objects
   const std::vector<Checkpoint *> ptrs = _app.getOutputWarehouse().getOutputs<Checkpoint>();
@@ -139,11 +142,13 @@ SetupRecoverFileBaseAction::getCheckpointFiles(std::set<std::string> & files)
   for (std::set<std::string>::const_iterator it = checkpoint_dirs.begin(); it != checkpoint_dirs.end(); ++it)
   {
     tinydir_dir dir;
+    dir.has_next = 0; // Avoid a garbage value in has_next (clang StaticAnalysis)
     tinydir_open(&dir, it->c_str());
 
     while (dir.has_next)
     {
       tinydir_file file;
+      file.is_dir = 0; // Avoid a garbage value in is_dir (clang StaticAnalysis)
       tinydir_readfile(&dir, &file);
 
       if (!file.is_dir)

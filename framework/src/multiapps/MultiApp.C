@@ -129,6 +129,35 @@ MultiApp::~MultiApp()
 void
 MultiApp::init()
 {
+  // Fill in the _positions vector
+  fillPositions();
+
+  if (_move_apps.size() != _move_positions.size())
+    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp "<<_name);
+
+  _total_num_apps = _positions.size();
+  mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
+
+  /// Set up our Comm and set the number of apps we're going to be working on
+  buildComm();
+
+  if (!_has_an_app)
+    return;
+
+  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
+
+  _apps.resize(_my_num_apps);
+
+  for (unsigned int i=0; i<_my_num_apps; i++)
+    createApp(i, _app.getGlobalTimeOffset());
+
+  // Swap back
+  Moose::swapLibMeshComm(swapped);
+}
+
+void
+MultiApp::fillPositions()
+{
   if (isParamValid("positions"))
     _positions = getParam<std::vector<Point> >("positions");
   else if (isParamValid("positions_file"))
@@ -159,32 +188,10 @@ MultiApp::init()
       _positions.push_back(Point(_positions_vec[i], _positions_vec[i+1], _positions_vec[i+2]));
 
   }
-
   else
     mooseError("Must supply either 'positions' or 'positions_file' for MultiApp "<<_name);
-
-  if (_move_apps.size() != _move_positions.size())
-    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp "<<_name);
-
-  _total_num_apps = _positions.size();
-  mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
-
-  /// Set up our Comm and set the number of apps we're going to be working on
-  buildComm();
-
-  if (!_has_an_app)
-    return;
-
-  MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
-
-  _apps.resize(_my_num_apps);
-
-  for (unsigned int i=0; i<_my_num_apps; i++)
-    createApp(i, _app.getGlobalTimeOffset());
-
-  // Swap back
-  Moose::swapLibMeshComm(swapped);
 }
+
 
 void
 MultiApp::preTransfer(Real /*dt*/, Real target_time)
@@ -387,7 +394,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   std::ostringstream output_base;
 
-  /* The following file_base needs to be improved (see #2554) */
   // Create an output base by taking the output base of the master problem and appending
   // the name of the multiapp + a number to it
   if (!_app.getOutputFileBase().empty())
@@ -510,6 +516,6 @@ MultiApp::globalAppToLocal(unsigned int global_app)
   if (global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps-1))
     return global_app-_first_local_app;
 
-  Moose::out << _first_local_app << " " << global_app << '\n';
+  _console << _first_local_app << " " << global_app << '\n';
   mooseError("Invalid global_app!");
 }

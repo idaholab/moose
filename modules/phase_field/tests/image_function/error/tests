@@ -1,0 +1,54 @@
+[Tests]
+  [./file_type]
+    # Test the un-supported file type error
+    type = RunException
+    input = check_error.i
+    cli_args = Functions/tif/file_type=bmp
+    expect_err = "Invalid option \"BMP\" in MooseEnum.  Valid options \(not case-sensitive\) are \"png tif tiff\"."
+    vtk = true
+  [../]
+  [./file_range]
+    # Test two many values supplied
+    type = RunException
+    input = file_range.i
+    expect_err = "Image range must specify one or two interger values"
+    vtk = true
+  [../]
+  [./file_range_order]
+    # Test the un-supported file type error
+    type = RunException
+    input = file_range_order.i
+    expect_err = "Image range must specify exactly two interger values, with the second larger than the first"
+    vtk = true
+  [../]
+  [./component]
+    # Test the out-of-range component
+    type = RunException
+    input = check_error.i
+    cli_args = "Functions/tif/component=5"
+    expect_err = "'component' parameter must be empty or have a value of 0 to 2"
+    vtk = true
+  [../]
+  [./invalid_file]
+    # Test for a bad file name
+    type = RunException
+    input = check_error.i
+    cli_args = "Functions/tif/file_base=not_a_real_file"
+    expect_err = "No image file\(s\) located"
+    vtk = true
+  [../]
+  [./threshold_values]
+    # Test the thresholding error
+    type = RunException
+    input = threshold_values.i
+    expect_err = "When thresholding is applied, both the upper_value and lower_value parameters must be set"
+    vtk = true
+  [../]
+  [./no_vtk]
+    # Test that correct error message occurs if VTK is disable in libMesh
+    type = RunException
+    input = check_error.i
+    expect_err = "A 'ImageFunction' is not a registered object"
+    vtk = false
+  [../]
+[]

@@ -105,6 +105,9 @@ public:
 
   // The following parameter controls the patch size that is searched for each nearest neighbor
   static const unsigned int _patch_size;
+
+  // The furthest through the patch that had to be searched for any node last time
+  Real _max_patch_percentage;
 };
 
 #endif //NEARESTNODELOCATOR_H

@@ -208,7 +208,7 @@ IterationAdaptiveDT::computeDT()
   }
 
   if (_verbose)
-    Moose::out << diag.str();
+    _console << diag.str();
 
   return dt;
 }
@@ -245,7 +245,7 @@ IterationAdaptiveDT::constrainStep(Real &dt)
   }
 
   if (_verbose)
-    Moose::out << diag.str();
+    _console << diag.str();
 
   return at_sync_point;
 }
@@ -263,7 +263,7 @@ IterationAdaptiveDT::computeFailedDT()
   }
 
   if (!_verbose)
-    Moose::out << std::endl << "Solve failed, cutting timestep" << std::endl;
+    _console << std::endl << "Solve failed, cutting timestep" << std::endl;
 
   diag << std::endl
        << "Solve failed with dt: "
@@ -287,7 +287,7 @@ IterationAdaptiveDT::computeFailedDT()
        << std::endl;
 
   if (_verbose)
-    Moose::out << diag.str();
+    _console << diag.str();
 
   return dt;
 }
@@ -354,7 +354,7 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
   }
 
   if (_verbose)
-    Moose::out << diag.str();
+    _console << diag.str();
 }
 
 void
@@ -413,7 +413,7 @@ IterationAdaptiveDT::computeAdaptiveDT(Real &dt, bool allowToGrow, bool allowToS
   }
 
   if (_verbose)
-    Moose::out << diag.str();
+    _console << diag.str();
 }
 
 void
@@ -443,7 +443,7 @@ IterationAdaptiveDT::computeInterpolationDT(Real & dt)
 
   }
   if (_verbose)
-    Moose::out << diag.str();
+    _console << diag.str();
 }
 
 
@@ -487,7 +487,7 @@ IterationAdaptiveDT::acceptStep()
          << _dt_old
          << std::endl;
     if (_verbose)
-      Moose::out << diag.str();
+      _console << diag.str();
   }
   else
   {

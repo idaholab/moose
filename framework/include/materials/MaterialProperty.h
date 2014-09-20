@@ -237,7 +237,7 @@ inline void
 MaterialProperty<T>::swap (PropertyValue *rhs)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
-  _value.swap(libmesh_cast_ptr<MaterialProperty<T>*>(rhs)->_value);
+  _value.swap(cast_ptr<MaterialProperty<T>*>(rhs)->_value);
 }
 
 template <typename T>
@@ -245,7 +245,7 @@ inline void
 MaterialProperty<T>::qpCopy (const unsigned int to_qp, PropertyValue *rhs, const unsigned int from_qp)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
-  _value[to_qp] = libmesh_cast_ptr<const MaterialProperty<T>*>(rhs)->_value[from_qp];
+  _value[to_qp] = cast_ptr<const MaterialProperty<T>*>(rhs)->_value[from_qp];
 }
 
 template<typename T>

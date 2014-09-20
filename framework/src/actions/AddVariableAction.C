@@ -67,46 +67,27 @@ AddVariableAction::AddVariableAction(const std::string & name, InputParameters p
 MooseEnum
 AddVariableAction::getNonlinearVariableFamilies()
 {
-  return MooseEnum("LAGRANGE, MONOMIAL, HERMITE, SCALAR, HIERARCHIC, CLOUGH, XYZ, SZABAB, BERNSTEIN, L2_LAGRANGE, L2_HIERARCHIC", "LAGRANGE");
+  return MooseEnum("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN L2_LAGRANGE L2_HIERARCHIC", "LAGRANGE");
 }
 
 MooseEnum
 AddVariableAction::getNonlinearVariableOrders()
 {
-  return MooseEnum("CONSTANT, FIRST, SECOND, THIRD, FOURTH", "FIRST", true);
+  return MooseEnum("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST", true);
 }
 
 void
 AddVariableAction::act()
 {
-  if (_current_action == "add_variable")
+  if (_current_task == "add_variable")
   {
     // Get necessary data for creating a variable
     std::string var_name = getShortName();
-    std::set<SubdomainID> blocks = getSubdomainIDs();
-    Real scale_factor = isParamValid("scaling") ? getParam<Real>("scaling") : 1;
-
-    // Scalar variable
-    if (_scalar_var)
-      _problem->addScalarVariable(var_name, _fe_type.order, scale_factor);
-
-    // Block restricted variable
-    else if (blocks.empty())
-      _problem->addVariable(var_name, _fe_type, scale_factor);
-
-    // Non-block restricted variable
-    else
-      _problem->addVariable(var_name, _fe_type, scale_factor, &blocks);
-
-    if (getParam<bool>("eigen"))
-    {
-      EigenSystem & esys(static_cast<EigenSystem &>(_problem->getNonlinearSystem()));
-      esys.markEigenVariable(var_name);
-    }
+    addVariable(var_name);
   }
 
   // Set the initial condition
-  if (_current_action == "add_ic")
+  if (_current_task == "add_ic")
     setInitialCondition();
 }
 
@@ -136,6 +117,31 @@ AddVariableAction::setInitialCondition()
       params.set<Real>("value") = initial;
       _problem->addInitialCondition("ConstantIC", "ic", params);
     }
+  }
+}
+
+void
+AddVariableAction::addVariable(std::string & var_name)
+{
+  std::set<SubdomainID> blocks = getSubdomainIDs();
+  Real scale_factor = isParamValid("scaling") ? getParam<Real>("scaling") : 1;
+
+  // Scalar variable
+  if (_scalar_var)
+    _problem->addScalarVariable(var_name, _fe_type.order, scale_factor);
+
+  // Block restricted variable
+  else if (blocks.empty())
+    _problem->addVariable(var_name, _fe_type, scale_factor);
+
+  // Non-block restricted variable
+  else
+    _problem->addVariable(var_name, _fe_type, scale_factor, &blocks);
+
+  if (getParam<bool>("eigen"))
+  {
+    EigenSystem & esys(static_cast<EigenSystem &>(_problem->getNonlinearSystem()));
+    esys.markEigenVariable(var_name);
   }
 }
 

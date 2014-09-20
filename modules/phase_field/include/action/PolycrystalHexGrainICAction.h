@@ -18,7 +18,7 @@ private:
   static const Real _abs_zero_tol;
 
   std::string _var_name_base;
-  unsigned int _crys_num;
+  unsigned int _op_num;
   unsigned int _grain_num;
 
   Real _x_offset;

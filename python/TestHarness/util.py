@@ -110,7 +110,7 @@ def printResult(test_name, result, timing, start, end, options, color=True):
       any_match = True
       f_result += colorText(m.group(1), options, 'CYAN')
     # Color Passed tests GREEN
-    m = re.search('(OK)', result)
+    m = re.search('(OK|DRY_RUN)', result)
     if m:
       any_match = True
       f_result += colorText(m.group(1), options, 'GREEN')

@@ -122,7 +122,7 @@ ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range, bool b
 
   pre();
 
-  _subdomain = std::numeric_limits<unsigned int>::max();
+  _subdomain = std::numeric_limits<SubdomainID>::max();
   typename RangeType::const_iterator el = range.begin();
   for (el = range.begin() ; el != range.end(); ++el)
   {

@@ -5,7 +5,7 @@
 #include "Action.h"
 
 /**
- * Automatically generates all variables to model a polycrystal with crys_num orderparameters
+ * Automatically generates all variables to model a polycrystal with op_num orderparameters
  */
 class Tricrystal2CircleGrainsICAction: public Action
 {
@@ -18,7 +18,7 @@ private:
   static const Real _abs_zero_tol;
 
   std::string _var_name_base;
-  unsigned int _crys_num;
+  unsigned int _op_num;
 
 };
 

@@ -29,7 +29,7 @@ AddKernelAction::AddKernelAction(const std::string & name, InputParameters param
 void
 AddKernelAction::act()
 {
-  if (_current_action == "add_kernel")
+  if (_current_task == "add_kernel")
     _problem->addKernel(_type, getShortName(), _moose_object_pars);
   else
   {

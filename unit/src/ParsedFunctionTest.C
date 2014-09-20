@@ -49,6 +49,9 @@ ParsedFunctionTest::finalize()
 
   delete _app;
   _app = NULL;
+
+  delete _mesh;
+  _mesh = NULL;
 }
 
 

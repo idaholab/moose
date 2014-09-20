@@ -24,10 +24,9 @@ InputParameters validParams<OversampleOutput>()
 {
 
   // Get the parameters from the parent object
-  InputParameters params = validParams<PetscOutput>();
+  InputParameters params = validParams<FileOutput>();
 
-  params.suppressParameter<bool>("output_vector_postprocessors");
-
+  // Add the oversample related parameters
   params.addParam<bool>("oversample", false, "Set to true to enable oversampling");
   params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling");
   params.addParam<Point>("position", "Set a positional offset, this vector will get added to the nodal coordinates to move the domain.");
@@ -41,7 +40,7 @@ InputParameters validParams<OversampleOutput>()
 }
 
 OversampleOutput::OversampleOutput(const std::string & name, InputParameters & parameters) :
-    PetscOutput(name, parameters),
+    FileOutput(name, parameters),
     _mesh_ptr(getParam<bool>("use_displaced") ?
               &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
     _oversample(getParam<bool>("oversample")),
@@ -49,7 +48,7 @@ OversampleOutput::OversampleOutput(const std::string & name, InputParameters & p
     _change_position(isParamValid("position")),
     _position(_change_position ? getParam<Point>("position") : Point())
 {
-  // Call the initialization method
+
   initOversample();
 
   // Append the '_oversample' to the file base, if desired and oversampling is being used
@@ -87,6 +86,7 @@ OversampleOutput::outputInitial()
   // Perform oversample solution projection
   if (_oversample || _change_position)
     update();
+
   // Call the initial output method
   Output::outputInitial();
 }

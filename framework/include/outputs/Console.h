@@ -84,6 +84,17 @@ public:
    */
   static void petscSetupOutput();
 
+  /** Helper function function for stringstream formatting
+   * @see outputSimulationInformation()
+   */
+  static void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr);
+
+  /// Width used for printing simulation information
+  static const unsigned int _field_width = 25;
+
+  /// Line length for printing simulation information
+  static const unsigned int _line_length = 100;
+
 protected:
 
   /**
@@ -113,10 +124,6 @@ protected:
    */
   std::string outputNorm(Real old_norm, Real norm);
 
-  /** Helper function function for stringstream formatting
-   * @see outputSimulationInformation()
-   */
-  void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr);
 
   /**
    * Write message to screen and/or file
@@ -204,12 +211,6 @@ protected:
 
   /// Number of significant digits
   unsigned int _precision;
-
-  /// Width used for printing simulation information
-  static const unsigned int _field_width = 25;
-
-  /// Line length for printing simulation information
-  static const unsigned int _line_length = 100;
 
 private:
 

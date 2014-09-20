@@ -18,14 +18,7 @@ template<>
 InputParameters validParams<VTKOutput>()
 {
   InputParameters params = validParams<OversampleOutput>();
-
-  // Supress un-available parameters
-  params.suppressParameter<bool>("output_scalar_variables");
-  params.suppressParameter<bool>("output_postprocessors");
-  params.suppressParameter<bool>("output_vector_postprocessors");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("sequence");
-  params.suppressParameter<bool>("output_input");
+  params += Output::enableOutputTypes("nodal elemental");
 
   // Set default padding to 3
   params.set<unsigned int>("padding") = 3;

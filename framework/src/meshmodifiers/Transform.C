@@ -19,7 +19,7 @@
 template<>
 InputParameters validParams<Transform>()
 {
-  MooseEnum transforms("TRANSLATE=1, ROTATE=2, SCALE=3");
+  MooseEnum transforms("TRANSLATE=1 ROTATE=2 SCALE=3");
 
   InputParameters params = validParams<MeshModifier>();
   params.addRequiredParam<MooseEnum>("transform", transforms, "The type of transformation to perform (TRANSLATE, ROTATE, SCALE)");

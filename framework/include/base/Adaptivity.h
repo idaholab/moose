@@ -18,6 +18,7 @@
 #include "Moose.h"
 #include "MooseError.h"
 #include "MooseEnum.h"
+#include "ConsoleStreamInterface.h"
 
 #ifdef LIBMESH_ENABLE_AMR
 
@@ -38,7 +39,7 @@ class MooseVariable;
  * Takes care of everything related to mesh adaptivity
  *
  */
-class Adaptivity
+class Adaptivity : public ConsoleStreamInterface
 {
 public:
   Adaptivity(FEProblem & subproblem);

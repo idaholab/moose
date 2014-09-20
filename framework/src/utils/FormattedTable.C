@@ -533,5 +533,5 @@ FormattedTable::getTermWidth(bool use_environment) const
 MooseEnum
 FormattedTable::getWidthModes()
 {
-  return MooseEnum("ENVIRONMENT=-1, AUTO=0, 80=80, 120=120, 160=160", "ENVIRONMENT", true);
+  return MooseEnum("ENVIRONMENT=-1 AUTO=0 80=80 120=120 160=160", "ENVIRONMENT", true);
 }

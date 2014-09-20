@@ -26,6 +26,7 @@
 #include "BndsCalcAux.h"
 #include "ACGrGrPoly.h"
 #include "ACGBPoly.h"
+#include "ACParsed.h"
 #include "GBEvolution.h"
 #include "HexPolycrystalIC.h"
 #include "PolycrystalRandomIC.h"
@@ -40,6 +41,10 @@
 #include "PolycrystalHexGrainICAction.h"
 #include "PolycrystalVoronoiICAction.h"
 #include "PolycrystalRandomICAction.h"
+#ifdef LIBMESH_HAVE_VTK
+#include "ImageFunction.h"
+#endif
+
 //#include "SPPARKSUserObject.h"
 //#include "SPPARKSAux.h"
 
@@ -86,6 +91,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CoupledImplicitEuler);
   registerKernel(ACGrGrPoly);
   registerKernel(ACGBPoly);
+  registerKernel(ACParsed);
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(RndSmoothCircleIC);
@@ -107,6 +113,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
   // registerAux(SPPARKSAux);
   registerUserObject(NodalVolumeFraction);
   // registerUserObject(SPPARKSUserObject);
+#ifdef LIBMESH_HAVE_VTK
+  registerFunction(ImageFunction);
+#endif
 }
 
 void

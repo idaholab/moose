@@ -25,7 +25,6 @@ InputParameters validParams<ElementL2Error>()
 
 ElementL2Error::ElementL2Error(const std::string & name, InputParameters parameters) :
     ElementIntegralVariablePostprocessor(name, parameters),
-    FunctionInterface(parameters),
     _func(getFunction("function"))
 {
 }

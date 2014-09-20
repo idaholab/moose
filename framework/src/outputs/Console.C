@@ -30,8 +30,7 @@ InputParameters validParams<Console>()
 
   // Get the parameters from the base class
   InputParameters params = validParams<TableOutput>();
-
-  params.suppressParameter<bool>("output_vector_postprocessors");
+  params += Output::enableOutputTypes("system_information scalar postprocessor input");
 
   // Screen and file output toggles
   params.addParam<bool>("output_screen", true, "Output to the screen");
@@ -135,14 +134,14 @@ Console::Console(const std::string & name, InputParameters parameters) :
   }
 
   // Set output coloring
-  if (Moose::__color_console)
+  if (Moose::_color_console)
   {
     char * term_env = getenv("TERM");
     if (term_env)
     {
       std::string term(term_env);
       if (term != "xterm-256color" && term != "xterm")
-        Moose::__color_console = false;
+        Moose::_color_console = false;
     }
   }
 }
@@ -550,6 +549,15 @@ Console::outputSystemInformation()
   if (_app.getSystemInfo() != NULL)
     oss << _app.getSystemInfo()->getInfo();
 
+  if (_problem_ptr->legacyUoAuxComputation() || _problem_ptr->legacyUoInitialization())
+  {
+    oss << "LEGACY MODES ENABLED:\n";
+    if (_problem_ptr->legacyUoAuxComputation())
+      oss << "  Computing EXEC_RESIDUAL AuxKernel types when any UserObject type is executed.\n";
+    if (_problem_ptr->legacyUoInitialization())
+      oss << "  Computing all UserObjects during initial setup.\n";
+  }
+
   oss << std::left << '\n'
       << "Parallelism:\n"
       << std::setw(_field_width) << "  Num Processors: " << static_cast<std::size_t>(n_processors()) << '\n'
@@ -685,8 +693,12 @@ Console::outputSystemInformation()
   if (time_stepper != "")
     oss << std::setw(_field_width) << "  TimeStepper: " << time_stepper << '\n';
 
-  oss << std::setw(_field_width) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(_problem_ptr->solverParams()._type) << "\n\n";
-  oss.flush();
+  oss << std::setw(_field_width) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(_problem_ptr->solverParams()._type) << '\n';
+
+  const std::string & pc_desc = _problem_ptr->getPreconditionerDescription();
+  if (!pc_desc.empty())
+    oss << std::setw(_field_width) << "  Preconditioner: " << pc_desc << '\n';
+  oss << '\n';
 
   // Output the information
   write(oss.str());

@@ -29,6 +29,7 @@ InputParameters validParams<Checkpoint>()
 {
   // Get the parameters from the base classes
   InputParameters params = validParams<FileOutput>();
+  params += Output::disableOutputTypes(); // Checkpoint acts like a honey badger, it does what it wants; disable individual controls
 
   // Typical checkpoint options
   params.addParam<unsigned int>("num_files", 2, "Number of the restart files to save");
@@ -37,14 +38,6 @@ InputParameters validParams<Checkpoint>()
   // Advanced settings
   params.addParam<bool>("binary", true, "Toggle the output of binary files");
   params.addParamNamesToGroup("binary", "Advanced");
-
-  // Checkpoint files always output everything, so suppress the toggles
-  params.suppressParameter<bool>("output_nodal_variables");
-  params.suppressParameter<bool>("output_elemental_variables");
-  params.suppressParameter<bool>("output_scalar_variables");
-  params.suppressParameter<bool>("output_postprocessors");
-  params.suppressParameter<bool>("output_vector_postprocessors");
-
   return params;
 }
 
@@ -147,6 +140,7 @@ Checkpoint::output()
 void
 Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
 {
+  int ret = 0;          // return code for file operations
 
   // Update the list of stored files
   _file_names.push_back(file_struct);
@@ -164,10 +158,15 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     processor_id_type proc_id = processor_id();
 
     // Delete checkpoint files (_mesh.cpr)
-    remove(delete_files.checkpoint.c_str());
+    ret = remove(delete_files.checkpoint.c_str());
+    if (ret != 0)
+      mooseWarning("Error during the deletion of file '" << delete_files.checkpoint.c_str() << "': " << ret);
 
     // Delete the system files (xdr and xdr.0000, ...)
-    remove(delete_files.system.c_str());
+    ret = remove(delete_files.system.c_str());
+    if (ret != 0)
+      mooseWarning("Error during the deletion of file '" << delete_files.system.c_str() << "': " << ret);
+
     {
       std::ostringstream oss;
       oss << delete_files.system
@@ -175,24 +174,44 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
           << std::setprecision(0)
           << std::setfill('0')
           << proc_id;
-      remove( oss.str().c_str() );
+      ret = remove(oss.str().c_str());
+      if (ret != 0)
+        mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
     }
 
-    // Remove material property files
-    remove(delete_files.material.c_str());
+    unsigned int n_threads = libMesh::n_threads();
 
-    // Remove the material files
+    // Remove material property files
+    if (_material_property_storage.hasStatefulProperties() || _bnd_material_property_storage.hasStatefulProperties())
     {
-      std::ostringstream oss;
-      oss << delete_files.material << '-' << proc_id;
-      remove(oss.str().c_str());
+      ret = remove(delete_files.material.c_str());
+      if (ret != 0)
+        mooseWarning("Error during the deletion of file '" << delete_files.material.c_str() << "': " << ret);
+
+      for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      {
+        std::ostringstream oss;
+        oss << delete_files.material << '-' << proc_id;
+        if (n_threads > 1)
+          oss << "-" << tid;
+        ret = remove(oss.str().c_str());
+        if (ret != 0)
+          mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
+      }
     }
 
     // Remove the restart files (rd)
     {
-      std::ostringstream oss;
-      oss << delete_files.restart << "-" << proc_id;
-      remove(oss.str().c_str());
+      for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      {
+        std::ostringstream oss;
+        oss << delete_files.restart << "-" << proc_id;
+        if (n_threads > 1)
+          oss << "-" << tid;
+        ret = remove(oss.str().c_str());
+        if (ret != 0)
+          mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
+      }
     }
   }
 }

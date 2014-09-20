@@ -39,7 +39,7 @@ InputParameters validParams<MultiAppInterpolationTransfer>()
   params.addParam<unsigned int>("num_points", 3, "The number of nearest points to use for interpolation.");
   params.addParam<Real>("power", 2, "The polynomial power to use for calculation of the decay in the interpolation.");
 
-  MooseEnum interp_type("inverse_distance, radial_basis", "inverse_distance");
+  MooseEnum interp_type("inverse_distance radial_basis", "inverse_distance");
   params.addParam<MooseEnum>("interp_type", interp_type, "The algorithm to use for interpolation.");
 
   params.addParam<Real>("radius", -1, "Radius to use for radial_basis interpolation.  If negative then the radius is taken as the max distance between points.");
@@ -71,7 +71,7 @@ MultiAppInterpolationTransfer::initialSetup()
 void
 MultiAppInterpolationTransfer::execute()
 {
-  Moose::out << "Beginning InterpolationTransfer " << _name << std::endl;
+  _console << "Beginning InterpolationTransfer " << _name << std::endl;
 
   switch (_direction)
   {
@@ -444,7 +444,7 @@ MultiAppInterpolationTransfer::execute()
     }
   }
 
-  Moose::out << "Finished InterpolationTransfer " << _name << std::endl;
+  _console << "Finished InterpolationTransfer " << _name << std::endl;
 }
 
 Node * MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end)
@@ -454,13 +454,12 @@ Node * MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & dis
 
   for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it)
   {
-    Node & node = *(*node_it);
-    Real current_distance = (p-node).size();
+    Real current_distance = (p-*(*node_it)).size();
 
     if (current_distance < distance)
     {
       distance = current_distance;
-      nearest = &node;
+      nearest = *node_it;
     }
   }
 

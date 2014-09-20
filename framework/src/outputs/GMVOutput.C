@@ -22,16 +22,8 @@ template<>
 InputParameters validParams<GMVOutput>()
 {
   // Get the base class parameters
-
   InputParameters params = validParams<OversampleOutput>();
-
-  // Suppress unavailable parameters
-  params.suppressParameter<bool>("output_scalar_variables");
-  params.suppressParameter<bool>("output_postprocessors");
-  params.suppressParameter<bool>("scalar_as_nodal");
-  params.suppressParameter<bool>("sequence");
-  params.suppressParameter<bool>("output_vector_postprocessors");
-  params.suppressParameter<bool>("output_input");
+  params += Output::disableOutputTypes();
 
   // Advanced file options
   params.addParam<bool>("binary", true, "Output the file in binary format");
@@ -60,36 +52,6 @@ GMVOutput::output()
   GMVIO out(_es_ptr->get_mesh());
   out.write_equation_systems(filename(), *_es_ptr);
   _file_num++;
-}
-
-void
-GMVOutput::outputNodalVariables()
-{
-  mooseError("Individual output of nodal variables is not supported for GMV output");
-}
-
-void
-GMVOutput::outputElementalVariables()
-{
-  mooseError("Individual output of elemental variables is not supported for GMV output");
-}
-
-void
-GMVOutput::outputPostprocessors()
-{
-  mooseError("Individual output of postprocessors is not supported for GMV output");
-}
-
-void
-GMVOutput::outputVectorPostprocessors()
-{
-  mooseError("Individual output of VectorPostprocessors is not supported for GMV output");
-}
-
-void
-GMVOutput::outputScalarVariables()
-{
-  mooseError("Individual output of scalars is not supported for GMV output");
 }
 
 std::string

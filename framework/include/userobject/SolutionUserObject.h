@@ -86,6 +86,11 @@ public:
   virtual void initialSetup();
 
 
+  const std::vector<std::string> & variableNames() const;
+
+  bool isVariableNodal(const std::string & var_name) const;
+
+
 protected:
   /**
    * Method for reading XDA mesh and equation systems file(s)
@@ -147,11 +152,14 @@ protected:
   /// The system name to extract from the XDA file (xda only)
   std::string _system_name;
 
-  /// A vector of nodal variable names to read from the file
-  const std::vector<std::string> _nodal_vars;
+  /// A list of variables to extract from the read system
+  std::vector<std::string> _system_variables;
 
-  /// A vector of nodal variable names to read from the file
-  const std::vector<std::string> _elem_vars;
+  /// Stores the local index need by MeshFunction
+  std::map<std::string, unsigned int> _local_variable_index;
+
+  /// Stores flag indicating if the variable is nodal
+  std::map<std::string, bool> _local_variable_nodal;
 
   /// Current ExodusII time index
   int _exodus_time_index;
@@ -232,9 +240,9 @@ protected:
   RealTensorValue _r1;
 
   /// transformations (rotations, translation, scales) are performed in this order
-  std::vector<MooseEnum> _transformation_order;
+  MultiMooseEnum _transformation_order;
 
-  /// True if initial_setup as executed
+  /// True if initial_setup has executed
   bool _initialized;
 
   /// Flag for using old EquationSystems::read

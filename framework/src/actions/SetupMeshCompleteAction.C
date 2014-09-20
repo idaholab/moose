@@ -49,10 +49,8 @@ SetupMeshCompleteAction::act()
   if (!_mesh)
     mooseError("No mesh file was supplied and no generation block was provided");
 
-  completeSetup(_mesh);
-//  if (completeSetup(_mesh))
-//    _mesh->printInfo();
+  completeSetup(_mesh.get());
 
   if (_displaced_mesh)
-    completeSetup(_displaced_mesh);
+    completeSetup(_displaced_mesh.get());
 }

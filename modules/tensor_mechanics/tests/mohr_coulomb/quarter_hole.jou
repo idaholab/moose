@@ -1,0 +1,80 @@
+reset
+undo on
+create surface circle radius 0.0001 zplane
+create surface rectangle width 0.05 height 0.05 zplane
+webcut body 2 tool body 1
+delete body 1
+delete surface 4
+create surface rectangle width 0.1 height 0.05 zplane
+move surface 5 y -0.025 include_merged
+webcut body 2 tool body 4
+delete body 4
+delete surface 7
+create surface rectangle width 0.05 height 0.1 zplane
+move surface 8 x -0.025 y 0 include_merged
+webcut body 2 tool body 6
+delete body 6
+delete surface 10
+
+sweep surface 9 perpendicular distance 0.005
+
+# set vertex types so the mapping algorithm produces the desired mesh
+draw surface 9 vertex type
+surface 9 vertex 27 29 30 31 loop_index 1 type end
+surface 9 vertex 28 loop_index 1 type side
+
+# seed the curves appropriately
+curve 39 interval 16
+curve 37 interval 16
+curve 37 scheme bias factor 1.25 start vertex 30
+curve 41 interval 16
+curve 41 scheme bias factor 1.25 start vertex 31
+
+# mesh the surface
+surface 9 smooth scheme winslow
+mesh surface 9
+smooth surface 9
+
+
+# same for bottom surface
+draw surface 16 vertex type
+surface 16 vertex 14 6 24 23 loop_index 1 type end
+surface 16 vertex 2 loop_index 1 type side
+curve 27 interval 16
+curve 14 interval 16
+curve 14 scheme bias factor 1.25 start vertex 6
+curve 26 interval 16
+curve 26 scheme bias factor 1.25 start vertex 24
+surface 16 smooth scheme winslow
+mesh surface 16
+smooth surface 16
+
+
+# seed the "z" direction appropriately
+curve 38 interval 1
+mesh volume 2
+
+
+# add sidesets
+sideset 1 surface 9
+sideset 1 name "zmax"
+sideset 2 surface 16
+sideset 2 name "zmin"
+sideset 3 surface 13
+sideset 3 name "ymin"
+sideset 4 surface 11
+sideset 4 name "ymax"
+sideset 5 surface 15
+sideset 5 name "xmin"
+sideset 6 surface 12
+sideset 6 name "xmax"
+nodeset 1 vertex 29 14
+nodeset 1 name "fixed_node"
+
+block 1 volume all
+
+display
+
+set large exodus file on
+export mesh "quarter_hole.e" overwrite
+

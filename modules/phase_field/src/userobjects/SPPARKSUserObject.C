@@ -78,7 +78,7 @@ SPPARKSUserObject::SPPARKSUserObject(const std::string & name,
 
 
 
-  Moose::out << std::endl
+  _console << std::endl
             << ">>>> STARTING SPPARKS <<<<" << std::endl;
   spparks_open( 0, NULL, libMesh::COMM_WORLD, &_spparks );
   if (!_spparks)
@@ -88,7 +88,7 @@ SPPARKSUserObject::SPPARKSUserObject(const std::string & name,
 
   char * file = new char[_file.length()+1];
   std::strcpy( file, _file.c_str() );
-  Moose::out << std::endl
+  _console << std::endl
             << ">>>> RUNNING SPPARKS FILE " << _file << " <<<<" << std::endl;
   spparks_file(_spparks, file);
 
@@ -127,7 +127,7 @@ SPPARKSUserObject::SPPARKSUserObject(const std::string & name,
             << ">>>> SPPARKS XYZ: " << xyz_array << " <<<<" << std::endl;
   // for (unsigned i = 0; i < nlcl; ++i)
   // {
-  //   Moose::out << id_array[i] << "\t"
+  //   _console << id_array[i] << "\t"
   //             << xyz_array[i][0] << " "
   //             << xyz_array[i][1] << " "
   //             << xyz_array[i][2] << std::endl;

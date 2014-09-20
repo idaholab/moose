@@ -2,7 +2,6 @@
 #include "Parser.h"
 #include "FEProblem.h"
 #include "Factory.h"
-#include "MooseEnum.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -23,8 +22,6 @@ template<>
 InputParameters validParams<AddCoupledEqSpeciesAuxKernelsAction>()
 {
   InputParameters params = validParams<Action>();
-//  params.addRequiredParam<std::vector<std::string> >("eq_reactions", "The list of aqueous equilibrium reactions");
-//  params.addRequiredParam<std::vector<Real> >("eq_constants", "The list of equilibrium constants for aqueous equilibrium reactions");
   params.addParam<std::string>("reactions", "The list of aqueous equilibrium reactions");
   params.addParam<std::vector<std::string> >("secondary_species", "The list of aqueous equilibrium species to be output as aux variables");
 
@@ -165,7 +162,7 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
         params_eq.set<std::vector<VariableName> >("v") = primary_species_involved[j];
         _problem->addAuxKernel("AqueousEquilibriumRxnAux", "aux_"+eq_species[j], params_eq);
 
-        Moose::out << "aux_"+eq_species[j] << "\n";
+        _console << "aux_"+eq_species[j] << "\n";
         params_eq.print();
       }
 //       else

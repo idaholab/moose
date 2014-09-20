@@ -665,7 +665,7 @@ NodalFloodCount::formatBytesUsed() const
     oss << _name << " Memory Used: " << _bytes_used / Real(1<<10) << " KB\n";
   else
     oss << _name << " Memory Used: " << _bytes_used << " Bytes\n";
-  Moose::out << oss.str() << std::endl;
+  _console << oss.str() << std::endl;
 }
 
 

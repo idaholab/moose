@@ -62,9 +62,11 @@ AuxiliarySystem::initialSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
-    _auxs(EXEC_RESIDUAL)[i].initialSetup();
-    _auxs(EXEC_TIMESTEP)[i].initialSetup();
+    _auxs(EXEC_INITIAL)[i].initialSetup();
     _auxs(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
+    _auxs(EXEC_TIMESTEP)[i].initialSetup();
+    _auxs(EXEC_JACOBIAN)[i].initialSetup();
+    _auxs(EXEC_RESIDUAL)[i].initialSetup();
   }
 }
 
@@ -73,9 +75,20 @@ AuxiliarySystem::timestepSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
-    _auxs(EXEC_RESIDUAL)[i].timestepSetup();
-    _auxs(EXEC_TIMESTEP)[i].timestepSetup();
     _auxs(EXEC_TIMESTEP_BEGIN)[i].timestepSetup();
+    _auxs(EXEC_TIMESTEP)[i].timestepSetup();
+    _auxs(EXEC_JACOBIAN)[i].timestepSetup();
+    _auxs(EXEC_RESIDUAL)[i].timestepSetup();
+  }
+}
+
+void
+AuxiliarySystem::jacobianSetup()
+{
+  for (unsigned int i=0; i<libMesh::n_threads(); i++)
+  {
+    _auxs(EXEC_JACOBIAN)[i].jacobianSetup();
+    _auxs(EXEC_RESIDUAL)[i].jacobianSetup();
   }
 }
 
@@ -84,13 +97,6 @@ AuxiliarySystem::residualSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
     _auxs(EXEC_RESIDUAL)[i].residualSetup();
-}
-
-void
-AuxiliarySystem::jacobianSetup()
-{
-  for (unsigned int i=0; i<libMesh::n_threads(); i++)
-    _auxs(EXEC_RESIDUAL)[i].jacobianSetup();
 }
 
 void
@@ -227,12 +233,12 @@ void
 AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
 {
   if (_vars[0].scalars().size() > 0)
-    computeScalarVars(_auxs(type));
+    computeScalarVars(type);
 
   if (_vars[0].variables().size() > 0)
   {
-    computeNodalVars(_auxs(type));
-    computeElementalVars(_auxs(type));
+    computeNodalVars(type);
+    computeElementalVars(type);
 
     if (_need_serialized_solution)
       serializeSolution();
@@ -270,9 +276,11 @@ AuxiliarySystem::addVector(const std::string & vector_name, const bool project, 
 }
 
 void
-AuxiliarySystem::computeScalarVars(std::vector<AuxWarehouse> & auxs)
+AuxiliarySystem::computeScalarVars(ExecFlagType type)
 {
   Moose::perf_log.push("update_aux_vars_scalar()","Solve");
+
+  std::vector<AuxWarehouse> & auxs = _auxs(type);
   PARALLEL_TRY {
     // FIXME: run multi-threaded
     THREAD_ID tid = 0;
@@ -303,8 +311,10 @@ AuxiliarySystem::computeScalarVars(std::vector<AuxWarehouse> & auxs)
 }
 
 void
-AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
+AuxiliarySystem::computeNodalVars(ExecFlagType type)
 {
+  std::vector<AuxWarehouse> & auxs = _auxs(type);
+
   // Do we have some kernels to evaluate?
   bool have_block_kernels = false;
   for (std::set<SubdomainID>::const_iterator subdomain_it = _mesh.meshSubdomains().begin();
@@ -345,9 +355,13 @@ AuxiliarySystem::computeNodalVars(std::vector<AuxWarehouse> & auxs)
 }
 
 void
-AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
+AuxiliarySystem::computeElementalVars(ExecFlagType type)
 {
   Moose::perf_log.push("update_aux_vars_elemental()","Solve");
+
+  std::vector<AuxWarehouse> & auxs = _auxs(type);
+  bool need_materials = true; //type != EXEC_INITIAL;
+
   PARALLEL_TRY {
     bool element_auxs_to_compute = false;
 
@@ -357,7 +371,7 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
     if (element_auxs_to_compute)
     {
       ConstElemRange & range = *_mesh.getActiveLocalElementRange();
-      ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs);
+      ComputeElemAuxVarsThread eavt(_mproblem, *this, auxs, need_materials);
       Threads::parallel_reduce(range, eavt);
 
       solution().close();
@@ -370,7 +384,7 @@ AuxiliarySystem::computeElementalVars(std::vector<AuxWarehouse> & auxs)
     if (bnd_auxs_to_compute)
     {
       ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
-      ComputeElemAuxBcsThread eabt(_mproblem, *this, auxs);
+      ComputeElemAuxBcsThread eabt(_mproblem, *this, auxs, need_materials);
       Threads::parallel_reduce(bnd_elems, eabt);
 
       solution().close();
@@ -411,8 +425,8 @@ bool
 AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id)
 {
   for (unsigned int i=0; i < Moose::exec_types.size(); ++i)
-    if (!_auxs(Moose::exec_types[i])[0].activeBCs(bnd_id).empty() ||
-        !_auxs(Moose::exec_types[i])[0].activeBCs(Moose::ANY_BOUNDARY_ID).empty())
+    if (!_auxs(Moose::exec_types[i])[0].elementalBCs(bnd_id).empty() ||
+        !_auxs(Moose::exec_types[i])[0].elementalBCs(Moose::ANY_BOUNDARY_ID).empty())
       return true;
 
   return false;

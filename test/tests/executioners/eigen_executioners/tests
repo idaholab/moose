@@ -18,6 +18,7 @@
     cli_args = 'Executioner/output_on_final=true Outputs/file_base=ipm_final'
     rel_err = 5e-05
     recover = false
+    allow_warnings = true
   [../]
   [./test_nonlinear_eigen]
     type = 'Exodiff'
@@ -37,6 +38,7 @@
 # because we only output the final solution, we can test with parallelization.
     cli_args = 'Executioner/output_on_final=true Outputs/file_base=ne_final Postprocessors/udiff/outputs=console'
     recover = false
+    allow_warnings = true
   [../]
   [./test_nonlinear_eigen_material]
     type = 'Exodiff'

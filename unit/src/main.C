@@ -36,6 +36,9 @@ int main(int argc, char **argv)
 
   registerApp(MooseUnitApp);
 
+  // Set the throw_on_error variable for unit tests
+  Moose::_throw_on_error = true;
+
   CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
 
   CppUnit::TextTestRunner runner;

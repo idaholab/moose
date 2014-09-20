@@ -16,26 +16,26 @@
 #          ro = outer radius
 #
 # The tests assume an inner and outer radii of 5 and 10, with internal and external
-# pressures of 100 and 200, respectively. The resulting compressive tangential
+# pressures of 100000 and 200000, respectively. The resulting compressive tangential
 # stress is largest at the inner wall and, from the above equation, has a value
-# of -271.429.
+# of -271429.
 #
 # RESULTS are below. Since stresses are average element values, values for the
 # edge element and one-element-in are used to extrapolate the stress to the
 # inner surface. The vesrion of the tests that are checked use the coarsest meshes.
 #
 #  Mesh    Radial elem   S(edge elem)  S(one elem in)  S(extrap to surf)
-# 1D-SPH       12          -264.842      -254.419        -270.053
-# 2D-RZ        12          -265.007      -254.668        -270.177
-#  3D          12 (4x4)    -258.922      -251.099        -262.834
-#  3D          12 (6x6)    -262.194      -252.969        -266.807
+# 1D-SPH       12          -264842      -254419        -270053
+# 2D-RZ        12          -265007      -254668        -270177
+#  3D          12 (4x4)    -258922      -251099        -262834
+#  3D          12 (6x6)    -262194      -252969        -266807
 #
-# 1D-SPH       48          -269.679      -266.390        -271.323
-# 2D-RZ        48          -269.723      -266.470        -271.350
-#  3D          48          -268.617      -265.717        -270.067
+# 1D-SPH       48          -269679      -266390        -271323
+# 2D-RZ        48          -269723      -266470        -271350
+#  3D          48          -268617      -265717        -270067
 #
-# 1D-SPH      100          -270.580      -268.932        -271.404
-# 2D-RZ       100          -270.587      -268.946        -271.408
+# 1D-SPH      100          -270580      -268932        -271404
+# 2D-RZ       100          -270587      -268946        -271408
 #
 # The numerical solution converges to the analytical solution as the mesh is
 # refined.
@@ -112,7 +112,7 @@
     variable = disp_x
     boundary = outer
     component = 0
-    factor = 200
+    factor = 200000
   [../]
 
  [./exterior_pressure_y]
@@ -120,7 +120,7 @@
     variable = disp_y
     boundary = outer
     component = 1
-    factor = 200
+    factor = 200000
   [../]
 
   [./interior_pressure_x]
@@ -128,7 +128,7 @@
     variable = disp_x
     boundary = inner
     component = 0
-    factor = 100
+    factor = 100000
   [../]
 
   [./interior_pressure_y]
@@ -136,7 +136,7 @@
     variable = disp_y
     boundary = inner
     component = 1
-    factor = 100
+    factor = 100000
   [../]
 []
 
@@ -168,7 +168,7 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  nl_rel_tol = 5e-6
+  nl_rel_tol = 5e-9
   nl_abs_tol = 1e-10
   nl_max_its = 15
 

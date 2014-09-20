@@ -40,6 +40,7 @@
 #include "EigenSystem.h"
 #include "MooseParsedFunction.h"
 #include "MeshChangedInterface.h"
+#include "ComputeJacobianBlocksThread.h"
 
 #include "ScalarInitialCondition.h"
 #include "ElementPostprocessor.h"
@@ -68,6 +69,7 @@
 
 #include "Transfer.h"
 #include "MultiAppTransfer.h"
+#include "MultiMooseEnum.h"
 
 //libmesh Includes
 #include "libmesh/exodusII_io.h"
@@ -137,17 +139,18 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _has_constraints(false),
     _has_multiapps(false),
     _has_initialized_stateful(false),
-    _dbg_top_residuals(0),
     _resurrector(NULL),
     _const_jacobian(false),
     _has_jacobian(false),
     _kernel_coverage_check(false),
-    _max_qps(std::numeric_limits<unsigned int>::max())
+    _max_qps(std::numeric_limits<unsigned int>::max()),
+    _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
+    _use_legacy_uo_initialization(_app.legacyUoInitializationDefault())
 {
 
 #ifdef LIBMESH_HAVE_PETSC
   // put in empty arrays for PETSc options
-  this->parameters().set<std::vector<MooseEnum> >("petsc_options") = std::vector<MooseEnum>();
+  this->parameters().set<MultiMooseEnum>("petsc_options") = MultiMooseEnum("", "", true);
   this->parameters().set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
   this->parameters().set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
 #endif
@@ -228,8 +231,13 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
 
 FEProblem::~FEProblem()
 {
-  delete _cm;
+  // Flush the Console stream, the underlying call to Console::mooseConsole
+  // relies on a call to Output::checkInterval that has references to
+  // _time, etc. If it is not flush here memory problems arise if you have
+  // an unflushed stream and start destructing things.
+  _console << std::flush;
 
+  delete _cm;
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; i++)
   {
@@ -241,17 +249,8 @@ FEProblem::~FEProblem()
 
     for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
       delete it->second;
-
-/*
-    for (std::map<std::string, RestartableDataValue *>::iterator it = _restartable_data[i].begin();
-        it != _restartable_data[i].end();
-        ++it)
-      delete it->second;
-*/
   }
 
-  delete &_mesh;
-  delete _displaced_mesh;
   delete _displaced_problem;
   delete &_nl;
 
@@ -287,7 +286,7 @@ FEProblem::getCoordSystem(SubdomainID sid)
 }
 
 void
-FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<MooseEnum> & coord_sys)
+FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys)
 {
   const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
   if (blocks.size() == 0)
@@ -413,9 +412,11 @@ void FEProblem::initialSetup()
 
   if (!_app.isRecovering())
   {
-    Moose::setup_perf_log.push("initial adaptivity","Setup");
-    for (unsigned int i = 0; i < adaptivity().getInitialSteps(); i++)
+    Moose::setup_perf_log.push("initial adaptivity", "Setup");
+    unsigned int n = adaptivity().getInitialSteps();
+    for (unsigned int i = 0; i < n; i++)
     {
+      _console << "Initial adaptivity step " << i+1 << " of " << n << "\n" << std::endl;
       computeIndicatorsAndMarkers();
 
       _adaptivity.initialAdaptMesh();
@@ -440,14 +441,18 @@ void FEProblem::initialSetup()
   for (unsigned int i=0; i<n_threads; i++)
     _materials[i].initialSetup();
 
+  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
+                                   _material_props, _bnd_material_props, _materials, _assembly);
+  /**
+   * The ComputeMaterialObjectThread object now allocates memory as needed for the material storage system.
+   * This cannot be done with threads. The first call to this object bypasses threading by calling the object
+   * directly. The subsequent call can be called with threads.
+   */
+  cmt(elem_range, true);
+
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
-  {
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                     _material_props, _bnd_material_props, _materials, _assembly);
-    Threads::parallel_reduce(elem_range, cmt);
     _has_initialized_stateful = true;
-  }
 
   // Auxilary variable initialSetup calls
   _aux.initialSetup();
@@ -527,10 +532,17 @@ void FEProblem::initialSetup()
     Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
 
     Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
-    computeUserObjects();
+    if (_use_legacy_uo_initialization)
+      computeUserObjects();
+
+    // The only user objects that should be computed here are the initial UOs
     computeUserObjects(EXEC_INITIAL);
-    computeUserObjects(EXEC_TIMESTEP_BEGIN);
-    computeUserObjects(EXEC_RESIDUAL);
+
+    if (_use_legacy_uo_initialization)
+    {
+      computeUserObjects(EXEC_TIMESTEP_BEGIN);
+      computeUserObjects(EXEC_RESIDUAL);
+    }
     Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
   }
 
@@ -1022,6 +1034,9 @@ FEProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid)
 
   _nl.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
   _aux.reinitNeighborFace(neighbor, neighbor_side, bnd_id, tid);
+
+  if (_displaced_problem != NULL && _reinit_displaced_face)
+    _displaced_problem->reinitNeighbor(elem, side, tid);
 }
 
 void
@@ -1573,38 +1588,34 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       parameters.set<bool>("_bnd") = false;
       parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-      Material *volume_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
-      mooseAssert(volume_material != NULL, "Not a Material object");
+      MooseSharedPointer<Material> volume_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create_shared_ptr(mat_name, name, parameters));
       _materials[tid].addMaterial(block_ids, volume_material);
-      _objects_by_name[tid][name].push_back(volume_material);
+      _objects_by_name[tid][name].push_back(volume_material.get());
 
       // face material
       parameters.set<bool>("_bnd") = true;
       parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-      Material *face_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
-      mooseAssert(face_material != NULL, "Not a Material object");
+      MooseSharedPointer<Material> face_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create_shared_ptr(mat_name, name, parameters));
       _materials[tid].addFaceMaterial(block_ids, face_material);
-      _objects_by_name[tid][name].push_back(face_material);
+      _objects_by_name[tid][name].push_back(face_material.get());
 
       // neighbor material
       parameters.set<bool>("_bnd") = true;
       parameters.set<bool>("_neighbor") = true;
       parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
-      Material *neighbor_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
-      mooseAssert(neighbor_material != NULL, "Not a Material object");
+      MooseSharedPointer<Material> neighbor_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create_shared_ptr(mat_name, name, parameters));
       _materials[tid].addNeighborMaterial(block_ids, neighbor_material);
-      _objects_by_name[tid][name].push_back(neighbor_material);
+      _objects_by_name[tid][name].push_back(neighbor_material.get());
     }
     else if (boundary_ids.size() > 0)
     {
       parameters.set<bool>("_bnd") = true;
       parameters.set<bool>("_neighbor") = false;
       parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-      Material *bnd_material = static_cast<Material *>(_factory.create(mat_name, name, parameters));
-      mooseAssert(bnd_material != NULL, "Not a Material object");
+      MooseSharedPointer<Material> bnd_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create_shared_ptr(mat_name, name, parameters));
       _materials[tid].addBoundaryMaterial(boundary_ids, bnd_material);
-      _objects_by_name[tid][name].push_back(bnd_material);
+      _objects_by_name[tid][name].push_back(bnd_material.get());
     }
     else
       mooseError("Material '" + name + "' did not specify either block or boundary parameter");
@@ -1791,38 +1802,49 @@ FEProblem::swapBackMaterialsNeighbor(THREAD_ID tid)
 /**
  * Small helper function used by addPostprocessor to try to get a Postprocessor pointer from a MooseObject
  */
-Postprocessor *
-getPostprocessorPointer(MooseObject * mo)
+MooseSharedPointer<Postprocessor>
+getPostprocessorPointer(MooseSharedPointer<MooseObject> mo)
 {
   {
-    ElementPostprocessor * intermediate = dynamic_cast<ElementPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<Postprocessor *>(intermediate);
+    MooseSharedPointer<ElementPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<ElementPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    NodalPostprocessor * intermediate = dynamic_cast<NodalPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<Postprocessor *>(intermediate);
+    MooseSharedPointer<NodalPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<NodalPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    InternalSidePostprocessor * intermediate = dynamic_cast<InternalSidePostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<Postprocessor *>(intermediate);
+    MooseSharedPointer<InternalSidePostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<InternalSidePostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    SidePostprocessor * intermediate = dynamic_cast<SidePostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<Postprocessor *>(intermediate);
+    MooseSharedPointer<SidePostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<SidePostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    GeneralPostprocessor * intermediate = dynamic_cast<GeneralPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<Postprocessor *>(intermediate);
+    MooseSharedPointer<GeneralPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<GeneralPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
   }
+
+  return MooseSharedPointer<Postprocessor>();
+}
+
+template <typename UO_TYPE, typename PP_TYPE>
+Postprocessor *
+getPostprocessorPointer(UO_TYPE * uo)
+{
+  PP_TYPE * intermediate = dynamic_cast<PP_TYPE *>(uo);
+  if (intermediate)
+    return static_cast<Postprocessor *>(intermediate);
 
   return NULL;
 }
@@ -1851,11 +1873,11 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
-    MooseObject * mo = _factory.create(pp_name, name, parameters);
+    MooseSharedPointer<MooseObject> mo = _factory.create_shared_ptr(pp_name, name, parameters);
     if (!mo)
       mooseError("Unable to determine type for Postprocessor: " + mo->name());
 
-    Postprocessor * pp = getPostprocessorPointer(mo);
+    MooseSharedPointer<Postprocessor> pp = getPostprocessorPointer(mo);
 
     // Postprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
     const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<std::vector<MooseEnum> >("execute_on"));
@@ -1867,14 +1889,14 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
       _pps(exec_flags[i])[tid].addPostprocessor(pp);
 
       // Add it to the user object warehouse as well...
-      UserObject * user_object = dynamic_cast<UserObject *>(mo);
-      if (!user_object)
+      MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::dynamic_pointer_cast<UserObject>(mo);
+      if (!user_object.get())
         mooseError("Unknown user object type: " + pp_name);
 
       _user_objects(exec_flags[i])[tid].addUserObject(user_object);
     }
 
-    _objects_by_name[tid][name].push_back(mo);
+    _objects_by_name[tid][name].push_back(mo.get());
     _pps_data[tid]->init(name);
   }
 }
@@ -1897,40 +1919,40 @@ FEProblem::getPostprocessorWarehouse()
 /**
  * Small helper function used by addVectorPostprocessor to try to get a VectorPostprocessor pointer from a MooseObject
  */
-VectorPostprocessor *
-getVectorPostprocessorPointer(MooseObject * mo)
+MooseSharedPointer<VectorPostprocessor>
+getVectorPostprocessorPointer(MooseSharedPointer<MooseObject> mo)
 {
   {
-    ElementVectorPostprocessor * intermediate = dynamic_cast<ElementVectorPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<VectorPostprocessor *>(intermediate);
+    MooseSharedPointer<ElementVectorPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<ElementVectorPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<VectorPostprocessor>(intermediate);
   }
 
   {
-    NodalVectorPostprocessor * intermediate = dynamic_cast<NodalVectorPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<VectorPostprocessor *>(intermediate);
+    MooseSharedPointer<NodalVectorPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<NodalVectorPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<VectorPostprocessor>(intermediate);
   }
 
   {
-    InternalSideVectorPostprocessor * intermediate = dynamic_cast<InternalSideVectorPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<VectorPostprocessor *>(intermediate);
+    MooseSharedPointer<InternalSideVectorPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<InternalSideVectorPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<VectorPostprocessor>(intermediate);
   }
 
   {
-    SideVectorPostprocessor * intermediate = dynamic_cast<SideVectorPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<VectorPostprocessor *>(intermediate);
+    MooseSharedPointer<SideVectorPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<SideVectorPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<VectorPostprocessor>(intermediate);
   }
 
   {
-    GeneralVectorPostprocessor * intermediate = dynamic_cast<GeneralVectorPostprocessor *>(mo);
-    if (intermediate)
-      return static_cast<VectorPostprocessor *>(intermediate);
+    MooseSharedPointer<GeneralVectorPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<GeneralVectorPostprocessor>(mo);
+    if (intermediate.get())
+      return MooseSharedNamespace::static_pointer_cast<VectorPostprocessor>(intermediate);
   }
 
-  return NULL;
+  return MooseSharedPointer<VectorPostprocessor>();
 }
 
 void
@@ -1958,11 +1980,11 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
-    MooseObject * mo = _factory.create(pp_name, name, parameters);
+    MooseSharedPointer<MooseObject> mo = _factory.create_shared_ptr(pp_name, name, parameters);
     if (!mo)
       mooseError("Unable to determine type for VectorPostprocessor: " + mo->name());
 
-    VectorPostprocessor * pp = getVectorPostprocessorPointer(mo);
+    MooseSharedPointer<VectorPostprocessor> pp = getVectorPostprocessorPointer(mo);
 
     // VectorPostprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
     const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<std::vector<MooseEnum> >("execute_on"));
@@ -1974,14 +1996,14 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
       _vpps(exec_flags[i])[tid].addVectorPostprocessor(pp);
 
       // Add it to the user object warehouse as well...
-      UserObject * user_object = dynamic_cast<UserObject *>(mo);
-      if (!user_object)
+      MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::dynamic_pointer_cast<UserObject>(mo);
+      if (!user_object.get())
         mooseError("Unknown user object type: " + pp_name);
 
       _user_objects(exec_flags[i])[tid].addUserObject(user_object);
     }
 
-    _objects_by_name[tid][name].push_back(mo);
+    _objects_by_name[tid][name].push_back(mo.get());
   }
 }
 
@@ -2016,17 +2038,13 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 
     parameters.set<MaterialData *>("_material_data") = mat_data;
 
-    MooseObject * mo = _factory.create(user_object_name, name, parameters);
-
-    UserObject * user_object = dynamic_cast<UserObject *>(mo);
-    if (!user_object)
-      mooseError("Unknown user object type: " + user_object_name);
+    MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::static_pointer_cast<UserObject>(_factory.create_shared_ptr(user_object_name, name, parameters));
 
     const std::vector<ExecFlagType> & exec_flags = user_object->execFlags();
     for (unsigned int i=0; i<exec_flags.size(); ++i)
       _user_objects(exec_flags[i])[tid].addUserObject(user_object);
 
-    _objects_by_name[tid][name].push_back(mo);
+    _objects_by_name[tid][name].push_back(user_object.get());
   }
 }
 
@@ -2164,11 +2182,11 @@ FEProblem::computeIndicatorsAndMarkers()
 }
 
 void
-FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, UserObjectWarehouse::GROUP group)
+FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group)
 {
-  if (pps[0].blockIds().size() > 0 || pps[0].boundaryIds().size() > 0 || pps[0].nodesetIds().size() > 0 || pps[0].blockNodalIds().size() > 0)
+  std::vector<UserObjectWarehouse> & pps = _user_objects(type);
+  if (pps[0].blockIds().size() || pps[0].boundaryIds().size() || pps[0].nodesetIds().size() || pps[0].blockNodalIds().size() || pps[0].internalSideUserObjects(group).size())
   {
-
     /* Note: The fact that we compute the aux system when we compute the user_objects
      * is a very bad behavior that some of our applications have come to rely on.  This
      * needs to be fixed.  For now we cannot easily change this behavior without
@@ -2182,7 +2200,10 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
       if (_displaced_problem != NULL)
         _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
-      _aux.compute();
+      if (_use_legacy_uo_aux_computation)
+        _aux.compute();
+      else
+        _aux.compute(type);
     }
 
     // init
@@ -2294,7 +2315,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
             ps->finalize();
 
-            Postprocessor * pp = getPostprocessorPointer(ps);
+            Postprocessor * pp = getPostprocessorPointer<ElementUserObject, ElementPostprocessor>(ps);
 
             if (pp)
             {
@@ -2332,7 +2353,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
             ps->finalize();
 
-            Postprocessor * pp = getPostprocessorPointer(ps);
+            Postprocessor * pp = getPostprocessorPointer<SideUserObject, SidePostprocessor>(ps);
 
             if (pp)
             {
@@ -2370,7 +2391,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
             it->finalize();
 
-            Postprocessor * pp = getPostprocessorPointer(it);
+            Postprocessor * pp = getPostprocessorPointer<InternalSideUserObject, InternalSidePostprocessor>(it);
 
             if (pp)
             {
@@ -2431,7 +2452,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
             ps->finalize();
 
-            Postprocessor * pp = getPostprocessorPointer(ps);
+            Postprocessor * pp = getPostprocessorPointer<NodalUserObject, NodalPostprocessor>(ps);
 
             if (pp)
             {
@@ -2468,7 +2489,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
             ps->finalize();
 
-            Postprocessor * pp = getPostprocessorPointer(ps);
+            Postprocessor * pp = getPostprocessorPointer<NodalUserObject, NodalPostprocessor>(ps);
 
             if (pp)
             {
@@ -2497,7 +2518,7 @@ FEProblem::computeUserObjectsInternal(std::vector<UserObjectWarehouse> & pps, Us
 
     (*generic_user_object_it)->finalize();
 
-    Postprocessor * pp = getPostprocessorPointer(*generic_user_object_it);
+    Postprocessor * pp = getPostprocessorPointer<GeneralUserObject, GeneralPostprocessor>(*generic_user_object_it);
 
     if (pp)
     {
@@ -2527,18 +2548,10 @@ FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectW
       _user_objects(type)[tid].jacobianSetup();
     break;
 
-  case EXEC_TIMESTEP:
-  case EXEC_TIMESTEP_BEGIN:
-    break;
-
-  case EXEC_INITIAL:
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _user_objects(type)[tid].initialSetup();
-    break;
-  case EXEC_CUSTOM:
+  default:
     break;
   }
-  computeUserObjectsInternal(_user_objects(type), group);
+  computeUserObjectsInternal(type, group);
 
   Moose::perf_log.pop("compute_user_objects()","Solve");
 }
@@ -2663,10 +2676,10 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
 
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
 
-  MooseObject * mo = _factory.create(multi_app_name, name, parameters);
+  MooseSharedPointer<MooseObject> mo = _factory.create_shared_ptr(multi_app_name, name, parameters);
 
-  MultiApp * multi_app = dynamic_cast<MultiApp *>(mo);
-  if (!multi_app)
+  MooseSharedPointer<MultiApp> multi_app = MooseSharedNamespace::dynamic_pointer_cast<MultiApp>(mo);
+  if (multi_app.get() == NULL)
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
   const std::vector<ExecFlagType> & exec_flags = multi_app->execFlags();
@@ -2795,17 +2808,17 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
 
   parameters.set<THREAD_ID>("_tid") = 0;
 
-  MooseObject * mo = _factory.create(transfer_name, name, parameters);
+  MooseSharedPointer<MooseObject> mo = _factory.create_shared_ptr(transfer_name, name, parameters);
 
-  Transfer * transfer = dynamic_cast<Transfer *>(mo);
-  if (!transfer)
+  MooseSharedPointer<Transfer> transfer = MooseSharedNamespace::dynamic_pointer_cast<Transfer>(mo);
+  if (transfer.get() == NULL)
     mooseError("Unknown Transfer type: " << transfer_name);
 
-  MultiAppTransfer * multi_app_transfer = dynamic_cast<MultiAppTransfer *>(transfer);
+  MooseSharedPointer<MultiAppTransfer> multi_app_transfer = MooseSharedNamespace::dynamic_pointer_cast<MultiAppTransfer>(transfer);
 
   const std::vector<ExecFlagType> & exec_flags = transfer->execFlags();
   for (unsigned int i=0; i<exec_flags.size(); ++i)
-    if (multi_app_transfer)
+    if (multi_app_transfer.get())
     {
       int direction = multi_app_transfer->direction();
 
@@ -3045,6 +3058,9 @@ FEProblem::solve()
   Moose::setSolverDefaults(*this);
 
   Moose::perf_log.push("solve()","Solve");
+
+  possiblyRebuildGeomSearchPatches();
+
 //  _solve_only_perf_log.push("solve");
 
   if (_solve)
@@ -3230,9 +3246,6 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   // Need to close and update the aux system in case residuals were saved to it.
   _aux.solution().close();
   _aux.update();
-
-  if (_dbg_top_residuals)
-    _nl.printTopResiduals(residual, _dbg_top_residuals);
 }
 
 void
@@ -3308,13 +3321,24 @@ FEProblem::computeTransientImplicitJacobian(Real time, const NumericVector<Numbe
 
 
 void
-FEProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+FEProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 {
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
   _aux.compute();
-  _nl.computeJacobianBlock(jacobian, precond_system, ivar, jvar);
+
+  _nl.computeJacobianBlocks(blocks);
+}
+
+void
+FEProblem::computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar)
+{
+  std::vector<JacobianBlock *> blocks;
+  JacobianBlock * block = new JacobianBlock(precond_system, jacobian, ivar, jvar);
+  blocks.push_back(block);
+  computeJacobianBlocks(blocks);
+  delete block;
 }
 
 void
@@ -3442,6 +3466,41 @@ FEProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
     _displaced_problem->updateGeomSearch(type);
 }
 
+void
+FEProblem::possiblyRebuildGeomSearchPatches()
+{
+  if (_displaced_problem) // Only need to do this if things are moving...
+  {
+    switch (_mesh.getPatchUpdateStrategy())
+    {
+      case 0: // Never
+        break;
+      case 2: // Auto
+      {
+        Real max = _displaced_problem->geomSearchData().maxPatchPercentage();
+        _communicator.max(max);
+
+        // If we haven't moved very far through the patch
+        if (max < 0.4)
+          break;
+      }
+
+      // Let this fall through if things do need to be updated...
+
+      case 1: // Always
+        _console << "\n\nUpdating geometric search patches\n\n";
+
+        _geometric_search_data.clearNearestNodeLocators();
+        _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
+
+        _displaced_problem->geomSearchData().clearNearestNodeLocators();
+        _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
+
+        reinitBecauseOfGhosting();
+    }
+  }
+}
+
 #ifdef LIBMESH_ENABLE_AMR
 void
 FEProblem::adaptMesh()
@@ -3518,12 +3577,6 @@ void
 FEProblem::notifyWhenMeshChanges(MeshChangedInterface * mci)
 {
   _notify_when_mesh_changes.push_back(mci);
-}
-
-void
-FEProblem::printMaterialMap()
-{
-  _materials[0].printMaterialMap();
 }
 
 void
@@ -3819,35 +3872,36 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
 
 #ifdef LIBMESH_HAVE_PETSC
 void
-FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
+FEProblem::storePetscOptions(const MultiMooseEnum & petsc_options,
                              const std::vector<std::string> & petsc_options_inames,
                              const std::vector<std::string> & petsc_options_values)
 {
-  std::vector<MooseEnum> & po = parameters().set<std::vector<MooseEnum> >("petsc_options");         // set because we need a writable reference
-  for (unsigned int i = 0; i < petsc_options.size(); i++)
+  MultiMooseEnum & po = parameters().set<MultiMooseEnum>("petsc_options");         // set because we need a writable reference
+
+  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
   {
     /**
      * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is initialized
      * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
      */
-    if (petsc_options[i] == "-log_summary")
+    if (*it == "-log_summary")
       mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
 
     // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
     else
     {
       std::string help_string;
-      if (petsc_options[i] == "-snes" || petsc_options[i] == "-snes_mf" || petsc_options[i] == "-snes_mf_operator")
+      if (*it == "-snes" || *it == "-snes_mf" || *it == "-snes_mf_operator")
         help_string = "Please set the solver type through \"solve_type\".";
-      else if (petsc_options[i] == "-ksp_monitor")
-        help_string = "Please use \"Output/linear_residuals = true\"";
+      else if (*it == "-ksp_monitor")
+        help_string = "Please use \"Outputs/console/type=Console Outputs/console/linear_residuals=true\"";
 
       if (help_string != "")
-        mooseWarning("The PETSc option " << petsc_options[i] << " should not be used directly in a MOOSE input file. " << help_string);
+        mooseWarning("The PETSc option " << *it << " should not be used directly in a MOOSE input file. " << help_string);
     }
 
-    if (find(po.begin(), po.end(), petsc_options[i]) == po.end())
-      po.push_back(petsc_options[i]);
+    if (find(po.begin(), po.end(), *it) == po.end())
+      po.push_back(*it);
   }
 
   std::vector<std::string> & pn = parameters().set<std::vector<std::string> >("petsc_inames");         // set because we need a writable reference
@@ -3856,12 +3910,25 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
   if (petsc_options_inames.size() != petsc_options_values.size())
     mooseError("PETSc names and options are not the same length");
 
+  bool boomeramg_found = false;
+  bool strong_threshold_found = false;
+  _pc_description = "";
   for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
   {
     if (find(pn.begin(), pn.end(), petsc_options_inames[i]) == pn.end())
     {
       pn.push_back(petsc_options_inames[i]);
       pv.push_back(petsc_options_values[i]);
+
+      // Look for a pc description
+      if (petsc_options_inames[i] == "-pc_type" || petsc_options_inames[i] == "-pc_sub_type" || petsc_options_inames[i] == "-pc_hypre_type")
+        _pc_description += petsc_options_values[i] + ' ';
+
+      // This special case is common enough that we'd like to handle it for the user.
+      if (petsc_options_inames[i] == "-pc_hypre_type" && petsc_options_values[i] == "boomeramg")
+        boomeramg_found = true;
+      if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
+        strong_threshold_found = true;
     }
     else
     {
@@ -3869,6 +3936,15 @@ FEProblem::storePetscOptions(const std::vector<MooseEnum> & petsc_options,
         if (pn[j] == petsc_options_inames[i])
           pv[j] = petsc_options_values[i];
     }
+  }
+
+  // When running a 3D mesh with boomeramg, it is almost always best to supply a strong threshold value
+  // We will provide that for the user here if they haven't supplied it themselves.
+  if (boomeramg_found && !strong_threshold_found && _mesh.dimension() == 3)
+  {
+    pn.push_back("-pc_hypre_boomeramg_strong_threshold");
+    pv.push_back("0.7");
+    _pc_description += "strong_threshold: 0.7 (auto)";
   }
 }
 #endif

@@ -20,9 +20,9 @@ template<>
 InputParameters validParams<PolycrystalRandomICAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<unsigned int>("crys_num", "number of order parameters to create");
+  params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
-  MooseEnum typ_options("continuous, discrete");
+  MooseEnum typ_options("continuous discrete");
   params.addParam<MooseEnum>("random_type", typ_options, "The type of random polycrystal initial condition. Whether one order parameter is chosen to be 1 at each node or if each order parameter continuously varies from 0 to 1");
 
   return params;
@@ -30,7 +30,7 @@ InputParameters validParams<PolycrystalRandomICAction>()
 
 PolycrystalRandomICAction::PolycrystalRandomICAction(const std::string & name, InputParameters params) :
     Action(name, params),
-    _crys_num(getParam<unsigned int>("crys_num")),
+    _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base")),
     _random_type(getParam<MooseEnum>("random_type"))
 {}
@@ -43,19 +43,19 @@ PolycrystalRandomICAction::act()
 #endif
 
   // Loop through the number of order parameters
-  for (unsigned int crys = 0; crys < _crys_num; crys++)
+  for (unsigned int op = 0; op < _op_num; op++)
   {
     //Create variable names
     std::string var_name = _var_name_base;
     std::stringstream out;
-    out << crys;
+    out << op;
     var_name.append(out.str());
 
     //Set parameters for BoundingBoxIC
     InputParameters poly_params = _factory.getValidParams("PolycrystalRandomIC");
     poly_params.set<VariableName>("variable") = var_name;
-    poly_params.set<unsigned int>("crys_num") = _crys_num;
-    poly_params.set<unsigned int>("crys_index") = crys;
+    poly_params.set<unsigned int>("op_num") = _op_num;
+    poly_params.set<unsigned int>("op_index") = op;
     poly_params.set<unsigned int>("typ") = _random_type;
 
     //Add initial condition

@@ -27,6 +27,7 @@
 #include "MooseError.h"
 #include "MooseTypes.h"
 #include "MooseEnum.h"
+#include "MultiMooseEnum.h"
 #include "MooseUtils.h"
 
 #ifdef LIBMESH_HAVE_FPARSER
@@ -106,7 +107,7 @@ public:
   void addRequiredParam(const std::string &name, const std::string &doc_string);
 
   /**
-   * This version of addRequiredParam is here for a consistent use with MooseEnum.  Use of
+   * This version of addRequiredParam is here for a consistent use with MooseEnums.  Use of
    * this function for any other type will throw an error.
    */
   template <typename T>
@@ -364,14 +365,21 @@ public:
    * Methods returning iterators to the coupled variables names stored in this
    * InputParameters object
    */
-  inline std::set<std::string>::const_iterator coupledVarsBegin()
+  inline std::set<std::string>::const_iterator coupledVarsBegin() const
   {
     return _coupled_vars.begin();
   }
-  inline std::set<std::string>::const_iterator coupledVarsEnd()
+  inline std::set<std::string>::const_iterator coupledVarsEnd() const
   {
     return _coupled_vars.end();
   }
+
+  /**
+   * Return whether or not the coupled variable exists
+   * @param coupling_name The name of the coupled variable to test for
+   * @return True if the variable exists in the coupled variables for this InputParameters object
+   */
+  bool hasCoupledValue(const std::string & coupling_name) const;
 
   /**
    * Return whether or not the requested parameter has a default coupled value.
@@ -472,7 +480,7 @@ private:
 
   /**
    * The set of parameters either explicitly set or provided a default value when added
-   * Note: We do not store MooseEnum names in valid params, instead we asked MooseEnums whether
+   * Note: We do not store MooseEnum names in valid params, instead we ask MooseEnums whether
    *       they are valid or not.
    */
   std::set<std::string> _valid_params;
@@ -482,6 +490,9 @@ private:
 
   /// The coupled variables set
   std::set<std::string> _coupled_vars;
+
+  /// The list of deprecated params
+  std::map<std::string, std::string> _deprecated_params;
 
   /// The default value for optionally coupled variables
   std::map<std::string, Real> _default_coupled_value;
@@ -506,7 +517,7 @@ InputParameters::set (const std::string& name)
 
   set_attributes(name, false);
 
-  return libmesh_cast_ptr<Parameter<T>*>(_values[name])->set();
+  return cast_ptr<Parameter<T>*>(_values[name])->set();
 }
 
 template <typename T, typename UP_T>
@@ -697,7 +708,6 @@ InputParameters::addCommandLineParam(const std::string &name, const std::string 
   MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
 }
 
-
 template <typename T>
 void
 InputParameters::checkConsistentType(const std::string &name) const
@@ -721,27 +731,27 @@ template <typename T>
 void
 InputParameters::addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
 {
-  mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
-
   addRequiredParam<T>(name, doc_string);
+
+  _deprecated_params.insert(std::make_pair(name, deprecation_message));
 }
 
 template <typename T>
 void
 InputParameters::addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message)
 {
-  mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
-
   addParam<T>(name, value, doc_string);
+
+  _deprecated_params.insert(std::make_pair(name, deprecation_message));
 }
 
 template <typename T>
 void
 InputParameters::addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
 {
-  mooseWarning("The parameter " << name << " is deprecated.\n" << deprecation_message);
-
   addParam<T>(name, doc_string);
+
+  _deprecated_params.insert(std::make_pair(name, deprecation_message));
 }
 
 template <typename T>
@@ -765,6 +775,16 @@ InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const Moos
 template <>
 inline
 void
+InputParameters::addRequiredParam<MultiMooseEnum>(const std::string &name, const MultiMooseEnum &moose_enum, const std::string &doc_string)
+{
+  InputParameters::set<MultiMooseEnum>(name) = moose_enum;               // valid parameter is set by set_attributes
+  _required_params.insert(name);
+  _doc_string[name] = doc_string;
+}
+
+template <>
+inline
+void
 InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &name, const std::vector<MooseEnum> &moose_enums, const std::string &doc_string)
 {
   InputParameters::set<std::vector<MooseEnum> >(name) = moose_enums;    // valid parameter is set by set_attributes
@@ -778,6 +798,14 @@ void
 InputParameters::addParam<MooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/)
 {
   mooseError("You must supply a MooseEnum object when using addParam, even if the parameter is not required!");
+}
+
+template <>
+inline
+void
+InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/)
+{
+  mooseError("You must supply a MultiMooseEnum object when using addParam, even if the parameter is not required!");
 }
 
 template <>

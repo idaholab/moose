@@ -69,6 +69,8 @@
 #include "VectorNeumannBC.h"
 #include "WeakGradientBC.h"
 #include "DiffusionFluxBC.h"
+#include "PostprocessorDirichletBC.h"
+
 // auxkernels
 #include "ConstantAux.h"
 #include "FunctionAux.h"
@@ -81,6 +83,7 @@
 #include "MaterialRealAux.h"
 #include "MaterialRealVectorValueAux.h"
 #include "MaterialRealTensorValueAux.h"
+#include "MaterialStdVectorAux.h"
 #include "DebugResidualAux.h"
 #include "BoundsAux.h"
 #include "SpatialUserObjectAux.h"
@@ -89,6 +92,7 @@
 #include "ConstantScalarAux.h"
 #include "QuotientAux.h"
 #include "NormalizationAux.h"
+#include "VariableGradientComponent.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -197,11 +201,15 @@
 #include "NodalNormalsCorner.h"
 #include "NodalNormalsPreprocessor.h"
 #include "SolutionUserObject.h"
+#ifdef LIBMESH_HAVE_FPARSER
+#include "Terminator.h"
+#endif
 
 // preconditioners
 #include "PhysicsBasedPreconditioner.h"
 #include "FiniteDifferencePreconditioner.h"
 #include "SingleMatrixPreconditioner.h"
+
 #include "SplitBasedPreconditioner.h"
 #include "Split.h"
 #include "ContactSplit.h"
@@ -262,6 +270,7 @@
 // MultiApps
 #include "TransientMultiApp.h"
 #include "FullSolveMultiApp.h"
+#include "AutoPositionsMultiApp.h"
 
 // Transfers
 #ifdef LIBMESH_HAVE_DTK
@@ -350,7 +359,9 @@
 #include "Tecplot.h"
 #include "Gnuplot.h"
 #include "SolutionHistory.h"
-#include "DebugOutput.h"
+#include "MaterialPropertyDebugOutput.h"
+#include "VariableResidualNormsDebugOutput.h"
+#include "TopResidualDebugOutput.h"
 
 namespace Moose {
 
@@ -407,6 +418,7 @@ registerObjects(Factory & factory)
   registerBoundaryCondition(VectorNeumannBC);
   registerBoundaryCondition(WeakGradientBC);
   registerBoundaryCondition(DiffusionFluxBC);
+  registerBoundaryCondition(PostprocessorDirichletBC);
 
   // dirac kernels
   registerDiracKernel(ConstantPointSource);
@@ -423,6 +435,7 @@ registerObjects(Factory & factory)
   registerAux(MaterialRealAux);
   registerAux(MaterialRealVectorValueAux);
   registerAux(MaterialRealTensorValueAux);
+  registerAux(MaterialStdVectorAux);
   registerAux(DebugResidualAux);
   registerAux(BoundsAux);
   registerAux(SpatialUserObjectAux);
@@ -432,6 +445,7 @@ registerObjects(Factory & factory)
   registerAux(QuotientAux);
   registerAux(NormalizationAux);
   registerAux(FunctionScalarAux);
+  registerAux(VariableGradientComponent);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
@@ -538,6 +552,9 @@ registerObjects(Factory & factory)
   registerUserObject(NodalNormalsCorner);
   registerUserObject(NodalNormalsEvaluator);
   registerUserObject(SolutionUserObject);
+#ifdef LIBMESH_HAVE_FPARSER
+  registerUserObject(Terminator);
+#endif
 
   // preconditioners
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
@@ -583,6 +600,7 @@ registerObjects(Factory & factory)
   // MultiApps
   registerMultiApp(TransientMultiApp);
   registerMultiApp(FullSolveMultiApp);
+  registerMultiApp(AutoPositionsMultiApp);
 
   // time steppers
   registerTimeStepper(ConstantDT);
@@ -639,7 +657,9 @@ registerObjects(Factory & factory)
   registerOutput(Tecplot);
   registerOutput(Gnuplot);
   registerOutput(SolutionHistory);
-  registerOutput(DebugOutput);
+  registerOutput(MaterialPropertyDebugOutput);
+  registerOutput(VariableResidualNormsDebugOutput);
+  registerOutput(TopResidualDebugOutput);
 
   registered = true;
 }
@@ -740,7 +760,6 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_time_periods", true);
   registerTask("setup_adaptivity", false);
   registerTask("meta_action", false);
-  registerTask("initial_mesh_refinement", false);
   registerTask("setup_debug", false);
   registerTask("setup_residual_debug", false);
   registerTask("setup_oversampling", false);
@@ -807,7 +826,6 @@ addActionTypes(Syntax & syntax)
 "(add_multi_app)"
 "(add_transfer)"
 "(copy_nodal_vars, copy_nodal_aux_vars)"
-"(initial_mesh_refinement)"
 "(add_material)"
 "(setup_material_output)"
 "(init_problem)"
@@ -967,12 +985,8 @@ swapLibMeshComm(MPI_Comm new_comm)
 void
 enableFPE(bool on)
 {
-#ifdef DEBUG
-  libMesh::enableFPE(on);
-#else
-  if (__trap_fpe)
+  if (_trap_fpe)
     libMesh::enableFPE(on);
-#endif
 }
 
 // Currently there are 6 exec types (See Moose.h)
@@ -993,8 +1007,19 @@ const std::vector<ExecFlagType> exec_types = populateExecTypes();
 
 PerfLog setup_perf_log("Setup");
 
-bool __trap_fpe = false;
+/**
+ * Initialize global variables
+ */
+#ifdef DEBUG
+bool _trap_fpe = true;
+#else
+bool _trap_fpe = false;
+#endif
 
-bool __color_console = true;
+bool _color_console = true;
+
+bool _warnings_are_errors = false;
+
+bool _throw_on_error = false;
 
 } // namespace Moose

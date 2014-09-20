@@ -36,11 +36,9 @@ OutputWarehouse::OutputWarehouse() :
 
 OutputWarehouse::~OutputWarehouse()
 {
+  // If the output buffer is not empty, it needs to be written
   if (_console_buffer.str().length())
     mooseConsole();
-
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
-    delete *it;
 }
 
 void
@@ -69,20 +67,23 @@ OutputWarehouse::timestepSetup()
 }
 
 void
-OutputWarehouse::addOutput(Output * output)
+OutputWarehouse::addOutput(MooseSharedPointer<Output> & output)
 {
-  // Add the object to the warehouse storage, Checkpoint placed at end so they are called last
-  Checkpoint * cp = dynamic_cast<Checkpoint *>(output);
-  if (cp != NULL)
-    _object_ptrs.push_back(output);
-  else
-    _object_ptrs.insert(_object_ptrs.begin(), output);
+  _all_ptrs.push_back(output);
 
-  // Store the name and pointer in map
-  _object_map[output->name()] = output;
+  // Add the object to the warehouse storage, Checkpoint placed at end so they are called last
+  Checkpoint * cp = dynamic_cast<Checkpoint *>(output.get());
+  if (cp != NULL)
+    _object_ptrs.push_back(output.get());
+  else
+    _object_ptrs.insert(_object_ptrs.begin(), output.get());
+
+  // Store the name and pointer
+  _object_map[output->name()] = output.get();
+  _object_names.insert(output->name());
 
   // If the output object is a FileOutput then store the output filename
-  FileOutput * ptr = dynamic_cast<FileOutput *>(output);
+  FileOutput * ptr = dynamic_cast<FileOutput *>(output.get());
   if (ptr != NULL)
     addOutputFilename(ptr->filename());
 
@@ -104,6 +105,13 @@ const std::vector<Output *> &
 OutputWarehouse::getOutputs() const
 {
   return _object_ptrs;
+}
+
+
+const std::set<OutputName> &
+OutputWarehouse::getOutputNames() const
+{
+  return _object_names;
 }
 
 void
@@ -166,8 +174,8 @@ OutputWarehouse::forceOutput()
 void
 OutputWarehouse::mooseConsole()
 {
+  // Loop through all Console Output objects and pass the current output buffer
   std::vector<Console *> objects = getOutputs<Console>();
-
   if (!objects.empty())
   {
     for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)
@@ -232,26 +240,17 @@ OutputWarehouse::getSyncTimes()
 }
 
 void
-OutputWarehouse::updateMaterialOutput(const std::set<OutputName> & outputs, const std::set<AuxVariableName> & variables)
+OutputWarehouse::addInterfaceHideVariables(const std::string & output_name, const std::set<std::string> & variable_names)
 {
-  for (std::set<OutputName>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
-    _material_output_map[*it].insert(variables.begin(), variables.end());
+  _interface_map[output_name].insert(variable_names.begin(), variable_names.end());
 }
 
 void
-OutputWarehouse::setMaterialOutputVariables(const std::set<AuxVariableName> & variables)
+OutputWarehouse::buildInterfaceHideVariables(const std::string & output_name, std::set<std::string> & hide)
 {
-  _all_material_output_variables = variables;
-}
-
-void
-OutputWarehouse::buildMaterialOutputHideList(const std::string & name, std::vector<std::string> & hide)
-{
-  // Get the difference of all the material output variables and those for the given output name
-  if (_material_output_map.find(name) != _material_output_map.end())
-    std::set_difference(_all_material_output_variables.begin(), _all_material_output_variables.end(),
-                        _material_output_map[name].begin(), _material_output_map[name].end(),
-                        std::back_inserter(hide));
+  std::map<std::string, std::set<std::string> >::const_iterator it = _interface_map.find(output_name);
+  if (it != _interface_map.end())
+    hide = it->second;
 }
 
 void

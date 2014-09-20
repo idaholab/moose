@@ -62,6 +62,11 @@ public:
    */
   virtual void build();
 
+  /**
+   * Retreive vector of FEProblem pointers
+   */
+  std::vector<FEProblem *> & getProblems(){ return _fe_problems; }
+
 protected:
   struct ProjInfo
   {

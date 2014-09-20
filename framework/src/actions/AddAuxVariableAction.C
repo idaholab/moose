@@ -38,19 +38,19 @@ AddAuxVariableAction::AddAuxVariableAction(const std::string & name, InputParame
 MooseEnum
 AddAuxVariableAction::getAuxVariableFamilies()
 {
-  return MooseEnum("LAGRANGE, MONOMIAL, SCALAR", "LAGRANGE", true);
+  return MooseEnum("LAGRANGE MONOMIAL SCALAR", "LAGRANGE", true);
 }
 
 MooseEnum
 AddAuxVariableAction::getAuxVariableOrders()
 {
-  return MooseEnum("CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH, NINTH", "FIRST", true);
+  return MooseEnum("CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "FIRST", true);
 }
 
 void
 AddAuxVariableAction::act()
 {
-  if (_current_action == "add_aux_variable")
+  if (_current_task == "add_aux_variable")
   {
     // Name of variable being added
     std::string var_name = getShortName();
@@ -77,6 +77,6 @@ AddAuxVariableAction::act()
   }
 
   // Create the initial condition
-  if (_current_action == "add_ic")
+  if (_current_task == "add_ic")
     setInitialCondition();
 }

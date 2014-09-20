@@ -52,6 +52,11 @@ public:
    */
   virtual void act();
 
+  /**
+   * Builds the objects necessary for material property output
+   */
+  void buildMaterialOutputObjects(FEProblem * problem_ptr);
+
 private:
 
   /**
@@ -95,10 +100,13 @@ private:
   std::map<std::string, std::set<SubdomainID> > _block_variable_map;
 
   /// Set of variable names for boundary
-  std::set<AuxVariableName> _variable_names;
+  std::set<std::string> _variable_names;
 
   /// List of variables for the current Material object
-  std::set<AuxVariableName> _material_variable_names;
+  std::set<std::string> _material_variable_names;
+
+  /// Map of output names and list of variables associated with the output
+  std::map<OutputName, std::set<std::string> > _material_variable_names_map;
 
   /// Reference to the OutputWarehouse
   OutputWarehouse & _output_warehouse;

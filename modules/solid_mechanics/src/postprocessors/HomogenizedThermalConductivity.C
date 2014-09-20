@@ -12,6 +12,7 @@ InputParameters validParams<HomogenizedThermalConductivity>()
   params.addCoupledVar("temp_z", "solution in z");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction this pp acts in (0 for x, 1 for y, 2 for z)");
   params.addParam<Real>("scale_factor", 1, "Scale factor");
+  params.addParam<std::string>("diffusion_coefficient_name","thermal_conductivity", "Property name of the diffusivity (Default: thermal_conductivity)");
   return params;
 }
 
@@ -21,7 +22,7 @@ HomogenizedThermalConductivity::HomogenizedThermalConductivity(const std::string
    _grad_temp_y(_subproblem.mesh().dimension() > 1 ? coupledGradient("temp_y") : _grad_zero),
    _grad_temp_z(_subproblem.mesh().dimension() == 3 ? coupledGradient("temp_z") : _grad_zero),
    _component(getParam<unsigned int>("component")),
-   _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
+   _diffusion_coefficient(getMaterialProperty<Real>(getParam<std::string>("diffusion_coefficient_name"))),
    _volume(0),
    _integral_value(0),
    _scale(getParam<Real>("scale_factor"))
@@ -84,5 +85,5 @@ HomogenizedThermalConductivity::computeQpIntegral()
     value += _grad_temp_z[_qp](2);
   }
 
-  return _scale * _thermal_conductivity[_qp] * value;
+  return _scale * _diffusion_coefficient[_qp] * value;
 }

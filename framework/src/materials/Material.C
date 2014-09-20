@@ -29,7 +29,9 @@ InputParameters validParams<Material>()
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
 
-  params.addParam<std::vector<OutputName> >("outputs", std::vector<OutputName>(1, "none"), "Vector of output names were you would like to restrict the output of material data (empty outputs to all)");
+  // Outputs
+  params += validParams<OutputInterface>();
+  params.set<std::vector<OutputName> >("outputs") =  std::vector<OutputName>(1, "none");
   params.addParam<std::vector<std::string> >("output_properties", "List of material properties, from this material, to output (outputs must also be defined to an output type)");
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
@@ -57,6 +59,10 @@ Material::Material(const std::string & name, InputParameters parameters) :
     Restartable(name, parameters, "Materials"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
+
+    // The false flag disables the automatic call  buildOutputVariableHideList;
+    // for Material objects the hide lists are handled by MaterialOutputAction
+    OutputInterface(name, parameters, false),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _tid(parameters.get<THREAD_ID>("_tid")),

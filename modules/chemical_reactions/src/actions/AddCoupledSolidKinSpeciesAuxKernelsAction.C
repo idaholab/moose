@@ -2,7 +2,6 @@
 #include "MooseUtils.h"
 #include "FEProblem.h"
 #include "Factory.h"
-#include "MooseEnum.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -66,7 +65,7 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
 
     for (unsigned int k=0; k < tokens.size(); k++)
     {
-      Moose::out << tokens[k] << "\t";
+      _console << tokens[k] << "\t";
       std::vector<std::string> stos_vars;
       MooseUtils::tokenize(tokens[k], stos_vars, 1, "()");
       if (stos_vars.size() == 2)
@@ -98,7 +97,7 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
     params_kin.set<std::vector<VariableName> >("v") = rxn_vars;
     _problem->addAuxKernel("KineticDisPreConcAux", "aux_"+solid_kin_species[j], params_kin);
 
-    Moose::out << "aux_"+solid_kin_species[j] << "\n";
+    _console << "aux_"+solid_kin_species[j] << "\n";
     params_kin.print();
   }
 

@@ -289,7 +289,7 @@ public:
    * Sets the mapping between BoundaryID and normal vector
    * Is called by AddAllSideSetsByNormals
    */
-  void setBoundaryToNormalMap(AutoPtr<std::map<BoundaryID, RealVectorValue> > boundary_map);
+  void setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * boundary_map);
 
   /**
    * Sets the set of BoundaryIDs
@@ -319,6 +319,7 @@ public:
    * Returns the level of uniform refinement requested (zero if AMR is disabled).
    */
   unsigned int & uniformRefineLevel();
+  const unsigned int & uniformRefineLevel() const;
 #endif //LIBMESH_ENABLE_AMR
 
   /**
@@ -352,6 +353,16 @@ public:
    */
   void setPatchSize(const unsigned int patch_size);
   unsigned int getPatchSize();
+
+  /**
+   * Set the patch size update strategy
+   */
+  void setPatchUpdateStrategy(MooseEnum patch_update_strategy);
+
+  /**
+   * Get the current patch update strategy.
+   */
+  const MooseEnum & getPatchUpdateStrategy();
 
   /**
    * Implicit conversion operator from MooseMesh -> libMesh::MeshBase.
@@ -721,7 +732,7 @@ protected:
   std::set<Node *> _semilocal_node_list;
 
   /**
-   * A range for use with TBB.  We do this so that it doesn't have
+   * A range for use with threading.  We do this so that it doesn't have
    * to get rebuilt all the time (which takes time).
    */
   ConstElemRange * _active_local_elem_range;
@@ -783,6 +794,9 @@ protected:
 
   /// The number of nodes to consider in the NearestNode neighborhood.
   unsigned int _patch_size;
+
+  /// The patch update strategy
+  MooseEnum _patch_update_strategy;
 
   /// file_name iff this mesh was read from a file
   std::string _file_name;

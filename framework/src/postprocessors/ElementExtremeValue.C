@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<ElementExtremeValue>()
 {
   // Define the min/max enumeration
-  MooseEnum type_options("max=0, min=1", "max");
+  MooseEnum type_options("max=0 min=1", "max");
 
   // Define the parameters
   InputParameters params = validParams<ElementVariablePostprocessor>();

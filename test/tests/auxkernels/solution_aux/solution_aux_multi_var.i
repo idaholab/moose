@@ -56,7 +56,6 @@
   [./soln]
     type = SolutionUserObject
     mesh = cubesource_added.e
-    nodal_variables = 'source_nodal nodal_10'
     timestep = 2
   [../]
 []

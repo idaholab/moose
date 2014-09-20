@@ -25,7 +25,6 @@ GeneralUserObject::GeneralUserObject(const std::string & name, InputParameters p
     UserObject(name, parameters),
     MaterialPropertyInterface(name, parameters),
     TransientInterface(parameters, name, "general_user_objects"),
-    FunctionInterface(parameters),
     DependencyResolverInterface(),
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters)

@@ -29,7 +29,7 @@ InputParameters validParams<AdaptiveTransient>()
   std::vector<Real> sync_times(1);
   sync_times[0] = -std::numeric_limits<Real>::max();
 
-  MooseEnum schemes("implicit-euler, explicit-euler, crank-nicolson, bdf2", "implicit-euler");
+  MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2", "implicit-euler");
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
   params.addRequiredParam<Real>("dt", "The timestep size between solves");
@@ -255,7 +255,7 @@ AdaptiveTransient::takeStep(Real input_dt)
   // Compute TimestepBegin Postprocessors
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN);
 
-  Moose::out << "Solving time step ";
+  _console << "Solving time step ";
   {
     std::ostringstream out;
 
@@ -282,7 +282,7 @@ AdaptiveTransient::takeStep(Real input_dt)
         << std::showpoint
         << std::left
         << _dt;
-    Moose::out << out.str() << std::endl;
+    _console << out.str() << std::endl;
   }
 
   preSolve();
@@ -328,7 +328,7 @@ AdaptiveTransient::takeStep(Real input_dt)
       _problem.computeUserObjects();
     }
 
-    Moose::out << std::endl;
+    _console << std::endl;
   }
 }
 
@@ -465,9 +465,7 @@ AdaptiveTransient::computeConstrainedDT()
   }
 
   if (_diag.str().size() > 0)
-  {
-    Moose::out << _diag.str() << std::endl;
-  }
+    _console << _diag.str() << std::endl;
 
   return dt_cur;
 

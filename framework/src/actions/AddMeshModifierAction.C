@@ -39,16 +39,14 @@ AddMeshModifierAction::act()
 
   // Add a pointer to the mesh, this is required for this MeshModifier to inheret from the BlockRestrictable,
   // as is the case for SideSetAroundSubdomain
-  _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh;
+  _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh.get();
 
   // Create the modifier object and run it
-  MeshModifier *mesh_modifier = static_cast<MeshModifier *>(_factory.create(_type, getShortName(), _moose_object_pars));
-
+  MooseSharedPointer<MeshModifier> mesh_modifier = MooseSharedNamespace::static_pointer_cast<MeshModifier>(_factory.create_shared_ptr(_type, getShortName(), _moose_object_pars));
   mooseAssert(_mesh != NULL, "Mesh hasn't been created");
-  mooseAssert(mesh_modifier != NULL, "Mesh Modifier hasn't been created");
 
   // Run the modifier on the normal mesh
-  mesh_modifier->setMeshPointer(_mesh);
+  mesh_modifier->setMeshPointer(_mesh.get());
   mesh_modifier->modify();
 
   // We'll need to prepare again!
@@ -57,10 +55,10 @@ AddMeshModifierAction::act()
   // Run the modifier on the displaced mesh
   if (_displaced_mesh)
   {
-    mesh_modifier->setMeshPointer(_displaced_mesh);
+    mesh_modifier->setMeshPointer(_displaced_mesh.get());
     mesh_modifier->modify();
     _displaced_mesh->prepared(false);
   }
 
-  delete mesh_modifier;
+  // mesh_modifier is deleted here
 }

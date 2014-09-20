@@ -66,6 +66,8 @@ traceout*.txt
 *.vtk
 *.vtu
 .depend
+*.png
+*.tif
 
 # Allow .e files in gold directories (7 levels)
 !/gold/*.e
@@ -173,4 +175,3 @@ modules/*/doc/doxygen/html/*
 *.cpr
 *.cpa-*
 *.cpr-*
-

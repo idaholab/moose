@@ -6,9 +6,9 @@ template<>
 InputParameters validParams<PolycrystalReducedIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.addRequiredParam<unsigned int>("crys_num", "Number of order parameters");
+  params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<unsigned int>("grain_num", "Number of grains being represented by the order parameters");
-  params.addRequiredParam<unsigned int>("crys_index", "The index for the current order parameter");
+  params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
 
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
 
@@ -24,9 +24,9 @@ PolycrystalReducedIC::PolycrystalReducedIC(const std::string & name,
     InitialCondition(name, parameters),
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
-    _op_num(getParam<unsigned int>("crys_num")),
+    _op_num(getParam<unsigned int>("op_num")),
     _grain_num(getParam<unsigned int>("grain_num")),
-    _op_index(getParam<unsigned int>("crys_index")),
+    _op_index(getParam<unsigned int>("op_index")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _cody_test(getParam<bool>("cody_test")),
     _columnar_3D(getParam<bool>("columnar_3D"))
@@ -45,7 +45,7 @@ PolycrystalReducedIC::initialSetup()
   _range = _top_right - _bottom_left;
 
   if (_op_num > _grain_num)
-     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (crys_num) can't be larger than the number of grains (grain_num)");
+     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
   if (_cody_test)
     if (_op_num != 5 || _grain_num != 10)
@@ -108,74 +108,16 @@ PolycrystalReducedIC::initialSetup()
     _assigned_op[9] = 4.0;
   }
   else
-  {
-    for (unsigned int grain = 0; grain < _grain_num; grain++) //Assign grains to specific order parameters in a way that maximized the distance
-    {
-      std::vector<int> min_op_ind;
-      std::vector<Real> min_op_dist;
-      min_op_ind.resize(_op_num);
-      min_op_dist.resize(_op_num);
-      //Determine the distance to the closest center assigned to each order parameter
-      if (grain >= _op_num)
-      {
-        std::fill(min_op_dist.begin() , min_op_dist.end(), _range.size());
-        for (unsigned int i = 0; i < grain; i++)
-        {
-          Real dist = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], _centerpoints[i]);
-          if (min_op_dist[_assigned_op[i]] > dist)
-          {
-            min_op_dist[_assigned_op[i]] = dist;
-            min_op_ind[_assigned_op[i]] = i;
-          }
-        }
-      }
-
-      //Assign the current center point to the order parameter that is furthest away.
-      Real mx;
-      if (grain < _op_num)
-        _assigned_op[grain] = grain;
-      else
-      {
-        mx = 0.0;
-        unsigned int mx_ind = 1e6;
-        for (unsigned int i = 0; i < _op_num; i++) //Find index of max
-          if (mx < min_op_dist[i])
-          {
-            mx = min_op_dist[i];
-            mx_ind = i;
-          }
-
-        _assigned_op[grain] = mx_ind;
-      }
-      //Moose::out << "For grain " << grain << ", center point = " << _centerpoints[grain](0) << " " << _centerpoints[grain](1) << "\n";
-      //Moose::out << "Max index is " << _assigned_op[grain] << ", with a max distance of " << mx << "\n";
-    }
-  }
+    //Assign grains to specific order parameters in a way that maximizes the distance
+    _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
 }
 
 Real
 PolycrystalReducedIC::value(const Point & p)
 {
-  // Assumption: We are going to assume that all variables are periodic together
-  // _mesh.initPeriodicDistanceForVariable(_nl, _var.number());
-
-  Real min_distance = _top_right(0)*1e5;
   Real val = 0.0;
-  unsigned int min_index = _grain_num + 100;
-  //Loops through all of the grain centers and finds the center that is closest to the point p
-  for (unsigned int grain = 0; grain < _grain_num; grain++)
-  {
-    Real distance = _mesh.minPeriodicDistance(_var.number(), _centerpoints[grain], p);
 
-    if (min_distance > distance)
-    {
-      min_distance = distance;
-      min_index = grain;
-    }
-  }
-
-  if (min_index > _grain_num)
-    mooseError("ERROR in PolycrystalReducedIC: didn't find minimum values");
+  unsigned int min_index = PolycrystalICTools::assignPointToGrain(p, _centerpoints, _mesh, _var, _range.size());
 
   //If the current order parameter index (_op_index) is equal to the min_index, set the value to 1.0
   if (_assigned_op[min_index] == _op_index) //Make sure that the _op_index goes from 0 to _op_num-1

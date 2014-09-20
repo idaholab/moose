@@ -55,11 +55,12 @@
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
-    scale_factor = -0.6895 #MPa
+    scale_factor = -689.5 #MPa
   [../]
 []
 
-[JIntegral]
+[DomainIntegral]
+  integrals = JIntegral
   boundary = 1001
   crack_direction_method = CurvedCrackFront
   crack_end_direction_method = CrackDirectionVector
@@ -67,6 +68,7 @@
   crack_direction_vector_end_2 = '1.0 0.0 0.0'
   radius_inner = '12.5 25.0 37.5'
   radius_outer = '25.0 37.5 50.0'
+  intersecting_boundary = '1 2'
 []
 
 [SolidMechanics]
@@ -180,7 +182,7 @@
    l_max_its = 50
    nl_max_its = 20
    nl_abs_tol = 1e-5
-   nl_rel_tol = 1e-8
+   nl_rel_tol = 1e-11
    l_tol = 1e-2
 
    start_time = 0.0

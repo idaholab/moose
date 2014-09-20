@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<BndTestDirichletBC>()
 {
   InputParameters p = validParams<NodalBC>();
-  MooseEnum test("none, boundaryNames, boundaryIDs, hasBoundary, isBoundarySubset, hasBoundaryMaterialProperty_true, hasBoundaryMaterialProperty_false", "none", "Select a test");
+  MooseEnum test("none boundaryNames boundaryIDs hasBoundary isBoundarySubset hasBoundaryMaterialProperty_true hasBoundaryMaterialProperty_false", "none", "Select a test");
   p.addParam<MooseEnum>("test", test, "Select the desired test");
   p.addRequiredParam<Real>("value", "Value of the BC");
   return p;

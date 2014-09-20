@@ -16,8 +16,6 @@
 #define NODALL2ERROR_H
 
 #include "NodalVariablePostprocessor.h"
-#include "FunctionInterface.h"
-
 
 class NodalL2Error;
 
@@ -27,8 +25,7 @@ InputParameters validParams<NodalL2Error>();
 /**
  *
  */
-class NodalL2Error : public NodalVariablePostprocessor,
-    public FunctionInterface
+class NodalL2Error : public NodalVariablePostprocessor
 {
 public:
   NodalL2Error(const std::string & name, InputParameters parameters);

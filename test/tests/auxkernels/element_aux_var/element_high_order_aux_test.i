@@ -40,11 +40,13 @@
     value = 2
     operator = +
     coupled = u
+    execute_on = 'initial timestep'
   [../]
   [./constant]
     variable = one
     type = ConstantAux
     value = 1
+    execute_on = 'initial timestep'
   [../]
 []
 

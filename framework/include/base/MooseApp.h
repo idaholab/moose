@@ -189,6 +189,16 @@ public:
   void disableCheckUnusedFlag();
 
   /**
+   * Tell MOOSE to compute all aux kernels when any user objects are computed - deprecated behavior
+   */
+  bool & legacyUoAuxComputationDefault();
+
+  /**
+   * Tell MOOSE to compute all aux kernels when any user objects are computed - deprecated behavior
+   */
+  bool & legacyUoInitializationDefault();
+
+  /**
    * Retrieve the Executioner for this App.
    */
   Executioner * getExecutioner() { return _executioner; }
@@ -353,13 +363,22 @@ protected:
 
   /// Syntax of the input file
   Syntax _syntax;
+
+  /// An alternate OutputWarehouse object (required for CoupledExecutioner)
+  OutputWarehouse * _alternate_output_warehouse;
+
+  /// OutputWarehouse object for this App
+  OutputWarehouse * _output_warehouse;
+
   /// The Factory responsible for building Actions
   ActionFactory _action_factory;
+
   /// Where built actions are stored
   ActionWarehouse _action_warehouse;
 
   /// Parser for parsing the input file
   Parser _parser;
+
   /// Pointer to the executioner of this run (typically build by actions)
   Executioner * _executioner;
 
@@ -399,11 +418,11 @@ protected:
   /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;
 
-  /// OutputWarehouse object for this App
-  OutputWarehouse * _output_warehouse;
+  /// Legacy Uo Aux computation flag
+  bool _legacy_uo_aux_computation_default;
 
-  /// An alternate OutputWarehouse object (required for CoupledExecutioner)
-  OutputWarehouse * _alternate_output_warehouse;
+  /// Legacy Uo Initialization flag
+  bool _legacy_uo_initialization_default;
 
 private:
 

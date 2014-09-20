@@ -39,6 +39,7 @@ InputParameters validParams<SetupMeshAction>()
   params.addParam<std::vector<BoundaryName> >("ghosted_boundaries", "Boundaries to be ghosted if using Nemesis");
   params.addParam<std::vector<Real> >("ghosted_boundaries_inflation", "If you are using ghosted boundaries you will want to set this value to a vector of amounts to inflate the bounding boxes by.  ie if you are running a 3D problem you might set it to '0.2 0.1 0.4'");
   params.addParam<unsigned int>("patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
+
   params.addParam<unsigned int>("uniform_refine", 0, "Specify the level of uniform refinement applied to the initial mesh");
 
   // groups
@@ -128,23 +129,14 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
 void
 SetupMeshAction::act()
 {
-  if (_type == "MooseMesh")
-  {
-    mooseDeprecated();
-    Moose::err << "Warning: MooseMesh is gone - please use FileMesh instead!";
-    _type = "FileMesh";
-  }
-
   // Create the mesh object and tell it to build itself
-  _mesh = dynamic_cast<MooseMesh *>(_factory.create(_type, "mesh", _moose_object_pars));
+  _mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create_shared_ptr(_type, "mesh", _moose_object_pars));
   _mesh->init();
-
-  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
 
   if (isParamValid("displacements"))
   {
     // Create the displaced mesh
-    _displaced_mesh = dynamic_cast<MooseMesh *>(_factory.create(_type, "displaced_mesh", _moose_object_pars));
+    _displaced_mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create_shared_ptr(_type, "displaced_mesh", _moose_object_pars));
     _displaced_mesh->init();
 
     std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
@@ -152,8 +144,8 @@ SetupMeshAction::act()
       mooseError("Number of displacements and dimension of mesh MUST be the same!");
   }
 
-  setupMesh(_mesh);
+  setupMesh(_mesh.get());
 
   if (_displaced_mesh)
-    setupMesh(_displaced_mesh);
+    setupMesh(_displaced_mesh.get());
 }

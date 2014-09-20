@@ -66,8 +66,8 @@
     type = IterationAdaptiveDT
     dt = 0.9
     optimal_iterations = 10
-    force_step_every_function_point = true                                                                          |
-    max_function_change = 1e20                                                                                      |
+    force_step_every_function_point = true
+    max_function_change = 1e20
     timestep_limiting_function = knot
   [../]
 []

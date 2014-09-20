@@ -49,7 +49,7 @@ public:
    * Add a Transfers
    * @param transfer Transfer being added
    */
-  void addTransfer(Transfer * transfer);
+  void addTransfer(MooseSharedPointer<Transfer> transfer);
 
   /**
    * Whether or not this warehouse has a Transfer named transfer_name
@@ -73,6 +73,10 @@ public:
 protected:
   std::vector<Transfer *> _all_transfers;
   std::vector<MultiAppTransfer *> _multi_app_transfers;
+
+private:
+  /// Hold shared pointers for automatic cleanup
+  std::vector<MooseSharedPointer<Transfer> > _all_ptrs;
 };
 
 #endif // TRANSFERWAREHOUSE_H

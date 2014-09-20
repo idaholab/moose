@@ -8,7 +8,7 @@
   [./checked_pointer_param_test]
     type = 'RunException'
     input = 'checked_pointer_param_test.i'
-    expect_err = "_fe_problem is NULL."
+    expect_err = "quotes around a vector"
   [../]
 
   [./add_aux_variable_multiple_test]
@@ -82,6 +82,20 @@
     type = 'RunException'
     input = 'deprecated_block_test.i'
     expect_err = "Input file block '\S+' has been deprecated."
+  [../]
+
+  [./deprecated_param_default]
+    type = 'RunException'
+    input = 'deprecated_param_test.i'
+    expect_err = "The parameter \w+ is deprecated."
+    cli_args = '--error Kernels/nan/deprecated_default=1'
+  [../]
+
+  [./deprecated_param_no_default]
+    type = 'RunException'
+    input = 'deprecated_param_test.i'
+    expect_err = "The parameter \w+ is deprecated."
+    cli_args = '--error Kernels/nan/deprecated_no_default=1'
   [../]
 
   [./double_restrict_uo_test]
@@ -298,6 +312,12 @@
     # Right now we don't check for the PETSc converged reason after the solve
     # we only do this in the monitor callbacks, thus we don't get a PETSc
     # error on newer versions of PETSc.
+  [../]
+
+  [./nan_no_trap_fpe_test]
+    type = 'RunApp'
+    input = 'nan_test.i'
+    cli_args = '--no-trap-fpe'
   [../]
 
   [./nan_test_transient]

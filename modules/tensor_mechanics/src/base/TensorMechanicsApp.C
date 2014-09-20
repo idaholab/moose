@@ -9,10 +9,12 @@
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
+#include "FiniteStrainWeakPlaneShear.h"
 #include "FiniteStrainRatePlasticMaterial.h"
 #include "FiniteStrainWeakPlaneTensile.h"
-#include "FiniteStrainWeakPlaneShear.h"
+#include "FiniteStrainMohrCoulomb.h"
 #include "FiniteStrainCrystalPlasticity.h"
+#include "FiniteStrainMultiPlasticity.h"
 #include "RankTwoAux.h"
 #include "RealTensorValueAux.h"
 #include "RankFourAux.h"
@@ -21,6 +23,12 @@
 #include "CrystalPlasticitySlipSysAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
 #include "CosseratLinearElasticMaterial.h"
+
+#include "TensorMechanicsPlasticSimpleTester.h"
+#include "TensorMechanicsPlasticTensile.h"
+#include "TensorMechanicsPlasticMohrCoulomb.h"
+#include "TensorMechanicsPlasticWeakPlaneTensile.h"
+#include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -63,9 +71,17 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainPlasticMaterial);
   registerMaterial(FiniteStrainWeakPlaneTensile);
   registerMaterial(FiniteStrainWeakPlaneShear);
+  registerMaterial(FiniteStrainMohrCoulomb);
   registerMaterial(FiniteStrainRatePlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
+  registerMaterial(FiniteStrainMultiPlasticity);
   registerMaterial(CosseratLinearElasticMaterial);
+
+  registerUserObject(TensorMechanicsPlasticSimpleTester);
+  registerUserObject(TensorMechanicsPlasticTensile);
+  registerUserObject(TensorMechanicsPlasticMohrCoulomb);
+  registerUserObject(TensorMechanicsPlasticWeakPlaneTensile);
+  registerUserObject(TensorMechanicsPlasticWeakPlaneTensileN);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);

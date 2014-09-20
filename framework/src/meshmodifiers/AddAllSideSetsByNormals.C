@@ -54,7 +54,7 @@ AddAllSideSetsByNormals::modify()
   _mesh_boundary_ids = _mesh_ptr->meshBoundaryIds();
 
   // Create the map object that will be owned by MooseMesh
-  AutoPtr<std::map<BoundaryID, RealVectorValue> > boundary_map(new std::map<BoundaryID, RealVectorValue>());
+  std::map<BoundaryID, RealVectorValue> * boundary_map = new std::map<BoundaryID, RealVectorValue>;
 
   _visited.clear();
 

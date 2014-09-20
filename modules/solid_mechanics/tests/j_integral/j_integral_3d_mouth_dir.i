@@ -71,12 +71,14 @@
   [../]
 []
 
-[JIntegral]
+[DomainIntegral]
+  integrals = JIntegral
   boundary = 800
   crack_direction_method = CrackMouth
   crack_mouth_boundary = 900
   radius_inner = '4.0 5.5'
   radius_outer = '5.5 7.0'
+  output_variable = 'disp_x'
 []
 
 [SolidMechanics]
@@ -249,6 +251,13 @@
 
   [./lin_its]
     type = NumLinearIterations
+  [../]
+
+  [./disp_x_centercrack]
+    type = CrackFrontData
+    crack_front_definition = crackFrontDefinition
+    variable = disp_x
+    crack_front_node_index = 1
   [../]
 []
 

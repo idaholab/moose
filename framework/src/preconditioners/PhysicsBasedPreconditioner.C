@@ -17,6 +17,7 @@
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
 #include "MooseEnum.h"
+#include "ComputeJacobianBlocksThread.h"
 
 //libMesh Includes
 #include "libmesh/libmesh_common.h"
@@ -202,21 +203,33 @@ PhysicsBasedPreconditioner::setup()
 {
   const unsigned int num_systems = _systems.size();
 
+  std::vector<JacobianBlock *> blocks;
+
   //Loop over variables
   for (unsigned int system_var=0; system_var<num_systems; system_var++)
   {
     LinearImplicitSystem & u_system = *_systems[system_var];
 
-    //Compute the diagonal block... storing the result in the system matrix
-    _fe_problem.computeJacobianBlock(*u_system.matrix, u_system, system_var, system_var);
+    {
+      JacobianBlock * block = new JacobianBlock(u_system, *u_system.matrix, system_var, system_var);
+      blocks.push_back(block);
+    }
 
     for (unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
     {
       unsigned int coupled_var = _off_diag[system_var][diag];
       std::string coupled_name = _nl.sys().variable_name(coupled_var);
-      _fe_problem.computeJacobianBlock(*_off_diag_mats[system_var][diag], u_system, system_var, coupled_var);
+
+      JacobianBlock * block =  new JacobianBlock(u_system, *_off_diag_mats[system_var][diag], system_var, coupled_var);
+      blocks.push_back(block);
     }
   }
+
+  _fe_problem.computeJacobianBlocks(blocks);
+
+  // cleanup
+  for (unsigned int i=0; i<blocks.size(); i++)
+    delete blocks[i];
 }
 
 void

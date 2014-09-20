@@ -72,10 +72,6 @@
     variable = u
     function = exact_fn
   [../]
-
-  [./res]
-    type = Residual
-  [../]
 []
 
 [Executioner]
