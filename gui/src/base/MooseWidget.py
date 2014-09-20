@@ -102,7 +102,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
       self._debug(*msg)
       if error:
         self.peacockError(*msg)
-      return_value = None
+      return None
 
     elif (owner != None):
       msg = ['Invalid owner object name', str(owner), 'when searching for', handle]
@@ -144,6 +144,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
       self._debug(*msg)
       if error:
         self.peacockError(*msg)
+      return None
 
     # Print a debug message if more than one value exists
     elif isinstance(return_value, list):
@@ -151,6 +152,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
       self._debug(*msg)
       if error:
         self.peacockError(*msg)
+        return None
 
     # Return it already
     return return_value
