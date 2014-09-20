@@ -23,7 +23,6 @@ app  = QtGui.QApplication(sys.argv)
 main = QtGui.QMainWindow()
 _test = TestMooseWidget(main=main)
 _test.addObject(SubTestMooseWidget(), handle='sub_widget')
-_test.addObject(SubTestMooseWidget(), handle='another_sub_widget')
 _test.setProperty('debug', True)
 
 # Test call to 'object' fails when an invalid parent name is given
@@ -68,3 +67,26 @@ def addObjectDuplicateName():
   result = _test.testLastErrorMessage('The handle sub_widget already exists')
   fail_msg = 'No expected error'
   return (result, fail_msg)
+
+# Test duplicate objects
+def multipleObjects():
+  _test.addObject(SubTestMooseWidget(), handle='another_sub_widget')
+  objs = _test.object('sub_sub_widget')
+  result = all(obj.property('handle') == 'sub_sub_widget' for obj in objs)
+  fail_msg = 'Expected widgets not found'
+  del _test._objects['another_sub_widget'] # remove this so it doesn't mess up other tests
+  return (result, fail_msg)
+
+# Test error object
+def objectErrorFlag():
+  obj = _test.object('invalid_widget_name', error=True)
+  result = _test.testLastErrorMessage('The handle, invalid_widget_name, was not located in the')
+  fail_msg = 'No expected error'
+  return (result, fail_msg)
+
+# Test objects multiple objects with same name
+
+# TODO
+# -finish 'error' option for object method, add a test
+
+# -implement and test multiple return values for duplicate names
