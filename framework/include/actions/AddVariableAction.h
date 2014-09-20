@@ -59,6 +59,13 @@ public:
 protected:
 
   /**
+   * Adds a nonlinear variable to the system.
+   *
+   * @param var_name The name of the variable.
+   */
+  void addVariable(std::string & var_name);
+
+  /**
    * Create initial condition object
    *
    * If the user supplies a value for 'initial_condition' in the input file this

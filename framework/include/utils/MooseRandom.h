@@ -74,7 +74,7 @@ public:
   /**
    * Return next random number drawn from a standard distribution.
    */
-  inline double randNormal() {
+  static inline double randNormal() {
     return randNormal(0.0, 1.0);
   }
 

@@ -57,7 +57,7 @@ NonlinearEigen::init()
     _problem.advanceState();
 
     // free power iterations
-    Moose::out << std::endl << " Free power iteration starts"  << std::endl;
+    _console << std::endl << " Free power iteration starts"  << std::endl;
 
     Real initial_res;
     inversePowerIteration(_free_iter, _free_iter, _pfactor, false,
@@ -93,7 +93,7 @@ NonlinearEigen::execute()
 void
 NonlinearEigen::takeStep()
 {
-  Moose::out << " Nonlinear iteration starts"  << std::endl;
+  _console << " Nonlinear iteration starts"  << std::endl;
 
   // nonlinear solve
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::PRE_AUX);

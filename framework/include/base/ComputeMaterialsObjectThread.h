@@ -57,6 +57,9 @@ protected:
   std::vector<MaterialWarehouse> & _materials;
   std::vector<Assembly *> & _assembly;
   bool _need_internal_side_material;
+
+  const bool _has_stateful_props;
+  const bool _has_bnd_stateful_props;
 };
 
 #endif //COMPUTERESIDUALTHREAD_H

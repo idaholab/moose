@@ -12,7 +12,7 @@ Threads::spin_mutex slave_flux_mutex;
 template<>
 InputParameters validParams<GapHeatTransfer>()
 {
-  MooseEnum orders("FIRST, SECOND, THIRD, FOURTH", "FIRST");
+  MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");

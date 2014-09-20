@@ -14,7 +14,7 @@
 #  where
 #    q - heat transfer rate (w)
 #    h - heat transfer coefficient (w/m^2-K)
-    A - surface area (m^2)
+#    A - surface area (m^2)
 #    Tw - surface temperature (K)
 #    Tf - fluid temperature adjacent to the surface (K)
 # The heat transfer coefficient (h) is input as a variable called 'rate'

@@ -51,17 +51,6 @@ protected:
    */
   std::string filename();
 
-  //@{
-  /**
-   * Individual component output is not supported for GMVOutput
-   */
-  virtual void outputNodalVariables();
-  virtual void outputElementalVariables();
-  virtual void outputPostprocessors();
-  virtual void outputVectorPostprocessors();
-  virtual void outputScalarVariables();
-  //@}
-
 private:
 
   /// Flag for binary output

@@ -96,6 +96,8 @@ ComputeJacobianThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
   _sys.updateActiveKernels(_subdomain, _tid);
+  if (_sys.doingDG())
+    _sys.updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt(), _tid);
 
   std::set<MooseVariable *> needed_moose_vars;
 
@@ -189,6 +191,9 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 void
 ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
 {
+  if (_sys.getDGKernelWarehouse(_tid).active().empty())
+    return;
+
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor(side);
 

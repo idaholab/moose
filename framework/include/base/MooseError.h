@@ -26,17 +26,24 @@
 #define mooseError(msg)                                                             \
   do                                                                                \
   {                                                                                 \
-    Moose::err << "\n\n"                                                            \
-               << (Moose::__color_console ? RED : "")                               \
-               << "\n\n*** ERROR ***\n"                                             \
-               << msg                                                               \
-               << (Moose::__color_console ? DEFAULT : "")                           \
-               << "\n\n";                                                           \
-    if (libMesh::global_n_processors() == 1)                                        \
-      print_trace();                                                                \
-    libmesh_here();                                                                 \
-    MPI_Abort(libMesh::GLOBAL_COMM_WORLD,1);                                        \
-    exit(1);                                                                        \
+    std::ostringstream _error_oss_;                                                 \
+    _error_oss_ << "\n\n"                                                           \
+                << (Moose::_color_console ? RED : "")                               \
+                << "\n\n*** ERROR ***\n"                                            \
+                << msg                                                              \
+                << (Moose::_color_console ? DEFAULT : "")                           \
+                << "\n\n";                                                          \
+    if (Moose::_throw_on_error)                                                     \
+      throw std::runtime_error(_error_oss_.str());                                  \
+    else                                                                            \
+    {                                                                               \
+      Moose::err << _error_oss_.str() << std::flush;                                \
+      if (libMesh::global_n_processors() == 1)                                      \
+        print_trace();                                                              \
+      libmesh_here();                                                               \
+      MPI_Abort(libMesh::GLOBAL_COMM_WORLD,1);                                      \
+      exit(1);                                                                      \
+    }                                                                               \
   } while (0)
 
 #ifdef NDEBUG
@@ -48,12 +55,12 @@
     if (!(asserted))                                                                \
     {                                                                               \
       Moose::err                                                                    \
-        << (Moose::__color_console ? RED : "")                                      \
+        << (Moose::_color_console ? RED : "")                                       \
         << "\n\nAssertion `" #asserted "' failed\n"                                 \
         << msg                                                                      \
         << "\nat "                                                                  \
         << __FILE__ << ", line " << __LINE__                                        \
-        << (Moose::__color_console ? DEFAULT : "")                                  \
+        << (Moose::_color_console ? DEFAULT : "")                                   \
         << std::endl;                                                               \
      if (libMesh::global_n_processors() == 1)                                       \
        print_trace();                                                               \
@@ -67,28 +74,45 @@
 #define mooseWarning(msg)                                                           \
   do                                                                                \
   {                                                                                 \
-    Moose::out                                                                      \
-      << (Moose::__color_console ? YELLOW : "")                                     \
+    if (Moose::_warnings_are_errors)                                                \
+      mooseError(msg);                                                              \
+    else                                                                            \
+    {                                                                               \
+      std::ostringstream _warn_oss_;                                                \
+                                                                                    \
+      _warn_oss_                                                                    \
+        << (Moose::_color_console ? YELLOW : "")                                    \
       << "\n\n*** Warning ***\n"                                                    \
       << msg                                                                        \
       << "\nat " << __FILE__ << ", line " << __LINE__                               \
-      << (Moose::__color_console ? DEFAULT : "")                                    \
-      << "\n"                                                                       \
-      << std::endl;                                                                 \
+      << (Moose::_color_console ? DEFAULT : "")                                     \
+        << "\n\n";                                                                  \
+      if (Moose::_throw_on_error)                                                   \
+        throw std::runtime_error(_warn_oss_.str());                                 \
+      else                                                                          \
+        Moose::err << _warn_oss_.str() << std::flush;                               \
+    }                                                                               \
   } while (0)
 
 #define mooseDoOnce(do_this) do { static bool did_this_already = false; if (!did_this_already) { did_this_already = true; do_this; } } while (0)
 
-#define mooseDeprecated()                                                                              \
-    mooseDoOnce(                                                                                       \
-      Moose::out                                                                                       \
-      << (Moose::__color_console ? YELLOW : "")                                                        \
-      << "*** Warning, This code is deprecated, and likely to be removed in future library versions! " \
-      << __FILE__ << ", line " << __LINE__ << ", compiled "                                            \
-      << __DATE__ << " at " << __TIME__ << " ***"                                                      \
-      << (Moose::__color_console ? DEFAULT : "")                                                       \
-      << std::endl;                                                                                    \
-      )
+#define mooseDeprecated(msg)                                                                                \
+  do                                                                                                        \
+  {                                                                                                         \
+    if (Moose::_warnings_are_errors)                                                                        \
+      mooseError("\n\nDeprecated code:\n" << msg << '\n');                                                  \
+    else                                                                                                    \
+      mooseDoOnce(                                                                                          \
+        Moose::out                                                                                          \
+          << (Moose::_color_console ? YELLOW : "")                                                          \
+          << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
+          << msg << '\n'                                                                                    \
+          << __FILE__ << ", line " << __LINE__ << ", compiled "                                             \
+          << __DATE__ << " at " << __TIME__ << " ***"                                                       \
+          << (Moose::_color_console ? DEFAULT : "")                                                         \
+          << std::endl;                                                                                     \
+        );                                                                                                  \
+   } while (0)
 
 #define mooseCheckMPIErr(err) do { if (err != MPI_SUCCESS) { if (libMesh::global_n_processors() == 1) print_trace(); libmesh_here(); MPI_Abort(libMesh::GLOBAL_COMM_WORLD,1); exit(1); } } while (0)
 

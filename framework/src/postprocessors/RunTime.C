@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<RunTime>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  MooseEnum time_options("alive, active");
+  MooseEnum time_options("alive active");
   params.addRequiredParam<MooseEnum>("time_type", time_options, "Whether to output the total elapsed or just the active time");
   return params;
 }

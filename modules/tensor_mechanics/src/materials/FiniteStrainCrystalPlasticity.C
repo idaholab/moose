@@ -8,15 +8,21 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
 {
   InputParameters params = validParams<FiniteStrainMaterial>();
 
-  params.addRequiredParam<int >("nss", "Properties");
-  params.addRequiredParam<std::vector<Real> >("gprops", "Properties");
-  params.addRequiredParam<std::vector<Real> >("hprops", "Properties");
-  params.addRequiredParam<std::vector<Real> >("flowprops", "Properties");
+  params.addRequiredParam<int >("nss", "Number of slip systems");
+  params.addParam<std::vector<Real> >("gprops", "Initial values of slip system resistances");
+  params.addParam<std::vector<Real> >("hprops", "Hardening properties");
+  params.addParam<std::vector<Real> >("flowprops", "Parameters used in slip rate equations");
   params.addRequiredParam<std::string>("slip_sys_file_name", "Name of the file containing the slip system");
+  params.addParam<std::string>("slip_sys_res_prop_file_name", "", "Name of the file containing the initial values of slip system resistances");
+  params.addParam<std::string>("slip_sys_flow_prop_file_name", "", "Name of the file containing the values of slip rate equation parameters");
+  params.addParam<std::string>("slip_sys_hard_prop_file_name", "", "Name of the file containing the values of hardness evolution parameters");
   params.addParam<std::string>("euler_angle_file_name", "", "Name of the file containing the euler angles");
   params.addParam<Real>("rtol", 1e-8, "Constitutive stress residue tolerance");
-  params.addParam<Real>("gtol", 1e2, "Constitutive gss residue tolerance");
-  params.addParam<Real>("slip_incr_tol", 2e-2, "Constitutive gss residue tolerance");
+  params.addParam<Real>("gtol", 1e2, "Constitutive slip system resistance residual tolerance");
+  params.addParam<Real>("slip_incr_tol", 2e-2, "Maximum allowable slip in an increment");
+  params.addParam<unsigned int>("maxiter", 100 , "Maximum number of iterations for stress update");
+  params.addParam<unsigned int>("maxitergss", 100 , "Maximum number of iterations for slip system resistance update");
+  params.addParam<unsigned int>("num_slip_sys_flowrate_props", 2, "Number of flow rate properties for a slip system");//Used for reading flow rate parameters
 
   return params;
 }
@@ -29,29 +35,34 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
     _hprops(getParam<std::vector<Real> >("hprops")),
     _flowprops(getParam<std::vector<Real> >("flowprops")),
     _slip_sys_file_name(getParam<std::string>("slip_sys_file_name")),
+    _slip_sys_res_prop_file_name(getParam<std::string>("slip_sys_res_prop_file_name")),
+    _slip_sys_flow_prop_file_name(getParam<std::string>("slip_sys_flow_prop_file_name")),
+    _slip_sys_hard_prop_file_name(getParam<std::string>("slip_sys_hard_prop_file_name")),
     _euler_angle_file_name(getParam<std::string>("euler_angle_file_name")),
     _rtol(getParam<Real>("rtol")),
     _gtol(getParam<Real>("gtol")),
     _slip_incr_tol(getParam<Real>("slip_incr_tol")),
-    _fp(declareProperty<RankTwoTensor>("fp")),
-    _fp_old(declarePropertyOld<RankTwoTensor>("fp")),
-    _pk2(declareProperty<RankTwoTensor>("pk2")),
-    _pk2_old(declarePropertyOld<RankTwoTensor>("pk2")),
-    _lag_e(declareProperty<RankTwoTensor>("lage")),
-    _gss(declareProperty<std::vector<Real> >("gss")),
-    _gss_old(declarePropertyOld<std::vector<Real> >("gss")),
-    _acc_slip(declareProperty<Real>("acc_slip")),
-    _acc_slip_old(declarePropertyOld<Real>("acc_slip")),
-    _update_rot(declareProperty<RankTwoTensor>("update_rot")),
-    _crysrot(declareProperty<RankTwoTensor>("crysrot")),
+    _maxiter(getParam<unsigned int>("maxiter")),
+    _maxiterg(getParam<unsigned int>("maxitergss")),
+    _num_slip_sys_flowrate_props(getParam<unsigned int>("num_slip_sys_flowrate_props")),
+    _fp(declareProperty<RankTwoTensor>("fp")),//Plastic deformation gradient
+    _fp_old(declarePropertyOld<RankTwoTensor>("fp")),//Plastic deformation gradient of previous increment
+    _pk2(declareProperty<RankTwoTensor>("pk2")),//2nd Piola Kirchoff Stress
+    _pk2_old(declarePropertyOld<RankTwoTensor>("pk2")),//2nd Piola Kirchoff Stress of previous increment
+    _lag_e(declareProperty<RankTwoTensor>("lage")),//Elastic component of Lagrangian strain
+    _gss(declareProperty<std::vector<Real> >("gss")),//Slip system resistances
+    _gss_old(declarePropertyOld<std::vector<Real> >("gss")),//Slip system resistances of previous increment
+    _acc_slip(declareProperty<Real>("acc_slip")),//Accumulated slip
+    _acc_slip_old(declarePropertyOld<Real>("acc_slip")),//Accumulated alip of previous increment
+    _update_rot(declareProperty<RankTwoTensor>("update_rot")),//Rotation tensor considering material rotation and crystal orientation
+    _crysrot(declareProperty<RankTwoTensor>("crysrot")),//Rotation tensor considering crystal orientation
     _crysrot_old(declarePropertyOld<RankTwoTensor>("crysrot"))
 {
 }
 
 void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
 {
-  unsigned int ind;
-  int is, ie;
+
   RealTensorValue rot;
 
   _stress[_qp].zero();
@@ -61,57 +72,27 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
 
   _pk2[_qp].zero();
 
-  _gss[_qp].resize(_nss);
-  _gss_old[_qp].resize(_nss);
+
+  if (_slip_sys_res_prop_file_name.length()!=0)
+    readFileInitSlipSysRes();
+  else
+    getInitSlipSysRes();
+
+  if (_slip_sys_flow_prop_file_name.length()!=0)
+    readFileFlowRateParams();
+  else
+    getFlowRateParams();
+
+  if (_slip_sys_hard_prop_file_name.length()!=0)
+    readFileHardnessParams();
+  else
+    getHardnessParams();
+
 
   _acc_slip[_qp] = 0.0;
 
-  _a0.resize(_nss);
-  _xm.resize(_nss);
-
-  ind = 0;
-  while (true)
-  {
-    is = _gprops[ind++];
-    ie = _gprops[ind++];
-
-    for (int i = is; i <= ie; ++i)
-      _gss[_qp][i-1] = _gprops[ind];
-
-    if (ie == static_cast<int>(_nss))
-      break;
-
-    ind++;
-  }
-
-  _r = _hprops[0];
-  _h0 = _hprops[1];
-  _tau_init = _hprops[2];
-  _tau_sat = _hprops[3];
-
-  ind = 0;
-  while (true)
-  {
-    is = _flowprops[ind++];
-    ie = _flowprops[ind++];
-
-    for (int i = is; i <= ie; ++i)
-    {
-      _a0[i-1] = _flowprops[ind];
-      _xm[i-1] = _flowprops[ind+1];
-    }
-
-    if (ie == static_cast<int>(_nss))
-      break;
-
-    ind += 3;
-  }
-
   getEulerAngles();
   getEulerRotations();
-
-  _mo.resize(_nss*3);
-  _no.resize(_nss*3);
 
   getSlipSystems();
 
@@ -119,10 +100,15 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
     for (unsigned int j = 0; j < 3; ++j)
       rot(i,j) = _crysrot[_qp](i,j);
 
+
   _elasticity_tensor[_qp].rotate(rot);
   _update_rot[_qp] = _crysrot[_qp];
 }
 
+/*
+  Solves stress residual equation using NR.
+  Updates slip system resistances iteratively.
+ */
 void FiniteStrainCrystalPlasticity::computeQpStress()
 {
   unsigned int i;
@@ -131,10 +117,10 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
   Real gmax, gdiff, rnorm;
   RankFourTensor jac;
   Real slip_incr_max, fac;
-  int iter, iterg, maxiter, maxiterg;
+  unsigned int iter, iterg, maxiter, maxiterg;
 
-  maxiter = 100;
-  maxiterg = 100;
+  maxiter = _maxiter;
+  maxiterg = _maxiterg;
 
   _crysrot[_qp] = _crysrot_old[_qp];
 
@@ -147,11 +133,11 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
     _gss[_qp][i]=_gss_old[_qp][i];
 
   iterg=0;
-  while (gmax > _gtol && iterg < maxiterg)
+  while (gmax > _gtol && iterg < maxiterg)//Check for slip system resistance update tolerance
   {
     iter = 0;
     pk2 = _pk2_old[_qp];
-    calc_resid_jacob(pk2, sig, fp_old_inv, fp_inv, slip_incr, tau, resid, jac);
+    calc_resid_jacob(pk2, sig, fp_old_inv, fp_inv, slip_incr, tau, resid, jac);//Calculate stress residual
 
     slip_incr_max = 0.0;
 
@@ -160,7 +146,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
         slip_incr_max = std::abs(slip_incr[i]);
 
     fac = 1.0;
-    if (slip_incr_max > _slip_incr_tol)
+    if (slip_incr_max > _slip_incr_tol)//Check for allowable slip increment
     {
       fac = 0.1;
       _console << "slip_incr=" << _current_elem->id() << ' ' << _qp << ' ' << slip_incr_max << '\n';
@@ -170,11 +156,11 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
     rnorm = resid.L2norm();
     // _console << "rnorm=" << iter << ' ' << rnorm << '\n';
 
-    while (rnorm > _rtol && iter <  maxiter)
+    while (rnorm > _rtol && iter <  maxiter)//Check for stress residual tolerance
     {
-      dpk2 = jac.invSymm() * resid;
-      pk2 = pk2 - dpk2 * fac;
-      calc_resid_jacob(pk2, sig, fp_old_inv, fp_inv, slip_incr, tau, resid, jac);
+      dpk2 = jac.invSymm() * resid;//Calculate stress increment
+      pk2 = pk2 - dpk2 * fac;//Update stress
+      calc_resid_jacob(pk2, sig, fp_old_inv, fp_inv, slip_incr, tau, resid, jac);//Calculate stress residual
       slip_incr_max=0.0;
 
       for (i = 0; i < _nss; ++i)
@@ -201,12 +187,12 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
     for (i = 0; i < _nss; ++i)
       gss_prev[i] = _gss[_qp][i];
 
-    updateGss(slip_incr);
+    update_slip_system_resistance(slip_incr);//Update slip system resistance
 
     gmax = 0.0;
     for (i = 0; i < _nss; ++i)
     {
-      gdiff = std::abs(gss_prev[i] - _gss[_qp][i]);
+      gdiff = std::abs(gss_prev[i] - _gss[_qp][i]);//Calculate increment size
 
       if (gdiff > gmax)
         gmax = gdiff;
@@ -225,10 +211,15 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
   _pk2[_qp] = pk2;
   _stress[_qp] = sig;
 
-  rot = getMatRot(_dfgrd[_qp]);
+
+  rot = get_current_rotation(_dfgrd[_qp]);//Calculate material rotation
+
   _update_rot[_qp] = rot * _crysrot[_qp];
 }
 
+/*
+  Calculate crystal rotation tensor from Euler Angles
+ */
 void
 FiniteStrainCrystalPlasticity::getEulerRotations()
 {
@@ -263,90 +254,97 @@ FiniteStrainCrystalPlasticity::getEulerRotations()
   _crysrot_old[_qp] = _crysrot[_qp];
 }
 
+/*
+  Read slip systems from file
+ */
 void
 FiniteStrainCrystalPlasticity::getSlipSystems()
 {
-  unsigned int i, j, k;
-  std::vector<Real> sd(3*_nss), sn(3*_nss);
+
   Real vec[3];
   std::ifstream fileslipsys;
+
+  _mo.resize(_nss*3);
+  _no.resize(_nss*3);
 
   fileslipsys.open(_slip_sys_file_name.c_str());
 
   if (!fileslipsys)
     mooseError("Can't open slip system input file");
 
-  for (i = 0; i < _nss; ++i)
+  // Read the slip normal
+  for (unsigned int i = 0; i < _nss; ++i)
   {
-    for (j = 0; j < 3; ++j)
+    for (unsigned int j = 0; j < 3; ++j)
       fileslipsys >> vec[j];
 
+    //Normalize the vectors
     Real mag;
     mag = std::pow(vec[0], 2.0) + std::pow(vec[1], 2.0) + std::pow(vec[2], 2.0);
     mag = std::pow(mag, 0.5);
 
-    for (j = 0; j < 3; ++j)
-      sn[i*3+j] = vec[j]/mag;
+    for (unsigned j = 0; j < 3; ++j)
+      _no[i*3+j] = vec[j]/mag;
   }
 
-  for (i = 0; i < _nss; ++i)
+  //Read the slip direction
+  for (unsigned int i = 0; i < _nss; ++i)
   {
-    for (j = 0; j < 3; ++j)
+    for (unsigned int j = 0; j < 3; ++j)
       fileslipsys >> vec[j];
 
+    //Normalize the vectors
     Real mag;
     mag = std::pow(vec[0], 2.0) + std::pow(vec[1], 2.0) + std::pow(vec[2], 2.0);
     mag = std::pow(mag, 0.5);
 
-    for (j = 0; j < 3; ++j)
-      sd[i*3+j] = vec[j] / mag;
+    for (unsigned int j = 0; j < 3; ++j)
+      _mo[i*3+j] = vec[j] / mag;//Slip direction
   }
 
   fileslipsys.close();
 
-  for (i = 0; i < _nss; ++i)
-  {
-    for (j = 0; j < 3; j++)
-    {
-      _mo[i*3+j] = 0.0;
-      for (k = 0; k < 3; ++k)
-        _mo[i*3+j] = _mo[i*3+j] + _crysrot[_qp](j,k) * sd[i*3+k];
-    }
-
-    for (j = 0; j < 3; j++)
-    {
-      _no[i*3+j] = 0.0;
-      for (k = 0; k < 3; k++)
-        _no[i*3+j] = _no[i*3+j] + _crysrot[_qp](j,k) * sn[i*3+k];
-    }
-  }
 }
 
+//Update slip system resistance. Overide to incorporate new slip system resistance laws
+void
+FiniteStrainCrystalPlasticity::update_slip_system_resistance(std::vector<Real> & slip_incr)
+{
+
+  updateGss(slip_incr);
+
+}
+
+/*
+Old function to update slip system resistances.
+Kept to avoid code break at computeQpstress
+*/
 void
 FiniteStrainCrystalPlasticity::updateGss(std::vector<Real> & slip_incr)
 {
-  unsigned int i, j;
+
   std::vector<Real> hb(_nss);
   Real qab,val;
 
   Real a = _hprops[4]; //Kalidindi
 
   _acc_slip[_qp]=_acc_slip_old[_qp];
-  for (i=0; i < _nss; i++)
+
+  for (unsigned int i=0; i < _nss; i++)
     _acc_slip[_qp]=_acc_slip[_qp]+fabs(slip_incr[i]);
 
   val = std::cosh(_h0 * _acc_slip[_qp] / (_tau_sat - _tau_init)); //Karthik
   val = _h0 * std::pow(1.0/val,2.0); //Kalidindi
 
-  for (i = 0; i < _nss; i++)
+  for (unsigned int i = 0; i < _nss; i++)
     // hb[i]=val;
     hb[i] = _h0 * std::pow(1.0 - _gss[_qp][i] / _tau_sat, a);
 
-  for (i=0; i < _nss; i++)
+  for (unsigned int i=0; i < _nss; i++)
   {
     _gss[_qp][i] = _gss_old[_qp][i];
 
-    for (j = 0; j < _nss; j++)
+    for (unsigned int j = 0; j < _nss; j++)
     {
       unsigned int iplane, jplane;
       iplane = i/3;
@@ -362,11 +360,12 @@ FiniteStrainCrystalPlasticity::updateGss(std::vector<Real> & slip_incr)
   }
 }
 
+
+//Calculates stress residual equation and jacobian
 void
 FiniteStrainCrystalPlasticity::calc_resid_jacob(const RankTwoTensor & pk2, RankTwoTensor & sig, const RankTwoTensor & fp_old_inv, RankTwoTensor & fp_inv,
                                                 std::vector<Real> & slip_incr, std::vector<Real> & tau, RankTwoTensor & resid, RankFourTensor & jac)
 {
-  unsigned int i, j, k;
   RankTwoTensor fe, ce, ee, iden, ce_pk2;
   RankTwoTensor eqv_slip_incr, pk2_new;
   std::vector<RankTwoTensor> s0(_nss), dtaudpk2(_nss), dfpinvdslip(_nss);
@@ -389,11 +388,35 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(const RankTwoTensor & pk2, RankT
   ce_pk2 = ce_pk2 / fe.det();
   // ce_pk2=(*pk2);//Approximation
 
-  for (i = 0; i < _nss; ++i)
+  std::vector<Real> mo,no;
+
+  mo.resize(3*_nss);
+  no.resize(3*_nss);
+
+  //Update slip direction and normal with crystal orientation
+  for (unsigned int i = 0; i < _nss; ++i)
   {
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
-        s0[i](j,k) = _mo[i*3+j] * _no[i*3+k];
+    for (unsigned int j = 0; j < 3; j++)
+    {
+      mo[i*3+j] = 0.0;
+      for (unsigned int k = 0; k < 3; ++k)
+        mo[i*3+j] = mo[i*3+j] + _crysrot[_qp](j,k) * _mo[i*3+k];
+    }
+
+    for (unsigned int j = 0; j < 3; j++)
+    {
+      no[i*3+j] = 0.0;
+      for (unsigned int k = 0; k < 3; k++)
+        no[i*3+j] = no[i*3+j] + _crysrot[_qp](j,k) * _no[i*3+k];
+    }
+  }
+
+  //Calculate Schmid tensor and resolved shear stresses
+  for (unsigned int i = 0; i < _nss; ++i)
+  {
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int k = 0; k < 3; ++k)
+        s0[i](j,k) = mo[i*3+j] * no[i*3+k];
 
     tau[i] = ce_pk2.doubleContraction(s0[i]);
   }
@@ -401,7 +424,7 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(const RankTwoTensor & pk2, RankT
   getSlipIncrements(tau, slip_incr, dslipdtau); //Calculate dslip,dslipdtau
 
   eqv_slip_incr.zero();
-  for (i = 0; i < _nss; ++i)
+  for (unsigned int i = 0; i < _nss; ++i)
     eqv_slip_incr += s0[i] * slip_incr[i];
 
   eqv_slip_incr = iden - eqv_slip_incr;
@@ -421,29 +444,29 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(const RankTwoTensor & pk2, RankT
   /*End Calculate Residual*/
   /*Calculate Jacobian*/
 
-  for (i = 0; i < _nss; ++i)
+  for (unsigned int i = 0; i < _nss; ++i)
   {
     dtaudpk2[i] = s0[i];
     dfpinvdslip[i] = -fp_old_inv * s0[i];
   }
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int k = 0; k < 3; ++k)
         dfedfpinv(i,j,k,j) = _dfgrd[_qp](i,k);
 
   deedfe.zero();
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int k = 0; k < 3; ++k)
       {
         deedfe(i,j,k,i) = deedfe(i,j,k,i) + fe(k,j) * 0.5;
         deedfe(i,j,k,j) = deedfe(i,j,k,j) + fe(k,i) * 0.5;
       }
 
   dfpinvdpk2.zero();
-  for (i = 0; i < _nss; ++i)
+  for (unsigned int i = 0; i < _nss; ++i)
   {
     temp2 = dfpinvdslip[i] * dslipdtau[i];
     temp4 = outerProduct(temp2, dtaudpk2[i]);
@@ -452,8 +475,8 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(const RankTwoTensor & pk2, RankT
 
   jac = _elasticity_tensor[_qp] * deedfe * dfedfpinv * dfpinvdpk2;
 
-  for (i = 0; i < 3 ; ++i)
-    for (j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < 3 ; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
       idenFour(i,j,i,j) = 1.0;
 
   jac = idenFour - jac;
@@ -464,6 +487,9 @@ FiniteStrainCrystalPlasticity::calc_resid_jacob(const RankTwoTensor & pk2, RankT
   sig = sig / fe.det();
 }
 
+/*
+Calculate slip increment. Override to modify.
+ */
 void
 FiniteStrainCrystalPlasticity::getSlipIncrements(const std::vector<Real> & tau, std::vector<Real> & slip_incr, std::vector<Real> & dslipdtau)
 {
@@ -476,22 +502,36 @@ FiniteStrainCrystalPlasticity::getSlipIncrements(const std::vector<Real> & tau, 
 
 RankFourTensor FiniteStrainCrystalPlasticity::outerProduct(const RankTwoTensor & a, const RankTwoTensor & b)
 {
-  unsigned int i, j, k, l;
+
   RankFourTensor result;
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
-        for (l = 0; l < 3; ++l)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int k = 0; k < 3; ++k)
+        for (unsigned int l = 0; l < 3; ++l)
           result(i,j,k,l) = a(i,j) * b(k,l);
 
   return result;
 }
 
+/*
+Calls getMatRot to perform RU factorization of a tensor.
+ */
+RankTwoTensor
+FiniteStrainCrystalPlasticity::get_current_rotation(const RankTwoTensor & a)
+{
+
+  return getMatRot(a);
+
+}
+
+/*
+Performs RU factorization of a tensor
+ */
 RankTwoTensor
 FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
 {
-  unsigned int i, j;
+
   RankTwoTensor rot;
   RankTwoTensor c, diag, evec;
   double cmat[3][3], w[3], work[10];
@@ -501,19 +541,22 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
 
   c = a.transpose() * a;
 
-  for (int i = 0; i < 3; ++i)
-    for (int j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
       cmat[i][j] = c(i,j);
 
   FORTRAN_CALL(dsyev)("V","U",&nd,cmat,&nd,&w,&work,&lwork,&info);
 
+  if (info != 0)
+    mooseError("DSYEV function call in getMatRot function failed");
+
   diag.zero();
 
-  for (i = 0; i < 3; ++i)
+  for (unsigned int i = 0; i < 3; ++i)
     diag(i,i) = std::pow(w[i], 0.5);
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
       evec(i,j) = cmat[i][j];
 
   rot = a * ((evec.transpose() * diag * evec).inverse());
@@ -559,38 +602,40 @@ FiniteStrainCrystalPlasticity::getEulerAngles()
   }
 }
 
+/*
+  Calculates tangent moduli which is used for global solve
+ */
 void
 FiniteStrainCrystalPlasticity::computeQpElasticityTensor()
 {
-  // Fill in the matrix stiffness material property
-  _elasticity_tensor[_qp] = _Cijkl;
-
-  unsigned int i, j, k, l;
   ElasticityTensorR4 tan_mod;
   RankTwoTensor fe, fp_inv, pk2fet, fepk2;
   RankFourTensor dfedf, deedfe, dsigdpk2dfe, temp;
 
+  // Fill in the matrix stiffness material property
+  _elasticity_tensor[_qp] = _Cijkl;
+
   fp_inv = _fp[_qp].inverse();
   fe = _dfgrd[_qp] * fp_inv;
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (l = 0; l < 3; ++l)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int l = 0; l < 3; ++l)
         dfedf(i,j,i,l) = fp_inv(l,j);
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int k = 0; k < 3; ++k)
       {
         deedfe(i,j,k,i) = deedfe(i,j,k,i) + fe(k,j) * 0.5;
         deedfe(i,j,k,j) = deedfe(i,j,k,j) + fe(k,i) * 0.5;
       }
 
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
-        for (l = 0; l < 3; ++l)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int k = 0; k < 3; ++k)
+        for (unsigned int l = 0; l < 3; ++l)
           temp(i,j,k,l) = fe(i,k) * fe(j,l);
 
   dsigdpk2dfe = temp * _elasticity_tensor[_qp] * deedfe;
@@ -598,9 +643,9 @@ FiniteStrainCrystalPlasticity::computeQpElasticityTensor()
   pk2fet = _pk2[_qp] * fe.transpose();
   fepk2 = fe * _pk2[_qp];
 
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (l = 0; l < 3; ++l)
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      for (unsigned int l = 0; l < 3; ++l)
       {
         tan_mod(i,j,i,l) = tan_mod(i,j,i,l) + pk2fet(l,j);
         tan_mod(i,j,j,l) = tan_mod(i,j,j,l) + fepk2(i,l);
@@ -613,3 +658,163 @@ FiniteStrainCrystalPlasticity::computeQpElasticityTensor()
 
   _Jacobian_mult[_qp] = tan_mod;
 }
+
+//Read initial slip system resistances  from .txt file. See test.
+void
+FiniteStrainCrystalPlasticity::readFileInitSlipSysRes()
+{
+
+  _gss[_qp].resize(_nss);
+  _gss_old[_qp].resize(_nss);
+
+  std::ifstream file;
+  file.open(_slip_sys_res_prop_file_name.c_str());
+
+  if (!file)
+    mooseError("Can't open slip system resistance input file");
+
+
+  for (unsigned int i = 0; i < _nss; ++i)
+      file >> _gss[_qp][i];
+
+  file.close();
+}
+
+//Read initial slip system resistances  from .i file
+void
+FiniteStrainCrystalPlasticity::getInitSlipSysRes()
+{
+
+  if (_gprops.size()==0)
+    mooseError("Error in reading slip system resistance properties: Specify input in .i file or a slip_sys_res_prop_file_name");
+
+  _gss[_qp].resize(_nss);
+  _gss_old[_qp].resize(_nss);
+
+  unsigned int ind;
+
+
+  ind = 0;
+  while (true)
+  {
+
+    Real vs,ve;
+    unsigned int is, ie;
+
+    vs=_gprops[ind++];
+    ve=_gprops[ind++];
+
+    if (vs != floor(vs) || ve != floor(ve))
+      mooseError("Error in reading slip system resistances: Values specifying start and end number of slip system groups should be integer\n");
+
+    is = static_cast<unsigned int>(vs);
+    ie = static_cast<unsigned int>(ve);
+
+    for (unsigned int i = is; i <= ie; ++i)
+      _gss[_qp][i-1] = _gprops[ind];
+
+    if (ie == _nss)
+      break;
+
+    ind++;
+  }
+
+}
+
+//Read flow rate parameters from .txt file. See test.
+void
+FiniteStrainCrystalPlasticity::readFileFlowRateParams()
+{
+
+  _a0.resize(_nss);
+  _xm.resize(_nss);
+
+  std::ifstream file;
+  file.open(_slip_sys_flow_prop_file_name.c_str());
+
+  if (!file)
+    mooseError("Can't open slip system flow prop input file");
+
+  std::vector<Real> vec;
+  vec.resize(_num_slip_sys_flowrate_props);
+
+  for (unsigned int i = 0; i < _nss; ++i)
+    {
+      for (unsigned int j = 0; j < _num_slip_sys_flowrate_props; ++j)
+       file >> vec[j];
+
+      _a0[i]=vec[0];
+      _xm[i]=vec[1];
+    }
+
+
+  file.close();
+
+}
+
+//Read flow rate parameters from .i file
+void
+FiniteStrainCrystalPlasticity::getFlowRateParams()
+{
+
+  if (_flowprops.size()==0)
+    mooseError("Error in reading flow rate  properties: Specify input in .i file or a slip_sys_flow_prop_file_name");
+
+
+  unsigned int ind;
+
+
+  _a0.resize(_nss);
+  _xm.resize(_nss);
+
+  ind = 0;
+  while (true)
+  {
+    Real vs,ve;
+    unsigned int is, ie;
+
+    vs = _flowprops[ind++];
+    ve = _flowprops[ind++];
+
+    if (vs != floor(vs) || ve != floor(ve))
+      mooseError("Error in reading flow props: Values specifying start and end number of slip system groups should be integer\n");
+
+    is = static_cast<unsigned int>(vs);
+    ie = static_cast<unsigned int>(ve);
+
+    for (unsigned int i = is; i <= ie; ++i)
+    {
+      _a0[i-1] = _flowprops[ind];
+      _xm[i-1] = _flowprops[ind+1];
+    }
+
+    if (ie == _nss)
+      break;
+
+    ind += _num_slip_sys_flowrate_props;
+  }
+
+}
+
+//Read hardness parameters from .txt file
+void
+FiniteStrainCrystalPlasticity::readFileHardnessParams()
+{
+
+}
+
+//Read harness parameters from .i file
+void
+FiniteStrainCrystalPlasticity::getHardnessParams()
+{
+
+  if (_hprops.size()==0)
+    mooseError("Error in reading hardness properties: Specify input in .i file or a slip_sys_hard_prop_file_name");
+
+  _r = _hprops[0];
+  _h0 = _hprops[1];
+  _tau_init = _hprops[2];
+  _tau_sat = _hprops[3];
+
+}
+

@@ -35,7 +35,7 @@ ExampleApp::registerApps()
 
 
 void
-ExampleApp::registerObjects(Factory & factory)
+ExampleApp::registerObjects(Factory & /*factory*/)
 {
 }
 

@@ -7,10 +7,26 @@
     valgrind = 'HEAVY'
   [../]
 
+  [./multi_normal_test]
+    type = 'Exodiff'
+    input = 'multismoothcircleIC_normal_test.i'
+    exodiff = 'multismoothcircleIC_normal_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
   [./lattice_test]
     type = 'Exodiff'
     input = 'latticesmoothcircleIC_test.i'
     exodiff = 'latticesmoothcircleIC_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./lattice_normal_test]
+    type = 'Exodiff'
+    input = 'latticesmoothcircleIC_normal_test.i'
+    exodiff = 'latticesmoothcircleIC_normal_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
   [../]

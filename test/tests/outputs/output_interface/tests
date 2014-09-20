@@ -1,0 +1,12 @@
+[Tests]
+  [./indicators]
+    type = 'Exodiff'
+    input = 'indicator.i'
+    exodiff = 'indicator_indicators.e indicator_no_indicators.e'
+  [../]
+  [./markers]
+    type = 'Exodiff'
+    input = 'marker.i'
+    exodiff = 'marker_markers.e marker_no_markers.e'
+  [../]
+[]

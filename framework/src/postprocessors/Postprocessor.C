@@ -13,25 +13,21 @@
 /****************************************************************/
 
 #include "Postprocessor.h"
-#include "SubProblem.h"
-#include "Conversion.h"
 #include "UserObject.h"
-
-// libMesh includes
 
 template<>
 InputParameters validParams<Postprocessor>()
 {
   InputParameters params = validParams<UserObject>();
+  params += validParams<OutputInterface>();
 
   params.addParamNamesToGroup("outputs", "Advanced");
-  params.addParam<std::vector<OutputName> >("outputs", "Vector of output names were you would like to restrict the output of this postprocessor (empty outputs to all)");
   params.registerBase("Postprocessor");
   return params;
 }
 
 Postprocessor::Postprocessor(const std::string & name, InputParameters parameters) :
-    _pp_name(name),
-    _outputs(parameters.get<std::vector<OutputName> >("outputs"))
+    OutputInterface(name, parameters),
+    _pp_name(name)
 {
 }

@@ -159,6 +159,8 @@ NearestNodeLocator::findNodes()
 
   Threads::parallel_reduce(*_slave_node_range, nnt);
 
+  _max_patch_percentage = nnt._max_patch_percentage;
+
   _nearest_node_info = nnt._nearest_node_info;
 
   Moose::perf_log.pop("NearestNodeLocator::findNodes()","Solve");

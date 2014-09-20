@@ -203,6 +203,11 @@ public:
 
 protected:
   /**
+   * _must_ fill in _positions with the positions of the sub-aps
+   */
+  virtual void fillPositions();
+
+  /**
    * Helper function for creating an App instance.
    *
    * @param i The local app number to create.

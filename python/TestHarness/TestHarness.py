@@ -58,6 +58,7 @@ class TestHarness:
     self.moose_dir = moose_dir
     self.run_tests_dir = os.path.abspath('.')
     self.code = '2d2d6769726c2d6d6f6465'
+    self.error_code = 0x0
     # Assume libmesh is a peer directory to MOOSE if not defined
     if os.environ.has_key("LIBMESH_DIR"):
       self.libmesh_dir = os.environ['LIBMESH_DIR']
@@ -100,11 +101,11 @@ class TestHarness:
   Recursively walks the current tree looking for tests to run
   Error codes:
   0x0  - Success
-  0x0x - Parser error
-  0x1x - TestHarness error
+  0x0* - Parser error
+  0x1* - TestHarness error
   """
   def findAndRunTests(self):
-    error_code = 0x0
+    self.error_code = 0x0
     self.preRun()
     self.start_time = clock()
 
@@ -115,6 +116,11 @@ class TestHarness:
     else:
       self.options.processingPBS = False
       for dirpath, dirnames, filenames in os.walk(os.getcwd(), followlinks=True):
+        # Prune submdule paths when searching for tests
+        if '.git' in filenames:
+          dirnames[:] = []
+
+        # Look for test directories that aren't in contrib folders
         if (self.test_match.search(dirpath) and "contrib" not in os.path.relpath(dirpath, os.getcwd())):
           for file in filenames:
             # set cluster_handle to be None initially (happens for each test)
@@ -135,7 +141,7 @@ class TestHarness:
               parser = Parser(self.factory, warehouse)
 
               # Parse it
-              error_code = error_code | parser.parse(file)
+              self.error_code = self.error_code | parser.parse(file)
 
               # Retrieve the tests from the warehouse
               testers = warehouse.getAllObjects()
@@ -155,6 +161,8 @@ class TestHarness:
                 # When running in valgrind mode, we end up with a ton of output for each failed
                 # test.  Therefore, we limit the number of fails...
                 if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
+                  (should_run, reason) = (False, 'Max Fails Exceeded')
+                elif self.num_failed > self.options.max_fails:
                   (should_run, reason) = (False, 'Max Fails Exceeded')
                 else:
                   (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
@@ -193,9 +201,9 @@ class TestHarness:
     self.cleanup()
 
     if self.num_failed:
-      error_code = error_code | 0x10
+      self.error_code = self.error_code | 0x10
 
-    sys.exit(error_code)
+    sys.exit(self.error_code)
 
   def prunePath(self, filename):
     test_dir = os.path.abspath(os.path.dirname(filename))
@@ -279,6 +287,9 @@ class TestHarness:
 
     if self.options.pbs and self.options.processingPBS == False:
       (reason, output) = self.buildPBSBatch(output, tester)
+    elif self.options.dry_run:
+      reason = 'DRY_RUN'
+      output += '\n'.join(tester.processResultsCommand(self.moose_dir, self.options))
     else:
       (reason, output) = tester.processResults(self.moose_dir, retcode, self.options, output)
 
@@ -299,6 +310,8 @@ class TestHarness:
         result = 'LAUNCHED'
       else:
         result = 'OK'
+    elif reason == 'DRY_RUN':
+      result = 'DRY_RUN'
     else:
       result = 'FAILED (%s)' % reason
       did_pass = False
@@ -462,7 +475,7 @@ class TestHarness:
     # in the 'Final Test Results' area.
     if add_to_table:
       self.test_table.append( (specs, output, result, timing, start, end) )
-      if result.find('OK') != -1:
+      if result.find('OK') != -1 or result.find('DRY_RUN') != -1:
         self.num_passed += 1
       elif result.find('skipped') != -1:
         self.num_skipped += 1
@@ -547,13 +560,17 @@ class TestHarness:
       summary = '<b>%d passed</b>'
     summary += ', <b>%d skipped</b>'
     if self.num_pending:
-      summary += ', <c>%d pending</c>, '
+      summary += ', <c>%d pending</c>'
     else:
-      summary += ', <b>%d pending</b>, '
+      summary += ', <b>%d pending</b>'
     if self.num_failed:
-      summary += '<r>%d FAILED</r>'
+      summary += ', <r>%d FAILED</r>'
     else:
-      summary += '<b>%d failed</b>'
+      summary += ', <b>%d failed</b>'
+
+    # Mask off TestHarness error codes to report parser errors
+    if self.error_code & 0x0F:
+      summary += ', <r>FATAL PARSER ERROR</r>'
 
     print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed), self.options, "", html=True )
     if self.options.pbs:
@@ -621,11 +638,14 @@ class TestHarness:
     parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
     parser.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
     parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
+    parser.add_argument('--max-fails', nargs=1, type=int, dest='max_fails', default=50, help='The number of tests allowed to fail before any additional tests will run')
     parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')
     parser.add_argument('--pbs-cleanup', nargs=1, metavar='batch_file', help='Clean up the directories/files created by PBS. You must supply the same batch_file used to launch PBS.')
     parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
     parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help="Pass --parallel-mesh to executable")
+    parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors')
     parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
+    parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
 
     outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='show the output of every test that fails')
@@ -715,7 +735,8 @@ class TestHarness:
       self.cleanPBSBatch()
       sys.exit(0)
 
-
+  def getOptions(self):
+    return self.options
 
 #################################################################################################################################
 # The TestTimer TestHarness

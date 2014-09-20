@@ -59,19 +59,6 @@ public:
    * @return A string of output file including the extension
    */
   virtual std::string filename();
-
-protected:
-  //@{
-  /**
-   * Individual component output is not supported for solution history output
-   */
-  virtual void outputNodalVariables();
-  virtual void outputElementalVariables();
-  virtual void outputPostprocessors();
-  virtual void outputVectorPostprocessors();
-  virtual void outputScalarVariables();
-  //@}
-
 };
 
 #endif /* SOLUTIONHISTORY_H */

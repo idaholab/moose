@@ -56,7 +56,7 @@ MultiAppUserObjectTransfer::initialSetup()
 void
 MultiAppUserObjectTransfer::execute()
 {
-  Moose::out << "Beginning MultiAppUserObjectTransfer " << _name << std::endl;
+  _console << "Beginning MultiAppUserObjectTransfer " << _name << std::endl;
 
   switch (_direction)
   {
@@ -165,7 +165,7 @@ MultiAppUserObjectTransfer::execute()
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
-      Moose::out << "Transferring to: " << to_var.name() << std::endl;
+      _console << "Transferring to: " << to_var.name() << std::endl;
 
       // EquationSystems & to_es = to_sys.get_equation_systems();
 
@@ -251,5 +251,5 @@ MultiAppUserObjectTransfer::execute()
     }
   }
 
-  Moose::out << "Finished MultiAppUserObjectTransfer " << _name << std::endl;
+  _console << "Finished MultiAppUserObjectTransfer " << _name << std::endl;
 }

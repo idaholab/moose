@@ -103,7 +103,7 @@ AB2PredictorCorrector::step()
 
       _infnorm = _u1.linfty_norm();
       _e_max = 1.1 * _e_tol * _infnorm;
-      Moose::out << "Time Error Estimate: " << _error << std::endl;
+      _console << "Time Error Estimate: " << _error << std::endl;
     }
     else
     {
@@ -127,7 +127,7 @@ AB2PredictorCorrector::converged()
   }
   else
   {
-    Moose::out << "Marking last solve not converged " << _error << " " << _e_max << std::endl;
+    _console << "Marking last solve not converged " << _error << " " << _e_max << std::endl;
     _dt_steps_taken = 0;
     return false;
   }

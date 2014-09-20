@@ -22,6 +22,9 @@
 #include <istream>
 #include <iterator>
 
+// External includes
+#include "pcrecpp.h"
+
 namespace MooseUtils
 {
 
@@ -33,7 +36,7 @@ tokenize(const std::string &str, std::vector<std::string> &elements, unsigned in
   std::string::size_type last_pos = str.find_first_not_of(delims, 0);
   std::string::size_type pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
 
-  while (pos != std::string::npos || last_pos != std::string::npos)
+  while (last_pos != std::string::npos)
   {
     elements.push_back(str.substr(last_pos, pos - last_pos));
     // skip delims between tokens
@@ -140,12 +143,56 @@ parallelBarrierNotify(const Parallel::Communicator & comm)
 }
 
 bool
-hasExtension(const std::string & filename, std::string ext)
+hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ext)
 {
-  if (filename.substr(filename.find_last_of(".") + 1) == ext)
+  // Extract the extension, w/o the '.'
+  std::string file_ext;
+  if (strip_exodus_ext)
+  {
+    pcrecpp::RE re(".*\\.([^\\.]*?)(?:-s\\d+)?$"); // capture the complete extension, ignoring -s*
+    re.FullMatch(filename, &file_ext);
+  }
+  else
+  {
+    pcrecpp::RE re(".*\\.([^\\.]*)$"); // capture the complete extension
+    re.FullMatch(filename, &file_ext);
+  }
+
+  // Perform the comparision
+  if (file_ext == ext)
     return true;
   else
     return false;
+}
+
+std::pair<std::string, std::string>
+splitFileName(std::string full_file)
+{
+  // Error if path ends with /
+  if (full_file[full_file.size()-1] == '/')
+    mooseError("Invalid full file name: " << full_file);
+
+  // Define the variables to output
+  std::string path;
+  std::string file;
+
+  // Locate the / sepearting the file from path
+  std::size_t found = full_file.find_last_of("/");
+
+  // If no / is found used "." for the path, otherwise seperate the two
+  if (found == std::string::npos)
+  {
+    path = ".";
+    file = full_file;
+  }
+  else
+  {
+    path = full_file.substr(0, found);
+    file = full_file.substr(found+1);
+  }
+
+  // Return the path and file as a pair
+  return std::pair<std::string, std::string>(path, file);
 }
 
 } // MooseUtils namespace

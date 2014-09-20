@@ -3,18 +3,26 @@
     type = 'Exodiff'
     input = 'solution_aux.i'
     exodiff = 'solution_aux_out.e'
+    allow_warnings = true
   [../]
 
   [./direct]
     type = 'Exodiff'
     input = 'solution_aux_direct.i'
     exodiff = 'solution_aux_direct_out.e'
+    allow_warnings = true
   [../]
 
   [./exodus]
     type = 'Exodiff'
     input = 'solution_aux_exodus.i'
     exodiff = 'solution_aux_exodus_out.e'
+  [../]
+
+  [./exodus_file_extension]
+    type = 'Exodiff'
+    input = 'solution_aux_exodus_file_extension.i'
+    exodiff = 'solution_aux_exodus_file_extension_out.e'
   [../]
 
   [./exodus_elem_map]
@@ -28,6 +36,13 @@
     input = 'solution_aux_exodus_elemental.i'
     exodiff = 'solution_aux_exodus_elemental_out.e'
     max_threads = 1 # ticket 2283
+  [../]
+
+  [./exodus_elemental_only]
+    # Tests using a single variable from a file containing multiple variables
+    type = 'Exodiff'
+    input = 'solution_aux_exodus_elemental_only.i'
+    exodiff = 'solution_aux_exodus_elemental_only_out.e'
   [../]
 
   [./exodus_direct]
@@ -78,10 +93,11 @@
     type = 'Exodiff'
     input = 'solution_aux_scale.i'
     exodiff = 'solution_aux_scale_out.e'
+    allow_warnings = true
   [../]
 
   [./aux_nonlinear_solution]
-    # This builds the XDA file for the 'aux_nonlinear_solution_from_xda' test below
+    # This builds the XDA and XDR files for the 'aux_nonlinear_solution_from_xda/r' tests below
     type = RunApp
     input = 'aux_nonlinear_solution.i'
   [../]
@@ -91,6 +107,7 @@
     input = 'aux_nonlinear_solution_xda.i'
     exodiff = 'aux_nonlinear_solution_xda_out.e'
     prereq = aux_nonlinear_solution
+    max_threads = 1 # ticket 2283
   [../]
 
   [./aux_nonlinear_solution_from_xdr]
@@ -98,5 +115,20 @@
     input = 'aux_nonlinear_solution_xdr.i'
     exodiff = 'aux_nonlinear_solution_xdr_out.e'
     prereq = aux_nonlinear_solution
+    max_threads = 1 # ticket 2283
+  [../]
+
+  [./aux_nonlinear_solution_adapt]
+    # This builds the XDA file for the 'aux_nonlinear_solution_adapt_from_xda' test below
+    type = RunApp
+    input = 'aux_nonlinear_solution_adapt.i'
+  [../]
+
+  [./aux_nonlinear_solution_adapt_from_xda]
+    type = Exodiff
+    input = 'aux_nonlinear_solution_adapt_xda.i'
+    exodiff = 'aux_nonlinear_solution_adapt_xda_out.e'
+    prereq = aux_nonlinear_solution_adapt
+    max_threads = 1 # ticket 2283
   [../]
 []

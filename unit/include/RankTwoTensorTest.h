@@ -30,16 +30,22 @@ class RankTwoTensorTest : public CppUnit::TestFixture
   CPPUNIT_TEST( addIaTest );
   CPPUNIT_TEST( transposeTest );
   CPPUNIT_TEST( doubleContractionTest );
-  CPPUNIT_TEST( traceTest );
-  CPPUNIT_TEST( secondInvariantTest );
-  CPPUNIT_TEST( detTest );
+  CPPUNIT_TEST( rotateTest );
   CPPUNIT_TEST( deviatoricTest );
-  CPPUNIT_TEST( inverseTest );
-  CPPUNIT_TEST( symmetricEigenvaluesTest );
+  CPPUNIT_TEST( traceTest );
   CPPUNIT_TEST( dtraceTest );
+  CPPUNIT_TEST( secondInvariantTest );
   CPPUNIT_TEST( dsecondInvariantTest );
+  CPPUNIT_TEST( d2secondInvariantTest );
+  CPPUNIT_TEST( thirdInvariantTest );
+  CPPUNIT_TEST( dthirdInvariantTest );
+  CPPUNIT_TEST( d2thirdInvariantTest );
+  CPPUNIT_TEST( sin3LodeTest );
+  CPPUNIT_TEST( dsin3LodeTest );
+  CPPUNIT_TEST( d2sin3LodeTest );
+  CPPUNIT_TEST( detTest );
   CPPUNIT_TEST( ddetTest );
-  CPPUNIT_TEST( dsymmetricEigenvaluesTest );
+  CPPUNIT_TEST( inverseTest );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -51,16 +57,22 @@ public:
   void addIaTest();
   void transposeTest();
   void doubleContractionTest();
-  void traceTest();
-  void secondInvariantTest();
-  void detTest();
+  void rotateTest();
   void deviatoricTest();
-  void inverseTest();
-  void symmetricEigenvaluesTest();
+  void traceTest();
   void dtraceTest();
+  void secondInvariantTest();
   void dsecondInvariantTest();
+  void d2secondInvariantTest();
+  void thirdInvariantTest();
+  void dthirdInvariantTest();
+  void d2thirdInvariantTest();
+  void sin3LodeTest();
+  void dsin3LodeTest();
+  void d2sin3LodeTest();
+  void detTest();
   void ddetTest();
-  void dsymmetricEigenvaluesTest();
+  void inverseTest();
 
  private:
   RankTwoTensor _m0;
@@ -69,7 +81,6 @@ public:
   RankTwoTensor _m3;
   RankTwoTensor _unsymmetric0;
   RankTwoTensor _unsymmetric1;
-
 };
 
 #endif  // RANKTWOTENSORTEST_H

@@ -23,7 +23,7 @@ InputParameters validParams<CoupledDirectionalMeshHeightInterpolation>()
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("coupled_var", "The variable whose values are going to be interpolated.");
 
-  MooseEnum directions("x, y, z");
+  MooseEnum directions("x y z");
   params.addRequiredParam<MooseEnum>("direction", directions, "The direction to interpolate in.");
 
   return params;

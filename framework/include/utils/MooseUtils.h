@@ -71,9 +71,19 @@ namespace MooseUtils
    * Function tests if the supplied filename as the desired extension
    * @param filename The filename to test the extension
    * @param ext The extension to test for (do not include the .)
+   * @param strip_exodus_ext When true, this function ignores -s* from the end of the extension
    * @return True if the filename has the supplied extension
    */
-  bool hasExtension(const std::string & filename, std::string ext);
+  bool hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ext = false);
+
+  /**
+   * Function for splitting path and filename
+   * @param full_name A complete filename and path
+   * @param A std::pair<std::string, std::string> containing the path and filename
+   *
+   * If the supplied filename does not contain a path, it returns "." as the path
+   */
+  std::pair<std::string, std::string> splitFileName(std::string full_file);
 
   /**
    * This routine is a simple helper function for searching a map by values instead of keys

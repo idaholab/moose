@@ -16,6 +16,7 @@
 #define ACTION_H
 
 #include "InputParameters.h"
+#include "ConsoleStreamInterface.h"
 
 #include <string>
 #include <ostream>
@@ -35,7 +36,7 @@ InputParameters validParams<Action>();
 /**
  * Base class for actions.
  */
-class Action
+class Action : public ConsoleStreamInterface
 {
 public:
   Action(const std::string & name, InputParameters params);
@@ -112,10 +113,10 @@ protected:
   ActionWarehouse & _awh;
 
   /// The current action (even though we have seperate instances for each action)
-  const std::string & _current_action;
+  const std::string & _current_task;
 
-  MooseMesh * & _mesh;
-  MooseMesh * & _displaced_mesh;
+  MooseSharedPointer<MooseMesh> & _mesh;
+  MooseSharedPointer<MooseMesh> & _displaced_mesh;
   /// Convenience reference to a problem this action works on
 
 public:

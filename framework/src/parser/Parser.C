@@ -33,6 +33,8 @@
 #include "MooseMesh.h"
 #include "Executioner.h"
 #include "MooseApp.h"
+#include "MooseEnum.h"
+#include "MultiMooseEnum.h"
 
 #include "GlobalParamsAction.h"
 
@@ -46,6 +48,7 @@
 #include "libmesh/getpot.h"
 
 Parser::Parser(MooseApp & app, ActionWarehouse & action_wh) :
+    ConsoleStreamInterface(app),
     _app(app),
     _factory(app.getFactory()),
     _action_wh(action_wh),
@@ -143,6 +146,21 @@ Parser::parse(const std::string &input_filename)
   _getpot_file.parse_input_file(input_filename);
   _getpot_initialized = true;
   _inactive_strings.clear();
+
+  // Check for "unidentified nominuses".  These can indicate a vector
+  // input which the user failed to wrap in quotes e.g.: v = 1 2
+  {
+    std::set<std::string> knowns;
+    std::vector<std::string> ufos = _getpot_file.unidentified_nominuses(knowns);
+    if (!ufos.empty())
+    {
+      Moose::err << "Error: the following unidentified entries were found in your input file:" << std::endl;
+      for (unsigned int i=0; i<ufos.size(); ++i)
+        Moose::err << ufos[i] << std::endl;
+      mooseError("Your input file may have a syntax error, or you may have forgotten to put quotes around a vector, ie. v='1 2'.");
+    }
+  }
+
 
   section_names = _getpot_file.get_section_names();
   appendAndReorderSectionNames(section_names);
@@ -273,7 +291,7 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
     if (error_on_warn)
       mooseError(oss.str());
     else
-      Moose::out << oss.str();
+      _console << oss.str();
   }
 }
 
@@ -301,7 +319,7 @@ Parser::checkOverriddenParams(bool error_on_warn)
     if (error_on_warn)
       mooseError(oss.str());
     else
-      Moose::out << oss.str() << std::flush;
+      _console << oss.str() << std::flush;
   }
 }
 
@@ -461,7 +479,8 @@ Parser::buildFullTree(const std::string &search_string)
     }
   }
 
-  Moose::out << _syntax_formatter->print(search_string);
+  // Do not change to _console, we need this printed to the stdout in all cases
+  Moose::out << _syntax_formatter->print(search_string) << std::flush;
 }
 
 
@@ -494,6 +513,10 @@ void Parser::setScalarParameter<PostprocessorName>(const std::string & full_name
 template<>
 void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const std::string & short_name,
                                            InputParameters::Parameter<MooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
+
+template<>
+void Parser::setScalarParameter<MultiMooseEnum>(const std::string & full_name, const std::string & short_name,
+                                                InputParameters::Parameter<MultiMooseEnum>* param, bool in_global, GlobalParamsAction *global_block);
 
 template<>
 void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, const std::string & short_name,
@@ -623,6 +646,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractScalar(RealVectorValue       , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(Point                 , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(MooseEnum             , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(MultiMooseEnum        , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(RealTensorValue       , it->second, full_name, it->first, in_global, global_params_block);
 
       // Moose String-derived scalars
@@ -850,6 +874,38 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
   {
     global_block->remove(short_name);
     global_block->setScalarParam<MooseEnum>(short_name) = current_param;
+  }
+}
+
+template<>
+void Parser::setScalarParameter<MultiMooseEnum>(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<MultiMooseEnum> * param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
+  else
+    gp = &_getpot_file;
+
+  MultiMooseEnum current_param = param->get();
+
+  int vec_size = gp->vector_variable_size(full_name.c_str());
+
+  std::string raw_values;
+  for (int i = 0; i < vec_size; ++i)
+  {
+    std::string single_value = gp->get_value_no_default(full_name.c_str(), "", i);
+    raw_values += ' ' + single_value;
+  }
+
+  param->set() = raw_values;
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setScalarParam<MultiMooseEnum>(short_name) = current_param;
   }
 }
 

@@ -15,6 +15,7 @@ InputParameters validParams<TensorMechanicsMaterial>()
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temperature", "temperature variable");
+  params.addParam<std::vector<FunctionName> >("initial_stress", "A list of functions describing the initial stress.  If provided, there must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, zz components respectively.  If not provided, all components of the initial stress will be zero");
   return params;
 }
 
@@ -44,7 +45,30 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
     _fill_method((RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"))
 {
   _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
+
+  const std::vector<FunctionName> & fcn_names( getParam<std::vector<FunctionName> >("initial_stress") );
+  const unsigned num = fcn_names.size();
+  if (!(num == 0 || num == 3*3))
+    mooseError("Either zero or " << 3*3 << " initial stress functions must be provided to TensorMechanicsMaterial.  You supplied " << num << "\n");
+  _initial_stress.resize(num);
+  for (unsigned i = 0 ; i < num ; ++i)
+    _initial_stress[i] = &getFunctionByName(fcn_names[i]);
 }
+
+void
+TensorMechanicsMaterial::initQpStatefulProperties()
+{
+  _stress[_qp].zero();
+  if (_initial_stress.size() == 3*3)
+    for (unsigned i = 0 ; i < 3 ; ++i)
+      for (unsigned j = 0 ; j < 3 ; ++j)
+        _stress[_qp](i, j) = _initial_stress[i*3 + j]->value(_t, _q_point[_qp]);
+
+  _total_strain[_qp].zero();
+  _elastic_strain[_qp].zero();
+
+}
+
 
 void
 TensorMechanicsMaterial::computeProperties()

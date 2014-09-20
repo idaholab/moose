@@ -27,15 +27,19 @@ Factory::~Factory()
 InputParameters
 Factory::getValidParams(const std::string & obj_name)
 {
+  std::map<std::string, paramsPtr>::iterator
+    it = _name_to_params_pointer.find(obj_name);
+
   // Check if the object is registered
-  if (_name_to_params_pointer.find(obj_name) == _name_to_params_pointer.end() )
+  if (it == _name_to_params_pointer.end())
     mooseError(std::string("A '") + obj_name + "' is not a registered object\n\n");
 
   // Print out deprecated message, if it exists
   deprecatedMessage(obj_name);
 
   // Return the parameters
-  InputParameters params = _name_to_params_pointer[obj_name]();
+  paramsPtr & func = it->second;
+  InputParameters params = (*func)();
   params.addPrivateParam("_moose_app", &_app);
   return params;
 }
@@ -43,8 +47,11 @@ Factory::getValidParams(const std::string & obj_name)
 MooseObject *
 Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters)
 {
+  std::map<std::string, buildPtr>::iterator
+    it = _name_to_build_pointer.find(obj_name);
+
   // Check if the object is registered
-  if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
+  if (it == _name_to_build_pointer.end())
     mooseError("Object '" + obj_name + "' was not registered.");
 
   // Print out deprecated message, if it exists
@@ -52,14 +59,21 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
 
   // Check to make sure that all required parameters are supplied
   parameters.checkParams(name);
-  return (*_name_to_build_pointer[obj_name])(name, parameters);
+
+  // Actually call the function pointer.  You can do this in one line,
+  // but it's a bit more obvious what's happening if you do it in two...
+  buildPtr & func = it->second;
+  return (*func)(name, parameters);
 }
 
 MooseObjectPtr
 Factory::create_shared_ptr(const std::string & obj_name, const std::string & name, InputParameters parameters)
 {
+  std::map<std::string, buildPtrShared>::iterator
+    it = _name_to_build_pointer_shared.find(obj_name);
+
   // Check if the object is registered
-  if (_name_to_build_pointer_shared.find(obj_name) == _name_to_build_pointer_shared.end())
+  if (it == _name_to_build_pointer_shared.end())
     mooseError("Object '" + obj_name + "' was not registered.");
 
   // Print out deprecated message, if it exists
@@ -67,7 +81,11 @@ Factory::create_shared_ptr(const std::string & obj_name, const std::string & nam
 
   // Check to make sure that all required parameters are supplied
   parameters.checkParams(name);
-  return (*_name_to_build_pointer_shared[obj_name])(name, parameters);
+
+  // Actually call the function pointer.  You can do this in one line,
+  // but it's a bit more obvious what's happening if you do it in two...
+  buildPtrShared & func = it->second;
+  return (*func)(name, parameters);
 }
 
 time_t Factory::parseTime(const std::string t_str)
@@ -93,8 +111,11 @@ time_t Factory::parseTime(const std::string t_str)
 
 void Factory::deprecatedMessage(const std::string obj_name)
 {
+  std::map<std::string, time_t>::iterator
+    time_it = _deprecated_time.find(obj_name);
+
   // If the object is not deprecated return
-  if (_deprecated_time.find(obj_name) == _deprecated_time.end() )
+  if (time_it == _deprecated_time.end())
     return;
 
   // Get the current time
@@ -102,20 +123,23 @@ void Factory::deprecatedMessage(const std::string obj_name)
   time(&now);
 
   // Get the stop time
-  time_t t_end =  _deprecated_time[obj_name];
+  time_t t_end = time_it->second;
 
   // Message storage
   std::ostringstream msg;
 
+  std::map<std::string, std::string>::iterator
+    name_it = _deprecated_name.find(obj_name);
+
   // Expired object
-  if ( now > t_end )
+  if (now > t_end)
   {
     msg << "***** Invalid Object: " << obj_name << " *****\n";
     msg << "Expired on " << ctime(&t_end);
 
     // Append replacement object, if it exsits
-    if (_deprecated_name.find(obj_name) != _deprecated_name.end())
-      msg << "Upadate your application using the '" << _deprecated_name[obj_name] << "' object";
+    if (name_it != _deprecated_name.end())
+      msg << "Upadate your application using the '" << name_it->second << "' object";
 
     // Produce the error message
     mooseError(msg.str());
@@ -129,8 +153,8 @@ void Factory::deprecatedMessage(const std::string obj_name)
     msg << "This object will be removed on " << ctime(&t_end);
 
     // Append replacement object, if it exsits
-    if (_deprecated_name.find(obj_name) != _deprecated_name.end())
-      msg << "Replaced " << obj_name << " with " <<  _deprecated_name[obj_name];
+    if (name_it != _deprecated_name.end())
+      msg << "Replaced " << obj_name << " with " <<  name_it->second;
 
     // Produce the error message
     mooseDoOnce(mooseWarning(msg.str()));

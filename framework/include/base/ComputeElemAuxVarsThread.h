@@ -27,7 +27,7 @@ class AuxiliarySystem;
 class ComputeElemAuxVarsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
+  ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs, bool need_materials);
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
 
@@ -42,6 +42,7 @@ public:
 protected:
   AuxiliarySystem & _aux_sys;
   std::vector<AuxWarehouse> & _auxs;
+  bool _need_materials;
 };
 
 #endif //COMPUTEELEMAUXVARSTHREAD_H

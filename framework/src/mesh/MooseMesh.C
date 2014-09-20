@@ -54,7 +54,7 @@ InputParameters validParams<MooseMesh>()
 {
   InputParameters params = validParams<MooseObject>();
 
-  MooseEnum mesh_distribution_type("PARALLEL=0, SERIAL, DEFAULT", "DEFAULT");
+  MooseEnum mesh_distribution_type("PARALLEL=0 SERIAL DEFAULT", "DEFAULT");
   params.addParam<MooseEnum>("distribution", mesh_distribution_type,
                              "PARALLEL: Always use libMesh::ParallelMesh "
                              "SERIAL: Always use libMesh::SerialMesh "
@@ -65,22 +65,25 @@ InputParameters validParams<MooseMesh>()
                         "foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, "
                         "where N = # CPUs, with NemesisIO.");
 
-  MooseEnum dims("1 = 1, 2, 3", "3");
+  MooseEnum dims("1=1 2 3", "3");
   params.addParam<MooseEnum>("dim", dims,
                              "This is only required for certain mesh formats where "
                              "the dimension of the mesh cannot be autodetected.  "
                              "In particular you must supply this for GMSH meshes.  "
                              "Note: This is completely ignored for ExodusII meshes!");
 
-  MooseEnum partitioning("default=-3, metis=-2, parmetis=-1, linear=0, centroid, hilbert_sfc, morton_sfc", "default");
+  MooseEnum partitioning("default=-3 metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc", "default");
   params.addParam<MooseEnum>("partitioner", partitioning, "Specifies a mesh partitioner to use when splitting the mesh for a parallel computation.");
-  MooseEnum direction("x, y, z, radial");
+  MooseEnum direction("x y z radial");
   params.addParam<MooseEnum>("centroid_partitioner_direction", direction, "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
+
+  MooseEnum patch_update_strategy("never always auto", "never");
+  params.addParam<MooseEnum>("patch_update_strategy", patch_update_strategy,  "How often to update the geometric search 'patch'.  The default is to never update it (which is the most efficient but could be a problem with lots of relative motion).  'always' will update the patch every timestep which might be time consuming.  'auto' will attempt to determine when the patch size needs to be updated automatically.");
 
   params.registerBase("MooseMesh");
 
   // groups
-  params.addParamNamesToGroup("dim nemesis", "Advanced");
+  params.addParamNamesToGroup("dim nemesis patch_update_strategy", "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
   return params;
@@ -110,6 +113,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
     _patch_size(40),
+    _patch_update_strategy(getParam<MooseEnum>("patch_update_strategy")),
     _regular_orthogonal_mesh(false),
     _allow_recovery(true)
 {
@@ -150,9 +154,7 @@ MooseMesh::MooseMesh(const std::string & name, InputParameters parameters) :
     }
   }
   else
-  {
     _mesh = new SerialMesh(_communicator, dim);
-  }
 
   // Set the partitioner
   switch (_partitioner_name)
@@ -209,7 +211,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _mesh(other_mesh.getMesh().clone().release()),
     _partitioner_name(other_mesh._partitioner_name),
     _partitioner_overridden(other_mesh._partitioner_overridden),
-    _uniform_refine_level(0),
+    _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _is_changed(false),
     _is_nemesis(false),
     _is_prepared(false),
@@ -223,6 +225,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
     _patch_size(40),
+    _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false)
 {
   *(getMesh().boundary_info) = *(other_mesh.getMesh().boundary_info);
@@ -418,24 +421,33 @@ MooseMesh::meshChanged()
   // Rebuild the active local element range
   delete _active_local_elem_range;
   _active_local_elem_range = NULL;
+
   // Rebuild the node range
   delete _active_node_range;
   _active_node_range = NULL;
+
   // Rebuild the semilocal range
   delete _active_semilocal_node_range;
   _active_semilocal_node_range = NULL;
+
   // Rebuild the local node range
   delete _local_node_range;
   _local_node_range = NULL;
+
   // Rebuild the boundary node range
   delete _bnd_node_range;
   _bnd_node_range = NULL;
+
+  // Rebuild the boundary element rage
+  delete _bnd_elem_range;
+  _bnd_elem_range = NULL;
 
   // Rebuild the ranges
   getActiveLocalElementRange();
   getActiveNodeRange();
   getLocalNodeRange();
   getBoundaryNodeRange();
+  getBoundaryElementRange();
 
   // Lets the output system know that the mesh has changed recently.
   _is_changed = true;
@@ -1835,13 +1847,18 @@ MooseMesh::setMeshBoundaryIDs(std::set<BoundaryID> boundary_IDs)
 }
 
 void
-MooseMesh::setBoundaryToNormalMap(AutoPtr<std::map<BoundaryID, RealVectorValue> > boundary_map)
+MooseMesh::setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * boundary_map)
 {
-  _boundary_to_normal_map = boundary_map;
+  _boundary_to_normal_map.reset(boundary_map);
 }
 
 #ifdef LIBMESH_ENABLE_AMR
 unsigned int & MooseMesh::uniformRefineLevel()
+{
+  return _uniform_refine_level;
+}
+
+const unsigned int & MooseMesh::uniformRefineLevel() const
 {
   return _uniform_refine_level;
 }
@@ -1978,6 +1995,18 @@ MooseMesh::getPatchSize()
   return _patch_size;
 }
 
+void
+MooseMesh::setPatchUpdateStrategy(MooseEnum patch_update_strategy)
+{
+  _patch_update_strategy = patch_update_strategy;
+}
+
+const MooseEnum &
+MooseMesh::getPatchUpdateStrategy()
+{
+  return _patch_update_strategy;
+}
+
 MooseMesh::operator libMesh::MeshBase & ()
 {
   return getMesh();
@@ -1991,12 +2020,14 @@ MooseMesh::operator const libMesh::MeshBase & () const
 MeshBase &
 MooseMesh::getMesh()
 {
+  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
   return *_mesh;
 }
 
 const MeshBase &
 MooseMesh::getMesh() const
 {
+  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
   return *_mesh;
 }
 

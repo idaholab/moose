@@ -3,6 +3,7 @@
 
 #include "Kernel.h"
 #include "InitialCondition.h"
+#include "PolycrystalICTools.h"
 
 // System includes
 #include <string>

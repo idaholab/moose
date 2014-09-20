@@ -26,6 +26,7 @@ public:
   TensorMechanicsMaterial(const std::string & name, InputParameters parameters);
 
 protected:
+  virtual void initQpStatefulProperties();
   virtual void computeProperties();
   virtual void computeQpElasticityTensor();
   virtual void computeStrain();
@@ -70,6 +71,10 @@ protected:
 
   /// determines the translation from C_ijkl to the Rank-4 tensor
   RankFourTensor::FillMethod _fill_method;
+
+  /// initial stress components
+  std::vector<Function *> _initial_stress;
+
 };
 
 #endif //TENSORMECHANICSMATERIAL_H

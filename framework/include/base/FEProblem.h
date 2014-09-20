@@ -49,6 +49,7 @@ class NonlinearSystem;
 class RandomInterface;
 class RandomData;
 class MeshChangedInterface;
+class MultiMooseEnum;
 
 template<>
 InputParameters validParams<FEProblem>();
@@ -109,7 +110,7 @@ public:
   virtual MooseMesh & mesh() { return _mesh; }
 
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid);
-  virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const std::vector<MooseEnum> & coord_sys);
+  virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
 
   /**
    * Set the coupling between variables
@@ -178,7 +179,7 @@ public:
                                                               const int maxits);
 
 #ifdef LIBMESH_HAVE_PETSC
-  void storePetscOptions(const std::vector<MooseEnum> & petsc_options,
+  void storePetscOptions(const MultiMooseEnum & petsc_options,
                          const std::vector<std::string> & petsc_options_inames,
                          const std::vector<std::string> & petsc_options_values);
 #endif
@@ -566,7 +567,30 @@ public:
   virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual );
   virtual void computeResidualType(const NumericVector<Number> & soln, NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
-  virtual void computeJacobianBlock(SparseMatrix<Number> &  jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
+
+  /**
+   * Computes several Jacobian blocks simultaneously, summing their contributions into smaller preconditioning matrices.
+   *
+   * Used by Physics-based preconditioning
+   *
+   * @param blocks The blocks to fill in (JacobianBlock is defined in ComputeJacobianBlocksThread)
+   */
+  virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks);
+
+  /**
+   * Really not a good idea to use this.
+   *
+   * It computes just one block of the Jacobian into a smaller matrix.  Calling this in a loop is EXTREMELY ineffecient!
+   * Try to use computeJacobianBlocks() instead!
+   *
+   * @param jacobian The matrix you want to fill
+   * @param precond_system The libMesh::system of the preconditioning system
+   * @param ivar the block-row of the Jacobian
+   * @param jvar the block-column of the Jacobian
+   *
+   */
+  virtual void computeJacobianBlock(SparseMatrix<Number> & jacobian, libMesh::System & precond_system, unsigned int ivar, unsigned int jvar);
+
   virtual Real computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update);
 
   /**
@@ -637,6 +661,8 @@ public:
 
   virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL);
 
+  virtual void possiblyRebuildGeomSearchPatches();
+
   virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
 
   /**
@@ -694,7 +720,6 @@ public:
    */
   void notifyWhenMeshChanges(MeshChangedInterface * mci);
 
-  void printMaterialMap();
   void checkProblemIntegrity();
 
   void serializeSolution();
@@ -712,6 +737,10 @@ public:
   void registerRandomInterface(RandomInterface & random_interface, const std::string & name);
 
   void setKernelCoverageCheck(bool flag) { _kernel_coverage_check = flag; }
+
+  bool & legacyUoAuxComputation() { return _use_legacy_uo_aux_computation; }
+
+  bool & legacyUoInitialization() { return _use_legacy_uo_initialization; }
 
   /**
    * Updates the active boundary id
@@ -737,11 +766,6 @@ public:
    * Calls parentOutputPositionChanged() on all sub apps.
    */
   void parentOutputPositionChanged();
-
-  /**
-   * Enable printing of top residuals
-   */
-  void setDebugTopResiduals(unsigned int n) { _dbg_top_residuals = n; }
 
   ///@{
   /**
@@ -784,6 +808,10 @@ public:
    */
   MaterialData * getBoundaryMaterialData(THREAD_ID tid) { return _bnd_material_data[tid]; }
 
+  /**
+   * Returns a short description of the active preconditioner
+   */
+  const std::string & getPreconditionerDescription() const { return _pc_description; }
 
 protected:
   /// Data names that will only be read from the restart file during RECOVERY
@@ -881,7 +909,7 @@ protected:
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
-  void computeUserObjectsInternal(std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
+  void computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GROUP group);
 
 protected:
   void checkUserObjects();
@@ -921,9 +949,6 @@ protected:
   /// Whether nor not stateful materials have been initialized
   bool _has_initialized_stateful;
 
-  /// Flag for print top residuals
-  bool _dbg_top_residuals;
-
   /// Object responsible for restart (read/write)
   Resurrector * _resurrector;
 
@@ -940,11 +965,17 @@ protected:
   /// Maximum number of quadrature points used in the problem
   unsigned int _max_qps;
 
+  /// Preconditioner description
+  std::string _pc_description;
+
 public:
   /// number of instances of FEProblem (to distinguish Systems when coupling problems together)
   static unsigned int _n;
 
 private:
+  bool _use_legacy_uo_aux_computation;
+  bool _use_legacy_uo_initialization;
+
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
    *

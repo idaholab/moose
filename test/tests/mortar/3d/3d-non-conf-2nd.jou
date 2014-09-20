@@ -2,13 +2,13 @@ reset
 
 # block 1
 brick x 1 y 2 z 2
-move volume 1 x -0.5 include_merged 
+move volume 1 x -0.5 include_merged
 volume 1  size auto factor 8
-mesh volume 1 
+mesh volume 1
 
 # block 2
 brick x 1 y 2 z 2
-move volume 2 x 0.5 include_merged 
+move volume 2 x 0.5 include_merged
 volume 2  size auto factor 7
 mesh volume 2
 
@@ -17,11 +17,11 @@ create vertex 0 -1   1
 create vertex 0   1   1
 create vertex 0   1 -1
 create vertex 0 -1 -1
-create curve vertex 17 18  
-create curve vertex 18 19  
-create curve vertex 19 20  
-create curve vertex 20 17  
-create surface curve 28 27 26 25  
+create curve vertex 17 18
+create curve vertex 18 19
+create curve vertex 19 20
+create curve vertex 20 17
+create surface curve 28 27 26 25
 
 create node location 0 -1 -1 owner surface 13
 create node location 0 -1 -0.666666 owner surface 13

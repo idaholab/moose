@@ -39,3 +39,9 @@ InputParameters validParams<MaterialAuxBase<RealTensorValue> >()
 {
   return validParams<MaterialAuxBase<Real> >();
 }
+
+template<>
+InputParameters validParams<MaterialAuxBase<std::vector<Real> > >()
+{
+  return validParams<MaterialAuxBase<Real> >();
+}

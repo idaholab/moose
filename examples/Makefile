@@ -27,7 +27,7 @@ all:: examples
 # Build the example programs
 examples: $(dirlist)
 
-$(dirlist): $(MOOSE_LIBS)
+$(dirlist): $(moose_LIBS)
 	@$(MAKE) -C $@ $(MAKECMDGOALS) TEST=test_ignore || exit 1
 
 # Rebuild the dependencies for the examples

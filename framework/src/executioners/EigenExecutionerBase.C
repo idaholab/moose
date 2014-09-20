@@ -85,7 +85,7 @@ EigenExecutionerBase::init()
 {
   if (_app.isRecovering())
   {
-    Moose::out<<"\nCannot recover eigenvalue solves!\nExiting...\n"<<std::endl;
+    _console << "\nCannot recover eigenvalue solves!\nExiting...\n" << std::endl;
     return;
   }
 
@@ -155,7 +155,7 @@ EigenExecutionerBase::makeBXConsistent(Real k)
     }
     std::stringstream ss;
     ss << std::fixed << std::setprecision(10) << _source_integral;
-    Moose::out << " |Bx_0| = " << ss.str() << std::endl;
+    _console << " |Bx_0| = " << ss.str() << std::endl;
   }
 }
 
@@ -210,7 +210,6 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   // so save old and older solutions before they are changed by the power iteration
   _eigen_sys.saveOldSolutions();
 
-  // _es.parameters.print(Moose::out);
   // save solver control parameters to be modified by the power iteration
   Real tol1 = _problem.es().parameters.get<Real> ("linear solver tolerance");
   unsigned int num1 = _problem.es().parameters.get<unsigned int>("nonlinear solver maximum iterations");
@@ -221,9 +220,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   if (echo)
   {
-    Moose::out << std::endl;
-    Moose::out << " Power iterations starts" << std::endl;
-    Moose::out << " ________________________________________________________________________________ " << std::endl;
+    _console << std::endl;
+    _console << " Power iterations starts" << std::endl;
+    _console << " ________________________________________________________________________________ " << std::endl;
   }
 
   // some iteration variables
@@ -239,7 +238,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   makeBXConsistent(k);
   while (true)
   {
-    if (echo)  Moose::out << " Power iteration= "<< iter << std::endl;
+    if (echo)
+      _console << " Power iteration= "<< iter << std::endl;
 
     // important: solutions of aux system is also copied
     _problem.advanceState();
@@ -283,42 +283,42 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
       std::streamsize pcs = Moose::out.precision();
       if (_solution_diff)
       {
-        Moose::out << std::endl;
-        Moose::out << " +================+=====================+=====================+\n";
-        Moose::out << " | iteration      | eigenvalue          | solution_difference |\n";
-        Moose::out << " +================+=====================+=====================+\n";
+        _console << std::endl;
+        _console << " +================+=====================+=====================+\n";
+        _console << " | iteration      | eigenvalue          | solution_difference |\n";
+        _console << " +================+=====================+=====================+\n";
         unsigned int j = 0;
         if (keff_history.size()>10)
         {
-          Moose::out << " :                :                     :                     :\n";
+          _console << " :                :                     :                     :\n";
           j = keff_history.size()-10;
         }
         for (; j<keff_history.size(); j++)
-          Moose::out << " | " << std::setw(14) << j
+          _console << " | " << std::setw(14) << j
                      << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
                      << " | " << std::setw(19) << std::scientific << std::setprecision(8) << diff_history[j]
                      << " |\n";
-        Moose::out << " +================+=====================+=====================+\n" << std::flush;
-        Moose::out << std::endl;
+        _console << " +================+=====================+=====================+\n" << std::flush;
+        _console << std::endl;
       }
       else
       {
-        Moose::out << std::endl;
-        Moose::out << " +================+=====================+\n";
-        Moose::out << " | iteration      | eigenvalue          |\n";
-        Moose::out << " +================+=====================+\n";
+        _console << std::endl;
+        _console << " +================+=====================+\n";
+        _console << " | iteration      | eigenvalue          |\n";
+        _console << " +================+=====================+\n";
         unsigned int j = 0;
         if (keff_history.size()>10)
         {
-          Moose::out << " :                :                     :\n";
+          _console << " :                :                     :\n";
           j = keff_history.size()-10;
         }
         for (; j<keff_history.size(); j++)
-          Moose::out << " | " << std::setw(14) << j
+          _console << " | " << std::setw(14) << j
                      << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
                      << " |\n";
-        Moose::out << " +================+=====================+\n" << std::flush;
-        Moose::out << std::endl;
+        _console << " +================+=====================+\n" << std::flush;
+        _console << std::endl;
       }
       Moose::out.flags(flg);
       Moose::out.precision(pcs);
@@ -331,11 +331,11 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     {
       chebyshev(iter);
       if (echo)
-        Moose::out << " Chebyshev step: " << chebyshev_parameters.icheb << std::endl;
+        _console << " Chebyshev step: " << chebyshev_parameters.icheb << std::endl;
     }
 
     if (echo)
-      Moose::out << " ________________________________________________________________________________ "
+      _console << " ________________________________________________________________________________ "
                  << std::endl;
 
     // not perform any convergence check when number of iterations is less than min_iter
@@ -401,14 +401,14 @@ EigenExecutionerBase::postExecute()
   Real s = 1.0;
   if (_norm_execflag==EXEC_CUSTOM)
   {
-    Moose::out << " Cannot let the normalization postprocessor on custom." << std::endl;
-    Moose::out << " Normalization is abandoned!" << std::endl;
+    _console << " Cannot let the normalization postprocessor on custom." << std::endl;
+    _console << " Normalization is abandoned!" << std::endl;
   }
   else
   {
     s = normalizeSolution(_norm_execflag!=EXEC_TIMESTEP && _norm_execflag!=EXEC_RESIDUAL);
     if (std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
-      Moose::out << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
+      _console << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
   }
 
   if (getParam<bool>("output_on_final") || std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
@@ -464,7 +464,7 @@ EigenExecutionerBase::printEigenvalue()
   ss << " Eigenvalue = " << std::fixed << std::setprecision(10) << _eigenvalue << std::endl;
   ss << "******************************************************* " << std::endl;
 
-  Moose::out << ss.str();
+  _console << ss.str();
 }
 
 EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters ()

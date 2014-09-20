@@ -25,14 +25,13 @@
 #include "InfixIterator.h"
 
 ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory) :
+    ConsoleStreamInterface(app),
     _app(app),
     _syntax(syntax),
     _action_factory(factory),
     _generator_valid(false),
     _show_actions(false),
     _show_parser(false),
-    _mesh(NULL),
-    _displaced_mesh(NULL),
     _problem(NULL),
     _executioner(NULL)
 {
@@ -63,6 +62,13 @@ ActionWarehouse::clear()
 
   _action_blocks.clear();
   _generator_valid = false;
+
+  // Due to the way ActionWarehouse is cleaned up (see MooseApp's
+  // destructor) we must guarantee that ActionWarehouse::clear()
+  // releases all the resources which have to be released _before_ the
+  // _comm object owned by the MooseApp is destroyed.
+  _mesh.reset();
+  _displaced_mesh.reset();
 }
 
 void
@@ -279,7 +285,7 @@ ActionWarehouse::printActionDependencySets() const
   }
 
   if (_show_actions)
-    Moose::out << oss.str() << std::endl;
+    _console << oss.str() << std::endl;
 }
 
 void
@@ -287,10 +293,10 @@ ActionWarehouse::executeAllActions()
 {
   if (_show_actions)
   {
-    Moose::out << "[DBG][ACT] Action Dependency Sets:\n";
+    _console << "[DBG][ACT] Action Dependency Sets:\n";
     printActionDependencySets();
 
-    Moose::out << "\n[DBG][ACT] Executing actions:" << std::endl;
+    _console << "\n[DBG][ACT] Executing actions:" << std::endl;
   }
 
 
@@ -312,7 +318,7 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
        ++act_iter)
   {
     if (_show_actions)
-      Moose::out << "[DBG][ACT] " << (*act_iter)->type() << " (" << COLOR_YELLOW << task << COLOR_DEFAULT << ")"  << std::endl;
+      _console << "[DBG][ACT] " << (*act_iter)->type() << " (" << COLOR_YELLOW << task << COLOR_DEFAULT << ")"  << std::endl;
     (*act_iter)->act();
   }
 }

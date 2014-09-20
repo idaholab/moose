@@ -70,6 +70,13 @@ private:
 
   /// Flag for aligning data in .csv file
   bool _align;
+
+  /// Decimal digits per number in the CSV file
+  unsigned int _precision;
+
+  /// Overwrite the default delimiter?
+  bool _set_delimiter;
+  std::string _delimiter;
 };
 
 #endif /* CSV_H */

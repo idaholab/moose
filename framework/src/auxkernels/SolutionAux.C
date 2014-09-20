@@ -25,8 +25,6 @@ InputParameters validParams<SolutionAux>()
   params.addParam<bool>("direct", false, "If true the meshes must be the same and then the values are simply copied over.");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor (a)  to be applied to the solution (x): ax+b, where b is the 'add_factor'");
   params.addParam<Real>("add_factor", 0.0, "Add this value (b) to the solution (x): ax+b, where a is the 'scale_factor'");
-
-  params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep_begin";
   return params;
 }
 
@@ -37,12 +35,11 @@ SolutionAux::SolutionAux(const std::string & name, InputParameters parameters) :
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
 {
+}
 
-  // Get all the variables from the SolutionUserObject
-  std::vector<std::string> vars = _solution_object.getParam<std::vector<std::string> >("nodal_variables");
-  std::vector<std::string> elem_vars = _solution_object.getParam<std::vector<std::string> >("elemental_variables");
-  vars.insert(vars.end(), elem_vars.begin(), elem_vars.end());
-
+void
+SolutionAux::initialSetup()
+{
   // If 'from_variable' is supplied, use the value
   if (isParamValid("from_variable"))
     _var_name = getParam<std::string>("from_variable");
@@ -50,6 +47,9 @@ SolutionAux::SolutionAux(const std::string & name, InputParameters parameters) :
   // If not, get the value from the SolutionUserObject
   else
   {
+    // Get all the variables from the SolutionUserObject
+    const std::vector<std::string> & vars = _solution_object.variableNames();
+
     // If there are more than one, throw an error
     if (vars.size() > 1)
       mooseError("The SolutionUserObject contains multiple variables, in this case the SolutionFunction must specifiy the desired variable in the input file with 'from_variable'");
@@ -58,8 +58,8 @@ SolutionAux::SolutionAux(const std::string & name, InputParameters parameters) :
     _var_name = vars[0];
   }
 
-  // Determine if 'from_variable' is elemental, if so then use direct extraction
-  if (std::find(elem_vars.begin(), elem_vars.end(), _var_name) != elem_vars.end())
+  //Determine if 'from_variable' is elemental, if so then use direct extraction
+  if (!_solution_object.isVariableNodal(_var_name))
     _direct = true;
 }
 
@@ -71,7 +71,9 @@ Real
 SolutionAux::computeValue()
 {
   // The value to output
-  Real output;  // _direct=true, extract the values using the dof
+  Real output;
+
+  // _direct=true, extract the values using the dof
   if (_direct)
   {
     if (isNodal())

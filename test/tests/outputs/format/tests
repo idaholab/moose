@@ -14,12 +14,13 @@
     type = 'RunApp'
     input = 'pps_file_out_warn.i'
     expect_out = "Postprocessor 'avg_block' has requested to be output by the 'gmv' output, but postprocessor output is not support by this type of output object."
+    allow_warnings = true
   [../]
 
   [./gmv_out_test]
     type = 'CheckFiles'
     input = 'output_test_gmv.i'
-    check_files = 'out_0000.gmv'
+    check_files = 'output_test_gmv_out_0000.gmv'
     recover = false
   [../]
 
@@ -33,20 +34,20 @@
   [./tecplot_out_test]
     type = 'CheckFiles'
     input = 'output_test_tecplot.i'
-    check_files = 'out_0000.dat'
+    check_files = 'output_test_tecplot_out_0000.dat'
   [../]
 
   [./tecplot_bin_test]
     type = 'CheckFiles'
     input = 'output_test_tecplot_binary.i'
-    check_files = 'bin_out_0000.plt'
+    check_files = 'output_test_tecplot_binary_out_0000.plt'
     tecplot = true
   [../]
 
   [./tecplot_bin_test_override]
     type = 'CheckFiles'
     input = 'output_test_tecplot_binary.i'
-    check_files = 'bin_out_0000.dat'
+    check_files = 'output_test_tecplot_binary_out_0000.dat'
     tecplot = false
   [../]
 
@@ -60,26 +61,26 @@
   [./gnuplot_ps_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot_ps.i'
-    check_files = 'out_ps.gp out_ps.dat'
+    check_files = 'output_test_gnuplot_ps_out.gp output_test_gnuplot_ps_out.dat'
   [../]
 
   [./gnuplot_png_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot.i'
-    check_files = 'out_png.gp out_png.dat'
-    cli_args = 'Outputs/file_base=out_png'
+    check_files = 'output_test_gnuplot_out.gp output_test_gnuplot_out.dat'
   [../]
 
   [./gnuplot_gif_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot_gif.i'
-    check_files = 'out_gif.gp out_gif.dat'
+    check_files = 'output_test_gnuplot_gif_out.gp output_test_gnuplot_gif_out.dat'
   [../]
 
   [./pps_screen_out_warn_test]
     type = 'RunApp'
     input = 'pps_screen_out_warn.i'
     expect_out = "A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the 'console' output object."
+    allow_warnings = true
   [../]
 
   [./show_input_test]
@@ -93,12 +94,12 @@
   [./sln_out_test]
     type = 'CheckFiles'
     input = 'output_test_sln.i'
-    check_files = 'out.slh'
+    check_files = 'output_test_sln_out.slh'
   [../]
 
   [./xdr_output]
     type = 'CheckFiles'
     input = 'output_test_xdr.i'
-    check_files = 'out_0001.xdr out_0001_mesh.xdr'
+    check_files = 'output_test_xdr_out_0001.xdr output_test_xdr_out_0001_mesh.xdr'
   [../]
 []

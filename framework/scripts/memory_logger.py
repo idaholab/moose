@@ -1,6 +1,86 @@
 #!/usr/bin/env python
-from tempfile import TemporaryFile
-import os, sys, re, socket, time, pickle, csv, uuid, subprocess, argparse, decimal, select
+from tempfile import TemporaryFile, SpooledTemporaryFile
+import os, sys, re, socket, time, pickle, csv, uuid, subprocess, argparse, decimal, select, platform
+
+class LLDB:
+  def _parseStackTrace(self, jibberish):
+    not_jibberish = re.findall(r'\(lldb\) bt(.*)\(lldb\)', jibberish, re.DOTALL)
+    if len(not_jibberish) != 0:
+      return not_jibberish[0].replace(' frame ', '')
+    else:
+      return 'Stack Trace failed:', jibberish
+
+  def _waitForResponse(self, wait=True):
+    while wait:
+      self.lldb_stdout.seek(self.last_position)
+      for line in self.lldb_stdout:
+        if line == '(lldb) ':
+          self.last_position = self.lldb_stdout.tell()
+          return True
+      time.sleep(0.05)
+    time.sleep(0.05)
+    return True
+
+  def getStackTrace(self, pid):
+    lldb_commands = [ 'attach -p ' + pid + '\n', 'bt\n', 'quit\n', 'Y\n' ]
+    self.lldb_stdout = SpooledTemporaryFile()
+    self.last_position = 0
+    lldb_process = subprocess.Popen(['lldb', '-x'], stdin=subprocess.PIPE, stdout=self.lldb_stdout, stderr=self.lldb_stdout)
+    while lldb_process.poll() == None:
+      for command in lldb_commands:
+        if command == lldb_commands[-1]:
+          lldb_commands = []
+          if self._waitForResponse(False):
+            # I have seen LLDB exit out from under us
+            try:
+              lldb_process.stdin.write(command)
+            except:
+              pass
+        elif self._waitForResponse():
+          lldb_process.stdin.write(command)
+    self.lldb_stdout.seek(0)
+    stack_trace = self._parseStackTrace(self.lldb_stdout.read())
+    self.lldb_stdout.close()
+    return stack_trace
+
+class GDB:
+  def _parseStackTrace(self, jibberish):
+    not_jibberish = re.findall(r'\(gdb\) (#.*)\(gdb\)', jibberish, re.DOTALL)
+    if len(not_jibberish) != 0:
+      return not_jibberish[0]
+    else:
+      return 'Stack Trace failed:', jibberish
+
+  def _waitForResponse(self, wait=True):
+    while wait:
+      self.gdb_stdout.seek(self.last_position)
+      for line in self.gdb_stdout:
+        if line == '(gdb) ':
+          self.last_position = self.gdb_stdout.tell()
+          return True
+      time.sleep(0.05)
+    time.sleep(0.05)
+    return True
+
+  def getStackTrace(self, pid):
+    gdb_commands = [ 'attach ' + pid + '\n', 'set verbose off\n', 'thread\n', 'apply\n', 'all\n', 'bt\n', 'quit\n', 'y\n' ]
+    self.gdb_stdout = SpooledTemporaryFile()
+    self.last_position = 0
+    gdb_process = subprocess.Popen(['gdb', '-nx'], stdin=subprocess.PIPE, stdout=self.gdb_stdout, stderr=self.gdb_stdout)
+    while gdb_process.poll() == None:
+      for command in gdb_commands:
+        if command == gdb_commands[-1]:
+          gdb_commands = []
+        elif self._waitForResponse():
+          # I have seen GDB exit out from under us
+          try:
+            gdb_process.stdin.write(command)
+          except:
+            pass
+    self.gdb_stdout.seek(0)
+    stack_trace = self._parseStackTrace(self.gdb_stdout.read())
+    self.gdb_stdout.close()
+    return stack_trace
 
 class Server:
   def __init__(self, arguments):
@@ -493,21 +573,16 @@ machine_id is supplied by the client class. This allows for multiple agents if d
     return 0
 
   def _getStack(self):
-    # A quick way to safely check for the avilability of needed tools
-    self._verifyCommand(['pstack'])
-
-    tmp_pids = self._getPIDs()
-    if self._darwin == True:
-      return ''
+    if self._darwin() == True:
+      stack_trace = LLDB()
     else:
-      # We are Linux
-      if tmp_pids != {}:
-        lowest_pid = sorted([x for x in tmp_pids.keys()])[0]
-        # This is very expensive on some systems (~1 second). Hence we only do this once with the first item found
-        tmp_proc = subprocess.Popen([which('pstack'), str(lowest_pid)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return tmp_proc.communicate()[0]
-      else:
-        return ''
+      stack_trace = GDB()
+    tmp_pids = self._getPIDs()
+    if tmp_pids != {}:
+      last_pid = sorted([x for x in tmp_pids.keys()])[-1]
+      return stack_trace.getStackTrace(str(last_pid))
+    else:
+      return ''
 
   def _getPIDs(self):
     pid_list = {}

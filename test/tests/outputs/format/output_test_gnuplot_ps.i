@@ -59,9 +59,8 @@
 []
 
 [Outputs]
-  file_base = out_ps
   output_initial = true
-  [./gnuplot]
+  [./out]
     type = Gnuplot
     extension = ps
   [../]

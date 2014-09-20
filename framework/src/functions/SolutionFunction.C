@@ -61,9 +61,7 @@ SolutionFunction::initialSetup()
   else
   {
     // Get all the variables from the SolutionUserObject
-    std::vector<std::string> vars = _solution_object_ptr->getParam<std::vector<std::string> >("nodal_variables");
-    std::vector<std::string> elem_vars = _solution_object_ptr->getParam<std::vector<std::string> >("elemental_variables");
-    vars.insert(vars.end(), elem_vars.begin(), elem_vars.end());
+    const std::vector<std::string> & vars = _solution_object_ptr->variableNames();
 
     // If there are more than one, throw an error
     if (vars.size() > 1)

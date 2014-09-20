@@ -16,6 +16,8 @@
 #include "MaterialOutputAction.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "AddOutputAction.h"
+#include "CoupledExecutioner.h"
 
 // Declare the output helper specializations
 template<>
@@ -48,19 +50,58 @@ MaterialOutputAction::~MaterialOutputAction()
 void
 MaterialOutputAction::act()
 {
-  // Do nothing if _problem is NULL (this is the case for coupled problems)
-  if (_problem == NULL)
+  // If running a coupled problem, loop through all the FEProblem objects
+  CoupledExecutioner * exec_ptr = dynamic_cast<CoupledExecutioner *>(_executioner);
+  if (exec_ptr != NULL)
   {
-    mooseWarning("FEProblem pointer is NULL, if you are executing a coupled problem this is expected. Auto material output is not supported for this case.");
-    return;
+    std::vector<FEProblem *> & problems = exec_ptr->getProblems();
+    for (std::vector<FEProblem *>::iterator it = problems.begin(); it != problems.end(); ++it)
+      buildMaterialOutputObjects(*it);
   }
 
+  // Error if _problem is NULL, I don't know how this would happen
+  else if (_problem == NULL)
+    mooseError("FEProblem pointer is NULL, it is needed for auto material property output");
+
+  // Build on the problem for this action, this is what should happend for everything except coupled problems
+  else
+    buildMaterialOutputObjects(_problem);
+}
+
+void
+MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
+{
+
   // Set the pointers to the MaterialData objects (Note, these pointers are not available at construction)
-  _block_material_data = _problem->getMaterialData(0);
-  _boundary_material_data = _problem->getBoundaryMaterialData(0);
+  _block_material_data = problem_ptr->getMaterialData(0);
+  _boundary_material_data = problem_ptr->getBoundaryMaterialData(0);
 
   // A complete list of all Material objects
-  std::vector<Material *> materials = _problem->getMaterialWarehouse(0).getMaterials();
+  std::vector<Material *> materials = problem_ptr->getMaterialWarehouse(0).getMaterials();
+
+  // Handle setting of material property output in [Outputs] sub-blocks
+  // Output objects can enable material property output, the following code examines the parameters
+  // for each Output object and sets a flag if any Output object has output set and also builds a list if the
+  // properties are limited via the 'show_material_properties' parameters
+  bool outputs_has_properties = false;
+  std::set<std::string> output_object_properties;
+
+  std::vector<Action *> output_actions =  _app.actionWarehouse().getActionsByName("add_output");
+  for (std::vector<Action *>::const_iterator it = output_actions.begin(); it != output_actions.end(); ++it)
+  {
+    // Extract the Output action
+    AddOutputAction * action = dynamic_cast<AddOutputAction *>(*it);
+    mooseAssert(action != NULL, "No AddOutputAction with the name " << *it << " exists");
+
+    // Add the material property names from the output object parameters to the list of properties to output
+    InputParameters & params = action->getObjectParams();
+    if (params.isParamValid("output_material_properties") && params.get<bool>("output_material_properties"))
+    {
+      outputs_has_properties = true;
+      std::vector<std::string> prop_names = params.get<std::vector<std::string> >("show_material_properties");
+      output_object_properties.insert(prop_names.begin(), prop_names.end());
+    }
+  }
 
   // Loop through each material object
   for (std::vector<Material *>::iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
@@ -71,19 +112,26 @@ MaterialOutputAction::act()
     // Extract the property names that will actually be output
     std::vector<std::string> output_properties = (*material_iter)->getParam<std::vector<std::string> >("output_properties");
 
-    /* Clear the list of variable names for the current material object, this list will be populated with all the
-    variables names for the current material object and is needed for purposes of controlling the which output objects
-    show the material property data */
+    // Append the properties listed in the Outputs block
+    if (outputs_has_properties)
+      output_properties.insert(output_properties.end(), output_object_properties.begin(), output_object_properties.end());
+
+    // Clear the list of variable names for the current material object, this list will be populated with all the
+    // variables names for the current material object and is needed for purposes of controlling the which output objects
+    // show the material property data
     _material_variable_names.clear();
 
-    // Only continue if the the 'outputs' input parameter is not equal to 'none'
-    if (outputs.find("none") == outputs.end())
+    // Create necessary outputs for the properties if:
+    //   (1) The Outputs block has material output enabled
+    //   (2) If the Material object itself has set the 'outputs' parameter
+    if (outputs_has_properties || outputs.find("none") == outputs.end())
     {
-      // Loop over the material property names
+      // Add the material property for output if the name is contained in the 'output_properties' list
+      // or if the list is empty (all properties)
       const std::set<std::string> names = (*material_iter)->getSuppliedItems();
       for (std::set<std::string>::const_iterator name_iter = names.begin(); name_iter != names.end(); ++name_iter)
       {
-        // Add the material property for output if the name is contained in the 'output_properties' list or if the list is empty
+        // Add the material property for output
         if (output_properties.empty() || std::find(output_properties.begin(), output_properties.end(), *name_iter) != output_properties.end())
         {
           if (hasProperty<Real>(*name_iter))
@@ -99,22 +147,32 @@ MaterialOutputAction::act()
             mooseWarning("The type for material property '" << *name_iter << "' is not supported for automatic output.");
         }
 
-        // Update the OutputWarehouse
-        /* If 'outputs' is supplied with a list of output objects to limit the output to this information must be communicated
-         * to output objects, which is done via the OutputWarehouse */
+        // If the material object as limited outputs, store the variables associated with the output objects
         if (!outputs.empty())
-          _output_warehouse.updateMaterialOutput(outputs, _material_variable_names);
+          for (std::set<OutputName>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
+            _material_variable_names_map[*it].insert(_material_variable_names.begin(), _material_variable_names.end());
+
       }
     }
   }
 
   // Create the AuxVariables
   FEType fe_type(CONSTANT, MONOMIAL); // currently only elemental variables are support for material property output
-  for (std::set<AuxVariableName>::iterator it = _variable_names.begin(); it != _variable_names.end(); ++it)
-    _problem->addAuxVariable(*it, fe_type);
+  for (std::set<std::string>::iterator it = _variable_names.begin(); it != _variable_names.end(); ++it)
+    problem_ptr->addAuxVariable(*it, fe_type);
 
-  // Update the complete list of material related AuxVariables to the OutputWarehouse
-  _output_warehouse.setMaterialOutputVariables(_variable_names);
+  // When a Material object has 'output_properties' defined all other properties not listed must be added to
+  // the hide list for the output objects so that properties that are not desired do not appear.
+  for (std::map<OutputName, std::set<std::string> >::const_iterator it = _material_variable_names_map.begin();
+       it != _material_variable_names_map.end(); ++it)
+  {
+    std::set<std::string> hide;
+    std::set_difference(_variable_names.begin(), _variable_names.end(),
+                        it->second.begin(), it->second.end(),
+                        std::inserter(hide, hide.begin()));
+
+    _output_warehouse.addInterfaceHideVariables(it->first, hide);
+  }
 }
 
 MooseObjectAction *

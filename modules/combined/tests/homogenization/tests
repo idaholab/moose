@@ -17,5 +17,6 @@
     input = 'anisoShortFiber.i'
     exodiff = 'anisoShortFiber_out.e'
     custom_cmp = 'anisoShortFiber.exodiff'
+    compiler = 'GCC CLANG'
   [../]
 []

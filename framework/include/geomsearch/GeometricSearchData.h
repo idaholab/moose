@@ -66,6 +66,18 @@ public:
    */
   void reinit();
 
+  /**
+   * Clear out the Penetration Locators so they will redo the search.
+   */
+  void clearNearestNodeLocators();
+
+  /**
+   * Maximum percentage through the search patch that any NearestNodeLocator had to look.
+   *
+   * As this goes towards 1.0 it's indicative of needing to rebuild the patches.
+   */
+  Real maxPatchPercentage();
+
 //protected:
   SubProblem & _subproblem;
   MooseMesh & _mesh;

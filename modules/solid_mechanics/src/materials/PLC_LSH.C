@@ -87,7 +87,7 @@ PLC_LSH::computeStress()
 
   if (_output_iteration_info == true)
   {
-    Moose::out
+    _console
       << std::endl
       << "iteration output for combined creep-plasticity solve:"
       << " time=" <<_t
@@ -140,7 +140,7 @@ PLC_LSH::computeStress()
 
     if (_output_iteration_info == true)
     {
-      Moose::out
+      _console
         << "stress_it=" << counter
         << " rel_delS=" << delS/first_delS
         << " rel_tol="  << _relative_tolerance
@@ -213,7 +213,7 @@ PLC_LSH::computeCreep( const SymmTensor & strain_increment,
 
     if (_output_iteration_info == true)
     {
-      Moose::out
+      _console
       << "crp_it="    << it
       << " trl_strs=" << effective_trial_stress
       << " phi="      << phi
@@ -306,7 +306,7 @@ PLC_LSH::computeLSH( const SymmTensor & strain_increment,
 
       if (_output_iteration_info == true)
       {
-        Moose::out
+        _console
           << "pls_it="    << it
           << " trl_strs=" << effective_trial_stress
           << " del_p="    << scalar_plastic_strain_increment

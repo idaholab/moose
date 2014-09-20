@@ -117,9 +117,8 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
   }
 
   if (_output_iteration_info)
-  {
-    Moose::out << iter_output.str();
-  }
+    _console << iter_output.str();
+
 
   if (it == _max_its &&
      norm_residual > _absolute_tolerance &&

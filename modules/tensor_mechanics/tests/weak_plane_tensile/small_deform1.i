@@ -1,7 +1,7 @@
 # checking for small deformation
 # A single element is stretched by 1E-6m in x,y and z directions.
 # stress_zz = Youngs Modulus*Strain = 2E6*1E-6 = 2 Pa
-# Tension cutoff is set to 1Pa
+# wpt_tensile_strength is set to 1Pa
 # Then the final stress should return to the yeild surface and its value should be 1pa.
 
 [Mesh]
@@ -166,13 +166,14 @@
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
-    tension_cutoff = 1.0
-    wpt_f_tol = 1E-6
+    wpt_tensile_strength = 1.0
+    yield_function_tolerance = 1E-6
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
     wpt_normal_vector = '0 0 1'
     wpt_normal_rotates = false
-    wpt_r_tol = 1E-5
+    ep_plastic_tolerance = 1E-5
+    internal_constraint_tolerance = 1E-5
   [../]
 []
 

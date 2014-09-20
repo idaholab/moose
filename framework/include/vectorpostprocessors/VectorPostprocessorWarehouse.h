@@ -93,7 +93,7 @@ public:
    * Add a VectorPostprocessor
    * @param VectorPostprocessor VectorPostprocessor being added
    */
-  void addVectorPostprocessor(VectorPostprocessor *VectorPostprocessor);
+  void addVectorPostprocessor(MooseSharedPointer<VectorPostprocessor> vector_postprocessor);
 
   /**
    * Get the list of blocks with VectorPostprocessors
@@ -144,6 +144,10 @@ protected:
   std::set<BoundaryID> _nodeset_ids_with_VectorPostprocessors;
   /// All of the block ids that have nodal VectorPostprocessors specified to act on them
   std::set<SubdomainID> _block_ids_with_nodal_VectorPostprocessors;
+
+private:
+  /// Hold shared pointers for automatic cleanup
+  std::vector<MooseSharedPointer<VectorPostprocessor> > _all_ptrs;
 };
 
 #endif // VECTORPOSTPROCESSORWAREHOUSE_H

@@ -71,7 +71,7 @@ RungeKutta2::solve()
   _fe_problem.advanceState();
 
   // ---------------------------------
-  Moose::out << " 2. stage" << std::endl;
+  _console << " 2. stage" << std::endl;
   _stage = 2;
   _fe_problem.time() = time;
   _fe_problem.timeOld() = time_half;

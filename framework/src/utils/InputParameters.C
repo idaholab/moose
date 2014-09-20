@@ -72,13 +72,24 @@ InputParameters::addClassDescription(const std::string &doc_string)
 void
 InputParameters::set_attributes(const std::string & name, bool inserted_only)
 {
-  // valid_params don't make sense for MooseEnums
-  if (!inserted_only && !have_parameter<MooseEnum>(name))
-    _valid_params.insert(name);
+  if (!inserted_only)
+  {
+    /**
+     * "_set_by_add_param" and "_deprecated_params" are not populated until after
+     * the default value has already been set in libMesh (first callback to this
+     * method). Therefore if a variable is in/not in one of these sets, you can
+     * be assured it was put there outside of the "addParam*()" calls.
+     */
+    _set_by_add_param.erase(name);
 
-  /* If set_attributes is called then the user has changed it from the default value
-     set by addParam, thus remove if from the list */
-  _set_by_add_param.erase(name);
+    // valid_params don't make sense for MooseEnums
+    if (!have_parameter<MooseEnum>(name) && !have_parameter<MultiMooseEnum>(name))
+      _valid_params.insert(name);
+
+    std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
+    if (pos != _deprecated_params.end())
+      mooseWarning("The parameter " << name << " is deprecated.\n" << pos->second);
+  }
 }
 
 std::string
@@ -190,6 +201,8 @@ InputParameters::isParamValid(const std::string &name) const
 {
   if (have_parameter<MooseEnum>(name))
     return get<MooseEnum>(name).isValid();
+  else if (have_parameter<MultiMooseEnum>(name))
+    return get<MultiMooseEnum>(name).isValid();
   else
     return _valid_params.find(name) != _valid_params.end();
 }
@@ -294,6 +307,12 @@ InputParameters::checkParams(const std::string &prefix)
 
   if (!oss.str().empty())
     mooseError(oss.str());
+}
+
+bool
+InputParameters::hasCoupledValue(const std::string & coupling_name) const
+{
+  return _coupled_vars.find(coupling_name) != _coupled_vars.end();
 }
 
 bool
@@ -451,6 +470,20 @@ InputParameters::applyParameters(const InputParameters & common)
       delete _values[common_name];
       _values[common_name] = it->second->clone();
       set_attributes(common_name, false);
+    }
+  }
+
+  // Loop through the coupled variables
+  for (std::set<std::string>::const_iterator it = common.coupledVarsBegin(); it != common.coupledVarsEnd(); ++it)
+  {
+    // If the local parameters has a coupled variable, populate it with the value from the common parameters
+    const std::string var_name = *it;
+    if (hasCoupledValue(var_name))
+    {
+      if (common.hasDefaultCoupledValue(var_name))
+        addCoupledVar(var_name, common.defaultCoupledValue(var_name), common.getDocString(var_name));
+      else
+        addCoupledVar(var_name, common.getDocString(var_name));
     }
   }
 }

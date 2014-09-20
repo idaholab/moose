@@ -2,7 +2,6 @@
 #include "MooseUtils.h"
 #include "FEProblem.h"
 #include "Factory.h"
-#include "MooseEnum.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -39,15 +38,13 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
   std::vector<NonlinearVariableName> vars = getParam<std::vector<NonlinearVariableName> >("primary_species");
   std::vector<std::string> reactions = getParam<std::vector<std::string> >("kin_reactions");
 
-  Moose::out<< "Solid kinetic reaction list:" << "\n";
+  _console << "Solid kinetic reaction list:" << "\n";
   for (unsigned int i=0; i < reactions.size(); i++)
-  {
-    Moose::out<< reactions[i] << "\n";
-  }
+    _console << reactions[i] << "\n";
 
   for (unsigned int i=0; i < vars.size(); i++)
   {
-    Moose::out << "primary species - " << vars[i] << "\n";
+    _console << "primary species - " << vars[i] << "\n";
     std::vector<bool> primary_participation(reactions.size(), false);
     std::vector<std::string> solid_kin_species(reactions.size());
     std::vector<Real> weight;
@@ -64,7 +61,7 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
 
       for (unsigned int k=0; k < tokens.size(); k++)
       {
-        Moose::out << tokens[k] << "\t";
+        _console << tokens[k] << "\t";
         std::vector<std::string> stos_vars;
         MooseUtils::tokenize(tokens[k], stos_vars, 1, "()");
         if (stos_vars.size() == 2)
@@ -74,8 +71,8 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
           iss >> coef;
           stos[k] = coef;
           rxn_vars[k] = stos_vars[1];
-          Moose::out << "stochiometric: " << stos[k] << "\t";
-          Moose::out << "reactant: " << rxn_vars[k] << "\n";
+          _console << "stochiometric: " << stos[k] << "\t";
+          _console << "reactant: " << rxn_vars[k] << "\n";
           // Check the participation of primary species
           if (rxn_vars[k] == vars[i]) primary_participation[j] = true;
         }
@@ -85,7 +82,7 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
         }
       }
       // Done parsing, recorded stochiometric and variables into separate arrays
-      Moose::out << "whether primary present (0 is not): " << primary_participation[j] << "\n";
+      _console << "whether primary present (0 is not): " << primary_participation[j] << "\n";
 
 
       if (primary_participation[j])
@@ -96,10 +93,10 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
           if (rxn_vars[m] == vars[i])
           {
             weight.push_back(stos[m]);
-            Moose::out << "weight for " << rxn_vars[m] <<" : " << weight[weight.size()-1] << "\n";
+            _console << "weight for " << rxn_vars[m] <<" : " << weight[weight.size()-1] << "\n";
           }
         }
-        Moose::out << "solid kinetic species: " << solid_kin_species[j] << "\n";
+        _console << "solid kinetic species: " << solid_kin_species[j] << "\n";
 
         std::vector<VariableName> coupled_var(1);
         coupled_var[0] = solid_kin_species[j];
@@ -111,10 +108,10 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
         params_kin.set<std::vector<VariableName> >("v") = coupled_var;
         _problem->addKernel("CoupledBEKinetic", vars[i]+"_"+solid_kin_species[j]+"_kin", params_kin);
 
-        Moose::out << vars[i]+"_"+solid_kin_species[j]+"_kin" << "\n";
+        _console << vars[i]+"_"+solid_kin_species[j]+"_kin" << "\n";
         params_kin.print();
       }
     }
-    Moose::out << "\n";
+    _console << "\n";
   }
 }

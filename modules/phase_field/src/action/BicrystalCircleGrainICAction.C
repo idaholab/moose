@@ -22,7 +22,7 @@ InputParameters validParams<BicrystalCircleGrainICAction>()
   InputParameters params = validParams<Action>();
 
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
-  params.addRequiredParam<unsigned int>("crys_num", "Number of grains, should be 2");
+  params.addRequiredParam<unsigned int>("op_num", "Number of grains, should be 2");
   params.addRequiredParam<Real>("radius", "Void radius");
   params.addRequiredParam<Real>("x", "The x coordinate of the circle grain center");
   params.addRequiredParam<Real>("y", "The y coordinate of the circle grain center");
@@ -37,7 +37,7 @@ InputParameters validParams<BicrystalCircleGrainICAction>()
 BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const std::string & name, InputParameters params) :
     Action(name, params),
     _var_name_base(getParam<std::string>("var_name_base")),
-    _crys_num(getParam<unsigned int>("crys_num")),
+    _op_num(getParam<unsigned int>("op_num")),
     _radius(getParam<Real>("radius")),
     _x(getParam<Real>("x")),
     _y(getParam<Real>("y")),
@@ -45,8 +45,8 @@ BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const std::string & n
     _int_width(getParam<Real>("int_width")),
     _3D_sphere(getParam<bool>("3D_sphere"))
 {
-  if (_crys_num != 2)
-    mooseError("crys_num must equal 2 for bicrystal ICs");
+  if (_op_num != 2)
+    mooseError("op_num must equal 2 for bicrystal ICs");
 }
 
 void
@@ -57,12 +57,12 @@ BicrystalCircleGrainICAction::act()
 #endif
 
   // Loop through the number of order parameters
-  for (unsigned int crys = 0; crys < _crys_num; crys++)
+  for (unsigned int op = 0; op < _op_num; op++)
   {
     //Create variable names
     std::string var_name = _var_name_base;
     std::stringstream out;
-    out << crys;
+    out << op;
     var_name.append(out.str());
 
     //Set parameters for SmoothCircleIC
@@ -74,7 +74,7 @@ BicrystalCircleGrainICAction::act()
     poly_params.set<Real>("radius") = _radius;
     poly_params.set<Real>("int_width") = _int_width;
     poly_params.set<bool>("3D_spheres") = _3D_sphere;
-    if (crys == 0)
+    if (op == 0)
     {
       //Values for circle grain
       poly_params.set<Real>("invalue") = 1.0;

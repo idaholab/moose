@@ -36,6 +36,7 @@
   [./nodal_layered_average]
     type = SpatialUserObjectAux
     variable = nodal_layered_average
+    execute_on = timestep
     user_object = average
   [../]
 []

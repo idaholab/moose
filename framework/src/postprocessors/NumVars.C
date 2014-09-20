@@ -20,7 +20,7 @@ InputParameters validParams<NumVars>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
-  MooseEnum system_options("nonlinear, auxiliary", "nonlinear");
+  MooseEnum system_options("nonlinear auxiliary", "nonlinear");
   params.addParam<MooseEnum>("system", system_options, "The system for which you want to print the number of variables.");
 
   return params;

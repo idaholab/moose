@@ -28,7 +28,8 @@ InputParameters validParams<Problem>()
 Problem::Problem(const std::string & name, InputParameters parameters) :
     MooseObject(name, parameters),
     _cli_option_found(false),
-    _color_output(false)
+    _color_output(false),
+    _termination_requested(false)
 {
 }
 

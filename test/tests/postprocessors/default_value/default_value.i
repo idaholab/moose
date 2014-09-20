@@ -35,7 +35,7 @@
     boundary = right
     value = 1
   [../]
-[]g
+[]
 
 [Executioner]
   type = Transient

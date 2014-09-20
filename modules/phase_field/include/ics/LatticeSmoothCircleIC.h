@@ -28,7 +28,9 @@ public:
    * @param var_name The variable this InitialCondtion is supposed to provide values for.
    */
   LatticeSmoothCircleIC(const std::string & name,
-                         InputParameters parameters);
+                        InputParameters parameters);
+
+  virtual void initialSetup();
 
   virtual void computeCircleRadii();
 
@@ -38,12 +40,14 @@ protected:
   Real _lattice_variation;
   std::vector<unsigned int> _circles_per_side;
   unsigned int _numbub;
-  Real _Lx;
-  Real _Ly;
-  Real _Lz;
 
   Real _radius;
   Real _radius_variation;
+  MooseEnum _radius_variation_type;
+
+  Point _bottom_left;
+  Point _top_right;
+  Point _range;
 };
 
 #endif //LATTICESMOOTHCIRCLEIC_H
