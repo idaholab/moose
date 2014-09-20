@@ -36,12 +36,12 @@ class TestHarness:
   def __init__(self, argv, app_name, moose_dir):
     self.factory = Factory()
 
-    # Get dependant applications and load dynamic tester plugins
+    # Get dependent applications and load dynamic tester plugins
     # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
     dirs = [os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))]
     sys.path.append(os.path.join(moose_dir, 'framework', 'scripts'))   # For find_dep_apps.py
 
-    # Use the find_dep_apps script to get the dependant applications for an app
+    # Use the find_dep_apps script to get the dependent applications for an app
     import find_dep_apps
     depend_app_dirs = find_dep_apps.findDepApps(app_name)
     dirs.extend([os.path.join(my_dir, 'scripts', 'TestHarness') for my_dir in depend_app_dirs.split('\n')])
