@@ -26,7 +26,7 @@
     input = 'lots_of_variables.i'
     exodiff = 'lots_of_variables_out.e'
     max_parallel = 1
-    max_time = 20
+    max_time = 30
     compiler = 'GCC CLANG'
     method = 'OPT OPROF'
     valgrind = 'HEAVY'
