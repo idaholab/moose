@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, re
+import sys, os, re
 
 class GPNode:
   def __init__(self, name, parent):
@@ -30,11 +30,14 @@ class GPNode:
     for child in self.children_list:
       self.children[child].Print(prefix + self.name + '/')
 
-  def fullName(self):
+  def fullName(self, no_root=False):
     if self.parent == None:
-      return self.name
+      if no_root and self.name == 'root':
+        return ''
+      else:
+        return self.name
     else:
-      return self.parent.fullName() + '/' + self.name
+      return self.parent.fullName(no_root) + '/' + self.name
 
 
 class ParseException(Exception):
@@ -79,6 +82,9 @@ class ParseGetPot:
         if m:
           child.comments.append(m.group(1))
 
+        if child_name in current_node.children:
+          raise ParseException("DuplicateSymbol", 'Duplicate Section Name "' + os.getcwd() + '/' + self.file_name + ":" + current_node.fullName(True) + '/' + child_name + '"')
+
         current_node.children[child_name] = child
         current_node.children_list.append(child_name)
 
@@ -119,7 +125,10 @@ class ParseGetPot:
 
             current_position += 1
           if not found_it:
-            raise ParseException("TODO", "TODO")
+            raise ParseException("SyntaxError", "Unmatched token in Parser")
+
+        if param_name in current_node.params:
+          raise ParseException("DuplicateSymbol", 'Duplicate Parameter Name "' + os.getcwd() + '/' + self.file_name + ":" + current_node.fullName(True) + '/' + param_name + '"')
 
         current_node.params[param_name] = param_value.strip("'")
         current_node.params_list.append(param_name)
