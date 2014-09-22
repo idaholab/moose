@@ -42,8 +42,10 @@ public:
 
   // forward delcarations
   class EBTerm;
+  class EBTermNode;
   class EBFunction;
   typedef std::vector<EBTerm> EBTermList;
+  typedef std::vector<EBTermNode *> EBTermNodeList;
 
   // Base class for nodes in the expression tree
   class EBTermNode
@@ -53,7 +55,7 @@ public:
     virtual EBTermNode * clone() const = 0;
 
     virtual std::string stringify() const = 0;
-    virtual unsigned int substitute(const std::string & find_str, EBTermNode *replace) { return 0; };
+    virtual unsigned int substitute(const std::vector<std::string> & find_str, EBTermNodeList replace) { return 0; };
     virtual int precedence() const = 0;
     friend std::ostream& operator<< (std::ostream & os, const EBTermNode & node) { return os << node.stringify(); };
   };
@@ -92,7 +94,7 @@ public:
     EBUnaryTermNode(EBTermNode * _subnode) : subnode(_subnode) {};
     virtual ~EBUnaryTermNode() { delete subnode; };
 
-    virtual unsigned int substitute(const std::string & find_str, EBTermNode *replace);
+    virtual unsigned int substitute(const std::vector<std::string> & find_str, EBTermNodeList replace);
 
   protected:
     EBTermNode *subnode;
@@ -137,7 +139,7 @@ public:
     EBBinaryTermNode(EBTermNode * _left, EBTermNode * _right) : left(_left), right(_right) {};
     virtual ~EBBinaryTermNode() { delete left; delete right; };
 
-    virtual unsigned int substitute(const std::string & find_str, EBTermNode *replace);
+    virtual unsigned int substitute(const std::vector<std::string> & find_str, EBTermNodeList replace);
 
   protected:
     EBTermNode *left, *right;
@@ -208,6 +210,7 @@ public:
 
     // perform a substitution (returns substituton count)
     unsigned int substitute(const EBTerm & find, const EBTerm & replace);
+    unsigned int substitute(const EBTermList & find, const EBTermList & replace);
 
   protected:
     EBTermNode *root;

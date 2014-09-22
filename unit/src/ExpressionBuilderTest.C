@@ -33,9 +33,15 @@ void ExpressionBuilderTest::test()
 
   EBFunction G, H;
 
+  // Test using functions in terms
   G((x,y)) = f;
   H((x)) = -G((x,b)) + c;
 
   CPPUNIT_ASSERT( std::string(H) == "-(x^2+4^1+3*4*-1)+8.9" );
   CPPUNIT_ASSERT( G.args() == "x,y" );
+
+  // Test substitution subtleties (this would return x^x if substitution were performed sequentially, which they are not.. ..because that would be dumb!)
+  G((x,y)) = pow(x,y);
+  CPPUNIT_ASSERT( std::string(G) == "x^y" );
+  CPPUNIT_ASSERT( std::string(G((y,x))) == "y^x" );
 }

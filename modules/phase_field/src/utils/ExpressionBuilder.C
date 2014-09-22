@@ -1,5 +1,7 @@
 #include "ExpressionBuilder.h"
 
+#include "MooseError.h"
+
 ExpressionBuilder::EBTermList
 ExpressionBuilder::EBTerm::operator, (const ExpressionBuilder::EBTerm & rarg)
 {
@@ -130,9 +132,7 @@ ExpressionBuilder::EBFunction::operator() (const ExpressionBuilder::EBTerm & arg
 ExpressionBuilder::EBFunction &
 ExpressionBuilder::EBFunction::operator() (const ExpressionBuilder::EBTermList & args)
 {
-  // THIS leaks!
   this->eval_arguments = EBTermList(args);
-
   return *this;
 }
 
@@ -147,14 +147,7 @@ ExpressionBuilder::EBFunction::operator= (const ExpressionBuilder::EBTerm & term
 ExpressionBuilder::EBFunction::operator ExpressionBuilder::EBTerm() const
 {
   EBTerm result(term);
-  unsigned int narg = arguments.size();
-
-  if (narg == eval_arguments.size())
-    // TODO: this substitution is dangerously wrong! h(a,b,c) = a+2*b+3*c; h(b,c,c) -> c+2*c+3*c !!!
-    for (unsigned i = 0; i < narg; ++i)
-      result.substitute(arguments[i], eval_arguments[i]);
-  // else ERROR;
-
+  result.substitute(arguments, eval_arguments);
   return result;
 }
 
@@ -223,55 +216,92 @@ ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, const Expr
 }
 
 unsigned int
-ExpressionBuilder::EBBinaryTermNode::substitute(const std::string & find_str, EBTermNode * replace)
+ExpressionBuilder::EBBinaryTermNode::substitute(const std::vector<std::string> & find_str, EBTermNodeList replace)
 {
+  std::string left_str = left->stringify();
+  std::string right_str = right->stringify();
+  unsigned int nfind = find_str.size();
   unsigned int success = 0;
 
-  if (left->stringify() == find_str)
+  for (unsigned int i = 0; i < nfind; ++i)
   {
-    delete left;
-    left = replace->clone();
-    success++;
+    if (left_str == find_str[i])
+    {
+      delete left;
+      left = replace[i]->clone();
+      success = 1;
+      break;
+    }
   }
-  else
+
+  if (success == 0)
     success += left->substitute(find_str, replace);
 
-  if (right->stringify() == find_str)
+  for (unsigned int i = 0; i < nfind; ++i)
   {
-    delete right;
-    right = replace->clone();
-    success++;
+    if (right_str == find_str[i])
+    {
+      delete right;
+      right = replace[i]->clone();
+      return success + 1;
+    }
   }
-  else
-    success += right->substitute(find_str, replace);
 
-  return success;
+  return success + right->substitute(find_str, replace);
 }
 
 unsigned int
-ExpressionBuilder::EBUnaryTermNode::substitute(const std::string & find_str, EBTermNode * replace)
+ExpressionBuilder::EBUnaryTermNode::substitute(const std::vector<std::string> & find_str, EBTermNodeList replace)
 {
-  if (subnode->stringify() == find_str)
+  std::string subnode_str = subnode->stringify();
+  unsigned int nfind = find_str.size();
+
+  for (unsigned int i = 0; i < nfind; ++i)
   {
-    delete subnode;
-    subnode = replace->clone();
-    return 1;
+    if (subnode_str == find_str[i])
+    {
+      delete subnode;
+      subnode = replace[i]->clone();
+      return 1;
+    }
   }
-  else
-    return subnode->substitute(find_str, replace);
+
+  return subnode->substitute(find_str, replace);
 }
 
 unsigned int
 ExpressionBuilder::EBTerm::substitute(const EBTerm & find, const EBTerm & replace)
 {
-  std::string find_str = find.root->stringify();
+  EBTermList find_list(1), replace_list(1);
+  find_list[0] = find;
+  replace_list[0] = replace;
+  return substitute(find_list, replace_list);
+}
 
-  if (root->stringify() == find_str)
+unsigned int
+ExpressionBuilder::EBTerm::substitute(const EBTermList & find, const EBTermList & replace)
+{
+  unsigned int nfind = find.size();
+  if (nfind != replace.size())
+    mooseError("Find and replace EBTerm lists must have equal length.");
+
+  std::string root_str = root->stringify();
+
+  EBTermNodeList replace_terms(nfind);
+  std::vector<std::string> find_str(nfind);
+
+  for (unsigned int i = 0; i < nfind; ++i)
   {
-    delete root;
-    root = replace.root->clone();
-    return 1;
+    find_str[i] = find[i].root->stringify();
+    replace_terms[i] = replace[i].root;
+
+    if (root_str == find_str[i])
+    {
+      delete root;
+      root = replace_terms[i]->clone();
+      return 1;
+    }
   }
-  else
-    return root->substitute(find_str, replace.root);
+
+  return root->substitute(find_str, replace_terms);
 }
