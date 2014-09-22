@@ -10,15 +10,42 @@
 
 using namespace libMesh;
 
+/**
+ * ExpressionBuilder adds an interface to derived classes that enables
+ * convenient construction of FParser expressions through operator overloading.
+ * It exposes the new types EBTerm and EBFunction
+ * Variables used in your expressions are of type EBTerm. The following declares
+ * three variables that can be used in an expression:
+ *
+ * EBTerm c1("c1"), c2("c3"), phi("phi");
+ *
+ * Declare a function 'G' and define it. Note the double bracket syntax '(())'':
+ *
+ * EBFunction G;
+ * G((c1, c2, c3)) = c1 + 2 * c2 + 3 * pow(c3, 2);
+ *
+ * Performing a substitution is as easy as:
+ * EBFunction H;
+ * H((c1, c2)) = G((c1, c2, 1-c1-c2))
+ *
+ * Use the ```<<``` io operator to output functions or terms. Or use explicit or
+ * implicit casts from EBFunction to std::string``` to pass a function to the
+ * FParser Parse method. FParser variables are built using the ```args()``` method.
+ *
+ * FunctionParserADBase<Real> GParser;
+ * GParser.Parse(G, G.args);
+ */
 class ExpressionBuilder
 {
 public:
   ExpressionBuilder() {};
 
+  // forward delcarations
   class EBTerm;
   class EBFunction;
   typedef std::vector<EBTerm> EBTermList;
 
+  // Base class for nodes in the expression tree
   class EBTermNode
   {
   public:
@@ -31,7 +58,7 @@ public:
     friend std::ostream& operator<< (std::ostream & os, const EBTermNode & node) { return os << node.stringify(); };
   };
 
-
+  // Template class for leaf nodes holding numbers in the expression tree
   template<typename T>
   class EBNumberNode : public EBTermNode
   {
@@ -45,7 +72,7 @@ public:
     virtual int precedence() const { return 0; };
   };
 
-
+  // Template class for leaf nodes holding symbols (i.e. variables) in the expression tree
   class EBSymbolNode : public EBTermNode
   {
     std::string symbol;
@@ -58,7 +85,52 @@ public:
     virtual int precedence() const { return 0; };
   };
 
+  // Base class for nodes with a single sub node (i.e. functions or operators taking one argument)
+  class EBUnaryTermNode : public EBTermNode
+  {
+  public:
+    EBUnaryTermNode(EBTermNode * _subnode) : subnode(_subnode) {};
+    virtual ~EBUnaryTermNode() { delete subnode; };
 
+    virtual unsigned int substitute(const std::string & find_str, EBTermNode *replace);
+
+  protected:
+    EBTermNode *subnode;
+  };
+
+  // Node representing a function with two arguments
+  class EBUnaryFuncTermNode : public EBUnaryTermNode
+  {
+  public:
+    enum NodeType { SIN, COS, TAN, ABS, LOG, LOG2, LOG10, EXP, SINH, COSH } type;
+
+    EBUnaryFuncTermNode(EBTermNode * _subnode, NodeType _type) :
+      EBUnaryTermNode(_subnode), type(_type) {};
+    virtual EBUnaryFuncTermNode * clone() const {
+      return new EBUnaryFuncTermNode(subnode->clone(), type);
+    };
+
+    virtual std::string stringify() const;
+    virtual int precedence() const { return 2; };
+  };
+
+  // Node representing a unary operator
+  class EBUnaryOpTermNode : public EBUnaryTermNode
+  {
+  public:
+    enum NodeType { NEG, LOGICNOT } type;
+
+    EBUnaryOpTermNode(EBTermNode * _subnode, NodeType _type) :
+      EBUnaryTermNode(_subnode), type(_type) {};
+    virtual EBUnaryOpTermNode * clone() const {
+      return new EBUnaryOpTermNode(subnode->clone(), type);
+    };
+
+    virtual std::string stringify() const;
+    virtual int precedence() const { return 3; };
+  };
+
+  // Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
   class EBBinaryTermNode : public EBTermNode
   {
   public:
@@ -71,23 +143,7 @@ public:
     EBTermNode *left, *right;
   };
 
-
-  class EBBinaryFuncTermNode : public EBBinaryTermNode
-  {
-  public:
-    enum NodeType { MIN, MAX, ATAN2, HYPOT } type;
-
-    EBBinaryFuncTermNode(EBTermNode * _left, EBTermNode * _right, NodeType _type) :
-      EBBinaryTermNode(_left, _right), type(_type) {};
-    virtual EBBinaryFuncTermNode * clone() const {
-      return new EBBinaryFuncTermNode(left->clone(), right->clone(), type);
-    };
-
-    virtual std::string stringify() const;
-    virtual int precedence() const { return 2; };
-  };
-
-
+  // Node representing a binary operator
   class EBBinaryOpTermNode : public EBBinaryTermNode
   {
   public:
@@ -106,29 +162,16 @@ public:
     NodeType type;
   };
 
-
-  class EBUnaryTermNode : public EBTermNode
+  // Node representing a function with two arguments
+  class EBBinaryFuncTermNode : public EBBinaryTermNode
   {
   public:
-    EBUnaryTermNode(EBTermNode * _subnode) : subnode(_subnode) {};
-    virtual ~EBUnaryTermNode() { delete subnode; };
+    enum NodeType { MIN, MAX, ATAN2, HYPOT } type;
 
-    virtual unsigned int substitute(const std::string & find_str, EBTermNode *replace);
-
-  protected:
-    EBTermNode *subnode;
-  };
-
-
-  class EBUnaryFuncTermNode : public EBUnaryTermNode
-  {
-  public:
-    enum NodeType { SIN, COS, TAN, ABS, LOG, LOG2, LOG10, EXP, SINH, COSH } type;
-
-    EBUnaryFuncTermNode(EBTermNode * _subnode, NodeType _type) :
-      EBUnaryTermNode(_subnode), type(_type) {};
-    virtual EBUnaryFuncTermNode * clone() const {
-      return new EBUnaryFuncTermNode(subnode->clone(), type);
+    EBBinaryFuncTermNode(EBTermNode * _left, EBTermNode * _right, NodeType _type) :
+      EBBinaryTermNode(_left, _right), type(_type) {};
+    virtual EBBinaryFuncTermNode * clone() const {
+      return new EBBinaryFuncTermNode(left->clone(), right->clone(), type);
     };
 
     virtual std::string stringify() const;
@@ -136,22 +179,7 @@ public:
   };
 
 
-  class EBUnaryOpTermNode : public EBUnaryTermNode
-  {
-  public:
-    enum NodeType { NEG, LOGICNOT } type;
-
-    EBUnaryOpTermNode(EBTermNode * _subnode, NodeType _type) :
-      EBUnaryTermNode(_subnode), type(_type) {};
-    virtual EBUnaryOpTermNode * clone() const {
-      return new EBUnaryOpTermNode(subnode->clone(), type);
-    };
-
-    virtual std::string stringify() const;
-    virtual int precedence() const { return 3; };
-  };
-
-
+  // User facing host object for an expression tree
   class EBTerm
   {
   public:
@@ -242,6 +270,7 @@ public:
     friend EBTerm hypot(const EBTerm &, const EBTerm &);
   };
 
+  // User facing host object for a function. This combines a term with an argument list.
   class EBFunction
   {
   public:
@@ -292,6 +321,7 @@ ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, T exponent
   );
 }
 
+// convert a number node into a string
 template<typename T>
 std::string
 ExpressionBuilder::EBNumberNode<T>::stringify() const
