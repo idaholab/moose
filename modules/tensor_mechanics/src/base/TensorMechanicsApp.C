@@ -30,6 +30,15 @@
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 
+#include "ACFracBulkRate.h"
+#include "ACFracIntVar.h"
+#include "ACFracCoupledInterface.h"
+#include "LinearElasticPFDamage.h"
+#include "ACFracBulkRateMaterial.h"
+#include "ACFracInterfaceRateMaterial.h"
+
+
+
 template<>
 InputParameters validParams<TensorMechanicsApp>()
 {
@@ -65,6 +74,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergenceTensors);
   registerKernel(CosseratStressDivergenceTensors);
   registerKernel(MomentBalancing);
+  registerKernel(ACFracBulkRate);
+  registerKernel(ACFracIntVar);
+  registerKernel(ACFracCoupledInterface);
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
@@ -76,6 +88,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainCrystalPlasticity);
   registerMaterial(FiniteStrainMultiPlasticity);
   registerMaterial(CosseratLinearElasticMaterial);
+  registerMaterial(LinearElasticPFDamage);
+  registerMaterial(ACFracBulkRateMaterial);
+  registerMaterial(ACFracInterfaceRateMaterial);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
