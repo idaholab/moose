@@ -149,12 +149,12 @@ hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ex
   std::string file_ext;
   if (strip_exodus_ext)
   {
-    pcrecpp::RE re(".*\\.([^\\.]*?)(?:-s\\d+)?$"); // capture the complete extension, ignoring -s*
+    pcrecpp::RE re(".*\\.([^\\.]*?)(?:-s\\d+)?\\s*$"); // capture the complete extension, ignoring -s*
     re.FullMatch(filename, &file_ext);
   }
   else
   {
-    pcrecpp::RE re(".*\\.([^\\.]*)$"); // capture the complete extension
+    pcrecpp::RE re(".*\\.([^\\.]*?)\\s*$"); // capture the complete extension
     re.FullMatch(filename, &file_ext);
   }
 
