@@ -197,13 +197,12 @@ protected:
    * @param pm Current value(s) of the plasticity multiplier(s) (consistency parameters)
    * @param delta_dp Change in plastic strain incurred so far during the return
    * @param f (output) Active yield function(s)
+   * @param r (output) Active flow directions
    * @param epp (output) Plastic-strain increment constraint
    * @param ic (output) Active internal-parameter constraint
-   * @param active The active constraints.  This is not modified if deactivate_if_linear_dependence = false, otherwise it may be modified
-   * @param deactivate_if_linear_dependence The "deactivated_due_to_ld" vector may be modified if linear dependence in the return directions is detected
-   * @param deactivated_due_to_ld This is not modified if deactivate_if_linear_dependence = false, otherwise it may be modified
+   * @param active The active constraints.
    */
-  virtual void calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active, const bool & deactivate_if_linear_dependence, std::vector<bool> & deactivated_due_to_ld);
+  virtual void calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, std::vector<RankTwoTensor> & r, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active);
 
   /**
    * Performs a number of singular-value decompositions
@@ -211,13 +210,12 @@ protected:
    * If linear dependence is found, then f, r, active and num_active is modified appropriately
    * @param stress the current stress
    * @param intnl the current values of internal parameters
-   * @param f (input/output) Upon output, these are the yield function values that are both active and not deactivated_due_to_ld
+   * @param f (input) Active yield function values
    * @param r (input) the flow directions that for those yield functions that are active upon entry to this function
    * @param active true if active
-   * @param num_active number of active yield functions
    * @param (output) deactivated_due_to_ld Yield functions deactivated due to linearly-dependent flow directions
    */
-  virtual void eliminateLinearDependence(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<Real> & f, const std::vector<RankTwoTensor> & r, const std::vector<bool> & active, unsigned num_active, std::vector<bool> & deactivated_due_to_ld);
+  virtual void eliminateLinearDependence(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & f, const std::vector<RankTwoTensor> & r, const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
 
   /**
    * Performs a singular-value decomposition of r and returns the singular values
@@ -334,11 +332,11 @@ protected:
    * @param f (input/output) Yield function(s).  In this routine, only the active constraints that are not deactivated_due_to_ld are contained in f.
    * @param epp (input/output) Plastic strain increment constraint
    * @param ic (input/output) Internal constraint.  In this routine, only the active constraints that are not deactivated_due_to_ld are contained in ic.
-   * @param active The active constraints.  This is not modified, but can't be made "const" because of how calculateConstraints is coded
-   * @param deactivated_due_to_ld True if a constraint has temporarily been made deactive due to linear dependence.  This is not modified, but can't be made "const" because of how calculateConstraints is coded
+   * @param active The active constraints.
+   * @param deactivated_due_to_ld True if a constraint has temporarily been made deactive due to linear dependence.
    * @return true if successfully found a step that reduces the residual-squared
    */
-  virtual bool lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
+  virtual bool lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld);
 
 
   /**
