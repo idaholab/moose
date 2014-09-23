@@ -3,23 +3,22 @@
 #include "MooseError.h"
 
 ExpressionBuilder::EBTermList
-ExpressionBuilder::EBTerm::operator, (const ExpressionBuilder::EBTerm & rarg)
+operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTerm & rarg)
 {
-  EBTermList list(2);
-  list[0] = *this;
+  ExpressionBuilder::EBTermList list(2);
+  list[0] = larg;
   list[1] = rarg;
   return list;
 }
 
 ExpressionBuilder::EBTermList
-ExpressionBuilder::EBTerm::operator, (const ExpressionBuilder::EBTermList & rargs)
+operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTermList & rargs)
 {
-  EBTermList list(1);
-  list[1] = *this;
+  ExpressionBuilder::EBTermList list(1);
+  list[0] = larg;
   list.insert( list.end(), rargs.begin(), rargs.end() );
   return list;
 }
-
 
 ExpressionBuilder::EBTermList
 operator, (const ExpressionBuilder::EBTermList & largs, const ExpressionBuilder::EBTerm & rarg)
@@ -29,11 +28,13 @@ operator, (const ExpressionBuilder::EBTermList & largs, const ExpressionBuilder:
   return list;
 }
 
+
 std::ostream &
 operator<< (std::ostream & os, const ExpressionBuilder::EBTerm & term)
 {
   return os << *(term.root);
 };
+
 
 std::string
 ExpressionBuilder::EBSymbolNode::stringify() const
@@ -110,17 +111,6 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
   }
 
   mooseError("Unknown type.");
-}
-
-ExpressionBuilder::EBFunction::EBFunction(const ExpressionBuilder::EBTerm & arg)
-{
-  this->eval_arguments.resize(1);
-  this->eval_arguments[0] = arg;
-}
-
-ExpressionBuilder::EBFunction::EBFunction(const ExpressionBuilder::EBTermList & args)
-{
-  this->eval_arguments = args;
 }
 
 ExpressionBuilder::EBFunction &
@@ -218,7 +208,7 @@ ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, const Expr
 }
 
 unsigned int
-ExpressionBuilder::EBBinaryTermNode::substitute(const std::vector<std::string> & find_str, EBTermNodeList replace)
+ExpressionBuilder::EBBinaryTermNode::substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace)
 {
   std::string left_str = left->stringify();
   std::string right_str = right->stringify();
@@ -253,7 +243,7 @@ ExpressionBuilder::EBBinaryTermNode::substitute(const std::vector<std::string> &
 }
 
 unsigned int
-ExpressionBuilder::EBUnaryTermNode::substitute(const std::vector<std::string> & find_str, EBTermNodeList replace)
+ExpressionBuilder::EBUnaryTermNode::substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace)
 {
   std::string subnode_str = subnode->stringify();
   unsigned int nfind = find_str.size();

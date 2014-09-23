@@ -55,7 +55,7 @@ public:
     virtual EBTermNode * clone() const = 0;
 
     virtual std::string stringify() const = 0;
-    virtual unsigned int substitute(const std::vector<std::string> & find_str, EBTermNodeList replace) { return 0; };
+    virtual unsigned int substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace) { return 0; };
     virtual int precedence() const = 0;
     friend std::ostream& operator<< (std::ostream & os, const EBTermNode & node) { return os << node.stringify(); };
   };
@@ -94,7 +94,7 @@ public:
     EBUnaryTermNode(EBTermNode * _subnode) : subnode(_subnode) {};
     virtual ~EBUnaryTermNode() { delete subnode; };
 
-    virtual unsigned int substitute(const std::vector<std::string> & find_str, EBTermNodeList replace);
+    virtual unsigned int substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace);
 
   protected:
     EBTermNode *subnode;
@@ -139,7 +139,7 @@ public:
     EBBinaryTermNode(EBTermNode * _left, EBTermNode * _right) : left(_left), right(_right) {};
     virtual ~EBBinaryTermNode() { delete left; delete right; };
 
-    virtual unsigned int substitute(const std::vector<std::string> & find_str, EBTermNodeList replace);
+    virtual unsigned int substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace);
 
   protected:
     EBTermNode *left, *right;
@@ -197,9 +197,9 @@ public:
     EBTerm(Real number) : root(new EBNumberNode<Real>(number)) {};
     EBTerm(const char *symbol) : root(new EBSymbolNode(symbol)) {};
 
-    // concatenate terms to form a parameter list with (()) syntax
-    EBTermList operator, (const EBTerm & arg);
-    EBTermList operator, (const EBTermList & args);
+    // concatenate terms to form a parameter list with (()) syntax (those need to be out-of-class!)
+    friend EBTermList operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTerm & rarg);
+    friend EBTermList operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTermList & rargs);
     friend EBTermList operator, (const ExpressionBuilder::EBTermList & largs, const ExpressionBuilder::EBTerm & rarg);
 
     // dump term as FParser expression
@@ -255,6 +255,9 @@ public:
     } \
     friend EBTerm operator op (const EBFunction & left, const EBTerm & right) { \
       return EBTerm(new EBBinaryOpTermNode(EBTerm(left).root->clone(), right.root->clone(), EBBinaryOpTermNode::OP)); \
+    } \
+    friend EBTerm operator op (const EBFunction & left, const EBFunction & right) { \
+      return EBTerm(new EBBinaryOpTermNode(EBTerm(left).root->clone(), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
     }
     BINARY_OP_IMPLEMENT(+,ADD)
     BINARY_OP_IMPLEMENT(-,SUB)
@@ -278,14 +281,21 @@ public:
   {
   public:
     EBFunction() {};
-    // constructor to generate functions with arguments
-    EBFunction(const EBTerm & arg);
-    EBFunction(const EBTermList & args);
 
     // set the temporary argument list which is either used for evaluation
     // or committed to the argument list upon function definition (assignment)
     EBFunction & operator() (const EBTerm & arg);
     EBFunction & operator() (const EBTermList & args);
+
+    // convenience operators to allow single bracket syntax
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2) { return (*this)((a1,a2)); };
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3) { return (*this)((a1,a2,a3)); };
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4) { return (*this)((a1,a2,a3,a4)); };
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5) { return (*this)((a1,a2,a3,a4,a5)); };
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6) { return (*this)((a1,a2,a3,a4,a5,a6)); };
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7) { return (*this)((a1,a2,a3,a4,a5,a6,a7)); };
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7, const EBTerm & a8) { return (*this)((a1,a2,a3,a4,a5,a6,a7,a8)); };
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7, const EBTerm & a8, const EBTerm & a9) { return (*this)((a1,a2,a3,a4,a5,a6,a7,a8,a9)); };
 
     // cast an EBFunction into an EBTerm
     operator EBTerm() const;

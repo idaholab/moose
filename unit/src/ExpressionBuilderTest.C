@@ -44,4 +44,12 @@ void ExpressionBuilderTest::test()
   G((x,y)) = pow(x,y);
   CPPUNIT_ASSERT( std::string(G) == "x^y" );
   CPPUNIT_ASSERT( std::string(G((y,x))) == "y^x" );
+
+  // Test single bracket syntax
+  EBTerm z("z"), u("u"), v("v"), w("w");
+  G(x,y,z) = x*y*z;
+  H(u,v,w,x,y,z) = u+v+w+x+y+z;
+  CPPUNIT_ASSERT( std::string(G(a,b,c)) == "a*b*c" );
+  CPPUNIT_ASSERT( std::string(H(a,b,c,a,b,c)) == "a+b+c+a+b+c" );
+  CPPUNIT_ASSERT( std::string(G(a,b,c)+H(a,b,c,a,b,c)) == "a*b*c+a+b+c+a+b+c" );
 }
