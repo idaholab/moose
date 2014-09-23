@@ -204,6 +204,8 @@ public:
 
     // dump term as FParser expression
     friend std::ostream & operator<< (std::ostream & os, const EBTerm & term);
+    // cast into a string
+    operator std::string() const { return root->stringify(); };
 
     // assign a term
     EBTerm & operator= (const EBTerm & term) { delete root; root = term.root==NULL ? NULL : term.root->clone(); return *this; }
@@ -256,9 +258,7 @@ public:
     friend EBTerm operator op (const EBFunction & left, const EBTerm & right) { \
       return EBTerm(new EBBinaryOpTermNode(EBTerm(left).root->clone(), right.root->clone(), EBBinaryOpTermNode::OP)); \
     } \
-    friend EBTerm operator op (const EBFunction & left, const EBFunction & right) { \
-      return EBTerm(new EBBinaryOpTermNode(EBTerm(left).root->clone(), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
-    }
+    friend EBTerm operator op (const EBFunction & left, const EBFunction & right);
     BINARY_OP_IMPLEMENT(+,ADD)
     BINARY_OP_IMPLEMENT(-,SUB)
     BINARY_OP_IMPLEMENT(*,MUL)
@@ -320,6 +320,19 @@ public:
     EBTerm term;
   };
 
+  #define BINARYFUNC_OP_IMPLEMENT(op,OP) \
+  friend EBTerm operator op (const EBFunction & left, const EBFunction & right) { \
+    return EBTerm(new EBBinaryOpTermNode( \
+      EBTerm(left).root->clone(), \
+      EBTerm(right).root->clone(), \
+      EBBinaryOpTermNode::OP) \
+    ); \
+  }
+  BINARYFUNC_OP_IMPLEMENT(+,ADD)
+  BINARYFUNC_OP_IMPLEMENT(-,SUB)
+  BINARYFUNC_OP_IMPLEMENT(*,MUL)
+  BINARYFUNC_OP_IMPLEMENT(/,DIV)
+  BINARYFUNC_OP_IMPLEMENT(%,MOD)
 };
 
 // convenience function for numeric exponent

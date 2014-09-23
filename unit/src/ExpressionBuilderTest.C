@@ -49,7 +49,8 @@ void ExpressionBuilderTest::test()
   EBTerm z("z"), u("u"), v("v"), w("w");
   G(x,y,z) = x*y*z;
   H(u,v,w,x,y,z) = u+v+w+x+y+z;
-  CPPUNIT_ASSERT( std::string(G(a,b,c)) == "a*b*c" );
-  CPPUNIT_ASSERT( std::string(H(a,b,c,a,b,c)) == "a+b+c+a+b+c" );
-  CPPUNIT_ASSERT( std::string(G(a,b,c)+H(a,b,c,a,b,c)) == "a*b*c+a+b+c+a+b+c" );
+
+  CPPUNIT_ASSERT( std::string(G(a,b,c)) == "1*4*8.9" );
+  CPPUNIT_ASSERT( std::string(H(a,b,c,a,b,c)) == "1+4+8.9+1+4+8.9" );
+  CPPUNIT_ASSERT( std::string(G(a,b,c)+H(a,b,c,a,b,c)) == "1*4*8.9+1+4+8.9+1+4+8.9" );
 }
