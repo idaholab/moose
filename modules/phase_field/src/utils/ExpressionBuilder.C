@@ -89,7 +89,12 @@ ExpressionBuilder::EBBinaryOpTermNode::stringify() const
 
   s << bop[type];
 
-  if (right->precedence() > precedence())
+  // these operators are left associative at equal precedence
+  // (this matters for -,/,&,^ but not for + and *)
+  if (right->precedence() > precedence() || (
+        right->precedence() == precedence() && (
+          type == SUB || type == DIV || type == MOD || type == POW
+        )))
     s << '(' << *right << ')';
   else
     s << *right;

@@ -53,4 +53,13 @@ void ExpressionBuilderTest::test()
   CPPUNIT_ASSERT( std::string(G(a,b,c)) == "1*4*8.9" );
   CPPUNIT_ASSERT( std::string(H(a,b,c,a,b,c)) == "1+4+8.9+1+4+8.9" );
   CPPUNIT_ASSERT( std::string(G(a,b,c)+H(a,b,c,a,b,c)) == "1*4*8.9+1+4+8.9+1+4+8.9" );
+
+  // Test associativity
+  EBTerm def   = x - y - z;
+  EBTerm left  = (x - y) - z;
+  EBTerm right = x - (y - z);
+
+  CPPUNIT_ASSERT( std::string(def) == "x-y-z" );
+  CPPUNIT_ASSERT( std::string(left) == "x-y-z" );
+  CPPUNIT_ASSERT( std::string(right) == "x-(y-z)" );
 }
