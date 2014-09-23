@@ -63,6 +63,7 @@ class ParseGetPot:
     self.comment_re = re.compile(r"[^']*(?:'.*')?\s*#\s*(.*)")
 
     self.unmatched_single_tick_re = re.compile(r"[^']*'[^']*\n")
+
     self.independent_data_re = re.compile(r"\s*([^'\n]+)")
 
     self._parseFile()
@@ -105,7 +106,8 @@ class ParseGetPot:
         param_value = m.group(2)
 
         # See if the value of this parameter has an unmatched single tick
-        m = self.unmatched_single_tick_re.match(line)
+        # Only look at the part before the comment (if there is one)
+        m = self.unmatched_single_tick_re.match(line.partition('#')[0])
         if m:
           current_position += 1
           found_it = False
@@ -118,7 +120,7 @@ class ParseGetPot:
             if m:
               param_value += ' ' + m.group(1)
 
-            m = self.unmatched_single_tick_re.match(line)
+            m = self.unmatched_single_tick_re.match(line.partition('#')[0]) # Don't include the comment
             if m:
               found_it = True
               break
