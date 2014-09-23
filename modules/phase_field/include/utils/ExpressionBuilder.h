@@ -258,7 +258,9 @@ public:
     friend EBTerm operator op (const EBFunction & left, const EBTerm & right) { \
       return EBTerm(new EBBinaryOpTermNode(EBTerm(left).root->clone(), right.root->clone(), EBBinaryOpTermNode::OP)); \
     } \
-    friend EBTerm operator op (const EBFunction & left, const EBFunction & right);
+    friend EBTerm operator op (const EBFunction & left, const EBFunction & right); \
+    friend EBTerm operator op (int left, const EBFunction & right); \
+    friend EBTerm operator op (Real left, const EBFunction & right);
     BINARY_OP_IMPLEMENT(+,ADD)
     BINARY_OP_IMPLEMENT(-,SUB)
     BINARY_OP_IMPLEMENT(*,MUL)
@@ -322,11 +324,13 @@ public:
 
   #define BINARYFUNC_OP_IMPLEMENT(op,OP) \
   friend EBTerm operator op (const EBFunction & left, const EBFunction & right) { \
-    return EBTerm(new EBBinaryOpTermNode( \
-      EBTerm(left).root->clone(), \
-      EBTerm(right).root->clone(), \
-      EBBinaryOpTermNode::OP) \
-    ); \
+    return EBTerm(new EBBinaryOpTermNode(EBTerm(left).root->clone(), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
+  } \
+  friend EBTerm operator op (int left, const EBFunction & right) { \
+    return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<int>(left), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
+  } \
+  friend EBTerm operator op (Real left, const EBFunction & right) { \
+    return EBTerm(new EBBinaryOpTermNode(new EBNumberNode<Real>(left), EBTerm(right).root->clone(), EBBinaryOpTermNode::OP)); \
   }
   BINARYFUNC_OP_IMPLEMENT(+,ADD)
   BINARYFUNC_OP_IMPLEMENT(-,SUB)
