@@ -29,8 +29,8 @@ class Parser:
 
     try:
       root = ParseGetPot.readInputFile(filename)
-    except:
-      print "Parse Error: " + filename
+    except ParseGetPot.ParseException, ex:
+      print "Parse Error in " + filename + ": " + ex.msg
       return 0x01 # Parse Error
 
     error_code = self._parseNode(filename, root)

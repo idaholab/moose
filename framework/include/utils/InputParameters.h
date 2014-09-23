@@ -197,15 +197,6 @@ public:
   void addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
 
   /**
-   * Add and mark a parameter as removed.  If the user supplies this parameter then an error will be thrown.
-   *
-   * @param name The name of the parameter
-   * @param removed_message The message that will will print about why this param was removed.
-   */
-  template <typename T>
-  void addRemovedParam(const std::string &name, const std::string &removed_message);
-
-  /**
    * This method checks to make sure that we aren't adding a parameter with the same name but a different type.  It
    * throws a MooseError if an inconsistent type is detected. While this state is supported by libMesh it brings
    * nothing but blood and tears for those who try ;)
@@ -752,13 +743,6 @@ InputParameters::addDeprecatedParam(const std::string &name, const std::string &
   addParam<T>(name, doc_string);
 
   _deprecated_params.insert(std::make_pair(name, deprecation_message));
-}
-
-template <typename T>
-void
-InputParameters::addRemovedParam(const std::string &name, const std::string &removed_message)
-{
-  mooseError("The parameter " << name << " has been removed.\n" << removed_message);
 }
 
 // Specializations for MooseEnum
