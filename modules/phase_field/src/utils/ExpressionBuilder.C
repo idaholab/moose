@@ -108,6 +108,8 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
     case POW:
       return 2;
   }
+
+  mooseError("Unknown type.");
 }
 
 ExpressionBuilder::EBFunction::EBFunction(const ExpressionBuilder::EBTerm & arg)
