@@ -21,3 +21,6 @@ class MooseObject(object):
 
   def getParam(self, name):
     return self._pars[name]
+
+  def isParamValid(self, name):
+    return self._pars.isValid(name)
