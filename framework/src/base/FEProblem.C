@@ -416,7 +416,7 @@ void FEProblem::initialSetup()
     unsigned int n = adaptivity().getInitialSteps();
     for (unsigned int i = 0; i < n; i++)
     {
-      _console << "Initial adaptivity step " << i+1 << " of " << n << "\n" << std::endl;
+      _console << "Initial adaptivity step " << i+1 << " of " << n << std::endl;
       computeIndicatorsAndMarkers();
 
       _adaptivity.initialAdaptMesh();
@@ -3508,9 +3508,11 @@ FEProblem::adaptMesh()
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
   for (unsigned int i=0; i < cycles_per_step; ++i)
   {
+    _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << "\n";
     if (_adaptivity.adaptMesh())
       meshChanged();
   }
+  _console << std::flush;
 }
 #endif //LIBMESH_ENABLE_AMR
 
