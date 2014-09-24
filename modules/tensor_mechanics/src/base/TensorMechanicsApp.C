@@ -11,7 +11,6 @@
 #include "FiniteStrainPlasticMaterial.h"
 #include "FiniteStrainWeakPlaneShear.h"
 #include "FiniteStrainRatePlasticMaterial.h"
-#include "FiniteStrainWeakPlaneTensile.h"
 #include "FiniteStrainMohrCoulomb.h"
 #include "FiniteStrainCrystalPlasticity.h"
 #include "FiniteStrainMultiPlasticity.h"
@@ -69,7 +68,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
   registerMaterial(FiniteStrainPlasticMaterial);
-  registerMaterial(FiniteStrainWeakPlaneTensile);
   registerMaterial(FiniteStrainWeakPlaneShear);
   registerMaterial(FiniteStrainMohrCoulomb);
   registerMaterial(FiniteStrainRatePlasticMaterial);

@@ -1,5 +1,7 @@
 #include "FiniteStrainMultiPlasticity.h"
 
+#include "RotationMatrix.h" // for rotVecToZ
+
 // Following is for perturbing distances in eliminating linearly-dependent directions
 #include "MooseRandom.h"
 
@@ -18,6 +20,7 @@ InputParameters validParams<FiniteStrainMultiPlasticity>()
   params.addRangeCheckedParam<Real>("linear_dependent", 1E-4, "linear_dependent>=0 & linear_dependent<1", "Flow directions are considered linearly dependent if the smallest singular value is less than linear_dependent times the largest singular value");
   MooseEnum deactivation_scheme("optimized safe optimized_to_safe", "optimized");
   params.addParam<MooseEnum>("deactivation_scheme", deactivation_scheme, "Scheme by which constraints are deactivated.  safe: return to the yield surface and then deactivate constraints with negative plasticity multipliers.  optimized: deactivate a constraint as soon as its plasticity multiplier becomes negative.  optimized_to_safe: first use 'optimized', and if that fails, try the return with 'safe' instead.");
+  params.addParam<RealVectorValue>("transverse_direction", "If this parameter is provided, before the return-map algorithm is called a rotation is performed so that the 'z' axis in the new frame lies along the transverse_direction in the original frame.  After returning, the inverse rotation is performed.  The transverse_direction will itself rotate with large strains.  This is so that transversely-isotropic plasticity models may be easily defined in the frame where the isotropy holds in the x-y plane.");
   params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  2 = debug Jacobian entries, 3 = check the entire Jacobian");
   params.addParam<RealTensorValue>("debug_jac_at_stress", RealTensorValue(), "Debug Jacobian entries at this stress.  For use by developers");
   params.addParam<std::vector<Real> >("debug_jac_at_pm", "Debug Jacobian entries at these plastic multipliers");
@@ -44,6 +47,10 @@ FiniteStrainMultiPlasticity::FiniteStrainMultiPlasticity(const std::string & nam
 
     _deactivation_scheme(getParam<MooseEnum>("deactivation_scheme")),
 
+    _n_supplied(parameters.isParamValid("transverse_direction")),
+    _n_input(_n_supplied ? getParam<RealVectorValue>("transverse_direction") : RealVectorValue()),
+    _rot(RealTensorValue()),
+
     _fspb_debug(getParam<int>("debug_fspb")),
     _fspb_debug_stress(getParam<RealTensorValue>("debug_jac_at_stress")),
     _fspb_debug_pm(getParam<std::vector<Real> >("debug_jac_at_pm")),
@@ -57,8 +64,19 @@ FiniteStrainMultiPlasticity::FiniteStrainMultiPlasticity(const std::string & nam
     _intnl(declareProperty<std::vector<Real> >("plastic_internal_parameter")),
     _intnl_old(declarePropertyOld<std::vector<Real> >("plastic_internal_parameter")),
     _yf(declareProperty<std::vector<Real> >("plastic_yield_function")),
-    _iter(declareProperty<Real>("plastic_NR_iterations")) // this is really an unsigned int, but for visualisation i convert it to Real
+    _iter(declareProperty<Real>("plastic_NR_iterations")), // this is really an unsigned int, but for visualisation i convert it to Real
+    _n(declareProperty<RealVectorValue>("plastic_transverse_direction")),
+    _n_old(declarePropertyOld<RealVectorValue>("plastic_transverse_direction"))
 {
+  if (_n_supplied)
+  {
+    // normalise the inputted transverse_direction
+    if (_n_input.size() == 0)
+      mooseError("MultiPlasticity: transverse_direction vector must not have zero length");
+    else
+      _n_input /= _n_input.size();
+  }
+      
   _f.resize(_num_f);
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
   {
@@ -85,6 +103,9 @@ FiniteStrainMultiPlasticity::initQpStatefulProperties()
 
   _iter[_qp] = 0.0; // this is really an unsigned int, but for visualisation i convert it to Real
 
+  _n[_qp] = _n_input;
+  _n_old[_qp] = _n_input;
+
   if (_fspb_debug == 2)
   {
     checkDerivatives();
@@ -102,6 +123,7 @@ FiniteStrainMultiPlasticity::computeQpStress()
     mooseError("Jacobian has been checked.  Exiting with no error");
   }
 
+  preReturnMap();
 
   /**
    * the idea in the following is to potentially subdivide the
@@ -112,6 +134,7 @@ FiniteStrainMultiPlasticity::computeQpStress()
    * are only a few "bad" quadpoints where the return-map
    * is difficult
    */
+
 
   // NOTE: perhaps i should optimise for purely elastic
 
@@ -170,6 +193,7 @@ FiniteStrainMultiPlasticity::computeQpStress()
     checkJacobian();
   }
 
+  postReturnMap();
 
   //Update measures of strain
   _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp] - (_plastic_strain[_qp] - _plastic_strain_old[_qp]);
@@ -182,6 +206,47 @@ FiniteStrainMultiPlasticity::computeQpStress()
   _plastic_strain[_qp] = _rotation_increment[_qp] * _plastic_strain[_qp] * _rotation_increment[_qp].transpose();
 }
 
+void
+FiniteStrainMultiPlasticity::preReturnMap()
+{
+  if (_n_supplied)
+  {
+    // this is a rotation matrix that will rotate _n to the "z" axis
+    _rot = RotationMatrix::rotVecToZ(_n[_qp]);
+    
+    // rotate the tensors to this frame
+    _elasticity_tensor[_qp].rotate(_rot);
+    _stress_old[_qp].rotate(_rot);
+    _plastic_strain_old[_qp].rotate(_rot);
+    _strain_increment[_qp].rotate(_rot);
+  }
+}
+
+void
+FiniteStrainMultiPlasticity::postReturnMap()
+{
+  if (_n_supplied)
+  {
+    // this is a rotation matrix that will rotate "z" axis back to _n
+    _rot = _rot.transpose();
+
+    // rotate the tensors back to original frame where _n is correctly oriented
+    _elasticity_tensor[_qp].rotate(_rot);
+    _stress_old[_qp].rotate(_rot);
+    _plastic_strain_old[_qp].rotate(_rot);
+    _strain_increment[_qp].rotate(_rot);
+    _stress[_qp].rotate(_rot);
+    _plastic_strain[_qp].rotate(_rot);
+
+    // Rotate n by _rotation_increment
+    for (unsigned int i = 0 ; i < LIBMESH_DIM ; ++i)
+    {
+      _n[_qp](i) = 0;
+      for (unsigned int j = 0 ; j < 3 ; ++j)
+        _n[_qp](i) += _rotation_increment[_qp](i, j)*_n_old[_qp](j);
+    }
+  }
+}
 
 void
 FiniteStrainMultiPlasticity::yieldFunction(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<Real> & f)
