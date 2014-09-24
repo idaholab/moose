@@ -54,11 +54,18 @@ public:
 
   const std::set<std::string> & getAllTasks() const { return _all_tasks; }
 
+  ///@{
+  /**
+   * Retrieve a parameter for the object
+   * @param name The name of the parameter
+   * @return The value of the parameter
+   */
   template <typename T>
-  const T & getParam(const std::string & name) { return _pars.get<T>(name); }
+  const T & getParam(const std::string & name);
 
   template <typename T>
-  const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
+  const T & getParam(const std::string & name) const;
+  ///@}
 
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
 
@@ -124,5 +131,19 @@ public:
   /// Convenience reference to an executioner
   Executioner * & _executioner;
 };
+
+template <typename T>
+const T &
+Action::getParam(const std::string & name)
+{
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
+
+template <typename T>
+const T &
+Action::getParam(const std::string & name) const
+{
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
 
 #endif // ACTION_H
