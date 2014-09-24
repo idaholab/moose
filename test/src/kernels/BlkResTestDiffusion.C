@@ -31,6 +31,7 @@ InputParameters & modifyParams(InputParameters & params)
     params.suppressParameter<std::vector<SubdomainName> >("block");
     params.suppressParameter<FEProblem*>("_fe_problem");
     params.suppressParameter<NonlinearVariableName>("variable");
+    params.set<FEProblem*>("_fe_problem") = NULL;
     params.set<MooseMesh*>("_mesh") = NULL;
     break;
 

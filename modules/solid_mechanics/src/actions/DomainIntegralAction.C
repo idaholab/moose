@@ -24,9 +24,9 @@ InputParameters validParams<DomainIntegralAction>()
   params.addParam<Real>("poissons_ratio","Poisson's ratio");
   params.addParam<Real>("youngs_modulus","Young's modulus");
   params.addParam<std::vector<SubdomainName> >("block","The block ids where InteractionIntegralAuxFields is defined");
-  params.addParam<VariableName>("disp_x", "The x displacement");
-  params.addParam<VariableName>("disp_y", "The y displacement");
-  params.addParam<VariableName>("disp_z", "The z displacement");
+  params.addParam<VariableName>("disp_x", "", "The x displacement");
+  params.addParam<VariableName>("disp_y", "", "The y displacement");
+  params.addParam<VariableName>("disp_z", "", "The z displacement");
   return params;
 }
 

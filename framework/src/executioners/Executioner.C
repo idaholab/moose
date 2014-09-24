@@ -28,13 +28,13 @@ template<>
 InputParameters validParams<Executioner>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<FileNameNoExtension>("restart_file_base", "File base name used for restart");
+  params.addParam<FileNameNoExtension>("restart_file_base", "", "File base name used for restart");
 
   params.registerBase("Executioner");
 
   params.addParamNamesToGroup("restart_file_base", "Restart");
 
-  params.addParam<std::vector<std::string> >("splitting","Top-level splitting defining a hierarchical decomposition into subsystems to help the solver.");
+  params.addParam<std::vector<std::string> >("splitting", "Top-level splitting defining a hierarchical decomposition into subsystems to help the solver.");
 
   return params;
 }
