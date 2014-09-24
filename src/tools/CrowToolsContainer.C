@@ -61,12 +61,12 @@ CrowToolsContainer::getType(const std::string tool_alias){
 }
 
 double
-CrowToolsContainer::getVariable(const char * param_name,const char *tool_alias){
-  return getVariable(std::string(param_name),std::string(tool_alias));
+CrowToolsContainer::getVariable(const char * tool_alias,const char *param_name){
+  return getVariable(std::string(tool_alias),std::string(param_name));
 }
 
 double
-CrowToolsContainer::getVariable(const std::string param_name,const std::string tool_alias){
+CrowToolsContainer::getVariable(const std::string tool_alias,const std::string param_name){
     if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
        CrowTools * tool = _tool_by_name.find(tool_alias)->second;
        return tool->getVariable(param_name);

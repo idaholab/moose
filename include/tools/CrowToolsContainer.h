@@ -31,8 +31,8 @@ public:
   std::string getType (const char * tool_alias);
   std::string getType (const std::string tool_alias);
 
-  double getVariable(const char * param_name, const char * tool_alias);
-  double getVariable(const std::string param_name, const std::string tool_alias);
+  double getVariable(const char * tool_alias, const char * param_name);
+  double getVariable(const std::string tool_alias, const std::string param_name);
     
   //void updateVariable(const char * param_name, double new_value, const char * tool_alias);
   //void updateVariable(const std::string param_name, double new_value, const std::string tool_alias);
