@@ -76,7 +76,7 @@ FiniteStrainMultiPlasticity::FiniteStrainMultiPlasticity(const std::string & nam
     else
       _n_input /= _n_input.size();
   }
-      
+
   _f.resize(_num_f);
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
   {
@@ -213,7 +213,7 @@ FiniteStrainMultiPlasticity::preReturnMap()
   {
     // this is a rotation matrix that will rotate _n to the "z" axis
     _rot = RotationMatrix::rotVecToZ(_n[_qp]);
-    
+
     // rotate the tensors to this frame
     _elasticity_tensor[_qp].rotate(_rot);
     _stress_old[_qp].rotate(_rot);
