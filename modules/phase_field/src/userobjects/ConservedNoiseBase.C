@@ -24,10 +24,6 @@ ConservedNoiseBase::ConservedNoiseBase(const std::string & name, InputParameters
   setRandomResetFrequency(EXEC_TIMESTEP);
 }
 
-ConservedNoiseBase::~ConservedNoiseBase()
-{
-}
-
 void
 ConservedNoiseBase::initialize()
 {

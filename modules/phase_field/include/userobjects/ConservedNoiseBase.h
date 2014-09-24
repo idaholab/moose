@@ -1,5 +1,5 @@
-#ifndef CONSERVEDNOISE_H
-#define CONSERVEDNOISE_H
+#ifndef CONSERVEDNOISEBASE_H
+#define CONSERVEDNOISEBASE_H
 
 #include "ElementUserObject.h"
 
@@ -16,13 +16,14 @@ InputParameters validParams<ConservedNoiseBase>();
   * kernel such as ConservedLangevinNoise, that keeps the total concenration constant.
   *
   * \see ConservedUniformNoise
+  * \see ConservedNormalNoise
   */
 class ConservedNoiseBase : public ElementUserObject
 {
 public:
   ConservedNoiseBase(const std::string & name, InputParameters parameters);
 
-  virtual ~ConservedNoiseBase();
+  virtual ~ConservedNoiseBase() {}
 
   virtual void initialize();
   virtual void execute();
@@ -43,4 +44,4 @@ protected:
   unsigned int _qp;
 };
 
-#endif //CONSERVEDNOISE_H
+#endif //CONSERVEDNOISEBASE_H
