@@ -13,7 +13,7 @@ InputParameters validParams<PolycrystalKernelAction>()
   params.addParam<VariableName>("c", "NONE", "Name of coupled concentration variable");
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
-  params.addParam<VariableName>("T", "Name of temperature variable");
+  params.addParam<VariableName>("T", "", "Name of temperature variable");
 
   return params;
 }
@@ -25,7 +25,8 @@ PolycrystalKernelAction::PolycrystalKernelAction(const std::string & name, Input
     _c(getParam<VariableName>("c")),
     _implicit(getParam<bool>("implicit")),
     _T(getParam<VariableName>("T"))
-{}
+{
+}
 
 void
 PolycrystalKernelAction::act()
