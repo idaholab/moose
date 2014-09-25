@@ -129,13 +129,15 @@
     index_j = 2
   [../]
   [./wps_internal_auxk]
-    type = MaterialRealAux
-    property = weak_plane_shear_internal
+    type = MaterialStdVectorAux
+    property = plastic_internal_parameter
+    index = 0
     variable = wps_internal
   [../]
   [./yield_fcn_auxk]
-    type = MaterialRealAux
-    property = weak_plane_shear_yield_function
+    type = MaterialStdVectorAux
+    property = plastic_yield_function
+    index = 0
     variable = yield_fcn
   [../]
 []
@@ -168,26 +170,32 @@
   [../]
 []
 
+[UserObjects]
+  [./wps]
+    type = TensorMechanicsPlasticWeakPlaneShear
+    cohesion = 1E3
+    cohesion_residual = 2E3
+    cohesion_rate = 4E4
+    dilation_angle = 1
+    friction_angle = 45
+    smoother = 500
+    yield_function_tolerance = 1E-3
+    internal_constraint_tolerance = 1E-3
+  [../]
+[]
+
 [Materials]
   [./mc]
-    type = FiniteStrainWeakPlaneShear
+    type = FiniteStrainMultiPlasticity
     block = 0
-    wps_cohesion = 1E3
-    wps_cohesion_residual = 2E3
-    wps_cohesion_rate = 4E4
-    wps_dilation_angle = 1
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
     fill_method = symmetric_isotropic
     C_ijkl = '1E9 0.5E9'
-    wps_friction_angle = 45
-    wps_normal_vector = '0 0 1'
-    wps_normal_rotates = false
-    wps_smoother = 500
-    yield_function_tolerance = 1E-3
+    plastic_models = wps
+    transverse_direction = '0 0 1'
     ep_plastic_tolerance = 1E-3
-    internal_constraint_tolerance = 1E-3
     debug_fspb = 1
   [../]
 []

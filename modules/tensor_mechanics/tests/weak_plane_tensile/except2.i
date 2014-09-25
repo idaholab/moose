@@ -154,22 +154,27 @@
   [../]
 []
 
+[UserObjects]
+  [./wpt]
+    type = TensorMechanicsPlasticWeakPlaneTensile
+    tensile_strength = 1.0
+    tensile_strength_rate = -1
+    yield_function_tolerance = 1E-6
+    internal_constraint_tolerance = 1E-5
+  [../]
+[]
+
 [Materials]
   [./mc]
-    type = FiniteStrainWeakPlaneTensile
+    type = FiniteStrainMultiPlasticity
     block = 0
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp
-    wpt_tensile_strength = 1.0
-    wpt_tensile_strength_rate = -1
-    yield_function_tolerance = 1E-6
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
-    wpt_normal_vector = '0 0 1'
-    wpt_normal_rotates = false
+    plastic_models = wpt
     ep_plastic_tolerance = 1E-5
-    internal_constraint_tolerance = 1E-5
   [../]
 []
 
