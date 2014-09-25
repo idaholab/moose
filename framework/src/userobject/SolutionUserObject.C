@@ -39,7 +39,7 @@ InputParameters validParams<SolutionUserObject>()
   params.addDeprecatedParam<std::vector<std::string> >("elemental_variables", "Elemental variables", "Use 'system_variables' for all variable names, both nodal and elemental");
 
   // When using XDA files the following must be defined
-  params.addParam<FileName>("es", "The name of the file holding the equation system info in xda format (xda only).");
+  params.addParam<FileName>("es", "<not supplied>", "The name of the file holding the equation system info in xda format (xda only).");
   params.addParam<std::string>("system", "nl0", "The name of the system to pull values out of (xda only).");
 
   // When using ExodusII a specific time is extracted

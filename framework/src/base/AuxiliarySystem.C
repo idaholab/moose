@@ -37,7 +37,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
     _serialized_solution(*NumericVector<Number>::build(_mproblem.comm()).release()),
     _time_integrator(NULL),
     _u_dot(addVector("u_dot", true, GHOSTED)),
-    _du_dot_du(addVector("du_dot_du", true, GHOSTED)),
     _need_serialized_solution(false)
 {
   _nodal_vars.resize(libMesh::n_threads());
@@ -207,12 +206,6 @@ NumericVector<Number> &
 AuxiliarySystem::solutionUDot()
 {
   return _u_dot;
-}
-
-NumericVector<Number> &
-AuxiliarySystem::solutionDuDotDu()
-{
-  return _du_dot_du;
 }
 
 NumericVector<Number> &

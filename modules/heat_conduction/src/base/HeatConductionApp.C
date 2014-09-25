@@ -14,7 +14,6 @@
 #include "HeatConductionMaterial.h"
 #include "AnisoHeatConductionMaterial.h"
 #include "HeatConductionBC.h"
-#include "BulkCoolantBC.h"
 #include "ThermalContactAuxBCsAction.h"
 #include "ThermalContactAuxVarsAction.h"
 #include "ThermalContactBCsAction.h"
@@ -63,7 +62,6 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerBoundaryCondition(HeatConductionBC);
   registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);
-  registerBoundaryCondition(BulkCoolantBC);
   registerBoundaryCondition(CoupledConvectiveFlux);
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);

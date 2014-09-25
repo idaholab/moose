@@ -258,16 +258,7 @@ public:
    */
   virtual void setSolutionUDot(const NumericVector<Number> & udot);
 
-  /**
-   * Set multiplier of udot for Jacobian evaluation.
-   * @param shift temporal shift for Jacobian
-   * @note If the residual is G(u,udot) = 0, the Jacobian is dG/du + shift*dG/dudot
-   * @note If the calling sequence for residual evaluation was changed, this could become an explicit argument.
-   */
-  virtual void setSolutionDuDotDu(Real shift);
-
   virtual NumericVector<Number> & solutionUDot();
-  virtual NumericVector<Number> & solutionDuDotDu();
   virtual NumericVector<Number> & residualVector(Moose::KernelType type);
 
   virtual const NumericVector<Number> * & currentSolution() { return _current_solution; }
@@ -479,8 +470,8 @@ protected:
   MooseSharedPointer<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
-  /// solution vector for \f$ {du^dot}\over{du} \f$
-  NumericVector<Number> & _du_dot_du;
+  /// \f$ {du^dot}\over{du} \f$
+  Number _du_dot_du;
   /// residual vector for time contributions
   NumericVector<Number> & _Re_time;
   /// residual vector for non-time contributions
