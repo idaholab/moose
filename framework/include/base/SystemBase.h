@@ -111,7 +111,7 @@ public:
   virtual NumericVector<Number> & solutionOlder() = 0;
 
   virtual NumericVector<Number> & solutionUDot() = 0;
-  virtual NumericVector<Number> & solutionDuDotDu() = 0;
+  virtual Number & duDotDu() = 0;
 
   /**
    * Check if the named vector exists in the system.
@@ -483,7 +483,7 @@ public:
   virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
 
   virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
-  virtual NumericVector<Number> & solutionDuDotDu() { return *_dummy_vec; }
+  virtual Number & duDotDu() { return _du_dot_du; }
 
   virtual bool hasVector(std::string name) { return _sys.have_vector(name); }
   virtual NumericVector<Number> & getVector(std::string name) { return _sys.get_vector(name); }
@@ -579,6 +579,7 @@ protected:
   NumericVector<Number> & _solution;
   NumericVector<Number> & _solution_old;
   NumericVector<Number> & _solution_older;
+  Real _du_dot_du;
 
   NumericVector<Number> * _dummy_vec;                     // to satisfy the interface
 

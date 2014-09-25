@@ -80,7 +80,6 @@ public:
   virtual const NumericVector<Number> * & currentSolution() { _current_solution = _sys.current_local_solution.get(); return _current_solution; }
 
   virtual NumericVector<Number> & solutionUDot();
-  virtual NumericVector<Number> & solutionDuDotDu();
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution();
@@ -141,8 +140,6 @@ protected:
   TimeIntegrator * _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
-  /// solution vector for \f$ {du^dot}\over{du} \f$
-  NumericVector<Number> & _du_dot_du;
 
   /// Whether or not a copy of the residual needs to be made
   bool _need_serialized_solution;
