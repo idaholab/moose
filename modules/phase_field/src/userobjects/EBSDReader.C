@@ -115,77 +115,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     a.phase /= Real(a.n);
     a.symmetry /= Real(a.n);
     a.p *= 1.0/Real(a.n);
-
-    // Save centerpoints of each grain
-    //_centerpoints[i](0) = _avg_x[i];
-    //_centerpoints[i](1) = _avg_y[i];
-    //_centerpoints[i](2) = _avg_z[i];
   }
-
-// Duplicated code!!!
-#if 0
-  // Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-  {
-    _bottom_left(i) = _mesh.getMinInDimension(i);
-    _top_right(i) = _mesh.getMaxInDimension(i);
-  }
-  _range = _top_right - _bottom_left;
-
-  // Output error message if number of order parameters is larger than number of grains from EBSD dataset
-  if (_op_num > _grain_num)
-    mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
-
-  // Assign grains to each order parameter in a way that maximizes distance
-  _assigned_op.resize(_grain_num);
-  for (unsigned int grain=0; grain < _grain_num; ++grain)
-  {
-    std::vector<int> min_op_ind;
-    std::vector<Real> min_op_dist;
-    min_op_ind.resize(_op_num);
-    min_op_dist.resize(_op_num);
-
-    // Determine the distance to the closest center assigned to each order parameter
-    if (grain >= _op_num)
-    {
-      std::fill(min_op_dist.begin() , min_op_dist.end(), _range.size());
-      for (unsigned int i=0; i<grain; ++i)
-      {
-        Real dist =  _mesh.minPeriodicDistance(grain, _centerpoints[grain], _centerpoints[i]);
-        if (min_op_dist[_assigned_op[i]] > dist)
-        {
-          min_op_dist[_assigned_op[i]] = dist;
-          min_op_ind[_assigned_op[i]] = i;
-        }
-      }
-    }
-
-    // Assign the current center point to the order parameter that is furthest away.
-    Real mx;
-    if (grain < _op_num)
-      _assigned_op[grain] = grain;
-    else
-    {
-      mx = 0.0;
-      unsigned int mx_ind = 1e6;
-      for (unsigned int i = 0; i < _op_num; ++i) // Find index of max
-        if (mx < min_op_dist[i])
-        {
-          mx = min_op_dist[i];
-          mx_ind = i;
-        }
-      _assigned_op[grain] = mx_ind;
-    }
-  }
-
-  // Update centroid_data[9] with assigned order parameter value
-  for (unsigned int k = 0; k < _data.size(); ++k)
-  {
-    std::vector<Real> & centroid_data = _data[k];
-    unsigned int index1 = centroid_data[6];
-    centroid_data[9] = _assigned_op[index1];
-  }
-#endif
 }
 
 EBSDReader::~EBSDReader()
@@ -202,6 +132,18 @@ const EBSDReader::EBSDAvgData &
 EBSDReader::getAvgData(unsigned int var) const
 {
   return _avg_data[indexFromIndex(var)];
+}
+
+const std::vector<Point> &
+EBSDReader::getCenterPoints() const
+{
+  return _centerpoints;
+}
+
+const unsigned int &
+EBSDReader::getGrainNum() const
+{
+  return _grain_num;
 }
 
 unsigned int
