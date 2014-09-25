@@ -119,7 +119,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
     _residual_copy(*NumericVector<Number>::build(_communicator).release()),
     _u_dot(addVector("u_dot", true, GHOSTED)),
-    _du_dot_du(addVector("du_dot_du", true, GHOSTED)),
     _Re_time(addVector("Re_time", false, GHOSTED)),
     _Re_non_time(addVector("Re_non_time", false, GHOSTED)),
     _increment_vec(NULL),
@@ -792,12 +791,6 @@ NumericVector<Number> &
 NonlinearSystem::solutionUDot()
 {
   return _u_dot;
-}
-
-NumericVector<Number> &
-NonlinearSystem::solutionDuDotDu()
-{
-  return _du_dot_du;
 }
 
 NumericVector<Number> &
@@ -2062,12 +2055,6 @@ void
 NonlinearSystem::setSolutionUDot(const NumericVector<Number> & udot)
 {
   _u_dot = udot;
-}
-
-void
-NonlinearSystem::setSolutionDuDotDu(Real value)
-{
-  _du_dot_du = value;
 }
 
 NumericVector<Number> &

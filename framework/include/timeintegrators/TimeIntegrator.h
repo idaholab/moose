@@ -63,7 +63,7 @@ protected:
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
   /// solution vector for \f$ {du^dot}\over{du} \f$
-  NumericVector<Number> & _du_dot_du;
+  Real & _du_dot_du;
   /// solution vectors
   const NumericVector<Number> * & _solution;
   const NumericVector<Number> & _solution_old;

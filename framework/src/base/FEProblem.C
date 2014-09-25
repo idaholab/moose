@@ -3313,7 +3313,7 @@ FEProblem::computeTransientImplicitJacobian(Real time, const NumericVector<Numbe
   { // The current interface guarantees that the residual is called before Jacobian, thus udot has already been set
     _nl.setSolutionUDot(udot);
   }
-  _nl.setSolutionDuDotDu(shift);
+  _nl.duDotDu() = shift;
   NonlinearImplicitSystem &sys = _nl.sys();
   _time = time;
   computeJacobian(sys,u,jacobian);
