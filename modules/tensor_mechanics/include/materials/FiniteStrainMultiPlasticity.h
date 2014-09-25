@@ -44,6 +44,15 @@ protected:
   /// When in the Newton-Raphson to deactivate constraints
   MooseEnum _deactivation_scheme;
 
+  /// User supplied the transverse direction vector
+  bool _n_supplied;
+
+  /// the supplied transverse direction vector
+  RealVectorValue _n_input;
+
+  /// rotation matrix that takes _n to (0, 0, 1)
+  RealTensorValue _rot;
+
   /// Debug parameter - useful for coders, not for users (hopefully!)
   int _fspb_debug;
 
@@ -82,6 +91,12 @@ protected:
 
   /// Number of Newton-Raphson iterations used in the return-map
   MaterialProperty<Real> & _iter;
+
+  /// current value of transverse direction
+  MaterialProperty<RealVectorValue> & _n;
+
+  /// old value of transverse direction
+  MaterialProperty<RealVectorValue> & _n_old;
 
   /// User objects that define the yield functions, flow potentials, etc
   std::vector<const TensorMechanicsPlasticModel *> _f;
@@ -365,6 +380,12 @@ protected:
    * @param return false if any of the Kuhn-Tucker conditions were violated (and hence the set of active constraints was changed)
    */
   virtual bool checkAndApplyKuhnTucker(const std::vector<Real> & f, const std::vector<Real> & pm, std::vector<bool> & active);
+
+  // gets called before any return-map
+  virtual void preReturnMap();
+
+  // gets called after return-map
+  virtual void postReturnMap();
 
 
  private:
