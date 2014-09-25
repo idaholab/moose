@@ -44,10 +44,15 @@ public:
    */
   const EBSDAvgData &  getAvgData(unsigned int i) const;
 
-  const std::vector<Point> & getCenterPoints() const
-  {
-    return _centerpoints;
-  }
+  /**
+   * Return the center points
+   */
+  const std::vector<Point> & getCenterPoints() const;
+
+  /**
+   * Return the number of grains
+   */
+  const unsigned & getGrainNum() const;
 
 protected:
   // MooseMesh Variables
