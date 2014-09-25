@@ -33,8 +33,7 @@ public:
   SolutionTimeAdaptiveDT(const std::string & name, InputParameters parameters);
   virtual ~SolutionTimeAdaptiveDT();
 
-  virtual void preSolve();
-  virtual void postSolve();
+  virtual void step();
 
   virtual void rejectStep();
 
