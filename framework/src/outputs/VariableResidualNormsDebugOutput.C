@@ -26,7 +26,7 @@ template<>
 InputParameters validParams<VariableResidualNormsDebugOutput>()
 {
   InputParameters params = validParams<PetscOutput>();
-  params += Output::disableOutputTypes();
+  params += Output::enableOutputTypes(); // No-input means enable nothing
   return params;
 }
 

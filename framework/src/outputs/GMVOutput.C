@@ -23,7 +23,7 @@ InputParameters validParams<GMVOutput>()
 {
   // Get the base class parameters
   InputParameters params = validParams<OversampleOutput>();
-  params += Output::disableOutputTypes();
+  params += Output::enableOutputTypes(); // No input, means enable nothing
 
   // Advanced file options
   params.addParam<bool>("binary", true, "Output the file in binary format");

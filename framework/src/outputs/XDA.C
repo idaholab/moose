@@ -22,7 +22,7 @@ InputParameters validParams<XDA>()
 {
   // Get the base class parameters
   InputParameters params = validParams<OversampleOutput>();
-  params += Output::disableOutputTypes(); // Output is handled explicitly, disable everything
+  params += Output::enableOutputTypes(); // Output is handled explicitly, enable nothing
 
   // Add description for the XDA class
   params.addClassDescription("Object for outputting data in the XDA/XDR format");

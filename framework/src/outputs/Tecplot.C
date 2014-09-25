@@ -25,7 +25,7 @@ InputParameters validParams<Tecplot>()
 {
   // Get the base class parameters
   InputParameters params = validParams<OversampleOutput>();
-  params += Output::disableOutputTypes();
+  params += Output::enableOutputTypes(); // No-input means enable nothing
 
   // Add binary toggle
   params.addParam<bool>("binary", false, "Set Tecplot files to output in binary format");

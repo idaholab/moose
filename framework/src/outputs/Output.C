@@ -90,7 +90,7 @@ Output::enableOutputTypes(const std::string & names)
 
   // Update the enum of output types to append
   if (names.empty())
-    output_types = output_types.getRawNames();
+    output_types = "";
   else
     output_types = names;
 
@@ -98,29 +98,6 @@ Output::enableOutputTypes(const std::string & names)
   Output::addValidParams(params, output_types);
   return params;
 }
-
-InputParameters
-Output::disableOutputTypes(const std::string & names)
-{
-  // The parameters object that will be returned
-  InputParameters params = emptyInputParameters();
-
-  // Set private parameter indicating that this method was called
-  params.addPrivateParam("_output_valid_params_was_called", true);
-
-  // If names is empty() don't add anything
-  if (!names.empty())
-  {
-    // Define the MultMooseEnum with the desired output types, by removing the type provided
-    MultiMooseEnum output_types = Output::getOutputTypes();
-    output_types = output_types.getRawNames();
-    output_types.erase(names);
-    Output::addValidParams(params, output_types);
-  }
-
-  return params;
-}
-
 
 Output::Output(const std::string & name, InputParameters & parameters) :
     MooseObject(name, parameters),
@@ -162,7 +139,7 @@ Output::init()
 {
   // Check that enable[disable]OutputTypes was called
   if (!isParamValid("_output_valid_params_was_called"))
-    mooseError("The static method Output::enableOutputTypes or Output::disableOutputTypes must be called inside the validParams function for this object to properly define the input parameters for the output object named '" << _name << "'");
+    mooseError("The static method Output::enableOutputTypes must be called inside the validParams function for this object to properly define the input parameters for the output object named '" << _name << "'");
 
   // Do not initialize more than once
   /* This check is needed for YAK which calls Executioners from within Executioners */
