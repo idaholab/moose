@@ -11,9 +11,9 @@ InputParameters validParams<SolidMaterialProperties>()
   params.addParam<std::string>("rho", "Density");
 
   // These are here so we are able to control these values
-  params.addPrivateParam<Real>("thermal_conductivity");
-  params.addPrivateParam<Real>("specific_heat");
-  params.addPrivateParam<Real>("density");
+  params.addPrivateParam<Real>("thermal_conductivity", 0.0);
+  params.addPrivateParam<Real>("specific_heat", 0.0);
+  params.addPrivateParam<Real>("density", 0.0);
 
   params.addPrivateParam<std::vector<MooseEnum> >("execute_on");
   params.addPrivateParam<bool>("use_displaced_mesh");
