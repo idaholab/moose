@@ -22,7 +22,7 @@ InputParameters validParams<SolutionHistory>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<FileOutput>();
-  params += Output::disableOutputTypes();
+  params += Output::enableOutputTypes(); // No-input means enable nothing
 
   // Return the parameters
   return params;

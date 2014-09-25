@@ -29,7 +29,7 @@ InputParameters validParams<Checkpoint>()
 {
   // Get the parameters from the base classes
   InputParameters params = validParams<FileOutput>();
-  params += Output::disableOutputTypes(); // Checkpoint acts like a honey badger, it does what it wants; disable individual controls
+  params += Output::enableOutputTypes(); // Checkpoint acts like a honey badger, it does what it wants; disable all individual controls
 
   // Typical checkpoint options
   params.addParam<unsigned int>("num_files", 2, "Number of the restart files to save");

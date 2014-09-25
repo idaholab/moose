@@ -26,7 +26,7 @@ template<>
 InputParameters validParams<TopResidualDebugOutput>()
 {
   InputParameters params = validParams<PetscOutput>();
-  params += Output::disableOutputTypes();
+  params += Output::enableOutputTypes(); // No-input means enable nothing
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
   params.addParam<unsigned int>("num_residuals", 0, "The number of top residuals to print out (0 = no output)");
