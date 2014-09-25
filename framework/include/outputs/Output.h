@@ -234,7 +234,7 @@ public:
   /**
    * A method controlling which types of outputs are supported by the Output object
    * @param names (optional) Space seperated of output type names that are supported by this Output object,
-   *              if this is ommited all outputs types will be supported. The list of aviable output
+   *              if this is ommited all outputs types will be un-supported. The list of aviable output
    *              types is given below.
    *
    * Output objects vary widely in what type of outputs they support (e.g., elemental variables,
@@ -261,17 +261,6 @@ public:
    *
    */
   static InputParameters enableOutputTypes(const std::string & names = std::string());
-
-  /**
-   * A method for disabling all individual output type control
-   * @param names (optional) Space seperated of output type names that are un-supported by this Output object,
-   *              if this is ommited all outputs types will be un-supported.
-   *
-   * This method acts in the opposite manner for Output::enableOutputTypes().
-   *
-   * @see Output::enableOutputTypes() Checkpoint
-   */
-  static InputParameters disableOutputTypes(const std::string & names = std::string());
 
 
 protected:

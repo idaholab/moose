@@ -58,6 +58,7 @@
 []
 
 [Outputs]
+  exodus = true
   [./csv]
     type = CSV
     delimiter = ' '
