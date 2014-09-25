@@ -29,10 +29,13 @@ private:
   NonlinearSystem & _nl;
   const EBSDReader & _ebsd_reader;
 
+  bool _consider_phase;
+  unsigned int _phase;
+  bool _all_to_one;
   unsigned int _op_num;
-  unsigned int _grain_num;
   unsigned int _op_index;
 
+  unsigned int _grain_num;
   Point _bottom_left;
   Point _top_right;
   Point _range;
