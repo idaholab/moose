@@ -10,7 +10,7 @@ InputParameters validParams<ConservedLangevinNoise>()
 ConservedLangevinNoise::ConservedLangevinNoise(const std::string & name,
                              InputParameters parameters) :
     LangevinNoise(name, parameters),
-    _noise(getUserObject<ConservedNoiseBase>("noise"))
+    _noise(getUserObject<ConservedNoiseInterface>("noise"))
 {
 }
 

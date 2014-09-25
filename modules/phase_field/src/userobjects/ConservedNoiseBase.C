@@ -12,16 +12,8 @@ InputParameters validParams<ConservedNoiseBase>()
 }
 
 ConservedNoiseBase::ConservedNoiseBase(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters),
-    _integral(0),
-    _volume(0),
-    _qp(0)
+    ConservedNoiseInterface(name, parameters)
 {
-  /**
-   * This call turns on Random Number generation for this object, it can be called either in
-   * the constructor or in initialSetup().
-   */
-  setRandomResetFrequency(EXEC_TIMESTEP);
 }
 
 void

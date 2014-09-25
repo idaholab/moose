@@ -20,7 +20,7 @@ protected:
   virtual Real computeQpResidual();
 
 private:
-  const ConservedNoiseBase & _noise;
+  const ConservedNoiseInterface & _noise;
 };
 
 #endif //CONSERVEDLANGEVINNOISE_H

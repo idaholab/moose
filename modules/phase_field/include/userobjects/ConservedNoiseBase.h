@@ -1,7 +1,7 @@
 #ifndef CONSERVEDNOISEBASE_H
 #define CONSERVEDNOISEBASE_H
 
-#include "ElementUserObject.h"
+#include "ConservedNoiseInterface.h"
 
 //Forward Declarations
 class ConservedNoiseBase;
@@ -18,7 +18,7 @@ InputParameters validParams<ConservedNoiseBase>();
   * \see ConservedUniformNoise
   * \see ConservedNormalNoise
   */
-class ConservedNoiseBase : public ElementUserObject
+class ConservedNoiseBase : public ConservedNoiseInterface
 {
 public:
   ConservedNoiseBase(const std::string & name, InputParameters parameters);
@@ -33,15 +33,7 @@ public:
   Real getQpValue(dof_id_type element_id, unsigned int qp) const;
 
 protected:
-  virtual Real getQpRandom() = 0;
-
   LIBMESH_BEST_UNORDERED_MAP<dof_id_type, std::vector<Real> > _random_data;
-
-  Real _integral;
-  Real _volume;
-  Real _offset;
-
-  unsigned int _qp;
 };
 
 #endif //CONSERVEDNOISEBASE_H

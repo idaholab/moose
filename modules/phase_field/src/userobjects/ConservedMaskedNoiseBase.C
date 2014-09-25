@@ -13,18 +13,10 @@ InputParameters validParams<ConservedMaskedNoiseBase>()
 }
 
 ConservedMaskedNoiseBase::ConservedMaskedNoiseBase(const std::string & name, InputParameters parameters) :
-    ElementUserObject(name, parameters),
+    ConservedNoiseInterface(name, parameters),
     _mask_property_name(getParam<std::string>("mask")),
-    _mask(getMaterialProperty<Real>(_mask_property_name)),
-    _integral(0),
-    _volume(0),
-    _qp(0)
+    _mask(getMaterialProperty<Real>(_mask_property_name))
 {
-  /**
-   * This call turns on Random Number generation for this object, it can be called either in
-   * the constructor or in initialSetup().
-   */
-  setRandomResetFrequency(EXEC_TIMESTEP);
 }
 
 void
@@ -42,7 +34,7 @@ ConservedMaskedNoiseBase::execute()
   std::vector<std::pair<Real, Real> > & me = _random_data[_current_elem->id()] = std::vector<std::pair<Real, Real> >(_qrule->n_points());
 
   // store a random number for each quadrature point
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     me[_qp].first = getQpRandom();
     me[_qp].second = _mask[_qp];
@@ -79,6 +71,6 @@ ConservedMaskedNoiseBase::getQpValue(dof_id_type element_id, unsigned int qp) co
   else
   {
     libmesh_assert_less(qp, me->second.size());
-    return me->second[qp].first - _offset * me->second[qp].second;
+    return (me->second[qp].first - _offset) * me->second[qp].second;
   }
 }

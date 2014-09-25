@@ -11,9 +11,9 @@
 []
 
 [Functions]
-  [./mask]
+  [./mask_func]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2); if (r<3, 1.0, 0.0)'
+    value = 'r:=sqrt((x-5)^2+(y-5)^2); if (r<3, 1.0, 0.0)'
   [../]
 []
 
@@ -21,47 +21,20 @@
   [./c]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.9
-  [../]
-  [./w]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[Preconditioning]
-  active = 'SMP'
-  [./SMP]
-   type = SMP
-   off_diag_row = 'w c'
-   off_diag_column = 'c w'
+    initial_condition = 0.0
   [../]
 []
 
 [Kernels]
-  [./cres]
-    type = SplitCHMath
-    variable = c
-    kappa_name = kappa_c
-    w = w
-  [../]
-
-  [./wres]
-    type = SplitCHWRes
-    variable = w
-    mob_name = M
-  [../]
-
   [./time]
-    type = CoupledImplicitEuler
-    variable = w
-    v = c
+    type = TimeDerivative
+    variable = c
   [../]
 
   [./conserved_langevin]
     type = ConservedLangevinNoise
     amplitude = 0.5
-    variable = w
+    variable = c
     noise = normal_masked_noise
   []
 []
@@ -69,25 +42,25 @@
 [BCs]
   [./Periodic]
     [./all]
-      variable = 'c w'
+      variable = c
       auto_direction = 'x y'
     [../]
   [../]
 []
 
 [Materials]
-  [./constant]
-    type = PFMobility
+  [./mask_material]
+    type = GenericFunctionMaterial
     block = 0
-    mob = 1.0
-    kappa = 2.0
+    prop_names  = 'mask_prop'
+    prop_values = 'mask_func'
   [../]
 []
 
 [UserObjects]
   [./normal_masked_noise]
     type = ConservedMaskedNormalNoise
-    mask = mask
+    mask = mask_prop
   [../]
 []
 
@@ -122,7 +95,6 @@
 [Outputs]
   file_base = normal_masked
   output_initial = true
-  exodus = true
   [./console]
     type = Console
     perf_log = true
@@ -130,6 +102,5 @@
   [../]
   [./csv]
     type = CSV
-    delimiter = ' '
   [../]
 []
