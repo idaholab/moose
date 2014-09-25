@@ -66,21 +66,18 @@ public:
    */
   InputParameters & parameters() { return _pars; }
 
+  ///@{
   /**
    * Retrieve a parameter for the object
    * @param name The name of the parameter
    * @return The value of the parameter
    */
   template <typename T>
-  const T & getParam(const std::string & name) { return _pars.get<T>(name); }
+  const T & getParam(const std::string & name);
 
-  /**
-   * Retrieve a parameter for the object (const version)
-   * @param name The name of the parameter
-   * @return The value of the parameter
-   */
   template <typename T>
-  const T & getParam(const std::string & name) const { return _pars.get<T>(name); }
+  const T & getParam(const std::string & name) const;
+  ///@}
 
   inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
 
@@ -438,5 +435,19 @@ private:
   // Allow FEProblem to set the recover/restart state, so make it a friend
   friend class FEProblem;
 };
+
+template <typename T>
+const T &
+MooseApp::getParam(const std::string & name)
+{
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
+
+template <typename T>
+const T &
+MooseApp::getParam(const std::string & name) const
+{
+  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
 
 #endif /* MOOSEAPP_H */

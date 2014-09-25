@@ -425,6 +425,20 @@ public:
    */
   void applyParameters(const InputParameters & common);
 
+  ///@{
+  /*
+   * These methods are here to retrieve parameters for scalar and vector types respectively. We will throw errors
+   * when returning most scalar types, but will allow retrieving empty vectors.
+   */
+  template <typename T>
+  static
+  const T & getParamHelper(const std::string & name, const InputParameters & pars, const T* the_type);
+
+  template <typename T>
+  static
+  const std::vector<T> & getParamHelper(const std::string & name, const InputParameters & pars, const std::vector<T>* the_type);
+  ///@}
+
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters validParams<MooseObject>();
   friend InputParameters validParams<Action>();
@@ -714,7 +728,6 @@ void
 InputParameters::suppressParameter(const std::string &name)
 {
   _required_params.erase(name);
-  _valid_params.erase(name);
   _private_params.insert(name);
 }
 
@@ -850,6 +863,39 @@ InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/,
   oss << r_value;
   l_value = oss.str();
 }
+
+template <typename T>
+const T &
+InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T*)
+{
+  if (!pars.isParamValid(name))
+    mooseError("The parameter \"" << name << "\" is being retrieved before being set.\n");
+  return pars.get<T>(name);
+}
+
+template <typename T>
+const std::vector<T> &
+InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const std::vector<T>*)
+{
+  return pars.get<std::vector<T> >(name);
+}
+
+template <>
+inline
+const MooseEnum &
+InputParameters::getParamHelper<MooseEnum>(const std::string & name, const InputParameters & pars, const MooseEnum*)
+{
+  return pars.get<MooseEnum>(name);
+}
+
+template <>
+inline
+const MultiMooseEnum &
+InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name, const InputParameters & pars, const MultiMooseEnum*)
+{
+  return pars.get<MultiMooseEnum>(name);
+}
+
 
 InputParameters emptyInputParameters();
 

@@ -13,7 +13,7 @@ InputParameters validParams<PolycrystalKernelAction>()
   params.addParam<VariableName>("c", "NONE", "Name of coupled concentration variable");
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
-  params.addParam<VariableName>("T", "", "Name of temperature variable");
+  params.addParam<VariableName>("T", "NONE", "Name of temperature variable");
 
   return params;
 }
@@ -67,7 +67,7 @@ PolycrystalKernelAction::act()
     poly_params.set<NonlinearVariableName>("variable") = var_name;
     poly_params.set<std::vector<VariableName> >("v") = v;
     poly_params.set<bool>("implicit")=_implicit;
-    if (!_T.empty())
+    if (_T != "NONE")
       poly_params.set<std::vector<VariableName> >("T").push_back(_T);
 
     std::string kernel_name = "ACBulk_";

@@ -41,7 +41,7 @@ CSV::CSV(const std::string & name, InputParameters & parameters) :
     _align(getParam<bool>("align")),
     _precision(getParam<unsigned int>("precision")),
     _set_delimiter(isParamValid("delimiter")),
-    _delimiter(getParam<std::string>("delimiter"))
+    _delimiter(isParamValid("delimiter") ? getParam<std::string>("delimiter") : "")
 {
 }
 

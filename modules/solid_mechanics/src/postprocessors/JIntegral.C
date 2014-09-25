@@ -28,7 +28,7 @@ JIntegral::JIntegral(const std::string & name, InputParameters parameters):
                         &getMaterialProperty<RealVectorValue>("J_thermal_term_vec"):
                         NULL),
     _convert_J_to_K(getParam<bool>("convert_J_to_K")),
-    _youngs_modulus(getParam<Real>("youngs_modulus"))
+  _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0)
 {
 }
 
