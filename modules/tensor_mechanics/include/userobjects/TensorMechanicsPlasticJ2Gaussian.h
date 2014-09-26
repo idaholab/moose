@@ -40,7 +40,7 @@ class TensorMechanicsPlasticJ2Gaussian : public TensorMechanicsPlasticJ2
   /// d(yieldStrength)/d(intnl)
   virtual Real dyieldStrength(const Real & intnl) const;
 
- 
+
 
 };
 

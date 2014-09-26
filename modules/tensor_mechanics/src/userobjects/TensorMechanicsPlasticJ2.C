@@ -58,8 +58,8 @@ TensorMechanicsPlasticJ2::dflowPotential_dstress(const RankTwoTensor & stress, c
   for (unsigned i = 0 ; i < 3 ; ++i)
     for (unsigned j = 0 ; j < 3 ; ++j)
       for (unsigned k = 0 ; k < 3 ; ++k)
-	for (unsigned l = 0 ; l < 3 ; ++l)
-	  dfp(i, j, k, l) += pre*dII(i, j)*dII(k, l);
+        for (unsigned l = 0 ; l < 3 ; ++l)
+          dfp(i, j, k, l) += pre*dII(i, j)*dII(k, l);
   return dfp;
 }
 

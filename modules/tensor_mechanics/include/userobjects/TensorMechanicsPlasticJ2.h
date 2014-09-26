@@ -81,7 +81,7 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
   /// d(yieldStrength)/d(intnl)
   virtual Real dyieldStrength(const Real & intnl) const;
 
- 
+
 
 };
 

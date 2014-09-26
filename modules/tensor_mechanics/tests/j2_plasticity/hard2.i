@@ -1,7 +1,7 @@
 # UserObject J2 test, with hardening, but with rate=1E6
 # apply uniform compression in x direction to give
 # trial stress_xx = 5, so sqrt(3*J2) = 5
-# with zero Poisson's ratio, lambda_mu = 1E6, and strength=2, strength_residual=1, 
+# with zero Poisson's ratio, lambda_mu = 1E6, and strength=2, strength_residual=1,
 # the equations that we need to solve are:
 #
 # stress_yy = stress_zz  [because of the symmetry of the problem: to keep Lode angle constant]
