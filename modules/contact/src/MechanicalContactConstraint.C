@@ -46,6 +46,7 @@ InputParameters validParams<MechanicalContactConstraint>()
 
   params.addParam<std::string>("formulation", "default", "The contact formulation");
   params.addParam<bool>("normalize_penalty", false, "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
+  params.addParam<bool>("master_slave_jacobian", true, "Whether to include jacobian entries coupling master and slave nodes.");
   return params;
 }
 
@@ -68,7 +69,8 @@ MechanicalContactConstraint::MechanicalContactConstraint(const std::string & nam
   _vars(_x_var, _y_var, _z_var),
   _nodal_area_var(getVar("nodal_area", 0)),
   _aux_system( _nodal_area_var->sys() ),
-  _aux_solution( _aux_system.currentSolution() )
+  _aux_solution( _aux_system.currentSolution() ),
+  _master_slave_jacobian( getParam<bool>("master_slave_jacobian") )
 {
   _overwrite_slave_residual = false;
 
@@ -87,6 +89,9 @@ MechanicalContactConstraint::MechanicalContactConstraint(const std::string & nam
 
   if (_friction_coefficient < 0)
     mooseError("The friction coefficient must be nonnegative");
+
+  if (!_master_slave_jacobian && _formulation != CF_PENALTY)
+    mooseError("The 'master_slave_jacobian = false' option is only valid with 'formulation = penalty'");
 }
 
 void
@@ -596,4 +601,58 @@ MechanicalContactConstraint::getPenalty(PenetrationInfo & pinfo)
     penalty *= nodalArea(pinfo);
   }
   return penalty;
+}
+
+void
+MechanicalContactConstraint::computeJacobian()
+{
+  getConnectedDofIndices(_var.number());
+
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), _var.number());
+
+  _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
+
+  _phi_slave.resize(_connected_dof_indices.size());
+
+  _qp = 0;
+
+  // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
+  // This corresponds to evaluating all of the connected shape functions at _this_ node
+  for (unsigned int j=0; j<_connected_dof_indices.size(); j++)
+  {
+    _phi_slave[j].resize(1);
+
+    if (_connected_dof_indices[j] == _var.nodalDofIndex())
+      _phi_slave[j][_qp] = 1.0;
+    else
+      _phi_slave[j][_qp] = 0.0;
+  }
+
+  for (_i = 0; _i < _test_slave.size(); _i++)
+    // Loop over the connected dof indices so we can get all the jacobian contributions
+    for (_j=0; _j<_connected_dof_indices.size(); _j++)
+      _Kee(_i,_j) += computeQpJacobian(Moose::SlaveSlave);
+
+  if (_master_slave_jacobian)
+  {
+    DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
+    if (Ken.m() && Ken.n())
+      for (_i=0; _i<_test_slave.size(); _i++)
+        for (_j=0; _j<_phi_master.size(); _j++)
+          Ken(_i,_j) += computeQpJacobian(Moose::SlaveMaster);
+  }
+
+  if (_master_slave_jacobian)
+  {
+    _Kne.resize(_test_master.size(), _connected_dof_indices.size());
+    for (_i=0; _i<_test_master.size(); _i++)
+      // Loop over the connected dof indices so we can get all the jacobian contributions
+      for (_j=0; _j<_connected_dof_indices.size(); _j++)
+        _Kne(_i,_j) += computeQpJacobian(Moose::MasterSlave);
+  }
+
+  if (Knn.m() && Knn.n())
+    for (_i=0; _i<_test_master.size(); _i++)
+      for (_j=0; _j<_phi_master.size(); _j++)
+        Knn(_i,_j) += computeQpJacobian(Moose::MasterMaster);
 }
