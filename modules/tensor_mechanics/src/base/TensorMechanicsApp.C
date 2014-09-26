@@ -29,6 +29,8 @@
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
 #include "TensorMechanicsPlasticWeakPlaneShearGaussian.h"
+#include "TensorMechanicsPlasticJ2.h"
+#include "TensorMechanicsPlasticJ2Gaussian.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -82,6 +84,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileN);
   registerUserObject(TensorMechanicsPlasticWeakPlaneShear);
   registerUserObject(TensorMechanicsPlasticWeakPlaneShearGaussian);
+  registerUserObject(TensorMechanicsPlasticJ2);
+  registerUserObject(TensorMechanicsPlasticJ2Gaussian);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);
