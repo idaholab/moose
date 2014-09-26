@@ -33,8 +33,6 @@ Pressure::Pressure(const std::string & name, InputParameters parameters)
 
     mooseError( errMsg.str() );
   }
-
-  mooseAssert( getParam<FunctionName>("function") == "" || _function, "Function not found" );
 }
 
 Real
