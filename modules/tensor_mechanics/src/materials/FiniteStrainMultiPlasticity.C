@@ -242,7 +242,7 @@ FiniteStrainMultiPlasticity::postReturnMap()
     for (unsigned int i = 0 ; i < LIBMESH_DIM ; ++i)
     {
       _n[_qp](i) = 0;
-      for (unsigned int j = 0 ; j < 3 ; ++j)
+      for (unsigned int j = 0 ; j < LIBMESH_DIM ; ++j)
         _n[_qp](i) += _rotation_increment[_qp](i, j)*_n_old[_qp](j);
     }
   }
