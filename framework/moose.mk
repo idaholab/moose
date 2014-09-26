@@ -123,17 +123,17 @@ app_LIB      := $(moose_LIBS) $(exodiff_APP)
 clean::
 	@rm -fr $(app_LIB) $(app_EXEC)
 	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                           -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \) -exec rm '{}' \;)
-	@$(shell find . \( -name *.gch \) | xargs rm -rf)
-	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
+                           -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" -or -name "libmesh" -prune \) -exec rm '{}' \;)
+	@$(shell find . \( -name *.gch -or -name "libmesh" -prune \) | xargs rm -rf)
+	@$(shell find . -type d -name .libs -or -name "libmesh" -prune | xargs rm -rf) # remove hidden directories created by libtool
 
 clobber::
 	@rm -fr $(app_LIB) $(app_EXEC)
 	@$(shell find . \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
                            -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \
-                           -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" \) -exec rm '{}' \;)
-	@$(shell find . \( -name *.gch \) | xargs rm -rf)
-	@$(shell find . -type d -name .libs | xargs rm -rf) # remove hidden directories created by libtool
+                           -or -name "*.gcda" -or -name "*.gcno" -or -name "*.gcov" -or -name "libmesh" -prune \) -exec rm '{}' \;)
+	@$(shell find . \( -name *.gch -or -name "libmesh" -prune \) | xargs rm -rf)
+	@$(shell find . -type d -name .libs -or -name "libmesh" -prune | xargs rm -rf) # remove hidden directories created by libtool
 
 cleanall::
 	@echo "Cleaning in:"
@@ -142,9 +142,9 @@ cleanall::
 	@for dir in $(app_DIRS); \
 	do \
 		find $${dir} \( -name "*~" -or -name "*.o" -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" \
-                           -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" \) -exec rm '{}' \; ; \
-		find $${dir} -name *.gch | xargs rm -rf; \
-		find $${dir} -type d -name .libs | xargs rm -rf; \
+                           -or -name "*.a" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.plist" -or -name "libmesh" -prune \) -exec rm '{}' \; ; \
+		find $${dir} \( -name *.gch -or -name "libmesh" -prune \) | xargs rm -rf; \
+		find $${dir} -type d -name .libs -or -name "libmesh" -prune | xargs rm -rf; \
 	done
 
 echo_include:
