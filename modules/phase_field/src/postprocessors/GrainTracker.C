@@ -413,7 +413,15 @@ GrainTracker::trackGrains()
   {
     if (_ebsd_reader)
     {
-      const std::vector<Point> & center_points = _ebsd_reader->getCenterPoints();
+      Real grain_num = _ebsd_reader->getGrainNum();
+
+      const std::vector<Point> & center_points(grain_num);
+
+      for (unsigned int gr=0; gr < grain_num; ++gr)
+      {
+        const EBSDReader::EBSDAvgData & d = _ebsd_reader->getAvgData(gr);
+        //center_points[gr] = d.p; //FIX THIS
+      }
 
       // To find the minimum distance we will use the boundingRegionDistance routine.
       // To do that, we need to build BoundingSphereObjects with a few dummy values, radius and node_id will be ignored
