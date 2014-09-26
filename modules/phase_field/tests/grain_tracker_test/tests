@@ -16,4 +16,10 @@
     #but can diff across architectures in the finite nodal aux fields.
     # min_parallel = 2
   [../]
+
+  [./test_ebsd]
+    type = 'Exodiff'
+    input = 'grain_tracker_ebsd.i'
+    exodiff = 'grain_tracker_ebsd_out.e'
+  [../]
 []
