@@ -140,6 +140,9 @@ EBSDMeshErrorTest::testParam(unsigned int nparam, const char ** param_list)
     // set a single parameter
     params.set<T>(param_list[i]) = T(1.0);
 
+    // set filename (is a required param but not used in these tests)
+    params.set<FileName>("filename") = "DUMMY";
+
     try
     {
       // construct mesh object
