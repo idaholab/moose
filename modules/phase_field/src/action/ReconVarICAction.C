@@ -19,8 +19,10 @@ InputParameters validParams<ReconVarICAction>()
   InputParameters params = validParams<Action>();
   params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader GeneralUserObject");
   params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order paraameters to create");
-  params.addRequiredParam<unsigned int>("grain_num", "Specifies the number of grains in the reconstructed dataset");
   params.addRequiredParam<std::string>("var_name_base","specifies the base name of the variables");
+  params.addRequiredParam<bool>("consider_phase","If true, IC will only act on one phase");
+  params.addParam<unsigned int>("phase", 0,"EBSD phase number to be assigned to this grain");
+
   return params;
 }
 
@@ -49,10 +51,13 @@ ReconVarICAction::act()
     {
       // Define parameters for ReconVarIC
       InputParameters poly_params = _factory.getValidParams("ReconVarIC");
-      poly_params.applyParameters(_pars);
       poly_params.set<VariableName>("variable") = var_name;
       poly_params.set<unsigned int>("op_index") = op;
-      // poly_params.set<std::vector<VariableName> >("eta") = getParam<std::vector<VariableName> >("eta");
+      poly_params.set<unsigned int>("op_num") = _op_num;
+      poly_params.set<UserObjectName>("ebsd_reader") = getParam<UserObjectName>("ebsd_reader");
+      poly_params.set<bool>("consider_phase") = getParam<bool>("consider_phase");
+      poly_params.set<unsigned int>("phase") = getParam<unsigned int>("phase");
+      poly_params.set<bool>("all_to_one") = false;
 
       // Add initial condition
       _problem->addInitialCondition("ReconVarIC", "Initialize_op", poly_params);

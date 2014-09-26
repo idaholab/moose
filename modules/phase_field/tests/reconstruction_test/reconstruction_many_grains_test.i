@@ -5,7 +5,6 @@
 
 [GlobalParams]
   op_num = 10
-  grain_num = 581
   var_name_base = gr
  # sd = 3
 []
@@ -20,6 +19,7 @@
   [./PolycrystalICs]
     [./ReconVarIC]
       ebsd_reader = ebsd
+      consider_phase = false
     [../]
   [../]
 []
