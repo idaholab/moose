@@ -87,7 +87,6 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     a.p = a.phi1 = a.phi = a.phi2 = a.phase = a.symmetry = 0.0;
     a.n = 0;
   }
-  //_centerpoints.resize(_grain_num);
 
   // Iterate through data points to get average variable values for each grain
   for (std::vector<EBSDPointData>::iterator j = _data.begin(); j != _data.end(); ++j)
@@ -132,12 +131,6 @@ const EBSDReader::EBSDAvgData &
 EBSDReader::getAvgData(unsigned int var) const
 {
   return _avg_data[indexFromIndex(var)];
-}
-
-const std::vector<Point> &
-EBSDReader::getCenterPoints() const
-{
-  return _centerpoints;
 }
 
 const unsigned int &
