@@ -45,11 +45,6 @@ public:
   const EBSDAvgData &  getAvgData(unsigned int i) const;
 
   /**
-   * Return the center points
-   */
-  const std::vector<Point> & getCenterPoints() const;
-
-  /**
    * Return the number of grains
    */
   const unsigned & getGrainNum() const;
@@ -88,10 +83,6 @@ protected:
   // Grain averaged values of EBSD variables
   std::vector<Real> _avg_phi1, _avg_PHI, _avg_phi2, _avg_x, _avg_y, _avg_z;
   std::vector<unsigned int> _avg_phase, _avg_sym;
-
-  // Variables needed to determine reduced order parameters variables
-  std::vector<Point> _centerpoints;
-  std::vector<Real> _assigned_op;
 
   /// Computes a global index in the _data array given an input *centroid* point
   unsigned indexFromPoint(const Point & p) const;
