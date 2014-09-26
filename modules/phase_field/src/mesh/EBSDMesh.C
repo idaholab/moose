@@ -27,9 +27,7 @@ EBSDMesh::EBSDMesh(const std::string & name, InputParameters parameters) :
     GeneratedMesh(name, parameters),
     _filename(getParam<FileName>("filename"))
 {
-  if (isParamValid("nx") || isParamValid("ny") || isParamValid("nz") ||
-      isParamValid("xmin") || isParamValid("ymin") || isParamValid("zmin") ||
-      isParamValid("xmax") || isParamValid("ymax") || isParamValid("zmax"))
+  if (_nx != 1 || _ny != 1 || _nz !=1)
     mooseWarning("Do not specify mesh geometry information, it is read from the EBSD file.");
 }
 
