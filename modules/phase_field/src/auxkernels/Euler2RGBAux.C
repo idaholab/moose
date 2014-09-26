@@ -5,7 +5,7 @@ template<>
 InputParameters validParams<Euler2RGBAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<unsigned int>("sd", "An integer representing reference sample direction");
+  params.addParam<unsigned int>("sd", 3, "An integer representing reference sample direction");
   return params;
 }
 
