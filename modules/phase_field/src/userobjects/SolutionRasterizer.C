@@ -25,7 +25,7 @@ SolutionRasterizer::SolutionRasterizer(const std::string & name, InputParameters
   if (_raster_mode == "FILTER")
   {
     if (!isParamValid("threshold"))
-      mooseError("Please specify 'threshold' parameter for raster_mode=FILTER");
+      mooseError("Please specify 'threshold' parameter for raster_mode = FILTER");
     _threshold = getParam<Real>("threshold");
   }
 }
@@ -48,12 +48,17 @@ SolutionRasterizer::initialSetup()
   std::string line, dummy;
   Real x, y, z;
   unsigned int current_line = 0;
+  unsigned int nfilter = 0, len0 = 0;
   while (std::getline(stream_in, line))
   {
     if (current_line < 2)
     {
-      // dump header (hmm... this will give the wrong number of atoms)
+      // dump header
       stream_out << line << '\n';
+
+      // get length of line 0 - the amount of space we have to replace teh atom count at the end of filtering
+      if (current_line == 0)
+        len0 = line.size();
     }
     else
     {
@@ -68,7 +73,10 @@ SolutionRasterizer::initialSetup()
             break;
           case 1: // FILTER
             if (pointValue(0.0, Point(x,y,z), _variable) > _threshold)
+            {
               stream_out << line << '\n';
+              nfilter++;
+            }
             break;
         }
     }
@@ -78,4 +86,29 @@ SolutionRasterizer::initialSetup()
 
   stream_in.close();
   stream_out.close();
+
+  // modify output file to fix atom count in line 0
+  if (_raster_mode == "FILTER")
+  {
+    // stringify the new number of atoms
+    std::ostringstream oss;
+    oss << nfilter;
+    std::string newline0 = oss.str();
+
+    // the new number should always be lower -> shorter than the old one, but we check to be sure
+    if (newline0.size() > len0)
+    {
+      mooseWarning("SolutionRasterizer could not update XYZ atom count in header.");
+      return;
+    }
+
+    // pad shorter numbers with spaces
+    while (newline0.size() < len0)
+      newline0 += ' ';
+
+    // inject new number into the file
+    std::ofstream stream_fix(_xyz_output.c_str(), std::ios::binary | std::ios::in | std::ios::out);
+    stream_fix << newline0;
+    stream_fix.close();
+  }
 }
