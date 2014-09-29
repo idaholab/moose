@@ -73,11 +73,13 @@ protected:
   public:
     BubbleData(std::set<unsigned int> & nodes, unsigned int var_idx) :
         _nodes(nodes),
-        _var_idx(var_idx)
+        _var_idx(var_idx),
+        _intersects_boundary(false)
     {}
 
     std::set<unsigned int> _nodes;
     unsigned int _var_idx;
+    bool _intersects_boundary;
   };
 
   /**
@@ -276,6 +278,21 @@ protected:
 
   // Dummy value for unimplemented method
   static const std::vector<std::pair<unsigned int, unsigned int> > _empty;
+
+  /**
+   * Vector of length _maps_size to keep track of the total
+   * boundary-intersecting bubble volume scaled by the total domain
+   * volume for each variable.
+   */
+  std::vector<Real> _total_volume_intersecting_boundary;
+
+  /**
+   * If true, the NodalFloodCount object also computes the
+   * (normalized) volume of bubbles which intersect the boundary and
+   * reports this value in the CSV file (if available).  Defaults to
+   * false.
+   */
+  bool _compute_boundary_intersecting_volume;
 };
 
 template<typename T>
