@@ -417,7 +417,7 @@ GrainTracker::trackGrains()
 
       // To find the minimum distance we will use the boundingRegionDistance routine.
       // To do that, we need to build BoundingSphereObjects with a few dummy values, radius and node_id will be ignored
-      BoundingSphereInfo ebsd_sphere(0, Point(0, 0, 0), 0);
+      BoundingSphereInfo ebsd_sphere(0, Point(0, 0, 0), 1);
       std::vector<BoundingSphereInfo *> ebsd_vector(1);
       ebsd_vector[0] = &ebsd_sphere;
       std::set<unsigned int> used_indices;
