@@ -3006,7 +3006,6 @@ FEProblem::init()
   _nl.dofMap().attach_extra_sparsity_function(&extraSparsity, &_nl);
   _nl.dofMap().attach_extra_send_list_function(&extraSendList, &_nl);
   _aux.dofMap().attach_extra_send_list_function(&extraSendList, &_aux);
-  _aux.dofMap().attach_extra_send_list_function(&extraSendList, &_aux);
 
 
   if (_solve && n_vars == 0)
