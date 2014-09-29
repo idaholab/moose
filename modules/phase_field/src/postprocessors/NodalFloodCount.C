@@ -42,6 +42,7 @@ InputParameters validParams<NodalFloodCount>()
   params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
   params.addParam<bool>("use_global_numbering", false, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: false)");
   params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
+  params.addParam<bool>("use_less_than_threshold_comparison", true, "Controls whether bubbles are defined to be less than or greater than the threshold value.");
   params.addParam<FileName>("bubble_volume_file", "An optional file name where bubble volumes can be output.");
   params.addParam<bool>("track_memory_usage", false, "Calculate memory usage");
   return params;
@@ -61,11 +62,11 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _condense_map_info(getParam<bool>("condense_map_info")),
     _global_numbering(getParam<bool>("use_global_numbering")),
     _var_index_mode(getParam<bool>("enable_var_coloring")),
+    _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _pbs(NULL),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _track_memory(getParam<bool>("track_memory_usage"))
-    // _bubble_volume_file_name(parameters.isParamValid("bubble_volume_file") ? getParam<FileName>("bubble_volume_file") : "")
 {
   // Size the data structures to hold the correct number of maps
   _bubble_maps.resize(_maps_size);
@@ -82,12 +83,6 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
 
 NodalFloodCount::~NodalFloodCount()
 {
-  for (std::map<std::string, std::ofstream *>::iterator handle_it = _file_handles.begin(); handle_it != _file_handles.end(); ++handle_it)
-  {
-    if (handle_it->second->is_open())
-      handle_it->second->close();
-    delete handle_it->second;
-  }
 }
 
 void
@@ -495,8 +490,15 @@ NodalFloodCount::flood(const Node *node, int current_idx, unsigned int live_regi
   // Determing which threshold to use based on whether this is an established region
   Real threshold = (live_region ? _step_connecting_threshold : _step_threshold);
 
-  // This node hasn't been marked, is it in a bubble?
-  if (_vars[current_idx]->getNodalValue(*node) < threshold)
+  // Get the value of the current variable at the current node
+  Number nodal_val = _vars[current_idx]->getNodalValue(*node);
+
+  // This node hasn't been marked, is it in a bubble?  We must respect
+  // the user-selected value of _use_less_than_threshold_comparison.
+  if (_use_less_than_threshold_comparison && (nodal_val < threshold))
+    return;
+
+  if (!_use_less_than_threshold_comparison && (nodal_val > threshold))
     return;
 
   // Yay! A bubble -> Mark it!
@@ -564,9 +566,7 @@ NodalFloodCount::calculateBubbleVolumes()
   // Size our temporary data structure
   std::vector<std::vector<Real> > bubble_volumes(_maps_size);
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-  {
     bubble_volumes[map_num].resize(_bubble_sets[map_num].size());
-  }
 
   std::vector<unsigned int> flood_nodes(_maps_size);
   const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
@@ -580,17 +580,19 @@ NodalFloodCount::calculateBubbleVolumes()
     {
       unsigned int bubble_counter = 0;
       std::list<BubbleData>::const_iterator end = _bubble_sets[map_num].end();
-      for (std::list<BubbleData>::const_iterator bubble_it1 = _bubble_sets[map_num].begin(); bubble_it1 != end; ++bubble_it1)
+      for (std::list<BubbleData>::const_iterator bubble_it = _bubble_sets[map_num].begin(); bubble_it != end; ++bubble_it)
       {
+        // Count the number of nodes on this element which are flooded.
         unsigned int flooded_nodes = 0;
         for (unsigned int node = 0; node < elem_n_nodes; ++node)
         {
           unsigned int node_id = elem->node(node);
-          if (bubble_it1->_nodes.find(node_id) != bubble_it1->_nodes.end())
+          if (bubble_it->_nodes.find(node_id) != bubble_it->_nodes.end())
             ++flooded_nodes;
         }
 
-        // Are a majority of the nodes flooded for this element?
+        // If a majority of the nodes for this element are flooded,
+        // assign its volume to the current bubble_counter entry.
         if (flooded_nodes >= elem_n_nodes / 2)
           bubble_volumes[map_num][bubble_counter] += curr_volume;
 
