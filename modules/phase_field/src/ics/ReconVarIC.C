@@ -78,28 +78,28 @@ ReconVarIC::value(const Point &)
   const unsigned int grn_index = d.grain;
   const unsigned int phase_index = d.phase;
 
-  if (!_consider_phase) //This is the old methodology where everything is an order parameter
+  Real value = 0.0;
+
+  if (!_consider_phase) //This is the old methodology where everything is an order parameter so grain_num is unchanged
   {
     if (_assigned_op[grn_index] == _op_index)
-      return 1.0;
-    else
-      return 0.0;
+      value = 1.0;
   }
   else
   {
     if (_all_to_one) //Ever part of this phase will be assigned to the same variable
     {
       if (phase_index == _phase)
-        return 1.0;
-      else
-        return 0.0;
+        value = 1.0;
     }
-    else //For the given phase, each grain is assigned to the corresponding op.
+    else //For the given phase, each grain is assigned to the corresponding op., but grain_num is one less.
     {
-      if (_assigned_op[grn_index] == _op_index && phase_index == _phase)
-        return 1.0;
-      else
-        return 0.0;
+      if (phase_index == _phase)
+        if (_assigned_op[grn_index - 1] == _op_index)
+          value = 1.0;
     }
+
   }
+
+  return value;
 }
