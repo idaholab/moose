@@ -5,9 +5,7 @@
 
 [GlobalParams]
   op_num = 9
-  grain_num = 9
   var_name_base = gr
-  sd = 3
 []
 
 [UserObjects]
@@ -51,7 +49,7 @@
   [./unique_grains]
     type = NodalFloodCountAux
     variable = unique_grains
-    execute_on = timestep
+    execute_on = timestep_begin
     bubble_object = grain_tracker
     field_display = UNIQUE_REGION
   [../]
@@ -78,20 +76,17 @@
     type = NumDOFs
   [../]
 
-   [./grain_tracker]
-     type = GrainTracker
-     threshold = 0.2
-     convex_hull_buffer = 1.0
-     use_single_map = false
-     enable_var_coloring = true
-     condense_map_info = true
-     connecting_threshold = 0.2
-     compute_op_maps = true
-     execute_on = timestep_begin
-     tracking_step = 0
-     remap_grains = false
-     ebsd_reader = ebsd
-   [../]
+  [./grain_tracker]
+    type = GrainTracker
+    threshold = 0.2
+    convex_hull_buffer = 5.0
+    use_single_map = false
+    enable_var_coloring = true
+    condense_map_info = true
+    connecting_threshold = 0.08
+    ebsd_reader = ebsd
+    execute_on = timestep_begin
+  [../]
 []
 
 [Executioner]
