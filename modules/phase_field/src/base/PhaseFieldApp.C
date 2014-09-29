@@ -44,6 +44,7 @@
 #ifdef LIBMESH_HAVE_VTK
 #include "ImageFunction.h"
 #endif
+#include "SolutionRasterizer.h"
 
 //#include "SPPARKSUserObject.h"
 //#include "SPPARKSAux.h"
@@ -116,6 +117,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 #ifdef LIBMESH_HAVE_VTK
   registerFunction(ImageFunction);
 #endif
+  registerUserObject(SolutionRasterizer);
 }
 
 void
