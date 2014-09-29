@@ -4,12 +4,30 @@ template<>
 InputParameters validParams<SolutionRasterizer>()
 {
   InputParameters params = validParams<SolutionUserObject>();
+  params.addClassDescription("Process an XYZ file of atomic coordinates and filter atoms via threshold or map variable values.");
+  params.addRequiredParam<FileName>("xyz_input", "XYZ input file.");
+  params.addRequiredParam<FileName>("xyz_output", "XYZ output file.");
+  params.addRequiredParam<std::string>("variable", "Variable from the mesh file to use for mapping to or filtering of the atoms.");
+  MooseEnum modeEnum("MAP FILTER", "MAP");
+  params.addParam<MooseEnum>("raster_mode", modeEnum, "Rasterization mode (MAP|FILTER).");
+  params.addParam<Real>("threshold", "Accept atoms with a variable value above this threshold in FILTER mode.");
   return params;
 }
 
 SolutionRasterizer::SolutionRasterizer(const std::string & name, InputParameters parameters) :
-    SolutionUserObject(name, parameters)
+    SolutionUserObject(name, parameters),
+    _xyz_input(getParam<FileName>("xyz_input")),
+    _xyz_output(getParam<FileName>("xyz_output")),
+    _variable(getParam<std::string>("variable")),
+    _raster_mode(getParam<MooseEnum>("raster_mode")),
+    _threshold(0.0)
 {
+  if (_raster_mode == "FILTER")
+  {
+    if (!isParamValid("threshold"))
+      mooseError("Please specify 'threshold' parameter for raster_mode=FILTER");
+    _threshold = getParam<Real>("threshold");
+  }
 }
 
 void
@@ -21,10 +39,39 @@ SolutionRasterizer::initialSetup()
   // initialize parent class
   SolutionUserObject::initialSetup();
 
-  std::cout << "SolutionRasterizer::initialSetup() doing stuff!\n";
+  // open input XYZ file
+  std::ifstream stream_in(_xyz_input.c_str());
 
-  for (Real x = 0.0; x < 1.0; x += 0.5)
-    for (Real y = 0.0; y < 1.0; y += 0.5)
-      for (Real z = 0.0; z < 1.0; z += 0.5)
-        std::cout << x << ' ' << y << ' ' << z << ' ' << pointValue(0.0, Point(x,y,z), "c") << '\n';
+  // open output XYZ file
+  std::ofstream stream_out(_xyz_output.c_str());
+
+  std::string line, dummy;
+  Real x, y, z;
+  unsigned int current_line = 0;
+  while (std::getline(stream_in, line))
+  {
+    if (current_line < 2)
+    {
+      // dump header (hmm... this will give the wrong number of atoms)
+      stream_out << line;
+    }
+    else
+    {
+      std::istringstream iss(line);
+      iss >> dummy >> x >> y >> z;
+      switch (int(_raster_mode))
+      {
+        case 0: // MAP
+          std::cout << line << ' ' << pointValue(0.0, Point(x,y,z), _variable) << '\n';
+          break;
+        case 1: // FILTER
+          if (pointValue(0.0, Point(x,y,z), _variable) > _threshold)
+            std::cout << line;
+          break;
+      }
+    }
+
+    current_line++;
+  }
+
 }

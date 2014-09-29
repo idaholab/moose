@@ -28,6 +28,14 @@ public:
   virtual void initialSetup();
 
 protected:
+  FileName _xyz_input;
+  FileName _xyz_output;
+
+  std::string _variable;
+
+  MooseEnum _raster_mode;
+
+  Real _threshold;
 };
 
 #endif //SOLUTIONRASTERIZER_H
