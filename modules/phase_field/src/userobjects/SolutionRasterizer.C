@@ -53,25 +53,29 @@ SolutionRasterizer::initialSetup()
     if (current_line < 2)
     {
       // dump header (hmm... this will give the wrong number of atoms)
-      stream_out << line;
+      stream_out << line << '\n';
     }
     else
     {
       std::istringstream iss(line);
       iss >> dummy >> x >> y >> z;
-      switch (int(_raster_mode))
-      {
-        case 0: // MAP
-          std::cout << line << ' ' << pointValue(0.0, Point(x,y,z), _variable) << '\n';
-          break;
-        case 1: // FILTER
-          if (pointValue(0.0, Point(x,y,z), _variable) > _threshold)
-            std::cout << line;
-          break;
-      }
+
+      if (iss.good())
+        switch (_raster_mode)
+        {
+          case 0: // MAP
+            stream_out << line << ' ' << pointValue(0.0, Point(x,y,z), _variable) << '\n';
+            break;
+          case 1: // FILTER
+            if (pointValue(0.0, Point(x,y,z), _variable) > _threshold)
+              stream_out << line << '\n';
+            break;
+        }
     }
 
     current_line++;
   }
 
+  stream_in.close();
+  stream_out.close();
 }
