@@ -63,9 +63,8 @@ SolutionRasterizer::initialSetup()
     else
     {
       std::istringstream iss(line);
-      iss >> dummy >> x >> y >> z;
 
-      if (iss.good())
+      if (iss >> dummy >> x >> y >> z)
         switch (_raster_mode)
         {
           case 0: // MAP
