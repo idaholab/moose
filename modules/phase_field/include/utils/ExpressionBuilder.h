@@ -306,7 +306,8 @@ public:
     operator std::string() const;
 
     // function definition (assignment)
-    EBFunction & operator= (const EBTerm & arg);
+    EBFunction & operator= (const EBTerm &);
+    EBFunction & operator= (const EBFunction &);
 
     // get the list of arguments and check if they are all symbols
     std::string args();

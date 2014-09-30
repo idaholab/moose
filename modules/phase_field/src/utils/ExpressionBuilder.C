@@ -137,7 +137,15 @@ ExpressionBuilder::EBFunction &
 ExpressionBuilder::EBFunction::operator= (const ExpressionBuilder::EBTerm & term)
 {
   this->arguments = this->eval_arguments;
-  this->term = EBTerm(term);
+  this->term = term;
+  return *this;
+}
+
+ExpressionBuilder::EBFunction &
+ExpressionBuilder::EBFunction::operator= (const ExpressionBuilder::EBFunction & func)
+{
+  this->arguments = this->eval_arguments;
+  this->term = EBTerm(func);
   return *this;
 }
 
