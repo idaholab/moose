@@ -471,7 +471,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
     //  const Node& node = dmm->nl->sys().get_mesh().node(snodes[i]);
     //  // determine v's dof on node and insert into indices
     // }
-     ConstBndNodeRange & bnodes = *dmm->nl->mesh().getBoundaryNodeRange();
+    ConstBndNodeRange & bnodes = *dmm->nl->mesh().getBoundaryNodeRange();
     for (ConstBndNodeRange::const_iterator bnodeit = bnodes.begin(); bnodeit != bnodes.end(); ++bnodeit) {
       const BndNode * bnode = *bnodeit;
       BoundaryID      boundary_id = bnode->_bnd_id;

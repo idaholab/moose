@@ -756,7 +756,7 @@ MooseMesh::getNodeBlockIds(const Node & node)
 
 
 // default begin() accessor
-bnd_node_iterator
+MooseMesh::bnd_node_iterator
 MooseMesh::bndNodesBegin ()
 {
   Predicates::NotNull<bnd_node_iterator_imp> p;
@@ -764,7 +764,7 @@ MooseMesh::bndNodesBegin ()
 }
 
 // default end() accessor
-bnd_node_iterator
+MooseMesh::bnd_node_iterator
 MooseMesh::bndNodesEnd ()
 {
   Predicates::NotNull<bnd_node_iterator_imp> p;
@@ -772,7 +772,7 @@ MooseMesh::bndNodesEnd ()
 }
 
 // default begin() accessor
-bnd_elem_iterator
+MooseMesh::bnd_elem_iterator
 MooseMesh::bndElemsBegin ()
 {
   Predicates::NotNull<bnd_elem_iterator_imp> p;
@@ -780,7 +780,7 @@ MooseMesh::bndElemsBegin ()
 }
 
 // default end() accessor
-bnd_elem_iterator
+MooseMesh::bnd_elem_iterator
 MooseMesh::bndElemsEnd ()
 {
   Predicates::NotNull<bnd_elem_iterator_imp> p;
