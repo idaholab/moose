@@ -45,6 +45,7 @@
 #include "ImageFunction.h"
 #endif
 #include "SolutionRasterizer.h"
+#include "ImageMesh.h"
 
 //#include "SPPARKSUserObject.h"
 //#include "SPPARKSAux.h"
@@ -118,6 +119,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerFunction(ImageFunction);
 #endif
   registerUserObject(SolutionRasterizer);
+  registerMesh(ImageMesh);
 }
 
 void
