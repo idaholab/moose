@@ -23,7 +23,8 @@
 #include "SubProblem.h"
 #include "Parser.h"
 
-PostprocessorWarehouse::PostprocessorWarehouse()
+PostprocessorWarehouse::PostprocessorWarehouse() :
+    Warehouse()
 {
 }
 
@@ -201,7 +202,7 @@ PostprocessorWarehouse::addPostprocessor(MooseSharedPointer<Postprocessor> & pos
 
   Postprocessor * raw_ptr = postprocessor.get();
 
-  _all_postprocessors.push_back(raw_ptr);
+  _all_objects.push_back(raw_ptr);
 
   if (dynamic_cast<ElementPostprocessor*>(raw_ptr))
   {
@@ -282,7 +283,7 @@ Postprocessor *
 PostprocessorWarehouse::getPostprocessor(std::string name)
 {
   // Loop through all the postprocessors, return the pointer if the names match
-  for (std::vector<Postprocessor *>::iterator it=_all_postprocessors.begin(); it != _all_postprocessors.end(); ++it)
+  for (std::vector<Postprocessor *>::iterator it=_all_objects.begin(); it != _all_objects.end(); ++it)
   {
     if (name.compare((*it)->PPName()) == 0)
       return *it;

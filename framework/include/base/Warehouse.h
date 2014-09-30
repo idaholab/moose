@@ -20,6 +20,7 @@
 #include <set>
 
 #include "MooseError.h"
+#include "MooseTypes.h"
 
 /**
  * Base class for all Warehouse containers. The warehouses in MOOSE hold

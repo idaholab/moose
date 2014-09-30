@@ -15,12 +15,9 @@
 #ifndef CONSTRAINTWAREHOUSE_H
 #define CONSTRAINTWAREHOUSE_H
 
-// system includes
-#include <map>
-#include <vector>
+#include "Warehouse.h"
 
-#include "MooseTypes.h"
-
+class Constraint;
 class NodalConstraint;
 class NodeFaceConstraint;
 class FaceFaceConstraint;
@@ -28,7 +25,7 @@ class FaceFaceConstraint;
 /**
  * Warehouse for storing constraints
  */
-class ConstraintWarehouse
+class ConstraintWarehouse : public Warehouse<Constraint>
 {
 public:
   ConstraintWarehouse();

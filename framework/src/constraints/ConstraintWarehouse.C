@@ -17,7 +17,8 @@
 #include "NodeFaceConstraint.h"
 #include "FaceFaceConstraint.h"
 
-ConstraintWarehouse::ConstraintWarehouse()
+ConstraintWarehouse::ConstraintWarehouse() :
+    Warehouse()
 {
 }
 

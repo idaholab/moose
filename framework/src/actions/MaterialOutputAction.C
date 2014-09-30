@@ -77,7 +77,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
   _boundary_material_data = problem_ptr->getBoundaryMaterialData(0);
 
   // A complete list of all Material objects
-  std::vector<Material *> materials = problem_ptr->getMaterialWarehouse(0).getMaterials();
+  std::vector<Material *> materials = problem_ptr->getMaterialWarehouse(0).all();
 
   // Handle setting of material property output in [Outputs] sub-blocks
   // Output objects can enable material property output, the following code examines the parameters

@@ -18,7 +18,7 @@
 #include <map>
 #include <vector>
 #include <set>
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 class BoundaryCondition;
 class IntegratedBC;
@@ -28,7 +28,7 @@ class PresetNodalBC;
 /**
  * Warehouse for storing boundary conditions (for non-linear variables)
  */
-class BCWarehouse
+class BCWarehouse : public Warehouse<BoundaryCondition>
 {
 public:
   BCWarehouse();

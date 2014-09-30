@@ -15,7 +15,7 @@
 #ifndef VARIABLEWAREHOUSE_H
 #define VARIABLEWAREHOUSE_H
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 #include <vector>
 #include <map>
@@ -28,7 +28,7 @@ class MooseVariableScalar;
 /**
  * Holds variables and provides some services
  */
-class VariableWarehouse
+class VariableWarehouse : public Warehouse<MooseVariableBase>
 {
 public:
   VariableWarehouse();
@@ -71,12 +71,6 @@ public:
   const std::vector<VariableName> & names() const;
 
   /**
-   * Get the list of all variables
-   * @return The list of variables
-   */
-  const std::vector<MooseVariableBase *> & all();
-
-  /**
    * Get the list of variables
    * @return The list of variables
    */
@@ -98,8 +92,6 @@ public:
 protected:
   /// list of variable names
   std::vector<VariableName> _names;
-  /// list of all variables
-  std::vector<MooseVariableBase *> _all;
   /// list of "normal" variables
   std::vector<MooseVariable *> _vars;
   /// Name to variable mapping
