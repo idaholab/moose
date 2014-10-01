@@ -19,14 +19,14 @@
 #include <map>
 #include <set>
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 class Split;
 
 /**
  * Holds splits and provides some services
  */
-class SplitWarehouse
+class SplitWarehouse : public Warehouse<Split>
 {
 public:
   SplitWarehouse();
@@ -42,7 +42,7 @@ public:
 
 protected:
   /// all splits
-  std::map<std::string, MooseSharedPointer<Split> > _all_splits;
+  std::map<std::string, MooseSharedPointer<Split> > _all_splits_by_name;
 };
 
 #endif // SPLITWAREHOUSE_H

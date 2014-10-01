@@ -23,7 +23,7 @@ VariableWarehouse::VariableWarehouse()
 
 VariableWarehouse::~VariableWarehouse()
 {
-  for (std::vector<MooseVariableBase *>::iterator it = _all.begin(); it != _all.end(); ++it)
+  for (std::vector<MooseVariableBase *>::iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     delete *it;
 }
 
@@ -32,7 +32,7 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
 {
   _names.push_back(var_name);
   _var_name[var_name] = var;
-  _all.push_back(var);
+  _all_objects.push_back(var);
 
   if (dynamic_cast<MooseVariable *>(var) != NULL)
   {
@@ -69,8 +69,8 @@ VariableWarehouse::getVariable(const std::string & var_name)
 MooseVariableBase *
 VariableWarehouse::getVariable(unsigned int var_number)
 {
-  if (var_number < _all.size())
-    return _all[var_number];
+  if (var_number < _all_objects.size())
+    return _all_objects[var_number];
   else
     return NULL;
 }
@@ -79,12 +79,6 @@ const std::vector<VariableName> &
 VariableWarehouse::names() const
 {
   return _names;
-}
-
-const std::vector<MooseVariableBase *> &
-VariableWarehouse::all()
-{
-  return _all;
 }
 
 const std::vector<MooseVariable *> &

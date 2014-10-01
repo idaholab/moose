@@ -12,42 +12,44 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DIRACKERNELWAREHOUSE_H
-#define DIRACKERNELWAREHOUSE_H
-
-#include "Warehouse.h"
+#ifndef WAREHOUSE_H
+#define WAREHOUSE_H
 
 #include <vector>
+#include <map>
+#include <set>
 
-class DiracKernel;
+#include "MooseError.h"
+#include "MooseTypes.h"
 
 /**
- * Holds DiracKernels and provides some services
+ * Base class for all Warehouse containers. The warehouses in MOOSE hold
+ * all of the MooseObjects. Returns various collections of objects when requested
+ * and is responsible for deletion of those objects when the simulation ends.
  */
-class DiracKernelWarehouse : public Warehouse<DiracKernel>
+
+template <typename T>
+class Warehouse
 {
 public:
-  DiracKernelWarehouse();
-  virtual ~DiracKernelWarehouse();
-
-  // Setup /////
-  void initialSetup();
-  void timestepSetup();
-  void residualSetup();
-  void jacobianSetup();
+  virtual ~Warehouse() {}
 
   /**
-   * Adds a Dirac kernel
-   * @param kernel The DiracKernel being added
+   * Get list of all kernels
+   * @return The list of all active kernels
    */
-  void addDiracKernel(MooseSharedPointer<DiracKernel> & kernel);
+  virtual const std::vector<T *> & all() const;
 
 protected:
-  /**
-   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
-   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
-   */
-  std::vector<MooseSharedPointer<DiracKernel> > _all_ptrs;
+  /// All instances of objects (raw pointers)
+  std::vector<T *> _all_objects;
 };
 
-#endif // DIRACKERNELWAREHOUSE_H
+template <typename T>
+const std::vector<T *> &
+Warehouse<T>::all() const
+{
+  return _all_objects;
+}
+
+#endif // WAREHOUSE_H

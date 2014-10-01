@@ -16,15 +16,15 @@
 #include "Indicator.h"
 #include "InternalSideIndicator.h"
 
-IndicatorWarehouse::IndicatorWarehouse()
+IndicatorWarehouse::IndicatorWarehouse() :
+    Warehouse()
 {
 }
 
 IndicatorWarehouse::~IndicatorWarehouse()
 {
-  for (std::vector<Indicator *>::const_iterator i = _all_indicators.begin(); i != _all_indicators.end(); ++i)
+  for (std::vector<Indicator *>::const_iterator i = _all_objects.begin(); i != _all_objects.end(); ++i)
     delete *i;
-
 }
 
 void
@@ -51,7 +51,7 @@ IndicatorWarehouse::IndicatorSetup()
 void
 IndicatorWarehouse::addIndicator(Indicator *Indicator, std::vector<SubdomainID> & block_ids)
 {
-  _all_indicators.push_back(Indicator);
+  _all_objects.push_back(Indicator);
 
   bool internal_side_indicator = false;
 

@@ -19,14 +19,14 @@
 #include <map>
 #include <set>
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 class Indicator;
 
 /**
  * Holds Indicators and provides some services
  */
-class IndicatorWarehouse
+class IndicatorWarehouse : public Warehouse<Indicator>
 {
 public:
   IndicatorWarehouse();
@@ -36,12 +36,6 @@ public:
   void initialSetup();
   void timestepSetup();
   void IndicatorSetup();
-
-  /**
-   * Get list of all Indicators
-   * @return The list of all active Indicators
-   */
-  const std::vector<Indicator *> & all() const { return _all_indicators; }
 
   /**
    * Get the list of all active Indicators
@@ -74,9 +68,6 @@ protected:
   std::vector<Indicator *> _active_indicators;
 
   std::vector<Indicator *> _active_internal_side_indicators;
-
-  /// All instances of Indicators
-  std::vector<Indicator *> _all_indicators;
 
   /// Indicators that live everywhere (on the whole domain)
   std::vector<Indicator *> _global_indicators;
