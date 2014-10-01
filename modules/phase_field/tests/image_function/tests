@@ -6,6 +6,13 @@
     exodiff = image_2d_out.e
     vtk = true
   [../]
+  [./2d_elemental]
+    # Test ability to read in a single 20x20 image
+    type = Exodiff
+    input = image_2d_elemental.i
+    exodiff = image_2d_elemental_out.e
+    vtk = true
+  [../]
   [./3d]
     # Test ability to read in stack of 20x20 images
     type = Exodiff
