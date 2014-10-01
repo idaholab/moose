@@ -203,12 +203,11 @@ Parser::parse(const std::string &input_filename)
           params.set<std::string>("registered_identifier") = registered_identifier;
 
           // Create the Action
-          Action * action_obj = _action_factory.create(it->second._action, curr_identifier, params);
-          mooseAssert (action_obj != NULL, std::string("Action") + it->second._action + " not created");
+          MooseSharedPointer<Action> action_obj = _action_factory.create(it->second._action, curr_identifier, params);
 
           // extract the MooseObject params if necessary
-          MooseObjectAction * object_action = dynamic_cast<MooseObjectAction *>(action_obj);
-          if (object_action)
+          MooseSharedPointer<MooseObjectAction> object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action_obj);
+          if (object_action.get())
             extractParams(curr_identifier, object_action->getObjectParams());
 
           // add it to the warehouse

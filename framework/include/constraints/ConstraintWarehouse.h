@@ -37,11 +37,11 @@ public:
   void residualSetup();
   void jacobianSetup();
 
-  void addNodalConstraint(NodalConstraint * nfc);
+  void addNodalConstraint(MooseSharedPointer<NodalConstraint> nfc);
 
-  void addNodeFaceConstraint(unsigned int slave, unsigned int master, NodeFaceConstraint * nfc);
+  void addNodeFaceConstraint(unsigned int slave, unsigned int master, MooseSharedPointer<NodeFaceConstraint> nfc);
 
-  void addFaceFaceConstraint(const std::string & name, FaceFaceConstraint * ffc);
+  void addFaceFaceConstraint(const std::string & name, MooseSharedPointer<FaceFaceConstraint> ffc);
 
   std::vector<NodalConstraint *> & getNodalConstraints();
 
@@ -53,6 +53,12 @@ public:
   void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const;
 
 protected:
+  /**
+   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   */
+  std::vector<MooseSharedPointer<Constraint> > _all_ptrs;
+
   /// nodal constraints on a boundary
   std::vector<NodalConstraint *> _nodal_constraints;
 
