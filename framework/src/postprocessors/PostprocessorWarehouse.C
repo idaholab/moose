@@ -24,7 +24,7 @@
 #include "Parser.h"
 
 PostprocessorWarehouse::PostprocessorWarehouse() :
-    Warehouse()
+    Warehouse<Postprocessor>()
 {
 }
 

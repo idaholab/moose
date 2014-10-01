@@ -17,7 +17,7 @@
 #include "InternalSideIndicator.h"
 
 IndicatorWarehouse::IndicatorWarehouse() :
-    Warehouse()
+    Warehouse<Indicator>()
 {
 }
 

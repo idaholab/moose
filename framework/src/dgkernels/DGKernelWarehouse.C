@@ -16,7 +16,7 @@
 #include "DGKernel.h"
 
 DGKernelWarehouse::DGKernelWarehouse() :
-    Warehouse()
+    Warehouse<DGKernel>()
 {
 }
 

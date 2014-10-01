@@ -16,7 +16,7 @@
 #include "Marker.h"
 
 MarkerWarehouse::MarkerWarehouse() :
-    Warehouse()
+    Warehouse<Marker>()
 {
 }
 

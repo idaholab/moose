@@ -16,7 +16,7 @@
 #include "Split.h"
 
 SplitWarehouse::SplitWarehouse() :
-    Warehouse()
+    Warehouse<Split>()
 {
 }
 

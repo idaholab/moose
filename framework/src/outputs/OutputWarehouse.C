@@ -26,7 +26,7 @@
 #include <unistd.h>
 
 OutputWarehouse::OutputWarehouse() :
-    Warehouse(),
+    Warehouse<Output>(),
     _multiapp_level(0)
 {
   // Set the reserved names
