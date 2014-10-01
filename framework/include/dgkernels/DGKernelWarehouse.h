@@ -15,8 +15,7 @@
 #ifndef DGKERNELWAREHOUSE_H
 #define DGKERNELWAREHOUSE_H
 
-#include "MooseTypes.h"
-#include "Moose.h"
+#include "Warehouse.h"
 
 #include <vector>
 
@@ -25,7 +24,7 @@ class DGKernel;
 /**
  * Holds kernels and provides some services
  */
-class DGKernelWarehouse
+class DGKernelWarehouse : public Warehouse<DGKernel>
 {
 public:
   DGKernelWarehouse();
@@ -36,12 +35,6 @@ public:
   void timestepSetup();
   void residualSetup();
   void jacobianSetup();
-
-  /**
-   * Get list of all kernels
-   * @return The list of all active kernels
-   */
-  const std::vector<DGKernel *> & all() const { return _all_dg_kernels; }
 
   /**
    * Get the list of all active kernels
@@ -61,7 +54,6 @@ protected:
   std::vector<MooseSharedPointer<DGKernel> > _all_ptrs;
 
   std::vector<DGKernel *> _active_dg_kernels;
-  std::vector<DGKernel *> _all_dg_kernels;
 };
 
 #endif // DGKERNELWAREHOUSE_H

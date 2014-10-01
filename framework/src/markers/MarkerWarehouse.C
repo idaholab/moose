@@ -15,15 +15,15 @@
 #include "MarkerWarehouse.h"
 #include "Marker.h"
 
-MarkerWarehouse::MarkerWarehouse()
+MarkerWarehouse::MarkerWarehouse() :
+    Warehouse()
 {
 }
 
 MarkerWarehouse::~MarkerWarehouse()
 {
-  for (std::vector<Marker *>::const_iterator i = _all_markers.begin(); i != _all_markers.end(); ++i)
+  for (std::vector<Marker *>::const_iterator i = _all_objects.begin(); i != _all_objects.end(); ++i)
     delete *i;
-
 }
 
 void
@@ -50,7 +50,7 @@ MarkerWarehouse::markerSetup()
 void
 MarkerWarehouse::addMarker(Marker *marker, std::vector<SubdomainID> & block_ids)
 {
-  _all_markers.push_back(marker);
+  _all_objects.push_back(marker);
 
   if (block_ids.empty())
   {

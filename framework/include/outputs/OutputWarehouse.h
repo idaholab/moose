@@ -19,6 +19,7 @@
 #include <vector>
 
 // MOOSE includes
+#include "Warehouse.h"
 #include "InputParameters.h"
 
 // Forward declarations
@@ -29,7 +30,7 @@ class FEProblem;
 /**
  * Class for storing and utilizing output objects
  */
-class OutputWarehouse
+class OutputWarehouse : public Warehouse<Output>
 {
 public:
 
@@ -266,9 +267,6 @@ private:
    * other purpose.
    */
   void addInterfaceHideVariables(const std::string & output_name, const std::set<std::string> & variable_names);
-
-  /// The list of all output objects
-  std::vector<Output *> _object_ptrs;
 
   /// A map of the output pointers
   std::map<OutputName, Output *> _object_map;

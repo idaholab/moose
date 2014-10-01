@@ -74,7 +74,7 @@ AuxWarehouse::addAuxKernel(MooseSharedPointer<AuxKernel> & aux)
 
   // Add the pointer to the complete and the nodal or elemental lists
   _all_ptrs.push_back(aux);
-  _all_aux_kernels.push_back(aux.get());
+  _all_objects.push_back(aux.get());
 
   // Boundary restricted
   if (aux->boundaryRestricted())

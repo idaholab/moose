@@ -19,7 +19,7 @@
 #include <map>
 #include <set>
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 class Transfer;
 class MultiAppTransfer;
@@ -27,17 +27,11 @@ class MultiAppTransfer;
 /**
  * Holds Transfers and provides some services
  */
-class TransferWarehouse
+class TransferWarehouse : public Warehouse<Transfer>
 {
 public:
   TransferWarehouse();
   virtual ~TransferWarehouse();
-
-  /**
-   * Get list of all Transfers
-   * @return The list of all active Transfers
-   */
-  const std::vector<Transfer *> & all() const { return _all_transfers; }
 
   /**
    * Get list of all MultiAppTransfers
@@ -71,7 +65,6 @@ public:
   void initialSetup();
 
 protected:
-  std::vector<Transfer *> _all_transfers;
   std::vector<MultiAppTransfer *> _multi_app_transfers;
 
 private:

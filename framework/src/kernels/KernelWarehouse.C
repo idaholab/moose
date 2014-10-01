@@ -17,7 +17,8 @@
 #include "KernelBase.h"
 #include "ScalarKernel.h"
 
-KernelWarehouse::KernelWarehouse()
+KernelWarehouse::KernelWarehouse() :
+    Warehouse()
 {
 }
 
@@ -59,7 +60,7 @@ KernelWarehouse::addKernel(MooseSharedPointer<KernelBase> & kernel, const std::s
   _all_ptrs.push_back(kernel);
 
   KernelBase * kernel_ptr = kernel.get();
-  _all_kernels.push_back(kernel_ptr);
+  _all_objects.push_back(kernel_ptr);
 
   if (block_ids.empty() || block_ids.find(Moose::ANY_BLOCK_ID) != block_ids.end())
   {
@@ -143,7 +144,7 @@ KernelWarehouse::updateActiveKernels(unsigned int subdomain_id)
 bool
 KernelWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const
 {
-  for (std::vector<KernelBase *>::const_iterator it = _all_kernels.begin(); it != _all_kernels.end(); ++it)
+  for (std::vector<KernelBase *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     unique_variables.insert((*it)->variable().name());
   for (std::vector<ScalarKernel *>::const_iterator it = _scalar_kernels.begin(); it != _scalar_kernels.end(); ++it)
     unique_variables.insert((*it)->variable().name());
