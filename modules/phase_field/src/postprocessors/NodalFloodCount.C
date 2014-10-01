@@ -602,13 +602,10 @@ NodalFloodCount::calculateBubbleVolumes()
         bubble_it = _bubble_sets[map_num].begin(),
         bubble_end = _bubble_sets[map_num].end();
 
-      // ctr is for printing stuff only
-      for (unsigned ctr=0; bubble_it != bubble_end; ++bubble_it, ++ctr)
-      {
-        // The 'intersects' helper function is defined in a local anonymous namespace.
+      // Determine boundary intersection for each BubbleData object
+      for (; bubble_it != bubble_end; ++bubble_it)
         bubble_it->_intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
                                                         bubble_it->_nodes.begin(), bubble_it->_nodes.end());
-      }
     }
   }
 
