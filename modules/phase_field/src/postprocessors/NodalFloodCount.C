@@ -42,8 +42,10 @@ InputParameters validParams<NodalFloodCount>()
   params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
   params.addParam<bool>("use_global_numbering", false, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: false)");
   params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
+  params.addParam<bool>("use_less_than_threshold_comparison", true, "Controls whether bubbles are defined to be less than or greater than the threshold value.");
   params.addParam<FileName>("bubble_volume_file", "An optional file name where bubble volumes can be output.");
   params.addParam<bool>("track_memory_usage", false, "Calculate memory usage");
+  params.addParam<bool>("compute_boundary_intersecting_volume", false, "If true, also compute the (normalized) volume of bubbles which intersect the boundary");
   return params;
 }
 
@@ -61,11 +63,12 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
     _condense_map_info(getParam<bool>("condense_map_info")),
     _global_numbering(getParam<bool>("use_global_numbering")),
     _var_index_mode(getParam<bool>("enable_var_coloring")),
+    _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _pbs(NULL),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
-    _track_memory(getParam<bool>("track_memory_usage"))
-    // _bubble_volume_file_name(parameters.isParamValid("bubble_volume_file") ? getParam<FileName>("bubble_volume_file") : "")
+    _track_memory(getParam<bool>("track_memory_usage")),
+    _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume"))
 {
   // Size the data structures to hold the correct number of maps
   _bubble_maps.resize(_maps_size);
@@ -82,12 +85,6 @@ NodalFloodCount::NodalFloodCount(const std::string & name, InputParameters param
 
 NodalFloodCount::~NodalFloodCount()
 {
-  for (std::map<std::string, std::ofstream *>::iterator handle_it = _file_handles.begin(); handle_it != _file_handles.end(); ++handle_it)
-  {
-    if (handle_it->second->is_open())
-      handle_it->second->close();
-    delete handle_it->second;
-  }
 }
 
 void
@@ -173,10 +170,23 @@ NodalFloodCount::finalize()
   if (_pars.isParamValid("bubble_volume_file"))
   {
     calculateBubbleVolumes();
-    std::vector<Real> data; data.reserve(_all_bubble_volumes.size() + 2);
+    std::vector<Real> data;
+    data.reserve(_all_bubble_volumes.size() + _total_volume_intersecting_boundary.size() + 2);
+
+    // Insert the current timestep and the simulation time into the data vector
     data.push_back(_fe_problem.timeStep());
     data.push_back(_fe_problem.time());
+
+    // Insert the (sorted) bubble volumes into the data vector
     data.insert(data.end(), _all_bubble_volumes.begin(), _all_bubble_volumes.end());
+
+    // If we are computing the boundary-intersecting volumes, insert
+    // those numbers into the normalized boundary-intersecting bubble
+    // volumes into the data vector.
+    if (_compute_boundary_intersecting_volume)
+      data.insert(data.end(), _total_volume_intersecting_boundary.begin(), _total_volume_intersecting_boundary.end());
+
+    // Finally, write the file
     writeCSVFile(getParam<FileName>("bubble_volume_file"), data);
   }
 
@@ -495,8 +505,15 @@ NodalFloodCount::flood(const Node *node, int current_idx, unsigned int live_regi
   // Determing which threshold to use based on whether this is an established region
   Real threshold = (live_region ? _step_connecting_threshold : _step_threshold);
 
-  // This node hasn't been marked, is it in a bubble?
-  if (_vars[current_idx]->getNodalValue(*node) < threshold)
+  // Get the value of the current variable at the current node
+  Number nodal_val = _vars[current_idx]->getNodalValue(*node);
+
+  // This node hasn't been marked, is it in a bubble?  We must respect
+  // the user-selected value of _use_less_than_threshold_comparison.
+  if (_use_less_than_threshold_comparison && (nodal_val < threshold))
+    return;
+
+  if (!_use_less_than_threshold_comparison && (nodal_val > threshold))
     return;
 
   // Yay! A bubble -> Mark it!
@@ -561,14 +578,54 @@ NodalFloodCount::calculateBubbleVolumes()
 {
   Moose::perf_log.push("calculateBubbleVolume()", "NodalFloodCount");
 
+  // Figure out which bubbles intersect the boundary if the user has enabled that capability.
+  if (_compute_boundary_intersecting_volume)
+  {
+    // Create a std::set of node IDs which are on the boundary called all_boundary_node_ids.
+    std::set<dof_id_type> all_boundary_node_ids;
+
+    // Iterate over the boundary nodes, putting them into the std::set data structure
+    MooseMesh::bnd_node_iterator
+      boundary_nodes_it  = _mesh.bndNodesBegin(),
+      boundary_nodes_end = _mesh.bndNodesEnd();
+    for (; boundary_nodes_it != boundary_nodes_end; ++boundary_nodes_it)
+    {
+      BndNode * boundary_node = *boundary_nodes_it;
+      all_boundary_node_ids.insert(boundary_node->_node->id());
+    }
+
+    // For each of the _maps_size BubbleData lists, determine if the set
+    // of nodes includes any boundary nodes.
+    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    {
+      std::list<BubbleData>::iterator
+        bubble_it = _bubble_sets[map_num].begin(),
+        bubble_end = _bubble_sets[map_num].end();
+
+      // ctr is for printing stuff only
+      for (unsigned ctr=0; bubble_it != bubble_end; ++bubble_it, ++ctr)
+      {
+        // The 'intersects' helper function is defined in a local anonymous namespace.
+        bubble_it->_intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
+                                                        bubble_it->_nodes.begin(), bubble_it->_nodes.end());
+      }
+    }
+  }
+
   // Size our temporary data structure
   std::vector<std::vector<Real> > bubble_volumes(_maps_size);
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-  {
     bubble_volumes[map_num].resize(_bubble_sets[map_num].size());
-  }
 
-  std::vector<unsigned int> flood_nodes(_maps_size);
+  // Clear pre-existing values and allocate space to store the volume
+  // of the boundary-intersecting grains for each variable.
+  _total_volume_intersecting_boundary.clear();
+  _total_volume_intersecting_boundary.resize(_maps_size);
+
+  // Loop over the active local elements.  For each variable, and for
+  // each BubbleData object, check whether a majority of the element's
+  // nodes belong to that Bubble, and if so assign the element's full
+  // volume to that bubble.
   const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
   for (MeshBase::const_element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != el_end; ++el)
   {
@@ -578,32 +635,61 @@ NodalFloodCount::calculateBubbleVolumes()
 
     for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     {
-      unsigned int bubble_counter = 0;
-      std::list<BubbleData>::const_iterator end = _bubble_sets[map_num].end();
-      for (std::list<BubbleData>::const_iterator bubble_it1 = _bubble_sets[map_num].begin(); bubble_it1 != end; ++bubble_it1)
+      std::list<BubbleData>::const_iterator
+        bubble_it = _bubble_sets[map_num].begin(),
+        bubble_end = _bubble_sets[map_num].end();
+
+      for (unsigned int bubble_counter = 0; bubble_it != bubble_end; ++bubble_it, ++bubble_counter)
       {
+        // Count the number of nodes on this element which are flooded.
         unsigned int flooded_nodes = 0;
         for (unsigned int node = 0; node < elem_n_nodes; ++node)
         {
           unsigned int node_id = elem->node(node);
-          if (bubble_it1->_nodes.find(node_id) != bubble_it1->_nodes.end())
+          if (bubble_it->_nodes.find(node_id) != bubble_it->_nodes.end())
             ++flooded_nodes;
         }
 
-        // Are a majority of the nodes flooded for this element?
+        // If a majority of the nodes for this element are flooded,
+        // assign its volume to the current bubble_counter entry.
         if (flooded_nodes >= elem_n_nodes / 2)
+        {
           bubble_volumes[map_num][bubble_counter] += curr_volume;
 
-        ++bubble_counter;
+          // If the current bubble also intersects the boundary, also
+          // accumlate the volume into the total volume of bubbles
+          // which intersect the boundary.
+          if (bubble_it->_intersects_boundary)
+            _total_volume_intersecting_boundary[map_num] += curr_volume;
+        }
       }
     }
+  }
+
+  // If we're calculating boundary-intersecting volumes, we have to normalize it by the
+  // volume of the entire domain.
+  if (_compute_boundary_intersecting_volume)
+  {
+    // Compute the total area using a bounding box.  FIXME: this
+    // assumes the domain is rectangular and 2D, and is probably a
+    // little expensive so we should only do it once if possible.
+    MeshTools::BoundingBox bbox = MeshTools::bounding_box(_mesh);
+    Real total_volume = (bbox.max()(0)-bbox.min()(0))*(bbox.max()(1)-bbox.min()(1));
+
+    // Sum up the partial boundary grain volume contributions from all processors
+    _communicator.sum(_total_volume_intersecting_boundary);
+
+    // Scale the boundary intersecting grain volumes by the total domain volume
+    for (unsigned int i=0; i<_total_volume_intersecting_boundary.size(); ++i)
+      _total_volume_intersecting_boundary[i] /= total_volume;
   }
 
   // Stick all the partial bubble volumes in one long single vector to be gathered on the root processor
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     _all_bubble_volumes.insert(_all_bubble_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
 
-  _communicator.sum(_all_bubble_volumes); //do all the sums!
+  // do all the sums!
+  _communicator.sum(_all_bubble_volumes);
 
   std::sort(_all_bubble_volumes.begin(), _all_bubble_volumes.end(), std::greater<Real>());
 

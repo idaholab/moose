@@ -176,3 +176,6 @@ modules/*/doc/doxygen/html/*
 *.cpr
 *.cpa-*
 *.cpr-*
+
+# phase_field/tests/solution_rasterizer
+out.xyz
