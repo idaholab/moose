@@ -73,11 +73,13 @@ protected:
   public:
     BubbleData(std::set<unsigned int> & nodes, unsigned int var_idx) :
         _nodes(nodes),
-        _var_idx(var_idx)
+        _var_idx(var_idx),
+        _intersects_boundary(false)
     {}
 
     std::set<unsigned int> _nodes;
     unsigned int _var_idx;
+    bool _intersects_boundary;
   };
 
   /**
@@ -195,6 +197,13 @@ protected:
   /// This variable is used to inidicate whether the maps will continue unique region information or just the variable numbers owning those regions
   const bool _var_index_mode;
 
+  /**
+   * Use less-than when comparing values against the threshold value.
+   * True by default.  If false, then greater-than comparison is used
+   * instead.
+   */
+  const bool _use_less_than_threshold_comparison;
+
   /// Convienence variable holding the size of all the datastructures size by the number of maps
   const unsigned int _maps_size;
 
@@ -251,8 +260,11 @@ protected:
    */
   std::multimap<unsigned int, unsigned int> _periodic_node_map;
 
-  /// The filename and filehandle used if bubble volumes are being recorded to a file.
-  std::map<std::string, std::ofstream *> _file_handles;
+  /**
+   * The filename and filehandle used if bubble volumes are being recorded to a file.
+   * MooseSharedPointer is used so we don't have to worry about cleaning up after ourselves...
+   */
+  std::map<std::string, MooseSharedPointer<std::ofstream> > _file_handles;
 
   /**
    * The vector hold the volume of each flooded bubble.  Note: this vector is only populated
@@ -266,6 +278,21 @@ protected:
 
   // Dummy value for unimplemented method
   static const std::vector<std::pair<unsigned int, unsigned int> > _empty;
+
+  /**
+   * Vector of length _maps_size to keep track of the total
+   * boundary-intersecting bubble volume scaled by the total domain
+   * volume for each variable.
+   */
+  std::vector<Real> _total_volume_intersecting_boundary;
+
+  /**
+   * If true, the NodalFloodCount object also computes the
+   * (normalized) volume of bubbles which intersect the boundary and
+   * reports this value in the CSV file (if available).  Defaults to
+   * false.
+   */
+  bool _compute_boundary_intersecting_volume;
 };
 
 template<typename T>
@@ -283,18 +310,38 @@ NodalFloodCount::writeCSVFile(const std::string file_name, const std::vector<T> 
 {
   if (processor_id() == 0)
   {
-    std::map<std::string, std::ofstream *>::iterator handle_it = _file_handles.find(file_name);
+    // typdef makes subsequent code easier to read...
+    typedef std::map<std::string, MooseSharedPointer<std::ofstream> >::iterator iterator_t;
+
+    // Try to find the filename
+    iterator_t handle_it = _file_handles.find(file_name);
+
+    // If the file_handle isn't found, create it
     if (handle_it == _file_handles.end())
     {
       MooseUtils::checkFileWriteable(file_name);
-      _file_handles[file_name] = new std::ofstream(file_name.c_str());
-      *_file_handles[file_name] << std::scientific << std::setprecision(6);
+
+      // Store the new filename in the map
+      std::pair<iterator_t, bool> result =
+        _file_handles.insert(std::make_pair(file_name, new std::ofstream(file_name.c_str())));
+
+      // Be sure that the insert worked!
+      mooseAssert(result.second, "Insertion into _file_handles map failed!");
+
+      // Set handle_it to be an iterator to the new file.
+      handle_it = result.first;
     }
 
-    mooseAssert(_file_handles[file_name]->is_open(), "File handle is not open");
+    // Get reference to the stream, makes syntax below much simpler
+    std::ofstream & the_stream = *(handle_it->second);
 
-    std::copy(data.begin(), data.end(), infix_ostream_iterator<T>(*_file_handles[file_name], ", "));
-    *_file_handles[file_name] << std::endl;
+    // Set formatting flags on the stream - technically we only need to do this once, but whatever.
+    the_stream << std::scientific << std::setprecision(6);
+
+    mooseAssert(the_stream.is_open(), "File handle is not open");
+
+    std::copy(data.begin(), data.end(), infix_ostream_iterator<T>(the_stream, ", "));
+    the_stream << std::endl;
   }
 }
 
