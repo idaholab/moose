@@ -18,7 +18,7 @@
 #include "FaceFaceConstraint.h"
 
 ConstraintWarehouse::ConstraintWarehouse() :
-    Warehouse()
+    Warehouse<Constraint>()
 {
 }
 

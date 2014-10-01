@@ -18,7 +18,7 @@
 #include "ScalarKernel.h"
 
 KernelWarehouse::KernelWarehouse() :
-    Warehouse()
+    Warehouse<KernelBase>()
 {
 }
 

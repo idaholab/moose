@@ -24,7 +24,7 @@
 #include "Parser.h"
 
 VectorPostprocessorWarehouse::VectorPostprocessorWarehouse() :
-    Warehouse()
+    Warehouse<VectorPostprocessor>()
 {
 }
 

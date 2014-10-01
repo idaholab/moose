@@ -20,7 +20,7 @@
 #include <fstream>
 
 MaterialWarehouse::MaterialWarehouse() :
-    Warehouse()
+    Warehouse<Material>()
 {
   _master_list.reserve(3);
   _master_list.push_back(&_active_materials);

@@ -17,7 +17,7 @@
 
 
 DiracKernelWarehouse::DiracKernelWarehouse() :
-    Warehouse()
+    Warehouse<DiracKernel>()
 {
 }
 

@@ -22,7 +22,8 @@
 #include "SubProblem.h"
 #include "Parser.h"
 
-UserObjectWarehouse::UserObjectWarehouse()
+UserObjectWarehouse::UserObjectWarehouse() :
+    Warehouse<UserObject>()
 {
 }
 

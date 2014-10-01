@@ -16,7 +16,7 @@
 #include "Damper.h"
 
 DamperWarehouse::DamperWarehouse() :
-    Warehouse()
+    Warehouse<Damper>()
 {
 }
 

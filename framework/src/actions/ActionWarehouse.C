@@ -25,7 +25,7 @@
 #include "InfixIterator.h"
 
 ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory) :
-    Warehouse(),
+    Warehouse<Action>(),
     ConsoleStreamInterface(app),
     _app(app),
     _syntax(syntax),
