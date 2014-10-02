@@ -35,7 +35,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
     SystemTempl<TransientExplicitSystem>(subproblem, name, Moose::VAR_AUXILIARY),
     _mproblem(subproblem),
     _serialized_solution(*NumericVector<Number>::build(_mproblem.comm()).release()),
-    _time_integrator(NULL),
     _u_dot(addVector("u_dot", true, GHOSTED)),
     _need_serialized_solution(false)
 {
@@ -46,7 +45,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & nam
 AuxiliarySystem::~AuxiliarySystem()
 {
   delete &_serialized_solution;
-  delete _time_integrator;
 }
 
 void
@@ -119,8 +117,7 @@ void
 AuxiliarySystem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
 {
   parameters.set<SystemBase *>("_sys") = this;
-  TimeIntegrator * ti = static_cast<TimeIntegrator *>(_factory.create(type, name, parameters));
-  _time_integrator = ti;
+  _time_integrator = MooseSharedNamespace::static_pointer_cast<TimeIntegrator>(_factory.create_shared_ptr(type, name, parameters));
 }
 
 void

@@ -77,7 +77,7 @@ SetupDebugAction::createOutputAction(const std::string & type, const std::string
   // Create the action
   std::string long_name = "Outputs/";
   long_name += name;
-  MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddOutputAction", long_name, _action_params));
+  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddOutputAction", long_name, _action_params));
 
   // Set the object parameters
   InputParameters & object_params = action->getObjectParams();
@@ -87,5 +87,5 @@ SetupDebugAction::createOutputAction(const std::string & type, const std::string
   _awh.addActionBlock(action);
 
   // Return the pointer to the action
-  return dynamic_cast<MooseObjectAction *>(action);
+  return action.get();
 }

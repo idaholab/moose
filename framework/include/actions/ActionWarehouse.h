@@ -63,7 +63,7 @@ public:
   /**
    * This method add an \p Action instance to the warehouse.
    */
-  void addActionBlock(Action * blk);
+  void addActionBlock(MooseSharedPointer<Action> blk);
 
   /**
    * This method checks the actions stored in the warehouse against the list of required registered
@@ -147,6 +147,8 @@ protected:
    * @param task The name of the task to find and build Actions for.
    */
   void buildBuildableActions(const std::string &task);
+
+  std::vector<MooseSharedPointer<Action> > _all_ptrs;
 
   /// The MooseApp this Warehouse is associated with
   MooseApp & _app;

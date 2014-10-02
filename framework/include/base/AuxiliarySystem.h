@@ -137,7 +137,7 @@ protected:
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
   /// Time integrator
-  TimeIntegrator * _time_integrator;
+  MooseSharedPointer<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
 

@@ -24,20 +24,6 @@ ConstraintWarehouse::ConstraintWarehouse() :
 
 ConstraintWarehouse::~ConstraintWarehouse()
 {
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::iterator i = _node_face_constraints.begin(); i != _node_face_constraints.end(); ++i)
-    for (std::vector<NodeFaceConstraint *>::iterator k=(i->second).begin(); k!=(i->second).end(); ++k)
-      delete *k;
-
-  for (std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::iterator i = _displaced_node_face_constraints.begin(); i != _displaced_node_face_constraints.end(); ++i)
-    for (std::vector<NodeFaceConstraint *>::iterator k=(i->second).begin(); k!=(i->second).end(); ++k)
-      delete *k;
-
-  for (std::map<std::string, std::vector<FaceFaceConstraint *> >::iterator i = _face_face_constraints.begin(); i != _face_face_constraints.end(); ++i)
-    for (std::vector<FaceFaceConstraint *>::iterator k=(i->second).begin(); k!=(i->second).end(); ++k)
-      delete *k;
-
-  for (std::vector<NodalConstraint *>::iterator i = _nodal_constraints.begin(); i != _nodal_constraints.end(); ++i)
-    delete *i;
 }
 
 void
@@ -117,26 +103,30 @@ ConstraintWarehouse::jacobianSetup()
 }
 
 void
-ConstraintWarehouse::addNodalConstraint(NodalConstraint * nc)
+ConstraintWarehouse::addNodalConstraint(MooseSharedPointer<NodalConstraint> nc)
 {
-  _nodal_constraints.push_back(nc);
+  _all_ptrs.push_back(nc);
+  _nodal_constraints.push_back(nc.get());
 }
 
 void
-ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*master*/, NodeFaceConstraint *nfc)
+ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*master*/, MooseSharedPointer<NodeFaceConstraint> nfc)
 {
+  _all_ptrs.push_back(nfc);
+
   bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") && nfc->getParam<bool>("use_displaced_mesh");
 
   if (displaced)
-    _displaced_node_face_constraints[slave].push_back(nfc);
+    _displaced_node_face_constraints[slave].push_back(nfc.get());
   else
-    _node_face_constraints[slave].push_back(nfc);
+    _node_face_constraints[slave].push_back(nfc.get());
 }
 
 void
-ConstraintWarehouse::addFaceFaceConstraint(const std::string & name, FaceFaceConstraint * ffc)
+ConstraintWarehouse::addFaceFaceConstraint(const std::string & name, MooseSharedPointer<FaceFaceConstraint> ffc)
 {
-  _face_face_constraints[name].push_back(ffc);
+  _all_ptrs.push_back(ffc);
+  _face_face_constraints[name].push_back(ffc.get());
 }
 
 std::vector<NodalConstraint *> &
