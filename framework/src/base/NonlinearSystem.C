@@ -562,25 +562,25 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
 {
   parameters.set<THREAD_ID>("_tid") = 0;
 
-  MooseObject * obj = _factory.create(c_name, name, parameters);
-  _fe_problem._objects_by_name[0][name].push_back(obj);
+  MooseSharedPointer<Constraint> constraint = MooseSharedNamespace::static_pointer_cast<Constraint>(_factory.create_shared_ptr(c_name, name, parameters));
+  _fe_problem._objects_by_name[0][name].push_back(constraint.get());
   for (THREAD_ID tid = 1; tid < libMesh::n_threads(); tid++)
     _fe_problem._objects_by_name[tid][name] = std::vector<MooseObject *>();
 
-  NodalConstraint    * nc = dynamic_cast<NodalConstraint *>(obj);
-  NodeFaceConstraint * nfc = dynamic_cast<NodeFaceConstraint *>(obj);
-  FaceFaceConstraint * ffc = dynamic_cast<FaceFaceConstraint *>(obj);
-  if (nfc != NULL)
+  MooseSharedPointer<NodalConstraint>    nc =  MooseSharedNamespace::dynamic_pointer_cast<NodalConstraint>(constraint);
+  MooseSharedPointer<NodeFaceConstraint> nfc = MooseSharedNamespace::dynamic_pointer_cast<NodeFaceConstraint>(constraint);
+  MooseSharedPointer<FaceFaceConstraint> ffc = MooseSharedNamespace::dynamic_pointer_cast<FaceFaceConstraint>(constraint);
+  if (nfc.get())
   {
     unsigned int slave = _mesh.getBoundaryID(parameters.get<BoundaryName>("slave"));
     unsigned int master = _mesh.getBoundaryID(parameters.get<BoundaryName>("master"));
     _constraints[0].addNodeFaceConstraint(slave, master, nfc);
   }
-  else if (ffc != NULL)
+  else if (ffc.get())
   {
     _constraints[0].addFaceFaceConstraint(parameters.get<std::string>("interface"), ffc);
   }
-  else if (nc != NULL)
+  else if (nc.get())
   {
     _constraints[0].addNodalConstraint(nc);
   }

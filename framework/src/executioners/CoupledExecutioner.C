@@ -122,8 +122,8 @@ CoupledExecutioner::addVariableAction(const std::string & task, ActionWarehouse 
         params.set<MooseEnum>("family") = src_params.get<MooseEnum>("family");
         params.set<MooseEnum>("order") = src_params.get<MooseEnum>("order");
 
-        Action * dest_action = _app.getActionFactory().create("AddAuxVariableAction", dest_name, params);
-        mooseAssert (dest_action != NULL, std::string("Action AddAuxVariableAction not created"));
+        MooseSharedPointer<Action> dest_action = _app.getActionFactory().create("AddAuxVariableAction", dest_name, params);
+        mooseAssert (dest_action.get(), std::string("Action AddAuxVariableAction not created"));
         dest.addActionBlock(dest_action);
       }
     }
