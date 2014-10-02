@@ -28,6 +28,7 @@
   [./constant_dummy]
     type = ConstantAux
     variable = dummy
+    execute_on = 'initial timestep'
     value = 4
   [../]
 []

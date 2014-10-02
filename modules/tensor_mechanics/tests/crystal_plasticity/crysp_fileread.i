@@ -77,7 +77,7 @@
     rank_two_tensor = fp
     index_j = 2
     index_i = 2
-    execute_on = timestep
+    execute_on = 'initial timestep'
     block = 0
   [../]
   [./e_zz]
@@ -100,7 +100,7 @@
     variable = gss1
     slipsysvar = gss
     index_i = 1
-    execute_on = timestep
+    execute_on = 'initial timestep'
     block = 0
   [../]
 []
