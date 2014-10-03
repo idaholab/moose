@@ -121,6 +121,8 @@
 
 #include "EqualValueNodalConstraint.h"
 
+#include "VecRangeCheckMaterial.h"
+
 // user objects
 #include "MTUserObject.h"
 #include "RandomHitUserObject.h"
@@ -340,6 +342,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(BadStatefulMaterial);
   registerMaterial(OutputTestMaterial);
   registerMaterial(SumMaterial);
+  registerMaterial(VecRangeCheckMaterial);
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
