@@ -277,6 +277,7 @@ InputParameters::mooseObjectSyntaxVisibility() const
       rangeCheck<type, up_type>(long_name, short_name, vector_p, oss); \
   } while (0)
 
+
 void
 InputParameters::checkParams(const std::string &prefix)
 {

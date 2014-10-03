@@ -11,16 +11,22 @@
     expect_err = "Range check failed for parameter Materials/vecrangecheck/iv3"
     cli_args = Materials/vecrangecheck/iv3="1.0 2.0"
   [../]
-  [./outofbounds]
+  [./allelementcheck]
     type = 'RunException'
     input = 'all_pass.i'
-    expect_err = "Error parsing expression: rvl_10 > 0\nOut of range variable rvl_10"
-    cli_args = Materials/vecrangecheck/rvl="1.0 2.0"
+    expect_err = "Range check failed for parameter Materials/vecrangecheck/rvp\n\tExpression: rvp > 0\n\t Component: 1"
+    cli_args = Materials/vecrangecheck/rvp="1.0 -2.0 3.0"
   [../]
   [./elementcompare]
     type = 'RunException'
     input = 'all_pass.i'
     expect_err = "Range check failed for parameter Materials/vecrangecheck/ivg"
     cli_args = Materials/vecrangecheck/ivg="1.0 2.0"
+  [../]
+  [./outofbounds]
+    type = 'RunException'
+    input = 'all_pass.i'
+    expect_err = "Error parsing expression: rvl_10 > 0\nOut of range variable rvl_10"
+    cli_args = Materials/vecrangecheck/rvl="1.0 2.0"
   [../]
 []
