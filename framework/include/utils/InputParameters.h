@@ -538,7 +538,7 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
     return;
 
   /**
-   * Automatically detect teh variables used in the range checking expression.
+   * Automatically detect the variables used in the range checking expression.
    * We allow the following variables (where snam is the short_name of the parameter)
    *
    * snam       : tests every component in the vector
