@@ -29,7 +29,7 @@ MaterialWarehouse::MaterialWarehouse() :
 }
 
 MaterialWarehouse::MaterialWarehouse(const MaterialWarehouse &rhs) :
-    Warehouse()
+    Warehouse<Material>()
 {
   _all_objects = rhs._all_objects;
   _active_materials = rhs._active_materials;
