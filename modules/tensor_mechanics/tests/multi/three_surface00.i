@@ -306,11 +306,11 @@
     max_subdivisions = 1
     debug_fspb = 1
     debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
-    debug_jac_at_pm = '1 1'
-    debug_jac_at_intnl = '1 1'
+    debug_jac_at_pm = '1 1 1'
+    debug_jac_at_intnl = '1 1 1'
     debug_stress_change = 1E-5
-    debug_pm_change = '1E-6 1E-6'
-    debug_intnl_change = '1E-6 1E-6'
+    debug_pm_change = '1E-6 1E-6 1E-6'
+    debug_intnl_change = '1E-6 1E-6 1E-6'
   [../]
 []
 

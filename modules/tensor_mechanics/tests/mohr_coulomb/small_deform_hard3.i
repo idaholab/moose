@@ -226,7 +226,7 @@
     ep_plastic_tolerance = 1E-9
     plastic_models = mc
     debug_fspb = 1
-    debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
+    debug_jac_at_stress = '10 1 2 1 11 -3 2 -3 8'
     debug_jac_at_pm = 1
     debug_jac_at_intnl = 1
     debug_stress_change = 1E-5
