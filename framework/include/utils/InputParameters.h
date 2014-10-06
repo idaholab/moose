@@ -564,13 +564,19 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
 
   // iterate over all vector values (maybe ;)
   bool need_to_iterate = false;
-  for (unsigned int i = 0; i < value.size(); i++)
-  {
+  unsigned int i = 0;
+  do {
     // set parameters
     for (unsigned int j = 0; j < vars.size(); j++)
     {
       if (vars[j] == short_name)
       {
+        if (value.size() == 0)
+        {
+          oss << "Range checking empty vector: " << _range_functions[short_name] << '\n';
+          return;
+        }
+
         parbuf[j] = value[i];
         need_to_iterate = true;
       }
@@ -619,8 +625,8 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
         oss << "\t Component: " << i << '\n';
     }
 
-    if (!need_to_iterate) break;
-  }
+
+  } while (need_to_iterate && ++i < value.size());
 }
 
 template <typename T, typename UP_T>

@@ -12,6 +12,7 @@ InputParameters validParams<VecRangeCheckMaterial>()
   params.addRequiredRangeCheckedParam<std::vector<int> >("ivg", "ivg_0 > ivg_1", "Int vector where component 0 is bigger than component 1");
   params.addRequiredRangeCheckedParam<std::vector<Real> >("rvg", "rvg_0 > rvg_1", "Real vector where component 0 is bigger than component 1");
   params.addRequiredRangeCheckedParam<std::vector<Real> >("rvl", "rvl_10 > 0", "Testing if component 10 is positive (usually we should have a size check here as well)");
+  params.addRequiredRangeCheckedParam<std::vector<Real> >("rve", "rve_size = 0 | rve_size = 3", "Vector with either 0 or 3 components");
   return params;
 }
 
