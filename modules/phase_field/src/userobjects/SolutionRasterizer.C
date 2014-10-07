@@ -56,7 +56,7 @@ SolutionRasterizer::initialSetup()
       // dump header
       stream_out << line << '\n';
 
-      // get length of line 0 - the amount of space we have to replace teh atom count at the end of filtering
+      // get length of line 0 - the amount of space we have to replace the atom count at the end of filtering
       if (current_line == 0)
         len0 = line.size();
     }

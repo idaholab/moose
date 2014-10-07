@@ -13,7 +13,7 @@ InputParameters validParams<ACParsed>();
 /**
  * ACParsed uses the Free Energy function and derivatives
  * provided by a DerivativeParsedMaterial to computer the
- * residual for the bulk part of teh Allen-Cahn equation.
+ * residual for the bulk part of the Allen-Cahn equation.
  * \see ACParsed
  * \see SplitACParsed
  */
