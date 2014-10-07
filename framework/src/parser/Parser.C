@@ -675,6 +675,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       // built-ins
       dynamicCastAndExtractVector(Real                  , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(int                   , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(long                  , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(unsigned int          , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(bool                  , it->second, full_name, it->first, in_global, global_params_block);
 
