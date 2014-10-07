@@ -50,7 +50,6 @@
     system_variables = u_aux
     scale = '3 2 1'
     translation = '1 1 0'
-    legacy_read = true
   [../]
 []
 

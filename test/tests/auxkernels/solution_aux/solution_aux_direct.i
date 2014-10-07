@@ -42,7 +42,6 @@
     es = out_0001.xda
     system = AuxiliarySystem
     system_variables = u_aux
-    legacy_read = true
   [../]
 []
 
