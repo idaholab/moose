@@ -22,6 +22,8 @@ public:
   struct EBSDMeshGeometry {
     // grid spacing
     Real d[3];
+    // grid origin
+    Real min[3];
     // mesh dimension
     unsigned int dim;
     // grid size

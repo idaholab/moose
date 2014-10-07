@@ -37,12 +37,15 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
   // Copy file header data from the EBSDMesh
   _dx = g.d[0];
   _nx = g.n[0];
+  _minx = g.min[0];
 
   _dy = g.d[1];
   _ny = g.n[1];
+  _minx = g.min[1];
 
   _dz = g.d[2];
   _nz = g.n[2];
+  _minx = g.min[2];
 
   // Resize the _data array
   unsigned total_size = g.dim < 3 ? _nx*_ny : _nx*_ny*_nz;
@@ -146,12 +149,12 @@ EBSDReader::indexFromPoint(const Point & p) const
   // z) values of this centroid to determine the index.
   unsigned int x_index, y_index, z_index, global_index;
 
-  x_index = (unsigned int)(p(0) / _dx);
-  y_index = (unsigned int)(p(1) / _dy);
+  x_index = (unsigned int)((p(0) - _minx)  / _dx);
+  y_index = (unsigned int)((p(1) - _miny) / _dy);
 
   if (_mesh_dimension == 3)
   {
-    z_index = (unsigned int)(p(2) / _dz);
+    z_index = (unsigned int)((p(2) - _minz) / _dz);
     global_index = z_index * _ny;
   }
   else
