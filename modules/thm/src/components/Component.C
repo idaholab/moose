@@ -11,7 +11,6 @@ InputParameters validParams<Component>()
   InputParameters params = validParams<R7Object>();
   params.addPrivateParam<Simulation *>("_sim");
 
-  params.addParam<std::string>("physics_input_file", "Input file with physics");
   params.addPrivateParam<std::string>("built_by_action", "add_component");
 
   params.registerBase("Component");
@@ -87,9 +86,6 @@ Component::Component(const std::string & name, InputParameters parameters) :
     _factory(_app.getFactory()),
     _mesh(_sim.mesh()),
     _phys_mesh(_sim.physicalMesh()),
-
-    _input_file_name(isParamValid("physics_input_file") ? getParam<std::string>("physics_input_file") : ""),
-
     _zero(_sim._zero)
 {
 }

@@ -151,7 +151,6 @@ protected:
   /// Global physical mesh this component works on
   MooseMesh * & _phys_mesh;
 
-  std::string _input_file_name;
   /// List of subdomain IDs this components owns
   std::vector<unsigned int> _subdomains;
 
