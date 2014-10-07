@@ -368,8 +368,8 @@ public:
 
   unsigned int _num_residual_evaluations;
 
-  void setPredictor(Predictor * predictor);
-  Predictor * getPredictor() { return _predictor; }
+  void setPredictor(MooseSharedPointer<Predictor> predictor);
+  Predictor * getPredictor() { return _predictor.get(); }
 
   TimeIntegrator * getTimeIntegrator() { return _time_integrator.get(); }
 
@@ -548,7 +548,7 @@ protected:
   Real _final_residual;
 
   /// If predictor is active, this is non-NULL
-  Predictor * _predictor;
+  MooseSharedPointer<Predictor> _predictor;
 
   bool _computing_initial_residual;
 

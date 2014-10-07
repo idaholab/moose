@@ -3174,7 +3174,7 @@ FEProblem::addPredictor(const std::string & type, const std::string & name, Inpu
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
-  Predictor * predictor = static_cast<Predictor *>(_factory.create(type, name, parameters));
+  MooseSharedPointer<Predictor> predictor = MooseSharedNamespace::static_pointer_cast<Predictor>(_factory.create_shared_ptr(type, name, parameters));
   _nl.setPredictor(predictor);
 }
 
