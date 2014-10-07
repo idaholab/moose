@@ -21,7 +21,7 @@ InputParameters validParams<FiniteStrainMultiPlasticity>()
   MooseEnum deactivation_scheme("optimized safe optimized_to_safe", "optimized");
   params.addParam<MooseEnum>("deactivation_scheme", deactivation_scheme, "Scheme by which constraints are deactivated.  safe: return to the yield surface and then deactivate constraints with negative plasticity multipliers.  optimized: deactivate a constraint as soon as its plasticity multiplier becomes negative.  optimized_to_safe: first use 'optimized', and if that fails, try the return with 'safe' instead.");
   params.addParam<RealVectorValue>("transverse_direction", "If this parameter is provided, before the return-map algorithm is called a rotation is performed so that the 'z' axis in the new frame lies along the transverse_direction in the original frame.  After returning, the inverse rotation is performed.  The transverse_direction will itself rotate with large strains.  This is so that transversely-isotropic plasticity models may be easily defined in the frame where the isotropy holds in the x-y plane.");
-  params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  2 = debug Jacobian entries, 3 = check the entire Jacobian");
+  params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  2 = debug Jacobian entries, 3 = check the entire Jacobian, and check Ax=b");
   params.addParam<RealTensorValue>("debug_jac_at_stress", RealTensorValue(), "Debug Jacobian entries at this stress.  For use by developers");
   params.addParam<std::vector<Real> >("debug_jac_at_pm", "Debug Jacobian entries at these plastic multipliers");
   params.addParam<std::vector<Real> >("debug_jac_at_intnl", "Debug Jacobian entries at these internal parameters");
@@ -109,9 +109,8 @@ FiniteStrainMultiPlasticity::initQpStatefulProperties()
   if (_fspb_debug == 2)
   {
     checkDerivatives();
-    mooseError("Derivatives have been checked.  Exiting with no error");
+    mooseError("Finite-differencing completed.  Exiting with no error");
   }
-
 }
 
 void
@@ -119,9 +118,10 @@ FiniteStrainMultiPlasticity::computeQpStress()
 {
   if (_fspb_debug == 3)
   {
-    checkJacobian();
-    mooseError("Jacobian has been checked.  Exiting with no error");
-  }
+    checkJacobian(); // cannot do this at initQpStatefulProperties level since E_ijkl is not defined
+    checkSolution();
+    mooseError("Finite-differencing completed.  Exiting with no error");
+   }
 
   preReturnMap();
 
@@ -182,15 +182,16 @@ FiniteStrainMultiPlasticity::computeQpStress()
 
   if (!return_successful)
   {
-    _console << "After making " << num_subdivisions << " subdivisions of the strain increment with L2norm " << _strain_increment[_qp].L2norm() << " the returnMap algorithm failed\n";
+    Moose::out << "After making " << num_subdivisions << " subdivisions of the strain increment with L2norm " << _strain_increment[_qp].L2norm() << " the returnMap algorithm failed\n";
     _fspb_debug_stress = _stress_old[_qp];
     _fspb_debug_pm.assign(_num_f, 1); // this is chosen arbitrarily - please change if a more suitable value occurs to you!
     _fspb_debug_intnl.resize(_num_f);
     for (unsigned a = 0 ; a < _num_f ; ++a)
       _fspb_debug_intnl[a] = _intnl_old[_qp][a];
-    mooseError("Exiting\n");
     checkDerivatives();
     checkJacobian();
+    checkSolution();
+    mooseError("Exiting\n");
   }
 
   postReturnMap();
@@ -915,7 +916,7 @@ FiniteStrainMultiPlasticity::singularValuesOfR(const std::vector<RankTwoTensor> 
 }
 
 void
-FiniteStrainMultiPlasticity::calculateRHS(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & rhs, const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld)
+FiniteStrainMultiPlasticity::calculateRHS(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & rhs, const std::vector<bool> & active, bool eliminate_ld, std::vector<bool> & deactivated_due_to_ld)
 {
   std::vector<Real> f; // the yield functions
   RankTwoTensor epp; // the plastic-strain constraint ("direction constraint")
@@ -924,7 +925,10 @@ FiniteStrainMultiPlasticity::calculateRHS(const RankTwoTensor & stress, const st
   std::vector<RankTwoTensor> r;
   calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, f, r, epp, ic, active);
 
-  eliminateLinearDependence(stress, intnl, f, r, active, deactivated_due_to_ld);
+  if (eliminate_ld)
+    eliminateLinearDependence(stress, intnl, f, r, active, deactivated_due_to_ld);
+  else
+    deactivated_due_to_ld.assign(_num_f, false);
 
 
   unsigned num_active_f = 0;
@@ -1202,7 +1206,7 @@ FiniteStrainMultiPlasticity::nrStep(const RankTwoTensor & stress, const std::vec
 {
   // Calculate RHS and Jacobian
   std::vector<Real> rhs;
-  calculateRHS(stress, intnl_old, intnl, pm, delta_dp, rhs, active, deactivated_due_to_ld);
+  calculateRHS(stress, intnl_old, intnl, pm, delta_dp, rhs, active, true, deactivated_due_to_ld);
 
   std::vector<std::vector<Real> > jac;
   calculateJacobian(stress, intnl, pm, E_inv, active, deactivated_due_to_ld, jac);
@@ -1373,51 +1377,65 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
 void
 FiniteStrainMultiPlasticity::checkDerivatives()
 {
-  _console << "\n ++++++++++++++ \nChecking the derivatives\n";
+  Moose::out << "\n\n++++++++++++++++++++++++\nChecking the derivatives\n++++++++++++++++++++++++\n";
   outputAndCheckDebugParameters();
 
   std::vector<bool> act;
   act.assign(_num_f, true);
 
-  _console << "dyieldFunction_dstress.  Relative L2 norms.\n";
+  Moose::out << "\ndyieldFunction_dstress.  Relative L2 norms.\n";
   std::vector<RankTwoTensor> df_dstress;
   std::vector<RankTwoTensor> fddf_dstress;
   dyieldFunction_dstress(_fspb_debug_stress, _fspb_debug_intnl, act, _num_f, df_dstress);
   fddyieldFunction_dstress(_fspb_debug_stress, _fspb_debug_intnl, fddf_dstress);
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
   {
-    _console << "alpha = " << alpha << " Relative L2norm = " << 2*(df_dstress[alpha] - fddf_dstress[alpha]).L2norm()/(df_dstress[alpha] + fddf_dstress[alpha]).L2norm() << "\n";
-    _console << "Coded:\n";
+    Moose::out << "alpha = " << alpha << " Relative L2norm = " << 2*(df_dstress[alpha] - fddf_dstress[alpha]).L2norm()/(df_dstress[alpha] + fddf_dstress[alpha]).L2norm() << "\n";
+    Moose::out << "Coded:\n";
     df_dstress[alpha].print();
-    _console << "Finite difference:\n";
+    Moose::out << "Finite difference:\n";
     fddf_dstress[alpha].print();
   }
 
-  _console << "dflowPotential_dstress.  Relative L2 norms.\n";
+  Moose::out << "\ndyieldFunction_dintnl.\n";
+  std::vector<Real> df_dintnl;
+  dyieldFunction_dintnl(_fspb_debug_stress, _fspb_debug_intnl, act, _num_f, df_dintnl);
+  Moose::out << "Coded:\n";
+  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+    Moose::out << df_dintnl[alpha] << " ";
+  Moose::out << "\n";
+  std::vector<Real> fddf_dintnl;
+  fddyieldFunction_dintnl(_fspb_debug_stress, _fspb_debug_intnl, fddf_dintnl);
+  Moose::out << "Finite difference:\n";
+  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+    Moose::out << fddf_dintnl[alpha] << " ";
+  Moose::out << "\n";
+
+  Moose::out << "\ndflowPotential_dstress.  Relative L2 norms.\n";
   std::vector<RankFourTensor> dr_dstress;
   std::vector<RankFourTensor> fddr_dstress;
   dflowPotential_dstress(_fspb_debug_stress, _fspb_debug_intnl, act, _num_f, dr_dstress);
   fddflowPotential_dstress(_fspb_debug_stress, _fspb_debug_intnl, fddr_dstress);
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
   {
-    _console << "alpha = " << alpha << " Relative L2norm = " << 2*(dr_dstress[alpha] - fddr_dstress[alpha]).L2norm()/(dr_dstress[alpha] + fddr_dstress[alpha]).L2norm() << "\n";
-    _console << "Coded:\n";
+    Moose::out << "alpha = " << alpha << " Relative L2norm = " << 2*(dr_dstress[alpha] - fddr_dstress[alpha]).L2norm()/(dr_dstress[alpha] + fddr_dstress[alpha]).L2norm() << "\n";
+    Moose::out << "Coded:\n";
     dr_dstress[alpha].print();
-    _console << "Finite difference:\n";
+    Moose::out << "Finite difference:\n";
     fddr_dstress[alpha].print();
   }
 
-  _console << "dflowPotential_dintnl.  Relative L2 norms.\n";
+  Moose::out << "\ndflowPotential_dintnl.  Relative L2 norms.\n";
   std::vector<RankTwoTensor> dr_dintnl;
   std::vector<RankTwoTensor> fddr_dintnl;
   dflowPotential_dintnl(_fspb_debug_stress, _fspb_debug_intnl, act, _num_f, dr_dintnl);
   fddflowPotential_dintnl(_fspb_debug_stress, _fspb_debug_intnl, fddr_dintnl);
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
   {
-    _console << "alpha = " << alpha << " Relative L2norm = " << 2*(dr_dintnl[alpha] - fddr_dintnl[alpha]).L2norm()/(dr_dintnl[alpha] + fddr_dintnl[alpha]).L2norm() << "\n";
-    _console << "Coded:\n";
+    Moose::out << "alpha = " << alpha << " Relative L2norm = " << 2*(dr_dintnl[alpha] - fddr_dintnl[alpha]).L2norm()/(dr_dintnl[alpha] + fddr_dintnl[alpha]).L2norm() << "\n";
+    Moose::out << "Coded:\n";
     dr_dintnl[alpha].print();
-    _console << "Finite difference:\n";
+    Moose::out << "Finite difference:\n";
     fddr_dintnl[alpha].print();
   }
 
@@ -1447,6 +1465,33 @@ FiniteStrainMultiPlasticity::fddyieldFunction_dstress(const RankTwoTensor & stre
       for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
         df_dstress[alpha](i, j) = (fep[alpha] - fep_minus[alpha])/ep;
     }
+}
+
+void
+FiniteStrainMultiPlasticity::fddyieldFunction_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<Real> & df_dintnl)
+{
+  df_dintnl.resize(_num_f);
+
+  std::vector<bool> act;
+  act.assign(_num_f, true);
+
+  std::vector<Real> origf;
+  yieldFunction(stress, intnl, act, _num_f, origf);
+
+  std::vector<Real> intnlep;
+  intnlep.resize(_num_f);
+  for (unsigned a = 0 ; a < _num_f ; ++a)
+    intnlep[a] = intnl[a];
+  Real ep;
+  std::vector<Real> fep;
+  for (unsigned a = 0 ; a < _num_f ; ++a)
+  {
+    ep = _fspb_debug_intnl_change[a];
+    intnlep[a] += ep;
+    yieldFunction(stress, intnlep, act, _num_f, fep);
+    df_dintnl[a] = (fep[a] - origf[a])/ep;
+    intnlep[a] -= ep;
+  }
 }
 
 void
@@ -1506,7 +1551,7 @@ FiniteStrainMultiPlasticity::fddflowPotential_dintnl(const RankTwoTensor & stres
 void
 FiniteStrainMultiPlasticity::checkJacobian()
 {
-  _console << "\n ++++++++++++++ \nChecking the Jacobian\n";
+  Moose::out << "\n\n+++++++++++++++++++++\nChecking the Jacobian\n+++++++++++++++++++++\n";
   outputAndCheckDebugParameters();
 
   std::vector<bool> act;
@@ -1521,37 +1566,39 @@ FiniteStrainMultiPlasticity::checkJacobian()
   calculateJacobian(_fspb_debug_stress, _fspb_debug_intnl, _fspb_debug_pm, E_inv, act, deactivated_due_to_ld, jac);
 
   std::vector<std::vector<Real> > fdjac;
-  fdJacobian(_fspb_debug_stress, _intnl_old[_qp], _fspb_debug_intnl, _fspb_debug_pm, delta_dp, E_inv, fdjac);
+  fdJacobian(_fspb_debug_stress, _intnl_old[_qp], _fspb_debug_intnl, _fspb_debug_pm, delta_dp, E_inv, false, fdjac);
 
-  _console << "Hand-coded Jacobian:\n";
+  Moose::out << "\nHand-coded Jacobian:\n";
   for (unsigned row = 0 ; row < jac.size() ; ++row)
   {
     for (unsigned col = 0 ; col < jac.size() ; ++col)
-      _console << jac[row][col] << " ";
-    _console << "\n";
+      Moose::out << jac[row][col] << " ";
+    Moose::out << "\n";
   }
 
-  _console << "Finite difference Jacobian:\n";
+  Moose::out << "Finite difference Jacobian:\n";
   for (unsigned row = 0 ; row < fdjac.size() ; ++row)
   {
     for (unsigned col = 0 ; col < fdjac.size() ; ++col)
-      _console << fdjac[row][col] << " ";
-    _console << "\n";
+      Moose::out << fdjac[row][col] << " ";
+    Moose::out << "\n";
   }
 }
 
 void
-FiniteStrainMultiPlasticity::fdJacobian(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<std::vector<Real> > & jac)
+FiniteStrainMultiPlasticity::fdJacobian(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, const RankFourTensor & E_inv, bool eliminate_ld, std::vector<std::vector<Real> > & jac)
 {
   std::vector<bool> active;
   active.assign(_num_f, true);
 
   std::vector<bool> deactivated_due_to_ld;
+  std::vector<bool> deactivated_due_to_ld_ep;
 
   std::vector<Real> orig_rhs;
-  calculateRHS(stress, intnl_old, intnl, pm, delta_dp, orig_rhs, active, deactivated_due_to_ld);
+  calculateRHS(stress, intnl_old, intnl, pm, delta_dp, orig_rhs, active, eliminate_ld, deactivated_due_to_ld);
 
-  unsigned int system_size = orig_rhs.size();
+  unsigned int whole_system_size = 6 + _num_f + _num_f;
+  unsigned int system_size = orig_rhs.size(); // will be = whole_system_size if eliminate_ld = false
   jac.resize(system_size);
   for (unsigned row = 0 ; row < system_size ; ++row)
     jac[row].assign(system_size, 0);
@@ -1579,11 +1626,17 @@ FiniteStrainMultiPlasticity::fdJacobian(const RankTwoTensor & stress, const std:
             delta_dpep(k, l) -= E_inv(k, l, j, i)*ep;
         }
       active.assign(_num_f, true);
-      calculateRHS(stressep, intnl_old, intnl, pm, delta_dpep, rhs_ep, active, deactivated_due_to_ld);
-      for (unsigned row = 0 ; row < system_size ; ++row)
-        jac[row][col] = -(rhs_ep[row] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
-      col++;
+      calculateRHS(stressep, intnl_old, intnl, pm, delta_dpep, rhs_ep, active, false, deactivated_due_to_ld_ep);
+      unsigned row = 0;
+      for (unsigned dof = 0 ; dof < whole_system_size ; ++dof)
+        if (dof_included(dof, deactivated_due_to_ld))
+        {
+          jac[row][col] = -(rhs_ep[dof] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
+          row++;
+        }
+      col++;  // all of the first 6 columns are dof_included since they're stresses
     }
+
 
   std::vector<Real> pmep;
   pmep.resize(_num_f);
@@ -1591,12 +1644,19 @@ FiniteStrainMultiPlasticity::fdJacobian(const RankTwoTensor & stress, const std:
     pmep[alpha] = pm[alpha];
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
   {
+    if (!dof_included(6 + alpha, deactivated_due_to_ld))
+      continue;
     ep = _fspb_debug_pm_change[alpha];
     pmep[alpha] += ep;
     active.assign(_num_f, true);
-    calculateRHS(stress, intnl_old, intnl, pmep, delta_dp, rhs_ep, active, deactivated_due_to_ld);
-    for (unsigned row = 0 ; row < system_size ; ++row)
-      jac[row][col] = -(rhs_ep[row] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
+    calculateRHS(stress, intnl_old, intnl, pmep, delta_dp, rhs_ep, active, false, deactivated_due_to_ld_ep);
+    unsigned row = 0;
+    for (unsigned dof = 0 ; dof < whole_system_size ; ++dof)
+      if (dof_included(dof, deactivated_due_to_ld))
+      {
+        jac[row][col] = -(rhs_ep[dof] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
+        row++;
+      }
     pmep[alpha] -= ep;
     col++;
   }
@@ -1607,40 +1667,155 @@ FiniteStrainMultiPlasticity::fdJacobian(const RankTwoTensor & stress, const std:
     intnlep[a] = intnl[a];
   for (unsigned a = 0 ; a < _num_f ; ++a)
   {
+    if (!dof_included(6 + _num_f + a, deactivated_due_to_ld))
+      continue;
     ep = _fspb_debug_intnl_change[a];
     intnlep[a] += ep;
     active.assign(_num_f, true);
-    calculateRHS(stress, intnl_old, intnlep, pm, delta_dp, rhs_ep, active, deactivated_due_to_ld);
-    for (unsigned row = 0 ; row < system_size ; ++row)
-      jac[row][col] = -(rhs_ep[row] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
+    calculateRHS(stress, intnl_old, intnlep, pm, delta_dp, rhs_ep, active, false, deactivated_due_to_ld_ep);
+    unsigned row = 0;
+    for (unsigned dof = 0 ; dof < whole_system_size ; ++dof)
+      if (dof_included(dof, deactivated_due_to_ld))
+      {
+        jac[row][col] = -(rhs_ep[dof] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
+        row++;
+      }
     intnlep[a] -= ep;
     col++;
   }
 }
 
 
+bool
+FiniteStrainMultiPlasticity::dof_included(unsigned int dof, const std::vector<bool> & deactivated_due_to_ld)
+{
+  if (dof < unsigned(6))
+    return true;
+  unsigned eff_dof = dof - 6;
+  if (eff_dof > deactivated_due_to_ld.size())
+    eff_dof -= deactivated_due_to_ld.size();
+  return !deactivated_due_to_ld[eff_dof];
+}
+
+
 void
 FiniteStrainMultiPlasticity::outputAndCheckDebugParameters()
 {
-  _console << "stress = \n";
+  Moose::out << "Debug Parameters are as follows\n";
+  Moose::out << "stress = \n";
   _fspb_debug_stress.print();
 
   if (_fspb_debug_pm.size() != _num_f || _fspb_debug_intnl.size() != _num_f || _fspb_debug_pm_change.size() != _num_f || _fspb_debug_intnl_change.size() != _num_f)
     mooseError("The debug parameters have the wrong size\n");
 
-  _console << "plastic multipliers =\n";
+  Moose::out << "plastic multipliers =\n";
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-    _console << _fspb_debug_pm[alpha] << "\n";
+    Moose::out << _fspb_debug_pm[alpha] << "\n";
 
-  _console << "internal parameters =\n";
+  Moose::out << "internal parameters =\n";
   for (unsigned a = 0 ; a < _num_f ; ++a)
-    _console << _fspb_debug_intnl[a] << "\n";
+    Moose::out << _fspb_debug_intnl[a] << "\n";
 
-  _console << "finite-differencing parameter for stress-changes:\n" << _fspb_debug_stress_change  << "\n";
-  _console << "finite-differencing parameter(s) for plastic-multiplier(s):\n";
+  Moose::out << "finite-differencing parameter for stress-changes:\n" << _fspb_debug_stress_change  << "\n";
+  Moose::out << "finite-differencing parameter(s) for plastic-multiplier(s):\n";
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-    _console << _fspb_debug_pm_change[alpha] << "\n";
-  _console << "finite-differencing parameter(s) for internal-parameter(s):\n";
+    Moose::out << _fspb_debug_pm_change[alpha] << "\n";
+  Moose::out << "finite-differencing parameter(s) for internal-parameter(s):\n";
   for (unsigned a = 0 ; a < _num_f ; ++a)
-    _console << _fspb_debug_intnl_change[a] << "\n";
+    Moose::out << _fspb_debug_intnl_change[a] << "\n";
+}
+
+
+void
+FiniteStrainMultiPlasticity::checkSolution()
+{
+  Moose::out << "\n\n+++++++++++++++++++++\nChecking the Solution\n";
+  Moose::out << "(Ie, checking Ax = b)\n+++++++++++++++++++++\n";
+  outputAndCheckDebugParameters();
+
+  std::vector<bool> act;
+  act.assign(_num_f, true);
+  std::vector<bool> deactivated_due_to_ld;
+  deactivated_due_to_ld.assign(_num_f, false);
+
+  RankFourTensor E_inv = _elasticity_tensor[_qp].invSymm();
+  RankTwoTensor delta_dp = -E_inv*_fspb_debug_stress;
+
+  std::vector<Real> orig_rhs;
+  calculateRHS(_fspb_debug_stress, _fspb_debug_intnl, _fspb_debug_intnl, _fspb_debug_pm, delta_dp, orig_rhs, act, true, deactivated_due_to_ld);
+
+  Moose::out << "\nb = ";
+  for (unsigned i = 0 ; i < orig_rhs.size(); ++i)
+    Moose::out << orig_rhs[i] << " ";
+  Moose::out << "\n\n";
+
+
+  std::vector<std::vector<Real> > jac_coded;
+  calculateJacobian(_fspb_debug_stress, _fspb_debug_intnl, _fspb_debug_pm, E_inv, act, deactivated_due_to_ld, jac_coded);
+
+  Moose::out << "Before checking Ax=b is correct, check that the Jacobians given below are equal.\n";
+  Moose::out << "The hand-coded Jacobian is used in calculating the solution 'x', given 'b' above.\n";
+  Moose::out << "Note that this only includes degrees of freedom that aren't deactivated due to linear dependence.\n";
+  Moose::out << "Hand-coded Jacobian:\n";
+  for (unsigned row = 0 ; row < jac_coded.size() ; ++row)
+  {
+    for (unsigned col = 0 ; col < jac_coded.size() ; ++col)
+      Moose::out << jac_coded[row][col] << " ";
+    Moose::out << "\n";
+  }
+
+
+  deactivated_due_to_ld.assign(_num_f, false);
+  RankTwoTensor dstress;
+  std::vector<Real> dpm;
+  std::vector<Real> dintnl;
+  nrStep(_fspb_debug_stress, _fspb_debug_intnl, _fspb_debug_intnl, _fspb_debug_pm, E_inv, delta_dp, dstress, dpm, dintnl, act, deactivated_due_to_ld);
+
+  std::vector<Real> x;
+  x.assign(orig_rhs.size(), 0);
+  unsigned ind = 0;
+  for (unsigned i = 0 ; i < 3 ; ++i)
+    for (unsigned j = 0 ; j <= i ; ++j)
+      x[ind++] = dstress(i, j);
+  for (unsigned alpha = 0 ; alpha < _num_f; ++alpha)
+    if (!deactivated_due_to_ld[alpha])
+      x[ind++] = dpm[alpha];
+  for (unsigned alpha = 0 ; alpha < _num_f; ++alpha)
+    if (!deactivated_due_to_ld[alpha])
+      x[ind++] = dintnl[alpha];
+
+  Moose::out << "\nThis yields x =";
+  for (unsigned i = 0 ; i < orig_rhs.size(); ++i)
+    Moose::out << x[i] << " ";
+  Moose::out << "\n";
+
+
+  std::vector<std::vector<Real> > jac_fd;
+  fdJacobian(_fspb_debug_stress, _fspb_debug_intnl, _fspb_debug_intnl, _fspb_debug_pm, delta_dp, E_inv, true, jac_fd);
+
+  Moose::out << "\nThe finite-difference Jacobian is used to multiply by this 'x',\n";
+  Moose::out << "in order to check that the solution is correct\n";
+  Moose::out << "Finite-difference Jacobian:\n";
+  for (unsigned row = 0 ; row < jac_fd.size() ; ++row)
+  {
+    for (unsigned col = 0 ; col < jac_fd.size() ; ++col)
+      Moose::out << jac_fd[row][col] << " ";
+    Moose::out << "\n";
+  }
+
+
+  std::vector<Real> fd_times_x;
+  fd_times_x.assign(orig_rhs.size(), 0);
+  for (unsigned row = 0 ; row < orig_rhs.size() ; ++row)
+    for (unsigned col = 0 ; col < orig_rhs.size() ; ++col)
+      fd_times_x[row] += jac_fd[row][col]*x[col];
+
+  Moose::out << "\n(Finite-difference Jacobian)*x =\n";
+  for (unsigned i = 0 ; i < orig_rhs.size(); ++i)
+    Moose::out << fd_times_x[i] << " ";
+  Moose::out << "\n";
+  Moose::out << "Recall that b = \n";
+  for (unsigned i = 0 ; i < orig_rhs.size(); ++i)
+    Moose::out << orig_rhs[i] << " ";
+  Moose::out << "\n";
 }
