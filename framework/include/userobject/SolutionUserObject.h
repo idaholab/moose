@@ -244,10 +244,6 @@ protected:
 
   /// True if initial_setup has executed
   bool _initialized;
-
-  /// Flag for using old EquationSystems::read
-  /* This was required for tests relying on old xda files without additional data, in debug mode, on linux */
-  bool _legacy_read;
 };
 
 #endif //SOLUTIONUSEROBJECT_H
