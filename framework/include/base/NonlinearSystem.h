@@ -277,7 +277,7 @@ public:
    * Sets a preconditioner
    * @param pc The preconditioner to be set
    */
-  void setPreconditioner(MoosePreconditioner *pc);
+  void setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc);
 
   /**
    * If called with true this system will use a finite differenced form of
@@ -501,7 +501,7 @@ protected:
   /// increment vector
   NumericVector<Number> * _increment_vec;
   /// Preconditioner
-  MoosePreconditioner * _preconditioner;
+  MooseSharedPointer<MoosePreconditioner> _preconditioner;
   /// Preconditioning side
   Moose::PCSideType _pc_side;
 
