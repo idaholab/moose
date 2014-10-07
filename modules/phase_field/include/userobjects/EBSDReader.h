@@ -76,6 +76,9 @@ protected:
   /// The spacing of the values in x, y and z directions.
   Real _dx, _dy, _dz;
 
+  /// Grid origin
+  Real _minx, _miny, _minz;
+
   // Initial condition values of EBSD variables
   std::vector<Real> _phi1_ic, _PHI_ic, _phi2_ic, _x_ic, _y_ic, _z_ic;
   std::vector<unsigned int> _grn_ic, _phase_ic, _sym_ic;

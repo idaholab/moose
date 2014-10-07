@@ -45,17 +45,20 @@ EBSDMesh::readEBSDHeader()
 
   // Labels to look for in the header
   std::vector<std::string> labels;
-  labels.push_back("X_step");
+  labels.push_back("X_step"); // 0
   labels.push_back("X_Dim");
-  labels.push_back("Y_step");
+  labels.push_back("Y_step"); // 2
   labels.push_back("Y_Dim");
-  labels.push_back("Z_step");
+  labels.push_back("Z_step"); // 4
   labels.push_back("Z_Dim");
+  labels.push_back("X_Min");  // 6
+  labels.push_back("Y_Min");
+  labels.push_back("Z_Min");
 
   // Dimension variables to store once they are found in the header
   // X_step, X_Dim, Y_step, Y_Dim, Z_step, Z_Dim
   // We use Reals even though the Dim values should all be integers...
-  std::vector<Real> label_vals(labels.size());
+  std::vector<Real> label_vals(labels.size(), 0.0);
 
   std::string line;
   while (std::getline(stream_in, line))
@@ -89,12 +92,15 @@ EBSDMesh::readEBSDHeader()
   // Copy stuff out of the label_vars array into class variables
   _geometry.d[0] = label_vals[0];
   _geometry.n[0] = label_vals[1];
+  _geometry.min[0] = label_vals[6];
 
   _geometry.d[1] = label_vals[2];
   _geometry.n[1] = label_vals[3];
+  _geometry.min[1] = label_vals[7];
 
   _geometry.d[2] = label_vals[4];
   _geometry.n[2] = label_vals[5];
+  _geometry.min[2] = label_vals[8];
 
   unsigned int dim;
 
@@ -131,12 +137,12 @@ EBSDMesh::buildMesh()
 
   // set min/max box length
   InputParameters & params = parameters();
-  params.set<Real>("xmin") = 0.0;
-  params.set<Real>("xmax") = nr[0] * _geometry.d[0];
-  params.set<Real>("ymin") = 0.0;
-  params.set<Real>("ymax") = nr[1] * _geometry.d[1];
-  params.set<Real>("zmin") = 0.0;
-  params.set<Real>("zmax") = nr[2] * _geometry.d[2];
+  params.set<Real>("xmin") = _geometry.min[0];
+  params.set<Real>("xmax") = nr[0] * _geometry.d[0] + _geometry.min[0];
+  params.set<Real>("ymin") = _geometry.min[1];
+  params.set<Real>("ymax") = nr[1] * _geometry.d[1] + _geometry.min[1];
+  params.set<Real>("zmin") = _geometry.min[2];
+  params.set<Real>("zmax") = nr[2] * _geometry.d[2] + _geometry.min[2];
 
   // check if the requested uniform refine level is possible and determine initial grid size
   for (unsigned int i = 0; i < uniform_refine; ++i)
