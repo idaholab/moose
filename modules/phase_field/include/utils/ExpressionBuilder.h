@@ -55,9 +55,9 @@ public:
     virtual EBTermNode * clone() const = 0;
 
     virtual std::string stringify() const = 0;
-    virtual unsigned int substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace) { return 0; };
+    virtual unsigned int substitute(const std::vector<std::string> & /*find_str*/, const EBTermNodeList & /*replace*/) { return 0; }
     virtual int precedence() const = 0;
-    friend std::ostream& operator<< (std::ostream & os, const EBTermNode & node) { return os << node.stringify(); };
+    friend std::ostream& operator<< (std::ostream & os, const EBTermNode & node) { return os << node.stringify(); }
   };
 
   // Template class for leaf nodes holding numbers in the expression tree
@@ -68,10 +68,10 @@ public:
 
   public:
     EBNumberNode(T _value) : value(_value) {};
-    virtual EBNumberNode<T> * clone() const { return new EBNumberNode(value); };
+    virtual EBNumberNode<T> * clone() const { return new EBNumberNode(value); }
 
     virtual std::string stringify() const;
-    virtual int precedence() const { return 0; };
+    virtual int precedence() const { return 0; }
   };
 
   // Template class for leaf nodes holding symbols (i.e. variables) in the expression tree
@@ -81,10 +81,10 @@ public:
 
   public:
     EBSymbolNode(std::string _symbol) : symbol(_symbol) {};
-    virtual EBSymbolNode * clone() const { return new EBSymbolNode(symbol); };
+    virtual EBSymbolNode * clone() const { return new EBSymbolNode(symbol); }
 
     virtual std::string stringify() const;
-    virtual int precedence() const { return 0; };
+    virtual int precedence() const { return 0; }
   };
 
   // Base class for nodes with a single sub node (i.e. functions or operators taking one argument)
@@ -113,7 +113,7 @@ public:
     };
 
     virtual std::string stringify() const;
-    virtual int precedence() const { return 2; };
+    virtual int precedence() const { return 2; }
   };
 
   // Node representing a unary operator
@@ -129,7 +129,7 @@ public:
     };
 
     virtual std::string stringify() const;
-    virtual int precedence() const { return 3; };
+    virtual int precedence() const { return 3; }
   };
 
   // Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
@@ -177,7 +177,7 @@ public:
     };
 
     virtual std::string stringify() const;
-    virtual int precedence() const { return 2; };
+    virtual int precedence() const { return 2; }
   };
 
 
@@ -193,9 +193,9 @@ public:
     EBTerm(EBTermNode * _root) : root(_root) {};
 
     // construct from number or string
-    EBTerm(int number) : root(new EBNumberNode<int>(number)) {};
-    EBTerm(Real number) : root(new EBNumberNode<Real>(number)) {};
-    EBTerm(const char *symbol) : root(new EBSymbolNode(symbol)) {};
+    EBTerm(int number) : root(new EBNumberNode<int>(number)) {}
+    EBTerm(Real number) : root(new EBNumberNode<Real>(number)) {}
+    EBTerm(const char *symbol) : root(new EBSymbolNode(symbol)) {}
 
     // concatenate terms to form a parameter list with (()) syntax (those need to be out-of-class!)
     friend EBTermList operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTerm & rarg);
@@ -205,7 +205,7 @@ public:
     // dump term as FParser expression
     friend std::ostream & operator<< (std::ostream & os, const EBTerm & term);
     // cast into a string
-    operator std::string() const { return root->stringify(); };
+    operator std::string() const { return root->stringify(); }
 
     // assign a term
     EBTerm & operator= (const EBTerm & term) { delete root; root = term.root==NULL ? NULL : term.root->clone(); return *this; }
@@ -290,14 +290,14 @@ public:
     EBFunction & operator() (const EBTermList & args);
 
     // convenience operators to allow single bracket syntax
-    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2) { return (*this)((a1,a2)); };
-    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3) { return (*this)((a1,a2,a3)); };
-    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4) { return (*this)((a1,a2,a3,a4)); };
-    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5) { return (*this)((a1,a2,a3,a4,a5)); };
-    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6) { return (*this)((a1,a2,a3,a4,a5,a6)); };
-    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7) { return (*this)((a1,a2,a3,a4,a5,a6,a7)); };
-    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7, const EBTerm & a8) { return (*this)((a1,a2,a3,a4,a5,a6,a7,a8)); };
-    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7, const EBTerm & a8, const EBTerm & a9) { return (*this)((a1,a2,a3,a4,a5,a6,a7,a8,a9)); };
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2) { return (*this)((a1,a2)); }
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3) { return (*this)((a1,a2,a3)); }
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4) { return (*this)((a1,a2,a3,a4)); }
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5) { return (*this)((a1,a2,a3,a4,a5)); }
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6) { return (*this)((a1,a2,a3,a4,a5,a6)); }
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7) { return (*this)((a1,a2,a3,a4,a5,a6,a7)); }
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7, const EBTerm & a8) { return (*this)((a1,a2,a3,a4,a5,a6,a7,a8)); }
+    EBFunction & operator() (const EBTerm & a1, const EBTerm & a2, const EBTerm & a3, const EBTerm & a4, const EBTerm & a5, const EBTerm & a6, const EBTerm & a7, const EBTerm & a8, const EBTerm & a9) { return (*this)((a1,a2,a3,a4,a5,a6,a7,a8,a9)); }
 
     // cast an EBFunction into an EBTerm
     operator EBTerm() const;
@@ -360,6 +360,6 @@ ExpressionBuilder::EBNumberNode<T>::stringify() const
   std::ostringstream s;
   s << std::setprecision(12) << value;
   return s.str();
-};
+}
 
 #endif //EXPRESSIONBUILDER_H
