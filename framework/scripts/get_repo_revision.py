@@ -12,12 +12,15 @@ def findRepoRevision(moose_dir):
 
   # Locate the .build_apps file
   found_it = False
-  apps_dir = os.getcwd() + "/"
+  apps_dir = os.getcwd()
+
+  # Search at most 4 directories up from where we are located
   for i in range(4):
-    apps_dir += "../"
-    if os.path.exists(apps_dir + apps_file):
+    if os.path.exists(os.path.join(apps_dir, apps_file)):
       found_it = True
       break
+    apps_dir = os.path.join(apps_dir, '..')
+
   if not found_it:
     # We need to see if we are in a git repo
     p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=None, shell=True)
