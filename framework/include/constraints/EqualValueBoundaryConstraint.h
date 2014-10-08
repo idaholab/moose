@@ -33,7 +33,7 @@ protected:
   virtual Real computeQpResidual(Moose::ConstraintType type);
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 
-  unsigned int _slave_boundary_id;
+  short _slave_boundary_id;
   Real _penalty;
 
 };
