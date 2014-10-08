@@ -2644,13 +2644,12 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
   {
     parameters.set<THREAD_ID>("_tid") = tid;
 
-    Marker *marker = static_cast<Marker *>(_factory.create(marker_name, name, parameters));
-    mooseAssert(marker != NULL, "Not a Marker object");
+    MooseSharedPointer<Marker> marker = MooseSharedNamespace::static_pointer_cast<Marker>(_factory.create_shared_ptr(marker_name, name, parameters));
 
     std::vector<SubdomainID> block_ids;
     _markers[tid].addMarker(marker, block_ids);
 
-    _objects_by_name[tid][name].push_back(marker);
+    _objects_by_name[tid][name].push_back(marker.get());
   }
 }
 
