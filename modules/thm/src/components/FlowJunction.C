@@ -66,14 +66,14 @@ FlowJunction::addMooseObjects()
   std::vector<VariableName> cv_lambda(1, _lm_name);
   std::vector<Real> sf = _sim.getParam<std::vector<Real> >("scaling_factors");
 
-  std::vector<MooseEnum> execute_options = SetupInterface::getExecuteOptions();
-  execute_options[0] = "residual";
+  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
+  execute_options = "residual";
 
   std::string c_pps = genName(name(), "flow_pps");
   {
     InputParameters params = _factory.getValidParams("PressureCB");
     params.set<std::vector<unsigned int> >("r7:boundary") = _bnd_id;
-    params.set<std::vector<MooseEnum> >("execute_on") = execute_options;
+    params.set<MultiMooseEnum>("execute_on") = execute_options;
     params.set<std::string>("r7:output") = "none";
     params.set<UserObjectName>("eos")  = getParam<UserObjectName>("eos");
     // coupling
