@@ -5,9 +5,9 @@ InputParameters validParams<ConservedMaskedNoiseBase>()
 {
   InputParameters params = validParams<ElementUserObject>();
 
-  std::vector<MooseEnum> setup_options(SetupInterface::getExecuteOptions());
-  setup_options[0] = "timestep_begin";
-  params.set<std::vector<MooseEnum> >("execute_on") = setup_options;
+  MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
+  setup_options = "timestep_begin";
+  params.set<MultiMooseEnum>("execute_on") = setup_options;
   params.addParam<std::string>("mask", "Material property to multiply the random numbers with");
   return params;
 }
