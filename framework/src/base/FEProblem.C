@@ -2188,12 +2188,6 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
   std::vector<UserObjectWarehouse> & pps = _user_objects(type);
   if (pps[0].blockIds().size() || pps[0].boundaryIds().size() || pps[0].nodesetIds().size() || pps[0].blockNodalIds().size() || pps[0].internalSideUserObjects(group).size())
   {
-    /* Note: The fact that we compute the aux system when we compute the user_objects
-     * is a very bad behavior that some of our applications have come to rely on.  This
-     * needs to be fixed.  For now we cannot easily change this behavior without
-     * affecting a number of applications.  However when I added the nodal user_objects
-     * this also changed the behavior so this hack is here to maintain saneness for now
-     */
     if (!pps[0].nodesetIds().size())
     {
       serializeSolution();
@@ -2201,10 +2195,12 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
       if (_displaced_problem != NULL)
         _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
+      /**
+       * Legacy behavior requires that we compute the RESIDUAL set of AuxKernels when
+       * we compute user objects.
+       */
       if (_use_legacy_uo_aux_computation)
         _aux.compute();
-      else
-        _aux.compute(type);
     }
 
     // init
@@ -3220,7 +3216,7 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   execMultiApps(EXEC_RESIDUAL);
 
-  computeUserObjects(EXEC_RESIDUAL);
+  computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::PRE_AUX);
 
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
@@ -3239,6 +3235,9 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   _aux.residualSetup();
 
   _aux.compute();
+
+  computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::POST_AUX);
+
   _nl.computeResidual(residual, type);
 
   // Need to close and update the aux system in case residuals were saved to it.
