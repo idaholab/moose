@@ -131,14 +131,14 @@ public:
    * Pointer to the TimeStepper
    * @return Pointer to the time stepper for this Executioner
    */
-  TimeStepper * getTimeStepper(){ return _time_stepper; }
+  TimeStepper * getTimeStepper(){ return _time_stepper.get(); }
 
   /**
    * Set the timestepper to use.
    *
    * @param ts The TimeStepper to use
    */
-  void setTimeStepper(TimeStepper * ts) { _time_stepper = ts; }
+  void setTimeStepper(MooseSharedPointer<TimeStepper> ts) { _time_stepper = ts; }
 
   /**
    * Get the timestepper.
@@ -211,7 +211,7 @@ protected:
   FEProblem & _problem;
 
   MooseEnum _time_scheme;
-  TimeStepper * _time_stepper;
+  MooseSharedPointer<TimeStepper> _time_stepper;
 
   /// Current timestep.
   int & _t_step;

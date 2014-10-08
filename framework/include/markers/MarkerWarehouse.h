@@ -53,7 +53,7 @@ public:
    * @param Marker Marker being added
    * @param block_ids Set of active domain where the Marker is defined
    */
-  void addMarker(Marker *Marker, std::vector<SubdomainID> & block_ids);
+  void addMarker(MooseSharedPointer<Marker> marker, std::vector<SubdomainID> & block_ids);
 
   /**
    * Update the list of active Markers
@@ -63,6 +63,14 @@ public:
 
 
 protected:
+  ///@{
+  /**
+   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   */
+  std::vector<MooseSharedPointer<Marker> > _all_ptrs;
+  ///@}
+
   /// Markers active on a block and in specified time
   std::vector<Marker *> _active_markers;
   /// Markers that live everywhere (on the whole domain)
