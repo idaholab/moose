@@ -2615,13 +2615,12 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
     parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
     parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
 
-    Indicator *indicator = static_cast<Indicator *>(_factory.create(indicator_name, name, parameters));
-    mooseAssert(indicator != NULL, "Not a Indicator object");
+    MooseSharedPointer<Indicator> indicator = MooseSharedNamespace::static_pointer_cast<Indicator>(_factory.create_shared_ptr(indicator_name, name, parameters));
 
     std::vector<SubdomainID> block_ids;
     _indicators[tid].addIndicator(indicator, block_ids);
 
-    _objects_by_name[tid][name].push_back(indicator);
+    _objects_by_name[tid][name].push_back(indicator.get());
   }
 }
 

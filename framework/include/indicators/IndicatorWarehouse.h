@@ -54,7 +54,7 @@ public:
    * @param Indicator Indicator being added
    * @param block_ids Set of active domain where the Indicator is defined
    */
-  void addIndicator(Indicator *Indicator, std::vector<SubdomainID> & block_ids);
+  void addIndicator(MooseSharedPointer<Indicator> indicator, std::vector<SubdomainID> & block_ids);
 
   /**
    * Update the list of active Indicators
@@ -64,6 +64,14 @@ public:
 
 
 protected:
+  ///@{
+  /**
+   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   */
+  std::vector<MooseSharedPointer<Indicator> > _all_ptrs;
+  ///@}
+
   /// Indicators active on a block and in specified time
   std::vector<Indicator *> _active_indicators;
 
