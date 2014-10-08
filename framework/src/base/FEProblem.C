@@ -1881,7 +1881,7 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
     MooseSharedPointer<Postprocessor> pp = getPostprocessorPointer(mo);
 
     // Postprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
-    const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<std::vector<MooseEnum> >("execute_on"));
+    const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
     for (unsigned int i=0; i<exec_flags.size(); ++i)
     {
       // Check for name collision
@@ -1988,7 +1988,7 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
     MooseSharedPointer<VectorPostprocessor> pp = getVectorPostprocessorPointer(mo);
 
     // VectorPostprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
-    const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<std::vector<MooseEnum> >("execute_on"));
+    const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
     for (unsigned int i=0; i<exec_flags.size(); ++i)
     {
       // Check for name collision
