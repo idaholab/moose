@@ -1444,7 +1444,8 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
           for (unsigned int i = 0; i < boundaries.size(); i++)
           {
             BoundaryID bnd_id = _mesh.getBoundaryID(boundaries[i]);
-            _ics[tid].addBoundaryInitialCondition(var_name, bnd_id, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+            _ics[tid].addBoundaryInitialCondition(var_name, bnd_id,
+                                                  MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create_shared_ptr(ic_name, name, parameters)));
           }
         }
       }
@@ -1462,10 +1463,12 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
           for (unsigned int i = 0; i < blocks.size(); i++)
           {
             SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
-            _ics[tid].addInitialCondition(var_name, blk_id, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+            _ics[tid].addInitialCondition(var_name, blk_id,
+                                          MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create_shared_ptr(ic_name, name, parameters)));
           }
         else
-          _ics[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID, static_cast<InitialCondition *>(_factory.create(ic_name, name, parameters)));
+          _ics[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID,
+                                        MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create_shared_ptr(ic_name, name, parameters)));
       }
     }
 
@@ -1479,7 +1482,8 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
     for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
     {
       parameters.set<THREAD_ID>("_tid") = tid;
-      _ics[tid].addScalarInitialCondition(var_name, static_cast<ScalarInitialCondition *>(_factory.create(ic_name, name, parameters)));
+      _ics[tid].addScalarInitialCondition(var_name,
+                                          MooseSharedNamespace::static_pointer_cast<ScalarInitialCondition>(_factory.create_shared_ptr(ic_name, name, parameters)));
     }
   }
   else
