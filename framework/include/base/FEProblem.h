@@ -853,7 +853,7 @@ protected:
   std::vector<Assembly *> _assembly;
 
   /// functions
-  std::vector<std::map<std::string, Function *> > _functions;
+  std::vector<std::map<std::string, MooseSharedPointer<Function> > > _functions;
 
   /// Initial condition warehouses (one for each thread)
   std::vector<InitialConditionWarehouse> _ics;

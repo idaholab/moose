@@ -277,7 +277,7 @@ public:
    * Sets a preconditioner
    * @param pc The preconditioner to be set
    */
-  void setPreconditioner(MoosePreconditioner *pc);
+  void setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc);
 
   /**
    * If called with true this system will use a finite differenced form of
@@ -368,8 +368,8 @@ public:
 
   unsigned int _num_residual_evaluations;
 
-  void setPredictor(Predictor * predictor);
-  Predictor * getPredictor() { return _predictor; }
+  void setPredictor(MooseSharedPointer<Predictor> predictor);
+  Predictor * getPredictor() { return _predictor.get(); }
 
   TimeIntegrator * getTimeIntegrator() { return _time_integrator.get(); }
 
@@ -501,7 +501,7 @@ protected:
   /// increment vector
   NumericVector<Number> * _increment_vec;
   /// Preconditioner
-  MoosePreconditioner * _preconditioner;
+  MooseSharedPointer<MoosePreconditioner> _preconditioner;
   /// Preconditioning side
   Moose::PCSideType _pc_side;
 
@@ -548,7 +548,7 @@ protected:
   Real _final_residual;
 
   /// If predictor is active, this is non-NULL
-  Predictor * _predictor;
+  MooseSharedPointer<Predictor> _predictor;
 
   bool _computing_initial_residual;
 

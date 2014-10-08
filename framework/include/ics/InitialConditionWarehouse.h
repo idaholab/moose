@@ -17,7 +17,7 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 class InitialCondition;
 class ScalarInitialCondition;
@@ -25,7 +25,7 @@ class ScalarInitialCondition;
 /**
  * Warehouse for storing initial conditions
  */
-class InitialConditionWarehouse
+class InitialConditionWarehouse : public Warehouse<InitialCondition>
 {
 public:
   InitialConditionWarehouse();
@@ -67,7 +67,7 @@ public:
    * @param blockid The block to which this IC is restricted
    * @param ic The initial condition object
    */
-  void addInitialCondition(const std::string & var_name, SubdomainID blockid, InitialCondition * ic);
+  void addInitialCondition(const std::string & var_name, SubdomainID blockid, MooseSharedPointer<InitialCondition> ic);
 
   /**
    * Add an initial condition for field variable restricted to a boundary
@@ -75,7 +75,7 @@ public:
    * @param boundary_id The boundary to which this IC is restricted
    * @param ic The initial condition object
    */
-  void addBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id, InitialCondition * ic);
+  void addBoundaryInitialCondition(const std::string & var_name, BoundaryID boundary_id, MooseSharedPointer<InitialCondition> ic);
 
   // Scalar ICs //////
 
@@ -90,7 +90,7 @@ public:
    * @param var_name The variable name this initial condition works on
    * @param ic The initial condition object
    */
-  void addScalarInitialCondition(const std::string & var_name, ScalarInitialCondition * ic);
+  void addScalarInitialCondition(const std::string & var_name, MooseSharedPointer<ScalarInitialCondition> ic);
 
 protected:
   /// Active ICs
@@ -98,14 +98,14 @@ protected:
   /// All block-restricted ICs
   std::map<SubdomainID, std::vector<InitialCondition *> > _all_ics;
   /// Initial conditions: [var name] -> [block_id] -> initial condition (only 1 IC per sub-block)
-  std::map<std::string, std::map<SubdomainID, InitialCondition *> > _ics;
+  std::map<std::string, std::map<SubdomainID, MooseSharedPointer<InitialCondition> > > _ics;
   /// All boundary restricted ICs
   std::map<BoundaryID, std::vector<InitialCondition *> > _active_boundary_ics;
   /// Initial conditions: [var name] -> [boundary_id] -> initial condition (only 1 IC per boundary)
-  std::map<std::string, std::map<BoundaryID, InitialCondition *> > _boundary_ics;
+  std::map<std::string, std::map<BoundaryID, MooseSharedPointer<InitialCondition> > > _boundary_ics;
 
   /// Initial conditions: [var name] -> initial condition
-  std::map<std::string, ScalarInitialCondition *> _scalar_ics;
+  std::map<std::string, MooseSharedPointer<ScalarInitialCondition> > _scalar_ics;
   /// Active scalar ICs
   std::vector<ScalarInitialCondition *> _active_scalar_ics;
 

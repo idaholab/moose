@@ -122,7 +122,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _Re_time(addVector("Re_time", false, GHOSTED)),
     _Re_non_time(addVector("Re_non_time", false, GHOSTED)),
     _increment_vec(NULL),
-    _preconditioner(NULL),
     _pc_side(Moose::PCS_RIGHT),
     _use_finite_differenced_preconditioner(false),
     _have_decomposition(false),
@@ -138,7 +137,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _n_linear_iters(0),
     _n_residual_evaluations(0),
     _final_residual(0.),
-    _predictor(NULL),
     _computing_initial_residual(false),
     _print_all_var_norms(false)
 {
@@ -169,8 +167,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
 
 NonlinearSystem::~NonlinearSystem()
 {
-  delete _preconditioner;
-  delete _predictor;
   delete &_serialized_solution;
   delete &_residual_copy;
 }
@@ -436,7 +432,7 @@ void
 NonlinearSystem::setupSplitBasedPreconditioner()
 {
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-   SplitBasedPreconditioner* sbp = dynamic_cast<SplitBasedPreconditioner*>(_preconditioner);
+  SplitBasedPreconditioner* sbp = dynamic_cast<SplitBasedPreconditioner*>(_preconditioner.get());
   sbp->setup();
 
 #if defined(LIBMESH_ENABLE_BLOCKED_STORAGE)
@@ -738,7 +734,7 @@ void
 NonlinearSystem::setInitialSolution()
 {
   NumericVector<Number> & initial_solution(solution());
-  if (_predictor != NULL)
+  if (_predictor.get())
   {
     _predictor->apply(initial_solution);
     _fe_problem.predictorCleanup(initial_solution);
@@ -774,7 +770,7 @@ NonlinearSystem::setInitialSolution()
     setConstraintSlaveValues(initial_solution, true);
 }
 
-void NonlinearSystem::setPredictor(Predictor * predictor)
+void NonlinearSystem::setPredictor(MooseSharedPointer<Predictor> predictor)
 {
   _predictor = predictor;
 }
@@ -2068,7 +2064,7 @@ NonlinearSystem::serializedSolution()
 }
 
 void
-NonlinearSystem::setPreconditioner(MoosePreconditioner *pc)
+NonlinearSystem::setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc)
 {
   if (_preconditioner != NULL)
     mooseError("More than one active Preconditioner detected");

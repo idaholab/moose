@@ -45,7 +45,7 @@ SetupTimeStepperAction::act()
 
     _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem;
     _moose_object_pars.set<Transient *>("_executioner") = transient;
-    TimeStepper * ts = static_cast<TimeStepper *>(_factory.create(_type, "TimeStepper", _moose_object_pars));
+    MooseSharedPointer<TimeStepper> ts = MooseSharedNamespace::static_pointer_cast<TimeStepper>(_factory.create_shared_ptr(_type, "TimeStepper", _moose_object_pars));
     transient->setTimeStepper(ts);
   }
 }
