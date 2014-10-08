@@ -39,13 +39,13 @@ CHPFCRFFSplitVariablesAction::CHPFCRFFSplitVariablesAction(const std::string & n
 void
 CHPFCRFFSplitVariablesAction::act()
 {
-  std::vector<MooseEnum> execute_options = SetupInterface::getExecuteOptions();
-  execute_options[0] = "timestep_begin";
+  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
+  execute_options = "timestep_begin";
 
   // Setup MultiApp
   InputParameters poly_params = _factory.getValidParams("TransientMultiApp");
   poly_params.set<MooseEnum>("app_type") = "MarmotApp";
-  poly_params.set<std::vector<MooseEnum> >("execute_on") = execute_options;
+  poly_params.set<MultiMooseEnum>("execute_on") = execute_options;
   poly_params.set<std::vector<std::string> >("input_files") = _sub_filenames;
   poly_params.set<unsigned int>("max_procs_per_app") = 1;
 
@@ -60,7 +60,7 @@ CHPFCRFFSplitVariablesAction::act()
 
   poly_params = _factory.getValidParams("MultiAppNearestNodeTransfer");
   poly_params.set<MooseEnum>("direction") = "to_multiapp";
-  poly_params.set<std::vector<MooseEnum> >("execute_on") = execute_options;
+  poly_params.set<MultiMooseEnum>("execute_on") = execute_options;
   poly_params.set<AuxVariableName>("variable") = _n_name;
   poly_params.set<VariableName>("source_variable") = _n_name;
   poly_params.set<MultiAppName>("multi_app") = "HHEquationSolver";
