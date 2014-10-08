@@ -33,14 +33,14 @@ std::ostream &
 operator<< (std::ostream & os, const ExpressionBuilder::EBTerm & term)
 {
   return os << *(term.root);
-};
+}
 
 
 std::string
 ExpressionBuilder::EBSymbolNode::stringify() const
 {
   return symbol;
-};
+}
 
 std::string
 ExpressionBuilder::EBUnaryFuncTermNode::stringify() const
@@ -49,7 +49,7 @@ ExpressionBuilder::EBUnaryFuncTermNode::stringify() const
   std::ostringstream s;
   s << ufunc[type] << '(' << *subnode << ')';
   return s.str();
-};
+}
 
 std::string
 ExpressionBuilder::EBUnaryOpTermNode::stringify() const
@@ -65,7 +65,7 @@ ExpressionBuilder::EBUnaryOpTermNode::stringify() const
     s << *subnode;
 
   return s.str();
-};
+}
 
 std::string
 ExpressionBuilder::EBBinaryFuncTermNode::stringify() const
@@ -74,7 +74,7 @@ ExpressionBuilder::EBBinaryFuncTermNode::stringify() const
   std::ostringstream s;
   s << bfunc[type] << '(' << *left << ',' << *right << ')';
   return s.str();
-};
+}
 
 std::string
 ExpressionBuilder::EBBinaryOpTermNode::stringify() const
@@ -100,7 +100,7 @@ ExpressionBuilder::EBBinaryOpTermNode::stringify() const
     s << *right;
 
   return s.str();
-};
+}
 
 int
 ExpressionBuilder::EBBinaryOpTermNode::precedence() const
