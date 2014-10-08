@@ -3,6 +3,7 @@
 
 #include "GeneralUserObject.h"
 #include "Function.h"
+#include "ZeroInterface.h"
 
 class SolidMaterialProperties;
 
@@ -12,7 +13,9 @@ InputParameters validParams<SolidMaterialProperties>();
 /**
  *
  */
-class SolidMaterialProperties : public GeneralUserObject
+class SolidMaterialProperties :
+  public GeneralUserObject,
+  public ZeroInterface
 {
 public:
   SolidMaterialProperties(const std::string & name, InputParameters parameters);
@@ -27,12 +30,19 @@ public:
   Real rho(Real temp) const;
 
 protected:
-  Function * _k;
   const Real & _k_const;
-  Function * _Cp;
   const Real & _Cp_const;
-  Function * _rho;
   const Real & _rho_const;
+
+  Function * _k;
+  Function * _Cp;
+  Function * _rho;
+
+  /**
+   * Helper function so we can avoid calling getParam on parameters
+   * before they are valid.
+   */
+  const Real & setConstRefParam(std::string get_string, std::string set_string);
 };
 
 

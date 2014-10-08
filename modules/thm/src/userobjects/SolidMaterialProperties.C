@@ -24,32 +24,17 @@ InputParameters validParams<SolidMaterialProperties>()
 
 SolidMaterialProperties::SolidMaterialProperties(const std::string & name, InputParameters parameters) :
     GeneralUserObject(name, parameters),
-    _k(NULL),
-    _k_const(getParam<Real>("thermal_conductivity")),
-    _Cp(NULL),
-    _Cp_const(getParam<Real>("specific_heat")),
-    _rho(NULL),
-    _rho_const(getParam<Real>("density"))
+    ZeroInterface(parameters),
+    _k_const(setConstRefParam("k", "thermal_conductivity")),
+    _Cp_const(setConstRefParam("Cp", "specific_heat")),
+    _rho_const(setConstRefParam("rho", "density")),
+    _k(_k_const==0 ? &getFunctionByName(getParam<std::string>("k")) : NULL),
+    _Cp(_Cp_const==0 ? &getFunctionByName(getParam<std::string>("Cp")) : NULL),
+    _rho(_rho_const==0 ? &getFunctionByName(getParam<std::string>("rho")) : NULL)
 {
-  std::string s;
-
-  s = getParam<std::string>("k");
-  if (isNumber(s))
-    this->parameters().set<Real>("thermal_conductivity") = toNumber(s);
-  else
-    _k = &getFunctionByName(s);
-
-  s = getParam<std::string>("Cp");
-  if (isNumber(s))
-    this->parameters().set<Real>("specific_heat") = toNumber(s);
-  else
-    _Cp = &getFunctionByName(s);
-
-  s = getParam<std::string>("rho");
-  if (isNumber(s))
-    this->parameters().set<Real>("density") = toNumber(s);
-  else
-    _rho = &getFunctionByName(s);
+  mooseAssert(_k || _k_const != 0, "Thermal conductivity should never be zero");
+  mooseAssert(_Cp || _Cp_const != 0, "Specific heat should never be zero");
+  mooseAssert(_rho || _rho_const != 0, "Density should never be zero");
 }
 
 SolidMaterialProperties::~SolidMaterialProperties()
@@ -96,4 +81,21 @@ SolidMaterialProperties::rho(Real temp) const
     return _rho->value(temp, Point());
   else
     return _rho_const;
+}
+
+const Real &
+SolidMaterialProperties::setConstRefParam(std::string get_string, std::string set_string)
+{
+  std::string s = getParam<std::string>(get_string);
+  if (isNumber(s))
+    {
+      this->parameters().set<Real>(set_string) = toNumber(s);
+      return getParam<Real>(set_string);
+    }
+  else
+    {
+      // We won't be using whatever the value of _XYZ_const is, so set
+      // the reference value to _real_zero
+      return _real_zero;
+    }
 }
