@@ -246,9 +246,6 @@ FEProblem::~FEProblem()
     delete _material_data[i];
     delete _bnd_material_data[i];
     delete _neighbor_material_data[i];
-
-    for (std::map<std::string, Function *>::iterator it = _functions[i].begin(); it != _functions[i].end(); ++it)
-      delete it->second;
   }
 
   delete _displaced_problem;
@@ -392,7 +389,7 @@ void FEProblem::initialSetup()
 
   // Call the initialSetup methods for functions
   for (unsigned int i=0; i<n_threads; i++)
-    for (std::map<std::string, Function *>::iterator vit = _functions[i].begin(); vit != _functions[i].end(); ++vit)
+    for (std::map<std::string, MooseSharedPointer<Function> >::iterator vit = _functions[i].begin(); vit != _functions[i].end(); ++vit)
       vit->second->initialSetup();
 
   if (!_app.isRecovering())
@@ -587,7 +584,7 @@ void FEProblem::timestepSetup()
   {
     _materials[i].timestepSetup();
 
-    for (std::map<std::string, Function *>::iterator vit = _functions[i].begin();
+    for (std::map<std::string, MooseSharedPointer<Function> >::iterator vit = _functions[i].begin();
         vit != _functions[i].end();
         ++vit)
       vit->second->timestepSetup();
@@ -1147,11 +1144,11 @@ FEProblem::addFunction(std::string type, const std::string & name, InputParamete
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<THREAD_ID>("_tid") = tid;
-    Function * func = static_cast<Function *>(_factory.create(type, name, parameters));
+    MooseSharedPointer<Function> func = MooseSharedNamespace::static_pointer_cast<Function>(_factory.create_shared_ptr(type, name, parameters));
     if (_functions[tid].find(name) != _functions[tid].end())
       mooseError("Duplicate function name added to FEProblem: " << name);
     _functions[tid][name] = func;
-    _objects_by_name[tid][name].push_back(func);
+    _objects_by_name[tid][name].push_back(func.get());
   }
 }
 
@@ -3232,7 +3229,7 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   {
     _materials[i].residualSetup();
 
-    for (std::map<std::string, Function *>::iterator vit = _functions[i].begin();
+    for (std::map<std::string, MooseSharedPointer<Function> >::iterator vit = _functions[i].begin();
         vit != _functions[i].end();
         ++vit)
       vit->second->residualSetup();
@@ -3277,7 +3274,7 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     {
       _materials[i].jacobianSetup();
 
-      for (std::map<std::string, Function *>::iterator vit = _functions[i].begin();
+      for (std::map<std::string, MooseSharedPointer<Function> >::iterator vit = _functions[i].begin();
           vit != _functions[i].end();
           ++vit)
         vit->second->jacobianSetup();
