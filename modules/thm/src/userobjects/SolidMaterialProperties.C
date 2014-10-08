@@ -15,7 +15,7 @@ InputParameters validParams<SolidMaterialProperties>()
   params.addPrivateParam<Real>("specific_heat", 0.0);
   params.addPrivateParam<Real>("density", 0.0);
 
-  params.addPrivateParam<std::vector<MooseEnum> >("execute_on");
+  params.addPrivateParam<MultiMooseEnum>("execute_on");
   params.addPrivateParam<bool>("use_displaced_mesh");
   params.registerBase("MaterialProperties");
 
