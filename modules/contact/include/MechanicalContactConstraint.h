@@ -45,7 +45,14 @@ public:
 
   virtual Real computeQpResidual(Moose::ConstraintType type);
 
+  /**
+   * Computes the jacobian for the current element.
+   */
+  virtual void computeJacobian();
+
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
+
+  virtual bool addCouplingEntriesToJacobian() { return _master_slave_jacobian; }
 
   bool shouldApply();
   void computeContactForce(PenetrationInfo * pinfo);
@@ -80,6 +87,8 @@ protected:
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;
   const NumericVector<Number> * _aux_solution;
+
+  const bool _master_slave_jacobian;
 };
 
 #endif

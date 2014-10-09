@@ -584,7 +584,8 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
   {
     mooseError("Unknown type of Constraint object");
   }
-  addImplicitGeometricCouplingEntriesToJacobian(true);
+  if (constraint.get() != NULL && constraint.get()->addCouplingEntriesToJacobian())
+    addImplicitGeometricCouplingEntriesToJacobian(true);
 }
 
 void
@@ -1464,10 +1465,12 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
                 _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
                 // Cache the jacobian block for the master side
-                _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne, nfc->masterVariable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
+                if (nfc->addCouplingEntriesToJacobian())
+                  _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne, nfc->masterVariable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
                 _fe_problem.cacheJacobian(0);
-                _fe_problem.cacheJacobianNeighbor(0);
+                if (nfc->addCouplingEntriesToJacobian())
+                  _fe_problem.cacheJacobianNeighbor(0);
 
                 // Do the off-diagonals next
                 const std::vector<MooseVariable *> coupled_vars = nfc->getCoupledMooseVars();
@@ -1480,7 +1483,8 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
                     continue;
 
                   // Only compute Jacobian entries if this coupling is being used by the preconditioner
-                  if (!_fe_problem.areCoupled(nfc->variable().number(), jvar.number()))
+                  if (nfc->variable().number() == jvar.number() ||
+                      !_fe_problem.areCoupled(nfc->variable().number(), jvar.number()))
                     continue;
 
                   // Need to zero out the matrices first
@@ -1495,10 +1499,12 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
                   _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
                   // Cache the jacobian block for the master side
-                  _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne, nfc->variable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
+                  if (nfc->addCouplingEntriesToJacobian())
+                    _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne, nfc->variable().dofIndicesNeighbor(), nfc->_connected_dof_indices, nfc->variable().scalingFactor());
 
                   _fe_problem.cacheJacobian(0);
-                  _fe_problem.cacheJacobianNeighbor(0);
+                  if (nfc->addCouplingEntriesToJacobian())
+                    _fe_problem.cacheJacobianNeighbor(0);
                 }
               }
             }
