@@ -89,11 +89,25 @@
     expect_err = 'The SolutionUserObject contains multiple variables, \w+'
   [../]
 
-  [./scaled_solution]
+  [./solution_aux_scale_build]
+    # Builds the solution file to be read by solution_aux_scale test
+    type = 'Exodiff'
+    input = 'solution_aux_scale_build.i'
+    exodiff = 'solution_aux_scale_build_out.e'
+  [../]
+
+  [./solution_aux_scale]
     type = 'Exodiff'
     input = 'solution_aux_scale.i'
     exodiff = 'solution_aux_scale_out.e'
-    allow_warnings = true
+    prereq = 'solution_aux_scale_build'
+  [../]
+
+  [./output_error]
+    type = 'RunException'
+    input = 'output_error.i'
+    expect_err = "Failed to access the data for variable 'u' at point"
+    prereq = 'solution_aux_scale_build'
   [../]
 
   [./aux_nonlinear_solution]
