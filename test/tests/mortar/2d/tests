@@ -5,6 +5,7 @@
     exodiff = 'conforming_out.e'
     max_parallel = 1
     max_threads = 1
+    compiler = 'GCC CLANG'
   [../]
 
   [./non-conforming]
@@ -22,6 +23,7 @@
     exodiff = 'conforming-2nd-order_out.e'
     max_parallel = 1
     max_threads = 1
+    compiler = 'GCC CLANG'
   [../]
 
   [./non-conforming-2nd-order]
