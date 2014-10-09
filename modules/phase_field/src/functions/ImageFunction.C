@@ -275,11 +275,7 @@ ImageFunction::vtkMagnitude()
 
   // Apply the greyscale filtering
   _magnitude_filter = vtkSmartPointer<vtkImageMagnitude>::New();
-#if VTK_MAJOR_VERSION < 6
-  _magnitude_filter->SetInput(_data);
-#else
   _magnitude_filter->SetInputConnection(_algorithm);
-#endif
   _magnitude_filter->Update();
 
   // Update the pointers
@@ -305,11 +301,7 @@ ImageFunction::vtkShiftAndScale()
   _shift_scale_filter = vtkSmartPointer<vtkImageShiftScale>::New();
   _shift_scale_filter->SetOutputScalarTypeToDouble();
 
-#if VTK_MAJOR_VERSION < 6
-  _shift_scale_filter->SetInput(_data);
-#else
   _shift_scale_filter->SetInputConnection(_algorithm);
-#endif
   _shift_scale_filter->SetShift(shift);
   _shift_scale_filter->SetScale(scale);
   _shift_scale_filter->Update();
@@ -336,11 +328,7 @@ ImageFunction::vtkThreshold()
   _image_threshold = vtkSmartPointer<vtkImageThreshold>::New();
 
   // Set the data source
-#if VTK_MAJOR_VERSION < 6
-  _image_threshold->SetInput(_data);
-#else
   _image_threshold->SetInputConnection(_algorithm);
-#endif
 
   // Setup the thresholding options
   _image_threshold->ThresholdByUpper(getParam<Real>("threshold"));
@@ -391,11 +379,7 @@ ImageFunction::imageFlip(const int & axis)
   flip_image->SetFilteredAxis(axis);
 
   // Set the data source
-#if VTK_MAJOR_VERSION < 6
-  flip_image->SetInput(_data);
-#else
   flip_image->SetInputConnection(_algorithm);
-#endif
 
   // Perform the flip
   flip_image->Update();
