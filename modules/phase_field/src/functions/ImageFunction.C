@@ -60,6 +60,7 @@ ImageFunction::ImageFunction(const std::string & name, InputParameters parameter
     Function(name, parameters),
 #ifdef LIBMESH_HAVE_VTK
     _data(NULL),
+    _algorithm(NULL),
 #endif
     _file_base(getParam<FileName>("file_base")),
     _file_type(getParam<MooseEnum>("file_type"))
@@ -274,14 +275,16 @@ ImageFunction::vtkMagnitude()
 
   // Apply the greyscale filtering
   _magnitude_filter = vtkSmartPointer<vtkImageMagnitude>::New();
-#if VTK_MAJOR_VERSION <= 5
+#if VTK_MAJOR_VERSION < 6
   _magnitude_filter->SetInput(_data);
 #else
-  _magnitude_filter->SetInputData(_data);
+  _magnitude_filter->SetInputConnection(_algorithm);
 #endif
   _magnitude_filter->Update();
 
+  // Update the pointers
   _data = _magnitude_filter->GetOutput();
+  _algorithm = _magnitude_filter->GetOutputPort();
 #endif
 }
 
@@ -302,15 +305,18 @@ ImageFunction::vtkShiftAndScale()
   _shift_scale_filter = vtkSmartPointer<vtkImageShiftScale>::New();
   _shift_scale_filter->SetOutputScalarTypeToDouble();
 
-#if VTK_MAJOR_VERSION <= 5
+#if VTK_MAJOR_VERSION < 6
   _shift_scale_filter->SetInput(_data);
 #else
-  _shift_scale_filter->SetInputData(_data);
+  _shift_scale_filter->SetInputConnection(_algorithm);
 #endif
   _shift_scale_filter->SetShift(shift);
   _shift_scale_filter->SetScale(scale);
   _shift_scale_filter->Update();
+
+  // Update the pointers
   _data = _shift_scale_filter->GetOutput();
+  _algorithm = _shift_scale_filter->GetOutputPort();
 #endif
 }
 
@@ -333,7 +339,7 @@ ImageFunction::vtkThreshold()
 #if VTK_MAJOR_VERSION < 6
   _image_threshold->SetInput(_data);
 #else
-  _image_threshold->SetInputData(_data);
+  _image_threshold->SetInputConnection(_algorithm);
 #endif
 
   // Setup the thresholding options
@@ -346,7 +352,10 @@ ImageFunction::vtkThreshold()
 
   // Perform the thresholding
   _image_threshold->Update();
+
+  // Update the pointers
   _data = _image_threshold->GetOutput();
+  _algorithm = _image_threshold->GetOutputPort();
 #endif
 }
 
@@ -354,25 +363,21 @@ void
 ImageFunction::vtkFlip()
 {
 #ifdef LIBMESH_HAVE_VTK
-  // x-axis
-  if (getParam<bool>("flip_x"))
-  {
-    _flip_filter_x = imageFlip(0);
-    _data = _flip_filter_x->GetOutput();
-  }
+  // Convert boolean values into an integer array, then loop over it
+  int mask[3] = {getParam<bool>("flip_x"),
+                 getParam<bool>("flip_y"),
+                 getParam<bool>("flip_z")};
 
-  // y-axis
-  if (getParam<bool>("flip_y"))
+  for (int dim=0; dim<3; ++dim)
   {
-    _flip_filter_y = imageFlip(1);
-    _data = _flip_filter_y->GetOutput();
-  }
+    if (mask[dim])
+    {
+      _flip_filter = imageFlip(dim);
 
-  // z-axis
-  if (getParam<bool>("flip_z"))
-  {
-    _flip_filter_z = imageFlip(2);
-    _data = _flip_filter_z->GetOutput();
+      // Update pointers
+      _data = _flip_filter->GetOutput();
+      _algorithm = _flip_filter->GetOutputPort();
+    }
   }
 #endif
 }
@@ -383,15 +388,16 @@ ImageFunction::imageFlip(const int & axis)
 {
   vtkSmartPointer<vtkImageFlip> flip_image = vtkSmartPointer<vtkImageFlip>::New();
 
+  flip_image->SetFilteredAxis(axis);
+
   // Set the data source
 #if VTK_MAJOR_VERSION < 6
   flip_image->SetInput(_data);
 #else
-  flip_image->SetInputData(_data);
+  flip_image->SetInputConnection(_algorithm);
 #endif
 
   // Perform the flip
-  flip_image->SetFilteredAxis(axis);
   flip_image->Update();
 
   // Return the flip filter pointer
