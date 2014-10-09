@@ -71,6 +71,7 @@ InputParameters validParams<MooseApp>()
 
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
+  params.addPrivateParam<MooseSharedPointer<Parallel::Communicator> >("_comm");
 
   return params;
 }
@@ -87,10 +88,10 @@ void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos
 }
 
 MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
-    ParallelObject(*parameters.get<Parallel::Communicator *>("_comm")), // Can't call getParam() before pars is set
+    ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
     _name(name),
     _pars(parameters),
-    _comm(getParam<Parallel::Communicator *>("_comm")),
+    _comm(getParam<MooseSharedPointer<Parallel::Communicator> >("_comm")),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
@@ -137,9 +138,6 @@ MooseApp::~MooseApp()
 
   // MUST be deleted before _comm is destroyed!
   delete _output_warehouse;
-
-  // Note: Communicator MUST be destroyed last because everything else is using it!
-  delete _comm;
 }
 
 void
