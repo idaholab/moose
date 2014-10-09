@@ -107,7 +107,7 @@
     type = 'RunException'
     input = 'output_error.i'
     expect_err = "Failed to access the data for variable 'u' at point"
-    prereq = 'solution_aux_scale_build'
+    prereq = 'build'
   [../]
 
   [./aux_nonlinear_solution]
