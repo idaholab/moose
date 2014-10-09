@@ -32,6 +32,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_system_information_out'
     check_files = 'console_file_system_information_out.txt'
     file_expect_out = 'Num\s*DOFs:\s*242'
+    recover = false
   [../]
   [./file_postprocessor]
     # Test that file contains regex
@@ -40,6 +41,7 @@
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/file_base=console_file_postprocessor_out'
     check_files = 'console_file_postprocessor_out.txt'
     file_expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
+    recover = false
   [../]
   [./file_scalar_aux]
     # Test that file contains regex

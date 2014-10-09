@@ -592,10 +592,10 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
         std::istringstream iss(vars[j]);
         iss.seekg(short_name.size() + 1);
 
-        int index;
+        size_t index;
         if (iss >> index)
         {
-          if (index < 0 || index >= value.size())
+          if (index >= value.size())
           {
             oss << "Error parsing expression: " << _range_functions[short_name] << "\nOut of range variable " << vars[j] << '\n';
             return;
