@@ -28,12 +28,13 @@ InputParameters validParams<ImageFunction>()
   // Define the general parameters
   InputParameters params = validParams<Function>();
   params.addParam<FileName>("file", "Image to open, utilize this option when a single file is given");
-  params.addParam<FileName>("file_base", "Image file base to open, use this option when a stack of images must be read (ignord if 'file' is given)");
+  params.addParam<FileName>("file_base", "Image file base to open, use this option when a stack of images must be read (ignored if 'file' is given)");
   params.addParam<MooseEnum>("file_type", type, "Image file type, use this to specify the type of file for an image stack (use with 'file_base'; ignored if 'file' is given)");
   params.addParam<std::vector<unsigned int> >("file_range", "Range of images to analyze, used with 'file_base' (ignored if 'file' is given)");
-  params.addParam<Point>("origin", "Origin of the image (defualts to mesh origin)");
+  params.addParam<Point>("origin", "Origin of the image (defaults to mesh origin)");
   params.addParam<Point>("dimensions", "x,y,z dimensions of the image (defaults to mesh dimensions)");
-  params.addParam<unsigned int>("component", "The image component to return, leaving this blank will result in a greyscale value for the image to be created. The component number is zero based, i.e. 0 returns the first component of the image");
+  params.addParam<unsigned int>("component", "The image component to return, leaving this blank will result in a greyscale value "
+                                             "for the image to be created. The component number is zero based, i.e. 0 returns the first component of the image");
 
   // Shift and Scale (application of these occurs prior to threshold)
   params.addParam<double>("shift", 0, "Value to add to all pixels; occurs prior to scaling");
@@ -88,7 +89,7 @@ ImageFunction::initialSetup()
     mooseError("Un-supported file type '" << _file_type << "'");
 
   // Set the component parameter
-  /* If the parameter is not set then vtkMagnitude() will applied */
+  // If the parameter is not set then vtkMagnitude() will applied
   if (isParamValid("component"))
   {
     unsigned int n = _data->GetNumberOfScalarComponents();
@@ -120,7 +121,7 @@ ImageFunction::value(Real /*t*/, const Point & p)
   if (!_bounding_box.contains_point(p))
     return 0.0;
 
-  // Deterimine pixel coordinates
+  // Determine pixel coordinates
   std::vector<int> x(3,0);
   for (int i = 0; i < LIBMESH_DIM; ++i)
   {
@@ -194,10 +195,10 @@ ImageFunction::initImageData()
       _file_range.push_back(_file_range[0]);
 
     if (_file_range.size() != 2)
-      mooseError("Image range must specify one or two interger values");
+      mooseError("Image range must specify one or two integer values");
 
     if (_file_range[1] < _file_range[0])
-      mooseError("Image range must specify exactly two interger values, with the second larger than the first");
+      mooseError("Image range must specify exactly two integer values, with the second larger than the first");
   }
   else
   {
@@ -240,7 +241,7 @@ ImageFunction::getFiles()
     // Loop through the files in the directory
     for (int i = 0; i < dir.n_files; i++)
     {
-      // Upate the current file
+      // Update the current file
       tinydir_file file;
       tinydir_readfile_n(&dir, &file, i);
 
