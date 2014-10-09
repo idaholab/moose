@@ -44,8 +44,8 @@ InputParameters validParams<SolutionUserObject>()
   params.addParam<int>("timestep", -1, "Index of the single timestep used (exodusII only).  If not supplied, time interpolation will occur.");
 
   // Add ability to perform coordinate transformation: scale, factor
-  params.addParam<std::vector<Real> >("coord_scale", "This name has been deprecated.  Please use scale instead");
-  params.addParam<std::vector<Real> >("coord_factor", "This name has been deprecated.  Please use translation instead");
+  params.addDeprecatedParam<std::vector<Real> >("coord_scale", "This name has been deprecated.",  "Please use scale instead");
+  params.addDeprecatedParam<std::vector<Real> >("coord_factor", "This name has been deprecated.",  "Please use translation instead");
   params.addParam<std::vector<Real> >("scale", std::vector<Real>(LIBMESH_DIM,1), "Scale factor for points in the simulation");
   params.addParam<std::vector<Real> >("scale_multiplier", std::vector<Real>(LIBMESH_DIM,1), "Scale multiplying factor for points in the simulation");
   params.addParam<std::vector<Real> >("translation", std::vector<Real>(LIBMESH_DIM,0), "Translation factors for x,y,z coordinates of the simulation");
@@ -626,6 +626,14 @@ SolutionUserObject::evalMeshFunction(const Point & p, std::string var_name, unsi
 
   // Extract the variable index for the MeshFunction(s), must use iterator b/c of const
   std::map<std::string, unsigned int>::const_iterator it = _local_variable_index.find(var_name);
+
+  // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
+  if (output.size() == 0)
+  {
+    std::ostringstream oss;
+    p.print(oss);
+    mooseError("Failed to access the data for variable '"<< var_name << "' at point " << oss.str() << " in the '" << _name << "' SolutionUserObject");
+  }
   return output(it->second);
 }
 
