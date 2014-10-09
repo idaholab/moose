@@ -15,7 +15,7 @@
     type = ImageFunction
     file_base = stack/test
     file_type = png
-    file_range = 00
+    file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
     threshold = 2.7e4
     upper_value = 1
     lower_value = -1

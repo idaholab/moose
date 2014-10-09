@@ -39,14 +39,14 @@
     type = ImageFunction
     file_base = stack/test
     flip_y = true
-    file_range = 00
+    file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
     origin = '0 0 0'
     dimensions = '1 1 0'
   [../]
   [./top_left]
     type = ImageFunction
     file_base = stack/test
-    file_range = 00
+    file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
     origin = '0 1 0'
     dimensions = '1 1 0'
     flip_x = true
@@ -56,14 +56,14 @@
     origin = '1 1 0'
     file_base = stack/test
     flip_y = true
-    file_range = 00
+    file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
     dimensions = '1 1 0'
   [../]
   [./bottom_right]
     type = ImageFunction
     origin = '1 0 0'
     file_base = stack/test
-    file_range = 00
+    file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
     dimensions = '1 1 0'
   [../]
 []
