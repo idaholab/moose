@@ -3266,7 +3266,7 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     execTransfers(EXEC_JACOBIAN);
     execMultiApps(EXEC_JACOBIAN);
 
-    computeUserObjects(EXEC_JACOBIAN);
+    computeUserObjects(EXEC_JACOBIAN, UserObjectWarehouse::PRE_AUX);
 
     if (_displaced_problem != NULL)
       _displaced_problem->updateMesh(soln, *_aux.currentSolution());
@@ -3283,11 +3283,9 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
     _aux.jacobianSetup();
 
-    // TODO: This can be made more efficient if we group the kernels together in a single group to be
-    //       executed.  If the user has both Residual and Jacobian aux kernels, we are looping over both
-    //       groups separately.
-    _aux.compute();
     _aux.compute(EXEC_JACOBIAN);
+
+    computeUserObjects(EXEC_JACOBIAN, UserObjectWarehouse::POST_AUX);
 
     _nl.computeJacobian(jacobian);
 
