@@ -203,7 +203,7 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
   InputParameters & object_params = action->getObjectParams();
   object_params.set<std::string>("property") = property_name;
   object_params.set<AuxVariableName>("variable") = variable_name;
-  object_params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+  object_params.set<MultiMooseEnum>("execute_on") = "timestep";
 
   if (material->boundaryRestricted())
     object_params.set<std::vector<BoundaryName> >("boundary") = material->boundaryNames();

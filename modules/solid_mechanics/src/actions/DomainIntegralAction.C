@@ -132,7 +132,7 @@ DomainIntegralAction::act()
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
-    params.set<std::vector<MooseEnum> >("execute_on")[0] = "initial";
+    params.set<MultiMooseEnum>("execute_on") = "initial";
     params.set<MooseEnum>("crack_direction_method") = _direction_method_moose_enum;
     params.set<MooseEnum>("crack_end_direction_method") = _end_direction_method_moose_enum;
     if (_have_crack_direction_vector)
@@ -181,7 +181,7 @@ DomainIntegralAction::act()
   {
     const std::string ak_type_name("DomainIntegralQFunction");
     InputParameters params = _factory.getValidParams(ak_type_name);
-    params.set<std::vector<MooseEnum> >("execute_on")[0] = "initial";
+    params.set<MultiMooseEnum>("execute_on") = "initial";
     params.set<UserObjectName>("crack_front_definition") = uo_name;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
@@ -224,7 +224,7 @@ DomainIntegralAction::act()
         pp_base_name = "J";
       const std::string pp_type_name("JIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("convert_J_to_K") = _convert_J_to_K;
       if (_convert_J_to_K)
@@ -265,7 +265,7 @@ DomainIntegralAction::act()
       const std::string pp_base_name("II");
       const std::string pp_type_name("InteractionIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
@@ -314,7 +314,7 @@ DomainIntegralAction::act()
       const std::string pp_base_name("II");
       const std::string pp_type_name("InteractionIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
@@ -363,7 +363,7 @@ DomainIntegralAction::act()
       const std::string pp_base_name("II");
       const std::string pp_type_name("InteractionIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
@@ -412,7 +412,7 @@ DomainIntegralAction::act()
       const std::string ov_base_name(_output_variables[i]);
       const std::string pp_type_name("CrackFrontData");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       if (_treat_as_2d)
       {

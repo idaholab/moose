@@ -17,7 +17,7 @@
 
 #include "ExecStore.h"
 #include "MooseTypes.h"
-#include "MooseEnum.h"
+#include "MultiMooseEnum.h"
 
 // libMesh
 #include "libmesh/enum_order.h"
@@ -53,10 +53,10 @@ namespace Moose {
 
   // Vector conversions
   template<typename T>
-  std::vector<T> vectorStringsToEnum(const std::vector<MooseEnum> & v);
+  std::vector<T> vectorStringsToEnum(const MultiMooseEnum & v);
 
   template<>
-  std::vector<ExecFlagType> vectorStringsToEnum<ExecFlagType>(const std::vector<MooseEnum> & v);
+  std::vector<ExecFlagType> vectorStringsToEnum<ExecFlagType>(const MultiMooseEnum & v);
 
   // conversion to string
   template<typename T>

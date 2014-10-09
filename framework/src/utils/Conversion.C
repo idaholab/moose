@@ -211,7 +211,7 @@ namespace Moose {
   }
 
   template<>
-  std::vector<ExecFlagType> vectorStringsToEnum<ExecFlagType>(const std::vector<MooseEnum> & v)
+  std::vector<ExecFlagType> vectorStringsToEnum<ExecFlagType>(const MultiMooseEnum & v)
   {
     std::vector<ExecFlagType> exec_flags(v.size());
     for (unsigned int i=0; i<v.size(); ++i)

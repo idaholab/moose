@@ -7,7 +7,7 @@ InputParameters validParams<NodalArea>()
 {
   InputParameters params = validParams<SideIntegralVariableUserObject>();
 
-  params.set<std::vector<MooseEnum> >("execute_on")[0] = "residual";
+  params.set<MultiMooseEnum>("execute_on") = "residual";
   return params;
 }
 
