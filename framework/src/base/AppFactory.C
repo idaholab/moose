@@ -62,10 +62,9 @@ AppFactory::create(const std::string & obj_name, const std::string & name, Input
   // Check to make sure that all required parameters are supplied
   parameters.checkParams("");
 
-  // Note - this must be deleted by the Application
-  Parallel::Communicator * comm = new Parallel::Communicator(COMM_WORLD_IN);
+  MooseSharedPointer<Parallel::Communicator> comm(new Parallel::Communicator(COMM_WORLD_IN));
 
-  parameters.set<Parallel::Communicator *>("_comm") = comm;
+  parameters.set<MooseSharedPointer<Parallel::Communicator> >("_comm") = comm;
 
   return (*_name_to_build_pointer[obj_name])(name, parameters);
 }

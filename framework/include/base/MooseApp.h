@@ -332,7 +332,7 @@ protected:
   InputParameters _pars;
 
   /// The MPI communicator this App is going to use
-  const Parallel::Communicator * _comm;
+  const MooseSharedPointer<Parallel::Communicator> _comm;
 
   /// Input file name used
   std::string _input_filename;
