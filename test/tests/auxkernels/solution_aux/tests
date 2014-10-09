@@ -6,13 +6,6 @@
     allow_warnings = true
   [../]
 
-  [./direct]
-    type = 'Exodiff'
-    input = 'solution_aux_direct.i'
-    exodiff = 'solution_aux_direct_out.e'
-    allow_warnings = true
-  [../]
-
   [./exodus]
     type = 'Exodiff'
     input = 'solution_aux_exodus.i'
@@ -90,7 +83,7 @@
   [../]
 
   [./solution_aux_scale_build]
-    # Builds the solution file to be read by solution_aux_scale test
+    # Builds the solution for solution_aux_scale
     type = 'Exodiff'
     input = 'solution_aux_scale_build.i'
     exodiff = 'solution_aux_scale_build_out.e'
@@ -100,6 +93,20 @@
     type = 'Exodiff'
     input = 'solution_aux_scale.i'
     exodiff = 'solution_aux_scale_out.e'
+    prereq = 'solution_aux_scale_build'
+  [../]
+
+  [./direct_build]
+    # Builds the solution for direct
+    type = 'Exodiff'
+    input = 'direct_build.i'
+    exodiff = 'direct_build_out.e'
+  [../]
+
+  [./direct]
+    type = 'Exodiff'
+    input = 'solution_aux_direct.i'
+    exodiff = 'solution_aux_direct_out.e'
     prereq = 'solution_aux_scale_build'
   [../]
 
