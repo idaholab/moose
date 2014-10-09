@@ -1,9 +1,23 @@
 [Tests]
+  [./build]
+    # Builds the solution for: test, direct, solution_aux_scale. output_error
+    type = 'Exodiff'
+    input = 'build.i'
+    exodiff = 'build_out.e'
+  [../]
+
   [./test]
     type = 'Exodiff'
     input = 'solution_aux.i'
     exodiff = 'solution_aux_out.e'
-    allow_warnings = true
+    prereq = 'build'
+  [../]
+
+  [./direct]
+    type = 'Exodiff'
+    input = 'solution_aux_direct.i'
+    exodiff = 'solution_aux_direct_out.e'
+    prereq = 'build'
   [../]
 
   [./exodus]
@@ -82,32 +96,11 @@
     expect_err = 'The SolutionUserObject contains multiple variables, \w+'
   [../]
 
-  [./solution_aux_scale_build]
-    # Builds the solution for solution_aux_scale
-    type = 'Exodiff'
-    input = 'solution_aux_scale_build.i'
-    exodiff = 'solution_aux_scale_build_out.e'
-  [../]
-
   [./solution_aux_scale]
     type = 'Exodiff'
     input = 'solution_aux_scale.i'
     exodiff = 'solution_aux_scale_out.e'
-    prereq = 'solution_aux_scale_build'
-  [../]
-
-  [./direct_build]
-    # Builds the solution for direct
-    type = 'Exodiff'
-    input = 'direct_build.i'
-    exodiff = 'direct_build_out.e'
-  [../]
-
-  [./direct]
-    type = 'Exodiff'
-    input = 'solution_aux_direct.i'
-    exodiff = 'solution_aux_direct_out.e'
-    prereq = 'solution_aux_scale_build'
+    prereq = 'build'
   [../]
 
   [./output_error]

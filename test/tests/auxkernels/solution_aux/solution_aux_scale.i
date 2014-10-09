@@ -44,8 +44,8 @@
 [UserObjects]
   [./xda_soln]
     type = SolutionUserObject
-    mesh = solution_aux_scale_build_out_0001_mesh.xda
-    es = solution_aux_scale_build_out_0001.xda
+    mesh = build_out_0001_mesh.xda
+    es = build_out_0001.xda
     system_variables = u
     scale = '3 2 1'
     translation = '1 1 0'

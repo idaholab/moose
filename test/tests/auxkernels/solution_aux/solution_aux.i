@@ -38,10 +38,9 @@
 [UserObjects]
   [./xda_soln]
     type = SolutionUserObject
-    mesh = out_0001_mesh.xda
-    es = out_0001.xda
-    system = AuxiliarySystem
-    system_variables = u_aux
+    mesh = build_out_0001_mesh.xda
+    es = build_out_0001.xda
+    system_variables = u
   [../]
 []
 
