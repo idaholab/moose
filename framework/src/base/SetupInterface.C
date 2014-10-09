@@ -20,11 +20,11 @@ InputParameters validParams<SetupInterface>()
 {
   InputParameters params = emptyInputParameters();
 
-  // Get an MooseEnum of the avaible 'execute_on' optoins
-  std::vector<MooseEnum> execute_options(SetupInterface::getExecuteOptions());
+  // Get an MooseEnum of the avaible 'execute_on' options
+  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
 
   // Add the 'execute_on' input parameter for users to set
-  params.addParam<std::vector<MooseEnum> >("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
+  params.addParam<MultiMooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
 
   return params;
 }
@@ -36,8 +36,8 @@ SetupInterface::SetupInterface(InputParameters & params)
    * Our way of dealing with this is by not having those particular classes add the this classes valid params to their own.  In
    * those cases it won't exist so we just set it to a default and ignore it.
    */
-  if (params.have_parameter<std::vector<MooseEnum> >("execute_on"))
-    _exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(params.get<std::vector<MooseEnum> >("execute_on"));
+  if (params.have_parameter<MultiMooseEnum>("execute_on"))
+    _exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(params.get<MultiMooseEnum>("execute_on"));
   else
     _exec_flags.push_back(EXEC_RESIDUAL);
 }
@@ -67,8 +67,8 @@ SetupInterface::execFlags() const
   return _exec_flags;
 }
 
-std::vector<MooseEnum>
+MultiMooseEnum
 SetupInterface::getExecuteOptions()
 {
-  return std::vector<MooseEnum>(1, MooseEnum("initial residual jacobian timestep timestep_begin custom", "residual"));
+  return MultiMooseEnum("initial residual jacobian timestep timestep_begin custom", "residual");
 }

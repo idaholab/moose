@@ -67,10 +67,10 @@ InputParameters validParams<MultiApp>()
   params.addPrivateParam<MPI_Comm>("_mpi_comm");
 
 
-  std::vector<MooseEnum> execute_options(SetupInterface::getExecuteOptions());
-  execute_options[0] = "timestep_begin";  // set the default
+  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
+  execute_options = "timestep_begin";  // set the default
 
-  params.addParam<std::vector<MooseEnum> >("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
+  params.addParam<MultiMooseEnum>("execute_on", execute_options, "Set to (residual|jacobian|timestep|timestep_begin|custom) to execute only at that moment");
 
   params.addParam<unsigned int>("max_procs_per_app", std::numeric_limits<unsigned int>::max(), "Maximum number of processors to give to each App in this MultiApp.  Useful for restricting small solves to just a few procs so they don't get spread out");
 
