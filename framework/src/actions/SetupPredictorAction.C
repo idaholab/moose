@@ -42,7 +42,7 @@ SetupPredictorAction::act()
     if (transient == NULL)
       mooseError("You can setup time stepper only with executioners of transient type.");
 
-    _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem;
+    _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
     _moose_object_pars.set<Transient *>("_executioner") = transient;
     MooseSharedPointer<Predictor> predictor = MooseSharedNamespace::static_pointer_cast<Predictor>(_factory.create_shared_ptr(_type, "Predictor", _moose_object_pars));
     _problem->getNonlinearSystem().setPredictor(predictor);

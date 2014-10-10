@@ -65,7 +65,7 @@ MaterialOutputAction::act()
 
   // Build on the problem for this action, this is what should happend for everything except coupled problems
   else
-    buildMaterialOutputObjects(_problem);
+    buildMaterialOutputObjects(_problem.get());
 }
 
 void

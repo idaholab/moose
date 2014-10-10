@@ -44,7 +44,6 @@ CoupledExecutioner::CoupledExecutioner(const std::string & name, InputParameters
 
 CoupledExecutioner::~CoupledExecutioner()
 {
-  delete _problem;
   for (unsigned int i = 0; i < _awhs.size(); i++)
   {
     _awhs[i]->clear();
@@ -171,7 +170,7 @@ CoupledExecutioner::build()
     _awhs[i]->executeAllActions();
     _owhs[i]->init();
     _executioners[i] = _awhs[i]->executioner();
-    _fe_problems[i] = _awhs[i]->problem();
+    _fe_problems[i] = _awhs[i]->problem().get();
   }
 
   // build an inverse map (problem ptr -> name)

@@ -43,7 +43,7 @@ SetupTimeStepperAction::act()
     if (transient == NULL)
       mooseError("You can setup time stepper only with executioners of transient type.");
 
-    _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem;
+    _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
     _moose_object_pars.set<Transient *>("_executioner") = transient;
     MooseSharedPointer<TimeStepper> ts = MooseSharedNamespace::static_pointer_cast<TimeStepper>(_factory.create_shared_ptr(_type, "TimeStepper", _moose_object_pars));
     transient->setTimeStepper(ts);
