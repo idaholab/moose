@@ -129,7 +129,7 @@ protected:
 public:
   MooseSharedPointer<FEProblem> & _problem;
   /// Convenience reference to an executioner
-  Executioner * & _executioner;
+  MooseSharedPointer<Executioner> & _executioner;
 };
 
 template <typename T>

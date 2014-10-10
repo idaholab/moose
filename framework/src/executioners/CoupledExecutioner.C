@@ -49,7 +49,6 @@ CoupledExecutioner::~CoupledExecutioner()
     _awhs[i]->clear();
     delete _awhs[i];
     delete _parsers[i];
-    delete _executioners[i];
     delete _owhs[i];
     // Note: _fe_problems are destroyed by executioners' destructors
   }
@@ -235,5 +234,5 @@ Executioner *
 CoupledExecutioner::getExecutionerByName(const std::string & name)
 {
   unsigned int i = _name_index[name];
-  return _executioners[i];
+  return _executioners[i].get();
 }

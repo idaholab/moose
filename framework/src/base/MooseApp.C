@@ -102,7 +102,6 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
-    _executioner(NULL),
     _use_nonlinear(true),
     _sys_info(NULL),
     _enable_unused_check(WARN_UNUSED),
@@ -133,7 +132,6 @@ MooseApp::~MooseApp()
 {
   delete _command_line;
   delete _sys_info;
-  delete _executioner;
   _action_warehouse.clear();
 
   // MUST be deleted before _comm is destroyed!

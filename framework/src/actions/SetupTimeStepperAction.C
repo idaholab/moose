@@ -39,7 +39,7 @@ SetupTimeStepperAction::act()
 {
   if (_problem->isTransient())
   {
-    Transient * transient = dynamic_cast<Transient *>(_executioner);
+    Transient * transient = dynamic_cast<Transient *>(_executioner.get());
     if (transient == NULL)
       mooseError("You can setup time stepper only with executioners of transient type.");
 

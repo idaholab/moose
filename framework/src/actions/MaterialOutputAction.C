@@ -51,7 +51,7 @@ void
 MaterialOutputAction::act()
 {
   // If running a coupled problem, loop through all the FEProblem objects
-  CoupledExecutioner * exec_ptr = dynamic_cast<CoupledExecutioner *>(_executioner);
+  CoupledExecutioner * exec_ptr = dynamic_cast<CoupledExecutioner *>(_executioner.get());
   if (exec_ptr != NULL)
   {
     std::vector<FEProblem *> & problems = exec_ptr->getProblems();

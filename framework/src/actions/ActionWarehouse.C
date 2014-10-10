@@ -32,8 +32,7 @@ ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory 
     _action_factory(factory),
     _generator_valid(false),
     _show_actions(false),
-    _show_parser(false),
-    _executioner(NULL)
+    _show_parser(false)
 {
 }
 
@@ -66,6 +65,7 @@ ActionWarehouse::clear()
   _displaced_mesh.reset();
 
   _problem.reset();
+  _executioner.reset();
 }
 
 void
