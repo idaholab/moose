@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = square.e
+  file = build_out_0001_mesh.xda
   # This test uses SolutionUserObject which doesn't work with ParallelMesh.
   distribution = serial
 []
