@@ -120,6 +120,9 @@ protected:
   /// Complete image data
   vtkImageData * _data;
 
+  /// VTK-6 seems to work better in terms of "algorithm outputs" rather than vtkImageData pointers...
+  vtkAlgorithmOutput * _algorithm;
+
   /// Complete image data
   vtkSmartPointer<vtkImageReader2> _image;
 
@@ -132,12 +135,8 @@ protected:
   /// Pointer to the magnitude filter
   vtkSmartPointer<vtkImageMagnitude> _magnitude_filter;
 
-  ///@{
-  /// Pointers to image flipping filters
-  vtkSmartPointer<vtkImageFlip> _flip_filter_x;
-  vtkSmartPointer<vtkImageFlip> _flip_filter_y;
-  vtkSmartPointer<vtkImageFlip> _flip_filter_z;
-  ///@}
+  /// Pointers to image flipping filter.  May be used for x, y, or z.
+  vtkSmartPointer<vtkImageFlip> _flip_filter;
 #endif
 
 private:
@@ -209,6 +208,7 @@ ImageFunction::readImages()
   _image->SetFileNames(_files);
   _image->Update();
   _data = _image->GetOutput();
+  _algorithm = _image->GetOutputPort();
 
   // Set the image dimensions and voxel size member variable
   int * dims = _data->GetDimensions();

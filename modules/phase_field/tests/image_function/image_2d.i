@@ -11,18 +11,18 @@
 []
 
 [Functions]
-  [./tif]
+  [./image_func]
     type = ImageFunction
     file_base = stack/test
     file_type = png
-    file_range = 00
+    file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
   [../]
 []
 
 [ICs]
   [./u_ic]
     type = FunctionIC
-    function = tif
+    function = image_func
     variable = u
   [../]
 []
