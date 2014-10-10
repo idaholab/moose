@@ -115,7 +115,7 @@ peacock_run_tmp.i
 yaml_dump*
 
 # Generated header file
-HerdRevision.h
+MooseRevision.h
 
 # Precompiled headers
 moose/include/base/Precompiled.h.gch

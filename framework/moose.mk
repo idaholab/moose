@@ -49,19 +49,18 @@ moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
 # clang static analyzer files
 moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
 
-# revision header
-revision_header = $(FRAMEWORK_DIR)/include/base/HerdRevision.h
-
 app_INCLUDES := $(moose_INCLUDE)
 app_LIBS     := $(moose_LIBS)
 app_DIRS     := $(FRAMEWORK_DIR)
-all:: herd_revision moose
+all:: moose_revision moose
 
-herd_revision:
-	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR))
+# revision header
+moose_revision_header = $(FRAMEWORK_DIR)/include/base/MooseRevision.h
+moose_revision:
+  $(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
+    $(moose_revision_header) MOOSE)
 
 moose: $(moose_LIB)
-
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
