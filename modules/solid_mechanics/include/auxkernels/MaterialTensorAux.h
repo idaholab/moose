@@ -35,6 +35,7 @@ protected:
 
   MaterialTensorCalculator _material_tensor_calculator;
   MaterialProperty<SymmTensor> & _tensor;
+  const int _qp_select;
   virtual Real computeValue();
 
 };

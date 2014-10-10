@@ -11,14 +11,14 @@
     # Test two many values supplied
     type = RunException
     input = file_range.i
-    expect_err = "Image range must specify one or two interger values"
+    expect_err = "Image range must specify one or two integer values"
     vtk = true
   [../]
   [./file_range_order]
     # Test the un-supported file type error
     type = RunException
     input = file_range_order.i
-    expect_err = "Image range must specify exactly two interger values, with the second larger than the first"
+    expect_err = "Image range must specify exactly two integer values, with the second larger than the first"
     vtk = true
   [../]
   [./component]

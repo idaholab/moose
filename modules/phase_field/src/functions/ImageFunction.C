@@ -28,12 +28,13 @@ InputParameters validParams<ImageFunction>()
   // Define the general parameters
   InputParameters params = validParams<Function>();
   params.addParam<FileName>("file", "Image to open, utilize this option when a single file is given");
-  params.addParam<FileName>("file_base", "Image file base to open, use this option when a stack of images must be read (ignord if 'file' is given)");
+  params.addParam<FileName>("file_base", "Image file base to open, use this option when a stack of images must be read (ignored if 'file' is given)");
   params.addParam<MooseEnum>("file_type", type, "Image file type, use this to specify the type of file for an image stack (use with 'file_base'; ignored if 'file' is given)");
   params.addParam<std::vector<unsigned int> >("file_range", "Range of images to analyze, used with 'file_base' (ignored if 'file' is given)");
-  params.addParam<Point>("origin", "Origin of the image (defualts to mesh origin)");
+  params.addParam<Point>("origin", "Origin of the image (defaults to mesh origin)");
   params.addParam<Point>("dimensions", "x,y,z dimensions of the image (defaults to mesh dimensions)");
-  params.addParam<unsigned int>("component", "The image component to return, leaving this blank will result in a greyscale value for the image to be created. The component number is zero based, i.e. 0 returns the first component of the image");
+  params.addParam<unsigned int>("component", "The image component to return, leaving this blank will result in a greyscale value "
+                                             "for the image to be created. The component number is zero based, i.e. 0 returns the first component of the image");
 
   // Shift and Scale (application of these occurs prior to threshold)
   params.addParam<double>("shift", 0, "Value to add to all pixels; occurs prior to scaling");
@@ -59,6 +60,7 @@ ImageFunction::ImageFunction(const std::string & name, InputParameters parameter
     Function(name, parameters),
 #ifdef LIBMESH_HAVE_VTK
     _data(NULL),
+    _algorithm(NULL),
 #endif
     _file_base(getParam<FileName>("file_base")),
     _file_type(getParam<MooseEnum>("file_type"))
@@ -88,7 +90,7 @@ ImageFunction::initialSetup()
     mooseError("Un-supported file type '" << _file_type << "'");
 
   // Set the component parameter
-  /* If the parameter is not set then vtkMagnitude() will applied */
+  // If the parameter is not set then vtkMagnitude() will applied
   if (isParamValid("component"))
   {
     unsigned int n = _data->GetNumberOfScalarComponents();
@@ -120,7 +122,7 @@ ImageFunction::value(Real /*t*/, const Point & p)
   if (!_bounding_box.contains_point(p))
     return 0.0;
 
-  // Deterimine pixel coordinates
+  // Determine pixel coordinates
   std::vector<int> x(3,0);
   for (int i = 0; i < LIBMESH_DIM; ++i)
   {
@@ -194,10 +196,10 @@ ImageFunction::initImageData()
       _file_range.push_back(_file_range[0]);
 
     if (_file_range.size() != 2)
-      mooseError("Image range must specify one or two interger values");
+      mooseError("Image range must specify one or two integer values");
 
     if (_file_range[1] < _file_range[0])
-      mooseError("Image range must specify exactly two interger values, with the second larger than the first");
+      mooseError("Image range must specify exactly two integer values, with the second larger than the first");
   }
   else
   {
@@ -240,7 +242,7 @@ ImageFunction::getFiles()
     // Loop through the files in the directory
     for (int i = 0; i < dir.n_files; i++)
     {
-      // Upate the current file
+      // Update the current file
       tinydir_file file;
       tinydir_readfile_n(&dir, &file, i);
 
@@ -273,14 +275,12 @@ ImageFunction::vtkMagnitude()
 
   // Apply the greyscale filtering
   _magnitude_filter = vtkSmartPointer<vtkImageMagnitude>::New();
-#if VTK_MAJOR_VERSION <= 5
-  _magnitude_filter->SetInput(_data);
-#else
-  _magnitude_filter->SetInputData(_data);
-#endif
+  _magnitude_filter->SetInputConnection(_algorithm);
   _magnitude_filter->Update();
 
+  // Update the pointers
   _data = _magnitude_filter->GetOutput();
+  _algorithm = _magnitude_filter->GetOutputPort();
 #endif
 }
 
@@ -301,15 +301,14 @@ ImageFunction::vtkShiftAndScale()
   _shift_scale_filter = vtkSmartPointer<vtkImageShiftScale>::New();
   _shift_scale_filter->SetOutputScalarTypeToDouble();
 
-#if VTK_MAJOR_VERSION <= 5
-  _shift_scale_filter->SetInput(_data);
-#else
-  _shift_scale_filter->SetInputData(_data);
-#endif
+  _shift_scale_filter->SetInputConnection(_algorithm);
   _shift_scale_filter->SetShift(shift);
   _shift_scale_filter->SetScale(scale);
   _shift_scale_filter->Update();
+
+  // Update the pointers
   _data = _shift_scale_filter->GetOutput();
+  _algorithm = _shift_scale_filter->GetOutputPort();
 #endif
 }
 
@@ -329,11 +328,7 @@ ImageFunction::vtkThreshold()
   _image_threshold = vtkSmartPointer<vtkImageThreshold>::New();
 
   // Set the data source
-#if VTK_MAJOR_VERSION < 6
-  _image_threshold->SetInput(_data);
-#else
-  _image_threshold->SetInputData(_data);
-#endif
+  _image_threshold->SetInputConnection(_algorithm);
 
   // Setup the thresholding options
   _image_threshold->ThresholdByUpper(getParam<Real>("threshold"));
@@ -345,7 +340,10 @@ ImageFunction::vtkThreshold()
 
   // Perform the thresholding
   _image_threshold->Update();
+
+  // Update the pointers
   _data = _image_threshold->GetOutput();
+  _algorithm = _image_threshold->GetOutputPort();
 #endif
 }
 
@@ -353,25 +351,21 @@ void
 ImageFunction::vtkFlip()
 {
 #ifdef LIBMESH_HAVE_VTK
-  // x-axis
-  if (getParam<bool>("flip_x"))
-  {
-    _flip_filter_x = imageFlip(0);
-    _data = _flip_filter_x->GetOutput();
-  }
+  // Convert boolean values into an integer array, then loop over it
+  int mask[3] = {getParam<bool>("flip_x"),
+                 getParam<bool>("flip_y"),
+                 getParam<bool>("flip_z")};
 
-  // y-axis
-  if (getParam<bool>("flip_y"))
+  for (int dim=0; dim<3; ++dim)
   {
-    _flip_filter_y = imageFlip(1);
-    _data = _flip_filter_y->GetOutput();
-  }
+    if (mask[dim])
+    {
+      _flip_filter = imageFlip(dim);
 
-  // z-axis
-  if (getParam<bool>("flip_z"))
-  {
-    _flip_filter_z = imageFlip(2);
-    _data = _flip_filter_z->GetOutput();
+      // Update pointers
+      _data = _flip_filter->GetOutput();
+      _algorithm = _flip_filter->GetOutputPort();
+    }
   }
 #endif
 }
@@ -382,15 +376,12 @@ ImageFunction::imageFlip(const int & axis)
 {
   vtkSmartPointer<vtkImageFlip> flip_image = vtkSmartPointer<vtkImageFlip>::New();
 
+  flip_image->SetFilteredAxis(axis);
+
   // Set the data source
-#if VTK_MAJOR_VERSION < 6
-  flip_image->SetInput(_data);
-#else
-  flip_image->SetInputData(_data);
-#endif
+  flip_image->SetInputConnection(_algorithm);
 
   // Perform the flip
-  flip_image->SetFilteredAxis(axis);
   flip_image->Update();
 
   // Return the flip filter pointer
