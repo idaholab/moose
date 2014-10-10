@@ -72,12 +72,6 @@ ifeq ($(MOOSE_PRECOMPILED), true)
   endif
 endif
 
-ifneq (,$(filter $(cxx_compiler), clang++))
-  ifneq (,$(findstring darwin,$(libmesh_HOST)))
-	libmesh_CXXFLAGS += -mmacosx-version-min=10.7
-  endif
-endif
-
 all::
 ifdef PRECOMPILED
 #
