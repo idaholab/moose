@@ -1,6 +1,12 @@
 [Mesh]
-  type = FileMesh
-  file = square.e
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
+  xmin = 1
+  xmax = 4
+  ymin = 1
+  ymax = 3
   # This test uses SolutionUserObject which doesn't work with ParallelMesh.
   distribution = serial
 []
@@ -48,34 +54,29 @@
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = left
     value = 0
   [../]
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = right
     value = 1
   [../]
 []
 
 [Executioner]
   type = Steady
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
   nl_rel_tol = 1e-10
 []
 
 [Outputs]
   output_initial = true
   exodus = true
+  xda = true
   [./console]
     type = Console
     perf_log = true
-  [../]
-  [./xda]
-    type = XDA
   [../]
 []
