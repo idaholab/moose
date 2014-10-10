@@ -2200,7 +2200,7 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
        * we compute user objects.
        */
       if (_use_legacy_uo_aux_computation)
-        _aux.compute();
+        _aux.compute(EXEC_RESIDUAL);
     }
 
     // init
@@ -3234,7 +3234,7 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   }
   _aux.residualSetup();
 
-  _aux.compute();
+  _aux.compute(EXEC_RESIDUAL);
 
   computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::POST_AUX);
 
@@ -3266,7 +3266,7 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     execTransfers(EXEC_JACOBIAN);
     execMultiApps(EXEC_JACOBIAN);
 
-    computeUserObjects(EXEC_JACOBIAN);
+    computeUserObjects(EXEC_JACOBIAN, UserObjectWarehouse::PRE_AUX);
 
     if (_displaced_problem != NULL)
       _displaced_problem->updateMesh(soln, *_aux.currentSolution());
@@ -3283,11 +3283,9 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
     _aux.jacobianSetup();
 
-    // TODO: This can be made more efficient if we group the kernels together in a single group to be
-    //       executed.  If the user has both Residual and Jacobian aux kernels, we are looping over both
-    //       groups separately.
-    _aux.compute();
     _aux.compute(EXEC_JACOBIAN);
+
+    computeUserObjects(EXEC_JACOBIAN, UserObjectWarehouse::POST_AUX);
 
     _nl.computeJacobian(jacobian);
 
@@ -3323,7 +3321,7 @@ FEProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
-  _aux.compute();
+  _aux.compute(EXEC_JACOBIAN);
 
   _nl.computeJacobianBlocks(blocks);
 }
@@ -3354,7 +3352,7 @@ FEProblem::computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number
       _materials[i].residualSetup();
     }
     _aux.residualSetup();
-    _aux.compute();
+    _aux.compute(EXEC_RESIDUAL);
     _lower.swap(lower);
     _upper.swap(upper);
   }
