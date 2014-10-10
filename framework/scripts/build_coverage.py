@@ -275,7 +275,7 @@ def _parseARGs(args=None):
   parser.add_argument('--html-location', help='Location of HTML generated content. Used in\nconjunction with --generate-html or --sync-location\n ')
   parser.add_argument('--sync-location', help='location to rsync the data to:\nuserid@server:/some/location\n ')
   parser.add_argument('--coverage-percentage', dest='coverage_percent', type=float, default=80.0, help='If specified, this is the percentage coverage has to pass\n ')
-  parser.add_argument('--cov-tool', metavar='coverage_tool', nargs='+', default="gcov", help='Which coverage tool to use (gcov default)\n ')
+  parser.add_argument('--cov-tool', metavar='coverage_tool', default="gcov", help='Which coverage tool to use (gcov default)\n ')
   options = parser.parse_args(args)
   return _verifyOptions(options)
 
