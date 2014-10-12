@@ -1,7 +1,9 @@
-# apply repeated stretches in z direction, and smaller stretches in the x and y directions
-# so that sigma_II = sigma_III,
-# which means that lode angle = -30deg.
-# The allows yield surface in meridional plane to be mapped out
+# apply uniform stretches in x, y and z directions.
+# let cohesion = 10, cohesion_residual = 2, cohesion_limit = 0.0003
+# With cohesion = C, friction_angle = 60deg, tip_smoother = 4, the
+# algorithm should return to
+# sigma_m = (C*Cos(60) - 4)/Sin(60)
+# This allows checking of the relationship for C
 
 [Mesh]
   type = GeneratedMesh
@@ -41,13 +43,13 @@
     type = FunctionPresetBC
     variable = disp_x
     boundary = 'front back'
-    function = '0.25E-6*x*sin(t)'
+    function = '1E-6*x*t'
   [../]
   [./y]
     type = FunctionPresetBC
     variable = disp_y
     boundary = 'front back'
-    function = '0.25E-6*y*sin(t)'
+    function = '1E-6*y*t'
   [../]
   [./z]
     type = FunctionPresetBC
@@ -194,15 +196,15 @@
 
 [UserObjects]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombExponential
-    mc_cohesion = 10
-    mc_friction_angle = 50
-    mc_dilation_angle = 0
-    mc_dilation_angle_residual = 50
-    mc_dilation_angle_rate = 3000.0
+    type = TensorMechanicsPlasticMohrCoulombCubic
+    cohesion = 10
+    cohesion_residual = 2
+    cohesion_limit = 0.0003
+    friction_angle = 60
+    dilation_angle = 5
     mc_tip_smoother = 4
-    mc_edge_smoother = 20
-    yield_function_tolerance = 1E-8
+    mc_edge_smoother = 25
+    yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9
   [../]
 []
@@ -219,19 +221,25 @@
     ep_plastic_tolerance = 1E-9
     plastic_models = mc
     debug_fspb = 1
+    debug_jac_at_stress = '10 1 2 1 10 3 2 3 10'
+    debug_jac_at_pm = 1
+    debug_jac_at_intnl = 1E-4
+    debug_stress_change = 1E-5
+    debug_pm_change = 1E-6
+    debug_intnl_change = 1E-8
   [../]
 []
 
 
 [Executioner]
-  end_time = 30
-  dt = 1
+  end_time = 10
+  dt = 0.25
   type = Transient
 []
 
 
 [Outputs]
-  file_base = small_deform4
+  file_base = small_deform_hard_cubic
   output_initial = true
   exodus = false
   [./console]
