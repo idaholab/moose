@@ -115,7 +115,7 @@
 
 [UserObjects]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulomb
+    type = TensorMechanicsPlasticMohrCoulombExponential
     mc_cohesion = 1E3
     mc_friction_angle = 30
     mc_dilation_angle = 5

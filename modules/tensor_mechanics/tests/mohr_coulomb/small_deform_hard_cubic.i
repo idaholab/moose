@@ -1,8 +1,9 @@
-# checking for small deformation
-# A single element is stretched by 1E-6m in x,y and z directions.
-# stress_zz = Youngs Modulus*Strain = 2E6*1E-6 = 2 Pa
-# wpt_tensile_strength is set to 1Pa
-# Then the final stress should return to the yeild surface and its value should be 1pa.
+# apply uniform stretches in x, y and z directions.
+# let cohesion = 10, cohesion_residual = 2, cohesion_limit = 0.0003
+# With cohesion = C, friction_angle = 60deg, tip_smoother = 4, the
+# algorithm should return to
+# sigma_m = (C*Cos(60) - 4)/Sin(60)
+# This allows checking of the relationship for C
 
 [Mesh]
   type = GeneratedMesh
@@ -28,8 +29,8 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[TensorMechanics]
+  [./solid]
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
@@ -38,42 +39,23 @@
 
 
 [BCs]
-  [./bottomx]
-    type = PresetBC
+  [./x]
+    type = FunctionPresetBC
     variable = disp_x
-    boundary = back
-    value = 0.0
+    boundary = 'front back'
+    function = '1E-6*x*t'
   [../]
-  [./bottomy]
-    type = PresetBC
+  [./y]
+    type = FunctionPresetBC
     variable = disp_y
-    boundary = back
-    value = 0.0
+    boundary = 'front back'
+    function = '1E-6*y*t'
   [../]
-  [./bottomz]
-    type = PresetBC
+  [./z]
+    type = FunctionPresetBC
     variable = disp_z
-    boundary = back
-    value = 0.0
-  [../]
-
-  [./topx]
-    type = PresetBC
-    variable = disp_x
-    boundary = front
-    value = 0E-6
-  [../]
-  [./topy]
-    type = PresetBC
-    variable = disp_y
-    boundary = front
-    value = 0E-6
-  [../]
-  [./topz]
-    type = PresetBC
-    variable = disp_z
-    boundary = front
-    value = 1E-6
+    boundary = 'front back'
+    function = '1E-6*z*t'
   [../]
 []
 
@@ -99,6 +81,14 @@
     family = MONOMIAL
   [../]
   [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mc_int]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./yield_fcn]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -147,6 +137,18 @@
     index_i = 2
     index_j = 2
   [../]
+  [./mc_int_auxk]
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_internal_parameter
+    variable = mc_int
+  [../]
+  [./yield_fcn_auxk]
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_yield_function
+    variable = yield_fcn
+  [../]
 []
 
 [Postprocessors]
@@ -180,24 +182,30 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
+  [./internal]
+    type = PointValue
+    point = '0 0 0'
+    variable = mc_int
+  [../]
+  [./f]
+    type = PointValue
+    point = '0 0 0'
+    variable = yield_fcn
+  [../]
 []
 
 [UserObjects]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombExponential
-    mc_cohesion = 100
-    mc_friction_angle = 60
-    mc_dilation_angle = 5
+    type = TensorMechanicsPlasticMohrCoulombCubic
+    cohesion = 10
+    cohesion_residual = 2
+    cohesion_limit = 0.0003
+    friction_angle = 60
+    dilation_angle = 5
     mc_tip_smoother = 4
     mc_edge_smoother = 25
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9
-  [../]
-  [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensile
-    wpt_tensile_strength = 1.0
-    yield_function_tolerance = 1E-6
-    internal_constraint_tolerance = 1E-5
   [../]
 []
 
@@ -211,27 +219,27 @@
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
     ep_plastic_tolerance = 1E-9
-    plastic_models = 'mc wpt'
+    plastic_models = mc
     debug_fspb = 1
-    debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
+    debug_jac_at_stress = '10 1 2 1 10 3 2 3 10'
     debug_jac_at_pm = 1
-    debug_jac_at_intnl = 1
+    debug_jac_at_intnl = 1E-4
     debug_stress_change = 1E-5
     debug_pm_change = 1E-6
-    debug_intnl_change = 1E-6
+    debug_intnl_change = 1E-8
   [../]
 []
 
 
 [Executioner]
-  end_time = 1
-  dt = 1
+  end_time = 10
+  dt = 0.25
   type = Transient
 []
 
 
 [Outputs]
-  file_base = mc_wpt_1
+  file_base = small_deform_hard_cubic
   output_initial = true
   exodus = false
   [./console]
