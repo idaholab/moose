@@ -62,7 +62,7 @@ AddOutputAction::act()
     mooseError("The output object named '" << object_name << "' already exists");
 
   // Add a pointer to the FEProblem class
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem",  _problem);
+  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem",  _problem.get());
 
   // Apply the common parameters
   InputParameters * common = output_warehouse.getCommonParameters();

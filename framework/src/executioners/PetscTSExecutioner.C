@@ -268,8 +268,6 @@ PetscTSExecutioner::PetscTSExecutioner(const std::string & name, InputParameters
 
 PetscTSExecutioner::~PetscTSExecutioner()
 {
-  // This problem was built by the Factory and needs to be released by this destructor
-  delete &_fe_problem;
   delete _time_stepper;
 }
 

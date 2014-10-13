@@ -76,8 +76,6 @@ EigenExecutionerBase::EigenExecutionerBase(const std::string & name, InputParame
 
 EigenExecutionerBase::~EigenExecutionerBase()
 {
-  // This problem was built by the Factory and needs to be released by this destructor
-  delete &_problem;
 }
 
 void
