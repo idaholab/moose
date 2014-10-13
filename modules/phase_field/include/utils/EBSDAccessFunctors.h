@@ -14,15 +14,15 @@ class EBSDAccessFunctors
 public:
   /// Per element EBSD data point
   struct EBSDPointData {
-    Real phi1, phi, phi2, phase, symmetry;
-    unsigned int grain, op;
+    Real phi1, phi, phi2, symmetry;
+    unsigned int grain, phase, op;
     Point p;
   };
 
   /// Averaged EBSD data
   struct EBSDAvgData {
-    Real phi1, phi, phi2, phase, symmetry;
-    unsigned int n;
+    Real phi1, phi, phi2, symmetry;
+    unsigned int phase, grain, n;
     Point p;
   };
 

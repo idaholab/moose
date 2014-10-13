@@ -66,7 +66,7 @@ protected:
 
   // Variables needed to determine reduced order parameter values
   unsigned int _op_num;
-  unsigned int _grain_num;
+  unsigned int _feature_num;
   Point _bottom_left;
   Point _top_right;
   Point _range;
