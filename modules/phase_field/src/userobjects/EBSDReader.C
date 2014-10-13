@@ -1,6 +1,8 @@
 #include "EBSDReader.h"
 #include "EBSDMesh.h"
 
+#include <Eigen/Geometry>
+
 template<>
 InputParameters validParams<EBSDReader>()
 {
@@ -14,7 +16,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     _mesh(_fe_problem.mesh()),
     _nl(_fe_problem.getNonlinearSystem()),
     _op_num(getParam<unsigned int>("op_num")),
-    _grain_num(0),
+    _feature_num(0),
     _mesh_dimension(_mesh.dimension()),
     _nx(0),
     _ny(0),
@@ -65,7 +67,7 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
       d.p = Point(x,y,z);
 
       // determine number of grains in the dataset
-      if (d.grain > _grain_num) _grain_num = d.grain;
+      if (d.grain > _feature_num) _feature_num = d.grain;
 
       // The Order parameter is not yet assigned.
       // We initialize it to zero in order not to have undefined values that break the testing.
@@ -78,34 +80,41 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
   stream_in.close();
 
   // total number of grains is one higher than the maximum grain id
-  _grain_num += 1;
+  _feature_num += 1;
 
   // Resize the variables
-  _avg_data.resize(_grain_num);
+  _avg_data.resize(_feature_num);
 
   // clear the averages
-  for (unsigned int i = 0; i < _grain_num; ++i)
+  for (unsigned int i = 0; i < _feature_num; ++i)
   {
     EBSDAvgData & a = _avg_data[i];
-    a.p = a.phi1 = a.phi = a.phi2 = a.phase = a.symmetry = 0.0;
-    a.n = 0;
+    a.p = a.phi1 = a.phi = a.phi2 = a.symmetry = 0.0;
+    a.phase = a.n = 0;
   }
 
-  // Iterate through data points to get average variable values for each grain
+    // Iterate through data points to get average variable values for each grain
   for (std::vector<EBSDPointData>::iterator j = _data.begin(); j != _data.end(); ++j)
   {
     EBSDAvgData & a = _avg_data[j->grain];
 
+    //use Eigen::Quaternion<Real> here?
     a.phi1  += j->phi1;
     a.phi   += j->phi;
     a.phi2  += j->phi2;
-    a.phase += j->phase;
+
+    if (a.n == 0)
+      a.phase = j->phase;
+    else
+      if (a.phase != j->phase)
+        mooseError("An EBSD feature needs to have a uniform phase.");
+
     a.symmetry += j->symmetry;
     a.p     += j->p;
     a.n++;
   }
 
-  for (unsigned int i = 0; i < _grain_num; ++i)
+  for (unsigned int i = 0; i < _feature_num; ++i)
   {
     EBSDAvgData & a = _avg_data[i];
 
@@ -114,7 +123,13 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     a.phi1  /=  Real(a.n);
     a.phi   /=  Real(a.n);
     a.phi2  /=  Real(a.n);
-    a.phase /= Real(a.n);
+
+    if (a.phase >= _feature_id.size())
+      _feature_id.resize(a.phase + 1);
+
+    a.grain = _feature_id[a.phase].size();
+    _feature_id[a.phase].push_back(i);
+
     a.symmetry /= Real(a.n);
     a.p *= 1.0/Real(a.n);
   }
@@ -145,7 +160,7 @@ EBSDReader::getAvgData(unsigned int phase, unsigned int grain) const
 const unsigned int
 EBSDReader::getGrainNum() const
 {
-  return _grain_num;
+  return _feature_num;
 }
 
 const unsigned int
