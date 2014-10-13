@@ -40,14 +40,24 @@ public:
   const EBSDPointData & getData(const Point & p) const;
 
   /**
-   * Get the requested type of average data at the index i.
+   * Get the requested type of average data for feature number i.
    */
   const EBSDAvgData &  getAvgData(unsigned int i) const;
 
   /**
-   * Return the number of grains
+   * Get the requested type of average data for a given phase and grain.
    */
-  const unsigned & getGrainNum() const;
+  const EBSDAvgData &  getAvgData(unsigned int phase, unsigned int grain) const;
+
+  /**
+   * Return the total number of grains
+   */
+  const unsigned int getGrainNum() const;
+
+  /**
+   * Return the number of grains in a given phase
+   */
+  const unsigned int getGrainNum(unsigned int phase) const;
 
 protected:
   // MooseMesh Variables
@@ -64,10 +74,13 @@ protected:
   // Logically three-dimensional data indexed by geometric points in a 1D vector
   std::vector<EBSDPointData> _data;
 
-  // Logically three-dimensional data indexed by index in a 1D vector
+  // Averages by feature ID
   std::vector<EBSDAvgData> _avg_data;
 
-  /// Dimension of teh problem domain
+  // feature ID for given phases and grains
+  std::vector<std::vector<unsigned int> > _feature_id;
+
+  /// Dimension of the problem domain
   unsigned int _mesh_dimension;
 
   /// The number of values in the x, y and z directions.
