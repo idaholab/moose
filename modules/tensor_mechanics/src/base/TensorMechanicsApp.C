@@ -99,7 +99,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
 void
 TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("TensorMechanicsAction", "TensorMechanics/*");
+  syntax.registerActionSyntax("TensorMechanicsAction", "Kernels/TensorMechanics");
 
   registerAction(TensorMechanicsAction, "add_kernel");
 }
