@@ -127,9 +127,9 @@ protected:
   /// Convenience reference to a problem this action works on
 
 public:
-  FEProblem * & _problem;
+  MooseSharedPointer<FEProblem> & _problem;
   /// Convenience reference to an executioner
-  Executioner * & _executioner;
+  MooseSharedPointer<Executioner> & _executioner;
 };
 
 template <typename T>

@@ -198,7 +198,7 @@ public:
   /**
    * Retrieve the Executioner for this App.
    */
-  Executioner * getExecutioner() { return _executioner; }
+  Executioner * getExecutioner() { return _executioner.get(); }
 
   /**
    * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
@@ -377,7 +377,7 @@ protected:
   Parser _parser;
 
   /// Pointer to the executioner of this run (typically build by actions)
-  Executioner * _executioner;
+  MooseSharedPointer<Executioner> _executioner;
 
   /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
   bool _use_nonlinear;
