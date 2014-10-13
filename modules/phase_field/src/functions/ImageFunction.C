@@ -115,7 +115,7 @@ ImageFunction::initialSetup()
 
   // Set the dimensions of the image and bounding box
   _data->SetSpacing(_voxel[0], _voxel[1], _voxel[2]);
-  _data->SetOrigin(_origin(0), _origin(0), _origin(0));
+  _data->SetOrigin(_origin(0), _origin(1), _origin(2));
   _bounding_box.min() = _origin;
   _bounding_box.max() = _origin + _physical_dims;
 
