@@ -38,11 +38,57 @@ public:
 
 protected:
   /**
+   * buildMesh() calls this helper function to build 2D ImageMeshes.
+   */
+  void buildMesh2D();
+
+  /**
+   * buildMesh() calls this helper function to build 3D ImageMeshes from stacks of images.
+   */
+  void buildMesh3D();
+
+  /**
+   * True if the user provided the "file" param, see below for details.
+   */
+  bool _has_file;
+
+  /**
    * The name of the image to extract Mesh parameters from.  The
    * current implementation processes the output of the 'file'
    * command, which typically exists on OSX and Linux.
    */
-  std::string _image_file;
+  std::string _file;
+
+  /**
+   * True if the user provided the "file_base" param, see below for details.
+   */
+  bool _has_file_base;
+
+  /**
+   * File base name used in conjunction with file_range
+   */
+  std::string _file_base;
+
+  /**
+   * True if the user provided the "file_range" param, see below for details.
+   */
+  bool _has_file_range;
+
+  /**
+   * Vector with at most two entries which defines the range of image files to open.
+   */
+  std::vector<unsigned int> _file_range;
+
+  /**
+   * True if the user provided the "file_suffix" param, see below for details.
+   */
+  bool _has_file_suffix;
+
+  /**
+   * String representing the file suffix.  The filenames are assumed to be of the form:
+   * file_base + (zero-padded number in file range) + . + file_suffix
+   */
+  std::string _file_suffix;
 
   /**
    * If true, forces the maximum width (height) of the mesh to be 1.0
@@ -59,6 +105,18 @@ protected:
    * Result: Mesh has 552x477 elements
    */
   Real _cells_per_pixel;
+
+  /**
+   * Stores the list of filenames in the "stack" when building 3D
+   * meshes from multiple images.
+   */
+  std::vector<std::string> _stack_filenames;
+
+  /**
+   * Process a single image with the 'file' command to find out the
+   * number of pixels in the x and y directions.
+   */
+  void GetPixelInfo(std::string filename, int & xpixels, int & ypixels);
 };
 
 #endif /* IMAGEMESH_H */

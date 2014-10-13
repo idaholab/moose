@@ -5,9 +5,9 @@
   dim = 2
 
   # Be sure to choose a corresponding image name below!
-  # image_file = image001_cropped3_closing_298.png         # full size, 157 Mb Exodus file!
-  # image_file = eighth_image001_cropped3_closing_298.png  # 1/8
-  image_file = sixteenth_image001_cropped3_closing_298.png # 1/16
+  # file = image001_cropped3_closing_298.png         # full size, 157 Mb Exodus file!
+  # file = eighth_image001_cropped3_closing_298.png  # 1/8
+  file = sixteenth_image001_cropped3_closing_298.png # 1/16
 
   # Uncomment to maintain 1:1 ratio between number of pixels and mesh size.
   # scale_to_one = false
