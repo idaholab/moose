@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<DerivativeTwoPhaseMaterial>()
 {
-  InputParameters params = validParams<DerivativeTwoPhaseMaterial>();
+  InputParameters params = validParams<DerivativeBaseMaterial>();
   params.addClassDescription("Two phase material that combines two single phase materials using a switching function.");
 
   // Two base materials
@@ -21,27 +21,134 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>()
 }
 
 InputParameters
-DerivativeTwoPhaseMaterial::AddArg(InputParameters params, VariableName var_name)
+DerivativeTwoPhaseMaterial::AddPhiToArgs(InputParameters params)
 {
-  params.set<std::vector<VariableName> >("args").push_back(var_name);
+  VariableName phi = params.set<std::vector<VariableName> >("phi")[0];
+  params.set<std::vector<VariableName> >("args").push_back(phi);
   return params;
 }
 
 DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const std::string & name,
                                                        InputParameters parameters) :
-    DerivativeBaseMaterial(name, AddArg(parameters, getVar("phi", 0)->name())),
+    DerivativeBaseMaterial(name, AddPhiToArgs(parameters)),
     _fa_name(getParam<std::string>("fa_name")),
     _fb_name(getParam<std::string>("fb_name")),
     _phi(coupledValue("phi")),
-    _W(getParam<Real>("W"))
+    _W(getParam<Real>("W")),
+    _prop_Fa(&getMaterialProperty<Real>(_fa_name)),
+    _prop_Fb(&getMaterialProperty<Real>(_fb_name))
 {
+
+  // reserve space for phase A and B material properties
+  _prop_dFa.resize(_nargs);
+  _prop_d2Fa.resize(_nargs);
+  _prop_d3Fa.resize(_nargs);
+  _prop_dFb.resize(_nargs);
+  _prop_d2Fb.resize(_nargs);
+  _prop_d3Fb.resize(_nargs);
+  for (unsigned int i = 0; i < _nargs; ++i)
+  {
+    _prop_dFa[i] = &getDerivative<Real>(_fa_name, _arg_names[i]);
+    _prop_dFb[i] = &getDerivative<Real>(_fb_name, _arg_names[i]);
+
+    _prop_d2Fa[i].resize(_nargs);
+    _prop_d2Fb[i].resize(_nargs);
+
+    // TODO: maybe we should reserve and initialize to NULL...
+    if (_third_derivatives) {
+      _prop_d3Fa[i].resize(_nargs);
+      _prop_d3Fb[i].resize(_nargs);
+    }
+
+    for (unsigned int j = 0; j < _nargs; ++j)
+    {
+      _prop_d2Fa[i][j] = &getDerivative<Real>(_fa_name, _arg_names[i], _arg_names[j]);
+      _prop_d2Fb[i][j] = &getDerivative<Real>(_fb_name, _arg_names[i], _arg_names[j]);
+
+      if (_third_derivatives) {
+        _prop_d3Fa[i][j].resize(_nargs);
+        _prop_d3Fb[i][j].resize(_nargs);
+
+        for (unsigned int k = 0; k < _nargs; ++k)
+        {
+          _prop_d3Fa[i][j][k] = &getDerivative<Real>(_fa_name, _arg_names[i], _arg_names[j], _arg_names[k]);
+          _prop_d3Fb[i][j][k] = &getDerivative<Real>(_fb_name, _arg_names[i], _arg_names[j], _arg_names[k]);
+        }
+      }
+    }
+  }
 }
 
 /// Fm(cmg,cmv,T) takes three arguments
 unsigned int
 DerivativeTwoPhaseMaterial::expectedNumArgs()
 {
-  // this alwats returns the number of argumens that was passed in
+  // this always returns the number of arguments that was passed in
   // i.e. any number of args is accepted.
   return _nargs;
+}
+
+Real
+DerivativeTwoPhaseMaterial::computeF()
+{
+  return h(_phi[_qp]) * (*_prop_Fb)[_qp] + (1.0 - h(_phi[_qp])) * (*_prop_Fa)[_qp] + _W * g(_phi[_qp]);
+}
+
+Real
+DerivativeTwoPhaseMaterial::computeDF(unsigned int i)
+{
+  if (i == _nargs - 1)
+    return dh(_phi[_qp]) * ((*_prop_Fb)[_qp] - (*_prop_Fa)[_qp]) + _W * dg(_phi[_qp]);
+  else
+    return h(_phi[_qp]) *
+    (*_prop_dFb[i])[_qp] +
+    (1.0 - h(_phi[_qp])) *
+    (*_prop_dFa[i])[_qp] +
+    _W * g(_phi[_qp]);
+}
+
+Real
+DerivativeTwoPhaseMaterial::computeD2F(unsigned int i, unsigned int j)
+{
+  if (i == _nargs - 1 && j == _nargs - 1)
+    return d2h(_phi[_qp]) * ((*_prop_Fb)[_qp] - (*_prop_Fa)[_qp]) + _W * d2g(_phi[_qp]);
+
+  if (i == _nargs - 1)
+    return dh(_phi[_qp]) * ((*_prop_dFb[j])[_qp] - (*_prop_dFa[j])[_qp]) + _W * dg(_phi[_qp]);;
+  if (j == _nargs - 1)
+    return dh(_phi[_qp]) * ((*_prop_dFb[i])[_qp] - (*_prop_dFa[i])[_qp]) + _W * dg(_phi[_qp]);;
+
+  return h(_phi[_qp]) * (*_prop_d2Fb[i][j])[_qp] + (1.0 - h(_phi[_qp])) * (*_prop_d2Fa[i][j])[_qp] + _W * g(_phi[_qp]);
+}
+
+Real
+DerivativeTwoPhaseMaterial::h(Real phi)
+{
+  return 3.0 * phi*phi - 2.0 * phi*phi*phi;
+}
+Real
+DerivativeTwoPhaseMaterial::dh(Real phi)
+{
+  return 6.0 * phi - 6.0 * phi*phi;
+}
+Real
+DerivativeTwoPhaseMaterial::d2h(Real phi)
+{
+  return 6.0 - 12.0 * phi;
+}
+
+Real
+DerivativeTwoPhaseMaterial::g(Real phi)
+{
+  return phi*phi * (1.0 - phi) * (1.0 - phi);
+}
+Real
+DerivativeTwoPhaseMaterial::dg(Real phi)
+{
+  return 2.0 * phi * (1.0 - phi) * (2.0 * phi - 1.0);
+}
+Real
+DerivativeTwoPhaseMaterial::d2g(Real phi)
+{
+  return 12.0 * (phi*phi - phi) + 2.0;
 }
