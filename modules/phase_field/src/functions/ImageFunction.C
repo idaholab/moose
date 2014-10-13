@@ -71,6 +71,10 @@ ImageFunction::ImageFunction(const std::string & name, InputParameters parameter
 #endif
 }
 
+ImageFunction::~ImageFunction()
+{
+}
+
 void
 ImageFunction::initialSetup()
 {
@@ -81,13 +85,42 @@ ImageFunction::initialSetup()
   // Create a list of files to extract data from
   getFiles();
 
-  // Read the image stack
+  // Read the image stack.  Hurray for VTK not using polymorphism in a
+  // smart way... we actually have to explicitly create the type of
+  // reader based on the file extension, using an if-statement...
   if (_file_type == "png")
-    readImages<vtkPNGReader>();
+    _image = vtkSmartPointer<vtkPNGReader>::New();
   else if (_file_type == "tiff" || _file_type == "tif")
-    readImages<vtkTIFFReader>();
+    _image = vtkSmartPointer<vtkTIFFReader>::New();
   else
     mooseError("Un-supported file type '" << _file_type << "'");
+
+  // Now that _image is set up, actually read the images
+  // Indicate that data read has started
+  _console << "Reading image(s)..." << std::endl;
+
+  // Extract the data
+  _image->SetFileNames(_files);
+  _image->Update();
+  _data = _image->GetOutput();
+  _algorithm = _image->GetOutputPort();
+
+  // Set the image dimensions and voxel size member variable
+  int * dims = _data->GetDimensions();
+  for (unsigned int i = 0; i < 3; ++i)
+  {
+    _dims.push_back(dims[i]);
+    _voxel.push_back(_physical_dims(i)/_dims[i]);
+  }
+
+  // Set the dimensions of the image and bounding box
+  _data->SetSpacing(_voxel[0], _voxel[1], _voxel[2]);
+  _data->SetOrigin(_origin(0), _origin(0), _origin(0));
+  _bounding_box.min() = _origin;
+  _bounding_box.max() = _origin + _physical_dims;
+
+  // Indicate data read is completed
+  _console << "          ...image read finished" << std::endl;
 
   // Set the component parameter
   // If the parameter is not set then vtkMagnitude() will applied
@@ -107,10 +140,6 @@ ImageFunction::initialSetup()
   vtkThreshold();
   vtkFlip();
 #endif
-}
-
-ImageFunction::~ImageFunction()
-{
 }
 
 Real
