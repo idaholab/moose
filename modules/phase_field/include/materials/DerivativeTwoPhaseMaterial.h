@@ -1,7 +1,7 @@
 #ifndef DERIVATIVETWOPHASEMATERIAL_H
 #define DERIVATIVETWOPHASEMATERIAL_H
 
-#include "DerivativeTwoPhaseMaterialHelper.h"
+#include "DerivativeBaseMaterial.h"
 
 // Forward Declarations
 class DerivativeTwoPhaseMaterial;
@@ -15,15 +15,19 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>();
  * This requires the autodiff patch (https://github.com/libMesh/libmesh/pull/238)
  * to Function Parser in libmesh.
  */
-class DerivativeTwoPhaseMaterial : public DerivativeMaterial
+class DerivativeTwoPhaseMaterial : public DerivativeBaseMaterial
 {
 public:
   DerivativeTwoPhaseMaterial(const std::string & name,
                              InputParameters parameters);
 
 protected:
-  std::string fa_name;
-  std::string fb_name;
+  static InputParameters AddArg(InputParameters params, VariableName var_name);
+
+  virtual unsigned int expectedNumArgs();
+
+  std::string _fa_name;
+  std::string _fb_name;
 
   VariableValue & _phi;
 
