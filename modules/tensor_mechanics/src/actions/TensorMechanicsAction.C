@@ -14,7 +14,7 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addParam<NonlinearVariableName>("temp", "", "The temperature");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-  
+
   return params;
 }
 
@@ -35,13 +35,11 @@ TensorMechanicsAction::act()
   std::vector<VariableName> vars;
   std::string type("StressDivergenceTensors");
 
-  if (_disp_x == "")
-    mooseError("disp_x must be specified");
-  
+  //Prepare displacements and set value for dim
   keys.push_back("disp_x");
   vars.push_back(_disp_x);
 
-  if (_disp_y != "") 
+  if (_disp_y != "")
   {
     ++dim;
     keys.push_back("disp_y");
@@ -53,7 +51,8 @@ TensorMechanicsAction::act()
       vars.push_back(_disp_z);
     }
   }
-  
+
+  //Add in the temperature
   unsigned int num_coupled(dim);
   if (_temp != "")
   {
@@ -61,11 +60,6 @@ TensorMechanicsAction::act()
     keys.push_back("temp");
     vars.push_back(_temp);
   }
-
-  // Create divergence objects
-  std::string short_name(_name);
-  // Chop off "TensorMechanics/"
-  short_name.erase(0, 15);
 
   InputParameters params = _factory.getValidParams(type);
   for (unsigned int j = 0; j < num_coupled; ++j)
@@ -76,6 +70,8 @@ TensorMechanicsAction::act()
 
   params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
   params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
+
+  std::string short_name = "TensorMechanics";
 
   for (unsigned int i = 0; i < dim; ++i)
   {
