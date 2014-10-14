@@ -369,6 +369,15 @@ protected:
   virtual bool singleStep(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, RankTwoTensor & delta_dp, const RankFourTensor & E_inv, std::vector<Real> & f,RankTwoTensor & epp, std::vector<Real> & ic, std::vector<bool> & active, const MooseEnum & deactivation_scheme);
 
   /**
+   * Checks whether the yield functions are in the admissible region
+   * @param stress stress
+   * @param intnl internal parameters
+   * @return return false if any yield functions exceed their tolerance
+   */
+  virtual bool admissible(const RankTwoTensor & stress, const std::vector<Real> & intnl);
+
+
+  /**
    * Checks Kuhn-Tucker conditions, and alters "active" if appropriate.
    * Do not let the simplicity of this routine fool you!
    * Explicitly:
@@ -378,7 +387,7 @@ protected:
    * @param f values of the active yield functions
    * @param pm values of all the plastic multipliers
    * @param active the active constraints (true if active)
-   * @param return false if any of the Kuhn-Tucker conditions were violated (and hence the set of active constraints was changed)
+   * @return return false if any of the Kuhn-Tucker conditions were violated (and hence the set of active constraints was changed)
    */
   virtual bool checkAndApplyKuhnTucker(const std::vector<Real> & f, const std::vector<Real> & pm, std::vector<bool> & active);
 
