@@ -9,9 +9,9 @@ InputParameters validParams<TensorMechanicsAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<NonlinearVariableName>("disp_x", "The x displacement");
-  params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
-  params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
-  params.addParam<NonlinearVariableName>("temp", "", "The temperature");
+  params.addParam<NonlinearVariableName>("disp_y", "The y displacement");
+  params.addParam<NonlinearVariableName>("disp_z", "The z displacement");
+  params.addParam<NonlinearVariableName>("temp", "The temperature");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
 
@@ -19,11 +19,7 @@ InputParameters validParams<TensorMechanicsAction>()
 }
 
 TensorMechanicsAction::TensorMechanicsAction(const std::string & name, InputParameters params) :
-    Action(name, params),
-    _disp_x(getParam<NonlinearVariableName>("disp_x")),
-    _disp_y(getParam<NonlinearVariableName>("disp_y")),
-    _disp_z(getParam<NonlinearVariableName>("disp_z")),
-    _temp(getParam<NonlinearVariableName>("temp"))
+    Action(name, params)
 {
 }
 
@@ -37,28 +33,28 @@ TensorMechanicsAction::act()
 
   //Prepare displacements and set value for dim
   keys.push_back("disp_x");
-  vars.push_back(_disp_x);
+  vars.push_back(getParam<NonlinearVariableName>("disp_x"));
 
-  if (_disp_y != "")
+  if (isParamValid("disp_y"))
   {
     ++dim;
     keys.push_back("disp_y");
-    vars.push_back(_disp_y);
-    if ( _disp_z != "" )
+    vars.push_back(getParam<NonlinearVariableName>("disp_y"));
+    if (isParamValid("disp_z"))
     {
       ++dim;
       keys.push_back("disp_z");
-      vars.push_back(_disp_z);
+      vars.push_back(getParam<NonlinearVariableName>("disp_z"));
     }
   }
 
   //Add in the temperature
   unsigned int num_coupled(dim);
-  if (_temp != "")
+  if (isParamValid("temp"))
   {
     ++num_coupled;
     keys.push_back("temp");
-    vars.push_back(_temp);
+    vars.push_back(getParam<NonlinearVariableName>("temp"));
   }
 
   InputParameters params = _factory.getValidParams(type);
