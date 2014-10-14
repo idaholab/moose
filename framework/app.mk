@@ -72,10 +72,17 @@ app_DIRS       += $(APPLICATION_DIR)
 # dependencies
 -include $(app_deps)
 
+# Write a revision header only if the app supplies the location.
+app_revision:
+ifdef APP_REV_HEADER
+  $(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(APPLICATION_DIR) \
+    $(APP_REV_HEADER) $(APPLICATION_NAME))
+endif
+
 ###############################################################################
 # Build Rules:
 #
-all:: $(app_LIB)
+all:: app_revision $(app_LIB)
 ifeq ($(BUILD_EXEC),yes)
   all:: $(app_EXEC)
 endif
