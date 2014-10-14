@@ -179,3 +179,6 @@ modules/*/doc/doxygen/html/*
 
 # phase_field/tests/solution_rasterizer
 out.xyz
+
+#File used to build code version into executable
+framework/include/base/HerdRevision.h
