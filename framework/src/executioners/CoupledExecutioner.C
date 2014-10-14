@@ -34,12 +34,11 @@ InputParameters validParams<CoupledExecutioner>()
 
 
 CoupledExecutioner::CoupledExecutioner(const std::string & name, InputParameters parameters) :
-    Executioner(name, parameters),
-    _problem(NULL)
+    Executioner(name, parameters)
 {
   InputParameters params = emptyInputParameters();
   params.addPrivateParam("_moose_app", &_app);
-  _problem = static_cast<CoupledProblem *>(_app.getFactory().create("CoupledProblem", "master_problem", params));
+  _problem = MooseSharedNamespace::static_pointer_cast<CoupledProblem>(_app.getFactory().create("CoupledProblem", "master_problem", params));
 }
 
 CoupledExecutioner::~CoupledExecutioner()

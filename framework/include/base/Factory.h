@@ -98,8 +98,7 @@ typedef MooseSharedPointer<MooseObject> MooseObjectPtr;
 /**
  * Typedef for function to build objects
  */
-typedef MooseObject * (*buildPtr)(const std::string & name, InputParameters parameters);
-typedef MooseObjectPtr (*buildPtrShared)(const std::string & name, InputParameters parameters);
+typedef MooseObjectPtr (*buildPtr)(const std::string & name, InputParameters parameters);
 
 /**
  * Typedef for validParams
@@ -115,16 +114,7 @@ typedef std::map<std::string, paramsPtr>::iterator registeredMooseObjectIterator
  * Build an object of type T
  */
 template<class T>
-MooseObject * buildObject(const std::string & name, InputParameters parameters)
-{
-  return new T(name, parameters);
-}
-
-/**
- * Build an object of type T
- */
-template<class T>
-MooseObjectPtr buildObjectShared(const std::string & name, InputParameters parameters)
+MooseObjectPtr buildObject(const std::string & name, InputParameters parameters)
 {
   return MooseObjectPtr(new T(name, parameters));
 }
@@ -148,7 +138,6 @@ public:
     if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
     {
       _name_to_build_pointer[obj_name] = &buildObject<T>;
-      _name_to_build_pointer_shared[obj_name] = &buildObjectShared<T>;
       _name_to_params_pointer[obj_name] = &validParams<T>;
     }
     else
@@ -200,9 +189,7 @@ public:
    * @param parameters Parameters this object should have
    * @return The created object
    */
-  virtual MooseObject *create(const std::string & obj_name, const std::string & name, InputParameters parameters);
-
-  MooseSharedPointer<MooseObject> create_shared_ptr(const std::string & obj_name, const std::string & name, InputParameters parameters);
+  MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters);
 
   /**
    * Access to registered object iterator (begin)
@@ -234,9 +221,6 @@ protected:
 
   /// Storage for pointers to the object
   std::map<std::string, buildPtr> _name_to_build_pointer;
-
-  /// Storage for pointers to the object
-  std::map<std::string, buildPtrShared> _name_to_build_pointer_shared;
 
   /// Storage for pointers to the parameters objects
   std::map<std::string, paramsPtr> _name_to_params_pointer;

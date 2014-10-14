@@ -42,7 +42,7 @@ AddMeshModifierAction::act()
   _moose_object_pars.set<MooseMesh *>("_mesh") = _mesh.get();
 
   // Create the modifier object and run it
-  MooseSharedPointer<MeshModifier> mesh_modifier = MooseSharedNamespace::static_pointer_cast<MeshModifier>(_factory.create_shared_ptr(_type, getShortName(), _moose_object_pars));
+  MooseSharedPointer<MeshModifier> mesh_modifier = MooseSharedNamespace::static_pointer_cast<MeshModifier>(_factory.create(_type, getShortName(), _moose_object_pars));
   mooseAssert(_mesh != NULL, "Mesh hasn't been created");
 
   // Run the modifier on the normal mesh
