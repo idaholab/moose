@@ -44,8 +44,10 @@ public:
   class EBTerm;
   class EBTermNode;
   class EBFunction;
+  class EBSubstitutionRule;
   typedef std::vector<EBTerm> EBTermList;
   typedef std::vector<EBTermNode *> EBTermNodeList;
+  typedef std::vector<const EBSubstitutionRule *> EBSubstitutionRuleList;
 
   // Base class for nodes in the expression tree
   class EBTermNode
@@ -55,7 +57,7 @@ public:
     virtual EBTermNode * clone() const = 0;
 
     virtual std::string stringify() const = 0;
-    virtual unsigned int substitute(const std::vector<std::string> & /*find_str*/, const EBTermNodeList & /*replace*/) { return 0; }
+    virtual unsigned int substitute(const EBSubstitutionRuleList & /*rule*/) { return 0; }
     virtual int precedence() const = 0;
     friend std::ostream& operator<< (std::ostream & os, const EBTermNode & node) { return os << node.stringify(); }
   };
@@ -94,7 +96,7 @@ public:
     EBUnaryTermNode(EBTermNode * _subnode) : subnode(_subnode) {};
     virtual ~EBUnaryTermNode() { delete subnode; };
 
-    virtual unsigned int substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace);
+    virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
     const EBTermNode * getSubnode() const { return subnode; }
 
   protected:
@@ -140,7 +142,7 @@ public:
     EBBinaryTermNode(EBTermNode * _left, EBTermNode * _right) : left(_left), right(_right) {};
     virtual ~EBBinaryTermNode() { delete left; delete right; };
 
-    virtual unsigned int substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace);
+    virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
     const EBTermNode * getLeft() const { return left; }
     const EBTermNode * getRight() const { return right; }
 
@@ -185,30 +187,37 @@ public:
 
 
   // substitution rule functor base class to perform flexible term substitutions
-  template<class Node_T>
   class EBSubstitutionRule {
   public:
-    EBTermNode * operator() (const EBTermNode *);
-    // on successful substitution this returns a new node to replace toe old one, otherwise it returns NULL
-    virtual EBTermNode * substitute(const Node_T &) = 0;
+    virtual EBTermNode * apply(const EBTermNode *) const = 0;
+    virtual ~EBSubstitutionRule() {}
   };
 
-  class EBTermSubstitution : public EBSubstitutionRule<EBSymbolNode> {
+  template<class Node_T>
+  class EBSubstitutionRuleTyped : public EBSubstitutionRule {
+  public:
+    virtual EBTermNode * apply(const EBTermNode *) const;
+  protected:
+    // on successful substitution this returns a new node to replace toe old one, otherwise it returns NULL
+    virtual EBTermNode * substitute(const Node_T &) const = 0;
+  };
+
+  class EBTermSubstitution : public EBSubstitutionRuleTyped<EBSymbolNode> {
   public:
     EBTermSubstitution(const EBTerm & _find, const EBTerm & _replace);
-    ~EBTermSubstitution() { delete find; delete replace; }
-    virtual EBTermNode * substitute(const EBSymbolNode &) = 0;
-  private:
-    EBSymbolNode * find;
+    virtual ~EBTermSubstitution() { delete replace; }
+  protected:
+    virtual EBTermNode * substitute(const EBSymbolNode &) const;
+    std::string find;
     EBTermNode * replace;
   };
 
-  class EBLogPlogSubstitution : public EBSubstitutionRule<EBUnaryFuncTermNode> {
+  class EBLogPlogSubstitution : public EBSubstitutionRuleTyped<EBUnaryFuncTermNode> {
   public:
     EBLogPlogSubstitution(const EBTerm & _epsilon) : epsilon(_epsilon.getRoot()->clone()) {}
-    ~EBLogPlogSubstitution() { delete epsilon; }
-    virtual EBTermNode * substitute(const EBUnaryFuncTermNode &) = 0;
-  private:
+    virtual ~EBLogPlogSubstitution() { delete epsilon; }
+  protected:
+    virtual EBTermNode * substitute(const EBUnaryFuncTermNode &) const;
     EBTermNode * epsilon;
   };
 
@@ -243,8 +252,8 @@ public:
     EBTerm & operator= (const EBTerm & term) { delete root; root = term.root==NULL ? NULL : term.root->clone(); return *this; }
 
     // perform a substitution (returns substituton count)
-    unsigned int substitute(const EBTerm & find, const EBTerm & replace);
-    unsigned int substitute(const EBTermList & find, const EBTermList & replace);
+    unsigned int substitute(const EBSubstitutionRule & rule);
+    unsigned int substitute(const EBSubstitutionRuleList & rules);
 
     const EBTermNode * getRoot() const { return root; }
 
@@ -358,6 +367,10 @@ public:
      */
     EBTerm operator- () { return -EBTerm(*this); }
     EBTerm operator! () { return !EBTerm(*this); }
+
+    // perform a substitution (returns substituton count)
+    unsigned int substitute(const EBSubstitutionRule & rule);
+    unsigned int substitute(const EBSubstitutionRuleList & rules);
 
   protected:
     EBTermList arguments, eval_arguments;

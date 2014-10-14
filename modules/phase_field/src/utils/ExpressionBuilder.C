@@ -155,8 +155,25 @@ ExpressionBuilder::EBFunction::operator= (const ExpressionBuilder::EBFunction & 
 
 ExpressionBuilder::EBFunction::operator ExpressionBuilder::EBTerm() const
 {
+  unsigned int narg = arguments.size();
+  if (narg != eval_arguments.size())
+    mooseError("EBFunction is used wth a different number of arguments than it was defined with.");
+
+  // prepare a copy of the function term to perform the substitution on
   EBTerm result(term);
-  result.substitute(arguments, eval_arguments);
+
+  // prepare a rule list for the substitutions
+  EBSubstitutionRuleList rules;
+  for (unsigned i = 0; i < narg; ++i)
+    rules.push_back(new EBTermSubstitution(arguments[i], eval_arguments[i]));
+
+  // perform substitution
+  result.substitute(rules);
+
+  // discard rule set
+  for (unsigned i = 0; i < narg; ++i)
+    delete rules[i];
+
   return result;
 }
 
@@ -184,6 +201,18 @@ ExpressionBuilder::EBFunction::args()
     s << ',' << arguments[i];
 
   return s.str();
+}
+
+unsigned int
+ExpressionBuilder::EBFunction::substitute(const EBSubstitutionRule & rule)
+{
+  return term.substitute(rule);
+}
+
+unsigned int
+ExpressionBuilder::EBFunction::substitute(const EBSubstitutionRuleList & rules)
+{
+  return term.substitute(rules);
 }
 
 
@@ -226,100 +255,93 @@ ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, const Expr
 }
 
 unsigned int
-ExpressionBuilder::EBBinaryTermNode::substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace)
+ExpressionBuilder::EBBinaryTermNode::substitute(const EBSubstitutionRuleList & rules)
 {
-  std::string left_str = left->stringify();
-  std::string right_str = right->stringify();
-  unsigned int nfind = find_str.size();
+  unsigned int nrule = rules.size();
   unsigned int success = 0;
 
-  for (unsigned int i = 0; i < nfind; ++i)
+  for (unsigned int i = 0; i < nrule; ++i)
   {
-    if (left_str == find_str[i])
+    EBTermNode * replace = rules[i]->apply(left);
+    if (replace != NULL)
     {
       delete left;
-      left = replace[i]->clone();
+      left = replace;
       success = 1;
       break;
     }
   }
 
   if (success == 0)
-    success += left->substitute(find_str, replace);
+    success += left->substitute(rules);
 
-  for (unsigned int i = 0; i < nfind; ++i)
+  for (unsigned int i = 0; i < nrule; ++i)
   {
-    if (right_str == find_str[i])
+    EBTermNode * replace = rules[i]->apply(right);
+    if (replace != NULL)
     {
       delete right;
-      right = replace[i]->clone();
+      right = replace;
       return success + 1;
     }
   }
 
-  return success + right->substitute(find_str, replace);
+  return success + right->substitute(rules);
 }
 
 unsigned int
-ExpressionBuilder::EBUnaryTermNode::substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace)
+ExpressionBuilder::EBUnaryTermNode::substitute(const EBSubstitutionRuleList & rules)
 {
-  std::string subnode_str = subnode->stringify();
-  unsigned int nfind = find_str.size();
+  unsigned int nrule = rules.size();
 
-  for (unsigned int i = 0; i < nfind; ++i)
+  for (unsigned int i = 0; i < nrule; ++i)
   {
-    if (subnode_str == find_str[i])
+    EBTermNode * replace = rules[i]->apply(subnode);
+    if (replace != NULL)
     {
       delete subnode;
-      subnode = replace[i]->clone();
+      subnode = replace;
       return 1;
     }
   }
 
-  return subnode->substitute(find_str, replace);
+  return subnode->substitute(rules);
 }
 
 unsigned int
-ExpressionBuilder::EBTerm::substitute(const EBTerm & find, const EBTerm & replace)
+ExpressionBuilder::EBTerm::substitute(const EBSubstitutionRule & rule)
 {
-  EBTermList find_list(1), replace_list(1);
-  find_list[0] = find;
-  replace_list[0] = replace;
-  return substitute(find_list, replace_list);
+  EBSubstitutionRuleList rules(1);
+  rules[0] = &rule;
+  return substitute(rules);
 }
 
 unsigned int
-ExpressionBuilder::EBTerm::substitute(const EBTermList & find, const EBTermList & replace)
+ExpressionBuilder::EBTerm::substitute(const EBSubstitutionRuleList & rules)
 {
-  unsigned int nfind = find.size();
-  if (nfind != replace.size())
-    mooseError("Find and replace EBTerm lists must have equal length.");
+  unsigned int nrule = rules.size();
 
-  std::string root_str = root->stringify();
+  if (root == NULL)
+    return 0;
 
-  EBTermNodeList replace_terms(nfind);
-  std::vector<std::string> find_str(nfind);
-
-  for (unsigned int i = 0; i < nfind; ++i)
+  for (unsigned int i = 0; i < nrule; ++i)
   {
-    find_str[i] = find[i].root->stringify();
-    replace_terms[i] = replace[i].root;
-
-    if (root_str == find_str[i])
+    EBTermNode * replace = rules[i]->apply(root);
+    if (replace != NULL)
     {
       delete root;
-      root = replace_terms[i]->clone();
+      root = replace;
       return 1;
     }
   }
 
-  return root->substitute(find_str, replace_terms);
+  return root->substitute(rules);
 }
 
 template<class Node_T>
-ExpressionBuilder::EBTermNode * ExpressionBuilder::EBSubstitutionRule<Node_T>::operator() (const ExpressionBuilder::EBTermNode * node)
+ExpressionBuilder::EBTermNode * ExpressionBuilder::EBSubstitutionRuleTyped<Node_T>::apply(const ExpressionBuilder::EBTermNode * node) const
 {
-  Node_T * match_node = dynamic_cast<Node_T *>(node);
+  const Node_T * match_node = dynamic_cast<const Node_T *>(node);
   if (match_node == NULL)
     return NULL;
   else
@@ -332,16 +354,23 @@ ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & _find, 
   const EBSymbolNode * find_root = dynamic_cast<const EBSymbolNode *>(_find.getRoot());
   if (find_root == NULL)
     mooseError("Function arguments must be pure symbols.");
-  find = find_root->clone();
+  find = find_root->stringify();
 }
 
 ExpressionBuilder::EBTermNode *
-ExpressionBuilder::EBLogPlogSubstitution::substitute(const EBUnaryFuncTermNode & node)
+ExpressionBuilder::EBTermSubstitution::substitute(const EBSymbolNode & node) const
+{
+  if (node.stringify() == find)
+    return replace->clone();
+  else
+    return NULL;
+}
+
+ExpressionBuilder::EBTermNode *
+ExpressionBuilder::EBLogPlogSubstitution::substitute(const EBUnaryFuncTermNode & node) const
 {
   if (node.type == EBUnaryFuncTermNode::LOG)
-  {
     return new EBBinaryFuncTermNode(node.getSubnode()->clone(), epsilon->clone(), EBBinaryFuncTermNode::PLOG);
-  }
   else
     return NULL;
 }
