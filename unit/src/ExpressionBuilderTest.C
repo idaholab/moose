@@ -35,9 +35,9 @@ void ExpressionBuilderTest::test()
 
   // Test using functions in terms
   G((x,y)) = f;
-  H((x)) = -G((x,b)) + c;
+  H((x)) = -G((x,b)) + c % b;
 
-  CPPUNIT_ASSERT( std::string(H) == "-(x^2+4^1+3*4*-1)+8.9" );
+  CPPUNIT_ASSERT( std::string(H) == "-(x^2+4^1+3*4*-1)+8.9%4" );
   CPPUNIT_ASSERT( G.args() == "x,y" );
 
   // Test substitution subtleties (this would return x^x if substitution were performed sequentially, which they are not.. ..because that would be dumb!)
@@ -62,4 +62,13 @@ void ExpressionBuilderTest::test()
   CPPUNIT_ASSERT( std::string(def) == "x-y-z" );
   CPPUNIT_ASSERT( std::string(left) == "x-y-z" );
   CPPUNIT_ASSERT( std::string(right) == "x-(y-z)" );
+
+  // test comparison operators
+  EBTerm comp1 = (x < y) + (x > y);
+  EBTerm comp2 = (x <= y) + (x >= y);
+  EBTerm comp3 = (x == y) + (x != y);
+
+  CPPUNIT_ASSERT( std::string(comp1) == "(x<y)+(x>y)" );
+  CPPUNIT_ASSERT( std::string(comp2) == "(x<=y)+(x>=y)" );
+  CPPUNIT_ASSERT( std::string(comp3) == "(x=y)+(x!=y)" );
 }
