@@ -48,7 +48,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
       {
         // EigenKernel
         parameters.set<bool>("implicit") = true;
-        MooseSharedPointer<KernelBase> ekernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create_shared_ptr(kernel_name, name, parameters));
+        MooseSharedPointer<KernelBase> ekernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, name, parameters));
         if (parameters.get<bool>("eigen"))
           markEigenVariable(parameters.get<NonlinearVariableName>("variable"));
         // Extract the SubdomainIDs from the object (via BlockRestrictable class)
@@ -62,7 +62,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
         parameters.set<bool>("implicit") = false;
         std::string old_name(name + "_old");
 
-        MooseSharedPointer<KernelBase> ekernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create_shared_ptr(kernel_name, old_name, parameters));
+        MooseSharedPointer<KernelBase> ekernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, old_name, parameters));
         _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
         // Extract the SubdomainIDs from the object (via BlockRestrictable class)
         std::set<SubdomainID> blk_ids = ekernel->blockIDs();
@@ -73,7 +73,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
     else // Standard nonlinear system kernel
     {
       // Create the kernel object via the factory
-      MooseSharedPointer<KernelBase> kernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create_shared_ptr(kernel_name, name, parameters));
+      MooseSharedPointer<KernelBase> kernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, name, parameters));
       // Extract the SubdomainIDs from the object (via BlockRestrictable class)
       std::set<SubdomainID> blk_ids = kernel->blockIDs();
       _kernels[tid].addKernel(kernel, blk_ids);
