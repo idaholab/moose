@@ -168,7 +168,7 @@ public:
   class EBBinaryFuncTermNode : public EBBinaryTermNode
   {
   public:
-    enum NodeType { MIN, MAX, ATAN2, HYPOT } type;
+    enum NodeType { MIN, MAX, ATAN2, HYPOT, PLOG } type;
 
     EBBinaryFuncTermNode(EBTermNode * _left, EBTermNode * _right, NodeType _type) :
       EBBinaryTermNode(_left, _right), type(_type) {};
@@ -282,6 +282,7 @@ public:
     template<typename T> friend EBTerm pow(const EBTerm &, T exponent);
     friend EBTerm atan2(const EBTerm &, const EBTerm &);
     friend EBTerm hypot(const EBTerm &, const EBTerm &);
+    friend EBTerm plog(const EBTerm &, const EBTerm &);
   };
 
   // User facing host object for a function. This combines a term with an argument list.

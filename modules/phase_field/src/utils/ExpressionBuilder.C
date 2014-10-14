@@ -70,7 +70,7 @@ ExpressionBuilder::EBUnaryOpTermNode::stringify() const
 std::string
 ExpressionBuilder::EBBinaryFuncTermNode::stringify() const
 {
-  const char * bfunc[] = { "min", "max", "atan2", "hypot" };
+  const char * bfunc[] = { "min", "max", "atan2", "hypot", "plog" };
   std::ostringstream s;
   s << bfunc[type] << '(' << *left << ',' << *right << ')';
   return s.str();
@@ -214,6 +214,7 @@ BINARY_FUNC_IMPLEMENT(min,MIN)
 BINARY_FUNC_IMPLEMENT(max,MAX)
 BINARY_FUNC_IMPLEMENT(atan2,ATAN2)
 BINARY_FUNC_IMPLEMENT(hypot,HYPOT)
+BINARY_FUNC_IMPLEMENT(plog,PLOG)
 
 // this is a function in ExpressionBuilder (pow) but an operator in FParser (^)
 ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & right) {
