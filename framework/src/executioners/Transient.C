@@ -281,12 +281,14 @@ Transient::incrementStepOrReject()
 void
 Transient::takeStep(Real input_dt)
 {
-  for (_picard_it=0; _picard_it<_picard_max_its && _picard_converged==false; _picard_it++)
+  _picard_it = 0;
+  while (_picard_it<_picard_max_its && _picard_converged == false)
   {
     if (_picard_max_its > 1)
       _console << "Beginning Picard Iteration " << _picard_it << "\n" << std::endl;
 
     solveStep(input_dt);
+    ++_picard_it;
   }
 }
 
