@@ -79,7 +79,7 @@ ExpressionBuilder::EBBinaryFuncTermNode::stringify() const
 std::string
 ExpressionBuilder::EBBinaryOpTermNode::stringify() const
 {
-  const char * bop[] = { "+", "-", "*", "/", "%", "^" };
+  const char * bop[] = { "+", "-", "*", "/", "%", "^", "<", ">", "<=", ">=", "=", "!=" };
   std::ostringstream s;
 
   if (left->precedence() > precedence())
@@ -113,6 +113,10 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
       return 5;
     case POW:
       return 2;
+    case LESS: case GREATER: case LESSEQ: case GREATEREQ:
+      return 8;
+    case EQ: case NOTEQ:
+      return 9;
   }
 
   mooseError("Unknown type.");

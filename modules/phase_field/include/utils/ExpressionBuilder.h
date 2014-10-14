@@ -149,7 +149,7 @@ public:
   class EBBinaryOpTermNode : public EBBinaryTermNode
   {
   public:
-    enum NodeType { ADD, SUB, MUL, DIV, MOD, POW };
+    enum NodeType { ADD, SUB, MUL, DIV, MOD, POW, LESS, GREATER, LESSEQ, GREATEREQ, EQ, NOTEQ };
 
     EBBinaryOpTermNode(EBTermNode * _left, EBTermNode * _right, NodeType _type) :
       EBBinaryTermNode(_left, _right), type(_type) {};
@@ -266,6 +266,12 @@ public:
     BINARY_OP_IMPLEMENT(*,MUL)
     BINARY_OP_IMPLEMENT(/,DIV)
     BINARY_OP_IMPLEMENT(%,MOD)
+    BINARY_OP_IMPLEMENT(<,LESS)
+    BINARY_OP_IMPLEMENT(>,GREATER)
+    BINARY_OP_IMPLEMENT(<=,LESSEQ)
+    BINARY_OP_IMPLEMENT(>=,GREATEREQ)
+    BINARY_OP_IMPLEMENT(==,EQ)
+    BINARY_OP_IMPLEMENT(!=,NOTEQ)
 
     /**
      * Binary functions
@@ -338,6 +344,12 @@ public:
   BINARYFUNC_OP_IMPLEMENT(*,MUL)
   BINARYFUNC_OP_IMPLEMENT(/,DIV)
   BINARYFUNC_OP_IMPLEMENT(%,MOD)
+  BINARYFUNC_OP_IMPLEMENT(<,LESS)
+  BINARYFUNC_OP_IMPLEMENT(>,GREATER)
+  BINARYFUNC_OP_IMPLEMENT(<=,LESSEQ)
+  BINARYFUNC_OP_IMPLEMENT(>=,GREATEREQ)
+  BINARYFUNC_OP_IMPLEMENT(==,EQ)
+  BINARYFUNC_OP_IMPLEMENT(!=,NOTEQ)
 };
 
 // convenience function for numeric exponent
