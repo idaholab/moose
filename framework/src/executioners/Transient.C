@@ -355,7 +355,7 @@ Transient::solveStep(Real input_dt)
   {
     _console << " Solve Converged!" << std::endl;
 
-    if (_picard_max_its <= 1 || _picard_converged)
+    if (_picard_max_its <= 1)
       _time_stepper->acceptStep();
 
     _solution_change_norm = _problem.solutionChangeNorm();
