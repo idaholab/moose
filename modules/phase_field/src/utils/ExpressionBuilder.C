@@ -315,3 +315,33 @@ ExpressionBuilder::EBTerm::substitute(const EBTermList & find, const EBTermList 
 
   return root->substitute(find_str, replace_terms);
 }
+
+template<class Node_T>
+ExpressionBuilder::EBTermNode * ExpressionBuilder::EBSubstitutionRule<Node_T>::operator() (const ExpressionBuilder::EBTermNode * node)
+{
+  Node_T * match_node = dynamic_cast<Node_T *>(node);
+  if (match_node == NULL)
+    return NULL;
+  else
+    return substitute(*match_node);
+}
+
+ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & _find, const EBTerm & _replace) :
+    replace(_replace.getRoot()->clone())
+{
+  const EBSymbolNode * find_root = dynamic_cast<const EBSymbolNode *>(_find.getRoot());
+  if (find_root == NULL)
+    mooseError("Function arguments must be pure symbols.");
+  find = find_root->clone();
+}
+
+ExpressionBuilder::EBTermNode *
+ExpressionBuilder::EBLogPlogSubstitution::substitute(const EBUnaryFuncTermNode & node)
+{
+  if (node.type == EBUnaryFuncTermNode::LOG)
+  {
+    return new EBBinaryFuncTermNode(node.getSubnode()->clone(), epsilon->clone(), EBBinaryFuncTermNode::PLOG);
+  }
+  else
+    return NULL;
+}

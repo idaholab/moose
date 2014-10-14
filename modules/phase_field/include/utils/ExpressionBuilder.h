@@ -95,6 +95,7 @@ public:
     virtual ~EBUnaryTermNode() { delete subnode; };
 
     virtual unsigned int substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace);
+    const EBTermNode * getSubnode() const { return subnode; }
 
   protected:
     EBTermNode *subnode;
@@ -140,6 +141,8 @@ public:
     virtual ~EBBinaryTermNode() { delete left; delete right; };
 
     virtual unsigned int substitute(const std::vector<std::string> & find_str, const EBTermNodeList & replace);
+    const EBTermNode * getLeft() const { return left; }
+    const EBTermNode * getRight() const { return right; }
 
   protected:
     EBTermNode *left, *right;
@@ -181,6 +184,35 @@ public:
   };
 
 
+  // substitution rule functor base class to perform flexible term substitutions
+  template<class Node_T>
+  class EBSubstitutionRule {
+  public:
+    EBTermNode * operator() (const EBTermNode *);
+    // on successful substitution this returns a new node to replace toe old one, otherwise it returns NULL
+    virtual EBTermNode * substitute(const Node_T &) = 0;
+  };
+
+  class EBTermSubstitution : public EBSubstitutionRule<EBSymbolNode> {
+  public:
+    EBTermSubstitution(const EBTerm & _find, const EBTerm & _replace);
+    ~EBTermSubstitution() { delete find; delete replace; }
+    virtual EBTermNode * substitute(const EBSymbolNode &) = 0;
+  private:
+    EBSymbolNode * find;
+    EBTermNode * replace;
+  };
+
+  class EBLogPlogSubstitution : public EBSubstitutionRule<EBUnaryFuncTermNode> {
+  public:
+    EBLogPlogSubstitution(const EBTerm & _epsilon) : epsilon(_epsilon.getRoot()->clone()) {}
+    ~EBLogPlogSubstitution() { delete epsilon; }
+    virtual EBTermNode * substitute(const EBUnaryFuncTermNode &) = 0;
+  private:
+    EBTermNode * epsilon;
+  };
+
+
   // User facing host object for an expression tree
   class EBTerm
   {
@@ -213,6 +245,8 @@ public:
     // perform a substitution (returns substituton count)
     unsigned int substitute(const EBTerm & find, const EBTerm & replace);
     unsigned int substitute(const EBTermList & find, const EBTermList & replace);
+
+    const EBTermNode * getRoot() const { return root; }
 
   protected:
     EBTermNode *root;
