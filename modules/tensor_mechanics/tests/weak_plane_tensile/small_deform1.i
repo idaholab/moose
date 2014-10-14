@@ -28,8 +28,8 @@
   [../]
 []
 
-[TensorMechanics]
-  [./solid]
+[Kernels]
+  [./TensorMechanics]
     disp_x = x_disp
     disp_y = y_disp
     disp_z = z_disp

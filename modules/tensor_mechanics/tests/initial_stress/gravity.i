@@ -34,20 +34,7 @@
 []
 
 [Kernels]
-  [./cx_elastic]
-    type = StressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./cy_elastic]
-    type = StressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-  [./cz_elastic]
-    type = StressDivergenceTensors
-    variable = disp_z
-    component = 2
+  [./TensorMechanics]
   [../]
   [./weight]
     type = BodyForce
