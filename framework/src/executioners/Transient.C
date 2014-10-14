@@ -343,6 +343,7 @@ Transient::solveStep(Real input_dt)
       _console << "Picard converged!" << std::endl;
 
       _picard_converged = true;
+      _time_stepper->acceptStep();
       return;
     }
   }
@@ -354,7 +355,8 @@ Transient::solveStep(Real input_dt)
   {
     _console << " Solve Converged!" << std::endl;
 
-    _time_stepper->acceptStep();
+    if (_picard_max_its <= 1 || _picard_converged)
+      _time_stepper->acceptStep();
 
     _solution_change_norm = _problem.solutionChangeNorm();
 
