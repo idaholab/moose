@@ -479,7 +479,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
           // Kuhn-Tucker conditions fail, so need to try another dumb_iteration
           successful_return = false;
           dumb_iteration += 1;
-          if (dumb_iteration >= std::pow(2, _num_f))
+          if (dumb_iteration >= std::pow(2.0, static_cast<int>(_num_f)))
             // have gone through every single possibility and not returned
             break;
           else
@@ -507,7 +507,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
       else if (deact_scheme == "dumb")
       {
         dumb_iteration += 1;
-        if (dumb_iteration >= std::pow(2, _num_f))
+        if (dumb_iteration >= std::pow(2.0, static_cast<int>(_num_f)))
           // have gone through every single possibility and not returned
           break;
         else
