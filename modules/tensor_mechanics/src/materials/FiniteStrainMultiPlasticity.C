@@ -18,8 +18,8 @@ InputParameters validParams<FiniteStrainMultiPlasticity>()
   params.addRequiredRangeCheckedParam<Real>("ep_plastic_tolerance", "ep_plastic_tolerance>0", "The Newton-Raphson process is only deemed converged if the plastic strain increment constraints have L2 norm less than this.");
   params.addRangeCheckedParam<unsigned int>("max_subdivisions", 64, "max_subdivisions>0", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the maximum number of subdivisions allowed.  The number of subdivisions tried increases exponentially, first 1, then 2, then 4, then 8, etc");
   params.addRangeCheckedParam<Real>("linear_dependent", 1E-4, "linear_dependent>=0 & linear_dependent<1", "Flow directions are considered linearly dependent if the smallest singular value is less than linear_dependent times the largest singular value");
-  MooseEnum deactivation_scheme("optimized safe optimized_to_safe", "optimized");
-  params.addParam<MooseEnum>("deactivation_scheme", deactivation_scheme, "Scheme by which constraints are deactivated.  safe: return to the yield surface and then deactivate constraints with negative plasticity multipliers.  optimized: deactivate a constraint as soon as its plasticity multiplier becomes negative.  optimized_to_safe: first use 'optimized', and if that fails, try the return with 'safe' instead.");
+  MooseEnum deactivation_scheme("optimized safe dumb optimized_to_safe optimized_to_safe_to_dumb", "optimized");
+  params.addParam<MooseEnum>("deactivation_scheme", deactivation_scheme, "Scheme by which constraints are deactivated.  safe: return to the yield surface and then deactivate constraints with negative plasticity multipliers.  optimized: deactivate a constraint as soon as its plasticity multiplier becomes negative.  dumb: iteratively try all combinations of active constraints until the solution is found.  optimized_to_safe: first use 'optimized', and if that fails, try the return with 'safe' instead.  optimized_to_safe_to_dumb: first use 'optimized', and if that fails, try with 'safe', and if that fails, try 'dumb'");
   params.addParam<RealVectorValue>("transverse_direction", "If this parameter is provided, before the return-map algorithm is called a rotation is performed so that the 'z' axis in the new frame lies along the transverse_direction in the original frame.  After returning, the inverse rotation is performed.  The transverse_direction will itself rotate with large strains.  This is so that transversely-isotropic plasticity models may be easily defined in the frame where the isotropy holds in the x-y plane.");
   params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  2 = debug Jacobian entries, 3 = check the entire Jacobian, and check Ax=b");
   params.addParam<RealTensorValue>("debug_jac_at_stress", RealTensorValue(), "Debug Jacobian entries at this stress.  For use by developers");
@@ -183,7 +183,7 @@ FiniteStrainMultiPlasticity::computeQpStress()
   if (!return_successful)
   {
     Moose::out << "After making " << num_subdivisions << " subdivisions of the strain increment with L2norm " << _strain_increment[_qp].L2norm() << " the returnMap algorithm failed\n";
-    _fspb_debug_stress = _stress_old[_qp];
+    _fspb_debug_stress = _stress_old[_qp] + _elasticity_tensor[_qp]*_strain_increment[_qp];
     _fspb_debug_pm.assign(_num_f, 1); // this is chosen arbitrarily - please change if a more suitable value occurs to you!
     _fspb_debug_intnl.resize(_num_f);
     for (unsigned a = 0 ; a < _num_f ; ++a)
@@ -431,13 +431,19 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
   // For complicated deactivation schemes we have to record the initial active set
   std::vector<bool> initial_act;
   initial_act.resize(_num_f);
-  if (_deactivation_scheme == "optimized_to_safe")
+  if (_deactivation_scheme == "optimized_to_safe" || _deactivation_scheme == "optimized_to_safe_to_dumb")
   {
     // if "optimized" fails we can change the deactivation scheme to "safe"
     deact_scheme = "optimized";
     for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
       initial_act[alpha] = act[alpha];
   }
+
+  // For "dumb" deactivation, the active set takes all combinations until a solution is found
+  int dumb_iteration = 1;
+  if (_deactivation_scheme == "dumb")
+    for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+      act[alpha] = (dumb_iteration & (1 << alpha)); // returns true if the alpha_th bit of dumb_iteration = 1
 
   successful_return = false;
 
@@ -453,25 +459,66 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
 
 
 
-    if (nr_res2 <= 0.5 && iter <= _max_iter && single_step_success)
-    {
-      // Returned, but must still check Kuhn-Tucker conditions
-      if (checkAndApplyKuhnTucker(f, pm, act))
-        successful_return = true; // Returned perfectly successfully.  The "while" loop will now exit
+    successful_return = (nr_res2 <= 0.5 && iter <= _max_iter && single_step_success);
+
+    // need to also check that yield functions are in admissible region, since
+    // some might have been deactivated incorrectly due to the nonlinear nature
+    // of the problem
+    successful_return = (successful_return && admissible(stress, intnl));
+
+
+    if (successful_return)
+      if (deact_scheme != "dumb")
+        // Need to check Kuhn-Tucker conditions
+        successful_return = (successful_return && checkAndApplyKuhnTucker(f, pm, act));
       else
-        successful_return = false; // KT conditions changed the "act" set.  Need to try another return
-    }
-    else if (deact_scheme == "optimized" && _deactivation_scheme == "optimized_to_safe")
-    {
-      // did not return successfully, but can try the "safe" version
-      successful_return = false;
-      deact_scheme = "safe";
-      for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-        act[alpha] = initial_act[alpha];
-    }
+      {
+        // Also need to check Kuhn-Tucker, BUT if they fail then need to try another dumb_iteration
+        if (!checkAndApplyKuhnTucker(f, pm, act))
+        {
+          // Kuhn-Tucker conditions fail, so need to try another dumb_iteration
+          successful_return = false;
+          dumb_iteration += 1;
+          if (dumb_iteration >= std::pow(2, _num_f))
+            // have gone through every single possibility and not returned
+            break;
+          else
+            for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+              act[alpha] = (dumb_iteration & (1 << alpha)); // returns true if the alpha_th bit of dumb_iteration = 1
+        }
+      }
     else
-      // did not return, and cannot do anything about it
-      break;
+    {
+      if (deact_scheme == "optimized" && (_deactivation_scheme == "optimized_to_safe" || _deactivation_scheme == "optimized_to_safe_to_dumb"))
+      {
+        // did not return successfully, but can try the "safe" version
+        deact_scheme = "safe";
+        for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+          act[alpha] = initial_act[alpha];
+      }
+      else if (deact_scheme == "safe" && _deactivation_scheme == "optimized_to_safe_to_dumb")
+      {
+        // did not return successfully, but can try the "dumb" version
+        deact_scheme = "dumb";
+        dumb_iteration = 1;
+        for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+          act[alpha] = (dumb_iteration & (1 << alpha)); // returns true if the alpha_th bit of dumb_iteration = 1
+      }
+      else if (deact_scheme == "dumb")
+      {
+        dumb_iteration += 1;
+        if (dumb_iteration >= std::pow(2, _num_f))
+          // have gone through every single possibility and not returned
+          break;
+        else
+          for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+            act[alpha] = (dumb_iteration & (1 << alpha)); // returns true if the alpha_th bit of dumb_iteration = 1
+      }
+      else
+        // did not return, and cannot do anything about it
+        break;
+    }
+
 
 
     if (!successful_return)
@@ -486,7 +533,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
       if (num_active == 0)
         break; // failure
 
-      // Since "act" set has changed, need to re-calculate nr_res2
+      // Since "act" set has changed, either by changing deact_scheme, or by KT failing, so need to re-calculate nr_res2
       yieldFunction(stress, intnl, act, num_active, f);
 
       nr_res2 = 0;
@@ -684,6 +731,24 @@ FiniteStrainMultiPlasticity::numberActive(const std::vector<bool> & active)
       num_active++;
   return num_active;
 }
+
+bool
+FiniteStrainMultiPlasticity::admissible(const RankTwoTensor & stress, const std::vector<Real> & intnl)
+{
+  std::vector<bool> act;
+  act.assign(_num_f, true);
+  std::vector<Real> f;
+
+  yieldFunction(stress, intnl, act, _num_f, f);
+
+  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+  {
+    if (f[alpha] > _f[alpha]->_f_tol)
+      return false;
+  }
+  return true;
+}
+
 
 bool
 FiniteStrainMultiPlasticity::checkAndApplyKuhnTucker(const std::vector<Real> & f, const std::vector<Real> & pm, std::vector<bool> & active)
@@ -1692,7 +1757,7 @@ FiniteStrainMultiPlasticity::dof_included(unsigned int dof, const std::vector<bo
   if (dof < unsigned(6))
     return true;
   unsigned eff_dof = dof - 6;
-  if (eff_dof > deactivated_due_to_ld.size())
+  if (eff_dof >= deactivated_due_to_ld.size())
     eff_dof -= deactivated_due_to_ld.size();
   return !deactivated_due_to_ld[eff_dof];
 }
