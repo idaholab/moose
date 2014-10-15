@@ -30,6 +30,22 @@ class GPNode:
     for child in self.children_list:
       self.children[child].Print(prefix + self.name + '/')
 
+  ##
+  # Perform a fuzzy search for a node name
+  # @return The node object if any part of a node key is in the supplied name
+  def getNode(self, name):
+    node = None
+    if name in self.children:
+      node = self.children[name]
+
+
+    else:
+      for key, value in self.children.iteritems():
+        node = value.getNode(name)
+        if node != None:
+          break
+    return node
+
   def fullName(self, no_root=False):
     if self.parent == None:
       if no_root and self.name == 'root':
@@ -58,7 +74,7 @@ class ParseGetPot:
 
     self.parameter_re = re.compile(r"\s*(\w+)\s*=\s*([^#\n]+?)\s*(#.*)?\n")
 
-    self.parameter_in_single_quotes_re = re.compile(r"\s*(\w+)\s*=\s*'([^\n]+?)'\s*(#.*)?\n")
+    self.parameter_in_single_quotes_re = re.compile(r"\s*([\w\-]+)\s*=\s*'([^\n]+?)'\s*(#.*)?\n")
 
     self.comment_re = re.compile(r"[^']*(?:'.*')?\s*#\s*(.*)")
 
