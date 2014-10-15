@@ -3,53 +3,72 @@ from tempfile import TemporaryFile, SpooledTemporaryFile
 import os, sys, re, socket, time, pickle, csv, uuid, subprocess, argparse, decimal, select, platform
 
 class LLDB:
-  def _parseStackTrace(self, jibberish):
-    not_jibberish = re.findall(r'\(lldb\) bt(.*)\(lldb\)', jibberish, re.DOTALL)
-    if len(not_jibberish) != 0:
-      return not_jibberish[0].replace(' frame ', '')
-    else:
-      return 'Stack Trace failed:', jibberish
+  def __init__(self):
+    self.debugger = lldb.SBDebugger.Create()
+    self.command_interpreter = self.debugger.GetCommandInterpreter()
+    self.target = self.debugger.CreateTargetWithFileAndArch(None, None)
+    self.listener = lldb.SBListener("event_listener")
+    self.error = lldb.SBError()
 
-  def _waitForResponse(self, wait=True):
-    while wait:
-      self.lldb_stdout.seek(self.last_position)
-      for line in self.lldb_stdout:
-        if line == '(lldb) ':
-          self.last_position = self.lldb_stdout.tell()
-          return True
-      time.sleep(0.05)
-    time.sleep(0.05)
-    return True
+  def __del__(self):
+    lldb.SBDebugger.Destroy(self.debugger)
+
+  def _parseStackTrace(self, gibberish):
+    return gibberish
+
+  def _run_commands(self, commands):
+    tmp_text = ''
+    return_obj = lldb.SBCommandReturnObject()
+    for command in commands:
+      self.command_interpreter.HandleCommand(command, return_obj)
+      if return_obj.Succeeded():
+        if command == 'process status':
+          tmp_text += '\n##########\nProcess Status:\n'
+          tmp_text += return_obj.GetOutput()
+        elif command == 'bt':
+          tmp_text += '\n##########\nBacktrace:\n'
+          tmp_text += return_obj.GetOutput()
+    return tmp_text
 
   def getStackTrace(self, pid):
-    lldb_commands = [ 'attach -p ' + pid + '\n', 'bt\n', 'quit\n', 'Y\n' ]
-    self.lldb_stdout = SpooledTemporaryFile()
-    self.last_position = 0
-    lldb_process = subprocess.Popen(['lldb', '-x'], stdin=subprocess.PIPE, stdout=self.lldb_stdout, stderr=self.lldb_stdout)
-    while lldb_process.poll() == None:
-      for command in lldb_commands:
-        if command == lldb_commands[-1]:
-          lldb_commands = []
-          if self._waitForResponse(False):
-            # I have seen LLDB exit out from under us
-            try:
-              lldb_process.stdin.write(command)
-            except:
-              pass
-        elif self._waitForResponse():
-          lldb_process.stdin.write(command)
-    self.lldb_stdout.seek(0)
-    stack_trace = self._parseStackTrace(self.lldb_stdout.read())
-    self.lldb_stdout.close()
-    return stack_trace
+    lldb_results = ''
+    attach_info = lldb.SBAttachInfo(int(pid))
+    process = self.target.Attach(attach_info, self.error)
+    process.GetBroadcaster().AddListener(self.listener, lldb.SBProcess.eBroadcastBitStateChanged)
+    done = False
+    while not done:
+      event = lldb.SBEvent()
+      if self.listener.WaitForEvent(lldb.UINT32_MAX, event):
+        state = lldb.SBProcess.GetStateFromEvent(event)
+        if state == lldb.eStateExited:
+          done = True
+        if state == lldb.eStateStopped:
+          lldb_results = self._run_commands(['process status', 'bt', 'cont'])
+          done = True
+        if state == lldb.eStateRunning:
+          self._run_commands(['process interrupt'])
+      time.sleep(0.1)
+
+    # Due to some strange race condition we have to wait until eState is running
+    # before we can pass the detach, quit command. Why we can not do this all in
+    # one go... bug?
+    done = False
+    while not done:
+      if self.listener.WaitForEvent(lldb.UINT32_MAX, event):
+        state = lldb.SBProcess.GetStateFromEvent(event)
+        if state == lldb.eStateRunning:
+          self._run_commands(['detach', 'quit'])
+          done = True
+      time.sleep(0.1)
+    return self._parseStackTrace(lldb_results)
 
 class GDB:
-  def _parseStackTrace(self, jibberish):
-    not_jibberish = re.findall(r'\(gdb\) (#.*)\(gdb\)', jibberish, re.DOTALL)
-    if len(not_jibberish) != 0:
-      return not_jibberish[0]
+  def _parseStackTrace(self, gibberish):
+    not_gibberish = re.findall(r'\(gdb\) (#.*)\(gdb\)', gibberish, re.DOTALL)
+    if len(not_gibberish) != 0:
+      return not_gibberish[0]
     else:
-      return 'Stack Trace failed:', jibberish
+      return 'Stack Trace failed:', gibberish
 
   def _waitForResponse(self, wait=True):
     while wait:
@@ -66,7 +85,7 @@ class GDB:
     gdb_commands = [ 'attach ' + pid + '\n', 'set verbose off\n', 'thread\n', 'apply\n', 'all\n', 'bt\n', 'quit\n', 'y\n' ]
     self.gdb_stdout = SpooledTemporaryFile()
     self.last_position = 0
-    gdb_process = subprocess.Popen(['gdb', '-nx'], stdin=subprocess.PIPE, stdout=self.gdb_stdout, stderr=self.gdb_stdout)
+    gdb_process = subprocess.Popen([which('gdb'), '-nx'], stdin=subprocess.PIPE, stdout=self.gdb_stdout, stderr=self.gdb_stdout)
     while gdb_process.poll() == None:
       for command in gdb_commands:
         if command == gdb_commands[-1]:
@@ -976,6 +995,15 @@ def verifyArgs(args):
     else:
       args.outfile = [os.getcwd() + '/' + args.run[0].replace('..', '').replace('/', '').replace(' ', '_') + '.log']
 
+  if args.pstack:
+    if platform.platform(0, 1).split('-')[:-1][0].find('Darwin') != -1:
+      try:
+        import lldb
+      except ImportError:
+        print 'Could not import lldb. This module is supplied by Xcode.\nEven if Xcode is installed, PYTHONPATH is normally not \nset to include lldb. Please search the internets for \ninformation about setting PYTHONPATH to include lldb for \nXcode.'
+        sys.exit(1)
+    else:
+      which('gdb')
   return args
 
 def parseArguments(args=None):
