@@ -76,11 +76,11 @@ MultiAppCopyTransfer::execute()
       unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
       //Create a serialized version of the solution vector
-      NumericVector<Number> * serialized_solution = NumericVector<Number>::build(from_sys.comm()).release();
-      serialized_solution->init(from_sys.n_dofs(), false, SERIAL);
+//      NumericVector<Number> * serialized_solution = NumericVector<Number>::build(from_sys.comm()).release();
+//      serialized_solution->init(from_sys.n_dofs(), false, SERIAL);
 
       // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-      from_sys.solution->localize(*serialized_solution);
+//      from_sys.solution->localize(*serialized_solution);
 
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
@@ -124,7 +124,8 @@ MultiAppCopyTransfer::execute()
 
                 // Assuming LAGRANGE!
                 dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
-                Real from_value = (*serialized_solution)(from_dof);
+                //Real from_value = (*serialized_solution)(from_dof);
+                Real from_value = (*from_sys.solution)(from_dof);
 
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
@@ -146,7 +147,7 @@ MultiAppCopyTransfer::execute()
         }
       }
 
-      delete serialized_solution;
+//      delete serialized_solution;
 
       break;
     }
@@ -197,11 +198,11 @@ MultiAppCopyTransfer::execute()
         mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppCopyTransfer only works with SerialMesh!");
 
         //Create a serialized version of the solution vector
-        NumericVector<Number> * serialized_solution = NumericVector<Number>::build(from_sys.comm()).release();
-        serialized_solution->init(from_sys.n_dofs(), false, SERIAL);
+//        NumericVector<Number> * serialized_solution = NumericVector<Number>::build(from_sys.comm()).release();
+//        serialized_solution->init(from_sys.n_dofs(), false, SERIAL);
 
         // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-        from_sys.solution->localize(*serialized_solution);
+//        from_sys.solution->localize(*serialized_solution);
 
 
         MeshBase * from_mesh = &from_problem.mesh().getMesh();
@@ -210,8 +211,8 @@ MultiAppCopyTransfer::execute()
 
         if (is_nodal)
         {
-          MeshBase::const_node_iterator to_node_it = to_mesh->nodes_begin();
-          MeshBase::const_node_iterator to_node_end = to_mesh->nodes_end();
+          MeshBase::const_node_iterator to_node_it = to_mesh->local_nodes_begin();
+          MeshBase::const_node_iterator to_node_end = to_mesh->local_nodes_end();
 
           for (; to_node_it != to_node_end; ++to_node_it)
           {
@@ -227,7 +228,8 @@ MultiAppCopyTransfer::execute()
 
             // Assuming LAGRANGE!
             dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
-            Real from_value = (*serialized_solution)(from_dof);
+            //Real from_value = (*serialized_solution)(from_dof);
+            Real from_value = (*from_sys.solution)(from_dof);
 
             // Swap back
             Moose::swapLibMeshComm(swapped);
@@ -240,7 +242,7 @@ MultiAppCopyTransfer::execute()
           mooseError("MultiAppCopyTransfer can only be used on nodal variables");
         }
 
-        delete serialized_solution;
+//        delete serialized_solution;
       }
 
       to_solution.close();
