@@ -35,7 +35,6 @@ public:
 protected:
   virtual void computeProperties();
 
-private:
   void functionsDerivative();
   void functionsOptimize();
 
