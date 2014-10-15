@@ -93,7 +93,7 @@ CreateExecutionerAction::act()
 
   Moose::setup_perf_log.push("Create Executioner","Setup");
   _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
-  MooseSharedPointer<Executioner> executioner = MooseSharedNamespace::static_pointer_cast<Executioner>(_factory.create_shared_ptr(_type, "Executioner", _moose_object_pars));
+  MooseSharedPointer<Executioner> executioner = MooseSharedNamespace::static_pointer_cast<Executioner>(_factory.create(_type, "Executioner", _moose_object_pars));
   Moose::setup_perf_log.pop("Create Executioner","Setup");
 
   if (_problem != NULL)

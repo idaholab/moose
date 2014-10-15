@@ -52,6 +52,15 @@
   [../]
 []
 
+[Kernels]
+  [./TensorMechanics]
+    disp_z = uz
+    disp_y = uy
+    disp_x = ux
+    use_displaced_mesh = true
+  [../]
+[]
+
 [AuxKernels]
   [./stress_zz]
     type = RankTwoAux
@@ -210,15 +219,6 @@
     type = Console
     perf_log = true
     linear_residuals = true
-  [../]
-[]
-
-[TensorMechanics]
-  [./solid]
-    disp_z = uz
-    disp_y = uy
-    disp_x = ux
-    use_displaced_mesh = true
   [../]
 []
 

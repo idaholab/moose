@@ -79,7 +79,7 @@ protected:
   };
 
   /// Instance of CoupledProblem class
-  CoupledProblem * _problem;
+  MooseSharedPointer<CoupledProblem> _problem;
   /// Mapping: FE problem name -> index to _awhs | _parsers arrays. After build() also _executioners | _fe_problems
   std::map<std::string, unsigned int> _name_index;
   /// Action warehouses to store actions into

@@ -58,7 +58,7 @@ CreateProblemAction::act()
     {
       _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
       _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
-      _problem = MooseSharedNamespace::dynamic_pointer_cast<FEProblem>(_factory.create_shared_ptr(_type, _problem_name, _moose_object_pars));
+      _problem = MooseSharedNamespace::dynamic_pointer_cast<FEProblem>(_factory.create(_type, _problem_name, _moose_object_pars));
       if (!_problem.get())
         mooseError("Problem has to be of a FEProblem type");
     }
