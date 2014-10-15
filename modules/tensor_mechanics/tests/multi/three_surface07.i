@@ -303,7 +303,7 @@
     ep_plastic_tolerance = 1E-9
     plastic_models = 'simple0 simple1 simple2'
     max_NR_iterations = 2
-    max_subdivisions = 1
+    min_stepsize = 1
     debug_fspb = 1
     debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
     debug_jac_at_pm = '1 1'
