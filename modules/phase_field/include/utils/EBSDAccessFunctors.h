@@ -21,8 +21,8 @@ public:
 
   /// Averaged EBSD data
   struct EBSDAvgData {
-    Real phi1, phi, phi2, symmetry;
-    unsigned int phase, grain, n;
+    Real phi1, phi, phi2;
+    unsigned int phase, symmetry, grain, n;
     Point p;
   };
 

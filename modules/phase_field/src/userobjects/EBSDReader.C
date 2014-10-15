@@ -89,8 +89,8 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
   for (unsigned int i = 0; i < _feature_num; ++i)
   {
     EBSDAvgData & a = _avg_data[i];
-    a.p = a.phi1 = a.phi = a.phi2 = a.symmetry = 0.0;
-    a.phase = a.n = 0;
+    a.p = a.phi1 = a.phi = a.phi2 = 0.0;
+    a.symmetry = a.phase = a.n = 0;
   }
 
     // Iterate through data points to get average variable values for each grain
@@ -109,8 +109,13 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
       if (a.phase != j->phase)
         mooseError("An EBSD feature needs to have a uniform phase.");
 
-    a.symmetry += j->symmetry;
-    a.p     += j->p;
+    if (a.n == 0)
+      a.symmetry = j->symmetry;
+    else
+      if (a.symmetry != j->symmetry)
+        mooseError("An EBSD feature needs to have a uniform symmetry parameter.");
+
+    a.p += j->p;
     a.n++;
   }
 
@@ -130,7 +135,6 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     a.grain = _feature_id[a.phase].size();
     _feature_id[a.phase].push_back(i);
 
-    a.symmetry /= Real(a.n);
     a.p *= 1.0/Real(a.n);
   }
 }
