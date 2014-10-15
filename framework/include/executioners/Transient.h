@@ -201,6 +201,14 @@ public:
 
   void parentOutputPositionChanged() { _problem.parentOutputPositionChanged(); }
 
+  /**
+   * Get the number of Picard iterations performed
+   * @return Number of Picard iterations performed
+   */
+  //Because this returns the number of Picard iterations, rather than the current
+  //iteration count (which starts at 0), increment by 1.
+  Real numPicardIts() { return _picard_it+1; }
+
 
 protected:
   /**

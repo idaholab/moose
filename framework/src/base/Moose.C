@@ -181,6 +181,7 @@
 #include "NodalExtremeValue.h"
 #include "ElementExtremeValue.h"
 #include "DifferencePostprocessor.h"
+#include "NumPicardIterations.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -532,6 +533,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalExtremeValue);
   registerPostprocessor(ElementExtremeValue);
   registerPostprocessor(DifferencePostprocessor);
+  registerPostprocessor(NumPicardIterations);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
