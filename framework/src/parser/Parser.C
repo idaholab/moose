@@ -677,7 +677,6 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractVector(int                   , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(long                  , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(unsigned int          , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector(bool                  , it->second, full_name, it->first, in_global, global_params_block);
 
       // Moose Vectors
       dynamicCastAndExtractVector(SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
