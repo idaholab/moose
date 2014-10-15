@@ -40,14 +40,17 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
   _dx = g.d[0];
   _nx = g.n[0];
   _minx = g.min[0];
+  _maxx = _minx + _dx * _nx;
 
   _dy = g.d[1];
   _ny = g.n[1];
   _minx = g.min[1];
+  _maxy = _miny + _dy * _ny;
 
   _dz = g.d[2];
   _nz = g.n[2];
   _minx = g.min[2];
+  _maxz = _minz + _dz * _nz;
 
   // Resize the _data array
   unsigned total_size = g.dim < 3 ? _nx*_ny : _nx*_ny*_nz;
@@ -64,6 +67,10 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
 
       std::istringstream iss(line);
       iss >> d.phi1 >> d.phi >> d.phi2 >> x >> y >> z >> d.grain >> d.phase >> d.symmetry;
+
+      if (x < _minx || y < _miny || x > _maxx || y > _maxy || (g.dim == 3 && (z > _maxz || z < _minz)))
+        mooseError("EBSD Data ouside of the domain declared in the header:\n" << line);
+
       d.p = Point(x,y,z);
 
       // determine number of grains in the dataset
