@@ -132,7 +132,7 @@ app_deps := $(moose_deps)
 # .) Calling 'make clean' in an app should not remove MOOSE object
 #    files, libraries, etc.
 clean::
-	@rm -rf $(app_LIB) $(app_EXEC) $(app_objects) $(app_deps)
+	@rm -rf $(app_LIB) $(app_EXEC) $(app_objects) $(app_deps) $(app_HEADER)
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
 # bunch more stuff.  We have to write this target as though it could
