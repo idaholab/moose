@@ -16,11 +16,12 @@ InputParameters validParams<FiniteStrainMultiPlasticity>()
   params.addRangeCheckedParam<unsigned int>("max_NR_iterations", 20, "max_NR_iterations>0", "Maximum number of Newton-Raphson iterations allowed");
   params.addRequiredParam<std::vector<UserObjectName> >("plastic_models", "List of names of user objects that define the plastic models that could be active for this material.");
   params.addRequiredRangeCheckedParam<Real>("ep_plastic_tolerance", "ep_plastic_tolerance>0", "The Newton-Raphson process is only deemed converged if the plastic strain increment constraints have L2 norm less than this.");
-  params.addRangeCheckedParam<unsigned int>("max_subdivisions", 64, "max_subdivisions>0", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the maximum number of subdivisions allowed.  The number of subdivisions tried increases exponentially, first 1, then 2, then 4, then 8, etc");
+  params.addRangeCheckedParam<Real>("min_stepsize", 0.01, "min_stepsize>0 & min_stepsize<=1", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the minimum fraction of applied strain increment that may be applied before the algorithm gives up entirely");
   params.addRangeCheckedParam<Real>("linear_dependent", 1E-4, "linear_dependent>=0 & linear_dependent<1", "Flow directions are considered linearly dependent if the smallest singular value is less than linear_dependent times the largest singular value");
   MooseEnum deactivation_scheme("optimized safe dumb optimized_to_safe optimized_to_safe_to_dumb", "optimized");
   params.addParam<MooseEnum>("deactivation_scheme", deactivation_scheme, "Scheme by which constraints are deactivated.  safe: return to the yield surface and then deactivate constraints with negative plasticity multipliers.  optimized: deactivate a constraint as soon as its plasticity multiplier becomes negative.  dumb: iteratively try all combinations of active constraints until the solution is found.  optimized_to_safe: first use 'optimized', and if that fails, try the return with 'safe' instead.  optimized_to_safe_to_dumb: first use 'optimized', and if that fails, try with 'safe', and if that fails, try 'dumb'");
   params.addParam<RealVectorValue>("transverse_direction", "If this parameter is provided, before the return-map algorithm is called a rotation is performed so that the 'z' axis in the new frame lies along the transverse_direction in the original frame.  After returning, the inverse rotation is performed.  The transverse_direction will itself rotate with large strains.  This is so that transversely-isotropic plasticity models may be easily defined in the frame where the isotropy holds in the x-y plane.");
+  params.addParam<bool>("ignore_failures", false, "The return-map algorithm will return with the best admissible stresses and internal parameters that it can, even if they don't fully correspond to the applied strain increment.  To speed computations, this flag can be set to true, the max_NR_iterations set small, and the min_stepsize large.");
   params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  2 = debug Jacobian entries, 3 = check the entire Jacobian, and check Ax=b");
   params.addParam<RealTensorValue>("debug_jac_at_stress", RealTensorValue(), "Debug Jacobian entries at this stress.  For use by developers");
   params.addParam<std::vector<Real> >("debug_jac_at_pm", "Debug Jacobian entries at these plastic multipliers");
@@ -37,7 +38,8 @@ FiniteStrainMultiPlasticity::FiniteStrainMultiPlasticity(const std::string & nam
                                                          InputParameters parameters) :
     FiniteStrainMaterial(name, parameters),
     _max_iter(getParam<unsigned int>("max_NR_iterations")),
-    _max_subdivisions(getParam<unsigned int>("max_subdivisions")),
+    _min_stepsize(getParam<Real>("min_stepsize")),
+    _ignore_failures(getParam<bool>("ignore_failures")),
 
     _num_f(getParam<std::vector<UserObjectName> >("plastic_models").size()),
     _epp_tol(getParam<Real>("ep_plastic_tolerance")),
@@ -125,76 +127,19 @@ FiniteStrainMultiPlasticity::computeQpStress()
 
   preReturnMap();
 
-  /**
-   * the idea in the following is to potentially subdivide the
-   * strain increment into smaller portions
-   * First one subdivision is tried, and if that fails then
-   * 2 are tried, then 4, etc.  This is in the hope that the
-   * time-step for the entire mesh need not be cut if there
-   * are only a few "bad" quadpoints where the return-map
-   * is difficult
-   */
+  unsigned int number_iterations;
 
+  // try a purely elastic step first
+  bool found_solution = elasticStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _plastic_strain_old[_qp], _plastic_strain[_qp], _elasticity_tensor[_qp], _strain_increment[_qp], _yf[_qp], number_iterations);
 
-  // NOTE: perhaps i should optimise for purely elastic
+  // if not purely elastic, do some plastic return
+  if (!found_solution)
+    found_solution = plasticStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _plastic_strain_old[_qp], _plastic_strain[_qp], _elasticity_tensor[_qp], _strain_increment[_qp], _yf[_qp], number_iterations);
 
-  bool return_successful = false;
-
-  // number of subdivisions of the strain increment currently being tried
-  unsigned int num_subdivisions = 1;
-
-  // number of iterations in the current return map
-  unsigned int iter;
-
-  while (num_subdivisions <= _max_subdivisions && !return_successful)
-  {
-    // prepare the variables for this set of strain increments
-    RankTwoTensor dep = _strain_increment[_qp]/num_subdivisions;
-    RankTwoTensor stress_previous = _stress_old[_qp];
-    RankTwoTensor plastic_strain_previous = _plastic_strain_old[_qp];
-    std::vector<Real> intnl_previous;
-    intnl_previous.resize(_intnl_old[_qp].size());
-    for (unsigned int a = 0; a < _intnl_old[_qp].size(); ++a)
-      intnl_previous[a] = _intnl_old[_qp][a];
-    _iter[_qp] = 0.0;
-
-
-    // now do the work: apply the "dep" over num_subdivisions "substeps"
-    for (unsigned substep = 0 ; substep < num_subdivisions ; ++substep)
-    {
-      return_successful = returnMap(stress_previous, plastic_strain_previous, _intnl_old[_qp], dep, _elasticity_tensor[_qp], _stress[_qp], _plastic_strain[_qp], _intnl[_qp], _yf[_qp], iter);
-      if (return_successful)
-      {
-        // record the updated variables in readiness for the next substep
-        stress_previous = _stress[_qp];
-        plastic_strain_previous = _plastic_strain[_qp];
-        for (unsigned int a = 0; a < _intnl_old[_qp].size(); ++a)
-          intnl_previous[a] = _intnl[_qp][a];
-        _iter[_qp] += 1.0*iter;
-      }
-      else
-        break; // oh dear, we need to increase the number of subdivisions
-    }
-
-    if (!return_successful)
-      num_subdivisions *= 2;
-  }
-
-  if (!return_successful)
-  {
-    Moose::out << "After making " << num_subdivisions << " subdivisions of the strain increment with L2norm " << _strain_increment[_qp].L2norm() << " the returnMap algorithm failed\n";
-    _fspb_debug_stress = _stress_old[_qp] + _elasticity_tensor[_qp]*_strain_increment[_qp];
-    _fspb_debug_pm.assign(_num_f, 1); // this is chosen arbitrarily - please change if a more suitable value occurs to you!
-    _fspb_debug_intnl.resize(_num_f);
-    for (unsigned a = 0 ; a < _num_f ; ++a)
-      _fspb_debug_intnl[a] = _intnl_old[_qp][a];
-    checkDerivatives();
-    checkJacobian();
-    checkSolution();
-    mooseError("Exiting\n");
-  }
 
   postReturnMap();
+
+  _iter[_qp] = 1.0*number_iterations;
 
   //Update measures of strain
   _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp] - (_plastic_strain[_qp] - _plastic_strain_old[_qp]);
@@ -248,6 +193,129 @@ FiniteStrainMultiPlasticity::postReturnMap()
     }
   }
 }
+
+bool
+FiniteStrainMultiPlasticity::elasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations)
+{
+  stress = stress_old + E_ijkl*strain_increment;
+  plastic_strain = plastic_strain_old;
+  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+    intnl[alpha] = intnl_old[alpha];
+  iterations = 0;
+  return admissible(stress, intnl, yf);
+}
+
+
+bool
+FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations)
+{
+  /**
+   * the idea in the following is to potentially subdivide the
+   * strain increment into smaller fractions, of size "step_size".
+   * First step_size = 1 is tried, and if that fails then 0.5 is
+   * tried, then 0.25, etc.  As soon as a step is successful, its
+   * results are put into the "good" variables, which are used
+   * if a subsequent step fails.  If >= 2 consecutive steps are
+   * successful, the step_size is increased by 1.2
+   *
+   * The point of all this is that I hope that the
+   * time-step for the entire mesh need not be cut if there
+   * are only a few "bad" quadpoints where the return-map
+   * is difficult
+   */
+
+  bool return_successful = false;
+
+  // total number of Newton-Raphson iterations used
+  unsigned int iter = 0;
+
+
+  Real step_size = 1.0;
+  Real time_simulated = 0.0;
+
+  RankTwoTensor dep = step_size*strain_increment;
+
+  // the "good" variables hold the latest admissible stress
+  // and internal parameters.
+  RankTwoTensor stress_good = stress_old;
+  RankTwoTensor plastic_strain_good = plastic_strain_old;
+  std::vector<Real> intnl_good(_num_f);
+  for (unsigned a = 0 ; a < _num_f ; ++a)
+    intnl_good[a] = intnl_old[a];
+  std::vector<Real> yf_good(_num_f);
+
+  unsigned int num_consecutive_successes = 0;
+
+  while (time_simulated < 1.0 && step_size >= _min_stepsize)
+  {
+    iter = 0;
+    return_successful = returnMap(stress_good, stress, intnl_good, intnl, plastic_strain_good, plastic_strain, E_ijkl, dep, yf, iter);
+    iterations += iter;
+
+    if (return_successful)
+    {
+      num_consecutive_successes += 1;
+      time_simulated += step_size;
+      if (time_simulated < 1.0)  // this condition is just for optimization: if time_simulated=1 then the "good" quantities are no longer needed
+      {
+        stress_good = stress;
+        plastic_strain_good = plastic_strain;
+        for (unsigned a = 0 ; a < _num_f ; ++a)
+        {
+          intnl_good[a] = intnl[a];
+          yf_good[a] = yf[a];
+        }
+        if (num_consecutive_successes >= 2)
+          step_size *= 1.2;
+      }
+      step_size = std::min(step_size, 1.0 - time_simulated); // avoid overshoots
+    }
+    else
+    {
+      step_size *= 0.5;
+      num_consecutive_successes = 0;
+      stress = stress_good;
+      plastic_strain = plastic_strain_good;
+      for (unsigned a = 0 ; a < _num_f ; ++a)
+      {
+        intnl[a] = intnl_good[a];
+        yf[a] = yf_good[a];
+      }
+      dep = step_size*strain_increment;
+    }
+  }
+
+
+  if (!return_successful)
+  {
+    if (_ignore_failures)
+    {
+      stress = stress_good;
+      plastic_strain = plastic_strain_good;
+      for (unsigned a = 0 ; a < _num_f ; ++a)
+      {
+        intnl[a] = intnl_good[a];
+        yf[a] = yf_good[a];
+      }
+    }
+    else
+    {
+      Moose::out << "After reducing the stepsize to " << step_size << " with original strain increment with L2norm " << strain_increment.L2norm() << " the returnMap algorithm failed\n";
+      _fspb_debug_stress = stress_old + E_ijkl*strain_increment;
+      _fspb_debug_pm.assign(_num_f, 1); // this is chosen arbitrarily - please change if a more suitable value occurs to you!
+      _fspb_debug_intnl.resize(_num_f);
+      for (unsigned a = 0 ; a < _num_f ; ++a)
+        _fspb_debug_intnl[a] = intnl_old[a];
+      checkDerivatives();
+      checkJacobian();
+      checkSolution();
+      mooseError("Exiting\n");
+    }
+  }
+
+  return return_successful;
+}
+
 
 void
 FiniteStrainMultiPlasticity::yieldFunction(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<bool> & active, unsigned num_active, std::vector<Real> & f)
@@ -340,37 +408,14 @@ FiniteStrainMultiPlasticity::dhardPotential_dintnl(const RankTwoTensor & stress,
 }
 
 bool
-FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const RankTwoTensor & plastic_strain_old, const std::vector<Real> & intnl_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & stress, RankTwoTensor & plastic_strain, std::vector<Real> & intnl, std::vector<Real> & f, unsigned int & iter)
+FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter)
 {
-  bool successful_return = true;  // return value of this function
+  bool successful_return = elasticStep(stress_old, stress, intnl_old, intnl, plastic_strain_old, plastic_strain, E_ijkl, strain_increment, f, iter);
 
-  // Assume this strain increment does not induce any plasticity
-  // This is the elastic-predictor
-  stress = stress_old + E_ijkl * delta_d; // the trial stress
-  plastic_strain = plastic_strain_old;
-  for (unsigned i = 0; i < intnl_old.size() ; ++i)
-    intnl[i] = intnl_old[i];
-  iter = 0;
-
-  // active constraints.  At this stage assume they're all active
-  std::vector<bool> act;
-  act.assign(_num_f, true);
-
-  yieldFunction(stress, intnl, act, _num_f, f);
-
-  Real nr_res2 = 0;
-  for (unsigned i = 0 ; i < f.size() ; ++i)
-    if (f[i] > 0.0)
-      nr_res2 += 0.5*std::pow(f[i]/_f[i]->_f_tol, 2);
-
-  if (nr_res2 < 0.5)
-    // a purely elastic increment.
-    // All output variables have been calculated
+  if (successful_return)
     return successful_return;
 
-
-
-  // So, from here on we know that the trial stress and intnl_old
+  // Here we know that the trial stress and intnl_old
   // is inadmissible, and we have to return from those values
   // value to the yield surface.  There are three
   // types of constraints we have to satisfy, listed
@@ -385,6 +430,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
   // pm*f=0 (up to tolerances), which may not hold upon exit
   //     of the NR loops if a constraint got deactivated
   //     due to linear dependence, and then f<0, and its pm>0
+
 
 
   // Plastic strain constraint, L2 norm must be zero (up to a tolerance)
@@ -402,18 +448,30 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
   std::vector<Real> ic;
 
 
-  // Inverse of E_ijkl (assuming symmetric)
-  RankFourTensor E_inv = E_ijkl.invSymm();
+  // Record the stress before Newton-Raphson in case of failure-and-restart
+  RankTwoTensor initial_stress = stress;
+
+  iter = 0;
 
   // Initialise the set of active constraints
   // At this stage, the active constraints are
   // those that exceed their _f_tol
+  // active constraints.  At this stage assume they're all active
+  std::vector<bool> act(_num_f);
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
     act[alpha] = (f[alpha] > _f[alpha]->_f_tol);
 
+
+
+
+
+  // Inverse of E_ijkl (assuming symmetric)
+  RankFourTensor E_inv = E_ijkl.invSymm();
+
+
   // convenience variable that holds the change in plastic strain incurred during the return
   // delta_dp = plastic_strain - plastic_strain_old
-  // delta_dp = E^{-1}*(trial_stress - stress), where trial_stress = E*(strain - plastic_strain_old)
+  // delta_dp = E^{-1}*(initial_stress - stress), where initial_stress = E*(strain - plastic_strain_old)
   RankTwoTensor delta_dp = RankTwoTensor();
 
   // The "consistency parameters" (plastic multipliers)
@@ -440,10 +498,28 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
   }
 
   // For "dumb" deactivation, the active set takes all combinations until a solution is found
-  int dumb_iteration = 1;
+  int dumb_iteration = 0;
   if (_deactivation_scheme == "dumb")
-    for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-      act[alpha] = (dumb_iteration & (1 << alpha)); // returns true if the alpha_th bit of dumb_iteration = 1
+  {
+    bool dummy_bool = incrementDumb(dumb_iteration, act);
+    yieldFunction(stress, intnl, act, numberActive(act), f);
+    while (tooDumbToTry(_deactivation_scheme, act, f))
+    {
+      dummy_bool = incrementDumb(dumb_iteration, act);
+      yieldFunction(stress, intnl, act, numberActive(act), f);
+    }
+  }
+
+
+
+  // The residual-squared that the line-search will reduce
+  // Later it will get contributions from epp and ic, but
+  // at present these are zero
+  Real nr_res2 = 0;
+  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+    if (act[alpha])
+      nr_res2 += 0.5*std::pow(f[alpha]/_f[alpha]->_f_tol, 2);
+
 
   successful_return = false;
 
@@ -452,6 +528,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
     single_step_success = true;
 
     iter = 0;
+
 
     // The Newton-Raphson loops
     while (nr_res2 > 0.5 && iter++ < _max_iter && single_step_success)
@@ -464,7 +541,11 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
     // need to also check that yield functions are in admissible region, since
     // some might have been deactivated incorrectly due to the nonlinear nature
     // of the problem
-    successful_return = (successful_return && admissible(stress, intnl));
+    if (_num_f > 1)
+    {
+      std::vector<Real> all_f;
+      successful_return = (successful_return && admissible(stress, intnl, all_f));
+    }
 
 
     if (successful_return)
@@ -478,13 +559,9 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
         {
           // Kuhn-Tucker conditions fail, so need to try another dumb_iteration
           successful_return = false;
-          dumb_iteration += 1;
-          if (dumb_iteration >= std::pow(2.0, static_cast<int>(_num_f)))
+          if (incrementDumb(dumb_iteration, act))
             // have gone through every single possibility and not returned
             break;
-          else
-            for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-              act[alpha] = (dumb_iteration & (1 << alpha)); // returns true if the alpha_th bit of dumb_iteration = 1
         }
       }
     else
@@ -500,19 +577,15 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
       {
         // did not return successfully, but can try the "dumb" version
         deact_scheme = "dumb";
-        dumb_iteration = 1;
-        for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-          act[alpha] = (dumb_iteration & (1 << alpha)); // returns true if the alpha_th bit of dumb_iteration = 1
+        dumb_iteration = 0;
+        if (incrementDumb(dumb_iteration, act))
+          break;
       }
       else if (deact_scheme == "dumb")
       {
-        dumb_iteration += 1;
-        if (dumb_iteration >= std::pow(2.0, static_cast<int>(_num_f)))
+        if (incrementDumb(dumb_iteration, act))
           // have gone through every single possibility and not returned
           break;
-        else
-          for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
-            act[alpha] = (dumb_iteration & (1 << alpha)); // returns true if the alpha_th bit of dumb_iteration = 1
       }
       else
         // did not return, and cannot do anything about it
@@ -523,7 +596,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
 
     if (!successful_return)
     {
-      stress = stress_old + E_ijkl * delta_d; // back to trial stress
+      stress = initial_stress;
       delta_dp = RankTwoTensor(); // back to zero change in plastic strain
       for (unsigned i = 0; i < intnl_old.size() ; ++i)
         intnl[i] = intnl_old[i];  // back to old internal params
@@ -536,23 +609,31 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, const R
       // Since "act" set has changed, either by changing deact_scheme, or by KT failing, so need to re-calculate nr_res2
       yieldFunction(stress, intnl, act, num_active, f);
 
+      // for deact_scheme == "dumb" we don't bother trying to activate constraints that are initially negative
+      while (tooDumbToTry(deact_scheme, act, f))
+      {
+        if (incrementDumb(dumb_iteration, act))
+          // have gone through every single possibility and not returned
+          break;
+        num_active = numberActive(act);
+        yieldFunction(stress, intnl, act, num_active, f);
+      }
+
       nr_res2 = 0;
-      for (unsigned i = 0 ; i < num_active ; ++i)
-        if (f[i] > 0.0)
-          nr_res2 += 0.5*std::pow(f[i]/_f[i]->_f_tol, 2);
+      unsigned ind = 0;
+      for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+        if (act[alpha])
+        {
+          if (f[ind] > _f[alpha]->_f_tol)
+            nr_res2 += 0.5*std::pow(f[ind]/_f[alpha]->_f_tol, 2);
+          ind++;
+        }
     }
 
   }
 
   // returned, with either success or failure
-  if (!successful_return)
-  {
-    // FAILURE
-    stress = stress_old;
-    for (unsigned i = 0; i < intnl_old.size() ; ++i)
-      intnl[i] = intnl_old[i];
-  }
-  else
+  if (successful_return)
   {
     plastic_strain += delta_dp;
     if (f.size() != _num_f)
@@ -733,17 +814,16 @@ FiniteStrainMultiPlasticity::numberActive(const std::vector<bool> & active)
 }
 
 bool
-FiniteStrainMultiPlasticity::admissible(const RankTwoTensor & stress, const std::vector<Real> & intnl)
+FiniteStrainMultiPlasticity::admissible(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<Real> & all_f)
 {
   std::vector<bool> act;
   act.assign(_num_f, true);
-  std::vector<Real> f;
 
-  yieldFunction(stress, intnl, act, _num_f, f);
+  yieldFunction(stress, intnl, act, _num_f, all_f);
 
   for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
   {
-    if (f[alpha] > _f[alpha]->_f_tol)
+    if (all_f[alpha] > _f[alpha]->_f_tol)
       return false;
   }
   return true;
@@ -1429,6 +1509,31 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
   stress = ls_stress;
 
   return success;
+}
+
+bool
+FiniteStrainMultiPlasticity::incrementDumb(int & dumb_iteration, std::vector<bool> & act)
+{
+  dumb_iteration += 1;
+  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+    act[alpha] = (dumb_iteration & (1 << alpha)); // returns true if the alpha_th bit of dumb_iteration == 1
+  return (dumb_iteration >= (1 << _num_f)); // (1 << _num_f) = 2^_num_f
+}
+
+bool
+FiniteStrainMultiPlasticity::tooDumbToTry(const MooseEnum & deactivation_scheme, const std::vector<bool> & act, const std::vector<Real> f)
+{
+  if (deactivation_scheme != "dumb")
+    return false;
+  unsigned ind = 0;
+  for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
+    if (act[alpha])
+    {
+      if (f[ind] < _f[alpha]->_f_tol)
+        return true;
+      ind++;
+    }
+  return false;
 }
 
 

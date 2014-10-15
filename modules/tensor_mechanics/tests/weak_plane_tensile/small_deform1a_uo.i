@@ -184,7 +184,7 @@
     C_ijkl = '0 1E6'
     plastic_models = wpt
     ep_plastic_tolerance = 1E-5
-    max_subdivisions = 1
+    min_stepsize = 1
     max_NR_iterations = 10
   [../]
 []
