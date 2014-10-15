@@ -13,6 +13,11 @@ InputParameters validParams<FiniteStrainMultiPlasticity>();
  * FiniteStrainMultiPlasticity is performs the return-map
  * algorithm and associated stress updates for plastic
  * models defined by a General User Objects
+ *
+ * Note that if run in debug mode you might have to use
+ * the --no-trap-fpe flag because PETSc-LAPACK-BLAS
+ * explicitly compute 0/0 and 1/0, and this causes
+ * Libmesh to trap the floating-point exceptions
  */
 class FiniteStrainMultiPlasticity : public FiniteStrainMaterial
 {
@@ -26,8 +31,11 @@ protected:
   /// Maximum number of Newton-Raphson iterations allowed
   unsigned int _max_iter;
 
-  /// Maximum number of subdivisions allowed
-  unsigned int _max_subdivisions;
+  /// Minimum fraction of applied strain that may be applied during adaptive stepsizing
+  Real _min_stepsize;
+
+  /// Even if the returnMap fails, return the best values found for stress and internal parameters
+  bool _ignore_failures;
 
   /// Number of plastic models for this material
   unsigned int _num_f;
@@ -285,22 +293,24 @@ protected:
 
   /**
    * Implements the return map
-   * @param stress_old  The stress at the previous "time" step
-   * @param plastic_strain_old  The value of plastic strain at the previous "time" step
-   * @param intnl_old The internal variables at the previous "time" step
-   * @param delta_d  The total strain increment for this "time" step
-   * @param E_ijkl   The elasticity tensor.  If no plasiticity then sig_new = sig_old + E_ijkl*delta_d
-   * @param stress    (output) The stress after returning to the yield surface
-   * @param plastic_strain   (output) The value of plastic strain after returning to the yield surface
-   * @param intnl    (output) All the internal variables after returning to the yield surface
-   * @param f  (output) All the yield functions after returning to the yield surface
-   * @param iter (output) The number of Newton-Raphson iterations used
-   * @return true if the stress was successfully returned to the yield surface
+   *
    * Note that this algorithm doesn't do any rotations.  In order to find the
    * final stress and plastic_strain must be rotated using _rotation_increment.
    * This is usually done in computeQpStress
+   *
+   * @param stress_old The value of stress at the previous "time" step
+   * @param stress (output) The stress after returning to the yield surface
+   * @param intnl_old The internal variables at the previous "time" step
+   * @param intnl    (output) All the internal variables after returning to the yield surface
+   * @param plastic_strain_old The value of plastic strain at the previous "time" step
+   * @param plastic_strain   (output) The value of plastic strain after returning to the yield surface
+   * @param E_ijkl   The elasticity tensor.  If no plasiticity then stress = stress_old + E_ijkl*strain_increment
+   * @param strain_increment   The applied strain increment
+   * @param f  (output) All the yield functions after returning to the yield surface
+   * @param iter (output) The number of Newton-Raphson iterations used
+   * @return true if the stress was successfully returned to the yield surface
    */
-  virtual bool returnMap(const RankTwoTensor & stress_old, const RankTwoTensor & plastic_strain_old, const std::vector<Real> & intnl_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & stress, RankTwoTensor & plastic_strain, std::vector<Real> & intnl, std::vector<Real> & f, unsigned int & iter);
+  virtual bool returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter);
 
   /**
    * Performs one Newton-Raphson step.  The purpose here is to find the
@@ -372,9 +382,28 @@ protected:
    * Checks whether the yield functions are in the admissible region
    * @param stress stress
    * @param intnl internal parameters
+   * @param all_f (output) the values of all the yield functions
    * @return return false if any yield functions exceed their tolerance
    */
-  virtual bool admissible(const RankTwoTensor & stress, const std::vector<Real> & intnl);
+  virtual bool admissible(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<Real> & all_f);
+
+  /**
+   * Increments "dumb_iteration" by 1, and sets "act" appropriately
+   * (act[alpha] = true iff alpha_th bit of dumb_iteration == 1)
+   * @param (input/output) dumb_iteration Used to set act bitwise - the "dumb" scheme tries all possible combinations of act until a successful return
+   * @param (output) act active constraints
+   * @return true if dumb_iteration now exceeds 2^_num_f, which indicates all possible combinations have been tried
+   */
+  virtual bool incrementDumb(int & dumb_iteration, std::vector<bool> & act);
+
+  /**
+   * if deactivation_scheme == "dumb", returns true if one-or-more active f are <= 0.
+   * This is useful for a-priori elimination of choices of "act" that are obviously not viable.
+   * @param deactivation_scheme the deactivation scheme.  Return value is always false unless this == "dumb"
+   * @param act the active constraints
+   * @param f the active yield functions
+   */
+  virtual bool tooDumbToTry(const MooseEnum & deactivation_scheme, const std::vector<bool> & act, const std::vector<Real> f);
 
 
   /**
@@ -396,6 +425,40 @@ protected:
 
   // gets called after return-map
   virtual void postReturnMap();
+
+  /*
+   * performs an elastic step
+   *
+   * @param stress_old The value of stress at the previous "time" step
+   * @param stress (output) stress = E_ijkl*plastic_strain
+   * @param intnl_old The internal variables at the previous "time" step
+   * @param intnl  (output) intnl = intnl_old
+   * @param plastic_strain_old The value of plastic strain at the previous "time" step
+   * @param plastic_strain   (output) plastic_strain = plastic_strain_old
+   * @param E_ijkl   The elasticity tensor.
+   * @param strain_increment   The applied strain increment
+   * @param yf  (output) All the yield functions at (stress, intnl)
+   * @param iterations (output) zero
+   * @return true if the (stress, intnl) are admissible
+   */
+  virtual bool elasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations);
+
+  /*
+   * performs a plastic step
+   *
+   * @param stress_old The value of stress at the previous "time" step
+   * @param stress (output) stress after returning to the yield surface
+   * @param intnl_old The internal variables at the previous "time" step
+   * @param intnl  (output) internal variables after returning to the yield surface
+   * @param plastic_strain_old The value of plastic strain at the previous "time" step
+   * @param plastic_strain   (output) plastic_strain after returning to the yield surface
+   * @param E_ijkl   The elasticity tensor.
+   * @param strain_increment   The applied strain increment
+   * @param yf  (output) All the yield functions at (stress, intnl)
+   * @param iterations (output) The total number of Newton-Raphson iterations used
+   * @return true if the (stress, intnl) are admissible.  Otherwise, if _ignore_failures==true, the output variables will be the best admissible ones found during the return-map.  Otherwise, if _ignore_failures==false, this routine will perform some finite-diference checks and call mooseError
+   */
+  virtual bool plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations);
 
 
  private:

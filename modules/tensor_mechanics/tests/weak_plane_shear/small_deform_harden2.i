@@ -203,7 +203,7 @@
     transverse_direction = '0 0 1'
     ep_plastic_tolerance = 1E-3
     max_NR_iterations = 100
-    max_subdivisions = 1
+    min_stepsize = 1
     debug_fspb = 1
   [../]
 []
