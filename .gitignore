@@ -68,6 +68,7 @@ traceout*.txt
 .depend
 *.png
 *.tif
+*.html
 *.xyz
 
 # Allow .e files in gold directories (7 levels)
