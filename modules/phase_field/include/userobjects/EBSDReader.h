@@ -92,6 +92,9 @@ protected:
   /// Grid origin
   Real _minx, _miny, _minz;
 
+  /// Maximum grid extent
+  Real _maxx, _maxy, _maxz;
+
   // Initial condition values of EBSD variables
   std::vector<Real> _phi1_ic, _PHI_ic, _phi2_ic, _x_ic, _y_ic, _z_ic;
   std::vector<unsigned int> _grn_ic, _phase_ic, _sym_ic;
