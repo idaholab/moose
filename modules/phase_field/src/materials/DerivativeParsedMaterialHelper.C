@@ -144,7 +144,8 @@ void DerivativeParsedMaterialHelper::functionsDerivative()
   for (i = 0; i < _nargs; ++i)
   {
     _func_dF[i] = new ADFunction(_func_F);
-    _func_dF[i]->AutoDiff(_arg_names[i]);
+    if (_func_dF[i]->AutoDiff(_arg_names[i]) != -1)
+      mooseError("Failed to take first derivative.");
 
     // second derivatives
     _func_d2F[i].resize(_nargs);
@@ -152,7 +153,8 @@ void DerivativeParsedMaterialHelper::functionsDerivative()
     for (j = i; j < _nargs; ++j)
     {
       _func_d2F[i][j] = new ADFunction(*_func_dF[i]);
-      _func_d2F[i][j]->AutoDiff(_arg_names[j]);
+      if (_func_d2F[i][j]->AutoDiff(_arg_names[j]) != -1)
+        mooseError("Failed to take second derivative.");
 
       // third derivatives
       if (_third_derivatives)
@@ -161,7 +163,8 @@ void DerivativeParsedMaterialHelper::functionsDerivative()
         for (k = j; k < _nargs; ++k)
         {
           _func_d3F[i][j][k] = new ADFunction(*_func_d2F[i][j]);
-          _func_d3F[i][j][k]->AutoDiff(_arg_names[k]);
+          if (_func_d3F[i][j][k]->AutoDiff(_arg_names[k]) != -1)
+            mooseError("Failed to take third derivative.");
         }
       }
     }
