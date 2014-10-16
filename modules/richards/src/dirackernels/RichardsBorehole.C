@@ -174,11 +174,9 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     }
   }
 
-  _nodal_pp.resize(_num_p);
-  for (unsigned int i=0 ; i<_num_p; ++i)
-    _nodal_pp[i] = _richards_name_UO.raw_var(i);
   _ps_at_nodes.resize(_num_p);
-
+  for (unsigned int pnum=0 ; pnum<_num_p; ++pnum)
+    _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
 
 }
 
@@ -307,19 +305,7 @@ RichardsBorehole::prepareNodalValues()
 {
   // NOTE: i'm assuming that all the richards variables are pressure values
 
-  // can't do the following in the constructor unfortunately
-  for (unsigned int i=0 ; i<_num_p; ++i)
-    _nodal_pp[i]->computeNodalValues();
-
-  _num_nodes = _var.nodalSln().size();
-
-  // we want to use seff_UO.seff, and this has arguments:
-  // seff(std::vector<VariableValue *> p, unsigned int qp)
-  // so i need a std::vector<VariableValue *> (ie a vector of pointers to VariableValues)
-  for (unsigned int pnum=0 ; pnum<_num_p; ++pnum)
-    // _nodal_pp[pnum] is just like _var, and the ->nodalSln() returns a VariableValue &.  We want a pointer to this.
-    _ps_at_nodes[pnum] = &(_nodal_pp[pnum]->nodalSln());
-
+  _num_nodes = (*_ps_at_nodes[_pvar]).size();
 
   Real p;
   Real density;
@@ -334,7 +320,7 @@ RichardsBorehole::prepareNodalValues()
   for (unsigned int nodenum=0; nodenum < _num_nodes ; ++nodenum)
   {
     // retrieve and calculate basic things at the node
-    p = _nodal_pp[_pvar]->nodalSln()[nodenum];  // pressure of fluid _pvar at node nodenum
+    p = (*_ps_at_nodes[_pvar])[nodenum]; // pressure of fluid _pvar at node nodenum
     density = _density_UO->density(p); // density of fluid _pvar at node nodenum
     ddensity_dp = _density_UO->ddensity(p); // d(density)/dP
     seff = _seff_UO->seff(_ps_at_nodes, nodenum); // effective saturation of fluid _pvar at node nodenum
@@ -376,7 +362,7 @@ RichardsBorehole::computeQpResidual()
   }
   else
   {
-    pp = _nodal_pp[_pvar]->nodalSln()[_i];
+    pp = (*_ps_at_nodes[_pvar])[_i];
     mob = _mobility[_i];
   }
 
@@ -466,7 +452,7 @@ RichardsBorehole::jac(unsigned int wrt_num)
   {
     if (_i != _j)
       return 0.0;  // residual at node _i only depends on variables at that node
-    pp = _nodal_pp[_pvar]->nodalSln()[_i];
+    pp = (*_ps_at_nodes[_pvar])[_i];
     dpp_dv = (_pvar == wrt_num ? 1 : 0);  // NOTE: i'm assuming that the variables are pressure variables
     mob = _mobility[_i];
     dmob_dv = _dmobility_dv[_i][wrt_num];

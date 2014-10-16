@@ -144,20 +144,10 @@ protected:
 
   /**
    * Holds the values of pressures at all the nodes of the element
-   * This holds the same info as _ps_at_nodes, but in a different way.
-   * Eg: _nodal_pp[_pvar]->nodalSln()[i] = (*_ps_at_nodes[_pvar])[i]
-   * We call its computeNodalValues method in order to retrieve the nodal
-   * porepressures from Moose if _fully_upwind = true.
-   * NOTE: only valid if all Richards variables are pressures
-   */
-  std::vector<MooseVariable *> _nodal_pp;
-
-  /**
-   * Holds the values of pressures at all the nodes of the element
    * Only used if _fully_upwind = true
    * Eg:
    * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
-   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i]
+   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i] = porepressure of pressure-variable _pvar at node i
    */
   std::vector<VariableValue *> _ps_at_nodes;
 
