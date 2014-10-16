@@ -330,6 +330,68 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
     mooseError("Older values not available for explicit schemes");
 }
 
+VariableValue &
+Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
+  {
+    VariableValue * value = _default_value[var_name];
+    if (value == NULL)
+    {
+      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+      _default_value[var_name] = value;
+    }
+    return *_default_value[var_name];
+  }
+
+  coupledCallback(var_name, false);
+  MooseVariable * var = getVar(var_name, comp);
+  return (_c_is_implicit) ? var->nodalValue() : var->nodalValueOld();
+}
+
+VariableValue &
+Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
+  {
+    VariableValue * value = _default_value[var_name];
+    if (value == NULL)
+    {
+      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+      _default_value[var_name] = value;
+    }
+    return *_default_value[var_name];
+  }
+
+  validateExecutionerType(var_name);
+  coupledCallback(var_name, true);
+  MooseVariable * var = getVar(var_name, comp);
+  return (_c_is_implicit) ? var->nodalValueOld() : var->nodalValueOlder();
+}
+
+VariableValue &
+Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Need to generate a "default value" filled VariableValue
+  {
+    VariableValue * value = _default_value[var_name];
+    if (value == NULL)
+    {
+      value = new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+      _default_value[var_name] = value;
+    }
+    return *_default_value[var_name];
+  }
+
+  validateExecutionerType(var_name);
+  coupledCallback(var_name, true);
+  MooseVariable * var = getVar(var_name, comp);
+  if (_c_is_implicit)
+    return var->nodalValueOlder();
+  else
+    mooseError("Older values not available for explicit schemes");
+}
+
 void
 Coupleable::validateExecutionerType(const std::string & name) const
 {

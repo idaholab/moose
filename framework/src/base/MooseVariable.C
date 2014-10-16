@@ -56,6 +56,10 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _need_second_old_neighbor(false),
     _need_second_older_neighbor(false),
 
+    _need_nodal_u(false),
+    _need_nodal_u_old(false),
+    _need_nodal_u_older(false),
+
     _phi(_assembly.fePhi(_fe_type)),
     _grad_phi(_assembly.feGradPhi(_fe_type)),
 
@@ -374,6 +378,42 @@ MooseVariable::secondPhiFaceNeighbor()
   return *_second_phi_face_neighbor;
 }
 
+VariableValue &
+MooseVariable::nodalValue()
+{
+  if (isNodal())
+  {
+    _need_nodal_u = true;
+    return _nodal_u;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+}
+
+VariableValue &
+MooseVariable::nodalValueOld()
+{
+  if (isNodal())
+  {
+    _need_nodal_u_old = true;
+    return _nodal_u_old;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+}
+
+VariableValue &
+MooseVariable::nodalValueOlder()
+{
+  if (isNodal())
+  {
+    _need_nodal_u_older = true;
+    return _nodal_u_older;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+}
+
 
 // FIXME: this and computeElemeValues() could be refactored to reuse most of
 //        the common code, instead of duplicating it.
@@ -685,6 +725,16 @@ MooseVariable::computeElemValues()
 
   unsigned int num_dofs = _dof_indices.size();
 
+  if (_need_nodal_u)
+    _nodal_u.resize(num_dofs);
+  if (is_transient)
+  {
+    if (_need_nodal_u_old)
+      _nodal_u_old.resize(num_dofs);
+    if (_need_nodal_u_older)
+      _nodal_u_older.resize(num_dofs);
+  }
+
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
@@ -716,13 +766,21 @@ MooseVariable::computeElemValues()
     idx = _dof_indices[i];
     soln_local = current_solution(idx);
 
+    if (_need_nodal_u)
+      _nodal_u[i] = soln_local;
+
     if (is_transient)
     {
-      if (_need_u_old || _need_grad_old || _need_second_old)
+      if (_need_u_old || _need_grad_old || _need_second_old || _need_nodal_u_old)
         soln_old_local = solution_old(idx);
 
-      if (_need_u_older || _need_grad_older || _need_second_older)
+      if (_need_u_older || _need_grad_older || _need_second_older || _need_nodal_u_older)
         soln_older_local = solution_older(idx);
+
+      if (_need_nodal_u_old)
+        _nodal_u_old[i] = soln_old_local;
+      if (_need_nodal_u_older)
+        _nodal_u_older[i] = soln_older_local;
 
       u_dot_local        = u_dot(idx);
     }
@@ -864,6 +922,16 @@ MooseVariable::computeElemValuesFace()
 
   unsigned int num_dofs = _dof_indices.size();
 
+  if (_need_nodal_u)
+    _nodal_u.resize(num_dofs);
+  if (is_transient)
+  {
+    if (_need_nodal_u_old)
+      _nodal_u_old.resize(num_dofs);
+    if (_need_nodal_u_older)
+      _nodal_u_older.resize(num_dofs);
+  }
+
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
@@ -885,13 +953,21 @@ MooseVariable::computeElemValuesFace()
     idx = _dof_indices[i];
     soln_local = current_solution(idx);
 
+    if (_need_nodal_u)
+      _nodal_u[i] = soln_local;
+
     if (is_transient)
     {
-      if (_need_u_old || _need_grad_old || _need_second_old)
+      if (_need_u_old || _need_grad_old || _need_second_old || _need_nodal_u_old)
         soln_old_local = solution_old(idx);
 
-      if (_need_u_older || _need_grad_older || _need_second_older)
+      if (_need_u_older || _need_grad_older || _need_second_older || _need_nodal_u_older)
         soln_older_local = solution_older(idx);
+
+      if (_need_nodal_u_old)
+        _nodal_u_old[i] = soln_old_local;
+      if (_need_nodal_u_older)
+        _nodal_u_older[i] = soln_older_local;
 
       u_dot_local = u_dot(idx);
     }
