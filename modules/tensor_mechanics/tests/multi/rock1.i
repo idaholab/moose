@@ -365,8 +365,9 @@
     ep_plastic_tolerance = 1E-7
     plastic_models = 'mc tensile wps wpt'
     deactivation_scheme = 'optimized_to_safe_to_dumb'
-    max_NR_iterations = 10
+    max_NR_iterations = 20
     min_stepsize = 1E-4
+    max_stepsize_for_dumb = 1E-3
     debug_fspb = 1
     debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
     debug_jac_at_pm = '1 1 1 1'
