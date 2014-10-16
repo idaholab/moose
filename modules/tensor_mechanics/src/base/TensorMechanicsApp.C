@@ -28,6 +28,8 @@
 #include "TensorMechanicsPlasticMohrCoulombExponential.h"
 #include "TensorMechanicsPlasticMohrCoulombCubic.h"
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
+#include "TensorMechanicsPlasticWeakPlaneTensileExponential.h"
+#include "TensorMechanicsPlasticWeakPlaneTensileCubic.h"
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
 #include "TensorMechanicsPlasticWeakPlaneShearGaussian.h"
@@ -85,6 +87,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsPlasticMohrCoulombExponential);
   registerUserObject(TensorMechanicsPlasticMohrCoulombCubic);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensile);
+  registerUserObject(TensorMechanicsPlasticWeakPlaneTensileExponential);
+  registerUserObject(TensorMechanicsPlasticWeakPlaneTensileCubic);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileN);
   registerUserObject(TensorMechanicsPlasticWeakPlaneShear);
   registerUserObject(TensorMechanicsPlasticWeakPlaneShearGaussian);

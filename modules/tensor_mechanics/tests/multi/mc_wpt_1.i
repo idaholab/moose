@@ -195,7 +195,6 @@
   [../]
   [./wpt]
     type = TensorMechanicsPlasticWeakPlaneTensile
-    wpt_tensile_strength = 1.0
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-5
   [../]
