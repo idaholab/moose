@@ -54,7 +54,7 @@ $(CROW_DIR)/python_modules/_distribution1Dpy2.so : $(CROW_DIR)/python_modules/di
 # Compile
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile \
 	$(libmesh_CXX) $(libmesh_CPPFLAGS) $(PYTHON2_INCLUDE)\
-         -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/ \
+         -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/ -I$(CROW_LIB_INCLUDE_DIR) \
 	 -c  $(CROW_PMODULES)/distribution1Dpy2_wrap.cxx -o $(CROW_DIR)/python_modules/distribution1Dpy2_wrap.lo
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
 	 $(libmesh_CXX) $(libmesh_CXXFLAGS) \
@@ -80,7 +80,7 @@ $(CROW_DIR)/python_modules/_distribution1Dpy3.so : $(CROW_DIR)/python_modules/di
 # Compile
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile \
 	$(libmesh_CXX) $(libmesh_CPPFLAGS) $(PYTHON_INCLUDE)\
-         -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/ \
+         -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/ -I$(CROW_LIB_INCLUDE_DIR) \
 	 -c  $(CROW_PMODULES)/distribution1Dpy3_wrap.cxx -o $(CROW_DIR)/python_modules/distribution1Dpy3_wrap.lo
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
 	 $(libmesh_CXX) $(libmesh_CXXFLAGS) \
@@ -118,7 +118,7 @@ $(CROW_DIR)/python_modules/_interpolationNDpy2.so : $(CROW_DIR)/python_modules/i
 # Compile
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile \
 	$(libmesh_CXX) $(libmesh_CPPFLAGS) $(PYTHON2_INCLUDE)\
-         -I$(CROW_DIR)/include/utilities/ \
+         -I$(CROW_DIR)/include/utilities/ -I$(CROW_LIB_INCLUDE_DIR) \
 	 -c  $(CROW_PMODULES)/interpolationNDpy2_wrap.cxx -o $(CROW_DIR)/python_modules/interpolationNDpy2_wrap.lo
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
 	 $(libmesh_CXX) $(libmesh_CXXFLAGS) \
@@ -139,7 +139,7 @@ $(CROW_DIR)/python_modules/_interpolationNDpy3.so : $(CROW_DIR)/python_modules/i
 # Compile
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile \
 	$(libmesh_CXX) $(libmesh_CPPFLAGS) $(PYTHON_INCLUDE)\
-         -I$(CROW_DIR)/include/utilities/ \
+         -I$(CROW_DIR)/include/utilities/ -I$(CROW_LIB_INCLUDE_DIR) \
 	 -c  $(CROW_PMODULES)/interpolationNDpy3_wrap.cxx -o $(CROW_DIR)/python_modules/interpolationNDpy3_wrap.lo
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
 	 $(libmesh_CXX) $(libmesh_CXXFLAGS) \

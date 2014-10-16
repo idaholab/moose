@@ -27,7 +27,7 @@ CrowToolsContainer::~CrowToolsContainer()
 }
 
 void
-CrowToolsContainer::addToolInContainer(const std::string & type, const std::string & name, CrowTools * tool){
+CrowToolsContainer::addToolInContainer(const std::string & type, const std::string & name, MooseSharedPointer<CrowTools> tool){
 
   if (_tool_by_name.find(name) == _tool_by_name.end())
     _tool_by_name[name] = tool;
@@ -47,12 +47,12 @@ std::string
 CrowToolsContainer::getType(const std::string tool_alias){
 
     if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
-       CrowTools * tool = _tool_by_name.find(tool_alias)->second;
-       std::string type = tool->getType();
-       if(type == "CrowToolError"){
-         mooseError("Type for CrowTool " << tool_alias << " not found");
-       }
-       return type;
+      MooseSharedPointer<CrowTools> tool = _tool_by_name.find(tool_alias)->second;
+      std::string type = tool->getType();
+      if(type == "CrowToolError"){
+        mooseError("Type for CrowTool " << tool_alias << " not found");
+      }
+      return type;
     }
     else{
        mooseError("CrowTool " << tool_alias << " not found in distribution container (get type");
@@ -68,8 +68,8 @@ CrowToolsContainer::getVariable(const char * tool_alias,const char *param_name){
 double
 CrowToolsContainer::getVariable(const std::string tool_alias,const std::string param_name){
     if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
-       CrowTools * tool = _tool_by_name.find(tool_alias)->second;
-       return tool->getVariable(param_name);
+      MooseSharedPointer<CrowTools> tool = _tool_by_name.find(tool_alias)->second;
+      return tool->getVariable(param_name);
     }
     mooseError("CrowTool " << tool_alias << " not found in CrowTools container (get variable)");
     return -1;
@@ -78,7 +78,7 @@ CrowToolsContainer::getVariable(const std::string tool_alias,const std::string p
 std::vector<std::string>
 CrowToolsContainer::getToolNames(){
   std::vector<std::string> toolsNames;
-  for(std::map<std::string, CrowTools *>::iterator it = _tool_by_name.begin(); it!= _tool_by_name.end();it++){
+  for(std::map<std::string, MooseSharedPointer<CrowTools> >::iterator it = _tool_by_name.begin(); it!= _tool_by_name.end();it++){
     toolsNames.push_back(it->first);
   }
   return toolsNames;
@@ -87,8 +87,8 @@ CrowToolsContainer::getToolNames(){
 std::vector<std::string>
 CrowToolsContainer::getToolVariableNames(const std::string tool_alias){
   if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
-     CrowTools * tool = _tool_by_name.find(tool_alias)->second;
-     return tool->getVariableNames();
+    MooseSharedPointer<CrowTools> tool = _tool_by_name.find(tool_alias)->second;
+    return tool->getVariableNames();
   }
   mooseError("CrowTool " << tool_alias << " not found in CrowTools container (getCrowToolVariableNames)");
 }
@@ -106,7 +106,7 @@ CrowToolsContainer::updateVariable(const std::string tool_alias, double new_valu
        std::cout << "param_name: " << param_name << std::endl;
        std::cout << "new_value: "  << new_value  << std::endl;
        std::cout << "tool_alias: " << tool_alias << std::endl;
-       CrowTools * tool = _tool_by_name.find(tool_alias)->second;
+       MooseSharedPointer<CrowTools> tool = _tool_by_name.find(tool_alias)->second;
        tool->updateVariable(param_name, new_value);
     }
     else{
@@ -126,8 +126,8 @@ CrowToolsContainer::compute(const char *tool_alias, double value){
 double
 CrowToolsContainer::compute(const std::string tool_alias, double value){
     if(_tool_by_name.find(tool_alias) != _tool_by_name.end()){
-       CrowTools * tool = _tool_by_name.find(tool_alias)->second;
-       return tool->compute(value);
+      MooseSharedPointer<CrowTools> tool = _tool_by_name.find(tool_alias)->second;
+      return tool->compute(value);
     }
     mooseError("CrowTool " << tool_alias << " not found in CrowTools container (compute)");
     return -1;

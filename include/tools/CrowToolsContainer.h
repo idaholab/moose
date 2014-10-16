@@ -17,7 +17,7 @@ public:
   /*
    * Function to construct on the fly this class through the action system
    */
-  void addToolInContainer(const std::string & type, const std::string & name, CrowTools * tool);
+  void addToolInContainer(const std::string & type, const std::string & name, MooseSharedPointer<CrowTools> tool);
 
   bool
   isEmpty()
@@ -48,9 +48,9 @@ public:
 protected:
   std::map < std::string, int > _vector_pos_map;
   /// mapping from tool name and tool itself
-  std::map<std::string, CrowTools *> _tool_by_name;
+  std::map<std::string, MooseSharedPointer<CrowTools> > _tool_by_name;
   /// "Buckets" of tools based on their types
-  std::map<std::string, std::vector<CrowTools *> > _tool_by_type;
+  std::map<std::string, std::vector<MooseSharedPointer<CrowTools> > > _tool_by_type;
 
   /**
    * Constructor(empty)

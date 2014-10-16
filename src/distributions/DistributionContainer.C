@@ -44,7 +44,7 @@ DistributionContainer::~DistributionContainer()
 
 
 void
-DistributionContainer::addDistributionInContainer(const std::string & /*type*/, const std::string & name, BasicDistribution * dist){
+DistributionContainer::addDistributionInContainer(const std::string & /*type*/, const std::string & name, MooseSharedPointer<BasicDistribution> dist){
    // create the distribution type
   //distribution * dist = dynamic_cast<distribution *>(_factory.create(type, name, params));
    if (_dist_by_name.find(name) == _dist_by_name.end())
@@ -60,7 +60,7 @@ DistributionContainer::addDistributionInContainer(const std::string & /*type*/, 
 }
 
 void
-DistributionContainer::addDistributionInContainerND(const std::string & /*type*/, const std::string & name, BasicDistributionND * dist){
+DistributionContainer::addDistributionInContainerND(const std::string & /*type*/, const std::string & name, MooseSharedPointer<BasicDistributionND> dist){
    // create the distribution type
   //distribution * dist = dynamic_cast<distribution *>(_factory.create(type, name, params));
    if (_dist_by_name.find(name) == _dist_by_name.end())
@@ -85,17 +85,17 @@ DistributionContainer::getType(const std::string dist_alias){
 
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end())
     {
-       BasicDistribution * dist = _dist_by_name.find(dist_alias)->second;
-       std::string type = dist->getType();
-       if(type == "DistributionError")
-       {
-         throwError("getType: Type for distribution " << dist_alias << " not found");
-       }
-       return type;
+      MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
+      std::string type = dist->getType();
+      if(type == "DistributionError")
+      {
+        throwError("getType: Type for distribution " << dist_alias << " not found");
+      }
+      return type;
     }
     else if (_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end())
     {
-      BasicDistributionND * dist = _dist_nd_by_name.find(dist_alias)->second;
+      MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
       std::string type = dist->getType();
       if(type == "DistributionError")
       {
@@ -190,12 +190,12 @@ double
 DistributionContainer::getVariable(const std::string dist_alias, const std::string param_name){
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end())
     {
-       BasicDistribution * dist = _dist_by_name.find(dist_alias)->second;
-       return dist->getVariable(param_name);
+      MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
+      return dist->getVariable(param_name);
     }
     else if (_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end())
     {
-      BasicDistributionND * dist = _dist_nd_by_name.find(dist_alias)->second;
+      MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
       return dist->getVariable(param_name);
     }
     throwError("getVariable: Distribution " << dist_alias << " not found in distribution container");
@@ -211,13 +211,13 @@ void
 DistributionContainer::updateVariable(const std::string dist_alias,const std::string param_name,double new_value){
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end())
     {
-       BasicDistribution * dist = _dist_by_name.find(dist_alias)->second;
-       dist->updateVariable(param_name, new_value);
+      MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
+      dist->updateVariable(param_name, new_value);
     }
     else if (_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end())
     {
-       BasicDistributionND * dist = _dist_nd_by_name.find(dist_alias)->second;
-       dist->updateVariable(param_name, new_value);
+      MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
+      dist->updateVariable(param_name, new_value);
     }
     else
     {
@@ -229,11 +229,11 @@ DistributionContainer::updateVariable(const std::string dist_alias,const std::st
 std::vector<std::string>
 DistributionContainer::getDistributionNames(){
   std::vector<std::string> distsNames;
-  for(std::map<std::string, BasicDistribution *>::iterator it = _dist_by_name.begin(); it!= _dist_by_name.end();it++)
+  for(std::map<std::string, MooseSharedPointer<BasicDistribution> >::iterator it = _dist_by_name.begin(); it!= _dist_by_name.end();it++)
   {
     distsNames.push_back(it->first);
   }
-  for(std::map<std::string, BasicDistributionND *>::iterator it = _dist_nd_by_name.begin(); it!= _dist_nd_by_name.end();it++)
+  for(std::map<std::string, MooseSharedPointer<BasicDistributionND> >::iterator it = _dist_nd_by_name.begin(); it!= _dist_nd_by_name.end();it++)
   {
     distsNames.push_back(it->first);
   }
@@ -244,8 +244,8 @@ std::vector<std::string>
 DistributionContainer::getDistributionVariableNames(const std::string dist_alias){
   if(_dist_by_name.find(dist_alias) != _dist_by_name.end())
   {
-     BasicDistribution * dist = _dist_by_name.find(dist_alias)->second;
-     return dist->getVariableNames();
+    MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
+    return dist->getVariableNames();
   }
   else if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end())
   {
@@ -269,8 +269,8 @@ double
 DistributionContainer::Pdf(const std::string dist_alias, double x){
 
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
-       BasicDistribution * dist = _dist_by_name.find(dist_alias)->second;
-       return dist->Pdf(x);
+      MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
+      return dist->Pdf(x);
     }
     throwError("Pdf: Distribution " + dist_alias + " was not found in distribution container.");
     return -1.0;
@@ -286,7 +286,7 @@ double
 DistributionContainer::Pdf(const std::string dist_alias, std::vector<double> x){
 
     if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end()){
-      BasicDistributionND * dist = _dist_nd_by_name.find(dist_alias)->second;
+      MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
       return dist->Pdf(x);
     }
     throwError("Pdf: Distribution ND" + dist_alias + " was not found in distribution container.");
@@ -302,8 +302,8 @@ double
 DistributionContainer::Cdf(const std::string dist_alias, double x){
 
    if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
-       BasicDistribution * dist = _dist_by_name.find(dist_alias)->second;
-       return dist->Cdf(x);
+     MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
+     return dist->Cdf(x);
     }
     throwError("Cdf: Distribution " + dist_alias + " was not found in distribution container.");
     return -1.0;
@@ -318,8 +318,8 @@ double
 DistributionContainer::Cdf(const std::string dist_alias, std::vector<double> x){
 
    if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end()){
-       BasicDistributionND * dist = _dist_nd_by_name.find(dist_alias)->second;
-       return dist->Cdf(x);
+     MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
+     return dist->Cdf(x);
     }
     throwError("Cdf: Distribution ND" + dist_alias + " was not found in distribution container.");
     return -1.0;
@@ -335,8 +335,8 @@ DistributionContainer::inverseCdf(const char * dist_alias, double rng) {
 double
 DistributionContainer::inverseCdf(const std::string dist_alias, double rng) {
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
-        BasicDistribution * dist = _dist_by_name.find(dist_alias)->second;
-        return dist->InverseCdf(rng);
+      MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
+      return dist->InverseCdf(rng);
      }
      throwError("inverseCdf: Distribution " + dist_alias + " was not found in distribution container.");
      return -1.0;
@@ -353,9 +353,9 @@ double
 DistributionContainer::getDistributionRandom(const std::string dist_alias){
 
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
-        BasicDistribution * dist = _dist_by_name.find(dist_alias)->second;
+      MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
         //return dist->InverseCdf(rng);
-        return dist->getRandom(random());
+      return dist->getRandom(random());
      }
      throwError("getDistributionRandom: Distribution " + dist_alias + " was not found in distribution container.");
      return -1.0;

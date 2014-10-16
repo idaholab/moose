@@ -10,6 +10,16 @@ class RandomClass;
 class BasicDistribution;
 class BasicDistributionND;
 
+#ifdef LIBMESH_HAVE_CXX11_SHARED_PTR
+#  include <memory>
+#  define MooseSharedPointer std::shared_ptr
+#  define MooseSharedNamespace std
+#else
+#  include "boost/shared_ptr.hpp"
+#  define MooseSharedPointer boost::shared_ptr
+#  define MooseSharedNamespace boost
+#endif
+
 class DistributionContainer
 {
 public:
@@ -17,8 +27,8 @@ public:
   /**
    * Function to construct on the fly this class through the action system
    */
-  void addDistributionInContainer(const std::string & type, const std::string & name, BasicDistribution * dist);
-  void addDistributionInContainerND(const std::string & type, const std::string & name, BasicDistributionND * dist);
+  void addDistributionInContainer(const std::string & type, const std::string & name, MooseSharedPointer<BasicDistribution> dist);
+  void addDistributionInContainerND(const std::string & type, const std::string & name, MooseSharedPointer<BasicDistributionND> dist);
 
   void seedRandom(unsigned int seed);
 
@@ -110,9 +120,9 @@ protected:
   std::map < std::string, int > _vector_pos_map;
 
   /// mapping from distribution name and distribution
-  std::map<std::string, BasicDistribution *> _dist_by_name;
+  std::map<std::string, MooseSharedPointer<BasicDistribution> > _dist_by_name;
   /// mapping from distributionND name and distribution
-  std::map<std::string, BasicDistributionND *> _dist_nd_by_name;
+  std::map<std::string, MooseSharedPointer<BasicDistributionND> > _dist_nd_by_name;
 
   std::map<std::string, bool> _dist_by_trigger_status;
   std::string _last_dist_triggered;
