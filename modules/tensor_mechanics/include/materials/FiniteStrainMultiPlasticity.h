@@ -34,6 +34,9 @@ protected:
   /// Minimum fraction of applied strain that may be applied during adaptive stepsizing
   Real _min_stepsize;
 
+  /// "dumb" deactivation will only be used if the stepsize falls below this quantity
+  Real _max_stepsize_for_dumb;
+
   /// Even if the returnMap fails, return the best values found for stress and internal parameters
   bool _ignore_failures;
 
@@ -308,9 +311,10 @@ protected:
    * @param strain_increment   The applied strain increment
    * @param f  (output) All the yield functions after returning to the yield surface
    * @param iter (output) The number of Newton-Raphson iterations used
+   * @param can_revert_to_dumb  If the _deactivation_scheme is set to revert to dumb, it will only be allowed to do so if this parameter is true
    * @return true if the stress was successfully returned to the yield surface
    */
-  virtual bool returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter);
+  virtual bool returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb);
 
   /**
    * Performs one Newton-Raphson step.  The purpose here is to find the
