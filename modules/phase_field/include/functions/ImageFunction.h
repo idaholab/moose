@@ -188,7 +188,9 @@ private:
   std::vector<double> _voxel;
 
   /// Component to extract
+#ifdef LIBMESH_HAVE_VTK
   unsigned int _component;
+#endif
 
   /// Bounding box for testing points
   MeshTools::BoundingBox  _bounding_box;
