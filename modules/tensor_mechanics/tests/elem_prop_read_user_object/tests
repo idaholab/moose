@@ -1,0 +1,12 @@
+[Tests]
+  [./test_elem]
+    type = 'Exodiff'
+    input = 'prop_elem_read.i'
+    exodiff = 'prop_elem_read_out.e'
+  [../]
+  [./test_grain]
+    type = 'Exodiff'
+    input = 'prop_grain_read.i'
+    exodiff = 'prop_grain_read_out.e'
+  [../]
+[]
