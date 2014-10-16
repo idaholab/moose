@@ -21,15 +21,16 @@ InputParameters validParams<MaterialTensorAux>()
   InputParameters params = validParams<AuxKernel>();
   params += validParams<MaterialTensorCalculator>();
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
-  params.addParam<int>("qp_select", -1, "The quad point you want evaluated");
+  params.addParam<unsigned int>("qp_select", "The quad point you want evaluated");
   return params;
 }
 
 MaterialTensorAux::MaterialTensorAux( const std::string & name, InputParameters parameters ) :
-    AuxKernel( name, parameters ),
-    _material_tensor_calculator( name, parameters),
-    _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) ),
-    _qp_select(parameters.get<int>("qp_select"))
+    AuxKernel(name, parameters),
+    _material_tensor_calculator(name, parameters),
+    _tensor(getMaterialProperty<SymmTensor>(getParam<std::string>("tensor"))),
+    _has_qp_select(isParamValid("qp_select")),
+    _qp_select(_has_qp_select ? getParam<unsigned int>("qp_select") : 0)
 {
 }
 
@@ -37,22 +38,25 @@ Real
 MaterialTensorAux::computeValue()
 {
   RealVectorValue direction;
-  int qp_call = _qp;
-  if (_qp_select >= 0 && _qp_select < _q_point.size())
-    qp_call = _qp_select;
-  else
+  unsigned int qp_call;
+
+  if (_has_qp_select)
   {
-    if (_qp_select != -1)
+    if (_qp_select < _q_point.size())
+      qp_call = _qp_select;
+    else
     {
-      _console << "qp_select = " << _qp_select << std::endl;
-      _console << "qp = " << _qp << std::endl;
-      _console << "q_point.size() = " << _q_point.size() << std::endl;
+      Moose::err << "qp_select = " << _qp_select << std::endl;
+      Moose::err << "qp = " << _qp << std::endl;
+      Moose::err << "q_point.size() = " << _q_point.size() << std::endl;
       mooseError("The parameter qp_select is not valid");
     }
   }
+  else
+    qp_call = _qp;
 
   Real value = _material_tensor_calculator.getTensorQuantity(_tensor[qp_call],
                                                              &_q_point[qp_call],
-                                                               direction);
+                                                             direction);
   return value;
 }
