@@ -17,9 +17,10 @@ InputParameters validParams<FiniteStrainMultiPlasticity>()
   params.addRequiredParam<std::vector<UserObjectName> >("plastic_models", "List of names of user objects that define the plastic models that could be active for this material.");
   params.addRequiredRangeCheckedParam<Real>("ep_plastic_tolerance", "ep_plastic_tolerance>0", "The Newton-Raphson process is only deemed converged if the plastic strain increment constraints have L2 norm less than this.");
   params.addRangeCheckedParam<Real>("min_stepsize", 0.01, "min_stepsize>0 & min_stepsize<=1", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the minimum fraction of applied strain increment that may be applied before the algorithm gives up entirely");
+  params.addRangeCheckedParam<Real>("max_stepsize_for_dumb", 0.01, "max_stepsize_for_dumb>0 & max_stepsize_for_dumb<=1", "If your deactivation_scheme is 'something_to_dumb', then 'dumb' will only be used if the stepsize falls below this value.  This parameter is useful because the 'dumb' scheme is computationally expensive");
   params.addRangeCheckedParam<Real>("linear_dependent", 1E-4, "linear_dependent>=0 & linear_dependent<1", "Flow directions are considered linearly dependent if the smallest singular value is less than linear_dependent times the largest singular value");
   MooseEnum deactivation_scheme("optimized safe dumb optimized_to_safe optimized_to_safe_to_dumb", "optimized");
-  params.addParam<MooseEnum>("deactivation_scheme", deactivation_scheme, "Scheme by which constraints are deactivated.  safe: return to the yield surface and then deactivate constraints with negative plasticity multipliers.  optimized: deactivate a constraint as soon as its plasticity multiplier becomes negative.  dumb: iteratively try all combinations of active constraints until the solution is found.  optimized_to_safe: first use 'optimized', and if that fails, try the return with 'safe' instead.  optimized_to_safe_to_dumb: first use 'optimized', and if that fails, try with 'safe', and if that fails, try 'dumb'");
+  params.addParam<MooseEnum>("deactivation_scheme", deactivation_scheme, "Scheme by which constraints are deactivated.  NOTE: This is internally set to 'safe' if only one plastic model is used, regardless of what you enter.  safe: return to the yield surface and then deactivate constraints with negative plasticity multipliers.  optimized: deactivate a constraint as soon as its plasticity multiplier becomes negative.  dumb: iteratively try all combinations of active constraints until the solution is found.  optimized_to_safe: first use 'optimized', and if that fails, try the return with 'safe' instead.  optimized_to_safe_to_dumb: first use 'optimized', and if that fails, try with 'safe', and if that fails, try 'dumb'");
   params.addParam<RealVectorValue>("transverse_direction", "If this parameter is provided, before the return-map algorithm is called a rotation is performed so that the 'z' axis in the new frame lies along the transverse_direction in the original frame.  After returning, the inverse rotation is performed.  The transverse_direction will itself rotate with large strains.  This is so that transversely-isotropic plasticity models may be easily defined in the frame where the isotropy holds in the x-y plane.");
   params.addParam<bool>("ignore_failures", false, "The return-map algorithm will return with the best admissible stresses and internal parameters that it can, even if they don't fully correspond to the applied strain increment.  To speed computations, this flag can be set to true, the max_NR_iterations set small, and the min_stepsize large.");
   params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  2 = debug Jacobian entries, 3 = check the entire Jacobian, and check Ax=b");
@@ -39,6 +40,7 @@ FiniteStrainMultiPlasticity::FiniteStrainMultiPlasticity(const std::string & nam
     FiniteStrainMaterial(name, parameters),
     _max_iter(getParam<unsigned int>("max_NR_iterations")),
     _min_stepsize(getParam<Real>("min_stepsize")),
+    _max_stepsize_for_dumb(getParam<Real>("max_stepsize_for_dumb")),
     _ignore_failures(getParam<bool>("ignore_failures")),
 
     _num_f(getParam<std::vector<UserObjectName> >("plastic_models").size()),
@@ -70,6 +72,9 @@ FiniteStrainMultiPlasticity::FiniteStrainMultiPlasticity(const std::string & nam
     _n(declareProperty<RealVectorValue>("plastic_transverse_direction")),
     _n_old(declarePropertyOld<RealVectorValue>("plastic_transverse_direction"))
 {
+  if (_num_f == 1)
+    _deactivation_scheme = "safe";
+
   if (_n_supplied)
   {
     // normalise the inputted transverse_direction
@@ -249,7 +254,7 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
   while (time_simulated < 1.0 && step_size >= _min_stepsize)
   {
     iter = 0;
-    return_successful = returnMap(stress_good, stress, intnl_good, intnl, plastic_strain_good, plastic_strain, E_ijkl, dep, yf, iter);
+    return_successful = returnMap(stress_good, stress, intnl_good, intnl, plastic_strain_good, plastic_strain, E_ijkl, dep, yf, iter, step_size <= _max_stepsize_for_dumb);
     iterations += iter;
 
     if (return_successful)
@@ -408,7 +413,7 @@ FiniteStrainMultiPlasticity::dhardPotential_dintnl(const RankTwoTensor & stress,
 }
 
 bool
-FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter)
+FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb)
 {
   bool successful_return = elasticStep(stress_old, stress, intnl_old, intnl, plastic_strain_old, plastic_strain, E_ijkl, strain_increment, f, iter);
 
@@ -573,7 +578,7 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
         for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
           act[alpha] = initial_act[alpha];
       }
-      else if (deact_scheme == "safe" && _deactivation_scheme == "optimized_to_safe_to_dumb")
+      else if (deact_scheme == "safe" && _deactivation_scheme == "optimized_to_safe_to_dumb" && can_revert_to_dumb)
       {
         // did not return successfully, but can try the "dumb" version
         deact_scheme = "dumb";
