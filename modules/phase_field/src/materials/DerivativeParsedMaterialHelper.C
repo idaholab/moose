@@ -182,7 +182,8 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
   // base function
   _func_F.Optimize();
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-  if (enable_jit) _func_F.JITCompile();
+  if (enable_jit && !_func_F.JITCompile())
+    mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
 #endif
 
   // optimize first derivatives
@@ -190,7 +191,8 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
   {
     _func_dF[i]->Optimize();
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-    if (enable_jit) _func_dF[i]->JITCompile();
+    if (enable_jit && !_func_dF[i]->JITCompile())
+      mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
 #endif
 
     // if the derivative vanishes set the function back to NULL
@@ -205,7 +207,8 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
     {
       _func_d2F[i][j]->Optimize();
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-      if (enable_jit) _func_d2F[i][j]->JITCompile();
+      if (enable_jit && !_func_d2F[i][j]->JITCompile())
+        mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
 #endif
 
       // if the derivative vanishes set the function back to NULL
@@ -222,7 +225,8 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
         {
           _func_d3F[i][j][k]->Optimize();
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-          if (enable_jit) _func_d3F[i][j][k]->JITCompile();
+          if (enable_jit && !_func_d3F[i][j][k]->JITCompile())
+            mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
 #endif
 
           // if the derivative vanishes set the function back to NULL
