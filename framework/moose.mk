@@ -167,8 +167,9 @@ clobber:: clean
 
 # cleanall runs 'make clean' in all dependent application directories
 cleanall:: clean
+	@echo "Cleaning in:"
 	@for dir in $(app_DIRS); do \
-          echo "Cleaning in $$dir" ; \
+          echo \ $$dir; \
           make -C $$dir clean ; \
         done
 
