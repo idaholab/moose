@@ -11,12 +11,19 @@ template<>
 InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>();
 
 /**
- * Mohr-Coulomb plasticity, nonassociative with hardening/softening
+ * Mohr-Coulomb plasticity, nonassociative with no hardening/softening.
+ *
+ * All of cohesion, friction angle and dilation angle are 1.0
+ * Usually you wouldn't use this for physical simulations - you'd use a
+ * derived class like TensorMechanicsPlasticMohrCoulombExponential
+ * that implements more realistic cohesion, friction and dilation angles,
+ * and/or hardening.
  *
  * The smoothing of the tip of the yield-surface cone is described in
  * Zienkiewicz and Prande "Some useful forms of isotropic yield surfaces for soil and rock mechanics" (1977) In G Gudehus (editor) "Finite Elements in Geomechanics" Wile, Chichester, pp 179-190.
  * The smoothing of the edges of the cone is described in
  * AJ Abbo, AV Lyamin, SW Sloan, JP Hambleton "A C2 continuous approximation to the Mohr-Coulomb yield surface" International Journal of Solids and Structures 48 (2011) 3001-3010
+ *
  */
 class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
 {
@@ -72,33 +79,6 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
 
  protected:
-
-  /// The cohesion at zero hardening
-  Real _cohesion;
-
-  /// friction angle at zero hardening
-  Real _phi;
-
-  /// dilation angle at zero hardening
-  Real _psi;
-
-  /// The cohesion_residual
-  Real _cohesion_residual;
-
-  /// friction angle_residual
-  Real _phi_residual;
-
-  /// dilation angle_residual
-  Real _psi_residual;
-
-  /// Logarithmic rate of change of cohesion to _cohesion_residual
-  Real _cohesion_rate;
-
-  /// Logarithmic rate of change of _phi to _phi_residual
-  Real _phi_rate;
-
-  /// Logarithmic rate of change of _psi to _psi_residual
-  Real _psi_rate;
 
   /// Square of tip smoothing parameter to smooth the cone at mean_stress = T
   Real _small_smoother2;

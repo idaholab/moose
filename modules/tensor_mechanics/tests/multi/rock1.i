@@ -321,7 +321,7 @@
 
 [UserObjects]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulomb
+    type = TensorMechanicsPlasticMohrCoulombExponential
     mc_friction_angle = 35
     mc_dilation_angle = 10
     mc_cohesion = 4E7
@@ -346,8 +346,8 @@
     internal_constraint_tolerance = 1.0E-7
   [../]
   [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensile
-    tensile_strength = 0.01E6
+    type = TensorMechanicsPlasticWeakPlaneTensileExponential
+    strength = 0.01E6
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
   [../]
