@@ -168,13 +168,13 @@ EBSDReader::getAvgData(unsigned int phase, unsigned int grain) const
   return _avg_data[indexFromIndex(_feature_id[phase][grain])];
 }
 
-const unsigned int
+unsigned int
 EBSDReader::getGrainNum() const
 {
   return _feature_num;
 }
 
-const unsigned int
+unsigned int
 EBSDReader::getGrainNum(unsigned int phase) const
 {
   return _feature_id[phase].size();
