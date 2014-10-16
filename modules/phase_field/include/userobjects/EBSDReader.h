@@ -52,12 +52,12 @@ public:
   /**
    * Return the total number of grains
    */
-  const unsigned int getGrainNum() const;
+  unsigned int getGrainNum() const;
 
   /**
    * Return the number of grains in a given phase
    */
-  const unsigned int getGrainNum(unsigned int phase) const;
+  unsigned int getGrainNum(unsigned int phase) const;
 
 protected:
   // MooseMesh Variables
