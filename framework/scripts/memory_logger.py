@@ -23,34 +23,37 @@ class LLDB:
       self.command_interpreter.HandleCommand(command, return_obj)
       if return_obj.Succeeded():
         if command == 'process status':
-          tmp_text += '\n##########\nProcess Status:\n'
+          tmp_text += '\n########################################################\n## Process Status:\n##\n'
           tmp_text += return_obj.GetOutput()
         elif command == 'bt':
-          tmp_text += '\n##########\nBacktrace:\n'
+          tmp_text += '\n########################################################\n## Backtrace:\n##\n'
           tmp_text += return_obj.GetOutput()
     return tmp_text
 
   def getStackTrace(self, pid):
+    event = lldb.SBEvent()
     lldb_results = ''
+    state = 0
     attach_info = lldb.SBAttachInfo(int(pid))
     process = self.target.Attach(attach_info, self.error)
     process.GetBroadcaster().AddListener(self.listener, lldb.SBProcess.eBroadcastBitStateChanged)
     done = False
     while not done:
-      event = lldb.SBEvent()
       if self.listener.WaitForEvent(lldb.UINT32_MAX, event):
         state = lldb.SBProcess.GetStateFromEvent(event)
         if state == lldb.eStateExited:
           done = True
-        if state == lldb.eStateStopped:
+        elif state == lldb.eStateStopped:
           lldb_results = self._run_commands(['process status', 'bt', 'cont'])
           done = True
-        if state == lldb.eStateRunning:
+        elif state == lldb.eStateRunning:
           self._run_commands(['process interrupt'])
-      time.sleep(0.1)
+      if state == lldb.eStateCrashed or state == lldb.eStateInvalid or state == lldb.eStateExited:
+        return 'Binary exited before sample could be taken'
+      time.sleep(0.03)
 
     # Due to some strange race condition we have to wait until eState is running
-    # before we can pass the detach, quit command. Why we can not do this all in
+    # before we can pass the 'detach, quit' command. Why we can not do this all in
     # one go... bug?
     done = False
     while not done:
@@ -59,7 +62,9 @@ class LLDB:
         if state == lldb.eStateRunning:
           self._run_commands(['detach', 'quit'])
           done = True
-      time.sleep(0.1)
+      if state == lldb.eStateCrashed or state == lldb.eStateInvalid or state == lldb.eStateExited:
+        return 'Binary exited before sample could be taken'
+      time.sleep(0.03)
     return self._parseStackTrace(lldb_results)
 
 class GDB:
@@ -1000,10 +1005,10 @@ def verifyArgs(args):
       try:
         import lldb
       except ImportError:
-        print 'Could not import lldb. This module is supplied by Xcode.\nEven if Xcode is installed, PYTHONPATH is normally not \nset to include lldb. Please search the internets for \ninformation about setting PYTHONPATH to include lldb for \nXcode.'
+        print 'Unable to import lldb. The lldb API is now supplied by \nXcode but not automatically set in your PYTHONPATH. \nPlease search the internet for how to do this if you \nwish to use --pstack on Mac OS X.\n\nNote: If you installed Xcode to the default location of \n/Applications, you should only have to perform the following:\n\n\texport PYTHONPATH=/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python:$PYTHONPATH\n'
         sys.exit(1)
     else:
-      which('gdb')
+      results = which('gdb')
   return args
 
 def parseArguments(args=None):
@@ -1046,4 +1051,3 @@ if __name__ == '__main__':
     MemoryPlotter(args)
     sys.exit(0)
   Server(args)
-
