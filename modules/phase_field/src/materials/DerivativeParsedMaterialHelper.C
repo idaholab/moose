@@ -10,13 +10,27 @@ InputParameters validParams<DerivativeParsedMaterialHelper>()
 #ifdef LIBMESH_HAVE_FPARSER_JIT
   params.addParam<bool>( "enable_jit", false, "Enable Just In Time compilation of the parsed functions (experimental)");
 #endif
+  params.addParam<bool>( "fail_on_evalerror", false, "Fail fatally if a function evaluation returns an error code (otherwise just pass on NaN)");
   return params;
 }
+
+const char * DerivativeParsedMaterialHelper::_eval_error_msg[] = {
+  "Unknown",
+  "Division by zero",
+  "Square root of a negative value",
+  "Logarithm of negative value",
+  "Trigonometric error (asin or acos of illegal value)",
+  "Maximum recursion level reached"
+};
 
 DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const std::string & name,
                                                    InputParameters parameters) :
     DerivativeBaseMaterial(name, parameters),
-    _nmat_props(0)
+    _func_F(NULL),
+    _nmat_props(0),
+    _enable_jit(isParamValid("enable_jit") && getParam<bool>("enable_jit")),
+    _fail_on_evalerror(getParam<bool>("fail_on_evalerror")),
+    _nan(std::numeric_limits<Real>::quiet_NaN())
 {
 }
 
@@ -58,6 +72,9 @@ void DerivativeParsedMaterialHelper::functionParse(const std::string & function_
   if (nconst != constant_expressions.size())
     mooseError("The parameter vectors constant_names and constant_values must have equal length.");
 
+  // build base function object
+  _func_F =  new ADFunction();
+
   // initialize constants
   ADFunction *expression;
   std::vector<Real> constant_values(nconst);
@@ -80,7 +97,7 @@ void DerivativeParsedMaterialHelper::functionParse(const std::string & function_
     _console << "Constant value " << i << ' ' << constant_expressions[i] << " = " << constant_values[i] << std::endl;
 #endif
 
-    if (!_func_F.AddConstant(constant_names[i], constant_values[i]))
+    if (!_func_F->AddConstant(constant_names[i], constant_values[i]))
       mooseError("Invalid constant name in DerivativeParsedMaterialHelper");
 
     delete expression;
@@ -120,8 +137,8 @@ void DerivativeParsedMaterialHelper::functionParse(const std::string & function_
   }
 
   // build the base function
-  if (_func_F.Parse(function_expression, variables) >= 0)
-     mooseError(std::string("Invalid function\n" + function_expression + "\nin DerivativeParsedMaterialHelper.\n") + _func_F.ErrorMsg());
+  if (_func_F->Parse(function_expression, variables) >= 0)
+     mooseError(std::string("Invalid function\n" + function_expression + "\nin DerivativeParsedMaterialHelper.\n") + _func_F->ErrorMsg());
 
   // Auto-Derivatives
   functionsDerivative();
@@ -143,7 +160,7 @@ void DerivativeParsedMaterialHelper::functionsDerivative()
   _func_d3F.resize(_nargs);
   for (i = 0; i < _nargs; ++i)
   {
-    _func_dF[i] = new ADFunction(_func_F);
+    _func_dF[i] = new ADFunction(*_func_F);
     if (_func_dF[i]->AutoDiff(_arg_names[i]) != -1)
       mooseError("Failed to take first derivative.");
 
@@ -175,25 +192,17 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
 {
   unsigned int i, j, k;
 
-#ifdef LIBMESH_HAVE_FPARSER_JIT
-  bool enable_jit = getParam<bool>("enable_jit");
-#endif
-
   // base function
-  _func_F.Optimize();
-#ifdef LIBMESH_HAVE_FPARSER_JIT
-  if (enable_jit && !_func_F.JITCompile())
+  _func_F->Optimize();
+  if (_enable_jit && !_func_F->JITCompile())
     mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
-#endif
 
   // optimize first derivatives
   for (i = 0; i < _nargs; ++i)
   {
     _func_dF[i]->Optimize();
-#ifdef LIBMESH_HAVE_FPARSER_JIT
-    if (enable_jit && !_func_dF[i]->JITCompile())
+    if (_enable_jit && !_func_dF[i]->JITCompile())
       mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
-#endif
 
     // if the derivative vanishes set the function back to NULL
     if (_func_dF[i]->isZero())
@@ -206,10 +215,8 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
     for (j = i; j < _nargs; ++j)
     {
       _func_d2F[i][j]->Optimize();
-#ifdef LIBMESH_HAVE_FPARSER_JIT
-      if (enable_jit && !_func_d2F[i][j]->JITCompile())
+      if (_enable_jit && !_func_d2F[i][j]->JITCompile())
         mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
-#endif
 
       // if the derivative vanishes set the function back to NULL
       if (_func_d2F[i][j]->isZero())
@@ -224,10 +231,8 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
         for (k = j; k < _nargs; ++k)
         {
           _func_d3F[i][j][k]->Optimize();
-#ifdef LIBMESH_HAVE_FPARSER_JIT
-          if (enable_jit && !_func_d3F[i][j][k]->JITCompile())
+          if (_enable_jit && !_func_d3F[i][j][k]->JITCompile())
             mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
-#endif
 
           // if the derivative vanishes set the function back to NULL
           if (_func_d3F[i][j][k]->isZero())
@@ -245,6 +250,29 @@ void DerivativeParsedMaterialHelper::functionsOptimize()
 Real DerivativeParsedMaterialHelper::computeF() { return 0.0; }
 Real DerivativeParsedMaterialHelper::computeDF(unsigned int) { return 0.0; }
 Real DerivativeParsedMaterialHelper::computeD2F(unsigned int, unsigned int) { return 0.0; }
+
+Real
+DerivativeParsedMaterialHelper::evaluate(ADFunction * parser)
+{
+  // null pointer is a shortcut for vanishing derivatives, see functionsOptimize()
+  if (parser == NULL) return 0.0;
+
+  // evaluate expression
+  Real result = parser->Eval(_func_params);
+
+  // fetch fparser evaluation error
+  int error_code = parser->EvalError();
+
+  // no error
+  if (error_code == 0)
+    return result;
+
+  // hard fail or return not a number
+  if (_fail_on_evalerror)
+    mooseError("DerivativeParsedMaterial function evaluation encountered an error: " << _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
+
+  return _nan;
+}
 
 void
 DerivativeParsedMaterialHelper::computeProperties()
@@ -272,24 +300,24 @@ DerivativeParsedMaterialHelper::computeProperties()
 
     // set function value
     if (_prop_F)
-      (*_prop_F)[_qp] = _func_F.Eval(_func_params);
+      (*_prop_F)[_qp] = evaluate(_func_F);
 
     for (i = 0; i < _nargs; ++i)
     {
       if (_prop_dF[i])
-        (*_prop_dF[i])[_qp] = _func_dF[i]==NULL ? 0.0 : _func_dF[i]->Eval(_func_params);
+        (*_prop_dF[i])[_qp] = evaluate(_func_dF[i]);
 
       // second derivatives
       for (j = i; j < _nargs; ++j)
       {
         if (_prop_d2F[i][j])
-          (*_prop_d2F[i][j])[_qp] = _func_d2F[i][j]==NULL ? 0.0 : _func_d2F[i][j]->Eval(_func_params);
+          (*_prop_d2F[i][j])[_qp] = evaluate(_func_d2F[i][j]);
 
         // third derivatives
         if (_third_derivatives)
           for (k = j; k < _nargs; ++k)
             if (_prop_d3F[i][j][k])
-              (*_prop_d3F[i][j][k])[_qp] = _func_d3F[i][j][k]==NULL ? 0.0 : _func_d3F[i][j][k]->Eval(_func_params);
+              (*_prop_d3F[i][j][k])[_qp] = evaluate(_func_d3F[i][j][k]);
       }
     }
   }
