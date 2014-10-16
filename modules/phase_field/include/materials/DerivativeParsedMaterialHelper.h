@@ -41,8 +41,11 @@ protected:
   /// Shorthand for an autodiff function parser object.
   typedef FunctionParserADBase<Real> ADFunction;
 
+  /// Evaluate FParser object and check EvalError
+  Real evaluate(ADFunction *);
+
   /// The undiffed free energy function parser object.
-  ADFunction _func_F;
+  ADFunction * _func_F;
 
   /// The first derivatives of the free energy (function parser objects).
   std::vector<ADFunction *> _func_dF;
@@ -62,6 +65,16 @@ protected:
 
   /// Tolerance values for all arguments (to protect from log(0)).
   std::vector<Real> _tol;
+
+  /// feature flags
+  bool _enable_jit;
+  bool _fail_on_evalerror;
+
+  /// appropriate not a number value to return
+  const Real _nan;
+
+  /// table of FParser eval error codes
+  static const char * _eval_error_msg[];
 
   // Dummy implementations
   virtual Real computeF();
