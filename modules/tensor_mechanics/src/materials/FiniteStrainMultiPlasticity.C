@@ -281,6 +281,7 @@ FiniteStrainMultiPlasticity::plasticStep(const RankTwoTensor & stress_old, RankT
       num_consecutive_successes = 0;
       stress = stress_good;
       plastic_strain = plastic_strain_good;
+      yf.resize(_num_f); // might have excited with junk
       for (unsigned a = 0 ; a < _num_f ; ++a)
       {
         intnl[a] = intnl_good[a];
