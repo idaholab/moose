@@ -14,6 +14,7 @@ InputParameters validParams<PolycrystalKernelAction>()
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
   params.addParam<VariableName>("T", "NONE", "Name of temperature variable");
+  params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
 
   return params;
 }
@@ -67,6 +68,7 @@ PolycrystalKernelAction::act()
     poly_params.set<NonlinearVariableName>("variable") = var_name;
     poly_params.set<std::vector<VariableName> >("v") = v;
     poly_params.set<bool>("implicit")=_implicit;
+    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
     if (_T != "NONE")
       poly_params.set<std::vector<VariableName> >("T").push_back(_T);
 
@@ -80,6 +82,7 @@ PolycrystalKernelAction::act()
     poly_params = _factory.getValidParams("ACInterface");
     poly_params.set<NonlinearVariableName>("variable") = var_name;
     poly_params.set<bool>("implicit")=getParam<bool>("implicit");
+    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     kernel_name = "ACInt_";
     kernel_name.append(var_name);
@@ -90,6 +93,7 @@ PolycrystalKernelAction::act()
     poly_params = _factory.getValidParams("TimeDerivative");
     poly_params.set<NonlinearVariableName>("variable") = var_name;
     poly_params.set<bool>("implicit") = true;
+    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     kernel_name = "IE_";
     kernel_name.append(var_name);
@@ -103,6 +107,7 @@ PolycrystalKernelAction::act()
       poly_params.set<std::vector<VariableName> >("c").push_back(_c);
       poly_params.set<Real>("en_ratio") = getParam<Real>("en_ratio");
       poly_params.set<bool>("implicit")=getParam<bool>("implicit");
+      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
       kernel_name = "ACBubInteraction_";
       kernel_name.append(var_name);
