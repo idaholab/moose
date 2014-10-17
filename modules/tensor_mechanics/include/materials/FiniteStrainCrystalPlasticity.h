@@ -19,15 +19,14 @@ protected:
   virtual void computeQpStress();
   virtual void computeQpElasticityTensor();
   virtual void initQpStatefulProperties();
-  virtual void calc_resid_jacob(const RankTwoTensor &, RankTwoTensor &, const RankTwoTensor &, RankTwoTensor &,
-                                std::vector<Real> &, std::vector<Real> &, RankTwoTensor &, RankFourTensor &);
-  virtual void getSlipIncrements(const std::vector<Real> &, std::vector<Real> &, std::vector<Real> &);
+  virtual void calc_resid_jacob(RankTwoTensor &, RankFourTensor &);
+  virtual void getSlipIncrements();
 
   //Override to modify slip system resistance evolution
-  virtual void update_slip_system_resistance(std::vector<Real> &);
+  virtual void update_slip_system_resistance();
 
   //Old function: Kept to avoid code break in computeQpStress
-  virtual void updateGss(std::vector<Real> &);
+  virtual void updateGss();
 
   virtual void getSlipSystems();
   virtual void getEulerAngles();
@@ -41,6 +40,24 @@ protected:
   virtual void readFileHardnessParams();
   virtual void getHardnessParams();
 
+  virtual void initSlipSysProps();
+  virtual void initAdditionalProps();
+
+  virtual void preSolveQp();
+  virtual void solveQp();
+  virtual void postSolveQp();
+
+  virtual void preSolveStatevar();
+  virtual void solveStatevar();
+  virtual void postSolveStatevar();
+
+  virtual void preSolveStress();
+  virtual void solveStress();
+  virtual void postSolveStress();
+
+  virtual void calcResidual( RankTwoTensor & );
+  virtual void calcJacobian( RankFourTensor & );
+
   void getEulerRotations();
   RankFourTensor outerProduct(const RankTwoTensor & a, const RankTwoTensor & b);
 
@@ -49,6 +66,8 @@ protected:
 
   ////Old function: Kept to avoid code break in computeQpStress
   RankTwoTensor getMatRot(const RankTwoTensor & a);
+
+
 
 
   const unsigned int _nss;
@@ -104,6 +123,13 @@ protected:
   MaterialProperty<RankTwoTensor> & _update_rot;
   MaterialProperty<RankTwoTensor> & _crysrot;
   MaterialProperty<RankTwoTensor> & _crysrot_old;
+
+
+  RankTwoTensor _fe, _fp_old_inv, _fp_inv;
+  std::vector< Real > _slip_incr, _tau, _dslipdtau;
+  //  std::vector< std::vector < std::vector <Real> > > _s0;
+  std::vector<RankTwoTensor> _s0;
+
 };
 
 #endif //FINITESTRAINCRYSTALPLASTICITY_H
