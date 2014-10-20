@@ -65,10 +65,15 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
   for (unsigned int vp = 0; vp < _numbub; ++vp)
   {
     bool try_again;
+    unsigned int num_tries = 0;
 
     do
     {
       try_again = false;
+      num_tries++;
+
+      if (num_tries > _numtries)
+        mooseError("Too many tries of assigning void centers in PolycrystalVoronoiVoidIC");
 
       Point rand_point;
 
@@ -120,7 +125,39 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
         if (dist < _bubspac)
           try_again = true;
       }
-    } while (try_again);
+
+      //Two algorithms are available for screening bubbles falling in grain interior. They produce nearly identical results.
+      //Here only one is listed. The other one is available upon request.
+
+      //Use circle center for checking whether voids are at GBs
+      if (try_again == false)
+      {
+        Real min_rij_1,  min_rij_2, rij, rij_diff_tol;
+
+        min_rij_1 = _range.size();
+        min_rij_2 = _range.size();
+
+        rij_diff_tol = 0.1 * _radius;
+
+        for (unsigned int gr = 0; gr < _grain_num; ++gr)
+        {
+          rij = _mesh.minPeriodicDistance(_var.number(), _centers[vp], _centerpoints[gr]);
+
+          if (rij < min_rij_1)
+          {
+            min_rij_2 = min_rij_1;
+            min_rij_1 = rij;
+          }
+          else if (rij < min_rij_2)
+            min_rij_2 = rij;
+        }
+
+        if (std::abs(min_rij_1 - min_rij_2) > rij_diff_tol)
+          try_again = true;
+      }
+
+    } while (try_again == true);
+
   }
 }
 
