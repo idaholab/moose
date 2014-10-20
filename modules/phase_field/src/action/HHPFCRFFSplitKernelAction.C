@@ -16,6 +16,7 @@ InputParameters validParams<HHPFCRFFSplitKernelAction>()
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");
   params.addParam<Real>("n_exp_terms", 4, "Number of terms used in the Taylor expansion of the natural log term");
+  params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
 
   return params;
 }
@@ -56,6 +57,7 @@ HHPFCRFFSplitKernelAction::act()
     // **Create the diffusion kernel for L_real_l
     InputParameters poly_params = _factory.getValidParams("Diffusion");
     poly_params.set<NonlinearVariableName>("variable") = real_name;
+    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     std::string kernel_name = "diff_";
     kernel_name.append(real_name);
@@ -70,6 +72,7 @@ HHPFCRFFSplitKernelAction::act()
     std::string pname = "alpha_R_";
     pname.append(out.str());
     poly_params.set<std::string>("prop_name") = pname;
+    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     kernel_name = "HH1_";
     kernel_name.append(real_name);
@@ -83,6 +86,7 @@ HHPFCRFFSplitKernelAction::act()
       poly_params.set<NonlinearVariableName>("variable") = real_name;
       poly_params.set<bool>("positive") = false;
       poly_params.set<std::vector<VariableName> >("coupled_var").push_back(imag_name);
+      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
       pname = "alpha_I_";
       pname.append(out.str());
@@ -99,6 +103,7 @@ HHPFCRFFSplitKernelAction::act()
     poly_params.set<NonlinearVariableName>("variable") = real_name;
     poly_params.set<bool>("positive") = false;
     poly_params.set<std::vector<VariableName> >("coupled_var").push_back(_n_name);
+    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     pname = "A_R_";
     pname.append(out.str());
@@ -114,6 +119,7 @@ HHPFCRFFSplitKernelAction::act()
       // **Create the diffusion kernel for L_imag_l
       InputParameters poly_params = _factory.getValidParams("Diffusion");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
+      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
       kernel_name = "diff_";
       kernel_name.append(imag_name);
@@ -124,6 +130,7 @@ HHPFCRFFSplitKernelAction::act()
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = true;
+      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
       pname = "alpha_R_";
       pname.append(out.str());
@@ -139,6 +146,7 @@ HHPFCRFFSplitKernelAction::act()
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = true;
       poly_params.set<std::vector<VariableName> >("coupled_var").push_back(real_name);
+      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
       pname = "alpha_I_";
       pname.append(out.str());
@@ -154,6 +162,7 @@ HHPFCRFFSplitKernelAction::act()
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = false;
       poly_params.set<std::vector<VariableName> >("coupled_var").push_back(_n_name);
+      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
       pname = "A_I_";
       pname.append(out.str());

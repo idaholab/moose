@@ -16,6 +16,7 @@ InputParameters validParams<CHPFCRFFSplitKernelAction>()
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");
   params.addParam<Real>("n_exp_terms", 4.0, "Number of terms used in the Taylor expansion of the natural log term");
+  params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   return params;
 }
 
@@ -39,6 +40,7 @@ CHPFCRFFSplitKernelAction::act()
   // Create the two kernels required for the n_variable, starting with the time derivative
   InputParameters poly_params = _factory.getValidParams("TimeDerivative");
   poly_params.set<NonlinearVariableName>("variable") = _n_name;
+  poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
   _problem->addKernel("TimeDerivative", "IE_n", poly_params);
 
@@ -62,6 +64,7 @@ CHPFCRFFSplitKernelAction::act()
   poly_params.set<MooseEnum>("log_approach") = getParam<MooseEnum>("log_approach");
   poly_params.set<Real>("tol") = getParam<Real>("tol");
   poly_params.set<Real>("n_exp_terms") = getParam<Real>("n_exp_terms");
+  poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
   _problem->addKernel("CHPFCRFF", "CH_bulk_n", poly_params);
 

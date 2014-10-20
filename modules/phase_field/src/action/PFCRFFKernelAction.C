@@ -19,6 +19,7 @@ InputParameters validParams<PFCRFFKernelAction>()
   params.addParam<Real>("a", 1.0, "Parameter in the taylor series expansion");
   params.addParam<Real>("b", 1.0, "Parameter in the taylor series expansion");
   params.addParam<Real>("c", 1.0, "Parameter in the taylor series expansion");
+  params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
 
   return params;
 }
@@ -43,6 +44,7 @@ PFCRFFKernelAction::act()
   // Create the two kernels required for the n_variable, starting with the time derivative
   InputParameters poly_params = _factory.getValidParams("TimeDerivative");
   poly_params.set<NonlinearVariableName>("variable") = _n_name;
+  poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
   _problem->addKernel("TimeDerivative", "IE_n", poly_params);
 
@@ -70,6 +72,7 @@ PFCRFFKernelAction::act()
   poly_params.set<Real>("a") = getParam<Real>("a");
   poly_params.set<Real>("b") = getParam<Real>("b");
   poly_params.set<Real>("b") = getParam<Real>("c");
+  poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
   _problem->addKernel("CHPFCRFF", "CH_bulk_n", poly_params);
 
@@ -92,6 +95,7 @@ PFCRFFKernelAction::act()
     // **Create the diffusion kernel for L_real_l
     InputParameters poly_params = _factory.getValidParams("Diffusion");
     poly_params.set<NonlinearVariableName>("variable") = real_name;
+    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     std::string kernel_name = "diff_";
     kernel_name.append(real_name);
@@ -106,6 +110,7 @@ PFCRFFKernelAction::act()
     std::string pname = "alpha_R_";
     pname.append(out.str());
     poly_params.set<std::string>("prop_name") = pname;
+    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     kernel_name = "HH1_";
     kernel_name.append(real_name);
@@ -119,6 +124,7 @@ PFCRFFKernelAction::act()
       poly_params.set<NonlinearVariableName>("variable") = real_name;
       poly_params.set<bool>("positive") = false;
       poly_params.set<std::vector<VariableName> >("coupled_var").push_back(imag_name);
+      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
       pname = "alpha_I_";
       pname.append(out.str());
@@ -135,6 +141,7 @@ PFCRFFKernelAction::act()
     poly_params.set<NonlinearVariableName>("variable") = real_name;
     poly_params.set<bool>("positive") = false;
     poly_params.set<std::vector<VariableName> >("coupled_var").push_back(_n_name);
+    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     pname = "A_R_";
     pname.append(out.str());
@@ -160,6 +167,7 @@ PFCRFFKernelAction::act()
       poly_params = _factory.getValidParams("HHPFCRFF");
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = true;
+      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
       pname = "alpha_R_";
       pname.append(out.str());
@@ -175,6 +183,7 @@ PFCRFFKernelAction::act()
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = true;
       poly_params.set<std::vector<VariableName> >("coupled_var").push_back(real_name);
+      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
       pname = "alpha_I_";
       pname.append(out.str());
@@ -190,6 +199,7 @@ PFCRFFKernelAction::act()
       poly_params.set<NonlinearVariableName>("variable") = imag_name;
       poly_params.set<bool>("positive") = false;
       poly_params.set<std::vector<VariableName> >("coupled_var").push_back(_n_name);
+      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
       pname = "A_I_";
       pname.append(out.str());
