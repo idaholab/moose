@@ -67,3 +67,13 @@ name: images
 Images are included with normal markdown syntax, but can also be modified.
 
 ![A an image caption](example_01.png)
+
+---
+name: columns
+#Columns
+.left[
+Left
+]
+.right[
+Right
+]

@@ -46,5 +46,13 @@
       color = '#ffffff'
       padding-left = '250px'
     [../]
+    [./right-column]
+      width = '30%'
+      float = 'right'
+    [../]
+    [./left-column]
+      width = '65%'
+      float = 'left'
+    [../]
   [../]
 []
