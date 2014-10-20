@@ -17,5 +17,16 @@
         align = 'right'
       [../]
     [../]
-[../]
+  [../]
+
+  [./CSS]
+    [./right]
+      width = '75%'
+      float = 'right'
+    [../]
+    [./left]
+      width = '20%'
+      float = 'left'
+    [../]
+  [../]
 []
