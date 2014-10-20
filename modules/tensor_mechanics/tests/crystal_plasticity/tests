@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'crysp.i'
     exodiff = 'out.e'
+    skip = 'FPE - inexact result'
   [../]
   [./test_fileread]
     type = 'Exodiff'

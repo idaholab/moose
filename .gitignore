@@ -70,7 +70,7 @@ traceout*.txt
 *.tif
 *.html
 *.xyz
-*_revision.h
+*Revision.h
 
 # Allow .e files in gold directories (7 levels)
 !/gold/*.e
