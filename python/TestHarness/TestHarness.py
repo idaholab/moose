@@ -115,9 +115,10 @@ class TestHarness:
       self.processPBSResults()
     else:
       self.options.processingPBS = False
-      for dirpath, dirnames, filenames in os.walk(os.getcwd(), followlinks=True):
+      base_dir = os.getcwd()
+      for dirpath, dirnames, filenames in os.walk(base_dir, followlinks=True):
         # Prune submdule paths when searching for tests
-        if '.git' in filenames:
+        if base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
           dirnames[:] = []
 
         # Look for test directories that aren't in contrib folders
