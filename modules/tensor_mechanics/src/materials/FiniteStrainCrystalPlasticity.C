@@ -940,7 +940,9 @@ FiniteStrainCrystalPlasticity::computeQpElasticityTensor()
   tan_mod += dsigdpk2dfe;
 
   Real je = _fe.det();
-  tan_mod /= je;
+
+  if ( je > 0.0 )
+    tan_mod /= je;
 
   _Jacobian_mult[_qp] = tan_mod;
 }
