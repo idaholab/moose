@@ -30,7 +30,9 @@ class PresentationBuilder(object):
     self.parser = Parser(self.factory, self.warehouse)
 
     # Create SlideSet objects via the Parser object by parsing the input file
-    self.parser.parse(input_file)
+    err = self.parser.parse(input_file)
+    if err:
+      sys.exit()
 
     # Build the slides
     self.warehouse.execute()
