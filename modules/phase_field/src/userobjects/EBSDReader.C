@@ -44,12 +44,12 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
 
   _dy = g.d[1];
   _ny = g.n[1];
-  _minx = g.min[1];
+  _miny = g.min[1];
   _maxy = _miny + _dy * _ny;
 
   _dz = g.d[2];
   _nz = g.n[2];
-  _minx = g.min[2];
+  _minz = g.min[2];
   _maxz = _minz + _dz * _nz;
 
   // Resize the _data array
@@ -68,8 +68,8 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
       std::istringstream iss(line);
       iss >> d.phi1 >> d.phi >> d.phi2 >> x >> y >> z >> d.grain >> d.phase >> d.symmetry;
 
-      if (x < _minx || y < _miny || x > _maxx || y > _maxy || (g.dim == 3 && (z > _maxz || z < _minz)))
-        mooseError("EBSD Data ouside of the domain declared in the header:\n" << line);
+      if (x < _minx || y < _miny || x > _maxx || y > _maxy || (g.dim == 3 && (z < _minz || z > _maxz)))
+        mooseError("EBSD Data ouside of the domain declared in the header ([" << _minx << ':' << _maxx << "], [" << _miny << ':' << _maxy << "], [" << _minz << ':' << _maxz << "]) dim=" << g.dim << "\n" << line);
 
       d.p = Point(x,y,z);
 
@@ -100,15 +100,15 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
     a.symmetry = a.phase = a.n = 0;
   }
 
-    // Iterate through data points to get average variable values for each grain
+  // Iterate through data points to get average variable values for each grain
   for (std::vector<EBSDPointData>::iterator j = _data.begin(); j != _data.end(); ++j)
   {
     EBSDAvgData & a = _avg_data[j->grain];
 
     //use Eigen::Quaternion<Real> here?
-    a.phi1  += j->phi1;
-    a.phi   += j->phi;
-    a.phi2  += j->phi2;
+    a.phi1 += j->phi1;
+    a.phi  += j->phi;
+    a.phi2 += j->phi2;
 
     if (a.n == 0)
       a.phase = j->phase;
@@ -132,9 +132,9 @@ EBSDReader::EBSDReader(const std::string & name, InputParameters params) :
 
     if (a.n == 0) continue;
 
-    a.phi1  /=  Real(a.n);
-    a.phi   /=  Real(a.n);
-    a.phi2  /=  Real(a.n);
+    a.phi1 /= Real(a.n);
+    a.phi  /= Real(a.n);
+    a.phi2 /= Real(a.n);
 
     if (a.phase >= _feature_id.size())
       _feature_id.resize(a.phase + 1);
@@ -187,7 +187,7 @@ EBSDReader::indexFromPoint(const Point & p) const
   // z) values of this centroid to determine the index.
   unsigned int x_index, y_index, z_index, global_index;
 
-  x_index = (unsigned int)((p(0) - _minx)  / _dx);
+  x_index = (unsigned int)((p(0) - _minx) / _dx);
   y_index = (unsigned int)((p(1) - _miny) / _dy);
 
   if (_mesh_dimension == 3)
