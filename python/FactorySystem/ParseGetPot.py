@@ -65,6 +65,7 @@ class ParseGetPot:
   def __init__(self, file_name):
     self.file_name = file_name
     self.file = open(file_name)
+    self.unique_keys = set() #The full path to each key to ensure that no duplicates are supplied
 
     self.root_node = GPNode('root', None)
 
@@ -92,24 +93,23 @@ class ParseGetPot:
       m = self.section_begin_re.match(line)
       if m:
         child_name = m.group(2)
-        child = GPNode(child_name, current_node)
+
+        if child_name in current_node.children:
+          child = current_node.children[child_name]
+        else:
+          child = GPNode(child_name, current_node)
+          current_node.children[child_name] = child
+          current_node.children_list.append(child_name)
 
         # See if there are any comments after the beginning of the block
         m = self.comment_re.match(line)
         if m:
           child.comments.append(m.group(1))
 
-        if child_name in current_node.children:
-          raise ParseException("DuplicateSymbol", 'Duplicate Section Name "' + os.getcwd() + '/' + self.file_name + ":" + current_node.fullName(True) + '/' + child_name + '"')
-
-        current_node.children[child_name] = child
-        current_node.children_list.append(child_name)
-
         current_position += 1
         current_position = self._recursiveParseFile(child, lines, current_position)
 
         continue
-
 
       # Look for a parameter on this line
       m = self.parameter_in_single_quotes_re.match(line)
@@ -145,8 +145,10 @@ class ParseGetPot:
           if not found_it:
             raise ParseException("SyntaxError", "Unmatched token in Parser")
 
-        if param_name in current_node.params:
-          raise ParseException("DuplicateSymbol", 'Duplicate Parameter Name "' + os.getcwd() + '/' + self.file_name + ":" + current_node.fullName(True) + '/' + param_name + '"')
+        unique_key = current_node.fullName(True) + '/' + param_name
+        if unique_key in self.unique_keys:
+          raise ParseException("DuplicateSymbol", 'Duplicate Section Name "' + os.getcwd() + '/' + self.file_name + ":" + unique_key + '"')
+        self.unique_keys.add(unique_key)
 
         current_node.params[param_name] = param_value.strip("'")
         current_node.params_list.append(param_name)
