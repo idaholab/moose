@@ -127,7 +127,6 @@ protected:
 
   RankTwoTensor _fe, _fp_old_inv, _fp_inv;
   std::vector< Real > _slip_incr, _tau, _dslipdtau;
-  //  std::vector< std::vector < std::vector <Real> > > _s0;
   std::vector<RankTwoTensor> _s0;
 
 };
