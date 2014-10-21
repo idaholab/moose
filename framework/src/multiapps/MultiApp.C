@@ -383,6 +383,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblem *>("_parent_fep") = _fe_problem;
+  app_params.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
   MooseApp * app = AppFactory::instance().create(_app_type, full_name, app_params, _my_comm);
   _apps[i] = app;
 

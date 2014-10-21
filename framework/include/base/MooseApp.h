@@ -220,7 +220,7 @@ public:
    * @return The reference to the command line object
    * Setup options based on InputParameters.
    */
-  CommandLine * commandLine() { return _command_line; }
+  MooseSharedPointer<CommandLine> commandLine() { return _command_line; }
 
   /**
    * This method is here so we can determine whether or not we need to
@@ -317,7 +317,7 @@ public:
    * Get SystemInfo object
    * @return A pointer to the SystemInformation object
    */
-  SystemInfo * getSystemInfo() { return _sys_info; }
+  SystemInfo * getSystemInfo() { return _sys_info.get(); }
 
 protected:
 
@@ -356,7 +356,7 @@ protected:
   Real _global_time_offset;
 
   /// Command line object
-  CommandLine * _command_line;
+  MooseSharedPointer<CommandLine> _command_line;
 
   /// Syntax of the input file
   Syntax _syntax;
@@ -383,7 +383,7 @@ protected:
   bool _use_nonlinear;
 
   /// System Information
-  SystemInfo * _sys_info;
+  MooseSharedPointer<SystemInfo> _sys_info;
 
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;

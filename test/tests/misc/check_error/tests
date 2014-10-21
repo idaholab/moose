@@ -381,7 +381,7 @@
 
   [./unused_param_test]
     type = 'RunApp'
-    expect_out = "WARNING: The following parameters were unused in your input file"
+    expect_out = "The following parameters were unused in your input file"
     input = 'unused_param_test.i'
     cli_args = '--warn-unused'
     # Don't allow --error-unused on this test

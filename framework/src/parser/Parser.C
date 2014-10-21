@@ -261,15 +261,13 @@ void
 Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn)
 {
   std::set<std::string> difference;
-  std::string message_indicator = error_on_warn ? "*** ERROR" : "*** WARNING";
-  std::string color = error_on_warn ? COLOR_RED : COLOR_YELLOW;
 
   std::sort(all_vars.begin(), all_vars.end());
 
   std::set_difference(all_vars.begin(), all_vars.end(), _extracted_vars.begin(), _extracted_vars.end(),
                       std::inserter(difference, difference.end()));
 
-  // Remove unparsed parameters that were located in an inactive sections
+  // Remove un-parsed parameters that were located in an inactive sections
   for (std::set<std::string>::iterator i=_inactive_strings.begin(); i != _inactive_strings.end(); ++i)
     for (std::set<std::string>::iterator j=difference.begin(); j != difference.end(); /*no increment*/)
     {
@@ -282,15 +280,14 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
   {
     std::ostringstream oss;
 
-    oss << color << message_indicator << ": The following parameters were unused in your input file:\n";
+    oss << "The following parameters were unused in your input file:\n";
     for (std::set<std::string>::iterator i=difference.begin(); i != difference.end(); ++i)
       oss << *i << "\n";
-    oss << message_indicator << "\n\n" << COLOR_DEFAULT;
 
     if (error_on_warn)
       mooseError(oss.str());
     else
-      _console << oss.str();
+      mooseWarning(oss.str());
   }
 }
 
@@ -302,31 +299,28 @@ Parser::checkOverriddenParams(bool error_on_warn)
     mooseError("No parsing has been done, so checking for overridden parameters is not possible");
 
   std::set<std::string> overridden_vars = _getpot_file.get_overridden_variables();
-  std::string message_indicator = error_on_warn ? "*** ERROR" : "*** WARNING";
-  std::string color = error_on_warn ? COLOR_RED : COLOR_YELLOW;
 
   if (!overridden_vars.empty())
   {
     std::ostringstream oss;
 
-    oss << color << message_indicator << ": The following variables were overridden or supplied multiple times:\n";
+    oss << "The following variables were overridden or supplied multiple times:\n";
     for (std::set<std::string>::const_iterator i=overridden_vars.begin();
          i != overridden_vars.end(); ++i)
       oss << *i << "\n";
-    oss << message_indicator << "\n\n" << COLOR_DEFAULT;
 
     if (error_on_warn)
       mooseError(oss.str());
     else
-      _console << oss.str() << std::flush;
+      mooseWarning(oss.str());
   }
 }
 
 void
 Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
 {
-  CommandLine *cmd_line = _app.commandLine();
-  if (cmd_line)
+  MooseSharedPointer<CommandLine> cmd_line = _app.commandLine();
+  if (cmd_line.get())
   {
     GetPot *get_pot = cmd_line->getPot();
     mooseAssert(get_pot, "GetPot object is NULL");
