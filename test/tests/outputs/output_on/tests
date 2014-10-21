@@ -1,0 +1,8 @@
+[test]
+  [./postprocessor]
+    # Test the the postprocessors are outputting on nonlinear residuals
+    type = 'RunApp'
+    input = 'postprocessors.i'
+    expect_out = '\|\s*1.003000e-01\s\|'
+  [../]
+[]

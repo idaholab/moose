@@ -28,8 +28,7 @@ template<>
 InputParameters validParams<Checkpoint>()
 {
   // Get the parameters from the base classes
-  InputParameters params = validParams<FileOutput>();
-  params += Output::enableOutputTypes(); // Checkpoint acts like a honey badger, it does what it wants; disable all individual controls
+  InputParameters params = validParams<BasicOutput<FileOutput> >();
 
   // Typical checkpoint options
   params.addParam<unsigned int>("num_files", 2, "Number of the restart files to save");
@@ -42,7 +41,7 @@ InputParameters validParams<Checkpoint>()
 }
 
 Checkpoint::Checkpoint(const std::string & name, InputParameters & parameters) :
-    FileOutput(name, parameters),
+    BasicOutput<FileOutput>(name, parameters),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
@@ -81,7 +80,7 @@ Checkpoint::directory()
 }
 
 void
-Checkpoint::output()
+Checkpoint::output(const OutputExecFlagType & /*type*/)
 {
   // Start the performance log
   Moose::perf_log.push("output()", "Checkpoint");
@@ -209,34 +208,4 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
       }
     }
   }
-}
-
-void
-Checkpoint::outputNodalVariables()
-{
-  mooseError("Invalid for Checkpoint output type");
-}
-
-void
-Checkpoint::outputElementalVariables()
-{
-  mooseError("Invalid for Checkpoint output type");
-}
-
-void
-Checkpoint::outputScalarVariables()
-{
-  mooseError("Invalid for Checkpoint output type");
-}
-
-void
-Checkpoint::outputPostprocessors()
-{
-  mooseError("Invalid for Checkpoint output type");
-}
-
-void
-Checkpoint::outputVectorPostprocessors()
-{
-  mooseError("Invalid for Checkpoint output type");
 }

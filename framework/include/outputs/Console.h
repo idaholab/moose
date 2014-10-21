@@ -58,14 +58,18 @@ public:
    * Timestep function
    * Runs at the beginning of each timestep and prints the timestep, time, and dt information
    */
-  virtual void timestepSetup();
+  //virtual void timestepSetup();
 
   /**
-   * Adds a outputting of nonlinear/linear residual printing to the base class output() method
+   * Customizes the order of output for the various components as well as adds additional
+   * output such as timestep information and nonlinear/linear residual information
    *
-   * @see petscOutput
+   * This method explicitly re-implements portions of AdvancedOutput::output, which is generally not
+   * recommended. This is done here to get the output ordering desired. If additional output types
+   * (e.g., elemental or nodal) are required in the future this calls will need to be explicitly added
+   * as well.
    */
-  virtual void output();
+  virtual void output(const OutputExecFlagType & type);
 
   /**
    * Creates the output file name
@@ -124,6 +128,10 @@ protected:
    */
   std::string outputNorm(Real old_norm, Real norm);
 
+  /**
+   * Prints the time step information for the screen output
+   */
+  void writeTimestepInformation();
 
   /**
    * Write message to screen and/or file

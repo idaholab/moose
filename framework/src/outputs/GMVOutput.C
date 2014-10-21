@@ -22,32 +22,27 @@ template<>
 InputParameters validParams<GMVOutput>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<OversampleOutput>();
-  params += Output::enableOutputTypes(); // No input, means enable nothing
+  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
 
   // Advanced file options
   params.addParam<bool>("binary", true, "Output the file in binary format");
   params.addParamNamesToGroup("binary", "Advanced");
 
   // Add description for the GMVOutput class
-  params.addClassDescription("Object for outputting data in the GMVOutput format");
+  params.addClassDescription("Object for outputting data in the GMV format");
 
   // Return the InputParameters
   return params;
 }
 
 GMVOutput::GMVOutput(const std::string & name, InputParameters parameters) :
-    OversampleOutput(name, parameters),
+    BasicOutput<OversampleOutput>(name, parameters),
     _binary(getParam<bool>("binary"))
 {
-  // Force sequence output
-  /* Note: This does not change the behavior for this object b/c outputSetup() is empty, but it is
-   * place here for consistency */
-  sequence(true);
 }
 
 void
-GMVOutput::output()
+GMVOutput::output(const OutputExecFlagType & /*type*/)
 {
   GMVIO out(_es_ptr->get_mesh());
   out.write_equation_systems(filename(), *_es_ptr);

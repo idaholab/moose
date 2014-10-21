@@ -25,8 +25,7 @@
 template<>
 InputParameters validParams<TopResidualDebugOutput>()
 {
-  InputParameters params = validParams<PetscOutput>();
-  params += Output::enableOutputTypes(); // No-input means enable nothing
+  InputParameters params = validParams<BasicOutput<PetscOutput> >();
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
   params.addParam<unsigned int>("num_residuals", 0, "The number of top residuals to print out (0 = no output)");
@@ -39,7 +38,7 @@ InputParameters validParams<TopResidualDebugOutput>()
 }
 
 TopResidualDebugOutput::TopResidualDebugOutput(const std::string & name, InputParameters & parameters) :
-    PetscOutput(name, parameters),
+    BasicOutput<PetscOutput>(name, parameters),
     _num_residuals(getParam<unsigned int>("num_residuals")),
     _sys(_problem_ptr->getNonlinearSystem().sys())
 {
@@ -50,7 +49,7 @@ TopResidualDebugOutput::~TopResidualDebugOutput()
 }
 
 void
-TopResidualDebugOutput::output()
+TopResidualDebugOutput::output(const OutputExecFlagType & /*type*/)
 {
   // Display the top residuals
   if (_num_residuals > 0)

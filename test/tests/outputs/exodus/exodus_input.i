@@ -43,6 +43,6 @@
   [./out]
     type = Exodus
     output_initial = true
-    output_input = true
+    output_input_on = 'final'
   [../]
 []

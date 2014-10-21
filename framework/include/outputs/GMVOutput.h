@@ -16,6 +16,7 @@
 #define GMVOUTPUT_H
 
 // MOOSE includes
+#include "BasicOutput.h"
 #include "OversampleOutput.h"
 
 // Forward declarations
@@ -28,7 +29,7 @@ InputParameters validParams<GMVOutput>();
  * Class for output data to the GMVOutputII format
  */
 class GMVOutput :
-  public OversampleOutput
+  public BasicOutput<OversampleOutput>
 {
 public:
 
@@ -43,7 +44,7 @@ protected:
    * Overload the Output::output method, this is required for GMVOutput
    * output due to the method utilized for outputing
    */
-  virtual void output();
+  virtual void output(const OutputExecFlagType & type);
 
   /**
    * Returns the current filename, this method handles adding the timestep suffix

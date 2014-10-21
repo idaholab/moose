@@ -29,8 +29,7 @@ InputParameters validParams<Gnuplot>();
  *
  * @see Exodus
  */
-class Gnuplot :
-  public TableOutput
+class Gnuplot : public TableOutput
 {
 public:
 
@@ -45,14 +44,9 @@ public:
   Gnuplot(const std::string & name, InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~Gnuplot();
-
-  /**
    * Output the table to a *.csv file
    */
-  virtual void output();
+  virtual void output(const OutputExecFlagType & type);
 
   /**
    * The filename for the output file
