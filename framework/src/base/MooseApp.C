@@ -71,6 +71,7 @@ InputParameters validParams<MooseApp>()
 
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
+  params.addPrivateParam<MooseSharedPointer<CommandLine> >("_command_line");
   params.addPrivateParam<MooseSharedPointer<Parallel::Communicator> >("_comm");
 
   return params;
@@ -121,9 +122,11 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     char ** argv = getParam<char**>("_argv");
 
     _sys_info = MooseSharedPointer<SystemInfo>(new SystemInfo(argc, argv));
-    _command_line = MooseSharedPointer<CommandLine>(new CommandLine(argc, argv));
-    _command_line->addCommandLineOptionsFromParams(_pars);
   }
+  if (isParamValid("_command_line"))
+    _command_line = getParam<MooseSharedPointer<CommandLine> >("_command_line");
+  else
+    mooseError("Valid CommandLine object required");
 }
 
 MooseApp::~MooseApp()

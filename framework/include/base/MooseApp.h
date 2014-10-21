@@ -220,7 +220,7 @@ public:
    * @return The reference to the command line object
    * Setup options based on InputParameters.
    */
-  CommandLine * commandLine() { return _command_line.get(); }
+  MooseSharedPointer<CommandLine> commandLine() { return _command_line; }
 
   /**
    * This method is here so we can determine whether or not we need to

@@ -319,8 +319,8 @@ Parser::checkOverriddenParams(bool error_on_warn)
 void
 Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
 {
-  CommandLine *cmd_line = _app.commandLine();
-  if (cmd_line)
+  MooseSharedPointer<CommandLine> cmd_line = _app.commandLine();
+  if (cmd_line.get())
   {
     GetPot *get_pot = cmd_line->getPot();
     mooseAssert(get_pot, "GetPot object is NULL");
