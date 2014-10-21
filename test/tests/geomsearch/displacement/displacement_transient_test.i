@@ -91,9 +91,8 @@
 
 [Outputs]
   output_initial = true
-  [./out]
+  [./out_displaced]
     type = Exodus
-    append_displaced = true
     use_displaced = true
   [../]
   [./console]

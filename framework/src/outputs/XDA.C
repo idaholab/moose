@@ -21,8 +21,7 @@ template<>
 InputParameters validParams<XDA>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<OversampleOutput>();
-  params += Output::enableOutputTypes(); // Output is handled explicitly, enable nothing
+  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
 
   // Add description for the XDA class
   params.addClassDescription("Object for outputting data in the XDA/XDR format");
@@ -36,17 +35,13 @@ InputParameters validParams<XDA>()
 }
 
 XDA::XDA(const std::string & name, InputParameters parameters) :
-    OversampleOutput(name, parameters),
+    BasicOutput<OversampleOutput> (name, parameters),
     _binary(getParam<bool>("_binary"))
 {
-  // Force sequence output
-  /* Note: This does not change the behavior for this object b/c outputSetup() is empty, but it is
-   * place here for consistency */
-  sequence(true);
 }
 
 void
-XDA::output()
+XDA::output(const OutputExecFlagType & /*type*/)
 {
   if (_binary)
   {

@@ -12,25 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SOLUTIONHISTORY_H
-#define SOLUTIONHISTORY_H
+#ifndef BASICOUTPUT_H
+#define BASICOUTPUT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
-#include "FileOutput.h"
-
-// Forward declerations
-class SolutionHistory;
-
-template<>
-InputParameters validParams<SolutionHistory>();
+#include "OversampleOutput.h"
 
 /**
- * Based class for adding basic filename support to output base class
+ * Based class for output objects
  *
- * @see Exodus
+ * Each output class (e.g., Exodus) should inherit from this base class. At a minimum, the pure
+ * virtual methods for the various types of output must be defined in the child class.
+ *
+ * There are four possible base classes for this method: Output, PetscOutput, FileOutput, OversampleOutput that
+ * are explicitly instatiated in the source file.
+ *
+ * @see Exodus Console CSV
  */
-class SolutionHistory : public BasicOutput<FileOutput>
+template<class OutputBase>
+class BasicOutput : public OutputBase
 {
 public:
 
@@ -40,20 +40,22 @@ public:
    * The constructor performs all of the necessary initialization of the various
    * output lists required for the various output types.
    *
-   * @see initAvailable init seperate
+   * @see initAvailable init separate
    */
-  SolutionHistory(const std::string & name, InputParameters & parameters);
+  BasicOutput(const std::string & name, InputParameters & parameters) :
+      OutputBase(name, parameters){}
+
+protected:
 
   /**
-   * Output the data to *.slh file
+   * Overload to call the output() method at the correct time
    */
-  virtual void output(const OutputExecFlagType & type);
+  virtual void outputStep(const OutputExecFlagType & type);
 
   /**
-   * The filename for the output file
-   * @return A string of output file including the extension
+   * Overload this function with the desired output activities
    */
-  virtual std::string filename();
+  virtual void output(const OutputExecFlagType & type) = 0;
 };
 
-#endif /* SOLUTIONHISTORY_H */
+#endif /* BASICOUTPUT_H */

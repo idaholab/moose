@@ -188,11 +188,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         _transferred_dofs = aldit._all_dof_indices;
       }
 
-      if (_output_sub_cycles)
-        output_warehouse.allowOutput(true);
-      else
-        output_warehouse.allowOutput(false);
-
       ex->setTargetTime(target_time-app_time_offset);
 
 //      unsigned int failures = 0;
@@ -273,9 +268,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           at_steady = true;
 
-         // Indicate that the next output call (occurs in ex->endStep()) should output, regarless of intervals etc...
-          output_warehouse.forceOutput();
-
           // Clean up the end
           ex->endStep(target_time-app_time_offset);
         }
@@ -285,16 +277,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
       // If we were looking for a steady state, but didn't reach one, we still need to output one more time
       if (!at_steady)
-      {
-        output_warehouse.forceOutput();
-        output_warehouse.outputStep();
-     }
+        output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
 
     }
     else if (_tolerate_failure)
     {
       ex->takeStep(dt);
-      output_warehouse.forceOutput();
       ex->endStep(target_time-app_time_offset);
     }
     else
@@ -303,9 +291,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       if (auto_advance)
         if (_first != true)
           ex->incrementStepOrReject();
-
-      if (auto_advance)
-        output_warehouse.allowOutput(true);
 
       ex->takeStep(dt);
 
@@ -339,8 +324,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
               {
                 if (ex->getTime() + app_time_offset + ex->timestepTol()*std::abs(ex->getTime()) >= target_time)
                 {
-                  output_warehouse.forceOutput();
-                  output_warehouse.outputStep();
+                  output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
                   caught_up = true;
                 }
               }
@@ -354,9 +338,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
             if (!caught_up)
               mooseError(_name << " Failed to catch up!\n");
-
-            output_warehouse.allowOutput(true);
-           }
+          }
         }
       }
     }
@@ -455,18 +437,11 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
   FEProblem * problem = appProblem(_first_local_app + i);
   OutputWarehouse & output_warehouse = _apps[i]->getOutputWarehouse();
 
-  // Disable output if the initial condition is not desired (required by resetApp)
-  if (!output_initial)
-    output_warehouse.allowOutput(false);
-
   // Update the file numbers for the outputs from the parent application
   output_warehouse.setFileNumbers(_app.getOutputFileNumbers());
 
   // Call initialization method of Executioner (Note, this preforms the output of the initial time step, if desired)
   ex->init();
-
-  // Enable output after setup
-  output_warehouse.allowOutput(true);
 
   if (_interpolate_transfers)
   {
@@ -483,7 +458,4 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
   ex->preExecute();
   problem->advanceState();
   _transient_executioners[i] = ex;
-
-  if (_detect_steady_state || _tolerate_failure)
-    _apps[i]->getOutputWarehouse().allowOutput(false);
 }

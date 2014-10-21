@@ -31,8 +31,8 @@ InputParameters validParams<TableOutput>()
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Base class parameters
-  InputParameters params = validParams<FileOutput>();
-  params += Output::enableOutputTypes("postprocessor scalar");
+  InputParameters params = validParams<AdvancedOutput<FileOutput> >();
+  params += AdvancedOutput<FileOutput>::enableOutputTypes("postprocessor scalar vector_postprocessor");
 
   // Add option for appending file on restart
   params.addParam<bool>("append_restart", false, "Append existing file on restart");
@@ -41,28 +41,12 @@ InputParameters validParams<TableOutput>()
 }
 
 TableOutput::TableOutput(const std::string & name, InputParameters parameters) :
-    FileOutput(name, parameters),
+    AdvancedOutput<FileOutput>(name, parameters),
     _tables_restartable(getParam<bool>("append_restart")),
     _postprocessor_table(_tables_restartable ? declareRestartableData<FormattedTable>("postprocessor_table") : declareRecoverableData<FormattedTable>("postprocessor_table")),
     _scalar_table(_tables_restartable ? declareRestartableData<FormattedTable>("scalar_table") : declareRecoverableData<FormattedTable>("scalar_table")),
     _all_data_table(_tables_restartable ? declareRestartableData<FormattedTable>("all_data_table") : declareRecoverableData<FormattedTable>("all_data_table"))
 {
-}
-
-TableOutput::~TableOutput()
-{
-}
-
-void
-TableOutput::outputNodalVariables()
-{
-  mooseError("Nodal nonlinear variable output not supported by TableOutput output class");
-}
-
-void
-TableOutput::outputElementalVariables()
-{
-  mooseError("Elemental nonlinear variable output not supported by TableOutput output class");
 }
 
 void

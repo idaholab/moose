@@ -17,7 +17,7 @@
 #include "Material.h"
 #include "MooseApp.h"
 #include "Console.h"
-#include "Checkpoint.h"
+//#include "Checkpoint.h"
 #include "CommonOutputAction.h"
 
 template<>
@@ -125,6 +125,6 @@ CheckOutputAction::checkInputOutput()
     const std::vector<Console *> ptrs = _app.getOutputWarehouse().getOutputs<Console>();
     for (std::vector<Console *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)
       if ((*it)->getParam<bool>("output_screen"))
-        (*it)->parameters().set<bool>("output_input") = true;
+        (*it)->parameters().set<MultiMooseEnum>("output_input_on") = "initial"; // Output::getExecuteOptions("initial");
   }
 }

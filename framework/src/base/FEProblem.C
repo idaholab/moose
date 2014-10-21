@@ -345,9 +345,9 @@ void FEProblem::initialSetup()
   // Build Refinement and Coarsening maps for stateful material projections if necessary
   if (_adaptivity.isOn() && (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
-    Moose::setup_perf_log.push("mesh.buildRefinementAndCoarseningMaps()","Setup");
+    Moose::setup_perf_log.push("mesh.buildRefinementAndCoarseningMaps()", "Setup");
     _mesh.buildRefinementAndCoarseningMaps(_assembly[0]);
-    Moose::setup_perf_log.pop("mesh.buildRefinementAndCoarseningMaps()","Setup");
+    Moose::setup_perf_log.pop("mesh.buildRefinementAndCoarseningMaps()", "Setup");
   }
 
   if (!_app.isRecovering())
@@ -1106,6 +1106,11 @@ FEProblem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
     // FIXME: cannot do this b/c variables are not computed => potential NaNs will pop-up
 //    reinitMaterials(subdomain, tid);
   }
+
+  // Call the subdomain methods of the output system, these are not threaded so only call it once
+  if (tid == 0)
+    _app.getOutputWarehouse().subdomainSetup();
+
 
   _nl.subdomainSetup(subdomain, tid);
 
@@ -3247,6 +3252,8 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::POST_AUX);
 
+  _app.getOutputWarehouse().residualSetup();
+
   _nl.computeResidual(residual, type);
 
   // Need to close and update the aux system in case residuals were saved to it.
@@ -3295,6 +3302,8 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     _aux.compute(EXEC_JACOBIAN);
 
     computeUserObjects(EXEC_JACOBIAN, UserObjectWarehouse::POST_AUX);
+
+    _app.getOutputWarehouse().jacobianSetup();
 
     _nl.computeJacobian(jacobian);
 

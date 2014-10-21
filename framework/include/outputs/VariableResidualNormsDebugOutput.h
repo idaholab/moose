@@ -16,6 +16,7 @@
 #define VARIABLERESIDUALNORMSDEBUGOUTPUT_H
 
 // MOOSE includes
+#include "BasicOutput.h"
 #include "PetscOutput.h"
 #include "FEProblem.h"
 
@@ -30,7 +31,7 @@ InputParameters validParams<VariableResidualNormsDebugOutput>();
  *
  * This class may be used from inside the [Outputs] block or via the [Debug] block (preferred)
  */
-class VariableResidualNormsDebugOutput : public PetscOutput
+class VariableResidualNormsDebugOutput : public BasicOutput<PetscOutput>
 {
 public:
 
@@ -51,7 +52,7 @@ protected:
   /**
    * Perform the debugging output
    */
-  virtual void output();
+  virtual void output(const OutputExecFlagType & type);
 
   /// Reference to libMesh system
   TransientNonlinearImplicitSystem & _sys;

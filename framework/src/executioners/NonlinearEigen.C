@@ -74,7 +74,7 @@ NonlinearEigen::init()
       _problem.timeStep()++;
       Real t = _problem.time();
       _problem.time() = _problem.timeStep();
-      _output_warehouse.outputStep();
+      _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
       _problem.time() = t;
     }
   }

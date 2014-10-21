@@ -177,7 +177,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
     std::string upper(*it);
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
-    _current_names.push_back(upper);
+    _current_names.insert(upper);
 
     if (std::find(_names.begin(), _names.end(), upper) == _names.end())
     {
@@ -205,10 +205,14 @@ void
 MultiMooseEnum::remove(InputIterator first, InputIterator last)
 {
   // Create a new list of enumerations by striping out the supplied values
-  std::vector<std::string> current = _current_names;
+  std::set<std::string> current = _current_names;
   for (InputIterator it = first; it != last; ++it)
   {
-    std::vector<std::string>::iterator found = std::find(current.begin(), current.end(), *it);
+    // Values stored as upper case
+    std::string upper(*it);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    std::set<std::string>::iterator found = current.find(upper);
     if (found != current.end())
       current.erase(found);
   }

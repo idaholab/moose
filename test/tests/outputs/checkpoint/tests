@@ -36,7 +36,7 @@
   [./recover_half_transient]
     type = RunApp
     input = checkpoint.i
-    cli_args = "Outputs/checkpoint=true --half-transient"
+    cli_args = 'Outputs/checkpoint=true --half-transient'
     recover = false
   [../]
   [./recover]
