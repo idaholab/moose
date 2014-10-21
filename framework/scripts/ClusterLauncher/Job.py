@@ -29,6 +29,8 @@ class Job(object):
     params = InputParameters()
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
     params.addParam('template_script', FRAMEWORK_DIR + '/scripts/ClusterLauncher/pbs_submit.sh', "The template job script to use.")
+    params.addParam('job_name', 'The name of the job')
+    params.addParam('test_name', 'The name of the test')
     return params
   validParams = staticmethod(validParams)
 

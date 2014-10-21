@@ -57,7 +57,7 @@ class RunParallel:
       self.startReadyJobs()
 
     # Now make sure that this job doesn't have an unsatisfied prereq
-    if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs):
+    if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs) and self.options.pbs is None:
       self.queue.append([tester, command, os.getcwd()])
       return
 

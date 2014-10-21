@@ -154,40 +154,37 @@ class TestHarness:
               if self.options.enable_recover:
                 testers = self.appendRecoverableTests(testers)
 
-              # Go through the Testers and run them
-              for tester in testers:
-                # Double the alloted time for tests when running with the valgrind option
-                tester.setValgrindMode(self.options.valgrind_mode)
 
-                # When running in valgrind mode, we end up with a ton of output for each failed
-                # test.  Therefore, we limit the number of fails...
-                if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
-                  (should_run, reason) = (False, 'Max Fails Exceeded')
-                elif self.num_failed > self.options.max_fails:
-                  (should_run, reason) = (False, 'Max Fails Exceeded')
-                else:
-                  (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
-
-                if should_run:
-                  # Create the cluster launcher input file
-                  if self.options.pbs and self.options.cluster_handle == None:
-                    self.options.cluster_handle = open(dirpath + '/tests.cluster', 'a')
-                    self.options.cluster_handle.write('[Jobs]\n')
-
-                  command = tester.getCommand(self.options)
-                  # This method spawns another process and allows this loop to continue looking for tests
-                  # RunParallel will call self.testOutputAndFinish when the test has completed running
-                  # This method will block when the maximum allowed parallel processes are running
+              # Handle PBS tests.cluster file
+              if self.options.pbs:
+                (tester, command) = self.createClusterLauncher(dirpath, testers)
+                if command is not None:
                   self.runner.run(tester, command)
-                else: # This job is skipped - notify the runner
-                  if (reason != ''):
-                    self.handleTestResult(tester.parameters(), '', reason)
-                  self.runner.jobSkipped(tester.parameters()['test_name'])
+              else:
+                # Go through the Testers and run them
+                for tester in testers:
+                  # Double the alloted time for tests when running with the valgrind option
+                  tester.setValgrindMode(self.options.valgrind_mode)
 
-                if self.options.cluster_handle != None:
-                  self.options.cluster_handle.write('[]\n')
-                  self.options.cluster_handle.close()
-                  self.options.cluster_handle = None
+                  # When running in valgrind mode, we end up with a ton of output for each failed
+                  # test.  Therefore, we limit the number of fails...
+                  if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
+                    (should_run, reason) = (False, 'Max Fails Exceeded')
+                  elif self.num_failed > self.options.max_fails:
+                    (should_run, reason) = (False, 'Max Fails Exceeded')
+                  else:
+                    (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
+
+                  if should_run:
+                    command = tester.getCommand(self.options)
+                    # This method spawns another process and allows this loop to continue looking for tests
+                    # RunParallel will call self.testOutputAndFinish when the test has completed running
+                    # This method will block when the maximum allowed parallel processes are running
+                    self.runner.run(tester, command)
+                  else: # This job is skipped - notify the runner
+                    if (reason != ''):
+                      self.handleTestResult(tester.parameters(), '', reason)
+                      self.runner.jobSkipped(tester.parameters()['test_name'])
 
               os.chdir(saved_cwd)
               sys.path.pop()
@@ -205,6 +202,39 @@ class TestHarness:
       self.error_code = self.error_code | 0x10
 
     sys.exit(self.error_code)
+
+
+  def createClusterLauncher(self, dirpath, testers):
+    self.options.test_serial_number = 0
+    command = None
+    tester = None
+    # Create the tests.cluster input file
+    # Loop through each tester and create a job
+    for tester in testers:
+      (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
+      if should_run:
+        if self.options.cluster_handle == None:
+          self.options.cluster_handle = open(dirpath + '/tests.cluster', 'a')
+        self.options.cluster_handle.write('[Jobs]\n')
+        # This returns the command to run as well as builds the parameters of the test
+        # The resulting command once this loop has completed is sufficient to launch
+        # all previous jobs
+        command = tester.getCommand(self.options)
+        self.options.cluster_handle.write('[]\n')
+        self.options.test_serial_number += 1
+      else: # This job is skipped - notify the runner
+        if (reason != ''):
+          self.handleTestResult(tester.parameters(), '', reason)
+          self.runner.jobSkipped(tester.parameters()['test_name'])
+
+    # Close the tests.cluster file
+    if self.options.cluster_handle is not None:
+      self.options.cluster_handle.close()
+      self.options.cluster_handle = None
+
+    # Return the final tester/command (sufficient to run all tests)
+    return (tester, command)
+
 
   def prunePath(self, filename):
     test_dir = os.path.abspath(os.path.dirname(filename))
@@ -414,30 +444,31 @@ class TestHarness:
   def buildPBSBatch(self, output, tester):
     # Create/Update the batch file
     if 'command not found' in output:
-      return('QSUB NOT FOUND', '')
+      return ('QSUB NOT FOUND', '')
     else:
       # Get the PBS Job ID using qstat
-      # TODO: Build an error handler. If there was any issue launching the cluster launcher due to <any thing>, why die here.
-      job_id = re.findall(r'.*JOB_ID: (\d+)', output)[0]
-      qstat = ['qstat', '-f', '-x', str(job_id)]
-      qstat_command = subprocess.Popen(qstat, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      qstat_stdout = qstat_command.communicate()[0]
-
-      # Get the Output_Path from qstat stdout
-      if qstat_stdout != None:
-        output_value = re.search(r'Output_Path(.*?)(^ +)', qstat_stdout, re.S | re.M).group(1)
-        output_value = output_value.split(':')[1].replace('\n', '').replace('\t', '')
+      results = re.findall(r'JOB_NAME: (\w+\d+) JOB_ID: (\d+) TEST_NAME: (\S+)', output, re.DOTALL)
+      if len(results) != 0:
+        file_name = self.options.pbs
+        job_list = open(os.path.abspath(os.path.join(tester.specs['executable'], os.pardir)) + '/' + file_name, 'a')
+        for result in results:
+          (test_dir, job_id, test_name) = result
+          qstat_command = subprocess.Popen(['qstat', '-f', '-x', str(job_id)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+          qstat_stdout = qstat_command.communicate()[0]
+          # Get the Output_Path from qstat stdout
+          if qstat_stdout != None:
+            output_value = re.search(r'Output_Path(.*?)(^ +)', qstat_stdout, re.S | re.M).group(1)
+            output_value = output_value.split(':')[1].replace('\n', '').replace('\t', '')
+          else:
+            job_list.close()
+            return ('QSTAT NOT FOUND', '')
+          # Write job_id, test['test_name'], and Ouput_Path to the batch file
+          job_list.write(str(job_id) + ':' + test_name + ':' + output_value + ':' + self.options.input_file_name  + '\n')
+        # Return to TestHarness and inform we have launched the job
+        job_list.close()
+        return ('', 'LAUNCHED')
       else:
-        return ('QSTAT NOT FOUND', '')
-
-      # Write job_id, test['test_name'], and Ouput_Path to the batch file
-      file_name = self.options.pbs
-      job_list = open(os.path.abspath(os.path.join(tester.specs['executable'], os.pardir)) + '/' + file_name, 'a')
-      job_list.write(str(job_id) + ':' + tester.specs['test_name'] + ':' + output_value + ':' + self.options.input_file_name  + '\n')
-      job_list.close()
-
-      # Return to TestHarness and inform we have launched the job
-      return ('', 'LAUNCHED')
+        return ('QSTAT INVALID RESULTS', '')
 
   def cleanPBSBatch(self):
     # Open the PBS batch file and assign it to a list
