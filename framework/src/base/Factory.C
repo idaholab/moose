@@ -62,6 +62,7 @@ Factory::create(const std::string & obj_name, const std::string & name, InputPar
   // Actually call the function pointer.  You can do this in one line,
   // but it's a bit more obvious what's happening if you do it in two...
   buildPtr & func = it->second;
+
   return (*func)(name, parameters);
 }
 

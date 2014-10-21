@@ -71,6 +71,7 @@ InputParameters validParams<MooseApp>()
 
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
+  params.addPrivateParam<MooseSharedPointer<CommandLine> >("_command_line");
   params.addPrivateParam<MooseSharedPointer<Parallel::Communicator> >("_comm");
 
   return params;
@@ -96,14 +97,12 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
-    _command_line(NULL),
     _alternate_output_warehouse(NULL),
     _output_warehouse(new OutputWarehouse),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
     _use_nonlinear(true),
-    _sys_info(NULL),
     _enable_unused_check(WARN_UNUSED),
     _factory(*this),
     _error_overridden(false),
@@ -122,16 +121,16 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     int argc = getParam<int>("_argc");
     char ** argv = getParam<char**>("_argv");
 
-    _sys_info = new SystemInfo(argc, argv);
-    _command_line = new CommandLine(argc, argv);
-    _command_line->addCommandLineOptionsFromParams(_pars);
+    _sys_info = MooseSharedPointer<SystemInfo>(new SystemInfo(argc, argv));
   }
+  if (isParamValid("_command_line"))
+    _command_line = getParam<MooseSharedPointer<CommandLine> >("_command_line");
+  else
+    mooseError("Valid CommandLine object required");
 }
 
 MooseApp::~MooseApp()
 {
-  delete _command_line;
-  delete _sys_info;
   _action_warehouse.clear();
 
   // MUST be deleted before _comm is destroyed!
@@ -303,7 +302,7 @@ MooseApp::executeExecutioner()
   if (_executioner)
   {
 #ifdef LIBMESH_HAVE_PETSC
-    Moose::PetscSupport::petscSetupOutput(_command_line);
+    Moose::PetscSupport::petscSetupOutput(_command_line.get());
 #endif
     _executioner->init();
     _executioner->execute();

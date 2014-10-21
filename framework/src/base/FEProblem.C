@@ -2655,6 +2655,10 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
   _has_multiapps = true;
 
   parameters.set<FEProblem *>("_fe_problem") = this;
+  parameters.set<THREAD_ID>("_tid") = 0;
+  parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
+  parameters.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
+
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem;
@@ -2666,10 +2670,6 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
-
-  parameters.set<THREAD_ID>("_tid") = 0;
-
-  parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
 
   MooseSharedPointer<MooseObject> mo = _factory.create(multi_app_name, name, parameters);
 

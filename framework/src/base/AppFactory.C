@@ -29,15 +29,12 @@ AppFactory::~AppFactory()
 MooseApp *
 AppFactory::createApp(std::string app_type, int argc, char ** argv)
 {
-  CommandLine command_line(argc, argv);
-
+  MooseSharedPointer<CommandLine> command_line(new CommandLine(argc, argv));
   InputParameters app_params = AppFactory::instance().getValidParams(app_type);
-
-  command_line.addCommandLineOptionsFromParams(app_params);
-  command_line.populateInputParams(app_params);
 
   app_params.set<int>("_argc") = argc;
   app_params.set<char**>("_argv") = argv;
+  app_params.set<MooseSharedPointer<CommandLine> >("_command_line") = command_line;
 
   MooseApp * app = AppFactory::instance().create(app_type, "main", app_params, MPI_COMM_WORLD);
   return app;
@@ -65,6 +62,13 @@ AppFactory::create(const std::string & obj_name, const std::string & name, Input
   MooseSharedPointer<Parallel::Communicator> comm(new Parallel::Communicator(COMM_WORLD_IN));
 
   parameters.set<MooseSharedPointer<Parallel::Communicator> >("_comm") = comm;
+
+  if (!parameters.isParamValid("_command_line"))
+    mooseError("Valid CommandLine object required");
+
+  MooseSharedPointer<CommandLine> command_line = parameters.get<MooseSharedPointer<CommandLine> >("_command_line");
+  command_line->addCommandLineOptionsFromParams(parameters);
+  command_line->populateInputParams(parameters);
 
   return (*_name_to_build_pointer[obj_name])(name, parameters);
 }
