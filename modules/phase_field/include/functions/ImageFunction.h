@@ -140,17 +140,6 @@ protected:
 #endif
 
 private:
-
-  /**
-   * Initializes image meta data such as image and voxel sizes
-   */
-  void initImageData();
-
-  /**
-   * Create the list of files to build the image data from
-   */
-  void getFiles();
-
   /**
    * Helper method for flipping image
    * @param axis Flag for determing the flip axis: "x=0", "y=1", "z=2"
@@ -159,15 +148,6 @@ private:
 #ifdef LIBMESH_HAVE_VTK
   vtkSmartPointer<vtkImageFlip> imageFlip(const int & axis);
 #endif
-
-  /// File base name
-  FileName _file_base;
-
-  /// File extension
-  MooseEnum _file_type;
-
-  /// Range of image files to open
-  std::vector<unsigned int> _file_range;
 
   /// Origin of image
   Point _origin;
@@ -187,7 +167,7 @@ private:
 #endif
 
   /// Bounding box for testing points
-  MeshTools::BoundingBox  _bounding_box;
+  MeshTools::BoundingBox _bounding_box;
 };
 
 #endif // IMAGEFUNCTION_H

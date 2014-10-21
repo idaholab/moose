@@ -11,10 +11,10 @@
 
 [Functions]
   [./image_func]
+    # ImageFunction gets its file range parameters from ImageMesh,
+    # when it is present.  This prevents duplicating information in
+    # input files.
     type = ImageFunction
-    file_base = stack/test
-    file_type = png
-    file_range = '0' # file_range is a vector input, a single entry means "read only 1 file"
   [../]
 []
 

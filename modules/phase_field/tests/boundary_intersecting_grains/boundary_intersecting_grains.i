@@ -61,18 +61,10 @@
 
 [Functions]
   [./tif]
+    # ImageFunction gets its file range parameters from ImageMesh,
+    # when it is present.  This prevents duplicating information in
+    # input files.
     type = ImageFunction
-    # Filename - match with mesh size above!
-    # file_base = image001_cropped3_closing         # full
-    # file_base = eighth_image001_cropped3_closing  # 1/8
-    file_base = sixteenth_image001_cropped3_closing # 1/16
-
-    # The file extension of our images
-    file_type = png
-
-    # file range is parsed as a vector of unsigned.  If it only has 1
-    # entry, only a single file is read.
-    file_range = '298'
   [../]
 []
 

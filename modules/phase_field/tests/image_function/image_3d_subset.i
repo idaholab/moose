@@ -16,7 +16,7 @@
   [./image_func]
     type = ImageFunction
     file_base = stack/test
-    file_type = png
+    file_suffix = png
     file_range = '0 5'
   [../]
 []

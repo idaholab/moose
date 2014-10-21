@@ -16,7 +16,7 @@
   [./image_func]
     type = ImageFunction
     file_base = stack/test
-    file_type = png
+    file_suffix = png
     # file range is parsed as a vector of unsigned.  If it only has 1
     # entry, only a single file is read.
     file_range = '0'

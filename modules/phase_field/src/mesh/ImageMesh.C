@@ -14,8 +14,8 @@
 
 #include <cstdlib> // std::system, mkstemp
 #include "ImageMesh.h"
+#include "FileRangeBuilder.h"
 #include "pcrecpp.h"
-#include "tinydir.h"
 
 // libMesh includes
 #include "libmesh/mesh_generation.h"
@@ -24,69 +24,28 @@ template<>
 InputParameters validParams<ImageMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
-  params.addParam<std::string>("file", "Name of single image file to extract mesh parameters from.  If provided, a 2D mesh is created.");
-  params.addParam<std::string>("file_base", "Image file base to open, use this option when a stack of images must be read (ignored if 'file' is given)");
-  params.addParam<std::vector<unsigned int> >("file_range", "Range of images to analyze, used with 'file_base' (ignored if 'file' is given)");
-  params.addParam<std::string>("file_suffix", "Suffix of the file to open, e.g. 'png'");
+
+  // Add parameters associated with file ranges
+  addFileRangeParams(params);
+
+  // Add ImageMesh-specific params
   params.addParam<bool>("scale_to_one", true, "Whether or not to scale the image so its max dimension is 1");
   params.addRangeCheckedParam<Real>("cells_per_pixel", 1.0, "cells_per_pixel<=1.0", "The number of mesh cells per pixel, must be <=1 ");
+
   return params;
 }
 
 ImageMesh::ImageMesh(const std::string & name, InputParameters parameters) :
     GeneratedMesh(name, parameters),
-    _has_file(isParamValid("file")),
-    _file(_has_file ? getParam<std::string>("file") : ""),
-    _has_file_base(isParamValid("file_base")),
-    _file_base(_has_file_base ? getParam<std::string>("file_base") : ""),
-    _has_file_range(isParamValid("file_range")),
-    _file_range(_has_file_range ? getParam<std::vector<unsigned int> >("file_range") : std::vector<unsigned int>()),
-    _has_file_suffix(isParamValid("file_suffix")),
-    _file_suffix(_has_file_suffix ? getParam<std::string>("file_suffix") : ""),
     _scale_to_one(getParam<bool>("scale_to_one")),
     _cells_per_pixel(getParam<Real>("cells_per_pixel"))
 {
-  // If the user provides one of the following combinations:
-  // .) file+file_base
-  // .) no file+no file_base
-  // .) file_base+no file_suffix
-  // then the input file is ambiguous and we throw an error.
-  if (_has_file && _has_file_base)
-    mooseError("ImageMesh error: cannot provide both file = " << _file << " and file_base = " << _file_base);
+  // Set up the parameters associated with file ranges
+  int status = parseFileRange(_pars);
 
-  if (!_has_file && !_has_file_base)
-    mooseError("ImageMesh error: You must provide a valid value for either the 'file' parameter or the 'file_base' parameter.");
-
-  if (_has_file_base && !_has_file_suffix)
-    mooseError("ImageMesh error: If you provide a 'file_base', you must also provide a valid 'file_suffix', e.g. 'png'.");
-
-  // If the user provided a filename and a range, warn that the range will be ignored.
-  if (_has_file && _has_file_range)
-    mooseWarning("Warning: file_range was ignored since a filename was provided.");
-
-  // If the user provided a file_base but not a file_range, we'll create one
-  if (_has_file_base && !_has_file_range)
-  {
-    _file_range.push_back(0);
-    _file_range.push_back(std::numeric_limits<unsigned int>::max());
-  }
-
-  // If the user provided a file_range with a single entry, repeat it
-  // for them.  This signifies a single image (i.e. 2D Mesh) is to be
-  // used.
-  if (_has_file_range && _file_range.size() == 1)
-    _file_range.push_back(_file_range[0]);
-
-  // If the user provided a file_range with too many entries, print a
-  // warning and truncate the extra values.
-  if (_has_file_range && _file_range.size() != 2)
-  {
-    mooseWarning("A maximum of two values are allowed in the _file_range, extra values truncated.");
-    _file_range.resize(2);
-  }
-
-  // Make sure that the range is in ascending order
-  std::sort(_file_range.begin(), _file_range.end());
+  // Failure is not an option
+  if (status != 0)
+    mooseError(getFileRangeErrorMessage(status));
 }
 
 ImageMesh::ImageMesh(const ImageMesh & other_mesh) :
@@ -109,59 +68,32 @@ ImageMesh::clone() const
 void
 ImageMesh::buildMesh()
 {
-  if (_has_file)
-    buildMesh2D();
+  // Make sure the filenames parameter is valid.  This is set up by
+  // the parseFileRange() function, see FileRangeBuilder.{C,h} for
+  // more information.
+  if (!isParamValid("filenames"))
+    mooseError("ImageMesh Error: filenames parameter is not valid!");
 
-  else if (_has_file_base)
-    buildMesh3D();
+  // Grab the list of filenames
+  std::vector<std::string> filenames = getParam<std::vector<std::string> >("filenames");
+
+  // A list of filenames of length 1 means we are building a 2D mesh
+  if (filenames.size()==1)
+    buildMesh2D(filenames[0]);
 
   else
-    mooseError("We'll never get here!");
+    buildMesh3D(filenames);
 }
 
 
 
 void
-ImageMesh::buildMesh3D()
+ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
 {
-  // 1.) Build up a list of filenames which comprise the stack using tinydir and pcrecpp
-
-  // Separate the file base from the path
-  std::pair<std::string, std::string> split_file = MooseUtils::splitFileName(_file_base);
-
-  // Create directory object
-  tinydir_dir dir;
-  tinydir_open_sorted(&dir, split_file.first.c_str());
-
-  // This regex will capture the file_base and any number of digits when used with FullMatch()
-  std::ostringstream oss;
-  oss << "(" << split_file.second << ".*?(\\d+))\\..*";
-  pcrecpp::RE file_base_and_num_regex(oss.str());
-
-  // Loop through the files in the directory
-  for (int i = 0; i < dir.n_files; i++)
-  {
-    // Update the current file
-    tinydir_file file;
-    tinydir_readfile_n(&dir, &file, i);
-
-    // Store the file if it has proper extension as in numeric range
-    if (!file.is_dir && MooseUtils::hasExtension(file.name, _file_suffix))
-    {
-      std::string the_base;
-      unsigned int file_num = 0;
-      file_base_and_num_regex.FullMatch(file.name, &the_base, &file_num);
-
-      if (!the_base.empty() && file_num >= _file_range[0] && file_num <= _file_range[1])
-        _stack_filenames.push_back(split_file.first + "/" + file.name);
-    }
-  }
-  tinydir_close(&dir);
-
   // If the user gave us a "stack" with 0 or 1 files in it, we can't
   // really create a 3D Mesh from that
-  if (_stack_filenames.size() <= 1)
-    mooseError("ImageMesh error: Cannot create a 3D ImageMesh from an image stack with " << _stack_filenames.size() << " images.");
+  if (filenames.size() <= 1)
+    mooseError("ImageMesh error: Cannot create a 3D ImageMesh from an image stack with " << filenames.size() << " images.");
 
   // For each file in the stack, process it using the 'file' command.
   // We want to be sure that all the images in the stack are the same
@@ -169,20 +101,20 @@ ImageMesh::buildMesh3D()
   int
     xpixels = 0,
     ypixels = 0,
-    zpixels = _stack_filenames.size();
+    zpixels = filenames.size();
 
   // Take pixel info from the first image in the stack to determine the aspect ratio
-  GetPixelInfo(_stack_filenames[0], xpixels, ypixels);
+  GetPixelInfo(filenames[0], xpixels, ypixels);
 
   // TODO: Check that all images are the same aspect ratio and have
   // the same number of pixels?  ImageFunction does not currently do
   // this...
-  // for (unsigned i=0; i<_stack_filenames.size(); ++i)
+  // for (unsigned i=0; i<filenames.size(); ++i)
   // {
   //   // Extract the number of pixels from the image using the file command
-  //   GetPixelInfo(_stack_filenames[i], xpixels, ypixels);
+  //   GetPixelInfo(filenames[i], xpixels, ypixels);
   //
-  //   // Moose::out << "Image " << _stack_filenames[i] << " has size: " << xpixels << " by " << ypixels << std::endl;
+  //   // Moose::out << "Image " << filenames[i] << " has size: " << xpixels << " by " << ypixels << std::endl;
   // }
 
   // Use the number of x and y pixels and the number of images to
@@ -236,14 +168,14 @@ ImageMesh::buildMesh3D()
 
 
 void
-ImageMesh::buildMesh2D()
+ImageMesh::buildMesh2D(const std::string & filename)
 {
   int
     xpixels = 0,
     ypixels = 0;
 
   // Extract the number of pixels from the image using the file command
-  GetPixelInfo(_file, xpixels, ypixels);
+  GetPixelInfo(filename, xpixels, ypixels);
 
   // Set the maximum dimension to 1.0 while scaling the other
   // direction to maintain the aspect ratio.
