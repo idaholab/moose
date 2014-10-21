@@ -1,4 +1,4 @@
-CROW_DIR := $(ROOT_DIR)/crow
+CROW_DIR ?= $(ROOT_DIR)/crow
 
 SWIG_VERSION := $(shell swig -version 2>/dev/null)
 PYTHON_CONFIG_WHICH := $(shell which python-config 2>/dev/null)
