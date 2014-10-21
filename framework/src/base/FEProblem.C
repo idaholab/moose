@@ -2811,19 +2811,28 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
 
   MooseSharedPointer<MultiAppTransfer> multi_app_transfer = MooseSharedNamespace::dynamic_pointer_cast<MultiAppTransfer>(transfer);
 
-  const std::vector<ExecFlagType> & exec_flags = transfer->execFlags();
-  for (unsigned int i=0; i<exec_flags.size(); ++i)
-    if (multi_app_transfer.get())
-    {
-      int direction = multi_app_transfer->direction();
+  if (multi_app_transfer.get())
+  {
+    std::vector<ExecFlagType> transfer_exec_flags = multi_app_transfer->execFlags();
+    const std::vector<ExecFlagType> & multiapp_exec_flags = multi_app_transfer->getMultiApp()->execFlags();
 
-      if (direction == MultiAppTransfer::TO_MULTIAPP)
-        _to_multi_app_transfers(exec_flags[i])[0].addTransfer(multi_app_transfer);
+    if (transfer_exec_flags.empty())
+      transfer_exec_flags.assign(multiapp_exec_flags.begin(), multiapp_exec_flags.end());
+    else if (transfer_exec_flags != multiapp_exec_flags)
+      mooseDoOnce(mooseWarning("MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"));
+
+    for (unsigned int i=0; i<transfer_exec_flags.size(); ++i)
+      if (multi_app_transfer->direction() == MultiAppTransfer::TO_MULTIAPP)
+        _to_multi_app_transfers(transfer_exec_flags[i])[0].addTransfer(multi_app_transfer);
       else
-        _from_multi_app_transfers(exec_flags[i])[0].addTransfer(multi_app_transfer);
-    }
-    else
+        _from_multi_app_transfers(transfer_exec_flags[i])[0].addTransfer(multi_app_transfer);
+  }
+  else
+  {
+    const std::vector<ExecFlagType> & exec_flags = transfer->execFlags();
+    for (unsigned int i=0; i<exec_flags.size(); ++i)
       _transfers(exec_flags[i])[0].addTransfer(transfer);
+  }
 }
 
 bool

@@ -75,7 +75,6 @@
   [./from_full]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
-    execute_on = initial
     multi_app = full_solve
     source_variable = u
     variable = from_full

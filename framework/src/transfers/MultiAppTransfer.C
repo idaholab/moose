@@ -26,6 +26,9 @@ InputParameters validParams<MultiAppTransfer>()
 
   params.addRequiredParam<MooseEnum>("direction", MultiAppTransfer::directions(), "Whether this Transfer will be 'to' or 'from' a MultiApp.");
 
+  // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be added by FEProblem when the transfer is added.
+  params.set<MultiMooseEnum>("execute_on").clear();
+
   return params;
 }
 

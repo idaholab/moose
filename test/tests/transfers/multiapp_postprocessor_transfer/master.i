@@ -79,7 +79,6 @@
   [./pp_transfer]
     type = MultiAppPostprocessorTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = pp_sub
     from_postprocessor = average
     to_postprocessor = from_master
