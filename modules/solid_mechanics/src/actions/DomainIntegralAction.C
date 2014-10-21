@@ -70,6 +70,7 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
     mooseError("Number of entries in 'radius_inner' and 'radius_outer' must match.");
 
   bool youngs_modulus_set(false);
+  bool poissons_ratio_set(false);
   MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
   if (integral_moose_enums.size() == 0)
     mooseError("Must specify at least one domain integral to perform.");
@@ -88,6 +89,7 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
         mooseError("DomainIntegral error: must set block ID or name for integral: "<<integral_moose_enums[i]);
 
       _poissons_ratio = getParam<Real>("poissons_ratio");
+      poissons_ratio_set = true;
       _youngs_modulus = getParam<Real>("youngs_modulus");
       youngs_modulus_set = true;
       _blocks = getParam<std::vector<SubdomainName> >("block");
@@ -107,10 +109,12 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
     _convert_J_to_K = getParam<bool>("convert_J_to_K");
   if (_convert_J_to_K)
   {
-    if (!isParamValid("youngs_modulus"))
-      mooseError("DomainIntegral error: must set Young's modulus for J-integral if convert_J_to_K = true.");
-    else if (!youngs_modulus_set)
+    if (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio"))
+      mooseError("DomainIntegral error: must set Young's modulus and Poisson's ratio for J-integral if convert_J_to_K = true.");
+    if (!youngs_modulus_set)
       _youngs_modulus = getParam<Real>("youngs_modulus");
+    if (!poissons_ratio_set)
+      _poissons_ratio = getParam<Real>("poissons_ratio");
   }
 
 }
@@ -228,7 +232,10 @@ DomainIntegralAction::act()
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("convert_J_to_K") = _convert_J_to_K;
       if (_convert_J_to_K)
+      {
         params.set<Real>("youngs_modulus") = _youngs_modulus;
+        params.set<Real>("poissons_ratio") = _poissons_ratio;
+      }
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
