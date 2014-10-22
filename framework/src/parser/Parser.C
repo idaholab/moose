@@ -319,7 +319,15 @@ Parser::checkOverriddenParams(bool error_on_warn)
 void
 Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
 {
-  MooseSharedPointer<CommandLine> cmd_line = _app.commandLine();
+  /**
+   * We only want to retrieve CLI overrides for the main application. We'll check the
+   * name of the controlling application to determine whether to use the command line
+   * here or not.
+   */
+  MooseSharedPointer<CommandLine> cmd_line;
+  if (_app.name() == "main") // See AppFactory::createApp
+    cmd_line = _app.commandLine();
+
   if (cmd_line.get())
   {
     GetPot *get_pot = cmd_line->getPot();
@@ -853,7 +861,7 @@ void Parser::setScalarParameter<MooseEnum>(const std::string & full_name, const 
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
@@ -877,7 +885,7 @@ void Parser::setScalarParameter<MultiMooseEnum>(const std::string & full_name, c
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
@@ -909,7 +917,7 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
@@ -940,7 +948,7 @@ void Parser::setScalarParameter<PostprocessorName>(const std::string & full_name
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
@@ -981,7 +989,7 @@ void Parser::setVectorParameter<MooseEnum>(const std::string & full_name, const 
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
@@ -1019,7 +1027,7 @@ void Parser::setVectorParameter<VariableName>(const std::string & full_name, con
 
   // See if this variable was passed on the command line
   // if it was then we will retrieve the value from the command line instead of the file
-  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+  if (_app.name() == "main" && _app.commandLine()->haveVariable(full_name.c_str()))
     gp = _app.commandLine()->getPot();
   else
     gp = &_getpot_file;
