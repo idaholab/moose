@@ -72,7 +72,6 @@
     source_variable = u
     direction = to_multiapp
     variable = transferred_u
-    execute_on = timestep
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
     error_on_miss = true
@@ -81,7 +80,6 @@
     source_variable = u
     direction = to_multiapp
     variable = elemental_transferred_u
-    execute_on = timestep
     type = MultiAppMeshFunctionTransfer
     multi_app = sub
     error_on_miss = true

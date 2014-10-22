@@ -70,7 +70,6 @@
     source_variable = u
     direction = to_multiapp
     variable = transferred_u
-    execute_on = timestep
     type = MultiAppDTKInterpolationTransfer
     multi_app = sub
   [../]

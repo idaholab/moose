@@ -95,7 +95,6 @@
   [./tosub]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = u_nodal
@@ -105,7 +104,6 @@
   [./elemental_tosub]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = u_elemental
@@ -115,7 +113,6 @@
   [./elemental_to_sub_elemental]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = x
     variable = x_elemental
@@ -125,7 +122,6 @@
   [./elemental_to_sub_nodal]
     type = MultiAppProjectionTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = x
     variable = x_nodal
