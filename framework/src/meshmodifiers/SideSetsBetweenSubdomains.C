@@ -47,6 +47,9 @@ SideSetsBetweenSubdomains::modify()
   std::vector<BoundaryName> boundary_names = boundaryNames();
   std::vector<BoundaryID> boundary_ids(boundaryIDs().begin(), boundaryIDs().end());
 
+  // Get a reference to our BoundaryInfo object for later use
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+
   MeshBase::const_element_iterator   el  = mesh.active_elements_begin();
   const MeshBase::const_element_iterator end_el = mesh.active_elements_end();
   for (; el != end_el ; ++el)
@@ -65,10 +68,10 @@ SideSetsBetweenSubdomains::modify()
 
         // Add the boundaries
         for (unsigned int i=0; i<boundary_ids.size(); ++i)
-          mesh.get_boundary_info().add_side(elem, side, boundary_ids[i]);
+          boundary_info.add_side(elem, side, boundary_ids[i]);
     }
   }
 
   for (unsigned int i=0; i<boundary_ids.size(); ++i)
-    mesh.get_boundary_info().sideset_name(boundary_ids[i]) = boundary_names[i];
+    boundary_info.sideset_name(boundary_ids[i]) = boundary_names[i];
 }

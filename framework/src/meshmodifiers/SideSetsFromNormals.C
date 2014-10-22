@@ -95,6 +95,7 @@ SideSetsFromNormals::modify()
 
   finalize();
 
+  BoundaryInfo & boundary_info = _mesh_ptr->getMesh().get_boundary_info();
   for (unsigned int i = 0; i < _boundary_ids.size(); ++i)
-    _mesh_ptr->getMesh().get_boundary_info().sideset_name(_boundary_ids[i]) = boundaryNames()[i];
+    boundary_info.sideset_name(_boundary_ids[i]) = boundaryNames()[i];
 }

@@ -75,6 +75,9 @@ SideSetsAroundSubdomain::modify()
   Point face_normal;
   bool add_to_bdy = true;
 
+  // Get a reference to our BoundaryInfo object for later use
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+
   // Loop over the elements
   MeshBase::const_element_iterator   el  = mesh.active_elements_begin();
   const MeshBase::const_element_iterator end_el = mesh.active_elements_end();
@@ -104,7 +107,7 @@ SideSetsAroundSubdomain::modify()
           // Add the boundaries, if appropriate
           if (add_to_bdy)
             for (unsigned int i = 0; i < boundary_ids.size(); ++i)
-              mesh.get_boundary_info().add_side(elem, side, boundary_ids[i]);
+              boundary_info.add_side(elem, side, boundary_ids[i]);
         }
     }
   }
@@ -113,5 +116,5 @@ SideSetsAroundSubdomain::modify()
 
   // Assign the supplied names to the newly created side sets
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
-    mesh.get_boundary_info().sideset_name(boundary_ids[i]) = _boundary_names[i];
+    boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 }
