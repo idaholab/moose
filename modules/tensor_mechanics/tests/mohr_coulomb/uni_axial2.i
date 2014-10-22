@@ -180,7 +180,7 @@
 
 [UserObjects]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulomb
+    type = TensorMechanicsPlasticMohrCoulombExponential
     mc_cohesion = 10E6
     mc_cohesion_residual = 8E6
     mc_cohesion_rate = 0
