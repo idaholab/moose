@@ -195,33 +195,29 @@ DGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,unsigned in
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     for (_i=0; _i<test_space.size(); _i++)
       for (_j=0; _j<loc_phi.size(); _j++)
-      {
-        if (jvar == _var.number())
-          Kxx(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian(type);
-        else
-          Kxx(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(type, jvar);
-      }
+        Kxx(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(type, jvar);
 }
 
 
 void
 DGKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-//  Moose::perf_log.push("computeOffDiagJacobian()","DGKernel");
+  if (jvar == _var.number())
+    computeJacobian();
+  else
+  {
+    // Compute element-element Jacobian
+    computeOffDiagElemNeighJacobian(Moose::ElementElement,jvar);
 
-  // Compute element-element Jacobian
-  computeOffDiagElemNeighJacobian(Moose::ElementElement,jvar);
+    // Compute element-neighbor Jacobian
+    computeOffDiagElemNeighJacobian(Moose::ElementNeighbor,jvar);
 
-  // Compute element-neighbor Jacobian
-  computeOffDiagElemNeighJacobian(Moose::ElementNeighbor,jvar);
+    // Compute neighbor-element Jacobian
+    computeOffDiagElemNeighJacobian(Moose::NeighborElement,jvar);
 
-  // Compute neighbor-element Jacobian
-  computeOffDiagElemNeighJacobian(Moose::NeighborElement,jvar);
-
-  // Compute neighbor-neighbor Jacobian
-  computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor,jvar);
-
-//  Moose::perf_log.pop("computeOffDiagJacobian()","DGKernel");
+    // Compute neighbor-neighbor Jacobian
+    computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor,jvar);
+  }
 }
 
 Real
