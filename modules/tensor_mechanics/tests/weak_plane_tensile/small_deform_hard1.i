@@ -145,10 +145,10 @@
 
 [UserObjects]
   [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensile
-    tensile_strength = 10
-    tensile_strength_residual = 10
-    tensile_strength_rate = 0
+    type = TensorMechanicsPlasticWeakPlaneTensileExponential
+    strength = 10
+    strength_residual = 10
+    strength_rate = 0
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-11
   [../]

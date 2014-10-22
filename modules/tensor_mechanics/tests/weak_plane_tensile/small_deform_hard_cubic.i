@@ -1,4 +1,7 @@
-# checking error is thrown for negative rate
+# Checking evolution tensile strength for cubic hardening
+# A single element is stretched by 1E-6*t in z direction, and
+# the yield-surface evolution is mapped out
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -56,32 +59,24 @@
     type = PresetBC
     variable = x_disp
     boundary = front
-    value = 1E-6
+    value = 0
   [../]
   [./topy]
     type = PresetBC
     variable = y_disp
     boundary = front
-    value = 1E-6
+    value = 0
   [../]
   [./topz]
-    type = PresetBC
+    type = FunctionPresetBC
     variable = z_disp
     boundary = front
-    value = 1E-6
+    function = 1E-6*t
   [../]
 []
 
 [AuxVariables]
-  [./stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
+  [./wpt_internal]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -96,26 +91,11 @@
 []
 
 [AuxKernels]
-  [./stress_xz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xz
-    index_i = 0
-    index_j = 2
-  [../]
-  [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zx
-    index_i = 2
-    index_j = 0
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
+  [./wpt_internal]
+    type = MaterialStdVectorAux
+    property = plastic_internal_parameter
+    index = 0
+    variable = wpt_internal
   [../]
   [./stress_zz]
     type = RankTwoAux
@@ -125,22 +105,18 @@
     index_j = 2
   [../]
   [./yield_fcn_auxk]
-    type = MaterialRealAux
-    property = weak_plane_tensile_yield_function
+    type = MaterialStdVectorAux
+    property = plastic_yield_function
+    index = 0
     variable = yield_fcn
   [../]
 []
 
 [Postprocessors]
-  [./s_xz]
+  [./wpt_internal]
     type = PointValue
     point = '0 0 0'
-    variable = stress_xz
-  [../]
-  [./s_yz]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_yz
+    variable = wpt_internal
   [../]
   [./s_zz]
     type = PointValue
@@ -156,11 +132,12 @@
 
 [UserObjects]
   [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensileExponential
-    strength = 1.0
-    strength_rate = -1
+    type = TensorMechanicsPlasticWeakPlaneTensileCubic
+    strength = 10
+    strength_residual = 4
+    strength_limit = 0.000003
     yield_function_tolerance = 1E-6
-    internal_constraint_tolerance = 1E-5
+    internal_constraint_tolerance = 1E-11
   [../]
 []
 
@@ -172,24 +149,25 @@
     disp_y = y_disp
     disp_z = z_disp
     fill_method = symmetric_isotropic
-    C_ijkl = '0 1E6'
+    C_ijkl = '0 1E7'
     plastic_models = wpt
-    ep_plastic_tolerance = 1E-5
+    transverse_direction = '0 0 1'
+    ep_plastic_tolerance = 1E-11
   [../]
 []
 
 
 [Executioner]
-  end_time = 1
-  dt = 1
+  end_time = 4
+  dt = 0.5
   type = Transient
 []
 
 
 [Outputs]
-  file_base = except2
+  file_base = small_deform_hard_cubic
   output_initial = true
-  exodus = true
+  exodus = false
   [./console]
     type = Console
     perf_log = true

@@ -4,20 +4,14 @@ template<>
 InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensile>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
-  params.addRequiredRangeCheckedParam<Real>("tensile_strength", "tensile_strength>=0", "Weak plane tensile strength");
-  params.addParam<Real>("tensile_strength_residual", "Tenile strength at infinite hardening.  If not given, this defaults to tensile_strength, ie, perfect plasticity");
-  params.addRangeCheckedParam<Real>("tensile_strength_rate", 0, "tensile_strength_rate>=0", "Tensile strength = tensile_strenght_residual + (tensile_strength - tensile_strength_residual)*exp(-tensile_rate*plasticstrain).  Set to zero for perfect plasticity");
-  params.addClassDescription("Associative weak-plane tensile plasticity with hardening/softening");
+  params.addClassDescription("Associative weak-plane tensile plasticity with tensile strength = 1");
 
   return params;
 }
 
 TensorMechanicsPlasticWeakPlaneTensile::TensorMechanicsPlasticWeakPlaneTensile(const std::string & name,
                                                          InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters),
-    _tension_cutoff(getParam<Real>("tensile_strength")),
-    _tension_cutoff_residual(parameters.isParamValid("tensile_strength_residual") ? getParam<Real>("tensile_strength_residual") : _tension_cutoff),
-    _tension_cutoff_rate(getParam<Real>("tensile_strength_rate"))
+    TensorMechanicsPlasticModel(name, parameters)
 {
 }
 
@@ -66,11 +60,11 @@ TensorMechanicsPlasticWeakPlaneTensile::dflowPotential_dintnl(const RankTwoTenso
 Real
 TensorMechanicsPlasticWeakPlaneTensile::tensile_strength(const Real internal_param) const
 {
-  return _tension_cutoff_residual + (_tension_cutoff - _tension_cutoff_residual)*std::exp(-_tension_cutoff_rate*internal_param);
+  return 1.0;
 }
 
 Real
 TensorMechanicsPlasticWeakPlaneTensile::dtensile_strength(const Real internal_param) const
 {
-  return -_tension_cutoff_rate*(_tension_cutoff - _tension_cutoff_residual)*std::exp(-_tension_cutoff_rate*internal_param);
+  return 0.0;
 }

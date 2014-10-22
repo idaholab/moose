@@ -1,5 +1,10 @@
-# checking for exception error messages on the edge smoothing
-# here edge_smoother=5deg, which means the friction_angle must be <= 35.747
+# apply uniform stretches in x, y and z directions.
+# let cohesion = 10, cohesion_residual = 2, cohesion_limit = 0.0003
+# With cohesion = C, friction_angle = 60deg, tip_smoother = 4, the
+# algorithm should return to
+# sigma_m = (C*Cos(60) - 4)/Sin(60)
+# This allows checking of the relationship for C
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -38,19 +43,19 @@
     type = FunctionPresetBC
     variable = disp_x
     boundary = 'front back'
-    function = '1E-6*x'
+    function = '1E-6*x*t'
   [../]
   [./y]
     type = FunctionPresetBC
     variable = disp_y
     boundary = 'front back'
-    function = '1E-6*y'
+    function = '1E-6*y*t'
   [../]
   [./z]
     type = FunctionPresetBC
     variable = disp_z
     boundary = 'front back'
-    function = '1E-6*z'
+    function = '1E-6*z*t'
   [../]
 []
 
@@ -76,6 +81,14 @@
     family = MONOMIAL
   [../]
   [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mc_int]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./yield_fcn]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -124,6 +137,18 @@
     index_i = 2
     index_j = 2
   [../]
+  [./mc_int_auxk]
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_internal_parameter
+    variable = mc_int
+  [../]
+  [./yield_fcn_auxk]
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_yield_function
+    variable = yield_fcn
+  [../]
 []
 
 [Postprocessors]
@@ -157,17 +182,28 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
+  [./internal]
+    type = PointValue
+    point = '0 0 0'
+    variable = mc_int
+  [../]
+  [./f]
+    type = PointValue
+    point = '0 0 0'
+    variable = yield_fcn
+  [../]
 []
 
 [UserObjects]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombExponential
-    mc_cohesion = 10
-    mc_friction_angle = 30
-    mc_friction_angle_residual = 36
-    mc_dilation_angle = 5
-    mc_tip_smoother = 1
-    mc_edge_smoother = 5
+    type = TensorMechanicsPlasticMohrCoulombCubic
+    cohesion = 10
+    cohesion_residual = 2
+    cohesion_limit = 0.0003
+    friction_angle = 60
+    dilation_angle = 5
+    mc_tip_smoother = 4
+    mc_edge_smoother = 25
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9
   [../]
@@ -185,25 +221,25 @@
     ep_plastic_tolerance = 1E-9
     plastic_models = mc
     debug_fspb = 1
-    debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
+    debug_jac_at_stress = '10 1 2 1 10 3 2 3 10'
     debug_jac_at_pm = 1
-    debug_jac_at_intnl = 1
+    debug_jac_at_intnl = 1E-4
     debug_stress_change = 1E-5
     debug_pm_change = 1E-6
-    debug_intnl_change = 1E-6
+    debug_intnl_change = 1E-8
   [../]
 []
 
 
 [Executioner]
-  end_time = 1
-  dt = 1
+  end_time = 10
+  dt = 0.25
   type = Transient
 []
 
 
 [Outputs]
-  file_base = except4
+  file_base = small_deform_hard_cubic
   output_initial = true
   exodus = false
   [./console]

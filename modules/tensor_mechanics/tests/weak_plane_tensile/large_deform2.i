@@ -167,8 +167,8 @@
 
 [UserObjects]
   [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensile
-    tensile_strength = 1.0E6
+    type = TensorMechanicsPlasticWeakPlaneTensileExponential
+    strength = 1.0E6
     yield_function_tolerance = 1E-7
     internal_constraint_tolerance = 1E-5
   [../]
