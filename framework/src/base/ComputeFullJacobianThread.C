@@ -172,6 +172,7 @@ ComputeFullJacobianThread::computeInternalFaceJacobian()
       if (dg->variable().number() == ivar && dg->isImplicit())
       {
         unsigned int jvar = (*it).second->number();
+        dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
         dg->subProblem().prepareNeighborShapes(jvar, _tid);
         dg->computeOffDiagJacobian(jvar);
       }
