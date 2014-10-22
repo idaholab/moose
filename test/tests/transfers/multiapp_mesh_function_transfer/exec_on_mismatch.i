@@ -3,13 +3,22 @@
   dim = 2
   nx = 10
   ny = 10
-  # The Transfer system doesn't work quite right with ParallelMesh enabled.
-  # Form more information, see #2126
+  # The MultiAppMeshFunctionTransfer doesn't work with ParallelMesh.
+  # See tosub_master.i and #2145 for more information.
   distribution = serial
 []
 
 [Variables]
   [./u]
+  [../]
+[]
+
+[AuxVariables]
+  [./transferred_u]
+  [../]
+  [./elemental_transferred_u]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -53,35 +62,32 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
   [../]
 []
 
 [MultiApps]
   [./sub]
+    positions = '.099 .099 0 .599 .599 0 0.599 0.099 0'
     type = TransientMultiApp
     app_type = MooseTestApp
-    execute_on = timestep
-    positions = '0.48 0 0'
-    input_files = tosub_displaced_sub.i
+    input_files = sub.i
   [../]
 []
 
 [Transfers]
-  [./to_sub]
-    type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
+  [./from_sub]
+    source_variable = sub_u
+    direction = from_multiapp
+    variable = transferred_u
+    type = MultiAppMeshFunctionTransfer
     multi_app = sub
-    source_variable = u
-    variable = from_master
-    displaced_target_mesh = true
+    execute_on = 'initial timestep'
   [../]
-  [./elemental_to_sub]
-    type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
+  [./elemental_from_sub]
+    source_variable = sub_u
+    direction = from_multiapp
+    variable = elemental_transferred_u
+    type = MultiAppMeshFunctionTransfer
     multi_app = sub
-    source_variable = u
-    variable = elemental_from_master
-    displaced_target_mesh = true
   [../]
 []

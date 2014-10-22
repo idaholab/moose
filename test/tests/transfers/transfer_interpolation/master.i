@@ -84,7 +84,6 @@
   [./nearest_node]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = nearest_node
@@ -92,7 +91,6 @@
   [./mesh_function]
     type = MultiAppMeshFunctionTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = mesh_function
@@ -100,7 +98,6 @@
   [./user_object]
     type = MultiAppUserObjectTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     variable = user_object
     user_object = layered_average
@@ -108,7 +105,6 @@
   [./interpolation]
     type = MultiAppInterpolationTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = interpolation

@@ -56,6 +56,9 @@ public:
    */
   void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
+  /// Return the MultiApp that this transfer belongs to
+  const MultiApp * getMultiApp() const { return _multi_app; }
+
 protected:
   /// The MultiApp this Transfer is transferring data to or from
   MultiApp * _multi_app;

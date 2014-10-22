@@ -68,7 +68,6 @@
   [./v_nodal_tr]
     type = MultiAppProjectionTransfer
     direction = from_multiapp
-    execute_on = timestep_begin
     multi_app = sub
     source_variable = v
     variable = v_nodal
@@ -78,7 +77,6 @@
   [./v_elemental_tr]
     type = MultiAppProjectionTransfer
     direction = from_multiapp
-    execute_on = timestep_begin
     multi_app = sub
     source_variable = v
     variable = v_elemental

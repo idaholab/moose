@@ -7,8 +7,15 @@ import subprocess, os, sys, re
 
 
 def shellCommand( command, cwd=None ):
-  return subprocess.check_output( command, shell=True, stderr=subprocess.STDOUT, cwd=cwd )
+  # The following line works with Python 2.7+
+  # return subprocess.check_output( command, shell=True, stderr=subprocess.STDOUT, cwd=cwd )
+  p = subprocess.Popen( command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd )
+  p.wait()
+  retcode = p.returncode
+  if retcode != 0:
+    raise Exception()
 
+  return p.communicate()[0]
 
 def gitVersionString( cwd=None ):
   SHA1 = ''
@@ -17,7 +24,7 @@ def gitVersionString( cwd=None ):
     # The SHA1 and date should always be available if we have a git repo.
     SHA1 = shellCommand( 'git show -s --format=%h', cwd ).strip()
     date = shellCommand( 'git show -s --format=%ci', cwd ).split()[0]
-  except subprocess.CalledProcessError:
+  except: # subprocess.CalledProcessError:
     return None
 
   # The tag check will always succeed if the repo starts with a v0.0 tag. To find only tags that
@@ -29,7 +36,7 @@ def gitVersionString( cwd=None ):
     commitsSinceTag = description[1]
     if commitsSinceTag != '0':
       tag = 'derived from ' + tag
-  except subprocess.CalledProcessError:
+  except: # subprocess.CalledProcessError:
     pass
   return tag + "git commit " + SHA1 + " on " + date
 
@@ -40,7 +47,7 @@ def gitSvnVersionString( cwd=None ):
     revision = shellCommand( 'git svn find-rev $(git log --max-count 1 --pretty=format:%H)', cwd ).strip()
     if len( revision ) > 0 and len( revision ) < 10:
       return 'svn revision ' + revision + " on " + date
-  except subprocess.CalledProcessError:
+  except: # subprocess.CalledProcessError:
     pass
   return None
 
@@ -51,7 +58,7 @@ def svnVersionString( cwd=None ):
     matchingRevision = re.search( r'\d+', revisionString )
     if matchingRevision is not None:
       return 'svn revision ' + matchingRevision.group(0)
-  except subprocess.CalledProcessError:
+  except: # subprocess.CalledProcessError:
     pass
   return None
 

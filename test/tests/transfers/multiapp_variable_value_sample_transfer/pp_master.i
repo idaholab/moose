@@ -69,7 +69,6 @@
     source_variable = u
     direction = to_multiapp
     postprocessor = from_master
-    execute_on = timestep
     type = MultiAppVariableValueSamplePostprocessorTransfer
     multi_app = pp_sub
   [../]

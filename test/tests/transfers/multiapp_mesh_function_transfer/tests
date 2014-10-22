@@ -34,4 +34,13 @@
     expect_err = 'Point not found'
     recover = false
   [../]
+
+  [./mismatch_exec_on]
+    type = 'RunException'
+    input = 'exec_on_mismatch.i'
+    expect_err = 'MultiAppTransfer execute_on flags do not match'
+    recover = false
+    cli_args = '--error' # Change warnings to errors for this test
+    max_parallel = 1
+  [../]
 []
