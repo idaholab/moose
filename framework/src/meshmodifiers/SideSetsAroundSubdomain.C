@@ -104,7 +104,7 @@ SideSetsAroundSubdomain::modify()
           // Add the boundaries, if appropriate
           if (add_to_bdy)
             for (unsigned int i = 0; i < boundary_ids.size(); ++i)
-              mesh.boundary_info->add_side(elem, side, boundary_ids[i]);
+              mesh.get_boundary_info().add_side(elem, side, boundary_ids[i]);
         }
     }
   }
@@ -113,5 +113,5 @@ SideSetsAroundSubdomain::modify()
 
   // Assign the supplied names to the newly created side sets
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
-    mesh.boundary_info->sideset_name(boundary_ids[i]) = _boundary_names[i];
+    mesh.get_boundary_info().sideset_name(boundary_ids[i]) = _boundary_names[i];
 }

@@ -65,10 +65,10 @@ SideSetsBetweenSubdomains::modify()
 
         // Add the boundaries
         for (unsigned int i=0; i<boundary_ids.size(); ++i)
-          mesh.boundary_info->add_side(elem, side, boundary_ids[i]);
+          mesh.get_boundary_info().add_side(elem, side, boundary_ids[i]);
     }
   }
 
   for (unsigned int i=0; i<boundary_ids.size(); ++i)
-    mesh.boundary_info->sideset_name(boundary_ids[i]) = boundary_names[i];
+    mesh.get_boundary_info().sideset_name(boundary_ids[i]) = boundary_names[i];
 }

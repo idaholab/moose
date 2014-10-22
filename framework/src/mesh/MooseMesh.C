@@ -228,7 +228,9 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false)
 {
-  *(getMesh().boundary_info) = *(other_mesh.getMesh().boundary_info);
+  // Note: this calls BoundaryInfo::operator= without changing the
+  // ownership semantics of either Mesh's BoundaryInfo object.
+  getMesh().get_boundary_info() = other_mesh.getMesh().get_boundary_info();
 
   const std::set<SubdomainID> & subdomains = other_mesh.meshSubdomains();
   for (std::set<SubdomainID>::const_iterator it = subdomains.begin(); it != subdomains.end(); ++it)
@@ -238,19 +240,19 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
   }
 
   std::vector<BoundaryID> side_boundaries;
-  other_mesh.getMesh().boundary_info->build_side_boundary_ids(side_boundaries);
+  other_mesh.getMesh().get_boundary_info().build_side_boundary_ids(side_boundaries);
   for (std::vector<BoundaryID>::const_iterator it = side_boundaries.begin(); it != side_boundaries.end(); ++it)
   {
     BoundaryID bid = *it;
-    getMesh().boundary_info->sideset_name(bid) = other_mesh.getMesh().boundary_info->sideset_name(bid);
+    getMesh().get_boundary_info().sideset_name(bid) = other_mesh.getMesh().get_boundary_info().get_sideset_name(bid);
   }
 
   std::vector<BoundaryID> node_boundaries;
-  other_mesh.getMesh().boundary_info->build_node_boundary_ids(node_boundaries);
+  other_mesh.getMesh().get_boundary_info().build_node_boundary_ids(node_boundaries);
   for (std::vector<BoundaryID>::const_iterator it = node_boundaries.begin(); it != node_boundaries.end(); ++it)
   {
     BoundaryID bid = *it;
-    getMesh().boundary_info->nodeset_name(bid) = other_mesh.getMesh().boundary_info->nodeset_name(bid);
+    getMesh().get_boundary_info().nodeset_name(bid) = other_mesh.getMesh().get_boundary_info().get_nodeset_name(bid);
   }
 }
 
@@ -325,7 +327,7 @@ MooseMesh::prepare(bool force)
     _mesh_subdomains.insert((*el)->subdomain_id());
 
   // Collect (local) boundary IDs
-  const std::set<BoundaryID>& local_bids = getMesh().boundary_info->get_boundary_ids();
+  const std::set<BoundaryID>& local_bids = getMesh().get_boundary_info().get_boundary_ids();
   _mesh_boundary_ids.insert(local_bids.begin(), local_bids.end());
 
   // Communicate subdomain and boundary IDs if this is a parallel mesh
@@ -578,7 +580,7 @@ MooseMesh::buildNodeList()
   /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
   std::vector<unsigned int> nodes;
   std::vector<boundary_id_type> ids;
-  getMesh().boundary_info->build_node_list(nodes, ids);
+  getMesh().get_boundary_info().build_node_list(nodes, ids);
 
   int n = nodes.size();
   _bnd_nodes.resize(n);
@@ -612,7 +614,7 @@ MooseMesh::buildBndElemList()
   std::vector<unsigned int> elems;
   std::vector<unsigned short int> sides;
   std::vector<boundary_id_type> ids;
-  getMesh().boundary_info->build_active_side_list(elems, sides, ids);
+  getMesh().get_boundary_info().build_active_side_list(elems, sides, ids);
 
   int n = elems.size();
   _bnd_elems.resize(n);
@@ -915,7 +917,7 @@ MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
   std::istringstream ss(boundary_name);
 
   if (!(ss >> id))
-    id = getMesh().boundary_info->get_id_by_name(boundary_name);
+    id = getMesh().get_boundary_info().get_id_by_name(boundary_name);
 
   return id;
 }
@@ -924,10 +926,10 @@ std::vector<BoundaryID>
 MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool generate_unknown) const
 {
   std::vector<BoundaryID> ids(boundary_name.size());
-  std::map<BoundaryID, std::string> & sideset_map = getMesh().boundary_info->set_sideset_name_map();
-  std::map<BoundaryID, std::string> & nodeset_map = getMesh().boundary_info->set_nodeset_name_map();
-  std::set<BoundaryID> boundary_ids = getMesh().boundary_info->get_boundary_ids();
-  BoundaryID max_boundary_id = boundary_ids.empty() ? 0 : *(getMesh().boundary_info->get_boundary_ids().rbegin());
+  const std::map<BoundaryID, std::string> & sideset_map = getMesh().get_boundary_info().get_sideset_name_map();
+  const std::map<BoundaryID, std::string> & nodeset_map = getMesh().get_boundary_info().get_nodeset_name_map();
+  std::set<BoundaryID> boundary_ids = getMesh().get_boundary_info().get_boundary_ids();
+  BoundaryID max_boundary_id = boundary_ids.empty() ? 0 : *(getMesh().get_boundary_info().get_boundary_ids().rbegin());
 
   for (unsigned int i=0; i<boundary_name.size(); i++)
   {
@@ -954,7 +956,7 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool 
           && !MooseUtils::doesMapContainValue(nodeset_map, std::string(boundary_name[i])))
         id = ++max_boundary_id;
       else
-        id = getMesh().boundary_info->get_id_by_name(boundary_name[i]);
+        id = getMesh().get_boundary_info().get_id_by_name(boundary_name[i]);
     }
 
     ids[i] = id;
@@ -1015,13 +1017,13 @@ void
 MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
 {
   std::vector<BoundaryID> side_boundaries;
-  getMesh().boundary_info->build_side_boundary_ids(side_boundaries);
+  getMesh().get_boundary_info().build_side_boundary_ids(side_boundaries);
 
   // We need to figure out if this boundary is a sideset or nodeset
   if (std::find(side_boundaries.begin(), side_boundaries.end(), boundary_id) != side_boundaries.end())
-    getMesh().boundary_info->sideset_name(boundary_id) = name;
+    getMesh().get_boundary_info().sideset_name(boundary_id) = name;
   else
-    getMesh().boundary_info->nodeset_name(boundary_id) = name;
+    getMesh().get_boundary_info().nodeset_name(boundary_id) = name;
 }
 
 void
@@ -1043,7 +1045,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & peri
       if (elem->neighbor(s))
         continue;
 
-      const std::vector<boundary_id_type>& bc_ids = getMesh().boundary_info->boundary_ids (elem, s);
+      const std::vector<boundary_id_type>& bc_ids = getMesh().get_boundary_info().boundary_ids (elem, s);
       for (std::vector<boundary_id_type>::const_iterator id_it = bc_ids.begin(); id_it!=bc_ids.end(); ++id_it)
       {
         const boundary_id_type boundary_id = *id_it;
@@ -1051,7 +1053,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & peri
         if (periodic && periodic->is_my_variable(var_number))
         {
           const Elem* neigh = pbs->neighbor(boundary_id, *point_locator, elem, s);
-          unsigned int s_neigh = getMesh().boundary_info->side_with_boundary_id (neigh, periodic->pairedboundary);
+          unsigned int s_neigh = getMesh().get_boundary_info().side_with_boundary_id (neigh, periodic->pairedboundary);
 
           AutoPtr<Elem> elem_side = elem->build_side(s);
           AutoPtr<Elem> neigh_side = neigh->build_side(s_neigh);
@@ -1092,7 +1094,7 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<unsigned int> > &
   std::vector<unsigned int> nl;
   std::vector<boundary_id_type> il;
 
-  getMesh().boundary_info->build_node_list(nl, il);
+  getMesh().get_boundary_info().build_node_list(nl, il);
 
   // Loop over all the boundary nodes adding the periodic nodes to the appropriate set
   for (unsigned int i=0; i<nl.size(); ++i)
@@ -1195,7 +1197,7 @@ MooseMesh::detectPairedSidesets()
    */
   unsigned int strides[3][3] = {{4, 2, 1}, {2, 4, 1}, {1, 4, 2}};
 
-  getMesh().boundary_info->build_node_list_from_side_list();
+  getMesh().get_boundary_info().build_node_list_from_side_list();
   unsigned int dim = getMesh().mesh_dimension();
   unsigned int z_dim = dim == 3 ? 2 : 1;  // Determine how many z loops there are, we always need to loop at least once!
   for (unsigned int curr_dim=0; curr_dim < dim; ++curr_dim)
@@ -1207,7 +1209,8 @@ MooseMesh::detectPairedSidesets()
       for (unsigned int j=0; j<2; ++j)
         for (unsigned int k=0; k<z_dim; ++k)
         {
-          std::vector<BoundaryID> bounds_ids = getMesh().boundary_info->boundary_ids(_extreme_nodes[i*strides[curr_dim][0] + j*strides[curr_dim][1] + k*strides[curr_dim][2]]);
+          std::vector<BoundaryID> bounds_ids =
+            getMesh().get_boundary_info().boundary_ids(_extreme_nodes[i*strides[curr_dim][0] + j*strides[curr_dim][1] + k*strides[curr_dim][2]]);
           for (unsigned int l=0; l<bounds_ids.size(); ++l)
             ++boundary_counts[bounds_ids[l]];
         }
@@ -1682,19 +1685,19 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id, const boundary_id_typ
     unsigned int n_sides = elem->n_sides();
     for (unsigned int s=0; s != n_sides; ++s)
     {
-      const std::vector<boundary_id_type>& old_ids = getMesh().boundary_info->boundary_ids(elem, s);
+      const std::vector<boundary_id_type>& old_ids = getMesh().get_boundary_info().boundary_ids(elem, s);
       if (std::find(old_ids.begin(), old_ids.end(), old_id) != old_ids.end())
       {
         std::vector<boundary_id_type> new_ids(old_ids);
         std::replace(new_ids.begin(), new_ids.end(), old_id, new_id);
         if (delete_prev)
         {
-          getMesh().boundary_info->remove_side(elem, s);
-          getMesh().boundary_info->add_side(elem, s, new_ids);
+          getMesh().get_boundary_info().remove_side(elem, s);
+          getMesh().get_boundary_info().add_side(elem, s, new_ids);
         }
         else
         {
-          getMesh().boundary_info->add_side(elem, s, new_ids);
+          getMesh().get_boundary_info().add_side(elem, s, new_ids);
         }
       }
     }
@@ -1729,31 +1732,31 @@ MooseMesh::dimension() const
 std::vector<BoundaryID>
 MooseMesh::boundaryIDs(const Elem *const elem, const unsigned short int side) const
 {
-  return getMesh().boundary_info->boundary_ids(elem, side);
+  return getMesh().get_boundary_info().boundary_ids(elem, side);
 }
 
 const std::set<BoundaryID> &
 MooseMesh::getBoundaryIDs() const
 {
-  return getMesh().boundary_info->get_boundary_ids();
+  return getMesh().get_boundary_info().get_boundary_ids();
 }
 
 void
 MooseMesh::buildNodeListFromSideList()
 {
-  getMesh().boundary_info->build_node_list_from_side_list();
+  getMesh().get_boundary_info().build_node_list_from_side_list();
 }
 
 void
 MooseMesh::buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il)
 {
-  getMesh().boundary_info->build_side_list(el, sl, il);
+  getMesh().get_boundary_info().build_side_list(el, sl, il);
 }
 
 unsigned int
 MooseMesh::sideWithBoundaryID(const Elem * const elem, const BoundaryID boundary_id) const
 {
-  return getMesh().boundary_info->side_with_boundary_id(elem, boundary_id);
+  return getMesh().get_boundary_info().side_with_boundary_id(elem, boundary_id);
 }
 
 MeshBase::const_node_iterator
@@ -1946,7 +1949,7 @@ MooseMesh::ghostGhostedBoundaries()
 
   mesh.clear_extra_ghost_elems();
 
-  mesh.boundary_info->build_side_list(elems, sides, ids);
+  mesh.get_boundary_info().build_side_list(elems, sides, ids);
 
   std::set<const Elem *> boundary_elems_to_ghost;
   std::set<Node *> connected_nodes_to_ghost;

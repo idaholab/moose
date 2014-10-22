@@ -67,13 +67,13 @@ NodalNormalsPreprocessor::execute()
     if (_mesh.isBoundaryNode(node->id()))
     {
       // List of IDs for the boundary
-      std::vector<BoundaryID> node_boundary_ids = _mesh.getMesh().boundary_info->boundary_ids(node);
+      std::vector<BoundaryID> node_boundary_ids = _mesh.getMesh().get_boundary_info().boundary_ids(node);
 
       // Perform the calculation, the node must be:
       //    (1) On a boundary to which the object is restricted
       //    (2) Not on a corner of the boundary
       if (hasBoundary(node_boundary_ids, ANY)
-          && (!_has_corners || ! _mesh.getMesh().boundary_info->has_boundary_id(node, _corner_boundary_id)))
+          && (!_has_corners || ! _mesh.getMesh().get_boundary_info().has_boundary_id(node, _corner_boundary_id)))
       {
         // Perform the caluation of the normal
         if (node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)
