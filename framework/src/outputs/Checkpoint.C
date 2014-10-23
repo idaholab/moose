@@ -149,10 +149,10 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
   if (_file_names.size() > _num_files)
   {
     // Extract the filenames to be removed
-    CheckpointFileNames delete_files = _file_names[0];
+    CheckpointFileNames delete_files = _file_names.front();
 
     // Remove these filenames from the list
-    _file_names.erase(_file_names.begin());
+    _file_names.pop_front();
 
     // Get thread and proc information
     processor_id_type proc_id = processor_id();
