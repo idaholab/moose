@@ -108,6 +108,7 @@
     input = 'output_error.i'
     expect_err = "Failed to access the data for variable 'u' at point"
     prereq = 'build'
+    max_threads = 1 # Expect error test
   [../]
 
   [./aux_nonlinear_solution]
