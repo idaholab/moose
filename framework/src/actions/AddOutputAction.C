@@ -43,7 +43,7 @@ void
 AddOutputAction::act()
 {
   // Do nothing if FEProblem is NULL, this should only be the case for CoupledProblem
-  if (_problem == NULL)
+  if (_problem.get() == NULL)
     return;
 
   // Get a reference to the OutputWarehouse

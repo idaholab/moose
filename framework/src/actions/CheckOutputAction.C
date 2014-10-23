@@ -50,7 +50,7 @@ CheckOutputAction::checkMaterialOutput()
 {
   // Do nothing if _problem is NULL (this is the case for coupled problems)
   /* Do not produce warning, you will get a warning from OutputAction */
-  if (_problem == NULL)
+  if (_problem.get() == NULL)
     return;
 
   // A complete list of all Material objects
