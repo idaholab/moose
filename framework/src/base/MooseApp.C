@@ -408,7 +408,7 @@ MooseApp::setOutputPosition(Point p)
   _output_position = p;
   _output_warehouse->meshChanged();
 
-  if (_executioner != NULL)
+  if (_executioner.get() != NULL)
     _executioner->parentOutputPositionChanged();
 }
 

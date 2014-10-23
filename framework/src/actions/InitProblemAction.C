@@ -32,7 +32,7 @@ InitProblemAction::InitProblemAction(const std::string & name, InputParameters p
 void
 InitProblemAction::act()
 {
-  if (_problem != NULL)
+  if (_problem.get() != NULL)
     _problem->init();
   else
   {

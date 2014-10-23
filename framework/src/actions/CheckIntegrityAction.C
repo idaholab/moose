@@ -33,6 +33,6 @@ void
 CheckIntegrityAction::act()
 {
   _awh.checkUnsatisfiedActions();
-  if (_problem != NULL)
+  if (_problem.get() != NULL)
     _problem->checkProblemIntegrity();
 }

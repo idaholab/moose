@@ -2072,7 +2072,7 @@ NonlinearSystem::serializedSolution()
 void
 NonlinearSystem::setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc)
 {
-  if (_preconditioner != NULL)
+  if (_preconditioner.get() != NULL)
     mooseError("More than one active Preconditioner detected");
 
   _preconditioner = pc;

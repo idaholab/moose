@@ -52,7 +52,7 @@ CreateProblemAction::CreateProblemAction(const std::string & name, InputParamete
 void
 CreateProblemAction::act()
 {
-  if (_mesh != NULL)
+  if (_mesh.get() != NULL)
   {
     // build the problem only if we have mesh
     {
