@@ -14,7 +14,11 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>()
   params.addRangeCheckedParam<Real>("cohesion_rate", 0, "cohesion_rate>=0", "Cohesion = cohesion_residual + (cohesion - cohesion_residual)*exp(-cohesion_rate*plasticstrain).  Set to zero for perfect plasticity");
   params.addRangeCheckedParam<Real>("friction_angle_rate", 0, "friction_angle_rate>=0", "tan(friction_angle) = tan(friction_angle_residual) + (tan(friction_angle) - tan(friction_angle_residual))*exp(-friction_angle_rate*plasticstrain).  Set to zero for perfect plasticity");
   params.addRangeCheckedParam<Real>("dilation_angle_rate", 0, "dilation_angle_rate>=0", "tan(dilation_angle) = tan(dilation_angle_residual) + (tan(dilation_angle) - tan(dilation_angle_residual))*exp(-dilation_angle_rate*plasticstrain).  Set to zero for perfect plasticity");
-  params.addRequiredRangeCheckedParam<Real>("smoother", "smoother>=0", "Smoothing parameter: the cone vertex at shear-stress = 0 will be smoothed by the given amount.  Typical value is 0.1*cohesion");
+  MooseEnum tip_scheme("hyperbolic cap", "hyperbolic");
+  params.addParam<MooseEnum>("tip_scheme", tip_scheme, "Scheme by which the cone's tip will be smoothed.");
+  params.addRequiredRangeCheckedParam<Real>("smoother", "smoother>=0", "For the 'hyperbolic' tip_scheme, the cone vertex at shear-stress = 0 will be smoothed by the given amount.  For the 'cap' tip_scheme, additional smoothing will occur.  Typical value is 0.1*cohesion");
+  params.addParam<Real>("cap_start", 0.0, "For the 'cap' tip_scheme, smoothing is performed in the stress_zz > cap_start region");
+  params.addRangeCheckedParam<Real>("cap_rate", 0.0, "cap_rate>=0", "For the 'cap' tip_scheme, this controls how quickly the cap degenerates to a hemisphere: small values mean a slow degeneration to a hemisphere (and zero means the 'cap' will be totally inactive).  Typical value is 1/cohesion");
   params.addClassDescription("Non-associative finite-strain weak-plane shear plasticity with hardening/softening");
 
   return params;
@@ -32,7 +36,10 @@ TensorMechanicsPlasticWeakPlaneShear::TensorMechanicsPlasticWeakPlaneShear(const
     _cohesion_rate(getParam<Real>("cohesion_rate")),
     _tan_phi_rate(getParam<Real>("friction_angle_rate")),
     _tan_psi_rate(getParam<Real>("dilation_angle_rate")),
-    _small_smoother(getParam<Real>("smoother"))
+    _tip_scheme(getParam<MooseEnum>("tip_scheme")),
+    _small_smoother2(std::pow(getParam<Real>("smoother"), 2)),
+    _cap_start(getParam<Real>("cap_start")),
+    _cap_rate(getParam<Real>("cap_rate"))
 {
   if (_tan_phi < _tan_psi)
     mooseError("Weak-plane friction angle must not be less than weak-plane dilation angle");
@@ -47,7 +54,7 @@ Real
 TensorMechanicsPlasticWeakPlaneShear::yieldFunction(const RankTwoTensor & stress, const Real & intnl) const
 {
   // note that i explicitly symmeterise in preparation for Cosserat
-  return std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2) + std::pow(_small_smoother, 2)) + stress(2,2)*tan_phi(intnl) - cohesion(intnl);
+  return std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2) + smooth(stress)) + stress(2,2)*tan_phi(intnl) - cohesion(intnl);
 }
 
 RankTwoTensor
@@ -55,7 +62,7 @@ TensorMechanicsPlasticWeakPlaneShear::df_dsig(const RankTwoTensor & stress, cons
 {
   RankTwoTensor deriv; // the constructor zeroes this
 
-  Real tau = std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2) + std::pow(_small_smoother, 2));
+  Real tau = std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2) + smooth(stress));
   // note that i explicitly symmeterise in preparation for Cosserat
   if (tau == 0.0)
   {
@@ -68,8 +75,9 @@ TensorMechanicsPlasticWeakPlaneShear::df_dsig(const RankTwoTensor & stress, cons
   {
     deriv(0, 2) = deriv(2, 0) = 0.25*(stress(0, 2)+stress(2,0))/tau;
     deriv(1, 2) = deriv(2, 1) = 0.25*(stress(1, 2)+stress(2,1))/tau;
+    deriv(2, 2) = 0.5*dsmooth(stress)/tau;
   }
-  deriv(2, 2) = _tan_phi_or_psi;
+  deriv(2, 2) += _tan_phi_or_psi;
   return deriv;
 }
 
@@ -96,7 +104,7 @@ RankFourTensor
 TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor & stress, const Real & /*intnl*/) const
 {
   RankFourTensor dr_dstress;
-  Real tau = std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2) + std::pow(_small_smoother, 2));
+  Real tau = std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2) + smooth(stress));
   if (tau == 0.0)
     return dr_dstress;
 
@@ -104,6 +112,7 @@ TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor
   RankTwoTensor dtau;
   dtau(0, 2) = dtau(2, 0) = 0.25*(stress(0, 2) + stress(2, 0))/tau;
   dtau(1, 2) = dtau(2, 1) = 0.25*(stress(1, 2) + stress(2, 1))/tau;
+  dtau(2, 2) = 0.5*dsmooth(stress)/tau;
 
   for (unsigned i = 0 ; i < 3 ; ++i)
     for (unsigned j = 0 ; j < 3 ; ++j)
@@ -120,6 +129,7 @@ TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor
   dr_dstress(1, 2, 2, 1) += 0.25/tau;
   dr_dstress(2, 1, 1, 2) += 0.25/tau;
   dr_dstress(2, 1, 2, 1) += 0.25/tau;
+  dr_dstress(2, 2, 2, 2) += 0.5*d2smooth(stress)/tau;
 
   return dr_dstress;
 }
@@ -166,4 +176,61 @@ Real
 TensorMechanicsPlasticWeakPlaneShear::dtan_psi(const Real internal_param) const
 {
   return -_tan_psi_rate*(_tan_psi - _tan_psi_residual)*std::exp(-_tan_psi_rate*internal_param);
+}
+
+
+Real
+TensorMechanicsPlasticWeakPlaneShear::smooth(const RankTwoTensor & stress) const
+{
+  Real smoother2 = _small_smoother2;
+  if (_tip_scheme == "cap")
+  {
+    Real x = stress(2, 2) - _cap_start;
+    Real p = 0;
+    if (x > 0)
+      p = x*(1 - std::exp(-_cap_rate*x));
+    smoother2 += std::pow(p, 2);
+  }
+  return smoother2;
+}
+
+
+Real
+TensorMechanicsPlasticWeakPlaneShear::dsmooth(const RankTwoTensor & stress) const
+{
+  Real dsmoother2 = 0;
+  if (_tip_scheme == "cap")
+  {
+    Real x = stress(2, 2) - _cap_start;
+    Real p = 0;
+    Real dp_dx = 0;
+    if (x > 0)
+    {
+      p = x*(1 - std::exp(-_cap_rate*x));
+      dp_dx = (1 - std::exp(-_cap_rate*x)) + x*_cap_rate*std::exp(-_cap_rate*x);
+    }
+    dsmoother2 += 2*p*dp_dx;
+  }
+  return dsmoother2;
+}
+
+Real
+TensorMechanicsPlasticWeakPlaneShear::d2smooth(const RankTwoTensor & stress) const
+{
+  Real d2smoother2 = 0;
+  if (_tip_scheme == "cap")
+  {
+    Real x = stress(2, 2) - _cap_start;
+    Real p = 0;
+    Real dp_dx = 0;
+    Real d2p_dx2 = 0;
+    if (x > 0)
+    {
+      p = x*(1 - std::exp(-_cap_rate*x));
+      dp_dx = (1 - std::exp(-_cap_rate*x)) + x*_cap_rate*std::exp(-_cap_rate*x);
+      d2p_dx2 = 2*_cap_rate*std::exp(-_cap_rate*x) - x*std::pow(_cap_rate, 2)*std::exp(-_cap_rate*x);
+    }
+    d2smoother2 += 2*std::pow(dp_dx, 2) + 2*p*d2p_dx2;
+  }
+  return d2smoother2;
 }
