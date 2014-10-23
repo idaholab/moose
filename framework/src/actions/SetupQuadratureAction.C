@@ -50,6 +50,6 @@ SetupQuadratureAction::~SetupQuadratureAction()
 void
 SetupQuadratureAction::act()
 {
-  if (_problem != NULL)
+  if (_problem.get() != NULL)
     _problem->createQRules(_type, _order, _element_order, _side_order);
 }

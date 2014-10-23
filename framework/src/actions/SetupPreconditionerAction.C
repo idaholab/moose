@@ -38,7 +38,7 @@ SetupPreconditionerAction::SetupPreconditionerAction(const std::string & name, I
 void
 SetupPreconditionerAction::act()
 {
-  if (_problem != NULL)
+  if (_problem.get() != NULL)
   {
     // build the preconditioner
     _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
