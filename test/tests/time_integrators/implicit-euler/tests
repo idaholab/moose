@@ -19,6 +19,5 @@
     ratio_tol = 1e-9
     difference_tol = 1e7
     recover = false
-    max_threads = 1 #see 4109
   [../]
 []
