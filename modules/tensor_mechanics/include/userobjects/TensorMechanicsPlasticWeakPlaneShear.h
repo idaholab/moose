@@ -12,7 +12,7 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>();
 
 /**
  * Rate-independent associative weak-plane tensile failure
- * with hardening/softening
+ * with hardening/softening.  The cone's tip is smoothed.
  */
 class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
 {
@@ -97,14 +97,32 @@ class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
   Real _tan_psi_rate;
 
   /**
-   * The yield function needs to be smooth around shear-stress=0,
-   * so it is modified to be
-   * f = sqrt(s_xz^2 + s_yz^2 + (_small_smoother*_cohesion)^2) + s_zz*_tan_phi - _cohesion
+   * The yield function is modified to
+   * f = sqrt(s_xz^2 + s_yz^2 + a) + s_zz*_tan_phi - _cohesion
+   * where "a" depends on the tip_scheme.  Currently _tip_scheme is
+   * 'hyperbolic', where a = _small_smoother2
+   * 'cap' where a = _small_smoother2 + (p(stress(2,2) - _cap_start))^2
+   *       with the function p(x)=x(1-exp(-_cap_rate*x)) for x>0, and p=0 otherwise
    */
-  Real _small_smoother;
+  MooseEnum _tip_scheme;
+
+  /// smoothing parameter for the cone's tip - see doco for _tip_scheme
+  Real _small_smoother2;
+
+  /// smoothing parameter dictating when the 'cap' will start - see doco for _tip_scheme
+  Real _cap_start;
+
+  /// dictates how quickly the 'cap' degenerates to a hemisphere - see doco for _tip_scheme
+  Real _cap_rate;
 
   /// Function that's used in dyieldFunction_dstress and flowPotential
   RankTwoTensor df_dsig(const RankTwoTensor & stress, const Real & _tan_phi_or_psi) const;
+
+  virtual Real smooth(const RankTwoTensor & stress) const;
+
+  virtual Real dsmooth(const RankTwoTensor & stress) const;
+
+  virtual Real d2smooth(const RankTwoTensor & stress) const;
 
   /// cohesion as a function of internal parameter
   virtual Real cohesion(const Real internal_param) const;

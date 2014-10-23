@@ -58,13 +58,13 @@ TensorMechanicsPlasticWeakPlaneTensile::dflowPotential_dintnl(const RankTwoTenso
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneTensile::tensile_strength(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneTensile::tensile_strength(const Real /*internal_param*/) const
 {
   return 1.0;
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneTensile::dtensile_strength(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneTensile::dtensile_strength(const Real /*internal_param*/) const
 {
   return 0.0;
 }

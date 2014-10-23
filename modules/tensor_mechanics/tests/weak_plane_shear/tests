@@ -32,6 +32,13 @@
     abs_zero = 1.0E-6
     heavy = true
   [../]
+  [./small4]
+    type = 'CSVDiff'
+    input = 'small_deform4.i'
+    csvdiff = 'small_deform4.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-6
+  [../]
 
   [./large1]
     type = 'Exodiff'
@@ -49,6 +56,14 @@
     type = 'CSVDiff'
     input = 'large_deform3.i'
     csvdiff = 'large_deform3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-6
+    heavy = true
+  [../]
+  [./large4]
+    type = 'CSVDiff'
+    input = 'large_deform4.i'
+    csvdiff = 'large_deform4.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-6
     heavy = true
