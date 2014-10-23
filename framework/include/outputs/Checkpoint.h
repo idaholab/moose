@@ -22,6 +22,8 @@
 #include "MaterialPropertyIO.h"
 #include "RestartableDataIO.h"
 
+#include <deque>
+
 // Forward declarations
 class Checkpoint;
 struct CheckpointFileNames;
@@ -128,7 +130,7 @@ private:
   RestartableDataIO _restartable_data_io;
 
   /// Vector of checkpoint filename structures
-  std::vector<CheckpointFileNames> _file_names;
+  std::deque<CheckpointFileNames> _file_names;
 };
 
 #endif //CHECKPOINT_H
