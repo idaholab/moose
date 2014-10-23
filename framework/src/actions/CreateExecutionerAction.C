@@ -96,7 +96,7 @@ CreateExecutionerAction::act()
   MooseSharedPointer<Executioner> executioner = MooseSharedNamespace::static_pointer_cast<Executioner>(_factory.create(_type, "Executioner", _moose_object_pars));
   Moose::setup_perf_log.pop("Create Executioner","Setup");
 
-  if (_problem != NULL)
+  if (_problem.get() != NULL)
   {
     storeCommonExecutionerParams(*_problem, _pars);
 
