@@ -37,6 +37,11 @@ NDSpline::NDSpline(std::string filename, std::vector<double> alfa, std::vector<d
 	else
 		_spline_coefficients = getCoefficients(_values, _hj.at(0), _alpha.at(0), _beta.at(0));
 
+    for (int i=0; i<_dimensions; i++){
+    	_cellPoint0.push_back(_discretizations[i][0]);
+    	_cellDxs.push_back(_discretizations[i][_discretizations[i].size()-1]-_discretizations[i][0]);
+    }
+
 	std::cerr << "ND spline completed initialization" << std::endl;
 }
 

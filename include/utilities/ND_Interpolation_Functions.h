@@ -28,15 +28,30 @@ public:
   virtual double getGradientAt(std::vector<double> point_coordinate);
   virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
   std::vector<double> NDinverseFunction(double F_min, double F_max);
-  double NDderivative(std::vector<double> x);
+  std::vector<double> NDinverseFunctionGrid(double F, double tolerance, int initial_divisions, int last_divisions, int seed = time(0));
+
   NDInterpolation();
   ~NDInterpolation();
 
 protected:
   std::string _data_filename;
-  bool        _completed_init;
+  bool _completed_init;
+  int _dimensions;
+
+  std::vector<double> _cellPoint0;
+  std::vector<double> _cellDxs;
+
   double minkowskiDistance(std::vector<double> point1, std::vector<double> point2, double p);
   double vectorNorm(std::vector<double> point, double p);
+
+  bool pivotCellCheck(std::vector<std::vector<double> > cell, double F);
+  int vertexOutcome(std::vector<double> vertex, double F);
+  void cellsFilter(std::vector<std::vector<std::vector<double> > > vertices, double F);
+  void refinedCellDivision(std::vector<std::vector<std::vector<double> > > refinedCell, std::vector<std::vector<double> > cell, int divisions);
+  std::vector<int> arrayConverter(int oneDcoordinate, int divisions, int n_dimensions);
+  std::vector<std::vector<double> > generateNewCell(std::vector<int> NDcoordinate, std::vector<double> coordinateOfPointZero, std::vector<double> dxs, int n_dimensions);
+  std::vector<std::vector<double> > pickNewCell(std::vector<std::vector<std::vector<double> > > cellsSet, int seed);
+  std::vector<double> getCellCenter(std::vector<std::vector<double> > cell);
 };
 
 class NDSpline: public NDInterpolation
@@ -56,7 +71,6 @@ public:
 private:
   std::vector< std::vector<double> > _discretizations;
   std::vector<double> _values;
-  int _dimensions;
   std::vector<double> _spline_coefficients;
   std::vector<double> _hj;
   std::vector<double> _alpha;
@@ -106,7 +120,6 @@ public:
   bool checkLB(double lower_bound);
 
 private:
-  int _dimensions;
   int _number_of_points;
   double _p;
   std::vector<double> _values;
@@ -149,7 +162,6 @@ public:
   MicroSphere(std::string filename, double p, int precision);
   MicroSphere(double p, int precision);
 private:
-  int _dimensions;
   int _number_of_points;
   double _p;
   std::vector<double> _values;
