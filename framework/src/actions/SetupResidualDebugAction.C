@@ -38,7 +38,7 @@ SetupResidualDebugAction::~SetupResidualDebugAction()
 void
 SetupResidualDebugAction::act()
 {
-  if (_problem == NULL)
+  if (_problem.get() == NULL)
     return;
 
   _problem->getNonlinearSystem().debuggingResiduals(true);

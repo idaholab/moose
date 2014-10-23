@@ -60,7 +60,7 @@ MaterialOutputAction::act()
   }
 
   // Error if _problem is NULL, I don't know how this would happen
-  else if (_problem == NULL)
+  else if (_problem.get() == NULL)
     mooseError("FEProblem pointer is NULL, it is needed for auto material property output");
 
   // Build on the problem for this action, this is what should happend for everything except coupled problems
