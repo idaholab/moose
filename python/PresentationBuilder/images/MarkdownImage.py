@@ -1,11 +1,9 @@
-import os
-from src.images import ImageBase
+import os, re
+from ..images import ImageBase
 
 ##
 # Image class for standard markdown image blocks
 class MarkdownImage(ImageBase):
-
-  re = r'\!\[(.*?)\]\((.*)\)'
 
   @staticmethod
   def validParams():
@@ -30,6 +28,20 @@ class MarkdownImage(ImageBase):
 
     if not self.isParamValid('url'):
       self._pars['url'] = self.match.group(2)
+
+      ##
+  #
+  @staticmethod
+  def match(markdown):
+
+    # List of match iterators to return
+    m = []
+
+    pattern = re.compile(r'\!\[(.*?)\]\((.*)\)')
+    m.append(pattern.finditer(markdown))
+
+    # Return the list
+    return m
 
   ##
   # Substitution regex

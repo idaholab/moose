@@ -1,4 +1,4 @@
-from src.slidesets import SlideSet
+from ..slidesets import SlideSet
 
 ##
 # A basic class for reading Remark markdown files directly

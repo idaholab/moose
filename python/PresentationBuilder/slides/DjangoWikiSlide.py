@@ -1,6 +1,6 @@
 import os, re, urllib
-from src.images import DjangoWikiImage
-from src.slides import RemarkSlide
+from ..images import DjangoWikiImage
+from ..slides import RemarkSlide
 
 ##
 # A slide for wiki content from a Djanjo Wiki (https://github.com/django-wiki/django-wiki)
@@ -22,6 +22,7 @@ class DjangoWikiSlide(RemarkSlide):
   def __init__(self, name, params):
     RemarkSlide.__init__(self, name, params, image_type='DjangoWikiImage')
 
+
   def parse(self, markdown):
     markdown = RemarkSlide.parse(self, markdown)
 
@@ -29,14 +30,19 @@ class DjangoWikiSlide(RemarkSlide):
     for item in self.replace:
       markdown = markdown.replace(item[0], item[1])
 
-    # In-line equations
-    pattern = re.compile('\$\$(.*?)\$\$')
+    # Equations
+    pattern = re.compile('(\${1,})(.*?)\${1,}', re.S)
     for m in pattern.finditer(markdown):
-      markdown = markdown.replace(m.group(0), '`$ ' + m.group(1) + ' $`')
 
-    # Block equations
-    pattern = re.compile(r'\$\$\$(.*?)\$\$\$', re.S)
-    for m in pattern.finditer(markdown):
-      markdown = markdown.replace(m.group(0), '\n`$$ ' + m.group(1) + ' $$`')
+      # Inline
+      if m.group(1) == '$$':
+        markdown = markdown.replace(m.group(0), '`$ ' + m.group(2) + ' $`')
+
+      elif m.group(1) == '$$$':
+        markdown = markdown.replace(m.group(0), '\n`$$ ' + m.group(2) + ' $$`')
+
+      else:
+        print 'ERROR parsing equation on slide', self.name()
+        print '  ', m.group(2)
 
     return markdown

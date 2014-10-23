@@ -1,8 +1,8 @@
-import sys, os, inspect
+import sys, os, inspect, re
 
 from FactorySystem import *
-from src.slidesets import *
-from src.slides import *
+from ..slidesets import *
+from ..slides import *
 
 ##
 # Class for generating complete slide shows from markdown syntax
@@ -17,6 +17,9 @@ class PresentationBuilder(object):
     self.factory = Factory()
     self.warehouse = SlideSetWarehouse()
 
+    # Set the location of PresentationBuilder directory
+    self._source_dir = os.path.abspath(os.path.join(os.path.split(inspect.getfile(self.__class__))[0], '..'))
+
     # Extract input/output file names
     f, ext = os.path.splitext(input_file)
     self._input_file = input_file
@@ -29,16 +32,23 @@ class PresentationBuilder(object):
     # Build the Parser object
     self.parser = Parser(self.factory, self.warehouse)
 
+
     # Create SlideSet objects via the Parser object by parsing the input file
+    print 'PARSER:'
     err = self.parser.parse(input_file)
     if err:
       sys.exit()
+    print ''
+
+    # Store the top-level 'presentation' level parameters
+    self._params = self.parser.root.children["presentation"].params
 
     # Build the slides
     self.warehouse.execute()
 
     # Build the table-of-contents
     self._contents()
+
 
   ##
   # Write the html file containing the presentation (public)
@@ -48,6 +58,7 @@ class PresentationBuilder(object):
     fid.write(self.warehouse.markdown())
     fid.write(self._template('bottom'))
 
+
   ##
   # Extracts the html templates that build the Remark slideshow (private)
   # @param name The name of the html file to extract
@@ -56,13 +67,16 @@ class PresentationBuilder(object):
     # Open and read the template html
     folder, filename = os.path.split(inspect.getfile(self.__class__))
 
-    fid = open(os.path.join(folder, '..', '..', 'templates', name + '.html'), 'r')
+    fid = open(os.path.join(folder, '..', 'templates', name + '.html'), 'r')
     data = fid.read()
     fid.close()
 
     # Inject CSS into the html header material
     if name == 'top':
       data = self._injectCSS(data)
+
+      if 'title' in self._params:
+        data = re.sub(r'\<title\>(Title)\</title\>', '<title>' + self._params['title'] + '</title>', data)
 
     # Return the html
     return data
@@ -74,25 +88,46 @@ class PresentationBuilder(object):
   # @see _template
   def _injectCSS(self, data):
 
-    # Look for the CSS block in the input file, do nothing if it is not found
-    node = self.parser.root.getNode('CSS')
-    if not node:
-      return data
-
     # Locate the point at which the custom css should be injected
     idx = data.find('</style>')
 
     # Write the intial portion of the html
     output = data[0:idx-1] + '\n'
 
-    # Write the custom CSS code
-    for name, block in node.children.iteritems():
-      output += ' '*6 + '.' + name + ' {\n'
-      for key, value in block.params.iteritems():
-        output += ' '*8 + key + ': ' + str(value) + ';\n'
-      output += ' '*6 + '}\n'
+    # Extract CSS from slide set files
+    if 'style' in self._params:
+      style = self._params['style']
+
+      # Check if the style is a readable file, if not assume it is a name
+      # of a file in the styles directory
+      if not os.path.exists(style):
+        style = os.path.join(self._source_dir, 'styles', style + '.css')
+
+      # Display a message if the style file doesn't exists and do nothinbg
+      if not os.path.exists(style):
+        print 'ERROR: Style sheet file "' + style + '" does not exists'
+
+      # Read the CSS and add to the output
+      else:
+        fid = open(style)
+        lines = fid.readlines()
+        fid.close()
+        for line in lines:
+          output += ' '*6 + line
+
+    # Look for the CSS block in the input file, do nothing if it is not found
+    node = self.parser.root.getNode('CSS')
+    if node:
+
+      # Write the custom CSS code
+      for name, block in node.children.iteritems():
+        output += ' '*6 + '.' + name + ' {\n'
+        for key, value in block.params.iteritems():
+          output += ' '*8 + key + ': ' + str(value) + ';\n'
+        output += ' '*6 + '}\n'
 
     # Write the remaining html and return it
+    output += ' '*4
     output += data[idx:]
     return output
 
@@ -101,13 +136,18 @@ class PresentationBuilder(object):
   # Builds the table of contents for each object
   def _contents(self):
 
+    # Initialize the table-of-contents slides
+    for obj in self.warehouse.objects:
+      obj.initContents()
+
     # Initial slide index
     idx = 1
     title_slides = []
 
     # Loop through each object and slide and set the slide index
     for obj in self.warehouse.objects:
-      for slide in obj._slides.itervalues():
+      for name in obj._slide_order:
+        slide = obj._slides[name]
         slide.index = idx
         idx += slide.count()
 
