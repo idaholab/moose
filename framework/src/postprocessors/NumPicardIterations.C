@@ -29,7 +29,8 @@ InputParameters validParams<NumPicardIterations>()
 NumPicardIterations::NumPicardIterations(const std::string & name, InputParameters parameters) :
     GeneralPostprocessor(name, parameters),
     _transient_executioner(NULL)
-{}
+{
+}
 
 void
 NumPicardIterations::initialize()
@@ -39,10 +40,10 @@ NumPicardIterations::initialize()
   {
     mooseError("The NumPicardIterations Postprocessor can only be used with a Transient Executioner");
   }
-};
+}
 
 Real
 NumPicardIterations::getValue()
 {
   return _transient_executioner->numPicardIts();
-};
+}
