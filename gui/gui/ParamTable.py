@@ -412,10 +412,7 @@ class ParamTable:
       param['cpp_type'] = 'FunctionName'
 
   def isVectorType(self, cpp_type):
-    if 'vector' in cpp_type:
-      return True
-
-    if 'Vector' in cpp_type:
+    if 'vector' in cpp_type or 'Vector' in cpp_type or 'MultiMooseEnum' == cpp_type:
       return True
 
     return False
@@ -602,7 +599,9 @@ class ParamTable:
         options_item = OptionsWidget(table_widget,row,self.type_options[param['cpp_type']], self.isVectorType(param['cpp_type']))
         table_widget.setCellWidget(row, 2, options_item)
 
-      if 'cpp_type' in param and (param['cpp_type'] == 'MooseEnum' or param['cpp_type'] == 'std::vector<MooseEnum, std::allocator<MooseEnum> >'):
+      if 'cpp_type' in param and (param['cpp_type'] == 'MooseEnum' or \
+                                  param['cpp_type'] == 'std::vector<MooseEnum, std::allocator<MooseEnum> >' or \
+                                  param['cpp_type'] == 'MultiMooseEnum'):
         options = param['options'].split(' ') if param['options'] != None else ''
         options_item = OptionsWidget(table_widget,row,options, self.isVectorType(param['cpp_type']))
         table_widget.setCellWidget(row, 2, options_item)
