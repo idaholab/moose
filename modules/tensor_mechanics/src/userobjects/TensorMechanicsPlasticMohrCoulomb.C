@@ -253,37 +253,37 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dintnl(const RankTwoTensor & s
 
 
 Real
-TensorMechanicsPlasticMohrCoulomb::cohesion(const Real internal_param) const
+TensorMechanicsPlasticMohrCoulomb::cohesion(const Real /*internal_param*/) const
 {
   return 1.0;
 }
 
 Real
-TensorMechanicsPlasticMohrCoulomb::dcohesion(const Real internal_param) const
+TensorMechanicsPlasticMohrCoulomb::dcohesion(const Real /*internal_param*/) const
 {
   return 0.0;
 }
 
 Real
-TensorMechanicsPlasticMohrCoulomb::phi(const Real internal_param) const
+TensorMechanicsPlasticMohrCoulomb::phi(const Real /*internal_param*/) const
 {
   return 1.0;
 }
 
 Real
-TensorMechanicsPlasticMohrCoulomb::dphi(const Real internal_param) const
+TensorMechanicsPlasticMohrCoulomb::dphi(const Real /*internal_param*/) const
 {
   return 0.0;
 }
 
 Real
-TensorMechanicsPlasticMohrCoulomb::psi(const Real internal_param) const
+TensorMechanicsPlasticMohrCoulomb::psi(const Real /*internal_param*/) const
 {
   return 1.0;
 }
 
 Real
-TensorMechanicsPlasticMohrCoulomb::dpsi(const Real internal_param) const
+TensorMechanicsPlasticMohrCoulomb::dpsi(const Real /*internal_param*/) const
 {
   return 0.0;
 }
