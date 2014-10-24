@@ -82,8 +82,17 @@ class DmakeRC(object):
     self.set(HOST_LINES=self._remote)
 
     # Enable previously disabled machines, requires update
-    if kwargs.pop('enable', False):
-      self.set(DISABLE=None)
+    enable = kwargs.pop('enable', None)
+    if enable != None:
+      # If the store value returns ALL, remove the entire list
+      if enable == ['ALL']:
+        self.set(DISABLE=None)
+      # Remove items from the current disable list
+      else:
+        current_disable = self.get('DISABLE')
+        for item in enable:
+          while item in current_disable: current_disable.remove(item)
+        self.set(DISABLE=current_disable)
       self._update = True
 
     # Reset machines that were hammered
