@@ -88,6 +88,12 @@ void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos
   }
 }
 
+// Free function for removing cli flags
+bool isFlag(const std::string s)
+{
+  return s.length() && s[0] == '-';
+}
+
 MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
     _name(name),
@@ -273,16 +279,21 @@ MooseApp::runInputFile()
   _action_warehouse.executeAllActions();
   _executioner = _action_warehouse.executioner();
 
-  // If requested, see if there are unidentified name/value pairs in the input file
-  if (getParam<bool>("error_unused") || _enable_unused_check == ERROR_UNUSED)
+  bool error_unused = getParam<bool>("error_unused") || _enable_unused_check == ERROR_UNUSED;
+  bool warn_unused = getParam<bool>("warn_unused") || _enable_unused_check == WARN_UNUSED;
+
+  if (error_unused || warn_unused)
   {
+    // Check the input file parameters
     std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
-    _parser.checkUnidentifiedParams(all_vars, true);
-  }
-  else if (getParam<bool>("warn_unused") || _enable_unused_check == WARN_UNUSED)
-  {
-    std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
-    _parser.checkUnidentifiedParams(all_vars, _enable_unused_check == ERROR_UNUSED);
+    _parser.checkUnidentifiedParams(all_vars, error_unused, true);
+
+    // Check the CLI parameters
+    all_vars = _command_line->getPot()->get_variable_names();
+    // Remove flags, they aren't "input" parameters
+    all_vars.erase( std::remove_if(all_vars.begin(), all_vars.end(), isFlag), all_vars.end() );
+
+    _parser.checkUnidentifiedParams(all_vars, error_unused, false);
   }
 
   if (getParam<bool>("error_override") || _error_overridden)
