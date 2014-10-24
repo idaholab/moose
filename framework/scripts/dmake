@@ -150,7 +150,7 @@ def parseArguments(args=None):
   distcc = parser.add_argument_group('Advanced distcc Options')
   distcc.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
   distcc.add_argument('--disable', nargs='+', help='Remove username/hostname/IP(s) from your DISTCC_HOSTS list')
-  distcc.add_argument('--enable','-e', action='store_true', help='Enable the previously disabled machines')
+  distcc.add_argument('--enable', nargs='+', help='Enable the previously disabled machines (''ALL'' to re-enable all machines)')
   distcc.add_argument('--hammer', nargs='+', help='Set username/hostname/IP(s) from your DISTCC_HOSTS list to use max available processors')
   distcc.add_argument('--normal','-n', action='store_true', help='Reset the machines to utilize the normal number of cores')
   distcc.add_argument('--allow_off_network', action='store_true', help='Allow for off INL network to use distcc pool')
@@ -171,7 +171,7 @@ def parseArguments(args=None):
   misc.add_argument('--serial', action='store_true', help='Disable the parallel creating of the Machine objects; this also will print the information for each object created for debugging purposes')
 
   # Allow flags to be run together
-  parser.parse_args('-mqvlrbdpoce'.split())
+  parser.parse_args('-mqvlrbdpoc'.split())
 
   # Parse the input and return the options
   options, unknown = parser.parse_known_args()
