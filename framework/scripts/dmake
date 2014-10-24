@@ -4,7 +4,7 @@
 import os, sys, argparse, socket, time, subprocess
 
 # Import the distcc API objexts
-from distcc import *
+import distcc
 
 ## Get the make directory
 def getMakeDirectory():
@@ -150,7 +150,7 @@ def parseArguments(args=None):
   distcc = parser.add_argument_group('Advanced distcc Options')
   distcc.add_argument('--timeout', type=int, default=30, help='Override the default for DISTCC_IO_TIMEOUT (default: %(default)d sec.)')
   distcc.add_argument('--disable', nargs='+', help='Remove username/hostname/IP(s) from your DISTCC_HOSTS list')
-  distcc.add_argument('--enable','-e', action='store_true', help='Enable the previously disabled machines')
+  distcc.add_argument('--enable', nargs='+', help='Enable the previously disabled machines (''ALL'' to re-enable all machines)')
   distcc.add_argument('--hammer', nargs='+', help='Set username/hostname/IP(s) from your DISTCC_HOSTS list to use max available processors')
   distcc.add_argument('--normal','-n', action='store_true', help='Reset the machines to utilize the normal number of cores')
   distcc.add_argument('--allow_off_network', action='store_true', help='Allow for off INL network to use distcc pool')
@@ -171,7 +171,7 @@ def parseArguments(args=None):
   misc.add_argument('--serial', action='store_true', help='Disable the parallel creating of the Machine objects; this also will print the information for each object created for debugging purposes')
 
   # Allow flags to be run together
-  parser.parse_args('-mqvlrbdpoce'.split())
+  parser.parse_args('-mqvlrbdpoc'.split())
 
   # Parse the input and return the options
   options, unknown = parser.parse_known_args()
@@ -217,7 +217,7 @@ if __name__ == "__main__":
   dmake_make_options = subOptions(options,'timeout','quiet','dbg','opt','oprof')
 
   # Create the local Machine object
-  master = Machine(localhost=True)
+  master = distcc.Machine(localhost=True)
 
   # Perform local build
   if options.local:
@@ -231,14 +231,14 @@ if __name__ == "__main__":
     sys.exit()
 
   # Create the MachineWarehouse object
-  warehouse = MachineWarehouse(master, allow = options.allow)
+  warehouse = distcc.MachineWarehouse(master, allow = options.allow)
 
   # Create the DmakeRC object
   opt = subOptions(options, 'buck', 'dedicated', 'description', 'clean', 'disable', 'enable', 'refresh_time', 'hammer', 'normal')
-  dmakerc = DmakeRC(master, **opt)
+  dmakerc = distcc.DmakeRC(master, **opt)
 
   # Create the DistccDaemon object
-  daemon = DistccDaemon(master, dedicated=options.dedicated)
+  daemon = distcc.DistccDaemon(master, dedicated=options.dedicated)
 
   # Kill the daemons
   if options.kill or options.no_daemon:
@@ -287,7 +287,7 @@ if __name__ == "__main__":
     print 'Using cached DISTCC_HOSTS, use --refresh to rebuild'
 
   # Display the  output
-  outputer = MachineOutput(warehouse)
+  outputer = distcc.MachineOutput(warehouse)
   outputer.display(distcc_hosts, jobs, verbose=options.verbose, make_args=make_args)
 
   # --summary does not run any commands, so exit
