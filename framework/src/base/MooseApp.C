@@ -288,12 +288,17 @@ MooseApp::runInputFile()
     std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
     _parser.checkUnidentifiedParams(all_vars, error_unused, true);
 
-    // Check the CLI parameters
-    all_vars = _command_line->getPot()->get_variable_names();
-    // Remove flags, they aren't "input" parameters
-    all_vars.erase( std::remove_if(all_vars.begin(), all_vars.end(), isFlag), all_vars.end() );
+    // Only check CLI parameters on the main application
+    // TODO: Add support for SubApp overrides and checks #4119
+    if (_name == "main")
+    {
+      // Check the CLI parameters
+      all_vars = _command_line->getPot()->get_variable_names();
+      // Remove flags, they aren't "input" parameters
+      all_vars.erase( std::remove_if(all_vars.begin(), all_vars.end(), isFlag), all_vars.end() );
 
-    _parser.checkUnidentifiedParams(all_vars, error_unused, false);
+      _parser.checkUnidentifiedParams(all_vars, error_unused, false);
+    }
   }
 
   if (getParam<bool>("error_override") || _error_overridden)
