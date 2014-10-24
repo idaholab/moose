@@ -38,11 +38,14 @@ public:
 
 protected:
   /**
-   * The name of the image to extract Mesh parameters from.  The
-   * current implementation processes the output of the 'file'
-   * command, which typically exists on OSX and Linux.
+   * buildMesh() calls this helper function to build 2D ImageMeshes.
    */
-  std::string _image_file;
+  void buildMesh2D(const std::string & filename);
+
+  /**
+   * buildMesh() calls this helper function to build 3D ImageMeshes from stacks of images.
+   */
+  void buildMesh3D(const std::vector<std::string> & filenames);
 
   /**
    * If true, forces the maximum width (height) of the mesh to be 1.0
@@ -59,6 +62,12 @@ protected:
    * Result: Mesh has 552x477 elements
    */
   Real _cells_per_pixel;
+
+  /**
+   * Process a single image with the 'file' command to find out the
+   * number of pixels in the x and y directions.
+   */
+  void GetPixelInfo(std::string filename, int & xpixels, int & ypixels);
 };
 
 #endif /* IMAGEMESH_H */
