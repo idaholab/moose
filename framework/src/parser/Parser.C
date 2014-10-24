@@ -258,7 +258,7 @@ Parser::checkActiveUsed(std::vector<std::string > & sections,
 }
 
 void
-Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn)
+Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn, bool in_input_file) const
 {
   std::set<std::string> difference;
 
@@ -280,7 +280,7 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
   {
     std::ostringstream oss;
 
-    oss << "The following parameters were unused in your input file:\n";
+    oss << "The following parameters were unused " << (in_input_file ? "in your input file:\n" : "on the command line:\n");
     for (std::set<std::string>::iterator i=difference.begin(); i != difference.end(); ++i)
       oss << *i << "\n";
 
@@ -292,7 +292,7 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
 }
 
 void
-Parser::checkOverriddenParams(bool error_on_warn)
+Parser::checkOverriddenParams(bool error_on_warn) const
 {
   if (!_sections_read && error_on_warn)
     // The user has requested errors but we haven't done any parsing yet so throw an error
