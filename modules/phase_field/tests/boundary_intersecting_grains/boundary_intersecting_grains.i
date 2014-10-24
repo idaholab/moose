@@ -5,9 +5,9 @@
   dim = 2
 
   # Be sure to choose a corresponding image name below!
-  # image_file = image001_cropped3_closing_298.png         # full size, 157 Mb Exodus file!
-  # image_file = eighth_image001_cropped3_closing_298.png  # 1/8
-  image_file = sixteenth_image001_cropped3_closing_298.png # 1/16
+  # file = image001_cropped3_closing_298.png         # full size, 157 Mb Exodus file!
+  # file = eighth_image001_cropped3_closing_298.png  # 1/8
+  file = sixteenth_image001_cropped3_closing_298.png # 1/16
 
   # Uncomment to maintain 1:1 ratio between number of pixels and mesh size.
   # scale_to_one = false
@@ -61,18 +61,10 @@
 
 [Functions]
   [./tif]
+    # ImageFunction gets its file range parameters from ImageMesh,
+    # when it is present.  This prevents duplicating information in
+    # input files.
     type = ImageFunction
-    # Filename - match with mesh size above!
-    # file_base = image001_cropped3_closing         # full
-    # file_base = eighth_image001_cropped3_closing  # 1/8
-    file_base = sixteenth_image001_cropped3_closing # 1/16
-
-    # The file extension of our images
-    file_type = png
-
-    # file range is parsed as a vector of unsigned.  If it only has 1
-    # entry, only a single file is read.
-    file_range = '298'
   [../]
 []
 

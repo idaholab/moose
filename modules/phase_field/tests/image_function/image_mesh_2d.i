@@ -1,8 +1,7 @@
 [Mesh]
-  type = GeneratedMesh
+  type = ImageMesh
   dim = 2
-  nx = 20
-  ny = 20
+  file = stack/test_00.png
 []
 
 [Variables]
@@ -11,18 +10,18 @@
 []
 
 [Functions]
-  [./tif]
+  [./image_func]
+    # ImageFunction gets its file range parameters from ImageMesh,
+    # when it is present.  This prevents duplicating information in
+    # input files.
     type = ImageFunction
-    file_base = stack/test
-    file_type = png
-    file_range = '01 00'
   [../]
 []
 
 [ICs]
   [./u_ic]
     type = FunctionIC
-    function = tif
+    function = image_func
     variable = u
   [../]
 []

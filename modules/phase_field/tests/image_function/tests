@@ -110,4 +110,18 @@
     exodiff = crop_out.e
     vtk = true
   [../]
+  [./image_mesh_3d]
+    # Tests ability to read a stack of 3D images into a Mesh
+    type = Exodiff
+    input = image_mesh_3d.i
+    exodiff = image_mesh_3d_out.e
+    vtk = true
+  [../]
+  [./image_mesh_2d]
+    # Tests ability to read a 2D image into a Mesh
+    type = Exodiff
+    input = image_mesh_2d.i
+    exodiff = image_mesh_2d_out.e
+    vtk = true
+  [../]
 []
