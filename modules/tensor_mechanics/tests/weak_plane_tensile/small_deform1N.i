@@ -1,7 +1,7 @@
 # checking for small deformation
 # A single element is stretched by 1E-6m in x,y and z directions.
 # stress_zz = Youngs Modulus*Strain = 2E6*1E-6 = 2 Pa
-# tensile_strength is set to 1Pa
+# wpt_tensile_strength is set to 1Pa
 # Then the final stress should return to the yeild surface and its value should be 1pa.
 
 [Mesh]
@@ -38,40 +38,51 @@
 
 
 [BCs]
-  [./x]
-    type = FunctionPresetBC
+  [./bottomx]
+    type = PresetBC
     variable = disp_x
-    boundary = 'front back'
-    function = '1E-6*x'
+    boundary = back
+    value = 0.0
   [../]
-  [./y]
-    type = FunctionPresetBC
+  [./bottomy]
+    type = PresetBC
     variable = disp_y
-    boundary = 'front back'
-    function = '1E-6*y'
+    boundary = back
+    value = 0.0
   [../]
-  [./z]
-    type = FunctionPresetBC
+  [./bottomz]
+    type = PresetBC
     variable = disp_z
-    boundary = 'front back'
-    function = '0E-6*z'
+    boundary = back
+    value = 0.0
+  [../]
+
+  [./topx]
+    type = PresetBC
+    variable = disp_x
+    boundary = front
+    value = 0E-6
+  [../]
+  [./topy]
+    type = PresetBC
+    variable = disp_y
+    boundary = front
+    value = 0E-6
+  [../]
+  [./topz]
+    type = PresetBC
+    variable = disp_z
+    boundary = front
+    value = 1E-6
   [../]
 []
 
 [AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./stress_xz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_yy]
+  [./stress_zx]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -83,23 +94,17 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./yield_fcn]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./iter]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
   [./stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -107,12 +112,12 @@
     index_i = 0
     index_j = 2
   [../]
-  [./stress_yy]
+  [./stress_zx]
     type = RankTwoAux
     rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
+    variable = stress_zx
+    index_i = 2
+    index_j = 0
   [../]
   [./stress_yz]
     type = RankTwoAux
@@ -128,28 +133,24 @@
     index_i = 2
     index_j = 2
   [../]
+  [./yield_fcn_auxk]
+    type = MaterialStdVectorAux
+    property = plastic_yield_function
+    index = 0
+    variable = yield_fcn
+  [../]
+  [./iter_auxk]
+    type = MaterialRealAux
+    property = plastic_NR_iterations
+    variable = iter
+  [../]
 []
 
 [Postprocessors]
-  [./s_xx]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_xx
-  [../]
-  [./s_xy]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_xy
-  [../]
   [./s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
-  [../]
-  [./s_yy]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_yy
   [../]
   [./s_yz]
     type = PointValue
@@ -161,15 +162,25 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
+  [./f]
+    type = PointValue
+    point = '0 0 0'
+    variable = yield_fcn
+  [../]
+  [./iter]
+    type = PointValue
+    point = '0 0 0'
+    variable = iter
+  [../]
 []
 
 [UserObjects]
   [./wpt]
     type = TensorMechanicsPlasticWeakPlaneTensileN
-    normal_vector = '1 1 0'
     tensile_strength = 1.0
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-5
+    normal_vector = '0 0 1'
   [../]
 []
 
@@ -184,8 +195,6 @@
     C_ijkl = '0 1E6'
     plastic_models = wpt
     ep_plastic_tolerance = 1E-5
-    min_stepsize = 1
-    max_NR_iterations = 10
   [../]
 []
 
@@ -198,7 +207,7 @@
 
 
 [Outputs]
-  file_base = small_deform1a_uo
+  file_base = small_deform1N
   output_initial = true
   exodus = true
   [./console]
