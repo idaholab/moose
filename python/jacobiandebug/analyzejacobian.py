@@ -287,6 +287,10 @@ if __name__ == '__main__':
   parser.add_option("-m", "--method", dest="method",
                     help="Pass either opt, dbg or devel.  Works the same as setting the $METHOD environment variable.")
 
+  parser.add_option("-r", "--resize-mesh", dest="resize_mesh", action="store_true", help="Perform resizing of generated meshs (to speed up the testing).")
+
+  parser.add_option("-s", "--mesh-size", dest="mesh_size", default=1, type="int", help="Set the mesh dimensions to this number of elements along each dimension (requires -r option).")
+
   (options, args) = parser.parse_args()
 
   for arg in args:
@@ -301,9 +305,12 @@ if __name__ == '__main__':
 
   print 'Running input with executable %s ...\n' % executable
 
+  mooseparams = [executable, '-i', options.input_file, '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON']
+  if options.resize_mesh :
+    mooseparams.extend(['Mesh/nx=%d' % options.mesh_size, 'Mesh/ny=%d' % options.mesh_size, 'Mesh/nz=%d' % options.mesh_size])
 
   try:
-    data = subprocess.Popen([executable, '-i', options.input_file, '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds'], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+    data = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
   except:
     print 'Peacock: Error executing moose based application\n'
     sys.exit(1)
