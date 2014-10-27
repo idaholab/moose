@@ -1,8 +1,8 @@
-#include "TensorMechanicsPlasticWeakPlaneShearGaussian.h"
+#include "TensorMechanicsPlasticWeakPlaneShearExponential.h"
 #include <math.h> // for M_PI
 
 template<>
-InputParameters validParams<TensorMechanicsPlasticWeakPlaneShearGaussian>()
+InputParameters validParams<TensorMechanicsPlasticWeakPlaneShearExponential>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticWeakPlaneShear>();
   params.addRequiredRangeCheckedParam<Real>("cohesion", "cohesion>=0", "Weak plane cohesion");
@@ -14,12 +14,12 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneShearGaussian>()
   params.addRangeCheckedParam<Real>("cohesion_rate", 0, "cohesion_rate>=0", "Cohesion = cohesion_residual + (cohesion - cohesion_residual)*exp(-cohesion_rate*plasticstrain).  Set to zero for perfect plasticity");
   params.addRangeCheckedParam<Real>("friction_angle_rate", 0, "friction_angle_rate>=0", "tan(friction_angle) = tan(friction_angle_residual) + (tan(friction_angle) - tan(friction_angle_residual))*exp(-friction_angle_rate*plasticstrain).  Set to zero for perfect plasticity");
   params.addRangeCheckedParam<Real>("dilation_angle_rate", 0, "dilation_angle_rate>=0", "tan(dilation_angle) = tan(dilation_angle_residual) + (tan(dilation_angle) - tan(dilation_angle_residual))*exp(-dilation_angle_rate*plasticstrain).  Set to zero for perfect plasticity");
-  params.addClassDescription("Non-associative finite-strain weak-plane shear plasticity with hardening/softening governed by a Gaussian rule");
+  params.addClassDescription("Non-associative finite-strain weak-plane shear plasticity with exponential-type of hardening/softening");
 
   return params;
 }
 
-TensorMechanicsPlasticWeakPlaneShearGaussian::TensorMechanicsPlasticWeakPlaneShearGaussian(const std::string & name,
+TensorMechanicsPlasticWeakPlaneShearExponential::TensorMechanicsPlasticWeakPlaneShearExponential(const std::string & name,
                                                          InputParameters parameters) :
     TensorMechanicsPlasticWeakPlaneShear(name, parameters),
     _cohesion(getParam<Real>("cohesion")),
@@ -41,57 +41,39 @@ TensorMechanicsPlasticWeakPlaneShearGaussian::TensorMechanicsPlasticWeakPlaneShe
 }
 
 
-
 Real
-TensorMechanicsPlasticWeakPlaneShearGaussian::cohesion(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShearExponential::cohesion(const Real internal_param) const
 {
-  if (internal_param >= 0)
-    return _cohesion_residual + (_cohesion - _cohesion_residual)*std::exp(-std::pow(_cohesion_rate*internal_param, 2));
-  else
-    return _cohesion;
+  return _cohesion_residual + (_cohesion - _cohesion_residual)*std::exp(-_cohesion_rate*internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShearGaussian::dcohesion(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShearExponential::dcohesion(const Real internal_param) const
 {
-  if (internal_param >= 0)
-    return -2.0*std::pow(_cohesion_rate, 2)*internal_param*(_cohesion - _cohesion_residual)*std::exp(-std::pow(_cohesion_rate*internal_param, 2));
-  else
-    return 0.0;
+  return -_cohesion_rate*(_cohesion - _cohesion_residual)*std::exp(-_cohesion_rate*internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShearGaussian::tan_phi(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShearExponential::tan_phi(const Real internal_param) const
 {
-  if (internal_param >= 0)
-    return _tan_phi_residual + (_tan_phi - _tan_phi_residual)*std::exp(-std::pow(_tan_phi_rate*internal_param, 2));
-  else
-    return _tan_phi;
+  return _tan_phi_residual + (_tan_phi - _tan_phi_residual)*std::exp(-_tan_phi_rate*internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShearGaussian::dtan_phi(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShearExponential::dtan_phi(const Real internal_param) const
 {
-  if (internal_param >= 0)
-    return -2*std::pow(_tan_phi_rate, 2)*internal_param*(_tan_phi - _tan_phi_residual)*std::exp(-std::pow(_tan_phi_rate*internal_param, 2));
-  else
-    return 0.0;
+  return -_tan_phi_rate*(_tan_phi - _tan_phi_residual)*std::exp(-_tan_phi_rate*internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShearGaussian::tan_psi(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShearExponential::tan_psi(const Real internal_param) const
 {
-  if (internal_param >= 0)
-    return _tan_psi_residual + (_tan_psi - _tan_psi_residual)*std::exp(-std::pow(_tan_psi_rate*internal_param, 2));
-  else
-    return _tan_psi;
+  return _tan_psi_residual + (_tan_psi - _tan_psi_residual)*std::exp(-_tan_psi_rate*internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShearGaussian::dtan_psi(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShearExponential::dtan_psi(const Real internal_param) const
 {
-  if (internal_param >= 0)
-    return -2*std::pow(_tan_psi_rate, 2)*internal_param*(_tan_psi - _tan_psi_residual)*std::exp(-std::pow(_tan_psi_rate*internal_param, 2));
-  else
-    return 0.0;
+  return -_tan_psi_rate*(_tan_psi - _tan_psi_residual)*std::exp(-_tan_psi_rate*internal_param);
 }
+
