@@ -48,6 +48,20 @@
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   [../]
+  [./small5]
+    type = 'CSVDiff'
+    input = 'small_deform5.i'
+    csvdiff = 'small_deform5.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small6]
+    type = 'CSVDiff'
+    input = 'small_deform6.i'
+    csvdiff = 'small_deform6.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
 
   [./many]
     type = 'CSVDiff'

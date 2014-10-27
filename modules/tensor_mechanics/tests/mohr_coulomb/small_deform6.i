@@ -1,8 +1,8 @@
-# checking for small deformation
-# A single element is stretched by 1E-6m in x,y and z directions.
-# stress_zz = Youngs Modulus*Strain = 2E6*1E-6 = 2 Pa
-# tensile_strength is set to 1Pa
-# Then the final stress should return to the yeild surface and its value should be 1pa.
+# apply repeated stretches in z direction, and smaller stretches in the x and y directions
+# so that sigma_II = sigma_III,
+# which means that lode angle = -30deg.
+# The allows yield surface in meridional plane to be mapped out
+# Using cap smoothing
 
 [Mesh]
   type = GeneratedMesh
@@ -42,19 +42,19 @@
     type = FunctionPresetBC
     variable = disp_x
     boundary = 'front back'
-    function = '1E-6*x'
+    function = '0.9E-6*x*sin(t)'
   [../]
   [./y]
     type = FunctionPresetBC
     variable = disp_y
     boundary = 'front back'
-    function = '1E-6*y'
+    function = '0.9E-6*y*sin(t)'
   [../]
   [./z]
     type = FunctionPresetBC
     variable = disp_z
     boundary = 'front back'
-    function = '0E-6*z'
+    function = '1E-6*z*t'
   [../]
 []
 
@@ -80,6 +80,18 @@
     family = MONOMIAL
   [../]
   [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mc_int]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./yield_fcn]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./iter]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -128,6 +140,23 @@
     index_i = 2
     index_j = 2
   [../]
+  [./mc_int_auxk]
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_internal_parameter
+    variable = mc_int
+  [../]
+  [./yield_fcn_auxk]
+    type = MaterialStdVectorAux
+    index = 0
+    property = plastic_yield_function
+    variable = yield_fcn
+  [../]
+  [./iter_auxk]
+    type = MaterialRealAux
+    property = plastic_NR_iterations
+    variable = iter
+  [../]
 []
 
 [Postprocessors]
@@ -161,15 +190,38 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
+  [./internal]
+    type = PointValue
+    point = '0 0 0'
+    variable = mc_int
+  [../]
+  [./f]
+    type = PointValue
+    point = '0 0 0'
+    variable = yield_fcn
+  [../]
+  [./iter]
+    type = PointValue
+    point = '0 0 0'
+    variable = iter
+  [../]
 []
 
 [UserObjects]
-  [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensileN
-    normal_vector = '1 1 0'
-    tensile_strength = 1.0
-    yield_function_tolerance = 1E-6
-    internal_constraint_tolerance = 1E-5
+  [./mc]
+    type = TensorMechanicsPlasticMohrCoulombExponential
+    mc_cohesion = 10
+    mc_friction_angle = 50
+    mc_dilation_angle = 0
+    mc_dilation_angle_residual = 50
+    mc_dilation_angle_rate = 3000.0
+    tip_scheme = cap
+    mc_tip_smoother = 0
+    cap_start = 3
+    cap_rate = 0.8
+    mc_edge_smoother = 20
+    yield_function_tolerance = 1E-8
+    internal_constraint_tolerance = 1E-9
   [../]
 []
 
@@ -181,26 +233,25 @@
     disp_y = disp_y
     disp_z = disp_z
     fill_method = symmetric_isotropic
-    C_ijkl = '0 1E6'
-    plastic_models = wpt
-    ep_plastic_tolerance = 1E-5
-    min_stepsize = 1
-    max_NR_iterations = 10
+    C_ijkl = '0 1E7'
+    ep_plastic_tolerance = 1E-9
+    plastic_models = mc
+    debug_fspb = 1
   [../]
 []
 
 
 [Executioner]
-  end_time = 1
+  end_time = 30
   dt = 1
   type = Transient
 []
 
 
 [Outputs]
-  file_base = small_deform1a_uo
+  file_base = small_deform6
   output_initial = true
-  exodus = true
+  exodus = false
   [./console]
     type = Console
     perf_log = true

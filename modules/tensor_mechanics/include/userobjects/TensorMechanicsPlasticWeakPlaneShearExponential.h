@@ -1,23 +1,23 @@
-#ifndef TENSORMECHANICSPLASTICWEAKPLANESHEARGAUSSIAN_H
-#define TENSORMECHANICSPLASTICWEAKPLANESHEARGAUSSIAN_H
+#ifndef TENSORMECHANICSPLASTICWEAKPLANESHEAREXPONENTIAL_H
+#define TENSORMECHANICSPLASTICWEAKPLANESHEAREXPONENTIAL_H
 
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
 
 
-class TensorMechanicsPlasticWeakPlaneShearGaussian;
+class TensorMechanicsPlasticWeakPlaneShearExponential;
 
 
 template<>
-InputParameters validParams<TensorMechanicsPlasticWeakPlaneShearGaussian>();
+InputParameters validParams<TensorMechanicsPlasticWeakPlaneShearExponential>();
 
 /**
  * Rate-independent associative weak-plane tensile failure
- * with hardening/softening
+ * with exponential hardening/softening.
  */
-class TensorMechanicsPlasticWeakPlaneShearGaussian : public TensorMechanicsPlasticWeakPlaneShear
+class TensorMechanicsPlasticWeakPlaneShearExponential : public TensorMechanicsPlasticWeakPlaneShear
 {
  public:
-  TensorMechanicsPlasticWeakPlaneShearGaussian(const std::string & name, InputParameters parameters);
+  TensorMechanicsPlasticWeakPlaneShearExponential(const std::string & name, InputParameters parameters);
 
  protected:
 
@@ -39,13 +39,13 @@ class TensorMechanicsPlasticWeakPlaneShearGaussian : public TensorMechanicsPlast
   /// tan(dilation angle_residual)
   Real _tan_psi_residual;
 
-  /// Gaussian rate of change of cohesion to _cohesion_residual
+  /// Logarithmic rate of change of cohesion to _cohesion_residual
   Real _cohesion_rate;
 
-  /// Gaussian rate of change of tan_phi to tan_phi_residual
+  /// Logarithmic rate of change of tan_phi to tan_phi_residual
   Real _tan_phi_rate;
 
-  /// Gaussian rate of change of tan_psi to tan_psi_residual
+  /// Logarithmic rate of change of tan_psi to tan_psi_residual
   Real _tan_psi_rate;
 
   /// cohesion as a function of internal parameter
@@ -68,4 +68,4 @@ class TensorMechanicsPlasticWeakPlaneShearGaussian : public TensorMechanicsPlast
 
 };
 
-#endif // TENSORMECHANICSPLASTICWEAKPLANESHEARGAUSSIAN_H
+#endif // TENSORMECHANICSPLASTICWEAKPLANESHEAREXPONENTIAL_H

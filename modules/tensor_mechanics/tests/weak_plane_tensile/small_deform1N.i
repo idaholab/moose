@@ -1,6 +1,9 @@
-# apply a pure tension, then some shear
-# the BCs are designed to map out the yield function, showing
-# the affect of 'cap' smoothing
+# checking for small deformation
+# A single element is stretched by 1E-6m in x,y and z directions.
+# stress_zz = Youngs Modulus*Strain = 2E6*1E-6 = 2 Pa
+# wpt_tensile_strength is set to 1Pa
+# Then the final stress should return to the yeild surface and its value should be 1pa.
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -17,19 +20,19 @@
 
 
 [Variables]
-  [./x_disp]
+  [./disp_x]
   [../]
-  [./y_disp]
+  [./disp_y]
   [../]
-  [./z_disp]
+  [./disp_z]
   [../]
 []
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -37,40 +40,40 @@
 [BCs]
   [./bottomx]
     type = PresetBC
-    variable = x_disp
+    variable = disp_x
     boundary = back
     value = 0.0
   [../]
   [./bottomy]
     type = PresetBC
-    variable = y_disp
+    variable = disp_y
     boundary = back
     value = 0.0
   [../]
   [./bottomz]
     type = PresetBC
-    variable = z_disp
+    variable = disp_z
     boundary = back
     value = 0.0
   [../]
 
   [./topx]
-    type = FunctionPresetBC
-    variable = x_disp
+    type = PresetBC
+    variable = disp_x
     boundary = front
-    function = 'if(t<1E-6,0,3*(t-1E-6)*(t-1E-6)*1E6)'
+    value = 0E-6
   [../]
   [./topy]
-    type = FunctionPresetBC
-    variable = y_disp
+    type = PresetBC
+    variable = disp_y
     boundary = front
-    function = 'if(t<1E-6,0,5*(t-1E-6)*(t-1E-6)*1E6)'
+    value = 0E-6
   [../]
   [./topz]
-    type = FunctionPresetBC
-    variable = z_disp
+    type = PresetBC
+    variable = disp_z
     boundary = front
-    function = 'if(t<1E-6,t,1E-6)'
+    value = 1E-6
   [../]
 []
 
@@ -141,7 +144,6 @@
     property = plastic_NR_iterations
     variable = iter
   [../]
-
 []
 
 [Postprocessors]
@@ -173,52 +175,39 @@
 []
 
 [UserObjects]
-  [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShearExponential
-    cohesion = 1E3
-    dilation_angle = 5
-    friction_angle = 45
-    tip_scheme = cap
-    smoother = 0
-    cap_rate = 0.001
-    cap_start = -1000.0
-    yield_function_tolerance = 1E-3
-    internal_constraint_tolerance = 1E-6
+  [./wpt]
+    type = TensorMechanicsPlasticWeakPlaneTensileN
+    tensile_strength = 1.0
+    yield_function_tolerance = 1E-6
+    internal_constraint_tolerance = 1E-5
+    normal_vector = '0 0 1'
   [../]
 []
 
 [Materials]
   [./mc]
     type = FiniteStrainMultiPlasticity
-    ep_plastic_tolerance = 1E-4
     block = 0
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     fill_method = symmetric_isotropic
-    C_ijkl = '1E9 0.5E9'
-    plastic_models = wps
-    transverse_direction = '0 0 1'
-    debug_fspb = 1
-    debug_jac_at_stress = '1E4 2E4 3E4 2E4 -4E4 5E4 3E4 5E4 6E8'
-    debug_jac_at_pm = 1
-    debug_jac_at_intnl = 1
-    debug_stress_change = 1E-3
-    debug_pm_change = 1E-5
-    debug_intnl_change = 1E-5
+    C_ijkl = '0 1E6'
+    plastic_models = wpt
+    ep_plastic_tolerance = 1E-5
   [../]
 []
 
 
 [Executioner]
-  end_time = 2E-6
-  dt = 1E-7
+  end_time = 1
+  dt = 1
   type = Transient
 []
 
 
 [Outputs]
-  file_base = small_deform4
+  file_base = small_deform1N
   output_initial = true
   exodus = true
   [./console]
