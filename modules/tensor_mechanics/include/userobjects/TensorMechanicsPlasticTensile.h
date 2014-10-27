@@ -12,7 +12,7 @@ InputParameters validParams<TensorMechanicsPlasticTensile>();
 
 /**
  * FiniteStrainTensile implements rate-independent associative tensile failure
- * with hardening/softening in the finite-strain framework.
+ * with no hardening/softening in the finite-strain framework.
  * The smoothing of the tip of the yield-surface cone is described in
  * Zienkiewicz and Prande "Some useful forms of isotropic yield surfaces for soil and rock mechanics" (1977) In G Gudehus (editor) "Finite Elements in Geomechanics" Wile, Chichester, pp 179-190.
  * The smoothing of the edges of the cone is described in
@@ -72,15 +72,6 @@ class TensorMechanicsPlasticTensile : public TensorMechanicsPlasticModel
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const;
 
  protected:
-
-  /// tensile strength at zero hardening/softening
-  Real _tensile_strength0;
-
-  /// tensile strength at infinite hardening/softening
-  Real _tensile_strength_residual;
-
-  /// Tensile strength = tensile_strength_residual + (tensile_strength - tensile_strength_residual)*exp(-tensile_strength_rate*plasticstrain).
-  Real _tensile_strength_rate;
 
   /// Square of tip smoothing parameter to smooth the cone at mean_stress = T
   Real _small_smoother2;

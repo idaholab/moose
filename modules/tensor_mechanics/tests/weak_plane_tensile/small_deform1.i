@@ -20,19 +20,19 @@
 
 
 [Variables]
-  [./x_disp]
+  [./disp_x]
   [../]
-  [./y_disp]
+  [./disp_y]
   [../]
-  [./z_disp]
+  [./disp_z]
   [../]
 []
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -40,38 +40,38 @@
 [BCs]
   [./bottomx]
     type = PresetBC
-    variable = x_disp
+    variable = disp_x
     boundary = back
     value = 0.0
   [../]
   [./bottomy]
     type = PresetBC
-    variable = y_disp
+    variable = disp_y
     boundary = back
     value = 0.0
   [../]
   [./bottomz]
     type = PresetBC
-    variable = z_disp
+    variable = disp_z
     boundary = back
     value = 0.0
   [../]
 
   [./topx]
     type = PresetBC
-    variable = x_disp
+    variable = disp_x
     boundary = front
     value = 0E-6
   [../]
   [./topy]
     type = PresetBC
-    variable = y_disp
+    variable = disp_y
     boundary = front
     value = 0E-6
   [../]
   [./topz]
     type = PresetBC
-    variable = z_disp
+    variable = disp_z
     boundary = front
     value = 1E-6
   [../]
@@ -172,9 +172,9 @@
   [./mc]
     type = FiniteStrainMultiPlasticity
     block = 0
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E6'
     plastic_models = wpt
