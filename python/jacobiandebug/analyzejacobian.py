@@ -347,5 +347,8 @@ if __name__ == '__main__':
     # MOOSE failed with an unexpected error
     print data
     sys.exit(1)
+  elif child.returncode == -11 :
+    print "The moose application crashed with a segmentation fault (try recompiling)"
+    sys.exit(1)
 
   parseOutput(data, options.write_matrices)
