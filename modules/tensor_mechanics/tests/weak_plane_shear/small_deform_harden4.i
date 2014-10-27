@@ -1,6 +1,4 @@
-# apply a pure tension, then some shear
-# the BCs are designed to map out the yield function, showing
-# the affect of 'cap' smoothing
+# apply repeated stretches to observe cohesion hardening, with cubic
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -58,19 +56,19 @@
     type = FunctionPresetBC
     variable = x_disp
     boundary = front
-    function = 'if(t<1E-6,0,3*(t-1E-6)*(t-1E-6)*1E6)'
+    function = '0'
   [../]
   [./topy]
     type = FunctionPresetBC
     variable = y_disp
     boundary = front
-    function = 'if(t<1E-6,0,5*(t-1E-6)*(t-1E-6)*1E6)'
+    function = '0'
   [../]
   [./topz]
     type = FunctionPresetBC
     variable = z_disp
     boundary = front
-    function = 'if(t<1E-6,t,1E-6)'
+    function = '2*t'
   [../]
 []
 
@@ -91,11 +89,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./yield_fcn]
+  [./wps_internal]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./iter]
+  [./yield_fcn]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -130,18 +128,18 @@
     index_i = 2
     index_j = 2
   [../]
+  [./wps_internal_auxk]
+    type = MaterialStdVectorAux
+    property = plastic_internal_parameter
+    index = 0
+    variable = wps_internal
+  [../]
   [./yield_fcn_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
     variable = yield_fcn
   [../]
-  [./iter_auxk]
-    type = MaterialRealAux
-    property = plastic_NR_iterations
-    variable = iter
-  [../]
-
 []
 
 [Postprocessors]
@@ -165,32 +163,30 @@
     point = '0 0 0'
     variable = yield_fcn
   [../]
-  [./iter]
+  [./int]
     type = PointValue
     point = '0 0 0'
-    variable = iter
+    variable = wps_internal
   [../]
 []
 
 [UserObjects]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShearExponential
+    type = TensorMechanicsPlasticWeakPlaneShearCubic
     cohesion = 1E3
-    dilation_angle = 5
+    cohesion_residual = 2E3
+    cohesion_limit = 0.00007
+    dilation_angle = 1
     friction_angle = 45
-    tip_scheme = cap
-    smoother = 0
-    cap_rate = 0.001
-    cap_start = -1000.0
+    smoother = 500
     yield_function_tolerance = 1E-3
-    internal_constraint_tolerance = 1E-6
+    internal_constraint_tolerance = 1E-3
   [../]
 []
 
 [Materials]
   [./mc]
     type = FiniteStrainMultiPlasticity
-    ep_plastic_tolerance = 1E-4
     block = 0
     disp_x = x_disp
     disp_y = y_disp
@@ -199,26 +195,21 @@
     C_ijkl = '1E9 0.5E9'
     plastic_models = wps
     transverse_direction = '0 0 1'
+    ep_plastic_tolerance = 1E-3
     debug_fspb = 1
-    debug_jac_at_stress = '1E4 2E4 3E4 2E4 -4E4 5E4 3E4 5E4 6E8'
-    debug_jac_at_pm = 1
-    debug_jac_at_intnl = 1
-    debug_stress_change = 1E-3
-    debug_pm_change = 1E-5
-    debug_intnl_change = 1E-5
   [../]
 []
 
 
 [Executioner]
-  end_time = 2E-6
+  end_time = 1E-6
   dt = 1E-7
   type = Transient
 []
 
 
 [Outputs]
-  file_base = small_deform4
+  file_base = small_deform_harden4
   output_initial = true
   exodus = true
   [./console]

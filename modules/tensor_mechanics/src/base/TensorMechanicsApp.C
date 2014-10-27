@@ -32,7 +32,9 @@
 #include "TensorMechanicsPlasticWeakPlaneTensileCubic.h"
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
+#include "TensorMechanicsPlasticWeakPlaneShearExponential.h"
 #include "TensorMechanicsPlasticWeakPlaneShearGaussian.h"
+#include "TensorMechanicsPlasticWeakPlaneShearCubic.h"
 #include "TensorMechanicsPlasticJ2.h"
 #include "TensorMechanicsPlasticJ2Gaussian.h"
 
@@ -91,7 +93,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileCubic);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileN);
   registerUserObject(TensorMechanicsPlasticWeakPlaneShear);
+  registerUserObject(TensorMechanicsPlasticWeakPlaneShearExponential);
   registerUserObject(TensorMechanicsPlasticWeakPlaneShearGaussian);
+  registerUserObject(TensorMechanicsPlasticWeakPlaneShearCubic);
   registerUserObject(TensorMechanicsPlasticJ2);
   registerUserObject(TensorMechanicsPlasticJ2Gaussian);
 

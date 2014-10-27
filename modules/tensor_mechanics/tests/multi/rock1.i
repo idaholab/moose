@@ -337,7 +337,7 @@
     internal_constraint_tolerance = 1.0E-7
   [../]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShear
+    type = TensorMechanicsPlasticWeakPlaneShearExponential
     cohesion = 1E6
     friction_angle = 25
     dilation_angle =  25

@@ -173,7 +173,7 @@
 
 [UserObjects]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShear
+    type = TensorMechanicsPlasticWeakPlaneShearExponential
     cohesion = 1E6
     dilation_angle = 6.34
     friction_angle = 45
