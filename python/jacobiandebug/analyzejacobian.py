@@ -11,6 +11,7 @@ from optparse import OptionParser
 
 
 nlsRE = re.compile("^Nonlinear System:$")
+varsingleRE = re.compile("^\s*Variables:\s*\"([^\"]+)\"")
 varlistFullRE = re.compile("^\s*Variables:\s*\{([^}]+)\}")
 varlistStartRE = re.compile("^\s*Variables:\s*\{([^}]+)")
 varlistEndRE = re.compile("^\s*([^}]+)\}")
@@ -152,7 +153,6 @@ def analyze(numvars, nlvars, dofs, Mfd, Mhc, Mdiff) :
 def parseOutput(output) :
   state = 1
   for line in output.split('\n'):
-
     #
     # Read in MOOSE startup info, such as variables and DOFs
     #
@@ -176,6 +176,12 @@ def parseOutput(output) :
         continue
 
       # looking for variables list
+      m = varsingleRE.match(line)
+      if m :
+        nlvars = [ m.group(1) ]
+        state = 4
+        continue
+
       m = varlistFullRE.match(line)
       if m :
         nlvarlist = m.group(1)
@@ -288,8 +294,9 @@ if __name__ == '__main__':
                     help="Pass either opt, dbg or devel.  Works the same as setting the $METHOD environment variable.")
 
   parser.add_option("-r", "--resize-mesh", dest="resize_mesh", action="store_true", help="Perform resizing of generated meshs (to speed up the testing).")
-
   parser.add_option("-s", "--mesh-size", dest="mesh_size", default=1, type="int", help="Set the mesh dimensions to this number of elements along each dimension (requires -r option).")
+
+  parser.add_option("-d", "--debug", dest="debug", action="store_true", help="Output the command line used to run the application.")
 
   (options, args) = parser.parse_args()
 
@@ -303,16 +310,25 @@ if __name__ == '__main__':
 
   executable = findExecutable(options.executable, options.method)
 
-  print 'Running input with executable %s ...\n' % executable
-
   mooseparams = [executable, '-i', options.input_file, '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON']
   if options.resize_mesh :
     mooseparams.extend(['Mesh/nx=%d' % options.mesh_size, 'Mesh/ny=%d' % options.mesh_size, 'Mesh/nz=%d' % options.mesh_size])
 
+  if options.debug :
+    print "Running\n%s %s\n" % (executable, " ".join(mooseparams))
+  else :
+    print 'Running input with executable %s ...\n' % executable
+
   try:
-    data = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+    child = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    data = child.communicate()[0]
   except:
-    print 'Peacock: Error executing moose based application\n'
+    print 'Error executing moose based application\n'
+    sys.exit(1)
+
+  if child.returncode == 1 :
+    # MOOSE failed with an unexpected error
+    print data
     sys.exit(1)
 
   parseOutput(data)
