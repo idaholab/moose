@@ -24,6 +24,8 @@
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
+#include "TensorMechanicsPlasticTensileExponential.h"
+#include "TensorMechanicsPlasticTensileCubic.h"
 #include "TensorMechanicsPlasticMohrCoulomb.h"
 #include "TensorMechanicsPlasticMohrCoulombExponential.h"
 #include "TensorMechanicsPlasticMohrCoulombCubic.h"
@@ -85,6 +87,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
+  registerUserObject(TensorMechanicsPlasticTensileExponential);
+  registerUserObject(TensorMechanicsPlasticTensileCubic);
   registerUserObject(TensorMechanicsPlasticMohrCoulomb);
   registerUserObject(TensorMechanicsPlasticMohrCoulombExponential);
   registerUserObject(TensorMechanicsPlasticMohrCoulombCubic);

@@ -42,6 +42,14 @@
     abs_zero = 1.0E-5
   [../]
 
+  [./small_hard3]
+    type = 'CSVDiff'
+    input = 'small_deform_hard3.i'
+    csvdiff = 'small_deform_hard3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+
   [./many_deforms]
     type = 'CSVDiff'
     input = 'many_deforms.i'

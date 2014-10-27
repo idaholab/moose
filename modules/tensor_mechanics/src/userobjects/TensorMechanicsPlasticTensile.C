@@ -5,13 +5,10 @@ template<>
 InputParameters validParams<TensorMechanicsPlasticTensile>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
-  params.addRequiredRangeCheckedParam<Real>("tensile_strength", "tensile_strength>=0", "Tensile strength");
-  params.addParam<Real>("tensile_strength_residual", "Tensile strength at infinite hardening.  If not given, this defaults to tensile_strength, ie, perfect plasticity");
-  params.addRangeCheckedParam<Real>("tensile_strength_rate", 0, "tensile_strength_rate>=0", "Tensile strength = tensile_strength_residual + (tensile_strength - tensile_strength_residual)*exp(-tensile_strength_rate*plasticstrain).  Set to zero for perfect plasticity");
   params.addRangeCheckedParam<Real>("tensile_edge_smoother", 25.0, "tensile_edge_smoother>=0 & tensile_edge_smoother<=30", "Smoothing parameter: the edges of the cone are smoothed by the given amount.");
   params.addRequiredRangeCheckedParam<Real>("tensile_tip_smoother", "tensile_tip_smoother>=0", "Smoothing parameter: the cone vertex at mean = Tensile strength, will be smoothed by the given amount.  Typical value is 0.1*tensile_strength");
   params.addParam<Real>("tensile_lode_cutoff", "If the second invariant of stress is less than this amount, the Lode angle is assumed to be zero.  This is to gaurd against precision-loss problems, and this parameter should be set small.  Default = 0.00001*((yield_Function_tolerance)^2)");
-  params.addClassDescription("Non-associative tensile plasticity with hardening/softening");
+  params.addClassDescription("Associative tensile plasticity with no hardening/softening, and tensile_strength = 1");
 
   return params;
 }
@@ -19,9 +16,6 @@ InputParameters validParams<TensorMechanicsPlasticTensile>()
 TensorMechanicsPlasticTensile::TensorMechanicsPlasticTensile(const std::string & name,
                                                          InputParameters parameters) :
     TensorMechanicsPlasticModel(name, parameters),
-    _tensile_strength0(getParam<Real>("tensile_strength")),
-    _tensile_strength_residual(parameters.isParamValid("tensile_strength_residual") ? getParam<Real>("tensile_strength_residual") : _tensile_strength0),
-    _tensile_strength_rate(getParam<Real>("tensile_strength_rate")),
     _small_smoother2(std::pow(getParam<Real>("tensile_tip_smoother"), 2)),
     _tt(getParam<Real>("tensile_edge_smoother")*M_PI/180.0),
     _sin3tt(std::sin(3*_tt)),
@@ -163,13 +157,13 @@ TensorMechanicsPlasticTensile::dflowPotential_dintnl(const RankTwoTensor & /*str
 
 
 Real
-TensorMechanicsPlasticTensile::tensile_strength(const Real internal_param) const
+TensorMechanicsPlasticTensile::tensile_strength(const Real /*internal_param*/) const
 {
-  return _tensile_strength_residual + (_tensile_strength0 - _tensile_strength_residual)*std::exp(-_tensile_strength_rate*internal_param);
+  return 1.0;
 }
 
 Real
-TensorMechanicsPlasticTensile::dtensile_strength(const Real internal_param) const
+TensorMechanicsPlasticTensile::dtensile_strength(const Real /*internal_param*/) const
 {
-  return -_tensile_strength_rate*(_tensile_strength0 - _tensile_strength_residual)*std::exp(-_tensile_strength_rate*internal_param);
+  return 0.0;
 }
