@@ -330,14 +330,14 @@
     internal_constraint_tolerance = 1.0E-7
   [../]
   [./tensile]
-    type = TensorMechanicsPlasticTensile
+    type = TensorMechanicsPlasticTensileExponential
     tensile_strength = 1E6
     tensile_tip_smoother = 1E5
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
   [../]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShear
+    type = TensorMechanicsPlasticWeakPlaneShearExponential
     cohesion = 1E6
     friction_angle = 25
     dilation_angle =  25

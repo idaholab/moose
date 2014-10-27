@@ -1,6 +1,13 @@
-# apply a pure tension, then some shear
-# the BCs are designed to map out the yield function, showing
-# the affect of 'cap' smoothing
+# checking for small deformation
+# A single element is incrementally stretched in the in the z direction
+# This causes the return direction to be along the hypersurface sigma_II = sigma_III,
+# and the resulting stresses are checked to lie on the expected yield surface
+#
+# tensile_strength is set to 1Pa,
+# cap smoothing is used with tip_smoother = 0.0, cap_start = 0.5, cap_rate = 2.0
+# Lode angle = -30degrees
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -17,69 +24,58 @@
 
 
 [Variables]
-  [./x_disp]
+  [./disp_x]
   [../]
-  [./y_disp]
+  [./disp_y]
   [../]
-  [./z_disp]
+  [./disp_z]
   [../]
 []
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
 
 [BCs]
-  [./bottomx]
-    type = PresetBC
-    variable = x_disp
-    boundary = back
-    value = 0.0
-  [../]
-  [./bottomy]
-    type = PresetBC
-    variable = y_disp
-    boundary = back
-    value = 0.0
-  [../]
-  [./bottomz]
-    type = PresetBC
-    variable = z_disp
-    boundary = back
-    value = 0.0
-  [../]
-
-  [./topx]
+  [./x]
     type = FunctionPresetBC
-    variable = x_disp
-    boundary = front
-    function = 'if(t<1E-6,0,3*(t-1E-6)*(t-1E-6)*1E6)'
+    variable = disp_x
+    boundary = 'front back'
+    function = '0'
   [../]
-  [./topy]
+  [./y]
     type = FunctionPresetBC
-    variable = y_disp
-    boundary = front
-    function = 'if(t<1E-6,0,5*(t-1E-6)*(t-1E-6)*1E6)'
+    variable = disp_y
+    boundary = 'front back'
+    function = '0'
   [../]
-  [./topz]
+  [./z]
     type = FunctionPresetBC
-    variable = z_disp
-    boundary = front
-    function = 'if(t<1E-6,t,1E-6)'
+    variable = disp_z
+    boundary = 'front back'
+    function = '0.25E-6*z*t*t'
   [../]
 []
 
 [AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_xy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./stress_xz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_zx]
+  [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -102,6 +98,20 @@
 []
 
 [AuxKernels]
+  [./stress_xx]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xx
+    index_i = 0
+    index_j = 0
+  [../]
+  [./stress_xy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_xy
+    index_i = 0
+    index_j = 1
+  [../]
   [./stress_xz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -109,12 +119,12 @@
     index_i = 0
     index_j = 2
   [../]
-  [./stress_zx]
+  [./stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
-    variable = stress_zx
-    index_i = 2
-    index_j = 0
+    variable = stress_yy
+    index_i = 1
+    index_j = 1
   [../]
   [./stress_yz]
     type = RankTwoAux
@@ -141,14 +151,28 @@
     property = plastic_NR_iterations
     variable = iter
   [../]
-
 []
 
 [Postprocessors]
+  [./s_xx]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_xx
+  [../]
+  [./s_xy]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_xy
+  [../]
   [./s_xz]
     type = PointValue
     point = '0 0 0'
     variable = stress_xz
+  [../]
+  [./s_yy]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_yy
   [../]
   [./s_yz]
     type = PointValue
@@ -173,54 +197,45 @@
 []
 
 [UserObjects]
-  [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShearExponential
-    cohesion = 1E3
-    dilation_angle = 5
-    friction_angle = 45
+  [./mc]
+    type = TensorMechanicsPlasticTensile
+    yield_function_tolerance = 1E-6
     tip_scheme = cap
-    smoother = 0
-    cap_rate = 0.001
-    cap_start = -1000.0
-    yield_function_tolerance = 1E-3
-    internal_constraint_tolerance = 1E-6
+    tensile_tip_smoother = 0.0
+    cap_start = -0.5
+    cap_rate = 2
+    internal_constraint_tolerance = 1E-5
   [../]
 []
 
 [Materials]
   [./mc]
     type = FiniteStrainMultiPlasticity
-    ep_plastic_tolerance = 1E-4
     block = 0
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     fill_method = symmetric_isotropic
-    C_ijkl = '1E9 0.5E9'
-    plastic_models = wps
-    transverse_direction = '0 0 1'
+    C_ijkl = '0 2.0E6'
+    ep_plastic_tolerance = 1E-5
+    max_NR_iterations = 1000
+    plastic_models = mc
     debug_fspb = 1
-    debug_jac_at_stress = '1E4 2E4 3E4 2E4 -4E4 5E4 3E4 5E4 6E8'
-    debug_jac_at_pm = 1
-    debug_jac_at_intnl = 1
-    debug_stress_change = 1E-3
-    debug_pm_change = 1E-5
-    debug_intnl_change = 1E-5
   [../]
 []
 
 
 [Executioner]
-  end_time = 2E-6
-  dt = 1E-7
+  end_time = 9
+  dt = 0.9
   type = Transient
 []
 
 
 [Outputs]
-  file_base = small_deform4
+  file_base = small_deform7
   output_initial = true
-  exodus = true
+  exodus = false
   [./console]
     type = Console
     perf_log = true

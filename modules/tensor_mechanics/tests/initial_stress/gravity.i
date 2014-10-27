@@ -167,7 +167,7 @@
 
 [UserObjects]
   [./mc]
-    type = TensorMechanicsPlasticTensile
+    type = TensorMechanicsPlasticTensileExponential
     tensile_strength = 1.0E6
     yield_function_tolerance = 1E-6
     tensile_tip_smoother = 1.0
