@@ -4,4 +4,10 @@
     input = 'simple_diffusion.i'
     exodiff = 'simple_diffusion_out.e'
   [../]
+
+  [./analyzejacobian]
+    type = 'AnalyzeJacobian'
+    input = 'simple_diffusion.i'
+    expect_out = '\nNo errors detected. :-\)\n'
+  [../]
 []

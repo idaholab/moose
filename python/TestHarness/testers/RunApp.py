@@ -25,7 +25,6 @@ class RunApp(Tester):
     params.addParam('min_parallel',    1, "Minimum number of MPI processes that this test can be run with (Default: 1)")
     params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
     params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
-    params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
     params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
 
     # Valgrind

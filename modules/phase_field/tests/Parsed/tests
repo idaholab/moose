@@ -16,4 +16,9 @@
     input = 'ACParsed_test.i'
     exodiff = 'ACParsed_test_out.e'
   [../]
+  [./analyzejacobian_ACParsed]
+    type = 'AnalyzeJacobian'
+    input = 'simple_diffusion.i'
+    expect_out = '\nNo errors detected. :-\)\n'
+  [../]
 []
