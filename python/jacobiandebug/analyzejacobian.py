@@ -147,10 +147,19 @@ def analyze(numvars, nlvars, dofs, Mfd, Mhc, Mdiff) :
     print "No errors detected. :-)"
 
 
+# output parsed (but not processed) jacobian matric data in gnuplot's nonuniform matrix format
+def saveMatrixToFile(M, dofs, filename) :
+  file = open(filename, "w")
+  for i in range(dofs) :
+    for j in range(dofs) :
+      file.write("%d %d %f\n" % (i, j, M[i][j]))
+    file.write("\n")
+
+
 #
 # Simple state machine parser for the MOOSE output
 #
-def parseOutput(output) :
+def parseOutput(output, write_matrices) :
   state = 1
   for line in output.split('\n'):
     #
@@ -275,6 +284,12 @@ def parseOutput(output) :
 
           analyze(numvars, nlvars, dofs, Mfd, Mhc, Mdiff)
 
+          # dump parsed matrices in gnuplottable format
+          if write_matrices :
+            saveMatrixToFile(Mfd, dofs, "jacobian_finite_differenced.dat")
+            saveMatrixToFile(Mhc, dofs, "jacobian_hand_coded.dat")
+            saveMatrixToFile(Mdiff, dofs, "jacobians_diffed.dat")
+
           # theoretically we could have multiple steps to analyze in the output
           continue
 
@@ -298,6 +313,8 @@ if __name__ == '__main__':
 
   parser.add_option("-d", "--debug", dest="debug", action="store_true", help="Output the command line used to run the application.")
 
+  parser.add_option("-w", "--write-matrices", dest="write_matrices", action="store_true", help="Output the Jacobian matrices in gnuplot format.")
+
   (options, args) = parser.parse_args()
 
   for arg in args:
@@ -310,7 +327,7 @@ if __name__ == '__main__':
 
   executable = findExecutable(options.executable, options.method)
 
-  mooseparams = [executable, '-i', options.input_file, '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON']
+  mooseparams = [executable, '-i', options.input_file, '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON', 'BCs/active=']
   if options.resize_mesh :
     mooseparams.extend(['Mesh/nx=%d' % options.mesh_size, 'Mesh/ny=%d' % options.mesh_size, 'Mesh/nz=%d' % options.mesh_size])
 
@@ -331,4 +348,4 @@ if __name__ == '__main__':
     print data
     sys.exit(1)
 
-  parseOutput(data)
+  parseOutput(data, options.write_matrices)
