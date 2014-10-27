@@ -1,25 +1,15 @@
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
-#include <math.h> // for M_PI
 
 template<>
 InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
-  params.addRequiredRangeCheckedParam<Real>("cohesion", "cohesion>=0", "Weak plane cohesion");
-  params.addRequiredRangeCheckedParam<Real>("friction_angle", "friction_angle>=0 & friction_angle<=45", "Weak-plane friction angle in degrees");
-  params.addRequiredRangeCheckedParam<Real>("dilation_angle", "dilation_angle>=0", "Weak-plane dilation angle in degrees.  For associative flow use dilation_angle = friction_angle.  Should not be less than friction angle.");
-  params.addParam<Real>("cohesion_residual", "Weak plane cohesion at infinite hardening.  If not given, this defaults to cohesion, ie, perfect plasticity");
-  params.addParam<Real>("friction_angle_residual", "Weak-plane friction angle in degrees at infinite hardening.  If not given, this defaults to friction_angle, ie, perfect plasticity");
-  params.addParam<Real>("dilation_angle_residual", "Weak-plane dilation angle in degrees at infinite hardening.  If not given, this defaults to dilation_angle, ie, perfect plasticity");
-  params.addRangeCheckedParam<Real>("cohesion_rate", 0, "cohesion_rate>=0", "Cohesion = cohesion_residual + (cohesion - cohesion_residual)*exp(-cohesion_rate*plasticstrain).  Set to zero for perfect plasticity");
-  params.addRangeCheckedParam<Real>("friction_angle_rate", 0, "friction_angle_rate>=0", "tan(friction_angle) = tan(friction_angle_residual) + (tan(friction_angle) - tan(friction_angle_residual))*exp(-friction_angle_rate*plasticstrain).  Set to zero for perfect plasticity");
-  params.addRangeCheckedParam<Real>("dilation_angle_rate", 0, "dilation_angle_rate>=0", "tan(dilation_angle) = tan(dilation_angle_residual) + (tan(dilation_angle) - tan(dilation_angle_residual))*exp(-dilation_angle_rate*plasticstrain).  Set to zero for perfect plasticity");
   MooseEnum tip_scheme("hyperbolic cap", "hyperbolic");
   params.addParam<MooseEnum>("tip_scheme", tip_scheme, "Scheme by which the cone's tip will be smoothed.");
   params.addRequiredRangeCheckedParam<Real>("smoother", "smoother>=0", "For the 'hyperbolic' tip_scheme, the cone vertex at shear-stress = 0 will be smoothed by the given amount.  For the 'cap' tip_scheme, additional smoothing will occur.  Typical value is 0.1*cohesion");
   params.addParam<Real>("cap_start", 0.0, "For the 'cap' tip_scheme, smoothing is performed in the stress_zz > cap_start region");
   params.addRangeCheckedParam<Real>("cap_rate", 0.0, "cap_rate>=0", "For the 'cap' tip_scheme, this controls how quickly the cap degenerates to a hemisphere: small values mean a slow degeneration to a hemisphere (and zero means the 'cap' will be totally inactive).  Typical value is 1/cohesion");
-  params.addClassDescription("Non-associative finite-strain weak-plane shear plasticity with hardening/softening");
+  params.addClassDescription("Non-associative finite-strain weak-plane shear perfect plasticity.  Here cohesion = 1, tan(phi) = 1 = tan(psi)");
 
   return params;
 }
@@ -27,26 +17,11 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>()
 TensorMechanicsPlasticWeakPlaneShear::TensorMechanicsPlasticWeakPlaneShear(const std::string & name,
                                                          InputParameters parameters) :
     TensorMechanicsPlasticModel(name, parameters),
-    _cohesion(getParam<Real>("cohesion")),
-    _tan_phi(std::tan(getParam<Real>("friction_angle")*M_PI/180.0)),
-    _tan_psi(std::tan(getParam<Real>("dilation_angle")*M_PI/180.0)),
-    _cohesion_residual(parameters.isParamValid("cohesion_residual") ? getParam<Real>("cohesion_residual") : _cohesion),
-    _tan_phi_residual(parameters.isParamValid("friction_angle_residual") ? std::tan(getParam<Real>("friction_angle_residual")*M_PI/180.0) : _tan_phi),
-    _tan_psi_residual(parameters.isParamValid("dilation_angle_residual") ? std::tan(getParam<Real>("dilation_angle_residual")*M_PI/180.0) : _tan_psi),
-    _cohesion_rate(getParam<Real>("cohesion_rate")),
-    _tan_phi_rate(getParam<Real>("friction_angle_rate")),
-    _tan_psi_rate(getParam<Real>("dilation_angle_rate")),
     _tip_scheme(getParam<MooseEnum>("tip_scheme")),
     _small_smoother2(std::pow(getParam<Real>("smoother"), 2)),
     _cap_start(getParam<Real>("cap_start")),
     _cap_rate(getParam<Real>("cap_rate"))
 {
-  if (_tan_phi < _tan_psi)
-    mooseError("Weak-plane friction angle must not be less than weak-plane dilation angle");
-  if (_cohesion_residual < 0)
-    mooseError("Weak-plane residual cohesion must not be negative");
-  if (_tan_phi_residual < 0 || _tan_phi_residual > 1 || _tan_psi_residual < 0 || _tan_phi_residual < _tan_psi_residual)
-    mooseError("Weak-plane residual friction and dilation angles must lie in [0, 45], and dilation_residual <= friction_residual");
 }
 
 
@@ -143,39 +118,39 @@ TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dintnl(const RankTwoTensor 
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::cohesion(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShear::cohesion(const Real /*internal_param*/) const
 {
-  return _cohesion_residual + (_cohesion - _cohesion_residual)*std::exp(-_cohesion_rate*internal_param);
+  return 1.0;
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::dcohesion(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShear::dcohesion(const Real /*internal_param*/) const
 {
-  return -_cohesion_rate*(_cohesion - _cohesion_residual)*std::exp(-_cohesion_rate*internal_param);
+  return 0.0;
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::tan_phi(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShear::tan_phi(const Real /*internal_param*/) const
 {
-  return _tan_phi_residual + (_tan_phi - _tan_phi_residual)*std::exp(-_tan_phi_rate*internal_param);
+  return 1.0;
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::dtan_phi(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShear::dtan_phi(const Real /*internal_param*/) const
 {
-  return -_tan_phi_rate*(_tan_phi - _tan_phi_residual)*std::exp(-_tan_phi_rate*internal_param);
+  return 0.0;
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::tan_psi(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShear::tan_psi(const Real /*internal_param*/) const
 {
-  return _tan_psi_residual + (_tan_psi - _tan_psi_residual)*std::exp(-_tan_psi_rate*internal_param);
+  return 1.0;
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::dtan_psi(const Real internal_param) const
+TensorMechanicsPlasticWeakPlaneShear::dtan_psi(const Real /*internal_param*/) const
 {
-  return -_tan_psi_rate*(_tan_psi - _tan_psi_residual)*std::exp(-_tan_psi_rate*internal_param);
+  return 0.0;
 }
 
 

@@ -172,7 +172,7 @@
 
 [UserObjects]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShear
+    type = TensorMechanicsPlasticWeakPlaneShearExponential
     cohesion = 1E3
     cohesion_residual = 2E3
     cohesion_rate = 0
