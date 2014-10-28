@@ -130,6 +130,10 @@ DomainIntegralAction::act()
   const std::string ak_base_name("q");
   const std::string av_base_name("q");
   const unsigned int num_crack_front_nodes = calcNumCrackFrontNodes();
+  const std::string aux_stress_base_name("aux_stress");
+  const std::string aux_disp_base_name("aux_disp");
+  const std::string aux_grad_disp_base_name("aux_grad_disp");
+  const std::string aux_strain_base_name("aux_strain");
 
   if (_current_task == "add_user_object")
   {
@@ -281,10 +285,6 @@ DomainIntegralAction::act()
       params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1,_disp_y);
       if (_disp_z !="")
         params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1,_disp_z);
-      params.set<std::string>("aux_stress") = "aux_stress_I";
-      params.set<std::string>("aux_disp") = "aux_disp_I";
-      params.set<std::string>("aux_grad_disp") = "aux_grad_disp_I";
-      params.set<std::string>("aux_strain") = "aux_strain_I";
       params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1 - std::pow(_poissons_ratio,2));
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
@@ -294,6 +294,18 @@ DomainIntegralAction::act()
           av_name_stream<<av_base_name<<"_"<<ring_index+1;
           std::ostringstream pp_name_stream;
           pp_name_stream<<pp_base_name<<"_"<<"KI"<<"_"<<ring_index+1;
+          std::ostringstream aux_stress_name_stream;
+          aux_stress_name_stream<<aux_stress_base_name<<"_I_0";
+          std::ostringstream aux_disp_name_stream;
+          aux_disp_name_stream<<aux_disp_base_name<<"_I_0";
+          std::ostringstream aux_grad_disp_name_stream;
+          aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_I_0";
+          std::ostringstream aux_strain_name_stream;
+          aux_strain_name_stream<<aux_strain_base_name<<"_I_0";
+          params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+          params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+          params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+          params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
           std::vector<VariableName> qvars;
           qvars.push_back(av_name_stream.str());
           params.set<std::vector<VariableName> >("q") = qvars;
@@ -307,6 +319,20 @@ DomainIntegralAction::act()
             av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
             std::ostringstream pp_name_stream;
             pp_name_stream<<pp_base_name<<"_"<<"KI"<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            std::ostringstream cfn_index_stream;
+            cfn_index_stream<<cfn_index+1;
+            std::ostringstream aux_stress_name_stream;
+            aux_stress_name_stream<<aux_stress_base_name<<"_I_"<<cfn_index+1;
+            std::ostringstream aux_disp_name_stream;
+            aux_disp_name_stream<<aux_disp_base_name<<"_I_"<<cfn_index+1;
+            std::ostringstream aux_grad_disp_name_stream;
+            aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_I_"<<cfn_index+1;
+            std::ostringstream aux_strain_name_stream;
+            aux_strain_name_stream<<aux_strain_base_name<<"_I_"<<cfn_index+1;
+            params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+            params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+            params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+            params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
             std::vector<VariableName> qvars;
             qvars.push_back(av_name_stream.str());
             params.set<std::vector<VariableName> >("q") = qvars;
@@ -330,10 +356,6 @@ DomainIntegralAction::act()
       params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1,_disp_y);
       if (_disp_z !="")
         params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1,_disp_z);
-      params.set<std::string>("aux_stress") = "aux_stress_II";
-      params.set<std::string>("aux_disp") = "aux_disp_II";
-      params.set<std::string>("aux_grad_disp") = "aux_grad_disp_II";
-      params.set<std::string>("aux_strain") = "aux_strain_II";
       params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1 - std::pow(_poissons_ratio,2));
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
@@ -343,6 +365,18 @@ DomainIntegralAction::act()
           av_name_stream<<av_base_name<<"_"<<ring_index+1;
           std::ostringstream pp_name_stream;
           pp_name_stream<<pp_base_name<<"_"<<"KII"<<"_"<<ring_index+1;
+          std::ostringstream aux_stress_name_stream;
+          aux_stress_name_stream<<aux_stress_base_name<<"_II_0";
+          std::ostringstream aux_disp_name_stream;
+          aux_disp_name_stream<<aux_disp_base_name<<"_II_0";
+          std::ostringstream aux_grad_disp_name_stream;
+          aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_II_0";
+          std::ostringstream aux_strain_name_stream;
+          aux_strain_name_stream<<aux_strain_base_name<<"_II_0";
+          params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+          params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+          params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+          params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
           std::vector<VariableName> qvars;
           qvars.push_back(av_name_stream.str());
           params.set<std::vector<VariableName> >("q") = qvars;
@@ -356,6 +390,20 @@ DomainIntegralAction::act()
             av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
             std::ostringstream pp_name_stream;
             pp_name_stream<<pp_base_name<<"_"<<"KII"<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            std::ostringstream cfn_index_stream;
+            cfn_index_stream<<cfn_index+1;
+            std::ostringstream aux_stress_name_stream;
+            aux_stress_name_stream<<aux_stress_base_name<<"_II_"<<cfn_index+1;
+            std::ostringstream aux_disp_name_stream;
+            aux_disp_name_stream<<aux_disp_base_name<<"_II_"<<cfn_index+1;
+            std::ostringstream aux_grad_disp_name_stream;
+            aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_II_"<<cfn_index+1;
+            std::ostringstream aux_strain_name_stream;
+            aux_strain_name_stream<<aux_strain_base_name<<"_II_"<<cfn_index+1;
+            params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+            params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+            params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+            params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
             std::vector<VariableName> qvars;
             qvars.push_back(av_name_stream.str());
             params.set<std::vector<VariableName> >("q") = qvars;
@@ -379,10 +427,6 @@ DomainIntegralAction::act()
       params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1,_disp_y);
       if (_disp_z !="")
         params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1,_disp_z);
-      params.set<std::string>("aux_stress") = "aux_stress_III";
-      params.set<std::string>("aux_disp") = "aux_disp_III";
-      params.set<std::string>("aux_grad_disp") = "aux_grad_disp_III";
-      params.set<std::string>("aux_strain") = "aux_strain_III";
       params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (2 * (1 + _poissons_ratio));
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
@@ -392,6 +436,18 @@ DomainIntegralAction::act()
           av_name_stream<<av_base_name<<"_"<<ring_index+1;
           std::ostringstream pp_name_stream;
           pp_name_stream<<pp_base_name<<"_"<<"KIII"<<"_"<<ring_index+1;
+          std::ostringstream aux_stress_name_stream;
+          aux_stress_name_stream<<aux_stress_base_name<<"_III_0";
+          std::ostringstream aux_disp_name_stream;
+          aux_disp_name_stream<<aux_disp_base_name<<"_III_0";
+          std::ostringstream aux_grad_disp_name_stream;
+          aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_III_0";
+          std::ostringstream aux_strain_name_stream;
+          aux_strain_name_stream<<aux_strain_base_name<<"_III_0";
+          params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+          params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+          params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+          params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
           std::vector<VariableName> qvars;
           qvars.push_back(av_name_stream.str());
           params.set<std::vector<VariableName> >("q") = qvars;
@@ -405,6 +461,20 @@ DomainIntegralAction::act()
             av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
             std::ostringstream pp_name_stream;
             pp_name_stream<<pp_base_name<<"_"<<"KIII"<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            std::ostringstream cfn_index_stream;
+            cfn_index_stream<<cfn_index+1;
+            std::ostringstream aux_stress_name_stream;
+            aux_stress_name_stream<<aux_stress_base_name<<"_III_"<<cfn_index+1;
+            std::ostringstream aux_disp_name_stream;
+            aux_disp_name_stream<<aux_disp_base_name<<"_III_"<<cfn_index+1;
+            std::ostringstream aux_grad_disp_name_stream;
+            aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_III_"<<cfn_index+1;
+            std::ostringstream aux_strain_name_stream;
+            aux_strain_name_stream<<aux_strain_base_name<<"_III_"<<cfn_index+1;
+            params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+            params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+            params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+            params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
             std::vector<VariableName> qvars;
             qvars.push_back(av_name_stream.str());
             params.set<std::vector<VariableName> >("q") = qvars;
@@ -476,9 +546,8 @@ DomainIntegralAction::act()
 
     if (sif_mode_enum_vec.size() > 0)
     {
-      const std::string mater_name("interactionIntegralAuxFields");
+      const std::string mater_base_name("auxFields");
       const std::string mater_type_name("InteractionIntegralAuxFields");
-
       InputParameters params = _factory.getValidParams(mater_type_name);
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
@@ -487,7 +556,27 @@ DomainIntegralAction::act()
       params.set<Real>("youngs_modulus") = _youngs_modulus;
       params.set<std::vector<SubdomainName> >("block") = _blocks;
 
-      _problem->addMaterial(mater_type_name,mater_name,params);
+      if (_treat_as_2d)
+      {
+        std::ostringstream mater_name_stream;
+        mater_name_stream<<mater_base_name<<"_0";
+        params.set<unsigned int>("crack_front_node_index") = 0;
+        params.set<std::string>("appended_index_name") = "0";
+        _problem->addMaterial(mater_type_name,mater_name_stream.str(),params);
+      }
+      else
+      {
+        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        {
+          std::ostringstream mater_name_stream;
+          mater_name_stream<<mater_base_name<<"_"<<cfn_index+1;
+          params.set<unsigned int>("crack_front_node_index") = cfn_index;
+          std::ostringstream cfn_index_stream;
+          cfn_index_stream<<cfn_index+1;
+          params.set<std::string>("appended_index_name") = cfn_index_stream.str();
+          _problem->addMaterial(mater_type_name,mater_name_stream.str(),params);
+        }
+      }
     }
   }
 }
