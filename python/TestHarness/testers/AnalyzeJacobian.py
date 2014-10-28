@@ -29,10 +29,9 @@ class AnalyzeJacobian(Tester):
       print 'Application not found: ' + str(specs['executable'])
       sys.exit(1)
 
+    mesh_options = ' -m %s' % options.method
     if specs['resize_mesh'] :
-      mesh_options = '-r -s %d' % specs['mesh_size']
-    else :
-      mesh_options = ''
+      mesh_options += ' -r -s %d' % specs['mesh_size']
 
     command += mesh_options + ' ' + specs['input']
 
