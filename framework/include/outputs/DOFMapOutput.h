@@ -62,6 +62,9 @@ protected:
    */
   void write(std::string message);
 
+  template<typename T>
+  std::string join(const std::vector<T> & elements, const char* const delim);
+
   /**
    * Apply indentation to newlines in the supplied stream
    * @param message Reference to the message being changed

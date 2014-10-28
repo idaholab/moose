@@ -104,6 +104,25 @@ DOFMapOutput::writeStreamToFile(bool append)
   _file_output_stream.str("");
 }
 
+template<typename T>
+std::string
+DOFMapOutput::join(const std::vector<T> & elements, const char* const delim)
+{
+  std::ostringstream os;
+  switch (elements.size())
+  {
+    case 0:
+      return "";
+    case 1:
+      os << elements[0];
+      return os.str();
+    default:
+      std::copy(elements.begin(), elements.end()-1, std::ostream_iterator<T>(os, delim));
+      os << elements.back();
+      return os.str();
+  }
+}
+
 void
 DOFMapOutput::write(std::string message)
 {
@@ -147,6 +166,9 @@ DOFMapOutput::outputSystemInformation()
   NonlinearSystem & nl = _problem_ptr->getNonlinearSystem();
   const KernelWarehouse & kernels = nl.getKernelWarehouse(0);
 
+  // get a set of all subdomains
+  const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
+
   bool first = true;
   oss << '[';
   for (unsigned int vg = 0; vg < dof_map.n_variable_groups(); ++vg)
@@ -161,27 +183,31 @@ DOFMapOutput::outputSystemInformation()
       first = false;
 
       oss << "{\"name\": \"" << vg_description.name(vn) << "\", \"subdomains\": [";
-      for (SubdomainID sd = 0; sd < 1; ++sd)
+      for (std::set<SubdomainID>::const_iterator sd = subdomains.begin(); sd != subdomains.end(); ++sd)
       {
-        oss << (sd>0 ? ", " : "") << "{\"kernels\": [";
+        oss << (sd != subdomains.begin() ? ", " : "") << "{\"sd\": " << *sd << ", \"kernels\": [";
 
         // build a list of all kernels in the current subdomain
-        nl.updateActiveKernels(sd, 0);
+        nl.updateActiveKernels(*sd, 0);
         const std::vector<KernelBase *> & active_kernels = kernels.activeVar(var);
         for (unsigned i = 0; i<active_kernels.size(); ++i)
           oss << (i>0 ? ", \"" : "\"") << active_kernels[i]->name() << '"';
 
-        // get the list of DOFs for this variable
-        std::vector<dof_id_type> idx;
-        //dof_map.local_variable_indices(idx, _mesh, var);
-
-
         oss << "], \"doflist\": [";
-        for (unsigned i = 0; i<idx.size(); ++i)
-          oss << (i>0 ? ", " : "") << idx[i] << ' ';
-        oss << "]}";
+
+        // get the list of DOFs for this variable
+        std::vector<dof_id_type> dofs;
+        for (unsigned int i = 0; i < _mesh.nElem(); ++i)
+          if (_mesh.elem(i)->subdomain_id() == *sd)
+          {
+            std::vector<dof_id_type> di;
+            dof_map.dof_indices(_mesh.elem(i), di, var);
+            dofs.insert(dofs.end(), di.begin(), di.end());
+          }
+
+        oss << join<dof_id_type>(dofs, ", ") << "]}";
       }
-      oss << "]}\n";
+      oss << "]}";
     }
   }
   oss << "]\n";
