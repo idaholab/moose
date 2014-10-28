@@ -35,6 +35,7 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_subproblem.mesh()),
     _treat_as_2d(getParam<bool>("2d")),
+    _closed_loop(false),
     _axis_2d(getParam<unsigned int>("axis_2d"))
 {
   MooseEnum direction_method_moose_enum = getParam<MooseEnum>("crack_direction_method");
@@ -293,7 +294,14 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
 
     //For embedded crack with closed loop of crack front nodes, must pick the end nodes
     if (end_nodes.size() == 0) //Crack front is a loop.  Pick nodes to be end nodes.
+    {
       pickLoopCrackEndNodes(end_nodes, nodes, node_to_line_elem_map, line_elems);
+      _closed_loop = true;
+      if (_end_direction_method == END_CRACK_DIRECTION_VECTOR)
+        mooseError("In CrackFrontDefinition, end_direction_method cannot be CrackDirectionVector for a closed-loop crack");
+      if (_intersecting_boundary_names.size() > 0)
+        mooseError("In CrackFrontDefinition, intersecting_boundary cannot be specified for a closed-loop crack");
+    }
     else if (end_nodes.size() == 2) //Rearrange the order of the end nodes if needed
       orderEndNodes(end_nodes);
     else
@@ -576,40 +584,50 @@ CrackFrontDefinition::updateCrackFrontGeometry()
 
     RealVectorValue back_segment;
     Real back_segment_len = 0.0;
+    if (_closed_loop)
+    {
+      back_segment = *crack_front_nodes[0] - *crack_front_nodes[num_crack_front_nodes-1];
+      back_segment_len = back_segment.size();
+    }
+
     for (unsigned int i=0; i<num_crack_front_nodes; ++i)
     {
-      CRACK_NODE_TYPE ntype = MIDDLE_NODE;
-      if (i==0)
-      {
+      CRACK_NODE_TYPE ntype;
+      if (_closed_loop)
+        ntype = MIDDLE_NODE;
+      else if (i==0)
         ntype = END_1_NODE;
-      }
       else if (i==num_crack_front_nodes-1)
-      {
         ntype = END_2_NODE;
-      }
+      else
+        ntype = MIDDLE_NODE;
 
       RealVectorValue forward_segment;
-      Real forward_segment_len = 0.0;
-      if (ntype != END_2_NODE)
+      Real forward_segment_len;
+      if (ntype == END_2_NODE)
+        forward_segment_len = 0.0;
+      else if (_closed_loop && i==num_crack_front_nodes-1)
+      {
+        forward_segment = *crack_front_nodes[0] - *crack_front_nodes[i];
+        forward_segment_len = forward_segment.size();
+      }
+      else
       {
         forward_segment = *crack_front_nodes[i+1] - *crack_front_nodes[i];
         forward_segment_len = forward_segment.size();
+        _overall_length += forward_segment_len;
       }
 
       _segment_lengths.push_back(std::make_pair(back_segment_len,forward_segment_len));
-      //Moose::out<<"seg len: "<<back_segment_len<<" "<<forward_segment_len<<std::endl;
 
       RealVectorValue tangent_direction = back_segment + forward_segment;
       tangent_direction = tangent_direction / tangent_direction.size();
       _tangent_directions.push_back(tangent_direction);
-      //Moose::out<<"tan dir: "<<tangent_direction(0)<<" "<<tangent_direction(1)<<" "<<tangent_direction(2)<<std::endl;
       _crack_directions.push_back(calculateCrackFrontDirection(crack_front_nodes[i],tangent_direction,ntype));
 
-      _overall_length += forward_segment_len;
 
       back_segment = forward_segment;
       back_segment_len = forward_segment_len;
-
     }
 
     //For CURVED_CRACK_FRONT, _crack_plane_normal gets computed in updateDataForCrackDirection
@@ -702,10 +720,25 @@ CrackFrontDefinition::updateDataForCrackDirection()
     {
       mooseError("Crack front must contain at least 3 nodes to use CurvedCrackFront option");
     }
-    unsigned int mid_id = (num_nodes-1)/2;
-    Node & start = _mesh.node(_ordered_crack_front_nodes[0]);
+    unsigned int start_id;
+    unsigned int mid_id;
+    unsigned int end_id;
+
+    if (_closed_loop)
+    {
+      start_id = 0;
+      mid_id = (num_nodes-1)/3;
+      end_id = 2*mid_id;
+    }
+    else
+    {
+      start_id = 0;
+      mid_id = (num_nodes-1)/2;
+      end_id = num_nodes-1;
+    }
+    Node & start = _mesh.node(_ordered_crack_front_nodes[start_id]);
     Node & mid   = _mesh.node(_ordered_crack_front_nodes[mid_id]);
-    Node & end   = _mesh.node(_ordered_crack_front_nodes[num_nodes-1]);
+    Node & end   = _mesh.node(_ordered_crack_front_nodes[end_id]);
 
     //Create two vectors connecting them
     RealVectorValue v1 = mid-start;
