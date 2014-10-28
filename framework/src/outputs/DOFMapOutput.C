@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "DOFMapOutput.h"
 #include "FEProblem.h"
-#include "Postprocessor.h"
+#include "KernelBase.h"
 #include "MooseApp.h"
 #include "Moose.h"
 
@@ -160,21 +160,28 @@ DOFMapOutput::outputSystemInformation()
         oss << ", ";
       first = false;
 
-      // get the list of DOFs for this variable
-      std::vector<dof_id_type> idx;
-      dof_map.local_variable_indices(idx, _mesh, var);
-
-      oss << "{\"name\": \"" << vg_description.name(vn) << "\", \"kernels\": [";
-      if (kernels.hasActiveKernels(var))
+      oss << "{\"name\": \"" << vg_description.name(vn) << "\", \"subdomains\": [";
+      for (SubdomainID sd = 0; sd < 1; ++sd)
       {
-        const std::vector<KernelBase *> & active_kernels = kernels.activeVar(var);
-        oss << active_kernels.size();
-      }
+        oss << (sd>0 ? ", " : "") << "{\"kernels\": [";
 
-      oss << "], \"doflist\": [";
-      for (unsigned i = 0; i<idx.size(); ++i)
-        oss << (i>0 ? ", " : "") << idx[i] << ' ';
-      oss << "]}";
+        // build a list of all kernels in the current subdomain
+        nl.updateActiveKernels(sd, 0);
+        const std::vector<KernelBase *> & active_kernels = kernels.activeVar(var);
+        for (unsigned i = 0; i<active_kernels.size(); ++i)
+          oss << (i>0 ? ", \"" : "\"") << active_kernels[i]->name() << '"';
+
+        // get the list of DOFs for this variable
+        std::vector<dof_id_type> idx;
+        //dof_map.local_variable_indices(idx, _mesh, var);
+
+
+        oss << "], \"doflist\": [";
+        for (unsigned i = 0; i<idx.size(); ++i)
+          oss << (i>0 ? ", " : "") << idx[i] << ' ';
+        oss << "]}";
+      }
+      oss << "]}\n";
     }
   }
   oss << "]\n";
