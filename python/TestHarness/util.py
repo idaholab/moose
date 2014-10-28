@@ -2,6 +2,8 @@ import os, re
 from subprocess import *
 from time import strftime, gmtime, ctime, localtime, asctime
 
+util_options = {"fail_on_errors": True}
+
 TERM_COLS = 110
 
 LIBMESH_OPTIONS = {
@@ -200,7 +202,8 @@ def getCompilers(libmesh_dir):
 
   else:
     print "Error! Could not find libmesh's config script in any of the usual locations!"
-    exit(1)
+    if util_options["fail_on_errors"]:
+      exit(1)
 
   # Pass the --cxx option to the libmesh-config script, and check the result
   command = libmesh_config + ' --cxx'
@@ -306,7 +309,8 @@ def getLibMeshConfigOption(libmesh_dir, option):
 
   if success == 0:
     print "Error! Could not find libmesh_config.h in any of the usual locations!"
-    exit(1)
+    if util_options["fail_on_errors"]:
+      exit(1)
 
   return option_set
 
@@ -336,7 +340,8 @@ def getSharedOption(libmesh_dir):
 
   else:
     print "Error! Could not find libmesh's libtool script in any of the usual locations!"
-    exit(1)
+    if util_options["fail_on_errors"]:
+      exit(1)
 
   # Now run the libtool script (in the shell) to see if shared libraries were built
   command = libmesh_libtool + " --config | grep build_libtool_libs | cut -d'=' -f2"
@@ -352,6 +357,10 @@ def getSharedOption(libmesh_dir):
   else:
     # Neither no nor yes?  Not possible!
     print "Error! Could not determine whether shared libraries were built."
-    exit(1)
+    if util_options["fail_on_errors"]:
+      exit(1)
 
   return shared_option
+
+def ignoreOptionErrors():
+  util_options["fail_on_errors"] = False

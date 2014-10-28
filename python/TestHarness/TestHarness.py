@@ -678,6 +678,7 @@ class TestHarness:
     parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors')
     parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
     parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
+    parser.add_argument("--ignore-option-errors", action="store_true", dest="ignore_option_errors", help="Ignore errors when determining options")
 
     outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
     outputgroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='show the output of every test that fails')
@@ -752,6 +753,10 @@ class TestHarness:
         if m != None and int(m.group(1)) > largest_serial_num:
           largest_serial_num = int(m.group(1))
       opts.pbs = "pbs_" +  str(largest_serial_num+1).zfill(3)
+
+    #Check if ignoring option errors
+    if self.options.ignore_option_errors:
+      ignoreOptionErrors()
 
   def postRun(self, specs, timing):
     return
