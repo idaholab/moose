@@ -9,5 +9,6 @@
     type = 'AnalyzeJacobian'
     input = 'simple_diffusion.i'
     expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
   [../]
 []

@@ -18,7 +18,9 @@
   [../]
   [./analyzejacobian_ACParsed]
     type = 'AnalyzeJacobian'
-    input = 'simple_diffusion.i'
+    input = 'ACParsed_test.i'
     expect_out = '\nNo errors detected. :-\)\n'
+    resize_mesh = true
+    recover = false
   [../]
 []
