@@ -78,7 +78,6 @@ FlowJunction::addMooseObjects()
     params.set<UserObjectName>("eos")  = getParam<UserObjectName>("eos");
     // coupling
     params.set<std::vector<VariableName> >("area") = cv_area;
-    params.set<std::vector<VariableName> >("pressure") = cv_pressure;
 
     _sim.addPostprocessor("PressureCB", c_pps, params);
   }
