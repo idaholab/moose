@@ -1,5 +1,7 @@
-# apply a number of "random" configurations and
-# check that the algorithm returns to the yield surface
+# apply many large deformations, checking that the algorithm returns correctly to
+# the yield surface each time
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -83,8 +85,8 @@
 [AuxKernels]
   [./yield_fcn_auxk]
     type = MaterialStdVectorAux
-    property = plastic_yield_function
     index = 0
+    property = plastic_yield_function
     variable = yield_fcn
   [../]
 []
@@ -113,10 +115,17 @@
 
 [UserObjects]
   [./mc]
-    type = TensorMechanicsPlasticTensile
+    type = TensorMechanicsPlasticMohrCoulombExponential
+    mc_cohesion = 1E3
+    mc_friction_angle = 30
+    mc_dilation_angle = 5
+    tip_scheme = cap
+    mc_tip_smoother = 0.0
+    cap_start = 1000
+    cap_rate = 1E-3
+    mc_edge_smoother = 10
     yield_function_tolerance = 1E-3
-    tensile_tip_smoother = 0.5
-    internal_constraint_tolerance = 1E-9
+    internal_constraint_tolerance = 1E-6
   [../]
 []
 
@@ -128,24 +137,25 @@
     disp_y = disp_y
     disp_z = disp_z
     fill_method = symmetric_isotropic
-    C_ijkl = '0 2.0E6'
+    C_ijkl = '0 1E7'
     max_NR_iterations = 1000
-    ep_plastic_tolerance = 1E-9
+    ep_plastic_tolerance = 1E-6
     plastic_models = mc
     debug_fspb = 1
+    deactivation_scheme = safe
   [../]
 []
 
 
 [Executioner]
-  end_time = 1E3
+  end_time = 1000
   dt = 1
   type = Transient
 []
 
 
 [Outputs]
-  file_base = many_deforms
+  file_base = many_deforms_cap
   output_initial = true
   exodus = false
   [./console]
