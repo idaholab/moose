@@ -106,21 +106,12 @@ DOFMapOutput::writeStreamToFile(bool append)
 
 template<typename T>
 std::string
-DOFMapOutput::join(const std::vector<T> & elements, const char* const delim)
+DOFMapOutput::join(const T & begin, const T & end, const char* const delim)
 {
   std::ostringstream os;
-  switch (elements.size())
-  {
-    case 0:
-      return "";
-    case 1:
-      os << elements[0];
-      return os.str();
-    default:
-      std::copy(elements.begin(), elements.end()-1, std::ostream_iterator<T>(os, delim));
-      os << elements.back();
-      return os.str();
-  }
+  for (T it = begin; it != end; ++it)
+    os << (it != begin ? delim : "") << *it;
+  return os.str();
 }
 
 void
@@ -182,10 +173,10 @@ DOFMapOutput::outputSystemInformation()
         oss << ", ";
       first = false;
 
-      oss << "{\"name\": \"" << vg_description.name(vn) << "\", \"subdomains\": [";
+      oss << "{\"var\": \"" << vg_description.name(vn) << "\", \"subdomains\": [";
       for (std::set<SubdomainID>::const_iterator sd = subdomains.begin(); sd != subdomains.end(); ++sd)
       {
-        oss << (sd != subdomains.begin() ? ", " : "") << "{\"sd\": " << *sd << ", \"kernels\": [";
+        oss << (sd != subdomains.begin() ? ", " : "") << "{\"id\": " << *sd << ", \"kernels\": [";
 
         // build a list of all kernels in the current subdomain
         nl.updateActiveKernels(*sd, 0);
@@ -193,19 +184,18 @@ DOFMapOutput::outputSystemInformation()
         for (unsigned i = 0; i<active_kernels.size(); ++i)
           oss << (i>0 ? ", \"" : "\"") << active_kernels[i]->name() << '"';
 
-        oss << "], \"doflist\": [";
+        oss << "], \"dofs\": [";
 
-        // get the list of DOFs for this variable
-        std::vector<dof_id_type> dofs;
+        // get the list of unique DOFs for this variable
+        std::set<dof_id_type> dofs;
         for (unsigned int i = 0; i < _mesh.nElem(); ++i)
           if (_mesh.elem(i)->subdomain_id() == *sd)
           {
             std::vector<dof_id_type> di;
             dof_map.dof_indices(_mesh.elem(i), di, var);
-            dofs.insert(dofs.end(), di.begin(), di.end());
+            dofs.insert(di.begin(), di.end());
           }
-
-        oss << join<dof_id_type>(dofs, ", ") << "]}";
+        oss << join(dofs.begin(), dofs.end(), ", ") << "]}";
       }
       oss << "]}";
     }
