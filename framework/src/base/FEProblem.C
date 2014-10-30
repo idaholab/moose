@@ -1220,11 +1220,11 @@ FEProblem::addVariable(const std::string & var_name, const FEType & type, Real s
 }
 
 void
-FEProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+FEProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
-  _nl.addScalarVariable(var_name, order, scale_factor);
+  _nl.addScalarVariable(var_name, order, scale_factor, active_subdomains);
   if (_displaced_problem)
-    _displaced_problem->addScalarVariable(var_name, order, scale_factor);
+    _displaced_problem->addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
 
 void
@@ -1325,11 +1325,11 @@ FEProblem::addAuxVariable(const std::string & var_name, const FEType & type, con
 }
 
 void
-FEProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+FEProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
-  _aux.addScalarVariable(var_name, order, scale_factor);
+  _aux.addScalarVariable(var_name, order, scale_factor, active_subdomains);
   if (_displaced_problem)
-    _displaced_problem->addAuxScalarVariable(var_name, order, scale_factor);
+    _displaced_problem->addAuxScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
 
 void
