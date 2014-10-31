@@ -137,17 +137,29 @@
 []
 
 [UserObjects]
+  [./coh]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 1E3
+    value_residual = 0
+    rate = 0.01
+  [../]
+  [./tanphi]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 1
+    value_residual = 0.577350269
+    rate = 0.01
+  [../]
+  [./tanpsi]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 0.08748866
+    value_residual = 0.03492077
+    rate = 0.01
+  [../]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShearExponential
-    cohesion = 1E3
-    cohesion_residual = 0
-    cohesion_rate = 0.01
-    dilation_angle = 5
-    dilation_angle_residual = 2
-    dilation_angle_rate = 0.01
-    friction_angle = 45
-    friction_angle_residual = 30
-    friction_angle_rate = 0.01
+    type = TensorMechanicsPlasticWeakPlaneShear
+    cohesion = coh
+    tan_friction_angle = tanphi
+    tan_dilation_angle = tanpsi
     smoother = 100
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-3

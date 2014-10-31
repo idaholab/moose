@@ -2,6 +2,7 @@
 #define TENSORMECHANICSPLASTICMOHRCOULOMB_H
 
 #include "TensorMechanicsPlasticModel.h"
+#include "TensorMechanicsHardeningModel.h"
 
 
 class TensorMechanicsPlasticMohrCoulomb;
@@ -11,13 +12,7 @@ template<>
 InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>();
 
 /**
- * Mohr-Coulomb plasticity, nonassociative with no hardening/softening.
- *
- * All of cohesion, friction angle and dilation angle are 1.0
- * Usually you wouldn't use this for physical simulations - you'd use a
- * derived class like TensorMechanicsPlasticMohrCoulombExponential
- * that implements more realistic cohesion, friction and dilation angles,
- * and/or hardening.
+ * Mohr-Coulomb plasticity, nonassociative with hardening/softening.
  *
  * For 'hyperbolic' smoothing, the smoothing of the tip of the yield-surface cone is described in
  * Zienkiewicz and Prande "Some useful forms of isotropic yield surfaces for soil and rock mechanics" (1977) In G Gudehus (editor) "Finite Elements in Geomechanics" Wile, Chichester, pp 179-190.
@@ -30,6 +25,9 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
 {
  public:
   TensorMechanicsPlasticMohrCoulomb(const std::string & name, InputParameters parameters);
+
+
+ protected:
 
   /**
    * The yield function
@@ -79,7 +77,14 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
 
- protected:
+  /// Hardening model for cohesion
+  const TensorMechanicsHardeningModel & _cohesion;
+
+  /// Hardening model for phi
+  const TensorMechanicsHardeningModel & _phi;
+
+  /// Hardening model for psi
+  const TensorMechanicsHardeningModel & _psi;
 
   /**
    * The yield function is modified to

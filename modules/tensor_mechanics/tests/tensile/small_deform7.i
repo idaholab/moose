@@ -197,8 +197,13 @@
 []
 
 [UserObjects]
+  [./ts]
+    type = TensorMechanicsHardeningConstant
+    value = 1
+  [../]
   [./mc]
     type = TensorMechanicsPlasticTensile
+    tensile_strength = ts
     yield_function_tolerance = 1E-6
     tip_scheme = cap
     tensile_tip_smoother = 0.0

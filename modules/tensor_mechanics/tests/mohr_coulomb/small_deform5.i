@@ -209,13 +209,26 @@
 []
 
 [UserObjects]
+  [./mc_coh]
+    type = TensorMechanicsHardeningConstant
+    value = 10
+  [../]
+  [./mc_phi]
+    type = TensorMechanicsHardeningConstant
+    value = 50
+    convert_to_radians = true
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 0
+    value_residual = 0.8726646 # 50deg
+    rate = 3000.0
+  [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombExponential
-    mc_cohesion = 10
-    mc_friction_angle = 50
-    mc_dilation_angle = 0
-    mc_dilation_angle_residual = 50
-    mc_dilation_angle_rate = 3000.0
+    type = TensorMechanicsPlasticMohrCoulomb
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
     tip_scheme = cap
     mc_tip_smoother = 0
     cap_start = 3
