@@ -19,6 +19,9 @@ class TensorMechanicsPlasticWeakPlaneTensile : public TensorMechanicsPlasticMode
  public:
   TensorMechanicsPlasticWeakPlaneTensile(const std::string & name, InputParameters parameters);
 
+
+ protected:
+
   /**
    * The yield function
    * @param stress the stress at which to calculate the yield function
@@ -66,8 +69,6 @@ class TensorMechanicsPlasticWeakPlaneTensile : public TensorMechanicsPlasticMode
    * @return dr_dintnl(i, j) = dr(i, j)/dintnl
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
-
- protected:
 
   /// tensile strength as a function of residual value, rate, and internal_param
   virtual Real tensile_strength(const Real internal_param) const;

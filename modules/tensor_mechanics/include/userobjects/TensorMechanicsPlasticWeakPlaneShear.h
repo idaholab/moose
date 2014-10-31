@@ -19,6 +19,9 @@ class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
  public:
   TensorMechanicsPlasticWeakPlaneShear(const std::string & name, InputParameters parameters);
 
+
+ protected:
+
   /**
    * The yield function
    * @param stress the stress at which to calculate the yield function
@@ -66,9 +69,6 @@ class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
    * @return dr_dintnl(i, j) = dr(i, j)/dintnl
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
-
- protected:
-
 
   /**
    * The yield function is modified to
