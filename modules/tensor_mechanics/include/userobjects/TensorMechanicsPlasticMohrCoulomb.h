@@ -31,6 +31,9 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
  public:
   TensorMechanicsPlasticMohrCoulomb(const std::string & name, InputParameters parameters);
 
+
+ protected:
+
   /**
    * The yield function
    * @param stress the stress at which to calculate the yield function
@@ -79,7 +82,6 @@ class TensorMechanicsPlasticMohrCoulomb : public TensorMechanicsPlasticModel
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
 
- protected:
 
   /**
    * The yield function is modified to

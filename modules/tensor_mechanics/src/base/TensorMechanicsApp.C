@@ -26,9 +26,11 @@
 #include "TensorMechanicsPlasticTensile.h"
 #include "TensorMechanicsPlasticTensileExponential.h"
 #include "TensorMechanicsPlasticTensileCubic.h"
+#include "TensorMechanicsPlasticTensileMulti.h"
 #include "TensorMechanicsPlasticMohrCoulomb.h"
 #include "TensorMechanicsPlasticMohrCoulombExponential.h"
 #include "TensorMechanicsPlasticMohrCoulombCubic.h"
+#include "TensorMechanicsPlasticMohrCoulombMulti.h"
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
 #include "TensorMechanicsPlasticWeakPlaneTensileExponential.h"
 #include "TensorMechanicsPlasticWeakPlaneTensileCubic.h"
@@ -39,6 +41,7 @@
 #include "TensorMechanicsPlasticWeakPlaneShearCubic.h"
 #include "TensorMechanicsPlasticJ2.h"
 #include "TensorMechanicsPlasticJ2Gaussian.h"
+#include "TensorMechanicsHardeningConstant.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -89,9 +92,11 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsPlasticTensile);
   registerUserObject(TensorMechanicsPlasticTensileExponential);
   registerUserObject(TensorMechanicsPlasticTensileCubic);
+  registerUserObject(TensorMechanicsPlasticTensileMulti);
   registerUserObject(TensorMechanicsPlasticMohrCoulomb);
   registerUserObject(TensorMechanicsPlasticMohrCoulombExponential);
   registerUserObject(TensorMechanicsPlasticMohrCoulombCubic);
+  registerUserObject(TensorMechanicsPlasticMohrCoulombMulti);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensile);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileExponential);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileCubic);
@@ -102,6 +107,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsPlasticWeakPlaneShearCubic);
   registerUserObject(TensorMechanicsPlasticJ2);
   registerUserObject(TensorMechanicsPlasticJ2Gaussian);
+  registerUserObject(TensorMechanicsHardeningConstant);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);
