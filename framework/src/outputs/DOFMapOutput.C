@@ -161,7 +161,7 @@ DOFMapOutput::outputSystemInformation()
   const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
 
   bool first = true;
-  oss << '[';
+  oss << "{\"ndof\": " << sys.n_dofs() << ", \"vars\": [";
   for (unsigned int vg = 0; vg < dof_map.n_variable_groups(); ++vg)
   {
     const VariableGroup &vg_description (dof_map.variable_group(vg));
@@ -200,7 +200,7 @@ DOFMapOutput::outputSystemInformation()
       oss << "]}";
     }
   }
-  oss << "]\n";
+  oss << "]}\n";
 
   // Output the information
   write(oss.str());
