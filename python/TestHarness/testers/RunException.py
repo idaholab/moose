@@ -7,8 +7,8 @@ class RunException(RunApp):
     params = RunApp.validParams()
 
     params.addParam('expect_err', "A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
-    params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the ouput. (Test may terminate unexpectedly and be considered passing)")
-    params.addParam('should_crash', True, "Indicates that the test is expected to crash or otherwise terminate early")
+    params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
+    params.addParam('should_crash', True, "Inidicates that the test is expected to crash or otherwise terminate early")
 
     # Printing errors in parallel often intertwine when multiple processors receive the same error.  We will set max_parallel = 1 by default, but it can be overridden
     params['max_parallel'] = 1
@@ -29,7 +29,7 @@ class RunException(RunApp):
     specs = self.specs
 
     # Expected errors and assertions might do a lot of things including crash so we
-    # will handle them separately
+    # will handle them seperately
     if specs.isValid('expect_err'):
       if not self.checkOutputForPattern(output, specs['expect_err']):
         reason = 'NO EXPECTED ERR'
