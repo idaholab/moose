@@ -4,26 +4,21 @@ import sys
 import os
 import re
 import math
+import json
 import numpy as np
 import subprocess
 
 from optparse import OptionParser
 
 
-nlsRE = re.compile("^Nonlinear System:$")
-varsingleRE = re.compile("^\s*Variables:\s*\"([^\"]+)\"")
-varlistFullRE = re.compile("^\s*Variables:\s*\{([^}]+)\}")
-varlistStartRE = re.compile("^\s*Variables:\s*\{([^}]+)")
-varlistEndRE = re.compile("^\s*([^}]+)\}")
-varlistContRE = re.compile("^\s*([^}]+)")
-varRE = re.compile("\"([^\"]+)\"")
-dofRE  = re.compile("\s*Num DOFs:\s*([\d]+)")
-ldofRE = re.compile("\s*Num Local DOFs:\s*([\d]+)")
+# These kernels have guaranteed correct Jacobians
+whitelisted_kernels = ['Diffusion', 'TimeDerivative']
 
+
+# regular expressions to parse the PETSc debug output
 MfdRE = re.compile("^Finite difference Jacobian \(user-defined state\)")
 MhcRE = re.compile("^Hand-coded Jacobian \(user-defined state\)")
 MdiffRE = re.compile("^Hand-coded minus finite difference Jacobian \(user-defined state\)")
-
 rowRE = re.compile("row ([\d]+): ")
 valRE = re.compile(" \(([\d]+), ([+-.e\d]+)\)")
 
@@ -89,22 +84,49 @@ def findExecutable(executable_option, method_option):
 
     return executable
 
+#
+# v
+#   sd1  kern1 kern2
+#   sd2  kern1
+#
+# u
+#   sd1  kern3
 
-def analyze(numvars, nlvars, dofs, Mfd, Mhc, Mdiff) :
-  fd   = np.zeros((numvars, numvars))
-  hc   = np.zeros((numvars, numvars))
-  norm = np.zeros((numvars, numvars))
+def analyze(dofdata, Mfd, Mhc, Mdiff) :
+  dofs = dofdata['ndof']
+  nlvars = [var['name'] for var in dofdata['vars']]
+  numvars = len(nlvars)
 
-  for i in range(dofs) :
-    for j in range(dofs) :
-      if abs(Mfd[i][j]) > 1e60 or abs(Mhc[i][j]) > 1e60:
-        fd  [i % numvars][j % numvars] += 1e10
-        norm[i % numvars][j % numvars] += 1e20
-        continue
-      else :
-        fd  [i % numvars][j % numvars] += Mfd[i][j]**2
-      hc  [i % numvars][j % numvars] += Mhc[i][j]**2
-      norm[i % numvars][j % numvars] += Mdiff[i][j]**2
+  # build analysis blocks (for now: one block per variable)
+  blocks = []
+  for var in dofdata['vars'] :
+    blockdofs = []
+    for subdomain in var['subdomains'] :
+      blockdofs.extend(subdomain['dofs'])
+    blocks.append(blockdofs)
+  nblocks = len(blocks)
+
+  # analysis results
+  fd   = np.zeros((nblocks, nblocks))
+  hc   = np.zeros((nblocks, nblocks))
+  norm = np.zeros((nblocks, nblocks))
+
+  # prepare block norms
+  for i in range(nblocks) :
+    for j in range(nblocks) :
+
+      # iterate over all DOFs in the current block and compute the block norm
+
+      for di in blocks[i] :
+        for dj in blocks[j] :
+          if abs(Mfd[di][dj]) > 1e60 or abs(Mhc[di][dj]) > 1e60:
+            fd  [i][j] += 1e10
+            norm[i][j] += 1e20
+            continue
+          else :
+            fd  [i][j] += Mfd[di][dj]**2
+          hc  [i][j] += Mhc[di][dj]**2
+          norm[i][j] += Mdiff[di][dj]**2
 
   fd = fd**0.5
   hc = hc**0.5
@@ -113,10 +135,11 @@ def analyze(numvars, nlvars, dofs, Mfd, Mhc, Mdiff) :
 
   e = 1e-4
 
-  for i in range(numvars) :
+  for i in range(nblocks) :
     printed = False
 
-    for j in range(numvars) :
+    for j in range(nblocks) :
+
       if norm[i][j] > e*fd[i][j] :
         if not printed :
           print "\nKernel for variable '%s':" % nlvars[i]
@@ -159,130 +182,60 @@ def saveMatrixToFile(M, dofs, filename) :
 #
 # Simple state machine parser for the MOOSE output
 #
-def parseOutput(output, write_matrices) :
-  state = 1
+def parseOutput(output, dofdata, write_matrices) :
+  dofs = dofdata['ndof']
+
+  state = 0
   for line in output.split('\n'):
-    #
-    # Read in MOOSE startup info, such as variables and DOFs
-    #
-
-    if state == 1 :
-      # looking fornon linear system header
-      m = nlsRE.match(line)
-      if m :
-        state = 2
-        continue
-
-    if state == 2 :
-      # look for DOF numbers
-      m = dofRE.match(line)
-      if m :
-        dofs = int(m.group(1))
-        continue
-      m = ldofRE.match(line)
-      if m :
-        ldofs = int(m.group(1))
-        continue
-
-      # looking for variables list
-      m = varsingleRE.match(line)
-      if m :
-        nlvars = [ m.group(1) ]
-        state = 4
-        continue
-
-      m = varlistFullRE.match(line)
-      if m :
-        nlvarlist = m.group(1)
-        nlvars = varRE.findall(nlvarlist)
-        state = 4
-        continue
-
-      m = varlistStartRE.match(line)
-      if m :
-        nlvarlist = m.group(1)
-        nlvars = varRE.findall(nlvarlist)
-        state = 3
-        continue
-
-    if state == 3 :
-      # continue looking for variables in a multi line list
-      m = varlistEndRE.match(line)
-      if m :
-        nlvarlist = m.group(1)
-        nlvars.extend(varRE.findall(nlvarlist))
-        state = 4
-        continue
-
-      m = varlistContRE.match(line)
-      if m :
-        nlvarlist = m.group(1)
-        nlvars.extend(varRE.findall(nlvarlist))
-        continue
-
-    #
-    # Initialization
-    #
-
-    if state == 4 :
-      if dofs != ldofs :
-        print "run in serial for debugging"
-        sys.exit(1)
-
-      numvars = len(nlvars)
-      state = 5
-
-    #
-    # Start of a new set of matrices
-    #
-
-    if state == 5 :
-      Mfd = np.zeros((dofs, dofs))
-      Mhc = np.zeros((dofs, dofs))
-      Mdiff = np.zeros((dofs, dofs))
-      state = 6
+    #print state, line
 
     #
     # Read in PetSc matrices
     #
 
-    if state == 6 :
+    if state == 0 :
+      Mfd = np.zeros((dofs, dofs))
+      Mhc = np.zeros((dofs, dofs))
+      Mdiff = np.zeros((dofs, dofs))
+      state = 1
+
+    if state == 1 :
       m = MfdRE.match(line)
       if m :
-        state = 7
+        state = 2
         continue
 
-    if state == 7 :
+    if state == 2 :
       m = MhcRE.match(line)
       if m :
-        state = 8
+        state = 3
         continue
 
-    if state == 8 :
+    if state == 3 :
       m = MdiffRE.match(line)
       if m :
-        state = 9
+        state = 4
         continue
 
     # read data
-    if state >= 7 and state <= 9 :
+    if state >= 2 and state <= 4 :
       m = rowRE.match(line)
       vals = valRE.findall(line)
       if m :
         row = int(m.group(1))
 
         for pair in vals :
-          if state == 7 :
+          if state == 2 :
             Mfd[row, int(pair[0])] = float(pair[1])
-          if state == 8 :
+          if state == 3 :
             Mhc[row, int(pair[0])] = float(pair[1])
-          if state == 9 :
+          if state == 4 :
             Mdiff[row, int(pair[0])] = float(pair[1])
 
-        if state == 9 and row+1 == dofs :
-          state = 5
+        if state == 4 and row+1 == dofs :
+          state = 0
 
-          analyze(numvars, nlvars, dofs, Mfd, Mhc, Mdiff)
+          analyze(dofdata, Mfd, Mhc, Mdiff)
 
           # dump parsed matrices in gnuplottable format
           if write_matrices :
@@ -309,16 +262,16 @@ if __name__ == '__main__':
                     help="Pass either opt, dbg or devel.  Works the same as setting the $METHOD environment variable.")
 
   parser.add_option("-r", "--resize-mesh", dest="resize_mesh", action="store_true", help="Perform resizing of generated meshs (to speed up the testing).")
-  parser.add_option("-s", "--mesh-size", dest="mesh_size", default=1, type="int", help="Set the mesh dimensions to this number of elements along each dimension (requires -r option).")
+  parser.add_option("-s", "--mesh-size", dest="mesh_size", default=1, type="int", help="Set the mesh dimensions to this number of elements along each dimension (defaults to 1, requires -r option).")
 
   parser.add_option("-d", "--debug", dest="debug", action="store_true", help="Output the command line used to run the application.")
-
   parser.add_option("-w", "--write-matrices", dest="write_matrices", action="store_true", help="Output the Jacobian matrices in gnuplot format.")
+  parser.add_option("-n", "--no-auto-options", dest="noauto", action="store_true", help="Do not add automatic options to the invocation of the moose based application. Requres a specially prepared input file for debugging.")
 
   (options, args) = parser.parse_args()
 
   for arg in args:
-    if '.i' in arg:
+    if arg[-2:] == '.i':
       options.input_file = arg
 
   if options.input_file is None :
@@ -327,22 +280,89 @@ if __name__ == '__main__':
 
   executable = findExecutable(options.executable, options.method)
 
-  mooseparams = [executable, '-i', options.input_file, '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON', 'BCs/active=']
+  basename = options.input_file[0:-2]
+  dofoutname = 'analyzerdofmap'
+
+  # common arguments for both debugging and dofmapping
+  moosebaseparams = [executable, '-i', options.input_file ]
   if options.resize_mesh :
-    mooseparams.extend(['Mesh/nx=%d' % options.mesh_size, 'Mesh/ny=%d' % options.mesh_size, 'Mesh/nz=%d' % options.mesh_size])
+    moosebaseparams.extend(['Mesh/nx=%d' % options.mesh_size, 'Mesh/ny=%d' % options.mesh_size, 'Mesh/nz=%d' % options.mesh_size])
+
+
+  # run to dump DOFs (this does not happen during the debug step)
+  dofmapfilename = basename + '_' + dofoutname + '.json'
+  if not options.noauto :
+    mooseparams = moosebaseparams[:]
+    mooseparams.extend(['Problem/solve=false', 'BCs/active=', 'Outputs/' + dofoutname+ '/type=DOFMap', 'Outputs/active=' + dofoutname, 'Outputs/file_base=' + basename + '_' + dofoutname])
+    if options.debug :
+      print "Running\n%s\n" % " ".join(mooseparams)
+    try:
+      child = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      child.wait()
+    except:
+      print 'Error executing moose based application to gather DOF map\n'
+      sys.exit(1)
+  else :
+    print "Runing without automatic options DOF map '%s' will not be generated automatically!" % dofmapfilename
+
+  # load and decode the DOF map data (for now we only care about one frame)
+  with open (dofmapfilename, "rt") as myfile :
+    dofjson = myfile.readlines()
+  dofdata = json.loads(dofjson[0].rstrip('\n'))
+  if options.debug :
+    print "DOF map output:\n%s\n" % dofdata
+
+
+  # for every DOF get the list of kernels contributing to it
+  dofkernels = [[] for i in range(dofdata['ndof'])]
+  kerneltypes = {}
+  for var in dofdata['vars'] :
+    for subdomain in var['subdomains'] :
+      kernels = [kernel for kernel in subdomain['kernels']]
+
+      # create lookup table from kernel name to kernel type
+      for kernel in kernels :
+        kerneltypes[kernel['name']] = kernel['type']
+
+      # list of active kernels contributing to a DOF
+      for dof in subdomain['dofs'] :
+        dofkernels[dof].extend([kernel['name'] for kernel in kernels if not kernel['name'] in dofkernels[dof]])
+
+  # get all unique kernel combinations occurring on the DOFs
+  combination_dofs = {}
+  for dof, kernels in enumerate(dofkernels) :
+    kernels.sort()
+    idx = tuple(kernels)
+    if idx in combination_dofs :
+      combination_dofs[idx].append(dof)
+    else :
+      combination_dofs[idx] = [dof]
+
+  #combinations = []
+  #for kernels in combination_dofs :
+  #   print kernels
+
+
+  # build the parameter list for the jacobian debug run
+  mooseparams = moosebaseparams[:]
+  if not options.noauto :
+    mooseparams.extend([ '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON', 'BCs/active='])
 
   if options.debug :
-    print "Running\n%s %s\n" % (executable, " ".join(mooseparams))
+    print "Running\n%s\n" % " ".join(mooseparams)
   else :
     print 'Running input with executable %s ...\n' % executable
 
+  # run debug process to gather jacobian data
   try:
     child = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     data = child.communicate()[0]
+    child.wait()
   except:
     print 'Error executing moose based application\n'
     sys.exit(1)
 
+  # analyze return code
   if child.returncode == 1 :
     # MOOSE failed with an unexpected error
     print data
@@ -351,4 +371,5 @@ if __name__ == '__main__':
     print "The moose application crashed with a segmentation fault (try recompiling)"
     sys.exit(1)
 
-  parseOutput(data, options.write_matrices)
+  # parse the raw output, which contains the PETSc debug information
+  parseOutput(data, dofdata, options.write_matrices)

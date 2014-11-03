@@ -197,7 +197,7 @@ DOFMapOutput::outputSystemInformation()
         oss << ", ";
       first = false;
 
-      oss << "{\"var\": \"" << vg_description.name(vn) << "\", \"subdomains\": [";
+      oss << "{\"name\": \"" << vg_description.name(vn) << "\", \"subdomains\": [";
       for (std::set<SubdomainID>::const_iterator sd = subdomains.begin(); sd != subdomains.end(); ++sd)
       {
         oss << (sd != subdomains.begin() ? ", " : "") << "{\"id\": " << *sd << ", \"kernels\": [";
