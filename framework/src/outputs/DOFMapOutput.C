@@ -22,6 +22,9 @@
 // libMesh includes
 #include "libmesh/fe.h"
 
+// compiler includes (for type demangling)
+#include <cxxabi.h>
+
 template<>
 InputParameters validParams<DOFMapOutput>()
 {
@@ -79,6 +82,25 @@ std::string
 DOFMapOutput::filename()
 {
   return _file_base + ".json";
+}
+
+std::string
+DOFMapOutput::demangle(const std::string & name)
+{
+#ifdef HAVE_CXA_DEMANGLE
+  // user compiler ABI to demangle
+  int status = -1;
+  char * result = abi::__cxa_demangle (name.c_str(), NULL, NULL, &status);
+  std::string demangled(result);
+  free(result);
+  return (status==0) ? demangled : name;
+#else
+  // at least remove leading digits
+  std::string demangled(name);
+  while (demangled.length() && demangled[0] >= '0' && demangled[0] <= '9')
+    demangled.erase(0,1);
+  return demangled;
+#endif
 }
 
 void
@@ -161,7 +183,13 @@ DOFMapOutput::outputSystemInformation()
   const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
 
   bool first = true;
-  oss << "{\"ndof\": " << sys.n_dofs() << ", \"vars\": [";
+  oss << "{\"ndof\": " << sys.n_dofs() << ", \"demangled\": ";
+#ifdef HAVE_CXA_DEMANGLE
+  oss << "true";
+#else
+  oss << "false";
+#endif
+  oss << ", \"vars\": [";
   for (unsigned int vg = 0; vg < dof_map.n_variable_groups(); ++vg)
   {
     const VariableGroup &vg_description (dof_map.variable_group(vg));
@@ -182,7 +210,7 @@ DOFMapOutput::outputSystemInformation()
         nl.updateActiveKernels(*sd, 0);
         const std::vector<KernelBase *> & active_kernels = kernels.activeVar(var);
         for (unsigned i = 0; i<active_kernels.size(); ++i)
-          oss << (i>0 ? ", \"" : "\"") << active_kernels[i]->name() << '"';
+          oss << (i>0 ? ", " : "") << "{\"name\": \""<< active_kernels[i]->name() << "\", \"type\": \"" << demangle(typeid(*active_kernels[i]).name()) << "\"}";
 
         oss << "], \"dofs\": [";
 

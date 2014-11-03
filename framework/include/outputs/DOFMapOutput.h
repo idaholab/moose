@@ -81,6 +81,11 @@ protected:
    */
   void writeStreamToFile(bool append = true);
 
+  /**
+   * Try to demangle type name
+   */
+  std::string demangle(const std::string & name);
+
   /// Flag for controlling outputting console information to a file
   bool _write_file;
 
