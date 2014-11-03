@@ -37,23 +37,23 @@ InputParameters validParams<SlaveConstraint>()
 }
 
 SlaveConstraint::SlaveConstraint(const std::string & name, InputParameters parameters) :
-  DiracKernel(name, parameters),
-  _component(getParam<unsigned int>("component")),
-  _model(contactModel(getParam<std::string>("model"))),
-  _formulation(contactFormulation(getParam<std::string>("formulation"))),
-  _normalize_penalty(getParam<bool>("normalize_penalty")),
-  _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("boundary"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
-  _penalty(getParam<Real>("penalty")),
-  _friction_coefficient(getParam<Real>("friction_coefficient")),
-  _residual_copy(_sys.residualGhosted()),
-  _x_var(coupled("disp_x")),
-  _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
-  _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
-  _vars(_x_var, _y_var, _z_var),
-  _mesh_dimension(_mesh.dimension()),
-  _nodal_area_var(getVar("nodal_area", 0)),
-  _aux_system( _nodal_area_var->sys() ),
-  _aux_solution( _aux_system.currentSolution() )
+    DiracKernel(name, parameters),
+    _component(getParam<unsigned int>("component")),
+    _model(contactModel(getParam<std::string>("model"))),
+    _formulation(contactFormulation(getParam<std::string>("formulation"))),
+    _normalize_penalty(getParam<bool>("normalize_penalty")),
+    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("master"), getParam<BoundaryName>("boundary"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
+    _penalty(getParam<Real>("penalty")),
+    _friction_coefficient(getParam<Real>("friction_coefficient")),
+    _residual_copy(_sys.residualGhosted()),
+    _x_var(coupled("disp_x")),
+    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
+    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
+    _vars(_x_var, _y_var, _z_var),
+    _mesh_dimension(_mesh.dimension()),
+    _nodal_area_var(getVar("nodal_area", 0)),
+    _aux_system(_nodal_area_var->sys()),
+    _aux_solution(_aux_system.currentSolution())
 {
   if (parameters.isParamValid("tangential_tolerance"))
   {

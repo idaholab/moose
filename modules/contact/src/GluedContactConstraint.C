@@ -50,22 +50,22 @@ InputParameters validParams<GluedContactConstraint>()
 
 GluedContactConstraint::GluedContactConstraint(const std::string & name, InputParameters parameters) :
     SparsityBasedContactConstraint(name, parameters),
-  _component(getParam<unsigned int>("component")),
-  _model(contactModel(getParam<std::string>("model"))),
-  _formulation(contactFormulation(getParam<std::string>("formulation"))),
-  _penalty(getParam<Real>("penalty")),
-  _friction_coefficient(getParam<Real>("friction_coefficient")),
-  _tension_release(getParam<Real>("tension_release")),
-  _updateContactSet(true),
-  _time_last_called(-std::numeric_limits<Real>::max()),
-  _residual_copy(_sys.residualGhosted()),
-  _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
-  _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
-  _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
-  _vars(_x_var, _y_var, _z_var),
-  _nodal_area_var(getVar("nodal_area", 0)),
-  _aux_system( _nodal_area_var->sys() ),
-  _aux_solution( _aux_system.currentSolution() )
+    _component(getParam<unsigned int>("component")),
+    _model(contactModel(getParam<std::string>("model"))),
+    _formulation(contactFormulation(getParam<std::string>("formulation"))),
+    _penalty(getParam<Real>("penalty")),
+    _friction_coefficient(getParam<Real>("friction_coefficient")),
+    _tension_release(getParam<Real>("tension_release")),
+    _updateContactSet(true),
+    _time_last_called(-std::numeric_limits<Real>::max()),
+    _residual_copy(_sys.residualGhosted()),
+    _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
+    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
+    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
+    _vars(_x_var, _y_var, _z_var),
+    _nodal_area_var(getVar("nodal_area", 0)),
+    _aux_system(_nodal_area_var->sys()),
+    _aux_solution(_aux_system.currentSolution())
 {
 //  _overwrite_slave_residual = false;
 
