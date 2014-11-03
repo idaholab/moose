@@ -46,9 +46,9 @@ MultiDContactConstraint::MultiDContactConstraint(const std::string & name, Input
     _component(getParam<unsigned int>("component")),
     _model(contactModel(getParam<std::string>("model"))),
     _penalty(getParam<Real>("penalty")),
-    _x_var(isCoupled("disp_x") ? coupled("disp_x") : 99999),
-    _y_var(isCoupled("disp_y") ? coupled("disp_y") : 99999),
-    _z_var(isCoupled("disp_z") ? coupled("disp_z") : 99999),
+    _x_var(isCoupled("disp_x") ? coupled("disp_x") : libMesh::invalid_uint),
+    _y_var(isCoupled("disp_y") ? coupled("disp_y") : libMesh::invalid_uint),
+    _z_var(isCoupled("disp_z") ? coupled("disp_z") : libMesh::invalid_uint),
     _mesh_dimension(_mesh.dimension()),
     _vars(_x_var, _y_var, _z_var)
 {
