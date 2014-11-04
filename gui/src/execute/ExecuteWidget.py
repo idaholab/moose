@@ -17,7 +17,7 @@ class ExecuteWidget(QtGui.QWidget, MooseWidget):
 
     # Add the controls and console display
     self.addObject(ExecuteCommandControl(**kwargs), handle='ExecuteCommandControl')
-    #self.addObject(ExecuteWidgetConsole(**kwargs), handle='ExecuteConsole')
+    self.addObject(ExecuteWidgetConsole(**kwargs), handle='ExecuteConsole')
 
     # Create the menu items
     self.addObject(QtGui.QMenu(), handle='ExecuteMenu')
