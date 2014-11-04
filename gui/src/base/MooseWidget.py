@@ -113,7 +113,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
 
     # Search the owner, this uses the 'owner' object method, so just return its results
     if kwargs.pop('search_owner', True) and isinstance(self.property('owner'), MooseWidget):
-      return self.property('owner').object(full_name, search_owner=False)
+      return self.property('owner').object(handle, search_owner=False)
 
     # If not searching the owner search locally and then in the children, in this case
     # it is possible to get more than one object
@@ -252,7 +252,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   #    A string containing the label to add to this object. If supplied a QLabel object
   #    is automatically created with the handle set to "<handle>Layout" using the
   #    handle supplied for the current call to addObject.
-  def addObject(self, q_object, **kwargs):
+  def addObject(self, q_object, *args, **kwargs):
 
     # Make sure the the object added is QtGui.QObject instance
     if not isinstance(q_object, QtCore.QObject):
@@ -298,9 +298,13 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
 
       if parent.endswith('._main_layout'):
         label_object = self.addObject(QtGui.QLabel(label), handle=handle+'Label')
+
       else:
         label_object = self.addObject(QtGui.QLabel(label), handle=handle+'Label', parent=parent)
 
+      # Set the labels buddy and a property in the object containing the label object
+      label_object.setBuddy(self._objects[handle])
+      label_object.setMargin(6) # this aligns the label nicer
       self._objects[handle].setProperty('label', label_object)
 
     # Depending on the object being added and the type of the parent, the action required
@@ -309,44 +313,44 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
     # QWidget -> QTabWidget
     if isinstance(q_object, QtGui.QWidget) and isinstance(parent_object, QtGui.QTabWidget):
       self._debug('Adding QWidget (' + handle + ') as a Tab (' + parent + ')')
-      parent_object.addTab(q_object, handle)
+      parent_object.addTab(q_object, handle, *args)
 
     # QAction -> QMenu
     elif isinstance(q_object, QtGui.QAction) and isinstance(parent_object, QtGui.QMenu):
       self._debug('Adding QAction (' + handle + ') to QMenu (' + parent + ')')
-      parent_object.addAction(q_object)
+      parent_object.addAction(q_object, *args)
 
     # QMenu -> QMenuBar
     elif isinstance(q_object, QtGui.QMenu) and isinstance(parent_object, QtGui.QMenuBar):
       self._debug('Adding QMenu (' + handle + ') to (' + parent + ')')
-      parent_object.addMenu(q_object)
+      parent_object.addMenu(q_object, *args)
 
     # QMenu -> QMainWindow.menuBar (if 'main' property was set in MooseWidget)
     elif isinstance(q_object, QtGui.QMenu) and self.property('main') != None:
       self._debug('Adding QMenu (' + handle + ') to (QMainWindow.menuBar())')
       print self.property('main')
       menu_bar = self.property('main').menuBar()
-      menu_bar.addMenu(q_object)
+      menu_bar.addMenu(q_object, *args)
 
     # QWidget -> QLayout
     elif isinstance(q_object, QtGui.QWidget) and isinstance(parent_object, QtGui.QLayout):
       self._debug('Adding QWidget (' + handle + ') to QLayout (' + parent + ')')
-      parent_object.addWidget(q_object)
+      parent_object.addWidget(q_object, *args)
 
     # QLayout -> QWidget
     elif isinstance(q_object, QtGui.QLayout) and isinstance(parent_object, QtGui.QWidget):
       self._debug('Adding QLayout (' + handle + ') to QWidget (' + parent + ')')
-      parent_object.setLayout(q_object)
+      parent_object.setLayout(q_object, *args)
 
     # QLayout -> QLayout (Default case when no parent is supplied)
     elif isinstance(q_object, QtGui.QLayout) and isinstance(parent_object, QtGui.QLayout):
       self._debug('Adding QLayout (' + handle + ') to (' + parent + ')')
-      parent_object.addLayout(q_object)
+      parent_object.addLayout(q_object, *args)
 
     # QWidget -> QSplitter
     elif isinstance(q_object, QtGui.QWidget) and isinstance(parent_object, QtGui.QSplitter):
       self._debug('Adding QWidget (' + handle + ') to QSplitter (' + parent + ')')
-      parent_object.addWidget(q_object)
+      parent_object.addWidget(q_object, *args)
 
 
     else:
@@ -414,7 +418,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
         method(obj)
 
       # Otherwise link the callback if it is possible
-      elif hasattr(self, callback_name):
+      if hasattr(self, callback_name):
         self._debug('Checking for ' + callback_name + ' method')
         if hasattr(obj, 'clicked'):
           method = getattr(self, callback_name)

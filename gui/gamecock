@@ -20,8 +20,8 @@ class PeacockTabWidget(QtGui.QWidget, MooseWidget):
     tabs = self.addObject(QtGui.QTabWidget(), handle='PeacockTabs', parent='MainVerticalSplit')
 
     # Add the tabs to the layout
-    self.addObject(InputWidget(**kwargs), handle='Input', parent='PeacockTabs')
-  #  self.addObject(ExecuteWidget(**kwargs), handle='Execute', parent='PeacockTabs')
+#    self.addObject(InputWidget(**kwargs), handle='Input', parent='PeacockTabs')
+    self.addObject(ExecuteWidget(**kwargs), handle='Execute', parent='PeacockTabs')
 
     # Add the Interactive console
     self.addObject(PeacockConsoleWidget(globals(), **kwargs), handle='InteractiveConsole', parent='MainVerticalSplit')
@@ -53,7 +53,7 @@ if __name__ == '__main__':
   width, height = screen_rect.width(), screen_rect.height()
 
 
-  tabs = PeacockTabWidget(main=main, alignment='vertical', debug=True, screen_width=width, screen_height=height)
+  tabs = PeacockTabWidget(main=main, alignment='vertical', debug=False, screen_width=width, screen_height=height)
 
   tabs.show()
 

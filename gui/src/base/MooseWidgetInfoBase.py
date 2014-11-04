@@ -1,6 +1,6 @@
 import sys
 
-#from PySide import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 #import inspect
 #from src.utils import *
@@ -57,7 +57,7 @@ class MooseWidgetInfoBase(object):
       flavor = obj.__class__.__name__
       parent = obj.property('parent_name')
       data.append(['  '*indent_level + key, parent, flavor, has_setup, has_callback])
-      if isinstance(obj, MooseWidget):
+      if hasattr(obj, '_getObjectInfo'):
         obj._getObjectInfo(data, indent_level + 1)
     return data
 
@@ -73,7 +73,7 @@ class MooseWidgetInfoBase(object):
 
     # Search for signals in child objects
     for key, obj in self._objects.iteritems():
-      if isinstance(obj, MooseWidget):
+      if hasattr(obj, '_getSignalInfo'):
         obj._getSignalInfo(data)
 
   ##
@@ -88,7 +88,7 @@ class MooseWidgetInfoBase(object):
 
     # Search for signals in child objects
     for key, obj in self._objects.iteritems():
-      if isinstance(obj, MooseWidget):
+      if hasattr(obj, '_getPullInfo'):
         obj._getPullInfo(data)
 
 
