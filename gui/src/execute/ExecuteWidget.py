@@ -3,31 +3,32 @@ from PySide import QtCore, QtGui
 
 from src.base import *
 from src.utils import *
-from ExecuteWidgetTopControl import *
-from ExecuteWidgetConsole import *
+from ExecuteCommandControl import *
+#from ExecuteWidgetConsole import *
 
 ##
 # The Peacock Execute Tab
-class ExecuteWidget(MooseWidget):
+class ExecuteWidget(QtGui.QWidget, MooseWidget):
 
 # public:
   def __init__(self, **kwargs):
+    QtGui.QWidget.__init__(self)
     MooseWidget.__init__(self, **kwargs)
 
     # Add the controls and console display
-    self.addObject(ExecuteWidgetTopControl(**kwargs), handle='ExecuteTopControls')
-    self.addObject(ExecuteWidgetConsole(**kwargs), handle='ExecuteConsole')
+    self.addObject(ExecuteCommandControl(**kwargs), handle='ExecuteCommandControl')
+    #self.addObject(ExecuteWidgetConsole(**kwargs), handle='ExecuteConsole')
 
     # Create the menu items
     self.addObject(QtGui.QMenu(), handle='ExecuteMenu')
 
     #### DEMO: One method for adding a menu action ####
     # I would rather see each action added in the menu setup
-    self.addObject(QtGui.QAction('&'+'Select executable', self),
-                   handle='SelectMenuAction', parent='ExecuteMenu')
+    #self.addObject(QtGui.QAction('&'+'Select executable', self),
+    #               handle='SelectMenuAction', parent='ExecuteMenu')
 
     # Connect the 'Run" button to the execute method
-    self.connectSignal('run', self.execute)
+    #self.connectSignal('run', self.execute)
 
     # Perform the setup for this object
     self.setup()
@@ -80,20 +81,20 @@ class ExecuteWidget(MooseWidget):
 
   ##
   # Setup the execute menu
-  def _setupExecuteMenu(self, q_object):
-    q_object.setTitle('Execute')
-
-    # Add 'Run' menu item
-    action = QtGui.QAction('&'+'Run', self)
-    action.triggered.connect(self.callback('Run'))
-    action.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_R))
-    q_object.addAction(action)
-
-    # Add 'Select' menu item
-    #### I think we should do the same for 'Select' rather how it was done above
+  #def _setupExecuteMenu(self, q_object):
+  #  q_object.setTitle('Execute')
+  #
+  #  # Add 'Run' menu item
+  #  action = QtGui.QAction('&'+'Run', self)
+  #  action.triggered.connect(self.callback('Run'))
+  #  action.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_R))
+  #  q_object.addAction(action)
+  #
+  #  # Add 'Select' menu item
+  #  #### I think we should do the same for 'Select' rather how it was done above
 
   ##
   # Add the 'Select' menu action
-  def _setupSelectMenuAction(self, q_object):
-    q_object.triggered.connect(self.callback('Select'))
-    q_object.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_E))
+  #def _setupSelectMenuAction(self, q_object):
+  #  q_object.triggered.connect(self.callback('Select'))
+  #  q_object.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_E))
