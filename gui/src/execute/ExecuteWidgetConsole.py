@@ -35,6 +35,14 @@ class ExecuteWidgetConsole(MooseWidget):
     q_object.setMinimumWidth(800)
     q_object.setFontFamily('Courier')
     q_object.setFontPointSize(10)
+
     q_object.setReadOnly(True)
+    q_object.setUndoRedoEnabled(False)
+    q_object.setMaximumBlockCount(5000)
+    q_object.setFrameStyle(QtGui.QFrame.NoFrame)
+    q_object.setStyleSheet('color:white;background-color:black;')
+    text_format = QtGui.QTextCharFormat()
+    text_format.setFontFixedPitch(True)
+    q_object.setCurrentCharFormat(text_format)
 
     q_object.verticalScrollBar().setValue(q_object.verticalScrollBar().maximum())
