@@ -41,15 +41,20 @@ FlowJunction::~FlowJunction()
 void
 FlowJunction::addVariables()
 {
+  std::vector<unsigned int> connected_subdomains;
+  this->getConnectedSubdomains(connected_subdomains);
+
   // add scalar variable (i.e. Lagrange multiplier)
   switch (_model_type)
   {
   case FlowModel::EQ_MODEL_2:
-    _sim.addVariable(true, _lm_name,  FEType(SECOND, SCALAR), 0, _scaling_factor);
+    _sim.addVariable(true, _lm_name,  FEType(SECOND, SCALAR),
+                     connected_subdomains, _scaling_factor);
     break;
 
   case FlowModel::EQ_MODEL_3:
-    _sim.addVariable(true, _lm_name,  FEType(THIRD, SCALAR), 0, _scaling_factor);
+    _sim.addVariable(true, _lm_name,  FEType(THIRD, SCALAR),
+                     connected_subdomains, _scaling_factor);
     break;
 
   default:
