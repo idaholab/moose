@@ -69,6 +69,7 @@
   radius_inner = '12.5 25.0 37.5'
   radius_outer = '25.0 37.5 50.0'
   intersecting_boundary = '1 2'
+  symmetry_plane = true
 []
 
 [SolidMechanics]
@@ -217,8 +218,9 @@
 
 [Outputs]
   file_base = j_int_surfbreak_ellip_crack_sym_mm_out
-  output_initial = true
+  output_initial = false
   exodus = true
+  csv = true
   [./console]
     type = Console
     perf_log = true

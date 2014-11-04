@@ -519,6 +519,69 @@ DomainIntegralAction::act()
       }
     }
   }
+  else if (_current_task == "add_vector_postprocessor")
+  {
+    if (!_treat_as_2d)
+    {
+      for (std::set<INTEGRAL>::iterator sit=_integrals.begin(); sit != _integrals.end(); ++sit)
+      {
+        std::string pp_base_name;
+        switch (*sit)
+        {
+          case J_INTEGRAL:
+            if (_convert_J_to_K)
+              pp_base_name = "K";
+            else
+              pp_base_name = "J";
+            break;
+          case INTERACTION_INTEGRAL_KI:
+            pp_base_name = "II_KI";
+            break;
+          case INTERACTION_INTEGRAL_KII:
+            pp_base_name = "II_KII";
+            break;
+          case INTERACTION_INTEGRAL_KIII:
+            pp_base_name = "II_KIII";
+            break;
+        }
+        const std::string vpp_type_name("VectorOfPostprocessors");
+        InputParameters params = _factory.getValidParams(vpp_type_name);
+        params.set<MultiMooseEnum>("execute_on") = "timestep";
+        for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
+        {
+          std::vector<PostprocessorName> postprocessor_names;
+          std::ostringstream vpp_name_stream;
+          vpp_name_stream<<pp_base_name<<"_"<<ring_index+1;
+          for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+          {
+            std::ostringstream pp_name_stream;
+            pp_name_stream<<pp_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            postprocessor_names.push_back(pp_name_stream.str());
+          }
+          params.set<std::vector<PostprocessorName> >("postprocessors") = postprocessor_names;
+          _problem->addVectorPostprocessor(vpp_type_name,vpp_name_stream.str(),params);
+        }
+      }
+
+      for (unsigned int i=0; i<_output_variables.size(); ++i)
+      {
+        const std::string vpp_type_name("VectorOfPostprocessors");
+        InputParameters params = _factory.getValidParams(vpp_type_name);
+        params.set<MultiMooseEnum>("execute_on") = "timestep";
+        std::ostringstream vpp_name_stream;
+        vpp_name_stream<<_output_variables[i]<<"_crack";
+        std::vector<PostprocessorName> postprocessor_names;
+        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        {
+          std::ostringstream pp_name_stream;
+          pp_name_stream<<vpp_name_stream.str()<<"_"<<cfn_index+1;
+          postprocessor_names.push_back(pp_name_stream.str());
+        }
+        params.set<std::vector<PostprocessorName> >("postprocessors") = postprocessor_names;
+        _problem->addVectorPostprocessor(vpp_type_name,vpp_name_stream.str(),params);
+      }
+    }
+  }
   else if (_current_task == "add_material")
   {
 
