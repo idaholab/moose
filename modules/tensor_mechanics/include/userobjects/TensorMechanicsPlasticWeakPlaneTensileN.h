@@ -19,6 +19,9 @@ class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticMod
  public:
   TensorMechanicsPlasticWeakPlaneTensileN(const std::string & name, InputParameters parameters);
 
+
+ protected:
+
   /**
    * The yield function
    * @param stress the stress at which to calculate the yield function
@@ -67,7 +70,6 @@ class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticMod
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
 
- protected:
 
   /// tension cutoff
   Real _tension_cutoff;
