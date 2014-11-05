@@ -56,12 +56,13 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
 
     # Extract the terms from the GUI
     executable = self.object('Executable').text()
-
-    print executable
-
     mpi = self.object('MPI').text()
     threads = self.object('Threads').text()
     args = self.object('Arguments').text()
+
+    # Check that program exists
+    #if not os.path.exists(executable):
+    #  self.peacockError('The', executable, 'does not exist.')
 
     # Build the command
     cmd = []
@@ -71,7 +72,7 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
       cmd.append('mpiexec -n ' + str(mpi))
 
     # Add executable
-    os.chdir(os.path.dirname(executable))
+    #os.chdir(os.path.dirname(executable))
     cmd.append(executable)
 
     # Add input file
@@ -82,8 +83,7 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
       cmd.append('--n-threads=' + str(threads))
 
     # Append the additional arguments
-    cmd.append(arguments)
-    print cmd
+    cmd.append(args)
     self._signal_run.emit(cmd)
 
   def _setupSelect(self, q_object):
