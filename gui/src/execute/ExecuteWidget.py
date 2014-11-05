@@ -1,10 +1,10 @@
-import os, sys
+import os, sys, subprocess
 from PySide import QtCore, QtGui
 
 from src.base import *
 from src.utils import *
 from ExecuteCommandControl import *
-#from ExecuteWidgetConsole import *
+from ExecuteWidgetConsole import *
 
 ##
 # The Peacock Execute Tab
@@ -28,54 +28,54 @@ class ExecuteWidget(QtGui.QWidget, MooseWidget):
     #               handle='SelectMenuAction', parent='ExecuteMenu')
 
     # Connect the 'Run" button to the execute method
-    #self.connectSignal('run', self.execute)
+    self.connectSignal('run', self.execute)
 
     # Perform the setup for this object
     self.setup()
 
   ##
   # Method for running an executable and passing the output to the Console widget
-  # @param executable The program to run
-  # @param mpi The number of mpi to utilize
-  # @param threeads The number of threads to use
-  # @param arguments Additional command line arguments
-  def execute(self, executable, mpi, threads, arguments=''):
+  # @param command The program to run
+  def execute(self, cmd):
 
-    # Check that program exists
-    if not os.path.exists(executable):
-      self.peacockError('The program', executable, 'does not exist.')
+    cmd = '/Users/slauae/projects/moose/test/moose_test-oprof'
+    args = ['-i', '/Users/slauae/projects/moose/test/tests/kernels/simple_transient_diffusion/simple_transient_diffusion.i', 'Mesh/uniform_refine=1']
 
-    # Build the command
-    cmd = []
-
-    # Add MPI
-    if len(mpi) > 0 and int(mpi) > 1:
-      cmd.append('mpiexec -n ' + str(mpi))
-
-    # Add executable
-    os.chdir(os.path.dirname(executable))
-    cmd.append(executable)
-
-    # Add input file
-    cmd.append('-i peacock_run_tmp.i')
-
-    # Add thread number
-    if len(threads) and int(threads) > 1:
-      cmd.append('--n-threads=' + str(threads))
-
-    # Append the additional arguments
-    cmd.append(arguments)
-
-    # Build the command and start a process
-    cmd = ' '.join(cmd)
+    # Execute the command
     self._debug('Command: ' + cmd)
-    proc = QtCore.QProcess(self.object('Console'))
-    proc.setProcessChannelMode(QtCore.QProcess.MergedChannels)
-    proc.start(cmd)
+
+    self.runProcess = QtCore.QProcess(self)
+
+   # pwd = os.getcwd()
+   # os.chdir(os.path.dirname(cmd))
+   # self.runProcess.setWorkingDirectory(os.path.dirname(cmd))
+
+    console_obj = self.object('ExecuteConsole')
+    self.runProcess.readyReadStandardOutput.connect(lambda: console_obj.updateConsole(self.runProcess))
+
+    self.runProcess.start('/Users/slauae/projects/moose/test/moose_test-oprof', args)
+
+
+
+
+  def writeOutput(self):
+    while self.runProcess.canReadLine():
+         #   if self.currentProcess is None:
+         #       break
+
+      text = self.runProcess.readLine()
+      print text,
+
+#output = process.stdout.read()
+#    print output
+
+    #proc = QtCore.QProcess(self.object('Console'))
+    #proc.setProcessChannelMode(QtCore.QProcess.MergedChannels)
+    #proc.start(cmd)
 
     # Connect the Console (display) to the process
-    self.object('Console').connect(proc, QtCore.SIGNAL("readyReadStandardOutput()"),
-                                   lambda: self.object('ExecuteConsole').updateConsole(proc))
+    #self.object('Console').connect(proc, QtCore.SIGNAL("readyReadStandardOutput()"),
+    #                               lambda: self.object('ExecuteConsole').updateConsole(proc))
 
 #private:
 

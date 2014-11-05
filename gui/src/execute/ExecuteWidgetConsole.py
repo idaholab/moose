@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 from PySide import QtCore, QtGui
 
 from src.base import *
@@ -6,25 +6,53 @@ from src.utils import *
 
 ##
 # Widget for executing and displaying MOOSE executable results
-class ExecuteWidgetConsole(MooseWidget):
+class ExecuteWidgetConsole(QtGui.QWidget, MooseWidget):
 
 # public:
   def __init__(self, **kwargs):
+    QtGui.QWidget.__init__(self)
     MooseWidget.__init__(self, **kwargs)
 
     # Create progress bar and console window
-    self.addObject(QtGui.QProgressBar(self), handle='ExecutionProgress', label='Progress:')
-    self.addObject(QtGui.QTextEdit(), handle='Console')
+    #self.addObject(QtGui.QProgressBar(self), handle='ExecutionProgress', label='Progress:')
+    self._console = self.addObject(QtGui.QTextEdit(), handle='Console')
+   # self._console.verticalScrollBar().setValue(self._console.verticalScrollBar().maximum())
+
+
 
     self.setup()
 
   ##
   # Collect the output and connect the advancement monitor for the bar
   def updateConsole(self, proc):
-    current_output = str(proc.readAllStandardOutput())
-    self.object('Console').append(current_output.rstrip('\n'))
-    #self.progress(current_output)
 
+    while proc.canReadLine():
+      cache = re.sub(r'\[(\d\d)m(.*)(\[39m)', self.testFunc, proc.readLine().data().rstrip('\n'))
+      self._console.append('<pre style="display:inline">' + cache + '</pre>')
+
+  def testFunc(self, match):
+    clr = None
+    c = int(match.group(1))
+    if c == 32:
+      clr = 'green'
+
+
+    if clr:
+      return '<span style="color:green">' + match.group(2) + '</span>'
+    else:
+      return match.group(0)
+
+
+
+#define BLACK    "\33[30m"
+#define RED      "\33[31m"
+#define GREEN    "\33[32m"
+#define YELLOW   "\33[33m"
+#define BLUE     "\33[34m"
+#define MAGENTA  "\33[35m"
+#define CYAN     "\33[36m"
+#define WHITE    "\33[37m"
+#define DEFAULT  "\33[39m"
 
 #private:
 
@@ -38,11 +66,10 @@ class ExecuteWidgetConsole(MooseWidget):
 
     q_object.setReadOnly(True)
     q_object.setUndoRedoEnabled(False)
-    q_object.setMaximumBlockCount(5000)
     q_object.setFrameStyle(QtGui.QFrame.NoFrame)
     q_object.setStyleSheet('color:white;background-color:black;')
     text_format = QtGui.QTextCharFormat()
     text_format.setFontFixedPitch(True)
     q_object.setCurrentCharFormat(text_format)
 
-    q_object.verticalScrollBar().setValue(q_object.verticalScrollBar().maximum())
+    #q_object.verticalScrollBar().setValue(q_object.verticalScrollBar().maximum())
