@@ -27,18 +27,26 @@ class ExecuteWidgetConsole(QtGui.QWidget, MooseWidget):
   def updateConsole(self, proc):
 
     while proc.canReadLine():
-      cache = re.sub(r'\[(\d\d)m(.*)(\[39m)', self.testFunc, proc.readLine().data().rstrip('\n'))
-      self._console.append('<pre style="display:inline">' + cache + '</pre>')
+      text = re.sub(r'(.)\[(\d\d)m(.*)(.)(\[39m)', self.testFunc, proc.readLine().data().rstrip('\n'))
+#     self._console.append('<pre style="display:inline;">' + text + '</pre>')
+
+
+#      text = proc.readLine().data().rstrip('\n')
+      print text
+      self._console.append('<span style="white-space:pre;font-family:courier">' + text + '</span>')
+     # self._console.append(text)
 
   def testFunc(self, match):
     clr = None
-    c = int(match.group(1))
+    print match.group(1)
+
+    c = int(match.group(2))
     if c == 32:
       clr = 'green'
 
 
     if clr:
-      return '<span style="color:green">' + match.group(2) + '</span>'
+      return '<span style="color:green;">' + match.group(3) + '</span>'
     else:
       return match.group(0)
 
@@ -61,15 +69,16 @@ class ExecuteWidgetConsole(QtGui.QWidget, MooseWidget):
   def _setupConsole(self, q_object):
     q_object.setMinimumHeight(300)
     q_object.setMinimumWidth(800)
+#    q_object.setFontFamily(QFont::Monospace)
     q_object.setFontFamily('Courier')
     q_object.setFontPointSize(10)
 
     q_object.setReadOnly(True)
     q_object.setUndoRedoEnabled(False)
     q_object.setFrameStyle(QtGui.QFrame.NoFrame)
-    q_object.setStyleSheet('color:white;background-color:black;')
-    text_format = QtGui.QTextCharFormat()
-    text_format.setFontFixedPitch(True)
-    q_object.setCurrentCharFormat(text_format)
+    q_object.setStyleSheet('color:white;background-color:black;white-space:pre;font-family:monospace')
+ #   text_format = QtGui.QTextCharFormat()
+ #   text_format.setFontFixedPitch(True)
+ #   q_object.setCurrentCharFormat(text_format)
 
     #q_object.verticalScrollBar().setValue(q_object.verticalScrollBar().maximum())
