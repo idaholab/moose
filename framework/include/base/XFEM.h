@@ -35,7 +35,7 @@ using namespace libMesh;
 
 enum XFEM_CUTPLANE_QUANTITY
 {
-  XCC_ORIGIN_X=1,
+  XCC_ORIGIN_X,
   XCC_ORIGIN_Y,
   XCC_ORIGIN_Z,
   XCC_NORMAL_X,
