@@ -39,6 +39,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
     PeacockTestInterface.__init__(self)
     MooseWidgetInfoBase.__init__(self)
 
+
     # All object added via addObject are stored in a dictionary
     self._objects = dict()
 
@@ -59,6 +60,9 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
     # Set screen width/height properties
     self.setProperty('screen_width', kwargs.pop('screen_width', 0))
     self.setProperty('screen_height', kwargs.pop('screen_height', 0))
+
+    # Store all remaining kwargs
+    self.options = kwargs
 
     # Create an error message dialog
     self._error_message = QtGui.QErrorMessage(self)

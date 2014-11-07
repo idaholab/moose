@@ -11,9 +11,9 @@ from src.utils import *
 # complete executable is accessed via "pull" named "executable".
 class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
 
+  ## A signal emitted when the run button is pressed, see _callbackRun
   _signal_run = QtCore.Signal(str)
 
-# public:
   def __init__(self, **kwargs):
     QtGui.QFrame.__init__(self)
     MooseWidget.__init__(self, **kwargs)
@@ -42,52 +42,71 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
     # Run the setup methods
     self.setup()
 
-    ## DEMO INFO ##
-    self.info()
-
-# protected:
-
-  def _setupRun(self, q_object):
-    q_object.setText('Run')
-
   ##
   # Executes when 'Run' is clicked (auto connected via addObject)
+  #
+  # This does not perform the actual execution of the command, it emits the
+  # 'run' signal. This signal is connected to the execute method in the top
+  # level ExecuteWidget
   def _callbackRun(self):
 
     # Extract the terms from the GUI
     executable = self.object('Executable').text()
     mpi = self.object('MPI').text()
     threads = self.object('Threads').text()
-    args = self.object('Arguments').text()
+    args = self.object('Arguments').text().split(' ')
 
     # Check that program exists
-    #if not os.path.exists(executable):
-    #  self.peacockError('The', executable, 'does not exist.')
+    if not os.path.exists(executable):
+      self.peacockError('The', executable, 'does not exist.')
 
-    # Build the command
-    cmd = []
-
-    # Add MPI
+    # Add MPI to the executable
     if len(mpi) > 0 and int(mpi) > 1:
-      cmd.append('mpiexec -n ' + str(mpi))
-
-    # Add executable
-    #os.chdir(os.path.dirname(executable))
-    cmd.append(executable)
+      executable = 'mpiexec -n ' + str(mpi) + ' ' + executable
 
     # Add input file
-    cmd.append('-i peacock_run_tmp.i')
+    args += ['-i', 'peacock_run_tmp.i']
 
     # Add thread number
     if len(threads) and int(threads) > 1:
-      cmd.append('--n-threads=' + str(threads))
+      args += ['--n-threads=', str(threads)]
 
-    # Append the additional arguments
-    cmd.append(args)
-    self._signal_run.emit(cmd)
+    # Emit the signal with the executable and arguments
+    self._signal_run.emit(executeable, args)
+
+  ##
+  # Executes when 'Select' button is pressed (auto connected via addObject)
+  def _callbackSelect(self):
+    file_name = QtGui.QFileDialog.getOpenFileName(self, 'Select Executable...')
+    self.object('Executable').setText(file_name[0])
+
+  ##@{
+  ##
+  # Setup methods for the various controls of this widget
+  def _setupRun(self, q_object):
+    q_object.setText('Run')
+    q_object.setToolTip('Run the executable with the supplied arguments')
 
   def _setupSelect(self, q_object):
     q_object.setText('Select')
+    q_object.setToolTip('Select the executable to run')
+
+  def _setupExecutable
+    # Apply command-line executable
+    if self.options['executable']:
+      q_object.setText(self.options['executable'])
+
+    else:
+
+
+
+  def _setupMPI(self, q_object):
+    q_object.setMaximumWidth(40)
+    q_object.setToolTip('Number of MPI processes to be used.')
+
+  def _setupThreads(self, q_object):
+    q_object.setMaximumWidth(40)
+    q_object.setToolTip('Number of threads to be used.')
 
   def _setupMPILabel(self, q_object):
     self._labelHelper(q_object, 'MPI')
@@ -100,6 +119,7 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
 
   def _setupExecutableLabel(self, q_object):
     self._labelHelper(q_object, 'Executable')
+  ##@}
 
   ##
   # A helper method for setting up labels
@@ -109,29 +129,25 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
     label_obj.setBuddy(self._objects[edit_object_name])
 
   ##
-  # Executes when 'Select' button is pressed (auto connected via addObject)
-  def _callbackSelect(self):
-    file_name = QtGui.QFileDialog.getOpenFileName(self, 'Select Executable...')
-    self.object('Executable').setText(file_name[0])
+  # A helper method for locating a moose executable
+  def _getExecutableHelper(type):
 
-  ##
-  # Setups the MPI control and label (auto called via setup())
-  def _setupMPI(self, q_object):
-    q_object.setMaximumWidth(40)
-    q_object.setToolTip('Number of MPI processes to be used.')
-    #q_object.property('label').setAlignment(QtCore.Qt.AlignRight)
+    # Locate the executable
+    executable = None
 
-  ##
-  # Setups the threads control and label (auto called via setup())
-  def _setupThreads(self, q_object):
-    q_object.setMaximumWidth(40)
-    q_object.setToolTip('Number of threads to be used.')
-    #q_object.property('label').setAlignment(QtCore.Qt.AlignRight)
+    # Start with the current directory and continue until home directory is reached
+    dir = os.getcwd()
+    while dir != os.getenv('HOME'):
 
-  ##
-  # A simple test of the pull functionality
-  def _pullExecInfo(self, *args):
-    txt = self.object('Executable').text()
-    if len(args) > 0:
-      txt += ' ' + args[0]
-    return txt
+      # Determine current folder, assume it is the app name
+      folder = dir.split(os.sep)[-1]
+
+      # Test if there is an executable
+      app = os.path.join(dir, folder + '-' + type)
+      if os.path.isfile(app):
+        executable = app
+        break
+      dir = os.path.realpath(os.path.join(dir, '..'))
+
+    # Return the path
+    return executable

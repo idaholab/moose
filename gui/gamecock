@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os, sys, traceback
+import os, sys, traceback, argparse
 
 from PySide import QtCore, QtGui
 
@@ -44,6 +44,18 @@ class PeacockTabWidget(QtGui.QWidget, MooseWidget):
 
 if __name__ == '__main__':
 
+  # Command-line arguments
+  parser = argparse.ArgumentParser(description="MOOSE GUI Application")
+
+  # Set global parameter(s)
+  parser.add_argument('-d', '--degbug', '--dbg', action='store_true', help='Run Peacock in debug mode')
+  parser.add_argument('-e', '--executable', type=str, help='The program to execute')
+
+  # Extract the command line options
+  parser.parse_args('-d'.split())
+  options = vars(parser.parse_args())
+
+  # Create the GUI
   app  = QtGui.QApplication(sys.argv)
   main = QtGui.QMainWindow()
   menubar = QtGui.QMenuBar() # need parentless menu bar for OSX (see PySide QMainWindow.menuBar())
@@ -53,7 +65,8 @@ if __name__ == '__main__':
   width, height = screen_rect.width(), screen_rect.height()
 
 
-  tabs = PeacockTabWidget(main=main, alignment='vertical', debug=False, screen_width=width, screen_height=height)
+  print options
+  tabs = PeacockTabWidget(main=main, alignment='vertical', screen_width=width, screen_height=height, **options)
 
   tabs.show()
 
