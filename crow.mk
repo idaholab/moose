@@ -134,9 +134,9 @@ clean::
 	  $(CROW_DIR)/control_modules/libdistribution1D.* \
 	  $(CROW_DIR)/control_modules/crowtools.py \
 	  $(CROW_DIR)/control_modules/*.so* \
-	  $(CROW_DIR)/python_modules/*.so* \
-	  $(CROW_DIR)/python_modules/*_wrap.cxx \
-	  $(CROW_DIR)/python_modules/*py[23].py \
+	  $(CROW_DIR)/crow_modules/*.so* \
+	  $(CROW_DIR)/crow_modules/*_wrap.cxx \
+	  $(CROW_DIR)/crow_modules/*py[23].py \
 	  $(CROW_LIB) $(CROW_DIR)/libCROW-$(METHOD).*
 
 clobber::

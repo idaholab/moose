@@ -7,23 +7,24 @@ control_modules/libdistribution1D.so*
 control_modules/libdistribution1D.so*
 control_modules/libcrowtools.so*
 control_modules/libcrowtools.so*
-python_modules/distribution1Dpy2.py
-python_modules/distribution1Dpy2_wrap.cxx
-python_modules/distribution1Dpy3.py
-python_modules/distribution1Dpy3_wrap.cxx
-python_modules/interpolationNDpy2.py
-python_modules/interpolationNDpy2_wrap.cxx
-python_modules/interpolationNDpy3.py
-python_modules/interpolationNDpy3_wrap.cxx
-python_modules/libdistribution1Dpy2.so*
-python_modules/libdistribution1Dpy2.so*
-python_modules/libdistribution1Dpy3.so*
-python_modules/libdistribution1Dpy3.so*
-python_modules/libinterpolationNDpy2.so*
-python_modules/libinterpolationNDpy2.so*
-python_modules/libinterpolationNDpy3.so*
-python_modules/libinterpolationNDpy3.so*
-
+crow_modules/distribution1Dpy2.py
+crow_modules/distribution1Dpy2_wrap.cxx
+crow_modules/distribution1Dpy3.py
+crow_modules/distribution1Dpy3_wrap.cxx
+crow_modules/interpolationNDpy2.py
+crow_modules/interpolationNDpy2_wrap.cxx
+crow_modules/interpolationNDpy3.py
+crow_modules/interpolationNDpy3_wrap.cxx
+crow_modules/libdistribution1Dpy2.so*
+crow_modules/libdistribution1Dpy2.so*
+crow_modules/libdistribution1Dpy3.so*
+crow_modules/libdistribution1Dpy3.so*
+crow_modules/libinterpolationNDpy2.so*
+crow_modules/libinterpolationNDpy2.so*
+crow_modules/libinterpolationNDpy3.so*
+crow_modules/libinterpolationNDpy3.so*
+crow_modules/distribution1Dpy2_wrap.cpp
+crow_modules/interpolationNDpy2_wrap.cpp
 
 
 
