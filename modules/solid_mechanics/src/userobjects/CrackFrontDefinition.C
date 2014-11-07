@@ -153,10 +153,9 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
     BoundaryID boundary_id = bnode->_bnd_id;
 
     if (hasBoundary(boundary_id))
-    {
       nodes.insert(bnode->_node->id());
-    }
   }
+
   if (_treat_as_2d)
   {
     if (nodes.size() > 1)
@@ -179,6 +178,8 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
           axis0 = 0;
           axis1 = 1;
           break;
+        default:
+          mooseError("Invalid axis.");
       }
 
       Real node0coor0;
@@ -196,9 +197,7 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
         {
           if ((std::abs(curr_node(axis0) - node0coor0) > _tol) ||
               (std::abs(curr_node(axis1) - node0coor1) > _tol))
-          {
-            mooseError("Boundary provided in CrackFrontDefinition contains "<<nodes.size()<<" nodes, which are not collinear in the "<<_axis_2d<<" axis.  Must contain either 1 node or collinear nodes to treat as 2D.");
-          }
+            mooseError("Boundary provided in CrackFrontDefinition contains " << nodes.size() << " nodes, which are not collinear in the " << _axis_2d << " axis.  Must contain either 1 node or collinear nodes to treat as 2D.");
         }
       }
 
@@ -214,9 +213,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
 {
   _ordered_crack_front_nodes.clear();
   if (nodes.size() < 1)
-  {
     mooseError("No crack front nodes");
-  }
   else if (nodes.size() == 1)
   {
     _ordered_crack_front_nodes.push_back(*nodes.begin());
@@ -243,9 +240,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
 
       std::vector<unsigned int> & connected_elems = nemit->second;
       for (unsigned int i=0; i<connected_elems.size(); ++i)
-      {
         crack_front_node_to_elem_map[*nit].insert(connected_elems[i]);
-      }
     }
 
 
@@ -291,14 +286,9 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
     {
       unsigned int num_connected_elems = nlemit->second.size();
       if (num_connected_elems == 1)
-      {
         end_nodes.push_back(nlemit->first);
-      }
       else if (num_connected_elems != 2)
-      {
         mooseError("Node "<<nlemit->first<<" is connected to >2 line segments in CrackFrontDefinition");
-      }
-
     }
 
     //For embedded crack with closed loop of crack front nodes, must pick the end nodes
@@ -335,9 +325,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
           }
         }
         if (found_new_node)
-        {
           break;
-        }
       }
       second_last_node = last_node;
       last_node = _ordered_crack_front_nodes[_ordered_crack_front_nodes.size()-1];
@@ -361,13 +349,9 @@ CrackFrontDefinition::orderEndNodes(std::vector<unsigned int> &end_nodes)
     dist_from_origin0 += node0(i)*node0(i);
     dist_from_origin1 += node1(i)*node1(i);
     if (node0(i) > _tol)
-    {
       ++num_pos_coor0;
-    }
     if (node1(i) > _tol)
-    {
       ++num_pos_coor1;
-    }
   }
   dist_from_origin0 = std::sqrt(dist_from_origin0);
   dist_from_origin1 = std::sqrt(dist_from_origin1);
@@ -382,16 +366,12 @@ CrackFrontDefinition::orderEndNodes(std::vector<unsigned int> &end_nodes)
     if (std::abs(dist_from_origin1 - dist_from_origin0) > _tol)
     {
       if (dist_from_origin1 < dist_from_origin0)
-      {
         switch_ends = true;
-      }
     }
     else
     {
       if (end_nodes[1] < end_nodes[0])
-      {
         switch_ends = true;
-      }
     }
   }
   if (switch_ends)
