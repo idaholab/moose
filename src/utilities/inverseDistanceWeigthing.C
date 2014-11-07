@@ -20,12 +20,15 @@ InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double 
 	_point_coordinates = pointCoordinates;
 	_p = p;
 	_completed_init = true;
+        _cellPoint0.resize(dimensions);
+        _cellDxs.resize(dimensions);
 
 	// Functions do determine:
     //   * std::vector<double> _cellPoint0;
     //   * std::vector<double> _cellDxs;
 
 	std::vector<double> cellPointInf;
+        cellPointInf.resize(dimensions);
 
 	for (int d=0; d<_dimensions; d++){
 		_cellPoint0[d]  = _point_coordinates[0][d];
