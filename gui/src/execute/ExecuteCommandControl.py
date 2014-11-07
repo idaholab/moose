@@ -1,4 +1,4 @@
-import os, sys, traceback
+import os, sys, traceback, glob
 from PySide import QtCore, QtGui
 
 from src.base import *
@@ -91,12 +91,20 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
     q_object.setText('Select')
     q_object.setToolTip('Select the executable to run')
 
-  def _setupExecutable
-    # Apply command-line executable
-    if self.options['executable']:
-      q_object.setText(self.options['executable'])
+  def _setupExecutable(self, q_object):
 
-    else:
+    cmd_line_exec = self.options['executable']
+    if cmd_line_exec:
+      q_object.setText(cmd_line_exec)
+      return
+
+    auto_exec = self._getExecutableHelper()
+    if auto_exec:
+      q_object.setText(auto_exec)
+      return
+
+    print 'Warning: no MOOSE executable located'
+
 
 
 
@@ -130,23 +138,35 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
 
   ##
   # A helper method for locating a moose executable
-  def _getExecutableHelper(type):
+  def _getExecutableHelper(self):
 
     # Locate the executable
     executable = None
 
     # Start with the current directory and continue until home directory is reached
     dir = os.getcwd()
-    while dir != os.getenv('HOME'):
+    while dir != os.sep:
 
       # Determine current folder, assume it is the app name
       folder = dir.split(os.sep)[-1]
 
-      # Test if there is an executable
-      app = os.path.join(dir, folder + '-' + type)
-      if os.path.isfile(app):
-        executable = app
-        break
+      # Test if there is an executable file
+      full_path = os.path.join(dir, folder)
+
+      # Add the executable
+      if os.path.join('moose', 'test') in full_path:
+        full_exec = os.path.join(full_path, 'moose_test-*')
+      else:
+        full_exec = os.path.join(full_path, folder + '-*')
+
+      print full_exec
+      app = glob.glob(full_exec)
+
+      if app:
+        if os.path.isfile(app[0]):
+          executable = app
+          break
+
       dir = os.path.realpath(os.path.join(dir, '..'))
 
     # Return the path
