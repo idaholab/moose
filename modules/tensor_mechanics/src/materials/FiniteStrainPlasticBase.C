@@ -623,12 +623,11 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
 
   Real lam = 1.0; // the line-search parameter: 1.0 is a full Newton step
   Real lam_min = 1E-10; // minimum value of lam allowed - perhaps this should be dynamically calculated?
-  bool line_searching = true;
   Real f0 = nr_res2; // initial value of residual2
   Real slope = -2*nr_res2; // "Numerical Recipes" uses -b*A*x, in order to check for roundoff, but i hope the nrStep would warn if there were problems.
   Real tmp_lam; // cached value of lam used in quadratic & cubic line search
-  Real f2; // cached value of f = residual2 used in the cubic in the line search
-  Real lam2; // cached value of lam used in the cubic in the line search
+  Real f2 = nr_res2; // cached value of f = residual2 used in the cubic in the line search
+  Real lam2 = lam; // cached value of lam used in the cubic in the line search
 
 
   // pm during the line-search
@@ -646,7 +645,7 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
   RankTwoTensor ls_stress;
 
 
-  while (line_searching)
+  while (true)
   {
     // update the variables using this line-search parameter
     for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
@@ -664,10 +663,7 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
 
 
     if (nr_res2 < f0 + 1E-4*lam*slope)
-    {
-      line_searching = false;
       break;
-    }
     else if (lam < lam_min)
     {
       success = false;
@@ -680,7 +676,6 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
       ls_stress = stress;
       calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic);
       nr_res2 = residual2(f, epp, ic);
-      line_searching = false;
       break;
     }
     else if (lam == 1.0)
