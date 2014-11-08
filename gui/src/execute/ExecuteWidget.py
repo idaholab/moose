@@ -17,7 +17,8 @@ class ExecuteWidget(QtGui.QWidget, MooseWidget):
 
     # Add the controls and console display
     self.addObject(ExecuteCommandControl(**kwargs), handle='ExecuteCommandControl')
-    self.addObject(ExecuteWidgetConsole(**kwargs), handle='ExecuteConsole')
+    self.addObject(ExecuteConsole(**kwargs), handle='ExecuteConsole')
+    self.addObject(ExecuteConsoleControl(**kwargs), handle='ExecuteConsoleControl')
 
     # Create the 'execute' menu items
     self.addObject(QtGui.QMenu(), handle='ExecuteMenu')
@@ -47,11 +48,11 @@ class ExecuteWidget(QtGui.QWidget, MooseWidget):
     # Get the object where the console information will be displayed and connect the process that will
     # display with the standard out/error
     console_obj = self.object('ExecuteConsole')
-    process.readyReadStandardOutput.connect(lambda: console_obj.updateConsole(self.runProcess))
-    process.readyReadStandardError.connect(lambda: console_obj.updateConsole(self.runProcess))
+    process.readyReadStandardOutput.connect(lambda: console_obj.updateConsole(process))
+    process.readyReadStandardError.connect(lambda: console_obj.updateConsole(process))
 
     # Run the command with supplied arguments
-    process.start('/Users/slauae/projects/moose/test/moose_test-oprof', args)
+    process.start(cmd, args)
 
 
   ##

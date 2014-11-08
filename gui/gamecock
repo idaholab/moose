@@ -65,7 +65,6 @@ if __name__ == '__main__':
   width, height = screen_rect.width(), screen_rect.height()
 
 
-  print options
   tabs = PeacockTabWidget(main=main, alignment='vertical', screen_width=width, screen_height=height, **options)
 
   tabs.show()
