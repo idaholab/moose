@@ -6,7 +6,7 @@ from src.utils import *
 
 ##
 # Widget for displaying executable results
-class ExecuteWidgetConsole(QtGui.QWidget, MooseWidget):
+class ExecuteConsole(QtGui.QWidget, MooseWidget):
 
 # public:
   def __init__(self, **kwargs):
@@ -25,7 +25,7 @@ class ExecuteWidgetConsole(QtGui.QWidget, MooseWidget):
   def updateConsole(self, process):
 
     while process.canReadLine():
-      text = re.sub(r'(.)\[(\d\d)m(.*)(.)(\[39m)', self.colorText, process.readLine().data().rstrip('\n'))
+      text = re.sub(r'(.)\[(\d\d)m(.*)(.)(\[39m)', self._colorText, process.readLine().data().rstrip('\n'))
       self._console.append('<span style="white-space:pre;font-family:courier">' + text + '</span>')
 
   ##

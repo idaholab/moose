@@ -12,7 +12,7 @@ from src.utils import *
 class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
 
   ## A signal emitted when the run button is pressed, see _callbackRun
-  _signal_run = QtCore.Signal(str)
+  _signal_run = QtCore.Signal(str, list)
 
   def __init__(self, **kwargs):
     QtGui.QFrame.__init__(self)
@@ -72,7 +72,7 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
       args += ['--n-threads=', str(threads)]
 
     # Emit the signal with the executable and arguments
-    self._signal_run.emit(executeable, args)
+    self._signal_run.emit(executable, args)
 
   ##
   # Executes when 'Select' button is pressed (auto connected via addObject)
@@ -93,19 +93,20 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
 
   def _setupExecutable(self, q_object):
 
+    # Utilize the user supplied executable
     cmd_line_exec = self.options['executable']
     if cmd_line_exec:
       q_object.setText(cmd_line_exec)
       return
 
+    # Search for a moose executeable
     auto_exec = self._getExecutableHelper()
     if auto_exec:
       q_object.setText(auto_exec)
       return
 
+    # Produce error
     print 'Warning: no MOOSE executable located'
-
-
 
 
   def _setupMPI(self, q_object):
@@ -143,31 +144,27 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
     # Locate the executable
     executable = None
 
-    # Start with the current directory and continue until home directory is reached
-    dir = os.getcwd()
-    while dir != os.sep:
+   # Start with the current directory and continue until home directory is reached
+    root = os.getcwd()
+    while root != os.sep:
 
       # Determine current folder, assume it is the app name
-      folder = dir.split(os.sep)[-1]
-
-      # Test if there is an executable file
-      full_path = os.path.join(dir, folder)
+      folder = root.split(os.sep)[-1]
 
       # Add the executable
-      if os.path.join('moose', 'test') in full_path:
-        full_exec = os.path.join(full_path, 'moose_test-*')
+      if os.path.join('moose', 'test') in root:
+        full_exec = os.path.join(root, 'moose_test-*')
       else:
-        full_exec = os.path.join(full_path, folder + '-*')
+        full_exec = os.path.join(root, folder + '-*')
 
-      print full_exec
+      # Perform wild-card search of executable, return the first hit if it exists
       app = glob.glob(full_exec)
-
       if app:
         if os.path.isfile(app[0]):
-          executable = app
+          executable = app[0]
           break
 
-      dir = os.path.realpath(os.path.join(dir, '..'))
+      root = os.path.realpath(os.path.join(root, '..'))
 
     # Return the path
     return executable
