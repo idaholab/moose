@@ -20,7 +20,6 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/string_to_enum.h"
 
-#define NOTFOUND -999999
 
 void assemble_l2_from(EquationSystems & es, const std::string & system_name)
 {
@@ -234,7 +233,7 @@ MultiAppProjectionTransfer::assembleL2From(EquationSystems & es, const std::stri
 
     MeshFunction * from_func = new MeshFunction(from_es, *serialized_from_solution, from_sys.get_dof_map(), from_var_num);
     from_func->init(Trees::ELEMENTS);
-    from_func->enable_out_of_mesh_mode(NOTFOUND);
+    from_func->enable_out_of_mesh_mode(OutOfMeshValue);
     from_fns[i] = from_func;
 
     Moose::swapLibMeshComm(swapped);

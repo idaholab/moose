@@ -17,6 +17,8 @@
 
 #include "libmesh/string_to_enum.h"
 
+const Real PenetrationAux::NotPenetrated = -999999;
+
 template<>
 InputParameters validParams<PenetrationAux>()
 {
@@ -128,7 +130,7 @@ PenetrationAux::computeValue()
 
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[current_node->id()];
 
-  Real retVal(-999999);
+  Real retVal(NotPenetrated);
   if (pinfo)
   {
     if (_quantity == PA_DISTANCE)
