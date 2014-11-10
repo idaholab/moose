@@ -1258,6 +1258,18 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
   Moose::perf_log.pop("residual.close4()","Solve");
 }
 
+void
+NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs)
+{
+  const Node & node = _mesh.node(node_id);
+  unsigned int s = number();
+  if (node.has_dofs(s))
+  {
+    for (unsigned int v = 0; v < nVariables(); v++)
+      for (unsigned int c = 0; c < node.n_comp(s, v); c++)
+        dofs.push_back(node.dof_number(s, v, c));
+  }
+}
 
 void
 NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<unsigned int, std::vector<unsigned int> > & graph)
@@ -1327,6 +1339,33 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
           graph[slave_id].push_back(master_id);
           graph[master_id].push_back(slave_id);
         }
+      }
+    }
+  }
+
+  // handle node-to-node constraints
+  const std::vector<NodalConstraint *> & ceds = _constraints[0].getNodalConstraints();
+  for (std::vector<NodalConstraint *>::const_iterator it = ceds.begin(); it != ceds.end(); ++it)
+  {
+    NodalConstraint * nc = *it;
+
+    std::vector<dof_id_type> master_dofs;
+    unsigned int master_node_id = nc->getMasterNodeId();
+    getNodeDofs(master_node_id, master_dofs);
+
+    std::vector<dof_id_type> slave_dofs;
+    std::vector<unsigned int> & slave_node_ids = nc->getSlaveNodeId();
+    for (std::vector<unsigned int>::iterator si = slave_node_ids.begin(); si != slave_node_ids.end(); si++)
+      getNodeDofs(*si, slave_dofs);
+
+    for (std::vector<unsigned int>::iterator mi = master_dofs.begin(); mi != master_dofs.end(); mi++)
+    {
+      unsigned int master_id = *mi;
+      for (std::vector<unsigned int>::iterator si = slave_dofs.begin(); si != slave_dofs.end(); si++)
+      {
+        unsigned int slave_id = *si;
+        graph[master_id].push_back(slave_id);
+        graph[slave_id].push_back(master_id);
       }
     }
   }
