@@ -187,8 +187,6 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _nl.addVector("NearNullSpace"+oss.str(),false,GHOSTED,false);
   }
   _subspace_dim["NearNullSpace"] = dimNearNullSpace;
-  dimNearNullSpace = _subspace_dim["NearNullSpace"];
-
 
   _functions.resize(n_threads);
   _ics.resize(n_threads);

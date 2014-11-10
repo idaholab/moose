@@ -139,7 +139,7 @@ FiniteStrainMultiPlasticity::computeQpStress()
 
   // if not purely elastic, do some plastic return
   if (!found_solution)
-    found_solution = plasticStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _plastic_strain_old[_qp], _plastic_strain[_qp], _elasticity_tensor[_qp], _strain_increment[_qp], _yf[_qp], number_iterations);
+    plasticStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _plastic_strain_old[_qp], _plastic_strain[_qp], _elasticity_tensor[_qp], _strain_increment[_qp], _yf[_qp], number_iterations);
 
 
   postReturnMap();
@@ -507,11 +507,11 @@ FiniteStrainMultiPlasticity::returnMap(const RankTwoTensor & stress_old, RankTwo
   int dumb_iteration = 0;
   if (_deactivation_scheme == "dumb")
   {
-    bool dummy_bool = incrementDumb(dumb_iteration, act);
+    incrementDumb(dumb_iteration, act);
     yieldFunction(stress, intnl, act, numberActive(act), f);
     while (tooDumbToTry(_deactivation_scheme, act, f))
     {
-      dummy_bool = incrementDumb(dumb_iteration, act);
+      incrementDumb(dumb_iteration, act);
       yieldFunction(stress, intnl, act, numberActive(act), f);
     }
   }
@@ -991,7 +991,7 @@ FiniteStrainMultiPlasticity::eliminateLinearDependence(const RankTwoTensor & str
     else
     {
       r_tmp.push_back(r[current_yf]);
-      info = singularValuesOfR(r_tmp, s);
+      singularValuesOfR(r_tmp, s);
       if (s[s.size() - 1] < _svd_tol*s[0])
       {
         scheduled_for_deactivation[current_yf] = true;
@@ -1411,12 +1411,11 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
 
   Real lam = 1.0; // the line-search parameter: 1.0 is a full Newton step
   Real lam_min = 1E-10; // minimum value of lam allowed - perhaps this should be dynamically calculated?
-  bool line_searching = true;
   Real f0 = nr_res2; // initial value of residual2
   Real slope = -2*nr_res2; // "Numerical Recipes" uses -b*A*x, in order to check for roundoff, but i hope the nrStep would warn if there were problems.
   Real tmp_lam; // cached value of lam used in quadratic & cubic line search
-  Real f2; // cached value of f = residual2 used in the cubic in the line search
-  Real lam2; // cached value of lam used in the cubic in the line search
+  Real f2 = nr_res2; // cached value of f = residual2 used in the cubic in the line search
+  Real lam2 = lam; // cached value of lam used in the cubic in the line search
 
 
   // pm during the line-search
@@ -1436,7 +1435,7 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
   // flow directions (not used in line search, but calculateConstraints returns this parameter)
   std::vector<RankTwoTensor> r;
 
-  while (line_searching)
+  while (true)
   {
     // update the variables using this line-search parameter
     for (unsigned alpha = 0 ; alpha < _num_f ; ++alpha)
@@ -1454,10 +1453,7 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
 
 
     if (nr_res2 < f0 + 1E-4*lam*slope)
-    {
-      line_searching = false;
       break;
-    }
     else if (lam < lam_min)
     {
       success = false;
@@ -1470,7 +1466,6 @@ FiniteStrainMultiPlasticity::lineSearch(Real & nr_res2, RankTwoTensor & stress, 
       ls_stress = stress;
       calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, r, epp, ic, active);
       nr_res2 = residual2(ls_pm, f, epp, ic, active, deactivated_due_to_ld);
-      line_searching = false;
       break;
     }
     else if (lam == 1.0)
