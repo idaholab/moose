@@ -76,6 +76,9 @@ protected:
   SystemBase & _sys;
 
   THREAD_ID _tid;
+
+public:
+  const static Number OutOfMeshValue;
 };
 
 #endif /* TRANSFER_H */

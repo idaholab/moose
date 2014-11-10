@@ -18,6 +18,8 @@
 #include "Assembly.h"
 #include "MooseVariable.h"
 
+const Number Transfer::OutOfMeshValue = -999999;
+
 template<>
 InputParameters validParams<Transfer>()
 {

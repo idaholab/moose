@@ -12,8 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define NOTFOUND -999999
-
 #include "MultiAppInterpolationTransfer.h"
 
 // Moose

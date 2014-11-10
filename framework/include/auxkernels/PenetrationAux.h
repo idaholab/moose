@@ -79,6 +79,9 @@ protected:
   virtual Real computeValue();
 
   PenetrationLocator & _penetration_locator;
+
+public:
+  static const Real NotPenetrated;
 };
 
 #endif //PENETRATIONAUX_H
