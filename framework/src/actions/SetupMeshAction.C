@@ -123,8 +123,7 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   }
 
   if (getParam<bool>("construct_side_list_from_node_list"))
-    mesh->getMesh().boundary_info->build_side_list_from_node_list();
-
+    mesh->getMesh().get_boundary_info().build_side_list_from_node_list();
 }
 
 void

@@ -293,7 +293,7 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
         check_name = pos->second;
     }
     else
-      check_name = mesh().getMesh().boundary_info->sideset_name(check_id);
+      check_name = mesh().getMesh().get_boundary_info().sideset_name(check_id);
 
     // Create a name if it doesn't exist
     if (check_name.empty())

@@ -59,11 +59,14 @@ AddExtraNodeset::modify()
   std::vector<BoundaryName> boundary_names = boundaryNames();
   std::vector<BoundaryID> boundary_ids(boundaryIDs().begin(), boundaryIDs().end());
 
+  // Get a reference to our BoundaryInfo object
+  BoundaryInfo & boundary_info = _mesh_ptr->getMesh().get_boundary_info();
+
   // add nodes with their ids
   const std::vector<unsigned int> & nodes = getParam<std::vector<unsigned int> >("nodes");
   for (unsigned int i=0; i<nodes.size(); i++)
     for (unsigned int j=0; j<boundary_ids.size(); ++j)
-      _mesh_ptr->getMesh().boundary_info->add_node(nodes[i], boundary_ids[j]);
+      boundary_info.add_node(nodes[i], boundary_ids[j]);
 
   // add nodes with their coordinates
   const std::vector<Real> & coord = getParam<std::vector<Real> >("coord");
@@ -92,7 +95,8 @@ AddExtraNodeset::modify()
       if (p.absolute_fuzzy_equals(q, getParam<Real>("tolerance")))
       {
         for (unsigned int j=0; j<boundary_ids.size(); ++j)
-          _mesh_ptr->getMesh().boundary_info->add_node(node, boundary_ids[j]);
+          boundary_info.add_node(node, boundary_ids[j]);
+
         on_node = true;
         break;
       }
@@ -102,5 +106,5 @@ AddExtraNodeset::modify()
   }
 
   for (unsigned int i=0; i<boundary_ids.size(); ++i)
-    _mesh_ptr->getMesh().boundary_info->sideset_name(boundary_ids[i]) = boundary_names[i];
+    boundary_info.sideset_name(boundary_ids[i]) = boundary_names[i];
 }
