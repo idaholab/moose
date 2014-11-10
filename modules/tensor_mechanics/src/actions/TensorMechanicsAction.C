@@ -53,11 +53,14 @@ TensorMechanicsAction::act()
   }
 
   save_in.resize(dim);
-  if(isParamValid("save_in_disp_x"))
+
+  if (isParamValid("save_in_disp_x"))
     save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_x");
-  if(isParamValid("save_in_disp_y"))
+
+  if (isParamValid("save_in_disp_y"))
     save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_y");
-  if(isParamValid("save_in_disp_z"))
+
+  if (isParamValid("save_in_disp_z"))
     save_in[2] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
 
   //Add in the temperature
