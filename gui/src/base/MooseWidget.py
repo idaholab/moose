@@ -39,6 +39,8 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
     PeacockTestInterface.__init__(self)
     MooseWidgetInfoBase.__init__(self)
 
+    # Create a preferences object for storing settings
+    self.prefs = PeacockPreferences()
 
     # All object added via addObject are stored in a dictionary
     self._objects = dict()

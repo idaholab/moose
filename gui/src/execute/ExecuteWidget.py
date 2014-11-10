@@ -97,9 +97,26 @@ class ExecuteWidget(QtGui.QWidget, MooseWidget):
     # Add the warning toggles
     q_object.addSeparator()
     self._clear_warning = QtGui.QAction('Clear Warning', self, checkable=True)
-    self._clear_warning.setChecked(True)
+
+
     q_object.addAction(self._clear_warning)
 
+
+
     self._kill_warning = QtGui.QAction('Kill Warning', self, checkable=True)
-    self._kill_warning.setChecked(True)
+    self._kill_warning.triggered.connect(self.testing)
+
     q_object.addAction(self._kill_warning)
+
+
+    self.prefs.declare('clear_warning', True)
+    self._clear_warning.setChecked(self.prefs['clear_warning'])
+
+
+    self.prefs.declare('kill_warning', True)
+    self._kill_warning.setChecked(self.prefs['kill_warning'])
+
+  def testing(self):
+    print 'here'
+    #self._kill_warning.toggle()
+    self.prefs['kill_warning'] = self._kill_warning.isChecked()
