@@ -688,7 +688,7 @@ FiniteStrainCrystalPlasticity::updateGss()
   _accslip_tmp=_acc_slip_old[_qp];
 
   for (unsigned int i=0; i < _nss; i++)
-    _accslip_tmp=_accslip_tmp+fabs(_slip_incr[i]);
+    _accslip_tmp=_accslip_tmp+std::abs(_slip_incr[i]);
 
   val = std::cosh(_h0 * _accslip_tmp / (_tau_sat - _tau_init)); //Karthik
   val = _h0 * std::pow(1.0/val,2.0); //Kalidindi
