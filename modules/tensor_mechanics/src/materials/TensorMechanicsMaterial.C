@@ -46,6 +46,9 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
 {
   _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
 
+  RotationTensor R(_Euler_angles); // R type: RealTensorValue
+  _Cijkl.rotate(R);
+
   const std::vector<FunctionName> & fcn_names( getParam<std::vector<FunctionName> >("initial_stress") );
   const unsigned num = fcn_names.size();
   if (!(num == 0 || num == 3*3))
