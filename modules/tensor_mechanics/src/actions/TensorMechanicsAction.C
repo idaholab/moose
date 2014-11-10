@@ -15,6 +15,9 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
 
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_x", "Auxiliary variables to save the x displacement residuals.");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_y", "Auxiliary variables to save the y displacement residuals.");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "Auxiliary variables to save the z displacement residuals.");
   return params;
 }
 
@@ -31,6 +34,7 @@ TensorMechanicsAction::act()
   std::vector<VariableName> vars;
   std::string type("StressDivergenceTensors");
 
+  std::vector<std::vector<AuxVariableName> > save_in;
   //Prepare displacements and set value for dim
   keys.push_back("disp_x");
   vars.push_back(getParam<NonlinearVariableName>("disp_x"));
@@ -47,6 +51,14 @@ TensorMechanicsAction::act()
       vars.push_back(getParam<NonlinearVariableName>("disp_z"));
     }
   }
+
+  save_in.resize(dim);
+  if(isParamValid("save_in_disp_x"))
+    save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_x");
+  if(isParamValid("save_in_disp_y"))
+    save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_y");
+  if(isParamValid("save_in_disp_z"))
+    save_in[2] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
 
   //Add in the temperature
   unsigned int num_coupled(dim);
