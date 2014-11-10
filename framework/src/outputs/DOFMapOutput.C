@@ -87,18 +87,14 @@ DOFMapOutput::filename()
 std::string
 DOFMapOutput::demangle(const std::string & name)
 {
-#ifdef HAVE_CXA_DEMANGLE
-  // user compiler ABI to demangle
-  int status = -1;
-  char * result = abi::__cxa_demangle (name.c_str(), NULL, NULL, &status);
-  std::string demangled(result);
-  free(result);
-  return (status==0) ? demangled : name;
+#if defined(LIBMESH_HAVE_GCC_ABI_DEMANGLE)
+  return libMesh::demangle(name.c_str());
 #else
   // at least remove leading digits
   std::string demangled(name);
   while (demangled.length() && demangled[0] >= '0' && demangled[0] <= '9')
     demangled.erase(0,1);
+
   return demangled;
 #endif
 }
