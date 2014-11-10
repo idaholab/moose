@@ -32,7 +32,10 @@ operator, (const ExpressionBuilder::EBTermList & largs, const ExpressionBuilder:
 std::ostream &
 operator<< (std::ostream & os, const ExpressionBuilder::EBTerm & term)
 {
-  return os << *(term.root);
+  if (term.root != NULL)
+    return os << *term.root;
+  else
+    return os << "[NULL]";
 }
 
 

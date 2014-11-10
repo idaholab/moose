@@ -201,6 +201,8 @@ BlockRestrictable::variableSubdomianIDs(InputParameters & parameters) const
     var = &_blk_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
   else if (parameters.have_parameter<AuxVariableName>("variable"))
     var = &_blk_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
+  else
+    mooseError("Unknown variable.");
 
   // Return the block ids for the variable
   return sys->getSubdomainsForVar(var->number());
