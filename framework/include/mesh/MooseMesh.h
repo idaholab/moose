@@ -767,7 +767,7 @@ protected:
   /**
    * A set of boundary IDs currently present in the mesh.
    * In serial, this is equivalent to the values returned
-   * by _mesh.boundary_info->get_boundary_ids().  In parallel,
+   * by _mesh.get_boundary_info().get_boundary_ids().  In parallel,
    * it will contain off-processor boundary IDs as well.
    */
   std::set<BoundaryID> _mesh_boundary_ids;

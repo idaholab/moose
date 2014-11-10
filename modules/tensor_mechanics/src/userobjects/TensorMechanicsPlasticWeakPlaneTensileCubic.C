@@ -6,7 +6,7 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensileCubic>()
   InputParameters params = validParams<TensorMechanicsPlasticWeakPlaneTensile>();
   params.addRequiredRangeCheckedParam<Real>("strength", "strength>=0", "Weak plane tensile strength");
   params.addParam<Real>("strength_residual", "Tensile strength at internal_parameter = limit.  If not given, this defaults to strength, ie, perfect plasticity");
-  params.addRangeCheckedParam<Real>("strength_limit", 0, "strength_limit>=0", "Tensile strength = cubic between strength (at zero internal parameter), and strength_residual (at internal_parameter = strength_limit).  Set to zero for perfect plasticity");
+  params.addRangeCheckedParam<Real>("strength_limit", 1, "strength_limit>0", "Tensile strength = cubic between strength (at zero internal parameter), and strength_residual (at internal_parameter = strength_limit).  Set to zero for perfect plasticity");
   params.addClassDescription("Associative weak-plane tensile plasticity with cubic hardening/softening");
 
   return params;

@@ -21,6 +21,33 @@ class TensorMechanicsPlasticWeakPlaneShearGaussian : public TensorMechanicsPlast
 
  protected:
 
+  /// The cohesion
+  Real _cohesion;
+
+  /// tan(friction angle)
+  Real _tan_phi;
+
+  /// tan(dilation angle)
+  Real _tan_psi;
+
+  /// The cohesion_residual
+  Real _cohesion_residual;
+
+  /// tan(friction angle_residual)
+  Real _tan_phi_residual;
+
+  /// tan(dilation angle_residual)
+  Real _tan_psi_residual;
+
+  /// Gaussian rate of change of cohesion to _cohesion_residual
+  Real _cohesion_rate;
+
+  /// Gaussian rate of change of tan_phi to tan_phi_residual
+  Real _tan_phi_rate;
+
+  /// Gaussian rate of change of tan_psi to tan_psi_residual
+  Real _tan_psi_rate;
+
   /// cohesion as a function of internal parameter
   virtual Real cohesion(const Real internal_param) const;
 

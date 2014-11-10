@@ -75,19 +75,31 @@ class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticMod
   /// tension cutoff at infinite hardening/softening
   Real _tension_cutoff_residual;
 
-  /// Tensile strength = wpt_tensile_strenght_residual + (wpt_tensile_strength - wpt_tensile_strength_residual)*exp(-wpt_tensile_rate*plasticstrain).
-  Real _tension_cutoff_rate;
+  /// Tensile strength = cubic between tensile_strength (at zero internal parameter) and tensile_strength_residual (at internal_parameter = tensile_strength_limit).
+  Real _tension_cutoff_limit;
+
+  /// Useful quantity in the cubic hardening
+  Real _half_tension_cutoff_limit;
+
+  /// Useful quantity in the cubic hardening
+  Real _alpha_tension_cutoff;
+
+  /// Useful quantity in the cubic hardening
+  Real _beta_tension_cutoff;
 
   /// Unit normal inputted by user
   RealVectorValue _input_n;
 
+  /// Flow direction, which is constant in this case
+  RankTwoTensor _df_dsig;
+
   /// This rotation matrix rotates _input_n to (0, 0, 1)
   RealTensorValue _rot;
 
-  /// tensile strength as a function of residual value, rate, and internal_param
+  /// tensile strength as a function of internal_param
   virtual Real tensile_strength(const Real internal_param) const;
 
-  /// d(tensile strength)/d(internal_param) as a function of residual value, rate, and internal_param
+  /// d(tensile strength)/d(internal_param) as a function of internal_param
   virtual Real dtensile_strength(const Real internal_param) const;
 };
 

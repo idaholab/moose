@@ -11,9 +11,9 @@ InputParameters validParams<TensorMechanicsPlasticMohrCoulombCubic>()
   params.addParam<Real>("cohesion_residual", "Mohr-Coulomb cohesion at internal_parameter = limit.  If not given, this defaults to cohesion, ie, perfect plasticity");
   params.addParam<Real>("friction_angle_residual", "Mohr-Coulomb friction angle in degrees at internal_parameter = limit.  If not given, this defaults to friction_angle, ie, perfect plasticity");
   params.addParam<Real>("dilation_angle_residual", "Mohr-Coulomb dilation angle in degrees at internal_parameter = limit.  If not given, this defaults to dilation_angle, ie, perfect plasticity");
-  params.addRangeCheckedParam<Real>("cohesion_limit", 0, "cohesion_limit>=0", "Cohesion = cubic between cohesion (at zero internal parameter) and cohesion_residual (at internal_parameter = cohesion_limit).  Set to zero for perfect plasticity");
-  params.addRangeCheckedParam<Real>("friction_angle_limit", 0, "friction_angle_limit>=0", "friction_angle = cubic between friction_angle (at zero internal parameter) and friction_angle_residual (at internal_parameter = friction_angle_limit).  Set to zero for perfect plasticity");
-  params.addRangeCheckedParam<Real>("dilation_angle_limit", 0, "dilation_angle_limit>=0", "dilation_angle =cubic between dilation_angle (at zero internal parameter) and dilation_angle_residual (at internal_parameter = dilation_angle_limit).  Set to zero for perfect plasticity");
+  params.addRangeCheckedParam<Real>("cohesion_limit", 1, "cohesion_limit>0", "Cohesion = cubic between cohesion (at zero internal parameter) and cohesion_residual (at internal_parameter = cohesion_limit).");
+  params.addRangeCheckedParam<Real>("friction_angle_limit", 1, "friction_angle_limit>0", "friction_angle = cubic between friction_angle (at zero internal parameter) and friction_angle_residual (at internal_parameter = friction_angle_limit).");
+  params.addRangeCheckedParam<Real>("dilation_angle_limit", 1, "dilation_angle_limit>0", "dilation_angle =cubic between dilation_angle (at zero internal parameter) and dilation_angle_residual (at internal_parameter = dilation_angle_limit).");
   params.addClassDescription("Non-associative Mohr-Coulomb plasticity with cubic-type of hardening/softening");
 
   return params;

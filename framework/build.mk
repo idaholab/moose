@@ -24,10 +24,10 @@ endif
 # Instead of using Make.common, use libmesh-config to get any libmesh
 # make variables we might need.  Be sure to pass METHOD along to libmesh-config
 # so that it can use the right one!
-libmesh_CXX      := $(shell METHOD=$(METHOD) $(libmesh_config) --cxx)
-libmesh_CC       := $(shell METHOD=$(METHOD) $(libmesh_config) --cc)
-libmesh_F77      := $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
-libmesh_F90      := $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
+libmesh_CXX      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cxx)
+libmesh_CC       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cc)
+libmesh_F77      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
+libmesh_F90      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
 libmesh_INCLUDE  := $(shell METHOD=$(METHOD) $(libmesh_config) --include)
 libmesh_CPPFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cppflags)
 libmesh_CXXFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cxxflags)

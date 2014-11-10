@@ -62,7 +62,7 @@ MeshExtruder::modify()
                                          _extrusion_vector);
 
   // See if the user has requested specific sides for the top and bottom
-  const std::set<boundary_id_type> &side_ids = _mesh_ptr->getMesh().boundary_info->get_side_boundary_ids();
+  const std::set<boundary_id_type> &side_ids = _mesh_ptr->getMesh().get_boundary_info().get_side_boundary_ids();
   std::set<boundary_id_type>::reverse_iterator last_side_it = side_ids.rbegin();
 
   const boundary_id_type old_top = *last_side_it;
@@ -92,7 +92,7 @@ MeshExtruder::changeID(const std::vector<BoundaryName> & names, BoundaryID old_i
     _mesh_ptr->changeBoundaryId(old_id, boundary_ids[0], true);
 
   for (unsigned int i=0; i<boundary_ids.size(); ++i)
-    _mesh_ptr->getMesh().boundary_info->sideset_name(boundary_ids[i]) = names[i];
+    _mesh_ptr->getMesh().get_boundary_info().sideset_name(boundary_ids[i]) = names[i];
 }
 
 
