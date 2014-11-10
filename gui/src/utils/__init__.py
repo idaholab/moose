@@ -1,2 +1,3 @@
 from colorText import *
-__all__ = ['colorText']
+from PeacockPreferences import *
+__all__ = ['colorText', 'PeacockPreferences']
