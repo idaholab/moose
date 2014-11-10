@@ -18,7 +18,7 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ExampleDirac;
 
 template<>
@@ -34,8 +34,7 @@ public:
 
 protected:
   Real _value;
-  std::vector<Real> _point_param;
-  Point _p;
+  Point _point;
 };
 
 #endif //EXAMPLEDIRAC_H
