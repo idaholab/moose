@@ -79,10 +79,14 @@ class RunParallel:
     # to hold the output as it is produced
     try:
       if self.options.dry_run:
+        tmp_command = command
         command = "echo"
 
       f = TemporaryFile()
       p = Popen([command],stdout=f,stderr=f,close_fds=False, shell=True)
+
+      if self.options.dry_run:
+        command = tmp_command
     except:
       print "Error in launching a new task"
       raise
