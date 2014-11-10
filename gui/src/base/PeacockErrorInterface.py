@@ -62,6 +62,12 @@ class PeacockErrorInterface(object):
       print message
 
   ##
+  #
+  def peacockWarning(self, *args, **kwargs):
+    message = ' '.join(args)
+    print message
+
+  ##
   # Retrieve the last error message (public)
   # @return A string containing the last error message
   def getLastErrorMessage(self):

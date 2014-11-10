@@ -55,7 +55,7 @@ class ExecuteConsole(QtGui.QWidget, MooseWidget):
 
     # Apply the color, otherwise just return the complete match
     if html_color:
-      return '<span style="color:green;">' + match.group(3) + '</span>'
+      return '<span style="color:' + html_color+ ';">' + match.group(3) + '</span>'
     else:
       return match.group(0)
 
@@ -64,8 +64,7 @@ class ExecuteConsole(QtGui.QWidget, MooseWidget):
   def _setupConsole(self, q_object):
     q_object.setMinimumHeight(300)
     q_object.setMinimumWidth(800)
-    q_object.setFontPointSize(10)
     q_object.setReadOnly(True)
     q_object.setUndoRedoEnabled(False)
     q_object.setFrameStyle(QtGui.QFrame.NoFrame)
-    q_object.setStyleSheet('color:white;background-color:black;white-space:pre;font-family:courier')
+    q_object.setStyleSheet('color:white;background-color:black;white-space:pre;font-family:courier;font:10pt')
