@@ -4,14 +4,16 @@ template<>
 InputParameters validParams<TensorMechanicsPlasticJ2>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
-  params.addClassDescription("J2 plasticity, associative, with no hardening");
+  params.addRequiredParam<UserObjectName>("yield_strength", "A TensorMechanicsHardening UserObject that defines hardening of the yield strength");
+  params.addClassDescription("J2 plasticity, associative, with hardening");
 
   return params;
 }
 
 TensorMechanicsPlasticJ2::TensorMechanicsPlasticJ2(const std::string & name,
                                                          InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters)
+    TensorMechanicsPlasticModel(name, parameters),
+    _strength(getUserObject<TensorMechanicsHardeningModel>("yield_strength"))
 {
 }
 
@@ -70,15 +72,15 @@ TensorMechanicsPlasticJ2::dflowPotential_dintnl(const RankTwoTensor & /*stress*/
 }
 
 Real
-TensorMechanicsPlasticJ2::yieldStrength(const Real & /*intnl*/) const
+TensorMechanicsPlasticJ2::yieldStrength(const Real & intnl) const
 {
-  return 1.0;
+  return _strength.value(intnl);
 }
 
 Real
-TensorMechanicsPlasticJ2::dyieldStrength(const Real & /*intnl*/) const
+TensorMechanicsPlasticJ2::dyieldStrength(const Real & intnl) const
 {
-  return 0.0;
+  return _strength.derivative(intnl);
 }
 
 

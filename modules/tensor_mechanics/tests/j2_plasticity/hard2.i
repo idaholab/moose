@@ -219,11 +219,15 @@
 []
 
 [UserObjects]
+  [./str]
+    type = TensorMechanicsHardeningGaussian
+    value_0 = 2
+    value_residual = 1
+    rate = 1E12
+  [../]
   [./j2]
-    type = TensorMechanicsPlasticJ2Gaussian
-    strength = 2
-    strength_residual = 1
-    rate = 1E6
+    type = TensorMechanicsPlasticJ2
+    yield_strength = str
     yield_function_tolerance = 1E-5
     internal_constraint_tolerance = 1E-9
   [../]

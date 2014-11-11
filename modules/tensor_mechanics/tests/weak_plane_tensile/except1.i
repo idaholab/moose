@@ -155,9 +155,13 @@
 []
 
 [UserObjects]
+  [./str]
+    type = TensorMechanicsHardeningConstant
+    value = -1.0
+  [../]
   [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensileExponential
-    strength = -1.0
+    type = TensorMechanicsPlasticWeakPlaneTensile
+    tensile_strength = str
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-5
   [../]

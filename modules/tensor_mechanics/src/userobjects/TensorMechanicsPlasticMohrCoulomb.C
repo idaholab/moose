@@ -5,6 +5,9 @@ template<>
 InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  params.addRequiredParam<UserObjectName>("cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  Physically the cohesion should not be negative.");
+  params.addRequiredParam<UserObjectName>("friction_angle", "A TensorMechanicsHardening UserObject that defines hardening of the friction angle (in radians).  Physically the friction angle should be between 0 and 90deg.");
+  params.addRequiredParam<UserObjectName>("dilation_angle", "A TensorMechanicsHardening UserObject that defines hardening of the dilation angle (in radians).  Usually the dilation angle is not greater than the friction angle, and it is between 0 and 90deg.");
   params.addRangeCheckedParam<Real>("mc_edge_smoother", 25.0, "mc_edge_smoother>=0 & mc_edge_smoother<=30", "Smoothing parameter: the edges of the cone are smoothed by the given amount.");
   MooseEnum tip_scheme("hyperbolic cap", "hyperbolic");
   params.addParam<MooseEnum>("tip_scheme", tip_scheme, "Scheme by which the pyramid's tip will be smoothed.");
@@ -12,7 +15,7 @@ InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>()
   params.addParam<Real>("cap_start", 0.0, "For the 'cap' tip_scheme, smoothing is performed in the stress_mean > cap_start region");
   params.addRangeCheckedParam<Real>("cap_rate", 0.0, "cap_rate>=0", "For the 'cap' tip_scheme, this controls how quickly the cap degenerates to a hemisphere: small values mean a slow degeneration to a hemisphere (and zero means the 'cap' will be totally inactive).  Typical value is 1/tensile_strength");
   params.addParam<Real>("mc_lode_cutoff", "If the second invariant of stress is less than this amount, the Lode angle is assumed to be zero.  This is to gaurd against precision-loss problems, and this parameter should be set small.  Default = 0.00001*((yield_Function_tolerance)^2)");
-  params.addClassDescription("Non-associative Mohr-Coulomb plasticity with no hardening/softening, and with cohesion, friction and dilation angle all = 1");
+  params.addClassDescription("Non-associative Mohr-Coulomb plasticity with hardening/softening");
 
   return params;
 }
@@ -20,6 +23,9 @@ InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>()
 TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const std::string & name,
                                                          InputParameters parameters) :
     TensorMechanicsPlasticModel(name, parameters),
+    _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
+    _phi(getUserObject<TensorMechanicsHardeningModel>("friction_angle")),
+    _psi(getUserObject<TensorMechanicsHardeningModel>("dilation_angle")),
     _tip_scheme(getParam<MooseEnum>("tip_scheme")),
     _small_smoother2(std::pow(getParam<Real>("mc_tip_smoother"), 2)),
     _cap_start(getParam<Real>("cap_start")),
@@ -37,8 +43,20 @@ TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const std::
   if (_lode_cutoff < 0)
     mooseError("mc_lode_cutoff must not be negative");
 
+  // With arbitary UserObjects, it is impossible to check everything, and
+  // I think this is the best I can do
+  if (phi(0) < 0 || psi(0) < 0 || phi(0) > M_PI/2.0 || psi(0) > M_PI/2.0)
+    mooseError("Mohr-Coulomb friction and dilation angles must lie in [0, Pi/2]");
+  if (phi(0) < psi(0))
+    mooseError("Mohr-Coulomb friction angle must not be less than Mohr-Coulomb dilation angle");
+  if (cohesion(0) < 0)
+    mooseError("Mohr-Coulomb cohesion must not be negative");
+
   // check Abbo et al's convexity constraint (Eqn c.18 in their paper)
-  Real sin_angle = std::sin(1.0);
+  // With an arbitrary UserObject, it is impossible to check for all angles
+  // I think the following is the best we can do
+  Real sin_angle = std::sin(std::max(phi(0), psi(0)));
+  sin_angle = std::max(sin_angle, std::sin(std::max(phi(1E6), psi(1E6))));
   Real rhs = std::sqrt(3)*(35*std::sin(_tt) + 14*std::sin(5*_tt) - 5*std::sin(7*_tt))/16/std::pow(std::cos(_tt), 5)/(11 - 10*std::cos(2*_tt));
   if (rhs <= sin_angle)
     mooseError("Mohr-Coulomb edge smoothing angle is too small and a non-convex yield surface will result.  Please choose a larger value");
@@ -272,39 +290,39 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dintnl(const RankTwoTensor & s
 
 
 Real
-TensorMechanicsPlasticMohrCoulomb::cohesion(const Real /*internal_param*/) const
+TensorMechanicsPlasticMohrCoulomb::cohesion(const Real internal_param) const
 {
-  return 1.0;
+  return _cohesion.value(internal_param);
 }
 
 Real
-TensorMechanicsPlasticMohrCoulomb::dcohesion(const Real /*internal_param*/) const
+TensorMechanicsPlasticMohrCoulomb::dcohesion(const Real internal_param) const
 {
-  return 0.0;
+  return _cohesion.derivative(internal_param);
 }
 
 Real
-TensorMechanicsPlasticMohrCoulomb::phi(const Real /*internal_param*/) const
+TensorMechanicsPlasticMohrCoulomb::phi(const Real internal_param) const
 {
-  return 1.0;
+  return _phi.value(internal_param);
 }
 
 Real
-TensorMechanicsPlasticMohrCoulomb::dphi(const Real /*internal_param*/) const
+TensorMechanicsPlasticMohrCoulomb::dphi(const Real internal_param) const
 {
-  return 0.0;
+  return _phi.derivative(internal_param);
 }
 
 Real
-TensorMechanicsPlasticMohrCoulomb::psi(const Real /*internal_param*/) const
+TensorMechanicsPlasticMohrCoulomb::psi(const Real internal_param) const
 {
-  return 1.0;
+  return _psi.value(internal_param);
 }
 
 Real
-TensorMechanicsPlasticMohrCoulomb::dpsi(const Real /*internal_param*/) const
+TensorMechanicsPlasticMohrCoulomb::dpsi(const Real internal_param) const
 {
-  return 0.0;
+  return _psi.derivative(internal_param);
 }
 
 

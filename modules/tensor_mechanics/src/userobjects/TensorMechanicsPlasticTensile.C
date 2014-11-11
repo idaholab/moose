@@ -5,6 +5,7 @@ template<>
 InputParameters validParams<TensorMechanicsPlasticTensile>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  params.addRequiredParam<UserObjectName>("tensile_strength", "A TensorMechanicsHardening UserObject that defines hardening of the tensile strength");
   params.addRangeCheckedParam<Real>("tensile_edge_smoother", 25.0, "tensile_edge_smoother>=0 & tensile_edge_smoother<=30", "Smoothing parameter: the edges of the cone are smoothed by the given amount.");
   MooseEnum tip_scheme("hyperbolic cap", "hyperbolic");
   params.addParam<MooseEnum>("tip_scheme", tip_scheme, "Scheme by which the pyramid's tip will be smoothed.");
@@ -12,7 +13,7 @@ InputParameters validParams<TensorMechanicsPlasticTensile>()
   params.addParam<Real>("cap_start", 0.0, "For the 'cap' tip_scheme, smoothing is performed in the stress_mean > cap_start region");
   params.addRangeCheckedParam<Real>("cap_rate", 0.0, "cap_rate>=0", "For the 'cap' tip_scheme, this controls how quickly the cap degenerates to a hemisphere: small values mean a slow degeneration to a hemisphere (and zero means the 'cap' will be totally inactive).  Typical value is 1/tensile_strength");
   params.addParam<Real>("tensile_lode_cutoff", "If the second invariant of stress is less than this amount, the Lode angle is assumed to be zero.  This is to gaurd against precision-loss problems, and this parameter should be set small.  Default = 0.00001*((yield_Function_tolerance)^2)");
-  params.addClassDescription("Associative tensile plasticity with no hardening/softening, and tensile_strength = 1");
+  params.addClassDescription("Associative tensile plasticity with hardening/softening, and tensile_strength = 1");
 
   return params;
 }
@@ -20,6 +21,7 @@ InputParameters validParams<TensorMechanicsPlasticTensile>()
 TensorMechanicsPlasticTensile::TensorMechanicsPlasticTensile(const std::string & name,
                                                          InputParameters parameters) :
     TensorMechanicsPlasticModel(name, parameters),
+    _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
     _tip_scheme(getParam<MooseEnum>("tip_scheme")),
     _small_smoother2(std::pow(getParam<Real>("tensile_tip_smoother"), 2)),
     _cap_start(getParam<Real>("cap_start")),
@@ -177,15 +179,15 @@ TensorMechanicsPlasticTensile::dflowPotential_dintnl(const RankTwoTensor & /*str
 
 
 Real
-TensorMechanicsPlasticTensile::tensile_strength(const Real /*internal_param*/) const
+TensorMechanicsPlasticTensile::tensile_strength(const Real internal_param) const
 {
-  return 1.0;
+  return _strength.value(internal_param);
 }
 
 Real
-TensorMechanicsPlasticTensile::dtensile_strength(const Real /*internal_param*/) const
+TensorMechanicsPlasticTensile::dtensile_strength(const Real internal_param) const
 {
-  return 0.0;
+  return _strength.derivative(internal_param);
 }
 
 

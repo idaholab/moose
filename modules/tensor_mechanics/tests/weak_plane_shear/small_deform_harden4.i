@@ -171,13 +171,25 @@
 []
 
 [UserObjects]
+  [./coh]
+    type = TensorMechanicsHardeningCubic
+    value_0 = 1E3
+    value_residual = 2E3
+    internal_limit = 0.00007
+  [../]
+  [./tanphi]
+    type = TensorMechanicsHardeningConstant
+    value = 1
+  [../]
+  [./tanpsi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.01745506
+  [../]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShearCubic
-    cohesion = 1E3
-    cohesion_residual = 2E3
-    cohesion_limit = 0.00007
-    dilation_angle = 1
-    friction_angle = 45
+    type = TensorMechanicsPlasticWeakPlaneShear
+    cohesion = coh
+    tan_friction_angle = tanphi
+    tan_dilation_angle = tanpsi
     smoother = 500
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-3

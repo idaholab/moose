@@ -320,34 +320,69 @@
 []
 
 [UserObjects]
+  [./mc_coh]
+    type = TensorMechanicsHardeningConstant
+    value = 4E7
+  [../]
+  [./mc_phi]
+    type = TensorMechanicsHardeningConstant
+    value = 35
+    convert_to_radians = true
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningConstant
+    value = 10
+    convert_to_radians = true
+  [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombExponential
-    mc_friction_angle = 35
-    mc_dilation_angle = 10
-    mc_cohesion = 4E7
+    type = TensorMechanicsPlasticMohrCoulomb
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
     mc_tip_smoother = 4E6
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
   [../]
+
+  [./ts]
+    type = TensorMechanicsHardeningConstant
+    value = 1E6
+  [../]
   [./tensile]
-    type = TensorMechanicsPlasticTensileExponential
-    tensile_strength = 1E6
+    type = TensorMechanicsPlasticTensile
+    tensile_strength = ts
     tensile_tip_smoother = 1E5
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
   [../]
+  [./coh]
+    type = TensorMechanicsHardeningConstant
+    value = 1E6
+  [../]
+  [./tanphi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.46630766
+  [../]
+  [./tanpsi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.46630766
+  [../]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShearExponential
-    cohesion = 1E6
-    friction_angle = 25
-    dilation_angle =  25
+    type = TensorMechanicsPlasticWeakPlaneShear
+    cohesion = coh
+    tan_friction_angle = tanphi
+    tan_dilation_angle = tanpsi
     smoother = 1E5
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
   [../]
+  [./str]
+    type = TensorMechanicsHardeningConstant
+    value = 0.01E6
+  [../]
   [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensileExponential
-    strength = 0.01E6
+    type = TensorMechanicsPlasticWeakPlaneTensile
+    tensile_strength = str
     yield_function_tolerance = 1.0E-1
     internal_constraint_tolerance = 1.0E-7
   [../]

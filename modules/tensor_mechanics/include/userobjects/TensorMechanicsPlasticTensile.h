@@ -2,6 +2,7 @@
 #define TENSORMECHANICSPLASTICTENSILE
 
 #include "TensorMechanicsPlasticModel.h"
+#include "TensorMechanicsHardeningModel.h"
 
 
 class TensorMechanicsPlasticTensile;
@@ -12,7 +13,7 @@ InputParameters validParams<TensorMechanicsPlasticTensile>();
 
 /**
  * FiniteStrainTensile implements rate-independent associative tensile failure
- * with no hardening/softening in the finite-strain framework.
+ * with hardening/softening in the finite-strain framework.
  * For 'hyperbolic' smoothing, the smoothing of the tip of the yield-surface cone is described in
  * Zienkiewicz and Prande "Some useful forms of isotropic yield surfaces for soil and rock mechanics" (1977) In G Gudehus (editor) "Finite Elements in Geomechanics" Wile, Chichester, pp 179-190.
  * For 'cap' smoothing, additional smoothing is performed.
@@ -23,6 +24,9 @@ class TensorMechanicsPlasticTensile : public TensorMechanicsPlasticModel
 {
  public:
   TensorMechanicsPlasticTensile(const std::string & name, InputParameters parameters);
+
+
+ protected:
 
   /**
    * The yield function
@@ -72,7 +76,7 @@ class TensorMechanicsPlasticTensile : public TensorMechanicsPlasticModel
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const;
 
- protected:
+  const TensorMechanicsHardeningModel & _strength;
 
   /**
    * The yield function is modified to
