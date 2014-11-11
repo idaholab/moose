@@ -99,6 +99,10 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
     _blocks = std::vector<SubdomainName>(1, "ANY_BLOCK_ID");
   }
 
+  // Check that defined blocks exist on the mesh
+  if (!_blk_mesh->hasSubdomainID(_blk_ids))
+    mooseError("The object '" << name << "' contains block ids that do no exist on the mesh");
+
   // Store the private parameter that contains the set of block ids
   parameters.set<std::vector<SubdomainID> >("_block_ids") = std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end());
 }
