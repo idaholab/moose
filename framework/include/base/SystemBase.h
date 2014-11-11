@@ -437,16 +437,21 @@ public:
    * @param order The order of the variable
    * @param scale_factor The scaling factor to be used with this scalar variable
    */
-  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL)
   {
     FEType type(order, SCALAR);
-    unsigned int var_num = _sys.add_variable(var_name, type);
+    unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       MooseVariableScalar * var = new MooseVariableScalar(var_num, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
+    if (active_subdomains == NULL)
+      _var_map[var_num] = std::set<SubdomainID>();
+    else
+      for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+        _var_map[var_num].insert(*it);
   }
 
   virtual bool hasVariable(const std::string & var_name)
