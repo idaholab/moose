@@ -182,15 +182,15 @@ DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & ty
 }
 
 void
-DisplacedProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+DisplacedProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
-  _displaced_nl.addScalarVariable(var_name, order, scale_factor);
+  _displaced_nl.addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
 
 void
-DisplacedProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor)
+DisplacedProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
-  _displaced_aux.addScalarVariable(var_name, order, scale_factor);
+  _displaced_aux.addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
 
 void
