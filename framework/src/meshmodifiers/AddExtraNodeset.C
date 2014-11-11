@@ -22,8 +22,7 @@ template<>
 InputParameters validParams<AddExtraNodeset>()
 {
   InputParameters params = validParams<MeshModifier>();
-  params.addParam<std::vector<BoundaryName> >("new_boundary", "The name of the boundary to create");
-  params.addDeprecatedParam<std::vector<BoundaryName> >("boundary", "The name of the boundary to create", "Use 'new_boundary' instead");
+  params.addRequiredParam<std::vector<BoundaryName> >("new_boundary", "The name of the boundary to create");
 
   params.addParam<std::vector<unsigned int> >("nodes", "The nodes you want to be in the nodeset (Either this parameter or \"coord\" must be supplied).");
   params.addParam<std::vector<Real> >("coord","The nodes with coordinates you want to be in the nodeset (Either this parameter or \"nodes\" must be supplied).");
@@ -40,10 +39,6 @@ AddExtraNodeset::AddExtraNodeset(const std::string & name, InputParameters param
 void
 AddExtraNodeset::modify()
 {
-  // *** DEPRECATED SUPPORT ***
-  // Remove these two lines and make 'new_boundary' required when this is removed
-  if (isParamValid("boundary"))
-    _pars.set<std::vector<BoundaryName> >("new_boundary") = getParam<std::vector<BoundaryName> >("boundary");
 
   // make sure the input is not empty
   bool data_valid = false;
