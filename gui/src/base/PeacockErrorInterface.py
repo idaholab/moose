@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from PySide import QtCore, QtGui
 
 ##
@@ -62,10 +60,45 @@ class PeacockErrorInterface(object):
       print message
 
   ##
+  # Produce a warning dialog
+  # @param args The error message, all arguments are collected into a single
+  #             error message (e.g., peacockError('This', 'is', str(True)))
+  # @param kwargs Optional flags to control output
   #
+  # Optional Keyword Arguments:
+  #   cancel
+  #   True | <False>
+  #   If true a cancel button is included in the warning
+  #
+  #   dialog
+  #   <True> | False
+  #   If true and the Object is a QWidget, an error dialog is created
   def peacockWarning(self, *args, **kwargs):
     message = ' '.join(args)
-    print message
+
+    # Show a dialog box
+    if self._has_dialog and kwargs.pop('dialog', True):
+      msg_box = QtGui.QMessageBox()
+      msg_box.setIcon(QtGui.QMessageBox.Warning)
+
+      # Adds cancel button
+      if kwargs.pop('cancel', False):
+        msg_box.setStandardButtons(QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok)
+
+      # Create the box
+      msg_box.setText(message)
+      ret = msg_box.exec_()
+
+      # Return False if Cancel was pressed, True otherwise
+      if ret == QtGui.QMessageBox.Cancel:
+        return False
+      else:
+        return True
+
+    # Without a dialog, just print the message
+    else:
+      print message
+      return True
 
   ##
   # Retrieve the last error message (public)

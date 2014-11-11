@@ -193,7 +193,6 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
   def pull(self, name):
     return self._getAttr('_pull' + name)
 
-
   ##
   # Extract attribute from MooseObject (protected)
   def _getAttr(self, full_name, search_owner = True):
@@ -204,7 +203,7 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
 
     else:
       for key, obj in self._objects.iteritems():
-        print 'Seraching for', full_name, 'in', obj.__class__.__name__
+        self._debug('Seraching for', full_name, 'in', obj.__class__.__name__)
         if hasattr(obj, full_name):
           attr = getattr(obj, full_name)
           return attr
@@ -237,7 +236,6 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
 
     # If an object has not been returned yet, it doesn't exist
     return found_obj
-
 
   ##
   # Add a QObject to this MooseWidget (public)
@@ -334,7 +332,6 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
     # QMenu -> QMainWindow.menuBar (if 'main' property was set in MooseWidget)
     elif isinstance(q_object, QtGui.QMenu) and self.property('main') != None:
       self._debug('Adding QMenu (' + handle + ') to (QMainWindow.menuBar())')
-      print self.property('main')
       menu_bar = self.property('main').menuBar()
       menu_bar.addMenu(q_object, *args)
 
@@ -357,7 +354,6 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
     elif isinstance(q_object, QtGui.QWidget) and isinstance(parent_object, QtGui.QSplitter):
       self._debug('Adding QWidget (' + handle + ') to QSplitter (' + parent + ')')
       parent_object.addWidget(q_object, *args)
-
 
     else:
       print 'peacockWarning ...'
@@ -426,10 +422,13 @@ class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBa
       # Otherwise link the callback if it is possible
       if hasattr(self, callback_name):
         self._debug('Checking for ' + callback_name + ' method')
+        method = getattr(self, callback_name)
         if hasattr(obj, 'clicked'):
-          method = getattr(self, callback_name)
           obj.clicked.connect(method)
           self._debug('Connecting ' + callback_name + ' to clicked signal of ' +  key + ' object')
+        elif hasattr(obj, 'triggered'):
+          obj.triggered.connect(method)
+          self._debug('Connecting ' + callback_name + ' to triggered signal of ' +  key + ' object')
 
 
 # protected:
