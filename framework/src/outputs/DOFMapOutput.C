@@ -180,7 +180,7 @@ DOFMapOutput::outputSystemInformation()
 
   bool first = true;
   oss << "{\"ndof\": " << sys.n_dofs() << ", \"demangled\": ";
-#ifdef HAVE_CXA_DEMANGLE
+#if defined(LIBMESH_HAVE_GCC_ABI_DEMANGLE)
   oss << "true";
 #else
   oss << "false";
