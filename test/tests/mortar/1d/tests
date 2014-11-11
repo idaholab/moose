@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = '1d.i'
+    exodiff = '1d_out.e'
+    max_parallel = 1
+    max_threads = 1
+    compiler = 'GCC CLANG'
+  [../]
+[]
