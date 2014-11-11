@@ -58,16 +58,17 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
     _crysrot(declareProperty<RankTwoTensor>("crysrot")),//Rotation tensor considering crystal orientation
     _crysrot_old(declarePropertyOld<RankTwoTensor>("crysrot"))
 {
-
   _tau.resize(_nss);
   _slip_incr.resize(_nss);
   _dslipdtau.resize(_nss);
-
 
   _mo.resize(_nss*LIBMESH_DIM);
   _no.resize(_nss*LIBMESH_DIM);
 
   _s0.resize(_nss);
+  
+  _pk2_tmp.zero();
+  _gss_tmp.resize(_nss);
 }
 
 void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
@@ -79,7 +80,6 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
   _fp[_qp].addIa(1.0);
 
   _pk2[_qp].zero();
-  _pk2_tmp.zero();
   _acc_slip[_qp] = 0.0;
 
   initSlipSysProps();//Initializes slip system related properties
@@ -124,7 +124,6 @@ FiniteStrainCrystalPlasticity::readFileInitSlipSysRes()
 
   _gss[_qp].resize(_nss);
   _gss_old[_qp].resize(_nss);
-  _gss_tmp.resize(_nss);
 
   MooseUtils::checkFileReadable(_slip_sys_res_prop_file_name);
 
@@ -147,7 +146,6 @@ FiniteStrainCrystalPlasticity::getInitSlipSysRes()
 
   _gss[_qp].resize(_nss);
   _gss_old[_qp].resize(_nss);
-  _gss_tmp.resize(_nss);
 
   unsigned int ind;
 
