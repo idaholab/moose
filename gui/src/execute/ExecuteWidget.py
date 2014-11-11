@@ -16,18 +16,22 @@ class ExecuteWidget(QtGui.QWidget, MooseWidget):
     QtGui.QWidget.__init__(self)
     MooseWidget.__init__(self, **kwargs)
 
-    # Storage for menu actions that are needed by execute and kill, these are populated
-    # in _setupExecuteMenu
-    self._kill_warning = None
-    self._clear_warning = None
-
     # Add the controls and console display
     self.addObject(ExecuteCommandControl(**kwargs), handle='ExecuteCommandControl')
     self.addObject(ExecuteConsole(**kwargs), handle='ExecuteConsole')
     self.addObject(ExecuteConsoleControl(**kwargs), handle='ExecuteConsoleControl')
 
-    # Create the 'execute' menu items
-    self.addObject(QtGui.QMenu(), handle='ExecuteMenu')
+    # Create the 'Execute' menu and the menu items
+    menu = self.addObject(QtGui.QMenu(), handle='ExecuteMenu')
+    self.addObject(QtGui.QAction('&'+'Run', self), handle='ExecuteMenuRun', parent='ExecuteMenu')
+    self.addObject(QtGui.QAction('&'+'Kill', self), handle='ExecuteMenuKill', parent='ExecuteMenu')
+    menu.addSeparator()
+    self.addObject(QtGui.QAction('&'+'Select', self), handle='ExecuteMenuSelect', parent='ExecuteMenu')
+    menu.addSeparator()
+    self._kill_warning = self.addObject(QtGui.QAction('Kill Warning', self),
+                                         handle='ExecuteMenuKillWarning', parent='ExecuteMenu')
+    self._clear_warning = self.addObject(QtGui.QAction('Clear Warning', self),
+                                         handle='ExecuteMenuClearWarning', parent='ExecuteMenu')
 
     # Connect the control buttons
     self.connectSignal('run', self.execute)
@@ -40,11 +44,20 @@ class ExecuteWidget(QtGui.QWidget, MooseWidget):
     # Perform the setup for this object
     self.setup()
 
+
   ##
   # Method for running an executable and passing the output to the Console widget
   # @param cmd The program to run
   # @param args The arguments to pass to the program
   def execute(self, cmd, args):
+
+    # Set enable/disable flags
+    self.object('KillConsole').setEnabled(True)
+    self.object('Run').setEnabled(False)
+    self.object('Select').setEnabled(False)
+
+    # Reset progress bar
+    self.object('ExecuteConsole').resetProgress()
 
     # A debugging message
     self._debug('Running Command: ' + cmd)
@@ -54,69 +67,98 @@ class ExecuteWidget(QtGui.QWidget, MooseWidget):
     console_obj = self.object('ExecuteConsole')
     self.process.readyReadStandardOutput.connect(lambda: console_obj.updateConsole(self.process))
     self.process.readyReadStandardError.connect(lambda: console_obj.updateConsole(self.process))
+    self.process.finished.connect(self._finished)
 
     # Run the command with supplied arguments
     self.process.start(cmd, args)
 
+  ##
+  # Method for killing the currently running executable
   def kill(self):
-    self._debug('Kill')
+    self._debug('Killing current process')
 
+    kill_process = True
     if self._kill_warning.isChecked():
-      self.peacockWarning('Kill the current running process?')
+      kill_process = self.peacockWarning('Kill the current running process?', cancel=True)
 
+    if kill_process:
+      self.process.kill()
 
-    self.process.kill()
-
+  ##
+  # Method for clearing the console window
   def clear(self):
-    self._debug('Clear')
-    self.object('Console').clear()
+    self._debug('Clear console')
+
+    clear_console = True
+    if self._clear_warning.isChecked():
+      clear_console = self.peacockWarning('Clear the current console text?', cancel=True)
+
+    if clear_console:
+      self.object('Console').clear()
+
+  ##
+  # Method is called when the QProcess command is finished
+  def _finished(self):
+    self.object('KillConsole').setEnabled(False)
+    self.object('Run').setEnabled(True)
+    self.object('Select').setEnabled(True)
 
   ##
   # Setup the execute menu
   def _setupExecuteMenu(self, q_object):
     q_object.setTitle('Execute')
 
-    # Add 'Run' menu item
-    action = QtGui.QAction('&' + 'Run', self)
-    action.triggered.connect(self.execute)
-    action.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_R))
-    q_object.addAction(action)
+  ##
+  # Setup method for the 'Run' Execute menu item
+  def _setupExecuteMenuRun(self, q_object):
+    # Connect the 'Run' menu item the to 'Run' button
+    q_object.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_R))
+    q_object.triggered.connect(self.callback('Run'))
 
-    # Add 'Kill' menu item
-    action = QtGui.QAction('&' + 'Kill', self)
-    action.triggered.connect(self.kill)
-    action.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_K))
-    q_object.addAction(action)
+  ##
+  # Setup method for the 'Kill' Execute menu item
+  def _setupExeuteMenuKill(self, q_object):
+    q_object.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_K))
+    q_object.triggered.connect(self.callback('Kill'))
 
-    # Add 'Select' menu item
-    action = QtGui.QAction('&'+'Select', self)
-    action.triggered.connect(self.callback('Select'))
-    action.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_F))
-    q_object.addAction(action)
+  ##
+  # Setup method for the 'Select' Execute menu item
+  def _setupExeuteMenuSelect(self, q_object):
+    q_object.setShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_F))
+    q_object.triggered.connect(self.callback('Select'))
 
-    # Add the warning toggles
-    q_object.addSeparator()
-    self._clear_warning = QtGui.QAction('Clear Warning', self, checkable=True)
+  ##
+  # Setup method for the 'Kill warning' toggle
+  def _setupExecuteMenuKillWarning(self, q_object):
 
+    # Indicates that the menu item contains a check mark
+    q_object.setCheckable(True)
 
-    q_object.addAction(self._clear_warning)
-
-
-
-    self._kill_warning = QtGui.QAction('Kill Warning', self, checkable=True)
-    self._kill_warning.triggered.connect(self.testing)
-
-    q_object.addAction(self._kill_warning)
-
-
-    self.prefs.declare('clear_warning', True)
-    self._clear_warning.setChecked(self.prefs['clear_warning'])
-
-
+    # Declare a preference for storing the kill warning status
     self.prefs.declare('kill_warning', True)
-    self._kill_warning.setChecked(self.prefs['kill_warning'])
 
-  def testing(self):
-    print 'here'
-    #self._kill_warning.toggle()
+    # Apply the preference
+    q_object.setChecked(self.prefs['kill_warning'])
+
+  ##
+  # Executes when the 'Kill warning' item is selected from the Execute menu
+  def _callbackExecuteMenuKillWarning(self):
     self.prefs['kill_warning'] = self._kill_warning.isChecked()
+
+  ##
+  # Setup method for the 'Kill warning' toggle
+  def _setupExecuteMenuClearWarning(self, q_object):
+
+    # Indicates that the menu item contains a check mark
+    q_object.setCheckable(True)
+
+    # Declare a preference for storing the clear warning status
+    self.prefs.declare('clear_warning', True)
+
+    # Apply the preference
+    q_object.setChecked(self.prefs['clear_warning'])
+
+  ##
+  # Executes when the 'Kill warning' item is selected from the Execute menu
+  def _callbackExecuteMenuClearWarning(self):
+    self.prefs['clear_warning'] = self._clear_warning.isChecked()

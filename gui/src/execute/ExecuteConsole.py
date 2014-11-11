@@ -14,6 +14,7 @@ class ExecuteConsole(QtGui.QWidget, MooseWidget):
     MooseWidget.__init__(self, **kwargs)
 
     # Create console window, storing the object as a member variable for easy access
+    self._progress = self.addObject(QtGui.QProgressBar(), handle='Progress')
     self._console = self.addObject(QtGui.QTextEdit(), handle='Console')
 
     # Execute the setup functions
@@ -25,8 +26,22 @@ class ExecuteConsole(QtGui.QWidget, MooseWidget):
   def updateConsole(self, process):
 
     while process.canReadLine():
-      text = re.sub(r'(.)\[(\d\d)m(.*)(.)(\[39m)', self._colorText, process.readLine().data().rstrip('\n'))
+      line = process.readLine().data().rstrip('\n')
+      text = re.sub(r'(.)\[(\d\d)m(.*)(.)(\[39m)', self._colorText, line)
       self._console.append('<span style="white-space:pre;font-family:courier">' + text + '</span>')
+
+      match = re.search(r'Time\sStep\s*([0-9]{1,})', line)
+      if match:
+        self._progress.setValue(float(match.group(1)))
+
+  ##
+  # Reset progress bar
+  def resetProgress(self):
+    num_steps = self.pull('NumSteps')
+    if num_steps:
+      self._progress.setRange(0, num_steps)
+    else:
+      self._progress.reset()
 
   ##
   # A method for coloring Console text via html (private)
@@ -58,6 +73,11 @@ class ExecuteConsole(QtGui.QWidget, MooseWidget):
       return '<span style="color:' + html_color+ ';">' + match.group(3) + '</span>'
     else:
       return match.group(0)
+
+  ##
+  # Setup method for the progress bar
+  def _setupProgress(self, q_object):
+    self.resetProgress()
 
   ##
   # Setup method for the Console display

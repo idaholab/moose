@@ -48,7 +48,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="MOOSE GUI Application")
 
   # Set global parameter(s)
-  parser.add_argument('-d', '--degbug', '--dbg', action='store_true', help='Run Peacock in debug mode')
+  parser.add_argument('-d', '--debug', '--dbg', action='store_true', help='Run Peacock in debug mode')
   parser.add_argument('-e', '--executable', type=str, help='The program to execute')
 
   # Extract the command line options
@@ -63,7 +63,6 @@ if __name__ == '__main__':
 
   screen_rect = app.desktop().screenGeometry()
   width, height = screen_rect.width(), screen_rect.height()
-
 
   tabs = PeacockTabWidget(main=main, alignment='vertical', screen_width=width, screen_height=height, **options)
 
