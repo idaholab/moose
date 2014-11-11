@@ -1,7 +1,7 @@
 #ifndef TENSORMECHANICSPLASTICWEAKPLANETENSILEN_H
 #define TENSORMECHANICSPLASTICWEAKPLANETENSILEN_H
 
-#include "TensorMechanicsPlasticModel.h"
+#include "TensorMechanicsPlasticWeakPlaneTensile.h"
 
 
 class TensorMechanicsPlasticWeakPlaneTensileN;
@@ -12,12 +12,15 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensileN>();
 
 /**
  * Rate-independent associative weak-plane tensile failure
- * with hardening/softening
+ * with hardening/softening, and normal direction specified
  */
-class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticModel
+class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticWeakPlaneTensile
 {
  public:
   TensorMechanicsPlasticWeakPlaneTensileN(const std::string & name, InputParameters parameters);
+
+
+ protected:
 
   /**
    * The yield function
@@ -67,25 +70,6 @@ class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticMod
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
 
- protected:
-
-  /// tension cutoff
-  Real _tension_cutoff;
-
-  /// tension cutoff at infinite hardening/softening
-  Real _tension_cutoff_residual;
-
-  /// Tensile strength = cubic between tensile_strength (at zero internal parameter) and tensile_strength_residual (at internal_parameter = tensile_strength_limit).
-  Real _tension_cutoff_limit;
-
-  /// Useful quantity in the cubic hardening
-  Real _half_tension_cutoff_limit;
-
-  /// Useful quantity in the cubic hardening
-  Real _alpha_tension_cutoff;
-
-  /// Useful quantity in the cubic hardening
-  Real _beta_tension_cutoff;
 
   /// Unit normal inputted by user
   RealVectorValue _input_n;
@@ -95,12 +79,6 @@ class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticMod
 
   /// This rotation matrix rotates _input_n to (0, 0, 1)
   RealTensorValue _rot;
-
-  /// tensile strength as a function of internal_param
-  virtual Real tensile_strength(const Real internal_param) const;
-
-  /// d(tensile strength)/d(internal_param) as a function of internal_param
-  virtual Real dtensile_strength(const Real internal_param) const;
 };
 
 #endif // TENSORMECHANICSPLASTICWEAKPLANETENSILEN_H

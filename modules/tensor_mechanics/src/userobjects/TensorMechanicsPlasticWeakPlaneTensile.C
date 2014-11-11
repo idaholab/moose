@@ -4,15 +4,20 @@ template<>
 InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensile>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
-  params.addClassDescription("Associative weak-plane tensile plasticity with tensile strength = 1");
+  params.addRequiredParam<UserObjectName>("tensile_strength", "A TensorMechanicsHardening UserObject that defines hardening of the weak-plane tensile strength");
+  params.addClassDescription("Associative weak-plane tensile plasticity with hardening/softening");
 
   return params;
 }
 
 TensorMechanicsPlasticWeakPlaneTensile::TensorMechanicsPlasticWeakPlaneTensile(const std::string & name,
                                                          InputParameters parameters) :
-    TensorMechanicsPlasticModel(name, parameters)
+    TensorMechanicsPlasticModel(name, parameters),
+    _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength"))
 {
+  // cannot check the following for all values of strength, but this is a start
+  if (_strength.value(0) < 0)
+    mooseError("Weak plane tensile strength must not be negative");
 }
 
 
@@ -58,13 +63,13 @@ TensorMechanicsPlasticWeakPlaneTensile::dflowPotential_dintnl(const RankTwoTenso
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneTensile::tensile_strength(const Real /*internal_param*/) const
+TensorMechanicsPlasticWeakPlaneTensile::tensile_strength(const Real internal_param) const
 {
-  return 1.0;
+  return _strength.value(internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneTensile::dtensile_strength(const Real /*internal_param*/) const
+TensorMechanicsPlasticWeakPlaneTensile::dtensile_strength(const Real internal_param) const
 {
-  return 0.0;
+  return _strength.derivative(internal_param);
 }

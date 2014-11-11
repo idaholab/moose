@@ -4,6 +4,9 @@ template<>
 InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
+  params.addRequiredParam<UserObjectName>("cohesion", "A TensorMechanicsHardening UserObject that defines hardening of the cohesion.  Physically the cohesion should not be negative.");
+  params.addRequiredParam<UserObjectName>("tan_friction_angle", "A TensorMechanicsHardening UserObject that defines hardening of tan(friction angle).  Physically the friction angle should be between 0 and 90deg.");
+  params.addRequiredParam<UserObjectName>("tan_dilation_angle", "A TensorMechanicsHardening UserObject that defines hardening of the tan(dilation angle).  Usually the dilation angle is not greater than the friction angle, and it is between 0 and 90deg.");
   MooseEnum tip_scheme("hyperbolic cap", "hyperbolic");
   params.addParam<MooseEnum>("tip_scheme", tip_scheme, "Scheme by which the cone's tip will be smoothed.");
   params.addRequiredRangeCheckedParam<Real>("smoother", "smoother>=0", "For the 'hyperbolic' tip_scheme, the cone vertex at shear-stress = 0 will be smoothed by the given amount.  For the 'cap' tip_scheme, additional smoothing will occur.  Typical value is 0.1*cohesion");
@@ -17,11 +20,22 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>()
 TensorMechanicsPlasticWeakPlaneShear::TensorMechanicsPlasticWeakPlaneShear(const std::string & name,
                                                          InputParameters parameters) :
     TensorMechanicsPlasticModel(name, parameters),
+    _cohesion(getUserObject<TensorMechanicsHardeningModel>("cohesion")),
+    _tan_phi(getUserObject<TensorMechanicsHardeningModel>("tan_friction_angle")),
+    _tan_psi(getUserObject<TensorMechanicsHardeningModel>("tan_dilation_angle")),
     _tip_scheme(getParam<MooseEnum>("tip_scheme")),
     _small_smoother2(std::pow(getParam<Real>("smoother"), 2)),
     _cap_start(getParam<Real>("cap_start")),
     _cap_rate(getParam<Real>("cap_rate"))
 {
+  // With arbitary UserObjects, it is impossible to check everything, and
+  // I think this is the best I can do
+  if (tan_phi(0) < 0 || tan_psi(0) < 0)
+    mooseError("Weak-Plane-Shear friction and dilation angles must lie in [0, Pi/2]");
+  if (tan_phi(0) < tan_psi(0))
+    mooseError("Weak-Plane-Shear friction angle must not be less than Weak-Plane-Shear dilation angle");
+  if (cohesion(0) < 0)
+    mooseError("Weak-Plane-Shear cohesion must not be negative");
 }
 
 
@@ -118,39 +132,39 @@ TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dintnl(const RankTwoTensor 
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::cohesion(const Real /*internal_param*/) const
+TensorMechanicsPlasticWeakPlaneShear::cohesion(const Real internal_param) const
 {
-  return 1.0;
+  return _cohesion.value(internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::dcohesion(const Real /*internal_param*/) const
+TensorMechanicsPlasticWeakPlaneShear::dcohesion(const Real internal_param) const
 {
-  return 0.0;
+  return _cohesion.derivative(internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::tan_phi(const Real /*internal_param*/) const
+TensorMechanicsPlasticWeakPlaneShear::tan_phi(const Real internal_param) const
 {
-  return 1.0;
+  return _tan_phi.value(internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::dtan_phi(const Real /*internal_param*/) const
+TensorMechanicsPlasticWeakPlaneShear::dtan_phi(const Real internal_param) const
 {
-  return 0.0;
+  return _tan_phi.derivative(internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::tan_psi(const Real /*internal_param*/) const
+TensorMechanicsPlasticWeakPlaneShear::tan_psi(const Real internal_param) const
 {
-  return 1.0;
+  return _tan_psi.value(internal_param);
 }
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::dtan_psi(const Real /*internal_param*/) const
+TensorMechanicsPlasticWeakPlaneShear::dtan_psi(const Real internal_param) const
 {
-  return 0.0;
+  return _tan_psi.derivative(internal_param);
 }
 
 

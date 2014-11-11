@@ -2,6 +2,7 @@
 #define TENSORMECHANICSPLASTICWEAKPLANETENSILE_H
 
 #include "TensorMechanicsPlasticModel.h"
+#include "TensorMechanicsHardeningModel.h"
 
 
 class TensorMechanicsPlasticWeakPlaneTensile;
@@ -12,12 +13,17 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensile>();
 
 /**
  * Rate-independent associative weak-plane tensile failure
- * with tensile strength = 1
+ * with hardening/softening of the tensile strength
  */
 class TensorMechanicsPlasticWeakPlaneTensile : public TensorMechanicsPlasticModel
 {
  public:
   TensorMechanicsPlasticWeakPlaneTensile(const std::string & name, InputParameters parameters);
+
+
+ protected:
+
+  const TensorMechanicsHardeningModel & _strength;
 
   /**
    * The yield function
@@ -66,8 +72,6 @@ class TensorMechanicsPlasticWeakPlaneTensile : public TensorMechanicsPlasticMode
    * @return dr_dintnl(i, j) = dr(i, j)/dintnl
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
-
- protected:
 
   /// tensile strength as a function of residual value, rate, and internal_param
   virtual Real tensile_strength(const Real internal_param) const;
