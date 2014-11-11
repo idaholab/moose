@@ -6,6 +6,7 @@ InputParameters validParams<InteractionIntegralAuxFields>()
   InputParameters params = validParams<Material>();
   addInteractionIntegralAuxFieldsParams(params);
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
+  params.addRequiredParam<unsigned int>("crack_front_node_index","The index of the node on the crack front to calculate auxiliary fields at");
   //TODO: anisotropic material properties
   // material properties defined at crack front
   return params;
@@ -36,21 +37,21 @@ InteractionIntegralAuxFields::getSIFModesEnum()
 
 InteractionIntegralAuxFields::InteractionIntegralAuxFields(const std::string & name, InputParameters parameters) :
     Material(name, parameters),
-    _aux_stress_I(declareProperty<ColumnMajorMatrix>("aux_stress_I")),
-    _aux_disp_I(declareProperty<ColumnMajorMatrix>("aux_disp_I")),
-    _aux_grad_disp_I(declareProperty<ColumnMajorMatrix>("aux_grad_disp_I")),
-    _aux_strain_I(declareProperty<ColumnMajorMatrix>("aux_strain_I")),
-    _aux_stress_II(declareProperty<ColumnMajorMatrix>("aux_stress_II")),
-    _aux_disp_II(declareProperty<ColumnMajorMatrix>("aux_disp_II")),
-    _aux_grad_disp_II(declareProperty<ColumnMajorMatrix>("aux_grad_disp_II")),
-    _aux_strain_II(declareProperty<ColumnMajorMatrix>("aux_strain_II")),
-    _aux_stress_III(declareProperty<ColumnMajorMatrix>("aux_stress_III")),
-    _aux_disp_III(declareProperty<ColumnMajorMatrix>("aux_disp_III")),
-    _aux_grad_disp_III(declareProperty<ColumnMajorMatrix>("aux_grad_disp_III")),
-    _aux_strain_III(declareProperty<ColumnMajorMatrix>("aux_strain_III")),
+    _appended_index_name(getParam<std::string>("appended_index_name")),
+    _aux_stress_I(declareProperty<ColumnMajorMatrix>("aux_stress_I_"+_appended_index_name)),
+    _aux_disp_I(declareProperty<ColumnMajorMatrix>("aux_disp_I_"+_appended_index_name)),
+    _aux_grad_disp_I(declareProperty<ColumnMajorMatrix>("aux_grad_disp_I_"+_appended_index_name)),
+    _aux_strain_I(declareProperty<ColumnMajorMatrix>("aux_strain_I_"+_appended_index_name)),
+    _aux_stress_II(declareProperty<ColumnMajorMatrix>("aux_stress_II_"+_appended_index_name)),
+    _aux_disp_II(declareProperty<ColumnMajorMatrix>("aux_disp_II_"+_appended_index_name)),
+    _aux_grad_disp_II(declareProperty<ColumnMajorMatrix>("aux_grad_disp_II_"+_appended_index_name)),
+    _aux_strain_II(declareProperty<ColumnMajorMatrix>("aux_strain_II_"+_appended_index_name)),
+    _aux_stress_III(declareProperty<ColumnMajorMatrix>("aux_stress_III_"+_appended_index_name)),
+    _aux_disp_III(declareProperty<ColumnMajorMatrix>("aux_disp_III_"+_appended_index_name)),
+    _aux_grad_disp_III(declareProperty<ColumnMajorMatrix>("aux_grad_disp_III_"+_appended_index_name)),
+    _aux_strain_III(declareProperty<ColumnMajorMatrix>("aux_strain_III_"+_appended_index_name)),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _has_crack_front_node_index(isParamValid("crack_front_node_index")),
-    _crack_front_node_index(_has_crack_front_node_index ? getParam<unsigned int>("crack_front_node_index") : 0),
+    _crack_front_node_index(getParam<unsigned int>("crack_front_node_index")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus"))
 {

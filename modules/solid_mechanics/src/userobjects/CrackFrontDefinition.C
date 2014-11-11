@@ -553,7 +553,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     rot_mat(0,2) = 0.0;
     rot_mat(1,2) = 0.0;
     rot_mat(2,2) = 0.0;
-    rot_mat(_axis_2d,2) = -1.0;
+    rot_mat(_axis_2d,2) = 1.0;
     _rot_matrix.push_back(rot_mat);
 
     _segment_lengths.push_back(std::make_pair(0.0,0.0));
