@@ -62,6 +62,7 @@ KernelWarehouse::addKernel(MooseSharedPointer<KernelBase> & kernel, const std::s
   KernelBase * kernel_ptr = kernel.get();
   _all_objects.push_back(kernel_ptr);
 
+  // Non-block restricted
   if (block_ids.empty() || block_ids.find(Moose::ANY_BLOCK_ID) != block_ids.end())
   {
     if (dynamic_cast<TimeKernel *>(kernel_ptr) != NULL)
@@ -69,6 +70,8 @@ KernelWarehouse::addKernel(MooseSharedPointer<KernelBase> & kernel, const std::s
     else
       _nontime_global_kernels.push_back(kernel_ptr);
   }
+
+  // Block restricted
   else
   {
     for (std::set<SubdomainID>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)

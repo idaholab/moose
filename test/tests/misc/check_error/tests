@@ -53,13 +53,7 @@
     expect_err = "Unknown variable"
   [../]
 
-  [./bad_material_block_test]
-    type = 'RunException'
-    input = 'bad_material_block_test.i'
-    expect_err = "Material block \S+ specified in the input file does not exist"
-  [../]
-
-  [./bad_material_test]
+  [./Badd_material_test]
     type = 'RunException'
     input = 'bad_material_test.i'
     expect_err = "A '\w+' is not a registered object"
@@ -261,12 +255,6 @@
     cli_args = 'Materials/stateful_mat/declare_only_older=true'
   [../]
 
-  [./missing_mesh_bcs_test]
-    type = 'RunException'
-    input = 'missing_mesh_bcs_test.i'
-    expect_err = "The following boundary ids from your input file do not exist in the input mesh \d+"
-  [../]
-
   [./missing_mesh_test]
     type = 'RunException'
     input = 'missing_mesh_test.i'
@@ -346,12 +334,6 @@
     type = 'RunApp'
     input = 'override_name_variable_test.i'
     expect_out = "The following variables were overridden or supplied multiple times:"
-  [../]
-
-  [./pps_bad_block_test]
-    type = 'RunException'
-    input = 'pps_bad_block_test.i'
-    expect_err = "One or more UserObjects is referencing a nonexistent block"
   [../]
 
   [./rz_3d_error_check_test]

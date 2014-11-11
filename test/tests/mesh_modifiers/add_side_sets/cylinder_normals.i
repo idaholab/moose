@@ -13,7 +13,7 @@
     normals = '0  0  1
                0  1  0
                0  0 -1'
-    boundary = 'top side bottom'
+    new_boundary = 'top side bottom'
   [../]
 []
 

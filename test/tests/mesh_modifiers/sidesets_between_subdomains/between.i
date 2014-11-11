@@ -8,7 +8,7 @@
     type = SideSetsBetweenSubdomains
     master_block = 'left'
     paired_block = 'right'
-    boundary = 'in_between'
+    new_boundary = 'in_between'
   [../]
 []
 

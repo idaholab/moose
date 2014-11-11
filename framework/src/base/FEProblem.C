@@ -3619,13 +3619,6 @@ FEProblem::checkProblemIntegrity()
     bool check_material_coverage = false;
     for (std::set<SubdomainID>::const_iterator i = _materials[0].blocks().begin(); i != _materials[0].blocks().end(); ++i)
     {
-      if (*i != Moose::ANY_BLOCK_ID && mesh_subdomains.find(*i) == mesh_subdomains.end())
-      {
-        std::stringstream oss;
-        oss << "Material block \"" << *i << "\" specified in the input file does not exist";
-        mooseError (oss.str());
-      }
-
       local_mesh_subs.erase(*i);
       check_material_coverage = true;
     }
@@ -3653,9 +3646,6 @@ FEProblem::checkProblemIntegrity()
 
     _materials[0].checkStatefulSanity();
   }
-
-  // Check that BCs used in your simulation exist in your mesh
-  _nl.checkBCCoverage();
 
   // Check UserObjects and Postprocessors
   checkUserObjects();

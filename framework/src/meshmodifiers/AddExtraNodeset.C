@@ -22,7 +22,9 @@ template<>
 InputParameters validParams<AddExtraNodeset>()
 {
   InputParameters params = validParams<MeshModifier>();
-  params += validParams<BoundaryRestrictableRequired>();
+  params.addParam<std::vector<BoundaryName> >("new_boundary", "The name of the boundary to create");
+  params.addDeprecatedParam<std::vector<BoundaryName> >("boundary", "The name of the boundary to create", "Use 'new_boundary' instead");
+
   params.addParam<std::vector<unsigned int> >("nodes", "The nodes you want to be in the nodeset (Either this parameter or \"coord\" must be supplied).");
   params.addParam<std::vector<Real> >("coord","The nodes with coordinates you want to be in the nodeset (Either this parameter or \"nodes\" must be supplied).");
   params.addParam<Real>("tolerance", TOLERANCE, "The tolerance in which two nodes are considered identical");
@@ -31,14 +33,18 @@ InputParameters validParams<AddExtraNodeset>()
 }
 
 AddExtraNodeset::AddExtraNodeset(const std::string & name, InputParameters params) :
-    MeshModifier(name, params),
-    BoundaryRestrictableRequired(name, params)
+    MeshModifier(name, params)
 {
 }
 
 void
 AddExtraNodeset::modify()
 {
+  // *** DEPRECATED SUPPORT ***
+  // Remove these two lines and make 'new_boundary' required when this is removed
+  if (isParamValid("boundary"))
+    _pars.set<std::vector<BoundaryName> >("new_boundary") = getParam<std::vector<BoundaryName> >("boundary");
+
   // make sure the input is not empty
   bool data_valid = false;
   if (_pars.isParamValid("nodes"))
@@ -56,8 +62,8 @@ AddExtraNodeset::modify()
     mooseError("Node set can not be empty!");
 
   // Get the BoundaryIDs from the mesh
-  std::vector<BoundaryName> boundary_names = boundaryNames();
-  std::vector<BoundaryID> boundary_ids(boundaryIDs().begin(), boundaryIDs().end());
+  std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName> >("new_boundary");
+  std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(boundary_names, true);
 
   // Get a reference to our BoundaryInfo object
   BoundaryInfo & boundary_info = _mesh_ptr->getMesh().get_boundary_info();
