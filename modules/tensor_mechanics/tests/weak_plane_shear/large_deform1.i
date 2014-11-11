@@ -159,11 +159,23 @@
 []
 
 [UserObjects]
+  [./coh]
+    type = TensorMechanicsHardeningConstant
+    value = 1
+  [../]
+  [./tanphi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.5
+  [../]
+  [./tanpsi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.1111077
+  [../]
   [./wps]
-    type = TensorMechanicsPlasticWeakPlaneShearExponential
-    cohesion = 1
-    dilation_angle = 6.34
-    friction_angle = 26.565051178
+    type = TensorMechanicsPlasticWeakPlaneShear
+    cohesion = coh
+    tan_friction_angle = tanphi
+    tan_dilation_angle = tanpsi
     smoother = 0.5
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-6

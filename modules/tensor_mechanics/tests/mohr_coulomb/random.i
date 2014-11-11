@@ -1,17 +1,19 @@
-# apply a number of "random" configurations and
-# check that the algorithm returns to the yield surface
+# apply many random large deformations, checking that the algorithm returns correctly to
+# the yield surface each time.
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 1
-  ny = 1
+  nx = 1000
+  ny = 1234
   nz = 1
-  xmin = -0.5
-  xmax = 0.5
-  ymin = -0.5
-  ymax = 0.5
-  zmin = -0.5
-  zmax = 0.5
+  xmin = 0
+  xmax = 1000
+  ymin = 0
+  ymax = 1234
+  zmin = 0
+  zmax = 1
 []
 
 
@@ -33,43 +35,45 @@
 []
 
 
-[BCs]
-  [./bottomx]
-    type = PresetBC
+[ICs]
+  [./x]
+    type = RandomIC
+    min = -0.1
+    max = 0.1
     variable = disp_x
-    boundary = back
-    value = 0.0
   [../]
-  [./bottomy]
-    type = PresetBC
+  [./y]
+    type = RandomIC
+    min = -0.1
+    max = 0.1
     variable = disp_y
-    boundary = back
-    value = 0.0
   [../]
-  [./bottomz]
-    type = PresetBC
+  [./z]
+    type = RandomIC
+    min = -0.1
+    max = 0.1
     variable = disp_z
-    boundary = back
-    value = 0.0
   [../]
+[]
 
-  [./topx]
+[BCs]
+  [./x]
     type = FunctionPresetBC
     variable = disp_x
-    boundary = front
-    function = '(sin(0.05*t)+x)/1E0'
+    boundary = 'front back'
+    function = '0'
   [../]
-  [./topy]
+  [./y]
     type = FunctionPresetBC
     variable = disp_y
-    boundary = front
-    function = '(cos(0.04*t)+x*y)/1E0'
+    boundary = 'front back'
+    function = '0'
   [../]
-  [./topz]
+  [./z]
     type = FunctionPresetBC
     variable = disp_z
-    boundary = front
-    function = 't/1E2'
+    boundary = 'front back'
+    function = '0'
   [../]
 []
 
@@ -83,8 +87,8 @@
 [AuxKernels]
   [./yield_fcn_auxk]
     type = MaterialStdVectorAux
-    property = plastic_yield_function
     index = 0
+    property = plastic_yield_function
     variable = yield_fcn
   [../]
 []
@@ -112,11 +116,29 @@
 []
 
 [UserObjects]
+  [./mc_coh]
+    type = TensorMechanicsHardeningConstant
+    value = 1E3
+  [../]
+  [./mc_phi]
+    type = TensorMechanicsHardeningConstant
+    value = 30
+    convert_to_radians = true
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningConstant
+    value = 5
+    convert_to_radians = true
+  [../]
   [./mc]
-    type = TensorMechanicsPlasticTensile
+    type = TensorMechanicsPlasticMohrCoulomb
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
+    mc_tip_smoother = 0.1E3
+    mc_edge_smoother = 10
     yield_function_tolerance = 1E-3
-    tensile_tip_smoother = 0.5
-    internal_constraint_tolerance = 1E-9
+    internal_constraint_tolerance = 1E-6
   [../]
 []
 
@@ -128,24 +150,26 @@
     disp_y = disp_y
     disp_z = disp_z
     fill_method = symmetric_isotropic
-    C_ijkl = '0 2.0E6'
+    C_ijkl = '0 1E7'
     max_NR_iterations = 1000
-    ep_plastic_tolerance = 1E-9
+    ep_plastic_tolerance = 1E-6
+    min_stepsize = 1E-3
     plastic_models = mc
     debug_fspb = 1
+    deactivation_scheme = safe
   [../]
 []
 
 
 [Executioner]
-  end_time = 1E3
+  end_time = 1
   dt = 1
   type = Transient
 []
 
 
 [Outputs]
-  file_base = many_deforms
+  file_base = random
   output_initial = true
   exodus = false
   [./console]

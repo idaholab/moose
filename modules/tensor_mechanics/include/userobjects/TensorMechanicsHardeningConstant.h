@@ -24,7 +24,7 @@ class TensorMechanicsHardeningConstant : public TensorMechanicsHardeningModel
 
  private:
 
-  /// The value that the parameter will tak
+  /// The value that the parameter will take
   Real _val;
 
 };

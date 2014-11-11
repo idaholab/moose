@@ -166,9 +166,13 @@
 []
 
 [UserObjects]
+  [./ts]
+    type = TensorMechanicsHardeningConstant
+    value = 1E6
+  [../]
   [./mc]
-    type = TensorMechanicsPlasticTensileExponential
-    tensile_strength = 1.0E6
+    type = TensorMechanicsPlasticTensile
+    tensile_strength = ts
     yield_function_tolerance = 1E-6
     tensile_tip_smoother = 1.0
     internal_constraint_tolerance = 1E-5

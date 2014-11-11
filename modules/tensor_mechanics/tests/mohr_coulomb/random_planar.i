@@ -1,19 +1,19 @@
-# apply many large deformations, checking that the algorithm returns correctly to
-# the yield surface each time
+# apply many random large deformations, checking that the algorithm returns correctly to
+# the yield surface each time.
 
 
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 1
-  ny = 1
+  nx = 1000
+  ny = 1234
   nz = 1
-  xmin = -0.5
-  xmax = 0.5
-  ymin = -0.5
-  ymax = 0.5
-  zmin = -0.5
-  zmax = 0.5
+  xmin = 0
+  xmax = 1000
+  ymin = 0
+  ymax = 1234
+  zmin = 0
+  zmax = 1
 []
 
 
@@ -35,43 +35,45 @@
 []
 
 
-[BCs]
-  [./bottomx]
-    type = PresetBC
+[ICs]
+  [./x]
+    type = RandomIC
+    min = -0.1
+    max = 0.1
     variable = disp_x
-    boundary = back
-    value = 0.0
   [../]
-  [./bottomy]
-    type = PresetBC
+  [./y]
+    type = RandomIC
+    min = -0.1
+    max = 0.1
     variable = disp_y
-    boundary = back
-    value = 0.0
   [../]
-  [./bottomz]
-    type = PresetBC
+  [./z]
+    type = RandomIC
+    min = -0.1
+    max = 0.1
     variable = disp_z
-    boundary = back
-    value = 0.0
   [../]
+[]
 
-  [./topx]
+[BCs]
+  [./x]
     type = FunctionPresetBC
     variable = disp_x
-    boundary = front
-    function = '(sin(0.05*t)+x)/1E0'
+    boundary = 'front back'
+    function = '0'
   [../]
-  [./topy]
+  [./y]
     type = FunctionPresetBC
     variable = disp_y
-    boundary = front
-    function = '(cos(0.04*t)+x*y)/1E0'
+    boundary = 'front back'
+    function = '0'
   [../]
-  [./topz]
+  [./z]
     type = FunctionPresetBC
     variable = disp_z
-    boundary = front
-    function = 't/1E2'
+    boundary = 'front back'
+    function = '0'
   [../]
 []
 
@@ -114,13 +116,25 @@
 []
 
 [UserObjects]
+  [./coh]
+    type = TensorMechanicsHardeningConstant
+    value = 1E3
+  [../]
+  [./phi]
+    type = TensorMechanicsHardeningConstant
+    value = 30
+    convert_to_radians = true
+  [../]
+  [./psi]
+    type = TensorMechanicsHardeningConstant
+    value = 5
+    convert_to_radians = true
+  [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombExponential
-    mc_cohesion = 1E3
-    mc_friction_angle = 30
-    mc_dilation_angle = 5
-    mc_tip_smoother = 0.1E3
-    mc_edge_smoother = 10
+    type = TensorMechanicsPlasticMohrCoulombMulti
+    cohesion = coh
+    friction_angle = phi
+    dilation_angle = psi
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-6
   [../]
@@ -135,25 +149,26 @@
     disp_z = disp_z
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
-    max_NR_iterations = 1000
+    max_NR_iterations = 100
     ep_plastic_tolerance = 1E-6
     plastic_models = mc
     debug_fspb = 1
-    # THIS IS WORTH EXPLORING: deactivation_scheme = optimized DOES NOT WORK HERE !!
-    deactivation_scheme = safe
+    deactivation_scheme = safe_to_dumb
+    min_stepsize = 1
+    max_stepsize_for_dumb = 1
   [../]
 []
 
 
 [Executioner]
-  end_time = 1000
+  end_time = 1
   dt = 1
   type = Transient
 []
 
 
 [Outputs]
-  file_base = many_deforms
+  file_base = random_planar
   output_initial = true
   exodus = false
   [./console]
