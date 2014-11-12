@@ -1,3 +1,3 @@
 from csvio import *
 
-__all__ = ['csvio']
+__all__ = ['CSVIOTestObject']

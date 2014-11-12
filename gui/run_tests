@@ -2,44 +2,49 @@
 import os, importlib, argparse, inspect
 from src.base import *
 
+from tests.io.csvio import CSVIOTestObject
+
 ##
 # A class for running all available tests, this utilizes
 # the base class, PeacockTestInterface, for running the tests
-class PeacockTester(PeacockTestInterface):
+class PeacockTester(object):
   def __init__(self, **kwargs):
+    self.io = CSVIOTestObject()
 
-    self._search = kwargs.pop('search', None)
 
-    PeacockTestInterface.__init__(self, **kwargs)
+  def test(self):
+    self.io.execute()
+    #self.io.test()
 
-    self._buildTests()
+
+#    self._buildTests()
 
   ##
   # Walks through the tests directory and registers a test
   # for each executable function that exists
-  def _buildTests(self):
-
-    # Walk through all files and directories in the 'tests' path
-    for root, dirs, files in os.walk('tests'):
-
-      # For each file, if the file is a .py file and not a module file it might contain tests
-      for f in files:
-        if f.endswith('.py') and f != '__init__.py' and not f.startswith('.'):
-
-          # Build and load the module
-          prefix, ext = os.path.splitext(os.path.join(root, f))
-          mod, ext = os.path.splitext(root)
-          mod = mod.replace('/','.')
-          i = importlib.import_module(mod)
-
-          # Look through all items in the module, if the items
-          # is executable register it as a test
-          for item in dir(i):
-            attr = getattr(i, item)
-            if hasattr(attr, '__call__') and not inspect.isclass(attr):
-              name = prefix + '.' + item
-              if self._search == None or self._search in name:
-                self.registerTest(attr, name)
+#  def _buildTests(self):
+#
+#    # Walk through all files and directories in the 'tests' path
+#    for root, dirs, files in os.walk('tests'):
+#
+#      # For each file, if the file is a .py file and not a module file it might contain tests
+#      for f in files:
+#        if f.endswith('.py') and f != '__init__.py' and not f.startswith('.'):
+#
+#          # Build and load the module
+#          prefix, ext = os.path.splitext(os.path.join(root, f))
+#          mod, ext = os.path.splitext(root)
+#          mod = mod.replace('/','.')
+#          i = importlib.import_module(mod)
+#
+#          # Look through all items in the module, if the items
+#          # is executable register it as a test
+#          for item in dir(i):
+#            attr = getattr(i, item)
+#            if hasattr(attr, '__call__') and not inspect.isclass(attr):
+#              name = prefix + '.' + item
+#              if self._search == None or self._search in name:
+#                self.registerTest(attr, name)
 
 
 # Main

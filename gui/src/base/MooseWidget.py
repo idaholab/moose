@@ -9,7 +9,7 @@ from src.base import *
 
 ##
 # Basic QWidget to serve as a container for controls
-class MooseWidget(PeacockErrorInterface, PeacockTestInterface, MooseWidgetInfoBase):
+class MooseWidget(PeacockErrorInterface, MooseWidgetInfoBase):
 
   ##
   # Constructor.

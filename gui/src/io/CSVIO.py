@@ -3,11 +3,10 @@ import os, sys, csv
 
 # Peacock modules
 from src.base import *
-#from tests.io import *
 
 ##
 # A class for performing read/write operations on *.csv files
-class CSVIO(PeacockErrorInterface, PeacockTestInterface):
+class CSVIO(PeacockErrorInterface):
 
   ##
   # Class constructor
@@ -18,12 +17,6 @@ class CSVIO(PeacockErrorInterface, PeacockTestInterface):
   #   @see PeacockErrorInterface, PeacockTestInterface
   def __init__(self, filename, **kwargs):
     PeacockErrorInterface.__init__(self, **kwargs)
-    PeacockTestInterface.__init__(self, **kwargs)
-
-    # Register the tests associated with this object
-    #self.registerTest(io.testDataRead)
-    #self.registerTest(io.testDataError)
-    #self.registerTest(io.testInvalidInput)
 
     # Initialize member variables
     self._headers = []

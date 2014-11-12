@@ -1,9 +1,8 @@
-#!/usr/bin/python
 import sys, os, inspect, time
 from StringIO import StringIO
 
 # Import Peacock modules
-from src import utils
+from colorText import colorText
 
 ##
 # A a class for performing testing
@@ -12,34 +11,29 @@ from src import utils
 # calls any function that is registered using 'registerTest' method.
 # The function must output the test result (True | False) and a message
 # that will show when the test fails
-class PeacockTestInterface(object):
+class TestObject(object):
 
-  ## Constructor (empty; public)
+  ## Constructor (public)
   def __init__(self, **kwargs):
 
+    # Parse tester options
     self._options = dict()
     self._options['verbose'] = kwargs.pop('verbose', False)
     self._options['quiet'] = kwargs.pop('quiet', False)
 
-
+    # Build a list of tests to perform
     self._tests = []
+    for func in dir(self):
+      if func.startswith('test'):
+        self._tests.append({'name':self.__class__.__name__+'/'+func, 'attr':getattr(self, func)})
 
   ##
-  # Register a function to execute as a test
-  # @param test A function that is serving as a test
-  # @param name (optional) The name of the test, the function name is used by default
-  def registerTest(self, test, name = None):
-    if name == None:
-      name = test.__name__
-    self._tests.append(dict(name=name, attr=test))
-
-  ##
-  # Performs the testing by calling all functions register via registerTest()
-  def test(self):
+  # Performs the testing by calling all functions
+  def execute(self):
 
     start_time = time.time()
-    num_tests = len(self._tests)
-    failed_tests = 0
+    self.num_tests = len(self._tests)
+    self.failed = 0
 
     # This needs to be threaded
     for test in self._tests:
@@ -57,7 +51,7 @@ class PeacockTestInterface(object):
 #        msg = 'RUN ERROR'
 
       if not result:
-        failed_tests += 1
+        self.failed += 1
 
       out = sys.stdout.getvalue() # release output
       sys.stdout.close()  # close the stream
@@ -65,11 +59,16 @@ class PeacockTestInterface(object):
 
       self._showTestResult(name, result, msg, out)
 
+    self.time = time.time() - start_time
+    self.passed = self.num_tests - self.failed
+
+  def summary(self):
+
     # Print the summary
     print '-'*110
-    print 'Executed', num_tests, 'in', str(time.time() - start_time), 'seconds'
-    print  utils.colorText(str(num_tests - failed_tests) + ' passed', 'GREEN') + ', ' \
-           + utils.colorText(str(failed_tests) + ' failed', 'RED')
+    print 'Executed', str(self.num_tests), 'in', str(self.time), 'seconds'
+    print  colorText(str(self.passed) + ' passed', 'GREEN') + ', ' \
+           + colorText(str(self.failed) + ' failed', 'RED')
 
 
   ##
@@ -83,12 +82,12 @@ class PeacockTestInterface(object):
     # Build the status message: OK or FAIL
     if result:
       color = 'GREEN'
-      msg = utils.colorText('OK', color)
+      msg = colorText('OK', color)
       msg_length = 2
     else:
       color = 'RED'
       msg_length = len(msg) + 7
-      msg = utils.colorText('(' + msg + ') FAIL', color)
+      msg = colorText('(' + msg + ') FAIL', color)
 
     # Produce the complete test message string
     n = 110 - len(name) - msg_length
@@ -101,4 +100,4 @@ class PeacockTestInterface(object):
     # Print the error message, if the test fails
     if not self._options['quiet'] and len(args) > 0 and (not result or (self._options['verbose'])):
       for line in args[0].splitlines():
-        print utils.colorText(name + ': ', color) + line
+        print colorText(name + ': ', color) + line

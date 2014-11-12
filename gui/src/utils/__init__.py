@@ -1,3 +1,4 @@
 from colorText import *
 from PeacockPreferences import *
-__all__ = ['colorText', 'PeacockPreferences']
+from TestObject import TestObject
+__all__ = ['colorText', 'PeacockPreferences', 'TestObject']
