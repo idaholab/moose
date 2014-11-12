@@ -196,9 +196,13 @@
 []
 
 [UserObjects]
+  [./str]
+    type = TensorMechanicsHardeningConstant
+    value = 2
+  [../]
   [./j2]
-    type = TensorMechanicsPlasticJ2Gaussian
-    strength = 2
+    type = TensorMechanicsPlasticJ2
+    yield_strength = str
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9
   [../]

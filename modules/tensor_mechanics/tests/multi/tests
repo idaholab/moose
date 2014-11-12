@@ -253,7 +253,7 @@
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
     heavy = true
-    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=10 Mesh/ymax=10'
+    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=10 Mesh/xmax=20 Mesh/ymax=10'
   [../]
     
 []

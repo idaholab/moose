@@ -2,6 +2,7 @@
 #define TENSORMECHANICSPLASTICWEAKPLANESHEAR_H
 
 #include "TensorMechanicsPlasticModel.h"
+#include "TensorMechanicsHardeningModel.h"
 
 
 class TensorMechanicsPlasticWeakPlaneShear;
@@ -12,12 +13,25 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneShear>();
 
 /**
  * Rate-independent associative weak-plane tensile failure
- * with no hardening/softening.  The cone's tip is smoothed.
+ * with hardening/softening.  The cone's tip is smoothed.
  */
 class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
 {
  public:
   TensorMechanicsPlasticWeakPlaneShear(const std::string & name, InputParameters parameters);
+
+
+ protected:
+
+  /// Hardening model for cohesion
+  const TensorMechanicsHardeningModel & _cohesion;
+
+  /// Hardening model for tan(phi)
+  const TensorMechanicsHardeningModel & _tan_phi;
+
+  /// Hardening model for tan(psi)
+  const TensorMechanicsHardeningModel & _tan_psi;
+
 
   /**
    * The yield function
@@ -66,9 +80,6 @@ class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
    * @return dr_dintnl(i, j) = dr(i, j)/dintnl
    */
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
-
- protected:
-
 
   /**
    * The yield function is modified to
