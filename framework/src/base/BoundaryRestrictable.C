@@ -78,6 +78,24 @@ BoundaryRestrictable::BoundaryRestrictable(const std::string name, InputParamete
   else
     _boundary_restricted = true;
 
+  // If this object is block restricted, check that defined blocks exist on the mesh
+  if (_bnd_ids.find(Moose::ANY_BOUNDARY_ID) == _bnd_ids.end())
+  {
+    const std::set<BoundaryID> & valid_ids = _bnd_mesh->meshBoundaryIds();
+    std::vector<BoundaryID> diff;
+
+    std::set_difference(_bnd_ids.begin(), _bnd_ids.end(), valid_ids.begin(), valid_ids.end(), std::back_inserter(diff));
+
+    if (!diff.empty())
+    {
+      std::ostringstream msg;
+      msg << "The object '" << name << "' contains the following boundary ids that do no exist on the mesh:";
+      for (std::vector<BoundaryID>::iterator it = diff.begin(); it != diff.end(); ++it)
+        msg << " " << *it;
+      mooseError(msg.str());
+    }
+  }
+
   // Store the ids in the input parameters
   parameters.set<std::vector<BoundaryID> >("_boundary_ids") = std::vector<BoundaryID>(_bnd_ids.begin(), _bnd_ids.end());
 }
