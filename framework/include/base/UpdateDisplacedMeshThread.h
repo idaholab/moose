@@ -27,6 +27,7 @@ public:
   UpdateDisplacedMeshThread(DisplacedProblem & problem);
 
   void operator() (const SemiLocalNodeRange & range) const;
+  void operator() (const NodeRange & range) const;
 
 protected:
   DisplacedProblem & _problem;

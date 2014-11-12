@@ -575,3 +575,26 @@ DisplacedProblem::registerRecoverableData(std::string name)
 
   _mproblem.registerRecoverableData(name);
 }
+
+void
+DisplacedProblem::undisplaceMesh()
+{
+  // If undisplaceMesh() is called during initial adaptivity, it is
+  // not valid to call _mesh.getActiveSemiLocalNodeRange() since it is
+  // not set up yet.  So we are creating the Range by hand.
+  //
+  // We must undisplace *all* our nodes to the _ref_mesh
+  // configuration, not just the local ones, since the partitioners
+  // require this.  We are using the GRAIN_SIZE=1 from MooseMesh.C,
+  // not sure how this value was decided upon.
+  //
+  // Note: we don't have to invalidate/update as much stuff as
+  // DisplacedProblem::updateMesh() does, since this will be handled
+  // by a later call to updateMesh().
+  NodeRange node_range(_mesh.getMesh().nodes_begin(),
+                       _mesh.getMesh().nodes_end(),
+                       /*grainsize=*/1);
+
+  // Undisplace the mesh using threads.
+  Threads::parallel_for (node_range, UpdateDisplacedMeshThread(*this));
+}
