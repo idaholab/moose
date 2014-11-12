@@ -2,7 +2,7 @@
   [./except1]
     type = 'RunException'
     input = 'except1.i'
-    expect_err = 'Weak-plane friction angle must not be less than weak-plane dilation angle'
+    expect_err = 'Weak-Plane-Shear friction angle must not be less than Weak-Plane-Shear dilation angle'
   [../]
   [./except2]
     type = 'RunException'

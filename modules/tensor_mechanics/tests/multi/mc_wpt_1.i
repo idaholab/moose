@@ -183,18 +183,37 @@
 []
 
 [UserObjects]
+  [./mc_coh]
+    type = TensorMechanicsHardeningConstant
+    value = 100
+  [../]
+  [./mc_phi]
+    type = TensorMechanicsHardeningConstant
+    value = 60
+    convert_to_radians = true
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningConstant
+    value = 5
+    convert_to_radians = true
+  [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombExponential
-    mc_cohesion = 100
-    mc_friction_angle = 60
-    mc_dilation_angle = 5
+    type = TensorMechanicsPlasticMohrCoulomb
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
     mc_tip_smoother = 4
     mc_edge_smoother = 25
     yield_function_tolerance = 1E-3
     internal_constraint_tolerance = 1E-9
   [../]
+  [./str]
+    type = TensorMechanicsHardeningConstant
+    value = 1
+  [../]
   [./wpt]
     type = TensorMechanicsPlasticWeakPlaneTensile
+    tensile_strength = str
     yield_function_tolerance = 1E-6
     internal_constraint_tolerance = 1E-5
   [../]

@@ -24,21 +24,18 @@
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
-#include "TensorMechanicsPlasticTensileExponential.h"
-#include "TensorMechanicsPlasticTensileCubic.h"
+#include "TensorMechanicsPlasticTensileMulti.h"
 #include "TensorMechanicsPlasticMohrCoulomb.h"
-#include "TensorMechanicsPlasticMohrCoulombExponential.h"
-#include "TensorMechanicsPlasticMohrCoulombCubic.h"
+#include "TensorMechanicsPlasticMohrCoulombMulti.h"
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
-#include "TensorMechanicsPlasticWeakPlaneTensileExponential.h"
-#include "TensorMechanicsPlasticWeakPlaneTensileCubic.h"
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
-#include "TensorMechanicsPlasticWeakPlaneShearExponential.h"
-#include "TensorMechanicsPlasticWeakPlaneShearGaussian.h"
-#include "TensorMechanicsPlasticWeakPlaneShearCubic.h"
 #include "TensorMechanicsPlasticJ2.h"
-#include "TensorMechanicsPlasticJ2Gaussian.h"
+#include "TensorMechanicsHardeningConstant.h"
+#include "TensorMechanicsHardeningGaussian.h"
+#include "TensorMechanicsHardeningExponential.h"
+#include "TensorMechanicsHardeningCutExponential.h"
+#include "TensorMechanicsHardeningCubic.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -87,21 +84,18 @@ TensorMechanicsApp::registerObjects(Factory & factory)
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
-  registerUserObject(TensorMechanicsPlasticTensileExponential);
-  registerUserObject(TensorMechanicsPlasticTensileCubic);
+  registerUserObject(TensorMechanicsPlasticTensileMulti);
   registerUserObject(TensorMechanicsPlasticMohrCoulomb);
-  registerUserObject(TensorMechanicsPlasticMohrCoulombExponential);
-  registerUserObject(TensorMechanicsPlasticMohrCoulombCubic);
+  registerUserObject(TensorMechanicsPlasticMohrCoulombMulti);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensile);
-  registerUserObject(TensorMechanicsPlasticWeakPlaneTensileExponential);
-  registerUserObject(TensorMechanicsPlasticWeakPlaneTensileCubic);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileN);
   registerUserObject(TensorMechanicsPlasticWeakPlaneShear);
-  registerUserObject(TensorMechanicsPlasticWeakPlaneShearExponential);
-  registerUserObject(TensorMechanicsPlasticWeakPlaneShearGaussian);
-  registerUserObject(TensorMechanicsPlasticWeakPlaneShearCubic);
   registerUserObject(TensorMechanicsPlasticJ2);
-  registerUserObject(TensorMechanicsPlasticJ2Gaussian);
+  registerUserObject(TensorMechanicsHardeningConstant);
+  registerUserObject(TensorMechanicsHardeningGaussian);
+  registerUserObject(TensorMechanicsHardeningExponential);
+  registerUserObject(TensorMechanicsHardeningCutExponential);
+  registerUserObject(TensorMechanicsHardeningCubic);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);

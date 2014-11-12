@@ -2,12 +2,7 @@
   [./except1]
     type = 'RunException'
     input = 'except1.i'
-    expect_err = 'strength>=0'
-  [../]
-  [./except2]
-    type = 'RunException'
-    input = 'except2.i'
-    expect_err = 'strength_rate>=0'
+    expect_err = 'Weak plane tensile strength must not be negative'
   [../]
   [./small1]
     type = 'CSVDiff'

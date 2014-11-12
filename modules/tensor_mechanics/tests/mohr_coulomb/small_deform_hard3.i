@@ -196,17 +196,29 @@
 []
 
 [UserObjects]
+  [./mc_coh]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 10
+    value_residual = 9.9
+    rate = 1E7
+  [../]
+  [./mc_phi]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 0.8726646 # 50deg
+    value_residual = 0.8901179 # 51deg
+    rate = 1E7
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 0
+    value_residual = 0.8726646 # 50deg
+    rate = 3000
+  [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombExponential
-    mc_cohesion = 10
-    mc_cohesion_residual = 9.9
-    mc_cohesion_rate = 1E7
-    mc_friction_angle = 50
-    mc_friction_angle_residual = 51
-    mc_friction_angle_rate = 1E7
-    mc_dilation_angle = 0
-    mc_dilation_angle_residual = 50
-    mc_dilation_angle_rate = 3000.0
+    type = TensorMechanicsPlasticMohrCoulomb
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
     mc_tip_smoother = 4
     mc_edge_smoother = 20
     yield_function_tolerance = 1E-6

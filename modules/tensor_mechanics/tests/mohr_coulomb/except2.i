@@ -159,11 +159,25 @@
 []
 
 [UserObjects]
+  [./mc_coh]
+    type = TensorMechanicsHardeningConstant
+    value = 10
+  [../]
+  [./mc_phi]
+    type = TensorMechanicsHardeningConstant
+    value = 30
+    convert_to_radians = true
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningConstant
+    value = 5
+    convert_to_radians = true
+  [../]
   [./mc]
-    type = TensorMechanicsPlasticMohrCoulombExponential
-    mc_cohesion = 10
-    mc_friction_angle = 30
-    mc_dilation_angle = 5
+    type = TensorMechanicsPlasticMohrCoulomb
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
     mc_tip_smoother = 1
     mc_edge_smoother = 25
     mc_lode_cutoff = -1.0E-6
