@@ -71,28 +71,37 @@ class TestHarness:
 
     self.checks = {}
     self.checks['platform'] = getPlatforms()
-    self.checks['compiler'] = getCompilers(self.libmesh_dir)
-    self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
-    self.checks['mesh_mode'] = getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
-    self.checks['dtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'dtk')
-    self.checks['library_mode'] = getSharedOption(self.libmesh_dir)
-    self.checks['unique_ids'] = getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
-    self.checks['vtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'vtk')
-    self.checks['tecplot'] =  getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
+
+    # The TestHarness doesn't strictly require the existance of libMesh in order to run. Here we allow the user
+    # to select whether they want to probe for libMesh configuration options.
+    if self.options.skip_config_checks:
+      self.checks['compiler'] = set(['ALL'])
+      self.checks['petsc_version'] = 'N/A'
+      self.checks['library_mode'] = set(['ALL'])
+      self.checks['mesh_mode'] = set(['ALL'])
+      self.checks['dtk'] = set(['ALL'])
+      self.checks['unique_ids'] = set(['ALL'])
+      self.checks['vtk'] = set(['ALL'])
+      self.checks['tecplot'] = set(['ALL'])
+    else:
+      self.checks['compiler'] = getCompilers(self.libmesh_dir)
+      self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
+      self.checks['library_mode'] = getSharedOption(self.libmesh_dir)
+      self.checks['mesh_mode'] = getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
+      self.checks['dtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'dtk')
+      self.checks['unique_ids'] = getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
+      self.checks['vtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'vtk')
+      self.checks['tecplot'] =  getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
 
     # Override the MESH_MODE option if using '--parallel-mesh' option
     if self.options.parallel_mesh == True or \
           (self.options.cli_args != None and \
           self.options.cli_args.find('--parallel-mesh') != -1):
 
-      option_set = set()
-      option_set.add('ALL')
-      option_set.add('PARALLEL')
+      option_set = set(['ALL', 'PARALLEL'])
       self.checks['mesh_mode'] = option_set
 
-    method = set()
-    method.add('ALL')
-    method.add(self.options.method.upper())
+    method = set(['ALL', self.options.method.upper()])
     self.checks['method'] = method
 
     self.initialize(argv, app_name)
@@ -663,6 +672,7 @@ class TestHarness:
     parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
     parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', default='tests', help='The default test specification file to look for (default="tests").')
     parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
+    parser.add_argument('--skip-config-checks', action='store_true', dest='skip_config_checks', help='Skip configuration checks (all tests will run regardless of restrictions)')
     parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
     parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
     parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
