@@ -86,6 +86,7 @@ protected:
   RealVectorValue _crack_mouth_coordinates;
   RealVectorValue _crack_plane_normal;
   bool _treat_as_2d;
+  bool _closed_loop;
   unsigned int _axis_2d;
 
   void getCrackFrontNodes(std::set<unsigned int>& nodes);
