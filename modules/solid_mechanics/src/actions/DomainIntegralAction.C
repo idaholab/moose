@@ -21,6 +21,7 @@ InputParameters validParams<DomainIntegralAction>()
   params.addRequiredParam<std::vector<Real> >("radius_outer", "Outer radius for volume integral domain");
   params.addParam<std::vector<VariableName> >("output_variable", "Variable values to be reported along the crack front");
   params.addParam<bool>("convert_J_to_K",false,"Convert J-integral to stress intensity factor K.");
+  params.addParam<bool>("symmetry_plane",false,"Adjust fracture integrals to account for a symmetry plane passing through the plane of the crack");
   params.addParam<Real>("poissons_ratio","Poisson's ratio");
   params.addParam<Real>("youngs_modulus","Young's modulus");
   params.addParam<std::vector<SubdomainName> >("block","The block ids where InteractionIntegralAuxFields is defined");
@@ -45,6 +46,7 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
   _radius_inner(getParam<std::vector<Real> >("radius_inner")),
   _radius_outer(getParam<std::vector<Real> >("radius_outer")),
   _convert_J_to_K(false),
+  _symmetry_plane(getParam<bool>("symmetry_plane")),
   _use_displaced_mesh(false)
 {
   if (isParamValid("crack_direction_vector"))
@@ -240,6 +242,7 @@ DomainIntegralAction::act()
         params.set<Real>("youngs_modulus") = _youngs_modulus;
         params.set<Real>("poissons_ratio") = _poissons_ratio;
       }
+      params.set<bool>("symmetry_plane") = _symmetry_plane;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
@@ -286,6 +289,7 @@ DomainIntegralAction::act()
       if (_disp_z !="")
         params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1,_disp_z);
       params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1 - std::pow(_poissons_ratio,2));
+      params.set<bool>("symmetry_plane") = _symmetry_plane;
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
         if (_treat_as_2d)
@@ -344,6 +348,8 @@ DomainIntegralAction::act()
     }
     if (_integrals.count(INTERACTION_INTEGRAL_KII) != 0)
     {
+      if (_symmetry_plane)
+        mooseError("In DomainIntegral, symmetry_plane option cannot be used with mode-II interaction integral");
       const std::string pp_base_name("II");
       const std::string pp_type_name("InteractionIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
@@ -415,6 +421,8 @@ DomainIntegralAction::act()
     }
     if (_integrals.count(INTERACTION_INTEGRAL_KIII) != 0)
     {
+      if (_symmetry_plane)
+        mooseError("In DomainIntegral, symmetry_plane option cannot be used with mode-III interaction integral");
       const std::string pp_base_name("II");
       const std::string pp_type_name("InteractionIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);

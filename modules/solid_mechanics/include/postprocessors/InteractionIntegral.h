@@ -46,6 +46,7 @@ protected:
   std::string _aux_strain_name;
   MaterialProperty<ColumnMajorMatrix> & _aux_strain;
   Real _K_factor;
+  bool _symmetry_plane;
 };
 
 #endif //INTERACTIONINTEGRAL_H

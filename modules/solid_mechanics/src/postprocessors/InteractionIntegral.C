@@ -13,6 +13,7 @@ InputParameters validParams<InteractionIntegral>()
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
   params.addParam<unsigned int>("crack_front_node_index","The index of the node on the crack front corresponding to this q function");
   params.addParam<Real>("K_factor", "Conversion factor between interaction integral and stress intensity factor K");
+  params.addParam<bool>("symmetry_plane",false,"Adjust fracture integrals to account for a symmetry plane passing through the plane of the crack");
   params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
@@ -38,7 +39,8 @@ InteractionIntegral::InteractionIntegral(const std::string & name, InputParamete
     _aux_grad_disp(getMaterialProperty<ColumnMajorMatrix>(_aux_grad_disp_name)),
     _aux_strain_name(getParam<std::string>("aux_strain")),
     _aux_strain(getMaterialProperty<ColumnMajorMatrix>(_aux_strain_name)),
-    _K_factor(getParam<Real>("K_factor"))
+    _K_factor(getParam<Real>("K_factor")),
+    _symmetry_plane(getParam<bool>("symmetry_plane"))
 {
 }
 
@@ -152,6 +154,8 @@ InteractionIntegral::computeQpIntegral()
 
   Real eq = term1 + term2 - term3;
 
-  return eq/q_avg_seg;
+  if (_symmetry_plane)
+    eq *= 2.0;
 
+  return eq/q_avg_seg;
 }
