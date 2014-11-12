@@ -2142,33 +2142,6 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
   }
 }
 
-void
-NonlinearSystem::checkBCCoverage() const
-{
-  // Check that BCs used in your simulation exist in your mesh
-  std::set<short> input_bcs, difference;
-
-  // get the boundaries from the simulation (input file)
-  _bcs[0].activeBoundaries(input_bcs);
-
-  // _mesh is from SystemBase...
-  std::set_difference (input_bcs.begin(), input_bcs.end(),
-                       _mesh.meshBoundaryIds().begin(), _mesh.meshBoundaryIds().end(),
-                       std::inserter(difference, difference.end()));
-
-  if (!difference.empty())
-  {
-    std::stringstream extra_boundary_ids;
-
-    std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned short>( extra_boundary_ids, " "));
-
-    mooseError("The following boundary ids from your input file do not exist in the input mesh "
-               + extra_boundary_ids.str());
-  }
-}
-
-
-
 bool
 NonlinearSystem::containsTimeKernel()
 {
