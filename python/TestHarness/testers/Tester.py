@@ -19,6 +19,9 @@ class Tester(MooseObject):
     params.addParam('group',       [], "A list of groups for which this test belongs.")
     params.addParam('prereq',      [], "A list of prereq tests that need to run successfully before launching this test.")
     params.addParam('skip_checks', False, "Tells the TestHarness to skip additional checks (This parameter is set automatically by the TestHarness during recovery tests)")
+    params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
+
+    params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
 
     # Test Filters
     params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
