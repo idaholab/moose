@@ -16,4 +16,13 @@
     input = 'ACParsed_test.i'
     exodiff = 'ACParsed_test_out.e'
   [../]
+
+  [./analyzejacobian_ACParsed]
+    type = 'AnalyzeJacobian'
+    input = 'ACParsed_test.i'
+    prereq = 'ACParsed'
+    expect_out = '\nNo errors detected. :-\)\n'
+    resize_mesh = true
+    recover = false
+  [../]
 []
