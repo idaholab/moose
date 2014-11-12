@@ -94,9 +94,8 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
   def _setupExecutable(self, q_object):
 
     # Utilize the user supplied executable
-    cmd_line_exec = self.options['executable']
-    if cmd_line_exec:
-      q_object.setText(cmd_line_exec)
+    if 'executable' in self.options:
+      q_object.setText(self.options['executable'])
       return
 
     # Search for a moose executeable

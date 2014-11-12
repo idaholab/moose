@@ -37,11 +37,11 @@ class ExecuteConsole(QtGui.QWidget, MooseWidget):
   ##
   # Reset progress bar
   def resetProgress(self):
+    self._progress.reset()
     num_steps = self.pull('NumSteps')
     if num_steps:
       self._progress.setRange(0, num_steps)
-    else:
-      self._progress.reset()
+
 
   ##
   # A method for coloring Console text via html (private)
