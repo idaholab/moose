@@ -168,7 +168,7 @@ InteractionIntegralAuxFields::computeAuxFields(const SIF_MODE sif_mode, ColumnMa
   disp(0,0) = 1 / (2*_shear_modulus) * std::sqrt(_r/(2*libMesh::pi)) * (k(0) * ct2 * (_kappa - 1 + 2*st2*st2)
                                                       + k(1) * st2 * (_kappa + 1 + 2*ct2*ct2));
   disp(0,1) = 1 / (2*_shear_modulus) * std::sqrt(_r/(2*libMesh::pi)) * (k(0) * st2 * (_kappa + 1 - 2*ct2*ct2)
-                                                      - k(2) * ct2 * (_kappa - 1 - 2*st2*st2));
+                                                      - k(1) * ct2 * (_kappa - 1 - 2*st2*st2));
   disp(0,2) = 1 /   _shear_modulus * std::sqrt(_r/(2*libMesh::pi)) * k(2) * st2*st2;
 
   //Calculate x1 derivative of auxiliary displacements
