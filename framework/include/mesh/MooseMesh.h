@@ -460,25 +460,6 @@ public:
    */
   std::vector<BoundaryID> getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool generate_unknown=false) const;
 
-  ///@{
-  /**
-   * Determine if subdomain(s) exist on the mesh
-   * @param subdomain_id A scalar or set of subdomain ids
-   */
-  bool hasSubdomainID(const SubdomainID & id);
-  bool hasSubdomainID(const std::set<SubdomainID> & id);
-  ///@}
-
-  ///@{
-  /**
-   * Determine if boundaryID(s) exist on the mesh
-   * @param boundary_id A scalar or set of boundary ids
-   */
-  bool hasBoundaryID(const BoundaryID & id);
-  bool hasBoundaryID(const std::set<BoundaryID> & id);
-  ///@}
-
-
   /**
    * Get the associated subdomain ID for the subdomain name.
    *
