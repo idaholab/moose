@@ -912,7 +912,10 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
 
   if (_treat_as_2d)
   {
-    closest_node = crack_tip_node_rot;
+    //In 2D, the closest node is the crack tip node and the position of the crack tip node is (0,0,0) in the crack front coordinate system
+    //In case this is a 3D mesh treated as 2D, project point onto same plane as crack front node.
+    //Note: In the crack front coordinate system, z is always in the tangent direction to the crack front
+    p_rot(2) = closest_node(2);
     closest_node_to_p = p_rot;
 
     //Find r, the distance between the qp and the crack front
