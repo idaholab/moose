@@ -1,19 +1,42 @@
 #!/usr/bin/env python
-import os, importlib, argparse, inspect
+import os, importlib, argparse, inspect, pkgutil
 from src.base import *
+from src.utils import TestObject
 
-from tests.io.csvio import CSVIOTestObject
+import tests
 
 ##
 # A class for running all available tests, this utilizes
 # the base class, PeacockTestInterface, for running the tests
 class PeacockTester(object):
   def __init__(self, **kwargs):
-    self.io = CSVIOTestObject()
 
+    self._test_objects = []
+
+
+    #prefix = tests.__name__ + "."
+    for importer, modname, ispkg in pkgutil.iter_modules(tests.__path__, tests.__name__ + '.'):
+      #print "Found submodule %s (is a package: %s)" % (modname, ispkg)
+      module = __import__(modname, fromlist="dummy")
+      #print "Imported", module
+
+      for name, obj in inspect.getmembers(module):
+        if inspect.isclass(obj):
+          instance = obj()
+          if isinstance(instance, TestObject):
+            self._test_objects.append(instance)
+
+          #print name,obj
+
+    print self._test_objects
 
   def test(self):
-    self.io.execute()
+    pass
+
+
+
+
+    #self.io.execute()
     #self.io.test()
 
 
@@ -59,4 +82,4 @@ if __name__ == '__main__':
 
   # Run the tests
   tester = PeacockTester(**vars(options))
-  tester.test()
+ # tester.test()

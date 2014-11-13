@@ -5,7 +5,7 @@ from src import io
 from src.utils import TestObject
 
 
-class CSVIOTestObject(TestObject):
+class CSVIOTest(TestObject):
   def __init__(self):
     TestObject.__init__(self)
 
