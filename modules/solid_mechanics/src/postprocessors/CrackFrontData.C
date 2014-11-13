@@ -41,12 +41,18 @@ CrackFrontData::CrackFrontData(const std::string & name, InputParameters paramet
 {
 }
 
+void
+CrackFrontData::initialize()
+{
+  if (!(_crack_front_node_index < _crack_front_definition->getNumCrackFrontNodes()))
+    mooseError("crack_front_node_index out of range in CrackFrontData");
+
+  _crack_front_node = _crack_front_definition->getCrackFrontNodePtr(_crack_front_node_index);
+}
+
 Real
 CrackFrontData::getValue()
 {
-  if (! _crack_front_node)
-    _crack_front_node = _crack_front_definition->getCrackFrontNodePtr(_crack_front_node_index);
-
   Real value = 0;
 
   if (_crack_front_node->processor_id() == processor_id())

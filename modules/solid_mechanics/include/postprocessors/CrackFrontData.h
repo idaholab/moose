@@ -33,7 +33,7 @@ class CrackFrontData : public GeneralPostprocessor
 public:
   CrackFrontData(const std::string & name, InputParameters parameters);
 
-  virtual void initialize() {}
+  virtual void initialize();
   virtual void execute() {}
 
 
