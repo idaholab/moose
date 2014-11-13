@@ -84,9 +84,8 @@ private:
    *
    * @param i The local app number for the app that needs to be setup.
    * @param time The time to set as the current time for the App
-   * @param output_initial Whether or not the app should be allowed to output its initial condition
    */
-  void setupApp(unsigned int i, Real time = 0.0, bool output_initial = true);
+  void setupApp(unsigned int i, Real time = 0.0);
 
   std::vector<Transient *> _transient_executioners;
 

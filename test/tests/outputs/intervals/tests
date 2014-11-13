@@ -37,7 +37,7 @@
     type = RunException
     input = no_output.i
 #    check_not_exists = no_output_out.e
-    expect_err = "The current settings results in only the input file an no variables being output to the Exodus file, this is not supported."
+    expect_err = "The current settings results in only the input file and no variables being output to the Exodus file, this is not supported."
   [../]
   [./no_intermediate]
     # Test that intermediate steps may be disabled

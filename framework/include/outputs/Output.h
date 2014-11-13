@@ -102,10 +102,9 @@ public:
 protected:
 
   /**
-   * A single call to this function should output all the necessary data for a single timestep. By
-   * default this function performs calls each of the four virtual output methods: outputScalarVariables(),
-   * outputPostprocessors(), outputElementalVariables(), and outputNodalVariables(). But, only if output exists
-   * for each type.
+   * A single call to this function should output all the necessary data for a single timestep.
+   * @param type The type execution flag (see Moose.h)
+   * @param force Ignore the flag and preform the output
    *
    * @see outputNodalVariables outputElementalVariables outputScalarVariables outputPostprocessors
    */

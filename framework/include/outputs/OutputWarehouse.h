@@ -73,6 +73,7 @@ public:
 
   /**
    * Calls the outputStep method for each output object
+   * @param type The type execution flag (see Moose.h)
    */
   void outputStep(OutputExecFlagType type);
 
@@ -212,6 +213,16 @@ public:
    */
   void allowOutput(bool state);
 
+  /**
+   * Indicates that the next call to outputStep should be forced
+   *
+   * This is needed by the MultiApp system, if forceOutput is called the next call to outputStep,
+   * regardless of the type supplied to the call, will be executed with OUTPUT_FORCED.
+   *
+   * Forced output will NOT override the allowOutput flag
+   */
+  void forceOutput();
+
 private:
   /**
    * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
@@ -316,6 +327,9 @@ private:
 
   /// Flag for enabling/disabling all output
   bool _allow_output;
+
+  /// Flag indicating that next call to outputStep is forced
+  bool _force_output;
 
   // Allow complete access:
   //  (1) FEProblem for calling initial/timestepSetup functions

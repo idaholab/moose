@@ -80,7 +80,8 @@ enum OutputExecFlagType
   OUTPUT_TIMESTEP_BEGIN = 4,
   OUTPUT_FINAL = 5,
   OUTPUT_FAILED = 6,
-  OUTPUT_CUSTOM = 7
+  OUTPUT_CUSTOM = 7,
+  OUTPUT_FORCED = 8
 };
 
 namespace Moose

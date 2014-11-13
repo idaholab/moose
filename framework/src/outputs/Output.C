@@ -128,7 +128,7 @@ Output::timestepSetupInternal()
 bool
 Output::shouldOutput(const OutputExecFlagType & type)
 {
-  if (_output_on.contains(type))
+  if (_output_on.contains(type) || type == OUTPUT_FORCED)
     return true;
   return false;
 }
