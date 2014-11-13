@@ -70,6 +70,7 @@
 #include "WeakGradientBC.h"
 #include "DiffusionFluxBC.h"
 #include "PostprocessorDirichletBC.h"
+#include "OneDEqualValueConstraintBC.h"
 
 // auxkernels
 #include "ConstantAux.h"
@@ -233,6 +234,7 @@
 // ScalarKernels
 #include "ODETimeDerivative.h"
 #include "FunctionScalarAux.h"
+#include "NodalEqualValueConstraint.h"
 
 // indicators
 #include "AnalyticalIndicator.h"
@@ -420,6 +422,7 @@ registerObjects(Factory & factory)
   registerBoundaryCondition(WeakGradientBC);
   registerBoundaryCondition(DiffusionFluxBC);
   registerBoundaryCondition(PostprocessorDirichletBC);
+  registerBoundaryCondition(OneDEqualValueConstraintBC);
 
   // dirac kernels
   registerDiracKernel(ConstantPointSource);
@@ -579,6 +582,7 @@ registerObjects(Factory & factory)
 
   // Scalar kernels
   registerScalarKernel(ODETimeDerivative);
+  registerScalarKernel(NodalEqualValueConstraint);
 
   // indicators
   registerIndicator(AnalyticalIndicator);
