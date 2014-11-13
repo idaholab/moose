@@ -78,6 +78,12 @@ class RunApp(Tester):
     if options.colored == False:
       specs['cli_args'].append('--no-color')
 
+    if options.cli_args and not specs['skip_test_harness_cli_args']:
+      specs['cli_args'].insert(0, options.cli_args)
+
+    if options.scaling and specs['scale_refine'] > 0:
+      specs['cli_args'].insert(0, ' -r ' + str(specs['scale_refine']))
+
     # Raise the floor
     ncpus = max(default_ncpus, int(specs['min_parallel']))
     # Lower the ceiling
@@ -103,12 +109,6 @@ class RunApp(Tester):
       command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
     else:
       command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
-
-    if options.scaling and specs['scale_refine'] > 0:
-      command += ' -r ' + str(specs['scale_refine'])
-
-    if options.cli_args and not specs['skip_test_harness_cli_args']:
-      command += ' ' + options.cli_args
 
     if options.pbs:
       return self.getPBSCommand(options)
