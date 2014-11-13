@@ -97,6 +97,12 @@ public:
   typename std::map<std::string, T>::iterator find(const std::string & name) { return _map.find(name); }
   ///@}
 
+  /**
+   * A method for testing of a key exists
+   */
+  bool contains(const std::string & name) { return find(name) != end(); }
+
+
 protected:
 
   /// Data storage
@@ -131,7 +137,7 @@ public:
    * Constructor
    * @param output_on The general "output_on" settings for the object
    */
-  OutputOnWarehouse(const MultiMooseEnum & output_on);
+  OutputOnWarehouse(const MultiMooseEnum & output_on, const InputParameters & params);
 };
 
 /**
@@ -305,7 +311,7 @@ protected:
 
   /**
    * Calls the output() method if output should occur
-   * @param type The execution type to perform
+   * @param type The type execution flag (see Moose.h)
    */
   void outputStep(const OutputExecFlagType & type);
 
@@ -429,6 +435,12 @@ private:
    * @see Output::enableOutputTypes
    */
   static void addValidParams(InputParameters & params, const MultiMooseEnum & types);
+
+  /**
+   * Helper method for checking if output types exists
+   * @param name The name of the output type to test (e.g., postprocessors)
+   */
+  bool hasOutputHelper(const std::string & name);
 
   /**
    * Get the supported types of output (e.g., postprocessors, etc.)

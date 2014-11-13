@@ -70,7 +70,7 @@ Exodus::initialSetup()
 
   // Test that some sort of variable output exists (case when all variables are disabled but input output is still enabled
   if (!hasNodalVariableOutput() && !hasElementalVariableOutput() && !hasPostprocessorOutput() && !hasScalarOutput())
-    mooseError("The current settings results in only the input file an no variables being output to the Exodus file, this is not supported.");
+    mooseError("The current settings results in only the input file and no variables being output to the Exodus file, this is not supported.");
 }
 
 void
@@ -141,10 +141,6 @@ Exodus::outputSetup()
   // Utilize the spatial dimensions
   if (_es_ptr->get_mesh().mesh_dimension() != 1)
     _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
-
-  // Adjust the position of the output
-  if (_app.hasOutputPosition())
-    _exodus_io_ptr->set_coordinate_offset(_app.getOutputPosition());
 }
 
 
@@ -247,6 +243,10 @@ Exodus::output(const OutputExecFlagType & type)
 
   // Prepare the ExodusII_IO object
   outputSetup();
+
+  // Adjust the position of the output
+  if (_app.hasOutputPosition())
+    _exodus_io_ptr->set_coordinate_offset(_app.getOutputPosition());
 
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();

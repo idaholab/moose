@@ -28,17 +28,30 @@
 #include "MooseUtils.h"
 
 
-// Constructor of OutputOnWarehouse; initializes the MultiMooseEnums for all output types
-OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & output_on) : OutputMapWrapper()
+// Constructor of OutputOnWarehouse; initializes the MultiMooseEnums for all available output types
+OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & output_on, const InputParameters & params) : OutputMapWrapper()
 {
   // Initialize each of the output_on settings for the various types of outputs
-  _map.insert(std::make_pair("nodal", output_on));
-  _map.insert(std::make_pair("elemental", output_on));
-  _map.insert(std::make_pair("scalars", output_on));
-  _map.insert(std::make_pair("postprocessors", output_on));
-  _map.insert(std::make_pair("vector_postprocessors", output_on));
-  _map.insert(std::make_pair("input", Output::getExecuteOptions()));
-  _map.insert(std::make_pair("system_information", Output::getExecuteOptions("initial")));
+  if (params.have_parameter<MultiMooseEnum>("output_nodal_on"))
+    _map.insert(std::make_pair("nodal", output_on));
+
+  if (params.have_parameter<MultiMooseEnum>("output_elemental_on"))
+    _map.insert(std::make_pair("elemental", output_on));
+
+  if (params.have_parameter<MultiMooseEnum>("output_scalars_on"))
+    _map.insert(std::make_pair("scalars", output_on));
+
+  if (params.have_parameter<MultiMooseEnum>("output_postprocessors_on"))
+    _map.insert(std::make_pair("postprocessors", output_on));
+
+  if (params.have_parameter<MultiMooseEnum>("output_vector_postprocessors_on"))
+    _map.insert(std::make_pair("vector_postprocessors", output_on));
+
+  if (params.have_parameter<MultiMooseEnum>("output_input_on"))
+    _map.insert(std::make_pair("input", Output::getExecuteOptions()));
+
+  if (params.have_parameter<MultiMooseEnum>("output_system_information_on"))
+    _map.insert(std::make_pair("system_information", Output::getExecuteOptions("initial")));
 }
 
 // Constructor of OutputDataWarehouse; initializes the OutputData structures for 'variable' based output types
@@ -156,7 +169,7 @@ AdvancedOutput<OutputBase>::enableOutputTypes(const std::string & names)
 template<class OutputBase>
 AdvancedOutput<OutputBase>::AdvancedOutput(const std::string & name, InputParameters & parameters) :
     OutputBase(name, parameters),
-    _advanced_output_on(OutputBase::_output_on)
+    _advanced_output_on(OutputBase::_output_on, parameters)
 {
 }
 
@@ -289,11 +302,12 @@ template<class OutputBase>
 void
 AdvancedOutput<OutputBase>::outputStep(const OutputExecFlagType & type)
 {
+
   // If recovering disable output of initial condition, it was already output
   if (type == OUTPUT_INITIAL && OutputBase::_app.isRecovering())
     return;
 
-// Return if the current output is not on the desired interval
+  // Return if the current output is not on the desired interval
   if (type != OUTPUT_FINAL && !OutputBase::onInterval())
     return;
 
@@ -307,6 +321,7 @@ template<>
 void
 AdvancedOutput<FileOutput>::outputStep(const OutputExecFlagType & type)
 {
+
   // If recovering disable output of initial condition, it was already output
   if (type == OUTPUT_INITIAL && _app.isRecovering())
     return;
@@ -328,6 +343,7 @@ template<>
 void
 AdvancedOutput<OversampleOutput>::outputStep(const OutputExecFlagType & type)
 {
+
   // If recovering disable output of initial condition, it was already output
   if (type == OUTPUT_INITIAL && _app.isRecovering())
     return;
@@ -399,19 +415,26 @@ template<class OutputBase>
 bool
 AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const OutputExecFlagType & type)
 {
-
   // Data output flag, true if data exists to be output
   bool output_data_flag = true;
 
-  // Set flag to false, only if the OutputData exists and the output variable list is empty
+  // Set flag to false, if the OutputData exists and the output variable list is empty
   std::map<std::string, OutputData>::const_iterator iter = _output_data.find(name);
   if (iter != _output_data.end() && iter->second.output.empty())
     output_data_flag = false;
 
+  // Set flag to false, if the OutputOnWarehouse DOES NOT contain an entry
+  if (!_advanced_output_on.contains(name))
+    output_data_flag = false;
+
+  // Force the output, if there is something to output and the time has not been output
+  if (type == OUTPUT_FORCED && output_data_flag && _last_output_time[name] != OutputBase::_time)
+    return true;
+
   // Return true (output should occur) if three criteria are satisfied, else do not output:
   //   (1) The output_data_flag = true (i.e, there is data to output)
   //   (2) The current output type is contained in the list of output execution types
-  //   (3) The current execution time is "final" and the data has not already been output
+  //   (3) The current execution time is "final" or "forced" and the data has not already been output
   if (output_data_flag && _advanced_output_on[name].contains(type) &&
       !(type == OUTPUT_FINAL && _last_output_time[name] == OutputBase::_time))
     return true;
@@ -438,11 +461,15 @@ AdvancedOutput<OutputBase>::hasOutput()
 {
   // Test that variables exist for output AND that output execution flags are valid
   for (std::map<std::string, OutputData>::const_iterator it = _output_data.begin(); it != _output_data.end(); ++it)
-    if (!(it->second).output.empty() && _advanced_output_on[it->first].isValid())
+    if (!(it->second).output.empty() &&
+        _advanced_output_on.contains(it->first) &&
+        _advanced_output_on[it->first].isValid())
       return true;
 
   // Test execution flags for non-variable output
-  if (_advanced_output_on["system_information"].isValid() || _advanced_output_on["input"].isValid())
+  if (_advanced_output_on.contains("system_information") && _advanced_output_on["system_information"].isValid())
+    return true;
+  if (_advanced_output_on.contains("input") && _advanced_output_on["input"].isValid())
     return true;
 
   return false;
@@ -683,9 +710,16 @@ AdvancedOutput<OutputBase>::addValidParams(InputParameters & params, const Multi
 
 template<class OutputBase>
 bool
+AdvancedOutput<OutputBase>::hasOutputHelper(const std::string & name)
+{
+  return !_output_data[name].output.empty() && _advanced_output_on.contains(name) && _advanced_output_on[name].isValid();
+}
+
+template<class OutputBase>
+bool
 AdvancedOutput<OutputBase>::hasNodalVariableOutput()
 {
-  return !_output_data["nodal"].output.empty() && _advanced_output_on["nodal"].isValid();
+  return hasOutputHelper("nodal");
 }
 
 template<class OutputBase>
@@ -699,7 +733,7 @@ template<class OutputBase>
 bool
 AdvancedOutput<OutputBase>::hasElementalVariableOutput()
 {
-  return !_output_data["elemental"].output.empty() && _advanced_output_on["elemental"].isValid();
+  return hasOutputHelper("elemental");
 }
 
 template<class OutputBase>
@@ -713,7 +747,7 @@ template<class OutputBase>
 bool
 AdvancedOutput<OutputBase>::hasScalarOutput()
 {
-  return !_output_data["scalars"].output.empty() && _advanced_output_on["scalars"].isValid();
+  return hasOutputHelper("scalars");
 }
 
 template<class OutputBase>
@@ -727,7 +761,7 @@ template<class OutputBase>
 bool
 AdvancedOutput<OutputBase>::hasPostprocessorOutput()
 {
-  return !_output_data["postprocessors"].output.empty() && _advanced_output_on["postprocessors"].isValid();
+  return hasOutputHelper("postprocessors");
 }
 
 template<class OutputBase>
@@ -741,7 +775,7 @@ template<class OutputBase>
 bool
 AdvancedOutput<OutputBase>::hasVectorPostprocessorOutput()
 {
-  return !_output_data["vector_postprocessors"].output.empty() && _advanced_output_on["vector_postprocessors"].isValid();
+  return hasOutputHelper("vector_postprocessors");
 }
 
 template<class OutputBase>

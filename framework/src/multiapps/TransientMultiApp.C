@@ -188,6 +188,10 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         _transferred_dofs = aldit._all_dof_indices;
       }
 
+      // Disable output for sub cycling
+      if (!_output_sub_cycles)
+        output_warehouse.allowOutput(false);
+
       ex->setTargetTime(target_time-app_time_offset);
 
 //      unsigned int failures = 0;
@@ -268,6 +272,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           at_steady = true;
 
+          // Indicate that the next output call (occurs in ex->endStep()) should output, regardless of intervals etc...
+          output_warehouse.forceOutput();
+
           // Clean up the end
           ex->endStep(target_time-app_time_offset);
         }
@@ -275,11 +282,11 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           ex->endStep();
       }
 
-      // If we were looking for a steady state, but didn't reach one, we still need to output one more time
+      // If we were looking for a steady state, but didn't reach one, we still need to output one more time, regardless of interval
       if (!at_steady)
-        output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+        output_warehouse.outputStep(OUTPUT_FORCED);
 
-    }
+    } // sub_cycling
     else if (_tolerate_failure)
     {
       ex->takeStep(dt);
@@ -291,6 +298,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       if (auto_advance)
         if (_first != true)
           ex->incrementStepOrReject();
+
+      if (auto_advance)
+        output_warehouse.allowOutput(true);
 
       ex->takeStep(dt);
 
@@ -324,7 +334,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
               {
                 if (ex->getTime() + app_time_offset + ex->timestepTol()*std::abs(ex->getTime()) >= target_time)
                 {
-                  output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+                  output_warehouse.outputStep(OUTPUT_FORCED);
                   caught_up = true;
                 }
               }
@@ -338,10 +348,15 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
             if (!caught_up)
               mooseError(_name << " Failed to catch up!\n");
+
           }
         }
       }
     }
+
+    // Re-enable all output (it may of been disabled by sub-cycling)
+    output_warehouse.allowOutput(true);
+
   }
 
   _first = false;
@@ -418,7 +433,11 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
 
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
-    setupApp(local_app, time, false);
+    // Setup the app, disable the output so that the initial condition does not output
+    // When an app is reset the initial condition was effectively already output before reset
+    _apps[local_app]->getOutputWarehouse().allowOutput(false);
+    setupApp(local_app, time);
+    _apps[local_app]->getOutputWarehouse().allowOutput(true);
 
     // Swap back
     Moose::swapLibMeshComm(swapped);
@@ -426,7 +445,7 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
 }
 
 void
-TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial)  // FIXME: Should we be passing time?
+TransientMultiApp::setupApp(unsigned int i, Real /*time*/)  // FIXME: Should we be passing time?
 {
   MooseApp * app = _apps[i];
   Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
@@ -435,7 +454,7 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/, bool output_initial) 
 
   // Get the FEProblem and OutputWarehouse for the current MultiApp
   FEProblem * problem = appProblem(_first_local_app + i);
-  OutputWarehouse & output_warehouse = _apps[i]->getOutputWarehouse();
+  OutputWarehouse & output_warehouse = app->getOutputWarehouse();
 
   // Update the file numbers for the outputs from the parent application
   output_warehouse.setFileNumbers(_app.getOutputFileNumbers());

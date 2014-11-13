@@ -29,7 +29,8 @@ OutputWarehouse::OutputWarehouse() :
     Warehouse<Output>(),
     _multiapp_level(0),
     _output_exec_flag(OUTPUT_CUSTOM),
-    _allow_output(true)
+    _allow_output(true),
+    _force_output(false)
 {
   // Set the reserved names
   _reserved.insert("none");                  // allows 'none' to be used as a keyword in 'outputs' parameter
@@ -148,9 +149,15 @@ OutputWarehouse::addOutputFilename(const OutFileBase & filename)
 void
 OutputWarehouse::outputStep(OutputExecFlagType type)
 {
-  if (_allow_output)
+  if (_force_output)
+    type = OUTPUT_FORCED;
+
+  if (type == OUTPUT_FORCED || _allow_output)
     for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
       (*it)->outputStep(type);
+
+  // Reset force output flag
+  _force_output = false;
 }
 
 void
@@ -273,4 +280,10 @@ void
 OutputWarehouse::allowOutput(bool state)
 {
   _allow_output = state;
+}
+
+void
+OutputWarehouse::forceOutput()
+{
+  _force_output = true;
 }
