@@ -33,7 +33,7 @@ class AnalyzeJacobian(Tester):
     if specs['resize_mesh'] :
       mesh_options += ' -r -s %d' % specs['mesh_size']
 
-    command += mesh_options + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
+    command += mesh_options + ' ' + specs['input'] + ' -e ' + specs['executable'] + ' ' + ' '.join(specs['cli_args'])
 
     return command
 
