@@ -366,6 +366,7 @@
 #include "MaterialPropertyDebugOutput.h"
 #include "VariableResidualNormsDebugOutput.h"
 #include "TopResidualDebugOutput.h"
+#include "DOFMapOutput.h"
 
 namespace Moose {
 
@@ -668,6 +669,7 @@ registerObjects(Factory & factory)
   registerOutput(MaterialPropertyDebugOutput);
   registerOutput(VariableResidualNormsDebugOutput);
   registerOutput(TopResidualDebugOutput);
+  registerNamedOutput(DOFMapOutput, "DOFMap");
 
   registered = true;
 }
