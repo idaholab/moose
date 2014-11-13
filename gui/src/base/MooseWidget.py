@@ -36,7 +36,6 @@ class MooseWidget(PeacockErrorInterface, MooseWidgetInfoBase):
 
     # Call the base class constructor
     PeacockErrorInterface.__init__(self)
-    PeacockTestInterface.__init__(self)
     MooseWidgetInfoBase.__init__(self)
 
     # Create a preferences object for storing settings

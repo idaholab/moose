@@ -1,3 +1,2 @@
-from MooseWidget_object import *
-
-__all__ = ['MooseWidget_object']
+from MooseWidgetTest import MooseWidgetTest
+__all__ = ['MooseWidgetTest']
