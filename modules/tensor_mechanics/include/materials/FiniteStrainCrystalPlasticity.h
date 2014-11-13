@@ -58,7 +58,7 @@ protected:
   virtual void calcResidual( RankTwoTensor & );
   virtual void calcJacobian( RankFourTensor & );
 
-  void getEulerRotations();
+  virtual void getEulerRotations();
   RankFourTensor outerProduct(const RankTwoTensor & a, const RankTwoTensor & b);
 
 
@@ -128,6 +128,10 @@ protected:
   RankTwoTensor _fe, _fp_old_inv, _fp_inv;
   std::vector< Real > _slip_incr, _tau, _dslipdtau;
   std::vector<RankTwoTensor> _s0;
+
+  RankTwoTensor _pk2_tmp;
+  Real _accslip_tmp;
+  std::vector<Real> _gss_tmp;
 
 };
 
