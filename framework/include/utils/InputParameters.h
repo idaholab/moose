@@ -511,6 +511,8 @@ private:
   /// If a parameters value was set by addParam, and not set again, it will appear in this list (see applyParameters)
   std::set<std::string> _set_by_add_param;
 
+  /// Flag for disabling deprecated parameters message, this is used by applyParameters to avoid dumping messages
+  bool _show_deprecated_message;
 };
 
 // Template and inline function implementations

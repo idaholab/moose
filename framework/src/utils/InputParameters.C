@@ -27,7 +27,8 @@ InputParameters emptyInputParameters()
 InputParameters::InputParameters() :
     Parameters(),
     _collapse_nesting(false),
-    _moose_object_syntax_visibility(true)
+    _moose_object_syntax_visibility(true),
+    _show_deprecated_message(true)
 {
 }
 
@@ -86,10 +87,14 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
     if (!have_parameter<MooseEnum>(name) && !have_parameter<MultiMooseEnum>(name))
       _valid_params.insert(name);
 
-    std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
-    if (pos != _deprecated_params.end())
+    if (_show_deprecated_message)
+    {
+      std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
+      if (pos != _deprecated_params.end())
       mooseWarning("The parameter " << name << " is deprecated.\n" << pos->second);
+    }
   }
+
 }
 
 std::string
@@ -446,6 +451,9 @@ InputParameters::hasDefaultPostprocessorValue(const std::string & name) const
 void
 InputParameters::applyParameters(const InputParameters & common)
 {
+  // Disable the display of deprecated message when applying common parameters, this avoids a dump of messages
+  _show_deprecated_message = false;
+
   // Loop through the common parameters
   for (InputParameters::const_iterator it = common.begin(); it != common.end(); ++it)
   {
@@ -489,4 +497,7 @@ InputParameters::applyParameters(const InputParameters & common)
         addCoupledVar(var_name, common.getDocString(var_name));
     }
   }
+
+  // Enable deprecated message printing
+  _show_deprecated_message = true;
 }
