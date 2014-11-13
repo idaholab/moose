@@ -66,6 +66,9 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const std::string &
   _no.resize(_nss*LIBMESH_DIM);
 
   _s0.resize(_nss);
+
+  _pk2_tmp.zero();
+  _gss_tmp.resize(_nss);
 }
 
 void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
@@ -467,19 +470,26 @@ FiniteStrainCrystalPlasticity::postSolveQp()
   _lag_e[_qp] = _dfgrd[_qp].transpose() * _dfgrd[_qp] - iden;
   _lag_e[_qp] = _lag_e[_qp] * 0.5;
 
+  _pk2[_qp] = _pk2_tmp;
   _stress[_qp] = _fe * _pk2[_qp] * _fe.transpose()/_fe.det();
 
 
   RankTwoTensor rot;
   rot = get_current_rotation(_dfgrd[_qp]); // Calculate material rotation
   _update_rot[_qp] = rot * _crysrot[_qp];
+
+  //Assign MaterialProperty values
+  for (unsigned i = 0; i < _nss; ++i)
+    _gss[_qp][i] = _gss_tmp[i];
+
+  _acc_slip[_qp] = _accslip_tmp;
 }
 
 void
 FiniteStrainCrystalPlasticity::preSolveStatevar()
 {
   for (unsigned i = 0; i < _nss; ++i)
-    _gss[_qp][i]=_gss_old[_qp][i];
+    _gss_tmp[i]=_gss_old[_qp][i];
 }
 
 void
@@ -499,14 +509,14 @@ FiniteStrainCrystalPlasticity::solveStatevar()
     postSolveStress();
 
     for (unsigned i = 0; i < _nss; ++i)
-      gss_prev[i] = _gss[_qp][i];
+      gss_prev[i] = _gss_tmp[i];
 
     update_slip_system_resistance(); // Update slip system resistance
 
     gmax = 0.0;
     for (unsigned i = 0; i < _nss; ++i)
     {
-      gdiff = std::abs(gss_prev[i] - _gss[_qp][i]); // Calculate increment size
+      gdiff = std::abs(gss_prev[i] - _gss_tmp[i]); // Calculate increment size
 
       if (gdiff > gmax)
         gmax = gdiff;
@@ -527,7 +537,7 @@ FiniteStrainCrystalPlasticity::postSolveStatevar()
 void
 FiniteStrainCrystalPlasticity::preSolveStress()
 {
-  _pk2[_qp] = _pk2_old[_qp];
+  _pk2_tmp = _pk2_old[_qp];
 }
 
 void
@@ -557,7 +567,7 @@ FiniteStrainCrystalPlasticity::solveStress()
   while (rnorm > _rtol && iter <  _maxiter) // Check for stress residual tolerance
   {
     dpk2 = jac.invSymm() * resid; // Calculate stress increment
-    _pk2[_qp] = _pk2[_qp] - dpk2 * fac; // Update stress
+    _pk2_tmp = _pk2_tmp - dpk2 * fac; // Update stress
 
     calc_resid_jacob(resid, jac); // Calculate stress residual
 
@@ -601,21 +611,21 @@ FiniteStrainCrystalPlasticity::updateGss()
 
   Real a = _hprops[4]; // Kalidindi
 
-  _acc_slip[_qp]=_acc_slip_old[_qp];
+  _accslip_tmp=_acc_slip_old[_qp];
 
   for (unsigned int i=0; i < _nss; i++)
-    _acc_slip[_qp]=_acc_slip[_qp]+fabs(_slip_incr[i]);
+    _accslip_tmp=_accslip_tmp+std::abs(_slip_incr[i]);
 
-  // Real val = std::cosh(_h0 * _acc_slip[_qp] / (_tau_sat - _tau_init)); // Karthik
+  // Real val = std::cosh(_h0 * _accslip_tmp / (_tau_sat - _tau_init)); // Karthik
   // val = _h0 * std::pow(1.0/val,2.0); // Kalidindi
 
   for (unsigned int i = 0; i < _nss; i++)
     // hb[i]=val;
-    hb[i] = _h0 * std::pow(1.0 - _gss[_qp][i] / _tau_sat, a);
+    hb[i] = _h0 * std::pow(std::abs(1.0 - _gss_tmp[i]/_tau_sat),a) * copysign(1.0,1.0-_gss_tmp[i]/_tau_sat);
 
   for (unsigned int i=0; i < _nss; i++)
   {
-    _gss[_qp][i] = _gss_old[_qp][i];
+    _gss_tmp[i] = _gss_old[_qp][i];
 
     for (unsigned int j = 0; j < _nss; j++)
     {
@@ -628,7 +638,7 @@ FiniteStrainCrystalPlasticity::updateGss()
       else
         qab = _r;
 
-      _gss[_qp][i] = _gss[_qp][i] + qab * hb[j] * std::abs(_slip_incr[j]);
+      _gss_tmp[i] = _gss_tmp[i] + qab * hb[j] * std::abs(_slip_incr[j]);
     }
   }
 }
@@ -653,7 +663,7 @@ FiniteStrainCrystalPlasticity::calcResidual( RankTwoTensor &resid )
   _fe = _dfgrd[_qp] * _fp_old_inv;
 
   ce = _fe.transpose() * _fe;
-  ce_pk2 = ce * _pk2[_qp];
+  ce_pk2 = ce * _pk2_tmp;
   ce_pk2 = ce_pk2 / _fe.det();
 
   // Calculate Schmid tensor and resolved shear stresses
@@ -678,7 +688,7 @@ FiniteStrainCrystalPlasticity::calcResidual( RankTwoTensor &resid )
 
   pk2_new = _elasticity_tensor[_qp] * ee;
 
-  resid = _pk2[_qp] - pk2_new;
+  resid = _pk2_tmp - pk2_new;
 }
 
 void
@@ -732,10 +742,10 @@ void
 FiniteStrainCrystalPlasticity::getSlipIncrements()
 {
   for (unsigned int i = 0; i < _nss; ++i)
-    _slip_incr[i] = _a0[i] * std::pow(std::abs(_tau[i] / _gss[_qp][i]), 1.0 / _xm[i]) * copysign(1.0, _tau[i]) * _dt;
+    _slip_incr[i] = _a0[i] * std::pow(std::abs(_tau[i] / _gss_tmp[i]), 1.0 / _xm[i]) * copysign(1.0, _tau[i]) * _dt;
 
   for (unsigned int i = 0; i < _nss; ++i)
-    _dslipdtau[i] = _a0[i] / _xm[i] * std::pow(std::abs(_tau[i] / _gss[_qp][i]), 1.0 / _xm[i] - 1.0) / _gss[_qp][i] * _dt;
+    _dslipdtau[i] = _a0[i] / _xm[i] * std::pow(std::abs(_tau[i] / _gss_tmp[i]), 1.0 / _xm[i] - 1.0) / _gss_tmp[i] * _dt;
 }
 
 RankFourTensor FiniteStrainCrystalPlasticity::outerProduct(const RankTwoTensor & a, const RankTwoTensor & b)

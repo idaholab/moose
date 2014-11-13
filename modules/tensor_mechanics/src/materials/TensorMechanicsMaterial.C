@@ -84,8 +84,10 @@ TensorMechanicsMaterial::computeProperties()
 void TensorMechanicsMaterial::computeQpElasticityTensor()
 {
   // Fill in the matrix stiffness material property
+  RotationTensor R(_Euler_angles); // R type: RealTensorValue
   _elasticity_tensor[_qp] = _Cijkl;
-  _Jacobian_mult[_qp] = _Cijkl;
+  _elasticity_tensor[_qp].rotate(R);
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 }
 
 void TensorMechanicsMaterial::computeStrain()
