@@ -477,7 +477,6 @@ class TestHarness:
         job_list.close()
         return ('', 'LAUNCHED')
       else:
-        print output
         return ('QSTAT INVALID RESULTS', '')
 
   def cleanPBSBatch(self):
