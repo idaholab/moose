@@ -25,8 +25,8 @@ InputParameters validParams<VectorOfPostprocessors>();
 
 /**
  *  VectorOfPostprocessors is a type of VectorPostprocessor that outputs the
-    values of an arbitrary user-specified set of postprocessors as a vector in the order specified by the user.
- **/
+ *  values of an arbitrary user-specified set of postprocessors as a vector in the order specified by the user.
+ */
 
 class VectorOfPostprocessors :
   public GeneralVectorPostprocessor
@@ -39,26 +39,34 @@ public:
     */
   VectorOfPostprocessors(const std::string & name, InputParameters parameters);
 
-  //Destructor
+  /**
+   * Destructor
+   */
   virtual ~VectorOfPostprocessors() {}
 
-  //Initialize
+  /**
+   * Initialize, clears the postprocessor vector
+   */
   virtual void initialize();
 
-  //Execute
+  /**
+   * Populates the postprocessor vector of values with the supplied postprocessors
+   */
   virtual void execute();
 
-  //Finalize: no-op because the postprocessors are already parallel consistent
+  ///@{
+  /**
+   * no-op because the postprocessors are already parallel consistent
+   */
   virtual void finalize(){};
-
-  //Join the threads: no-op because the postprocessors are already parallel consistent
   virtual void threadJoin(const UserObject & y){};
+  ///@}
 
 protected:
-  //The VectorPostprocessorValue object where the results are stored
+  /// The VectorPostprocessorValue object where the results are stored
   VectorPostprocessorValue & _pp_vec;
 
-  //The vector of PostprocessorValue objects that are used to get the values of the postprocessors
+  /// The vector of PostprocessorValue objects that are used to get the values of the postprocessors
   std::vector<const PostprocessorValue *> _postprocessor_values;
 };
 
