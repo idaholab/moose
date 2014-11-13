@@ -18,6 +18,7 @@
 #include "KernelBase.h"
 #include "MooseApp.h"
 #include "Moose.h"
+#include "Conversion.h"
 
 // libMesh includes
 #include "libmesh/fe.h"
@@ -29,23 +30,25 @@ template<>
 InputParameters validParams<DOFMapOutput>()
 {
   // Get the parameters from the base class
-  InputParameters params = validParams<FileOutput>();
-  params += Output::enableOutputTypes("system_information");
+  InputParameters params = validParams<BasicOutput<FileOutput> >();
 
   // Screen and file output toggles
   params.addParam<bool>("output_screen", false, "Output to the screen");
   params.addParam<bool>("output_file", true, "Output to the file");
   params.addParam<std::string>("system_name", "nl0", "System to output");
+
+  // By default this only executes on the initial timestep
+  params.set<MultiMooseEnum>("output_on") = "initial";
+
   return params;
 }
 
 DOFMapOutput::DOFMapOutput(const std::string & name, InputParameters parameters) :
-    FileOutput(name, parameters),
+    BasicOutput<FileOutput>(name, parameters),
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _system_name(getParam<std::string>("system_name")),
-    _mesh(_mci_feproblem.mesh()),
-    _console_buffer(_app.getOutputWarehouse().consoleBuffer())
+    _mesh(_problem_ptr->mesh())
 {
   // Set output coloring
   if (Moose::_color_console)
@@ -60,28 +63,13 @@ DOFMapOutput::DOFMapOutput(const std::string & name, InputParameters parameters)
   }
 }
 
-DOFMapOutput::~DOFMapOutput()
-{
-  // Write the file output stream
-  writeStreamToFile();
-}
-
-void
-DOFMapOutput::initialSetup()
-{
-  // If file output is desired, wipe out the existing file if not recovering
-  if (!_app.isRecovering())
-    writeStreamToFile(false);
-
-  // Output the system information
-  if (_system_information && _allow_output)
-    outputSystemInformation();
-}
-
 std::string
 DOFMapOutput::filename()
 {
-  return _file_base + ".json";
+  if (_file_num > 0)
+    return _file_base + "_" + Moose::stringify(_file_num) + ".json";
+  else
+    return _file_base + ".json";
 }
 
 std::string
@@ -102,24 +90,17 @@ DOFMapOutput::demangle(const std::string & name)
 void
 DOFMapOutput::writeStreamToFile(bool append)
 {
-  if (!_write_file)
-    return;
-
   // Create the stream
   std::ofstream output;
 
-  // Open the file
-  if (append)
-    output.open(filename().c_str(), std::ios::app | std::ios::out);
-  else
-    output.open(filename().c_str(), std::ios::trunc);
-
-  // Write contents of file output stream and close the file
+  // Open the file and write contents of file output stream and close the file
+  output.open(filename().c_str(), std::ios::trunc);
   output << _file_output_stream.str();
   output.close();
 
   // Clear the file output stream
   _file_output_stream.str("");
+  _file_num++;
 }
 
 template<typename T>
@@ -133,33 +114,7 @@ DOFMapOutput::join(const T & begin, const T & end, const char* const delim)
 }
 
 void
-DOFMapOutput::write(std::string message)
-{
-  // Do nothing if the message is empty, writing empty strings messes with multiapp indenting
-  if (message.empty())
-    return;
-
-  // Write the message to file
-  if (_write_file)
-    _file_output_stream << message << std::endl;
-
-  // Write message to the screen
-  if (_write_screen)
-    Moose::out << message;
-}
-
-void
-DOFMapOutput::mooseConsoleOutput(const std::string & message)
-{
-  // Write the messages
-  write(message);
-
-  // Flush the stream to the screen
-  Moose::out << std::flush;
-}
-
-void
-DOFMapOutput::outputSystemInformation()
+DOFMapOutput::output(const OutputExecFlagType & /*type*/)
 {
   // Don't build this information if nothing is to be written
   if (!_write_screen && !_write_file)
@@ -230,6 +185,15 @@ DOFMapOutput::outputSystemInformation()
   }
   oss << "]}\n";
 
-  // Output the information
-  write(oss.str());
+  // Write the message to file stream
+  if (_write_file)
+    _file_output_stream << oss.str() << std::endl;
+
+  // Write message to the screen
+  if (_write_screen)
+    _console << oss.str() << std::flush;
+
+  // Write the actual file
+  if (_write_file)
+    writeStreamToFile();
 }

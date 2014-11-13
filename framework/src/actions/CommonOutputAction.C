@@ -49,6 +49,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("tecplot", false, "Output the results using the default settings for Tecplot output");
    params.addParam<bool>("gnuplot", false, "Output the scalar and postprocessor results using the default settings for GNUPlot output");
    params.addParam<bool>("solution_history", false, "Print a solution history file (.slh) using the default settings");
+   params.addParam<bool>("dofmap", false, "Create the dof map .json output file");
 
    // Common parameters
    // Note: Be sure that objects that share these parameters utilize the same defaults
@@ -153,6 +154,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("solution_history"))
     create("SolutionHistory");
+
+  if (getParam<bool>("dofmap"))
+    create("DOFMap");
 
   if (!getParam<bool>("color"))
     Moose::_color_console = false;
