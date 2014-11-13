@@ -16,6 +16,7 @@
 #define DOFMAPOUTPUT_H
 
 // MOOSE includes
+#include "BasicOutput.h"
 #include "FileOutput.h"
 
 // Forward declarations
@@ -27,19 +28,11 @@ InputParameters validParams<DOFMapOutput>();
 /**
  * An output object for writing the DOF map of the system in a machine parsable format
  */
-class DOFMapOutput :
-  public FileOutput
+class DOFMapOutput : public BasicOutput<FileOutput>
 {
 public:
   DOFMapOutput(const std::string & name, InputParameters);
-  virtual ~DOFMapOutput();
-
-  /**
-   * Initial setup function
-   * Prints the DOF map information, this is done here so that the system information
-   * is printed prior to any PETSc solve information
-   */
-  virtual void initialSetup();
+  virtual ~DOFMapOutput(){};
 
   /**
    * Creates the output file name
@@ -49,27 +42,20 @@ public:
   virtual std::string filename();
 
   /**
-   * Display the system information
+   * Write the DOF mapt
    */
-  void outputSystemInformation();
+  void output(const OutputExecFlagType & type);
 
 protected:
 
   /**
-   * Write message to screen and/or file
-   * @param message The desired message
-   * @param indent True if multiapp indenting is desired
+   * A helper method for joining items with a delimeter
+   * @param begin Beginning iterator
+   * @param end Ending iterator
+   * @param delim The delimiter character to insert
    */
-  void write(std::string message);
-
   template<typename T>
   std::string join(const T & begin, const T & end, const char* const delim);
-
-  /**
-   * Apply indentation to newlines in the supplied stream
-   * @param message Reference to the message being changed
-   */
-  void indentMessage(std::string & message);
 
   /**
    * Write the file stream to the file
@@ -95,28 +81,11 @@ protected:
   /// Stream for storing information to be written to a file
   std::stringstream _file_output_stream;
 
+  /// The name of the system to extract DOF information
   std::string _system_name;
 
+  /// Reference to the mesh object
   MooseMesh & _mesh;
-
-private:
-
-  /**
-   * Add a message to the output streams
-   * @param message The message to add to the output streams
-   *
-   * Any call to this method will write the supplied message to the screen and/or file,
-   * following the same restrictions as outputStep and outputInitial.
-   *
-   * Calls to this method should be made via OutputWarehouse::mooseDOFMapOutput so that the
-   * output stream buffer is cleaned up correctly. Thus, it is a private method.
-   */
-  void mooseConsoleOutput(const std::string & message);
-
-  /// Reference to cached messages from calls to _console
-  const std::ostringstream & _console_buffer;
-
-  friend class OutputWarehouse;
 };
 
 #endif /* DOFMAPOUTPUT_H */
