@@ -322,7 +322,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
         for (unsigned int j=0; j<curr_line_elem.size(); ++j)
         {
           unsigned int line_elem_node = curr_line_elem[j];
-          if (last_node == end_nodes[0] && line_elem_node == end_nodes[1]) //wrong direction around closed loop
+          if (_closed_loop && (last_node == end_nodes[0] && line_elem_node == end_nodes[1])) //wrong direction around closed loop
             continue;
           if (line_elem_node != last_node &&
               line_elem_node != second_last_node)
@@ -820,10 +820,8 @@ CrackFrontDefinition::calculateCrackFrontDirection(const Node* crack_front_node,
 const Node *
 CrackFrontDefinition::getCrackFrontNodePtr(const unsigned int node_index) const
 {
-  Node * node_ptr = NULL;
-  if (node_index < _ordered_crack_front_nodes.size())
-    node_ptr = _mesh.nodePtr(_ordered_crack_front_nodes[node_index]);
-  return node_ptr;
+  mooseAssert(node_index < _ordered_crack_front_nodes.size(),"node_index out of range");
+  return _mesh.nodePtr(_ordered_crack_front_nodes[node_index]);
 }
 
 const RealVectorValue &
@@ -849,6 +847,12 @@ const RealVectorValue &
 CrackFrontDefinition::getCrackDirection(const unsigned int node_index) const
 {
   return _crack_directions[node_index];
+}
+
+unsigned int
+CrackFrontDefinition::getNumCrackFrontNodes() const
+{
+  return _ordered_crack_front_nodes.size();
 }
 
 RealVectorValue

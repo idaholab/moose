@@ -169,6 +169,7 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_aux_variable");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_aux_kernel");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_postprocessor");
+  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_vector_postprocessor");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_material");
 
   registerAction(PressureAction, "add_bc");
