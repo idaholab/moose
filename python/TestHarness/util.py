@@ -174,12 +174,10 @@ def getPlatforms():
   return platforms
 
 def getCompilers(libmesh_dir):
-  # We'll use the GXX-VERSION string from LIBMESH's Make.common
-  # to figure this out
   # Supported compilers are GCC, INTEL or ALL
   compilers = set(['ALL'])
 
-  mpicxx_cmd = getLibToolConfigOption(libmesh_dir, ' --cxx')
+  mpicxx_cmd = getLibMeshConfig(libmesh_dir, ' --cxx')
 
   # Account for useage of distcc
   if "distcc" in mpicxx_cmd:
@@ -188,7 +186,7 @@ def getCompilers(libmesh_dir):
 
   # If mpi ic on the command, run -show to get the compiler
   if "mpi" in mpicxx_cmd:
-    raw_compiler = runCommand(mpicxx-cmd + " -show")
+    raw_compiler = runCommand(mpicxx_cmd + " -show")
   else:
     raw_compiler = mpicxx_cmd
 
@@ -281,6 +279,28 @@ def getLibMeshConfigOption(libmesh_dir, option):
     exit(1)
 
   return option_set
+
+def getLibMeshConfig(libmesh_dir, command):
+  # Installed location of libmesh config script
+  libmesh_config_installed   = libmesh_dir + '/bin/libmesh-config'
+
+  # Uninstalled location of libmesh libtool script
+  libmesh_config_uninstalled = libmesh_dir + '/libmesh-config'
+
+  # The eventual variable we will use to refer to libmesh's libtool script
+  libmesh_config = ''
+
+  if os.path.exists(libmesh_config_installed):
+    libmesh_config = libmesh_config_installed
+
+  elif os.path.exists(libmesh_config_uninstalled):
+    libmesh_config = libmesh_config_uninstalled
+
+  else:
+    print "Error! Could not find libmesh's config script in any of the usual locations!"
+    exit(1)
+
+  return runCommand(libmesh_config + command).rstrip()
 
 def getLibToolConfigOption(libmesh_dir, command):
   # MOOSE no longer relies on Make.common being present.  This gives us the
