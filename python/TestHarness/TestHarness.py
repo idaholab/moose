@@ -223,7 +223,7 @@ class TestHarness:
       (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
       if should_run:
         if self.options.cluster_handle == None:
-          self.options.cluster_handle = open(dirpath + '/tests.cluster', 'a')
+          self.options.cluster_handle = open(dirpath + '/' + self.options.pbs + '.cluster', 'w')
         self.options.cluster_handle.write('[Jobs]\n')
         # This returns the command to run as well as builds the parameters of the test
         # The resulting command once this loop has completed is sufficient to launch
@@ -496,8 +496,8 @@ class TestHarness:
         batch_dir = os.path.abspath(os.path.join(job[2], os.pardir)).split('/')
         if os.path.exists('/'.join(batch_dir)):
           shutil.rmtree('/'.join(batch_dir))
-        if os.path.exists('/'.join(batch_dir[:-1]) + '/' + job[3] + '.cluster'):
-          os.remove('/'.join(batch_dir[:-1]) + '/' + job[3] + '.cluster')
+        if os.path.exists('/'.join(batch_dir[:-1]) + '/' + self.options.pbs_cleanup + '.cluster'):
+          os.remove('/'.join(batch_dir[:-1]) + '/' + self.options.pbs_cleanup + '.cluster')
     os.remove(self.options.pbs_cleanup)
 
 # END PBS Defs
