@@ -298,12 +298,23 @@ if __name__ == '__main__':
       print "Running\n%s\n" % " ".join(mooseparams)
     try:
       child = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      data = child.communicate()[0]
       child.wait()
     except:
       print 'Error executing moose based application to gather DOF map\n'
       sys.exit(1)
   else :
     print "Runing without automatic options DOF map '%s' will not be generated automatically!" % dofmapfilename
+
+  # analyze return code
+  if child.returncode == 1 :
+    # MOOSE failed with an unexpected error
+    print data
+    sys.exit(1)
+  elif child.returncode == -11 :
+    print "The moose application crashed with a segmentation fault (try recompiling)"
+    sys.exit(1)
+
 
   # load and decode the DOF map data (for now we only care about one frame)
   with open (dofmapfilename, "rt") as myfile :
@@ -360,15 +371,6 @@ if __name__ == '__main__':
     child.wait()
   except:
     print 'Error executing moose based application\n'
-    sys.exit(1)
-
-  # analyze return code
-  if child.returncode == 1 :
-    # MOOSE failed with an unexpected error
-    print data
-    sys.exit(1)
-  elif child.returncode == -11 :
-    print "The moose application crashed with a segmentation fault (try recompiling)"
     sys.exit(1)
 
   # parse the raw output, which contains the PETSc debug information
