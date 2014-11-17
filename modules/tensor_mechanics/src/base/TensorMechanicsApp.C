@@ -21,6 +21,7 @@
 #include "CrystalPlasticitySlipSysAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
 #include "CosseratLinearElasticMaterial.h"
+#include "ElementPropertyReadFileTest.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -36,6 +37,8 @@
 #include "TensorMechanicsHardeningExponential.h"
 #include "TensorMechanicsHardeningCutExponential.h"
 #include "TensorMechanicsHardeningCubic.h"
+#include "ElementPropertyReadFile.h"
+
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -81,6 +84,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainCrystalPlasticity);
   registerMaterial(FiniteStrainMultiPlasticity);
   registerMaterial(CosseratLinearElasticMaterial);
+  registerMaterial(ElementPropertyReadFileTest);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
@@ -96,6 +100,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsHardeningExponential);
   registerUserObject(TensorMechanicsHardeningCutExponential);
   registerUserObject(TensorMechanicsHardeningCubic);
+  registerUserObject(ElementPropertyReadFile);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);
