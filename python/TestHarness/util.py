@@ -180,6 +180,9 @@ def runExecutable(libmesh_dir, location, bin, args):
   # Uninstalled location of libmesh executable
   libmesh_uninstalled = libmesh_dir + '/' + bin
 
+  # Uninstalled location of libmesh executable
+  libmesh_uninstalled2 = libmesh_dir + '/contrib/bin/' + bin
+
   # The eventual variable we will use to refer to libmesh's executable
   libmesh_exe = ''
 
@@ -188,6 +191,9 @@ def runExecutable(libmesh_dir, location, bin, args):
 
   elif os.path.exists(libmesh_uninstalled):
     libmesh_exe = libmesh_uninstalled
+
+  elif os.path.exists(libmesh_uninstalled2):
+    libmesh_exe = libmesh_uninstalled2
 
   else:
     print "Error! Could not find '" + bin + "' in any of the usual libmesh's locations!"
