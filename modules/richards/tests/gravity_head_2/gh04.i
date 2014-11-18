@@ -284,7 +284,6 @@
 
 [Outputs]
   file_base = gh04
-  output_initial = false
   csv = true
   [./console]
     type = Console

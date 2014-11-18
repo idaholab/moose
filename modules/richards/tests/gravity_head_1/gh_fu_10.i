@@ -118,7 +118,6 @@
 
 [Outputs]
   file_base = gh_fu_10
-  output_initial = false
   exodus = true
   [./console]
     type = Console
