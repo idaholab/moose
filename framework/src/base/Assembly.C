@@ -1063,12 +1063,10 @@ Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
     {
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
-      for (unsigned int i=0; i<di.size(); i++)
-        residual.set(di[i], _tmp_Re(i));
+      residual.insert(_tmp_Re, di);
     }
     else
-      for (unsigned int i=0; i<di.size(); i++)
-        residual.set(di[i], res_block(i));
+      residual.insert(res_block, di);
   }
 }
 
