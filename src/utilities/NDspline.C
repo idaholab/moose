@@ -128,14 +128,16 @@ double NDSpline::spline_cartesian_interpolation(std::vector<double> point_coordi
 		coordinates = from1DtoNDconverter(i, indexes);
 
 		double product=1;
-		for (int nDim=0; nDim<_dimensions; nDim++)
-			product *= u_k(point_coordinate.at(nDim), _discretizations.at(nDim).at(0), _hj.at(nDim), coordinates.at(nDim)+1);       //u_k(double x, double a, double h, double k)
+		for (int nDim=0; nDim<_dimensions; nDim++){
+			//u_k(double x, std::vector<double> & discretizations, double k)
+			product *= u_k(point_coordinate.at(nDim), _discretizations.at(nDim), coordinates.at(nDim)+1);
+			//product *= u_k(point_coordinate.at(nDim), _discretizations.at(nDim).at(0), _hj.at(nDim), coordinates.at(nDim)+1);       //u_k(double x, double a, double h, double k)
+		}
 
 		interpolated_value += _spline_coefficients.at(i)*product;
 	}
 	return interpolated_value;
 }
-
 
 void NDSpline::calculateCoefficients(){
 	std::vector<int> loop_locator (_dimensions);
@@ -266,10 +268,36 @@ void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDd
 }
 
 
-double NDSpline::u_k(double x, double a, double h, double k){
-	// defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
-	return phi((x-a)/h - (k-2));
+//double NDSpline::u_k(double x, double a, double h, double k){
+//	// defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
+//	return phi((x-a)/h - (k-2));
+//}
+
+
+double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
+  // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
+  double up   = discretizations[0];
+  double down = discretizations[discretizations.size()-1];
+
+  for(int n=0; n<discretizations.size(); n++)
+	  if (x>discretizations[n])
+		  down = n;
+
+  for(int n=discretizations.size(); n<0; n--)
+	  if (x<discretizations[n])
+		  up = n;
+
+  // Node re-scaling - linear type
+  //double scaled_x = down + (x-discretizations[down])/(discretizations[up]-discretizations[down]);
+  double scaled_x = down + (x-discretizations[down])/(discretizations[down+1]-discretizations[down]);
+
+  double a = 0.0;
+  double h = 1.0;
+  return phi((scaled_x-a)/h - (k-2));
+
+  //return phi((x-discretizations[0])/(discretizations[1]-discretizations[0]) - (k-2));
 }
+
 
 
 double NDSpline::phi(double t){

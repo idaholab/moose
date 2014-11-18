@@ -72,7 +72,7 @@ double InverseDistanceWeighting::interpolateAt(std::vector<double> point){
 			weightsCumulativeSum = 1;
 			break;
 		} else {
-                  weights[i]= std::pow(1.0/minkowskiDistance(point, _point_coordinates[i],_p),_dimensions+1);
+            weights[i]= std::pow(1.0/minkowskiDistance(point, _point_coordinates[i],_p),_dimensions+1);
 			weightsCumulativeSum += weights[i];
 			value += weights[i] * _values[i];
 		}

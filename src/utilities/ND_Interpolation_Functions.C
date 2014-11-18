@@ -8,6 +8,7 @@
 #include <math.h>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
 #include <ctime>
 
 
@@ -217,7 +218,12 @@ std::vector<double> InverseDistanceWeighting::NDinverseFunction(double F_min, do
 
 
 
-std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double tolerance, int initial_divisions, int last_divisions, int seed){
+std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double tolerance, int initial_divisions){
+
+	int seed = time(0);
+
+	int last_divisions = (int)round(1.0/tolerance*initial_divisions);
+
 	// Create basic cell
 	std::vector<std::vector<double> > basic_cell;
 	std::vector<int> NDcoordinate (_dimensions);
@@ -255,7 +261,7 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double tole
 
 bool NDInterpolation::pivotCellCheck(std::vector<std::vector<double> > cell, double F){
 	// This function check if F is contained within cell
-	// if the vertex outcome is the same for all vertices then F is not contained within the cell --> outcome = False
+	// if the vertex outcome is the same for all vertices then F is not contained within the cell --> outcome = True
 
 	bool outcome = true;
 
@@ -265,7 +271,6 @@ bool NDInterpolation::pivotCellCheck(std::vector<std::vector<double> > cell, dou
 		else
 			outcome = outcome && false;
 	}
-
 	return outcome;
 }
 
@@ -368,6 +373,68 @@ std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<doubl
 		center[i] = cell[0][i] + dxs[i];
 	}
 	return center;
+}
+
+
+double NDInterpolation::NDderivative(std::vector<double> coordinate){
+	double value = derivativeStep(coordinate,1);
+	return value;
+}
+
+double NDInterpolation::OneDderivative(double fxph, double fx, double fxmh){
+	double h = fxph-fx;
+
+	double value=(fxph-2*fx+fxmh)/(2*h);
+
+	return value;
+}
+
+double NDInterpolation::derivativeStep(std::vector<double> coordinate, int loop){
+	double value;
+
+	double h =_cellDxs[loop]/100.0;
+
+	std::vector<double> coordinateU = coordinate;
+	std::vector<double> coordinateD = coordinate;
+	std::vector<double> coordinateC = coordinate;
+
+	coordinateU[loop] = coordinateU[loop] + h;
+	coordinateU[loop] = coordinateD[loop] - h;
+
+	if (loop < _dimensions){
+		double up     = derivativeStep(coordinateU, loop++);
+		double center = derivativeStep(coordinateC, loop++);
+		double down   = derivativeStep(coordinateD, loop++);
+		value = OneDderivative(up,center,down);
+	}else
+		value = OneDderivative(interpolateAt(coordinateU),interpolateAt(coordinateC),interpolateAt(coordinateD));
+
+	return value;
+}
+
+
+double NDInterpolation::integral(std::vector<double> coordinate, int samples){
+	double value;
+	double volume=1;
+	double sum=0;
+	std::vector<double> cellrange (_dimensions);
+	std::vector<double> sampleCoordinate (_dimensions);
+
+	boost::random::mt19937 rng;
+	boost::random::uniform_real_distribution<> zeroOne(0,1);
+
+	for (int i=0; i<_dimensions; i++){
+		cellrange[i] = coordinate[i]-_cellPoint0[i];
+		volume = volume * cellrange[i];
+	}
+
+	for (int n=0; n<samples; n++){
+		for (int i=0; i<_dimensions; i++)
+			sampleCoordinate[i] = _cellPoint0[i] + zeroOne(rng)  * cellrange[i];
+
+		sum = sum + interpolateAt(sampleCoordinate);
+	}
+	return value = volume/samples * sum;
 }
 
 

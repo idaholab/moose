@@ -28,7 +28,10 @@ public:
   virtual double getGradientAt(std::vector<double> point_coordinate);
   virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
   std::vector<double> NDinverseFunction(double F_min, double F_max);
-  std::vector<double> NDinverseFunctionGrid(double F, double tolerance, int initial_divisions, int last_divisions, int seed = time(0));
+  std::vector<double> NDinverseFunctionGrid(double F, double tolerance, int initial_divisions);
+
+  double NDderivative(std::vector<double> coordinate);
+  double integral(std::vector<double> coordinate, int samples);
 
   NDInterpolation();
   ~NDInterpolation();
@@ -52,6 +55,9 @@ protected:
   std::vector<std::vector<double> > generateNewCell(std::vector<int> NDcoordinate, std::vector<double> coordinateOfPointZero, std::vector<double> dxs, int n_dimensions);
   std::vector<std::vector<double> > pickNewCell(std::vector<std::vector<std::vector<double> > > cellsSet, int seed);
   std::vector<double> getCellCenter(std::vector<std::vector<double> > cell);
+
+  double OneDderivative(double fxph, double fx, double fxmh);
+  double derivativeStep(std::vector<double> coordinate, int loop);
 };
 
 class NDSpline: public NDInterpolation
@@ -96,7 +102,7 @@ private:
   void from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing);
 
   double phi(double t);
-  double u_k(double x, double a, double h, double i);
+  double u_k(double x, std::vector<double> & discretizations, double k);
   void tridag(std::vector<double> & a, std::vector<double> & b, std::vector<double> & c, std::vector<double> & r, std::vector<double> & u);
   std::vector<double> getCoefficients(std::vector<double> & y, double h, double alpha, double beta);
   //void iterationStep(int nDim, std::vector<double> & coefficients, std::vector<double> & data);

@@ -25,16 +25,17 @@ public:
    void updateVariable(const std::string & variableName, double & newValue);
    virtual double  Pdf(std::vector<double> x) = 0;                              ///< Pdf function at coordinate x
    virtual double  Cdf(std::vector<double> x) = 0;                              ///< Cdf function at coordinate x
-   virtual std::vector<double> InverseCdf(double min, double max) = 0;
+   //virtual std::vector<double> InverseCdf(double min, double max) = 0;
+   virtual std::vector<double> InverseCdf(double F, double tolerance, int initial_divisions=10) = 0;
 
-  std::string & getType();
+   std::string & getType();
 
 protected:
-  std::string _type; ///< Distribution type
-  std::string _data_filename;
-  EPbFunctionType _function_type;
-  std::map <std::string,double> _dis_parameters;
-  bool _checkStatus;
+   std::string _type; ///< Distribution type
+   std::string _data_filename;
+   EPbFunctionType _function_type;
+   std::map <std::string,double> _dis_parameters;
+   bool _checkStatus;
 
 };
 
@@ -76,14 +77,20 @@ public:
 
      return value;
   };
+
   std::vector<double>
-  InverseCdf(double min, double max)
+  InverseCdf(double F, double tolerance, int initial_divisions=10)
   {
-    return _interpolator.NDinverseFunction(min, max);
+	  return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
+      //return _interpolator.NDinverseFunction(min, max);
   };
+
 protected:
   InverseDistanceWeighting  _interpolator;
 };
+
+
+
 
 class BasicMultivariateNormal: public virtual BasicDistributionND
 {
@@ -94,10 +101,16 @@ public:
   virtual ~BasicMultivariateNormal();
   double  Pdf(std::vector<double> x);
   double  Cdf(std::vector<double> x);
+//  std::vector<double>
+//  InverseCdf(double /*min*/, double /*max*/)
+//  {
+//    return std::vector<double>(2,-1.0);
+//  };
   std::vector<double>
-  InverseCdf(double /*min*/, double /*max*/)
+  InverseCdf(double F, double tolerance, int initial_divisions=10)
   {
-    return std::vector<double>(2,-1.0);
+	  return std::vector<double>(2,-1.0);
+      //return _interpolator.NDinverseFunction(min, max);
   };
 
   //double MVNDST(std::vector<double> a, std::vector<double> b, double alpha, double epsilon, int Nmax);
@@ -114,6 +127,8 @@ private:
   std::vector<std::vector<double> > _cholesky_C;
   double _determinant_cov_matrix;
 };
+
+
 
 
 class BasicMultiDimensionalScatteredMS: public virtual BasicDistributionND
@@ -143,10 +158,16 @@ public:
   {
     return -1.0;
   };
+//  std::vector<double>
+//  InverseCdf(double /*min*/, double /*max*/)
+//  {
+//    return std::vector<double>(2,-1.0);
+//  };
   std::vector<double>
-  InverseCdf(double /*min*/, double /*max*/)
+  InverseCdf(double F, double tolerance, int initial_divisions=10)
   {
-    return std::vector<double>(2,-1.0);
+	  return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
+      //return _interpolator.NDinverseFunction(min, max);
   };
 protected:
   MicroSphere _interpolator;
@@ -195,10 +216,16 @@ public:
   {
     return -1.0;
   };
+//  std::vector<double>
+//  InverseCdf(double /*min*/, double /*max*/)
+//  {
+//    return std::vector<double>(2,-1.0);
+//  };
   std::vector<double>
-  InverseCdf(double /*min*/, double /*max*/)
+  InverseCdf(double F, double tolerance, int initial_divisions=10)
   {
-    return std::vector<double>(2,-1.0);
+	  return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
+      //return _interpolator.NDinverseFunction(min, max);
   };
 protected:
   NDSpline _interpolator;
