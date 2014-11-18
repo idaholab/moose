@@ -401,7 +401,6 @@
   file_base = uo2
   [./console]
     type = Console
-    linear_residuals = false
     perf_log = false
   [../]
   [./csv]

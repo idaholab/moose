@@ -128,7 +128,6 @@
 
 [Outputs]
   file_base = jn_fu_22
-  output_initial = false
   exodus = false
   [./console]
     type = Console

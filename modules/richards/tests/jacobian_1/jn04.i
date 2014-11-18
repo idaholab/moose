@@ -112,7 +112,6 @@
 
 [Outputs]
   file_base = jn04
-  output_initial = false
   exodus = false
   [./console]
     type = Console

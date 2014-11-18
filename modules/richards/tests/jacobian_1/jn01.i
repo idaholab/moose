@@ -113,7 +113,6 @@
 
 [Outputs]
   file_base = jn01
-  output_initial = false
   exodus = false
   [./console]
     type = Console

@@ -282,7 +282,6 @@
 
 [Outputs]
   file_base = gh02
-  output_initial = false
   csv = true
   [./console]
     type = Console
