@@ -1,39 +1,38 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  elem_type = HEX8
-  displacements = 'ux uy uz'
+  dim = 2
+  elem_type = QUAD4
+  displacements = 'disp_x disp_y'
+  nx = 2
+  ny = 2
 []
 
 [Variables]
-  [./ux]
+  [./disp_x]
     block = 0
   [../]
-  [./uy]
-    block = 0
-  [../]
-  [./uz]
+  [./disp_y]
     block = 0
   [../]
 []
 
 [AuxVariables]
-  [./stress_zz]
+  [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
-  [./fp_zz]
+  [./e_yy]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./fp_yy]
     order = CONSTANT
     family = MONOMIAL
     block = 0
   [../]
   [./rotout]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
-  [./e_zz]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -52,40 +51,41 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    disp_z = uz
-    disp_y = uy
-    disp_x = ux
-    use_displaced_mesh = true
+[UserObjects]
+  [./prop_read]
+    type = ElementPropertyReadFile
+    prop_file_name = 'euler_ang_file.txt'
+    # Enter file data as prop#1, prop#2, .., prop#nprop
+    nprop = 3
+    read_type = element
   [../]
 []
 
 [AuxKernels]
-  [./stress_zz]
+  [./stress_yy]
     type = RankTwoAux
-    variable = stress_zz
+    variable = stress_yy
     rank_two_tensor = stress
-    index_j = 2
-    index_i = 2
+    index_j = 1
+    index_i = 1
     execute_on = timestep
     block = 0
   [../]
-  [./fp_zz]
+  [./e_yy]
     type = RankTwoAux
-    variable = fp_zz
-    rank_two_tensor = fp
-    index_j = 2
-    index_i = 2
-    execute_on = timestep
-    block = 0
-  [../]
-  [./e_zz]
-    type = RankTwoAux
-    variable = e_zz
+    variable = e_yy
     rank_two_tensor = lage
-    index_j = 2
-    index_i = 2
+    index_j = 1
+    index_i = 1
+    execute_on = timestep
+    block = 0
+  [../]
+  [./fp_yy]
+    type = RankTwoAux
+    variable = fp_yy
+    rank_two_tensor = fp
+    index_j = 1
+    index_i = 1
     execute_on = timestep
     block = 0
   [../]
@@ -106,28 +106,22 @@
 []
 
 [BCs]
-  [./symmy]
+  [./fix_x]
     type = PresetBC
-    variable = uy
-    boundary = bottom
+    variable = disp_x
+    boundary = 'left'
     value = 0
   [../]
-  [./symmx]
+  [./fix_y]
     type = PresetBC
-    variable = ux
-    boundary = left
-    value = 0
-  [../]
-  [./symmz]
-    type = PresetBC
-    variable = uz
-    boundary = back
+    variable = disp_y
+    boundary = 'bottom'
     value = 0
   [../]
   [./tdisp]
     type = FunctionPresetBC
-    variable = uz
-    boundary = front
+    variable = disp_y
+    boundary = top
     function = tdisp
   [../]
 []
@@ -137,11 +131,10 @@
   [./crysp]
     type = FiniteStrainCrystalPlasticity
     block = 0
-    disp_y = uy
-    disp_x = ux
+    disp_y = disp_y
+    disp_x = disp_x
     gtol = 1e-2
     slip_sys_file_name = input_slip_sys.txt
-    disp_z = uz
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     nss = 12
     num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
@@ -150,32 +143,24 @@
     gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
     fill_method = symmetric9
     tan_mod_type = exact
-  [../]
-  [./elastic]
-    type = FiniteStrainElasticMaterial
-    block = 0
-    disp_y = uy
-    disp_x = ux
-    disp_z = uz
-    C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
-    fill_method = symmetric9
+    read_prop_user_object = prop_read
   [../]
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [./stress_yy]
     type = ElementAverageValue
-    variable = stress_zz
+    variable = stress_yy
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./fp_zz]
+  [./e_yy]
     type = ElementAverageValue
-    variable = fp_zz
+    variable = e_yy
     block = 'ANY_BLOCK_ID 0'
   [../]
-  [./e_zz]
+  [./fp_yy]
     type = ElementAverageValue
-    variable = e_zz
+    variable = fp_yy
     block = 'ANY_BLOCK_ID 0'
   [../]
   [./gss1]
@@ -194,7 +179,7 @@
 
 [Executioner]
   type = Transient
-  dt = 0.05
+  dt = 0.01
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -207,22 +192,34 @@
   nl_rel_tol = 1e-10
   ss_check_tol = 1e-10
   end_time = 1
-  dtmin = 0.05
+  dtmin = 0.01
   num_steps = 10
   nl_abs_step_tol = 1e-10
+
 []
 
 [Outputs]
-  file_base = out
+  file_base = crysp_user_object_out
   output_initial = true
   exodus = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    linear_residuals = false
+  [../]
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    disp_y = disp_y
+    disp_x = disp_x
+    use_displaced_mesh = true
   [../]
 []
 
 [Problem]
   use_legacy_uo_initialization = false
 []
+
+
+
