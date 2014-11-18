@@ -50,7 +50,7 @@ public:
    * Get variable number coming from libMesh
    * @return the libmesh variable number
    */
-  unsigned int number() const;
+  unsigned int number() const { return _var_num; }
 
   /**
    * Get the system this variable is part of.
@@ -65,17 +65,17 @@ public:
   /**
    * Kind of the variable (Nonlinear, Auxiliary, ...)
    */
-  Moose::VarKindType kind() const;
+  Moose::VarKindType kind() const { return _var_kind; }
 
   /**
    * Set the scaling factor for this variable
    */
-  void scalingFactor(Real factor);
+  void scalingFactor(Real factor) { _scaling_factor = factor; }
 
   /**
    * Get the scaling factor for this variable
    */
-  Real scalingFactor() const;
+  Real scalingFactor() const { return _scaling_factor; }
 
   /**
    * Get the order of this variable

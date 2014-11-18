@@ -634,15 +634,6 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int neighbor_
 }
 
 DenseMatrix<Number> &
-Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar)
-{
-  if (_block_diagonal_matrix)
-    return _sub_Kee[ivar][0];
-  else
-    return _sub_Kee[ivar][jvar];
-}
-
-DenseMatrix<Number> &
 Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar)
 {
   if (_block_diagonal_matrix)
