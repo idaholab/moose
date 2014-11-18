@@ -2044,6 +2044,8 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
     const dof_id_type first_dof_on_proc = dofMap().first_dof(processor_id());
     const dof_id_type end_dof_on_proc   = dofMap().end_dof(processor_id());
 
+    unsigned int max_nz = sparsity.size();
+
     for (std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
     {
       dof_id_type dof = git->first;
@@ -2068,9 +2070,15 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
         dof_id_type coupled_dof = row[i];
 
         if (coupled_dof < first_dof_on_proc || coupled_dof >= end_dof_on_proc)
-          n_oz[local_dof]++;
+        {
+          if (n_oz[local_dof] < max_nz)
+            n_oz[local_dof]++;
+        }
         else
-          n_nz[local_dof]++;
+        {
+          if (n_nz[local_dof] < max_nz)
+            n_nz[local_dof]++;
+        }
       }
     }
   }
