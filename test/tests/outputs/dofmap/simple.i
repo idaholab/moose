@@ -55,6 +55,5 @@
 []
 
 [Outputs]
-  #output_initial = true
   dofmap = true
 []

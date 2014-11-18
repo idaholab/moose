@@ -101,7 +101,6 @@
 []
 
 [Outputs]
-  output_initial = false
   csv = true
   [./out]
     type = Exodus

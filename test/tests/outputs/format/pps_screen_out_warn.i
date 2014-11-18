@@ -63,6 +63,6 @@
 [Outputs]
   [./console]
     type = Console
-    output_postprocessors = false
+    output_postprocessors_on = none
   [../]
 []
