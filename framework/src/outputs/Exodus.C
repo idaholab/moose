@@ -234,12 +234,12 @@ Exodus::outputInput()
 void
 Exodus::output(const OutputExecFlagType & type)
 {
-  // Start the performance log
-  Moose::perf_log.push("output()", "Exodus");
-
   // Do nothing if there is nothing to output
   if (!hasOutput(type))
     return;
+
+  // Start the performance log
+  Moose::perf_log.push("output()", "Exodus");
 
   // Prepare the ExodusII_IO object
   outputSetup();

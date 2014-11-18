@@ -86,7 +86,6 @@
 [Outputs]
   [./exodus]
     type = Exodus
-    output_initial = false
     hide = 'aux27 v num_aux'
   [../]
 []

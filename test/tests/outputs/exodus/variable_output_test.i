@@ -89,11 +89,10 @@
 [Outputs]
   [./exodus]
     type = Exodus
-    output_initial = false
     file_base = new_out
     hide_variables = 'u box aux_pp'
     scalar_as_nodal = true
-    output_scalar_variables = false
+    output_scalars_on = none
   [../]
   [./console]
     Type = Console

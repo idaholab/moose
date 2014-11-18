@@ -31,7 +31,6 @@
 []
 
 [Outputs]
-  output_initial = false
   exodus = false
   csv = true
   [./console]

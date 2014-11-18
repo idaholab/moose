@@ -63,7 +63,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<std::vector<VariableName> >("show", "A list of the variables and postprocessors that should be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
 
   // Add the 'output_on' input parameter
-  params.addParam<MultiMooseEnum>("execute_on", Output::getExecuteOptions("timestep_end"), "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment (default: timestep_end)");
+  params.addParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"), "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment (default: timestep_end)");
 
   // **** DEPRECATED PARAMETERS ***
   params.addDeprecatedParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file",
@@ -85,13 +85,13 @@ CommonOutputAction::CommonOutputAction(const std::string & name, InputParameters
   _action_params.set<ActionWarehouse *>("awh") = &_awh;
 
   // **** DEPRECATED PARAMETER SUPPORT ****
-  MultiMooseEnum & execute_on = _pars.set<MultiMooseEnum>("execute_on");
+  MultiMooseEnum & output_on = _pars.set<MultiMooseEnum>("output_on");
   if (getParam<bool>("output_initial"))
-    execute_on.push_back("initial");
+    output_on.push_back("initial");
   if (getParam<bool>("output_intermediate"))
-    execute_on.push_back("timestep_end");
+    output_on.push_back("timestep_end");
   if (getParam<bool>("output_final"))
-    execute_on.push_back("final");
+    output_on.push_back("final");
 }
 
 void

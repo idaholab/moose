@@ -54,7 +54,7 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
   [./os2]
     type = Exodus
@@ -62,8 +62,8 @@
     refinements = 2
   [../]
   [./os4]
-   type = Exodus
-   oversample = true
-   refinements = 4
- [../]
+    type = Exodus
+    oversample = true
+    refinements = 4
+  [../]
 []

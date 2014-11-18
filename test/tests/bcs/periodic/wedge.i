@@ -71,7 +71,6 @@
 
 [Outputs]
   file_base = out_wedge
-  output_initial = false
   exodus = true
   [./console]
     type = Console

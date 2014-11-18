@@ -100,11 +100,9 @@
   [../]
   [./exodus]
     type = Exodus
-    output_initial = false
   [../]
   [./exodus2]
     type = Exodus
-    output_initial = false
   [../]
 []
 

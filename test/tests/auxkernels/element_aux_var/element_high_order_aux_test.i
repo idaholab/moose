@@ -99,7 +99,7 @@
   [./ex_out]
     type = Exodus
     file_base = ho
-    output_initial = true
     elemental_as_nodal = true
+    output_on = 'initial timestep_end'
   [../]
 []

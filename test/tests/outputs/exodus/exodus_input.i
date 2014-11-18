@@ -42,7 +42,7 @@
 [Outputs]
   [./out]
     type = Exodus
-    output_initial = true
-    output_input_on = 'final'
+    output_input_on = final
+    output_on = 'initial timestep_end'
   [../]
 []

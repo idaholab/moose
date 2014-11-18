@@ -50,8 +50,6 @@
 [Outputs]
   [./out]
     type = Exodus
-    output_initial = true
-    output_intermediate = false
-    output_final = true
+    output_on = 'initial final'
   [../]
 []

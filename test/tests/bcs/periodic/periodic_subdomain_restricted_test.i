@@ -95,7 +95,6 @@
 
 [Outputs]
   file_base = out_restrict
-  output_initial = false
   interval = 1
   exodus = true
   [./console]

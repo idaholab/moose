@@ -87,10 +87,8 @@
   console = false
   [./screen_file]
     type = FileConsole
-    output_initial = false
     fit_mode = 100
-    linear_residuals = true
-    nonlinear_residuals = true
+    output_on = 'nonlinear linear timestep_end'
   [../]
 []
 

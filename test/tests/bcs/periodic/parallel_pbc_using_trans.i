@@ -74,7 +74,6 @@
 []
 
 [Outputs]
-  output_initial = false
   exodus = true
   [./console]
     type = Console

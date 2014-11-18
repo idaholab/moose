@@ -81,7 +81,8 @@ enum OutputExecFlagType
   OUTPUT_FINAL = 5,
   OUTPUT_FAILED = 6,
   OUTPUT_CUSTOM = 7,
-  OUTPUT_FORCED = 8
+  OUTPUT_FORCED = 8,
+  OUTPUT_NONE = 9
 };
 
 namespace Moose

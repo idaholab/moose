@@ -95,7 +95,6 @@
 []
 
 [Outputs]
-  output_initial = false
   interval = 1
   exodus = true
   csv = true

@@ -116,11 +116,10 @@
 
 [Outputs]
   file_base = out_nodal_aux_var_value
-  output_initial = false
   exodus = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []

@@ -415,6 +415,10 @@ template<class OutputBase>
 bool
 AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const OutputExecFlagType & type)
 {
+  // Do not output if the 'none' is contained by the output_on
+  if (_advanced_output_on.contains(name) && _advanced_output_on[name].contains('none'))
+    return false;
+
   // Data output flag, true if data exists to be output
   bool output_data_flag = true;
 
@@ -712,7 +716,7 @@ template<class OutputBase>
 bool
 AdvancedOutput<OutputBase>::hasOutputHelper(const std::string & name)
 {
-  return !_output_data[name].output.empty() && _advanced_output_on.contains(name) && _advanced_output_on[name].isValid();
+  return !_output_data[name].output.empty() && _advanced_output_on.contains(name) && _advanced_output_on[name].isValid() && !_advanced_output_on[name].contains("none");
 }
 
 template<class OutputBase>

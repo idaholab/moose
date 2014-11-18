@@ -63,11 +63,10 @@
   [./console]
     type = Console
     perf_log = true
-    nonlinear_residuals = true
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
   [./dofmap]
     type = DOFMap
-    output_on = 'timestep_begin'
+    output_on = timestep_begin
   [../]
 []

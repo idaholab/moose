@@ -86,7 +86,6 @@
 
 [Outputs]
   file_base = level1
-  output_initial = false
   exodus = true
   [./console]
     type = Console

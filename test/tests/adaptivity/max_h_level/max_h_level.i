@@ -75,7 +75,6 @@
 [Outputs]
   [./out]
     type = Exodus
-    output_initial = false
-    output_scalar_variables = false
+    output_scalars_on = none
   [../]
 []
