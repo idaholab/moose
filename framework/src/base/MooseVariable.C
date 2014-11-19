@@ -467,14 +467,13 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
   const NumericVector<Real> & u_dot            = _sys.solutionUDot();
-  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
+  const Real & du_dot_du                       = _sys.duDotDu();
 
   dof_id_type idx = 0;
   Real soln_local = 0;
   Real soln_old_local = 0;
   Real soln_older_local = 0;
   Real u_dot_local = 0;
-  Real du_dot_du_local = 0;
 
   Real phi_local = 0;
   const RealGradient * dphi_qp = NULL;
@@ -514,7 +513,6 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
         soln_older_local = solution_older(idx);
 
       u_dot_local        = u_dot(idx);
-      du_dot_du_local    = du_dot_du(idx);
     }
 
     for (unsigned int qp=0; qp < nqp; qp++)
@@ -560,7 +558,7 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
       if (is_transient)
       {
         _u_dot[qp]        += phi_local * u_dot_local;
-        _du_dot_du[qp]    += phi_local * du_dot_du_local;
+        _du_dot_du[qp]    = du_dot_du;
 
         if (_need_u_old)
           _u_old[qp]        += phi_local * soln_old_local;
@@ -694,14 +692,13 @@ MooseVariable::computeElemValues()
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
   const NumericVector<Real> & u_dot            = _sys.solutionUDot();
-  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
+  const Real & du_dot_du                       = _sys.duDotDu();
 
   dof_id_type idx = 0;
   Real soln_local = 0;
   Real soln_old_local = 0;
   Real soln_older_local = 0;
   Real u_dot_local = 0;
-  Real du_dot_du_local = 0;
 
   Real phi_local = 0;
   const RealGradient * dphi_qp = NULL;
@@ -731,7 +728,6 @@ MooseVariable::computeElemValues()
         soln_older_local = solution_older(idx);
 
       u_dot_local        = u_dot(idx);
-      du_dot_du_local    = du_dot_du(idx);
     }
 
     for (unsigned int qp=0; qp < nqp; qp++)
@@ -777,7 +773,7 @@ MooseVariable::computeElemValues()
       if (is_transient)
       {
         _u_dot[qp]        += phi_local * u_dot_local;
-        _du_dot_du[qp]    += phi_local * du_dot_du_local;
+        _du_dot_du[qp]    = du_dot_du;
 
         if (_need_u_old)
           _u_old[qp]        += phi_local * soln_old_local;
@@ -875,14 +871,13 @@ MooseVariable::computeElemValuesFace()
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
   const NumericVector<Real> & u_dot            = _sys.solutionUDot();
-  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
+  const Real & du_dot_du                       = _sys.duDotDu();
 
   dof_id_type idx;
   Real soln_local;
-  Real soln_old_local=0;
-  Real soln_older_local=0;
-//  Real u_dot_local;
-//  Real du_dot_du_local;
+  Real soln_old_local = 0;
+  Real soln_older_local = 0;
+  Real u_dot_local = 0;
 
   Real phi_local;
   RealGradient dphi_local;
@@ -900,6 +895,8 @@ MooseVariable::computeElemValuesFace()
 
       if (_need_u_older || _need_grad_older || _need_second_older)
         soln_older_local = solution_older(idx);
+
+      u_dot_local = u_dot(idx);
     }
 
     for (unsigned int qp=0; qp < nqp; ++qp)
@@ -918,8 +915,8 @@ MooseVariable::computeElemValuesFace()
 
       if (is_transient)
       {
-        _u_dot[qp]        += phi_local * u_dot(idx);
-        _du_dot_du[qp]    += phi_local * du_dot_du(idx);
+        _u_dot[qp]        += phi_local * u_dot_local;
+        _du_dot_du[qp]    = du_dot_du;
 
         if (_need_u_old)
           _u_old[qp]        += phi_local * soln_old_local;
@@ -1226,7 +1223,7 @@ MooseVariable::computeNodalValues()
         _nodal_u_older[i] = _sys.solutionOlder()(_dof_indices[i]);
 
         _nodal_u_dot[i] = _sys.solutionUDot()(_dof_indices[i]);
-        _nodal_du_dot_du[i] = _sys.solutionDuDotDu()(_dof_indices[i]);
+        _nodal_du_dot_du[i] = _sys.duDotDu();
       }
     }
   }

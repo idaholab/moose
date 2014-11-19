@@ -17,7 +17,7 @@
 
 #include "Moose.h"
 #include "ParallelUniqueId.h"
-#include "BndNode.h"
+#include "MooseMesh.h"
 // libmesh
 #include "libmesh/elem_range.h"
 #include "libmesh/numeric_vector.h"

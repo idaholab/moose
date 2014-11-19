@@ -136,6 +136,16 @@ public:
   std::map<unsigned int, std::vector<unsigned int> > & nodeToElemMap();
 
   /**
+   * These structs are required so that the bndNodes{Begin,End} and
+   * bndElems{Begin,End} functions work...
+   */
+  struct bnd_node_iterator;
+  struct const_bnd_node_iterator;
+
+  struct bnd_elem_iterator;
+  struct const_bnd_elem_iterator;
+
+  /**
    * Return iterators to the beginning/end of the boundary nodes list.
    */
   virtual bnd_node_iterator bndNodesBegin();
@@ -270,8 +280,8 @@ public:
   NodeRange * getActiveNodeRange();
   SemiLocalNodeRange * getActiveSemiLocalNodeRange();
   ConstNodeRange * getLocalNodeRange();
-  ConstBndNodeRange * getBoundaryNodeRange();
-  ConstBndElemRange * getBoundaryElementRange();
+  StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode*> * getBoundaryNodeRange();
+  StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> * getBoundaryElementRange();
 
   /**
    * Returns a read-only reference to the set of subdomains currently
@@ -740,8 +750,8 @@ protected:
   SemiLocalNodeRange * _active_semilocal_node_range;
   NodeRange * _active_node_range;
   ConstNodeRange * _local_node_range;
-  ConstBndNodeRange * _bnd_node_range;
-  ConstBndElemRange * _bnd_elem_range;
+  StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode*> * _bnd_node_range;
+  StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> * _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
   std::map<unsigned int, std::vector<unsigned int> > _node_to_elem_map;
@@ -757,7 +767,7 @@ protected:
   /**
    * A set of boundary IDs currently present in the mesh.
    * In serial, this is equivalent to the values returned
-   * by _mesh.boundary_info->get_boundary_ids().  In parallel,
+   * by _mesh.get_boundary_info().get_boundary_ids().  In parallel,
    * it will contain off-processor boundary IDs as well.
    */
   std::set<BoundaryID> _mesh_boundary_ids;
@@ -923,5 +933,122 @@ private:
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
 };
+
+
+
+/**
+ * The definition of the bnd_node_iterator struct.
+ */
+struct
+MooseMesh::bnd_node_iterator :
+variant_filter_iterator<MeshBase::Predicate,
+                        BndNode*>
+{
+  // Templated forwarding ctor -- forwards to appropriate variant_filter_iterator ctor
+  template <typename PredType, typename IterType>
+  bnd_node_iterator (const IterType& d,
+                     const IterType& e,
+                     const PredType& p ) :
+      variant_filter_iterator<MeshBase::Predicate,
+                              BndNode*>(d,e,p) {}
+};
+
+
+
+/**
+ * The definition of the const_bnd_node_iterator struct.  It is similar to the
+ * iterator above, but also provides an additional conversion-to-const ctor.
+ */
+struct
+MooseMesh::const_bnd_node_iterator :
+variant_filter_iterator<MeshBase::Predicate,
+                        BndNode* const,
+                        BndNode* const&,
+                        BndNode* const*>
+{
+  // Templated forwarding ctor -- forwards to appropriate variant_filter_iterator ctor
+  template <typename PredType, typename IterType>
+  const_bnd_node_iterator (const IterType& d,
+                           const IterType& e,
+                           const PredType& p ) :
+    variant_filter_iterator<MeshBase::Predicate,
+                            BndNode* const,
+                            BndNode* const&,
+                            BndNode* const*>(d,e,p)  {}
+
+
+  // The conversion-to-const ctor.  Takes a regular iterator and calls the appropriate
+  // variant_filter_iterator copy constructor.  Note that this one is *not* templated!
+  const_bnd_node_iterator (const MooseMesh::bnd_node_iterator& rhs) :
+    variant_filter_iterator<MeshBase::Predicate,
+                            BndNode* const,
+                            BndNode* const&,
+                            BndNode* const*>(rhs)
+  {
+  }
+};
+
+
+
+/**
+ * The definition of the bnd_elem_iterator struct.
+ */
+struct
+MooseMesh::bnd_elem_iterator :
+variant_filter_iterator<MeshBase::Predicate,
+                        BndElement*>
+{
+  // Templated forwarding ctor -- forwards to appropriate variant_filter_iterator ctor
+  template <typename PredType, typename IterType>
+  bnd_elem_iterator (const IterType& d,
+                     const IterType& e,
+                     const PredType& p ) :
+      variant_filter_iterator<MeshBase::Predicate,
+                              BndElement*>(d,e,p) {}
+};
+
+
+
+/**
+ * The definition of the const_bnd_elem_iterator struct.  It is similar to the regular
+ * iterator above, but also provides an additional conversion-to-const ctor.
+ */
+struct
+MooseMesh::const_bnd_elem_iterator :
+variant_filter_iterator<MeshBase::Predicate,
+                        BndElement* const,
+                        BndElement* const&,
+                        BndElement* const*>
+{
+  // Templated forwarding ctor -- forwards to appropriate variant_filter_iterator ctor
+  template <typename PredType, typename IterType>
+  const_bnd_elem_iterator (const IterType& d,
+                           const IterType& e,
+                           const PredType& p ) :
+    variant_filter_iterator<MeshBase::Predicate,
+                            BndElement* const,
+                            BndElement* const&,
+                            BndElement* const*>(d,e,p)  {}
+
+
+  // The conversion-to-const ctor.  Takes a regular iterator and calls the appropriate
+  // variant_filter_iterator copy constructor.  Note that this one is *not* templated!
+  const_bnd_elem_iterator (const bnd_elem_iterator& rhs) :
+    variant_filter_iterator<MeshBase::Predicate,
+                            BndElement* const,
+                            BndElement* const&,
+                            BndElement* const*>(rhs)
+  {
+  }
+};
+
+
+
+/**
+ * Some useful StoredRange typedefs.  These are defined *outside* the
+ * MooseMesh class to mimic the Const{Node,Elem}Range classes in libmesh.
+ */
+typedef StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode*> ConstBndNodeRange;
+typedef StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> ConstBndElemRange;
 
 #endif /* MOOSEMESH_H */

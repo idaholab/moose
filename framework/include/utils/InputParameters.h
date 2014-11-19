@@ -91,6 +91,9 @@ public:
    */
   template <typename T, typename UP_T> void rangeCheck(const std::string & full_name, const std::string & short_name,
                                                        InputParameters::Parameter<T> * param, std::ostream & oss=Moose::out);
+  template <typename T, typename UP_T> void rangeCheck(const std::string & full_name, const std::string & short_name,
+                                                       InputParameters::Parameter<std::vector<T> > * param,
+                                                       std::ostream & oss=Moose::out);
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
@@ -195,15 +198,6 @@ public:
 
   template <typename T>
   void addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
-
-  /**
-   * Add and mark a parameter as removed.  If the user supplies this parameter then an error will be thrown.
-   *
-   * @param name The name of the parameter
-   * @param removed_message The message that will will print about why this param was removed.
-   */
-  template <typename T>
-  void addRemovedParam(const std::string &name, const std::string &removed_message);
 
   /**
    * This method checks to make sure that we aren't adding a parameter with the same name but a different type.  It
@@ -434,6 +428,20 @@ public:
    */
   void applyParameters(const InputParameters & common);
 
+  ///@{
+  /*
+   * These methods are here to retrieve parameters for scalar and vector types respectively. We will throw errors
+   * when returning most scalar types, but will allow retrieving empty vectors.
+   */
+  template <typename T>
+  static
+  const T & getParamHelper(const std::string & name, const InputParameters & pars, const T* the_type);
+
+  template <typename T>
+  static
+  const std::vector<T> & getParamHelper(const std::string & name, const InputParameters & pars, const std::vector<T>* the_type);
+  ///@}
+
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters validParams<MooseObject>();
   friend InputParameters validParams<Action>();
@@ -518,6 +526,107 @@ InputParameters::set (const std::string& name)
   set_attributes(name, false);
 
   return cast_ptr<Parameter<T>*>(_values[name])->set();
+}
+
+template <typename T, typename UP_T>
+void
+InputParameters::rangeCheck(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> > * param, std::ostream & oss)
+{
+  mooseAssert(param, "Parameter is NULL");
+
+  if (_range_functions.find(short_name) == _range_functions.end())
+    return;
+
+  /**
+   * Automatically detect the variables used in the range checking expression.
+   * We allow the following variables (where snam is the short_name of the parameter)
+   *
+   * snam       : tests every component in the vector
+   *              'snam > 0'
+   * snam_size  : the size of the vector
+   *              'snam_size = 5'
+   * snam_i     : where i is a number from 0 to sname_size-1 tests a specific component
+   *              'snam_0 > snam_1'
+   */
+  FunctionParserBase<UP_T> fp;
+  std::vector<std::string> vars;
+  if (fp.ParseAndDeduceVariables(_range_functions[short_name], vars) != -1) // -1 for success
+  {
+    oss << "Error parsing expression: " << _range_functions[short_name] << '\n';
+    return;
+  }
+
+  // Fparser parameter buffer
+  std::vector<UP_T> parbuf(vars.size());
+
+  // parameter vector
+  const std::vector<T> & value = param->set();
+
+  // iterate over all vector values (maybe ;)
+  bool need_to_iterate = false;
+  unsigned int i = 0;
+  do {
+    // set parameters
+    for (unsigned int j = 0; j < vars.size(); j++)
+    {
+      if (vars[j] == short_name)
+      {
+        if (value.size() == 0)
+        {
+          oss << "Range checking empty vector: " << _range_functions[short_name] << '\n';
+          return;
+        }
+
+        parbuf[j] = value[i];
+        need_to_iterate = true;
+      }
+      else if (vars[j] == short_name + "_size")
+        parbuf[j] = value.size();
+      else
+      {
+        if (vars[j].substr(0, short_name.size() + 1) != short_name + "_")
+        {
+          oss << "Error parsing expression: " << _range_functions[short_name] << '\n';
+          return;
+        }
+        std::istringstream iss(vars[j]);
+        iss.seekg(short_name.size() + 1);
+
+        size_t index;
+        if (iss >> index)
+        {
+          if (index >= value.size())
+          {
+            oss << "Error parsing expression: " << _range_functions[short_name] << "\nOut of range variable " << vars[j] << '\n';
+            return;
+          }
+          parbuf[j] = value[index];
+        }
+        else
+        {
+          oss << "Error parsing expression: " << _range_functions[short_name] << "\nInvalid variable " << vars[j] << '\n';
+          return;
+        }
+      }
+    }
+
+    // test function using the parameters determined above
+    UP_T result = fp.Eval(&parbuf[0]);
+    if (fp.EvalError())
+    {
+      oss << "Error evaluating expression: " << _range_functions[short_name] << '\n';
+      return;
+    }
+
+    if (!result)
+    {
+      oss << "Range check failed for parameter " << full_name << "\n\tExpression: " << _range_functions[short_name] << "\n";
+      if (need_to_iterate)
+        oss << "\t Component: " << i << '\n';
+    }
+
+
+  } while (need_to_iterate && ++i < value.size());
 }
 
 template <typename T, typename UP_T>
@@ -723,7 +832,6 @@ void
 InputParameters::suppressParameter(const std::string &name)
 {
   _required_params.erase(name);
-  _valid_params.erase(name);
   _private_params.insert(name);
 }
 
@@ -752,13 +860,6 @@ InputParameters::addDeprecatedParam(const std::string &name, const std::string &
   addParam<T>(name, doc_string);
 
   _deprecated_params.insert(std::make_pair(name, deprecation_message));
-}
-
-template <typename T>
-void
-InputParameters::addRemovedParam(const std::string &name, const std::string &removed_message)
-{
-  mooseError("The parameter " << name << " has been removed.\n" << removed_message);
 }
 
 // Specializations for MooseEnum
@@ -866,6 +967,39 @@ InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/,
   oss << r_value;
   l_value = oss.str();
 }
+
+template <typename T>
+const T &
+InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T*)
+{
+  if (!pars.isParamValid(name))
+    mooseError("The parameter \"" << name << "\" is being retrieved before being set.\n");
+  return pars.get<T>(name);
+}
+
+template <typename T>
+const std::vector<T> &
+InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const std::vector<T>*)
+{
+  return pars.get<std::vector<T> >(name);
+}
+
+template <>
+inline
+const MooseEnum &
+InputParameters::getParamHelper<MooseEnum>(const std::string & name, const InputParameters & pars, const MooseEnum*)
+{
+  return pars.get<MooseEnum>(name);
+}
+
+template <>
+inline
+const MultiMooseEnum &
+InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name, const InputParameters & pars, const MultiMooseEnum*)
+{
+  return pars.get<MultiMooseEnum>(name);
+}
+
 
 InputParameters emptyInputParameters();
 

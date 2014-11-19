@@ -2,12 +2,12 @@
   [./except1]
     type = 'RunException'
     input = 'except1.i'
-    expect_err = 'Weak-plane friction angle must not be less than weak-plane dilation angle'
+    expect_err = 'Weak-Plane-Shear friction angle must not be less than Weak-Plane-Shear dilation angle'
   [../]
   [./except2]
     type = 'RunException'
     input = 'except2.i'
-    expect_err = 'Weak-plane normal vector must not have zero length'
+    expect_err = 'MultiPlasticity: transverse_direction vector must not have zero length'
   [../]
 
   [./small1]
@@ -32,6 +32,13 @@
     abs_zero = 1.0E-6
     heavy = true
   [../]
+  [./small4]
+    type = 'CSVDiff'
+    input = 'small_deform4.i'
+    csvdiff = 'small_deform4.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-6
+  [../]
 
   [./large1]
     type = 'Exodiff'
@@ -49,6 +56,14 @@
     type = 'CSVDiff'
     input = 'large_deform3.i'
     csvdiff = 'large_deform3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-6
+    heavy = true
+  [../]
+  [./large4]
+    type = 'CSVDiff'
+    input = 'large_deform4.i'
+    csvdiff = 'large_deform4.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-6
     heavy = true
@@ -72,6 +87,13 @@
     type = 'CSVDiff'
     input = 'small_deform_harden3.i'
     csvdiff = 'small_deform_harden3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-3
+  [../]
+  [./small_hard4]
+    type = 'CSVDiff'
+    input = 'small_deform_harden4.i'
+    csvdiff = 'small_deform_harden4.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-3
   [../]

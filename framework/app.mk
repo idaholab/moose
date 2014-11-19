@@ -56,6 +56,10 @@ app_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(srcfiles))
 app_LIB     := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)-$(METHOD).la
 # application
 app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
+# revision header
+CAMEL_CASE_NAME := $(shell echo $(APPLICATION_NAME) | perl -pe 's/(?:^|_)([a-z])/\u$$1/g;')
+app_BASE_DIR    ?= base/
+app_HEADER      := $(APPLICATION_DIR)/include/$(app_base_dir)$(CAMEL_CASE_NAME)Revision.h
 
 # If building shared libs, make the plugins a dependency, otherwise don't.
 ifeq ($(libmesh_shared),yes)
@@ -66,6 +70,7 @@ endif
 
 app_LIBS       := $(app_LIB) $(app_LIBS)
 app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
+app_HEADERS    := $(app_HEADER) $(app_HEADERS)
 app_INCLUDES   += $(app_INCLUDE)
 app_DIRS       += $(APPLICATION_DIR)
 
@@ -80,10 +85,19 @@ ifeq ($(BUILD_EXEC),yes)
   all:: $(app_EXEC)
 endif
 
+$(app_objects): $(app_HEADER)
+
+# Target-specific Variable Values (See GNU-make manual)
+$(app_HEADER): curr_dir    := $(APPLICATION_DIR)
+$(app_HEADER): curr_app    := $(APPLICATION_NAME)
+$(app_HEADER):
+	@echo "MOOSE Generating Header "$@"..."
+	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(curr_dir) $@ $(curr_app))
+
 # Target-specific Variable Values (See GNU-make manual)
 $(app_LIB): curr_objs := $(app_objects)
 $(app_LIB): curr_dir := $(APPLICATION_DIR)
-$(app_LIB): $(app_objects) $(app_plugin_deps)
+$(app_LIB): $(app_objects) $(app_plugin_deps) $(app_HEADER)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib

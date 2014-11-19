@@ -38,12 +38,12 @@ SetupPreconditionerAction::SetupPreconditionerAction(const std::string & name, I
 void
 SetupPreconditionerAction::act()
 {
-  if (_problem != NULL)
+  if (_problem.get() != NULL)
   {
     // build the preconditioner
-    _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem;
-    MoosePreconditioner * pc = dynamic_cast<MoosePreconditioner *>(_factory.create(_type, getShortName(), _moose_object_pars));
-    if (pc == NULL)
+    _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
+    MooseSharedPointer<MoosePreconditioner> pc = MooseSharedNamespace::static_pointer_cast<MoosePreconditioner>(_factory.create(_type, getShortName(), _moose_object_pars));
+    if (!pc.get())
       mooseError("Failed to build the preconditioner.");
 
     _problem->getNonlinearSystem().setPreconditioner(pc);

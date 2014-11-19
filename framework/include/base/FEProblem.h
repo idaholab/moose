@@ -325,7 +325,7 @@ public:
   // NL /////
   NonlinearSystem & getNonlinearSystem() { return _nl; }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
-  void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
+  void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
@@ -334,7 +334,7 @@ public:
 
   // Aux /////
   void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains = NULL);
-  void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
+  void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addAuxScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
@@ -853,7 +853,7 @@ protected:
   std::vector<Assembly *> _assembly;
 
   /// functions
-  std::vector<std::map<std::string, Function *> > _functions;
+  std::vector<std::map<std::string, MooseSharedPointer<Function> > > _functions;
 
   /// Initial condition warehouses (one for each thread)
   std::vector<InitialConditionWarehouse> _ics;

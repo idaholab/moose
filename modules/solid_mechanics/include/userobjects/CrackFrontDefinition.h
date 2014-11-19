@@ -35,6 +35,7 @@ public:
   Real getCrackFrontForwardSegmentLength(const unsigned int node_index) const;
   Real getCrackFrontBackwardSegmentLength(const unsigned int node_index) const;
   const RealVectorValue & getCrackDirection(const unsigned int node_index) const;
+  unsigned int getNumCrackFrontNodes() const;
   bool treatAs2D() const {return _treat_as_2d;}
   RealVectorValue rotateToCrackFrontCoords(const RealVectorValue vector, const unsigned int node_index) const;
   ColumnMajorMatrix rotateToCrackFrontCoords(const SymmTensor tensor, const unsigned int node_index) const;
@@ -86,6 +87,7 @@ protected:
   RealVectorValue _crack_mouth_coordinates;
   RealVectorValue _crack_plane_normal;
   bool _treat_as_2d;
+  bool _closed_loop;
   unsigned int _axis_2d;
 
   void getCrackFrontNodes(std::set<unsigned int>& nodes);

@@ -5,106 +5,111 @@
 
 import subprocess, os, sys, re
 
-def findRepoRevision(moose_dir):
-  apps_file = '.gitignore'
-  revision = ""
-  vcs = 'SVN'
 
-  # Locate the .build_apps file
-  found_it = False
-  apps_dir = os.getcwd() + "/"
-  for i in range(4):
-    apps_dir += "../"
-    if os.path.exists(apps_dir + apps_file):
-      found_it = True
-      break
-  if not found_it:
-    # We need to see if we are in a git repo
-    p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=None, shell=True)
-    p.wait()
-    if p.returncode == 0:
-      git_dir = p.communicate()[0]
-      app_dir = os.path.abspath(os.path.join(os.getcwd(), git_dir))
+def shellCommand( command, cwd=None ):
+  # The following line works with Python 2.7+
+  # return subprocess.check_output( command, shell=True, stderr=subprocess.STDOUT, cwd=cwd )
+  p = subprocess.Popen( command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=cwd )
+  p.wait()
+  retcode = p.returncode
+  if retcode != 0:
+    raise Exception()
 
-    return revision  # blank string
+  return p.communicate()[0]
 
-  # At this point apps_dir should contain the root of the repository
+def gitVersionString( cwd=None ):
+  SHA1 = ''
+  date = ''
+  try:
+    # The SHA1 and date should always be available if we have a git repo.
+    SHA1 = shellCommand( 'git show -s --format=%h', cwd ).strip()
+    date = shellCommand( 'git show -s --format=%ci', cwd ).split()[0]
+  except: # subprocess.CalledProcessError:
+    return None
 
-  # See if this is an SVN checkout
-  regex = ''
-  if os.path.exists(os.path.join(apps_dir, '.git')):
-    # See if this git project has a SVN remote
-    saved_dir = os.getcwd()
-    os.chdir(apps_dir)
-    srre=re.compile('svn-remote')
-    p = subprocess.Popen('git config -l', stdout=subprocess.PIPE, shell=True, stderr=None)
-    buffer = p.communicate()[0]
-    os.chdir(saved_dir)
-    m = srre.search(str(buffer))
-    if m != None:
-      # It has a SVN remote -- get the ID from the svn commit
-      command = 'git svn log --limit 1'
-      regex = re.compile(r'r(\d+)')
-    else:
-      # It doesn't have a SVN remote -- get the git commit id
-      command = 'git log -n 1 --pretty="%h"'
-      regex = re.compile(r'^(\S+)')
-      vcs = 'GIT'
-  elif os.path.exists(apps_dir + '.svn'):
-    command = 'svnversion .'
-    regex = re.compile(r'(\d+)\w*$')
-  else:
-    return revision  # blank string
-
-  saved_dir = os.getcwd()
-  # Change current working directory (this is necessary for braindead SVN)
-  os.chdir(apps_dir)
-  # Get the revision from the log
-  p = subprocess.Popen([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-  buffer = p.communicate()[0]
-  # Restore current working directory
-  os.chdir(saved_dir)
-
-  # find the revision
-  m = regex.search(str(buffer))
-  if m != None:
-    revision = m.group(1)
-  if vcs == 'GIT':
-    revision = '"'+revision+'"'
-  return revision
+  # The tag check will always succeed if the repo starts with a v0.0 tag. To find only tags that
+  # were part of the first parent, use --first-parent.
+  tag = ''
+  try:
+    description = shellCommand( 'git describe --tags --long --match "v[0-9]*"', cwd ).rsplit('-',2)
+    tag = description[0] + ', '
+    commitsSinceTag = description[1]
+    if commitsSinceTag != '0':
+      tag = 'derived from ' + tag
+  except: # subprocess.CalledProcessError:
+    pass
+  return tag + "git commit " + SHA1 + " on " + date
 
 
-def writeRevision(moose_dir, revision):
+def gitSvnVersionString( cwd=None ):
+  try:
+    date = shellCommand( 'git show -s --format=%ci', cwd ).split()[0]
+    revision = shellCommand( 'git svn find-rev $(git log --max-count 1 --pretty=format:%H)', cwd ).strip()
+    if len( revision ) > 0 and len( revision ) < 10:
+      return 'svn revision ' + revision + " on " + date
+  except: # subprocess.CalledProcessError:
+    pass
+  return None
+
+
+def svnVersionString( cwd=None ):
+  try:
+    revisionString = shellCommand( 'svnversion .', cwd )
+    matchingRevision = re.search( r'\d+', revisionString )
+    if matchingRevision is not None:
+      return 'svn revision ' + matchingRevision.group(0)
+  except: # subprocess.CalledProcessError:
+    pass
+  return None
+
+
+def repoVersionString( cwd=None ):
+  version = svnVersionString( cwd )
+  if version is None:
+    version = gitSvnVersionString( cwd )
+  if version is None:
+    version = gitVersionString( cwd )
+  if version is None:
+    version = "unknown"
+  return version
+
+
+def writeRevision( app_name, app_revision, revision_header ):
+  # Use all caps for app name (by convention).
+  app_definition = app_name.upper() + '_REVISION'
+
   # see if the revision is different
-  revision_file = moose_dir + '/include/base/HerdRevision.h'
-
-  # We have to have something listed as a revision if we didn't find one (i.e revision is blank)
-  if revision == "":
-    revision = '"N/A"';
-
-  revision_changed = True
-  if os.path.exists(revision_file):
-    f = open(revision_file, "r")
+  revision_changed = False
+  if os.path.exists(revision_header):
+    f = open(revision_header, "r")
     buffer = f.read()
 
-    m = re.search(r'HERD_REVISION (\S+)', buffer)
-    existing_revision = ""
-    if m != None:
-      existing_revision = m.group(1)
+    m =  re.search( re.escape( app_definition) + r' "([^"]*)"',buffer )
+    if m is not None and m.group(1) != app_revision:
+      revision_changed = True
 
-    if revision == existing_revision:
-      revision_changed = False
     f.close()
+  else:
+    # Count it as changed if the header does not exist.
+    revision_changed = True
 
   if revision_changed:
-    f = open(revision_file, "w")
-    f.write("/* THIS FILE IS AUTOGENERATED - DO NOT EDIT */\n\n")
-    f.write("#ifndef HERDREVISION_H\n#define HERDREVISION_H\n\n#define HERD_REVISION " + revision + "\n\n#endif //HERDREVISION_H\n")
+    f = open(revision_header, "w")
+    f.write( '/* THIS FILE IS AUTOGENERATED - DO NOT EDIT */\n' \
+             '\n'
+             '#ifndef ' + app_definition + '_H\n'
+             '#define ' + app_definition + '_H\n'
+             '\n'
+             '#define ' + app_definition + ' "' + app_revision + '"\n'
+             '\n'
+             '#endif // ' + app_definition + '_H\n')
     f.close()
 
 # Entry point
-if len(sys.argv) == 2:
-  moose_dir = sys.argv[1]
-  revision = findRepoRevision(moose_dir)
+if len(sys.argv) == 4:
+  repo_location = sys.argv[1]
+  header_file = sys.argv[2]
+  app_name = sys.argv[3]
 
-  writeRevision(moose_dir, revision)
+  revision = repoVersionString( repo_location )
+  writeRevision( app_name, revision, header_file )

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, re
+import sys, os, re
 
 class GPNode:
   def __init__(self, name, parent):
@@ -30,11 +30,30 @@ class GPNode:
     for child in self.children_list:
       self.children[child].Print(prefix + self.name + '/')
 
-  def fullName(self):
-    if self.parent == None:
-      return self.name
+  ##
+  # Perform a fuzzy search for a node name
+  # @return The node object if any part of a node key is in the supplied name
+  def getNode(self, name):
+    node = None
+    if name in self.children:
+      node = self.children[name]
+
+
     else:
-      return self.parent.fullName() + '/' + self.name
+      for key, value in self.children.iteritems():
+        node = value.getNode(name)
+        if node != None:
+          break
+    return node
+
+  def fullName(self, no_root=False):
+    if self.parent == None:
+      if no_root and self.name == 'root':
+        return ''
+      else:
+        return self.name
+    else:
+      return self.parent.fullName(no_root) + '/' + self.name
 
 
 class ParseException(Exception):
@@ -46,6 +65,7 @@ class ParseGetPot:
   def __init__(self, file_name):
     self.file_name = file_name
     self.file = open(file_name)
+    self.unique_keys = set() #The full path to each key to ensure that no duplicates are supplied
 
     self.root_node = GPNode('root', None)
 
@@ -55,11 +75,12 @@ class ParseGetPot:
 
     self.parameter_re = re.compile(r"\s*(\w+)\s*=\s*([^#\n]+?)\s*(#.*)?\n")
 
-    self.parameter_in_single_quotes_re = re.compile(r"\s*(\w+)\s*=\s*'([^\n]+?)'\s*(#.*)?\n")
+    self.parameter_in_single_quotes_re = re.compile(r"\s*([\w\-]+)\s*=\s*'([^\n]+?)'\s*(#.*)?\n")
 
     self.comment_re = re.compile(r"[^']*(?:'.*')?\s*#\s*(.*)")
 
     self.unmatched_single_tick_re = re.compile(r"[^']*'[^']*\n")
+
     self.independent_data_re = re.compile(r"\s*([^'\n]+)")
 
     self._parseFile()
@@ -72,21 +93,23 @@ class ParseGetPot:
       m = self.section_begin_re.match(line)
       if m:
         child_name = m.group(2)
-        child = GPNode(child_name, current_node)
+
+        if child_name in current_node.children:
+          child = current_node.children[child_name]
+        else:
+          child = GPNode(child_name, current_node)
+          current_node.children[child_name] = child
+          current_node.children_list.append(child_name)
 
         # See if there are any comments after the beginning of the block
         m = self.comment_re.match(line)
         if m:
           child.comments.append(m.group(1))
 
-        current_node.children[child_name] = child
-        current_node.children_list.append(child_name)
-
         current_position += 1
         current_position = self._recursiveParseFile(child, lines, current_position)
 
         continue
-
 
       # Look for a parameter on this line
       m = self.parameter_in_single_quotes_re.match(line)
@@ -99,7 +122,8 @@ class ParseGetPot:
         param_value = m.group(2)
 
         # See if the value of this parameter has an unmatched single tick
-        m = self.unmatched_single_tick_re.match(line)
+        # Only look at the part before the comment (if there is one)
+        m = self.unmatched_single_tick_re.match(line.partition('#')[0])
         if m:
           current_position += 1
           found_it = False
@@ -112,14 +136,19 @@ class ParseGetPot:
             if m:
               param_value += ' ' + m.group(1)
 
-            m = self.unmatched_single_tick_re.match(line)
+            m = self.unmatched_single_tick_re.match(line.partition('#')[0]) # Don't include the comment
             if m:
               found_it = True
               break
 
             current_position += 1
           if not found_it:
-            raise ParseException("TODO", "TODO")
+            raise ParseException("SyntaxError", "Unmatched token in Parser")
+
+        unique_key = current_node.fullName(True) + '/' + param_name
+        if unique_key in self.unique_keys:
+          raise ParseException("DuplicateSymbol", 'Duplicate Section Name "' + os.getcwd() + '/' + self.file_name + ":" + unique_key + '"')
+        self.unique_keys.add(unique_key)
 
         current_node.params[param_name] = param_value.strip("'")
         current_node.params_list.append(param_name)

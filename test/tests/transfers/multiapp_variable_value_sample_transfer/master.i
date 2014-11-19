@@ -69,7 +69,6 @@
     source_variable = u
     direction = to_multiapp
     variable = from_master
-    execute_on = timestep
     type = MultiAppVariableValueSampleTransfer
     multi_app = sub
   [../]

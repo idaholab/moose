@@ -35,19 +35,17 @@ InputParameters validParams<SolutionUserObject>()
   params.addRequiredParam<MeshFileName>("mesh", "The name of the mesh file (must be xda or exodusII file).");
   params.addParam<std::vector<std::string> >("system_variables", std::vector<std::string>(),
                                              "The name of the nodal and elemental variables from the file you want to use for values");
-  params.addDeprecatedParam<std::vector<std::string> >("nodal_variables", "Nodal variables", "Use 'system_variables' for all variable names, both nodal and elemental");
-  params.addDeprecatedParam<std::vector<std::string> >("elemental_variables", "Elemental variables", "Use 'system_variables' for all variable names, both nodal and elemental");
 
   // When using XDA files the following must be defined
-  params.addParam<FileName>("es", "The name of the file holding the equation system info in xda format (xda only).");
+  params.addParam<FileName>("es", "<not supplied>", "The name of the file holding the equation system info in xda format (xda only).");
   params.addParam<std::string>("system", "nl0", "The name of the system to pull values out of (xda only).");
 
   // When using ExodusII a specific time is extracted
   params.addParam<int>("timestep", -1, "Index of the single timestep used (exodusII only).  If not supplied, time interpolation will occur.");
 
   // Add ability to perform coordinate transformation: scale, factor
-  params.addParam<std::vector<Real> >("coord_scale", "This name has been deprecated.  Please use scale instead");
-  params.addParam<std::vector<Real> >("coord_factor", "This name has been deprecated.  Please use translation instead");
+  params.addDeprecatedParam<std::vector<Real> >("coord_scale", "This name has been deprecated.",  "Please use scale instead");
+  params.addDeprecatedParam<std::vector<Real> >("coord_factor", "This name has been deprecated.",  "Please use translation instead");
   params.addParam<std::vector<Real> >("scale", std::vector<Real>(LIBMESH_DIM,1), "Scale factor for points in the simulation");
   params.addParam<std::vector<Real> >("scale_multiplier", std::vector<Real>(LIBMESH_DIM,1), "Scale multiplying factor for points in the simulation");
   params.addParam<std::vector<Real> >("translation", std::vector<Real>(LIBMESH_DIM,0), "Translation factors for x,y,z coordinates of the simulation");
@@ -55,7 +53,6 @@ InputParameters validParams<SolutionUserObject>()
   params.addParam<Real>("rotation0_angle", 0.0, "Anticlockwise rotation angle (in degrees) to use for rotation about rotation0_vector.");
   params.addParam<RealVectorValue>("rotation1_vector", RealVectorValue(0, 0, 1), "Vector about which to rotate points of the simulation.");
   params.addParam<Real>("rotation1_angle", 0.0, "Anticlockwise rotation angle (in degrees) to use for rotation about rotation1_vector.");
-  params.addParam<bool>("legacy_read", false, "Utilize the legacy call to EquationsSystems::read, this may be required for older XDA/XDR files");
 
   // following lines build the default_transformation_order
   MultiMooseEnum default_transformation_order("rotation0 translation scale rotation1 scale_multiplier", "translation scale");
@@ -98,38 +95,8 @@ SolutionUserObject::SolutionUserObject(const std::string & name, InputParameters
     _rotation1_angle(getParam<Real>("rotation1_angle")),
     _r1(RealTensorValue()),
     _transformation_order(getParam<MultiMooseEnum>("transformation_order")),
-    _initialized(false),
-    _legacy_read(getParam<bool>("legacy_read"))
+    _initialized(false)
 {
-
-  // Handle deprecated parameters
-  if (isParamValid("nodal_variables"))
-  {
-    std::vector<std::string> vars = getParam<std::vector<std::string> >("nodal_variables");
-    _system_variables.insert(_system_variables.end(), vars.begin(), vars.end());
-  }
-
-  if (isParamValid("elemental_variables"))
-  {
-    std::vector<std::string> vars = getParam<std::vector<std::string> >("elemental_variables");
-    _system_variables.insert(_system_variables.end(), vars.begin(), vars.end());
-  }
-
-  if (_legacy_read)
-    mooseWarning("The input parameter 'legacy_read' is deprecated.\nThis option is for legacy support and will be removed on 10/1/2014.\nThe xda/xdr files being read should be regenerated and the flag removed.");
-
-  // Extract coordinate transformation
-  if (parameters.isParamValid("coord_scale"))
-  {
-    mooseWarning("Parameter name coord_scale is deprecated.  Please use scale instead.");
-    _scale = getParam<std::vector<Real> >("coord_scale");
-  }
-
-  if (parameters.isParamValid("coord_factor"))
-  {
-    mooseWarning("Parameter name coord_factor is deprecated.  Please use translation instead.");
-    _translation = getParam<std::vector<Real> >("coord_factor");
-  }
 
   // form rotation matrices with the specified angles
   Real halfPi = std::acos(0.0);
@@ -194,12 +161,8 @@ SolutionUserObject::readXda()
   // Create the libmesh::EquationSystems
   _es = new EquationSystems(*_mesh);
 
-  // Use the legacy read
-  if (_legacy_read)
-    _es->read(_es_file);
-
   // Use new read syntax (binary)
-  else if (_file_type ==  "xdr")
+  if (_file_type ==  "xdr")
     _es->read(_es_file, DECODE, EquationSystems::READ_HEADER | EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA);
 
   // Use new read syntax
@@ -663,6 +626,14 @@ SolutionUserObject::evalMeshFunction(const Point & p, std::string var_name, unsi
 
   // Extract the variable index for the MeshFunction(s), must use iterator b/c of const
   std::map<std::string, unsigned int>::const_iterator it = _local_variable_index.find(var_name);
+
+  // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
+  if (output.size() == 0)
+  {
+    std::ostringstream oss;
+    p.print(oss);
+    mooseError("Failed to access the data for variable '"<< var_name << "' at point " << oss.str() << " in the '" << _name << "' SolutionUserObject");
+  }
   return output(it->second);
 }
 

@@ -54,7 +54,7 @@ CoupledTransientExecutioner::execute()
   std::vector<Transient *> trans(n_problems);
   for (unsigned int i = 0; i < n_problems; i++)
   {
-    Transient * exec = dynamic_cast<Transient *>(_executioners[i]);
+    Transient * exec = dynamic_cast<Transient *>(_executioners[i].get());
     if (exec == NULL)
       mooseError("Executioner for problem '" << _fe_problems[i]->name() << "' has to be of a transient type.");
     trans[i] = exec;

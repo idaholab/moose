@@ -19,14 +19,14 @@
 #include <map>
 #include <set>
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 class Indicator;
 
 /**
  * Holds Indicators and provides some services
  */
-class IndicatorWarehouse
+class IndicatorWarehouse : public Warehouse<Indicator>
 {
 public:
   IndicatorWarehouse();
@@ -36,12 +36,6 @@ public:
   void initialSetup();
   void timestepSetup();
   void IndicatorSetup();
-
-  /**
-   * Get list of all Indicators
-   * @return The list of all active Indicators
-   */
-  const std::vector<Indicator *> & all() const { return _all_indicators; }
 
   /**
    * Get the list of all active Indicators
@@ -60,7 +54,7 @@ public:
    * @param Indicator Indicator being added
    * @param block_ids Set of active domain where the Indicator is defined
    */
-  void addIndicator(Indicator *Indicator, std::vector<SubdomainID> & block_ids);
+  void addIndicator(MooseSharedPointer<Indicator> indicator, std::vector<SubdomainID> & block_ids);
 
   /**
    * Update the list of active Indicators
@@ -70,13 +64,18 @@ public:
 
 
 protected:
+  ///@{
+  /**
+   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   */
+  std::vector<MooseSharedPointer<Indicator> > _all_ptrs;
+  ///@}
+
   /// Indicators active on a block and in specified time
   std::vector<Indicator *> _active_indicators;
 
   std::vector<Indicator *> _active_internal_side_indicators;
-
-  /// All instances of Indicators
-  std::vector<Indicator *> _all_indicators;
 
   /// Indicators that live everywhere (on the whole domain)
   std::vector<Indicator *> _global_indicators;

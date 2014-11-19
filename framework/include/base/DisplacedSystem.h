@@ -40,7 +40,7 @@ public:
   virtual NumericVector<Number> & solution() { return _undisplaced_system.solution(); }
 
   virtual NumericVector<Number> & solutionUDot() { return _undisplaced_system.solutionUDot(); }
-  virtual NumericVector<Number> & solutionDuDotDu() { return _undisplaced_system.solutionDuDotDu(); }
+  virtual Number & duDotDu() { return _undisplaced_system.duDotDu(); }
 
   /**
    * Return the residual copy from the NonlinearSystem

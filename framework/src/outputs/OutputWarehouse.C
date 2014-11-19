@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 OutputWarehouse::OutputWarehouse() :
+    Warehouse<Output>(),
     _multiapp_level(0)
 {
   // Set the reserved names
@@ -44,7 +45,7 @@ OutputWarehouse::~OutputWarehouse()
 void
 OutputWarehouse::initialSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->initialSetup();
 }
 
@@ -52,14 +53,14 @@ OutputWarehouse::initialSetup()
 void
 OutputWarehouse::init()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->init();
 }
 
 void
 OutputWarehouse::timestepSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
   {
     (*it)->timestepSetupInternal();
     (*it)->timestepSetup();
@@ -74,9 +75,9 @@ OutputWarehouse::addOutput(MooseSharedPointer<Output> & output)
   // Add the object to the warehouse storage, Checkpoint placed at end so they are called last
   Checkpoint * cp = dynamic_cast<Checkpoint *>(output.get());
   if (cp != NULL)
-    _object_ptrs.push_back(output.get());
+    _all_objects.push_back(output.get());
   else
-    _object_ptrs.insert(_object_ptrs.begin(), output.get());
+    _all_objects.insert(_all_objects.begin(), output.get());
 
   // Store the name and pointer
   _object_map[output->name()] = output.get();
@@ -104,7 +105,8 @@ OutputWarehouse::hasOutput(const std::string & name) const
 const std::vector<Output *> &
 OutputWarehouse::getOutputs() const
 {
-  return _object_ptrs;
+  mooseDeprecated("OutputWarehouse::getOutputs() is deprecated - use OutputWarehouse::all() instead");
+  return _all_objects;
 }
 
 
@@ -125,49 +127,49 @@ OutputWarehouse::addOutputFilename(const OutFileBase & filename)
 void
 OutputWarehouse::outputInitial()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->outputInitial();
 }
 
 void
 OutputWarehouse::outputFailedStep()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->outputFailedStep();
 }
 
 void
 OutputWarehouse::outputStep()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->outputStep();
 }
 
 void
 OutputWarehouse::outputFinal()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->outputFinal();
 }
 
 void
 OutputWarehouse::meshChanged()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->meshChanged();
 }
 
 void
 OutputWarehouse::allowOutput(bool state)
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->allowOutput(state);
 }
 
 void
 OutputWarehouse::forceOutput()
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     (*it)->forceOutput();
 }
 
@@ -190,7 +192,7 @@ OutputWarehouse::mooseConsole()
 void
 OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset)
 {
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
   {
     FileOutput * ptr = dynamic_cast<FileOutput *>(*it);
     if (ptr != NULL)
@@ -212,7 +214,7 @@ std::map<std::string, unsigned int>
 OutputWarehouse::getFileNumbers()
 {
   std::map<std::string, unsigned int> output;
-  for (std::vector<Output *>::const_iterator it = _object_ptrs.begin(); it != _object_ptrs.end(); ++it)
+  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
   {
     FileOutput * ptr = dynamic_cast<FileOutput *>(*it);
     if (ptr != NULL)

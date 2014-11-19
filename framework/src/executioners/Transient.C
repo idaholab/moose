@@ -83,7 +83,6 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
     Executioner(name, parameters),
     _problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
     _time_scheme(getParam<MooseEnum>("scheme")),
-    _time_stepper(NULL),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
     _time_old(_problem.timeOld()),
@@ -166,22 +165,19 @@ Transient::Transient(const std::string & name, InputParameters parameters) :
 
 Transient::~Transient()
 {
-  delete _time_stepper;
-  // This problem was built by the Factory and needs to be released by this destructor
-  delete &_problem;
 }
 
 void
 Transient::init()
 {
-  if (_time_stepper == NULL)
+  if (!_time_stepper.get())
   {
     InputParameters pars = _app.getFactory().getValidParams("ConstantDT");
     pars.set<FEProblem *>("_fe_problem") = &_problem;
     pars.set<Transient *>("_executioner") = this;
     pars.set<Real>("dt") = getParam<Real>("dt");
     pars.set<bool>("reset_dt") = getParam<bool>("reset_dt");
-    _time_stepper = static_cast<TimeStepper *>(_app.getFactory().create("ConstantDT", "TimeStepper", pars));
+    _time_stepper = MooseSharedNamespace::static_pointer_cast<TimeStepper>(_app.getFactory().create("ConstantDT", "TimeStepper", pars));
   }
 
   _problem.initialSetup();
@@ -285,12 +281,14 @@ Transient::incrementStepOrReject()
 void
 Transient::takeStep(Real input_dt)
 {
-  for (_picard_it=0; _picard_it<_picard_max_its && _picard_converged==false; _picard_it++)
+  _picard_it = 0;
+  while (_picard_it<_picard_max_its && _picard_converged == false)
   {
     if (_picard_max_its > 1)
       _console << "Beginning Picard Iteration " << _picard_it << "\n" << std::endl;
 
     solveStep(input_dt);
+    ++_picard_it;
   }
 }
 
@@ -347,6 +345,7 @@ Transient::solveStep(Real input_dt)
       _console << "Picard converged!" << std::endl;
 
       _picard_converged = true;
+      _time_stepper->acceptStep();
       return;
     }
   }
@@ -358,7 +357,8 @@ Transient::solveStep(Real input_dt)
   {
     _console << " Solve Converged!" << std::endl;
 
-    _time_stepper->acceptStep();
+    if (_picard_max_its <= 1)
+      _time_stepper->acceptStep();
 
     _solution_change_norm = _problem.solutionChangeNorm();
 
@@ -687,7 +687,7 @@ Transient::setupTimeIntegrator()
 std::string
 Transient::getTimeStepperName()
 {
-  if (_time_stepper != NULL)
+  if (_time_stepper.get())
     return demangle(typeid(*_time_stepper).name());
   else
     return std::string();

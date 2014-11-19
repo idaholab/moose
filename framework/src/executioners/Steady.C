@@ -45,8 +45,6 @@ Steady::Steady(const std::string & name, InputParameters parameters) :
 
 Steady::~Steady()
 {
-  // This problem was built by the Factory and needs to be released by this destructor
-  delete &_problem;
 }
 
 Problem &

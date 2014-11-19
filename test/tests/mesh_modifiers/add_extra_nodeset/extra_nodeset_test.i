@@ -8,7 +8,7 @@
 [MeshModifiers]
   [./middle_node]
     type = AddExtraNodeset
-    boundary = 'middle_node'
+    new_boundary = 'middle_node'
     nodes = '2'
   [../]
 []

@@ -59,6 +59,7 @@ void
 SetupMeshAction::setupMesh(MooseMesh *mesh)
 {
   std::vector<BoundaryName> ghosted_boundaries = getParam<std::vector<BoundaryName> >("ghosted_boundaries");
+
   for (unsigned int i=0; i<ghosted_boundaries.size(); i++)
     mesh->addGhostedBoundary(mesh->getBoundaryID(ghosted_boundaries[i]));
 
@@ -122,21 +123,20 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
   }
 
   if (getParam<bool>("construct_side_list_from_node_list"))
-    mesh->getMesh().boundary_info->build_side_list_from_node_list();
-
+    mesh->getMesh().get_boundary_info().build_side_list_from_node_list();
 }
 
 void
 SetupMeshAction::act()
 {
   // Create the mesh object and tell it to build itself
-  _mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create_shared_ptr(_type, "mesh", _moose_object_pars));
+  _mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create(_type, "mesh", _moose_object_pars));
   _mesh->init();
 
   if (isParamValid("displacements"))
   {
     // Create the displaced mesh
-    _displaced_mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create_shared_ptr(_type, "displaced_mesh", _moose_object_pars));
+    _displaced_mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create(_type, "displaced_mesh", _moose_object_pars));
     _displaced_mesh->init();
 
     std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");

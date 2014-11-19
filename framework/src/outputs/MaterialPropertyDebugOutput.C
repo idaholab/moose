@@ -26,7 +26,7 @@ template<>
 InputParameters validParams<MaterialPropertyDebugOutput>()
 {
   InputParameters params = validParams<PetscOutput>();
-  params += Output::disableOutputTypes();
+  params += Output::enableOutputTypes(); // No-input means enable nothing
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
   params.addParam<bool>("show_var_residual_norms", false, "Print the residual norms of the individual solution variables at each nonlinear iteration");

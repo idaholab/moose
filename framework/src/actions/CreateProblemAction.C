@@ -52,14 +52,14 @@ CreateProblemAction::CreateProblemAction(const std::string & name, InputParamete
 void
 CreateProblemAction::act()
 {
-  if (_mesh != NULL)
+  if (_mesh.get() != NULL)
   {
     // build the problem only if we have mesh
     {
       _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
       _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
-      _problem = dynamic_cast<FEProblem *>(_factory.create(_type, _problem_name, _moose_object_pars));
-      if (_problem == NULL)
+      _problem = MooseSharedNamespace::dynamic_pointer_cast<FEProblem>(_factory.create(_type, _problem_name, _moose_object_pars));
+      if (!_problem.get())
         mooseError("Problem has to be of a FEProblem type");
     }
     // set up the problem

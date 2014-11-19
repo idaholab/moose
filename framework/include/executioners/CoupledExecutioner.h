@@ -79,7 +79,7 @@ protected:
   };
 
   /// Instance of CoupledProblem class
-  CoupledProblem * _problem;
+  MooseSharedPointer<CoupledProblem> _problem;
   /// Mapping: FE problem name -> index to _awhs | _parsers arrays. After build() also _executioners | _fe_problems
   std::map<std::string, unsigned int> _name_index;
   /// Action warehouses to store actions into
@@ -87,7 +87,7 @@ protected:
   /// Parsers for creating the actions (have to keep them around since some actions are accessing them when executed)
   std::vector<Parser *> _parsers;
   /// Executioners build from input files
-  std::vector<Executioner *> _executioners;
+  std::vector<MooseSharedPointer<Executioner> > _executioners;
   /// FE problems build from input files
   std::vector<FEProblem *> _fe_problems;
   /// Variable mapping: problem name -> list variables that needs to be projected

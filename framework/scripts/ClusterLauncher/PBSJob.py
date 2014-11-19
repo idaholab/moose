@@ -112,4 +112,4 @@ class PBSJob(Job):
   def launch(self):
     # Finally launch the job
     my_process = subprocess.Popen('qsub ' + os.path.split(self.specs['template_script'])[1], stdout=subprocess.PIPE, shell=True)
-    print 'JOB_ID:', my_process.communicate()[0].split('.')[0]
+    print 'JOB_NAME:', self.specs['job_name'], 'JOB_ID:', my_process.communicate()[0].split('.')[0], 'TEST_NAME:', self.specs['test_name']

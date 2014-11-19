@@ -14,7 +14,7 @@
 
 #include "SystemInfo.h"
 #include "ExecutablePath.h"
-#include "HerdRevision.h"  ///< This file is auto-generated and contains the revisions
+#include "MooseRevision.h"  ///< This file is auto-generated and contains the revision
 
 #include "libmesh/libmesh_config.h"
 
@@ -37,10 +37,8 @@ SystemInfo::getInfo()
 {
   std::stringstream oss;
   oss << std::left;
-
-  // Repository Revision
   oss << "Framework Information:\n";
-  oss << std::setw(25) << "Version: " << HERD_REVISION << "\n";
+  oss << std::setw(25) << "MOOSE version: " << MOOSE_REVISION << "\n";
 #ifdef LIBMESH_DETECTED_PETSC_VERSION_MAJOR
   oss << std::setw(25) << "PETSc Version: "
       << LIBMESH_DETECTED_PETSC_VERSION_MAJOR << '.'

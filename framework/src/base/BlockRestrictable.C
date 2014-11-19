@@ -99,6 +99,24 @@ BlockRestrictable::BlockRestrictable(const std::string name, InputParameters & p
     _blocks = std::vector<SubdomainName>(1, "ANY_BLOCK_ID");
   }
 
+  // If this object is block restricted, check that defined blocks exist on the mesh
+  if (_blk_ids.find(Moose::ANY_BLOCK_ID) == _blk_ids.end())
+  {
+    const std::set<SubdomainID> & valid_ids = _blk_mesh->meshSubdomains();
+    std::vector<SubdomainID> diff;
+
+    std::set_difference(_blk_ids.begin(), _blk_ids.end(), valid_ids.begin(), valid_ids.end(), std::back_inserter(diff));
+
+    if (!diff.empty())
+    {
+      std::ostringstream msg;
+      msg << "The object '" << name << "' contains the following block ids that do no exist on the mesh:";
+      for (std::vector<SubdomainID>::iterator it = diff.begin(); it != diff.end(); ++it)
+        msg << " " << *it;
+      mooseError(msg.str());
+    }
+  }
+
   // Store the private parameter that contains the set of block ids
   parameters.set<std::vector<SubdomainID> >("_block_ids") = std::vector<SubdomainID>(_blk_ids.begin(), _blk_ids.end());
 }
@@ -201,6 +219,8 @@ BlockRestrictable::variableSubdomianIDs(InputParameters & parameters) const
     var = &_blk_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
   else if (parameters.have_parameter<AuxVariableName>("variable"))
     var = &_blk_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
+  else
+    mooseError("Unknown variable.");
 
   // Return the block ids for the variable
   return sys->getSubdomainsForVar(var->number());

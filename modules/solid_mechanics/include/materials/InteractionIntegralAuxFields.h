@@ -30,6 +30,7 @@ public:
 protected:
   virtual void computeQpProperties();
 
+  std::string _appended_index_name;
   MaterialProperty<ColumnMajorMatrix> & _aux_stress_I;
   MaterialProperty<ColumnMajorMatrix> & _aux_disp_I;
   MaterialProperty<ColumnMajorMatrix> & _aux_grad_disp_I;
@@ -54,7 +55,6 @@ protected:
 
 private:
   const CrackFrontDefinition * _crack_front_definition;
-  bool _has_crack_front_node_index;
   const unsigned int _crack_front_node_index;
   std::vector<SIF_MODE> _sif_mode;
   Real _poissons_ratio;

@@ -202,4 +202,58 @@
     abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe'
   [../]
+
+  [./four_surface14]
+    type = 'CSVDiff'
+    input = 'four_surface14.i'
+    csvdiff = 'four_surface14.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./four_surface24]
+    type = 'CSVDiff'
+    input = 'four_surface24.i'
+    csvdiff = 'four_surface24.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+
+  [./six_surface14]
+    type = 'CSVDiff'
+    input = 'six_surface14.i'
+    csvdiff = 'six_surface14.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+
+  [./eight_surface14]
+    type = 'CSVDiff'
+    input = 'eight_surface14.i'
+    csvdiff = 'eight_surface14.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+
+  [./rock1]
+    type = CSVDiff
+    input = 'rock1.i'
+    csvdiff = 'rock1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=2 Mesh/ny=2 Mesh/xmax=2 Mesh/ymax=2'
+  [../]
+  [./rock1_heavy]
+    type = CSVDiff
+    input = 'rock1.i'
+    csvdiff = 'rock1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    heavy = true
+    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=10 Mesh/xmax=20 Mesh/ymax=10'
+  [../]
+    
 []

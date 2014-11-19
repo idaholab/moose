@@ -15,7 +15,8 @@
 #include "SplitWarehouse.h"
 #include "Split.h"
 
-SplitWarehouse::SplitWarehouse()
+SplitWarehouse::SplitWarehouse() :
+    Warehouse<Split>()
 {
 }
 
@@ -26,15 +27,16 @@ SplitWarehouse::~SplitWarehouse()
 void
 SplitWarehouse::addSplit(const std::string& name, MooseSharedPointer<Split> & split)
 {
-  _all_splits.insert(std::make_pair(name, split));
+  _all_objects.push_back(split.get());
+  _all_splits_by_name.insert(std::make_pair(name, split));
 }
 
 Split*
 SplitWarehouse::getSplit(const std::string& name)
 {
-  std::map<std::string, MooseSharedPointer<Split> >::iterator it = _all_splits.find(name);
+  std::map<std::string, MooseSharedPointer<Split> >::iterator it = _all_splits_by_name.find(name);
 
-  if (it == _all_splits.end())
+  if (it == _all_splits_by_name.end())
     mooseError("No split named '" << name << "'");
 
   return it->second.get();

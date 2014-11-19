@@ -35,6 +35,7 @@ CrackFrontDefinition::CrackFrontDefinition(const std::string & name, InputParame
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_subproblem.mesh()),
     _treat_as_2d(getParam<bool>("2d")),
+    _closed_loop(false),
     _axis_2d(getParam<unsigned int>("axis_2d"))
 {
   MooseEnum direction_method_moose_enum = getParam<MooseEnum>("crack_direction_method");
@@ -153,10 +154,9 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
     BoundaryID boundary_id = bnode->_bnd_id;
 
     if (hasBoundary(boundary_id))
-    {
       nodes.insert(bnode->_node->id());
-    }
   }
+
   if (_treat_as_2d)
   {
     if (nodes.size() > 1)
@@ -179,6 +179,8 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
           axis0 = 0;
           axis1 = 1;
           break;
+        default:
+          mooseError("Invalid axis.");
       }
 
       Real node0coor0;
@@ -196,9 +198,7 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
         {
           if ((std::abs(curr_node(axis0) - node0coor0) > _tol) ||
               (std::abs(curr_node(axis1) - node0coor1) > _tol))
-          {
-            mooseError("Boundary provided in CrackFrontDefinition contains "<<nodes.size()<<" nodes, which are not collinear in the "<<_axis_2d<<" axis.  Must contain either 1 node or collinear nodes to treat as 2D.");
-          }
+            mooseError("Boundary provided in CrackFrontDefinition contains " << nodes.size() << " nodes, which are not collinear in the " << _axis_2d << " axis.  Must contain either 1 node or collinear nodes to treat as 2D.");
         }
       }
 
@@ -214,9 +214,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
 {
   _ordered_crack_front_nodes.clear();
   if (nodes.size() < 1)
-  {
     mooseError("No crack front nodes");
-  }
   else if (nodes.size() == 1)
   {
     _ordered_crack_front_nodes.push_back(*nodes.begin());
@@ -243,9 +241,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
 
       std::vector<unsigned int> & connected_elems = nemit->second;
       for (unsigned int i=0; i<connected_elems.size(); ++i)
-      {
         crack_front_node_to_elem_map[*nit].insert(connected_elems[i]);
-      }
     }
 
 
@@ -291,19 +287,21 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
     {
       unsigned int num_connected_elems = nlemit->second.size();
       if (num_connected_elems == 1)
-      {
         end_nodes.push_back(nlemit->first);
-      }
       else if (num_connected_elems != 2)
-      {
         mooseError("Node "<<nlemit->first<<" is connected to >2 line segments in CrackFrontDefinition");
-      }
-
     }
 
     //For embedded crack with closed loop of crack front nodes, must pick the end nodes
     if (end_nodes.size() == 0) //Crack front is a loop.  Pick nodes to be end nodes.
+    {
       pickLoopCrackEndNodes(end_nodes, nodes, node_to_line_elem_map, line_elems);
+      _closed_loop = true;
+      if (_end_direction_method == END_CRACK_DIRECTION_VECTOR)
+        mooseError("In CrackFrontDefinition, end_direction_method cannot be CrackDirectionVector for a closed-loop crack");
+      if (_intersecting_boundary_names.size() > 0)
+        mooseError("In CrackFrontDefinition, intersecting_boundary cannot be specified for a closed-loop crack");
+    }
     else if (end_nodes.size() == 2) //Rearrange the order of the end nodes if needed
       orderEndNodes(end_nodes);
     else
@@ -324,7 +322,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
         for (unsigned int j=0; j<curr_line_elem.size(); ++j)
         {
           unsigned int line_elem_node = curr_line_elem[j];
-          if (last_node == end_nodes[0] && line_elem_node == end_nodes[1]) //wrong direction around closed loop
+          if (_closed_loop && (last_node == end_nodes[0] && line_elem_node == end_nodes[1])) //wrong direction around closed loop
             continue;
           if (line_elem_node != last_node &&
               line_elem_node != second_last_node)
@@ -335,9 +333,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
           }
         }
         if (found_new_node)
-        {
           break;
-        }
       }
       second_last_node = last_node;
       last_node = _ordered_crack_front_nodes[_ordered_crack_front_nodes.size()-1];
@@ -361,13 +357,9 @@ CrackFrontDefinition::orderEndNodes(std::vector<unsigned int> &end_nodes)
     dist_from_origin0 += node0(i)*node0(i);
     dist_from_origin1 += node1(i)*node1(i);
     if (node0(i) > _tol)
-    {
       ++num_pos_coor0;
-    }
     if (node1(i) > _tol)
-    {
       ++num_pos_coor1;
-    }
   }
   dist_from_origin0 = std::sqrt(dist_from_origin0);
   dist_from_origin1 = std::sqrt(dist_from_origin1);
@@ -382,16 +374,12 @@ CrackFrontDefinition::orderEndNodes(std::vector<unsigned int> &end_nodes)
     if (std::abs(dist_from_origin1 - dist_from_origin0) > _tol)
     {
       if (dist_from_origin1 < dist_from_origin0)
-      {
         switch_ends = true;
-      }
     }
     else
     {
       if (end_nodes[1] < end_nodes[0])
-      {
         switch_ends = true;
-      }
     }
   }
   if (switch_ends)
@@ -573,7 +561,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     rot_mat(0,2) = 0.0;
     rot_mat(1,2) = 0.0;
     rot_mat(2,2) = 0.0;
-    rot_mat(_axis_2d,2) = -1.0;
+    rot_mat(_axis_2d,2) = 1.0;
     _rot_matrix.push_back(rot_mat);
 
     _segment_lengths.push_back(std::make_pair(0.0,0.0));
@@ -596,40 +584,50 @@ CrackFrontDefinition::updateCrackFrontGeometry()
 
     RealVectorValue back_segment;
     Real back_segment_len = 0.0;
+    if (_closed_loop)
+    {
+      back_segment = *crack_front_nodes[0] - *crack_front_nodes[num_crack_front_nodes-1];
+      back_segment_len = back_segment.size();
+    }
+
     for (unsigned int i=0; i<num_crack_front_nodes; ++i)
     {
-      CRACK_NODE_TYPE ntype = MIDDLE_NODE;
-      if (i==0)
-      {
+      CRACK_NODE_TYPE ntype;
+      if (_closed_loop)
+        ntype = MIDDLE_NODE;
+      else if (i==0)
         ntype = END_1_NODE;
-      }
       else if (i==num_crack_front_nodes-1)
-      {
         ntype = END_2_NODE;
-      }
+      else
+        ntype = MIDDLE_NODE;
 
       RealVectorValue forward_segment;
-      Real forward_segment_len = 0.0;
-      if (ntype != END_2_NODE)
+      Real forward_segment_len;
+      if (ntype == END_2_NODE)
+        forward_segment_len = 0.0;
+      else if (_closed_loop && i==num_crack_front_nodes-1)
+      {
+        forward_segment = *crack_front_nodes[0] - *crack_front_nodes[i];
+        forward_segment_len = forward_segment.size();
+      }
+      else
       {
         forward_segment = *crack_front_nodes[i+1] - *crack_front_nodes[i];
         forward_segment_len = forward_segment.size();
+        _overall_length += forward_segment_len;
       }
 
       _segment_lengths.push_back(std::make_pair(back_segment_len,forward_segment_len));
-      //Moose::out<<"seg len: "<<back_segment_len<<" "<<forward_segment_len<<std::endl;
 
       RealVectorValue tangent_direction = back_segment + forward_segment;
       tangent_direction = tangent_direction / tangent_direction.size();
       _tangent_directions.push_back(tangent_direction);
-      //Moose::out<<"tan dir: "<<tangent_direction(0)<<" "<<tangent_direction(1)<<" "<<tangent_direction(2)<<std::endl;
       _crack_directions.push_back(calculateCrackFrontDirection(crack_front_nodes[i],tangent_direction,ntype));
 
-      _overall_length += forward_segment_len;
 
       back_segment = forward_segment;
       back_segment_len = forward_segment_len;
-
     }
 
     //For CURVED_CRACK_FRONT, _crack_plane_normal gets computed in updateDataForCrackDirection
@@ -722,10 +720,25 @@ CrackFrontDefinition::updateDataForCrackDirection()
     {
       mooseError("Crack front must contain at least 3 nodes to use CurvedCrackFront option");
     }
-    unsigned int mid_id = (num_nodes-1)/2;
-    Node & start = _mesh.node(_ordered_crack_front_nodes[0]);
+    unsigned int start_id;
+    unsigned int mid_id;
+    unsigned int end_id;
+
+    if (_closed_loop)
+    {
+      start_id = 0;
+      mid_id = (num_nodes-1)/3;
+      end_id = 2*mid_id;
+    }
+    else
+    {
+      start_id = 0;
+      mid_id = (num_nodes-1)/2;
+      end_id = num_nodes-1;
+    }
+    Node & start = _mesh.node(_ordered_crack_front_nodes[start_id]);
     Node & mid   = _mesh.node(_ordered_crack_front_nodes[mid_id]);
-    Node & end   = _mesh.node(_ordered_crack_front_nodes[num_nodes-1]);
+    Node & end   = _mesh.node(_ordered_crack_front_nodes[end_id]);
 
     //Create two vectors connecting them
     RealVectorValue v1 = mid-start;
@@ -807,10 +820,8 @@ CrackFrontDefinition::calculateCrackFrontDirection(const Node* crack_front_node,
 const Node *
 CrackFrontDefinition::getCrackFrontNodePtr(const unsigned int node_index) const
 {
-  Node * node_ptr = NULL;
-  if (node_index < _ordered_crack_front_nodes.size())
-    node_ptr = _mesh.nodePtr(_ordered_crack_front_nodes[node_index]);
-  return node_ptr;
+  mooseAssert(node_index < _ordered_crack_front_nodes.size(),"node_index out of range");
+  return _mesh.nodePtr(_ordered_crack_front_nodes[node_index]);
 }
 
 const RealVectorValue &
@@ -836,6 +847,12 @@ const RealVectorValue &
 CrackFrontDefinition::getCrackDirection(const unsigned int node_index) const
 {
   return _crack_directions[node_index];
+}
+
+unsigned int
+CrackFrontDefinition::getNumCrackFrontNodes() const
+{
+  return _ordered_crack_front_nodes.size();
 }
 
 RealVectorValue
@@ -899,7 +916,10 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
 
   if (_treat_as_2d)
   {
-    closest_node = crack_tip_node_rot;
+    //In 2D, the closest node is the crack tip node and the position of the crack tip node is (0,0,0) in the crack front coordinate system
+    //In case this is a 3D mesh treated as 2D, project point onto same plane as crack front node.
+    //Note: In the crack front coordinate system, z is always in the tangent direction to the crack front
+    p_rot(2) = closest_node(2);
     closest_node_to_p = p_rot;
 
     //Find r, the distance between the qp and the crack front

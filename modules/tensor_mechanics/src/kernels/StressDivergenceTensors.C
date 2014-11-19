@@ -13,10 +13,6 @@ InputParameters validParams<StressDivergenceTensors>()
   params.addCoupledVar("temp", "The temperature");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
-//  params.set<bool>("use_displaced_mesh") = true;
-  // Using the displaced mesh will be set in the solid mechanics action input now.
-  params.set<bool>("use_displaced_mesh") = false;
-
   return params;
 }
 

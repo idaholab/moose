@@ -34,23 +34,20 @@ InputParameters validParams<CoupledExecutioner>()
 
 
 CoupledExecutioner::CoupledExecutioner(const std::string & name, InputParameters parameters) :
-    Executioner(name, parameters),
-    _problem(NULL)
+    Executioner(name, parameters)
 {
   InputParameters params = emptyInputParameters();
   params.addPrivateParam("_moose_app", &_app);
-  _problem = static_cast<CoupledProblem *>(_app.getFactory().create("CoupledProblem", "master_problem", params));
+  _problem = MooseSharedNamespace::static_pointer_cast<CoupledProblem>(_app.getFactory().create("CoupledProblem", "master_problem", params));
 }
 
 CoupledExecutioner::~CoupledExecutioner()
 {
-  delete _problem;
   for (unsigned int i = 0; i < _awhs.size(); i++)
   {
     _awhs[i]->clear();
     delete _awhs[i];
     delete _parsers[i];
-    delete _executioners[i];
     delete _owhs[i];
     // Note: _fe_problems are destroyed by executioners' destructors
   }
@@ -122,8 +119,8 @@ CoupledExecutioner::addVariableAction(const std::string & task, ActionWarehouse 
         params.set<MooseEnum>("family") = src_params.get<MooseEnum>("family");
         params.set<MooseEnum>("order") = src_params.get<MooseEnum>("order");
 
-        Action * dest_action = _app.getActionFactory().create("AddAuxVariableAction", dest_name, params);
-        mooseAssert (dest_action != NULL, std::string("Action AddAuxVariableAction not created"));
+        MooseSharedPointer<Action> dest_action = _app.getActionFactory().create("AddAuxVariableAction", dest_name, params);
+        mooseAssert (dest_action.get(), std::string("Action AddAuxVariableAction not created"));
         dest.addActionBlock(dest_action);
       }
     }
@@ -171,7 +168,7 @@ CoupledExecutioner::build()
     _awhs[i]->executeAllActions();
     _owhs[i]->init();
     _executioners[i] = _awhs[i]->executioner();
-    _fe_problems[i] = _awhs[i]->problem();
+    _fe_problems[i] = _awhs[i]->problem().get();
   }
 
   // build an inverse map (problem ptr -> name)
@@ -236,5 +233,5 @@ Executioner *
 CoupledExecutioner::getExecutionerByName(const std::string & name)
 {
   unsigned int i = _name_index[name];
-  return _executioners[i];
+  return _executioners[i].get();
 }

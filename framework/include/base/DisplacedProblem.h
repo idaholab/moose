@@ -75,8 +75,8 @@ public:
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
   virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains = NULL);
-  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
-  virtual void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1.);
+  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
+  virtual void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
 
   // Adaptivity /////
   virtual void initAdaptivity();

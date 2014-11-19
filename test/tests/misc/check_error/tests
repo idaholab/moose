@@ -53,13 +53,7 @@
     expect_err = "Unknown variable"
   [../]
 
-  [./bad_material_block_test]
-    type = 'RunException'
-    input = 'bad_material_block_test.i'
-    expect_err = "Material block \S+ specified in the input file does not exist"
-  [../]
-
-  [./bad_material_test]
+  [./Badd_material_test]
     type = 'RunException'
     input = 'bad_material_test.i'
     expect_err = "A '\w+' is not a registered object"
@@ -261,12 +255,6 @@
     cli_args = 'Materials/stateful_mat/declare_only_older=true'
   [../]
 
-  [./missing_mesh_bcs_test]
-    type = 'RunException'
-    input = 'missing_mesh_bcs_test.i'
-    expect_err = "The following boundary ids from your input file do not exist in the input mesh \d+"
-  [../]
-
   [./missing_mesh_test]
     type = 'RunException'
     input = 'missing_mesh_test.i'
@@ -348,12 +336,6 @@
     expect_out = "The following variables were overridden or supplied multiple times:"
   [../]
 
-  [./pps_bad_block_test]
-    type = 'RunException'
-    input = 'pps_bad_block_test.i'
-    expect_err = "One or more UserObjects is referencing a nonexistent block"
-  [../]
-
   [./rz_3d_error_check_test]
     type = 'RunException'
     input = '3D_RZ_error_check.i'
@@ -381,9 +363,18 @@
 
   [./unused_param_test]
     type = 'RunApp'
-    expect_out = "WARNING: The following parameters were unused in your input file"
+    expect_out = "The following parameters were unused in your input file"
     input = 'unused_param_test.i'
     cli_args = '--warn-unused'
+    # Don't allow --error-unused on this test
+    skip_test_harness_cli_args = true
+  [../]
+
+  [./unused_param_test_cli]
+    type = 'RunApp'
+    expect_out = "The following parameters were unused on the command line"
+    input = 'unused_param_test.i'
+    cli_args = '--warn-unused Executioner/unused_param=true'
     # Don't allow --error-unused on this test
     skip_test_harness_cli_args = true
   [../]

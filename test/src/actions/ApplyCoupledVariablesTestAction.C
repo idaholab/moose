@@ -44,7 +44,7 @@ ApplyCoupledVariablesTestAction::act()
 
   // Create the action
   std::string long_name = "Kernels/_coef_diffusion";
-  MooseObjectAction * action = static_cast<MooseObjectAction *>(_action_factory.create("AddKernelAction", long_name, action_params));
+  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddKernelAction", long_name, action_params));
 
   // Apply the parameters from the this action to the object being created
   action->getObjectParams().applyParameters(_pars);

@@ -85,7 +85,6 @@
   [./t_from_sub]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = t
     variable = t
@@ -93,7 +92,6 @@
   [./u_from_sub]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = u_from_sub
@@ -101,7 +99,6 @@
   [./u_to_sub]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
-    execute_on = timestep
     multi_app = sub
     source_variable = u
     variable = u_from_master

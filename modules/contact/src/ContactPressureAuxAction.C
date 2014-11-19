@@ -60,11 +60,9 @@ ContactPressureAuxAction::act()
     name << "_contact_pressure_";
     name << counter++;
 
-    std::vector<MooseEnum> execute_options(3, SetupInterface::getExecuteOptions()[0]);
-    execute_options[0] = "jacobian";
-    execute_options[1] = "timestep";
-    execute_options[2] = "timestep_begin";
-    params.set<std::vector<MooseEnum> >("execute_on") = execute_options;
+    MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
+    execute_options = "jacobian timestep timestep_begin";
+    params.set<MultiMooseEnum>("execute_on") = execute_options;
     _problem->addAuxKernel("ContactPressureAux", name.str(), params);
   }
 }

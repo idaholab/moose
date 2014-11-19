@@ -15,6 +15,7 @@ class Parser:
     self.warehouse = warehouse
     self.params_parsed = set()
     self.params_ignored = set()
+    self.root = None
 
   """
   Parse the passed filename filling the warehouse with populated InputParameter objects
@@ -28,12 +29,12 @@ class Parser:
     error_code = 0x00
 
     try:
-      root = ParseGetPot.readInputFile(filename)
-    except:
-      print "Parse Error: " + filename
+      self.root = ParseGetPot.readInputFile(filename)
+    except ParseGetPot.ParseException, ex:
+      print "Parse Error in " + filename + ": " + ex.msg
       return 0x01 # Parse Error
 
-    error_code = self._parseNode(filename, root)
+    error_code = self._parseNode(filename, self.root)
 
     if len(self.params_ignored):
       print 'Warning detected when parsing file "' + os.path.join(os.getcwd(), filename) + '"'
@@ -98,6 +99,12 @@ class Parser:
 
       # Extract the parameters from the Getpot node
       error_code = error_code | self.extractParams(filename, params, node)
+
+      # Add factory and warehouse as private params of the object
+      params.addPrivateParam('_factory', self.factory)
+      params.addPrivateParam('_warehouse', self.warehouse)
+      params.addPrivateParam('_parser', self)
+      params.addPrivateParam('_root', self.root)
 
       # Build the object
       moose_object = self.factory.create(moose_type, node.name, params)

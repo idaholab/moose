@@ -70,6 +70,7 @@
 #include "WeakGradientBC.h"
 #include "DiffusionFluxBC.h"
 #include "PostprocessorDirichletBC.h"
+#include "OneDEqualValueConstraintBC.h"
 
 // auxkernels
 #include "ConstantAux.h"
@@ -181,6 +182,7 @@
 #include "NodalExtremeValue.h"
 #include "ElementExtremeValue.h"
 #include "DifferencePostprocessor.h"
+#include "NumPicardIterations.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -188,6 +190,7 @@
 #include "SideValueSampler.h"
 #include "PointValueSampler.h"
 #include "LineValueSampler.h"
+#include "VectorOfPostprocessors.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -232,6 +235,7 @@
 // ScalarKernels
 #include "ODETimeDerivative.h"
 #include "FunctionScalarAux.h"
+#include "NodalEqualValueConstraint.h"
 
 // indicators
 #include "AnalyticalIndicator.h"
@@ -362,6 +366,7 @@
 #include "MaterialPropertyDebugOutput.h"
 #include "VariableResidualNormsDebugOutput.h"
 #include "TopResidualDebugOutput.h"
+#include "DOFMapOutput.h"
 
 namespace Moose {
 
@@ -419,6 +424,7 @@ registerObjects(Factory & factory)
   registerBoundaryCondition(WeakGradientBC);
   registerBoundaryCondition(DiffusionFluxBC);
   registerBoundaryCondition(PostprocessorDirichletBC);
+  registerBoundaryCondition(OneDEqualValueConstraintBC);
 
   // dirac kernels
   registerDiracKernel(ConstantPointSource);
@@ -532,6 +538,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalExtremeValue);
   registerPostprocessor(ElementExtremeValue);
   registerPostprocessor(DifferencePostprocessor);
+  registerPostprocessor(NumPicardIterations);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
@@ -539,6 +546,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(SideValueSampler);
   registerVectorPostprocessor(PointValueSampler);
   registerVectorPostprocessor(LineValueSampler);
+  registerVectorPostprocessor(VectorOfPostprocessors);
 
   // user objects
   registerUserObject(LayeredIntegral);
@@ -577,6 +585,7 @@ registerObjects(Factory & factory)
 
   // Scalar kernels
   registerScalarKernel(ODETimeDerivative);
+  registerScalarKernel(NodalEqualValueConstraint);
 
   // indicators
   registerIndicator(AnalyticalIndicator);
@@ -660,6 +669,7 @@ registerObjects(Factory & factory)
   registerOutput(MaterialPropertyDebugOutput);
   registerOutput(VariableResidualNormsDebugOutput);
   registerOutput(TopResidualDebugOutput);
+  registerNamedOutput(DOFMapOutput, "DOFMap");
 
   registered = true;
 }

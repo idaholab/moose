@@ -22,7 +22,8 @@
 #include "SubProblem.h"
 #include "Parser.h"
 
-UserObjectWarehouse::UserObjectWarehouse()
+UserObjectWarehouse::UserObjectWarehouse() :
+    Warehouse<UserObject>()
 {
 }
 
@@ -240,7 +241,7 @@ UserObjectWarehouse::addUserObject(MooseSharedPointer<UserObject> & user_object)
 
   UserObject * raw_ptr = user_object.get();
 
-  _all_user_objects.push_back(raw_ptr);
+  _all_objects.push_back(raw_ptr);
   _name_to_user_objects[user_object->name()] = raw_ptr;
 
   // Add an ElementUserObject

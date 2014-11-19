@@ -19,14 +19,14 @@
 #include <map>
 #include <set>
 
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 class Marker;
 
 /**
  * Holds Markers and provides some services
  */
-class MarkerWarehouse
+class MarkerWarehouse : public Warehouse<Marker>
 {
 public:
   MarkerWarehouse();
@@ -36,12 +36,6 @@ public:
   void initialSetup();
   void timestepSetup();
   void markerSetup();
-
-  /**
-   * Get list of all Markers
-   * @return The list of all active Markers
-   */
-  const std::vector<Marker *> & all() const { return _all_markers; }
 
   /**
    * Get the list of all active Markers
@@ -59,7 +53,7 @@ public:
    * @param Marker Marker being added
    * @param block_ids Set of active domain where the Marker is defined
    */
-  void addMarker(Marker *Marker, std::vector<SubdomainID> & block_ids);
+  void addMarker(MooseSharedPointer<Marker> marker, std::vector<SubdomainID> & block_ids);
 
   /**
    * Update the list of active Markers
@@ -69,12 +63,16 @@ public:
 
 
 protected:
+  ///@{
+  /**
+   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   */
+  std::vector<MooseSharedPointer<Marker> > _all_ptrs;
+  ///@}
+
   /// Markers active on a block and in specified time
   std::vector<Marker *> _active_markers;
-  /// Markers active on a block and in specified time per variable
-//  std::map<SubdomainID, std::vector<Marker *> > _active_var_Markers;
-  /// All instances of Markers
-  std::vector<Marker *> _all_markers;
   /// Markers that live everywhere (on the whole domain)
   std::vector<Marker *> _global_markers;
   /// Markers that live on a specified block

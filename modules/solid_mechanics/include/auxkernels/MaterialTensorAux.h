@@ -32,11 +32,13 @@ public:
   virtual ~MaterialTensorAux() {}
 
 protected:
+  virtual Real computeValue();
 
   MaterialTensorCalculator _material_tensor_calculator;
   MaterialProperty<SymmTensor> & _tensor;
-  virtual Real computeValue();
 
+  const bool _has_qp_select;
+  const unsigned int _qp_select;
 };
 
 #endif // MATERIALTENSORAUX_H

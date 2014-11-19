@@ -38,7 +38,6 @@ InputParameters validParams<FileOutput>()
 
 FileOutput::FileOutput(const std::string & name, InputParameters & parameters) :
     PetscOutput(name, parameters),
-    _file_base(getParam<std::string>("file_base")),
     _file_num(declareRecoverableData<unsigned int>("file_num", 0)),
     _padding(getParam<unsigned int>("padding")),
     _output_file(true)
@@ -47,14 +46,13 @@ FileOutput::FileOutput(const std::string & name, InputParameters & parameters) :
   if (_app.isRestarting())
     _file_num = 0;
 
-  // Set the file base, if it has not been set already
-  if (!isParamValid("file_base"))
-  {
-    if (getParam<bool>("_built_by_moose"))
-      _file_base = getOutputFileBase(_app);
-    else
-      _file_base = getOutputFileBase(_app, "_" + name);
-  }
+  // Set the file base
+  if (isParamValid("file_base"))
+    _file_base = getParam<std::string>("file_base");
+  else if (getParam<bool>("_built_by_moose"))
+    _file_base = getOutputFileBase(_app);
+  else
+    _file_base = getOutputFileBase(_app, "_" + name);
 
   // Check the file directory of file_base
   std::string base = "./" + _file_base;

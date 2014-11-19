@@ -50,14 +50,12 @@ SolutionTimeAdaptiveDT::~SolutionTimeAdaptiveDT()
 }
 
 void
-SolutionTimeAdaptiveDT::preSolve()
+SolutionTimeAdaptiveDT::step()
 {
   gettimeofday(&_solve_start, NULL);
-}
 
-void
-SolutionTimeAdaptiveDT::postSolve()
-{
+  TimeStepper::step();
+
   if (converged())
   {
     gettimeofday (&_solve_end, NULL);

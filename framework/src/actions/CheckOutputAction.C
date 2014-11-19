@@ -50,11 +50,11 @@ CheckOutputAction::checkMaterialOutput()
 {
   // Do nothing if _problem is NULL (this is the case for coupled problems)
   /* Do not produce warning, you will get a warning from OutputAction */
-  if (_problem == NULL)
+  if (_problem.get() == NULL)
     return;
 
   // A complete list of all Material objects
-  std::vector<Material *> materials = _problem->getMaterialWarehouse(0).getMaterials();
+  std::vector<Material *> materials = _problem->getMaterialWarehouse(0).all();
 
   // Loop through each material object
   for (std::vector<Material *>::iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)

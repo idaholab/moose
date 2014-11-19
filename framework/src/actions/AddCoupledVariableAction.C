@@ -40,7 +40,7 @@ AddCoupledVariableAction::~AddCoupledVariableAction()
 void
 AddCoupledVariableAction::act()
 {
-  CoupledExecutioner * master_executioner = dynamic_cast<CoupledExecutioner *>(_executioner);
+  CoupledExecutioner * master_executioner = dynamic_cast<CoupledExecutioner *>(_executioner.get());
   if (master_executioner != NULL)
   {
     std::vector<std::string> parts;

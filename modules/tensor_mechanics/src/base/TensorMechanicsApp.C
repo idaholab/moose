@@ -9,9 +9,7 @@
 #include "LinearElasticMaterial.h"
 #include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
-#include "FiniteStrainWeakPlaneShear.h"
 #include "FiniteStrainRatePlasticMaterial.h"
-#include "FiniteStrainWeakPlaneTensile.h"
 #include "FiniteStrainMohrCoulomb.h"
 #include "FiniteStrainCrystalPlasticity.h"
 #include "FiniteStrainMultiPlasticity.h"
@@ -23,12 +21,24 @@
 #include "CrystalPlasticitySlipSysAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
 #include "CosseratLinearElasticMaterial.h"
+#include "ElementPropertyReadFileTest.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
+#include "TensorMechanicsPlasticTensileMulti.h"
 #include "TensorMechanicsPlasticMohrCoulomb.h"
+#include "TensorMechanicsPlasticMohrCoulombMulti.h"
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
+#include "TensorMechanicsPlasticWeakPlaneShear.h"
+#include "TensorMechanicsPlasticJ2.h"
+#include "TensorMechanicsHardeningConstant.h"
+#include "TensorMechanicsHardeningGaussian.h"
+#include "TensorMechanicsHardeningExponential.h"
+#include "TensorMechanicsHardeningCutExponential.h"
+#include "TensorMechanicsHardeningCubic.h"
+#include "ElementPropertyReadFile.h"
+
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -69,19 +79,28 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(LinearElasticMaterial);
   registerMaterial(FiniteStrainElasticMaterial);
   registerMaterial(FiniteStrainPlasticMaterial);
-  registerMaterial(FiniteStrainWeakPlaneTensile);
-  registerMaterial(FiniteStrainWeakPlaneShear);
   registerMaterial(FiniteStrainMohrCoulomb);
   registerMaterial(FiniteStrainRatePlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
   registerMaterial(FiniteStrainMultiPlasticity);
   registerMaterial(CosseratLinearElasticMaterial);
+  registerMaterial(ElementPropertyReadFileTest);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
+  registerUserObject(TensorMechanicsPlasticTensileMulti);
   registerUserObject(TensorMechanicsPlasticMohrCoulomb);
+  registerUserObject(TensorMechanicsPlasticMohrCoulombMulti);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensile);
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileN);
+  registerUserObject(TensorMechanicsPlasticWeakPlaneShear);
+  registerUserObject(TensorMechanicsPlasticJ2);
+  registerUserObject(TensorMechanicsHardeningConstant);
+  registerUserObject(TensorMechanicsHardeningGaussian);
+  registerUserObject(TensorMechanicsHardeningExponential);
+  registerUserObject(TensorMechanicsHardeningCutExponential);
+  registerUserObject(TensorMechanicsHardeningCubic);
+  registerUserObject(ElementPropertyReadFile);
 
   registerAux(RankTwoAux);
   registerAux(RealTensorValueAux);
@@ -95,7 +114,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
 void
 TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("TensorMechanicsAction", "TensorMechanics/*");
+  syntax.registerActionSyntax("TensorMechanicsAction", "Kernels/TensorMechanics");
 
   registerAction(TensorMechanicsAction, "add_kernel");
 }

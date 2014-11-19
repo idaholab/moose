@@ -42,8 +42,6 @@ MultiSmoothCircleIC::initialSetup()
   }
   _range = _top_right - _bottom_left;
 
-  _range.print();
-
   switch (_radius_variation_type)
   {
   case 2: //No variation

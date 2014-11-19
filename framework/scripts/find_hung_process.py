@@ -8,8 +8,16 @@ from tempfile import TemporaryFile
 from optparse import OptionParser, OptionGroup, Values
 
 ##################################################################
-# Modify the following variable for your cluster
-node_name_pattern = re.compile("(fission-\d{4})")
+# Modify the following variable(s) for your cluster or use one of the versions below
+### FISSION
+#node_name_pattern = re.compile("(fission-\d{4})")
+#pstack_binary = 'pstack'
+### BECHLER
+#node_name_pattern = re.compile("(b\d{2})")
+#pstack_binary = 'pstack'
+### FALCON
+node_name_pattern = re.compile("(r\di\dn\d{1,2})")
+pstack_binary = 'gstack'
 ##################################################################
 
 def generateTraces(job_num, application_name, num_hosts):
@@ -37,7 +45,7 @@ def generateTraces(job_num, application_name, num_hosts):
       continue
 
     #command = "ssh " + host + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I {} gdb --batch --pid={} -ex bt 2>&1 | grep '^#' \""
-    command = "ssh " + hosts[i] + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I '{}' sh -c 'echo Host: " + hosts[i] + " PID: {}; pstack {}; printf '*%.0s' {1..80}; echo' \""
+    command = "ssh " + hosts[i] + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I '{}' sh -c 'echo Host: " + hosts[i] + " PID: {}; " + pstack_binary + " {}; printf '*%.0s' {1..80}; echo' \""
     f = TemporaryFile()
     p = subprocess.Popen(command, stdout=f, close_fds=False, shell=True)
     jobs.append((p, f))

@@ -126,7 +126,7 @@ parallelBarrierNotify(const Parallel::Communicator & comm)
   if (comm.rank() == 0)
   {
     // The master process is already through, so report it
-    Moose::out << "Jobs complete: 1/" << comm.size() << "\r" << std::flush;
+    Moose::out << "Jobs complete: 1/" << comm.size() << (1 == comm.size() ? "\n" : "\r") << std::flush;
     for (unsigned int i=2; i<=comm.size(); ++i)
     {
       comm.receive(MPI_ANY_SOURCE, slave_processor_id);
@@ -149,12 +149,12 @@ hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ex
   std::string file_ext;
   if (strip_exodus_ext)
   {
-    pcrecpp::RE re(".*\\.([^\\.]*?)(?:-s\\d+)?$"); // capture the complete extension, ignoring -s*
+    pcrecpp::RE re(".*\\.([^\\.]*?)(?:-s\\d+)?\\s*$"); // capture the complete extension, ignoring -s*
     re.FullMatch(filename, &file_ext);
   }
   else
   {
-    pcrecpp::RE re(".*\\.([^\\.]*)$"); // capture the complete extension
+    pcrecpp::RE re(".*\\.([^\\.]*?)\\s*$"); // capture the complete extension
     re.FullMatch(filename, &file_ext);
   }
 

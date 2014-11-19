@@ -12,17 +12,17 @@
 []
 
 [Functions]
-  [./tif]
+  [./image_func]
     type = ImageFunction
     file_base = stack/test
-    file_type = png
+    file_suffix = png
   [../]
 []
 
 [ICs]
   [./u_ic]
     type = FunctionIC
-    function = tif
+    function = image_func
     variable = u
   [../]
 []

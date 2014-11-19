@@ -17,7 +17,7 @@
 
 #include "ParallelUniqueId.h"
 #include "AuxWarehouse.h"
-#include "BndNode.h"
+#include "MooseMesh.h"
 
 class FEProblem;
 class AuxiliarySystem;

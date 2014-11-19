@@ -17,7 +17,8 @@
 #include "NodalBC.h"
 #include "PresetNodalBC.h"
 
-BCWarehouse::BCWarehouse()
+BCWarehouse::BCWarehouse() :
+    Warehouse<BoundaryCondition>()
 {
 }
 

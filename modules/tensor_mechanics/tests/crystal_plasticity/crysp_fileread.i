@@ -61,6 +61,15 @@
   [../]
 []
 
+[Kernels]
+  [./TensorMechanics]
+    disp_z = disp_z
+    disp_y = disp_y
+    disp_x = disp_x
+    use_displaced_mesh = true
+  [../]
+[]
+
 [AuxKernels]
   [./stress_zz]
     type = RankTwoAux
@@ -77,7 +86,7 @@
     rank_two_tensor = fp
     index_j = 2
     index_i = 2
-    execute_on = timestep
+    execute_on = 'initial timestep'
     block = 0
   [../]
   [./e_zz]
@@ -100,7 +109,7 @@
     variable = gss1
     slipsysvar = gss
     index_i = 1
-    execute_on = timestep
+    execute_on = 'initial timestep'
     block = 0
   [../]
 []
@@ -209,14 +218,5 @@
     type = Console
     perf_log = true
     linear_residuals = true
-  [../]
-[]
-
-[TensorMechanics]
-  [./solid]
-    disp_z = disp_z
-    disp_y = disp_y
-    disp_x = disp_x
-    use_displaced_mesh = true
   [../]
 []

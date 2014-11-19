@@ -18,7 +18,7 @@
 #include <vector>
 #include <map>
 #include <set>
-#include "MooseTypes.h"
+#include "Warehouse.h"
 
 class VectorPostprocessor;
 class ElementVectorPostprocessor;
@@ -30,7 +30,7 @@ class GeneralVectorPostprocessor;
 /**
  * Holds VectorPostprocessors and provides some services
  */
-class VectorPostprocessorWarehouse
+class VectorPostprocessorWarehouse : public Warehouse<VectorPostprocessor>
 {
 public:
   VectorPostprocessorWarehouse();
@@ -75,12 +75,6 @@ public:
    * @return The list of general VectorPostprocessors
    */
   const std::vector<GeneralVectorPostprocessor *> & genericVectorPostprocessors() const { return _generic_VectorPostprocessors; }
-
-  /**
-   * Get the list of all VectorPostprocessors
-   * @return The list of all VectorPostprocessors
-   */
-  const std::vector<VectorPostprocessor *> & all() const { return _all_VectorPostprocessors; }
 
   /**
    * Get a pointer to a VectorPostprocessor
@@ -134,7 +128,6 @@ protected:
   std::map<SubdomainID, std::vector<NodalVectorPostprocessor *> > _block_nodal_VectorPostprocessors;
 
   std::vector<GeneralVectorPostprocessor *> _generic_VectorPostprocessors;
-  std::vector<VectorPostprocessor *> _all_VectorPostprocessors;
 
   /// All of the block ids that have VectorPostprocessors specified to act on them
   std::set<SubdomainID> _block_ids_with_VectorPostprocessors;

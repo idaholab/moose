@@ -53,6 +53,7 @@ namespace Moose {
       quadrature_type_to_enum["MONOMIAL"] = QMONOMIAL;
       quadrature_type_to_enum["SIMPSON"]  = QSIMPSON;
       quadrature_type_to_enum["TRAP"]     = QTRAP;
+      quadrature_type_to_enum["GAUSS_LOBATTO"] = QGAUSS_LOBATTO;
     }
   }
 
@@ -210,7 +211,7 @@ namespace Moose {
   }
 
   template<>
-  std::vector<ExecFlagType> vectorStringsToEnum<ExecFlagType>(const std::vector<MooseEnum> & v)
+  std::vector<ExecFlagType> vectorStringsToEnum<ExecFlagType>(const MultiMooseEnum & v)
   {
     std::vector<ExecFlagType> exec_flags(v.size());
     for (unsigned int i=0; i<v.size(); ++i)

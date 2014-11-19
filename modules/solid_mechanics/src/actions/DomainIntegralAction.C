@@ -21,12 +21,13 @@ InputParameters validParams<DomainIntegralAction>()
   params.addRequiredParam<std::vector<Real> >("radius_outer", "Outer radius for volume integral domain");
   params.addParam<std::vector<VariableName> >("output_variable", "Variable values to be reported along the crack front");
   params.addParam<bool>("convert_J_to_K",false,"Convert J-integral to stress intensity factor K.");
+  params.addParam<bool>("symmetry_plane",false,"Adjust fracture integrals to account for a symmetry plane passing through the plane of the crack");
   params.addParam<Real>("poissons_ratio","Poisson's ratio");
   params.addParam<Real>("youngs_modulus","Young's modulus");
   params.addParam<std::vector<SubdomainName> >("block","The block ids where InteractionIntegralAuxFields is defined");
-  params.addParam<VariableName>("disp_x", "The x displacement");
-  params.addParam<VariableName>("disp_y", "The y displacement");
-  params.addParam<VariableName>("disp_z", "The z displacement");
+  params.addParam<VariableName>("disp_x", "", "The x displacement");
+  params.addParam<VariableName>("disp_y", "", "The y displacement");
+  params.addParam<VariableName>("disp_z", "", "The z displacement");
   return params;
 }
 
@@ -45,6 +46,7 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
   _radius_inner(getParam<std::vector<Real> >("radius_inner")),
   _radius_outer(getParam<std::vector<Real> >("radius_outer")),
   _convert_J_to_K(false),
+  _symmetry_plane(getParam<bool>("symmetry_plane")),
   _use_displaced_mesh(false)
 {
   if (isParamValid("crack_direction_vector"))
@@ -70,6 +72,7 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
     mooseError("Number of entries in 'radius_inner' and 'radius_outer' must match.");
 
   bool youngs_modulus_set(false);
+  bool poissons_ratio_set(false);
   MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
   if (integral_moose_enums.size() == 0)
     mooseError("Must specify at least one domain integral to perform.");
@@ -88,6 +91,7 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
         mooseError("DomainIntegral error: must set block ID or name for integral: "<<integral_moose_enums[i]);
 
       _poissons_ratio = getParam<Real>("poissons_ratio");
+      poissons_ratio_set = true;
       _youngs_modulus = getParam<Real>("youngs_modulus");
       youngs_modulus_set = true;
       _blocks = getParam<std::vector<SubdomainName> >("block");
@@ -107,10 +111,12 @@ DomainIntegralAction::DomainIntegralAction(const std::string & name, InputParame
     _convert_J_to_K = getParam<bool>("convert_J_to_K");
   if (_convert_J_to_K)
   {
-    if (!isParamValid("youngs_modulus"))
-      mooseError("DomainIntegral error: must set Young's modulus for J-integral if convert_J_to_K = true.");
-    else if (!youngs_modulus_set)
+    if (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio"))
+      mooseError("DomainIntegral error: must set Young's modulus and Poisson's ratio for J-integral if convert_J_to_K = true.");
+    if (!youngs_modulus_set)
       _youngs_modulus = getParam<Real>("youngs_modulus");
+    if (!poissons_ratio_set)
+      _poissons_ratio = getParam<Real>("poissons_ratio");
   }
 
 }
@@ -126,13 +132,17 @@ DomainIntegralAction::act()
   const std::string ak_base_name("q");
   const std::string av_base_name("q");
   const unsigned int num_crack_front_nodes = calcNumCrackFrontNodes();
+  const std::string aux_stress_base_name("aux_stress");
+  const std::string aux_disp_base_name("aux_disp");
+  const std::string aux_grad_disp_base_name("aux_grad_disp");
+  const std::string aux_strain_base_name("aux_strain");
 
   if (_current_task == "add_user_object")
   {
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
-    params.set<std::vector<MooseEnum> >("execute_on")[0] = "initial";
+    params.set<MultiMooseEnum>("execute_on") = "initial";
     params.set<MooseEnum>("crack_direction_method") = _direction_method_moose_enum;
     params.set<MooseEnum>("crack_end_direction_method") = _end_direction_method_moose_enum;
     if (_have_crack_direction_vector)
@@ -181,7 +191,7 @@ DomainIntegralAction::act()
   {
     const std::string ak_type_name("DomainIntegralQFunction");
     InputParameters params = _factory.getValidParams(ak_type_name);
-    params.set<std::vector<MooseEnum> >("execute_on")[0] = "initial";
+    params.set<MultiMooseEnum>("execute_on") = "initial";
     params.set<UserObjectName>("crack_front_definition") = uo_name;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
@@ -224,11 +234,15 @@ DomainIntegralAction::act()
         pp_base_name = "J";
       const std::string pp_type_name("JIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("convert_J_to_K") = _convert_J_to_K;
       if (_convert_J_to_K)
+      {
         params.set<Real>("youngs_modulus") = _youngs_modulus;
+        params.set<Real>("poissons_ratio") = _poissons_ratio;
+      }
+      params.set<bool>("symmetry_plane") = _symmetry_plane;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
@@ -265,7 +279,7 @@ DomainIntegralAction::act()
       const std::string pp_base_name("II");
       const std::string pp_type_name("InteractionIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
@@ -274,11 +288,8 @@ DomainIntegralAction::act()
       params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1,_disp_y);
       if (_disp_z !="")
         params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1,_disp_z);
-      params.set<std::string>("aux_stress") = "aux_stress_I";
-      params.set<std::string>("aux_disp") = "aux_disp_I";
-      params.set<std::string>("aux_grad_disp") = "aux_grad_disp_I";
-      params.set<std::string>("aux_strain") = "aux_strain_I";
       params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1 - std::pow(_poissons_ratio,2));
+      params.set<bool>("symmetry_plane") = _symmetry_plane;
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
         if (_treat_as_2d)
@@ -287,6 +298,18 @@ DomainIntegralAction::act()
           av_name_stream<<av_base_name<<"_"<<ring_index+1;
           std::ostringstream pp_name_stream;
           pp_name_stream<<pp_base_name<<"_"<<"KI"<<"_"<<ring_index+1;
+          std::ostringstream aux_stress_name_stream;
+          aux_stress_name_stream<<aux_stress_base_name<<"_I_0";
+          std::ostringstream aux_disp_name_stream;
+          aux_disp_name_stream<<aux_disp_base_name<<"_I_0";
+          std::ostringstream aux_grad_disp_name_stream;
+          aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_I_0";
+          std::ostringstream aux_strain_name_stream;
+          aux_strain_name_stream<<aux_strain_base_name<<"_I_0";
+          params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+          params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+          params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+          params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
           std::vector<VariableName> qvars;
           qvars.push_back(av_name_stream.str());
           params.set<std::vector<VariableName> >("q") = qvars;
@@ -300,6 +323,20 @@ DomainIntegralAction::act()
             av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
             std::ostringstream pp_name_stream;
             pp_name_stream<<pp_base_name<<"_"<<"KI"<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            std::ostringstream cfn_index_stream;
+            cfn_index_stream<<cfn_index+1;
+            std::ostringstream aux_stress_name_stream;
+            aux_stress_name_stream<<aux_stress_base_name<<"_I_"<<cfn_index+1;
+            std::ostringstream aux_disp_name_stream;
+            aux_disp_name_stream<<aux_disp_base_name<<"_I_"<<cfn_index+1;
+            std::ostringstream aux_grad_disp_name_stream;
+            aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_I_"<<cfn_index+1;
+            std::ostringstream aux_strain_name_stream;
+            aux_strain_name_stream<<aux_strain_base_name<<"_I_"<<cfn_index+1;
+            params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+            params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+            params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+            params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
             std::vector<VariableName> qvars;
             qvars.push_back(av_name_stream.str());
             params.set<std::vector<VariableName> >("q") = qvars;
@@ -311,10 +348,12 @@ DomainIntegralAction::act()
     }
     if (_integrals.count(INTERACTION_INTEGRAL_KII) != 0)
     {
+      if (_symmetry_plane)
+        mooseError("In DomainIntegral, symmetry_plane option cannot be used with mode-II interaction integral");
       const std::string pp_base_name("II");
       const std::string pp_type_name("InteractionIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
@@ -323,10 +362,6 @@ DomainIntegralAction::act()
       params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1,_disp_y);
       if (_disp_z !="")
         params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1,_disp_z);
-      params.set<std::string>("aux_stress") = "aux_stress_II";
-      params.set<std::string>("aux_disp") = "aux_disp_II";
-      params.set<std::string>("aux_grad_disp") = "aux_grad_disp_II";
-      params.set<std::string>("aux_strain") = "aux_strain_II";
       params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1 - std::pow(_poissons_ratio,2));
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
@@ -336,6 +371,18 @@ DomainIntegralAction::act()
           av_name_stream<<av_base_name<<"_"<<ring_index+1;
           std::ostringstream pp_name_stream;
           pp_name_stream<<pp_base_name<<"_"<<"KII"<<"_"<<ring_index+1;
+          std::ostringstream aux_stress_name_stream;
+          aux_stress_name_stream<<aux_stress_base_name<<"_II_0";
+          std::ostringstream aux_disp_name_stream;
+          aux_disp_name_stream<<aux_disp_base_name<<"_II_0";
+          std::ostringstream aux_grad_disp_name_stream;
+          aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_II_0";
+          std::ostringstream aux_strain_name_stream;
+          aux_strain_name_stream<<aux_strain_base_name<<"_II_0";
+          params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+          params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+          params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+          params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
           std::vector<VariableName> qvars;
           qvars.push_back(av_name_stream.str());
           params.set<std::vector<VariableName> >("q") = qvars;
@@ -349,6 +396,20 @@ DomainIntegralAction::act()
             av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
             std::ostringstream pp_name_stream;
             pp_name_stream<<pp_base_name<<"_"<<"KII"<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            std::ostringstream cfn_index_stream;
+            cfn_index_stream<<cfn_index+1;
+            std::ostringstream aux_stress_name_stream;
+            aux_stress_name_stream<<aux_stress_base_name<<"_II_"<<cfn_index+1;
+            std::ostringstream aux_disp_name_stream;
+            aux_disp_name_stream<<aux_disp_base_name<<"_II_"<<cfn_index+1;
+            std::ostringstream aux_grad_disp_name_stream;
+            aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_II_"<<cfn_index+1;
+            std::ostringstream aux_strain_name_stream;
+            aux_strain_name_stream<<aux_strain_base_name<<"_II_"<<cfn_index+1;
+            params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+            params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+            params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+            params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
             std::vector<VariableName> qvars;
             qvars.push_back(av_name_stream.str());
             params.set<std::vector<VariableName> >("q") = qvars;
@@ -360,10 +421,12 @@ DomainIntegralAction::act()
     }
     if (_integrals.count(INTERACTION_INTEGRAL_KIII) != 0)
     {
+      if (_symmetry_plane)
+        mooseError("In DomainIntegral, symmetry_plane option cannot be used with mode-III interaction integral");
       const std::string pp_base_name("II");
       const std::string pp_type_name("InteractionIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
@@ -372,10 +435,6 @@ DomainIntegralAction::act()
       params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1,_disp_y);
       if (_disp_z !="")
         params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1,_disp_z);
-      params.set<std::string>("aux_stress") = "aux_stress_III";
-      params.set<std::string>("aux_disp") = "aux_disp_III";
-      params.set<std::string>("aux_grad_disp") = "aux_grad_disp_III";
-      params.set<std::string>("aux_strain") = "aux_strain_III";
       params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (2 * (1 + _poissons_ratio));
       for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
       {
@@ -385,6 +444,18 @@ DomainIntegralAction::act()
           av_name_stream<<av_base_name<<"_"<<ring_index+1;
           std::ostringstream pp_name_stream;
           pp_name_stream<<pp_base_name<<"_"<<"KIII"<<"_"<<ring_index+1;
+          std::ostringstream aux_stress_name_stream;
+          aux_stress_name_stream<<aux_stress_base_name<<"_III_0";
+          std::ostringstream aux_disp_name_stream;
+          aux_disp_name_stream<<aux_disp_base_name<<"_III_0";
+          std::ostringstream aux_grad_disp_name_stream;
+          aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_III_0";
+          std::ostringstream aux_strain_name_stream;
+          aux_strain_name_stream<<aux_strain_base_name<<"_III_0";
+          params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+          params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+          params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+          params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
           std::vector<VariableName> qvars;
           qvars.push_back(av_name_stream.str());
           params.set<std::vector<VariableName> >("q") = qvars;
@@ -398,6 +469,20 @@ DomainIntegralAction::act()
             av_name_stream<<av_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
             std::ostringstream pp_name_stream;
             pp_name_stream<<pp_base_name<<"_"<<"KIII"<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            std::ostringstream cfn_index_stream;
+            cfn_index_stream<<cfn_index+1;
+            std::ostringstream aux_stress_name_stream;
+            aux_stress_name_stream<<aux_stress_base_name<<"_III_"<<cfn_index+1;
+            std::ostringstream aux_disp_name_stream;
+            aux_disp_name_stream<<aux_disp_base_name<<"_III_"<<cfn_index+1;
+            std::ostringstream aux_grad_disp_name_stream;
+            aux_grad_disp_name_stream<<aux_grad_disp_base_name<<"_III_"<<cfn_index+1;
+            std::ostringstream aux_strain_name_stream;
+            aux_strain_name_stream<<aux_strain_base_name<<"_III_"<<cfn_index+1;
+            params.set<std::string>("aux_stress") = aux_stress_name_stream.str();
+            params.set<std::string>("aux_disp") = aux_disp_name_stream.str();
+            params.set<std::string>("aux_grad_disp") = aux_grad_disp_name_stream.str();
+            params.set<std::string>("aux_strain") = aux_strain_name_stream.str();
             std::vector<VariableName> qvars;
             qvars.push_back(av_name_stream.str());
             params.set<std::vector<VariableName> >("q") = qvars;
@@ -412,7 +497,7 @@ DomainIntegralAction::act()
       const std::string ov_base_name(_output_variables[i]);
       const std::string pp_type_name("CrackFrontData");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<std::vector<MooseEnum> >("execute_on")[0] = "timestep";
+      params.set<MultiMooseEnum>("execute_on") = "timestep";
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       if (_treat_as_2d)
       {
@@ -431,6 +516,69 @@ DomainIntegralAction::act()
           params.set<unsigned int>("crack_front_node_index") = cfn_index;
           _problem->addPostprocessor(pp_type_name,pp_name_stream.str(),params);
         }
+      }
+    }
+  }
+  else if (_current_task == "add_vector_postprocessor")
+  {
+    if (!_treat_as_2d)
+    {
+      for (std::set<INTEGRAL>::iterator sit=_integrals.begin(); sit != _integrals.end(); ++sit)
+      {
+        std::string pp_base_name;
+        switch (*sit)
+        {
+          case J_INTEGRAL:
+            if (_convert_J_to_K)
+              pp_base_name = "K";
+            else
+              pp_base_name = "J";
+            break;
+          case INTERACTION_INTEGRAL_KI:
+            pp_base_name = "II_KI";
+            break;
+          case INTERACTION_INTEGRAL_KII:
+            pp_base_name = "II_KII";
+            break;
+          case INTERACTION_INTEGRAL_KIII:
+            pp_base_name = "II_KIII";
+            break;
+        }
+        const std::string vpp_type_name("VectorOfPostprocessors");
+        InputParameters params = _factory.getValidParams(vpp_type_name);
+        params.set<MultiMooseEnum>("execute_on") = "timestep";
+        for (unsigned int ring_index=0; ring_index<_radius_inner.size(); ++ring_index)
+        {
+          std::vector<PostprocessorName> postprocessor_names;
+          std::ostringstream vpp_name_stream;
+          vpp_name_stream<<pp_base_name<<"_"<<ring_index+1;
+          for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+          {
+            std::ostringstream pp_name_stream;
+            pp_name_stream<<pp_base_name<<"_"<<cfn_index+1<<"_"<<ring_index+1;
+            postprocessor_names.push_back(pp_name_stream.str());
+          }
+          params.set<std::vector<PostprocessorName> >("postprocessors") = postprocessor_names;
+          _problem->addVectorPostprocessor(vpp_type_name,vpp_name_stream.str(),params);
+        }
+      }
+
+      for (unsigned int i=0; i<_output_variables.size(); ++i)
+      {
+        const std::string vpp_type_name("VectorOfPostprocessors");
+        InputParameters params = _factory.getValidParams(vpp_type_name);
+        params.set<MultiMooseEnum>("execute_on") = "timestep";
+        std::ostringstream vpp_name_stream;
+        vpp_name_stream<<_output_variables[i]<<"_crack";
+        std::vector<PostprocessorName> postprocessor_names;
+        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        {
+          std::ostringstream pp_name_stream;
+          pp_name_stream<<vpp_name_stream.str()<<"_"<<cfn_index+1;
+          postprocessor_names.push_back(pp_name_stream.str());
+        }
+        params.set<std::vector<PostprocessorName> >("postprocessors") = postprocessor_names;
+        _problem->addVectorPostprocessor(vpp_type_name,vpp_name_stream.str(),params);
       }
     }
   }
@@ -469,9 +617,8 @@ DomainIntegralAction::act()
 
     if (sif_mode_enum_vec.size() > 0)
     {
-      const std::string mater_name("interactionIntegralAuxFields");
+      const std::string mater_base_name("auxFields");
       const std::string mater_type_name("InteractionIntegralAuxFields");
-
       InputParameters params = _factory.getValidParams(mater_type_name);
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
@@ -480,7 +627,27 @@ DomainIntegralAction::act()
       params.set<Real>("youngs_modulus") = _youngs_modulus;
       params.set<std::vector<SubdomainName> >("block") = _blocks;
 
-      _problem->addMaterial(mater_type_name,mater_name,params);
+      if (_treat_as_2d)
+      {
+        std::ostringstream mater_name_stream;
+        mater_name_stream<<mater_base_name<<"_0";
+        params.set<unsigned int>("crack_front_node_index") = 0;
+        params.set<std::string>("appended_index_name") = "0";
+        _problem->addMaterial(mater_type_name,mater_name_stream.str(),params);
+      }
+      else
+      {
+        for (unsigned int cfn_index=0; cfn_index<num_crack_front_nodes; ++cfn_index)
+        {
+          std::ostringstream mater_name_stream;
+          mater_name_stream<<mater_base_name<<"_"<<cfn_index+1;
+          params.set<unsigned int>("crack_front_node_index") = cfn_index;
+          std::ostringstream cfn_index_stream;
+          cfn_index_stream<<cfn_index+1;
+          params.set<std::string>("appended_index_name") = cfn_index_stream.str();
+          _problem->addMaterial(mater_type_name,mater_name_stream.str(),params);
+        }
+      }
     }
   }
 }

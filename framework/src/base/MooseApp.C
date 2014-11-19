@@ -71,6 +71,8 @@ InputParameters validParams<MooseApp>()
 
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
+  params.addPrivateParam<MooseSharedPointer<CommandLine> >("_command_line");
+  params.addPrivateParam<MooseSharedPointer<Parallel::Communicator> >("_comm");
 
   return params;
 }
@@ -86,24 +88,27 @@ void insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos
   }
 }
 
+// Free function for removing cli flags
+bool isFlag(const std::string s)
+{
+  return s.length() && s[0] == '-';
+}
+
 MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
-    ParallelObject(*parameters.get<Parallel::Communicator *>("_comm")), // Can't call getParam() before pars is set
+    ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
     _name(name),
     _pars(parameters),
-    _comm(getParam<Parallel::Communicator *>("_comm")),
+    _comm(getParam<MooseSharedPointer<Parallel::Communicator> >("_comm")),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
-    _command_line(NULL),
     _alternate_output_warehouse(NULL),
     _output_warehouse(new OutputWarehouse),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
-    _executioner(NULL),
     _use_nonlinear(true),
-    _sys_info(NULL),
     _enable_unused_check(WARN_UNUSED),
     _factory(*this),
     _error_overridden(false),
@@ -122,24 +127,20 @@ MooseApp::MooseApp(const std::string & name, InputParameters parameters) :
     int argc = getParam<int>("_argc");
     char ** argv = getParam<char**>("_argv");
 
-    _sys_info = new SystemInfo(argc, argv);
-    _command_line = new CommandLine(argc, argv);
-    _command_line->addCommandLineOptionsFromParams(_pars);
+    _sys_info = MooseSharedPointer<SystemInfo>(new SystemInfo(argc, argv));
   }
+  if (isParamValid("_command_line"))
+    _command_line = getParam<MooseSharedPointer<CommandLine> >("_command_line");
+  else
+    mooseError("Valid CommandLine object required");
 }
 
 MooseApp::~MooseApp()
 {
-  delete _command_line;
-  delete _sys_info;
-  delete _executioner;
   _action_warehouse.clear();
 
   // MUST be deleted before _comm is destroyed!
   delete _output_warehouse;
-
-  // Note: Communicator MUST be destroyed last because everything else is using it!
-  delete _comm;
 }
 
 void
@@ -278,16 +279,26 @@ MooseApp::runInputFile()
   _action_warehouse.executeAllActions();
   _executioner = _action_warehouse.executioner();
 
-  // If requested, see if there are unidentified name/value pairs in the input file
-  if (getParam<bool>("error_unused") || _enable_unused_check == ERROR_UNUSED)
+  bool error_unused = getParam<bool>("error_unused") || _enable_unused_check == ERROR_UNUSED;
+  bool warn_unused = getParam<bool>("warn_unused") || _enable_unused_check == WARN_UNUSED;
+
+  if (error_unused || warn_unused)
   {
+    // Check the input file parameters
     std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
-    _parser.checkUnidentifiedParams(all_vars, true);
-  }
-  else if (getParam<bool>("warn_unused") || _enable_unused_check == WARN_UNUSED)
-  {
-    std::vector<std::string> all_vars = _parser.getPotHandle()->get_variable_names();
-    _parser.checkUnidentifiedParams(all_vars, _enable_unused_check == ERROR_UNUSED);
+    _parser.checkUnidentifiedParams(all_vars, error_unused, true);
+
+    // Only check CLI parameters on the main application
+    // TODO: Add support for SubApp overrides and checks #4119
+    if (_name == "main")
+    {
+      // Check the CLI parameters
+      all_vars = _command_line->getPot()->get_variable_names();
+      // Remove flags, they aren't "input" parameters
+      all_vars.erase( std::remove_if(all_vars.begin(), all_vars.end(), isFlag), all_vars.end() );
+
+      _parser.checkUnidentifiedParams(all_vars, error_unused, false);
+    }
   }
 
   if (getParam<bool>("error_override") || _error_overridden)
@@ -307,7 +318,7 @@ MooseApp::executeExecutioner()
   if (_executioner)
   {
 #ifdef LIBMESH_HAVE_PETSC
-    Moose::PetscSupport::petscSetupOutput(_command_line);
+    Moose::PetscSupport::petscSetupOutput(_command_line.get());
 #endif
     _executioner->init();
     _executioner->execute();
@@ -413,7 +424,7 @@ MooseApp::setOutputPosition(Point p)
   _output_position = p;
   _output_warehouse->meshChanged();
 
-  if (_executioner != NULL)
+  if (_executioner.get() != NULL)
     _executioner->parentOutputPositionChanged();
 }
 

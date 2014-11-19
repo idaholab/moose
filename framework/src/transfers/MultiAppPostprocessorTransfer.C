@@ -28,14 +28,20 @@ InputParameters validParams<MultiAppPostprocessorTransfer>()
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<PostprocessorName>("from_postprocessor", "The name of the Postprocessor in the Master to transfer the value from.");
   params.addRequiredParam<PostprocessorName>("to_postprocessor", "The name of the Postprocessor in the MultiApp to transfer the value to.  This should most likely be a Reporter Postprocessor.");
+  MooseEnum reduction_type("average sum maximum minimum");
+  params.addParam<MooseEnum>("reduction_type", reduction_type, "The type of reduction to perform to reduce postprocessor values from multiple SubApps to a single value");
   return params;
 }
 
 MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const std::string & name, InputParameters parameters) :
     MultiAppTransfer(name, parameters),
     _from_pp_name(getParam<PostprocessorName>("from_postprocessor")),
-    _to_pp_name(getParam<PostprocessorName>("to_postprocessor"))
+    _to_pp_name(getParam<PostprocessorName>("to_postprocessor")),
+    _reduction_type(getParam<MooseEnum>("reduction_type"))
 {
+  if (_direction == FROM_MULTIAPP)
+    if (!_reduction_type.isValid())
+      mooseError("In MultiAppPostprocessorTransfer, must specify 'reduction_type' if direction = from_multiapp");
 }
 
 void
@@ -56,7 +62,49 @@ MultiAppPostprocessorTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      mooseError("Can't transfer a Postprocessor from a MultiApp to a Postprocessor in the Master!  This doesn't make sense because you would have multiple Postprocessors from each Sub-App feeding into just one Postprocessor in the Master!");
+      FEProblem & to_problem = *_multi_app->problem();
+
+      Real pp_value = 0;
+      unsigned int pp_count = 0;
+
+      switch (_reduction_type)
+      {
+        case AVERAGE:
+        case SUM:
+          pp_value = 0;
+          break;
+        case MAXIMUM:
+          pp_value = -std::numeric_limits<Real>::max();
+          break;
+        case MINIMUM:
+          pp_value = std::numeric_limits<Real>::max();
+          break;
+      }
+
+      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+        if (_multi_app->hasLocalApp(i))
+        {
+          ++pp_count;
+          Real this_pp_value = _multi_app->appProblem(i)->getPostprocessorValue(_from_pp_name);
+          switch (_reduction_type)
+          {
+            case AVERAGE:
+            case SUM:
+              pp_value += this_pp_value;
+              break;
+            case MAXIMUM:
+              pp_value = std::max(this_pp_value,pp_value);
+              break;
+            case MINIMUM:
+              pp_value = std::min(this_pp_value,pp_value);
+              break;
+          }
+        }
+
+      if (_reduction_type == AVERAGE)
+        pp_value /= (double) pp_count;
+
+      to_problem.getPostprocessorValue(_to_pp_name) = pp_value;
       break;
     }
   }

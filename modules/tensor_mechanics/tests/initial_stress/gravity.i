@@ -34,20 +34,7 @@
 []
 
 [Kernels]
-  [./cx_elastic]
-    type = StressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./cy_elastic]
-    type = StressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-  [./cz_elastic]
-    type = StressDivergenceTensors
-    variable = disp_z
-    component = 2
+  [./TensorMechanics]
   [../]
   [./weight]
     type = BodyForce
@@ -179,9 +166,13 @@
 []
 
 [UserObjects]
+  [./ts]
+    type = TensorMechanicsHardeningConstant
+    value = 1E6
+  [../]
   [./mc]
     type = TensorMechanicsPlasticTensile
-    tensile_strength = 1.0E6
+    tensile_strength = ts
     yield_function_tolerance = 1E-6
     tensile_tip_smoother = 1.0
     internal_constraint_tolerance = 1E-5

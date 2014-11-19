@@ -463,7 +463,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
     // For some reason the following may return an empty node list
     // std::vector<dof_id_type> snodes;
     // std::vector<boundary_id_type> sides;
-    // dmm->nl->sys().get_mesh().boundary_info->build_node_list(snodes, sides);
+    // dmm->nl->sys().get_mesh().get_boundary_info().build_node_list(snodes, sides);
     // // FIXME: make an array of (snode,side) pairs, sort on side and use std::lower_bound from <algorithm>
     // for (dof_id_type i = 0; i < sides.size(); ++i) {
     //   boundary_id_type s = sides[i];
@@ -471,7 +471,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
     //  const Node& node = dmm->nl->sys().get_mesh().node(snodes[i]);
     //  // determine v's dof on node and insert into indices
     // }
-     ConstBndNodeRange & bnodes = *dmm->nl->mesh().getBoundaryNodeRange();
+    ConstBndNodeRange & bnodes = *dmm->nl->mesh().getBoundaryNodeRange();
     for (ConstBndNodeRange::const_iterator bnodeit = bnodes.begin(); bnodeit != bnodes.end(); ++bnodeit) {
       const BndNode * bnode = *bnodeit;
       BoundaryID      boundary_id = bnode->_bnd_id;
@@ -1427,7 +1427,7 @@ PetscErrorCode  DMSetFromOptions_Moose(DM dm)
   if (blockset.size()) {
     ierr = DMMooseSetBlocks(dm,blockset);CHKERRQ(ierr);
   }
-  PetscInt maxsides = dmm->nl->sys().get_mesh().boundary_info->get_boundary_ids().size();
+  PetscInt maxsides = dmm->nl->sys().get_mesh().get_boundary_info().get_boundary_ids().size();
   char** sides;
   ierr = PetscMalloc(maxsides*sizeof(char*),&sides);CHKERRQ(ierr);
   PetscInt nsides = maxsides;

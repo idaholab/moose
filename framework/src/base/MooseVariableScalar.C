@@ -44,7 +44,7 @@ MooseVariableScalar::reinit()
   const NumericVector<Real> & solution_old     = _sys.solutionOld();
   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
   const NumericVector<Real> & u_dot            = _sys.solutionUDot();
-  const NumericVector<Real> & du_dot_du        = _sys.solutionDuDotDu();
+  const Real & du_dot_du                       = _sys.duDotDu();
 
   _dof_map.SCALAR_dof_indices(_dof_indices, _var_num);
 
@@ -63,7 +63,7 @@ MooseVariableScalar::reinit()
     _u_older[i] = solution_older(idx);
 
     _u_dot[i]        = u_dot(idx);
-    _du_dot_du[i]    = du_dot_du(idx);
+    _du_dot_du[i]    = du_dot_du;
   }
 }
 

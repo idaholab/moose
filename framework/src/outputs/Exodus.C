@@ -25,7 +25,7 @@ InputParameters validParams<Exodus>()
 {
   // Get the base class parameters
   InputParameters params = validParams<OversampleOutput>();
-  params += Output::disableOutputTypes("vector_postprocessor system_information");
+  params += Output::enableOutputTypes("nodal elemental scalar postprocessor input");
 
   // Set the default padding to 3
   params.set<unsigned int>("padding") = 3;

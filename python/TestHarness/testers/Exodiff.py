@@ -44,7 +44,7 @@ class Exodiff(RunApp):
                       + old_floor + ' -t ' + str(self.specs['rel_err']) + ' ' + ' '.join(self.specs['exodiff_opts']) + ' ' \
                       + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file) + ' ' + os.path.join(self.specs['test_dir'], file))
 
-      return commands
+    return commands
 
 
   def processResults(self, moose_dir, retcode, options, output):

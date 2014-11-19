@@ -12,7 +12,7 @@
     type = SideSetsFromNormals
     normals = '0  1  0
                0 -1  0'
-    boundary = 'front back'
+    new_boundary = 'front back'
 
     # This parameter makes it so that we won't
     # adjust the normal for each adjacent element.

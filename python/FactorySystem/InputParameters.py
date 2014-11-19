@@ -5,6 +5,7 @@ class InputParameters:
     self.substitute = {}
     self.required = set()
     self.private = set()
+    self.group = {}
 
   def addRequiredParam(self, name, *args):
     self.required.add(name)
@@ -62,6 +63,12 @@ class InputParameters:
 
   def getDescription(self, key):
     return self.desc[key]
+
+  def addParamsToGroup(self, group, prop_list):
+    self.group[group] = prop_list
+
+  def groupKeys(self, group):
+    return self.group[group]
 
   def printParams(self):
     for k in self.desc:

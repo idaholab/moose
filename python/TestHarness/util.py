@@ -158,54 +158,55 @@ def colorText(str, options, color, html=False):
 
 def getPlatforms():
   # We'll use uname to figure this out
-  # Supported platforms are LINUX, DARWIN, SL, LION or ALL
-  platforms = set()
-  platforms.add('ALL')
+  # Supported platforms are LINUX, DARWIN, ML, MAVERICKS, YOSEMITE, or ALL
+  platforms = set(['ALL'])
   raw_uname = os.uname()
   if raw_uname[0].upper() == 'DARWIN':
     platforms.add('DARWIN')
-    if re.match("10\.", raw_uname[2]):
-      platforms.add('SL')
-    if re.match("11\.", raw_uname[2]):
-      platforms.add("LION")
+    if re.match("12\.", raw_uname[2]):
+      platforms.add('ML')
+    if re.match("13\.", raw_uname[2]):
+      platforms.add("MAVERICKS")
+    if re.match("14\.", raw_uname[2]):
+      platforms.add("YOSEMITE")
   else:
     platforms.add(raw_uname[0].upper())
   return platforms
 
-def getCompilers(libmesh_dir):
-  # We'll use the GXX-VERSION string from LIBMESH's Make.common
-  # to figure this out
-  # Supported compilers are GCC, INTEL or ALL
-  compilers = set()
-  compilers.add('ALL')
+def runExecutable(libmesh_dir, location, bin, args):
+  # Installed location of libmesh executable
+  libmesh_installed   = libmesh_dir + '/' + location + '/' + bin
 
-  # Get the gxx compiler.  Note that the libmesh-config script
-  # can live in different places depending on whether libmesh is
-  # "installed" or not.
+  # Uninstalled location of libmesh executable
+  libmesh_uninstalled = libmesh_dir + '/' + bin
 
-  # Installed location of libmesh-config script
-  libmesh_config_installed   = libmesh_dir + '/bin/libmesh-config'
+  # Uninstalled location of libmesh executable
+  libmesh_uninstalled2 = libmesh_dir + '/contrib/bin/' + bin
 
-  # Uninstalled location of libmesh-config script
-  libmesh_config_uninstalled = libmesh_dir + '/contrib/bin/libmesh-config'
+  # The eventual variable we will use to refer to libmesh's executable
+  libmesh_exe = ''
 
-  # The eventual variable we will use to refer to libmesh's configure script
-  libmesh_config = ''
+  if os.path.exists(libmesh_installed):
+    libmesh_exe = libmesh_installed
 
-  if os.path.exists(libmesh_config_installed):
-    libmesh_config = libmesh_config_installed
+  elif os.path.exists(libmesh_uninstalled):
+    libmesh_exe = libmesh_uninstalled
 
-  elif os.path.exists(libmesh_config_uninstalled):
-    libmesh_config = libmesh_config_uninstalled
+  elif os.path.exists(libmesh_uninstalled2):
+    libmesh_exe = libmesh_uninstalled2
 
   else:
-    print "Error! Could not find libmesh's config script in any of the usual locations!"
+    print "Error! Could not find '" + bin + "' in any of the usual libmesh's locations!"
     exit(1)
 
-  # Pass the --cxx option to the libmesh-config script, and check the result
-  command = libmesh_config + ' --cxx'
-  p = Popen(command, shell=True, stdout=PIPE)
-  mpicxx_cmd = p.communicate()[0].strip()
+  return runCommand(libmesh_exe + " " + args).rstrip()
+
+
+def getCompilers(libmesh_dir):
+  # Supported compilers are GCC, INTEL or ALL
+  compilers = set(['ALL'])
+
+  mpicxx_cmd = runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx")
 
   # Account for useage of distcc
   if "distcc" in mpicxx_cmd:
@@ -214,8 +215,7 @@ def getCompilers(libmesh_dir):
 
   # If mpi ic on the command, run -show to get the compiler
   if "mpi" in mpicxx_cmd:
-    p = Popen(mpicxx_cmd + " -show", shell=True, stdout=PIPE)
-    raw_compiler = p.communicate()[0]
+    raw_compiler = runCommand(mpicxx_cmd + " -show")
   else:
     raw_compiler = mpicxx_cmd
 
@@ -267,8 +267,7 @@ def checkPetscVersion(checks, test):
 def getLibMeshConfigOption(libmesh_dir, option):
   # Some tests work differently with parallel mesh enabled
   # We need to detect this condition
-  option_set = set()
-  option_set.add('ALL')
+  option_set = set(['ALL'])
 
   filenames = [
     libmesh_dir + '/include/base/libmesh_config.h',   # Old location
@@ -313,37 +312,9 @@ def getLibMeshConfigOption(libmesh_dir, option):
 def getSharedOption(libmesh_dir):
   # Some tests may only run properly with shared libraries on/off
   # We need to detect this condition
-  shared_option = set()
-  shared_option.add('ALL')
+  shared_option = set(['ALL'])
 
-  # MOOSE no longer relies on Make.common being present.  This gives us the
-  # potential to work with "uninstalled" libmesh trees, for example.
-
-  # Installed location of libmesh libtool script
-  libmesh_libtool_installed   = libmesh_dir + '/contrib/bin/libtool'
-
-  # Uninstalled location of libmesh libtool script
-  libmesh_libtool_uninstalled = libmesh_dir + '/libtool'
-
-  # The eventual variable we will use to refer to libmesh's libtool script
-  libmesh_libtool = ''
-
-  if os.path.exists(libmesh_libtool_installed):
-    libmesh_libtool = libmesh_libtool_installed
-
-  elif os.path.exists(libmesh_libtool_uninstalled):
-    libmesh_libtool = libmesh_libtool_uninstalled
-
-  else:
-    print "Error! Could not find libmesh's libtool script in any of the usual locations!"
-    exit(1)
-
-  # Now run the libtool script (in the shell) to see if shared libraries were built
-  command = libmesh_libtool + " --config | grep build_libtool_libs | cut -d'=' -f2"
-
-  # Note: the strip() command removes the trailing newline
-  p = Popen(command, shell=True, stdout=PIPE)
-  result = p.communicate()[0].strip()
+  result = runExecutable(libmesh_dir, "contrib/bin", "libtool", "--config | grep build_libtool_libs | cut -d'=' -f2")
 
   if re.search('yes', result) != None:
     shared_option.add('DYNAMIC')

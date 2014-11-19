@@ -23,7 +23,8 @@
 #include "SubProblem.h"
 #include "Parser.h"
 
-VectorPostprocessorWarehouse::VectorPostprocessorWarehouse()
+VectorPostprocessorWarehouse::VectorPostprocessorWarehouse() :
+    Warehouse<VectorPostprocessor>()
 {
 }
 
@@ -201,7 +202,7 @@ VectorPostprocessorWarehouse::addVectorPostprocessor(MooseSharedPointer<VectorPo
 
   VectorPostprocessor * raw_ptr = vector_postprocessor.get();
 
-  _all_VectorPostprocessors.push_back(raw_ptr);
+  _all_objects.push_back(raw_ptr);
 
   if (dynamic_cast<ElementVectorPostprocessor*>(raw_ptr))
   {
@@ -282,7 +283,7 @@ VectorPostprocessor *
 VectorPostprocessorWarehouse::getVectorPostprocessor(std::string name)
 {
   // Loop through all the VectorPostprocessors, return the pointer if the names match
-  for (std::vector<VectorPostprocessor *>::iterator it=_all_VectorPostprocessors.begin(); it != _all_VectorPostprocessors.end(); ++it)
+  for (std::vector<VectorPostprocessor *>::iterator it=_all_objects.begin(); it != _all_objects.end(); ++it)
   {
     if (name.compare((*it)->PPName()) == 0)
       return *it;

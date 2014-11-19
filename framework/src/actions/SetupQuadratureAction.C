@@ -20,7 +20,7 @@
 template<>
 InputParameters validParams<SetupQuadratureAction>()
 {
-  MooseEnum types("CLOUGH CONICAL GAUSS GRID MONOMIAL SIMPSON TRAP", "GAUSS");
+  MooseEnum types("CLOUGH CONICAL GAUSS GRID MONOMIAL SIMPSON TRAP GAUSS_LOBATTO", "GAUSS");
   MooseEnum order("AUTO CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH "
                   "ELEVENTH TWELFTH THIRTEENTH FOURTEENTH FIFTEENTH SIXTEENTH SEVENTEENTH EIGHTTEENTH NINTEENTH TWENTIETH", "AUTO");
 
@@ -50,6 +50,6 @@ SetupQuadratureAction::~SetupQuadratureAction()
 void
 SetupQuadratureAction::act()
 {
-  if (_problem != NULL)
+  if (_problem.get() != NULL)
     _problem->createQRules(_type, _order, _element_order, _side_order);
 }

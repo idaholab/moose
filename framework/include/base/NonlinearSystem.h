@@ -258,16 +258,7 @@ public:
    */
   virtual void setSolutionUDot(const NumericVector<Number> & udot);
 
-  /**
-   * Set multiplier of udot for Jacobian evaluation.
-   * @param shift temporal shift for Jacobian
-   * @note If the residual is G(u,udot) = 0, the Jacobian is dG/du + shift*dG/dudot
-   * @note If the calling sequence for residual evaluation was changed, this could become an explicit argument.
-   */
-  virtual void setSolutionDuDotDu(Real shift);
-
   virtual NumericVector<Number> & solutionUDot();
-  virtual NumericVector<Number> & solutionDuDotDu();
   virtual NumericVector<Number> & residualVector(Moose::KernelType type);
 
   virtual const NumericVector<Number> * & currentSolution() { return _current_solution; }
@@ -286,7 +277,7 @@ public:
    * Sets a preconditioner
    * @param pc The preconditioner to be set
    */
-  void setPreconditioner(MoosePreconditioner *pc);
+  void setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc);
 
   /**
    * If called with true this system will use a finite differenced form of
@@ -330,10 +321,11 @@ public:
    */
   void reinitDampers(THREAD_ID tid);
 
+  ///@{
   /// System Integrity Checks
   void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains, bool check_kernel_coverage) const;
-  void checkBCCoverage() const;
   bool containsTimeKernel();
+  ///@}
 
   /**
    * Return the number of non-linear iterations
@@ -377,8 +369,8 @@ public:
 
   unsigned int _num_residual_evaluations;
 
-  void setPredictor(Predictor * predictor);
-  Predictor * getPredictor() { return _predictor; }
+  void setPredictor(MooseSharedPointer<Predictor> predictor);
+  Predictor * getPredictor() { return _predictor.get(); }
 
   TimeIntegrator * getTimeIntegrator() { return _time_integrator.get(); }
 
@@ -479,8 +471,8 @@ protected:
   MooseSharedPointer<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
-  /// solution vector for \f$ {du^dot}\over{du} \f$
-  NumericVector<Number> & _du_dot_du;
+  /// \f$ {du^dot}\over{du} \f$
+  Number _du_dot_du;
   /// residual vector for time contributions
   NumericVector<Number> & _Re_time;
   /// residual vector for non-time contributions
@@ -510,7 +502,7 @@ protected:
   /// increment vector
   NumericVector<Number> * _increment_vec;
   /// Preconditioner
-  MoosePreconditioner * _preconditioner;
+  MooseSharedPointer<MoosePreconditioner> _preconditioner;
   /// Preconditioning side
   Moose::PCSideType _pc_side;
 
@@ -557,7 +549,7 @@ protected:
   Real _final_residual;
 
   /// If predictor is active, this is non-NULL
-  Predictor * _predictor;
+  MooseSharedPointer<Predictor> _predictor;
 
   bool _computing_initial_residual;
 
