@@ -4,7 +4,7 @@ from PySide import QtGui
 
 # Import Peacock modules
 from src import *
-from src.utils import TestObject
+from src.utils import PeacockTestObject
 
 # Create a subclass
 class SubTestMooseWidget(QtGui.QWidget, base.MooseWidget):
@@ -27,9 +27,9 @@ test.addObject(QtGui.QWidget(), handle='non_moose_widget')
 test.setProperty('debug', True)
 
 
-class MooseWidget(TestObject):
+class MooseWidget(PeacockTestObject):
   def __init__(self, **kwargs):
-    TestObject.__init__(self, **kwargs)
+    PeacockTestObject.__init__(self, **kwargs)
 
   # Clean up the objects created for this test
   def __del__(self):
