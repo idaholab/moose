@@ -84,7 +84,7 @@ class MooseWidgetTest(TestObject):
 
   # Test duplicate objects
   def testMultipleObjects(self):
-   # self.test.addObject(SubTestMooseWidget(), handle='another_sub_widget')
+    self.test.addObject(SubTestMooseWidget(), handle='another_sub_widget')
    # objs = self.test.object('sub_sub_widget')
    # result = all(obj.property('handle') == 'sub_sub_widget' for obj in objs)
    # fail_msg = 'Expected widgets not found'
