@@ -16,9 +16,6 @@ class ExecuteWidget(QtGui.QWidget, MooseWidget):
     QtGui.QWidget.__init__(self)
     MooseWidget.__init__(self, **kwargs)
 
-    # A flag for calling wait method on process, this is needed by the testing system
-    self._wait_for_finished = kwargs.pop('wait', False)
-
     # Add the controls and console display
     self.addObject(ExecuteCommandControl(**kwargs), handle='ExecuteCommandControl')
     self.addObject(ExecuteConsole(**kwargs), handle='ExecuteConsole')
@@ -74,11 +71,6 @@ class ExecuteWidget(QtGui.QWidget, MooseWidget):
 
     # Run the command with supplied arguments
     self.process.start(cmd, args)
-
-    # Wait for the process to finish if the wait flag was passed
-    if self._wait_for_finished:
-      self.process.waitForFinished()
-
 
   ##
   # Method for killing the currently running executable

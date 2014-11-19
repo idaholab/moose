@@ -20,4 +20,4 @@ class TestObject(object):
       if func.startswith('test'):
         attr = getattr(self, func)
         if hasattr(attr, '__call__'):
-          self.tests.append({'name':self.__class__.__name__+'/'+func, 'attr':attr})
+          self.tests.append({'name':self.__class__.__name__+'.'+func, 'attr':attr})
