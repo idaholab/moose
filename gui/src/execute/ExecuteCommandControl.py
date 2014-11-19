@@ -1,4 +1,4 @@
-import os, sys, traceback, glob
+import os, sys, glob
 from PySide import QtCore, QtGui
 
 from src.base import *
@@ -94,7 +94,7 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
   def _setupExecutable(self, q_object):
 
     # Utilize the user supplied executable
-    if 'executable' in self.options:
+    if 'executable' in self.options and self.options['executable'] != None:
       q_object.setText(self.options['executable'])
       return
 
@@ -105,7 +105,7 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
       return
 
     # Produce error
-    print 'Warning: no MOOSE executable located'
+    self.peacockWarning('No MOOSE executable located', screen=True, dialog=False)
 
 
   def _setupMPI(self, q_object):
@@ -143,7 +143,7 @@ class ExecuteCommandControl(QtGui.QFrame, MooseWidget):
     # Locate the executable
     executable = None
 
-   # Start with the current directory and continue until home directory is reached
+    # Start with the current directory and continue until home directory is reached
     root = os.getcwd()
     while root != os.sep:
 

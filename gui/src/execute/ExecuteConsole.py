@@ -24,7 +24,6 @@ class ExecuteConsole(QtGui.QWidget, MooseWidget):
   # Update the text in the console text edit object (public)
   # @param process The QProcess to capture lines from (see ExecuteWidget)
   def updateConsole(self, process):
-
     while process.canReadLine():
       line = process.readLine().data().rstrip('\n')
       text = re.sub(r'(.)\[(\d\d)m(.*)(.)(\[39m)', self._colorText, line)

@@ -1,3 +1,9 @@
 #!/usr/bin/python
+import sys
 
-print 'Testing'
+# Handle input arguments
+args = sys.argv[1:]
+if len(args) > 0 and args[0] == '--flag':
+  print 'Testing with flag'
+else:
+  print 'Testing'

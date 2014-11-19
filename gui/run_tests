@@ -8,8 +8,8 @@ from PySide import QtGui
 import tests
 
 ##
-# A class for running all available tests, this utilizes
-# the base class, PeacockTestInterface, for running the tests
+# A class for running all available test objects that are stored in the tests directory,
+# test objects must inherit from src.utils.TestObject.
 class PeacockTester(object):
   def __init__(self, **kwargs):
 
@@ -25,9 +25,9 @@ class PeacockTester(object):
 
     #prefix = tests.__name__ + "."
     for importer, modname, ispkg in pkgutil.iter_modules(tests.__path__, tests.__name__ + '.'):
-      #print "Found submodule %s (is a package: %s)" % (modname, ispkg)
+#      print "Found submodule %s (is a package: %s)" % (modname, ispkg)
       module = __import__(modname, fromlist="dummy")
-      #print "Imported", module
+ #     print "Imported", module
 
       for name, obj in inspect.getmembers(module):
         if inspect.isclass(obj):
@@ -48,13 +48,13 @@ class PeacockTester(object):
     failed = 0
 
     # This needs to be threaded
-    for objects in self._test_objects:
-      for test in objects.tests:
+    for obj in self._test_objects:
+      for test in obj.tests:
         num_tests += 1
         name = test['name']
         attr = test['attr']
 
-        print 'Running', name
+#        print 'Running', name
         backup = sys.stdout
         sys.stdout = StringIO()     # capture output
 
@@ -76,11 +76,13 @@ class PeacockTester(object):
         self._showTestResult(name, result, msg, out)
 
 
+      del obj
+
     # Print the summary
     print '-'*110
-    print 'Executed', str(num_tests), 'in', str(time.time() - start_time), 'seconds'
+    print 'Executed', str(num_tests), 'tests in', str(time.time() - start_time), 'seconds'
     print  colorText(str(num_tests - failed) + ' passed', 'GREEN') + ', ' \
-           + colorText(str(failed) + ' failed', 'RED')
+           + colorText(str(failed) + ' failed', 'RED') + '\n'
 
 
   ##

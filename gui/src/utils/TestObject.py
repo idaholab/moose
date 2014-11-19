@@ -1,12 +1,11 @@
 from colorText import colorText
 
 ##
-# A a class for performing testing
+# A base class for creating test objects
 #
-# Any class that inherits from this interface has a test() method that
-# calls any function that is registered using 'registerTest' method.
-# The function must output the test result (True | False) and a message
-# that will show when the test fails
+# Any method beginning with "test" will be called automatically by PeacockTester
+# object. These methods should return a tuple containing the test result (True | False) and
+# a message to print in the result was False.
 class TestObject(object):
 
   ## Constructor (public)
@@ -22,4 +21,3 @@ class TestObject(object):
         attr = getattr(self, func)
         if hasattr(attr, '__call__'):
           self.tests.append({'name':self.__class__.__name__+'/'+func, 'attr':attr})
-          print func
