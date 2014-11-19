@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-import os, importlib, argparse, inspect, pkgutil
+import sys, os, importlib, argparse, inspect, pkgutil, time
+from StringIO import StringIO
 from src.base import *
-from src.utils import TestObject
+from src.utils import TestObject, colorText
+from PySide import QtGui
 
 import tests
 
@@ -11,8 +13,15 @@ import tests
 class PeacockTester(object):
   def __init__(self, **kwargs):
 
+    # Parse tester options
+    self._options = dict()
+    self._options['verbose'] = kwargs.pop('verbose', False)
+    self._options['quiet'] = kwargs.pop('quiet', False)
+
+
     self._test_objects = []
 
+    app  = QtGui.QApplication(sys.argv)
 
     #prefix = tests.__name__ + "."
     for importer, modname, ispkg in pkgutil.iter_modules(tests.__path__, tests.__name__ + '.'):
@@ -22,18 +31,88 @@ class PeacockTester(object):
 
       for name, obj in inspect.getmembers(module):
         if inspect.isclass(obj):
-          instance = obj()
+          instance = obj(app=app)
           if isinstance(instance, TestObject):
             self._test_objects.append(instance)
 
           #print name,obj
 
-    print self._test_objects
+    #print self._test_objects
 
-  def test(self):
-    pass
+  ##
+  # Performs the testing by calling all functions
+  def execute(self):
+
+    start_time = time.time()
+    num_tests = 0
+    failed = 0
+
+    # This needs to be threaded
+    for objects in self._test_objects:
+      for test in objects.tests:
+        num_tests += 1
+        name = test['name']
+        attr = test['attr']
+
+        print 'Running', name
+        backup = sys.stdout
+        sys.stdout = StringIO()     # capture output
 
 
+        (result, msg) = attr()
+#      try:
+#        (result, msg) = attr()
+#      except:
+#        result = False
+#        msg = 'RUN ERROR'
+
+        if not result:
+          failed += 1
+
+        out = sys.stdout.getvalue() # release output
+        sys.stdout.close()  # close the stream
+        sys.stdout = backup # restore original stdout
+
+        self._showTestResult(name, result, msg, out)
+
+
+    # Print the summary
+    print '-'*110
+    print 'Executed', str(num_tests), 'in', str(time.time() - start_time), 'seconds'
+    print  colorText(str(num_tests - failed) + ' passed', 'GREEN') + ', ' \
+           + colorText(str(failed) + ' failed', 'RED')
+
+
+  ##
+  # Show the pass/fail result in typical MOOSE run_tests style
+  # @param name The name of the test
+  # @param result True/False result of the test
+  # @param msg A message to show upon failure
+  # @param stdout The stbdout string from the test execution, prints if failed
+  def _showTestResult(self, name, result, msg, *args):
+
+    # Build the status message: OK or FAIL
+    if result:
+      color = 'GREEN'
+      msg = colorText('OK', color)
+      msg_length = 2
+    else:
+      color = 'RED'
+      msg_length = len(msg) + 7
+      msg = colorText('(' + msg + ') FAIL', color)
+
+    # Produce the complete test message string
+    n = 110 - len(name) - msg_length
+    print name + '.'*n + msg
+
+    # Do not show any test output if --quiet is used
+    if self._options['quiet']:
+      return
+
+    # Print the error message, if the test fails
+    if not self._options['quiet'] and len(args) > 0 and (not result or (self._options['verbose'])):
+      for line in args[0].splitlines():
+        print colorText(name + ': ', color) + line
 
 
     #self.io.execute()
@@ -82,4 +161,4 @@ if __name__ == '__main__':
 
   # Run the tests
   tester = PeacockTester(**vars(options))
- # tester.test()
+  tester.execute()
