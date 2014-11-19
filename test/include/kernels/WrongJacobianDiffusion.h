@@ -20,14 +20,21 @@ public:
   WrongJacobianDiffusion(const std::string & name, InputParameters parameters);
 
 protected:
+  /**
+   * Compute the correct diffusion residual with an arbitrary prefactor applied
+   */
   virtual Real computeQpResidual();
+
+  /**
+   * Compute the correct diffusion on-diagonal Jacobian with an arbitrary prefactor applied
+   */
   virtual Real computeQpJacobian();
 
 private:
   /// prefactor of the Residual
   Real _rfactor;
 
-  /// prefactor of teh Jacobian
+  /// prefactor of the Jacobian
   Real _jfactor;
 };
 
