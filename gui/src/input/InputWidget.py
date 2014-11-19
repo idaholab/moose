@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os, sys, traceback
+import os, sys
 
 from PySide import QtCore, QtGui
 

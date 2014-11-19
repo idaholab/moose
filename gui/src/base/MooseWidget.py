@@ -35,7 +35,7 @@ class MooseWidget(PeacockErrorInterface, MooseWidgetInfoBase):
       self.peacockError('All MooseWidget objects must also be a QtGui.QWidget object')
 
     # Call the base class constructor
-    PeacockErrorInterface.__init__(self)
+    PeacockErrorInterface.__init__(self, **kwargs)
     MooseWidgetInfoBase.__init__(self)
 
     # Create a preferences object for storing settings

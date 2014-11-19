@@ -1,3 +1,2 @@
-from execute import *
-
-__all__ = ['execute']
+from ExecuteWidget import ExecuteWidget
+__all__ = ['ExecuteWidget']

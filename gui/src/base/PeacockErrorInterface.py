@@ -1,3 +1,4 @@
+import traceback
 from PySide import QtCore, QtGui
 
 ##
@@ -17,8 +18,12 @@ class PeacockErrorInterface(object):
     # Initialize all member variables
     self._all_error_messages = []
     self._last_error_message = None
+    self._all_warning_messages = []
+    self._last_warning_message = None
     self._error_dialog = None
     self._has_dialog = False
+    self._testing = kwargs.get('testing', False)
+    self._stack = kwargs.get('stack', False)
 
     # Create the error dialog if the object is a QWidget
     if isinstance(self, QtGui.QWidget):
@@ -44,12 +49,20 @@ class PeacockErrorInterface(object):
   #   screen
   #   <True> | False
   #   If true (the default) the error message is printed to the screen
+  #
+  #   stack
+  #   <True> | False
+  #   If true (the default) the error message is followed by a stack trace
   def peacockError(self, *args, **kwargs):
 
     # Build and store the message
     message = ' '.join(args)
     self._last_error_message = message
     self._all_error_messages.append(message)
+
+    # Do nothing if in testing mode
+    if self._testing:
+      return
 
     # Create the dialog
     if self._has_dialog and kwargs.pop('dialog', False):
@@ -59,11 +72,17 @@ class PeacockErrorInterface(object):
     if kwargs.pop('screen', True):
       print message
 
+    # Print the stack trace
+    if kwargs.pop('stack', True) or self._stack:
+      traceback.print_stack()
+
   ##
   # Produce a warning dialog
   # @param args The error message, all arguments are collected into a single
   #             error message (e.g., peacockError('This', 'is', str(True)))
   # @param kwargs Optional flags to control output
+  # @return If the 'cancel' button is used and selected by the user this
+  #         method returns False, otherwise True
   #
   # Optional Keyword Arguments:
   #   cancel
@@ -73,8 +92,24 @@ class PeacockErrorInterface(object):
   #   dialog
   #   <True> | False
   #   If true and the Object is a QWidget, an error dialog is created
+  #
+  #   screen
+  #   True | <False>
+  #   If true the error message is printed to the screen, the default is False
+  #
+  #   stack
+  #   True | <False>
+  #   If true the warning message is followed by a stack trace
   def peacockWarning(self, *args, **kwargs):
+
+    # Build and store the message
     message = ' '.join(args)
+    self._last_warning_message = message
+    self._all_warning_messages.append(message)
+
+    # Do nothing if in testing mode
+    if self._testing:
+      return True
 
     # Show a dialog box
     if self._has_dialog and kwargs.pop('dialog', True):
@@ -96,9 +131,14 @@ class PeacockErrorInterface(object):
         return True
 
     # Without a dialog, just print the message
-    else:
+    if kwargs.pop('screen', False):
       print message
+      traceback.print_stack()
       return True
+
+    # Print the stack trace
+    if kwargs.pop('stack', True) or self._stack:
+      traceback.print_stack()
 
   ##
   # Retrieve the last error message (public)
