@@ -23,14 +23,12 @@ SimpleEigenStrainMaterial::SimpleEigenStrainMaterial(const std::string & name,
 
 void SimpleEigenStrainMaterial::computeEigenStrain()
 {
-  RankTwoTensor init_eigenstrain, init_deigenstrain_dc;
-
-  init_eigenstrain.addIa(_epsilon0 * (_c[_qp] - _c0));
-  _eigenstrain[_qp] = init_eigenstrain;
+  _eigenstrain[_qp].zero();
+  _eigenstrain[_qp].addIa(_epsilon0 * (_c[_qp] - _c0));
 
   // first derivative w.r.t. c
-  init_eigenstrain_dc.addIa(_epsilon0);
-  _deigenstrain_dc[_qp] = init_deigenstrain_dc;
+  _deigenstrain_dc[_qp].zero();
+  _deigenstrain_dc[_qp].addIa(_epsilon0);
 
   // second derivative w.r.t. c (vanishes)
   _d2eigenstrain_dc2[_qp].zero();
@@ -38,8 +36,7 @@ void SimpleEigenStrainMaterial::computeEigenStrain()
 
 void SimpleEigenStrainMaterial::computeQpElasticityTensor()
 {
-  _elasticity_tensor[_qp] = _Cijkl;
-  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp] = _Cijkl;
 
   // the elasticity tensor is independent of c
   _delasticity_tensor_dc[_qp].zero();
