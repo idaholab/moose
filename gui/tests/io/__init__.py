@@ -1,3 +1,3 @@
-from CSVIOTest import CSVIOTest
+from CSVIO import CSVIO
 
-__all__ = ['CSVIOTest']
+__all__ = ['CSVIO']

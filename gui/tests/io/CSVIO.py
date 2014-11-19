@@ -2,12 +2,12 @@ import os, sys
 
 # Import Peacock IO module
 from src import io
-from src.utils import TestObject
+from src.utils import PeacockTestObject
 
 
-class CSVIOTest(TestObject):
+class CSVIO(PeacockTestObject):
   def __init__(self, **kwargs):
-    TestObject.__init__(self, **kwargs)
+    PeacockTestObject.__init__(self, **kwargs)
 
     # Set global test filename
     self.test_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'input.csv')

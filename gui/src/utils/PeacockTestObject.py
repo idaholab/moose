@@ -6,7 +6,7 @@ from colorText import colorText
 # Any method beginning with "test" will be called automatically by PeacockTester
 # object. These methods should return a tuple containing the test result (True | False) and
 # a message to print in the result was False.
-class TestObject(object):
+class PeacockTestObject(object):
 
   ## Constructor (public)
   def __init__(self, **kwargs):

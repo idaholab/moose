@@ -3,15 +3,15 @@ import os, sys, time
 from PySide import QtGui
 
 import src.execute
-from src.utils import TestObject
+from src.utils import PeacockTestObject
 
 # Create the application
 main = QtGui.QMainWindow()
 test = src.execute.ExecuteWidget(main=main, testing=True, debug=False)
 
-class ExecuteWidget(TestObject):
+class ExecuteWidget(PeacockTestObject):
   def __init__(self, **kwargs):
-    TestObject.__init__(self, **kwargs)
+    PeacockTestObject.__init__(self, **kwargs)
     self.test_app = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_app')
 
   # Clean-up the objects created for this test
@@ -52,7 +52,7 @@ class ExecuteWidget(TestObject):
 
   # Tests the kill method via the callback
   def testKill(self):
-    # Setup the executeable with the --kill flag
+    # Setup the executable with the --kill flag
     test.object('Arguments').setText('--kill')
     test.object('Executable').setText(self.test_app)
 
