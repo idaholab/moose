@@ -1,3 +1,6 @@
+#ifndef WRONGJACOBIANDIFFUSION_H
+#define WRONGJACOBIANDIFFUSION_H
+
 #include "Kernel.h"
 #include "Material.h"
 
@@ -7,6 +10,10 @@ class WrongJacobianDiffusion;
 template<>
 InputParameters validParams<WrongJacobianDiffusion>();
 
+/**
+ * Kernel that allows to construct wrong jacobians, by multiplying a diffusion
+ * kernel jacobian and/or residual with an arbitrary prefactor
+ */
 class WrongJacobianDiffusion : public Kernel
 {
 public:
@@ -17,6 +24,11 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
+  /// prefactor of the Residual
   Real _rfactor;
+
+  /// prefactor of teh Jacobian
   Real _jfactor;
 };
+
+#endif //WRONGJACOBIANDIFFUSION_H
