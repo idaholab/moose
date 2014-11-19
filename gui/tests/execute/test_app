@@ -1,0 +1,12 @@
+#!/usr/bin/python
+import sys, time
+
+# Handle input arguments
+args = sys.argv[1:]
+if len(args) > 0 and args[0] == '--flag':
+  print 'Testing with flag'
+elif len(args) > 0 and args[0] == '--kill':
+  time.sleep(2)
+  print 'Testing Kill'
+else:
+  print 'Testing'

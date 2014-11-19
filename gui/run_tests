@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+import argparse
+
+from src.utils import PeacockTester
+
+# Main
+if __name__ == '__main__':
+
+  # Command-line arguments
+  parser = argparse.ArgumentParser(description='run_tests: A function for executing GUI tests.')
+  parser.add_argument('--verbose', '-v', action='store_true', help='Display all test output')
+  parser.add_argument('--quiet', '-q', action='store_true', help='Disable display of all test output')
+  parser.add_argument('--search', help='Limit testing to tests that contain the supplied search text')
+  options = parser.parse_args()
+
+  # Run the tests
+  tester = PeacockTester(**vars(options))
+  tester.execute()

@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+import os, sys, argparse
+
+from src.base import PeacockApp
+
+if __name__ == '__main__':
+
+  # Command-line arguments
+  parser = argparse.ArgumentParser(description="MOOSE GUI Application")
+
+  # Set global parameter(s)
+  parser.add_argument('-d', '--debug', '--dbg', action='store_true', help='Run Peacock in debug mode')
+  parser.add_argument('-e', '--executable', type=str, help='The program to execute')
+
+  # Extract the command line options
+  parser.parse_args('-d'.split())
+  options = vars(parser.parse_args())
+
+  # Create the GUI
+  PeacockApp(**options)
