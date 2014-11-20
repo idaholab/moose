@@ -51,7 +51,7 @@ InputParameters validParams<AddVariableAction>()
 
   // Advanced input options
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
-  params.addParamNamesToGroup("scaling", "Advanced");
+  params.addParamNamesToGroup("scaling eigen", "Advanced");
 
   return params;
 }
