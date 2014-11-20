@@ -58,6 +58,7 @@
 #include "WrongJacobianDiffusion.h"
 
 #include "CoupledAux.h"
+#include "CoupledScalarAux.h"
 #include "CoupledGradAux.h"
 #include "PolyConstantAux.h"
 #include "MMSConstantAux.h"
@@ -283,6 +284,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Aux kernels
   registerAux(CoupledAux);
+  registerAux(CoupledScalarAux);
   registerAux(CoupledGradAux);
   registerAux(PolyConstantAux);
   registerAux(MMSConstantAux);
