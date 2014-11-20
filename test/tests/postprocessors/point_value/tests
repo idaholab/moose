@@ -4,4 +4,10 @@
     input = 'point_value.i'
     exodiff = 'point_value_out.e'
   [../]
+
+  [./error]
+    type = 'RunException'
+    input = 'point_value_error.i'
+    expect_err = 'No element located at'
+  [../]
 []
