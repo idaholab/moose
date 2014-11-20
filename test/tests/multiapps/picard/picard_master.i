@@ -48,6 +48,12 @@
   [../]
 []
 
+[Postprocessors]
+  [./picard_its]
+    type = NumPicardIterations
+  [../]
+[]
+
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
