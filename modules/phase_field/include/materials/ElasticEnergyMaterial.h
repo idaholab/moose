@@ -1,6 +1,9 @@
 #ifndef ELASTICENERGYMATERIAL_H
 #define ELASTICENERGYMATERIAL_H
 
+#include "DerivativeBaseMaterial.h"
+#include "RankTwoTensor.h"
+
 // Forward Declaration
 class ElasticEnergyMaterial;
 
@@ -16,6 +19,8 @@ public:
   ElasticEnergyMaterial(const std::string & name, InputParameters parameters);
 
 protected:
+  std::string _strain_name;
+  MaterialProperty<RankTwoTensor> & _strain;
 };
 
 #endif //ELASTICENERGYMATERIAL_H

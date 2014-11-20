@@ -13,6 +13,6 @@ ElasticEnergyMaterial::ElasticEnergyMaterial(const std::string & name,
                                              InputParameters parameters) :
     DerivativeBaseMaterial(name, parameters),
     _strain_name(getParam<std::string>("strain")),
-    _strain(getMaterialProperty<>(_strain_name))
+    _strain(getMaterialProperty<RankTwoTensor>(_strain_name))
 {
 }
