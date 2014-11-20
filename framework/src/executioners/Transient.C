@@ -355,7 +355,7 @@ Transient::solveStep(Real input_dt)
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   if (lastSolveConverged())
   {
-    _console << " Solve Converged!" << std::endl;
+    _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
 
     if (_picard_max_its <= 1)
       _time_stepper->acceptStep();
@@ -378,7 +378,7 @@ Transient::solveStep(Real input_dt)
   }
   else
   {
-    _console << " Solve Did NOT Converge!" << std::endl;
+    _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
 
     // Perform the output of the current, failed time step (this only occurs if desired)
     _output_warehouse.outputFailedStep();
