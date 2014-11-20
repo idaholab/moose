@@ -226,3 +226,27 @@ GluedContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 
   return 0;
 }
+
+Real
+GluedContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned int /*jvar*/)
+{
+  Real retVal = 0;
+
+  switch (type)
+  {
+    case Moose::SlaveSlave:
+      break;
+    case Moose::SlaveMaster:
+      break;
+    case Moose::MasterSlave:
+    {
+      double slave_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
+      retVal =  slave_jac*_test_master[_i][_qp];
+      break;
+    }
+    case Moose::MasterMaster:
+    break;
+  }
+
+  return retVal;
+}
