@@ -55,6 +55,7 @@
 #include "PMassEigenKernel.h"
 #include "CoupledEigenKernel.h"
 #include "ConsoleMessageKernel.h"
+#include "WrongJacobianDiffusion.h"
 
 #include "CoupledAux.h"
 #include "CoupledGradAux.h"
@@ -278,6 +279,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(PMassEigenKernel);
   registerKernel(CoupledEigenKernel);
   registerKernel(ConsoleMessageKernel);
+  registerKernel(WrongJacobianDiffusion);
 
   // Aux kernels
   registerAux(CoupledAux);

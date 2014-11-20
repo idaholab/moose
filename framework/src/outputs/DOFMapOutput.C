@@ -197,17 +197,21 @@ DOFMapOutput::outputSystemInformation()
         oss << ", ";
       first = false;
 
-      oss << "{\"var\": \"" << vg_description.name(vn) << "\", \"subdomains\": [";
+      oss << "{\"name\": \"" << vg_description.name(vn) << "\", \"subdomains\": [";
       for (std::set<SubdomainID>::const_iterator sd = subdomains.begin(); sd != subdomains.end(); ++sd)
       {
         oss << (sd != subdomains.begin() ? ", " : "") << "{\"id\": " << *sd << ", \"kernels\": [";
 
         // build a list of all kernels in the current subdomain
         nl.updateActiveKernels(*sd, 0);
-        const std::vector<KernelBase *> & active_kernels = kernels.activeVar(var);
-        for (unsigned i = 0; i<active_kernels.size(); ++i)
-          oss << (i>0 ? ", " : "") << "{\"name\": \""<< active_kernels[i]->name() << "\", \"type\": \"" << demangle(typeid(*active_kernels[i]).name()) << "\"}";
 
+        // if this variable has active kernels output them
+        if (kernels.hasActiveKernels(var))
+        {
+          const std::vector<KernelBase *> & active_kernels = kernels.activeVar(var);
+          for (unsigned i = 0; i<active_kernels.size(); ++i)
+            oss << (i>0 ? ", " : "") << "{\"name\": \""<< active_kernels[i]->name() << "\", \"type\": \"" << demangle(typeid(*active_kernels[i]).name()) << "\"}";
+        }
         oss << "], \"dofs\": [";
 
         // get the list of unique DOFs for this variable
