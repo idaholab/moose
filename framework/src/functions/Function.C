@@ -31,7 +31,8 @@ Function::Function(const std::string & name, InputParameters parameters) :
     PostprocessorInterface(parameters),
     UserObjectInterface(parameters),
     Restartable(name, parameters, "Functions"),
-    MeshChangedInterface(parameters)
+    MeshChangedInterface(parameters),
+    ScalarCoupleable(parameters)
 {
 }
 

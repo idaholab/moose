@@ -22,6 +22,7 @@
 #include "UserObjectInterface.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "ScalarCoupleable.h"
 
 // libMesh
 #include "libmesh/vector_value.h"
@@ -43,7 +44,8 @@ class Function :
   public PostprocessorInterface,
   public UserObjectInterface,
   public Restartable,
-  public MeshChangedInterface
+  public MeshChangedInterface,
+  public ScalarCoupleable
 {
 public:
   /**
