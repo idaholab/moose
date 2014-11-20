@@ -1,5 +1,5 @@
 import os, re, urllib, urlparse
-from src.slidesets import SlideSet
+from ..slidesets import SlideSet
 from FactorySystem import InputParameters
 
 ##
@@ -139,4 +139,4 @@ class DjangoWikiSet(SlideSet):
         output.append(line)
 
     # Done
-    return ' '.join(output)
+    return ''.join(output)

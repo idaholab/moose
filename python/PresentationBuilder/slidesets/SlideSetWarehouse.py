@@ -15,13 +15,16 @@ class SlideSetWarehouse(Warehouse):
   ##
   # Performs the slide creation steps
   def execute(self):
+
+    print 'EXECUTE:'
+
     for obj in self.objects:
       name = obj.name()
-      print 'Setup:', name
+      print '  SETUP:', name
       obj.setup()
 
-      print 'Read:', name
+      print '   READ:', name
       raw = obj.read()
 
-      print 'Build:', name
+      print '  BUILD:', name
       obj.build(raw)

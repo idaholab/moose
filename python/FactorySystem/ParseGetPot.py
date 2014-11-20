@@ -30,6 +30,7 @@ class GPNode:
     for child in self.children_list:
       self.children[child].Print(prefix + self.name + '/')
 
+
   ##
   # Perform a fuzzy search for a node name
   # @return The node object if any part of a node key is in the supplied name
@@ -54,6 +55,34 @@ class GPNode:
         return self.name
     else:
       return self.parent.fullName(no_root) + '/' + self.name
+
+  def write(self, level = 0):
+
+    # List to be returned
+    output = []
+
+    # Write the block headings
+    if level == 0:
+       output.append('[' + self.name + ']')
+    elif level > 0:
+      output.append(' '*2*level + '[./' + self.name + ']')
+
+    # Write the parameters
+    for param in self.params_list:
+      output.append(' '*2*(level + 1) + param + " = '" + str(self.params[param] + "'"))
+
+    # Write the children
+    for child in self.children_list:
+      output += self.children[child].write(level + 1)
+
+    # Write the block closing
+    if level == 0:
+      output.append('[]\n')
+    elif level > 0:
+      output.append(' '*2*level + '[../]')
+
+    # Return the data
+    return output
 
 
 class ParseException(Exception):

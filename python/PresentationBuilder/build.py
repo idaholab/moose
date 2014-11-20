@@ -1,8 +1,16 @@
 #!/usr/bin/python
+import os, sys
 import argparse
 
+# Should just add ~/projects/moose/python to PYTHONPATH
+MOOSE_DIR = os.path.abspath(os.path.join('..','..'))
+if os.environ.has_key("MOOSE_DIR"):
+  MOOSE_DIR = os.environ['MOOSE_DIR']
+sys.path.append(os.path.join(MOOSE_DIR, 'python'))
+from FactorySystem import ParseGetPot
+
 # Import the presentation builder source code
-import src
+from PresentationBuilder import base
 
 if __name__ == '__main__':
 
@@ -12,5 +20,5 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   # Build the presentation
-  builder = src.base.PresentationBuilder(args.input)
+  builder = base.PresentationBuilder(args.input)
   builder.write()

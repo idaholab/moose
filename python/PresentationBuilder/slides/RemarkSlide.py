@@ -1,12 +1,13 @@
 # Python packages
 import os, re, inspect
 from FactorySystem import InputParameters, MooseObject
-from src.images import *
+from ..images import *
 ##
 # Base class for individual Remark markdown slide content
 class RemarkSlide(MooseObject):
 
-  _title_re = r'(?<![^\s.])(#{1,})(.*?)\n'
+  # Regex for locating titles
+  _title_re = r'(?<![^\s\n.])(#{1,})(.*?)\n'
 
   @staticmethod
   def validParams():
@@ -15,6 +16,9 @@ class RemarkSlide(MooseObject):
     params.addParam('background-image', 'The background image file name')
     params.addParam('comments', 'Additional slide comments')
     params.addParam('show_in_contents', True, 'Toggle if the slide appears in the table-of-contents')
+    params.addParam('prefix', 'Raw markdown to insert before slide content')
+    params.addParam('suffix', 'Raw markdown to insert after slide content')
+    params.addParam('auto_title', True, 'Enable/disable automatic addition of (cont.) for slides without a title.')
 
     params.addParamsToGroup('properties', ['class', 'background-image'])
 
@@ -87,7 +91,7 @@ class RemarkSlide(MooseObject):
     self._raw_markdown = self.getParam('markdown')
 
     # Set the location of PresentationBuilder directory
-    self._source_dir = os.path.abspath(os.path.join(os.path.split(inspect.getfile(self.__class__))[0], '..', '..'))
+    self._source_dir = os.path.abspath(os.path.join(os.path.split(inspect.getfile(self.__class__))[0], '..'))
 
     # Initialize the image information storage
     self._images = dict()
@@ -97,14 +101,11 @@ class RemarkSlide(MooseObject):
     if self.isParamValid('comments'):
       self.comments.append(self.getParam('comments'))
 
-    # Store the previous slide
-    if self.parent._slides:
-      self._previous = self.parent._slides.items()[-1]
-
     # Extract title
     match = re.search(self._title_re, self._raw_markdown)
     if match:
       self._title = (match.group(1) + ' ' + match.group(2)).replace('\r', '')
+
 
   ##
   # Build table of contents list
@@ -115,7 +116,7 @@ class RemarkSlide(MooseObject):
       return []
 
     # Search the slide for headings
-    pattern = re.compile(self._title_re)
+    pattern = re.compile(r'^\s*(#{1,})(.*?)\n')
 
     # Build a tuple containing the table-of-contents information for this slide
     contents = []
@@ -131,7 +132,7 @@ class RemarkSlide(MooseObject):
   def parse(self, markdown):
 
     # Remove existing comments, they will be combined with other comments added via input file
-    match = re.search(r'\?\?\?\s*\n(.*)', markdown)
+    match = re.search(r'\?\?\?\s*\n(.*)', markdown, re.S)
     if match:
       self.comments.append(match.group(1))
       markdown = markdown.replace(match.group(0), '')
@@ -141,6 +142,14 @@ class RemarkSlide(MooseObject):
     if match:
       # Remove the name, it is added in the markdown() method when retrieving slide
       markdown = markdown.replace(match.group(1), '')
+
+    # Search the raw markdown for an existing class
+    for key in self._pars.groupKeys('properties'):
+      match = re.search('(' + key + ':\s*(.*?)\s*\n)', markdown)
+      if match:
+        self._pars[key] = match.group(1)
+        markdown = markdown.replace(match.group(1), '')
+
 
     # Return the parsed markdown
     return markdown
@@ -160,38 +169,54 @@ class RemarkSlide(MooseObject):
     if self._root:
       images_node = self._root.getNode(self.parent.name()).getNode('Images')
 
+    # Do nothing if the ./Images node does not exist
+    if not images_node:
+      return
+
+    # Get the common parameters from the ./Images block
+    parent_params = self._factory.validParams(self._image_type)
+    self._parser.extractParams('', parent_params, images_node)
+
     # Build the image objects
-    pattern = re.compile(image_class.re)
-    for m in pattern.finditer(markdown):
+    match_list = image_class.match(markdown)
+    for match in match_list:
+      for m in match:
 
-      # Get the default parameters from the image being created
-      params = self._factory.validParams(self._image_type)
+        # Get the default parameters from the image being created
+        params = self._factory.validParams(self._image_type)
 
-      # Add the parent parameter
-      params.addPrivateParam('_parent', self)
-      params.addPrivateParam('_match', m)
+        # Apply the common parameters
+        params.applyParams(parent_params)
 
-      # Extract the object name
-      name = image_class.extractName(m)
+        # Add the parent parameter
+        params.addPrivateParam('_parent', self)
+        params.addPrivateParam('_match', m)
 
-      # Do nothing if the image was already created
-      # I am not sure why the images are matched more than once, but they are...
-      if name in self._images:
-        continue
+        # Extract the object name
+        name = image_class.extractName(m)
 
-      # Indicate that the image is being created
-      print '    creating image:', name
+        # Do nothing if the image was already created
+        # I am not sure why the images are matched more than once, but they are...
+        if name in self._images:
+          continue
 
-      # Apply the [./Slides] block parameters
-      if images_node:
-        node = images_node.getNode(name)
-        if node:
-          self._parser.extractParams('', params, node)
-          print '      setting image parameters from input file'
+        # Indicate that the image is being created
+        print ' '*6 + 'IMAGE:', name
 
-      # Create and store the Image object
-      img = self._factory.create(self._image_type, name, params)
-      self._images[name] = img
+        # Apply the [./Slides] block parameters
+        if images_node:
+          node = images_node.getNode(name)
+          if node:
+
+            # Apply the parameters from the node
+            self._parser.extractParams('', params, node)
+
+            # Indicate that the parameters are being set for the image
+            print ' '*8 + 'Appling image settings from input file'
+
+        # Create and store the Image object
+        img = self._factory.create(self._image_type, name, params)
+        self._images[name] = img
 
 
   ##
@@ -202,6 +227,7 @@ class RemarkSlide(MooseObject):
     for tag, image in self._images.iteritems():
       self.markdown = re.sub(image.sub(), image.html(), self.markdown)
 
+
   ##
   # Compute the number of slides
   #
@@ -210,6 +236,7 @@ class RemarkSlide(MooseObject):
   # needed for generating the table-of-contents
   def count(self):
     return 1 + len(re.findall('\n--', self.markdown))
+
 
   ##
   # Return the RemarkJS ready markdown for this slide
@@ -242,20 +269,35 @@ class RemarkSlide(MooseObject):
         else:
           output += key + ': ' + value + '\n'
 
+    # Insert prefix markdown
+    if self.isParamValid('prefix'):
+      output += self.getParam('prefix')
+
     # Insert continued title
-    if self._title == None:
-      if self._previous and self._previous[1]._title != None:
-        self._title = self._previous[1]._title
+    if self._title == None and self.getParam('auto_title'):
+      idx = self.parent._slide_order.index(self.name())
+      if idx > 0:
+        previous_name = self.parent._slide_order[idx-1]
+        previous = self.parent._slides[previous_name]
+      else:
+        previous = None
+
+      if previous and previous._title != None:
+        self._title = previous._title
         output += self._title + ' (cont.)'
 
     # Inject the the raw markdown
     output += '\n' + self.markdown
 
+    # Insert suffix markdown
+    if self.isParamValid('suffix'):
+      output += self.getParam('suffix')
+
     # Add the Remark comments
     if self.comments:
       output += '\n???\n'
       for comment in self.comments:
-        output += comment
+        output += comment + '\n'
 
     # Return the complete markdown
     return output + '\n'
