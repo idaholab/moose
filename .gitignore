@@ -74,6 +74,7 @@ temp_print_trace.*
 *.html
 *.xyz
 *Revision.h
+*.json
 
 # Allow .e files in gold directories (7 levels)
 !/gold/*.e
