@@ -56,7 +56,10 @@ PointValue::execute()
 
   // First find the element the hit lands in
   const Elem * elem = (*pl)(_point);
-  mooseAssert(elem, "No element located at the specified point");
+
+  if (!elem)
+    mooseError("No element located at " << _point <<" in PointValue Postprocessor named: " << _name);
+
   _root_id = elem->processor_id();
 
   // Compute the value at the point

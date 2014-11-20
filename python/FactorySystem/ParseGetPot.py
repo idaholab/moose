@@ -30,6 +30,7 @@ class GPNode:
     for child in self.children_list:
       self.children[child].Print(prefix + self.name + '/')
 
+
   ##
   # Perform a fuzzy search for a node name
   # @return The node object if any part of a node key is in the supplied name
@@ -54,6 +55,37 @@ class GPNode:
         return self.name
     else:
       return self.parent.fullName(no_root) + '/' + self.name
+
+  ##
+  # Build a string suitable for writing to a raw input file
+  # @param level The indentation level to apply to the string
+  def createString(self, level = 0):
+
+    # String to be returned
+    output = ''
+
+    # Write the block headings
+    if level == 0:
+       output += '[' + self.name + ']\n'
+    elif level > 0:
+      output += ' '*2*level + '[./' + self.name + ']\n'
+
+    # Write the parameters
+    for param in self.params_list:
+      output += ' '*2*(level + 1) + param + " = '" + str(self.params[param]) + "'\n"
+
+    # Write the children
+    for child in self.children_list:
+      output += self.children[child].write(level + 1) + '\n'
+
+    # Write the block closing
+    if level == 0:
+      output += '[]\n'
+    elif level > 0:
+      output += ' '*2*level + '[../]'
+
+    # Return the data
+    return output
 
 
 class ParseException(Exception):

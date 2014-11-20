@@ -1,18 +1,15 @@
 import re, urllib
 
-from src.images import ImageBase
+from ..images import ImageBase
 
 
 ##
 # Image class for DjangoWikiSlide class
 class DjangoWikiImage(ImageBase):
 
-  re = r'\s*\[image:([0-9]*)(.*?)\]\s*\n\s{4,}(.*?)\n'
-
   @staticmethod
   def validParams():
     params = ImageBase.validParams()
-    params['download'] = True # by default download the image
     return params
 
   @staticmethod
@@ -33,7 +30,8 @@ class DjangoWikiImage(ImageBase):
 
     # Store the caption, if it is not provided in the parameters
     if not self.isParamValid('caption'):
-      self._pars['caption'] = self.match.group(3).replace('\r', '')
+      if len(self.match.groups()) > 2:
+        self._pars['caption'] = self.match.group(3).replace('\r', '')
 
     # Grab the image alignment if it is not provided
     if not self.isParamValid('align'):
@@ -49,6 +47,29 @@ class DjangoWikiImage(ImageBase):
       self._pars['url'] = url
 
   ##
+  # Performs the regex matching for Django images
+  @staticmethod
+  def match(markdown):
+
+    # List of match iterators to return
+    m = []
+
+    # Caption
+    pattern = re.compile(r'\s*\[image:([0-9]*)(.*)\]\s*\n\s{4,}(.*?)\n')
+    m.append(pattern.finditer(markdown))
+
+    # No caption
+    pattern = re.compile(r'\s*\[image:([0-9]*)(.*)\]\s*\n')
+    m.append(pattern.finditer(markdown))
+
+    # Return the list
+    return m
+
+  ##
   # Substitution regex
   def sub(self):
-    return r'\[image:' + str(self._id) + '(.*?)\]\s*\n\s{4,}(.*?)\n'
+
+    if self.isParamValid('caption'):
+      return r'\[image:' + str(self._id) + '(.*?)\]\s*\n\s{4,}(.*?)\n'
+    else:
+      return r'\[image:' + str(self._id) + '(.*?)\]\s*\n'

@@ -2,14 +2,14 @@
   [./cover]
     type = CoverSet
     title = '**PresentationBuilder**<br><br> A tool for generating slides from MOOSE wiki content'
-    background-image = 'inl_dark_title.png'
-    class = 'middle, cover'
+    background-image = 'inl_white_slide.png'
+    contents_title = 'Contents'
     contents = true
 
     [./Slides]
-      [./cover-contents]
-        background-image = 'inl_white_slide.png'
-        class = 'left, top'
+      [./cover-title]
+         background-image = 'inl_dark_title.png'
+         class = 'middle, cover'
       [../]
     [../]
   [../]

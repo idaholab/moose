@@ -1,10 +1,10 @@
 # Load python packages
-import re, sys
+import re, sys, math
 from collections import OrderedDict
 
 # Load Moose packages
 from FactorySystem import MooseObject
-from src.slides import *
+from ..slides import *
 
 ##
 # Base class for markdown slide generation
@@ -19,8 +19,12 @@ class SlideSet(MooseObject):
     params.addParam('title', 'The title of the slide set, if this exists a title slide will be injected')
     params.addParam('slides', 'A list of slide ids to output, if blank all slides are output')
     params.addParam('contents', 'Include table of contents slide')
+    params.addParam('contents_title', 'The table-of-contents heading for this slide set')
     params.addParam('contents_level', 1, 'The heading level to include in the contents')
+    params.addParam('contents_items_per_slide', 12, 'The number of contents items to include on a page')
     params.addParam('show_in_contents', True, 'Toggle if the slide set content appears in the table-of-contents')
+
+    params.addParam('style', 'The CSS style sheet to utilize for this slide set')
 
     # Create the common parameters from RemarkSlide 'properties' group
     slide_params = RemarkSlide.validParams()
@@ -52,13 +56,14 @@ class SlideSet(MooseObject):
     self._slide_type = kwargs.pop('slide_type', 'RemarkSlide')
 
     # Initialize storage for the generate slides, use an ordered dict to maintain slide ordering
-    self._slides = OrderedDict()
+    self._slides = dict()
+    self._slide_order = []
 
     # Count the number of slides, used for assigning default name
     self._count = 0
 
     # Print a message
-    print 'Created:', name
+    print '  CREATED:', name
 
 
   ##
@@ -73,12 +78,9 @@ class SlideSet(MooseObject):
 
     # Apply title slide
     if self.isParamValid('title'):
-      self._createSlide('# ' + self.getParam('title') + '\n', show_in_contents=False, title=True,
+      slide = self._createSlide('# ' + self.getParam('title') + '\n', show_in_contents=False, title=True,
                        name=self.name() + '-title')
 
-    # Add table-of-contents slide
-    if self.isParamValid('contents'):
-      self._createSlide('# Contents\n', name = self.name() + '-contents', show_in_contents=False)
 
 
   ##
@@ -110,6 +112,7 @@ class SlideSet(MooseObject):
   #  the slide number. Regardless of the default name, the
   #  slide name will ALWAYS be changed to use the heading
   #
+  #  index
   def _createSlide(self, raw, **kwargs):
 
     # Get the class from the name of the slide
@@ -124,10 +127,11 @@ class SlideSet(MooseObject):
       name = self.name() + '-' + str(self._count)
 
     # Indicate that the slide is being created
-    print '  creating slide:', name
+    print '    SLIDE:', name
 
     # Get the default input parameters from the slide being created
     params = self._factory.validParams(self._slide_type)
+    params.applyParams(self._pars)
 
     # Apply the common properties from this class
     for key in params.groupKeys('properties'):
@@ -140,7 +144,7 @@ class SlideSet(MooseObject):
       if node:
         node = node.getNode(name)
         if node:
-          print '    setting slide parameters from input file'
+          print ' '*6 + 'Apply settings from input file'
           self._parser.extractParams('', params, node)
 
     # Add the parent and markdown parameters
@@ -154,12 +158,59 @@ class SlideSet(MooseObject):
     # Build and store the slide
     slide = self._factory.create(self._slide_type, name, params)
     self._slides[name] = slide
+
+    idx = kwargs.pop('index', None)
+    if idx != None:
+      self._slide_order.insert(idx, name)
+    else:
+      self._slide_order.append(name)
     self._count += 1
 
     # Call the parse method and populate the markdown
     slide._createImages(raw)
     slide.markdown = slide.parse(raw)
     slide._insertImages()
+
+
+
+  ##
+  # Initialize contents
+  # This creates and inserts the correct number of contents slides
+  def initContents(self):
+
+    # Do nothing if the 'contents' flag is not set in the input file
+    if not self.isParamValid('contents'):
+      return
+
+    # Extract the contents
+    contents = []
+    for name in self._slide_order:
+      contents += self._slides[name].contents()
+
+    # Determine the number of contents slides needed
+    max_per_slide = float(self.getParam('contents_items_per_slide'))
+    n = int(math.ceil(len(contents) / max_per_slide))
+
+    # Determine the table of contents header
+    if self.isParamValid('contents_title'):
+      contents_title = '# ' + self.getParam('contents_title') + '\n'
+    elif self.isParamValid('title'):
+      contents_title = '# ' + self.getParam('title') + ' Contents\n'
+    else:
+      contents_title = '# Contents\n'
+
+    # Locate the slide insert location
+    if self.name() + '-title' in self._slides:
+      idx = 1
+    else:
+      idx = 0
+
+    # Add the content(s) slides
+    for i in range(n):
+      if i > 0:
+        contents_title = ''
+      self._createSlide(contents_title, name = self.name() + '-contents-' + str(i), show_in_contents=False, index=idx)
+      idx += 1
 
 
   ##
@@ -170,18 +221,17 @@ class SlideSet(MooseObject):
     if not self.isParamValid('contents'):
       return
 
-    lvl = int(self.getParam('contents_level'))
-
-    # Extract the contents
+    # Update the contents object
     contents = []
-    for slide in self._slides.itervalues():
-      contents += slide.contents()
-
-    # Get the slide object that contains the contents slide
-    slide = self._slides[self.name() + '-contents']
+    for name in self._slide_order:
+      contents += self._slides[name].contents()
 
     # Build the table-of-contents entries
-    output = ''
+    max_per_slide = int(self.getParam('contents_items_per_slide'))
+    lvl = int(self.getParam('contents_level'))
+    output = ['']
+    count = 0
+    page = 0
     for item in contents:
       if item[2] <= lvl:
         title = item[0]         # the heading content
@@ -189,22 +239,28 @@ class SlideSet(MooseObject):
         indent = 25*(item[2]-1) # heading level indenting
         idx = str(item[3])      # slide index
 
-        if slide.isParamValid('line-height'):
-          height = slide.getParam('line-height')
-        else:
-          height = '15px'
+        #if slide.isParamValid('line-height'):
+        #  height = slide.getParam('line-height')
+        #else:
+        height = '15px'
 
         # Build a link to the slide, by name
         link = '<a href="#' + name + '">'
 
         # Create the contents entry
-        output += '<p style="line-height:' + height + ';text-align:left;text-indent:' + str(indent) + 'px;">' + link + title + '</a>'
-        output += '<span style="float:right;">' + link + idx + '</a>'
-        output += '</span></p>\n'
+        output[page] += '<p style="line-height:' + height + ';text-align:left;text-indent:' + str(indent) + 'px;">' + link + title + '</a>'
+        output[page] += '<span style="float:right;">' + link + idx + '</a>'
+        output[page] += '</span></p>\n'
 
-    # Populate the markdown for the contents slide
-    slide.markdown += output
+        count += 1
+        if (count > max_per_slide):
+          count = 0
+          page += 1
+          output.append('')
 
+    for i in range(len(output)):
+      contents_name = self.name() + '-contents-' + str(i)
+      self._slides[contents_name].markdown += output[i]
 
   ##
   # Return the complete markdown for this slide set
@@ -212,8 +268,8 @@ class SlideSet(MooseObject):
 
     # Create a list of all the slide markdown
     output = []
-    for value in self._slides.itervalues():
-      output.append(value.getMarkdown())
+    for name in self._slide_order:
+      output.append(self._slides[name].getMarkdown())
 
     # Join the list with slide breaks
     return '\n---\n'.join(output)

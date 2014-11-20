@@ -225,10 +225,12 @@ template<>
 void
 MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & property_name, Material * material)
 {
+  char suffix[3] = {'x','y','z'};
+
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     std::ostringstream oss;
-    oss << property_name << "_" << i;
+    oss << property_name << "_" << suffix[i];
 
     MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(createAction("MaterialRealVectorValueAux", property_name, oss.str(), material));
     action->getObjectParams().set<unsigned int>("component") = i;
