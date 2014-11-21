@@ -229,10 +229,10 @@ AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
   {
     computeNodalVars(type);
     computeElementalVars(type);
-
-    if (_need_serialized_solution)
-      serializeSolution();
   }
+
+  if (_need_serialized_solution)
+    serializeSolution();
 
   // can compute time derivatives _after_ the current values were updated
   // also, at the very beginning, avoid division by dt which might be zero.
