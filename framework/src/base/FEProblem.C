@@ -95,6 +95,7 @@ InputParameters validParams<FEProblem>()
   params.addParam<unsigned int>("dimNearNullSpace", 0, "The dimension of the near nullspace");
   params.addParam<bool>("solve", true, "Whether or not to actually solve the Nonlinear system.  This is handy in the case that all you want to do is execute AuxKernels, Transfers, etc. without actually solving anything");
   params.addParam<bool>("use_nonlinear", true, "Determines whether to use a Nonlinear vs a Eigenvalue system (Automatically determined based on executioner)");
+  params.addParam<bool>("error_on_jacobian_nonzero_reallocation", false, "This causes PETSc to error if it had to reallocate memory in the Jacobian matrix due to not having enough nonzeros");
   return params;
 }
 
@@ -145,7 +146,8 @@ FEProblem::FEProblem(const std::string & name, InputParameters parameters) :
     _kernel_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
-    _use_legacy_uo_initialization(_app.legacyUoInitializationDefault())
+    _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
+    _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation"))
 {
 
 #ifdef LIBMESH_HAVE_PETSC
