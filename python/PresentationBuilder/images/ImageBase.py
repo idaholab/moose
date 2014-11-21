@@ -17,8 +17,9 @@ class ImageBase(MooseObject):
     params.addParam('align', 'The image horizontal alignment')
     params.addParam('width', 'The image width')
     params.addParam('height', 'The image height')
+    params.addParam('style', 'The img style property')
     params.addParam('vertical-align', 'The vertical alignment of the image')
-    params.addParamsToGroup('html', ['align', 'width', 'height', 'vertical-align'])
+    params.addParamsToGroup('html', ['align', 'width', 'height', 'vertical-align', 'style'])
 
     return params
 
@@ -74,7 +75,7 @@ class ImageBase(MooseObject):
 
 
     # Create the html <img> block
-    img = '<figure>\n'
+    img = '<figure style="float:left">\n'
     img += '  <a href="' + url + '">\n'
     img += '    <img src="' + img_name + '"'
 

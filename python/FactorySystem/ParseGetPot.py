@@ -76,7 +76,7 @@ class GPNode:
 
     # Write the children
     for child in self.children_list:
-      output += self.children[child].write(level + 1) + '\n'
+      output += self.children[child].createString(level + 1) + '\n'
 
     # Write the block closing
     if level == 0:

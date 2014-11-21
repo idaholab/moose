@@ -172,6 +172,14 @@ class SlideSet(MooseObject):
     slide._insertImages()
 
 
+  ##
+  # A helper method for extracting the contents entries from slides
+  def _extractContents(self):
+    contents = []
+    for name in self._slide_order:
+      contents += self._slides[name].contents()
+    return contents
+
 
   ##
   # Initialize contents
@@ -183,9 +191,7 @@ class SlideSet(MooseObject):
       return
 
     # Extract the contents
-    contents = []
-    for name in self._slide_order:
-      contents += self._slides[name].contents()
+    contents = self._extractContents()
 
     # Determine the number of contents slides needed
     max_per_slide = float(self.getParam('contents_items_per_slide'))
@@ -222,9 +228,7 @@ class SlideSet(MooseObject):
       return
 
     # Update the contents object
-    contents = []
-    for name in self._slide_order:
-      contents += self._slides[name].contents()
+    contents = self._extractContents()
 
     # Build the table-of-contents entries
     max_per_slide = int(self.getParam('contents_items_per_slide'))
