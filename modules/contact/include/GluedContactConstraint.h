@@ -47,6 +47,14 @@ public:
 
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 
+  /**
+   * Compute off-diagonal Jacobian entries
+   * @param type The type of coupling
+   * @param jvar The index of the coupled variable
+   */
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                        unsigned int jvar);
+
   bool shouldApply();
 protected:
   const unsigned int _component;
