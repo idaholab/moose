@@ -82,6 +82,11 @@
   [../]
 []
 
+[Problem]
+  type = FEProblem
+  error_on_jacobian_nonzero_reallocation = false
+[]
+
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
