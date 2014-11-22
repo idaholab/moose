@@ -1,5 +1,5 @@
-#ifndef TENSORMECHANICSPLASTICTENSILEMULTI
-#define TENSORMECHANICSPLASTICTENSILEMUTLI
+#ifndef TENSORMECHANICSPLASTICTENSILEMULTI_H
+#define TENSORMECHANICSPLASTICTENSILEMULTI_H
 
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -88,4 +88,4 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
 
 };
 
-#endif // TENSORMECHANICSPLASTICTENSILEMULTI
+#endif // TENSORMECHANICSPLASTICTENSILEMULTI_H
