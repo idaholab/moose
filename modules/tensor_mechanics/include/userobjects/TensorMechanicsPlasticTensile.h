@@ -1,5 +1,5 @@
-#ifndef TENSORMECHANICSPLASTICTENSILE
-#define TENSORMECHANICSPLASTICTENSILE
+#ifndef TENSORMECHANICSPLASTICTENSILE_H
+#define TENSORMECHANICSPLASTICTENSILE_H
 
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
@@ -133,4 +133,4 @@ class TensorMechanicsPlasticTensile : public TensorMechanicsPlasticModel
 
 };
 
-#endif // TENSORMECHANICSPLASTICTENSILE
+#endif // TENSORMECHANICSPLASTICTENSILE_H
