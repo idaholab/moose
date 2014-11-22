@@ -108,7 +108,7 @@
           << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
           << msg << '\n'                                                                                    \
           << __FILE__ << ", line " << __LINE__ << ", compiled "                                             \
-          << __DATE__ << " at " << __TIME__ << " ***"                                                       \
+          << __LIBMESH_DATE__ << " at " << __LIBMESH_TIME__ << " ***"                                       \
           << (Moose::_color_console ? DEFAULT : "")                                                         \
           << std::endl;                                                                                     \
         );                                                                                                  \
