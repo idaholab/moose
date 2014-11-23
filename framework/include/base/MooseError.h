@@ -17,6 +17,14 @@
 
 #include "Moose.h"
 
+// temporary fix to allow merging moose PR #4278 until libmesh PR #415 is merged
+#ifndef __LIBMESH_TIME__
+#  define __LIBMESH_TIME__ __TIME__
+#endif
+#ifndef __LIBMESH_DATE__
+#  define __LIBMESH_DATE__ __DATE__
+#endif
+
 // libMesh includes
 #include "libmesh/print_trace.h"
 
