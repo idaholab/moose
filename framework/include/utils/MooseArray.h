@@ -77,6 +77,16 @@ public:
   }
 
   /**
+   * Change the number of elements the array can store to zero.
+   *
+   * Will destroy data currently in array!
+   *
+   * Note that this does _not_ free unused memory.
+   * This is done for speed.
+   */
+  void clear();
+
+  /**
    * Change the number of elements the array can store.
    *
    * Will allocate more memory if necessary.
@@ -196,6 +206,14 @@ MooseArray<T>::setAllValues(const T & value)
 {
   for (unsigned int i=0; i<_size; i++)
     _data[i] = value;
+}
+
+template<typename T>
+inline
+void
+MooseArray<T>::clear()
+{
+  _size = 0;
 }
 
 template<typename T>
