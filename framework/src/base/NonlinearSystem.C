@@ -1258,6 +1258,18 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
   Moose::perf_log.pop("residual.close4()","Solve");
 }
 
+void
+NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs)
+{
+  const Node & node = _mesh.node(node_id);
+  unsigned int s = number();
+  if (node.has_dofs(s))
+  {
+    for (unsigned int v = 0; v < nVariables(); v++)
+      for (unsigned int c = 0; c < node.n_comp(s, v); c++)
+        dofs.push_back(node.dof_number(s, v, c));
+  }
+}
 
 void
 NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<unsigned int, std::vector<unsigned int> > & graph)
@@ -1331,6 +1343,33 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
     }
   }
 
+  // handle node-to-node constraints
+  const std::vector<NodalConstraint *> & ceds = _constraints[0].getNodalConstraints();
+  for (std::vector<NodalConstraint *>::const_iterator it = ceds.begin(); it != ceds.end(); ++it)
+  {
+    NodalConstraint * nc = *it;
+
+    std::vector<dof_id_type> master_dofs;
+    unsigned int master_node_id = nc->getMasterNodeId();
+    getNodeDofs(master_node_id, master_dofs);
+
+    std::vector<dof_id_type> slave_dofs;
+    std::vector<unsigned int> & slave_node_ids = nc->getSlaveNodeId();
+    for (std::vector<unsigned int>::iterator si = slave_node_ids.begin(); si != slave_node_ids.end(); si++)
+      getNodeDofs(*si, slave_dofs);
+
+    for (std::vector<unsigned int>::iterator mi = master_dofs.begin(); mi != master_dofs.end(); mi++)
+    {
+      unsigned int master_id = *mi;
+      for (std::vector<unsigned int>::iterator si = slave_dofs.begin(); si != slave_dofs.end(); si++)
+      {
+        unsigned int slave_id = *si;
+        graph[master_id].push_back(slave_id);
+        graph[slave_id].push_back(master_id);
+      }
+    }
+  }
+
   // Make every entry sorted and unique
   for (std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
   {
@@ -1367,11 +1406,11 @@ NonlinearSystem::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jaco
 void
 NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced)
 {
-
-//  This is here for debugging constraint Jacobians.  Since it's kind of a nontrivial line of code
-//  I would like to leave it here for ease of turning it on.  I will eventually remove it.
-//  TODO: Remove this.
-//  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+#if PETSC_VERSION_LESS_THAN(3,3,0)
+#else
+  if (!_fe_problem.errorOnJaocobianNonzeroReallocation())
+    MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+#endif
 
   std::vector<numeric_index_type> zero_rows;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = NULL;
@@ -1651,8 +1690,8 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 #endif
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 #else
-  // PETSc 3.3.0
-  MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+  if (!_fe_problem.errorOnJaocobianNonzeroReallocation())
+    MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 #endif
 
 #endif
@@ -1825,8 +1864,8 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 #endif
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 #else
-    // PETSc 3.3.0
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+  if (!_fe_problem.errorOnJaocobianNonzeroReallocation())
+    MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 #endif
 
 #endif
@@ -2005,6 +2044,8 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
     const dof_id_type first_dof_on_proc = dofMap().first_dof(processor_id());
     const dof_id_type end_dof_on_proc   = dofMap().end_dof(processor_id());
 
+    unsigned int max_nz = sparsity.size();
+
     for (std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
     {
       dof_id_type dof = git->first;
@@ -2029,9 +2070,15 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
         dof_id_type coupled_dof = row[i];
 
         if (coupled_dof < first_dof_on_proc || coupled_dof >= end_dof_on_proc)
-          n_oz[local_dof]++;
+        {
+          if (n_oz[local_dof] < max_nz)
+            n_oz[local_dof]++;
+        }
         else
-          n_nz[local_dof]++;
+        {
+          if (n_nz[local_dof] < max_nz)
+            n_nz[local_dof]++;
+        }
       }
     }
   }

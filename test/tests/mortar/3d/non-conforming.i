@@ -89,6 +89,11 @@
   [../]
 []
 
+[Problem]
+  type = FEProblem
+  error_on_jacobian_nonzero_reallocation = false
+[]
+
 [Executioner]
   type = Steady
   nl_rel_tol = 1e-14
