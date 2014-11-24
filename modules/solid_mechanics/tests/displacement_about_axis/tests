@@ -1,0 +1,12 @@
+[Tests]
+ [./disp_about_axis]
+   type = 'Exodiff'
+   input = 'disp_about_axis.i'
+   exodiff = 'disp_about_axis_out.e'
+ [../]
+ [./disp_about_axis_axial_motion]
+   type = 'Exodiff'
+   input = 'disp_about_axis_axial_motion.i'
+   exodiff = 'disp_about_axis_axial_motion_out.e'
+ [../]
+[]

@@ -49,6 +49,8 @@
 #include "PresetVelocity.h"
 #include "Pressure.h"
 #include "PressureAction.h"
+#include "DisplacementAboutAxis.h"
+#include "DisplacementAboutAxisAction.h"
 #include "SolidMechanicsAction.h"
 #include "DomainIntegralAction.h"
 #include "SolidMechInertialForce.h"
@@ -106,6 +108,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(Pressure);
+  registerBoundaryCondition(DisplacementAboutAxis);
 
   registerExecutioner(AdaptiveTransient);
 
@@ -163,6 +166,9 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
+  syntax.registerActionSyntax("EmptyAction", "BCs/DisplacementAboutAxis");
+  syntax.registerActionSyntax("DisplacementAboutAxisAction", "BCs/DisplacementAboutAxis/*");
+
   syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_user_object");
@@ -173,6 +179,7 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_material");
 
   registerAction(PressureAction, "add_bc");
+  registerAction(DisplacementAboutAxisAction, "add_bc");
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");
   registerAction(CavityPressureUOAction, "add_user_object");
