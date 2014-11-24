@@ -1,3 +1,11 @@
+.libs
+*.la
+*.lo
+*.d
+*.o
+*.a
+*.so
+*.pyc
 libCROW-*so*
 control_modules/distribution1D.py
 control_modules/distribution1D_wrap.cxx
