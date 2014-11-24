@@ -6,8 +6,6 @@
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
 #include "MaterialProperty.h"
-#include "petscblaslapack.h"
-
 
 RankTwoTensor::RankTwoTensor()
 {

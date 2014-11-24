@@ -11,6 +11,9 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 
+#include "petscsys.h"
+#include "petscblaslapack.h"
+
 #include <vector>
 
 
@@ -287,7 +290,7 @@ public:
    * @param a Eigenvectors are placed in this array if calculation_type == "V".
    * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
    */
-  void syev(const char * calculation_type, std::vector<PetscScalar> & eigvals, std::vector<PetscScalar> & a) const
+  void syev(const char * calculation_type, std::vector<PetscScalar> & eigvals, std::vector<PetscScalar> & a) const;
 
 protected:
 

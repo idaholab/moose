@@ -14,6 +14,9 @@ class RankTwoTensor;
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
 
+#include "petscsys.h"
+#include "petscblaslapack.h"
+
 // system includes
 #include <vector>
 
@@ -176,7 +179,7 @@ protected:
    * @param n size of A
    * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
    */
-  int matrixInversion(std::vector<double> & A, int n) const;
+  int matrixInversion(std::vector<PetscScalar> & A, int n) const;
 
   /**
   * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in

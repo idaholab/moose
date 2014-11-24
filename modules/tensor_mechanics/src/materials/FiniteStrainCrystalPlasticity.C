@@ -1,7 +1,5 @@
 #include "FiniteStrainCrystalPlasticity.h"
-#include <cmath>
-
-extern "C" void FORTRAN_CALL(dsyev) ( ... );
+#include "petscblaslapack.h"
 
 template<>
 InputParameters validParams<FiniteStrainCrystalPlasticity>()
@@ -755,10 +753,11 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
 {
   RankTwoTensor rot;
   RankTwoTensor c, diag, evec;
-  double cmat[LIBMESH_DIM][LIBMESH_DIM], w[LIBMESH_DIM], work[10];
-  int info;
-  int nd = LIBMESH_DIM;
-  int lwork = 10;
+  PetscScalar cmat[LIBMESH_DIM][LIBMESH_DIM], work[10];
+  PetscReal w[LIBMESH_DIM];
+  PetscBLASInt nd = LIBMESH_DIM,
+               lwork = 10,
+               info;
 
   c = a.transpose() * a;
 
@@ -766,7 +765,7 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       cmat[i][j] = c(i,j);
 
-  FORTRAN_CALL(dsyev)("V","U",&nd,cmat,&nd,&w,&work,&lwork,&info);
+  LAPACKsyev_("V", "U", &nd, &cmat[0][0], &nd, w, work, &lwork, &info);
 
   if (info != 0)
     mooseError("FiniteStrainCrystalPLasticity: DSYEV function call in getMatRot function failed");

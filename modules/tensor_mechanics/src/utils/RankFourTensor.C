@@ -2,11 +2,7 @@
 #include "RankTwoTensor.h"
 
 // Any other includes here
-#include "libmesh/tensor_value.h"
 #include "MaterialProperty.h"
-#include "libmesh/libmesh.h"
-#include "petscblaslapack.h"
-#include <vector>
 #include <ostream>
 
 MooseEnum
