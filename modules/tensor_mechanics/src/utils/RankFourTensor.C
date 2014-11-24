@@ -5,6 +5,10 @@
 #include "MaterialProperty.h"
 #include <ostream>
 
+#if PETSC_VERSION_LESS_THAN(3,5,0)
+  extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
+#endif
+
 MooseEnum
 RankFourTensor::fillMethodEnum()
 {
@@ -518,7 +522,11 @@ RankFourTensor::matrixInversion(std::vector<PetscScalar> & A, int n) const
     return return_value;
 
   // get the inverse of A
+#if PETSC_VERSION_LESS_THAN(3,5,0)
+  FORTRAN_CALL(dgetri)(&n, &A[0], &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
+#else
   LAPACKgetri_(&n, &A[0], &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
+#endif
 
   return return_value;
 }

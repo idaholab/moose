@@ -562,7 +562,6 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
     row_num = 0;
     col_num++;
   }
-
 }
 
 void
@@ -575,9 +574,7 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
   std::vector<std::vector<Real> > jac;
   calculateJacobian(stress, intnl, pm, E_inv, jac);
 
-
-
-  // prepare for LAPACKgesv_ routine provided by PETSc
+  // prepare for LAPACKgesv_ routine provided by PETSc (at least since PETSc 3.0.0)
   int system_size = rhs.size();
 
   std::vector<double> a(system_size*system_size);
@@ -594,8 +591,6 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
 
   if (info != 0)
     mooseError("In solving the linear system in a Newton-Raphson process, the PETSC LAPACK gsev routine returned with error code " << info);
-
-
 
   // Extract the results back to dstress, dpm and dintnl
   unsigned int dim = 3;
