@@ -429,4 +429,10 @@
     expect_err = 'Node 0 does not contain any dofs for the v variable'
     method = 'dbg'
   [../]
+
+  [./lin_comb_incomp_len]
+    type = 'RunException'
+    input = 'lin_comb_incomp_len.i'
+    expect_err = 'lc-aux: the length of v and w has to be the same'
+  [../]
 []
