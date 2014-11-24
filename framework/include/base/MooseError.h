@@ -17,6 +17,14 @@
 
 #include "Moose.h"
 
+// temporary fix to allow merging moose PR #4278 until libmesh PR #415 is merged
+#ifndef __LIBMESH_TIME__
+#  define __LIBMESH_TIME__ __TIME__
+#endif
+#ifndef __LIBMESH_DATE__
+#  define __LIBMESH_DATE__ __DATE__
+#endif
+
 // libMesh includes
 #include "libmesh/print_trace.h"
 
@@ -108,7 +116,7 @@
           << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
           << msg << '\n'                                                                                    \
           << __FILE__ << ", line " << __LINE__ << ", compiled "                                             \
-          << __DATE__ << " at " << __TIME__ << " ***"                                                       \
+          << __LIBMESH_DATE__ << " at " << __LIBMESH_TIME__ << " ***"                                       \
           << (Moose::_color_console ? DEFAULT : "")                                                         \
           << std::endl;                                                                                     \
         );                                                                                                  \
