@@ -36,6 +36,9 @@ protected:
   Real _ftol;
   Real _eptol;
 
+  // outer and mixed product of teh delta function tensors
+  RankFourTensor _deltaOuter, _deltaMixed;
+
   /**
    * Implements the return map
    * @param sig_old  The stress at the previous "time" step
@@ -98,10 +101,6 @@ protected:
    * @param dresid_dsig the required derivative (this is an output variable)
    */
   virtual void getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, RankFourTensor & dresid_dsig);
-
-
-  /// returns unity if i==j, otherwise zero
-  Real deltaFunc(unsigned int i, unsigned int j);
 
   /**
    * yield stress as a function of equivalent plastic strain.

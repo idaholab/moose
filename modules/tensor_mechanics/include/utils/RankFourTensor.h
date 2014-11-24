@@ -34,18 +34,34 @@ class RankTwoTensor;
 class RankFourTensor
 {
 public:
+  // Select initialization
+  enum InitMethod
+  {
+    initNone,
+    initIdentity,
+    initIdentityFour
+  };
 
   /// Default constructor; fills to zero
   RankFourTensor();
 
+  /// Select specific initialization pattern
+  RankFourTensor(const InitMethod);
+
   /// Copy constructor
-  RankFourTensor(const RankFourTensor & a);
+  RankFourTensor(const RankFourTensor &);
 
   /// Destructor
   ~RankFourTensor() {}
 
+  // Named constructors
+  static RankFourTensor Identity() { return RankFourTensor(initIdentity); }
+  static RankFourTensor IdentityFour() { return RankFourTensor(initIdentityFour); };
+
+//private:
   /// Gets the value for the index specified.  Takes index = 0,1,2
   Real & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
+public:
 
   /**
    * Gets the value for the index specified.  Takes index = 0,1,2
