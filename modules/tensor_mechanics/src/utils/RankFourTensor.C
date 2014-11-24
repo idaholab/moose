@@ -22,6 +22,8 @@ RankFourTensor::fillMethodEnum()
 
 RankFourTensor::RankFourTensor()
 {
+  mooseAssert(N == 3, "RankFourTensor is currently only tested for 3 dimensions.");
+
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)

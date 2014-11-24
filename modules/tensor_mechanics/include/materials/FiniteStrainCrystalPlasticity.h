@@ -191,11 +191,6 @@ protected:
   virtual ElasticityTensorR4 elastoPlasticTangentModuli();
 
   /**
-   * This function calculate the outer product between 2 rank two tensors.
-   */
-  RankFourTensor outerProduct(const RankTwoTensor & a, const RankTwoTensor & b);
-
-  /**
    * This function perform RU decomposition to obtain the rotation tensor.
    */
   RankTwoTensor get_current_rotation(const RankTwoTensor & a);

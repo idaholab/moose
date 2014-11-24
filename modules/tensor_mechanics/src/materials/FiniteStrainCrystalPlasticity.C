@@ -694,9 +694,7 @@ FiniteStrainCrystalPlasticity::calcResidual( RankTwoTensor &resid )
 void
 FiniteStrainCrystalPlasticity::calcJacobian( RankFourTensor &jac )
 {
-  RankTwoTensor temp2;
   RankFourTensor dfedfpinv, deedfe, dfpinvdpk2, idenFour;
-  RankFourTensor temp4;
   std::vector<RankTwoTensor> dtaudpk2(_nss), dfpinvdslip(_nss);
 
   for (unsigned int i = 0; i < _nss; ++i)
@@ -722,11 +720,7 @@ FiniteStrainCrystalPlasticity::calcJacobian( RankFourTensor &jac )
 
   dfpinvdpk2.zero();
   for (unsigned int i = 0; i < _nss; ++i)
-  {
-    temp2 = dfpinvdslip[i] * _dslipdtau[i];
-    temp4 = outerProduct(temp2, dtaudpk2[i]);
-    dfpinvdpk2 += temp4;
-  }
+    dfpinvdpk2 += (dfpinvdslip[i] * _dslipdtau[i]).outerProduct(dtaudpk2[i]);
 
   jac = _elasticity_tensor[_qp] * deedfe * dfedfpinv * dfpinvdpk2;
 
@@ -746,19 +740,6 @@ FiniteStrainCrystalPlasticity::getSlipIncrements()
 
   for (unsigned int i = 0; i < _nss; ++i)
     _dslipdtau[i] = _a0[i] / _xm[i] * std::pow(std::abs(_tau[i] / _gss_tmp[i]), 1.0 / _xm[i] - 1.0) / _gss_tmp[i] * _dt;
-}
-
-RankFourTensor FiniteStrainCrystalPlasticity::outerProduct(const RankTwoTensor & a, const RankTwoTensor & b)
-{
-  RankFourTensor result;
-
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-          result(i,j,k,l) = a(i,j) * b(k,l);
-
-  return result;
 }
 
 // Calls getMatRot to perform RU factorization of a tensor.

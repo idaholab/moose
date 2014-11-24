@@ -169,7 +169,7 @@ public:
 protected:
 
   /// Dimensionality of rank-four tensor
-  static const unsigned int N = 3;
+  static const unsigned int N = LIBMESH_DIM;
 
   /// The values of the rank-four tensor
   Real _vals[N][N][N][N];
