@@ -431,7 +431,7 @@ RankTwoTensor::dtrace() const
 Real
 RankTwoTensor::thirdInvariant() const
 {
-  RankTwoTensor s = 0.5*deviatoric();
+  RankTwoTensor s = 0.5 * deviatoric();
   s += s.transpose();
 
   Real result = 0.0;
@@ -446,11 +446,11 @@ RankTwoTensor::thirdInvariant() const
 RankTwoTensor
 RankTwoTensor::dthirdInvariant() const
 {
-  RankTwoTensor s = 0.5*deviatoric();
+  RankTwoTensor s = 0.5 * deviatoric();
   s += s.transpose();
 
   RankTwoTensor d;
-  Real sec_over_three = secondInvariant()/3.0;
+  Real sec_over_three = secondInvariant() / 3.0;
 
   d(0, 0) = s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2) + sec_over_three;
   d(0, 1) = s(2, 0) * s(1, 2) - s(1, 0) * s(2, 2);
@@ -468,7 +468,7 @@ RankTwoTensor::dthirdInvariant() const
 RankFourTensor
 RankTwoTensor::d2thirdInvariant() const
 {
-  RankTwoTensor s = 0.5*deviatoric();
+  RankTwoTensor s = 0.5 * deviatoric();
   s += s.transpose();
 
   RankFourTensor d2;
@@ -592,7 +592,7 @@ RankTwoTensor::d2sin3Lode(const Real r0) const
     for (unsigned j = 0 ; j < N ; ++j)
       for (unsigned k = 0 ; k < N ; ++k)
         for (unsigned l = 0 ; l < N ; ++l)
-          deriv(i, j, k, l) += (-1.5*dII(i, j)*dIII(k, l) -1.5*dIII(i, j)*dII(k, l))/std::pow(bar, 2.5) + 1.5*2.5*dII(i, j)*dII(k, l)*J3/std::pow(bar, 3.5);
+          deriv(i, j, k, l) += (-1.5*dII(i, j)*dIII(k, l) -1.5 * dIII(i, j) * dII(k, l)) / std::pow(bar, 2.5) + 1.5*2.5*dII(i, j) * dII(k, l) * J3 / std::pow(bar, 3.5);
 
   deriv *= -1.5 * std::sqrt(3.0);
   return deriv;
