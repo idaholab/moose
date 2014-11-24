@@ -2,11 +2,11 @@
 
 // Any other includes here
 #include <vector>
+#include <ostream>
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
 #include "MaterialProperty.h"
-#include <ostream>
-#include <petscblaslapack.h>
+#include "petscblaslapack.h"
 
 
 RankTwoTensor::RankTwoTensor()
@@ -703,7 +703,7 @@ RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
 void
 RankTwoTensor::symmetricEigenvalues(std::vector<Real> & eigvals) const
 {
-  std::vector<double> a;
+  std::vector<PetscScalar> a;
   syev("N", eigvals, a);
 }
 
@@ -712,7 +712,7 @@ RankTwoTensor::dsymmetricEigenvalues(std::vector<Real> & eigvals, std::vector<Ra
 {
   deigvals.resize(N);
 
-  std::vector<double> a;
+  std::vector<PetscScalar> a;
   syev("V", eigvals, a);
 
   // now a contains the eigenvetors
@@ -747,8 +747,8 @@ RankTwoTensor::dsymmetricEigenvalues(std::vector<Real> & eigvals, std::vector<Ra
 void
 RankTwoTensor::d2symmetricEigenvalues(std::vector<RankFourTensor> & deriv) const
 {
-  std::vector<double> eigvec;
-  std::vector<double> eigvals;
+  std::vector<PetscScalar> eigvec;
+  std::vector<PetscScalar> eigvals;
   Real ev[N][N];
 
   // reset rank four tensor
@@ -780,7 +780,7 @@ RankTwoTensor::d2symmetricEigenvalues(std::vector<RankFourTensor> & deriv) const
 }
 
 void
-RankTwoTensor::syev(const char * calculation_type, std::vector<Real> & eigvals, std::vector<double> & a) const
+RankTwoTensor::syev(const char * calculation_type, std::vector<PetscScalar> & eigvals, std::vector<PetscScalar> & a) const
 {
   eigvals.resize(N);
   a.resize(N*N);
@@ -789,7 +789,7 @@ RankTwoTensor::syev(const char * calculation_type, std::vector<Real> & eigvals, 
   int nd = N;
   int lwork = 66 * nd;
   int info;
-  std::vector<double> work(lwork);
+  std::vector<PetscScalar> work(lwork);
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)

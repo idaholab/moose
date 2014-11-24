@@ -2,16 +2,12 @@
 #include "RankTwoTensor.h"
 
 // Any other includes here
-#include <vector>
 #include "libmesh/tensor_value.h"
 #include "MaterialProperty.h"
 #include "libmesh/libmesh.h"
+#include "petscblaslapack.h"
+#include <vector>
 #include <ostream>
-
-extern "C" void FORTRAN_CALL(dsyev) ( ... ); // eigenvalue and eigenvectors for symmetric matrix from LAPACK
-extern "C" void FORTRAN_CALL(dgeev) ( ... ); // eigenvalue and eigenvectors for general matrix from LAPACK
-extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
-extern "C" void FORTRAN_CALL(dgetrf) ( ... ); // matrix inversion routine from LAPACK
 
 MooseEnum
 RankFourTensor::fillMethodEnum()
@@ -252,7 +248,7 @@ RankFourTensor::invSymm() const
   int error;
 
   RankFourTensor result;
-  std::vector<double> mat(ntens * ntens);
+  std::vector<PetscScalar> mat(ntens * ntens);
 
   // We use the LAPACK matrix inversion routine here.  Form the matrix
   //
@@ -509,24 +505,24 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod 
 }
 
 int
-RankFourTensor::matrixInversion(std::vector<double> & A, int n) const
+RankFourTensor::matrixInversion(std::vector<PetscScalar> & A, int n) const
 {
   int return_value,
       buffer_size = n * 64;
-  std::vector<int> ipiv(n),
-                   buffer(buffer_size);
+  std::vector<PetscBLASInt> ipiv(n);
+  std::vector<PetscScalar> buffer(buffer_size);
 
   // Following does a LU decomposition of "square matrix A"
   // upon return "A = P*L*U" if return_value == 0
   // Here i use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
-  FORTRAN_CALL(dgetrf)(&n, &n, &A[0], &n, &ipiv[0], &return_value);
+  LAPACKgetrf_(&n, &n, &A[0], &n, &ipiv[0], &return_value);
 
   if (return_value != 0)
     // couldn't LU decompose because: illegal value in A; or, A singular
     return return_value;
 
   // get the inverse of A
-  FORTRAN_CALL(dgetri)(&n, &A[0], &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
+  LAPACKgetri_(&n, &A[0], &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
 
   return return_value;
 }
@@ -686,8 +682,6 @@ RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 81)
     mooseError("To use fillGeneralFromInputVector, your input must have size 81. Yours has size " << input.size());
-
-  zero();
 
   int ind;
   for (unsigned int i = 0; i < N; ++i)
