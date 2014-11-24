@@ -94,15 +94,20 @@ class RunApp(Tester):
     #Set number of threads to be used upper bound
     nthreads = min(nthreads, int(specs['max_threads']))
 
+    caveats = []
     if nthreads > options.nthreads:
-      self.specs['caveats'] = ['min_threads=' + str(nthreads)]
+      caveats.append('min_threads=' + str(nthreads))
     elif nthreads < options.nthreads:
-      self.specs['caveats'] = ['max_threads=' + str(nthreads)]
+      caveats.append('max_threads=' + str(nthreads))
     # TODO: Refactor this caveats business
     if ncpus > default_ncpus:
-      self.specs['caveats'] = ['min_cpus=' + str(ncpus)]
+      caveats.append('min_cpus=' + str(ncpus))
     elif ncpus < default_ncpus:
-      self.specs['caveats'] = ['max_cpus=' + str(ncpus)]
+      caveats.append('max_cpus=' + str(ncpus))
+
+    if len(caveats) > 0:
+      self.specs['caveats'] = caveats
+
     if self.force_mpi or options.parallel or ncpus > 1 or nthreads > 1:
       command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(specs['cli_args'])
     elif options.valgrind_mode == specs['valgrind'] or options.valgrind_mode == 'HEAVY' and specs[VALGRIND] == 'NORMAL':
