@@ -94,6 +94,7 @@
 #include "QuotientAux.h"
 #include "NormalizationAux.h"
 #include "VariableGradientComponent.h"
+#include "LinearCombinationAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -452,6 +453,7 @@ registerObjects(Factory & factory)
   registerAux(NormalizationAux);
   registerAux(FunctionScalarAux);
   registerAux(VariableGradientComponent);
+  registerAux(LinearCombinationAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
