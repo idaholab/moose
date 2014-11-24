@@ -25,6 +25,15 @@
     exodiff = 'out_older.e'
   [../]
 
+  [./test_older_mpi_threads]
+    type = 'Exodiff'
+    input = 'stateful_prop_test_older.i'
+    exodiff = 'out_older.e'
+    min_parallel = 2
+    min_threads = 2
+    prereq = 'test_older test_older_csv'
+  [../]
+
   [./spatial_test]
     type = 'Exodiff'
     input = 'stateful_prop_spatial_test.i'

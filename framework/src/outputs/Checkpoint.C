@@ -188,20 +188,11 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     // Remove material property files
     if (_material_property_storage.hasStatefulProperties() || _bnd_material_property_storage.hasStatefulProperties())
     {
-      ret = remove(delete_files.material.c_str());
+      std::ostringstream oss;
+      oss << delete_files.material << '-' << proc_id;
+      ret = remove(oss.str().c_str());
       if (ret != 0)
-        mooseWarning("Error during the deletion of file '" << delete_files.material << "': " << ret);
-
-      for (THREAD_ID tid = 0; tid < n_threads; tid++)
-      {
-        std::ostringstream oss;
-        oss << delete_files.material << '-' << proc_id;
-        if (n_threads > 1)
-          oss << "-" << tid;
-        ret = remove(oss.str().c_str());
-        if (ret != 0)
-          mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
-      }
+        mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
     }
 
     // Remove the restart files (rd)
