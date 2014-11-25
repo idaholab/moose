@@ -13,8 +13,19 @@
 /****************************************************************/
 
 #include "ColumnMajorMatrix.h"
-#include "petscsys.h"
-#include "petscblaslapack.h"
+
+#include "libmesh/petsc_macro.h"
+#include <petscsys.h>
+#include <petscblaslapack.h>
+
+#if !defined(LIBMESH_HAVE_PETSC)
+  extern "C" void FORTRAN_CALL(dsyev) ( ... );
+  extern "C" void FORTRAN_CALL(dgeev) ( ... );
+  extern "C" void FORTRAN_CALL(dgetrf) ( ... );
+#endif
+#if !defined(LIBMESH_HAVE_PETSC) || PETSC_VERSION_LESS_THAN(3,5,0)
+  extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
+#endif
 
 ColumnMajorMatrix::ColumnMajorMatrix(unsigned int rows, unsigned int cols) :
     _n_rows(rows),
@@ -154,7 +165,11 @@ ColumnMajorMatrix::eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) con
   int buffer_size = n * 64;
   std::vector<Real> buffer(buffer_size);
 
+#if !defined(LIBMESH_HAVE_PETSC)
+  FORTRAN_CALL(dsyev)(&jobz, &uplo, &n, evec_data, &n, eval_data, &buffer[0], &buffer_size, &return_value);
+#else
   LAPACKsyev_(&jobz, &uplo, &n, evec_data, &n, eval_data, &buffer[0], &buffer_size, &return_value);
+#endif
 
   if (return_value)
     mooseError("error in lapack eigen solve");
@@ -191,7 +206,11 @@ ColumnMajorMatrix::eigenNonsym(ColumnMajorMatrix & eval_real, ColumnMajorMatrix 
   int buffer_size = n * 64;
   std::vector<Real> buffer(buffer_size);
 
+#if !defined(LIBMESH_HAVE_PETSC)
+  FORTRAN_CALL(dgeev)(&jobvl, &jobvr, &n, a_data, &n, eval_r, eval_i, evec_le, &n, evec_ri, &n, &buffer[0], &buffer_size, &return_value);
+#else
   LAPACKgeev_(&jobvl, &jobvr, &n, a_data, &n, eval_r, eval_i, evec_le, &n, evec_ri, &n, &buffer[0], &buffer_size, &return_value);
+#endif
 
   if (return_value)
     mooseError("error in lapack eigen solve");
@@ -233,8 +252,17 @@ ColumnMajorMatrix::inverse(ColumnMajorMatrix & invA) const
   int buffer_size = n * 64;
   std::vector<Real> buffer(buffer_size);
 
+#if !defined(LIBMESH_HAVE_PETSC)
+  FORTRAN_CALL(dgetrf)(&n, &n, invA_data, &n, &ipiv[0], &return_value);
+#else
   LAPACKgetrf_(&n, &n, invA_data, &n, &ipiv[0], &return_value);
+#endif
+
+#if !defined(LIBMESH_HAVE_PETSC) || PETSC_VERSION_LESS_THAN(3,5,0)
+  FORTRAN_CALL(dgetri)(&n, invA_data, &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
+#else
   LAPACKgetri_(&n, invA_data, &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
+#endif
 
   if (return_value)
     mooseError("error in lapack inverse solve");
