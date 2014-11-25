@@ -27,6 +27,9 @@ public:
   /// Copy constructor for RankFourTensor
   ElasticityTensorR4(const RankFourTensor &a);
 
+  // Fill from vector
+  ElasticityTensorR4(const std::vector<Real> & input, FillMethod fill_method) : RankFourTensor(input, fill_method) {}
+
   /**
    * This is used for the standard kernel stress_ij*d(test)/dx_j, when varied wrt u_k
    * Jacobian entry: d(stress_ij*d(test)/dx_j)/du_k = d(C_ijmn*du_m/dx_n*dtest/dx_j)/du_k

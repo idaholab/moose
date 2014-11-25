@@ -50,16 +50,10 @@ protected:
 
   RealVectorValue _Euler_angles;
 
-  /// vectors to get the input values
-  std::vector<Real> _Cijkl_vector;
-
   /// Individual material information
   ElasticityTensorR4 _Cijkl;
 
   RankTwoTensor _strain_increment;
-
-  /// Current deformation gradient
-  //RankTwoTensor _dfgrd;
 
   /// initial stress components
   std::vector<Function *> _initial_stress;

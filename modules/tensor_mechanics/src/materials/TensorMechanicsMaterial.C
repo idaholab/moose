@@ -36,11 +36,8 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
     _Euler_angles(getParam<Real>("euler_angle_1"),
                   getParam<Real>("euler_angle_2"),
                   getParam<Real>("euler_angle_3")),
-    _Cijkl_vector(getParam<std::vector<Real> >("C_ijkl")),
-    _Cijkl()
+    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"))
 {
-  _Cijkl.fillFromInputVector(_Cijkl_vector, (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"));
-
   const std::vector<FunctionName> & fcn_names(getParam<std::vector<FunctionName> >("initial_stress"));
   const unsigned num = fcn_names.size();
 
