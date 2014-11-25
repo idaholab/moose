@@ -692,7 +692,8 @@ FiniteStrainCrystalPlasticity::calcResidual( RankTwoTensor &resid )
 void
 FiniteStrainCrystalPlasticity::calcJacobian( RankFourTensor &jac )
 {
-  RankFourTensor dfedfpinv, deedfe, dfpinvdpk2, idenFour;
+  RankFourTensor dfedfpinv, deedfe, dfpinvdpk2;
+
   std::vector<RankTwoTensor> dtaudpk2(_nss), dfpinvdslip(_nss);
 
   for (unsigned int i = 0; i < _nss; ++i)
@@ -706,8 +707,6 @@ FiniteStrainCrystalPlasticity::calcJacobian( RankFourTensor &jac )
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
         dfedfpinv(i,j,k,j) = _dfgrd_tmp(i,k);
 
-  deedfe.zero();
-
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
@@ -716,17 +715,10 @@ FiniteStrainCrystalPlasticity::calcJacobian( RankFourTensor &jac )
         deedfe(i,j,k,j) = deedfe(i,j,k,j) + _fe(k,i) * 0.5;
       }
 
-  dfpinvdpk2.zero();
   for (unsigned int i = 0; i < _nss; ++i)
     dfpinvdpk2 += (dfpinvdslip[i] * _dslipdtau[i]).outerProduct(dtaudpk2[i]);
 
-  jac = _elasticity_tensor[_qp] * deedfe * dfedfpinv * dfpinvdpk2;
-
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      idenFour(i,j,i,j) = 1.0;
-
-  jac = idenFour - jac;
+  jac = RankFourTensor::IdentityFour() - (_elasticity_tensor[_qp] * deedfe * dfedfpinv * dfpinvdpk2);
 }
 
 // Calculate slip increment,dslipdtau. Override to modify.
@@ -851,14 +843,15 @@ FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
 
   ElasticityTensorR4 tan_mod;
   RankTwoTensor pk2fet, fepk2;
-  RankFourTensor dfedf, deedfe, dsigdpk2dfe, temp;
+  RankFourTensor deedfe, dsigdpk2dfe;
 
   // Fill in the matrix stiffness material property
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-        dfedf(i,j,i,l) = _fp_inv(l,j);
+  // RankFourTensor dfedf;
+  // for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  //   for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+  //     for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+  //       dfedf(i,j,i,l) = _fp_inv(l,j);
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
@@ -868,13 +861,7 @@ FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
         deedfe(i,j,k,j) = deedfe(i,j,k,j) + _fe(k,i) * 0.5;
       }
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-          temp(i,j,k,l) = _fe(i,k) * _fe(j,l);
-
-  dsigdpk2dfe = temp * _elasticity_tensor[_qp] * deedfe;
+  dsigdpk2dfe = _fe.mixedProductIkJl(_fe) * _elasticity_tensor[_qp] * deedfe;
 
   pk2fet = _pk2_tmp * _fe.transpose();
   fepk2 = _fe * _pk2_tmp;
@@ -890,12 +877,10 @@ FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
   tan_mod += dsigdpk2dfe;
 
   Real je = _fe.det();
-
   if ( je > 0.0 )
     tan_mod /= je;
 
   return tan_mod;
-
 }
 
 

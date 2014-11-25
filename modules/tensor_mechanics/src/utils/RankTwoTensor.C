@@ -16,6 +16,24 @@ RankTwoTensor::RankTwoTensor()
       _vals[i][j] = 0.0;
 }
 
+RankTwoTensor::RankTwoTensor(const InitMethod init)
+{
+  switch (init)
+  {
+    case initNone:
+      break;
+
+    case initIdentity:
+      for (unsigned int i = 0; i < N; ++i)
+        for (unsigned int j = 0; j < N; ++j)
+          _vals[i][j] = (i==j);
+      break;
+
+    default:
+      mooseError("Unknown RankTwoTensor initialization pattern.");
+  }
+}
+
 RankTwoTensor::RankTwoTensor(const TypeVector<Real> & row1, const TypeVector<Real> & row2, const TypeVector<Real> & row3)
 {
   // Initialize the Tensor matrix from the passed in vectors
@@ -362,6 +380,20 @@ RankTwoTensor::outerProduct(const RankTwoTensor & a) const
   return result;
 }
 
+RankFourTensor
+RankTwoTensor::mixedProductIkJl(const RankTwoTensor & a) const
+{
+  RankFourTensor result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          result(i,j,k,l) = _vals[i][k] * a(j,l);
+
+  return result;
+}
+
 RankTwoTensor
 RankTwoTensor::deviatoric() const
 {
@@ -401,12 +433,10 @@ RankTwoTensor::d2secondInvariant() const
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          result(i, j, k, l) = 0.5*(i==k)*(j==l) + 0.5*(i==l)*(j==k) - (1.0/3.0)*(i==j)*(k==l);
+          result(i,j,k,l) = 0.5*(i==k)*(j==l) + 0.5*(i==l)*(j==k) - (1.0/3.0)*(i==j)*(k==l);
 
   return result;
 }
-
-
 
 Real
 RankTwoTensor::trace() const

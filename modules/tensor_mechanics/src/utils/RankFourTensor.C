@@ -31,6 +31,36 @@ RankFourTensor::RankFourTensor(const RankFourTensor & a)
   *this = a;
 }
 
+RankFourTensor::RankFourTensor(const InitMethod init)
+{
+  switch (init)
+  {
+    case initNone:
+      break;
+
+    case initIdentity:
+      for (unsigned int i = 0; i < N; ++i)
+        for (unsigned int j = 0; j < N; ++j)
+          for (unsigned int k = 0; k < N; ++k)
+            for (unsigned int l = 0; l < N; ++l)
+              _vals[i][j][k][l] = 0.0;
+      for (unsigned int i = 0; i < N; ++i)
+        _vals[i][i][i][i] = 1.0;
+      break;
+
+    case initIdentityFour:
+      for (unsigned int i = 0; i < N; ++i)
+        for (unsigned int j = 0; j < N; ++j)
+          for (unsigned int k = 0; k < N; ++k)
+            for (unsigned int l = 0; l < N; ++l)
+              _vals[i][j][k][l] = (i==k) && (j==l);
+      break;
+
+    default:
+      mooseError("Unknown RankFourTensor initialization pattern.");
+  }
+}
+
 Real &
 RankFourTensor::operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
 {

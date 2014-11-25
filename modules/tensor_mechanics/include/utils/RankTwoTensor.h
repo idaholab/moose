@@ -29,9 +29,18 @@
 class RankTwoTensor
 {
 public:
+  // Select initialization
+  enum InitMethod
+  {
+    initNone,
+    initIdentity
+  };
 
   /// Default constructor; fills to zero
   RankTwoTensor();
+
+  /// Select specific initialization pattern
+  RankTwoTensor(const InitMethod);
 
   /**
    * Constructor that takes in 3 vectors and uses them to create rows
@@ -53,6 +62,9 @@ public:
 
   /// Copy constructor from RealTensorValue
   RankTwoTensor(const TypeTensor<Real> & a);
+
+  // Named constructors
+  static RankTwoTensor Identity() { return RankTwoTensor(initIdentity); }
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
   Real & operator()(unsigned int i, unsigned int j);
@@ -150,6 +162,9 @@ public:
 
   /// returns C_ijkl = a_ij * b_kl
   RankFourTensor outerProduct(const RankTwoTensor & a) const;
+
+  /// returns C_ijkl = a_ik * b_jl
+  RankFourTensor mixedProductIkJl(const RankTwoTensor & a) const;
 
   /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
   RankTwoTensor deviatoric() const;
