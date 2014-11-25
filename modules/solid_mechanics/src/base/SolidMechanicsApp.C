@@ -43,6 +43,7 @@
 #include "PowerLawCreepModel.h"
 #include "CavityPressureAction.h"
 #include "CavityPressurePostprocessor.h"
+#include "LineMaterialSymmTensorSampler.h"
 #include "CavityPressurePPAction.h"
 #include "CavityPressureUserObject.h"
 #include "CavityPressureUOAction.h"
@@ -157,6 +158,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(TorqueReaction);
 
   registerVectorPostprocessor(CrackDataSampler);
+  registerVectorPostprocessor(LineMaterialSymmTensorSampler);
 
   registerUserObject(MaterialTensorOnLine);
   registerUserObject(CavityPressureUserObject);
