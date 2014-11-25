@@ -85,16 +85,16 @@ public:
   RealTensorValue operator* (const RealTensorValue & a) const;
 
   /// C_ijkl*a
-  RankFourTensor operator* (const Real & a) const;
+  RankFourTensor operator* (const Real a) const;
 
   /// C_ijkl *= a
-  RankFourTensor & operator*= (const Real & a);
+  RankFourTensor & operator*= (const Real a);
 
   /// C_ijkl/a
-  RankFourTensor operator/ (const Real & a) const;
+  RankFourTensor operator/ (const Real a) const;
 
   /// C_ijkl /= a  for all i, j, k, l
-  RankFourTensor & operator/= (const Real & a);
+  RankFourTensor & operator/= (const Real a);
 
   /// C_ijkl += a_ijkl  for all i, j, k, l
   RankFourTensor & operator+= (const RankFourTensor & a);
