@@ -14,6 +14,9 @@ class RankTwoTensor;
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
 
+#include "petscsys.h"
+#include "petscblaslapack.h"
+
 // system includes
 #include <vector>
 
@@ -116,7 +119,6 @@ public:
    */
   RankFourTensor transposeMajor() const;
 
-
   /**
    * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l = 3).
    * Fill method depends on size of input
@@ -128,7 +130,6 @@ public:
                            and C_ijkl = C_jikl = C_ijlk
   */
   virtual void surfaceFillFromInputVector(const std::vector<Real> & input);
-
 
   /// Static method for use in validParams for getting the "fill_method"
   static MooseEnum fillMethodEnum();
@@ -149,7 +150,6 @@ public:
     general
   };
 
-
   /**
    * fillFromInputVector takes some number of inputs to fill
    * the Rank-4 tensor.
@@ -165,11 +165,10 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
-
 protected:
 
   /// Dimensionality of rank-four tensor
-  static const unsigned int N = 3;
+  static const unsigned int N = LIBMESH_DIM;
 
   /// The values of the rank-four tensor
   Real _vals[N][N][N][N];
@@ -180,7 +179,7 @@ protected:
    * @param n size of A
    * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
    */
-  int MatrixInversion(double *A, int n) const;
+  int matrixInversion(std::vector<PetscScalar> & A, int n) const;
 
   /**
   * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in

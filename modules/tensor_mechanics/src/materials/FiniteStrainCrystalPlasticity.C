@@ -1,7 +1,5 @@
 #include "FiniteStrainCrystalPlasticity.h"
-#include <cmath>
-
-extern "C" void FORTRAN_CALL(dsyev) ( ... );
+#include "petscblaslapack.h"
 
 template<>
 InputParameters validParams<FiniteStrainCrystalPlasticity>()
@@ -694,9 +692,7 @@ FiniteStrainCrystalPlasticity::calcResidual( RankTwoTensor &resid )
 void
 FiniteStrainCrystalPlasticity::calcJacobian( RankFourTensor &jac )
 {
-  RankTwoTensor temp2;
   RankFourTensor dfedfpinv, deedfe, dfpinvdpk2, idenFour;
-  RankFourTensor temp4;
   std::vector<RankTwoTensor> dtaudpk2(_nss), dfpinvdslip(_nss);
 
   for (unsigned int i = 0; i < _nss; ++i)
@@ -722,11 +718,7 @@ FiniteStrainCrystalPlasticity::calcJacobian( RankFourTensor &jac )
 
   dfpinvdpk2.zero();
   for (unsigned int i = 0; i < _nss; ++i)
-  {
-    temp2 = dfpinvdslip[i] * _dslipdtau[i];
-    temp4 = outerProduct(temp2, dtaudpk2[i]);
-    dfpinvdpk2 += temp4;
-  }
+    dfpinvdpk2 += (dfpinvdslip[i] * _dslipdtau[i]).outerProduct(dtaudpk2[i]);
 
   jac = _elasticity_tensor[_qp] * deedfe * dfedfpinv * dfpinvdpk2;
 
@@ -748,19 +740,6 @@ FiniteStrainCrystalPlasticity::getSlipIncrements()
     _dslipdtau[i] = _a0[i] / _xm[i] * std::pow(std::abs(_tau[i] / _gss_tmp[i]), 1.0 / _xm[i] - 1.0) / _gss_tmp[i] * _dt;
 }
 
-RankFourTensor FiniteStrainCrystalPlasticity::outerProduct(const RankTwoTensor & a, const RankTwoTensor & b)
-{
-  RankFourTensor result;
-
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-          result(i,j,k,l) = a(i,j) * b(k,l);
-
-  return result;
-}
-
 // Calls getMatRot to perform RU factorization of a tensor.
 RankTwoTensor
 FiniteStrainCrystalPlasticity::get_current_rotation(const RankTwoTensor & a)
@@ -774,10 +753,11 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
 {
   RankTwoTensor rot;
   RankTwoTensor c, diag, evec;
-  double cmat[LIBMESH_DIM][LIBMESH_DIM], w[LIBMESH_DIM], work[10];
-  int info;
-  int nd = LIBMESH_DIM;
-  int lwork = 10;
+  PetscScalar cmat[LIBMESH_DIM][LIBMESH_DIM], work[10];
+  PetscReal w[LIBMESH_DIM];
+  PetscBLASInt nd = LIBMESH_DIM,
+               lwork = 10,
+               info;
 
   c = a.transpose() * a;
 
@@ -785,7 +765,7 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       cmat[i][j] = c(i,j);
 
-  FORTRAN_CALL(dsyev)("V","U",&nd,cmat,&nd,&w,&work,&lwork,&info);
+  LAPACKsyev_("V", "U", &nd, &cmat[0][0], &nd, w, work, &lwork, &info);
 
   if (info != 0)
     mooseError("FiniteStrainCrystalPLasticity: DSYEV function call in getMatRot function failed");
