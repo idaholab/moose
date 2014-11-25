@@ -33,23 +33,20 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
     _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
     _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
     _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
-    // _d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
-    _euler_angle_1(getParam<Real>("euler_angle_1")),
-    _euler_angle_2(getParam<Real>("euler_angle_2")),
-    _euler_angle_3(getParam<Real>("euler_angle_3")),
+    _Euler_angles(getParam<Real>("euler_angle_1"),
+                  getParam<Real>("euler_angle_2"),
+                  getParam<Real>("euler_angle_3")),
     _Cijkl_vector(getParam<std::vector<Real> >("C_ijkl")),
-    _Cijkl(),
-    _Euler_angles(_euler_angle_1, _euler_angle_2, _euler_angle_3),
-    _has_T(isCoupled("temperature")),
-    _T(_has_T ? &coupledValue("temperature") : NULL),
-    _fill_method((RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"))
+    _Cijkl()
 {
-  _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
+  _Cijkl.fillFromInputVector(_Cijkl_vector, (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"));
 
-  const std::vector<FunctionName> & fcn_names( getParam<std::vector<FunctionName> >("initial_stress") );
+  const std::vector<FunctionName> & fcn_names(getParam<std::vector<FunctionName> >("initial_stress"));
   const unsigned num = fcn_names.size();
+
   if (!(num == 0 || num == 3*3))
     mooseError("Either zero or " << 3*3 << " initial stress functions must be provided to TensorMechanicsMaterial.  You supplied " << num << "\n");
+
   _initial_stress.resize(num);
   for (unsigned i = 0 ; i < num ; ++i)
     _initial_stress[i] = &getFunctionByName(fcn_names[i]);

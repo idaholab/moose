@@ -306,11 +306,9 @@ FiniteStrainCrystalPlasticity::getEulerAngles()
 {
   if ( _read_prop_user_object )
   {
-
-    _euler_angle_1 = _read_prop_user_object->getData( _current_elem , 0 );
-    _euler_angle_2 = _read_prop_user_object->getData( _current_elem , 1 );
-    _euler_angle_3 = _read_prop_user_object->getData( _current_elem , 2 );
-
+    _Euler_angles(0) = _read_prop_user_object->getData( _current_elem , 0 );
+    _Euler_angles(1) = _read_prop_user_object->getData( _current_elem , 1 );
+    _Euler_angles(2) = _read_prop_user_object->getData( _current_elem , 2 );
   }
 }
 
@@ -323,9 +321,9 @@ FiniteStrainCrystalPlasticity::getEulerRotations()
   RankTwoTensor RT;
   Real pi = libMesh::pi;
 
-  phi1 = _euler_angle_1 * (pi/180.0);
-  phi = _euler_angle_2 * (pi/180.0);
-  phi2 = _euler_angle_3 * (pi/180.0);
+  phi1 = _Euler_angles(0) * (pi/180.0);
+  phi =  _Euler_angles(1) * (pi/180.0);
+  phi2 = _Euler_angles(2) * (pi/180.0);
 
   cp1 = std::cos(phi1);
   cp2 = std::cos(phi2);
@@ -346,14 +344,12 @@ FiniteStrainCrystalPlasticity::getEulerRotations()
   RT(2,2) = cp;
 
   _crysrot = RT.transpose();
-
 }
 
 // Read slip systems from file
 void
 FiniteStrainCrystalPlasticity::getSlipSystems()
 {
-
   Real vec[LIBMESH_DIM];
   std::ifstream fileslipsys;
 
@@ -414,10 +410,9 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 void
 FiniteStrainCrystalPlasticity::preSolveQp()
 {
-
   _Jacobian_mult[_qp].zero();//Initializes jacobian for preconditioner
 
-  _dfgrd_tmp = _dfgrd[_qp];
+  _dfgrd_tmp = _deformation_gradient[_qp];
 
   calc_schmid_tensor();
 
@@ -432,7 +427,6 @@ FiniteStrainCrystalPlasticity::preSolveQp()
 
   _elasticity_tensor[_qp] = _Cijkl;
   _elasticity_tensor[_qp].rotate(rot);
-
 }
 
 void
@@ -446,7 +440,6 @@ FiniteStrainCrystalPlasticity::solveQp()
 void
 FiniteStrainCrystalPlasticity::postSolveQp()
 {
-
   _stress[_qp] = _fe * _pk2[_qp] * _fe.transpose()/_fe.det();
 
   _Jacobian_mult[_qp] += calcTangentModuli();//Calculate jacobian for preconditioner
@@ -454,14 +447,13 @@ FiniteStrainCrystalPlasticity::postSolveQp()
   RankTwoTensor iden;
   iden.addIa(1.0);
 
-  _lag_e[_qp] = _dfgrd[_qp].transpose() * _dfgrd[_qp] - iden;
+  _lag_e[_qp] = _deformation_gradient[_qp].transpose() * _deformation_gradient[_qp] - iden;
   _lag_e[_qp] = _lag_e[_qp] * 0.5;
 
 
   RankTwoTensor rot;
-  rot = get_current_rotation(_dfgrd[_qp]); // Calculate material rotation
+  rot = get_current_rotation(_deformation_gradient[_qp]); // Calculate material rotation
   _update_rot[_qp] = rot * _crysrot;
-
 }
 
 void
@@ -471,7 +463,6 @@ FiniteStrainCrystalPlasticity::preSolveStatevar()
     _gss_tmp[i] = _gss_old[_qp][i];
 
   _accslip_tmp_old = _acc_slip_old[_qp];
-
 }
 
 void
@@ -514,13 +505,11 @@ FiniteStrainCrystalPlasticity::solveStatevar()
 void
 FiniteStrainCrystalPlasticity::postSolveStatevar()
 {
-
   //Assign MaterialProperty values
   for (unsigned i = 0; i < _nss; ++i)
     _gss[_qp][i] = _gss_tmp[i];
 
   _acc_slip[_qp] = _accslip_tmp;
-
 }
 
 void
@@ -569,14 +558,11 @@ FiniteStrainCrystalPlasticity::solveStress()
       if (std::abs(_slip_incr[i]) > slip_incr_max)
         slip_incr_max = std::abs(_slip_incr[i]);
 
-    //    mooseAssert( slip_incr_max < _slip_incr_tol, "FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
+    // mooseAssert( slip_incr_max < _slip_incr_tol, "FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
+    if ( slip_incr_max > _slip_incr_tol )
+      mooseError("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
 
-  if ( slip_incr_max > _slip_incr_tol )
-    mooseError("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
-
-
-    rnorm=resid.L2norm();
-
+    rnorm = resid.L2norm();
     iter++;
   }
 }
@@ -584,10 +570,8 @@ FiniteStrainCrystalPlasticity::solveStress()
 void
 FiniteStrainCrystalPlasticity::postSolveStress()
 {
-
   _fp[_qp] = _fp_inv.inverse();
   _pk2[_qp] = _pk2_tmp;
-
 }
 
 // Update slip system resistance. Overide to incorporate new slip system resistance laws

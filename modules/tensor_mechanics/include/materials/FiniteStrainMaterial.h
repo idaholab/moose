@@ -33,7 +33,8 @@ protected:
   MaterialProperty<RankTwoTensor> & _elastic_strain_old;
   MaterialProperty<RankTwoTensor> & _stress_old;
   MaterialProperty<RankTwoTensor> & _rotation_increment;
-  MaterialProperty<RankTwoTensor> & _dfgrd;
+
+  MaterialProperty<RankTwoTensor> & _deformation_gradient;
 };
 
 #endif //FINITESTRAINMATERIAL_H

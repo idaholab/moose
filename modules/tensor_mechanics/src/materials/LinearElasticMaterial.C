@@ -42,15 +42,6 @@ LinearElasticMaterial::computeQpStrain()
   //strain = (grad_disp + grad_disp^T)/2
   RankTwoTensor grad_tensor(_grad_disp_x[_qp],_grad_disp_y[_qp],_grad_disp_z[_qp]);
 
-  if (_t_step > 1000000)
-  {
-    RankTwoTensor test = grad_tensor;
-    test.addIa(1.0);
-
-    RankTwoTensor eye = test*test.inverse();
-    eye.print();
-  }
-
   _elastic_strain[_qp] = (grad_tensor + grad_tensor.transpose())/2.0;
   _total_strain[_qp] = _elastic_strain[_qp];
 }
