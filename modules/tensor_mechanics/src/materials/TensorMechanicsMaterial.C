@@ -60,14 +60,13 @@ TensorMechanicsMaterial::initQpStatefulProperties()
 
   _total_strain[_qp].zero();
   _elastic_strain[_qp].zero();
-
 }
-
 
 void
 TensorMechanicsMaterial::computeProperties()
 {
   computeStrain();
+
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     computeQpElasticityTensor();

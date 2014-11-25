@@ -22,6 +22,11 @@ protected:
   MaterialProperty<RankTwoTensor> & _eigenstrain;
   MaterialProperty<RankTwoTensor> & _deigenstrain_dc;
   MaterialProperty<RankTwoTensor> & _d2eigenstrain_dc2;
+
+  MaterialProperty<ElasticityTensorR4> & _delasticity_tensor_dc;
+  MaterialProperty<ElasticityTensorR4> & _d2elasticity_tensor_dc2;
+
+  VariableValue & _c;
 };
 
 #endif //EIGENSTRAINBASEMATERIAL_H
