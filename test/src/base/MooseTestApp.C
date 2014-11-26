@@ -107,6 +107,9 @@
 #include "BadStatefulMaterial.h"
 #include "OutputTestMaterial.h"
 #include "SumMaterial.h"
+#include "VecRangeCheckMaterial.h"
+#include "DerivativeMaterialInterfaceTestProvider.h"
+#include "DerivativeMaterialInterfaceTestClient.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -122,8 +125,6 @@
 #include "PostprocessorCED.h"
 
 #include "EqualValueNodalConstraint.h"
-
-#include "VecRangeCheckMaterial.h"
 
 // user objects
 #include "MTUserObject.h"
@@ -347,6 +348,9 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(OutputTestMaterial);
   registerMaterial(SumMaterial);
   registerMaterial(VecRangeCheckMaterial);
+  registerMaterial(DerivativeMaterialInterfaceTestProvider);
+  registerMaterial(DerivativeMaterialInterfaceTestClient);
+
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
