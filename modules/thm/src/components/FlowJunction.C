@@ -13,6 +13,12 @@ InputParameters validParams<FlowJunction>()
   InputParameters params = validParams<Junction>();
   params.addParam<std::vector<Real> >("K", "Form loss coefficients");
   params.addParam<Real>("scaling_factor", 1., "Scaling factor for the Lagrange multiplier variable");
+  std::vector<Real> sf4(4, 1.);
+  sf4[0] = 1.e+3;
+  sf4[1] = 1.e+0;
+  sf4[2] = 1.e+6;
+  sf4[3] = 1.;
+  params.addParam<std::vector<Real> >("scaling_factor_bcs", sf4, "Scaling factors for the BCs");
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
   return params;
 }
@@ -22,7 +28,9 @@ FlowJunction::FlowJunction(const std::string & name, InputParameters params) :
     Junction(name, params),
     _model_type(_sim.getParam<FlowModel::EModelType>("model_type")),
     _lm_name(genName(name, "lm")),
-    _K(getParam<std::vector<Real> >("K"))
+    _K(getParam<std::vector<Real> >("K")),
+    _scaling_factor(getParam<Real>("scaling_factor")),
+    _scaling_factor_bcs(getParam<std::vector<Real> >("scaling_factor_bcs"))
 {
 }
 
@@ -37,11 +45,11 @@ FlowJunction::addVariables()
   switch (_model_type)
   {
   case FlowModel::EQ_MODEL_2:
-    _sim.addVariable(true, _lm_name,  FEType(SECOND, SCALAR), 0, 1.);
+    _sim.addVariable(true, _lm_name,  FEType(SECOND, SCALAR), 0, _scaling_factor);
     break;
 
   case FlowModel::EQ_MODEL_3:
-    _sim.addVariable(true, _lm_name,  FEType(THIRD, SCALAR), 0, getParam<Real>("scaling_factor"));
+    _sim.addVariable(true, _lm_name,  FEType(THIRD, SCALAR), 0, _scaling_factor);
     break;
 
   default:
@@ -64,7 +72,6 @@ FlowJunction::addMooseObjects()
   std::vector<VariableName> cv_rhou(1, FlowModel::RHOU);
   std::vector<VariableName> cv_rhoE(1, FlowModel::RHOE);
   std::vector<VariableName> cv_lambda(1, _lm_name);
-  std::vector<Real> sf = _sim.getParam<std::vector<Real> >("scaling_factors");
 
   MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
   execute_options = "residual";
@@ -94,7 +101,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
       params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
       params.set<PostprocessorName>("c") = c_pps;
-      params.set<std::vector<Real> >("scaling_factors") = sf;
+      params.set<std::vector<Real> >("scaling_factors") = _scaling_factor_bcs;
       // coupling
       params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName> >("rho") = cv_rho;
@@ -118,7 +125,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
       params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
       params.set<PostprocessorName>("c") = c_pps;
-      params.set<std::vector<Real> >("scaling_factors") = sf;
+      params.set<std::vector<Real> >("scaling_factors") = _scaling_factor_bcs;
       // coupling
       params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName> >("rho") = cv_rho;
@@ -154,7 +161,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
       params.set<std::vector<VariableName> >("area") = cv_area;
       params.set<PostprocessorName>("c") = c_pps;
-      params.set<std::vector<Real> >("scaling_factors") = sf;
+      params.set<std::vector<Real> >("scaling_factors") = _scaling_factor_bcs;
       params.set<std::vector<VariableName> >("lambda") = cv_lambda;
 
       _sim.addBoundaryCondition("OneDFreeEnergyBC", genName(name(), _bnd_id[i], "erg_bc"), params);

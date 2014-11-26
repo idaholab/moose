@@ -25,6 +25,8 @@ protected:
   FlowModel::EModelType _model_type;
   std::string _lm_name;
   std::vector<Real> _K;
+  Real _scaling_factor;
+  std::vector<Real> _scaling_factor_bcs;
 };
 
 #endif /* FLOWJUNCTION_H */
