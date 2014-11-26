@@ -71,13 +71,13 @@ protected:
   class BubbleData
   {
   public:
-    BubbleData(std::set<unsigned int> & nodes, unsigned int var_idx) :
+    BubbleData(std::set<dof_id_type> & nodes, unsigned int var_idx) :
         _nodes(nodes),
         _var_idx(var_idx),
         _intersects_boundary(false)
     {}
 
-    std::set<unsigned int> _nodes;
+    std::set<dof_id_type> _nodes;
     unsigned int _var_idx;
     bool _intersects_boundary;
   };

@@ -45,7 +45,7 @@ struct DM_Moose
   std::map<unsigned int, std::string>      *varnames;
   bool                                     allvars; // whether all system variables are included
   std::set<std::string>                    *blocks;
-  std::map<std::string, unsigned int>      *blockids;
+  std::map<std::string, subdomain_id_type> *blockids;
   std::map<unsigned int, std::string>      *blocknames;
   bool                                     allblocks;
   std::set<std::string>                    *sides;
@@ -163,7 +163,7 @@ PetscErrorCode DMMooseGetBlocks(DM dm, std::vector<std::string>& blocknames)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
   if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
-  for (std::map<std::string, unsigned int>::const_iterator it = dmm->blockids->begin(); it != dmm->blockids->end(); ++it) blocknames.push_back(it->first);
+  for (std::map<std::string, subdomain_id_type>::const_iterator it = dmm->blockids->begin(); it != dmm->blockids->end(); ++it) blocknames.push_back(it->first);
   PetscFunctionReturn(0);
 }
 
@@ -437,12 +437,12 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
       DofMap& dofmap = dmm->nl->sys().get_dof_map();
       std::set<dof_id_type>               indices;
       std::set<dof_id_type> unindices;
-      for (std::map<std::string, dof_id_type>::const_iterator vit = dmm->varids->begin(); vit != dmm->varids->end(); ++vit){
-  dof_id_type v = vit->second;
+      for (std::map<std::string, unsigned int>::const_iterator vit = dmm->varids->begin(); vit != dmm->varids->end(); ++vit){
+        unsigned int v = vit->second;
   /* Iterate only over this DM's blocks. */
   if (!dmm->allblocks || (dmm->nosides && dmm->nocontacts)) {
-    for (std::map<std::string, dof_id_type>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
-      dof_id_type b = bit->second;
+    for (std::map<std::string, subdomain_id_type>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
+      subdomain_id_type b = bit->second;
       MeshBase::const_element_iterator el     = dmm->nl->sys().get_mesh().active_local_subdomain_elements_begin(b);
       MeshBase::const_element_iterator end_el = dmm->nl->sys().get_mesh().active_local_subdomain_elements_end(b);
       for ( ; el != end_el; ++el) {
@@ -592,8 +592,8 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
   if (namelist) {ierr = PetscMalloc(*len*sizeof(char*),namelist);CHKERRQ(ierr);}
   if (islist)   {ierr = PetscMalloc(*len*sizeof(IS),islist);CHKERRQ(ierr);}
   if (dmlist)   {ierr = PetscMalloc(*len*sizeof(DM),dmlist);CHKERRQ(ierr);}
-  for (std::multimap<std::string, dof_id_type>::const_iterator dit = dmm->splitlocs->begin(); dit != dmm->splitlocs->end(); ++dit) {
-    dof_id_type                             d = dit->second;
+  for (std::multimap<std::string, unsigned int>::const_iterator dit = dmm->splitlocs->begin(); dit != dmm->splitlocs->end(); ++dit) {
+    unsigned int                         d = dit->second;
     std::string                          dname = dit->first;
     DM_Moose::SplitInfo&                 dinfo = (*dmm->splits)[dname];
     if (!dinfo.dm) {
@@ -1024,8 +1024,8 @@ static PetscErrorCode  DMView_Moose(DM dm, PetscViewer viewer)
     }
     ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer, "blocks:"); CHKERRQ(ierr);
-    std::map<std::string,unsigned int>::iterator bit = dmm->blockids->begin();
-    std::map<std::string,unsigned int>::const_iterator bend = dmm->blockids->end();
+    std::map<std::string, subdomain_id_type>::iterator bit = dmm->blockids->begin();
+    std::map<std::string, subdomain_id_type>::const_iterator bend = dmm->blockids->end();
     for (; bit != bend; ++bit) {
       ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", bit->first.c_str(), bit->second); CHKERRQ(ierr);
     }
@@ -1253,7 +1253,7 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
       // Equivalently, skip this block if dmm->blocks is dmm->blocks is null or empty or excludes this block.
       if (!dmm->blocks || !dmm->blocks->size() || dmm->blocks->find(bname) == dmm->blocks->end()) continue;
     }
-    dmm->blockids->insert(std::pair<std::string,unsigned int>(bname,bid));
+    dmm->blockids->insert(std::pair<std::string, subdomain_id_type>(bname,bid));
     dmm->blocknames->insert(std::pair<unsigned int,std::string>(bid,bname));
   }
   if (dmm->blockids->size() == blocks.size()) dmm->allblocks = PETSC_TRUE; else dmm->allblocks = PETSC_FALSE;
@@ -1638,7 +1638,7 @@ PetscErrorCode  DMCreate_Moose(DM dm)
   dm->data = dmm;
 
   dmm->varids        = new(std::map<std::string, unsigned int>);
-  dmm->blockids      = new(std::map<std::string, unsigned int>);
+  dmm->blockids      = new(std::map<std::string, subdomain_id_type>);
   dmm->varnames      = new(std::map<unsigned int, std::string>);
   dmm->blocknames    = new(std::map<unsigned int, std::string>);
   dmm->sideids       = new(std::map<std::string, BoundaryID>);

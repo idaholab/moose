@@ -36,10 +36,10 @@ public:
                     std::vector<std::vector<FEBase *> > & fes,
                     FEType & fe_type,
                     NearestNodeLocator & nearest_node,
-                    std::map<unsigned int, std::vector<unsigned int> > & node_to_elem_map,
-                    std::vector< unsigned int > & elem_list,
-                    std::vector< unsigned short int > & side_list,
-                    std::vector< short int > & id_list);
+                    std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
+                    std::vector<dof_id_type> & elem_list,
+                    std::vector<unsigned short int> & side_list,
+                    std::vector<boundary_id_type> & id_list);
 
   // Splitting Constructor
   PenetrationThread(PenetrationThread & x, Threads::split split);
@@ -73,11 +73,11 @@ protected:
 
   NearestNodeLocator & _nearest_node;
 
-  std::map<unsigned int, std::vector<unsigned int> > & _node_to_elem_map;
+  std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map;
 
-  std::vector< unsigned int > & _elem_list;
-  std::vector< unsigned short int > & _side_list;
-  std::vector< short int > & _id_list;
+  std::vector<dof_id_type> & _elem_list;
+  std::vector<unsigned short int> & _side_list;
+  std::vector<boundary_id_type> & _id_list;
 
   unsigned int _n_elems;
 

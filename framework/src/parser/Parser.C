@@ -679,6 +679,16 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractVector(int                   , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(long                  , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(unsigned int          , it->second, full_name, it->first, in_global, global_params_block);
+      // We need to be able to parse 8-byte unsigned types when
+      // libmesh is configured --with-dof-id-bytes=8.  Officially,
+      // libmesh uses uint64_t in that scenario, which is usually
+      // equivalent to 'unsigned long long'.  Note that 'long long'
+      // has been around since C99 so most C++ compilers support it,
+      // but presumably uint64_t is the "most standard" way to get a
+      // 64-bit unsigned type, so we'll stick with that here.
+#if LIBMESH_DOF_ID_BYTES == 8
+      dynamicCastAndExtractVector(uint64_t              , it->second, full_name, it->first, in_global, global_params_block);
+#endif
 
       // Moose Vectors
       dynamicCastAndExtractVector(SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);

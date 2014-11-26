@@ -500,7 +500,7 @@ MooseMesh::coarsenedElementChildren(const Elem * elem)
 }
 
 void
-MooseMesh::updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems)
+MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
 {
   _semilocal_node_list.clear();
 
@@ -520,7 +520,7 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems
   }
 
   // Now add the nodes connected to ghosted_elems
-  for (std::set<unsigned int>::iterator it=ghosted_elems.begin();
+  for (std::set<dof_id_type>::iterator it=ghosted_elems.begin();
       it!=ghosted_elems.end();
       ++it)
   {
@@ -578,7 +578,7 @@ MooseMesh::buildNodeList()
   freeBndNodes();
 
   /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
-  std::vector<unsigned int> nodes;
+  std::vector<dof_id_type> nodes;
   std::vector<boundary_id_type> ids;
   getMesh().get_boundary_info().build_node_list(nodes, ids);
 
@@ -611,7 +611,7 @@ MooseMesh::buildBndElemList()
   freeBndElems();
 
   /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
-  std::vector<unsigned int> elems;
+  std::vector<dof_id_type> elems;
   std::vector<unsigned short int> sides;
   std::vector<boundary_id_type> ids;
   getMesh().get_boundary_info().build_active_side_list(elems, sides, ids);
@@ -625,7 +625,7 @@ MooseMesh::buildBndElemList()
   }
 }
 
-std::map<unsigned int, std::vector<unsigned int> > &
+std::map<dof_id_type, std::vector<dof_id_type> > &
 MooseMesh::nodeToElemMap()
 {
   if (!_node_to_elem_map_built) // Guard the creation with a double checked lock
@@ -1098,7 +1098,7 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<unsigned int> > &
 {
   periodic_node_sets.clear();
 
-  std::vector<unsigned int> nl;
+  std::vector<dof_id_type> nl;
   std::vector<boundary_id_type> il;
 
   getMesh().get_boundary_info().build_node_list(nl, il);
@@ -1760,7 +1760,7 @@ MooseMesh::buildNodeListFromSideList()
 }
 
 void
-MooseMesh::buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il)
+MooseMesh::buildSideList(std::vector<dof_id_type> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il)
 {
   getMesh().get_boundary_info().build_side_list(el, sl, il);
 }
@@ -1953,7 +1953,7 @@ MooseMesh::ghostGhostedBoundaries()
 
   Moose::perf_log.push("ghostGhostedBoundaries()","MooseMesh");
 
-  std::vector<unsigned int> elems;
+  std::vector<dof_id_type> elems;
   std::vector<unsigned short int> sides;
   std::vector<boundary_id_type> ids;
 

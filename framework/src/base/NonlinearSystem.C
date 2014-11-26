@@ -1269,7 +1269,7 @@ NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & do
 }
 
 void
-NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<unsigned int, std::vector<unsigned int> > & graph)
+NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<dof_id_type, std::vector<dof_id_type> > & graph)
 {
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
 
@@ -2023,8 +2023,8 @@ NonlinearSystem::residualGhosted()
 
 void
 NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
-                                 std::vector<unsigned int> & n_nz,
-                                 std::vector<unsigned int> & n_oz)
+                                 std::vector<dof_id_type> & n_nz,
+                                 std::vector<dof_id_type> & n_oz)
 {
 
   if (_add_implicit_geometric_coupling_entries_to_jacobian)

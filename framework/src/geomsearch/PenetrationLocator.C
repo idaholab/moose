@@ -88,9 +88,9 @@ PenetrationLocator::detectPenetration()
   Moose::perf_log.push("detectPenetration()","Solve");
 
   // Data structures to hold the element boundary information
-  std::vector< unsigned int > elem_list;
-  std::vector< unsigned short int > side_list;
-  std::vector< short int > id_list;
+  std::vector<dof_id_type> elem_list;
+  std::vector<unsigned short int> side_list;
+  std::vector<boundary_id_type> id_list;
 
   // Retrieve the Element Boundary data structures from the mesh
   _mesh.buildSideList(elem_list, side_list, id_list);

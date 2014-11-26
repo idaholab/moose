@@ -954,7 +954,11 @@ Assembly::addResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 }
 
 void
-Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values, std::vector<unsigned int> & cached_residual_rows, DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor)
+Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values,
+                             std::vector<dof_id_type> & cached_residual_rows,
+                             DenseVector<Number> & res_block,
+                             std::vector<dof_id_type> & dof_indices,
+                             Real scaling_factor)
 {
   if (dof_indices.size() > 0 && res_block.size())
   {
@@ -1051,7 +1055,7 @@ void
 Assembly::addCachedResidual(NumericVector<Number> & residual, Moose::KernelType type)
 {
   std::vector<Real> & cached_residual_values = _cached_residual_values[type];
-  std::vector<unsigned int> & cached_residual_rows = _cached_residual_rows[type];
+  std::vector<dof_id_type> & cached_residual_rows = _cached_residual_rows[type];
 
   mooseAssert(cached_residual_values.size() == cached_residual_rows.size(), "Number of cached residuals and number of rows must match!");
 

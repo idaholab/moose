@@ -133,7 +133,7 @@ public:
    * If not already created, creates a map from every node to all
    * elements to which they are created.
    */
-  std::map<unsigned int, std::vector<unsigned int> > & nodeToElemMap();
+  std::map<dof_id_type, std::vector<dof_id_type> > & nodeToElemMap();
 
   /**
    * These structs are required so that the bndNodes{Begin,End} and
@@ -166,7 +166,7 @@ public:
    * Calls BoundaryInfo::build_side_list().
    * Fills in the three passed vectors with list logical (element, side, id) tuples.
    */
-  void buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il);
+  void buildSideList(std::vector<dof_id_type> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il);
 
   /**
    * Calls BoundaryInfo::side_with_boundary_id().
@@ -263,7 +263,7 @@ public:
    * Clears the "semi-local" node list and rebuilds it.  Semi-local nodes
    * consist of all nodes that belong to local and ghost elements.
    */
-  void updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems);
+  void updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems);
 
   /**
    * Returns true if the node is semi-local
@@ -754,7 +754,7 @@ protected:
   StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> * _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
-  std::map<unsigned int, std::vector<unsigned int> > _node_to_elem_map;
+  std::map<dof_id_type, std::vector<dof_id_type> > _node_to_elem_map;
   bool _node_to_elem_map_built;
 
   /**

@@ -18,7 +18,7 @@
 #include "libmesh/threads.h"
 
 NearestNodeThread::NearestNodeThread(const MooseMesh & mesh,
-                                     std::map<unsigned int, std::vector<unsigned int> > & neighbor_nodes) :
+                                     std::map<dof_id_type, std::vector<dof_id_type> > & neighbor_nodes) :
   _max_patch_percentage(0.0),
   _mesh(mesh),
   _neighbor_nodes(neighbor_nodes)
@@ -50,7 +50,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
     const Node * closest_node = NULL;
     Real closest_distance = std::numeric_limits<Real>::max();
 
-    const std::vector<unsigned int> & neighbor_nodes = _neighbor_nodes[node_id];
+    const std::vector<dof_id_type> & neighbor_nodes = _neighbor_nodes[node_id];
 
     unsigned int n_neighbor_nodes = neighbor_nodes.size();
 

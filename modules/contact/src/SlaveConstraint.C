@@ -96,7 +96,7 @@ SlaveConstraint::addPoints()
     {
       // Find an element that is connected to this node that and that is also on this processor
 
-      std::vector<unsigned int> & connected_elems = _mesh.nodeToElemMap()[slave_node_num];
+      std::vector<dof_id_type> & connected_elems = _mesh.nodeToElemMap()[slave_node_num];
 
       Elem * elem = NULL;
 

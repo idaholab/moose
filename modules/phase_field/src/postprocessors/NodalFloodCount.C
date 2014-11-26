@@ -369,7 +369,7 @@ NodalFloodCount::unpack(const std::vector<unsigned int> & packed_data)
   bool has_data_to_save = false;
 
   unsigned int curr_set_length = 0;
-  std::set<unsigned int> curr_set;
+  std::set<dof_id_type> curr_set;
   unsigned int curr_var_idx = std::numeric_limits<unsigned int>::max();
 
   _region_to_var_idx.clear();
@@ -420,8 +420,8 @@ void
 NodalFloodCount::mergeSets()
 {
   Moose::perf_log.push("mergeSets()", "NodalFloodCount");
-  std::set<unsigned int> set_union;
-  std::insert_iterator<std::set<unsigned int> > set_union_inserter(set_union, set_union.begin());
+  std::set<dof_id_type> set_union;
+  std::insert_iterator<std::set<dof_id_type> > set_union_inserter(set_union, set_union.begin());
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
@@ -471,7 +471,7 @@ NodalFloodCount::updateFieldInfo()
     unsigned int counter = 1;
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
     {
-      for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
+      for (std::set<dof_id_type>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
       {
         // Color the bubble map with a unique region
         _bubble_maps[map_num][*it2] = counter;

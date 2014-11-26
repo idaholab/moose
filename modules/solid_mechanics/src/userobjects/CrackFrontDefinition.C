@@ -121,7 +121,7 @@ CrackFrontDefinition::initialSetup()
   _crack_mouth_boundary_ids = _mesh.getBoundaryIDs(_crack_mouth_boundary_names,true);
   _intersecting_boundary_ids = _mesh.getBoundaryIDs(_intersecting_boundary_names,true);
 
-  std::set<unsigned int> nodes;
+  std::set<dof_id_type> nodes;
   getCrackFrontNodes(nodes);
   orderCrackFrontNodes(nodes);
 
@@ -145,7 +145,7 @@ CrackFrontDefinition::threadJoin(const UserObject & /*uo*/)
 }
 
 void
-CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
+CrackFrontDefinition::getCrackFrontNodes(std::set<dof_id_type>& nodes)
 {
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
@@ -186,7 +186,7 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
       Real node0coor0;
       Real node0coor1;
 
-      for (std::set<unsigned int>::iterator sit=nodes.begin(); sit != nodes.end(); ++sit)
+      for (std::set<dof_id_type>::iterator sit=nodes.begin(); sit != nodes.end(); ++sit)
       {
         Node & curr_node = _mesh.node(*sit);
         if (sit == nodes.begin())
@@ -202,7 +202,7 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
         }
       }
 
-      std::set<unsigned int>::iterator second_node = nodes.begin();
+      std::set<dof_id_type>::iterator second_node = nodes.begin();
       ++second_node;
       nodes.erase(second_node,nodes.end());
     }
@@ -210,7 +210,7 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<unsigned int>& nodes)
 }
 
 void
-CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
+CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> &nodes)
 {
   _ordered_crack_front_nodes.clear();
   if (nodes.size() < 1)
@@ -229,17 +229,16 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
     //Loop through the set of crack front nodes, and create a node to element map for just the crack front nodes
     //The main reason for creating a second map is that we need to do a sort prior to the set_intersection.
     //The original map contains vectors, and we can't sort them, so we create sets in the local map.
-    std::map<unsigned int, std::vector<unsigned int> > & node_to_elem_map = _mesh.nodeToElemMap();
-    std::map<unsigned int, std::set<unsigned int> > crack_front_node_to_elem_map;
-    std::map<unsigned int, std::vector<unsigned int> >::iterator nemit;
+    std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToElemMap();
+    std::map<dof_id_type, std::set<dof_id_type> > crack_front_node_to_elem_map;
 
-    for (std::set<unsigned int>::iterator nit = nodes.begin(); nit != nodes.end(); ++nit )
+    for (std::set<dof_id_type>::iterator nit = nodes.begin(); nit != nodes.end(); ++nit )
     {
-      nemit = node_to_elem_map.find(*nit);
+      std::map<dof_id_type, std::vector<dof_id_type> >::iterator nemit = node_to_elem_map.find(*nit);
       if (nemit == node_to_elem_map.end())
         mooseError("Could not find crack front node "<<*nit<<"in the node to elem map");
 
-      std::vector<unsigned int> & connected_elems = nemit->second;
+      std::vector<dof_id_type> & connected_elems = nemit->second;
       for (unsigned int i=0; i<connected_elems.size(); ++i)
         crack_front_node_to_elem_map[*nit].insert(connected_elems[i]);
     }
@@ -247,29 +246,29 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
 
     //Determine which nodes are connected to each other via elements, and construct line elements to represent
     //those connections
-    std::vector<std::vector<unsigned int> > line_elems;
-    std::map<unsigned int, std::vector<unsigned int> > node_to_line_elem_map;
+    std::vector<std::vector<dof_id_type> > line_elems;
+    std::map<dof_id_type, std::vector<dof_id_type> > node_to_line_elem_map;
 
-    for (std::map<unsigned int, std::set<unsigned int> >::iterator cfnemit = crack_front_node_to_elem_map.begin();
+    for (std::map<dof_id_type, std::set<dof_id_type> >::iterator cfnemit = crack_front_node_to_elem_map.begin();
          cfnemit != crack_front_node_to_elem_map.end();
          ++cfnemit)
     {
-      std::map<unsigned int, std::set<unsigned int> >::iterator cfnemit2 = cfnemit;
+      std::map<dof_id_type, std::set<dof_id_type> >::iterator cfnemit2 = cfnemit;
       for (++cfnemit2;
            cfnemit2 != crack_front_node_to_elem_map.end();
            ++cfnemit2)
       {
 
-        std::vector<unsigned int> common_elements;
-        std::set<unsigned int> &elements_connected_to_node1 = cfnemit->second;
-        std::set<unsigned int> &elements_connected_to_node2 = cfnemit2->second;
+        std::vector<dof_id_type> common_elements;
+        std::set<dof_id_type> &elements_connected_to_node1 = cfnemit->second;
+        std::set<dof_id_type> &elements_connected_to_node2 = cfnemit2->second;
         std::set_intersection(elements_connected_to_node1.begin(), elements_connected_to_node1.end(),
                               elements_connected_to_node2.begin(), elements_connected_to_node2.end(),
-                              std::inserter(common_elements,common_elements.end()));
+                              std::inserter(common_elements, common_elements.end()));
 
         if (common_elements.size() > 0)
         {
-          std::vector<unsigned int> my_line_elem;
+          std::vector<dof_id_type> my_line_elem;
           my_line_elem.push_back(cfnemit->first);
           my_line_elem.push_back(cfnemit2->first);
           node_to_line_elem_map[cfnemit->first].push_back(line_elems.size());
@@ -280,8 +279,8 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
     }
 
     //Find nodes on ends of line (those connected to only one line element)
-    std::vector<unsigned int> end_nodes;
-    for (std::map<unsigned int, std::vector<unsigned int> >::iterator nlemit = node_to_line_elem_map.begin();
+    std::vector<dof_id_type> end_nodes;
+    for (std::map<dof_id_type, std::vector<dof_id_type> >::iterator nlemit = node_to_line_elem_map.begin();
          nlemit != node_to_line_elem_map.end();
          ++nlemit)
     {
@@ -310,18 +309,18 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
     //Create an ordered list of the nodes going along the line of the crack front
     _ordered_crack_front_nodes.push_back(end_nodes[0]);
 
-    unsigned int last_node = end_nodes[0];
-    unsigned int second_last_node = last_node;
+    dof_id_type last_node = end_nodes[0];
+    dof_id_type second_last_node = last_node;
     while (last_node != end_nodes[1])
     {
-      std::vector<unsigned int> & curr_node_line_elems = node_to_line_elem_map[last_node];
+      std::vector<dof_id_type> & curr_node_line_elems = node_to_line_elem_map[last_node];
       bool found_new_node = false;
       for (unsigned int i=0; i<curr_node_line_elems.size(); ++i)
       {
-        std::vector<unsigned int> curr_line_elem = line_elems[curr_node_line_elems[i]];
+        std::vector<dof_id_type> curr_line_elem = line_elems[curr_node_line_elems[i]];
         for (unsigned int j=0; j<curr_line_elem.size(); ++j)
         {
-          unsigned int line_elem_node = curr_line_elem[j];
+          dof_id_type line_elem_node = curr_line_elem[j];
           if (_closed_loop && (last_node == end_nodes[0] && line_elem_node == end_nodes[1])) //wrong direction around closed loop
             continue;
           if (line_elem_node != last_node &&
@@ -342,7 +341,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<unsigned int> &nodes)
 }
 
 void
-CrackFrontDefinition::orderEndNodes(std::vector<unsigned int> &end_nodes)
+CrackFrontDefinition::orderEndNodes(std::vector<dof_id_type> &end_nodes)
 {
   //Choose the node to be the first node.  Do that based on undeformed coordinates for repeatability.
   Node & node0 = _mesh.node(end_nodes[0]);
@@ -391,17 +390,17 @@ CrackFrontDefinition::orderEndNodes(std::vector<unsigned int> &end_nodes)
 }
 
 void
-CrackFrontDefinition::pickLoopCrackEndNodes(std::vector<unsigned int> &end_nodes,
-                                            std::set<unsigned int> &nodes,
-                                            std::map<unsigned int, std::vector<unsigned int> > &node_to_line_elem_map,
-                                            std::vector<std::vector<unsigned int> > &line_elems)
+CrackFrontDefinition::pickLoopCrackEndNodes(std::vector<dof_id_type> &end_nodes,
+                                            std::set<dof_id_type> &nodes,
+                                            std::map<dof_id_type, std::vector<dof_id_type> > &node_to_line_elem_map,
+                                            std::vector<std::vector<dof_id_type> > &line_elems)
 {
   unsigned int max_dist_node;
   Real min_dist = std::numeric_limits<Real>::max();
   Real max_dist = -std::numeric_limits<Real>::max();
   //Pick the node farthest from the origin as the end node, or the one with
   //the greatest x coordinate if the nodes are equidistant from the origin
-  for (std::set<unsigned int>::iterator nit = nodes.begin(); nit != nodes.end(); ++nit )
+  for (std::set<dof_id_type>::iterator nit = nodes.begin(); nit != nodes.end(); ++nit )
   {
     Node & node = _mesh.node(*nit);
     Real dist = node.size();
@@ -420,7 +419,7 @@ CrackFrontDefinition::pickLoopCrackEndNodes(std::vector<unsigned int> &end_nodes
   else
   {
     std::vector<Node *> node_vec;
-    for (std::set<unsigned int>::iterator nit = nodes.begin(); nit != nodes.end(); ++nit )
+    for (std::set<dof_id_type>::iterator nit = nodes.begin(); nit != nodes.end(); ++nit )
       node_vec.push_back(_mesh.nodePtr(*nit));
     end_node = maxNodeCoor(node_vec);
   }
@@ -428,14 +427,14 @@ CrackFrontDefinition::pickLoopCrackEndNodes(std::vector<unsigned int> &end_nodes
   end_nodes.push_back(end_node);
 
   //Find the two nodes connected to the node identified as the end node, and pick one of those to be the other end node
-  std::vector<unsigned int> end_node_line_elems = node_to_line_elem_map[end_node];
+  std::vector<dof_id_type> end_node_line_elems = node_to_line_elem_map[end_node];
   if (end_node_line_elems.size() != 2)
     mooseError("Crack front nodes are in a loop, but crack end node is only connected to one other node");
   std::vector<Node *> candidate_other_end_nodes;
 
   for (unsigned int i=0; i<2; ++i)
   {
-    std::vector<unsigned int> end_line_elem = line_elems[end_node_line_elems[i]];
+    std::vector<dof_id_type> end_line_elem = line_elems[end_node_line_elems[i]];
     for (unsigned int j=0; j<end_line_elem.size(); ++j)
     {
       unsigned int line_elem_node = end_line_elem[j];
@@ -998,7 +997,7 @@ CrackFrontDefinition::isNodeOnIntersectingBoundary(const Node * const node) cons
 {
   bool is_on_boundary = false;
   mooseAssert(node,"Invalid node");
-  unsigned int node_id = node->id();
+  dof_id_type node_id = node->id();
   for (unsigned int i=0; i<_intersecting_boundary_ids.size(); ++i)
   {
     if (_mesh.isBoundaryNode(node_id,_intersecting_boundary_ids[i]))

@@ -345,11 +345,11 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
 
       if (frictional_contact_this_interaction)
       {
-        std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+        std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
         for (unsigned int i=0; i<slave_nodes.size(); i++)
         {
-          unsigned int slave_node_num = slave_nodes[i];
+          dof_id_type slave_node_num = slave_nodes[i];
 
           if (pen_loc._penetration_info[slave_node_num])
           {
@@ -484,11 +484,11 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
         Real friction_coefficient = interaction_params._friction_coefficient;
 
 
-        std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+        std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
         for (unsigned int i=0; i<slave_nodes.size(); i++)
         {
-          unsigned int slave_node_num = slave_nodes[i];
+          dof_id_type slave_node_num = slave_nodes[i];
 
           if (pen_loc._penetration_info[slave_node_num])
           {
@@ -768,11 +768,11 @@ FrictionalContactProblem::numLocalFrictionalConstraints()
     {
       std::set<unsigned int> & has_penetrated = pen_loc._has_penetrated;
 
-      std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+      std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
-        unsigned int slave_node_num = slave_nodes[i];
+        dof_id_type slave_node_num = slave_nodes[i];
 
         if (pen_loc._penetration_info[slave_node_num])
         {
@@ -947,11 +947,11 @@ FrictionalContactProblem::updateIncrementalSlip()
     {
       std::set<unsigned int> & has_penetrated = pen_loc._has_penetrated;
 
-      std::vector<unsigned int> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+      std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
-        unsigned int slave_node_num = slave_nodes[i];
+        dof_id_type slave_node_num = slave_nodes[i];
 
         if (pen_loc._penetration_info[slave_node_num])
         {

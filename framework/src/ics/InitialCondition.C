@@ -104,7 +104,7 @@ InitialCondition::compute()
   // The global DOF indices
   std::vector<dof_id_type> dof_indices;
   // Side/edge DOF indices
-  std::vector<dof_id_type> side_dofs;
+  std::vector<unsigned int> side_dofs;
 
   // Get FE objects of the appropriate type
   // We cannot use the FE object in Assembly, since the following code is messing with the quadrature rules

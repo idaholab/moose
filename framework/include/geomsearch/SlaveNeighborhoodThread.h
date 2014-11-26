@@ -26,8 +26,8 @@ class SlaveNeighborhoodThread
 {
 public:
   SlaveNeighborhoodThread(const MooseMesh & mesh,
-                          const std::vector<unsigned int> & trial_master_nodes,
-                          std::map<unsigned int, std::vector<unsigned int> > & node_to_elem_map,
+                          const std::vector<dof_id_type> & trial_master_nodes,
+                          std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
                           const unsigned int patch_size);
 
 
@@ -39,23 +39,23 @@ public:
   void join(const SlaveNeighborhoodThread & other);
 
   /// List of the slave nodes we're actually going to keep track of
-  std::vector<unsigned int> _slave_nodes;
+  std::vector<dof_id_type> _slave_nodes;
 
   /// The neighborhood nodes associated with each node
-  std::map<unsigned int, std::vector<unsigned int> > _neighbor_nodes;
+  std::map<dof_id_type, std::vector<dof_id_type> > _neighbor_nodes;
 
   /// Elements that we need to ghost
-  std::set<unsigned int> _ghosted_elems;
+  std::set<dof_id_type> _ghosted_elems;
 
 protected:
   /// The Mesh
   const MooseMesh & _mesh;
 
   /// Nodes to search against
-  const std::vector<unsigned int> & _trial_master_nodes;
+  const std::vector<dof_id_type> & _trial_master_nodes;
 
   /// Node to elem map
-  std::map<unsigned int, std::vector<unsigned int> > & _node_to_elem_map;
+  std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map;
 
   /// The number of nodes to keep
   unsigned int _patch_size;

@@ -40,10 +40,10 @@ PenetrationThread::PenetrationThread(SubProblem & subproblem,
                                      std::vector<std::vector<FEBase *> > & fes,
                                      FEType & fe_type,
                                      NearestNodeLocator & nearest_node,
-                                     std::map<unsigned int, std::vector<unsigned int> > & node_to_elem_map,
-                                     std::vector< unsigned int > & elem_list,
-                                     std::vector< unsigned short int > & side_list,
-                                     std::vector< short int > & id_list) :
+                                     std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
+                                     std::vector<dof_id_type> & elem_list,
+                                     std::vector<unsigned short int> & side_list,
+                                     std::vector<boundary_id_type> & id_list) :
   _subproblem(subproblem),
   _mesh(mesh),
   _master_boundary(master_boundary),
@@ -177,7 +177,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
     if (!info_set)
     {
       const Node * closest_node = _nearest_node.nearestNode(node.id());
-      std::vector<unsigned int> & closest_elems = _node_to_elem_map[closest_node->id()];
+      std::vector<dof_id_type> & closest_elems = _node_to_elem_map[closest_node->id()];
 
       for (unsigned int j=0; j<closest_elems.size(); j++)
       {
@@ -766,7 +766,7 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
   for (unsigned int i(0); i<edge_nodes.size(); ++i)
   {
     unsigned int local_index = side->get_node_index(edge_nodes[i]);
-    if (local_index == Node::invalid_id)
+    if (local_index == libMesh::invalid_uint)
       mooseError("Side does not contain node");
     local_node_indices.push_back(local_index);
   }
@@ -1489,7 +1489,7 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
                                                   std::vector<PenetrationInfo*> & p_info)
 {
   //elems connected to a node on this edge, find one that has the same corners as this, and is not the current elem
-  std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[edge_nodes[0]->id()]; //just need one of the nodes
+  std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[edge_nodes[0]->id()]; //just need one of the nodes
 
   std::vector<const Elem*> elems_connected_to_edge;
 

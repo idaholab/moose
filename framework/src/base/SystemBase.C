@@ -35,8 +35,8 @@ void extraSendList(std::vector<dof_id_type> & send_list, void * context)
 
 /// Free function used for a libMesh callback
 void extraSparsity(SparsityPattern::Graph & sparsity,
-                   std::vector<unsigned int> & n_nz,
-                   std::vector<unsigned int> & n_oz,
+                   std::vector<dof_id_type> & n_nz,
+                   std::vector<dof_id_type> & n_oz,
                    void * context)
 {
   SystemBase * sys = static_cast<SystemBase *>(context);
