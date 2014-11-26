@@ -16,8 +16,7 @@ SimpleEigenStrainMaterial::SimpleEigenStrainMaterial(const std::string & name,
                                                      InputParameters parameters) :
     EigenStrainBaseMaterial(name, parameters),
     _epsilon0(getParam<Real>("epsilon0")),
-    _c0(getParam<Real>("c0")),
-    _c(coupledValue("c"))
+    _c0(getParam<Real>("c0"))
 {
 }
 
