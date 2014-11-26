@@ -24,11 +24,11 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const std::string & name,
     _Fa_name(getParam<std::string>("fa_name")),
     _Fb_name(getParam<std::string>("fb_name")),
     // first derivatives
-    _dfadca(getDerivative<Real>(_Fa_name, _var.name())),
-    _dfbdcb(getDerivative<Real>(_Fb_name, _cb_name)),
+    _dfadca(getMaterialPropertyDerivative<Real>(_Fa_name, _var.name())),
+    _dfbdcb(getMaterialPropertyDerivative<Real>(_Fb_name, _cb_name)),
     // second derivatives d2F/dx*dca for jacobian diagonal elements
-    _d2fadca2(getDerivative<Real>(_Fa_name, _var.name(), _var.name())),
-    _d2fbdcbca(getDerivative<Real>(_Fb_name, _cb_name, _var.name()))
+    _d2fadca2(getMaterialPropertyDerivative<Real>(_Fa_name, _var.name(), _var.name())),
+    _d2fbdcbca(getMaterialPropertyDerivative<Real>(_Fb_name, _cb_name, _var.name()))
 {
   MooseVariable *arg;
   unsigned int i;
@@ -45,8 +45,8 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const std::string & name,
     arg = _coupled_moose_vars[i];
 
     // lookup table for the material properties representing the derivatives needed for the off-diagonal jacobian
-    _off_diag_a[i] = &getDerivative<Real>(_Fa_name, _var.name(), arg->name());
-    _off_diag_b[i] = &getDerivative<Real>(_Fb_name, _cb_name, arg->name());
+    _off_diag_a[i] = &getMaterialPropertyDerivative<Real>(_Fa_name, _var.name(), arg->name());
+    _off_diag_b[i] = &getMaterialPropertyDerivative<Real>(_Fb_name, _cb_name, arg->name());
   }
 }
 

@@ -26,8 +26,8 @@ KKSCHBulk::KKSCHBulk(const std::string & name, InputParameters parameters) :
     _cb_var(coupled("cb")),
     _cb_name(getVar("cb", 0)->name()),
     _prop_h(getMaterialProperty<Real>(_h_name)),
-    _second_derivative_Fa(getDerivative<Real>(_Fa_name, _ca_name, _ca_name)),
-    _second_derivative_Fb(getDerivative<Real>(_Fb_name, _cb_name, _cb_name))
+    _second_derivative_Fa(getMaterialPropertyDerivative<Real>(_Fa_name, _ca_name, _ca_name)),
+    _second_derivative_Fb(getMaterialPropertyDerivative<Real>(_Fb_name, _cb_name, _cb_name))
 {
   // reserve space for derivatives
   _second_derivatives.resize(_nvar);
@@ -41,15 +41,15 @@ KKSCHBulk::KKSCHBulk(const std::string & name, InputParameters parameters) :
     MooseVariable *cvar = this->_coupled_moose_vars[i];
 
     // get the second derivative material property (TODO:warn)
-    _second_derivatives[i] = &getDerivative<Real>(_Fa_name, _ca_name, cvar->name());
+    _second_derivatives[i] = &getMaterialPropertyDerivative<Real>(_Fa_name, _ca_name, cvar->name());
 
     // get the third derivative material properties
     _third_derivatives[i].resize(_nvar);
     for (unsigned int j = 0; j < _nvar; ++j)
-      _third_derivatives[i][j] = &getDerivative<Real>(_Fa_name, _ca_name, cvar->name(), _coupled_moose_vars[j]->name());
+      _third_derivatives[i][j] = &getMaterialPropertyDerivative<Real>(_Fa_name, _ca_name, cvar->name(), _coupled_moose_vars[j]->name());
 
     // third derivative for the on-diagonal jacobian
-    _third_derivatives_ca[i] = &getDerivative<Real>(_Fa_name, _ca_name, cvar->name(), _ca_name);
+    _third_derivatives_ca[i] = &getMaterialPropertyDerivative<Real>(_Fa_name, _ca_name, cvar->name(), _ca_name);
 
     // get the gradient
     _grad_args[i] = &(cvar->gradSln());

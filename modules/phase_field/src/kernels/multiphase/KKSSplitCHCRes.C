@@ -28,9 +28,9 @@ KKSSplitCHCRes::KKSSplitCHCRes(const std::string & name, InputParameters paramet
     _cb_var(coupled("cb")),
     _cb_name(getVar("cb", 0)->name()),
     _prop_h(getMaterialProperty<Real>(_h_name)),
-    _first_derivative_Fa(getDerivative<Real>(_Fa_name, _ca_name)),
-    _second_derivative_Fa(getDerivative<Real>(_Fa_name, _ca_name, _ca_name)),
-    _second_derivative_Fb(getDerivative<Real>(_Fb_name, _cb_name, _cb_name)),
+    _first_derivative_Fa(getMaterialPropertyDerivative<Real>(_Fa_name, _ca_name)),
+    _second_derivative_Fa(getMaterialPropertyDerivative<Real>(_Fa_name, _ca_name, _ca_name)),
+    _second_derivative_Fb(getMaterialPropertyDerivative<Real>(_Fb_name, _cb_name, _cb_name)),
     _w_var(coupled("w")),
     _w(coupledValue("w"))
 {
@@ -43,7 +43,7 @@ KKSSplitCHCRes::KKSSplitCHCRes(const std::string & name, InputParameters paramet
     MooseVariable *cvar = this->_coupled_moose_vars[i];
 
     // get the second derivative material property (TODO:warn)
-    _second_derivatives[i] = &getDerivative<Real>(_Fa_name, _ca_name, cvar->name());
+    _second_derivatives[i] = &getMaterialPropertyDerivative<Real>(_Fa_name, _ca_name, cvar->name());
   }
 }
 
