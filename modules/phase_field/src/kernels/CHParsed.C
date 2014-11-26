@@ -17,15 +17,15 @@ CHParsed::CHParsed(const std::string & name, InputParameters parameters) :
   _grad_vars.resize(_nvar+1);
 
   // derivatives w.r.t. and gradients of the kernel variable
-  _second_derivatives[0] = &getDerivative<Real>(_F_name, _var.name(), _var.name());
-  _third_derivatives[0]  = &getDerivative<Real>(_F_name, _var.name(), _var.name(), _var.name());
+  _second_derivatives[0] = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name());
+  _third_derivatives[0]  = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name(), _var.name());
   _grad_vars[0] = &(_grad_u);
 
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    _second_derivatives[i+1] = &getDerivative<Real>(_F_name, _var.name(), _coupled_moose_vars[i]->name());
-    _third_derivatives[i+1]  = &getDerivative<Real>(_F_name, _var.name(), _var.name(), _coupled_moose_vars[i]->name());
+    _second_derivatives[i+1] = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _coupled_moose_vars[i]->name());
+    _third_derivatives[i+1]  = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name(), _coupled_moose_vars[i]->name());
     _grad_vars[i+1] = &(_coupled_moose_vars[i]->gradSln());
   }
 }

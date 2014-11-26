@@ -10,8 +10,8 @@ InputParameters validParams<ACParsed>()
 
 ACParsed::ACParsed(const std::string & name, InputParameters parameters) :
     DerivativeKernelInterface<ACBulk>(name, parameters),
-    _dFdEta(getDerivative<Real>(_F_name, _var.name())),
-    _d2FdEta2(getDerivative<Real>(_F_name, _var.name(), _var.name()))
+    _dFdEta(getMaterialPropertyDerivative<Real>(_F_name, _var.name())),
+    _d2FdEta2(getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name()))
 {
 }
 
