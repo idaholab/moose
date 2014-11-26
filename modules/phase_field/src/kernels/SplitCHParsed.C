@@ -9,8 +9,8 @@ InputParameters validParams<SplitCHParsed>()
 
 SplitCHParsed::SplitCHParsed(const std::string & name, InputParameters parameters) :
     DerivativeKernelInterface<SplitCHCRes>(name, parameters),
-    _dFdc(getDerivative<Real>(_F_name, _var.name())),
-    _d2Fdc2(getDerivative<Real>(_F_name, _var.name(), _var.name()))
+    _dFdc(getMaterialPropertyDerivative<Real>(_F_name, _var.name())),
+    _d2Fdc2(getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name()))
 {
 }
 

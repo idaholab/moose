@@ -10,11 +10,11 @@ InputParameters validParams<DerivativeMaterialInterfaceTestProvider>()
 DerivativeMaterialInterfaceTestProvider::DerivativeMaterialInterfaceTestProvider(const std::string & name,
                                                                                  InputParameters parameters) :
     DerivativeMaterialInterface<Material>(name, parameters),
-    _prop1(declareProperty<Real>(propertyNameFirst("prop","a"))),
-    _prop2(declareProperty<Real>(propertyNameFirst("prop","b"))),
-    _prop3(declareProperty<Real>(propertyNameSecond("prop","b", "a"))),
-    _prop4(declareProperty<Real>(propertyNameSecond("prop","a", "c"))),
-    _prop5(declareProperty<Real>(propertyNameThird("prop","b", "c", "a")))
+    _prop1(declarePropertyDerivative<Real>("prop","a")),
+    _prop2(declarePropertyDerivative<Real>("prop","b")),
+    _prop3(declarePropertyDerivative<Real>("prop","b", "a")),
+    _prop4(declarePropertyDerivative<Real>("prop","a", "c")),
+    _prop5(declarePropertyDerivative<Real>("prop","b", "c", "a"))
 {
 }
 
