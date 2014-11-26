@@ -16,6 +16,7 @@ InputParameters validParams<TensorMechanicsMaterial>()
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temperature", "temperature variable");
   params.addParam<std::vector<FunctionName> >("initial_stress", "A list of functions describing the initial stress.  If provided, there must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, zz components respectively.  If not provided, all components of the initial stress will be zero");
+  params.addParam<std::string>("base_name", "Material property base name");
   return params;
 }
 
@@ -28,14 +29,21 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const std::string & name,
     _grad_disp_x_old(_fe_problem.isTransient() ? coupledGradientOld("disp_x") : _grad_zero),
     _grad_disp_y_old(_fe_problem.isTransient() ? coupledGradientOld("disp_y") : _grad_zero),
     _grad_disp_z_old(_fe_problem.isTransient() && _mesh.dimension() == 3 ? coupledGradientOld("disp_z") : _grad_zero),
-    _stress(declareProperty<RankTwoTensor>("stress")),
-    _total_strain(declareProperty<RankTwoTensor>("total_strain")),
-    _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
-    _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
-    _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+
+    _stress(declareProperty<RankTwoTensor>(_base_name + "stress")),
+    _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _elastic_strain(declareProperty<RankTwoTensor>(_base_name + "elastic_strain")),
+
+    _elasticity_tensor_name(_base_name + "elasticity_tensor"),
+    _elasticity_tensor(declareProperty<ElasticityTensorR4>(_elasticity_tensor_name)),
+
+    _Jacobian_mult(declareProperty<ElasticityTensorR4>(_base_name + "Jacobian_mult")),
+
     _Euler_angles(getParam<Real>("euler_angle_1"),
                   getParam<Real>("euler_angle_2"),
                   getParam<Real>("euler_angle_3")),
+
     _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"))
 {
   const std::vector<FunctionName> & fcn_names(getParam<std::vector<FunctionName> >("initial_stress"));

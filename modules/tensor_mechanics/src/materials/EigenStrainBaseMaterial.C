@@ -10,13 +10,18 @@ InputParameters validParams<EigenStrainBaseMaterial>()
 
 EigenStrainBaseMaterial::EigenStrainBaseMaterial(const std::string & name,
                                                  InputParameters parameters) :
-    LinearElasticMaterial(name, parameters),
-    _eigenstrain(declareProperty<RankTwoTensor>("eigenstrain")),
-    _deigenstrain_dc(declareProperty<RankTwoTensor>("deigenstrain_dc")),
-    _d2eigenstrain_dc2(declareProperty<RankTwoTensor>("d2eigenstrain_dc2")),
-    _delasticity_tensor_dc(declareProperty<ElasticityTensorR4>("delasticity_tensor_dc")),
-    _d2elasticity_tensor_dc2(declareProperty<ElasticityTensorR4>("d2elasticity_tensor_dc2")),
-    _c(coupledValue("c"))
+    DerivativeMaterialInterface<LinearElasticMaterial>(name, parameters),
+
+    _c(coupledValue("c")),
+    _c_name(getParam<VariableName>("c")),
+
+    _eigenstrain_name(_base_name + "eigenstrain"),
+    _eigenstrain(declareProperty<RankTwoTensor>(_eigenstrain_name)),
+    _deigenstrain_dc(declarePropertyDerivative<RankTwoTensor>(_eigenstrain_name, _c_name)),
+    _d2eigenstrain_dc2(declarePropertyDerivative<RankTwoTensor>(_eigenstrain_name, _c_name, _c_name)),
+
+    _delasticity_tensor_dc(declarePropertyDerivative<ElasticityTensorR4>(_elasticity_tensor_name, _c_name)),
+    _d2elasticity_tensor_dc2(declarePropertyDerivative<ElasticityTensorR4>(_elasticity_tensor_name, _c_name, _c_name))
 {
 }
 
