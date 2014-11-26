@@ -783,19 +783,11 @@ FiniteStrainMultiPlasticity::singleStep(Real & nr_res2, RankTwoTensor & stress, 
       // and not the entire active set.  If we pass that nr_res2 back from
       // this function then the calling function will not realise we've converged!
       // Therefore, check for this case
-      std::vector<bool> all_active;
-      all_active.assign(_num_surfaces, true);
-
-      // the following is so we don't much up return values of f, epp and ic from this routine
-      std::vector<Real> all_f;
-      RankTwoTensor all_epp;
-      std::vector<Real> all_ic;
-
-      std::vector<RankTwoTensor> r;
-      calculateConstraints(stress, intnl_old, intnl, pm, delta_dp, all_f, r, all_epp, all_ic, all_active);
+      unsigned ind = 0;
       for (unsigned surface = 0 ; surface < _num_surfaces ; ++surface)
-        if (all_f[surface] > _f[modelNumber(surface)]->_f_tol)
-          completely_converged = false;
+        if (active[surface])
+          if (f[ind++] > _f[modelNumber(surface)]->_f_tol)
+            completely_converged = false;
     }
     else
       completely_converged = false;
