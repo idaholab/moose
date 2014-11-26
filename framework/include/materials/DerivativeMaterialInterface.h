@@ -53,13 +53,26 @@ public:
   MaterialProperty<U> & getDefaultMaterialProperty(const std::string & name);
 
   template<typename U>
-  MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1);
+  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1);
+  template<typename U>
+  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2);
+  template<typename U>
+  MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
 
   template<typename U>
-  MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1, const std::string &c2);
-
+  MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1);
   template<typename U>
-  MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
+  MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2);
+  template<typename U>
+  MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
+
+  // deprecated methods
+  template<typename U>
+  MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1) __attribute__ ((deprecated));
+  template<typename U>
+  MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1, const std::string &c2) __attribute__ ((deprecated));
+  template<typename U>
+  MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3) __attribute__ ((deprecated));
 
 private:
   const std::string _constant_zero;
@@ -140,12 +153,62 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & n
   }
 }
 
+template<class T>
+template<typename U>
+MaterialProperty<U> &
+DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::string &c1)
+{
+  return this->template declareProperty<U>(propertyNameFirst(base, c1));
+}
 
+template<class T>
+template<typename U>
+MaterialProperty<U> &
+DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2)
+{
+  return this->template declareProperty<U>(propertyNameSecond(base, c1, c2));
+}
+
+template<class T>
+template<typename U>
+MaterialProperty<U> &
+DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3)
+{
+  return this->template declareProperty<U>(propertyNameThird(base, c1, c2, c3));
+}
+
+
+template<class T>
+template<typename U>
+MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1)
+{
+  return getDefaultMaterialProperty<U>(propertyNameFirst(base, c1));
+}
+
+template<class T>
+template<typename U>
+MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2)
+{
+  return getDefaultMaterialProperty<U>(propertyNameSecond(base, c1, c2));
+}
+
+template<class T>
+template<typename U>
+MaterialProperty<U> &
+DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3)
+{
+  return getDefaultMaterialProperty<U>(propertyNameThird(base, c1, c2, c3));
+}
+
+// deprecated
 template<class T>
 template<typename U>
 MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std::string &c1)
 {
+  mooseDeprecated("getDerivative is being replaced by getMaterialPropertyDerivative (same arguments)");
   return getDefaultMaterialProperty<U>(propertyNameFirst(base, c1));
 }
 
@@ -154,6 +217,7 @@ template<typename U>
 MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std::string &c1, const std::string &c2)
 {
+  mooseDeprecated("getDerivative is being replaced by getMaterialPropertyDerivative (same arguments)");
   return getDefaultMaterialProperty<U>(propertyNameSecond(base, c1, c2));
 }
 
@@ -162,6 +226,7 @@ template<typename U>
 MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3)
 {
+  mooseDeprecated("getDerivative is being replaced by getMaterialPropertyDerivative (same arguments)");
   return getDefaultMaterialProperty<U>(propertyNameThird(base, c1, c2, c3));
 }
 

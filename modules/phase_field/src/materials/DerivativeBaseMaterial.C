@@ -54,16 +54,13 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
     _args[i] = &coupledValue("args", i);
 
     // first derivatives
-    _prop_dF[i] = &declareProperty<Real>(propertyNameFirst(_F_name, _arg_names[i]));
+    _prop_dF[i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i]);
 
     // second derivatives
     for (j = i; j < _nargs; ++j)
     {
       _prop_d2F[i][j] =
-      _prop_d2F[j][i] =
-        &declareProperty<Real>(
-          propertyNameSecond(_F_name, _arg_names[i], _arg_names[j])
-        );
+      _prop_d2F[j][i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i], _arg_names[j]);
 
       // third derivatives
       if (_third_derivatives)
@@ -77,10 +74,7 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
           _prop_d3F[j][k][i] =
           _prop_d3F[k][j][i] =
           _prop_d3F[j][i][k] =
-          _prop_d3F[i][k][j] =
-            &declareProperty<Real>(
-              propertyNameThird(_F_name, _arg_names[i], _arg_names[j], _arg_names[k])
-            );
+          _prop_d3F[i][k][j] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i], _arg_names[j], _arg_names[k]);
         }
       }
     }

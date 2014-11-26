@@ -10,12 +10,12 @@ InputParameters validParams<DerivativeMaterialInterfaceTestClient>()
 DerivativeMaterialInterfaceTestClient::DerivativeMaterialInterfaceTestClient(const std::string & name,
                                                                                  InputParameters parameters) :
     DerivativeMaterialInterface<Material>(name, parameters),
-    _prop0(getDerivative<Real>("prop","c")), // fetch non-existing derivative
-    _prop1(getDerivative<Real>("prop","a")),
-    _prop2(getDerivative<Real>("prop","b")),
-    _prop3(getDerivative<Real>("prop","a", "b")), // fetch alphabetically sorted (but declared unsorted)
-    _prop4(getDerivative<Real>("prop","a", "c")),
-    _prop5(getDerivative<Real>("prop","c", "b", "a")) // fetch unsorted (declared unsorted, but differently unsorted)
+    _prop0(getMaterialPropertyDerivative<Real>("prop","c")), // fetch non-existing derivative
+    _prop1(getMaterialPropertyDerivative<Real>("prop","a")),
+    _prop2(getMaterialPropertyDerivative<Real>("prop","b")),
+    _prop3(getMaterialPropertyDerivative<Real>("prop","a", "b")), // fetch alphabetically sorted (but declared unsorted)
+    _prop4(getMaterialPropertyDerivative<Real>("prop","a", "c")),
+    _prop5(getMaterialPropertyDerivative<Real>("prop","c", "b", "a")) // fetch unsorted (declared unsorted, but differently unsorted)
 {
 }
 
