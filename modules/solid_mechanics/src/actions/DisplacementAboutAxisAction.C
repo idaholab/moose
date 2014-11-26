@@ -55,17 +55,17 @@ DisplacementAboutAxisAction::act()
     RealVectorValue xaxis(1,0,0);
     RealVectorValue yaxis(0,1,0);
     RealVectorValue zaxis(0,0,1);
-    if (_axis_direction.absolute_fuzzy_equals(xaxis,1.e-15))
+    if (_axis_direction.absolute_fuzzy_equals(xaxis,1.e-15) || _axis_direction.absolute_fuzzy_equals(-1*xaxis,1.e-15))
     {
       dim_vec.push_back(1);
       dim_vec.push_back(2);
     }
-    else if (_axis_direction.absolute_fuzzy_equals(yaxis,1.e-15))
+    else if (_axis_direction.absolute_fuzzy_equals(yaxis,1.e-15) || _axis_direction.absolute_fuzzy_equals(-1*yaxis,1.e-15))
     {
       dim_vec.push_back(0);
       dim_vec.push_back(2);
     }
-    else if (_axis_direction.absolute_fuzzy_equals(zaxis,1.e-15))
+    else if (_axis_direction.absolute_fuzzy_equals(zaxis,1.e-15) || _axis_direction.absolute_fuzzy_equals(-1*zaxis,1.e-15))
     {
       dim_vec.push_back(0);
       dim_vec.push_back(1);

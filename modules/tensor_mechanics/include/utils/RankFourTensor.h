@@ -14,6 +14,9 @@ class RankTwoTensor;
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
 
+#include "petscsys.h"
+#include "petscblaslapack.h"
+
 // system includes
 #include <vector>
 
@@ -31,18 +34,53 @@ class RankTwoTensor;
 class RankFourTensor
 {
 public:
+  // Select initialization
+  enum InitMethod
+  {
+    initNone,
+    initIdentity,
+    initIdentityFour
+  };
+
+  /**
+   * To fill up the 81 entries in the 4th-order tensor, fillFromInputVector
+   * is called with one of the following fill_methods.
+   * See the fill*FromInputVector functions for more details
+   */
+  enum FillMethod
+  {
+    antisymmetric,
+    symmetric9,
+    symmetric21,
+    general_isotropic,
+    symmetric_isotropic,
+    antisymmetric_isotropic,
+    general
+  };
 
   /// Default constructor; fills to zero
   RankFourTensor();
 
+  /// Select specific initialization pattern
+  RankFourTensor(const InitMethod);
+
+  /// Fill from vector
+  RankFourTensor(const std::vector<Real> &, FillMethod);
+
   /// Copy constructor
-  RankFourTensor(const RankFourTensor & a);
+  RankFourTensor(const RankFourTensor &);
 
   /// Destructor
   ~RankFourTensor() {}
 
+  // Named constructors
+  static RankFourTensor Identity() { return RankFourTensor(initIdentity); }
+  static RankFourTensor IdentityFour() { return RankFourTensor(initIdentityFour); };
+
+//private:
   /// Gets the value for the index specified.  Takes index = 0,1,2
   Real & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
+public:
 
   /**
    * Gets the value for the index specified.  Takes index = 0,1,2
@@ -66,16 +104,16 @@ public:
   RealTensorValue operator* (const RealTensorValue & a) const;
 
   /// C_ijkl*a
-  RankFourTensor operator* (const Real & a) const;
+  RankFourTensor operator* (const Real a) const;
 
   /// C_ijkl *= a
-  RankFourTensor & operator*= (const Real & a);
+  RankFourTensor & operator*= (const Real a);
 
   /// C_ijkl/a
-  RankFourTensor operator/ (const Real & a) const;
+  RankFourTensor operator/ (const Real a) const;
 
   /// C_ijkl /= a  for all i, j, k, l
-  RankFourTensor & operator/= (const Real & a);
+  RankFourTensor & operator/= (const Real a);
 
   /// C_ijkl += a_ijkl  for all i, j, k, l
   RankFourTensor & operator+= (const RankFourTensor & a);
@@ -116,7 +154,6 @@ public:
    */
   RankFourTensor transposeMajor() const;
 
-
   /**
    * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l = 3).
    * Fill method depends on size of input
@@ -129,26 +166,8 @@ public:
   */
   virtual void surfaceFillFromInputVector(const std::vector<Real> & input);
 
-
   /// Static method for use in validParams for getting the "fill_method"
   static MooseEnum fillMethodEnum();
-
-  /**
-   * To fill up the 81 entries in the 4th-order tensor, fillFromInputVector
-   * is called with one of the following fill_methods.
-   * See the fill*FromInputVector functions for more details
-   */
-  enum FillMethod
-  {
-    antisymmetric,
-    symmetric9,
-    symmetric21,
-    general_isotropic,
-    symmetric_isotropic,
-    antisymmetric_isotropic,
-    general
-  };
-
 
   /**
    * fillFromInputVector takes some number of inputs to fill
@@ -165,11 +184,10 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
-
 protected:
 
   /// Dimensionality of rank-four tensor
-  static const unsigned int N = 3;
+  static const unsigned int N = LIBMESH_DIM;
 
   /// The values of the rank-four tensor
   Real _vals[N][N][N][N];
@@ -180,7 +198,7 @@ protected:
    * @param n size of A
    * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
    */
-  int MatrixInversion(double *A, int n) const;
+  int matrixInversion(std::vector<PetscScalar> & A, int n) const;
 
   /**
   * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in

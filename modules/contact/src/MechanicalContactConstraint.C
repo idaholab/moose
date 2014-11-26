@@ -47,6 +47,8 @@ InputParameters validParams<MechanicalContactConstraint>()
   params.addParam<std::string>("formulation", "default", "The contact formulation");
   params.addParam<bool>("normalize_penalty", false, "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
   params.addParam<bool>("master_slave_jacobian", true, "Whether to include jacobian entries coupling master and slave nodes.");
+  params.addParam<bool>("connected_slave_nodes_jacobian", true, "Whether to include jacobian entries coupling nodes connected to slave nodes.");
+  params.addParam<bool>("non_displacement_variables_jacobian", true, "Whether to include jacobian entries coupling with variables that are not displacement variables.");
   return params;
 }
 
@@ -70,7 +72,9 @@ MechanicalContactConstraint::MechanicalContactConstraint(const std::string & nam
     _nodal_area_var(getVar("nodal_area", 0)),
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution()),
-    _master_slave_jacobian(getParam<bool>("master_slave_jacobian"))
+    _master_slave_jacobian(getParam<bool>("master_slave_jacobian")),
+    _connected_slave_nodes_jacobian(getParam<bool>("connected_slave_nodes_jacobian")),
+    _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian"))
 {
   _overwrite_slave_residual = false;
 
@@ -89,9 +93,6 @@ MechanicalContactConstraint::MechanicalContactConstraint(const std::string & nam
 
   if (_friction_coefficient < 0)
     mooseError("The friction coefficient must be nonnegative");
-
-  if (!_master_slave_jacobian && _formulation != CF_PENALTY)
-    mooseError("The 'master_slave_jacobian = false' option is only valid with 'formulation = penalty'");
 }
 
 void
@@ -571,6 +572,134 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
 }
 
 Real
+MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                                      unsigned int jvar)
+{
+  PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
+
+  const Real penalty = getPenalty(*pinfo);
+
+  unsigned int coupled_component;
+  double normal_component_in_coupled_var_dir = 1.0;
+  if (getCoupledVarComponent(jvar,coupled_component))
+    normal_component_in_coupled_var_dir = pinfo->_normal(coupled_component);
+
+  switch (type)
+  {
+    case Moose::SlaveSlave:
+      switch (_model)
+      {
+        case CM_FRICTIONLESS:
+          switch (_formulation)
+          {
+            case CF_DEFAULT:
+            {
+              double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
+              return (-curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
+            }
+            case CF_PENALTY:
+            case CF_AUGMENTED_LAGRANGE:
+              return _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp] * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
+            default:
+              mooseError("Invalid contact formulation");
+          }
+        case CM_COULOMB:
+        case CM_GLUED:
+        {
+          double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
+          return -curr_jac;
+        }
+        default:
+          mooseError("Invalid or unavailable contact model");
+      }
+
+    case Moose::SlaveMaster:
+      switch (_model)
+      {
+        case CM_FRICTIONLESS:
+          switch (_formulation)
+          {
+            case CF_DEFAULT:
+            {
+              Node * curr_master_node = _current_master->get_node(_j);
+              double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), curr_master_node->dof_number(0, _vars(_component), 0));
+              return (-curr_jac - _phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
+            }
+            case CF_PENALTY:
+            case CF_AUGMENTED_LAGRANGE:
+              return -_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp] * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
+            default:
+              mooseError("Invalid contact formulation");
+          }
+        case CM_COULOMB:
+        case CM_GLUED:
+          return 0;
+        default:
+          mooseError("Invalid or unavailable contact model");
+      }
+
+    case Moose::MasterSlave:
+      switch (_model)
+      {
+        case CM_FRICTIONLESS:
+          switch (_formulation)
+          {
+            case CF_DEFAULT:
+            {
+              double slave_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
+              return slave_jac * _test_master[_i][_qp] * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
+            }
+            case CF_PENALTY:
+            case CF_AUGMENTED_LAGRANGE:
+              return -_test_master[_i][_qp] * penalty * _phi_slave[_j][_qp] * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
+            default:
+              mooseError("Invalid contact formulation");
+          }
+        case CM_COULOMB:
+        case CM_GLUED:
+          switch (_formulation)
+          {
+            case CF_DEFAULT:
+            {
+              double slave_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
+              return slave_jac * _test_master[_i][_qp];
+            }
+            case CF_PENALTY:
+            case CF_AUGMENTED_LAGRANGE:
+              return 0;
+            default:
+              mooseError("Invalid contact formulation");
+          }
+        default:
+          mooseError("Invalid or unavailable contact model");
+      }
+
+    case Moose::MasterMaster:
+      switch (_model)
+      {
+        case CM_FRICTIONLESS:
+          switch (_formulation)
+          {
+            case CF_DEFAULT:
+              return 0;
+            case CF_PENALTY:
+            case CF_AUGMENTED_LAGRANGE:
+              return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp] * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
+            default:
+              mooseError("Invalid contact formulation");
+          }
+        case CM_COULOMB:
+        case CM_GLUED:
+          return 0;
+        default:
+          mooseError("Invalid or unavailable contact model");
+      }
+  }
+
+  return 0;
+}
+
+Real
 MechanicalContactConstraint::nodalArea(PenetrationInfo & pinfo)
 {
   const Node * node = pinfo._node;
@@ -640,10 +769,7 @@ MechanicalContactConstraint::computeJacobian()
       for (_i=0; _i<_test_slave.size(); _i++)
         for (_j=0; _j<_phi_master.size(); _j++)
           Ken(_i,_j) += computeQpJacobian(Moose::SlaveMaster);
-  }
 
-  if (_master_slave_jacobian)
-  {
     _Kne.resize(_test_master.size(), _connected_dof_indices.size());
     for (_i=0; _i<_test_master.size(); _i++)
       // Loop over the connected dof indices so we can get all the jacobian contributions
@@ -655,4 +781,89 @@ MechanicalContactConstraint::computeJacobian()
     for (_i=0; _i<_test_master.size(); _i++)
       for (_j=0; _j<_phi_master.size(); _j++)
         Knn(_i,_j) += computeQpJacobian(Moose::MasterMaster);
+}
+
+void
+MechanicalContactConstraint::computeOffDiagJacobian(unsigned int jvar)
+{
+  getConnectedDofIndices(jvar);
+
+  _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
+
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), jvar);
+
+  _phi_slave.resize(_connected_dof_indices.size());
+
+  _qp = 0;
+
+  // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
+  // This corresponds to evaluating all of the connected shape functions at _this_ node
+  for (unsigned int j=0; j<_connected_dof_indices.size(); j++)
+  {
+    _phi_slave[j].resize(1);
+
+    if (_connected_dof_indices[j] == _var.nodalDofIndex())
+      _phi_slave[j][_qp] = 1.0;
+    else
+      _phi_slave[j][_qp] = 0.0;
+  }
+
+  for (_i=0; _i<_test_slave.size(); _i++)
+    // Loop over the connected dof indices so we can get all the jacobian contributions
+    for (_j=0; _j<_connected_dof_indices.size(); _j++)
+      _Kee(_i,_j) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
+
+  if (_master_slave_jacobian)
+  {
+    DenseMatrix<Number> & Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
+    for (_i=0; _i<_test_slave.size(); _i++)
+      for (_j=0; _j<_phi_master.size(); _j++)
+        Ken(_i,_j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
+
+    _Kne.resize(_test_master.size(), _connected_dof_indices.size());
+    if (_Kne.m() && _Kne.n())
+      for (_i=0; _i<_test_master.size(); _i++)
+        // Loop over the connected dof indices so we can get all the jacobian contributions
+        for (_j=0; _j<_connected_dof_indices.size(); _j++)
+          _Kne(_i,_j) += computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
+  }
+
+  for (_i=0; _i<_test_master.size(); _i++)
+    for (_j=0; _j<_phi_master.size(); _j++)
+      Knn(_i,_j) += computeQpOffDiagJacobian(Moose::MasterMaster, jvar);
+}
+
+void
+MechanicalContactConstraint::getConnectedDofIndices(unsigned int var_num)
+{
+  unsigned int component;
+  if (getCoupledVarComponent(var_num,component) || _non_displacement_vars_jacobian)
+  {
+    if (_master_slave_jacobian && _connected_slave_nodes_jacobian)
+      NodeFaceConstraint::getConnectedDofIndices(var_num);
+    else
+    {
+      _connected_dof_indices.clear();
+      MooseVariable & var = _sys.getVariable(0, var_num);
+      _connected_dof_indices.push_back(var.nodalDofIndex());
+    }
+  }
+}
+
+bool
+MechanicalContactConstraint::getCoupledVarComponent(unsigned int var_num,
+                                                    unsigned int &component)
+{
+  component = std::numeric_limits<unsigned int>::max();
+  bool coupled_var_is_disp_var = false;
+  for (unsigned int i=0; i<_vars.size(); ++i)
+  {
+    if (var_num == _vars(i))
+    {
+      coupled_var_is_disp_var = true;
+      component = i;
+      break;
+    }
+  }
+  return coupled_var_is_disp_var;
 }

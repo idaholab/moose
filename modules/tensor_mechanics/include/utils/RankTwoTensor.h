@@ -11,6 +11,9 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 
+#include "petscsys.h"
+#include "petscblaslapack.h"
+
 #include <vector>
 
 
@@ -26,9 +29,18 @@
 class RankTwoTensor
 {
 public:
+  // Select initialization
+  enum InitMethod
+  {
+    initNone,
+    initIdentity
+  };
 
   /// Default constructor; fills to zero
   RankTwoTensor();
+
+  /// Select specific initialization pattern
+  RankTwoTensor(const InitMethod);
 
   /**
    * Constructor that takes in 3 vectors and uses them to create rows
@@ -50,6 +62,9 @@ public:
 
   /// Copy constructor from RealTensorValue
   RankTwoTensor(const TypeTensor<Real> & a);
+
+  // Named constructors
+  static RankTwoTensor Identity() { return RankTwoTensor(initIdentity); }
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
   Real & operator()(unsigned int i, unsigned int j);
@@ -122,16 +137,16 @@ public:
   RankTwoTensor operator - () const;
 
   /// performs _vals *= a
-  RankTwoTensor & operator*= (const Real & a);
+  RankTwoTensor & operator*= (const Real a);
 
   /// returns _vals*a
-  RankTwoTensor operator* (const Real & a) const;
+  RankTwoTensor operator* (const Real a) const;
 
   /// performs _vals /= a
-  RankTwoTensor & operator/= (const Real & a);
+  RankTwoTensor & operator/= (const Real a);
 
   /// returns _vals/a
-  RankTwoTensor operator/ (const Real & a) const;
+  RankTwoTensor operator/ (const Real a) const;
 
   /// performs _vals *= a (component by component) and returns the result
   RankTwoTensor & operator*= (const RankTwoTensor & a);
@@ -145,11 +160,14 @@ public:
   /// returns _vals_ij * a_ij (sum on i, j)
   Real doubleContraction(const RankTwoTensor & a) const;
 
+  /// returns C_ijkl = a_ij * b_kl
+  RankFourTensor outerProduct(const RankTwoTensor & a) const;
 
+  /// returns C_ijkl = a_ik * b_jl
+  RankFourTensor mixedProductIkJl(const RankTwoTensor & a) const;
 
   /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
   RankTwoTensor deviatoric() const;
-
 
   /// returns the trace of the tensor, ie _vals[i][i] (sum i = 0, 1, 2)
   Real trace() const;
@@ -159,8 +177,6 @@ public:
    * d(trace)/dA_ij
    */
   RankTwoTensor dtrace() const;
-
-
 
   /**
    * Denote the _vals[i][j] by A_ij, then
@@ -181,7 +197,6 @@ public:
    * d^2(secondInvariant)/dA_ij/dA_kl
    */
   RankFourTensor d2secondInvariant() const;
-
 
   /**
    * Sin(3*Lode_angle)
@@ -244,7 +259,7 @@ public:
   void print() const;
 
   /// Add identity times a to _vals
-  void addIa(const Real & a);
+  void addIa(const Real a);
 
   /// Sqrt(_vals[i][j]*_vals[i][j])
   Real L2norm() const;
@@ -290,13 +305,13 @@ public:
    * @param a Eigenvectors are placed in this array if calculation_type == "V".
    * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
    */
-  void syev(const char * calculation_type, std::vector<Real> & eigvals, std::vector<double> & a) const;
+  void syev(const char * calculation_type, std::vector<PetscScalar> & eigvals, std::vector<PetscScalar> & a) const;
 
 protected:
 
 
 private:
-  static const unsigned int N = 3;
+  static const unsigned int N = LIBMESH_DIM;
   Real _vals[N][N];
 };
 

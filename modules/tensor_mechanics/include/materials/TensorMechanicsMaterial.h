@@ -48,33 +48,15 @@ protected:
   MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
 
-  Real _euler_angle_1;
-  Real _euler_angle_2;
-  Real _euler_angle_3;
-
-  // vectors to get the input values
-  std::vector<Real> _Cijkl_vector;
+  RealVectorValue _Euler_angles;
 
   /// Individual material information
   ElasticityTensorR4 _Cijkl;
 
-  // MaterialProperty<RankTwoTensor> & _d_stress_dT;
   RankTwoTensor _strain_increment;
-
-  RealVectorValue _Euler_angles;
-
-  /// Current deformation gradient
-  RankTwoTensor _dfgrd;
-
-  bool _has_T;
-  VariableValue * _T; //pointer rather than reference
-
-  /// determines the translation from C_ijkl to the Rank-4 tensor
-  RankFourTensor::FillMethod _fill_method;
 
   /// initial stress components
   std::vector<Function *> _initial_stress;
-
 };
 
 #endif //TENSORMECHANICSMATERIAL_H

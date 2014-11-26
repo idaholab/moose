@@ -1,7 +1,5 @@
 #include "FiniteStrainCrystalPlasticity.h"
-#include <cmath>
-
-extern "C" void FORTRAN_CALL(dsyev) ( ... );
+#include "petscblaslapack.h"
 
 template<>
 InputParameters validParams<FiniteStrainCrystalPlasticity>()
@@ -308,11 +306,9 @@ FiniteStrainCrystalPlasticity::getEulerAngles()
 {
   if ( _read_prop_user_object )
   {
-
-    _euler_angle_1 = _read_prop_user_object->getData( _current_elem , 0 );
-    _euler_angle_2 = _read_prop_user_object->getData( _current_elem , 1 );
-    _euler_angle_3 = _read_prop_user_object->getData( _current_elem , 2 );
-
+    _Euler_angles(0) = _read_prop_user_object->getData( _current_elem , 0 );
+    _Euler_angles(1) = _read_prop_user_object->getData( _current_elem , 1 );
+    _Euler_angles(2) = _read_prop_user_object->getData( _current_elem , 2 );
   }
 }
 
@@ -325,9 +321,9 @@ FiniteStrainCrystalPlasticity::getEulerRotations()
   RankTwoTensor RT;
   Real pi = libMesh::pi;
 
-  phi1 = _euler_angle_1 * (pi/180.0);
-  phi = _euler_angle_2 * (pi/180.0);
-  phi2 = _euler_angle_3 * (pi/180.0);
+  phi1 = _Euler_angles(0) * (pi/180.0);
+  phi =  _Euler_angles(1) * (pi/180.0);
+  phi2 = _Euler_angles(2) * (pi/180.0);
 
   cp1 = std::cos(phi1);
   cp2 = std::cos(phi2);
@@ -348,14 +344,12 @@ FiniteStrainCrystalPlasticity::getEulerRotations()
   RT(2,2) = cp;
 
   _crysrot = RT.transpose();
-
 }
 
 // Read slip systems from file
 void
 FiniteStrainCrystalPlasticity::getSlipSystems()
 {
-
   Real vec[LIBMESH_DIM];
   std::ifstream fileslipsys;
 
@@ -416,10 +410,9 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 void
 FiniteStrainCrystalPlasticity::preSolveQp()
 {
-
   _Jacobian_mult[_qp].zero();//Initializes jacobian for preconditioner
 
-  _dfgrd_tmp = _dfgrd[_qp];
+  _dfgrd_tmp = _deformation_gradient[_qp];
 
   calc_schmid_tensor();
 
@@ -434,7 +427,6 @@ FiniteStrainCrystalPlasticity::preSolveQp()
 
   _elasticity_tensor[_qp] = _Cijkl;
   _elasticity_tensor[_qp].rotate(rot);
-
 }
 
 void
@@ -448,7 +440,6 @@ FiniteStrainCrystalPlasticity::solveQp()
 void
 FiniteStrainCrystalPlasticity::postSolveQp()
 {
-
   _stress[_qp] = _fe * _pk2[_qp] * _fe.transpose()/_fe.det();
 
   _Jacobian_mult[_qp] += calcTangentModuli();//Calculate jacobian for preconditioner
@@ -456,14 +447,13 @@ FiniteStrainCrystalPlasticity::postSolveQp()
   RankTwoTensor iden;
   iden.addIa(1.0);
 
-  _lag_e[_qp] = _dfgrd[_qp].transpose() * _dfgrd[_qp] - iden;
+  _lag_e[_qp] = _deformation_gradient[_qp].transpose() * _deformation_gradient[_qp] - iden;
   _lag_e[_qp] = _lag_e[_qp] * 0.5;
 
 
   RankTwoTensor rot;
-  rot = get_current_rotation(_dfgrd[_qp]); // Calculate material rotation
+  rot = get_current_rotation(_deformation_gradient[_qp]); // Calculate material rotation
   _update_rot[_qp] = rot * _crysrot;
-
 }
 
 void
@@ -473,7 +463,6 @@ FiniteStrainCrystalPlasticity::preSolveStatevar()
     _gss_tmp[i] = _gss_old[_qp][i];
 
   _accslip_tmp_old = _acc_slip_old[_qp];
-
 }
 
 void
@@ -516,13 +505,11 @@ FiniteStrainCrystalPlasticity::solveStatevar()
 void
 FiniteStrainCrystalPlasticity::postSolveStatevar()
 {
-
   //Assign MaterialProperty values
   for (unsigned i = 0; i < _nss; ++i)
     _gss[_qp][i] = _gss_tmp[i];
 
   _acc_slip[_qp] = _accslip_tmp;
-
 }
 
 void
@@ -571,14 +558,11 @@ FiniteStrainCrystalPlasticity::solveStress()
       if (std::abs(_slip_incr[i]) > slip_incr_max)
         slip_incr_max = std::abs(_slip_incr[i]);
 
-    //    mooseAssert( slip_incr_max < _slip_incr_tol, "FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
+    // mooseAssert( slip_incr_max < _slip_incr_tol, "FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
+    if ( slip_incr_max > _slip_incr_tol )
+      mooseError("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
 
-  if ( slip_incr_max > _slip_incr_tol )
-    mooseError("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp << " slip_incr_max = " << slip_incr_max );
-
-
-    rnorm=resid.L2norm();
-
+    rnorm = resid.L2norm();
     iter++;
   }
 }
@@ -586,10 +570,8 @@ FiniteStrainCrystalPlasticity::solveStress()
 void
 FiniteStrainCrystalPlasticity::postSolveStress()
 {
-
   _fp[_qp] = _fp_inv.inverse();
   _pk2[_qp] = _pk2_tmp;
-
 }
 
 // Update slip system resistance. Overide to incorporate new slip system resistance laws
@@ -694,9 +676,8 @@ FiniteStrainCrystalPlasticity::calcResidual( RankTwoTensor &resid )
 void
 FiniteStrainCrystalPlasticity::calcJacobian( RankFourTensor &jac )
 {
-  RankTwoTensor temp2;
-  RankFourTensor dfedfpinv, deedfe, dfpinvdpk2, idenFour;
-  RankFourTensor temp4;
+  RankFourTensor dfedfpinv, deedfe, dfpinvdpk2;
+
   std::vector<RankTwoTensor> dtaudpk2(_nss), dfpinvdslip(_nss);
 
   for (unsigned int i = 0; i < _nss; ++i)
@@ -710,8 +691,6 @@ FiniteStrainCrystalPlasticity::calcJacobian( RankFourTensor &jac )
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
         dfedfpinv(i,j,k,j) = _dfgrd_tmp(i,k);
 
-  deedfe.zero();
-
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
@@ -720,21 +699,10 @@ FiniteStrainCrystalPlasticity::calcJacobian( RankFourTensor &jac )
         deedfe(i,j,k,j) = deedfe(i,j,k,j) + _fe(k,i) * 0.5;
       }
 
-  dfpinvdpk2.zero();
   for (unsigned int i = 0; i < _nss; ++i)
-  {
-    temp2 = dfpinvdslip[i] * _dslipdtau[i];
-    temp4 = outerProduct(temp2, dtaudpk2[i]);
-    dfpinvdpk2 += temp4;
-  }
+    dfpinvdpk2 += (dfpinvdslip[i] * _dslipdtau[i]).outerProduct(dtaudpk2[i]);
 
-  jac = _elasticity_tensor[_qp] * deedfe * dfedfpinv * dfpinvdpk2;
-
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      idenFour(i,j,i,j) = 1.0;
-
-  jac = idenFour - jac;
+  jac = RankFourTensor::IdentityFour() - (_elasticity_tensor[_qp] * deedfe * dfedfpinv * dfpinvdpk2);
 }
 
 // Calculate slip increment,dslipdtau. Override to modify.
@@ -746,19 +714,6 @@ FiniteStrainCrystalPlasticity::getSlipIncrements()
 
   for (unsigned int i = 0; i < _nss; ++i)
     _dslipdtau[i] = _a0[i] / _xm[i] * std::pow(std::abs(_tau[i] / _gss_tmp[i]), 1.0 / _xm[i] - 1.0) / _gss_tmp[i] * _dt;
-}
-
-RankFourTensor FiniteStrainCrystalPlasticity::outerProduct(const RankTwoTensor & a, const RankTwoTensor & b)
-{
-  RankFourTensor result;
-
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-          result(i,j,k,l) = a(i,j) * b(k,l);
-
-  return result;
 }
 
 // Calls getMatRot to perform RU factorization of a tensor.
@@ -774,10 +729,11 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
 {
   RankTwoTensor rot;
   RankTwoTensor c, diag, evec;
-  double cmat[LIBMESH_DIM][LIBMESH_DIM], w[LIBMESH_DIM], work[10];
-  int info;
-  int nd = LIBMESH_DIM;
-  int lwork = 10;
+  PetscScalar cmat[LIBMESH_DIM][LIBMESH_DIM], work[10];
+  PetscReal w[LIBMESH_DIM];
+  PetscBLASInt nd = LIBMESH_DIM,
+               lwork = 10,
+               info;
 
   c = a.transpose() * a;
 
@@ -785,7 +741,7 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       cmat[i][j] = c(i,j);
 
-  FORTRAN_CALL(dsyev)("V","U",&nd,cmat,&nd,&w,&work,&lwork,&info);
+  LAPACKsyev_("V", "U", &nd, &cmat[0][0], &nd, w, work, &lwork, &info);
 
   if (info != 0)
     mooseError("FiniteStrainCrystalPLasticity: DSYEV function call in getMatRot function failed");
@@ -871,14 +827,15 @@ FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
 
   ElasticityTensorR4 tan_mod;
   RankTwoTensor pk2fet, fepk2;
-  RankFourTensor dfedf, deedfe, dsigdpk2dfe, temp;
+  RankFourTensor deedfe, dsigdpk2dfe;
 
   // Fill in the matrix stiffness material property
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-        dfedf(i,j,i,l) = _fp_inv(l,j);
+  // RankFourTensor dfedf;
+  // for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  //   for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+  //     for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+  //       dfedf(i,j,i,l) = _fp_inv(l,j);
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
@@ -888,13 +845,7 @@ FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
         deedfe(i,j,k,j) = deedfe(i,j,k,j) + _fe(k,i) * 0.5;
       }
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-          temp(i,j,k,l) = _fe(i,k) * _fe(j,l);
-
-  dsigdpk2dfe = temp * _elasticity_tensor[_qp] * deedfe;
+  dsigdpk2dfe = _fe.mixedProductIkJl(_fe) * _elasticity_tensor[_qp] * deedfe;
 
   pk2fet = _pk2_tmp * _fe.transpose();
   fepk2 = _fe * _pk2_tmp;
@@ -910,12 +861,10 @@ FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
   tan_mod += dsigdpk2dfe;
 
   Real je = _fe.det();
-
   if ( je > 0.0 )
     tan_mod /= je;
 
   return tan_mod;
-
 }
 
 
