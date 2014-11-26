@@ -61,6 +61,11 @@ RankFourTensor::RankFourTensor(const InitMethod init)
   }
 }
 
+RankFourTensor::RankFourTensor(const std::vector<Real> & input, FillMethod fill_method)
+{
+  fillFromInputVector(input, fill_method);
+}
+
 Real &
 RankFourTensor::operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
 {

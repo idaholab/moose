@@ -42,11 +42,30 @@ public:
     initIdentityFour
   };
 
+  /**
+   * To fill up the 81 entries in the 4th-order tensor, fillFromInputVector
+   * is called with one of the following fill_methods.
+   * See the fill*FromInputVector functions for more details
+   */
+  enum FillMethod
+  {
+    antisymmetric,
+    symmetric9,
+    symmetric21,
+    general_isotropic,
+    symmetric_isotropic,
+    antisymmetric_isotropic,
+    general
+  };
+
   /// Default constructor; fills to zero
   RankFourTensor();
 
   /// Select specific initialization pattern
   RankFourTensor(const InitMethod);
+
+  /// Fill from vector
+  RankFourTensor(const std::vector<Real> &, FillMethod);
 
   /// Copy constructor
   RankFourTensor(const RankFourTensor &);
@@ -149,22 +168,6 @@ public:
 
   /// Static method for use in validParams for getting the "fill_method"
   static MooseEnum fillMethodEnum();
-
-  /**
-   * To fill up the 81 entries in the 4th-order tensor, fillFromInputVector
-   * is called with one of the following fill_methods.
-   * See the fill*FromInputVector functions for more details
-   */
-  enum FillMethod
-  {
-    antisymmetric,
-    symmetric9,
-    symmetric21,
-    general_isotropic,
-    symmetric_isotropic,
-    antisymmetric_isotropic,
-    general
-  };
 
   /**
    * fillFromInputVector takes some number of inputs to fill

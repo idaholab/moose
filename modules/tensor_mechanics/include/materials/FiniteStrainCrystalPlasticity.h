@@ -284,7 +284,6 @@ protected:
   RankTwoTensor _pk2_tmp;
   Real _accslip_tmp, _accslip_tmp_old;
   std::vector<Real> _gss_tmp;
-
 };
 
 #endif //FINITESTRAINCRYSTALPLASTICITY_H

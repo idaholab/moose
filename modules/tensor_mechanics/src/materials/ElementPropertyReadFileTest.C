@@ -1,7 +1,6 @@
 #include "ElementPropertyReadFileTest.h"
 #include <cmath>
 
-
 template<>
 InputParameters validParams<ElementPropertyReadFileTest>()
 {
@@ -12,44 +11,38 @@ InputParameters validParams<ElementPropertyReadFileTest>()
 
 ElementPropertyReadFileTest::ElementPropertyReadFileTest(const std::string & name,
                                                          InputParameters parameters) :
-  FiniteStrainElasticMaterial(name, parameters),
-  _read_prop_user_object(isParamValid("read_prop_user_object") ? & getUserObject<ElementPropertyReadFile>("read_prop_user_object") : NULL),
-  _some_state_var(declareProperty<Real>("some_state_var")),
-  _some_state_var_old(declarePropertyOld<Real>("some_state_var"))
+    FiniteStrainElasticMaterial(name, parameters),
+    _read_prop_user_object(isParamValid("read_prop_user_object") ? & getUserObject<ElementPropertyReadFile>("read_prop_user_object") : NULL),
+    _some_state_var(declareProperty<Real>("some_state_var")),
+    _some_state_var_old(declarePropertyOld<Real>("some_state_var"))
 {
 }
 
 
 void ElementPropertyReadFileTest::initQpStatefulProperties()
 {
-
   _some_state_var[_qp] = _some_state_var_old[_qp] = 0.0;
 
   if ( _read_prop_user_object )
     //Stateful properties read from file used in initialization
     _some_state_var[_qp] = _some_state_var_old[_qp] = _read_prop_user_object->getData( _current_elem , 3 );
-
 }
 
 
 void
 ElementPropertyReadFileTest::computeQpElasticityTensor()
 {
-
   //Properties assigned at the beginning of every call to material calculation
-
   if ( _read_prop_user_object )
   {
-    _euler_angle_1 = _read_prop_user_object->getData( _current_elem , 0 );
-    _euler_angle_2 = _read_prop_user_object->getData( _current_elem , 1 );
-    _euler_angle_3 = _read_prop_user_object->getData( _current_elem , 2 );
-
+    _Euler_angles(0) = _read_prop_user_object->getData( _current_elem , 0 );
+    _Euler_angles(1) = _read_prop_user_object->getData( _current_elem , 1 );
+    _Euler_angles(2) = _read_prop_user_object->getData( _current_elem , 2 );
   }
 
   getEulerRotations();
 
   RealTensorValue rot;
-
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
       rot(i,j) = _crysrot(i,j);
@@ -57,9 +50,7 @@ ElementPropertyReadFileTest::computeQpElasticityTensor()
   _elasticity_tensor[_qp] = _Cijkl;
   _elasticity_tensor[_qp].rotate(rot);
 
-
   _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
-
 }
 
 void
@@ -70,9 +61,9 @@ ElementPropertyReadFileTest::getEulerRotations()
   RankTwoTensor RT;
   Real pi = libMesh::pi;
 
-  phi1 = _euler_angle_1 * (pi/180.0);
-  phi = _euler_angle_2 * (pi/180.0);
-  phi2 = _euler_angle_3 * (pi/180.0);
+  phi1 = _Euler_angles(0) * (pi/180.0);
+  phi =  _Euler_angles(1) * (pi/180.0);
+  phi2 = _Euler_angles(2) * (pi/180.0);
 
   cp1 = std::cos(phi1);
   cp2 = std::cos(phi2);
@@ -93,5 +84,4 @@ ElementPropertyReadFileTest::getEulerRotations()
   RT(2,2) = cp;
 
   _crysrot = RT.transpose();
-
 }
