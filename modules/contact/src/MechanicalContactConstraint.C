@@ -426,13 +426,16 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           {
             case CF_DEFAULT:
             {
-              double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
-              //TODO:  Need off-diagonal term/s
-              return (-curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
+              RealVectorValue jac_vec;
+              for (unsigned int i=0; i<_mesh_dimension; ++i)
+              {
+                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+              }
+              return -pinfo->_normal(_component) * (pinfo->_normal*jac_vec) + (_phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
-              //TODO:  Need off-diagonal terms
               return _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
             default:
               mooseError("Invalid contact formulation");
@@ -465,13 +468,17 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             case CF_DEFAULT:
             {
               Node * curr_master_node = _current_master->get_node(_j);
-              double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), curr_master_node->dof_number(0, _vars(_component), 0));
-              //TODO:  Need off-diagonal terms
-              return (-curr_jac - _phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
+
+              RealVectorValue jac_vec;
+              for (unsigned int i=0; i<_mesh_dimension; ++i)
+              {
+                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                jac_vec(i) = (*_jacobian)(dof_number, curr_master_node->dof_number(0, _vars(_component), 0));
+              }
+              return -pinfo->_normal(_component)*(pinfo->_normal*jac_vec) - (_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
-              //TODO:  Need off-diagonal terms
               return -_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
             default:
               mooseError("Invalid contact formulation");
@@ -504,15 +511,16 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           {
             case CF_DEFAULT:
             {
-              //TODO:  Need off-diagonal terms
-              double slave_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
-              //TODO: To get off-diagonal terms correct using an approach like this, we would need to assemble in the rows for
-              //all displacement components times their components of the normal vector.
-              return slave_jac * _test_master[_i][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
+              RealVectorValue jac_vec;
+              for (unsigned int i=0; i<_mesh_dimension; ++i)
+              {
+                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+              }
+              return pinfo->_normal(_component)*(pinfo->_normal*jac_vec) * _test_master[_i][_qp];
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
-              //TODO:  Need off-diagonal terms
               return -_test_master[_i][_qp] * penalty * _phi_slave[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
             default:
               mooseError("Invalid contact formulation");
@@ -546,7 +554,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               return 0;
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
-              //TODO: Need off-diagonal terms
               return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
             default:
               mooseError("Invalid contact formulation");
@@ -594,8 +601,13 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           {
             case CF_DEFAULT:
             {
-              double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
-              return (-curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
+              RealVectorValue jac_vec;
+              for (unsigned int i=0; i<_mesh_dimension; ++i)
+              {
+                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+              }
+              return -pinfo->_normal(_component) * (pinfo->_normal*jac_vec) + (_phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
@@ -622,8 +634,14 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
             case CF_DEFAULT:
             {
               Node * curr_master_node = _current_master->get_node(_j);
-              double curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), curr_master_node->dof_number(0, _vars(_component), 0));
-              return (-curr_jac - _phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
+
+              RealVectorValue jac_vec;
+              for (unsigned int i=0; i<_mesh_dimension; ++i)
+              {
+                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                jac_vec(i) = (*_jacobian)(dof_number, curr_master_node->dof_number(0, _vars(_component), 0));
+              }
+              return -pinfo->_normal(_component)*(pinfo->_normal*jac_vec) - (_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
@@ -646,8 +664,13 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           {
             case CF_DEFAULT:
             {
-              double slave_jac = (*_jacobian)(_current_node->dof_number(0, _vars(_component), 0), _connected_dof_indices[_j]);
-              return slave_jac * _test_master[_i][_qp] * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
+              RealVectorValue jac_vec;
+              for (unsigned int i=0; i<_mesh_dimension; ++i)
+              {
+                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
+              }
+              return pinfo->_normal(_component)*(pinfo->_normal*jac_vec) * _test_master[_i][_qp];
             }
             case CF_PENALTY:
             case CF_AUGMENTED_LAGRANGE:
@@ -741,22 +764,6 @@ MechanicalContactConstraint::computeJacobian()
 
   _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
 
-  _phi_slave.resize(_connected_dof_indices.size());
-
-  _qp = 0;
-
-  // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
-  // This corresponds to evaluating all of the connected shape functions at _this_ node
-  for (unsigned int j=0; j<_connected_dof_indices.size(); j++)
-  {
-    _phi_slave[j].resize(1);
-
-    if (_connected_dof_indices[j] == _var.nodalDofIndex())
-      _phi_slave[j][_qp] = 1.0;
-    else
-      _phi_slave[j][_qp] = 0.0;
-  }
-
   for (_i = 0; _i < _test_slave.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j=0; _j<_connected_dof_indices.size(); _j++)
@@ -791,22 +798,6 @@ MechanicalContactConstraint::computeOffDiagJacobian(unsigned int jvar)
   _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
 
   DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), jvar);
-
-  _phi_slave.resize(_connected_dof_indices.size());
-
-  _qp = 0;
-
-  // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
-  // This corresponds to evaluating all of the connected shape functions at _this_ node
-  for (unsigned int j=0; j<_connected_dof_indices.size(); j++)
-  {
-    _phi_slave[j].resize(1);
-
-    if (_connected_dof_indices[j] == _var.nodalDofIndex())
-      _phi_slave[j][_qp] = 1.0;
-    else
-      _phi_slave[j][_qp] = 0.0;
-  }
 
   for (_i=0; _i<_test_slave.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
@@ -847,6 +838,24 @@ MechanicalContactConstraint::getConnectedDofIndices(unsigned int var_num)
       MooseVariable & var = _sys.getVariable(0, var_num);
       _connected_dof_indices.push_back(var.nodalDofIndex());
     }
+  }
+
+  _phi_slave.resize(_connected_dof_indices.size());
+  //dof_id_type current_node_var_dof_index = _sys.getVariable(0, _vars(component)).nodalDofIndex();
+  dof_id_type current_node_var_dof_index = _sys.getVariable(0, var_num).nodalDofIndex();
+  _qp = 0;
+
+  // Fill up _phi_slave so that it is 1 when j corresponds to the dof associated with this node
+  // and 0 for every other dof
+  // This corresponds to evaluating all of the connected shape functions at _this_ node
+  for (unsigned int j=0; j<_connected_dof_indices.size(); j++)
+  {
+    _phi_slave[j].resize(1);
+
+    if (_connected_dof_indices[j] == current_node_var_dof_index)
+      _phi_slave[j][_qp] = 1.0;
+    else
+      _phi_slave[j][_qp] = 0.0;
   }
 }
 
