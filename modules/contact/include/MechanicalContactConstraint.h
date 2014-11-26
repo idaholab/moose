@@ -50,7 +50,39 @@ public:
    */
   virtual void computeJacobian();
 
+  /**
+   * Compute off-diagonal Jacobian entries
+   * @param jvar The index of the coupled variable
+   */
+  virtual void computeOffDiagJacobian(unsigned int jvar);
+
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
+
+  /**
+   * Compute off-diagonal Jacobian entries
+   * @param type The type of coupling
+   * @param jvar The index of the coupled variable
+   */
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                        unsigned int jvar);
+
+  /**
+   * Get the dof indices of the nodes connected to the slave node for a specific variable
+   * @param var_num The number of the variable for which dof indices are gathered
+   * @return bool indicating whether the coupled variable is one of the displacement variables
+   */
+  virtual void getConnectedDofIndices(unsigned int var_num);
+
+  /**
+   * Determine whether the coupled variable is one of the displacement variables,
+   * and find its component
+   * @param var_num The number of the variable to be checked
+   * @param component The component index computed in this routine
+   * @return bool indicating whether the coupled variable is one of the displacement variables
+   */
+  bool getCoupledVarComponent(unsigned int var_num,
+                              unsigned int &component);
+
 
   virtual bool addCouplingEntriesToJacobian() { return _master_slave_jacobian; }
 
@@ -88,7 +120,12 @@ protected:
   SystemBase & _aux_system;
   const NumericVector<Number> * _aux_solution;
 
+  /// Whether to include coupling between the master and slave nodes in the Jacobian
   const bool _master_slave_jacobian;
+  /// Whether to include coupling terms with the nodes connected to the slave nodes in the Jacobian
+  const bool _connected_slave_nodes_jacobian;
+  /// Whether to include coupling terms with non-displacement variables in the Jacobian
+  const bool _non_displacement_vars_jacobian;
 };
 
 #endif
