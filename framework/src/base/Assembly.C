@@ -1123,28 +1123,15 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id
     _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
-    {
-      _tmp_Ke = jac_block;
-      _tmp_Ke *= scaling_factor;
+      jac_block *= scaling_factor;
 
-      for (unsigned int i=0; i<di.size(); i++)
-        for (unsigned int j=0; j<dj.size(); j++)
-        {
-          _cached_jacobian_values.push_back(_tmp_Ke(i, j));
-          _cached_jacobian_rows.push_back(di[i]);
-          _cached_jacobian_cols.push_back(dj[j]);
-        }
-    }
-    else
-    {
-      for (unsigned int i=0; i<di.size(); i++)
-        for (unsigned int j=0; j<dj.size(); j++)
-        {
-          _cached_jacobian_values.push_back(jac_block(i, j));
-          _cached_jacobian_rows.push_back(di[i]);
-          _cached_jacobian_cols.push_back(dj[j]);
-        }
-    }
+    for (unsigned int i=0; i<di.size(); i++)
+      for (unsigned int j=0; j<dj.size(); j++)
+      {
+        _cached_jacobian_values.push_back(jac_block(i, j));
+        _cached_jacobian_rows.push_back(di[i]);
+        _cached_jacobian_cols.push_back(dj[j]);
+      }
   }
 
   jac_block.zero();
