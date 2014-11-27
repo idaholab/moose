@@ -13,7 +13,7 @@ EigenStrainBaseMaterial::EigenStrainBaseMaterial(const std::string & name,
     DerivativeMaterialInterface<LinearElasticMaterial>(name, parameters),
 
     _c(coupledValue("c")),
-    _c_name(getParam<VariableName>("c")),
+    _c_name(getVar("c", 0)->name()),
 
     _eigenstrain_name(_base_name + "eigenstrain"),
     _eigenstrain(declareProperty<RankTwoTensor>(_eigenstrain_name)),
