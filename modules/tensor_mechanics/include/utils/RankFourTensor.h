@@ -3,11 +3,13 @@
 
 // Forward declaration of RankTwoTensor
 class RankTwoTensor;
+class RankFourTensor;
 
 // MOOSE includes
 #include "Moose.h"
 #include "PermutationTensor.h"
 #include "MooseEnum.h"
+#include "DerivativeMaterialInterface.h"
 
 // libMesh includes
 #include "libmesh/tensor_value.h"
@@ -20,6 +22,12 @@ class RankTwoTensor;
 // system includes
 #include <vector>
 
+/**
+ * Helper function template specialization to set an object to zero.
+ * Needed by DerivativeMaterialInterface
+ */
+template<>
+void mooseSetToZero<RankFourTensor>(RankFourTensor & v);
 
 /**
  * RankFourTensor is designed to handle any N-dimensional fourth order tensor, C.

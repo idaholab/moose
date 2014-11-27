@@ -2,6 +2,16 @@
 #define ELASTICITYTENSORR4_H
 
 #include "RankFourTensor.h"
+#include "DerivativeMaterialInterface.h"
+
+class ElasticityTensorR4;
+
+/**
+ * Helper function template specialization to set an object to zero.
+ * Needed by DerivativeMaterialInterface
+ */
+template<>
+void mooseSetToZero<ElasticityTensorR4>(ElasticityTensorR4 & v);
 
 /**
  * ElasticityTensorR4 inherits from RankFourTensor.  As such it contains data and
