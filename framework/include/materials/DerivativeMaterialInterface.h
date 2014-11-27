@@ -7,7 +7,7 @@
 /**
  * Helper function templates to set a variable to zero.
  * Specializations may have to be implemented (for examples see
- * RankTwoTensor, RankFourTensor, ElasticityTensorR4). 
+ * RankTwoTensor, RankFourTensor, ElasticityTensorR4).
  */
 template<typename T>
 void mooseSetToZero(T & v)
@@ -106,7 +106,6 @@ DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const std::string & 
     T(name, parameters),
     _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {
-  std::cout << "Constructing " << name << "\n";
 }
 
 template<class T>
@@ -173,7 +172,7 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & n
 
   // otherwise return a reference to a static zero property
   unsigned int nqp = _dmi_fe_problem.getMaxQps();
-  if (nqp > _zero.size())
+  if (int(nqp) > _zero.size())
   {
     // resize to accomodate maximum number of qpoints
     _zero.resize(nqp);
