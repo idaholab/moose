@@ -42,28 +42,28 @@ protected:
   std::string _h_name;
 
   /// Derivatives of \f$ F_a \f$ with respect to all coupled variables
-  std::vector<MaterialProperty<Real> *> _derivatives_Fa;
+  std::vector<const MaterialProperty<Real> *> _derivatives_Fa;
 
   /// Derivatives of \f$ F_b \f$ with respect to all coupled variables
-  std::vector<MaterialProperty<Real> *> _derivatives_Fb;
+  std::vector<const MaterialProperty<Real> *> _derivatives_Fb;
 
   /// Value of the free energy function \f$ F_a \f$
-  MaterialProperty<Real> & _prop_Fa;
+  const MaterialProperty<Real> & _prop_Fa;
 
   /// Value of the free energy function \f$ F_b \f$
-  MaterialProperty<Real> & _prop_Fb;
+  const MaterialProperty<Real> & _prop_Fb;
 
   /// Derivative of the free energy function \f$ \frac d{d\eta} F_a \f$
-  MaterialProperty<Real> & _prop_dFa;
+  const MaterialProperty<Real> & _prop_dFa;
 
   /// Derivative of the free energy function \f$ \frac d{d\eta} F_b \f$
-  MaterialProperty<Real> & _prop_dFb;
+  const MaterialProperty<Real> & _prop_dFb;
 
   /// Derivative of the switching function \f$ \frac d{d\eta} h(\eta) \f$
-  MaterialProperty<Real> & _prop_dh;
+  const MaterialProperty<Real> & _prop_dh;
 
   /// Second derivative of the switching function \f$ \frac {d^2}{d\eta^2} h(\eta) \f$
-  MaterialProperty<Real> & _prop_d2h;
+  const MaterialProperty<Real> & _prop_d2h;
 
   /// Gradients for all coupled variables
   std::vector<VariableGradient*> _grad_args;

@@ -54,25 +54,25 @@ private:
   std::string _cb_name;
 
   /// Derivatives of \f$ dFa/dca \f$ with respect to all coupled variables
-  std::vector<MaterialProperty<Real> *> _second_derivatives;
+  std::vector<const MaterialProperty<Real> *> _second_derivatives;
 
   /// Second derivatives of dFa/dca with respect to all coupled variables
-  std::vector<std::vector<MaterialProperty<Real> *> > _third_derivatives;
+  std::vector<std::vector<const MaterialProperty<Real> *> > _third_derivatives;
 
   /// Derivatives of \f$ d^2Fa/dca^2 \f$ with respect to all coupled variables
-  std::vector<MaterialProperty<Real> *> _third_derivatives_ca;
+  std::vector<const MaterialProperty<Real> *> _third_derivatives_ca;
 
   /// Gradients for all coupled variables
   std::vector<VariableGradient *> _grad_args;
 
   /// h(eta) material property
-  MaterialProperty<Real> & _prop_h;
+  const MaterialProperty<Real> & _prop_h;
 
   /// Second derivative \f$ d^2Fa/dca^2 \f$
-  MaterialProperty<Real> & _second_derivative_Fa;
+  const MaterialProperty<Real> & _second_derivative_Fa;
 
   /// Second derivative \f$ d^2Fb/dcb^2 \f$
-  MaterialProperty<Real> & _second_derivative_Fb;
+  const MaterialProperty<Real> & _second_derivative_Fb;
 };
 
 #endif //KKSCHBULK_H

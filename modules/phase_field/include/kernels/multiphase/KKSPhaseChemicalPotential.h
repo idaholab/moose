@@ -50,13 +50,13 @@ private:
   std::string _Fb_name;
 
   /// material properties we need to access
-  MaterialProperty<Real> & _dfadca;
-  MaterialProperty<Real> & _dfbdcb;
-  MaterialProperty<Real> & _d2fadca2;
-  MaterialProperty<Real> & _d2fbdcbca;
+  const MaterialProperty<Real> & _dfadca;
+  const MaterialProperty<Real> & _dfbdcb;
+  const MaterialProperty<Real> & _d2fadca2;
+  const MaterialProperty<Real> & _d2fbdcbca;
 
-  std::vector<MaterialProperty<Real>* > _off_diag_a;
-  std::vector<MaterialProperty<Real>* > _off_diag_b;
+  std::vector<const MaterialProperty<Real>* > _off_diag_a;
+  std::vector<const MaterialProperty<Real>* > _off_diag_b;
 };
 
 #endif //KKSPHASECHEMICALPOTENTIAL_H

@@ -36,16 +36,16 @@ protected:
   VariableValue & _cb;
 
   /// Value of the switching function \f$ h(\eta) \f$
-  MaterialProperty<Real> & _prop_h;
+  const MaterialProperty<Real> & _prop_h;
 
   /// Derivative of the free energy function \f$ \frac d{dc_a} F_a \f$
-  MaterialProperty<Real> & _prop_dFadca;
+  const MaterialProperty<Real> & _prop_dFadca;
 
   /// Second derivative of the free energy function \f$ \frac {d^2}{dc_a^2} F_a \f$
-  MaterialProperty<Real> & _prop_d2Fadca2;
+  const MaterialProperty<Real> & _prop_d2Fadca2;
 
   /// Second derivative of the free energy function \f$ \frac {d^2}{dc_b^2} F_b \f$
-  MaterialProperty<Real> & _prop_d2Fbdcb2;
+  const MaterialProperty<Real> & _prop_d2Fbdcb2;
 };
 
 #endif //KKSACBULKC_H

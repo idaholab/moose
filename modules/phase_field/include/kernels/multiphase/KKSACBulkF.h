@@ -32,10 +32,10 @@ protected:
   std::string _g_name;
 
   /// Derivative of the double well function \f$ \frac d{d\eta} g(\eta) \f$
-  MaterialProperty<Real> & _prop_dg;
+  const MaterialProperty<Real> & _prop_dg;
 
   /// Second derivative of the double well function \f$ \frac {d^2}{d\eta^2} g(\eta) \f$
-  MaterialProperty<Real> & _prop_d2g;
+  const MaterialProperty<Real> & _prop_d2g;
 };
 
 #endif //KKSACBULKF_H

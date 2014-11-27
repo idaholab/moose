@@ -52,19 +52,19 @@ private:
   std::string _cb_name;
 
   /// Derivatives of \f$ dFa/dca \f$ with respect to all coupled variables
-  std::vector<MaterialProperty<Real> *> _second_derivatives;
+  std::vector<const MaterialProperty<Real> *> _second_derivatives;
 
   /// h(eta) material property
-  MaterialProperty<Real> & _prop_h;
+  const MaterialProperty<Real> & _prop_h;
 
   /// Second derivative \f$ d^2Fa/dca^2 \f$
-  MaterialProperty<Real> & _first_derivative_Fa;
+  const MaterialProperty<Real> & _first_derivative_Fa;
 
   /// Second derivative \f$ d^2Fa/dca^2 \f$
-  MaterialProperty<Real> & _second_derivative_Fa;
+  const MaterialProperty<Real> & _second_derivative_Fa;
 
   /// Second derivative \f$ d^2Fb/dcb^2 \f$
-  MaterialProperty<Real> & _second_derivative_Fb;
+  const MaterialProperty<Real> & _second_derivative_Fb;
 
   /// Chemical potential
   unsigned int _w_var;

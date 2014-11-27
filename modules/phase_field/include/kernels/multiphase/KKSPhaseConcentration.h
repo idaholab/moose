@@ -47,10 +47,10 @@ private:
   std::string _h_name;
 
   /// Switching function \f$ h(\eta) \f$
-  MaterialProperty<Real> & _prop_h;
+  const MaterialProperty<Real> & _prop_h;
 
   /// Derivative of the switching function \f$ \frac d{d\eta} h(\eta) \f$
-  MaterialProperty<Real> & _prop_dh;
+  const MaterialProperty<Real> & _prop_dh;
 };
 
 #endif //KKSPHASECONCENTRATION_H
