@@ -97,20 +97,31 @@ EigenExecutionerBase::init()
     _eigen_sys.initSystemSolution(EigenSystem::EIGEN, 1.0);
   }
   _problem.initialSetup();
-  if (_source_integral==0.0) mooseError("|Bx| = 0!");
   _eigen_sys.initSystemSolutionOld(EigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated
-  // TODO: Multiple execFlags support
-  _bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execFlags()[0];
+  _bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execFlags();
   if (_solution_diff)
-    _xdiff_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("xdiff")).execFlags()[0];
+    _xdiff_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("xdiff")).execFlags();
   else
-    _xdiff_execflag = EXEC_TIMESTEP;
+    _xdiff_execflag.push_back(EXEC_TIMESTEP);
   if (isParamValid("normalization"))
-    _norm_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization")).execFlags()[0];
+    _norm_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization")).execFlags();
   else
     _norm_execflag = _bx_execflag;
+
+  // check if _source_integral has been evaluated during initialSetup()
+  bool is_bx_on_initial = false;
+  for (unsigned int i=0; i<_bx_execflag.size(); i++)
+    if (_bx_execflag[i] == EXEC_INITIAL) is_bx_on_initial = true;
+
+  if (!is_bx_on_initial)
+  {
+    _problem.computeUserObjects(_bx_execflag[0], UserObjectWarehouse::PRE_AUX);
+    _problem.computeAuxiliaryKernels(_bx_execflag[0]);
+    _problem.computeUserObjects(_bx_execflag[0], UserObjectWarehouse::POST_AUX);
+  }
+  if (_source_integral==0.0) mooseError("|Bx| = 0!");
 
   // normalize solution to make |Bx|=_eigenvalue, _eigenvalue at this point has the initialized value
   makeBXConsistent(_eigenvalue);
@@ -135,7 +146,7 @@ EigenExecutionerBase::makeBXConsistent(Real k)
 {
   Real consistency_tolerance = 1e-10;
 
-  // Scale the solution so that the postprocessor is equal to one.
+  // Scale the solution so that the postprocessor is equal to k.
   // We have a fix point loop here, in case the postprocessor is a nonlinear function of the scaling factor.
   // FIXME: We have assumed this loop always converges.
   while (std::fabs(k-_source_integral)>consistency_tolerance*std::fabs(k))
@@ -193,9 +204,11 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   mooseAssert(pfactor>0.0, "Invaid linear convergence tolerance");
   mooseAssert(tol_eig>0.0, "Invalid eigenvalue tolerance");
   mooseAssert(tol_x>0.0, "Invalid solution norm tolerance");
-  if ( _bx_execflag != EXEC_TIMESTEP && _bx_execflag != EXEC_RESIDUAL)
+  if (std::find(_bx_execflag.begin(), _bx_execflag.end(), EXEC_TIMESTEP) == _bx_execflag.end() &&
+      std::find(_bx_execflag.begin(), _bx_execflag.end(), EXEC_RESIDUAL) == _bx_execflag.end())
     mooseError("rhs postprocessor for the power method has to be executed on timestep or residual");
-  if ( _xdiff_execflag != EXEC_TIMESTEP && _xdiff_execflag != EXEC_RESIDUAL)
+  if (std::find(_xdiff_execflag.begin(), _xdiff_execflag.end(), EXEC_TIMESTEP) == _xdiff_execflag.end() &&
+      std::find(_xdiff_execflag.begin(), _xdiff_execflag.end(), EXEC_RESIDUAL) == _xdiff_execflag.end())
     mooseError("xdiff postprocessor for the power method has to be executed on timestep or residual");
 
   // not perform any iteration when max_iter==0
@@ -397,14 +410,15 @@ EigenExecutionerBase::postExecute()
   }
 
   Real s = 1.0;
-  if (_norm_execflag==EXEC_CUSTOM)
+  if (std::find(_norm_execflag.begin(), _norm_execflag.end(), EXEC_CUSTOM) != _norm_execflag.end())
   {
     _console << " Cannot let the normalization postprocessor on custom." << std::endl;
     _console << " Normalization is abandoned!" << std::endl;
   }
   else
   {
-    s = normalizeSolution(_norm_execflag!=EXEC_TIMESTEP && _norm_execflag!=EXEC_RESIDUAL);
+    s = normalizeSolution((std::find(_norm_execflag.begin(), _norm_execflag.end(), EXEC_TIMESTEP) == _norm_execflag.end()) &&
+                          (std::find(_norm_execflag.begin(), _norm_execflag.end(), EXEC_RESIDUAL) == _norm_execflag.end()));
     if (std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
       _console << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
   }
@@ -424,9 +438,9 @@ EigenExecutionerBase::normalizeSolution(bool force)
 {
   if (force)
   {
-    _problem.computeUserObjects(_norm_execflag);
-    _problem.computeAuxiliaryKernels(_norm_execflag);
-    _problem.computeUserObjects(_norm_execflag, UserObjectWarehouse::POST_AUX);
+    _problem.computeUserObjects(_norm_execflag[0]);
+    _problem.computeAuxiliaryKernels(_norm_execflag[0]);
+    _problem.computeUserObjects(_norm_execflag[0], UserObjectWarehouse::POST_AUX);
   }
 
   Real factor;
@@ -583,7 +597,7 @@ void
 EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k)
 {
   PostprocessorName bxp = getParam<PostprocessorName>("bx_norm");
-  if ( _problem.getUserObject<UserObject>(bxp).execFlags()[0] != EXEC_RESIDUAL)
+  if (std::find(_bx_execflag.begin(), _bx_execflag.end(), EXEC_RESIDUAL) == _bx_execflag.end())
     mooseError("rhs postprocessor for the nonlinear eigenvalue solve must be executed on residual");
   makeBXConsistent(k);
 
