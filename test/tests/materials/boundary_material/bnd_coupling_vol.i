@@ -3,7 +3,7 @@
 # Also bringing boundary restricted material inside another boundary restricted
 # material
 #
-# Solving: k \Laplace u + u - f = 0
+# Solving: -k \Laplace u + u - f = 0
 #
 # u = x^2 + y^2
 # k = 3, but is decomposed as k3vol = k1vol + k2vol, where k1vol = 1 and k2vol = 2

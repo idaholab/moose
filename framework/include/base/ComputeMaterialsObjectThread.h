@@ -32,7 +32,7 @@ public:
   ComputeMaterialsObjectThread(FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,
                                std::vector<MaterialData *> & bnd_material_data, std::vector<MaterialData *> & neighbor_material_data,
                                MaterialPropertyStorage & material_props, MaterialPropertyStorage & bnd_material_props,
-                               std::vector<MaterialWarehouse> & materials, std::vector<Assembly *> & assembly);
+                               std::vector<MaterialWarehouse> & materials, std::vector<Assembly *> & assembly, bool with_normal_props);
 
   // Splitting Constructor
   ComputeMaterialsObjectThread(ComputeMaterialsObjectThread & x, Threads::split split);
@@ -60,6 +60,7 @@ protected:
 
   const bool _has_stateful_props;
   const bool _has_bnd_stateful_props;
+  bool _with_normal_props;
 };
 
 #endif //COMPUTERESIDUALTHREAD_H
