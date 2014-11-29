@@ -121,8 +121,8 @@
   [./constants]
     type = GenericConstantMaterial
     block = 0
-    prop_names  = 'M   L   kappa constant_zero'
-    prop_values = '0.7 0.7 0.4   0            '
+    prop_names  = 'M   L   kappa'
+    prop_values = '0.7 0.7 0.4  '
   [../]
 []
 
