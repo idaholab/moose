@@ -25,8 +25,8 @@ protected:
   virtual Real computeDFDC(PFFunctionType type);
 
 private:
-  MaterialProperty<Real> & _dFdc;
-  MaterialProperty<Real> & _d2Fdc2;
+  const MaterialProperty<Real> & _dFdc;
+  const MaterialProperty<Real> & _d2Fdc2;
 };
 
 #endif // SPLITCHPARSED_H

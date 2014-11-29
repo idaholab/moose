@@ -2,6 +2,28 @@
 #define DERIVATIVEMATERIALINTERFACE_H
 
 #include "MaterialProperty.h"
+#include "FEProblem.h"
+
+/**
+ * Helper function templates to set a variable to zero.
+ * Specializations may have to be implemented (for examples see
+ * RankTwoTensor, RankFourTensor, ElasticityTensorR4).
+ */
+template<typename T>
+void mooseSetToZero(T & v)
+{
+  /**
+   * The default for non-pointer types is to assign zero.
+   * This should either do something sensible, or throw a compiler error.
+   * Otherwise the T type is designed badly.
+   */
+  v = 0;
+}
+template<typename T>
+void mooseSetToZero(T* & v)
+{
+  mooseError("Cannot use pointer types for MaterialProperty derivatives.");
+}
 
 /**
  * Interface class ("Veneer") to provide generator methods for derivative
@@ -50,7 +72,7 @@ public:
    * Fetch a material property if it exists, otherwise return the 'constant_zero' property
    */
   template<typename U>
-  MaterialProperty<U> & getDefaultMaterialProperty(const std::string & name);
+  const MaterialProperty<U> & getDefaultMaterialProperty(const std::string & name);
 
   template<typename U>
   MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1);
@@ -60,29 +82,29 @@ public:
   MaterialProperty<U> & declarePropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
 
   template<typename U>
-  MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1);
+  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1);
   template<typename U>
-  MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2);
+  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2);
   template<typename U>
-  MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
+  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3);
 
   // deprecated methods
   template<typename U>
-  MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1) __attribute__ ((deprecated));
+  const MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1) __attribute__ ((deprecated));
   template<typename U>
-  MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1, const std::string &c2) __attribute__ ((deprecated));
+  const MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1, const std::string &c2) __attribute__ ((deprecated));
   template<typename U>
-  MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3) __attribute__ ((deprecated));
+  const MaterialProperty<U> & getDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3) __attribute__ ((deprecated));
 
 private:
-  const std::string _constant_zero;
+  FEProblem & _dmi_fe_problem;
 };
 
 
 template<class T>
 DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const std::string & name, InputParameters parameters) :
     T(name, parameters),
-    _constant_zero("constant_zero")
+    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {
 }
 
@@ -139,18 +161,27 @@ DerivativeMaterialInterface<T>::getMaterialPropertyPointer(const std::string & n
 
 template<class T>
 template<typename U>
-MaterialProperty<U> &
+const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & name)
 {
+  static MaterialProperty<U> _zero;
+
+  // if found return the requested property
   if (this->template hasMaterialProperty<U>(name))
     return this->template getMaterialProperty<U>(name);
-  else
+
+  // otherwise return a reference to a static zero property
+  unsigned int nqp = _dmi_fe_problem.getMaxQps();
+  if (int(nqp) > _zero.size())
   {
-    if (this->template hasMaterialProperty<U>(_constant_zero))
-      return this->template getMaterialProperty<U>(_constant_zero);
-    else
-      mooseError("In your input file declare a 'GenericConstantMaterial' with property named '" + _constant_zero + "' set to 0.");
+    // resize to accomodate maximum number of qpoints
+    _zero.resize(nqp);
+
+    // set values for all qpoints to zero
+    for (unsigned int qp = 0; qp < nqp; ++qp)
+      mooseSetToZero<U>(_zero[qp]);
   }
+  return _zero;
 }
 
 template<class T>
@@ -180,7 +211,7 @@ DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string &bas
 
 template<class T>
 template<typename U>
-MaterialProperty<U> &
+const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1)
 {
   return getDefaultMaterialProperty<U>(propertyNameFirst(base, c1));
@@ -188,7 +219,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 
 template<class T>
 template<typename U>
-MaterialProperty<U> &
+const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2)
 {
   return getDefaultMaterialProperty<U>(propertyNameSecond(base, c1, c2));
@@ -196,7 +227,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 
 template<class T>
 template<typename U>
-MaterialProperty<U> &
+const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3)
 {
   return getDefaultMaterialProperty<U>(propertyNameThird(base, c1, c2, c3));
@@ -205,7 +236,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 // deprecated
 template<class T>
 template<typename U>
-MaterialProperty<U> &
+const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std::string &c1)
 {
   mooseDeprecated("getDerivative is being replaced by getMaterialPropertyDerivative (same arguments)");
@@ -214,7 +245,7 @@ DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std
 
 template<class T>
 template<typename U>
-MaterialProperty<U> &
+const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std::string &c1, const std::string &c2)
 {
   mooseDeprecated("getDerivative is being replaced by getMaterialPropertyDerivative (same arguments)");
@@ -223,7 +254,7 @@ DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std
 
 template<class T>
 template<typename U>
-MaterialProperty<U> &
+const MaterialProperty<U> &
 DerivativeMaterialInterface<T>::getDerivative(const std::string &base, const std::string &c1, const std::string &c2, const std::string &c3)
 {
   mooseDeprecated("getDerivative is being replaced by getMaterialPropertyDerivative (same arguments)");

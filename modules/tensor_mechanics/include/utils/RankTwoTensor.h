@@ -5,6 +5,7 @@
 #include "PermutationTensor.h"
 
 #include "RankFourTensor.h"
+#include "DerivativeMaterialInterface.h"
 
 // Any requisite includes here
 #include "libmesh/libmesh.h"
@@ -16,6 +17,14 @@
 
 #include <vector>
 
+class RankTwoTensor;
+
+/**
+ * Helper function template specialization to set an object to zero.
+ * Needed by DerivativeMaterialInterface
+ */
+template<>
+void mooseSetToZero<RankTwoTensor>(RankTwoTensor & v);
 
 /**
  * RankTwoTensor is designed to handle the Stress or Strain Tensor for a fully anisotropic material.

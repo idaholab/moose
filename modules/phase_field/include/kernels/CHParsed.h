@@ -24,8 +24,8 @@ protected:
   virtual RealGradient computeGradDFDCons(PFFunctionType type);
 
 private:
-  std::vector<MaterialProperty<Real>* > _second_derivatives;
-  std::vector<MaterialProperty<Real>* > _third_derivatives;
+  std::vector<const MaterialProperty<Real>* > _second_derivatives;
+  std::vector<const MaterialProperty<Real>* > _third_derivatives;
   std::vector<VariableGradient *> _grad_vars;
 };
 

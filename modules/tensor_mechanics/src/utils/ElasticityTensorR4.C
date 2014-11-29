@@ -1,5 +1,11 @@
 #include "ElasticityTensorR4.h"
 
+template<>
+void mooseSetToZero<ElasticityTensorR4>(ElasticityTensorR4 & v)
+{
+  v.zero();
+}
+
 ElasticityTensorR4::ElasticityTensorR4() :
     RankFourTensor()
 {
