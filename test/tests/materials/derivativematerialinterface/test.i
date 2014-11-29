@@ -6,12 +6,6 @@
 []
 
 [Materials]
-  [./const]
-    type = GenericConstantMaterial
-    block = 0
-    prop_names  = 'constant_zero'
-    prop_values = '0.0'
-  [../]
   [./provider]
     type = DerivativeMaterialInterfaceTestProvider
     block = 0
