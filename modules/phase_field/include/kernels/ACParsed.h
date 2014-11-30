@@ -26,8 +26,8 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
 
 private:
-  MaterialProperty<Real> & _dFdEta;
-  MaterialProperty<Real> & _d2FdEta2;
+  const MaterialProperty<Real> & _dFdEta;
+  const MaterialProperty<Real> & _d2FdEta2;
 };
 
 #endif // ACPARSED_H

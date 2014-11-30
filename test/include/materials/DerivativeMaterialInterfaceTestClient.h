@@ -20,7 +20,7 @@ public:
 protected:
   void computeProperties();
 
-  MaterialProperty<Real> & _prop0, & _prop1, & _prop2, & _prop3, & _prop4, & _prop5;
+  const MaterialProperty<Real> & _prop0, & _prop1, & _prop2, & _prop3, & _prop4, & _prop5;
 };
 
 #endif //DERIVATIVEMATERIALINTERFACETESTCLIENT_H

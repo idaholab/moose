@@ -2005,6 +2005,16 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
     const dof_id_type first_dof_on_proc = dofMap().first_dof(processor_id());
     const dof_id_type end_dof_on_proc   = dofMap().end_dof(processor_id());
 
+    // If we're on the last processor then we have all of the scalar dofs
+    const dof_id_type n_scalar_dofs_on_proc = processor_id() == n_processors()-1 ? dofMap().n_SCALAR_dofs() : 0;
+
+    // If we're _not_ on the last processor then all of the scalar dofs are off processor (n_oz)
+    const dof_id_type n_scalar_dofs_not_on_proc = processor_id() == n_processors()-1 ? 0 : dofMap().n_SCALAR_dofs();
+
+    // The total number of dofs on and off processor (including scalar dofs)
+    const dof_id_type n_dofs_on_proc = dofMap().n_local_dofs() + n_scalar_dofs_on_proc;
+    const dof_id_type n_dofs_not_on_proc = (dofMap().n_dofs() - dofMap().n_local_dofs()) + n_scalar_dofs_not_on_proc;
+
     for (std::map<dof_id_type, std::vector<dof_id_type> >::iterator git=graph.begin(); git != graph.end(); ++git)
     {
       dof_id_type dof = git->first;
@@ -2033,6 +2043,10 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
         else
           n_nz[local_dof]++;
       }
+
+      // Safety
+      n_nz[local_dof] = std::min(n_nz[local_dof], n_dofs_on_proc);
+      n_oz[local_dof] = std::min(n_oz[local_dof], n_dofs_not_on_proc);
     }
   }
 }

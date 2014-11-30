@@ -9,6 +9,12 @@
   extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
 #endif
 
+template<>
+void mooseSetToZero<RankFourTensor>(RankFourTensor & v)
+{
+  v.zero();
+}
+
 MooseEnum
 RankFourTensor::fillMethodEnum()
 {

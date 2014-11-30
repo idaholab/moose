@@ -7,6 +7,12 @@
 #include "libmesh/tensor_value.h"
 #include "MaterialProperty.h"
 
+template<>
+void mooseSetToZero<RankTwoTensor>(RankTwoTensor & v)
+{
+  v.zero();
+}
+
 RankTwoTensor::RankTwoTensor()
 {
   mooseAssert(N == 3, "RankTwoTensor is currently only tested for 3 dimensions.");
