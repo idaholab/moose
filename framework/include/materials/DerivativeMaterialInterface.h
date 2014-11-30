@@ -69,7 +69,7 @@ public:
   // return references to a zero material property for non-existing material properties
 
   /**
-   * Fetch a material property if it exists, otherwise return the 'constant_zero' property
+   * Fetch a material property if it exists, otherwise return a constant zero property
    */
   template<typename U>
   const MaterialProperty<U> & getDefaultMaterialProperty(const std::string & name);
