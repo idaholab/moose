@@ -217,8 +217,8 @@ GrainTracker::finalize()
     {
       if (grain_it->second->status != INACTIVE)
       {
-        std::set<unsigned int>::const_iterator node_it_end = grain_it->second->nodes_ptr->end();
-        for (std::set<unsigned int>::const_iterator node_it = grain_it->second->nodes_ptr->begin(); node_it != node_it_end; ++node_it)
+        std::set<dof_id_type>::const_iterator node_it_end = grain_it->second->nodes_ptr->end();
+        for (std::set<dof_id_type>::const_iterator node_it = grain_it->second->nodes_ptr->begin(); node_it != node_it_end; ++node_it)
           _nodal_data[*node_it].push_back(std::make_pair(grain_it->first, grain_it->second->variable_idx));
       }
     }
@@ -297,7 +297,7 @@ GrainTracker::buildBoundingSpheres()
       total_node_count += it1->_nodes.size();
 
       // Find the min/max of our bounding box to calculate our bounding sphere
-      for (std::set<unsigned int>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
+      for (std::set<dof_id_type>::iterator it2 = it1->_nodes.begin(); it2 != it1->_nodes.end(); ++it2)
       {
         Node *node = mesh.query_node_ptr(*it2);
         if (node)
@@ -722,7 +722,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
 
   MeshBase & mesh = _mesh.getMesh();
   // Remap the grain
-  for (std::set<unsigned int>::const_iterator node_it = grain_it1->second->nodes_ptr->begin();
+  for (std::set<dof_id_type>::const_iterator node_it = grain_it1->second->nodes_ptr->begin();
        node_it != grain_it1->second->nodes_ptr->end(); ++node_it)
   {
     Node *curr_node = mesh.query_node_ptr(*node_it);
@@ -738,7 +738,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
         VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
 
         // Copy Value from intersecting variable to new variable
-        unsigned int & dof_index = _vars[new_variable_idx]->nodalDofIndex();
+        dof_id_type & dof_index = _vars[new_variable_idx]->nodalDofIndex();
 
         // Set the only DOF for this variable on this node
         solution.set(dof_index, value[0]);
@@ -751,7 +751,7 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator
         VariableValue & value_older = _vars[new_variable_idx]->nodalSlnOlder();
 
         // Copy Value from variable to the intersecting variable
-        unsigned int & dof_index = _vars[curr_var_idx]->nodalDofIndex();
+        dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
 
         // Set the only DOF for this variable on this node
         solution.set(dof_index, value[0]);
@@ -787,7 +787,7 @@ GrainTracker::updateFieldInfo()
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
 
     if (grain_it->second->status != INACTIVE)
-      for (std::set<unsigned int>::iterator node_it = grain_it->second->nodes_ptr->begin();
+      for (std::set<dof_id_type>::iterator node_it = grain_it->second->nodes_ptr->begin();
            node_it != grain_it->second->nodes_ptr->end(); ++node_it)
       {
         Node *curr_node = mesh.query_node_ptr(*node_it);
@@ -863,8 +863,10 @@ GrainTracker::BoundingSphereInfo::BoundingSphereInfo(unsigned int node_id, const
 {}
 
 // Unique Grain
-GrainTracker::UniqueGrain::UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs,
-                                       const std::set<unsigned int> *nodes_pt, STATUS status) :
+GrainTracker::UniqueGrain::UniqueGrain(unsigned int var_idx,
+                                       const std::vector<BoundingSphereInfo *> & b_sphere_ptrs,
+                                       const std::set<dof_id_type> *nodes_pt,
+                                       STATUS status) :
     variable_idx(var_idx),
     sphere_ptrs(b_sphere_ptrs),
     status(status),

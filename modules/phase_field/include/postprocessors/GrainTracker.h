@@ -142,7 +142,7 @@ public:
   /// This struct hold the information necessary to identify and track a unique grain;
   struct UniqueGrain
   {
-    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<unsigned int> *nodes_pt, STATUS status);
+    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<dof_id_type> *nodes_pt, STATUS status);
     ~UniqueGrain();
 
     unsigned int variable_idx;
@@ -153,7 +153,7 @@ public:
      * after new sets are built before "trackGrains" has been re-run.  This is intentional and lets us
      * avoid making unnecessary copies of the set when we don't need it.
      */
-    const std::set<unsigned int> *nodes_ptr;
+    const std::set<dof_id_type> *nodes_ptr;
   };
 
   bool _compute_op_maps;
