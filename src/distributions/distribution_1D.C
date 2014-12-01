@@ -450,7 +450,7 @@ BasicLogisticDistribution::BasicLogisticDistribution(double location, double sca
 {
     _dist_parameters["location"] = location;
     _dist_parameters["scale"] = scale;
-    
+
     _backend = new LogisticDistributionBackend(location, scale);
 }
 
@@ -681,10 +681,10 @@ BasicGammaDistribution::BasicGammaDistribution(double k, double theta, double lo
     _dist_parameters["theta"] = theta; //scale
     _dist_parameters["low"] = low; //low value shift. 0.0 would be a regular gamma
     // distribution
-    
+
     if ((theta<0) || (k<0))
     throwError("ERROR: incorrect value of k or theta for gamma distribution");
-    
+
     _backend = new GammaDistributionBackend(k, theta);
 }
 
@@ -763,10 +763,10 @@ BasicBetaDistribution::BasicBetaDistribution(double alpha, double beta, double s
     _dist_parameters["alpha"] = alpha;
     _dist_parameters["beta"] = beta;
     _dist_parameters["scale"] = scale;
-    
+
     if ((alpha<0) || (beta<0))
     throwError("ERROR: incorrect value of alpha or beta for beta distribution");
-    
+
     _backend = new BetaDistributionBackend(alpha, beta);
 }
 

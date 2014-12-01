@@ -48,17 +48,17 @@ batteries::~batteries()
 double
 batteries::compute(double time)
 {
-	double status=getVariable(std::string("status"));
+ double status=getVariable(std::string("status"));
 
-	if (status==1){
-		if (time>(getVariable(std::string("initial_life"))+getVariable(std::string("start_time"))))
-			status=0;
-		else
-			status=1;
-	}
-	else
-		status=0;
+ if (status==1){
+  if (time>(getVariable(std::string("initial_life"))+getVariable(std::string("start_time"))))
+   status=0;
+  else
+   status=1;
+ }
+ else
+  status=0;
 
-	return status;
+ return status;
 }
 
