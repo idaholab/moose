@@ -37,6 +37,7 @@ class Tester(MooseObject):
     params.addParam('recover',       True,    "A test that runs with '--recover' mode enabled")
     params.addParam('vtk',           ['ALL'], "A test that runs only if VTK is detected ('ALL', 'TRUE', 'FALSE')")
     params.addParam('tecplot',       ['ALL'], "A test that runs only if Tecplot is detected ('ALL', 'TRUE', 'FALSE')")
+    params.addParam('dof_id_bytes',  ['ALL'], "A test that runs only if libmesh is configured --with-dof-id-bytes = a specific number, e.g. '4', '8'")
 
     return params
 
@@ -172,6 +173,11 @@ class Tester(MooseObject):
     # Check for positive scale refine values when using store timing options
     if self.specs['scale_refine'] == 0 and options.store_time:
       return (False, reason)
+
+    # There should only be one entry in self.specs['dof_id_bytes']
+    for x in self.specs['dof_id_bytes']:
+      if x != 'ALL' and not x in checks['dof_id_bytes']:
+        return (False, 'skipped (--with-dof-id-bytes!=' + x + ')')
 
     # Check the return values of the derived classes
     return self.checkRunnable(options)
