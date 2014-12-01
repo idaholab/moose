@@ -115,20 +115,20 @@ BasicDistribution::hasParameter(std::string s)
 double BasicDistribution::windowProcessing(double rng){
         double value;
 
-   if(getVariable(std::string("PB_window_Low")) != 0.0 || getVariable(std::string("PB_window_Up")) != 1.0){	// interval Pb window
+   if(getVariable(std::string("PB_window_Low")) != 0.0 || getVariable(std::string("PB_window_Up")) != 1.0){ // interval Pb window
                 double pbLOW = getVariable(std::string("PB_window_Low"));
                 double pbUP  = getVariable(std::string("PB_window_Up"));
                 double pb = pbLOW + (pbUP-pbLOW) * rng;
                 value = InverseCdf(pb);
                 //std::cerr << " pbLOW " << pbLOW << " pbUP " << pbUP << " pb " << pb << " value " << value << std::endl;
-        }else if(getVariable(std::string("V_window_Low")) != -std::numeric_limits<double>::max() && getVariable(std::string("V_window_Up")) != std::numeric_limits<double>::max( )){	// interval V window
+        }else if(getVariable(std::string("V_window_Low")) != -std::numeric_limits<double>::max() && getVariable(std::string("V_window_Up")) != std::numeric_limits<double>::max( )){ // interval V window
                 double pbLOW = Cdf(getVariable(std::string("V_window_Low")));
                 double pbUP  = Cdf(getVariable(std::string("V_window_Up")));
                 double pb = pbLOW + (pbUP-pbLOW) * rng;
                 value = InverseCdf(pb);
                 //std::cerr << " valLOW " << valLOW << " valUP " << valUP << " value " << value << std::endl;
         }
-        else	// DEFAULT
+        else // DEFAULT
                 value = InverseCdf(rng);
 
         return value;

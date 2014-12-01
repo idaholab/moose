@@ -45,16 +45,16 @@ DieselGeneratorBase::~DieselGeneratorBase()
 double
 DieselGeneratorBase::compute(double time)
 {
-	double status=getVariable(std::string("status"));
+ double status=getVariable(std::string("status"));
 
-	if (status==1){
-		if (time>(getVariable(std::string("supply_time"))+getVariable(std::string("start_time"))))
-			status=0;
-		else
-			status=1;
-	}
-	else
-		status=0;
+ if (status==1){
+  if (time>(getVariable(std::string("supply_time"))+getVariable(std::string("start_time"))))
+   status=0;
+  else
+   status=1;
+ }
+ else
+  status=0;
 
-	return status;
+ return status;
 }
