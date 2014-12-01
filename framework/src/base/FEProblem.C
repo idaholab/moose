@@ -438,7 +438,7 @@ void FEProblem::initialSetup()
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                   _material_props, _bnd_material_props, _materials, _assembly);
+                                   _material_props, _bnd_material_props, _materials, _assembly, false);
   /**
    * The ComputeMaterialObjectThread object now allocates memory as needed for the material storage system.
    * This cannot be done with threads. The first call to this object bypasses threading by calling the object
@@ -556,7 +556,7 @@ void FEProblem::initialSetup()
     {
       ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
       ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                       _material_props, _bnd_material_props, _materials, _assembly);
+                                       _material_props, _bnd_material_props, _materials, _assembly, true);
       Threads::parallel_reduce(elem_range, cmt);
     }
   }
