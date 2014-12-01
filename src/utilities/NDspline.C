@@ -52,7 +52,7 @@ NDSpline::NDSpline(){
 }
 
 NDSpline::~NDSpline() {
-  
+
 }
 
 double NDSpline::interpolateAt(std::vector<double> point_coordinate){

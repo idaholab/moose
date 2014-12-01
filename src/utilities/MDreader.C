@@ -1,6 +1,6 @@
 //
 //  Multi-dimensional array reader
-//  
+//
 
 #include <stdio.h>
 #include <iostream>
@@ -22,18 +22,18 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
     // - [int] number of discretization points for each dimension   N
     // - [[double]] discretizations points for each dimension       sum (N_i*d_i)
     // - [[double]] CDF value for each discretization point
-    
+
     // location of first CDF value point = 1 + N + sum (N_i*d_i)
 
 	std::cerr << "readOrderedNDarray" << std::endl;
-    
+
 	std::vector<double> data;
 	data = read1Darray(filename);
 
 	int startingPoint = 0;
 	numberOfDimensions = data[startingPoint];
 	std::cerr << "numberOfDimensions: " << numberOfDimensions << std::endl;
-    
+
     std::vector<int> discretizations (numberOfDimensions);
 
     startingPoint++;
