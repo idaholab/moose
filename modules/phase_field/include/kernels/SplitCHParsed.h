@@ -30,7 +30,7 @@ private:
   const MaterialProperty<Real> & _dFdc;
   const MaterialProperty<Real> & _d2Fdc2;
 
-  std::vector<MaterialProperty<Real> *> _d2Fdcdarg;
+  std::vector<const MaterialProperty<Real> *> _d2Fdcdarg;
 };
 
 #endif // SPLITCHPARSED_H

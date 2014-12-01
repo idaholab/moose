@@ -53,8 +53,8 @@ DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const std::string & name,
   _prop_d3Fb.resize(_nfargs);
   for (unsigned int i = 0; i < _nfargs; ++i)
   {
-    _prop_dFa[i] = &getDerivative<Real>(_fa_name, _arg_names[i]);
-    _prop_dFb[i] = &getDerivative<Real>(_fb_name, _arg_names[i]);
+    _prop_dFa[i] = &getMaterialPropertyDerivative<Real>(_fa_name, _arg_names[i]);
+    _prop_dFb[i] = &getMaterialPropertyDerivative<Real>(_fb_name, _arg_names[i]);
 
     _prop_d2Fa[i].resize(_nfargs);
     _prop_d2Fb[i].resize(_nfargs);
@@ -67,8 +67,8 @@ DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const std::string & name,
 
     for (unsigned int j = 0; j < _nfargs; ++j)
     {
-      _prop_d2Fa[i][j] = &getDerivative<Real>(_fa_name, _arg_names[i], _arg_names[j]);
-      _prop_d2Fb[i][j] = &getDerivative<Real>(_fb_name, _arg_names[i], _arg_names[j]);
+      _prop_d2Fa[i][j] = &getMaterialPropertyDerivative<Real>(_fa_name, _arg_names[i], _arg_names[j]);
+      _prop_d2Fb[i][j] = &getMaterialPropertyDerivative<Real>(_fb_name, _arg_names[i], _arg_names[j]);
 
       if (_third_derivatives) {
         _prop_d3Fa[i][j].resize(_nfargs);
@@ -76,8 +76,8 @@ DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const std::string & name,
 
         for (unsigned int k = 0; k < _nfargs; ++k)
         {
-          _prop_d3Fa[i][j][k] = &getDerivative<Real>(_fa_name, _arg_names[i], _arg_names[j], _arg_names[k]);
-          _prop_d3Fb[i][j][k] = &getDerivative<Real>(_fb_name, _arg_names[i], _arg_names[j], _arg_names[k]);
+          _prop_d3Fa[i][j][k] = &getMaterialPropertyDerivative<Real>(_fa_name, _arg_names[i], _arg_names[j], _arg_names[k]);
+          _prop_d3Fb[i][j][k] = &getMaterialPropertyDerivative<Real>(_fb_name, _arg_names[i], _arg_names[j], _arg_names[k]);
         }
       }
     }

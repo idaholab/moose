@@ -53,16 +53,16 @@ protected:
   Real _W;
 
   /// Function value of the A and B phase.
-  MaterialProperty<Real> * _prop_Fa, * _prop_Fb;
+  const MaterialProperty<Real> * _prop_Fa, * _prop_Fb;
 
   /// Derivatives of Fa and Fb with respect to arg[i]
-  std::vector<MaterialProperty<Real> *> _prop_dFa, _prop_dFb;
+  std::vector<const MaterialProperty<Real> *> _prop_dFa, _prop_dFb;
 
   /// Second derivatives of Fa and Fb.
-  std::vector<std::vector<MaterialProperty<Real> *> > _prop_d2Fa, _prop_d2Fb;
+  std::vector<std::vector<const MaterialProperty<Real> *> > _prop_d2Fa, _prop_d2Fb;
 
   /// Third derivatives of Fa and Fb.
-  std::vector<std::vector<std::vector<MaterialProperty<Real> *> > > _prop_d3Fa, _prop_d3Fb;
+  std::vector<std::vector<std::vector<const MaterialProperty<Real> *> > > _prop_d3Fa, _prop_d3Fb;
 };
 
 #endif // DERIVATIVETWOPHASEMATERIAL_H

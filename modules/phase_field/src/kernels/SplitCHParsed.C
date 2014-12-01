@@ -18,7 +18,7 @@ SplitCHParsed::SplitCHParsed(const std::string & name, InputParameters parameter
 
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
-    _d2Fdcdarg[i] = &getDerivative<Real>(_F_name, _var.name(), _coupled_moose_vars[i]->name());
+    _d2Fdcdarg[i] = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _coupled_moose_vars[i]->name());
 }
 
 Real
