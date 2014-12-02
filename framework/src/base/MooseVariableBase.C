@@ -35,34 +35,10 @@ MooseVariableBase::~MooseVariableBase()
 {
 }
 
-unsigned int
-MooseVariableBase::number() const
-{
-  return _var_num;
-}
-
 const std::string &
 MooseVariableBase::name() const
 {
   return _sys.system().variable(_var_num).name();
-}
-
-Moose::VarKindType
-MooseVariableBase::kind() const
-{
-  return _var_kind;
-}
-
-void
-MooseVariableBase::scalingFactor(Real factor)
-{
-  _scaling_factor = factor;
-}
-
-Real
-MooseVariableBase::scalingFactor() const
-{
-  return _scaling_factor;
 }
 
 unsigned int

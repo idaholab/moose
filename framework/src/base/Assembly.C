@@ -634,15 +634,6 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int neighbor_
 }
 
 DenseMatrix<Number> &
-Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar)
-{
-  if (_block_diagonal_matrix)
-    return _sub_Kee[ivar][0];
-  else
-    return _sub_Kee[ivar][jvar];
-}
-
-DenseMatrix<Number> &
 Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar)
 {
   if (_block_diagonal_matrix)
@@ -1072,19 +1063,17 @@ Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
     {
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
-      for (unsigned int i=0; i<di.size(); i++)
-        residual.set(di[i], _tmp_Re(i));
+      residual.insert(_tmp_Re, di);
     }
     else
-      for (unsigned int i=0; i<di.size(); i++)
-        residual.set(di[i], res_block(i));
+      residual.insert(res_block, di);
   }
 }
 
 void
 Assembly::setResidual(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
 {
-  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
@@ -1095,7 +1084,7 @@ Assembly::setResidual(NumericVector<Number> & residual, Moose::KernelType type/*
 void
 Assembly::setResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
 {
-  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & var = *(*it);
@@ -1134,28 +1123,15 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id
     _dof_map.constrain_element_matrix(jac_block, di, dj, false);
 
     if (scaling_factor != 1.0)
-    {
-      _tmp_Ke = jac_block;
-      _tmp_Ke *= scaling_factor;
+      jac_block *= scaling_factor;
 
-      for (unsigned int i=0; i<di.size(); i++)
-        for (unsigned int j=0; j<dj.size(); j++)
-        {
-          _cached_jacobian_values.push_back(_tmp_Ke(i, j));
-          _cached_jacobian_rows.push_back(di[i]);
-          _cached_jacobian_cols.push_back(dj[j]);
-        }
-    }
-    else
-    {
-      for (unsigned int i=0; i<di.size(); i++)
-        for (unsigned int j=0; j<dj.size(); j++)
-        {
-          _cached_jacobian_values.push_back(jac_block(i, j));
-          _cached_jacobian_rows.push_back(di[i]);
-          _cached_jacobian_cols.push_back(dj[j]);
-        }
-    }
+    for (unsigned int i=0; i<di.size(); i++)
+      for (unsigned int j=0; j<dj.size(); j++)
+      {
+        _cached_jacobian_values.push_back(jac_block(i, j));
+        _cached_jacobian_rows.push_back(di[i]);
+        _cached_jacobian_cols.push_back(dj[j]);
+      }
   }
 
   jac_block.zero();
@@ -1189,7 +1165,7 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & jacobian)
 void
 Assembly::addJacobian(SparseMatrix<Number> & jacobian)
 {
-  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
@@ -1224,7 +1200,7 @@ Assembly::addJacobian(SparseMatrix<Number> & jacobian)
 void
 Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian)
 {
-  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
@@ -1244,7 +1220,7 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian)
 void
 Assembly::cacheJacobian()
 {
-  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
@@ -1279,7 +1255,7 @@ Assembly::cacheJacobian()
 void
 Assembly::cacheJacobianNeighbor()
 {
-  const std::vector<MooseVariable *> vars = _sys.getVariables(_tid);
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
   {
     MooseVariable & ivar = *(*it);
