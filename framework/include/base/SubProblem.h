@@ -217,14 +217,14 @@ public:
   virtual void checkBoundaryMatProps();
 
   /**
-   * Helper method for isMatPropRequested to factor out block and boundary checking
+   * Helper method for adding a material property name to the _material_property_requested set
    */
-  virtual bool checkMatPropRequested(std::map<unsigned int, std::multimap<std::string, std::string> > &, const std::string &);
+  virtual void markMatPropRequested(const std::string &);
 
   /**
    * Find out if a material property has been requested by any object
    */
-  virtual bool isMatPropRequested(const std::string & prop_name);
+  virtual bool isMatPropRequested(const std::string & prop_name) const;
 
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
@@ -307,6 +307,9 @@ protected:
 
   /// Map for boundary material properties (boundary_id -> list of properties)
   std::map<unsigned int, std::set<std::string> > _map_boundary_material_props;
+
+  /// set containing all material property names that have been requested by getMaterialProperty*
+  std::set<std::string> _material_property_requested;
 
   ///@{
   /**
