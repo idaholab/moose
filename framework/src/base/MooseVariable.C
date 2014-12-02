@@ -224,10 +224,9 @@ MooseVariable::reinitAux()
     // FIXME: check if the following is equivalent with '_nodal_dof_index = _dof_indices[0];'?
     _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
 
+    libmesh_assert(_dof_indices.size());
     _nodal_u.resize(_dof_indices.size());
-    const NumericVector<Real> & current_solution = *_sys.currentSolution();
-    for (unsigned int i=0; i<_dof_indices.size(); i++)
-      _nodal_u[i] = current_solution(_dof_indices[i]);
+    _sys.currentSolution()->get(_dof_indices, &_nodal_u[0]);
 
     _is_defined = true;
   }
@@ -245,10 +244,10 @@ MooseVariable::reinitAuxNeighbor()
     {
       _nodal_dof_index_neighbor = _neighbor->dof_number(_sys.number(), _var_num, 0);
 
+      libmesh_assert(_dof_indices_neighbor.size());
       _nodal_u_neighbor.resize(_dof_indices_neighbor.size());
-      const NumericVector<Real> & current_solution = *_sys.currentSolution();
-      for (unsigned int i=0; i<_dof_indices_neighbor.size(); i++)
-        _nodal_u_neighbor[i] = current_solution(_dof_indices_neighbor[i]);
+      _sys.currentSolution()->get(_dof_indices_neighbor,
+                                  &_nodal_u_neighbor[0]);
 
       _is_defined_neighbor = true;
     }
@@ -292,32 +291,20 @@ void
 MooseVariable::insert(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)
-  {
-    for (unsigned int i=0; i<_nodal_u.size(); i++)
-      residual.set(_dof_indices[i], _nodal_u[i]);
-  }
+    residual.insert(&_nodal_u[0], _dof_indices);
 
   if (_has_nodal_value_neighbor)
-  {
-    for (unsigned int i=0; i<_nodal_u_neighbor.size(); i++)
-      residual.set(_dof_indices_neighbor[i], _nodal_u_neighbor[0]);
-  }
+    residual.insert(&_nodal_u_neighbor[0], _dof_indices_neighbor);
 }
 
 void
 MooseVariable::add(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)
-  {
-    for (unsigned int i=0; i<_nodal_u.size(); i++)
-      residual.add(_dof_indices[i], _nodal_u[i]);
-  }
+    residual.add_vector(&_nodal_u[0], _dof_indices);
 
   if (_has_nodal_value_neighbor)
-  {
-    for (unsigned int i=0; i<_nodal_u_neighbor.size(); i++)
-      residual.add(_dof_indices_neighbor[i], _nodal_u_neighbor[0]);
-  }
+    residual.add_vector(&_nodal_u_neighbor[0], _dof_indices_neighbor);
 }
 
 const VariablePhiValue &
@@ -1202,29 +1189,24 @@ MooseVariable::computeNodalValues()
 {
   if (_is_defined)
   {
-    unsigned int n = _dof_indices.size();
-
+    const unsigned int n = _dof_indices.size();
+    mooseAssert(n, "Defined but empty?");
     _nodal_u.resize(n);
+    _sys.currentSolution()->get(_dof_indices, &_nodal_u[0]);
     if (_subproblem.isTransient())
     {
       _nodal_u_old.resize(n);
       _nodal_u_older.resize(n);
+      _sys.solutionOld().get(_dof_indices, &_nodal_u_old[0]);
+      _sys.solutionOlder().get(_dof_indices, &_nodal_u_older[0]);
+
       _nodal_u_dot.resize(n);
       _nodal_du_dot_du.resize(n);
-    }
-
-    for (unsigned int i = 0; i < n; i++)
-    {
-      _nodal_u[i] = (*_sys.currentSolution())(_dof_indices[i]);
-
-      if (_subproblem.isTransient())
-      {
-        _nodal_u_old[i] = _sys.solutionOld()(_dof_indices[i]);
-        _nodal_u_older[i] = _sys.solutionOlder()(_dof_indices[i]);
-
-        _nodal_u_dot[i] = _sys.solutionUDot()(_dof_indices[i]);
-        _nodal_du_dot_du[i] = _sys.duDotDu();
-      }
+      for (unsigned int i = 0; i < n; i++)
+        {
+          _nodal_u_dot[i] = _sys.solutionUDot()(_dof_indices[i]);
+          _nodal_du_dot_du[i] = _sys.duDotDu();
+        }
     }
   }
 }
@@ -1234,23 +1216,19 @@ MooseVariable::computeNodalNeighborValues()
 {
   if (_is_defined_neighbor)
   {
-    unsigned int n = _dof_indices_neighbor.size();
-
+    const unsigned int n = _dof_indices_neighbor.size();
+    mooseAssert(n, "Defined but empty?");
     _nodal_u_neighbor.resize(n);
+    _sys.currentSolution()->get(_dof_indices_neighbor, &_nodal_u_neighbor[0]);
+
     if (_subproblem.isTransient())
     {
       _nodal_u_old_neighbor.resize(n);
       _nodal_u_older_neighbor.resize(n);
-    }
-
-    for (unsigned int i = 0; i < n; i++)
-    {
-      _nodal_u_neighbor[i] = (*_sys.currentSolution())(_dof_indices_neighbor[i]);
-      if (_subproblem.isTransient())
-      {
-        _nodal_u_old_neighbor[i] = _sys.solutionOld()(_dof_indices_neighbor[i]);
-        _nodal_u_older_neighbor[i] = _sys.solutionOlder()(_dof_indices_neighbor[i]);
-      }
+      _sys.solutionOld().get(_dof_indices_neighbor,
+                             &_nodal_u_old_neighbor[0]);
+      _sys.solutionOlder().get(_dof_indices_neighbor,
+                               &_nodal_u_older_neighbor[0]);
     }
   }
 }
