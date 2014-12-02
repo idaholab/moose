@@ -20,7 +20,7 @@ void mooseSetToZero(T & v)
   v = 0;
 }
 template<typename T>
-void mooseSetToZero(T* & v)
+void mooseSetToZero(T* &)
 {
   mooseError("Cannot use pointer types for MaterialProperty derivatives.");
 }
