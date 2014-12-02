@@ -174,7 +174,7 @@ FlowJunction::addMooseObjects()
     params.set<NonlinearVariableName>("variable") = _lm_name;
 
     params.set<FlowModel::EModelType>("model_type") = _model_type;
-    params.set<std::vector<unsigned int> >("nodes") = _nodes;
+    params.set<std::vector<dof_id_type> >("nodes") = _nodes;
     params.set<std::vector<Real> >("normals") = _normals;
     params.set<std::vector<Real> >("K") = _K;
     params.set<UserObjectName>("eos") = getParam<UserObjectName>("eos");
