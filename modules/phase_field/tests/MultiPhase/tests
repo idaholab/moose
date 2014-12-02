@@ -1,0 +1,7 @@
+[Tests]
+  [./derivativetwophasematerial]
+    type = 'Exodiff'
+    input = 'derivativetwophasematerial.i'
+    exodiff = 'derivativetwophasematerial_out.e'
+  [../]
+[]

@@ -21,7 +21,7 @@ InputParameters validParams<DerivativeTwoPhaseMaterial>()
 }
 
 InputParameters
-DerivativeTwoPhaseMaterial::AddPhiToArgs(InputParameters params)
+DerivativeTwoPhaseMaterial::addPhiToArgs(InputParameters params)
 {
   VariableName phi = params.set<std::vector<VariableName> >("phi")[0];
   params.set<std::vector<VariableName> >("args").push_back(phi);
@@ -30,46 +30,51 @@ DerivativeTwoPhaseMaterial::AddPhiToArgs(InputParameters params)
 
 DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const std::string & name,
                                                        InputParameters parameters) :
-    DerivativeBaseMaterial(name, AddPhiToArgs(parameters)),
+    DerivativeBaseMaterial(name, addPhiToArgs(parameters)),
     _fa_name(getParam<std::string>("fa_name")),
     _fb_name(getParam<std::string>("fb_name")),
     _phi(coupledValue("phi")),
+    _phi_id(_nargs - 1),
     _W(getParam<Real>("W")),
     _prop_Fa(&getMaterialProperty<Real>(_fa_name)),
     _prop_Fb(&getMaterialProperty<Real>(_fb_name))
 {
+  // phi is appended to args to have toe base class add all the derivative material properties containing phi
+  // however we treat derivatives w.r.t. phi differently. They are computed from the composite form only, as
+  // Fa and Fb are not functions of phi.
+  _nfargs = _nargs - 1;
 
   // reserve space for phase A and B material properties
-  _prop_dFa.resize(_nargs);
-  _prop_d2Fa.resize(_nargs);
-  _prop_d3Fa.resize(_nargs);
-  _prop_dFb.resize(_nargs);
-  _prop_d2Fb.resize(_nargs);
-  _prop_d3Fb.resize(_nargs);
-  for (unsigned int i = 0; i < _nargs; ++i)
+  _prop_dFa.resize(_nfargs);
+  _prop_d2Fa.resize(_nfargs);
+  _prop_d3Fa.resize(_nfargs);
+  _prop_dFb.resize(_nfargs);
+  _prop_d2Fb.resize(_nfargs);
+  _prop_d3Fb.resize(_nfargs);
+  for (unsigned int i = 0; i < _nfargs; ++i)
   {
     _prop_dFa[i] = &getDerivative<Real>(_fa_name, _arg_names[i]);
     _prop_dFb[i] = &getDerivative<Real>(_fb_name, _arg_names[i]);
 
-    _prop_d2Fa[i].resize(_nargs);
-    _prop_d2Fb[i].resize(_nargs);
+    _prop_d2Fa[i].resize(_nfargs);
+    _prop_d2Fb[i].resize(_nfargs);
 
     // TODO: maybe we should reserve and initialize to NULL...
     if (_third_derivatives) {
-      _prop_d3Fa[i].resize(_nargs);
-      _prop_d3Fb[i].resize(_nargs);
+      _prop_d3Fa[i].resize(_nfargs);
+      _prop_d3Fb[i].resize(_nfargs);
     }
 
-    for (unsigned int j = 0; j < _nargs; ++j)
+    for (unsigned int j = 0; j < _nfargs; ++j)
     {
       _prop_d2Fa[i][j] = &getDerivative<Real>(_fa_name, _arg_names[i], _arg_names[j]);
       _prop_d2Fb[i][j] = &getDerivative<Real>(_fb_name, _arg_names[i], _arg_names[j]);
 
       if (_third_derivatives) {
-        _prop_d3Fa[i][j].resize(_nargs);
-        _prop_d3Fb[i][j].resize(_nargs);
+        _prop_d3Fa[i][j].resize(_nfargs);
+        _prop_d3Fb[i][j].resize(_nfargs);
 
-        for (unsigned int k = 0; k < _nargs; ++k)
+        for (unsigned int k = 0; k < _nfargs; ++k)
         {
           _prop_d3Fa[i][j][k] = &getDerivative<Real>(_fa_name, _arg_names[i], _arg_names[j], _arg_names[k]);
           _prop_d3Fb[i][j][k] = &getDerivative<Real>(_fb_name, _arg_names[i], _arg_names[j], _arg_names[k]);
@@ -97,28 +102,24 @@ DerivativeTwoPhaseMaterial::computeF()
 Real
 DerivativeTwoPhaseMaterial::computeDF(unsigned int i)
 {
-  if (i == _nargs - 1)
+  if (i == _phi_id)
     return dh(_phi[_qp]) * ((*_prop_Fb)[_qp] - (*_prop_Fa)[_qp]) + _W * dg(_phi[_qp]);
   else
-    return h(_phi[_qp]) *
-    (*_prop_dFb[i])[_qp] +
-    (1.0 - h(_phi[_qp])) *
-    (*_prop_dFa[i])[_qp] +
-    _W * g(_phi[_qp]);
+    return h(_phi[_qp]) * (*_prop_dFb[i])[_qp] + (1.0 - h(_phi[_qp])) * (*_prop_dFa[i])[_qp];
 }
 
 Real
 DerivativeTwoPhaseMaterial::computeD2F(unsigned int i, unsigned int j)
 {
-  if (i == _nargs - 1 && j == _nargs - 1)
+  if (i == _phi_id && j == _phi_id)
     return d2h(_phi[_qp]) * ((*_prop_Fb)[_qp] - (*_prop_Fa)[_qp]) + _W * d2g(_phi[_qp]);
 
-  if (i == _nargs - 1)
-    return dh(_phi[_qp]) * ((*_prop_dFb[j])[_qp] - (*_prop_dFa[j])[_qp]) + _W * dg(_phi[_qp]);;
-  if (j == _nargs - 1)
-    return dh(_phi[_qp]) * ((*_prop_dFb[i])[_qp] - (*_prop_dFa[i])[_qp]) + _W * dg(_phi[_qp]);;
+  if (i == _phi_id)
+    return dh(_phi[_qp]) * ((*_prop_dFb[j])[_qp] - (*_prop_dFa[j])[_qp]);
+  if (j == _phi_id)
+    return dh(_phi[_qp]) * ((*_prop_dFb[i])[_qp] - (*_prop_dFa[i])[_qp]);
 
-  return h(_phi[_qp]) * (*_prop_d2Fb[i][j])[_qp] + (1.0 - h(_phi[_qp])) * (*_prop_d2Fa[i][j])[_qp] + _W * g(_phi[_qp]);
+  return h(_phi[_qp]) * (*_prop_d2Fb[i][j])[_qp] + (1.0 - h(_phi[_qp])) * (*_prop_d2Fa[i][j])[_qp];
 }
 
 Real

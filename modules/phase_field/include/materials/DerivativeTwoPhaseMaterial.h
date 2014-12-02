@@ -22,7 +22,7 @@ public:
                              InputParameters parameters);
 
 protected:
-  static InputParameters AddPhiToArgs(InputParameters);
+  static InputParameters addPhiToArgs(InputParameters);
 
   virtual unsigned int expectedNumArgs();
 
@@ -44,6 +44,10 @@ protected:
 
   /// Phase parameter (0=A-phase, 1=B-phase)
   VariableValue & _phi;
+
+  /// index of the phi in _args (after it is appended by addPhiToArgs())
+  unsigned int _phi_id;
+  unsigned int _nfargs;
 
   /// Phase transformatuion energy barrier
   Real _W;
