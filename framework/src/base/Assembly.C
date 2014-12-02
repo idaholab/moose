@@ -245,8 +245,9 @@ Assembly::setNeighborQRule(QBase * qrule, unsigned int dim)
 void
 Assembly::invalidateCache()
 {
-  std::map<unsigned int, ElementFEShapeData * >::iterator it = _element_fe_shape_data_cache.begin();
-  std::map<unsigned int, ElementFEShapeData * >::iterator end = _element_fe_shape_data_cache.end();
+  std::map<dof_id_type, ElementFEShapeData * >::iterator
+    it  = _element_fe_shape_data_cache.begin(),
+    end = _element_fe_shape_data_cache.end();
 
   for (; it!=end; ++it)
     it->second->_invalidated = true;

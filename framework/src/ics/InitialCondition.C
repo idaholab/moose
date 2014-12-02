@@ -150,7 +150,8 @@ InitialCondition::compute()
   std::vector<int> free_dof(n_dofs, 0);
 
   // Zero the interpolated values
-  Ue.resize (n_dofs); Ue.zero();
+  Ue.resize (n_dofs);
+  Ue.zero();
 
   // In general, we need a series of
   // projections to ensure a unique and continuous
@@ -162,12 +163,12 @@ InitialCondition::compute()
   _fe_problem.sizeZeroes(n_nodes, _tid);
 
   // Interpolate node values first
-  dof_id_type current_dof = 0;
+  unsigned int current_dof = 0;
   for (unsigned int n = 0; n != n_nodes; ++n)
   {
     // FIXME: this should go through the DofMap,
     // not duplicate dof_indices code badly!
-    const dof_id_type nc = FEInterface::n_dofs_at_node (dim, fe_type, elem_type, n);
+    const unsigned int nc = FEInterface::n_dofs_at_node (dim, fe_type, elem_type, n);
     if (!_current_elem->is_vertex(n))
     {
       current_dof += nc;
@@ -326,13 +327,13 @@ InitialCondition::compute()
         // Form edge projection matrix
         for (unsigned int sidei = 0, freei = 0; sidei != side_dofs.size(); ++sidei)
         {
-          dof_id_type i = side_dofs[sidei];
+          unsigned int i = side_dofs[sidei];
           // fixed DoFs aren't test functions
           if (dof_is_fixed[i])
             continue;
           for (unsigned int sidej = 0, freej = 0; sidej != side_dofs.size(); ++sidej)
           {
-            dof_id_type j = side_dofs[sidej];
+            unsigned int j = side_dofs[sidej];
             if (dof_is_fixed[j])
               Fe(freei) -= phi[i][qp] * phi[j][qp] * JxW[qp] * Ue(j);
             else
@@ -407,13 +408,13 @@ InitialCondition::compute()
         // Form side projection matrix
         for (unsigned int sidei = 0, freei = 0; sidei != side_dofs.size(); ++sidei)
         {
-          dof_id_type i = side_dofs[sidei];
+          unsigned int i = side_dofs[sidei];
           // fixed DoFs aren't test functions
           if (dof_is_fixed[i])
             continue;
           for (unsigned int sidej = 0, freej = 0; sidej != side_dofs.size(); ++sidej)
           {
-            dof_id_type j = side_dofs[sidej];
+            unsigned int j = side_dofs[sidej];
             if (dof_is_fixed[j])
               Fe(freei) -= phi[i][qp] * phi[j][qp] * JxW[qp] * Ue(j);
             else

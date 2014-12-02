@@ -148,15 +148,15 @@ public:
    * @param div_threshold  Maximum value of residual before triggering divergence check
    */
   virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
-                                                                    const int it,
+                                                                    const PetscInt it,
                                                                     const Real xnorm,
                                                                     const Real snorm,
                                                                     const Real fnorm,
                                                                     const Real rtol,
                                                                     const Real stol,
                                                                     const Real abstol,
-                                                                    const int nfuncs,
-                                                                    const int max_funcs,
+                                                                    const PetscInt nfuncs,
+                                                                    const PetscInt max_funcs,
                                                                     const Real ref_resid,
                                                                     const Real div_threshold);
 
@@ -171,12 +171,12 @@ public:
    * @param maxits         Maximum number of linear iterations allowed
    */
   virtual MooseLinearConvergenceReason checkLinearConvergence(std::string &msg,
-                                                              const int n,
+                                                              const PetscInt n,
                                                               const Real rnorm,
                                                               const Real rtol,
                                                               const Real atol,
                                                               const Real dtol,
-                                                              const int maxits);
+                                                              const PetscInt maxits);
 
 #ifdef LIBMESH_HAVE_PETSC
   void storePetscOptions(const MultiMooseEnum & petsc_options,

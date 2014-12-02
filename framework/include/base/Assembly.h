@@ -637,7 +637,7 @@ protected:
   };
 
   /// Cached shape function values stored by element
-  std::map<unsigned int, ElementFEShapeData * > _element_fe_shape_data_cache;
+  std::map<dof_id_type, ElementFEShapeData * > _element_fe_shape_data_cache;
 
   /// Whether or not fe cache should be built at all
   bool _should_use_fe_cache;
@@ -661,9 +661,9 @@ protected:
   /// Values cached by calling cacheJacobian()
   std::vector<Real> _cached_jacobian_values;
   /// Row where the corresponding cached value should go
-  std::vector<unsigned int> _cached_jacobian_rows;
+  std::vector<dof_id_type> _cached_jacobian_rows;
   /// Column where the corresponding cached value should go
-  std::vector<unsigned int> _cached_jacobian_cols;
+  std::vector<dof_id_type> _cached_jacobian_cols;
 
   unsigned int _max_cached_jacobians;
 

@@ -246,13 +246,13 @@ LayeredBase::getLayer(Point p) const
 
     if (one_higher == _layer_bounds.end())
     {
-      return _layer_bounds.size() - 2; // Just return the last layer.  -2 because layers are "in-between" bounds
+      return static_cast<unsigned int>(_layer_bounds.size() - 2); // Just return the last layer.  -2 because layers are "in-between" bounds
     }
     else if (one_higher == _layer_bounds.begin())
       return 0; // Return the first layer
     else
       // The -1 is because the interval that we fall in is just _before_ the number that is bigger (which is what we found
-      return std::distance(_layer_bounds.begin(), one_higher-1);
+      return static_cast<unsigned int>(std::distance(_layer_bounds.begin(), one_higher-1));
   }
 }
 

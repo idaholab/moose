@@ -48,7 +48,7 @@ MooseVariableScalar::reinit()
 
   _dof_map.SCALAR_dof_indices(_dof_indices, _var_num);
 
-  dof_id_type n = _dof_indices.size();
+  unsigned int n = _dof_indices.size();
   _u.resize(n);
   _u_old.resize(n);
   _u_older.resize(n);

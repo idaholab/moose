@@ -982,7 +982,7 @@ static PetscErrorCode DMCreateMatrix_Moose(DM dm, const MatType type, Mat *A)
   MPI_Comm comm;
   M = dof_map.n_dofs();
   N = M;
-  m = dof_map.n_dofs_on_processor(dmm->nl->sys().processor_id());
+  m = static_cast<PetscInt>(dof_map.n_dofs_on_processor(dmm->nl->sys().processor_id()));
   n = m;
   ierr = PetscObjectGetComm((PetscObject)dm,&comm);CHKERRQ(ierr);
   ierr = MatCreate(comm, A);CHKERRQ(ierr);

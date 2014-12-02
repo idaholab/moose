@@ -212,14 +212,14 @@ NodalFloodCount::getValue()
 
 
 Real
-NodalFloodCount::getNodalValue(unsigned int node_id, unsigned int var_idx, bool show_var_coloring) const
+NodalFloodCount::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
 {
   mooseAssert(var_idx < _maps_size, "Index out of range");
   mooseAssert(!show_var_coloring || _var_index_mode, "Cannot use \"show_var_coloring\" without \"enable_var_coloring\"");
 
   if (show_var_coloring)
   {
-    std::map<unsigned int, int>::const_iterator node_it = _var_index_maps[var_idx].find(node_id);
+    std::map<dof_id_type, int>::const_iterator node_it = _var_index_maps[var_idx].find(node_id);
 
     if (node_it != _var_index_maps[var_idx].end())
       return node_it->second;
@@ -228,7 +228,7 @@ NodalFloodCount::getNodalValue(unsigned int node_id, unsigned int var_idx, bool 
   }
   else
   {
-    std::map<unsigned int, int>::const_iterator node_it = _bubble_maps[var_idx].find(node_id);
+    std::map<dof_id_type, int>::const_iterator node_it = _bubble_maps[var_idx].find(node_id);
 
     if (node_it != _bubble_maps[var_idx].end())
       return node_it->second + _region_offsets[var_idx];
@@ -238,21 +238,21 @@ NodalFloodCount::getNodalValue(unsigned int node_id, unsigned int var_idx, bool 
 }
 
 Real
-NodalFloodCount::getElementalValue(unsigned int /*element_id*/) const
+NodalFloodCount::getElementalValue(dof_id_type /*element_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
   return 0;
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &
-NodalFloodCount::getNodalValues(unsigned int /*node_id*/) const
+NodalFloodCount::getNodalValues(dof_id_type /*node_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
   return _empty;
 }
 
 std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
-NodalFloodCount::getElementalValues(unsigned int /*elem_id*/) const
+NodalFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
 {
   std::vector<std::vector<std::pair<unsigned int, unsigned int> > > empty;
 
@@ -296,7 +296,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
    * We need a data structure that reorganizes the region markings into sets so that we can pack them up
    * in a form to marshall them between processors.  The set of nodes are stored by map_num, region_num.
    **/
-  std::vector<std::vector<std::set<unsigned int> > > data(_maps_size);
+  std::vector<std::vector<std::set<dof_id_type> > > data(_maps_size);
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
@@ -304,15 +304,15 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
 
     unsigned int n_periodic_nodes = 0;
     {
-      std::map<unsigned int, int>::const_iterator end = _bubble_maps[map_num].end();
+      std::map<dof_id_type, int>::const_iterator end = _bubble_maps[map_num].end();
       // Reorganize the data by values
 
-      for (std::map<unsigned int, int>::const_iterator it = _bubble_maps[map_num].begin(); it != end; ++it)
+      for (std::map<dof_id_type, int>::const_iterator it = _bubble_maps[map_num].begin(); it != end; ++it)
         data[map_num][(it->second)].insert(it->first);
 
       // Append our periodic neighbor nodes to the data structure before packing
       if (merge_periodic_info)
-        for (std::vector<std::set<unsigned int> >::iterator it = data[map_num].begin(); it != data[map_num].end(); ++it)
+        for (std::vector<std::set<dof_id_type> >::iterator it = data[map_num].begin(); it != data[map_num].end(); ++it)
           n_periodic_nodes += appendPeriodicNeighborNodes(*it);
 
       mooseAssert(_region_counts[map_num]+1 == data[map_num].size(), "Error in packing data");
@@ -332,7 +332,7 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
        */
 
       // Note the _region_counts[mar_num]*2 takes into account the number of nodes and the variable index for each region
-      std::vector<unsigned int> partial_packed_data(_bubble_maps[map_num].size() + n_periodic_nodes + _region_counts[map_num]*2);
+      std::vector<dof_id_type> partial_packed_data(_bubble_maps[map_num].size() + n_periodic_nodes + _region_counts[map_num]*2);
 
       // Now pack it up
       unsigned int current_idx = 0;
@@ -352,8 +352,8 @@ NodalFloodCount::pack(std::vector<unsigned int> & packed_data, bool merge_period
         else
           partial_packed_data[current_idx++] = map_num;                   // The variable owning this bubble
 
-        std::set<unsigned int>::iterator end = data[map_num][i].end();
-        for (std::set<unsigned int>::iterator it = data[map_num][i].begin(); it != end; ++it)
+        std::set<dof_id_type>::iterator end = data[map_num][i].end();
+        for (std::set<dof_id_type>::iterator it = data[map_num][i].begin(); it != end; ++it)
           partial_packed_data[current_idx++] = *it;                       // The individual node ids
       }
 
@@ -493,7 +493,7 @@ NodalFloodCount::flood(const Node *node, int current_idx, unsigned int live_regi
 {
   if (node == NULL)
     return;
-  unsigned int node_id = node->id();
+  dof_id_type node_id = node->id();
 
   // Has this node already been marked? - if so move along
   if (_nodes_visited[current_idx].find(node_id) != _nodes_visited[current_idx].end())
@@ -538,7 +538,7 @@ NodalFloodCount::flood(const Node *node, int current_idx, unsigned int live_regi
 }
 
 unsigned int
-NodalFloodCount::appendPeriodicNeighborNodes(std::set<unsigned int> & data) const
+NodalFloodCount::appendPeriodicNeighborNodes(std::set<dof_id_type> & data) const
 {
   unsigned int orig_size = data.size();
 
@@ -548,13 +548,16 @@ NodalFloodCount::appendPeriodicNeighborNodes(std::set<unsigned int> & data) cons
    * periodic boundary we will simply add those periodic neighbors to the appropriate bubble
    * before packing up the data
    */
-  std::set<unsigned int> periodic_neighbors;
+  std::set<dof_id_type> periodic_neighbors;
 
-  for (std::set<unsigned int>::iterator s_it = data.begin(); s_it != data.end(); ++s_it)
+  // Using a typedef makes the code easier to understand and avoids repeating information.
+  typedef std::multimap<dof_id_type, dof_id_type>::const_iterator IterType;
+
+  for (std::set<dof_id_type>::iterator s_it = data.begin(); s_it != data.end(); ++s_it)
   {
-    std::pair<std::multimap<unsigned int, unsigned int>::const_iterator, std::multimap<unsigned int, unsigned int>::const_iterator> iters =
-      _periodic_node_map.equal_range(*s_it);
-    for (std::multimap<unsigned int, unsigned int>::const_iterator it = iters.first; it != iters.second; ++it)
+    std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(*s_it);
+
+    for (IterType it = iters.first; it != iters.second; ++it)
       periodic_neighbors.insert(it->second);
   }
 
@@ -642,7 +645,7 @@ NodalFloodCount::calculateBubbleVolumes()
         unsigned int flooded_nodes = 0;
         for (unsigned int node = 0; node < elem_n_nodes; ++node)
         {
-          unsigned int node_id = elem->node(node);
+          dof_id_type node_id = elem->node(node);
           if (bubble_it->_nodes.find(node_id) != bubble_it->_nodes.end())
             ++flooded_nodes;
         }

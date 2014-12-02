@@ -120,10 +120,11 @@ GluedContactConstraint::jacobianSetup()
 void
 GluedContactConstraint::updateContactSet(bool beginning_of_step)
 {
-  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
+  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
 
-  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator
+    it  = _penetration_locator._penetration_info.begin(),
+    end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
@@ -134,8 +135,8 @@ GluedContactConstraint::updateContactSet(bool beginning_of_step)
       continue;
     }
 
-    const unsigned int slave_node_num = it->first;
-    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
+    const dof_id_type slave_node_num = it->first;
+    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
     if (beginning_of_step)
     {
@@ -158,7 +159,7 @@ GluedContactConstraint::updateContactSet(bool beginning_of_step)
 bool
 GluedContactConstraint::shouldApply()
 {
-  std::set<unsigned int>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
+  std::set<dof_id_type>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
   return (hpit != _penetration_locator._has_penetrated.end());
 }
 
@@ -189,7 +190,7 @@ GluedContactConstraint::computeQpResidual(Moose::ConstraintType type)
     {
       PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
-      long int dof_number = _current_node->dof_number(0, _vars(_component), 0);
+      dof_id_type dof_number = _current_node->dof_number(0, _vars(_component), 0);
       Real resid = _residual_copy(dof_number);
 
       pinfo->_contact_force(_component) = -resid;

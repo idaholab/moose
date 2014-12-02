@@ -31,7 +31,7 @@ PenetrationThread::PenetrationThread(SubProblem & subproblem,
                                      const MooseMesh & mesh,
                                      BoundaryID master_boundary,
                                      BoundaryID slave_boundary,
-                                     std::map<unsigned int, PenetrationInfo *> & penetration_info,
+                                     std::map<dof_id_type, PenetrationInfo *> & penetration_info,
                                      bool update_location,
                                      Real tangential_tolerance,
                                      bool do_normal_smoothing,
@@ -181,7 +181,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
       for (unsigned int j=0; j<closest_elems.size(); j++)
       {
-        unsigned int elem_id = closest_elems[j];
+        dof_id_type elem_id = closest_elems[j];
         const Elem * elem = _mesh.elem(elem_id);
 
         std::vector<PenetrationInfo*> thisElemInfo;
@@ -1257,7 +1257,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo* info,
 {
   const Elem* side = info->_side;
   const Point& p=info->_closest_point_ref;
-  std::set<unsigned int> elems_to_exclude;
+  std::set<dof_id_type> elems_to_exclude;
   elems_to_exclude.insert(info->_elem->id());
   const Node* slave_node = info->_node;
 
@@ -1483,7 +1483,7 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
 
 void
 PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
-                                                  const std::set<unsigned int> &elems_to_exclude,
+                                                  const std::set<dof_id_type> &elems_to_exclude,
                                                   const std::vector<const Node*> edge_nodes,
                                                   std::vector<PenetrationInfo*> &face_info_comm_edge,
                                                   std::vector<PenetrationInfo*> & p_info)

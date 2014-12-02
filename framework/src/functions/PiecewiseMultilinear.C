@@ -146,8 +146,13 @@ PiecewiseMultilinear::getNeighborIndices(std::vector<Real> in_arr, Real x, unsig
   }
   else
   {
-    std::vector<double>::iterator up = std::lower_bound(in_arr.begin(), in_arr.end(), x); // returns up which points at the first element in inArr that is not less than x
-    upper_x = std::distance(in_arr.begin(), up);
+    // returns up which points at the first element in inArr that is not less than x
+    std::vector<double>::iterator up = std::lower_bound(in_arr.begin(), in_arr.end(), x);
+
+    // std::distance returns std::difference_type, which can be negative in theory, but
+    // in this context will always be >=0.  Therefore the explicit cast is just to shut
+    // the compiler up.
+    upper_x = static_cast<unsigned int>(std::distance(in_arr.begin(), up));
     if (in_arr[upper_x] == x)
       lower_x = upper_x;
     else

@@ -33,7 +33,7 @@ ContactPressureAux::computeValue()
   const Real area = _nodal_area[_qp];
   const PenetrationInfo * pinfo(NULL);
 
-  const std::map<unsigned int, PenetrationInfo*>::const_iterator it = _penetration_locator._penetration_info.find( _current_node->id() );
+  const std::map<dof_id_type, PenetrationInfo*>::const_iterator it = _penetration_locator._penetration_info.find( _current_node->id() );
   if (it != _penetration_locator._penetration_info.end())
   {
     pinfo = it->second;

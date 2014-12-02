@@ -332,7 +332,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
         ++plit)
     {
       PenetrationLocator & pen_loc = *plit->second;
-      std::set<unsigned int> & has_penetrated = pen_loc._has_penetrated;
+      std::set<dof_id_type> & has_penetrated = pen_loc._has_penetrated;
 
       bool frictional_contact_this_interaction = false;
 
@@ -355,16 +355,16 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
           {
             PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-            std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
+            std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
             if (hpit != has_penetrated.end())
             {
 //              _console<<"Slave node: "<<slave_node_num<<std::endl;
               const Node * node = info._node;
 
-              VectorValue<unsigned int> solution_dofs(node->dof_number(nonlinear_sys.number(), disp_x_var->number(), 0),
-                                                      node->dof_number(nonlinear_sys.number(), disp_y_var->number(), 0),
-                                                      (disp_z_var ? node->dof_number(nonlinear_sys.number(), disp_z_var->number(), 0) : 0));
+              VectorValue<dof_id_type> solution_dofs(node->dof_number(nonlinear_sys.number(), disp_x_var->number(), 0),
+                                                     node->dof_number(nonlinear_sys.number(), disp_y_var->number(), 0),
+                                                     (disp_z_var ? node->dof_number(nonlinear_sys.number(), disp_z_var->number(), 0) : 0));
 
               //Get old parametric coords from info
               //get old element from info
@@ -465,7 +465,7 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
       ++plit)
     {
       PenetrationLocator & pen_loc = *plit->second;
-      std::set<unsigned int> & has_penetrated = pen_loc._has_penetrated;
+      std::set<dof_id_type> & has_penetrated = pen_loc._has_penetrated;
 
       bool frictional_contact_this_interaction = false;
 
@@ -498,23 +498,23 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
             if (node->processor_id() == processor_id())
             {
 
-              std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
+              std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
               if (hpit != has_penetrated.end())
               {
                 _num_contact_nodes++;
 
-                VectorValue<unsigned int> residual_dofs(node->dof_number(aux_sys.number(), residual_x_var->number(), 0),
-                                                        node->dof_number(aux_sys.number(), residual_y_var->number(), 0),
-                                                        (residual_z_var ? node->dof_number(aux_sys.number(), residual_z_var->number(), 0) : 0));
+                VectorValue<dof_id_type> residual_dofs(node->dof_number(aux_sys.number(), residual_x_var->number(), 0),
+                                                       node->dof_number(aux_sys.number(), residual_y_var->number(), 0),
+                                                       (residual_z_var ? node->dof_number(aux_sys.number(), residual_z_var->number(), 0) : 0));
 
-                VectorValue<unsigned int> diag_stiff_dofs(node->dof_number(aux_sys.number(), diag_stiff_x_var->number(), 0),
-                                                          node->dof_number(aux_sys.number(), diag_stiff_y_var->number(), 0),
-                                                          (diag_stiff_z_var ? node->dof_number(aux_sys.number(), diag_stiff_z_var->number(), 0) : 0));
+                VectorValue<dof_id_type> diag_stiff_dofs(node->dof_number(aux_sys.number(), diag_stiff_x_var->number(), 0),
+                                                         node->dof_number(aux_sys.number(), diag_stiff_y_var->number(), 0),
+                                                         (diag_stiff_z_var ? node->dof_number(aux_sys.number(), diag_stiff_z_var->number(), 0) : 0));
 
-                VectorValue<unsigned int> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->number(), 0),
-                                                        node->dof_number(aux_sys.number(), inc_slip_y_var->number(), 0),
-                                                        (inc_slip_z_var ? node->dof_number(aux_sys.number(), inc_slip_z_var->number(), 0) : 0));
+                VectorValue<dof_id_type> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->number(), 0),
+                                                       node->dof_number(aux_sys.number(), inc_slip_y_var->number(), 0),
+                                                       (inc_slip_z_var ? node->dof_number(aux_sys.number(), inc_slip_z_var->number(), 0) : 0));
 
                 RealVectorValue res_vec;
                 RealVectorValue stiff_vec;
@@ -720,8 +720,9 @@ FrictionalContactProblem::applySlip(NumericVector<Number>& vec_solution,
       inc_slip_var = inc_slip_z_var;
     }
 
-    unsigned int solution_dof = node->dof_number(nonlinear_sys.number(), disp_var->number(), 0);
-    unsigned int inc_slip_dof = node->dof_number(aux_sys.number(), inc_slip_var->number(), 0);
+    dof_id_type
+      solution_dof = node->dof_number(nonlinear_sys.number(), disp_var->number(), 0),
+      inc_slip_dof = node->dof_number(aux_sys.number(), inc_slip_var->number(), 0);
 
     vec_solution.add(solution_dof, slip);
     aux_solution.add(inc_slip_dof, slip);
@@ -766,7 +767,7 @@ FrictionalContactProblem::numLocalFrictionalConstraints()
 
     if (frictional_contact_this_interaction)
     {
-      std::set<unsigned int> & has_penetrated = pen_loc._has_penetrated;
+      std::set<dof_id_type> & has_penetrated = pen_loc._has_penetrated;
 
       std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
@@ -776,7 +777,7 @@ FrictionalContactProblem::numLocalFrictionalConstraints()
 
         if (pen_loc._penetration_info[slave_node_num])
         {
-          std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
+          std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
           if (hpit != has_penetrated.end())
           {
@@ -791,15 +792,15 @@ FrictionalContactProblem::numLocalFrictionalConstraints()
 
 MooseNonlinearConvergenceReason
 FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
-                                                    const int it,
+                                                    const PetscInt it,
                                                     const Real xnorm,
                                                     const Real snorm,
                                                     const Real fnorm,
                                                     const Real rtol,
                                                     const Real stol,
                                                     const Real abstol,
-                                                    const int nfuncs,
-                                                    const int /*max_funcs*/,
+                                                    const PetscInt nfuncs,
+                                                    const PetscInt /*max_funcs*/,
                                                     const Real ref_resid,
                                                     const Real /*div_threshold*/)
 {
@@ -945,7 +946,7 @@ FrictionalContactProblem::updateIncrementalSlip()
 
     if (frictional_contact_this_interaction)
     {
-      std::set<unsigned int> & has_penetrated = pen_loc._has_penetrated;
+      std::set<dof_id_type> & has_penetrated = pen_loc._has_penetrated;
 
       std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
 
@@ -957,14 +958,14 @@ FrictionalContactProblem::updateIncrementalSlip()
         {
           PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
 
-          std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
+          std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
           if (hpit != has_penetrated.end())
           {
             const Node * node = info._node;
-            VectorValue<unsigned int> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->number(), 0),
-                                                    node->dof_number(aux_sys.number(), inc_slip_y_var->number(), 0),
-                                                    (inc_slip_z_var ? node->dof_number(aux_sys.number(), inc_slip_z_var->number(), 0) : 0));
+            VectorValue<dof_id_type> inc_slip_dofs(node->dof_number(aux_sys.number(), inc_slip_x_var->number(), 0),
+                                                   node->dof_number(aux_sys.number(), inc_slip_y_var->number(), 0),
+                                                   (inc_slip_z_var ? node->dof_number(aux_sys.number(), inc_slip_z_var->number(), 0) : 0));
 
             RealVectorValue inc_slip = info._incremental_slip;
 

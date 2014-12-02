@@ -68,7 +68,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
 
   for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
   {
-    unsigned int node_id = *nd;
+    dof_id_type node_id = *nd;
 
     const Node & node = *_mesh.nodePtr(node_id);
 
@@ -79,7 +79,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
     // Get a list, in descending order of distance, of master nodes in relation to this node
     for (unsigned int k=0; k<n_master_nodes; k++)
     {
-      unsigned int master_id = _trial_master_nodes[k];
+      dof_id_type master_id = _trial_master_nodes[k];
       const Node * cur_node = &_mesh.node(master_id);
       Real distance = ((*cur_node) - node).size();
 
@@ -129,7 +129,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
       { // Now check the neighbor nodes to see if we own any of them
         for (unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
         {
-          unsigned int neighbor_node_id = neighbor_nodes[neighbor_it];
+          dof_id_type neighbor_node_id = neighbor_nodes[neighbor_it];
 
           if (_mesh.node(neighbor_node_id).processor_id() == processor_id)
             need_to_track = true;

@@ -43,7 +43,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
 {
   for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
   {
-    unsigned int node_id = *nd;
+    dof_id_type node_id = *nd;
 
     const Node & node = _mesh.node(node_id);
 

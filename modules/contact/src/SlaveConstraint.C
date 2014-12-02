@@ -74,10 +74,11 @@ SlaveConstraint::addPoints()
 {
   _point_to_info.clear();
 
-  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
+  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
 
-  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator
+    it  = _penetration_locator._penetration_info.begin(),
+    end = _penetration_locator._penetration_info.end();
   for (; it!=end; ++it)
   {
     PenetrationInfo * pinfo = it->second;
@@ -87,11 +88,11 @@ SlaveConstraint::addPoints()
       continue;
     }
 
-    unsigned int slave_node_num = it->first;
+    dof_id_type slave_node_num = it->first;
 
     const Node * node = pinfo->_node;
 
-    std::set<unsigned int>::iterator hpit( has_penetrated.find( slave_node_num ) );
+    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
     if (hpit != has_penetrated.end() && node->processor_id() == processor_id())
     {
       // Find an element that is connected to this node that and that is also on this processor
@@ -273,7 +274,7 @@ SlaveConstraint::nodalArea(PenetrationInfo & pinfo)
 {
   const Node * node = pinfo._node;
 
-  unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
+  dof_id_type dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
 
   Real area = (*_aux_solution)( dof );
   if (area == 0)

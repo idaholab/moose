@@ -130,8 +130,9 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem *elem, unsigned int side
 
     const Elem * neighbor = elem->neighbor(side);
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
-    const unsigned int elem_id = elem->id();
-    const unsigned int neighbor_id = neighbor->id();
+    const dof_id_type
+      elem_id = elem->id(),
+      neighbor_id = neighbor->id();
 
     if (_has_bnd_stateful_props && ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level())))
     {

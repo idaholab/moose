@@ -118,7 +118,7 @@ NearestNodeLocator::findNodes()
     {
       const BndNode * bnode = *nd;
       BoundaryID boundary_id = bnode->_bnd_id;
-      unsigned int node_id = bnode->_node->id();
+      dof_id_type node_id = bnode->_node->id();
 
       // If we have a BB only consider saving this node if it's in our inflated BB
       if (!my_inflated_box || (my_inflated_box->contains_point(*bnode->_node)))
@@ -184,14 +184,14 @@ NearestNodeLocator::reinit()
 }
 
 Real
-NearestNodeLocator::distance(unsigned int node_id)
+NearestNodeLocator::distance(dof_id_type node_id)
 {
   return _nearest_node_info[node_id]._distance;
 }
 
 
 const Node *
-NearestNodeLocator::nearestNode(unsigned int node_id)
+NearestNodeLocator::nearestNode(dof_id_type node_id)
 {
   return _nearest_node_info[node_id]._nearest_node;
 }

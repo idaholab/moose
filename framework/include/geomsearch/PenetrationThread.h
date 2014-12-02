@@ -27,7 +27,7 @@ public:
                     const MooseMesh & mesh,
                     BoundaryID master_boundary,
                     BoundaryID slave_boundary,
-                    std::map<unsigned int, PenetrationInfo *> & penetration_info,
+                    std::map<dof_id_type, PenetrationInfo *> & penetration_info,
                     bool update_location,
                     Real tangential_tolerance,
                     bool do_normal_smoothing,
@@ -56,7 +56,7 @@ protected:
   BoundaryID _slave_boundary;
 
   // This is the info map we're actually filling here
-  std::map<unsigned int, PenetrationInfo *> & _penetration_info;
+  std::map<dof_id_type, PenetrationInfo *> & _penetration_info;
 
   bool _update_location;
   Real _tangential_tolerance;
@@ -155,7 +155,7 @@ protected:
 
   void
   getInfoForFacesWithCommonNodes(const Node* slave_node,
-                                 const std::set<unsigned int> &elems_to_exclude,
+                                 const std::set<dof_id_type> &elems_to_exclude,
                                  const std::vector<const Node*> edge_nodes,
                                  std::vector<PenetrationInfo*> &face_info_comm_edge,
                                  std::vector<PenetrationInfo*> & p_info);
