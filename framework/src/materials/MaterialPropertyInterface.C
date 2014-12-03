@@ -86,6 +86,12 @@ MaterialPropertyInterface::checkMaterialProperty(const std::string & name)
 }
 
 void
+MaterialPropertyInterface::markMatPropRequested(const std::string & name)
+{
+  _mi_feproblem.markMatPropRequested(name);
+}
+
+void
 MaterialPropertyInterface::statefulPropertiesAllowed(bool stateful_allowed)
 {
   _stateful_allowed = stateful_allowed;

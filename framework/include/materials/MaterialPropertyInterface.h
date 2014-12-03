@@ -133,6 +133,11 @@ protected:
   void checkMaterialProperty(const std::string & name);
 
   /**
+   * A proxy method for _mi_feproblem.markMatPropRequested(name)
+   */
+  void markMatPropRequested(const std::string &);
+
+  /**
    * True by default. If false, this class throws an error if any of
    * the stateful material properties interfaces are used.
    */
@@ -155,6 +160,9 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
   if (!_stateful_allowed && _material_data->getMaterialPropertyStorage().hasStatefulProperties())
     mooseError("Error: Stateful material properties not allowed for this object.");
 
+  // mark property as requested
+  markMatPropRequested(name);
+
   // Update the boolean flag.
   _get_material_property_called = true;
 
@@ -168,6 +176,9 @@ MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
   if (!_stateful_allowed)
     mooseError("Error: Stateful material properties not allowed for this object.");
 
+  // mark property as requested
+  markMatPropRequested(name);
+
   return _material_data->getPropertyOld<T>(name);
 }
 
@@ -177,6 +188,9 @@ MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
   if (!_stateful_allowed)
     mooseError("Error: Stateful material properties not allowed for this object.");
+
+  // mark property as requested
+  markMatPropRequested(name);
 
   return _material_data->getPropertyOlder<T>(name);
 }
