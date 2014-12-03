@@ -64,47 +64,69 @@ MultiAppPostprocessorTransfer::execute()
     {
       FEProblem & to_problem = *_multi_app->problem();
 
-      Real pp_value = 0;
-      unsigned int pp_count = 0;
+      Real reduced_pp_value;
+      Real default_init;
 
       switch (_reduction_type)
       {
         case AVERAGE:
         case SUM:
-          pp_value = 0;
+          reduced_pp_value = 0;
+          default_init = -std::numeric_limits<Real>::max();
           break;
         case MAXIMUM:
-          pp_value = -std::numeric_limits<Real>::max();
+          reduced_pp_value = -std::numeric_limits<Real>::max();
+          default_init = -std::numeric_limits<Real>::max();
           break;
         case MINIMUM:
-          pp_value = std::numeric_limits<Real>::max();
+          reduced_pp_value = std::numeric_limits<Real>::max();
+          default_init = std::numeric_limits<Real>::max();
           break;
       }
 
+      bool found_local = false;
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
-        if (_multi_app->hasLocalApp(i))
+      {
+        if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
         {
-          ++pp_count;
-          Real this_pp_value = _multi_app->appProblem(i)->getPostprocessorValue(_from_pp_name);
+          found_local = true;
+          Real curr_pp_value = _multi_app->appProblem(i)->getPostprocessorValue(_from_pp_name);
           switch (_reduction_type)
           {
             case AVERAGE:
             case SUM:
-              pp_value += this_pp_value;
+              reduced_pp_value += curr_pp_value;
               break;
             case MAXIMUM:
-              pp_value = std::max(this_pp_value,pp_value);
+              reduced_pp_value = std::max(curr_pp_value,reduced_pp_value);
               break;
             case MINIMUM:
-              pp_value = std::min(this_pp_value,pp_value);
+              reduced_pp_value = std::min(curr_pp_value,reduced_pp_value);
               break;
           }
         }
+      }
+      if (!found_local)
+        reduced_pp_value = default_init;
 
-      if (_reduction_type == AVERAGE)
-        pp_value /= (double) pp_count;
+      switch (_reduction_type)
+      {
+        case AVERAGE:
+          _communicator.sum(reduced_pp_value);
+          reduced_pp_value /= (Real) _multi_app->numGlobalApps();
+          break;
+        case SUM:
+          _communicator.sum(reduced_pp_value);
+          break;
+        case MAXIMUM:
+          _communicator.max(reduced_pp_value);
+          break;
+        case MINIMUM:
+          _communicator.min(reduced_pp_value);
+          break;
+      }
 
-      to_problem.getPostprocessorValue(_to_pp_name) = pp_value;
+      to_problem.getPostprocessorValue(_to_pp_name) = reduced_pp_value;
       break;
     }
   }
