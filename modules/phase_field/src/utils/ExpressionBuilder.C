@@ -48,19 +48,19 @@ ExpressionBuilder::EBSymbolNode::stringify() const
 std::string
 ExpressionBuilder::EBUnaryFuncTermNode::stringify() const
 {
-  const char * ufunc[] = { "sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh" };
+  const char * name[] = { "sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh" };
   std::ostringstream s;
-  s << ufunc[type] << '(' << *subnode << ')';
+  s << name[type] << '(' << *subnode << ')';
   return s.str();
 }
 
 std::string
 ExpressionBuilder::EBUnaryOpTermNode::stringify() const
 {
-  const char * uop[] = { "-", "!" };
+  const char * name[] = { "-", "!" };
   std::ostringstream s;
 
-  s <<  uop[type];
+  s <<  name[type];
 
   if (subnode->precedence() > precedence())
     s << '(' << *subnode << ')';
@@ -73,16 +73,16 @@ ExpressionBuilder::EBUnaryOpTermNode::stringify() const
 std::string
 ExpressionBuilder::EBBinaryFuncTermNode::stringify() const
 {
-  const char * bfunc[] = { "min", "max", "atan2", "hypot", "plog" };
+  const char * name[] = { "min", "max", "atan2", "hypot", "plog" };
   std::ostringstream s;
-  s << bfunc[type] << '(' << *left << ',' << *right << ')';
+  s << name[type] << '(' << *left << ',' << *right << ')';
   return s.str();
 }
 
 std::string
 ExpressionBuilder::EBBinaryOpTermNode::stringify() const
 {
-  const char * bop[] = { "+", "-", "*", "/", "%", "^", "<", ">", "<=", ">=", "=", "!=" };
+  const char * name[] = { "+", "-", "*", "/", "%", "^", "<", ">", "<=", ">=", "=", "!=" };
   std::ostringstream s;
 
   if (left->precedence() > precedence())
@@ -90,7 +90,7 @@ ExpressionBuilder::EBBinaryOpTermNode::stringify() const
   else
     s << *left;
 
-  s << bop[type];
+  s << name[type];
 
   // these operators are left associative at equal precedence
   // (this matters for -,/,&,^ but not for + and *)
@@ -123,6 +123,15 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
   }
 
   mooseError("Unknown type.");
+}
+
+std::string
+ExpressionBuilder::EBTernaryFuncTermNode::stringify() const
+{
+  const char * name[] = { "ifexpr" };
+  std::ostringstream s;
+  s << name[type] << '(' << *left << ',' << *middle << ',' << *right << ')';
+  return s.str();
 }
 
 ExpressionBuilder::EBFunction &
@@ -257,6 +266,33 @@ ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, const Expr
   );
 }
 
+#define TERNARY_FUNC_IMPLEMENT(op,OP) \
+ExpressionBuilder::EBTerm op (const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & middle, const ExpressionBuilder::EBTerm & right) { \
+  return ExpressionBuilder::EBTerm( \
+    new ExpressionBuilder::EBTernaryFuncTermNode(left.root->clone(), middle.root->clone(), right.root->clone(), ExpressionBuilder::EBTernaryFuncTermNode::OP) \
+  ); \
+}
+TERNARY_FUNC_IMPLEMENT(ifexpr,IFEXPR)
+
+unsigned int
+ExpressionBuilder::EBUnaryTermNode::substitute(const EBSubstitutionRuleList & rules)
+{
+  unsigned int nrule = rules.size();
+
+  for (unsigned int i = 0; i < nrule; ++i)
+  {
+    EBTermNode * replace = rules[i]->apply(subnode);
+    if (replace != NULL)
+    {
+      delete subnode;
+      subnode = replace;
+      return 1;
+    }
+  }
+
+  return subnode->substitute(rules);
+}
+
 unsigned int
 ExpressionBuilder::EBBinaryTermNode::substitute(const EBSubstitutionRuleList & rules)
 {
@@ -293,22 +329,58 @@ ExpressionBuilder::EBBinaryTermNode::substitute(const EBSubstitutionRuleList & r
 }
 
 unsigned int
-ExpressionBuilder::EBUnaryTermNode::substitute(const EBSubstitutionRuleList & rules)
+ExpressionBuilder::EBTernaryTermNode::substitute(const EBSubstitutionRuleList & rules)
 {
   unsigned int nrule = rules.size();
+  bool left_success   = false,
+       middle_success = false,
+       right_success  = false;
+  EBTermNode * replace;
 
   for (unsigned int i = 0; i < nrule; ++i)
   {
-    EBTermNode * replace = rules[i]->apply(subnode);
-    if (replace != NULL)
+    replace = rules[i]->apply(left);
+    if (replace)
     {
-      delete subnode;
-      subnode = replace;
-      return 1;
+      delete left;
+      left = replace;
+      left_success = true;
+      break;
     }
   }
 
-  return subnode->substitute(rules);
+  for (unsigned int i = 0; i < nrule; ++i)
+  {
+    replace = rules[i]->apply(middle);
+    if (replace)
+    {
+      delete middle;
+      middle = replace;
+      middle_success = true;
+      break;
+    }
+  }
+
+  for (unsigned int i = 0; i < nrule; ++i)
+  {
+    replace = rules[i]->apply(right);
+    if (replace)
+    {
+      delete right;
+      right = replace;
+      right_success = true;
+      break;
+    }
+  }
+
+  if (!left_success)
+    left_success = left->substitute(rules);
+  if (!middle_success)
+    middle_success = middle->substitute(rules);
+  if (!right_success)
+    right_success = right->substitute(rules);
+
+  return left_success + middle_success + right_success;
 }
 
 unsigned int
