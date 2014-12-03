@@ -55,7 +55,7 @@ DerivativeParsedMaterial::DerivativeParsedMaterial(const std::string & name,
 unsigned int
 DerivativeParsedMaterial::expectedNumArgs()
 {
-  // this alwats returns the number of argumens that was passed in
+  // this always returns the number of arguments that was passed in
   // i.e. any number of args is accepted.
   return _nargs;
 }

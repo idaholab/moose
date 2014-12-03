@@ -20,6 +20,7 @@
 #include "RndBoundingBoxIC.h"
 #include "PFMobility.h"
 #include "DerivativeParsedMaterial.h"
+#include "DerivativeTwoPhaseMaterial.h"
 #include "NodalFloodCount.h"
 #include "NodalFloodCountAux.h"
 #include "NodalVolumeFraction.h"
@@ -109,6 +110,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PFMobility);
   registerMaterial(GBEvolution);
   registerMaterial(DerivativeParsedMaterial);
+  registerMaterial(DerivativeTwoPhaseMaterial);
   registerUserObject(NodalFloodCount);
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);
