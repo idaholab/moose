@@ -10,6 +10,5 @@
     input = 'master_from_multiapp.i'
     exodiff = 'master_from_multiapp_out_sub0.e master_from_multiapp_out_sub1.e master_from_multiapp_out.e'
     recover = false
-    deleted = 'refs #4028'
   [../]
 []
