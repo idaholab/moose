@@ -278,7 +278,11 @@ MooseVariable::reinitNodes(const std::vector<dof_id_type> & nodes)
       }
     }
   }
-  _is_defined = true;
+
+  if (_dof_indices.size() > 0)
+    _is_defined = true;
+  else
+    _is_defined = false;
 }
 
 void
