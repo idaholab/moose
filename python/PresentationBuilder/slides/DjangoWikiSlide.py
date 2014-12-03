@@ -22,6 +22,8 @@ class DjangoWikiSlide(RemarkSlide):
   def __init__(self, name, params):
     RemarkSlide.__init__(self, name, params, image_type='DjangoWikiImage')
 
+    # Storage for comments
+    self._comments = []
 
   def parse(self, markdown):
     markdown = RemarkSlide.parse(self, markdown)
@@ -45,4 +47,25 @@ class DjangoWikiSlide(RemarkSlide):
         print 'ERROR parsing equation on slide', self.name()
         print '  ', m.group(2)
 
+    # Extract comments
+    markdown = re.sub(r'(?<![^\s.])(\s*\[\]\(\?\?\?\s*(.*?)\))', self._storeComment, markdown)
+
+    # Add the comments at the end
+    if self._comments:
+      prefix = '\n'
+      if len(self._comments) > 1:
+        prefix = '\n- '
+
+      markdown += '\n???\n'
+      for c in self._comments:
+        markdown += prefix + c
+
+    # Return the markdown
     return markdown
+
+  ##
+  # Substitution function for extracting Remark comments (private)
+  def _storeComment(self, match):
+    print match.group(2).strip()
+    self._comments.append(match.group(2).strip())
+    return ''
