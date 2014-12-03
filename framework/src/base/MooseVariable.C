@@ -155,6 +155,12 @@ MooseVariable::prepare()
   _dof_map.dof_indices (_elem, _dof_indices, _var_num);
   _has_nodal_value = false;
   _has_nodal_value_neighbor = false;
+
+  // FIXME: remove this when the Richard's module is migrated to use the new NodalCoupleable interface.
+  if (_dof_indices.size() > 0)
+    _is_defined = true;
+  else
+    _is_defined = false;
 }
 
 void
