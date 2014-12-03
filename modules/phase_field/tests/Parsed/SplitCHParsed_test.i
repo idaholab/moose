@@ -68,13 +68,6 @@
     mob = 1e-3
   [../]
 
-  [./const]
-    type = GenericConstantMaterial
-    block = 0
-    prop_names  = 'constant_zero'
-    prop_values = '0'
-  [../]
-
   [./free_energy]
     type = DerivativeParsedMaterial
     block = 0
