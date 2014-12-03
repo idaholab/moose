@@ -1207,10 +1207,21 @@ MooseVariable::computeNodalValues()
       _nodal_u_dot.resize(n);
       _nodal_du_dot_du.resize(n);
       for (unsigned int i = 0; i < n; i++)
-        {
-          _nodal_u_dot[i] = _sys.solutionUDot()(_dof_indices[i]);
-          _nodal_du_dot_du[i] = _sys.duDotDu();
-        }
+      {
+        _nodal_u_dot[i] = _sys.solutionUDot()(_dof_indices[i]);
+        _nodal_du_dot_du[i] = _sys.duDotDu();
+      }
+    }
+  }
+  else
+  {
+    _nodal_u.resize(0);
+    if (_subproblem.isTransient())
+    {
+      _nodal_u_old.resize(0);
+      _nodal_u_older.resize(0);
+      _nodal_u_dot.resize(0);
+      _nodal_du_dot_du.resize(0);
     }
   }
 }
