@@ -58,8 +58,8 @@ public:
   /**
    * no-op because the postprocessors are already parallel consistent
    */
-  virtual void finalize(){};
-  virtual void threadJoin(const UserObject & y){};
+  virtual void finalize() {}
+  virtual void threadJoin(const UserObject &) {}
   ///@}
 
 protected:
