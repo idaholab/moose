@@ -39,7 +39,7 @@ class DjangoWikiSlide(RemarkSlide):
         markdown = markdown.replace(m.group(0), '`$ ' + m.group(2) + ' $`')
 
       elif m.group(1) == '$$$':
-        markdown = markdown.replace(m.group(0), '\n`$$ ' + m.group(2) + ' $$`')
+        markdown = markdown.replace(m.group(0), '`$$ ' + m.group(2) + ' $$`')
 
       else:
         print 'ERROR parsing equation on slide', self.name()
