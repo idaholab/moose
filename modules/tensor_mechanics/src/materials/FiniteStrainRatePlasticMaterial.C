@@ -192,7 +192,6 @@ FiniteStrainRatePlasticMaterial::getFlowTensor(const RankTwoTensor & sig, Real /
 void
 FiniteStrainRatePlasticMaterial::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, Real yield_stress, RankFourTensor & dresid_dsig)
 {
-  unsigned i, j, k ,l;
   RankTwoTensor sig_dev, flow_tensor, flow_dirn,fij;
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dft, dfd_dsig, dfi_dsig;
