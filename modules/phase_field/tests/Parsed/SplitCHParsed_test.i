@@ -61,7 +61,7 @@
 []
 
 [Materials]
-  [./constants]
+  [./pfmobility]
     type = PFMobility
     block = 0
     kappa = 0.1
