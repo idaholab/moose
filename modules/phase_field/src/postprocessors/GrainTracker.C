@@ -108,7 +108,7 @@ GrainTracker::initialize()
 }
 
 Real
-GrainTracker::getNodalValue(unsigned int node_id, unsigned int var_idx, bool show_var_coloring) const
+GrainTracker::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
 {
   if (_t_step < _tracking_step)
     return 0;
@@ -117,7 +117,7 @@ GrainTracker::getNodalValue(unsigned int node_id, unsigned int var_idx, bool sho
 }
 
 Real
-GrainTracker::getElementalValue(unsigned int element_id) const
+GrainTracker::getElementalValue(dof_id_type element_id) const
 {
   // If this element contains the centroid of on of the grains, return the unique index
   const Elem * curr_elem = _mesh.elem(element_id);
@@ -235,7 +235,7 @@ GrainTracker::finalize()
 
 
 const std::vector<std::pair<unsigned int, unsigned int> > &
-GrainTracker::getNodalValues(unsigned int node_id) const
+GrainTracker::getNodalValues(dof_id_type node_id) const
 {
   const std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > >::const_iterator pos = _nodal_data.find(node_id);
 
@@ -251,7 +251,7 @@ GrainTracker::getNodalValues(unsigned int node_id) const
 }
 
 std::vector<std::vector<std::pair<unsigned int, unsigned int> > >
-GrainTracker::getElementalValues(unsigned int elem_id) const
+GrainTracker::getElementalValues(dof_id_type elem_id) const
 {
   std::vector<std::vector<std::pair<unsigned int, unsigned int> > > elem_info;
 
@@ -273,7 +273,7 @@ GrainTracker::buildBoundingSpheres()
   if (_t_step < _tracking_step)
     return;
 
-  std::map<BoundaryID, std::set<unsigned int> > pb_nodes;
+  std::map<BoundaryID, std::set<dof_id_type> > pb_nodes;
   // Build a list of periodic nodes
   _mesh.buildPeriodicNodeSets(pb_nodes, _var_number, _pbs);
   MeshBase & mesh = _mesh.getMesh();
