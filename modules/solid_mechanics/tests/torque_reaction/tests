@@ -1,0 +1,8 @@
+[Tests]
+ [./torque_reaction]
+   type = 'Exodiff'
+   input = 'torque_reaction.i'
+   exodiff = 'torque_reaction_out.e'
+   abs_zero = 1e-6
+ [../]
+[]
