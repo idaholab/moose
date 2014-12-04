@@ -82,6 +82,16 @@ namespace RELAP7
     WBM_SIMPLE = 0,
     WBM_ORIGINAL = 1
   };
+
+  /**
+   * Check valve type
+   */
+  enum ECheckValveType
+  {
+    CHECK_VALVE_FLOW = 0,   ///< the type of check valve which closes by flow reversal
+    CHECK_VALVE_STATIC = 1,    ///< the type of check valve which closes by static differential pressure
+    CHECK_VALVE_DYNAMIC = 2  ///< the type of check valve which closes by dynamic differential pressure
+  };
 }
 
 #endif // ENUMS_H
