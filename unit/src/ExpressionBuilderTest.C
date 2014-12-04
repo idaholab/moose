@@ -71,4 +71,8 @@ void ExpressionBuilderTest::test()
   CPPUNIT_ASSERT( std::string(comp1) == "(x<y)+(x>y)" );
   CPPUNIT_ASSERT( std::string(comp2) == "(x<=y)+(x>=y)" );
   CPPUNIT_ASSERT( std::string(comp3) == "(x=y)+(x!=y)" );
+
+  // test ifexpr
+  EBTerm if1 = ifexpr(x < 2 * y, x*x + y, y*y +x);
+  CPPUNIT_ASSERT( std::string(if1) == "ifexpr(x<2*y,x*x+y,y*y+x)" );
 }

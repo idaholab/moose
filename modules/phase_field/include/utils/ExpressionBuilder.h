@@ -143,8 +143,6 @@ public:
     virtual ~EBBinaryTermNode() { delete left; delete right; };
 
     virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
-    const EBTermNode * getLeft() const { return left; }
-    const EBTermNode * getRight() const { return right; }
 
   protected:
     EBTermNode *left, *right;
@@ -179,6 +177,35 @@ public:
       EBBinaryTermNode(_left, _right), type(_type) {};
     virtual EBBinaryFuncTermNode * clone() const {
       return new EBBinaryFuncTermNode(left->clone(), right->clone(), type);
+    };
+
+    virtual std::string stringify() const;
+    virtual int precedence() const { return 2; }
+  };
+
+  // Base class for nodes with two sub nodes (i.e. functions or operators taking two arguments)
+  class EBTernaryTermNode : public EBBinaryTermNode
+  {
+  public:
+    EBTernaryTermNode(EBTermNode * _left, EBTermNode * _middle, EBTermNode * _right) : EBBinaryTermNode(_left, _right), middle(_middle) {};
+    virtual ~EBTernaryTermNode() { delete middle; };
+
+    virtual unsigned int substitute(const EBSubstitutionRuleList & rule);
+
+  protected:
+    EBTermNode *middle;
+  };
+
+  // Node representing a function with three arguments
+  class EBTernaryFuncTermNode : public EBTernaryTermNode
+  {
+  public:
+    enum NodeType { IFEXPR } type;
+
+    EBTernaryFuncTermNode(EBTermNode * _left, EBTermNode * _middle, EBTermNode * _right, NodeType _type) :
+      EBTernaryTermNode(_left, _middle, _right), type(_type) {};
+    virtual EBTernaryFuncTermNode * clone() const {
+      return new EBTernaryFuncTermNode(left->clone(), middle->clone(), right->clone(), type);
     };
 
     virtual std::string stringify() const;
@@ -326,6 +353,11 @@ public:
     friend EBTerm atan2(const EBTerm &, const EBTerm &);
     friend EBTerm hypot(const EBTerm &, const EBTerm &);
     friend EBTerm plog(const EBTerm &, const EBTerm &);
+
+    /**
+     * Ternary functions
+     */
+    friend EBTerm ifexpr(const EBTerm &, const EBTerm &, const EBTerm &);
   };
 
   // User facing host object for a function. This combines a term with an argument list.
