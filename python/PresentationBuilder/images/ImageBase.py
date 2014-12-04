@@ -12,7 +12,7 @@ class ImageBase(MooseObject):
     params.addParam('show_caption', True, 'Toggle the visibility of the caption')
     params.addParam('name', 'The image file name')
     params.addParam('url', 'The image file url')
-    params.addParam('download', 'Download the image locally')
+    params.addParam('download', False, 'Download the image locally')
 
     params.addParam('align', 'The image horizontal alignment')
     params.addParam('width', 'The image width')
@@ -40,10 +40,7 @@ class ImageBase(MooseObject):
     # Set download flag (default is true)
     self._download = True
     if self.isParamValid('download'):
-      d = self._pars['download']
-      if d.lower() == 'false' or d == 0:
-        self._download = False
-
+      self._download = self._pars['download']
 
   ##
   # Perform the matching

@@ -333,7 +333,6 @@ FiniteStrainPlasticMaterial::getSigEqv(const RankTwoTensor & stress)
 void
 FiniteStrainPlasticMaterial::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, RankFourTensor & dresid_dsig)
 {
-  unsigned int i, j, k, l;
   RankTwoTensor sig_dev, df_dsig, flow_dirn;
   RankTwoTensor dfi_dft, dfi_dsig;
   RankFourTensor dft_dsig, dfd_dft, dfd_dsig;

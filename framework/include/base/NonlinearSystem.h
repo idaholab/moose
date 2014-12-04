@@ -555,6 +555,7 @@ protected:
 
   bool _print_all_var_norms;
 
+  void getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs);
 };
 
 #endif /* NONLINEARSYSTEM_H */

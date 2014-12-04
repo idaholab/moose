@@ -813,6 +813,15 @@ public:
    */
   const std::string & getPreconditionerDescription() const { return _pc_description; }
 
+  /**
+   * Will return True if the user wants to get an error when
+   * a nonzero is reallocated in the Jacobian by PETSc
+   */
+  bool errorOnJaocobianNonzeroReallocation() { return _error_on_jacobian_nonzero_reallocation; }
+
+
+
+
 protected:
   /// Data names that will only be read from the restart file during RECOVERY
   std::set<std::string> _recoverable_data;
@@ -975,6 +984,8 @@ public:
 private:
   bool _use_legacy_uo_aux_computation;
   bool _use_legacy_uo_initialization;
+
+  bool _error_on_jacobian_nonzero_reallocation;
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
