@@ -79,5 +79,6 @@ MooseVariableScalar::setValue(unsigned int i, Number value)
 void
 MooseVariableScalar::insert(NumericVector<Number> & soln)
 {
-  soln.insert(&_u[0], _dof_indices);
+  if (_dof_indices.size() > 0)
+    soln.insert(&_u[0], _dof_indices);
 }
