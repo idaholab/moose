@@ -287,7 +287,7 @@ class RemarkSlide(MooseObject):
         output += self._title + ' (cont.)'
 
     # Inject the the raw markdown
-    output += '\n' + self.markdown
+    output += self.markdown
 
     # Insert suffix markdown
     if self.isParamValid('suffix'):
@@ -300,4 +300,4 @@ class RemarkSlide(MooseObject):
         output += comment + '\n'
 
     # Return the complete markdown
-    return output + '\n'
+    return output
