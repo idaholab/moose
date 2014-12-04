@@ -956,6 +956,9 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 void
 NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool displaced)
 {
+  // Make sure the residual is in a good state
+  residual.close();
+
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = NULL;
 
   if (!displaced)
@@ -1055,14 +1058,11 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
       if (constraints_applied)
       {
-        residual.close();
         _fe_problem.addCachedResidualDirectly(residual, 0);
         residual.close();
+
         if (_need_residual_ghosted)
-        {
           _residual_ghosted = residual;
-          _residual_ghosted.close();  // somewhat redundant since the assignment above should also close
-        }
       }
     }
   }
@@ -1072,14 +1072,11 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
     if (constraints_applied)
     {
-      residual.close();
       _fe_problem.addCachedResidualDirectly(residual, 0);
       residual.close();
+
       if (_need_residual_ghosted)
-      {
         _residual_ghosted = residual;
-        _residual_ghosted.close();  // somewhat redundant since the assignment above should also close
-      }
     }
   }
 
