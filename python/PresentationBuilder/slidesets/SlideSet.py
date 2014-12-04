@@ -18,7 +18,7 @@ class SlideSet(MooseObject):
     params.addRequiredParam('type', 'The type of slide set to create')
     params.addParam('title', 'The title of the slide set, if this exists a title slide will be injected')
     params.addParam('slides', 'A list of slide ids to output, if blank all slides are output')
-    params.addParam('contents', 'Include table of contents slide')
+    params.addParam('contents', False, 'Include table of contents slide')
     params.addParam('contents_title', 'The table-of-contents heading for this slide set')
     params.addParam('contents_level', 1, 'The heading level to include in the contents')
     params.addParam('contents_items_per_slide', 12, 'The number of contents items to include on a page')
@@ -187,7 +187,7 @@ class SlideSet(MooseObject):
   def initContents(self):
 
     # Do nothing if the 'contents' flag is not set in the input file
-    if not self.isParamValid('contents'):
+    if not self.getParam('contents'):
       return
 
     # Extract the contents
@@ -224,7 +224,7 @@ class SlideSet(MooseObject):
   def contents(self):
 
     # Do nothing if the 'contents' flag is not set in the input file
-    if not self.isParamValid('contents'):
+    if not self.getParam('contents'):
       return
 
     # Update the contents object
