@@ -33,5 +33,5 @@ GeometricalComponent::getConnections(RELAP7::EEndType id)
   if (it != _connections.end())
     return it->second;
   else
-    mooseError("Component '" << name() << "' does not have this type of end defined.");
+    mooseError(name() << ": No end of this type available (" << id << ").");
 }
