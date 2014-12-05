@@ -62,6 +62,9 @@ class SlideSet(MooseObject):
     # Count the number of slides, used for assigning default name
     self._count = 0
 
+    # Storage for links
+    self._links = []
+
     # Print a message
     print '  CREATED:', name
 
@@ -79,8 +82,7 @@ class SlideSet(MooseObject):
     # Apply title slide
     if self.isParamValid('title'):
       slide = self._createSlide('# ' + self.getParam('title') + '\n', show_in_contents=False, title=True,
-                       name=self.name() + '-title')
-
+                                name=self.name() + '-title')
 
 
   ##
@@ -92,12 +94,27 @@ class SlideSet(MooseObject):
     if not raw_markdown:
       return
 
+    # Extract links
+    match = re.findall('(^\s*\[(.*)\]:(.*))', raw_markdown, re.MULTILINE)
+    for m in match:
+      self._links = m[0]
+
+    print self._links
+
     # Separate the individual slides
     raw_slides = re.split(r'\n---', raw_markdown)
 
     # Create/store the slides
     for raw in raw_slides:
       self._createSlide(raw)
+
+
+  ##
+  # Subsitituion function for capturing markdown links
+  def _captureLinks(self, match):
+    print match.group(0)
+    self._links.append(match.group(0))
+    return ''
 
 
   ##
@@ -149,6 +166,7 @@ class SlideSet(MooseObject):
 
     # Add the parent and markdown parameters
     params.addPrivateParam('_parent', self)
+    params.addPrivateParam('format', self._warehouse.format)
     params.addRequiredParam('markdown', raw, 'The raw markdown to parse for the current slide')
 
     # Over-ride parameters with optional key, value pairs
@@ -272,8 +290,23 @@ class SlideSet(MooseObject):
 
     # Create a list of all the slide markdown
     output = []
-    for name in self._slide_order:
+
+    # The list of slides to output
+    slides = self._slide_order
+    if self.isParamValid('slides'):
+      slides = self.getParam('slides').split()
+
+    # Extract the slide content
+    for name in slides:
       output.append(self._slides[name].getMarkdown())
 
     # Join the list with slide breaks
-    return '\n---\n'.join(output)
+    if self._warehouse.format == 'remark':
+      output = '\n---\n'.join(output)
+    elif self._warehouse.format == 'reveal':
+      output = '\n\n'.join(output)
+
+    # Append the links
+    for link in self._links:
+      output += link + '\n'
+    return output

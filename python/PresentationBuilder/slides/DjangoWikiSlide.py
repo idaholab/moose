@@ -12,7 +12,7 @@ class DjangoWikiSlide(RemarkSlide):
     return params
 
   # When reading the markdown these replacements are made
-  replace = [('&amp;', '&'), ('&lt;', '<'), ('&gt;', '>'), ('\r\n', '\n')]
+  replace = [('&amp;', '&'), ('&lt;', '<'), ('&gt;', '>'), ('\r\n', '\n'), ('&quot;', '"')]
 
   ##
   # Constructor

@@ -17,12 +17,24 @@
   padding-left: 250px;
 }
 
-.small {
+.tiny {
   font-size: 10px;
 }
 
-.font-15 {
-  font-size: 18px;
+.scriptsize {
+  font-size: 13px;
+}
+
+.footnotesize {
+  font-size: 14px;
+}
+
+.small {
+  font-size: 20px;
+}
+
+.font-16 {
+  font-size: 16px;
 }
 
 .left-75 {
@@ -43,6 +55,11 @@
 .right-33 {
   width: 33%;
   float: right;
+}
+
+.center-33{
+  width: 33%;
+  float: center;
 }
 
 .left-33 {
@@ -82,13 +99,15 @@ table, th, td {
 }
 
 table{
+  width: 100%;
+  margin: 10px auto;
   border-spacing: 0px;
   border-bottom: 2px solid black;
   border-top: 2px solid black;
 }
 
 table.table-tight th, td{
-  padding: 1px;
+  padding: 4px;
   border-spacing: 0px;
   font-size: 85%
 }
@@ -105,10 +124,10 @@ th{
 }
 
 figure {
-  display:table;
-  margin:14px;
-  padding:7px;
-  width:14px;
+  display: table;
+  margin: 14px;
+  padding: 7px;
+  width: 14px;
 }
 
 /* Sets up the scrolbar to be always viewable */
