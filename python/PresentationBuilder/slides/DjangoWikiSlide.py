@@ -47,8 +47,22 @@ class DjangoWikiSlide(RemarkSlide):
         print 'ERROR parsing equation on slide', self.name()
         print '  ', m.group(2)
 
+    # Handle in-list code
+    # The Django-wiki doesn't seem to support highlighted code blocks nested under a list item,
+    # indenting the code block removes the code block, so all blocks in the wiki must be as follows:
+    #
+    # - A list item
+    # ```c++
+    # unsigned int - = 0
+    # ```
+    #
+    # However, RemarkJS does support indented code blocks, but these blocks need to be indented by
+    # four spaces. The following preforms this indenting.
+    regex = re.compile(r'([\*-].*?\n)(```.*?```\s*\n)', re.MULTILINE|re.DOTALL)
+    markdown = regex.sub(self._indentListNestedCode, markdown)
+
     # Extract comments
-    markdown = re.sub(r'(?<![^\s.])(\s*\[\]\(\?\?\?\s*(.*?)\))', self._storeComment, markdown)
+    markdown = re.sub(r'(?<![^\s.])(\s*\[\]\(\?\?\?\s*(.*?)\))', self._storeComment, markdown, re.S)
 
     # Add the comments at the end
     if self._comments:
@@ -68,3 +82,20 @@ class DjangoWikiSlide(RemarkSlide):
   def _storeComment(self, match):
     self._comments.append(match.group(2).strip())
     return ''
+
+  ##
+  # Subsitution function for nesting code in lists (private)
+  def _indentListNestedCode(self, match):
+
+    # Perform an additional match to check if the ``` directly below the list item
+    sub_match = re.search(r'([\*-].*?\n)(```)', match.group(0), re.MULTILINE)
+
+    # If so, then build the indented output
+    if sub_match:
+      output = match.group(1)
+      for line in match.group(2).split('\n')[0:-1]: #[0:-1] removes the empty string at the end of the list
+        output += ' '*4 + line + '\n'
+      return output
+
+    else:
+      return match.group(0)
