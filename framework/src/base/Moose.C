@@ -192,6 +192,7 @@
 #include "PointValueSampler.h"
 #include "LineValueSampler.h"
 #include "VectorOfPostprocessors.h"
+#include "ElementsAlongLine.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -549,6 +550,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(PointValueSampler);
   registerVectorPostprocessor(LineValueSampler);
   registerVectorPostprocessor(VectorOfPostprocessors);
+  registerVectorPostprocessor(ElementsAlongLine);
 
   // user objects
   registerUserObject(LayeredIntegral);
