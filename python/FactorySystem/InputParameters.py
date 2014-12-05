@@ -40,6 +40,25 @@ class InputParameters:
   def __setitem__(self, key, value):
     self.valid[key] = value
 
+  ##
+  # Adds parameters from another InputParameters object via += operator
+  # @param add_params The InputParameters object to merge into the existing object
+  def __iadd__(self, add_params):
+
+    # Loop through all possible parameters and perform the correct adding into
+    # this InputParameters object
+    for key in add_params.keys():
+      if add_params.isRequired(key):
+        self.addRequiredParam(key, add_params[key], add_params.desc[key])
+      elif add_params.isValid(key):
+        self.addParam(key, add_params[key], add_params.desc[key])
+      else:
+        self.addParam(key, add_params.desc[key])
+
+    # Return this InputParameters object
+    return self
+
+
   def type(self, key):
     if key in self.valid:
       return type(self.valid[key])

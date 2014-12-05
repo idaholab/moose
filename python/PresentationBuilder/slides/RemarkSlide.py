@@ -131,6 +131,14 @@ class RemarkSlide(MooseObject):
   # This method should overloaded to handle special syntax
   def parse(self, markdown):
 
+    # Insert prefix markdown
+    if self.isParamValid('prefix'):
+      markdown = self.getParam('prefix') + '\n' + markdown
+
+    # Insert suffix markdown
+    if self.isParamValid('suffix'):
+      markdown += self.getParam('suffix')
+
     # Remove existing comments, they will be combined with other comments added via input file
     match = re.search(r'\?\?\?\s*\n(.*)', markdown, re.S)
     if match:
@@ -149,7 +157,6 @@ class RemarkSlide(MooseObject):
       if match:
         self._pars[key] = match.group(1)
         markdown = markdown.replace(match.group(1), '')
-
 
     # Return the parsed markdown
     return markdown
@@ -269,9 +276,6 @@ class RemarkSlide(MooseObject):
         else:
           output += key + ': ' + value + '\n'
 
-    # Insert prefix markdown
-    if self.isParamValid('prefix'):
-      output += self.getParam('prefix')
 
     # Insert continued title
     if self._title == None and self.getParam('auto_title'):
@@ -288,10 +292,6 @@ class RemarkSlide(MooseObject):
 
     # Inject the the raw markdown
     output += '\n' + self.markdown
-
-    # Insert suffix markdown
-    if self.isParamValid('suffix'):
-      output += self.getParam('suffix')
 
     # Add the Remark comments
     if self.comments:
