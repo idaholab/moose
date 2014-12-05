@@ -17,7 +17,6 @@ class MergeCoverSet(SlideSet):
   def __init__(self, name, params, **kwargs):
     SlideSet.__init__(self, name, params)
 
-
     self._merge_list = []
     if self.isParamValid('slide_sets'):
       self._merge_list = self.getParam('slide_sets')

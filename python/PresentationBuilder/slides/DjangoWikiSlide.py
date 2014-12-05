@@ -66,6 +66,5 @@ class DjangoWikiSlide(RemarkSlide):
   ##
   # Substitution function for extracting Remark comments (private)
   def _storeComment(self, match):
-    print match.group(2).strip()
     self._comments.append(match.group(2).strip())
     return ''
