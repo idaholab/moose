@@ -1,0 +1,7 @@
+[Tests]
+  [./twophasestress]
+    type = 'Exodiff'
+    input = 'twophasestress.i'
+    exodiff = 'twophasestress_out.e'
+  [../]
+[]
