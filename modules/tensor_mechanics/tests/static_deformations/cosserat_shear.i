@@ -74,7 +74,7 @@
     disp_y = wc_y
     disp_x = wc_x
     component = 0
-    appended_property_name = _couple
+    base_name = couple
   [../]
   [./y_couple]
     type = StressDivergenceTensors
@@ -83,7 +83,7 @@
     disp_y = wc_y
     disp_x = wc_x
     component = 1
-    appended_property_name = _couple
+    base_name = couple
   [../]
   [./z_couple]
     type = StressDivergenceTensors
@@ -92,7 +92,7 @@
     disp_y = wc_y
     disp_x = wc_x
     component = 2
-    appended_property_name = _couple
+    base_name = couple
   [../]
   [./x_moment]
     type = MomentBalancing
@@ -232,4 +232,3 @@
     linear_residuals = false
   [../]
 []
-
