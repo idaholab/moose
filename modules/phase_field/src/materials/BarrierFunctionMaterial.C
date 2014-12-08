@@ -5,7 +5,7 @@ InputParameters validParams<BarrierFunctionMaterial>()
 {
   InputParameters params = validParams<OrderParameterFunctionMaterial>();
   params.addClassDescription("Helper material to provide g(eta) and its derivative in a polynomial.\nSIMPLE: eta^2*(1-eta)^2\nLOW: eta*(1-eta)");
-  MooseEnum h_order("SIMPLE LOW");
+  MooseEnum h_order("SIMPLE=0 LOW", "SIMPLE");
   params.addParam<MooseEnum>("g_order", h_order, "Polynomial order of the switching function h(eta)");
   params.set<std::string>("function_name") = std::string("g");
   return params;
