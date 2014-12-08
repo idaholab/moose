@@ -21,6 +21,8 @@
 #include "PFMobility.h"
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeTwoPhaseMaterial.h"
+#include "BarrierFunctionMaterial.h"
+#include "SwitchingFunctionMaterial.h"
 #include "NodalFloodCount.h"
 #include "NodalFloodCountAux.h"
 #include "NodalVolumeFraction.h"
@@ -95,6 +97,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACGrGrPoly);
   registerKernel(ACGBPoly);
   registerKernel(ACParsed);
+
   registerInitialCondition(CrossIC);
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(RndSmoothCircleIC);
@@ -107,20 +110,27 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(PolycrystalReducedIC);
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
+
   registerMaterial(PFMobility);
   registerMaterial(GBEvolution);
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeTwoPhaseMaterial);
-  registerUserObject(NodalFloodCount);
+  registerMaterial(BarrierFunctionMaterial);
+  registerMaterial(SwitchingFunctionMaterial);
+
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);
   // registerAux(SPPARKSAux);
+
+  registerUserObject(NodalFloodCount);
   registerUserObject(NodalVolumeFraction);
+  registerUserObject(SolutionRasterizer);
   // registerUserObject(SPPARKSUserObject);
+
 #ifdef LIBMESH_HAVE_VTK
   registerFunction(ImageFunction);
 #endif
-  registerUserObject(SolutionRasterizer);
+
   registerMesh(ImageMesh);
 }
 
