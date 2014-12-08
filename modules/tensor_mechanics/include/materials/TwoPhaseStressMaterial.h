@@ -1,5 +1,5 @@
-#ifndef TWOPHASESTRAINMATERIAL_H
-#define TWOPHASESTRAINMATERIAL_H
+#ifndef TWOPHASESTRESSMATERIAL_H
+#define TWOPHASESTRESSMATERIAL_H
 
 #include "Material.h"
 
@@ -43,4 +43,4 @@ protected:
   MaterialProperty<ElasticityTensorR4> & _dstress_dstrain;
 };
 
-#endif //TWOPHASESTRAINMATERIAL_H
+#endif //TWOPHASESTRESSMATERIAL_H
