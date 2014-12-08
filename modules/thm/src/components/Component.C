@@ -10,7 +10,6 @@ InputParameters validParams<Component>()
 {
   InputParameters params = validParams<R7Object>();
   params.addPrivateParam<Simulation *>("_sim");
-
   params.addPrivateParam<std::string>("built_by_action", "add_component");
 
   params.registerBase("Component");
