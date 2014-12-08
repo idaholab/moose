@@ -2,10 +2,10 @@
 #define ELASTICENERGYMATERIAL_H
 
 #include "DerivativeBaseMaterial.h"
-#include "RankTwoTensor.h"
 
 // Forward Declaration
 class ElasticEnergyMaterial;
+class RankTwoTensor;
 
 template<>
 InputParameters validParams<DerivativeBaseMaterial>();
@@ -19,8 +19,19 @@ public:
   ElasticEnergyMaterial(const std::string & name, InputParameters parameters);
 
 protected:
-  std::string _strain_name;
-  MaterialProperty<RankTwoTensor> & _strain;
+  virtual Real computeF();
+  virtual Real computeDF(unsigned int);
+  virtual Real computeD2F(unsigned int, unsigned int);
+
+  std::string _base_name;
+
+  // mechanics properties
+  const MaterialProperty<RankTwoTensor> & _stress;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _dstress;
+  std::vector<std::vector<const MaterialProperty<RankTwoTensor> *> > _d2stress;
+  const MaterialProperty<RankTwoTensor> & _strain;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _dstrain;
+  std::vector<std::vector<const MaterialProperty<RankTwoTensor> *> > _d2strain;
 };
 
 #endif //ELASTICENERGYMATERIAL_H

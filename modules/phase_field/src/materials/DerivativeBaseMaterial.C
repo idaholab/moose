@@ -37,7 +37,7 @@ DerivativeBaseMaterial::DerivativeBaseMaterial(const std::string & name,
     if (_third_derivatives) {
       _prop_d3F[i].resize(_nargs);
 
-      for (unsigned int j = 0; j < _nargs; ++j)
+      for (j = 0; j < _nargs; ++j)
         _prop_d3F[i][j].resize(_nargs);
     }
   }
@@ -130,7 +130,8 @@ DerivativeBaseMaterial::initialSetup()
   }
 }
 
-// implementing this in the derived class is optional (not really, but we'l have to check what is needed for the residuals!)
+// implementing this in the derived class is optional
+// (not really, but we'll have to check what is needed for the residuals!)
 Real
 DerivativeBaseMaterial::computeD3F(unsigned int /*arg1*/, unsigned int /*arg2*/, unsigned int /*arg3*/)
 {
