@@ -77,6 +77,7 @@ BCWarehouse::jacobianSetup()
 void
 BCWarehouse::addBC(BoundaryID boundary_id, MooseSharedPointer<IntegratedBC> & bc)
 {
+  _all_objects.push_back(bc.get());
   _all_ptrs.push_back(MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(bc));
   _bcs[boundary_id].push_back(bc.get());
 }
@@ -84,6 +85,7 @@ BCWarehouse::addBC(BoundaryID boundary_id, MooseSharedPointer<IntegratedBC> & bc
 void
 BCWarehouse::addNodalBC(BoundaryID boundary_id, MooseSharedPointer<NodalBC> & bc)
 {
+  _all_objects.push_back(bc.get());
   _all_ptrs.push_back(MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(bc));
   _nodal_bcs[boundary_id].push_back(bc.get());
 }
@@ -91,6 +93,7 @@ BCWarehouse::addNodalBC(BoundaryID boundary_id, MooseSharedPointer<NodalBC> & bc
 void
 BCWarehouse::addPresetNodalBC(BoundaryID boundary_id, MooseSharedPointer<PresetNodalBC> & bc)
 {
+  _all_objects.push_back(bc.get());
   _all_ptrs.push_back(MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(bc));
   _preset_nodal_bcs[boundary_id].push_back(bc.get());
 }
