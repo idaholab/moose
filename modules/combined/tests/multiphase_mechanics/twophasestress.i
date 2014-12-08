@@ -124,7 +124,6 @@
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  nl_rel_tol = 1e-14
 []
 
 [Outputs]
