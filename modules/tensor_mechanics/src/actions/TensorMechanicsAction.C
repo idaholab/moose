@@ -12,7 +12,7 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addParam<NonlinearVariableName>("disp_y", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "The z displacement");
   params.addParam<NonlinearVariableName>("temp", "The temperature");
-  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
+  params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
 
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_x", "Auxiliary variables to save the x displacement residuals.");
@@ -81,7 +81,9 @@ TensorMechanicsAction::act()
   }
 
   params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-  params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
+
+  if (isParamValid("base_name"))
+    params.set<std::string>("base_name") = getParam<std::string>("base_name");
 
   std::string short_name = "TensorMechanics";
 
