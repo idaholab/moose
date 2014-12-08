@@ -1,4 +1,4 @@
- #ifndef BARRIERFUNCTIONMATERIAL_H
+#ifndef BARRIERFUNCTIONMATERIAL_H
 #define BARRIERFUNCTIONMATERIAL_H
 
 #include "OrderParameterFunctionMaterial.h"
@@ -20,7 +20,7 @@ class BarrierFunctionMaterial : public OrderParameterFunctionMaterial
 {
 public:
   BarrierFunctionMaterial(const std::string & name,
-                      InputParameters parameters);
+                          InputParameters parameters);
 
 protected:
   virtual void computeQpProperties();

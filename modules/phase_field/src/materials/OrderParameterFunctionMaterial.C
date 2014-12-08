@@ -10,7 +10,7 @@ InputParameters validParams<OrderParameterFunctionMaterial>()
 }
 
 OrderParameterFunctionMaterial::OrderParameterFunctionMaterial(const std::string & name,
-                                         InputParameters parameters) :
+                                                               InputParameters parameters) :
     DerivativeMaterialInterface<Material>(name, parameters),
     _eta(coupledValue("eta")),
     _eta_var(coupled("eta")),

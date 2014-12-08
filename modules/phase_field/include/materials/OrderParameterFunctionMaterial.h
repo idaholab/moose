@@ -19,7 +19,7 @@ class OrderParameterFunctionMaterial : public DerivativeMaterialInterface<Materi
 {
 public:
   OrderParameterFunctionMaterial(const std::string & name,
-                      InputParameters parameters);
+                                 InputParameters parameters);
 
 protected:
   /// Coupled variable value for the order parameter \f$ \eta \f$.

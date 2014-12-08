@@ -12,7 +12,7 @@ InputParameters validParams<BarrierFunctionMaterial>()
 }
 
 BarrierFunctionMaterial::BarrierFunctionMaterial(const std::string & name,
-                                         InputParameters parameters) :
+                                                 InputParameters parameters) :
     OrderParameterFunctionMaterial(name, parameters),
     _g_order(getParam<MooseEnum>("g_order"))
 {
@@ -21,20 +21,23 @@ BarrierFunctionMaterial::BarrierFunctionMaterial(const std::string & name,
 void
 BarrierFunctionMaterial::computeQpProperties()
 {
-  if (_g_order == 0) // SIMPLE
+  switch (_g_order)
   {
-    _prop_f[_qp] =   _eta[_qp] * _eta[_qp]
-                   * (1.0 - _eta[_qp]) * (1.0 - _eta[_qp]);
-    _prop_df[_qp] =   2.0 * _eta[_qp] * (_eta[_qp] - 1.0)
-                    * (2.0 * _eta[_qp] - 1.0);
-    _prop_d2f[_qp] =  12.0 * (_eta[_qp] * _eta[_qp] - _eta[_qp]) + 2.0;
+    case 0: // SIMPLE
+      _prop_f[_qp] =   _eta[_qp] * _eta[_qp]
+                     * (1.0 - _eta[_qp]) * (1.0 - _eta[_qp]);
+      _prop_df[_qp] =   2.0 * _eta[_qp] * (_eta[_qp] - 1.0)
+                      * (2.0 * _eta[_qp] - 1.0);
+      _prop_d2f[_qp] = 12.0 * (_eta[_qp] * _eta[_qp] - _eta[_qp]) + 2.0;
+      break;
+
+    case 1: // LOW
+      _prop_f[_qp] = _eta[_qp] * (1.0 - _eta[_qp]);
+      _prop_df[_qp] = 1.0 - 2.0 * _eta[_qp];
+      _prop_d2f[_qp] = - 2.0;
+      break;
+
+    default:
+      mooseError("Internal error");
   }
-  else if (_g_order == 1) // LOW
-  {
-    _prop_f[_qp] =   _eta[_qp] * (1.0 - _eta[_qp]);
-    _prop_df[_qp] =  1.0 - 2.0 * _eta[_qp];
-    _prop_d2f[_qp] =  - 2.0;
-  }
-  else
-    mooseError("Internal error");
 }

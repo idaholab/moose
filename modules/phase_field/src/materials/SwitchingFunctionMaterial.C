@@ -12,7 +12,7 @@ InputParameters validParams<SwitchingFunctionMaterial>()
 }
 
 SwitchingFunctionMaterial::SwitchingFunctionMaterial(const std::string & name,
-                                         InputParameters parameters) :
+                                                     InputParameters parameters) :
     OrderParameterFunctionMaterial(name, parameters),
     _h_order(getParam<MooseEnum>("h_order"))
 {
@@ -21,22 +21,25 @@ SwitchingFunctionMaterial::SwitchingFunctionMaterial(const std::string & name,
 void
 SwitchingFunctionMaterial::computeQpProperties()
 {
-  if (_h_order == 0) // SIMPLE
+  switch (_h_order)
   {
-    _prop_f[_qp] =   3.0 * _eta[_qp]*_eta[_qp]
-                   - 2.0 * _eta[_qp]*_eta[_qp]*_eta[_qp];
-    _prop_df[_qp] =  6.0 * _eta[_qp]
-                   - 6.0 * _eta[_qp]*_eta[_qp];
-    _prop_d2f[_qp] =  6.0 - 12.0 * _eta[_qp];
+    case 0: // SIMPLE
+      _prop_f[_qp] =   3.0 * _eta[_qp]*_eta[_qp]
+                     - 2.0 * _eta[_qp]*_eta[_qp]*_eta[_qp];
+      _prop_df[_qp] =   6.0 * _eta[_qp]
+                      - 6.0 * _eta[_qp]*_eta[_qp];
+      _prop_d2f[_qp] = 6.0 - 12.0 * _eta[_qp];
+      break;
+
+    case 1: // HIGH
+      _prop_f[_qp] =   _eta[_qp]*_eta[_qp]*_eta[_qp]
+                     * (6.0 * _eta[_qp]*_eta[_qp] - 15.0 * _eta[_qp] + 10.0);
+      _prop_df[_qp] =   30.0 * _eta[_qp]*_eta[_qp]
+                      * (_eta[_qp]*_eta[_qp] - 2.0 * _eta[_qp] + 1.0);
+      _prop_d2f[_qp] = _eta[_qp] * (120.0 * _eta[_qp]*_eta[_qp] - 180.0 * _eta[_qp] + 60.0);
+      break;
+
+    default:
+      mooseError("Internal error");
   }
-  else if (_h_order == 1) // HIGH
-  {
-    _prop_f[_qp] =    _eta[_qp]*_eta[_qp]*_eta[_qp]
-                    * (6.0 * _eta[_qp]*_eta[_qp] - 15.0 * _eta[_qp] + 10.0);
-    _prop_df[_qp] =   30.0 * _eta[_qp]*_eta[_qp]
-                    * (_eta[_qp]*_eta[_qp] - 2.0 * _eta[_qp] + 1.0);
-    _prop_d2f[_qp] = _eta[_qp] * (120.0 * _eta[_qp]*_eta[_qp] - 180.0 * _eta[_qp] + 60.0);
-  }
-  else
-    mooseError("Internal error");
 }

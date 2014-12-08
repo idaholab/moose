@@ -20,7 +20,7 @@ class SwitchingFunctionMaterial : public OrderParameterFunctionMaterial
 {
 public:
   SwitchingFunctionMaterial(const std::string & name,
-                      InputParameters parameters);
+                            InputParameters parameters);
 
 protected:
   virtual void computeQpProperties();
