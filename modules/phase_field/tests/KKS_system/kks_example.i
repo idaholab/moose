@@ -101,7 +101,7 @@
 
   # h(eta)
   [./h_eta]
-    type = KKSHEtaPolyMaterial
+    type = SwitchingFunctionMaterial
     block = 0
     h_order = HIGH
     eta = eta
@@ -110,7 +110,7 @@
 
   # g(eta)
   [./g_eta]
-    type = KKSGEtaPolyMaterial
+    type = BarrierFunctionMaterial
     block = 0
     g_order = SIMPLE
     eta = eta

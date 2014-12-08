@@ -1,10 +1,4 @@
 [Tests]
-  [./kks_f_eta_poly_materials]
-    type = 'Exodiff'
-    input = 'kks_f_eta_poly_materials.i'
-    exodiff = 'kks_f_eta_poly_materials.e'
-  [../]
-
   [./derivative_parsed_material]
     type = 'Exodiff'
     input = 'derivative_parsed_material.i'

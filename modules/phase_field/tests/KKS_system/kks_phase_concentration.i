@@ -96,7 +96,7 @@
 
   # h(eta)
   [./h_eta]
-    type = KKSHEtaPolyMaterial
+    type = SwitchingFunctionMaterial
     block = 0
     h_order = HIGH
     eta = eta
