@@ -6,48 +6,48 @@
 
 
 InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double p){
-	_data_filename = filename;
-	int dimensions;
-	int numberOfPoints;
-	std::vector<double> values;
-	std::vector< std::vector<double> > pointCoordinates;
+ _data_filename = filename;
+ int dimensions;
+ int numberOfPoints;
+ std::vector<double> values;
+ std::vector< std::vector<double> > pointCoordinates;
 
-	readScatteredNDarray(_data_filename, dimensions, numberOfPoints, pointCoordinates, values);
+ readScatteredNDarray(_data_filename, dimensions, numberOfPoints, pointCoordinates, values);
 
-	_dimensions = dimensions;
-	_number_of_points = numberOfPoints;
-	_values = values;
-	_point_coordinates = pointCoordinates;
-	_p = p;
-	_completed_init = true;
+ _dimensions = dimensions;
+ _number_of_points = numberOfPoints;
+ _values = values;
+ _point_coordinates = pointCoordinates;
+ _p = p;
+ _completed_init = true;
         _cellPoint0.resize(dimensions);
         _cellDxs.resize(dimensions);
 
-	// Functions do determine:
+ // Functions do determine:
     //   * std::vector<double> _cellPoint0;
     //   * std::vector<double> _cellDxs;
 
-	std::vector<double> cellPointInf;
+ std::vector<double> cellPointInf;
         cellPointInf.resize(dimensions);
 
-	for (int d=0; d<_dimensions; d++){
-		_cellPoint0[d]  = _point_coordinates[0][d];
-	    cellPointInf[d] = _point_coordinates[0][d];
-	}
+ for (int d=0; d<_dimensions; d++){
+  _cellPoint0[d]  = _point_coordinates[0][d];
+     cellPointInf[d] = _point_coordinates[0][d];
+ }
 
-	for (int n=1; n<_number_of_points; n++)
-		for (int d=0; d<_dimensions; d++){
-			if (_point_coordinates[n][d] < _cellPoint0[d])
-				_cellPoint0[d] = _point_coordinates[n][d];
-			if (_point_coordinates[n][d] > cellPointInf[d])
-				cellPointInf[d] = _point_coordinates[n][d];
-		}
+ for (int n=1; n<_number_of_points; n++)
+  for (int d=0; d<_dimensions; d++){
+   if (_point_coordinates[n][d] < _cellPoint0[d])
+    _cellPoint0[d] = _point_coordinates[n][d];
+   if (_point_coordinates[n][d] > cellPointInf[d])
+    cellPointInf[d] = _point_coordinates[n][d];
+  }
 
-	for (int d=0; d<_dimensions; d++)
-		_cellDxs[d] = cellPointInf[d]-_cellPoint0[d];
+ for (int d=0; d<_dimensions; d++)
+  _cellDxs[d] = cellPointInf[d]-_cellPoint0[d];
 
-	std::cerr << "_dimensions " << _dimensions << std::endl;
-	std::cerr << "_number_of_points " << _number_of_points << std::endl;
+ std::cerr << "_dimensions " << _dimensions << std::endl;
+ std::cerr << "_number_of_points " << _number_of_points << std::endl;
 }
 
 InverseDistanceWeighting::InverseDistanceWeighting(double p){
@@ -58,33 +58,33 @@ InverseDistanceWeighting::InverseDistanceWeighting(double p){
 }
 
 double InverseDistanceWeighting::interpolateAt(std::vector<double> point){
-	double value = 0;
-	double weightsCumulativeSum = 0;
-	std::vector<double> weights (_number_of_points);
+ double value = 0;
+ double weightsCumulativeSum = 0;
+ std::vector<double> weights (_number_of_points);
 
-	if (not _completed_init)
-	{
-	  throw ("Error in interpolateAt: the class has not been completely initialized... you can not interpolate!!!!");
-	}
-	for (int i=0; i<_number_of_points; i++){
-		if (minkowskiDistance(point, _point_coordinates[i],_p) == 0){
-			value = _values[i];
-			weightsCumulativeSum = 1;
-			break;
-		} else {
+ if (not _completed_init)
+ {
+   throw ("Error in interpolateAt: the class has not been completely initialized... you can not interpolate!!!!");
+ }
+ for (int i=0; i<_number_of_points; i++){
+  if (minkowskiDistance(point, _point_coordinates[i],_p) == 0){
+   value = _values[i];
+   weightsCumulativeSum = 1;
+   break;
+  } else {
             weights[i]= std::pow(1.0/minkowskiDistance(point, _point_coordinates[i],_p),_dimensions+1);
-			weightsCumulativeSum += weights[i];
-			value += weights[i] * _values[i];
-		}
-	}
+   weightsCumulativeSum += weights[i];
+   value += weights[i] * _values[i];
+  }
+ }
 
-	value = value/weightsCumulativeSum;
+ value = value/weightsCumulativeSum;
 
-	return value;
+ return value;
 }
 
 double InverseDistanceWeighting::getGradientAt(std::vector<double> point){
-	// TO BE COMPLETED
+ // TO BE COMPLETED
   if (not _completed_init)
   {
     throw ("Error in getGradientAt: the class has not been completely initialized... you can not interpolate!!!!");

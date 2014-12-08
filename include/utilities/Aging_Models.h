@@ -12,7 +12,7 @@
 void Aging_Models(std::vector<double> input_1, std::vector<double> input_2, std::vector<std::vector<double> > output);
 
 // Input_1 and input_2 are the temporal profiles of temperature and pressure for the particular passive component
-// Note that more input might be needed, 
+// Note that more input might be needed,
 
 // output is the temporal profile of the seven Markov state probabilities
 

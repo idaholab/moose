@@ -4,7 +4,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <math.h>
-#include <cmath>	// to use erfc error function
+#include <cmath> // to use erfc error function
 
 /*
  *      this file contains auxiliary functions for the beta and gamma distributions

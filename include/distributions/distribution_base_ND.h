@@ -48,13 +48,13 @@ public:
 
   BasicMultiDimensionalInverseWeight(std::string data_filename,double p):  _interpolator(data_filename,p)
   {
-	  bool LBcheck = _interpolator.checkLB(0.0);
-	  if (LBcheck == false)
-		  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+   bool LBcheck = _interpolator.checkLB(0.0);
+   if (LBcheck == false)
+    throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
 
-	  bool UBcheck = _interpolator.checkUB(1.0);
-	  if (UBcheck == false)
-		  throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
+   bool UBcheck = _interpolator.checkUB(1.0);
+   if (UBcheck == false)
+    throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
   };
   BasicMultiDimensionalInverseWeight(double p):  _interpolator(InverseDistanceWeighting(p))
   {
@@ -73,7 +73,7 @@ public:
      double value = _interpolator.interpolateAt(x);
 
      if (value > 1.0)
-    	 value=1.0;
+      value=1.0;
 
      return value;
   };
@@ -81,7 +81,7 @@ public:
   std::vector<double>
   InverseCdf(double F, double tolerance, int initial_divisions=10)
   {
-	  return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
+   return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
       //return _interpolator.NDinverseFunction(min, max);
   };
 
@@ -109,7 +109,7 @@ public:
   std::vector<double>
   InverseCdf(double F, double tolerance, int initial_divisions=10)
   {
-	  return std::vector<double>(2,-1.0);
+   return std::vector<double>(2,-1.0);
       //return _interpolator.NDinverseFunction(min, max);
   };
 
@@ -166,7 +166,7 @@ public:
   std::vector<double>
   InverseCdf(double F, double tolerance, int initial_divisions=10)
   {
-	  return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
+   return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
       //return _interpolator.NDinverseFunction(min, max);
   };
 protected:
@@ -182,13 +182,13 @@ public:
 
   BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta): _interpolator(data_filename, alpha, beta)
   {
-	  bool LBcheck = _interpolator.checkLB(0.0);
-	  if (LBcheck == false)
-		  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+   bool LBcheck = _interpolator.checkLB(0.0);
+   if (LBcheck == false)
+    throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
 
-	  bool UBcheck = _interpolator.checkUB(1.0);
-	  if (UBcheck == false)
-		  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
+   bool UBcheck = _interpolator.checkUB(1.0);
+   if (UBcheck == false)
+    throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
   };
   BasicMultiDimensionalCartesianSpline(): _interpolator()
   {
@@ -207,7 +207,7 @@ public:
      double value = _interpolator.interpolateAt(x);
 
      if (value > 1.0)
-    	 value=1.0;
+      value=1.0;
 
      return value;
   };
@@ -224,7 +224,7 @@ public:
   std::vector<double>
   InverseCdf(double F, double tolerance, int initial_divisions=10)
   {
-	  return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
+   return _interpolator.NDinverseFunctionGrid(F, tolerance, initial_divisions);
       //return _interpolator.NDinverseFunction(min, max);
   };
 protected:
@@ -236,13 +236,13 @@ protected:
 //public:
 //  BasicMultiDimensionalLinear(std::string data_filename): _interpolator(data_filename)
 //  {
-//	  bool LBcheck = _interpolator.checkLB(0.0);
-//	  if (LBcheck == false)
-//		  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
+//   bool LBcheck = _interpolator.checkLB(0.0);
+//   if (LBcheck == false)
+//    throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element below 0.0 in file: " << data_filename);
 //
-//	  bool UBcheck = _interpolator.checkUB(1.0);
-//	  if (UBcheck == false)
-//		  throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
+//   bool UBcheck = _interpolator.checkUB(1.0);
+//   if (UBcheck == false)
+//    throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element above 1.0 in file: " << data_filename);
 //  };
 //  BasicMultiDimensionalLinear(): _interpolator()
 //  {
@@ -261,7 +261,7 @@ protected:
 //     double value = _interpolator.interpolateAt(x);
 //
 //     if (value > 1.0)
-//    	 value=1.0;
+//      value=1.0;
 //
 //     return value;
 //  };
