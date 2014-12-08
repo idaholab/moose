@@ -3,7 +3,7 @@
 template<>
 InputParameters validParams<SwitchingFunctionMaterial>()
 {
-  InputParameters params = validParams<OrderParameterFunction>();
+  InputParameters params = validParams<OrderParameterFunctionMaterial>();
   params.addClassDescription("Helper material to provide h(eta) and its derivative in one of two polynomial forms.\nSIMPLE: 3*eta^2-2*eta^3\nHIGH: eta^3*(6*eta^2-15*eta+10)");
   MooseEnum h_order("SIMPLE HIGH");
   params.addParam<MooseEnum>("h_order", h_order, "Polynomial order of the switching function h(eta)");
@@ -13,7 +13,7 @@ InputParameters validParams<SwitchingFunctionMaterial>()
 
 SwitchingFunctionMaterial::SwitchingFunctionMaterial(const std::string & name,
                                          InputParameters parameters) :
-    OrderParameterFunction(name, parameters),
+    OrderParameterFunctionMaterial(name, parameters),
     _h_order(getParam<MooseEnum>("h_order"))
 {
 }
