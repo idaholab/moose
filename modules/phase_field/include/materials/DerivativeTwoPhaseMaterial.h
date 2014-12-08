@@ -30,30 +30,38 @@ protected:
   virtual Real computeDF(unsigned int);
   virtual Real computeD2F(unsigned int, unsigned int);
 
-  virtual Real h(Real phi);
-  virtual Real dh(Real phi);
-  virtual Real d2h(Real phi);
-  virtual Real g(Real phi);
-  virtual Real dg(Real phi);
-  virtual Real d2g(Real phi);
+  /// Phase parameter (0=A-phase, 1=B-phase)
+  VariableValue & _eta;
+
+  /// name of the order parameter variable
+  VariableName _eta_name;
+
+  /// index of the phi in _args (after it is appended by addPhiToArgs())
+  unsigned int _eta_id;
+  unsigned int _nfargs;
 
   /// A-phase derivative material name
   std::string _fa_name;
   /// B-phase derivative material name
   std::string _fb_name;
 
-  /// Phase parameter (0=A-phase, 1=B-phase)
-  VariableValue & _phi;
+  // h(eta) switching function
+  std::string _h_name;
+  const MaterialProperty<Real> & _h;
+  const MaterialProperty<Real> & _dh;
+  const MaterialProperty<Real> & _d2h;
 
-  /// index of the phi in _args (after it is appended by addPhiToArgs())
-  unsigned int _phi_id;
-  unsigned int _nfargs;
+  // g(eta) switching function
+  std::string _g_name;
+  const MaterialProperty<Real> & _g;
+  const MaterialProperty<Real> & _dg;
+  const MaterialProperty<Real> & _d2g;
 
   /// Phase transformatuion energy barrier
   Real _W;
 
   /// Function value of the A and B phase.
-  const MaterialProperty<Real> * _prop_Fa, * _prop_Fb;
+  const MaterialProperty<Real> & _prop_Fa, & _prop_Fb;
 
   /// Derivatives of Fa and Fb with respect to arg[i]
   std::vector<const MaterialProperty<Real> *> _prop_dFa, _prop_dFb;
