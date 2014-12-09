@@ -102,6 +102,19 @@
     mob = 1
   [../]
 
+  [./switching]
+    type = SwitchingFunctionMaterial
+    block = 0
+    eta = eta
+    h_order = SIMPLE
+  [../]
+  [./barrier]
+    type = BarrierFunctionMaterial
+    block = 0
+    eta = eta
+    g_order = SIMPLE
+  [../]
+
   [./free_energy_A]
     type = DerivativeParsedMaterial
     block = 0
@@ -128,7 +141,7 @@
     fa_name = Fa
     fb_name = Fb
     args = 'c'
-    phi = eta
+    eta = eta
     third_derivatives = false
     outputs = exodus
   [../]
