@@ -66,6 +66,11 @@ protected:
   std::map<BoundaryID, std::vector<NodeFaceConstraint *> > _displaced_node_face_constraints;
 
   std::map<std::string, std::vector<FaceFaceConstraint *> > _face_face_constraints;
+
+  // We can't use "auto", but these typedefs make parsing for loops much easier for humans...
+  typedef std::vector<NodalConstraint *>::const_iterator NodalConstraintIter;
+  typedef std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator NodeFaceIter;
+  typedef std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator FaceFaceIter;
 };
 
 #endif // CONSTRAINTWAREHOUSE_H
