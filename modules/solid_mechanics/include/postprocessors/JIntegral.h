@@ -33,7 +33,7 @@ protected:
   MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
   MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
   bool _convert_J_to_K;
-  bool _symmetry_plane;
+  bool _has_symmetry_plane;
   Real _poissons_ratio;
   Real _youngs_modulus;
 
