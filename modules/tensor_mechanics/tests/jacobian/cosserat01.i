@@ -48,7 +48,7 @@
     disp_z = wc_z
     disp_y = wc_y
     disp_x = wc_x
-    appended_property_name = _couple
+    base_name = coupled
   [../]
   [./x_moment]
     type = MomentBalancing

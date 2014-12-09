@@ -105,6 +105,7 @@ ConstraintWarehouse::jacobianSetup()
 void
 ConstraintWarehouse::addNodalConstraint(MooseSharedPointer<NodalConstraint> nc)
 {
+  _all_objects.push_back(nc.get());
   _all_ptrs.push_back(nc);
   _nodal_constraints.push_back(nc.get());
 }
@@ -112,6 +113,7 @@ ConstraintWarehouse::addNodalConstraint(MooseSharedPointer<NodalConstraint> nc)
 void
 ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*master*/, MooseSharedPointer<NodeFaceConstraint> nfc)
 {
+  _all_objects.push_back(nfc.get());
   _all_ptrs.push_back(nfc);
 
   bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") && nfc->getParam<bool>("use_displaced_mesh");
@@ -125,6 +127,7 @@ ConstraintWarehouse::addNodeFaceConstraint(unsigned int slave, unsigned int /*ma
 void
 ConstraintWarehouse::addFaceFaceConstraint(const std::string & name, MooseSharedPointer<FaceFaceConstraint> ffc)
 {
+  _all_objects.push_back(ffc.get());
   _all_ptrs.push_back(ffc);
   _face_face_constraints[name].push_back(ffc.get());
 }

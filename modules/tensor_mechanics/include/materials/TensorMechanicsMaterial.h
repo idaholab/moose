@@ -52,6 +52,7 @@ protected:
   std::string _elasticity_tensor_name;
   MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
 
+  /// derivative of stress w.r.t. strain (_dstress_dstrain)
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
 
   RealVectorValue _Euler_angles;

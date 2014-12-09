@@ -47,7 +47,7 @@ int sideIntersectedByLine(const Elem * elem, int not_side, const LineSegment & l
 
   for (unsigned int i=0; i<n_sides; i++)
   {
-    if (i == not_side) // Don't search the "not_side"
+    if (static_cast<int>(i) == not_side) // Don't search the "not_side"
       continue;
 
     // Get a simplified side element

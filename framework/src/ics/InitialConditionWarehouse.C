@@ -95,6 +95,7 @@ InitialConditionWarehouse::addInitialCondition(const std::string & var_name, Sub
 
   _ics[var_name][blockid] = ic;
   _all_ics[blockid].push_back(ic.get());
+  _all_objects.push_back(ic.get());
 }
 
 void
@@ -104,6 +105,7 @@ InitialConditionWarehouse::addBoundaryInitialCondition(const std::string & var_n
   {
     _boundary_ics[var_name][boundary_id] = ic;
     _active_boundary_ics[boundary_id].push_back(ic.get());
+    _all_objects.push_back(ic.get());
   }
   else
     mooseError("Initial condition '" << _boundary_ics[var_name][boundary_id]->name() << "' and '" << ic->name() << "' are both defined on the same block.");
