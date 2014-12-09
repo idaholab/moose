@@ -89,6 +89,7 @@ class RemarkSlide(MooseObject):
     self._title = None
     self._previous = None
     self._raw_markdown = self.getParam('markdown')
+    self._format = self.getParam('format')
 
     # Set the location of PresentationBuilder directory
     self._source_dir = os.path.abspath(os.path.join(os.path.split(inspect.getfile(self.__class__))[0], '..'))
@@ -244,10 +245,34 @@ class RemarkSlide(MooseObject):
   def count(self):
     return 1 + len(re.findall('\n--', self.markdown))
 
+  ##
+  # Return the markdown
+  def getMarkdown(self):
+    if self._format == 'remark':
+      return self.getRemarkMarkdown()
+    elif self._format == 'reveal':
+      return self.getRevealMarkdown()
+    else:
+      print 'ERROR: Unknown markdown format', self._format
+      sys.exit()
+
+  ##
+  # Return the Reveal.js styled markdown
+  def getRevealMarkdown(self):
+    output = ''
+    output +=  ' '*8 + '<section data-markdown data-separator="---"; id="' + self.name() + '">\n'
+    output +=  ' '*10 + '<script type="text/template">\n'
+
+    output += self.markdown
+
+    output +=  ' '*10 + '</script>\n'
+    output +=  ' '*8 + '</section>\n'
+    return output
+
 
   ##
   # Return the RemarkJS ready markdown for this slide
-  def getMarkdown(self):
+  def getRemarkMarkdown(self):
 
     # The markdown to be output
     output = ''

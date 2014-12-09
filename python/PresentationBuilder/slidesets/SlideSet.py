@@ -149,6 +149,7 @@ class SlideSet(MooseObject):
 
     # Add the parent and markdown parameters
     params.addPrivateParam('_parent', self)
+    params.addPrivateParam('format', self._warehouse.format)
     params.addRequiredParam('markdown', raw, 'The raw markdown to parse for the current slide')
 
     # Over-ride parameters with optional key, value pairs
@@ -276,4 +277,7 @@ class SlideSet(MooseObject):
       output.append(self._slides[name].getMarkdown())
 
     # Join the list with slide breaks
-    return '\n---\n'.join(output)
+    if self._warehouse.format == 'remark':
+      return '\n---\n'.join(output)
+    elif self._warehouse.format == 'reveal':
+      return '\n\n'.join(output)

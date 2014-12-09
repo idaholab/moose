@@ -11,11 +11,23 @@ class PresentationBuilder(object):
   ##
   # Constructor
   # @param input_file The name of the input file to read
-  def __init__(self, input_file):
+  def __init__(self, input_file, **kwargs):
+
+    # Determine the format
+    self._format = kwargs.pop('format', 'remark')
+
+    self._reveal_dir = None
+    if self._format == 'reveal':
+      self._reveal_dir = os.getenv('REVEAL_JS_DIR', os.path.join(os.getenv('HOME'), 'projects', 'reveal.js'))
+
+      if not os.path.exists(self._reveal_dir):
+        print 'ERROR: Attempted to output in Reveal.js format, but Reveal.js directory was not found, set the REAVEL_JS_DIR enviornmental variable or clone the repository into your ~/projects directory.'
+        sys.exit()
+
 
     # Create the Factory and Warehouse
     self.factory = Factory()
-    self.warehouse = SlideSetWarehouse()
+    self.warehouse = SlideSetWarehouse(format=self._format)
 
     # Set the location of PresentationBuilder directory
     self._source_dir = os.path.abspath(os.path.join(os.path.split(inspect.getfile(self.__class__))[0], '..'))
@@ -67,16 +79,22 @@ class PresentationBuilder(object):
     # Open and read the template html
     folder, filename = os.path.split(inspect.getfile(self.__class__))
 
-    fid = open(os.path.join(folder, '..', 'templates', name + '.html'), 'r')
+    fid = open(os.path.join(folder, '..', 'templates', self._format + '_' + name + '.html'), 'r')
     data = fid.read()
     fid.close()
 
+    # Update the paths for Reveal.js contents
+    if self._format == 'reveal':
+      data = data.replace('../..', self._reveal_dir)
+
     # Inject CSS into the html header material
     if name == 'top':
-      data = self._injectCSS(data)
+
+      if self._format == 'remark':
+        data = self._injectCSS(data)
 
       if 'title' in self._params:
-        data = re.sub(r'\<title\>(Title)\</title\>', '<title>' + self._params['title'] + '</title>', data)
+        data = re.sub(r'\<title\>.*?\</title\>', '<title>' + self._params['title'] + '</title>', data)
 
     # Return the html
     return data
