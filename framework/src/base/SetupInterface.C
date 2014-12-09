@@ -67,6 +67,16 @@ SetupInterface::execFlags() const
   return _exec_flags;
 }
 
+ExecFlagType
+SetupInterface::execBitFlags() const
+{
+  unsigned char exec_bit_field = EXEC_NONE;
+  for (unsigned int i=0; i<_exec_flags.size(); ++i)
+    exec_bit_field |= _exec_flags[i];
+
+  return static_cast<ExecFlagType>(exec_bit_field);
+}
+
 MultiMooseEnum
 SetupInterface::getExecuteOptions()
 {
