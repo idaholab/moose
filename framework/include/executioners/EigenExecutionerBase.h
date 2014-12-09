@@ -135,15 +135,15 @@ protected:
   // postprocessor for eigenvalue
   const Real & _source_integral;
   const Real & _source_integral_old;
-  std::vector<ExecFlagType> _bx_execflag;
+  ExecFlagType _bx_execflag;
 
   // postprocessor for evaluating |x-xprevious|
   Real * _solution_diff;
-  std::vector<ExecFlagType> _xdiff_execflag;
+  ExecFlagType _xdiff_execflag;
 
   // postprocessor for normalization
   Real & _normalization;
-  std::vector<ExecFlagType> _norm_execflag;
+  ExecFlagType _norm_execflag;
 
   // Chebyshev acceleration
   class Chebyshev_Parameters
