@@ -819,6 +819,7 @@ public:
    */
   bool errorOnJaocobianNonzeroReallocation() { return _error_on_jacobian_nonzero_reallocation; }
 
+  void setErrorOnJacobianNonzeroReallocation(bool state) { _error_on_jacobian_nonzero_reallocation = state; }
 
 
 
