@@ -115,7 +115,7 @@
   real*8 dw, dwmol
   real*8 dg, dgmol, dgp,dgt,hg,hgp,hgt
   integer ierr
-  integer :: iphase = 0
+  integer :: iphase
   real*8 delp, delh
   real*8 dw0, dw1, hw0,hw1, sw0, sw1
   real*8 dg0, dg1, hg0,hg1, h1
@@ -173,6 +173,7 @@ end subroutine water_steam_prop_PH
   real*8 dTdp
   logical succ
 
+  iphase = 0
 
 ! determine phase condition
   succ= TSAT( p, Ts)
@@ -349,7 +350,7 @@ dhsdp=(hg1-hg0)/delp
   real*8 dw
   real*8 dg, hg
   integer ierr
-  integer :: iphase = 0
+  integer :: iphase
   real*8 delp, delh
   real*8 dw0, dw1, hw0,hw1, sw0, sw1
   real*8 dg0, dg1, hg0,hg1, h1
@@ -357,6 +358,7 @@ dhsdp=(hg1-hg0)/delp
   real*8 dTdp
   logical succ
 
+  iphase = 0
 
 ! determine phase condition
   ierror=0
@@ -432,5 +434,3 @@ dhsdp=(hg1-hg0)/delp
 
 
  end subroutine water_steam_prop_PH_noderiv
-
-
