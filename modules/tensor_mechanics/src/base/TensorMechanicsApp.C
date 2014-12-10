@@ -18,6 +18,7 @@
 #include "CosseratLinearElasticMaterial.h"
 #include "ElementPropertyReadFileTest.h"
 #include "TwoPhaseStressMaterial.h"
+#include "SimpleEigenStrainMaterial.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -89,6 +90,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(CosseratLinearElasticMaterial);
   registerMaterial(ElementPropertyReadFileTest);
   registerMaterial(TwoPhaseStressMaterial);
+  registerMaterial(SimpleEigenStrainMaterial);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
