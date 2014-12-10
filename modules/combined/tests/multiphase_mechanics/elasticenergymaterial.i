@@ -73,6 +73,7 @@
   [./elasticenergy]
     type = ElasticEnergyMaterial
     block = 0
+    args = 'c'
     outputs = exodus
   [../]
 []

@@ -60,6 +60,6 @@ ElasticEnergyMaterial::computeD2F(unsigned int i, unsigned int j)
 {
   return 0.5 * ((*_d2stress[i][j])[_qp].doubleContraction(_strain[_qp])
                 + (*_dstress[i])[_qp].doubleContraction((*_dstrain[j])[_qp])
-                + (*_dstress[j])[_qp].doubleContraction((*_dstrain[i])[_qp]);
+                + (*_dstress[j])[_qp].doubleContraction((*_dstrain[i])[_qp])
                 + _stress[_qp].doubleContraction((*_d2strain[i][j])[_qp]));
 }
