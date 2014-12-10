@@ -83,7 +83,10 @@ class RunParallel:
         command = "echo"
 
       f = TemporaryFile()
-      p = Popen([command],stdout=f,stderr=f,close_fds=False, shell=True)
+
+      # On Windows, there is an issue with path translation when the command is passed in
+      # as a list.
+      p = Popen(command,stdout=f,stderr=f,close_fds=False, shell=True)
 
       if self.options.dry_run:
         command = tmp_command
@@ -184,8 +187,17 @@ class RunParallel:
       sleep(time_to_wait)
 
   def satisfyLoad(self):
+    # Get the current load average, or zero if it isn't available for some reason (such as being
+    #   run on a non-posix operating system)
+    loadAverage = 0.0
+    try:
+      loadAverage = os.getloadavg()[0]
+    except AttributeError:
+      pass      # getloadavg() not available in this implementation of os
+
     # We'll always run at least one job regardless of load or we'll starve!
-    while self.jobs.count(None) < len(self.jobs) and os.getloadavg()[0] >= self.average_load:
+    while self.jobs.count(None) < len(self.jobs) and loadAverage >= self.average_load:
+
 #      print "DEBUG: Sleeping... ", len(self.jobs) - self.jobs.count(None), " jobs running (load average: ", os.getloadavg()[0], ")\n"
       self.spinwait(0.5) # If the load average is high we'll sleep longer here to let things clear out
 #      print "DEBUG: Ready to run (load average: ", os.getloadavg()[0], ")\n"

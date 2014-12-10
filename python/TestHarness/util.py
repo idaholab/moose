@@ -1,4 +1,4 @@
-import os, re
+import platform, os, re
 from subprocess import *
 from time import strftime, gmtime, ctime, localtime, asctime
 
@@ -157,10 +157,11 @@ def colorText(str, options, color, html=False):
   return str
 
 def getPlatforms():
-  # We'll use uname to figure this out
+  # We'll use uname to figure this out.  platform.uname() is available on all platforms
+  #   while os.uname() is not (See bugs.python.org/issue8080).
   # Supported platforms are LINUX, DARWIN, ML, MAVERICKS, YOSEMITE, or ALL
   platforms = set(['ALL'])
-  raw_uname = os.uname()
+  raw_uname = platform.uname()
   if raw_uname[0].upper() == 'DARWIN':
     platforms.add('DARWIN')
     if re.match("12\.", raw_uname[2]):
