@@ -17,16 +17,13 @@ ElasticEnergyMaterial::ElasticEnergyMaterial(const std::string & name,
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _strain(getMaterialProperty<RankTwoTensor>(_base_name + "elastic_strain"))
 {
-  // loop counters
-  unsigned int i, j, k;
-
   _dstress.resize(_nargs);
   _d2stress.resize(_nargs);
   _dstrain.resize(_nargs);
   _d2strain.resize(_nargs);
 
   // fetch stress and strain derivatives (in simple eigenstrain models this is is only w.r.t. 'c')
-  for (i = 0; i < _nargs; ++i)
+  for (unsigned int i = 0; i < _nargs; ++i)
   {
     _dstress[i] = &getMaterialPropertyDerivative<RankTwoTensor>(_base_name + "stress", _arg_names[i]);
     _dstrain[i] = &getMaterialPropertyDerivative<RankTwoTensor>(_base_name + "strain", _arg_names[i]);
