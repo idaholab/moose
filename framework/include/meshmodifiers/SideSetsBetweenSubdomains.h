@@ -15,7 +15,7 @@
 #ifndef SIDESETSBETWEENSUBDOMAINS_H
 #define SIDESETSBETWEENSUBDOMAINS_H
 
-#include "AddSideSetsBase.h"
+#include "MeshModifier.h"
 
 class SideSetsBetweenSubdomains;
 

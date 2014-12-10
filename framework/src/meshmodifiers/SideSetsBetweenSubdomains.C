@@ -19,7 +19,7 @@
 template<>
 InputParameters validParams<SideSetsBetweenSubdomains>()
 {
-  InputParameters params = validParams<AddSideSetsBase>();
+  InputParameters params = validParams<MeshModifier>();
   params.addRequiredParam<SubdomainName>("master_block", "The first block for which to draw a sideset between");
   params.addRequiredParam<SubdomainName>("paired_block", "The second block for which to draw a sideset between");
   params.addParam<std::vector<BoundaryName> >("new_boundary", "The name of the boundary to create");
