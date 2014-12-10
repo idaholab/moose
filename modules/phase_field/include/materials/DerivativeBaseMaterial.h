@@ -64,7 +64,7 @@ protected:
    *
    * @param arg The index of the function argument the derivative is taken of
    */
-  virtual Real computeDF(unsigned int arg) = 0;
+  virtual Real computeDF(unsigned int) = 0;
 
   /**
    * Override this method to calculate the second derivatives.
@@ -75,7 +75,7 @@ protected:
    * @param arg2 The index of the function argument the second derivative is taken of
    * @Note arg1<=arg2 is guaranteed (deriviatives are symmetric)!
    */
-  virtual Real computeD2F(unsigned int arg1, unsigned int arg2) = 0;
+  virtual Real computeD2F(unsigned int, unsigned int) = 0;
 
   /**
    * Override this method to calculate the third derivatives.
@@ -84,7 +84,7 @@ protected:
    * @Note The implementation of this method is optional. It is only evaluated when
    *       the 'third_derivatives' parameter is set to true.
    */
-  virtual Real computeD3F(unsigned int arg1, unsigned int arg2, unsigned int arg3);
+  virtual Real computeD3F(unsigned int, unsigned int, unsigned int);
 
   /// Coupled variables for function arguments
   std::vector<VariableValue *> _args;

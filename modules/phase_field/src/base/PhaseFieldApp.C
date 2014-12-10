@@ -23,6 +23,7 @@
 #include "DerivativeTwoPhaseMaterial.h"
 #include "BarrierFunctionMaterial.h"
 #include "SwitchingFunctionMaterial.h"
+#include "ElasticEnergyMaterial.h"
 #include "NodalFloodCount.h"
 #include "NodalFloodCountAux.h"
 #include "NodalVolumeFraction.h"
@@ -117,6 +118,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(DerivativeTwoPhaseMaterial);
   registerMaterial(BarrierFunctionMaterial);
   registerMaterial(SwitchingFunctionMaterial);
+  registerMaterial(ElasticEnergyMaterial);
 
   registerAux(NodalFloodCountAux);
   registerAux(BndsCalcAux);

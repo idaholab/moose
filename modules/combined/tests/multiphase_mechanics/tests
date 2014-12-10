@@ -4,6 +4,11 @@
     input = 'simpleeigenstrain.i'
     exodiff = 'simpleeigenstrain_out.e'
   [../]
+  [./elasticenergymaterial]
+    type = 'Exodiff'
+    input = 'elasticenergymaterial.i'
+    exodiff = 'elasticenergymaterial_out.e'
+  [../]
   [./twophasestress]
     type = 'Exodiff'
     input = 'twophasestress.i'
