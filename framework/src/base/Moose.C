@@ -38,6 +38,7 @@
 #include "AddAllSideSetsByNormals.h"
 #include "SubdomainBoundingBox.h"
 #include "OrientedSubdomainBoundingBox.h"
+#include "SplitConformingMeshForMortar.h"
 
 // problems
 #include "FEProblem.h"
@@ -393,6 +394,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(AddAllSideSetsByNormals);
   registerMeshModifier(SubdomainBoundingBox);
   registerMeshModifier(OrientedSubdomainBoundingBox);
+  registerMeshModifier(SplitConformingMeshForMortar);
 
   // problems
   registerProblem(FEProblem);
