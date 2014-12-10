@@ -576,13 +576,13 @@ BasicExponentialDistribution::untrCdf(double x){
 double
 BasicExponentialDistribution::Cdf(double x){
   double low = _dist_parameters.find("low") ->second;
-  return BasicTruncatedDistribution::Cdf(x-low);
+  return BasicTruncatedDistribution::Cdf(x);//-low);
 }
 
 double
 BasicExponentialDistribution::InverseCdf(double x){
   double low = _dist_parameters.find("low") ->second;
-  return BasicTruncatedDistribution::InverseCdf(x) + low;
+  return BasicTruncatedDistribution::InverseCdf(x);// + low;
 }
 
 /*
@@ -805,21 +805,22 @@ double
 BasicBetaDistribution::Pdf(double x){
   double scale = _dist_parameters.find("scale") ->second;
   double low   = _dist_parameters.find("low"  ) ->second;
-  return BasicTruncatedDistribution::Pdf( (x-low)/scale )/scale;
+  return BasicTruncatedDistribution::Pdf( (x-low)/scale)/scale;
 }
 
 double
 BasicBetaDistribution::Cdf(double x){
   double scale = _dist_parameters.find("scale") ->second;
   double low   = _dist_parameters.find("low"  ) ->second;
-  return BasicTruncatedDistribution::Cdf( (x-low)/scale );
+  //return BasicTruncatedDistribution::Cdf( (x-low)/scale );
+  return BasicTruncatedDistribution::Cdf( (x-low)/scale);// -low)/scale );
 }
 
 double
 BasicBetaDistribution::InverseCdf(double x){
   double scale = _dist_parameters.find("scale") ->second;
   double low   = _dist_parameters.find("low"  ) ->second;
-  return BasicTruncatedDistribution::InverseCdf(x)*scale + low;
+  return BasicTruncatedDistribution::InverseCdf(x)*scale+low;//*scale+low;
 }
 
 /*
