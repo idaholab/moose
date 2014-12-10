@@ -383,9 +383,7 @@ public:
   DenseVector<Number> & residualBlock(unsigned int var_num, Moose::KernelType type = Moose::KT_NONTIME) { return _sub_Re[static_cast<unsigned int>(type)][var_num]; }
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, Moose::KernelType type = Moose::KT_NONTIME) { return _sub_Rn[static_cast<unsigned int>(type)][var_num]; }
 
-  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar)
-    { return _sub_Kee[ivar][_block_diagonal_matrix ? 0 : jvar]; }
-
+  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id_type> & idof_indices, std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
 
@@ -451,6 +449,10 @@ protected:
   CouplingMatrix * & _cm;
   /// Entries in the coupling matrix (only for field variables)
   std::vector<std::pair<MooseVariable *, MooseVariable *> > _cm_entry;
+  /// Flag that indicates if the jacobian block was used
+  std::vector<std::vector<unsigned char> > _jacobian_block_used;
+  /// Flag that indicates if the jacobian block for neighbor was used
+  std::vector<std::vector<unsigned char> > _jacobian_block_neighbor_used;
   /// DOF map
   const DofMap & _dof_map;
   /// Thread number (id)
