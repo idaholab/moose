@@ -55,18 +55,19 @@ class FEProblem;
 // Note: If this enum is changed, make sure to modify the local
 // function populateExecTypes in Moose.C.
 enum ExecFlagType {
+  EXEC_NONE              = 0x00,
   /// Object is evaluated only once at the beginning of the simulation
-  EXEC_INITIAL,
+  EXEC_INITIAL           = 0x01,
   /// Object is evaluated in every residual computation
-  EXEC_RESIDUAL,
+  EXEC_RESIDUAL          = 0x02,
   /// Object is evaluated in every jacobian computation
-  EXEC_JACOBIAN,
+  EXEC_JACOBIAN          = 0x04,
   /// Object is evaluated at the end of every time step
-  EXEC_TIMESTEP,
+  EXEC_TIMESTEP          = 0x08,
   /// Object is evaluated at the beginning of every time step
-  EXEC_TIMESTEP_BEGIN,
+  EXEC_TIMESTEP_BEGIN    = 0x10,
   /// For use with custom executioners that want to fire objects at a specific time
-  EXEC_CUSTOM
+  EXEC_CUSTOM            = 0x20
 };
 
 namespace Moose

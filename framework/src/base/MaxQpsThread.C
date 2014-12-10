@@ -42,16 +42,22 @@ MaxQpsThread::operator() (const ConstElemRange & range)
 
   Assembly & assembly = _fe_problem.assembly(_tid);
 
+  // For short circuiting reinit
+  std::set<ElemType> seen_it;
   for (ConstElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
   {
     const Elem * elem = *elem_it;
 
-    assembly.reinit(elem);
+    // Only reinit if the element type has not previously been seen
+    if (seen_it.insert(elem->type()).second)
+    {
+      assembly.reinit(elem);
 
-    unsigned int qps = assembly.qPoints().size();
+      unsigned int qps = assembly.qPoints().size();
 
-    if (qps > _max)
-      _max = qps;
+      if (qps > _max)
+        _max = qps;
+    }
   }
 }
 

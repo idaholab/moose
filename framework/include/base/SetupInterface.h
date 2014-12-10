@@ -62,6 +62,11 @@ public:
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
   /**
+   * Build and return the execution flags as a bitfield
+   */
+  ExecFlagType execBitFlags() const;
+
+  /**
    * Returns the available options for the 'execute_on' input parameters
    * @return A MooseEnum with the available 'execute_on' options, the default is 'residual'
    */
