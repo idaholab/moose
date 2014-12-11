@@ -1,13 +1,23 @@
 # Python packages
-import os, re, inspect
+import os, re, inspect, string
 from FactorySystem import InputParameters, MooseObject
 from ..images import *
+
+try:
+  import misaka
+  import markdown
+  from markdown.extensions.codehilite import CodeHiliteExtension
+
+except ImportError:
+  print 'Error importing markdown modules'
+  pass
+
 ##
 # Base class for individual Remark markdown slide content
 class RemarkSlide(MooseObject):
 
   # Regex for locating titles
-  _title_re = r'(?<![^\s\n.])(#{1,})(.*?)\n'
+  _title_re = r'^\s*(#+)(.*)'
 
   @staticmethod
   def validParams():
@@ -19,6 +29,7 @@ class RemarkSlide(MooseObject):
     params.addParam('prefix', 'Raw markdown to insert before slide content')
     params.addParam('suffix', 'Raw markdown to insert after slide content')
     params.addParam('auto_title', True, 'Enable/disable automatic addition of (cont.) for slides without a title.')
+    params.addParam('slides', 'A list of slides to include')
 
     params.addParamsToGroup('properties', ['class', 'background-image'])
 
@@ -30,7 +41,7 @@ class RemarkSlide(MooseObject):
   @staticmethod
   def extractName(raw):
     # If the name is given in the slide markdown, use it
-    match = re.search('(name:\s*(.*?)\s*\n)', raw)
+    match = re.search('(name:\s*(.*?)\s*\n)', raw, re.MULTILINE)
     if match:
       return match.group(2)
 
@@ -89,6 +100,7 @@ class RemarkSlide(MooseObject):
     self._title = None
     self._previous = None
     self._raw_markdown = self.getParam('markdown')
+    self._format = self.getParam('format')
 
     # Set the location of PresentationBuilder directory
     self._source_dir = os.path.abspath(os.path.join(os.path.split(inspect.getfile(self.__class__))[0], '..'))
@@ -102,10 +114,9 @@ class RemarkSlide(MooseObject):
       self.comments.append(self.getParam('comments'))
 
     # Extract title
-    match = re.search(self._title_re, self._raw_markdown)
+    match = re.search(self._title_re, self._raw_markdown, re.MULTILINE)
     if match:
       self._title = (match.group(1) + ' ' + match.group(2)).replace('\r', '')
-
 
   ##
   # Build table of contents list
@@ -244,10 +255,52 @@ class RemarkSlide(MooseObject):
   def count(self):
     return 1 + len(re.findall('\n--', self.markdown))
 
+  ##
+  # Return the markdown
+  def getMarkdown(self):
+    if self._format == 'remark':
+      return self.getRemarkMarkdown()
+    elif self._format == 'reveal':
+      return self.getRevealMarkdown()
+    else:
+      print 'ERROR: Unknown markdown format', self._format
+      sys.exit()
+
+  def _startSpan(self, match):
+    return '<span style="' + self._warehouse.css[match.group(1)] + '">\n'
+
+  ##
+  # Return the Reveal.js styled markdown
+  def getRevealMarkdown(self):
+
+    # Remove non-ASCII characters from markdown, these appear when reading from the wiki
+    # (http://stackoverflow.com/questions/8689795/python-remove-non-ascii-characters-but-leave-periods-and-spaces)
+    self.markdown = filter(lambda x: x in string.printable, self.markdown)
+
+    # Convert the markdown to HTML using misaka which is a python wrapper utilizing the same
+    # parser as GitHub
+    # (https://gist.github.com/fyears/5097469)
+    html = misaka.html(self.markdown,
+                       extensions = misaka.EXT_NO_INTRA_EMPHASIS | misaka.EXT_FENCED_CODE |
+                       misaka.EXT_AUTOLINK |
+                       misaka.EXT_TABLES,
+                       render_flags =  misaka.HTML_USE_XHTML | misaka.HTML_HARD_WRAP)
+
+    # Convert the Remark.js style blocks to spans
+    html = re.sub(r'<p>\.(.*?)\[</p>', self._startSpan, html)
+    html = re.sub(r'<p>\]</p>', '</span>', html)
+
+    # Create the html output suitable for Reveal.js
+    output = ''
+    output +=  ' '*10 + '<section id="' + self.name() + '">\n'
+    output += html
+    output +=  ' '*10 + '</section>\n'
+    return output
+
 
   ##
   # Return the RemarkJS ready markdown for this slide
-  def getMarkdown(self):
+  def getRemarkMarkdown(self):
 
     # The markdown to be output
     output = ''
