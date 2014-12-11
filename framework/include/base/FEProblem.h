@@ -817,7 +817,7 @@ public:
    * Will return True if the user wants to get an error when
    * a nonzero is reallocated in the Jacobian by PETSc
    */
-  bool errorOnJaocobianNonzeroReallocation() { return _error_on_jacobian_nonzero_reallocation; }
+  bool errorOnJacobianNonzeroReallocation() { return _error_on_jacobian_nonzero_reallocation; }
 
   void setErrorOnJacobianNonzeroReallocation(bool state) { _error_on_jacobian_nonzero_reallocation = state; }
 
