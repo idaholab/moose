@@ -22,9 +22,10 @@ class SlideSet(MooseObject):
     params.addParam('contents', False, 'Include table of contents slide')
     params.addParam('contents_title', 'The table-of-contents heading for this slide set')
     params.addParam('contents_level', 1, 'The heading level to include in the contents')
-    params.addParam('contents_items_per_slide', 12, 'The number of contents items to include on a page')
+    params.addParam('contents_items_per_slide', 11, 'The number of contents items to include on a page')
     params.addParam('show_in_contents', True, 'Toggle if slide set content appears in the table-of-contents')
     params.addParam('style', 'The CSS style sheet to utilize for this slide set')
+    params.addParam('non_ascii_warn', True, 'Produce warning if non-ascii characters are located')
 
     # Create the common parameters from RemarkSlide 'properties' group
     slide_params = RemarkSlide.validParams()
@@ -92,12 +93,10 @@ class SlideSet(MooseObject):
         slides.insert(0, self._title_slide)
 
     # Remove inactive slides
-    if self.isParamValid('isactive'):
+    if self.isParamValid('inactive'):
       for name in self.getParam('inactive').split():
         if name in slides:
           slides.remove(name)
-        else:
-          print 'WARNING: Slide name ' + name + ' is unknown'
 
     return slides
 
@@ -110,6 +109,7 @@ class SlideSet(MooseObject):
   ##
   # Initial setup creates the title and contents slide, if desired
   def setup(self):
+
 
     # Apply title slide
     if self.isParamValid('title'):
@@ -126,6 +126,22 @@ class SlideSet(MooseObject):
     # Do nothing if the raw_markdown is empty
     if not raw_markdown:
       return
+
+    # Test if raw markdown contains non-ascii
+    if self.getParam('non_ascii_warn'):
+      non_ascii = []
+      lines = raw_markdown.split('\n')
+      for line in lines:
+        try:
+          line.encode('ascii')
+        except UnicodeDecodeError:
+          non_ascii.append(line)
+
+      if len(non_ascii) > 0:
+        print 'WARNING: Slideset ' + self.name() + ' contains non-ascii characters'
+        for item in non_ascii:
+          print item
+        print '\n'
 
     # Extract links
     match = re.findall('^(\s*\[(.*)\]:(.*))', raw_markdown, re.MULTILINE)

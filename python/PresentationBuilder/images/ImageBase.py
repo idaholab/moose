@@ -72,7 +72,7 @@ class ImageBase(MooseObject):
 
 
     # Create the html <img> block
-    img = '<figure style="float:left">\n'
+    img = '<div style="text-align:center"><figure>\n'
     img += '  <a href="' + url + '">\n'
     img += '    <img src="' + img_name + '"'
 
@@ -87,7 +87,7 @@ class ImageBase(MooseObject):
       img += '    ' + self._pars['caption']
       img += '\n  </figcaption>\n'
 
-    img += '</figure>\n'
+    img += '</figure></div>\n'
 
     # Return the complete html
     return img
