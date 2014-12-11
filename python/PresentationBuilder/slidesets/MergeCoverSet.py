@@ -29,7 +29,7 @@ class MergeCoverSet(SlideSet):
     contents = []
     for obj in self._warehouse.objects:
       if obj != self and (len(self._merge_list) == 0 or obj.name() in self._merge_list):
-        for name in obj._slide_order:
+        for name in obj.activeSlides():
           contents += obj._slides[name].contents()
 
     return contents

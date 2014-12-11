@@ -45,8 +45,17 @@ class DjangoWikiSet(SlideSet):
     # Extract other RemarkJS commands
     raw = re.sub(r'(?<![^\s.])(\s*\[\]\((.*?)\))', self._applyRemark, raw)
 
+    # Extract "[TOC]"
+    raw = re.sub(r'(\s*\[TOC\])', self._stripTOC, raw)
+
     # Return the markdown
     return raw
+
+  ##
+  # Substitution function for enabling table of contents via [TOC] in wiki content
+  def _stripTOC(self, match):
+    return ''
+    self._pars['contents'] = True
 
   ##
   # Substitution function for extracting Remark properties and commands (private)
