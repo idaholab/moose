@@ -31,14 +31,23 @@ InputParameters validParams<PenetrationAux>()
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;
-  params.addParam<std::string>("quantity","distance","The quantity to recover from the available penetration information: distance(default), tangential_distance, normal_x, normal_y, normal_z, closest_point_x, closest_point_y, closest_point_z, element_id, side, incremental_slip_x, incremental_slip_y, incremental_slip_z, incremental_slip_magnitude, accumulated_slip, force_x, force_y, force_z, normal_force_magnitude, normal_force_x, normal_force_y, normal_force_z, tangential_force_magnitude, tangential_force_x, tangential_force_y, tangential_force_z, frictional_energy, mechanical_status");
+
+  // To avoid creating a conversion routine we will list the enumeration options in the same order as the class-based enum.
+  // Care must be taken to ensure that this list stays in sync with the enum in the .h file.
+  MooseEnum quantity("distance tangential_distance normal_x normal_y normal_z closest_point_x closest_point_y closest_point_z "
+                     "element_id side incremental_slip_magnitude incremental_slip_x incremental_slip_y incremental_slip_z accumulated_slip "
+                     "force_x force_y force_z normal_force_magnitude normal_force_x normal_force_y normal_force_z tangential_force_magnitude "
+                     "tangential_force_x tangential_force_y tangential_force_z frictional_energy mechanical_status", "distance");
+
+  params.addParam<MooseEnum>("quantity", quantity, "The quantity to recover from the available penetration information");
   return params;
 }
 
 PenetrationAux::PenetrationAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
-    _quantity_string( getParam<std::string>("quantity") ),
-    _quantity(PA_DISTANCE),
+
+    // Here we cast the value of the MOOSE enum to an integer to the class-based enum.
+    _quantity(PenetrationAux::PA_ENUM(int(getParam<MooseEnum>("quantity")))),
     _penetration_locator(_nodal ?  getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))) : getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))))
 {
   if (parameters.isParamValid("tangential_tolerance"))
@@ -53,65 +62,6 @@ PenetrationAux::PenetrationAux(const std::string & name, InputParameters paramet
   {
     _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
   }
-
-  if ( _quantity_string == "distance" )
-    _quantity = PA_DISTANCE;
-  else if ( _quantity_string == "tangential_distance" )
-    _quantity = PA_TANG_DISTANCE;
-  else if ( _quantity_string == "normal_x" )
-    _quantity = PA_NORMAL_X;
-  else if ( _quantity_string == "normal_y" )
-    _quantity = PA_NORMAL_Y;
-  else if ( _quantity_string == "normal_z" )
-    _quantity = PA_NORMAL_Z;
-  else if ( _quantity_string == "closest_point_x" )
-    _quantity = PA_CLOSEST_POINT_X;
-  else if ( _quantity_string == "closest_point_y" )
-    _quantity = PA_CLOSEST_POINT_Y;
-  else if ( _quantity_string == "closest_point_z" )
-    _quantity = PA_CLOSEST_POINT_Z;
-  else if ( _quantity_string == "element_id" )
-    _quantity = PA_ELEM_ID;
-  else if ( _quantity_string == "side" )
-    _quantity = PA_SIDE;
-  else if ( _quantity_string == "incremental_slip_magnitude" )
-    _quantity = PA_INCREMENTAL_SLIP_MAG;
-  else if ( _quantity_string == "incremental_slip_x" )
-    _quantity = PA_INCREMENTAL_SLIP_X;
-  else if ( _quantity_string == "incremental_slip_y" )
-    _quantity = PA_INCREMENTAL_SLIP_Y;
-  else if ( _quantity_string == "incremental_slip_z" )
-    _quantity = PA_INCREMENTAL_SLIP_Z;
-  else if ( _quantity_string == "accumulated_slip" )
-    _quantity = PA_ACCUMULATED_SLIP;
-  else if ( _quantity_string == "force_x" )
-    _quantity = PA_FORCE_X;
-  else if ( _quantity_string == "force_y" )
-    _quantity = PA_FORCE_Y;
-  else if ( _quantity_string == "force_z" )
-    _quantity = PA_FORCE_Z;
-  else if ( _quantity_string == "normal_force_magnitude" )
-    _quantity = PA_NORMAL_FORCE_MAG;
-  else if ( _quantity_string == "normal_force_x" )
-    _quantity = PA_NORMAL_FORCE_X;
-  else if ( _quantity_string == "normal_force_y" )
-    _quantity = PA_NORMAL_FORCE_Y;
-  else if ( _quantity_string == "normal_force_z" )
-    _quantity = PA_NORMAL_FORCE_Z;
-  else if ( _quantity_string == "tangential_force_magnitude" )
-    _quantity = PA_TANGENTIAL_FORCE_MAG;
-  else if ( _quantity_string == "tangential_force_x" )
-    _quantity = PA_TANGENTIAL_FORCE_X;
-  else if ( _quantity_string == "tangential_force_y" )
-    _quantity = PA_TANGENTIAL_FORCE_Y;
-  else if ( _quantity_string == "tangential_force_z" )
-    _quantity = PA_TANGENTIAL_FORCE_Z;
-  else if ( _quantity_string == "frictional_energy" )
-    _quantity = PA_FRICTIONAL_ENERGY;
-  else if ( _quantity_string == "mechanical_status" )
-    _quantity = PA_MECH_STATUS;
-  else
-    mooseError("Invalid quantity type in PenetrationAux: "<<_quantity_string);
 }
 
 PenetrationAux::~PenetrationAux()
