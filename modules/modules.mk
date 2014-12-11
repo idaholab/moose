@@ -24,6 +24,10 @@ ifeq ($(ALL_MODULES),yes)
         WATER_STEAM_EOS           := yes
 endif
 
+ifeq ($(PHASE_FIELD),yes)
+        TENSOR_MECHANICS          := yes
+endif
+
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
 ###############################################################################
@@ -81,9 +85,19 @@ ifeq ($(NAVIER_STOKES),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
+ifeq ($(TENSOR_MECHANICS),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/tensor_mechanics
+  APPLICATION_NAME   := tensor_mechanics
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
 ifeq ($(PHASE_FIELD),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/phase_field
   APPLICATION_NAME   := phase_field
+
+  # Dependency on tensor mechanics
+  DEPEND_MODULES     := tensor_mechanics
+
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
@@ -96,12 +110,6 @@ endif
 ifeq ($(SOLID_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
   APPLICATION_NAME   := solid_mechanics
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(TENSOR_MECHANICS),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/tensor_mechanics
-  APPLICATION_NAME   := tensor_mechanics
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
