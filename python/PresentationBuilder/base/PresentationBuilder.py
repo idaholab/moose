@@ -181,7 +181,7 @@ class PresentationBuilder(object):
 
     # Loop through each object and slide and set the slide index
     for obj in self.warehouse.objects:
-      for name in obj._slide_order:
+      for name in obj.activeSlides():
         slide = obj._slides[name]
         slide.index = idx
         idx += slide.count()

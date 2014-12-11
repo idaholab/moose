@@ -17,13 +17,13 @@ class SlideSet(MooseObject):
     params = MooseObject.validParams()
     params.addRequiredParam('type', 'The type of slide set to create')
     params.addParam('title', 'The title of the slide set, if this exists a title slide will be injected')
-    params.addParam('slides', 'A list of slide ids to output, if blank all slides are output')
+    params.addParam('active', 'A list of ordered slide names to output, if blank all slides are output')
+    params.addParam('inactive', 'A list of slide names to exclude from output')
     params.addParam('contents', False, 'Include table of contents slide')
     params.addParam('contents_title', 'The table-of-contents heading for this slide set')
     params.addParam('contents_level', 1, 'The heading level to include in the contents')
     params.addParam('contents_items_per_slide', 12, 'The number of contents items to include on a page')
-    params.addParam('show_in_contents', True, 'Toggle if the slide set content appears in the table-of-contents')
-
+    params.addParam('show_in_contents', True, 'Toggle if slide set content appears in the table-of-contents')
     params.addParam('style', 'The CSS style sheet to utilize for this slide set')
 
     # Create the common parameters from RemarkSlide 'properties' group
@@ -58,6 +58,8 @@ class SlideSet(MooseObject):
     # Initialize storage for the generate slides, use an ordered dict to maintain slide ordering
     self._slides = dict()
     self._slide_order = []
+    self._content_slides = None # name(s) of contents slides
+    self._title_slide = None # name of title slides
 
     # Count the number of slides, used for assigning default name
     self._count = 0
@@ -68,6 +70,36 @@ class SlideSet(MooseObject):
     # Print a message
     print '  CREATED:', name
 
+  ##
+  # Return the active slide names
+  def activeSlides(self):
+
+    # By default return all slides, in order
+    slides = self._slide_order
+
+    # Limit the slides to the active list
+    if self.isParamValid('active'):
+      slides = self.getParam('active').split()
+      for name in slides:
+        if name not in self._slides:
+          slides.remove(name)
+          print 'WARNING: Slide name ' + name + ' is unknown'
+
+      # Insert the contents and title slides to the active list
+      if self._content_slides != None:
+        slides = self._content_slides + slides
+      if self._title_slide != None:
+        slides.insert(0, self._title_slide)
+
+    # Remove inactive slides
+    if self.isParamValid('isactive'):
+      for name in self.getParam('inactive').split():
+        if name in slides:
+          slides.remove(name)
+        else:
+          print 'WARNING: Slide name ' + name + ' is unknown'
+
+    return slides
 
   ##
   # The method that creates/retrieves the markdown (virtual)
@@ -81,8 +113,9 @@ class SlideSet(MooseObject):
 
     # Apply title slide
     if self.isParamValid('title'):
+      self._title_slide = self.name() + '-title'
       slide = self._createSlide('# ' + self.getParam('title') + '\n', show_in_contents=False, title=True,
-                                name=self.name() + '-title')
+                                name=self._title_slide)
 
 
   ##
@@ -95,11 +128,9 @@ class SlideSet(MooseObject):
       return
 
     # Extract links
-    match = re.findall('(^\s*\[(.*)\]:(.*))', raw_markdown, re.MULTILINE)
+    match = re.findall('^(\s*\[(.*)\]:(.*))', raw_markdown, re.MULTILINE)
     for m in match:
-      self._links = m[0]
-
-    print self._links
+      self._links.append(m[0])
 
     # Separate the individual slides
     raw_slides = re.split(r'\n---', raw_markdown)
@@ -194,7 +225,9 @@ class SlideSet(MooseObject):
   # A helper method for extracting the contents entries from slides
   def _extractContents(self):
     contents = []
-    for name in self._slide_order:
+
+    # Get the contents from the slides
+    for name in self.activeSlides():
       contents += self._slides[name].contents()
     return contents
 
@@ -230,10 +263,12 @@ class SlideSet(MooseObject):
       idx = 0
 
     # Add the content(s) slides
+    self._content_slides = []
     for i in range(n):
       if i > 0:
         contents_title = ''
-      self._createSlide(contents_title, name = self.name() + '-contents-' + str(i), show_in_contents=False, index=idx)
+      self._content_slides.append(self.name() + '-contents-' + str(i))
+      self._createSlide(contents_title, name = self._content_slides[i], show_in_contents=False, index=idx)
       idx += 1
 
 
@@ -291,13 +326,8 @@ class SlideSet(MooseObject):
     # Create a list of all the slide markdown
     output = []
 
-    # The list of slides to output
-    slides = self._slide_order
-    if self.isParamValid('slides'):
-      slides = self.getParam('slides').split()
-
     # Extract the slide content
-    for name in slides:
+    for name in self.activeSlides():
       output.append(self._slides[name].getMarkdown())
 
     # Join the list with slide breaks

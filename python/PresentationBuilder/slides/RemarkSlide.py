@@ -118,7 +118,6 @@ class RemarkSlide(MooseObject):
     if match:
       self._title = (match.group(1) + ' ' + match.group(2)).replace('\r', '')
 
-
   ##
   # Build table of contents list
   def contents(self):
@@ -293,9 +292,9 @@ class RemarkSlide(MooseObject):
 
     # Create the html output suitable for Reveal.js
     output = ''
-    output +=  ' '*8 + '<section id="' + self.name() + '">\n'
+    output +=  ' '*10 + '<section id="' + self.name() + '">\n'
     output += html
-    output +=  ' '*8 + '</section>\n'
+    output +=  ' '*10 + '</section>\n'
     return output
 
 

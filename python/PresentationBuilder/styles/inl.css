@@ -125,9 +125,9 @@ th{
 
 figure {
   display: table;
-  margin: 14px;
-  padding: 7px;
-  width: 14px;
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
 }
 
 /* Sets up the scrolbar to be always viewable */
