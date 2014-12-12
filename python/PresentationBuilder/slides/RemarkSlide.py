@@ -17,7 +17,7 @@ except ImportError:
 class RemarkSlide(MooseObject):
 
   # Regex for locating titles
-  _title_re = r'^\s*(#+)(.*)'
+  _title_re = r'^\s*(#+)\s+(.*)'
 
   @staticmethod
   def validParams():
