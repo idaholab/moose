@@ -1405,7 +1405,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 {
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 #else
-  if (!_fe_problem.errorOnJaocobianNonzeroReallocation())
+  if (!_fe_problem.errorOnJacobianNonzeroReallocation())
     MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 #endif
 
@@ -1687,7 +1687,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 #endif
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 #else
-  if (!_fe_problem.errorOnJaocobianNonzeroReallocation())
+  if (!_fe_problem.errorOnJacobianNonzeroReallocation())
     MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 #endif
 
@@ -1861,7 +1861,7 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 #endif
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 #else
-  if (!_fe_problem.errorOnJaocobianNonzeroReallocation())
+  if (!_fe_problem.errorOnJacobianNonzeroReallocation())
     MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 #endif
 
