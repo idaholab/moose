@@ -96,6 +96,97 @@ namespace MooseUtils
         return true;
     return false;
   }
+
+  /**
+   * Function to check whether two variables are equal within an absolute tolerance
+   * @param var1 The first variable to be checked
+   * @param var2 The second variable to be checked
+   * @param tol The tolerance to be used
+   * @return true if var1 and var2 are equal within tol
+   */
+  bool absoluteFuzzyEqual(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
+
+  /**
+   * Function to check whether a variable is greater than or equal to another variable within an absolute tolerance
+   * @param var1 The first variable to be checked
+   * @param var2 The second variable to be checked
+   * @param tol The tolerance to be used
+   * @return true if var1 > var2 or var1 == var2 within tol
+   */
+  bool absoluteFuzzyGreaterEqual(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
+
+  /**
+   * Function to check whether a variable is greater than another variable within an absolute tolerance
+   * @param var1 The first variable to be checked
+   * @param var2 The second variable to be checked
+   * @param tol The tolerance to be used
+   * @return true if var1 > var2 and var1 != var2 within tol
+   */
+  bool absoluteFuzzyGreaterThan(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
+
+  /**
+   * Function to check whether a variable is less than or equal to another variable within an absolute tolerance
+   * @param var1 The first variable to be checked
+   * @param var2 The second variable to be checked
+   * @param tol The tolerance to be used
+   * @return true if var1 < var2 or var1 == var2 within tol
+   */
+  bool absoluteFuzzyLessEqual(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
+
+  /**
+   * Function to check whether a variable is less than another variable within an absolute tolerance
+   * @param var1 The first variable to be checked
+   * @param var2 The second variable to be checked
+   * @param tol The tolerance to be used
+   * @return true if var1 < var2 and var1 != var2 within tol
+   */
+  bool absoluteFuzzyLessThan(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
+
+  /**
+   * Function to check whether two variables are equal within a relative tolerance
+   * @param var1 The first variable to be checked
+   * @param var2 The second variable to be checked
+   * @param tol The relative tolerance to be used
+   * @return true if var1 and var2 are equal within relative tol
+   */
+  bool relativeFuzzyEqual(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
+
+  /**
+   * Function to check whether a variable is greater than or equal to another variable within a relative tolerance
+   * @param var1 The first variable to be checked
+   * @param var2 The second variable to be checked
+   * @param tol The tolerance to be used
+   * @return true if var1 > var2 or var1 == var2 within relative tol
+   */
+  bool relativeFuzzyGreaterEqual(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
+
+  /**
+   * Function to check whether a variable is greater than another variable within a relative tolerance
+   * @param var1 The first variable to be checked
+   * @param var2 The second variable to be checked
+   * @param tol The tolerance to be used
+   * @return true if var1 > var2 and var1 != var2 within relative tol
+   */
+  bool relativeFuzzyGreaterThan(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
+
+  /**
+   * Function to check whether a variable is less than or equal to another variable within a relative tolerance
+   * @param var1 The first variable to be checked
+   * @param var2 The second variable to be checked
+   * @param tol The tolerance to be used
+   * @return true if var1 < var2 or var1 == var2 within relative tol
+   */
+  bool relativeFuzzyLessEqual(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
+
+  /**
+   * Function to check whether a variable is less than another variable within a relative tolerance
+   * @param var1 The first variable to be checked
+   * @param var2 The second variable to be checked
+   * @param tol The tolerance to be used
+   * @return true if var1 < var2 and var1 != var2 within relative tol
+   */
+  bool relativeFuzzyLessThan(const libMesh::Real & var1, const libMesh::Real & var2, const libMesh::Real & tol = libMesh::TOLERANCE*libMesh::TOLERANCE);
+
 }
 
 #endif //MOOSEUTILS_H
