@@ -19,8 +19,9 @@
 #include "Material.h"
 #include "Console.h"
 
-// libMesh includesx
+// libMesh includes
 #include "libmesh/transient_system.h"
+#include "libmesh/fe_type.h"
 
 template<>
 InputParameters validParams<TopResidualDebugOutput>()
@@ -75,12 +76,32 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
     dof_id_type nd = node.id();
 
     for (unsigned int var = 0; var < node.n_vars(_sys.number()); ++var)
-      if (node.n_dofs(_sys.number(), var) > 0)
+      if (node.n_dofs(_sys.number(), var) > 0) // this check filters scalar variables (which are clearly not a dof on every node)
       {
         dof_id_type dof_idx = node.dof_number(_sys.number(), var, 0);
         vec[j] = TopResidualDebugOutputTopResidualData(var, nd, residual(dof_idx));
         j++;
       }
+  }
+
+  // Loop over all scalar variables
+  std::vector<unsigned int> var_nums;
+  _sys.get_all_variable_numbers(var_nums);
+  const DofMap &dof_map(_sys.get_dof_map());
+  for (std::vector<unsigned int>::const_iterator it = var_nums.begin(); it != var_nums.end(); ++it)
+  {
+    if (_sys.variable_type(*it).family == SCALAR)
+    {
+      std::vector<dof_id_type> dof_indices;
+      dof_map.SCALAR_dof_indices(dof_indices, *it);
+      for (std::vector<dof_id_type>::const_iterator dof_it = dof_indices.begin(); dof_it != dof_indices.end(); ++dof_it)
+        if (*dof_it >= dof_map.first_dof() && *it < dof_map.end_dof())
+        {
+          vec[j] = TopResidualDebugOutputTopResidualData(*it, 0, residual(*dof_it), true);
+          j++;
+        }
+    }
+
   }
 
   // Sort vec by residuals
@@ -96,6 +117,12 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
   Moose::err << std::endl;
 
   for (unsigned int i = 0; i < n; ++i)
+  {
     Moose::err << "[DBG][" << processor_id() << "] " << std::setprecision(15) << vec[i]._residual << " '"
-               << _sys.variable_name(vec[i]._var).c_str() << "' at node " << vec[i]._nd << '\n';
+               << _sys.variable_name(vec[i]._var).c_str() << "' ";
+    if (vec[i]._is_scalar)
+      Moose::err << "(SCALAR)\n";
+    else
+      Moose::err << "at node " << vec[i]._nd << '\n';
+  }
 }

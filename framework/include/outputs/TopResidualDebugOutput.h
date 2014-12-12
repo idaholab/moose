@@ -35,14 +35,17 @@ struct TopResidualDebugOutputTopResidualData
   unsigned int _var;
   unsigned int _nd;
   Real _residual;
+  bool _is_scalar;
 
-  TopResidualDebugOutputTopResidualData() { _var = 0; _nd = 0; _residual = 0.; }
 
-  TopResidualDebugOutputTopResidualData(unsigned int var, unsigned int nd, Real residual)
+  TopResidualDebugOutputTopResidualData() { _var = 0; _nd = 0; _residual = 0.; _is_scalar = false; }
+
+  TopResidualDebugOutputTopResidualData(unsigned int var, unsigned int nd, Real residual, bool is_scalar = false)
   {
     _var = var;
     _nd = nd;
     _residual = residual;
+    _is_scalar = is_scalar;
   }
 };
 
