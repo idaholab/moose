@@ -24,7 +24,7 @@ InputParameters validParams<RichardsSeff1RSC>();
  */
 class RichardsSeff1RSC : public RichardsSeff
 {
- public:
+public:
   RichardsSeff1RSC(const std::string & name, InputParameters parameters);
 
   /**
@@ -50,7 +50,7 @@ class RichardsSeff1RSC : public RichardsSeff
    */
   void d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const;
 
- protected:
+protected:
 
   /// oil viscosity
   Real _oil_viscosity;

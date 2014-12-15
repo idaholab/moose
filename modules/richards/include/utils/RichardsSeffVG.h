@@ -17,7 +17,7 @@
  */
 class RichardsSeffVG
 {
- public:
+public:
   RichardsSeffVG();
 
   /**

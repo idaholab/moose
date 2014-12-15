@@ -19,8 +19,7 @@ InputParameters validParams<RichardsFullyUpwindFlux>()
   return params;
 }
 
-RichardsFullyUpwindFlux::RichardsFullyUpwindFlux(const std::string & name,
-                                             InputParameters parameters) :
+RichardsFullyUpwindFlux::RichardsFullyUpwindFlux(const std::string & name, InputParameters parameters) :
     Kernel(name,parameters),
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _num_p(_richards_name_UO.num_v()),
@@ -37,9 +36,8 @@ RichardsFullyUpwindFlux::RichardsFullyUpwindFlux(const std::string & name,
     _dmobility_dv(0)
 {
   _ps_at_nodes.resize(_num_p);
-  for (unsigned int pnum=0 ; pnum<_num_p; ++pnum)
+  for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
     _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
-
 }
 
 
@@ -58,7 +56,7 @@ RichardsFullyUpwindFlux::prepareNodalValues()
   _mobility.resize(_num_nodes);
   _dmobility_dv.resize(_num_nodes);
   dseff_dp.resize(_num_p);
-  for (unsigned int nodenum=0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
   {
     // retrieve and calculate basic things at the node
     p = (*_ps_at_nodes[_pvar])[nodenum]; // pressure of fluid _pvar at node nodenum
@@ -72,7 +70,7 @@ RichardsFullyUpwindFlux::prepareNodalValues()
     // calculate the mobility and its derivatives wrt (variable_ph = porepressure_ph)
     _mobility[nodenum] = density*relperm/_viscosity[0][_pvar]; // assume viscosity is constant throughout element
     _dmobility_dv[nodenum].resize(_num_p);
-    for (unsigned int ph = 0; ph < _num_p ; ++ph)
+    for (unsigned int ph = 0; ph < _num_p; ++ph)
       _dmobility_dv[nodenum][ph] = density*drelperm_ds*dseff_dp[ph]/_viscosity[0][_pvar];
     _dmobility_dv[nodenum][_pvar] += ddensity_dp*relperm/_viscosity[0][_pvar];
   }
@@ -289,7 +287,7 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
     if (_has_save_in)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (unsigned int i=0; i<_save_in.size(); i++)
+      for (unsigned int i = 0; i < _save_in.size(); i++)
         _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
     }
   }
@@ -302,11 +300,11 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
     {
       unsigned int rows = ke.m();
       DenseVector<Number> diag(rows);
-      for (unsigned int i=0; i<rows; i++)
+      for (unsigned int i = 0; i < rows; i++)
         diag(i) = _local_ke(i,i);
 
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (unsigned int i=0; i<_diag_save_in.size(); i++)
+      for (unsigned int i = 0; i < _diag_save_in.size(); i++)
         _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
     }
   }

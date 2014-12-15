@@ -146,31 +146,31 @@ protected:
   RealVectorValue _borehole_direction;
 
   /// fluid porepressure (or porepressures in case of multiphase)
-  MaterialProperty<std::vector<Real> > &_pp;
+  MaterialProperty<std::vector<Real> > & _pp;
 
   /// d(porepressure_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_dpp_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
 
   /// fluid viscosity
-  MaterialProperty<std::vector<Real> > &_viscosity;
+  MaterialProperty<std::vector<Real> > & _viscosity;
 
   /// material permeability
   MaterialProperty<RealTensorValue> & _permeability;
 
   /// deriviatves of Seff wrt variables
-  MaterialProperty<std::vector<std::vector<Real> > > &_dseff_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _dseff_dv;
 
   /// relative permeability
-  MaterialProperty<std::vector<Real> > &_rel_perm;
+  MaterialProperty<std::vector<Real> > & _rel_perm;
 
   /// d(relperm_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_drel_perm_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _drel_perm_dv;
 
   /// fluid density
-  MaterialProperty<std::vector<Real> > &_density;
+  MaterialProperty<std::vector<Real> > & _density;
 
   /// d(density_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_ddensity_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_dv;
 
   /**
    * This is used to hold the total fluid flowing into the borehole
@@ -221,7 +221,7 @@ protected:
 
 
   /// reads a space-separated line of floats from ifs and puts in myvec
-  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
+  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
 
   /**
    * Calculates Peaceman's form of the borehole well constant

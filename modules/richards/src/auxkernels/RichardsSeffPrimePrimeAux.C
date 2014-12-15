@@ -20,10 +20,10 @@ InputParameters validParams<RichardsSeffPrimePrimeAux>()
 }
 
 RichardsSeffPrimePrimeAux::RichardsSeffPrimePrimeAux(const std::string & name, InputParameters parameters) :
-  AuxKernel(name, parameters),
-  _seff_UO(getUserObject<RichardsSeff>("seff_UO")),
-  _wrt1(getParam<int>("wrtnum1")),
-  _wrt2(getParam<int>("wrtnum2"))
+    AuxKernel(name, parameters),
+    _seff_UO(getUserObject<RichardsSeff>("seff_UO")),
+    _wrt1(getParam<int>("wrtnum1")),
+    _wrt2(getParam<int>("wrtnum2"))
 {
   int n = coupledComponents("pressure_vars");
   if (_wrt1 < 0 || _wrt1 >= n)
@@ -32,11 +32,11 @@ RichardsSeffPrimePrimeAux::RichardsSeffPrimePrimeAux(const std::string & name, I
     mooseError("Your wrtnum2 is " << _wrt2 << " but it must obey 0 <= wrtnum2 < " << n << ".");
   _pressure_vals.resize(n);
 
-  for (int i=0 ; i<n; ++i)
+  for (int i = 0 ; i < n; ++i)
     _pressure_vals[i] = &coupledValue("pressure_vars", i);
 
   _mat.resize(n);
-  for (int i=0; i<n; ++i)
+  for (int i = 0; i < n; ++i)
     _mat[i].resize(n);
 }
 

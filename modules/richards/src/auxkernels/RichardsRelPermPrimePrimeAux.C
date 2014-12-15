@@ -18,9 +18,9 @@ InputParameters validParams<RichardsRelPermPrimePrimeAux>()
 }
 
 RichardsRelPermPrimePrimeAux::RichardsRelPermPrimePrimeAux(const std::string & name, InputParameters parameters) :
-  AuxKernel(name, parameters),
-  _seff_var(coupledValue("seff_var")),
-  _relperm_UO(getUserObject<RichardsRelPerm>("relperm_UO"))
+    AuxKernel(name, parameters),
+    _seff_var(coupledValue("seff_var")),
+    _relperm_UO(getUserObject<RichardsRelPerm>("relperm_UO"))
 {}
 
 Real

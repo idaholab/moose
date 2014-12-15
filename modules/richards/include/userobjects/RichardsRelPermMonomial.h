@@ -22,7 +22,7 @@ InputParameters validParams<RichardsRelPermMonomial>();
  */
 class RichardsRelPermMonomial : public RichardsRelPerm
 {
- public:
+public:
   RichardsRelPermMonomial(const std::string & name, InputParameters parameters);
 
   /**
@@ -43,7 +43,7 @@ class RichardsRelPermMonomial : public RichardsRelPerm
    */
   Real d2relperm(Real seff) const;
 
- protected:
+protected:
 
   /// immobile saturation
   Real _simm;

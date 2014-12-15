@@ -22,7 +22,7 @@ InputParameters validParams<RichardsDensityMethane20degC>();
  */
 class RichardsDensityMethane20degC : public RichardsDensity
 {
- public:
+public:
   RichardsDensityMethane20degC(const std::string & name, InputParameters parameters);
 
   /**

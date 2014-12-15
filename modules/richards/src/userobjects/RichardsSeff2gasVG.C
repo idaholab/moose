@@ -18,9 +18,9 @@ InputParameters validParams<RichardsSeff2gasVG>()
 }
 
 RichardsSeff2gasVG::RichardsSeff2gasVG(const std::string & name, InputParameters parameters) :
-  RichardsSeff(name, parameters),
-  _al(getParam<Real>("al")),
-  _m(getParam<Real>("m"))
+    RichardsSeff(name, parameters),
+    _al(getParam<Real>("al")),
+    _m(getParam<Real>("m"))
 {
 }
 

@@ -18,7 +18,7 @@ InputParameters validParams<RichardsDensityMethane20degC>()
 }
 
 RichardsDensityMethane20degC::RichardsDensityMethane20degC(const std::string & name, InputParameters parameters) :
-  RichardsDensity(name, parameters)
+    RichardsDensity(name, parameters)
 {}
 
 
@@ -38,7 +38,6 @@ RichardsDensityMethane20degC::ddensity(Real p) const
     return 0.00654576947608E-3 + 2.08715433094E-13*p;
   else
     return 0.1*6.54576947608E-5*std::exp(6.54576947608E-5*p);
-
 }
 
 Real

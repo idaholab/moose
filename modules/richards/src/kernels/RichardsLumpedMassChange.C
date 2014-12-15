@@ -19,9 +19,8 @@ InputParameters validParams<RichardsLumpedMassChange>()
   return params;
 }
 
-RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name,
-                                             InputParameters parameters) :
-    TimeKernel(name,parameters),
+RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name, InputParameters parameters) :
+    TimeKernel(name, parameters),
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _num_p(_richards_name_UO.num_v()),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
@@ -37,7 +36,7 @@ RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name,
   _ps_at_nodes.resize(_num_p);
   _ps_old_at_nodes.resize(_num_p);
 
-  for (unsigned int pnum=0 ; pnum<_num_p; ++pnum)
+  for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
   {
     _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
     _ps_old_at_nodes[pnum] = _richards_name_UO.nodal_var_old(pnum);
@@ -50,7 +49,6 @@ RichardsLumpedMassChange::RichardsLumpedMassChange(const std::string & name,
 Real
 RichardsLumpedMassChange::computeQpResidual()
 {
-
   // current values:
   Real density = (*_density_UO).density((*_ps_at_nodes[_pvar])[_i]);
   Real seff = (*_seff_UO).seff(_ps_at_nodes, _i);

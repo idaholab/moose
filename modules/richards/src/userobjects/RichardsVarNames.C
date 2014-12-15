@@ -20,13 +20,12 @@ InputParameters validParams<RichardsVarNames>()
 }
 
 RichardsVarNames::RichardsVarNames(const std::string & name, InputParameters parameters) :
-  GeneralUserObject(name, parameters),
-  Coupleable(parameters, false),
-  ZeroInterface(parameters),
-  _num_v(coupledComponents("richards_vars")),
-  _the_names(std::string()),
-  _var_types(getParam<MooseEnum>("var_types"))
-
+    GeneralUserObject(name, parameters),
+    Coupleable(parameters, false),
+    ZeroInterface(parameters),
+    _num_v(coupledComponents("richards_vars")),
+    _the_names(std::string()),
+    _var_types(getParam<MooseEnum>("var_types"))
 {
   unsigned int max_moose_var_num_seen = 0;
 

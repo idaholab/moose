@@ -17,9 +17,9 @@ InputParameters validParams<FunctionOfVariableAux>()
 }
 
 FunctionOfVariableAux::FunctionOfVariableAux(const std::string & name, InputParameters parameters) :
-  AuxKernel(name, parameters),
-  _t_variable(coupledValue("t_variable")),
-  _func(getFunction("function"))
+    AuxKernel(name, parameters),
+    _t_variable(coupledValue("t_variable")),
+    _func(getFunction("function"))
 {}
 
 Real

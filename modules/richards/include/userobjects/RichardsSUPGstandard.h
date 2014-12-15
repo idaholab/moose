@@ -22,7 +22,7 @@ InputParameters validParams<RichardsSUPGstandard>();
  */
 class RichardsSUPGstandard : public RichardsSUPG
 {
- public:
+public:
   RichardsSUPGstandard(const std::string & name, InputParameters parameters);
 
   /**
@@ -111,7 +111,7 @@ class RichardsSUPGstandard : public RichardsSUPG
   /// returns false in this case since everything is trivial
   bool SUPG_trivial() const;
 
- protected:
+protected:
 
   /**
    * the SUPG pressure parameter
@@ -121,7 +121,7 @@ class RichardsSUPGstandard : public RichardsSUPG
    */
   Real _p_SUPG;
 
- private:
+private:
 
   /// cosh(alpha)/sinh(alpha) - 1/alpha, modified at extreme values of alpha to prevent overflows
   Real cosh_relation(Real alpha) const;

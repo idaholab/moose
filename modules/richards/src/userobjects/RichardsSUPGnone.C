@@ -16,7 +16,7 @@ InputParameters validParams<RichardsSUPGnone>()
 }
 
 RichardsSUPGnone::RichardsSUPGnone(const std::string & name, InputParameters parameters) :
-  RichardsSUPG(name, parameters)
+    RichardsSUPG(name, parameters)
 {}
 
 RealVectorValue

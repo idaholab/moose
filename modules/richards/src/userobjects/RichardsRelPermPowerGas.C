@@ -18,9 +18,9 @@ InputParameters validParams<RichardsRelPermPowerGas>()
 }
 
 RichardsRelPermPowerGas::RichardsRelPermPowerGas(const std::string & name, InputParameters parameters) :
-  RichardsRelPerm(name, parameters),
-  _simm(getParam<Real>("simm")),
-  _n(getParam<Real>("n"))
+    RichardsRelPerm(name, parameters),
+    _simm(getParam<Real>("simm")),
+    _n(getParam<Real>("n"))
 {
 }
 

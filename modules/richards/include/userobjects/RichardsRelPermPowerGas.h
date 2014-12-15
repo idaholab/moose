@@ -21,7 +21,7 @@ InputParameters validParams<RichardsRelPermPowerGas>();
  */
 class RichardsRelPermPowerGas : public RichardsRelPerm
 {
- public:
+public:
   RichardsRelPermPowerGas(const std::string & name, InputParameters parameters);
 
   /**
@@ -42,7 +42,7 @@ class RichardsRelPermPowerGas : public RichardsRelPerm
    */
   Real d2relperm(Real seff) const;
 
- protected:
+protected:
 
   /// immobile saturation
   Real _simm;

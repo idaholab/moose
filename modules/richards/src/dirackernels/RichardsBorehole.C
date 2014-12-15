@@ -114,7 +114,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
   // construct the line-segment lengths between each point
   _half_seg_len.resize(std::max(num_pts-1, 1));
-  for (unsigned int i=0 ; i<_xs.size()-1; ++i)
+  for (unsigned int i = 0 ; i < _xs.size() - 1; ++i)
   {
     _half_seg_len[i] = 0.5*std::sqrt(std::pow(_xs[i+1] - _xs[i], 2) + std::pow(_ys[i+1] - _ys[i], 2) + std::pow(_zs[i+1] - _zs[i], 2));
     if (_half_seg_len[i] == 0)
@@ -125,7 +125,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
 
   // construct the rotation matrix needed to rotate the permeability
   _rot_matrix.resize(std::max(num_pts-1, 1));
-  for (unsigned int i=0 ; i<_xs.size()-1; ++i)
+  for (unsigned int i = 0 ; i < _xs.size()-1; ++i)
   {
     RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
     _rot_matrix[i] = RotationMatrix::rotVecToZ(v2);
@@ -145,7 +145,7 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
     RealVectorValue vec0;
     RealTensorValue ten0;
     Real the_sum;
-    for (unsigned int i=0 ; i<_xs.size()-1; ++i)
+    for (unsigned int i = 0 ; i < _xs.size()-1; ++i)
     {
       // check rotation matrix does the correct rotation
       _console << i << std::endl;
@@ -158,16 +158,16 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
       // check rotation matrix is orthogonal
       ten0 = _rot_matrix[i]*_rot_matrix[i].transpose() - iii;
       the_sum = 0;
-      for (unsigned int j=0 ; j<3; ++j)
-        for (unsigned int k=0 ; k<3; ++k)
+      for (unsigned int j = 0 ; j < 3; ++j)
+        for (unsigned int k = 0 ; k < 3; ++k)
           the_sum = ten0(j,k)*ten0(j,k);
       if (the_sum > 1E-20)
         mooseError("Rotation matrix for v2 = " << v2 << " does not obey R.R^T=I.  It is " << _rot_matrix[i] << "\n");
 
       ten0 = _rot_matrix[i].transpose()*_rot_matrix[i] - iii;
       the_sum = 0;
-      for (unsigned int j=0 ; j<3; ++j)
-        for (unsigned int k=0 ; k<3; ++k)
+      for (unsigned int j = 0 ; j < 3; ++j)
+        for (unsigned int k = 0 ; k < 3; ++k)
           the_sum = ten0(j,k)*ten0(j,k);
       if (the_sum > 1E-20)
         mooseError("Rotation matrix for v2 = " << v2 << " does not obey R^T.R=I.  It is " << _rot_matrix[i] << "\n");
@@ -175,12 +175,13 @@ RichardsBorehole::RichardsBorehole(const std::string & name, InputParameters par
   }
 
   _ps_at_nodes.resize(_num_p);
-  for (unsigned int pnum=0 ; pnum<_num_p; ++pnum)
+  for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
     _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
 
 }
 
-bool RichardsBorehole::parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec)
+bool
+RichardsBorehole::parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec)
 // reads a space-separated line of floats from ifs and puts in myvec
 {
   std::string line;
@@ -188,12 +189,12 @@ bool RichardsBorehole::parseNextLineReals(std::ifstream & ifs, std::vector<Real>
   bool gotline(false);
   if (getline(ifs,line))
   {
-    gotline=true;
+    gotline = true;
 
     //Harvest floats separated by whitespace
     std::istringstream iss(line);
     Real f;
-    while (iss>>f)
+    while (iss >> f)
     {
       myvec.push_back(f);
     }
@@ -317,7 +318,7 @@ RichardsBorehole::prepareNodalValues()
   _mobility.resize(_num_nodes);
   _dmobility_dv.resize(_num_nodes);
   dseff_dp.resize(_num_p);
-  for (unsigned int nodenum=0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
   {
     // retrieve and calculate basic things at the node
     p = (*_ps_at_nodes[_pvar])[nodenum]; // pressure of fluid _pvar at node nodenum
@@ -431,7 +432,8 @@ Real
 RichardsBorehole::jac(unsigned int wrt_num)
 {
   Real character = _character.value(_t, _q_point[_qp]);
-  if (character == 0.0) return 0.0;
+  if (character == 0.0)
+    return 0.0;
 
   Real bh_pressure = _p_bot + _unit_weight*(_q_point[_qp] - _bottom_point); // really want to use _q_point instaed of _current_point, i think?!
 

@@ -45,8 +45,7 @@ class RichardsFullyUpwindFlux : public Kernel
 {
 public:
 
-  RichardsFullyUpwindFlux(const std::string & name,
-                        InputParameters parameters);
+  RichardsFullyUpwindFlux(const std::string & name, InputParameters parameters);
 
 
 protected:
@@ -119,13 +118,13 @@ protected:
   MaterialProperty<std::vector<Real> > &_viscosity;
 
   /// permeability*(grad(pressure) - density*gravity)  (a vector of these in the multiphase case)
-  MaterialProperty<std::vector<RealVectorValue> > &_flux_no_mob;
+  MaterialProperty<std::vector<RealVectorValue> > & _flux_no_mob;
 
   /// d(_flux_no_mob)/d(variable)
-  MaterialProperty<std::vector<std::vector<RealVectorValue> > > &_dflux_no_mob_dv;
+  MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dflux_no_mob_dv;
 
   /// d(_flux_no_mob)/d(grad(variable))
-  MaterialProperty<std::vector<std::vector<RealTensorValue> > > &_dflux_no_mob_dgradv;
+  MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dflux_no_mob_dgradv;
 
   /// number of nodes in this element
   unsigned int _num_nodes;

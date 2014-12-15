@@ -25,8 +25,7 @@ InputParameters validParams<RichardsPiecewiseLinearSink>()
   return params;
 }
 
-RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const std::string & name,
-                                             InputParameters parameters) :
+RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const std::string & name, InputParameters parameters) :
     IntegratedBC(name,parameters),
     _use_mobility(getParam<bool>("use_mobility")),
     _use_relperm(getParam<bool>("use_relperm")),
@@ -66,7 +65,7 @@ RichardsPiecewiseLinearSink::RichardsPiecewiseLinearSink(const std::string & nam
     _ddensity_dv(getMaterialProperty<std::vector<std::vector<Real> > >("ddensity_dv"))
 {
   _ps_at_nodes.resize(_num_p);
-  for (unsigned int pnum=0 ; pnum<_num_p; ++pnum)
+  for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
     _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
 }
 
@@ -88,7 +87,7 @@ RichardsPiecewiseLinearSink::prepareNodalValues()
   _nodal_relperm.resize(_num_nodes);
   _dnodal_relperm_dv.resize(_num_nodes);
   dseff_dp.resize(_num_p);
-  for (unsigned int nodenum=0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
   {
     // retrieve and calculate basic things at the node
     p = (*_ps_at_nodes[_pvar])[nodenum]; // pressure of fluid _pvar at node nodenum
