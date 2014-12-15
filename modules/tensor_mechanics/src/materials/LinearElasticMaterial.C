@@ -50,7 +50,10 @@ LinearElasticMaterial::computeQpStress()
   //Calculation and Apply stress free strain
   RankTwoTensor stress_free_strain = computeStressFreeStrain();
 
+  // add the stress free strain on here
+  // ther derivatives of elastic_strain w.r.t. c are built down in EigenstrainBaseMaterial
   _elastic_strain[_qp] += stress_free_strain;
+
   _total_strain[_qp] = _elastic_strain[_qp];
 
   // stress = C * e
