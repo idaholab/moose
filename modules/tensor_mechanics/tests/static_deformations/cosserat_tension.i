@@ -32,32 +32,32 @@
 [MeshModifiers]
   [./bottom_xline1]
     type = AddExtraNodeset
-    boundary = 101
+    new_boundary = 101
     coord = '0 0 0'
   [../]
   [./bottom_xline2]
     type = AddExtraNodeset
-    boundary = 101
+    new_boundary = 101
     coord = '0.5 0 0'
   [../]
   [./bottom_xline3]
     type = AddExtraNodeset
-    boundary = 101
+    new_boundary = 101
     coord = '1 0 0'
   [../]
   [./bottom_zline1]
     type = AddExtraNodeset
-    boundary = 102
+    new_boundary = 102
     coord = '0 0 0.0'
   [../]
   [./bottom_zline2]
     type = AddExtraNodeset
-    boundary = 102
+    new_boundary = 102
     coord = '0 0 0.1'
   [../]
   [./bottom_zline3]
     type = AddExtraNodeset
-    boundary = 102
+    new_boundary = 102
     coord = '0 0 0.2'
   [../]
 []
