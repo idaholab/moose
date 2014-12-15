@@ -50,7 +50,6 @@
 [Outputs]
   [./out]
     type = Exodus
-    output_initial = false
     interval = 5
   [../]
 []

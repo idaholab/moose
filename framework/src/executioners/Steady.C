@@ -66,7 +66,7 @@ Steady::init()
   _problem.initialSetup();
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
-  _output_warehouse.outputInitial();
+  _output_warehouse.outputStep(OUTPUT_INITIAL);
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
 
@@ -103,7 +103,7 @@ Steady::execute()
     _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
     _problem.computeIndicatorsAndMarkers();
 
-    _output_warehouse.outputStep();
+    _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
 
 #ifdef LIBMESH_ENABLE_AMR
     if (r_step != steps)

@@ -116,9 +116,9 @@
   [./ex_out]
     type = Exodus
     file_base = l2elemaux
-    output_initial = true
     elemental_as_nodal = true
     interval = 1
+    output_on = 'initial timestep_end'
   [../]
   [./console]
     type = Console

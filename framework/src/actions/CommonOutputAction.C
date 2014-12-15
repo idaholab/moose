@@ -18,9 +18,10 @@
 #include "FEProblem.h"
 #include "MooseObjectAction.h"
 #include "ActionFactory.h"
-#include "Exodus.h"
+#include "Output.h"
+//#include "Exodus.h"
 #include "OutputWarehouse.h"
-#include "FileOutput.h"
+//#include "FileOutput.h"
 
 // Extrnal includes
 #include "tinydir.h"
@@ -48,19 +49,29 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("tecplot", false, "Output the results using the default settings for Tecplot output");
    params.addParam<bool>("gnuplot", false, "Output the scalar and postprocessor results using the default settings for GNUPlot output");
    params.addParam<bool>("solution_history", false, "Print a solution history file (.slh) using the default settings");
+   params.addParam<bool>("dofmap", false, "Create the dof map .json output file");
 
    // Common parameters
-   /* Note: Be sure that objects that share these parameters utilize the same defaults */
-   params.addParam<bool>("output_initial", false,  "Request that the initial condition is output to the solution file");
-   params.addParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output");
-   params.addParam<bool>("output_final", false, "Force the final timestep to be output, regardless of output interval");
+   // Note: Be sure that objects that share these parameters utilize the same defaults
    params.addParam<bool>("color", true, "Set to false to turn off all coloring in all outputs");
    params.addParam<std::string>("file_base", "Common file base name to be utilized with all output objects");
    params.addParam<std::vector<std::string> >("output_if_base_contains", "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputting only a subset of outputs when using MultiApps.");
    params.addParam<unsigned int>("interval", 1, "The interval at which timesteps are output to the solution file");
    params.addParam<std::vector<Real> >("sync_times", std::vector<Real>(), "Times at which the output and solution is forced to occur");
+
    params.addParam<std::vector<VariableName> >("hide", "A list of the variables and postprocessors that should NOT be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
    params.addParam<std::vector<VariableName> >("show", "A list of the variables and postprocessors that should be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
+
+  // Add the 'output_on' input parameter
+  params.addParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"), "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment (default: timestep_end)");
+
+  // **** DEPRECATED PARAMETERS ***
+  params.addDeprecatedParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file",
+                                  "replace by adding 'initial' to the 'output_on' option");
+  params.addDeprecatedParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output",
+                                  "replace by adding 'timestep_end' to the 'output_on' option");
+  params.addDeprecatedParam<bool>("output_final", false, "Force the final time step to be output, regardless of output interval",
+                                  "replace by adding 'final' to the 'output_on' option");
 
    // Return object
    return params;
@@ -72,6 +83,15 @@ CommonOutputAction::CommonOutputAction(const std::string & name, InputParameters
 {
   // Set the ActionWarehouse pointer in the parameters that will be passed to the actions created with this action
   _action_params.set<ActionWarehouse *>("awh") = &_awh;
+
+  // **** DEPRECATED PARAMETER SUPPORT ****
+  MultiMooseEnum & output_on = _pars.set<MultiMooseEnum>("output_on");
+  if (getParam<bool>("output_initial"))
+    output_on.push_back("initial");
+  if (getParam<bool>("output_intermediate"))
+    output_on.push_back("timestep_end");
+  if (getParam<bool>("output_final"))
+    output_on.push_back("final");
 }
 
 void
@@ -134,6 +154,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("solution_history"))
     create("SolutionHistory");
+
+  if (getParam<bool>("dofmap"))
+    create("DOFMap");
 
   if (!getParam<bool>("color"))
     Moose::_color_console = false;

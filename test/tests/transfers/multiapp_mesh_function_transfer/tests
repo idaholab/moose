@@ -36,11 +36,10 @@
   [../]
 
   [./mismatch_exec_on]
-    type = 'RunException'
+    type = 'RunApp'
     input = 'exec_on_mismatch.i'
-    expect_err = 'MultiAppTransfer execute_on flags do not match'
+    expect_out = 'MultiAppTransfer execute_on flags do not match'
     recover = false
-    cli_args = '--error' # Change warnings to errors for this test
     max_parallel = 1
   [../]
 []

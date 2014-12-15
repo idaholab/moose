@@ -24,7 +24,6 @@
 #include "Restartable.h"
 #include "FileMesh.h"
 #include "CoupledExecutioner.h"
-#include "VectorPostprocessor.h"
 #include "MooseUtils.h"
 
 template<>
@@ -33,34 +32,33 @@ InputParameters validParams<Output>()
   // Get the parameters from the parent object
   InputParameters params = validParams<MooseObject>();
 
-
-  // Hide/show variable output options
-  params.addParam<std::vector<VariableName> >("hide", "A list of the variables and postprocessors that should NOT be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
-  params.addParam<std::vector<VariableName> >("show", "A list of the variables and postprocessors that should be output to the Exodus file (may include Variables, ScalarVariables, and Postprocessor names).");
-
   // Displaced Mesh options
   params.addParam<bool>("use_displaced", false, "Enable/disable the use of the displaced mesh for outputting");
 
-  // Enable sequential file output (do not set default, the use_displace criteria relies on isParamValid, see Constructor)
-  params.addParam<bool>("sequence", "Enable/disable sequential file output (enable by default when 'use_displace = true', otherwise defaults to false");
-
   // Output intervals and timing
-  params.addParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file");
-  params.addParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output");
-  params.addParam<bool>("output_final", false, "Force the final time step to be output, regardless of output interval");
   params.addParam<unsigned int>("interval", 1, "The interval at which time steps are output to the solution file");
-  params.addParam<bool>("output_failed", false, "When true all time attempted time steps are output");
   params.addParam<std::vector<Real> >("sync_times", "Times at which the output and solution is forced to occur");
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
   params.addParam<Real>("start_time", "Time at which this output object begins to operate");
   params.addParam<Real>("end_time", "Time at which this output object stop operating");
   params.addParam<Real>("time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
 
+  // Add the 'output_on' input parameter for users to set
+  params.addParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"), "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment");
+
   // 'Timing' group
   params.addParamNamesToGroup("time_tolerance interval output_initial output_final sync_times sync_only start_time end_time ", "Timing");
 
-  // 'Variables' Group
-  params.addParamNamesToGroup("hide show", "Variables");
+
+  // **** DEPRECATED PARAMETERS ****
+  params.addDeprecatedParam<bool>("output_initial", false, "Request that the initial condition is output to the solution file",
+                                  "replace by adding 'initial' to the 'output_on' option");
+  params.addDeprecatedParam<bool>("output_intermediate", true, "Request that all intermediate steps (not initial or final) are output",
+                                  "replace by adding 'timestep_end' to the 'output_on' option");
+  params.addDeprecatedParam<bool>("output_final", false, "Force the final time step to be output, regardless of output interval",
+                                  "replace by adding 'final' to the 'output_on' option");
+  params.addDeprecatedParam<bool>("output_failed", false, "When true all time attempted time steps are output",
+                                  "replace by adding 'failed' to the 'output_on' option");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_built_by_moose", false);
@@ -71,50 +69,22 @@ InputParameters validParams<Output>()
 }
 
 MultiMooseEnum
-Output::getOutputTypes()
+Output::getExecuteOptions(std::string default_type)
 {
-  return MultiMooseEnum("nodal=0 elemental=1 scalar=2 postprocessor=3 vector_postprocessor=4 input=5 system_information=6");
-}
-
-InputParameters
-Output::enableOutputTypes(const std::string & names)
-{
-  // The parameters object that will be returned
-  InputParameters params = emptyInputParameters();
-
-  // Set private parameter indicating that this method was called
-  params.addPrivateParam("_output_valid_params_was_called", true);
-
-  // Get the MultiEnum of output types
-  MultiMooseEnum output_types = Output::getOutputTypes();
-
-  // Update the enum of output types to append
-  if (names.empty())
-    output_types = "";
-  else
-    output_types = names;
-
-  // Add the parameters and return them
-  Output::addValidParams(params, output_types);
-  return params;
+  // The numbers associated must be in sync with the OutputExecFlagType in Moose.h
+  return MultiMooseEnum("initial=0 linear=1 nonlinear=2 timestep_end=3 timestep_begin=4 final=5 failed=6 custom=7 none=9", default_type);
 }
 
 Output::Output(const std::string & name, InputParameters & parameters) :
     MooseObject(name, parameters),
     Restartable(name, parameters, "Output"),
     MeshChangedInterface(parameters),
+    SetupInterface(parameters),
     _problem_ptr(getParam<FEProblem *>("_fe_problem")),
     _transient(_problem_ptr->isTransient()),
     _use_displaced(getParam<bool>("use_displaced")),
     _es_ptr(_use_displaced ? &_problem_ptr->getDisplacedProblem()->es() : &_problem_ptr->es()),
-    _output_initial(getParam<bool>("output_initial")),
-    _output_intermediate(getParam<bool>("output_intermediate")),
-    _output_final(getParam<bool>("output_final")),
-    _system_information(isParamValid("output_system_information") ? getParam<bool>("output_system_information") : false),
-    _mesh_changed(false),
-    _sequence(isParamValid("sequence") ? getParam<bool>("sequence") : false),
-    _allow_output(true),
-    _on_initial(false),
+    _output_on(getParam<MultiMooseEnum>("output_on")),
     _time(_problem_ptr->time()),
     _time_old(_problem_ptr->timeOld()),
     _t_step(_problem_ptr->timeStep()),
@@ -127,115 +97,27 @@ Output::Output(const std::string & name, InputParameters & parameters) :
     _end_time(isParamValid("end_time") ? getParam<Real>("end_time") : std::numeric_limits<Real>::max()),
     _t_tol(getParam<Real>("time_tolerance")),
     _sync_only(getParam<bool>("sync_only")),
-    _force_output(false),
-    _output_failed(false),
-    _output_setup_called(false),
     _initialized(false)
 {
+
+  // **** DEPRECATED PARAMETER SUPPORT ****
+  if (getParam<bool>("output_initial"))
+    _output_on.push_back("initial");
+
+  if (!getParam<bool>("output_intermediate"))
+    _output_on.erase("timestep_end");
+
+  if (getParam<bool>("output_final"))
+    _output_on.push_back("final");
+
+  if (getParam<bool>("output_failed"))
+    _output_on.push_back("failed");
 }
 
 void
 Output::init()
 {
-  // Check that enable[disable]OutputTypes was called
-  if (!isParamValid("_output_valid_params_was_called"))
-    mooseError("The static method Output::enableOutputTypes must be called inside the validParams function for this object to properly define the input parameters for the output object named '" << _name << "'");
-
-  // Do not initialize more than once
-  /* This check is needed for YAK which calls Executioners from within Executioners */
-  if (_initialized)
-    return;
-
-  // If recovering disable output of initial condition to avoid duplicate files
-  if (_app.isRecovering())
-    _output_initial = false;
-
-  // Set the sequence flag to true if it has not been set and 'use_displaced = true'
-  if (!isParamValid("sequence") && _use_displaced)
-    sequence(true);
-
-  // Initialize the available output
-  initAvailableLists();
-
-  // Separate the hide/show list into components
-  initShowHideLists(getParam<std::vector<VariableName> >("show"), getParam<std::vector<VariableName> >("hide"));
-
-  // If 'elemental_as_nodal = true' the elemental variable names must be appended to the
-  // nodal variable names. Thus, when libMesh::EquationSystem::build_solution_vector is called
-  // it will create the correct nodal variable from the elemental
-  if (isParamValid("elemental_as_nodal") && getParam<bool>("elemental_as_nodal"))
-  {
-    _nodal_variables.show.insert(_nodal_variables.show.end(), _elemental_variables.show.begin(), _elemental_variables.show.end());
-    _nodal_variables.hide.insert(_nodal_variables.hide.end(), _elemental_variables.hide.begin(), _elemental_variables.hide.end());
-    _nodal_variables.available.insert(_nodal_variables.available.end(), _elemental_variables.available.begin(), _elemental_variables.available.end());
-  }
-
-  // Similarly as above, if 'scalar_as_nodal = true' append the elemental variable lists
-  if (isParamValid("scalar_as_nodal") && getParam<bool>("scalar_as_nodal"))
-  {
-    _nodal_variables.show.insert(_nodal_variables.show.end(), _scalar.show.begin(), _scalar.show.end());
-    _nodal_variables.hide.insert(_nodal_variables.hide.end(), _scalar.hide.begin(), _scalar.hide.end());
-    _nodal_variables.available.insert(_nodal_variables.available.end(), _scalar.available.begin(), _scalar.available.end());
-  }
-
-  // Initialize the show/hide/output lists for each of the types of output
-  initOutputList(_nodal_variables);
-  initOutputList(_elemental_variables);
-  initOutputList(_scalar);
-  initOutputList(_postprocessor);
-  initOutputList(_vector_postprocessor);
-
-  // Disable output lists based on two items:
-  //   (1) If the toggle parameter is invalid
-  //   (2) If the toggle is set to false
-  // This is done after initialization to allow for the appending of the elemental output to occur, because
-  // it is possible to output a scalar variable as a nodal, then disable the output of scalars, resulting
-  // in only the nodal version of the scalar variable to be in the output file (Exodus supports this). The
-  // same is true for elemental variables.
-  if (isParamValid("output_elemental_variables") ? !getParam<bool>("output_elemental_variables") : true)
-    _elemental_variables.output.clear();
-
-  if (isParamValid("output_nodal_variables") ? !getParam<bool>("output_nodal_variables") : true)
-    _nodal_variables.output.clear();
-
-  if (isParamValid("output_scalar_variables") ? !getParam<bool>("output_scalar_variables") : true)
-    _scalar.output.clear();
-
-  if (isParamValid("output_postprocessors") ? !getParam<bool>("output_postprocessors") : true)
-    _postprocessor.output.clear();
-
-  if (isParamValid("output_vector_postprocessors") ? !getParam<bool>("output_vector_postprocessors") : true)
-    _vector_postprocessor.output.clear();
-
-  // Set the _output_input bool, this is done here rather than the constructor so that CheckOutputAction can force in case --show-input is used
-  _output_input = isParamValid("output_input") ? getParam<bool>("output_input") : false;
-
-  // Set the initialization flag
   _initialized = true;
-
-  // Assume after init()
-  /* Between init() and the first call of outputStep() all output is considered to be a part of initial output. This is
-     mainly only import for calls to _console that occur during this time */
-  _on_initial = true;
-}
-
-Output::~Output()
-{
-}
-
-void
-Output::outputSetup()
-{
-}
-
-void
-Output::initialSetup()
-{
-}
-
-void
-Output::timestepSetup()
-{
 }
 
 void
@@ -243,290 +125,16 @@ Output::timestepSetupInternal()
 {
 }
 
-void
-Output::outputInitial()
-{
-  if (shouldOutput())
-  {
-    outputSetup();
-    _mesh_changed = false;
-    _output_setup_called = true;
-    output();
-    _num++;
-  }
-
-  // Set the force output flag to false
-  _force_output = false;
-
-}
-
-void
-Output::outputFailedStep()
-{
-  if (_output_failed)
-    outputStep();
-}
-
-void
-Output::outputStep()
-{
-  // Set output initial related flags, outputting of initial is over at the first call to outputStep
-  _on_initial = false;
-  _output_initial = false;
-
-  // Only perform output if you should
-  if (!shouldOutput())
-    return;
-
-  // If the mesh has changed or the sequence state is true or if it has not been called, call the outputSetup() function
-  if (_mesh_changed || _sequence || _num == 0 || !_output_setup_called)
-  {
-    // Execute the setup function
-    outputSetup();
-
-    // Reset the _mesh_changed flag
-    _mesh_changed = false;
-
-    // outputSetup has been called
-    _output_setup_called = true;
-  }
-
-  // Update the output number
-  _num++;
-
-  // Perform the output
-  output();
-
-  // Set the force output flag to false
-  _force_output = false;
-}
-
 bool
-Output::shouldOutput()
+Output::shouldOutput(const OutputExecFlagType & type)
 {
-  // Do Nothing if output is not forced and allowing output has been disabled
-  if (!_force_output && !_allow_output)
-    return false;
-
-  // On initial step: between init() and first call to outputStep()
-  if (onInitial())
-  {
-    if (_force_output || _output_initial)
-      return true;
-    else
-      return false;
-  }
-
-  // On intermediate steps
-  else
-  {
-    // Do not perform output if:
-    // (1) Intermediate output is disabled
-    // (2) Output is not forced and (output is not allowed or not on interval)
-    if (!_output_intermediate || (!_force_output && (!_allow_output || !checkInterval())))
-      return false;
-    else
-      return true;
-  }
-}
-
-void
-Output::outputFinal()
-{
-  // If the intermediate steps are being output and the final time step is on an interval it will already have been output by outputStep, so do nothing
-  if (checkInterval() && _output_intermediate)
-    return;
-
-  // Do nothing if output is not forced or if output is disallowed
-  if (!_force_output && !_allow_output)
-    return;
-
-  // Do nothing if the output is not forced and final output is not desired
-  if (!_force_output && !_output_final)
-    return;
-
-  // If the mesh has changed or the sequence state is true, call the outputSetup() function
-  if (_mesh_changed || _sequence || !_output_setup_called)
-  {
-    outputSetup();
-    _output_setup_called = true;
-  }
-
-  // Perform the output
-  output();
-
-  // Set the force output flag to false
-  _force_output = false;
-}
-
-
-void
-Output::outputNodalVariables()
-{
-  mooseError("Individual output of nodal variables is not support for this output object");
-}
-
-void
-Output::outputElementalVariables()
-{
-  mooseError("Individual output of elemental variables is not support for this output object");
-}
-
-void
-Output::outputPostprocessors()
-{
-  mooseError("Individual output of postprocessors is not support for this output object");
-}
-
-void
-Output::outputVectorPostprocessors()
-{
-  mooseError("Individual output of VectorPostprocessors is not support for this output object");
-}
-
-void
-Output::outputScalarVariables()
-{
-  mooseError("Individual output of scalars is not support for this output object");
-}
-
-
-void
-Output::output()
-{
-  // Call the various output types, if data exists
-  if (hasNodalVariableOutput())
-    outputNodalVariables();
-
-  if (hasElementalVariableOutput())
-    outputElementalVariables();
-
-  if (hasPostprocessorOutput())
-    outputPostprocessors();
-
-  if (hasVectorPostprocessorOutput())
-    outputVectorPostprocessors();
-
-  if (hasScalarOutput())
-    outputScalarVariables();
-}
-
-void
-Output::forceOutput()
-{
-  _force_output = true;
-}
-
-bool
-Output::hasOutput()
-{
-  // Test all the possible output formats, return true if any of them are true
-  if (hasNodalVariableOutput() || hasElementalVariableOutput() ||
-      hasScalarOutput() || hasPostprocessorOutput() || hasVectorPostprocessorOutput())
+  if (_output_on.contains(type) || type == OUTPUT_FORCED)
     return true;
-  else
-    return false;
-}
-
-void
-Output::outputInput()
-{
-  // The method left intentially empty
-}
-
-void
-Output::outputSystemInformation()
-{
-  // Empty function
+  return false;
 }
 
 bool
-Output::hasNodalVariableOutput()
-{
-  return !_nodal_variables.output.empty();
-}
-
-const std::vector<std::string> &
-Output::getNodalVariableOutput()
-{
-  return _nodal_variables.output;
-}
-
-bool
-Output::hasElementalVariableOutput()
-{
-  return !_elemental_variables.output.empty();
-}
-
-const std::vector<std::string> &
-Output::getElementalVariableOutput()
-{
-  return _elemental_variables.output;
-}
-
-bool
-Output::hasScalarOutput()
-{
-  return !_scalar.output.empty();
-}
-
-const std::vector<std::string> &
-Output::getScalarOutput()
-{
-  return _scalar.output;
-}
-
-bool
-Output::hasPostprocessorOutput()
-{
-  return !_postprocessor.output.empty();
-}
-
-const std::vector<std::string> &
-Output::getPostprocessorOutput()
-{
-  return _postprocessor.output;
-}
-
-bool
-Output::hasVectorPostprocessorOutput()
-{
-  return !_vector_postprocessor.output.empty();
-}
-
-const std::vector<std::string> &
-Output::getVectorPostprocessorOutput()
-{
-  return _vector_postprocessor.output;
-}
-
-void
-Output::meshChanged()
-{
-  _mesh_changed = true;
-}
-
-void
-Output::allowOutput(bool state)
-{
-  _allow_output = state;
-}
-
-
-void
-Output::sequence(bool state)
-{
-  _sequence = state;
-}
-
-bool
-Output::onInitial()
-{
-  return _on_initial;
-}
-
-bool
-Output::checkInterval()
+Output::onInterval()
 {
   // The output flag to return
   bool output = false;
@@ -545,239 +153,6 @@ Output::checkInterval()
 
   // Return the output status
   return output;
-}
-
-void
-Output::initAvailableLists()
-{
-  // Initialize Postprocessor list
-  // This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
-  // to produce an warning if postprocessor output is disabled
-  ExecStore<PostprocessorWarehouse> & warehouse = _problem_ptr->getPostprocessorWarehouse();
-  bool has_limited_pps = initPostprocessorOrVectorPostprocessorLists<ExecStore<PostprocessorWarehouse>, Postprocessor>(_postprocessor, warehouse);
-
-  // Produce the warning when 'outputs' is used, but postprocessor output is disable
-  if (has_limited_pps && isParamValid("output_postprocessors") && getParam<bool>("output_postprocessors") == false)
-    mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '" << _name << "' output object.");
-
-  // Initialize vector postprocessor list
-  // This flag is set to true if any vector postprocessor has the 'outputs' parameter set, it is then used
-  // to produce an warning if vector postprocessor output is disabled
-  ExecStore<VectorPostprocessorWarehouse> & vector_warehouse = _problem_ptr->getVectorPostprocessorWarehouse();
-  bool has_limited_vector_pps = initPostprocessorOrVectorPostprocessorLists<ExecStore<VectorPostprocessorWarehouse>, VectorPostprocessor>(_vector_postprocessor, vector_warehouse);
-
-  // Produce the warning when 'outputs' is used, but vector postprocessor output is disable
-  if (has_limited_vector_pps && isParamValid("output_vector_postprocessors") && getParam<bool>("output_vector_postprocessors") == false)
-    mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '" << _name << "' output object.");
-
-  // Get a list of the available variables
-  std::vector<VariableName> variables = _problem_ptr->getVariableNames();
-
-  // Loop through the variables and store the names in the correct available lists
-  for (std::vector<VariableName>::const_iterator it = variables.begin(); it != variables.end(); ++it)
-  {
-    if (_problem_ptr->hasVariable(*it))
-    {
-      MooseVariable & var = _problem_ptr->getVariable(0, *it);
-      const FEType type = var.feType();
-      if (type.order == CONSTANT)
-        _elemental_variables.available.push_back(*it);
-      else
-        _nodal_variables.available.push_back(*it);
-    }
-
-    else if (_problem_ptr->hasScalarVariable(*it))
-      _scalar.available.push_back(*it);
-  }
-}
-
-void
-Output::initShowHideLists(const std::vector<VariableName> & show, const std::vector<VariableName> & hide)
-{
-
-  // Storage for user-supplied input that is unknown as a variable or postprocessor
-  std::vector<std::string> unknown;
-
-  // Populate the show lists
-  for (std::vector<VariableName>::const_iterator it = show.begin(); it != show.end(); ++it)
-  {
-    if (_problem_ptr->hasVariable(*it))
-    {
-      MooseVariable & var = _problem_ptr->getVariable(0, *it);
-      const FEType type = var.feType();
-      if (type.order == CONSTANT)
-        _elemental_variables.show.push_back(*it);
-      else
-        _nodal_variables.show.push_back(*it);
-    }
-    else if (_problem_ptr->hasScalarVariable(*it))
-      _scalar.show.push_back(*it);
-    else if (_problem_ptr->hasPostprocessor(*it))
-      _postprocessor.show.push_back(*it);
-    else if (_problem_ptr->hasVectorPostprocessor(*it))
-      _vector_postprocessor.show.push_back(*it);
-    else
-      unknown.push_back(*it);
-  }
-
-  // Populate the hide lists
-  for (std::vector<VariableName>::const_iterator it = hide.begin(); it != hide.end(); ++it)
-  {
-    if (_problem_ptr->hasVariable(*it))
-    {
-      MooseVariable & var = _problem_ptr->getVariable(0, *it);
-      const FEType type = var.feType();
-      if (type.order == CONSTANT)
-        _elemental_variables.hide.push_back(*it);
-      else
-        _nodal_variables.hide.push_back(*it);
-    }
-    else if (_problem_ptr->hasScalarVariable(*it))
-      _scalar.hide.push_back(*it);
-    else if (_problem_ptr->hasPostprocessor(*it))
-      _postprocessor.hide.push_back(*it);
-    else if (_problem_ptr->hasVectorPostprocessor(*it))
-      _vector_postprocessor.hide.push_back(*it);
-    else
-      unknown.push_back(*it);
-  }
-
-  // Error if an unknown variable or postprocessor is found
-  if (!unknown.empty())
-  {
-    std::ostringstream oss;
-    oss << "Output(s) do not exist (must be variable, scalar, postprocessor, or vector postprocessor): " << (*unknown.begin());
-    for (std::vector<std::string>::iterator it = unknown.begin()+1; it != unknown.end();  ++it)
-      oss << ", " << *it;
-    mooseError(oss.str());
-  }
-}
-
-void
-Output::initOutputList(OutputData & data)
-{
-  // References to the vectors of variable names
-  std::vector<std::string> & hide  = data.hide;
-  std::vector<std::string> & show  = data.show;
-  std::vector<std::string> & avail = data.available;
-  std::vector<std::string> & output = data.output;
-
-  // Append the list from OutputInterface objects
-  std::set<std::string> interface_hide;
-  _app.getOutputWarehouse().buildInterfaceHideVariables(_name, interface_hide);
-  hide.insert(hide.end(), interface_hide.begin(), interface_hide.end());
-
-  // Sort the vectors
-  std::sort(avail.begin(), avail.end());
-  std::sort(show.begin(), show.end());
-  std::sort(hide.begin(), hide.end());
-
-  // Both show and hide are empty (show all available)
-  if (show.empty() && hide.empty())
-    output.assign(avail.begin(), avail.end());
-
-  // Only hide is empty (show all the variables listed)
-  else if (!show.empty() && hide.empty())
-    output.assign(show.begin(), show.end());
-
-  // Only show is empty (show all except those hidden)
-  else if (show.empty() && !hide.empty())
-    std::set_difference(avail.begin(), avail.end(), hide.begin(), hide.end(), std::back_inserter(output));
-
-  // Both hide and show are present (show all those listed)
-  else
-  {
-    // Check if variables are in both, which is invalid
-    std::vector<std::string> tmp;
-    std::set_intersection(hide.begin(), hide.end(), avail.begin(), avail.end(), std::back_inserter(tmp));
-    if (!tmp.empty())
-    {
-      std::ostringstream oss;
-      oss << "Output(s) specified to be both shown and hidden: " << (*tmp.begin());
-      for (std::vector<std::string>::iterator it = tmp.begin()+1; it != tmp.end();  ++it)
-        oss << ", " << *it;
-      mooseError(oss.str());
-    }
-
-    // Define the output variable list
-    output.assign(show.begin(), show.end());
-  }
-}
-
-
-void
-Output::addValidParams(InputParameters & params, const MultiMooseEnum & types)
-{
-
-  // Nodal output
-  if (types.contains("nodal"))
-  {
-    params.addParam<bool>("output_nodal_variables", true, "Enable/disable the output of nodal nonlinear variables");
-    params.addParamNamesToGroup("output_nodal_variables", "Variables");
-  }
-
-  // Elemental output
-  if (types.contains("elemental"))
-  {
-    // Add elemental output control
-    params.addParam<bool>("output_elemental_variables", true, "Enable/disable the output of elemental nonlinear variables");
-    params.addParamNamesToGroup("output_elemental_variables", "Variables");
-
-    // Add material output control, which are output via elemental variables
-    params.addParam<bool>("output_material_properties", false, "Flag indicating if material properties should be output");
-    params.addParam<std::vector<std::string> >("show_material_properties", "List of materialproperties that should be written to the output");
-    params.addParamNamesToGroup("output_material_properties show_material_properties", "Materials");
-    params.addParamNamesToGroup("show_material_properties", "Materials");
-  }
-
-  // Scalar variable output
-  if (types.contains("scalar"))
-  {
-    params.addParam<bool>("output_scalar_variables", true, "Enable/disable the output of aux scalar variables");
-    params.addParamNamesToGroup("output_scalar_variables", "Variables");
-  }
-
-  // Nodal and scalar output
-  if (types.contains("nodal") && types.contains("scalar"))
-  {
-    params.addParam<bool>("scalar_as_nodal", false, "Output scalar variables as nodal");
-    params.addParamNamesToGroup("scalar_as_nodal", "Variables");
-  }
-
-  // Elemental and nodal
-  if (types.contains("elemental") && types.contains("nodal"))
-  {
-    params.addParam<bool>("elemental_as_nodal", false, "Output elemental nonlinear variables as nodal");
-    params.addParamNamesToGroup("elemental_as_nodal", "Variables");
-  }
-
-  // Postprocessors
-  if (types.contains("postprocessor"))
-  {
-    params.addParam<bool>("output_postprocessors", true, "Enable/disable the output of postprocessors");
-    params.addParamNamesToGroup("output_postprocessors", "Variables");
-  }
-
-  // Vector Postprocessors
-  if (types.contains("vector_postprocessor"))
-  {
-    params.addParam<bool>("output_vector_postprocessors", true, "Enable/disable the output of VectorPostprocessors");
-    params.addParamNamesToGroup("output_vector_postprocessors", "Variables");
-  }
-
-  // Input file
-  if (types.contains("input"))
-  {
-    params.addParam<bool>("output_input", false, "Enable/disable the output of the input file");
-    params.addParamNamesToGroup("output_input", "Variables");
-  }
-
-  // System Information
-  if (types.contains("system_information"))
-  {
-    params.addParam<bool>("output_system_information", true, "Enable/disable the output of the simulation information");
-    params.addParamNamesToGroup("output_system_information", "Variables");
-  }
 }
 
 Real

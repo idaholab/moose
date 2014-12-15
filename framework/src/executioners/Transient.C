@@ -187,7 +187,7 @@ Transient::init()
     _time_old = _time;
 
   Moose::setup_perf_log.push("Output Initial Condition","Setup");
-  _output_warehouse.outputInitial();
+  _output_warehouse.outputStep(OUTPUT_INITIAL);
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
   // If this is the first step
@@ -229,10 +229,7 @@ Transient::execute()
     _first = false;
 
     if (!keepGoing())
-    {
-      _output_warehouse.outputFinal();
       break;
-    }
 
     computeDT();
 
@@ -243,7 +240,7 @@ Transient::execute()
     _steps_taken++;
   }
 
-
+  _output_warehouse.outputStep(OUTPUT_FINAL);
   postExecute();
 }
 
@@ -326,6 +323,8 @@ Transient::solveStep(Real input_dt)
   // Compute Post-Aux User Objects (Timestep begin)
   _problem.computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::POST_AUX);
 
+  // Perform output for timestep begin
+  _output_warehouse.outputStep(OUTPUT_TIMESTEP_BEGIN);
 
   if (_picard_max_its > 1)
   {
@@ -381,7 +380,7 @@ Transient::solveStep(Real input_dt)
     _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
 
     // Perform the output of the current, failed time step (this only occurs if desired)
-    _output_warehouse.outputFailedStep();
+    _output_warehouse.outputStep(OUTPUT_FAILED);
   }
 
   postSolve();
@@ -408,7 +407,7 @@ Transient::endStep(Real input_time)
     _problem.computeIndicatorsAndMarkers();
 
     // Perform the output of the current time step
-    _output_warehouse.outputStep();
+    _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
 
     // Output MultiApps if we were doing Picard iterations
     if (_picard_max_its > 1)
@@ -417,16 +416,10 @@ Transient::endStep(Real input_time)
       _problem.advanceMultiApps(EXEC_TIMESTEP);
     }
 
-    //output \todo{Remove after old output system is removed}
-    if (_time_interval)
-    {
-      //Set the time for the next output interval if we're at or beyond an output interval
-      if (_time + _timestep_tolerance >= _next_interval_output_time)
-      {
-        _next_interval_output_time += _time_interval_output_interval;
-      }
-    }
-  }
+    //output
+    if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
+      _next_interval_output_time += _time_interval_output_interval;
+   }
 }
 
 Real

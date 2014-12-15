@@ -243,15 +243,12 @@
   file_base = bl22
   [./exodus]
     type = Exodus
-    output_initial = true
     interval = 100000
-    output_final = true
     hide = pgas
+    output_on = 'initial final timestep_end'
   [../]
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = false
-    nonlinear_residuals = false
   [../]
 []

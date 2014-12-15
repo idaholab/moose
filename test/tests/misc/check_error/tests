@@ -377,6 +377,7 @@
     cli_args = '--warn-unused Executioner/unused_param=true'
     # Don't allow --error-unused on this test
     skip_test_harness_cli_args = true
+    max_parallel = 1 # warning can mix on multiple processes
   [../]
 
   [./uo_pps_name_collision_test]

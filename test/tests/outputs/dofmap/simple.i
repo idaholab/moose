@@ -55,8 +55,5 @@
 []
 
 [Outputs]
-  #output_initial = true
-  [./dofmap]
-    type = DOFMap
-  [../]
+  dofmap = true
 []

@@ -51,13 +51,13 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
   [./out]
     type = VTK
-    nonlinear_residuals = true
     nonlinear_residual_dt_divisor = 100
     start_time = 1.8
     end_time = 1.85
+    output_on = 'nonlinear timestep_end'
   [../]
 []

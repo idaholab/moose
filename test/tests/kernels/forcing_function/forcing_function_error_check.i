@@ -68,5 +68,4 @@
     type = Console
     perf_log = true
   [../]
-
 []

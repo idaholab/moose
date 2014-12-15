@@ -115,7 +115,6 @@
 
 [Outputs]
   file_base = jn_lumped_16
-  output_initial = false
   exodus = false
   [./console]
     type = Console

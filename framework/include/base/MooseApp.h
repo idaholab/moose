@@ -247,12 +247,12 @@ public:
   /**
    * Whether or not this is a "recover" calculation.
    */
-  bool isRecovering() { return _recover; }
+  bool isRecovering() const { return _recover; }
 
   /**
    * Whether or not this is a "recover" calculation.
    */
-  bool isRestarting() { return _restart; }
+  bool isRestarting() const { return _restart; }
 
   /**
    * Return true if the recovery file base is set

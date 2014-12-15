@@ -10,13 +10,6 @@
     min_parallel = 1
   [../]
 
-  [./pps_file_out_warn_test]
-    type = 'RunApp'
-    input = 'pps_file_out_warn.i'
-    expect_out = "Postprocessor 'avg_block' has requested to be output by the 'gmv' output, but postprocessor output is not support by this type of output object."
-    allow_warnings = true
-  [../]
-
   [./gmv_out_test]
     type = 'CheckFiles'
     input = 'output_test_gmv.i'
