@@ -22,11 +22,11 @@
 }
 
 .scriptsize {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .footnotesize {
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .small {
@@ -52,19 +52,19 @@
   float: left;
 }
 
-.right-33 {
+.left-33 {
   width: 33%;
-  float: right;
+  float: left;
 }
 
 .center-33{
   width: 33%;
-  float: center;
+  float: left;
 }
 
-.left-33 {
+.right-33 {
   width: 33%;
-  float: left;
+  float: right;
 }
 
 .right-66 {
@@ -124,8 +124,8 @@ th{
 }
 
 figure {
-  display: table;
-  margin: 0px;
+  display: block;
+  margin: auto;
   padding: 0px;
   border: 0px;
 }

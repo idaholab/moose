@@ -62,7 +62,7 @@ class CoverSet(SlideSet):
 
     # Loop through each object and append the markdown with title slides
     max_per_slide = int(self.getParam('contents_items_per_slide'))
-    output = ['']
+    output = []
     count = 0
     page = 0
 
@@ -71,6 +71,10 @@ class CoverSet(SlideSet):
         for key in obj._slide_order:
           slide = obj._slides[key]
           if slide.getParam('title') and obj.getParam('show_in_contents'):
+
+            if len(output) <= page:
+              output.append('')
+
             link = '<a href="#' + slide.name() + '">'
             output[page] += '<p style="text-align:left;">' + link + obj.getParam('title') + '</a>'
             output[page] += '<span style="float:right;">' + link + str(slide.index) + '</a>'
@@ -80,8 +84,6 @@ class CoverSet(SlideSet):
             if (count >= max_per_slide):
               count = 0
               page += 1
-              output.append('')
-
 
     for i in range(len(output)):
       contents_name = self.name() + '-contents-' + str(i)
