@@ -48,6 +48,8 @@
       Moose::err << _error_oss_.str() << std::flush;                                \
       if (libMesh::global_n_processors() == 1)                                      \
         print_trace();                                                              \
+      else                                                                          \
+        libMesh::write_traceout();                                                  \
       libmesh_here();                                                               \
       MPI_Abort(libMesh::GLOBAL_COMM_WORLD,1);                                      \
       exit(1);                                                                      \
@@ -72,6 +74,8 @@
         << std::endl;                                                               \
      if (libMesh::global_n_processors() == 1)                                       \
        print_trace();                                                               \
+     else                                                                           \
+       libMesh::write_traceout();                                                   \
      libmesh_here();                                                                \
      MPI_Abort(libMesh::GLOBAL_COMM_WORLD,1);                                       \
      exit(1);                                                                       \
