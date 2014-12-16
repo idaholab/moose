@@ -75,7 +75,7 @@ public:
    * Calls the outputStep method for each output object
    * @param type The type execution flag (see Moose.h)
    */
-  void outputStep(OutputExecFlagType type);
+  void outputStep(ExecFlagType type);
 
   /**
    * Calls the meshChanged method for every output object
@@ -217,7 +217,7 @@ public:
    * Indicates that the next call to outputStep should be forced
    *
    * This is needed by the MultiApp system, if forceOutput is called the next call to outputStep,
-   * regardless of the type supplied to the call, will be executed with OUTPUT_FORCED.
+   * regardless of the type supplied to the call, will be executed with EXEC_FORCED.
    *
    * Forced output will NOT override the allowOutput flag
    */
@@ -284,7 +284,7 @@ private:
    *
    * This is a private method used by FEProblem, it is not intended for any other purpose
    */
-  void setOutputExecutionType(OutputExecFlagType type);
+  void setOutputExecutionType(ExecFlagType type);
 
   /// A map of the output pointers
   std::map<OutputName, Output *> _object_map;
@@ -323,7 +323,7 @@ private:
   std::map<std::string, std::set<std::string> > _interface_map;
 
   /// The current output execution flag
-  OutputExecFlagType _output_exec_flag;
+  ExecFlagType _output_exec_flag;
 
   /// Flag for enabling/disabling all output
   bool _allow_output;

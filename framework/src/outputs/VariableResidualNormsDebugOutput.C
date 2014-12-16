@@ -42,7 +42,7 @@ VariableResidualNormsDebugOutput::~VariableResidualNormsDebugOutput()
 }
 
 void
-VariableResidualNormsDebugOutput::output(const OutputExecFlagType & /*type*/)
+VariableResidualNormsDebugOutput::output(const ExecFlagType & /*type*/)
 {
   // Stream for outputting
   std::ostringstream oss;

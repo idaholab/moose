@@ -73,7 +73,7 @@ public:
    * Outputs a checkpoint file.
    * Each call to this function creates various files associated with
    */
-  void output(const OutputExecFlagType & type);
+  void output(const ExecFlagType & type);
 
   /**
    * Returns the base filename for the checkpoint files

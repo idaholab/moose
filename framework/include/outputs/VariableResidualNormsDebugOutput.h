@@ -52,7 +52,7 @@ protected:
   /**
    * Perform the debugging output
    */
-  virtual void output(const OutputExecFlagType & type);
+  virtual void output(const ExecFlagType & type);
 
   /// Reference to libMesh system
   TransientNonlinearImplicitSystem & _sys;

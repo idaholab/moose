@@ -40,7 +40,7 @@ SolutionHistory::filename()
 }
 
 void
-SolutionHistory::output(const OutputExecFlagType & /*type*/)
+SolutionHistory::output(const ExecFlagType & /*type*/)
 {
   // Reference to the Non-linear System
   NonlinearSystem & nl_sys = _problem_ptr->getNonlinearSystem();

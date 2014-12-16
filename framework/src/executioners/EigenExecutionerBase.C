@@ -136,7 +136,7 @@ EigenExecutionerBase::init()
   _problem.timeStep() = 0;
   Real t = _problem.time();
   _problem.time() = _problem.timeStep();
-  _output_warehouse.outputStep(OUTPUT_INITIAL);
+  _output_warehouse.outputStep(EXEC_INITIAL);
   _problem.time() = t;
   Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
@@ -372,7 +372,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
       // FIXME: if 'step' capability is available, we will not need to do this.
       Real t = _problem.time();
       _problem.time() = time_base + Real(iter)/max_iter;
-      _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+      _output_warehouse.outputStep(EXEC_TIMESTEP_END);
       _problem.time() = t;
     }
   }
@@ -404,7 +404,7 @@ EigenExecutionerBase::postExecute()
     _problem.timeStep()++;
     Real t = _problem.time();
     _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+    _output_warehouse.outputStep(EXEC_TIMESTEP_END);
     _problem.time() = t;
   }
 
@@ -426,7 +426,7 @@ EigenExecutionerBase::postExecute()
     _problem.timeStep()++;
     Real t = _problem.time();
     _problem.time() = _problem.timeStep();
-    _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+    _output_warehouse.outputStep(EXEC_TIMESTEP_END);
     _problem.time() = t;
   }
 }

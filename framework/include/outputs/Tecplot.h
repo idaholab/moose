@@ -43,7 +43,7 @@ protected:
    * Overload the Output::output method, this is required for Tecplot
    * output due to the method utilized for outputing single/global parameters
    */
-  virtual void output(const OutputExecFlagType & type);
+  virtual void output(const ExecFlagType & type);
 
   /**
    * Returns the current filename, this method handles adding the timestep suffix

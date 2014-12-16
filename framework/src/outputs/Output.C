@@ -44,7 +44,7 @@ InputParameters validParams<Output>()
   params.addParam<Real>("time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
 
   // Add the 'output_on' input parameter for users to set
-  params.addParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"), "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment");
+  params.addParam<MultiMooseEnum>("output_on", Output::getExecuteOptions("timestep_end"), "Set to (none|initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment");
 
   // 'Timing' group
   params.addParamNamesToGroup("time_tolerance interval output_initial output_final sync_times sync_only start_time end_time ", "Timing");
@@ -71,8 +71,8 @@ InputParameters validParams<Output>()
 MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
 {
-  // The numbers associated must be in sync with the OutputExecFlagType in Moose.h
-  return MultiMooseEnum("initial=0 linear=1 nonlinear=2 timestep_end=3 timestep_begin=4 final=5 failed=6 custom=7 none=9", default_type);
+  // The numbers associated must be in sync with the ExecFlagType in Moose.h
+  return MultiMooseEnum("none=0 initial=1 linear=2 nonlinear=4 timestep_end=8 timestep_begin=16 final=32 failed=128 custom=256", default_type);
 }
 
 Output::Output(const std::string & name, InputParameters & parameters) :
@@ -126,9 +126,9 @@ Output::timestepSetupInternal()
 }
 
 bool
-Output::shouldOutput(const OutputExecFlagType & type)
+Output::shouldOutput(const ExecFlagType & type)
 {
-  if (_output_on.contains(type) || type == OUTPUT_FORCED)
+  if (_output_on.contains(type) || type == EXEC_FORCED)
     return true;
   return false;
 }

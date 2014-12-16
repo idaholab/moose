@@ -85,7 +85,7 @@ CSV::outputVectorPostprocessors()
 }
 
 void
-CSV::output(const OutputExecFlagType & type)
+CSV::output(const ExecFlagType & type)
 {
   // Call the base class output (populates tables)
   TableOutput::output(type);

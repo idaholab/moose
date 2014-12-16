@@ -98,7 +98,7 @@ FileOutput::getOutputFileBase(MooseApp & app, std::string suffix)
 }
 
 bool
-FileOutput::shouldOutput(const OutputExecFlagType & type)
+FileOutput::shouldOutput(const ExecFlagType & type)
 {
   if (checkFilename())
     return PetscOutput::shouldOutput(type);

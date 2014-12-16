@@ -79,6 +79,6 @@ AdaptAndModify::endStep(Real input_time)
       _next_interval_output_time += _time_interval_output_interval;
   }
 
-  _output_warehouse.outputStep(OUTPUT_TIMESTEP_END);
+  _output_warehouse.outputStep(EXEC_TIMESTEP_END);
 
 }

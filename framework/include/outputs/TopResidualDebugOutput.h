@@ -76,7 +76,7 @@ protected:
   /**
    * Perform the debugging output
    */
-  virtual void output(const OutputExecFlagType & type);
+  virtual void output(const ExecFlagType & type);
 
   /**
    * Prints the n top residuals for the variables in the system
