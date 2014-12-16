@@ -32,12 +32,14 @@ InputParameters::InputParameters() :
 }
 
 InputParameters::InputParameters(const InputParameters &rhs) :
-    Parameters()
+    Parameters(),
+    _moose_object_syntax_visibility(true)
 {
   *this = rhs;
 }
 
-InputParameters::InputParameters(const Parameters &rhs)
+InputParameters::InputParameters(const Parameters &rhs) :
+    _moose_object_syntax_visibility(true)
 {
   Parameters::operator=(rhs);
   _collapse_nesting = false;
@@ -60,6 +62,7 @@ InputParameters::clear()
   _default_coupled_value.clear();
   _default_postprocessor_value.clear();
   _collapse_nesting = false;
+  _moose_object_syntax_visibility = true;
   _moose_object_syntax_visibility = true;
 }
 
