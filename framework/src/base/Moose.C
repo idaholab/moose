@@ -1015,7 +1015,6 @@ const std::vector<ExecFlagType> populateExecTypes()
   exec_types[3] = EXEC_RESIDUAL;
   exec_types[4] = EXEC_TIMESTEP;
   exec_types[5] = EXEC_CUSTOM;
-
   return exec_types;
 }
 

@@ -70,7 +70,7 @@ SetupInterface::execFlags() const
 ExecFlagType
 SetupInterface::execBitFlags() const
 {
-  unsigned char exec_bit_field = EXEC_NONE;
+  unsigned int exec_bit_field = EXEC_NONE;
   for (unsigned int i=0; i<_exec_flags.size(); ++i)
     exec_bit_field |= _exec_flags[i];
 
