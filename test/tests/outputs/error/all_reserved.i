@@ -42,6 +42,6 @@
 [Outputs]
   exodus = true
   [./all]
-    type = 'Exodus'
+    type = Exodus
   [../]
 []

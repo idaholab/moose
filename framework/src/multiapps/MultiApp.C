@@ -360,7 +360,7 @@ MultiApp::moveApp(unsigned int global_app, Point p)
 void
 MultiApp::parentOutputPositionChanged()
 {
-  if (getParam<bool>("output_in_position"))
+  if (_output_in_position)
     for (unsigned int i = 0; i < _apps.size(); i++)
       _apps[i]->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
 }
@@ -418,7 +418,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   // Update the MultiApp level for the app that was just created
   app->getOutputWarehouse().multiappLevel() = _app.getOutputWarehouse().multiappLevel() + 1;
-
   app->setupOptions();
   app->runInputFile();
 }

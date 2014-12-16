@@ -83,7 +83,6 @@
 
 [Outputs]
   file_base = out_trapezoid
-  output_initial = false
   exodus = true
   [./console]
     type = Console

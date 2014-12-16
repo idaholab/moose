@@ -117,7 +117,6 @@
 
 [Outputs]
   file_base = gh06
-  output_initial = false
   exodus = true
   [./console]
     type = Console

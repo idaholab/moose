@@ -419,7 +419,6 @@ MooseApp::run()
 void
 MooseApp::setOutputPosition(Point p)
 {
-
   _output_position_set = true;
   _output_position = p;
   _output_warehouse->meshChanged();

@@ -16,6 +16,7 @@
 #define EXODUS_H
 
 // MOOSE includes
+#include "AdvancedOutput.h"
 #include "OversampleOutput.h"
 
 // libMesh includes
@@ -31,8 +32,7 @@ InputParameters validParams<Exodus>();
 /**
  * Class for output data to the ExodusII format
  */
-class Exodus :
-  public OversampleOutput
+class Exodus : public AdvancedOutput<OversampleOutput>
 {
 public:
 
@@ -50,12 +50,37 @@ public:
    * Overload the OutputBase::output method, this is required for ExodusII
    * output due to the method utilized for outputing single/global parameters
    */
-  virtual void output();
+  virtual void output(const OutputExecFlagType & type);
 
   /**
-   * Sets up the libMesh::ExodusII_IO object used for outputting to the Exodus format
+   * Performs basic error checking and initial setup of ExodusII_IO output object
    */
-  virtual void outputSetup();
+  virtual void initialSetup();
+
+  /**
+   * Set flag indicating that the mesh has changed
+   */
+  virtual void meshChanged();
+
+  /**
+   * Performs the necessary deletion and re-creating of ExodusII_IO object
+   *
+   * This function is stand-alone and called directly from the output() method because
+   * the ExodusII_IO object is extremely fragile with respect to closing a file that has
+   * not had data written. Thus, it is important to only create a new ExodusII_IO object
+   * if it is certain that it will be used.
+   */
+  void outputSetup();
+
+  /**
+   * Set the sequence state
+   * When the sequence state is set to true then the outputSetup() method is called with every
+   * call to output(). In the case of Exodus output, this creates a new file with each output.
+   *
+   * The sequence state is automatically set to true when 'use_displaced = true', otherwise it
+   * is set to false initially
+   */
+  virtual void sequence(bool state);
 
 protected:
 
@@ -73,11 +98,6 @@ protected:
    * Writes postprocessor values to global output parameters
    */
   virtual void outputPostprocessors();
-
-  /**
-   * Not implemented.
-   */
-  virtual void outputVectorPostprocessors() { mooseError("Can't currently output VectorPostprocessors to Exodus"); };
 
   /**
    * Writes scalar AuxVariables to global output parameters
@@ -116,6 +136,7 @@ protected:
    */
   bool _exodus_initialized;
 
+
 private:
 
   /**
@@ -130,6 +151,15 @@ private:
 
   /// Flag indicating MOOSE is recovering via --recover command-line option
   bool _recovering;
+
+  /// Storage for input file record; this is written to the file only after it has been initialized
+  std::vector<std::string> _input_record;
+
+  /// A flag indicating to the Exodus object that the mesh has changed
+  bool & _exodus_mesh_changed;
+
+  /// Sequence flag, if true each timestep is written to a new file
+  bool _sequence;
 };
 
 #endif /* EXODUS_H */

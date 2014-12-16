@@ -83,6 +83,6 @@
   [./out]
     type = Exodus
     elemental_as_nodal = true
-    output_initial = true
+    output_on = 'initial timestep_end'
   [../]
 []

@@ -70,6 +70,21 @@ enum ExecFlagType {
   EXEC_CUSTOM            = 0x20
 };
 
+/// Output execution flags
+enum OutputExecFlagType
+{
+  OUTPUT_INITIAL = 0,
+  OUTPUT_LINEAR = 1,
+  OUTPUT_NONLINEAR = 2,
+  OUTPUT_TIMESTEP_END = 3,
+  OUTPUT_TIMESTEP_BEGIN = 4,
+  OUTPUT_FINAL = 5,
+  OUTPUT_FAILED = 6,
+  OUTPUT_CUSTOM = 7,
+  OUTPUT_FORCED = 8,
+  OUTPUT_NONE = 9
+};
+
 namespace Moose
 {
 

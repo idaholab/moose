@@ -16,7 +16,8 @@
 #define MATERIALPROPERTYDEBUGOUTPUT_H
 
 // MOOSE includes
-#include "PetscOutput.h"
+#include "BasicOutput.h"
+#include "Output.h"
 #include "FEProblem.h"
 
 // Forward declerations
@@ -30,7 +31,7 @@ InputParameters validParams<MaterialPropertyDebugOutput>();
  *
  * This class may be used from inside the [Outputs] block or via the [Debug] block (preferred)
  */
-class MaterialPropertyDebugOutput : public Output
+class MaterialPropertyDebugOutput : public BasicOutput<Output>
 {
 public:
 
@@ -52,7 +53,7 @@ protected:
    * Perform the debugging output
    * For this object this is empty; the output is preformed in the constructor
    */
-  virtual void output();
+  virtual void output(const OutputExecFlagType & type);
 
   /**
    * Prints material property information in a format similar to Moose system information

@@ -354,7 +354,9 @@
 #include "SetupRecoverFileBaseAction.h"
 
 // Outputs
+#ifdef LIBMESH_HAVE_EXODUS_API
 #include "Exodus.h"
+#endif
 #include "Nemesis.h"
 #include "Console.h"
 #include "CSV.h"

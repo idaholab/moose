@@ -72,39 +72,15 @@ public:
   bool hasOutput(const std::string & name) const;
 
   /**
-   * Calls the outputInitial method for each of the output objects
-   */
-  void outputInitial();
-
-  /**
-   * Calls the outputFailedStep method for each output object
-   */
-  void outputFailedStep();
-
-  /**
    * Calls the outputStep method for each output object
+   * @param type The type execution flag (see Moose.h)
    */
-  void outputStep();
-
-  /**
-   * Calls the outputFinal method for each output object
-   */
-  void outputFinal();
+  void outputStep(OutputExecFlagType type);
 
   /**
    * Calls the meshChanged method for every output object
    */
   void meshChanged();
-
-  /**
-   * Calls the allowOutput method for every output object
-   */
-  void allowOutput(bool state);
-
-  /**
-   * Calls the forceOutput method for every output object
-   */
-  void forceOutput();
 
   /**
    * Return the list of hidden variables for the given output name
@@ -229,6 +205,23 @@ public:
    */
   std::ostringstream & consoleBuffer() { return _console_buffer; }
 
+  /**
+   * Ability to enable/disable all output calls
+   *
+   * This is needed by RattleSNake/YAK to disable output because of the Yo Dawg executioners calling
+   * other executioners.
+   */
+  void allowOutput(bool state);
+
+  /**
+   * Indicates that the next call to outputStep should be forced
+   *
+   * This is needed by the MultiApp system, if forceOutput is called the next call to outputStep,
+   * regardless of the type supplied to the call, will be executed with OUTPUT_FORCED.
+   *
+   * Forced output will NOT override the allowOutput flag
+   */
+  void forceOutput();
 
 private:
   /**
@@ -259,6 +252,24 @@ private:
   void timestepSetup();
 
   /**
+   * Calls the jacobianSetup function for each of the output objects
+   * @see FEProblem::computeJacobian
+   */
+  void jacobianSetup();
+
+  /**
+   * Calls the residualSetup function for each of the output objects
+   * @see FEProblem::computeResidualTyp
+   */
+  void residualSetup();
+
+  /**
+   * Calls the subdomainSetup function for each of the output objects
+   * @see FEProblem::setupSubdomain
+   */
+  void subdomainSetup();
+
+  /**
    * Insert a variable name for hiding via the OutoutInterface
    * @param output_name The name of the output object on which the variable is to be hidden
    * @param variable_name The name of the variable to be hidden
@@ -267,6 +278,13 @@ private:
    * other purpose.
    */
   void addInterfaceHideVariables(const std::string & output_name, const std::set<std::string> & variable_names);
+
+  /**
+   * Sets the execution flag type
+   *
+   * This is a private method used by FEProblem, it is not intended for any other purpose
+   */
+  void setOutputExecutionType(OutputExecFlagType type);
 
   /// A map of the output pointers
   std::map<OutputName, Output *> _object_map;
@@ -303,6 +321,15 @@ private:
 
   /// Storage for variables to hide as prescribed by the object via the OutputInterface
   std::map<std::string, std::set<std::string> > _interface_map;
+
+  /// The current output execution flag
+  OutputExecFlagType _output_exec_flag;
+
+  /// Flag for enabling/disabling all output
+  bool _allow_output;
+
+  /// Flag indicating that next call to outputStep is forced
+  bool _force_output;
 
   // Allow complete access:
   //  (1) FEProblem for calling initial/timestepSetup functions

@@ -21,8 +21,8 @@ template<>
 InputParameters validParams<Nemesis>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<OversampleOutput>();
-  params += Output::enableOutputTypes("nodal elemental scalar postprocessor input");
+  InputParameters params = validParams<AdvancedOutput<OversampleOutput> >();
+  params += AdvancedOutput<OversampleOutput>::enableOutputTypes("scalar postprocessor input");
 
   // Add description for the Nemesis class
   params.addClassDescription("Object for output data in the Nemesis format");
@@ -32,10 +32,11 @@ InputParameters validParams<Nemesis>()
 }
 
 Nemesis::Nemesis(const std::string & name, InputParameters parameters) :
-    OversampleOutput(name, parameters),
+    AdvancedOutput<OversampleOutput>(name, parameters),
     _nemesis_io_ptr(NULL),
     _file_num(0),
-    _nemesis_num(0)
+    _nemesis_num(0),
+    _nemesis_initialized(false)
 {
 }
 
@@ -46,12 +47,22 @@ Nemesis::~Nemesis()
 }
 
 void
-Nemesis::outputSetup()
+Nemesis::initialSetup()
 {
-  // The libMesh::NemesisII_IO will fail when it is closed if the object is created but
-  // nothing is written to the file. This checks that at least something will be written.
-  if (!hasOutput())
-    mooseError("The current settings result in nothing being output to the Nemesis file.");
+  // Make certain that a Nemesis_IO object exists
+  meshChanged();
+}
+
+void
+Nemesis::meshChanged()
+{
+  // Maintain Oversample::meshChanged() functionality
+  OversampleOutput::meshChanged();
+
+  // Do not delete the Nemesis_IO object if it has not been used; also there is no need to setup
+  // the object in this case, so just return
+  if (_nemesis_io_ptr != NULL && !_nemesis_initialized)
+    return;
 
   // Delete existing NemesisII_IO objects
   if (_nemesis_io_ptr != NULL)
@@ -65,18 +76,8 @@ Nemesis::outputSetup()
 
   // Create the new NemesisIO object
   _nemesis_io_ptr = new Nemesis_IO(_mesh_ptr->getMesh());
-}
+  _nemesis_initialized = false;
 
-void
-Nemesis::outputNodalVariables()
-{
-  // Empty for Nemesis output
-}
-
-void
-Nemesis::outputElementalVariables()
-{
-  // Empty for Nemesis output
 }
 
 void
@@ -128,17 +129,21 @@ Nemesis::outputScalarVariables()
 }
 
 void
-Nemesis::output()
+Nemesis::output(const OutputExecFlagType & type)
 {
+  if (!OversampleOutput::shouldOutput(type))
+    return;
+
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();
   _global_values.clear();
 
   // Call the output methods
-  OversampleOutput::output();
+  AdvancedOutput<OversampleOutput>::output(type);
 
   // Write the data
   _nemesis_io_ptr->write_timestep(filename(), *_es_ptr, _nemesis_num, time() + _app.getGlobalTimeOffset());
+  _nemesis_initialized = true;
 
   // Increment output call counter for the current file
   _nemesis_num++;

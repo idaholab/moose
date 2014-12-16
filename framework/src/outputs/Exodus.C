@@ -24,8 +24,11 @@ template<>
 InputParameters validParams<Exodus>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<OversampleOutput>();
-  params += Output::enableOutputTypes("nodal elemental scalar postprocessor input");
+  InputParameters params = validParams<AdvancedOutput<OversampleOutput> >();
+  params += AdvancedOutput<OversampleOutput>::enableOutputTypes("nodal elemental scalar postprocessor input");
+
+  // Enable sequential file output (do not set default, the use_displace criteria relies on isParamValid, see Constructor)
+  params.addParam<bool>("sequence", "Enable/disable sequential file output (enabled by default when 'use_displace = true', otherwise defaults to false");
 
   // Set the default padding to 3
   params.set<unsigned int>("padding") = 3;
@@ -34,18 +37,20 @@ InputParameters validParams<Exodus>()
   params.addClassDescription("Object for output data in the Exodus II format");
 
   // Set outputting of the input to be on by default
-  params.set<bool>("output_input") = true;
+  params.set<MultiMooseEnum>("output_input_on") = "initial";
 
   // Return the InputParameters
   return params;
 }
 
 Exodus::Exodus(const std::string & name, InputParameters parameters) :
-    OversampleOutput(name, parameters),
+    AdvancedOutput<OversampleOutput>(name, parameters),
     _exodus_io_ptr(NULL),
     _exodus_initialized(false),
     _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
-    _recovering(_app.isRecovering())
+    _recovering(_app.isRecovering()),
+    _exodus_mesh_changed(declareRestartableData<bool>("exodus_mesh_changed", true)),
+    _sequence(isParamValid("sequence") ? getParam<bool>("sequence") : _use_displaced ? true : false)
 {
 }
 
@@ -56,26 +61,65 @@ Exodus::~Exodus()
 }
 
 void
-Exodus::outputSetup()
+Exodus::initialSetup()
 {
   // The libMesh::ExodusII_IO will fail when it is closed if the object is created but
   // nothing is written to the file. This checks that at least something will be written.
   if (!hasOutput())
     mooseError("The current settings result in nothing being output to the Exodus file.");
 
-  // Delete existing ExodusII_IO objects
+  // Test that some sort of variable output exists (case when all variables are disabled but input output is still enabled
+  if (!hasNodalVariableOutput() && !hasElementalVariableOutput() && !hasPostprocessorOutput() && !hasScalarOutput())
+    mooseError("The current settings results in only the input file and no variables being output to the Exodus file, this is not supported.");
+}
+
+void
+Exodus::meshChanged()
+{
+  // Maintain Oversample::meshChanged() functionality
+  OversampleOutput::meshChanged();
+
+  // Indicate to the Exodus object that the mesh has changed
+  _exodus_mesh_changed = true;
+}
+
+void
+Exodus::sequence(bool state)
+{
+  _sequence = state;
+}
+
+void
+Exodus::outputSetup()
+{
   if (_exodus_io_ptr != NULL)
+  {
+    // Do nothing if the ExodusII_IO objects exists, but has not been initialized
+    if (!_exodus_initialized && _exodus_io_ptr != NULL)
+      return;
+
+    // Do nothing if the output is using oversampling. In this case the mesh that is being output
+    // has not been changed, so there is no need to create a new ExodusII_IO object
+    if (_exodus_io_ptr != NULL && (_oversample || _change_position))
+      return;
+
+    // Do nothing if the mesh has not changed and sequential output is not desired
+    if (!_exodus_mesh_changed && !_sequence)
+      return;
+  }
+  else
     delete _exodus_io_ptr;
 
-  // Create the new ExodusII_IO object
+  // Create the ExodusII_IO object
   _exodus_io_ptr = new ExodusII_IO(_es_ptr->get_mesh());
+  _exodus_initialized = false;
 
-  /* Increment file number and set appending status, append if all the following conditions are met:
-     (1) If the application is recovering (not restarting)
-     (2) The mesh has not changed
-     (3) An existing Exodus file exists for appending (_exodus_num > 0)
-     (4) Sequential output is NOT desired */
-  if (_recovering && !_mesh_changed && _exodus_num > 0 && !_sequence)
+  // Increment file number and set appending status, append if all the following conditions are met:
+  //   (2) If the application is recovering (not restarting)
+  //   (2) The mesh has NOT changed
+  //   (3) An existing Exodus file exists for appending (_exodus_num > 0)
+  //   (4) Sequential output is NOT desired
+  if (_recovering && !_exodus_mesh_changed && _exodus_num > 0 && !_sequence)
   {
     // Set the recovering flag to false so that this special case is not triggered again
     _recovering = false;
@@ -85,21 +129,18 @@ Exodus::outputSetup()
   }
   else
   {
-    // Increment file counter and reset exodus file number count
-    _file_num++;
-    _exodus_num = 1;
+    // Increment file counter
+    if (_exodus_mesh_changed || _sequence)
+      _file_num++;
 
-    // Do not append the existing file
+    // Disable file appending and reset exodus file number count
     _exodus_io_ptr->append(false);
+    _exodus_num = 1;
   }
 
   // Utilize the spatial dimensions
   if (_es_ptr->get_mesh().mesh_dimension() != 1)
     _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
-
-  // Adjust the position of the output
-  if (_app.hasOutputPosition())
-    _exodus_io_ptr->set_coordinate_offset(_app.getOutputPosition());
 }
 
 
@@ -111,6 +152,7 @@ Exodus::outputNodalVariables()
 
   // Write the data via libMesh::ExodusII_IO
   _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
+  _exodus_num++;
 
   // This satisfies the initialization of the ExodusII_IO object
   _exodus_initialized = true;
@@ -184,20 +226,34 @@ Exodus::outputInput()
   syntax_formatter.printInputFile(_app.actionWarehouse());
   syntax_formatter.format();
 
-  // Write the input to the output
-  _exodus_io_ptr->write_information_records(syntax_formatter.getInputFileRecord());
+  // Store the information
+  _input_record = syntax_formatter.getInputFileRecord();
 }
 
 
 void
-Exodus::output()
+Exodus::output(const OutputExecFlagType & type)
 {
+  // Do nothing if there is nothing to output
+  if (!hasOutput(type))
+    return;
+
+  // Start the performance log
+  Moose::perf_log.push("output()", "Exodus");
+
+  // Prepare the ExodusII_IO object
+  outputSetup();
+
+  // Adjust the position of the output
+  if (_app.hasOutputPosition())
+    _exodus_io_ptr->set_coordinate_offset(_app.getOutputPosition());
+
   // Clear the global variables (postprocessors and scalars)
   _global_names.clear();
   _global_values.clear();
 
-  // Call the output methods
-  OversampleOutput::output();
+  // Call the individual output methods
+  AdvancedOutput<OversampleOutput>::output(type);
 
   // Write the global variables (populated by the output methods)
   if (!_global_values.empty())
@@ -207,14 +263,18 @@ Exodus::output()
     _exodus_io_ptr->write_global_data(_global_values, _global_names);
   }
 
-  if (_output_input)
+  // Write the input file record if it exists and the output file is initialized
+  if (!_input_record.empty() && _exodus_initialized)
   {
-    outputInput();
-    _output_input = false;
+     _exodus_io_ptr->write_information_records(_input_record);
+    _input_record.clear();
   }
 
-  // Increment output call counter, which is reset by outputSetup
-  _exodus_num++;
+  // Reset the mesh changed flag
+  _exodus_mesh_changed = false;
+
+  // Stop the logging
+  Moose::perf_log.pop("output()", "Exodus");
 }
 
 std::string
@@ -243,5 +303,6 @@ Exodus::outputEmptyTimestep()
   // Write a timestep with no variables
   _exodus_io_ptr->set_output_variables(std::vector<std::string>());
   _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
+  _exodus_num++;
   _exodus_initialized = true;
 }

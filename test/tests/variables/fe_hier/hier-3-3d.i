@@ -156,7 +156,6 @@
 []
 
 [Outputs]
-  output_initial = false
   exodus = true
   csv = true
   [./console]

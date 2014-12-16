@@ -128,10 +128,9 @@
 
 [Outputs]
   file_base = pps_out
-  output_initial = false
   [./exodus]
     type = Exodus
-    output_scalar_variables = false
+    output_scalars_on = none
   [../]
   [./console]
     type = Console

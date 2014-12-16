@@ -30,7 +30,7 @@ InputParameters validParams<Console>()
 
   // Get the parameters from the base class
   InputParameters params = validParams<TableOutput>();
-  params += Output::enableOutputTypes("system_information scalar postprocessor input");
+  params += TableOutput::enableOutputTypes("system_information scalar postprocessor input");
 
   // Screen and file output toggles
   params.addParam<bool>("output_screen", true, "Output to the screen");
@@ -69,6 +69,9 @@ InputParameters validParams<Console>()
   multiplier.push_back(2);
   params.addParam<std::vector<Real> >("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
 
+  // By default set System Information to output on initial
+  params.set<MultiMooseEnum>("output_system_information_on") = "initial";
+
   // Advanced group
   params.addParamNamesToGroup("max_rows fit_node verbose show_multiapp_name", "Advanced");
 
@@ -81,11 +84,13 @@ InputParameters validParams<Console>()
   // Variable norms group
   params.addParamNamesToGroup("outlier_variable_norms all_variable_norms outlier_multiplier", "Norms");
 
-  // By default the Console object outputs non linear iterations
-  params.set<bool>("nonlinear_residuals") = true;
+  // By default the Console object outputs nonlinear iterations and failed timesteps
+  params.set<MultiMooseEnum>("output_on").push_back("nonlinear");
+  params.set<MultiMooseEnum>("output_on").push_back("failed");
 
-  // Set outputting of failed solves to true for Console outputters
-  params.set<bool>("output_failed") = true;
+  // By default postprocessors and scalar are only output at the end of a timestep
+  params.set<MultiMooseEnum>("output_postprocessors_on") = "timestep_end";
+  params.set<MultiMooseEnum>("output_scalars_on") = "timestep_end";
 
   return params;
 }
@@ -187,7 +192,7 @@ Console::~Console()
 void
 Console::initialSetup()
 {
-  // Set the string for multiapp output indending
+  // Set the string for multiapp output indenting
   if (_app.getOutputWarehouse().multiappLevel() > 0)
     _multiapp_indent = COLOR_CYAN + _app.name() + ": " + COLOR_DEFAULT;
 
@@ -209,28 +214,95 @@ Console::initialSetup()
   // Output the performance log early
   if (getParam<bool>("setup_log_early"))
     write(Moose::setup_perf_log.get_perf_info());
+}
 
-  // Output the input file
-  if (_output_input)
-    outputInput();
-
-  // Output the system information
-  if (_system_information && _allow_output && !_force_output)
-    outputSystemInformation();
-
-  // Output the timestep information
-  timestepSetup();
+std::string
+Console::filename()
+{
+  return _file_base + ".txt";
 }
 
 void
-Console::timestepSetup()
+Console::output(const OutputExecFlagType & type)
 {
-  // Do nothing if output is turned off
-  // Do nothing if the problem is steady or if it is not an output interval
-  // Do nothing if output_initial = false and the timestep is zero
-  if (!_allow_output || !checkInterval() || (!_output_initial && timeStep() == 0))
+  // Return if the current output is not on the desired interval
+  if (type != OUTPUT_FINAL && !onInterval())
     return;
 
+  // Output the system information first; this forces this to be the first item to write by default
+  // However, 'output_system_information_on' still operates correctly, so it may be changed by the user
+  if (shouldOutput("system_information", type))
+    outputSystemInformation();
+
+  // Write the input
+  if (shouldOutput("input", type))
+    outputInput();
+
+  // Write the timestep information ("Time Step 0 ..."), this is may be controlled with "execute_on"
+  if (type == OUTPUT_TIMESTEP_BEGIN || (type == OUTPUT_INITIAL && _output_on.contains(OUTPUT_INITIAL)))
+    writeTimestepInformation();
+
+  // Print Non-linear Residual (control with "execute_on")
+  if (type == OUTPUT_NONLINEAR && _output_on.contains(OUTPUT_NONLINEAR))
+  {
+    if (_write_screen)
+      Moose::out << _multiapp_indent << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
+
+    if (_write_file)
+      _file_output_stream << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << std::scientific << _norm << std::endl;
+  }
+
+  // Print Linear Residual (control with "execute_on")
+  else if (type == OUTPUT_LINEAR && _output_on.contains(OUTPUT_LINEAR))
+  {
+    if (_write_screen)
+      Moose::out << _multiapp_indent << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
+
+    if (_write_file)
+      _file_output_stream << std::setw(7) << _linear_iter << std::scientific << " Linear |R| = " << std::scientific << _norm << std::endl;
+  }
+
+  // Write variable norms
+  else if (type == OUTPUT_TIMESTEP_END)
+    writeVariableNorms();
+
+  // Write Postprocessors and Scalars
+  if (shouldOutput("postprocessors", type))
+    outputPostprocessors();
+
+  if (shouldOutput("scalars", type))
+    outputScalarVariables();
+
+  // Write the file
+  writeStreamToFile();
+}
+
+void
+Console::writeStreamToFile(bool append)
+{
+  if (!_write_file)
+    return;
+
+  // Create the stream
+  std::ofstream output;
+
+  // Open the file
+  if (append)
+    output.open(filename().c_str(), std::ios::app | std::ios::out);
+  else
+    output.open(filename().c_str(), std::ios::trunc);
+
+  // Write contents of file output stream and close the file
+  output << _file_output_stream.str();
+  output.close();
+
+  // Clear the file output stream
+  _file_output_stream.str("");
+}
+
+void
+Console::writeTimestepInformation()
+{
   // Stream to build the time step information
   std::stringstream oss;
 
@@ -272,72 +344,6 @@ Console::timestepSetup()
 
   // Output to the screen
   write(oss.str());
-}
-
-std::string
-Console::filename()
-{
-  return _file_base + ".txt";
-}
-
-void
-Console::writeStreamToFile(bool append)
-{
-  if (!_write_file)
-    return;
-
-  // Create the stream
-  std::ofstream output;
-
-  // Open the file
-  if (append)
-    output.open(filename().c_str(), std::ios::app | std::ios::out);
-  else
-    output.open(filename().c_str(), std::ios::trunc);
-
-  // Write contents of file output stream and close the file
-  output << _file_output_stream.str();
-  output.close();
-
-  // Clear the file output stream
-  _file_output_stream.str("");
-}
-
-void
-Console::output()
-{
-  // Print Non-linear Residual
-  if (onNonlinearResidual())
-  {
-    if (_write_screen)
-      Moose::out << _multiapp_indent << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << std::endl;
-
-    if (_write_file)
-      _file_output_stream << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << std::scientific << _norm << std::endl;
-  }
-
-  // Print Linear Residual
-  else if (onLinearResidual())
-  {
-    if (_write_screen)
-      Moose::out << _multiapp_indent << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << std::endl;
-
-    if (_write_file)
-      _file_output_stream << std::setw(7) << _linear_iter << std::scientific << " Linear |R| = " << std::scientific << _norm << std::endl;
-  }
-
-  // Call the base class output function
-  else
-  {
-    // Write variable norms
-    writeVariableNorms();
-
-    // Perform output of scalars and postprocessors
-    TableOutput::output();
-  }
-
-  // Write the file
-  writeStreamToFile();
 }
 
 void
@@ -525,10 +531,6 @@ Console::write(std::string message, bool indent)
 void
 Console::mooseConsole(const std::string & message)
 {
-  // Do nothing if output is disabled
-  if (!shouldOutput())
-    return;
-
   // Write the messages
   write(message);
 
