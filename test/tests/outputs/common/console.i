@@ -84,7 +84,7 @@
 []
 
 [Outputs]
-  console = true # this is the default, this is what is being tested
+  console = true
 []
 
 [ICs]

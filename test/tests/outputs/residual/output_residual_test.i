@@ -108,7 +108,6 @@
 
 [Outputs]
   file_base = out
-  output_initial = false
   exodus = true
   [./console]
     type = Console

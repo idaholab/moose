@@ -16,6 +16,7 @@
 #define TABLESOUTPUTBASE_H
 
 // MOOSE includes
+#include "AdvancedOutput.h"
 #include "FileOutput.h"
 #include "FormattedTable.h"
 
@@ -35,8 +36,7 @@ InputParameters validParams<TableOutput>();
  *
  * @see CSV Console
  */
-class TableOutput :
-  public FileOutput
+class TableOutput : public AdvancedOutput<FileOutput>
 {
 public:
 
@@ -45,22 +45,7 @@ public:
    */
   TableOutput(const std::string & name, InputParameters);
 
-  /**
-   * Destructor
-   */
-  virtual ~TableOutput();
-
 protected:
-
-  //@{
-  /**
-   * Produces an error, it is not possible to output nodal and elemental data to a table
-   *
-   * The call to this function is disable by suppressing the input parameter: output_nodal_variables
-   */
-  virtual void outputNodalVariables();
-  virtual void outputElementalVariables();
-  //@}
 
   /**
    * Populates the tables with scalar aux variables

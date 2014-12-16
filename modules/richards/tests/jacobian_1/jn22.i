@@ -127,7 +127,6 @@
 
 [Outputs]
   file_base = jn20
-  output_initial = false
   exodus = false
   [./console]
     type = Console

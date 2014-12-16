@@ -81,10 +81,9 @@
   file_base = out_gen
   exodus = true
   [./oversampling]
+    file_base = out_gen_oversample
     type = Exodus
-    oversample = true
     refinements = 3
-    append_oversample = true
   [../]
   [./console]
     type = Console

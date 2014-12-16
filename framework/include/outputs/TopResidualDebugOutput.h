@@ -16,6 +16,7 @@
 #define TOPRESIDUALEBUGOUTPUT_H
 
 // MOOSE includes
+#include "BasicOutput.h"
 #include "PetscOutput.h"
 #include "FEProblem.h"
 
@@ -51,7 +52,7 @@ struct TopResidualDebugOutputTopResidualData
  *
  * This class may be used from inside the [Outputs] block or via the [Debug] block (preferred)
  */
-class TopResidualDebugOutput : public PetscOutput
+class TopResidualDebugOutput : public BasicOutput<PetscOutput>
 {
 public:
 
@@ -72,7 +73,7 @@ protected:
   /**
    * Perform the debugging output
    */
-  virtual void output();
+  virtual void output(const OutputExecFlagType & type);
 
   /**
    * Prints the n top residuals for the variables in the system

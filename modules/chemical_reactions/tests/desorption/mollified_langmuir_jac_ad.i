@@ -74,11 +74,10 @@
 
 [Outputs]
   file_base = langmuir_jac1
-  output_initial = false
   exodus = false
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []

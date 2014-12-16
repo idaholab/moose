@@ -50,7 +50,7 @@
 [Outputs]
   [./out]
     type = Exodus
-    output_final = true
     interval = 5
+    output_on = 'final timestep_end'
   [../]
 []

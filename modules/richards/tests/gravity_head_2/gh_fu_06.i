@@ -276,7 +276,6 @@
 
 [Outputs]
   file_base = gh_fu_06
-  output_initial = false
   csv = true
   [./console]
     type = Console

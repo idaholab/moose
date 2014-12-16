@@ -616,7 +616,6 @@
   file_base = uo1
   [./console]
     type = Console
-    linear_residuals = false
     perf_log = false
   [../]
   [./csv]

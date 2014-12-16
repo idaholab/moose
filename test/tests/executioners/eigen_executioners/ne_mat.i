@@ -97,10 +97,9 @@
   file_base = ne_mat
   interval = 1
   exodus = true
-#  output_initial = true
   [./console]
     type = Console
-    linear_residuals = true
     perf_log = true
+    output_on = 'failed nonlinear linear timestep_end'
   [../]
 []

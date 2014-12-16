@@ -50,21 +50,6 @@ public:
   virtual std::string filename();
 
   /**
-   * Performs the initial output, including the creation of the file base contains check
-   */
-  virtual void outputInitial();
-
-  /**
-   * Performs the output of a time step, including the creation of the file base contains check
-   */
-  virtual void outputStep();
-
-  /**
-   * Performs the final output, including the creation of the file base contains check
-   */
-  virtual void outputFinal();
-
-  /**
    * Sets the file number manually.
    *
    * This method was implemented for the MultiApp system, particularly when reseting
@@ -94,6 +79,11 @@ public:
 protected:
 
   /**
+   * Checks if the output method should be executed
+   */
+  bool shouldOutput(const OutputExecFlagType & type);
+
+  /**
    * Checks the filename for output
    * Checks the output against the 'output_if_base_contians' list
    * @return Returns true if the filename is valid for output
@@ -109,8 +99,10 @@ protected:
   /// Number of digits to pad the extensions
   unsigned int _padding;
 
-  /// True if the file should be output (used for 'output_if_base_constains'
-  bool _output_file;
+  /// Storage for 'output_if_base_contains'
+  std::vector<std::string> _output_if_base_contains;
+
+private:
 
   // OutputWarehouse needs access to _file_num for MultiApp ninja wizardry (see OutputWarehouse::merge)
   friend class OutputWarehouse;

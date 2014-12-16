@@ -119,7 +119,6 @@
 
 [Outputs]
   file_base = gh15
-  output_initial = false
   exodus = true
   [./console]
     type = Console

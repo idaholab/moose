@@ -56,7 +56,7 @@
 []
 
 [Outputs]
-   exodus = true
+  exodus = true
   [./console]
     type = Console
     perf_log = true

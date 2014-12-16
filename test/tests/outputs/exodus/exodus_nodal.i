@@ -94,25 +94,19 @@
 
 ##! [MultipleOutputBlocks]
 [Outputs]
-  output_initial = false                # common output_initial
   [./out]
-    # Setup the output system to output only aux2 and aux3 as nodal variables
     type = Exodus
-    hide = 'u v aux0 aux1'              # disables variables
-    output_postprocessors = false       # disables postprocessors
-    output_scalar_variables = false     # disables scalar variables
-    output_elemental_variables = false  # disables elemental variables
-    scalar_as_nodal = true              # converts aux2 to nodal
-    elemental_as_nodal = true           # converts aux3 to nodal
-    output_nodal_variables = true       # enable nodal variables (optional, this is the default)
+    hide = 'u v aux0 aux1'
+    scalar_as_nodal = true
+    elemental_as_nodal = true
+    output_elemental_on = none
+    output_scalars_on = none
+    output_postprocessors_on = none
   [../]
   [./screen]
-    # Setup the screen output
     type = Console
-    output_input = true                 # override the common parameter for this output object
-    nonlinear_residuals =  true         # enable printing non-linear residuals (optional, this is the default)
-    linear_residuals = false            # disable printing linear residuals
-    perf_log = true                     # display performance log
+    perf_log = true
+    output_on = 'failed nonlinear timestep_end'
   [../]
 []
 ##! [MultipleOutputBlocks]
