@@ -29,7 +29,7 @@
 
 
 // Constructor of OutputOnWarehouse; initializes the MultiMooseEnums for all available output types
-OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & output_on, const InputParameters & params) : OutputMapWrapper()
+OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & output_on, const InputParameters & params) : OutputMapWrapper<MultiMooseEnum>()
 {
   // Initialize each of the output_on settings for the various types of outputs
   if (params.have_parameter<MultiMooseEnum>("output_nodal_on"))
@@ -55,7 +55,7 @@ OutputOnWarehouse::OutputOnWarehouse(const MultiMooseEnum & output_on, const Inp
 }
 
 // Constructor of OutputDataWarehouse; initializes the OutputData structures for 'variable' based output types
-OutputDataWarehouse::OutputDataWarehouse() : OutputMapWrapper()
+OutputDataWarehouse::OutputDataWarehouse() : OutputMapWrapper<OutputData>()
 {
   _map["nodal"] = OutputData();
   _map["elemental"] = OutputData();
