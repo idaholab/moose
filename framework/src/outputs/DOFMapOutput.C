@@ -88,7 +88,7 @@ DOFMapOutput::demangle(const std::string & name)
 }
 
 void
-DOFMapOutput::writeStreamToFile(bool append)
+DOFMapOutput::writeStreamToFile(bool /*append*/)
 {
   // Create the stream
   std::ofstream output;

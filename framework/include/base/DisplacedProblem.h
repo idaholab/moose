@@ -174,6 +174,12 @@ public:
    */
   virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
+  /**
+   * Resets the displaced mesh to the reference mesh.  Required when
+   * refining the DisplacedMesh.
+   */
+  void undisplaceMesh();
+
 protected:
   FEProblem & _mproblem;
   MooseMesh & _mesh;

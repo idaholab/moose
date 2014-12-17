@@ -416,7 +416,7 @@ bool
 AdvancedOutput<OutputBase>::shouldOutput(const std::string & name, const OutputExecFlagType & type)
 {
   // Do not output if the 'none' is contained by the output_on
-  if (_advanced_output_on.contains(name) && _advanced_output_on[name].contains('none'))
+  if (_advanced_output_on.contains(name) && _advanced_output_on[name].contains("none"))
     return false;
 
   // Data output flag, true if data exists to be output
