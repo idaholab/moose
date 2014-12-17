@@ -20,6 +20,13 @@
   [../]
 []
 
+[AuxVariables]
+  [./local_energy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [ICs]
   [./cIC]
     type = RandomIC
@@ -30,7 +37,7 @@
 []
 
 [Kernels]
-active = 'c_dot CH_Parsed CHint'
+  active = 'CH_Parsed c_dot CHint'
   [./c_dot]
     type = TimeDerivative
     variable = c
@@ -54,6 +61,17 @@ active = 'c_dot CH_Parsed CHint'
   [../]
 []
 
+[AuxKernels]
+  [./local_energy]
+    type = TotalFreeEnergy
+    variable = local_energy
+    f_name = fbulk
+    interfacial_vars = c
+    kappa_names = kappa_c
+    execute_on = timestep
+  [../]
+[]
+
 [BCs]
   [./Periodic]
     [./all]
@@ -69,15 +87,14 @@ active = 'c_dot CH_Parsed CHint'
     mob = 1.0
     kappa = 0.5
   [../]
-
   [./free_energy]
     type = DerivativeParsedMaterial
     block = 0
     f_name = fbulk
-    args = 'c'
-    constant_names = 'W'
-    constant_expressions = '1.0/2^2'
-    function = 'W*(1-c)^2*(1+c)^2'
+    args = c
+    constant_names = W
+    constant_expressions = 1.0/2^2
+    function = W*(1-c)^2*(1+c)^2
     enable_jit = true
   [../]
 []
@@ -88,18 +105,19 @@ active = 'c_dot CH_Parsed CHint'
     variable = c
     boundary = top
   [../]
+  [./total_free_energy]
+    type = ElementIntegralVariablePostprocessor
+    variable = local_energy
+  [../]
 []
 
 [Executioner]
   type = Transient
   scheme = bdf2
   dt = 2.0
-
-  solve_type = 'NEWTON'
-
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
-
   l_max_its = 30
   l_tol = 1e-4
   nl_max_its = 20
@@ -110,10 +128,10 @@ active = 'c_dot CH_Parsed CHint'
 [Outputs]
   output_initial = true
   exodus = true
-  active = 'console'
   [./console]
     type = Console
     perf_log = true
     linear_residuals = true
   [../]
 []
+
