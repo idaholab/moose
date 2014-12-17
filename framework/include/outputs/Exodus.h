@@ -117,7 +117,7 @@ protected:
   std::string filename();
 
   /// Pointer to the libMesh::ExodusII_IO object that performs the actual data output
-  ExodusII_IO * _exodus_io_ptr;
+  MooseSharedPointer<ExodusII_IO> _exodus_io_ptr;
 
   /// Storage for scalar values (postprocessors and scalar AuxVariables)
   std::vector<Real> _global_values;
