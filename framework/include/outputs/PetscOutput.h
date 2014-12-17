@@ -57,10 +57,10 @@ protected:
   Real _norm;
 
   /// Current non-linear iteration returned from PETSc
-  int _nonlinear_iter;
+  PetscInt _nonlinear_iter;
 
   /// Current linear iteration returned from PETSc
-  int _linear_iter;
+  PetscInt _linear_iter;
 
 private:
 

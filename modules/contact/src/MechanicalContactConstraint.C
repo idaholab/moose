@@ -128,13 +128,14 @@ MechanicalContactConstraint::jacobianSetup()
 void
 MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
 {
-  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
-  std::map<unsigned int, unsigned> & unlocked_this_step = _penetration_locator._unlocked_this_step;
-  std::map<unsigned int, unsigned> & locked_this_step = _penetration_locator._locked_this_step;
-  std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
+  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
+  std::map<dof_id_type, unsigned int> & unlocked_this_step = _penetration_locator._unlocked_this_step;
+  std::map<dof_id_type, unsigned int> & locked_this_step = _penetration_locator._locked_this_step;
+  std::map<dof_id_type, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
 
-  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+  std::map<dof_id_type, PenetrationInfo *>::iterator
+    it  = _penetration_locator._penetration_info.begin(),
+    end = _penetration_locator._penetration_info.end();
 
   for (; it!=end; ++it)
   {
@@ -142,8 +143,8 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
     if (!pinfo)
       continue;
 
-    const unsigned int slave_node_num = it->first;
-    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
+    const dof_id_type slave_node_num = it->first;
+    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 
     if (beginning_of_step)
     {
@@ -238,10 +239,10 @@ MechanicalContactConstraint::shouldApply()
 
 //  _point_to_info.clear();
 //
-//  std::set<unsigned int> & has_penetrated = _penetration_locator._has_penetrated;
+//  std::set<dof_id_type> & has_penetrated = _penetration_locator._has_penetrated;
 //
-//  std::map<unsigned int, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
-//  std::map<unsigned int, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
+//  std::map<dof_id_type, PenetrationInfo *>::iterator it = _penetration_locator._penetration_info.begin();
+//  std::map<dof_id_type, PenetrationInfo *>::iterator end = _penetration_locator._penetration_info.end();
 //
 //  for (; it!=end; ++it)
 //  {
@@ -250,9 +251,9 @@ MechanicalContactConstraint::shouldApply()
 //    if (!pinfo)
 //      continue;
 //
-//    unsigned int slave_node_num = it->first;
+//    dof_id_type slave_node_num = it->first;
 //
-//    std::set<unsigned int>::iterator hpit = has_penetrated.find(slave_node_num);
+//    std::set<dof_id_type>::iterator hpit = has_penetrated.find(slave_node_num);
 //
 //    if ( hpit != has_penetrated.end() )
 //    {
@@ -262,21 +263,21 @@ MechanicalContactConstraint::shouldApply()
 //    }
 //  }
 
-  std::set<unsigned int>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
+  std::set<dof_id_type>::iterator hpit = _penetration_locator._has_penetrated.find(_current_node->id());
   return (hpit != _penetration_locator._has_penetrated.end());
 }
 
 void
 MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
 {
-  std::map<unsigned int, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
+  std::map<dof_id_type, Real> & lagrange_multiplier = _penetration_locator._lagrange_multiplier;
   const Node * node = pinfo->_node;
 
   RealVectorValue res_vec;
   // Build up residual vector
   for (unsigned int i=0; i<_mesh_dimension; ++i)
   {
-    long int dof_number = node->dof_number(0, _vars(i), 0);
+    dof_id_type dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
   }
   RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
@@ -429,7 +430,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               RealVectorValue jac_vec;
               for (unsigned int i=0; i<_mesh_dimension; ++i)
               {
-                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                dof_id_type dof_number = _current_node->dof_number(0, _vars(i), 0);
                 jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
               }
               return -pinfo->_normal(_component) * (pinfo->_normal*jac_vec) + (_phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
@@ -472,7 +473,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               RealVectorValue jac_vec;
               for (unsigned int i=0; i<_mesh_dimension; ++i)
               {
-                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                dof_id_type dof_number = _current_node->dof_number(0, _vars(i), 0);
                 jac_vec(i) = (*_jacobian)(dof_number, curr_master_node->dof_number(0, _vars(_component), 0));
               }
               return -pinfo->_normal(_component)*(pinfo->_normal*jac_vec) - (_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * pinfo->_normal(_component);
@@ -514,7 +515,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               RealVectorValue jac_vec;
               for (unsigned int i=0; i<_mesh_dimension; ++i)
               {
-                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                dof_id_type dof_number = _current_node->dof_number(0, _vars(i), 0);
                 jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
               }
               return pinfo->_normal(_component)*(pinfo->_normal*jac_vec) * _test_master[_i][_qp];
@@ -604,7 +605,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
               RealVectorValue jac_vec;
               for (unsigned int i=0; i<_mesh_dimension; ++i)
               {
-                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                dof_id_type dof_number = _current_node->dof_number(0, _vars(i), 0);
                 jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
               }
               return -pinfo->_normal(_component) * (pinfo->_normal*jac_vec) + (_phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
@@ -638,7 +639,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
               RealVectorValue jac_vec;
               for (unsigned int i=0; i<_mesh_dimension; ++i)
               {
-                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                dof_id_type dof_number = _current_node->dof_number(0, _vars(i), 0);
                 jac_vec(i) = (*_jacobian)(dof_number, curr_master_node->dof_number(0, _vars(_component), 0));
               }
               return -pinfo->_normal(_component)*(pinfo->_normal*jac_vec) - (_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp]) * pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
@@ -667,7 +668,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
               RealVectorValue jac_vec;
               for (unsigned int i=0; i<_mesh_dimension; ++i)
               {
-                long int dof_number = _current_node->dof_number(0, _vars(i), 0);
+                dof_id_type dof_number = _current_node->dof_number(0, _vars(i), 0);
                 jac_vec(i) = (*_jacobian)(dof_number, _connected_dof_indices[_j]);
               }
               return pinfo->_normal(_component)*(pinfo->_normal*jac_vec) * _test_master[_i][_qp];
@@ -727,7 +728,7 @@ MechanicalContactConstraint::nodalArea(PenetrationInfo & pinfo)
 {
   const Node * node = pinfo._node;
 
-  unsigned int dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
+  dof_id_type dof = node->dof_number(_aux_system.number(), _nodal_area_var->number(), 0);
 
   Real area = (*_aux_solution)( dof );
   if (area == 0)

@@ -160,8 +160,9 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
   const Elem * neighbor = elem->neighbor(side);
 
   // Get the global id of the element and the neighbor
-  const unsigned int elem_id = elem->id();
-  const unsigned int neighbor_id = neighbor->id();
+  const dof_id_type
+    elem_id = elem->id(),
+    neighbor_id = neighbor->id();
 
   if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
   {

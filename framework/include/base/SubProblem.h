@@ -140,7 +140,7 @@ public:
   virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) = 0;
-  virtual void reinitNodes(const std::vector<unsigned int> & nodes, THREAD_ID tid) = 0;
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) = 0;
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid) = 0;
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid) = 0;
@@ -229,7 +229,7 @@ public:
   /**
    * Will make sure that all dofs connected to elem_id are ghosted to this processor
    */
-  virtual void addGhostedElem(unsigned int elem_id) = 0;
+  virtual void addGhostedElem(dof_id_type elem_id) = 0;
 
   /**
    * Will make sure that all necessary elements from boundary_id are ghosted to this processor

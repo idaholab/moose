@@ -133,7 +133,7 @@ public:
    * If not already created, creates a map from every node to all
    * elements to which they are created.
    */
-  std::map<unsigned int, std::vector<unsigned int> > & nodeToElemMap();
+  std::map<dof_id_type, std::vector<dof_id_type> > & nodeToElemMap();
 
   /**
    * These structs are required so that the bndNodes{Begin,End} and
@@ -166,7 +166,7 @@ public:
    * Calls BoundaryInfo::build_side_list().
    * Fills in the three passed vectors with list logical (element, side, id) tuples.
    */
-  void buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il);
+  void buildSideList(std::vector<dof_id_type> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il);
 
   /**
    * Calls BoundaryInfo::side_with_boundary_id().
@@ -188,22 +188,22 @@ public:
   /**
    * Calls n_nodes/elem() on the underlying libMesh mesh object.
    */
-  virtual unsigned int nNodes() const;
-  virtual unsigned int nElem() const;
+  virtual dof_id_type nNodes() const;
+  virtual dof_id_type nElem() const;
 
   /**
    * Various accessors (pointers/references) for Node "i".
    */
-  virtual const Node & node (const unsigned int i) const;
-  virtual Node & node (const unsigned int i);
-  virtual const Node* nodePtr(const unsigned int i) const;
-  virtual Node* nodePtr(const unsigned int i);
+  virtual const Node & node (const dof_id_type i) const;
+  virtual Node & node (const dof_id_type i);
+  virtual const Node* nodePtr(const dof_id_type i) const;
+  virtual Node* nodePtr(const dof_id_type i);
 
   /**
    * Various accessors (pointers/references) for Elem "i".
    */
-  virtual Elem * elem(const unsigned int i);
-  virtual const Elem * elem(const unsigned int i) const;
+  virtual Elem * elem(const dof_id_type i);
+  virtual const Elem * elem(const dof_id_type i) const;
 
   /**
    * Setter/getter for the _is_changed flag.
@@ -263,7 +263,7 @@ public:
    * Clears the "semi-local" node list and rebuilds it.  Semi-local nodes
    * consist of all nodes that belong to local and ghost elements.
    */
-  void updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems);
+  void updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems);
 
   /**
    * Returns true if the node is semi-local
@@ -405,7 +405,7 @@ public:
    * Return a writable reference to a vector of node IDs that belong
    * to nodeset_id.
    */
-  std::vector<unsigned int> & getNodeList(boundary_id_type nodeset_id);
+  std::vector<dof_id_type> & getNodeList(boundary_id_type nodeset_id);
 
   /**
    * Add a new node to the mesh.  If there is already a node located at the point passed
@@ -491,12 +491,12 @@ public:
    * in the system.  It does this only for active local elements so the list will not be globally complete when
    * run in parallel!
    */
-  void buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & periodic_node_map, unsigned int var_number, PeriodicBoundaries *pbs) const;
+  void buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & periodic_node_map, unsigned int var_number, PeriodicBoundaries *pbs) const;
 
   /**
    * This routine builds a datastructure of node ids organized by periodic boundary ids
    */
-  void buildPeriodicNodeSets(std::map<BoundaryID, std::set<unsigned int> > & periodic_node_sets, unsigned int var_number, PeriodicBoundaries *pbs) const;
+  void buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type> > & periodic_node_sets, unsigned int var_number, PeriodicBoundaries *pbs) const;
 
   /**
    * Returns the width of the requested dimension
@@ -607,25 +607,25 @@ public:
    * Returns true if the requested node is in the list of boundary
    * nodes, false otherwise.
    */
-  bool isBoundaryNode(unsigned int node_id);
+  bool isBoundaryNode(dof_id_type node_id);
 
   /**
    * Returns true if the requested node is in the list of boundary
    * nodes for the specified boundary, false otherwise.
    */
-  bool isBoundaryNode(unsigned int node_id, BoundaryID bnd_id);
+  bool isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id);
 
   /**
    * Returns true if the requested element is in the list of boundary
    * elements, false otherwise.
    */
-  bool isBoundaryElem(unsigned int elem_id);
+  bool isBoundaryElem(dof_id_type elem_id);
 
   /**
    * Returns true if the requested element is in the list of boundary
    * elements for the specified boundary, false otherwise.
    */
-  bool isBoundaryElem(unsigned int elem_id, BoundaryID bnd_id);
+  bool isBoundaryElem(dof_id_type elem_id, BoundaryID bnd_id);
 
   /**
    * Generate a unified error message if the underlying libMesh mesh
@@ -754,7 +754,7 @@ protected:
   StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> * _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
-  std::map<unsigned int, std::vector<unsigned int> > _node_to_elem_map;
+  std::map<dof_id_type, std::vector<dof_id_type> > _node_to_elem_map;
   bool _node_to_elem_map_built;
 
   /**
@@ -780,24 +780,24 @@ protected:
   typedef std::vector<BndNode *>::iterator             bnd_node_iterator_imp;
   typedef std::vector<BndNode *>::const_iterator const_bnd_node_iterator_imp;
   /// Map of sets of node IDs in each boundary
-  std::map<boundary_id_type, std::set<unsigned int> > _bnd_node_ids;
+  std::map<boundary_id_type, std::set<dof_id_type> > _bnd_node_ids;
 
   /// array of boundary elems
   std::vector<BndElement *> _bnd_elems;
   typedef std::vector<BndElement *>::iterator             bnd_elem_iterator_imp;
   typedef std::vector<BndElement *>::const_iterator const_bnd_elem_iterator_imp;
   /// Map of set of elem IDs connected to each boundary
-  std::map<boundary_id_type, std::set<unsigned int> > _bnd_elem_ids;
+  std::map<boundary_id_type, std::set<dof_id_type> > _bnd_elem_ids;
 
-  std::map<unsigned int, Node *> _quadrature_nodes;
-  std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, Node *> > > _elem_to_side_to_qp_to_quadrature_nodes;
+  std::map<dof_id_type, Node *> _quadrature_nodes;
+  std::map<dof_id_type, std::map<unsigned int, std::map<dof_id_type, Node *> > > _elem_to_side_to_qp_to_quadrature_nodes;
   std::vector<BndNode> _extra_bnd_nodes;
 
   /// list of nodes that belongs to a specified block (domain)
-  std::map<unsigned int, std::set<SubdomainID> > _block_node_list;
+  std::map<dof_id_type, std::set<SubdomainID> > _block_node_list;
 
   /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> [array of node ids]
-  std::map<boundary_id_type, std::vector<unsigned int> > _node_set_nodes;
+  std::map<boundary_id_type, std::vector<dof_id_type> > _node_set_nodes;
 
   std::set<unsigned int> _ghosted_boundaries;
   std::vector<Real> _ghosted_boundaries_inflation;

@@ -42,7 +42,7 @@ ComputeJacobianBlocksThread::~ComputeJacobianBlocksThread()
 void
 ComputeJacobianBlocksThread::postElement(const Elem * elem)
 {
-  std::vector<unsigned int> dof_indices; // Do this out here to avoid creating and destroying it thousands of times
+  std::vector<dof_id_type> dof_indices; // Do this out here to avoid creating and destroying it thousands of times
 
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 

@@ -79,7 +79,7 @@ RandomInterface::getRandomLong()
   else
     id = _curr_element->id();
 
-  return _generator->randl(id);
+  return _generator->randl(static_cast<unsigned int>(id));
 }
 
 Real
@@ -93,5 +93,5 @@ RandomInterface::getRandomReal()
   else
     id = _curr_element->id();
 
-  return _generator->rand(id);
+  return _generator->rand(static_cast<unsigned int>(id));
 }

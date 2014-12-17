@@ -37,8 +37,8 @@ public:
 };
 
 SlaveNeighborhoodThread::SlaveNeighborhoodThread(const MooseMesh & mesh,
-                                                 const std::vector<unsigned int> & trial_master_nodes,
-                                                 std::map<unsigned int, std::vector<unsigned int> > & node_to_elem_map,
+                                                 const std::vector<dof_id_type> & trial_master_nodes,
+                                                 std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
                                                  const unsigned int patch_size) :
   _mesh(mesh),
   _trial_master_nodes(trial_master_nodes),
@@ -68,7 +68,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
 
   for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
   {
-    unsigned int node_id = *nd;
+    dof_id_type node_id = *nd;
 
     const Node & node = *_mesh.nodePtr(node_id);
 
@@ -79,14 +79,14 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
     // Get a list, in descending order of distance, of master nodes in relation to this node
     for (unsigned int k=0; k<n_master_nodes; k++)
     {
-      unsigned int master_id = _trial_master_nodes[k];
+      dof_id_type master_id = _trial_master_nodes[k];
       const Node * cur_node = &_mesh.node(master_id);
       Real distance = ((*cur_node) - node).size();
 
       neighbors.push(std::make_pair(master_id, distance));
     }
 
-    std::vector<unsigned int> neighbor_nodes;
+    std::vector<dof_id_type> neighbor_nodes;
 
     unsigned int patch_size = std::min(_patch_size, static_cast<unsigned int>(neighbors.size()));
     neighbor_nodes.resize(patch_size);
@@ -115,7 +115,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
     else
     {
       { // See if we own any of the elements connected to the slave node
-        const std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[node_id];
+        const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[node_id];
 
         for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
           if (_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
@@ -129,13 +129,13 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
       { // Now check the neighbor nodes to see if we own any of them
         for (unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
         {
-          unsigned int neighbor_node_id = neighbor_nodes[neighbor_it];
+          dof_id_type neighbor_node_id = neighbor_nodes[neighbor_it];
 
           if (_mesh.node(neighbor_node_id).processor_id() == processor_id)
             need_to_track = true;
           else // Now see if we own any of the elements connected to the neighbor nodes
           {
-            const std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[neighbor_node_id];
+            const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[neighbor_node_id];
 
             for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
               if (_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
@@ -160,7 +160,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
       _neighbor_nodes[node_id] = neighbor_nodes;
 
       { // Add the elements connected to the slave node to the ghosted list
-        const std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[node_id];
+        const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[node_id];
 
         for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
           _ghosted_elems.insert(elems_connected_to_node[elem_id_it]);
@@ -169,7 +169,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
       // Now add elements connected to the neighbor nodes to the ghosted list
       for (unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
       {
-        const std::vector<unsigned int> & elems_connected_to_node = _node_to_elem_map[neighbor_nodes[neighbor_it]];
+        const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[neighbor_nodes[neighbor_it]];
 
         for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
           _ghosted_elems.insert(elems_connected_to_node[elem_id_it]);

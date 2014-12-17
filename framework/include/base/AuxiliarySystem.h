@@ -86,8 +86,8 @@ public:
 
   // This is an empty function since the Aux system doesn't have a matrix!
   virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
-                               std::vector<unsigned int> & /*n_nz*/,
-                               std::vector<unsigned int> & /*n_oz*/);
+                               std::vector<dof_id_type> & /*n_nz*/,
+                               std::vector<dof_id_type> & /*n_oz*/);
 
   /**
    * Compute auxiliary variables

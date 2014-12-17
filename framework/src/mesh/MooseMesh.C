@@ -283,10 +283,10 @@ MooseMesh::freeBndNodes()
   for (std::vector<BndNode *>::iterator it = _bnd_nodes.begin(); it != _bnd_nodes.end(); ++it)
     delete (*it);
 
-  for (std::map<boundary_id_type, std::vector<unsigned int> >::iterator it = _node_set_nodes.begin(); it != _node_set_nodes.end(); ++it)
+  for (std::map<boundary_id_type, std::vector<dof_id_type> >::iterator it = _node_set_nodes.begin(); it != _node_set_nodes.end(); ++it)
     it->second.clear();
   _node_set_nodes.clear();
-  for (std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_node_ids.begin(); it != _bnd_node_ids.end(); ++it)
+  for (std::map<boundary_id_type, std::set<dof_id_type> >::iterator it = _bnd_node_ids.begin(); it != _bnd_node_ids.end(); ++it)
     it->second.clear();
   _bnd_node_ids.clear();
 }
@@ -297,7 +297,7 @@ MooseMesh::freeBndElems()
   // free memory
   for (std::vector<BndElement *>::iterator it = _bnd_elems.begin(); it != _bnd_elems.end(); ++it)
     delete (*it);
-  for (std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_elem_ids.begin(); it != _bnd_elem_ids.end(); ++it)
+  for (std::map<boundary_id_type, std::set<dof_id_type> >::iterator it = _bnd_elem_ids.begin(); it != _bnd_elem_ids.end(); ++it)
     it->second.clear();
   _bnd_elem_ids.clear();
 }
@@ -380,7 +380,7 @@ MooseMesh::update()
 }
 
 const Node &
-MooseMesh::node(const unsigned int i) const
+MooseMesh::node(const dof_id_type i) const
 {
   if (i > getMesh().max_node_id())
     return *(*_quadrature_nodes.find(i)).second;
@@ -389,7 +389,7 @@ MooseMesh::node(const unsigned int i) const
 }
 
 Node &
-MooseMesh::node(const unsigned int i)
+MooseMesh::node(const dof_id_type i)
 {
   if (i > getMesh().max_node_id())
     return *_quadrature_nodes[i];
@@ -398,7 +398,7 @@ MooseMesh::node(const unsigned int i)
 }
 
 const Node*
-MooseMesh::nodePtr(const unsigned int i) const
+MooseMesh::nodePtr(const dof_id_type i) const
 {
   if (i > getMesh().max_node_id())
     return (*_quadrature_nodes.find(i)).second;
@@ -407,7 +407,7 @@ MooseMesh::nodePtr(const unsigned int i) const
 }
 
 Node*
-MooseMesh::nodePtr(const unsigned int i)
+MooseMesh::nodePtr(const dof_id_type i)
 {
   if (i > getMesh().max_node_id())
     return _quadrature_nodes[i];
@@ -500,7 +500,7 @@ MooseMesh::coarsenedElementChildren(const Elem * elem)
 }
 
 void
-MooseMesh::updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems)
+MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
 {
   _semilocal_node_list.clear();
 
@@ -520,7 +520,7 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<unsigned int> & ghosted_elems
   }
 
   // Now add the nodes connected to ghosted_elems
-  for (std::set<unsigned int>::iterator it=ghosted_elems.begin();
+  for (std::set<dof_id_type>::iterator it=ghosted_elems.begin();
       it!=ghosted_elems.end();
       ++it)
   {
@@ -578,7 +578,7 @@ MooseMesh::buildNodeList()
   freeBndNodes();
 
   /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
-  std::vector<unsigned int> nodes;
+  std::vector<dof_id_type> nodes;
   std::vector<boundary_id_type> ids;
   getMesh().get_boundary_info().build_node_list(nodes, ids);
 
@@ -611,7 +611,7 @@ MooseMesh::buildBndElemList()
   freeBndElems();
 
   /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
-  std::vector<unsigned int> elems;
+  std::vector<dof_id_type> elems;
   std::vector<unsigned short int> sides;
   std::vector<boundary_id_type> ids;
   getMesh().get_boundary_info().build_active_side_list(elems, sides, ids);
@@ -625,7 +625,7 @@ MooseMesh::buildBndElemList()
   }
 }
 
-std::map<unsigned int, std::vector<unsigned int> > &
+std::map<dof_id_type, std::vector<dof_id_type> > &
 MooseMesh::nodeToElemMap()
 {
   if (!_node_to_elem_map_built) // Guard the creation with a double checked lock
@@ -851,8 +851,13 @@ MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, c
   {
     // Create a new node id starting from the max node id and counting down.  This will be the least
     // likely to collide with an existing node id.
-    unsigned int max_id = std::numeric_limits<unsigned int>::max()-100;
-    unsigned int new_id = max_id - _quadrature_nodes.size();
+    // Note that we are using numeric_limits<unsigned>::max even
+    // though max_id is stored as a dof_id_type.  I tried this with
+    // numeric_limits<dof_id_type>::max and it broke several tests in
+    // MOOSE.  So, this is some kind of a magic number that we will
+    // just continue to use...
+    dof_id_type max_id = std::numeric_limits<unsigned int>::max()-100;
+    dof_id_type new_id = max_id - _quadrature_nodes.size();
 
     if (new_id <= getMesh().max_node_id())
       mooseError("Quadrature node id collides with existing node id!");
@@ -895,8 +900,9 @@ void
 MooseMesh::clearQuadratureNodes()
 {
   { // Delete all the quadrature nodes
-    std::map<unsigned int, Node *>::iterator it = _quadrature_nodes.begin();
-    std::map<unsigned int, Node *>::iterator end = _quadrature_nodes.end();
+    std::map<dof_id_type, Node *>::iterator
+      it  = _quadrature_nodes.begin(),
+      end = _quadrature_nodes.end();
 
     for (; it != end; ++it)
       delete it->second;
@@ -1031,7 +1037,7 @@ MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
 }
 
 void
-MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & periodic_node_map, unsigned int var_number, PeriodicBoundaries *pbs) const
+MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & periodic_node_map, unsigned int var_number, PeriodicBoundaries *pbs) const
 {
   mooseAssert(!Threads::in_threads, "This function should only be called outside of a threaded region due to the use of PointLocator");
 
@@ -1043,6 +1049,9 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & peri
 
   // Get a const reference to the BoundaryInfo object that we will use several times below...
   const BoundaryInfo & boundary_info = getMesh().get_boundary_info();
+
+  // A typedef makes the code below easier to read...
+  typedef std::multimap<dof_id_type, dof_id_type>::iterator IterType;
 
   for (; it != it_end; ++it)
   {
@@ -1076,10 +1085,10 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & peri
               if (master_point.absolute_fuzzy_equals(*slave_node))
               {
                 // Avoid inserting any duplicates
-                std::pair<std::multimap<unsigned int, unsigned int>::iterator, std::multimap<unsigned int, unsigned int>::iterator> iters =
+                std::pair<IterType, IterType> iters =
                   periodic_node_map.equal_range(master_node->id());
                 bool found = false;
-                for (std::multimap<unsigned int, unsigned int>::iterator map_it = iters.first; map_it != iters.second; ++map_it)
+                for (IterType map_it = iters.first; map_it != iters.second; ++map_it)
                   if (map_it->second == slave_node->id())
                     found = true;
                 if (!found)
@@ -1094,11 +1103,13 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<unsigned int, unsigned int> & peri
 }
 
 void
-MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<unsigned int> > & periodic_node_sets, unsigned int var_number, PeriodicBoundaries *pbs) const
+MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type> > & periodic_node_sets,
+                                 unsigned int var_number,
+                                 PeriodicBoundaries *pbs) const
 {
   periodic_node_sets.clear();
 
-  std::vector<unsigned int> nl;
+  std::vector<dof_id_type> nl;
   std::vector<boundary_id_type> il;
 
   getMesh().get_boundary_info().build_node_list(nl, il);
@@ -1760,7 +1771,7 @@ MooseMesh::buildNodeListFromSideList()
 }
 
 void
-MooseMesh::buildSideList(std::vector<unsigned int> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il)
+MooseMesh::buildSideList(std::vector<dof_id_type> & el, std::vector<unsigned short int> & sl, std::vector<boundary_id_type> & il)
 {
   getMesh().get_boundary_info().build_side_list(el, sl, il);
 }
@@ -1795,26 +1806,26 @@ MooseMesh::activeLocalElementsEnd()
   return getMesh().active_local_elements_end();
 }
 
-unsigned int
+dof_id_type
 MooseMesh::nNodes() const
 {
   return getMesh().n_nodes();
 }
 
-unsigned int
+dof_id_type
 MooseMesh::nElem() const
 {
   return getMesh().n_elem();
 }
 
 Elem *
-MooseMesh::elem(const unsigned int i)
+MooseMesh::elem(const dof_id_type i)
 {
   return getMesh().elem(i);
 }
 
 const Elem *
-MooseMesh::elem(const unsigned int i) const
+MooseMesh::elem(const dof_id_type i) const
 {
   return getMesh().elem(i);
 }
@@ -1953,7 +1964,7 @@ MooseMesh::ghostGhostedBoundaries()
 
   Moose::perf_log.push("ghostGhostedBoundaries()","MooseMesh");
 
-  std::vector<unsigned int> elems;
+  std::vector<dof_id_type> elems;
   std::vector<unsigned short int> sides;
   std::vector<boundary_id_type> ids;
 
@@ -2057,7 +2068,7 @@ void MooseMesh::printInfo(std::ostream &os)
   getMesh().print_info(os);
 }
 
-std::vector<unsigned int> &
+std::vector<dof_id_type> &
 MooseMesh::getNodeList(boundary_id_type nodeset_id)
 {
   return _node_set_nodes[nodeset_id];
@@ -2070,10 +2081,10 @@ MooseMesh::getSubdomainBoundaryIds(unsigned int subdomain_id)
 }
 
 bool
-MooseMesh::isBoundaryNode(unsigned int node_id)
+MooseMesh::isBoundaryNode(dof_id_type node_id)
 {
   bool found_node = false;
-  for (std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_node_ids.begin(); it != _bnd_node_ids.end(); ++it)
+  for (std::map<boundary_id_type, std::set<dof_id_type> >::iterator it = _bnd_node_ids.begin(); it != _bnd_node_ids.end(); ++it)
   {
     if (it->second.find(node_id) != it->second.end())
     {
@@ -2085,10 +2096,10 @@ MooseMesh::isBoundaryNode(unsigned int node_id)
 }
 
 bool
-MooseMesh::isBoundaryNode(unsigned int node_id, BoundaryID bnd_id)
+MooseMesh::isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id)
 {
   bool found_node = false;
-  std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_node_ids.find(bnd_id);
+  std::map<boundary_id_type, std::set<dof_id_type> >::iterator it = _bnd_node_ids.find(bnd_id);
   if (it != _bnd_node_ids.end())
     if (it->second.find(node_id) != it->second.end())
       found_node = true;
@@ -2096,10 +2107,10 @@ MooseMesh::isBoundaryNode(unsigned int node_id, BoundaryID bnd_id)
 }
 
 bool
-MooseMesh::isBoundaryElem(unsigned int elem_id)
+MooseMesh::isBoundaryElem(dof_id_type elem_id)
 {
   bool found_elem = false;
-  for (std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_elem_ids.begin(); it != _bnd_elem_ids.end(); ++it)
+  for (std::map<boundary_id_type, std::set<dof_id_type> >::iterator it = _bnd_elem_ids.begin(); it != _bnd_elem_ids.end(); ++it)
   {
     if (it->second.find(elem_id) != it->second.end())
     {
@@ -2111,10 +2122,10 @@ MooseMesh::isBoundaryElem(unsigned int elem_id)
 }
 
 bool
-MooseMesh::isBoundaryElem(unsigned int elem_id, BoundaryID bnd_id)
+MooseMesh::isBoundaryElem(dof_id_type elem_id, BoundaryID bnd_id)
 {
   bool found_elem = false;
-  std::map<boundary_id_type, std::set<unsigned int> >::iterator it = _bnd_elem_ids.find(bnd_id);
+  std::map<boundary_id_type, std::set<dof_id_type> >::iterator it = _bnd_elem_ids.find(bnd_id);
   if (it != _bnd_elem_ids.end())
     if (it->second.find(elem_id) != it->second.end())
       found_elem = true;

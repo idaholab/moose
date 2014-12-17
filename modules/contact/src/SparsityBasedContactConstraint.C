@@ -42,7 +42,12 @@ SparsityBasedContactConstraint::getConnectedDofIndices()
   PetscErrorCode ierr;
   PetscInt ncols;
   const PetscInt *cols;
-  ierr = MatGetRow(jac,_var.nodalDofIndex(),&ncols,&cols,PETSC_NULL);CHKERRABORT(_communicator.get(), ierr);
+  ierr = MatGetRow(jac,
+                   static_cast<PetscInt>(_var.nodalDofIndex()),
+                   &ncols,
+                   &cols,
+                   PETSC_NULL);
+  CHKERRABORT(_communicator.get(), ierr);
   bool debug = false;
   if (debug) {
     libMesh::out << "_connected_dof_indices: adding " << ncols << " dofs from Jacobian row[" << _var.nodalDofIndex() << "] = [";
@@ -56,7 +61,12 @@ SparsityBasedContactConstraint::getConnectedDofIndices()
   if (debug) {
     libMesh::out << "]\n";
   }
-  ierr = MatRestoreRow(jac,_var.nodalDofIndex(),&ncols,&cols,PETSC_NULL);CHKERRABORT(_communicator.get(), ierr);
+  ierr = MatRestoreRow(jac,
+                       static_cast<PetscInt>(_var.nodalDofIndex()),
+                       &ncols,
+                       &cols,
+                       PETSC_NULL);
+  CHKERRABORT(_communicator.get(), ierr);
 #else
   NodeFaceConstraint::getConnectedDofIndices();
 #endif
