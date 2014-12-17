@@ -34,13 +34,14 @@ InputParameters::InputParameters() :
 
 InputParameters::InputParameters(const InputParameters &rhs) :
     Parameters(),
-    _moose_object_syntax_visibility(true)
+    _show_deprecated_message(true)
+
 {
   *this = rhs;
 }
 
 InputParameters::InputParameters(const Parameters &rhs) :
-    _moose_object_syntax_visibility(true)
+    _show_deprecated_message(true)
 {
   Parameters::operator=(rhs);
   _collapse_nesting = false;
@@ -64,7 +65,7 @@ InputParameters::clear()
   _default_postprocessor_value.clear();
   _collapse_nesting = false;
   _moose_object_syntax_visibility = true;
-  _moose_object_syntax_visibility = true;
+  _show_deprecated_message = true;
 }
 
 void
