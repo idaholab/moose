@@ -52,9 +52,9 @@ RandomData::updateSeeds(ExecFlagType exec_flag)
     _new_seed = _master_seed + _rd_problem.timeStep();
   /**
    * case EXEC_TIMESTEP_BEGIN:   // reset and advance every timestep
-   * case EXEC_TIMESTEP:         // reset and advance every timestep
-   * case EXEC_RESIDUAL:         // Reset every residual, advance every timestep
-   * case EXEC_JACOBIAN:         // Reset every Jacobian, advance every timestep
+   * case EXEC_TIMESTEP_END:     // reset and advance every timestep
+   * case EXEC_LINEAR:           // Reset every residual, advance every timestep
+   * case EXEC_NONLINEAR:        // Reset every Jacobian, advance every timestep
    */
 
   // If the _new_seed has been updated, we need to update all of the generators

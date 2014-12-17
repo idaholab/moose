@@ -54,6 +54,7 @@ class FEProblem;
 /// Execution flags - when is the object executed/evaluated
 // Note: If this enum is changed, make sure to modify the local
 // function populateExecTypes in Moose.C.
+// The function Output::getExecuteOptions must also be updated to match the numbering
 enum ExecFlagType {
   EXEC_NONE              = 0x00,
   /// Object is evaluated only once at the beginning of the simulation
@@ -92,8 +93,7 @@ namespace Moose
 extern PerfLog perf_log;
 
 /**
- * PerfLog to be used during setup.  This log will get printed just before the first solve.
- */
+ * PerfLog to be used during setup.  This log will get printed just before the first solve. */
 extern PerfLog setup_perf_log;
 
 /**

@@ -305,7 +305,7 @@ AdaptiveTransient::takeStep(Real input_dt)
     bool last_solve_converged = lastSolveConverged();
 
     if (last_solve_converged)
-      _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+      _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
 
     postSolve();
 
@@ -314,7 +314,7 @@ AdaptiveTransient::takeStep(Real input_dt)
     // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
     if (last_solve_converged)
     {
-      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
+      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
       _problem.computeUserObjects();
     }
 

@@ -361,7 +361,7 @@ Transient::solveStep(Real input_dt)
 
     _solution_change_norm = _problem.solutionChangeNorm();
 
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
 #if 0
     // User definable callback
     if (_estimate_error)
@@ -370,10 +370,10 @@ Transient::solveStep(Real input_dt)
 
     _problem.onTimestepEnd();
 
-    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
-    _problem.execTransfers(EXEC_TIMESTEP);
-    _problem.execMultiApps(EXEC_TIMESTEP, _picard_max_its == 1);
+    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
+    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
+    _problem.execTransfers(EXEC_TIMESTEP_END);
+    _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
   }
   else
   {
@@ -413,7 +413,7 @@ Transient::endStep(Real input_time)
     if (_picard_max_its > 1)
     {
       _problem.advanceMultiApps(EXEC_TIMESTEP_BEGIN);
-      _problem.advanceMultiApps(EXEC_TIMESTEP);
+      _problem.advanceMultiApps(EXEC_TIMESTEP_END);
     }
 
     //output
@@ -526,7 +526,7 @@ Transient::computeConstrainedDT()
          << dt_cur
          << std::endl;
   }
-  multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP);
+  multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_END);
   if (multi_app_dt < dt_cur)
   {
     dt_cur = multi_app_dt;

@@ -96,11 +96,11 @@ Steady::execute()
     _problem.solve();
     postSolve();
 
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
     _problem.onTimestepEnd();
 
-    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
+    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
     _problem.computeIndicatorsAndMarkers();
 
     _output_warehouse.outputStep(EXEC_TIMESTEP_END);

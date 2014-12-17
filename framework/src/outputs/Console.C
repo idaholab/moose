@@ -555,7 +555,7 @@ Console::outputSystemInformation()
   {
     oss << "LEGACY MODES ENABLED:\n";
     if (_problem_ptr->legacyUoAuxComputation())
-      oss << "  Computing EXEC_RESIDUAL AuxKernel types when any UserObject type is executed.\n";
+      oss << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed.\n";
     if (_problem_ptr->legacyUoInitialization())
       oss << "  Computing all UserObjects during initial setup.\n";
   }

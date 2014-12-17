@@ -36,7 +36,7 @@ RandomInterface::RandomInterface(const std::string & name, InputParameters & par
     _ri_name(name),
     _master_seed(parameters.get<unsigned int>("seed")),
     _is_nodal(is_nodal),
-    _reset_on(EXEC_RESIDUAL),
+    _reset_on(EXEC_LINEAR),
     _curr_node(problem.assembly(tid).node()),
     _curr_element(problem.assembly(tid).elem())
 {

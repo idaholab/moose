@@ -64,10 +64,10 @@ NonlinearEigen::init()
                           std::numeric_limits<Real>::min(), std::numeric_limits<Real>::max(),
                           true, _output_pi, 0.0, _eigenvalue, initial_res);
 
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
     _problem.onTimestepEnd();
-    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-    _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+    _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
+    _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
 
     if (!getParam<bool>("output_on_final"))
     {
@@ -107,8 +107,8 @@ NonlinearEigen::takeStep()
   postSolve();
   printEigenvalue();
 
-  _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::PRE_AUX);
+  _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
   _problem.onTimestepEnd();
-  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP);
-  _problem.computeUserObjects(EXEC_TIMESTEP, UserObjectWarehouse::POST_AUX);
+  _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
+  _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
 }

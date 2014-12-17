@@ -61,9 +61,9 @@ AuxiliarySystem::initialSetup()
   {
     _auxs(EXEC_INITIAL)[i].initialSetup();
     _auxs(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
-    _auxs(EXEC_TIMESTEP)[i].initialSetup();
-    _auxs(EXEC_JACOBIAN)[i].initialSetup();
-    _auxs(EXEC_RESIDUAL)[i].initialSetup();
+    _auxs(EXEC_TIMESTEP_END)[i].initialSetup();
+    _auxs(EXEC_NONLINEAR)[i].initialSetup();
+    _auxs(EXEC_LINEAR)[i].initialSetup();
   }
 }
 
@@ -73,9 +73,9 @@ AuxiliarySystem::timestepSetup()
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
     _auxs(EXEC_TIMESTEP_BEGIN)[i].timestepSetup();
-    _auxs(EXEC_TIMESTEP)[i].timestepSetup();
-    _auxs(EXEC_JACOBIAN)[i].timestepSetup();
-    _auxs(EXEC_RESIDUAL)[i].timestepSetup();
+    _auxs(EXEC_TIMESTEP_END)[i].timestepSetup();
+    _auxs(EXEC_NONLINEAR)[i].timestepSetup();
+    _auxs(EXEC_LINEAR)[i].timestepSetup();
   }
 }
 
@@ -84,8 +84,8 @@ AuxiliarySystem::jacobianSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
   {
-    _auxs(EXEC_JACOBIAN)[i].jacobianSetup();
-    _auxs(EXEC_RESIDUAL)[i].jacobianSetup();
+    _auxs(EXEC_NONLINEAR)[i].jacobianSetup();
+    _auxs(EXEC_LINEAR)[i].jacobianSetup();
   }
 }
 
@@ -93,7 +93,7 @@ void
 AuxiliarySystem::residualSetup()
 {
   for (unsigned int i=0; i<libMesh::n_threads(); i++)
-    _auxs(EXEC_RESIDUAL)[i].residualSetup();
+    _auxs(EXEC_LINEAR)[i].residualSetup();
 }
 
 void
@@ -220,7 +220,7 @@ AuxiliarySystem::serializeSolution()
 }
 
 void
-AuxiliarySystem::compute(ExecFlagType type/* = EXEC_RESIDUAL*/)
+AuxiliarySystem::compute(ExecFlagType type/* = EXEC_LINEAR*/)
 {
   if (_vars[0].scalars().size() > 0)
     computeScalarVars(type);

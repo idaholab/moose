@@ -372,16 +372,16 @@ void FEProblem::initialSetup()
   // UserObject initialSetup
   for (unsigned int i=0; i<n_threads; i++)
   {
-    _user_objects(EXEC_RESIDUAL)[i].updateDependObjects(_aux.getDependObjects(EXEC_RESIDUAL));
-    _user_objects(EXEC_JACOBIAN)[i].updateDependObjects(_aux.getDependObjects(EXEC_JACOBIAN));
-    _user_objects(EXEC_TIMESTEP)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP));
+    _user_objects(EXEC_LINEAR)[i].updateDependObjects(_aux.getDependObjects(EXEC_RESIDUAL));
+    _user_objects(EXEC_NONLINEAR)[i].updateDependObjects(_aux.getDependObjects(EXEC_JACOBIAN));
+    _user_objects(EXEC_TIMESTEP_END)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP_END));
     _user_objects(EXEC_TIMESTEP_BEGIN)[i].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP_BEGIN));
     _user_objects(EXEC_INITIAL)[i].updateDependObjects(_aux.getDependObjects(EXEC_INITIAL));
     _user_objects(EXEC_CUSTOM)[i].updateDependObjects(_aux.getDependObjects(EXEC_CUSTOM));
 
-    _user_objects(EXEC_RESIDUAL)[i].initialSetup();
-    _user_objects(EXEC_JACOBIAN)[i].initialSetup();
-    _user_objects(EXEC_TIMESTEP)[i].initialSetup();
+    _user_objects(EXEC_LINEAR)[i].initialSetup();
+    _user_objects(EXEC_NONLINEAR)[i].initialSetup();
+    _user_objects(EXEC_TIMESTEP_END)[i].initialSetup();
     _user_objects(EXEC_TIMESTEP_BEGIN)[i].initialSetup();
     _user_objects(EXEC_INITIAL)[i].initialSetup();
     _user_objects(EXEC_CUSTOM)[i].initialSetup();
@@ -509,9 +509,9 @@ void FEProblem::initialSetup()
     it->second->updateSeeds(EXEC_INITIAL);
 
   // Call initial setup on the transfers
-  _transfers(EXEC_RESIDUAL)[0].initialSetup();
-  _transfers(EXEC_JACOBIAN)[0].initialSetup();
-  _transfers(EXEC_TIMESTEP)[0].initialSetup();
+  _transfers(EXEC_LINEAR)[0].initialSetup();
+  _transfers(EXEC_NONLINEAR)[0].initialSetup();
+  _transfers(EXEC_TIMESTEP_END)[0].initialSetup();
   _transfers(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
   _transfers(EXEC_INITIAL)[0].initialSetup();
   _transfers(EXEC_CUSTOM)[0].initialSetup();
@@ -538,7 +538,7 @@ void FEProblem::initialSetup()
     if (_use_legacy_uo_initialization)
     {
       computeUserObjects(EXEC_TIMESTEP_BEGIN);
-      computeUserObjects(EXEC_RESIDUAL);
+      computeUserObjects(EXEC_LINEAR);
     }
     Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
   }
@@ -2205,7 +2205,7 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
        * we compute user objects.
        */
       if (_use_legacy_uo_aux_computation)
-        _aux.compute(EXEC_RESIDUAL);
+        _aux.compute(EXEC_LINEAR);
     }
 
     // init
@@ -2534,18 +2534,18 @@ FEProblem::computeUserObjectsInternal(ExecFlagType type, UserObjectWarehouse::GR
 }
 
 void
-FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP*/, UserObjectWarehouse::GROUP group)
+FEProblem::computeUserObjects(ExecFlagType type/* = EXEC_TIMESTEP_END*/, UserObjectWarehouse::GROUP group)
 {
   Moose::perf_log.push("compute_user_objects()","Solve");
 
   switch (type)
   {
-  case EXEC_RESIDUAL:
+  case EXEC_LINEAR:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
       _user_objects(type)[tid].residualSetup();
     break;
 
-  case EXEC_JACOBIAN:
+  case EXEC_NONLINEAR:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
       _user_objects(type)[tid].jacobianSetup();
     break;
@@ -3224,13 +3224,13 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
        it != _random_data_objects.end();
        ++it)
-    it->second->updateSeeds(EXEC_RESIDUAL);
+    it->second->updateSeeds(EXEC_LINEAR);
 
-  execTransfers(EXEC_RESIDUAL);
+  execTransfers(EXEC_LINEAR);
 
-  execMultiApps(EXEC_RESIDUAL);
+  execMultiApps(EXEC_LINEAR);
 
-  computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::PRE_AUX);
+  computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::PRE_AUX);
 
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(soln, *_aux.currentSolution());
@@ -3248,9 +3248,9 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   }
   _aux.residualSetup();
 
-  _aux.compute(EXEC_RESIDUAL);
+  _aux.compute(EXEC_LINEAR);
 
-  computeUserObjects(EXEC_RESIDUAL, UserObjectWarehouse::POST_AUX);
+  computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
 
   _app.getOutputWarehouse().residualSetup();
 
@@ -3277,12 +3277,12 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
          it != _random_data_objects.end();
          ++it)
-      it->second->updateSeeds(EXEC_JACOBIAN);
+      it->second->updateSeeds(EXEC_NONLINEAR);
 
-    execTransfers(EXEC_JACOBIAN);
-    execMultiApps(EXEC_JACOBIAN);
+    execTransfers(EXEC_NONLINEAR);
+    execMultiApps(EXEC_NONLINEAR);
 
-    computeUserObjects(EXEC_JACOBIAN, UserObjectWarehouse::PRE_AUX);
+    computeUserObjects(EXEC_NONLINEAR, UserObjectWarehouse::PRE_AUX);
 
     if (_displaced_problem != NULL)
       _displaced_problem->updateMesh(soln, *_aux.currentSolution());
@@ -3299,9 +3299,9 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
     _aux.jacobianSetup();
 
-    _aux.compute(EXEC_JACOBIAN);
+    _aux.compute(EXEC_NONLINEAR);
 
-    computeUserObjects(EXEC_JACOBIAN, UserObjectWarehouse::POST_AUX);
+    computeUserObjects(EXEC_NONLINEAR, UserObjectWarehouse::POST_AUX);
 
     _app.getOutputWarehouse().jacobianSetup();
 
@@ -3339,7 +3339,7 @@ FEProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
-  _aux.compute(EXEC_JACOBIAN);
+  _aux.compute(EXEC_NONLINEAR);
 
   _nl.computeJacobianBlocks(blocks);
 }
@@ -3370,7 +3370,7 @@ FEProblem::computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number
       _materials[i].residualSetup();
     }
     _aux.residualSetup();
-    _aux.compute(EXEC_RESIDUAL);
+    _aux.compute(EXEC_LINEAR);
     _lower.swap(lower);
     _upper.swap(upper);
   }
