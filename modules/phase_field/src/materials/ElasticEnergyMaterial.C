@@ -26,7 +26,7 @@ ElasticEnergyMaterial::ElasticEnergyMaterial(const std::string & name,
   for (unsigned int i = 0; i < _nargs; ++i)
   {
     _dstress[i] = &getMaterialPropertyDerivative<RankTwoTensor>(_base_name + "stress", _arg_names[i]);
-    _dstrain[i] = &getMaterialPropertyDerivative<RankTwoTensor>(_base_name + "strain", _arg_names[i]);
+    _dstrain[i] = &getMaterialPropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", _arg_names[i]);
 
     _d2stress[i].resize(_nargs);
     _d2strain[i].resize(_nargs);
@@ -34,7 +34,7 @@ ElasticEnergyMaterial::ElasticEnergyMaterial(const std::string & name,
     for (unsigned int j = 0; j < _nargs; ++j)
     {
       _d2stress[i][j] = &getMaterialPropertyDerivative<RankTwoTensor>(_base_name + "stress", _arg_names[i], _arg_names[j]);
-      _d2strain[i][j] = &getMaterialPropertyDerivative<RankTwoTensor>(_base_name + "strain", _arg_names[i], _arg_names[j]);
+      _d2strain[i][j] = &getMaterialPropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", _arg_names[i], _arg_names[j]);
     }
   }
 }
