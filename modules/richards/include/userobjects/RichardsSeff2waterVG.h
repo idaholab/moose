@@ -22,7 +22,7 @@ InputParameters validParams<RichardsSeff2waterVG>();
  */
 class RichardsSeff2waterVG : public RichardsSeff
 {
- public:
+public:
   RichardsSeff2waterVG(const std::string & name, InputParameters parameters);
 
   /**
@@ -38,7 +38,7 @@ class RichardsSeff2waterVG : public RichardsSeff
    * @param qp the quad point to evaluate effective saturation at
    * @param result the derivtives will be placed in this array
    */
-  void dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const;
+  void dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> & result) const;
 
   /**
    * second derivative of effective saturation as a function of porepressure
@@ -46,9 +46,9 @@ class RichardsSeff2waterVG : public RichardsSeff
    * @param qp the quad point to evaluate effective saturation at
    * @param result the derivtives will be placed in this array
    */
-  void d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const;
+  void d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const;
 
- protected:
+protected:
 
   /// van Genuchten alpha parameter
   Real _al;

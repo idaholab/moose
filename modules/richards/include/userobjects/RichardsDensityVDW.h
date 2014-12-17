@@ -33,7 +33,7 @@ InputParameters validParams<RichardsDensityVDW>();
  */
 class RichardsDensityVDW : public RichardsDensity
 {
- public:
+public:
   RichardsDensityVDW(const std::string & name, InputParameters parameters);
 
   /**
@@ -54,7 +54,7 @@ class RichardsDensityVDW : public RichardsDensity
    */
   Real d2density(Real p) const;
 
- protected:
+protected:
 
   /// van der Waals a
   Real _a;

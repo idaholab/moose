@@ -21,11 +21,11 @@ InputParameters validParams<RichardsSeff2waterRSC>()
 }
 
 RichardsSeff2waterRSC::RichardsSeff2waterRSC(const std::string & name, InputParameters parameters) :
-  RichardsSeff(name, parameters),
-  _oil_viscosity(getParam<Real>("oil_viscosity")),
-  _scale_ratio(getParam<Real>("scale_ratio")),
-  _shift(getParam<Real>("shift")),
-  _scale(0.25*_scale_ratio*_oil_viscosity)
+    RichardsSeff(name, parameters),
+    _oil_viscosity(getParam<Real>("oil_viscosity")),
+    _scale_ratio(getParam<Real>("scale_ratio")),
+    _shift(getParam<Real>("shift")),
+    _scale(0.25*_scale_ratio*_oil_viscosity)
 {}
 
 
@@ -38,7 +38,7 @@ RichardsSeff2waterRSC::seff(std::vector<VariableValue *> p, unsigned int qp) con
 }
 
 void
-RichardsSeff2waterRSC::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
+RichardsSeff2waterRSC::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> & result) const
 {
   Real pc = (*p[1])[qp] - (*p[0])[qp];
   result[1] = RichardsSeffRSC::dseff(pc, _shift, _scale);
@@ -46,7 +46,7 @@ RichardsSeff2waterRSC::dseff(std::vector<VariableValue *> p, unsigned int qp, st
 }
 
 void
-RichardsSeff2waterRSC::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
+RichardsSeff2waterRSC::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const
 {
   Real pc = (*p[1])[qp] - (*p[0])[qp];
   result[1][1] = RichardsSeffRSC::d2seff(pc, _shift, _scale);

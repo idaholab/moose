@@ -22,7 +22,7 @@ InputParameters validParams<RichardsSeff1BWsmall>();
  */
 class RichardsSeff1BWsmall : public RichardsSeff
 {
- public:
+public:
   RichardsSeff1BWsmall(const std::string & name, InputParameters parameters);
 
   /**
@@ -54,7 +54,7 @@ class RichardsSeff1BWsmall : public RichardsSeff
    */
   void d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const;
 
- protected:
+protected:
 
   /// BW's initial effective saturation
   Real _sn;

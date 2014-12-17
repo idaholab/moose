@@ -19,7 +19,7 @@ InputParameters validParams<RichardsDensityIdeal>();
  */
 class RichardsDensityIdeal : public RichardsDensity
 {
- public:
+public:
   RichardsDensityIdeal(const std::string & name, InputParameters parameters);
 
   /**
@@ -38,7 +38,7 @@ class RichardsDensityIdeal : public RichardsDensity
    */
   Real d2density(Real /*p*/) const;
 
- protected:
+protected:
 
   /// density = _slope*(p - _p0)
   Real _slope;

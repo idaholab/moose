@@ -24,8 +24,7 @@ InputParameters validParams<RichardsMaterial>();
 class RichardsMaterial : public Material
 {
 public:
-  RichardsMaterial(const std::string & name,
-                  InputParameters parameters);
+  RichardsMaterial(const std::string & name, InputParameters parameters);
 
 protected:
 
@@ -97,13 +96,13 @@ private:
   MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _d2seff_dv;
 
   /// old saturation
-  MaterialProperty<std::vector<Real> >& _sat_old;
+  MaterialProperty<std::vector<Real> > & _sat_old;
 
   /// saturation (vector of saturations in case of multiphase)
-  MaterialProperty<std::vector<Real> >& _sat;
+  MaterialProperty<std::vector<Real> > & _sat;
 
   /// d(saturation_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > >& _dsat_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _dsat_dv;
 
 
   /// relative permeability (vector of relative permeabilities in case of multiphase)

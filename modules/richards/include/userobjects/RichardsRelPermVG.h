@@ -20,7 +20,7 @@ InputParameters validParams<RichardsRelPermVG>();
  */
 class RichardsRelPermVG : public RichardsRelPerm
 {
- public:
+public:
   RichardsRelPermVG(const std::string & name, InputParameters parameters);
 
   /**
@@ -41,7 +41,7 @@ class RichardsRelPermVG : public RichardsRelPerm
    */
   Real d2relperm(Real seff) const;
 
- protected:
+protected:
 
   /// immobile saturation
   Real _simm;

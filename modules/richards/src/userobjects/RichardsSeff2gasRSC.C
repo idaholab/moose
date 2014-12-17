@@ -21,11 +21,11 @@ InputParameters validParams<RichardsSeff2gasRSC>()
 }
 
 RichardsSeff2gasRSC::RichardsSeff2gasRSC(const std::string & name, InputParameters parameters) :
-  RichardsSeff(name, parameters),
-  _oil_viscosity(getParam<Real>("oil_viscosity")),
-  _scale_ratio(getParam<Real>("scale_ratio")),
-  _shift(getParam<Real>("shift")),
-  _scale(0.25*_scale_ratio*_oil_viscosity)
+    RichardsSeff(name, parameters),
+    _oil_viscosity(getParam<Real>("oil_viscosity")),
+    _scale_ratio(getParam<Real>("scale_ratio")),
+    _shift(getParam<Real>("shift")),
+    _scale(0.25*_scale_ratio*_oil_viscosity)
 {}
 
 

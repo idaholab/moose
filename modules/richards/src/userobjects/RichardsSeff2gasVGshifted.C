@@ -19,10 +19,10 @@ InputParameters validParams<RichardsSeff2gasVGshifted>()
 }
 
 RichardsSeff2gasVGshifted::RichardsSeff2gasVGshifted(const std::string & name, InputParameters parameters) :
-  RichardsSeff(name, parameters),
-  _al(getParam<Real>("al")),
-  _m(getParam<Real>("m")),
-  _shift(getParam<Real>("shift"))
+    RichardsSeff(name, parameters),
+    _al(getParam<Real>("al")),
+    _m(getParam<Real>("m")),
+    _shift(getParam<Real>("shift"))
 {
   _scale = RichardsSeffVG::seff(-_shift, _al, _m);
 }
@@ -38,7 +38,7 @@ RichardsSeff2gasVGshifted::seff(std::vector<VariableValue *> p, unsigned int qp)
 }
 
 void
-RichardsSeff2gasVGshifted::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
+RichardsSeff2gasVGshifted::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> & result) const
 {
   Real negpc = (*p[0])[qp] - (*p[1])[qp];
   negpc = negpc - _shift;
@@ -48,7 +48,7 @@ RichardsSeff2gasVGshifted::dseff(std::vector<VariableValue *> p, unsigned int qp
 
 
 void
-RichardsSeff2gasVGshifted::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
+RichardsSeff2gasVGshifted::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const
 {
   Real negpc = (*p[0])[qp] - (*p[1])[qp];
   negpc = negpc - _shift;

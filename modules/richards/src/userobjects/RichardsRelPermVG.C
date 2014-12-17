@@ -18,9 +18,9 @@ InputParameters validParams<RichardsRelPermVG>()
 }
 
 RichardsRelPermVG::RichardsRelPermVG(const std::string & name, InputParameters parameters) :
-  RichardsRelPerm(name, parameters),
-  _simm(getParam<Real>("simm")),
-  _m(getParam<Real>("m"))
+    RichardsRelPerm(name, parameters),
+    _simm(getParam<Real>("simm")),
+    _m(getParam<Real>("m"))
 {
 }
 
@@ -28,13 +28,11 @@ RichardsRelPermVG::RichardsRelPermVG(const std::string & name, InputParameters p
 Real
 RichardsRelPermVG::relperm(Real seff) const
 {
-  if (seff >= 1.0) {
+  if (seff >= 1.0)
     return 1.0;
-  }
 
-  if (seff <= _simm) {
+  if (seff <= _simm)
     return 0.0;
-  }
 
   Real s_internal = (seff - _simm)/(1.0 - _simm);
   Real krel = std::pow(s_internal, 0.5)*std::pow(1 - std::pow(1 - std::pow(s_internal, 1.0/_m), _m), 2);
@@ -49,13 +47,11 @@ RichardsRelPermVG::relperm(Real seff) const
 Real
 RichardsRelPermVG::drelperm(Real seff) const
 {
-  if (seff >= 1.0) {
+  if (seff >= 1.0)
     return 0.0;
-  }
 
-  if (seff <= _simm) {
+  if (seff <= _simm)
     return 0.0;
-  }
 
   Real s_internal = (seff - _simm)/(1.0 - _simm);
   Real tmp = 1 - std::pow(s_internal, 1.0/_m);
@@ -71,13 +67,11 @@ RichardsRelPermVG::drelperm(Real seff) const
 Real
 RichardsRelPermVG::d2relperm(Real seff) const
 {
-  if (seff >= 1.0) {
+  if (seff >= 1.0)
     return 0.0;
-  }
 
-  if (seff <= _simm) {
+  if (seff <= _simm)
     return 0.0;
-  }
 
   Real s_internal = (seff - _simm)/(1.0 - _simm);
   Real tmp = 1 - std::pow(s_internal, 1.0/_m);

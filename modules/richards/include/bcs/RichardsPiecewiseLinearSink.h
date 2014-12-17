@@ -36,8 +36,7 @@ class RichardsPiecewiseLinearSink : public IntegratedBC
 {
 public:
 
-  RichardsPiecewiseLinearSink(const std::string & name,
-                        InputParameters parameters);
+  RichardsPiecewiseLinearSink(const std::string & name, InputParameters parameters);
 
 protected:
   virtual void computeResidual();
@@ -113,13 +112,13 @@ protected:
   std::vector<std::vector<Real> > _dnodal_relperm_dv;
 
   /// porepressure values (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > &_pp;
+  MaterialProperty<std::vector<Real> > & _pp;
 
   /// d(porepressure_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_dpp_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
 
   /// viscosity (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > &_viscosity;
+  MaterialProperty<std::vector<Real> > & _viscosity;
 
   /// permeability
   MaterialProperty<RealTensorValue> & _permeability;
@@ -128,36 +127,26 @@ protected:
    * derivative of effective saturation wrt variables
    * only _dseff_dv[_pvar][i] is used for i being all variables
    */
-  MaterialProperty<std::vector<std::vector<Real> > > &_dseff_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _dseff_dv;
 
   /// relative permeability (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > &_rel_perm;
+  MaterialProperty<std::vector<Real> > & _rel_perm;
 
   /// d(relperm_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_drel_perm_dv;
+  MaterialProperty<std::vector<std::vector<Real> > > & _drel_perm_dv;
 
   /// fluid density (only the _pvar component is used)
-  MaterialProperty<std::vector<Real> > &_density;
+  MaterialProperty<std::vector<Real> > & _density;
 
   /// d(density_i)/d(variable_j)
-  MaterialProperty<std::vector<std::vector<Real> > > &_ddensity_dv;
-
-  /**
-   * Holds the values of pressures at all the nodes of the element
-   * This holds the same info as _ps_at_nodes, but in a different way.
-   * Eg: _nodal_pp[_pvar]->nodalSln()[i] = (*_ps_at_nodes[_pvar])[i]
-   * We call its computeNodalValues method in order to retrieve the nodal
-   * porepressures from Moose if _fully_upwind = true.
-   * NOTE: only valid if all Richards variables are pressures
-   */
-  std::vector<MooseVariable *> _nodal_pp;
+  MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_dv;
 
   /**
    * Holds the values of pressures at all the nodes of the element
    * Only used if _fully_upwind = true
    * Eg:
    * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
-   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i]
+   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i] = porepressure of pressure-variable _pvar at node i
    */
   std::vector<VariableValue *> _ps_at_nodes;
 

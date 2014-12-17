@@ -15,7 +15,7 @@
  */
 class RichardsSeffRSC
 {
- public:
+public:
   RichardsSeffRSC();
 
   /**

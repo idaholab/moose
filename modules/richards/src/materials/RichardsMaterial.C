@@ -30,8 +30,7 @@ InputParameters validParams<RichardsMaterial>()
   return params;
 }
 
-RichardsMaterial::RichardsMaterial(const std::string & name,
-                                   InputParameters parameters) :
+RichardsMaterial::RichardsMaterial(const std::string & name, InputParameters parameters) :
     Material(name, parameters),
 
     _material_por(getParam<Real>("mat_porosity")),
@@ -101,7 +100,7 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
   // Need to add the variables that the user object is coupled to as dependencies so MOOSE will compute them
   {
     const std::vector<MooseVariable *> & coupled_vars = _richards_name_UO.getCoupledMooseVars();
-    for (unsigned int i=0; i<coupled_vars.size(); i++)
+    for (unsigned int i = 0; i < coupled_vars.size(); i++)
       addMooseVariableDependency(coupled_vars[i]);
   }
 
@@ -112,7 +111,7 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
     mooseError(LIBMESH_DIM*LIBMESH_DIM << " components of perm_change must be given to a RichardsMaterial.  You supplied " << coupledComponents("perm_change") << "\n");
 
   _perm_change.resize(LIBMESH_DIM*LIBMESH_DIM);
-  for (unsigned int i=0 ; i<LIBMESH_DIM*LIBMESH_DIM ; ++i)
+  for (unsigned int i = 0; i < LIBMESH_DIM*LIBMESH_DIM; ++i)
     _perm_change[i] = (isCoupled("perm_change")? &coupledValue("perm_change", i) : &_zero); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
 
   if (!(_material_viscosity.size() == _num_p && getParam<std::vector<UserObjectName> >("relperm_UO").size() && getParam<std::vector<UserObjectName> >("seff_UO").size() && getParam<std::vector<UserObjectName> >("sat_UO").size() && getParam<std::vector<UserObjectName> >("density_UO").size() && getParam<std::vector<UserObjectName> >("SUPG_UO").size()))
@@ -130,7 +129,7 @@ RichardsMaterial::RichardsMaterial(const std::string & name,
   _grad_p.resize(_num_p);
 
 
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
   {
     // DON'T WANT "pressure_vars" at all since pp_name_UO contains the same info
     //_pressure_vals[i] = &coupledValue("pressure_vars", i); // coupled value returns a reference
@@ -155,7 +154,7 @@ RichardsMaterial::computePandSeff()
   // From these we will build the relative permeability, density, flux, etc
   if (_richards_name_UO.var_types() == "pppp")
   {
-    for (unsigned int i=0 ; i<_num_p; ++i)
+    for (unsigned int i = 0; i < _num_p; ++i)
     {
       _pressure_vals[i] = _richards_name_UO.richards_vals(i);
       _pressure_old_vals[i] = _richards_name_UO.richards_vals_old(i);
@@ -164,7 +163,7 @@ RichardsMaterial::computePandSeff()
   }
 
 
-  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
   {
     _pp_old[qp].resize(_num_p);
     _pp[qp].resize(_num_p);
@@ -178,7 +177,7 @@ RichardsMaterial::computePandSeff()
 
     if (_richards_name_UO.var_types() == "pppp")
     {
-      for (unsigned int i=0 ; i<_num_p; ++i)
+      for (unsigned int i = 0; i < _num_p; ++i)
       {
         _pp_old[qp][i] = (*_pressure_old_vals[i])[qp];
         _pp[qp][i] = (*_pressure_vals[i])[qp];
@@ -187,7 +186,7 @@ RichardsMaterial::computePandSeff()
         _dpp_dv[qp][i][i] = 1;
 
         _d2pp_dv[qp][i].resize(_num_p);
-        for (unsigned int j=0 ; j<_num_p; ++j)
+        for (unsigned int j = 0; j < _num_p; ++j)
           _d2pp_dv[qp][i][j].assign(_num_p, 0);
 
         _seff_old[qp][i] = (*_material_seff_UO[i]).seff(_pressure_old_vals, qp);
@@ -197,7 +196,7 @@ RichardsMaterial::computePandSeff()
         (*_material_seff_UO[i]).dseff(_pressure_vals, qp, _dseff_dv[qp][i]);
 
         _d2seff_dv[qp][i].resize(_num_p);
-        for (unsigned int j=0 ; j<_num_p; ++j)
+        for (unsigned int j = 0; j < _num_p; ++j)
           _d2seff_dv[qp][i][j].resize(_num_p);
         (*_material_seff_UO[i]).d2seff(_pressure_vals, qp, _d2seff_dv[qp][i]);
 
@@ -214,7 +213,7 @@ RichardsMaterial::computeDerivedQuantities(unsigned int qp)
 {
   // fluid viscosity
   _viscosity[qp].resize(_num_p);
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
     _viscosity[qp][i] = _material_viscosity[i];
 
 
@@ -222,12 +221,12 @@ RichardsMaterial::computeDerivedQuantities(unsigned int qp)
   _sat_old[qp].resize(_num_p);
   _sat[qp].resize(_num_p);
   _dsat_dv[qp].resize(_num_p);
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
   {
     _sat_old[qp][i] = (*_material_sat_UO[i]).sat(_seff_old[qp][i]);
     _sat[qp][i] = (*_material_sat_UO[i]).sat(_seff[qp][i]);
     _dsat_dv[qp][i].assign(_num_p, (*_material_sat_UO[i]).dsat(_seff[qp][i]));
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
       _dsat_dv[qp][i][j] *= _dseff_dv[qp][i][j];
   }
 
@@ -236,12 +235,12 @@ RichardsMaterial::computeDerivedQuantities(unsigned int qp)
   _density_old[qp].resize(_num_p);
   _density[qp].resize(_num_p);
   _ddensity_dv[qp].resize(_num_p);
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
   {
     _density_old[qp][i] = (*_material_density_UO[i]).density(_pp_old[qp][i]);
     _density[qp][i] = (*_material_density_UO[i]).density(_pp[qp][i]);
     _ddensity_dv[qp][i].assign(_num_p, (*_material_density_UO[i]).ddensity(_pp[qp][i]));
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
       _ddensity_dv[qp][i][j] *= _dpp_dv[qp][i][j];
   }
 
@@ -249,11 +248,11 @@ RichardsMaterial::computeDerivedQuantities(unsigned int qp)
   // relative permeability
   _rel_perm[qp].resize(_num_p);
   _drel_perm_dv[qp].resize(_num_p);
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
   {
     _rel_perm[qp][i] = (*_material_relperm_UO[i]).relperm(_seff[qp][i]);
     _drel_perm_dv[qp][i].assign(_num_p, (*_material_relperm_UO[i]).drelperm(_seff[qp][i]));
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
       _drel_perm_dv[qp][i][j] *= _dseff_dv[qp][i][j];
   }
 
@@ -262,12 +261,12 @@ RichardsMaterial::computeDerivedQuantities(unsigned int qp)
   _mass_old[qp].resize(_num_p);
   _mass[qp].resize(_num_p);
   _dmass[qp].resize(_num_p);
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
   {
     _mass_old[qp][i] = _porosity_old[qp]*_density_old[qp][i]*_sat_old[qp][i];
     _mass[qp][i] = _porosity[qp]*_density[qp][i]*_sat[qp][i];
     _dmass[qp][i].resize(_num_p);
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
       _dmass[qp][i][j] = _porosity[qp]*(_ddensity_dv[qp][i][j]*_sat[qp][i] + _density[qp][i]*_dsat_dv[qp][i][j]);
   }
 
@@ -276,16 +275,16 @@ RichardsMaterial::computeDerivedQuantities(unsigned int qp)
   _flux_no_mob[qp].resize(_num_p);
   _dflux_no_mob_dv[qp].resize(_num_p);
   _dflux_no_mob_dgradv[qp].resize(_num_p);
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
   {
     _flux_no_mob[qp][i] = _permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]);
 
     _dflux_no_mob_dv[qp][i].resize(_num_p);
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
       _dflux_no_mob_dv[qp][i][j] = _permeability[qp]*(- _ddensity_dv[qp][i][j]*_gravity[qp]);
 
     _dflux_no_mob_dgradv[qp][i].resize(_num_p);
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
       _dflux_no_mob_dgradv[qp][i][j] = _permeability[qp]*_dpp_dv[qp][i][j];
   }
 
@@ -294,19 +293,19 @@ RichardsMaterial::computeDerivedQuantities(unsigned int qp)
   _flux[qp].resize(_num_p);
   _dflux_dv[qp].resize(_num_p);
   _dflux_dgradv[qp].resize(_num_p);
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
   {
     _flux[qp][i] = _density[qp][i]*_rel_perm[qp][i]*_flux_no_mob[qp][i]/_viscosity[qp][i];
 
     _dflux_dv[qp][i].resize(_num_p);
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
     {
       _dflux_dv[qp][i][j] = _density[qp][i]*_rel_perm[qp][i]*_dflux_no_mob_dv[qp][i][j]/_viscosity[qp][i];
       _dflux_dv[qp][i][j] += (_ddensity_dv[qp][i][j]*_rel_perm[qp][i] + _density[qp][i]*_drel_perm_dv[qp][i][j])*_flux_no_mob[qp][i]/_viscosity[qp][i];
     }
 
     _dflux_dgradv[qp][i].resize(_num_p);
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
       _dflux_dgradv[qp][i][j] = _density[qp][i]*_rel_perm[qp][i]*_dflux_no_mob_dgradv[qp][i][j]/_viscosity[qp][i];
   }
 }
@@ -319,12 +318,12 @@ RichardsMaterial::zero2ndDerivedQuantities(unsigned int qp)
   _d2flux_dgradvdv[qp].resize(_num_p);
   _d2flux_dvdgradv[qp].resize(_num_p);
 
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
   {
     _d2flux_dvdv[qp][i].resize(_num_p);
     _d2flux_dgradvdv[qp][i].resize(_num_p);
     _d2flux_dvdgradv[qp][i].resize(_num_p);
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
     {
       _d2flux_dvdv[qp][i][j].assign(_num_p, RealVectorValue());
       _d2flux_dgradvdv[qp][i][j].assign(_num_p, RealTensorValue());
@@ -339,7 +338,7 @@ RichardsMaterial::compute2ndDerivedQuantities(unsigned int qp)
 {
   zero2ndDerivedQuantities(qp);
 
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
   {
     if ((*_material_SUPG_UO[i]).SUPG_trivial())
       continue; // as the derivatives won't be needed
@@ -348,10 +347,10 @@ RichardsMaterial::compute2ndDerivedQuantities(unsigned int qp)
     _d2density[i].resize(_num_p);
     Real ddens = (*_material_density_UO[i]).ddensity(_pp[qp][i]);
     Real d2dens = (*_material_density_UO[i]).d2density(_pp[qp][i]);
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
     {
       _d2density[i][j].resize(_num_p);
-      for (unsigned int k=0 ; k<_num_p; ++k)
+      for (unsigned int k = 0; k < _num_p; ++k)
         _d2density[i][j][k] = d2dens*_dpp_dv[qp][i][j]*_dpp_dv[qp][i][k] + ddens*_d2pp_dv[qp][i][j][k];
     }
 
@@ -359,18 +358,18 @@ RichardsMaterial::compute2ndDerivedQuantities(unsigned int qp)
     _d2rel_perm_dv[i].resize(_num_p);
     Real drel = (*_material_relperm_UO[i]).drelperm(_seff[qp][i]);
     Real d2rel = (*_material_relperm_UO[i]).d2relperm(_seff[qp][i]);
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
     {
       _d2rel_perm_dv[i][j].resize(_num_p);
-      for (unsigned int k=0 ; k<_num_p; ++k)
+      for (unsigned int k = 0; k < _num_p; ++k)
         _d2rel_perm_dv[i][j][k] = d2rel*_dseff_dv[qp][i][j]*_dseff_dv[qp][i][k] + drel*_d2seff_dv[qp][i][j][k];
     }
 
 
       // now compute the second derivs of the fluxes
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
     {
-      for (unsigned int k=0 ; k<_num_p; ++k)
+      for (unsigned int k = 0; k < _num_p; ++k)
       {
         _d2flux_dvdv[qp][i][j][k] = _d2density[i][j][k]*_rel_perm[qp][i]*(_permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]));
         _d2flux_dvdv[qp][i][j][k] += (_ddensity_dv[qp][i][j]*_drel_perm_dv[qp][i][k] + _ddensity_dv[qp][i][k]*_drel_perm_dv[qp][i][j])*(_permeability[qp]*((*_grad_p[i])[qp] - _density[qp][i]*_gravity[qp]));
@@ -380,14 +379,14 @@ RichardsMaterial::compute2ndDerivedQuantities(unsigned int qp)
         _d2flux_dvdv[qp][i][j][k] += _density[qp][i]*_rel_perm[qp][i]*(_permeability[qp]*(- _d2density[i][j][k]*_gravity[qp]));
       }
     }
-    for (unsigned int j=0 ; j<_num_p; ++j)
-      for (unsigned int k=0 ; k<_num_p; ++k)
+    for (unsigned int j = 0; j < _num_p; ++j)
+      for (unsigned int k = 0; k < _num_p; ++k)
         _d2flux_dvdv[qp][i][j][k] /= _viscosity[qp][i];
 
 
-    for (unsigned int j=0 ; j<_num_p; ++j)
+    for (unsigned int j = 0; j < _num_p; ++j)
     {
-      for (unsigned int k=0 ; k<_num_p; ++k)
+      for (unsigned int k = 0; k < _num_p; ++k)
       {
         _d2flux_dgradvdv[qp][i][j][k] = (_ddensity_dv[qp][i][k]*_rel_perm[qp][i] + _density[qp][i]*_drel_perm_dv[qp][i][k])*_permeability[qp]*_dpp_dv[qp][i][j]/_viscosity[qp][i];
         _d2flux_dvdgradv[qp][i][k][j] = _d2flux_dgradvdv[qp][i][j][k];
@@ -403,7 +402,7 @@ RichardsMaterial::zeroSUPG(unsigned int qp)
   _tauvel_SUPG[qp].assign(_num_p, RealVectorValue());
   _dtauvel_SUPG_dgradp[qp].resize(_num_p);
   _dtauvel_SUPG_dp[qp].resize(_num_p);
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
   {
     _dtauvel_SUPG_dp[qp][i].assign(_num_p, RealVectorValue());
     _dtauvel_SUPG_dgradp[qp][i].assign(_num_p, RealTensorValue());
@@ -420,17 +419,17 @@ RichardsMaterial::computeSUPG()
   FEBase * & fe(_assembly.getFE(getParam<bool>("linear_shape_fcns") ? FEType(FIRST, LAGRANGE) : FEType(SECOND, LAGRANGE), _current_elem->dim()));
 
   // Grab references to FE object's mapping data from the _subproblem's FE object
-  const std::vector<Real>& dxidx(fe->get_dxidx());
-  const std::vector<Real>& dxidy(fe->get_dxidy());
-  const std::vector<Real>& dxidz(fe->get_dxidz());
-  const std::vector<Real>& detadx(fe->get_detadx());
-  const std::vector<Real>& detady(fe->get_detady());
-  const std::vector<Real>& detadz(fe->get_detadz());
-  const std::vector<Real>& dzetadx(fe->get_dzetadx());
-  const std::vector<Real>& dzetady(fe->get_dzetady());
-  const std::vector<Real>& dzetadz(fe->get_dzetadz());
+  const std::vector<Real> & dxidx(fe->get_dxidx());
+  const std::vector<Real> & dxidy(fe->get_dxidy());
+  const std::vector<Real> & dxidz(fe->get_dxidz());
+  const std::vector<Real> & detadx(fe->get_detadx());
+  const std::vector<Real> & detady(fe->get_detady());
+  const std::vector<Real> & detadz(fe->get_detadz());
+  const std::vector<Real> & dzetadx(fe->get_dzetadx());
+  const std::vector<Real> & dzetady(fe->get_dzetady());
+  const std::vector<Real> & dzetadz(fe->get_dzetadz());
 
-  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
   {
 
     // Bounds checking on element data and putting into vector form
@@ -467,7 +466,7 @@ RichardsMaterial::computeSUPG()
     }
 
     _trace_perm = _permeability[qp].tr();
-    for (unsigned int i=0 ; i<_num_p; ++i)
+    for (unsigned int i = 0; i < _num_p; ++i)
     {
       RealVectorValue vel = (*_material_SUPG_UO[i]).velSUPG(_permeability[qp], (*_grad_p[i])[qp], _density[qp][i], _gravity[qp]);
       RealTensorValue dvel_dgradp = (*_material_SUPG_UO[i]).dvelSUPG_dgradp(_permeability[qp]);
@@ -482,14 +481,14 @@ RichardsMaterial::computeSUPG()
       _tauvel_SUPG[qp][i] = tau*vel;
 
       RealTensorValue dtauvel_dgradp = tau*dvel_dgradp;
-      for (unsigned int j=0 ; j<LIBMESH_DIM; ++j)
-        for (unsigned int k=0 ; k<LIBMESH_DIM; ++k)
+      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+        for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
           dtauvel_dgradp(j, k) += dtau_dgradp(j)*vel(k); // this is outerproduct - maybe libmesh can do it better?
-      for (unsigned int j=0 ; j<_num_p; ++j)
+      for (unsigned int j = 0; j<_num_p; ++j)
         _dtauvel_SUPG_dgradp[qp][i][j] = dtauvel_dgradp*_dpp_dv[qp][i][j];
 
       RealVectorValue dtauvel_dp = dtau_dp*vel + tau*dvel_dp;
-      for (unsigned int j=0 ; j<_num_p; ++j)
+      for (unsigned int j = 0; j < _num_p; ++j)
         _dtauvel_SUPG_dp[qp][i][j] = dtauvel_dp*_dpp_dv[qp][i][j];
     }
   }
@@ -504,38 +503,38 @@ RichardsMaterial::computeProperties()
 
 
   // porosity, permeability, and gravity
-  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
   {
     _porosity[qp] = _material_por + (*_por_change)[qp];
     _porosity_old[qp] = _material_por + (*_por_change_old)[qp];
 
     _permeability[qp] = _material_perm;
-    for (unsigned int i=0; i<LIBMESH_DIM; i++)
-      for (unsigned int j=0; j<LIBMESH_DIM; j++)
-        _permeability[qp](i,j) *= std::pow(10,(*_perm_change[LIBMESH_DIM*i+j])[qp]);
+    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+      for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+        _permeability[qp](i, j) *= std::pow(10, (*_perm_change[LIBMESH_DIM*i+j])[qp]);
 
     _gravity[qp] = _material_gravity;
   }
 
 
   // compute "derived" quantities -- those that depend on P and Seff --- such as density, relperm
-  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
     computeDerivedQuantities(qp);
 
 
   // compute certain second derivatives of the derived quantities
   // These are needed in Jacobian calculations if doing SUPG
-  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
     compute2ndDerivedQuantities(qp);
 
 
   // Now for SUPG itself
-  for (unsigned int qp=0; qp<_qrule->n_points(); qp++)
+  for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
     zeroSUPG(qp);
 
   // the following saves computational effort if all SUPG is trivial
   bool trivial_supg = true;
-  for (unsigned int i=0 ; i<_num_p; ++i)
+  for (unsigned int i = 0; i < _num_p; ++i)
     trivial_supg = trivial_supg && (*_material_SUPG_UO[i]).SUPG_trivial();
   if (trivial_supg)
     return;
