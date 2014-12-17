@@ -6,6 +6,17 @@ ifeq ($(CROW_USE_PYTHON3),TRUE)
 	PYTHON3_CONFIG_WHICH := $(shell which python3-config 2>/dev/null)
 endif
 
+ifneq ($(findstring SWIG Version 2,$(SWIG_VERSION)),)
+	HAS_SWIG := false #true
+else
+ifneq ($(findstring SWIG Version 3,$(SWIG_VERSION)),)
+	HAS_SWIG := true
+else
+	HAS_SWIG := false
+endif
+endif
+$(warning HAS_SWIG $(HAS_SWIG))
+
 UNAME := $(shell uname)
 
 ifneq ($(PYTHON_CONFIG_WHICH),)
@@ -19,7 +30,7 @@ ifneq ($(PYTHON3_CONFIG_WHICH),)
 endif
 
 ifneq ($(PYTHON3_CONFIG_WHICH),)
-ifeq ($(findstring SWIG Version 2,$(SWIG_VERSION)),)
+ifeq ($(HAS_SWIG),false)
 	CONTROL_MODULES =
 	PYTHON_MODULES =
 else
@@ -37,9 +48,14 @@ ifneq ($(PYTHON_CONFIG_WHICH),)
 	PYTHON_INCLUDE=$(PYTHON2_INCLUDE)
 	PYTHON_LIB=$(PYTHON2_LIB)
 	#CONTROL_MODULES=
+ifeq ($(HAS_SWIG),false)
+	CONTROL_MODULES =
+	PYTHON_MODULES =
+else
 	SWIG_PY_FLAGS=
 	PYTHON_MODULES = $(CROW_DIR)/crow_modules/_distribution1Dpy2.so $(CROW_DIR)/crow_modules/_interpolationNDpy2.so
 	CONTROL_MODULES=$(CROW_DIR)/control_modules/_distribution1D.so $(CROW_DIR)/control_modules/_crowtools.so
+endif #have swig
 else #No python3 config or python2 config
 	PYTHON_INCLUDE = -DNO_PYTHON_FOR_YOU
 	PYTHON_LIB = -DNO_PYTHON_FOR_YOU
@@ -59,6 +75,7 @@ endif
 
 HAS_DYNAMIC := $(shell $(libmesh_LIBTOOL) --config | grep build_libtool_libs | cut -d'=' -f2 )
 
+$(warning CROW_MODULES $(CROW_MODULES))
 ifeq ($(HAS_DYNAMIC),no)
 ifdef CONTROL_MODULES
 $(warning CROW modules must be compiled with shared libmesh libraries)
