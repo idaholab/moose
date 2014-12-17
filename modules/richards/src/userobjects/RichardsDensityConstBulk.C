@@ -18,9 +18,9 @@ InputParameters validParams<RichardsDensityConstBulk>()
 }
 
 RichardsDensityConstBulk::RichardsDensityConstBulk(const std::string & name, InputParameters parameters) :
-  RichardsDensity(name, parameters),
-  _dens0(getParam<Real>("dens0")),
-  _bulk(getParam<Real>("bulk_mod"))
+    RichardsDensity(name, parameters),
+    _dens0(getParam<Real>("dens0")),
+    _bulk(getParam<Real>("bulk_mod"))
 {}
 
 

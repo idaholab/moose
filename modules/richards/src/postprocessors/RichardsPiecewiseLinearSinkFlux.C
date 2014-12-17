@@ -50,10 +50,10 @@ RichardsPiecewiseLinearSinkFlux::computeQpIntegral()
   flux *= _m_func.value(_t, _q_point[_qp]);
 
   if (_use_mobility)
-    {
-      Real k = (_permeability[_qp]*_normals[_qp])*_normals[_qp];
-      flux *= _density[_qp][_pvar]*k/_viscosity[_qp][_pvar];
-    }
+  {
+    Real k = (_permeability[_qp]*_normals[_qp])*_normals[_qp];
+    flux *= _density[_qp][_pvar]*k/_viscosity[_qp][_pvar];
+  }
   if (_use_relperm)
     flux *= _rel_perm[_qp][_pvar];
 

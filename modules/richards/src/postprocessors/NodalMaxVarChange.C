@@ -18,9 +18,9 @@ InputParameters validParams<NodalMaxVarChange>()
 }
 
 NodalMaxVarChange::NodalMaxVarChange(const std::string & name, InputParameters parameters) :
-  NodalVariablePostprocessor(name, parameters),
-  _u_old(_var.nodalSlnOld()),
-  _value(-std::numeric_limits<Real>::max())
+    NodalVariablePostprocessor(name, parameters),
+    _u_old(_var.nodalSlnOld()),
+    _value(-std::numeric_limits<Real>::max())
 {
 }
 

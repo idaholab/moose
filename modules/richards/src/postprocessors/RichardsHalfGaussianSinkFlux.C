@@ -32,10 +32,8 @@ RichardsHalfGaussianSinkFlux::RichardsHalfGaussianSinkFlux(const std::string & n
 Real
 RichardsHalfGaussianSinkFlux::computeQpIntegral()
 {
-  if (_pp[_qp][_pvar] >= _centre) {
+  if (_pp[_qp][_pvar] >= _centre)
     return _maximum*_dt;
-  }
-  else {
+  else
     return _maximum*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2))*_dt;
-  }
 }

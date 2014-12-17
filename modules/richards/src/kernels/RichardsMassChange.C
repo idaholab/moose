@@ -18,8 +18,7 @@ InputParameters validParams<RichardsMassChange>()
   return params;
 }
 
-RichardsMassChange::RichardsMassChange(const std::string & name,
-                                             InputParameters parameters) :
+RichardsMassChange::RichardsMassChange(const std::string & name, InputParameters parameters) :
     TimeDerivative(name,parameters),
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),

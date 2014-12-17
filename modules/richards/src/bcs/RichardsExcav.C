@@ -19,8 +19,7 @@ InputParameters validParams<RichardsExcav>()
   return params;
 }
 
-RichardsExcav::RichardsExcav(const std::string & name,
-                                             InputParameters parameters) :
+RichardsExcav::RichardsExcav(const std::string & name, InputParameters parameters) :
     NodalBC(name,parameters),
     _p_excav(getParam<Real>("p_excav")),
     _func(getFunction("excav_geom_function"))

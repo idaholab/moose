@@ -20,7 +20,7 @@ InputParameters validParams<RichardsSUPGnone>();
  */
 class RichardsSUPGnone : public RichardsSUPG
 {
- public:
+public:
   RichardsSUPGnone(const std::string & name, InputParameters parameters);
 
   /// SUPG velocity = zero

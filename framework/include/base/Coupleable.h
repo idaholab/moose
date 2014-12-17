@@ -176,6 +176,30 @@ protected:
    */
   virtual VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
 
+  /**
+   * Returns nodal values of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   */
+  virtual VariableValue & coupledNodalValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns an old nodal value from previous time step  of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the old value of the coupled variable
+   */
+  virtual VariableValue & coupledNodalValueOld(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns an old nodal value from two time steps previous of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the older value of the coupled variable
+   */
+  virtual VariableValue & coupledNodalValueOlder(const std::string & var_name, unsigned int comp = 0);
+
 protected:
   // Reference to FEProblem
   FEProblem & _c_fe_problem;

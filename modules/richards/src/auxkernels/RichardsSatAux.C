@@ -18,9 +18,9 @@ InputParameters validParams<RichardsSatAux>()
 }
 
 RichardsSatAux::RichardsSatAux(const std::string & name, InputParameters parameters) :
-  AuxKernel(name, parameters),
-  _seff_var(coupledValue("seff_var")),
-  _sat_UO(getUserObject<RichardsSat>("sat_UO"))
+    AuxKernel(name, parameters),
+    _seff_var(coupledValue("seff_var")),
+    _sat_UO(getUserObject<RichardsSat>("sat_UO"))
 {}
 
 

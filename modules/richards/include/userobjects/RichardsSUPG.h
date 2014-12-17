@@ -22,7 +22,7 @@ InputParameters validParams<RichardsSUPG>();
  */
 class RichardsSUPG : public GeneralUserObject
 {
- public:
+public:
   RichardsSUPG(const std::string & name, InputParameters parameters);
 
   void initialize();

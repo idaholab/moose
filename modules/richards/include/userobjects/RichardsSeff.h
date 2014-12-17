@@ -20,7 +20,7 @@ InputParameters validParams<RichardsSeff>();
  */
 class RichardsSeff : public GeneralUserObject
 {
- public:
+public:
   RichardsSeff(const std::string & name, InputParameters parameters);
 
   void initialize();

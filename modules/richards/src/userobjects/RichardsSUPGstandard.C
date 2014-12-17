@@ -17,8 +17,8 @@ InputParameters validParams<RichardsSUPGstandard>()
 }
 
 RichardsSUPGstandard::RichardsSUPGstandard(const std::string & name, InputParameters parameters) :
-  RichardsSUPG(name, parameters),
-  _p_SUPG(getParam<Real>("p_SUPG"))
+    RichardsSUPG(name, parameters),
+    _p_SUPG(getParam<Real>("p_SUPG"))
 {
 }
 

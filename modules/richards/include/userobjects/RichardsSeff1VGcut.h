@@ -27,7 +27,7 @@ InputParameters validParams<RichardsSeff1VGcut>();
  */
 class RichardsSeff1VGcut : public RichardsSeff1VG
 {
- public:
+public:
   RichardsSeff1VGcut(const std::string & name, InputParameters parameters);
 
   /// just prints some (maybe) useful info to the console
@@ -46,7 +46,7 @@ class RichardsSeff1VGcut : public RichardsSeff1VG
    * @param qp the quad point to evaluate effective saturation at
    * @param result the derivtives will be placed in this array
    */
-  void dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const;
+  void dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> & result) const;
 
   /**
    * second derivative of effective saturation as a function of porepressure
@@ -54,9 +54,9 @@ class RichardsSeff1VGcut : public RichardsSeff1VG
    * @param qp the quad point to evaluate effective saturation at
    * @param result the derivtives will be placed in this array
    */
-  void d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const;
+  void d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const;
 
- protected:
+protected:
 
   /// van Genuchten alpha parameter
   Real _al;

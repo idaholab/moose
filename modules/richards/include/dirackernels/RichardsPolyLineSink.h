@@ -81,7 +81,7 @@ protected:
    * @param ifs the file stream
    * @param myvec upon return will contain the space-separated flows encountered in ifs
    */
-  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> &myvec);
+  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
 };
 
 #endif //RICHARDSPOLYLINESINK_H

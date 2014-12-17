@@ -19,7 +19,7 @@ InputParameters validParams<RichardsDensityConstBulk>();
  */
 class RichardsDensityConstBulk : public RichardsDensity
 {
- public:
+public:
   RichardsDensityConstBulk(const std::string & name, InputParameters parameters);
 
   /**
@@ -40,7 +40,7 @@ class RichardsDensityConstBulk : public RichardsDensity
    */
   Real d2density(Real p) const;
 
- protected:
+protected:
 
   /// density = _dens0*exp(p/_bulk)
   Real _dens0;

@@ -34,7 +34,7 @@ protected:
   unsigned int _pvar;
 
   /// Mass, or vector of masses in multicomponent situation
-  MaterialProperty<std::vector<Real> > &_mass;
+  MaterialProperty<std::vector<Real> > & _mass;
 };
 
 #endif

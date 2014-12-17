@@ -25,8 +25,7 @@ class RichardsExcav : public NodalBC
 {
 public:
 
-  RichardsExcav(const std::string & name,
-                        InputParameters parameters);
+  RichardsExcav(const std::string & name, InputParameters parameters);
 
 protected:
   virtual Real computeQpResidual();
