@@ -15,7 +15,7 @@ ACParsed::ACParsed(const std::string & name, InputParameters parameters) :
 {
   // reserve space for derivatives
   _d2FdEtadarg.resize(_nvar);
-std::cout << "In " << name << " _nvar = " << _nvar << "\n";
+
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
     _d2FdEtadarg[i] = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _coupled_moose_vars[i]->name());
