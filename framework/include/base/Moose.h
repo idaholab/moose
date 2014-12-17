@@ -79,9 +79,28 @@ enum ExecFlagType {
   /// Deprecated
   EXEC_RESIDUAL          = 0x200, // EXEC_LINEAR
   EXEC_JACOBIAN          = 0x400, // EXEC_NONLINEAR
-  EXEC_TIMESTEP          = 0x800  // EXEC_TIMESTEP_END
+  EXEC_TIMESTEP          = 0x800, // EXEC_TIMESTEP_END
+  OUTPUT_NONE            = 0x00,
+  OUTPUT_INITIAL         = 0x01,
+  OUTPUT_LINEAR          = 0x02,
+  OUTPUT_NONLINEAR       = 0x04,
+  OUTPUT_TIMESTEP_END    = 0x08,
+  OUTPUT_TIMESTEP_BEGIN  = 0x10,
+  OUTPUT_FINAL           = 0x20,
+  OUTPUT_FORCED          = 0x40,
+  OUTPUT_FAILED          = 0x80,
+  OUTPUT_CUSTOM          = 0x100
   ///@}
 };
+
+// Support for deprecated output flags
+typedef ExecFlagType OutputExecFlagType;
+
+// Some define trickery to allow YAK to continue to operate, this will
+// allow the update to MOOSE to occur w/o an integration branch
+#define EXEC_RESIDUAL EXEC_LINEAR
+#define EXEC_JACOBIAN EXEC_NONLINEAR
+#define EXEC_TIMESTEP EXEC_TIMESTEP_END
 
 namespace Moose
 {
