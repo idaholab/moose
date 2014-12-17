@@ -79,7 +79,7 @@
   [./mass_fin]
     type = RichardsMass
     variable = pressure
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./left_flux_out]
     type = RichardsHalfGaussianSinkFlux

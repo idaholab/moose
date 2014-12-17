@@ -77,7 +77,7 @@
     rank_two_tensor = stress
     index_j = 2
     index_i = 2
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
   [./fp_zz]
@@ -86,7 +86,7 @@
     rank_two_tensor = fp
     index_j = 2
     index_i = 2
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
     block = 0
   [../]
   [./e_zz]
@@ -95,13 +95,13 @@
     rank_two_tensor = lage
     index_j = 2
     index_i = 2
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
   [./rotout]
     type = CrystalPlasticityRotationOutAux
     variable = rotout
-    execute_on = timestep
+    execute_on = timestep_end
     block = 0
   [../]
   [./gss1]
@@ -109,7 +109,7 @@
     variable = gss1
     slipsysvar = gss
     index_i = 1
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
     block = 0
   [../]
 []

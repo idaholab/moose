@@ -141,42 +141,42 @@
     tensor = stress
     variable = stress_xx
     index = 0
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./stress_yy]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_yy
     index = 1
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./stress_zz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zz
     index = 2
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./stress_xy]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_xy
     index = 3
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./stress_yz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_yz
     index = 4
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./stress_zx]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zx
     index = 5
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./hoop1]
     type = MaterialTensorAux
@@ -186,7 +186,7 @@
     block = 1
     point1 = '20 20 -4'
     point2 = '20 20 47'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./hoop2]
     type = MaterialTensorAux
@@ -196,7 +196,7 @@
     block = 2
     point1 = '-25 12 20'
     point2 = '-25 10 20'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./hoop3]
     type = MaterialTensorAux
@@ -206,7 +206,7 @@
     block = 3
     point1 = '0 -20 20'
     point2 = '16 -20 20'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./radial1]
     type = MaterialTensorAux
@@ -216,7 +216,7 @@
     block = 1
     point1 = '20 20 -4'
     point2 = '20 20 47'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./radial2]
     type = MaterialTensorAux
@@ -226,7 +226,7 @@
     block = 2
     point1 = '-25 12 20'
     point2 = '-25 10 20'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./radial3]
     type = MaterialTensorAux
@@ -236,7 +236,7 @@
     block = 3
     point1 = '0 -20 20'
     point2 = '16 -20 20'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./axial1]
     type = MaterialTensorAux
@@ -246,7 +246,7 @@
     block = 1
     point1 = '20 20 -4'
     point2 = '20 20 47'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./axial2]
     type = MaterialTensorAux
@@ -256,7 +256,7 @@
     block = 2
     point1 = '-25 12 20'
     point2 = '-25 10 20'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./axial3]
     type = MaterialTensorAux
@@ -266,7 +266,7 @@
     block = 3
     point1 = '0 -20 20'
     point2 = '16 -20 20'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
 [] # AuxKernels

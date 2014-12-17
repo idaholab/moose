@@ -116,21 +116,21 @@
   [./fluid_mass1]
     type = RichardsMass
     variable = pressure
-    execute_on = timestep
+    execute_on = timestep_end
     #output = file
   [../]
 
   [./zmass_error]
     type = PlotFunction
     function = mass_bal_fcn
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 
   [./p0]
     type = PointValue
     variable = pressure
     point = '0 0 0'
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

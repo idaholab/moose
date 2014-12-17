@@ -69,21 +69,21 @@
     tensor = stress
     variable = stress_yy
     index = 1
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./stress_zz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zz
     index = 2
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
   [./vonmises]
     type = MaterialTensorAux
     tensor = stress
     variable = vonmises
     quantity = vonmises
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

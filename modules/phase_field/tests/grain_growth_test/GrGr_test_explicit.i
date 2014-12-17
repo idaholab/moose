@@ -51,7 +51,7 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 
@@ -71,7 +71,7 @@
   [./gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
-    execute_on = 'initial timestep'
+    execute_on = 'initial timestep_end'
   [../]
 []
 
