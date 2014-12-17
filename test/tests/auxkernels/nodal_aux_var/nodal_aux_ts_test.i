@@ -73,7 +73,7 @@
     type = CoupledAux
     value = 2
     coupled = u
-    execute_on = timestep
+    execute_on = timestep_end
   [../]
 []
 

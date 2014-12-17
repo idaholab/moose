@@ -66,7 +66,7 @@
 [Postprocessors]
   [./right_value]
     variable = u
-    execute_on = residual
+    execute_on = linear
     boundary = 2
     type = SideAverageValue
   [../]

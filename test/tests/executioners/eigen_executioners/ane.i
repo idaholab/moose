@@ -86,7 +86,7 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     # execute on residual is important for nonlinear eigen solver!
-    execute_on = residual
+    execute_on = linear
   [../]
 
   [./udiff]

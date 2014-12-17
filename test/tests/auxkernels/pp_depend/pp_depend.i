@@ -34,7 +34,7 @@
   [./pp_aux]
     type = PostprocessorAux
     variable = pp_aux
-    execute_on = timestep
+    execute_on = timestep_end
     pp = t_pp
   [../]
 []

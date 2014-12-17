@@ -31,7 +31,7 @@
   [./layered_aux]
     type = SpatialUserObjectAux
     variable = layered_average_value
-    execute_on = timestep
+    execute_on = timestep_end
     user_object = layered_average
   [../]
 []
@@ -83,7 +83,7 @@
 
 [MultiApps]
   [./sub_app]
-    execute_on = timestep
+    execute_on = timestep_end
     positions = '0 0 0'
     type = TransientMultiApp
     input_files = tosub_displaced_sub.i
