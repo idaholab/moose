@@ -45,7 +45,6 @@ InputParameters validParams<Exodus>()
 
 Exodus::Exodus(const std::string & name, InputParameters parameters) :
     AdvancedOutput<OversampleOutput>(name, parameters),
-    _exodus_io_ptr(NULL),
     _exodus_initialized(false),
     _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
     _recovering(_app.isRecovering()),
@@ -56,8 +55,6 @@ Exodus::Exodus(const std::string & name, InputParameters parameters) :
 
 Exodus::~Exodus()
 {
-  // Clean up the libMesh::ExodusII_IO object
-  delete _exodus_io_ptr;
 }
 
 void
@@ -107,11 +104,9 @@ Exodus::outputSetup()
     if (!_exodus_mesh_changed && !_sequence)
       return;
   }
-  else
-    delete _exodus_io_ptr;
 
   // Create the ExodusII_IO object
-  _exodus_io_ptr = new ExodusII_IO(_es_ptr->get_mesh());
+  _exodus_io_ptr.reset(new ExodusII_IO(_es_ptr->get_mesh()));
   _exodus_initialized = false;
 
   // Increment file number and set appending status, append if all the following conditions are met:

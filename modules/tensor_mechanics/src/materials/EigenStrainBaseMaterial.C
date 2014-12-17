@@ -17,8 +17,10 @@ EigenStrainBaseMaterial::EigenStrainBaseMaterial(const std::string & name,
 
     _eigenstrain_name(_base_name + "eigenstrain"),
     _eigenstrain(declareProperty<RankTwoTensor>(_eigenstrain_name)),
-    _deigenstrain_dc(declarePropertyDerivative<RankTwoTensor>(_eigenstrain_name, _c_name)),
-    _d2eigenstrain_dc2(declarePropertyDerivative<RankTwoTensor>(_eigenstrain_name, _c_name, _c_name)),
+
+    // the derivatives of elastic strain w.r.t c are provided here
+    _deigenstrain_dc(declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", _c_name)),
+    _d2eigenstrain_dc2(declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", _c_name, _c_name)),
 
     _delasticity_tensor_dc(declarePropertyDerivative<ElasticityTensorR4>(_elasticity_tensor_name, _c_name)),
     _d2elasticity_tensor_dc2(declarePropertyDerivative<ElasticityTensorR4>(_elasticity_tensor_name, _c_name, _c_name))

@@ -9,10 +9,16 @@ InputParameters validParams<ACParsed>()
 }
 
 ACParsed::ACParsed(const std::string & name, InputParameters parameters) :
-    DerivativeKernelInterface<ACBulk>(name, parameters),
+    DerivativeKernelInterface<JvarMapInterface<ACBulk> >(name, parameters),
     _dFdEta(getMaterialPropertyDerivative<Real>(_F_name, _var.name())),
     _d2FdEta2(getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _var.name()))
 {
+  // reserve space for derivatives
+  _d2FdEtadarg.resize(_nvar);
+
+  // Iterate over all coupled variables
+  for (unsigned int i = 0; i < _nvar; ++i)
+    _d2FdEtadarg[i] = &getMaterialPropertyDerivative<Real>(_F_name, _var.name(), _coupled_moose_vars[i]->name());
 }
 
 Real
@@ -28,4 +34,15 @@ ACParsed::computeDFDOP(PFFunctionType type)
   }
 
   mooseError("Internal error");
+}
+
+Real
+ACParsed::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  // get the coupled variable jvar is referring to
+  unsigned int cvar;
+  if (!mapJvarToCvar(jvar, cvar))
+    return 0.0;
+
+  return _L[_qp] * (*_d2FdEtadarg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }
