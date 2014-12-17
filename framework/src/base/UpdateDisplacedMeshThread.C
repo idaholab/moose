@@ -87,3 +87,21 @@ UpdateDisplacedMeshThread::operator() (const SemiLocalNodeRange & range) const
     }
   }
 }
+
+void
+UpdateDisplacedMeshThread::operator() (const NodeRange & range) const
+{
+  NodeRange::const_iterator nd = range.begin();
+
+  for (; nd != range.end(); ++nd)
+  {
+    Node & displaced_node = **nd;
+
+    // Get the same node from the reference mesh.
+    Node & reference_node = _ref_mesh.node(displaced_node.id());
+
+    // Undisplace the node
+    for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+      displaced_node(i) = reference_node(i);
+  }
+}
