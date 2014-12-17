@@ -73,7 +73,6 @@ protected:
     PA_MECH_STATUS
   };
 
-  std::string _quantity_string;
   PA_ENUM _quantity;
 
   virtual Real computeValue();
